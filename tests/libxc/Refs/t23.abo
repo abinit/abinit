@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.8.4 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 17h55 )
+.Starting date : Fri 14 Nov 2025.
+- ( at 21h07 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/libxc_t23-t24/t23.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/TestBot_MPI1/libxc_t23-t24/t23.abi
 - output file    -> t23.abo
 - root for input  files -> t23i
 - root for output files -> t23o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Si.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/Psdj_paw_pbe_std/Si.xml
  Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -189,9 +189,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Si.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Si.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Si.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/Psdj_paw_pbe_std/Si.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/Psdj_paw_pbe_std/Si.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/Psdj_paw_pbe_std/Si.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
@@ -224,37 +224,37 @@ tolerances: {tolvrs: 1.00E-15, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.2255699603189    -5.226E+00 1.489E-02 2.115E+02
- ETOT  2  -5.1924743014066     3.310E-02 3.295E-06 3.470E+01
- ETOT  3  -5.1772731486214     1.520E-02 6.791E-06 3.397E+00
- ETOT  4  -5.1774735465005    -2.004E-04 2.036E-08 2.755E-01
- ETOT  5  -5.1781832481854    -7.097E-04 7.361E-08 1.750E-02
- ETOT  6  -5.1788924236803    -7.092E-04 4.171E-08 3.354E-03
- ETOT  7  -5.1789492952740    -5.687E-05 2.668E-10 1.429E-03
- ETOT  8  -5.1789282572545     2.104E-05 3.680E-11 9.311E-04
- ETOT  9  -5.1789551406481    -2.688E-05 5.686E-11 9.333E-05
- ETOT 10  -5.1789687034441    -1.356E-05 2.126E-11 1.001E-05
- ETOT 11  -5.1789701753940    -1.472E-06 4.285E-12 1.259E-06
- ETOT 12  -5.1789723135077    -2.138E-06 4.134E-13 1.900E-07
- ETOT 13  -5.1789726016280    -2.881E-07 7.370E-15 2.163E-08
- ETOT 14  -5.1789728176641    -2.160E-07 2.999E-15 2.743E-09
- ETOT 15  -5.1789728727915    -5.513E-08 2.543E-16 2.371E-10
- ETOT 16  -5.1789728431338     2.966E-08 3.534E-17 1.093E-11
- ETOT 17  -5.1789728491561    -6.022E-09 2.200E-18 1.696E-12
- ETOT 18  -5.1789728485594     5.967E-10 7.824E-20 1.141E-13
+ ETOT  1  -5.2308227041143    -5.231E+00 1.450E-02 2.186E+02
+ ETOT  2  -5.1958086994033     3.501E-02 3.576E-06 3.591E+01
+ ETOT  3  -5.1796761716151     1.613E-02 8.064E-06 3.436E+00
+ ETOT  4  -5.1803327895160    -6.566E-04 5.694E-08 2.546E-01
+ ETOT  5  -5.1812471099842    -9.143E-04 1.063E-07 1.519E-02
+ ETOT  6  -5.1820478099670    -8.007E-04 5.508E-08 1.092E-03
+ ETOT  7  -5.1821408297417    -9.302E-05 8.681E-10 1.412E-04
+ ETOT  8  -5.1821228235175     1.801E-05 3.848E-12 1.062E-05
+ ETOT  9  -5.1821261555238    -3.332E-06 1.498E-12 1.510E-06
+ ETOT 10  -5.1821303243374    -4.169E-06 9.624E-13 2.557E-07
+ ETOT 11  -5.1821308230957    -4.988E-07 2.340E-14 2.775E-08
+ ETOT 12  -5.1821308792747    -5.618E-08 7.550E-16 2.771E-09
+ ETOT 13  -5.1821308977828    -1.851E-08 3.241E-17 2.637E-10
+ ETOT 14  -5.1821309200997    -2.232E-08 1.665E-17 2.846E-11
+ ETOT 15  -5.1821309234496    -3.350E-09 9.750E-19 3.085E-12
+ ETOT 16  -5.1821309246787    -1.229E-09 9.656E-20 3.069E-13
+ ETOT 17  -5.1821309255871    -9.085E-10 5.289E-20 3.546E-14
+ ETOT 18  -5.1821309256842    -9.703E-11 8.182E-22 3.110E-15
 
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-)     Maximum=    5.4595E-02  at reduced coord.    0.2500    0.2500    0.2500
-)     Minimum=    1.4403E-03  at reduced coord.    0.5000    0.5000    0.5000
-   Integrated=    3.2801E+00
+)     Maximum=    5.4563E-02  at reduced coord.    0.2500    0.2500    0.2500
+)     Minimum=    1.4590E-03  at reduced coord.    0.5000    0.5000    0.5000
+   Integrated=    3.2752E+00
 --------------------------------------------------------------------------------
 
  scprqt:  WARNING -
   nstep=   18 was not enough SCF cycles to converge;
-  potential residual=  1.141E-13 exceeds tolvrs=  1.000E-15
+  potential residual=  3.110E-15 exceeds tolvrs=  1.000E-15
 
 
 --- !ResultsGS
@@ -267,10 +267,10 @@ lattice_vectors:
 lattice_lengths: [   7.25492,    7.25492,    7.25492, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7001139E+02
-convergence: {deltae:  5.967E-10, res2:  1.141E-13, residm:  7.824E-20, diffor:  0.000E+00, }
-etotal    :  -5.17897285E+00
+convergence: {deltae: -9.703E-11, res2:  3.110E-15, residm:  8.182E-22, diffor:  0.000E+00, }
+etotal    :  -5.18213093E+00
 entropy   :   0.00000000E+00
-fermie    :   1.79594876E-01
+fermie    :   1.78207836E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 xred      :
@@ -283,28 +283,28 @@ force_length_stats: {min: null, max: null, mean: null, }
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        1.90945          1.53578032
-    2        1.90945          1.53578032
+    1        1.90945          1.53332348
+    2        1.90945          1.53332348
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.214723419178108
- Compensation charge over fine fft grid    =     -0.214723907511302
+ Compensation charge over spherical meshes =     -0.214400884025257
+ Compensation charge over fine fft grid    =     -0.214401371624929
 
  ==== Results concerning PAW augmentation regions ====
 
 
  Total pseudopotential strength Dij (eV):
  Atom #  1
-  10.33155 924.33974   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
- 924.33974 *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   2.95750   0.00000   0.00000 -23.04709   0.00000   0.00000
-   0.00000   0.00000   0.00000   2.95750   0.00000   0.00000 -23.04709   0.00000
-   0.00000   0.00000   0.00000   0.00000   2.95750   0.00000   0.00000 -23.04709
-   0.00000   0.00000 -23.04709   0.00000   0.00000 140.49187   0.00000   0.00000
-   0.00000   0.00000   0.00000 -23.04709   0.00000   0.00000 140.49187   0.00000
-   0.00000   0.00000   0.00000   0.00000 -23.04709   0.00000   0.00000 140.49187
+  10.33594 924.87143   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+ 924.87143 *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   2.95805   0.00000   0.00000 -23.06010   0.00000   0.00000
+   0.00000   0.00000   0.00000   2.95805   0.00000   0.00000 -23.06010   0.00000
+   0.00000   0.00000   0.00000   0.00000   2.95805   0.00000   0.00000 -23.06010
+   0.00000   0.00000 -23.06010   0.00000   0.00000 140.68214   0.00000   0.00000
+   0.00000   0.00000   0.00000 -23.06010   0.00000   0.00000 140.68214   0.00000
+   0.00000   0.00000   0.00000   0.00000 -23.06010   0.00000   0.00000 140.68214
  pawio_print_ij: WARNING -
   The matrix seems to have high value(s) !
   (  1 components have a value greater than 2721.1).
@@ -312,14 +312,14 @@ force_length_stats: {min: null, max: null, mean: null, }
   Action: you should check your atomic dataset (psp file)
           and look for "high" projector functions...
  Atom #  2
-  10.33155 924.33974   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
- 924.33974 *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   2.95750   0.00000   0.00000 -23.04709   0.00000   0.00000
-   0.00000   0.00000   0.00000   2.95750   0.00000   0.00000 -23.04709   0.00000
-   0.00000   0.00000   0.00000   0.00000   2.95750   0.00000   0.00000 -23.04709
-   0.00000   0.00000 -23.04709   0.00000   0.00000 140.49187   0.00000   0.00000
-   0.00000   0.00000   0.00000 -23.04709   0.00000   0.00000 140.49187   0.00000
-   0.00000   0.00000   0.00000   0.00000 -23.04709   0.00000   0.00000 140.49187
+  10.33594 924.87143   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+ 924.87143 *********   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   2.95805   0.00000   0.00000 -23.06010   0.00000   0.00000
+   0.00000   0.00000   0.00000   2.95805   0.00000   0.00000 -23.06010   0.00000
+   0.00000   0.00000   0.00000   0.00000   2.95805   0.00000   0.00000 -23.06010
+   0.00000   0.00000 -23.06010   0.00000   0.00000 140.68214   0.00000   0.00000
+   0.00000   0.00000   0.00000 -23.06010   0.00000   0.00000 140.68214   0.00000
+   0.00000   0.00000   0.00000   0.00000 -23.06010   0.00000   0.00000 140.68214
  pawio_print_ij: WARNING -
   The matrix seems to have high value(s) !
   (  1 components have a value greater than 2721.1).
@@ -329,30 +329,30 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Augmentation waves occupancies Rhoij:
  Atom #  1
-   0.81120   0.00317   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.80871   0.00317   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    0.00317   0.00001   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   1.26898   0.00000   0.00000   0.01078   0.00000   0.00000
-   0.00000   0.00000   0.00000   1.26898   0.00000   0.00000   0.01078   0.00000
-   0.00000   0.00000   0.00000   0.00000   1.26898   0.00000   0.00000   0.01078
-   0.00000   0.00000   0.01078   0.00000   0.00000   0.00010   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.01078   0.00000   0.00000   0.00010   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.01078   0.00000   0.00000   0.00010
+   0.00000   0.00000   1.26758   0.00000   0.00000   0.01075   0.00000   0.00000
+   0.00000   0.00000   0.00000   1.26758   0.00000   0.00000   0.01075   0.00000
+   0.00000   0.00000   0.00000   0.00000   1.26758   0.00000   0.00000   0.01075
+   0.00000   0.00000   0.01075   0.00000   0.00000   0.00010   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.01075   0.00000   0.00000   0.00010   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.01075   0.00000   0.00000   0.00010
  Atom #  2
-   0.81120   0.00317   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.80871   0.00317   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    0.00317   0.00001   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   1.26898   0.00000   0.00000   0.01078   0.00000   0.00000
-   0.00000   0.00000   0.00000   1.26898   0.00000   0.00000   0.01078   0.00000
-   0.00000   0.00000   0.00000   0.00000   1.26898   0.00000   0.00000   0.01078
-   0.00000   0.00000   0.01078   0.00000   0.00000   0.00010   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.01078   0.00000   0.00000   0.00010   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.01078   0.00000   0.00000   0.00010
+   0.00000   0.00000   1.26758   0.00000   0.00000   0.01075   0.00000   0.00000
+   0.00000   0.00000   0.00000   1.26758   0.00000   0.00000   0.01075   0.00000
+   0.00000   0.00000   0.00000   0.00000   1.26758   0.00000   0.00000   0.01075
+   0.00000   0.00000   0.01075   0.00000   0.00000   0.00010   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.01075   0.00000   0.00000   0.00010   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.01075   0.00000   0.00000   0.00010
 
 
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   15.714E-21; max=  78.237E-21
+ Mean square residual over all n,k,spin=   17.723E-23; max=  81.819E-23
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -366,48 +366,48 @@ force_length_stats: {min: null, max: null, mean: null, }
  length scales= 10.260000000000 10.260000000000 10.260000000000 bohr
               =  5.429358160133  5.429358160133  5.429358160133 angstroms
  prteigrs : about to open file t23o_EIG
- Fermi (or HOMO) energy (eV) =   4.88703   Average Vxc (eV)=  -8.66740
+ Fermi (or HOMO) energy (eV) =   4.84928   Average Vxc (eV)=  -8.74808
  Eigenvalues (   eV  ) for nkpt=   3  k points:
  kpt#   1, nband=  5, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -6.75246    4.88703    4.88703    4.88703    8.35666
+  -6.80415    4.84928    4.84928    4.84928    8.29605
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.28012790204115E+00
-hartree             :  7.05452714107836E-01
-xc                  : -6.26083382676999E-01
+kinetic             :  3.27517617688945E+00
+hartree             :  7.01223807862592E-01
+xc                  : -6.25933245694941E-01
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  2.80406532694243E-01
-local_psp           : -2.48265108515983E+00
-PAW spherical_terms :  2.06423925662033E+00
-total_energy        : -5.17897284855937E+00
-total_energy_eV     : -1.40927018182667E+02
+local_psp           : -2.47380921401147E+00
+PAW spherical_terms :  2.06126980276206E+00
+total_energy        : -5.18213092568416E+00
+total_energy_eV     : -1.41012953831569E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  1.09120169194648E-01
+band_energy         :  9.56313840430335E-02
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  2.80406532694243E-01
-xc_dc               :  2.13406291700166E+00
-PAW spherical_terms :  6.97902316330203E-01
-total_energy_dc     : -5.17897285096534E+00
-total_energy_dc_eV  : -1.40927018248136E+02
+xc_dc               :  2.14556345972555E+00
+PAW spherical_terms :  6.96732484203523E-01
+total_energy_dc     : -5.18213092551974E+00
+total_energy_dc_eV  : -1.41012953827095E+02
 ...
 
 
 --- !EnergyTermsWithPAWCore
 iteration_state     : {dtset: 1, }
 comment             : 'Components of total free energy, including PAW core contributions'
-Total energy        : -5.40275020440176E+02
-Total energy DC     : -5.40275020442582E+02
-Total energy (eV)   : -1.47016309711670E+04
-Total energy DC (eV): -1.47016309712324E+04
+Total energy        : -5.40278178517300E+02
+Total energy DC     : -5.40278178517136E+02
+Total energy (eV)   : -1.47017169068159E+04
+Total energy DC (eV): -1.47017169068114E+04
 ...
 
 
@@ -420,7 +420,7 @@ Total energy DC (eV): -1.47016309712324E+04
            diemac      1.20000000E+01
              ecut      6.00000000E+00 Hartree
            enunit           1
-           etotal     -5.1789728486E+00
+           etotal     -5.1821309257E+00
             fcart      9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         512
@@ -599,10 +599,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         29.4  wall=         29.5
+- Proc.   0 individual time (sec): cpu=         28.9  wall=         29.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  59 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         29.4  wall=         29.5
++Overall time at end (sec) : cpu=         28.9  wall=         29.0
