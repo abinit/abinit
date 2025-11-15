@@ -25918,6 +25918,9 @@ The GBT requires [[nspinor]] = 2 and [[nspden]] 4, but is not compatible with sp
 Also, one has to disable spatial symmetries completely by setting [[nsym]] to 1, and
 time-reversal symmetry as well with [[kptopt]] = 4.
 
+If set to 2, the GBT is used together with a projected spin-orbit coupling (SOC),
+in which only the σ_z (S_z) component of the SOC operator is retained.
+
 Note that, for the time being, [[use_gbt]] /= 0 requires:
 
 - NC pseudos (no PAW)

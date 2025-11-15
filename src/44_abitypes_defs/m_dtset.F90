@@ -570,7 +570,6 @@ type, public :: dataset_type
  integer :: prepalw
  integer :: prepanl
  integer :: prepgkk = 0
- integer :: projected_so = 0
  integer :: prtbbb = 0
  integer :: prtbltztrp = 0
  integer :: prtchkprdm = 0
@@ -2085,7 +2084,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prepanl            = dtin%prepanl
  dtout%prepgkk            = dtin%prepgkk
  dtout%prtbbb             = dtin%prtbbb
- dtout%projected_so       = dtin%projected_so
  dtout%prtbltztrp         = dtin%prtbltztrp
  dtout%prtchkprdm         = dtin%prtchkprdm
  dtout%prtcif             = dtin%prtcif
@@ -3793,7 +3791,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff'
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
- list_vars=trim(list_vars)//' printfiles projected_so prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtcurrent prtddb prtden'
+ list_vars=trim(list_vars)//' printfiles prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtcurrent prtddb prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm'
  list_vars=trim(list_vars)//' prtebands prtefg prtefmas prteig prteliash prtelf prtevk'
  list_vars=trim(list_vars)//' prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prthist prtkden prtkpt prtlden'
