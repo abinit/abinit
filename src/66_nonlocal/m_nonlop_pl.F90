@@ -130,6 +130,8 @@ contains
 !!         if 2, applies the non-local operator to a function in reciprocal space
 !!  ucvol=unit cell volume (bohr^3)
 !!  vectin(2,nspinor*npwin)=input cmplx wavefunction coefficients <G|Cnk>
+!!  use_gbt= if 1, no spin-orbit coupling (scaler-Relativistic only);
+!!           if 2, include only the σ_z component of the spin-orbit coupling. 
 !!
 !! OUTPUT
 !!  ==== if (signs==1) ====
@@ -171,8 +173,8 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 &                     ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,kgin,kgout,kpgin,kpgout,&
 &                     kptin,kptout,lmnmax,matblk,mgfft,mpi_enreg,mpsang,mpssoang,&
 &                     natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,npwin,npwout,nspinor,nspinortot,&
-&                     ntypat,only_SO,phkxredin,phkxredout,ph1d,ph3din,ph3dout,projected_so,signs,&
-&                     ucvol,vectin,vectout)
+&                     ntypat,only_SO,phkxredin,phkxredout,ph1d,ph3din,ph3dout,signs,&
+&                     ucvol,use_gbt,vectin,vectout)
 
 !Arguments ------------------------------------
 !This type is defined in defs_mpi
@@ -181,7 +183,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !scalars
  integer,intent(in) :: choice,dimekb1,dimekb2,dimffnlin,dimffnlout,idir,istwf_k
  integer,intent(in) :: lmnmax,matblk,mgfft,mpsang,mpssoang,natom,nkpgin,nkpgout
- integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,only_SO,projected_so,signs
+ integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,only_SO,signs,use_gbt
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -236,7 +238,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !arrays
  integer,allocatable :: indlmn_s(:,:,:),jproj(:)
  real(dp) :: amet(2,3,3,2,2),amet_lo(3,3),e2nl_tmp(6),eisnl(3),rank2(6)
- real(dp) :: rank2c(2,6),strsnl(6),strsnl_out(6),strsso(6,3),strssoc(6),trace(2)!,tsec(2)
+ real(dp) :: rank2c(2,6),soc_weight(3),strsnl(6),strsnl_out(6),strsso(6,3),strssoc(6),trace(2)!,tsec(2)
  real(dp),allocatable :: d2gxdis(:,:,:,:,:),d2gxdis_s(:,:,:,:)
  real(dp),allocatable :: d2gxds2(:,:,:,:,:),d2gxds2_s(:,:,:,:)
  real(dp),allocatable :: dgxdis(:,:,:,:,:),dgxdis_s(:,:,:,:),dgxds(:,:,:,:,:)
@@ -281,7 +283,12 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !Eventually compute the spin-orbit metric tensor:
  if (mpssoang>mpsang) then
    ABI_MALLOC(pauli,(2,2,2,3))
-   call metric_so(amet,gprimd,pauli)
+   soc_weight = 1.0_dp
+   if (use_gbt == 2) then
+      soc_weight(1) = 0
+      soc_weight(2) = 0
+   end if
+   call metric_so(amet,soc_weight,gprimd,pauli)
  end if
 
 !Allocate array gxa (contains projected scalars).
@@ -437,7 +444,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 
      ! Change nspinso if collinear run or if nspinor == 2 and SOC is not wanted.
      ! TODO: The last check requires pspso
-     if (nspinortot == 1) nspinso = 1
+     if (nspinortot == 1 .and. use_gbt /= 2) nspinso = 1
 
      do ispinor=1,nspinso
        ispinor_index=ispinor
@@ -596,13 +603,12 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
                      call metcon(rank,gmet,temp,tmpfac)
                      gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)= &
 &                     wt(ilang,iproj)*tmpfac(:,1:((rank+1)*(rank+2))/2)
-                   else
+                   else if (ispinor==2 .or. use_gbt==2) then
 !                    ------ Spin-orbit ------
                      gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)=zero
 !                    Contraction over spins:
                      do ispinp=1,nspinortot
-!                      projected_so = 0: full SOC; = 1: only z component for GBT
-                       if (projected_so == 0.or.ispin == ispinp) then
+                       if (use_gbt == 2.or.ispin == ispinp) then
 !                        => Imaginary part (multiplying by i, then by the Im of amet):
                          temp(1,1:((rank+1)*(rank+2))/2)= &
 &                         -gxa(2,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispinp)

@@ -195,10 +195,6 @@ module m_hamiltonian
   !        = 0 ==> do not use GPU
   !        > 0 ==> see defs_basis.F90 to have the list of possible GPU implementations
 
-  integer :: projected_so = -1
-   ! projected_so = 0 if full spin orbit
-   !              = 1 if only z-component spin orbit
-
   integer :: usecprj = -1
    ! usecprj= 1 if cprj projected WF are stored in memory
    !        = 0 if they are to be computed on the fly
@@ -214,6 +210,7 @@ module m_hamiltonian
   integer :: use_gbt = 0
    ! 0, use normal non-collinear calculation
    ! 1, use spin spiral calculation
+   ! 2, use spin spiral with z-component SOC
 
   integer :: zora = 0
    ! zora=0: no zora terms. zora=1: use available zora terms
@@ -746,13 +743,13 @@ end subroutine gsham_free
 subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
                      xred,nfft,mgfft,ngfft,rprimd,nloalg,&
                      ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&   ! optional
-                     electronpositron,fock,nucdipmom,gpu_option,projected_so,use_gbt,zora) ! optional
+                     electronpositron,fock,nucdipmom,gpu_option,use_gbt,zora) ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(gs_hamiltonian_type),intent(inout),target :: ham
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
- integer,optional,intent(in) :: comm_atom,usecprj,gpu_option,projected_so,use_gbt,zora
+ integer,optional,intent(in) :: comm_atom,usecprj,gpu_option,use_gbt,zora
  type(electronpositron_type),optional,pointer :: electronpositron
  type(fock_type),optional,pointer :: fock
  type(pseudopotential_type),intent(in) :: psps
@@ -788,7 +785,6 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  my_zora=0; if (present(zora)) my_zora=zora
 
  ham%use_gbt = 0; if (present(use_gbt)) ham%use_gbt = use_gbt
- ham%projected_so = 0; if (present(projected_so)) ham%projected_so = projected_so
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -1420,7 +1416,6 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
  gs_hamk_out%n5 = gs_hamk_in%n5
  gs_hamk_out%n6 = gs_hamk_in%n6
  gs_hamk_out%gpu_option = gs_hamk_in%gpu_option
- gs_hamk_out%projected_so = gs_hamk_in%projected_so
  gs_hamk_out%usecprj = gs_hamk_in%usecprj
  gs_hamk_out%usepaw = gs_hamk_in%usepaw
  gs_hamk_out%useylm = gs_hamk_in%useylm

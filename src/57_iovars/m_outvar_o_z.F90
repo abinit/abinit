@@ -494,9 +494,6 @@ contains
  intarr(1,:)=dtsets(:)%prepgkk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prepgkk','INT',0)
 
- intarr(1,:)=dtsets(:)%projected_so
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'projected_so','INT',0)
-
 !prtatlist
  if(multivals%natom==0)then
    do idtset=0,ndtset_alloc

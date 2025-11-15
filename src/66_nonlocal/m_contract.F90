@@ -2025,6 +2025,9 @@ end subroutine metcon_so
 !! INPUTS
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space
 !!              (bohr**-1)
+!!  soc_weight(3)=prefactors for the spin-orbit components (dimensionless):
+!!                (soc_weight(1),soc_weight(2),soc_weight(3))
+!!                scale the σ_x, σ_y, σ_z contributions, respectively.
 !!
 !! OUTPUT
 !!  amet(2,3,3,2,2)=the antisymmetric tensor A(Re/Im,y,y'',s,s'')
@@ -2053,11 +2056,11 @@ end subroutine metcon_so
 !!
 !! SOURCE
 
-subroutine metric_so(amet,gprimd,pauli)
+subroutine metric_so(amet,soc_weight,gprimd,pauli)
 
 !Arguments ------------------------------------
 !arrays
- real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in) :: gprimd(3,3),soc_weight(3)
  real(dp),intent(out) :: amet(2,3,3,2,2),pauli(2,2,2,3)
 
 !Local variables-------------------------------
@@ -2084,7 +2087,7 @@ subroutine metric_so(amet,gprimd,pauli)
        m1=mod(n ,3)+1    !  n,m1,m2 is an even permutation
        m2=mod(m1,3)+1
        amet(1:2,iy1,iy2,1:2,1:2) = amet(:,iy1,iy2,:,:) &
-&       + pauli(:,:,:,n) &
+&       + soc_weight(n)*pauli(:,:,:,n) &
 &       *(gprimd(m1,iy1)*gprimd(m2,iy2) &
 &       -gprimd(m2,iy1)*gprimd(m1,iy2))
      end do
