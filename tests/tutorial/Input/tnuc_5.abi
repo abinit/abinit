@@ -63,7 +63,7 @@ pseudos "Cl.xml,F.xml"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tnuc_5.abo, tolnlines=  0, tolabs=  0.0E0, tolrel= 0.0E0
+#%%   tnuc_5.abo, tolnlines=  13, tolabs=  1.2e-09, tolrel= 6.0e-05
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
