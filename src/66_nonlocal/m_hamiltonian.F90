@@ -119,6 +119,10 @@ module m_hamiltonian
    ! Fourth dimension of Ekb
    ! 2 if Ekb factors contain a exp(-iqR) phase, 1 otherwise
 
+  integer :: ispin_gbt = -1
+   ! 1, GBT spin up channel (uses k - q/2)
+   ! 2, GBT spin down channel (uses k + q/2)
+
   integer :: istwf_k = -1
    ! option parameter that describes the storage of wfs at k
 
@@ -768,7 +772,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  integer :: cplex_dij,jsp,l_gpu_option
  real(dp) :: ucvol
 !arrays
- integer :: my_spintab(2)
+ integer :: my_spintab(2),ispin_gbt
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable,target :: ekb_tmp(:,:,:,:)
 ! *************************************************************************
@@ -829,6 +833,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  ham%gmet(:,:)  =gmet(:,:)
  ham%gprimd(:,:)=gprimd(:,:)
  ham%indlmn(:,:,:)=psps%indlmn(:,:,:)
+ ham%ispin_gbt  =ispin_gbt
  ham%lmnmax     =psps%lmnmax
  ham%mgfft      =mgfft
  ham%mpsang     =psps%mpsang
@@ -1426,6 +1431,7 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
  gs_hamk_out%ucvol = gs_hamk_in%ucvol
  gs_hamk_out%gmet = gs_hamk_in%gmet
  gs_hamk_out%gprimd = gs_hamk_in%gprimd
+ gs_hamk_out%ispin_gbt = gs_hamk_in%ispin_gbt
  gs_hamk_out%kpt_k = gs_hamk_in%kpt_k
  gs_hamk_out%kpt_kp = gs_hamk_in%kpt_kp
 
