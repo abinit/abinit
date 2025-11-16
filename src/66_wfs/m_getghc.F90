@@ -207,7 +207,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !scalars
  integer,parameter :: level=114, tim_fourwf=1
  integer :: choice,cplex,cpopt_here,fftalg,i1,i2,i3,idat,idir,ierr,i0
- integer :: ig,igspinor,istwf_k_,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
+ integer :: ig,igspinor,istwf_k_,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor,ispin_gbt
  integer :: n4,n5,n6,ndat_,nnlout,npw_fft,npw_k1,npw_k2,nspinortot,option_fft
  integer :: paw_opt,select_k_,shift1,shift2,signs,tim_nonlop
  logical(kind=c_bool) :: k1_eq_k2
@@ -1073,6 +1073,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        if (gs_ham%usepaw==1) gsc_ptr => gsc
 
        ! Apply Vnl{k-q/2} to u^up
+       gs_ham%ispin_gbt = 1
        call cg_copy_spin(1, npw_k1, nspinortot, ndat, cwavef, cwavef_spin)
        call nonlop(choice, cpopt_here, cwaveprj_nonlop, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
                    nnlout, paw_opt, signs, gsc_ptr, tim_nonlop, cwavef_spin, gvnlxc_spin, select_k=K_H_K)
@@ -1081,6 +1082,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
        ! Apply H_{k+q/2} to u^down
        !gvnlxc_spin = zero
+       gs_ham%ispin_gbt = 2
        call cg_copy_spin(2, npw_k1, nspinortot, ndat, cwavef, cwavef_spin)
        call nonlop(choice, cpopt_here, cwaveprj_nonlop, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
                    nnlout, paw_opt, signs, gsc_ptr, tim_nonlop, cwavef_spin, gvnlxc_spin, select_k=KPRIME_H_KPRIME)

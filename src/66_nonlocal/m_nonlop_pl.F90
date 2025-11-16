@@ -170,7 +170,7 @@ contains
 !! SOURCE
 
 subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
-&                     ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,kgin,kgout,kpgin,kpgout,&
+&                     ffnlin,ffnlout,gmet,gprimd,idir,indlmn,ispin_gbt,istwf_k,kgin,kgout,kpgin,kpgout,&
 &                     kptin,kptout,lmnmax,matblk,mgfft,mpi_enreg,mpsang,mpssoang,&
 &                     natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,npwin,npwout,nspinor,nspinortot,&
 &                     ntypat,only_SO,phkxredin,phkxredout,ph1d,ph3din,ph3dout,signs,&
@@ -181,7 +181,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !The (inout) classification below is misleading; mpi_enreg is temporarily
 ! changed but reset to its initial condition before exiting.
 !scalars
- integer,intent(in) :: choice,dimekb1,dimekb2,dimffnlin,dimffnlout,idir,istwf_k
+ integer,intent(in) :: choice,dimekb1,dimekb2,dimffnlin,dimffnlout,idir,istwf_k,ispin_gbt
  integer,intent(in) :: lmnmax,matblk,mgfft,mpsang,mpssoang,natom,nkpgin,nkpgout
  integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,only_SO,signs,use_gbt
  real(dp),intent(in) :: ucvol
@@ -283,10 +283,11 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !Eventually compute the spin-orbit metric tensor:
  if (mpssoang>mpsang) then
    ABI_MALLOC(pauli,(2,2,2,3))
-   soc_weight = 1.0_dp
+   soc_weight = one
+! GBT: keep only the z-component, optionally flip its sign
    if (use_gbt == 2) then
-      soc_weight(1) = 0
-      soc_weight(2) = 0
+     soc_weight(1:2) = 0
+     if (ispin_gbt == 2) soc_weight(3) = -1
    end if
    call metric_so(amet,soc_weight,gprimd,pauli)
  end if
@@ -603,12 +604,11 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
                      call metcon(rank,gmet,temp,tmpfac)
                      gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)= &
 &                     wt(ilang,iproj)*tmpfac(:,1:((rank+1)*(rank+2))/2)
-                   else if (ispinor==2 .or. use_gbt==2) then
+                   else 
 !                    ------ Spin-orbit ------
                      gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)=zero
 !                    Contraction over spins:
                      do ispinp=1,nspinortot
-                       if (use_gbt == 2.or.ispin == ispinp) then
 !                        => Imaginary part (multiplying by i, then by the Im of amet):
                          temp(1,1:((rank+1)*(rank+2))/2)= &
 &                         -gxa(2,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj,ispinp)
@@ -627,7 +627,6 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
                          gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)= &
 &                         gxafac(:,jjs:jjs-1+((rank+1)*(rank+2))/2,ia,iproj)+ &
 &                         wt(ilang,iproj)*tmpfac(:,1:((rank+1)*(rank+2))/2)
-                       end if
                      end do
                    end if
 
