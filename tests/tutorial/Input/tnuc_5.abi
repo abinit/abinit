@@ -41,7 +41,7 @@ paral_atom 0
 ecut 10
 pawecutdg 20
 
-nstep 50
+nstep 20
 
 natom 2
 ntypat 2
