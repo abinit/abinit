@@ -600,6 +600,14 @@ fi
 # Fixed in autoconf > 2.72.
 if test "${abi_fc_vendor}" = "nvhpc" -a "${target_cpu}" = "aarch64"; then
   FCLIBS=`echo ${FCLIBS} | sed -e 's/-lsr-complexity-limit=[[0-9]]* //g' -e 's/-lsr-complexity-limit=[[0-9]]*$//g'`
+
+  # Remove "ignoring -lnvmalloc" warnings on recent NVHPC versions
+  nvhpc_version_major=`echo ${abi_fc_version} | sed "s/-.*//" | cut -f1 -d'.'`
+  nvhpc_version_minor=`echo ${abi_fc_version} | sed "s/-.*//" | cut -f2 -d'.'`
+  nvhpc_version=`printf %d%02d ${nvhpc_version_major} ${nvhpc_version_minor}`
+  if test ${nvhpc_version} -gt 2501; then
+    FCLIBS=`echo ${FCLIBS} | sed -e 's/-lnvmalloc/-nvmalloc/g'`
+  fi
 fi
 
 # Determine Fortran-C name mangling scheme
@@ -1102,7 +1110,7 @@ fi
 # Help to produce libraires
 if test "${mandatory}" = "#"; then
       ABI_MSG_NOTICE_L([help-fb],[We can __help__ you !])
-else 
+else
    if test "${mandatory}" = "fail"; then
    	ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
    fi
@@ -1329,6 +1337,6 @@ fi
 
 
 if test "x${mandatory}" = "x#"; then
-  ABI_TRIGGERS_SUMMARY	
+  ABI_TRIGGERS_SUMMARY
   ABI_MSG_NOTICE_L([help-fb], [Missing Mandatory library!])
-fi 
+fi
