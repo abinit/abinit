@@ -25,7 +25,7 @@
 ## DATASET 1 (GSTORE computation)
  optdriver1 7               # Enter EPH code.
  eph_task1 11               # GSTORE computation
- gstore_kfilter1 "qprange"  # Compute g(k,q) fnly for |nk> at the band edges
+ gstore_kfilter1 "qprange"  # Compute g(k,q) only for |nk> at the band edges
  gstore_use_lgk1 1          # Only q-points in the IBZ_k
  #gstore_use_lgk1 0
 
@@ -69,7 +69,7 @@
 #%% [files]
 #%% use_git_submodule = MgO_eph_zpr
 #%% files_to_test =
-#%%   teph4zpr_10.abo, tolnlines= 180, tolabs= 3.000e-02, tolrel= 0.98
+#%%   teph4zpr_10.abo, tolnlines= 180, tolabs= 0.09, tolrel= 0.1
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
