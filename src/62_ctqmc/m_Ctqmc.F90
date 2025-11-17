@@ -1431,15 +1431,16 @@ include 'mpif.h'
   ilatex = 0
   IF ( this%opt_movie .EQ. 1 ) THEN
     Cchar ="0000"
-    WRITE(Cchar,'(I4)') this%rank
+    WRITE(Cchar,'(I4)') this%rank + (this%tid-1) * this%size
     ilatex = 87+this%rank
     OPEN(UNIT=ilatex, FILE="Movie_"//TRIM(ADJUSTL(Cchar))//".tex")
     WRITE(ilatex,'(A)') "\documentclass{beamer}"
     WRITE(ilatex,'(A)') "\usepackage{color}"
     WRITE(ilatex,'(A)') "\setbeamersize{sidebar width left=0pt}"
     WRITE(ilatex,'(A)') "\setbeamersize{sidebar width right=0pt}"
-    WRITE(ilatex,'(A)') "\setbeamersize{text width left=0pt}"
-    WRITE(ilatex,'(A)') "\setbeamersize{text width right=0pt}"
+    !FIXME Those lines don't work anymore, but output is still readable...
+    !WRITE(ilatex,'(A)') "\setbeamersize{text width left=0pt}"
+    !WRITE(ilatex,'(A)') "\setbeamersize{text width right=0pt}"
     WRITE(ilatex,*)
     WRITE(ilatex,'(A)') "\begin{document}"
     WRITE(ilatex,*)
