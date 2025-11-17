@@ -510,10 +510,14 @@ function xomp_target_is_present(ptr)
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_GPU_UNIFIED_MEMORY
+ xomp_target_is_present = .true. ! No check needed in unified memory
+#else
  device_id = xomp_get_default_device()
  rc = omp_target_is_present(ptr, device_id)
  xomp_target_is_present = .true.
  if(rc==0) xomp_target_is_present = .false.
+#endif
 #else
  xomp_target_is_present = .false.
  ! this macro is called before m_errors is compiled
