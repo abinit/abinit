@@ -20137,7 +20137,7 @@ Sets a tolerance for differences of magnetization (in atomic unit ) that, reache
 TWICE successively, will cause one SCF cycle to stop (and ions to be moved).
 If set to zero, this stopping condition is ignored.
 Effective only when SCF cycles are done ([[iscf]]>0). This tolerance applies
-to any particular cartesian component of any atom. 
+to any particular cartesian component of any atom.
 
 This stopping criterion is not allowed for RF calculations.
 Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
@@ -20152,7 +20152,7 @@ To do so one has to specify both criteria for the same dataset.
 Note that a tolerance defined generically does not couple with a criterion defined for one particular dataset.
 See [[tolwfr]] for more details about coupling two criteria.
 
-When the maximum magnetization among all atoms and directions is smaller than 10e^-8, both the maximum of magnetization 
+When the maximum magnetization among all atoms and directions is smaller than 10e^-8, both the maximum of magnetization
 and its difference are reset to zero. In this case, the toldmag convergence criterion cannot be used.
 """,
 ),
@@ -24757,13 +24757,14 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This input variable specifies whether the EPH code should compute the $g(\kk, \qq)$
-matrix elements for $\kk$ in the IBZ or in the BZ.
+matrix elements with $\kk$ in the IBZ or in the BZ.
 
 !!! important
 
     The combination [[gstore_kzone]] = "ibz" with [[gstore_qzone]] = "ibz" is not allowed.
     One usually restricts one wavevector to the IBZ while the other wavevector covers the full BZ.
-    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes.
+    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes,
+    and it is not recommended for production runs (much slower).
 """,
 ),
 
@@ -24785,7 +24786,8 @@ e-ph matrix elements for $\qq$ in the IBZ or in the BZ.
 
     The combination [[gstore_kzone]] = "ibz" with [[gstore_qzone]] = "ibz" is not allowed.
     One usually restricts one wavevector to the IBZ while the other wavevector covers the full BZ.
-    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes.
+    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes,
+    and it is not recommended for production runs (much slower).
 """,
 ),
 
@@ -24805,10 +24807,10 @@ when computing the e-ph matrix elements with [[eph_task]] == 11.
 Possible values are:
 
 - "none" --> No filter is applied (default)
-- "fs_tetra" --> Use tetrahedron method to filter k/k+q states on the Fermi surface.
-- "qprange" --> Use [[gw_qprange]] to select k-points. If [[gw_qprange]] is not given in input
+- "qprange" --> Use [[gw_qprange]] to select k-points. If [[gw_qprange]] is not given in input,
    the code automatically selects the k-points associated to the direct and the fundamental KS gap
-   as computed from the WFK file.
+   as computed from the WFK file. This option is usually used for ZPR computations in semiconductors.
+- "fs_tetra" --> Use tetrahedron method to filter k/k+q states on the Fermi surface.
 
 Note that it is possible to use another filter based on the position of the energy states wrt to either
 the CBM/VBM or the position wrt to the Fermi level via [[gstore_erange]].
@@ -24871,7 +24873,7 @@ The first entry gives the first band to be included while the second index speci
 Note that the array depends on the value of [[nsppol]] thus one has to provide four integers for the
 two different spin channels when [[nsppol]] == 2.
 
-If not specified in input, ABINIT will use all the bands from 1 up to the maximum number of bands [[nband]]
+If not specified in input, ABINIT will use all the bands from 1 up to [[nband]]
 unless additional filters are activated, see [[gstore_kfilter]] and [[gstore_erange]].
 """,
 ),
