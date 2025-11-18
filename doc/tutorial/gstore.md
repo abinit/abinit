@@ -40,10 +40,8 @@ The first step is to specify whether the $\kk$-points or the $\qq$-points should
 This is controlled by the variables [[gstore_kzone]] and [[gstore_qzone]].
 The default behavior is:
 
-```
 [[gstore_kzone]] = "ibz"
 [[gstore_qzone]] = "bz"
-```
 
 These settings are OK if you need to compute electronic properties such as the ZPR or electronic transport properties.
 For phonon properties ....
@@ -64,19 +62,15 @@ The following examples will help clarify this point.
 Sigma_\kk is ..
 In this case, one can use
 
-``
-gstore_kzone "ibz"
-gstore_qzone "bz"
-gstore_use_lgk 1   # Default is 0
-```
+[[gstore_kzone]] "ibz"
+[[gstore_qzone]] "bz"
+[[gstore_use_lgk]] 1   # Default is 0
 
 For phonon properties, one can use
 
-``
-gstore_kzone "bz"
-gstore_qzone "ibz"
-gstore_use_lgq 1   # Default is 0
-```
+[[gstore_kzone]] "bz"
+[[gstore_qzone]] "ibz"
+[[gstore_use_lgq]] 1   # Default is 0
 
 !!! important
 
@@ -117,37 +111,66 @@ For computing the ZPR of the fundamental/direct band gap:
 [[nband]]
 
 
-TODO: Gstore parallelism and GWPT
+## MPI parallelism in gstore computation
 
+The GSTORE computation with [[eph_task]] 11 is parallelized over five different MPI levels.
+The user can specify manually the MPI grid using [[eph_np_pqbks]].
+In this case the product of the MPI processors along the different dimensions must be equal to the
+total number of MPI processes allocated by the user, else the code will stop.
 
-## How to compute physical properties from a GSTORE
+If [[eph_np_pqbks]] is not specified in the input, the code will generate this grid automatically using the total number of processors
+and the basic dimensions of the job computed at runtime.
+
+If you decide to enforce your MPI grid, take into account the following.
+The parallelization levels over $\spin$, $\kk$-points and $\qq-points$ are the most efficient
+but the the number of processors for $\kk$ or $\qq$ points should be adjusted according to the values
+of [[gstore_kzone]], [[gstore_qzone]].
+Cleary, one should use less processors for the zone that is being restricted to the IBZ to reduce load imbalace.
+The parallelism over perturbations should be activated only when the previous three levels start to saturate.
+The parallelism over bands is not supported in GSTORE computation
+
+TODO: GWPT and [[gwpt_np_wpqbks]]
+Also [[boxcutmin]] to accelerate computations.
+
+## Restarting a GSTORE computation
+
+If your GSTORE calculation has been killed due to e.g. timeout limit,
+you can always restart the computation by rerurring the same input with the
+addition of
+
+[[getgstore_filepath]]  "out_GSTORE.nc"
+
+where "out_GSTORE.nc" is the name of the output GSTORE file produced by the calculation
+that was interrupted.
+
+## How to compute physical properties from a GSTORE file
 
 So far we have discussed how to generate a GSTORE.nc file.
 Now we explain how to read the e-ph matrix elements from file and use them
 to compute physical properties.
 
+!!! critical
+
+    Do not use a WFK file different from the one used to generate the GSTORE file.
+
 Reading a GSTORE file is very easy, just use:
 
-[[optdriver]] 7              # Enter EPH code.
+[[optdriver]] 7         # Enter EPH code.
 [[getgstore_filepath]]  "teph4zpr_10o_DS1_GSTORE.nc"
 
 [[eph_task]] 24              # SIGMAPH from GSTORE
-
 
 The GSTORE.nc stores additional quantities such as phonon frequencies and eigenvectors for all the $\qq$-points in the IBZ,
 and additional metadata such as, for instance, a table that specifies whether
 all the entries for a particular $\qq$-points have been computed.
 This table is used to implement the automatic restart of the computation if the job is killed due to the time-limit.
-
 In our implementation, we are also able to filter the set of $\kk$- and $\qq$-points as well as the set of
 $m$ and $n$ bands in the e-ph matrix elements.
 The kind of filtering technique that should be used depends on the application in mind.
-
 For metals, for instance, one is usually interested in the e-ph matrix elements only for bands inside
 an energy window around the Fermi level.
 Moreover one can select only those $\kk$ and $\qq$ for which there is at least one electronic transition
 from $\kk$ to $\kk+\qq$ inside the energy window.
-
 %For the computation of the e-ph induced renormalization of the electronic states and the ZPR, on the other hand, one is usually interested in the corrections at the band edges. In this case, one can compute the GWPT matrix elements only for the $\nk$-states of the CBM/VBM, and then evaluate the coupling for all the $\qq$-points in the irreducible zone defined by the little group of $\kk$.
 %For the ZPR we have to include a large number of empty states associated to the $m$ index and this clearly increases significantly the computational cost.
 %If we assume, however, that the GWPT matrix elements do not differ significantly from the KS ones, one can use the Sternheimer method to account for the contribution to the sum beyond the active space.

@@ -4499,7 +4499,7 @@ Variable(
 Select the electron-phonon task to be performed when [[optdriver]] == 7.
 The choice is among:
 
-* 0 --> No computation. Mainly used to access the post-processing tools.
+* 0 --> No computation. Mainly used to access the post-processing tools available in EPH (phonon band and dos).
 * 1 --> Compute phonon linewidths in metals and superconducting properties (isotropic formalism).
 * 2 --> Compute e-ph matrix elements. Save results in GKK.nc file.
 * -2 --> Compute e-ph matrix elements. Save results in GKQ.nc file that can be post-processed with AbiPy.
@@ -4523,7 +4523,7 @@ The choice is among:
          by [[eph_ngqpt_fine]] (NB: the q-mesh must be a sub-mesh of the k-mesh or equal).
 * 12 --> Migdal-Eliashberg equations (isotropic case).
 * -12 --> Migdal-Eliashberg equations (anisotropic case). UNDER DEVELOPMENT.
-* 13 --> Variational polaron equations
+* 13 --> Variational polaron equations. Requires GSTORE file specified via [[getgstore_filepath]]
 * -13 --> Compute polaron wavefunctions and atomic displacements in the supercell and write results to files
 * 14 --> Compute the molecular Berry curvature from GSTORE.nc. No support for metals or non-collinear magnetism yet. Reference: [[cite:Saparov2022]], [[cite:Coh2023]].
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
@@ -4533,15 +4533,18 @@ The choice is among:
               An array D(R) with the decay of the W(R,r) as a function of R is computed and saved to file
               In the second case (-15) the q-points are taken directly from the DVDB file.
 * 16, -16 --> test_phrotation TO BE DOCUMENTED.
-* 17 --> Compute e-ph matrix elements with the GWPT formalism  UNDER DEVELOPMENT.
+* 17 --> Compute e-ph matrix elements with the GWPT formalism  Produce GSTORE file.
+         Requires netcdf library with MPI-IO support.
 * 18 --> Compute e-ph matrix g(k,q) along a high-symmetry path. See [[eph_fix_wavevec]] and other related variables.
 * 19 --> Compute matrix elements of the screened interaction W between two Cooper pairs.
+* 24 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections, also possibly the spectral function.
+         Similar to [[eph_task]] 4 but requires GSTORE file specified via [[getgstore_filepath]]
 
 !!! important
 
     At the time of writing ( |today| ), PAW is not supported by the EPH code.
     Also, calculations with [[nspinor]] = 2 require [[nspden]] 1 in all the EPH tasks
-    in which the interpolation of the DFPT potentials is needed.
+    in which the interpolation of the DFPT scattering potentials is needed.
 """,
 ),
 

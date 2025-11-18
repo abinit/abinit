@@ -15,7 +15,7 @@ Additional examples are provided in this
 that explains how to use Abipy to automate the calculations and post-process the results for Diamond.
 
 It is assumed the user has already completed the two tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
-and that he/she is familiar with the calculation of ground state (GS) and response properties
+and that they are familiar with the calculation of ground state (GS) and response properties
 in particular phonons, Born effective charges and the high-frequency dielectric tensor.
 The user should have read the [introduction tutorial for the EPH code](/tutorial/eph_intro)
 before running these examples.

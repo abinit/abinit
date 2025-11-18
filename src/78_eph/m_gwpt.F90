@@ -288,12 +288,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  complex(dp) :: ctmp_dp
 !arrays
  real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0)
- real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
- real(dp) :: qq_ibz(3), qq_bz(3)
+ real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3), qq_ibz(3), qq_bz(3)
  real(dp),allocatable :: qlwl(:,:), vnk_cart_ibz(:,:,:)
  real(dp),allocatable :: kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:)
- real(dp),allocatable :: ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
- real(dp),allocatable :: kinpw_kqmp(:), kinpw_kmp(:), ph3d_kqmp(:,:,:), ph3d_kmp(:,:,:)
+ real(dp),allocatable :: ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:), kinpw_kqmp(:), kinpw_kmp(:), ph3d_kqmp(:,:,:), ph3d_kmp(:,:,:)
  real(dp),allocatable, target :: vxc1_qq(:,:,:,:)
  real(dp),allocatable :: gxc_atm(:,:,:,:), gks_atm(:,:,:,:), gks_atm2(:,:,:,:), gsig_atm(:,:,:,:)
  real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:), ph1d(:,:)
