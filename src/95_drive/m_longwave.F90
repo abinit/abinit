@@ -147,7 +147,6 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  real(dp) :: ucvol,vxcavg
  logical :: non_magnetic_xc,just_timdisp
 ! logical :: has_strain,non_magnetic_xc
- character(len=fnlen) :: dscrpt
  character(len=500) :: msg
  type(ebands_t) :: bstruct
  type(ddb_hdr_type) :: ddb_hdr
@@ -165,12 +164,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3)
  real(dp) :: dum_gauss(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
- real(dp) :: strsxc(6)
  integer,allocatable :: atindx(:),atindx1(:)
  integer,allocatable :: blkflg(:,:,:,:,:,:),blkflg_car(:,:,:,:,:,:)
  integer,allocatable :: d3e_pert1(:),d3e_pert2(:),d3e_pert3(:)
  integer,allocatable :: indsym(:,:,:),irrzon(:,:,:),kg(:,:)
- integer,allocatable :: nattyp(:),npwarr(:),pertsy(:,:),symrec(:,:,:)
+ integer,allocatable :: nattyp(:),npwarr(:),symrec(:,:,:)
  integer,allocatable :: rfpert(:,:,:,:,:,:)
  real(dp),allocatable :: cg(:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),d3etot_car(:,:,:,:,:,:,:)
@@ -730,7 +728,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
 & ffnl,gmet,gprimd,gsqcut,&
 & hdr,just_timdisp,kg,kxc,dtset%mband,dtset%mgfft,&
-& dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ncorespl,ngfftf,nfftf,&
+& dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,&
 & dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,nylmgr,occ,&
 & pawfgr,pawtab,ph1d,&
 & psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,xred,ylm,ylmgr)

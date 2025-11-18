@@ -74,30 +74,15 @@ program anaddb
  integer:: comm, ii, ierr
  integer:: nproc, my_rank, ana_ncid
  logical:: iam_master
- integer:: rfelfd(4), rfphon(4), rfstrs(4), ngqpt_coarse(3)
- integer:: count_wminmax(2)
- integer, allocatable:: d2flg(:)
- real(dp):: etotal, tcpu, tcpui, twall, twalli !,cpu, wall, gflops
- real(dp):: epsinf(3, 3), dielt_rlx(3, 3)
- real(dp):: compl(6, 6), compl_clamped(6, 6), compl_stress(6, 6)
- real(dp):: elast(6, 6), elast_clamped(6, 6), elast_stress(6, 6)
- real(dp):: red_ptot(3), pel(3)
- real(dp):: piezo(6, 3), qphnrm(3), qphon(3, 3), strten(6), tsec(2)
- real(dp):: wminmax(2)
- real(dp), allocatable:: d2cart(:,:), dchide(:,:,:), lst(:)
- real(dp), allocatable:: dchidt(:,:,:,:), displ(:), eigval(:,:)
- real(dp), allocatable:: eigvec(:,:,:,:,:), fact_oscstr(:,:,:), instrain(:,:)
- real(dp), allocatable:: gred(:,:), phfrq(:)
- real(dp), allocatable:: rsus(:,:,:)
- real(dp), allocatable:: zeff(:,:,:)
- real(dp), allocatable:: qdrp_cart(:,:,:,:)
+ real(dp):: tcpu, tcpui, twall, twalli !,cpu, wall, gflops
+ real(dp)::  tsec(2)
  real(dp), allocatable:: delta_asrw0(:,:), delta_asrw0_fm(:,:)
  integer:: units(2)
  character(len=10):: procstr
  character(len=24):: codename, start_datetime
- character(len = strlen):: string, raw_string
+! character(len = strlen):: string, raw_string
  character(len = fnlen):: worker_logfile
- character(len = fnlen):: filnam(8), elph_base_name, tmpfilename, phibz_prefix
+ character(len = fnlen):: filnam(8)
  character(len=500):: msg
  type(args_t):: args
  type(anaddb_dataset_type):: dtset
@@ -245,14 +230,14 @@ program anaddb
  if (abs(dtset%magpen) > tol8) then
    ABI_MALLOC(delta_asrw0,(3* Crystal%natom,3))
    ABI_MALLOC(delta_asrw0_fm,(3* Crystal%natom,3))
-   call ddb_magpen(ddb, ddb_lw, delta_asrw0, delta_asrw0_fm, dtset%dissip, dtset%magpen, dtset%mpatpol, & 
- & dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, Crystal%ntypat, dtset%freqflag, dtset%prtvol, 1, Crystal%ucvol, dtset%timdisp, &
+   call ddb_magpen(ddb, ddb_lw, dtset%magpen, dtset%mpatpol, & 
+ & dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, dtset%prtvol, 1, Crystal%ucvol, dtset%timdisp, &
  & Crystal%xred)
 
    if (dtset%freqflag/=0) then
-     call ddb_omega_interpol(Crystal%amu, ddb, ddb_lw, delta_asrw0, delta_asrw0_fm, dtset%dissip, dtset%eta, filnam(8), &
+     call ddb_omega_interpol(Crystal%amu, ddb, ddb_lw, dtset%eta, filnam(8), &
    & dtset%magpen, dtset%mpatpol, dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, dtset%nfreq, Crystal%ntypat, & 
-   & dtset%freqflag, dtset%frmax, dtset%frmin, dtset%prtvol, 1, Crystal%typat, Crystal%ucvol, Crystal%xred)
+   & dtset%freqflag, dtset%frmax, dtset%frmin, dtset%prtvol, Crystal%typat, Crystal%ucvol, Crystal%xred)
    end if
 
    ABI_FREE(delta_asrw0)

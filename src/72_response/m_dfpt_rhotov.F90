@@ -161,7 +161,6 @@ contains
  integer :: optnc,nkxc_cur,prtopt
  logical :: vhartr1_allocated,vxc1_allocated
  real(dp) :: doti,elpsp10
- character(len=500) :: msg
 !arrays
  real(dp)             :: tsec(20)
  real(dp),allocatable :: rhor1_nohat(:,:),vhartr01(:),vxc1val(:,:)
@@ -224,21 +223,21 @@ contains
    ABI_MALLOC(fatsph,(nfft,natom))
    ABI_MALLOC(taumr,(nfft,natom,3))
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
-  &  ntypat,ratsm,ratsph,rhor1,rprimd,typat,xred,ratopt,prtopt,cplex,&
+  &  ntypat,ratsm,ratsph,rhor1,rprimd,typat,xred,prtopt,cplex,&
   &  qgbt,use_gbt,intgden=intgden,rhomag=rhomag,fatsph=fatsph,qphon=qphon,taumr=taumr)
  end if
 
  if(ipert>natom+11.and.ipert<=2*natom+11)then
    ABI_MALLOC(v1hspinfield,(cplex*nfft,nspden))
-   call dfpt_v1hspinfield_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngfft,nspden,&
-&  qphon,taumr,v1hspinfield,xred)
+   call dfpt_v1hspinfield_atsph(cplex,fatsph,idir,ipert,natom,nfft,nspden,&
+&  qphon,taumr,v1hspinfield)
  end if
 
  ABI_MALLOC(vmagpen1,(cplex*nfft,nspden))
  vmagpen1=zero
  if (abs(magpen) > tol6) then
    call dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,&
-& mpdir,mpi_enreg,natom,nfft,ngfft,nspden,qphon,rhomag,taumr,vmagpen1,xred)
+& mpdir,natom,nfft,nspden,qphon,rhomag,taumr,vmagpen1)
 !  emagpen1=two*emagpen1
  end if
 
@@ -644,38 +643,33 @@ end subroutine dfpt_v1hspinfield
 !! SOURCE
 
 subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
-& mpi_enreg,natom,nfft,ngfft,nspden,qphon,rhomag,taumr,vmagpen1,xred)
+& natom,nfft,nspden,qphon,rhomag,taumr,vmagpen1)
 
 !Arguments 
 !scalars:
  integer,intent(in)   :: cplex,natom,nfft,nspden
  real(dp),intent(in)  :: magpen
  real(dp),intent(out) :: emagpen1 
- type(MPI_type),intent(in) :: mpi_enreg
 !arrays:
  integer,intent(in)    :: mpatpol(2),mpdir(3)
- integer,intent(in)    :: ngfft(18)
  real(dp),intent(in)   :: fatsph(nfft,natom)
  real(dp),intent(in)   :: intgden(cplex,nspden,natom)
  real(dp), intent(in)  :: qphon(3)
  real(dp),intent(in)   :: rhomag(2,nspden)
  real(dp), intent(in)   :: taumr(nfft,natom,3)   
  real(dp),intent(out)  :: vmagpen1(cplex*nfft,nspden)
- real(dp), intent(in)  :: xred(3,natom)
 
 !Local variables-------------------------------
 !scalars:
- integer :: i,iatom,ifft,prtopt,i1,i2,i3,im,n1,n2,n3,re
- real(dp) :: arg,d1,d2,d3,r1,r2,r3
+ integer :: i,iatom,ifft,im,re
+ real(dp) :: arg
  real(dp) :: phr1d_re,phr1d_im
  real(dp) :: Blocx_re,Blocy_re,Blocz_re
  real(dp) :: Blocx_im,Blocy_im,Blocz_im
- character(len=500) :: msg
 !arrays:
  real(dp) :: Bx(cplex),By(cplex),Bz(cplex)
  real(dp) :: Blocx(cplex*nfft),Blocy(cplex*nfft),Blocz(cplex*nfft)
  real(dp) :: rhomag_eff(2,nspden),intgden_eff(cplex,nspden,natom)
- real(dp) :: my_xred(3,natom),xshift(3, natom)
 
 ! *************************************************************************
 
@@ -852,31 +846,27 @@ end subroutine dfpt_v1magpen
 !!
 !! SOURCE
 
-subroutine dfpt_v1hspinfield_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngfft,nspden,&
-& qphon,taumr,v1hspinfield,xred)
+subroutine dfpt_v1hspinfield_atsph(cplex,fatsph,idir,ipert,natom,nfft,nspden,&
+& qphon,taumr,v1hspinfield)
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in)    :: idir,ipert,nfft,cplex,natom,nspden
- type(MPI_type), intent(in) :: mpi_enreg
 !arrays
- integer, intent(in)    :: ngfft(18)
  real(dp), intent(in)   :: fatsph(nfft,natom)
  real(dp), intent(in)   :: qphon(3)
  real(dp), intent(inout):: v1hspinfield(cplex*nfft,nspden)
  real(dp), intent(in)   :: taumr(nfft,natom,3)   
- real(dp), intent(in)   :: xred(3,natom)
 
 !Local variables-------------------------------
 !scalars
- integer :: ifft,iatom,i1,i2,i3,im,n1,n2,n3,re
- real(dp) :: arg,d1,d2,d3,r1,r2,r3
+ integer :: ifft,iatom,im,re
+ real(dp) :: arg
  real(dp) :: phr1d_re,phr1d_im
  real(dp) :: Bloc_re, Bloc_im 
  character(len=500) :: msg
 !arrays
  real(dp) :: Bloc(cplex*nfft)
- real(dp) :: my_xred(3,natom),xshift(3, natom)
 
 ! *************************************************************************
 

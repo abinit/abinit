@@ -931,7 +931,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    ABI_MALLOC(intgden, (nspden, natom))
 
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
-                      ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,dtset%ratopt,1,cplex1,dtset%qgbt,dtset%use_gbt,intgden=intgden,rhomag=rhomag)
+                      ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,dtset%qgbt,dtset%use_gbt,intgden=intgden,rhomag=rhomag)
 
    !  for rhomag:
    !    in collinear case component 1 is total density and 2 is _magnetization_ up-down

@@ -232,8 +232,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: nkpt_rbz,nkxc,nkxc1,nspden_rhoij,ntypat,nzlmopt,openexit
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
- integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
- integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
+ integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwrpaw
+ integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sumg0_save,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw,usevxctau,usevxctau_paw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
  logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
@@ -1621,7 +1621,7 @@ ABI_NVTX_END_RANGE()
 &   chneut,dyew,dyfrwf,dyfrx1,dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &   gprimd,dtset%mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,&
-&   rfasr,dtset%rfatpol,rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
+&   rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
 
 !  Output of the dynamical matrix (master only)
    call dfpt_dyout(becfrnl,dtset%berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,&
@@ -3520,15 +3520,15 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
 & dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
 & eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 & gprimd,mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,prtbbb,&
-& rfasr,rfatpol,rfpert,rprimd,typat,ucvol,usevdw,zion)
+& rfpert,rprimd,typat,ucvol,usevdw,zion)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: asr,berryopt,chneut,dyfr_cplex,dyfr_nondiag,mband,mpert,natom,ntypat,outd2
- integer,intent(in) :: pawbec,pawpiezo,prtbbb,rfasr,usevdw
+ integer,intent(in) :: pawbec,pawpiezo,prtbbb,usevdw
  real(dp),intent(in) :: ucvol
 !arrays
- integer,intent(in) :: rfatpol(2),rfpert(mpert),typat(natom)
+ integer,intent(in) :: rfpert(mpert),typat(natom)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert)
  integer,intent(out) :: carflg(3,mpert,3,mpert)
  real(dp),intent(in) :: becfrnl(3,natom,3*pawbec)

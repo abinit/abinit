@@ -679,7 +679,7 @@ end subroutine add_atomic_fcts
    ABI_MALLOC(rhor_dum,(nfftf,nspden))
    rhor_dum(:,:)=zero
    call calcdenmagsph(mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
-&    ratsm,ratsph,rhor_dum,rprimd,typat,xred,1,0,cplex1,qgbt,use_gbt,intgf2=intgf2)
+&    ratsm,ratsph,rhor_dum,rprimd,typat,xred,0,cplex1,qgbt,use_gbt,intgf2=intgf2)
    ABI_FREE(rhor_dum)
  else
    intgf2=zero
@@ -847,7 +847,7 @@ end subroutine constrained_dft_free
  ABI_MALLOC(strs_intgden,(6,nspden,natom))
 
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,&
-                    xred,1,1,cplex1,qgbt,use_gbt,intgden=intgden,gr_intgden=gr_intgden,rhomag=rhomag,strs_intgden=strs_intgden)
+                    xred,1,cplex1,qgbt,use_gbt,intgden=intgden,gr_intgden=gr_intgden,rhomag=rhomag,strs_intgden=strs_intgden)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl)
 
 !DEBUG
@@ -858,7 +858,7 @@ end subroutine constrained_dft_free
  ABI_MALLOC(intgres_tmp,(nspden,natom))
  intgres_tmp(:,:)=zero
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
-&  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,xred,1,11,cplex1,qgbt,use_gbt,intgden=intgres_tmp,rhomag=rhomag)
+&  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,xred,11,cplex1,qgbt,use_gbt,intgden=intgres_tmp,rhomag=rhomag)
 
 !DEBUG
 !write(std_out,*) ' intgres_tmp(1:nspden,1:natom)=',intgres_tmp(1:nspden,1:natom)
@@ -1236,7 +1236,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred,qgbt,use_gbt)
 
 !We need the integrated magnetic moments and the smoothing function
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
-                    c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,1,cplex1,qgbt,use_gbt,intgden=intgden,rhomag=rhomag)
+                    c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,cplex1,qgbt,use_gbt,intgden=intgden,rhomag=rhomag)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl)
 
 !Loop over atoms
@@ -1381,7 +1381,7 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
 
 !We need the integrated magnetic moments
  call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
-                    1,1,cplex1,qgbt,use_gbt,intgden=intgden,rhomag=rhomag)
+                    1,cplex1,qgbt,use_gbt,intgden=intgden,rhomag=rhomag)
 
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,ratsm,ratsph,rhomag,typat,znucl)
 
@@ -1520,14 +1520,13 @@ end subroutine mag_penalty_e
 !! SOURCE
 
 subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
-&           ratopt,option,cplex,qgbt,use_gbt,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,fatsph,qphon,taumr)
+&           option,cplex,qgbt,use_gbt,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,fatsph,qphon,taumr)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in)        :: natom,nfft,nspden,ntypat
  real(dp),intent(in)       :: ratsm
  type(MPI_type),intent(in) :: mpi_enreg
- integer,intent(in)        :: ratopt
  integer,intent(in)        :: option
  integer,intent(in)        :: cplex
  integer,intent(in)        :: use_gbt
@@ -1551,7 +1550,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  integer,parameter :: ndir=3,ishift=5
  integer :: i1,i2,i3,iatom,ierr,ifft_local,ii,isp,ispden,ix,iy,iz,izloc,jatom,n1,n1a,n1b,n2,ifft,ifft_local_cplex
  integer :: neighbor_overlap,n2a,n2b,n3,n3a,n3b,nfftot,n4,n5,n6
- integer :: n1c, n2c, n3c
+! integer :: n1c, n2c, n3c
  integer :: jfft
  real(dp) :: arg,phr1d_im,phr1d_re
  real(dp),parameter :: delta=0.99_dp
@@ -1562,7 +1561,8 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  integer :: overlap_ij(natom,natom)
  real(dp) :: gmet(3,3),gprimd(3,3),gr_intg(3,4)
- real(dp) :: intg(cplex,4),intg_im(4),intg_re(4),qphon_(3),rhomag_(2,nspden)
+ real(dp) :: intg(cplex,4),qphon_(3),rhomag_(2,nspden)
+! real(dp) :: intg_im(4),intg_re(4)
  real(dp) :: fatsph_(nfft,natom),taumr_(nfft,natom,3)
  real(dp) :: strs(3,3),strs_cartred(3,3),strs_intg(6,4),tsec(2)
  real(dp) :: dist_ij(natom,natom),intgden_(cplex,nspden,natom)!,intgden_im_(nspden,natom)
@@ -2060,7 +2060,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
 
 !Local variables ------------------------------
 !scalars
- integer :: iatom,ix,ic,icplex
+ integer :: iatom,ix,icplex
  real(dp) :: mag_coll   , mag_x, mag_y, mag_z ! EB
  real(dp) :: mag_coll_im, mag_x_im, mag_y_im, mag_z_im ! SPr
  real(dp) :: rho_tot, rho_tot_im
@@ -2939,7 +2939,7 @@ end subroutine calmaxdifmag
 !! SOURCE
 
 subroutine fatsph_recip(fatsph,fatsph3i,gmet,mpi_enreg,natom,nfft,ngfft,ntypat,&
-& ratsm,ratsph,rprimd,typat,ucvol,xred) 
+& ratsm,ratsph,typat,ucvol,xred) 
 
 !Arguments ------------------------------------
 !scalars
@@ -2948,17 +2948,17 @@ subroutine fatsph_recip(fatsph,fatsph3i,gmet,mpi_enreg,natom,nfft,ngfft,ntypat,&
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in)  :: ngfft(18),typat(natom)
- real(dp),intent(in) :: gmet(3,3),ratsph(ntypat),rprimd(3,3)
+ real(dp),intent(in) :: gmet(3,3),ratsph(ntypat)
  real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(out):: fatsph(nfft,natom)
  real(dp),intent(out):: fatsph3i(ngfft(1),ngfft(2),ngfft(3),natom)   
 
 !Local variables ------------------------------
 !scalars
- integer :: iatom,ifft
+ integer :: iatom
  integer :: i1,i2,i3,id1,id2,id3,ig1,ig2,ig3,ii,ii1,n1,n2,n3,n4,n5,n6
  real(dp) :: arg1,arg2,fac1,fac2,fac3,gq1,gq2,gq3,gcube
- real(dp) :: gsquar,gmag,gmagrad,rad,sfr,sfi,widthsq,norm
+ real(dp) :: gsquar,gmag,gmagrad,rad,sfr,sfi,widthsq
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)

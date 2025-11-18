@@ -291,14 +291,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  logical,parameter :: paral_pert_inplace=.true.,remove_inv=.false.
  logical :: first_entry,found_eq_gkk,has_nd,t_exist,paral_atom,write_1wfk,init_rhor1,with_vxctau
  logical :: kramers_deg
- character(len=fnlen) :: dscrpt,fiden1i,fiwf1i,fiwf1i_mq,fiwf1o,fiwf1o_mq,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam, fnamewffmq_
+ character(len=fnlen) :: fiden1i,fiwf1i,fiwf1i_mq,fiwf1o,fiwf1o_mq,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam, fnamewffmq_
  character(len=500) :: msg
  type(crystal_t) :: crystal, ddb_crystal
  type(dataset_type), pointer :: dtset_tmp
  type(ebands_t) :: ebands_k,ebands_kq,gkk_ebands, ebands_kmq !+/-q duplicates
  type(gkk_t)     :: gkk2d
  type(hdr_type) :: hdr,hdr_mq,hdr_den,hdr_tmp
- type(ddb_hdr_type) :: ddb_hdr, tmp_ddb_hdr
+ type(ddb_hdr_type) :: ddb_hdr
  type(pawang_type) :: pawang1
  type(wfk_t) :: ddk_f(4)
  type(wvl_data) :: wvl
@@ -313,7 +313,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer,allocatable :: symaf1(:),symaf1_tmp(:),symrc1(:,:,:),symrl1(:,:,:),symrl1_tmp(:,:,:)
  integer, pointer :: old_atmtab(:)
  logical, allocatable :: distrb_flags(:,:,:)
- real(dp) :: dielt(3,3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),qphon_mq(3),tsec(2)
+ real(dp) :: dielt(3,3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),tsec(2)
  real(dp),allocatable :: buffer1(:,:,:,:,:),cg(:,:),cg1(:,:),cg1_active(:,:),cg1_3(:,:,:),cg0_pert(:,:)
  real(dp),allocatable :: cg1_pert(:,:,:,:),cgq(:,:),gh0c1_pert(:,:,:,:)
  real(dp),allocatable :: doccde_rbz(:),docckqde(:)

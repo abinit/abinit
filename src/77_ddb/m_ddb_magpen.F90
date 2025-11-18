@@ -88,30 +88,29 @@ contains
 !!
 !! SOURCE
 
- subroutine ddb_magpen(ddb,ddb_lw,delta_asrw0,delta_asrw0_fm,dissip,& 
+ subroutine ddb_magpen(ddb,ddb_lw,& 
 & magpen,mpatpol,mpdir,mpert,mpopt,natom, &
-& ntypat,omegaflag,prtvol,rftyp,ucvol,timdisp,xred)
+& prtvol,rftyp,ucvol,timdisp,xred)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: dissip,mpert,mpopt,natom,ntypat,omegaflag,prtvol,rftyp,timdisp
+ integer,intent(in) :: mpert,mpopt,natom,prtvol,rftyp,timdisp
+! integer,intent(in) :: dissip
  real(dp),intent(in) :: magpen,ucvol
 !arrays
  type(ddb_type),intent(inout) :: ddb,ddb_lw
  integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp), intent(inout) :: delta_asrw0(3*natom,3), delta_asrw0_fm(3*natom,3)
  real(dp),intent(in) :: xred(3,natom)
 
 !Local variables -------------------------
 !scalars
- integer :: iblok,ii,ipert1,ipert2,jblok,kblok,lblok,nblok,ndim 
+ integer :: iblok,ii,jblok,kblok,lblok,nblok,ndim 
  integer :: nmat,nmdir,optgb,prtopt
  character(len=500) :: msg
  logical :: qeq0
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4),rfmagn(4),rffreq(4)
  real(dp) :: omega(3),qphnrm(3),qphon(3,3)
- complex(dpc) :: barepsilon(3,3),epsilon(3,3), macmagsus(3,3)
  complex(dpc), allocatable :: barmagsus(:,:),invbarmagsus(:,:)
  complex(dpc), allocatable :: invmagsus(:,:), magsus(:,:), invhmat(:,:)
  complex(dpc), allocatable :: barmmom(:,:),barmmom_tr(:,:),mmom(:,:),mmom_tr(:,:)
@@ -200,7 +199,7 @@ contains
      end if
 
      call local_spinsus(barmagsus,ddb,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
-   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol)
+   & mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol)
 
    end if
 
@@ -263,7 +262,7 @@ contains
 
    if (iblok /= 0 .or. jblok /=0 .or. lblok/=0) then
      call magmom(barmmom,barmmom_tr,ddb,invbarmagsus,invhmat,iblok,jblok,lblok,magpen,magsus,mmom,mmom_tr,&
-   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield,zfield_tr)
+   & mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol,zfield,zfield_tr)
    end if
 
    !Now calculate the non-magnetic second-order quantities
@@ -275,8 +274,8 @@ contains
    call ddb%to_d2etot(ddb%val,kblok,0,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega)
 
    !Convert second-order derivatives to diferent magnetic boundary conditions
-   call mp_d2etot(barmagsus,ddb,kblok,invhmat,magsus,magpen,mpert,mpopt,natom, &
- & nblok,ndim,qphon,xred,zfield,zfield_tr)
+   call mp_d2etot(barmagsus,ddb,kblok,magsus,mpert,mpopt,natom, &
+ & ndim,zfield,zfield_tr)
 
    !Convert second-order energies to the physical quantities of ddb%val
    call ddb%to_d2etot(ddb%val,kblok,1,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega)
@@ -350,7 +349,7 @@ contains
 
      if (iblok /= 0) then
        call berrycurv_ss(bc_barmagsus,bc_ss,ddb_lw,iblok,invbarmagsus,mpatpol,mpdir,mpert,&
-     & natom,nblok,ndim,nmdir,prtvol)
+     & natom,ndim,nmdir,prtvol)
      end if
 
      !Berry curvature of the induced Zeeman fields
@@ -390,12 +389,12 @@ contains
 
      if (iblok /= 0 .or. jblok /=0 .or. lblok /= 0) then
        call berrycurv_sp(barmmom,bc_sp,bc_ss,ddb_lw,iblok,invbarmagsus,jblok,lblok, &
-     & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred)
+     & mpatpol,mpdir,mpert,natom,ndim,nmdir,prtvol)
      end if
 
      !Berry curvature of other second-order quantites
      call berrycurv_pp(barmagsus,bc_barmagsus,bc_sp,ddb_lw,kblok, &
-   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qeq0,ucvol,xred,zfield)
+   & mpert,natom,ndim,qeq0,ucvol,zfield)
 
      !Print them
      call mp_d3etot_print(ddb_lw,ddb_lw%val_fs,kblok,mpert,natom,nblok,1,omega,&
@@ -461,12 +460,12 @@ contains
 !! SOURCE
 
  subroutine local_spinsus(barmagsus,ddb,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus, &
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol, &
+& mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol, &
 & fs2rs,blkval_fs) !optional
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir
+ integer,intent(in) :: iblok,mpert,natom,ndim,nmdir
  integer,intent(in) :: prtopt,prtvol
  integer,intent(in),optional :: fs2rs
  real(dp),intent(in) :: magpen
@@ -485,7 +484,7 @@ contains
  integer :: fs2rs_
  integer :: iat1,iat2,icol,idir1,idir2,index,info,ipert1,ipert2,irow,lwork
  integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
- real(dp) :: fac
+ !real(dp) :: fac
  character(len=1000) :: msg
 !arrays
  complex(dpc) :: idty(ndim,ndim)
@@ -759,17 +758,17 @@ contains
 !! SOURCE
 
  subroutine magmom(barmmom,barmmom_tr,ddb,invbarmagsus,invhmat,iblok,jblok,lblok,magpen,magsus,mmom,mmom_tr,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield,zfield_tr, &
+& mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol,zfield,zfield_tr, &
 & fs2rs,blkval_fs) !optional
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,jblok,lblok,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol
+ integer,intent(in) :: iblok,jblok,lblok,mpert,natom,ndim,nmdir,prtopt,prtvol
  integer,intent(in),optional :: fs2rs
  real(dp),intent(in) :: magpen
 !arrays
  type(ddb_type),intent(inout) :: ddb
- real(dp),intent(in) :: qphon(3),xred(3,natom)
+! real(dp),intent(in) :: qphon(3),xred(3,natom)
  integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in),optional :: blkval_fs(2,3,mpert,3,mpert,1)
  complex(dpc),intent(out) :: barmmom(ndim,(natom+5)*3)
@@ -784,9 +783,8 @@ contains
 !Local variables -------------------------
 !scalars
  integer :: fs2rs_
- integer :: iat1,iat2,icol,idir1,idir2,index,ipert1,ipert2,irow
- integer :: ipert1_red,ipert2_red,idir1_red,idir2_red,jndex,zblok
- real(dp) :: fac
+ integer :: iat1,icol,idir1,idir2,index,ipert1,ipert2,irow
+ integer :: ipert1_red,idir1_red,jndex,zblok
  character(len=1000) :: msg
 !arrays
  integer :: indexat1(ndim),indexdir1(ndim)
@@ -1133,22 +1131,22 @@ contains
 !! SOURCE
 
  subroutine mp_d2etot(barmagsus,ddb,&
-& iblok,invhmat,magsus,magpen,mpert,mpopt,&
-& natom,nblok,ndim,qphon,xred,zfield,zfield_tr,&
+& iblok,magsus,mpert,mpopt,&
+& natom,ndim,zfield,zfield_tr,&
 & fs2rs,blkval_fs,blkval_rs) !optional
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim
+ integer,intent(in) :: iblok,mpert,mpopt,natom,ndim
  integer,intent(in),optional :: fs2rs
- real(dp),intent(in) :: magpen
+! real(dp),intent(in) :: magpen
 !arrays
  type(ddb_type),intent(inout) :: ddb
- real(dp),intent(in) :: qphon(3),xred(3,natom)
+! real(dp),intent(in) :: qphon(3),xred(3,natom)
  real(dp),intent(in),optional :: blkval_fs(2,3,mpert,3,mpert,1)
  real(dp),intent(out),optional :: blkval_rs(2,3,mpert,3,mpert,1)
  complex(dpc),intent(in) :: barmagsus(ndim,ndim)
- complex(dpc),intent(in) :: invhmat(ndim,ndim)
+! complex(dpc),intent(in) :: invhmat(ndim,ndim)
  complex(dpc),intent(in) :: magsus(ndim,ndim)
  complex(dpc),intent(in) :: zfield(ndim,(natom+5)*3)
  complex(dpc),intent(in) :: zfield_tr((natom+5)*3,ndim)
@@ -1272,7 +1270,7 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: iblok,idir1,idir2,ipert1,ipert2,index,irow,icol
+ integer :: iblok,idir1,idir2,ipert1,ipert2,irow,icol
  integer :: rftyp
  character(len=1000) :: msg
 !arrays
@@ -1490,8 +1488,6 @@ contains
 !Local variables -------------------------
 !scalars
  integer :: icol,idir1,idir2,ipert1,ipert2,irow
- real(dp) :: fac
- character(len=1000) :: msg
 !arrays
 
 ! *********************************************************************
@@ -1555,11 +1551,11 @@ contains
 !! SOURCE
 
  subroutine berrycurv_ss(bc_barmagsus,bc_ss,ddb_lw,iblok,invbarmagsus,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
+& mpatpol,mpdir,mpert,natom,ndim,nmdir,prtvol)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir,prtvol
+ integer,intent(in) :: iblok,mpert,natom,ndim,nmdir,prtvol
 !arrays
  type(ddb_type),intent(inout) :: ddb_lw
  integer,intent(in) :: mpatpol(2),mpdir(3)
@@ -1569,16 +1565,13 @@ contains
 !Local variables -------------------------
 !scalars
  integer :: iat1,iat2,icol,idir1,idir2,idir3,index
- integer :: info,ipert1,ipert2,ipert3,irow,lwork
+ integer :: ipert1,ipert2,ipert3,irow
  integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
- real(dp) :: fac
  complex(dpc), parameter :: ione=(0.d0,1.d0)
  character(len=1000) :: msg
 !arrays
  complex(dpc) :: idty(ndim,ndim)
  integer :: indexat(ndim),indexdir(ndim)
- integer, allocatable :: ipiv(:)
- complex(dpc),allocatable :: work(:),work1(:,:),work2(:,:)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
@@ -1708,24 +1701,23 @@ contains
 !! SOURCE
 
  subroutine berrycurv_sp(barmmom,bc_sp,bc_ss,ddb_lw,iblok,invbarmagsus,&
-& jblok,lblok,mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred)
+& jblok,lblok,mpatpol,mpdir,mpert,natom,ndim,nmdir,prtvol)!,qphon,xred)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,jblok,lblok,mpert,natom,nblok,ndim,nmdir,prtvol
+ integer,intent(in) :: iblok,jblok,lblok,mpert,natom,ndim,nmdir,prtvol
 !arrays
  type(ddb_type),intent(inout) :: ddb_lw
  integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp),intent(in) :: qphon(3),xred(3,natom)
+! real(dp),intent(in) :: qphon(3),xred(3,natom)
  complex(dpc),intent(in) :: barmmom(ndim,(natom+5)*3)
  complex(dpc),intent(in) :: bc_ss(ndim,ndim)
  complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
  complex(dpc),intent(out) :: bc_sp(ndim,(natom+5)*3)
 !Local variables -------------------------
 !scalars
- integer :: iat1,iat2,icol,idir1,idir2,idir3,index,ipert1,ipert2,ipert3,irow
- integer :: ipert1_red,ipert2_red,idir1_red,idir2_red,jndex
- real(dp) :: fac,re,im
+ integer :: iat1,icol,idir1,idir2,idir3,index,ipert1,ipert2,ipert3,irow
+ integer :: ipert1_red,idir1_red,jndex
  complex(dpc), parameter :: ione=(0.d0,1.d0)
  character(len=1000) :: msg
 !arrays
@@ -1917,33 +1909,27 @@ contains
 !! SOURCE
 
  subroutine berrycurv_pp(barmagsus,bc_barmagsus,bc_sp,ddb_lw,kblok,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qeq0,ucvol,xred,zfield)
+& mpert,natom,ndim,qeq0,ucvol,zfield)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: kblok,mpert,natom,nblok,ndim,nmdir,prtvol
+ integer,intent(in) :: kblok,mpert,natom,ndim
  real(dp),intent(in) :: ucvol
  logical,intent(in) :: qeq0
 !arrays
  type(ddb_type),intent(inout) :: ddb_lw
- integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp),intent(in) :: xred(3,natom)
  complex(dpc),intent(in) :: barmagsus(ndim,ndim)
  complex(dpc),intent(in) :: bc_barmagsus(ndim,ndim)
  complex(dpc),intent(in) :: bc_sp(ndim,(natom+5)*3)
  complex(dpc),intent(in) :: zfield(ndim,(natom+5)*3)
 !Local variables -------------------------
 !scalars
- integer :: iat1,iat2,icol,idir1,idir2,idir3,index,ipert1,ipert2,ipert3,irow
- integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
- real(dp) :: fac
+ integer :: icol,idir1,idir2,idir3,index,ipert1,ipert2,ipert3,irow
  complex(dpc), parameter :: ione=(0.d0,1.d0)
  complex(dpc) :: cval
- character(len=1000) :: msg
 !arrays
  complex(dpc) :: bc_barpp((natom+5)*3,(natom+5)*3), bc_pp((natom+5)*3,(natom+5)*3) 
  complex(dpc) :: term((natom+5)*3,(natom+5)*3,3)
- character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
 
@@ -2108,7 +2094,7 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: iblok,idir1,idir2,idir3,ipert1,ipert2,ipert3,index,irow,icol
+ integer :: iblok,idir1,idir2,idir3,ipert1,ipert2,ipert3,irow,icol
  integer :: rftyp
  character(len=1000) :: msg
 !arrays

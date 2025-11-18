@@ -97,9 +97,9 @@ contains
 !!
 !! SOURCE
 
-subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot_td,dtset,gsqcut,&
- & mband,mk1mem,mpert,mpi_enreg,mpw,natom,nfft,ngfft,nkpt,nspden,nspinor,nsppol, & 
- & npwarr,occ,ucvol)
+subroutine dfpttd_berrycurv(cg1,cg2,d3etot_td,dtset,&
+ & mband,mk1mem,mpi_enreg,mpw,nkpt,nspinor,nsppol, & 
+ & npwarr,occ)
     
  use defs_basis
 
@@ -107,14 +107,13 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot_td,dtset,gsqcut,&
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: cplex,mband,mk1mem,mpert,mpw
- integer, intent(in) :: natom,nfft,nkpt,nspden,nspinor,nsppol
- real(dp),intent(in) :: gsqcut,ucvol
+ integer, intent(in) :: mband,mk1mem,mpw
+ integer, intent(in) :: nkpt,nspinor,nsppol
  type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(inout) :: mpi_enreg
 
 !arrays
- integer,intent(in) :: ngfft(18), npwarr(nkpt)
+ integer,intent(in) ::  npwarr(nkpt)
  real(dp),intent(in) :: cg1(2,mpw*nspinor*mband*mk1mem*nsppol)
  real(dp),intent(in) :: cg2(2,mpw*nspinor*mband*mk1mem*nsppol)
  real(dp),intent(out) :: d3etot_td(2)
@@ -122,10 +121,9 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot_td,dtset,gsqcut,&
 
 !Local variables-------------------------------
 !scalars
- integer :: bandtot,bd2tot,iband,icg,ierr,ikpt,isppol,istwf_k,me
+ integer :: bandtot,iband,icg,ierr,ikpt,isppol,istwf_k,me
  integer :: nband_k,npw_k,offset_cgi,size_wf,spaceworld 
  real(dp) :: doti,dotr,wtk_k                                    
- character(len=500) :: msg                   
 !arrays
  real(dp) :: d3etot_k(2)
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)

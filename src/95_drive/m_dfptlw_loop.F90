@@ -148,7 +148,7 @@ contains
 subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
 & ffnl,gmet,gprimd,gsqcut,&
 & hdr,just_timdisp,kg,kxc,mband,mgfft,mkmem,mk1mem,&
-& mpert,mpi_enreg,mpw,natom,nattyp,ncorespl,ngfftf,nfftf,nkpt,nkxc,nspinor,nsppol,&
+& mpert,mpi_enreg,mpw,natom,nattyp,ngfftf,nfftf,nkpt,nkxc,nspinor,nsppol,&
 & npwarr,nylmgr,occ,&
 & pawfgr,pawtab,ph1d,&
 & psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,xred,ylm,ylmgr)
@@ -177,7 +177,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),gmet(3,3)
  real(dp),intent(in) :: ffnl(mkmem,mpw,dimffnl,psps%lmnmax,psps%ntypat)
  real(dp),intent(in) :: gprimd(3,3),kxc(nfftf,nkxc)
- real(dp),intent(in) :: ncorespl(psps%mqgrid_vl,2,psps%ntypat)
+! real(dp),intent(in) :: ncorespl(psps%mqgrid_vl,2,psps%ntypat)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom)
  real(dp),intent(in) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
@@ -192,13 +192,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
  integer :: alpha,ask_accurate,bantot,beta,comm_cell,cplex
  integer :: delta,dkdk_index,formeig,gamma
  integer :: ia1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
- integer :: idq,ierr,ii,ikpt,ireadwf,istr,itypat,mcg,mcg1,me,mpsang
+ integer :: idq,ierr,ii,ikpt,ireadwf,istr,itypat,mcg1,me,mpsang
  integer :: mpw1, mpw1_mq
  integer :: n1,n2,n3,ndir,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
  integer :: optgeom,opthartdqdq,optorth,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
  integer :: pert1case_mq,pert2case_mq
- real(dp) :: boxcut,delad,delag,delbd,delbg,ecut,ecut_eff
+ real(dp) :: delad,delag,delbd,delbg,ecut,ecut_eff
  logical :: finite_q,kramers_deg,samepert
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwfddk,fiwfdkdk
@@ -623,20 +623,20 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
              !Allocate the second-gradient array
              ABI_MALLOC(vpsp1_i1pertdqdq,(2*nfftf,dtset%nspden,n2dq))
 
-             !Calculate first-order pseudocore charge (still, only for quadrupoles)
-             if (i1pert==natom+2.and.i2pert<=natom.and.psps%n1xccc/=0.and.nkxc == 7) then
-               if (psps%nc_xccc_gspace==1) then
-                 ndir=1
-                 call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,i2dir,i2pert,&
-                 & mgfft,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,psps%ntypat,&
-                 & ph1d,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
-                 & atmrhor1=xccc3d2,optn_in=n3xccc/nfftf,optn2_in=1)
-               else if (psps%nc_xccc_gspace==0) then
-                 call dfpt_mkcore(cplex,i2dir,i2pert,dtset%natom,psps%ntypat,n1,psps%n1xccc,&
-                 & n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d2,xred)
-               end if
-             end if
-
+!             !Calculate first-order pseudocore charge (still, only for quadrupoles)
+!             if (i1pert==natom+2.and.i2pert<=natom.and.psps%n1xccc/=0.and.nkxc == 7) then
+!               if (psps%nc_xccc_gspace==1) then
+!                 ndir=1
+!                 call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,i2dir,i2pert,&
+!                 & mgfft,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,psps%ntypat,&
+!                 & ph1d,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
+!                 & atmrhor1=xccc3d2,optn_in=n3xccc/nfftf,optn2_in=1)
+!               else if (psps%nc_xccc_gspace==0) then
+!                 call dfpt_mkcore(cplex,i2dir,i2pert,dtset%natom,psps%ntypat,n1,psps%n1xccc,&
+!                 & n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d2,xred)
+!               end if
+!             end if
+!
              do i3pert = 1, mpert
                do i3dir = 1, 3
 
@@ -892,15 +892,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                       call wrtout(std_out,message,'COLL')
                       call wrtout(ab_out,message,'COLL')
                      !Perform the Berry curvature part of the time-disperion 3dte calculation
-                     call dfpttd_berrycurv(cg1,cg2,cplex,d3etot_td,dtset,gsqcut,&
-                     & mband,mk1mem,mpert,mpi_enreg,&
-                     & mpw1,natom,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwar1,occ,&
-                     & ucvol)
+                     call dfpttd_berrycurv(cg1,cg2,d3etot_td,dtset,&
+                     & mband,mk1mem,mpi_enreg,&
+                     & mpw1,nkpt,nspinor,nsppol,npwar1,occ)
                      if (.not.kramers_deg) then
-                       call dfpttd_berrycurv(cg1_mq,cg2_mq,cplex,d3etot_td_mq,dtset,gsqcut,&
-                       & mband,mk1mem,mpert,mpi_enreg,&
-                       & mpw1,natom,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwar1_mq,occ,&
-                       & ucvol)
+                       call dfpttd_berrycurv(cg1_mq,cg2_mq,d3etot_td_mq,dtset,&
+                       & mband,mk1mem,mpi_enreg,&
+                       & mpw1,nkpt,nspinor,nsppol,npwar1_mq,occ)
                      end if
 
                      !Add the result to the big array

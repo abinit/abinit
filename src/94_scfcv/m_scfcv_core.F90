@@ -1775,7 +1775,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      if(response==0.and.(dtset%iscf>0.or.dtset%iscf==-3).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
        intgden0=intgden
        call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,&
-                            dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,1,cplex1,dtset%qgbt,dtset%use_gbt,intgden=intgden)
+                            dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,dtset%qgbt,dtset%use_gbt,intgden=intgden)
        !Compute maximal magnet and maximal difference of magnet
        call calmaxdifmag(cplex1,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
        if (dtset%prt_lorbmag==1 .and. (dtset%nspinor==2) .and. (dtset%nspden==4 ) .and. (dtset%usepawu .ne. 0)) then
@@ -2050,7 +2050,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      if(response==0.and.(dtset%iscf>0.or.dtset%iscf==-3).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
        intgden0=intgden
        call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nspden,&
-                            dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,1,cplex1,dtset%qgbt,dtset%use_gbt,intgden=intgden)
+                            dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,dtset%qgbt,dtset%use_gbt,intgden=intgden)
        !Compute maximal magnet and maximal difference of magnet
        call calmaxdifmag(cplex1,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
        if (dtset%prt_lorbmag==1 .and. (dtset%nspinor==2) .and. (dtset%nspden==4 ) .and. (dtset%usepawu .ne. 0)) then
