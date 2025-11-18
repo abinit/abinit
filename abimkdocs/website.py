@@ -884,12 +884,29 @@ The full bibtex file is available [here](../abiref.bib).
     Most of the tutorials do not rely on parallelism (except specific [[tutorial:basepar|tutorials on parallelism]]).
     However you can run most of the tutorial examples in parallel with MPI, see the [[topic:parallelism|topic on parallelism]].
 """
+
+    hdiago_readme = """
+
+!!! important
+
+    In this lesson, we rely on the iterative KS eigensolvers to compute empty states.
+    However, when a large number of unoccupied states is required, a direct diagonalization
+    of the KS Hamiltonian is generally more efficient.
+    This can be done by setting:
+
+        [[optdriver]] = 6
+        [[gwr_task]] = "HDIAGO"
+
+    and, when available, enabling the ELPA library for optimal performance
+    For additional information, please consult the [gwr_intro](/tutorial/gwr_intro) page
+
+"""
         new_lines = []
         for line in lines:
             if "[TUTORIAL_README]" in line:
                 new_lines.extend(tutorial_readme.splitlines())
-            elif "[TUTORIAL_READMEV9]" in line:
-                raise RuntimeError("Replace TUTORIAL_README9 with TUTORIAL_README")
+            elif "[HDIAGO_README]" in line:
+                new_lines.extend(hdiago_readme.splitlines())
             else:
                 new_lines.append(line)
 

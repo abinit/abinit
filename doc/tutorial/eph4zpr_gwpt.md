@@ -5,29 +5,31 @@ authors: MG
 # Zero-point renormalization of the band gap and temperature-dependent band gaps with GWPT
 
 This tutorial is similar to [eph4zpr](/tutorial/eph4zpr).
-Also in this case, we compute the electron self-energy due to phonons, obtain the zero-point
+Also in this lesson, we will compute the electron self-energy due to phonons, obtain the zero-point
 renormalization (ZPR) of the band gap and temperature-dependent band energies within the harmonic approximation.
-The main difference with respect to [eph4zpr](/tutorial/eph4zpr), is that in this lesson the e-ph
-matrix elements are computed withing the GPWT formalism [[cite:Li2019]].
+The main difference with respect to [eph4zpr](/tutorial/eph4zpr), is that, in this lesson,
+the e-ph matrix elements are computed within the GWPT formalism [[cite:Li2019]].
 
 It is assumed the user has already completed the two tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
 and that they are familiar with the calculation of ground state (GS) and response properties
 in particular phonons, Born effective charges and the high-frequency dielectric tensor.
 
-ALSO GW TUTORIALS
-
 The user should have read the [introduction tutorial for the EPH code](/tutorial/eph_intro)
 before running these examples.
+ALSO GW TUTORIALS
 
 This lesson should take about 2.0 hour.
 
 ## Formalism
 
+TODO
+
 
 ## Typical workflow for ZPR with GWPT
 
-A typical workflow for ZPR-GWPT requires the same step as the ones [needed for a KS-ZPR](/tutorial/eph_intro/typical_workflow_for_zpr)
-plust additional computations for the screened interaction $W$.
+A typical workflow for ZPR-GWPT requires the same step as the ones
+[needed for KS-ZPR](/tutorial/eph_intro/typical_workflow_for_zpr)
+plus additional computations for the screened interaction $W$.
 
 ## Getting started
 
@@ -79,9 +81,11 @@ mv MgO_eph_zpr-master MgO_eph_zpr
     in which you will be executing the tutorial and must be named `MgO_eph_zpr`.
 
 
-For the discussion on how to merge the DDB and DVDB files, I can use a link to MgO
+TODO: For the discussion on how to merge the DDB and DVDB files, I can use a link to MgO
 
 ## Computing the WFK files with empty states
+
+[HDIAGO_README]
 
 ## Computing the screened interaction W
 
