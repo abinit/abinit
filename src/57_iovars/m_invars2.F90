@@ -465,6 +465,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_nband',tread,'INT')
  if(tread==1) dtset%extfpmd_nband=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_pawsph',tread,'INT')
+ if(tread==1) dtset%extfpmd_pawsph=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_prterr',tread,'INT')
+ if(tread==1) dtset%extfpmd_prterr=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rhoqpmix',tread,'DPR')
  if(tread==1) dtset%rhoqpmix=dprarr(1)
 
@@ -3213,20 +3219,27 @@ if (dtset%usekden==1) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_frocc',tread,'INT')
    if(tread==1) dtset%rcpaw_frocc = intarr(1)
 
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_nfrpaw',tread,'INT')
-   if(tread==1) dtset%rcpaw_nfrpaw = intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rcpaw_updatepaw',tread,'INT')
+   if(tread==1) dtset%rcpaw_updatepaw(1:2) = intarr(1:2)
 
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_nfrtnc',tread,'INT')
-   if(tread==1) dtset%rcpaw_nfrtnc = intarr(1)
+   dtset%rcpaw_updatetnc=dtset%nstep
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_updatetnc',tread,'INT')
+   if(tread==1) dtset%rcpaw_updatetnc = intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_tolnc',tread,'DPR')
    if(tread==1) dtset%rcpaw_tolnc = dprarr(1)
 
-   call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'rcpaw_frtypat',tread,'INT')
-   if(tread==1) dtset%rcpaw_frtypat(1:ntypat) = intarr(1:ntypat)
+   call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'rcpaw_rctypat',tread,'INT')
+   if(tread==1) dtset%rcpaw_rctypat(1:ntypat) = intarr(1:ntypat)
 
-   call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'rcpaw_scenergy',tread,'ENE')
-   if(tread==1) dtset%rcpaw_scenergy(1:ntypat) = dprarr(1:ntypat)
+   call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'rcpaw_sc',tread,'DPR')
+   if(tread==1) dtset%rcpaw_sc(1:ntypat) = dprarr(1:ntypat)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_orbshift',tread,'INT')
+   if(tread==1) dtset%rcpaw_orbshift = intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_potshift',tread,'INT')
+   if(tread==1) dtset%rcpaw_potshift = intarr(1)
  endif
 
 ! Print variables
