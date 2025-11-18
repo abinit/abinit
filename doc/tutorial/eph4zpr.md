@@ -639,6 +639,9 @@ The same trick is highly recommended when computing WFK files for $GW$ calculati
     On the other hand, ZPR calculations can take advange of the Sternheimer method to reduce the number
     of empty bands required to converge.
 
+
+[HDIAGO_README]
+
 ## Our first ZPR calculation
 
 For our first example, we use a minimalistic input file so that we can

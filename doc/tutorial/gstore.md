@@ -22,13 +22,6 @@ matrix elements using a dedicated EPH sub-driver:
 [[optdriver]] 7   # Enter EPH code.
 [[eph_task]] 11   # GSTORE computation
 
-It is important to understand, however, that now the use is responsibile for specifying how the k-mesh or the q-mesh should
-be samples and how symmetries should be used to reduce the number of matrix elements.
-All the variables controlling the GSTORE computation start with the `gstore_` prefix.
-There are default values tailored for the computation of electronic properties, but in some cases you may need to customize
-or override the default behaviour, depending on your use-case.
-This guide will hopefully help you in understading how the select the right options.
-
 It is important to understand, however, that the user is now responsible for specifying
 how the $\kk$-mesh and $\qq$-mesh should be sampled and how symmetries should be applied to reduce the number of matrix elements.
 All variables controlling the GSTORE computation start with the gstore_ prefix.
@@ -43,15 +36,21 @@ The default behavior is:
 [[gstore_kzone]] = "ibz"
 [[gstore_qzone]] = "bz"
 
-These settings are OK if you need to compute electronic properties such as the ZPR or electronic transport properties.
-For phonon properties ....
+These settings are OK if you need to compute electronic properties such as the electron self-energy
+required for ZPR or electronic transport calculations.
+For the phonon self-energy, on the other hand, on should override the default behaviour using
+
+[[gstore_kzone]] = "bz"
+[[gstore_qzone]] = "ibz"
+
 
 !!! important
 
     The combination [[gstore_kzone]] = "ibz" with [[gstore_qzone]] = "ibz" is not allowed.
     One usually restricts one wavevector to the IBZ while the other wavevector covers the full BZ.
-    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes.
-    and it is not recommended for production runs (much slower).
+    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes (much slower).
+    and it is not recommended for production runs unless you know that the post-processing step
+    of the GSTORE does not support symmetries.
 
 
 An additional reduction of the wavevectors can be achieved with the two
@@ -59,7 +58,13 @@ mutually exclusive variables [[gstore_use_lgq]] and [[gstore_use_lgk]].
 In some cases, the integration over the BZ can indeed be restricted by symmetry to the irreducible wedge defined by the "external" wavevector.
 The following examples will help clarify this point.
 
-Sigma_\kk is ..
+The electron self-energy Sigma_\nk is defined by an integration over $\qq$-points in the full BZ
+but one can use the symmetries of the little group of $\kk$ to restrict
+
+$$
+Sigma_\nk = \int_BZ d\qq = \int_{IBZ_\kk} w^\kk(q) [...]
+$$
+
 In this case, one can use
 
 [[gstore_kzone]] "ibz"
@@ -75,23 +80,23 @@ For phonon properties, one can use
 !!! important
 
     Not all the e-ph calculations are compatible with the little group filtering.
-    Please check the documentation or run small test calculations before firing big rockets.
+    Please check the documentation or run small test calculations before firing big calculations.
 
 
 Now we turn to the problem of selecting the bands that enter the e-ph matrix elements.
 Several options are available, each tailored to simplify a different type of calculation.
 Let us begin with the default behavior.
-If no specific option is provided in the input file, ABINIT computes all matrix elements with m and n ranging from 1 up to [[nband]].
+If no specific option is provided in the input file, ABINIT computes **all** matrix elements with m and n ranging from 1 up to [[nband]].
 Clearly, this is rarely what you actually want: not all these transitions are needed to compute the final physical properties.
-However, ABINIT cannot (yet) read your mind, so you must explicitly specify the band ranges in the input.
+However, ABINIT cannot (yet) read your mind, so you must **explicitly** specify the band ranges in the input.
 
-The most basic variable is [[gstore_brange]], which defines the range of the m and n indices (for each spin channel when [[nsppol]] = 2).
+The most basic variable is [[gstore_brange]], which defines the range of the m and n indices
+(for each spin channel when [[nsppol]] = 2).
 [[gstore_brange]] gives you full control over the bands to include, but it is not always
-the most convenient option —especially when the relevant contributions to the physical properties come
+the most convenient option — especially when the relevant contributions to the physical properties come
 from transitions located within an energy window around the Fermi level (as in metals)
-or from windows starting at the band edges.
+or from windows starting at the band edges in semiconductors.
 In this case, it is much easier to filter bands using an energy range defined by [[gstore_erange]].
-
 
 !!! important
 
@@ -100,42 +105,49 @@ In this case, it is much easier to filter bands using an energy range defined by
 
 Finally, the [[gstore_kfilter]] variable allows you to apply an additional level of filtering directly on the electronic states.
 As before, the most appropriate choice for this option depends strongly on the specific physical property you intend to compute.
+There are, indeed, several possibile values TO BE DESCRIBED
 
 We conclude this guide by providing examples of recommended settings for different classes of physical properties.
-Note that not all gstore_ variables are explicitly included in these examples, as we rely on the default behavior whenever appropriate.
+Note that not all gstore_ variables are explicitly included in these examples,
+as we rely on the default behavior whenever appropriate.
 
 For computing the ZPR of the fundamental/direct band gap:
 
 [[gstore_kfilter]] "qprange"  # Compute g(k,q) only for |nk> at the band edges
 [[gstore_use_lgk]] 1          # Only q-points in the IBZ_k
-[[nband]]
-
+[[nband]]                     # Bands for the m index (from 1 up to nband)
 
 ## MPI parallelism in gstore computation
 
 The GSTORE computation with [[eph_task]] 11 is parallelized over five different MPI levels.
 The user can specify manually the MPI grid using [[eph_np_pqbks]].
 In this case the product of the MPI processors along the different dimensions must be equal to the
-total number of MPI processes allocated by the user, else the code will stop.
+total number of MPI processes allocated by the user, else the code will stop as idle processes are not supported.
 
-If [[eph_np_pqbks]] is not specified in the input, the code will generate this grid automatically using the total number of processors
-and the basic dimensions of the job computed at runtime.
+If [[eph_np_pqbks]] is not specified in the input, the code will generate this grid automatically
+using the total number of processors and the basic dimensions of the job computed at runtime.
 
-If you decide to enforce your MPI grid, take into account the following.
-The parallelization levels over $\spin$, $\kk$-points and $\qq-points$ are the most efficient
+If you decide to enforce your MPI grid with [[eph_np_pqbks]], take into account the following.
+The parallelization levels over collinear spins, $\kk$-points and $\qq-points$ are the most efficient ones
 but the the number of processors for $\kk$ or $\qq$ points should be adjusted according to the values
 of [[gstore_kzone]], [[gstore_qzone]].
-Cleary, one should use less processors for the zone that is being restricted to the IBZ to reduce load imbalace.
-The parallelism over perturbations should be activated only when the previous three levels start to saturate.
-The parallelism over bands is not supported in GSTORE computation
+To reduce load imbalace, one should use less processors for the wavevector that is being restricted to the IBZ
+
+The parallelism over perturbations should be activated only when the previous three MPI levels start to saturate.
+Note that the parallelism over bands is not supported in GSTORE computation.
 
 TODO: GWPT and [[gwpt_np_wpqbks]]
 Also [[boxcutmin]] to accelerate computations.
 
+## How to density the q-mesh
+
+[[eph_ngqpt_fine]]
+
+
 ## Restarting a GSTORE computation
 
 If your GSTORE calculation has been killed due to e.g. timeout limit,
-you can always restart the computation by rerurring the same input with the
+you can always restart the computation by re-rurring the same input with the
 addition of
 
 [[getgstore_filepath]]  "out_GSTORE.nc"
@@ -152,13 +164,20 @@ to compute physical properties.
 !!! critical
 
     Do not use a WFK file different from the one used to generate the GSTORE file.
+    The (complex) e-ph matrix elements stored in the GSTORE depend on the gauge
+    of the wavefunctions in the WFK file.
 
-Reading a GSTORE file is very easy, just use:
+
+Reading a GSTORE file is very easy, use [[getgstore_filepath]] and then select the appropriate
+value of [[eph_task]] to perform the post-processing step
 
 [[optdriver]] 7         # Enter EPH code.
 [[getgstore_filepath]]  "teph4zpr_10o_DS1_GSTORE.nc"
 
-[[eph_task]] 24              # SIGMAPH from GSTORE
+[[eph_task]] 24         # SIGMAPH from GSTORE
+
+Other options or files may be needed depending on [[eph_task]].
+Please consult the documentation or the available tutorials.
 
 The GSTORE.nc stores additional quantities such as phonon frequencies and eigenvectors for all the $\qq$-points in the IBZ,
 and additional metadata such as, for instance, a table that specifies whether
