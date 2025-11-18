@@ -413,7 +413,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  logical :: need_fermie1,nmxc,paral_atom,use_nhat_gga
  real(dp) :: wtime_step,now,prev
  real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast,maxmag,difmag
- real(dp) :: epawdc1_dum,eta,evar,fe1fixed,fermie1,gsqcut,omega,qphon_norm,maxfor,renorm,res2,res3,residm2
+ real(dp) :: eta,evar,fe1fixed,fermie1,gsqcut,omega,qphon_norm,maxfor,renorm,res2,res3,residm2
  real(dp) :: ucvol,vxcavg,elmag1,el_temp
  real(dp) :: res2_mq,fe1fixed_mq,elast_mq
  real(dp) :: eberry_mq,edocc_mq,eeig0_mq,ehart01_mq,ehart1_mq,ek0_mq,ek1_mq,eloc0_mq,elpsp1_mq
@@ -1104,7 +1104,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        intgden0=intgden
        call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &        dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-&        dtset%ratopt,prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag)
+&        prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag)
        call calmaxdifmag(cplex,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
      endif
      call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,eigen0,&
@@ -1146,7 +1146,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    !   prtopt=1
    !   call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
    ! & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-   ! & dtset%ratopt,prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag,&
+   ! & prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag,&
    ! & qphon=qphon)
    !   call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,&
    ! & ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
@@ -1210,7 +1210,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        intgden0=intgden
        call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &        dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-&        dtset%ratopt,prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag)
+&        prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag)
        call calmaxdifmag(cplex,intgden,intgden0,dtset%natom,dtset%nspden,maxmag,difmag)
      endif
      call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,eigen0,&
@@ -1561,7 +1561,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      prtopt=idir+1;
      call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-&     dtset%ratopt,prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag,&
+&     prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag,&
 &     qphon=qphon)
      call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],prtopt,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
 
@@ -1581,7 +1581,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !      prtopt=idir+1;
 !      call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 ! &     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-! &     dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+! &     prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
 !      call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
 !      !debug: write out the vtk first-order density components
 ! !    call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
@@ -1822,12 +1822,12 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 
 !    terms for Zeeman or scalar potential perturbation, SPr 2deb
      else if ( ipert==natom+5 .or. ipert==natom+6 ) then
-       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emagpen1!+elmag1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emagpen1+elmag1
 !       write(ab_out,*)"HHHEREEEEE",ek0,edocc,eeig0,eloc0,enl0,ehart1,exc1,epaw1
 
 !    terms for atomic-spheres local Zeeman perturbation
      else if ( ipert>natom+11.and.ipert<=2*natom+11 ) then
-       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emagpen1!+elmag1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emagpen1+elmag1
      end if
    end if
 

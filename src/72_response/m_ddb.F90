@@ -1260,7 +1260,7 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,o
 
 !Local variables -------------------------
 !scalars
- integer :: iblok,nsize,rftyp
+ integer :: iblok,rftyp
  integer :: idir1,idir2,ipert1,ipert2,mpert
 !arrays
  integer :: rfelfd(4),rfmagn(4),rfphon(4),rfstrs(4)
@@ -2403,7 +2403,7 @@ subroutine rdddb9(ddb,ddb_hdr,unddb,&
  ! Read the blocks from the input database, and close it.
  do iblok=1,ddb%nblok
 !<<<<<<< HEAD
-!   call ddb%read_block(iblok,mband,mpert,msize,nkpt,ddbun,&
+!   call ddb%read_block_txt(iblok,mband,mpert,msize,nkpt,unddb,&
 ! & ddb_version=ddb_version)
 !
 !   if (raw_ == 1) cycle
@@ -2496,7 +2496,7 @@ subroutine rdddb9(ddb,ddb_hdr,unddb,&
 !     ddb%flg(1:nsize,iblok) = reshape(car3flg, shape = (/3*mpert*3*mpert*3*mpert/))
 !     ddb%val(1,1:nsize,iblok) = reshape(d3cart(1,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
 !     ddb%val(2,1:nsize,iblok) = reshape(d3cart(2,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
-!=======
+!!=======
 !>>>>>>> trunk/develop
 
    call ddb%read_block_txt(iblok,mband,mpert,msize,nkpt,unddb, ddb_version=ddb_version)
@@ -6531,17 +6531,18 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
 !scalars
  integer,parameter :: master=0
  integer,parameter :: cvrsio9_new=20240201
- integer :: ii, iddb, ddbun, ddbun2, ddbvsn
+ integer ::  iddb, ddbvsn
+! integer :: ddbun
  integer :: iddb_mkpt, iddb_psps
  integer :: dimekb, matom, mband, mblok, mkpt, nsppol
- integer :: msize, msize_, mtypat, lmnmax, usepaw, mblktyp, msym, mpert
+ integer :: msize, msize_, mtypat, lmnmax, usepaw, msym, mpert
  integer :: nblok, iblok, iblok1, iblok2
- integer :: tmerge, nq, nw
+! integer :: tmerge, nq, nw
  integer :: comm
  logical :: eig2d, can_merge
  integer,parameter :: prtvol=-1, brav=1
  real(dp),parameter :: qtol=2.0d-8, wtol=2.0d-8
- real(dp) :: diff,sdiff
+! real(dp) :: diff,sdiff
  character(len=500) :: msg
  type(ddb_type) :: ddb, ddb2
  type(ddb_hdr_type) :: ddb_hdr, ddb_hdr2

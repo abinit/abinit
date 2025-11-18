@@ -865,7 +865,10 @@ meta: {optdriver: 1, }
  ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
-
+    1)    idir= 1    ipert=  19
+    2)    idir= 2    ipert=  19
+    3)    idir= 3    ipert=  19
+ 
 ================================================================================
 
 --------------------------------------------------------------------------------
