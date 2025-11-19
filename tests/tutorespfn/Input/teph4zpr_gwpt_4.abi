@@ -1,5 +1,13 @@
-# SCR computation for MgO
+# NSCF computation of WFK files with empty states
  ecut 35.0
+
+ nband  110 nbdbuf -10 # A negative value means 10% of nband
+
+ nstep 150
+ iscf -2          # NSCF run
+ tolwfr 1e-14     # 1e-18 is the recommended value
+
+ getden_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
  ngkpt 4 4 4
  nshiftk 1
@@ -8,10 +16,6 @@
 ##############################################
 ####                 SECTION: SCR
 ##############################################
- optdriver 3                               # Enter SCR driver
- getwfk_filepath "teph4zpr_gwpt_3o_WFK"    # 4x4x4 k-mesh
- nband 50
- ecuteps 8
 
 # Read crystal structure from DEN.nc file
  structure "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"

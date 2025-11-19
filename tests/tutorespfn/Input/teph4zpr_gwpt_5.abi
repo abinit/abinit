@@ -1,5 +1,4 @@
-# GW omputation at Gamma for MgO.
-
+# SCR computation for MgO
  ecut 35.0
 
  ngkpt 4 4 4
@@ -7,29 +6,18 @@
  shiftk 0 0 0
 
 ##############################################
-####                 SECTION: SIGMA
+####                 SECTION: SCR
 ##############################################
- optdriver 4                               # Enter SIGMA driver
- getwfk_filepath "teph4zpr_gwpt_3o_WFK"    # 4x4x4 k-mesh
- getscr_filepath "teph4zpr_gwpt_4o_SCR"
+ optdriver 3                               # Enter SCR driver
+ getwfk_filepath "teph4zpr_gwpt_4o_WFK"    # 4x4x4 k-mesh
  nband 50
  ecuteps 8
- ecutsigx 35.0
 
-##############################################
-####                 SECTION: Sigma_nk
-##############################################
- nkptgw 1
- kptgw
-    0.0    0.0    0.0
- bdgw
-    8 9
- zcut 0.01 eV
+# Read crystal structure from DEN.nc file
+ structure "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
- structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
-
- pp_dirpath = "$ABI_PSPDIR"
- pseudos = "O.psp8, Mg-sp-gw.psp8"
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "O.psp8, Mg-sp-gw.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -49,5 +37,5 @@
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH, GWPT
-#%% description = ZPR computation at Gamma for MgO. Convergence of ZPR wrt nband
+#%% description = SCR computation for MgO
 #%%<END TEST_INFO>
