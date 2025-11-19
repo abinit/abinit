@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.5.8.3 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h13 )
+.Starting date : Wed 19 Nov 2025.
+- ( at 13h10 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v10_t110/t110.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v10_t110/t110.abi
 - output file    -> t110.abo
 - root for input  files -> t110i
 - root for output files -> t110o
@@ -247,8 +247,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12179
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -497,22 +497,21 @@ tolerances: {toldmag: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   12.142549702215      1.214E+01 4.197E-32 7.265E+03 1.392E+01 1.392E+01
- ETOT  2   17.562181447769      5.420E+00 1.358E-03 1.388E+04 1.237E+00 1.515E+01
- ETOT  3   12.291332283287     -5.271E+00 1.303E-03 1.174E+03 4.540E+00 1.969E+01
- ETOT  4   13.719979029681      1.429E+00 1.161E-04 6.635E+00 2.816E+00 2.251E+01
- ETOT  5   14.967386914584      1.247E+00 2.204E-05 8.231E-02 1.371E+00 2.388E+01
- ETOT  6   15.084634669621      1.172E-01 4.261E-07 9.984E-05 1.292E-01 2.401E+01
- ETOT  7   15.088470809298      3.836E-03 1.589E-09 6.622E-07 4.029E-03 2.401E+01
- ETOT  8   15.088592188046      1.214E-04 3.604E-10 7.019E-10 1.332E-04 2.401E+01
- ETOT  9   15.088598030965      5.843E-06 7.383E-11 1.553E-12 6.292E-06 2.401E+01
- ETOT 10   15.088598571997      5.410E-07 2.318E-11 5.426E-15 5.713E-07 2.401E+01
- ETOT 11   15.088598568778     -3.219E-09 1.097E-11 1.161E-16 2.068E-09 2.401E+01
- ETOT 12   15.088598567872     -9.057E-10 3.442E-12 2.951E-18 9.647E-10 2.401E+01
+-ETOT  1  -7.4245612904537     -7.425E+00 4.197E-32 7.265E+03 1.392E+01 1.392E+01
+ ETOT  2 -0.95580524406163      6.469E+00 1.358E-03 1.388E+04 1.237E+00 1.515E+01
+ ETOT  3  -13.720052885541     -1.276E+01 1.303E-03 1.174E+03 4.540E+00 1.969E+01
+ ETOT  4  -15.031176670949     -1.311E+00 1.161E-04 6.635E+00 2.816E+00 2.251E+01
+ ETOT  5  -15.088114229630     -5.694E-02 2.204E-05 8.231E-02 1.371E+00 2.388E+01
+ ETOT  6  -15.088598089977     -4.839E-04 4.261E-07 9.984E-05 1.292E-01 2.401E+01
+ ETOT  7  -15.088598566704     -4.767E-07 1.589E-09 6.622E-07 4.029E-03 2.401E+01
+ ETOT  8  -15.088598567655     -9.507E-10 3.604E-10 7.019E-10 1.332E-04 2.401E+01
+ ETOT  9  -15.088598567657     -1.764E-12 7.383E-11 1.553E-12 6.292E-06 2.401E+01
+ ETOT 10  -15.088598567657      7.105E-14 2.318E-11 5.426E-15 5.713E-07 2.401E+01
+ ETOT 11  -15.088598567657     -1.155E-13 1.097E-11 1.161E-16 2.068E-09 2.401E+01
+ ETOT 12  -15.088598567657     -4.441E-14 3.442E-12 2.951E-18 9.647E-10 2.401E+01
 
  At SCF step   12, magnetizations are converged : 
   for the second time, max diff in magnetization=  9.647E-10 < toldmag=  1.000E-08
-
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
@@ -529,12 +528,12 @@ tolerances: {toldmag: 1.00E-08, }
 
  dfpt_looppert: DFPT cycle converged with prtwf=-1. Will skip output of the 1st-order WFK file.
  Mean square residual over all n,k,spin=   26.489E-15; max=  34.416E-13
- 
+
  Seven components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.28559561E-01 eigvalue=   7.57410512E-03  local=  -6.76906005E-03
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-    Zeeman=  -3.01771971E+01  Hartree=   1.99038674E+00     xc=  -1.52507876E+01
+    Hspinfield=  -3.01771971E+01  Hartree=   1.99038674E+00     xc=  -1.52507876E+01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   2.82485689E+01     enl0=  -2.89340667E-02   enl1=   0.00000000E+00
@@ -579,7 +578,7 @@ tolerances: {toldmag: 1.00E-08, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -588,7 +587,7 @@ tolerances: {toldmag: 1.00E-08, }
               amu      5.58470000E+01
              ecut      2.00000000E+01 Hartree
            etotal1    -2.4796967735E+01
-           etotal2     1.5088598568E+01
+           etotal2    -1.5088598568E+01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         512
@@ -826,10 +825,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.3  wall=          8.3
+- Proc.   0 individual time (sec): cpu=          8.2  wall=          8.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.3  wall=          8.3
++Overall time at end (sec) : cpu=          8.2  wall=          8.2
