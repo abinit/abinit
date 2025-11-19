@@ -14,15 +14,18 @@ It is assumed the user has already completed the two tutorials [RF1](/tutorial/r
 and that they are familiar with the calculation of ground state (GS) and response properties
 in particular phonons, Born effective charges and the high-frequency dielectric tensor.
 
-The user should have read the [introduction tutorial for the EPH code](/tutorial/eph_intro)
+The user should have read the [introduction tutorial for the EPH code](/tutorial/eph_intro),
+the description of the [gstore-based approach](/tutorial/gstore),
 before running these examples.
+
 ALSO GW TUTORIALS
 
-This lesson should take about 2.0 hour.
+This lesson should take about 2.0 hours.
 
 ## Formalism
 
-TODO
+In the GWPT method [[cite:Li2019]], the e-ph matrix elements are computed by replacing the
+first-order change of the KS Hamiltonian due to a phonon with the variation of the $GW$ self-energy.
 
 
 ## Typical workflow for ZPR with GWPT
@@ -40,8 +43,8 @@ Why not create Work_eph4zpr in $ABI_TESTS/tutorespfn/Input?
 
 ```sh
 cd $ABI_TESTS/tutorespfn/Input
-mkdir Work_eph4zpr
-cd Work_eph4zpr
+mkdir Work_eph4zpr_gwpt
+cd Work_eph4zpr_gwpt
 ```
 
 In this tutorial, we prefer to focus on the use of the EPH code hence
@@ -72,16 +75,16 @@ unzip the file and rename the directory with:
 
 ```sh
 unzip master.zip
-mv MgO_eph_zpr-master MgO_eph_zpr
+mv MgO_eph_zpr-master MgO_eph_zpr_gwpt
 ```
 
 !!! warning
 
     The directory with the precomputed files must be located in the same working directory
-    in which you will be executing the tutorial and must be named `MgO_eph_zpr`.
+    in which you will be executing the tutorial and must be named `MgO_eph_zpr_gwpt`.
 
 
-TODO: For the discussion on how to merge the DDB and DVDB files, I can use a link to MgO
+TODO: For the discussion on how to merge the DDB and DVDB files, I can use the link to the MgO ZPR lesson
 
 ## Computing the WFK files with empty states
 

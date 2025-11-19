@@ -4534,8 +4534,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      ABI_MALLOC(slice_bb, (gstore_cplex, nb_kq, nb_k))
 
      if (with_g2dw) then
-       ! Read my_gq0nm_atm matrix elements for DW in the RIA.
-       ! Find the index of q = 0.
+       ! Read my_gq0nm_atm matrix elements for DW in the RIA. Find the index of q = 0.
        iq_glob = -1
        do ii=1, gstore%glob_nq_spin(spin)
          iq_bz = qglob2bz(ii, spin)

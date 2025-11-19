@@ -77,5 +77,5 @@
 #%% keywords = NC, DFPT, EPH, GSTORE
 #%% description =
 #%%   ZPR computation from GSTORE file. Should reproduce the results of teph4zpr_7.abi
-#%%   in which a different routine that compute the e-ph matrix elements on-the-fly is used.
+#%%   in which a different routine that computes the e-ph matrix elements on-the-fly is used.
 #%%<END TEST_INFO>
