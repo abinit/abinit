@@ -1098,6 +1098,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%vxcavg     =vxcavg
  if (ngrvdw>0) results_gs%grvdw(1:3,1:ngrvdw)=grvdw(1:3,1:ngrvdw)
  if (associated(extfpmd)) then
+   if(dtset%extfpmd_prterr==1) then
+     call extfpmd_err(extfpmd,eigen,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,&
+&         dtset%wtk,trim(dtfil%filnam_ds(4))//'_EXTFPMD_ERR')
+   endif
    results_gs%nelect_extfpmd=extfpmd%nelect
    results_gs%extfpmd_eshift=extfpmd%eshift
  end if
