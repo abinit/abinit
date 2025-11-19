@@ -1661,14 +1661,14 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
    if (rfelfd(ider)==1.or.rfelfd(ider)==3) worki(natom+1,ider)=1
    ! Then the electric field
    if (rfelfd(ider)==2.or.rfelfd(ider)==3) worki(natom+2,ider)=1
+   ! Then the ddq
+   if (rfqvec_(ider)==1) worki(natom+8,ider)=1
    ! Then the uniaxial stress
    if (rfstrs(ider)==1.or.rfstrs(ider)==3) worki(natom+3,ider)=1
    ! Then the shear stress
    if (rfstrs(ider)==2.or.rfstrs(ider)==3) worki(natom+4,ider)=1
    ! Then the uniform Zeeman field
    if (rfmagn_(ider)==1) worki(natom+5,ider)=1
-   ! Then the ddq
-   if (rfqvec_(ider)==1) worki(natom+8,ider)=1
    ! Then the ddw
    if (rffreq_(ider)==1) worki(natom+9,ider)=1
    ! At last, the local Zeeman fields
@@ -1714,9 +1714,9 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
    end if ! ok
 
    ! Check the frequency
-!   if( ok==1 .and. ddb_version>=cvrsio9_new )then
+   if( ok==1 .and. ddb_version>=cvrsio9_new )then
 !TODO: This might fail if previous DDB files are read
-   if( ok==1 )then
+!   if( ok==1 )then
      if (nder == 2) then
        if( abs( ddb%omega(1,iblok) - omega_(1) )>DDB_QTOL ) ok=0
      else if (nder == 3) then
