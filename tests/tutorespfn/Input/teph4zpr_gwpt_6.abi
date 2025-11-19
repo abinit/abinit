@@ -1,0 +1,86 @@
+# Calculation of GWPT e-ph matrix elements
+# Preparatory run for ZPR computation.
+
+ ecut 35.0
+
+ ngkpt 4 4 4
+ nshiftk 1
+ shiftk 0 0 0
+
+##############################################
+####                 SECTION: GWPT
+##############################################
+#gwpt_np_wpqbks 1 1 8 1 1 1
+optdriver 7              # Enter EPH driver.
+eph_task 17              # GWPT computation.
+
+# Additional filter in k-space: only k-points corresponding to the band edges are considered
+gstore_kfilter "qprange"
+#gstore_use_lgk  0
+gstore_use_lgk 1   # IMPORTANT FOR PERFORMANCE
+                   # Since we want to compute ZPR_k, we can restrict the q-points to the IBZ_k
+
+ecuteps  8         # Cutoff energy for screening (cannot be larger than the one found in the SCR file)
+                   # SC TODO: on alps_gnu_14.2_cov, ecuteps here = ecuteps in the SCR file still results in an error
+ecutsigx 8         # Cutoff energy for exchange part.
+boxcutmin 1.1
+tolwfr 1e-16       # Tolerance for Sternheimer solver.
+nstep 150
+
+
+gwcomp 2          # Activate COH static remainder technique.
+
+# TODO: elph2_imagden Should have a default value
+elph2_imagden 0.1 eV
+zcut 0.01 eV
+#gw_icutcoul 16      # Monte-carlo integration
+
+nband 10
+
+getwfk_filepath "teph4zpr_gwpt_3o_WFK"    # 4x4x4 k-mesh
+getscr_filepath "teph4zpr_gwpt_4o_SCR"
+
+# We also need the KS GS density and potential.
+#getden_filepath "diamond_eph_gwpt/gso_DEN.nc"
+#getpot_filepath "diamond_eph_gwpt/gso_POT.nc"
+
+ddb_ngqpt 4 4 4
+
+getddb_filepath "teph4zpr_1_DDB"
+getdvdb_filepath "teph4zpr_2_DVDB"
+
+#mixprec 1
+#boxcutmin 1.1
+
+prtphdos 0       # Disable computation of PHDOS to save some time
+
+#############################################
+###                 SECTION: Sigma_nk
+#############################################
+zcut 0.01 eV
+
+structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+
+pp_dirpath = "$ABI_PSPDIR"
+pseudos = "O.psp8, Mg-sp-gw.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
+#%% test_chain =  teph4zpr_gwpt_1.abi, teph4zpr_gwtp_2.abi, teph4zpr_gwtp_3.abi, teph4zpr_gwtp_4.abi,
+#%%               teph4zpr_gwpt_5.abi, teph4zpr_gwtp_6.abi, teph4zpr_gwtp_7.abi, teph4zpr_gwtp_8.abi, teph4zpr_gwtp__9.abi
+#%% [files]
+#%% use_git_submodule = MgO_eph_zpr
+#%% files_to_test =
+#%%   teph4zpr_gwtp_6.abo, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH, GWPT
+#%% description = Convergence of ZPR wrt nband with the Sternheimer method
+#%%<END TEST_INFO>
