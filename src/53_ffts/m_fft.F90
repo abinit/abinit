@@ -227,7 +227,7 @@ MODULE m_fft
    procedure :: execute_rg_spc => uplan_execute_rg_spc
    procedure :: execute_rg_dpc => uplan_execute_rg_dpc
 
-   ! Main entry point for performing FFTs on the full box
+   ! Main entry point for performing FFTs on the full box.
    ! complex-to-complex version, operating on complex arrays
    generic :: execute_gr => execute_gr_spc, &
                             execute_gr_dpc
@@ -4715,31 +4715,33 @@ subroutine fft_output_counters(nbandtot, mpi_enreg)
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
- integer :: cnt,ierr
-!arrays
+ integer :: cnt,ierr, units(2)
+! *************************************************************************
 
- call wrtout([std_out,ab_out],'')
+ units = [std_out, ab_out]
+
+ call wrtout(units,'')
  write(msg,'(a)')                ' --- FFT COUNTERS ------------------------------------------------------------'
- call wrtout([std_out,ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,i6)')             ' total Number of Bands         : NB = ',nbandtot
- call wrtout([std_out,ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a)')                '                      | total count (TC) |            TC/NB'
- call wrtout([std_out,ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a)')                ' -----------------------------------------------------------------------------'
- call wrtout([std_out,ab_out], msg)
+ call wrtout(units, msg)
  call xmpi_sum(fourwf_counter,mpi_enreg%comm_kpt,ierr)
  cnt=fourdp_counter
  if (cnt>0) then
    write(msg,'(a,i16,a)')       ' fourdp               | ',cnt,' |'
-   call wrtout([std_out,ab_out], msg)
+   call wrtout(units, msg)
  end if
  cnt=fourwf_counter
  if (cnt>0) then
    write(msg,'(a,i16,a,f16.1)') ' fourwf               | ',cnt,' | ',dble(cnt)/nbandtot
-   call wrtout([std_out,ab_out], msg)
+   call wrtout(units, msg)
  end if
  write(msg,'(a)')                ' -----------------------------------------------------------------------------'
- call wrtout([std_out,ab_out], msg)
+ call wrtout(units, msg)
 
 end subroutine fft_output_counters
 !!***
@@ -4796,8 +4798,7 @@ end subroutine uplan_init
 !!  uplan_free
 !!
 !! FUNCTION
-!!
-!! INPUTS
+!!  Free dynamic memory.
 !!
 !! SOURCE
 
@@ -4809,7 +4810,7 @@ subroutine uplan_free(uplan)
 
  ABI_SFREE(uplan%gbound)
  if (uplan%gpu_option /= ABI_GPU_DISABLED) then
-   ! Free memory on the GPU
+   ! TODO: Free memory on the GPU
  end if
 
 end subroutine uplan_free
