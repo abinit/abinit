@@ -1028,7 +1028,7 @@ module m_xgTransposer
 #endif
 
     if (xgTransposer%gpu_option /= ABI_GPU_DISABLED .and. xgTransposer%gpu_thread_limit /= 0) then
-      nthreads_bak=xomp_get_num_threads(open_parallel=.True.)
+      nthreads_bak=xomp_get_max_threads()
       call xomp_set_num_threads(min(xgTransposer%gpu_thread_limit,nthreads_bak))
     end if
 

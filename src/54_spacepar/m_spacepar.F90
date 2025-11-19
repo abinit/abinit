@@ -814,7 +814,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
  l_gpu_thread_limit=0; if(present(gpu_thread_limit)) l_gpu_thread_limit=gpu_thread_limit
 
  if(l_gpu_thread_limit /= 0) then
-   nthreads_bak=xomp_get_num_threads(open_parallel=.True.)
+   nthreads_bak=xomp_get_max_threads()
    call xomp_set_num_threads(min(l_gpu_thread_limit,nthreads_bak))
  end if
 
