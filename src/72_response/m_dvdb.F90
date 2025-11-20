@@ -3154,7 +3154,7 @@ subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, drho_cplex, nfft, ngfft, n
 ! *************************************************************************
 
  ! Get rho1(cplex, nfftf, nspden, my_npert))
- call db%get_ftqbz(qbz, drho_cplex, nfft, ngfft, vxc1, comm)
+ call db%get_ftqbz(qbz, drho_cplex, nfft, ngfft, rho1, comm)
 
  option = 2 ! if 2, treat only density change
  !option = 1 ! if 1, treat both density change and XC core correction
