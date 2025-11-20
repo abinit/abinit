@@ -554,7 +554,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  !========== INITIALISATION OF MINIMIZATION ITERATIONS =================
  !======================================================================
 
- if(ipert/=natom+10.and.ipert/=natom+11) then
+ if (ipert/=natom+10.and.ipert/=natom+11) then
    !  The following is needed for first order perturbations only
    !  Otherwise, the work is already done in rf2_init (called in dfpt_vtowfk.F90)
 
@@ -863,9 +863,8 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  ! ====== BEGIN LOOP FOR A GIVEN BAND: MINIMIZATION ITERATIONS ==========
  ! ======================================================================
  ABI_NVTX_START_RANGE(NVTX_DFPT_CGWF_CORE)
+
  do iline=1,nline
-
-
    ! ======================================================================
    ! ================= COMPUTE THE RESIDUAL ===============================
    ! ======================================================================

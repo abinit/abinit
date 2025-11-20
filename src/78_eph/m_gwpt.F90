@@ -630,7 +630,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_CHECK_IEQ(dvdb%nqpt, drhodb%nqpt, "Different number of q-points in DVDB and DRHODB")
  ierr = 0
  do ii=1,dvdb%nqpt
-   if (any(dvdb%qpts(:, ii) /= drhodb%qpts(:, ii))) then
+   !if (any(dvdb%qpts(:, ii) /= drhodb%qpts(:, ii))) then
+   if (any(abs(dvdb%qpts(:, ii) - drhodb%qpts(:, ii)) > tol12)) then
      ierr = ierr + 1; call wrtout(std_out, sjoin(ktoa(dvdb%qpts(:, ii)), " /= ", ktoa(drhodb%qpts(:, ii))))
    end if
  end do
