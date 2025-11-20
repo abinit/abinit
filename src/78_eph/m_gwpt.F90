@@ -250,7 +250,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),contiguous, pointer :: qp_ene(:,:,:), qp_occ(:,:,:)
  real(dp) :: weight_q,bigexc,bigsxc,vxcavg ! ediff, eshift, q0rad, bz_vol
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma, isirr_q
- logical :: stern_use_cache, use_ftinterp
+ logical :: stern_use_cache, need_ftinterp
  logical :: print_time_qq, print_time_kk, print_time_pp, non_magnetic_xc, need_x_kmp, need_x_kqmp
  complex(dp) :: ieta !, idelta_sum
  type(wfd_t) :: wfd
@@ -638,15 +638,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_CHECK(ierr == 0, "Found different q-points in DVDB and DRHODB. See messages above!")
 
  ! Check if the q-points are present in the DVDB
- !qptopt = dtset%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
- !call dvdb%need_ftinterp(nq_path, qpath%points, qptopt, qmap_symrec, use_ftinterp)
+ ! qmap_symrec gives the mapping gstore%ibz --> dvdb%ibz
+ !call dvdb%need_ftinterp(gstore%nqibz, gstore%qibz, gstore%qptopt, qmap_symrec, need_ftinterp)
+ !ABI_FREE(qmap_symrec)
+ !need_ftinterp = .True.
 
- !if (.not. use_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
+ !if (.not. need_ftinterp .and. dtset%eph_need_ftinterp /= 0) then
  !  ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
- !  use_ftinterp = .True.
+ !  need_ftinterp = .True.
  !end if
 
- !if (use_ftinterp) then
+ !if (need_ftinterp) then
  !  call wrtout(units, " Cannot find all q-points in the DVDB --> Activating Fourier interpolation.")
  !  call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, xmpi_comm_self)
  !else
@@ -701,20 +703,21 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call pot_cryst%free(); call pot_hdr%free()
 
  ! Find correspondence IBZ --> set of q-points in DVDB.
- ! use_ftinterp selects whether DFPT potentials should be read from the DVDB or Fourier-interpolated on the fly.
+ ! need_ftinterp selects whether DFPT potentials should be read from the DVDB or Fourier-interpolated on the fly.
  ! Activate FT interpolation automatically if required q-points in the IBZ are not found in the DVDB.
 
  ! qibz2dvdb gives the mapping gstore%ibz --> dvdb%ibz
  ! TODO: Make sure we have the same ibz in rho1%ibz
- use_ftinterp = .False.
+ need_ftinterp = .False.
  ABI_MALLOC(qibz2dvdb, (gstore%nqibz))
  if (dvdb%find_qpts(gstore%nqibz, gstore%qibz, qibz2dvdb, comm) /= 0) then
    call wrtout(units, " Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
-   use_ftinterp = .True.
+   need_ftinterp = .True.
  else
    call wrtout(units, " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
-   use_ftinterp = .False.
+   need_ftinterp = .False.
  end if
+ !need_ftinterp = .True.
 
  ! Distribute DFPT potentials (IBZ q-points) inside qpt_comm.
  ! Note that we distribute IBZ instead of the full BZ or the IBZ_k inside the loop over ikcalc.
@@ -742,7 +745,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  call wrtout(std_out, sjoin("P Number of q-points in the IBZ treated by this proc: " ,itoa(count(itreat_qibz == 1))))
 
- if (use_ftinterp) then
+ if (need_ftinterp) then
    ! Use ddb_ngqpt q-mesh to compute the real-space representation of DFPT v1scf_qq potentials to prepare Fourier interpolation.
    ! R-points are distributed inside comm_rpt
    ! Note that when R-points are distributed inside qpt_comm we cannot interpolate potentials on-the-fly
@@ -762,7 +765,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call drhodb%print([std_out], "DRHODB file", dtset%prtvol)
  call pstat_proc%print(_PSTAT_ARGS_)
 
- if (.not. use_ftinterp) then
+ if (.not. need_ftinterp) then
    ! Need to translate itreat_qibz into itreatq_dvdb.
    ABI_ICALLOC(itreatq_dvdb, (dvdb%nqpt))
    do iq_ibz=1,gstore%nqibz
@@ -792,7 +795,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  drude_plsmf = sqrt(four_pi * ebands%nelect / cryst%ucvol)
  my_plsmf = drude_plsmf; if (dtset%ppmfrq > tol6) my_plsmf = dtset%ppmfrq
  call ppm%init(mqmem, pp_mesh%nibz, npw_c, dtset%ppmodel, my_plsmf, dtset%gw_invalid_freq)
- call ppm%print(units)
+ if (my_rank == master) call ppm%print(units)
 
  ! Read symmetrized em1 from file and build ppmodel parameters.
  ! TODO: MPI-shared memory + compute only my set of pp-vectors in ppm%new_setup
@@ -1012,7 +1015,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      !
      ! Important: vxc1_qq does not include the contribution due to the model core charge (if any).
 
-     if (use_ftinterp) then
+     if (need_ftinterp) then
        ! Use Fourier interpolation to get DFPT potentials and DFPT densities for this qpt.
        call dvdb%get_ftqbz(qq_bz, cplex, nfftf, ngfftf, v1scf_qq, gqk%pert_comm%value)
 
