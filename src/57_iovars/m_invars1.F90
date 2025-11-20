@@ -2786,6 +2786,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%posocc=one
    dtsets(idtset)%postoldfe=0.000001_dp
    dtsets(idtset)%postoldff=zero
+   dtsets(idtset)%precon_ls_maxite=20
+   dtsets(idtset)%precon_ls_rtol=tol6
+   dtsets(idtset)%precon_tsmear=zero
    dtsets(idtset)%prepalw=0
    dtsets(idtset)%prepanl=0
    dtsets(idtset)%prtcurrent=0

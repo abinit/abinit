@@ -111,6 +111,7 @@ module m_precon
         real(dp) :: linsolve_rtol, ridge_param
         !chi0_diag/quasidiag parameters
         real(dp) :: deigvals_tol_fp
+        real(dp) :: precon_tsmear
 
     contains
         procedure :: init => precon_init                    ! Initialize the precon_object.
@@ -324,7 +325,18 @@ contains
             
             !chi0_diag/quasidiag parameters
             this%deigvals_tol_fp = tol10
-            ! TODO : Make these parameters user-defined.
+            this%precon_tsmear = dtset%tsmear
+            if (dtset%precon_tsmear /= zero) then   ! dtset%precon_tsmear = 0.0 means we use dtset%tsmear 
+                                                    ! (the smearing temperature is not adjusted for the preonditioner).
+                this%precon_tsmear = dtset%precon_tsmear    ! Only used for chi0_diag and chi0_quasidiag for now.
+            end if
+            write(6,*)'chi0diel init : dtset%iprcel=', dtset%iprcel; flush(6) !DEBUG
+            write(6,*)'chi0diel init : dtset%precon_ls_maxite=', dtset%precon_ls_maxite; flush(6) !DEBUG
+            write(6,*)'chi0diel init : this%linsolve_maxiter=', this%linsolve_maxiter; flush(6) !DEBUG
+            write(6,*)'chi0diel init : dtset%precon_tsmear=', dtset%precon_tsmear; flush(6) !DEBUG
+            write(6,*)'chi0diel init : this%precon_tsmear=', this%precon_tsmear; flush(6) !DEBUG
+
+                ! TODO : Make these parameters user-defined.
 
             !Usefull : indices mapping arrays
             if (this%use_indices_arrays)then
@@ -397,6 +409,12 @@ contains
 
         ! *************************************************************************
         write(6,*)'chi0diel precon%update'; flush(6) !DEBUG
+                    write(6,*)'chi0diel init : dtset%iprcel=', dtset%iprcel; flush(6) !DEBUG
+            write(6,*)'chi0diel init : dtset%precon_ls_maxite=', dtset%precon_ls_maxite; flush(6) !DEBUG
+            write(6,*)'chi0diel init : this%linsolve_maxiter=', this%linsolve_maxiter; flush(6) !DEBUG
+            write(6,*)'chi0diel init : dtset%precon_tsmear=', dtset%precon_tsmear; flush(6) !DEBUG
+            write(6,*)'chi0diel init : this%precon_tsmear=', this%precon_tsmear; flush(6) !DEBUG
+
         !write(100+mpi_enreg%me,*)'apply_precon%update : dtset%nband', dtset%nband; flush(100+mpi_enreg%me)
         if (this%use_precon) then
             
@@ -1780,19 +1798,25 @@ contains
         integer :: i_kg(2), i_cg_iband1(2*dtset%nspinor), i_cg_iband2(2*dtset%nspinor)
         real(dp) :: sum_rhoi_r
         integer :: ifft
+        logical :: band_paral
         !arrays
         integer, allocatable :: needed_bands_bounds(:, :)
         integer, allocatable :: needed_bands_number(:)
         integer, allocatable :: kg_k(:, :)
         integer :: gbound_k(2*dtset%mgfft+8,2)
         real(dp), allocatable :: psii_aug(:, :, :, :)
+        real(dp), allocatable :: rhoi_aug(:, :, :)
         real(dp), allocatable :: delta_rho_coarse_r(:, :)
+        !for band parall
+        integer :: option_fourwf, blocksize, iblock, ibandblock1, ibandblock2
+        integer :: i_cg_ibandblock1(2*dtset%nspinor), i_cg_ibandblock2(2*dtset%nspinor)
+        real(dp), allocatable :: dummy_occ_k(:)
         !dummy arguments
         real(dp) ::  dummy_denpot(0, dtset%ngfft(5), dtset%ngfft(6)), dummy_fofgout(2, 0)
         
         ! *************************************************************************
 
-        ! TODO : also save rhoi (the exact value)
+        band_paral = (dtset%paral_kgb == 1 .and. dtset%npband > 1)
 
         n1 = dtset%ngfft(1)
         n2 = dtset%ngfft(2)
@@ -1808,9 +1832,12 @@ contains
         ! Allocate the array containing the precomputed psii
         ABI_MALLOC(this%precomputed_psii, (2, this%nfftprc, dtset%nspinor, sum(needed_bands_number)))
         this%precomputed_psii_indices = zero
+        ABI_MALLOC(this%precomputed_rhoi, (this%nfftprc, dtset%nspinor, sum(needed_bands_number)))
+        this%precomputed_rhoi_indices = zero
         i_psii = 1
         
         ABI_MALLOC(psii_aug, (2, n4, n5, n6*dtset%mband))   ! TODO : check, this dtset%mband take band paral into account
+        ABI_MALLOC(rhoi_aug, (n4, n5, n6))
 
         !Loop over spins and kpoints
         do isppol =1, dtset%nsppol
@@ -1826,9 +1853,38 @@ contains
                 iband1 = needed_bands_bounds(1, i_kpt_sppol)
                 iband2 = needed_bands_bounds(2, i_kpt_sppol)
 
-                if (dtset%paral_kgb == 1 .and. dtset%npband > 1) then
-                    ! TODO : bandparal
+                if (band_paral) then
+
+                    if (dtset%nspinor==1) then
+                        option_fourwf = 0
+                        ndat = mpi_enreg%bandpp
+                        
+                        blocksize = mpi_enreg%nproc_band*mpi_enreg%bandpp
+                        iblock = 1  ! TODO : loop over blocks (LOBPCG) 
+
+                        ibandblock1 = blocksize*(iblock-1) + 1  
+                        ibandblock2 = blocksize*(iblock)
+                        i_cg_ibandblock1 = this%cg_indices(:, ibandblock1, ikpt, isppol)
+                        i_cg_ibandblock2 = this%cg_indices(:, ibandblock2, ikpt, isppol)    ! Changer
+
+                        ABI_MALLOC(psii_aug, (2, n4, n5, n6*ndat))
+                        ABI_MALLOC(dummy_occ_k, (nband_k))
+                        !ABI_MALLOC(dummy_denpot, (n4, n5, n6))
+
+                        call bandfft_kpt_set_ikpt(ikpt, mpi_enreg)
+                        call prep_fourwf(dummy_denpot, blocksize, this%cg(:, i_cg_ibandblock1(1):i_cg_ibandblock2(2)),    &
+                        &           psii_aug(:, :, :, 1:n6*ndat), iblock, dtset%istwfk(ikpt), dtset%mgfft, mpi_enreg, nband_k,      &
+                        &           ndat, dtset%ngfft, this%npwarr(ikpt),                                       &
+                        &           n4, n5, n6, dummy_occ_k, option_fourwf, this%ucvol, dtset%wtk(ikpt))
+
+                        ABI_FREE(dummy_occ_k)
+                        !ABI_FREE(dummy_denpot)
+                    else
+                        ABI_BUG("TODO non-collinear magnetisme in precon")
+                    end if
+
                 else
+                    
                     if (dtset%nspinor==1) then
                         
                         option = 0
@@ -1851,12 +1907,11 @@ contains
                         ABI_FREE(kg_k)
 
                     else
-                        ABI_BUG("non-collinear magnetisme in precon")
+                        ABI_BUG("TODO non-collinear magnetisme in precon")
                     end if
                 end if
                 
                 rank = xmpi_comm_rank(mpi_enreg%comm_bandfft)
-                idat = 1
 
                 do iband = iband1, iband2
                     
@@ -1864,7 +1919,16 @@ contains
                     if (.not. (1 + mpi_enreg%bandpp*rank <= iband .and. iband <= mpi_enreg%bandpp*(rank+1))) then
                         cycle
                     end if
+
+                    if (band_paral) then
+                        idat = iband - mpi_enreg%bandpp*rank
+                    else
+                        idat = iband
+                    end if
                         
+                    rhoi_aug = zero
+                    call cg_addtorho(n1, n2, n3, n4, n5, n6, 1, one, one, psii_aug(:, :, :, (idat-1)*n6+1:idat*n6), rhoi_aug)
+
                     if (this%nfftprc == n1*n2*n3) then
                         
                         option = 1
@@ -1875,8 +1939,13 @@ contains
                             &           psii_aug(icplex, :, :, idat:idat+n6-1), option)
                         end do
                         
+                        option = 1
+                        call fftpac(1, mpi_enreg, 1, n1, n2, n3, n4, n5, n6, dtset%ngfft,   &
+                        &           this%precomputed_rhoi(:, 1, i_psii),                    & 
+                        &           rhoi_aug, option)
 
                     else
+                        
                         ! In PAW, the preconditioning grid should be the fine grid.
                         if (this%nfftprc == this%pawfgr%nfft) then
                             ABI_BUG("chi0-based preconditioner : PAW not implemented.")
@@ -1899,22 +1968,24 @@ contains
                     sum_rhoi_r = 0
                     do ispinor = 1, dtset%nspinor
                         do ifft=1, this%nfftprc
-                            sum_rhoi_r = sum_rhoi_r + (this%precomputed_psii(1, ifft, ispinor, i_psii))**2 + &
-                            &                         (this%precomputed_psii(2, ifft, ispinor, i_psii))**2
+                            sum_rhoi_r = sum_rhoi_r + this%precomputed_rhoi(ifft, ispinor, i_psii)
                         end do
-                        this%precomputed_psii(:, :, ispinor, i_psii) = this%precomputed_psii(:, :, ispinor, i_psii) / sqrt(sum_rhoi_r * this%dvol)     ! Normalization
+                        this%precomputed_psii(:, :, ispinor, i_psii) = this%precomputed_psii(:, :, ispinor, i_psii) / sqrt(sum_rhoi_r * this%dvol)
+                        this%precomputed_rhoi(:, ispinor, i_psii) = this%precomputed_rhoi(:, ispinor, i_psii) / (sum_rhoi_r * this%dvol)
                     end do
 
-                    ! Save the index for iband, ikpt, isppol in precomputed_psii
+                    ! Save the index for iband, ikpt, isppol in precomputed_psii and precomputed_rhoi
                     this%precomputed_psii_indices(iband, ikpt, isppol) = i_psii
+                    this%precomputed_rhoi_indices(iband, ikpt, isppol) = i_psii
                     i_psii = i_psii + 1
 
-                    idat = idat+1
-
                 end do  !iband
+
+                
             end do  !ikpt
         end do  !isppol
 
+        ABI_FREE(rhoi_aug)
         ABI_FREE(psii_aug)
         ABI_FREE(needed_bands_number)
         ABI_FREE(needed_bands_bounds)
@@ -1931,12 +2002,12 @@ contains
        
         !Local variables-------------------------------
         !scalars
-        integer :: nspin, i_rhoi, isppol, ikpt, i_kpt_sppol, nband_k, rank, iband, iband1, iband2, ibandblock1, ibandblock2
+        integer :: nspin, i_rhoi, isppol, ikpt, i_kpt_sppol, nband_k, rank, iband, iband1, iband2
         !arrays
         integer, allocatable :: needed_bands_bounds(:, :)
         integer, allocatable :: needed_bands_number(:)
         !for band parall
-        integer :: option_fourwf, ndat, blocksize, iblock, option
+        integer :: option_fourwf, ndat, blocksize, iblock, option, ibandblock1, ibandblock2
         integer :: n1, n2, n3, n4, n5, n6
         integer :: idat
         integer :: i_cg_ibandblock1(2*dtset%nspinor), i_cg_ibandblock2(2*dtset%nspinor)
@@ -2141,7 +2212,7 @@ contains
                 do iband = 1 + mpi_enreg%bandpp*rank, mpi_enreg%bandpp*(rank+1)
                     
                     i_eigen = get_eigen_index(dtset, iband, ikpt, isppol)  ! Index of (iband, ikpt, isppol) in eigen array.
-                    fp = derivative_occ(dtset%occopt, this%eigen(i_eigen), this%fermie, dtset%tsmear) * maxocc
+                    fp = derivative_occ(dtset%occopt, this%eigen(i_eigen), this%fermie, this%precon_tsmear) * maxocc
 
                     if (abs(fp) > this%deigvals_tol_fp) then
                         needed_bands_bounds(1, i_kpt_sppol) = min(needed_bands_bounds(1, i_kpt_sppol), iband)   ! iband_min
@@ -2240,7 +2311,7 @@ contains
                     
                     !2.1) Computing f'(eig_i - fermie).
                     eigenval = this%eigen(i_eigen)
-                    fp = derivative_occ(dtset%occopt, eigenval, this%fermie, dtset%tsmear) * maxocc
+                    fp = derivative_occ(dtset%occopt, eigenval, this%fermie, this%precon_tsmear) * maxocc
                     !fp = doccde(i_eigen)   ! Same as derivative_occ (probably more robust)
                     dos_fermie = dos_fermie + fp * dtset%wtk(ikpt)
 
@@ -2315,7 +2386,7 @@ contains
 
                     i_eigen = get_eigen_index(dtset, iband, ikpt, isppol)
                     eigenval = this%eigen(i_eigen)
-                    fp = derivative_occ(dtset%occopt, eigenval, this%fermie, dtset%tsmear) * maxocc
+                    fp = derivative_occ(dtset%occopt, eigenval, this%fermie, this%precon_tsmear) * maxocc
                     !fp = doccde(i_eigen)
                     delta_occ(i_eigen) = delta_occ(i_eigen) - fp * delta_fermie
 
@@ -2520,7 +2591,7 @@ contains
                     end if  ! TODO : create a cycle function, that is also correct in LOBPCG
 
                     i_eigen = get_eigen_index(dtset, iband, ikpt, isppol)  ! Index of (iband, ikpt, isppol) in eigen array.
-                    fp = derivative_occ(dtset%occopt, this%eigen(i_eigen), this%fermie, dtset%tsmear) * maxocc
+                    fp = derivative_occ(dtset%occopt, this%eigen(i_eigen), this%fermie, this%precon_tsmear) * maxocc
 
                     ! Compute and add the contribution to delta_rhol.
                     if (dtset%nspinor == 1) then
@@ -2665,7 +2736,7 @@ contains
 
                     !Indices
                     i_eigen = get_eigen_index(dtset, iband, ikpt, isppol)       ! Index of (iband, ikpt, isppol) in eigen array.
-                    fp = derivative_occ(dtset%occopt, this%eigen(i_eigen), this%fermie, dtset%tsmear) * maxocc
+                    fp = derivative_occ(dtset%occopt, this%eigen(i_eigen), this%fermie, this%precon_tsmear) * maxocc
 
                     if (abs(fp) > this%deigvals_tol_fp) then
                     

@@ -465,7 +465,10 @@ module m_iterative_solvers
         res = gmres_rtol
         del = 0
         its = gmres_maxiter  ! No restart
-        info = 1
+        info = 0
+        if (xmpi_comm_rank(xmpi_world) == 0) then
+            info = 1        ! Print residuals only on master
+        end if
         call gmresm(m, n, est, rhs, matvec, psolve, dotprd, h, v, res, del, its, info)
         ABI_FREE(h)
         ABI_FREE(v)
@@ -637,6 +640,8 @@ module m_iterative_solvers
       p(1:j+1) = - matmul(h(1:j+1,1:j),y(1:j))
       p(1) = p(1) + beta
       res = dsqrt(dot_product(p(1:j+1),p(1:j+1)))
+      ! MPI aware: broadcast the 'res' value of master to avoid desynchronization.
+      call xmpi_bcast(res, 0, xmpi_world, ierr)
       if(info==1) print*, 'gmresm: it=', its,' res=', real(res)
       
       done = (res<=tol .or. its==imx .or. res>res_)
@@ -653,9 +658,6 @@ module m_iterative_solvers
          goto 1       ! (j==m) restart
       end if
       res_ = res*stgn
-
-      ! MPI aware: broadcast the 'res' value of master to avoid desynchronization.
-      call xmpi_bcast(res, 0, xmpi_world, ierr)
 
    end do   
  
