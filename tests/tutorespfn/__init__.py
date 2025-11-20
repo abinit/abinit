@@ -82,7 +82,6 @@ inp_files = [
 "teph4zpr_gwpt_6.abi",
 "teph4zpr_gwpt_7.abi",
 "teph4zpr_gwpt_8.abi",
-"teph4zpr_gwpt_9.abi",
 #
 "teph4vpq_1.abi",
 "teph4vpq_2.abi",
