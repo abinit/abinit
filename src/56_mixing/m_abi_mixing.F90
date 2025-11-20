@@ -817,7 +817,8 @@ end subroutine abi_mixing_eval_deallocate
     end if
     if (dbl_nnsclo == 1) errid = AB7_ERROR_MIXING_INC_NNSLOOP
  end if
-
+ 
+ if(present(nelect_extfpmd)) nelect_extfpmd=nelect_extfpmd_
  if (present(resnrm)) resnrm = resnrm_
  nullify(rcpawarr_)
 

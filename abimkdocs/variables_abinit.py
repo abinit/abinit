@@ -3697,7 +3697,7 @@ Variable(
 Defines the linear grid resolution (energy increment) to be used for the
 computation of the Density-Of-States, when [[prtdos]] is non-zero.
 If [[dosdeltae]] is set to zero (the default value), the actual increment is
-0.001 Ha if [[prtdos]] = 1 or 4 (smearing technique), and the much smaller value 0.00005 Ha if
+0.001 Ha if [[prtdos]] = 1 or 4 (smearing technique), and the much smaller value 0.0005 Ha if
 [[prtdos]] = 2, 3 or 5 (tetrahedron technique). This different default value arises because the
 smearing technique gives a quite smooth DOS, while the DOS
 from the tetrahedron method is rapidly varying.
