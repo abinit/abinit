@@ -498,6 +498,9 @@ contains
  dprarr(1,:)=dtsets(:)%precon_ls_rtol
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'precon_ls_rtol','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%precon_tsmear
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'precon_tsmear','DPR',0)
+
  intarr(1,:)=dtsets(:)%prepalw
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prepalw','INT',0)
 

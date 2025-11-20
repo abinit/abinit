@@ -943,6 +943,16 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%d3e_pert2_magat(2)=dtset%natom
  endif
 
+ ! SCF-Preconditioning input variables
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'precon_ls_maxite',tread,'INT')
+ if(tread==1) dtset%precon_ls_maxite=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'precon_ls_rtol',tread,'DPR')
+ if(tread==1) dtset%precon_ls_rtol=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'precon_tsmear',tread,'DPR')
+ if(tread==1) dtset%precon_tsmear=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prepalw',tread,'INT')
  if(tread==1) dtset%prepalw=intarr(1)
 
