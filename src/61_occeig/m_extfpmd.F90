@@ -57,7 +57,7 @@ module m_extfpmd
   !!
   !! SOURCE
   type,public :: extfpmd_type
-    logical :: truecg
+    logical :: truecg,pawsph
     integer :: bcut,mband,nbcut,nbdbuf,nfftf,nspden,version
     real(dp) :: ebcut,edc_kinetic,e_kinetic,entropy
     real(dp) :: nelect,eshift,ucvol,el_temp,bandshift
@@ -108,10 +108,11 @@ contains
   !!
   !! SOURCE
   subroutine init(this,mband,extfpmd_eshift,nbcut,nbdbuf,nfftf,nspden,&
-  & nsppol,nkpt,occopt,rprimd,tphysel,tsmear,version,mpi_enreg,extfpmd_mband)
+  & nsppol,nkpt,occopt,rprimd,tphysel,tsmear,version,mpi_enreg,extfpmd_mband,pawsph)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
+    logical,intent(in) :: pawsph
     integer,intent(in) :: mband,nbcut,nbdbuf,nfftf,nspden
     integer,intent(in) :: nsppol,nkpt,version,extfpmd_mband,occopt
     real(dp),intent(in) :: extfpmd_eshift,tphysel,tsmear
@@ -147,6 +148,7 @@ contains
     this%eshift=extfpmd_eshift
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
     this%el_temp=merge(tphysel,tsmear,tphysel>tol8.and.occopt/=3.and.occopt/=9)
+    this%pawsph=pawsph
 
     if(this%version==5) then
       ! Make a copy of mpi_enreg in order to cycle.
@@ -208,6 +210,7 @@ contains
     this%eshift=zero
     this%ucvol=zero
     this%el_temp=zero
+    this%pawsph=.false.
   end subroutine destroy
   !!***
 
@@ -293,7 +296,7 @@ contains
       ! Computes U_0 from the sum of local
       ! potentials (vtrial), averaging over all space.
       ! Simplest and most precise way to evaluate U_0.
-      this%eshift=sum(this%vtrial)/(nfftf*nspden)
+      this%eshift=this%eshift+sum(this%vtrial)/(nfftf*nspden)
     end if
 
     ! Get extended FPMD band energy cutoff
@@ -612,7 +615,7 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ii,ifft,ispden,isppol,ikpt,iband,nband_k,ierr
+    integer :: ii,ifft,ispden,isppol,ikpt,iband,nband_k,ierr,nom
     real(dp) :: ix,step,factor,fn,gamma,maxocc
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
@@ -655,9 +658,12 @@ contains
     ! over energy with Fermi-Dirac complete integrals and
     ! substracting 0 to bcut contribution with numeric integration.
     if(this%version==1.or.this%version==3) then
-      step=(this%ebcut-this%eshift)/(this%bcut)
+      ABI_FREE(valuesent)
+      nom=10000
+      ABI_MALLOC(valuesent,(nom+1))
+      step=(this%ebcut-this%eshift)/(nom)
       !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
-      do ii=1,this%bcut+1
+      do ii=1,nom+1
         ix=this%eshift+(dble(ii)-one)*step
         fn=fermi_dirac(ix,fermie,this%el_temp)
         if(fn>tol16.and.(one-fn)>tol16) then
@@ -879,6 +885,57 @@ contains
       extfpmd_chkinp=.true.
     end if
   end function extfpmd_chkinp
+  !!***
+
+  !!***
+  !!****f* ABINIT/m_extfpmd/extfpmd_prterr
+  !! NAME
+  !!  extfpmd_prterr
+  !!
+  !! SUBROUTINE
+  !!  Print extfpmd error
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!
+  !! SOURCE
+  subroutine extfpmd_err(this,eigen,mband,nband,nkpt,nsppol,wtk,fname)
+    ! Arguments -------------------------------
+    ! Scalars
+    class(extfpmd_type),intent(inout) :: this
+    character(len=*),intent(in) :: fname
+    integer,intent(in) :: mband,nkpt,nsppol
+    ! Arrays
+    integer,intent(in) :: nband(nkpt*nsppol)
+    real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
+    real(dp),intent(in) :: wtk(nkpt)
+
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: band_index,ii,ikpt,isppol,nband_k,tmp_unt
+    real(dp) :: err(minval(nband)-this%nbdbuf)
+
+    ! *********************************************************************
+    err=zero
+    band_index=0
+    do isppol=1,nsppol
+      do ikpt=1,nkpt
+        nband_k=nband(ikpt+(isppol-1)*nkpt)
+        do ii=1,nband_k-this%nbdbuf
+          err(ii)=err(ii)+&
+          & wtk(ikpt)*(eigen(band_index+ii)-this%eshift-extfpmd_e_fg(dble(ii),this%ucvol))&
+&           /nsppol/extfpmd_e_fg(dble(ii),this%ucvol)
+        end do
+        band_index=band_index+nband_k
+      end do
+    end do
+   open(file=fname,newunit=tmp_unt,status='unknown',form='formatted') 
+    do ii=1,minval(nband)-this%nbdbuf
+      write(tmp_unt,*) ii,abs(err(ii))
+    enddo
+   close(tmp_unt)
+  end subroutine extfpmd_err
   !!***
 
 end module m_extfpmd

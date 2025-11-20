@@ -222,6 +222,8 @@ type, public :: dataset_type
  integer :: extfpmd_nbcut = 25
  integer :: extfpmd_nbdbuf = 0
  integer :: extfpmd_nband = 0
+ integer :: extfpmd_pawsph = 0
+ integer :: extfpmd_prterr = 0
  integer :: extrapwf
  integer :: expert_user
 !F
@@ -650,8 +652,9 @@ type, public :: dataset_type
  integer :: rmm_diis = 0
  integer :: rmm_diis_savemem = 0
  integer :: rcpaw_frocc = 0
- integer :: rcpaw_nfrpaw = 2
- integer :: rcpaw_nfrtnc = 2
+ integer :: rcpaw_updatetnc
+ integer :: rcpaw_orbshift = 0
+ integer :: rcpaw_potshift = 0
 !S
  integer :: sigma_nshiftk = 1      ! Number of shifts in k-mesh for Sigma_{nk}.
  integer :: signperm
@@ -781,6 +784,7 @@ type, public :: dataset_type
  integer :: ngkpt(3)   ! Number of division for MP sampling.
  integer :: ph_ngqpt(3) = 20
  integer :: qprtrb(3)
+ integer :: rcpaw_updatepaw(2)= 0
  integer :: rfatpol(2)
  integer :: rfdir(3)
  integer :: rf2_pert1_dir(3)
@@ -818,7 +822,7 @@ type, public :: dataset_type
  integer, allocatable ::  plowan_nbl(:)      ! plowan_nbl(plowan_natom)
  integer, allocatable ::  plowan_projcalc(:) ! plowan_projcalc(\sum_iatom plowan_nbl)
  integer, allocatable ::  prtatlist(:)       ! prtatlist(natom)
- integer, allocatable ::  rcpaw_frtypat(:)   ! rcpaw_frtypat(ntypat)
+ integer, allocatable ::  rcpaw_rctypat(:)   ! rcpaw_rctypat(ntypat)
  integer, allocatable ::  so_psp(:)          ! so_psp(npsp)
  integer, allocatable ::  symafm(:)          ! symafm(nsym)
  integer, allocatable ::  symrel(:,:,:)      ! symrel(3,3,nsym)
@@ -935,7 +939,7 @@ type, public :: dataset_type
  real(dp) :: pw_unbal_thresh
  real(dp) :: ratsm
  real(dp) :: ratsph_extra
- real(dp) :: rcpaw_tolnc = 0.000001_dp
+ real(dp) :: rcpaw_tolnc = tol5
  real(dp) :: recrcut
  real(dp) :: recefermi
  real(dp) :: rectolden
@@ -1088,7 +1092,7 @@ type, public :: dataset_type
  real(dp), allocatable :: qptdm(:,:)          ! qptdm(3,nqptdm)
  real(dp), allocatable :: quadmom(:)          ! quadmom(ntypat)
  real(dp), allocatable :: ratsph(:)           ! ratsph(ntypat)
- real(dp), allocatable :: rcpaw_scenergy(:)   ! rcpaw_scenergy(ntypat)
+ real(dp), allocatable :: rcpaw_sc(:)         ! rcpaw_sc(ntypat)
  real(dp), allocatable :: rprim_orig(:,:,:)   ! rprim_orig(3,3,nimage)
  real(dp), allocatable :: rprimd_orig(:,:,:)  ! rprimd_orig(3,3,nimage)
  real(dp), allocatable :: sigma_shiftk(:,:)   ! sigma_shiftk(3, sigma_nshiftk)    ! shifts in k-mesh for Sigma_{nk}.
@@ -1724,6 +1728,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%extfpmd_nbcut      = dtin%extfpmd_nbcut
  dtout%extfpmd_nbdbuf     = dtin%extfpmd_nbdbuf
  dtout%extfpmd_nband      = dtin%extfpmd_nband
+ dtout%extfpmd_pawsph     = dtin%extfpmd_pawsph
+ dtout%extfpmd_prterr     = dtin%extfpmd_prterr
  dtout%extrapwf           = dtin%extrapwf
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
@@ -2144,9 +2150,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%qptopt             = dtin%qptopt
  dtout%quadquad           = dtin%quadquad
  dtout%random_atpos       = dtin%random_atpos
- dtout%rcpaw_frocc       = dtin%rcpaw_frocc
- dtout%rcpaw_nfrpaw       = dtin%rcpaw_nfrpaw
- dtout%rcpaw_nfrtnc       = dtin%rcpaw_nfrtnc
+ dtout%rcpaw_frocc        = dtin%rcpaw_frocc
+ dtout%rcpaw_updatetnc    = dtin%rcpaw_updatetnc
+ dtout%rcpaw_orbshift     = dtin%rcpaw_orbshift
+ dtout%rcpaw_potshift     = dtin%rcpaw_potshift
  dtout%recgratio          = dtin%recgratio
  dtout%recnpath           = dtin%recnpath
  dtout%recnrec            = dtin%recnrec
@@ -2449,6 +2456,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%shiftk_orig        = dtin%shiftk_orig
  dtout%strtarget(:)       = dtin%strtarget(:)
  dtout%ucrpa_window(:)    = dtin%ucrpa_window(:)
+ dtout%rcpaw_updatepaw(:) = dtin%rcpaw_updatepaw(:)
  dtout%vcutgeo(:)         = dtin%vcutgeo(:)
  dtout%vprtrb(:)          = dtin%vprtrb(:)
 
@@ -2478,7 +2486,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%plowan_lcalc, dtout%plowan_lcalc)
  call alloc_copy(dtin%plowan_projcalc, dtout%plowan_projcalc)
  call alloc_copy(dtin%prtatlist, dtout%prtatlist)
- call alloc_copy(dtin%rcpaw_frtypat,dtout%rcpaw_frtypat)
+ call alloc_copy(dtin%rcpaw_rctypat,dtout%rcpaw_rctypat)
  call alloc_copy(dtin%so_psp, dtout%so_psp)
  call alloc_copy(dtin%symafm, dtout%symafm)
  call alloc_copy(dtin%symrel, dtout%symrel)
@@ -2519,7 +2527,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%qptdm, dtout%qptdm)
  call alloc_copy(dtin%quadmom, dtout%quadmom)
  call alloc_copy(dtin%ratsph, dtout%ratsph)
- call alloc_copy(dtin%rcpaw_scenergy,dtout%rcpaw_scenergy)
+ call alloc_copy(dtin%rcpaw_sc,dtout%rcpaw_sc)
  call alloc_copy(dtin%rprim_orig, dtout%rprim_orig)
  call alloc_copy(dtin%rprimd_orig, dtout%rprimd_orig)
  call alloc_copy(dtin%shiftk, dtout%shiftk)
@@ -2596,7 +2604,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%plowan_nbl)
  ABI_SFREE(dtset%plowan_projcalc)
  ABI_SFREE(dtset%prtatlist)
- ABI_SFREE(dtset%rcpaw_frtypat)
+ ABI_SFREE(dtset%rcpaw_rctypat)
  ABI_SFREE(dtset%so_psp)
  ABI_SFREE(dtset%symafm)
  ABI_SFREE(dtset%symrel)
@@ -2638,7 +2646,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%qptdm)
  ABI_SFREE(dtset%quadmom)
  ABI_SFREE(dtset%ratsph)
- ABI_SFREE(dtset%rcpaw_scenergy)
+ ABI_SFREE(dtset%rcpaw_sc)
  ABI_SFREE(dtset%rprim_orig)
  ABI_SFREE(dtset%rprimd_orig)
  ABI_SFREE(dtset%shiftk)
@@ -3701,7 +3709,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_phwinfact eph_fix_korq'
  list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_tols_idelta eph_fix_wavevec eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user'
- list_vars=trim(list_vars)//' extfpmd_nbcut extfpmd_nbdbuf extfpmd_nband extrapwf'
+ list_vars=trim(list_vars)//' extfpmd_nbcut extfpmd_nbdbuf extfpmd_nband extfpmd_pawsph extfpmd_prterr extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest ffnl_lw'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw fft_count'
@@ -3848,7 +3856,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
  list_vars=trim(list_vars)//' rfstrs rfstrs_ref rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  list_vars=trim(list_vars)//' rmm_diis rmm_diis_savemem'
- list_vars=trim(list_vars)//' rcpaw_scenergy rcpaw_nfrpaw rcpaw_frocc rcpaw_tolnc rcpaw_nfrtnc rcpaw_frtypat'
+ list_vars=trim(list_vars)//' rcpaw_frocc rcpaw_orbshift rcpaw_potshift rcpaw_rctypat rcpaw_sc rcpaw_tolnc rcpaw_updatepaw rcpaw_updatetnc'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' sel_EFS'
