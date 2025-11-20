@@ -370,17 +370,17 @@ variable is [[zora]]=2, which activates the ZORA electron and nuclear spin terms
 once the calculation finishes, you will find near the bottom of the output file, the four
 total energies:
 
-    etotal1    -3.9162257011E+01
-    etotal2    -3.9162258675E+01
-    etotal3    -3.9162256163E+01
-    etotal4    -3.9162256345E+01
+    etotal1    -3.9162256582E+01
+    etotal2    -3.9162258242E+01
+    etotal3    -3.9162255743E+01
+    etotal4    -3.9162255929E+01
 
 Note how similar they are. The $J$ tensor is quite weak, so energy must be very tightly converged and
 a convergence study of box size, [[ecut]], and so forth must be done carefully. In our case, the first
 two energies provide 
-$$ J_{yy} = \frac{1}{2}(-39.162257011 -    -39.162258675) = 8.32\times 10^{-7}, $$ 
+$$ J_{yy} = \frac{1}{2}(-39.162256582 -    -39.162258242) = 8.30\times 10^{-7}, $$ 
 and
-$$ J_{zz}=\frac{1}{2}(-39.162256163 - -39.162256345) = 9.1\times 10^{-8} , $$ 
+$$ J_{zz}=\frac{1}{2}(-39.162255743 - -39.162255929) = 9.30\times 10^{-8} , $$ 
 where we have taken advantage of the symmetries to reduce the calculations from four to two for each element.
 
 The values obtained are in atomic units, where Energy/(dipole$^2$) in atomic units has the value
@@ -390,6 +390,6 @@ accomplished by multiplication by $h\times 10^{12}\times 1.2673\times 10^{28}\ti
 where the $\gamma$ factors are the nuclear gyromagnetic ratios in MHz/T and $h$ is
 Planck's constant in SI units. For our ClF example, we use
 4.17566 MHz/T for $^{35}$Cl, and 40.069244 MHz/T for $^{19}$F. These factors then yield
-$J_{yy} = 1169$ Hz, and $J_{zz} = 128$ Hz, for an isotropic value of 822 Hz. For comparison,
-the experimental value is 839 Hz [[cite:bryce2000indirect]], although this very good level of agreement with experiment should be 
-checked very carefully against convergence parameters and molecular geometry.
+$J_{yy} = 1166$ Hz, and $J_{zz} = 131$ Hz, for an isotropic value of 821 Hz. For comparison,
+the experimental value is 839 Hz [[cite:bryce2000indirect]] Note that this good level of agreement 
+with experiment should be checked very carefully against convergence parameters and molecular geometry.
