@@ -872,6 +872,7 @@ type, public :: dataset_type
  real(dp) :: dmft_yukawa_epsilon
  real(dp) :: dmft_yukawa_lambda
  real(dp) :: dmftqmc_n
+ real(dp) :: dmftctqmc_chains
  real(dp) :: dosdeltae
  real(dp) :: dtion
  real(dp) :: dtele
@@ -1656,6 +1657,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmftctqmc_meas     = dtin%dmftctqmc_meas
  dtout%dmftctqmc_mov      = dtin%dmftctqmc_mov
  dtout%dmftctqmc_mrka     = dtin%dmftctqmc_mrka
+ dtout%dmftctqmc_chains = dtin%dmftctqmc_chains
  dtout%dmftctqmc_order    = dtin%dmftctqmc_order
  dtout%dmftqmc_l          = dtin%dmftqmc_l
  dtout%dmftqmc_n          = dtin%dmftqmc_n
@@ -3699,7 +3701,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmftbandf dmftbandi dmftcheck dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
  list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_localprop dmftctqmc_meas dmftctqmc_mov'
- list_vars=trim(list_vars)//' dmftctqmc_mrka dmftctqmc_order'
+ list_vars=trim(list_vars)//' dmftctqmc_mrka dmftctqmc_chains dmftctqmc_order'
  list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm'
  list_vars=trim(list_vars)//' dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qdamp dvdb_rspace_cell'

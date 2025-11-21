@@ -672,6 +672,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%dmftctqmc_meas
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmftctqmc_meas','INT',0)
 
+ dprarr(1,:)=dtsets(:)%dmftctqmc_chains
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmftctqmc_chains','INT',0,firstchar="-")
+
  intarr(1,:)=dtsets(:)%dmft_dc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_dc','INT',0)
 

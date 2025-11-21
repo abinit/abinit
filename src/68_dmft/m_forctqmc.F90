@@ -1432,7 +1432,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        nomega = paw_dmft%dmftqmc_l
        call CtqmcInterface_init(hybrid,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
          & paw_dmft%dmftqmc_therm,paw_dmft%dmftctqmc_meas,nflavor,paw_dmft%dmftqmc_l,&
-         & one/paw_dmft%temp,zero,std_out,paw_dmft%spacecomm,paw_dmft%nspinor)
+         & one/paw_dmft%temp,zero,std_out,paw_dmft%dmftctqmc_chains,paw_dmft%spacecomm,paw_dmft%nspinor)
        !    options
        ! =================================================================
        call CtqmcInterface_setOpts(hybrid, &
