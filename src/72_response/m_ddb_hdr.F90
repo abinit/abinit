@@ -156,9 +156,6 @@ MODULE m_ddb_hdr
    integer :: usepaw
 
    integer :: nblok         ! Number of blocks in the ddb
-
-   integer :: fullinit      ! Whether the full info on the pseudo is present
-                            ! TODO rename this variable
    logical :: has_d0E_xx=.false.
    logical :: has_d1E_xx=.false.
    logical :: has_d2E_xx=.false.
