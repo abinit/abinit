@@ -67,6 +67,8 @@ dmftctqmc_meas    1   # modulo de mesure E
 dmftctqmc_mrka    0   # markov analysis
 dmftctqmc_mov     0   # movie
 dmftctqmc_order   050   # perturbation
+dmftctqmc_chains  1   # force 1 chain per MPI task for testing purposes
+                      # auto-setting match OpenMP threads and alter convergence
 
 dmft_rslf 1
 dmft_read_occnd 1

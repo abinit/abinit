@@ -29,6 +29,7 @@ USE defs_basis
 USE m_profiling_abi
 USE m_errors
 USE m_xmpi
+USE m_xomp
 #endif
 
 USE_MPI
