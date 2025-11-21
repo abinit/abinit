@@ -22,25 +22,9 @@
 - root for input  files -> teph4zpr_gwpt_8i
 - root for output files -> teph4zpr_gwpt_8o
 
- DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+ Symmetries : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
- Values of the parameters that define the memory need for DATASET  1.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       5
-     lnmax =       5     mgfft =      32  mpssoang =       3    mqgrid =    3001
-     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
-    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
-    occopt =       1   xclevel =       2
--    mband =          20        mffmem =           1         mkmem =           8
-       mpw =        1304          nfft =       32768          nkpt =           8
-================================================================================
-P This job should need less than                      14.907 Mbytes of memory.
-  Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      3.186 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
-================================================================================
-
- DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
-================================================================================
- Values of the parameters that define the memory need for DATASET  2.
+ Values of the parameters that define the memory need of the present run
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       5
      lnmax =       5     mgfft =      32  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
@@ -76,7 +60,6 @@ _ WF disk file :      3.186 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
         freqspmin     -7.34986508E-02 Hartree
            istwfk        2    0    3    0    0    0    7    0
               ixc          11
-           jdtset        1    2
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -90,7 +73,6 @@ _ WF disk file :      3.186 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 P           mkmem           8
             natom           2
             nband          20
-           ndtset           2
           nfreqsp         201
             ngfft          32      32      32
              nkpt           8
@@ -146,9 +128,7 @@ P           mkmem           8
 
 ================================================================================
 
- chkinp: Checking input parameters for consistency, jdtset=   1.
-
- chkinp: Checking input parameters for consistency, jdtset=   2.
+ chkinp: Checking input parameters for consistency.
 
 ================================================================================
 == DATASET  1 ==================================================================
@@ -472,296 +452,6 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    6.980
 
 ============================================================================================
 
-================================================================================
-== DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
-
---- !DatasetInfo
-iteration_state: {dtset: 2, }
-dimensions: {natom: 2, nkpt: 8, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1304, }
-cutoff_energies: {ecut:  35.0, pawecutdg:  -1.0, }
-electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
-meta: {optdriver: 7, eph_task: 24, }
-...
-
- mkfilename: getwfk from: teph4zpr_gwpt_4o_WFK
-
- mkfilename: getddb from: teph4zpr_gwpt_1_DDB
-
- mkfilename: getpot from: MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc
-
- mkfilename: getdvdb from: teph4zpr_gwpt_2_DVDB
-
- mkfilename: getgstore from: teph4zpr_gwpt_7o_GSTORE.nc
-
- Exchange-correlation functional for the present dataset will be:
-  GGA: Perdew-Burke-Ernzerhof functional - ixc=11
- Citation for XC functional:
-  J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
-
-- Reading GS states from WFK file: teph4zpr_gwpt_4o_WFK
-- Reading DDB from file: teph4zpr_gwpt_1_DDB
-- Reading DVDB from file: teph4zpr_gwpt_2_DVDB
-
-
-
-
-  ==== Info on the Cryst% object ====
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
- R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
- R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
- Unit cell volume ucvol=  1.2975866E+02 bohr^3
- Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Time-reversal symmetry is present
- Reduced atomic positions [iatom, xred, symbol]:
-    1)    0.0000000  0.0000000  0.0000000  Mg
-    2)    0.5000000  0.5000000  0.5000000   O
-
- DDB file with 8 blocks has been read.
-
-================================================================================
-
- Dielectric Tensor and Effective Charges
-
-
- anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
-
- The violation of the charge neutrality conditions
- by the effective charges is as follows :
-    atom        electric field
- displacement     direction
-       1               1       -0.085945        0.000000
-       1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
-       2               1        0.000000        0.000000
-       2               2       -0.085945        0.000000
-       2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
-       3               3       -0.085945        0.000000
-
- Effective charge tensors after
- imposition of the charge neutrality (if requested by user),
- and eventual restriction to some part :
-   atom    displacement
-         1         1    2.040887E+00   -1.659033E-16   -1.658285E-16
-         1         2   -1.659033E-16    2.040887E+00    1.659781E-16
-         1         3    1.659033E-16    1.659033E-16    2.040887E+00
-         2         1   -2.040887E+00    1.659033E-16    1.658285E-16
-         2         2    1.659033E-16   -2.040887E+00   -1.659781E-16
-         2         3   -1.659033E-16   -1.659033E-16   -2.040887E+00
- Now, the imaginary part of the dynamical matrix is zeroed
-- Found dielectric tensor and Born effective charges in DDB file: teph4zpr_gwpt_1_DDB
-- Cannot find quadrupole tensor in DDB file: teph4zpr_gwpt_1_DDB
- Values initialized with zeros.
-       Homogeneous q point set in the B.Z.
- Grid q points  :       64
-  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
-  2)   2.50000000E-01  0.00000000E+00  0.00000000E+00
-  3)   5.00000000E-01  0.00000000E+00  0.00000000E+00
-  4)  -2.50000000E-01  0.00000000E+00  0.00000000E+00
-  5)   0.00000000E+00  2.50000000E-01  0.00000000E+00
-  6)   2.50000000E-01  2.50000000E-01  0.00000000E+00
-  7)   5.00000000E-01  2.50000000E-01  0.00000000E+00
-  8)  -2.50000000E-01  2.50000000E-01  0.00000000E+00
-  9)   0.00000000E+00  5.00000000E-01  0.00000000E+00
- 10)   2.50000000E-01  5.00000000E-01  0.00000000E+00
- 11)   5.00000000E-01  5.00000000E-01  0.00000000E+00
- 12)  -2.50000000E-01  5.00000000E-01  0.00000000E+00
- 13)   0.00000000E+00 -2.50000000E-01  0.00000000E+00
- 14)   2.50000000E-01 -2.50000000E-01  0.00000000E+00
- 15)   5.00000000E-01 -2.50000000E-01  0.00000000E+00
- 16)  -2.50000000E-01 -2.50000000E-01  0.00000000E+00
- 17)   0.00000000E+00  0.00000000E+00  2.50000000E-01
- 18)   2.50000000E-01  0.00000000E+00  2.50000000E-01
- 19)   5.00000000E-01  0.00000000E+00  2.50000000E-01
- 20)  -2.50000000E-01  0.00000000E+00  2.50000000E-01
- 21)   0.00000000E+00  2.50000000E-01  2.50000000E-01
- 22)   2.50000000E-01  2.50000000E-01  2.50000000E-01
- 23)   5.00000000E-01  2.50000000E-01  2.50000000E-01
- 24)  -2.50000000E-01  2.50000000E-01  2.50000000E-01
- 25)   0.00000000E+00  5.00000000E-01  2.50000000E-01
- 26)   2.50000000E-01  5.00000000E-01  2.50000000E-01
- 27)   5.00000000E-01  5.00000000E-01  2.50000000E-01
- 28)  -2.50000000E-01  5.00000000E-01  2.50000000E-01
- 29)   0.00000000E+00 -2.50000000E-01  2.50000000E-01
- 30)   2.50000000E-01 -2.50000000E-01  2.50000000E-01
- 31)   5.00000000E-01 -2.50000000E-01  2.50000000E-01
- 32)  -2.50000000E-01 -2.50000000E-01  2.50000000E-01
- 33)   0.00000000E+00  0.00000000E+00  5.00000000E-01
- 34)   2.50000000E-01  0.00000000E+00  5.00000000E-01
- 35)   5.00000000E-01  0.00000000E+00  5.00000000E-01
- 36)  -2.50000000E-01  0.00000000E+00  5.00000000E-01
- 37)   0.00000000E+00  2.50000000E-01  5.00000000E-01
- 38)   2.50000000E-01  2.50000000E-01  5.00000000E-01
- 39)   5.00000000E-01  2.50000000E-01  5.00000000E-01
- 40)  -2.50000000E-01  2.50000000E-01  5.00000000E-01
- 41)   0.00000000E+00  5.00000000E-01  5.00000000E-01
- 42)   2.50000000E-01  5.00000000E-01  5.00000000E-01
- 43)   5.00000000E-01  5.00000000E-01  5.00000000E-01
- 44)  -2.50000000E-01  5.00000000E-01  5.00000000E-01
- 45)   0.00000000E+00 -2.50000000E-01  5.00000000E-01
- 46)   2.50000000E-01 -2.50000000E-01  5.00000000E-01
- 47)   5.00000000E-01 -2.50000000E-01  5.00000000E-01
- 48)  -2.50000000E-01 -2.50000000E-01  5.00000000E-01
- 49)   0.00000000E+00  0.00000000E+00 -2.50000000E-01
- 50)   2.50000000E-01  0.00000000E+00 -2.50000000E-01
- 51)   5.00000000E-01  0.00000000E+00 -2.50000000E-01
- 52)  -2.50000000E-01  0.00000000E+00 -2.50000000E-01
- 53)   0.00000000E+00  2.50000000E-01 -2.50000000E-01
- 54)   2.50000000E-01  2.50000000E-01 -2.50000000E-01
- 55)   5.00000000E-01  2.50000000E-01 -2.50000000E-01
- 56)  -2.50000000E-01  2.50000000E-01 -2.50000000E-01
- 57)   0.00000000E+00  5.00000000E-01 -2.50000000E-01
- 58)   2.50000000E-01  5.00000000E-01 -2.50000000E-01
- 59)   5.00000000E-01  5.00000000E-01 -2.50000000E-01
- 60)  -2.50000000E-01  5.00000000E-01 -2.50000000E-01
- 61)   0.00000000E+00 -2.50000000E-01 -2.50000000E-01
- 62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
- 63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
- 64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
-
- The interatomic forces have been obtained
---------------------------------------------------------------------------------
-
-
-- Reading e-ph matrix elements from: teph4zpr_gwpt_7o_GSTORE.nc
- Asking for with_cplex: 1
- Asking for with_gmode: phonon
- Asking for gvals_name: gvals
- Asking for g2dw: yes
- Initializing gstore object from: teph4zpr_gwpt_7o_GSTORE.nc
-
- Reading KS e-ph matrix elements
-P qpt_comm can use shmem: yes
-P kpt_comm can use shmem: yes
-P bsum_comm can use shmem: yes
-P pp_sum_comm can use shmem: yes
-
- === Gstore parameters ===
- kzone: ibz
- kfilter: qprange
- nkibz: 8
- nkbz: 64
- glob_nk_spin: [1]
- qzone: bz
- nqibz: 8
- nqbz: 64
- glob_nq_spin: [64]
- kptopt: 1
- qptopt: 1
- has_used_lgk: 1
- has_used_lgq: 0
- with_vk: 1
-
- gqk_cplex: 2
- gqk_bstart_k: 6
- gqk_bstart_kq: 1
- gqk_bstop_k: 9
- gqk_bstop_kq: 10
- gqk_nb_k: 4
- gqk_nb_kq: 10
- gqk_my_npert: 6
-P gqk_my_nk: -1
-P gqk_my_nq: -1
-
-  === MPI distribution ===
-P Number of CPUs for parallelism over perturbations: 1
-P Number of perturbations treated by this CPU: 6
-P Number of CPUs for parallelism over q-points: 1
-P Number of CPUs for parallelism over k-points: 1
- k-points included in gstore:
-1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Little group operations of the k-point will be used to symmetry reduce the integral in q-space.
-
- === Gaps, band edges and relative position wrt Fermi level ===
- Direct band gap semiconductor
- Fundamental gap:     4.479 (eV)
-   VBM:     4.490 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:     8.969 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         4.479 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
- Position of CBM/VBM with respect to the Fermi level:
- Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
-
-  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
-   0.0     0.000     7.270     2.781     1.698
- 100.0     0.009     7.173     2.684     1.795
- 200.0     0.017     7.077     2.587     1.892
- 300.0     0.026     6.980     2.490     1.989
-
-
- Will compute Sigma(omega) using 201 points and step: 1.000000E-02 (eV)
- Reading GS KS potential for Sternheimer from: MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc
-================================================================================
- Final results in eV.
- Notations:
-     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-     eQP - eKS: Difference between the QP and the KS energy.
-     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-     Z(eKS): Renormalization factor.
-     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
-     mu_e: Fermi level for given (T, nelect)
-
-
- Using g(k,q) of type: GWPT
-
-
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.270
-   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   6   4.490    4.888    0.398    2.084   -0.481    0.191   -2.165    4.248    0.000    0.000
-   7   4.490    4.888    0.398    2.084   -0.481    0.191   -2.165    4.248    0.000    0.000
-   8   4.490    4.888    0.398    2.084   -0.481    0.191   -2.165    4.248    0.000    0.000
-   9   8.969    8.349   -0.619   -0.656   -0.007    0.944    0.204   -0.860    4.479    3.461
-
- KS gap:    4.479 (assuming bval:8 ==> bcond:9)
- QP gap:    3.461 (OTMS:    1.739)
- QP_gap - KS_gap:   -1.018 (OTMS:   -2.740)
-
-============================================================================================
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  100.0 [K], mu_e:    7.173
-   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   6   4.490    4.888    0.398    2.109   -0.488    0.189   -2.233    4.342    0.000    0.000
-   7   4.490    4.888    0.398    2.109   -0.488    0.189   -2.233    4.342    0.000    0.000
-   8   4.490    4.888    0.398    2.109   -0.488    0.189   -2.233    4.342    0.000    0.000
-   9   8.969    8.339   -0.630   -0.668   -0.007    0.943    0.221   -0.889    4.479    3.451
-
- KS gap:    4.479 (assuming bval:8 ==> bcond:9)
- QP gap:    3.451 (OTMS:    1.702)
- QP_gap - KS_gap:   -1.028 (OTMS:   -2.777)
-
-============================================================================================
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  200.0 [K], mu_e:    7.077
-   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   6   4.490    4.891    0.401    2.353   -0.559    0.171   -2.664    5.017    0.000    0.000
-   7   4.490    4.891    0.401    2.353   -0.559    0.171   -2.664    5.017    0.000    0.000
-   8   4.490    4.891    0.401    2.353   -0.559    0.171   -2.664    5.017    0.000    0.000
-   9   8.969    8.257   -0.711   -0.763   -0.009    0.933    0.307   -1.069    4.479    3.366
-
- KS gap:    4.479 (assuming bval:8 ==> bcond:9)
- QP gap:    3.366 (OTMS:    1.364)
- QP_gap - KS_gap:   -1.113 (OTMS:   -3.115)
-
-============================================================================================
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    6.980
-   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   6   4.490    4.895    0.405    2.803   -0.689    0.145   -3.343    6.146    0.000    0.000
-   7   4.490    4.895    0.405    2.803   -0.689    0.145   -3.343    6.146    0.000    0.000
-   8   4.490    4.895    0.405    2.803   -0.689    0.145   -3.343    6.146    0.000    0.000
-   9   8.969    8.119   -0.849   -0.925   -0.011    0.918    0.421   -1.347    4.479    3.224
-
- KS gap:    4.479 (assuming bval:8 ==> bcond:9)
- QP gap:    3.224 (OTMS:    0.751)
- QP_gap - KS_gap:   -1.255 (OTMS:   -3.728)
-
-============================================================================================
-
 == END DATASET(S) ==============================================================
 ================================================================================
 
@@ -772,23 +462,18 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    6.980
              ecut      3.50000000E+01 Hartree
         eph_stern           1
          eph_task          24
-           etotal1     0.0000000000E+00
-           etotal2     0.0000000000E+00
-            fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-            fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           etotal      0.0000000000E+00
+            fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
               ixc          11
-           jdtset        1    2
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.27305763E+01
 P           mkmem           8
             natom           2
             nband          20
-           ndtset           2
           nfreqsp         201
             ngfft          32      32      32
              nkpt           8
@@ -805,9 +490,7 @@ P           mkmem           8
                        4.0182361526E+00  0.0000000000E+00  4.0182361526E+00
                        4.0182361526E+00  4.0182361526E+00  0.0000000000E+00
           spgroup         225
-           strten1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0

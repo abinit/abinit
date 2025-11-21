@@ -547,12 +547,14 @@ interface xmpi_max
   module procedure xmpi_max_int
   module procedure xmpi_max_dpv
   module procedure xmpi_max_dp0d_ip
+  module procedure xmpi_max_dp1d_ip
 end interface xmpi_max
 
 interface xmpi_max_ip
   module procedure xmpi_max_int0d_ip
-  module procedure xmpi_max_dp0d_ip
   module procedure xmpi_max_int1d_ip
+  module procedure xmpi_max_dp0d_ip
+  module procedure xmpi_max_dp1d_ip
 end interface xmpi_max_ip
 
 !----------------------------------------------------------------------
