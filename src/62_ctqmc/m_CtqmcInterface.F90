@@ -23,8 +23,7 @@
 #include "defs.h"
 MODULE m_CtqmcInterface
 USE m_Ctqmc
-USE m_xomp
-use defs_basis
+USE m_global
 
 IMPLICIT NONE
 
