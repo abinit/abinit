@@ -1895,23 +1895,23 @@ end subroutine cqratio
 !!  using a plasmon-pole model.
 !!
 !! INPUTS
-!!  nspinor=Number of spinorial components.
-!!  npwc=Number of G vectors in the plasmon pole.
+!!  nspinor=Number of spinor components.
+!!  npwc=Number of G vectors in the plasmon pole (correlation part)
 !!  nomega=Number of frequencies.
 !!  rhotwgp(npwx)=oscillator matrix elements divided by |q+G| i.e. $\frac{\langle b1 k-q s | e^{-i(q+G)r | b2 k s \rangle}{|q+G|}$.
 !!  botsq(npwc,dm2_botsq)=Plasmon pole parameters for this q-point.
 !!  otq(npwc,dm2_otq)=Plasmon pole parameters for this q-point.
-!!  omegame0i(nomega)=Frequencies used to evaluate \Sigma_c ($\omega$ - $\epsilon_i)$
+!!  omegame0i(nomega)=($\omega$ - $\epsilon_i)$
 !!  zcut=Small imaginary part to avoid the divergence. (see related input variable)
 !!  theta_mu_minus_e0i= $\theta(\mu-\epsilon_{k-q,b1,s}), defines if the state is occupied or not.
 !!  eig(dm_eig,dm_eig)=The eigvectors of the symmetrized inverse dielectric matrix for this q point
 !!    (first index for G, second index for bands).
-!!  npwx=number of G vectors in rhotwgp
+!!  npwx=number of G vectors in rhotwgp.
 !!
 !! OUTPUT
 !!  ket(npwc,nomega):
 !!
-!!  i/two_pi * convolution between G and W ...
+
 !!
 !!  === model==1,2 ====
 !!
@@ -1920,6 +1920,9 @@ end subroutine cqratio
 !!                             2 omegatw(G,G2) (omega-E_i + omegatw(G,G2)(2f-1))
 !!
 !!  sigcme(nomega) (to be described), only relevant if ppm3 or ppm4
+!!
+!! NOTES
+!!  The i/two_pi factor in the convolution between G and W is included in this routine.
 !!
 !! TODO:
 !!  Use BLAS for better efficiency

@@ -1,8 +1,4 @@
 # Computation of spectral function with/without Sternheimer method
- ndtset 2
-
-
-
 
 ngkpt 4 4 4
 nshiftk 1

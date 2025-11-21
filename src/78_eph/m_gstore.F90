@@ -2662,26 +2662,36 @@ end subroutine gstore_fill_bks_mask_pp_mesh
 
 subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
 
+ !use, intrinsic :: ieee_arithmetic
+ !use, intrinsic :: ieee_exceptions
+
 !Arguments ------------------------------------
  class(gstore_t),intent(in) :: gstore
  real(dp),intent(in) :: ecut
  integer,intent(out) :: mpw, gmax(3)
 
 !Local variables-------------------------------
- integer,parameter :: istwfk1 = 1
- integer :: my_is, my_ik, my_iq, spin, onpw, ierr, my_mpw, ipx, ipy, ipz, pp_max
+ integer,parameter :: istwfk1 = 1, pp_max = 0
+ integer :: my_is, my_ik, my_iq, spin, onpw, ierr, my_mpw, ipx, ipy, ipz, cnt, i1, i2, i3, nprocs, my_rank
  real(dp) :: weight_q, cpu, wall, gflops
 !arrays
  integer :: my_gmax(3)
  integer,allocatable :: gtmp(:,:)
- real(dp) :: kk(3), qpt(3), pp(3)
+ real(dp) :: kk(3), kq(3), qpt(3), pp(3), kq_cart(3), kq_max(3)
 !----------------------------------------------------------------------
 
- mpw = 0; gmax = 0
+ ! Enable trapping of underflow
+ !call ieee_set_halting_mode(IEEE_UNDERFLOW, .true.)
 
  ! TODO: This is an hotspot due to the double loop over k and q. Should use a geometrical approach to compute mpw and gmax.
  call wrtout(std_out, " Computing mpw. This may take some time for dense k/q meshes...", pre_newlines=1)
  call cwtime(cpu, wall, gflops, "start")
+
+ nprocs = xmpi_comm_size(gstore%comm); my_rank = xmpi_comm_rank(gstore%comm)
+ mpw = 0; gmax = 0
+ !mpw = 1304; gmax= [8, 8, 8]; return
+
+ kq_max = zero
 
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is))
@@ -2690,19 +2700,23 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
      kk = gqk%my_kpts(:, my_ik)
 
      ! Compute g-sphere, returns onpw. Note istwfk == 1.
-     call get_kg(kk, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
-     ABI_FREE(gtmp)
+     !call get_kg(kk, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
+     !ABI_FREE(gtmp)
 
-     pp_max = 0
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_q, qpt)
+
+       kq = kk + qpt
+       kq_cart = matmul(gstore%cryst%gprimd, kq)
+       kq_max = max(kq_max, abs(kq_cart))
+
        ! TODO: g0 umklapp here can enter into play! gmax could not be large enough!
        do ipz=-pp_max,pp_max
           do ipy=-pp_max,pp_max
             do ipx=-pp_max,pp_max
              pp = [ipx, ipy, ipz] * half
-             call get_kg(kk + qpt - pp, 1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
-             ABI_FREE(gtmp)
+             !call get_kg(kq - pp, 1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
+             !ABI_FREE(gtmp)
            end do
          end do
        end do
@@ -2712,11 +2726,33 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
    end associate
  end do ! my_is
 
+ !my_mpw = mpw; call xmpi_max(my_mpw, mpw, gstore%comm, ierr)
+ !my_gmax = gmax; call xmpi_max(my_gmax, gmax, gstore%comm, ierr)
+ !call wrtout(std_out, sjoin(' Optimal value of mpw: ', itoa(mpw)))
+
+ call xmpi_max(kq_max, gstore%comm, ierr)
+ kq_max = matmul(gstore%cryst%rprimd, kq_max)
+
+ mpw = 0; gmax = 0; cnt = 0
+ do i1=-1,1
+   kk(1) = dble(i1) * kq_max(1)
+   do i2=-1,1
+     kk(2) = dble(i2) * kq_max(2)
+     do i3=-1,1
+       cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
+       kk(3) = dble(i3) * kq_max(3)
+       call get_kg(kk, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
+       ABI_FREE(gtmp)
+     end do
+   end do
+ end do
+
  my_mpw = mpw; call xmpi_max(my_mpw, mpw, gstore%comm, ierr)
  my_gmax = gmax; call xmpi_max(my_gmax, gmax, gstore%comm, ierr)
+ call wrtout(std_out, sjoin(' New Optimal value of mpw: ', itoa(mpw), "with gmax:", ltoa(gmax)))
 
- call wrtout(std_out, sjoin(' Optimal value of mpw: ', itoa(mpw)))
  call cwtime_report(" gstore_get_mpw_gmax", cpu, wall, gflops)
+ !stop
 
 end subroutine gstore_get_mpw_gmax
 !!***
