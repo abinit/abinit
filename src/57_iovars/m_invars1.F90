@@ -2400,6 +2400,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_meas=1
    dtsets(idtset)%dmftctqmc_mov=0
    dtsets(idtset)%dmftctqmc_mrka=0
+   dtsets(idtset)%dmftctqmc_chains=xomp_get_max_threads()
    dtsets(idtset)%dmftctqmc_order=0
    dtsets(idtset)%dmftqmc_l=0
    dtsets(idtset)%dmftqmc_n=0.0_dp

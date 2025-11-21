@@ -106,7 +106,8 @@ CONTAINS
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,flavors,samples,beta,U,ostream,MPI_COMM,nspinor)
+SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,flavors,samples,beta,U,ostream,num_chains,&
+&    MPI_COMM,nspinor)
 
 !Arguments ------------------------------------
   TYPE(CtqmcInterface), INTENT(INOUT), TARGET :: this
@@ -119,6 +120,7 @@ SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,fla
   INTEGER, INTENT(IN) :: samples
   !INTEGER, INTENT(IN) :: Wmax
   INTEGER, INTENT(IN) :: ostream
+  INTEGER, INTENT(IN) :: num_chains
   INTEGER, INTENT(IN) :: nspinor
   DOUBLE PRECISION, INTENT(IN) :: beta
   DOUBLE PRECISION, INTENT(IN) :: u
@@ -143,10 +145,7 @@ SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,fla
  ! buffer(10)=DBLE(opt_nondiag)
   !buffer(9)=0.d0!mu
   !buffer(9)=DBLE(Wmax)
-  this%num_chains = 1
-#ifdef HAVE_OPENMP
-  this%num_chains = xomp_get_max_threads()
-#endif
+  this%num_chains = num_chains
   MALLOC(this%Hybrid_chains, (this%num_chains))
   this%Hybrid => this%Hybrid_chains(1)
   IF ( PRESENT( MPI_COMM ) ) THEN
