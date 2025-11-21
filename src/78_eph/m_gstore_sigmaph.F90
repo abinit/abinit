@@ -443,6 +443,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
    ABI_MALLOC(wfd_istwfk, (nkpt))
    wfd_istwfk = 1
 
+   ! TODO: Possible problem if nband < gstore%nband
    call wfd%init(cryst, pawtab, psps, keep_ur, dtset%mband, nband, nkpt, nsppol, bks_mask,&
                  dtset%nspden, nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft,&
                  dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
