@@ -1,5 +1,5 @@
 
-.Version 10.5.1.4 of ABINIT, released May 2025.
+.Version 10.5.8.3 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  4 Jul 2025.
-- ( at 13h05 )
+.Starting date : Wed 19 Nov 2025.
+- ( at 13h04 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/TestBot_MPI1/tutorespfn_tlw_4-tlw_5-tlw_6-tlw_7/tlw_4.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/tutorespfn_tlw_4-tlw_5-tlw_6-tlw_7/tlw_4.abi
 - output file    -> tlw_4.abo
 - root for input  files -> tlw_4i
 - root for output files -> tlw_4o
@@ -49,6 +49,7 @@ _ WF disk file :      0.090 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =         144
       nfft =        4096          nkpt =         128
+- my_mband =           4
 ================================================================================
 P This job should need less than                       7.917 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -66,6 +67,7 @@ _ WF disk file :      1.127 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =         144
       nfft =        4096          nkpt =         128
+- my_mband =           4
 ================================================================================
 P This job should need less than                       7.917 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -83,6 +85,7 @@ _ WF disk file :      1.127 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =         144
       nfft =        4096          nkpt =         128
+- my_mband =           4
 ================================================================================
 P This job should need less than                       8.313 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -100,6 +103,7 @@ _ WF disk file :      1.127 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =         144
       nfft =        4096          nkpt =         128
+- my_mband =           4
 ================================================================================
 P This job should need less than                       8.311 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -117,6 +121,7 @@ _ WF disk file :      1.127 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =         144
       nfft =        4096          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                      14.653 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -134,6 +139,7 @@ _ WF disk file :      2.252 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =         144
       nfft =        4096          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                      14.653 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -151,6 +157,7 @@ _ WF disk file :      2.252 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =         144
       nfft =        4096          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                      14.653 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -168,6 +175,7 @@ _ WF disk file :      2.252 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =         144
       nfft =        4096          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                      14.653 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -185,6 +193,7 @@ _ WF disk file :      2.252 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =         144
       nfft =        4096          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                      14.653 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -202,6 +211,7 @@ _ WF disk file :      2.252 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =         144
       nfft =        4096          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                      14.653 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -219,6 +229,7 @@ _ WF disk file :      2.252 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =         144
       nfft =        4096          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                      14.653 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -1292,8 +1303,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/Pspdir/31-Ga.LDA.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/Pspdir/31-Ga.LDA.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/31-Ga.LDA.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/31-Ga.LDA.fhi
 - gallium, fhi98PP : Trouiller-Martins-type, LDA Ceperley/Alder Perdew/Wang (1992), l= 0 local
 - 31.00000   3.00000     11001                znucl, zion, pspdat
     6    7    3    0       529   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1306,8 +1317,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              3   -1.913945
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/Pspdir/15-P.LDA.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/Pspdir/15-P.LDA.fhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/15-P.LDA.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/15-P.LDA.fhi
 - phosphorus, fhi98PP : Trouiller-Martins-type, LDA Ceperley/Alder Perdew/Wang (1992), l= 2 local
 - 15.00000   5.00000     21003                znucl, zion, pspdat
     6    7    3    2       499   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1757,7 +1768,7 @@ meta: {optdriver: 1, }
     1)    idir= 1    ipert=  12
     2)    idir= 2    ipert=  12
     3)    idir= 3    ipert=  12
- 
+
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -2764,7 +2775,7 @@ meta: {optdriver: 10, }
 
 
  The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: 
- (in reduced coordinates except for strain pert.) 
+ (in reduced coordinates except for strain and hspinfield perturbations) 
 
             i1dir   i1pert  i2dir   i2pert  i3dir  i3pert
      1)       1       4       1       1       1      10
@@ -6778,10 +6789,10 @@ P          mk1mem12       256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        134.0  wall=        134.0
+- Proc.   0 individual time (sec): cpu=        136.8  wall=        136.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  39 WARNINGs and  82 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        134.0  wall=        134.0
++Overall time at end (sec) : cpu=        136.8  wall=        136.8
