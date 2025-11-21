@@ -4879,10 +4879,10 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
  integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, ncerr, natom3
  integer :: glob_nq, glob_nk, im_kq, in_k, m_kq, n_k, nb_k, nb_kq, ii ! ib_k,
  integer :: bstart_k, bstop_k, bstart_kq, bstop_kq, max_nk, max_nq
- integer :: ik_bz, ik_ibz, ib_min_k, ib_max_k, iq_bz, ikq_ibz, ib_min_kq, ib_max_kq
+ integer :: ik_bz, ik_ibz, ib_min_k, ib_max_k, iq_bz, ikq_ibz, ib_min_kq, ib_max_kq, nn
  logical :: with_ks__, changed_k, changed_kq, all_gs
  real(dp),parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
- real(dp) :: gg, gg_ks, g_ratio !, vnk
+ real(dp) :: gg, gg_ks, g_ratio, min_g_ratio, max_g_ratio, mean_g_ratio, stdev_g_ratio !, vnk
  character(len=abi_slen) :: gstore_gmode
  character(len=500) :: msg
 !arrays
@@ -5075,20 +5075,39 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
           NCF_CHECK(ncerr)
           call average_g2_mn(do_avg, nb_kq, nb_k, bstart_kq, bstart_k, degblock_kq, degblock_k, gslice_ks_mn, g2ks_mn)
 
-          write(ab_out, "(1x,5(a5,1x),3a16)")"iq", "ik", "pcase", "m_kq", "n_k", "|g^SE|", "|g^KS|"
-          !write(ab_out, "(1x,5(a5,1x),3a16)")"iq", "ik", "pcase", "m_kq", "n_k", "|g^SE|", "|g^KS|", "SE/KS"
+          !write(ab_out, "(1x,5(a5,1x),3a16)")"iq", "ik", "pcase", "m_kq", "n_k", "|g^SE|", "|g^KS|"
+          write(ab_out, "(1x,5(a5,1x),3a16)")"iq", "ik", "pcase", "m_kq", "n_k", "|g^SE|", "|g^KS|", "SE/KS"
+          min_g_ratio = +huge(one); max_g_ratio = -huge(one); mean_g_ratio = zero; stdev_g_ratio = zero
+          nn = 0
+
           do im_kq=1,nb_kq
             m_kq = im_kq + bstart_kq - 1
             do in_k=1,nb_k
               n_k = in_k + bstart_k - 1
               gg = sqrt(g2_mn(im_kq, in_k))
               gg_ks = sqrt(g2ks_mn(im_kq, in_k))
-              !write(ab_out, "(a1,5(i5,1x),2(es16.6))")"-", iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks
               call safe_div(gg, gg_ks, -one, g_ratio)
+              if (g_ratio /= -one) then
+                nn = nn + 1
+                min_g_ratio = min(g_ratio, min_g_ratio)
+                max_g_ratio = max(g_ratio, max_g_ratio)
+                mean_g_ratio = mean_g_ratio + g_ratio
+                stdev_g_ratio = g_ratio ** 2
+              end if
               write(ab_out, "(a1,5(i5,1x),3(es16.6))")"-", iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks, g_ratio
+              !write(ab_out, "(a1,5(i5,1x),2(es16.6))")"-", iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks
             end do
           end do
+
+          ! \sigma^{2} = \langle x^{2} \rangle - \langle x \rangle^{2}
+          mean_g_ratio = mean_g_ratio / nn
+          stdev_g_ratio = sqrt((stdev_g_ratio / nn) - mean_g_ratio ** 2)
+          write(ab_out, "(a1, (es16.6))")"- mean_g_ratio:", mean_g_ratio
+          write(ab_out, "(a1, (es16.6))")"- stdev_g_ratio:", stdev_g_ratio
+          write(ab_out, "(a1, (es16.6))")"- min_g_ratio:", min_g_ratio
+          write(ab_out, "(a1, (es16.6))")"- max_g_ratio:", max_g_ratio
         end if
+
        end do ! ipc
 
        ABI_FREE(degblock_kq)
