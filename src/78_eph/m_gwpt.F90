@@ -1098,6 +1098,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Get npw_k, kg_k for kk
        call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kk, ik_ibz, isirr_k, dtset%nloalg, & ! in
                                 istwf_k, npw_k, kg_k, nkpg_k, kpg_k, gbound_k)               ! out
+       ABI_CHECK_ILEQ(npw_k, mpw, "npw_k > mpw!")
 
        ! Find k + q in the extended zone and extract symmetry info.
        ! Be careful here because there are two umklapp vectors to be considered as:
@@ -1118,6 +1119,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Get npw_kq, kg_kq for k+q.
        call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, &  ! in
                                 istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)      ! out
+       ABI_CHECK_ILEQ(npw_kq, mpw, "npw_kq > mpw!")
 
        ABI_MALLOC(ug_k, (2, npw_k*nspinor))
        ABI_MALLOC(ug_kq, (2, npw_kq*nspinor))
@@ -1205,6 +1207,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Get npw_kmp, kg_kmp for k-p.
          call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kmp, ikmp_ibz, isirr_kmp, dtset%nloalg, &  ! in
                                   istwf_kmp, npw_kmp, kg_kmp, nkpg_kmp, kpg_kmp, gbound_kmp)         ! out
+         ABI_CHECK_ILEQ(npw_kmp, mpw, "npw_kmp > mpw!")
 
          ABI_MALLOC(ph3d_kmp, (2, npw_kmp, matblk))
          ABI_MALLOC(kinpw_kmp, (npw_kmp))
@@ -1229,6 +1232,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Get npw_kqmp, kg_kqmp for k+q-p.
          call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kqmp, ikqmp_ibz, isirr_kqmp, dtset%nloalg, &  ! in
                                   istwf_kqmp, npw_kqmp, kg_kqmp, nkpg_kqmp, kpg_kqmp, gbound_kqmp)      ! out
+         ABI_CHECK_ILEQ(npw_kqmp, mpw, "npw_kqmp > mpw!")
 
          ABI_MALLOC(full_cg1_kqmp, (2, npw_kqmp*nspinor))
          ABI_MALLOC(full_cg1_kmp, (2, npw_kmp*nspinor))
