@@ -722,6 +722,21 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                            vpsp1_i2pertdq(:,1,2)=vhart1dqdq(:)+vpsp1dqdq(:)+vxc1dqdq(:)
                          end if
                        end if
+
+                       if (i1pert==natom+2.and.i2pert<=natom.and.psps%n1xccc/=0) then
+                         !Get the q-gradient of the pseudocore density
+                         call dfpt_vlocaldq(atindx,2,gmet,gsqcut,i2dir,i2pert,mpi_enreg, &
+                         & psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,dtset%ngfft,dtset%ntypat,n1,n2,n3, &
+                           & ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i2pertdq(:,1,1))
+                           !& ph1d,i3dir,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_i2pertdq(:,1,1),xccc3d2dq,optnc=1)
+
+                         !Get the q-gradient of the first-order XC potential due to the pseudocore charge
+                         call dfpt_mkvxcccdq(cplex,i3dir,dtset%ixc,gprimd,kxc,mpi_enreg,nfftf,dtset%ngfft,&
+                       & nkxc,nspden,dtset%qptn,rprimd,vxccc1_i2pertdq,xccc3d2,xccc3d2dq)
+
+                         !Add this contribution to the gradient of the local PSP
+                         vpsp1_i2pertdq= vpsp1_i2pertdq + vxccc1_i2pertdq
+                       end if
                      end if !samepert
   
                      !Prepare ddk wf file
@@ -744,7 +759,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                      call wrtout(std_out,message,'COLL')
                      !call wrtout(ab_out,message,'COLL')
   !                  Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
-                     !call wfk_open_read(ddk_f,fiwfddk,1,dtset%iomode,dtfil%unddk,mpi_enreg%comm_cell)
                      call ddk_f%open_read(fiwfddk,1,dtset%iomode,dtfil%unddk,mpi_enreg%comm_cell)
   
                      !Prepare d2_dkdk wf file
@@ -770,7 +784,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                        write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
                        call wrtout(std_out,message,'COLL')
                        !call wrtout(ab_out,message,'COLL') 
-                       !call wfk_open_read(d2_dkdk_f,fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
                        call d2_dkdk_f%open_read(fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
                      
                      end if
@@ -797,9 +810,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                        end if
                        write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
                        call wrtout(std_out,message,'COLL')
-                       !call wrtout(ab_out,message,'COLL') 
-                       !call wfk_open_read(d2_dkdk_f2,fiwfdkdk,1,dtset%iomode,dtfil%unddk+2,mpi_enreg%comm_cell)
-                       call d2_dkdk_f2%open_read(fiwfdkdk,1,dtset%iomode,dtfil%unddk+1,mpi_enreg%comm_cell)
+
+
+                       call d2_dkdk_f2%open_read(fiwfdkdk,1,dtset%iomode,dtfil%unddk+2,mpi_enreg%comm_cell)
                      end if
   
                      !Perform the longwave DFPT part of the 3dte calculation
