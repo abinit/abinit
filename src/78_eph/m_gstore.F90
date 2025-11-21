@@ -2639,6 +2639,9 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
  my_mpw = mpw; call xmpi_max(my_mpw, mpw, gstore%comm, ierr)
  my_gmax = gmax; call xmpi_max(my_gmax, gmax, gstore%comm, ierr)
 
+ ! TODO
+ !call gstore%get_mpw_gmax(ecut, mpw, gmax, pp_max=)
+
  call wrtout(std_out, sjoin(' Optimal value of mpw: ', itoa(mpw)))
  call cwtime_report(" gstore_fill_bks_mask_pp_mesh", cpu, wall, gflops)
 
@@ -2660,7 +2663,7 @@ end subroutine gstore_fill_bks_mask_pp_mesh
 !!
 !! SOURCE
 
-subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
+subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax, pp_max)
 
  !use, intrinsic :: ieee_arithmetic
  !use, intrinsic :: ieee_exceptions
@@ -2669,10 +2672,11 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
  class(gstore_t),intent(in) :: gstore
  real(dp),intent(in) :: ecut
  integer,intent(out) :: mpw, gmax(3)
+ integer,optional,intent(in) :: pp_max
 
 !Local variables-------------------------------
- integer,parameter :: istwfk1 = 1, pp_max = 0
- integer :: my_is, my_ik, my_iq, spin, onpw, ierr, my_mpw, ipx, ipy, ipz, cnt, i1, i2, i3, nprocs, my_rank
+ integer,parameter :: istwfk1 = 1
+ integer :: my_is, my_ik, my_iq, spin, onpw, ierr, my_mpw, ipx, ipy, ipz, cnt, i1, i2, i3, nprocs, my_rank, pp_max__
  real(dp) :: weight_q, cpu, wall, gflops
 !arrays
  integer :: my_gmax(3)
@@ -2691,6 +2695,8 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
  mpw = 0; gmax = 0
  !mpw = 1304; gmax= [8, 8, 8]; return
 
+ pp_max__ = 0; if (present(pp_max)) pp_max__ = pp_max
+
  kq_max = zero
 
  do my_is=1,gstore%my_nspins
@@ -2700,23 +2706,27 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
      kk = gqk%my_kpts(:, my_ik)
 
      ! Compute g-sphere, returns onpw. Note istwfk == 1.
-     !call get_kg(kk, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
-     !ABI_FREE(gtmp)
+     call get_kg(kk, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
+     ABI_FREE(gtmp)
 
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_q, qpt)
 
-       kq = kk + qpt
-       kq_cart = matmul(gstore%cryst%gprimd, kq)
+       kq_cart = matmul(gstore%cryst%gprimd, kk + qpt)
+       kq_max = max(kq_max, abs(kq_cart))
+
+       kq_cart = matmul(gstore%cryst%gprimd, kk - qpt)
        kq_max = max(kq_max, abs(kq_cart))
 
        ! TODO: g0 umklapp here can enter into play! gmax could not be large enough!
-       do ipz=-pp_max,pp_max
-          do ipy=-pp_max,pp_max
-            do ipx=-pp_max,pp_max
-             pp = [ipx, ipy, ipz] * half
+       do ipz=-pp_max__,pp_max__
+          do ipy=-pp_max__,pp_max__
+            do ipx=-pp_max__,pp_max__
+             pp = [ipx, ipy, ipz]
              !call get_kg(kq - pp, 1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
              !ABI_FREE(gtmp)
+             kq_cart = matmul(gstore%cryst%gprimd, kk + qpt - pp)
+             kq_max = max(kq_max, abs(kq_cart))
            end do
          end do
        end do
@@ -2726,14 +2736,15 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
    end associate
  end do ! my_is
 
- !my_mpw = mpw; call xmpi_max(my_mpw, mpw, gstore%comm, ierr)
- !my_gmax = gmax; call xmpi_max(my_gmax, gmax, gstore%comm, ierr)
- !call wrtout(std_out, sjoin(' Optimal value of mpw: ', itoa(mpw)))
+ my_mpw = mpw; call xmpi_max(my_mpw, mpw, gstore%comm, ierr)
+ my_gmax = gmax; call xmpi_max(my_gmax, gmax, gstore%comm, ierr)
+ call wrtout(std_out, sjoin(' Optimal value of mpw: ', itoa(mpw), "with gmax:", ltoa(gmax)))
 
  call xmpi_max(kq_max, gstore%comm, ierr)
  kq_max = matmul(gstore%cryst%rprimd, kq_max)
 
- mpw = 0; gmax = 0; cnt = 0
+ !mpw = 0; gmax = 0
+ cnt = 0
  do i1=-1,1
    kk(1) = dble(i1) * kq_max(1)
    do i2=-1,1
@@ -2749,7 +2760,7 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
 
  my_mpw = mpw; call xmpi_max(my_mpw, mpw, gstore%comm, ierr)
  my_gmax = gmax; call xmpi_max(my_gmax, gmax, gstore%comm, ierr)
- call wrtout(std_out, sjoin(' New Optimal value of mpw: ', itoa(mpw), "with gmax:", ltoa(gmax)))
+ call wrtout(std_out, sjoin(' Optimal value of mpw: ', itoa(mpw), "with gmax:", ltoa(gmax)))
 
  call cwtime_report(" gstore_get_mpw_gmax", cpu, wall, gflops)
  !stop

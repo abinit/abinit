@@ -4337,7 +4337,7 @@ subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, in
    !ABI_MALLOC(kg_kbz, (3, npw_kbz))
    !ABI_MALLOC(cgs_kbz, (2, npw_kbz*self%nspinor, nband))
 
-   ABI_CHECK(mpw >= npw_kbz, "mpw < npw_kbz")
+   ABI_CHECK_ILEQ(npw_kbz, mpw, "npw_kbz > mpw!")
    kg_kbz(:,1:npw_kbz) = self%kdata(ik_ibz)%kg_k
    do ib=1,nband
      band = ib + bstart - 1
@@ -4347,7 +4347,7 @@ subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, in
    ! Reconstruct u_k(G) from the IBZ image.
    istwf_kbz = 1
    call get_kg(kk_bz, istwf_kbz, ecut, cryst%gmet, npw_kbz, gtmp)
-   ABI_CHECK(mpw >= npw_kbz, "mpw < npw_kbz")
+   ABI_CHECK_ILEQ(npw_kbz, mpw, "npw_kbz > mpw!")
    kg_kbz(:,1:npw_kbz) = gtmp(:,:npw_kbz)
    ABI_FREE(gtmp)
    !ABI_MALLOC(kg_kbz, (3, npw_kbz))
