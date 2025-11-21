@@ -376,7 +376,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
  extfpmd_pawsph=.false.
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
-     extfpmd%eshift=zero
+     extfpmd%eshift_paw=zero
      if(extfpmd%pawsph) then
        extfpmd_pawsph=.true.
        extfpmd_rho=extfpmd%nelect/ucvol
@@ -588,7 +588,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
        do ispden=1,nspden
          ff(1:mesh_size)=paw_an(iatom)%vxc1(1:mesh_size,1,ispden)*sqrt(four_pi)*pawrad(itypat)%rad(1:mesh_size)**2
          call simp_gen(eshift,ff,pawrad(itypat))
-         extfpmd%eshift=extfpmd%eshift+eshift/ucvol/nspden
+         extfpmd%eshift_paw=extfpmd%eshift_paw+eshift/ucvol/nspden
        enddo
        ABI_FREE(ff)
      endif
@@ -665,7 +665,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
        do ispden=1,nspden
          ff(1:mesh_size)=paw_an(iatom)%vxct1(1:mesh_size,1,ispden)*sqrt(four_pi)*pawrad(itypat)%rad(1:mesh_size)**2
          call simp_gen(eshift,ff,pawrad(itypat))
-         extfpmd%eshift=extfpmd%eshift-eshift/ucvol/nspden
+         extfpmd%eshift_paw=extfpmd%eshift_paw-eshift/ucvol/nspden
        enddo
        ABI_FREE(ff)
      endif
@@ -837,7 +837,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
 &                      four_pi*pawrad(itypat)%rad(1:mesh_size)**2
        call simp_gen(eshift,ff,pawrad(itypat))
        ehpw=eshift*extfpmd_rho
-       extfpmd%eshift=extfpmd%eshift+eshift/ucvol
+       extfpmd%eshift_paw=extfpmd%eshift_paw+eshift/ucvol
        rho(1:mesh_size)=extfpmd_rho*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
        call poisson(rho,0,pawrad(itypat),vh)
        do il=2,mesh_size
@@ -872,7 +872,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
          call pawrad_deducer0(vh,mesh_size,pawrad(itypat))
          vh(1:mesh_size)=vh(1:mesh_size)*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
          call simp_gen(eshift,vh,pawrad(itypat))
-         extfpmd%eshift=extfpmd%eshift+eshift/ucvol/nspden
+         extfpmd%eshift_paw=extfpmd%eshift_paw+eshift/ucvol/nspden
        enddo
        ABI_FREE(vh)
        ABI_FREE(ff)
@@ -1241,7 +1241,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
      call timab(48,2,tsec)
    end if
    if(extfpmd_pawsph) then
-     call xmpi_sum(extfpmd%eshift,my_comm_atom,ierr)
+     call xmpi_sum(extfpmd%eshift_paw,my_comm_atom,ierr)
    endif
  end if
 
