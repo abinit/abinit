@@ -1939,48 +1939,52 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
  real(dp),intent(in) :: theta_mu_minus_e0i, zcut
 !arrays
  real(dp),intent(in) :: omegame0i(nomega)
- complex(gwp),intent(in) :: botsq(npwc,ppm%dm2_botsq), eig(ppm%dm_eig,ppm%dm_eig), otq(npwc,ppm%dm2_otq)
- complex(gwp),intent(in) :: rhotwgp(npwx*nspinor)
- complex(gwp),intent(inout) :: ket(npwc*nspinor, nomega)
+ complex(gwp),intent(in) :: botsq(npwc, ppm%dm2_botsq), eig(ppm%dm_eig, ppm%dm_eig), otq(npwc, ppm%dm2_otq)
+ complex(gwp),intent(in) :: rhotwgp(npwx, nspinor)
+ complex(gwp),intent(inout) :: ket(npwc, nspinor, nomega)
  complex(gwp),intent(out) :: sigcme(nomega)
 
 !Local variables-------------------------------
 !scalars
- integer :: ig,igp,ii,ios,ispinor,spadc,spadx
- real(dp) :: den,ff,inv_den,omegame0i_io,otw,twofm1,twofm1_zcut
+ integer :: ig,igp,ii,ios,ispinor
+ real(dp),parameter :: tol_occ = tol3
+ real(dp) :: den, den2, ff, inv_den, omegame0i_io, otw, twofm1, twofm1_zcut, twofm1_zcut2, zcut2
  complex(gwp) :: ct, num, numf, rhotwgdp_igp
- logical :: fully_occupied,totally_empty
+ logical :: fully_occupied, totally_empty
  !character(len=500) :: msg
 !arrays
  complex(gwp),allocatable :: rhotwgdpcc(:)
 !*************************************************************************
 
+ zcut2 = zcut ** 2
+
  select case (ppm%model)
 
  case (PPM_GODBY_NEEDS, PPM_HYBERTSEN_LOUIE)
-   fully_occupied = (abs(theta_mu_minus_e0i-one) < 0.001)
-   totally_empty  = (abs(theta_mu_minus_e0i    ) < 0.001)
+   fully_occupied = (abs(theta_mu_minus_e0i-one) < tol_occ)
+   totally_empty  = (abs(theta_mu_minus_e0i    ) < tol_occ)
 
    do ispinor=1,nspinor
-     spadx = (ispinor-1)*npwx; spadc = (ispinor-1)*npwc
 
      if (.not. totally_empty) then
        ! \Bomega^2_{G1G2}/\omegat_{G1G2} M_{G1,G2}. \theta(\mu-e_s) / (\omega+\omegat_{G1G2}-e_s-i\delta)
        twofm1_zcut = zcut
-!$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den)
+       twofm1_zcut2 = zcut2
+!$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den, den2)
        do ios=1,nomega
          omegame0i_io = omegame0i(ios)
          do igp=1,npwc
-           rhotwgdp_igp = rhotwgp(spadx+igp)
+           rhotwgdp_igp = rhotwgp(igp, ispinor)
            do ig=1,npwc
              otw = DBLE(otq(ig,igp)) !in principle otw -> otw - ieta
              num = botsq(ig,igp) * rhotwgdp_igp
              den = omegame0i_io + otw
-             if (den**2 > zcut**2) then
-               ket(spadc+ig,ios) = ket(spadc+ig,ios) + num/(den*otw) * theta_mu_minus_e0i
+             den2 = den ** 2
+             if (den2 > zcut2) then
+               ket(ig,ispinor, ios) = ket(ig,ispinor,ios) + num/(den*otw) * theta_mu_minus_e0i
              else
-               ket(spadc+ig,ios) = ket(spadc+ig,ios) + &
-                 num * CMPLX(den,twofm1_zcut) / ((den**2+twofm1_zcut**2)*otw) * theta_mu_minus_e0i
+               ket(ig,ispinor,ios) = ket(ig,ispinor,ios) + &
+                 num * CMPLX(den,twofm1_zcut) / ((den2 + twofm1_zcut2) * otw) * theta_mu_minus_e0i
              end if
            end do ! ig
          end do ! igp
@@ -1990,20 +1994,22 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
      if (.not. fully_occupied) then
        ! \Bomega^2_{G1G2}/\omegat_{G1G2} M_{G1,G2}. \theta(e_s-\mu) / (\omega-\omegat_{G1G2}-e_s+i\delta)
        twofm1_zcut = -zcut
-!$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den)
+       twofm1_zcut2 = twofm1_zcut**2
+!$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den, den2)
        do ios=1,nomega
          omegame0i_io = omegame0i(ios)
          do igp=1,npwc
-           rhotwgdp_igp = rhotwgp(spadx+igp)
+           rhotwgdp_igp = rhotwgp(igp, ispinor)
            do ig=1,npwc
              otw = DBLE(otq(ig,igp)) !in principle otw -> otw - ieta
              num = botsq(ig,igp) * rhotwgdp_igp
-             den = omegame0i_io-otw
-             if (den**2 > zcut**2) then
-               ket(spadc+ig,ios) = ket(spadc+ig,ios) + num / (den*otw)*(one-theta_mu_minus_e0i)
+             den = omegame0i_io - otw
+             den2 = den ** 2
+             if (den2 > zcut2) then
+               ket(ig,ispinor,ios) = ket(ig,ispinor, ios) + num / (den*otw) * (one-theta_mu_minus_e0i)
              else
-               ket(spadc+ig,ios) = ket(spadc+ig,ios) + &
-                 num * CMPLX(den,twofm1_zcut) / ((den**2+twofm1_zcut**2)*otw)*(one-theta_mu_minus_e0i)
+               ket(ig,ispinor, ios) = ket(ig,ispinor,ios) + &
+                 num * CMPLX(den,twofm1_zcut) / ((den2 + twofm1_zcut2) * otw) * (one-theta_mu_minus_e0i)
              end if
            end do ! ig
          end do ! igp
@@ -2023,7 +2029,7 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
    ff = theta_mu_minus_e0i      ! occupation number f (include poles if ...)
    twofm1 = two*ff-one          ! 2f-1
    twofm1_zcut = twofm1*zcut
-   rhotwgdpcc(:) = CONJG(rhotwgp(:))
+   rhotwgdpcc(:) = CONJG(rhotwgp(:, 1))
 
    do ios=1,nomega
      omegame0i_io = omegame0i(ios)
