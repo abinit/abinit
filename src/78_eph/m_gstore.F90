@@ -2681,7 +2681,7 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax, pp_max)
 !arrays
  integer :: my_gmax(3)
  integer,allocatable :: gtmp(:,:)
- real(dp) :: kk(3), kq(3), qpt(3), pp(3), kq_cart(3), kq_max(3)
+ real(dp) :: kk(3), kq(3), qpt(3), pp(3), kq_max(3)
 !----------------------------------------------------------------------
 
  ! TODO: This is an hotspot due to the double loop over k and q. Should use a geometrical approach to compute mpw and gmax.
@@ -2691,8 +2691,6 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax, pp_max)
  nprocs = xmpi_comm_size(gstore%comm); my_rank = xmpi_comm_rank(gstore%comm)
  mpw = 0; gmax = 0
  pp_max__ = 0; if (present(pp_max)) pp_max__ = pp_max
-
- kq_max = zero
 
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is))
@@ -2707,11 +2705,6 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax, pp_max)
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_q, qpt)
 
-       !kq_cart = matmul(gstore%cryst%gprimd, kk + qpt)
-       !kq_max = max(kq_max, abs(kq_cart))
-       !kq_cart = matmul(gstore%cryst%gprimd, kk - qpt)
-       !kq_max = max(kq_max, abs(kq_cart))
-
        ! TODO: g0 umklapp here can enter into play! gmax could not be large enough!
        do ipz=-pp_max__,pp_max__
           do ipy=-pp_max__,pp_max__
@@ -2719,8 +2712,6 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax, pp_max)
              pp = [ipx, ipy, ipz] * half
              call get_kg(kq + qpt - pp, 1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
              ABI_FREE(gtmp)
-             !kq_cart = matmul(gstore%cryst%gprimd, kk + qpt - pp)
-             !kq_max = max(kq_max, abs(kq_cart))
            end do
          end do
        end do
@@ -2734,28 +2725,6 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax, pp_max)
  my_gmax = gmax; call xmpi_max(my_gmax, gmax, gstore%comm, ierr)
 
  call wrtout(std_out, sjoin(' Optimal value of mpw: ', itoa(mpw), "with gmax:", ltoa(gmax)))
-
- !call xmpi_max(kq_max, gstore%comm, ierr)
- !kq_max = matmul(gstore%cryst%rprimd, kq_max)
-
- !cnt = 0
- !do i1=-1,1
- !  kk(1) = dble(i1) * kq_max(1)
- !  do i2=-1,1
- !    kk(2) = dble(i2) * kq_max(2)
- !    do i3=-1,1
- !      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
- !      kk(3) = dble(i3) * kq_max(3)
- !      call get_kg(kk, istwfk1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
- !      ABI_FREE(gtmp)
- !    end do
- !  end do
- !end do
-
- !my_mpw = mpw; call xmpi_max(my_mpw, mpw, gstore%comm, ierr)
- !my_gmax = gmax; call xmpi_max(my_gmax, gmax, gstore%comm, ierr)
- !call wrtout(std_out, sjoin(' Optimal value of mpw: ', itoa(mpw), "with gmax:", ltoa(gmax)))
-
  call cwtime_report(" gstore_get_mpw_gmax", cpu, wall, gflops)
 
 end subroutine gstore_get_mpw_gmax
@@ -5075,10 +5044,8 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
           NCF_CHECK(ncerr)
           call average_g2_mn(do_avg, nb_kq, nb_k, bstart_kq, bstart_k, degblock_kq, degblock_k, gslice_ks_mn, g2ks_mn)
 
-          !write(ab_out, "(1x,5(a5,1x),3a16)")"iq", "ik", "pcase", "m_kq", "n_k", "|g^SE|", "|g^KS|"
-          write(ab_out, "(1x,5(a5,1x),3a16)")"iq", "ik", "pcase", "m_kq", "n_k", "|g^SE|", "|g^KS|", "SE/KS"
-          min_g_ratio = +huge(one); max_g_ratio = -huge(one); mean_g_ratio = zero; stdev_g_ratio = zero
-          nn = 0
+          write(ab_out, "(1x,5(a5,1x),3a16)")"iq", "ik", "pcase", "m_kq", "n_k", "SE/KS", "|g^SE|", "|g^KS|"
+          min_g_ratio = +huge(one); max_g_ratio = -huge(one); mean_g_ratio = zero; stdev_g_ratio = zero; nn = 0
 
           do im_kq=1,nb_kq
             m_kq = im_kq + bstart_kq - 1
@@ -5094,18 +5061,19 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
                 mean_g_ratio = mean_g_ratio + g_ratio
                 stdev_g_ratio = g_ratio ** 2
               end if
-              write(ab_out, "(a1,5(i5,1x),3(es16.6))")"-", iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks, g_ratio
-              !write(ab_out, "(a1,5(i5,1x),2(es16.6))")"-", iq_glob, ik_glob, ipc, m_kq, n_k, gg, gg_ks
+              write(ab_out, "(a1,5(i5,1x),3(es16.6))")"-", iq_glob, ik_glob, ipc, m_kq, n_k, g_ratio, gg, gg_ks
             end do
           end do
 
-          ! \sigma^{2} = \langle x^{2} \rangle - \langle x \rangle^{2}
-          mean_g_ratio = mean_g_ratio / nn
-          stdev_g_ratio = sqrt((stdev_g_ratio / nn) - mean_g_ratio ** 2)
-          write(ab_out, "(a1, (es16.6))")"- mean_g_ratio:", mean_g_ratio
-          write(ab_out, "(a1, (es16.6))")"- stdev_g_ratio:", stdev_g_ratio
-          write(ab_out, "(a1, (es16.6))")"- min_g_ratio:", min_g_ratio
-          write(ab_out, "(a1, (es16.6))")"- max_g_ratio:", max_g_ratio
+          if (nn /= 0) then
+            mean_g_ratio = mean_g_ratio / nn
+            ! \sigma^{2} = \langle x^{2} \rangle - \langle x \rangle^{2}
+            stdev_g_ratio = sqrt((stdev_g_ratio / nn) - (mean_g_ratio ** 2))
+            write(ab_out, "(a,es16.6)")"- mean_g_ratio:", mean_g_ratio
+            write(ab_out, "(a,es16.6)")"- stdev_g_ratio:", stdev_g_ratio
+            write(ab_out, "(a,es16.6)")"- min_g_ratio:", min_g_ratio
+            write(ab_out, "(a,es16.6)")"- max_g_ratio:", max_g_ratio
+          end if
         end if
 
        end do ! ipc
