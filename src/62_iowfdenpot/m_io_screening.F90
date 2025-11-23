@@ -2604,7 +2604,7 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
         ABI_COMMENT(msg)
      else
         dtset%npweps = Gsph_c%ng
-        write(msg,'(2a,f4.1,a,i0,2a,f3.1)')&
+        write(msg,'(2a,f4.1,a,i0,2a,f4.1)')&
         "npweps was not set in input.",&
         ch10//"The number of G-vectors generated according to ecuteps (",dtset%ecuteps,") is smaller than that stored on file (",npwe_file,")",&
         ch10//"Calculation will proceed with ecuteps: ",dtset%ecuteps
