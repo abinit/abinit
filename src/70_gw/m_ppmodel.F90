@@ -1946,7 +1946,7 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
 
 !Local variables-------------------------------
 !scalars
- integer :: ig,igp,ii,ios,ispinor
+ integer :: ig,igp,ii,iw,ispinor
  real(dp),parameter :: tol_occ = tol3
  real(dp) :: den, den2, ff, inv_den, omegame0i_io, otw, twofm1, twofm1_zcut, twofm1_zcut2, zcut2
  complex(gwp) :: ct, num, numf, rhotwgdp_igp
@@ -1971,8 +1971,8 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
        twofm1_zcut = zcut
        twofm1_zcut2 = zcut2
 !$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den, den2)
-       do ios=1,nomega
-         omegame0i_io = omegame0i(ios)
+       do iw=1,nomega
+         omegame0i_io = omegame0i(iw)
          do igp=1,npwc
            rhotwgdp_igp = rhotwgp(igp, ispinor)
            do ig=1,npwc
@@ -1981,14 +1981,14 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
              den = omegame0i_io + otw
              den2 = den ** 2
              if (den2 > zcut2) then
-               ket(ig,ispinor, ios) = ket(ig,ispinor,ios) + num/(den*otw) * theta_mu_minus_e0i
+               ket(ig,ispinor, iw) = ket(ig,ispinor,iw) + num/(den*otw) * theta_mu_minus_e0i
              else
-               ket(ig,ispinor,ios) = ket(ig,ispinor,ios) + &
+               ket(ig,ispinor,iw) = ket(ig,ispinor,iw) + &
                  num * CMPLX(den,twofm1_zcut) / ((den2 + twofm1_zcut2) * otw) * theta_mu_minus_e0i
              end if
            end do ! ig
          end do ! igp
-       end do ! ios
+       end do ! iw
      end if ! not totally empty
 
      if (.not. fully_occupied) then
@@ -1996,8 +1996,8 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
        twofm1_zcut = -zcut
        twofm1_zcut2 = twofm1_zcut**2
 !$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den, den2)
-       do ios=1,nomega
-         omegame0i_io = omegame0i(ios)
+       do iw=1,nomega
+         omegame0i_io = omegame0i(iw)
          do igp=1,npwc
            rhotwgdp_igp = rhotwgp(igp, ispinor)
            do ig=1,npwc
@@ -2006,14 +2006,14 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
              den = omegame0i_io - otw
              den2 = den ** 2
              if (den2 > zcut2) then
-               ket(ig,ispinor,ios) = ket(ig,ispinor, ios) + num / (den*otw) * (one-theta_mu_minus_e0i)
+               ket(ig,ispinor,iw) = ket(ig,ispinor, iw) + num / (den*otw) * (one-theta_mu_minus_e0i)
              else
-               ket(ig,ispinor, ios) = ket(ig,ispinor,ios) + &
+               ket(ig,ispinor, iw) = ket(ig,ispinor,iw) + &
                  num * CMPLX(den,twofm1_zcut) / ((den2 + twofm1_zcut2) * otw) * (one-theta_mu_minus_e0i)
              end if
            end do ! ig
          end do ! igp
-       end do ! ios
+       end do ! iw
      end if ! not fully occupied
 
    end do ! ispinor
@@ -2031,8 +2031,8 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
    twofm1_zcut = twofm1*zcut
    rhotwgdpcc(:) = CONJG(rhotwgp(:, 1))
 
-   do ios=1,nomega
-     omegame0i_io = omegame0i(ios)
+   do iw=1,nomega
+     omegame0i_io = omegame0i(iw)
      ct = czero_gw
      do ii=1,npwc ! Loop over the DM bands
        num = czero_gw
@@ -2068,15 +2068,15 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
        end if
 
      end do ! ii DM bands
-     sigcme(ios) = ct*half
+     sigcme(iw) = ct*half
 
      !if (ppm%model == PPM_ENGEL_FARID) then
-     !ct = dot_product(ket(:, ios), ket(:, ios))
-     !if (abs(sigcme(ios) - ct) > tol12) then
+     !ct = dot_product(ket(:, iw), ket(:, iw))
+     !if (abs(sigcme(iw) - ct) > tol12) then
      !  ABI_ERROR("foo bar")
      !end if
      !end if
-   end do ! ios
+   end do ! iw
 
    ABI_FREE(rhotwgdpcc)
 
