@@ -1399,7 +1399,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            end if
 
            do n_k=bstart_k, bstop_k
-             in_k = n_k - bstart_k + 1; if gqk%pert_comm%skip(in_k) cycle ! MPI parallelism inside pert_comm
+             in_k = n_k - bstart_k + 1; if (gqk%pert_comm%skip(in_k)) cycle ! MPI parallelism inside pert_comm
 
              ! Compute <bsum,k-p|e^{-i(p+G')}r|n,k> * vc_sqrt(p,G')
              cwork_ur = ur_star_kmp * ur_nk(:,n_k)
