@@ -1185,8 +1185,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  ! GWPT code
  names(1940)='ik_preamble                     '; basic(1940) = 1
  names(1941)='ip_preamble                     '; basic(1941) = 1
- names(1942)='ibsum_preamble                  '; basic(1942) = 1
- names(1943)='pert_loop                       '; basic(1943) = 1
+ names(1942)='ibsum_preamble1                 '; basic(1942) = 1
+ names(1943)='ibsum_preamble2                 '; basic(1943) = 1
+ names(1944)='pert_loop                       '; basic(1944) = 1
 
  ! xg_t (2nd part)
  names(2000)='xgBlock_scale                   '; basic(2000) = 1
