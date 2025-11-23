@@ -1304,8 +1304,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                               cryst, mapl_kqmp, gbound_kqmp, work_ngfft, work, cg_kqmp)
 
            ! NB: cg_kqmp is dimensioned with mpw --> have to slice cg_kqmp
-           ii = ib_sum; if (stern_kmp%has_band_para) ii = ib_sum - my_bsum_start(spin) + 1
-           stern_kmp%cgq(:,:,ii) = cg_kqmp(:,1:npw_kqmp*nspinor)
+           stern_kmp%cgq(:,:,ib_sum) = cg_kqmp(:,1:npw_kqmp*nspinor)
          end do ! ib_sum
 
          ! ==========================
@@ -1321,8 +1320,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                               cryst, mapl_kmp, gbound_kmp, work_ngfft, work, cg_kmp)
 
            ! NB: cg_kmp is dimensioned with mpw --> have to slice cg_kmp
-           ii = ib_sum; if (stern_kqmp%has_band_para) ii = ib_sum - my_bsum_start(spin) + 1
-           stern_kqmp%cgq(:,:,ii) = cg_kmp(:,1:npw_kmp*nspinor)
+           stern_kqmp%cgq(:,:,ib_sum) = cg_kmp(:,1:npw_kmp*nspinor)
          end do ! ib_sum
 
          ! Get PPM parameters at pp_bz to applying W_{gg'}(pp_bz).
@@ -1401,7 +1399,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            end if
 
            do n_k=bstart_k, bstop_k
-             in_k = n_k - bstart_k + 1 !; if gqk%pert_comm%skip(n_k) cycle ! MPI parallelism inside pert_comm
+             in_k = n_k - bstart_k + 1 !; if gqk%pert_comm%skip(in_k) cycle ! MPI parallelism inside pert_comm
 
              ! Compute <bsum,k-p|e^{-i(p+G')}r|n,k> * vc_sqrt(p,G')
              cwork_ur = ur_star_kmp * ur_nk(:,n_k)
@@ -1456,11 +1454,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            end do ! n_k
 
            ! TODO: this is an all_gatherv but oh well.
-           !if (gqk%pert_comm%nproc > 1) then
-           !  call xmpi_sum(vec_gx_nk, gqk%pert_comm, ierr)
-           !  call xmpi_sum(vec_gwc_nk, gqk%pert_comm, ierr)
-           !  if (dtset%gwcomp == 2) call xmpi_sum(vec_coh_nk, gqk%pert_comm, ierr)
-           !end if
+           if (gqk%pert_comm%nproc > 1) then
+             call xmpi_sum(vec_gx_nk, gqk%pert_comm%value, ierr)
+             call xmpi_sum(vec_gwc_nk, gqk%pert_comm%value, ierr)
+             if (dtset%gwcomp == 2) call xmpi_sum(vec_coh_nk, gqk%pert_comm%value, ierr)
+           end if
 
            ! Get u_{n',k+q-p}(r), stored in ur_star_kqmp
            call wfd%rotate_cg(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, kg_kqmp, istwf_kqmp, &
@@ -1480,14 +1478,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            !
            ! Store results in vec_gwc_mkq(:,:,m_kq).
 
-           !if (gqk%pert_comm%nproc > 1) then
-           !  vec_gwc_mkq = zero
-           !  if (need_x_kqmp) vec_gx_mkq = zero
-           !  if (dtset%gwcomp == 2) vec_coh_mkq = zero
-           !end if
+           if (gqk%pert_comm%nproc > 1) then
+             vec_gwc_mkq = zero
+             if (need_x_kqmp) vec_gx_mkq = zero
+             if (dtset%gwcomp == 2) vec_coh_mkq = zero
+           end if
 
            do m_kq=bstart_kq, bstop_kq
-             im_kq = m_kq - bstart_kq + 1 !if (gqk%pert_comm%skip(m_kq)) cycle ! MPI parallelism inside pert_comm
+             im_kq = m_kq - bstart_kq + 1; if (gqk%pert_comm%skip(im_kq)) cycle ! MPI parallelism inside pert_comm
 
              ! <m,k+q|e^{i(p+G)}r|bsum,k+q-p> * vc_sqrt(p,G).
              ! Exchange bra and ket and take the CC of the FFT in sigtk_multiply_by_vc_sqrt
@@ -1523,7 +1521,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ! of the PPM matrix elements.
              ! TODO: Generalize ppm%calc_sigc with BLAS-like API.
              vec_gwc_mkq(:,:,m_kq) = zero
-             !print *, "omegame0i_mkq:", omegame0i_mkq
              call ppm%calc_sigc(nspinor, npw_c, nw_mkq, rhotwg_c, trans_botsq_pbz, trans_otq_pbz, &
                                 omegame0i_mkq, dtset%zcut, theta_mu_minus_e0i, trans_dmeig_pbz, npw_c, &
                                 vec_gwc_mkq(:,:,m_kq), sigcme_mkq)
@@ -1536,11 +1533,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            end do ! m_kq
 
            ! TODO: this is an all_gatherv but oh well.
-           !if (gqk%pert_comm%nproc > 1) then
-           !  call xmpi_sum(vec_gwc_mkq, gqk%pert_comm, ierr)
-           !   if (need_x_kqmp) call xmpi_sum(vec_gx_mkq, gqk%pert_comm, ierr)
-           !  if (dtset%gwcomp == 2) call xmpi_sum(vec_coh_mkq, gqk%pert_comm, ierr)
-           !end if
+           if (gqk%pert_comm%nproc > 1) then
+             call xmpi_sum(vec_gwc_mkq, gqk%pert_comm%value, ierr)
+             if (need_x_kqmp) call xmpi_sum(vec_gx_mkq, gqk%pert_comm%value, ierr)
+             if (dtset%gwcomp == 2) call xmpi_sum(vec_coh_mkq, gqk%pert_comm%value, ierr)
+           end if
 
            ! ========================================
            ! Loop over my set of atomic perturbations
@@ -1580,9 +1577,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              stern_kmp%bands_treated_now(:) = 0; stern_kmp%bands_treated_now(ib_sum) = 1
              stern_kmp%rank_band = 0; u1_band = ib_sum; band_me = ib_sum
-             if (stern_kmp%has_band_para) then
-               NOT_IMPLEMENTED_ERROR()
-             end if
 
              ! (k+q-p, k-p)
              call stern_kmp%solve(u1_band, band_me, idir, ipert, qq_bz, gs_ham_kqmp, rf_ham_kqmp, &
@@ -1731,9 +1725,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              stern_kqmp%bands_treated_now(:) = 0; stern_kqmp%bands_treated_now(ib_sum) = 1
              stern_kqmp%rank_band = 0; u1_band = ib_sum; band_me = ib_sum
-             if (stern_kqmp%has_band_para) then
-               NOT_IMPLEMENTED_ERROR()
-             end if
 
              ! (k-p, k+q-p)
              call stern_kqmp%solve(u1_band, band_me, idir, ipert, -qq_bz, gs_ham_kmp, rf_ham_kmp, &
