@@ -1128,17 +1128,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! TODO: Can distribute operations inside gqk%pert_comm
 
        do n_k=bstart_k, bstop_k
-         in_k = n_k - bstart_k + 1 !; if (gqk%pert_comm%skip(n_k)) cycle ! MPI parallelism inside pert_comm
+         in_k = n_k - bstart_k + 1 !; if (gqk%pert_comm%skip(in_k)) cycle ! MPI parallelism inside pert_comm
          call wfd%rotate_cg(n_k, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                             cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_nk(:,n_k))
          vxc_nk(in_k, ik_glob) = dot_product(ur_nk(:,n_k), vxc(:, spin) * ur_nk(:,n_k)) / nfftf
        end do
 
        do m_kq=bstart_kq, bstop_kq
-         !if (gqk%pert_comm%skip(m_kq)) cycle ! MPI parallelism inside pert_comm
+         im_kq = m_kq - bstart_kq + 1 !; if (gqk%pert_comm%skip(im_kq)) cycle ! MPI parallelism inside pert_comm
          call wfd%rotate_cg(m_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
                             cryst, mapl_kq, gbound_kq, work_ngfft, work, ug_kq, urs_kbz=ur_mkq(:,m_kq))
        end do
+       !call xmpi_sum(ur_nk, gqk%pert_comm%value, ierr)
        !call xmpi_sum(ur_mkq, gqk%pert_comm%value, ierr)
 
        ! ===========================
@@ -1152,7 +1153,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
             in_k = n_k - bstart_k + 1
             cnt = cnt + 1
             if (gqk%pp_sum_comm%skip(cnt)) cycle ! MPI parallelism inside pp_sum_comm
-            ! Parallelized inside gqk%pert_ppsum_comm
             do imyp=1,gqk%my_npert
               if (cplex == 1) then
                 ctmp_gwpc = sum(GWPC_CONJG(ur_mkq(:,m_kq)) * ur_nk(:,n_k) * vxc1_qq(1,:,spin,imyp)) / nfftf
@@ -1872,7 +1872,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 !end if ! .not qq_is_gamma.
 
            end do  ! imyp (my perturbations)
-           call timab(1943, 1, tsec)
+           call timab(1943, 2, tsec)
 
            call rf_ham_kqmp%free(); call rf_ham_kmp%free()
          end do ! ib_sum (sum over bands)
