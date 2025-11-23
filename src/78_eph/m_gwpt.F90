@@ -1460,7 +1460,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              if (dtset%gwcomp == 2) call xmpi_sum(vec_coh_nk, gqk%pert_comm%value, ierr)
            end if
 
-           call timab(1942, 1, tsec)
+           call timab(1942, 2, tsec)
            call timab(1943, 1, tsec)
 
            ! Get u_{n',k+q-p}(r), stored in ur_star_kqmp
