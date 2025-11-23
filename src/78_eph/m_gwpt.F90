@@ -1357,12 +1357,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ! Compute static limit at pp_bz from the symmetrical image in the IBZ
            call em1_symmetrize_op(ipp_bz, npw_c, 1, gsph_c, pp_mesh, wc0_pibz(ipp_ibz)%vals, wc0_pbz)
          end if
+         call timab(1941, 2, tsec)
 
          ! ===========================================
          ! Sum over bands (n' index in equations)
          ! All procs in gqk%pert_comm enter this part.
          ! ===========================================
-         call timab(1941, 2, tsec)
 
          do ib_sum=my_bsum_start(spin), my_bsum_stop(spin)
            call timab(1942, 1, tsec)
@@ -1460,6 +1460,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              if (dtset%gwcomp == 2) call xmpi_sum(vec_coh_nk, gqk%pert_comm%value, ierr)
            end if
 
+           call timab(1942, 1, tsec)
+           call timab(1943, 1, tsec)
+
            ! Get u_{n',k+q-p}(r), stored in ur_star_kqmp
            call wfd%rotate_cg(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, kg_kqmp, istwf_kqmp, &
                               cryst, mapl_kqmp, gbound_kqmp, work_ngfft, work, cg_kqmp, urs_kbz=ur_star_kqmp)
@@ -1539,6 +1542,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              if (dtset%gwcomp == 2) call xmpi_sum(vec_coh_mkq, gqk%pert_comm%value, ierr)
            end if
 
+           call timab(1943, 2, tsec)
+
            ! ========================================
            ! Loop over my set of atomic perturbations
            ! ========================================
@@ -1550,8 +1555,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ! TODO: Should create array of gs_ham(my_npert) and rf_ham(my_npert) but I'm not sure the GPU version supports
            !       multiple instances.
 
-           call timab(1942, 2, tsec)
-           call timab(1943, 1, tsec)
+           call timab(1944, 1, tsec)
 
            do imyp=1,gqk%my_npert
              ! NB: Only one proc enters this section. No MPI parallelism is allowed here.
@@ -1872,7 +1876,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 !end if ! .not qq_is_gamma.
 
            end do  ! imyp (my perturbations)
-           call timab(1943, 2, tsec)
+           call timab(1944, 2, tsec)
 
            call rf_ham_kqmp%free(); call rf_ham_kmp%free()
          end do ! ib_sum (sum over bands)
@@ -2012,7 +2016,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        do band=gqk%bstart_k, gqk%bstop_k
          in_k = band - gqk%bstart_k + 1
          write(ab_out, "(i5, 4(f8.3))") &
-           band,  ebands%eig(band, ik_ibz, spin) * Ha_eV, &
+           band, ebands%eig(band, ik_ibz, spin) * Ha_eV, &
            vxc_nk(in_k, ik_glob) * Ha_eV,  &
            real(sigx_nk(in_k, ik_glob)) * Ha_eV, &
            real(sigce0_nk(in_k, ik_glob)) * Ha_eV

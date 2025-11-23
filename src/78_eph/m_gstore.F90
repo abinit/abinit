@@ -5038,7 +5038,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
              end do
            end do
         else
-          ! g^SE and g^KS
+          ! SE/KS ratio, g^SE, g^KS
           ncerr = nf90_get_var(spin_ncid, spin_vid("gvals_ks"), gslice_ks_mn, &
                                start=[1,1,1,ipc,ik_glob,iq_glob], count=[2,nb_kq,nb_k,1,1,1])
           NCF_CHECK(ncerr)

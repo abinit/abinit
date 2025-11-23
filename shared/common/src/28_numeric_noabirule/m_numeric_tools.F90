@@ -4732,8 +4732,8 @@ pure function stats_eval(arr) result(stats)
  nn = SIZE(arr)
  do ii=1,nn
    xx = arr(ii)
-   stats%max  = MAX(stats%max, xx)
    stats%min  = MIN(stats%min, xx)
+   stats%max  = MAX(stats%max, xx)
    stats%mean = stats%mean + xx
  end do
 
@@ -4746,7 +4746,7 @@ pure function stats_eval(arr) result(stats)
    x2_sum = x2_sum + (xx - stats%mean)*(xx - stats%mean)
  end do
 
- if (nn>1) then
+ if (nn > 1) then
    stats%stdev  = x2_sum/(nn-1)
    stats%stdev = SQRT(ABS(stats%stdev))
  else
