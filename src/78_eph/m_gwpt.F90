@@ -49,7 +49,7 @@ module m_gwpt
  use m_dtfil,          only : datafiles_type
  use m_dtset,          only : dataset_type
  use m_gwdefs,         only : GW_Q0_DEFAULT
- use m_time,           only : cwtime, cwtime_report, timab, sec2str
+ use m_time,           only : cwtime, cwtime_report, timab, sec2str, timab
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, r2c, get_diag, linfit, iseven, simpson_cplx, print_arr, inrange
  use m_io_tools,       only : iomode_from_fname
@@ -287,10 +287,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  complex(gwp) :: ctmp_gwpc, xdot_tmp
  complex(dp) :: ctmp_dp
 !arrays
- real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0)
+ real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0), tsec(2)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3), qq_ibz(3), qq_bz(3)
- real(dp),allocatable :: qlwl(:,:), vnk_cart_ibz(:,:,:)
- real(dp),allocatable :: kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:)
+ real(dp),allocatable :: qlwl(:,:), vnk_cart_ibz(:,:,:), kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:)
  real(dp),allocatable :: ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:), kinpw_kqmp(:), kinpw_kmp(:), ph3d_kqmp(:,:,:), ph3d_kmp(:,:,:)
  real(dp),allocatable, target :: vxc1_qq(:,:,:,:)
  real(dp),allocatable :: gxc_atm(:,:,:,:), gks_atm(:,:,:,:), gks_atm2(:,:,:,:), gsig_atm(:,:,:,:)
@@ -542,6 +541,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Diagonal elements of velocity operator in cartesian coordinates for all kk in the IBZ.
  ! Use ndone to understand if velocities have been already compured in a previous run.
 
+ ! TODO: A similar section of code is found in gstore%compute. Should have common routine.
+
  if (gstore%with_vk /= 0 .and. ndone == 0) then
    call wrtout(std_out, " computing and writing velocity operator matrix elements in the ibz")
    call wrtout(std_out, " note that not all the k-points in the ibz are computed when kfilter is activated!")
@@ -630,7 +631,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_CHECK_IEQ(dvdb%nqpt, drhodb%nqpt, "Different number of q-points in DVDB and DRHODB")
  ierr = 0
  do ii=1,dvdb%nqpt
-   !if (any(dvdb%qpts(:, ii) /= drhodb%qpts(:, ii))) then
    if (any(abs(dvdb%qpts(:, ii) - drhodb%qpts(:, ii)) > tol12)) then
      ierr = ierr + 1; call wrtout(std_out, sjoin(ktoa(dvdb%qpts(:, ii)), " /= ", ktoa(drhodb%qpts(:, ii))))
    end if
@@ -817,7 +817,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    call ppm%new_setup(iq_ibz, cryst, pp_mesh, npw_c, hscr%nomega, hscr%omega, epsm1_ggw, nfftf, gsph_c%gvec, ngfftf, rhor(:,1))
 
    if (dtset%gwcomp == 2) then
-     ! Keep static limit in memory.
+     ! Keep static limit of Wc in memory.
      do ii=1,npw_c
        epsm1_ggw(ii,ii,1) = epsm1_ggw(ii,ii,1) - one
      end do
@@ -1060,11 +1060,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
        ! Here we skip points if little group tricks are activated.
        if (dtset%gstore_use_lgk /= 0) then
-         ii = lg_myk(my_ik)%findq_ibzk(qq_bz); if (ii == -1) cycle
+         if (lg_myk(my_ik)%findq_ibzk(qq_bz) == -1) cycle
        end if
 
        if (dtset%gstore_use_lgq /= 0) then
-         ii = lg_myq%findq_ibzk(kk); if (ii == -1) cycle
+         if (lg_myq%findq_ibzk(kk) == -1) cycle
        end if
 
        ! NB: All procs in gqk%pert_comm and gqk%bsum_comm and gqk%pp_sum_comm enter this section.
@@ -1080,6 +1080,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
        call inds2str(0, sjoin(" Computing g^Sigma(k,q) for kpt:", kk_string), my_ik, gqk%my_nk, gqk%glob_nk, msg)
        call wrtout(std_out, sjoin(msg, ", for spin:", itoa(spin)), pre_newlines=1)
+       call timab(1940, 1, tsec)
 
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.
        ik_ibz = gqk%my_k2ibz(1, my_ik) ; isym_k = gqk%my_k2ibz(2, my_ik)
@@ -1089,8 +1090,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
        kk_ibz = ebands%kptns(:,ik_ibz)
        istwf_k_ibz = wfd%istwfk(ik_ibz); npw_k_ibz = wfd%npwarr(ik_ibz)
-       !print *, "my_ik", my_ik, " of my_nk:", gqk%my_nk
-       !print *, "ik_ibz:", ik_ibz, "kk:", kk, "kk_ibz:", kk_ibz
+       !print *, "my_ik", my_ik, " of my_nk:", gqk%my_nk; print *, "ik_ibz:", ik_ibz, "kk:", kk, "kk_ibz:", kk_ibz
 
        print_time_kk = my_rank == 0 .and. (my_ik <= LOG_MODK .or. mod(my_ik, LOG_MODK) == 0)
        if (print_time_kk) call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
@@ -1121,26 +1121,30 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                                 istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)      ! out
        ABI_CHECK_ILEQ(npw_kq, mpw, "npw_kq > mpw!")
 
-       ABI_MALLOC(ug_k, (2, npw_k*nspinor))
-       ABI_MALLOC(ug_kq, (2, npw_kq*nspinor))
+       ABI_CALLOC(ug_k, (2, npw_k*nspinor))
+       ABI_CALLOC(ug_kq, (2, npw_kq*nspinor))
 
        ! Precompute ur_nk and ur_mkq for all m and n band indices treated.
        ! TODO: Can distribute operations inside gqk%pert_comm
+
        do n_k=bstart_k, bstop_k
-         in_k = n_k - bstart_k + 1
+         in_k = n_k - bstart_k + 1 !; if (gqk%pert_comm%skip(n_k)) cycle ! MPI parallelism inside pert_comm
          call wfd%rotate_cg(n_k, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                             cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_nk(:,n_k))
          vxc_nk(in_k, ik_glob) = dot_product(ur_nk(:,n_k), vxc(:, spin) * ur_nk(:,n_k)) / nfftf
        end do
 
        do m_kq=bstart_kq, bstop_kq
+         !if (gqk%pert_comm%skip(m_kq)) cycle ! MPI parallelism inside pert_comm
          call wfd%rotate_cg(m_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
                             cryst, mapl_kq, gbound_kq, work_ngfft, work, ug_kq, urs_kbz=ur_mkq(:,m_kq))
        end do
+       !call xmpi_sum(ur_mkq, gqk%pert_comm%value, ierr)
 
        ! ===========================
        ! Compute <m,k+q|vxc1_qq|n,k>
        ! ===========================
+
        gxc_atm = czero; cnt = 0
        do m_kq=bstart_kq, bstop_kq
          im_kq = m_kq - bstart_kq + 1
@@ -1161,9 +1165,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          end do ! n_k
        end do ! m_kq
 
-       call xmpi_sum(gxc_atm, gqk%pert_ppsum_comm%value, ierr)
        ! TODO: this is an all_gatherv but oh well.
-       !call xmpi_sum(gxc_atm, gqk%pert_comm%value, ierr)
+       call xmpi_sum(gxc_atm, gqk%pert_ppsum_comm%value, ierr)
+       call timab(1940, 2, tsec)
 
        ! ===========================================================
        ! MPI sum over the pp momenta in the full BZ gqk%pp_sum_comm
@@ -1179,6 +1183,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
        do ipp_bz=my_pp_start_spin(spin), my_pp_stop_spin(spin)
          ! All procs in gqk%pert_comm and gqk%bsum_com enter this section.
+         call timab(1941, 1, tsec)
 
          my_ipp = ipp_bz - my_pp_start_spin(spin) + 1
          print_time_pp = my_rank == 0 .and. (my_ipp <= LOG_MODP .or. mod(my_ipp, LOG_MODP) == 0)
@@ -1359,8 +1364,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Sum over bands (n' index in equations)
          ! All procs in gqk%pert_comm enter this part.
          ! ===========================================
+         call timab(1941, 2, tsec)
 
          do ib_sum=my_bsum_start(spin), my_bsum_stop(spin)
+           call timab(1942, 1, tsec)
            ! Get u_{n',k-p}(r)^*, stored in ur_star_kmp.
            call wfd%rotate_cg(ib_sum, ndat1, spin, kmp_ibz, npw_kmp, kg_kmp, istwf_kmp, &
                               cryst, mapl_kmp, gbound_kmp, work_ngfft, work, cg_kmp, urs_kbz=ur_star_kmp)
@@ -1387,7 +1394,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ! vec_gwc_nk(:,:,n_k) stores:
            !
            !    sum_g' \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kmp) - e') <bsum,k-p|e^{-i(p+g')}r|n,k>
-           if (gqk%pert_comm%nproc > 1) vec_gwc_nk = zero
+           if (gqk%pert_comm%nproc > 1) then
+             vec_gwc_nk = zero
+             vec_gx_nk = zero
+             if (dtset%gwcomp == 2) vec_coh_nk = zero
+           end if
 
            do n_k=bstart_k, bstop_k
              in_k = n_k - bstart_k + 1 !; if gqk%pert_comm%skip(n_k) cycle ! MPI parallelism inside pert_comm
@@ -1445,7 +1456,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            end do ! n_k
 
            ! TODO: this is an all_gatherv but oh well.
-           !call xmpi_sum(vec_gwc_nk, gqk%pert_comm, ierr)
+           !if (gqk%pert_comm%nproc > 1) then
+           !  call xmpi_sum(vec_gx_nk, gqk%pert_comm, ierr)
+           !  call xmpi_sum(vec_gwc_nk, gqk%pert_comm, ierr)
+           !  if (dtset%gwcomp == 2) call xmpi_sum(vec_coh_nk, gqk%pert_comm, ierr)
+           !end if
 
            ! Get u_{n',k+q-p}(r), stored in ur_star_kqmp
            call wfd%rotate_cg(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, kg_kqmp, istwf_kqmp, &
@@ -1464,11 +1479,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            !    \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kqmp) - e')
            !
            ! Store results in vec_gwc_mkq(:,:,m_kq).
-           if (gqk%pert_comm%nproc > 1) vec_gwc_mkq = zero
+
+           !if (gqk%pert_comm%nproc > 1) then
+           !  vec_gwc_mkq = zero
+           !  if (need_x_kqmp) vec_gx_mkq = zero
+           !  if (dtset%gwcomp == 2) vec_coh_mkq = zero
+           !end if
 
            do m_kq=bstart_kq, bstop_kq
-             im_kq = m_kq - bstart_kq + 1
-             !if (gqk%pert_sumcomm%skip(m_kq)) cycle ! MPI parallelism inside pert_comm
+             im_kq = m_kq - bstart_kq + 1 !if (gqk%pert_comm%skip(m_kq)) cycle ! MPI parallelism inside pert_comm
 
              ! <m,k+q|e^{i(p+G)}r|bsum,k+q-p> * vc_sqrt(p,G).
              ! Exchange bra and ket and take the CC of the FFT in sigtk_multiply_by_vc_sqrt
@@ -1517,7 +1536,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            end do ! m_kq
 
            ! TODO: this is an all_gatherv but oh well.
-           !call xmpi_sum(vec_gwc_mkq, gqk%pert_comm, ierr)
+           !if (gqk%pert_comm%nproc > 1) then
+           !  call xmpi_sum(vec_gwc_mkq, gqk%pert_comm, ierr)
+           !   if (need_x_kqmp) call xmpi_sum(vec_gx_mkq, gqk%pert_comm, ierr)
+           !  if (dtset%gwcomp == 2) call xmpi_sum(vec_coh_mkq, gqk%pert_comm, ierr)
+           !end if
 
            ! ========================================
            ! Loop over my set of atomic perturbations
@@ -1529,6 +1552,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            !        - Build the full first-order wavefunction including the active subspace.
            ! TODO: Should create array of gs_ham(my_npert) and rf_ham(my_npert) but I'm not sure the GPU version supports
            !       multiple instances.
+
+           call timab(1942, 2, tsec)
+           call timab(1943, 1, tsec)
 
            do imyp=1,gqk%my_npert
              ! NB: Only one proc enters this section. No MPI parallelism is allowed here.
@@ -1855,10 +1881,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 !end if ! .not qq_is_gamma.
 
            end do  ! imyp (my perturbations)
+           call timab(1943, 1, tsec)
+
            call rf_ham_kqmp%free(); call rf_ham_kmp%free()
          end do ! ib_sum (sum over bands)
 
-         ! Show progress of all pp points
+         ! Show progress of all pp points.
          if (print_time_pp) then
            call inds2str(1, " My pp-point:", my_ipp, my_npp(spin), pp_mesh%nbz, msg)
            call cwtime_report(msg, cpu_pp, wall_pp, gflops_pp);
@@ -1944,7 +1972,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ABI_FREE(vlocal1_mqq)
      ABI_FREE(vxc1_qq)
 
-     if (print_time_qq) then
+     if (print_time_qq .and. wall_qq > tol3) then
        call inds2str(2, "My q-point", my_iq, gqk%my_nq, gqk%glob_nq, msg)
        call cwtime_report(msg, cpu_qq, wall_qq, gflops_qq); if (my_iq == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
      end if
