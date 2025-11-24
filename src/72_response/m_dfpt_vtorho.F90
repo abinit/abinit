@@ -678,7 +678,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 &     npw_k,npw1_k,dtset%nspinor,nsppol,n4,n5,n6,occ_k,pawrhoij1_unsym,prtvol,psps,resid_k,&
 &     rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,ddk_f,wtk_k,nlines_done,cg1_out,eta=eta_,omega=omega_)
 
-!     write(ab_out,*)"CCCCHECK ek0 00 ",ikpt,ek0_k(10)!,ek0
 !    Free temporary storage
      ABI_FREE(kinpw1)
      ABI_FREE(kg_k)

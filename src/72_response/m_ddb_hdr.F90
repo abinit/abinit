@@ -102,9 +102,11 @@ MODULE m_ddb_hdr
  character(len=descrlen),public,parameter :: DESCR_ipert_10 = '2nd derivative wrt to k'
  character(len=descrlen),public,parameter :: DESCR_ipert_11 = '2nd derivative wrt to k and electric field'
 
- integer,public,parameter :: DDB_VERSION=20230401 ! TODO: check if we should update this with new G matrix stuff
+ integer,public,parameter :: DDB_VERSION=20240201 ! 
+ !integer,public,parameter :: DDB_VERSION=20230401 ! TODO: check if we should update this with new G matrix stuff
  ! DDB Version number for text format.
 
+ !integer,public,parameter :: DDB_VERSION_NC=20240201 ! TODO:  
  integer,public,parameter :: DDB_VERSION_NC=20230219 ! TODO: check if we should update this with new G matrix stuff
  ! DDB NetCDF version number.
 
@@ -202,6 +204,9 @@ MODULE m_ddb_hdr
 
    real(dp),allocatable :: occ(:)
    ! occ(mband*mkpt*nsppol)
+
+  ! real(dp),allocatable :: omega(:,:)
+  ! ! omega(3,nblock)
 
    real(dp),allocatable :: spinat(:,:)
    ! spinat(3,matom)
@@ -1746,7 +1751,7 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, comm, &
  npsp = ddb_hdr%mtypat
 
  ! Set maximal value for mpert
- ddb_hdr%mpert = ddb_hdr%natom+MPERT_MAX
+ ddb_hdr%mpert = 2*ddb_hdr%natom+MPERT_MAX
 
  ! Compute the block dimensions
  call ddb_hdr%get_block_dims()
@@ -4534,7 +4539,6 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,msym,natom,nblok,nkpt,&
        read (unddb,*)
      end do
    end do
-
  else if(string==' No informat')then
 
    dimekb=0
@@ -4752,7 +4756,7 @@ subroutine ddb_hdr_print(ddb_hdr, unddb)
 &  ddb_hdr%occopt,ddb_hdr%pawecutdg,ddb_hdr%rprim,ddb_hdr%dfpt_sciss,&
 &  ddb_hdr%spinat,ddb_hdr%symafm,ddb_hdr%symrel,ddb_hdr%tnons,ddb_hdr%tolwfr,&
 &  ddb_hdr%tphysel,ddb_hdr%tsmear,ddb_hdr%typat,ddb_hdr%usepaw,ddb_hdr%wtk,&
-&  ddb_hdr%xred,ddb_hdr%zion,ddb_hdr%znucl)
+&  ddb_hdr%xred,ddb_hdr%zion,ddb_hdr%znucl,ddb_hdr%ddb_version)
 
  call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,ddb_hdr%with_psps,&
 &  ddb_hdr%psps%indlmn,ddb_hdr%psps%lmnmax,ddb_hdr%nblok,ddb_hdr%ntypat,unddb,&
@@ -4926,13 +4930,13 @@ subroutine ddb_io_out (unddb,dscrpt,matom,mband,&
 &  acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
 &  natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
 &  pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
-&  typat,usepaw,wtk,xred,zion,znucl)
+&  typat,usepaw,wtk,xred,zion,znucl,ddbvrs)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: unddb,matom,mband,mkpt,msym,mtypat
  integer,intent(in) :: intxc,iscf,ixc,natom,nkpt,nspden,nspinor,nsppol,nsym
- integer,intent(in) :: ntypat,occopt,usepaw
+ integer,intent(in) :: ntypat,occopt,usepaw,ddbvrs
  real(dp),intent(in) :: dilatmx,ecut,ecutsm,kptnrm,pawecutdg,dfpt_sciss,tolwfr,tphysel
  real(dp),intent(in) :: tsmear
  character(len=fnlen),intent(in) :: dscrpt
@@ -4947,6 +4951,8 @@ subroutine ddb_io_out (unddb,dscrpt,matom,mband,&
 !Set routine version number here:
 !scalars
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
+ integer,parameter :: cvrsio9=20230401
+ integer,parameter :: cvrsio9_new=20240201
  integer :: bantot,ii,ij,ikpt,iline,im
 !arrays
  character(len=9) :: name(9)
@@ -4955,9 +4961,15 @@ subroutine ddb_io_out (unddb,dscrpt,matom,mband,&
  DBG_ENTER("COLL")
 
 !Write the header
- write(unddb, '(/,a,/,a,i10,/,/,a,a,/)' ) &
- ' **** DERIVATIVE DATABASE ****    ',&
- '+DDB, Version number',DDB_VERSION,' ',trim(dscrpt)
+ if (ddbvrs <= cvrsio9) then 
+   write(unddb, '(/,a,/,a,i10,/,/,a,a,/)' ) &
+   ' **** DERIVATIVE DATABASE ****    ',&
+   '+DDB, Version number',cvrsio9,' ',trim(dscrpt)
+ else
+   write(unddb, '(/,a,/,a,i10,/,/,a,a,/)' ) &
+   ' **** DERIVATIVE DATABASE ****    ',&
+   '+DDB, Version number',DDB_VERSION,' ',trim(dscrpt)
+ endif
 
 !Write the descriptive data
 !1. usepaw
