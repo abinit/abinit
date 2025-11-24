@@ -1875,7 +1875,6 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
     !  cg1s_kq(:,:,ipc,ib_k) = zero
     !end if
  else
-    !cg1s_kq(:,:,ipc,ib_k) = zero
     ug1_nkq = zero
  end if
 
@@ -1893,9 +1892,9 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  ABI_FREE(grad_berry)
 
  if (stern%use_cache) then
-    ! Store |Psi_1> to init Sternheimer solver for the next q-point.
-    ABI_UNUSED(qpt(1))
-    !call stern%u1c%store(qpt, stern%npw_kq, stern%nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
+   ! Store |Psi_1> to init Sternheimer solver for the next q-point.
+   ABI_UNUSED(qpt(1))
+   !call stern%u1c%store(qpt, stern%npw_kq, stern%nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
  end if
 
  ! Handle possible convergence error.

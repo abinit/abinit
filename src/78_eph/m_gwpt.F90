@@ -54,7 +54,7 @@ module m_gwpt
  use m_numeric_tools,  only : arth, c2r, r2c, get_diag, linfit, iseven, simpson_cplx, print_arr, inrange
  use m_io_tools,       only : iomode_from_fname
  use m_fftcore,        only : ngfft_seq, sphereboundary, print_ngfft
- use m_cgtk,           only : cgtk_rotate
+ use m_cgtk,           only : cgtk_rotate, cgtk_change_gsphere
  use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm, fxphas_and_cmp
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
@@ -352,7 +352,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    done_qbz_spin = 0
  else
    ! Init gstore from pre-existent file. gstore_gname and read_dw are not relevant here.
-   call gstore%from_ncpath(gstore_filepath, with_cplex0, dtset, cryst, ebands, ifc, &
+   call gstore%from_ncpath(gstore_filepath, with_cplex0, dtset, dtfil, cryst, ebands, ifc, &
                            "atom", dtset%gstore_gname, .False., comm)
  end if
 
@@ -1729,6 +1729,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              stern_kqmp%bands_treated_now(:) = 0; stern_kqmp%bands_treated_now(ib_sum) = 1
              stern_kqmp%rank_band = 0; u1_band = ib_sum; band_me = ib_sum
+
+             !call cgtk_change_gsphere(nspinor, &
+             !                         npw_kqmp, istwfk1, kg_kqmp, cg1_kqmp, &
+             !                         npw_kmp,  istwfk1, kg_kmp, cg11_kmp, work_ngfft, work)
 
              ! (k-p, k+q-p)
              call stern_kqmp%solve(u1_band, band_me, idir, ipert, -qq_bz, gs_ham_kmp, rf_ham_kmp, &
