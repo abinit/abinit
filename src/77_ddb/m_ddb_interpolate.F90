@@ -160,6 +160,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, comm)
    ddb_new%typ = 85
  end if
  ddb_new%qpt = zero
+ ddb_new%omega = zero
  ddb_new%nrm = one
 
  ABI_MALLOC(d2cart,(2,3,mpert,3,mpert))

@@ -1821,7 +1821,6 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 !    terms for Zeeman or scalar potential perturbation, SPr 2deb
      else if ( ipert==natom+5 .or. ipert==natom+6 ) then
        evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emagpen1+elmag1
-!       write(ab_out,*)"HHHEREEEEE",ek0,edocc,eeig0,eloc0,enl0,ehart1,exc1,epaw1
 
 !    terms for atomic-spheres local Zeeman perturbation
      else if ( ipert>natom+11.and.ipert<=2*natom+11 ) then
