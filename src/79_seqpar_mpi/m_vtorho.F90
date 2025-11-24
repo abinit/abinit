@@ -402,7 +402,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer(c_int64_t)   :: ph3d_size
 #endif
 
- logical :: berryflag,computesusmat,fixed_occ,has_vectornd
+ logical :: berryflag,computesusmat,fixed_occ,has_vectornd,step_cond
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.,do_invS
  integer :: dmft_dftocc
@@ -610,13 +610,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ! Here I change the default behavior to avoid the extra loop but only if RMM-DIIS is used.
        ! XG 20210312 : I prefectly agree with you. This is historical, and should be changed, after testing and update of reference files.
        if ((itimes(1) > 1 .or. (itimes(2)>1)) .and. dtset%rmm_diis /= 0) nnsclo_now = 1
-       if(associated(rcpaw)) then
-         if(istep<=rcpaw%nfrpaw) then
-           nnsclo_now = 3
-         elseif(istep<=2) then
-           nnsclo_now =2
-         endif
-       endif
      else
        ! Wavelets
        if (iscf==0) then
@@ -1093,8 +1086,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
        ! Build inverse of overlap matrix for chebfi
+       if(associated(rcpaw)) then
+         step_cond=istep<=1.or.(rcpaw%istep>=rcpaw%updatepaw(1)+1.and.rcpaw%istep<=rcpaw%updatepaw(2)+1)
+       else
+         step_cond=istep <= 1
+       endif
+
        if (dtset%cprj_in_memory==0) then
-         if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
+         if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. step_cond) then
             call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
          end if
        end if
@@ -1133,7 +1132,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (dtset%cprj_in_memory==1) then
          do_invS=xg_nonlop%paw.and.dtset%wfoptalg==111
          call xg_nonlop_make_k(xg_nonlop,my_ikpt,istwf_k,mpi_enreg%me_g0,mpi_enreg%me_g0_fft,npw_k,ffnl,ph3d,kpg_k,&
-           & istep<=1,compute_invS_approx=do_invS,compute_gram=do_invS)
+           & step_cond,compute_invS_approx=do_invS,compute_gram=do_invS)
        end if
 
        ! Here we initialize the wavefunctions with atomic orbitals at the first GS iteration of the first
@@ -1425,12 +1424,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if(rcpaw%istep==1) then
          min_eigv=minval(eigen)
          do itypat=1,dtset%ntypat
-           rcpaw%atm(itypat)%eig=rcpaw%atm(itypat)%eig-rcpaw%atm(itypat)%min_eigv+min_eigv
+           if(allocated(rcpaw%atm(itypat)%eig)) then
+             rcpaw%atm(itypat)%eig=rcpaw%atm(itypat)%eig-rcpaw%atm(itypat)%min_eigv+min_eigv
+           endif
          enddo
        endif
        nelect=nelect+rcpaw%nelect_core_orig
        if(rcpaw%frocc) then
-         if(rcpaw%istep>rcpaw%nfrocc) then
+         if(rcpaw%istep>rcpaw%updateocc) then
            nelect=nelect-rcpaw%nelect_core
          endif
        endif
@@ -1902,9 +1903,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Compute extended plane waves contributions
      if(associated(extfpmd)) then
+       extfpmd%nelect_res=-extfpmd%nelect
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
          dtset%nspinor,dtset%nsppol,dtset%wtk)
+       extfpmd%nelect_res=extfpmd%nelect_res+extfpmd%nelect
        call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%nkpt,dtset%nspinor,&
          dtset%nsppol,dtset%nband,dtset%wtk)
        call extfpmd%compute_entropy(energies%entropy_extfpmd,energies%e_fermie,dtset%nkpt,&
