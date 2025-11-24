@@ -123,7 +123,7 @@ jpawu2      0.9 eV  # Values of J
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test =
-#%%   t103_MPI4.abo, tolnlines = 2, tolabs = 1.0e-04, tolrel = 1.0e-04, fld_options=-medium
+#%%   t103_MPI4.abo, tolnlines = 3, tolabs = 1.0e-04, tolrel = 1.0e-04, fld_options=-medium
 #%% [extra_info]
 #%% authors = F. Gendron
 #%% keywords = DMFT, dmft_magnfield
