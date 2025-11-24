@@ -1494,8 +1494,8 @@ subroutine ddb_bcast(ddb, comm)
  call xmpi_bcast(ddb%omega, master, comm, ierr)
  call xmpi_bcast(ddb%qpt, master, comm, ierr)
  call xmpi_bcast(ddb%val, master, comm, ierr)
- call xmpi_bcast(ddb%val_fs, master, comm, ierr)
- call xmpi_bcast(ddb%val_rs, master, comm, ierr)
+! call xmpi_bcast(ddb%val_fs, master, comm, ierr)
+! call xmpi_bcast(ddb%val_rs, master, comm, ierr)
 
  DBG_EXIT("COLL")
 
