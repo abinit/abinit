@@ -2175,8 +2175,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%random_atpos       = dtin%random_atpos
  dtout%ratopt             = dtin%ratopt
  dtout%rcpaw_frocc        = dtin%rcpaw_frocc
- dtout%rcpaw_nfrpaw       = dtin%rcpaw_nfrpaw
- dtout%rcpaw_nfrtnc       = dtin%rcpaw_nfrtnc
+! dtout%rcpaw_nfrpaw       = dtin%rcpaw_nfrpaw
+! dtout%rcpaw_nfrtnc       = dtin%rcpaw_nfrtnc
  dtout%rcpaw_updatetnc    = dtin%rcpaw_updatetnc
  dtout%rcpaw_orbshift     = dtin%rcpaw_orbshift
  dtout%rcpaw_potshift     = dtin%rcpaw_potshift
