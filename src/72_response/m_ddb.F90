@@ -2178,7 +2178,7 @@ subroutine ddb_read_d2eig(ddb, ddb_hdr, iblok_store, iblok_read, comm)
     else if (ddb_hdr%has_open_file_txt) then
 
       ! Read the next block and store it
-      call ddb%read_d2eig_txt(ddb_hdr%unddb, iblok_store)
+      call ddb%read_d2eig_txt(ddb_hdr%unddb, iblok_store,ddb_hdr%ddb_version)
 
     else
       write(msg, '(3a)' )&
@@ -2217,12 +2217,12 @@ end subroutine ddb_read_d2eig
 !! SOURCE
 
 
-subroutine ddb_read_d2eig_txt(ddb, unddb, iblok)
+subroutine ddb_read_d2eig_txt(ddb, unddb, iblok, ddbvsn)
 
 !Arguments -------------------------------
 !scalars
  class(ddb_type),intent(inout) :: ddb
- integer, intent(in) :: unddb
+ integer, intent(in) :: unddb, ddbvsn
  integer, intent(in), optional :: iblok
 !Local variables -------------------------
 !scalars
@@ -2233,7 +2233,7 @@ subroutine ddb_read_d2eig_txt(ddb, unddb, iblok)
   if (present(iblok)) iblok_eig2d = iblok
 
   call ddb%read_block_txt(iblok_eig2d,ddb%nband*ddb%nsppol,ddb%mpert,ddb%msize,ddb%nkpt,unddb,&
-                      ddb%eig2dval(:,:,:,:),ddb%kpt(:,:))
+                      ddb%eig2dval(:,:,:,:),ddb%kpt(:,:),ddb_version=ddbvsn)
 
 end subroutine ddb_read_d2eig_txt
 !!***
@@ -4961,13 +4961,13 @@ end subroutine asrq0_free
 !!
 !! SOURCE
 
-subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
+subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,ddb_version, &
                            blkval2,kpt) !optional
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: choice,mband,mpert,msize,nkpt,nunit
- integer,intent(in) :: iblok
+ integer,intent(in) :: iblok, ddb_version
  class(ddb_type),intent(in) :: ddb
 !arrays
  real(dp),intent(in),optional :: kpt(3,nkpt)
@@ -4975,6 +4975,7 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
 
 !Local variables -------------------------
 !scalars
+ integer,parameter :: cvrsio9_new=20240201
  integer :: iband,idir1,idir2,idir3,ii,ikpt,ipert1,ipert2,ipert3
  integer :: nelmts
  logical :: eig2d_
@@ -5026,7 +5027,9 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    write(nunit, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
 
    ! Write the perturbation frequency
-!   write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
+   if( ddb_version>=cvrsio9_new )then
+     write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
+   endif
 
    ! Write the matrix elements
    if(choice==2)then
@@ -5055,10 +5058,12 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    write(nunit, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,iblok),ii=4,6),ddb%nrm(2,iblok)
    write(nunit, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,iblok),ii=7,9),ddb%nrm(3,iblok)
 
-!   ! Write the perturbation frequency
-!   write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
-!   write(nunit, '(a,1es16.8)' )'          ',ddb%omega(2,iblok)
-!   write(nunit, '(a,1es16.8)' )'          ',ddb%omega(3,iblok)
+   ! Write the perturbation frequency
+   if( ddb_version>=cvrsio9_new )then
+     write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
+     write(nunit, '(a,1es16.8)' )'          ',ddb%omega(2,iblok)
+     write(nunit, '(a,1es16.8)' )'          ',ddb%omega(3,iblok)
+   endif
 
    ! Write the matrix elements
    if(choice==2)then
@@ -5220,7 +5225,7 @@ subroutine ddb_write_txt(ddb, ddb_hdr, filename, with_psps, comm)
  call ddb_hdr%open_write_txt(filename, with_psps)
 
  do iblok=1,ddb%nblok
-   call ddb%write_block_txt(iblok,choice,1,ddb%mpert,ddb%msize,ddb_hdr%nkpt,ddb_hdr%unddb)
+   call ddb%write_block_txt(iblok,choice,1,ddb%mpert,ddb%msize,ddb_hdr%nkpt,ddb_hdr%unddb,ddb_hdr%ddb_version)
  end do
 
  call ddb_hdr%close()
@@ -5267,7 +5272,7 @@ subroutine ddb_write_d2eig(ddb, ddb_hdr, iblok, comm)
 
   else if (ddb_hdr%has_open_file_txt) then
 
-    call ddb%write_d2eig_txt(ddb_hdr%unddb, iblok)
+    call ddb%write_d2eig_txt(ddb_hdr%unddb, iblok,ddb_hdr%ddb_version)
 
   else
     write(msg, '(3a)' )&
@@ -5408,7 +5413,7 @@ end subroutine ddb_write_d2eig_nc
 !!
 !! SOURCE
 
-subroutine ddb_write_d2eig_txt(ddb, unddb, iblok)
+subroutine ddb_write_d2eig_txt(ddb, unddb, iblok,ddbvsn)
 !Arguments -------------------------------
  class(ddb_type),intent(in) :: ddb
  integer,intent(in) :: unddb
@@ -5418,12 +5423,13 @@ subroutine ddb_write_d2eig_txt(ddb, unddb, iblok)
 !scalars
  integer,parameter :: iblok_eig2d=1
  integer,parameter :: choice=2
+ integer :: ddbvsn
 ! ************************************************************************
 
   ! GA: This routine is redundant with outbsd.
   !     The present implementation should replace outbsd.
 
- call ddb%write_block_txt(iblok,choice,ddb%nband,ddb%mpert,ddb%msize,ddb%nkpt,unddb,&
+ call ddb%write_block_txt(iblok,choice,ddb%nband,ddb%mpert,ddb%msize,ddb%nkpt,unddb,ddbvsn, &
                       ddb%eig2dval(:,:,:,:), ddb%kpt(:,:))
 
 end subroutine ddb_write_d2eig_txt

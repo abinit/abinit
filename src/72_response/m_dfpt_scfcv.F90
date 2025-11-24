@@ -1174,8 +1174,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      end if
 
      optene = 0 ! use direct scheme
-!     write(ab_out,*)"CCCCHECK ek0 ",ek0
-!     write(ab_out,*)"CCCCHECK 3 "
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,elmag1,eloc0,elpsp1,emagpen1,&
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,evxctau0,evxctau1,exc1,ipert,dtset%natom,optene)

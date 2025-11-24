@@ -339,6 +339,7 @@ contains
   ddb_hdr%nblok = DDB%nblok
   ABI_MALLOC(ddb_hdr%typ,(ddb_hdr%nblok))
   ddb_hdr%typ = DDB%typ
+  if (ddb_hdr%ddb_version>=20230401) ddb_hdr%ddb_version=20230401 !TODO: The variable 'omega' must be assigned for new versions. 
 
   filename = trim(Invar%output_prefix)//'_DDB'
   call DDB%write(ddb_hdr, filename)
