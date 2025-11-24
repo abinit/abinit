@@ -3187,7 +3187,7 @@ end subroutine ddb_read_nc
 !!
 !! SOURCE
 
-logical function ddb_can_merge_blocks(ddb1, ddb2, iblok1, iblok2) result(can_merge)
+logical function ddb_can_merge_blocks(ddb1, ddb2, iblok1, iblok2, ddbvsn) result(can_merge)
 
 !Arguments -------------------------------
 !array
@@ -3195,10 +3195,12 @@ logical function ddb_can_merge_blocks(ddb1, ddb2, iblok1, iblok2) result(can_mer
  type(ddb_type),intent(inout) :: ddb2
  integer,intent(in) :: iblok1
  integer,intent(in) :: iblok2
+ integer,intent(in) :: ddbvsn
 
 !local variables
 !scalars
  integer :: nq, ii, blktyp
+ integer,parameter :: cvrsio9_new=20240201
  real(dp),parameter :: qtol=2.0d-8
  real(dp) :: diff
 ! ************************************************************************
@@ -3230,6 +3232,12 @@ logical function ddb_can_merge_blocks(ddb1, ddb2, iblok1, iblok2) result(can_mer
           - ddb2%qpt(3+3*(ii-1),iblok2)/ddb2%nrm(ii,iblok2))
     if (abs(diff) > qtol) can_merge = .false.
   end do
+  if(ddbvsn >= cvrsio9_new)then
+    do ii=1,nq
+      diff=ddb1%omega(ii,iblok1)-ddb2%omega(ii,iblok2)
+      if (abs(diff) > qtol) can_merge = .false.
+    end do
+  end if
 
 end function ddb_can_merge_blocks
 !!***
@@ -3253,7 +3261,7 @@ end function ddb_can_merge_blocks
 !!
 !! SOURCE
 
-subroutine ddb_merge_blocks(ddb1, ddb2, iblok1, iblok2)
+subroutine ddb_merge_blocks(ddb1, ddb2, iblok1, iblok2, ddbvsn)
 
 !Arguments -------------------------------
 !array
@@ -3261,12 +3269,14 @@ subroutine ddb_merge_blocks(ddb1, ddb2, iblok1, iblok2)
  class(ddb_type),intent(inout) :: ddb2
  integer,intent(in) :: iblok1
  integer,intent(in) :: iblok2
+ integer,intent(in) :: ddbvsn
 
 !local variables
 !scalars
  integer :: ii, blktyp, mpert1, mpert2
  integer :: idir1, idir2, idir3, ipert1, ipert2, ipert3
  real(dp),parameter :: qtol=2.0d-8
+ integer,parameter :: cvrsio9_new=20240201
 !arrays
  real(dp), allocatable :: d1matr(:,:,:)
  real(dp), allocatable :: d2matr(:,:,:,:,:)
@@ -3289,6 +3299,11 @@ subroutine ddb_merge_blocks(ddb1, ddb2, iblok1, iblok2)
   do ii=1,9
     ddb1%qpt(ii,iblok1) = ddb2%qpt(ii,iblok2)
   end do
+  if(ddbvsn >= cvrsio9_new)then
+    do ii=1,3
+      ddb1%omega(ii,iblok1) = ddb2%omega(ii,iblok2)
+    end do
+  endif
   do ii=1,3
     ddb1%nrm(ii,iblok1) = ddb2%nrm(ii,iblok2)
   end do
@@ -6605,15 +6620,10 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
    if (ddb_hdr%has_d3E_xx) msize_ = msize_ * 3 * mpert
    msize = max(msize, msize_)
 
-!<<<<<<< HEAD
-! mpert = 2*matom + MPERT_MAX
-! msize = 3 * mpert * 3 * mpert
-!=======
    if (ddb_hdr%with_psps>0 .or. ddb_hdr%psps%usepaw > 0) then
      iddb_psps = iddb
    end if
  end do
-!>>>>>>> trunk/develop
 
  ddb%nsppol = nsppol
 
@@ -6664,14 +6674,10 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
    call ddb_hdr2%open_read(filenames(iddb), comm, &
                           matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
                           msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
-!<<<<<<< HEAD
    ddbvsn=ddb_hdr2%ddb_version
-!   close(ddbun)
-!=======
    call ddb_hdr2%close()
 
    if (chkopt==1)then
-!>>>>>>> trunk/develop
 
      ! Compare the current DDB and input DDB information.
      ! In case of an inconsistency, halt the execution.
@@ -6713,46 +6719,7 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
      can_merge = .false.
      do iblok1=1, nblok
 
-!<<<<<<< HEAD
-!       ! Figure out if the block can be merged to an existing one
-!       if(ddb2%typ(iblok2)==ddb%typ(iblok1))then
-!
-!         tmerge = 1
-!
-!         ! Compare the wavevectors
-!         if(ddb2%typ(iblok2)==1.or.ddb2%typ(iblok2)==2.or.ddb2%typ(iblok2)==5)then
-!           nq=1
-!         else if(ddb2%typ(iblok2)==3.or.ddb2%typ(iblok2)==33)then
-!           ! Note: do not merge permutation related elements ....
-!           nq=3
-!         else if(ddb2%typ(iblok2)==4 .or. ddb2%typ(iblok2)==0)then
-!           nq=0
-!         end if
-!         if(nq/=0)then
-!           do ii=1,nq
-!             diff = ddb%qpt(1+3*(ii-1),iblok1)/ddb%nrm(ii,iblok1) - ddb2%qpt(1+3*(ii-1),iblok2)/ddb2%nrm(ii,iblok2)
-!             if (abs(diff) > qtol) tmerge=0
-!             diff = ddb%qpt(2+3*(ii-1),iblok1)/ddb%nrm(ii,iblok1) - ddb2%qpt(2+3*(ii-1),iblok2)/ddb2%nrm(ii,iblok2)
-!             if (abs(diff) > qtol) tmerge=0
-!             diff = ddb%qpt(3+3*(ii-1),iblok1)/ddb%nrm(ii,iblok1) - ddb2%qpt(3+3*(ii-1),iblok2)/ddb2%nrm(ii,iblok2)
-!             if (abs(diff) > qtol) tmerge=0
-!           end do ! ii
-!         end if
-!
-!         ! Compare the frequencies
-!         if(ddbvsn >= cvrsio9_new)then
-!           nw=nq
-!           if(nw/=0)then
-!             do ii=1,nw
-!               sdiff=ddb%omega(ii,iblok1)-ddb2%omega(ii,iblok2)
-!               if (abs(sdiff) > wtol) tmerge=0
-!             end do
-!           end if
-!         end if
-!       end if
-!=======
-       can_merge = ddb%can_merge_blocks(ddb2, iblok1, iblok2)
-!>>>>>>> trunk/develop
+       can_merge = ddb%can_merge_blocks(ddb2, iblok1, iblok2, ddbvsn)
 
        if (can_merge) then
          write(msg, '(a,i5,a,a)' )' merge block #',iblok2,' from file ', filenames(iddb)
@@ -6769,28 +6736,7 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
        iblok = nblok
      end if
 
-!<<<<<<< HEAD
-!     ! Add the blok to the output ddb
-!     ddb%typ(iblok) = ddb2%typ(iblok2)
-!     do ii=1,9
-!       ddb%qpt(ii,iblok) = ddb2%qpt(ii,iblok2)
-!     end do
-!     do ii=1,3
-!       ddb%nrm(ii,iblok) = ddb2%nrm(ii,iblok2)
-!     end do
-!     do ii=1,3
-!       ddb%omega(ii,iblok) = ddb2%omega(ii,iblok2)
-!     end do
-!     do ii=1,msize
-!       if(ddb2%flg(ii,iblok2) == 1)then
-!         ddb%flg(ii,iblok) = 1
-!         ddb%val(1,ii,iblok) = ddb2%val(1,ii,iblok2)
-!         ddb%val(2,ii,iblok) = ddb2%val(2,ii,iblok2)
-!       end if
-!     end do
-!=======
-     call ddb%merge_blocks(ddb2, iblok, iblok2)
-!>>>>>>> trunk/develop
+     call ddb%merge_blocks(ddb2, iblok, iblok2, ddbvsn)
 
    end do  ! iblok2
 
