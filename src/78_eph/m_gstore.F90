@@ -171,6 +171,8 @@ module m_gstore
  use m_pawfgr,         only : pawfgr_type
  use m_mlwfovlp,       only : wan_t
  use m_pstat,          only : pstat_proc
+ use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph
+ use m_gsphere,        only : gsphere_t
 
  implicit none
 
@@ -963,7 +965,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! =============================================
  ! Initialize gqk basic dimensions and MPI grid
  ! =============================================
- call gstore%set_mpi_grid__(nproc_spin, comm_spin)
+ call gstore%set_mpi_grid__(dtfil, nproc_spin, comm_spin)
  call xmpi_comm_free(comm_spin)
 
  ! At this point, we have the Cartesian grid (one per spin if any),
@@ -1374,23 +1376,28 @@ end subroutine gstore_distribute_spins
 !!
 !! SOURCE
 
-subroutine gstore_set_mpi_grid__(gstore, nproc_spin, comm_spin)
+subroutine gstore_set_mpi_grid__(gstore, dtfil, nproc_spin, comm_spin)
 
 !Arguments ------------------------------------
 !scalars
  class(gstore_t),target,intent(inout) :: gstore
+ type(datafiles_type),intent(in) :: dtfil
  integer,intent(in) :: nproc_spin(gstore%nsppol)
  integer,intent(inout) :: comm_spin(gstore%nsppol)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
  integer :: spin, my_is, np, my_rank, ierr, npp_bz, units(2), bstart_k, bstop_k, nb_k, bstart_kq, bstop_kq, nb_kq
+ integer :: comm_cart, me_cart, dims(ndims)
  type(gqk_t),pointer :: gqk
  character(len=5000) :: msg
- character(len=10) :: order
- integer :: comm_cart, me_cart, dims(ndims)
+ character(len=10) :: order, priority
+ character(len=fnlen) :: screen_filepath
  logical :: reorder, periods(ndims), keepdim(ndims)
- character(len=10) :: priority
+ type(kmesh_t) :: pp_mesh
+ type(gsphere_t) :: gsph_c
+ real(dp),allocatable :: qlwl(:,:)
+ type(hscr_t),target :: hscr
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]
@@ -1513,23 +1520,26 @@ subroutine gstore_set_mpi_grid__(gstore, nproc_spin, comm_spin)
      else
        ! Automatic grid generation for GWPT (hopefully smart)
 
-       !if (gqk%glob_nk == 1 .and. gqk%glob_nq == 1) then
-         ! This may happen in GWPT when only of e-ph matrix element is wanted.
-         ! Here we activate the parallelism over pp_sum and perturbations.
-         ! In principle we should distributed the
-         npp_bz = product(get_diag(gstore%dtset%kptrlatt))
+       ! In GWPT, the loop over pp-wavevectors is always in the BZ and is expected to be the most efficient
+       ! Note however that the p-mesh is not necessarly equal to the k-mesh hence we have to read it from the SCR file.
+       !npp_bz = product(get_diag(gstore%dtset%kptrlatt))
 
-         !call kmesh%init(gstore%cryst, gstore%dtset%nkibz, gstore%dtset%kptns, dtset%kptopt)
-         !call find_qmesh(qmesh, gstore%cryst, kmesh)
-         !npp_bz = qmesh%nbz
-         !call kmesh%free(); call qmesh%free()
+       screen_filepath = dtfil%fnameabi_scr
+       ABI_CHECK(dtfil%fnameabi_scr /= ABI_NOFILE, "SCR file must be specified")
+       call get_hscr_qmesh_gsph(screen_filepath, gstore%dtset, gstore%cryst, hscr, pp_mesh, gsph_c, qlwl, comm_spin(spin))
+       npp_bz = pp_mesh%nbz
+       call hscr%free(); call pp_mesh%free(); call gsph_c%free()
+       ABI_SFREE(qlwl)
 
+       if (np <= npp_bz * gqk%natom3) then
+         ! "Small" np. Give higher priority to npp_bz and then perturbations.
          order = "12"
-         !order = "21"
          call xmpi_distrib_2d(np, order, npp_bz, gqk%natom3, gqk%pp_sum_comm%nproc, gqk%pert_comm%nproc, ierr)
-         !call xmpi_distrib_2d(np, order, gqk%natom3, gstore%dtset%mband, gqk%pert_comm%nproc, gqk%bsum_comm%nproc, ierr)
-         ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority))
-       !end if
+         ABI_CHECK(ierr == 0, sjoin("Cannot distribute nprocs:", itoa(np), " with priority: ", priority, " Please use gwpt_np_wpqbks"))
+       else
+         ! "Large" np. Activate parallelism over k-points or q-points depending on gstore input variables.
+         ABI_ERROR("Your number of MPI procs is too large for the automatic GWPT parallelization. Please use gwpt_np_wpqbks")
+       end if
      end if
 
    else
@@ -4213,7 +4223,7 @@ end function gstore_check_cplex_qkzone_gmode
 !!
 !! SOURCE
 
-subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, ifc, &
+subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, ebands, ifc, &
                               with_gmode, gvals_name, with_g2dw, comm)
 
 !Arguments ------------------------------------
@@ -4221,6 +4231,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  character(len=*),intent(in) :: path
  integer,intent(in) :: with_cplex
  type(dataset_type),target,intent(in) :: dtset
+ type(datafiles_type),intent(in) :: dtfil
  class(crystal_t),target,intent(in) :: cryst
  class(ebands_t),target,intent(in) :: ebands
  class(ifc_type),target,intent(in) :: ifc
@@ -4449,7 +4460,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  ! Compute krank
  call gstore%krank_ibz%from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
 
- call gstore%set_mpi_grid__(nproc_spin, comm_spin)
+ call gstore%set_mpi_grid__(dtfil, nproc_spin, comm_spin)
 
  ! At this point, we have the Cartesian grid (one per spin if any) and we can finally allocate and distribute other arrays.
  call gstore%malloc__(with_cplex, max_nq, qglob2bz, max_nk, gstore%kglob2bz, qbz2ibz, gstore%kbz2ibz)
@@ -5012,10 +5023,6 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
          end do
        end if
 
-       ! g(Sk, q) = g(k, S^{-1}q)
-       ! Note symrel convention here.
-       !ss = transpose(gstore%cryst%symrel(:,:, isym_k))
-
        do ipc=1,natom3
          ! Write the 4th and the last perturbation.
          if ((ipc /= 4 .and. ipc /= natom3) .and. .not. all_gs) cycle
@@ -5059,7 +5066,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
                 min_g_ratio = min(g_ratio, min_g_ratio)
                 max_g_ratio = max(g_ratio, max_g_ratio)
                 mean_g_ratio = mean_g_ratio + g_ratio
-                stdev_g_ratio = g_ratio ** 2
+                stdev_g_ratio = stdev_g_ratio + g_ratio ** 2
               end if
               write(ab_out, "(a1,5(i5,1x),3(es16.6))")"-", iq_glob, ik_glob, ipc, m_kq, n_k, g_ratio, gg, gg_ks
             end do
@@ -5068,9 +5075,8 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
           if (nn /= 0) then
             mean_g_ratio = mean_g_ratio / nn
             ! \sigma^{2} = \langle x^{2} \rangle - \langle x \rangle^{2}
-            stdev_g_ratio = sqrt((stdev_g_ratio / nn) - (mean_g_ratio ** 2))
             write(ab_out, "(a,es16.6)")"- mean_g_ratio:", mean_g_ratio
-            write(ab_out, "(a,es16.6)")"- stdev_g_ratio:", stdev_g_ratio
+            write(ab_out, "(a,es16.6)")"- stdev_g_ratio:", sqrt((stdev_g_ratio / nn) - (mean_g_ratio ** 2))
             write(ab_out, "(a,es16.6)")"- min_g_ratio:", min_g_ratio
             write(ab_out, "(a,es16.6)")"- max_g_ratio:", max_g_ratio
           end if

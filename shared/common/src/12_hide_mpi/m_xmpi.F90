@@ -4980,7 +4980,7 @@ end subroutine xmpio_create_coldistr_from_fp3blocks
 !! FUNCTION
 !!  Try to optimally distribute nprocs in a 2d grid of shape (n1, n2) given a problem of dimension (size1, size2).
 !!  Use order string to define priorities:
-!!      "12" or "21" if both dimensions should be optimized (if not possibile the first one gets optimized)
+!!      "12" or "21" if both dimensions should be optimized (if not possibile the first one gets optimized).
 !!      "1" or "2" to optimize only one dimension.
 !!  Return: exit status in ierr.
 !!
@@ -5069,7 +5069,6 @@ end subroutine balance_2
 end subroutine xmpi_distrib_2d
 !!***
 
-
 !----------------------------------------------------------------------
 
 !!****f* m_xmpi/xmpi_split_nsppol
@@ -5077,8 +5076,7 @@ end subroutine xmpi_distrib_2d
 !! xmpi_split_nsppol
 !!
 !! FUNCTION
-!!  Distribute spins.
-!!  Also create and return indirect mapping to spin index and init %brange_spin
+!!  Distribute collinear spins. Also create and return indirect mapping to spin index and init %brange_spin
 !!
 !! INPUTS
 !!  in_comm=Input communicator

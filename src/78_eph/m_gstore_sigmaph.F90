@@ -303,7 +303,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
 
  ! Init gstore and MPI grid from file and dtset.
  ! The Fan-Migdal SE requires |g(k,q)|^2 as well as g2DW in the phonon representation.
- call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, &
+ call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, dtfil, cryst, ebands, ifc, &
                          "phonon", dtset%gstore_gname, .True., comm)
  ! Consistency check.
  ierr = 0
