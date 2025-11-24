@@ -244,10 +244,6 @@ program anaddb
    ABI_FREE(delta_asrw0_fm)
  end if
 
- ! Acoustic Sum Rule
- ! In case the interatomic forces are not calculated, the
- ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
-  call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal%xcart)
 
 ! ! TODO: This is to maintain the previous behaviour in which all the arrays were initialized to zero.
 ! ! In the new version asrq0%d2asr is always computed if the Gamma block is present
@@ -262,6 +258,11 @@ program anaddb
  if (ddb_hdr%has_d3E_lw) then
    call ddb_lw_copy(ddb, ddb_lw, ddb_hdr)
  end if
+
+! Acoustic Sum Rule
+! In case the interatomic forces are not calculated, the
+! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
+ call asrq0%init(ddb, dtset%asr, dtset%rfmeth, crystal%xcart)
 
 
 ! Open netcdf output and write basic quantities
