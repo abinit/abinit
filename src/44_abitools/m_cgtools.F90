@@ -762,8 +762,7 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_op
 
 !Local variables-------------------------------
 !scalars
- integer :: mm, nn, kk, lda, ldb, ldc
- integer :: my_gpu_option
+ integer :: mm, nn, kk, lda, ldb, ldc, my_gpu_option
  real(dp) :: my_alpha(2), my_beta(2)
  complex(dp) :: my_calpha, my_cbeta
 ! *************************************************************************
@@ -3293,8 +3292,7 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
 
 !Local variables-------------------------------
 !scalars
- integer :: nbandm,npw_sp,ierr
- integer :: my_gpu_option
+ integer :: nbandm,npw_sp,ierr, my_gpu_option
 !arrays
  real(dp) :: tsec(2),bkp_scprod(2),bkp_dirg0(2)
 ! *************************************************************************

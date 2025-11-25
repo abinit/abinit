@@ -271,6 +271,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(ppmodel_t) :: ppm
  character(len=fnlen) :: screen_filepath, gstore_filepath
  character(len=5000) :: msg, qq_bz_string, kk_string, qkp_string, pp_string
+ character(len=500) :: init_mode
 !arrays
  integer :: nbsum, my_bsum_start(dtset%nsppol), my_bsum_stop(dtset%nsppol), my_nbsum(dtset%nsppol)
  integer :: g0_k(3), g0_q(3), g0_kq(3), g0_kmp(3), g0_kqmp(3), units(2), work_ngfft(18), gmax(3)
@@ -1583,10 +1584,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              stern_kmp%rank_band = 0; u1_band = ib_sum; band_me = ib_sum
 
              ! (k+q-p, k-p)
+             init_mode = "None"
              call stern_kmp%solve(u1_band, band_me, idir, ipert, qq_bz, gs_ham_kqmp, rf_ham_kqmp, &
                                   ebands%eig(:,ikmp_ibz,spin), ebands%eig(:,ikqmp_ibz,spin), &
                                   cg_kmp, cwaveprj0, cg1_kqmp, cwaveprj, msg, ierr, &
-                                  full_cg1=full_cg1_kqmp, full_ur1=full_ur1_kqmp)
+                                  full_cg1=full_cg1_kqmp, full_ur1=full_ur1_kqmp, init_mode=init_mode)
 
              ! Debug: Mute Delta_{q} (stern_kmp) by
              !full_ur1_kqmp = zero
@@ -1730,15 +1732,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              stern_kqmp%bands_treated_now(:) = 0; stern_kqmp%bands_treated_now(ib_sum) = 1
              stern_kqmp%rank_band = 0; u1_band = ib_sum; band_me = ib_sum
 
-             !call cgtk_change_gsphere(nspinor, &
-             !                         npw_kqmp, istwfk1, kg_kqmp, cg1_kqmp, &
-             !                         npw_kmp,  istwfk1, kg_kmp, cg11_kmp, work_ngfft, work)
+             init_mode = "input"
+             if (init_mode == "input") then
+               call cgtk_change_gsphere(nspinor, &
+                                        npw_kqmp, istwfk1, kg_kqmp, cg1_kqmp, &
+                                        npw_kmp,  istwfk1, kg_kmp, cg1_kmp, work_ngfft, work)
+             end if
 
              ! (k-p, k+q-p)
              call stern_kqmp%solve(u1_band, band_me, idir, ipert, -qq_bz, gs_ham_kmp, rf_ham_kmp, &
                                    ebands%eig(:,ikqmp_ibz,spin), ebands%eig(:,ikmp_ibz,spin), &
                                    cg_kqmp, cwaveprj0, cg1_kmp, cwaveprj, msg, ierr, &
-                                   full_cg1=full_cg1_kmp, full_ur1=full_ur1_star_kmp)
+                                   full_cg1=full_cg1_kmp, full_ur1=full_ur1_star_kmp, init_mode=init_mode)
 
              full_ur1_star_kmp = GWPC_CONJG(full_ur1_star_kmp)
 
