@@ -1556,9 +1556,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ! TODO: Should create array of gs_ham(my_npert) and rf_ham(my_npert) but I'm not sure the GPU version supports
            !       multiple instances.
 
-           call timab(1944, 1, tsec)
-
            do imyp=1,gqk%my_npert
+             call timab(1944, 1, tsec)
              ! NB: Only one proc enters this section. No MPI parallelism is allowed here.
              idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
              !print *, "For kk, ", kk, "pp:", pp, "idir, ipert", idir, ipert
@@ -1732,7 +1731,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              stern_kqmp%bands_treated_now(:) = 0; stern_kqmp%bands_treated_now(ib_sum) = 1
              stern_kqmp%rank_band = 0; u1_band = ib_sum; band_me = ib_sum
 
-             init_mode = "input"
+             !init_mode = "input"
+             init_mode = "None"
              if (init_mode == "input") then
                call cgtk_change_gsphere(nspinor, &
                                         npw_kqmp, istwfk1, kg_kqmp, cg1_kqmp, &
@@ -1764,6 +1764,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                gks_atm2(:,:,in_k,ipc) = stern_kqmp%eig1_k(:, bstart_kq:bstop_kq, ib_sum)
              end if
 
+             call timab(1944, 2, tsec)
+             call timab(1945, 1, tsec)
              do n_k=bstart_k, bstop_k
                in_k = n_k - bstart_k + 1
 
@@ -1880,12 +1882,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  !  end if
                  !end if
 
-               end do ! n_k
-             end do ! m_kq
+               end do ! m_kq
+             end do ! n_k
+             call timab(1945, 2, tsec)
 !end if ! .not qq_is_gamma.
-
            end do  ! imyp (my perturbations)
-           call timab(1944, 2, tsec)
 
            call rf_ham_kqmp%free(); call rf_ham_kmp%free()
          end do ! ib_sum (sum over bands)

@@ -1926,18 +1926,11 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
      ierr = 1
 
    else if (out_resid < zero) then
+     ! This may happen when the eigenvalue eig_mk(0) is higher than the lowest non-treated eig_mk+q(0). See dfpt_cgwf.
      write(err_msg, "(2(a,i0),a, (a,es13.5), a,i0)") &
        " Sternheimer solver didn't convergence for band: ", u1_band, "/", stern%nband, ch10, &
        " resid:", out_resid, ", after nline: ", stern%nlines_done
-     ! This may happen when the eigenvalue eig_mk(0) is higher than
-     ! the lowest non-treated eig_mk+q(0). The solution adopted here
-     ! is very crude, and rely upon the fact that occupancies of such
-     ! levels should be smaller and smaller with increasing nband, so that
-     ! a convergence study will give the right result.
-     !write(std_out, *)" eig0_k, eig0_kq, eig0_k - eig0_kq"
-     !do iband=1,stern%nband
      !  write(std_out, *)iband, eig0_k(iband), eig0_kq(iband), eig0_k(iband) - eig0_kq(iband)
-     !end do
      ierr = -2
    end if
 
