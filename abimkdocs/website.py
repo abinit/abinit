@@ -885,7 +885,7 @@ The full bibtex file is available [here](../abiref.bib).
     However you can run most of the tutorial examples in parallel with MPI, see the [[topic:parallelism|topic on parallelism]].
 """
 
-    hdiago_readme = """
+        hdiago_readme = """
 
 !!! important
 
