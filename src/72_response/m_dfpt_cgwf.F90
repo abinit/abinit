@@ -1808,13 +1808,14 @@ end subroutine stern_init
 subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_hamkq, eig0_k, eig0_kq, &
                        ug0_nk, cprj0_nk, &                  ! in
                        ug1_nkq, cprj1_nkq, err_msg, ierr, & ! out
-                       full_cg1, full_ur1) ! optional
+                       full_cg1, full_ur1, init_mode) ! optional
 
 !Arguments ------------------------------------
  class(stern_t),intent(inout) :: stern
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
  integer,intent(in) :: u1_band, band_me, idir, ipert
+ character(len=*),optional,intent(in) :: init_mode
 !arrays
  real(dp),intent(in) :: qpt(3), eig0_k(stern%nband), eig0_kq(stern%nband)
  real(dp),intent(inout) :: ug0_nk(2, stern%npw_k*stern%nspinor), ug1_nkq(2, stern%npw_kq*stern%nspinor)
@@ -1830,6 +1831,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, ibgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcount0 = 0
  integer :: opt_gvnlx1, grad_berry_size_mpw1, iband
  real(dp) :: out_resid, fermie1, eig0nk !, dotr
+ character(len=500) :: init_mode__
  type(rf2_t) :: rf2
 !arrays
  real(dp),allocatable :: grad_berry(:,:)
@@ -1863,20 +1865,36 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
  !if (psps%usepaw==1) mcprjq = stern%nspinor*mband_mem*mkqmem*nsppol*usecprj
 
- ! Init entry in cg1s_kq, either from cache or with zeros.
- if (stern%use_cache) then
-    ug1_nkq = zero
-    !u1c_ib_k = stern%u1c%find_band(band_ks)
-    !if (u1c_ib_k /= -1) then
-    !  call cgtk_change_gsphere(stern%nspinor, &
-    !                           stern%u1c%prev_npw_kq, istwfk1, stern%u1c%prev_kg_kq, stern%u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
-    !                           stern%npw_kq, istwfk1, kg_kq, cg1s_kq(1,1,ipc,ib_k), stern%work_ngfft, stern%work)
-    !else
-    !  cg1s_kq(:,:,ipc,ib_k) = zero
-    !end if
- else
-    ug1_nkq = zero
- end if
+ init_mode__ = "None"; if (present(init_mode)) init_mode__ = init_mode
+
+ select case (init_mode__)
+ case ("None")
+   ! Init entry in cg1s_kq, either from cache or with zeros.
+   if (stern%use_cache) then
+      ug1_nkq = zero
+      !u1c_ib_k = stern%u1c%find_band(band_ks)
+      !if (u1c_ib_k /= -1) then
+      !  call cgtk_change_gsphere(stern%nspinor, &
+      !                           stern%u1c%prev_npw_kq, istwfk1, stern%u1c%prev_kg_kq, stern%u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
+      !                           stern%npw_kq, istwfk1, kg_kq, cg1s_kq(1,1,ipc,ib_k), stern%work_ngfft, stern%work)
+      !else
+      !  cg1s_kq(:,:,ipc,ib_k) = zero
+      !end if
+   else
+      ug1_nkq = zero
+   end if
+
+ case ("input")
+   continue
+
+ !case ("random")
+   !call cg_randomize(istwfk1, stern%npw_kq, stern%nspinor, ndat1, stern%mpi_enreg%me_g0, ug1_nkq)
+   !call projbd(cgq, work, -1, icgq, igscq, istwfk1, mcgq, mgscq, nband_me, npw1, nspinor, &
+   !  gscq, scprod, 0, tim_projbd, useoverlap, me_g0, comm_fft, gpu_option=gs_hamkq%gpu_option)
+
+ case default
+   ABI_ERROR(sjoin("Invalid init_mode:", init_mode__))
+ end select
 
  call dfpt_cgwf(u1_band, band_me, stern%rank_band, stern%bands_treated_now, berryopt0, &
    stern%cgq, ug1_nkq, ug0_nk, &  ! Important stuff
@@ -1952,9 +1970,8 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    ! Compute full first order wavefunction
    ! =====================================
 
-   ! WARNING: Assuming all bands at k+q are on this cpu.
+   ! NOTE: Assuming all bands at k+q are on this cpu.
    cycle_bands(:) = .False.
-   !call proc_distrb_cycle_bands(cycle_bands, stern%mpi_enreg%proc_distrb, ikpt, isppol, me)
    ABI_CHECK_IGEQ(u1_band, 1, "u1_band")
    eig0nk = eig0_k(u1_band)
    fermie1 = zero; if (sum(qpt**2) < tol14) fermie1 = stern%fermie1_idir_ipert(idir, ipert)

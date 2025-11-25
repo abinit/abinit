@@ -5074,8 +5074,8 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
 
           if (nn /= 0) then
             mean_g_ratio = mean_g_ratio / nn
-            ! \sigma^{2} = \langle x^{2} \rangle - \langle x \rangle^{2}
             write(ab_out, "(a,es16.6)")"- mean_g_ratio:", mean_g_ratio
+            ! \sigma^{2} = \langle x^{2} \rangle - \langle x \rangle^{2}
             write(ab_out, "(a,es16.6)")"- stdev_g_ratio:", sqrt((stdev_g_ratio / nn) - (mean_g_ratio ** 2))
             write(ab_out, "(a,es16.6)")"- min_g_ratio:", min_g_ratio
             write(ab_out, "(a,es16.6)")"- max_g_ratio:", max_g_ratio
