@@ -1,0 +1,76 @@
+# energy computations for nuclear dipoles in the ClF molecules
+# leading to computation the indirect spin-spin coupling
+
+ndtset 4
+
+natnd 2
+iatnd 1 2
+
+atndlist1 
+0  1 0
+0  1 0
+atndlist2
+0  1 0
+0 -1 0
+atndlist3 
+0 0  1
+0 0  1
+atndlist4
+0 0  1
+0 0 -1
+
+pawcpxocc 2
+optforces 0
+optstress 0
+
+toldfe 1.0D-11
+write_files "gsr"
+
+zora 2
+
+pawovlp -1
+chksymtnons 0
+chksymbreak 0
+
+kptopt 0
+nkpt 1
+kpt 3*0
+
+paral_atom 0
+
+ecut 10
+pawecutdg 20
+
+nstep 20
+
+natom 2
+ntypat 2
+typat 1 2
+znucl 17 9
+acell 3*10.0 Angstrom
+xcart
+0.0 0.0 0.0
+0.0 0.0 1.63 Angstrom
+
+pp_dirpath="$ABI_PSPDIR/Psdj_paw_pbe_std/"
+pseudos "Cl.xml,F.xml"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   tnuc_5.abo, tolnlines=  61, tolabs=  1.1e-06, tolrel= 3.0e-03
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW
+#%% description =
+#%%   example of energy calculations leading to indirect nuclear spin
+#%%   coupling. ClF molecule at center of an empty box.
+#%% topics = NMR
+#%%<END TEST_INFO>
