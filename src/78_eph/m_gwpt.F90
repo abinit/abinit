@@ -1445,6 +1445,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              if (dtset%gwcomp == 2) then
                vec_coh_nk(:, n_k) = matmul(wc0_pbz, rhotwg_c)
+               !call xgemv("N", npw_c, npw_c, cone_gw, wc0_pbz, npw_c, rhotwg_c, 1, czero_gw, vec_coh_nk(:, n_k), 1)
              end if
 
              if (qq_is_gamma) then
@@ -1531,6 +1532,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              if (dtset%gwcomp == 2) then
                vec_coh_mkq(:, m_kq) = matmul(conjg(rhotwg_c), wc0_pbz)
+               !call xgemv("H", npw_c, npw_c, cone_gw, wc0_pbz, npw_c, rhotwg_c, 1, czero_gw, vec_coh_mkq(:, m_kq), 1)
              end if
 
              if (dtset%useric /= 0) vec_gwc_mkq(:,:,m_kq) = zero

@@ -1818,7 +1818,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_MALLOC(kxcg, (nfftf_tot,dim_kxcg))
 
    case (-11)
-     !LR+ALDA kernel
+     ! LR+ALDA kernel
      ABI_CHECK(epsm1%ID==0,"epsm1%ID should be 0")
 
      if (Dtset%usepaw==1) then

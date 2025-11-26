@@ -1558,7 +1558,7 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
    ABI_COMMENT(msg)
  end if
 
- if (npweA>Hscr%npwe) then
+ if (npweA > Hscr%npwe) then
    write(msg,'(2(a,i0))')' Dimension of matrix = ',Hscr%npwe," requiring a too big matrix = ",npweA
    ABI_ERROR(msg)
  end if
@@ -1584,11 +1584,11 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
      ! Have to allocate workspace for dp data.
      ! FIXME: Change the file format of the SCR and SUC file so that
      ! they are written in single precision if not HAVE_GW_DPC
-     ABI_MALLOC_OR_DIE(bufdc3d,(npweA,npweA,nomegaA), ierr)
+     ABI_MALLOC_OR_DIE(bufdc3d, (npweA,npweA,nomegaA), ierr)
 
      call mpiotk_read_fsuba_dpc3D(mpi_fh,offset, [HScr%npwe,HScr%npwe,HScr%nomega], [npweA,npweA,nomegaA], [1,1,1],&
         buf_dim,bufdc3d,xmpio_chunk_bsize,sc_mode,comm,ierr)
-     ABI_CHECK(ierr==0,"Fortran matrix too big")
+     ABI_CHECK(ierr == 0,"Fortran matrix too big")
 
      epsm1(:,:,:,1) = bufdc3d
      ABI_FREE(bufdc3d)
