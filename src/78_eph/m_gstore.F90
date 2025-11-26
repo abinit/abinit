@@ -2686,12 +2686,12 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax, pp_max)
 
 !Local variables-------------------------------
  integer,parameter :: istwfk1 = 1
- integer :: my_is, my_ik, my_iq, spin, onpw, ierr, my_mpw, ipx, ipy, ipz, cnt, i1, i2, i3, nprocs, my_rank, pp_max__
+ integer :: my_is, my_ik, my_iq, spin, onpw, ierr, my_mpw, ipx, ipy, ipz, nprocs, my_rank, pp_max__ !, cnt, i1, i2, i3,
  real(dp) :: weight_q, cpu, wall, gflops
 !arrays
  integer :: my_gmax(3)
  integer,allocatable :: gtmp(:,:)
- real(dp) :: kk(3), kq(3), qpt(3), pp(3), kq_max(3)
+ real(dp) :: kk(3), kq(3), qpt(3), pp(3) !, kq_max(3)
 !----------------------------------------------------------------------
 
  ! TODO: This is an hotspot due to the double loop over k and q. Should use a geometrical approach to compute mpw and gmax.
