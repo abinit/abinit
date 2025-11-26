@@ -2895,6 +2895,7 @@ subroutine ifc_to_ddb(ifc, ddb, crystal)
   ABI_MALLOC(ddb%flg,(msize,nqibz))  ; ddb%flg = one
   ABI_MALLOC(ddb%nrm,(3,nqibz))      ; ddb%nrm = zero ; ddb%nrm(1,:) = one
   ABI_MALLOC(ddb%qpt,(9,nqibz))      ; ddb%qpt = zero
+  ABI_MALLOC(ddb%omega,(3,nqibz))    ; ddb%omega = zero
   ABI_MALLOC(ddb%val,(2,msize,nqibz)); ddb%val = zero
   ABI_MALLOC(ddb%typ,(nqibz))
 

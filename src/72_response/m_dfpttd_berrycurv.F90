@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpttd_berrycurv
 !! NAME
 !!  m_dfpttd_berrycurv

@@ -136,7 +136,7 @@ contains
  complex(dpc), allocatable :: genzeff_tr(:,:), ri_genelsus(:,:,:)
 
 !TMP: CrI3 varaibles:
- complex(dpc),parameter :: ure=(1.d0,0.d0),uim=(0.d0,1.d0)
+ complex*16,parameter :: ure=(1.d0,0.d0),uim=(0.d0,1.d0)
  
 ! *********************************************************************
 
@@ -310,12 +310,12 @@ contains
 
    !Taylor-expansion around w=0 with dissipation if eta/=0
    else if (omegaflag==3) then
-     cplx_weta=cmplx(omega(iw),eta,16)
+     cplx_weta=cmplx(omega(iw),eta,kind=dpc)
      do ii=1,ddb%msize
        if (all(ddb%flg(ii,:)==1)) then
-         cplxvar=cmplx(zero,zero,16)
+         cplxvar=cmplx(zero,zero,kind=dpc)
          do jw= 1, nwcalc
-           cplxvar= cplxvar + cplx_weta**(jw-1)*cmplx(coeffs(1,jw,ii),coeffs(2,jw,ii),16)
+           cplxvar= cplxvar + cplx_weta**(jw-1)*cmplx(coeffs(1,jw,ii),coeffs(2,jw,ii),kind=dpc)
          end do
          int_fsddb(1,ii,1)=real(cplxvar)
          int_fsddb(2,ii,1)=aimag(cplxvar) 
@@ -1202,7 +1202,7 @@ subroutine phonon_green(amu,displ,eigvec,eta,blkval,&
          irow= (ipert1-1)*3 + idir1
          ifc(irow,icol)= &
        & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,1), &
-       & blkval(2,idir1,ipert1,idir2,ipert2,1),16)
+       & blkval(2,idir1,ipert1,idir2,ipert2,1),kind=dpc)
        end do
      end do
    end do
@@ -1280,7 +1280,7 @@ subroutine phonon_green(amu,displ,eigvec,eta,blkval,&
 
 !Finally extract the spectral function from the trace
  do irow= 1, pdim
-   mode_phonspec(irow)= -one/pi * aimag(two*cmplx(omega,eta,16)*mass_phongreen(irow,irow))
+   mode_phonspec(irow)= -one/pi * aimag(two*cmplx(omega,eta,kind=dpc)*mass_phongreen(irow,irow))
  end do
  phonspec= sum(mode_phonspec(:))
 
@@ -1445,7 +1445,7 @@ do imode=1,3*natom
      do ipert1=1,natom
        i1=idir1+(ipert1-1)*3
        index=i1+3*natom*(imode-1)
-       modedisp(i1,imode)= cmplx(displ(2*index-1),displ(2*index),16)
+       modedisp(i1,imode)= cmplx(displ(2*index-1),displ(2*index),kind=dpc)
      end do
    end do
  end do
@@ -1456,7 +1456,7 @@ do imode=1,3*natom
  end do 
 
 !!!!!!TMP rotation of doublet 23 and 24 for Cr2O3
-! baseout=cmplx(zero,zero,16)
+! baseout=cmplx(zero,zero,kind=dpc)
 ! baseout(1,1)=one
 ! baseout(2,2)=one
 !
@@ -1481,7 +1481,7 @@ do imode=1,3*natom
 !(Born and magnetic charges)
  pdim= 3*natom
  ABI_MALLOC(c_blkval,(3,mpert,3,mpert))
- c_blkval= cmplx(blkval(1,:,:,:,:,1),blkval(2,:,:,:,:,1),16)
+ c_blkval= cmplx(blkval(1,:,:,:,:,1),blkval(2,:,:,:,:,1),kind=dpc)
 
 !Born charges
  ABI_MALLOC(zeff,(3,pdim))
@@ -1704,7 +1704,7 @@ subroutine mode_mmom(amu,eigvec,mmom,modemm,modedisp,modezf,natom,ndim,ntypat,ty
      do iat1= 1, natom
        do idir1= 1, 3
          irow= (iat1-1)*3 + idir1
-         modedisp(irow,imode)= cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),16)
+         modedisp(irow,imode)= cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),kind=dpc)
        end do
      end do
    end do
@@ -1828,7 +1828,7 @@ subroutine mode_zeff(amu,eigvec,modezeff,natom,ntypat,typat,zeff)
          do idir1= 1, 3
            irow= (iat1-1)*3 + idir1
            modezeff(im,imode)= modezeff(im,imode) +  mass(iat1)*zeff(im,irow)* &
-         & cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),16)
+         & cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),kind=dpc)
          end do
        end do
      end do
@@ -1963,7 +1963,7 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen_fm,magsus,natom,n
        do idir1= 1, 3
          imode1= (iat1-1)*3 + idir1
          eigdisp(imode1,imode2)= &
-       & cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),16)
+       & cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),kind=dpc)
        end do
      end do
    end do
@@ -2024,7 +2024,7 @@ subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen_fm,magsus,natom,n
  lm_zfield= matmul(nm_zfield(:,1:3*natom),matmul(nm_phongreen,nm_fmzeff_tr))
 
  !restrict only to a set of modes
-! lm_zfield=cmplx(zero,zero,16)
+! lm_zfield=cmplx(zero,zero,kind=dpc)
 ! do i= 1, ndim
 !   do j= 1, 3
 !     do k= 21,21
@@ -2147,7 +2147,7 @@ end subroutine me_altcalc
 
  pdim= 3*natom
  ABI_MALLOC(c_blkval,(3,mpert,3,mpert))
- c_blkval= cmplx(blkval(1,:,:,:,:,1),blkval(2,:,:,:,:,1),16)
+ c_blkval= cmplx(blkval(1,:,:,:,:,1),blkval(2,:,:,:,:,1),kind=dpc)
 
  !Dielectric tensor
  fac= -four_pi/ucvol

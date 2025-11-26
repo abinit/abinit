@@ -1999,6 +1999,8 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    ! Read the perturbation frequency
    if (ddb_version>=cvrsio9_new) then
      read(nunit, '(10x,1es16.8)' ) ddb%omega(1,iblok)
+   else
+     ddb%omega(1,iblok)=0.d0
    end if
 
    ! Read every element
@@ -2032,6 +2034,8 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
      read(nunit, '(10x,1es16.8)' ) ddb%omega(1,iblok)
      read(nunit, '(10x,1es16.8)' ) ddb%omega(2,iblok)
      read(nunit, '(10x,1es16.8)' ) ddb%omega(3,iblok)
+   else
+     ddb%omega(:,iblok)=0.d0
    end if
 
    ! Read every element
@@ -5043,9 +5047,12 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,ddb
    write(nunit, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
 
    ! Write the perturbation frequency
-   if( ddb_version>=cvrsio9_new )then
+    !write(ab_out,*)"HHHHHHHHHHHHHHH"
+   !if( ddb_version>=cvrsio9_new )then
      write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
-   endif
+   !else
+   !  write(nunit, '(a,1es16.8)' )' frequency',0.d0
+   !endif
 
    ! Write the matrix elements
    if(choice==2)then
@@ -5075,11 +5082,15 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,ddb
    write(nunit, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,iblok),ii=7,9),ddb%nrm(3,iblok)
 
    ! Write the perturbation frequency
-   if( ddb_version>=cvrsio9_new )then
+   !if( ddb_version>=cvrsio9_new )then
      write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
      write(nunit, '(a,1es16.8)' )'          ',ddb%omega(2,iblok)
      write(nunit, '(a,1es16.8)' )'          ',ddb%omega(3,iblok)
-   endif
+   !else
+   !  write(nunit, '(a,1es16.8)' )' frequency',0.d0
+   !  write(nunit, '(a,1es16.8)' )'          ',0.d0
+   !  write(nunit, '(a,1es16.8)' )'          ',0.d0
+   !endif
 
    ! Write the matrix elements
    if(choice==2)then
@@ -6552,7 +6563,6 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer,parameter :: cvrsio9_new=20240201
  integer ::  iddb, ddbvsn
 ! integer :: ddbun
  integer :: iddb_mkpt, iddb_psps
