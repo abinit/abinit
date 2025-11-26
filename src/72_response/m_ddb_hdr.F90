@@ -205,9 +205,6 @@ MODULE m_ddb_hdr
    real(dp),allocatable :: occ(:)
    ! occ(mband*mkpt*nsppol)
 
-  ! real(dp),allocatable :: omega(:,:)
-  ! ! omega(3,nblock)
-
    real(dp),allocatable :: spinat(:,:)
    ! spinat(3,matom)
 
@@ -4951,8 +4948,6 @@ subroutine ddb_io_out (unddb,dscrpt,matom,mband,&
 !Set routine version number here:
 !scalars
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
- integer,parameter :: cvrsio9=20230401
- integer,parameter :: cvrsio9_new=20240201
  integer :: bantot,ii,ij,ikpt,iline,im
 !arrays
  character(len=9) :: name(9)
@@ -4961,15 +4956,9 @@ subroutine ddb_io_out (unddb,dscrpt,matom,mband,&
  DBG_ENTER("COLL")
 
 !Write the header
- if (ddbvrs <= cvrsio9) then 
-   write(unddb, '(/,a,/,a,i10,/,/,a,a,/)' ) &
-   ' **** DERIVATIVE DATABASE ****    ',&
-   '+DDB, Version number',cvrsio9,' ',trim(dscrpt)
- else
-   write(unddb, '(/,a,/,a,i10,/,/,a,a,/)' ) &
-   ' **** DERIVATIVE DATABASE ****    ',&
-   '+DDB, Version number',DDB_VERSION,' ',trim(dscrpt)
- endif
+ write(unddb, '(/,a,/,a,i10,/,/,a,a,/)' ) &
+ ' **** DERIVATIVE DATABASE ****    ',&
+ '+DDB, Version number',DDB_VERSION,' ',trim(dscrpt)
 
 !Write the descriptive data
 !1. usepaw

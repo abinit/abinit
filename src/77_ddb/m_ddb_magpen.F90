@@ -285,9 +285,9 @@ contains
    !Print the physical quantities in the new magnetic boundary conditions
    if (prtopt==1) then
      if (mpopt==1) then
-       call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,prtvol,qeq0,qphnrm,qphon,ucvol)
+       call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,prtvol,qeq0,qphnrm,qphon,ucvol,ddb%msize)
      else if (mpopt==2) then
-       call mp_d2etot_print(ddb,ddb%val_rs,kblok,mpert,natom,nblok,2,omega,prtvol,qeq0,qphnrm,qphon,ucvol)
+       call mp_d2etot_print(ddb,ddb%val_rs,kblok,mpert,natom,nblok,2,omega,prtvol,qeq0,qphnrm,qphon,ucvol,ddb%msize)
      end if
    end if
 
@@ -398,7 +398,7 @@ contains
 
      !Print them
      call mp_d3etot_print(ddb_lw,ddb_lw%val_fs,kblok,mpert,natom,nblok,1,omega,&
-   & prtvol,qeq0,qphnrm,qphon,ucvol)
+   & prtvol,qeq0,qphnrm,qphon,ucvol,ddb_lw%msize)
 
    end do
    ABI_FREE(bc_ss)
@@ -532,11 +532,11 @@ contains
 
          if (fs2rs_==0) then
            barmagsus(irow,icol)= &
-         & cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),16)
+         & cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),kind=dpc)
          else if (fs2rs_==1) then
            invmagsus(irow,icol)= &
          & cmplx(blkval_fs(1,idir1,ipert1,idir2,ipert2,iblok), &
-         & blkval_fs(2,idir1,ipert1,idir2,ipert2,iblok),16)
+         & blkval_fs(2,idir1,ipert1,idir2,ipert2,iblok),kind=dpc)
          end if
 
        end do
@@ -829,22 +829,22 @@ contains
 
          if (fs2rs_==0) then
            if (iblok /=0 .and. ipert2 <= natom) then
-             barmmom(irow,icol)= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),16)
-             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,iblok),ddb%val(2,jndex,iblok),16)
+             barmmom(irow,icol)= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),kind=dpc)
+             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,iblok),ddb%val(2,jndex,iblok),kind=dpc)
            else if (jblok /=0 .and. ipert2 == natom+2) then
-             barmmom(irow,icol)= cmplx(ddb%val(1,index,jblok),ddb%val(2,index,jblok),16)
-             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,jblok),ddb%val(2,jndex,jblok),16)
+             barmmom(irow,icol)= cmplx(ddb%val(1,index,jblok),ddb%val(2,index,jblok),kind=dpc)
+             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,jblok),ddb%val(2,jndex,jblok),kind=dpc)
            else if (lblok /=0 .and. ipert2 == natom+5) then
-             barmmom(irow,icol)= cmplx(ddb%val(1,index,lblok),ddb%val(2,index,lblok),16)
-             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,lblok),ddb%val(2,jndex,lblok),16)
+             barmmom(irow,icol)= cmplx(ddb%val(1,index,lblok),ddb%val(2,index,lblok),kind=dpc)
+             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,lblok),ddb%val(2,jndex,lblok),kind=dpc)
            end if
          else if (fs2rs_==1) then
            zfield(irow,icol)= &
          & cmplx(blkval_fs(1,idir1,ipert1,idir2,ipert2,iblok), &
-         & blkval_fs(2,idir1,ipert1,idir2,ipert2,iblok),16)
+         & blkval_fs(2,idir1,ipert1,idir2,ipert2,iblok),kind=dpc)
            zfield_tr(icol,irow)= &
          & cmplx(blkval_fs(1,idir2,ipert2,idir1,ipert1,iblok), &
-         & blkval_fs(2,idir2,ipert2,idir1,ipert1,iblok),16)
+         & blkval_fs(2,idir2,ipert2,idir1,ipert1,iblok),kind=dpc)
          end if
 
        end do
@@ -1186,7 +1186,7 @@ contains
 
          if (fs2rs_==0) then
            !Extract the penalized second-order derivatives 
-           val_ps= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),16)
+           val_ps= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),kind=dpc)
            !Calculate the fixed-spin flavor
            val_fs= val_ps + &
          & sum( zfield_tr(irow,:) * matmul( barmagsus,zfield(:,icol) ) ) 
@@ -1195,7 +1195,7 @@ contains
          else if (fs2rs_==1) then
            val_fs= &
          & cmplx(blkval_fs(1,idir1,ipert1,idir2,ipert2,iblok), &
-         & blkval_fs(2,idir1,ipert1,idir2,ipert2,iblok),16)
+         & blkval_fs(2,idir1,ipert1,idir2,ipert2,iblok),kind=dpc)
          end if
 
          if (mpopt==2) then
@@ -1255,23 +1255,23 @@ contains
 !!
 !! SOURCE
 
- subroutine mp_d2etot_print(ddb,blkval,kblok,mpert,natom,nblok,opt,omega,prtvol,qeq0,qphnrm,qphon,ucvol)
+ subroutine mp_d2etot_print(ddb,blkval,kblok,mpert,natom,nblok,opt,omega,prtvol,qeq0,qphnrm,qphon,ucvol,msize)
 
 !Arguments -------------------------------
 !scalars
  class(ddb_type),intent(in) :: ddb
- integer,intent(in) :: kblok,mpert,natom,nblok,opt,prtvol
+ integer,intent(in) :: kblok,mpert,natom,nblok,opt,prtvol,msize
  logical,intent(in) :: qeq0
  real(dp),intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: omega(3)
- real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
+ real(dp),intent(in) :: blkval(2,msize,nblok)
  real(dp),intent(inout) :: qphnrm(3),qphon(3,3)
 
 !Local variables -------------------------
 !scalars
  integer :: iblok,idir1,idir2,ipert1,ipert2,irow,icol
- integer :: rftyp
+ integer :: rftyp,index
  character(len=1000) :: msg
 !arrays
  integer :: rfelfd(4),rfmagn(4),rfphon(4),rfstrs(4)
@@ -1303,7 +1303,8 @@ contains
          do ipert2= 1, natom
            do idir2= 1, 3
              icol=( ipert2-1)*3 + idir2
-             val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+             index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
+             val(:)=blkval(:,index,kblok)
              write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
            & ipert1, cart(idir1), ipert2, cart(idir2), val(1), val(2)
              call wrtout([ab_out,std_out], msg)
@@ -1332,7 +1333,8 @@ contains
      do idir1= 1, 3
        do ipert2= 1, natom
          do idir2= 1, 3
-           val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+           index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
+           val(:)=blkval(:,index,kblok)
            write(msg,'(3x,a2,7x,i3,4x,a2,2x,2es18.9)') &
          & cart(idir1), ipert2, cart(idir2), val(1), val(2)
            call wrtout([ab_out,std_out], msg)
@@ -1358,7 +1360,8 @@ contains
      ipert2= ddb%natom + 2
      do idir2= 1, 3
        do idir1= 1, 3
-         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+         index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
+         val(:)=blkval(:,index,kblok)
          write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
        & val(1), val(2)
          call wrtout([ab_out,std_out], msg)
@@ -1387,7 +1390,8 @@ contains
      ipert2= ddb%natom + 2
      do idir2= 1, 3
        do idir1= 1, 3
-         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)/ucvol
+         index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
+         val(:)=blkval(:,index,kblok)/ucvol
          write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
        & val(1), val(2)
          call wrtout([ab_out,std_out], msg)
@@ -1417,7 +1421,8 @@ contains
    ipert2= ddb%natom + 5
    do idir2= 1, 3
      do idir1= 1, 3
-       val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)/ucvol
+       index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
+       val(:)=blkval(:,index,kblok)/ucvol
        write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
      & val(1), val(2)
        call wrtout([ab_out,std_out], msg)
@@ -1446,7 +1451,8 @@ contains
    do idir1= 1, 3
      do ipert2= 1, natom
        do idir2= 1, 3
-         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+         index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
+         val(:)=blkval(:,index,kblok)
          write(msg,'(3x,a2,7x,i3,4x,a2,2x,2es18.9)') &
        & cart(idir1), ipert2, cart(idir2), val(1), val(2)
          call wrtout([ab_out,std_out], msg)
@@ -1606,7 +1612,7 @@ contains
        & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
 
          bc_barmagsus(irow,icol)= -one* &
-       & cmplx(ddb_lw%val(1,index,iblok),ddb_lw%val(2,index,iblok),16)
+       & cmplx(ddb_lw%val(1,index,iblok),ddb_lw%val(2,index,iblok),kind=dpc)
 
        end do
      end do
@@ -1756,13 +1762,13 @@ contains
          
          if (iblok /=0 .and. ipert2 <= natom) then
            bc_barsp(irow,icol)= -one* &
-         & cmplx(ddb_lw%val(1,index,iblok),ddb_lw%val(2,index,iblok),16)
+         & cmplx(ddb_lw%val(1,index,iblok),ddb_lw%val(2,index,iblok),kind=dpc)
          else if (jblok /=0 .and. ipert2 == natom+2) then
            bc_barsp(irow,icol)= -one* &
-         & cmplx(ddb_lw%val(1,index,jblok),ddb_lw%val(2,index,jblok),16)
+         & cmplx(ddb_lw%val(1,index,jblok),ddb_lw%val(2,index,jblok),kind=dpc)
          else if (lblok /=0 .and. ipert2 == natom+5) then
            bc_barsp(irow,icol)= -one* &
-         & cmplx(ddb_lw%val(1,index,lblok),ddb_lw%val(2,index,lblok),16)
+         & cmplx(ddb_lw%val(1,index,lblok),ddb_lw%val(2,index,lblok),kind=dpc)
          end if
 
        end do
@@ -1946,7 +1952,7 @@ contains
        & 3*((ipert1 - 1) + mpert*((idir2 - 1) + &
        & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
 
-         bc_barpp(irow,icol)= cmplx(ddb_lw%val(1,index,kblok),ddb_lw%val(2,index,kblok),16)
+         bc_barpp(irow,icol)= cmplx(ddb_lw%val(1,index,kblok),ddb_lw%val(2,index,kblok),kind=dpc)
 
        end do
      end do
@@ -2079,23 +2085,23 @@ contains
 !!
 !! SOURCE
 
- subroutine mp_d3etot_print(ddb_lw,blkval,kblok,mpert,natom,nblok,opt,omega,prtvol,qeq0,qphnrm,qphon,ucvol)
+ subroutine mp_d3etot_print(ddb_lw,blkval,kblok,mpert,natom,nblok,opt,omega,prtvol,qeq0,qphnrm,qphon,ucvol,msize)
 
 !Arguments -------------------------------
 !scalars
  class(ddb_type),intent(in) :: ddb_lw
- integer,intent(in) :: kblok,mpert,natom,nblok,opt,prtvol
+ integer,intent(in) :: kblok,mpert,natom,nblok,opt,prtvol,msize
  logical,intent(in) :: qeq0
  real(dp),intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: omega(3)
- real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
+ real(dp),intent(in) :: blkval(2,msize,nblok)
  real(dp),intent(inout) :: qphnrm(3),qphon(3,3)
 
 !Local variables -------------------------
 !scalars
  integer :: iblok,idir1,idir2,idir3,ipert1,ipert2,ipert3,irow,icol
- integer :: rftyp
+ integer :: rftyp,index
  character(len=1000) :: msg
 !arrays
  integer :: rfelfd(4),rfmagn(4),rfphon(4),rfstrs(4),rffreq(4)
@@ -2133,7 +2139,10 @@ contains
          do ipert2= 1, natom
            do idir2= 1, 3
              icol=( ipert2-1)*3 + idir2
-             val(:)=blkval(:,idir1,ipert1,idir2,ipert2,idir3,ipert3,kblok)
+             index = idir1 + &
+               & 3*((ipert1 - 1) + mpert*((idir2 - 1) + &
+               & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
+             val(:)=blkval(:,index,kblok)
              write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
            & ipert1, cart(idir1), ipert2, cart(idir2), val(1), val(2)
              call wrtout([ab_out,std_out], msg)
@@ -2163,7 +2172,10 @@ contains
      do idir1= 1, 3
        do ipert2= 1, natom
          do idir2= 1, 3
-           val(:)=blkval(:,idir1,ipert1,idir2,ipert2,idir3,ipert3,kblok)
+           index = idir1 + &
+             & 3*((ipert1 - 1) + mpert*((idir2 - 1) + &
+             & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
+           val(:)=blkval(:,index,kblok)
            write(msg,'(3x,a2,7x,i3,4x,a2,2x,2es18.9)') &
          & cart(idir1), ipert2, cart(idir2), val(1), val(2)
            call wrtout([ab_out,std_out], msg)
@@ -2190,7 +2202,10 @@ contains
      ipert2= ddb_lw%natom + 2
      do idir2= 1, 3
        do idir1= 1, 3
-         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,idir3,ipert3,kblok)
+         index = idir1 + &
+           & 3*((ipert1 - 1) + mpert*((idir2 - 1) + &
+           & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
+         val(:)=blkval(:,index,kblok)
          write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
        & val(1), val(2)
          call wrtout([ab_out,std_out], msg)
@@ -2219,7 +2234,10 @@ contains
      ipert2= ddb_lw%natom + 2
      do idir2= 1, 3
        do idir1= 1, 3
-         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,idir3,ipert3,kblok)/ucvol
+         index = idir1 + &
+           & 3*((ipert1 - 1) + mpert*((idir2 - 1) + &
+           & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
+         val(:)=blkval(:,index,kblok)/ucvol
          write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
        & val(1), val(2)
          call wrtout([ab_out,std_out], msg)
@@ -2249,7 +2267,10 @@ contains
    ipert2= ddb_lw%natom + 5
    do idir2= 1, 3
      do idir1= 1, 3
-       val(:)=blkval(:,idir1,ipert1,idir2,ipert2,idir3,ipert3,kblok)/ucvol
+       index = idir1 + &
+         & 3*((ipert1 - 1) + mpert*((idir2 - 1) + &
+         & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
+       val(:)=blkval(:,index,kblok)/ucvol
        write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
      & val(1), val(2)
        call wrtout([ab_out,std_out], msg)
@@ -2278,7 +2299,10 @@ contains
    do ipert1= 1, natom
      do idir1= 1, 3
        do idir2= 1, 3
-         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,idir3,ipert3,kblok)
+         index = idir1 + &
+           & 3*((ipert1 - 1) + mpert*((idir2 - 1) + &
+           & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
+         val(:)=blkval(:,index,kblok)
          write(msg,'(i3,4x,a2,7x,a2,2x,2es18.9)') &
        & ipert1, cart(idir1), cart(idir2), val(1), val(2)
          call wrtout([ab_out,std_out], msg)
