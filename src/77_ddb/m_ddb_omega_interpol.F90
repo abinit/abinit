@@ -729,7 +729,7 @@ contains
  write(alpha_unit,*) '#'
  write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
 
- convfac= mu_0_SI *  e_Cb * BField_Tesla / Bohr_meter**2 * 1.d12
+ convfac= half * mu_0_SI *  e_Cb * BField_Tesla / Bohr_meter**2 * 1.d12
 
  write(alpha_unit,*) '#  Real part of clamped-ion magnetoelectric tensor (ps/m)'
  write(msg,'(a,a)') ch10,&
@@ -821,7 +821,7 @@ contains
  
  write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
 
- convfac= mu_0_SI * mu_B_SI * BField_Tesla / Bohr_meter**3 
+ convfac= half * mu_0_SI * mu_B_SI * BField_Tesla / Bohr_meter**3 
 
  write(mmag_unit,*) ' '
  write(mmag_unit,*) '#  Real part of clamped-ion magnetic susceptibility (SI adim)'
