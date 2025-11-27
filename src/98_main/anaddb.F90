@@ -231,13 +231,12 @@ program anaddb
    ABI_MALLOC(delta_asrw0,(3* Crystal%natom,3))
    ABI_MALLOC(delta_asrw0_fm,(3* Crystal%natom,3))
    call ddb_magpen(ddb, ddb_lw, dtset%magpen, dtset%mpatpol, & 
- & dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, dtset%prtvol, 1, Crystal%ucvol, dtset%timdisp, &
- & Crystal%xred)
+ & dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, dtset%prtvol, 1, Crystal%ucvol, dtset%timdisp)
 
    if (dtset%freqflag/=0) then
      call ddb_omega_interpol(Crystal%amu, ddb, ddb_lw, dtset%eta, filnam(8), &
    & dtset%magpen, dtset%mpatpol, dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, dtset%nfreq, Crystal%ntypat, & 
-   & dtset%freqflag, dtset%frmax, dtset%frmin, dtset%prtvol, Crystal%typat, Crystal%ucvol, Crystal%xred)
+   & dtset%freqflag, dtset%frmax, dtset%frmin, dtset%prtvol, Crystal%typat, Crystal%ucvol)
    end if
 
    ABI_FREE(delta_asrw0)

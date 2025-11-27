@@ -4983,13 +4983,13 @@ end subroutine asrq0_free
 !!
 !! SOURCE
 
-subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,ddb_version, &
+subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit, &
                            blkval2,kpt) !optional
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: choice,mband,mpert,msize,nkpt,nunit
- integer,intent(in) :: iblok, ddb_version
+ integer,intent(in) :: iblok
  class(ddb_type),intent(in) :: ddb
 !arrays
  real(dp),intent(in),optional :: kpt(3,nkpt)
@@ -5244,7 +5244,7 @@ subroutine ddb_write_txt(ddb, ddb_hdr, filename, with_psps, comm)
  call ddb_hdr%open_write_txt(filename, with_psps)
 
  do iblok=1,ddb%nblok
-   call ddb%write_block_txt(iblok,choice,1,ddb%mpert,ddb%msize,ddb_hdr%nkpt,ddb_hdr%unddb,ddb_hdr%ddb_version)
+   call ddb%write_block_txt(iblok,choice,1,ddb%mpert,ddb%msize,ddb_hdr%nkpt,ddb_hdr%unddb)
  end do
 
  call ddb_hdr%close()
@@ -5448,7 +5448,7 @@ subroutine ddb_write_d2eig_txt(ddb, unddb, iblok,ddbvsn)
   ! GA: This routine is redundant with outbsd.
   !     The present implementation should replace outbsd.
 
- call ddb%write_block_txt(iblok,choice,ddb%nband,ddb%mpert,ddb%msize,ddb%nkpt,unddb,ddbvsn, &
+ call ddb%write_block_txt(iblok,choice,ddb%nband,ddb%mpert,ddb%msize,ddb%nkpt,unddb, &
                       ddb%eig2dval(:,:,:,:), ddb%kpt(:,:))
 
 end subroutine ddb_write_d2eig_txt

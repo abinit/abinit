@@ -83,7 +83,7 @@ contains
 
  subroutine ddb_omega_interpol(amu,ddb,ddb_lw, & 
 & eta,outfilename_radix,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
-& nomega,ntypat,omegaflag,omegamax,omegamin,prtvol,typat,ucvol,xred)
+& nomega,ntypat,omegaflag,omegamax,omegamin,prtvol,typat,ucvol)
 
 !Arguments -------------------------------
 !scalars
@@ -95,7 +95,6 @@ contains
  integer,intent(in) :: mpatpol(2),mpdir(3),typat(natom)
  real(dp),intent(in) :: amu(ntypat)
 ! real(dp), intent(inout) :: delta_asrw0(3*natom,3), delta_asrw0_fm(3*natom,3)
- real(dp),intent(in) :: xred(3,natom)
 
 !Local variables -------------------------
 !scalars
@@ -119,7 +118,7 @@ contains
  real(dp), allocatable :: displ(:),eigvec(:),eigvec_fm(:,:,:,:,:),phfrq(:,:)
  real(dp), allocatable :: mode_phonspec(:,:),phonspec(:)
  real(dp), allocatable :: coeffs(:,:,:)
- complex(dpc), allocatable :: dummysus(:,:)
+ complex(dpc), allocatable :: dummysus(:,:), dummysus1(:,:), dummysus2(:,:)
  complex(dpc), allocatable :: invmagsus(:,:,:), lm_magsus(:,:,:), magsus(:,:,:)
  complex(dpc), allocatable :: dummymom(:,:),dummymom_tr(:,:),mmom(:,:,:), mmom_tr(:,:,:)
  complex(dpc), allocatable :: ri_mmom(:,:,:)
@@ -197,6 +196,8 @@ contains
  ABI_MALLOC(modemeff,(3,3*natom,nomega))
  ABI_MALLOC(modezeff,(3,3*natom,nomega))
  ABI_MALLOC(dummysus,(ndim,ndim))
+ ABI_MALLOC(dummysus1,(ndim,ndim))
+ ABI_MALLOC(dummysus2,(ndim,ndim))
  ABI_MALLOC(magsus,(ndim,ndim,nomega))
  ABI_MALLOC(lm_magsus,(ndim,ndim,nomega))
  ABI_MALLOC(invmagsus,(ndim,ndim,nomega))
@@ -329,8 +330,8 @@ contains
    end if
 
    !Calculate the local spin susceptibilities
-   call local_spinsus(dummysus,ddb,1,dummysus,invmagsus(:,:,iw),&
- & dummysus,magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol,&
+   call local_spinsus(dummysus,ddb,1,dummysus1,invmagsus(:,:,iw),&
+ & dummysus1,magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol,&
  & fs2rs=fs2rs,blkval_fs=int_fsddb)
 
    !Calculate the 1st-order magnetic moments
@@ -1417,7 +1418,7 @@ subroutine lm_normal_modes(blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mchi_nm
 !Local variables-------------------------------
 !scalars
  integer :: i1,iat1,iat2,idir1,idir2,im,imode,index,ipert,ipert1,irow,jpert
- integer :: pdim
+ integer :: pdim, tmp
  real(dp) :: fac
  complex(dpc) :: cplx_eta,cplx_w2
 !arrays
@@ -1435,7 +1436,7 @@ subroutine lm_normal_modes(blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mchi_nm
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-
+ tmp=ntypat
 !Rotate doubly degenerated modes 
 ! call alignph(amu,displ,blkval,mpert,natom,ntypat,phfrq,typat)
 

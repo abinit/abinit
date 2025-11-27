@@ -122,13 +122,13 @@ contains
 
  subroutine dfpt_rhotov(cplex,ehart01,ehart1,elmag1,elpsp1,emagpen1,exc1,gsqcut,icutcoul,idir,ipert,&
 &           ixc,kxc,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,ntypat,n3xccc,&
-&           non_magnetic_xc,optene,optres,qphon,ratopt,ratsm,ratsph,rhog,rhog1,rhor,rhor1,rprimd,typat,ucvol,&
+&           non_magnetic_xc,optene,optres,qphon,ratsm,ratsph,rhog,rhog1,rhor,rhor1,rprimd,typat,ucvol,&
 &           usepaw,usexcnhat,vcutgeo,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot,xred,qgbt,use_gbt)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,icutcoul,idir,ipert,ixc,n3xccc,natom,nfft,nhat1grdim,nkxc,nspden
- integer,intent(in) :: ntypat,optene,optres,usepaw,usexcnhat,ixcrot,ratopt
+ integer,intent(in) :: ntypat,optene,optres,usepaw,usexcnhat,ixcrot
  logical,intent(in) :: non_magnetic_xc
  integer,intent(in) :: use_gbt 
  real(dp),intent(in):: qgbt(3)

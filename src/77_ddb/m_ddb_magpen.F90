@@ -90,7 +90,7 @@ contains
 
  subroutine ddb_magpen(ddb,ddb_lw,& 
 & magpen,mpatpol,mpdir,mpert,mpopt,natom, &
-& prtvol,rftyp,ucvol,timdisp,xred)
+& prtvol,rftyp,ucvol,timdisp)
 
 !Arguments -------------------------------
 !scalars
@@ -100,7 +100,6 @@ contains
 !arrays
  type(ddb_type),intent(inout) :: ddb,ddb_lw
  integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp),intent(in) :: xred(3,natom)
 
 !Local variables -------------------------
 !scalars
