@@ -2411,7 +2411,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
           if (x1rdm/=1 .and. sigmak_todo(ik_ibz)==1) then
             ! Do not compute correlation MELS if the k-point was read from the checkpoint file
             ! this IF only affects GW density matrix update
-            call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,qp_ebands, &
+            call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,dtfil, Cryst,qp_ebands, &
                               Sigp,Sr,epsm1,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
                               Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
                               gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)

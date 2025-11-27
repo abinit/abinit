@@ -735,7 +735,6 @@ pure logical function isncfile(fname)
  character(len=*),intent(in) :: fname
 
 !Local variables-------------------------------
-!scalars
  integer :: ic,nch_trim
 ! *************************************************************************
 
@@ -773,7 +772,6 @@ end function isncfile
 pure integer function iomode_from_fname(fname) result(iomode)
 
 !Arguments ------------------------------------
-!scalars
  character(len=*),intent(in) :: fname
 ! *************************************************************************
 
@@ -829,7 +827,6 @@ end subroutine enforce_fortran_io
 pure function iomode2str(iomode)
 
 !Arguments ------------------------------------
-!scalars
  character(len=48) :: iomode2str
  integer,intent(in) :: iomode
 ! *************************************************************************
@@ -881,7 +878,6 @@ subroutine mvrecord(funt,nrec,ierr)
  integer,intent(out) :: ierr
 
 !Local variables-------------------------------
-!scalars
  integer :: irec
 ! *************************************************************************
 
@@ -937,7 +933,6 @@ function open_file(file, iomsg, unit, newunit, access, form, status, action, rec
  integer :: iostat
 
 !Local variables-------------------------------
-!scalars
  character(len=500) :: my_access,my_form,my_status,my_action,msg
 ! *************************************************************************
 
