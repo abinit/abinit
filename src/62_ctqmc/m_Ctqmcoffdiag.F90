@@ -3121,8 +3121,8 @@ include 'mpif.h'
       op%measPerturbation(:   ,iflavor) = op%measPerturbation(:,iflavor) &
                                     / SUM(op%measPerturbation(:,iflavor))
 
-    xsum = SUM(op%meas_fullemptylines(:,iflavor))
     IF ( op%opt_order .GT. 0 ) then 
+      xsum = SUM(op%meas_fullemptylines(:,iflavor))      
       IF (xsum /= 0.0 ) then      
         op%meas_fullemptylines(:   ,iflavor) = op%meas_fullemptylines(:,iflavor) &
                                       / SUM(op%meas_fullemptylines(:,iflavor))
