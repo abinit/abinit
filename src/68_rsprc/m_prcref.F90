@@ -119,6 +119,7 @@ contains
 !!   | prtvol=control print volume and debugging
 !!   | typat(natom)=integer type for each atom in cell
 !!  etotal=total ennergy
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fcart(3,natom)=cartesian forces (hartree/bohr)
 !!  ffttomix(nfft*(1-nfftprc/nfft))=Index of the points of the FFT (fine) grid on the grid used for mixing (coarse)
 !!  gmet(3,3)=metric tensor in G space in Bohr**-2.

@@ -101,7 +101,7 @@ contains
 !! unitdos=unit number of output of the DOS. Not needed if option==1
 !! wtk(nkpt)=k point weights
 !! iB1, iB2 = band min and max between which to calculate the number of electrons
-!! extfpmd_nbdbuf=Number of bands in the buffer to converge scf cycle with extfpmd models
+!! extfpmd_nbdbuf=--optional--number of bands forced to be unoccupied for extfpmd calculations
 !!
 !! OUTPUT
 !! doccde(mband*nkpt*nsppol)=derivative of occupancies wrt the energy for each band and k point.
@@ -122,9 +122,9 @@ contains
 !!
 !! SOURCE
 
-subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mband, nband, &
-                  nelect, nkpt, nsppol, occ, occopt, option, tphysel, tsmear, unitdos, wtk, &
-                  iB1, iB2, extfpmd_nbdbuf,rcpaw) ! optional parameters
+subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,fermih,maxocc,mband,nband,&
+                  nelect,nkpt,nsppol,occ,occopt,option,tphysel,tsmear,unitdos,wtk,&
+                  iB1,iB2,extfpmd_nbdbuf,rcpaw) ! optional parameters
 
 !Arguments ------------------------------------
 !scalars
@@ -280,7 +280,7 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
 
    if(present(rcpaw)) then
      if(associated(rcpaw)) then
-       if(.not.rcpaw%frocc.or.(rcpaw%frocc.and.rcpaw%istep<=rcpaw%nfrocc)) then
+       if(.not.rcpaw%frocc.or.(rcpaw%frocc.and.rcpaw%istep<=rcpaw%updateocc)) then
          rcpaw%entropy=zero
          rcpaw%nelect_core=zero
          do itypat=1,rcpaw%ntypat
@@ -291,7 +291,7 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
              ABI_MALLOC(arg_core,(rcpaw%atm(itypat)%ln_size))
              ABI_MALLOC(derfun_core,(rcpaw%atm(itypat)%ln_size))
              ABI_MALLOC(ent_core,(rcpaw%atm(itypat)%ln_size))
-             do isppol=1,nsppol
+             do isppol=1,rcpaw%atm(itypat)%nsppol
                do iln=1,rcpaw%atm(itypat)%ln_size
                  if (tsmear==0) then
                    arg_core(iln)=sign(huge_tsmearinv,fermie-rcpaw%atm(itypat)%eig(iln,isppol))
@@ -477,6 +477,7 @@ end subroutine getnel
 !!  prtvol=control print volume and debugging output
 !!  stmbias= optional, if non-zero, compute occupation numbers for STM (non-zero around the Fermi energy)
 !!   NOTE: in this case, only fermie and occ are meaningful outputs.
+!!  extfpmd <type(extfpmd_type)>=--optional--extended first-principles molecular dynamics type
 !!  tphysel="physical" electronic temperature with FD occupations
 !!  tsmear=smearing width (or temperature)
 !!  wtk(nkpt)=k point weights
@@ -491,9 +492,9 @@ end subroutine getnel
 !!
 !! SOURCE
 
-subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarget, mband, nband, &
-  nelect, ne_qFD, nh_qFD, nkpt, nspinor, nsppol, occ, occopt, prtvol, tphysel, tsmear, wtk, &
-  prtstm, stmbias, extfpmd,rcpaw) ! Optional argument
+subroutine newocc(doccde,eigen,entropy,fermie,fermih,ivalence,spinmagntarget,mband,nband,&
+  nelect,ne_qFD,nh_qFD,nkpt,nspinor,nsppol,occ,occopt,prtvol,tphysel,tsmear,wtk,&
+  prtstm,stmbias,extfpmd,rcpaw) ! Optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -520,7 +521,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  !real(dp),parameter :: tol = tol10
  real(dp) :: dosdeltae,entropy_tmp,fermie_hi,fermie_lo,fermie_mid,fermie_mid_tmp
  real(dp) :: fermih_lo,fermih_mid,fermih_hi
- real(dp) :: fermie_biased,maxocc
+ real(dp) :: fermie_biased,maxocc,rcpaw_nelect
  real(dp) :: nelect_tmp,nelecthi,nelectlo,nelectmid,nelect_biased
  real(dp) :: nholeshi,nholeslo,nholesmid
  real(dp) :: entropyet(2),fermie_hit(2),fermie_lot(2),fermie_midt(2),nelecthit(2)
@@ -535,20 +536,16 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
  call timab(74,1,tsec)
 
+ rcpaw_nelect=zero
  if(present(rcpaw)) then
    if(associated(rcpaw))  then
      rcpaw_getnel=>rcpaw
+     rcpaw_nelect=rcpaw%nelect_core
      do itypat=1,rcpaw%ntypat
        if(rcpaw%atm(itypat)%zcore_orig>zero) then
          rcpaw%atm(itypat)%occ_res=-rcpaw%atm(itypat)%occ
        endif
      enddo
-   endif
- endif
-
- if(present(extfpmd)) then
-   if(associated(extfpmd)) then
-     extfpmd%nelect_res=-extfpmd%nelect
    endif
  endif
 
@@ -590,7 +587,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
  ! Check whether nelect is coherent with nband (nband(1) is enough,
  ! since it was checked that nband is independent of k-point and spin-pol
- if (nelect > nband(1) * nsppol * maxocc) then
+ if (nelect > nband(1) * nsppol * maxocc+rcpaw_nelect) then
    write(msg,'(3a,es16.8,a,i0,a,es16.8,a)' )&
    'nelect must be smaller than nband*maxocc, while ',ch10,&
    'the calling routine gives nelect= ',nelect,', nband= ',nband(1),' and maxocc= ',maxocc,'.'
@@ -984,12 +981,6 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
    endif
  endif
 
- if(present(extfpmd)) then
-   if(associated(extfpmd)) then
-     extfpmd%nelect_res=extfpmd%nelect_res+extfpmd%nelect
-   endif
- endif
-
  !write(std_out,*) "kT*Entropy:", entropy*tsmear
 
  ! MG: If you are wondering why this part is now disabled by default consider that this output
@@ -1055,6 +1046,8 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
    end if
 
  end if ! End choice based on spin
+
+ rcpaw_getnel=>null()
 
  call timab(74,2,tsec)
 

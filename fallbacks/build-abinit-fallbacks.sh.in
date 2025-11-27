@@ -9,8 +9,19 @@ Optional_fbks="--disable-bigdft --disable-atompaw --disable-wannier90 --disable-
 
 if [[ -z $1 ]]; then
    Disabled=$Optional_fbks
+   if [ "@sd_libxc_init@" != "fb" ]; then
+	   Disabled+=' --disable-libxc ' 
+   fi 	   
+   if [ "@sd_hdf5_init@" != "fb" ]; then
+	   Disabled+=' --disable-hdf5 ' 
+   fi 	   
+   if [ "@sd_netcdf_init@" != "fb" ]; then
+	   Disabled+=' --disable-netcdf4 ' 
+   fi 	   
+   if [ "@sd_netcdf_fortran_init@" != "fb" ]; then
+	   Disabled+=' --disable-netcdf4-fortran ' 
+   fi 	   
 fi
-
 while [[ "$#" -gt 0 ]]; do
    if [ ! "`echo -n $Fallbacks | grep -Fo ${1}`" ]; then
        echo "Unknown parameter: $1";

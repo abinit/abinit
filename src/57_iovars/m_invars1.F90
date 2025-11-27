@@ -694,8 +694,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%plowan_nbl,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%plowan_lcalc,(12*mxnatom))
    ABI_MALLOC(dtsets(idtset)%plowan_projcalc,(12*mxnatom))
-   ABI_MALLOC(dtsets(idtset)%rcpaw_frtypat,(mxntypat))
-   ABI_MALLOC(dtsets(idtset)%rcpaw_scenergy,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%rcpaw_rctypat,(mxntypat))
+   ABI_MALLOC(dtsets(idtset)%rcpaw_sc,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%vel_orig,(3,mxnatom,mxnimage))
    ABI_MALLOC(dtsets(idtset)%vel_cell_orig,(3,3,mxnimage))
    ABI_MALLOC(dtsets(idtset)%xred_orig,(3,mxnatom,mxnimage))
@@ -2458,13 +2458,13 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%goprecon =0
    dtsets(idtset)%goprecprm(:)=0
    dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
-   dtsets(idtset)%gpu_kokkos_nthrd=xomp_get_num_threads(open_parallel=.true.)
+   dtsets(idtset)%gpu_kokkos_nthrd=xomp_get_max_threads()
    dtsets(idtset)%gpu_linalg_limit=2000000
    dtsets(idtset)%gpu_nl_distrib=0
    dtsets(idtset)%gpu_nl_splitsize=1
    dtsets(idtset)%gpu_thread_limit=0
    if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) then
-     dtsets(idtset)%gpu_thread_limit=min(4,xomp_get_num_threads(open_parallel=.true.))
+     dtsets(idtset)%gpu_thread_limit=min(4,xomp_get_max_threads())
    end if
    if (dtsets(idtset)%gw_customnfreqsp/=0) dtsets(idtset)%gw_freqsp(:) = zero
    if ( dtsets(idtset)%gw_nqlwl > 0 ) then
@@ -2761,8 +2761,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%recptrott=0
    dtsets(idtset)%rectesteg=0
    dtsets(idtset)%rectolden=zero
-   dtsets(idtset)%rcpaw_scenergy(:)=-two
-   dtsets(idtset)%rcpaw_frtypat(:)=0
+   dtsets(idtset)%rcpaw_sc(:)=tol1
+   dtsets(idtset)%rcpaw_rctypat(:)=1
    dtsets(idtset)%rcut=zero
    dtsets(idtset)%restartxf=0
 !  dtsets(idtset)%rfasr=0

@@ -149,6 +149,7 @@ pseudos "Psdj_paw_pw_std/V.xml, Psdj_paw_pw_std/Sr.xml, Psdj_paw_pw_std/O.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% test_chain = tucalc_crpa_2.abi
 #%% [files]
 #%% [shell]

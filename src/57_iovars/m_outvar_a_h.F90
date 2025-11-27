@@ -1562,6 +1562,12 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%extfpmd_nband
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'extfpmd_nband','INT',0)
 
+ intarr(1,:)=dtsets(:)%extfpmd_pawsph
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'extfpmd_pawsph','INT',0)
+
+ intarr(1,:)=dtsets(:)%extfpmd_prterr
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'extfpmd_prterr','INT',0)
+
 !Special treatment of the default values for the hybrid functional parameters.
  do ii=1,4
    if(ii==1)dprarr(1,:)=dtsets(:)%hyb_mixing
