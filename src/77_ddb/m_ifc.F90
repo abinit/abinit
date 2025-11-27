@@ -287,7 +287,6 @@ subroutine ifc_free(ifc)
  ABI_SFREE(ifc%zeff)
  ABI_SFREE(ifc%qdrp_cart)
  ABI_SFREE(ifc%dynmat)
- !ABI_SFREE(ifc%dynmat_lr)
 
 end subroutine ifc_free
 !!***
@@ -406,7 +405,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  ngqpt=0; ngqpt(1:3)=ngqpt_in(1:3)
 
-! Copy important parameters in Ifc
+ ! Copy important parameters in Ifc
  Ifc%natom = natom
  Ifc%mpert = mpert
  Ifc%asr = asr
@@ -489,9 +488,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    rprim_tmp = rprim
  endif
 
-! Find symmetrical dynamical matrices
+ ! Find symmetrical dynamical matrices
  if (.not.present(Ifc_coarse)) then
-
    ! Each q-point in the BZ mush be the symmetrical of one of the qpts in the ddb file.
    ! SP - gprimd and rprimd is required instead of gprim and rprim for non-diagonal supercells.
    call symdm9(ddb, &
@@ -548,10 +546,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      sumg0=0
      if (Ifc%dipquad==1.or.Ifc%quadquad==1) then
        call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
-                 Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
+                   Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
      else
        call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
-                 Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option)
+                   Crystal%xred,zeff,qdrp_cart,option=ifc%ewald_option)
      end if
      call q0dy3_apply(natom,dyewq0,dyew)
      plus=0
@@ -876,7 +874,6 @@ subroutine ifc_print(ifc, units, header, prtvol)
  call wrtout(units, sjoin(" Number of real-space points for IFC(R): ", itoa(ifc%nrpt)))
  call wrtout(units, sjoin(" Radius of biggest sphere inscribed in the WS supercell: ", ftoa(ifc%r_inscribed_sphere)))
  call wrtout(units, " ")
-
  call wrtout(units, " Q-mesh:")
  call wrtout(units, sjoin(" ngqpt:", ltoa(ifc%ngqpt),", nqshft:", itoa(ifc%nqshft)))
  do ii=1,ifc%nqshft
@@ -897,7 +894,6 @@ end subroutine ifc_print
 !!  a Fourier transform on the IFCs matrix in real space.
 !!
 !! INPUTS
-!!  Ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
 !!  Crystal<type(crystal_t)> = Information on the crystalline structure.
 !!  qpt(3)=q-point in reduced coordinates (unless nanaqdir is specified)
 !!  [nanaqdir]=If present, the qpt will be treated as a vector specifying the
@@ -1011,7 +1007,6 @@ end subroutine ifc_fourq
 !!  Compute phonon group velocities at an arbitrary q-point.
 !!
 !! INPUTS
-!!  ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !!  crystal<crystal_t> = Information on the crystalline structure.
 !!  qpt(3)=q-point in reduced coordinates.
 !!  eigvec(2*3*natom*3*natom) = The eigenvectors of the dynamical matrix.
@@ -1162,7 +1157,6 @@ end subroutine ifc_get_phmesh
 !!  Perform spherical integration with Lebedev-Laikov grids
 !!
 !! INPUTS
-!! ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !! crystal<crystal_t> = Information on the crystalline structure.
 !! qrad_tolkms(2):
 !!   qrad=Radius of the sphere in reciprocal space
@@ -1634,7 +1628,6 @@ end subroutine corsifc9
 !!  to a TDEP file named outfile.forceconstants_ABINIT
 !!
 !! INPUTS
-!! Ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
 !! ifcana= 0 => no analysis of ifc ; 1 => full analysis
 !! atifcflg(natom) =  atifcflg(ia) equals 1 if the analysis of ifc has to be done for atom ia; otherwise 0.
 !! ifcout= Number of interatomic force constants written in the output file
@@ -1983,7 +1976,6 @@ end subroutine ifc_write
 !! Prints to the output file
 !!
 !! INPUTS
-!! Ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
 !! ifcana= 0 => no analysis of ifc ; 1 => full analysis
 !! ifcout= Number of interatomic force constants written in the output file
 !! iout=unit number for nice output
@@ -2124,7 +2116,7 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
      if (iout > 0) then
        do nu=1,3
          write(iout, '(1x,3f9.5)' )(rsiaf(mu,nu,ii)+tol10,mu=1,3)
-!       transfer short range and long range
+         ! transfer short range and long range
          do mu=1,3
            Ifc%short_atmfrc(mu,ia,nu,ib,irpt) = rsiaf(mu,nu,ii) + tol10
          end do
@@ -2231,7 +2223,7 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
            (ewiaf1(mu,nu)+tol10,mu=1,3),&
            (sriaf(mu,nu,ii) +tol10,mu=1,3)
 
-!       transfer short range and long range
+         ! transfer short range and long range
          do mu=1,3
            Ifc%short_atmfrc(mu,ia,nu,ib,irpt) = sriaf(mu,nu,ii) + tol10
            Ifc%ewald_atmfrc(mu,ia,nu,ib,irpt) = ewiaf1(mu,nu) + tol10
@@ -2310,12 +2302,8 @@ end subroutine ifc_getiaf
 !! (included by U. Aschauer and EB)
 !!
 !! INPUTS
-!!  argin(sizein)=description
 !!
 !! OUTPUT
-!!  argout(sizeout)=description
-!!
-!! SIDE EFFECTS
 !!
 !! SOURCE
 
@@ -2491,7 +2479,6 @@ end subroutine omega_decomp
 !!  Flag in input file is outboltztrap=1
 !!
 !! INPUTS
-!!  ifc<ifc_type>=Stores data related to interatomic force constants.
 !!  Crystal<crystal_t>=Info on the crystal structure
 !!  basename = file name for output to disk
 !!  ngqpt(3)=Divisions of the q-mesh
@@ -2595,7 +2582,6 @@ end subroutine ifc_outphbtrap
 !!  Output phonon isosurface in Xcrysden format.
 !!
 !! INPUTS
-!!  ifc<ifc_type>=Stores data related to interatomic force constants.
 !!  crystal<crystal_t>=Info on the crystal structure
 !!  ngqpt(3)=Divisions of the q-mesh
 !!  nqshft=Number of shifts

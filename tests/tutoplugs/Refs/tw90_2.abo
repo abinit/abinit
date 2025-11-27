@@ -1,5 +1,5 @@
 
-.Version 10.3.4.4 of ABINIT, released Nov 2024.
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 26 Jan 2025.
-- ( at 09h43 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 17h56 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/TestBot_MPI1/tutoplugs_tw90_2/tw90_2.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/tutoplugs_tw90_2/tw90_2.abi
 - output file    -> tw90_2.abo
 - root for input  files -> tw90_2i
 - root for output files -> tw90_2o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -203,9 +203,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pw_std/Si.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pw_std/Si.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_test-ylmgr/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
@@ -395,7 +395,7 @@ xc                  : -4.84345124305865E+00
 Ewald energy        : -8.39800922793231E+00
 psp_core            :  2.32083792626005E-01
 local_psp           : -2.46415460816513E+00
-spherical_terms     :  3.70068402796820E+00
+PAW spherical_terms :  3.70068402796820E+00
 total_energy        : -7.93217605106508E+00
 total_energy_eV     : -2.15845487370631E+02
 ...
@@ -408,9 +408,19 @@ band_energy         :  2.34478190227520E-01
 Ewald energy        : -8.39800922793231E+00
 psp_core            :  2.32083792626005E-01
 xc_dc               : -1.92387313951062E+00
-spherical_terms     :  1.92314411570850E+00
+PAW spherical_terms :  1.92314411570850E+00
 total_energy_dc     : -7.93217626888091E+00
 total_energy_dc_eV  : -2.15845493297701E+02
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -5.77972898855398E+02
+Total energy DC     : -5.77972899073214E+02
+Total energy (eV)   : -1.57274424114312E+04
+Total energy DC (eV): -1.57274424173583E+04
 ...
 
 

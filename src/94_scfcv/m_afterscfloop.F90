@@ -120,6 +120,7 @@ contains
 !!   | nsppol=1 for unpolarized, 2 for spin-polarized
 !!   | nsym=number of symmetries in space group
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  grchempottn(3,natom)=d(E_chemical_potential)/d(xred) (hartree)
 !!  grcondft(3,natom)=d(E_constrained_DFT)/d(xred) (hartree)
@@ -258,8 +259,8 @@ contains
 !!   | e_nlpsp_vfock(IN)=nonlocal psp + potential Fock ACE part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
 !!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
-!!   | e_paw(IN)=PAW spherical part energy
-!!   | e_pawdc(IN)=PAW spherical part double-counting energy
+!!   | paw%e_paw(IN)=PAW spherical part energy
+!!   | paw%e_pawdc(IN)=PAW spherical part double-counting energy
 !!   | e_elecfield(OUT)=the term of the energy functional that depends explicitely    !!HONG
 !!   |                  on the electric field:
 !!   |                 enefield =  -ebar_i p_i - Omega/(8*pi) (g^{-1})_ij ebar_i ebar_j for fixed E/ebar
@@ -277,11 +278,11 @@ contains
 !! SOURCE
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
-& deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
+& deltae,diffor,difmag,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,extfpmd,favg,fcart,fock,forold,grchempottn,grcondft,&
 & gred,gresid,grewtn,grhf,grhor,grvdw,&
 & grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
-& kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
+& kg,kxc,lrhor,maxfor,maxmag,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
@@ -333,6 +334,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
+ real(dp),intent(in) :: maxmag, difmag
  real(dp),intent(inout) :: cg(2,mcg)
  real(dp),intent(inout) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(inout) :: forold(3,dtset%natom)
@@ -692,13 +694,13 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    if (psps%usepaw==0) then
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&     option=1,extfpmd=extfpmd)
+&     option=1)
    else
      ABI_MALLOC(tauwfg,(2,dtset%nfft))
      ABI_MALLOC(tauwfr,(dtset%nfft,dtset%nspden))
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &     npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&     option=1,extfpmd=extfpmd)
+&     option=1)
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
      ABI_FREE(tauwfg)
      ABI_FREE(tauwfr)
@@ -987,7 +989,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !print a warning to the output file (non-dummy arguments: dtset%nstep,
 !residm, diffor - infos from tollist have been saved inside )
  choice=3
- call scprqt(choice,cpus,deltae,diffor,dtset,&
+ call scprqt(choice,cpus,deltae,diffor,maxmag,difmag,dtset,&
 & eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,&
 & dtfil%fnameabo_app_eig,dtfil%filnam_ds(1),&
 & 1,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,maxfor,&
@@ -1096,6 +1098,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%vxcavg     =vxcavg
  if (ngrvdw>0) results_gs%grvdw(1:3,1:ngrvdw)=grvdw(1:3,1:ngrvdw)
  if (associated(extfpmd)) then
+   if(dtset%extfpmd_prterr==1) then
+     call extfpmd_err(extfpmd,eigen,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,&
+&         dtset%wtk,trim(dtfil%filnam_ds(4))//'_EXTFPMD_ERR')
+   endif
    results_gs%nelect_extfpmd=extfpmd%nelect
    results_gs%extfpmd_eshift=extfpmd%eshift
  end if

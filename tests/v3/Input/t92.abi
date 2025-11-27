@@ -82,6 +82,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = haicgu_*
 #%% [files]
 #%% files_to_test = 
 #%%   t92.abo, tolnlines = 5, tolabs = 1.1e-9, tolrel = 4.0e-02

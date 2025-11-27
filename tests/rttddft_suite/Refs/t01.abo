@@ -1,8 +1,8 @@
 
-.Version 10.4.0.6 of ABINIT, released Apr 2025.
-.(MPI version, prepared for a x86_64_linux_gnu9.1 computer)
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 16 May 2025.
-- ( at 10h16 )
-
-- input  file    -> /tmp/abinit/opt/Test_suite/rttddft_suite_t01/t01.abi
+.Starting date : Thu  9 Oct 2025.
+- ( at 17h56 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/rttddft_suite_t01/t01.abi
 - output file    -> t01.abo
 - root for input  files -> t01i
 - root for output files -> t01o
 
-- inpspheads : Reading pseudopotential header in XML form from
--   /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
  DATASET    1 : the unit cell is not primitive
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -32,13 +32,12 @@
      natom =       4  nloc_mem =       2    nspden =       1   nspinor =       1
     nsppol =       1      nsym =     192    n1xccc =       1    ntypat =       1
     occopt =       3   xclevel =       2
--    mband =          42        mffmem =           1         mkmem =           1
+-    mband =          42        mffmem =           1         mkmem =           4
        mpw =         288          nfft =        5832          nkpt =           4
-Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       7.192 Mbytes of memory.
+P This job should need less than                       8.437 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.740 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -51,12 +50,12 @@ _ WF disk file :      0.740 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
      natom =       4  nloc_mem =       2    nspden =       1   nspinor =       1
     nsppol =       1      nsym =     192    n1xccc =       1    ntypat =       1
     occopt =       3   xclevel =       2
--    mband =          42        mffmem =           1         mkmem =           1
+-    mband =          42        mffmem =           1         mkmem =           4
        mpw =         288          nfft =        5832          nkpt =           4
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       7.814 Mbytes of memory.
+P This job should need less than                       8.437 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.740 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -69,12 +68,12 @@ _ WF disk file :      0.740 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
      natom =       4  nloc_mem =       2    nspden =       1   nspinor =       1
     nsppol =       1      nsym =     192    n1xccc =       1    ntypat =       1
     occopt =       3   xclevel =       2
--    mband =          42        mffmem =           1         mkmem =           1
+-    mband =          42        mffmem =           1         mkmem =           4
        mpw =         288          nfft =        5832          nkpt =           4
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       7.814 Mbytes of memory.
+P This job should need less than                       8.437 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.740 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -87,7 +86,7 @@ _ WF disk file :      0.740 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      6.3324722713E+00  6.3324722713E+00  6.3324722713E+00 Bohr
@@ -111,7 +110,7 @@ _ WF disk file :      0.740 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
                        5.00000000E-01  5.00000000E-01  5.00000000E-01
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.26649445E+01
-P           mkmem           1
+P           mkmem           4
             natom           4
             nband          42
            ndtset           3
@@ -154,9 +153,6 @@ P           mkmem           1
         optdriver1          0
         optdriver2          9
         optdriver3          9
--      paral_atom1          1
--      paral_atom2          0
--      paral_atom3          0
         pawecutdg      1.60000000E+01 Hartree
            prtden           0
         prtebands           0
@@ -386,7 +382,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 4, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -422,9 +418,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     16.000   => boxcut(ratio)=   2.10481
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
-- pspatm: opening atomic psp file    /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
-- pspatm : Reading pseudopotential header in XML form from /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 1.81432190
@@ -456,17 +452,17 @@ tolerances: {tolvrs: 1.00E-12, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -651.01050183957    -6.510E+02 8.834E+00 1.089E+03
- ETOT  2  -634.34146297605     1.667E+01 4.543E-02 6.528E+01
- ETOT  3  -633.77006702631     5.714E-01 6.762E-03 5.184E+00
- ETOT  4  -633.74254394822     2.752E-02 2.480E-04 2.790E-02
- ETOT  5  -633.74207531003     4.686E-04 5.978E-05 4.463E-04
- ETOT  6  -633.74207058131     4.729E-06 1.582E-06 5.331E-05
+ ETOT  1  -651.01050183964    -6.510E+02 8.834E+00 1.089E+03
+ ETOT  2  -634.34146297606     1.667E+01 4.543E-02 6.528E+01
+ ETOT  3  -633.77006702630     5.714E-01 6.762E-03 5.184E+00
+ ETOT  4  -633.74254394823     2.752E-02 2.480E-04 2.790E-02
+ ETOT  5  -633.74207531002     4.686E-04 5.978E-05 4.463E-04
+ ETOT  6  -633.74207058130     4.729E-06 1.582E-06 5.331E-05
  ETOT  7  -633.74206949816     1.083E-06 1.715E-06 7.590E-07
- ETOT  8  -633.74206948500     1.316E-08 4.070E-08 5.287E-08
- ETOT  9  -633.74206948246     2.540E-09 6.091E-08 5.437E-10
- ETOT 10  -633.74206948198     4.732E-10 1.951E-09 9.682E-12
- ETOT 11  -633.74206948185     1.379E-10 9.946E-10 7.057E-13
+ ETOT  8  -633.74206948499     1.317E-08 4.070E-08 5.287E-08
+ ETOT  9  -633.74206948246     2.534E-09 6.091E-08 5.437E-10
+ ETOT 10  -633.74206948198     4.776E-10 1.951E-09 9.681E-12
+ ETOT 11  -633.74206948184     1.415E-10 9.946E-10 7.058E-13
 
  At SCF step   11       nres2   =  7.06E-13 < tolvrs=  1.00E-12 =>converged.
 
@@ -486,7 +482,7 @@ lattice_vectors:
 lattice_lengths: [   6.33247,    6.33247,    6.33247, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.5393344E+02
-convergence: {deltae:  1.379E-10, res2:  7.057E-13, residm:  9.946E-10, diffor: null, }
+convergence: {deltae:  1.415E-10, res2:  7.058E-13, residm:  9.946E-10, diffor: null, }
 etotal    :  -6.33742069E+02
 entropy   :   0.00000000E+00
 fermie    :   6.76370937E-01
@@ -519,8 +515,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     17.168591213807037
- Compensation charge over fine fft grid    =     17.169430396531364
+ Compensation charge over spherical meshes =     17.168591213848632
+ Compensation charge over fine fft grid    =     17.169430396634315
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -645,32 +641,42 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.57357942303141E+02
-hartree             :  9.75565271143549E+01
-xc                  : -3.52134524780550E+01
+kinetic             :  1.57357942304444E+02
+hartree             :  9.75565271142170E+01
+xc                  : -3.52134524779791E+01
 Ewald energy        : -4.69167569432709E+02
 psp_core            :  2.49424417536982E+01
-local_psp           : -3.57883907328273E+02
-spherical_terms     : -5.13322362090270E+01
-internal            : -6.33740254276870E+02
-'-kT*entropy'       : -1.81416540773217E-03
-total_energy        : -6.33742068442277E+02
-total_energy_eV     : -1.72449986926132E+04
+local_psp           : -3.57883907328227E+02
+PAW spherical_terms : -5.13322362089007E+01
+internal            : -6.33740254275456E+02
+'-kT*entropy'       : -1.81416540773817E-03
+total_energy        : -6.33742068440863E+02
+total_energy_eV     : -1.72449986925747E+04
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -8.65056754004084E+01
+band_energy         : -8.65056754004485E+01
 Ewald energy        : -4.69167569432709E+02
 psp_core            :  2.49424417536982E+01
-xc_dc               : -8.68707406847004E+01
-spherical_terms     : -1.61387115523183E+01
-internal            : -6.33740255316438E+02
-'-kT*entropy'       : -1.81416540773217E-03
-total_energy_dc     : -6.33742069481846E+02
-total_energy_dc_eV  : -1.72449987209013E+04
+xc_dc               : -8.68707406845855E+01
+PAW spherical_terms : -1.61387115523882E+01
+internal            : -6.33740255316433E+02
+'-kT*entropy'       : -1.81416540773817E-03
+total_energy_dc     : -6.33742069481841E+02
+total_energy_dc_eV  : -1.72449987209012E+04
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -6.03345223527425E+03
+Total energy DC     : -6.03345223631523E+03
+Total energy (eV)   : -1.64178584775023E+05
+Total energy DC (eV): -1.64178584803349E+05
 ...
 
 
@@ -686,7 +692,7 @@ total_energy_dc_eV  : -1.72449987209013E+04
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 4, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -756,7 +762,7 @@ Integrated density (ie. total nb of electrons) =      72.0008307579
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    1.06    1.06
+- Time - cpu, wall (sec):    0.29    0.29
 
 
 --- Iteration 2
@@ -775,13 +781,13 @@ Integrated density (ie. total nb of electrons) =      72.0008226054
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.15    0.15
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 3
 
 Total energy =    -633.740175 Ha
-Integrated density (ie. total nb of electrons) =      72.0008144528
+Integrated density (ie. total nb of electrons) =      72.0008144529
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -794,7 +800,7 @@ Integrated density (ie. total nb of electrons) =      72.0008144528
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.15    0.15
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 4
@@ -813,7 +819,7 @@ Integrated density (ie. total nb of electrons) =      72.0008063003
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.15    0.15
+- Time - cpu, wall (sec):    0.23    0.23
 
 
 --- Iteration 5
@@ -832,7 +838,7 @@ Integrated density (ie. total nb of electrons) =      72.0007981478
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.15    0.15
+- Time - cpu, wall (sec):    0.23    0.23
 
 
 --- Iteration 6
@@ -851,7 +857,7 @@ Integrated density (ie. total nb of electrons) =      72.0007899952
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.15    0.15
+- Time - cpu, wall (sec):    0.23    0.23
 
 
 --- Iteration 7
@@ -870,7 +876,7 @@ Integrated density (ie. total nb of electrons) =      72.0007818427
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.15    0.15
+- Time - cpu, wall (sec):    0.23    0.23
 
 
 --- Iteration 8
@@ -889,7 +895,7 @@ Integrated density (ie. total nb of electrons) =      72.0007736902
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.15    0.15
+- Time - cpu, wall (sec):    0.23    0.23
 
 
 --- Iteration 9
@@ -908,7 +914,7 @@ Integrated density (ie. total nb of electrons) =      72.0007655377
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.15    0.15
+- Time - cpu, wall (sec):    0.23    0.23
 
 
 --- Iteration 10
@@ -927,7 +933,7 @@ Integrated density (ie. total nb of electrons) =      72.0007573852
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.16    0.16
+- Time - cpu, wall (sec):    0.23    0.23
 
 
 ---------------------------------------------------------------------------
@@ -937,7 +943,7 @@ Integrated density (ie. total nb of electrons) =      72.0007573852
 
 ================================================================================
 == DATASET  3 ==================================================================
--   mpi_nproc: 4, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1008,7 +1014,7 @@ Integrated density (ie. total nb of electrons) =      72.0008305857
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    3.25    3.25
+- Time - cpu, wall (sec):    0.87    0.87
 
 
 --- Iteration 2
@@ -1028,7 +1034,7 @@ Integrated density (ie. total nb of electrons) =      72.0008222978
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.46    0.47
+- Time - cpu, wall (sec):    0.68    0.68
 
 
 --- Iteration 3
@@ -1048,7 +1054,7 @@ Integrated density (ie. total nb of electrons) =      72.0008140440
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.45    0.45
+- Time - cpu, wall (sec):    0.68    0.68
 
 
 --- Iteration 4
@@ -1068,7 +1074,7 @@ Integrated density (ie. total nb of electrons) =      72.0008058192
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.46    0.46
+- Time - cpu, wall (sec):    0.68    0.68
 
 
 --- Iteration 5
@@ -1088,7 +1094,7 @@ Integrated density (ie. total nb of electrons) =      72.0007976166
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.46    0.47
+- Time - cpu, wall (sec):    0.68    0.68
 
 
 --- Iteration 6
@@ -1108,14 +1114,14 @@ Integrated density (ie. total nb of electrons) =      72.0007894286
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.47    0.47
+- Time - cpu, wall (sec):    0.68    0.68
 
 
 --- Iteration 7
 Converged after    1 self-consistent corrector steps
 
 Total energy =    -633.739768 Ha
-Integrated density (ie. total nb of electrons) =      72.0007812474
+Integrated density (ie. total nb of electrons) =      72.0007812475
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -1128,7 +1134,7 @@ Integrated density (ie. total nb of electrons) =      72.0007812474
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.47    0.47
+- Time - cpu, wall (sec):    0.68    0.68
 
 
 --- Iteration 8
@@ -1148,7 +1154,7 @@ Integrated density (ie. total nb of electrons) =      72.0007730660
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.47    0.47
+- Time - cpu, wall (sec):    0.68    0.68
 
 
 --- Iteration 9
@@ -1168,7 +1174,7 @@ Integrated density (ie. total nb of electrons) =      72.0007648784
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.45    0.45
+- Time - cpu, wall (sec):    0.68    0.68
 
 
 --- Iteration 10
@@ -1188,7 +1194,7 @@ Integrated density (ie. total nb of electrons) =      72.0007566806
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.45    0.45
+- Time - cpu, wall (sec):    0.68    0.68
 
 
 ---------------------------------------------------------------------------
@@ -1198,7 +1204,7 @@ Integrated density (ie. total nb of electrons) =      72.0007566806
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      6.3324722713E+00  6.3324722713E+00  6.3324722713E+00 Bohr
               amu      5.86900000E+01
@@ -1236,7 +1242,7 @@ Integrated density (ie. total nb of electrons) =      72.0007566806
                        5.00000000E-01  5.00000000E-01  5.00000000E-01
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      1.26649445E+01
-P           mkmem           1
+P           mkmem           4
             natom           4
             nband          42
            ndtset           3
@@ -1335,9 +1341,6 @@ P           mkmem           1
         optdriver1          0
         optdriver2          9
         optdriver3          9
--      paral_atom1          1
--      paral_atom2          0
--      paral_atom3          0
         pawecutdg      1.60000000E+01 Hartree
            prtden           0
         prtebands           0
@@ -1346,7 +1349,7 @@ P           mkmem           1
             prtwf1          1
             prtwf2          0
             prtwf3          0
-           strten1     4.6248744726E-01  4.6248744726E-01  4.6248744726E-01
+           strten1     4.6248744727E-01  4.6248744727E-01  4.6248744727E-01
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1608,7 +1611,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1620,12 +1623,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1643,15 +1646,15 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         14.4  wall=         14.5
+- Proc.   0 individual time (sec): cpu=         13.0  wall=         13.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         57.6  wall=         57.9
+.Delivered  12 WARNINGs and  18 COMMENTs to log file.
++Overall time at end (sec) : cpu=         13.0  wall=         13.1

@@ -458,7 +458,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 & energies%e_entropy + energies%e_elecfield + energies%e_magfield+&
 & energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if (dtset%usepaw==0) etotal = etotal + energies%e_nlpsp_vfock
- if (dtset%usepaw/=0) etotal = etotal + energies%e_paw
+ if (dtset%usepaw/=0) etotal = etotal + energies%paw%epaw
  write(message,'(a,2x,e19.12)') ' Total energy before tail correction', etotal
  call wrtout(std_out, message, 'COLL')
 
@@ -527,7 +527,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 & energies%e_entropy + energies%e_elecfield + energies%e_magfield+&
 & energies%e_ewald + energies%e_vdw_dftd
  if (dtset%usepaw==0) etotal = etotal + energies%e_nlpsp_vfock
- if (dtset%usepaw/=0) etotal = etotal + energies%e_paw
+ if (dtset%usepaw/=0) etotal = etotal + energies%paw%epaw
 
  write(message,'(a,2x,e19.12)') ' Total energy with tail correction', etotal
  call wrtout(std_out, message, 'COLL')
