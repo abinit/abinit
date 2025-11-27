@@ -948,6 +948,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
    vpsp1(1:cplex*nfft)=vpsp1(1:cplex*nfft)*xnorm
 
    ABI_FREE(work1)
+   ABI_FREE(gcutoff)
 
 !  End the condition of non-electric-field
  end if

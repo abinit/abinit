@@ -1055,6 +1055,8 @@ contains
  ABI_FREE(int_fsddb)
  ABI_FREE(int_rsddb)
  ABI_FREE(dummysus)
+ ABI_FREE(dummysus1)
+ ABI_FREE(dummysus2)
  ABI_FREE(magsus)
  ABI_FREE(lm_magsus)
  ABI_FREE(invmagsus)
