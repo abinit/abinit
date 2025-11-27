@@ -55,7 +55,7 @@ TYPE, PUBLIC :: ImpurityOperator
   DOUBLE PRECISION _PRIVATE          :: beta
    !  Inverse of temperature.
 
-  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:)   :: mat_U
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)   :: mat_U
   !  for iflavor1 and iflavor2, mat_U(iflavor1,iflavor2) is the
   !  coulomb interaction between iflavor1 and iflavor2.
 
@@ -1814,7 +1814,7 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_measN(this,flavor)
     totalC    = totalC    + this%particles(aF)%list(scanning,C_   )
   END DO
 
-  ImpurityOperator_measN = cmplx(totalC - totalCdag,0.d0,kind=8)
+  ImpurityOperator_measN = totalC - totalCdag
 
 END FUNCTION ImpurityOperator_measN
 !!***
