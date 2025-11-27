@@ -1261,7 +1261,7 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,o
 !Local variables -------------------------
 !scalars
  integer :: iblok,rftyp
- integer :: idir1,idir2,ipert1,ipert2,mpert
+ integer :: idir1,idir2,ipert1,ipert2
 !arrays
  integer :: rfelfd(4),rfmagn(4),rfphon(4),rfstrs(4)
  real(dp) :: val(2)
@@ -2340,8 +2340,6 @@ subroutine rdddb9(ddb,ddb_hdr,unddb,&
  integer,parameter :: msppol=2,mtyplo=6
  integer :: raw_
  integer :: iblok,isym
- integer :: nsize,timrev
- integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: ddb_version
  real(dp),parameter :: tolsym8=tol8
 !arrays
@@ -5291,7 +5289,7 @@ subroutine ddb_write_d2eig(ddb, ddb_hdr, iblok, comm)
 
   else if (ddb_hdr%has_open_file_txt) then
 
-    call ddb%write_d2eig_txt(ddb_hdr%unddb, iblok,ddb_hdr%ddb_version)
+    call ddb%write_d2eig_txt(ddb_hdr%unddb, iblok)
 
   else
     write(msg, '(3a)' )&
@@ -5432,7 +5430,7 @@ end subroutine ddb_write_d2eig_nc
 !!
 !! SOURCE
 
-subroutine ddb_write_d2eig_txt(ddb, unddb, iblok,ddbvsn)
+subroutine ddb_write_d2eig_txt(ddb, unddb, iblok)
 !Arguments -------------------------------
  class(ddb_type),intent(in) :: ddb
  integer,intent(in) :: unddb
@@ -5442,7 +5440,6 @@ subroutine ddb_write_d2eig_txt(ddb, unddb, iblok,ddbvsn)
 !scalars
  integer,parameter :: iblok_eig2d=1
  integer,parameter :: choice=2
- integer :: ddbvsn
 ! ************************************************************************
 
   ! GA: This routine is redundant with outbsd.

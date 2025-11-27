@@ -331,7 +331,7 @@ contains
 
    !Calculate the local spin susceptibilities
    call local_spinsus(dummysus,ddb,1,dummysus1,invmagsus(:,:,iw),&
- & dummysus1,magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol,&
+ & dummysus2,magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol,&
  & fs2rs=fs2rs,blkval_fs=int_fsddb)
 
    !Calculate the 1st-order magnetic moments

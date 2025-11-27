@@ -194,7 +194,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
  integer :: ia1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
  integer :: idq,ierr,ii,ikpt,ireadwf,istr,itypat,mcg1,me,mpsang
  integer :: mpw1, mpw1_mq
- integer :: n1,n2,n3,ndir,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
+ integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
  integer :: optgeom,opthartdqdq,optorth,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
  integer :: pert1case_mq,pert2case_mq
