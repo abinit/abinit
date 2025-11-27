@@ -26,7 +26,9 @@ module m_sigc
  use m_splines
  use m_dtset
 
+ use m_io_tools,      only : iomode_from_fname
  use defs_datatypes,  only : pseudopotential_type
+ use m_dtfil,         only : datafiles_type
  use m_array,         only : array2_gwpc_t
  use m_time,          only : timab, cwtime, cwtime_report
  use m_hide_blas,     only : xdotc, xgemv, xgemm, xherk
@@ -43,6 +45,7 @@ module m_sigc
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_screening,     only : epsm1_t
  use m_ppmodel,       only : ppmodel_t
+ use m_screen,        only : em1_symmetrize_op
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_pawang,        only : pawang_type
@@ -56,6 +59,7 @@ module m_sigc
  use m_occ,           only : get_fact_spin_tol_empty
  use m_ebands,        only : ebands_t
  use m_pstat,         only : pstat_proc
+ use m_io_screening,  only : read_screening  ! hscr_t, get_hscr_qmesh_gsph,
 
  implicit none
 
@@ -129,7 +133,7 @@ contains
 !! SOURCE
 
 subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
-                        Dtset,Cryst,QP_BSt,Sigp,Sr,epsm1,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,Ltg_k,&
+                        Dtset, dtfil, Cryst,QP_BSt,Sigp,Sr,epsm1,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,Ltg_k,&
                         PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,&
                         gwc_ngfft,rho_ngfft,rho_nfftot,rhor,use_aerhor,aepaw_rhor,sigcme_tmp)
 
@@ -142,6 +146,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
  type(vcoul_t),intent(in) :: Vcp
  type(dataset_type),intent(in) :: Dtset
+ type(datafiles_type),intent(in) :: dtfil
  type(epsm1_t),intent(inout) :: epsm1
  type(gsphere_t),intent(in) :: Gsph_Max,Gsph_c
  type(littlegroup_t),intent(in) :: Ltg_k
@@ -168,7 +173,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer :: npw_k,iab,ib,ib1,ib2,ierr,ig,ii,iik,itim_q,i1,i2,npls,ib_sum
  integer :: ik_bz,ik_ibz,io,iiw,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx
  integer :: band,band1,band2,idle,rank,jik,jk_bz,jk_ibz,kb,nspinor
- integer :: nomega_tot,nq_summed,ibsp,dimcprj_gw,npwc
+ integer :: nomega_tot,nq_summed,ibsp,dimcprj_gw,npwc, scr_iomode
  integer :: spad,spadc1,spadc2,irow,my_nbks,ndegs,wtqm,wtqp,mod10, iwc,ifft
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,nfftf,mgfftf,use_padfftf
  integer :: ilwrk, neigmax, ac_epsm1cqwz2_win
@@ -193,7 +198,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegame0i(:), w_maxval(:)
  complex(gwp) :: sigcohme(Sigp%nsig_ab), omegap_cplx(epsm1%nomega_i)
- complex(gwp),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:)
+ complex(gwp),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:), coh_g(:)
  complex(gwp),allocatable :: botsq_conjg_transp(:,:)
  complex(gwp),pointer, contiguous :: ac_epsm1cqwz2(:,:,:) => null()
  complex(gwp),allocatable :: epsm1_trcc_qbz(:,:,:), epsm1_tmp(:,:)
@@ -215,8 +220,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  real(gwp),allocatable :: epsm1_eig(:)
  complex(gwp),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:), conv_rhotw_epsm1_rhotw(:,:,:)
  complex(dp) :: tmp_rhotw_epsm1_rhotw(epsm1%nomega_i), tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv)
- type(array2_gwpc_t),allocatable :: wc0_pibz(:)
- complex(gwp),allocatable :: wc0_pbz(:,:) !, vec_coh_nk(:,:), vec_coh_mkq(:,:),
+ type(array2_gwpc_t),allocatable :: wc0_qibz(:)
+ complex(gwp),allocatable :: wc0_qbz(:,:) !, vec_coh_nk(:,:), vec_coh_mkq(:,:),
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -411,28 +416,30 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  end if
 
  if (Sigp%gwcomp == 2) then
-   !! Allocate memory to store static screening in the IBZ and workspace array for the value at pp_bz in the BZ.
-   !! TODO: Store only the ip_ibz needed by this MPI rank to save memory.
+   ! Allocate memory to store static screening in the IBZ and workspace array for the value at qq_bz in the BZ.
+   ! TODO: Store only the iq_ibz needed by this MPI rank to save memory.
    call wrtout(units, " Activating COH remainder technique")
-   !ABI_MALLOC(wc0_pibz, (pp_mesh%nibz))
-   !ABI_MALLOC(wc0_pbz, (npwc, npwc))
 
-   !scr_iomode = iomode_from_fname(dtfil%fnameabi_scr)
-   !ABI_MALLOC(epsm1_ggw, (npwc, npwc, 1))
+   ABI_MALLOC(wc0_qibz, (qmesh%nibz))
+   ABI_MALLOC(wc0_qbz, (npwc, npwc))
+   ABI_MALLOC(epsm1_ggw, (npwc, npwc, 1))
 
-   !do iq_ibz=1,pp_mesh%nibz
-   !  call read_screening("inverse_dielectric_function", screen_filepath, &
-   !                      npwc, 1, 1, epsm1_ggw, scr_iomode, comm, iqiA=iq_ibz)
-   !end do
-   !! Keep static limit of Wc in memory.
-   !do ii=1,npwc
-   !  epsm1_ggw(ii,ii,1) = epsm1_ggw(ii,ii,1) - one
-   !end do
-   !ABI_MALLOC(wc0_pibz(iq_ibz)%vals, (npwc, npwc))
-   !wc0_pibz(iq_ibz)%vals = epsm1_ggw(:,:,1)
+   scr_iomode = iomode_from_fname(dtfil%fnameabi_scr)
+   do iq_ibz=1,qmesh%nibz
+     call read_screening("inverse_dielectric_function", dtfil%fnameabi_scr, &
+                         npwc, 1, 1, epsm1_ggw, scr_iomode, wfd%comm, iqiA=iq_ibz)
 
-   !ABI_FREE(epsm1_ggw)
+     ! Keep static limit of Wc in memory.
+     !do ii=1,npwc
+     !  epsm1_ggw(ii,ii,1) = epsm1_ggw(ii,ii,1) - one
+     !end do
+     ABI_MALLOC(wc0_qibz(iq_ibz)%vals, (npwc, npwc))
+     wc0_qibz(iq_ibz)%vals = epsm1_ggw(:,:,1)
+   end do
+
+   ABI_FREE(epsm1_ggw)
    !call hscr%free()
+   ABI_MALLOC(coh_g, (npwc))
  end if
 
  ABI_MALLOC(rhotwg_ki, (npwc*nspinor, minbnd:maxbnd))
@@ -836,6 +843,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        end if
      end if ! gwcalctyp
 
+     if (dtset%gwcomp == 2) then
+       ! Compute static limit at pp_bz from the symmetrical image in the IBZ
+       call em1_symmetrize_op(iq_bz, npwc, 1, gsph_c, qmesh, wc0_qibz(iq_ibz)%vals, wc0_qbz)
+     end if
+
      ! Get Fourier components of the Coulomb interaction in the BZ
      ! In 3D systems, neglecting umklapp: vc(Sq,sG) = vc(q,G) = 4pi/|q+G|**2
      ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
@@ -1136,10 +1148,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
               Sigp%zcut,theta_mu_minus_e0i,sigc_ket,PPm%model,npwc,PPm%dm2_botsq,PPm%dm2_otq)
          end if
 
-         !if (Sigp%gwcomp==2) then
-         !  wc0_qbz => epsm1%epsm1_qbz(:,:,1)
-         !  coh_g = matmul(wc0_qbz, rhotwg_ki(:,kb))
-         !end if
+         if (Sigp%gwcomp == 2) then
+           !wc0_qbz => epsm1%epsm1_qbz(:,:,1)
+           coh_g = matmul(wc0_qbz, rhotwg_ki(:,kb))
+         end if
 
          call timab(438,2,tsec) !
          call timab(439,1,tsec) ! sigma_me
@@ -1235,12 +1247,13 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              end if
            end if ! gwcomp==1
 
-           !if (Sigp%gwcomp == 2) then
-           !  sigcohme(1) = quarter * dot_product(rhotwg, coh_g)
-           !  do io=1,nomega_sigc
-           !    sigctmp(io,:) = sigctmp(io,:) + sigcohme(:)
-           !  end do
-           !end if
+           if (Sigp%gwcomp == 2) then
+             !sigcohme(1) = quarter * dot_product(conjg(rhotwg), coh_g)
+             sigcohme(1) = quarter * dot_product(rhotwg, coh_g)
+             do io=1,nomega_sigc
+               sigctmp(io,:) = sigctmp(io,:) + sigcohme(1)
+             end do
+           end if
 
            ! Accumulate and, in case, symmetrize matrix elements of Sigma_c
            do iab=1,Sigp%nsig_ab
@@ -1468,6 +1481,15 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    else
      ABI_SFREE_PTR(ac_epsm1cqwz2)
    end if
+ end if
+
+ if (dtset%gwcomp == 2) then
+   ABI_SFREE(wc0_qbz)
+   do iq_ibz=1,qmesh%nibz
+     call wc0_qibz(iq_ibz)%free()
+   end do
+   ABI_FREE(wc0_qibz)
+   ABI_FREE(coh_g)
  end if
 
  call timab(431,2,tsec)
