@@ -233,7 +233,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwrpaw
- integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rf2_dkdk,rf2_dkde,rfmagn
+ integer :: rfddk,rfelfd,rfphon,rfstrs,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sumg0_save,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw,usevxctau,usevxctau_paw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
  logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
