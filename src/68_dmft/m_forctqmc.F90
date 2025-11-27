@@ -208,6 +208,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  ! =================================================================
  ! Impose diago of levels and Ylm basis if opt_nondiag=1
  ! =================================================================
+ ! to do: uniform the choice of local basis wtih triqs
  ! opt_diag=1 ! 1: diago the levels (The best choice).
  ! opt_diag=2 ! 2: diago density matrix (can be used for historical reasons)
 
