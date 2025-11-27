@@ -3308,6 +3308,8 @@ subroutine ddb_merge_blocks(ddb1, ddb2, iblok1, iblok2, ddbvsn)
     do ii=1,3
       ddb1%omega(ii,iblok1) = ddb2%omega(ii,iblok2)
     end do
+  else
+      ddb1%omega(:,iblok1) = 0.d0
   endif
   do ii=1,3
     ddb1%nrm(ii,iblok1) = ddb2%nrm(ii,iblok2)
@@ -5048,11 +5050,7 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,ddb
 
    ! Write the perturbation frequency
     !write(ab_out,*)"HHHHHHHHHHHHHHH"
-   !if( ddb_version>=cvrsio9_new )then
      write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
-   !else
-   !  write(nunit, '(a,1es16.8)' )' frequency',0.d0
-   !endif
 
    ! Write the matrix elements
    if(choice==2)then
@@ -5082,15 +5080,9 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,ddb
    write(nunit, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,iblok),ii=7,9),ddb%nrm(3,iblok)
 
    ! Write the perturbation frequency
-   !if( ddb_version>=cvrsio9_new )then
      write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
      write(nunit, '(a,1es16.8)' )'          ',ddb%omega(2,iblok)
      write(nunit, '(a,1es16.8)' )'          ',ddb%omega(3,iblok)
-   !else
-   !  write(nunit, '(a,1es16.8)' )' frequency',0.d0
-   !  write(nunit, '(a,1es16.8)' )'          ',0.d0
-   !  write(nunit, '(a,1es16.8)' )'          ',0.d0
-   !endif
 
    ! Write the matrix elements
    if(choice==2)then
