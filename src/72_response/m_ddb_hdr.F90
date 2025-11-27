@@ -4753,7 +4753,7 @@ subroutine ddb_hdr_print(ddb_hdr, unddb)
 &  ddb_hdr%occopt,ddb_hdr%pawecutdg,ddb_hdr%rprim,ddb_hdr%dfpt_sciss,&
 &  ddb_hdr%spinat,ddb_hdr%symafm,ddb_hdr%symrel,ddb_hdr%tnons,ddb_hdr%tolwfr,&
 &  ddb_hdr%tphysel,ddb_hdr%tsmear,ddb_hdr%typat,ddb_hdr%usepaw,ddb_hdr%wtk,&
-&  ddb_hdr%xred,ddb_hdr%zion,ddb_hdr%znucl,ddb_hdr%ddb_version)
+&  ddb_hdr%xred,ddb_hdr%zion,ddb_hdr%znucl)
 
  call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,ddb_hdr%with_psps,&
 &  ddb_hdr%psps%indlmn,ddb_hdr%psps%lmnmax,ddb_hdr%nblok,ddb_hdr%ntypat,unddb,&
@@ -4927,13 +4927,13 @@ subroutine ddb_io_out (unddb,dscrpt,matom,mband,&
 &  acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
 &  natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
 &  pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
-&  typat,usepaw,wtk,xred,zion,znucl,ddbvrs)
+&  typat,usepaw,wtk,xred,zion,znucl)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: unddb,matom,mband,mkpt,msym,mtypat
  integer,intent(in) :: intxc,iscf,ixc,natom,nkpt,nspden,nspinor,nsppol,nsym
- integer,intent(in) :: ntypat,occopt,usepaw,ddbvrs
+ integer,intent(in) :: ntypat,occopt,usepaw
  real(dp),intent(in) :: dilatmx,ecut,ecutsm,kptnrm,pawecutdg,dfpt_sciss,tolwfr,tphysel
  real(dp),intent(in) :: tsmear
  character(len=fnlen),intent(in) :: dscrpt

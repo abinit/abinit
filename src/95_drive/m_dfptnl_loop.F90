@@ -615,7 +615,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                    call dfpt_rhotov(cplex,dummy_real,dummy_real,dummy_real,dummy_real,dummy_real,dummy_real,&
 &                   gsqcut,dtset%icutcoul,i2dir,i2pert,dtset%ixc,kxc,dtset%magpen,dtset%mpatpol,dtset%mpdir,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,&
 &                   nhat1_i2pert,nhat1gr,nhat1grdim,nkxc,nspden,dtset%ntypat,n3xccc,non_magnetic_xc,optene,option,&
-&                   dtset%qptn,dtset%ratopt,dtset%ratsm,dtset%ratsph,rhog,rho2g1,rhor,rho2r1,rprimd,dtset%typat,ucvol,psps%usepaw,&
+&                   dtset%qptn,dtset%ratsm,dtset%ratsph,rhog,rho2g1,rhor,rho2r1,rprimd,dtset%typat,ucvol,psps%usepaw,&
 &                   usexcnhat,dtset%vcutgeo,vhartr1_i2pert,&
 &                   vpsp1,vresid_dum,dummy_real,vtrial1_i2pert,vxc,vxc1_i2pert,xccc3d2,dtset%ixcrot,xred,dtset%qgbt,dtset%use_gbt)
 
