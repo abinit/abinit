@@ -285,7 +285,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp) :: efrnl,efrx1,efrx2,ehart,ehart01,ehart1,eii,ek,ek0,ek1,ek2,eloc0
  real(dp) :: elpsp1,enl,enl0,enl1,end0,end1,entropy,enxc,eovl1,epaw1,evxctau0,evxctau1,evdw,exc1
  real(dp) :: fsum,gsqcut,maxocc,nelectkq
- real(dp) :: residm,tolwfr,tolwfr_save,toldfe_save,toldff_save,tolrff_save,tolvrs_save
+ real(dp) :: residm,tolwfr,tolwfr_save,toldfe_save,toldff_save,tolrff_save,tolvrs_save,toldmag_save
  real(dp) :: ucvol, eig1_r, eig1_i
  real(dp) :: residm_mq !+/-q duplicates
  logical,parameter :: paral_pert_inplace=.true.,remove_inv=.false.
@@ -420,6 +420,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  tolwfr_save = dtset%tolwfr
  toldfe_save = dtset%toldfe
  toldff_save = dtset%toldff
+ toldmag_save = dtset%toldmag
  tolrff_save = dtset%tolrff
  tolvrs_save = dtset%tolvrs
 
@@ -1728,6 +1729,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        if (abs(dtset_tmp%tolwfr) < 1.e-24) dtset_tmp%tolwfr = 1.e-24
        dtset_tmp%toldfe = zero
        dtset_tmp%toldff = zero
+       dtset_tmp%toldmag = zero
        dtset_tmp%tolrff = zero
        dtset_tmp%tolvrs = zero
        write (msg, '(a,i6,a)') ' NOTE: doing GKK calculation for icase ', icase, ' with non-SCF calculation'
@@ -2076,6 +2078,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        dtset_tmp%tolwfr = tolwfr_save
        dtset_tmp%toldfe = toldfe_save
        dtset_tmp%toldff = toldff_save
+       dtset_tmp%toldmag = toldmag_save
        dtset_tmp%tolrff = tolrff_save
        dtset_tmp%tolvrs = tolvrs_save
        blkflg = blkflg_save ! this ensures we do not use the (unconverged) 2DTE from this non scf run

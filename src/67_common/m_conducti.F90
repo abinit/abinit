@@ -144,6 +144,7 @@ contains
  real(dp) :: Tatm,tphysel,tsmear,ucvol,eig_in_max,eig_in_min,phi
  character(len=fnlen) :: filnam1,filnam_gen,occfile
  character(len=500) :: msg
+ character(len=100) :: line
  type(hdr_type) :: hdr
  type(MPI_type) :: mpi_enreg
 !arrays
@@ -179,9 +180,13 @@ contains
    filnam1=trim(filnam_gen)//'_OPT'
 !  Read frequency range
    read(iunt,*) dom,omin,omax,mom
-   read(iunt,err=13,end=13,fmt=*) broad_mode,au_units,phi,add_drude
+   read(iunt,end=13,fmt='(a)') line
+   read(line,end=11,fmt=*) broad_mode,au_units,phi,add_drude
    goto 14
-13 backspace(iunt) ; broad_mode=1 ; au_units=0; phi=zero; add_drude=0
+11 read(line,end=13,fmt=*) broad_mode,au_units
+   phi=zero; add_drude=0
+   goto 14
+13 broad_mode=1 ; au_units=0; phi=zero; add_drude=0
 14 continue
 !  In case of varocc read filename of occupation datafile
    if (present(varocc)) then
@@ -840,13 +845,6 @@ contains
    write(std_out,'(a,f15.5)' )'# Number of electrons           = ',socc
    write(std_out,'(a,f15.5)' )'# sumrule           = ',np_sum/socc
    write(std_out,'(a,f15.5)' )'# sumrule (integration) = ',np_sum_2/socc
-   if(au_units==0) then
-     write(std_out,'(a,f15.5)' ) '# Estimated DC conductivity (Ohm.cm)-1 =',&
-&    sig_abs(1)-(sig_abs(1)-sig_abs(2))/(oml1(1)-oml1(2))*oml1(1)
-   else
-      write(std_out,'(a,f15.5)' ) '# Estimated DC conductivity (au) =',&
-&    sig_abs(1)-(sig_abs(1)-sig_abs(2))/(oml1(1)-oml1(2))*oml1(1)
-   endif
    do iom=1,mom
      oml=oml1(iom)
      write(sigd_unt,'(f12.5,6es22.12)') oml,cond_nd(1,1,iom),cond_nd(2,2,iom),cond_nd(3,3,iom),&
@@ -982,6 +980,7 @@ end subroutine conducti_paw
  real(dp) :: Tatm,tsmear,ucvol,dirac,diff_eig
  character(len=fnlen) :: filnam2,filnam_gen
  character(len=500) :: msg
+ character(len=100) :: line
  character(len=20) :: str_atm
  type(hdr_type) :: hdr
  type(MPI_type) :: mpi_enreg
@@ -991,7 +990,7 @@ end subroutine conducti_paw
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),dummy(0,0,0,0,0)
  real(dp),allocatable :: dom_var1(:,:),dhdk2_g(:)
  real(dp),allocatable :: eig0_k(:),eigen0(:),eig0nc(:,:,:)
- real(dp),allocatable :: energy_cor(:,:),edge(:),nphicor_arr(:)
+ real(dp),allocatable :: energy_cor(:,:),edge(:),nphicor_arr(:),occ_cor(:,:)
  real(dp),allocatable :: occ(:),occ_k(:),wtk(:)
  real(dp),allocatable :: oml_edge(:,:),oml_emis(:,:)
  real(dp),allocatable :: psinablapsi2(:,:,:,:,:)
@@ -1025,17 +1024,18 @@ end subroutine conducti_paw
    filnam2=trim(filnam_gen)//'_OPT2'
 !  Read frequency range
    if (need_absorption) then
-     read(iunt,err=11,end=11,fmt=*) dom,omin,omax,mom,input_atm,dom_max,dom_ctr
+     read(iunt,fmt='(a)') line
+     read(line,end=11,fmt=*) dom,omin,omax,mom,input_atm,dom_max,dom_ctr
      goto 12
-11   backspace(iunt) ; read(iunt,*) dom,omin,omax,mom,input_atm ; dom_max=zero ; dom_ctr=zero
+11   read(line,fmt=*) dom,omin,omax,mom,input_atm ; dom_max=zero ; dom_ctr=zero
 12   continue
    else if (need_emissivity) then
      read(iunt,*) dom,omin,omax,mom,input_atm
      dom_max=zero;dom_ctr=zero
    end if
-   read(iunt,err=13,end=13,fmt=*) broad_mode,au_units
+   read(iunt,end=13,err=13,fmt=*) broad_mode,au_units
    goto 14
-13 backspace(iunt) ; broad_mode=1 ; au_units=0
+13 broad_mode=1 ; au_units=0
 14 continue
    close(iunt)
    if (abs(dom_max)>tol10.and.dom_max<dom) then
@@ -1140,6 +1140,7 @@ end subroutine conducti_paw
  call xmpi_bcast(nphicor_max,master,comm,mpierr)
 
  ABI_MALLOC(ncor,(nphicor_max,ntypat))
+ ABI_MALLOC(occ_cor,(nphicor_max,ntypat))
  ABI_MALLOC(lcor,(nphicor_max,ntypat))
  ABI_MALLOC(kappacor,(nphicor_max,ntypat))
  ABI_MALLOC(energy_cor,(nphicor_max,ntypat))
@@ -1155,6 +1156,8 @@ end subroutine conducti_paw
      NCF_CHECK(nf90_get_var(ncid,varid,kappacor))
      varid=nctk_idname(ncid,"eigenvalues_core")
      NCF_CHECK(nf90_get_var(ncid,varid,energy_cor))
+     varid=nctk_idname(ncid,"occupation_core")
+     NCF_CHECK(nf90_get_var(ncid,varid,occ_cor))
      varid=nctk_idname(ncid,"number_of_core_states")
      NCF_CHECK(nf90_get_var(ncid,varid,nphicor_arr))
 !Close here netcdf file here because the rest has to be read with collective I/O
@@ -1163,10 +1166,12 @@ end subroutine conducti_paw
      do itypat=1,ntypat
        read(unit=opt2_unt) nphicor_arr(itypat)
        do icor=1,nphicor_max
-         read(unit=opt2_unt,err=23,end=23) ncor(icor,itypat),lcor(icor,itypat),kappacor(icor,itypat),energy_cor(icor,itypat)
+         read(unit=opt2_unt,fmt='(a)') line
+         read(line,end=23,fmt=*) ncor(icor,itypat),lcor(icor,itypat),kappacor(icor,itypat),energy_cor(icor,itypat),occ_cor(icor,itypat)
          goto 24
-23       backspace(opt2_unt) ; read(unit=opt2_unt) ncor(icor,itypat),lcor(icor,itypat),energy_cor(icor,itypat)
+23       read(line,fmt=*) ncor(icor,itypat),lcor(icor,itypat),energy_cor(icor,itypat)
          kappacor(icor,itypat)=0
+         occ_cor(icor,itypat)=one
 24       continue
        enddo
      end do
@@ -1178,6 +1183,7 @@ end subroutine conducti_paw
  call xmpi_bcast(lcor,master,comm,mpierr)
  call xmpi_bcast(kappacor,master,comm,mpierr)
  call xmpi_bcast(energy_cor,master,comm,mpierr)
+ call xmpi_bcast(occ_cor,master,comm,mpierr)
  call xmpi_bcast(nphicor,master,comm,mpierr)
  ABI_MALLOC(edge,(nphicor))
  edge(1:nphicor)=fermie-energy_cor(1:nphicor,itypat_atnbr)
@@ -1226,24 +1232,28 @@ end subroutine conducti_paw
    write(std_out,'(a,i4)') ' Number of core orbitals nc=',nphicor
    do icor=1,nphicor
      if (kappacor(icor,itypat_atnbr)==0) then
-       write(std_out,'(a,2i4,4f15.5)') ' n, l, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ', &
-         ncor(icor,itypat_atnbr),lcor(icor,itypat_atnbr),energy_cor(icor,itypat_atnbr),edge(icor),&
-&          energy_cor(icor,itypat_atnbr)*Ha_eV,edge(icor)*Ha_eV
+       write(std_out,'(a,2i4,5f15.5)') ' n, l, occ, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ', &
+         ncor(icor,itypat_atnbr),lcor(icor,itypat_atnbr),occ_cor(icor,itypat_atnbr),&
+&        energy_cor(icor,itypat_atnbr),edge(icor),&
+&        energy_cor(icor,itypat_atnbr)*Ha_eV,edge(icor)*Ha_eV
      else
        if (kappacor(icor,itypat_atnbr)>0) then
          j2=2*lcor(icor,itypat_atnbr)-1
-         write(std_out,'(a,i4,i4,a,i4,4f15.5)') ' n, j, l, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ',&
-&          ncor(icor,itypat_atnbr),j2,' / 2',lcor(icor,itypat_atnbr),energy_cor(icor,itypat_atnbr),edge(icor),&
+         write(std_out,'(a,i4,i4,a,i4,5f15.5)') ' n, j, l, occ, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ',&
+&          ncor(icor,itypat_atnbr),j2,' / 2',lcor(icor,itypat_atnbr),occ_cor(icor,itypat_atnbr),&
+&          energy_cor(icor,itypat_atnbr),edge(icor),&
 &          energy_cor(icor,itypat_atnbr)*Ha_eV,edge(icor)*Ha_eV
        else
          if (kappacor(icor,itypat_atnbr)<-1) then
            j2=2*lcor(icor,itypat_atnbr)+1
-           write(std_out,'(a,i4,i4,a,i4,4f15.5)') ' n, j, l, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ',&
-&            ncor(icor,itypat_atnbr),j2,'/2',lcor(icor,itypat_atnbr),energy_cor(icor,itypat_atnbr),edge(icor),&
+           write(std_out,'(a,i4,i4,a,i4,5f15.5)') ' n, j, l, occ, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ',&
+&            ncor(icor,itypat_atnbr),j2,'/2',lcor(icor,itypat_atnbr),occ_cor(icor,itypat_atnbr),&
+&            energy_cor(icor,itypat_atnbr),edge(icor),&
 &            energy_cor(icor,itypat_atnbr)*Ha_eV,edge(icor)*Ha_eV
          else
-           write(std_out,'(a,i4,a,i4,4f15.5)') ' n, j, l, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ',&
-&            ncor(icor,itypat_atnbr),'   1/2',lcor(icor,itypat_atnbr),energy_cor(icor,itypat_atnbr),edge(icor),&
+           write(std_out,'(a,i4,a,i4,5f15.5)') ' n, j, l, occ, Energy(Ha), Edge(Ha), Energy(eV), Edge(eV): ',&
+&            ncor(icor,itypat_atnbr),'   1/2',lcor(icor,itypat_atnbr),occ_cor(icor,itypat_atnbr),&
+&            energy_cor(icor,itypat_atnbr),edge(icor),&
 &            energy_cor(icor,itypat_atnbr)*Ha_eV,edge(icor)*Ha_eV
          end if
        end if
@@ -1413,10 +1423,9 @@ end subroutine conducti_paw
          myband=(mpi_enreg%proc_distrb(ikpt,iband,isppol)==me)
          if (myband) then
 
-           diff_occ = (two/dble(nsppol*nspinor))-occ_k(iband)
 !          In case of MPI-IO, read core-valence dipoles for band n
            if (iomode_estf_mpiio) then
-            itask=itask+1
+             itask=itask+1
              nc_start=[1,1,1,1,iband,ikpt,isppol];nc_stride=[1,1,1,1,1,1,1]
              nc_count=[2,3,nphicor_max,natom,1,1,1]
              NCF_CHECK(nf90_get_var(ncid,varid,psinablapsi2,start=nc_start,stride=nc_stride,count=nc_count))
@@ -1437,6 +1446,7 @@ end subroutine conducti_paw
                end do
                do iom=1,mom
                  do icor=1,nphicor
+                   diff_occ = occ_cor(icor,itypat_atnbr)-occ_k(iband) 
                    diff_eig=eig0_k(iband)-energy_cor(icor,itypat_atnbr)
                    oml=oml_edge(icor,iom)
                    if(need_absorption) then
