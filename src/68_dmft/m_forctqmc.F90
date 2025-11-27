@@ -208,7 +208,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  ! =================================================================
  ! Impose diago of levels and Ylm basis if opt_nondiag=1
  ! =================================================================
- ! to do: uniform the choice of local basis wtih triqs
  ! opt_diag=1 ! 1: diago the levels (The best choice).
  ! opt_diag=2 ! 2: diago density matrix (can be used for historical reasons)
 
@@ -265,6 +264,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  ! ------------------------------------------------
  ! If levels are not diagonal, then diagonalize it (according to
  ! dmftctqmc_basis)
+ ! dmftctqmc_basis = 0 : Slm
+ ! dmftctqmc_basis = 1 : diagonalize hamiltonian
+ ! dmftctqmc_basis = 2 : Ylm
+ ! dmftctqmc_basis = 3 : digonalize occupation matrix
+ ! dmftctqmc_basis = 4 : JmJ
  ! ------------------------------------------------
  if (paw_dmft%dmftctqmc_basis == 1) then
    if (nondiaglevels .or. useylm == 1) then
