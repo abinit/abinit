@@ -630,6 +630,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        write(tag_atom,'(I2)') iatom
      endif
 
+     !print Weiss field for correlated atoms
      lpawu = paw_dmft%lpawu(iatom)             
      if (lpawu == -1) cycle                    
 
