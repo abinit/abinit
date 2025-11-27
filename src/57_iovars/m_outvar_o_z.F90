@@ -764,28 +764,38 @@ contains
  intarr(1,:)=dtsets(:)%rcpaw_frocc
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_frocc','INT',0)
 
- intarr(1,:)=dtsets(:)%rcpaw_nfrpaw
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_nfrpaw','INT',0)
+ intarr(1,:)=dtsets(:)%rcpaw_updatetnc
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_updatetnc','INT',0)
 
- intarr(1,:)=dtsets(:)%rcpaw_nfrtnc
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_nfrtnc','INT',0)
+ intarr(1,:)=dtsets(:)%rcpaw_orbshift
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_orbshift','INT',0)
+
+ intarr(1,:)=dtsets(:)%rcpaw_potshift
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_potshift','INT',0)
 
  dprarr(1,:)=dtsets(:)%rcpaw_tolnc
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_tolnc','DPR',0)
 
  do idtset=0, ndtset_alloc
-   do ii = 1, ntypat
-     intarr(ii,idtset) = dtsets(idtset)%rcpaw_frtypat(ii)
+   do ii = 1, 2
+     intarr(ii,idtset) = dtsets(idtset)%rcpaw_updatepaw(ii)
    end do ! end loop over ntypat
  end do ! end loop over datasets
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'rcpaw_frtypat','INT',0)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'rcpaw_updatepaw','INT',0)
 
  do idtset=0, ndtset_alloc
    do ii = 1, ntypat
-     dprarr(ii,idtset) = dtsets(idtset)%rcpaw_scenergy(ii)
+     intarr(ii,idtset) = dtsets(idtset)%rcpaw_rctypat(ii)
    end do ! end loop over ntypat
  end do ! end loop over datasets
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'rcpaw_scenergy','ENE',0)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'rcpaw_rctypat','INT',0)
+
+ do idtset=0, ndtset_alloc
+   do ii = 1, ntypat
+     dprarr(ii,idtset) = dtsets(idtset)%rcpaw_sc(ii)
+   end do ! end loop over ntypat
+ end do ! end loop over datasets
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'rcpaw_sc','DPR',0)
 
  dprarr(1,:)=dtsets(:)%rcut
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcut','LEN',0)

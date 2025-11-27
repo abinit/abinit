@@ -2735,6 +2735,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
         'Action: re-run with PAW '
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
+  
+     !  paral_atom not allowed at present
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
 
 !    nucdipmom requires complex rhoij
      if(dt%pawcpxocc/=2)then
@@ -3776,9 +3779,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  rcpaw_frocc
    call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_frocc',dt%rcpaw_frocc,2,(/0,1/),iout)
 
-!  rcpaw_frtypat
+!  rcpaw_rctypat
    do itypat=1,dt%ntypat
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_frtypat',dt%rcpaw_frtypat(itypat),2,(/0,1/),iout)
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_rctypat',dt%rcpaw_rctypat(itypat),2,(/0,1/),iout)
    enddo
 
 !  recgratio
@@ -4244,8 +4247,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    call chkint_eq(0,0,cond_string,cond_values,ierr,'use_rcpaw',dt%use_rcpaw,2,(/0,1/),iout)
    if(dt%use_rcpaw==1) then
      if((dt%npfft/=1).or.(dt%occopt<3).or.(dt%occopt>8).or.&
-        (dt%stmbias/=zero).or.(dt%spinmagntarget/=-99.99_dp).or.(dt%nsppol==2).or.(dt%nspinor==2).or.&
-        (dt%nspden>1).or.(dt%usewvl==1).or.(dt%positron/=0).or.(dt%icoulomb/=0).or.(dt%iscf<12).or.&
+        (dt%stmbias/=zero).or.(dt%spinmagntarget/=-99.99_dp).or.(dt%nspinor==2).or.&
+        (dt%usewvl==1).or.(dt%positron/=0).or.(dt%icoulomb/=0).or.(dt%iscf<12).or.&
         (dt%usepaw/=1).or.(dt%usepawu==1).or.(dt%usedmft==1)) then
        ABI_ERROR('RCPAW: work in progress')
      endif
@@ -4469,14 +4472,14 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end do
 
   ! ZORA
-  ! only values of -3,-2,-1,0,1,2,3 are allowed. 0 is the default.
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'zora',dt%zora,7,(/-3,-2,-1,0,1,2,3/),iout)
+  ! only values of -4,-3,-2,-1,0,1,2,3 are allowed. 0 is the default.
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'zora',dt%zora,8,(/-4,-3,-2,-1,0,1,2,3/),iout)
   if(dt%zora .NE. 0) then
      cond_string(1)='zora';cond_values(1)=dt%zora
   !  require PAW
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/1/),iout)
   end if
-  if(dt%zora .GT. 1) then
+  if(dt%zora .NE. 0 .and. dt%zora .NE. 1) then
      cond_string(1)='zora';cond_values(1)=dt%zora
      ! require nspinor 2
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
