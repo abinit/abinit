@@ -951,7 +951,7 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_getNewOverlap(this, CdagC_1)
     IF ( otherFlavor .EQ. flavor ) CYCLE
     overlap = ImpurityOperator_overlapSegFlav(this,CdagC_2(1:2),otherflavor)
     totalOverlap = totalOverlap &
-                 + overlap * dble(this%mat_U(otherFlavor,flavor))
+                 + overlap * this%mat_U(otherFlavor,flavor)
     this%updates(otherFlavor) = -sign * overlap
   END DO
 
@@ -1135,7 +1135,7 @@ FUNCTION ImpurityOperator_getTraceAdd(this, CdagC_1) RESULT(trace)
     antisym_sign = -1.d0
   END IF
 
-  trace = antisym_sign * DEXP(dble(this%mat_U(this%activeFlavor,this%activeFlavor))*length + overlap) 
+  trace = antisym_sign * DEXP(this%mat_U(this%activeFlavor,this%activeFlavor)*length + overlap) 
 
 END FUNCTION ImpurityOperator_getTraceAdd
 !!***
@@ -1200,7 +1200,7 @@ FUNCTION ImpurityOperator_getTraceRemove(this, position) RESULT(trace)
     antisym_sign = -1.d0
   END IF
 
-  trace = antisym_sign * DEXP(-dble(this%mat_U(this%activeFlavor,this%activeFlavor))*length-overlap)
+  trace = antisym_sign * DEXP(-this%mat_U(this%activeFlavor,this%activeFlavor)*length-overlap)
 
 END FUNCTION ImpurityOperator_getTraceRemove
 !!***
@@ -1414,7 +1414,7 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_overlapFlavor(this,flavor)
     IF ( otherFlavor .EQ. flavor ) CYCLE
     overlap = this%overlaps(otherFlavor,flavor)
     totalOverlap = totalOverlap &
-            + overlap * dble(this%mat_U(otherFlavor,flavor))
+            + overlap * this%mat_U(otherFlavor,flavor)
   END DO
 
   ImpurityOperator_overlapFlavor = totalOverlap
@@ -1468,11 +1468,11 @@ DOUBLE PRECISION FUNCTION ImpurityOperator_overlapSwap(this,flavor1,flavor2)
     ELSE IF ( otherFlavor .EQ. flavor1 ) THEN
       overlap = this%overlaps(otherFlavor,flavor2)
       totalOverlap = totalOverlap &
-                   + overlap * dble(this%mat_U(otherFlavor,flavor2))
+                   + overlap * this%mat_U(otherFlavor,flavor2)
     ELSE
       overlap = this%overlaps(otherFlavor,flavor2)
       totalOverlap = totalOverlap &
-                   + overlap * dble(this%mat_U(otherFlavor,flavor1))
+                   + overlap * this%mat_U(otherFlavor,flavor1)
     END IF
   END DO
 
