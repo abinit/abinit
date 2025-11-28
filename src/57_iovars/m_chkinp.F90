@@ -887,7 +887,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    endif
 #endif
 
-#if !defined HAVE_TRIQS_v4_0 && !defined HAVE_TRIQS_v3_2
+#if !defined HAVE_TRIQS_INTERNAL && !defined HAVE_TRIQS_v3_2
    if(dt%dmft_solv>=6.and.dt%dmft_solv<=7) then
      write(msg,'(3a)') &
       & ' dmft_solv=6, or 7 is only relevant if the TRIQS library v3.2>= is linked',ch10,&
@@ -935,8 +935,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_move_double',dt%dmft_triqs_move_double,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_move_shift',dt%dmft_triqs_move_shift,2,(/0,1/),iout)
-     cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-     call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_nsubdivisions',dt%dmft_triqs_nsubdivisions,1,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_off_diag',dt%dmft_triqs_off_diag,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -988,6 +986,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        cond_string(1)='dmft_triqs_compute_integral' ; cond_values(1)=dt%dmft_triqs_compute_integral
        cond_string(2)='dmft_triqs_entropy' ; cond_values(2)=dt%dmft_triqs_entropy
        call chkint_ge(0,2,cond_string,cond_values,ierr,'dmft_triqs_gaussorder',dt%dmft_triqs_gaussorder,0,iout)
+       cond_string(1)='dmft_triqs_compute_integral' ; cond_values(1)=dt%dmft_triqs_compute_integral
+       cond_string(2)='dmft_triqs_entropy' ; cond_values(2)=dt%dmft_triqs_entropy
+       call chkint_ge(0,2,cond_string,cond_values,ierr,'dmft_triqs_nsubdivisions',dt%dmft_triqs_nsubdivisions,1,iout)
      end if
      if (dt%dmft_t2g==1) then
        cond_string(1)='dmft_t2g' ; cond_values(1)=dt%dmft_t2g

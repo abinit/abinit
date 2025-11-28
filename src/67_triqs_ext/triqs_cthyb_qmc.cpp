@@ -107,7 +107,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   paramCTQMC.random_name = "";
   paramCTQMC.random_seed = seed_a + rank * seed_b;
   paramCTQMC.length_cycle = cycle_length;
-#if defined HAVE_TRIQS_v4_0
+#if defined HAVE_TRIQS_INTERNAL
   paramCTQMC.time_invariance = time_invariance;
   paramCTQMC.pauli_prob = pauli_prob;
 #endif
@@ -116,7 +116,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
   file qmc_data_hfile;
 
-#if defined HAVE_TRIQS_v4_0
+#if defined HAVE_TRIQS_INTERNAL
   if (restart > 0 && rank == 0) {
 
     // Check if the configuration file can be read
@@ -250,7 +250,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     cout << "   Det Precision warning = " << det_precision_warning << endl;
     cout << "   Det Precision error   = " << det_precision_error << endl;
     cout << "   Det sing. threshold   = " << det_singular_threshold << endl;
-#if defined HAVE_TRIQS_v4_0
+#if defined HAVE_TRIQS_INTERNAL
     cout << "   Time invariance       = " << time_invariance << endl;
     cout << "   Pauli prob            = " << pauli_prob << endl;
 #endif
@@ -258,7 +258,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
   solver.solve(paramCTQMC);
 
-#if defined HAVE_TRIQS_v4_0
+#if defined HAVE_TRIQS_INTERNAL
   if (rank == 0) cout << endl << "   == Writing CTQMC data on file " << qmc_data_fnamew << endl;
 
   // Write all final configurations

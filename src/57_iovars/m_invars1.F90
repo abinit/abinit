@@ -2356,7 +2356,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_dlr_epsilon=-1.0_dp
    dtsets(idtset)%dmft_triqs_dlr_wmax=-1.0_dp
    dtsets(idtset)%dmft_triqs_entropy=0
-   dtsets(idtset)%dmft_triqs_gaussorder=0
+   dtsets(idtset)%dmft_triqs_gaussorder=-1
    dtsets(idtset)%dmft_triqs_imag_threshold=1.0d-13
    dtsets(idtset)%dmft_triqs_length_cycle=0
    dtsets(idtset)%dmft_triqs_loc_n_min=0
@@ -2371,7 +2371,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_n_tau=0
    dtsets(idtset)%dmft_triqs_n_warmup_cycles_init=-1
    dtsets(idtset)%dmft_triqs_n_warmup_cycles_restart=-1
-   dtsets(idtset)%dmft_triqs_nsubdivisions=1
+   dtsets(idtset)%dmft_triqs_nsubdivisions=0
    dtsets(idtset)%dmft_triqs_off_diag=-1
    dtsets(idtset)%dmft_triqs_pauli_prob=0.8
    dtsets(idtset)%dmft_triqs_prt_entropy=0
