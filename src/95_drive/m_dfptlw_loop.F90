@@ -914,11 +914,11 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
                end do    ! ir3dir
              end do     ! ir3pert
 
-             call hdr1_pq%free()
-             call hdr1_pq%free()
-             if (.not.kramers_deg) then
-               call hdr2_mq%free()
-               call hdr2_mq%free()
+             if (finite_q) then
+               call hdr1_pq%free()
+               if (.not.kramers_deg) then
+                 call hdr2_mq%free()
+               end if
              end if
              
              ABI_SFREE(vpsp1_i2pertdq)
@@ -957,7 +957,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
  ABI_FREE(rho2g1)
  ABI_FREE(nhat1)
  ABI_FREE(pawrhoij_read)
- ABI_SFREE(kpq)
  ABI_SFREE(xccc3d2)
 
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
@@ -975,7 +974,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
    ABI_FREE(kg1_mq)
    ABI_FREE(npwar1_mq)
    ABI_FREE(npwtot1_mq)
-   ABI_SFREE(kmq)
+   ABI_FREE(kmq)
  end if
 !Treatment of T4 and T5 terms that have a q-gradient of a rf Hamiltonian
 !they need to be converted to type-II for strain perturbation

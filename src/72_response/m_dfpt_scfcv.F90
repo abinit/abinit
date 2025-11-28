@@ -1686,6 +1686,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    ABI_FREE(d2bbb_mq)
    ABI_FREE(d2lo_mq)
    ABI_FREE(d2nl_mq)
+   ABI_FREE(d2bbb_pq)
+   ABI_FREE(d2lo_pq)
+   ABI_FREE(d2nl_pq)
  end if
  ABI_FREE(vhartr1)
  ABI_FREE(vxc1)

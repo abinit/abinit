@@ -427,11 +427,13 @@ contains
    ABI_FREE(v1hspinfield)
  end if
 
- ABI_SFREE(vmagpen1)
- ABI_SFREE(intgden)
- ABI_SFREE(rhomag)
- ABI_SFREE(fatsph) 
- ABI_SFREE(taumr) 
+ ABI_FREE(vmagpen1)
+ if((ipert>natom+11.and.ipert<=2*natom+11).or.abs(magpen)>tol6) then
+   ABI_FREE(intgden)
+   ABI_FREE(rhomag)
+   ABI_FREE(fatsph) 
+   ABI_FREE(taumr) 
+ endif
 
  call timab(157,2,tsec)
 
