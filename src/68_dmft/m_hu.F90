@@ -659,10 +659,10 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
  character(len=4) :: tag_at
  character(len=30) :: basis_vee
  character(len=500) :: message
- complex(dpc), target, allocatable :: veeylm(:,:,:,:)
- complex(dpc), pointer :: veeslm(:,:,:,:) => null(),veetemp(:,:,:,:) => null()
- complex(dpc), pointer :: veetemp2(:,:,:,:) => null(),veetemp3(:,:,:,:) => null()
- complex(dpc), pointer :: veeylm2(:,:,:,:) => null()
+ complex(dp), target, allocatable :: veeylm(:,:,:,:)
+ complex(dp), pointer :: veeslm(:,:,:,:) => null(),veetemp(:,:,:,:) => null()
+ complex(dp), pointer :: veetemp2(:,:,:,:) => null(),veetemp3(:,:,:,:) => null()
+ complex(dp), pointer :: veeylm2(:,:,:,:) => null()
 ! *********************************************************************
 
  natom   = paw_dmft%natom
