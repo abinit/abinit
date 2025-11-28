@@ -755,11 +755,20 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%dmft_triqs_basis
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_basis','INT',0)
 
+ intarr(1,:)=dtsets(:)%dmft_triqs_compute_integral
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_compu','INT',0)
+
  dprarr(1,:)=dtsets(:)%dmft_triqs_dlr_epsilon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_dlr_e','DPR',0)
 
  dprarr(1,:)=dtsets(:)%dmft_triqs_dlr_wmax
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_dlr_w','DPR',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_entropy
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_entro','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_gaussorder
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_gauss','INT',0)
 
  intarr(1,:)=dtsets(:)%dmft_triqs_length_cycle
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_lengt','INT',0)
@@ -781,6 +790,24 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%dmft_triqs_n_warmup_cycles_restart
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_war','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_nsubdivisions
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_nsubd','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_off_diag
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_off_d','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_prt_entropy
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_prt_e','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_read_ctqmcdata
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_readc','INT',0)
+
+ dprarr(1,:)=dtsets(:)%dmft_triqs_shift_mu
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_shifm','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%dmft_triqs_tol_block
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_tol_b','DPR',0)
 
  intarr(1,:)=dtsets(:)%dmft_wanorthnorm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_wanorthnorm','INT',0)

@@ -3005,16 +3005,17 @@ Variable(
 
 Selects the double counting (DC) correction formula used in DFT+DMFT calculations.
 
-   * 1,5 - Full Localized Limit (FLL): magnetic (1) and non-magnetic (5) versions.
-   * 2,6 - Around Mean Field (AMF): magnetic (2) and non-magnetic (6) versions.
+   * 1 or 5 - Full Localized Limit (FLL): magnetic (1) and non-magnetic (5) versions.
+   * 2 or 6 - Around Mean Field (AMF): magnetic (2) and non-magnetic (6) versions.
    * 7 - Nominal double counting: uses the nominal occupancy [[dmft_nominal]] for the DC term.
-   * 8 - Exact formula (cf [[cite:Haule2015a]]): only compatible with [[ixc]] in [7,-1012,11,-101130].
-         This is the formula you should always aim for. The implementation makes the assumption
+   * 8 - Exact formula (cf [[cite:Haule2015a]]): only compatible with LDA and PBE ([[ixc]] in [7,-1012,11,-101130]).
+         This is the formula you should always use. The implementation makes the assumption
          that the screened potential has the form of a Yukawa potential (cf [[dmft_yukawa_param]]),
          which is rigorously valid only in the case [[dmft_solv]]=7, with the full Slater Hamiltonian.
          Besides, we assume that the projection of the correlated orbital [[dmft_orbital]]
          on the energy window [ [[dmftbandi]],[[dmftbandf]] ] is equal to [[dmft_orbital]] itself
-         (i.e. the closure relation is assumed).
+         (i.e. the closure relation is assumed). Please look at the relevant section in the
+         [[tutorial:dmft_triqs|tutorial on DFT+DMFT with TRIQS/CT-HYB]] for detailed informations on how to use it.
 
 Magnetic formulas ([[dmft_dc]] < 5 ) are used with magnetic DFT ([[usepawu]]=10).
 Non-magnetic formulas ([[dmft_dc]] >= 5 ) are used with non-magnetic DFT ([[usepawu]]=14).
@@ -3093,7 +3094,9 @@ of $k$-resolved spectral function (or density of states) is performed.
 However, the calculation requires as input the self-energy computed in the real
 axis using an external analytical continuation code.
 The section 7 of the [[tutorial:dmft|tutorial on DFT+DMFT]] details how to obtain this data
-and related information.
+and related information with the ABINIT's internal implementation. In order to use it with
+the TRIQS/CT-HYB interface, please have a look at the relevant section in the
+[[tutorial:dmft_triqs|TRIQS/CT-HYB tutorial]].
 """,
 ),
 
@@ -3242,14 +3245,14 @@ Variable(
     requires="[[usedmft]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
-Set the reduced radial wavefunction $u_l(r)$ of the local orbitals $\frac{u_l(r)}{r} Y_{lm}(\hat{r})$
+Set the reduced radial wavefunction $u_l(r)$ of the correlated orbitals $\frac{u_l(r)}{r} Y_{lm}(\hat{r})$
 for each atom type, where $Y_{lm}(\hat{r})$ are the real spherical harmonics.
 For uncorrelated atom types, simply put any arbitrary value.
 The same radial wavefunction is used for all angular momentum channels $m$ of a given atom type.
 
   * If set to $i >$ 0, use the $i$-th radial orbital of the corresponding PAW dataset.
     They all correspond to atomic orbitals at different energies, with $i$=1 having the lowest energy
-    and being bound (default choice).
+    and being the most bound (default choice).
   * If set to $i \le$ 0, read an arbitrary radial part from the file specified by [[dmft_orbital_filepath]].
 """,
 ),
@@ -3280,7 +3283,7 @@ formula as the one used for the radial mesh of the PAW dataset. The first value 
 
 Thus, inside the PAW sphere, the radial mesh of your orbital must be identical to that of the
 PAW dataset, but your orbital can stop at any arbitrary radius (earlier or even later as long as
-you extend the mesh in a consistent way). If you do not known how to extrapolate the PAW mesh, this
+you extend the mesh in a consistent way). If you do not know how to extrapolate the PAW mesh, this
 can be done very simply by printing the Wannier functions ([[dmft_prtwan]]=1).
 
 If you only know the values of your orbital $u_l(r)$ on a specific set of radii, simply use a cubic
@@ -3472,7 +3475,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 
-Can be set to 1 only if in cubic symmetry. It enables one to carry a DFT+DMFT
+This should be set to 1 only if in cubic symmetry. It enables one to carry a DFT+DMFT
 calculations on _t<sub>2g</sub>_ orbitals only.
 """,
 ),
@@ -3491,7 +3494,7 @@ Variable(
 The DFT occupation matrix for correlated electrons can be computed by direct integration of the DFT
 Green's function. It can be compared to the calculation of the same quantity by downfolding Fermi-Dirac
 occupations. Because the Matsubara grid is finite, the two quantities numerically
-differ. This check allows to see if you [[dmft_nwli]]/[[dmft_triqs_n_iw]] (depending on your solver)
+differ. This check allows to see if your value of [[dmft_nwli]]/[[dmft_triqs_n_iw]] (depending on your solver)
 is large enough.
 If the difference is larger than [[dmft_tolfreq]], then the code stops and an error message is thrown.
 """,
@@ -3555,19 +3558,17 @@ Variable(
     vartype="integer",
     topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
-    defaultval=2,
+    defaultval=1,
     mnemonics="Dynamical Mean Field Theory: TRIQS, COMPUTE thermodynamic INTEGRAL",
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_entropy]] == 1, [[dmft_triqs_measure_density_matrix]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
-Specify how to compute the contribution from the impurity entropy.
+Specify whether to compute the contribution from the impurity entropy.
 
   * 0 --> Neglect it. As this is the main bottleneck of a free energy calculation, it can be useful
           to disable it and only compute the remaining contribution.
-  * 1 --> Compute it using thermodynamic integration over interaction strength. This option is not
-          really advised, as it can lead to unphysical impurity problems and numerical issues.
-  * 2 --> Compute it using thermodynamic integration over both interaction and double counting
-          strength.
+  * 1 --> Compute it using the coupling constant method over both interaction and chemical potential strength.
+          See the [[tutorial:dmft_triqs|TRIQS/CT-HYB tutorial]] for more details.
 """,
 ),
 
@@ -3720,7 +3721,7 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
-Computes the DFT+DMFT entropy using thermodynamic integration.
+Computes the DFT+DMFT entropy.
 """,
 ),
 
@@ -3730,6 +3731,7 @@ Variable(
     vartype="integer",
     topics=['DmftTriqsCthyb_useful'],
     dimensions="scalar",
+    defaultval="None",
     mnemonics="Dynamical Mean Field Theory: TRIQS, GAUSS-Legendre ORDER",
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_compute_integral]] == 1",
     added_in_version="before_v9",
@@ -3978,6 +3980,8 @@ At the initial DFT+DMFT iteration, a configuration file from a previous output c
 via [[getctqmcdata]]. Afterwards, by default, the run automatically restarts from the last
 configuration of the previous run of the SCF cycle (this behavior is controlled by
 [[dmft_triqs_read_ctqmcdata]].
+
+The restart feature is only available with our internal version of TRIQS/CT-HYB.
 """,
 ),
 
@@ -3987,7 +3991,7 @@ Variable(
     vartype="integer",
     topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
-    defaultval=1,
+    defaultval="None",
     mnemonics="Dynamical Mean Field Theory: TRIQS, Number of SUBDIVISIONS",
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_compute_integral]] == 1",
     added_in_version="before_v10.5.6",
@@ -4013,7 +4017,8 @@ Variable(
     text=r"""
 Set to 1 to keep all off-diagonal components of the hybridization and electronic levels for the
 TRIQS/CT-HYB run. If set to 0, the off-diagonal elements are set to 0 before the Monte-Carlo run (in the
-basis specified by [[dmft_triqs_basis]]).
+basis specified by [[dmft_triqs_basis]]). This allows to use the feature [[dmft_triqs_measure_density_matrix]]
+for more accurate results, but the calculation is no longer numerically exact.
 """,
 ),
 
@@ -4032,6 +4037,25 @@ For the insert/remove moves, a proportion [[dmft_triqs_pauli_prob]] of the moves
 proposed according to Pauli principle. This increases the acceptance rate and reduce the
 autocorrelation time in a lot of systems, though ergodicity in the case [[dmft_solv]]=7 is
 only guaranteed if [[dmft_triqs_pauli_prob]] < 1.
+
+This feature is only available with our internal version of TRIQS/CT-HYB.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_prt_entropy",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, PRinT additional info for ENTROPY",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Print additional information when performing the thermodynamic integration (cf [[dmft_triqs_compute_integral]]).
+For each value of the coupling constant $\lambda$, print the occupation numbers, the Green's function, etc.
+This might increase the measurement time.
 """,
 ),
 
@@ -4084,6 +4108,33 @@ At each CT-HYB run, the initial configuration of the Monte-Carlo is read from fi
 At very low temperatures, this can sometimes cause some issues since the weights
 become very low, and the weight of a configuration can become 0 at the next iteration
 if you're not converged yet. In this case, disable this.
+
+The restart feature is only available with our internal version of TRIQS/CT-HYB.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_shift_mu",
+    varset="dmft",
+    vartype="real",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, SHIFT of the chemical potential (MU)",
+    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+During the thermodynamic integration for the entropy calculation, the coupling constant
+$\lambda$ can also be set in front of the chemical potential in order to make the CT-HYB
+run easier. It is set such that the true chemical potential of the system $\mu$ is recovered at $\lambda$=1,
+and it is shifted by [[dmft_triqs_shift_mu]] at $\lambda$=0.
+
+The CT-HYB run is easier if the system is either filled or empty, so you want the target
+chemical potential $\mu$ + [[dmft_triqs_shift_mu]] to be set in order to reach the configuration
+that is closer to the current configuration of your system. For instance, if your system is nearer
+from filled than empty, set the shift to a negative value in order to make the system more filled
+as $\lambda$ decreases. Be careful however, as setting a high value of [[dmft_triqs_shift_mu]] will
+require a higher number of integration points.
 """,
 ),
 
@@ -4101,6 +4152,8 @@ Variable(
 Set to 1 to activate an improved estimator for the density matrix in TRIQS/CTHYB.
 This greatly reduces the statistical noise, but can increase the computation time
 if you measure too often.
+
+This feature is only available with our internal version of TRIQS/CT-HYB.
 """,
 ),
 
@@ -4117,9 +4170,8 @@ Variable(
     text=r"""
 Before any CT-HYB run, the code rotates in the basis specified by [[dmft_triqs_basis]]. Then,
 all the off-diagonal elements below the threshold [[dmft_triqs_tol_block]] are set to 0 in
-order to try and reveal a compact block structure to reduce the computation time, which is
-automatically detected. If you have set [[dmft_triqs_off_diag]]=0, this option is useless.
-Otherwise, try not to set this value above numerical noise.
+order to try and reveal a compact block structure to reduce the computation time.
+This block structure is automatically detected. Try not to set this value above numerical noise.
 """,
 ),
 
