@@ -1409,7 +1409,7 @@ subroutine lm_normal_modes(amu,blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mch
  DBG_ENTER("COLL")
 
 !Rotate doubly degenerated modes 
- call alignph(amu,displ,blkval,mpert,natom,ntypat,phfrq,typat)
+ call alignph(amu,displ,blkval,mpert,natom,ntypat,phfrq,typat,silent=1)
 
 !Define the complex eigendisplacementes array
 do imode=1,3*natom
