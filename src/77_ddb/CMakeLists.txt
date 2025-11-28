@@ -6,12 +6,14 @@ add_library(77_ddb STATIC
   defs_elphon.F90
   m_ddb_diel.F90
   m_ddb_elast.F90
-  m_ddb_interpolate.F90
   m_eliashberg_1d.F90
   m_elphon.F90
   m_ddb_flexo.F90
   m_harmonic_thermo.F90
   m_ddb_internalstr.F90
+  m_ddb_interpolate.F90
+  m_ddb_magpen.F90
+  m_ddb_omega_interpol.F90
   m_a2ftr.F90
   m_anaddb_dataset.F90
   m_anaddb_driver.F90
