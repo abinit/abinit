@@ -74,7 +74,7 @@ pseudos "H.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi, haicgu_*
 #%% [files]
 #%% files_to_test =
 #%%   t10.abo, tolnlines=  15, tolabs=  2.2e-09, tolrel= 1.0

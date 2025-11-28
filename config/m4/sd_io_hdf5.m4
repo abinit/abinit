@@ -50,6 +50,15 @@ AC_DEFUN([SD_HDF5_INIT], [
   sd_hdf5_status=""
   sd_hdf5_cascade="no"
 
+AC_ARG_WITH([fb-hdf5-version],
+  [AS_HELP_STRING([--with-fb-hdf5-version=VERSION],
+    [Specify the version of hdf5 to use when installed via fallback])],
+  [abi_fb_hdf5_version="$withval"],
+  [abi_fb_hdf5_version="1.14.6"]
+)
+
+AC_SUBST([abi_fb_hdf5_version])
+
   # Process options
   for kwd in ${sd_hdf5_options}; do
     case "${kwd}" in
@@ -296,16 +305,21 @@ AC_DEFUN([SD_HDF5_DETECT], [
           [Define to 1 if you have a parallel HDF5 library.])
       fi
     else
-      if test "${sd_hdf5_status}" = "optional" -a \
-              "${sd_hdf5_init}" = "def"; then
+        sd_hdf5_ok="yes"
         sd_hdf5_enable="no"
         sd_hdf5_cppflags=""
-        sd_hdf5_cflags=""
+        sd_hdf5_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_hdf5_version}}/include"
         sd_hdf5_cxxflags=""
         sd_hdf5_fcflags=""
         sd_hdf5_ldflags=""
-        sd_hdf5_libs=""
+        sd_hdf5_libs="-L${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/lib ${sd_hdf5_libs_def}"
+	test "${sd_hdf5_enable_fc}" = "yes" && \
+          sd_hdf5_fcflags="${sd_hdf5_fcflags_def} -I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_hdf5_version}}/include"
+      if test "${sd_hdf5_status}" = "optional" -a \
+              "${sd_hdf5_init}" = "def"; then
+	sd_hdf5_init='fb'
       else
+	sd_hdf5_init='fb'
         if test "${sd_hdf5_policy}" = "fail"; then
               AC_MSG_FAILURE([invalid HDF5 configuration])
         else

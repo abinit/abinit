@@ -51,6 +51,7 @@ module m_outscfcv
  use m_matlu,            only : copy_matlu,destroy_matlu,init_matlu,matlu_type
  use m_nucprop,          only : calc_efg,calc_fc
  use m_outwant,          only : outwant
+ use m_rcpaw,            only : rcpaw_type
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type, simp_gen, bound_deriv
  use m_pawtab,           only : pawtab_type
@@ -197,7 +198,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 & nattyp,nfft,ngfft,nhat,nkpt,npwarr,nspden,nsppol,nsym,ntypat,n3xccc,occ,&
 & paw_dmft,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,paw_an,paw_ij,&
 & prtvol,psps,results_gs,rhor,rprimd,&
-& taur,ucvol,usecprj,vhartr,vpsp,vtrial,vxc,wvl_den,xccc3d,xred)
+& taur,ucvol,usecprj,vhartr,vpsp,vtrial,vxc,wvl_den,xccc3d,xred,rcpaw)
 
 !Arguments ------------------------------------
 !scalars
@@ -216,6 +217,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(pseudopotential_type),intent(in) :: psps
  type(results_gs_type),intent(in) :: results_gs
  type(wvl_denspot_type), intent(in) :: wvl_den
+ type(rcpaw_type),intent(in),optional,pointer :: rcpaw
 !arrays
  integer,intent(in) :: atindx1(natom),dimcprj(natom*usecprj)
  integer,intent(in) :: kg(3,mpw*mkmem),nattyp(ntypat),ngfft(18),npwarr(nkpt)
@@ -939,19 +941,19 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    if (dtset%prtdensph==1.and.dtset%usewvl==0) then
      if(all(dtset%constraint_kind(:)==0))then
-       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,units,1,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,units,1,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
      else
-       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,units,1,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%ziontypat)
+       call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,units,1,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl,dtset%ziontypat)
      endif
      if(any(dtset%constraint_kind(:)/=0))then
-       call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,units,21,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+       call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,units,21,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
      endif
    end if !end prtdensph==1 .and. usewvl==0
 
 !!!!!!!!!!!!!!!!!!!!!!!!if prt_lorbmag value is equal 1 and the calculations are noncollinear then the local orbital magnetic moments are calculated
 if (dtset%prt_lorbmag==1) then
 
-    if ((dtset%nspinor .ne. 2) .and. (dtset%nsppol .ne.4)) then
+    if ((dtset%nspinor .ne. 2) .and. (dtset%nspden .ne.4)) then
         write (msg,'(a)')" "
         call wrtout(units, msg)
         write (msg,'(a)')"WARNING*"
@@ -962,7 +964,7 @@ if (dtset%prt_lorbmag==1) then
         if (dtset%usepawu .ne. 0)then
             call loc_orbmom_cal(1,0,dmatdum,0,0,indsym,my_natom,dtset%natom,dtset%natpawu,&
             &   dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,pawrad,dtset%pawprtvol,&
-            &   pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,&
+            &   pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,dtset%znucl,&
             &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
         else
             write (msg,'(a)')" "
@@ -1002,7 +1004,7 @@ if (dtset%prt_lorbmag==1) then
  if (dtset%magconon /= 0) then
 !  calculate final value of terms for magnetic constraint: "energy" term, lagrange multiplier term, and atomic contributions
    call mag_penalty_e(dtset%magconon,dtset%magcon_lambda,mpi_enreg,&
-&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred,dtset%qgbt,dtset%use_gbt)
+&   natom,nfft,ngfft,nspden,ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%spinat,dtset%typat,xred,dtset%znucl,dtset%qgbt,dtset%use_gbt)
  end if
 
  call timab(1167,2,tsec)
@@ -1047,9 +1049,15 @@ if (dtset%prt_lorbmag==1) then
 &     pawrad,pawrhoij,pawtab,psps%znuclpsp)
    end if
    if (prtnabla==2.or.prtnabla==3) then
-     call optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen,psps%filpsp,hdr,&
-&     mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawang,pawrad,pawrhoij,pawtab,&
-&     psps%znuclpsp)
+     if(present(rcpaw)) then
+       call optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen,psps%filpsp,hdr,&
+&       mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawang,pawrad,pawrhoij,pawtab,&
+&       psps%znuclpsp,rcpaw=rcpaw)
+     else
+       call optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen,psps%filpsp,hdr,&
+&       mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawang,pawrad,pawrhoij,pawtab,&
+&       psps%znuclpsp)
+     endif
    end if
  end if
  if (prtnabla<0) then
@@ -1062,7 +1070,7 @@ if (dtset%prt_lorbmag==1) then
  call timab(1170,1,tsec)
 
 !Optionally provide output for AE wavefunctions (only for PAW)
- if (psps%usepaw==1 .and. dtset%pawprtwf==1) then
+ if (psps%usepaw==1 .and. dtset%pawprtwf>=1) then
    ABI_MALLOC(ps_norms,(nsppol,nkpt,mband))
 
    call pawmkaewf(dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkmem,nsppol,Dtset%nband,&

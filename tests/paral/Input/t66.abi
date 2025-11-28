@@ -82,6 +82,7 @@ pseudos "Psdj_paw_pw_std/Si.xml, Psdj_paw_pw_std/O.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = haicgu_*, manneback_gnu_14.2_hpc
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
@@ -92,4 +93,5 @@ pseudos "Psdj_paw_pw_std/Si.xml, Psdj_paw_pw_std/O.xml"
 #%% keywords = NC, DFPT
 #%% description =
 #%%   Test band parallelism in DFPT with PAW
+#%%  Exclude manneback_gnu_14.2_hpc because of completely wrong results with MPI 4  ... To be debugged ... See also test paral#60 and mpiio#51 MPI4.
 #%%<END TEST_INFO>

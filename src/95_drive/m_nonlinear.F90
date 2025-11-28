@@ -56,6 +56,7 @@ module m_nonlinear
  use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
                            pawrhoij_bcast, pawrhoij_nullify, pawrhoij_inquire_dim
+ use m_paw_energies,only : paw_energies_type
  use m_pawdij,      only : pawdij, symdij
  use m_paw_finegrid,only : pawexpiqr
  use m_pawxc,       only : pawxc_get_nkxc
@@ -179,13 +180,14 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
  logical :: is_dfpt=.true.,nmxc
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: boxcut,compch_fft,compch_sph,ecore,ecut_eff,ecutdg_eff,ecutf
- real(dp) :: eei,epaw,epawdc,spaw,bigexc,bigsxc,etot,fermie,fermih
+ real(dp) :: eei,bigexc,bigsxc,etot,fermie,fermih
  real(dp) :: gsqcut,gsqcut_eff,gsqcutc_eff
  real(dp) :: rdum,residm,ucvol,vxcavg,el_temp
  character(len=500) :: msg
  character(len=30) :: small_msg
  character(len=fnlen) :: dscrpt
  type(pawang_type) :: pawang1
+ type(paw_energies_type) :: paw_energies
  type(ebands_t) :: bstruct
  type(hdr_type) :: hdr,hdr_den
  type(ddb_hdr_type) :: ddb_hdr
@@ -905,17 +907,14 @@ el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.
    call wrtout(std_out,' nonlinear : ground-state density and potential set up.')
  end if
 
- epaw = zero ; epawdc = zero ; spaw = zero
 !PAW: compute Dij quantities (psp strengths)
  if (psps%usepaw==1)then
    cplex=1;ipert=0;option=1
    nzlmopt=0;if (dtset%pawnzlm>0) nzlmopt=-1
-   call pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,gprimd,ipert,dtset%ixc,&
-     & my_natom,natom,dtset%nspden,&
-&   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,&
-&   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,&
-&   ucvol,psps%znuclpsp, &
+   call pawdenpot(compch_sph,el_temp,gprimd,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
+&   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_energies,paw_ij,pawang,&
+&   dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
+&   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp, &
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
    call timab(561,1,tsec)

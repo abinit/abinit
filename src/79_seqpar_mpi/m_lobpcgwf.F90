@@ -147,15 +147,15 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
    space = SPACE_C
  end if
 
-#ifdef HAVE_OPENMP_OFFLOAD
- if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
-   !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid,occ)
- end if
-#endif
-
  !For preconditionning
  ABI_MALLOC(pcon,(npw))
  call build_pcon(pcon,kinpw,npw)
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+   !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid,occ,pcon)
+ end if
+#endif
 
  ! Local variables for lobpcg
  me_g0 = -1
@@ -181,6 +181,9 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  if (dtset%nbdbuf==-101.and.nspinor==1.and.dtset%nsppol==1) then
    ABI_MALLOC(occ_tmp,(nband))
    occ_tmp(:) = half*occ(:)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:occ_tmp) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
    call xgBlock_map_1d(xgocc,occ_tmp,SPACE_R,nband,gpu_option=dtset%gpu_option)
  else
    call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
@@ -194,9 +197,15 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  call lobpcg_run(lobpcg,xgx0,getghc_gsc1,xg_precond,xgeigen,xgocc,xgresidu,prtvol,nspinor,isppol,ikpt,inonsc,istep,nbdbuf)
 
  if (allocated(occ_tmp)) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:occ_tmp) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
    ABI_FREE(occ_tmp)
  end if
  ! Free preconditionning since not needed anymore
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:pcon) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
  ABI_FREE(pcon)
 
  if ( .not. l_paw ) then
@@ -235,7 +244,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
 #ifdef HAVE_OPENMP_OFFLOAD
  if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
-   !$OMP TARGET EXIT DATA MAP(from:cg,eig,resid,occ)
+   !$OMP TARGET EXIT DATA MAP(from:cg,eig,resid,occ,pcon)
  end if
 #endif
 

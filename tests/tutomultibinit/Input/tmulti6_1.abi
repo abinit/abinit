@@ -21,7 +21,7 @@ randomseed=111111 # for testing only
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_builders = alps_nag_7.2_serial
+#%% exclude_builders = alps_nag_7.2_serial, manneback_gnu_14.2_hpc
 #%% need_cpp_vars = HAVE_NETCDF
 #%% lwf_pot = tmulti6_1.nc
 #%% exec_args = --F03
@@ -40,4 +40,6 @@ randomseed=111111 # for testing only
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
 #%%   is detected, which is needed by the random number generator.
 #%%   The random number generator in in 28_numeric_noabirule/m_random_xoroshiro128plus.F90
+#%%
+#%%   Diabled on manneback_gnu_14.2_hpc because of out of memory.
 #%%<END TEST_INFO>

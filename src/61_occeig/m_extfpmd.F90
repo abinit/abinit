@@ -57,8 +57,8 @@ module m_extfpmd
   !!
   !! SOURCE
   type,public :: extfpmd_type
-    logical :: truecg
-    integer :: bcut,mband,nbcut,nbdbuf,nfft,nspden,version
+    logical :: truecg,pawsph
+    integer :: bcut,mband,nbcut,nbdbuf,nfftf,nspden,version
     real(dp) :: ebcut,edc_kinetic,e_kinetic,entropy
     real(dp) :: nelect,eshift,ucvol,el_temp,bandshift
     real(dp) :: nelect_res, nelect_respc
@@ -91,7 +91,7 @@ contains
   !!  extfpmd_eshift=pre-defined extfpmd energy shift
   !!  nbcut=number of states used to average the constant potential value
   !!  nbdbuf=Number of bands in the buffer to converge scf cycle with extfpmd models
-  !!  nfft=(effective) number of FFT grid points (for this processor)
+  !!  nfftf=number of FFT fine grid points
   !!  nspden=number of spin-density components
   !!  nsppol=number of independent spin WF components
   !!  nkpt=number of k-points
@@ -107,13 +107,14 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine init(this,mband,extfpmd_eshift,nbcut,nbdbuf,nfft,nspden,nsppol,nkpt,&
-  & occopt,rprimd,tphysel,tsmear,version,mpi_enreg,extfpmd_mband)
+  subroutine init(this,mband,extfpmd_eshift,nbcut,nbdbuf,nfftf,nspden,&
+  & nsppol,nkpt,occopt,rprimd,tphysel,tsmear,version,mpi_enreg,extfpmd_mband,pawsph)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
-    integer,intent(in) :: mband,nbcut,nbdbuf,nfft,nspden,nsppol,nkpt
-    integer,intent(in) :: version,extfpmd_mband,occopt
+    logical,intent(in) :: pawsph
+    integer,intent(in) :: mband,nbcut,nbdbuf,nfftf,nspden
+    integer,intent(in) :: nsppol,nkpt,version,extfpmd_mband,occopt
     real(dp),intent(in) :: extfpmd_eshift,tphysel,tsmear
     type(MPI_type),intent(in) :: mpi_enreg
     ! Arrays
@@ -130,9 +131,9 @@ contains
     this%mband=extfpmd_mband
     this%nbdbuf=nbdbuf
     this%version=version
-    ABI_MALLOC(this%vtrial,(nfft,nspden))
+    ABI_MALLOC(this%vtrial,(nfftf,nspden))
     this%vtrial(:,:)=zero
-    this%nfft=nfft
+    this%nfftf=nfftf
     this%nspden=nspden
     this%ebcut=zero
     this%edc_kinetic=zero
@@ -141,14 +142,13 @@ contains
     this%nelect=zero
     this%nelect_res=zero
     this%nelect_respc=zero
-    ABI_MALLOC(this%nelectarr,(nfft,nspden))
-    this%nelectarr(:,:)=zero
     this%bandshift=zero
     ABI_MALLOC(this%bandshiftk,(nkpt*nsppol))
     this%bandshiftk(:)=zero
     this%eshift=extfpmd_eshift
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
     this%el_temp=merge(tphysel,tsmear,tphysel>tol8.and.occopt/=3.and.occopt/=9)
+    this%pawsph=pawsph
 
     if(this%version==5) then
       ! Make a copy of mpi_enreg in order to cycle.
@@ -186,11 +186,13 @@ contains
 
     this%vtrial(:,:)=zero
     ABI_FREE(this%vtrial)
-    this%nelectarr(:,:)=zero
-    ABI_FREE(this%nelectarr)
+    if(allocated(this%nelectarr)) then
+      this%nelectarr(:,:)=zero
+      ABI_FREE(this%nelectarr)
+    end if
     this%bandshiftk(:)=zero
     ABI_FREE(this%bandshiftk)
-    this%nfft=0
+    this%nfftf=0
     this%nspden=0
     this%bcut=0
     this%mband=0
@@ -208,6 +210,7 @@ contains
     this%eshift=zero
     this%ucvol=zero
     this%el_temp=zero
+    this%pawsph=.false.
   end subroutine destroy
   !!***
 
@@ -225,28 +228,28 @@ contains
   !!  eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
   !!  mband=maximum number of bands
   !!  nband(nkpt*nsppol)=desired number of bands at each k point
-  !!  nfft=(effective) number of FFT grid points (for this processor)
+  !!  nfftf=number of FFT fine grid points
   !!  nkpt=number of k points
   !!  nsppol=1 for unpolarized, 2 for spin-polarized
   !!  nspden=number of spin-density components
   !!  wtk(nkpt)=k point weights
-  !!  vtrial(nfftf,nspden)=GS potential (Hartree)
+  !!  vtrial(nfftf,nspden)=GS potential on the fine grid (Hartree)
   !!
   !! OUTPUT
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_eshift(this,eigen,eknk,mband,nband,nfft,nkpt,nsppol,nspden,wtk,vtrial)
+  subroutine compute_eshift(this,eigen,eknk,mband,nband,nfftf,nkpt,nsppol,nspden,wtk,vtrial)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
-    integer,intent(in) :: mband,nfft,nkpt,nsppol,nspden
+    integer,intent(in) :: mband,nfftf,nkpt,nsppol,nspden
     ! Arrays
     integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
     real(dp),intent(in) :: eknk(mband*nkpt*nsppol)
     real(dp),intent(in) :: wtk(nkpt)
-    real(dp),intent(in) :: vtrial(nfft,nspden)
+    real(dp),intent(in) :: vtrial(nfftf,nspden)
 
     ! Local variables -------------------------
     ! Scalars
@@ -293,7 +296,7 @@ contains
       ! Computes U_0 from the sum of local
       ! potentials (vtrial), averaging over all space.
       ! Simplest and most precise way to evaluate U_0.
-      this%eshift=sum(this%vtrial)/(this%nfft*this%nspden)
+      this%eshift=this%eshift+sum(this%vtrial)/(nfftf*nspden)
     end if
 
     ! Get extended FPMD band energy cutoff
@@ -405,21 +408,25 @@ contains
     ! of Fermi gas contributions for each point of the fftf grid.
     ! Warning: This is not yet operational. Work in progress.
     if(this%version==10) then
-      ABI_MALLOC(gamma_hybrid_tf,(this%nfft,this%nspden))
-      ABI_MALLOC(xcut_hybrid_tf,(this%nfft,this%nspden))
+      ABI_MALLOC(gamma_hybrid_tf,(this%nfftf,this%nspden))
+      ABI_MALLOC(xcut_hybrid_tf,(this%nfftf,this%nspden))
+      if(.not.allocated(this%nelectarr)) then
+        ABI_MALLOC(this%nelectarr,(this%nfftf,this%nspden))
+        this%nelectarr(:,:)=zero
+      end if
       gamma_hybrid_tf(:,:)=(fermie-this%vtrial(:,:))/this%el_temp
       xcut_hybrid_tf(:,:)=(this%ebcut-this%vtrial(:,:))/this%el_temp
       if(ANY(this%ebcut.lt.this%vtrial(:,:))) xcut_hybrid_tf(:,:)=zero
 
       !$OMP PARALLEL DO
-      do ifft=1,this%nfft
+      do ifft=1,this%nfftf
         do ispden=1,this%nspden
           this%nelectarr(ifft,ispden)=factor*djp12(xcut_hybrid_tf(ifft,ispden),gamma_hybrid_tf(ifft,ispden))
         end do
       end do
       !$OMP END PARALLEL DO
 
-      nelect=nelect+sum(this%nelectarr)/(this%nfft*this%nspden)
+      nelect=nelect+sum(this%nelectarr)/(this%nfftf*this%nspden)
       gamma_hybrid_tf(:,:)=zero
       xcut_hybrid_tf(:,:)=zero
       ABI_FREE(gamma_hybrid_tf)
@@ -528,17 +535,17 @@ contains
     ! of Fermi gas contributions for each point of the fftf grid.
     ! Warning: This is not yet operational. Work in progress.
     if(this%version==10) then
-      ABI_MALLOC(gamma_hybrid_tf,(this%nfft,this%nspden))
-      ABI_MALLOC(xcut_hybrid_tf,(this%nfft,this%nspden))
+      ABI_MALLOC(gamma_hybrid_tf,(this%nfftf,this%nspden))
+      ABI_MALLOC(xcut_hybrid_tf,(this%nfftf,this%nspden))
       gamma_hybrid_tf(:,:)=(fermie-this%vtrial(:,:))/this%el_temp
       xcut_hybrid_tf(:,:)=(this%ebcut-this%vtrial(:,:))/this%el_temp
       e_kinetic_hybrid_tf=zero
 
       !$OMP PARALLEL DO REDUCTION (+:e_kinetic_hybrid_tf)
-      do ifft=1,this%nfft
+      do ifft=1,this%nfftf
         do ispden=1,this%nspden
           e_kinetic_hybrid_tf=e_kinetic_hybrid_tf+factor*djp32(xcut_hybrid_tf(ifft,ispden),gamma_hybrid_tf(ifft,ispden))/&
-          & (this%nfft*this%nspden)
+          & (this%nfftf*this%nspden)
         end do
       end do
       !$OMP END PARALLEL DO
@@ -554,7 +561,7 @@ contains
     ! from the contributions to the kinetic energy and
     ! the number of electrons
     if(this%version==10) then
-      this%edc_kinetic=this%e_kinetic+sum(this%nelectarr(:,:)*this%vtrial(:,:)/(this%nfft*this%nspden))
+      this%edc_kinetic=this%e_kinetic+sum(this%nelectarr(:,:)*this%vtrial(:,:)/(this%nfftf*this%nspden))
     else
       this%edc_kinetic=this%e_kinetic+this%nelect*this%eshift
     end if
@@ -608,7 +615,7 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ii,ifft,ispden,isppol,ikpt,iband,nband_k,ierr
+    integer :: ii,ifft,ispden,isppol,ikpt,iband,nband_k,ierr,nom
     real(dp) :: ix,step,factor,fn,gamma,maxocc
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
@@ -651,9 +658,12 @@ contains
     ! over energy with Fermi-Dirac complete integrals and
     ! substracting 0 to bcut contribution with numeric integration.
     if(this%version==1.or.this%version==3) then
-      step=(this%ebcut-this%eshift)/(this%bcut)
+      ABI_FREE(valuesent)
+      nom=10000
+      ABI_MALLOC(valuesent,(nom+1))
+      step=(this%ebcut-this%eshift)/(nom)
       !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
-      do ii=1,this%bcut+1
+      do ii=1,nom+1
         ix=this%eshift+(dble(ii)-one)*step
         fn=fermi_dirac(ix,fermie,this%el_temp)
         if(fn>tol16.and.(one-fn)>tol16) then
@@ -695,13 +705,13 @@ contains
     ! as we do for version=1 and version=2.
     ! Warning: This is not yet operational. Work in progress.
     if(this%version==10) then
-      ABI_MALLOC(gamma_hybrid_tf,(this%nfft,this%nspden))
-      ABI_MALLOC(step_hybrid_tf,(this%nfft,this%nspden))
+      ABI_MALLOC(gamma_hybrid_tf,(this%nfftf,this%nspden))
+      ABI_MALLOC(step_hybrid_tf,(this%nfftf,this%nspden))
       gamma_hybrid_tf(:,:)=(fermie-this%vtrial(:,:))/this%el_temp
       step_hybrid_tf(:,:)=(this%ebcut-this%vtrial(:,:))/(this%bcut)
       this%entropy=zero
 
-      do ifft=1,this%nfft
+      do ifft=1,this%nfftf
         do ispden=1,this%nspden
           !$OMP PARALLEL DO PRIVATE(ix,fn) SHARED(valuesent)
           do ii=1,this%bcut+1
@@ -720,7 +730,7 @@ contains
           if(size(valuesent)>=6) then
             this%entropy=this%entropy+(5./3.*factor*dip32(gamma_hybrid_tf(ifft,ispden))/this%el_temp-&
             & gamma_hybrid_tf(ifft,ispden)*factor*dip12(gamma_hybrid_tf(ifft,ispden))/this%el_temp-&
-            & simpson(step_hybrid_tf(ifft,ispden),valuesent))/(this%nfft*this%nspden)
+            & simpson(step_hybrid_tf(ifft,ispden),valuesent))/(this%nfftf*this%nspden)
           end if
         end do
       end do
@@ -875,6 +885,57 @@ contains
       extfpmd_chkinp=.true.
     end if
   end function extfpmd_chkinp
+  !!***
+
+  !!***
+  !!****f* ABINIT/m_extfpmd/extfpmd_prterr
+  !! NAME
+  !!  extfpmd_prterr
+  !!
+  !! SUBROUTINE
+  !!  Print extfpmd error
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!
+  !! SOURCE
+  subroutine extfpmd_err(this,eigen,mband,nband,nkpt,nsppol,wtk,fname)
+    ! Arguments -------------------------------
+    ! Scalars
+    class(extfpmd_type),intent(inout) :: this
+    character(len=*),intent(in) :: fname
+    integer,intent(in) :: mband,nkpt,nsppol
+    ! Arrays
+    integer,intent(in) :: nband(nkpt*nsppol)
+    real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
+    real(dp),intent(in) :: wtk(nkpt)
+
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: band_index,ii,ikpt,isppol,nband_k,tmp_unt
+    real(dp) :: err(minval(nband)-this%nbdbuf)
+
+    ! *********************************************************************
+    err=zero
+    band_index=0
+    do isppol=1,nsppol
+      do ikpt=1,nkpt
+        nband_k=nband(ikpt+(isppol-1)*nkpt)
+        do ii=1,nband_k-this%nbdbuf
+          err(ii)=err(ii)+&
+          & wtk(ikpt)*(eigen(band_index+ii)-this%eshift-extfpmd_e_fg(dble(ii),this%ucvol))&
+&           /nsppol/extfpmd_e_fg(dble(ii),this%ucvol)
+        end do
+        band_index=band_index+nband_k
+      end do
+    end do
+   open(file=fname,newunit=tmp_unt,status='unknown',form='formatted') 
+    do ii=1,minval(nband)-this%nbdbuf
+      write(tmp_unt,*) ii,abs(err(ii))
+    enddo
+   close(tmp_unt)
+  end subroutine extfpmd_err
   !!***
 
 end module m_extfpmd

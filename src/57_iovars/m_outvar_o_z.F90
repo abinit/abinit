@@ -259,6 +259,9 @@ contains
  intarr(1,:)=dtsets(:)%paral_rf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'paral_rf','INT',0)
 
+ intarr(1,:)=dtsets(:)%paw_add_core
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'paw_add_core','INT',0)
+
  intarr(1,:)=dtsets(:)%pawcpxocc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pawcpxocc','INT',0)
 
@@ -704,8 +707,13 @@ contains
  dprarr(2,:)=dtsets(:)%qgbt(2)
  dprarr(3,:)=dtsets(:)%qgbt(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'qgbt','DPR',0)
+ 
+ dprarr(1,:)=dtsets(:)%qgbt_cart(1)
+ dprarr(2,:)=dtsets(:)%qgbt_cart(2)
+ dprarr(3,:)=dtsets(:)%qgbt_cart(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'qgbt_cart','DPR',0)
 
-!qptdm
+ !qptdm
  narr=3*dtsets(1)%nqptdm ! default size for all datasets
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    if(idtset/=0)then
@@ -756,28 +764,38 @@ contains
  intarr(1,:)=dtsets(:)%rcpaw_frocc
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_frocc','INT',0)
 
- intarr(1,:)=dtsets(:)%rcpaw_nfrpaw
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_nfrpaw','INT',0)
+ intarr(1,:)=dtsets(:)%rcpaw_updatetnc
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_updatetnc','INT',0)
 
- intarr(1,:)=dtsets(:)%rcpaw_nfrtnc
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_nfrtnc','INT',0)
+ intarr(1,:)=dtsets(:)%rcpaw_orbshift
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_orbshift','INT',0)
+
+ intarr(1,:)=dtsets(:)%rcpaw_potshift
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_potshift','INT',0)
 
  dprarr(1,:)=dtsets(:)%rcpaw_tolnc
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_tolnc','DPR',0)
 
  do idtset=0, ndtset_alloc
-   do ii = 1, ntypat
-     intarr(ii,idtset) = dtsets(idtset)%rcpaw_frtypat(ii)
+   do ii = 1, 2
+     intarr(ii,idtset) = dtsets(idtset)%rcpaw_updatepaw(ii)
    end do ! end loop over ntypat
  end do ! end loop over datasets
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'rcpaw_frtypat','INT',0)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'rcpaw_updatepaw','INT',0)
 
  do idtset=0, ndtset_alloc
    do ii = 1, ntypat
-     dprarr(ii,idtset) = dtsets(idtset)%rcpaw_scenergy(ii)
+     intarr(ii,idtset) = dtsets(idtset)%rcpaw_rctypat(ii)
    end do ! end loop over ntypat
  end do ! end loop over datasets
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'rcpaw_scenergy','ENE',0)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'rcpaw_rctypat','INT',0)
+
+ do idtset=0, ndtset_alloc
+   do ii = 1, ntypat
+     dprarr(ii,idtset) = dtsets(idtset)%rcpaw_sc(ii)
+   end do ! end loop over ntypat
+ end do ! end loop over datasets
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'rcpaw_sc','DPR',0)
 
  dprarr(1,:)=dtsets(:)%rcut
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcut','LEN',0)
@@ -1138,6 +1156,9 @@ contains
 
  dprarr(1,:)=dtsets(:)%toldff
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'toldff','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%toldmag
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'toldmag','DPR',0)
 
  dprarr(1,:)=dtsets(:)%tolimg
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolimg','ENE',0)

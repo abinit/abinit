@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(sequential version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.(sequential version, prepared for a x86_64_linux_nag7.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 14 Sep 2024.
-- ( at 19h24 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/TestBot_MPI1/seq_tsv4_90/tsv4_90.abi
+.Starting date : Wed 24 Sep 2025.
+- ( at 18h46 )
+  
+- input  file    -> /home/buildbot/ABINIT/alps_nag_7.2_serial/srostami_test/tests/TestBot_MPI1/seq_tsv4_90/tsv4_90.abi
 - output file    -> tsv4_90.abo
 - root for input  files -> tsv4_90i
 - root for output files -> tsv4_90o
@@ -43,7 +43,7 @@ _ WF disk file :      0.327 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
@@ -53,7 +53,7 @@ _ WF disk file :      0.327 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
               amu      2.80855000E+01
            diemac      1.20000000E+01
              ecut      7.50000000E+00 Hartree
--          fftalg         512
+-          fftalg         312
            istwfk        1    1    1    1    1    1    1    1
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -84,30 +84,30 @@ P           mkmem           8
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         227
    spinmagntarget      0.00000000E+00
-           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
-                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
-                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
-                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
-                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
-                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
-                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
-                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
-                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
-                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
-                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
-                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
-                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
-                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
-                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
-                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
-                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
-                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
-                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
-                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
-                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
-                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
-                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
-                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1 
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0 
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0 
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1 
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1 
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0 
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0 
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1 
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0 
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1 
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1 
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0 
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1 
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0 
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0 
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1 
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1 
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0 
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0 
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1 
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0 
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1 
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1 
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0 
             tnons      0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.5000000  0.0000000     0.0000000  0.5000000  0.0000000
                        0.5000000  0.0000000  0.0000000     0.5000000  0.0000000  0.0000000
@@ -182,8 +182,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      7.500   => boxcut(ratio)=   2.01887
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_nag_7.2_serial/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_nag_7.2_serial/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -213,16 +213,16 @@ solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.7673908119970    -8.767E+00 1.931E-03 1.364E+01
- ETOT  2  -8.7748922099049    -7.501E-03 1.013E-06 4.555E-01
- ETOT  3  -8.7750352974883    -1.431E-04 3.556E-06 8.898E-03
- ETOT  4  -8.7750369095207    -1.612E-06 5.369E-08 2.050E-05
- ETOT  5  -8.7750369143168    -4.796E-09 1.234E-09 3.968E-08
- ETOT  6  -8.7750369143294    -1.267E-11 4.821E-12 2.914E-10
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -8.7673908119978    -8.767E+00 1.931E-03 1.364E+01 0.000E+00 0.000E+00
+ ETOT  2  -8.7748922099057    -7.501E-03 1.013E-06 4.555E-01 0.000E+00 0.000E+00
+ ETOT  3  -8.7750352974892    -1.431E-04 3.556E-06 8.898E-03 0.000E+00 0.000E+00
+ ETOT  4  -8.7750369095215    -1.612E-06 5.369E-08 2.050E-05 0.000E+00 0.000E+00
+ ETOT  5  -8.7750369143177    -4.796E-09 1.234E-09 3.968E-08 0.000E+00 0.000E+00
+ ETOT  6  -8.7750369143302    -1.243E-11 4.821E-12 2.914E-10 0.000E+00 0.000E+00
 
- At SCF step    6, etot is converged :
-  for the second time, diff in etot=  1.267E-11 < toldfe=  1.000E-06
+ At SCF step    6, etot is converged : 
+  for the second time, diff in etot=  1.243E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.79061316E-04  sigma(3 2)=  0.00000000E+00
@@ -240,7 +240,7 @@ lattice_vectors:
 lattice_lengths: [   7.25444,    7.25444,    7.25444, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6995803E+02
-convergence: {deltae: -1.267E-11, res2:  2.914E-10, residm:  4.821E-12, diffor: null, }
+convergence: {deltae: -1.243E-11, res2:  2.914E-10, residm:  4.821E-12, diffor: null, }
 etotal    :  -8.77503691E+00
 entropy   :   0.00000000E+00
 fermie    :   2.23848765E-01
@@ -259,15 +259,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.935406     0.935406      1.870812     0.000000
-    2   2.00000     0.935406     0.935406      1.870812     0.000000
- ---------------------------------------------------------------------
-  Sum:              1.870812     1.870812      3.741625     0.000000
- Total magnetization (from the atomic spheres):             0.000000
- Total magnetization (exact up - dn):                       0.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.935406     0.935406      1.870812     0.000000
+    2 Si   2.00000     0.935406     0.935406      1.870812     0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 1.870812     1.870812      3.741625     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -317,16 +318,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.22250550290987E+00
-hartree             :  6.22919799939532E-01
-xc                  : -3.56452784751326E+00
+kinetic             :  3.22250550290958E+00
+hartree             :  6.22919799939209E-01
+xc                  : -3.56452784751307E+00
 Ewald energy        : -8.40101830357140E+00
-psp_core            :  8.49832746614837E-02
-local_psp           : -2.57380009805296E+00
-non_local_psp       :  1.83390075729732E+00
-total_energy        : -8.77503691432942E+00
-total_energy_eV     : -2.38780897861488E+02
-band_energy         :  3.71651089599930E-01
+psp_core            :  8.49832746606449E-02
+local_psp           : -2.57380009805230E+00
+non_local_psp       :  1.83390075729717E+00
+total_energy        : -8.77503691433017E+00
+total_energy_eV     : -2.38780897861508E+02
+band_energy         :  3.71651089600759E-01
 ...
 
 
@@ -342,7 +343,7 @@ band_energy         :  3.71651089599930E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0259324000E+01  1.0259324000E+01  1.0259324000E+01 Bohr
               amu      2.80855000E+01
@@ -351,7 +352,7 @@ band_energy         :  3.71651089599930E-01
            etotal     -8.7750369143E+00
             fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         512
+-          fftalg         312
            istwfk        1    1    1    1    1    1    1    1
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -382,32 +383,32 @@ P           mkmem           8
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         227
    spinmagntarget      0.00000000E+00
-           strten     -1.7906131567E-04 -1.7906131567E-04 -1.7906131567E-04
+           strten     -1.7906131566E-04 -1.7906131566E-04 -1.7906131566E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
-                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
-                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
-                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
-                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
-                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
-                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
-                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
-                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
-                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
-                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
-                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
-                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
-                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
-                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
-                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
-                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
-                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
-                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
-                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
-                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
-                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
-                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
-                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1 
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0 
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0 
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1 
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1 
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0 
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0 
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1 
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0 
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1 
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1 
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0 
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1 
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0 
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0 
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1 
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1 
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0 
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0 
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1 
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0 
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1 
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1 
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0 
             tnons      0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.5000000  0.0000000     0.0000000  0.5000000  0.0000000
                        0.5000000  0.0000000  0.0000000     0.5000000  0.0000000  0.0000000
@@ -446,70 +447,66 @@ P           mkmem           8
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          0.9        0.01      0.000
-- Total wall clock time (s,m,h):          0.9        0.01      0.000
+- Total cpu        time (s,m,h):          1.5        0.03      0.000
+- Total wall clock time (s,m,h):          1.5        0.03      0.000
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            0.9, wall_time =            0.9
+- cpu_time =            1.5, wall_time =            1.5
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- fourwf%(pot)                              0.221  25.8         0.223  25.7           2976      -1.00        0.99       0.99
-- pspini                                    0.151  17.7         0.151  17.4              1      -1.00        1.00       1.00
-- timing timab                              0.114  13.3         0.114  13.1             10      -1.00        1.00       1.00
-- nonlop(apply)                             0.031   3.6         0.034   3.9           2976      -1.00        0.92       0.92
-- get_dtsets_pspheads                       0.030   3.5         0.030   3.5              1      -1.00        0.99       0.99
-- getghc(/=fourXX,nonlop,fock_XX)           0.022   2.6         0.023   2.6             -1      -1.00        0.96       0.96
-- projbd                                    0.022   2.5         0.018   2.1           4672      -1.00        1.21       1.21
-- abinit(chkinp,chkvars)                    0.019   2.2         0.019   2.2              1      -1.00        0.98       0.98
-- fourdp                                    0.017   2.0         0.028   3.2             54      -1.00        0.60       0.60
-- fourwf%(den)                              0.016   1.9         0.014   1.6            384      -1.00        1.17       1.17
-- abinit(outvars)                           0.015   1.8         0.015   1.7              1      -1.00        1.02       1.02
-- abinit(after driver)                      0.014   1.7         0.014   1.6              1      -1.00        1.02       1.02
-- vtowfk(ssdiag)                            0.012   1.4         0.011   1.3             -1      -1.00        1.13       1.13
-- ewald                                     0.011   1.3         0.011   1.3              1      -1.00        1.01       1.01
-- stress                                    0.009   1.0         0.009   1.0              1      -1.00        0.99       0.99
-- ewald2 (+vdw_dftd)                        0.008   0.9         0.008   0.9              1      -1.00        1.01       1.01
-- abinit(init,iofn1,herald)                 0.007   0.9         0.007   0.8              1      -1.00        1.06       1.06
-- xc:pot/=fourdp                            0.004   0.5         0.005   0.6              7      -1.00        0.89       0.89
-- others (142)                              0.014   1.6         0.014   1.6             -1      -1.00        0.99       0.99
+- fourwf%(pot)                              0.655  43.0         0.658  42.9           2976      -1.00        1.00       1.00
+- pspini                                    0.187  12.3         0.188  12.2              1      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.142   9.3         0.142   9.3              1      -1.00        1.00       1.00
+- timing timab                              0.127   8.3         0.127   8.3             12      -1.00        1.00       1.00
+- fourwf%(den)                              0.051   3.4         0.048   3.1            384      -1.00        1.07       1.07
+- nonlop(apply)                             0.043   2.8         0.039   2.5           2976      -1.00        1.10       1.10
+- get_dtsets_pspheads                       0.038   2.5         0.038   2.5              1      -1.00        1.00       1.00
+- getghc(/=fourXX,nonlop,fock_XX)           0.029   1.9         0.035   2.3             -1      -1.00        0.83       0.83
+- projbd                                    0.020   1.3         0.018   1.2           4672      -1.00        1.10       1.10
+- ewald                                     0.017   1.1         0.018   1.2              1      -1.00        0.96       0.96
+- abinit(outvars)                           0.016   1.0         0.018   1.2              1      -1.00        0.87       0.87
+- abinit(after driver)                      0.013   0.9         0.015   1.0              1      -1.00        0.88       0.88
+- stress                                    0.013   0.9         0.013   0.8              1      -1.00        1.00       1.00
+- fourdp                                    0.012   0.8         0.009   0.6             54      -1.00        1.39       1.39
+- vtowfk(ssdiag)                            0.012   0.8         0.013   0.8             -1      -1.00        0.96       0.96
+- ewald2 (+vdw_dftd)                        0.011   0.7         0.011   0.7              1      -1.00        0.98       0.98
+- others (194)                              0.029   1.9         0.028   1.8             -1      -1.00        1.03       1.03
 -<END_TIMER>
 -
-- subtotal                                  0.739  86.2         0.748  86.2                                  0.99       0.99
+- subtotal                                  1.416  92.9         1.418  92.4                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls
+- as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           0.9, wall_time =           0.9
+- cpu_time =           1.5, wall_time =           1.5
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- fourwf%(pot)                              0.221  25.8         0.223  25.7           2976      -1.00        0.99       0.99
-- pspini                                    0.151  17.7         0.151  17.4              1      -1.00        1.00       1.00
-- timing timab                              0.114  13.3         0.114  13.1             10      -1.00        1.00       1.00
-- nonlop(apply)                             0.031   3.6         0.034   3.9           2976      -1.00        0.92       0.92
-- get_dtsets_pspheads                       0.030   3.5         0.030   3.5              1      -1.00        0.99       0.99
-- getghc(/=fourXX,nonlop,fock_XX)           0.022   2.6         0.023   2.6             -1      -1.00        0.96       0.96
-- projbd                                    0.022   2.5         0.018   2.1           4672      -1.00        1.21       1.21
-- abinit(chkinp,chkvars)                    0.019   2.2         0.019   2.2              1      -1.00        0.98       0.98
-- fourdp                                    0.017   2.0         0.028   3.2             54      -1.00        0.60       0.60
-- fourwf%(den)                              0.016   1.9         0.014   1.6            384      -1.00        1.17       1.17
-- abinit(outvars)                           0.015   1.8         0.015   1.7              1      -1.00        1.02       1.02
-- abinit(after driver)                      0.014   1.7         0.014   1.6              1      -1.00        1.02       1.02
-- vtowfk(ssdiag)                            0.012   1.4         0.011   1.3             -1      -1.00        1.13       1.13
-- ewald                                     0.011   1.3         0.011   1.3              1      -1.00        1.01       1.01
-- stress                                    0.009   1.0         0.009   1.0              1      -1.00        0.99       0.99
-- ewald2 (+vdw_dftd)                        0.008   0.9         0.008   0.9              1      -1.00        1.01       1.01
-- abinit(init,iofn1,herald)                 0.007   0.9         0.007   0.8              1      -1.00        1.06       1.06
-- xc:pot/=fourdp                            0.004   0.5         0.005   0.6              7      -1.00        0.89       0.89
-- others (142)                              0.014   1.6         0.014   1.6             -1      -1.00        0.99       0.99
+- fourwf%(pot)                              0.655  43.0         0.658  42.9           2976      -1.00        1.00       1.00
+- pspini                                    0.187  12.3         0.188  12.2              1      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.142   9.3         0.142   9.3              1      -1.00        1.00       1.00
+- timing timab                              0.127   8.3         0.127   8.3             12      -1.00        1.00       1.00
+- fourwf%(den)                              0.051   3.4         0.048   3.1            384      -1.00        1.07       1.07
+- nonlop(apply)                             0.043   2.8         0.039   2.5           2976      -1.00        1.10       1.10
+- get_dtsets_pspheads                       0.038   2.5         0.038   2.5              1      -1.00        1.00       1.00
+- getghc(/=fourXX,nonlop,fock_XX)           0.029   1.9         0.035   2.3             -1      -1.00        0.83       0.83
+- projbd                                    0.020   1.3         0.018   1.2           4672      -1.00        1.10       1.10
+- ewald                                     0.017   1.1         0.018   1.2              1      -1.00        0.96       0.96
+- abinit(outvars)                           0.016   1.0         0.018   1.2              1      -1.00        0.87       0.87
+- abinit(after driver)                      0.013   0.9         0.015   1.0              1      -1.00        0.88       0.88
+- stress                                    0.013   0.9         0.013   0.8              1      -1.00        1.00       1.00
+- fourdp                                    0.012   0.8         0.009   0.6             54      -1.00        1.39       1.39
+- vtowfk(ssdiag)                            0.012   0.8         0.013   0.8             -1      -1.00        0.96       0.96
+- ewald2 (+vdw_dftd)                        0.011   0.7         0.011   0.7              1      -1.00        0.98       0.98
+- others (194)                              0.029   1.9         0.028   1.8             -1      -1.00        1.03       1.03
 -<END_TIMER>
 
-- subtotal                                  0.739  86.2         0.748  86.2                                  0.99       0.99
+- subtotal                                  1.416  92.9         1.418  92.4                                  1.00       1.00
 
 ================================================================================
 
@@ -538,7 +535,7 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -550,12 +547,12 @@ P           mkmem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -573,7 +570,7 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -588,15 +585,15 @@ P           mkmem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.9  wall=          0.9
+- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.9  wall=          0.9
++Overall time at end (sec) : cpu=          1.5  wall=          1.5

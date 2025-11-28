@@ -52,7 +52,7 @@
    0.0 1.0 0.0
    0.0 0.0 1.0
  so_psp 0
- toldfe 1.0d-7
+ toldff 1.0d-7
  typat  2*1
  xcart
  0.0  0.0 0.0

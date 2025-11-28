@@ -94,7 +94,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu
  integer :: nproc,nthreads,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response !,so_psp
  integer :: fftalg,fftalga,usepaw,usewvl
- integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
+ integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr,ttoldmag
  logical :: test,twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
  logical :: xc_is_lda,xc_is_gga,xc_is_mgga,xc_is_hybrid,xc_is_pot_only,xc_need_kden
@@ -283,8 +283,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    !  berryopt cannot be 4,6,7,14,16,17 when toldfe, tolvrs, toldff and tolrff are zero (or negative)
    if (any(dt%berryopt== [4,6,7,14,16,17] ) ) then
      cond_string(1)='berryopt' ; cond_values(1)=dt%berryopt
-     call chkdpr(1,1,cond_string,cond_values,ierr,'max(toldfe,toldff,tolrff,tolvrs)',&
-       max(dt%toldfe,dt%toldff,dt%tolrff,dt%tolvrs),1,tol16*tol16,iout)
+     call chkdpr(1,1,cond_string,cond_values,ierr,'max(toldfe,toldff,tolrff,tolvrs,toldmag)',&
+       max(dt%toldfe,dt%toldff,dt%tolrff,dt%tolvrs,dt%toldmag),1,tol16*tol16,iout)
    endif
    ! Non-zero berryopt and usepaw==1 cannot be done unless response==0
    if (usepaw==1.and.dt%berryopt/=0) then
@@ -2733,6 +2733,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
         'Action: re-run with PAW '
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
+  
+     !  paral_atom not allowed at present
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
 
 !    nucdipmom requires complex rhoij
      if(dt%pawcpxocc/=2)then
@@ -3187,6 +3190,18 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      'd3e_pert1_elfd, d3e_pert2_elfd, d3e_pert3_elfd, d3e_pert1_phon, d3e_pert2_phon, and d3e_pert3_phon in your input file.'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
+
+!  paw_add_core
+   if (usepaw==1) then
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'paw_add_core',dt%paw_add_core,2,(/0,1/),iout)
+     if (dt%paw_add_core==1.and.any(pspheads(1:npsp)%pspcod/=17)) then
+       write(msg, '(5a)' )&
+        'paw_add_core input variable can only be used PAW datasets in XML format.',ch10,&
+        'However one of your PAW atomic dataset is not in PAW-XML format!',ch10,&
+        'Action: change your pseudopotential file to a PAW-XML one '
+       ABI_ERROR_NOSTOP(msg,ierr)
+     end if
+   endif
 
 !  pawcpxocc
    if (usepaw==1) then
@@ -3762,9 +3777,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  rcpaw_frocc
    call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_frocc',dt%rcpaw_frocc,2,(/0,1/),iout)
 
-!  rcpaw_frtypat
+!  rcpaw_rctypat
    do itypat=1,dt%ntypat
-     call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_frtypat',dt%rcpaw_frtypat(itypat),2,(/0,1/),iout)
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'rcpaw_rctypat',dt%rcpaw_rctypat(itypat),2,(/0,1/),iout)
    enddo
 
 !  recgratio
@@ -4036,6 +4051,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  tolwfr
    call chkdpr(0,0,cond_string,cond_values,ierr,'tolwfr',dt%tolwfr,1,zero,iout)
 
+!!  tolwfr
+   call chkdpr(0,0,cond_string,cond_values,ierr,'toldmag',dt%tolwfr,1,zero,iout)
+
 !  tsmear
    call chkdpr(0,0,cond_string,cond_values,ierr,'tsmear',dt%tsmear,1,zero,iout)
 !  Check that tsmear is non-zero positive for metallic occupation functions
@@ -4223,15 +4241,22 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
    end if
 
-!  usercpaw
+!  use_rcpaw
    call chkint_eq(0,0,cond_string,cond_values,ierr,'use_rcpaw',dt%use_rcpaw,2,(/0,1/),iout)
    if(dt%use_rcpaw==1) then
      if((dt%npfft/=1).or.(dt%occopt<3).or.(dt%occopt>8).or.&
-        (dt%stmbias/=zero).or.(dt%spinmagntarget/=-99.99_dp).or.(dt%nsppol==2).or.(dt%nspinor==2).or.&
-        (dt%nspden>1).or.(dt%usewvl==1).or.(dt%positron/=0).or.(dt%icoulomb/=0).or.(dt%iscf<12).or.&
+        (dt%stmbias/=zero).or.(dt%spinmagntarget/=-99.99_dp).or.(dt%nspinor==2).or.&
+        (dt%usewvl==1).or.(dt%positron/=0).or.(dt%icoulomb/=0).or.(dt%iscf<12).or.&
         (dt%usepaw/=1).or.(dt%usepawu==1).or.(dt%usedmft==1)) then
        ABI_ERROR('RCPAW: work in progress')
      endif
+     if (any(pspheads(1:npsp)%pspcod/=17)) then
+       write(msg, '(5a)' )&
+        'Relaxed-core PAW (use_rcpaw=1) can only be used PAW datasets in XML format.',ch10,&
+        'However one of your PAW atomic dataset is not in PAW-XML format!',ch10,&
+        'Action: change your pseudopotential file to a PAW-XML one '
+       ABI_ERROR_NOSTOP(msg,ierr)
+     end if
    endif
 
 !  usexcnhat
@@ -4445,14 +4470,14 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end do
 
   ! ZORA
-  ! only values of -3,-2,-1,0,1,2,3 are allowed. 0 is the default.
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'zora',dt%zora,7,(/-3,-2,-1,0,1,2,3/),iout)
+  ! only values of -4,-3,-2,-1,0,1,2,3 are allowed. 0 is the default.
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'zora',dt%zora,8,(/-4,-3,-2,-1,0,1,2,3/),iout)
   if(dt%zora .NE. 0) then
      cond_string(1)='zora';cond_values(1)=dt%zora
   !  require PAW
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/1/),iout)
   end if
-  if(dt%zora .GT. 1) then
+  if(dt%zora .NE. 0 .and. dt%zora .NE. 1) then
      cond_string(1)='zora';cond_values(1)=dt%zora
      ! require nspinor 2
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
@@ -4552,12 +4577,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
    ! Test on tolerances (similar tests are performed in scprqt, so keep the two versions in synch)
    if (any(optdriver == [RUNL_GSTATE, RUNL_RESPFN])) then
-     ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0
+     ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0; ttoldmag=0
      if(abs(dt%tolwfr)>tiny(zero))ttolwfr=1
      if(abs(dt%toldff)>tiny(zero))ttoldff=1
      if(abs(dt%tolrff)>tiny(zero))ttolrff=1
      if(abs(dt%toldfe)>tiny(zero))ttoldfe=1
      if(abs(dt%tolvrs)>tiny(zero))ttolvrs=1
+     if(abs(dt%toldmag)>tiny(zero))ttoldmag=1
 
      ! If non-scf calculations, tolwfr must be defined
      if(ttolwfr /= 1 .and. ((dt%iscf<0 .and. dt%iscf/=-3) .or. dt%rf2_dkdk/=0 .or. dt%rf2_dkde/=0))then
@@ -4574,12 +4600,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
      ! If SCF calculations, one and only one of these can differ from zero
      if ( (dt%iscf>0 .or. dt%iscf==-3) .and. &
-       & ( (ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff>1) .or. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff/=1) ) ) then
+       & ( (ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag>1) .or. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag/=1) ) ) then
        write(msg,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,i0,2a)' )&
         'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
-        'toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
+        'toldff, tolrff, toldfe, toldmag or tolvrs ','must differ from zero, while they are',ch10,&
         'toldff=',dt%toldff,', tolrff=',dt%tolrff,', toldfe=',dt%toldfe,ch10,&
-        'and tolvrs=',dt%tolvrs,' for idtset: ', idtset, ch10,&
+        'toldmag=',dt%toldmag,'and tolvrs=',dt%tolvrs,' for idtset: ', idtset, ch10,&
         'Action: change your input file and resubmit the job.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
@@ -4643,8 +4669,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_CHECK_NOSTOP(all(dt%istwfk(1:nkpt) == 1), 'GBT requires istwfk == 1', ierr)
      ABI_CHECK_NOSTOP(dt%usefock == 0, 'GBT with Fock is not coded', ierr)
      ABI_CHECK_NOSTOP(.not. xc_is_mgga, 'GBT with meta-GGA is not coded', ierr)
-     ABI_CHECK_NOSTOP(dt%ionmov == 0, 'GBT and atomic relaxation not tested', ierr)
-     ABI_CHECK_NOSTOP(dt%optcell == 0, 'GBT and cell relaxation not coded', ierr)
+!     ABI_CHECK_NOSTOP(dt%ionmov == 0, 'GBT and atomic relaxation not tested', ierr)
+!     ABI_CHECK_NOSTOP(dt%optcell == 0, 'GBT and cell relaxation not coded', ierr)
      if (all(abs(dt%spinat(1:2, 1:dt%natom)) < tol8)) then
        ABI_CHECK_NOSTOP(.False., 'at least one spinat(:,iat) should have non-zero x or y components', ierr)
      end if

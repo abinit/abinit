@@ -1,5 +1,5 @@
 
-.Version 10.3.6.3 of ABINIT, released Feb 2025.
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  7 Apr 2025.
-- ( at 01h04 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h02 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/TestBot_MPI1/v10_t83/t83.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v10_t83/t83.abi
 - output file    -> t83.abo
 - root for input  files -> t83i
 - root for output files -> t83o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Symmetries : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -204,9 +204,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     60.000   => boxcut(ratio)=   2.15090
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -385,7 +385,7 @@ xc                  : -1.92531097538472E+00
 Ewald energy        : -1.45569337980346E+01
 psp_core            :  9.58621570308017E-01
 local_psp           : -7.18211190742143E+00
-spherical_terms     : -1.28851039345114E+01
+PAW spherical_terms : -1.28851039345114E+01
 internal            : -2.89508338283167E+01
 '-kT*entropy'       : -1.12837916701667E-02
 total_energy        : -2.89621176199869E+01
@@ -400,7 +400,7 @@ band_energy         : -1.15166470813680E+01
 Ewald energy        : -1.45569337980346E+01
 psp_core            :  9.58621570308017E-01
 xc_dc               : -1.11983402615400E+00
-spherical_terms     : -2.71601960214918E+00
+PAW spherical_terms : -2.71601960214918E+00
 internal            : -2.89508129373978E+01
 '-kT*entropy'       : -1.12837916701667E-02
 total_energy_dc     : -2.89620967290679E+01
@@ -605,7 +605,7 @@ xc                  : -1.94072262571429E+00
 Ewald energy        : -1.43429767948171E+01
 psp_core            :  9.58621570308017E-01
 local_psp           : -7.58290595307042E+00
-spherical_terms     : -1.28791367545104E+01
+PAW spherical_terms : -1.28791367545104E+01
 internal            : -2.89392593880226E+01
 '-kT*entropy'       : -1.48978499915080E-03
 total_energy        : -2.89407491730217E+01
@@ -620,7 +620,7 @@ band_energy         : -1.15511894465128E+01
 Ewald energy        : -1.43429767948171E+01
 psp_core            :  9.58621570308017E-01
 xc_dc               : -1.28349537619588E+00
-spherical_terms     : -2.72029930979862E+00
+PAW spherical_terms : -2.72029930979862E+00
 internal            : -2.89393393570163E+01
 '-kT*entropy'       : -1.48978499915080E-03
 total_energy_dc     : -2.89408291420155E+01
@@ -825,7 +825,7 @@ xc                  : -1.95504925215883E+00
 Ewald energy        : -1.39042542044794E+01
 psp_core            :  9.58621570308017E-01
 local_psp           : -8.36783032531912E+00
-spherical_terms     : -1.28687323446503E+01
+PAW spherical_terms : -1.28687323446503E+01
 internal            : -2.89171606506750E+01
 '-kT*entropy'       : -3.79018523744279E-14
 total_energy        : -2.89171606506750E+01
@@ -840,7 +840,7 @@ band_energy         : -1.16604999002532E+01
 Ewald energy        : -1.39042542044794E+01
 psp_core            :  9.58621570308017E-01
 xc_dc               : -1.58393551900286E+00
-spherical_terms     : -2.72713928585176E+00
+PAW spherical_terms : -2.72713928585176E+00
 internal            : -2.89172073392793E+01
 '-kT*entropy'       : -3.79018523744279E-14
 total_energy_dc     : -2.89172073392793E+01
@@ -1045,7 +1045,7 @@ xc                  : -1.96073124954055E+00
 Ewald energy        : -1.36792760441001E+01
 psp_core            :  9.58621570308017E-01
 local_psp           : -8.75296413316526E+00
-spherical_terms     : -1.28632357872379E+01
+PAW spherical_terms : -1.28632357872379E+01
 internal            : -2.89028422379583E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy        : -2.89028422379583E+01
@@ -1060,7 +1060,7 @@ band_energy         : -1.17247610702732E+01
 Ewald energy        : -1.36792760441001E+01
 psp_core            :  9.58621570308017E-01
 xc_dc               : -1.72689892964835E+00
-spherical_terms     : -2.73051088069871E+00
+PAW spherical_terms : -2.73051088069871E+00
 internal            : -2.89028253544123E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy_dc     : -2.89028253544123E+01
@@ -1265,7 +1265,7 @@ xc                  : -1.95505841492874E+00
 Ewald energy        : -1.39042542044794E+01
 psp_core            :  9.58621570308017E-01
 local_psp           : -8.36787714473625E+00
-spherical_terms     : -1.28687770610401E+01
+PAW spherical_terms : -1.28687770610401E+01
 internal            : -2.89172344585038E+01
 '-kT*entropy'       : -3.79344303064303E-14
 total_energy        : -2.89172344585039E+01
@@ -1280,7 +1280,7 @@ band_energy         : -1.16604883633447E+01
 Ewald energy        : -1.39042542044794E+01
 psp_core            :  9.58621570308017E-01
 xc_dc               : -1.58396519883398E+00
-spherical_terms     : -2.72712114360435E+00
+PAW spherical_terms : -2.72712114360435E+00
 internal            : -2.89172073399545E+01
 '-kT*entropy'       : -3.79344303064303E-14
 total_energy_dc     : -2.89172073399545E+01
@@ -1485,7 +1485,7 @@ xc                  : -1.94073624073503E+00
 Ewald energy        : -1.43429767948171E+01
 psp_core            :  9.58621570308017E-01
 local_psp           : -7.58293907060269E+00
-spherical_terms     : -1.28792418806040E+01
+PAW spherical_terms : -1.28792418806040E+01
 internal            : -2.89393901372722E+01
 '-kT*entropy'       : -1.48996151123501E-03
 total_energy        : -2.89408800987834E+01
@@ -1500,7 +1500,7 @@ band_energy         : -1.15512174704521E+01
 Ewald energy        : -1.43429767948171E+01
 psp_core            :  9.58621570308017E-01
 xc_dc               : -1.28351182511286E+00
-spherical_terms     : -2.72025466048233E+00
+PAW spherical_terms : -2.72025466048233E+00
 internal            : -2.89393391805563E+01
 '-kT*entropy'       : -1.48996151123501E-03
 total_energy_dc     : -2.89408291420676E+01
@@ -1706,7 +1706,7 @@ xc                  : -1.92531097538453E+00
 Ewald energy        : -1.45569337980346E+01
 psp_core            :  9.58621570308017E-01
 local_psp           : -7.18211190742153E+00
-spherical_terms     : -1.28851039345115E+01
+PAW spherical_terms : -1.28851039345115E+01
 internal            : -2.89508338283171E+01
 '-kT*entropy'       : -1.12837916701667E-02
 total_energy        : -2.89621176199872E+01
@@ -1721,7 +1721,7 @@ band_energy         : -1.15166470813681E+01
 Ewald energy        : -1.45569337980346E+01
 psp_core            :  9.58621570308017E-01
 xc_dc               : -1.11983402615412E+00
-spherical_terms     : -2.71601960214914E+00
+PAW spherical_terms : -2.71601960214914E+00
 internal            : -2.89508129373980E+01
 '-kT*entropy'       : -1.12837916701667E-02
 total_energy_dc     : -2.89620967290681E+01
@@ -1935,7 +1935,7 @@ xc                  : -1.93881108645245E+00
 Ewald energy        : -1.43864397470288E+01
 psp_core            :  9.59746494598014E-01
 local_psp           : -7.48788983444667E+00
-spherical_terms     : -1.28799215838846E+01
+PAW spherical_terms : -1.28799215838846E+01
 internal            : -2.89588420801980E+01
 '-kT*entropy'       : -1.04886154268312E-03
 total_energy        : -2.89598909417407E+01
@@ -1950,7 +1950,7 @@ band_energy         : -1.15691573381660E+01
 Ewald energy        : -1.43864397470288E+01
 psp_core            :  9.59746494598014E-01
 xc_dc               : -1.24327389145958E+00
-spherical_terms     : -2.71968885742116E+00
+PAW spherical_terms : -2.71968885742116E+00
 internal            : -2.89588133394775E+01
 '-kT*entropy'       : -1.04886154268312E-03
 total_energy_dc     : -2.89598622010202E+01
@@ -2155,7 +2155,7 @@ xc                  : -1.95042237609279E+00
 Ewald energy        : -1.40301791165436E+01
 psp_core            :  9.60069497542180E-01
 local_psp           : -8.12333265029944E+00
-spherical_terms     : -1.28720143451253E+01
+PAW spherical_terms : -1.28720143451253E+01
 internal            : -2.89425793741364E+01
 '-kT*entropy'       : -3.46256917984537E-13
 total_energy        : -2.89425793741368E+01
@@ -2170,7 +2170,7 @@ band_energy         : -1.16634687720812E+01
 Ewald energy        : -1.40301791165436E+01
 psp_core            :  9.60069497542180E-01
 xc_dc               : -1.48404554673868E+00
-spherical_terms     : -2.72493341738202E+00
+PAW spherical_terms : -2.72493341738202E+00
 internal            : -2.89425573552032E+01
 '-kT*entropy'       : -3.46256917984537E-13
 total_energy_dc     : -2.89425573552036E+01
@@ -2375,7 +2375,7 @@ xc                  : -1.95522828252980E+00
 Ewald energy        : -1.38418379624158E+01
 psp_core            :  9.60274069373908E-01
 local_psp           : -8.44496826681440E+00
-spherical_terms     : -1.28677226270496E+01
+PAW spherical_terms : -1.28677226270496E+01
 internal            : -2.89318847129274E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy        : -2.89318847129274E+01
@@ -2390,7 +2390,7 @@ band_energy         : -1.17205338617514E+01
 Ewald energy        : -1.38418379624158E+01
 psp_core            :  9.60274069373908E-01
 xc_dc               : -1.60221884815936E+00
-spherical_terms     : -2.72758248894469E+00
+PAW spherical_terms : -2.72758248894469E+00
 internal            : -2.89318990918973E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy_dc     : -2.89318990918973E+01
@@ -2595,7 +2595,7 @@ xc                  : -1.95042057871452E+00
 Ewald energy        : -1.40301917111993E+01
 psp_core            :  9.60069681323690E-01
 local_psp           : -8.12332728184807E+00
-spherical_terms     : -1.28720001477081E+01
+PAW spherical_terms : -1.28720001477081E+01
 internal            : -2.89425761136432E+01
 '-kT*entropy'       : -3.46599506424377E-13
 total_energy        : -2.89425761136436E+01
@@ -2610,7 +2610,7 @@ band_energy         : -1.16634485005183E+01
 Ewald energy        : -1.40301917111993E+01
 psp_core            :  9.60069681323690E-01
 xc_dc               : -1.48404539773004E+00
-spherical_terms     : -2.72494306136386E+00
+PAW spherical_terms : -2.72494306136386E+00
 internal            : -2.89425589894878E+01
 '-kT*entropy'       : -3.46599506424377E-13
 total_energy_dc     : -2.89425589894882E+01
@@ -2815,7 +2815,7 @@ xc                  : -1.93880476168199E+00
 Ewald energy        : -1.43864388058775E+01
 psp_core            :  9.59746569697822E-01
 local_psp           : -7.48786689197094E+00
-spherical_terms     : -1.28798787221092E+01
+PAW spherical_terms : -1.28798787221092E+01
 internal            : -2.89587794448438E+01
 '-kT*entropy'       : -1.04876638888328E-03
 total_energy        : -2.89598282112327E+01
@@ -2830,7 +2830,7 @@ band_energy         : -1.15691531202995E+01
 Ewald energy        : -1.43864388058775E+01
 psp_core            :  9.59746569697822E-01
 xc_dc               : -1.24326503846308E+00
-spherical_terms     : -2.71970363132114E+00
+PAW spherical_terms : -2.71970363132114E+00
 internal            : -2.89588140262635E+01
 '-kT*entropy'       : -1.04876638888328E-03
 total_energy_dc     : -2.89598627926524E+01
@@ -3038,7 +3038,7 @@ xc                  : -1.93747745985062E+00
 Ewald energy        : -1.44323210017598E+01
 psp_core            :  9.62852990005906E-01
 local_psp           : -7.39792063491793E+00
-spherical_terms     : -1.28783583982765E+01
+PAW spherical_terms : -1.28783583982765E+01
 internal            : -2.89753824806966E+01
 '-kT*entropy'       : -1.04337969656987E-03
 total_energy        : -2.89764258603932E+01
@@ -3053,7 +3053,7 @@ band_energy         : -1.15799489019170E+01
 Ewald energy        : -1.44323210017598E+01
 psp_core            :  9.62852990005906E-01
 xc_dc               : -1.20558084332830E+00
-spherical_terms     : -2.72036580677534E+00
+PAW spherical_terms : -2.72036580677534E+00
 internal            : -2.89753635637746E+01
 '-kT*entropy'       : -1.04337969656987E-03
 total_energy_dc     : -2.89764069434711E+01
@@ -3251,7 +3251,7 @@ xc                  : -1.94724870540381E+00
 Ewald energy        : -1.41501877308499E+01
 psp_core            :  9.64035391869578E-01
 local_psp           : -7.90375974280478E+00
-spherical_terms     : -1.28728199295932E+01
+PAW spherical_terms : -1.28728199295932E+01
 internal            : -2.89650630703722E+01
 '-kT*entropy'       : -9.67908825167255E-13
 total_energy        : -2.89650630703732E+01
@@ -3266,7 +3266,7 @@ band_energy         : -1.16589278636372E+01
 Ewald energy        : -1.41501877308499E+01
 psp_core            :  9.64035391869578E-01
 xc_dc               : -1.39579902149106E+00
-spherical_terms     : -2.72418189424265E+00
+PAW spherical_terms : -2.72418189424265E+00
 internal            : -2.89650611183512E+01
 '-kT*entropy'       : -9.67908825167255E-13
 total_energy_dc     : -2.89650611183522E+01
@@ -3464,7 +3464,7 @@ xc                  : -1.95144136406121E+00
 Ewald energy        : -1.39960717619530E+01
 psp_core            :  9.64766393761935E-01
 local_psp           : -8.16796601116869E+00
-spherical_terms     : -1.28699132167931E+01
+PAW spherical_terms : -1.28699132167931E+01
 internal            : -2.89578088140908E+01
 '-kT*entropy'       : -2.42527140278067E-15
 total_energy        : -2.89578088140908E+01
@@ -3479,7 +3479,7 @@ band_energy         : -1.17083863062412E+01
 Ewald energy        : -1.39960717619530E+01
 psp_core            :  9.64766393761935E-01
 xc_dc               : -1.49194818140975E+00
-spherical_terms     : -2.72607835137731E+00
+PAW spherical_terms : -2.72607835137731E+00
 internal            : -2.89577182072193E+01
 '-kT*entropy'       : -2.42527140278067E-15
 total_energy_dc     : -2.89577182072193E+01
@@ -3677,7 +3677,7 @@ xc                  : -1.94724957121337E+00
 Ewald energy        : -1.41500441746491E+01
 psp_core            :  9.64035720404676E-01
 local_psp           : -7.90399277767227E+00
-spherical_terms     : -1.28728107791306E+01
+PAW spherical_terms : -1.28728107791306E+01
 internal            : -2.89650470928029E+01
 '-kT*entropy'       : -9.56850505385916E-13
 total_energy        : -2.89650470928039E+01
@@ -3692,7 +3692,7 @@ band_energy         : -1.16589621960494E+01
 Ewald energy        : -1.41500441746491E+01
 psp_core            :  9.64035720404676E-01
 xc_dc               : -1.39588144019654E+00
-spherical_terms     : -2.72419338041658E+00
+PAW spherical_terms : -2.72419338041658E+00
 internal            : -2.89650454709069E+01
 '-kT*entropy'       : -9.56850505385916E-13
 total_energy_dc     : -2.89650454709079E+01
@@ -3890,7 +3890,7 @@ xc                  : -1.93744038739141E+00
 Ewald energy        : -1.44329546143245E+01
 psp_core            :  9.62851369380669E-01
 local_psp           : -7.39672281736199E+00
-spherical_terms     : -1.28783628256807E+01
+PAW spherical_terms : -1.28783628256807E+01
 internal            : -2.89753834561581E+01
 '-kT*entropy'       : -1.06102649446786E-03
 total_energy        : -2.89764444826526E+01
@@ -3905,7 +3905,7 @@ band_energy         : -1.15797923658420E+01
 Ewald energy        : -1.44329546143245E+01
 psp_core            :  9.62851369380669E-01
 xc_dc               : -1.20510860386988E+00
-spherical_terms     : -2.72036583005746E+00
+PAW spherical_terms : -2.72036583005746E+00
 internal            : -2.89753700447132E+01
 '-kT*entropy'       : -1.06102649446786E-03
 total_energy_dc     : -2.89764310712076E+01
@@ -4113,7 +4113,7 @@ xc                  : -1.93646217156552E+00
 Ewald energy        : -1.44881634674819E+01
 psp_core            :  9.66814866106851E-01
 local_psp           : -7.29951602217943E+00
-spherical_terms     : -1.28756374248218E+01
+PAW spherical_terms : -1.28756374248218E+01
 internal            : -2.89889732524421E+01
 '-kT*entropy'       : -1.16632193540085E-03
 total_energy        : -2.89901395743775E+01
@@ -4128,7 +4128,7 @@ band_energy         : -1.15797750485956E+01
 Ewald energy        : -1.44881634674819E+01
 psp_core            :  9.66814866106851E-01
 xc_dc               : -1.16615005249588E+00
-spherical_terms     : -2.72170496374072E+00
+PAW spherical_terms : -2.72170496374072E+00
 internal            : -2.89889786662072E+01
 '-kT*entropy'       : -1.16632193540085E-03
 total_energy_dc     : -2.89901449881426E+01
@@ -4326,7 +4326,7 @@ xc                  : -1.94547543818739E+00
 Ewald energy        : -1.42611407697863E+01
 psp_core            :  9.69950346611862E-01
 local_psp           : -7.71347319842078E+00
-spherical_terms     : -1.28712641342361E+01
+PAW spherical_terms : -1.28712641342361E+01
 internal            : -2.89853687527580E+01
 '-kT*entropy'       : -4.39363714515268E-13
 total_energy        : -2.89853687527585E+01
@@ -4341,7 +4341,7 @@ band_energy         : -1.16485910790379E+01
 Ewald energy        : -1.42611407697863E+01
 psp_core            :  9.69950346611862E-01
 xc_dc               : -1.32074522548628E+00
-spherical_terms     : -2.72484112926119E+00
+PAW spherical_terms : -2.72484112926119E+00
 internal            : -2.89853678569598E+01
 '-kT*entropy'       : -4.39363714515268E-13
 total_energy_dc     : -2.89853678569602E+01
@@ -4539,7 +4539,7 @@ xc                  : -1.94918953461080E+00
 Ewald energy        : -1.41399227857248E+01
 psp_core            :  9.71459975344949E-01
 local_psp           : -7.92341215627264E+00
-spherical_terms     : -1.28695877227791E+01
+PAW spherical_terms : -1.28695877227791E+01
 internal            : -2.89812539522311E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy        : -2.89812539522311E+01
@@ -4554,7 +4554,7 @@ band_energy         : -1.16903195330339E+01
 Ewald energy        : -1.41399227857248E+01
 psp_core            :  9.71459975344949E-01
 xc_dc               : -1.39638416454229E+00
-spherical_terms     : -2.72604702610398E+00
+PAW spherical_terms : -2.72604702610398E+00
 internal            : -2.89812135340600E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy_dc     : -2.89812135340600E+01
@@ -4752,7 +4752,7 @@ xc                  : -1.94547994957597E+00
 Ewald energy        : -1.42607902383657E+01
 psp_core            :  9.69951922470171E-01
 local_psp           : -7.71403294084965E+00
-spherical_terms     : -1.28712470079445E+01
+PAW spherical_terms : -1.28712470079445E+01
 internal            : -2.89853193066846E+01
 '-kT*entropy'       : -4.17619972487609E-13
 total_energy        : -2.89853193066850E+01
@@ -4767,7 +4767,7 @@ band_energy         : -1.16487055976385E+01
 Ewald energy        : -1.42607902383657E+01
 psp_core            :  9.69951922470171E-01
 xc_dc               : -1.32094039927993E+00
-spherical_terms     : -2.72485392632696E+00
+PAW spherical_terms : -2.72485392632696E+00
 internal            : -2.89853382391409E+01
 '-kT*entropy'       : -4.17619972487609E-13
 total_energy_dc     : -2.89853382391413E+01
@@ -4965,7 +4965,7 @@ xc                  : -1.93657688372096E+00
 Ewald energy        : -1.44884066504774E+01
 psp_core            :  9.66946906572547E-01
 local_psp           : -7.30051893346293E+00
-spherical_terms     : -1.28754813632578E+01
+PAW spherical_terms : -1.28754813632578E+01
 internal            : -2.89895644887402E+01
 '-kT*entropy'       : -1.10112889646549E-03
 total_energy        : -2.89906656176367E+01
@@ -4980,7 +4980,7 @@ band_energy         : -1.15795440255952E+01
 Ewald energy        : -1.44884066504774E+01
 psp_core            :  9.66946906572547E-01
 xc_dc               : -1.16672152196240E+00
-spherical_terms     : -2.72182454386117E+00
+PAW spherical_terms : -2.72182454386117E+00
 internal            : -2.89895498353236E+01
 '-kT*entropy'       : -1.10112889646549E-03
 total_energy_dc     : -2.89906509642200E+01
@@ -5188,7 +5188,7 @@ xc                  : -1.93619282739579E+00
 Ewald energy        : -1.45272592736733E+01
 psp_core            :  9.69996182288681E-01
 local_psp           : -7.23505310404808E+00
-spherical_terms     : -1.28730537585950E+01
+PAW spherical_terms : -1.28730537585950E+01
 internal            : -2.89981812042554E+01
 '-kT*entropy'       : -1.10126880552203E-03
 total_energy        : -2.89992824730609E+01
@@ -5203,7 +5203,7 @@ band_energy         : -1.15768272090299E+01
 Ewald energy        : -1.45272592736733E+01
 psp_core            :  9.69996182288681E-01
 xc_dc               : -1.14104354022536E+00
-spherical_terms     : -2.72305273958650E+00
+PAW spherical_terms : -2.72305273958650E+00
 internal            : -2.89981865802264E+01
 '-kT*entropy'       : -1.10126880552203E-03
 total_energy_dc     : -2.89992878490319E+01
@@ -5401,7 +5401,7 @@ xc                  : -1.94499408168097E+00
 Ewald energy        : -1.43622800048064E+01
 psp_core            :  9.77298757972641E-01
 local_psp           : -7.55206870383976E+00
-spherical_terms     : -1.28678742725661E+01
+PAW spherical_terms : -1.28678742725661E+01
 internal            : -2.90040314854478E+01
 '-kT*entropy'       : -3.31241210542247E-14
 total_energy        : -2.90040314854479E+01
@@ -5416,7 +5416,7 @@ band_energy         : -1.16337761954187E+01
 Ewald energy        : -1.43622800048064E+01
 psp_core            :  9.77298757972641E-01
 xc_dc               : -1.25857766798679E+00
-spherical_terms     : -2.72668864007595E+00
+PAW spherical_terms : -2.72668864007595E+00
 internal            : -2.90040237503152E+01
 '-kT*entropy'       : -3.31241210542247E-14
 total_energy_dc     : -2.90040237503152E+01
@@ -5613,7 +5613,7 @@ xc                  : -1.94839577018347E+00
 Ewald energy        : -1.42728749052850E+01
 psp_core            :  9.79826864545071E-01
 local_psp           : -7.71035499018961E+00
-spherical_terms     : -1.28675305842489E+01
+PAW spherical_terms : -1.28675305842489E+01
 internal            : -2.90032727475769E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy        : -2.90032727475769E+01
@@ -5628,7 +5628,7 @@ band_energy         : -1.16679444380342E+01
 Ewald energy        : -1.42728749052850E+01
 psp_core            :  9.79826864545071E-01
 xc_dc               : -1.31493230667847E+00
-spherical_terms     : -2.72714229341343E+00
+PAW spherical_terms : -2.72714229341343E+00
 internal            : -2.90030670788661E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy_dc     : -2.90030670788661E+01
@@ -5826,7 +5826,7 @@ xc                  : -1.94500357501542E+00
 Ewald energy        : -1.43616895580420E+01
 psp_core            :  9.77306184693644E-01
 local_psp           : -7.55309633196928E+00
-spherical_terms     : -1.28678382088454E+01
+PAW spherical_terms : -1.28678382088454E+01
 internal            : -2.90039710031983E+01
 '-kT*entropy'       : -2.88478627299918E-14
 total_energy        : -2.90039710031983E+01
@@ -5841,7 +5841,7 @@ band_energy         : -1.16339356013811E+01
 Ewald energy        : -1.43616895580420E+01
 psp_core            :  9.77306184693644E-01
 xc_dc               : -1.25894929335895E+00
-spherical_terms     : -2.72672604482165E+00
+PAW spherical_terms : -2.72672604482165E+00
 internal            : -2.90039943129101E+01
 '-kT*entropy'       : -2.88478627299918E-14
 total_energy_dc     : -2.90039943129101E+01
@@ -6039,7 +6039,7 @@ xc                  : -1.93667298001909E+00
 Ewald energy        : -1.45281353910975E+01
 psp_core            :  9.70818676368139E-01
 local_psp           : -7.23888975246233E+00
-spherical_terms     : -1.28720444431472E+01
+PAW spherical_terms : -1.28720444431472E+01
 internal            : -2.90003349258707E+01
 '-kT*entropy'       : -8.66255111290825E-04
 total_energy        : -2.90012011809820E+01
@@ -6054,7 +6054,7 @@ band_energy         : -1.15762472881647E+01
 Ewald energy        : -1.45281353910975E+01
 psp_core            :  9.70818676368139E-01
 xc_dc               : -1.14303440084864E+00
-spherical_terms     : -2.72372540846884E+00
+PAW spherical_terms : -2.72372540846884E+00
 internal            : -2.90003238122115E+01
 '-kT*entropy'       : -8.66255111290825E-04
 total_energy_dc     : -2.90011900673228E+01
@@ -6262,7 +6262,7 @@ xc                  : -1.93637335229781E+00
 Ewald energy        : -1.45505295393429E+01
 psp_core            :  9.72207115703317E-01
 local_psp           : -7.19932134238226E+00
-spherical_terms     : -1.28710905406097E+01
+PAW spherical_terms : -1.28710905406097E+01
 internal            : -2.90048171390713E+01
 '-kT*entropy'       : -8.20878398780060E-04
 total_energy        : -2.90056380174701E+01
@@ -6277,7 +6277,7 @@ band_energy         : -1.15748162105376E+01
 Ewald energy        : -1.45505295393429E+01
 psp_core            :  9.72207115703317E-01
 xc_dc               : -1.12756022510089E+00
-spherical_terms     : -2.72414997543538E+00
+PAW spherical_terms : -2.72414997543538E+00
 internal            : -2.90048488347134E+01
 '-kT*entropy'       : -8.20878398780060E-04
 total_energy_dc     : -2.90056697131122E+01
@@ -6475,7 +6475,7 @@ xc                  : -1.94558020250937E+00
 Ewald energy        : -1.44556117935887E+01
 psp_core            :  9.85341359931563E-01
 local_psp           : -7.41278641883258E+00
-spherical_terms     : -1.28636434459931E+01
+PAW spherical_terms : -1.28636434459931E+01
 internal            : -2.90206602140915E+01
 '-kT*entropy'       : -2.37339437635085E-15
 total_energy        : -2.90206602140915E+01
@@ -6490,7 +6490,7 @@ band_energy         : -1.16147893239421E+01
 Ewald energy        : -1.44556117935887E+01
 psp_core            :  9.85341359931563E-01
 xc_dc               : -1.20654569352121E+00
-spherical_terms     : -2.72905502122844E+00
+PAW spherical_terms : -2.72905502122844E+00
 internal            : -2.90206604723488E+01
 '-kT*entropy'       : -2.37339437635085E-15
 total_energy_dc     : -2.90206604723488E+01
@@ -6688,7 +6688,7 @@ xc                  : -1.94898204251384E+00
 Ewald energy        : -1.43954527043208E+01
 psp_core            :  9.89476133478997E-01
 local_psp           : -7.52650387999335E+00
-spherical_terms     : -1.28640309290587E+01
+PAW spherical_terms : -1.28640309290587E+01
 internal            : -2.90235898663737E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy        : -2.90235898663737E+01
@@ -6703,7 +6703,7 @@ band_energy         : -1.16418825301703E+01
 Ewald energy        : -1.43954527043208E+01
 psp_core            :  9.89476133478997E-01
 xc_dc               : -1.24653728806584E+00
-spherical_terms     : -2.72911292827272E+00
+PAW spherical_terms : -2.72911292827272E+00
 internal            : -2.90235093173506E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy_dc     : -2.90235093173506E+01
@@ -6901,7 +6901,7 @@ xc                  : -1.94569937506609E+00
 Ewald energy        : -1.44548025802686E+01
 psp_core            :  9.85527358672087E-01
 local_psp           : -7.41531169245377E+00
-spherical_terms     : -1.28635822176046E+01
+PAW spherical_terms : -1.28635822176046E+01
 internal            : -2.90210145750852E+01
 '-kT*entropy'       : -1.12957344592237E-15
 total_energy        : -2.90210145750852E+01
@@ -6916,7 +6916,7 @@ band_energy         : -1.16150758907666E+01
 Ewald energy        : -1.44548025802686E+01
 psp_core            :  9.85527358672087E-01
 xc_dc               : -1.20753813423874E+00
-spherical_terms     : -2.72911670727579E+00
+PAW spherical_terms : -2.72911670727579E+00
 internal            : -2.90210059538776E+01
 '-kT*entropy'       : -1.12957344592237E-15
 total_energy_dc     : -2.90210059538776E+01
@@ -7114,7 +7114,7 @@ xc                  : -1.93737543354551E+00
 Ewald energy        : -1.45510572651280E+01
 psp_core            :  9.74072552879356E-01
 local_psp           : -7.20860191875030E+00
-spherical_terms     : -1.28688490582827E+01
+PAW spherical_terms : -1.28688490582827E+01
 internal            : -2.90084441421403E+01
 '-kT*entropy'       : -4.79277641750241E-04
 total_energy        : -2.90089234197821E+01
@@ -7129,7 +7129,7 @@ band_energy         : -1.15739783008488E+01
 Ewald energy        : -1.45510572651280E+01
 psp_core            :  9.74072552879356E-01
 xc_dc               : -1.13189081423369E+00
-spherical_terms     : -2.72555341724207E+00
+PAW spherical_terms : -2.72555341724207E+00
 internal            : -2.90084072445732E+01
 '-kT*entropy'       : -4.79277641750241E-04
 total_energy_dc     : -2.90088865222149E+01
@@ -7337,7 +7337,7 @@ xc                  : -1.93676174404670E+00
 Ewald energy        : -1.45663287065292E+01
 psp_core            :  9.73952141869049E-01
 local_psp           : -7.17727552998550E+00
-spherical_terms     : -1.28695354918430E+01
+PAW spherical_terms : -1.28695354918430E+01
 internal            : -2.90107413584802E+01
 '-kT*entropy'       : -4.81299602381207E-04
 total_energy        : -2.90112226580826E+01
@@ -7352,7 +7352,7 @@ band_energy         : -1.15737586632326E+01
 Ewald energy        : -1.45663287065292E+01
 psp_core            :  9.73952141869049E-01
 xc_dc               : -1.11957437648018E+00
-spherical_terms     : -2.72504475914944E+00
+PAW spherical_terms : -2.72504475914944E+00
 internal            : -2.90107543635223E+01
 '-kT*entropy'       : -4.81299602381207E-04
 total_energy_dc     : -2.90112356631247E+01
@@ -7550,7 +7550,7 @@ xc                  : -1.94706406676759E+00
 Ewald energy        : -1.45332931836191E+01
 psp_core            :  9.93404502425180E-01
 local_psp           : -7.30529789453441E+00
-spherical_terms     : -1.28592666464061E+01
+PAW spherical_terms : -1.28592666464061E+01
 internal            : -2.90342409920416E+01
 '-kT*entropy'       : -2.46594863723834E-16
 total_energy        : -2.90342409920416E+01
@@ -7565,7 +7565,7 @@ band_energy         : -1.15952433025860E+01
 Ewald energy        : -1.45332931836191E+01
 psp_core            :  9.93404502425180E-01
 xc_dc               : -1.16762136358546E+00
-spherical_terms     : -2.73162177414286E+00
+PAW spherical_terms : -2.73162177414286E+00
 internal            : -2.90343751215083E+01
 '-kT*entropy'       : -2.46594863723834E-16
 total_energy_dc     : -2.90343751215083E+01
@@ -7606,9 +7606,9 @@ total_energy_dc_eV  : -7.90065526566597E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.99649
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -7785,7 +7785,7 @@ xc                  : -1.95087724806458E+00
 Ewald energy        : -1.45091523451467E+01
 psp_core            :  1.00017934811727E+00
 local_psp           : -7.36769660480038E+00
-spherical_terms     : -1.28603022104751E+01
+PAW spherical_terms : -1.28603022104751E+01
 internal            : -2.90424649188001E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy        : -2.90424649188001E+01
@@ -7800,7 +7800,7 @@ band_energy         : -1.16127736380531E+01
 Ewald energy        : -1.45091523451467E+01
 psp_core            :  1.00017934811727E+00
 xc_dc               : -1.18929567754896E+00
-spherical_terms     : -2.73138717954660E+00
+PAW spherical_terms : -2.73138717954660E+00
 internal            : -2.90424294921781E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy_dc     : -2.90424294921781E+01
@@ -7841,9 +7841,9 @@ total_energy_dc_eV  : -7.90284697138643E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.99942
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -8020,7 +8020,7 @@ xc                  : -1.94740199071479E+00
 Ewald energy        : -1.45347199949664E+01
 psp_core            :  9.94068157305280E-01
 local_psp           : -7.30705332344723E+00
-spherical_terms     : -1.28591216047299E+01
+PAW spherical_terms : -1.28591216047299E+01
 internal            : -2.90356313690633E+01
 '-kT*entropy'       : -9.60052585867481E-17
 total_energy        : -2.90356313690633E+01
@@ -8035,7 +8035,7 @@ band_energy         : -1.15945970045122E+01
 Ewald energy        : -1.45347199949664E+01
 psp_core            :  9.94068157305280E-01
 xc_dc               : -1.16860404441500E+00
-spherical_terms     : -2.73178839397744E+00
+PAW spherical_terms : -2.73178839397744E+00
 internal            : -2.90356412805657E+01
 '-kT*entropy'       : -9.60052585867481E-17
 total_energy_dc     : -2.90356412805657E+01
@@ -8076,9 +8076,9 @@ total_energy_dc_eV  : -7.90099980506736E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   2.02045
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -8255,7 +8255,7 @@ xc                  : -1.93825430776619E+00
 Ewald energy        : -1.45656927460457E+01
 psp_core            :  9.76859591087462E-01
 local_psp           : -7.19286605410080E+00
-spherical_terms     : -1.28661510987284E+01
+PAW spherical_terms : -1.28661510987284E+01
 internal            : -2.90151671779701E+01
 '-kT*entropy'       : -1.82884528764569E-04
 total_energy        : -2.90153500624989E+01
@@ -8270,7 +8270,7 @@ band_energy         : -1.15727376676231E+01
 Ewald energy        : -1.45656927460457E+01
 psp_core            :  9.76859591087462E-01
 xc_dc               : -1.12644666267193E+00
-spherical_terms     : -2.72714810469096E+00
+PAW spherical_terms : -2.72714810469096E+00
 internal            : -2.90151655899443E+01
 '-kT*entropy'       : -1.82884528764569E-04
 total_energy_dc     : -2.90153484744730E+01
@@ -8478,7 +8478,7 @@ xc                  : -1.93715987447667E+00
 Ewald energy        : -1.45779839632716E+01
 psp_core            :  9.75336669367369E-01
 local_psp           : -7.16255532411195E+00
-spherical_terms     : -1.28683591268720E+01
+PAW spherical_terms : -1.28683591268720E+01
 internal            : -2.90162141570854E+01
 '-kT*entropy'       : -2.24759153708907E-04
 total_energy        : -2.90164389162391E+01
@@ -8493,7 +8493,7 @@ band_energy         : -1.15733112079957E+01
 Ewald energy        : -1.45779839632716E+01
 psp_core            :  9.75336669367369E-01
 xc_dc               : -1.11449242706832E+00
-spherical_terms     : -2.72577350311724E+00
+PAW spherical_terms : -2.72577350311724E+00
 internal            : -2.90162244320855E+01
 '-kT*entropy'       : -2.24759153708907E-04
 total_energy_dc     : -2.90164491912392E+01
@@ -8534,9 +8534,9 @@ total_energy_dc_eV  : -7.89577737196996E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.97686
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -8713,7 +8713,7 @@ xc                  : -1.94922649280674E+00
 Ewald energy        : -1.45969631108165E+01
 psp_core            :  1.00125562500503E+00
 local_psp           : -7.22428825950806E+00
-spherical_terms     : -1.28554905088930E+01
+PAW spherical_terms : -1.28554905088930E+01
 internal            : -2.90453826027270E+01
 '-kT*entropy'       : -1.35675879172242E-16
 total_energy        : -2.90453826027270E+01
@@ -8728,7 +8728,7 @@ band_energy         : -1.15765258057525E+01
 Ewald energy        : -1.45969631108165E+01
 psp_core            :  1.00125562500503E+00
 xc_dc               : -1.13922386841723E+00
-spherical_terms     : -2.73392952271972E+00
+PAW spherical_terms : -2.73392952271972E+00
 internal            : -2.90453866827009E+01
 '-kT*entropy'       : -1.35675879172242E-16
 total_energy_dc     : -2.90453866827009E+01
@@ -8769,9 +8769,9 @@ total_energy_dc_eV  : -7.90365166385106E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.97349
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -8948,7 +8948,7 @@ xc                  : -1.95392568288841E+00
 Ewald energy        : -1.46157569755486E+01
 psp_core            :  1.01180511836609E+00
 local_psp           : -7.22965948486091E+00
-spherical_terms     : -1.28566284779759E+01
+PAW spherical_terms : -1.28566284779759E+01
 internal            : -2.90595504826292E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy        : -2.90595504826292E+01
@@ -8963,7 +8963,7 @@ band_energy         : -1.15805637251427E+01
 Ewald energy        : -1.46157569755486E+01
 psp_core            :  1.01180511836609E+00
 xc_dc               : -1.14124786201728E+00
-spherical_terms     : -2.73377293309116E+00
+PAW spherical_terms : -2.73377293309116E+00
 internal            : -2.90595363774337E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy_dc     : -2.90595363774337E+01
@@ -9004,9 +9004,9 @@ total_energy_dc_eV  : -7.90750199159983E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.97529
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -9183,7 +9183,7 @@ xc                  : -1.94984381631725E+00
 Ewald energy        : -1.46021969463142E+01
 psp_core            :  1.00268431329481E+00
 local_psp           : -7.22418787087692E+00
-spherical_terms     : -1.28547938541632E+01
+PAW spherical_terms : -1.28547938541632E+01
 internal            : -2.90475296663784E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy        : -2.90475296663784E+01
@@ -9198,7 +9198,7 @@ band_energy         : -1.15737402111272E+01
 Ewald energy        : -1.46021969463142E+01
 psp_core            :  1.00268431329481E+00
 xc_dc               : -1.13998885826523E+00
-spherical_terms     : -2.73451052642208E+00
+PAW spherical_terms : -2.73451052642208E+00
 internal            : -2.90477522288339E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy_dc     : -2.90477522288339E+01
@@ -9239,9 +9239,9 @@ total_energy_dc_eV  : -7.90429536168969E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   2.00051
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -9418,7 +9418,7 @@ xc                  : -1.93910695184916E+00
 Ewald energy        : -1.45770045748682E+01
 psp_core            :  9.79213062420766E-01
 local_psp           : -7.18237572363744E+00
-spherical_terms     : -1.28641143653817E+01
+PAW spherical_terms : -1.28641143653817E+01
 internal            : -2.90211820216685E+01
 '-kT*entropy'       : -4.95646910218441E-05
 total_energy        : -2.90212315863595E+01
@@ -9433,7 +9433,7 @@ band_energy         : -1.15720146804817E+01
 Ewald energy        : -1.45770045748682E+01
 psp_core            :  9.79213062420766E-01
 xc_dc               : -1.12304651034729E+00
-spherical_terms     : -2.72836727157781E+00
+PAW spherical_terms : -2.72836727157781E+00
 internal            : -2.90212199748543E+01
 '-kT*entropy'       : -4.95646910218441E-05
 total_energy_dc     : -2.90212695395453E+01
@@ -9484,9 +9484,9 @@ total_energy_dc_eV  : -7.89708905545093E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.99855
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -9663,7 +9663,7 @@ xc                  : -1.93751328223744E+00
 Ewald energy        : -1.45873442534043E+01
 psp_core            :  9.76450906260358E-01
 local_psp           : -7.15174760206249E+00
-spherical_terms     : -1.28674590846315E+01
+PAW spherical_terms : -1.28674590846315E+01
 internal            : -2.90214394736104E+01
 '-kT*entropy'       : -8.36890723945833E-05
 total_energy        : -2.90215231626827E+01
@@ -9678,7 +9678,7 @@ band_energy         : -1.15732439436292E+01
 Ewald energy        : -1.45873442534043E+01
 psp_core            :  9.76450906260358E-01
 xc_dc               : -1.11094054302377E+00
-spherical_terms     : -2.72635665361639E+00
+PAW spherical_terms : -2.72635665361639E+00
 internal            : -2.90214344874133E+01
 '-kT*entropy'       : -8.36890723945833E-05
 total_energy_dc     : -2.90215181764857E+01
@@ -9719,9 +9719,9 @@ total_energy_dc_eV  : -7.89715671300320E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.95462
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -9898,7 +9898,7 @@ xc                  : -1.95174996529710E+00
 Ewald energy        : -1.46497195010013E+01
 psp_core            :  1.00875553382954E+00
 local_psp           : -7.16235965279069E+00
-spherical_terms     : -1.28519491601580E+01
+PAW spherical_terms : -1.28519491601580E+01
 internal            : -2.90538867944794E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy        : -2.90538867944794E+01
@@ -9913,7 +9913,7 @@ band_energy         : -1.15590577831311E+01
 Ewald energy        : -1.46497195010013E+01
 psp_core            :  1.00875553382954E+00
 xc_dc               : -1.11819008852097E+00
-spherical_terms     : -2.73588721888207E+00
+PAW spherical_terms : -2.73588721888207E+00
 internal            : -2.90540990577059E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy_dc     : -2.90540990577059E+01
@@ -9954,9 +9954,9 @@ total_energy_dc_eV  : -7.90602242165700E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.95203
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -10133,7 +10133,7 @@ xc                  : -1.95796097674657E+00
 Ewald energy        : -1.47172243953021E+01
 psp_core            :  1.02429674714879E+00
 local_psp           : -7.10779744420647E+00
-spherical_terms     : -1.28533520771386E+01
+PAW spherical_terms : -1.28533520771386E+01
 internal            : -2.90746325369548E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy        : -2.90746325369548E+01
@@ -10148,7 +10148,7 @@ band_energy         : -1.15453438411072E+01
 Ewald energy        : -1.47172243953021E+01
 psp_core            :  1.02429674714879E+00
 xc_dc               : -1.10029850005773E+00
-spherical_terms     : -2.73603734258608E+00
+PAW spherical_terms : -2.73603734258608E+00
 internal            : -2.90746073319043E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy_dc     : -2.90746073319043E+01
@@ -10189,9 +10189,9 @@ total_energy_dc_eV  : -7.91160300687218E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.95230
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -10368,7 +10368,7 @@ xc                  : -1.95282677566374E+00
 Ewald energy        : -1.46599192825613E+01
 psp_core            :  1.01118056288129E+00
 local_psp           : -7.15970548313051E+00
-spherical_terms     : -1.28513480489242E+01
+PAW spherical_terms : -1.28513480489242E+01
 internal            : -2.90575146131223E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy        : -2.90575146131223E+01
@@ -10383,7 +10383,7 @@ band_energy         : -1.15534822951249E+01
 Ewald energy        : -1.46599192825613E+01
 psp_core            :  1.01118056288129E+00
 xc_dc               : -1.11857948677176E+00
-spherical_terms     : -2.73671314289201E+00
+PAW spherical_terms : -2.73671314289201E+00
 internal            : -2.90575136444686E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy_dc     : -2.90575136444686E+01
@@ -10424,9 +10424,9 @@ total_energy_dc_eV  : -7.90695157796823E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.98124
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -10603,7 +10603,7 @@ xc                  : -1.93987147002158E+00
 Ewald energy        : -1.45873079225156E+01
 psp_core            :  9.81193693673523E-01
 local_psp           : -7.17299149291011E+00
-spherical_terms     : -1.28626986204112E+01
+PAW spherical_terms : -1.28626986204112E+01
 internal            : -2.90270057690612E+01
 '-kT*entropy'       : -9.82198054501420E-06
 total_energy        : -2.90270155910418E+01
@@ -10618,7 +10618,7 @@ band_energy         : -1.15714870981692E+01
 Ewald energy        : -1.45873079225156E+01
 psp_core            :  9.81193693673523E-01
 xc_dc               : -1.12010437258619E+00
-spherical_terms     : -2.72926642173937E+00
+PAW spherical_terms : -2.72926642173937E+00
 internal            : -2.90269721213369E+01
 '-kT*entropy'       : -9.82198054501420E-06
 total_energy_dc     : -2.90269819433174E+01
@@ -10669,9 +10669,9 @@ total_energy_dc_eV  : -7.89864347956900E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.98298
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -10848,7 +10848,7 @@ xc                  : -1.93780084732181E+00
 Ewald energy        : -1.45954210187277E+01
 psp_core            :  9.77364553093314E-01
 local_psp           : -7.14297372499056E+00
-spherical_terms     : -1.28667298767745E+01
+PAW spherical_terms : -1.28667298767745E+01
 internal            : -2.90265573515771E+01
 '-kT*entropy'       : -2.44603283374567E-05
 total_energy        : -2.90265818119054E+01
@@ -10863,7 +10863,7 @@ band_energy         : -1.15734604244780E+01
 Ewald energy        : -1.45954210187277E+01
 psp_core            :  9.77364553093314E-01
 xc_dc               : -1.10817257957976E+00
-spherical_terms     : -2.72685247300950E+00
+PAW spherical_terms : -2.72685247300950E+00
 internal            : -2.90265419427016E+01
 '-kT*entropy'       : -2.44603283374567E-05
 total_energy_dc     : -2.90265664030300E+01
@@ -10904,9 +10904,9 @@ total_energy_dc_eV  : -7.89853040530628E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.93358
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -11083,7 +11083,7 @@ xc                  : -1.95437135242622E+00
 Ewald energy        : -1.46947279129989E+01
 psp_core            :  1.01587129592211E+00
 local_psp           : -7.11360209498929E+00
-spherical_terms     : -1.28493284999689E+01
+PAW spherical_terms : -1.28493284999689E+01
 internal            : -2.90609695833979E+01
 '-kT*entropy'       : -7.59276222277651E-18
 total_energy        : -2.90609695833979E+01
@@ -11098,7 +11098,7 @@ band_energy         : -1.15421571045459E+01
 Ewald energy        : -1.46947279129989E+01
 psp_core            :  1.01587129592211E+00
 xc_dc               : -1.10219203974923E+00
-spherical_terms     : -2.73783533124551E+00
+PAW spherical_terms : -2.73783533124551E+00
 internal            : -2.90610410926175E+01
 '-kT*entropy'       : -7.59276222277651E-18
 total_energy_dc     : -2.90610410926175E+01
@@ -11139,9 +11139,9 @@ total_energy_dc_eV  : -7.90791144542447E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.93253
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -11318,7 +11318,7 @@ xc                  : -1.96283123997604E+00
 Ewald energy        : -1.48154773322829E+01
 psp_core            :  1.03765564257027E+00
 local_psp           : -6.99797317807634E+00
-spherical_terms     : -1.28504916931501E+01
+PAW spherical_terms : -1.28504916931501E+01
 internal            : -2.90875425408038E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy        : -2.90875425408038E+01
@@ -11333,7 +11333,7 @@ band_energy         : -1.15068811930319E+01
 Ewald energy        : -1.48154773322829E+01
 psp_core            :  1.03765564257027E+00
 xc_dc               : -1.06462352778250E+00
-spherical_terms     : -2.73818703520222E+00
+PAW spherical_terms : -2.73818703520222E+00
 internal            : -2.90875134457293E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy_dc     : -2.90875134457293E+01
@@ -11374,9 +11374,9 @@ total_energy_dc_eV  : -7.91511493904650E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.93063
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -11553,7 +11553,7 @@ xc                  : -1.95600665949567E+00
 Ewald energy        : -1.47108266698120E+01
 psp_core            :  1.01944837261173E+00
 local_psp           : -7.10717808851000E+00
-spherical_terms     : -1.28484242994937E+01
+PAW spherical_terms : -1.28484242994937E+01
 internal            : -2.90653439483439E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy        : -2.90653439483439E+01
@@ -11568,7 +11568,7 @@ band_energy         : -1.15335134180143E+01
 Ewald energy        : -1.47108266698120E+01
 psp_core            :  1.01944837261173E+00
 xc_dc               : -1.10176017083416E+00
-spherical_terms     : -2.73868947793702E+00
+PAW spherical_terms : -2.73868947793702E+00
 internal            : -2.90653413639857E+01
 '-kT*entropy'       : -7.55261880796144E-18
 total_energy_dc     : -2.90653413639857E+01
@@ -11609,9 +11609,9 @@ total_energy_dc_eV  : -7.90908160877351E+02
          ecut(hartree)=     60.000   => boxcut(ratio)=   1.96266
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_neb_npt/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Be.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.60727588
@@ -11788,7 +11788,7 @@ xc                  : -1.94049809590357E+00
 Ewald energy        : -1.45974973321305E+01
 psp_core            :  9.82866326227564E-01
 local_psp           : -7.16312398244215E+00
-spherical_terms     : -1.28615731104090E+01
+PAW spherical_terms : -1.28615731104090E+01
 internal            : -2.90326731710188E+01
 '-kT*entropy'       : -1.42839293404269E-06
 total_energy        : -2.90326745994117E+01
@@ -11803,7 +11803,7 @@ band_energy         : -1.15710109581480E+01
 Ewald energy        : -1.45974973321305E+01
 psp_core            :  9.82866326227564E-01
 xc_dc               : -1.11701210112459E+00
-spherical_terms     : -2.73001085397495E+00
+PAW spherical_terms : -2.73001085397495E+00
 internal            : -2.90326649191505E+01
 '-kT*entropy'       : -1.42839293404269E-06
 total_energy_dc     : -2.90326663475434E+01
@@ -12124,10 +12124,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         24.8  wall=         24.9
+- Proc.   0 individual time (sec): cpu=         24.7  wall=         24.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  46 WARNINGs and  31 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         24.8  wall=         24.9
++Overall time at end (sec) : cpu=         24.7  wall=         24.8

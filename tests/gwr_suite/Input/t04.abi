@@ -123,7 +123,7 @@ pseudos "Psdj_nc_sr_04_pbe_std_psp8/Si.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
+#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi, haicgu_*
 #%% [files]
 #%% files_to_test =
 #%%   t04.abo, tolnlines = 70, tolabs = 8e-3, tolrel = 3.0e-3, fld_options = -medium;

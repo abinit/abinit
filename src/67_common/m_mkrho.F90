@@ -103,6 +103,7 @@ contains
 !!   | symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !!   | symrel(3,3,nsym)=symmetry matrices in real space (integers)
 !!   | wtk(nkpt)=k point weights (they sum to 1.0)
+!!  extfpmd <type(extfpmd_type)>=--optional--extended first-principles molecular dynamics type
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
@@ -1085,19 +1086,16 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
  nfftot=dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
 
-!Add extfpmd free electrons contribution to density
+!Add extfpmd electrons contributions to density on coarse grid.
+!When using a fine grid, space-dependant contributions to the
+!density are added in the pawmkrho subroutine.
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
-     if(extfpmd%version==10) then
-       do ispden=1,dtset%nspden
-         do ifft=1,dtset%nfft
-           rhor(ifft,ispden)=rhor(ifft,ispden)+extfpmd%nelectarr(ifft,ispden)/ucvol/dtset%nspden
-         end do
-       end do
+     if(extfpmd%version==10.and.allocated(extfpmd%nelectarr)) then
+       rhor(:,:)=rhor(:,:)+extfpmd%nelectarr(:,:)/ucvol/dtset%nspden
      else
        rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
      end if
-     rhog(1,1)=rhog(1,1)+extfpmd%nelect/ucvol/dtset%nspden
    end if
  end if
 

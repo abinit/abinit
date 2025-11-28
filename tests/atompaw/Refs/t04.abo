@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.6.3 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h00 )
+.Starting date : Wed 15 Oct 2025.
+- ( at 23h05 )
   
 - input  file    -> t04.abi
 - output file    -> t04.abo
@@ -362,10 +362,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/atompaw_t03-t04/Ni.GGA-PBE-paw.abinit
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/atompaw_t03-t04/Ni.GGA-PBE-paw.abinit
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/TestBot_MPI1/atompaw_t03-t04/Ni.GGA-PBE-paw.abinit
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/TestBot_MPI1/atompaw_t03-t04/Ni.GGA-PBE-paw.abinit
 - Paw atomic data for element Ni - Generated with atompaw v4.2.0.3
-- 28.00000  10.00000  20240913                znucl, zion, pspdat
+- 28.00000  10.00000  20251015                znucl, zion, pspdat
     7   11    2    0      1450   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
  Pseudopotential format is: paw5
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
@@ -399,13 +399,13 @@ solver: {iscf: 17, nstep: 6, nline: 6, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-09, }
 ...
 
-     iter   Etot(hartree)     deltaE(h) residm    nres2    magn
- ETOT  1  -42.343061779296    -4.23E+01 1.60E+00 5.00E+02 1.492
- ETOT  2  -41.314343387654     1.03E+00 5.33E-02 4.04E+02 0.000
- ETOT  3  -39.468463164444     1.85E+00 9.55E-02 1.16E+02 0.057
- ETOT  4  -39.259346173278     2.09E-01 1.01E-01 2.06E+01 0.425
- ETOT  5  -39.219742002340     3.96E-02 7.43E-02 4.69E+00 0.403
- ETOT  6  -39.236546286058    -1.68E-02 1.03E-02 3.86E+00 0.375
+     iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
+ ETOT  1  -42.343061779242    -4.234E+01 1.600E+00 4.997E+02 1.515E+00 1.515E+00
+ ETOT  2  -41.314343387714     1.029E+00 5.327E-02 4.044E+02 1.510E+00 4.387E-03
+ ETOT  3  -39.468463164507     1.846E+00 9.553E-02 1.156E+02 8.383E-02 8.822E-02
+ ETOT  4  -39.259346173331     2.091E-01 1.008E-01 2.058E+01 3.870E-01 4.752E-01
+ ETOT  5  -39.219742002338     3.960E-02 7.433E-02 4.685E+00 3.161E-02 4.436E-01
+ ETOT  6  -39.236546286008    -1.680E-02 1.033E-02 3.858E+00 5.453E-02 3.891E-01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.03961273E-02  sigma(3 2)=  0.00000000E+00
@@ -445,20 +445,21 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.30970     4.918080     4.528991      9.447071     0.389089
- ---------------------------------------------------------------------
-  Sum:              4.918080     4.528991      9.447071     0.389089
- Total magnetization (from the atomic spheres):             0.389089
- Total magnetization (exact up - dn):                       0.375327
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.30970     4.918080     4.528991      9.447071     0.389089
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 4.918080     4.528991      9.447071     0.389089
+ Total magnetization (from the atomic spheres):                0.389089
+ Total magnetization (exact up - dn):                          0.375327
+
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      5.093015719727896
- Compensation charge over fine fft grid    =      5.351075120628694
+ Compensation charge over spherical meshes =      5.093015719689908
+ Compensation charge over fine fft grid    =      5.351075120222937
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -547,7 +548,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  length scales=  6.651835987757  6.651835987757  6.651835987757 bohr
               =  3.520000000000  3.520000000000  3.520000000000 angstroms
  Fermi (or HOMO) energy (hartree) =   0.23466   Average Vxc (hartree)=  -0.43541
- Magnetization (Bohr magneton)=  3.75326741E-01
+ Magnetization (Bohr magneton)=  3.75326742E-01
  Total spin up =  5.18766337E+00   Total spin down =  4.81233663E+00
  Eigenvalues (hartree) for nkpt=  28  k points, SPIN UP:
  kpt#   1, nband= 14, wtk=  0.02778, kpt= -0.0833 -0.1667  0.0000 (reduced coord)
@@ -571,32 +572,32 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.51276373296025E+00
-hartree             :  3.52567316596958E+00
-xc                  : -1.94788040759520E+00
+kinetic             :  8.51276373244694E+00
+hartree             :  3.52567316633480E+00
+xc                  : -1.94788040760082E+00
 Ewald energy        : -3.44631323032630E+01
 psp_core            :  2.79463573512882E+00
-local_psp           : -1.42100767314761E+01
-spherical_terms     : -3.11634456314876E+00
-internal            : -3.89043613714243E+01
-'-kT*entropy'       : -1.28283557733068E-03
-total_energy        : -3.89056442070017E+01
-total_energy_eV     : -1.05867641883731E+03
+local_psp           : -1.42100767323197E+01
+PAW spherical_terms : -3.11634456316196E+00
+internal            : -3.89043613724349E+01
+'-kT*entropy'       : -1.28283557790723E-03
+total_energy        : -3.89056442080128E+01
+total_energy_eV     : -1.05867641886482E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  1.68608572078259E+00
+band_energy         :  1.68608572157637E+00
 Ewald energy        : -3.44631323032630E+01
 psp_core            :  2.79463573512882E+00
-xc_dc               : -3.03089796133605E+00
-spherical_terms     : -6.22195464179343E+00
-internal            : -3.92352634504810E+01
-'-kT*entropy'       : -1.28283557733068E-03
-total_energy_dc     : -3.92365462860584E+01
-total_energy_dc_eV  : -1.06768072233059E+03
+xc_dc               : -3.03089796169982E+00
+PAW spherical_terms : -6.22195464217253E+00
+internal            : -3.92352634504301E+01
+'-kT*entropy'       : -1.28283557790723E-03
+total_energy_dc     : -3.92365462860080E+01
+total_energy_dc_eV  : -1.06768072232922E+03
 ...
 
 
@@ -844,7 +845,7 @@ P           mkmem          28
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         225
            spinat      0.0000000000E+00  0.0000000000E+00  4.0000000000E+00
-           strten1     2.0396127294E-02  2.0396127294E-02  2.0396127294E-02
+           strten1     2.0396127285E-02  2.0396127285E-02  2.0396127285E-02
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -976,10 +977,10 @@ P           mkmem          28
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.0  wall=          4.0
+- Proc.   0 individual time (sec): cpu=          3.0  wall=          3.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.0  wall=          4.0
++Overall time at end (sec) : cpu=          3.0  wall=          3.0

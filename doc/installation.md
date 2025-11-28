@@ -19,7 +19,7 @@ working in the terminal), the installation/compilation steps are:
      The libraries can be installed with the help of the "fallback" procedure, see below for more info on this step.
      Alternatively, you may want to install everything from source using the procedure detailed in
      the [ABINIT_build tutorial](/tutorial/abinit_build).
-  2. Get the [latest version of the ABINIT package](https://www.abinit.org/packages) (abinit-x.y.z.tar.gz)
+  2. Get the [latest version of the ABINIT package](https://github.com/abinit/abinit/releases/latest) (abinit-x.y.z.tar.gz)
      from the abinit web site.
      More information are available [here](#how-to-get-a-version-of-abinit).
   3. Prepare a configuration file named "hostname".ac9, that contains the information
@@ -29,7 +29,7 @@ working in the terminal), the installation/compilation steps are:
      See below for more information, as well as [this section](#how-to-write-the-hostnameac9-file).
   4. Issue `./configure` (or, even better, first create a *tmp* directory for the build
      then `cd tmp` and finally run `../configure` within the build directory).
-     For further details, consult [this link](https://wiki.abinit.org/doku.php?id=build:configure).
+     For further details, consult [this link](https://docs.abinit.org/tutorial/abinit_build/).
   5. Issue `make` (or `make -jN` for compiling with N processors, e.g. `make -j4`
      to use four processors). This step might take dozen of minutes depending on the compilation options.
      More information are available [here](#how-to-compile-the-executables).

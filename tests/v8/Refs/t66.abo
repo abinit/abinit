@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h14 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t66/t66.abi
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h18 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t66/t66.abi
 - output file    -> t66.abo
 - root for input  files -> t66i
 - root for output files -> t66o
@@ -49,6 +49,7 @@ _ WF disk file :      1.989 Mbytes ; DEN or POT disk file :      0.124 Mbytes.
 -    mband =          22        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         370
       nfft =        8000          nkpt =           8
+- my_mband =          22
 ================================================================================
 P This job should need less than                       9.505 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -248,8 +249,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12179
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -295,21 +296,21 @@ solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-10, }
 ...
 
-     iter   Etot(hartree)     deltaE(h) residm    vres2    magn
- ETOT  1  -23.632504525289    -2.36E+01 1.65E-01 3.32E+03 1.996
- ETOT  2  -24.234271448877    -6.02E-01 2.75E-02 1.59E+03 1.490
- ETOT  3  -24.785954211467    -5.52E-01 3.75E-02 1.24E+01 2.412
- ETOT  4  -24.793505400464    -7.55E-03 2.98E-03 1.26E+00 2.695
- ETOT  5  -24.788284614512     5.22E-03 1.66E-03 1.82E+01 3.235
- ETOT  6  -24.795957173316    -7.67E-03 1.58E-03 1.78E+00 3.181
- ETOT  7  -24.796939237943    -9.82E-04 6.59E-04 6.13E-02 3.309
- ETOT  8  -24.796940183493    -9.46E-07 4.14E-04 3.35E-02 3.287
- ETOT  9  -24.796955560787    -1.54E-05 1.66E-04 2.52E-02 3.316
- ETOT 10  -24.796965780060    -1.02E-05 9.91E-05 3.26E-03 3.319
- ETOT 11  -24.796967648858    -1.87E-06 3.85E-05 1.27E-04 3.324
- ETOT 12  -24.796967734778    -8.59E-08 2.39E-05 4.00E-07 3.325
- ETOT 13  -24.796967735085    -3.08E-10 8.46E-06 5.23E-10 3.325
- ETOT 14  -24.796967735085    -3.55E-14 5.63E-06 1.30E-11 3.325
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -23.632504525289    -2.363E+01 1.648E-01 3.316E+03 1.941E+00 1.941E+00
+ ETOT  2  -24.234271448877    -6.018E-01 2.745E-02 1.592E+03 5.469E-01 1.394E+00
+ ETOT  3  -24.785954211467    -5.517E-01 3.749E-02 1.237E+01 7.550E-01 2.149E+00
+ ETOT  4  -24.793505400464    -7.551E-03 2.979E-03 1.262E+00 2.337E-01 2.383E+00
+ ETOT  5  -24.788284614512     5.221E-03 1.664E-03 1.819E+01 4.094E-01 2.792E+00
+ ETOT  6  -24.795957173316    -7.673E-03 1.582E-03 1.776E+00 2.258E-02 2.770E+00
+ ETOT  7  -24.796939237943    -9.821E-04 6.594E-04 6.128E-02 9.767E-02 2.867E+00
+ ETOT  8  -24.796940183493    -9.456E-07 4.137E-04 3.348E-02 1.364E-02 2.854E+00
+ ETOT  9  -24.796955560787    -1.538E-05 1.665E-04 2.519E-02 2.419E-02 2.878E+00
+ ETOT 10  -24.796965780060    -1.022E-05 9.905E-05 3.262E-03 3.538E-03 2.881E+00
+ ETOT 11  -24.796967648858    -1.869E-06 3.853E-05 1.266E-04 2.508E-03 2.884E+00
+ ETOT 12  -24.796967734778    -8.592E-08 2.385E-05 4.003E-07 5.267E-04 2.884E+00
+ ETOT 13  -24.796967735085    -3.076E-10 8.464E-06 5.231E-10 1.739E-05 2.884E+00
+ ETOT 14  -24.796967735085    -3.553E-14 5.631E-06 1.295E-11 7.443E-07 2.884E+00
 
  At SCF step   14       vres2   =  1.30E-11 < tolvrs=  1.00E-10 =>converged.
 
@@ -346,14 +347,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     4.496153     1.611719      6.107872     2.884434
- ---------------------------------------------------------------------
-  Sum:              4.496153     1.611719      6.107872     2.884434
- Total magnetization (from the atomic spheres):             2.884434
- Total magnetization (exact up - dn):                       3.325184
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.00000     4.496153     1.611719      6.107872     2.884434
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 4.496153     1.611719      6.107872     2.884434
+ Total magnetization (from the atomic spheres):                2.884434
+ Total magnetization (exact up - dn):                          3.325184
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -463,7 +465,7 @@ meta: {optdriver: 1, rfmagn: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 3    ipert=   6
@@ -490,30 +492,32 @@ solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   12.142549007517      1.214E+01 4.898E-32 7.265E+03
- ETOT  2   17.562182618981      5.420E+00 1.358E-03 1.388E+04
- ETOT  3   12.291330265475     -5.271E+00 1.303E-03 1.174E+03
- ETOT  4   13.719978999541      1.429E+00 1.161E-04 6.635E+00
- ETOT  5   14.967390527237      1.247E+00 2.222E-05 8.231E-02
- ETOT  6   15.084638356200      1.172E-01 5.407E-07 9.984E-05
- ETOT  7   15.088474508055      3.836E-03 5.031E-08 6.622E-07
- ETOT  8   15.088595886936      1.214E-04 1.861E-09 7.020E-10
- ETOT  9   15.088601729750      5.843E-06 3.014E-09 1.571E-12
- ETOT 10   15.088602269874      5.401E-07 4.547E-10 1.314E-14
- ETOT 11   15.088602270839      9.651E-10 7.403E-10 2.017E-15
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   12.142549007517      1.214E+01 4.898E-32 7.265E+03 1.392E+01 1.392E+01
+ ETOT  2   17.562182618981      5.420E+00 1.358E-03 1.388E+04 1.237E+00 1.515E+01
+ ETOT  3   12.291330265475     -5.271E+00 1.303E-03 1.174E+03 4.540E+00 1.969E+01
+ ETOT  4   13.719978999541      1.429E+00 1.161E-04 6.635E+00 2.816E+00 2.251E+01
+ ETOT  5   14.967390527237      1.247E+00 2.222E-05 8.231E-02 1.371E+00 2.388E+01
+ ETOT  6   15.084638356200      1.172E-01 5.407E-07 9.984E-05 1.292E-01 2.401E+01
+ ETOT  7   15.088474508055      3.836E-03 5.031E-08 6.622E-07 4.029E-03 2.401E+01
+ ETOT  8   15.088595886936      1.214E-04 1.861E-09 7.020E-10 1.332E-04 2.401E+01
+ ETOT  9   15.088601729750      5.843E-06 3.014E-09 1.571E-12 6.292E-06 2.401E+01
+ ETOT 10   15.088602269874      5.401E-07 4.547E-10 1.314E-14 5.703E-07 2.401E+01
+ ETOT 11   15.088602270839      9.651E-10 7.403E-10 2.017E-15 2.175E-09 2.401E+01
 
- At SCF step   11, etot is converged :
+ At SCF step   11, etot is converged : 
   for the second time, diff in etot=  9.651E-10 < toldfe=  1.000E-06
 
- ------------------------------------------------------------------------
- Integrals of the first order density n^(1) and magnetization m^(1):
- ------------------------------------------------------------------------
-
-     n^(1)    =   0.00000000E+00
-     m^(1)    =   0.30177205E+02
-
- ------------------------------------------------------------------------
+ ---------------------------------------------------------------------------
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.00000    12.849999   -11.164985      1.685014    24.014983
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                12.849999   -11.164985      1.685014    24.014983
+ Total magnetization (from the atomic spheres):               24.014983
+ Total magnetization (exact up - dn):                         30.177205
 
 ================================================================================
 
@@ -538,34 +542,34 @@ tolerances: {toldfe: 1.00E-06, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
-
+  
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
-
+  
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
-
+  
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-
+  
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-
+  
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-
+  
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
@@ -756,7 +760,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -768,12 +772,12 @@ P          mk1mem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -791,7 +795,7 @@ P          mk1mem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -806,15 +810,15 @@ P          mk1mem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          6.7  wall=          6.8
+- Proc.   0 individual time (sec): cpu=          7.0  wall=          7.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.7  wall=          6.8
++Overall time at end (sec) : cpu=          7.0  wall=          7.1

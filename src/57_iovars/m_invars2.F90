@@ -235,13 +235,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,natomcor,nband1,nberry
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key,tread_extrael
- integer :: tread_brange, tread_erange, tread_kfilter
+ integer :: tread_brange, tread_erange, tread_kfilter, tread_qgbt, tread_cart
  integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image, tread_dipdip, my_rank
  integer :: itol_wfr, itol_gen_wfr
  logical :: xc_is_mgga,xc_is_pot_only,xc_need_kden,xc_has_kxc
  real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
- real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
+ real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_, toldmag_
  real(dp) :: tolmxde_, tolmxf_
  character(len=500) :: msg
  character(len=fnlen) :: key_value
@@ -464,6 +464,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_nband',tread,'INT')
  if(tread==1) dtset%extfpmd_nband=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_pawsph',tread,'INT')
+ if(tread==1) dtset%extfpmd_pawsph=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_prterr',tread,'INT')
+ if(tread==1) dtset%extfpmd_prterr=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rhoqpmix',tread,'DPR')
  if(tread==1) dtset%rhoqpmix=dprarr(1)
@@ -2294,9 +2300,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'goprecprm',tread,'DPR')
  if(tread==1) dtset%goprecprm(1:3)=dprarr(1:3)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_cplex', tread, 'INT')
- if (tread == 1) dtset%gstore_cplex = intarr(1)
-
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_with_vk', tread, 'INT')
  if (tread == 1) dtset%gstore_with_vk = intarr(1)
 
@@ -2314,9 +2317,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kfilter', tread_kfilter, 'KEY', key_value=key_value)
  if (tread_kfilter == 1) dtset%gstore_kfilter = tolower(key_value)
-
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_gmode', tread, 'KEY', key_value=key_value)
- if (tread == 1) dtset%gstore_gmode = tolower(key_value)
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_gname', tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%gstore_gname = tolower(key_value)
@@ -2414,6 +2414,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%quadmom(1:ntypat)=dprarr(1:ntypat)
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'paw_add_core',tread,'INT')
+ if(tread==1) dtset%paw_add_core=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawcpxocc',tread,'INT')
  if(tread==1) then
    dtset%pawcpxocc=intarr(1)
@@ -3221,20 +3223,27 @@ if (dtset%usekden==1) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_frocc',tread,'INT')
    if(tread==1) dtset%rcpaw_frocc = intarr(1)
 
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_nfrpaw',tread,'INT')
-   if(tread==1) dtset%rcpaw_nfrpaw = intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rcpaw_updatepaw',tread,'INT')
+   if(tread==1) dtset%rcpaw_updatepaw(1:2) = intarr(1:2)
 
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_nfrtnc',tread,'INT')
-   if(tread==1) dtset%rcpaw_nfrtnc = intarr(1)
+   dtset%rcpaw_updatetnc=dtset%nstep
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_updatetnc',tread,'INT')
+   if(tread==1) dtset%rcpaw_updatetnc = intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_tolnc',tread,'DPR')
    if(tread==1) dtset%rcpaw_tolnc = dprarr(1)
 
-   call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'rcpaw_frtypat',tread,'INT')
-   if(tread==1) dtset%rcpaw_frtypat(1:ntypat) = intarr(1:ntypat)
+   call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'rcpaw_rctypat',tread,'INT')
+   if(tread==1) dtset%rcpaw_rctypat(1:ntypat) = intarr(1:ntypat)
 
-   call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'rcpaw_scenergy',tread,'ENE')
-   if(tread==1) dtset%rcpaw_scenergy(1:ntypat) = dprarr(1:ntypat)
+   call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'rcpaw_sc',tread,'DPR')
+   if(tread==1) dtset%rcpaw_sc(1:ntypat) = dprarr(1:ntypat)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_orbshift',tread,'INT')
+   if(tread==1) dtset%rcpaw_orbshift = intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_potshift',tread,'INT')
+   if(tread==1) dtset%rcpaw_potshift = intarr(1)
  endif
 
 ! Print variables
@@ -3699,6 +3708,7 @@ if (dtset%usekden==1) then
  tolwfr_=zero
  toldfe_=zero
  toldff_=zero
+ toldmag_=zero
  tolrff_=zero
  tolvrs_=zero
  itol=0
@@ -3736,6 +3746,17 @@ if (dtset%usekden==1) then
      if(abs(dprarr(1))>tiny(0._dp))itol=itol+1
    end if
    dtset%optforces=1
+ end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'toldmag',tread,'DPR',ds_input)
+ if(tread==1) then
+   if (ds_input == 0) then
+     toldmag_=dprarr(1)
+     if(abs(dprarr(1))>tiny(0._dp))itol_gen=itol_gen+1
+   else
+     dtset%toldmag=dprarr(1)
+     if(abs(dprarr(1))>tiny(0._dp))itol=itol+1
+   end if
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolrff',tread,'DPR',ds_input)
@@ -3776,11 +3797,12 @@ if (dtset%usekden==1) then
    end if
  end if
 
+ !write(ab_out,*)"GGGGG", itol_gen,itol
  ! check for multiple definitions of tolXXX for the present dataset
  if (itol > 1 .or. itol_gen > 1) then
    write(msg, '(3a)' )&
    'Only one of the tolXXX variables may be defined at once.',ch10,&
-   'Action: check values of tolvrs, toldfe, tolrff and toldff.'
+   'Action: check values of tolvrs, toldfe, tolrff, toldmag and toldff.'
    ABI_ERROR(msg)
  end if
 
@@ -3795,6 +3817,7 @@ if (dtset%usekden==1) then
  if (itol == 0 .and. itol_wfr == 1) then
    dtset%toldfe=zero
    dtset%toldff=zero
+   dtset%toldmag=zero
    dtset%tolrff=zero
    dtset%tolvrs=zero
  end if
@@ -3807,6 +3830,7 @@ if (dtset%usekden==1) then
    if (itol_gen == 1) then
      dtset%toldfe=toldfe_
      dtset%toldff=toldff_
+     dtset%toldmag=toldmag_
      dtset%tolrff=tolrff_
      dtset%tolvrs=tolvrs_
    end if
@@ -4389,17 +4413,17 @@ if (dtset%usekden==1) then
  end if
 
  if (dtset%use_gbt /= 0) then
-  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt', tread, 'DPR')
-  if (tread==1) then
-    dtset%qgbt(1:3) = dprarr(1:3)
-  else
-    call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt_cart', tread, 'DPR')
-    if (tread==1) then
-      call mkrdim(dtset%acell_orig(1:3,1),dtset%rprim_orig(1:3,1:3,1),rprimd)
-      dtset%qgbt(1:3) = MATMUL(TRANSPOSE(rprimd)/two_pi, dprarr(1:3))
-    endif
-  endif
- endif
+   call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt', tread_qgbt, 'DPR')
+   if (tread_qgbt == 1) dtset%qgbt(1:3) = dprarr(1:3)
+   call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'qgbt_cart', tread_cart, 'DPR')
+   if (tread_qgbt ==1 .and. tread_cart == 1) then
+     ABI_ERROR("Both 'qgbt' and 'qgbt_cart' are defined, choose to define only one of these.")
+   else if (tread_cart == 1) then
+     dtset%qgbt_cart = dprarr(1:3)
+     call mkrdim(dtset%acell_orig(1:3,1),dtset%rprim_orig(1:3,1:3,1),rprimd)
+     dtset%qgbt(1:3) = MATMUL(TRANSPOSE(rprimd)/two_pi, dtset%qgbt_cart)
+   end if
+ end if
 
  ABI_FREE(intarr)
  ABI_FREE(dprarr)
