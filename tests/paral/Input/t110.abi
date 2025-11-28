@@ -51,19 +51,20 @@ usedmft1 0
 usedmft  1
 dmftbandi 9
 dmftbandf 33
-dmft_nwli 2000
+dmft_triqs_n_iw 2000
 dmft_iter 1
 
 # == CTQMC
 dmft_solv 7 # CTQMC
-dmftqmc_l 200
-dmftqmc_n 1.d6
-dmftqmc_therm 5000
-dmftctqmc_basis2 1
-dmftctqmc_basis3 2
-dmftctqmc_basis4 3
-dmftctqmc_basis5 4
-dmftctqmc_meas 10
+dmft_triqs_n_tau 200
+dmft_triqs_n_cycles 125000
+dmft_triqs_n_warmup_cycles_init 5000
+dmft_triqs_n_warmup_cycles_restart 0
+dmft_triqs_basis2 1
+dmft_triqs_basis3 2
+dmft_triqs_basis4 3
+dmft_triqs_basis5 4
+dmft_triqs_length_cycle 10
 
 dmft_mxsf 0.1
 dmft_dc  7
@@ -74,9 +75,9 @@ dmft_yukawa_lambda 1.62
 dmft_yukawa_epsilon 1.2
 
 dmft_triqs_off_diag 1
-dmft_triqs_wmax 1.0
+dmft_triqs_dlr_wmax 1.0
 dmft_triqs_loc_n_max 2
-dmft_triqs_epsilon 1.d-2
+dmft_triqs_dlr_epsilon 1.d-2
 dmft_triqs_tol_block5 1.0d-15
 
 # == DFT+U

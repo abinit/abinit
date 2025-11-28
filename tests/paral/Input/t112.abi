@@ -67,7 +67,7 @@ nnsclo2   10             # Number of non-self consistent loops
 usedmft2  1              # Active DMFT
 dmftbandi 9              # First band included in the projection. Initial
 dmftbandf 25             # and final bands.
-dmft_nwli 1000        # Linear freqeuncy mesh
+dmft_triqs_n_iw 1000     # Linear freqeuncy mesh
 dmft_iter 1              # Number of iterations of the DMFT part.
                          # We often use single-shot, since anyway the charge density
                          # changes through the DFT+DMFT anyway.
@@ -77,13 +77,15 @@ dmft_dc   6              # Double counting type. 1 is Fully Localized Limit (FLL
 #CTQMC
 dmft_solv        6      # Choice of solver: Internal CT-SEG.
 #
-dmftqmc_l        500     # Number of time slices for G(tau).
-dmftqmc_n        1.d5    # Number of QMC sweeps
-dmftqmc_therm    1000    # Thermalization
-dmftctqmc_meas   100
-dmftctqmc_basis  2
+dmft_triqs_n_tau        500     # Number of time slices for G(tau).
+dmft_triqs_n_cycles        12500    # Number of QMC sweeps
+dmft_triqs_n_warmup_cycles_init    1000    # Thermalization
+dmft_triqs_n_warmup_cycles_restart 0
+dmft_triqs_length_cycle   100
+dmft_triqs_basis  2
 dmft_triqs_off_diag 0
-dmft_triqs_wmax 1.0
+dmft_triqs_dlr_wmax 1.0
+dmft_triqs_dlr_epsilon 1.d-6
 
 #Hubbard
 usepawu1     4          # For density matrix printout.
@@ -135,10 +137,10 @@ kptbounds3               # The four segments of the band structure are
 #%%                iw_cp t112o_DS3_grid t112_MPI8o_DS4_spectralfunction_realgrid;
 #%%                iw_cp t112o_DS2_Self t112_MPI8o_DS2_Self-omega_iatom0001_isppol1;
 #%% [NCPU_8]
-#%% files_to_test = t112_MPI8.abo, tolnlines = 2, tolabs = 1.e-2, tolrel = 1.e-2;
+#%% files_to_test = t112_MPI8.abo, tolnlines = 2, tolabs = 1.e-2, tolrel = 1.e-2, fld_options=-medium;
 #%%                 t112_MPI8o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines = 12, tolabs = 1.e-2, tolrel = 1.e-4, fld_options=-easy;
-#%%                 t112_MPI8o_DS4_DFTDMFT_Self_backtransform.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t112_MPI8o_DS4_DFTDMFT_Self_realaxis.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%%                 t112_MPI8o_DS4_DFTDMFT_Self_backtransform.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t112_MPI8o_DS4_DFTDMFT_Self_realaxis.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t112_MPI8o_DS4_DFTDMFT_SpFunloc_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
 #%%                 t112_MPI8o_DS4_SpFunc-from_realaxisself, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
 #%% [paral_info]

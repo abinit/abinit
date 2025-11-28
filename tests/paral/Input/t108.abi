@@ -72,7 +72,7 @@ nnsclo2   10      # Number of non-self consistent loops
 #Definition for DMFT loop
 dmftbandi 5             # First KS band included in the projection for Wannier orbitals
 dmftbandf 13            # Last KS band included in the projection for Wannier orbitals
-dmft_nwli 100           # Linear frequency mesh
+dmft_triqs_n_iw 100     # Linear frequency mesh
 dmft_iter 1             # Number of iterations of the DMFT part.
 
 dmft_mxsf 0.7           # Mixing of the old and new self-energy at every iterations.
@@ -80,19 +80,21 @@ dmft_dc   6             # Double counting type. 6 is Around Mean Field (AMF)
 
 #Definition of impurity solver
 dmft_solv  6           # TRIQS in the density-density approximation
-dmftqmc_l        50    # Number of time slices for G(tau).
-dmftqmc_n        1.d5  # Number of QMC sweeps
-dmftqmc_therm    1000  # Thermalization
-dmftctqmc_basis  0
-dmftctqmc_meas   10
+dmft_triqs_n_tau        50    # Number of time slices for G(tau).
+dmft_triqs_n_cycles   12500 # Number of QMC sweeps
+dmft_triqs_n_warmup_cycles_init 1000  # Thermalization
+dmft_triqs_basis  0
+dmft_triqs_length_cycle   10
+dmft_triqs_n_warmup_cycles_restart 0
 
 dmft_triqs_off_diag 0
-dmft_triqs_wmax  1.0
-dmft_triqs_epsilon 1.d-2
+dmft_triqs_dlr_wmax  1.0
+dmft_triqs_dlr_epsilon 1.d-2
 dmft_triqs_entropy 1
 dmft_triqs_compute_integral 1
 dmft_triqs_gaussorder 3
 dmft_triqs_nsubdivisions 2
+dmft_triqs_shift_mu -1.0
 
 dmft_orbital -1
 dmft_orbital_filepath "t108"
@@ -118,7 +120,7 @@ jpawu2      0.84 eV  # Values of J
 #%% max_nprocs = 8
 #%% [NCPU_8]
 #%% files_to_test = t108_MPI8.abo, tolnlines = 1, tolabs = 1.e-5, tolrel = 1.e-5, fld_options=-medium;
-#%%                 t108_MPI8o_DS2_CTQMC_HISTOGRAM_iatom0001.dat, tolnlines = 6, tolabs = 0.0, tolrel = 0.0;
+#%%                 t108_MPI8o_DS2_CTQMC_HISTOGRAM_iatom0001.dat, tolnlines = 6, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%% [extra_info]
 #%% authors = E. Castiel, F. Gendron
 #%% keywords = DMFT, TRIQS

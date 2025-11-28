@@ -76,7 +76,7 @@ nnsclo    7
 # Definition for DMFT loop
 dmftbandi 5             # First KS band included in the projection for Wannier orbitals
 dmftbandf 13            # Last KS band included in the projection for Wannier orbitals
-dmft_nwli 1000          # Linear frequency mesh
+dmft_triqs_n_iw 1000    # Linear frequency mesh
 dmft_iter 1             # Number of iterations of the DMFT part.
 
 dmft_mxsf 0.7           # Mixing of the old and new self-energy at every iterations.
@@ -84,15 +84,15 @@ dmft_dc   8             # Double counting type. 6 is Around Mean Field (AMF)
 
 #Definition of impurity solver
 dmft_solv  6           # TRIQS in the density-density approximation
-dmftqmc_l        500   # Number of time slices for G(tau).
-dmftqmc_n        1.d4  # Number of QMC sweeps
-dmftqmc_therm    1000  # Thermalization
-dmftctqmc_meas   100
+dmft_triqs_n_tau        500   # Number of time slices for G(tau).
+dmft_triqs_n_cycles     1250  # Number of QMC sweeps
+dmft_triqs_n_warmup_cycles_init    1000  # Thermalization
+dmft_triqs_length_cycle   100
 
 dmft_triqs_off_diag 0
-dmft_triqs_wmax  1.0
-dmftctqmc_basis 0
-dmft_triqs_epsilon 1.d-2
+dmft_triqs_dlr_wmax  1.0
+dmft_triqs_basis 0
+dmft_triqs_dlr_epsilon 1.d-2
 dmft_fermi_step 0.02
 dmft_prt_maxent 1
 dmft_prtself 1
@@ -107,7 +107,7 @@ dmft_triqs_measure_density_matrix 1
 dmft_triqs_move_shift 0
 dmft_triqs_pauli_prob 1.0
 dmft_triqs_read_ctqmcdata 1
-dmft_triqs_therm_restart 1
+dmft_triqs_n_warmup_cycles_restart 0
 dmft_triqs_time_invariance 1
 dmft_triqs_use_norm_as_weight 1
 
@@ -131,7 +131,7 @@ dmft_yukawa_param3 3
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test = t113_MPI8.abo;
+#%% files_to_test = t113_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;;
 #%% [extra_info]
 #%% authors = E. Castiel, F. Gendron
 #%% keywords = DMFT, TRIQS
