@@ -424,6 +424,8 @@ contains
  ABI_FREE(fmzeff_tr)
  ABI_FREE(lm_epsilon)
  ABI_FREE(dum_phongreen)
+ ABI_FREE(ddb%val_fs)
+ ABI_FREE(ddb%val_rs)
 
  end subroutine ddb_magpen
 !!***

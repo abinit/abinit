@@ -679,7 +679,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
      ABI_FREE(ffnl_i)
      if (psps%useylm==1) then
        useylmgr=0
-       ABI_SFREE(ylmgr)
+       ABI_FREE(ylmgr)
        ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
      end if
    else
@@ -694,7 +694,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
      & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
      end if
      useylmgr=0
-     ABI_SFREE(ylmgr)
+     ABI_FREE(ylmgr)
      ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
    end if
  else if (dtset%ffnl_lw == 1) then
@@ -834,7 +834,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_SFREE(ylmgr)
  ABI_SFREE(blkflg_car)
  ABI_SFREE(d3etot_car)
- ABI_SFREE(ncorespl)
+ if (allocated(ncorespl)) then
+   ABI_FREE(ncorespl)
+ endif
  call pawfgr_destroy(pawfgr)
 
  ! Clean the header

@@ -564,10 +564,10 @@ subroutine ddb_free(ddb)
  ABI_SFREE(ddb%qpt)
  ABI_SFREE(ddb%omega)
  ABI_SFREE(ddb%nrm)
- ABI_SFREE(ddb%val)
- ABI_SFREE(ddb%val_fs)
- ABI_SFREE(ddb%val_rs)
+! ABI_SFREE(ddb%val_fs)
+! ABI_SFREE(ddb%val_rs)
  ABI_SFREE(ddb%kpt)
+ ABI_SFREE(ddb%val)
  ABI_SFREE(ddb%eig2dval)
 
 end subroutine ddb_free
