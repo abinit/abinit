@@ -923,6 +923,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_MALLOC(gks_atm2, (2, nb_kq, nb_k, natom3))
    ABI_MALLOC(gxc_atm, (2, nb_kq, nb_k, natom3))
 
+   ! Arrays used to compare gwpt with gw
    ABI_CALLOC(vxc_nk, (nb_k, gqk%glob_nk))
    ABI_CALLOC(sigx_nk, (nb_k, gqk%glob_nk))
    ABI_CALLOC(sigce0_nk, (nb_k, gqk%glob_nk))
@@ -1441,7 +1442,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ! Note that the i/two_pi factor in the self-energy is included in calc_sigc so we should not double count it.
              vec_gwc_nk(:,:,n_k) = zero
              call ppm%calc_sigc(nspinor, npw_c, nw_nk, rhotwg_c, botsq_pbz, otq_pbz, &
-                                omegame0i_nk, dtset%zcut, theta_mu_minus_e0i, dmeig_pbz, npw_c, vec_gwc_nk(:,:,n_k), sigcme_nk)
+                                omegame0i_nk, dtset%zcut, theta_mu_minus_e0i, dmeig_pbz, npw_c, &
+                                vec_gwc_nk(:,:,n_k), sigcme_nk)
 
              if (dtset%gwcomp == 2) then
                vec_coh_nk(:, n_k) = matmul(wc0_pbz, rhotwg_c)
@@ -1522,8 +1524,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              end do
              omegame0i_mkq = omegas_mkq - qp_ene(ib_sum, ikqmp_ibz, spin)
 
-             ! Note that here we sum over G instead of G' so we have to pass the transpose
-             ! of the PPM matrix elements.
+             ! Note that here we sum over G instead of G' so we have to pass the transpose of the PPM matrix elements.
              ! TODO: Generalize ppm%calc_sigc with BLAS-like API.
              vec_gwc_mkq(:,:,m_kq) = zero
              call ppm%calc_sigc(nspinor, npw_c, nw_mkq, rhotwg_c, trans_botsq_pbz, trans_otq_pbz, &
@@ -2014,8 +2015,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
    ! Collect self-energy matrix elements.
    call xmpi_sum(vxc_nk, gqk%kpt_comm%value, ierr)
-   call xmpi_sum(sigx_nk, gqk%comm%value, ierr)
-   call xmpi_sum(sigce0_nk, gqk%comm%value, ierr)
+   call xmpi_sum(sigx_nk, gqk%kpt_comm%value, ierr)
+   call xmpi_sum(sigce0_nk, gqk%kpt_comm%value, ierr)
    sigx_nk = -sigx_nk * (one / (cryst%ucvol * pp_mesh%nbz))
    sigce0_nk =  sigce0_nk * (one / (cryst%ucvol * pp_mesh%nbz))
 

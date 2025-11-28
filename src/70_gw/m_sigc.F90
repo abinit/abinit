@@ -169,7 +169,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_fourdp2=2,ndat1=1
+ integer,parameter :: ndat1 = 1
  integer :: npw_k,iab,ib,ib1,ib2,ierr,ig,ii,iik,itim_q,i1,i2,npls,ib_sum
  integer :: ik_bz,ik_ibz,io,iiw,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx
  integer :: band,band1,band2,idle,rank,jik,jk_bz,jk_ibz,kb,nspinor
@@ -616,9 +616,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! If epsm1 is MPI-shared, we have to close the RMA epoch.
  if (epsm1%use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
 
- ! ==========================================
- ! ==== Fat loop over k_i in the full BZ ====
- ! ==========================================
+ ! Loop over collinear spins.
  do spin=1,Wfd%nsppol
    if (ALL(proc_distrb(:,:,spin)/=Wfd%my_rank)) CYCLE
    call timab(433,1,tsec) ! Init spin
@@ -662,6 +660,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
    call timab(433,2,tsec) ! Init spin
 
+   ! ==========================================
+   ! ==== Fat loop over k_i in the full BZ ====
+   ! ==========================================
+
    do ik_bz=1,Kmesh%nbz
      ! Parallelization over k-points and spin. For the spin there is another check in the inner loop
      if (ALL(proc_distrb(:,ik_bz,spin)/=Wfd%my_rank)) CYCLE
@@ -671,12 +673,12 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      if (print_time) call cwtime(cpu_k, wall_k, gflops_k, "start")
 
      ! Find the corresponding irreducible k-point
-     call kmesh%get_BZ_item(ik_bz,ksum,ik_ibz,isym_ki,iik,ph_mkt)
+     call kmesh%get_BZ_item(ik_bz, ksum, ik_ibz, isym_ki, iik, ph_mkt)
      spinrot_kbz(:)=Cryst%spinrot(:,isym_ki)
 
      ! Identify q and G0 where q + G0 = k_GW - k_i
      kgw_m_ksum=kgw-ksum
-     call findqg0(iq_bz,g0,kgw_m_ksum,Qmesh%nbz,Qmesh%bz,Sigp%mG0)
+     call findqg0(iq_bz, g0, kgw_m_ksum, Qmesh%nbz, Qmesh%bz, Sigp%mG0)
 
      ! If symsigma, symmetrize the matrix elements.
      ! Sum only q"s in IBZ_k. In this case elements are weighted
@@ -695,11 +697,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      call qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q)
      q_is_gamma = normv(qbz, Cryst%gmet, "G") < GW_TOLQ0
 
-     !q_is_gamma = (normv(qbz,Cryst%gmet,"G") < 0.7)
-     !if (iq_ibz/=2.and.iq_ibz/=1) CYCLE
-     !if (ANY(qbz<=-(half-tol16)) .or. ANY(qbz>(half+tol16))) CYCLE
-     !if (q_is_gamma) then; write(std_out,*)"skipping q=Gamma"; CYCLE; end if
-     !
      ! Tables for the FFT of the oscillators.
      !  a) FFT index of the G-G0.
      !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
@@ -755,12 +752,12 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        call PPm%get_qbz(Gsph_c, Qmesh, iq_bz, botsq, otq, eig)
      end if
 
-     if (ANY(mod10 == [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
+     if (any(mod10 == [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
 
        ! Numerical integration or model GW with contour deformation or Analytic Continuation
        ! TODO In case of AC we should symmetrize only the imaginary frequencies
-       if (mod10==SIG_GW_CD.and.epsm1%mqmem==0) then
-         ! Do in-place symmetrisation.
+       if (mod10==SIG_GW_CD .and. epsm1%mqmem == 0) then
+         ! Do in-place symmetrization.
          call epsm1%rotate_iqbz_inplace(iq_bz, epsm1%nomega, npwc, Gsph_c, Qmesh, remove_exchange=.TRUE.)
        else
          ! This call sets the value of epsm1%epsm1_qbz(npwc, npwc, epsm1%nomega)
@@ -861,7 +858,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      ! Sum over bands
      do ib_sum=1,Sigp%nbnds
 
-       ! Parallelism over spin. This processor has this k-point but what about spin?
+       ! MPI Parallelism over spin.
        if (proc_distrb(ib_sum,ik_bz,spin) /= wfd%my_rank) CYCLE
 
        call wfd%get_ur(ib_sum, ik_ibz, spin, ur_ibz)
@@ -881,7 +878,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        call timab(436,2,tsec) ! (1)
        call timab(437,1,tsec) ! rho_tw_g
 
+       ! =====================================================
        ! Get all <k-q,ib_sum,s|e^{-i(q+G).r}|s,jb,k>, at once
+       ! =====================================================
        do jb=ib1,ib2
 
          call rho_tw_g(nspinor,npwc,gwc_nfftot,ndat1,gwc_ngfft,1,use_padfft,igfftcg0,gw_gbound,&
@@ -938,12 +937,13 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              end if
            end if
          end if
-       end do !jb  Got all matrix elements from minbnd up to maxbnd.
+
+       end do ! jb  Got all matrix elements from ib1 up to ib2.
 
        theta_mu_minus_e0i = fact_spin*qp_occ(ib_sum,ik_ibz,spin)
 
        ! Starting point to evaluate the derivative of Sigma and the Spectral function
-       e0i=qp_ene(ib_sum,ik_ibz,spin)
+       e0i = qp_ene(ib_sum,ik_ibz,spin)
 
        ! Frequencies for the spectral function, e0i=qp_ene(ib_sum,ik_ibz,spin)
        ! FIXME the interval is not centered on eoi ! WHY?
@@ -1010,7 +1010,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          ! Get frequencies $\omega$-\epsilon_in$ to evaluate $d\Sigma/dE$, note the spin
          ! subtract e_KS since we have stored e_KS+ Delta \omega in Sr%omega4sd, not required for AC
          do io=Sr%nomega_r+1,nomega_tot
-           omegame0i(io)=DBLE(Sr%omega4sd(kb,jk_ibz,io-Sr%nomega_r,spin))-e0i
+           omegame0i(io)=DBLE(Sr%omega4sd(kb,jk_ibz,io-Sr%nomega_r,spin)) - e0i
          end do
 
          ! Get the ket \Sigma|\phi_{k,kb}> according to the method.

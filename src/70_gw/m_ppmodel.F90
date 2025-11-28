@@ -192,7 +192,7 @@ contains
 !!  ppm_get_qbz
 !!
 !! FUNCTION
-!!  Compute plasmonpole matrix elements for q in the BZ from the symmetrical image in the IBZ
+!!  Compute plasmon-pole matrix elements for q in the BZ from the symmetrical image in the IBZ
 !!
 !! INPUTS
 !!  Gsph<gsphere_t>=data related to the G-sphere
@@ -547,8 +547,6 @@ end subroutine ppm_init
 !! INPUTS
 !!  Cryst<crystal_t>=Info on the unit cell and crystal symmetries.
 !!  Qmesh<kmesh_t>=the q-mesh used for the inverse dielectric matrix
-!!    %nibz=number of irreducible q-points
-!!    %ibz(3,%nibz)=the irred q-point
 !!  npwe=number of G vectors for the correlation part
 !!  nomega=number of frequencies in $\epsilon^{-1}$
 !!  omega=frequencies in epsm1
@@ -1917,7 +1915,7 @@ end subroutine cqratio
 !!
 !!    ket(G,omega) += Sum_G2                 Omega(G,G2) * rhotw(G2)
 !!                            ---------------------------------------------------
-!!                             2 omegatw(G,G2) (omega-E_i + omegatw(G,G2)(2f-1))
+!!                             2 omegatw(G,G2) (omega - E_i + omegatw(G,G2)(2f-1))
 !!
 !!  sigcme(nomega) (to be described), only relevant if ppm3 or ppm4
 !!
@@ -2001,7 +1999,7 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
          do igp=1,npwc
            rhotwgdp_igp = rhotwgp(igp, ispinor)
            do ig=1,npwc
-             otw = DBLE(otq(ig,igp)) !in principle otw -> otw - ieta
+             otw = DBLE(otq(ig,igp)) !in principle otw -> otw + ieta
              num = botsq(ig,igp) * rhotwgdp_igp
              den = omegame0i_io - otw
              den2 = den ** 2
