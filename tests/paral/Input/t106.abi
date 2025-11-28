@@ -52,22 +52,23 @@ dmftbandi  9
 dmftbandf 34
 dmft_solv 6
 dmft_iter 1
-dmft_nwli 50
+dmft_triqs_n_iw 50
 dmft_mxsf 0.3
 dmft_wanorthnorm 2
 
 dmft_dc 8
 dmft_yukawa_param 3
 dmft_triqs_off_diag 1
-dmftqmc_l 150
-dmftqmc_therm 100
-dmftctqmc_meas 100
-dmftctqmc_basis 1
-dmftqmc_n 1.d5
-dmft_triqs_leg_measure 1
-dmft_triqs_nleg 10
+dmft_triqs_n_tau 150
+dmft_triqs_n_warmup_cycles_init 100
+dmft_triqs_length_cycle 100
+dmft_triqs_basis 1
+dmft_triqs_n_cycles 12500
+dmft_triqs_measure_g_l 1
+dmft_triqs_n_l 10
 dmft_triqs_move_double 0
 dmft_triqs_loc_n_min 5
+dmft_triqs_n_warmup_cycles_restart 0
 
 ##### DFT+U
 usepawu1    4

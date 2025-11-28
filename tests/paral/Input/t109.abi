@@ -73,7 +73,7 @@ nnsclo2   10      # Number of non-self consistent loops
 #Definition for DMFT loop
 dmftbandi 9             # First KS band included in the projection for Wannier orbitals
 dmftbandf 26            # Last KS band included in the projection for Wannier orbitals
-dmft_nwli 100           # Linear frequency mesh
+dmft_triqs_n_iw 100     # Linear frequency mesh
 dmft_iter 1             # Number of iterations of the DMFT part.
                         # We often use single-shot, since anyway the charge density
                         # changes through the DFT+DMFT anyway.
@@ -82,19 +82,22 @@ dmft_dc   6             # Double counting type. 6 is Around Mean Field (AMF)
 
 #Definition of impurity solver
 dmft_solv         6     # TRIQS in the density-density approximation
-dmftqmc_l        50     # Number of time slices for G(tau).
-dmftqmc_n        1.d5   # Number of QMC sweeps
-dmftqmc_therm    5000   # Thermalization
+dmft_triqs_n_tau        50     # Number of time slices for G(tau).
+dmft_triqs_n_cycles        12500   # Number of QMC sweeps
+dmft_triqs_n_warmup_cycles_init   5000   # Thermalization
+dmft_triqs_n_warmup_cycles_restart 0
 
-dmftctqmc_meas 10
+dmft_triqs_length_cycle 10
 dmft_triqs_off_diag 0
-dmftctqmc_basis 1
-dmft_triqs_wmax 1.0
-dmft_triqs_epsilon 1d-2
+dmft_triqs_basis 1
+dmft_triqs_dlr_wmax 1.0
+dmft_triqs_dlr_epsilon 1d-2
 
 dmft_triqs_entropy 1
 dmft_triqs_compute_integral 2
 dmft_triqs_gaussorder 3
+dmft_triqs_shift_mu 1.2
+dmft_prt_entropy 1
 
 #Definition of DFT+U
 usepawu1    4           #
