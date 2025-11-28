@@ -21,6 +21,6 @@ diamond_eph_gwpt/dfpto_DS3_DEN1.nc
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH, GWPT
 #%% description = Merge precomputed DFPT DEN files stored in diamond_eph_gwpt git submodule
 #%%<END TEST_INFO>

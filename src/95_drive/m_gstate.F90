@@ -46,6 +46,7 @@ module m_gstate
  use m_ebands
  use m_dtfil
  use m_extfpmd
+ use m_rcpaw
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -294,6 +295,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr, hdr_den, hdr_bz
  type(extfpmd_type),pointer :: extfpmd => null()
+ type(rcpaw_type), pointer :: rcpaw => null()
  type(macro_uj_type) :: dtpawuj(1)
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
@@ -875,8 +877,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if(extfpmd_chkinp(dtset)) then
      ABI_MALLOC(extfpmd,)
      call extfpmd%init(dtset%mband,hdr%extfpmd_eshift,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
-&     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,dtset%occopt,rprimd,dtset%tphysel,&
-&     dtset%tsmear,dtset%useextfpmd,mpi_enreg,dtset%extfpmd_nband)
+&     nfftf,dtset%nspden,dtset%nsppol,dtset%nkpt,dtset%occopt,rprimd,dtset%tphysel,&
+&     dtset%tsmear,dtset%useextfpmd,mpi_enreg,dtset%extfpmd_nband,dtset%extfpmd_pawsph==1)
    end if
  end if
 
@@ -903,7 +905,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%spinmagntarget,dtset%mband,dtset%nband,&
 &   dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
 &   dtset%occopt,dtset%prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,&
-&   extfpmd=extfpmd)
+&   extfpmd=extfpmd,rcpaw=rcpaw)
    if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(args_gs%upawu(:))>=tol8.or.  &
 &   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy_ks=zero
 
@@ -1033,6 +1035,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call xmpi_bcast(paw_dmft%occnd(:,:,:,:,:),0,paw_dmft%spacecomm,ierr)
    end if
    call print_sc_dmft(paw_dmft,dtset%pawprtvol)
+ end if
+
+ ! Initialize (eventually) rcpaw object
+ if (dtset%use_rcpaw==1) then
+   ABI_WARNING("Untested Mode RCPAW")
+   ABI_MALLOC(rcpaw,)
+   call rcpaw_init(rcpaw,dtset,psps%filpsp,pawrad,pawtab,psps%ntypat,1,my_natom,mpi_enreg%comm_atom,mpi_enreg%my_atmtab)
  end if
 
 !###########################################################
@@ -1371,7 +1380,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call timab(1225,3,tsec)
 
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cprj,cpus,&
-&   args_gs%dmatpawu,dtefield,dtfil,dtpawuj,dtset,ecore,eigen,hdr,extfpmd,&
+&   args_gs%dmatpawu,dtefield,dtfil,dtpawuj,dtset,ecore,eigen,hdr,extfpmd,rcpaw,&
 &   indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &   nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &   pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
@@ -1703,6 +1712,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call extfpmd%destroy()
    ABI_FREE(extfpmd)
  end if
+
+!Destroy rcpaw datastructure
+ if(associated(rcpaw)) then
+   call rcpaw_destroy(rcpaw)
+   ABI_FREE(rcpaw)
+ endif
 
 !Destroy electronpositron datastructure
  if (dtset%positron/=0) then

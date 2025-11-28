@@ -1,8 +1,8 @@
 
-.Version 10.3.4.5 of ABINIT, released Nov 2024.
-.(MPI version, prepared for a x86_64_linux_intel2021.10 computer) 
+.Version 10.5.8.4 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 18 Feb 2025.
-- ( at 14h50 )
+.Starting date : Fri 14 Nov 2025.
+- ( at 21h14 )
   
-- input  file    -> /home/jzwanzig/local/abinit-develop/tmp-intel/tests/Test_suite/v10_t41/t41.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/TestBot_MPI1/v10_t41/t41.abi
 - output file    -> t41.abo
 - root for input  files -> t41i
 - root for output files -> t41o
- 
+
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/jzwanzig/local/abinit-develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/jzwanzig/local/abinit-develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -43,7 +43,7 @@ P This job should need less than                       6.488 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
- 
+
  DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2 (RF).
@@ -55,12 +55,13 @@ _ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
 -   mkqmem =          32        mk1mem =          32           mpw =         150
       nfft =        4096          nkpt =          32
+- my_mband =           4
 ================================================================================
 P This job should need less than                       2.805 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -176,17 +177,17 @@ P          mk1mem          32
              xred      2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             znucl       15.00000   13.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   1.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   2.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -202,28 +203,28 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  R(3)=  5.1504485  5.1504485  0.0000000  G(3)=  0.0970789  0.0970789 -0.0970789
  Unit cell volume ucvol=  2.7325313E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.18228
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  24
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.31465
- 
+
  getcut : COMMENT -
   Note that boxcut > 2.2 ; recall that boxcut=Gcut(box)/Gcut(sphere) = 2
   is sufficient for exact treatment of convolution.
   Such a large boxcut is a waste : you could raise ecut
   e.g. ecut=   13.394057 Hartrees makes boxcut=2
- 
- 
+
+
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/jzwanzig/local/abinit-develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm: opening atomic psp file    /home/jzwanzig/local/abinit-develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm : Reading pseudopotential header in XML form from /home/jzwanzig/local/abinit-develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90690075
@@ -241,10 +242,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Mesh size for Vloc has been set to 1773 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
-- pspini: atom type   2  psp file is /home/jzwanzig/local/abinit-develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm: opening atomic psp file    /home/jzwanzig/local/abinit-develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm : Reading pseudopotential header in XML form from /home/jzwanzig/local/abinit-develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
+
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -262,12 +263,12 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Mesh size for Vloc has been set to 1771 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
+
   -1.67993637E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
+
 _setup2: Arith. and geom. avg. npw (full set) are     146.250     146.234
- 
+
 ================================================================================
 
 --- !BeginCycle
@@ -275,35 +276,34 @@ iteration_state: {dtset: 1, }
 solver: {iscf: 17, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-18, }
 ...
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -6.2673140801686    -6.267E+00 5.250E-02 7.218E-01
- ETOT  2  -6.3204271873121    -5.311E-02 4.551E-05 1.486E-01
- ETOT  3  -6.3189887333680     1.438E-03 1.354E-05 5.787E-03
- ETOT  4  -6.3188053935977     1.833E-04 5.759E-07 7.113E-04
- ETOT  5  -6.3187231518410     8.224E-05 8.584E-08 4.696E-05
- ETOT  6  -6.3186984331092     2.472E-05 1.116E-09 1.718E-06
- ETOT  7  -6.3186939684412     4.465E-06 3.354E-10 5.080E-08
- ETOT  8  -6.3186942775048    -3.091E-07 3.586E-12 3.962E-09
- ETOT  9  -6.3186943450799    -6.758E-08 2.064E-12 3.937E-10
- ETOT 10  -6.3186943742338    -2.915E-08 7.806E-15 3.712E-11
- ETOT 11  -6.3186943932300    -1.900E-08 1.772E-14 7.550E-13
- ETOT 12  -6.3186943986042    -5.374E-09 5.473E-17 7.631E-14
- ETOT 13  -6.3186943986570    -5.277E-11 5.909E-17 1.018E-15
- ETOT 14  -6.3186943986309     2.601E-11 1.463E-19 6.006E-16
- ETOT 15  -6.3186943986670    -3.608E-11 4.354E-19 1.268E-17
- ETOT 16  -6.3186943986583     8.679E-12 1.056E-20 1.982E-18
- ETOT 17  -6.3186943986586    -2.203E-13 1.163E-21 7.762E-20
- 
- At SCF step   17       nres2   =  7.76E-20 < tolvrs=  1.00E-18 =>converged.
- 
+ ETOT  1  -5.1349484242449    -5.135E+00 5.202E-02 6.985E-01
+ ETOT  2  -5.1655210644955    -3.057E-02 2.576E-05 1.526E-01
+ ETOT  3  -5.1648075274463     7.135E-04 1.649E-05 6.021E-03
+ ETOT  4  -5.1648536818051    -4.615E-05 1.065E-06 9.899E-04
+ ETOT  5  -5.1648406618358     1.302E-05 1.393E-07 4.908E-05
+ ETOT  6  -5.1648444806975    -3.819E-06 1.458E-09 1.759E-06
+ ETOT  7  -5.1648448679835    -3.873E-07 2.987E-10 7.636E-08
+ ETOT  8  -5.1648450141962    -1.462E-07 7.970E-12 3.671E-09
+ ETOT  9  -5.1648449981783     1.602E-08 1.293E-12 3.531E-10
+ ETOT 10  -5.1648449973681     8.102E-10 5.586E-15 2.444E-11
+ ETOT 11  -5.1648449966416     7.265E-10 9.290E-15 7.757E-13
+ ETOT 12  -5.1648449963053     3.362E-10 1.151E-16 2.866E-14
+ ETOT 13  -5.1648449961990     1.064E-10 2.294E-17 1.237E-15
+ ETOT 14  -5.1648449962008    -1.840E-12 1.150E-19 1.347E-16
+ ETOT 15  -5.1648449962006     1.963E-13 5.471E-20 1.946E-17
+ ETOT 16  -5.1648449962005     1.537E-13 5.571E-22 6.812E-19
+
+ At SCF step   16       nres2   =  6.81E-19 < tolvrs=  1.00E-18 =>converged.
+
 Result for kinetic energy density :
- 
+
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-)     Maximum=    1.8313E-01  at reduced coord.    0.2500    0.2500    0.2500
-)     Minimum=    1.2762E-03  at reduced coord.    0.7500    0.7500    0.7500
-   Integrated=    3.5939E+00
+)     Maximum=    1.8289E-01  at reduced coord.    0.2500    0.2500    0.2500
+)     Minimum=    1.2828E-03  at reduced coord.    0.7500    0.7500    0.7500
+   Integrated=    3.5910E+00
 --------------------------------------------------------------------------------
 
 --- !ResultsGS
@@ -316,10 +316,10 @@ lattice_vectors:
 lattice_lengths: [   7.28383,    7.28383,    7.28383, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7325313E+02
-convergence: {deltae: -2.203E-13, res2:  7.762E-20, residm:  1.163E-21, diffor:  0.000E+00, }
-etotal    :  -6.31869440E+00
+convergence: {deltae:  1.537E-13, res2:  6.812E-19, residm:  5.571E-22, diffor:  0.000E+00, }
+etotal    :  -5.16484500E+00
 entropy   :   0.00000000E+00
-fermie    :   1.74809937E-01
+fermie    :   1.74039724E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 xred      :
@@ -332,156 +332,166 @@ force_length_stats: {min: null, max: null, mean: null, }
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        1.90690          2.59457058
-    2        1.90363          0.75696325
- 
+    1        1.90690          2.59283632
+    2        1.90363          0.75653375
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.530654957079630
- Compensation charge over fine fft grid    =     -0.530545153512888
- 
+ Compensation charge over spherical meshes =     -0.530722200379504
+ Compensation charge over fine fft grid    =     -0.530612382840780
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1
    === REAL PART:
-   1.40103   0.02357   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.02357  28.56319   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.27606   0.00000   0.00000  -0.00675   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.27606   0.00000   0.00000  -0.00675   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.27606   0.00000   0.00000  -0.00675
-   0.00000   0.00000  -0.00675   0.00000   0.00000  16.64896   0.00000   0.00000
-   0.00000   0.00000   0.00000  -0.00675   0.00000   0.00000  16.64896   0.00000
-   0.00000   0.00000   0.00000   0.00000  -0.00675   0.00000   0.00000  16.64896
+   1.40118   0.02373   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.02373  28.56332   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
+   0.00000   0.00000   0.27608   0.00000   0.00000  -0.00683   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.27608   0.00000   0.00000  -0.00683   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.27608   0.00000   0.00000  -0.00683
+   0.00000   0.00000  -0.00683   0.00000   0.00000  16.64918   0.00000   0.00000
+   0.00000   0.00000   0.00000  -0.00683   0.00000   0.00000  16.64918   0.00000
+   0.00000  -0.00000   0.00000   0.00000  -0.00683   0.00000   0.00000  16.64918
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
  Atom #  2
    === REAL PART:
-   0.32322   0.13952   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.13952  35.89218   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.07142   0.00000   0.00000  -0.02883   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.07142   0.00000   0.00000  -0.02883   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.07142   0.00000   0.00000  -0.02883
-   0.00000   0.00000  -0.02883   0.00000   0.00000  19.03356   0.00000   0.00000
-   0.00000   0.00000   0.00000  -0.02883   0.00000   0.00000  19.03356   0.00000
-   0.00000   0.00000   0.00000   0.00000  -0.02883   0.00000   0.00000  19.03356
+   0.32323   0.13953   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.13953  35.89447   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000
+   0.00000   0.00000   0.07142   0.00000   0.00000  -0.02877   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.07142   0.00000   0.00000  -0.02877   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.07142   0.00000   0.00000  -0.02877
+   0.00000   0.00000  -0.02877   0.00000   0.00000  19.03299   0.00000   0.00000
+   0.00000  -0.00000   0.00000  -0.02877   0.00000   0.00000  19.03299   0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.02877   0.00000   0.00000  19.03299
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00007   0.00000   0.00000  -0.00106   0.00000
-   0.00000   0.00000  -0.00007   0.00000   0.00000   0.00106   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000  -0.00106   0.00000   0.00000   0.01610   0.00000
-   0.00000   0.00000   0.00106   0.00000   0.00000  -0.01610   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
- 
- 
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000   0.00007  -0.00000  -0.00000  -0.00106  -0.00000
+   0.00000   0.00000  -0.00007  -0.00000  -0.00000   0.00106  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000  -0.00106   0.00000  -0.00000   0.01610  -0.00000
+   0.00000   0.00000   0.00106   0.00000   0.00000  -0.01610  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1
    === REAL PART:
-   1.61112   0.00772   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00772   0.00005   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   1.15922  -0.00000   0.00000   0.00671   0.00000   0.00000
-   0.00000   0.00000  -0.00000   1.15922   0.00000   0.00000   0.00671   0.00000
-   0.00000   0.00000   0.00000   0.00000   1.15922   0.00000   0.00000   0.00671
-   0.00000   0.00000   0.00671   0.00000   0.00000   0.00004   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00671   0.00000   0.00000   0.00004   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00671   0.00000   0.00000   0.00004
+   1.61233   0.00771   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00771   0.00004   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   1.15759   0.00000   0.00000   0.00670   0.00000   0.00000
+   0.00000   0.00000   0.00000   1.15759   0.00000   0.00000   0.00670   0.00000
+   0.00000   0.00000   0.00000   0.00000   1.15759   0.00000   0.00000   0.00670
+   0.00000   0.00000   0.00670   0.00000   0.00000   0.00004   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00670   0.00000   0.00000   0.00004   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00670   0.00000   0.00000   0.00004
    === IMAGINARY PART:
-   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00003   0.00000  -0.00000   0.00000   0.00000
-   0.00000   0.00000  -0.00003   0.00000   0.00000  -0.00000  -0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000   0.00003  -0.00000  -0.00000   0.00000  -0.00000
+   0.00000   0.00000  -0.00003   0.00000  -0.00000  -0.00000   0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
  Atom #  2
    === REAL PART:
-   1.08527  -0.00266   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   1.08525  -0.00266   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
   -0.00266   0.00001   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.82110  -0.00000   0.00000  -0.00091   0.00000   0.00000
-   0.00000   0.00000  -0.00000   0.82110   0.00000  -0.00000  -0.00091   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.82110   0.00000   0.00000  -0.00091
-   0.00000   0.00000  -0.00091  -0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000  -0.00091   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   0.82032  -0.00000   0.00000  -0.00091   0.00000   0.00000
+   0.00000   0.00000  -0.00000   0.82032   0.00000   0.00000  -0.00091   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.82032   0.00000   0.00000  -0.00091
+   0.00000   0.00000  -0.00091   0.00000   0.00000   0.00000  -0.00000   0.00000
+   0.00000   0.00000   0.00000  -0.00091   0.00000  -0.00000   0.00000   0.00000
    0.00000   0.00000   0.00000   0.00000  -0.00091   0.00000   0.00000   0.00000
    === IMAGINARY PART:
+   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000   0.00131  -0.00000  -0.00000   0.00000  -0.00000
+   0.00000   0.00000  -0.00131  -0.00000  -0.00000  -0.00000   0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00131   0.00000  -0.00000   0.00000   0.00000
-   0.00000   0.00000  -0.00131   0.00000   0.00000  -0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000
-   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000
- 
- 
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
- Mean square residual over all n,k,spin=   40.689E-23; max=  11.634E-22
+
+ Mean square residual over all n,k,spin=   20.721E-23; max=  55.711E-23
  reduced coordinates (array xred) for    2 atoms
        0.250000000000      0.250000000000      0.250000000000
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      1.36274997628497     1.36274997628497     1.36274997628497
     2      0.00000000000000     0.00000000000000     0.00000000000000
  length scales= 10.300896971100 10.300896971100 10.300896971100 bohr
               =  5.450999905140  5.450999905140  5.450999905140 angstroms
- Fermi (or HOMO) energy (hartree) =   0.17481   Average Vxc (hartree)=  -0.35366
+ Fermi (or HOMO) energy (hartree) =   0.17404   Average Vxc (hartree)=  -0.35415
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband=  4, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
-  -0.17703    0.00574    0.09075    0.13255
+  -0.17738    0.00518    0.09009    0.13184
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
+
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.59392002676674E+00
-hartree             :  9.31854441039484E-01
-xc                  : -4.83938787055022E+00
+kinetic             :  3.59104947042008E+00
+hartree             :  9.29407434414604E-01
+xc                  : -4.84088167714458E+00
 Ewald energy        : -8.73435537339883E+00
-psp_core            : -6.14791273484789E-02
-local_psp           : -3.07414087363650E+00
-spherical_terms     :  5.86489438726601E+00
-nucl. magn. dipoles : -8.84559465068707E-09
-total_energy        : -6.31869439870739E+00
-total_energy_eV     : -1.71940418777259E+02
+psp_core            : -6.14791273485205E-02
+local_psp           : -3.06968709979730E+00
+PAW spherical_terms :  7.02110138656577E+00
+nucl. magn. dipoles : -8.84551678336281E-09
+total_energy        : -5.16484499513429E+00
+total_energy_eV     : -1.40542579739999E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  1.75695118146591E-01
+band_energy         :  1.71099353121278E-01
 Ewald energy        : -8.73435537339883E+00
-psp_core            : -6.14791273484789E-02
-xc_dc               : -1.77251934546083E+00
-spherical_terms     :  4.07396432940298E+00
-total_energy_dc     : -6.31869439865857E+00
-total_energy_dc_eV  : -1.71940418775930E+02
+psp_core            : -6.14791273485205E-02
+xc_dc               : -1.77041701551599E+00
+PAW spherical_terms :  5.23030716694161E+00
+total_energy_dc     : -5.16484499620046E+00
+total_energy_dc_eV  : -1.40542579769011E+02
 ...
 
- 
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -5.85200826929294E+02
+Total energy DC     : -5.85200826930360E+02
+Total energy (eV)   : -1.59241243367624E+04
+Total energy DC (eV): -1.59241243367915E+04
+...
+
+
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -492,35 +502,35 @@ meta: {optdriver: 1, rfddk: 1, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1504485  5.1504485  G(1)= -0.0970789  0.0970789  0.0970789
  R(2)=  5.1504485  0.0000000  5.1504485  G(2)=  0.0970789 -0.0970789  0.0970789
  R(3)=  5.1504485  5.1504485  0.0000000  G(3)=  0.0970789  0.0970789 -0.0970789
  Unit cell volume ucvol=  2.7325313E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.18228
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  24
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.31465
- 
+
  getcut : COMMENT -
   Note that boxcut > 2.2 ; recall that boxcut=Gcut(box)/Gcut(sphere) = 2
   is sufficient for exact treatment of convolution.
   Such a large boxcut is a waste : you could raise ecut
   e.g. ecut=   13.394057 Hartrees makes boxcut=2
- 
- 
+
+
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/jzwanzig/local/abinit-develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm: opening atomic psp file    /home/jzwanzig/local/abinit-develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm : Reading pseudopotential header in XML form from /home/jzwanzig/local/abinit-develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/P.GGA_X_PBE+GGA_C_PBE.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90690075
@@ -538,10 +548,10 @@ meta: {optdriver: 1, rfddk: 1, }
  Mesh size for Vloc has been set to 1773 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
-- pspini: atom type   2  psp file is /home/jzwanzig/local/abinit-develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm: opening atomic psp file    /home/jzwanzig/local/abinit-develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
-- pspatm : Reading pseudopotential header in XML form from /home/jzwanzig/local/abinit-develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
+
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/Al.GGA_X_PBE+GGA_C_PBE.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -559,29 +569,29 @@ meta: {optdriver: 1, rfddk: 1, }
  Mesh size for Vloc has been set to 1771 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
+
 --------------------------------------------------------------------------------
- 
- 
+
+
  ==>  initialize data related to q vector <== 
- 
+
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
     2)    idir= 2    ipert=   3
     3)    idir= 3    ipert=   3
- 
+
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : derivative vs k along direction   1
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -590,57 +600,57 @@ iteration_state: {dtset: 2, }
 solver: {iscf: -3, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolwfr: 1.00E-20, }
 ...
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -9.9359682440123     -9.936E+00 8.426E-03 0.000E+00
- ETOT  2  -9.9379394963269     -1.971E-03 4.409E-06 0.000E+00
- ETOT  3  -9.9379404156253     -9.193E-07 2.132E-09 0.000E+00
- ETOT  4  -9.9379404164200     -7.947E-10 1.402E-12 0.000E+00
- ETOT  5  -9.9379404164207     -7.354E-13 1.711E-15 0.000E+00
- ETOT  6  -9.9379404164207      0.000E+00 1.257E-18 0.000E+00
- ETOT  7  -9.9379404164208     -2.487E-14 9.531E-21 0.000E+00
- 
- At SCF step    7   max residual=  9.53E-21 < tolwfr=  1.00E-20 =>converged.
+-ETOT  1  -9.9019501806749     -9.902E+00 8.387E-03 0.000E+00
+ ETOT  2  -9.9038473122186     -1.897E-03 4.132E-06 0.000E+00
+ ETOT  3  -9.9038481642629     -8.520E-07 1.911E-09 0.000E+00
+ ETOT  4  -9.9038481649741     -7.112E-10 1.216E-12 0.000E+00
+ ETOT  5  -9.9038481649747     -6.395E-13 1.422E-15 0.000E+00
+ ETOT  6  -9.9038481649747      2.842E-14 1.004E-18 0.000E+00
+ ETOT  7  -9.9038481649747      5.329E-15 8.139E-21 0.000E+00
+
+ At SCF step    7   max residual=  8.14E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
- Mean square residual over all n,k,spin=   38.578E-22; max=  95.307E-22
+
+ Mean square residual over all n,k,spin=   32.024E-22; max=  81.388E-22
  dfpt_looppert : ek2=    1.7858742990E+01
-          f-sum rule ratio=    1.1827869157E+00
+          f-sum rule ratio=    1.1827031691E+00
  Expectation of eigenvalue derivatives (hartree) for nkpt=  32  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
-  -0.07563   -0.08810    0.20616    0.15495
+  -0.07537   -0.08715    0.20523    0.15461
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
- 
+
+
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   2.61624372E+01 eigvalue=  -6.09682131E+00  local=  -2.84785233E+01  evxctau0=   1.13891617E+00
+     kin0=   2.61934740E+01 eigvalue=  -6.09027047E+00  local=  -2.85295077E+01  evxctau0=   1.07081333E+00
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -2.11230875E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  evxctau1=  -1.03628251E+00  nclr dpl1=   4.67944310E-09
+     kin1=  -2.11215919E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  evxctau1=  -1.01172273E+00  nclr dpl1=   4.69958055E-09
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=   1.70998690E+01   enl1=   2.39555197E+00
+    edocc=   0.00000000E+00     enl0=   1.71474684E+01   enl1=   2.43748900E+00
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -9.93794042E+00
+   erelax=  -9.90384816E+00
  11 Contribution from 1st-order change of wavefunctions overlap
- eovl1 =  -5.60313793E-02
+ eovl1 =  -5.59353373E-02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.9937940416E+01 Ha. Also 2DEtotal=   -0.270425111449E+03 eV
-    (  non-var. 2DEtotal :   -9.9379404163E+00 Ha)
- 
+ 2DEtotal=   -0.9903848165E+01 Ha. Also 2DEtotal=   -0.269497414108E+03 eV
+    (  non-var. 2DEtotal :   -9.9038481649E+00 Ha)
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : derivative vs k along direction   2
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -649,57 +659,57 @@ iteration_state: {dtset: 2, }
 solver: {iscf: -3, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolwfr: 1.00E-20, }
 ...
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -9.9359682439218     -9.936E+00 8.426E-03 0.000E+00
- ETOT  2  -9.9379394962363     -1.971E-03 4.409E-06 0.000E+00
- ETOT  3  -9.9379404155347     -9.193E-07 2.132E-09 0.000E+00
- ETOT  4  -9.9379404163294     -7.947E-10 1.402E-12 0.000E+00
- ETOT  5  -9.9379404163302     -7.496E-13 1.711E-15 0.000E+00
- ETOT  6  -9.9379404163302     -1.776E-15 1.257E-18 0.000E+00
- ETOT  7  -9.9379404163302      3.553E-15 9.531E-21 0.000E+00
- 
- At SCF step    7   max residual=  9.53E-21 < tolwfr=  1.00E-20 =>converged.
+-ETOT  1  -9.9019501805867     -9.902E+00 8.387E-03 0.000E+00
+ ETOT  2  -9.9038473121303     -1.897E-03 4.132E-06 0.000E+00
+ ETOT  3  -9.9038481641745     -8.520E-07 1.911E-09 0.000E+00
+ ETOT  4  -9.9038481648857     -7.112E-10 1.216E-12 0.000E+00
+ ETOT  5  -9.9038481648864     -6.928E-13 1.422E-15 0.000E+00
+ ETOT  6  -9.9038481648864      1.776E-15 1.004E-18 0.000E+00
+ ETOT  7  -9.9038481648864      0.000E+00 8.139E-21 0.000E+00
+
+ At SCF step    7   max residual=  8.14E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
- Mean square residual over all n,k,spin=   38.578E-22; max=  95.307E-22
+
+ Mean square residual over all n,k,spin=   32.025E-22; max=  81.388E-22
  dfpt_looppert : ek2=    1.7858742990E+01
-          f-sum rule ratio=    1.1827869157E+00
+          f-sum rule ratio=    1.1827031691E+00
  Expectation of eigenvalue derivatives (hartree) for nkpt=  32  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
-  -0.12111    0.18711    0.19893   -0.04330
+  -0.12039    0.18637    0.19847   -0.04318
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
- 
+
+
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   2.61624372E+01 eigvalue=  -6.09682131E+00  local=  -2.84785233E+01  evxctau0=   1.13891617E+00
+     kin0=   2.61934740E+01 eigvalue=  -6.09027047E+00  local=  -2.85295077E+01  evxctau0=   1.07081333E+00
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -2.11230875E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  evxctau1=  -1.03628251E+00  nclr dpl1=   4.67944310E-09
+     kin1=  -2.11215919E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  evxctau1=  -1.01172273E+00  nclr dpl1=   4.69958055E-09
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=   1.70998690E+01   enl1=   2.39555197E+00
+    edocc=   0.00000000E+00     enl0=   1.71474684E+01   enl1=   2.43748900E+00
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -9.93794042E+00
+   erelax=  -9.90384816E+00
  11 Contribution from 1st-order change of wavefunctions overlap
- eovl1 =  -5.60313793E-02
+ eovl1 =  -5.59353373E-02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.9937940416E+01 Ha. Also 2DEtotal=   -0.270425111447E+03 eV
-    (  non-var. 2DEtotal :   -9.9379404163E+00 Ha)
- 
+ 2DEtotal=   -0.9903848165E+01 Ha. Also 2DEtotal=   -0.269497414106E+03 eV
+    (  non-var. 2DEtotal :   -9.9038481648E+00 Ha)
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : derivative vs k along direction   3
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -708,148 +718,148 @@ iteration_state: {dtset: 2, }
 solver: {iscf: -3, nstep: 30, nline: 4, wfoptalg: 10, }
 tolerances: {tolwfr: 1.00E-20, }
 ...
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -9.9359682438574     -9.936E+00 8.426E-03 0.000E+00
- ETOT  2  -9.9379394961718     -1.971E-03 4.409E-06 0.000E+00
- ETOT  3  -9.9379404154703     -9.193E-07 2.132E-09 0.000E+00
- ETOT  4  -9.9379404162650     -7.947E-10 1.402E-12 0.000E+00
- ETOT  5  -9.9379404162657     -7.656E-13 1.711E-15 0.000E+00
- ETOT  6  -9.9379404162657     -7.105E-15 1.257E-18 0.000E+00
- ETOT  7  -9.9379404162657      1.243E-14 9.531E-21 0.000E+00
- 
- At SCF step    7   max residual=  9.53E-21 < tolwfr=  1.00E-20 =>converged.
+-ETOT  1  -9.9019501805451     -9.902E+00 8.387E-03 0.000E+00
+ ETOT  2  -9.9038473120886     -1.897E-03 4.132E-06 0.000E+00
+ ETOT  3  -9.9038481641329     -8.520E-07 1.911E-09 0.000E+00
+ ETOT  4  -9.9038481648441     -7.112E-10 1.216E-12 0.000E+00
+ ETOT  5  -9.9038481648448     -6.626E-13 1.422E-15 0.000E+00
+ ETOT  6  -9.9038481648448     -3.020E-14 1.004E-18 0.000E+00
+ ETOT  7  -9.9038481648448      1.243E-14 8.139E-21 0.000E+00
+
+ At SCF step    7   max residual=  8.14E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
- Mean square residual over all n,k,spin=   38.578E-22; max=  95.307E-22
+
+ Mean square residual over all n,k,spin=   32.025E-22; max=  81.388E-22
  dfpt_looppert : ek2=    1.7858742990E+01
-          f-sum rule ratio=    1.1827869157E+00
+          f-sum rule ratio=    1.1827031691E+00
  Expectation of eigenvalue derivatives (hartree) for nkpt=  32  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
-   0.09835   -0.04951   -0.20262   -0.05557
+   0.09785   -0.04961   -0.20193   -0.05546
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
- 
+
+
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   2.61624372E+01 eigvalue=  -6.09682131E+00  local=  -2.84785233E+01  evxctau0=   1.13891617E+00
+     kin0=   2.61934740E+01 eigvalue=  -6.09027047E+00  local=  -2.85295077E+01  evxctau0=   1.07081333E+00
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -2.11230875E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  evxctau1=  -1.03628251E+00  nclr dpl1=   4.67944310E-09
+     kin1=  -2.11215919E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  evxctau1=  -1.01172273E+00  nclr dpl1=   4.69958055E-09
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=   1.70998690E+01   enl1=   2.39555197E+00
+    edocc=   0.00000000E+00     enl0=   1.71474684E+01   enl1=   2.43748900E+00
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -9.93794042E+00
+   erelax=  -9.90384816E+00
  11 Contribution from 1st-order change of wavefunctions overlap
- eovl1 =  -5.60313793E-02
+ eovl1 =  -5.59353373E-02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.9937940416E+01 Ha. Also 2DEtotal=   -0.270425111445E+03 eV
-    (  non-var. 2DEtotal :   -9.9379404162E+00 Ha)
- 
+ 2DEtotal=   -0.9903848165E+01 Ha. Also 2DEtotal=   -0.269497414105E+03 eV
+    (  non-var. 2DEtotal :   -9.9038481648E+00 Ha)
+
 ====================================================
- 
+
  Orbital magnetic moment computed with DFPT derivative wavefunctions 
- 
+
  Orbital magnetic moment, Cartesian directions :
- -3.63064721E-04  6.85219388E-10  1.12766795E-09
- 
- 
+ -3.62001398E-04 -1.72128480E-09  1.88554125E-09
+
+
  Chern vector, Cartesian directions :
-  3.23680713E-06  7.38676382E-11  7.27119399E-11
- 
- 
+  3.35617211E-06  7.33051709E-11 -7.33409511E-11
+
+
  Orbital magnetic moment, term-by-term breakdown :
-     rho(1) CC :   2.51275470E-04  6.01176062E-10  9.07237894E-10
-    rho(1) VV1 :  -6.25189662E-06 -5.17323912E-14 -5.15670071E-14
-    rho(1) VV2 :  -5.12558936E-10 -2.65144594E-13  3.31953171E-13
-     rho(0) NL :   1.64355511E-04 -1.90335938E-11  8.77584012E-11
-   <L_R> terms :  -3.28205490E-06  1.03393700E-10  1.32391695E-10
- <A0.An> terms :  -2.39785339E-06  9.76232394E-17 -4.21317615E-16
+     rho(1) CC :   2.52369850E-04 -1.73487394E-09  1.73937733E-09
+    rho(1) VV1 :  -6.24581087E-06  2.42079066E-16 -2.19487051E-16
+    rho(1) VV2 :  -6.36507698E-10  1.11827404E-12 -9.04451028E-13
+     rho(0) NL :   1.64302921E-04 -4.08068572E-11  3.54196044E-11
+   <L_R> terms :  -3.26796027E-06  5.32777100E-11  1.11648722E-10
+ <A0.An> terms :  -2.39637669E-06 -2.30831408E-16  2.57226753E-16
     Lamb terms :  -7.66763385E-04  0.00000000E+00  0.00000000E+00
  Chern vector, term-by-term breakdown :
-  Ch CC :   3.08635944E-06  7.32816799E-11  7.32889522E-11
- Ch vv1 :   1.50447690E-07  5.85958242E-13 -5.77012312E-13
- Ch vv2 :  -1.05879118E-22  6.60678818E-23  2.93849504E-24
- 
- 
+  Ch CC :   3.20588682E-06  7.33320087E-11 -7.33498970E-11
+ Ch vv1 :   1.50285296E-07 -2.68377906E-14  8.94594567E-15
+ Ch vv2 :   0.00000000E+00 -1.66817435E-22  1.96009259E-22
+
+
  Term-by-term breakdowns for each band :
- 
- 
+
+
  band   1 of   4
- Orbital magnetic moment :   3.01440377E-05 -1.24397808E-12  4.78730576E-12
-     rho(1) CC :   6.05650921E-06 -4.80730401E-15 -3.92279225E-14
-    rho(1) VV1 :  -1.84302029E-06  5.52130294E-19 -1.29437580E-19
-    rho(1) VV2 :  -1.63489297E-08 -3.58251408E-13  3.33555922E-13
-     rho(0) NL :   2.63525349E-05 -1.13243966E-12  4.49297788E-12
-   <L_R> terms :  -9.98394885E-08  2.51519736E-13  9.09063152E-21
- <A0.An> terms :  -3.05797790E-07  0.00000000E+00  2.82537110E-23
- 
- 
- Chern vector :   1.05227544E-09  3.27105241E-15 -2.48618300E-15
-  Ch CC :  -1.75641126E-08  6.17202317E-19  5.59731493E-16
- Ch VV1 :   1.84684205E-08 -3.97317811E-22  1.96010120E-22
- Ch VV2 :   1.47967528E-10  3.27043560E-15 -3.04591469E-15
- 
- 
+ Orbital magnetic moment :   3.01000017E-05  1.18339001E-12 -9.80415030E-13
+     rho(1) CC :   6.03519544E-06 -1.43028052E-14  1.43452680E-14
+    rho(1) VV1 :  -1.83612784E-06  3.46457450E-19  2.53925437E-19
+    rho(1) VV2 :  -1.64469103E-08  1.17534226E-12 -1.01711079E-12
+     rho(0) NL :   2.63224923E-05 -2.41890940E-21  1.78597391E-20
+   <L_R> terms :  -9.97409444E-08  2.23502114E-14  2.23502244E-14
+ <A0.An> terms :  -3.05370323E-07  1.18856768E-23  3.00755872E-23
+
+
+ Chern vector :   1.08666149E-09 -1.07488376E-14  9.30148443E-15
+  Ch CC :  -1.74855455E-08 -4.01029716E-19 -4.02235650E-19
+ Ch VV1 :   1.84230109E-08 -3.68952564E-22  1.60581445E-22
+ Ch VV2 :   1.49196062E-10 -1.07484362E-14  9.30188650E-15
+
+
  band   2 of   4
- Orbital magnetic moment :   1.44655184E-04  3.94940571E-13  9.56785334E-14
-     rho(1) CC :   6.87081912E-05  2.99146030E-13  6.17997978E-15
-    rho(1) VV1 :  -2.06879070E-06  5.89887947E-20  4.18591243E-20
-    rho(1) VV2 :   2.26755079E-08  9.32189358E-14 -1.48686073E-15
-     rho(0) NL :   7.68380298E-05  2.57539143E-15  9.09853361E-14
-   <L_R> terms :   1.82916917E-06  1.55621440E-19  3.63907798E-20
- <A0.An> terms :  -6.74091357E-07  5.65074220E-23  0.00000000E+00
- 
- 
- Chern vector :  -8.55446533E-07 -6.66823514E-15  3.40294720E-15
-  Ch CC :  -9.02995759E-07 -3.35910472E-15  3.35035150E-15
- Ch VV1 :   4.80954365E-08 -2.93132252E-22  3.07259107E-22
- Ch VV2 :  -5.46211303E-10 -3.30913012E-15  5.25953937E-17
- 
- 
+ Orbital magnetic moment :   1.44746952E-04 -1.13990024E-11  6.69443689E-13
+     rho(1) CC :   6.86967837E-05 -5.57389579E-14  5.62528558E-14
+    rho(1) VV1 :  -2.06834968E-06  3.23545630E-19  1.72129130E-19
+    rho(1) VV2 :   2.26214958E-08 -5.69767313E-14  1.12574658E-13
+     rho(0) NL :   7.69478783E-05 -1.12862872E-11  5.00615960E-13
+   <L_R> terms :   1.82185120E-06  1.51613614E-19  4.24741516E-20
+ <A0.An> terms :  -6.73833438E-07 -4.56006677E-23  2.71589739E-23
+
+
+ Chern vector :  -8.53064625E-07  4.26249031E-15 -6.23377078E-15
+  Ch CC :  -9.00668492E-07  2.23867618E-15 -2.23429042E-15
+ Ch VV1 :   4.81494330E-08  8.04961626E-23 -1.37003585E-22
+ Ch VV2 :  -5.45566104E-10  2.02381405E-15 -3.99948023E-15
+
+
  band   3 of   4
- Orbital magnetic moment :  -3.00547975E-02  2.28268081E-09  3.19791982E-09
-     rho(1) CC :  -5.29157560E-02  2.34997501E-09  2.65511811E-09
-    rho(1) VV1 :  -1.88137845E-06  1.87714431E-14 -1.81464575E-15
-    rho(1) VV2 :  -2.24278929E-09  3.34051579E-17 -9.11666649E-17
-     rho(0) NL :   2.76658288E-02 -8.97870640E-11  3.87962761E-10
-   <L_R> terms :  -4.80230751E-03  2.24727711E-11  1.54841426E-10
- <A0.An> terms :  -6.79187598E-07  1.29160444E-15 -5.68379339E-16
- 
- 
- Chern vector :  -6.09883279E-03 -6.37354141E-14  6.22344788E-14
-  Ch CC :  -6.21546937E-03 -8.05141907E-14  6.26227655E-14
- Ch VV1 :   1.16029018E-04  8.94589341E-15 -8.94589341E-15
- Ch VV2 :   6.07560887E-07  7.83288316E-15  8.55760667E-15
- 
- 
+ Orbital magnetic moment :  -3.17310369E-02 -1.77541211E-09  1.84527141E-09
+     rho(1) CC :  -5.45760919E-02 -1.74658514E-09  1.74502217E-09
+    rho(1) VV1 :  -1.88256059E-06  5.44483346E-15 -3.12048881E-15
+    rho(1) VV2 :  -2.22784721E-09 -1.26863468E-16  6.43195673E-17
+     rho(0) NL :   2.76456157E-02 -9.34342169E-11  1.33137706E-10
+   <L_R> terms :  -4.79799729E-03  6.46032158E-11 -3.28850791E-11
+ <A0.An> terms :  -6.78673755E-07 -1.28320699E-15 -3.34703866E-16
+
+
+ Chern vector :  -6.22738393E-03  7.33322930E-11 -7.34514542E-11
+  Ch CC :  -6.34436860E-03  7.33476619E-11 -7.34729046E-11
+ Ch VV1 :   1.16376904E-04 -2.68377745E-14  2.68377817E-14
+ Ch VV2 :   6.07774043E-07  1.14689292E-14 -5.38737162E-15
+
+
  band   4 of   4
- Orbital magnetic moment :   3.02836970E-02 -1.59661239E-09 -2.07513485E-09
-     rho(1) CC :   5.30922668E-02 -1.74909329E-09 -1.74784716E-09
-    rho(1) VV1 :  -4.58707182E-07 -7.05044454E-14 -4.97522738E-14
-    rho(1) VV2 :  -4.59634789E-09 -1.45527162E-16 -2.47233219E-17
-     rho(0) NL :  -2.76046638E-02  7.18833345E-11 -3.04788323E-10
-   <L_R> terms :   4.79729612E-03  8.06694087E-11 -2.24497316E-11
- <A0.An> terms :  -7.38776645E-07 -1.19398126E-15  1.47061696E-16
- 
- 
- Chern vector :   6.10292399E-03  7.39347707E-11  7.26487886E-11
-  Ch CC :   6.21947629E-03  7.33655526E-11  7.32224193E-11
- Ch VV1 :  -1.15945134E-04  5.77012349E-13 -5.68066419E-13
- Ch VV2 :  -6.07162643E-07 -7.79418857E-15 -5.56428737E-15
- 
+ Orbital magnetic moment :   3.19609520E-02  6.43429214E-11  4.05808142E-11
+     rho(1) CC :   5.47537297E-02  1.17812463E-11 -5.71543219E-12
+    rho(1) VV1 :  -4.58772770E-07 -5.20342439E-15  2.90057570E-15
+    rho(1) VV2 :  -4.58324600E-09  3.53743379E-17  2.07888572E-17
+     rho(0) NL :  -2.75845831E-02  6.39136469E-11 -9.82187177E-11
+   <L_R> terms :   4.79300722E-03 -1.13478561E-11  1.44511451E-10
+ <A0.An> terms :  -7.38499173E-07  1.05237562E-15  5.91930562E-16
+
+
+ Chern vector :   6.23159208E-03 -2.06357568E-14  1.07435429E-13
+  Ch CC :   6.34849264E-03 -1.78914337E-14  1.25242299E-13
+ Ch VV1 :  -1.16293191E-04 -1.58710596E-20 -1.78918360E-14
+ Ch VV2 :  -6.07377673E-07 -2.74430721E-15  8.49655355E-17
+
 ====================================================
- 
+
 ================================================================================
- 
+
  ---- first-order wavefunction calculations are completed ----
- 
- 
+
+
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -857,8 +867,8 @@ tolerances: {tolwfr: 1.00E-20, }
             acell      1.0300896971E+01  1.0300896971E+01  1.0300896971E+01 Bohr
               amu      3.09737620E+01  2.69815390E+01
              ecut      5.00000000E+00 Hartree
-           etotal1    -6.3186943987E+00
-           etotal2    -9.9379404163E+00
+           etotal1    -5.1648449962E+00
+           etotal2    -9.9038481648E+00
             fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         512
@@ -964,9 +974,9 @@ P          mk1mem          32
              xred      2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             znucl       15.00000   13.00000
- 
+
 ================================================================================
- 
+
  The spacegroup number, the magnetic point group, and/or the number of symmetries
  have changed between the initial recognition based on the input file
  and a postprocessing based on the final acell, rprim, and xred.
@@ -1070,10 +1080,10 @@ P          mk1mem          32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          8.9  wall=          9.0
- 
+- Proc.   0 individual time (sec): cpu=         26.1  wall=         26.1
+
 ================================================================================
- 
+
  Calculation completed.
-.Delivered  39 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.9  wall=          9.0
+.Delivered  37 WARNINGs and  17 COMMENTs to log file.
++Overall time at end (sec) : cpu=         26.1  wall=         26.1

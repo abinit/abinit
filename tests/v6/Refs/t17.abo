@@ -1,5 +1,5 @@
 
-.Version 10.3.4.2 of ABINIT, released May 2025.
+.Version 10.4.5.1 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  8 Jun 2025.
-- ( at 17h12 )
+.Starting date : Wed  1 Oct 2025.
+- ( at 15h42 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_invaraxial/tests/TestBot_MPI1/v6_t17/t17.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v6_t17/t17.abi
 - output file    -> t17.abo
 - root for input  files -> t17i
 - root for output files -> t17o
@@ -145,7 +145,7 @@ _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
            getwfk22        -1
            getwfk31         0
            getwfk32        -1
-         hspinfield    0.00000000E+00  0.00000000E+00  1.00000000E+00
+       hspinfield      0.00000000E+00  0.00000000E+00  1.00000000E+00
            istwfk11      2
            istwfk12      2
            istwfk21      1
@@ -302,8 +302,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.04204
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_invaraxial/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/leshu_invaraxial/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -341,16 +341,16 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.3459673781096    -5.346E+00 1.080E-03 4.255E+01
- ETOT  2  -5.4640309758069    -1.181E-01 1.183E-04 1.244E+01
- ETOT  3  -5.4660508978595    -2.020E-03 2.183E-06 4.590E+00
- ETOT  4  -5.4668775566658    -8.267E-04 5.066E-07 4.314E-01
- ETOT  5  -5.4668954337670    -1.788E-05 4.388E-08 3.294E-02
- ETOT  6  -5.4668959240963    -4.903E-07 3.048E-09 2.513E-03
- ETOT  7  -5.4668961549006    -2.308E-07 4.661E-10 5.946E-05
- ETOT  8  -5.4668961645919    -9.691E-09 3.563E-11 1.831E-06
- ETOT  9  -5.4668961646375    -4.560E-11 1.567E-13 2.934E-07
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.3459673781096    -5.346E+00 1.080E-03 4.255E+01 4.796E-01 4.796E-01
+ ETOT  2  -5.4640309758069    -1.181E-01 1.183E-04 1.244E+01 1.800E-01 6.596E-01
+ ETOT  3  -5.4660508978595    -2.020E-03 2.183E-06 4.590E+00 2.629E-02 6.333E-01
+ ETOT  4  -5.4668775566658    -8.267E-04 5.066E-07 4.314E-01 2.729E-02 6.060E-01
+ ETOT  5  -5.4668954337670    -1.788E-05 4.388E-08 3.294E-02 4.071E-03 6.020E-01
+ ETOT  6  -5.4668959240963    -4.903E-07 3.048E-09 2.513E-03 1.217E-03 6.032E-01
+ ETOT  7  -5.4668961549006    -2.308E-07 4.661E-10 5.946E-05 1.578E-04 6.030E-01
+ ETOT  8  -5.4668961645919    -9.691E-09 3.563E-11 1.831E-06 7.880E-05 6.029E-01
+ ETOT  9  -5.4668961646375    -4.560E-11 1.567E-13 2.934E-07 6.801E-06 6.029E-01
 
  At SCF step    9, etot is converged : 
   for the second time, diff in etot=  4.560E-11 < toldfe=  1.000E-07
@@ -412,14 +412,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     1.060850     0.457903      1.518753     0.602946
- ---------------------------------------------------------------------
-  Sum:              1.060850     0.457903      1.518753     0.602946
- Total magnetization (from the atomic spheres):             0.602946
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     1.060850     0.457903      1.518753     0.602946
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 1.060850     0.457903      1.518753     0.602946
+ Total magnetization (from the atomic spheres):                0.602946
+ Total magnetization (exact up - dn):                          3.000000
+
  Collinear magnetization     0.3000000000E+01 (in # of spins, without 1/2 for magnetic moment)
  Spin magnetic energy -m.B =    -0.1500000000E+01 Ha
 ================================================================================
@@ -521,10 +522,10 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)     deltaE(h) residm    vres2    magn
- ETOT  1  -5.4668961646491    -5.47E+00 1.93E-16 1.53E-09 3.000
- ETOT  2  -5.4668961646493    -1.62E-13 2.35E-20 2.96E-10 3.000
- ETOT  3  -5.4668961646494    -1.04E-13 3.98E-17 6.97E-11 3.000
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.4668961646491    -5.467E+00 1.930E-16 1.535E-09 6.029E-01 6.029E-01
+ ETOT  2  -5.4668961646493    -1.616E-13 2.345E-20 2.963E-10 9.410E-08 6.029E-01
+ ETOT  3  -5.4668961646494    -1.039E-13 3.983E-17 6.974E-11 4.766E-10 6.029E-01
 
  At SCF step    3, etot is converged : 
   for the second time, diff in etot=  1.039E-13 < toldfe=  1.000E-07
@@ -586,14 +587,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     1.060849     0.457904      1.518753     0.602944
- ---------------------------------------------------------------------
-  Sum:              1.060849     0.457904      1.518753     0.602944
- Total magnetization (from the atomic spheres):             0.602944
- Total magnetization (exact up - dn):                       3.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Bi   2.00000     1.060849     0.457904      1.518753     0.602944
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 1.060849     0.457904      1.518753     0.602944
+ Total magnetization (from the atomic spheres):                0.602944
+ Total magnetization (exact up - dn):                          3.000000
+
  Collinear magnetization     0.3000000000E+01 (in # of spins, without 1/2 for magnetic moment)
  Spin magnetic energy -m.B =    -0.1500000000E+01 Ha
 ================================================================================
@@ -700,15 +702,15 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.0326590295135    -5.033E+00 6.342E-03 5.003E+01
- ETOT  2  -5.0625061399746    -2.985E-02 3.095E-04 4.831E+00
- ETOT  3  -5.0646057565072    -2.100E-03 1.533E-04 1.134E+00
- ETOT  4  -5.0646773617182    -7.161E-05 2.229E-04 2.388E-01
- ETOT  5  -5.0646787151103    -1.353E-06 3.443E-05 3.515E-02
- ETOT  6  -5.0646791710146    -4.559E-07 7.562E-05 1.158E-03
- ETOT  7  -5.0646791869207    -1.591E-08 1.044E-05 4.827E-05
- ETOT  8  -5.0646791872585    -3.378E-10 2.257E-05 1.151E-06
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.0326590295135    -5.033E+00 6.342E-03 5.003E+01 1.072E+00 1.072E+00
+ ETOT  2  -5.0625061399746    -2.985E-02 3.095E-04 4.831E+00 1.491E-01 1.221E+00
+ ETOT  3  -5.0646057565072    -2.100E-03 1.533E-04 1.134E+00 4.463E-02 1.266E+00
+ ETOT  4  -5.0646773617182    -7.161E-05 2.229E-04 2.388E-01 1.004E-02 1.276E+00
+ ETOT  5  -5.0646787151103    -1.353E-06 3.443E-05 3.515E-02 2.698E-04 1.276E+00
+ ETOT  6  -5.0646791710146    -4.559E-07 7.562E-05 1.158E-03 5.301E-04 1.275E+00
+ ETOT  7  -5.0646791869207    -1.591E-08 1.044E-05 4.827E-05 1.038E-04 1.275E+00
+ ETOT  8  -5.0646791872585    -3.378E-10 2.257E-05 1.151E-06 7.970E-06 1.275E+00
 
  At SCF step    8, etot is converged : 
   for the second time, diff in etot=  3.378E-10 < toldfe=  1.000E-07
@@ -774,13 +776,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.275229     -0.000005   -0.000001    1.275229
- ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000005   -0.000001    1.275229
- Total magnetization (exact)        -0.000011   -0.000003    5.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Bi   2.00000        1.275229      1.275229   -0.000005   -0.000001    1.275229    0.000223 -163.386040
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)
+ (cart.coord.)                                     -0.000005   -0.000001    1.275229
+ (sph.coord.)                           1.275229                                        0.000223 -163.386040
+ Total magnetization (exact)
+ (cart.coord.)                                     -0.000011   -0.000003    5.000000
+ (sph.coord.)                           5.000000                                        0.000134 -163.494621
  Magnetization vector    -0.1118867224E-04   -0.3315378334E-05    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
  Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
@@ -879,10 +885,10 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.0646811711824    -5.065E+00 6.697E-06 1.136E-08
- ETOT  2  -5.0646811711836    -1.152E-12 1.987E-06 3.931E-09
- ETOT  3  -5.0646811711839    -3.118E-13 2.363E-07 4.068E-10
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.0646811711824    -5.065E+00 6.697E-06 1.136E-08 1.275E+00 1.275E+00
+ ETOT  2  -5.0646811711836    -1.152E-12 1.987E-06 3.931E-09 3.007E-07 1.275E+00
+ ETOT  3  -5.0646811711839    -3.118E-13 2.363E-07 4.068E-10 3.940E-07 1.275E+00
 
  At SCF step    3, etot is converged : 
   for the second time, diff in etot=  3.118E-13 < toldfe=  1.000E-07
@@ -948,13 +954,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.275219     -0.000000   -0.000000    1.275219
- ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000   -0.000000    1.275219
- Total magnetization (exact)        -0.000001   -0.000000    5.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Bi   2.00000        1.275219      1.275219   -0.000000   -0.000000    1.275219    0.000011    0.000000
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)
+ (cart.coord.)                                     -0.000000   -0.000000    1.275219
+ (sph.coord.)                           1.275219                                        0.000011    0.000000
+ Total magnetization (exact)
+ (cart.coord.)                                     -0.000001   -0.000000    5.000000
+ (sph.coord.)                           5.000000                                        0.000007    0.000000
  Magnetization vector    -0.5502842367E-06   -0.1608271688E-06    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
  Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
@@ -1054,15 +1064,15 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.0326590295135    -5.033E+00 6.342E-03 5.003E+01
- ETOT  2  -5.0625061399746    -2.985E-02 3.095E-04 4.831E+00
- ETOT  3  -5.0646057565072    -2.100E-03 1.533E-04 1.134E+00
- ETOT  4  -5.0646773617182    -7.161E-05 2.229E-04 2.388E-01
- ETOT  5  -5.0646787151103    -1.353E-06 3.443E-05 3.515E-02
- ETOT  6  -5.0646791710146    -4.559E-07 7.562E-05 1.158E-03
- ETOT  7  -5.0646791869207    -1.591E-08 1.044E-05 4.827E-05
- ETOT  8  -5.0646791872585    -3.378E-10 2.257E-05 1.151E-06
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.0326590295135    -5.033E+00 6.342E-03 5.003E+01 1.072E+00 1.072E+00
+ ETOT  2  -5.0625061399746    -2.985E-02 3.095E-04 4.831E+00 1.491E-01 1.221E+00
+ ETOT  3  -5.0646057565072    -2.100E-03 1.533E-04 1.134E+00 4.463E-02 1.266E+00
+ ETOT  4  -5.0646773617182    -7.161E-05 2.229E-04 2.388E-01 1.004E-02 1.276E+00
+ ETOT  5  -5.0646787151103    -1.353E-06 3.443E-05 3.515E-02 2.698E-04 1.276E+00
+ ETOT  6  -5.0646791710146    -4.559E-07 7.562E-05 1.158E-03 5.301E-04 1.275E+00
+ ETOT  7  -5.0646791869207    -1.591E-08 1.044E-05 4.827E-05 1.038E-04 1.275E+00
+ ETOT  8  -5.0646791872585    -3.378E-10 2.257E-05 1.151E-06 7.970E-06 1.275E+00
 
  At SCF step    8, etot is converged : 
   for the second time, diff in etot=  3.378E-10 < toldfe=  1.000E-07
@@ -1128,13 +1138,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.275229     -0.000005   -0.000001    1.275229
- ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000005   -0.000001    1.275229
- Total magnetization (exact)        -0.000011   -0.000003    5.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Bi   2.00000        1.275229      1.275229   -0.000005   -0.000001    1.275229    0.000223 -163.386040
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)
+ (cart.coord.)                                     -0.000005   -0.000001    1.275229
+ (sph.coord.)                           1.275229                                        0.000223 -163.386040
+ Total magnetization (exact)
+ (cart.coord.)                                     -0.000011   -0.000003    5.000000
+ (sph.coord.)                           5.000000                                        0.000134 -163.494621
  Magnetization vector    -0.1118867224E-04   -0.3315378334E-05    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
  Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
@@ -1233,10 +1247,10 @@ solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-07, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -5.0646811711824    -5.065E+00 6.697E-06 1.136E-08
- ETOT  2  -5.0646811711836    -1.152E-12 1.987E-06 3.931E-09
- ETOT  3  -5.0646811711839    -3.118E-13 2.363E-07 4.068E-10
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -5.0646811711824    -5.065E+00 6.697E-06 1.136E-08 1.275E+00 1.275E+00
+ ETOT  2  -5.0646811711836    -1.152E-12 1.987E-06 3.931E-09 3.007E-07 1.275E+00
+ ETOT  3  -5.0646811711839    -3.118E-13 2.363E-07 4.068E-10 3.940E-07 1.275E+00
 
  At SCF step    3, etot is converged : 
   for the second time, diff in etot=  3.118E-13 < toldfe=  1.000E-07
@@ -1302,13 +1316,17 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
-    1   2.00000        1.275219     -0.000000   -0.000000    1.275219
- ---------------------------------------------------------------------
- Total magnetization (spheres)      -0.000000   -0.000000    1.275219
- Total magnetization (exact)        -0.000001   -0.000000    5.000000
+    Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
+    1 Bi   2.00000        1.275219      1.275219   -0.000000   -0.000000    1.275219    0.000011    0.000000
+ ------------------------------------------------------------------------------------------------------------
+ Total magnetization (spheres)
+ (cart.coord.)                                     -0.000000   -0.000000    1.275219
+ (sph.coord.)                           1.275219                                        0.000011    0.000000
+ Total magnetization (exact)
+ (cart.coord.)                                     -0.000001   -0.000000    5.000000
+ (sph.coord.)                           5.000000                                        0.000007    0.000000
  Magnetization vector    -0.5502842367E-06   -0.1608271688E-06    0.5000000000E+01 (in # of spins, without 1/2 for magnetic moment)
  Spin magnetic energy -m.B =    -0.2500000000E+01 Ha
 ================================================================================
@@ -1401,7 +1419,7 @@ band_energy         : -3.81141886083962E+00
            getwfk22        -1
            getwfk31         0
            getwfk32        -1
-         hspinfield    0.00000000E+00  0.00000000E+00  1.00000000E+00
+       hspinfield      0.00000000E+00  0.00000000E+00  1.00000000E+00
            istwfk11      2
            istwfk12      2
            istwfk21      1
@@ -1621,10 +1639,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.3
+- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  25 WARNINGs and  26 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.3  wall=          3.3
+.Delivered  23 WARNINGs and  28 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.6  wall=          3.7

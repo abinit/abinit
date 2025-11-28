@@ -133,11 +133,16 @@ MODULE m_pawtab
 
 !Integer scalars
 
+  integer :: add_core_energy
+   ! Flag controling addition of core energies in total energy
+   ! add_core_energy=0 ; do not add core energy to PAW energy
+   ! add_core_energy=1 ; add core energy to PAW energy
+
   integer :: basis_size
    ! Number of elements for the paw nl basis on the considered atom type
 
   integer :: has_coretau
-   ! Flag controling use of core kinetic enrgy density (AE and pseudo)
+   ! Flag controling use of core kinetic energy density (AE and pseudo)
    ! if 1, [t]coretau() is allocated.
    ! if 2, [t]coretau() is computed and stored.
 
@@ -327,11 +332,17 @@ MODULE m_pawtab
    ! Gives 1/q d(tTAUcore(q))/dq for q=0
    ! (tTAUcore(q) = FT of pseudo core kinetic density)
 
+  real(dp) :: ehnzc
+   ! Hartree energy of core electrons + nucleus
+  
   real(dp) :: eps
   ! Epsilon parameter for Yukawa potential (only used for the exact double counting)
 
   real(dp) :: ex_cc
    ! Exchange energy for the core-core interaction of the Fock operator
+
+  real(dp) :: ekincore
+   ! Kinetic energy for the core density
 
   real(dp) :: exccore
    ! Exchange-correlation energy for the core density
@@ -636,7 +647,7 @@ MODULE m_pawtab
  public :: pawtab_nullify      ! Nullify content
  public :: pawtab_get_lsize    ! Get the max. l for a product of 2 partial waves
  public :: pawtab_set_flags    ! Set the value of the internal flags
- public :: pawtab_print        ! Printout of the object.
+ public :: pawtab_print        ! Printout of the object
  public :: pawtab_bcast        ! MPI broadcast the object
 !TODO: someone should implement a pawtab copy routine to get an independent identical copy of the object
 
@@ -702,6 +713,7 @@ subroutine pawtab_nullify_0D(Pawtab)
  Pawtab%has_nablaphi=0
  Pawtab%has_shapefncg=0
  Pawtab%has_wvl=0
+ Pawtab%add_core_energy=0
 
  Pawtab%usetcore=0
  Pawtab%usexcnhat=0
@@ -1048,10 +1060,11 @@ end subroutine pawtab_free_1D
 !! SOURCE
 
 subroutine pawtab_set_flags_0D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
-&                              has_vhtnzc,has_nabla,has_nablaphi,has_shapefncg,has_vminushalf,has_wvl)
+&                              has_vhtnzc,has_nabla,has_nablaphi,has_shapefncg,has_vminushalf,has_wvl,&
+&                              add_core_energy)
 
 !Arguments ------------------------------------
- integer,intent(in),optional :: has_coretau,has_fock,has_kij,has_tproj,has_tvale
+ integer,intent(in),optional :: has_coretau,add_core_energy,has_fock,has_kij,has_tproj,has_tvale
  integer,intent(in),optional :: has_vhnzc,has_vhtnzc,has_vminushalf
  integer,intent(in),optional :: has_nabla,has_nablaphi,has_shapefncg,has_wvl
  type(pawtab_type),intent(inout) :: Pawtab
@@ -1074,6 +1087,7 @@ subroutine pawtab_set_flags_0D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has
  Pawtab%has_shapefncg =0
  Pawtab%has_vminushalf=0
  Pawtab%has_wvl       =0
+ Pawtab%add_core_energy=0
  if (present(has_fock))      Pawtab%has_fock=has_fock
  if (present(has_kij))       Pawtab%has_kij=has_kij
  if (present(has_tproj))     Pawtab%has_tproj=has_tproj
@@ -1086,6 +1100,7 @@ subroutine pawtab_set_flags_0D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has
  if (present(has_shapefncg) )Pawtab%has_shapefncg=has_shapefncg
  if (present(has_vminushalf))Pawtab%has_vminushalf=has_vminushalf
  if (present(has_wvl))       Pawtab%has_wvl=has_wvl
+ if (present(add_core_energy)) Pawtab%add_core_energy=add_core_energy
 
 end subroutine pawtab_set_flags_0D
 !!***
@@ -1103,10 +1118,11 @@ end subroutine pawtab_set_flags_0D
 !! SOURCE
 
 subroutine pawtab_set_flags_1D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
-&                              has_vhtnzc,has_nabla,has_nablaphi,has_shapefncg,has_vminushalf,has_wvl)
+&                              has_vhtnzc,has_nabla,has_nablaphi,has_shapefncg,has_vminushalf,has_wvl,&
+&                              add_core_energy)
 
 !Arguments ------------------------------------
- integer,intent(in),optional :: has_coretau,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,has_vhtnzc
+ integer,intent(in),optional :: has_coretau,add_core_energy,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,has_vhtnzc
  integer,intent(in),optional :: has_nabla,has_nablaphi,has_shapefncg,has_vminushalf,has_wvl
  type(pawtab_type),intent(inout) :: Pawtab(:)
 
@@ -1133,6 +1149,7 @@ subroutine pawtab_set_flags_1D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has
    Pawtab(ii)%has_shapefncg =0
    Pawtab(ii)%has_vminushalf=0
    Pawtab(ii)%has_wvl       =0
+   Pawtab(ii)%add_core_energy=0
    if (present(has_fock))      Pawtab(ii)%has_fock=has_fock
    if (present(has_kij))       Pawtab(ii)%has_kij=has_kij
    if (present(has_tproj))     Pawtab(ii)%has_tproj=has_tproj
@@ -1145,6 +1162,7 @@ subroutine pawtab_set_flags_1D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has
    if (present(has_shapefncg)) Pawtab(ii)%has_shapefncg=has_shapefncg
    if (present(has_vminushalf))Pawtab(ii)%has_vminushalf=has_vminushalf
    if (present(has_wvl))       Pawtab(ii)%has_wvl=has_wvl
+   if (present(add_core_energy)) Pawtab(ii)%add_core_energy=add_core_energy
  end do
 
 end subroutine pawtab_set_flags_1D
@@ -1225,13 +1243,13 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Size of radial mesh ............................ ',Pawtab(ityp)%mesh_size
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  Size of radial mesh for partial waves........... ',Pawtab(ityp)%partialwave_mesh_size
+  write(msg,'(a,i4)')'  Size of radial mesh for partial waves .......... ',Pawtab(ityp)%partialwave_mesh_size
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  Size of radial mesh for [pseudo] core density... ',Pawtab(ityp)%core_mesh_size
+  write(msg,'(a,i4)')'  Size of radial mesh for [pseudo] core density .. ',Pawtab(ityp)%core_mesh_size
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  Size of radial mesh for [pseudo] kin core density',Pawtab(ityp)%coretau_mesh_size
+  write(msg,'(a,i4)')'  Size of radial mesh for [pseudo] kincore density ',Pawtab(ityp)%coretau_mesh_size
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  Size of radial mesh for pseudo valence density.. ',Pawtab(ityp)%tnvale_mesh_size
+  write(msg,'(a,i4)')'  Size of radial mesh for pseudo valence density . ',Pawtab(ityp)%tnvale_mesh_size
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  No of Q-points for tcorespl/tvalespl/tcoretauspl ',Pawtab(ityp)%mqgrid
   call wrtout(my_unt,msg,my_mode)
@@ -1258,11 +1276,11 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
     call wrtout(my_unt,msg,my_mode)
   end if
   if (Pawtab(ityp)%usepawu/=0.or.Pawtab(ityp)%useexexch/=0) then
-    write(msg,'(a,i4)')'  Number of (i,j) elements for PAW+U or EXX ..... ',Pawtab(ityp)%ij_proj
+    write(msg,'(a,i4)')'  Number of (i,j) elements for PAW+U or EXX ...... ',Pawtab(ityp)%ij_proj
     call wrtout(my_unt,msg,my_mode)
     write(msg,'(a,i4)')'  Number of projectors on which U or EXX acts .... ',Pawtab(ityp)%nproju
     call wrtout(my_unt,msg,my_mode)
-    write(msg,'(a,i4)')'  Option interaction for PAW+U (double-counting).. ',Pawtab(ityp)%option_interaction_pawu
+    write(msg,'(a,i4)')'  Option interaction for PAW+U (double-counting) . ',Pawtab(ityp)%option_interaction_pawu
     call wrtout(my_unt,msg,my_mode)
   end if
   write(msg,'(a,i4)')'  Use potential zero ............................. ',Pawtab(ityp)%usepotzero
@@ -1295,54 +1313,60 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Has wvl ........................................ ',Pawtab(ityp)%has_wvl
   call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,i4)')'  Add core energy ................................ ',Pawtab(ityp)%add_core_energy
+  call wrtout(my_unt,msg,my_mode)
   !
   ! Real scalars
-  write(msg,'(a,es16.8)')'  beta ............................................',Pawtab(ityp)%beta
+  write(msg,'(a,es16.8)')'  beta ........................................',Pawtab(ityp)%beta
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,es16.8)')'  1/q d(tNcore(q))/dq for q=0 .....................',Pawtab(ityp)%dncdq0
+  write(msg,'(a,es16.8)')'  1/q d(tNcore(q))/dq for q=0 .................',Pawtab(ityp)%dncdq0
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,es16.8)')'  d^2(tNcore(q))/dq^2 for q=0 .....................',Pawtab(ityp)%d2ncdq0
+  write(msg,'(a,es16.8)')'  d^2(tNcore(q))/dq^2 for q=0 .................',Pawtab(ityp)%d2ncdq0
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,es16.8)')'  1/q d(tNvale(q))/dq for q=0 .....................',Pawtab(ityp)%dnvdq0
+  write(msg,'(a,es16.8)')'  1/q d(tNvale(q))/dq for q=0 .................',Pawtab(ityp)%dnvdq0
   call wrtout(my_unt,msg,my_mode)
   if (Pawtab(ityp)%has_coretau/=0) then
-    write(msg,'(a,es16.8)')'  1/q d(tTAUcore(q))/dq for q=0 ...................',Pawtab(ityp)%dtaucdq0
+    write(msg,'(a,es16.8)')'  1/q d(tTAUcore(q))/dq for q=0 ...............',Pawtab(ityp)%dtaucdq0
     call wrtout(my_unt,msg,my_mode)
   end if
   if (Pawtab(ityp)%has_fock/=0) then
-    write(msg,'(a,es16.8)')'  Core-core Fock energy  ..........................',Pawtab(ityp)%ex_cc
+    write(msg,'(a,es16.8)')'  Core-core Fock energy  ......................',Pawtab(ityp)%ex_cc
     call wrtout(my_unt,msg,my_mode)
   end if
-  write(msg,'(a,es16.8)')'  XC energy for the core density ..................',Pawtab(ityp)%exccore
+  write(msg,'(a,es16.8)')'  XC energy for the core density ..............',Pawtab(ityp)%exccore
+  call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,es16.8)')'  Kinetic energy for the core density .........',Pawtab(ityp)%ekincore
   call wrtout(my_unt,msg,my_mode)
   if(abs(Pawtab(ityp)%sxccore)>tiny(zero)) then
-    write(msg,'(a,es16.8)')'  XC entropy for the core density .................',Pawtab(ityp)%sxccore
-  call wrtout(my_unt,msg,my_mode)
-  end if
-  write(msg,'(a,es16.8)')'  Lamb shielding due to core density ..............',Pawtab(ityp)%lamb_shielding
-  call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,es16.8)')'  Radius of the PAW sphere ........................',Pawtab(ityp)%rpaw
-  call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,es16.8)')'  Compensation charge radius (if >rshp, g(r)=0) ...',Pawtab(ityp)%rshp !(if r>rshp, g(r)=zero)
-  call wrtout(my_unt,msg,my_mode)
-  if (Pawtab(ityp)%shape_type==2) then
-   write(msg,'(a,es16.8)')'  Sigma parameter in gaussian shape function ......',Pawtab(ityp)%shape_sigma !(shape_type=2)
-   call wrtout(my_unt,msg,my_mode)
-  end if
-  if (Pawtab(ityp)%usepawu/=0) then
-   write(msg,'(a,es16.8)')'  Value of the U parameter [eV] ...................',Pawtab(ityp)%upawu*Ha_eV
-   call wrtout(my_unt,msg,my_mode)
-   write(msg,'(a,es16.8)')'  Value of the J parameter [eV] ...................',Pawtab(ityp)%jpawu*Ha_eV
-   call wrtout(my_unt,msg,my_mode)
-  end if
-  if (Pawtab(ityp)%useexexch/=0) then
-    write(msg,'(a,es16.8)')'  Mixing of exact exchange (PBE0) .................',Pawtab(ityp)%exchmix
+    write(msg,'(a,es16.8)')'  XC entropy for the core density .............',Pawtab(ityp)%sxccore
     call wrtout(my_unt,msg,my_mode)
   end if
- if (associated(Pawtab(ityp)%wvl)) then
-   write(msg,'(a,es16.8)')'  WARNING: This Pawtab structure contains WVL data.'
-   call wrtout(my_unt,msg,my_mode)
- end if
+  write(msg,'(a,es16.8)')'  EH(n_Zc) ....................................',Pawtab(ityp)%ehnzc
+  call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,es16.8)')'  Lamb shielding due to core density ..........',Pawtab(ityp)%lamb_shielding
+  call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,es16.8)')'  Radius of the PAW sphere ....................',Pawtab(ityp)%rpaw
+  call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,es16.8)')'  Compensation charge radius (if >rshp,g(r)=0) ',Pawtab(ityp)%rshp !(if r>rshp, g(r)=zero)
+  call wrtout(my_unt,msg,my_mode)
+  if (Pawtab(ityp)%shape_type==2) then
+    write(msg,'(a,es16.8)')'  Sigma parameter in gaussian shape function ..',Pawtab(ityp)%shape_sigma !(shape_type=2)
+    call wrtout(my_unt,msg,my_mode)
+  end if
+  if (Pawtab(ityp)%usepawu/=0) then
+    write(msg,'(a,es16.8)')'  Value of the U parameter [eV] ...............',Pawtab(ityp)%upawu*Ha_eV
+    call wrtout(my_unt,msg,my_mode)
+    write(msg,'(a,es16.8)')'  Value of the J parameter [eV] ...............',Pawtab(ityp)%jpawu*Ha_eV
+    call wrtout(my_unt,msg,my_mode)
+  end if
+  if (Pawtab(ityp)%useexexch/=0) then
+    write(msg,'(a,es16.8)')'  Mixing of exact exchange (PBE0) .............',Pawtab(ityp)%exchmix
+    call wrtout(my_unt,msg,my_mode)
+  end if
+  if (associated(Pawtab(ityp)%wvl)) then
+    write(msg,'(a,es16.8)')'  WARNING: This Pawtab structure contains WVL data.'
+    call wrtout(my_unt,msg,my_mode)
+  end if
 
  end do ! ityp
 
@@ -1510,13 +1534,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 !Integers (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
 !  ij_proj,lcut_size,lexexch,lmnmix_sz,lpawu,mqgrid_shp,nproju,useexexch,usepawu,usepotzero,
-!  option_interaction_pawu,usespnorb
-   if (full_broadcast) nn_int=nn_int+12
+!  option_interaction_pawu,usespnorb,add_core_energy
+   if (full_broadcast) nn_int=nn_int+13
 
 !Reals (read from psp file)
 !-------------------------------------------------------------------------
-!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,eps,ex_cc,exccore,sxccore,lamb_shielding,lambda,rpaw,rshp,rcore,rcoretau,shape_sigma
-   nn_dpr=nn_dpr+16
+!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,eps,ex_cc,exccore,ekincore,sxccore,ehnzc,
+!  lamb_shielding,lambda,rpaw,rshp,rcore,rcoretau,shape_sigma
+   nn_dpr=nn_dpr+18
 
 !Reals (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
@@ -2036,6 +2061,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_int(ii)=pawtab%usepawu  ;ii=ii+1
      list_int(ii)=pawtab%usepotzero ;ii=ii+1
      list_int(ii)=pawtab%usespnorb ;ii=ii+1
+     list_int(ii)=pawtab%add_core_energy  ;ii=ii+1
 !Integer arrays
      if (siz_indklmn>0) then
        list_int(ii:ii+siz_indklmn-1)=reshape(pawtab%indklmn,(/siz_indklmn/))
@@ -2216,6 +2242,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      pawtab%usepawu=list_int(ii)  ;ii=ii+1
      pawtab%usepotzero=list_int(ii) ;ii=ii+1
      pawtab%usespnorb=list_int(ii) ;ii=ii+1
+     pawtab%add_core_energy=list_int(ii) ;ii=ii+1
 !Integer arrays
      if (allocated(pawtab%indklmn)) then
        LIBPAW_DEALLOCATE(pawtab%indklmn)
@@ -2282,7 +2309,9 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_dpr(ii)=pawtab%eps  ;ii=ii+1
    list_dpr(ii)=pawtab%ex_cc   ;ii=ii+1
    list_dpr(ii)=pawtab%exccore  ;ii=ii+1
+   list_dpr(ii)=pawtab%ekincore  ;ii=ii+1
    list_dpr(ii)=pawtab%sxccore  ;ii=ii+1
+   list_dpr(ii)=pawtab%ehnzc  ;ii=ii+1
    list_dpr(ii)=pawtab%lamb_shielding  ;ii=ii+1
    list_dpr(ii)=pawtab%lambda  ;ii=ii+1
    list_dpr(ii)=pawtab%rpaw  ;ii=ii+1
@@ -2542,7 +2571,9 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%eps=list_dpr(ii)  ;ii=ii+1
    pawtab%ex_cc=list_dpr(ii)  ;ii=ii+1
    pawtab%exccore=list_dpr(ii)  ;ii=ii+1
+   pawtab%ekincore=list_dpr(ii)  ;ii=ii+1
    pawtab%sxccore=list_dpr(ii)  ;ii=ii+1
+   pawtab%ehnzc=list_dpr(ii)  ;ii=ii+1
    pawtab%lamb_shielding=list_dpr(ii)  ;ii=ii+1
    pawtab%lambda=list_dpr(ii)  ;ii=ii+1
    pawtab%rpaw=list_dpr(ii)  ;ii=ii+1

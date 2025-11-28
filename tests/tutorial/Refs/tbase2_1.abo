@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h05 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tbase2_1/tbase2_1.abi
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h09 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/tutorial_tbase2_1/tbase2_1.abi
 - output file    -> tbase2_1.abo
 - root for input  files -> tbase2_1i
 - root for output files -> tbase2_1o
@@ -226,8 +226,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
 - H     ONCVPSP-3.3.0  r_core=   1.00957   0.90680
 -  1.00000   1.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       300   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -247,7 +247,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1503.000    1503.000
 
 ================================================================================
 
-=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
 
 --- Iteration: ( 1/10) Internal Cycle: (1/1)
@@ -270,7 +270,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  6  -1.1171843463486    -6.490E-10 1.734E-12 3.695E-07 1.013E-05 2.690E-02
  ETOT  7  -1.1171843463515    -2.882E-12 1.164E-14 2.496E-09 5.222E-07 2.690E-02
 
- At SCF step    7, forces are converged :
+ At SCF step    7, forces are converged : 
   for the second time, max diff in force=  5.222E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -347,7 +347,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1181409608961    -1.692E-08 9.303E-11 2.737E-06 3.907E-05 9.213E-03
  ETOT  5  -1.1181409610935    -1.975E-10 1.625E-13 4.362E-08 2.128E-06 9.215E-03
 
- At SCF step    5, forces are converged :
+ At SCF step    5, forces are converged : 
   for the second time, max diff in force=  2.128E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -428,7 +428,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1182855312527    -4.258E-09 2.342E-11 7.280E-07 1.912E-05 1.227E-03
  ETOT  5  -1.1182855313061    -5.335E-11 4.435E-14 1.155E-08 1.119E-06 1.228E-03
 
- At SCF step    5, forces are converged :
+ At SCF step    5, forces are converged : 
   for the second time, max diff in force=  1.119E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -507,7 +507,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  2  -1.1182883127611    -4.061E-08 8.582E-15 4.242E-06 1.532E-05 5.700E-05
  ETOT  3  -1.1182883136634    -9.023E-10 7.671E-12 7.623E-07 1.190E-05 6.890E-05
 
- At SCF step    3, forces are converged :
+ At SCF step    3, forces are converged : 
   for the second time, max diff in force=  1.190E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -570,7 +570,7 @@ force_length_stats: {min:   6.88974574E-05, max:   6.88974574E-05, mean:   6.889
            Absolute (Ha)=-2.78236E-06
            Relative     =-2.48805E-06
 
- At Broyd/MD step   4, gradients are converged :
+ At Broyd/MD step   4, gradients are converged : 
   max grad (force/stress) = 6.8897E-05 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -670,14 +670,14 @@ solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-06, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1 -0.47392512431104    -4.739E-01 6.747E-06 4.683E+00
- ETOT  2 -0.47392965590756    -4.532E-06 8.633E-13 1.597E-01
- ETOT  3 -0.47393081420014    -1.158E-06 6.509E-09 1.777E-02
- ETOT  4 -0.47393103574282    -2.215E-07 1.198E-09 4.999E-05
- ETOT  5 -0.47393103688359    -1.141E-09 1.856E-12 2.009E-07
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1 -0.47392512431104    -4.739E-01 6.747E-06 4.683E+00 7.069E-01 7.069E-01
+ ETOT  2 -0.47392965590756    -4.532E-06 8.633E-13 1.597E-01 2.393E-05 7.069E-01
+ ETOT  3 -0.47393081420014    -1.158E-06 6.509E-09 1.777E-02 5.409E-04 7.064E-01
+ ETOT  4 -0.47393103574282    -2.215E-07 1.198E-09 4.999E-05 4.030E-04 7.060E-01
+ ETOT  5 -0.47393103688359    -1.141E-09 1.856E-12 2.009E-07 3.471E-05 7.059E-01
 
- At SCF step    5, etot is converged :
+ At SCF step    5, etot is converged : 
   for the second time, diff in etot=  1.141E-09 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -713,14 +713,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.705948     0.000000      0.705948     0.705948
- ---------------------------------------------------------------------
-  Sum:              0.705948     0.000000      0.705948     0.705948
- Total magnetization (from the atomic spheres):             0.705948
- Total magnetization (exact up - dn):                       1.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  H   2.00000     0.705948     0.000000      0.705948     0.705948
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.705948     0.000000      0.705948     0.705948
+ Total magnetization (from the atomic spheres):                0.705948
+ Total magnetization (exact up - dn):                          1.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -780,7 +781,7 @@ band_energy         : -2.66611263131906E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00794000E+00
@@ -962,7 +963,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -979,12 +980,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1002,15 +1003,15 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.1  wall=          2.3
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  27 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.1  wall=          2.3
++Overall time at end (sec) : cpu=          1.0  wall=          1.0

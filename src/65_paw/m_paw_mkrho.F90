@@ -25,6 +25,7 @@ MODULE m_paw_mkrho
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_extfpmd
 
  use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
@@ -75,6 +76,7 @@ CONTAINS  !=====================================================================
 !!                     if 0: compute only the compensating charge
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
 !!         1 for GS calculations
+!!  extfpmd <type(extfpmd_type)>=--optional--extended first-principles molecular dynamics type
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1).
 !!  indsym(4,nsym,natom)=indirect indexing array for atom labels
 !!  ipert=index of perturbation if pawrhoij is a pertubed rhoij
@@ -133,7 +135,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 &          my_natom,natom,nspden,nsym,ntypat,paral_kgb,pawang,pawfgr,pawfgrtab,pawprtvol,&
 &          pawrhoij,pawrhoij_unsym,&
 &          pawtab,qphon,rhopsg,rhopsr,rhor,rprimd,symafm,symrec,typat,ucvol,usewvl,xred,&
-&          pawang_sym,pawnhat,pawnhatgr,pawrhoij0,rhog) ! optional arguments
+&          pawang_sym,pawnhat,pawnhatgr,pawrhoij0,rhog,extfpmd) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -145,6 +147,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
  type(pawang_type),intent(in) :: pawang
  type(pawang_type),intent(in),optional :: pawang_sym
  type(pawfgr_type),intent(in) :: pawfgr
+ type(extfpmd_type),intent(in),pointer,optional :: extfpmd
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom)
  integer,intent(in) :: symafm(nsym),symrec(3,3,nsym),typat(natom)
@@ -250,6 +253,17 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 
 !  Add pseudo density and compensation charge density (on fine grid)
    rhor(:,:)=rhor(:,:)+pawnhat_ptr(:,:)
+
+!  Add extfpmd electrons contributions to density on fine grid.
+   if(present(extfpmd)) then
+     if(associated(extfpmd)) then
+       if(extfpmd%version==10.and.allocated(extfpmd%nelectarr)) then
+         rhor(:,:)=rhor(:,:)+extfpmd%nelectarr(:,:)/ucvol/nspden
+       else
+         rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/nspden
+       end if
+     end if
+   end if
 
 !  Compute compensated pseudo density in reciprocal space
    if (present(rhog)) then

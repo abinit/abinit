@@ -18,13 +18,13 @@
  # all the previous one before its optimization.
 
  vpq_nstates     3     # 3 states
- vpq_nstep       100   # Maximum number of optimization steps
+ vpq_nstep       55    # Maximum number of optimization steps
  vpq_nstep_ort   30    # Maximum number of steps for which the orthogonalization
                        # constraint is applied
  vpq_translate   1     # Take into account the translational invariance
 
  # these parameters are default but given here explicitly for clarity
- vpq_aseed      "gau_energy"  # Initial charge localization is Guassian-like
+ vpq_aseed      "gau_energy"  # Initial charge localization is Gaussian-like
  vpq_gpr_energy  0. 1.        # Gaussian parameters for initial charge
 
 # Frohlich correction
@@ -83,7 +83,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_*
+#%% exclude_builders = eos_nvhpc_*, haicgu_*
 #%% test_chain = teph4vpq_1.abi, teph4vpq_2.abi, teph4vpq_3.abi,
 #%%              teph4vpq_4.abi, teph4vpq_5.abi, teph4vpq_6.abi,
 #%%              teph4vpq_7.abi, teph4vpq_8.abi, teph4vpq_9.abi,

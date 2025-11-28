@@ -88,6 +88,7 @@ contains
 !!   | pawoptmix=-PAW- 1 if the computed residuals include the PAW (rhoij) part
 !!   | prtvol=control print volume and debugging
 !!  etotal=the total energy obtained from the input density
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fnametmp_fft=name of _FFT file
 !!  fcart(3,natom)=cartesian forces (hartree/bohr)
 !!  ffttomix(nfft*(1-nfftmix/nfft))=Index of the points of the FFT (fine) grid on the grid used for mixing (coarse)
@@ -561,10 +562,9 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  endif
 
  if(associated(extfpmd)) then
-   extfpmd%nelect=extfpmd%nelect-extfpmd%nelect_res
    mix%f_extfpmd(i_vresid1)=extfpmd%nelect_res
    mix%f_extfpmd(i_vrespc1)=extfpmd%nelect_respc
-   nelect_extfpmd_=extfpmd%nelect
+   nelect_extfpmd_=extfpmd%nelect-extfpmd%nelect_res
  endif
 
 
@@ -623,6 +623,10 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    ABI_FREE(rcpaw_arr)
  endif
  nullify(rcpaw_arr_)
+
+ if(associated(extfpmd)) then
+   extfpmd%nelect=nelect_extfpmd_
+ endif
 
 !PAW: apply a simple mixing to rhoij (this is temporary)
  if(dtset%iscf==15 .or. dtset%iscf==16)then

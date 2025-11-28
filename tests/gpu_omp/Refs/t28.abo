@@ -620,7 +620,7 @@ xc                  : -2.29596476102258E+00
 Ewald energy        : -2.51299337734686E+00
 psp_core            :  4.70723192679138E-02
 local_psp           : -8.13899272863497E+00
-spherical_terms     :  9.32702014491993E-01
+PAW spherical_terms :  9.32702014491993E-01
 internal            : -6.07502901441373E+00
 '-kT*entropy'       : -7.02307763882904E-03
 total_energy        : -6.08205209205256E+00
@@ -635,11 +635,21 @@ band_energy         : -1.61167477255382E+00
 Ewald energy        : -2.51299337734686E+00
 psp_core            :  4.70723192679138E-02
 xc_dc               : -2.40155397864825E+00
-spherical_terms     :  4.04117363433229E-01
+PAW spherical_terms :  4.04117363433229E-01
 internal            : -6.07503244584779E+00
 '-kT*entropy'       : -7.02307763882904E-03
 total_energy_dc     : -6.08205552348662E+00
 total_energy_dc_eV  : -1.65501147507428E+02
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, itime: 3, icycle: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -3.84389689138872E+01
+Total energy DC     : -3.84389723453212E+01
+Total energy (eV)   : -1.04597753829839E+03
+Total energy DC (eV): -1.04597763167246E+03
 ...
 
  rms coord change=  6.3436E-04   atom, delta coord (reduced):
@@ -897,7 +907,7 @@ xc                  : -2.17125431260329E+00
 Ewald energy        : -2.51299337734686E+00
 psp_core            :  4.70723192679138E-02
 local_psp           : -8.05389456742890E+00
-spherical_terms     :  8.19702880818558E-01
+PAW spherical_terms :  8.19702880818558E-01
 internal            : -6.05776108813265E+00
 '-kT*entropy'       : -5.64189583547795E-03
 total_energy        : -6.06340298396812E+00
@@ -912,11 +922,21 @@ band_energy         : -1.92920924328566E+00
 Ewald energy        : -2.51299337734686E+00
 psp_core            :  4.70723192679138E-02
 xc_dc               : -1.96944770358330E+00
-spherical_terms     :  3.06816915077477E-01
+PAW spherical_terms :  3.06816915077477E-01
 internal            : -6.05776108987043E+00
 '-kT*entropy'       : -5.64189583547795E-03
 total_energy_dc     : -6.06340298570591E+00
 total_energy_dc_eV  : -1.64993586141914E+02
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 2, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -3.75632671992267E+01
+Total energy DC     : -3.75632671993686E+01
+Total energy (eV)   : -1.02214848279391E+03
+Total energy DC (eV): -1.02214848279777E+03
 ...
 
 

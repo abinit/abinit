@@ -837,12 +837,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real
-   call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,&
-     KS_energies%entropy_paw,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
-     Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_paw_ij,&
-     Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
-     Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-     Cryst%xred,Cryst%ucvol,Psps%znuclpsp,epaw_xc=KS_energies%e_pawxc)
+   call pawdenpot(compch_sph,el_temp,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+     Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_energies%paw,KS_paw_ij,&
+     Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
+     Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%xred,Cryst%ucvol,Psps%znuclpsp)
 
  else
    ABI_MALLOC(ks_nhatgr, (0, 0, 0))
@@ -3032,7 +3030,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  Sigp%npwx   = Dtset%npwsigx
 
  ! Read parameters of the WFK, verifify them and retrieve all G-vectors.
- call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
+ if (dtset%userie == 456) then
+   call wfk_read_eigenvalues("SC_WFK",energies_p,Hdr_wfk,comm)
+ else
+   call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
+ end if
  mband = MAXVAL(Hdr_wfk%nband)
 
  remove_inv = .FALSE.
@@ -4265,12 +4267,10 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
  ! Get electronic temperature from dtset
  el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
- call pawdenpot(qp_compch_sph,el_temp,QP_energies%e_paw,QP_energies%e_pawdc,&
-   QP_energies%entropy_paw,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
-   Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,QP_paw_an,QP_paw_an,&
-   QP_paw_ij,Pawang,Dtset%pawprtvol,Pawrad,QP_pawrhoij,Dtset%pawspnorb,&
-   Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-   Cryst%xred,Cryst%ucvol,Psps%znuclpsp)
+ call pawdenpot(qp_compch_sph,el_temp,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+   Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,QP_paw_an,QP_paw_an,QP_energies%paw,&
+   QP_paw_ij,Pawang,Dtset%pawprtvol,Pawrad,QP_pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
+   Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%xred,Cryst%ucvol,Psps%znuclpsp)
 
 end subroutine paw_qpscgw
 !!***

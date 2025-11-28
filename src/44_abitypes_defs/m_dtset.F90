@@ -225,6 +225,8 @@ type, public :: dataset_type
  integer :: extfpmd_nbcut = 25
  integer :: extfpmd_nbdbuf = 0
  integer :: extfpmd_nband = 0
+ integer :: extfpmd_pawsph = 0
+ integer :: extfpmd_prterr = 0
  integer :: extrapwf
  integer :: expert_user
 !F
@@ -281,14 +283,12 @@ type, public :: dataset_type
  integer :: gpu_option
  integer :: gpu_thread_limit
 
- integer :: gstore_cplex = 2
  integer :: gstore_with_vk = 1
  integer :: gstore_use_lgk = 0
  integer :: gstore_use_lgq = 0
  character(len=abi_slen) :: gstore_kzone = "ibz"
  character(len=abi_slen) :: gstore_qzone = "bz"
  character(len=abi_slen) :: gstore_kfilter = "none"
- character(len=abi_slen) :: gstore_gmode = "phonon"
  character(len=abi_slen) :: gstore_gname = "gvals"
  integer :: gstore_brange(2, 2) = 0
  real(dp) :: gstore_erange(2, 2) = zero
@@ -529,6 +529,7 @@ type, public :: dataset_type
  integer :: paral_atom
  integer :: paral_kgb
  integer :: paral_rf
+ integer :: paw_add_Core
  integer :: pawcpxocc
  integer :: pawcross
  integer :: pawfatbnd
@@ -654,8 +655,9 @@ type, public :: dataset_type
  integer :: rmm_diis = 0
  integer :: rmm_diis_savemem = 0
  integer :: rcpaw_frocc = 0
- integer :: rcpaw_nfrpaw = 2
- integer :: rcpaw_nfrtnc = 2
+ integer :: rcpaw_updatetnc
+ integer :: rcpaw_orbshift = 0
+ integer :: rcpaw_potshift = 0
 !S
  integer :: sigma_nshiftk = 1      ! Number of shifts in k-mesh for Sigma_{nk}.
  integer :: signperm
@@ -785,6 +787,7 @@ type, public :: dataset_type
  integer :: ngkpt(3)   ! Number of division for MP sampling.
  integer :: ph_ngqpt(3) = 20
  integer :: qprtrb(3)
+ integer :: rcpaw_updatepaw(2)= 0
  integer :: rfatpol(2)
  integer :: rfdir(3)
  integer :: rf2_pert1_dir(3)
@@ -822,7 +825,7 @@ type, public :: dataset_type
  integer, allocatable ::  plowan_nbl(:)      ! plowan_nbl(plowan_natom)
  integer, allocatable ::  plowan_projcalc(:) ! plowan_projcalc(\sum_iatom plowan_nbl)
  integer, allocatable ::  prtatlist(:)       ! prtatlist(natom)
- integer, allocatable ::  rcpaw_frtypat(:)   ! rcpaw_frtypat(ntypat)
+ integer, allocatable ::  rcpaw_rctypat(:)   ! rcpaw_rctypat(ntypat)
  integer, allocatable ::  so_psp(:)          ! so_psp(npsp)
  integer, allocatable ::  symafm(:)          ! symafm(nsym)
  integer, allocatable ::  symrel(:,:,:)      ! symrel(3,3,nsym)
@@ -941,7 +944,7 @@ type, public :: dataset_type
  real(dp) :: pw_unbal_thresh
  real(dp) :: ratsm
  real(dp) :: ratsph_extra
- real(dp) :: rcpaw_tolnc = 0.000001_dp
+ real(dp) :: rcpaw_tolnc = tol5
  real(dp) :: recrcut
  real(dp) :: recefermi
  real(dp) :: rectolden
@@ -969,6 +972,7 @@ type, public :: dataset_type
  real(dp) :: toldfe
  real(dp) :: tolmxde
  real(dp) :: toldff
+ real(dp) :: toldmag
  real(dp) :: tolimg
  real(dp) :: tolmxf
  real(dp) :: tolrde
@@ -1037,8 +1041,8 @@ type, public :: dataset_type
  real(dp) :: pol(3)
  real(dp) :: polcen(3)
  real(dp) :: pvelmax(3)
- real(dp) :: qgbt(3)=[0.0_dp,0.0_dp,0.0_dp]
- real(dp) :: qgbt_cart(3)=[0.0_dp,0.0_dp,0.0_dp]
+ real(dp) :: qgbt(3)=zero
+ real(dp) :: qgbt_cart(3)=zero
  real(dp) :: qptn(3)
  real(dp) :: red_efield(3)
  real(dp) :: red_dfield(3)
@@ -1093,7 +1097,7 @@ type, public :: dataset_type
  real(dp), allocatable :: qptdm(:,:)          ! qptdm(3,nqptdm)
  real(dp), allocatable :: quadmom(:)          ! quadmom(ntypat)
  real(dp), allocatable :: ratsph(:)           ! ratsph(ntypat)
- real(dp), allocatable :: rcpaw_scenergy(:)   ! rcpaw_scenergy(ntypat)
+ real(dp), allocatable :: rcpaw_sc(:)         ! rcpaw_sc(ntypat)
  real(dp), allocatable :: rprim_orig(:,:,:)   ! rprim_orig(3,3,nimage)
  real(dp), allocatable :: rprimd_orig(:,:,:)  ! rprimd_orig(3,3,nimage)
  real(dp), allocatable :: sigma_shiftk(:,:)   ! sigma_shiftk(3, sigma_nshiftk)    ! shifts in k-mesh for Sigma_{nk}.
@@ -1163,6 +1167,9 @@ type, public :: dataset_type
 
  procedure :: get_wrmesh_for_sigeph => dtset_get_wrmesh_for_sigeph
   ! Frequency mesh for sigma(w) and spectral functions (EPH self-energy)
+
+ procedure :: get_edos_params => dtset_get_edos_params
+  ! Return parameters for the computation of the electronic DOS.
 
  end type dataset_type
 !!***
@@ -1731,6 +1738,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%extfpmd_nbcut      = dtin%extfpmd_nbcut
  dtout%extfpmd_nbdbuf     = dtin%extfpmd_nbdbuf
  dtout%extfpmd_nband      = dtin%extfpmd_nband
+ dtout%extfpmd_pawsph     = dtin%extfpmd_pawsph
+ dtout%extfpmd_prterr     = dtin%extfpmd_prterr
  dtout%extrapwf           = dtin%extrapwf
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
@@ -1810,14 +1819,12 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gpu_option         = dtin%gpu_option
  dtout%gpu_thread_limit   = dtin%gpu_thread_limit
 
- dtout%gstore_cplex       = dtin%gstore_cplex
  dtout%gstore_with_vk     = dtin%gstore_with_vk
  dtout%gstore_use_lgk     = dtin%gstore_use_lgk
  dtout%gstore_use_lgq     = dtin%gstore_use_lgq
  dtout%gstore_kzone       = dtin%gstore_kzone
  dtout%gstore_qzone       = dtin%gstore_qzone
  dtout%gstore_kfilter     = dtin%gstore_kfilter
- dtout%gstore_gmode       = dtin%gstore_gmode
  dtout%gstore_gname       = dtin%gstore_gname
  dtout%gstore_brange      = dtin%gstore_brange
  dtout%gstore_erange      = dtin%gstore_erange
@@ -2054,6 +2061,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%paral_rf           = dtin%paral_rf
  dtout%prt_lorbmag        = dtin%prt_lorbmag
  dtout%pawcpxocc          = dtin%pawcpxocc
+ dtout%paw_add_core       = dtin%paw_add_core
  dtout%pawcross           = dtin%pawcross
  dtout%pawlcutd           = dtin%pawlcutd
  dtout%pawlmix            = dtin%pawlmix
@@ -2152,9 +2160,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%qptopt             = dtin%qptopt
  dtout%quadquad           = dtin%quadquad
  dtout%random_atpos       = dtin%random_atpos
- dtout%rcpaw_frocc       = dtin%rcpaw_frocc
- dtout%rcpaw_nfrpaw       = dtin%rcpaw_nfrpaw
- dtout%rcpaw_nfrtnc       = dtin%rcpaw_nfrtnc
+ dtout%rcpaw_frocc        = dtin%rcpaw_frocc
+ dtout%rcpaw_updatetnc    = dtin%rcpaw_updatetnc
+ dtout%rcpaw_orbshift     = dtin%rcpaw_orbshift
+ dtout%rcpaw_potshift     = dtin%rcpaw_potshift
  dtout%recgratio          = dtin%recgratio
  dtout%recnpath           = dtin%recnpath
  dtout%recnrec            = dtin%recnrec
@@ -2402,6 +2411,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%toldfe             = dtin%toldfe
  dtout%tolmxde            = dtin%tolmxde
  dtout%toldff             = dtin%toldff
+ dtout%toldmag            = dtin%toldmag
  dtout%tolimg             = dtin%tolimg
  dtout%tolmxf             = dtin%tolmxf
  dtout%tolrde             = dtin%tolrde
@@ -2456,6 +2466,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%shiftk_orig        = dtin%shiftk_orig
  dtout%strtarget(:)       = dtin%strtarget(:)
  dtout%ucrpa_window(:)    = dtin%ucrpa_window(:)
+ dtout%rcpaw_updatepaw(:) = dtin%rcpaw_updatepaw(:)
  dtout%vcutgeo(:)         = dtin%vcutgeo(:)
  dtout%vprtrb(:)          = dtin%vprtrb(:)
 
@@ -2485,7 +2496,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%plowan_lcalc, dtout%plowan_lcalc)
  call alloc_copy(dtin%plowan_projcalc, dtout%plowan_projcalc)
  call alloc_copy(dtin%prtatlist, dtout%prtatlist)
- call alloc_copy(dtin%rcpaw_frtypat,dtout%rcpaw_frtypat)
+ call alloc_copy(dtin%rcpaw_rctypat,dtout%rcpaw_rctypat)
  call alloc_copy(dtin%so_psp, dtout%so_psp)
  call alloc_copy(dtin%symafm, dtout%symafm)
  call alloc_copy(dtin%symrel, dtout%symrel)
@@ -2526,7 +2537,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%qptdm, dtout%qptdm)
  call alloc_copy(dtin%quadmom, dtout%quadmom)
  call alloc_copy(dtin%ratsph, dtout%ratsph)
- call alloc_copy(dtin%rcpaw_scenergy,dtout%rcpaw_scenergy)
+ call alloc_copy(dtin%rcpaw_sc,dtout%rcpaw_sc)
  call alloc_copy(dtin%rprim_orig, dtout%rprim_orig)
  call alloc_copy(dtin%rprimd_orig, dtout%rprimd_orig)
  call alloc_copy(dtin%shiftk, dtout%shiftk)
@@ -2603,7 +2614,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%plowan_nbl)
  ABI_SFREE(dtset%plowan_projcalc)
  ABI_SFREE(dtset%prtatlist)
- ABI_SFREE(dtset%rcpaw_frtypat)
+ ABI_SFREE(dtset%rcpaw_rctypat)
  ABI_SFREE(dtset%so_psp)
  ABI_SFREE(dtset%symafm)
  ABI_SFREE(dtset%symrel)
@@ -2645,7 +2656,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%qptdm)
  ABI_SFREE(dtset%quadmom)
  ABI_SFREE(dtset%ratsph)
- ABI_SFREE(dtset%rcpaw_scenergy)
+ ABI_SFREE(dtset%rcpaw_sc)
  ABI_SFREE(dtset%rprim_orig)
  ABI_SFREE(dtset%rprimd_orig)
  ABI_SFREE(dtset%shiftk)
@@ -3260,6 +3271,32 @@ subroutine dtset_get_wrmesh_for_sigeph(dtset, nwr, wr_step)
 end subroutine dtset_get_wrmesh_for_sigeph
 !!***
 
+!!****f* m_dtset/dtset_get_edos_params
+!! NAME
+!! dtset_get_edos_params
+!!
+!! FUNCTION
+!!   Return parameters for the computation of the electronic DOS.
+!!   to be passed to ebands%get_edos
+!!
+!! SOURCE
+
+subroutine dtset_get_edos_params(dtset, edos_intmeth, edos_step, edos_broad)
+
+!Arguments-------------------------------
+!scalars
+ class(dataset_type),intent(in) :: dtset
+ integer,intent(out) :: edos_intmeth
+ real(dp),intent(out) :: edos_step, edos_broad
+! *********************************************************************
+
+ edos_intmeth = 2; if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
+ edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+ edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
+
+end subroutine dtset_get_edos_params
+!!***
+
 !!****f* m_dtset/macroin
 !! NAME
 !! macroin
@@ -3356,6 +3393,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol3
        dtsets(idtset)%tolmxf=1.0d-3
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=1
        dtsets(idtset)%timopt=0
        dtsets(idtset)%npulayit=4
@@ -3379,6 +3417,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol5
        dtsets(idtset)%tolmxf=5.0d-4
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=1
        dtsets(idtset)%timopt=0
        dtsets(idtset)%npulayit=7
@@ -3402,6 +3441,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol7
        dtsets(idtset)%tolmxf=1.0d-4
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=2
        dtsets(idtset)%timopt=1
        if(xmpi_paral==1) dtsets(idtset)%timopt = 0
@@ -3426,6 +3466,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol9
        dtsets(idtset)%tolmxf=5.0d-5
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=2
        dtsets(idtset)%timopt=1
        if(xmpi_paral==1) dtsets(idtset)%timopt = 0
@@ -3450,6 +3491,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol10
        dtsets(idtset)%tolmxf=1.0d-6
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=2
        dtsets(idtset)%timopt=1
        if(xmpi_paral==1) dtsets(idtset)%timopt = 0
@@ -3474,6 +3516,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol12
        dtsets(idtset)%tolmxf=1.0d-6
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=2
        dtsets(idtset)%timopt=1
        if(xmpi_paral==1) dtsets(idtset)%timopt = 0
@@ -3678,7 +3721,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_phwinfact eph_fix_korq'
  list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_tols_idelta eph_fix_wavevec eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user'
- list_vars=trim(list_vars)//' extfpmd_nbcut extfpmd_nbdbuf extfpmd_nband extrapwf'
+ list_vars=trim(list_vars)//' extfpmd_nbcut extfpmd_nbdbuf extfpmd_nband extfpmd_pawsph extfpmd_prterr extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest ffnl_lw'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw fft_count'
@@ -3712,7 +3755,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib gpu_thread_limit'
  list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option'
  list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
- list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter gstore_gmode gstore_gname'
+ list_vars=trim(list_vars)//' gstore_brange gstore_erange gstore_kfilter gstore_gname'
  list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk gstore_use_lgk gstore_use_lgq'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
@@ -3790,7 +3833,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' optnlxccc optstress oracle_factor oracle_min_occ orbmag ortalg'
  list_vars=trim(list_vars)//' opt_effpot opt_ncoeff opt_coeff output_file outdata_prefix'
 !P
- list_vars=trim(list_vars)//' papiopt paral_atom paral_kgb paral_rf pawcpxocc pawcross'
+ list_vars=trim(list_vars)//' papiopt paral_atom paral_kgb paral_rf paw_add_core pawcpxocc pawcross'
  list_vars=trim(list_vars)//' pawecutdg pawfatbnd pawlcutd pawlmix'
  list_vars=trim(list_vars)//' pawmixdg pawnhatxc pawnphi pawntheta pawnzlm pawoptmix pawoptosc pawovlp'
  list_vars=trim(list_vars)//' pawprtdos pawprtvol pawprtwf pawprt_b pawprt_k pawspnorb pawstgylm'
@@ -3825,7 +3868,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
  list_vars=trim(list_vars)//' rfstrs rfstrs_ref rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  list_vars=trim(list_vars)//' rmm_diis rmm_diis_savemem'
- list_vars=trim(list_vars)//' rcpaw_scenergy rcpaw_nfrpaw rcpaw_frocc rcpaw_tolnc rcpaw_nfrtnc rcpaw_frtypat'
+ list_vars=trim(list_vars)//' rcpaw_frocc rcpaw_orbshift rcpaw_potshift rcpaw_rctypat rcpaw_sc rcpaw_tolnc rcpaw_updatepaw rcpaw_updatetnc'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' sel_EFS'
@@ -3865,7 +3908,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' td_ef_type td_ef_induced_vecpot td_ef_tzero td_ef_tau td_ef_lambda td_ef_pol td_ef_ezero'
  list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix transport_ngkpt'
- list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons tolcum toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
+ list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons tolcum toldfe tolmxde toldff toldmag tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tolwfr_diago tphysel ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
