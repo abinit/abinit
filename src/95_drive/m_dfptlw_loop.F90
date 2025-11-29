@@ -335,7 +335,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
 
  else
    ABI_MALLOC(kg1,(3,mpw*mk1mem))
-   kpq=dtset%kptns
+   kpq=dtset%kptns(:,1:dtset%nkpt)
    mpw1=mpw
    kg1=kg
    npwar1=npwarr
@@ -942,7 +942,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
 
 !More memory cleaning
  call gs_hamkq%free()
-
  ABI_FREE(kpq)
  ABI_FREE(kg1)
  ABI_FREE(npwar1)
@@ -970,7 +969,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,codvsn,d3e_pert1,d3e_pert2,d3etot,dimffn
    ABI_FREE(cg2_mq)
    ABI_FREE(eigen1_mq)
    ABI_FREE(eigen2_mq)
-   ABI_FREE(kmq)
    ABI_FREE(kg1_mq)
    ABI_FREE(npwar1_mq)
    ABI_FREE(npwtot1_mq)
