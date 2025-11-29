@@ -511,7 +511,8 @@ class AbimemFile:
 
         if heap: heap.show()
         if stack: stack.show()
-        if verbose and reallocs:
+        #if verbose and reallocs:
+        if reallocs:
             print("Possible reallocations:")
             pprint(reallocs)
 
