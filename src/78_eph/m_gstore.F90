@@ -4798,9 +4798,8 @@ subroutine gstore_check_restart(filepath, dtset, nqbz, done_qbz_spin, restart, c
       if (gstore_completed /= 0) then
         ! Previous computation completed, keep a backup of the file and start from scratch.
         restart = 0; done_qbz_spin = 0
-        msg = sjoin("Found GSTORE.nc file with all entries already computed.", ch10, &
-                    "Will overwrite:", trim(filepath), ch10, "Keeping backup copy in:", strcat(filepath, ".bkp"))
-        call wrtout(ab_out, sjoin("WARNING: ", msg))
+        msg = sjoin("- WARNING: Found GSTORE.nc file with all entries already computed.", ch10, &
+                    "- Will overwrite:", trim(filepath), ch10, "Keeping backup copy in:", strcat(filepath, ".bkp"))
         ABI_WARNING(msg)
         ! Keep backup copy
         ABI_CHECK(clib_rename(trim(filepath), strcat(filepath, ".bkp")) == 0, "Failed to rename GSTORE file.")
