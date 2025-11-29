@@ -25,7 +25,7 @@ nstep 150
 
 nband 12          # Number of bands to build G with Lehmnann's representation.
                   # This value cannot be larger that the number of bands in the WFK file.
-gwcomp 2          # Activate COH static remainder technique.
+#gwcomp 2          # Activate COH static remainder technique.
 #prtvol 10
 
 # TODO: elph2_imagden Should have a default value
