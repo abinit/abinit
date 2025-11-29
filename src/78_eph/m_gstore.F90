@@ -2714,6 +2714,7 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax, pp_max)
 
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_q, qpt)
+       kq = kk + qpt
 
        ! TODO: g0 umklapp here can enter into play! gmax could not be large enough!
        do ipz=-pp_max__,pp_max__

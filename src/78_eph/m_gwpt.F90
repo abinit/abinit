@@ -1436,6 +1436,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              do m_kq=bstart_kq, bstop_kq
                cnt = cnt + 1; omegas_nk(cnt) = qp_ene(m_kq, ikq_ibz, spin)
              end do
+             !omegas_nk(:) = qp_ene(n_k, ik_ibz, spin)
              omegame0i_nk = omegas_nk - qp_ene(ib_sum, ikmp_ibz, spin)
              !print *, "omegame0i_nk:", omegame0i_nk
 
@@ -1521,6 +1522,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              do n_k=bstart_k, bstop_k
                cnt = cnt + 1; omegas_mkq(cnt) = qp_ene(n_k, ik_ibz, spin)
              end do
+             !omegas_mkq(:) = qp_ene(m_kq, ikq_ibz, spin)
              omegame0i_mkq = omegas_mkq - qp_ene(ib_sum, ikqmp_ibz, spin)
 
              ! Here we sum over G instead of G' so we have to pass the transpose of the PPM matrix elements.
