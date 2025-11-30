@@ -291,7 +291,7 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
 
   # Check TRIQS C++ API
   if test "${sd_triqs_ok}" != "yes"; then
-    AC_MSG_CHECKING([whether the TRIQS library works])
+    AC_MSG_CHECKING([whether you are linked against the official >=3.2.x TRIQS API])
     AC_LANG_PUSH([C++])
     AC_LINK_IFELSE([AC_LANG_PROGRAM(
       [[
