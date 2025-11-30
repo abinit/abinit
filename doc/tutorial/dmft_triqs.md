@@ -108,7 +108,7 @@ and:
 
 ```sh
  checking whether you are linked against the internal TRIQS library... [yes|no]
- checking whether the TRIQS library works... [yes|no]
+ checking whether you are linked against the official >=3.2.x TRIQS API... [yes|no]
 ```
 
 The first line indicates whether our internal version has been found, and the second line
