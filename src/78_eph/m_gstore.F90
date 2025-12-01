@@ -2721,7 +2721,7 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax, pp_max)
           do ipy=-pp_max__,pp_max__
             do ipx=-pp_max__,pp_max__
              pp = [ipx, ipy, ipz] * half
-             call get_kg(kq + qpt - pp, 1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
+             call get_kg(kq - pp, 1, ecut, gstore%cryst%gmet, onpw, gtmp, mpw=mpw, gmax=gmax)
              ABI_FREE(gtmp)
            end do
          end do
