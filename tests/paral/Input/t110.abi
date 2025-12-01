@@ -108,5 +108,5 @@ pseudos "58ce.paw"
 #%% [extra_info]
 #%% authors = E. Castiel, J. Bieder, B. Amadon
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for Ce : test TRIQS interface with different basis and spinors
+#%% description = DFT+DMFT for Ce with TRIQS: test all basis with spinors and off-diagonal components
 #%%<END TEST_INFO>

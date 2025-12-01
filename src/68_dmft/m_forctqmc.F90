@@ -4430,11 +4430,11 @@ subroutine diag_block(matlu)
          write(tag_block4,'(i1)') isppol
          message = trim(message) // " and isppol " // tag_block4
        end if
-       call wrtout([ab_out,std_out],message,'COLL')
+       call wrtout(std_out,message,'COLL')
        do im=1,tndim
          write(message,'(12(1x,18(1x,"(",f9.3,",",f9.3,")")))') &
             & (eigvectmatlu(iatom)%mat(im,im1,isppol),im1=1,tndim)
-         call wrtout([ab_out,std_out],message,'COLL')
+         call wrtout(std_out,message,'COLL')
        end do ! im1
      end do ! isppol
    end if ! pawprtvol>=3

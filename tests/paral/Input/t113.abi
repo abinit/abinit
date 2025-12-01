@@ -47,7 +47,7 @@ ecut 20         # Maximal plane-wave kinetic energy cut-off, in Hartree
 pawecutdg 50    # PAW: Energy Cutoff for the Double Grid
 nband 20        # Number of bands
 occopt 3        # Smearing type
-tsmear 1000 K   # Electronic smearing temperature
+tsmear 2000 K   # Electronic smearing temperature
 
 ############################
 # DFT Calculation
@@ -135,6 +135,6 @@ dmft_yukawa_param3 3
 #%% [extra_info]
 #%% authors = E. Castiel, F. Gendron
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for Fe : test exact double counting in GGA
+#%% description = DFT+DMFT for Fe : test exact DC in GGA
 #%% topics = DMFT
 #%%<END TEST_INFO>

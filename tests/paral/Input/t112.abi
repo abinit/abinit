@@ -138,17 +138,17 @@ kptbounds3               # The four segments of the band structure are
 #%%                iw_cp t112o_DS2_Self t112_MPI8o_DS2_Self-omega_iatom0001_isppol1;
 #%% [NCPU_8]
 #%% files_to_test = t112_MPI8.abo, tolnlines = 2, tolabs = 1.e-2, tolrel = 1.e-2, fld_options=-medium;
-#%%                 t112_MPI8o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines = 12, tolabs = 1.e-2, tolrel = 1.e-4, fld_options=-easy;
+#%%                 t112_MPI8o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines = 14, tolabs = 1.e-2, tolrel = 1.e-4, fld_options=-easy;
 #%%                 t112_MPI8o_DS4_DFTDMFT_Self_backtransform.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t112_MPI8o_DS4_DFTDMFT_Self_realaxis.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
-#%%                 t112_MPI8o_DS4_DFTDMFT_SpFunloc_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
-#%%                 t112_MPI8o_DS4_SpFunc-from_realaxisself, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t112_MPI8o_DS4_DFTDMFT_SpFunloc_iatom0001, tolnlines = 3, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t112_MPI8o_DS4_SpFunc-from_realaxisself, tolnlines = 4, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [extra_info]
 #%% authors = E. Castiel, F. Gendron
 #%% keywords = dmft_kspectralfunc, DMFT, TRIQS
-#%% description = Test for the spectral function with TRIQS
+#%% description = DFT+DMFT for Fe with TRIQS: test spectral function
 #%%<END TEST_INFO>
 

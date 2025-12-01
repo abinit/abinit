@@ -45,7 +45,7 @@ ecut 20         # Maximal plane-wave kinetic energy cut-off, in Hartree
 pawecutdg 50    # PAW: Energy Cutoff for the Double Grid
 nband 40        # Number of bands
 occopt 3        # Smearing type
-tsmear 3000 K   # Electronic smearing temperature
+tsmear 2000 K   # Electronic smearing temperature
 
 ############################
 # DFT Calculation
@@ -95,7 +95,8 @@ dmft_triqs_dlr_epsilon 1d-2
 
 dmft_triqs_entropy 1
 dmft_triqs_compute_integral 1
-dmft_triqs_gaussorder 3
+dmft_triqs_gaussorder 2
+dmft_triqs_nsubdivisions 3
 dmft_triqs_shift_mu 1.2
 
 #Definition of DFT+U
@@ -116,10 +117,10 @@ jpawu2      0.84 eV  # Values of J
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test = t109_MPI8.abo, tolnlines = 38, tolabs = 0.001, tolrel = 0.1, fld_options=-easy
+#%% files_to_test = t109_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium
 #%% [extra_info]
 #%% authors = E. Castiel, F. Gendron
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for Fe : test TRIQS interface with computation of entropy and spinors
+#%% description = DFT+DMFT for Fe with TRIQS: test entropy with spinors
 #%% topics = DMFT
 #%%<END TEST_INFO>
