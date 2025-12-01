@@ -785,7 +785,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        veeslm => null()
 
        ! The line below is not really useful
-       !if (.not. triqs) veeylm(:,:,:,:) = cmplx(dble(veeylm(:,:,:,:)),zero,kind=dp)
+       if (.not. triqs) veeylm(:,:,:,:) = cmplx(dble(veeylm(:,:,:,:)),zero,kind=dp)
 
        basis_vee = 'Ylm'
        if (.not. paw_dmft%dmft_solv .eq. 10) then
