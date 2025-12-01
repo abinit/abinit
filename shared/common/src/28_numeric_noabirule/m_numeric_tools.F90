@@ -241,7 +241,6 @@ MODULE m_numeric_tools
  interface isordered
    module procedure isordered_rdp
  end interface isordered
-
 !!***
 
 !----------------------------------------------------------------------
@@ -292,8 +291,42 @@ MODULE m_numeric_tools
  public :: vdiff_print        ! Print vdiff_t to formatted file.
 !!***
 
+ !===========================================================
+ ! A single non-empty bin
+ !===========================================================
+ type :: bin_t
+    integer  :: npts = 0
+    real(dp) :: xmin = 0.0_dp
+    real(dp) :: xmax = 0.0_dp
+    integer, allocatable :: idx(:)   ! indices into x(:)
+  !contains
+  !  procedure :: average => bin_average
+  !  procedure :: size    => bin_size
+ end type bin_t
 
-CONTAINS  !===========================================================
+ !===========================================================
+ ! Bins container: only store non-empty bins
+ !===========================================================
+ type, public :: bins_t
+    real(dp), pointer :: xvals(:) => null()
+
+    integer :: total_points = 0
+    integer :: nbins = 0  ! number of non-empty bins
+
+    type(bin_t), allocatable :: bin(:)
+
+    ! Binning metadata
+    real(dp) :: xmin = zero
+    real(dp) :: xmax = zero
+    real(dp) :: dx   = zero
+  contains
+    procedure :: init          => bins_init
+    !procedure :: free          => bins_free
+    !procedure :: loop          => bins_loop
+ end type bins_t
+!!***
+
+contains  !===========================================================
 !!***
 
 !!****f* m_numeric_tools/arth_int
@@ -6646,5 +6679,127 @@ integer pure function blocked_loop(loop_index, loop_stop, batch_size) result(nda
 end function blocked_loop
 !!***
 
-END MODULE m_numeric_tools
+
+!====================================================================
+! bin_t: average x-value inside the bin
+!====================================================================
+!function bin_average(self, xvals) result(avg)
+!  class(bin_t), intent(in) :: self
+!  real(dp),    intent(in) :: xvals(:)
+!  real(dp) :: avg
+!  integer :: i
+!
+!  if (self%npts == 0) then
+!     avg = 0.0_dp
+!     return
+!  end if
+!
+!  avg = 0.0_dp
+!  do i = 1, self%npts
+!     avg = avg + xvals(self%idx(i))
+!  end do
+!  avg = avg / real(self%npts, dp)
+!end function bin_average
+
+!====================================================================
+! bins_t initialisation: only non-empty bins are stored
+!====================================================================
+subroutine bins_init(self, nn, xvals, dx)
+  class(bins_t), intent(out) :: self
+  integer,intent(in) :: nn
+  real(dp), target, intent(in) :: xvals(nn)
+  real(dp),        intent(in)  :: dx
+
+  integer :: i, k, b, idx_bin
+  real(dp) :: xmin, xmax, length
+  integer, allocatable :: count_(:), map(:)
+
+  self%xvals => xvals
+  self%dx = dx
+  self%total_points = nn
+
+  xmin = minval(xvals)
+  xmax = maxval(xvals)
+  self%xmin = xmin
+  self%xmax = xmax
+
+  length = xmax - xmin
+
+  ! Number of uniform bins
+  k = int(floor(length/dx)) + 1
+  ABI_MALLOC(count_, (k))
+  count_ = 0
+
+  ! First pass: count
+  do i = 1, nn
+    b = 1 + int( (xvals(i) - xmin) / dx )
+    if (b < 1)   b = 1
+    if (b >  k)  b = k
+    count_(b) = count_(b) + 1
+  end do
+
+  ! Map from full bin list to non-empty bins
+  ABI_MALLOC(map, (k))
+  map = 0
+  self%nbins = count(count_ > 0)
+  ABI_MALLOC(self%bin, (self%nbins))
+
+  ! Fill map
+  idx_bin = 0
+  do b = 1, k
+   if (count_(b) > 0) then
+     idx_bin = idx_bin + 1
+     map(b) = idx_bin
+     ABI_MALLOC(self%bin(idx_bin)%idx, (count_(b)))
+     self%bin(idx_bin)%npts = count_(b)
+     self%bin(idx_bin)%xmin = xmin + (b-1)*dx
+     self%bin(idx_bin)%xmax = xmin +  b   *dx
+   end if
+  end do
+
+  ! Temporary counters
+  count_ = 0
+
+  ! Second pass: put indices into non-empty bins
+  do i = 1, nn
+    b = 1 + int( (xvals(i) - xmin)/dx )
+    if (b < 1) b = 1
+    if (b >  k) b = k
+    if (map(b) > 0) then
+      idx_bin = map(b)
+      count_(b) = count_(b) + 1
+      self%bin(idx_bin)%idx(count_(b)) = i
+    end if
+  end do
+
+  ! Simple loop interface
+  !do i = 1, self%nbins
+  !  write(*,*) "Bin", i, ": npts=", self%bin(i)%npts
+  !end do
+
+end subroutine bins_init
+
+
+!!****t* m_numeric_tools/bins_free
+!! NAME
+!! bins_free
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine bins_free(bins)
+
+ class(bins_t),intent(inout) :: bins
+!!************************************************************************
+ integer :: ii
+ do ii = 1, bins%nbins
+   ABI_SFREE(bins%bin(ii)%idx)
+ end do
+ ABI_SFREE(bins%bin)
+!
+end subroutine bins_free
+!!***
+
+end module m_numeric_tools
 !!***

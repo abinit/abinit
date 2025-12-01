@@ -51,7 +51,7 @@ module m_gwpt
  use m_gwdefs,         only : GW_Q0_DEFAULT
  use m_time,           only : cwtime, cwtime_report, timab, sec2str, timab
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, c2r, r2c, get_diag, linfit, iseven, simpson_cplx, print_arr, inrange
+ use m_numeric_tools,  only : arth, c2r, r2c, get_diag, linfit, iseven, simpson_cplx, print_arr, inrange, bins_t
  use m_io_tools,       only : iomode_from_fname
  use m_fftcore,        only : ngfft_seq, sphereboundary, print_ngfft
  use m_cgtk,           only : cgtk_rotate, cgtk_change_gsphere
@@ -100,19 +100,32 @@ module m_gwpt
 
 !----------------------------------------------------------------------
 
- type bins_t
+!----------------------------------------------------------------------
 
-   real(dp) :: dx, xmin, xmax
-   integer :: size
-   integer, allocatable :: counts(:), start(:), list(:)
-   real(dp),contiguous, pointer :: xvals(:)
-
- contains
-
-   procedure :: init => bins_init
-   procedure :: free => bins_free
-   procedure :: print => bins_print
- end type bins_t
+!!!****t* m_numeric_tools/bins_t
+!!! NAME
+!!! bins_t
+!!!
+!!! FUNCTION
+!!!
+!!! SOURCE
+!
+! type bins_t
+!
+!   real(dp) :: dx, xmin, xmax
+!   integer :: size
+!   integer, allocatable :: counts(:), start(:), list(:)
+!   real(dp),contiguous, pointer :: xvals(:)
+!
+!   integer,allocatable :: nonempty_index(:)
+!
+! contains
+!
+!   procedure :: init => bins_init
+!   procedure :: free => bins_free
+!   procedure :: print => bins_print
+! end type bins_t
+!!!***
 
 contains  !=====================================================
 !!***
@@ -1455,9 +1468,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              omegame0i_nk = omegas_nk - qp_ene(ib_sum, ikmp_ibz, spin)
              !print *, "omegame0i_nk:", omegame0i_nk
 
-             call bins%init(nw_nk, omegame0i_nk, 0.1_dp * eV_Ha)
+             !call bins%init(nw_nk, omegame0i_nk, 0.1_dp * eV_Ha)
              !call bins%print()
-             call bins%free()
+             !call bins%free()
 
              ! Note that the i/two_pi factor in Sigma(w) is included in calc_sigc
              vec_gwc_nk(:,:,n_k) = zero
@@ -2227,133 +2240,6 @@ end function spin_vid
 end subroutine gwpt_run
 !!***
 
-subroutine bins_init(bins, nn, xvals, dx)
-
-!Arguments ------------------------------------
- class(bins_t),intent(out) :: bins
- integer, intent(in) :: nn
- real(dp), target,intent(in) :: xvals(nn)
- real(dp), intent(in) :: dx
-
-!Local variables ------------------------------
- integer :: ii, kk, pos
- real(dp) :: tt, length
-!************************************************************************
-
-
- bins%xvals => xvals
- bins%dx = dx
- ! Compute global minimum and maximum
- bins%xmin = minval(xvals)
- bins%xmax = maxval(xvals)
-
- ! Compute number of bins
- length = bins%xmax - bins%xmin
- if (length <= zero) then
-   bins%size = 1
- else
-   bins%size = int(floor(length / dx)) + 1
- end if
-
- ABI_MALLOC(bins%counts, (bins%size))
- bins%counts = 0
-
- ! First pass: count points per bin
- do ii = 1, nn
-   tt = (xvals(ii) - bins%xmin) / dx
-   kk = int(floor(tt)) + 1
-   if (kk >= 1 .and. kk <= bins%size) bins%counts(kk) = bins%counts(kk) + 1
- end do
-
- ! Create structure
- ABI_MALLOC(bins%start, (bins%size+1))
- bins%start(1) = 1
- do kk = 1, bins%size
-   bins%start(kk+1) = bins%start(kk) + bins%counts(kk)
- end do
-
- ABI_MALLOC(bins%list, (nn))
-
- ! Second pass: insert indices
- bins%counts = 0
- do ii = 1, nn
-  tt = (xvals(ii) - bins%xmin) / dx
-  kk = int(floor(tt)) + 1
-  if (kk >= 1 .and. kk <= bins%size) then
-    pos = bins%start(kk) + bins%counts(kk)
-    bins%list(pos) = ii
-    bins%counts(kk) = bins%counts(kk) + 1
-  end if
- end do
-
- print *, "nn, bins%size:", nn, count(bins%counts /= 0)
-
-end subroutine bins_init
-
-subroutine bins_free(bins)
- class(bins_t),intent(inout) :: bins
-!************************************************************************
-
- ABI_SFREE(bins%counts)
- ABI_SFREE(bins%start)
- ABI_SFREE(bins%list)
-end subroutine bins_free
-
-
-subroutine bins_print(bins)
- class(bins_t), intent(in) :: bins
-
-!Local variables ------------------------------
- integer :: kk, ii, ibeg, iend
-!************************************************************************
-
- print *, "-----------------------------------------"
- print *, " BINS_T OBJECT"
- print *, "-----------------------------------------"
- print *, "xmin       =", bins%xmin
- print *, "xmax       =", bins%xmax
- print *, "dx         =", bins%dx
- print *, "num_bins   =", bins%size
- print *, "-----------------------------------------"
- print *, " Bin counts:"
- do kk = 1, bins%size
-   print "(i0,a,i0)", kk, ": ", bins%counts(kk)
- end do
- print *, "-----------------------------------------"
- print *, " Bin start positions (CSR style):"
- do kk = 1, bins%size+1
-   print "(i0,a,i0)", kk, ": ", bins%start(kk)
- end do
- print *, "-----------------------------------------"
- print *, " Bin contents:"
- print *, " (Each bin lists the indices of xvals assigned to it.)"
- print *, ""
-
- do kk = 1, bins%size
-   ibeg = bins%start(kk)
-   iend = bins%start(kk+1) - 1
-
-   if (ibeg > iend) then
-     !print *, "(empty)"
-   else
-     write(*,'(a,i0,a)') "Bin ", kk, ": "
-     ! Print indices
-     do ii = ibeg, iend
-       write(*,'(i0)', advance='no') bins%list(ii)
-     end do
-     print *, ""        ! newline
-
-     write(*,'(a)',advance='no') "       values:"
-     do ii = ibeg, iend
-       write(*,'(f12.6)', advance='no') bins%xvals(bins%list(ii))
-     end do
-     print *, ""
-   end if
- end do
-
- print *, "-----------------------------------------"
-
-end subroutine bins_print
-
 end module m_gwpt
 !!***
+

@@ -1909,8 +1909,6 @@ end subroutine cqratio
 !! OUTPUT
 !!  ket(npwc,nomega):
 !!
-
-!!
 !!  === model==1,2 ====
 !!
 !!    ket(G,omega) += Sum_G2                 Omega(G,G2) * rhotw(G2)
@@ -1945,7 +1943,7 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
 !Local variables-------------------------------
 !scalars
  integer :: ig,igp,ii,iw,ispinor
- real(dp),parameter :: tol_occ = tol3
+ real(dp),parameter :: tol_occ = tol3, tol_omega = tol6
  real(dp) :: den, den2, ff, inv_den, omegame0i_io, otw, twofm1, twofm1_zcut, twofm1_zcut2, zcut2
  complex(gwp) :: ct, num, numf, rhotwgdp_igp
  logical :: fully_occupied, totally_empty
@@ -1971,6 +1969,10 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
 !$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den, den2)
        do iw=1,nomega
          omegame0i_io = omegame0i(iw)
+         !if (iw > 1 .and. abs(omegame0i(iw) - omegame0i(iw-1)) < tol_omega) then
+         !  ket(:,:,iw) = ket(:,:,iw-1); cycle
+         !end if
+
          do igp=1,npwc
            rhotwgdp_igp = rhotwgp(igp, ispinor)
            do ig=1,npwc
@@ -1996,6 +1998,10 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
 !$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den, den2)
        do iw=1,nomega
          omegame0i_io = omegame0i(iw)
+         !if (iw > 1 .and. abs(omegame0i(iw) - omegame0i(iw-1)) < tol_omega) then
+         !  ket(:,:,iw) = ket(:,:,iw-1); cycle
+         !end if
+
          do igp=1,npwc
            rhotwgdp_igp = rhotwgp(igp, ispinor)
            do ig=1,npwc
