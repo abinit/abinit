@@ -10,7 +10,7 @@ pawprtvol 3
 getden  -1
 
 ##### CONVERGENCE PARAMETERS
-nstep1   30
+nstep1   50
 nstep2   2
 ecut      10
 pawecutdg 40
@@ -99,5 +99,5 @@ pseudos "58ce.paw"
 #%% [extra_info]
 #%% authors = E. Castiel, J. Bieder, B. Amadon
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for Ce : test parallelism of TRIQS interface with self-consistency and off-diagonal elements in the cubic basis
+#%% description = DFT+DMFT for Ce with TRIQS: test parallelization, exact DC and charge self-consistency with off-diagonal elements in the cubic basis
 #%%<END TEST_INFO>

@@ -47,7 +47,7 @@ ecut 20         # Maximal plane-wave kinetic energy cut-off, in Hartree
 pawecutdg 50    # PAW: Energy Cutoff for the Double Grid
 nband 20        # Number of bands
 occopt 3        # Smearing type
-tsmear 1000 K   # Electronic smearing temperature
+tsmear 2000 K   # Electronic smearing temperature
 
 ############################
 # DFT Calculation
@@ -115,10 +115,10 @@ jpawu       0.84 eV  # Values of J
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test = t111_MPI8.abo, tolnlines = 3, tolabs = 1.e-4, tolrel = 1.e-4, fld_options=-easy;
+#%% files_to_test = t111_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%% [extra_info]
 #%% authors = E. Castiel, F. Gendron
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for Fe : test TRIQS interface for different basis with magnetic DFT
+#%% description = DFT+DMFT for Fe with TRIQS: test basis with magnetic DFT
 #%% topics = DMFT
 #%%<END TEST_INFO>

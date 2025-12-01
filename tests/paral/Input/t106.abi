@@ -6,11 +6,11 @@
 #
 # ---------------------------------------------------------------------------------------------------------
 # -- Datasets and options
-ndtset 2
-jdtset 1 2
+ndtset 1
+jdtset 2
 prtvol 4
 pawprtvol 3
-getden -1
+getden2 1
 nsym 1
 
 # -- Convergence Parameters
@@ -91,18 +91,20 @@ pseudos "28ni.paw, 8o.2.paw"
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
+#%% [shell]
+#%% pre_commands = iw_cp t106o_DS1_DEN t106_MPI8o_DS1_DEN;
 #%% [NCPU_8]
-#%% files_to_test = t106_MPI8.abo, tolnlines = 7, tolabs = 5.e-4, tolrel = 5.e-4, fld_options=-easy;
-#%%                 t106_MPI8o_DS2_UnitaryMatrix_iatom0001, tolnlines = 17, tolabs = 1.e-4, tolrel = 1.e-3, fld_options=-medium;
-#%%                 t106_MPI8o_DS2_UnitaryMatrix_iatom0002, tolnlines = 17, tolabs = 1.e-4, tolrel = 1.e-3, fld_options=-medium;
+#%% files_to_test = t106_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_UnitaryMatrix_iatom0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_UnitaryMatrix_iatom0002, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t106_MPI8o_DS2_Selfmxent0001_is1_iflav0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t106_MPI8o_DS2_Selfmxent0002_is1_iflav0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
-#%%                 t106_MPI8o_DS2_Gtau_diag_Leg_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
-#%%                 t106_MPI8o_DS2_Gtau_diag_Leg_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
-#%%                 t106_MPI8o_DS2_Gtau_offdiag_Leg_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
-#%%                 t106_MPI8o_DS2_Gtau_offdiag_Leg_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t106_MPI8o_DS2_Gtau_diag_Leg_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_Gtau_diag_Leg_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_Gtau_offdiag_Leg_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_Gtau_offdiag_Leg_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%% [extra_info]
 #%% keywords = PAW, DMFT, TRIQS
 #%% authors = E. Castiel, B. Amadon
-#%% description = DFT+DMFT for NiO : test TRIQS interface with several correlated atoms, Legendre measurement and off-diagonal elements
+#%% description = DFT+DMFT for NiO with TRIQS: test Maxent files and exact DC with Legendre measurement, off-diagonal elements and several correlated atoms
 #%%<END TEST_INFO>
