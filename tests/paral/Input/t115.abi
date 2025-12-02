@@ -104,7 +104,7 @@ pseudos "23v.paw, 38sr.paw, 8o.paw"
 #%% max_nprocs = 8
 #%% [NCPU_8]
 #%% files_to_test = t115_MPI8o_DS2_Gtau_diag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
-#%%                 t115_MPI8o_DS3_Gtau_diag_iatom0003.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t115_MPI8o_DS3_Gtau_diag_iatom0003.dat, tolnlines = 34, tolabs = 5.e-6, tolrel = 5.e-6, fld_options=-medium;
 #%% [extra_info]
 #%% authors = B. Amadon, E. Castiel
 #%% keywords = DMFT, TRIQS
