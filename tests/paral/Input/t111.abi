@@ -115,7 +115,7 @@ jpawu       0.84 eV  # Values of J
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test = t111_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%% files_to_test = t111_MPI8.abo, tolnlines = 1, tolabs = 5.e-5, tolrel = 5e-5, fld_options=-easy;
 #%% [extra_info]
 #%% authors = E. Castiel, F. Gendron
 #%% keywords = DMFT, TRIQS

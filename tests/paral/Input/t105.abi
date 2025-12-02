@@ -105,6 +105,7 @@ pseudos "23v.paw"
 #%% files_to_test = t105_MPI8.abo, tolnlines = 35, tolabs = 5.0, tolrel = 1.1, fld_options=-easy;
 #%%                 t105_MPI8o_DS2_Wannier_functions_iatom0001_001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
 #%%                 t105_MPI8o_DS2_DMFTOCCND, tolnlines = 688, tolabs = 0.1, tolrel = 1.1, fld_options=-easy;
+#%%                 t105_MPI8o_DS2_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%% [extra_info]
 #%% authors = E. Castiel, B. Amadon, T. Cavignac
 #%% keywords = DMFT, TRIQS
