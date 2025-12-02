@@ -287,16 +287,18 @@ calculations one would like numbers about 3 orders of magnitude
 smaller.
 
 A final detail to note: the induced moment due to the filled core
-orbitals, is due to what is called the Lamb shielding. Usual PAW
-datasets do not include this value, but you can add it to your input
-file with the variable [[lambsig]]. To compute it you must obtain the
-core wavefunctions, which is a normal option in Atompaw (see [tutorial
-PAW2](/tutorial/paw2)). Then, you can integrate the core wavefunctions
-to generate the Lamb shielding, through
+orbitals, is due to what is called the Lamb shielding, which has
+the form
 
-$$ \sigma_{Lamb} = \frac{\alpha^2}{3}\sum^{cores}_n \left\langle\psi_n|\frac{1}{r}|\psi_n\right\rangle $$
+$$ \sigma_{Lamb} = \frac{\alpha^2}{3}\sum^{cores}_n \left\langle\psi_n|\frac{1}{r}|\psi_n\right\rangle, $$
 
 where $\alpha$ is the fine structure constant.
+The [[https://www.abinit.org/pseudopotential.html|current Abinit PAW datasets]], 
+JTH-v2.0, include this quantity and it 
+is automatically read in and used in the calculation. However, should you use other PAW 
+datasets, you can input the Lamb shielding value to use with the input variable
+[[lambsig]].
+However, we strongly recommend using the up-to-date Abinit PAW datasets.
 
 Moving forward, should you want to compute the shielding tensor for an
 atomic site in a solid, the procedure is identical, except that you
