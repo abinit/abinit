@@ -1,7 +1,7 @@
 # Multi_dataset parameters
-ndtset 2       # Two datasets
-jdtset 1 2     # one followed by two
-getden -1      # Second one takes the density of first
+ndtset 1      # Two datasets
+jdtset 2      # one followed by two
+getden 1      # Second one takes the density of first
 
 pawprtvol 3  # Printing additional information
 prtvol 4     #
@@ -116,6 +116,7 @@ jpawu2      0.84 eV  # Values of J
 #%% need_cpp_vars = HAVE_TRIQS_v3_2
 #%% [shell]
 #%% pre_commands = iw_cp t108_0001 .;
+#%%                iw_cp t108_MPI8o_DS1_DEN .;
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
