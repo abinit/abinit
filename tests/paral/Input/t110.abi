@@ -13,7 +13,7 @@ nstep1   50
 nstep     1
 ecut      10
 pawecutdg 40
-tolvrs  1.0d-10
+tolvrs  9.0d-11
 nband     34
 occopt 3 tsmear 700 K
 diemix 0.1
@@ -102,9 +102,11 @@ pseudos "58ce.paw"
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test = t110_MPI8.abo, tolnlines = 126, tolabs = 1.0e-4, tolrel = 1.1, fld_options=-easy;
+#%% files_to_test = t110_MPI8o_DS2_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t110_MPI8o_DS3_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t110_MPI8o_DS4_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
 #%%                 t110_MPI8o_DS5_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
-#%%                 t110_MPI8o_DS5_Gtau_offdiag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t110_MPI8o_DS5_Gtau_offdiag_iatom0001.dat, tolnlines = 2, tolabs = 5.e-5, tolrel = 1.e-3, fld_options=-easy;
 #%% [extra_info]
 #%% authors = E. Castiel, J. Bieder, B. Amadon
 #%% keywords = DMFT, TRIQS

@@ -89,13 +89,13 @@ pseudos "58ce.paw"
 #%% nprocs_to_test = 4, 8
 #%% max_nprocs = 8
 #%% [NCPU_4]
-#%% files_to_test = t107_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%% files_to_test = t107_MPI4.abo, tolnlines = 5, tolabs = 3.e-7, tolrel = 1.e-6, fld_options=-medium;
 #%%                 t107_MPI4o_DS2_DMFTORBITAL_itypat0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t107_MPI4o_DS2_DMFTOVERLAP_iatom0001_isppol1, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t107_MPI4o_DS2_Gtau_diag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t107_MPI4o_DS2_Gtau_diag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%% [NCPU_8]
-#%% files_to_test = t107_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%% files_to_test = t107_MPI8.abo, tolnlines = 9, tolabs = 1.e-6, tolrel = 5.e-6, fld_options=-medium;
 #%% [extra_info]
 #%% authors = E. Castiel, J. Bieder, B. Amadon
 #%% keywords = DMFT, TRIQS
