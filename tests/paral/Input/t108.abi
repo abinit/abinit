@@ -122,7 +122,7 @@ jpawu2      0.84 eV  # Values of J
 #%% [NCPU_8]
 #%% files_to_test = t108_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t108_MPI8o_DS2_CTQMC_HISTOGRAM_iatom0001_ilam03.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
-#%%                 t108_MPI8o_DS2_Gtau_diag_DLR_iatom0001_ilam01.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t108_MPI8o_DS2_Gtau_diag_iatom0001_ilam01.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t108_MPI8o_DS2_Gtau_diag_iatom0001_ilam02.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%% [extra_info]
 #%% authors = E. Castiel, F. Gendron
