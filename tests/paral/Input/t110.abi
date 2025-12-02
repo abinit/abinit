@@ -9,7 +9,7 @@ getden1 0
 getden  1
 
 ##### CONVERGENCE PARAMETERS
-nstep1   30
+nstep1   50
 nstep     1
 ecut      10
 pawecutdg 40
