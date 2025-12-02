@@ -1,8 +1,8 @@
 # == Convergency and starting
 # DATASET 1: LDA
 # DATASET 2: DMFT
-ndtset 5
-jdtset 1 2 3 4 5
+ndtset 4
+jdtset 2 3 4 5
 prtvol    4
 pawprtvol 3
 getden1 0
@@ -98,6 +98,8 @@ pseudos "58ce.paw"
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_TRIQS_v3_2
 #%% [files]
+#%% [shell]
+#%% pre_commands = iw_cp t110_MPI8o_DS1_DEN .;
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
