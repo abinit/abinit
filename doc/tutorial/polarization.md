@@ -81,7 +81,7 @@ further, you might refresh your memory concerning the other variables:
 [[ecutsm]], [[dilatmx]], [[ngkpt]], [[nshiftk]], and [[shiftk]].
 
 Note as well that the pseudopotentials used here are freely available
-from [[http://www.pseudo-dojo.org|Pseudo Dojo]]. The ones chosen here for P and Al
+from [[https://www.pseudo-dojo.org|Pseudo Dojo]]. The ones chosen here for P and Al
 use the Perdew-Wang parameterization of the local density approximation (LDA); this is
 done to facilitate comparison of the results of this tutorial with those of
 [Non-linear properties](/tutorial/nlo).

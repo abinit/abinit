@@ -26,7 +26,7 @@ This tutorial should take about 1 hour.
 We studied the H$_2$ molecule in a big box.
 We used 10 Ha as cut-off energy, a 10x10x10 Bohr$^3$ supercell, the local-density approximation
 (as well as the local-spin-density approximation) in the Perdew-Wang parametrization ([[ixc]] = -1012)
-and a pseudopotential from the pseudodojo <http://www.pseudo-dojo.org/>.
+and a pseudopotential from the pseudodojo <https://www.pseudo-dojo.org/>.
 
 At this stage, we compared our results:
 
