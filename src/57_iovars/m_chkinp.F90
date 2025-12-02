@@ -804,14 +804,18 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
        if (dt%dmft_solv>=5) then
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-         if (dt%dmft_solv == 6 .or. dt%dmft_solv == 7) then
+         if (dt%dmft_solv == 6 .or. dt%dmft_solv == 7 ) then
            call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,5,(/0,1,2,3,4/),iout)
            if (dt%dmftctqmc_basis == 4) then
              cond_string(1)='dmftctqmc_basis' ; cond_values(1)=dt%dmftctqmc_basis
              call chkint_eq(0,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
            end if
          else
-           call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,3,(/0,1,2/),iout)
+           call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,4,(/0,1,2,4/),iout)
+           if (dt%dmftctqmc_basis == 4) then
+              cond_string(1)='dmftctqmc_basis' ; cond_values(1)=dt%dmftctqmc_basis
+              call chkint_eq(0,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
+            end if
          end if
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_check',dt%dmftctqmc_check,4,(/0,1,2,3/),iout)
