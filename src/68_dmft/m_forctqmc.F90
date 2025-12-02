@@ -48,7 +48,7 @@ MODULE m_forctqmc
  use m_matlu, only : add_matlu,checkdiag_matlu,checkreal_matlu,chi_matlu,copy_matlu,destroy_matlu, &
      & diag_matlu,diff_matlu,fac_matlu,gather_matlu,init_matlu,magmomforb_matlu,magmomfspin_matlu, &
      & magmomfzeeman_matlu,matlu_type,print_matlu,printplot_matlu,prod_matlu,rotate_matlu,shift_matlu, &
-     & slm2ylm_matlu,sym_matlu,symmetrize_matlu,xmpi_matlu,ylm2jmj_matlu,zero_matlu,magnfield_matlu
+     & slm2ylm_matlu,sym_matlu,symmetrize_matlu,xmpi_matlu,ylm2jmj_matlu,zero_matlu,magnfield_matlu,magmomjmj_matlu
  use m_oper, only : destroy_oper,gather_oper,identity_oper,init_oper,inverse_oper,oper_type
  use m_paw_correlations, only : calc_vee
  use m_paw_dmft, only : paw_dmft_type
@@ -236,7 +236,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    write(std_out,*) " Ylm (complex spherical harmonics) basis is used (before rotation)"
    rot_type_vee = 4 ! for rotatevee_hu
  else if (useylm == 1 .and. usejmj == 1) then
-   write(message,'(3a)') ch10,'   == Jmj local basis is used without any diagonalization of Hamiltonian ',ch10
+   write(message,'(3a)') ch10,'   == Jmj local basis is used without diagonalization of local Hamiltonian ',ch10
    call wrtout(std_out,message,'COLL')
    rot_type_vee = 3 !  
  end if ! useylm
@@ -1110,7 +1110,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      call magmomjmj_matlu(matlumag_tot,natom=1)
     !call rotate_matlu(matlumag_tot,eigvectmatlu(iatom,1),natom=1,prtopt=3,inverse=1)
      call print_matlu(matlumag_tot,natom=1,prtopt=1)
-     call gather_matlu(matlumag_tot,magmom_tot(iatom),natom=1,option=1,prtopt=0)
+     call gather_matlu(matlumag_tot,magmom_tot,natom=1,option=1,prtopt=0)
      call destroy_matlu(matlumag_tot,natom=1)
 
    else
