@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h11 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v5_t96-t97-t98-t99/t96.abi
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h15 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v5_t96-t97-t98-t99/t96.abi
 - output file    -> t96.abo
 - root for input  files -> t96i
 - root for output files -> t96o
@@ -49,6 +49,7 @@ _ WF disk file :      0.238 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         138
       nfft =        4096          nkpt =           8
+- my_mband =          14
 ================================================================================
 P This job should need less than                       3.801 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -66,6 +67,7 @@ _ WF disk file :      0.474 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         138
       nfft =        4096          nkpt =           8
+- my_mband =          14
 ================================================================================
 P This job should need less than                       3.801 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -83,6 +85,7 @@ _ WF disk file :      0.474 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         138
       nfft =        4096          nkpt =           8
+- my_mband =          14
 ================================================================================
 P This job should need less than                       3.801 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -100,6 +103,7 @@ _ WF disk file :      0.474 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         138
       nfft =        4096          nkpt =           8
+- my_mband =          14
 ================================================================================
 P This job should need less than                       4.122 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -117,6 +121,7 @@ _ WF disk file :      0.474 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         138
       nfft =        4096          nkpt =           8
+- my_mband =          14
 ================================================================================
 P This job should need less than                       4.122 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -134,6 +139,7 @@ _ WF disk file :      0.474 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         138
       nfft =        4096          nkpt =           8
+- my_mband =          14
 ================================================================================
 P This job should need less than                       4.122 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -151,6 +157,7 @@ _ WF disk file :      0.474 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         138
       nfft =        4096          nkpt =           8
+- my_mband =          14
 ================================================================================
 P This job should need less than                       4.122 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -168,6 +175,7 @@ _ WF disk file :      0.474 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         138
       nfft =        4096          nkpt =           8
+- my_mband =          14
 ================================================================================
 P This job should need less than                       4.122 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -185,6 +193,7 @@ _ WF disk file :      0.474 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         138
       nfft =        4096          nkpt =           8
+- my_mband =          14
 ================================================================================
 P This job should need less than                       4.122 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -515,8 +524,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/28ni.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/28ni.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/28ni.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/28ni.pspnc
 -  Troullier-Martins psp for element  Ni        Thu Oct 27 17:35:45 EDT 1994
 - 28.00000  10.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -546,12 +555,12 @@ solver: {iscf: 7, nstep: 800, nline: 8, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)     deltaE(h) residm    vres2    magn
- ETOT  1  -35.773220506268    -3.58E+01 1.79E-02 4.96E+01 0.500
- ETOT  2  -35.798029380427    -2.48E-02 3.47E-06 4.74E+00 0.501
- ETOT  3  -35.800714952205    -2.69E-03 1.58E-10 2.59E-02 0.500
- ETOT  4  -35.800740240201    -2.53E-05 2.30E-13 9.72E-04 0.518
- ETOT  5  -35.800911149545    -1.71E-04 9.19E-15 1.66E-02 0.634
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -35.773220506268    -3.577E+01 1.787E-02 4.956E+01 4.722E-01 4.722E-01
+ ETOT  2  -35.798029380427    -2.481E-02 3.467E-06 4.738E+00 1.831E-02 4.905E-01
+ ETOT  3  -35.800714952205    -2.686E-03 1.583E-10 2.588E-02 1.594E-03 4.921E-01
+ ETOT  4  -35.800740240201    -2.529E-05 2.296E-13 9.721E-04 1.838E-02 5.104E-01
+ ETOT  5  -35.800911149545    -1.709E-04 9.187E-15 1.663E-02 1.091E-01 6.195E-01
 
  At SCF step    5   max residual=  9.19E-15 < tolwfr=  1.00E-14 =>converged.
 
@@ -588,14 +597,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     3.851830     3.232297      7.084127     0.619533
- ---------------------------------------------------------------------
-  Sum:              3.851830     3.232297      7.084127     0.619533
- Total magnetization (from the atomic spheres):             0.619533
- Total magnetization (exact up - dn):                       0.634140
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000     3.851830     3.232297      7.084127     0.619533
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 3.851830     3.232297      7.084127     0.619533
+ Total magnetization (from the atomic spheres):                0.619533
+ Total magnetization (exact up - dn):                          0.634140
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -709,7 +719,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -738,16 +748,26 @@ solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-05, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   131.90291570781     -2.768E+03 9.410E+00 9.969E+04
- ETOT  2   30.285336106726     -1.016E+02 1.283E-01 2.020E+04
- ETOT  3  0.41093603101589     -2.987E+01 2.056E-02 3.458E+01
- ETOT  4  0.37133843573119     -3.960E-02 1.984E-05 4.306E-02
- ETOT  5  0.37126856694576     -6.987E-05 8.303E-08 2.547E-03
- ETOT  6  0.37126242718304     -6.140E-06 4.977E-09 1.586E-05
- ETOT  7  0.37126239985727     -2.733E-08 3.335E-11 4.869E-06
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   131.90291570781     -2.768E+03 9.410E+00 9.969E+04 1.902E-08 1.902E-08
+ ETOT  2   30.285336106726     -1.016E+02 1.283E-01 2.020E+04 6.071E-08 4.169E-08
+ ETOT  3  0.41093603101589     -2.987E+01 2.056E-02 3.458E+01 1.217E-07 1.634E-07
+ ETOT  4  0.37133843573119     -3.960E-02 1.984E-05 4.306E-02 1.026E-06 1.190E-06
+ ETOT  5  0.37126856694576     -6.987E-05 8.303E-08 2.547E-03 7.845E-06 9.035E-06
+ ETOT  6  0.37126242718304     -6.140E-06 4.977E-09 1.586E-05 7.883E-05 8.787E-05
+ ETOT  7  0.37126239985727     -2.733E-08 3.335E-11 4.869E-06 6.032E-04 6.911E-04
 
  At SCF step    7       vres2   =  4.87E-06 < tolvrs=  1.00E-05 =>converged.
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000    -0.000352     0.000339     -0.000013    -0.000691
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                -0.000352     0.000339     -0.000013    -0.000691
+ Total magnetization (from the atomic spheres):               -0.000691
+ Total magnetization (exact up - dn):                         -0.000742
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -779,53 +799,53 @@ tolerances: {tolvrs: 1.00E-05, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         0.3712412498         0.0000000000
    1    1   2    1         0.1856206249         0.0000000000
    1    1   3    1         0.1856206249         0.0000000000
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.1856206249         0.0000000000
    2    1   2    1         0.3712412498         0.0000000000
    2    1   3    1         0.1856206249         0.0000000000
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.1856206249         0.0000000000
    3    1   2    1         0.1856206249         0.0000000000
    3    1   3    1         0.3712412498         0.0000000000
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
-
+  
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-
+  
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-
+  
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0151527041         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.0151527041         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0151527041         0.0000000000
@@ -876,7 +896,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 2    ipert=   1
@@ -905,16 +925,26 @@ solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-05, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   131.98804425091     -2.768E+03 9.123E+00 9.972E+04
- ETOT  2   30.311706674143     -1.017E+02 1.277E-01 2.022E+04
- ETOT  3  0.41072319120948     -2.990E+01 2.057E-02 3.441E+01
- ETOT  4  0.37133716441312     -3.939E-02 1.972E-05 4.351E-02
- ETOT  5  0.37126683446022     -7.033E-05 8.478E-08 2.548E-03
- ETOT  6  0.37126069229097     -6.142E-06 4.941E-09 1.616E-05
- ETOT  7  0.37126065473930     -3.755E-08 3.488E-11 5.368E-07
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   131.98804425091     -2.768E+03 9.123E+00 9.972E+04 2.039E-08 2.039E-08
+ ETOT  2   30.311706674143     -1.017E+02 1.277E-01 2.022E+04 5.759E-08 3.720E-08
+ ETOT  3  0.41072319120948     -2.990E+01 2.057E-02 3.441E+01 9.992E-08 1.371E-07
+ ETOT  4  0.37133716441312     -3.939E-02 1.972E-05 4.351E-02 8.527E-07 9.898E-07
+ ETOT  5  0.37126683446022     -7.033E-05 8.478E-08 2.548E-03 6.523E-06 7.513E-06
+ ETOT  6  0.37126069229097     -6.142E-06 4.941E-09 1.616E-05 6.547E-05 7.298E-05
+ ETOT  7  0.37126065473930     -3.755E-08 3.488E-11 5.368E-07 5.013E-04 5.743E-04
 
  At SCF step    7       vres2   =  5.37E-07 < tolvrs=  1.00E-05 =>converged.
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000    -0.000293     0.000282     -0.000011    -0.000574
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                -0.000293     0.000282     -0.000011    -0.000574
+ Total magnetization (from the atomic spheres):               -0.000574
+ Total magnetization (exact up - dn):                         -0.000616
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -946,53 +976,53 @@ tolerances: {tolvrs: 1.00E-05, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         0.3712401712         0.0000000000
    1    1   2    1         0.1856200856         0.0000000000
    1    1   3    1         0.1856200856         0.0000000000
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.1856200856         0.0000000000
    2    1   2    1         0.3712401712         0.0000000000
    2    1   3    1         0.1856200856         0.0000000000
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.1856200856         0.0000000000
    3    1   2    1         0.1856200856         0.0000000000
    3    1   3    1         0.3712401712         0.0000000000
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
-
+  
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-
+  
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-
+  
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0151526600         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0151526600         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0151526600         0.0000000000
@@ -1043,7 +1073,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 3    ipert=   1
@@ -1072,16 +1102,26 @@ solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-05, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   131.91151024561     -2.768E+03 9.279E+00 9.970E+04
- ETOT  2   30.288127502692     -1.016E+02 1.283E-01 2.020E+04
- ETOT  3  0.41091152820255     -2.988E+01 2.056E-02 3.457E+01
- ETOT  4  0.37133306788283     -3.958E-02 1.982E-05 4.309E-02
- ETOT  5  0.37126317743324     -6.989E-05 8.320E-08 2.547E-03
- ETOT  6  0.37125703889424     -6.139E-06 4.975E-09 1.576E-05
- ETOT  7  0.37125701044980     -2.844E-08 3.335E-11 9.100E-07
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   131.91151024561     -2.768E+03 9.279E+00 9.970E+04 0.000E+00 0.000E+00
+ ETOT  2   30.288127502692     -1.016E+02 1.283E-01 2.020E+04 0.000E+00 0.000E+00
+ ETOT  3  0.41091152820255     -2.988E+01 2.056E-02 3.457E+01 2.838E-08 3.370E-08
+ ETOT  4  0.37133306788283     -3.958E-02 1.982E-05 4.309E-02 2.166E-07 2.503E-07
+ ETOT  5  0.37126317743324     -6.989E-05 8.320E-08 2.547E-03 1.651E-06 1.901E-06
+ ETOT  6  0.37125703889424     -6.139E-06 4.975E-09 1.576E-05 1.659E-05 1.849E-05
+ ETOT  7  0.37125701044980     -2.844E-08 3.335E-11 9.100E-07 1.270E-04 1.455E-04
 
  At SCF step    7       vres2   =  9.10E-07 < tolvrs=  1.00E-05 =>converged.
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000     0.000074    -0.000071      0.000003     0.000146
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.000074    -0.000071      0.000003     0.000146
+ Total magnetization (from the atomic spheres):                0.000146
+ Total magnetization (exact up - dn):                          0.000156
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1113,53 +1153,53 @@ tolerances: {tolvrs: 1.00E-05, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         0.3712359405         0.0000000000
    1    1   2    1         0.1856179702         0.0000000000
    1    1   3    1         0.1856179702         0.0000000000
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.1856179702         0.0000000000
    2    1   2    1         0.3712359405         0.0000000000
    2    1   3    1         0.1856179702         0.0000000000
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.1856179702         0.0000000000
    3    1   2    1         0.1856179702         0.0000000000
    3    1   3    1         0.3712359405         0.0000000000
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
-
+  
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-
+  
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-
+  
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0151524874         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-
+  
    2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.0151524874         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
-
+  
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0151524874         0.0000000000
@@ -1203,7 +1243,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1232,19 +1272,39 @@ solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-05, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   2299.3246757654     -8.235E+02 9.328E+00 4.664E+06
- ETOT  2   1019.8116808751     -1.280E+03 1.985E+00 1.368E+06
- ETOT  3   288.25959816179     -7.316E+02 4.899E-01 1.695E+04
- ETOT  4   280.33102375494     -7.929E+00 4.016E-03 1.308E+01
- ETOT  5   280.31326368886     -1.776E-02 1.366E-05 9.235E-01
- ETOT  6   280.31226756711     -9.961E-04 4.538E-07 3.989E-02
- ETOT  7   280.31222597529     -4.159E-05 1.452E-08 9.182E-03
- ETOT  8   280.31222491467     -1.061E-06 5.028E-08 1.969E-02
- ETOT  9   280.31221306433     -1.185E-05 8.709E-11 9.258E-04
- ETOT 10   280.31221235958     -7.047E-07 1.412E-10 2.923E-06
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   2299.3246757654     -8.235E+02 9.328E+00 4.664E+06 1.930E+01 5.037E+00
+ ETOT  2   1019.8116808751     -1.280E+03 1.985E+00 1.368E+06 2.173E+01 1.671E+00
+ ETOT  3   288.25959816179     -7.316E+02 4.899E-01 1.695E+04 9.858E+00 1.307E+00
+ ETOT  4   280.33102375494     -7.929E+00 4.016E-03 1.308E+01 8.628E-01 1.014E+00
+ ETOT  5   280.31326368886     -1.776E-02 1.366E-05 9.235E-01 1.218E-02 1.009E+00
+ ETOT  6   280.31226756711     -9.961E-04 4.538E-07 3.989E-02 5.270E-04 1.001E+00
+ ETOT  7   280.31222597529     -4.159E-05 1.452E-08 9.182E-03 2.752E-03 9.968E-01
+ ETOT  8   280.31222491467     -1.061E-06 5.028E-08 1.969E-02 1.944E-03 9.928E-01
+ ETOT  9   280.31221306433     -1.185E-05 8.709E-11 9.258E-04 4.359E-04 9.926E-01
+ ETOT 10   280.31221235958     -7.047E-07 1.412E-10 2.923E-06 2.259E-04 9.921E-01
 
  At SCF step   10       vres2   =  2.92E-06 < tolvrs=  1.00E-05 =>converged.
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+ Real part of magnetization:
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000    -0.000002    -0.000003     -0.000005     0.000001
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                -0.000002    -0.000003     -0.000005     0.000001
+ Total magnetization (from the atomic spheres):                0.000001
+ Total magnetization (exact up - dn):                          0.000001
+
+----------------------------
+ Imaginary part of magnetization:
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000    -7.573482    -6.581376    -14.154858    -0.992105
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                -7.573482    -6.581376    -14.154858    -0.992105
+ Total magnetization (from the atomic spheres):               -0.992105
+ Total magnetization (exact up - dn):                         -0.881398
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1276,26 +1336,26 @@ tolerances: {tolvrs: 1.00E-05, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1       280.3121827434         0.0000000000
    1    1   2    1        80.5362331426         0.0000000000
    1    1   3    1        80.5362331426         0.0000000000
-
+  
    2    1   1    1        80.5362331426        -0.0000000000
-
+  
    3    1   1    1        80.5362331426        -0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -1338,7 +1398,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 2    ipert=   1
@@ -1366,19 +1426,39 @@ solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-05, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   368.72165189740     -2.548E+03 1.079E+01 1.536E+05
- ETOT  2   247.78835158460     -1.209E+02 2.059E-01 5.795E+04
- ETOT  3   161.16265362150     -8.663E+01 4.088E-02 7.406E+01
- ETOT  4   161.07251088270     -9.014E-02 3.539E-05 9.356E-02
- ETOT  5   161.07236595413     -1.449E-04 1.288E-07 5.195E-03
- ETOT  6   161.07235370570     -1.225E-05 9.915E-09 1.589E-03
- ETOT  7   161.07235238968     -1.316E-06 8.079E-10 5.531E-05
- ETOT  8   161.07235237305     -1.663E-08 2.314E-11 4.529E-05
- ETOT  9   161.07235235300     -2.005E-08 3.226E-13 1.338E-05
- ETOT 10   161.07235234463     -8.367E-09 1.898E-13 7.149E-08
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   368.72165189740     -2.548E+03 1.079E+01 1.536E+05 6.891E-03 2.019E-03
+ ETOT  2   247.78835158460     -1.209E+02 2.059E-01 5.795E+04 1.511E-02 2.551E-03
+ ETOT  3   161.16265362150     -8.663E+01 4.088E-02 7.406E+01 8.793E-03 4.668E-05
+ ETOT  4   161.07251088270     -9.014E-02 3.539E-05 9.356E-02 7.772E-04 9.751E-05
+ ETOT  5   161.07236595413     -1.449E-04 1.288E-07 5.195E-03 4.195E-04 3.870E-05
+ ETOT  6   161.07235370570     -1.225E-05 9.915E-09 1.589E-03 4.748E-04 9.358E-05
+ ETOT  7   161.07235238968     -1.316E-06 8.079E-10 5.531E-05 3.145E-04 7.188E-06
+ ETOT  8   161.07235237305     -1.663E-08 2.314E-11 4.529E-05 5.315E-05 1.750E-05
+ ETOT  9   161.07235235300     -2.005E-08 3.226E-13 1.338E-05 2.698E-05 9.481E-06
+ ETOT 10   161.07235234463     -8.367E-09 1.898E-13 7.149E-08 9.695E-06 2.487E-06
 
  At SCF step   10       vres2   =  7.15E-08 < tolvrs=  1.00E-05 =>converged.
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+ Real part of magnetization:
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000    -0.000001    -0.000001     -0.000002     0.000000
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                -0.000001    -0.000001     -0.000002     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
+ Total magnetization (exact up - dn):                          0.000000
+
+----------------------------
+ Imaginary part of magnetization:
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000     0.000000     0.000003      0.000003    -0.000002
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.000000     0.000003      0.000003    -0.000002
+ Total magnetization (from the atomic spheres):               -0.000002
+ Total magnetization (exact up - dn):                         -0.000005
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1410,29 +1490,29 @@ tolerances: {tolvrs: 1.00E-05, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   2    1        80.5362208658        -0.0000000000
    1    1   3    1        80.5362208658        -0.0000000000
-
+  
    2    1   1    1        80.5362208658         0.0000000000
    2    1   2    1       161.0723523852         0.0000000000
    2    1   3    1        80.5361123609         0.0000000000
-
+  
    3    1   1    1        80.5362208658         0.0000000000
    3    1   2    1        80.5361123609        -0.0000000000
    3    1   3    1       161.0723523852         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -1475,7 +1555,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 3    ipert=   1
@@ -1503,18 +1583,38 @@ solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-05, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   369.35167830840     -2.547E+03 1.162E+01 1.539E+05
- ETOT  2   248.21222387841     -1.211E+02 2.473E-01 5.823E+04
- ETOT  3   161.15966512133     -8.705E+01 5.559E-02 7.178E+01
- ETOT  4   161.07252040902     -8.714E-02 3.431E-05 9.993E-02
- ETOT  5   161.07236431655     -1.561E-04 1.385E-07 4.722E-03
- ETOT  6   161.07235099677     -1.332E-05 1.179E-08 3.549E-04
- ETOT  7   161.07235044029     -5.565E-07 4.663E-10 6.245E-05
- ETOT  8   161.07235073801      2.977E-07 2.688E-11 5.817E-04
- ETOT  9   161.07235037386     -3.641E-07 1.866E-12 7.660E-07
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   369.35167830840     -2.547E+03 1.162E+01 1.539E+05 2.499E-04 3.270E-03
+ ETOT  2   248.21222387841     -1.211E+02 2.473E-01 5.823E+04 4.329E-03 1.195E-03
+ ETOT  3   161.15966512133     -8.705E+01 5.559E-02 7.178E+01 4.075E-03 2.291E-04
+ ETOT  4   161.07252040902     -8.714E-02 3.431E-05 9.993E-02 3.814E-05 3.493E-05
+ ETOT  5   161.07236431655     -1.561E-04 1.385E-07 4.722E-03 6.035E-05 2.436E-05
+ ETOT  6   161.07235099677     -1.332E-05 1.179E-08 3.549E-04 6.115E-05 5.243E-06
+ ETOT  7   161.07235044029     -5.565E-07 4.663E-10 6.245E-05 5.552E-05 1.388E-05
+ ETOT  8   161.07235073801      2.977E-07 2.688E-11 5.817E-04 7.678E-05 6.290E-05
+ ETOT  9   161.07235037386     -3.641E-07 1.866E-12 7.660E-07 6.506E-05 2.622E-06
 
  At SCF step    9       vres2   =  7.66E-07 < tolvrs=  1.00E-05 =>converged.
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+ Real part of magnetization:
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000    -0.000011    -0.000013     -0.000024     0.000002
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                -0.000011    -0.000013     -0.000024     0.000002
+ Total magnetization (from the atomic spheres):                0.000002
+ Total magnetization (exact up - dn):                          0.000002
+
+----------------------------
+ Imaginary part of magnetization:
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000     0.000000    -0.000003     -0.000003     0.000003
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.000000    -0.000003     -0.000003     0.000003
+ Total magnetization (from the atomic spheres):                0.000003
+ Total magnetization (exact up - dn):                          0.000005
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1546,29 +1646,29 @@ tolerances: {tolvrs: 1.00E-05, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   2    1        80.5361043389        -0.0000000000
    1    1   3    1        80.5361043389        -0.0000000000
-
+  
    2    1   1    1        80.5361043389         0.0000000000
    2    1   2    1       161.0723343519         0.0000000000
    2    1   3    1        80.5361503078         0.0000000000
-
+  
    3    1   1    1        80.5361043389         0.0000000000
    3    1   2    1        80.5361503078        -0.0000000000
    3    1   3    1       161.0723343519         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -1611,7 +1711,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1640,20 +1740,40 @@ solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-05, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1252.9022581923     -1.798E+03 1.054E+01 1.754E+06
- ETOT  2   599.29951034323     -6.536E+02 9.444E-01 5.274E+05
- ETOT  3   207.32906275740     -3.920E+02 1.687E-01 3.066E+03
- ETOT  4   204.81948580399     -2.510E+00 1.397E-03 1.815E+02
- ETOT  5   204.67506317284     -1.444E-01 5.994E-05 1.288E-01
- ETOT  6   204.67696233938      1.899E-03 1.642E-07 2.412E+00
- ETOT  7   204.67509053119     -1.872E-03 9.062E-10 2.306E-01
- ETOT  8   204.67488056298     -2.100E-04 1.674E-08 6.798E-04
- ETOT  9   204.67487948400     -1.079E-06 8.135E-10 4.247E-05
- ETOT 10   204.67487963203      1.480E-07 3.557E-11 6.165E-05
- ETOT 11   204.67487942480     -2.072E-07 2.193E-12 6.827E-06
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   1252.9022581923     -1.798E+03 1.054E+01 1.754E+06 1.662E+01 2.935E+00
+ ETOT  2   599.29951034323     -6.536E+02 9.444E-01 5.274E+05 1.719E+01 9.501E-02
+ ETOT  3   207.32906275740     -3.920E+02 1.687E-01 3.066E+03 7.118E+00 1.339E+00
+ ETOT  4   204.81948580399     -2.510E+00 1.397E-03 1.815E+02 2.534E-01 1.305E+00
+ ETOT  5   204.67506317284     -1.444E-01 5.994E-05 1.288E-01 1.103E-01 1.290E+00
+ ETOT  6   204.67696233938      1.899E-03 1.642E-07 2.412E+00 4.507E-02 1.294E+00
+ ETOT  7   204.67509053119     -1.872E-03 9.062E-10 2.306E-01 5.685E-02 1.294E+00
+ ETOT  8   204.67488056298     -2.100E-04 1.674E-08 6.798E-04 1.326E-02 1.297E+00
+ ETOT  9   204.67487948400     -1.079E-06 8.135E-10 4.247E-05 5.381E-04 1.298E+00
+ ETOT 10   204.67487963203      1.480E-07 3.557E-11 6.165E-05 1.196E-04 1.299E+00
+ ETOT 11   204.67487942480     -2.072E-07 2.193E-12 6.827E-06 1.270E-05 1.299E+00
 
  At SCF step   11       vres2   =  6.83E-06 < tolvrs=  1.00E-05 =>converged.
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+ Real part of magnetization:
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000     0.000003     0.000000      0.000003     0.000002
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.000003     0.000000      0.000003     0.000002
+ Total magnetization (from the atomic spheres):                0.000002
+ Total magnetization (exact up - dn):                          0.000002
+
+----------------------------
+ Imaginary part of magnetization:
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000    -7.478721    -6.180186    -13.658906    -1.298535
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                -7.478721    -6.180186    -13.658906    -1.298535
+ Total magnetization (from the atomic spheres):               -1.298535
+ Total magnetization (exact up - dn):                         -1.320847
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1685,38 +1805,38 @@ tolerances: {tolvrs: 1.00E-05, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1       204.6750401019         0.0000000000
    1    1   2    1       132.2068882357         0.0000000000
    1    1   3    1        72.4681518662         0.0000000000
-
+  
    2    1   1    1       132.2068882357         0.0000000000
    2    1   2    1       204.6750401019         0.0000000000
    2    1   3    1        72.4681518662         0.0000000000
-
+  
    3    1   1    1        72.4681518662         0.0000000000
    3    1   2    1        72.4681518662         0.0000000000
    3    1   3    1       144.9363037324         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         5.9157674993         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-
+  
    2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         5.9157674993         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
-
+  
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1        10.7923990396         0.0000000000
@@ -1760,7 +1880,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 2    ipert=   1
@@ -1789,21 +1909,41 @@ solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-05, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1256.0458288146     -1.794E+03 8.791E+00 1.758E+06
- ETOT  2   601.50208284568     -6.545E+02 9.464E-01 5.303E+05
- ETOT  3   207.29890616257     -3.942E+02 1.694E-01 3.021E+03
- ETOT  4   204.81938333174     -2.480E+00 1.388E-03 1.813E+02
- ETOT  5   204.67506327370     -1.443E-01 5.986E-05 1.304E-01
- ETOT  6   204.67626500944      1.202E-03 1.668E-07 1.601E+00
- ETOT  7   204.67518770136     -1.077E-03 7.850E-10 3.459E-01
- ETOT  8   204.67487876455     -3.089E-04 1.676E-08 6.818E-04
- ETOT  9   204.67487768362     -1.081E-06 8.162E-10 4.240E-05
- ETOT 10   204.67487773075      4.713E-08 3.802E-11 3.484E-05
- ETOT 11   204.67487763801     -9.274E-08 1.638E-12 1.004E-05
- ETOT 12   204.67487760494     -3.307E-08 3.868E-12 5.938E-07
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   1256.0458288146     -1.794E+03 8.791E+00 1.758E+06 1.663E+01 2.935E+00
+ ETOT  2   601.50208284568     -6.545E+02 9.464E-01 5.303E+05 1.722E+01 9.238E-02
+ ETOT  3   207.29890616257     -3.942E+02 1.694E-01 3.021E+03 7.128E+00 1.338E+00
+ ETOT  4   204.81938333174     -2.480E+00 1.388E-03 1.813E+02 2.494E-01 1.305E+00
+ ETOT  5   204.67506327370     -1.443E-01 5.986E-05 1.304E-01 1.102E-01 1.290E+00
+ ETOT  6   204.67626500944      1.202E-03 1.668E-07 1.601E+00 3.668E-02 1.294E+00
+ ETOT  7   204.67518770136     -1.077E-03 7.850E-10 3.459E-01 5.182E-02 1.294E+00
+ ETOT  8   204.67487876455     -3.089E-04 1.676E-08 6.818E-04 1.636E-02 1.297E+00
+ ETOT  9   204.67487768362     -1.081E-06 8.162E-10 4.240E-05 5.399E-04 1.298E+00
+ ETOT 10   204.67487773075      4.713E-08 3.802E-11 3.484E-05 1.227E-04 1.299E+00
+ ETOT 11   204.67487763801     -9.274E-08 1.638E-12 1.004E-05 1.328E-05 1.299E+00
+ ETOT 12   204.67487760494     -3.307E-08 3.868E-12 5.938E-07 3.117E-05 1.299E+00
 
  At SCF step   12       vres2   =  5.94E-07 < tolvrs=  1.00E-05 =>converged.
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+ Real part of magnetization:
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000    -0.000020     0.000002     -0.000017    -0.000022
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                -0.000020     0.000002     -0.000017    -0.000022
+ Total magnetization (from the atomic spheres):               -0.000022
+ Total magnetization (exact up - dn):                         -0.000019
+
+----------------------------
+ Imaginary part of magnetization:
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000    -7.478761    -6.180153    -13.658914    -1.298608
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                -7.478761    -6.180153    -13.658914    -1.298608
+ Total magnetization (from the atomic spheres):               -1.298608
+ Total magnetization (exact up - dn):                         -1.320979
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1835,38 +1975,38 @@ tolerances: {tolvrs: 1.00E-05, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1       204.6749032267         0.0000000000
    1    1   2    1       132.2067995589         0.0000000000
    1    1   3    1        72.4681036678         0.0000000000
-
+  
    2    1   1    1       132.2067995589         0.0000000000
    2    1   2    1       204.6749032267         0.0000000000
    2    1   3    1        72.4681036678         0.0000000000
-
+  
    3    1   1    1        72.4681036678         0.0000000000
    3    1   2    1        72.4681036678         0.0000000000
    3    1   3    1       144.9362073357         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         5.9157635647         0.0000000000
    1    1   2    1        -0.0000000000        -0.0000000000
    1    1   3    1        -0.0000000000        -0.0000000000
-
+  
    2    1   1    1        -0.0000000000        -0.0000000000
    2    1   2    1         5.9157635647         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000        -0.0000000000
    3    1   3    1        10.7923918007         0.0000000000
@@ -1910,7 +2050,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 3    ipert=   1
@@ -1939,18 +2079,38 @@ solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-05, }
 ...
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   571.40944342510     -2.386E+03 1.379E+01 3.927E+05
- ETOT  2   374.38513705079     -1.970E+02 5.101E-01 1.849E+05
- ETOT  3   145.36907078243     -2.290E+02 1.155E-01 3.996E+02
- ETOT  4   144.93657375792     -4.325E-01 2.092E-04 2.110E-01
- ETOT  5   144.93630192243     -2.718E-04 3.582E-07 8.606E-02
- ETOT  6   144.95578643154      1.948E-02 8.690E-09 2.283E+01
- ETOT  7   144.93619373510     -1.959E-02 1.254E-08 1.031E-03
- ETOT  8   144.93619207557     -1.660E-06 1.568E-09 1.293E-04
- ETOT  9   144.93619199449     -8.108E-08 3.739E-11 3.543E-06
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
+-ETOT  1   571.40944342510     -2.386E+03 1.379E+01 3.927E+05 1.165E-04 1.719E-03
+ ETOT  2   374.38513705079     -1.970E+02 5.101E-01 1.849E+05 9.607E-04 7.227E-04
+ ETOT  3   145.36907078243     -2.290E+02 1.155E-01 3.996E+02 9.724E-04 1.390E-04
+ ETOT  4   144.93657375792     -4.325E-01 2.092E-04 2.110E-01 2.525E-04 2.440E-04
+ ETOT  5   144.93630192243     -2.718E-04 3.582E-07 8.606E-02 7.652E-03 7.408E-03
+ ETOT  6   144.95578643154      1.948E-02 8.690E-09 2.283E+01 1.418E-01 1.344E-01
+ ETOT  7   144.93619373510     -1.959E-02 1.254E-08 1.031E-03 1.349E-01 4.817E-04
+ ETOT  8   144.93619207557     -1.660E-06 1.568E-09 1.293E-04 4.812E-04 1.648E-05
+ ETOT  9   144.93619199449     -8.108E-08 3.739E-11 3.543E-06 1.218E-04 3.608E-06
 
  At SCF step    9       vres2   =  3.54E-06 < tolvrs=  1.00E-05 =>converged.
+ Integrated electronic and magnetization densities in atomic spheres:
+ ------------------------------------------------------------------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+ Real part of magnetization:
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000    -0.000002     0.000000     -0.000001    -0.000002
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                -0.000002     0.000000     -0.000001    -0.000002
+ Total magnetization (from the atomic spheres):               -0.000002
+ Total magnetization (exact up - dn):                         -0.000002
+
+----------------------------
+ Imaginary part of magnetization:
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Ni   2.00000    -0.000013    -0.000009     -0.000023    -0.000004
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                -0.000013    -0.000009     -0.000023    -0.000004
+ Total magnetization (from the atomic spheres):               -0.000004
+ Total magnetization (exact up - dn):                         -0.000005
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1982,26 +2142,26 @@ tolerances: {tolvrs: 1.00E-05, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   3    1        72.4677177888        -0.0000000000
-
+  
    2    1   3    1        72.4677177888         0.0000000000
-
+  
    3    1   1    1        72.4677177888         0.0000000000
    3    1   2    1        72.4677177888        -0.0000000000
    3    1   3    1       144.9361326185         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
  Phonon energies in Hartree :
@@ -2013,7 +2173,7 @@ tolerances: {tolvrs: 1.00E-05, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      5.86900000E+01
@@ -2344,7 +2504,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2367,12 +2527,12 @@ P          mk1mem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2390,15 +2550,15 @@ P          mk1mem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.8  wall=          5.8
+- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and  41 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.8  wall=          5.8
++Overall time at end (sec) : cpu=          6.0  wall=          6.0
