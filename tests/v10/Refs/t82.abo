@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h08 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v10_t81-t82/t82.abi
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h02 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v10_t81-t82/t82.abi
 - output file    -> t82.abo
 - root for input  files -> t82i
 - root for output files -> t82o
 
-- inpspheads : Reading pseudopotential header in XML form from
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al.GGA-PBE.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.GGA-PBE.xml
  Symmetries : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -159,9 +159,9 @@ meta: {optdriver: 0, ionmov: 12, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.08216
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al.GGA-PBE.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al.GGA-PBE.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al.GGA-PBE.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.GGA-PBE.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.GGA-PBE.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Al.GGA-PBE.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.01466516
@@ -187,7 +187,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     958.000     958.000
 
 ================================================================================
 
-=== [ionmov=12] Isokinetic ensemble molecular dynamics
+=== [ionmov=12] Isokinetic ensemble molecular dynamics                      
 ================================================================================
 
 --- Iteration: (1/4) Internal Cycle: (1/1)
@@ -208,15 +208,15 @@ _setup2: Arith. and geom. avg. npw (full set) are     958.000     958.000
   5.00000000000000E-01  0.00000000000000E+00  5.00000000000000E-01
   5.00000000000000E-01  5.00000000000000E-01  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.39876E-05 7.88611E-06 (free atoms)
-  4.29912841912027E-06  1.00759594858411E-05 -1.39876424989304E-05
- -3.06110807228603E-07  3.34022958843333E-07  1.27709556771887E-05
- -4.12612046110042E-06 -5.92991954087468E-06 -9.24828504110278E-06
-  1.33102849208750E-07 -4.48006290380972E-06  1.04649718628445E-05
+  4.29912841909762E-06  1.00759594858966E-05 -1.39876424988626E-05
+ -3.06110807261097E-07  3.34022958859080E-07  1.27709556771279E-05
+ -4.12612046105486E-06 -5.92991954092120E-06 -9.24828504115853E-06
+  1.33102849218344E-07 -4.48006290383444E-06  1.04649718628932E-05
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -5.22159636668177E-05 -1.22379674001147E-04  1.69889838428702E-04
-  3.71793285289666E-06 -4.05694573004066E-06 -1.55112314083206E-04
-  5.01146593164155E-05  7.20230784259347E-05  1.12326980868697E-04
- -1.61662850249451E-06  5.44135413052526E-05 -1.27104505214193E-04
+ -5.22159636665425E-05 -1.22379674001821E-04  1.69889838427879E-04
+  3.71793285329133E-06 -4.05694573023191E-06 -1.55112314082469E-04
+  5.01146593158622E-05  7.20230784264998E-05  1.12326980869375E-04
+ -1.61662850261104E-06  5.44135413055528E-05 -1.27104505214785E-04
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
@@ -243,22 +243,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     958.000     958.000
   5.02137460083582E-01  1.66028840719422E-04  4.99592830485431E-01
   4.98390762885313E-01  5.01957086437457E-01 -6.96715503172025E-04
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.09635E-04 6.26784E-05 (free atoms)
- -5.11181293644991E-05 -9.93498879217372E-05 -4.00495458089365E-05
- -2.42480666366723E-05  5.85857708715120E-05  6.32863485125153E-05
-  7.47526981284437E-05 -6.88707039180022E-05  2.30866581813088E-05
-  6.13497872727701E-07  1.09634820968227E-04 -4.63234608848876E-05
+ -5.11181293644469E-05 -9.93498879217101E-05 -4.00495458089481E-05
+ -2.42480666367084E-05  5.85857708716022E-05  6.32863485125904E-05
+  7.47526981284139E-05 -6.88707039180339E-05  2.30866581812707E-05
+  6.13497872741464E-07  1.09634820968142E-04 -4.63234608849130E-05
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  6.20865934997718E-04  1.20667484947691E-03  4.86430137683560E-04
-  2.94509966452722E-04 -7.11565737281549E-04 -7.68657586462902E-04
- -9.07924534682808E-04  8.36483543384460E-04 -2.80403837071268E-04
- -7.45136676763304E-06 -1.33159265557982E-03  5.62631285850611E-04
+  6.20865934997085E-04  1.20667484947658E-03  4.86430137683701E-04
+  2.94509966453161E-04 -7.11565737282645E-04 -7.68657586463814E-04
+ -9.07924534682445E-04  8.36483543384846E-04 -2.80403837070806E-04
+ -7.45136676780020E-06 -1.33159265557878E-03  5.62631285850918E-04
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 5.19220E-04 2.93000E-04 (free atoms)
  -2.46190983758854E-04 -3.80447400618497E-04 -5.06229304450917E-05
   1.17876457896158E-04 -1.35291278296181E-04  3.18772134864948E-04
   5.19220031936161E-04  4.03336628408812E-05 -9.89022757514791E-05
  -3.90905506073466E-04  4.75405016073797E-04 -1.69246928668377E-04
  Kinetic energy of ions (ekin) [Ha]=  2.53345233578282E-02
- Total energy (etotal) [Ha]= -8.08630881074389E+00
+ Total energy (etotal) [Ha]= -8.08630881074391E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-8.86348E-06
@@ -341,8 +341,8 @@ force_length_stats: {min:   2.57978625E-04, max:   4.39296750E-04, mean:   3.485
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.462614913085478
- Compensation charge over fine fft grid    =     -0.463124836748751
+ Compensation charge over spherical meshes =     -0.462614913085481
+ Compensation charge over fine fft grid    =     -0.463124836748744
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -394,30 +394,30 @@ force_length_stats: {min:   2.57978625E-04, max:   4.39296750E-04, mean:   3.485
  Cartesian coordinates (xcart) [bohr]
  -2.46196600525398E-02 -3.80464681520265E-02 -5.06466569396345E-03
   1.17855273981169E-02  6.05932947448921E+00  6.10473333395019E+00
-  6.12477636749930E+00  4.02926668980152E-03  6.06296581476439E+00
+  6.12477636749930E+00  4.02926668980151E-03  6.06296581476439E+00
   6.03376698253704E+00  6.12039694435494E+00 -1.69252656386974E-02
  Reduced coordinates (xred)
  -2.02702531502287E-03 -3.13250280169540E-03 -4.16992174216992E-04
-  9.70344933110239E-04  4.98886426971066E-01  5.02624690307389E-01
-  5.04274905473123E-01  3.31744043734817E-04  4.99185819967399E-01
+  9.70344933110238E-04  4.98886426971066E-01  5.02624690307389E-01
+  5.04274905473123E-01  3.31744043734816E-04  4.99185819967399E-01
   4.96781774908789E-01  5.03914331786894E-01 -1.39351810057130E-03
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.64364E-04 2.04683E-04 (free atoms)
- -1.67873694826534E-04 -3.02103610379972E-04 -1.00671981282027E-04
-  3.28132120658173E-05  1.61812455032347E-05  2.55371164266265E-04
-  3.27812639404751E-04 -7.84414466311676E-05 -2.82010741187154E-06
- -1.92752156644034E-04  3.64363811507905E-04 -1.51879075572366E-04
+ -1.67873694826770E-04 -3.02103610379652E-04 -1.00671981281829E-04
+  3.28132120656277E-05  1.61812455034717E-05  2.55371164266219E-04
+  3.27812639405199E-04 -7.84414466317088E-05 -2.82010741253076E-06
+ -1.92752156644057E-04  3.64363811507889E-04 -1.51879075571859E-04
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  2.03894508261060E-03  3.66926260519639E-03  1.22273261098922E-03
- -3.98539732239705E-04 -1.96532702657357E-04 -3.10166390368233E-03
- -3.98151699599258E-03  9.52727001372944E-04  3.42522045863752E-05
-  2.34111164562169E-03 -4.42545690391198E-03  1.84467908810674E-03
+  2.03894508261347E-03  3.66926260519249E-03  1.22273261098681E-03
+ -3.98539732237403E-04 -1.96532702660236E-04 -3.10166390368177E-03
+ -3.98151699599803E-03  9.52727001379518E-04  3.42522045943819E-05
+  2.34111164562197E-03 -4.42545690391178E-03  1.84467908810058E-03
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 5.19218E-04 2.93000E-04 (free atoms)
- -2.46196601530943E-04 -3.80464683470524E-04 -5.06466577215689E-05
+ -2.46196601530943E-04 -3.80464683470524E-04 -5.06466577215688E-05
   1.17855273513885E-04 -1.35251340882316E-04  3.18787253837756E-04
   5.19217589560496E-04  4.02926655586376E-05 -9.88879388202104E-05
  -3.90876261543438E-04  4.75423358794202E-04 -1.69252657295977E-04
  Kinetic energy of ions (ekin) [Ha]=  2.53345233578282E-02
- Total energy (etotal) [Ha]= -8.08633373762670E+00
+ Total energy (etotal) [Ha]= -8.08633373762671E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-2.49269E-05
@@ -489,8 +489,8 @@ force_length_stats: {min:   3.19455131E-04, max:   5.63006199E-04, mean:   4.535
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.463541842281140
- Compensation charge over fine fft grid    =     -0.463578237369194
+ Compensation charge over spherical meshes =     -0.463541842281139
+ Compensation charge over fine fft grid    =     -0.463578237369195
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -540,32 +540,32 @@ force_length_stats: {min:   3.19455131E-04, max:   5.63006199E-04, mean:   4.535
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -3.69300444606276E-02 -5.70732443688294E-02 -7.60122324975896E-03
-  1.76749031206999E-02  6.05257431224431E+00  6.12067527153467E+00
-  6.15073624403873E+00  6.03664736412129E-03  6.05802558581712E+00
+ -3.69300444606276E-02 -5.70732443688294E-02 -7.60122324975895E-03
+  1.76749031206998E-02  6.05257431224431E+00  6.12067527153467E+00
+  6.15073624403873E+00  6.03664736412125E-03  6.05802558581712E+00
   6.01422811468311E+00  6.14417150214232E+00 -2.53904167201140E-02
  Reduced coordinates (xred)
- -3.04058361678677E-03 -4.69904583975640E-03 -6.25836096823455E-04
+ -3.04058361678677E-03 -4.69904583975639E-03 -6.25836096823454E-04
   1.45523845535549E-03  4.98330250125071E-01  5.03937247466395E-01
-  5.06412275640217E-01  4.97018927102432E-04  4.98779073118874E-01
+  5.06412275640217E-01  4.97018927102430E-04  4.98779073118874E-01
   4.95173069521214E-01  5.05871776787583E-01 -2.09048448844612E-03
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.84227E-04 2.66867E-04 (free atoms)
- -2.30569187059162E-04 -4.17823783961112E-04 -1.28083488151246E-04
-  1.25655786991754E-05  7.10983150509698E-05  3.11189197064270E-04
-  4.14540348137837E-04 -1.37501626713578E-04  2.63540972044762E-05
- -1.96536739777851E-04  4.84227095623719E-04 -2.09459806117501E-04
+ -2.30569187059094E-04 -4.17823783961169E-04 -1.28083488151236E-04
+  1.25655786991341E-05  7.10983150509483E-05  3.11189197064105E-04
+  4.14540348137849E-04 -1.37501626713645E-04  2.63540972046167E-05
+ -1.96536739777889E-04  4.84227095623866E-04 -2.09459806117486E-04
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  2.80042630050872E-03  5.07476618409787E-03  1.55566480263301E-03
- -1.52617865028313E-04 -8.63539460454888E-04 -3.77961349913319E-03
- -5.03488652735444E-03  1.67005477498011E-03 -3.20089201332186E-04
-  2.38707809187403E-03 -5.88128149862308E-03  2.54403789783236E-03
+  2.80042630050790E-03  5.07476618409857E-03  1.55566480263289E-03
+ -1.52617865027811E-04 -8.63539460454627E-04 -3.77961349913118E-03
+ -5.03488652735458E-03  1.67005477498093E-03 -3.20089201333892E-04
+  2.38707809187450E-03 -5.88128149862487E-03  2.54403789783218E-03
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 5.19207E-04 2.93000E-04 (free atoms)
- -2.46205706138365E-04 -3.80510783645541E-04 -5.06971483080280E-05
+ -2.46205706138365E-04 -3.80510783645541E-04 -5.06971483080278E-05
   1.17810713560079E-04 -1.35157214486396E-04  3.18816879385198E-04
-  5.19206668524131E-04  4.02010846093893E-05 -9.88365986242277E-05
+  5.19206668524132E-04  4.02010846093889E-05 -9.88365986242281E-05
  -3.90811675945845E-04  4.75466913522548E-04 -1.69283132452942E-04
  Kinetic energy of ions (ekin) [Ha]=  2.53345233578282E-02
- Total energy (etotal) [Ha]= -8.08637747326731E+00
+ Total energy (etotal) [Ha]= -8.08637747326730E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-4.37356E-05
@@ -600,10 +600,10 @@ force_length_stats: {min:   3.19455131E-04, max:   5.63006199E-04, mean:   4.535
  frms,max,avg= 2.6686712E-04 4.8422710E-04  -4.023E-06  1.687E-06 -3.960E-06 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.01185634330714    -0.02148536102206    -0.00658631722159
-    2      0.00064614798192     0.00365602204941     0.01600199055618
-    3      0.02131651997767    -0.00707061733790     0.00135518205182
-    4     -0.01010632465245     0.02489995631055    -0.01077085538641
+    1     -0.01185634330713    -0.02148536102207    -0.00658631722159
+    2      0.00064614798191     0.00365602204941     0.01600199055617
+    3      0.02131651997767    -0.00707061733790     0.00135518205183
+    4     -0.01010632465245     0.02489995631056    -0.01077085538640
  frms,max,avg= 1.3722858E-02 2.4899956E-02  -2.068E-04  8.673E-05 -2.036E-04 e/A
  length scales= 12.145709217382 12.145709217382 12.145709217382 bohr
               =  6.427232500000  6.427232500000  6.427232500000 angstroms
@@ -623,15 +623,15 @@ force_length_stats: {min:   3.19455131E-04, max:   5.63006199E-04, mean:   4.535
 --- !EnergyTerms
 iteration_state     : {dtset: 1, itime: 4, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.16556324824033E+00
-hartree             :  4.79901071850164E-01
-xc                  : -2.92434638807125E+00
+kinetic             :  2.16556324824035E+00
+hartree             :  4.79901071850160E-01
+xc                  : -2.92434638807126E+00
 Ewald energy        : -6.79405175429543E+00
 psp_core            :  5.57424134077039E-02
 local_psp           : -3.22549054785359E+00
-spherical_terms     :  2.18417604055202E+00
-internal            : -8.05850591617006E+00
-'-kT*entropy'       : -2.45310522101652E-02
+PAW spherical_terms :  2.18417604055201E+00
+internal            : -8.05850591617005E+00
+'-kT*entropy'       : -2.45310522101647E-02
 total_energy        : -8.08303696838022E+00
 total_energy_eV     : -2.19950621701165E+02
 ...
@@ -640,15 +640,25 @@ total_energy_eV     : -2.19950621701165E+02
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, itime: 4, icycle: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.44059016097709E+00
+band_energy         : -1.44059016097710E+00
 Ewald energy        : -6.79405175429543E+00
 psp_core            :  5.57424134077039E-02
-xc_dc               :  1.37332179371419E-02
-spherical_terms     :  1.03319862870541E-01
+xc_dc               :  1.37332179371517E-02
+PAW spherical_terms :  1.03319862870537E-01
 internal            : -8.06184642105714E+00
-'-kT*entropy'       : -2.45310522101652E-02
-total_energy_dc     : -8.08637747326731E+00
-total_energy_dc_eV  : -2.20041521461934E+02
+'-kT*entropy'       : -2.45310522101647E-02
+total_energy_dc     : -8.08637747326730E+00
+total_energy_dc_eV  : -2.20041521461933E+02
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, itime: 4, icycle: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -9.69124276832462E+02
+Total energy DC     : -9.69127617337349E+02
+Total energy (eV)   : -2.63712127049330E+04
+Total energy DC (eV): -2.63713036046938E+04
 ...
 
  rms coord change=  3.6186E-03   atom, delta coord (reduced):
@@ -669,7 +679,7 @@ total_energy_dc_eV  : -2.20041521461934E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.2145709217E+01  1.2145709217E+01  1.2145709217E+01 Bohr
               amu      2.69815390E+01
@@ -679,7 +689,7 @@ total_energy_dc_eV  : -2.20041521461934E+02
            etotal     -8.0863774733E+00
             fcart     -2.3056918706E-04 -4.1782378396E-04 -1.2808348815E-04
                        1.2565578699E-05  7.1098315051E-05  3.1118919706E-04
-                       4.1454034814E-04 -1.3750162671E-04  2.6354097204E-05
+                       4.1454034814E-04 -1.3750162671E-04  2.6354097205E-05
                       -1.9653673978E-04  4.8422709562E-04 -2.0945980612E-04
 -          fftalg         512
            ionmov          12
@@ -798,7 +808,7 @@ P           mkmem           4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -810,12 +820,12 @@ P           mkmem           4
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -833,15 +843,15 @@ P           mkmem           4
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          2.4
++Overall time at end (sec) : cpu=          2.4  wall=          2.4

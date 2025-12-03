@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h16 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t102-t103/t102.abi
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h10 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v9_t102-t103/t102.abi
 - output file    -> t102.abo
 - root for input  files -> t102i
 - root for output files -> t102o
 
-- inpspheads : Reading pseudopotential header in XML form from
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
 
  invars1: COMMENT -
   With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.
@@ -148,9 +148,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.04111
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -182,9 +182,9 @@ tolerances: {toldfe: 1.00E-05, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.1312769901043    -8.131E+00 3.847E-02 1.536E+00
- ETOT  2  -8.1578624572413    -2.659E-02 5.963E-03 3.670E-01
- ETOT  3  -8.1573551622476     5.073E-04 4.073E-04 1.776E-01
+ ETOT  1  -8.1312769901044    -8.131E+00 3.847E-02 1.536E+00
+ ETOT  2  -8.1578624572409    -2.659E-02 5.963E-03 3.670E-01
+ ETOT  3  -8.1573551622473     5.073E-04 4.073E-04 1.776E-01
  ETOT  4  -8.1569179597558     4.372E-04 2.810E-05 3.185E-03
  ETOT  5  -8.1569026000146     1.536E-05 9.624E-06 1.267E-04
 
@@ -224,11 +224,11 @@ xred      :
 - [  5.0000E-01,   0.0000E+00,   5.0000E-01, Al]
 - [  0.0000E+00,   5.0000E-01,   5.0000E-01, Al]
 cartesian_forces: # hartree/bohr
-- [ -4.31375362E-06,   1.55439207E-06,  -3.74781635E-06, ]
-- [  6.18171362E-06,  -3.57674038E-06,  -1.74139678E-06, ]
-- [  4.02367615E-07,   1.18537876E-06,   4.32021942E-06, ]
-- [ -2.27032762E-06,   8.36969560E-07,   1.16899371E-06, ]
-force_length_stats: {min:   2.68727591E-06, max:   7.35113038E-06, mean:   5.11459620E-06, }
+- [ -4.31375363E-06,   1.55439214E-06,  -3.74781633E-06, ]
+- [  6.18171371E-06,  -3.57674042E-06,  -1.74139680E-06, ]
+- [  4.02367589E-07,   1.18537879E-06,   4.32021938E-06, ]
+- [ -2.27032767E-06,   8.36969500E-07,   1.16899375E-06, ]
+force_length_stats: {min:   2.68727595E-06, max:   7.35113047E-06, mean:   5.11459623E-06, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -242,8 +242,8 @@ force_length_stats: {min:   2.68727591E-06, max:   7.35113038E-06, mean:   5.114
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.140642941062970
- Compensation charge over fine fft grid    =     -0.142445505436381
+ Compensation charge over spherical meshes =     -0.140642941062925
+ Compensation charge over fine fft grid    =     -0.142445505436301
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -568,13 +568,13 @@ force_length_stats: {min:   2.68727591E-06, max:   7.35113038E-06, mean:   5.114
    0.00000  -0.00000   0.00000  -0.00000  -0.00098  -0.00000   0.00000   0.00000
    === IMAGINARY PART:
    0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000
-   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000
+   0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000
    0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000
-  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000
+  -0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000
   -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
   -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000
    0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000
-  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000
+  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
  Atom #  1 - Component magn (x)
    === REAL PART:
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -586,14 +586,14 @@ force_length_stats: {min:   2.68727591E-06, max:   7.35113038E-06, mean:   5.114
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    === IMAGINARY PART:
-   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000
+  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000
   -0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
    0.00000   0.00000   0.00000   0.00532   0.00000  -0.00000   0.00002  -0.00000
   -0.00000  -0.00000  -0.00532   0.00000  -0.00000  -0.00002   0.00000  -0.00000
    0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
   -0.00000   0.00000   0.00000   0.00002  -0.00000   0.00000  -0.00000   0.00000
   -0.00000   0.00000  -0.00002  -0.00000   0.00000   0.00000   0.00000   0.00000
-  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000
+  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
  Atom #  1 - Component magn (y)
    === REAL PART:
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -625,8 +625,8 @@ force_length_stats: {min:   2.68727591E-06, max:   7.35113038E-06, mean:   5.114
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    === IMAGINARY PART:
    0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000
-  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000
-   0.00000  -0.00000  -0.00000  -0.00000  -0.00532   0.00000  -0.00000  -0.00002
+  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000
+   0.00000  -0.00000   0.00000  -0.00000  -0.00532   0.00000  -0.00000  -0.00002
    0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
    0.00000  -0.00000   0.00532  -0.00000  -0.00000   0.00002   0.00000   0.00000
    0.00000  -0.00000  -0.00000  -0.00000  -0.00002  -0.00000   0.00000   0.00000
@@ -643,13 +643,13 @@ force_length_stats: {min:   2.68727591E-06, max:   7.35113038E-06, mean:   5.114
    0.00000   0.00000  -0.00000  -0.00098   0.00000   0.00000   0.00000  -0.00000
   -0.00000   0.00000  -0.00000   0.00000  -0.00098   0.00000  -0.00000   0.00000
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000
+  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000
   -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000
   -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000
-   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000
    0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000
    0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000
-  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
+  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000
   -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000
  Atom #  4 - Component magn (x)
    === REAL PART:
@@ -663,12 +663,12 @@ force_length_stats: {min:   2.68727591E-06, max:   7.35113038E-06, mean:   5.114
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    === IMAGINARY PART:
    0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
-  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
+  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
    0.00000   0.00000   0.00000   0.00532   0.00000  -0.00000   0.00002  -0.00000
-   0.00000  -0.00000  -0.00532   0.00000  -0.00000  -0.00002   0.00000  -0.00000
-   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000
+   0.00000  -0.00000  -0.00532  -0.00000  -0.00000  -0.00002   0.00000  -0.00000
+   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000
    0.00000  -0.00000   0.00000   0.00002   0.00000   0.00000  -0.00000  -0.00000
-   0.00000   0.00000  -0.00002  -0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000  -0.00002  -0.00000   0.00000   0.00000  -0.00000   0.00000
    0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000
  Atom #  4 - Component magn (y)
    === REAL PART:
@@ -700,13 +700,13 @@ force_length_stats: {min:   2.68727591E-06, max:   7.35113038E-06, mean:   5.114
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    === IMAGINARY PART:
-  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000
-  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000
-   0.00000   0.00000  -0.00000  -0.00000  -0.00532  -0.00000  -0.00000  -0.00002
-   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000
+   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000
+  -0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000  -0.00000  -0.00532  -0.00000  -0.00000  -0.00002
+   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
   -0.00000   0.00000   0.00532  -0.00000  -0.00000   0.00002  -0.00000   0.00000
    0.00000  -0.00000   0.00000  -0.00000  -0.00002  -0.00000   0.00000   0.00000
-  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000
+  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
   -0.00000   0.00000   0.00002   0.00000  -0.00000  -0.00000  -0.00000   0.00000
 
 
@@ -722,9 +722,9 @@ force_length_stats: {min:   2.68727591E-06, max:   7.35113038E-06, mean:   5.114
        0.000000000000      0.500000000000      0.500000000000
  rms dE/dt=  3.5165E-05; max dE/dt=  6.8592E-05; dE/dt below (all hartree)
     1       0.000033206263      0.000030683701      0.000009271016
-    2      -0.000044333829      0.000068592302     -0.000005552331
-    3      -0.000001636252      0.000033409957     -0.000050335310
-    4       0.000018109513      0.000035983990     -0.000027054180
+    2      -0.000044333830      0.000068592303     -0.000005552331
+    3      -0.000001636252      0.000033409957     -0.000050335309
+    4       0.000018109514      0.000035983991     -0.000027054180
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
@@ -733,17 +733,17 @@ force_length_stats: {min:   2.68727591E-06, max:   7.35113038E-06, mean:   5.114
     4      0.00000000000000     1.95477002498729     1.95477002498729
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000431375362     0.00000155439207    -0.00000374781635
-    2      0.00000618171362    -0.00000357674038    -0.00000174139678
-    3      0.00000040236762     0.00000118537876     0.00000432021942
-    4     -0.00000227032762     0.00000083696956     0.00000116899371
- frms,max,avg= 3.1166571E-06 6.1817136E-06  -1.809E-07 -5.708E-06  2.493E-06 h/b
+    1     -0.00000431375363     0.00000155439214    -0.00000374781633
+    2      0.00000618171371    -0.00000357674042    -0.00000174139680
+    3      0.00000040236759     0.00000118537879     0.00000432021938
+    4     -0.00000227032767     0.00000083696950     0.00000116899375
+ frms,max,avg= 3.1166572E-06 6.1817137E-06  -1.809E-07 -5.708E-06  2.493E-06 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00022182211134     0.00007993004706    -0.00019272044899
-    2      0.00031787646861    -0.00018392336999    -0.00008954621529
-    3      0.00002069057295     0.00006095462130     0.00022215459595
-    4     -0.00011674493021     0.00004303870163     0.00006011206833
+    1     -0.00022182211157     0.00007993005064    -0.00019272044816
+    2      0.00031787647281    -0.00018392337211    -0.00008954621636
+    3      0.00002069057158     0.00006095462295     0.00022215459411
+    4     -0.00011674493282     0.00004303869852     0.00006011207041
  frms,max,avg= 1.6026494E-04 3.1787647E-04  -9.302E-06 -2.935E-04  1.282E-04 e/A
  length scales=  7.387960000000  7.387960000000  7.387960000000 bohr
               =  3.909540049975  3.909540049975  3.909540049975 angstroms
@@ -768,32 +768,42 @@ force_length_stats: {min:   2.68727591E-06, max:   7.35113038E-06, mean:   5.114
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.80905762117367E+00
-hartree             :  1.65228050055906E-02
-xc                  : -4.37781451140249E+00
+kinetic             :  3.80905762117404E+00
+hartree             :  1.65228050055925E-02
+xc                  : -4.37781451140236E+00
 Ewald energy        : -1.11705419810135E+01
 psp_core            : -4.34746035722819E-01
-local_psp           :  1.35902927136219E+00
-spherical_terms     :  2.64537736400756E+00
-internal            : -8.15311546658976E+00
-'-kT*entropy'       : -1.40347457432164E-02
-total_energy        : -8.16715021233298E+00
-total_energy_eV     : -2.22239459470073E+02
+local_psp           :  1.35902927136243E+00
+PAW spherical_terms :  2.64537736400747E+00
+internal            : -8.15311546658910E+00
+'-kT*entropy'       : -1.40347457432161E-02
+total_energy        : -8.16715021233232E+00
+total_energy_eV     : -2.22239459470055E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  2.59949769799198E+00
+band_energy         :  2.59949769799203E+00
 Ewald energy        : -1.11705419810135E+01
 psp_core            : -4.34746035722819E-01
-xc_dc               :  1.40164540341924E-01
-spherical_terms     :  7.22757924131017E-01
-internal            : -8.14286785427135E+00
-'-kT*entropy'       : -1.40347457432164E-02
-total_energy_dc     : -8.15690260001457E+00
-total_energy_dc_eV  : -2.21960607757629E+02
+xc_dc               :  1.40164540341928E-01
+PAW spherical_terms :  7.22757924130977E-01
+internal            : -8.14286785427134E+00
+'-kT*entropy'       : -1.40347457432161E-02
+total_energy_dc     : -8.15690260001456E+00
+total_energy_dc_eV  : -2.21960607757628E+02
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -9.71035790400824E+02
+Total energy DC     : -9.71025542788506E+02
+Total energy (eV)   : -2.64232276343953E+04
+Total energy DC (eV): -2.64229487826829E+04
 ...
 
 
@@ -809,7 +819,7 @@ total_energy_dc_eV  : -2.21960607757629E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
 -          iomode           3
             acell      7.3879600000E+00  7.3879600000E+00  7.3879600000E+00 Bohr
@@ -818,10 +828,10 @@ total_energy_dc_eV  : -2.21960607757629E+02
              ecut      1.00000000E+01 Hartree
            enunit           2
            etotal     -8.1569026000E+00
-            fcart     -4.3137536220E-06  1.5543920663E-06 -3.7478163463E-06
-                       6.1817136241E-06 -3.5767403828E-06 -1.7413967804E-06
-                       4.0236761539E-07  1.1853787560E-06  4.3202194186E-06
-                      -2.2703276175E-06  8.3696956047E-07  1.1689937081E-06
+            fcart     -4.3137536264E-06  1.5543921360E-06 -3.7478163300E-06
+                       6.1817137056E-06 -3.5767404242E-06 -1.7413968013E-06
+                       4.0236758889E-07  1.1853787882E-06  4.3202193828E-06
+                      -2.2703276681E-06  8.3696950000E-07  1.1689937485E-06
 -          fftalg         512
            istwfk        1
               ixc     -101130
@@ -848,7 +858,7 @@ P           mkmem           1
          prtnabla           3
           spgroup           1
            strten     -7.2335803051E-04 -7.2288000083E-04 -7.2203019218E-04
-                       1.0729007603E-08  4.2757083903E-08 -4.5154783160E-08
+                       1.0729007622E-08  4.2757083878E-08 -4.5154783198E-08
            toldfe      1.00000000E-05 Hartree
            tsmear      3.67490000E-03 Hartree
             typat      1  1  1  1
@@ -937,7 +947,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -949,12 +959,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -972,7 +982,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

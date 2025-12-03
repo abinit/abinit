@@ -257,6 +257,7 @@ type, public :: paw_setup_t
   logical                      :: tread=.false.
   integer                      :: ngrid
   real(dpxml)                  :: rpaw
+  real(dpxml)                  :: ekin_core
   real(dpxml)                  :: ex_cc
   real(dpxml)                  :: lamb_shielding=0.0D0
   character(len=4)             :: idgrid
@@ -1261,6 +1262,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
  paw_setupout%idgrid=paw_setupin%idgrid
  paw_setupout%optortho=paw_setupin%optortho
  paw_setupout%rpaw=paw_setupin%rpaw
+ paw_setupout%ekin_core=paw_setupin%ekin_core
  paw_setupout%ex_cc=paw_setupin%ex_cc
  paw_setupout%lamb_shielding=paw_setupin%lamb_shielding
  paw_setupout%atom%tread=paw_setupin%atom%tread
@@ -1991,6 +1993,18 @@ end subroutine paw_setup_copy
      paw_setup%generator%gen  = trim(strg)
      call paw_rdfromline(" name",line,strg,ierr)
      paw_setup%generator%name= trim(strg)
+     cycle
+   end if
+
+!  --Read core kinetic energy
+   if (line(1:12)=='<core_energy') then
+     call paw_rdfromline(" kinetic",line,strg,ierr)
+     if (len(trim(strg))<=30) then
+       strg1=trim(strg)
+       read(unit=strg1,fmt=*) paw_setup%ekin_core
+     else
+       read(unit=strg,fmt=*) paw_setup%ekin_core
+     end if
      cycle
    end if
 
@@ -3059,7 +3073,14 @@ end subroutine paw_setup_copy
 !  End of reading loop
  end do
 
- if(Atm%ln_size>0)then
+ atm%zcore_conv=.false.
+ atm%nc_conv=.false.
+ atm%nresid_c=one
+
+ if(Atm%ln_size==0)then
+   LIBPAW_ALLOCATE(Atm%mode,(1,1))
+   Atm%mode = ORB_FROZEN
+ else
    LIBPAW_ALLOCATE(Atm%eig,(Atm%ln_size,Atm%nsppol))
    LIBPAW_ALLOCATE(Atm%occ,(Atm%ln_size,Atm%nsppol))
    LIBPAW_ALLOCATE(Atm%occ_res,(Atm%ln_size,Atm%nsppol))
@@ -3173,9 +3194,6 @@ end subroutine paw_setup_copy
    Atm%mode = ORB_FROZEN
    LIBPAW_ALLOCATE(Atm%max_occ,(Atm%ln_size,Atm%nsppol))
    Atm%max_occ=Atm%occ
-   atm%zcore_conv=.false.
-   atm%nc_conv=.false.
-   atm%nresid_c=one
 
 !   ! * Setup of kln2ln.
 !   !TODO this has to be tested

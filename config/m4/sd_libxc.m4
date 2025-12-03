@@ -41,6 +41,17 @@ AC_DEFUN([SD_LIBXC_INIT], [
   sd_libxc_policy=""
   sd_libxc_status=""
 
+
+AC_ARG_WITH([fb-libxc-version],
+  [AS_HELP_STRING([--with-fb-libxc-version=VERSION],
+    [Specify the version of fb-libxc to use from the fallback directory])],
+  [abi_fb_libxc_version="$withval"],
+  [abi_fb_libxc_version="6.2.2"]
+)
+
+AC_SUBST([abi_fb_libxc_version])
+
+
   # Process options
   for kwd in ${sd_libxc_options}; do
     case "${kwd}" in
@@ -187,21 +198,25 @@ AC_DEFUN([SD_LIBXC_INIT], [
           TMP_LIBXC_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags libxc`
           TMP_LIBXC_FFFLAGS="${TMP_HDF5_CPPFLAGS}"
           TMP_LIBXC_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxc`
-	  if "$PKG_CONFIG" --exists libxcf03; then
-               TMP_LIBXC04OR90_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxcf03`
-          elif "$PKG_CONFIG" --exists libxcf90; then
-               TMP_LIBXC04OR90_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxcf90`
-	  else
- 		AC_MSG_ERROR([invalid PKG-CONFIG  for LibXC: neither fortran90 nor fortran03 interface available])
-	  fi
+	  #if test "${sd_libxc_enable_fc}" = "yes"; then
+	  #    if "$PKG_CONFIG" --exists libxcf03; then
+          #        TMP_LIBXC04OR90_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxcf03`
+          #    elif "$PKG_CONFIG" --exists libxcf90; then
+          #        TMP_LIBXC04OR90_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxcf90`
+	  #    else
+          #        AC_MSG_ERROR([invalid PKG-CONFIG  for LibXC: neither fortran90 nor fortran03 interface available])
+	  #    fi
+	  #else	  
+          #     TMP_LIBXC04OR90_LIBS=''
+	  #fi
 
           sd_libxc_cppflags="${TMP_LIBXC_CPPFLAGS} "
           sd_libxc_cflags="${TMP_LIBXC_CPPFLAGS}"
           sd_libxc_cxxflags="${TMP_LIBXC_CPPFLAGS}"
           test "${sd_libxc_enable_fc}" = "yes" && \
                sd_libxc_fcflags="${TMP_LIBXC_FFLAGS}"
-          sd_libxc_ldflags="${TMP_LIBXC_LIBS} ${TMP_LIBXC04OR90_LIBS}"
-          sd_libxc_libs="${TMP_LIBXC_LIBS} ${TMP_LIBXC04OR90_LIBS}"
+          sd_libxc_ldflags="${TMP_LIBXC_LIBS}" 
+          sd_libxc_libs="${TMP_LIBXC_LIBS}" 
           ;;
 
 
@@ -217,7 +232,8 @@ AC_DEFUN([SD_LIBXC_INIT], [
   # Override the default configuration if the ESL Bundle is available
   # Note: The setting of the build flags is done once for all
   #       ESL-bundled packages
-  if test "${sd_libxc_init}" = "def" -a ! -z "${ESL_BUNDLE_PREFIX}"; then
+
+  if test "${sd_libxc_init}" = "def" -o "${sd_libxc_init}" = "pkg" && test -n "${ESL_BUNDLE_PREFIX}"; then
     sd_libxc_init="esl"
     sd_libxc_cppflags=""
     sd_libxc_cflags=""
@@ -274,15 +290,19 @@ AC_DEFUN([SD_LIBXC_DETECT], [
       AC_DEFINE([HAVE_LIBXC], 1,
         [Define to 1 if you have the LibXC library.])
     else
-      if test "${sd_libxc_status}" = "optional" -a \
-              "${sd_libxc_init}" = "def"; then
-        sd_libxc_enable="no"
+        sd_libxc_ok="yes"
         sd_libxc_cppflags=""
-        sd_libxc_cflags=""
+        sd_libxc_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version}}/include"
         sd_libxc_fcflags=""
         sd_libxc_ldflags=""
-        sd_libxc_libs=""
+        sd_libxc_kxc_ok="no"
+        sd_libxc_libs="-L${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version}/lib ${sd_libxc_libs_def}"
+      if test "${sd_libxc_status}" = "optional" -a \
+              "${sd_libxc_init}" = "def"; then
+ 
+            sd_libxc_init='fb'
       else
+        sd_libxc_init='fb'
         if test "${sd_netcdf_policy}" = "fail"; then
               AC_MSG_FAILURE([invalid LibXC configuration])
         else
@@ -302,6 +322,7 @@ AC_DEFUN([SD_LIBXC_DETECT], [
 
 
                     # ------------------------------------ #
+
 
 
 #

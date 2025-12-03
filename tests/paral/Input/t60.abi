@@ -75,6 +75,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = manneback_gnu_14.2_hpc
 #%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% [shell] 
 #%% post_commands = 
@@ -95,4 +96,5 @@
 #%%  Diamond.
 #%%  Diamond dynamical temperature-dependent of the electronic structure. 
 #%%  Three q-points are computed. Test of the parallelization. Must be compared with v7/Refs/t55.abo
+#%%  Exclude manneback_gnu_14.2_hpc because of completely wrong results with MPI 4  OK with NCPU 2 or 1 ... To be debugged ... See also test mpiio#51 MPI4.
 #%%<END TEST_INFO>

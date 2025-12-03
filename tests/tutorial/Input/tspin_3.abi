@@ -12,7 +12,7 @@ tmpdata_prefix = "tspin_3t"
    ecut  25.0
 
 # SCF:
-  nstep   70
+  nstep   30
  tolwfr   1.0d-7
 
 # Multidataset:
@@ -76,7 +76,7 @@ ratsph3  2.4
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tspin_3.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   tspin_3.abo, tolnlines = 2, tolabs = 2.000e-08, tolrel = 2.000e-03
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

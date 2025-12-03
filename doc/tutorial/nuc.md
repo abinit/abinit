@@ -11,7 +11,8 @@ interest in M&ouml;ssbauer, NMR, and NQR spectroscopy, namely:
 
   * the electric field gradient,
   * the isomer shift,
-  * chemical shielding
+  * magnetic shielding
+  * indirect spin-spin coupling
 
 This tutorial should take about 2 hours.
 
@@ -202,9 +203,9 @@ of 2.2 mm/sec for $\alpha$-Sn relative to SnO$_2$, we find
 $\Delta\langle r^2\rangle = 5.67\times 10^{-3}\mathrm{fm}^2$, in decent agreement
 with other calculations of 6--7$\times 10^{-3}\mathrm{fm}^2$ [[cite:Svane1987]], [[cite:Svane1997]].
 
-## Chemical shielding
+## Magnetic shielding
 
-The chemical shielding is routinely measured in NMR spectroscopy, and arises from the orbital 
+The magnetic (chemical) shielding is routinely measured in NMR spectroscopy, and arises from the orbital 
 currents induced by an external magnetic field. From an energetic point of view, it can be
 understood as the joint response between an external magnetic field, and the nuclear magnetic
 dipole moment at an atomic site, that is,
@@ -219,11 +220,13 @@ shielded magnetic field (the traditional view),
 or conversely [[cite:Thonhauser2009]] [[cite:Ceresoli2010]], 
 a shielded dipole interacting with the bare magnetic field. In Abinit we adopt
 the second view point, and so compute the perturbed energy $\partial E/\partial B$ in the
-presence of a nuclear dipole moment. The necessary expressions are found in [[cite:Zwanziger2023]], see also [[cite:Gonze2011a]] [[cite:Ceresoli2006]], and
+presence of a nuclear dipole moment. The necessary expressions are found 
+in [[cite:Zwanziger2023]], see also [[cite:Gonze2011a]] [[cite:Ceresoli2006]], and
 are quite complex; in highly abbreviated form we evaluate
 $$ \partial E/\partial B_\alpha = -M_{\alpha} = \frac{i}{2}\epsilon_{\alpha\beta\gamma}\sum_n^{\mathrm{occ}} \int d\mathbf{k} 
 \langle \partial_{k_\beta} u_{n\mathbf{k}}|(H_{\mathbf{k}}+E_{\mathbf{k}})|\partial_{k_\gamma} u_{n\mathbf{k}}\rangle $$
-for the induced magnetic moment $M$ in direction $\alpha$. Notice the implied summation over the antisymmetric unit tensor $\epsilon_{\alpha\beta\gamma}$;
+for the induced magnetic moment $M$ in direction $\alpha$. 
+Notice the implied summation over the antisymmetric unit tensor $\epsilon_{\alpha\beta\gamma}$;
 the structure is hence that of a cross product, which yields the circulation induced by the Hamiltonian.
 In the full PAW treatment implemented in Abinit there are a number of other related terms as well. Note
 in this expression the appearance of the derivatives of the wavefunctions; these are obtained from the DDK
@@ -269,7 +272,7 @@ minutes or so. After completion you will find in the output file:
 
 The first result is the induced magnetic moment, which is a
 vector--note that it points in the original dipole direction. To get
-the shielding, divide the dipole strength (here, 1), and multiply by
+the shielding, divide by the dipole strength (here, 1), and multiply by
 (-1) to get the normal NMR sign convention--the result is
 554.9~ppm. This result is underconverged--the fully converged result,
 with [[ecut]]=30, is 552.1 ppm. For comparison, the all-electron,
@@ -301,7 +304,7 @@ will have to run the sequence three times, once for each direction of
 the applied dipole. Then you will have obtained three component
 vectors $M_\alpha$, $M_\beta$, and $M_\gamma$, which you can assemble
 into a $3\times 3$ matrix. Note that this matrix is the complete 
-chemical shielding tensor, which means that it includes both a symmetric
+magnetic shielding tensor, which means that it includes both a symmetric
 and an antisymmetric part. The symmetric part, which can be extracted
 as $\sigma^s=\frac{1}{2}(\sigma + \sigma^T)$ (the sum of the matrix
 and its transpose), is the part relevant to spectroscopy. The antisymmetric
@@ -309,3 +312,84 @@ part appears in relaxation. For normal spectroscopic studies,
 diagonalize the symmetric part to find the principal
 values and directions. The result is the shielding tensor at the site
 of interest, and orientated with respect to the Cartesian directions.
+
+## Indirect spin-spin coupling
+
+Yet another observable routinely measured in NMR spectroscopy is the indirect
+spin-spin coupling, which consists of the energy effect of two nearby nuclear
+magnetic dipoles mediated by the electronic charge and spin density between
+them. As a contribution to the Hamiltonian, this term gives
+$$ J_{ij} = \frac{\partial^2 E}{\partial m_i\partial m_j} $$
+(there is a separate, through-space dipole interaction, which gives just a
+constant dependent only on the atomic distribution and not the electrons, and is
+not considered here). Thanks to the inclusion of the relativistic interactions
+in the ZORA approximation, Abinit treats the interaction between the nuclear
+dipole moments of fixed magnitude and the electrons quite accurately
+[[cite:Zwanziger2025a]]. Therefore, the mixed partial derivative expression for
+$J_{ij}$ can be computed non-perturbatively from a finite difference
+expression, as follows: $$ J_{ij} = \frac{1}{4}\left[ E(+1,+1) - E(+1,-1) -
+E(-1,+1) + E(-1,-1)\right], $$ where a term like $E(+1,+1)$ means the energy
+with both dipoles (of magnitude 1) along positive Cartesian directions;
+$E(+1,-1)$ means one dipole positive, one negative, and so forth. Therefore, to
+get a single element of the full $J_{ij}$ tensor (which can be written as a
+$3\times 3$ matrix), in general 4 total energy calculations are needed. 
+
+An example calculation is provided in the following file:
+
+{% dialog tests/tutorial/Input/tnuc_5.abi %}
+
+This file is for molecular ClF, treated as an isolated species in an
+otherwise empty cell. In this case we can take advantage of symmetry to greatly
+reduce the number of necessary energy calculations. The molecule is aligned along 
+the Cartesian z axis, and thus the only non-zero elements of the $J$ tensor are
+$J_{xx}=J_{yy}$, and $J_{zz}$. Furthermore, because it's a diatomic, the energy terms
+$E(+1,+1)=E(-1,-1)$ and $E(+1,-1)=E(-1,+1)$. Thus only four total calculations are needed,
+two with the dipoles along $y$ and two with the dipoles along $z$. These are input 
+with the code block
+
+    ndtset 4
+     
+    natnd 2
+    iatnd 1 2
+     
+    atndlist1 
+    0  1 0
+    0  1 0
+    atndlist2
+    0  1 0
+    0 -1 0
+    atndlist3 
+    0 0  1
+    0 0  1
+    atndlist4
+    0 0  1
+    0 0 -1
+
+The dipoles are input with [[natnd]], [[iatnd]], and [[atndlist]]. The other critical input
+variable is [[zora]]=2, which activates the ZORA electron and nuclear spin terms. In any case, 
+once the calculation finishes, you will find near the bottom of the output file, the four
+total energies:
+
+    etotal1    -3.9162256582E+01
+    etotal2    -3.9162258242E+01
+    etotal3    -3.9162255743E+01
+    etotal4    -3.9162255929E+01
+
+Note how similar they are. The $J$ tensor is quite weak, so energy must be very tightly converged and
+a convergence study of box size, [[ecut]], and so forth must be done carefully. In our case, the first
+two energies provide 
+$$ J_{yy} = \frac{1}{2}(-39.162256582 -    -39.162258242) = 8.30\times 10^{-7}, $$ 
+and
+$$ J_{zz}=\frac{1}{2}(-39.162255743 - -39.162255929) = 9.30\times 10^{-8} , $$ 
+where we have taken advantage of the symmetries to reduce the calculations from four to two for each element.
+
+The values obtained are in atomic units, where Energy/(dipole$^2$) in atomic units has the value
+$1.2673\times 10^{28}$ T$^2$/J in SI units. 
+For comparison with typical NMR spectroscopy values, the tensor elements should be converted into Hz, and this is
+accomplished by multiplication by $h\times 10^{12}\times 1.2673\times 10^{28}\times\gamma_i\gamma_j$,
+where the $\gamma$ factors are the nuclear gyromagnetic ratios in MHz/T and $h$ is
+Planck's constant in SI units. For our ClF example, we use
+4.17566 MHz/T for $^{35}$Cl, and 40.069244 MHz/T for $^{19}$F. These factors then yield
+$J_{yy} = 1166$ Hz, and $J_{zz} = 131$ Hz, for an isotropic value of 821 Hz. For comparison,
+the experimental value is 839 Hz [[cite:bryce2000indirect]] Note that this good level of agreement 
+with experiment should be checked very carefully against convergence parameters and molecular geometry.

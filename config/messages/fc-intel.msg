@@ -1,7 +1,6 @@
 Your compiler will work properly only if the LD_LIBRARY_PATH
-and INTEL_LICENSE_FILE environment variables are correctly
-set-up. Please make sure that this is the case before
-building ABINIT.
+environment variables is correctly set-up. Please make sure 
+that this is the case before building ABINIT.
 
 In most cases it means sourcing a script in the Intel
 compiler install directory, e.g.:

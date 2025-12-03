@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h07 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t53/t53.abi
+.Starting date : Wed 10 Sep 2025.
+- ( at 12h12 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v1_t53/t53.abi
 - output file    -> t53.abo
 - root for input  files -> t53i
 - root for output files -> t53o
@@ -143,8 +143,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 2, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -176,9 +176,9 @@ solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-12, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
 
- ETOT  1  -5.4674717803872    -5.467E+00 1.770E-03 2.583E+02
+ ETOT  1  -5.4674717803872    -5.467E+00 1.770E-03 2.583E+02 2.382E-01 2.382E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.29825   Average Vxc (hartree)=   0.00000
@@ -196,7 +196,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.32929    3.67108    4.79605    8.11379    8.11575    9.31085   11.02255   11.44604
 
- ETOT  2  -5.5379684579235    -7.050E-02 1.604E-05 1.913E+01
+ ETOT  2  -5.5379684579235    -7.050E-02 1.604E-05 1.913E+01 2.988E-02 2.675E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.26582   Average Vxc (hartree)=   0.00000
@@ -214,7 +214,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.37481    2.93380    4.79803    7.22905    7.23334    8.95404   10.58154   10.61172
 
- ETOT  3  -5.5436259926757    -5.658E-03 7.973E-05 4.159E+00
+ ETOT  3  -5.5436259926757    -5.658E-03 7.973E-05 4.159E+00 8.910E-03 2.727E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25914   Average Vxc (hartree)=   0.00000
@@ -232,7 +232,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.51374    2.67211    4.83419    7.04977    7.05151    8.88287   10.32852   10.42905
 
- ETOT  4  -5.5447690655139    -1.143E-03 6.576E-05 1.106E+00
+ ETOT  4  -5.5447690655139    -1.143E-03 6.576E-05 1.106E+00 3.627E-03 2.747E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25656   Average Vxc (hartree)=   0.00000
@@ -250,7 +250,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.55499    2.56420    4.87282    6.98065    6.98128    8.85023   10.22178   10.26299
 
- ETOT  5  -5.5450477665274    -2.787E-04 2.179E-04 3.229E-01
+ ETOT  5  -5.5450477665274    -2.787E-04 2.179E-04 3.229E-01 1.661E-03 2.756E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25546   Average Vxc (hartree)=   0.00000
@@ -268,7 +268,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.56961    2.51750    4.90018    6.95110    6.95133    8.83357   10.17456   10.19157
 
- ETOT  6  -5.5451242208995    -7.645E-05 1.823E-05 1.009E-01
+ ETOT  6  -5.5451242208995    -7.645E-05 1.823E-05 1.009E-01 7.896E-04 2.760E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25499   Average Vxc (hartree)=   0.00000
@@ -286,7 +286,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.57466    2.49657    4.91700    6.93847    6.93855    8.82514   10.15316   10.15933
 
- ETOT  7  -5.5451469610288    -2.274E-05 2.882E-05 3.354E-02
+ ETOT  7  -5.5451469610288    -2.274E-05 2.882E-05 3.354E-02 3.941E-04 2.762E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25479   Average Vxc (hartree)=   0.00000
@@ -304,7 +304,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.57623    2.48692    4.92672    6.93319    6.93322    8.82090   10.14336   10.14566
 
- ETOT  8  -5.5451541562508    -7.195E-06 2.566E-06 1.177E-02
+ ETOT  8  -5.5451541562508    -7.195E-06 2.566E-06 1.177E-02 1.982E-04 2.763E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25471   Average Vxc (hartree)=   0.00000
@@ -325,7 +325,7 @@ tolerances: {tolvrs: 1.00E-12, }
  Five largest eigenvalues of the hermitian RPA dielectric matrix:
   4.7582E+00  3.1506E+00  2.7832E+00  2.7827E+00  2.3933E+00
 
- ETOT  9  -5.5451575195220    -3.363E-06 4.237E-06 7.065E-04
+ ETOT  9  -5.5451575195220    -3.363E-06 4.237E-06 7.065E-04 1.162E-04 2.764E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25475   Average Vxc (hartree)=   0.00000
@@ -343,7 +343,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.57385    2.48151    4.94022    6.93203    6.93204    8.81694   10.13827   10.13861
 
- ETOT 10  -5.5451578758077    -3.563E-07 3.889E-07 2.086E-05
+ ETOT 10  -5.5451578758077    -3.563E-07 3.889E-07 2.086E-05 5.181E-05 2.765E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25470   Average Vxc (hartree)=   0.00000
@@ -361,7 +361,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.57606    2.47882    4.93877    6.93065    6.93066    8.81625   10.13606   10.13619
 
- ETOT 11  -5.5451578854389    -9.631E-09 6.228E-07 2.110E-06
+ ETOT 11  -5.5451578854389    -9.631E-09 6.228E-07 2.110E-06 1.461E-05 2.765E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25470   Average Vxc (hartree)=   0.00000
@@ -379,7 +379,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.57587    2.47858    4.93907    6.93062    6.93062    8.81649   10.13575   10.13580
 
- ETOT 12  -5.5451578867064    -1.267E-09 6.169E-08 1.002E-07
+ ETOT 12  -5.5451578867064    -1.267E-09 6.169E-08 1.002E-07 2.894E-06 2.765E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25469   Average Vxc (hartree)=   0.00000
@@ -397,7 +397,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.57596    2.47845    4.93898    6.93059    6.93059    8.81643   10.13566   10.13568
 
- ETOT 13  -5.5451578867546    -4.820E-11 9.608E-08 1.073E-08
+ ETOT 13  -5.5451578867546    -4.820E-11 9.608E-08 1.073E-08 1.017E-06 2.765E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25469   Average Vxc (hartree)=   0.00000
@@ -415,7 +415,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.57595    2.47843    4.93901    6.93058    6.93058    8.81645   10.13564   10.13565
 
- ETOT 14  -5.5451578867611    -6.506E-12 9.621E-09 5.005E-10
+ ETOT 14  -5.5451578867611    -6.506E-12 9.621E-09 5.005E-10 2.156E-07 2.765E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25469   Average Vxc (hartree)=   0.00000
@@ -433,7 +433,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.57595    2.47842    4.93900    6.93058    6.93058    8.81645   10.13563   10.13563
 
- ETOT 15  -5.5451578867613    -2.416E-13 1.463E-08 5.689E-11
+ ETOT 15  -5.5451578867613    -2.416E-13 1.463E-08 5.689E-11 7.263E-08 2.765E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25469   Average Vxc (hartree)=   0.00000
@@ -451,7 +451,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.57595    2.47842    4.93900    6.93058    6.93058    8.81645   10.13563   10.13563
 
- ETOT 16  -5.5451578867614    -4.174E-14 1.492E-09 2.536E-12
+ ETOT 16  -5.5451578867614    -4.174E-14 1.492E-09 2.536E-12 1.615E-08 2.765E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25469   Average Vxc (hartree)=   0.00000
@@ -469,7 +469,7 @@ tolerances: {tolvrs: 1.00E-12, }
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.57595    2.47842    4.93900    6.93058    6.93058    8.81645   10.13563   10.13563
 
- ETOT 17  -5.5451578867614    -7.105E-15 2.228E-09 3.041E-13
+ ETOT 17  -5.5451578867614    -7.105E-15 2.228E-09 3.041E-13 5.269E-09 2.765E-01
 
  prteigrs : about to open file t53o_EIG
  Fermi (or HOMO) energy (hartree) =   0.25469   Average Vxc (hartree)=   0.00000
@@ -524,15 +524,16 @@ force_length_stats: {min:   1.24072673E-01, max:   1.24072673E-01, mean:   1.240
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.766755     0.490275      1.257030     0.276480
-    2   2.00000     0.766755     0.490275      1.257030     0.276480
- ---------------------------------------------------------------------
-  Sum:              1.533509     0.980550      2.514059     0.552959
- Total magnetization (from the atomic spheres):             0.552959
- Total magnetization (exact up - dn):                       2.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Si   2.00000     0.766755     0.490275      1.257030     0.276480
+    2 Si   2.00000     0.766755     0.490275      1.257030     0.276480
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 1.533509     0.980550      2.514059     0.552959
+ Total magnetization (from the atomic spheres):                0.552959
+ Total magnetization (exact up - dn):                          2.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -654,7 +655,7 @@ band_energy         :  9.38728178306215E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.2000000000E+01  8.0000000000E+00  8.0000000000E+00 Bohr
               amu      2.80855000E+01
@@ -749,7 +750,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -761,12 +762,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -784,7 +785,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -799,7 +800,7 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

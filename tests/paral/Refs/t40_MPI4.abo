@@ -1,5 +1,5 @@
 
-.Version 10.3.4.6 of ABINIT, released Dec 2025.
+.Version 10.5.1.5 of ABINIT, released Jul 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 25 Feb 2025.
-- ( at 09h24 )
+.Starting date : Thu  9 Oct 2025.
+- ( at 18h16 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/TestBot_MPI4/paral_t40_MPI4/t40.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI4/paral_t40_MPI4/t40.abi
 - output file    -> t40_MPI4.abo
 - root for input  files -> t40_MPI4i
 - root for output files -> t40_MPI4o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
 
  invars1: COMMENT -
   With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.
@@ -326,9 +326,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_paw_pbe_std/P.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_paw_pbe_std/P.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/P.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90690075
@@ -346,9 +346,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -803,7 +803,7 @@ xc                  : -3.18573197116292E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -2.96819428790209E+00
-spherical_terms     :  1.70503287928685E+00
+PAW spherical_terms :  1.70503287928685E+00
 total_energy        : -8.72191825576379E+00
 total_energy_eV     : -2.37335465653130E+02
 ...
@@ -816,9 +816,19 @@ band_energy         :  6.63505969174288E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.61191999698121E-01
-spherical_terms     :  7.88384964425980E-02
+PAW spherical_terms :  7.88384964425980E-02
 total_energy_dc     : -8.72191825545644E+00
 total_energy_dc_eV  : -2.37335465644767E+02
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 1, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -5.84871679818845E+02
+Total energy DC     : -5.84871679818538E+02
+Total energy (eV)   : -1.59151677883936E+04
+Total energy DC (eV): -1.59151677883852E+04
 ...
 
 
@@ -1311,7 +1321,7 @@ xc                  : -3.18573197116291E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -2.96819428790201E+00
-spherical_terms     :  1.70503287928658E+00
+PAW spherical_terms :  1.70503287928658E+00
 total_energy        : -8.72191825576397E+00
 total_energy_eV     : -2.37335465653135E+02
 ...
@@ -1324,9 +1334,19 @@ band_energy         :  6.63505969174375E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.61191999698168E-01
-spherical_terms     :  7.88384964425546E-02
+PAW spherical_terms :  7.88384964425546E-02
 total_energy_dc     : -8.72191825545644E+00
 total_energy_dc_eV  : -2.37335465644767E+02
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 2, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -5.84871679818845E+02
+Total energy DC     : -5.84871679818538E+02
+Total energy (eV)   : -1.59151677883936E+04
+Total energy DC (eV): -1.59151677883852E+04
 ...
 
 
@@ -1819,7 +1839,7 @@ xc                  : -3.18573197114060E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -2.96819428783525E+00
-spherical_terms     :  1.70503287927136E+00
+PAW spherical_terms :  1.70503287927136E+00
 total_energy        : -8.72191825571459E+00
 total_energy_eV     : -2.37335465651791E+02
 ...
@@ -1832,9 +1852,19 @@ band_energy         :  6.63505969144341E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.61191999677226E-01
-spherical_terms     :  7.88384964516415E-02
+PAW spherical_terms :  7.88384964516415E-02
 total_energy_dc     : -8.72191825545644E+00
 total_energy_dc_eV  : -2.37335465644767E+02
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 3, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -5.84871679818796E+02
+Total energy DC     : -5.84871679818538E+02
+Total energy (eV)   : -1.59151677883923E+04
+Total energy DC (eV): -1.59151677883852E+04
 ...
 
 
@@ -2327,7 +2357,7 @@ xc                  : -3.18573197114056E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -2.96819428783515E+00
-spherical_terms     :  1.70503287927127E+00
+PAW spherical_terms :  1.70503287927127E+00
 total_energy        : -8.72191825571441E+00
 total_energy_eV     : -2.37335465651786E+02
 ...
@@ -2340,9 +2370,19 @@ band_energy         :  6.63505969144694E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.61191999677212E-01
-spherical_terms     :  7.88384964513074E-02
+PAW spherical_terms :  7.88384964513074E-02
 total_energy_dc     : -8.72191825545641E+00
 total_energy_dc_eV  : -2.37335465644766E+02
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 4, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -5.84871679818796E+02
+Total energy DC     : -5.84871679818538E+02
+Total energy (eV)   : -1.59151677883923E+04
+Total energy DC (eV): -1.59151677883852E+04
 ...
 
 
@@ -2835,7 +2875,7 @@ xc                  : -3.18573197114056E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -2.96819428783515E+00
-spherical_terms     :  1.70503287927127E+00
+PAW spherical_terms :  1.70503287927127E+00
 total_energy        : -8.72191825571441E+00
 total_energy_eV     : -2.37335465651786E+02
 ...
@@ -2848,9 +2888,19 @@ band_energy         :  6.63505969144694E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.61191999677212E-01
-spherical_terms     :  7.88384964513074E-02
+PAW spherical_terms :  7.88384964513074E-02
 total_energy_dc     : -8.72191825545641E+00
 total_energy_dc_eV  : -2.37335465644766E+02
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 5, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -5.84871679818796E+02
+Total energy DC     : -5.84871679818538E+02
+Total energy (eV)   : -1.59151677883923E+04
+Total energy DC (eV): -1.59151677883852E+04
 ...
 
 
@@ -3334,7 +3384,7 @@ xc                  : -3.18573197114056E+00
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 local_psp           : -2.96819428783515E+00
-spherical_terms     :  1.70503287927127E+00
+PAW spherical_terms :  1.70503287927127E+00
 total_energy        : -8.72191825571441E+00
 total_energy_eV     : -2.37335465651786E+02
 ...
@@ -3347,9 +3397,19 @@ band_energy         :  6.63505969144694E-01
 Ewald energy        : -8.99667321169082E+00
 psp_core            : -1.06397509684384E-01
 xc_dc               : -3.61191999677212E-01
-spherical_terms     :  7.88384964513074E-02
+PAW spherical_terms :  7.88384964513074E-02
 total_energy_dc     : -8.72191825545641E+00
 total_energy_dc_eV  : -2.37335465644766E+02
+...
+
+
+--- !EnergyTermsWithPAWCore
+iteration_state     : {dtset: 6, }
+comment             : 'Components of total free energy, including PAW core contributions'
+Total energy        : -5.84871679818796E+02
+Total energy DC     : -5.84871679818538E+02
+Total energy (eV)   : -1.59151677883923E+04
+Total energy DC (eV): -1.59151677883852E+04
 ...
 
 
@@ -3583,10 +3643,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          7.6  wall=          7.6
+- Proc.   0 individual time (sec): cpu=          7.1  wall=          7.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  18 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         30.1  wall=         30.3
++Overall time at end (sec) : cpu=         28.5  wall=         28.6

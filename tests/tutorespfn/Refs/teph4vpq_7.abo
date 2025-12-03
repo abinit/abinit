@@ -1,5 +1,5 @@
 
-.Version 10.4.0.2 of ABINIT, released Apr 2025.
+.Version 10.5.6.2 of ABINIT, released Sep 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 23 Apr 2025.
-- ( at 14h36 )
+.Starting date : Sat 11 Oct 2025.
+- ( at 10h09 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_release-10.4/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_7.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_7.abi
 - output file    -> teph4vpq_7.abo
 - root for input  files -> teph4vpq_7i
 - root for output files -> teph4vpq_7o
@@ -248,8 +248,8 @@ meta: {optdriver: 7, eph_task: -13, }
 - Writing phonon DOS to netcdf file: teph4vpq_7o_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_release-10.4/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_release-10.4/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
 - Li    ONCVPSP-3.2.3.1  r_core=   1.40824   1.10935
 -  3.00000   3.00000    170503                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -262,8 +262,8 @@ meta: {optdriver: 7, eph_task: -13, }
              1   -2.250662   -0.474685
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_release-10.4/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_release-10.4/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
 - F     ONCVPSP-3.2.3.1  r_core=   1.30942   1.45782   1.60379
 -  9.00000   7.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -287,8 +287,8 @@ meta: {optdriver: 7, eph_task: -13, }
  For spin: 1: pstate: 2: maxval(abs(sc_displ_cart_re)):     7.399309E-01
  For spin: 1: pstate: 2: maxval(abs(sc_displ_cart_im)):     7.466255E-04
  Writing displacement vectors to: teph4vpq_7o_pstate_2_POLARON_DISPL_VECTORS.xsf
- For spin: 1: pstate: 3: maxval(abs(sc_displ_cart_re)):     8.384856E-01
- For spin: 1: pstate: 3: maxval(abs(sc_displ_cart_im)):     2.463979E-03
+ For spin: 1: pstate: 3: maxval(abs(sc_displ_cart_re)):     8.385251E-01
+ For spin: 1: pstate: 3: maxval(abs(sc_displ_cart_im)):     2.467618E-03
  Writing displacement vectors to: teph4vpq_7o_pstate_3_POLARON_DISPL_VECTORS.xsf
  For spin: 1: pstate: 1: 1/N_k \sum_nk |A_nk|^2 =     1.000000E+00
  Polaron density for spin: 1: pstate: 1 integrates to:     1.000000E+00
@@ -310,8 +310,8 @@ meta: {optdriver: 7, eph_task: -13, }
  Polaron density for spin: 1: pstate: 3 integrates to:     1.000000E+00
  Polaron center in Cartesian coordinates: [   1.5018E+01,    1.5039E+01,    1.1511E+01]  (Bohr)
  Fractional coordinates in terms of the primitive cell: [   1.5025E+00,    1.4970E+00,    2.4165E+00]
- Polaron spread:     2.843196E+00 (Bohr)    1.504554E+00 (Ang)
- Full width at half-maximum (FWHM)     6.695214E+00 (Bohr)     3.542955E+00 (Ang)
+ Polaron spread:     2.842740E+00 (Bohr)    1.504313E+00 (Ang)
+ Full width at half-maximum (FWHM)     6.694141E+00 (Bohr)     3.542387E+00 (Ang)
 - Writing the polaron wavefunction with undisplaced atoms to:teph4vpq_7o_pstate_3_POLARON.xsf
 - Writing the polaron wavefunction with diplaced atoms to:teph4vpq_7o_pstate_3_POLARON_DISPL.xsf
 
@@ -474,10 +474,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         12.3  wall=         12.4
+- Proc.   0 individual time (sec): cpu=         12.7  wall=         12.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.3  wall=         12.4
++Overall time at end (sec) : cpu=         12.7  wall=         12.8
