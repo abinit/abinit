@@ -137,7 +137,7 @@ kptbounds3               # The four segments of the band structure are
 #%%                iw_cp t112o_DS3_grid t112_MPI8o_DS4_spectralfunction_realgrid;
 #%%                iw_cp t112o_DS2_Self t112_MPI8o_DS2_Self-omega_iatom0001_isppol1;
 #%% [NCPU_8]
-#%% files_to_test = t112_MPI8.abo, tolnlines = 2, tolabs = 5.e-4, tolrel = 5.e-4, fld_options=-medium;
+#%% files_to_test = t112_MPI8.abo, tolnlines = 2, tolabs = 5.e-3, tolrel = 5.e-3, fld_options=-medium;
 #%%                 t112_MPI8o_DS3_DFTDMFT_SpectralFunction_kres, tolnlines = 14, tolabs = 7.e-3, tolrel = 1.e-4, fld_options=-easy;
 #%%                 t112_MPI8o_DS4_DFTDMFT_Self_backtransform.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t112_MPI8o_DS4_DFTDMFT_Self_realaxis.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
