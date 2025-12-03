@@ -3017,7 +3017,7 @@ Selects the double counting (DC) correction formula used in DFT+DMFT calculation
          which is rigorously valid only in the case [[dmft_solv]]=7, with the full Slater Hamiltonian.
          Besides, we assume that the projection of the correlated orbital [[dmft_orbital]]
          on the energy window [ [[dmftbandi]],[[dmftbandf]] ] is equal to [[dmft_orbital]] itself
-         (i.e. the closure relation is assumed). Please look at the relevant section in the
+         (i.e. the closure relation is assumed). Please look at section 7 of the
          [[tutorial:dmft_triqs|tutorial on DFT+DMFT with TRIQS/CT-HYB]] for detailed informations on how to use it.
 
 Magnetic formulas ([[dmft_dc]] < 5 ) need to be used with magnetic DFT ([[usepawu]]=10).
@@ -3102,7 +3102,7 @@ However, the calculation requires as input the self-energy computed in the real
 axis using an external analytical continuation code.
 The section 7 of the [[tutorial:dmft|tutorial on DFT+DMFT]] details how to obtain this data
 and related information with the ABINIT's internal implementation. In order to use it with
-the TRIQS/CT-HYB interface, please have a look at the relevant section in the
+the TRIQS/CT-HYB interface, please have a look at section 6 in the
 [[tutorial:dmft_triqs|TRIQS/CT-HYB tutorial]].
 """,
 ),
@@ -4056,9 +4056,13 @@ Variable(
     added_in_version="before_v10.5.6",
     text=r"""
 For the insert/remove moves, a proportion [[dmft_triqs_pauli_prob]] of the moves will be
-proposed according to Pauli principle. This increases the acceptance rate and reduce the
-autocorrelation time in a lot of systems, though ergodicity in the case [[dmft_solv]]=7 is
-only guaranteed if [[dmft_triqs_pauli_prob]] < 1.
+proposed according to Pauli principle. This means that the two operators will be inserted/removed
+such that two operators of the same type do not follow each other. The remaining proportion
+1 - [[dmft_triqs_pauli_prob]] of the moves will be proposed uniformly.
+
+Pauli moves increase the acceptance rate and reduce the autocorrelation time in a lot of systems,
+though non Pauli moves are still required for ergodicity in the [[dmft_solv]]=7 case ; so be careful
+not to set [[dmft_triqs_pauli_prob]] too close to 1.
 
 This feature is only available with our internal version of TRIQS/CT-HYB.
 """,
@@ -4172,7 +4176,8 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
-Set to 1 to activate an improved estimator for the density matrix in TRIQS/CTHYB.
+Set to 1 to activate an improved estimator for the density matrix in TRIQS/CTHYB, based on the time
+translation invariance of the Hamiltonian.
 This greatly reduces the statistical noise, but can increase the computation time
 if you measure too often.
 

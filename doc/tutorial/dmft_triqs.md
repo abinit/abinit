@@ -4,7 +4,7 @@ author: ECastiel
 
 # Tutorial on DFT+DMFT with TRIQS/CT-HYB
 
-## Introduction
+## 1. Introduction
 
 In this tutorial, you will learn how to run a DFT+DMFT calculation on iron using the interface
 between ABINIT and TRIQS/CT-HYB.
@@ -17,7 +17,7 @@ Before starting, you should already know how to do a basic DFT calculation with 
 and [basic4](/tutorial/base4)). It also helps if you are familiar with PAW
 (see [PAW1](/tutorial/paw1) and [PAW2](/tutorial/paw2)) and [DFT+U](/tutorial/dftu).
 There is also a tutorial on the ABINIT's internal DMFT solvers (see [DMFT](/tutorial/dmft)), but
-it is independent.
+the two DMFT tutorials are independent.
 
 We also recommend that you are comfortable with TRIQS/CT-HYB, and we will assume you already
 have at least a basic idea of how the DFT+DMFT method works.
@@ -26,7 +26,7 @@ The whole tutorial should take a few hours to complete.
 
 [TUTORIAL_README]
 
-## Presentation
+## 2. Presentation
 
 ABINIT comes with its own internal DMFT code and solvers, but they are not numerically exact
 and rely on the density-density approximation. TRIQS/CT-HYB, on the other hand, can handle the
@@ -45,8 +45,6 @@ Even though our interface with TRIQS/CT-HYB roughly follows the internal DMFT im
 of ABINIT, there are a few important differences in input variables or available features, and
 it is more than just swapping out the impurity solver.
 
-You can find all the input variables related to DMFT listed [[varset:dmft|here]].
-
 The input variables that are specific to the TRIQS/CT-HYB solver start with `dmft_triqs_`, and
 many of them are direct copies of TRIQS/CT-HYB's own API inputs - so if you have used TRIQS
 before, you should not get lost.
@@ -59,24 +57,28 @@ Finally, variables that control the self-consistent cycle itself start with `dmf
 these are shared between the internal DMFT and the TRIQS/CT-HYB interface, but some features
 are available only in one or the other. The glossary clearly points out when that is the case.
 
-If you want a good overview of the input variables relevant for the TRIQS/CT-HYB interface, we
-recommend checking out the dedicated [[topic:DmftTriqsCthyb|topic]].
+If you want a good overview of all input variables relevant for the TRIQS/CT-HYB interface, we
+recommend checking out the dedicated [[topic:DmftTriqsCthyb|topic]]. Their detailed documentation
+can be found in the DMFT [[varset:dmft|variable glossary]]. We highly recommend to check it out
+after you finish this, as we only introduce the most important variables in this tutorial.
 
-## Installation
+## 3. Installation
 
 First, you need to install [[https://triqs.github.io/triqs/latest/|TRIQS]], and then TRIQS/CT-HYB.
 Our interface is compatible with the official version of TRIQS/CT-HYB, which you can find
-[[https://triqs.github.io/cthyb/latest/|here]]. However, their implementation is not suited for
-large systems or calculations that require high accuracy, hence we provide our internal version, found
-[[https://github.com/ec147/cthyb/tree/develop/|here]] (download the `develop` branch).
+[[https://triqs.github.io/cthyb/latest/|here]]. At the time of writing, our interface handles
+versions `3.2.x` and `3.3.x`.
 
-The installation instructions are identical for the two versions, and you can find them on their official
+However, the official implementation is not suited for large systems or calculations that require high accuracy,
+hence we also provide our internal version, found [[https://github.com/ec147/cthyb/tree/develop/|here]] (download the `develop` branch).
+
+Install it as you would with the official fork. The installation instructions are indicated on their
 [[https://triqs.github.io/cthyb/latest/install.html|website]].
 
 Our internal version contains additional features which we implemented, meant to reduce the computation time for structural properties
 calculations:
 
-  * an improved proposal distribution ([[dmft_triqs_pauli_prob]])
+  * an improved proposal distribution for the insert/remove moves ([[dmft_triqs_pauli_prob]])
   * an improved estimator for the density matrix ([[dmft_triqs_time_invariance]])
   * the possibility to automatically restart the CT-HYB from the previous configuration, in order to reduce the warmup time ([[dmft_triqs_read_ctqmcdata]])
 
@@ -88,7 +90,7 @@ compiling and pick an efficient BLAS implementation, as it can make a big differ
 in performance.
 
 After that, you need to reconfigure ABINIT to link it with TRIQS. Add the following line to your
-configuration file:
+`.ac9` configuration file:
 
     with_triqs="yes"
 
@@ -102,32 +104,38 @@ Next, make sure your options are recognized correctly and that ABINIT can
 successfully link to TRIQS and compile a test code. When configuring, pay attention
 to these lines:
 
-    checking whether to enable the complex version of TRIQS... [yes|no]
-
-and:
-
 ```sh
  checking whether you are linked against the internal TRIQS library... [yes|no]
  checking whether you are linked against the official >=3.2.x TRIQS API... [yes|no]
 ```
 
+and:
+
+    checking whether to enable the complex version of TRIQS... [yes|no]
+
 The first line indicates whether our internal version has been found, and the second line
 whether the official version has been found, depending on which you choose to install.
-This tutorial has been written with our internal version.
 
-If something goes wrong, carefully check the `config.log` file. Ask yourself: Why did the
+The third line indicates whether or not you are using the complex version of TRIQS/CT-HYB
+instead of the real version. Including the imaginary part of the Green's function can be important
+in systems with strong spin-orbit coupling, and you can activate it by configuring your TRIQS/CT-HYB
+installation with `-DHybridisation_is_complex=ON` and `-DLocal_hamiltonian_is_complex=ON`.
+
+This tutorial has been written with the real version of our internal fork.
+
+If something goes wrong at this step, carefully check the `config.log` file. Ask yourself: Why did the
 test code fail to compile ? Was the library found and linked properly ?
 
-Remember, you can override any automatically added compilation or linker flags using the
-configuration files variables: `TRIQS_CPPFLAGS`, `TRIQS_CFLAGS`, `TRIQS_CXXFLAGS`,
-`TRIQS_LDFLAGS`, and `TRIQS_LIBS`.
+!!! tip
+
+    Our interface requires linking to MPI, so make sure that ABINIT uses the MPI wrappers when compiling. You can manually select them with `CC=mpicc`, `CXX=mpicxx` and `FC=mpif90`. When compiling ABINIT with `gcc`, the following Fortran flags (which can be manually set via `FCFLAGS`) are required: `-ffree-line-length-none` and `-fallow-argument-mismatch`. As we are linking with a C++ code, the Fortran flag `-lstdc++` is also required, and depending on your MPI library, the `-lmpi_cxx` flag could also be necessary. For the TRIQS flags (which can be set via `TRIQS_LDFLAGS`), linking is required to the libraries: `-L/path_to_triqs -lcppdlr_c -lh5_c -lnda_c -ltriqs -ltriqs_cthyb_c` (assuming all libraries are in the same directory). All of this should be done automatically, but we indicate here how to do it manually in case you encounter some issue.
 
 As a last resort, if you still can't solve the issue, post a question on the
 [[https://discourse.abinit.org/|ABINIT user forum]].
 
-Once everything is set, simply recompile ABINIT.
+Once everything is set, simply compile ABINIT.
 
-## Fatbands of Fe within DFT
+## 4. Fatbands of Fe within DFT
 
 Before jumping into the DFT+DMFT calculation for Fe, it is useful to first get some physical insight into
 its electronic structure at the DFT level. This will help later when choosing some of the key DMFT
@@ -197,7 +205,7 @@ bands.
 So when you move to the DMFT calculation, you will need to be careful in selecting which bands to
 include, to make sure you capture as much of the $d$ spectral weight as possible.
 
-## Charge self-consistent DFT+DMFT calculation on Fe
+## 5. Charge self-consistent DFT+DMFT calculation on Fe
 
 We will now walk you through the basics of running a charge self-consistent DFT+DMFT calculation,
 using iron as an example. Along the way, we will introduce the main input variables you need to know,
@@ -248,7 +256,7 @@ things simpler and faster for this example.
 
 For the second dataset, we start by activating DMFT, setting [[usedmft]]$=1$.
 
-### Correlated Electrons
+### 5.1 Correlated Electrons
 
 Next, we need to choose which angular momentum channel ($s$,$p$,$d$,...) we want to treat as
 correlated within DMFT. Each channel corresponds
@@ -267,16 +275,16 @@ number of orbitals, so choosing your correlated channel wisely is important.
 
 !!! note
 
-    At the moment, only values of [[lpawu]] $\le 3$ are supported - anything higher would be computationally impractical anyway.
+    At the moment, only values of [[lpawu]] $\le 3$ are supported - anything higher would be computationally impractical anyway. Besides, you can only select one unique value of [[lpawu]] per type of atom.
 
 In our iron example, the localized orbitals that show strong correlation effects are the $3d$
 orbitals. Since there is only one atom type (Fe), we simply set [[lpawu]]$=2$.
 
 !!! note
 
-    In the case [[lpawu]]$=2$, you can select specific values of $m$ with [[dmft_t2g]] ($m=-2,-1,1$) and [[dmft_x2my2d]] ($m=2$), which is useful for cubic symmetry.
+    In the case [[lpawu]]$=2$, you can select specific values of $m$ with [[dmft_t2g]] ($m=-2,-1$ and $1$) and [[dmft_x2my2d]] ($m=2$), which is useful for cubic symmetry.
 
-### Correlated Orbital
+### 5.2 Correlated Orbital
 
 Now that we have defined which angular momentum channel we are treating as correlated, we need
 to specify the radial part of the correlated orbital - the reduced radial wavefunction $u_l(r)$.
@@ -288,7 +296,7 @@ The choice of the radial wavefunction is made through the variable [[dmft_orbita
 $3d$ orbitals remain quite localized and keep their atomic character, so we just take the
 lowest-energy atomic orbital from the PAW dataset (truncated at the PAW radius). That is the default
 choice, [[dmft_orbital]]$=1$, but you can pick any orbital from your PAW dataset or even provide a
-custom one from a file if needed (the latter is explained in the section for the exact double counting formula).
+custom one from a file if needed (the latter is explained in section $7$ of this tutorial).
 
 !!! tip
 
@@ -307,17 +315,16 @@ at the beginning of the self-consistent cycle:
 This lets you check the normalization of the orbital. The radial function $u_l(r)$ is also written
 to the file `tdmft_triqs_2o_DS2_DMFTORBITAL_itypat0001.dat`. You can plot it with your favorite tool
  - for instance, all DMFT-related outputs are compatible with `xmgrace`. If you plot this file, you
-should clearly see the truncated $3d$ atomic orbital from your PAW dataset:
+should see the $3d$ atomic orbital from your PAW dataset, truncated at the PAW radius:
 
 ![dmft_cycle_tuto](dmft_triqs_assets/3d_orbital.png)
 
-### Energy window
+### 5.3 Energy window
 
 Unfortunately, we cannot directly compute the lattice Green's function over the full Hilbert space - it
 would be far too computationally demanding. Instead, we restrict ourselves to a smaller subspace
-$\mathcal{H}$, made up of low-energy basis elements. We then downfold this Green's function, which is
-projected onto $\mathcal{H}$, onto the local orbitals defined by [[dmft_orbital]] in order to retrieve
-the local Green's function.
+$\mathcal{H}$, made up of low-energy basis elements. We then downfold this projected Green's function
+onto the local orbitals defined by [[dmft_orbital]] in order to retrieve the local Green's function.
 
 But notice: this is actually the same as downfolding the full lattice Green's function onto the
 projection of [[dmft_orbital]] onto $\mathcal{H}$.
@@ -347,7 +354,7 @@ your orbital and your computation time.
     overlapping with neighboring atoms. That would violate a key approximation of the method - that
     interatomic elements of the Green's function can be neglected.
 
-This is extremely important since if this approximation breaks, the very important identity
+The latter is extremely important since if this approximation breaks, the very important identity
 Downfold(Upfold) = Identity might break down, which can lead to inaccuracies and unstability.
 You can check the deviation in the `log2` file:
 
@@ -367,15 +374,11 @@ message: |
 
 As an exercise, you can check that this deviation becomes lower whenever you increase the energy window.
 
-!!! tip
-
-    Because Kohn-Sham wavefunctions vary between systems, the projection of [[dmft_orbital]] onto your subspace $\mathcal{H}$ will also vary, especially if the energy window is too narrow. To reliably compare energies between systems, you have to use the same orbital for all calculations, and converge your results with respect to [[dmftbandi]] and [[dmftbandf]]. See the section on the exact double counting formula for more guidance.
-
 As shown earlier from the fatband analysis, the main spectral weight for the $d$ orbitals lie between
 bands $5$ and $13$, so we use this as our energy window, though a larger energy window would be ideal to decrease the deviation of
 Downfold(Upfold) from the identity.
 
-Once the orbitals have been projected onto this finite Hilbert space, they might no longer be orthogonal.
+Once the orbitals have been projected onto this low-energy subspace, they might no longer be orthogonal.
 You can inspect this in the `log2` file:
 
 ```sh
@@ -406,22 +409,22 @@ You can inspect this in the `log2` file:
         0.00000  -0.00000   0.00000   0.00000   0.80154
 ```
 
-Here, the occupation and norm matrices are
-shown. All local operators are printed in matrix form in the `log` file,
+Here, the occupation and overlap matrices are
+shown. More generally, all local operators are printed in matrix form in the `log` file,
 sorted by spin and increasing magnetic quantum number $m$.
 
 By default, all quantities are output in the real spherical harmonics (cubic) basis. The only exception
-occurs when data is passed to the CT-HYB solver, which requires a rotation to the CT-QMC basis (see the
-corresponding subsection for details). Wherever a basis change occurs, it is clearly indicated in the
+occurs when data is passed to the CT-HYB solver, which requires a rotation to the CT-QMC basis (see
+section $5.10$). Wherever a basis change occurs, it is clearly indicated in the
 `log`.
 
 As shown above, the norms of the projected orbitals are slightly below the original atomic value
 (which wasn't normalized to begin with). Try increasing [[dmftbandf]], and you will see the norms
 approach the true atomic value of $0.8514$.
 
-Finally, we promote the projected orbitals to proper Wannier functions by orthonormalizing them via the scheme specified by [[dmft_wanorthnorm]].
+The projected orbitals are next promoted to proper Wannier functions by orthonormalizing them via the scheme specified by [[dmft_wanorthnorm]].
 
-### Interaction tensor
+### 5.4 Interaction tensor
 
 In a solid, the correlated electrons do not interact via the bare Coulomb potential - their interaction is screened by all the other electrons in the system. Because of this,
 you need to provide the screened interaction tensor $U_{ijkl}$, as DFT+DMFT is not a formalism that allows its computation in an ab-initio way.
@@ -444,7 +447,7 @@ So, if you change your energy window, you may need to readjust $U$ and $J$.
 For this example, we will use the same parameters as in [[cite:Han2018]] —
 $U = 5.5$ eV and $J = 0.84$ eV — since their chosen energy window is similar to ours.
 
-### Self-consistent cycle
+### 5.5 Self-consistent cycle
 
 A charge self-consistent DFT+DMFT calculation involves two nested loops:
 
@@ -461,25 +464,25 @@ Here’s a schematic showing how the DFT+DMFT self-consistent cycle works:
 When doing a charge self-consistent calculation, it is usually best to set [[dmft_iter]]$=1$ and only adjust [[nstep]] to control convergence speed.
 That is because trying to reach self-consistency in the DMFT loop before the charge density converges just wastes time.
 
-### Magnetism
+### 5.6 Magnetism
 
 The next step is to decide what type of magnetism you want to include. Here, we choose [[nsppol]]$=$[[nspden]]$=1$, which enforces a collinear paramagnetic solution by
 symmetrizing the two spin channels of the Green’s function. Even so, the impurity solver is solved with all spin channels, meaning local magnetic moments can still form.
 
-Collinear magnetism can be enabled with [[nsppol]]$=$[[nspden]]$=2$. In this case, it can sometimes be better to keep the DFT exchange-correlation potential non-magnetic and let magnetism emerge purely from DMFT. You can do that by setting [[usepawu]]$=10$. Otherwise, set [[usepawu]]$=14$ for a magnetic XC potential.
+Collinear magnetism can be enabled with [[nsppol]]$=$[[nspden]]$=2$. In this case, it can sometimes be better to keep the DFT exchange-correlation potential non-magnetic and let magnetism emerge purely from DMFT, as approximate magnetic double counting formula can introduce an artifical spin dependence in the calculation. You can select a non-magnetic XC potential by setting [[usepawu]]$=10$. Otherwise, set [[usepawu]]$=14$ for a magnetic XC potential.
 
 Finally, non-collinear calculations are also supported by our interface ([[nspinor]]$=2$ and [[nspden]]$=4$).
 
-### Double counting
+### 5.7 Double counting
 
 When combining DFT and DMFT, you run into the double counting problem - some of the local interactions are already partly included at the DFT level, so they need to be subtracted and
 replaced by their exact DMFT values.
 
-ABINIT provides the exact double counting formula, which removes these contributions exactly. It is a bit more involved to use, so we will cover it later in its own section.
+ABINIT provides the exact double counting formula, though it is a bit more involved to use, so this is covered in section $7$ of this tutorial.
 
 There are also several simpler, commonly used approximate formulas, which you can select using the variable [[dmft_dc]]. Here, we choose [[dmft_dc]]$=6$, corresponding to the AMF correction, better suited for metals.
 
-### Impurity solver
+### 5.8 Impurity solver
 
 We haven’t yet told ABINIT to use the TRIQS/CT-HYB interface instead of its internal DMFT solvers. This is done with [[dmft_solv]], which sets the impurity solver to be used.
 
@@ -491,7 +494,7 @@ For TRIQS/CT-HYB, there are two relevant options:
 
 If instead you want to use ABINIT’s internal DMFT implementation with its built-in solvers, check out the dedicated [DMFT tutorial](/tutorial/dmft).
 
-### Matsubara Mesh
+### 5.9 Matsubara Mesh
 
 In our implementation, the Green’s function is represented in imaginary frequencies as $G(i\omega_n)$, and is computed exactly on the first [[dmft_triqs_n_iw]] = $n_{i\omega}$ Matsubara frequencies, defined as
 \begin{equation*}
@@ -505,7 +508,7 @@ However, directly summing:
 \end{equation*}
 (with $e^{i0^+}$ a small damping factor) would be impractical — it would take far too long to converge.
 
-To make this efficient, we use a moment expansion of the Green’s function up to fifth order:
+To make this efficient, we use a moment expansion of the Green’s function up to fifth order to handle the high-frequency behavior analytically:
 
 \begin{equation*}
     \sum_{n=-\infty}^{\infty} G(i\omega_n) e^{i 0^{+}} \approx \sum_{n=-n_{i\omega}}^{n_{i\omega}-1} \left[ G(i\omega_n) - \sum_{j=1}^{5} \frac{G_j}{(i\omega_n)^j} \right] + \sum_{n=-\infty}^{\infty} \frac{G_j}{(i\omega_n)^j} e^{i 0^{+}}
@@ -542,7 +545,7 @@ As you can see, this integration method is highly efficient — in this example,
 
     When you change the temperature, remember to increase the number of Matsubara frequencies linearly with $\beta$ to maintain the same effective energy range.
 
-### CT-QMC basis
+### 5.10 CT-QMC basis
 
 In the SCF cycle, we work in the cubic basis.
 However, even though [[dmft_solv]]$=7$ is fully rotationally invariant and
@@ -607,9 +610,9 @@ automatically detects and prints the most compact block structure of the hybridi
 ```
 
 This allows TRIQS/CT-HYB to discard some irrelevant moves, and to optimize the computation of the determinant of the hybridization matrix. In our case, there are
-$10$ blocks of size $1$, as there are no off-diagonal components.
+$10$ blocks of size $1$, as there are no off-diagonal components. The block detection algorithm can be tuned via [[dmft_triqs_tol_block]].
 
-### CT-HYB parameters
+### 5.11 CT-HYB parameters
 
 The key controls for the TRIQS/CT-HYB solver are [[dmft_triqs_n_cycles]], [[dmft_triqs_length_cycle]],
 [[dmft_triqs_n_warmup_cycles_init]] and [[dmft_triqs_n_warmup_cycles_restart]]. These parameters are
@@ -672,7 +675,7 @@ You will find detailed explanations of the moves on the TRIQS/CT-HYB
 
 The key parameters to control the proposal distribution are [[dmft_triqs_move_double]], [[dmft_triqs_move_shift]] and [[dmft_triqs_pauli_prob]].
 
-### Local Hilbert space
+### 5.12 Local Hilbert space
 
 In principle, the local impurity problem lives in a Hilbert space of size $2^{2(2l+1)}$,
 which can get massive - especially for systems with $f$ orbitals. In practice, you
@@ -702,7 +705,7 @@ longer guaranteed, and these parameters must be checked and converged carefully.
 
 By default, the code keeps the full Hilbert space.
 
-### Imaginary time
+### 5.13 Imaginary time
 
 In the CT-HYB solver, both the hybridization function $\Delta(\tau)$ and the Green's
 function $G(\tau)$ live in imaginary time, with $\tau \in [0,\beta]$.
@@ -734,7 +737,7 @@ A practical rule of thumb is to keep the ratio [[dmft_triqs_n_cycles]] / [[dmft_
 
     When you change the temperature, remember that you should increase [[dmft_triqs_n_tau]] proportionally to $\beta$ in order to keep the bin width $\Delta \tau$ roughly constant.
 
-### Compact representation
+### 5.14 Compact representation of the Green's function
 
 Working directly with $G(\tau)$ on an imaginary-time grid has some drawbacks. Since $\tau$
 is discretized, the representation is not continuous, and the Fourier transform to
@@ -813,7 +816,7 @@ You should obtain this for the first diagonal component:
 As you can see, the DLR smooths out the noise extremely well while accurately following the
 more accurate low-frequency data, meaning that our DLR parameters have been well chosen.
 
-### Self-energy
+### 5.15 Self-energy
 
 At the end of each DMFT iteration, the compact Green's function is first Fourier
 transformed to Matsubara frequencies. From there, the self-energy is computed using the
@@ -838,7 +841,9 @@ reconstruct the DFT Hamiltonian and the electronic levels.
 
     If you are doing a magnetic run but using a non-magnetic XC potential, both spin channels of the self-energy will initially be identical. To encourage the solver to enter a magnetic configuration and speed up convergence, you can manually apply a small splitting between the spin components of the self-energy using [[dmft_shiftself]].
 
-### Energy and Number of Electrons
+By default, only the self-energy of the last iteration is written on file, but you can print each iteration with [[dmft_prtself]].
+
+### 5.16 Energy and Number of Electrons
 
 It is always a good idea to keep an eye on both the total energy and the number of
 correlated electrons throughout the DFT+DMFT cycle. These are excellent indicators of
@@ -931,7 +936,7 @@ $k$ iterations in order to reduce the noise, choosing $k$ to minimize the varian
 
 In this example, we did not run enough iterations to reliably perform such an average.
 
-## Analytical Continuation, Spectral Functions, and Restarting a Calculation
+## 6. Analytical Continuation, Spectral Functions, and Restarting a Calculation
 
 In this section, we will walk you through how to obtain both the local and $k$-resolved
 spectral functions by performing an analytical continuation of your imaginary-axis
@@ -947,7 +952,7 @@ However, since our CT-HYB solver gives access only to the imaginary-frequency or
 imaginary-time Green's function, we cannot apply this formula directly. An analytical
 continuation is therefore required.
 
-### Local spectral function
+### 6.1 Local spectral function
 
 Let's start with the local spectral function, which comes from the local Green's function
 and reflects only the spectral weight of the correlated orbitals.
@@ -957,7 +962,7 @@ should use the DLR-fitted Green's function rather than the raw binned data. We d
 provide an internal continuation routine, so you are free to use whatever method or library
 you prefer.
 
-Below is a template script using TRIQS/SOM, freely available
+Below, we will use TRIQS/SOM, freely available
 [[https://github.com/krivenko/som|here]].
 
 You can run our example continuation script with:
@@ -986,14 +991,14 @@ matches the original imaginary-time Green's function:
 In our example, better convergence parameters would be necessary to obtain a closer match.
 
 Once the continuation is complete, the computed spectral function is written to
-`spectral.dat`, and should look like this::
+`spectral.dat` by our script, and should look like this::
 
 ![dmft_cycle_tuto](dmft_triqs_assets/spectral_gtau.png)
 
-### $k$-resolved Spectral Function and Restarting a Calculation
+### 6.2 $k$-resolved Spectral Function and Restarting a Calculation
 
 To compute the lattice spectral function in the Kohn-Sham basis - i.e., including the
-contributions from all electrons - the workflow becomes more involved and requires an
+spectral weight from all electrons - the workflow becomes more involved and requires an
 additional ABINIT calculation. Crucially, this time you must perform the analytical
 continuation on the self-energy rather than on the Green's function.
 
@@ -1006,17 +1011,17 @@ should provide:
   * the DMFT self-energy
   * the CT-HYB Monte Carlo configuration (optional), to speed up the initial warmup phase
 
-These are read using the variables [[getden]], [[getself]], and [[getctqmcdata]]. You can
-chain datasets in this way.
+These are read using the variables [[getden]], [[getself]], and [[getctqmcdata]] respectively. You can
+also chain datasets in this way.
 
-After copying the output files from the previous run, set up the next input file to perform
-a single iteration - its purpose is only to produce the analytical continuation files,
-since the calculation is already converged.
+After copying the output files from the previous run, start the next input file which performs
+a single iteration - its purpose is only to produce the analytical continuation files:
 
 ```sh
 cp tdmft_triqs_2o_DS2_DEN tdmft_triqs_3o_DS2_DEN
 cp tdmft_triqs_2o_DS2_Self-omega_iatom0001_isppol1 tdmft_triqs_3o_DS2_Self-omega_iatom0001_isppol1
 cp tdmft_triqs_2o_DS2_CTQMC_DATA_iatom0001.h5 tdmft_triqs_3o_DS2_CTQMC_DATA_iatom0001.h5
+cp ../tdmft_triqs_3.abi .
 mpirun -n 4 abinit tdmft_triqs_3.abi > log3
 ```
 
@@ -1104,7 +1109,7 @@ Then run:
 
     mpirun -n 4 abinit tdmft_triqs_3.abi > log3
 
-ABINIT first reconstructs the self-imaginary on the imaginary axis from your analytical
+ABINIT first reconstructs the self-energy on the imaginary axis from your analytical
 continuation, writing it to `tdmft_triqs_3o_DS3_DFTDMFT_Self_backtransform.dat`. You should
 verify that it agrees with the original input, though we already did that with the script.
 
@@ -1126,13 +1131,13 @@ which should produce a plot similar to:
 
 ![dmft_cycle_tuto](dmft_triqs_assets/kres_spectral.png)
 
-## Exact double counting formula, enforcing stationarity, and providing a custom orbital
+## 7. Exact double counting formula, enforcing stationarity, and providing a custom orbital
 
 In this section, we will explain how to activate the exact double counting formula and how
 to enforce stationarity in your DFT+DMFT calculations - an essential requirement when
 computing free energies. We also show how to supply a custom correlated orbital.
 
-As discussed in the section on the energy window, the correlated orbital defining the DMFT
+As discussed in section $5.3$, the correlated orbital defining the DMFT
 projector is obtained by projecting the orbital specified by [[dmft_orbital]]
 onto a low-energy subspace $\mathcal{H}$, composed of Kohn-Sham states with band indices
 between [[dmftbandi]] and [[dmftbandf]].
@@ -1151,7 +1156,7 @@ temperatures, or phases: all calculations must rely on the same Baym-Kadanoff fu
 which means using the same fixed orbital, and also the same values of $U$ and $J$ - a point
 often overlooked in the literature.
 
-### Fixing the DMFT orbital
+### 7.1 Fixing the DMFT orbital
 
 The only way to strictly fix the orbital is to converge with respect to [[dmftbandi]]
 and [[dmftbandf]] until the projected orbital matches the target orbital [[dmft_orbital]]
@@ -1159,7 +1164,8 @@ by virtue of the completeness of the Kohn-Sham basis.
 
 This is especially important when using the exact double counting formula, which requires
 access to the local orbital in real space. The implementation assumes that the projection
-of [[dmft_orbital]] onto the correlated window is equal to the orbital itself.
+of [[dmft_orbital]] onto the correlated window is equal to [[dmft_orbital]] itself in order
+to do that.
 
 However, if [[dmft_orbital]] is chosen as a truncated atomic orbital, achieving
 convergence in the correlated window may be impractical, often requiring an excessively
@@ -1168,12 +1174,19 @@ onto a finite energy window for a chosen reference system (at a given temperatur
 volume). This projection defines a Wannier function, less localized and easier to converge,
 as high-energy components have been filtered out.
 
+Once this reference Wannier function has been produced, you need to use it on all
+subsequent systems for which you wish to compare energy differences. If these systems
+are close to your reference system, the Kohn-Sham wavefunctions will be very similar to those
+of your reference system, and the convergence with [[dmftbandi]] and [[dmftbandf]] will be extremely fast,
+and you will barely need to increase the energy window compared to the one used to produce the original
+Wannier function. This convergence will be even more facilitated if the original window is large enough.
+
 You can compute this real-space projected orbital using [[dmft_prtwan]], which writes the
 projection of [[dmft_orbital]] onto the correlated energy window. The maximum radius is
 controlled via [[dmft_wanrad]]. For DMFT to remain meaningful, the orbital must not
 overlap with the one from neighboring atoms; therefore the energy window must be
 sufficiently large, and [[dmft_wanrad]] chosen so that the Wannier function essentially
-vanishes outside this radius.
+vanishes outside this radius such that you capture all the weight of the orbital.
 
 Start the calculation of the Wannier function:
 
@@ -1190,7 +1203,7 @@ of the Wannier orbital is written to `tdmft_triqs_4o_DS2_Wannier_functions_iatom
 for each angular momentum channel $m$, using the PAW radial grid extended to
 [[dmft_wanrad]].
 
-### Providing a custom orbital
+### 7.2 Providing a custom orbital
 
 To use this projected orbital as your correlated orbital, set [[dmft_orbital]] to $-1$.
 
@@ -1244,7 +1257,7 @@ density (through additional iterations, or by changing the temperature or volume
 need to increase [[dmftbandf]] in order to achieve this overlap. A sufficiently large
 starting energy window simplifies the process.
 
-### Activating the exact double-counting formula
+### 7.3 Activating the exact double-counting formula
 
 Once the DMFT downfolding operator has been fixed, you can safely use the exact double
 counting formula by setting [[dmft_dc]] to $8$.
@@ -1286,7 +1299,7 @@ integrals, appears in `log4`:
 
    Slater parameters F^0, F^2, F^4 are   0.2021   0.2509   0.1757
 ```
-## Entropy calculation
+## 8. Entropy calculation
 
 You now have all the ingredients required to compute the DFT+DMFT free energy. This is
 significantly more demanding than evaluating just the internal energy - both in terms
