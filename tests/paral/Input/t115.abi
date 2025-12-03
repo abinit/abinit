@@ -97,8 +97,6 @@ pseudos "23v.paw, 38sr.paw, 8o.paw"
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_TRIQS_v3_2
-#%% [shell]
-#%% pre_commands = iw_cp t114_0003 .;
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
