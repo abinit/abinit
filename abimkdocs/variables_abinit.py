@@ -4240,10 +4240,6 @@ One should use a width comparable with the Debye frequency or the maximum phonon
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[elph2_imagden]] has the
 [[ENERGY]] characteristics (1 Ha = 27.2113845 eV).
 
-!!! important
-
-    The default value of [[elph2_imagden]] changed in version 10.5.6. Now it is 0.1 eV.
-    In previous versiohs, it was zero.
 """,
 ),
 
