@@ -2988,6 +2988,8 @@ Variable(
     text=r"""
 This variable sets the numerical tolerance used to determine the Fermi level. The root-finding algorithm stops once the calculated electron count matches the target value within this tolerance.
 A smaller value improves the accuracy of the Fermi level but increases the number of root-finding iterations, which may significantly impact performance for large systems. If you are using noisy solvers (e.g., CT-QMC), it is unnecessary to set a tolerance smaller than the intrinsic noise level of your solver.
+
+See [[dmft_fermi_step]] for further tuning of the root-finding algorithm.
 """,
 ),
 
@@ -3007,8 +3009,9 @@ Selects the double counting (DC) correction formula used in DFT+DMFT calculation
 
    * 1 or 5 - Full Localized Limit (FLL): magnetic (1) and non-magnetic (5) versions.
    * 2 or 6 - Around Mean Field (AMF): magnetic (2) and non-magnetic (6) versions.
-   * 7 - Nominal double counting: uses the nominal occupancy [[dmft_nominal]] for the DC term.
-   * 8 - Exact formula (cf [[cite:Haule2015a]]): only compatible with LDA and PBE ([[ixc]] in [7,-1012,11,-101130]).
+   * 7 - Nominal double counting: non-magnetic version only. Uses the nominal occupancy set by [[dmft_nominal]].
+   * 8 - Exact formula (cf [[cite:Haule2015a]]): non-magnetic version only, and only compatible
+         with LDA and PBE ([[ixc]] $\in$ [7,-1012,11,-101130]).
          This is the formula you should always use. The implementation makes the assumption
          that the screened potential has the form of a Yukawa potential (cf [[dmft_yukawa_param]]),
          which is rigorously valid only in the case [[dmft_solv]]=7, with the full Slater Hamiltonian.
@@ -3017,8 +3020,8 @@ Selects the double counting (DC) correction formula used in DFT+DMFT calculation
          (i.e. the closure relation is assumed). Please look at the relevant section in the
          [[tutorial:dmft_triqs|tutorial on DFT+DMFT with TRIQS/CT-HYB]] for detailed informations on how to use it.
 
-Magnetic formulas ([[dmft_dc]] < 5 ) are used with magnetic DFT ([[usepawu]]=10).
-Non-magnetic formulas ([[dmft_dc]] >= 5 ) are used with non-magnetic DFT ([[usepawu]]=14).
+Magnetic formulas ([[dmft_dc]] < 5 ) need to be used with magnetic DFT ([[usepawu]]=10).
+Non-magnetic formulas ([[dmft_dc]] >= 5 ) need to be used with non-magnetic DFT ([[usepawu]]=14).
 See [[cite:Park2015]] and [[cite:Chen2016a]] for more details on the non-magnetic treatment.
 
 """,
@@ -3054,11 +3057,14 @@ Variable(
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v10.5.6",
     text=r"""
-Set the value of the maximal step increment in the Fermi level search. If it is too low, the
-root-finding algorithm will be significantly slowed down. If it is too high, the root-finding
-algorithm might encounter instabilities and fail to converge.
+During the Fermi level search, the step increment for the Fermi level is capped to [[dmft_fermi_step]].
+If this value is too low, the root-finding algorithm will be significantly slowed down.
+If it is too high, the step increment might become too high and the algorithm might encounter instabilities
+and fail to converge.
 
 Can be specified in the unit of your choice (Ha, Ry, eV, K) since it has the [[ENERGY]] characteristics.
+
+See [[dmft_charge_prec]] for further tuning of the root-finding algorithm.
 """,
 ),
 
@@ -3073,7 +3079,8 @@ Variable(
     requires="[[usedmft]] == 1",
     added_in_version="before_v9",
     text=r"""
-Number of iterations in the DMFT inner loop.
+Number of iterations in the DMFT inner loop, at fixed density. The number of DFT+DMFT cycles (i.e. density updates)
+is set via [[nstep]], for a total number of [[nstep]] $\times$ [[dmft_iter]] calls to the impurity solver.
 """,
 ),
 
@@ -3305,7 +3312,8 @@ Variable(
 Set to 1 to write useful files for the analytical continuation of the self-energy.
 This prints the self-energy in the basis that diagonalizes the local electronic levels.
 The off-diagonal elements are thus minimized, since they are not handled by most analytical
-continuation codes. The rotation matrix is also printed.
+continuation codes. The rotation matrix is also printed, as well as the matrix overlap of the
+Wannier functions.
 """,
 ),
 
@@ -3476,7 +3484,7 @@ Variable(
     text=r"""
 
 This should be set to 1 only if in cubic symmetry. It enables one to carry a DFT+DMFT
-calculations on _t<sub>2g</sub>_ orbitals only.
+calculations on $\text{t}_{2\text{g}}$ orbitals only.
 """,
 ),
 
@@ -3563,12 +3571,17 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_entropy]] == 1, [[dmft_triqs_measure_density_matrix]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
-Specify whether to compute the contribution from the impurity entropy.
+Specify whether to compute the contribution from the impurity entropy when computing the DFT+DMFT entropy (cf [[dmft_triqs_entropy]]).
 
   * 0 --> Neglect it. As this is the main bottleneck of a free energy calculation, it can be useful
-          to disable it and only compute the remaining contribution.
+          to disable it and only compute the remaining contribution. In this case, only the internal energy is printed under `ETOT`,
+          as neglecting the impurity entropy is not a good approximation.
   * 1 --> Compute it using the coupling constant method over both interaction and chemical potential strength.
-          See the [[tutorial:dmft_triqs|TRIQS/CT-HYB tutorial]] for more details.
+          See the [[tutorial:dmft_triqs|TRIQS/CT-HYB tutorial]] for more details. This requires the evaluation of the integral of
+          the interaction energy and the electron number over the strength of the coupling constant $\lambda \in [0,1]$, which is
+          done numerically by solving the impurity problem for several values of $\lambda$ (cf [[dmft_triqs_gaussorder]] and
+          [[dmft_triqs_nsubdivisions]] to set the integration points). At $\lambda$=0, the interaction Hamiltonian is 0 (as the
+          non-interacting limit is known analytically), and the chemical potential is shifted by [[dmft_triqs_shift_mu]].
 """,
 ),
 
@@ -3583,7 +3596,7 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
-For the computation of the determinant of the hybridization matrix in TRIQS/CTHYB,
+For the computation of the determinant of the hybridization matrix during the TRIQS/CTHYB run,
 some memory is initially reserved for a maximal size of [[dmft_triqs_det_init_size]].
 This is automatically resized (x2) when the perturbation order becomes larger, but
 this can take some time if this happens too often.
@@ -3677,7 +3690,7 @@ Variable(
     text=r"""
 Specify the accuracy parameter $\varepsilon$ for the DLR (Discrete Lehmann representation)
 frequencies used as a compact representation of the noisy imaginary-time Green's function
-from the CT-QMC.
+from the CT-QMC ([[dmft_triqs_measure_g_l]]=0).
 
 The DLR frequencies are then computed to ensure that they can represent any arbitrary
 Green's function with accuracy [[dmft_triqs_dlr_epsilon]] (cf [[cite:Kaye2022]]).
@@ -3700,7 +3713,7 @@ Variable(
     text=r"""
 Specify the maximal real frequency parameter $\omega_{\mathrm{max}}$ for the DLR
 (Discrete Lehmann representation) frequencies used as a compact representation of
-the noisy imaginary-time Green's function from the CT-QMC.
+the noisy imaginary-time Green's function from the CT-QMC ([[dmft_triqs_measure_g_l]]=0).
 
 The DLR frequencies are then computed to ensure that they can represent any arbitrary
 Green's function whose spectral function have a support
@@ -3721,7 +3734,7 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
-Computes the DFT+DMFT entropy.
+Computes the DFT+DMFT entropy from the evaluation of the Baym-Kadanoff functional.
 """,
 ),
 
@@ -3736,8 +3749,10 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_compute_integral]] == 1",
     added_in_version="before_v9",
     text=r"""
-Order of Gauss-Legendre quadrature for each subdivision (cf [[dmft_triqs_nsubdivisions]]) of the
-thermodynamic integration interval (cf [[dmft_triqs_compute_integral]]).
+When evaluating the coupling constant integral for the computation of the impurity entropy (cf [[dmft_triqs_compute_integral]]),
+the integration interval [0,1] is split in [[dmft_triqs_nsubdivisions]] regular subdivisions. Then, each one of these
+subdivisions is evaluated numerically by Gauss-Legendre quadrature of order [[dmft_triqs_gaussorder]], for a total of
+[[dmft_triqs_gaussorder]] $\times$ [[dmft_triqs_nsubdivisions]] integration points.
 """,
 ),
 
@@ -3832,6 +3847,8 @@ Variable(
 Set to 1 to active the measurement of the impurity density matrix in TRIQS/CTHYB. This greatly
 improves the accuracy of static observables such as the number of electrons, energy...
 Currently, TRIQS/CTHYB does not support this feature with off-diagonal components.
+
+The sampling efficiency of the density matrix can be improved by activating [[dmft_triqs_time_invariance]].
 """,
 ),
 
@@ -3847,11 +3864,13 @@ Variable(
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 if you want to sample the Green's function directly in the Legendre basis
-(cf [[cite:Boehnke2011]]). By default, the Green's function is sampled on the imaginary
+(cf [[cite:Boehnke2011]]). Otherwise, if set to 0, the Green's function is sampled on the imaginary
 time axis, and a constrained fit is then performed to obtain the coefficients of the
 Discrete Lehmann representation (DLR, cf [[cite:Kaye2022]]). We strongly advise to use
 the DLR, as it significantly outperforms the Legendre representation for noise reduction.
-This option is only here for historical purposes.
+
+See [[dmft_triqs_n_l]] to set the parameters of the Legendre representation, and [[dmft_triqs_dlr_epsilon]] and
+[[dmft_triqs_dlr_wmax]] for the DLR parameters.
 """,
 ),
 
@@ -3866,7 +3885,8 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
-Set to 1 to activate the double moves in TRIQS/CTHYB.
+Set to 1 to activate the double moves in TRIQS/CTHYB. Go to their website for more information on this move.
+It can be required for ergodicity in the off-diagonal case.
 """,
 ),
 
@@ -3881,7 +3901,9 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
-Set to 1 to activate the shift move in TRIQS/CTHYB.
+Set to 1 to activate the shift move in TRIQS/CTHYB. Go to their website for more information on this move.
+It is never required for ergodicity, but is quite efficient in lowering the auto-correlation time, and has
+very high acceptance rates.
 """,
 ),
 
@@ -3913,7 +3935,9 @@ Variable(
     added_in_version="before_v10.5.6",
     text=r"""
 Number of linear Matsubara frequencies for the representation of the Green's function
-(only in the case [[dmft_solv]] $\in$ [6,7]).
+(only in the case [[dmft_solv]] $\in$ [6,7]). The high-frequency behavior is taken into account
+via a moment expansion of the Green's function up to order 5, where the moments are computed
+analytically in a self-consistent fashion.
 """,
 ),
 
@@ -3996,12 +4020,10 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_compute_integral]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
-Specify the number of regular subdivisions of the thermodynamic integration interval
-(cf [[dmft_triqs_compute_integral]]). Each subdivision will contain [[dmft_triqs_gaussorder]]
-Gauss-Legendre quadrature points, for a total of [[dmft_triqs_nsubdivisions]] $\times$
-[[dmft_triqs_gaussorder]] integration points. You only need to care about increasing the number of
-subdivisions if you need a high number of integration points and Gauss-Legendre quadrature becomes
-unstable.
+When evaluating the coupling constant integral for the computation of the impurity entropy (cf [[dmft_triqs_compute_integral]]),
+the integration interval [0,1] is split in [[dmft_triqs_nsubdivisions]] regular subdivisions. Then, each one of these
+subdivisions is evaluated numerically by Gauss-Legendre quadrature of order [[dmft_triqs_gaussorder]], for a total of
+[[dmft_triqs_gaussorder]] $\times$ [[dmft_triqs_nsubdivisions]] integration points.
 """,
 ),
 
@@ -4053,7 +4075,8 @@ Variable(
     requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
-Print additional information when performing the thermodynamic integration (cf [[dmft_triqs_compute_integral]]).
+Print additional information when performing the thermodynamic integration (cf [[dmft_triqs_compute_integral]]),
+in order to help you tune your parameters.
 For each value of the coupling constant $\lambda$, print the occupation numbers, the Green's function, etc.
 This might increase the measurement time.
 """,
@@ -15590,8 +15613,8 @@ Variable(
     requires="[[usepaw]] == 1",
     added_in_version="v10",
     text=r"""
-If [[paw_add_core]] is activated (set to 1), then the core-electron contributions are added to the total energy displayed during the iterations and at the end of the calculation. These include the kinetic, electrostatic, and exchange-correlation contributions.  
-By default, this variable is not activated, and the core contributions are only listed at the end of the calculation, without being added to the total energy.  
+If [[paw_add_core]] is activated (set to 1), then the core-electron contributions are added to the total energy displayed during the iterations and at the end of the calculation. These include the kinetic, electrostatic, and exchange-correlation contributions.
+By default, this variable is not activated, and the core contributions are only listed at the end of the calculation, without being added to the total energy.
 This feature is available only when the PAW atomic data are in [PAW-XML](https://esl.cecam.org/en/data/paw-xml/) format.
 """,
 ),
@@ -21140,7 +21163,7 @@ Sets a tolerance for differences of magnetization (in atomic unit ) that, reache
 TWICE successively, will cause one SCF cycle to stop (and ions to be moved).
 If set to zero, this stopping condition is ignored.
 Effective only when SCF cycles are done ([[iscf]]>0). This tolerance applies
-to any particular cartesian component of any atom. 
+to any particular cartesian component of any atom.
 
 This stopping criterion is not allowed for RF calculations.
 Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
@@ -21155,7 +21178,7 @@ To do so one has to specify both criteria for the same dataset.
 Note that a tolerance defined generically does not couple with a criterion defined for one particular dataset.
 See [[tolwfr]] for more details about coupling two criteria.
 
-When the maximum magnetization among all atoms and directions is smaller than 10e^-8, both the maximum of magnetization 
+When the maximum magnetization among all atoms and directions is smaller than 10e^-8, both the maximum of magnetization
 and its difference are reset to zero. In this case, the toldmag convergence criterion cannot be used.
 """,
 ),
