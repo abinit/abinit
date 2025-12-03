@@ -943,8 +943,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_triqs_pauli_prob',dt%dmft_triqs_pauli_prob,-1,one,iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_read_ctqmcdata',dt%dmft_triqs_read_ctqmcdata,2,(/0,1/),iout)
+#if defined HAVE_TRIQS_INTERNAL
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_triqs_n_warmup_cycles_restart',dt%dmft_triqs_n_warmup_cycles_restart,0,iout)
+#endif
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_triqs_time_invariance',dt%dmft_triqs_time_invariance,2,(/0,1/),iout)
      cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -2733,7 +2735,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
         'Action: re-run with PAW '
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
-  
+
      !  paral_atom not allowed at present
      call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
 
