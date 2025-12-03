@@ -226,6 +226,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    usejmj = 1 ! jmj local basis
    opt_diag = 0 ! no diagonalization of local Hamiltonian
    opt_nondiag = 1 ! off_diag element taken into account
+ else
+   usejmj = 0 
  endif
 
  !write(6,*) "nspinor,useylm",nspinor,useylm
@@ -1108,8 +1110,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)
      call zero_matlu(matlumag_tot,natom=1)
      call magmomjmj_matlu(matlumag_tot,natom=1)
-    !call rotate_matlu(matlumag_tot,eigvectmatlu(iatom,1),natom=1,prtopt=3,inverse=1)
-     call print_matlu(matlumag_tot,natom=1,prtopt=1)
+    !call print_matlu(matlumag_tot,natom=1,prtopt=1)
      call gather_matlu(matlumag_tot,magmom_tot,natom=1,option=1,prtopt=0)
      call destroy_matlu(matlumag_tot,natom=1)
 
@@ -1507,7 +1508,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        call CtqmcoffdiagInterface_run(hybridoffdiag,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd(:,:,:),&
           & Gw=gw_tmp_nd(:,:,:),D=doccsum,E=green%ecorr_qmc(iatom),Noise=noise,matU=dble(udens_atoms(iatom)%mat(:,:,1)),&
           & Docc=docc(:,:),opt_levels=levels_ctqmc(:),hybri_limit=hybri_limit(:,:),Magmom_orb=REAL(magmom_orb(iatom)%value),&
-          & Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom,fname=paw_dmft%filapp)
+          & Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom,&
+          & fname=paw_dmft%filapp,jmjbasis=usejmj)
 
        ! For entropy (alternative formulation)
        if (paw_dmft%ientropy == 1) then
