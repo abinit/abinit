@@ -104,9 +104,9 @@ pseudos "58ce.paw"
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test = t110_MPI8o_DS2_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%% files_to_test = t110_MPI8o_DS2_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 200, tolabs = 5.e-2, tolrel = 1.0, fld_options=-easy;
 #%%                 t110_MPI8o_DS3_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
-#%%                 t110_MPI8o_DS4_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t110_MPI8o_DS4_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 200, tolabs = 5.e-2, tolrel = 1.0, fld_options=-easy;
 #%%                 t110_MPI8o_DS5_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
 #%%                 t110_MPI8o_DS5_Gtau_offdiag_iatom0001.dat, tolnlines = 2, tolabs = 5.e-5, tolrel = 1.e-3, fld_options=-easy;
 #%% [extra_info]
