@@ -2731,7 +2731,7 @@ subroutine abi_gpu_work_resizeCptr(array,current_dim,asked_dim)
 ! *************************************************************************
 
   if ( current_dim < asked_dim  ) then
-    if(current_dim == 0) then
+    if(current_dim /= 0) then
       call dealloc_on_gpu(array)
     end if
     current_dim = asked_dim
