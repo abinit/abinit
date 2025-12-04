@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.8.4 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h08 )
+.Starting date : Thu  4 Dec 2025.
+- ( at 16h21 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v8_t83-t84/t83.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v8_t83-t84/t83.abi
 - output file    -> t83.abo
 - root for input  files -> t83i
 - root for output files -> t83o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Psdj_paw_pw_std/Al.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/As.LDA_PW-JTH_sp.xml
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -73,6 +73,7 @@ _ WF disk file :      0.095 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =          95
       nfft =        3375          nkpt =          16
+- my_mband =           4
 ================================================================================
 P This job should need less than                       1.824 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -90,6 +91,7 @@ _ WF disk file :      0.095 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =          95
       nfft =        3375          nkpt =          16
+- my_mband =           4
 ================================================================================
 P This job should need less than                       1.913 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -351,9 +353,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Psdj_paw_pw_std/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -371,9 +373,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/As.LDA_PW-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -1563,6 +1565,12 @@ tolerances: {tolwfr: 1.00E-20, }
    1    4   1    4      -346.0468258764         0.0000000000
    1    4   2    4       115.3489419588         0.0000000000
    1    4   3    4       115.3489419588         0.0000000000
+   1    4   1    5        -0.0000000000         0.0000000000
+   1    4   2    5        -0.0000000001         0.0000000000
+   1    4   3    5        -0.0000000000         0.0000000000
+   1    4   1    6         2.4866728576         0.0000000000
+   1    4   2    6        -2.4866728577         0.0000000000
+   1    4   3    6        -2.4866728577         0.0000000000
   
    2    4   1    1         0.0000000000         0.0000000000
    2    4   2    1        -7.0880245489         0.0000000000
@@ -1573,6 +1581,12 @@ tolerances: {tolwfr: 1.00E-20, }
    2    4   1    4       115.3489419588         0.0000000000
    2    4   2    4      -346.0468258764         0.0000000000
    2    4   3    4       115.3489419588         0.0000000000
+   2    4   1    5        -0.0000000000         0.0000000000
+   2    4   2    5         0.0000000000         0.0000000000
+   2    4   3    5         0.0000000001         0.0000000000
+   2    4   1    6        -2.4866728578         0.0000000000
+   2    4   2    6         2.4866728578         0.0000000000
+   2    4   3    6        -2.4866728579         0.0000000000
   
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1        -0.0000000000         0.0000000000
@@ -1583,6 +1597,12 @@ tolerances: {tolwfr: 1.00E-20, }
    3    4   1    4       115.3489419588         0.0000000000
    3    4   2    4       115.3489419588         0.0000000000
    3    4   3    4      -346.0468258764         0.0000000000
+   3    4   1    5         0.0000000001         0.0000000000
+   3    4   2    5         0.0000000002         0.0000000000
+   3    4   3    5         0.0000000001         0.0000000000
+   3    4   1    6        -2.4866728576         0.0000000000
+   3    4   2    6        -2.4866728577         0.0000000000
+   3    4   3    6         2.4866728577         0.0000000000
   
    1    5   1    4        -0.0000000000         0.0000000000
    1    5   2    4        -0.0000000000         0.0000000000
@@ -2093,10 +2113,10 @@ P          mk1mem4         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          7.1  wall=          7.1
+- Proc.   0 individual time (sec): cpu=          7.0  wall=          7.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  23 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.1  wall=          7.1
++Overall time at end (sec) : cpu=          7.0  wall=          7.0
