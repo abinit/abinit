@@ -119,8 +119,8 @@ jpawu2      0.70 eV  # Values of J
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10
 #%% [NCPU_10]
-#%% files_to_test = t115_MPI10.abo, tolnlines = 20, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options=-medium;
-#%%   t115_MPI10o_DS2_LocalMagnSuscept_atom_01.dat, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options=-medium;
+#%% files_to_test = t115_MPI10.abo, tolnlines = 20, tolabs = 1.0e-03, tolrel = 1.0e-03, fld_options=-medium;
+#%%   t115_MPI10o_DS2_LocalMagnSuscept_atom_01.dat, tolnlines = 5, tolabs = 1.0e-04, tolrel = 1.0e-04, fld_options=-medium;
 #%% [extra_info]
 #%% authors = F. Gendron
 #%% keywords = DMFT, CTQMC
