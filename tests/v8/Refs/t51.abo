@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.8.4 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h08 )
+.Starting date : Thu  4 Dec 2025.
+- ( at 20h09 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v8_t51/t51.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v8_t51/t51.abi
 - output file    -> t51.abo
 - root for input  files -> t51i
 - root for output files -> t51o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.GGA_PBE-JTH_sp.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/As.GGA_PBE-JTH_sp.xml
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -55,6 +55,7 @@ _ WF disk file :      0.049 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =          77
       nfft =        1728          nkpt =         128
+- my_mband =           4
 ================================================================================
 P This job should need less than                       3.534 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -72,6 +73,7 @@ _ WF disk file :      0.604 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =          77
       nfft =        1728          nkpt =         128
+- my_mband =           4
 ================================================================================
 P This job should need less than                       3.547 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -89,6 +91,7 @@ _ WF disk file :      0.604 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =          77
       nfft =        1728          nkpt =         128
+- my_mband =           4
 ================================================================================
 P This job should need less than                       3.644 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -106,6 +109,7 @@ _ WF disk file :      0.604 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =          77
       nfft =        3375          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                       6.470 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -123,6 +127,7 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =          77
       nfft =        3375          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                       6.470 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -670,9 +675,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Psdj_paw_pbe_std/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -690,9 +695,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.GGA_PBE-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.GGA_PBE-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.GGA_PBE-JTH_sp.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/As.GGA_PBE-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/As.GGA_PBE-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/As.GGA_PBE-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -1360,6 +1365,12 @@ tolerances: {tolvrs: 1.00E-08, }
    1    4   1    4      -208.4765462554         0.0000000000
    1    4   2    4        69.4921820851         0.0000000000
    1    4   3    4        69.4921820851         0.0000000000
+   1    4   1    5        -0.0000000082         0.0000000000
+   1    4   2    5        -0.0000000083         0.0000000000
+   1    4   3    5        -0.0000000082         0.0000000000
+   1    4   1    6         2.0582271462         0.0000000000
+   1    4   2    6        -2.0582271460         0.0000000000
+   1    4   3    6        -2.0582271462         0.0000000000
   
    2    4   1    1        -0.0000000000         0.0000000000
    2    4   2    1        -5.8055845697         0.0000000000
@@ -3333,10 +3344,10 @@ P          mk1mem6        256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        153.8  wall=        153.9
+- Proc.   0 individual time (sec): cpu=        157.8  wall=        157.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  26 WARNINGs and  40 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        153.8  wall=        153.9
++Overall time at end (sec) : cpu=        157.8  wall=        157.8
