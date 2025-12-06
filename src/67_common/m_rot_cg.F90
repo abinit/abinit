@@ -152,7 +152,8 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
 
 !Arguments ------------------------------------
 !scalars
-  integer, intent(in) :: blocksize,dmft_optim,first_bandc,nband,nbandc,npw,nspinor
+  integer, intent(in) :: blocksize,first_bandc,nband,nbandc,npw,nspinor
+  logical, intent(in) :: dmft_optim
 !! type(MPI_type),intent(inout) :: mpi_enreg
 !! type(dataset_type),intent(in) :: dtset
 !! type(paw_dmft_type), intent(in)  :: band_in
@@ -203,7 +204,7 @@ subroutine rot_cg(occ_nd,cwavef,npw,nband,blocksize,nspinor,first_bandc,nbandc,o
   ! $c^{rot}_{n,k}(g) =  \sum_{n'} [\bar{f_{n',n}} * c_{n',k}(g)]$
 
   ! Correct a bug in the formula when using TRIQS
-  if (dmft_optim == 1) occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))
+  if (dmft_optim) occ_nd_cpx(:,:) = conjg(occ_nd_cpx(:,:))
 
   do ispinor=1,nspinor
     mat_tmp(:,:) = cmplx(cwavef(1,1:npw,first_bandc:first_bandc+nbandc-1,ispinor), &
