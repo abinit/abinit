@@ -683,6 +683,14 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%dmft_mxsf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_mxsf','DPR',0)
 
+ !narr=mxvals%natom                    ! default size for all datasets
+ !do idtset=0,ndtset_alloc       ! specific size for each dataset
+ !  narrm(idtset)=dtsets(idtset)%natom
+ !  if(idtset==0)narrm(idtset)=mxvals%natom
+ !  if (narrm(idtset)>0) intarr(1:narrm(idtset),idtset)=dtsets(idtset)%dmft_nominal(1:narrm(idtset))
+ !end do
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'dmft_nominal','INT',multivals%natom)
+
  intarr(1,:)=dtsets(:)%dmft_nwli
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_nwli','INT',0)
 
@@ -691,6 +699,14 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%dmft_occnd_imag
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_occnd_imag','INT',0)
+
+ narr=mxvals%ntypat                    ! default size for all datasets
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
+   narrm(idtset)=dtsets(idtset)%ntypat
+   if(idtset==0)narrm(idtset)=mxvals%ntypat
+   if (narrm(idtset)>0) intarr(1:narrm(idtset),idtset)=dtsets(idtset)%dmft_orbital(1:narrm(idtset))
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'dmft_orbital','INT',multivals%ntypat)
 
  intarr(1,:)=dtsets(:)%dmft_prt_maxent
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_prt_maxent','INT',0)
@@ -716,6 +732,14 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%dmft_rslf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_rslf','INT',0)
 
+ narr=mxvals%natom                    ! default size for all datasets
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
+   narrm(idtset)=dtsets(idtset)%natom
+   if(idtset==0)narrm(idtset)=mxvals%natom
+   if (narrm(idtset)>0) dprarr(1:narrm(idtset),idtset)=dtsets(idtset)%dmft_shiftself(1:narrm(idtset))
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'dmft_shiftself','DPR',multivals%natom)
+
  intarr(1,:)=dtsets(:)%dmft_solv
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_solv','INT',0)
 
@@ -728,11 +752,62 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%dmft_tollc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_tollc','DPR',0)
 
- intarr(1,:)=dtsets(:)%dmft_triqs_nleg
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_nleg','INT',0)
+ intarr(1,:)=dtsets(:)%dmft_triqs_basis
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_basis','INT',0)
 
- dprarr(1,:)=dtsets(:)%dmft_triqs_wmax
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_wmax','DPR',0)
+ intarr(1,:)=dtsets(:)%dmft_triqs_compute_integral
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_compu','INT',0)
+
+ dprarr(1,:)=dtsets(:)%dmft_triqs_dlr_epsilon
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_dlr_e','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%dmft_triqs_dlr_wmax
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_dlr_w','DPR',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_entropy
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_entro','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_gaussorder
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_gauss','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_length_cycle
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_lengt','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_n_cycles
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_cyc','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_n_iw
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_iw','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_n_l
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_l','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_n_tau
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_tau','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_n_warmup_cycles_init
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_wai','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_n_warmup_cycles_restart
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_n_war','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_nsubdivisions
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_nsubd','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_off_diag
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_off_d','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_prt_entropy
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_prt_e','INT',0)
+
+ intarr(1,:)=dtsets(:)%dmft_triqs_read_ctqmcdata
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_readc','INT',0)
+
+ dprarr(1,:)=dtsets(:)%dmft_triqs_shift_mu
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_shifm','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%dmft_triqs_tol_block
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_triqs_tol_b','DPR',0)
 
  intarr(1,:)=dtsets(:)%dmft_wanorthnorm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_wanorthnorm','INT',0)
@@ -742,6 +817,15 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%dmft_x2my2d
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_x2my2d','INT',0)
+
+ dprarr(1,:)=dtsets(:)%dmft_yukawa_epsilon
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_yukawa_eps','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%dmft_yukawa_lambda
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_yukawa_lam','DPR',0)
+
+ intarr(1,:)=dtsets(:)%dmft_yukawa_param
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_yukawa_par','INT',0)
 
  dprarr(1,:)=dtsets(:)%dosdeltae
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dosdeltae','ENE',0)
