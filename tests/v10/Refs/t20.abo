@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.1.1 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 15 Jul 2025.
-- ( at 15h20 )
+.Starting date : Sun  7 Dec 2025.
+- ( at 22h35 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_hist-fix/tests/TestBot_MPI1/v10_t20/t20.abi
 - output file    -> t20.abo
@@ -932,7 +932,7 @@ xc                  : -1.91398789127859E+00
 Ewald energy        : -9.82061779656150E-02
 psp_core            :  9.87948886923406E-03
 local_psp           : -5.92824052543798E+00
-spherical_terms     : -2.62758526892683E-01
+PAW spherical_terms : -2.62758526892683E-01
 total_energy        : -3.37049235708512E+00
 total_energy_eV     : -9.17157613258395E+01
 ...
@@ -945,7 +945,7 @@ band_energy         : -2.03544315798444E+00
 Ewald energy        : -9.82061779656150E-02
 psp_core            :  9.87948886923406E-03
 xc_dc               : -1.25323455469312E+00
-spherical_terms     :  6.51240340020909E-03
+PAW spherical_terms :  6.51240340020909E-03
 total_energy_dc     : -3.37049199837373E+00
 total_energy_dc_eV  : -9.17157515648062E+01
 ...
@@ -1134,10 +1134,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          2.4
++Overall time at end (sec) : cpu=          2.3  wall=          2.3
