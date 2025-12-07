@@ -32,8 +32,8 @@ MODULE m_self
  use m_fstrings, only : int2char4
  use m_hu, only : hu_type
  use m_io_tools, only : get_unit
- use m_matlu, only : copy_matlu,destroy_matlu,diag_matlu,fac_matlu,init_matlu,matlu_type,print_matlu, &
-                   & rotate_matlu,xmpi_matlu,zero_matlu
+ use m_matlu, only : add_matlu,copy_matlu,destroy_matlu,diag_matlu,fac_matlu, &
+                   & init_matlu,matlu_type,print_matlu,rotate_matlu,xmpi_matlu,zero_matlu
  use m_oper, only : destroy_oper,gather_oper,init_oper,oper_type,print_oper
  use m_paw_dmft, only : mpi_distrib_dmft_type,paw_dmft_type
  use m_paw_exactDC, only : compute_exactDC
@@ -438,7 +438,7 @@ subroutine dc_self(charge_loc,hdc,hu,paw_dmft,pawtab,occ_matlu)
      end do ! isppol
      if (nsppol == 1 .and. nspinor == 1) occ(:,:) = occ(:,:) * two
      call compute_exactDC(lpawu,pawtab(itypat),paw_dmft%radgrid(itypat),occ(:,:), &
-                        & vdc(:,:),paw_dmft%edc(iatom),paw_dmft%edcdc(iatom))
+                        & vdc(:,:),paw_dmft%edc(iatom),paw_dmft%edcdc(iatom),paw_dmft%ixc)
      do isppol=1,nsppol
        do ispinor=1,nspinor
          hdc(iatom)%mat(1+(ispinor-1)*ndim:ispinor*ndim,1+(ispinor-1)*ndim:ispinor*ndim,isppol) = vdc(:,:)
@@ -1887,12 +1887,14 @@ subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
 !Local variables-------------------------------
  integer :: iatom,ifreq,im,im1,ispinor,ispinor1,isppol,jfreq
  integer :: lpawu,myproc,natom,ndim,nspinor,nsppol,unt
+ logical :: triqs
  complex(dp) :: omega
  !real(dp) :: delta
  type(self_type) :: selftempmatsub
  character(len=2) :: tag_im,tag_im1
  character(len=4) :: tag_at
  character(len=50) :: tag_is
+ type(matlu_type), allocatable :: matlu_tmp(:)
 ! *********************************************************************
 
  !delta=0.0000000
@@ -1905,6 +1907,13 @@ subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
 !  Compute limit of Real Part and put in double counting energy.
 ! call copy_matlu(selfhdc,self%hdc%matlu,natom)
      !write(6,*) "self3",aimag(selfr%oper(489)%matlu(1)%mat(1,1,1,1,1))
+
+ triqs = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
+
+ if (triqs) then
+   ABI_MALLOC(matlu_tmp,(natom))
+   call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu(:),matlu_tmp(:))
+ end if ! triqs
 
  do ifreq=1,self%nw
    if (self%distrib%procf(ifreq) /= myproc) cycle
@@ -1919,7 +1928,16 @@ subroutine selfreal2imag_self(selfr,self,filapp,paw_dmft)
      end do ! iatom
    end do ! jfreq
    call fac_matlu(selftempmatsub%oper(ifreq)%matlu(:),natom,cone/pi)
+   if (triqs) then ! add the missing high-frequency moment when using TRIQS
+     call add_matlu(selftempmatsub%oper(ifreq)%matlu(:),self%moments(1)%matlu(:),matlu_tmp(:),natom,1)
+     call copy_matlu(matlu_tmp(:),selftempmatsub%oper(ifreq)%matlu(:),natom)
+   end if ! triqs
  end do ! ifreq
+
+ if (triqs) then
+   call destroy_matlu(matlu_tmp(:),natom)
+   ABI_FREE(matlu_tmp)
+ end if ! triqs
 
  call gather_oper(selftempmatsub%oper(:),self%distrib,paw_dmft,opt_ksloc=2)
 

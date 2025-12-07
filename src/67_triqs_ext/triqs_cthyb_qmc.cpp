@@ -9,13 +9,25 @@
 #include <triqs_cthyb/configuration.hpp>
 #include <triqs_cthyb/solver_core.hpp>
 #include <triqs_cthyb_qmc.hpp>
+#include <triqs/atom_diag/atom_diag.hpp>
 
 using namespace h5;
 using namespace mpi;
 using namespace triqs::gfs;
 
+#define ATOM_DIAG triqs::atom_diag::atom_diag<Complex>
+#define ATOM_DIAG_T typename triqs::atom_diag::atom_diag<Complex>
+
+template <bool Complex>
+ATOM_DIAG_T::scalar_t trace_rho_op_paral(ATOM_DIAG_T::block_matrix_t const &density_matrix,
+                                         ATOM_DIAG_T::many_body_op_t const &op, ATOM_DIAG const &atom,
+                                         int rank, int nproc);
+
+template <bool Complex>
+std::pair<int, matrix_t> get_matrix_element_of_monomial_simplified(operators::monomial_t const &op_vec, int B, ATOM_DIAG const &atom);
+
 void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_double, bool measure_density_matrix,
-                     bool time_invariance, bool use_norm_as_weight, bool compute_entropy, int loc_n_min, int loc_n_max,
+                     bool time_invariance, bool use_norm_as_weight, bool debug, int integral, int loc_n_min, int loc_n_max,
                      int seed_a, int seed_b, int num_orbitals, int n_tau, int n_l, int n_cycles, int cycle_length,
                      int ntherm, int ntherm_restart, int det_init_size, int det_n_operations_before_check, int rank,
                      int nblocks, int read_data, int verbo, double beta, double imag_threshold, double det_precision_warning,
@@ -25,14 +37,13 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
                      complex<double> *moments_self_1, complex<double> *moments_self_2, complex<double> *occ, complex<double> *eu,
                      char *fname_data, char *fname_dataw, char *fname_histo) {
 
-  int ndim = num_orbitals / 2;
   string qmc_data_fname  = string(fname_data);
   string qmc_data_fnamew = string(fname_dataw);
   string hist_fname = string(fname_histo);
   auto comm = MPI_COMM_WORLD;
   int iflavor, iflavor1, nproc;
   MPI_Comm_size(comm,&nproc);
-  int itask = 0, therm = ntherm;
+  int therm = ntherm;
 
   // Hamiltonian definition
   many_body_op_t H;
@@ -96,25 +107,24 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   paramCTQMC.random_name = "";
   paramCTQMC.random_seed = seed_a + rank * seed_b;
   paramCTQMC.length_cycle = cycle_length;
-#if defined HAVE_TRIQS_v3_4
+#if defined HAVE_TRIQS_INTERNAL
   paramCTQMC.time_invariance = time_invariance;
   paramCTQMC.pauli_prob = pauli_prob;
 #endif
 
-  int restart = (exists(qmc_data_fname) && read_data == 1 ? 1 : 0);
+  int restart = (exists(qmc_data_fname) && read_data > 0 ? read_data : 0);
 
   file qmc_data_hfile;
 
-#if defined HAVE_TRIQS_v3_4
-  if (restart == 1 && rank == 0) {
+#if defined HAVE_TRIQS_INTERNAL
+  if (restart > 0 && rank == 0) {
 
     // Check if the configuration file can be read
     qmc_data_hfile = {qmc_data_fname,'r'};
     group grp = qmc_data_hfile;
-    int err = -1;
     double beta_;
     gf_struct_t gf_struct_;
-    int nbins_,nproc_;
+    int nproc_;
 
     h5_read(grp,"beta",beta_);
     h5_read(grp,"gf_struct",gf_struct_);
@@ -137,14 +147,14 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
     if (restart == 0) qmc_data_hfile.close();
 
-    if (restart == 1) cout << endl << "   == Reading CTQMC data from file " << qmc_data_fname << endl;
+    if (restart > 0) cout << endl << "   == Reading CTQMC data from file " << qmc_data_fname << endl;
   }
 
   MPI_Bcast(&restart,1,MPI_INTEGER,0,comm);
 
-  if (restart == 1) {
+  if (restart > 0) {
 
-    therm = ntherm_restart;
+    if (restart == 1) therm = ntherm_restart;
     std::vector<int> sendcounts(nproc);
 
     if (rank == 0) {
@@ -159,6 +169,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     std::vector<int> block_index_list(length);
     std::vector<int> inner_index_list(length);
     std::vector<int> is_dagger_list(length);
+    std::vector<int> lin_index_list(length);
     int displs [nproc] = {0};
     for (int i : range(1,nproc)) displs[i] = displs[i-1] + sendcounts[i-1];
     int tot_size = displs[nproc-1] + sendcounts[nproc-1];
@@ -166,6 +177,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     std::vector<int> block_index_list_tot(tot_size);
     std::vector<int> inner_index_list_tot(tot_size);
     std::vector<int> is_dagger_list_tot(tot_size);
+    std::vector<int> lin_index_list_tot(tot_size);
 
     if (rank == 0) {
       group grp = qmc_data_hfile;
@@ -174,16 +186,18 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
       h5_read(gr,"block",block_index_list_tot);
       h5_read(gr,"inner",inner_index_list_tot);
       h5_read(gr,"dagger",is_dagger_list_tot);
+      h5_read(gr,"lin",lin_index_list_tot);
     }
 
     MPI_Scatterv(&tau_list_tot[0],&sendcounts[0],displs,MPI_UNSIGNED_LONG_LONG,&tau_list[0],length,MPI_UNSIGNED_LONG_LONG,0,comm);
     MPI_Scatterv(&block_index_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&block_index_list[0],length,MPI_INTEGER,0,comm);
     MPI_Scatterv(&inner_index_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&inner_index_list[0],length,MPI_INTEGER,0,comm);
     MPI_Scatterv(&is_dagger_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&is_dagger_list[0],length,MPI_INTEGER,0,comm);
+    MPI_Scatterv(&lin_index_list_tot[0],&sendcounts[0],displs,MPI_INTEGER,&lin_index_list[0],length,MPI_INTEGER,0,comm);
 
     for (int i : range(length)) {
       bool is_dagger = (is_dagger_list[i] == 1 ? true : false);
-      auto op = op_desc{block_index_list[i],inner_index_list[i],is_dagger,0}; // linear index will be set later, within TRIQS
+      auto op = op_desc{block_index_list[i],inner_index_list[i],is_dagger,lin_index_list[i]};
       time_pt tau = time_pt(tau_list[i],beta);
       paramCTQMC.initial_configuration.insert(tau,op);
     }
@@ -207,7 +221,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   paramCTQMC.measure_G_l = leg_measure;
   paramCTQMC.n_warmup_cycles = therm;
 
-  if (compute_entropy) {
+  if (integral > 0 && !debug) {
     paramCTQMC.measure_G_l = false;
     paramCTQMC.measure_G_tau = false;
   }
@@ -236,7 +250,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     cout << "   Det Precision warning = " << det_precision_warning << endl;
     cout << "   Det Precision error   = " << det_precision_error << endl;
     cout << "   Det sing. threshold   = " << det_singular_threshold << endl;
-#if defined HAVE_TRIQS_v3_4
+#if defined HAVE_TRIQS_INTERNAL
     cout << "   Time invariance       = " << time_invariance << endl;
     cout << "   Pauli prob            = " << pauli_prob << endl;
 #endif
@@ -244,7 +258,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
 
   solver.solve(paramCTQMC);
 
-#if defined HAVE_TRIQS_v3_4
+#if defined HAVE_TRIQS_INTERNAL
   if (rank == 0) cout << endl << "   == Writing CTQMC data on file " << qmc_data_fnamew << endl;
 
   // Write all final configurations
@@ -255,6 +269,7 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   std::vector<int> block_index_list(length);
   std::vector<int> inner_index_list(length);
   std::vector<int> is_dagger_list(length);
+  std::vector<int> lin_index_list(length);
   int count = 0;
   for (auto const &o : config) {
     uint64_t tau = floor_div(o.first,tau_0); // trick to get the value of the integer representing the time_pt
@@ -262,10 +277,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     int block_index = op.block_index;
     int inner_index = op.inner_index;
     int is_dagger = (op.dagger ? 1 : 0);
+    int lin_index = op.linear_index;
     tau_list[count] = tau;
     block_index_list[count] = block_index;
     inner_index_list[count] = inner_index;
     is_dagger_list[count] = is_dagger;
+    lin_index_list[count] = lin_index;
     ++count;
   }
   std::vector<int> recvcounts(nproc);
@@ -277,10 +294,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
   std::vector<int> block_index_list_tot(tot_size);
   std::vector<int> inner_index_list_tot(tot_size);
   std::vector<int> is_dagger_list_tot(tot_size);
+  std::vector<int> lin_index_list_tot(tot_size);
   MPI_Gatherv(&tau_list[0],length,MPI_UNSIGNED_LONG_LONG,&tau_list_tot[0],&recvcounts[0],displs,MPI_UNSIGNED_LONG_LONG,0,comm);
   MPI_Gatherv(&block_index_list[0],length,MPI_INTEGER,&block_index_list_tot[0],&recvcounts[0],displs,MPI_INTEGER,0,comm);
   MPI_Gatherv(&inner_index_list[0],length,MPI_INTEGER,&inner_index_list_tot[0],&recvcounts[0],displs,MPI_INTEGER,0,comm);
   MPI_Gatherv(&is_dagger_list[0],length,MPI_INTEGER,&is_dagger_list_tot[0],&recvcounts[0],displs,MPI_INTEGER,0,comm);
+  MPI_Gatherv(&lin_index_list[0],length,MPI_INTEGER,&lin_index_list_tot[0],&recvcounts[0],displs,MPI_INTEGER,0,comm);
 
   if (rank == 0) {
 
@@ -298,12 +317,16 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     h5_write(gr,"block",block_index_list_tot);
     h5_write(gr,"inner",inner_index_list_tot);
     h5_write(gr,"dagger",is_dagger_list_tot);
+    h5_write(gr,"lin",lin_index_list_tot);
 
     qmc_data_hfilew.close();
   }
+
+  if (rank == 0) cout << endl << "   == File written " << endl;
+
 #endif
 
-  if (!compute_entropy) {
+  if (integral == 0 || debug) {
 
     for (int iblock : range(nblocks))
       for (int tau : range(n_tau))
@@ -336,21 +359,24 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
     auto subspaces = h_loc_diag.n_subspaces();
     auto rho = solver.density_matrix();
 
-    if (!compute_entropy) {
-      complex<double> occ_tmp [num_orbitals] = {0};
-
-      for (int iblock : range(nblocks))
-        for (int o : range(siz_list[iblock])) {
-          iflavor = flavor_list[o+iblock*num_orbitals];
-          n_op = c_dag(to_string(iblock),o) * c(to_string(iblock),o);
-          if (itask == rank) occ_tmp[iflavor] = trace_rho_op(rho,n_op,h_loc_diag);
-          itask = (itask+1)%nproc;
-        }
-
-      MPI_Allreduce(occ_tmp,occ,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
+    // Rotate density matrix to Fock basis
+    for (int sub : range(subspaces)) {
+      auto unit_mat = h_loc_diag.get_unitary_matrix(sub);
+      rho[sub] = unit_mat * rho[sub] * dagger(unit_mat);
     }
 
-    if (rank == 0 && !compute_entropy) {
+    complex<double> occ_tmp [num_orbitals] = {0};
+
+    for (int iblock : range(nblocks))
+      for (int o : range(siz_list[iblock])) {
+        iflavor = flavor_list[o+iblock*num_orbitals];
+        n_op = c_dag(to_string(iblock),o) * c(to_string(iblock),o);
+        occ_tmp[iflavor] = trace_rho_op_paral(rho,n_op,h_loc_diag,rank,nproc);
+      }
+
+    MPI_Allreduce(occ_tmp,occ,num_orbitals,MPI_C_DOUBLE_COMPLEX,MPI_SUM,comm);
+
+    if (rank == 0 && (integral == 0 || debug)) {
 
       ofstream occ_file;
       occ_file.open(hist_fname);
@@ -368,14 +394,12 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
       for (int sub : range(subspaces)) {
         auto fock_states = h_loc_diag.get_fock_states(sub);
         int sub_dim = h_loc_diag.get_subspace_dim(sub);
-        auto unit_mat = h_loc_diag.get_unitary_matrix(sub);
-        auto rho_tmp = unit_mat * rho[sub] * dagger(unit_mat);  // rotate density matrix to Fock basis
         for (int ind : range(sub_dim)) {
           auto f_state = fock_states[ind];
 #ifdef HAVE_TRIQS_COMPLEX
-          double prob = rho_tmp(ind,ind).real();
+          double prob = rho[sub](ind,ind).real();
 #else
-          double prob = rho_tmp(ind,ind);
+          double prob = rho[sub](ind,ind);
 #endif
           f_stateb = bitset<64>(f_state);
           bitset<64> f_stateb_;
@@ -401,13 +425,10 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
       }
     }
 
-    if (itask == rank || compute_entropy) *eu = trace_rho_op(rho,Hint,h_loc_diag);
-    if (!compute_entropy) {
-      mpi_broadcast(*eu,comm,itask);
-      itask = (itask+1)%nproc;
-    }
+    *eu = trace_rho_op_paral(rho,Hint,h_loc_diag,rank,nproc);
+    *eu = all_reduce(*eu,comm);
 
-    if (!leg_measure && !compute_entropy) { // Get moments of the self-energy
+    if (!leg_measure && integral == 0) { // Get moments of the self-energy
 
       many_body_operator commut,commut2,Sinf_op,S1_op;
 
@@ -422,10 +443,8 @@ void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool move_shift, bool move_
           Sinf_op = - commut*c_dag(to_string(iblock),o) - c_dag(to_string(iblock),o)*commut;
           commut2 = c_dag(to_string(iblock),o)*Hint - Hint*c_dag(to_string(iblock),o);
           S1_op = commut2*commut + commut*commut2;
-          if (itask == rank) Sinf_mat(iflavor,iflavor) = trace_rho_op(rho,Sinf_op,h_loc_diag);
-          itask = (itask+1)%nproc;
-          if (itask == rank) mself2[iflavor] = trace_rho_op(rho,S1_op,h_loc_diag);
-          itask = (itask+1)%nproc;
+          Sinf_mat(iflavor,iflavor) = trace_rho_op_paral(rho,Sinf_op,h_loc_diag,rank,nproc);
+          mself2[iflavor] = trace_rho_op_paral(rho,S1_op,h_loc_diag,rank,nproc);
         }
 
       Sinf_mat = all_reduce(Sinf_mat,comm);
@@ -497,4 +516,101 @@ void build_dlr(int wdlr_size, int *ndlr, double *wdlr, double lam, double eps) {
   if (*ndlr > wdlr_size) return;
   for (int i : range((*ndlr))) wdlr[i] = omega[i];
 }
+
+// This is a copy from a function of TRIQS, which I optimized since they are not doing it and this function takes forever (E. Castiel)
+// Please make sure it is kept up to date with the official function
+// CAREFUL: the result is not reduced on all CPUs, you have to do it manually after calling the routine, and the density matrix is
+// assumed to be in the Fock basis, unlike the official version which assumes the eigenstate basis
+template <bool Complex>
+ATOM_DIAG_T::scalar_t trace_rho_op_paral(ATOM_DIAG_T::block_matrix_t const &density_matrix,
+                                         ATOM_DIAG_T::many_body_op_t const &op,
+                                         ATOM_DIAG const &atom, int rank, int nproc) {
+  ATOM_DIAG_T::scalar_t result = 0;
+  if (atom.n_subspaces() != density_matrix.size()) TRIQS_RUNTIME_ERROR << "trace_rho_op : size mismatch : number of blocks differ";
+
+  int itask = -1;
+
+  for (int sp = 0; sp < atom.n_subspaces(); ++sp) {
+    int dim = atom.get_subspace_dim(sp);
+    if (dim != first_dim(density_matrix[sp]))
+      TRIQS_RUNTIME_ERROR << "trace_rho_op : size mismatch : size of block " << sp << " differ";
+    for (auto const &x : op) {
+      itask = (itask+1)%nproc;
+      if (itask != rank) continue;
+      auto b_m = get_matrix_element_of_monomial_simplified(x.monomial, sp, atom);
+      // Compute trace of matrix product with correct complexity unlike the official version...
+      if (b_m.first == sp) {
+        ATOM_DIAG_T::scalar_t trace_p = 0;
+        for (int i = 0; i < dim; ++i)
+          for (int j = 0; j < dim; ++j)
+            trace_p += b_m.second(i,j) * density_matrix[sp](j,i);
+        result += x.coef * trace_p;
+      }
+
+    }
+  }
+
+  // little helper function to check block matrix hermiticity
+
+  auto is_block_matrix_hermitian = [](ATOM_DIAG_T::block_matrix_t const &bm) {
+    return std::all_of(bm.begin(), bm.end(), [](ATOM_DIAG_T::matrix_t const &mat) { return max_element(abs(mat - dagger(mat))) == 0.0; });
+  };
+
+  // check if op && density matrix are hermitian, if so return real(result)
+  // The product of two hermitian matrices is hermitian, hence the Tr(rho * Op)
+  // needs to be real in this case.
+  // Note: Here it assumed that op & den mat are truely hermitian, 0 tolerance
+  if (is_op_hermitian(op) && is_block_matrix_hermitian(density_matrix))
+    return std::real(result);
+  else
+    return result;
+}
+
+// Simplified version to find the matrix elements of the operators (CAREFUL: only the diagonal ones are computed, since they are the
+// only ones needed for the computation of trace_rho_op ; for the off-diagonal ones, use the official function)
+// Also, the operators are not rotated back to the eigenbasis to save up time, unlike the official version
+template <bool Complex>
+std::pair<int, matrix_t> get_matrix_element_of_monomial_simplified(operators::monomial_t const &op_vec, int B, ATOM_DIAG const &atom) {
+
+  imperative_operator<class hilbert_space, ATOM_DIAG_T::scalar_t, false> monomial_op(many_body_op_t(1.0, op_vec), atom.get_fops());
+
+  matrix_t m;
+  int Bp = -1;
+  int dim = atom.get_subspace_dim(B);
+
+  auto const &fock_states = atom.get_fock_states(B);
+
+  for (auto [i_index, i] : itertools::enumerate(fock_states)) {
+    state<class hilbert_space, ATOM_DIAG_T::scalar_t, true> initial_st(atom.get_full_hilbert_space(), i);
+
+    auto final_st = monomial_op(initial_st);
+
+    // The initializer for i_index is needed here because of the Core Language Defect #2313.
+    // https://stackoverflow.com/a/46115028
+
+    EXPECTS(final_st.nterms() <= 1);
+    foreach (final_st, [&, i_idx = i_index](fock_state_t j, ATOM_DIAG_T::scalar_t x) {
+
+      auto it = std::find(fock_states.begin(), fock_states.end(), j);
+
+      if (it != fock_states.end()) {
+
+        Bp = B;
+        if (m.empty()) { m = matrix_t::zeros({dim, dim}); }
+        m(std::distance(fock_states.begin(), it), i_idx) = x;
+
+      }
+
+    })
+      ;
+
+  }
+
+  return {Bp, std::move(m)};
+
+}
+
+
+
+
 
