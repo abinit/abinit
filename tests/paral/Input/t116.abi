@@ -5,7 +5,7 @@ ndtset 2      # Two datasets
 jdtset 1 2      # one followed by two
 getden -1     # Second one takes the density of first
 
-# pawprtvol 3  # Printing additional information
+ pawprtvol 3  # Printing additional information
 # prtvol 4     #
  prtden -1    #  
 # prtwf  0     #
@@ -26,18 +26,19 @@ getden -1     # Second one takes the density of first
 
 #Definition atom
  ntypat 2    # number of different types of atoms
- znucl 1 26  # z number of atom
+ znucl 26 1  # z number of atom
 
 #Definition of the atoms
  natom 3            # number of atom
- typat 1 1 2        # type of atom
- xred 0.25 0.25 0.25 # reduced coordinates for primitive cell
-      0.75 0.75 0.75
-      0.00 0.00 0.00 
+ typat 1 2 2        # type of atom
+ xred 0.0 0.0 0.0   # reduced coordinates for primitive cell
+     0.25 0.25 0.25
+     0.75 0.75 0.75
+
 
 #Definition pseudopotentials
 pp_dirpath "$ABI_PSPDIR"  # This is the path to the directory where  
-pseudos "1h.paw,26fe.paw"   # pseudopotentials for tests are stored    
+pseudos "26fe.paw,1h.paw"   # pseudopotentials for tests are stored    
 ixc 7
 
 #Definition of the k-point grid
@@ -68,7 +69,7 @@ ixc 7
  nstep1 30        # Number of iterations for the DFT convergence
  nline1 5         # Number of line minimizations
  nnsclo1 5        # Number of non-self consistent loop
- tolvrs1 1.0d-8   # Tolerance of the density for DFT convergence
+ tolvrs1 1.0d-8  # Tolerance of the density for DFT convergence
 
 #Definition of the spin properties
  nsppol 1     # No Spin-polarization
@@ -103,7 +104,7 @@ dmft_dc   5             # Double counting type. 1 is Fully Localized Limit (FLL)
 
 
 #Definition of impurity solver
-dmft_solv          8     # CT-QMC solver in density-density approximation
+dmft_solv         8     # CT-QMC solver in density-density approximation
 dmftqmc_l        200    # Number of time slices for G(tau).
 dmftqmc_n        1.0d6   # Number of QMC sweeps
 dmftqmc_therm   10000   # Thermalization
@@ -114,11 +115,11 @@ dmftctqmc_order  25     # Perturbation order
 usepawu1    4           # FLL double counting without spin-polarization
 usepawu2    14          # FLL double counting in DMFT without spon-polarization
 dmatpuopt   2           # The density matrix: the simplest expression.
-lpawu       -1 2         # Angular momentum for the projected Hamiltonian
+lpawu       2  -1         # Angular momentum for the projected Hamiltonian
 upawu1      0.0 0.0 eV
-upawu2      0.0 5.5 eV     # Values of U for each angular momentum
+upawu2      5.5 0.0 eV     # Values of U for each angular momentum
 jpawu1      0.00 0.00 eV
-jpawu2      0.00 0.84 eV     # Values of J
+jpawu2      0.84 0.00 eV     # Values of J
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -127,10 +128,10 @@ jpawu2      0.00 0.84 eV     # Values of J
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10
 #%% [NCPU_10]
-#%% files_to_test = t114_MPI10.abo, tolnlines = 45, tolabs = 5.0e-3, tolrel = 5.0e-03, fld_options=-easy
+#%% files_to_test = t116_MPI10.abo, tolnlines = 45, tolabs = 5.0e-03, tolrel = 5.0e-03, fld_options=-easy
 #%% [extra_info]
 #%% authors = F. Gendron
 #%% keywords = DMFT, CTQMC
-#%% description = Test Correlated and non-Correlated atoms with dmft_solv 8 and different order than test t113
+#%% description = Test Correlated and non-Correlated atoms with dmft_solv 8.
 #%% topics = DMFT
 #%%<END TEST_INFO>
