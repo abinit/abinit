@@ -1713,20 +1713,19 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
 
    end if ! ok
 
-!   write(ab_out,*)"HHHHHHHHHHHHHH", ddb%ddb_version
 !   ! Check the frequency
 !   if( ok==1 .and. ddb_version>=cvrsio9_new )then
-!!TODO: This might fail if previous DDB files are read
-!!   if( ok==1 )then
-!     if (nder == 2) then
-!       if( abs( ddb%omega(1,iblok) - omega_(1) )>DDB_QTOL ) ok=0
-!     else if (nder == 3) then
-!       do ider=1,3
-!         if( abs( ddb%omega(ider,iblok) - omega_(ider) )>DDB_QTOL ) ok=0
-!       end do
-!     end if
-!   end if !ok
-!
+!TODO: This might fail if previous DDB files are read
+   if( ok==1 )then
+     if (nder == 2) then
+       if( abs( ddb%omega(1,iblok) - omega_(1) )>DDB_QTOL ) ok=0
+     else if (nder == 3) then
+       do ider=1,3
+         if( abs( ddb%omega(ider,iblok) - omega_(ider) )>DDB_QTOL ) ok=0
+       end do
+     end if
+   end if !ok
+
    ! Check if there is enough information in this blok
    if( ok==1 )then
 
@@ -5047,7 +5046,6 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit, &
    write(nunit, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
 
    ! Write the perturbation frequency
-    !write(ab_out,*)"HHHHHHHHHHHHHHH"
      write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
 
    ! Write the matrix elements

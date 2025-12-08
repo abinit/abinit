@@ -629,11 +629,13 @@ end subroutine ddb_oscstr
 !!
 !! SOURCE
 
-subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
+subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat, &
+                   silent) !optional
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mpert,natom,ntypat
+ integer,optional,intent(in) :: silent
 !arrays
  integer,intent(in) :: typat(natom)
  real(dp),intent(in) :: amu(ntypat),d2cart(2,3,mpert,3,mpert),phfrq(3*natom)
@@ -642,7 +644,7 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: i1,idir1,idir2,ii,imode,imodex,imodey,imodez,ipert1
+ integer :: i1,idir1,idir2,ii,imode,imodex,imodey,imodez,ipert1,silent_
  real(dp) :: theta
 !arrays
  integer,allocatable :: deg(:)
@@ -650,6 +652,10 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
  real(dp),allocatable :: modez(:,:,:),modezabs(:),oscstr(:,:,:),vec(:,:),vect(:,:)
 
 ! *********************************************************************
+
+!Reduce verbosity
+ silent_=0
+ if (present(silent)) silent_=silent
 
 !Get the oscillator strength and mode effective charge for each mode
  ABI_MALLOC(oscstr,(2,3,3*natom))
@@ -659,7 +665,9 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
  ABI_MALLOC(vect,(3*natom,3))
  ABI_MALLOC(deg,(3*natom))
 
- write(std_out,'(a,a)')ch10,' alignph : before modifying the eigenvectors, mode number and mode effective charges :'
+ if (silent_/=1) then
+   write(std_out,'(a,a)')ch10,' alignph : before modifying the eigenvectors, mode number and mode effective charges :'
+ end if
  do imode=1,3*natom
    modezabs(imode)=zero
    do ii=1,2
@@ -711,13 +719,17 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
  imode = 1
  do while (imode <= 3*natom)
 
-   write(std_out,'(a,a,i4,a,i2)')ch10,' Mode number ',imode,' has degeneracy ',deg(imode)
-   write(std_out,'(a,3es16.6)') ' Mode effective charge of this mode =',modez(1,:,imode)
+   if (silent_/=1) then
+     write(std_out,'(a,a,i4,a,i2)')ch10,' Mode number ',imode,' has degeneracy ',deg(imode)
+     write(std_out,'(a,3es16.6)') ' Mode effective charge of this mode =',modez(1,:,imode)
+   end if
 
    if (deg(imode) == 2) then
 
 !    Optimize on the x direction
-     write(std_out,'(a,3es16.6)') ' Mode effective charge of next mode =',modez(1,:,imode+1)
+     if (silent_/=1) then
+       write(std_out,'(a,3es16.6)') ' Mode effective charge of next mode =',modez(1,:,imode+1)
+     end if
      if (abs(modez(1,1,imode)) > tol8) then
        theta = atan(-modez(1,1,imode+1)/modez(1,1,imode))
        vec(:,1) = displ(1,:,imode)
