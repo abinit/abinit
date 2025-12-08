@@ -54,6 +54,7 @@ module m_gwpt
  use m_numeric_tools,  only : arth, c2r, r2c, get_diag, linfit, iseven, simpson_cplx, print_arr, inrange, bins_t
  use m_io_tools,       only : iomode_from_fname
  use m_fftcore,        only : ngfft_seq, sphereboundary, print_ngfft
+ use m_fft_mesh,       only : setmesh
  use m_cgtk,           only : cgtk_rotate, cgtk_change_gsphere
  use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm, fxphas_and_cmp
  use m_crystal,        only : crystal_t
@@ -257,7 +258,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, istwfk1 = 1, cplex1 = 1, pawread0 = 0
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, with_cplex0 = 0, n3xccc0 = 0
  integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
- integer :: nb_k, nb_kq, bstart_k, bstop_k, bstart_kq, bstop_kq, matblk
+ integer :: nb_k, nb_kq, bstart_k, bstop_k, bstart_kq, bstop_kq, matblk, method, enforce_sym
  integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nproc !, gsum_master
  integer :: ib_sum, ii, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, ig, max_npw_xc, min_npw_xc, npw_x, npw_c, nw_nk, nw_mkq
@@ -450,7 +451,38 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  end do ! my_is
 
  ! TODO: Use same FFT mesh as GW code but make sure that all potentials are properly interpolated.
- !call setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, mG0, cryst, enforce_sym, unit)
+
+ ! === Setup of the FFT mesh for the oscillator strengths ===
+ ! * Init gwc_ngfft(7:18) and gwx_ngfft(7:18) with Dtset%ngfft(7:18)
+ ! * Here we redefine gwc_ngfft(1:6) according to the following options:
+ !
+ ! method == 0 --> FFT grid read from fft.in (debugging purpose)
+ ! method == 1 --> Normal FFT mesh
+ ! method == 2 --> Slightly augmented FFT grid to calculate exactly rho_tw_g (see setmesh.F90)
+ ! method == 3 --> Doubled FFT grid, same as the the FFT for the density,
+ !
+ ! enforce_sym == 1 --> Enforce a FFT mesh compatible with all the symmetry operation and FFT library
+ ! enforce_sym == 0 --> Find the smallest FFT grid compatible with the library, do not care about symmetries
+ !
+ !gwc_ngfft(1:18) = dtset%ngfft(1:18)
+ !gwx_ngfft(1:18) = dtset%ngfft(1:18)
+
+ method = 2
+ if (dtset%fftgw == 00 .or. dtset%fftgw == 01) method = 0
+ if (dtset%fftgw == 10 .or. dtset%fftgw == 11) method = 1
+ if (dtset%fftgw == 20 .or. dtset%fftgw == 21) method = 2
+ if (dtset%fftgw == 30 .or. dtset%fftgw == 31) method = 3
+ enforce_sym = mod(dtset%fftgw, 10)
+
+#if 0
+ ! FFT mesh for sigma_x.
+ call setmesh(cryst%gmet, Gsph_Max%gvec, gwx_ngfft, Sigp%npwvec, Sigp%npwx, Sigp%npwwfn, &
+              gwx_nfftot, method, Sigp%mG0, cryst, enforce_sym)
+
+ ! FFT mesh for sigma_c.
+ call setmesh(cryst%gmet, Gsph_Max%gvec, gwc_ngfft, Sigp%npwvec, epsm1%npwe, Sigp%npwwfn,&
+              gwc_nfftot, method, Sigp%mG0, cryst, enforce_sym, unit=dev_null)
+#endif
 
  ! Initialize Coulomb term on the IBZ of the pp_mesh. Use largest G-sphere.
  call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)

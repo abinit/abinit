@@ -1,7 +1,7 @@
 # Computation of e-ph matrix g(k,q) along high-symmetry path.
  ndtset 2
 
- optdriver 7
+ optdriver 7  # Ente EPH code
  eph_task 18  # Activate computation of g(k,q) along high-symmetry path.
 
  eph_path_brange 6 8  # Compute g(k,q) only for this band  range

@@ -18,7 +18,9 @@ The user should have read the [introduction tutorial for the EPH code](/tutorial
 the description of the [gstore-based approach](/tutorial/gstore),
 before running these examples.
 
-ALSO GW TUTORIALS
+Also, you are kindly invidited to read the [first GW tutorial](/tutorial/gw1) if you are not familiar with GW.
+A brief description of the formalism and of the equations implemented in the
+code can be found in the [[theory:mbt|GW_notes]].
 
 This lesson should take about 2.0 hours.
 
@@ -31,7 +33,7 @@ first-order change of the KS Hamiltonian due to a phonon with the variation of t
 ## Typical workflow for ZPR with GWPT
 
 A typical workflow for ZPR-GWPT requires the same step as the ones
-[needed for KS-ZPR](/tutorial/eph_intro/typical_workflow_for_zpr)
+[needed for KS-ZPR](/tutorial/eph_intro#typical_workflow_for_zpr)
 plus additional computations for the screened interaction $W$.
 
 ## Getting started
@@ -94,7 +96,9 @@ TODO: For the discussion on how to merge the DDB and DVDB files, I can use the l
 
 In this section, we use the WFK file generated in the previous section to compute the RPA polarizability and the
 screened interaction $W$.
-Note that we rely on the plasmon-pole approximation (default behaviour)
+Note that here we generate a screening file with only two frequencies (default behaviour).
+The SCR file will then be used to construct the plasmon-pole approximation when computing the self-energy using
+[[ppmodel]].
 
 ## Computing QP corrections with one-shot GW
 
@@ -104,17 +108,68 @@ Then these values can be used in our next GWPT computation.
 
 ## Computing e-ph matrix elements with GWPT
 
-To activate the computation of the GWPT matrix elements, we need to use:
+To activate the computation of the GWPT matrix elements, we use the following two variables:
 
 [[optdriver]] 7  # Enter EPH driver.
 [[eph_task]] 17  # GWPT computation.
 
+GWPT computations require several external files in input.
+In what follows, we describe all the files step by step and discuss the connection with the parameters appearing in Eq.
 
+The KS states are read from the WFK file via [[getwfk_filepath]].
+This file defines the list of $\kk$-points in the e-ph matrix elements.
+The value of [[ngkpt]], [[nshiftk]] and [[shiftk]] must be consistent with the ones used to generate the WFK file.
+The number of bands in the $n'$ sum is given by [[nband]].
+Clearly this value cannot be greater than the number of bands stored in the WFK file.
+
+The screening is read from the SCR file specified with [[getscr_filepath]].
+The cutoff energy in $W$ is given [[ecuteps]], while [[ecutsigx]] defines
+the cutoff-energy for the exchange part of the self-energy.
+Note that [[ecuteps]] cannot be larger than the value used in the screening calculation.
+The SCR file defines the $\pp$-mesh for the integration over transferred momennta in Eq.
+This $\pp$-mesh must be identical to, or a submesh of, the $\kk$-mesh associated with the WFK file.
+No interpolation in $\pp$-space is possible at this level.
+
+Also, [[ppmodel]] defines the kind of plasmon-pole approximation.
+By default we use the Godby-Needs model
+At the time of writing only ppmodel 1 and 2 are supported in the GWPT code.
+
+The DFPT KS potentials are read from [[getdvdb_filepath]], while the DFPT KS densities
+are taken from [[getdrhodb_filepath]].
+These two files define the list of $\qq$-points in the GWPT matrix elements.
+This $\qq$-mesh must be identical to, or a submesh of, the $\kk$-mesh associated with the WFK file.
+Note that, in this case, it is possible to densify the $\qq$-mesh by using [[eph_ngqpt_fine]].
+In a typical scenario, one generates a WFK file on a $\kk$-mesh much denser than the one used in the DFPT part
+and then use the Fourier interpolation of the DFPT potentials to reach a $\qq$-mesh that is equal or half the $kk$-mesh.
+
+Finally, the GWPT code needs to read the GS KS potential from the file specified with [[getpot_filepath]].
+This file is produced at the end of the GS SCF cycle by setting [[prtpot]] to 1 (note that the default if 0).
+The first order change of the KS wavefunctions due to an atomic perturbation is computed on-the-fly
+by solving the NSCF Sterheimer equation.
+There are two variables controlling the NSCF cycle:
+[[nstep]] defines the maximum number of iterations while [[tolwfr]] gives the stopping criterion.
+
+[[zcut]]
+
+TODO
 [[gwcomp]] 2
 
 ## Computing the ZPR with GWPT
 
 In this section, we can finally compute the ZPR of MgO using the results produced previously.
 
+[[optdriver] 7
+[[eph_task]] 24
+
 [[gstore_gname]] "gvals"      # Use GWPT e-ph matrix elements from GSTORE (default)
 [[eph_stern]] 1               # Activate Sterheimer to compute contribution given by states above nband
+
+It is important to understand that at this level of the calculations
+there are few parameters that can be changed this run is essentially a post-processing
+of the e-ph matrix elements stored in the GSTORE file.
+
+The temperature mesh is defined by [[tmesh]]
+
+[[gstore_gname]]
+
+[[zcut]]

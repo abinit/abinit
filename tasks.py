@@ -1,12 +1,19 @@
 """
 Pyinvoke file for automating build/config stuff.
 
-Example:
+Can be executed everywhere inside the Abinit directory, including build directories.
 
-    invoke abichecks
+Examples:
+
+To get list of commands:
+
     invoke --list
 
-Can be executed everywhere inside the Abinit directory, including build directories.
+To run  (some of the) abichecks scripts:
+
+    invoke abichecks
+
+
 """
 from __future__ import annotations
 
@@ -32,33 +39,29 @@ from tests.pymods.termcolor import cprint
 ABINIT_ROOTDIR = os.path.dirname(__file__)
 ABINIT_SRCDIR = os.path.join(ABINIT_ROOTDIR, "src")
 
-# Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
-#os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(ABINIT_ROOTDIR, "Pspdir"))
-#print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
-
 ALL_BINARIES = [
-    "abinit",
-    "abitk",
-    "aim",
-    "anaddb",
-    "band2eps",
-    "conducti",
-    "cut3d",
-    "dummy_tests",
-    "fftprof",
-    "fold2Bloch",
-    "ioprof",
-    "lapackprof",
-    "macroave",
-    "mrgddb",
-    "mrgdv",
-    "mrggkk",
-    "mrgscr",
-    "multibinit",
-    "optic",
-    "atdep",
-    "testtransposer",
-    "lruj",
+"abinit",
+"abitk",
+"aim",
+"anaddb",
+"band2eps",
+"conducti",
+"cut3d",
+"dummy_tests",
+"fftprof",
+"fold2Bloch",
+"ioprof",
+"lapackprof",
+"macroave",
+"mrgddb",
+"mrgdv",
+"mrggkk",
+"mrgscr",
+"multibinit",
+"optic",
+"atdep",
+"testtransposer",
+"lruj",
 ]
 
 
@@ -275,7 +278,7 @@ def robodoc(ctx):
 @task
 def mksite(ctx):
     """
-    Build the Abinit documentation by running the mksite.py script and open the main page in the browser.
+    Build the Abinit documentation by running the mksite.py script, and open the main page in the browser.
     """
     with cd(ABINIT_ROOTDIR):
         webbrowser.open_new_tab("http://127.0.0.1:8000")
@@ -304,10 +307,9 @@ def ctags(ctx):
     Update ctags file.
     """
     with cd(ABINIT_ROOTDIR):
-        cmd = "ctags -R --langmap=fortran:+.finc.f90.F90,c:.c.cpp shared/ src/"
+        cmd = "ctags -R --langmap=fortran:+.finc.f90.F90,c:.c.cpp.cu shared/ src/"
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
-        #ctx.run('ctags -R --exclude="_*"', pty=True)
 
 @task
 def fgrep(ctx, pattern):
@@ -321,7 +323,6 @@ def fgrep(ctx, pattern):
     #    --include=\*.${file_extension} - search files that match the extension(s) or file pattern only
     with cd(ABINIT_ROOTDIR):
         cmd  = 'grep -r -i --color --include "*[.F90,.f90,.finc,.c,.cu,.cpp]" "%s" src shared' % pattern
-        #cmd  = 'grep -r -i --color --include "*.F90" "%s" src shared' % pattern
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
@@ -461,6 +462,8 @@ def lldb(ctx, input_name, exec_name="abinit", run_make=False):
 @task
 def mpi_check(ctx, np_list="1, 2", abinit_input_file="run.abi", mpi_runner="mpiexec", run_make=False):
     """
+    Run Abinit input (run.abi) with different number of MPI procs.
+
     Args:
         np_list: List of MPI procs
     """
@@ -490,6 +493,7 @@ def mpi_check(ctx, np_list="1, 2", abinit_input_file="run.abi", mpi_runner="mpie
 @task
 def omp_check(ctx, omp_threads="1, 2", np=1, abinit_input_file="run.abi", mpi_runner="mpiexec", run_make=False):
     """
+    Run Abinit input (run.abi) with different number of OpenMP threads.
     """
     if run_make: make(ctx)
 
@@ -515,6 +519,7 @@ def omp_check(ctx, omp_threads="1, 2", np=1, abinit_input_file="run.abi", mpi_ru
 
 @task
 def pyenv_clean(ctx):
+    """Clean conda/pip cache."""
     if which("conda") is not None:
         cmd = f"conda clean --all --yes"
         cprint(f"About to execute {cmd=}")
@@ -580,7 +585,7 @@ def push(ctx):
 
 @task
 def submodules(ctx):
-    """Update submodules."""
+    """Update Abinit submodules."""
     with cd(ABINIT_ROOTDIR):
         # https://stackoverflow.com/questions/1030169/easy-way-to-pull-latest-of-all-git-submodules
         ctx.run("git submodule update --remote --init", pty=True)
@@ -986,6 +991,7 @@ def get_cache_info_windows() -> dict:
     except Exception:
         pass
     return caches
+
 
 def _extract_errors(logfile, context_lines: int = 5) -> list[str]:
     """

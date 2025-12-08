@@ -566,7 +566,6 @@ subroutine blas_cholesky_ortho_spc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
  integer :: ierr
  logical :: my_usegemm
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ! 1) Calculate overlap_ij =  <phi_i|phi_j>
@@ -678,7 +677,6 @@ subroutine sqmat_itranspose_sp(n,mat,alpha)
  real(sp),optional,intent(in) :: alpha
 !arrays
  real(sp),intent(inout) :: mat(n,n)
-
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_MKL_IMATCOPY
@@ -725,7 +723,6 @@ subroutine sqmat_itranspose_dp(n,mat,alpha)
  real(dp),optional,intent(in) :: alpha
 !arrays
  real(dp),intent(inout) :: mat(n,n)
-
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_MKL_IMATCOPY
@@ -866,7 +863,6 @@ subroutine sqmat_otranspose_sp(n,imat,omat,alpha)
 !arrays
  real(sp),intent(in) :: imat(n,n)
  real(sp),intent(out) :: omat(n,n)
-
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_MKL_OMATCOPY
@@ -915,7 +911,6 @@ subroutine sqmat_otranspose_dp(n,imat,omat,alpha)
 !arrays
  real(dp),intent(in) :: imat(n,n)
  real(dp),intent(out) :: omat(n,n)
-
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_MKL_OMATCOPY
