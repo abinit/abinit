@@ -1447,7 +1447,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  rhotwg_x(1) = czero_gw; if (ib_sum == n_k) rhotwg_x(1) = cmplx(sqrt(vcp%i_sz),0.0_gwp)
                end if
 
-               vec_gx_nk(:,n_k) = rhotwg_x(1:npw_c*nspinor)
+               vec_gx_nk(:,n_k) = rhotwg_x(1:npw_x*nspinor)
                if (dtset%userid /= 0) vec_gx_nk(:,n_k) = zero
                ! FIXME: This is wrong if nspinor == 2
                rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
@@ -1542,7 +1542,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  rhotwg_x(1) = czero_gw; if (ib_sum == m_kq) rhotwg_x(1) = cmplx(sqrt(vcp%i_sz),0.0_gwp)
                end if
 
-               vec_gx_mkq(:,m_kq) = rhotwg_x(1:npw_c*nspinor)
+               vec_gx_mkq(:,m_kq) = rhotwg_x(1:npw_x*nspinor)
                if (dtset%userid /= 0) vec_gx_mkq(:,m_kq) = zero
                rhotwg_c(:) = rhotwg_x(1:npw_c*nspinor)
 
