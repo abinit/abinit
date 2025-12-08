@@ -535,7 +535,7 @@ subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,f
      wtk = paw_dmft%wtk(ikpt)
      ibc = 0
      do ib=1,nband_k
-       if ((.not. paw_dmft%band_in(ib)) .and. (.not. paw_dmft%dmft_use_all_bands)) cycle
+       if ((.not. paw_dmft%band_in(ib)) .and. (paw_dmft%dmft_solv /= 6 .and. paw_dmft%dmft_solv /= 7)) cycle
        if (paw_dmft%band_in(ib)) ibc = ibc + 1
        eig = paw_dmft%eigen(ib+band_index)
        if (present(fcalc_dft)) then
@@ -895,11 +895,11 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
  real(dp), optional, intent(in) :: renorm(:)
 ! integer :: prtopt
 !Local variables-------------------------------
- integer :: dmft_optim,iatom,idijeff,im,im1,ims,ims1,ispinor,ispinor1,isppol,itypat
+ integer :: iatom,idijeff,im,im1,ims,ims1,ispinor,ispinor1,isppol,itypat
  integer :: lpawu,lpawu1,ndim,ndim1,nocc,nsploop,prt_pawuenergy
  real(dp) :: e_dc,e_dc_for_s,e_dcdc,e_dcdc_for_s,e_ee,edftumdc,edftumdc_for_s
  real(dp) :: edftumdcdc,edftumdcdc_for_s,e_ee_for_s,jpawu,upawu,xe1,xe2
- logical :: t2g,x2my2d
+ logical :: dmft_optim,t2g,x2my2d
  character(len=500) :: message
  integer, parameter :: spinor_idxs(2,4) = RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  integer, parameter :: mt2g(3) = (/1,2,4/)
@@ -920,7 +920,7 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
  t2g        = (paw_dmft%dmft_t2g == 1)
  x2my2d     = (paw_dmft%dmft_x2my2d == 1)
 
- dmft_optim = paw_dmft%dmft_optim
+ dmft_optim = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
 
  isppol   = 1
  ispinor  = 1
@@ -961,12 +961,12 @@ subroutine compute_dftu_energy(energies_dmft,green,paw_dmft,pawtab,renorm)
      do im1=1,ndim
        ims1 = im1
        ! Correct bug in computation of DFT+U energy in the t2g/x2my2d case with TRIQS
-       if (x2my2d .and. dmft_optim == 1) ims1 = 5
-       if (t2g .and. dmft_optim == 1) ims1 = mt2g(im1)
+       if (x2my2d .and. dmft_optim) ims1 = 5
+       if (t2g .and. dmft_optim) ims1 = mt2g(im1)
        do im=1,ndim
          ims = im
-         if (x2my2d .and. dmft_optim == 1) ims = 5
-         if (t2g .and. dmft_optim == 1) ims = mt2g(im)
+         if (x2my2d .and. dmft_optim) ims = 5
+         if (t2g .and. dmft_optim) ims = mt2g(im)
          ! Here, we take the transpose in order to match pawuenergy's conventions
          noccmmp(1,ims,ims1,idijeff) = &
            & dble(green%occup%matlu(iatom)%mat(im1+(ispinor-1)*ndim,im+(ispinor1-1)*ndim,isppol))
@@ -1174,14 +1174,13 @@ end subroutine compute_noninterentropy
 !!
 !! SOURCE
 
-subroutine compute_free_energy(energies_dmft,paw_dmft,green,part,self,weiss)
+subroutine compute_free_energy(energies_dmft,paw_dmft,green,part,self)
 
 !Arguments ------------------------------------
  type(energy_type), intent(inout) :: energies_dmft
  type(paw_dmft_type), intent(in) :: paw_dmft
  type(green_type), intent(in) :: green
  type(self_type), optional, intent(in) :: self
- type(green_type), optional, intent(in) :: weiss
  character(len=4), intent(in) :: part
 !Local variables-------------------------------
  integer :: integral
@@ -1203,8 +1202,7 @@ subroutine compute_free_energy(energies_dmft,paw_dmft,green,part,self,weiss)
    energies_dmft%ekin_imp = green%ekin_imp
 
    if (integral == 1) then
-     ! Tr(log(G0)) (careful, we set opt_inv to 1 since weiss contains G0^-1 rather than G0 after the dyson call)
-     call compute_trace_log_loc(weiss,paw_dmft,energies_dmft%fband_weiss,opt_inv=1)
+     energies_dmft%fband_weiss = green%fband_weiss
      energies_dmft%fimp = energies_dmft%fband_weiss + green%integral
    else
      energies_dmft%fimp = energies_dmft%ekin_imp + energies_dmft%e_hu_tot
@@ -1261,7 +1259,9 @@ end subroutine compute_free_energy
 !!  green  <type(green_type)>= green function data
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  opt_inv = 0 (default) when green = G
-!!          = 1 when green = G^-1 (useful for the Weiss field)
+!!          = 1 when green = G^-1 (used for Weiss field)
+!!              CAREFUL: in this case, the chemical potential is shifted
+!!              by dmft_triqs_shift_mu
 !!
 !! OUTPUT
 !!  trace = Tr(log(G_loc))
@@ -1273,17 +1273,19 @@ end subroutine compute_free_energy
 subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
 
 !Arguments ------------------------------------
- type(green_type), intent(in) :: green
+ type(green_type), target, intent(in) :: green
  type(paw_dmft_type), intent(in) :: paw_dmft
  real(dp), intent(out) :: trace
  integer, optional, intent(in) :: opt_inv
 !Local variables-------------------------------
- integer :: i,iatom,ierr,ifreq,info,isppol,lpawu,lwork,natom,ndim
+ integer :: i,iatom,ierr,ifreq,im,info,isppol,lpawu,lwork,natom,ndim
  integer :: nmoments,nspinor,nsppol,nwlo,optinv
- real(dp) :: correction,fac,temp
+ real(dp) :: correction,fac,freq2,temp
  complex(dp) :: trace_tmp
  real(dp), allocatable :: eig(:),rwork(:)
  complex(dp), allocatable :: mat_temp(:,:),omega_fac(:),work(:)
+ complex(dp), target, allocatable :: mat_temp2(:,:)
+ complex(dp), pointer :: mat_pt(:,:) => null()
 ! *********************************************************************
 
  optinv = 0
@@ -1312,21 +1314,36 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
    if (green%distrib%procf(ifreq) /= paw_dmft%myproc) cycle
    fac = merge(temp*two,temp,nsppol==1.and.nspinor==1)
    trace_tmp = czero
+   freq2 = paw_dmft%omega_lo(ifreq)**2
    do iatom=1,natom
      lpawu = paw_dmft%lpawu(iatom)
      if (lpawu == -1) cycle
      ndim = nspinor * (2*lpawu+1)
      ABI_MALLOC(mat_temp,(ndim,ndim))
      do isppol=1,nsppol
-       call abi_xgemm("n","c",ndim,ndim,ndim,cone,green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,&
-                    & green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol),ndim,czero,mat_temp(:,:),ndim)
+
+       if (optinv == 0) then
+         mat_pt => green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol)
+       else if (optinv == 1) then
+         ABI_MALLOC(mat_temp2,(ndim,ndim))
+         mat_temp2(:,:) = green%oper(ifreq)%matlu(iatom)%mat(:,:,isppol)
+         do im=1,ndim
+           mat_temp2(im,im) = mat_temp2(im,im) + paw_dmft%dmft_triqs_shift_mu
+         end do ! im
+         mat_pt => mat_temp2(:,:)
+       end if
+
+       call abi_xgemm("n","c",ndim,ndim,ndim,cone,mat_pt(:,:),ndim,mat_pt(:,:),ndim, &
+                    & czero,mat_temp(:,:),ndim)
        call zheev('n','u',ndim,mat_temp(:,:),ndim,eig(:),work(:),lwork,rwork(1:3*ndim-2),info)
 
        if (optinv == 1) then
-         trace_tmp = trace_tmp - sum(log(eig(1:ndim)/(paw_dmft%omega_lo(ifreq)**2)))
+         trace_tmp = trace_tmp - sum(log(eig(1:ndim)/freq2))
        else
-         trace_tmp = trace_tmp + sum(log(eig(1:ndim)*(paw_dmft%omega_lo(ifreq)**2)))
+         trace_tmp = trace_tmp + sum(log(eig(1:ndim)*freq2))
        end if
+
+       ABI_SFREE(mat_temp2)
 
      end do ! isppol
      if (ifreq == nwlo) then
@@ -1338,6 +1355,7 @@ subroutine compute_trace_log_loc(green,paw_dmft,trace,opt_inv)
    trace = trace + dble(trace_tmp)*fac
  end do ! ifreq
 
+ mat_pt => null()
  ABI_FREE(rwork)
  ABI_FREE(work)
  ABI_FREE(eig)

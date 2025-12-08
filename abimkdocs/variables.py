@@ -200,6 +200,7 @@ ABI_TOPICS = [
     "Dev",
     "DFPT",
     "DMFT",
+    "DmftTriqsCthyb",
     "DynamicsMultibinit",
     "EffectiveMass",
     "EFG",
