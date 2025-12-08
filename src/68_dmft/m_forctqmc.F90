@@ -127,7 +127,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  real(dp) :: umod(2,2)
  complex(dp) :: integral(2,2)
  real(dp), allocatable :: docc(:,:),gtmp(:,:),gtmp_nd(:,:,:),levels_ctqmc(:),vee(:,:,:,:)
- complex(dp), allocatable :: muorb,muspin,muzeem
+ complex(dp), allocatable :: muorb(:),muspin(:),muzeem(:)
  complex(dp), allocatable :: fw1(:,:),fw1_nd(:,:,:),gw_tmp(:,:),gw_tmp_nd(:,:,:)
  complex(dp), allocatable :: gw1_nd(:,:,:),hybri_limit(:,:),levels_ctqmc_nd(:,:),shift(:)
  type(coeff2c_type), allocatable :: magmom_orb(:),magmom_spin(:),magmom_tot(:)
@@ -622,29 +622,29 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !    call checkdiag_matlu(weiss_for_rot%oper(ifreq)%matlu,natom,tol6)
    end do ! ifreq
 
-   do iatom=1,natom
-
-     if (iatom < 10) then
-       write(tag_atom,'("0",I1)') iatom
-     else 
-       write(tag_atom,'(I2)') iatom
-     endif
-
-     !print Weiss field for correlated atoms
-     lpawu = paw_dmft%lpawu(iatom)             
-     if (lpawu == -1) cycle                    
-
-     if (myproc == mod(nproc+1,nproc)) then
-       if (open_file(trim(paw_dmft%filapp)//"_atom_"//tag_atom//"_G0w.dat",message,newunit=unt) /= 0) ABI_ERROR(message)
-       ndim = 2*paw_dmft%lpawu(iatom) + 1
-       do ifreq=1,nwlo
-         write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),&
-           & (((weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol),&
-           & im1=1,3),ispinor=1,nspinor),isppol=1,nsppol)
-       end do ! ifreq
-       close(unit=unt)
-     end if ! myproc=master
-   enddo
+!   do iatom=1,natom
+!
+!     if (iatom < 10) then
+!       write(tag_atom,'("0",I1)') iatom
+!     else 
+!       write(tag_atom,'(I2)') iatom
+!     endif
+!
+!     !print Weiss field for correlated atoms
+!     lpawu = paw_dmft%lpawu(iatom)             
+!     if (lpawu == -1) cycle                    
+!
+  !   if (myproc == mod(nproc+1,nproc)) then
+  !     if (open_file(trim(paw_dmft%filapp)//"_atom_"//tag_atom//"_G0w.dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+  !     ndim = 2*paw_dmft%lpawu(iatom) + 1
+  !     do ifreq=1,nwlo
+  !       write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),&
+  !         & (((weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol),&
+  !         & im1=1,3),ispinor=1,nspinor),isppol=1,nsppol)
+  !     end do ! ifreq
+  !     close(unit=unt)
+  !   end if ! myproc=master
+  ! enddo
 
    call flush_unit(std_out)
    if (pawprtvol >= 3) then
@@ -1678,6 +1678,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  ! =================================================================
  if (paw_dmft%nspinor .eq. 2) then
   ABI_MALLOC(matlumag,(natom))
+  ABI_MALLOC(muzeem,(natom))
+  ABI_MALLOC(muspin,(natom))
+  ABI_MALLOC(muorb,(natom))
   write(message,'(a,2x,a)') ch10,"== Magnetic moments from CT-QMC occupation matrix "
   call wrtout(std_out,message,'COLL')
 
@@ -1689,42 +1692,45 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
       ! == orbital angular momentum
       do icomp=1,3 !x,y,z components
-        muorb=czero
+        muorb(iatom)=czero
         call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
         call copy_matlu(green%occup_tau%matlu,matlumag,natom)
         call rotate_matlu(matlumag,eigvectmatlu,natom=natom,inverse=0)
         call magmomforb_matlu(matlumag,muorb,natom=natom,option=icomp,optprt=0)
-        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Orbital angular momentum for axis ", icomp, " is ", REAL(muorb)
+        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Orbital angular momentum for axis ", icomp, " is ", REAL(muorb(iatom))
         call wrtout(std_out,message,'COLL')
         call destroy_matlu(matlumag,(natom))
       end do
 
       ! == spin angular momentum
       do icomp=1,3 !x,y,z components
-        muspin=czero
+        muspin(iatom)=czero
         call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
         call copy_matlu(green%occup_tau%matlu,matlumag,natom=natom)
         call rotate_matlu(matlumag,eigvectmatlu,natom=natom,inverse=0)
         call magmomfspin_matlu(matlumag,muspin,natom=natom,option=icomp,optprt=0)
-        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Spin angular momentum for axis ", icomp, " is ", REAL(muspin)
+        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Spin angular momentum for axis ", icomp, " is ", REAL(muspin(iatom))
         call wrtout(std_out,message,'COLL')
         call destroy_matlu(matlumag,(natom))
       end do
 
       ! == total angular momentum (L_u + 2*S_u)
       do icomp=1,3 !x,y,z components
-        muzeem=czero
+        muzeem(iatom)=czero
         call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
         call copy_matlu(green%occup_tau%matlu,matlumag,natom=natom)
         call rotate_matlu(matlumag,eigvectmatlu,natom=natom,inverse=0)
         call magmomfzeeman_matlu(matlumag,muzeem,natom=natom,option=icomp,optprt=0)
-        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Zeeman angular momentum for axis ", icomp, " is ", REAL(muzeem)
+        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Zeeman angular momentum for axis ", icomp, " is ", REAL(muzeem(iatom))
         call wrtout(std_out,message,'COLL')
         call destroy_matlu(matlumag,(natom))
       end do
     endif !lpawu
   end do !iatom
   ABI_FREE(matlumag)
+  ABI_FREE(muzeem)
+  ABI_FREE(muspin)
+  ABI_FREE(muorb)
  end if !nspinor
  ! =================================================================
 
