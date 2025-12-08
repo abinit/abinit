@@ -17690,7 +17690,7 @@ Variable(
     added_in_version="9.11.0",
     text=r"""
 If set to 1, ABINIT will produce a netCDF EVK file, containing the elements of the velocity operator (ddk) between two wavefunctions at wavevector k.
-Not compatible with parallelization over perturbations ([[paral_rf]]=1) when netCDF library doesn't support MPI-IO.
+Not compatible with parallelization over perturbations ([[paral_rf]]=1) when netCDF library does not support MPI-IO.
 """,
 ),
 
