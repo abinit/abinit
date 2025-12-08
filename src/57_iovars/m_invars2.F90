@@ -2523,11 +2523,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_solv',tread,'INT')
    if(tread==1) dtset%dmft_solv=intarr(1)
    if (dtset%dmft_solv==6.or.dtset%dmft_solv==7) then ! change some default values for TRIQS
-     dtset%dmftctqmc_meas=0
-     dtset%dmft_optim=1
-     dtset%dmft_use_all_bands=1
-     dtset%dmft_use_full_chipsi=1
-     dtset%dmftctqmc_basis=-1
      dtset%dmft_dc=0
      dtset%dmft_iter=-1
      if (dtset%dmft_solv==6) dtset%dmft_triqs_pauli_prob = 1.0_dp
@@ -2546,16 +2541,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      call intagm(dprarr,intarr,jdtset,marr,natom,string(1:lenstr),'dmft_nominal',tread,'INT')
      if(tread==1) dtset%dmft_nominal(:)=intarr(1:natom)
    end if
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_epsilon_yukawa',tread,'DPR')
-   if(tread==1) dtset%dmft_epsilon_yukawa=dprarr(1)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_fermi_step',tread,'DPR')
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_fermi_step',tread,'ENE')
    if(tread==1) dtset%dmft_fermi_step=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_kspectralfunc',tread,'INT')
    if(tread==1) dtset%dmft_kspectralfunc=intarr(1)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_lambda_yukawa',tread,'DPR')
-   if(tread==1) dtset%dmft_lambda_yukawa=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_magnfield',tread,'INT')
    if(tread==1) dtset%dmft_magnfield=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_magnfield_b',tread,'DPR')
@@ -2568,8 +2559,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_nwlo=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_occnd_imag',tread,'INT')
    if(tread==1) dtset%dmft_occnd_imag=intarr(1)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_optim',tread,'INT')
-   if(tread==1) dtset%dmft_optim=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'dmft_orbital',tread,'INT')
    if(tread==1) dtset%dmft_orbital(:)=intarr(1:ntypat)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"dmft_orbital_filepath",tread,'KEY',key_value=key_value)
@@ -2584,14 +2573,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_read_occnd=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_rslf',tread,'INT')
    if(tread==1) dtset%dmft_rslf=intarr(1)
-   call intagm(dprarr,intarr,jdtset,marr,natom,string(1:lenstr),'dmft_shiftself',tread,'DPR')
+   call intagm(dprarr,intarr,jdtset,marr,natom,string(1:lenstr),'dmft_shiftself',tread,'ENE')
    if(tread==1) dtset%dmft_shiftself(:)=dprarr(1:natom)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_t2g',tread,'INT')
    if(tread==1) dtset%dmft_t2g=intarr(1)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_use_all_bands',tread,'INT')
-   if(tread==1) dtset%dmft_use_all_bands=intarr(1)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_use_full_chipsi',tread,'INT')
-   if(tread==1) dtset%dmft_use_full_chipsi=intarr(1)
 
    natomcor=0
    do iatom=1,dtset%natom
@@ -2601,10 +2586,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_wanorthnorm',tread,'INT')
    if(tread==1) dtset%dmft_wanorthnorm=intarr(1)
 
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_wanrad',tread,'DPR')
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_wanrad',tread,'LEN')
    if(tread==1) dtset%dmft_wanrad=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_x2my2d',tread,'INT')
    if(tread==1) dtset%dmft_x2my2d=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_yukawa_epsilon',tread,'DPR')
+   if(tread==1) dtset%dmft_yukawa_epsilon=dprarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_yukawa_lambda',tread,'DPR')
+   if(tread==1) dtset%dmft_yukawa_lambda=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_yukawa_param',tread,'INT')
    if(tread==1) dtset%dmft_yukawa_param=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_tolfreq',tread,'DPR')
@@ -2635,7 +2624,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_nlambda',tread,'INT')
    if(tread==1) dtset%dmft_nlambda=intarr(1)
 
-   if(dtset%dmft_solv>=5) then
+   if(dtset%dmft_solv>=5.and.dtset%dmft_solv/=6.and.dtset%dmft_solv/=7) then
 
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_n',tread,'DPR')
      if(tread==1) dtset%dmftqmc_n=dprarr(1)
@@ -2667,73 +2656,88 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_basis',tread,'INT')
        if(tread==1) dtset%dmftctqmc_basis  =intarr(1)
      end if
-     if(dtset%dmft_solv>=6.and.dtset%dmft_solv<=7) then
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_off_diag',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_off_diag=intarr(1)
-       if (dtset%dmft_triqs_off_diag == 1) then
-         dtset%dmft_triqs_measure_density_matrix = 0
-         dtset%dmft_triqs_time_invariance = 0
-         dtset%dmft_triqs_move_double = 1
-       end if
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_compute_integral',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_compute_integral=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_init_size',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_det_init_size=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_n_operations_before_check',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_det_n_operations_before_check=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_precision_error',tread,'DPR')
-       if(tread==1) dtset%dmft_triqs_det_precision_error=dprarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_precision_warning',tread,'DPR')
-       if(tread==1) dtset%dmft_triqs_det_precision_warning=dprarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_singular_threshold',tread,'DPR')
-       if(tread==1) dtset%dmft_triqs_det_singular_threshold=dprarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_entropy',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_entropy=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_epsilon',tread,'DPR')
-       if(tread==1) dtset%dmft_triqs_epsilon=dprarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_gaussorder',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_gaussorder=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_imag_threshold',tread,'DPR')
-       if(tread==1) dtset%dmft_triqs_imag_threshold=dprarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_leg_measure',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_leg_measure=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_loc_n_min',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_loc_n_min=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_loc_n_max',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_loc_n_max=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_measure_density_matrix',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_measure_density_matrix=intarr(1)
-       if(dtset%dmft_triqs_measure_density_matrix==0) then
-         dtset%dmft_triqs_time_invariance=0
-         dtset%dmft_triqs_use_norm_as_weight=0
-       end if
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_move_double',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_move_double=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_move_shift',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_move_shift=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_nleg',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_nleg=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_nsubdivisions',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_nsubdivisions=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_pauli_prob',tread,'DPR')
-       if(tread==1) dtset%dmft_triqs_pauli_prob=dprarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_read_ctqmcdata',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_read_ctqmcdata=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_seed_a',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_seed_a=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_seed_b',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_seed_b=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_therm_restart',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_therm_restart=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_time_invariance',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_time_invariance=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_tol_block',tread,'DPR')
-       if(tread==1) dtset%dmft_triqs_tol_block=dprarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_use_norm_as_weight',tread,'INT')
-       if(tread==1) dtset%dmft_triqs_use_norm_as_weight=intarr(1)
-       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_wmax',tread,'ENE')
-       if(tread==1) dtset%dmft_triqs_wmax=dprarr(1)
+   elseif(dtset%dmft_solv>=6.and.dtset%dmft_solv<=7) then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_off_diag',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_off_diag=intarr(1)
+     if (dtset%dmft_triqs_off_diag==1) then
+       dtset%dmft_triqs_measure_density_matrix = 0
+       dtset%dmft_triqs_time_invariance = 0
+       dtset%dmft_triqs_move_double = 1
      end if
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_basis',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_basis=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_compute_integral',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_compute_integral=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_init_size',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_det_init_size=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_n_operations_before_check',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_det_n_operations_before_check=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_precision_error',tread,'DPR')
+     if(tread==1) dtset%dmft_triqs_det_precision_error=dprarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_precision_warning',tread,'DPR')
+     if(tread==1) dtset%dmft_triqs_det_precision_warning=dprarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_det_singular_threshold',tread,'DPR')
+     if(tread==1) dtset%dmft_triqs_det_singular_threshold=dprarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_dlr_epsilon',tread,'DPR')
+     if(tread==1) dtset%dmft_triqs_dlr_epsilon=dprarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_dlr_wmax',tread,'ENE')
+     if(tread==1) dtset%dmft_triqs_dlr_wmax=dprarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_entropy',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_entropy=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_gaussorder',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_gaussorder=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_imag_threshold',tread,'DPR')
+     if(tread==1) dtset%dmft_triqs_imag_threshold=dprarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_length_cycle',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_length_cycle=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_loc_n_min',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_loc_n_min=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_loc_n_max',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_loc_n_max=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_measure_density_matrix',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_measure_density_matrix=intarr(1)
+     if(dtset%dmft_triqs_measure_density_matrix==0) then
+       dtset%dmft_triqs_time_invariance=0
+       dtset%dmft_triqs_use_norm_as_weight=0
+     end if
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_measure_g_l',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_measure_g_l=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_move_double',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_move_double=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_move_shift',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_move_shift=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_n_cycles',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_n_cycles=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_n_iw',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_n_iw=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_n_l',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_n_l=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_n_tau',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_n_tau=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_n_warmup_cycles_init',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_n_warmup_cycles_init=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_n_warmup_cycles_restart',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_n_warmup_cycles_restart=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_nsubdivisions',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_nsubdivisions=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_pauli_prob',tread,'DPR')
+     if(tread==1) dtset%dmft_triqs_pauli_prob=dprarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_prt_entropy',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_prt_entropy=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_random_seed_a',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_random_seed_a=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_random_seed_b',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_random_seed_b=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_read_ctqmcdata',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_read_ctqmcdata=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_shift_mu',tread,'ENE')
+     if(tread==1) dtset%dmft_triqs_shift_mu=dprarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_time_invariance',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_time_invariance=intarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_tol_block',tread,'DPR')
+     if(tread==1) dtset%dmft_triqs_tol_block=dprarr(1)
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_triqs_use_norm_as_weight',tread,'INT')
+     if(tread==1) dtset%dmft_triqs_use_norm_as_weight=intarr(1)
    end if
  elseif (dtset%usedmft==10) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftbandi',tread,'INT')
@@ -4415,7 +4419,7 @@ if (dtset%usekden==1) then
    if (tread_qgbt ==1 .and. tread_cart == 1) then
      ABI_ERROR("Both 'qgbt' and 'qgbt_cart' are defined, choose to define only one of these.")
    else if (tread_cart == 1) then
-     dtset%qgbt_cart = dprarr(1:3) 
+     dtset%qgbt_cart = dprarr(1:3)
      call mkrdim(dtset%acell_orig(1:3,1),dtset%rprim_orig(1:3,1:3,1),rprimd)
      dtset%qgbt(1:3) = MATMUL(TRANSPOSE(rprimd)/two_pi, dtset%qgbt_cart)
    end if
