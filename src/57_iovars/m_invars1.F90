@@ -242,7 +242,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  dtsets(:)%ntypat=1 ; dtsets(0)%ntypat=0    ! Will always echo ntypat
  dtsets(:)%macro_uj=0
  dtsets(:)%maxnsym=384
- dtsets(:)%use_gbt=0
+! dtsets(:)%use_gbt=0
  dtsets(:)%useria=0
  dtsets(:)%userib=0
  dtsets(:)%useric=0
@@ -374,8 +374,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    if(tread==1) dtsets(idtset)%useextfpmd=intarr(1)
 
    ! Read use_gbt
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gbt',tread,'INT')
-   if (tread==1) dtsets(idtset)%use_gbt=intarr(1)
+!   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gbt',tread,'INT')
+!   if (tread==1) dtsets(idtset)%use_gbt=intarr(1)
 
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
@@ -1079,10 +1079,13 @@ subroutine indefo1(dtset)
  dtset%slabzend=zero
  dtset%so_psp(:)=1
  dtset%spinat(:,:)=zero
+ dtset%spinaxis(1:2)=zero
+ dtset%spinaxis(3)=1
 !T
  dtset%tfkinfunc=0
  dtset%typat(:)=0  ! This init is important because dimension of typat is mx%natom (and not natom).
 !U
+ dtset%use_gbt=0
  dtset%usedmatpu=0
  dtset%usedmft=0
  dtset%useexexch=0
@@ -1426,6 +1429,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
  end if
  dtset%nsppol=nsppol
+ 
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spinaxis',tread,'DPR')
+ if (tread==1) dtset%spinaxis(1:3) = dprarr(1:3)
 
 ! here are ZORA, nspinor, pawspnorb flags
 ! flag for ZORA (zeroth order regularized approximation for relativistic terms)
@@ -2048,6 +2054,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      if (dtset%paral_kgb/=0) dtset%wfoptalg=14
    end if
  end if
+
+ ! Read use_gbt
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gbt',tread,'INT')
+ if (tread==1) dtset%use_gbt=intarr(1)
 
 !---------------------------------------------------------------------------
 !Some PAW+DMFT keywords

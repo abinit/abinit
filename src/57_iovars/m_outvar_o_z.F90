@@ -994,6 +994,11 @@ contains
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'spinat','DPR',multivals%natom)
 
+ dprarr(1,:)=dtsets(:)%spinaxis(1)
+ dprarr(2,:)=dtsets(:)%spinaxis(2)
+ dprarr(3,:)=dtsets(:)%spinaxis(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'spinaxis','DPR',0)
+
  dprarr(1,:)=dtsets(:)%spinmagntarget
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'spinmagntarget','DPR',0)
 
