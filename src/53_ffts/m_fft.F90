@@ -227,13 +227,11 @@ MODULE m_fft
    procedure :: execute_rg_spc => uplan_execute_rg_spc
    procedure :: execute_rg_dpc => uplan_execute_rg_dpc
 
-   ! Main entry point for performing FFTs on the full box.
+   ! Main entry points for performing FFTs on the full box.
    ! complex-to-complex version, operating on complex arrays
-   generic :: execute_gr => execute_gr_spc, &
-                            execute_gr_dpc
+   generic :: execute_gr => execute_gr_spc, execute_gr_dpc
 
-   generic :: execute_rg => execute_rg_spc, &
-                            execute_rg_dpc
+   generic :: execute_rg => execute_rg_spc, execute_rg_dpc
  end type uplan_t
 !!***
 
