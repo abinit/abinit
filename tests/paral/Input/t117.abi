@@ -6,7 +6,7 @@ jdtset 1 2      # one followed by two
 getden -1     # Second one takes the density of first
 
  pawprtvol 3  # Printing additional information
- prtvol 4     #
+# prtvol 4     #
  prtden -1    #  
 # prtwf  0     #
  
