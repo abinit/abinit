@@ -134,9 +134,6 @@ contains
  complex(dpc), allocatable :: macmagsus(:,:,:)
  complex(dpc), allocatable :: genzeff_tr(:,:), ri_genelsus(:,:,:)
 
-!TMP: CrI3 varaibles:
- complex*16,parameter :: ure=(1.d0,0.d0),uim=(0.d0,1.d0)
- 
 ! *********************************************************************
 
  write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
@@ -260,24 +257,6 @@ contains
        call polcoe(omegacalc,ddb%val_fs(2,ii,:),nwcalc,coeffs(2,:,ii))
      end if
    end do
-
-   i=0
-   do ipert2= natom+11+mpatpol(1), natom+11+mpatpol(2)
-     do idir2= 1, 2
-       i= i + 1
-       j=0
-       do ipert1= natom+11+mpatpol(1), natom+11+mpatpol(2)
-         do idir1= 1, 2
-           j= j + 1
-           index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
-           write(150,*) j, i, coeffs(1,:,index) 
-           write(151,*) j, i, coeffs(2,:,index) 
-
-         end do
-       end do
-     end do
-   end do
-
  end if
 
 !Loop over the frequency
@@ -361,9 +340,9 @@ contains
    & lm_alpha(:,:,iw),lm_epsilon(:,:,iw),lm_localpha(:,:,iw),lm_magsus(:,:,iw),lm_mchi(:,:,iw),&
    & mpert,mmom(:,:,iw),mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol,zeff)
 
-     call lm_normal_modes(int_fsddb,displ,eta,lm_alpha_nm(:,:,:,iw),lm_epsilon_nm(:,:,:,iw),lm_mchi_nm(:,:,:,iw), &
+     call lm_normal_modes(amu,int_fsddb,displ,eta,lm_alpha_nm(:,:,:,iw),lm_epsilon_nm(:,:,:,iw),lm_mchi_nm(:,:,:,iw), &
    & mcell,mmom(:,:,iw),modemm(:,:,iw),modedisp(:,:,iw),modemeff(:,:,iw),modezeff(:,:,iw),modezf(:,:,iw),&
-   & mpert,natom,ndim,ntypat,omega(iw),phfrq(:,iw),ucvol,zfield(:,:,iw))
+   & mpert,natom,ndim,ntypat,omega(iw),phfrq(:,iw),typat,ucvol,zfield(:,:,iw))
 
    else if (mpopt==2) then
      call phonon_green(amu,displ,eigvec,eta,int_rsddb,& 
@@ -374,9 +353,9 @@ contains
    & lm_alpha(:,:,iw),lm_epsilon(:,:,iw),lm_localpha(:,:,iw),lm_magsus(:,:,iw),lm_mchi(:,:,iw),& 
    & mpert,mmom(:,:,iw),mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol,zeff)
 
-     call lm_normal_modes(int_rsddb,displ,eta,lm_alpha_nm(:,:,:,iw),lm_epsilon_nm(:,:,:,iw),lm_mchi_nm(:,:,:,iw), &
+     call lm_normal_modes(amu,int_rsddb,displ,eta,lm_alpha_nm(:,:,:,iw),lm_epsilon_nm(:,:,:,iw),lm_mchi_nm(:,:,:,iw), &
    & mcell,mmom(:,:,iw),modemm(:,:,iw),modedisp(:,:,iw),modemeff(:,:,iw),modezeff(:,:,iw),modezf(:,:,iw),&
-   & mpert,natom,ndim,ntypat,omega(iw),phfrq(:,iw),ucvol,zfield(:,:,iw))
+   & mpert,natom,ndim,ntypat,omega(iw),phfrq(:,iw),typat,ucvol,zfield(:,:,iw))
 
    end if
 
@@ -727,7 +706,7 @@ contains
  write(alpha_unit,*) '#'
  write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
 
- convfac= mu_0_SI *  e_Cb * BField_Tesla / Bohr_meter**2 * 1.d12
+ convfac= half * mu_0_SI *  e_Cb * BField_Tesla / Bohr_meter**2 * 1.d12
 
  write(alpha_unit,*) '#  Real part of clamped-ion magnetoelectric tensor (ps/m)'
  write(msg,'(a,a)') ch10,&
@@ -819,7 +798,7 @@ contains
  
  write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
 
- convfac= mu_0_SI * mu_B_SI * BField_Tesla / Bohr_meter**3 
+ convfac= half * mu_0_SI * mu_B_SI * BField_Tesla / Bohr_meter**3 
 
  write(mmag_unit,*) ' '
  write(mmag_unit,*) '#  Real part of clamped-ion magnetic susceptibility (SI adim)'
@@ -927,10 +906,6 @@ contains
    ABI_ERROR(msg)
  end if
 
-   do i= 1, 3*natom
-     write(300,*) i, phfrq(i,1)*27211.4
-   end do
-
  write(phon_unit,*) '#'
  if (mpopt==1) then
    write(phon_unit,*) '#  Frozen-spin phonon frequencies calculated and interpolated by ANADDB'
@@ -996,11 +971,6 @@ contains
  write(zeff_unit,*) '#'
  write(zeff_unit,*) '#  Electric Born effective charges calculated and interpolated by ANADDB'
  write(zeff_unit,*) '#'
-
- do i=1, 3*natom
-   write(301,*) i, sqrt(dot_product(modezeff(:,i,1),modezeff(:,i,1)))
-   write(302,*) i, sqrt(dot_product(modemeff(:,i,1),modemeff(:,i,1)))/0.5291772105*100
- end do
 
  write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' ) 3 
  do imode= 1, 3*natom
@@ -1387,8 +1357,8 @@ end subroutine phonon_green
 
 #include "abi_common.h"
 
-subroutine lm_normal_modes(blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mchi_nm, &
-& mcell,mmom,modemm,modedisp,modemeff,modezeff,modezf,mpert,natom,ndim,ntypat,omega,phfrq,ucvol,zfield)
+subroutine lm_normal_modes(amu,blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mchi_nm, &
+& mcell,mmom,modemm,modedisp,modemeff,modezeff,modezf,mpert,natom,ndim,ntypat,omega,phfrq,typat,ucvol,zfield)
 
  use defs_basis
  use m_errors
@@ -1401,8 +1371,8 @@ subroutine lm_normal_modes(blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mchi_nm
  integer, intent(in)  :: mpert,natom,ndim,ntypat 
  real(dp), intent(in) :: eta,mcell,omega,ucvol
 !arrays
-! integer, intent(in)  :: typat(natom)
-! real(dp), intent(in) :: amu(ntypat)
+ integer, intent(in)  :: typat(natom)
+ real(dp), intent(in) :: amu(ntypat)
  real(dp), intent(in) :: blkval(2,3,mpert,3,mpert,1)
  real(dp), intent(inout) :: displ(2*3*natom*3*natom)
  real(dp), intent(in) :: phfrq(3*natom)
@@ -1440,7 +1410,7 @@ subroutine lm_normal_modes(blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mchi_nm
  DBG_ENTER("COLL")
  tmp=ntypat
 !Rotate doubly degenerated modes 
-! call alignph(amu,displ,blkval,mpert,natom,ntypat,phfrq,typat)
+ call alignph(amu,displ,blkval,mpert,natom,ntypat,phfrq,typat,silent=1)
 
 !Define the complex eigendisplacementes array
 do imode=1,3*natom
@@ -1453,32 +1423,10 @@ do imode=1,3*natom
    end do
  end do
 
- ABI_MALLOC(norm,(3*natom))
- do imode= 1, 3*natom
-   norm(imode)= sqrt(dot_product(modedisp(:,imode),modedisp(:,imode)))
- end do 
-
-!!!!!!TMP rotation of doublet 23 and 24 for Cr2O3
-! baseout=cmplx(zero,zero,kind=dpc)
-! baseout(1,1)=one
-! baseout(2,2)=one
-!
-!! baseout(:,1)=1.d0/sqrt(2.d0)*(/ure,uim/)
-!! baseout(:,2)=1.d0/sqrt(2.d0)*(/ure,-uim/)
-!
-! basein(:,1)=modedisp(1:2,24)
-! basein(:,2)=modedisp(1:2,23)
-! hmat=matmul(transpose(conjg(basein)),basein)
-! basein=basein/sqrt(hmat(1,1))
-!
-! rmat=matmul(transpose(conjg(baseout)),basein)
-!
-! totbasein(:,1)=modedisp(:,24)
-! totbasein(:,2)=modedisp(:,23)
-! totbaseout=matmul(totbasein,transpose(conjg(rmat)))
-! modedisp(:,23)=totbaseout(:,1)*(.99712401816457066536,-.07578715194108398329)
-! modedisp(:,24)=totbaseout(:,2)*(.99712401816457066536,.07578715194108398329)
-
+! ABI_MALLOC(norm,(3*natom))
+! do imode= 1, 3*natom
+!   norm(imode)= sqrt(dot_product(modedisp(:,imode),modedisp(:,imode)))
+! end do 
 
 !Compute the mode-resolved macroscopic quantities
 !(Born and magnetic charges)
@@ -1612,458 +1560,6 @@ do imode=1,3*natom
  DBG_EXIT("COLL")
 
 end subroutine lm_normal_modes
-!!***
-
-!!****f* ABINIT/mode_mmom
-!! NAME
-!!  mode_mmom
-!!
-!! FUNCTION
-!!  Projects the magnetic moments and Zeeman fields on the eigenmodes 
-!!  of the dynamical matrix calculated at each value of omega
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2024 ABINIT group (FIXME: add author)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! INPUTS
-!!  amu(ntypat)= atomic masses
-!!  eigvec(2,3,natom,3,natom)= dynamical matrix eigenvectors
-!!  mmom(ndim,(natom+2)*3)= first-order magnetic moments
-!!  natom= number of atoms in the cell
-!!  ndim= dimension of the penalized degrees of freedom
-!!  ntypat= number of atom types in the cell
-!!  typat(natom)= array with the type of atoms in the cell
-!!
-!! OUTPUT
-!!  modemm(ndim,3*natom)= mode-resolved magnetic moments
-!!  modezf(ndim,3*natom)= mode-resolved Zeeman fields
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
-subroutine mode_mmom(amu,eigvec,mmom,modemm,modedisp,modezf,natom,ndim,ntypat,typat,zfield)
-
- use defs_basis
- use m_errors
- use m_profiling_abi
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer, intent(in)  :: natom,ndim,ntypat 
-!arrays
- integer, intent(in) :: typat(natom)
- real(dp), intent(in) :: amu(ntypat)
- real(dp), intent(in) :: eigvec(2,3,natom,3,natom)
- complex(dpc), intent(in) :: mmom(ndim,(natom+5)*3)
- complex(dpc), intent(in) :: zfield(ndim,(natom+5)*3)
- complex(dpc), intent(out) :: modemm(ndim,3*natom)
- complex(dpc), intent(out) :: modedisp(3*natom,3*natom)
- complex(dpc), intent(out) :: modezf(ndim,3*natom)
-
-!Local variables-------------------------------
-!scalars
- integer :: iat1,iat2,idir1,idir2,im,imode,irow
- real(dp) :: mcell
-!arrays
- real(dp), allocatable :: mass(:)
-!character(len=500) :: msg                   
-
-! *************************************************************************
-
- DBG_ENTER("COLL")
-
-!Define the mass factors
- ABI_MALLOC(mass,(natom))
- mcell=zero
- do iat1= 1, natom
-   mass(iat1)= amu(typat(iat1))
-   mcell= mcell + amu(typat(iat1))
- end do
- mass(:)=sqrt(mcell/mass(:))
-
-!Reshape the eigenvector array
- do iat2= 1, natom
-   do idir2= 1, 3
-     imode= (iat2-1)*3 + idir2
-     do iat1= 1, natom
-       do idir1= 1, 3
-         irow= (iat1-1)*3 + idir1
-         modedisp(irow,imode)= cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),kind=dpc)
-       end do
-     end do
-   end do
- end do
-
-!Compute the mode-resolved moments
- modemm(:,:)=(zero,zero)
- modezf(:,:)=(zero,zero)
- do im= 1, ndim
-   do iat2= 1, natom
-     do idir2= 1, 3
-       imode= (iat2-1)*3 + idir2
-       do iat1= 1, natom
-         do idir1= 1, 3
-           irow= (iat1-1)*3 + idir1
-           modemm(im,imode)= modemm(im,imode) +  mass(iat1)*mmom(im,irow)*modedisp(irow,imode)
-           modezf(im,imode)= modezf(im,imode) +  mass(iat1)*zfield(im,irow)*modedisp(irow,imode)
-         end do
-       end do
-     end do
-   end do
- end do
-
- ABI_FREE(mass)
-
-
- DBG_EXIT("COLL")
-
-end subroutine mode_mmom
-!!***
-
-!!****f* ABINIT/mode_zeff
-!! NAME
-!!  mode_zeff
-!!
-!! FUNCTION
-!!  Projects the Born effective charges on the eigenmodes of the dynamical 
-!!  matrix calculated at each value of omega
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2024 ABINIT group (FIXME: add author)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! INPUTS
-!!  amu(ntypat)= atomic masses
-!!  eigvec(2,3,natom,3,natom)= dynamical matrix eigenvectors
-!!  zeff(ndim,(natom+2)*3)= first-order magnetic moments
-!!  natom= number of atoms in the cell
-!!  ntypat= number of atom types in the cell
-!!  typat(natom)= array with the type of atoms in the cell
-!!  zeff(3,3*natom)= atomic Born effective charges at a given omega
-!!
-!! OUTPUT
-!!  modezeff(3,3*natom)= mode-resolved magnetic moments
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
-subroutine mode_zeff(amu,eigvec,modezeff,natom,ntypat,typat,zeff)
-
- use defs_basis
- use m_errors
- use m_profiling_abi
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer, intent(in)  :: natom,ntypat 
-!arrays
- integer, intent(in) :: typat(natom)
- real(dp), intent(in) :: amu(ntypat)
- real(dp), intent(in) :: eigvec(2,3,natom,3,natom)
- complex(dpc), intent(in) :: zeff(3,natom*3)
- complex(dpc), intent(out) :: modezeff(3,3*natom)
-
-!Local variables-------------------------------
-!scalars
- integer :: iat1,iat2,idir1,idir2,im,imode,irow
- real(dp) :: mcell
-!arrays
- real(dp), allocatable :: mass(:)
-!character(len=500) :: msg                   
-
-! *************************************************************************
-
- DBG_ENTER("COLL")
-
-!Define the mass factors
- ABI_MALLOC(mass,(natom))
- mcell=zero
- do iat1= 1, natom
-   mass(iat1)= amu(typat(iat1))
-   mcell= mcell + amu(typat(iat1))
- end do
- mass(:)=sqrt(mcell/mass(:))
-
-!Compute the mode-resolved Born charges
- modezeff(:,:)=(zero,zero)
- do im= 1, 3
-   do iat2= 1, natom
-     do idir2= 1, 3
-       imode= (iat2-1)*3 + idir2
-       do iat1= 1, natom
-         do idir1= 1, 3
-           irow= (iat1-1)*3 + idir1
-           modezeff(im,imode)= modezeff(im,imode) +  mass(iat1)*zeff(im,irow)* &
-         & cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),kind=dpc)
-         end do
-       end do
-     end do
-   end do
- end do
-
- ABI_FREE(mass)
-
- DBG_EXIT("COLL")
-
-end subroutine mode_zeff
-!!***
-
-!!****f* ABINIT/me_altcalc
-!! NAME
-!!  me_altcalc
-!!
-!! FUNCTION
-!!  Calculates the relaxed-ion magnetic moments induced 
-!!  by an electric field
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2024 ABINIT group (FIXME: add author)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! INPUTS
-!!  amu(ntypat)= atomic masses
-!!  eigvec(2,3,natom,3,natom)= dynamical matrix eigenvectors
-!!  natom= number of atoms in the cell
-!!  ntypat= number of atom types in the cell
-!!  typat(natom)= array with the type of atoms in the cell
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
-subroutine me_altcalc(amu,eigvec,lm_magsus,lm_zfield,phongreen_fm,magsus,natom,ndim,ntypat,omega,ri_mmom,typat,&
-& fmzeff_tr,zfield)
-
- use defs_basis
- use m_errors
- use m_profiling_abi
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer, intent(in)  :: natom,ndim,ntypat 
- real(dp), intent(in) :: omega
-!arrays
- integer, intent(in) :: typat(natom)
- real(dp), intent(in) :: amu(ntypat)
- real(dp), intent(in) :: eigvec(2,3,natom,3,natom)
- complex(dpc), intent(in) :: lm_magsus(ndim,ndim)
- complex(dpc), intent(out) :: lm_zfield(ndim,3)
- complex(dpc), intent(in) :: magsus(ndim,ndim)
- complex(dpc), intent(in) :: phongreen_fm(3*natom,3*natom)
- complex(dpc), intent(out) :: ri_mmom(ndim,3)
- complex(dpc), intent(in) :: fmzeff_tr(3*natom,3)
- complex(dpc), intent(in) :: zfield(ndim,(natom+2)*3)
-
-!Local variables-------------------------------
-!scalars
- integer :: i,iat1,iat2,idir1,idir2,icol,imode1,imode2,irow
- real(dp) :: mcell,mfac1,mfac2
- complex*16,parameter :: ure=(1.d0,0.d0),uim=(0.d0,1.d0)
-!arrays
- real(dp), allocatable :: mass(:)
- complex(dpc),allocatable :: mass_phongreen(:,:)
- complex(dpc) :: ri_magsus(ndim,ndim)
- complex(dpc) :: eigdisp(3*natom,3*natom)
- complex(dpc) :: nm_zfield(ndim,3*natom)
- complex(dpc) :: nm_fmzeff_tr(3*natom,3)
- complex(dpc) :: nm_phongreen(3*natom,3*natom)
- complex(dpc) :: basein(2,2),baseout(2,2),rmat(2,2),hmat(2,2)
- complex(dpc) :: totbasein(3*natom,2),totbaseout(3*natom,2)
-
-! *************************************************************************
-
- DBG_ENTER("COLL")
-
-!Define the mass factors
- ABI_MALLOC(mass,(natom))
- mcell=zero
- do iat1= 1, natom
-   mass(iat1)= amu(typat(iat1))
-   mcell= mcell + amu(typat(iat1))
- end do
- mass(:)=sqrt(mcell/mass(:))
-
- ABI_MALLOC(mass_phongreen,(3*natom,3*natom))
- do icol= 1, 3*natom
-   iat2= ceiling(icol/three)
-   mfac2= sqrt(amu(typat(iat2))*amu_emass)
-   do irow= 1, 3*natom
-     iat1= ceiling(irow/three)
-     mfac1= sqrt(amu(typat(iat1))*amu_emass)
-     mass_phongreen(irow,icol)= mfac1*phongreen_fm(irow,icol)*mfac2
-   end do
- end do
-
-!Different formula on the sublattice space
- !Spin part
- ri_magsus= magsus + lm_magsus
- ri_mmom=-matmul(ri_magsus,zfield(:,(natom+1)*3+1:(natom+2)*3))
- !Lattice part
- lm_zfield= matmul(zfield(:,1:3*natom),matmul(phongreen_fm,fmzeff_tr))
-! ri_mmom= ri_mmom + matmul(ri_magsus,lm_zfield)
-
-!Project on the normal-modes space the lattice part
- do iat2= 1, natom
-   do idir2= 1, 3
-     imode2= (iat2-1)*3 + idir2
-     do iat1= 1, natom
-       do idir1= 1, 3
-         imode1= (iat1-1)*3 + idir1
-         eigdisp(imode1,imode2)= &
-       & cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),kind=dpc)
-       end do
-     end do
-   end do
- end do
-
-!tmp change the phase of mode 21
-! do i=1, natom*3
-!   eigdisp(i,21)= (0.d0,1.d0)*eigdisp(i,21)
-! end do
-
-!enforce a circularly polarized pair of modes 20 and 21
-!B
- baseout(:,1)=1.d0/sqrt(2.d0)*(/ure,uim/)
- baseout(:,2)=1.d0/sqrt(2.d0)*(/ure,-uim/)
-
-!A
-! norm=dot_product(eigdisp(1:2,20),eigdisp(1:2,20))
-! basein(:,1)=1.d0/sqrt(norm)*eigdisp(1:2,20)    
-
-! norm=dot_product(eigdisp(1:2,21),eigdisp(1:2,21))
-! basein(:,2)=1.d0/sqrt(norm)*eigdisp(1:2,21) 
-
-  basein(:,1)=eigdisp(1:2,20)
-  basein(:,2)=eigdisp(1:2,21)
-  hmat=matmul(transpose(conjg(basein)),basein)
-
-  basein=basein/sqrt(hmat(1,1))
-
-! rmat=matmul(baseout,transpose(conjg(basein)))
- rmat=matmul(transpose(conjg(baseout)),basein)
-!  rmat=matmul(basein,transpose(conjg(baseout)))
-
- totbasein(:,1)=eigdisp(:,20)
- totbasein(:,2)=eigdisp(:,21)
- totbaseout=matmul(totbasein,transpose(conjg(rmat)))
- eigdisp(:,20)=totbaseout(:,1)
- eigdisp(:,21)=totbaseout(:,2)
-
-! do i= 1, 3*natom, 3
-!   vecin(1:2)= eigdisp(i:i+1,20)
-!   vecout(:)=matmul(transpose(conjg(rmat)),vecin)
-!   eigdisp(i:i+1,20)= vecout(1:2)
-!
-!   vecin(1:2)= eigdisp(i:i+1,21)
-!   vecout(:)= matmul(vecin,transpose(conjg(rmat)))
-!   vecout(:)=matmul(transpose(conjg(rmat)),vecin)
-!   eigdisp(i:i+1,21)= vecout(1:2)
-! end do
-
-!now do the calculation
- do i=1, ndim
-!   nm_zfield(i,1:3*natom)=matmul(conjg(zfield(i,1:3*natom)),eigdisp)
-    nm_zfield(i,1:3*natom)=matmul(zfield(i,1:3*natom),eigdisp)
- end do
- nm_fmzeff_tr=matmul(transpose(conjg(eigdisp)),fmzeff_tr)
- nm_phongreen=matmul(transpose(conjg(eigdisp)),matmul(phongreen_fm,eigdisp))
- 
- lm_zfield= matmul(nm_zfield(:,1:3*natom),matmul(nm_phongreen,nm_fmzeff_tr))
-
- !restrict only to a set of modes
-! lm_zfield=cmplx(zero,zero,kind=dpc)
-! do i= 1, ndim
-!   do j= 1, 3
-!     do k= 21,21
-!       do l= 21,21
-!         lm_zfield(i,j)= lm_zfield(i,j) + nm_zfield(i,k)*nm_phongreen(k,l)*nm_fmzeff_tr(l,j)
-!       end do 
-!     end do 
-!   end do
-! end do
-
- write(120,*) omega,real(nm_zfield(1:4,20))
- write(220,*) omega,aimag(nm_zfield(1:4,20))
- write(121,*) omega,real(nm_zfield(1:4,21))
- write(221,*) omega,aimag(nm_zfield(1:4,21))
-
- write(420,*) omega,real(nm_fmzeff_tr(20,1:3))
- write(421,*) omega,real(nm_fmzeff_tr(21,1:3))
- write(520,*) omega,aimag(nm_fmzeff_tr(20,1:3))
- write(521,*) omega,aimag(nm_fmzeff_tr(21,1:3))
-
-
- do i=1, 3*natom
-   write(320,*) real(eigdisp(i,20)),aimag(eigdisp(i,20))
-   write(321,*) real(eigdisp(i,21)),aimag(eigdisp(i,21))
- end do 
- write(320,*) 
- write(321,*) 
-
- ri_mmom= ri_mmom + matmul(ri_magsus,lm_zfield)
-
- ABI_FREE(mass)
- ABI_FREE(mass_phongreen)
-
- DBG_EXIT("COLL")
-
-end subroutine me_altcalc
 !!***
 
 !!****f* ABINIT/ri_d2etot
