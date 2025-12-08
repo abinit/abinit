@@ -1039,6 +1039,7 @@ type, public :: dataset_type
  real(dp) :: red_dfield(3)
  real(dp) :: red_efieldbar(3)
  real(dp) :: sigma_erange(2) = zero
+ real(dp) :: spinaxis(3) = [0.0_dp,0.0_dp,1.0_dp]
  real(dp) :: strtarget(6)
  real(dp) :: tmesh(3) = [5._dp, 59._dp, 6._dp]  ! [start, stop, num]
  real(dp) :: td_ef_pol(3)
@@ -2444,6 +2445,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%red_dfield(:)      = dtin%red_dfield(:)
  dtout%red_efieldbar(:)   = dtin%red_efieldbar(:)
  dtout%shiftk_orig        = dtin%shiftk_orig
+ dtout%spinaxis           = dtin%spinaxis
  dtout%strtarget(:)       = dtin%strtarget(:)
  dtout%ucrpa_window(:)    = dtin%ucrpa_window(:)
  dtout%vcutgeo(:)         = dtin%vcutgeo(:)
@@ -3844,7 +3846,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' spin_temperature_nstep spin_temperature_start'
  !list_vars=trim(list_vars)//' spin_tolavg spin_tolvar'
  list_vars=trim(list_vars)//' spin_var_temperature spin_write_traj'
- list_vars=trim(list_vars)//' spinat spinmagntarget spmeth'
+ list_vars=trim(list_vars)//' spinat spinaxis spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
  list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'
  list_vars=trim(list_vars)//' structure '

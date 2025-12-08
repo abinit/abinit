@@ -666,7 +666,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_rwwf=7
- integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,dimffnl_str,iband,iband_cprj,iband_last,ibg,icg,ider,ider_str
+ integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,dimffnl_str,iband,iband_cprj,iband_last,ibg,icg,ider,ider_str,ispin_gbt
  integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipositron,ipw,ishift,isppol,istwf_k
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
@@ -1189,10 +1189,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              ABI_MALLOC(cwavef_spin, (2, npw_k*blocksize))  
              ABI_MALLOC(enlout_spin,(nnlout*blocksize))
              enlout_spin(:) = zero
+             gs_hamk%ispin_gbt = 1
+             write(std_out,*) "DEBUG: choice = ", choice
              call cg_copy_spin(1,npw_k,my_nspinor,blocksize,cwavef,cwavef_spin)
              call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=K_H_K)
-             
+            
+             gs_hamk%ispin_gbt = 2 
              call cg_copy_spin(2,npw_k,my_nspinor,blocksize,cwavef,cwavef_spin)
              call nonlop(choice,cpopt,cwaveprj,enlout_spin,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=KPRIME_H_KPRIME)

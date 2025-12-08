@@ -4641,7 +4641,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_CHECK_NOSTOP(dt%gpu_option == ABI_GPU_DISABLED, 'GBT is not compatible with GPUs', ierr)
      ABI_CHECK_NOSTOP(dt%nspinor == 2, 'GBT requires nspinor 2', ierr)
      ABI_CHECK_NOSTOP(dt%nspden == 4, 'GBT requires nspden 4', ierr)
-!     ABI_CHECK_NOSTOP(all(dt%so_psp(1:npsp) == 0), 'GBT requires so_psp == 0', ierr)
      ABI_CHECK_NOSTOP(all(dt%istwfk(1:nkpt) == 1), 'GBT requires istwfk == 1', ierr)
      ABI_CHECK_NOSTOP(dt%usefock == 0, 'GBT with Fock is not coded', ierr)
      ABI_CHECK_NOSTOP(.not. xc_is_mgga, 'GBT with meta-GGA is not coded', ierr)
@@ -4649,6 +4648,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !     ABI_CHECK_NOSTOP(dt%optcell == 0, 'GBT and cell relaxation not coded', ierr)
      if (all(abs(dt%spinat(1:2, 1:dt%natom)) < tol8)) then
        ABI_CHECK_NOSTOP(.False., 'at least one spinat(:,iat) should have non-zero x or y components', ierr)
+     end if
+     if(dt%use_gbt == 1) then
+       ABI_CHECK_NOSTOP(all(dt%so_psp(1:npsp) == 0), 'use_gbt = 1 requires so_psp == 0', ierr)
      end if
 
      ! in calcdenmagsph we wrap the atoms in the first unit cell assuming the magnetization is periodic
