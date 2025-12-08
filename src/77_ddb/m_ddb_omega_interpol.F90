@@ -98,8 +98,8 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: alpha_unit,diel_unit,fs2rs,i,iblok,idir1,idir2,ifound
- integer :: ii,imode,index,ipert1,ipert2,iw,j,jw
+ integer :: alpha_unit,diel_unit,fs2rs,i,iblok,ifound
+ integer :: ii,imode,iw,j,jw
  integer :: mmag_unit,mmom_unit,nblok,ndim 
  integer :: nmat,nmdir,nwcalc,optgb,phon_unit,prtopt
  integer :: locmagsus_unit,zeff_unit,zfield_unit
