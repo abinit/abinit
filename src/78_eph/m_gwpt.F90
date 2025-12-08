@@ -51,7 +51,7 @@ module m_gwpt
  use m_gwdefs,         only : GW_Q0_DEFAULT
  use m_time,           only : cwtime, cwtime_report, timab, sec2str, timab
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, c2r, r2c, get_diag, linfit, iseven, simpson_cplx, print_arr, inrange, bins_t
+ use m_numeric_tools,  only : arth, c2r, r2c, get_diag, linfit, iseven, simpson_cplx, print_arr, inrange !, bins_t
  use m_io_tools,       only : iomode_from_fname
  use m_fftcore,        only : ngfft_seq, sphereboundary, print_ngfft
  use m_fft_mesh,       only : setmesh
@@ -100,33 +100,6 @@ module m_gwpt
  public :: gwpt_run  ! Main entry point to compute GWPT e-ph matrix elements
 
 !----------------------------------------------------------------------
-
-!----------------------------------------------------------------------
-
-!!!****t* m_numeric_tools/bins_t
-!!! NAME
-!!! bins_t
-!!!
-!!! FUNCTION
-!!!
-!!! SOURCE
-!
-! type bins_t
-!
-!   real(dp) :: dx, xmin, xmax
-!   integer :: size
-!   integer, allocatable :: counts(:), start(:), list(:)
-!   real(dp),contiguous, pointer :: xvals(:)
-!
-!   integer,allocatable :: nonempty_index(:)
-!
-! contains
-!
-!   procedure :: init => bins_init
-!   procedure :: free => bins_free
-!   procedure :: print => bins_print
-! end type bins_t
-!!!***
 
 contains  !=====================================================
 !!***
@@ -315,7 +288,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: eig0nk !, cpu, wall, gflops !, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
  complex(gwp) :: ctmp_gwpc, xdot_tmp
  complex(dp) :: ctmp_dp
- type(bins_t) :: bins
+ !type(bins_t) :: bins
 !arrays
  real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0), tsec(2)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3), qq_ibz(3), qq_bz(3)
