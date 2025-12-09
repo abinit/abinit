@@ -1735,21 +1735,19 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
            end if
 !          Integral of density or potential residual
 !<<<<<<< HEAD
-!           if (cplex==1) then
-!             intg(1,1:nspden)=intg(1,1:nspden)+fsm*rhor(ifft_local,1:nspden)
-!           else if (cplex==2) then
-!             intg_re(1:nspden)=fsm*rhor(2*ifft_local-1,1:nspden)
-!             intg_im(1:nspden)=fsm*rhor(2*ifft_local  ,1:nspden)
-!             if (sum(qphon_(:)**2)<tol8) then 
-!               intg(1,1:nspden)=intg(1,1:nspden)+intg_re(1:nspden)
-!               intg(2,1:nspden)=intg(2,1:nspden)+intg_im(1:nspden)
-!             else 
-!               intg(1,1:nspden)=intg(1,1:nspden)+phr1d_re*intg_re(1:nspden)-phr1d_im*intg_im(1:nspden)
-!               intg(2,1:nspden)=intg(2,1:nspden)+phr1d_re*intg_im(1:nspden)+phr1d_im*intg_re(1:nspden)
-!             end if
-!           end if
+           if (cplex==1) then
+             intg(1,1:nspden)=intg(1,1:nspden)+fsm*rhor(ifft_local,1:nspden)
+           else if (cplex==2) then
+             if (sum(qphon_(:)**2)<tol8) then 
+               intg(1,1:nspden)=intg(1,1:nspden)+fsm*rhor(2*ifft_local-1,1:nspden)
+               intg(2,1:nspden)=intg(2,1:nspden)+fsm*rhor(2*ifft_local  ,1:nspden)
+             else 
+               intg(1,1:nspden)=intg(1,1:nspden)+phr1d_re*fsm*rhor(2*ifft_local-1,1:nspden)-phr1d_im*fsm*rhor(2*ifft_local  ,1:nspden)
+               intg(2,1:nspden)=intg(2,1:nspden)+phr1d_re*fsm*rhor(2*ifft_local  ,1:nspden)+phr1d_im*fsm*rhor(2*ifft_local-1,1:nspden)
+             end if
+           end if
 !=======
-           intg(1:cplex,1:nspden)=intg(1:cplex,1:nspden)+fsm*rhor(ifft_local_cplex:ifft_local_cplex+cplex-1,1:nspden)
+!           intg(1:cplex,1:nspden)=intg(1:cplex,1:nspden)+fsm*rhor(ifft_local_cplex:ifft_local_cplex+cplex-1,1:nspden)
 !>>>>>>> trunk/develop
            if((present(gr_intgden).or.present(strs_intgden)).and. option<10 .and. ratsm2>tol12)then
              do ispden=1,nspden
@@ -1850,21 +1848,12 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 !    Specific treatment of collinear density, due to the storage mode.
 !    intgden_(1,iatom)= integral of up density
 !    intgden_(2,iatom)= integral of dn density
-!<<<<<<< HEAD
-!     intgden_(1,1,iatom)=intg(1,2)
-!     intgden_(1,2,iatom)=intg(1,1)-intg(1,2)
-!     if (cplex==2) then
-!       intgden_(2,1,iatom)=intg(2,2)
-!       intgden_(2,2,iatom)=intg(2,1)-intg(2,2)
-!     end if
-!=======
      intgden_(1:cplex,1,iatom)=intg(1:cplex,2)
      intgden_(1:cplex,2,iatom)=intg(1:cplex,1)-intg(1:cplex,2)
      !if (cplex==2) then
      !  intgden_im_(1,iatom)=intg(2,2)
      !  intgden_im_(2,iatom)=intg(2,1)-intg(2,2)
      !endif 
-!>>>>>>> trunk/develop
      if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
        gr_intgden(:,1,iatom)=gr_intg(:,2)
        gr_intgden(:,2,iatom)=gr_intg(:,1)-gr_intg(:,2)
@@ -1874,17 +1863,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
        strs_intgden(:,2,iatom)=strs_intg(:,1)-strs_intg(:,2)
      endif
    else
-!<<<<<<< HEAD
-!     intgden_(1,1:nspden,iatom)=intg(1,1:nspden)
-!     if (cplex==2) then
-!       intgden_(2,1:nspden,iatom)=intg(2,1:nspden)
-!     end if
-!=======
      intgden_(1:cplex,1:nspden,iatom)=intg(1:cplex,1:nspden)
-     !if (cplex==2) then
-     !  intgden_im_(1:nspden,iatom)=intg(2,1:nspden)
-     !endif
-!>>>>>>> trunk/develop
      if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
        gr_intgden(:,1:nspden,iatom)=gr_intg(:,1:nspden)
      endif
@@ -2127,25 +2106,6 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
          msg=' Atom  Sphere_radius  Integrated_density'
          if(present(ziontypat)) write(msg,'(a,a)')trim(msg),'       Atomic charge'
        endif
-!<<<<<<< HEAD
-!       if(option==11)msg=' Atom  Sphere_radius  Integrated_potresid'
-!       if(option==21)msg=' Atom  Sphere_radius               Torque'
-!       call wrtout(nunit,msg,'COLL')
-!       if(option==1.and.cplex==2) then
-!         msg='                             Real             Imaginary'
-!         call wrtout(nunit,msg,'COLL')
-!       end if
-!       do iatom=1,natom
-!         if (cplex==1) then
-!           write(msg, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),intgden(1,1,iatom)
-!         else if (cplex==2) then
-!           write(msg, '(i5,f15.5,2f20.8)' ) iatom,ratsph(typat(iatom)),intgden(1,1,iatom),intgden(2,1,iatom)
-!         end if
-!         if(option==21)then
-!!          There is a change of sign to get the gradient wrt chrgat.
-!           write(msg, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),-intgden(1,1,iatom)
-!         endif 
-!=======
        if(option==11)msg='    Atom  Sphere_radius  Integrated_potresid'
        if(option==21)msg='    Atom  Sphere_radius               Torque'
        call wrtout(units,msg)
@@ -2158,7 +2118,6 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
            write(msg, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),-intgden(1,1,iatom)
            !write(msg, '(i5,a3,f15.5,f20.8)' ) iatom,atom%symbol,ratsph(typat(iatom)),-intgden(1,1,iatom)
          endif
-!>>>>>>> trunk/develop
          !If option=1, print atomic charge
          if(option==1 .and. present(ziontypat))then
            write(msg, '(a,f20.8)' ) trim(msg),ziontypat(typat(iatom))-intgden(1,1,iatom)
