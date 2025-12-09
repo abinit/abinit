@@ -697,7 +697,7 @@ subroutine ddb_hdr_get_block_dims(ddb_hdr)
 ! ************************************************************************
 
  ! Compute mpert
- !ddb_hdr%mpert = ddb_hdr%natom+MPERT_MAX
+ !ddb_hdr%mpert = 2*ddb_hdr%natom+MPERT_MAX
  ! GA: mpert is stored in netcdf format but not in text format.
 
  ! Compute msize

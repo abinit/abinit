@@ -1,5 +1,5 @@
 
-.Version 10.5.8.3 of ABINIT, released Oct 2025.
+.Version 10.5.8.4 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 19 Nov 2025.
-- ( at 13h15 )
+.Starting date : Thu  4 Dec 2025.
+- ( at 16h21 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v8_t66/t66.abi
 - output file    -> t66.abo
@@ -546,15 +546,15 @@ tolerances: {toldfe: 1.00E-06, }
   
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
-   1    1   3    6         0.0000002785        -0.0000001177
+   1    1   3    6         0.0000002785         0.0000000000
   
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
-   2    1   3    6        -0.0000003294        -0.0000002524
+   2    1   3    6        -0.0000003294         0.0000000000
   
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
-   3    1   3    6        -0.0000002064         0.0000001890
+   3    1   3    6        -0.0000002064         0.0000000000
   
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
@@ -564,6 +564,10 @@ tolerances: {toldfe: 1.00E-06, }
   
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
+  
+   3    6   1    1         0.0000002785         0.0000000000
+   3    6   2    1        -0.0000003294         0.0000000000
+   3    6   3    1        -0.0000002064         0.0000000000
   
   
   Magnetic susceptibility, in cartesian coordinates

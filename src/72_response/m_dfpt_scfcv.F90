@@ -1555,7 +1555,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  if (ipert/=dtset%natom+1.and.dtset%prt1mag/=0) then
    prtopt=1
-   if(ipert==dtset%natom+5) then
+   if(ipert==dtset%natom+5 .or. ipert>dtset%natom+11 ) then
      prtopt=idir+1;
      call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
@@ -1564,7 +1564,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],prtopt,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
 
      call magmom_to_d2(blkflg,cplex,d2lo,idir,intgden,ipert,mpert,&
- & dtset%natom,nspden,rhomag)
+ &    dtset%natom,nspden,rhomag)
    end if
  end if
  !if((dtset%iscf>0).and.(dtset%nsppol==2.or.dtset%nspden>1).and.(ipert/=dtset%natom+5)) then

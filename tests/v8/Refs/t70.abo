@@ -1,5 +1,5 @@
 
-.Version 10.5.8.3 of ABINIT, released Oct 2025.
+.Version 10.5.8.4 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 19 Nov 2025.
-- ( at 13h16 )
+.Starting date : Mon  8 Dec 2025.
+- ( at 16h33 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t70.abi
 - output file    -> t70.abo
@@ -279,11 +279,15 @@ tolerances: {toldfe: 1.00E-02, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    6         0.0000064427        -0.4104866934
+   1    1   1    6        -0.0000098428         0.1222778400
   
-   2    1   1    6         0.0000001737        -0.0000404029
+   2    1   1    6        -0.0000007876         0.0000397545
   
-   3    1   1    6        -0.0000014101        -0.0000038688
+   3    1   1    6         0.0000020105         0.0000076952
+  
+   1    6   1    1        -0.0000098428        -0.1222778400
+   1    6   2    1        -0.0000007876        -0.0000397545
+   1    6   3    1         0.0000020105        -0.0000076952
   
   
   Magnetic susceptibility, in cartesian coordinates
@@ -470,10 +474,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         15.2  wall=         15.3
+- Proc.   0 individual time (sec): cpu=         15.3  wall=         15.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.2  wall=         15.3
++Overall time at end (sec) : cpu=         15.3  wall=         15.4
