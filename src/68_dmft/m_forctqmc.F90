@@ -622,29 +622,29 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !    call checkdiag_matlu(weiss_for_rot%oper(ifreq)%matlu,natom,tol6)
    end do ! ifreq
 
-!   do iatom=1,natom
-!
-!     if (iatom < 10) then
-!       write(tag_atom,'("0",I1)') iatom
-!     else 
-!       write(tag_atom,'(I2)') iatom
-!     endif
-!
-!     !print Weiss field for correlated atoms
-!     lpawu = paw_dmft%lpawu(iatom)             
-!     if (lpawu == -1) cycle                    
-!
-  !   if (myproc == mod(nproc+1,nproc)) then
-  !     if (open_file(trim(paw_dmft%filapp)//"_atom_"//tag_atom//"_G0w.dat",message,newunit=unt) /= 0) ABI_ERROR(message)
-  !     ndim = 2*paw_dmft%lpawu(iatom) + 1
-  !     do ifreq=1,nwlo
-  !       write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),&
-  !         & (((weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol),&
-  !         & im1=1,3),ispinor=1,nspinor),isppol=1,nsppol)
-  !     end do ! ifreq
-  !     close(unit=unt)
-  !   end if ! myproc=master
-  ! enddo
+   do iatom=1,natom
+
+     if (iatom < 10) then
+       write(tag_atom,'("0",I1)') iatom
+     else 
+       write(tag_atom,'(I2)') iatom
+     endif
+
+     !print Weiss field for correlated atoms
+     lpawu = paw_dmft%lpawu(iatom)             
+     if (lpawu == -1) cycle                    
+
+     if (myproc == mod(nproc+1,nproc)) then
+       if (open_file(trim(paw_dmft%filapp)//"_atom_"//tag_atom//"_G0w.dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+       ndim = 2*paw_dmft%lpawu(iatom) + 1
+       do ifreq=1,nwlo
+         write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),&
+           & (((weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol),&
+           & im1=1,3),ispinor=1,nspinor),isppol=1,nsppol)
+       end do ! ifreq
+       close(unit=unt)
+     end if ! myproc=master
+   enddo
 
    call flush_unit(std_out)
    if (pawprtvol >= 3) then
