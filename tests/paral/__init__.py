@@ -108,6 +108,9 @@ inp_files = [
 "t110.abi",
 "t111.abi",
 "t112.abi",
-"t115.abi", # DMFT dmftctqmc_basis = 4 + ctqmc_localprop soc
+"t113.abi",
+"t114.abi",
+"t115.abi",
+"t118.abi", # DMFT dmftctqmc_basis = 4 + ctqmc_localprop soc
 "t120.abi", # Test meta-GGA + PAW + paral_kgb + cprj_in_memory + istwfk
 ]

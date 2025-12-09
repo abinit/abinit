@@ -37,7 +37,7 @@ MODULE m_forctqmc
 
  use m_crystal, only : crystal_t
  use m_datafordmft, only : compute_levels,hybridization_asymptotic_coefficient
- use m_energy, only : compute_migdal_energy
+ use m_energy, only : compute_migdal_energy,compute_trace_log_loc
  use m_fstrings, only : int2char4
  use m_green, only : compute_moments_loc,copy_green,destroy_green,green_type, &
     & init_green,int_fct,occup_green_tau,print_green
@@ -49,10 +49,10 @@ MODULE m_forctqmc
      & diag_matlu,diff_matlu,fac_matlu,gather_matlu,init_matlu,magmomforb_matlu,magmomfspin_matlu, &
      & magmomfzeeman_matlu,matlu_type,print_matlu,printplot_matlu,prod_matlu,rotate_matlu,shift_matlu, &
      & slm2ylm_matlu,sym_matlu,symmetrize_matlu,xmpi_matlu,ylm2jmj_matlu,zero_matlu,magnfield_matlu,magmomjmj_matlu
+ use m_numeric_tools, only : coeffs_gausslegint
  use m_oper, only : destroy_oper,gather_oper,identity_oper,init_oper,inverse_oper,oper_type
  use m_paw_correlations, only : calc_vee
  use m_paw_dmft, only : paw_dmft_type
- use m_paw_exactDC, only : grule
  use m_paw_numeric, only : jbessel => paw_jbessel
  use m_pawang, only : pawang_type
  use m_self, only : destroy_self,initialize_self,self_type
@@ -2698,7 +2698,7 @@ end subroutine ctqmcoutput_printgreen
 
 subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_nd,fw1_nd,leg_measure,iatom)
 
-#if defined HAVE_TRIQS_v3_4 || defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
+#if defined HAVE_TRIQS_v3_2 || defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  use TRIQS_CTQMC !Triqs module
 #endif
 #if defined HAVE_PYTHON_INVOCATION
@@ -3262,7 +3262,7 @@ end subroutine ctqmc_calltriqs
 
 subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
-#if defined HAVE_TRIQS_v3_4 || defined HAVE_TRIQS_v3_2
+#if defined HAVE_TRIQS_INTERNAL || defined HAVE_TRIQS_v3_2
  use TRIQS_CTQMC
 #endif
  use ISO_C_BINDING
@@ -3278,8 +3278,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  integer :: itau,itypat,iw,l,len_t,lpawu,myproc,natom,ncon,ndim,nflavor,nflavor_max,ngauss,nleg,nmoments
  integer :: nspinor,nsppol,nsub,ntau,ntot,nwlo,p,pad_elam,pad_lambda,read_data,rot_type_vee,tndim,unt,verbo,wdlr_size
  integer, target :: ndlr
- logical :: density_matrix,entropy,leg_measure,nondiag,off_diag,rot_inv
- real(dp) :: besp,bespp,beta,dx,elam,emig_tot,err,err_,fact,fact2,tau,tol,xtau,xx
+ logical :: debug,density_matrix,entropy,leg_measure,nondiag,off_diag,rot_inv
+ real(dp) :: besp,bespp,beta,dx,elam,emig_tot,err,err_,fact,fact2,shift_mu,tau,tol,xtau,xx
  complex(dp) :: mself_1,mself_2,occ_tmp,u_nl
  complex(dp), target :: eu
  type(oper_type), target :: energy_level
@@ -3308,6 +3308,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
  basis          = paw_dmft%dmftctqmc_basis
  beta           = one / paw_dmft%temp
+ debug          = paw_dmft%dmft_triqs_prt_entropy
  density_matrix = paw_dmft%dmft_triqs_measure_density_matrix
  entropy        = (paw_dmft%dmft_triqs_entropy == 1)
  integral       = paw_dmft%dmft_triqs_compute_integral
@@ -3324,6 +3325,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  nwlo           = paw_dmft%dmft_nwlo
  off_diag       = paw_dmft%dmft_triqs_off_diag
  rot_inv        = (paw_dmft%dmft_solv == 7)
+ shift_mu       = paw_dmft%dmft_triqs_shift_mu
  tol            = paw_dmft%dmft_triqs_tol_block
 
  if (rot_inv) then
@@ -3571,7 +3573,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    ABI_MALLOC(wdlr_tmp,(wdlr_size))
    ndlr_ptr = C_LOC(ndlr)
    wdlr_ptr = C_LOC(wdlr_tmp)
-#if defined HAVE_TRIQS_v3_4 || defined HAVE_TRIQS_v3_2
+#if defined HAVE_TRIQS_INTERNAL || defined HAVE_TRIQS_v3_2
    call build_dlr(wdlr_size,ndlr_ptr,wdlr_ptr,paw_dmft%dmft_triqs_lambda,paw_dmft%dmft_triqs_epsilon)
 #endif
    if (ndlr > wdlr_size) then
@@ -3627,16 +3629,8 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
    ABI_MALLOC(tweights,(ngauss))
    ABI_MALLOC(tpoints,(ngauss))
 
-   ! Calculation of Gauss-Legendre grid (on [-1,1]) of size ngauss, only the zeros of [1...0] are returned, so the symmetric points
-   ! on [0...-1] are added afterwards
-   call grule(ngauss,tpoints(:),tweights(:))
-
-   ! Fill the symmetric t-points on [-1,0], and put array in ascending order
-   do i=1,ngauss/2  ! valid in both cases ngauss odd and ngauss even
-     tpoints(ngauss-i+1)  =   tpoints(i)
-     tpoints(i)           = - tpoints(i)
-     tweights(ngauss-i+1) =   tweights(i)
-   end do ! i
+   ! Calculation of Gauss-Legendre grid (on [-1,1]) of size ngauss
+   call coeffs_gausslegint(-one,one,tpoints(:),tweights(:),ngauss)
 
    dx = one / dble(nsub)
 
@@ -3814,7 +3808,27 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      if (ilam /= ntot) then
        write(message,'(a,3x,a,f6.4,a)') ch10,"== Thermodynamic integration over interaction for lambda= ",lam_list(ilam),ch10
        call wrtout(std_out,message,'COLL')
+
+       ! Integrate over diagonal electronic levels
+       do isppol=1,nsppol
+         do im=1,tndim
+           iflavor = im + (isppol-1)*ndim
+           levels_ctqmc(iflavor,iflavor) = energy_level%matlu(iatom)%mat(im,im,isppol) + (lam_list(ilam)-one)*shift_mu
+           if (nsppol == 1 .and. nspinor == 1) levels_ctqmc(iflavor+ndim,iflavor+ndim) = levels_ctqmc(iflavor,iflavor)
+         end do ! im
+       end do ! isppol
+
      end if ! ilam/=ntot
+
+     if (ilam == ntot .and. entropy .and. integral == 1) then
+       do isppol=1,nsppol
+         do im=1,tndim
+           iflavor = im + (isppol-1)*ndim
+           levels_ctqmc(iflavor,iflavor) = energy_level%matlu(iatom)%mat(im,im,isppol)
+           if (nsppol == 1 .and. nspinor == 1) levels_ctqmc(iflavor+ndim,iflavor+ndim) = levels_ctqmc(iflavor,iflavor)
+         end do ! im
+       end do ! isppol
+     end if
 
      if (ilam == 2) verbo = 0
 
@@ -3823,11 +3837,13 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      else
        write(tag_lam,'(i2)') ilam
      end if
+
      tag_lam2 = ""
      if (ilam /= ntot) tag_lam2 = "_ilam" // tag_lam
 
      read_data = paw_dmft%dmft_triqs_read_ctqmcdata
      stringfile = "_iatom" // tag_at // trim(adjustl(tag_lam2)) // ".h5"
+
      if (paw_dmft%idmftloop == 1) then
        read_data = 0
        if (paw_dmft%dmft_triqs_read_ctqmcdata == 1 .and. paw_dmft%ireadctqmcdata == 1) read_data = 1
@@ -3842,18 +3858,18 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
      len_t = len(trim(adjustl(fname_dataw))) + 1
      fname_dataw(len_t:len_t) = c_null_char
 
-     fname_histo = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_HISTOGRAM_iatom" // tag_at // ".dat"
+     fname_histo = trim(adjustl(paw_dmft%filapp)) // "_CTQMC_HISTOGRAM_iatom" // tag_at // trim(adjustl(tag_lam2)) // ".dat"
      len_t = len(trim(adjustl(fname_histo))) + 1
      fname_histo(len_t:len_t) = c_null_char
 
      call flush_unit(std_out)
 
-#if defined HAVE_TRIQS_v3_4 || defined HAVE_TRIQS_v3_2
+#if defined HAVE_TRIQS_INTERNAL || defined HAVE_TRIQS_v3_2
      call Ctqmc_triqs_run(rot_inv,leg_measure,paw_dmft%dmft_triqs_move_shift,paw_dmft%dmft_triqs_move_double, &
                         & density_matrix,paw_dmft%dmft_triqs_time_invariance,paw_dmft%dmft_triqs_use_norm_as_weight, &
-                        & (ilam/=ntot.and.integral==1),paw_dmft%dmft_triqs_loc_n_min,paw_dmft%dmft_triqs_loc_n_max, &
+                        & debug,merge(integral,0,ilam/=ntot),paw_dmft%dmft_triqs_loc_n_min,paw_dmft%dmft_triqs_loc_n_max, &
                         & paw_dmft%dmft_triqs_seed_a,paw_dmft%dmft_triqs_seed_b,nflavor,ntau,nleg, &
-                        & int(paw_dmft%dmftqmc_n/paw_dmft%nproc),paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm, &
+                        & paw_dmft%dmft_triqs_n_cycles,paw_dmft%dmftctqmc_meas,paw_dmft%dmftqmc_therm, &
                         & paw_dmft%dmft_triqs_therm_restart,paw_dmft%dmft_triqs_det_init_size, &
                         & paw_dmft%dmft_triqs_det_n_operations_before_check,myproc,nblocks(iatom),read_data,verbo, &
                         & beta,paw_dmft%dmft_triqs_imag_threshold,paw_dmft%dmft_triqs_det_precision_warning, &
@@ -3864,7 +3880,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
      call flush_unit(std_out)
 
-     if (ilam == ntot) then
+     if (ilam == ntot .or. debug) then
 
        do isppol=1,nsppol
          if (nsppol == 1 .and. nspinor == 1) then
@@ -3874,7 +3890,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
          end if
        end do ! isppol
 
-       if ((.not. leg_measure) .and. density_matrix) then
+       if ((.not. leg_measure) .and. density_matrix .and. ilam == ntot) then
 
          ! Constrain the occupations and high-frequency moments with the more accurate values sampled from the CTQMC
 
@@ -3923,6 +3939,14 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
          end do ! isppol
 
        end if ! density_matrix
+
+       if (ilam < ntot) then
+         call occup_green_tau(green)
+
+         write(message,'(a,3x,a)') ch10,"== Print Occupation matrix in CTQMC basis"
+         call wrtout(std_out,message,"COLL")
+         call print_matlu(green%occup_tau%matlu(:),natom,1)
+       end if
 
        if (leg_measure) then
 
@@ -3974,7 +3998,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
            leg_array(2,itau) = xtau
            do ileg=3,nleg
              leg_array(ileg,itau) = (dble(2*(ileg-2)+1)*xtau*leg_array(ileg-1,itau)- &
-             & dble(ileg-2)*leg_array(ileg-2,itau)) / dble(ileg-1)
+               & dble(ileg-2)*leg_array(ileg-2,itau)) / dble(ileg-1)
            end do ! ileg
          end do ! itau
 
@@ -3984,7 +4008,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
              do itau=1,ntau
                do ileg=1,nleg
                  gtau_leg(itau,iflavor,iflavor1) = gtau_leg(itau,iflavor,iflavor1) + &
-                  & gl(ileg,iflavor,iflavor1)*leg_array(ileg,itau)*sqrt(dble(2*ileg-1))/beta
+                   & gl(ileg,iflavor,iflavor1)*leg_array(ileg,itau)*sqrt(dble(2*ileg-1))/beta
                end do ! ileg
              end do ! itau
            end do ! iflavor
@@ -3992,7 +4016,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
          if (myproc == 0 .and. off_diag) then
 
-           if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_Leg_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+           if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_Leg_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
            write(unt,'(6a)') "# Off-diagonal components of Legendre-sampled G(tau) in the CTQMC basis",ch10, &
                            & "# Columns are ordered this way:",ch10, &
                            & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
@@ -4007,7 +4031,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
          if (myproc == 0) then
 
-           if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_Leg_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+           if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_Leg_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
            write(unt,'(5a)') "# Diagonal components of Legendre-sampled G(tau) in the CTQMC basis",ch10, &
                            & "# Columns are ordered this way:",ch10, &
                            & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"
@@ -4056,7 +4080,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
          ABI_FREE(gl_tmp)
          ABI_FREE(t_lp)
 
-       else
+       else if (ilam == ntot) then
 
          ABI_MALLOC(gl_dlr,(ndlr,tndim,tndim,nsppol))
          ABI_MALLOC(gl_dlr_re,(ndlr))
@@ -4071,7 +4095,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
          if (myproc == 0 .and. off_diag) then
 
-           if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_DLR_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+           if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_DLR_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
            write(unt,'(6a)') "# Off-diagonal components of DLR fit of G(tau) in the CTQMC basis",ch10, &
                            & "# Columns are ordered this way:",ch10, &
                            & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
@@ -4087,7 +4111,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
          if (myproc == 0) then
 
-           if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_DLR_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+           if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_DLR_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
            write(unt,'(5a)') "# Diagonal components of DLR fit of G(tau) in the CTQMC basis",ch10, &
                            & "# Columns are ordered this way:",ch10, &
                            & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"
@@ -4109,7 +4133,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
        if (myproc == 0 .and. off_diag) then
 
-         if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+         if (open_file(trim(paw_dmft%filapp)//"_Gtau_offdiag_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
          write(unt,'(6a)') "# Off-diagonal components of binned G(tau) in the CTQMC basis",ch10, &
                          & "# Columns are ordered this way:",ch10, &
                          & "# Imaginary Time     ((Re(G_{ij}) Im(G_{ij}),i=1,2*(2*l+1)),j=1,2*(2*l+1)) where the", &
@@ -4125,7 +4149,7 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
        if (myproc == 0) then
 
-         if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_iatom"//tag_at//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+         if (open_file(trim(paw_dmft%filapp)//"_Gtau_diag_iatom"//tag_at//trim(adjustl(tag_lam2))//".dat",message,newunit=unt) /= 0) ABI_ERROR(message)
          write(unt,'(5a)') "# Diagonal components of binned G(tau) in the CTQMC basis",ch10, &
                          & "# Columns are ordered this way:",ch10, &
                          & "# Imaginary Time     (G_{ii},i=1,2*(2*l+1))"
@@ -4136,20 +4160,36 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
 
        end if ! myproc
 
-       if (entropy) then
+       if (entropy .and. ilam == ntot) then
 
          call compute_migdal_energy(emig(:),emig_tot,green,paw_dmft,hybmwdhyb,iatom=iatom)
          green%ekin_imp = green%ekin_imp + two*emig_tot
 
        end if ! entropy
 
-     end if ! ilam=ntot
+     end if ! ilam=ntot or debug
 
      if (integral > 0 .and. ilam < ntot .and. entropy) then
+
        elam = dble(eu)
+
+       do isppol=1,nsppol
+         do im=1,tndim
+           iflavor = im + (isppol-1)*ndim
+
+           if (nsppol == 1 .and. nspinor == 1) then
+             occ_tmp = occ(iflavor) + occ(iflavor+ndim)
+           else
+             occ_tmp = occ(iflavor)
+           end if
+           elam = elam + dble(shift_mu*occ_tmp)
+         end do ! im
+       end do ! isppol
+
        i = mod(ilam-1,ngauss) + 1
        green%integral = green%integral + tweights(i)*elam*dx*half
        elam_list(ilam) = elam
+
      end if ! integral and ilam<ntot and entropy
 
      if (integral > 0 .and. ilam == ntot-1 .and. entropy) then
@@ -4274,7 +4314,11 @@ subroutine ctqmc_calltriqs_c(paw_dmft,green,self,hu,weiss,self_new,pawprtvol)
  call gather_oper(weiss%oper(:),weiss%distrib,paw_dmft,opt_ksloc=2)
  call gather_oper(green%oper(:),green%distrib,paw_dmft,opt_ksloc=2)
 
- call compute_moments_loc(green,self_new,energy_level,weiss,1,opt_log=paw_dmft%dmft_triqs_entropy)
+ call compute_moments_loc(green,self_new,energy_level,weiss,1,opt_log=paw_dmft%dmft_triqs_entropy,shift_mu=shift_mu)
+
+ if (entropy .and. integral > 0) then
+   call compute_trace_log_loc(weiss,paw_dmft,green%fband_weiss,opt_inv=1)
+ end if
 
  call destroy_matlu(dmat_ctqmc(:),natom)
  call destroy_matlu(eigvectmatlu(:),natom)
