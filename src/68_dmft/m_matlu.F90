@@ -3887,7 +3887,7 @@ end subroutine add_matlu
  character(len=500) :: message
  real(dp) :: xj
 !arrays
- complex(dp),allocatable :: mat_out_c(:,:),mutmp(:)
+ complex(dp),allocatable :: mat_out_c(:,:)
  integer, allocatable :: ind_msml(:,:)
  complex(dp), allocatable :: temp_mat(:,:)
  type(coeff2c_type), allocatable :: gathermatlu(:)
