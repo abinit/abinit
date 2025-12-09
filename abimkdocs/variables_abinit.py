@@ -3993,7 +3993,7 @@ Variable(
     topics=['DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: TRIQS, Number of WARMUP CYCLES at RESTART",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Specify the number of warmup cycles for each CPU when restarting the TRIQS/CT-HYB simulation from
