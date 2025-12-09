@@ -70,6 +70,7 @@ nav:
     - topics/Dev.md
     - topics/DFPT.md
     - topics/DMFT.md
+    - topics/DmftTriqsCthyb.md
     - topics/DynamicsMultibinit.md
     - topics/EffectiveMass.md
     - topics/EFG.md
@@ -212,6 +213,7 @@ nav:
         - GWR1: tutorial/gwr1.md
         - Bethe-Salpeter: tutorial/bse.md
         - DMFT: tutorial/dmft.md
+        - DMFT with TRIQS/CT-HYB: tutorial/dmft_triqs.md
         - TDDFT (Casida): tutorial/tddft.md
         - RT-TDDFT: tutorial/rttddft.md
     - DFPT & electron-phonon:

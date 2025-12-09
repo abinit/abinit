@@ -6,11 +6,11 @@
 #
 # ---------------------------------------------------------------------------------------------------------
 # -- Datasets and options
-ndtset 2
-jdtset 1 2
+ndtset 1
+jdtset 2
 prtvol 4
 pawprtvol 3
-getden -1
+getden2 1
 nsym 1
 
 # -- Convergence Parameters
@@ -52,22 +52,23 @@ dmftbandi  9
 dmftbandf 34
 dmft_solv 6
 dmft_iter 1
-dmft_nwli 50
+dmft_triqs_n_iw 50
 dmft_mxsf 0.3
 dmft_wanorthnorm 2
 
 dmft_dc 8
 dmft_yukawa_param 3
 dmft_triqs_off_diag 1
-dmftqmc_l 150
-dmftqmc_therm 100
-dmftctqmc_meas 100
-dmftctqmc_basis 1
-dmftqmc_n 1.d5
-dmft_triqs_leg_measure 1
-dmft_triqs_nleg 10
+dmft_triqs_n_tau 150
+dmft_triqs_n_warmup_cycles_init 100
+dmft_triqs_length_cycle 100
+dmft_triqs_basis 1
+dmft_triqs_n_cycles 12500
+dmft_triqs_measure_g_l 1
+dmft_triqs_n_l 10
 dmft_triqs_move_double 0
 dmft_triqs_loc_n_min 5
+dmft_triqs_n_warmup_cycles_restart 0
 
 ##### DFT+U
 usepawu1    4
@@ -77,7 +78,7 @@ lpawu   2 -1   # U on d-orbitals of Ni, no U on oxygen
 upawu1  0.00  0.0   # values in Hartree
 jpawu1  0.0000 0.0  # values in Hartree
 upawu2  0.30  0.0   # values in Hartree
-jpawu2  0.0000 0.0  # values in Hartree
+jpawu2  0.1000 0.0  # values in Hartree
 
 pp_dirpath "$ABI_PSPDIR"
 pseudos "28ni.paw, 8o.2.paw"
@@ -90,18 +91,20 @@ pseudos "28ni.paw, 8o.2.paw"
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
+#%% [shell]
+#%% pre_commands = iw_cp t106o_DS1_DEN t106_MPI8o_DS1_DEN;
 #%% [NCPU_8]
-#%% files_to_test = t106_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
-#%%                 t106_MPI8o_DS2_UnitaryMatrix_iatom0001, tolnlines = 14, tolabs = 1.e-4, tolrel = 1.e-3, fld_options=-medium;
-#%%                 t106_MPI8o_DS2_UnitaryMatrix_iatom0002, tolnlines = 14, tolabs = 1.e-4, tolrel = 1.e-3, fld_options=-medium;
+#%% files_to_test = t106_MPI8.abo, tolnlines = 2, tolabs = 5.e-6, tolrel = 1.e-6, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_UnitaryMatrix_iatom0001, tolnlines = 10, tolabs = 1.e-6, tolrel = 5.e-6, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_UnitaryMatrix_iatom0002, tolnlines = 12, tolabs = 5.e-6, tolrel = 5.e-5, fld_options=-medium;
 #%%                 t106_MPI8o_DS2_Selfmxent0001_is1_iflav0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t106_MPI8o_DS2_Selfmxent0002_is1_iflav0001, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
-#%%                 t106_MPI8o_DS2_Gtau_diag_Leg_iatom0001.dat, tolnlines = 12, tolabs = 5.e-8, tolrel = 5.e-8, fld_options=-medium;
-#%%                 t106_MPI8o_DS2_Gtau_diag_Leg_iatom0002.dat, tolnlines = 4, tolabs = 5.e-8, tolrel = 5.e-8, fld_options=-medium;
-#%%                 t106_MPI8o_DS2_Gtau_offdiag_Leg_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
-#%%                 t106_MPI8o_DS2_Gtau_offdiag_Leg_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t106_MPI8o_DS2_Gtau_diag_Leg_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_Gtau_diag_Leg_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_Gtau_offdiag_Leg_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t106_MPI8o_DS2_Gtau_offdiag_Leg_iatom0002.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%% [extra_info]
 #%% keywords = PAW, DMFT, TRIQS
-#%% authors = B. Amadon, E. Castiel
-#%% description = DFT+DMFT for NiO : test TRIQS interface with several correlated atoms, Legendre measurement and off-diagonal elements
+#%% authors = E. Castiel, B. Amadon
+#%% description = DFT+DMFT for NiO with TRIQS: test Maxent files and exact DC with Legendre measurement, off-diagonal elements and several correlated atoms
 #%%<END TEST_INFO>
