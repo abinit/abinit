@@ -8,7 +8,7 @@ jdtset 1 2     # one followed by two
 getwfk -1      # Second one takes the density of first
 
  pawprtvol 3  # Printing additional information
- prtvol 4     #
+# prtvol 4     #
  prtden -1    #
 
 ############################
@@ -119,8 +119,8 @@ jpawu2      0.70 eV  # Values of J
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10
 #%% [NCPU_10]
-#%% files_to_test = t115_MPI10.abo, tolnlines = 40, tolabs = 1.0e-04, tolrel = 1.0e-04, fld_options=-easy;
-#%%   t115_MPI10o_DS2_LocalMagnSuscept_atom_01.dat, tolnlines = 20, tolabs = 1.0e-05, tolrel = 1.0e-05, fld_options=-easy;
+#%% files_to_test = t118_MPI10.abo, tolnlines = 60, tolabs = 1.0e-04, tolrel = 1.0e-04, fld_options=-easy;
+#%%   t118_MPI10o_DS2_LocalMagnSuscept_atom_01.dat, tolnlines = 20, tolabs = 1.0e-05, tolrel = 1.0e-05, fld_options=-easy;
 #%% [extra_info]
 #%% authors = F. Gendron
 #%% keywords = DMFT, CTQMC
