@@ -11,21 +11,21 @@ to reduce the number of $\kk$ and $\qq$ points to the appropriate irreducible Br
 or automatically filtering the bands in transport calculations.
 
 However, this strategy also has important drawbacks.
-The electron–phonon matrix elements must be recomputed from scratch every time a new physical quantity is evaluated.
-More critically, there exist algorithms in which the same set of matrix elements is required multiple times.
+The e-ph matrix elements must be recomputed from scratch every time a new physical quantity is evaluated.
+More critically, there exist algorithms in which the same set of e-ph matrix elements is required multiple times.
 A notable example is the VarPEq algorithm: here an external SCF loop is present, and at each iteration
 the code must evaluate terms that depend on a fixed set of e-ph matrix elements.
 
-To overcome this limitation, starting from this version, ABINIT now provides the capability to precompute the $\gkq$
-matrix elements using a dedicated EPH sub-driver:
+To overcome this limitation, starting from version ??, ABINIT now provides the capability to precompute the $\gkq$
+matrix elements using a dedicated EPH sub-driver that is activated using:
 
 [[optdriver]] 7   # Enter EPH code.
 [[eph_task]] 11   # GSTORE computation
 
 It is important to understand, however, that the user is now responsible for specifying
 how the $\kk$-mesh and $\qq$-mesh should be sampled and how symmetries should be applied to reduce the number of matrix elements.
-All variables controlling the GSTORE computation start with the gstore_ prefix.
-Default values are provided and are generally well suited for standard electronic-structure workflows,
+All variables controlling the GSTORE computation start with the `gstore_` prefix.
+Default values are provided that are generally well suited for standard electronic-structure workflows,
 but in many situations you may need to customize or override the default behavior depending on your specific use case.
 This guide aims to help you understand how to select the appropriate options.
 
@@ -58,7 +58,7 @@ mutually exclusive variables [[gstore_use_lgq]] and [[gstore_use_lgk]].
 In some cases, the integration over the BZ can indeed be restricted by symmetry to the irreducible wedge defined by the "external" wavevector.
 The following examples will help clarify this point.
 
-The electron self-energy Sigma_\nk is defined by an integration over $\qq$-points in the full BZ
+The electron self-energy Sigma_\nk is defined by an integration over $\qq$-points in the full BZ,
 but one can use the symmetries of the little group of $\kk$ to restrict
 
 $$
@@ -71,7 +71,8 @@ In this case, one can use
 [[gstore_qzone]] "bz"
 [[gstore_use_lgk]] 1   # Default is 0
 
-For phonon properties, one can use
+
+For phonon properties, one should use
 
 [[gstore_kzone]] "bz"
 [[gstore_qzone]] "ibz"
@@ -80,17 +81,17 @@ For phonon properties, one can use
 !!! important
 
     Not all the e-ph calculations are compatible with the little group filtering.
-    Please check the documentation or run small test calculations before firing big calculations.
+    Please check the documentation and/or run small test calculations before firing big calculations.
 
 
 Now we turn to the problem of selecting the bands that enter the e-ph matrix elements.
 Several options are available, each tailored to simplify a different type of calculation.
 Let us begin with the default behavior.
-If no specific option is provided in the input file, ABINIT computes **all** matrix elements with m and n ranging from 1 up to [[nband]].
+If no specific option is provided in the input file, ABINIT computes **all** matrix elements with $m$ and $n$ ranging from 1 up to [[nband]].
 Clearly, this is rarely what you actually want: not all these transitions are needed to compute the final physical properties.
-However, ABINIT cannot (yet) read your mind, so you must **explicitly** specify the band ranges in the input.
+However, ABINIT cannot (yet) read your mind, so you must **explicitly** specify the band ranges in the input file.
 
-The most basic variable is [[gstore_brange]], which defines the range of the m and n indices
+The most basic variable is [[gstore_brange]], which defines the range of the $m$ and $n$ indices
 (for each spin channel when [[nsppol]] = 2).
 [[gstore_brange]] gives you full control over the bands to include, but it is not always
 the most convenient option — especially when the relevant contributions to the physical properties come
@@ -124,8 +125,8 @@ The user can specify manually the MPI grid using [[eph_np_pqbks]].
 In this case the product of the MPI processors along the different dimensions must be equal to the
 total number of MPI processes allocated by the user, else the code will stop as idle processes are not supported.
 
-If [[eph_np_pqbks]] is not specified in the input, the code will generate this grid automatically
-using the total number of processors and the basic dimensions of the job computed at runtime.
+If [[eph_np_pqbks]] is not specified in the input, the code will generate the MPI grid automatically
+using the total number of MPI processors and the basic dimensions of the job computed at runtime.
 
 If you decide to enforce your MPI grid with [[eph_np_pqbks]], take into account the following.
 The parallelization levels over collinear spins, $\kk$-points and $\qq-points$ are the most efficient ones
@@ -139,10 +140,19 @@ Note that the parallelism over bands is not supported in GSTORE computation.
 TODO: GWPT and [[gwpt_np_wpqbks]]
 Also [[boxcutmin]] to accelerate computations.
 
-## How to density the q-mesh
+!!! important
 
-[[eph_ngqpt_fine]]
+    The output of the GSTORE file requires a netcdf library with MPI-IO support.
 
+## How to densify the q-mesh
+
+By default, the e-ph matrix elements are computed using the coarse ab-initio $\qq$-mesh given by [[ddb_ngqpt]].
+This is the $\qq$-mesh used in the DFPT calculation.
+
+To densify the $\qq$-mesh, use [[eph_ngqpt_fine]] but remember that
+The $\qq$-mesh must be identical to, or a submesh of, the $\kk$-mesh associated with the WFK file.
+
+Further details on the interpolation of the DFPT scattering potentials are available in this section.
 
 ## Restarting a GSTORE computation
 
