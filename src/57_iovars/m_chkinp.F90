@@ -3052,18 +3052,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
-!<<<<<<< HEAD
    !Longwave not compatible with spinors
    if(nspinor/=1.and.dt%timdisp==0)then
      cond_string(1)='nspinor' ; cond_values(1)=nspinor
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
    end if
-   !Longwave calculation not compatible with nonlinear core corrections
-   if(dt%optdriver==RUNL_LONGWAVE.and.dt%timdisp==0.and.dt%lw_flexo/=0)then
-!=======
    !Longwave calculation only compatible with nonlinear core corrections for quadrupoles and NOA
-!   if(dt%optdriver==RUNL_LONGWAVE.and.dt%lw_flexo/=0)then
-!>>>>>>> trunk/develop
+   if(dt%optdriver==RUNL_LONGWAVE.and.dt%timdisp==0.and.dt%lw_flexo/=0)then
      do ipsp=1,npsp
        !  Check that xccc is zero
        if (pspheads(ipsp)%xccc/=0) then

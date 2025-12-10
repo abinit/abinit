@@ -150,40 +150,6 @@ program anaddb
    end if
  end if
 
-!<<<<<<< HEAD
-!!******************************************************************
-!
-! ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
-! call ddb_hdr%open_read(filnam(3), ddbun, comm = comm, dimonly = 1)
-!
-! natom = ddb_hdr%natom
-! ntypat = ddb_hdr%ntypat
-! mtyp = ddb_hdr%mblktyp
-! usepaw = ddb_hdr%usepaw
-!
-! call ddb_hdr%free()
-!
-! mpert = 2*natom+MPERT_MAX
-! msize = 3*mpert*3*mpert; if (mtyp == 3) msize = msize*3*mpert
-!
-! ! Read the input file, and store the information in a long string of characters
-! ! strlen from defs_basis module
-! if (iam_master) then
-!   call instrng(filnam(1), lenstr, 1, strlen, string, raw_string)
-!   ! To make case-insensitive, map characters to upper case.
-!   call inupper(string(1:lenstr))
-! end if
-!
-! call xmpi_bcast(string, master, comm, ierr)
-! call xmpi_bcast(raw_string, master, comm, ierr)
-! call xmpi_bcast(lenstr, master, comm, ierr)
-!
-! ! Save input string in global variable so that we can access it in ntck_open_create
-! INPUT_STRING = raw_string
-!
-! ! Read the inputs
-! call invars9(dtset, lenstr, natom, string)
-!=======
 ! ========================================================================== !
 ! Read input variables
  call dtset%read_input(comm)
