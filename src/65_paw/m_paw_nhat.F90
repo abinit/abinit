@@ -480,8 +480,8 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 
 !    Add the contribution of the atom to the compensation charge
 !    LB-2025-12-11 : if the PAW sphere overlaps with itself (true if it is larger than the unit cell, rare case but possible...),
-!    then several values of ic can give the same kc in the following loops, so they are not independent, and cannot be parallelized
-!    (for example with OpenMP directives)
+!    then several values of ic can give the same kc in the following loops, so the iterations are not independent,
+!    and cannot be parallelized (for example with OpenMP directives)
      if (compute_nhat) then
        if (cplex==1) then
          ! Not possible to parallelize here (see comment above)
