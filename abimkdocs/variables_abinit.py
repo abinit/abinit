@@ -17674,8 +17674,7 @@ ELF is computed from an alternative approach which should better take into
 account the existence of spin dependent densities (see the documentation in
 /doc/theory/ELF of your ABINIT repository)
 
-Please note that ELF is **not** yet implemented in the case of PAW
-([[usepaw]] = 1) calculations.
+Please note that ELF is **not** yet implemented in the case of PAW ([[usepaw]] = 1) calculations.
 """,
 ),
 

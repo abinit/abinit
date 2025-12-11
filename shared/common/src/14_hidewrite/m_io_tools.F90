@@ -655,7 +655,6 @@ subroutine flush_unit(unit)
 
 !Local variables-------------------------------
  logical :: isopen
-
 !************************************************************************
 
  if (unit == dev_null) return
