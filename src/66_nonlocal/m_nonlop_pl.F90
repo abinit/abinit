@@ -36,7 +36,7 @@ module m_nonlop_pl
  use m_opernl
 
  use defs_abitypes, only : MPI_type
- use m_geometry,   only : strconv
+ use m_geometry,   only : strconv, geteuler
  use m_kg,         only : ph1d3d
  use m_contract,   only : cont22cso, cont22so, cont24, cont33cso, cont33so, cont35, cont22, cont3, cont13, &
                           metcon, metcon_so, metric_so
@@ -174,7 +174,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 &                     kptin,kptout,lmnmax,matblk,mgfft,mpi_enreg,mpsang,mpssoang,&
 &                     natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,npwin,npwout,nspinor,nspinortot,&
 &                     ntypat,only_SO,phkxredin,phkxredout,ph1d,ph3din,ph3dout,signs,&
-&                     ucvol,use_gbt,vectin,vectout)
+&                     spinaxis,ucvol,use_gbt,vectin,vectout)
 
 !Arguments ------------------------------------
 !This type is defined in defs_mpi
@@ -195,7 +195,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  real(dp),intent(in) :: gprimd(3,3),kpgin(npwin,nkpgin),kpgout(npwout,nkpgout)
 !real(dp),intent(in) :: kptin(3),kptout(3),ph1d(2,3*(2*mgfft+1)*natom) !vz_d
  real(dp),intent(in) :: kptin(3),kptout(3) !vz_d
- real(dp),intent(in) :: ph1d(2,*) !vz_d
+ real(dp),intent(in) :: ph1d(2,*),spinaxis(3) !vz_d
  real(dp),intent(in) :: phkxredin(2,natom),phkxredout(2,natom)
  real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
  real(dp),intent(inout) :: vectin(:,:)
@@ -233,7 +233,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  integer :: mincat,mproj,mu,mumax,n1,n2,n3,ndgxdt,ndgxdtfac,nincat,nlang
  integer :: nproj,nspinso,rank
  integer :: sign,spaceComm,  isft
- real(dp) :: e2nl,e2nldd,enlk
+ real(dp) :: alpha,beta,e2nl,e2nldd,enlk
  character(len=500) :: msg
 !arrays
  integer,allocatable :: indlmn_s(:,:,:),jproj(:)
@@ -289,7 +289,10 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
      soc_weight(1:2) = 0
      if (ispin_gbt == 2) soc_weight(3) = -1
    end if
-   call metric_so(amet,soc_weight,gprimd,pauli)
+   call geteuler(spinaxis,alpha,beta)
+   write(std_out,*) ' SPINAXIS = ', spinaxis(1), spinaxis(2), spinaxis(3)
+   write(std_out,*) ' alpha (rad) = ', alpha, ' beta (rad) = ', beta
+   call metric_so(amet,soc_weight,gprimd,pauli,alpha,beta)
  end if
 
 !Allocate array gxa (contains projected scalars).

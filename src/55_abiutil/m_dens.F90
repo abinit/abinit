@@ -33,7 +33,7 @@ MODULE m_dens
  use m_time,          only : timab
  use m_numeric_tools, only : wrap2_zero_one
  use m_io_tools,      only : open_file
- use m_geometry,      only : dist2, xcart2xred, metric
+ use m_geometry,      only : dist2, xcart2xred, metric, geteuler, cart2spinaxis
  use m_mpinfo,        only : ptabs_fourdp
 
  implicit none
@@ -796,7 +796,7 @@ end subroutine constrained_dft_free
 !!
 !! SOURCE
 
- subroutine constrained_residual(c_dft,e_constrained_dft,grcondft,intgres,mpi_enreg,rhor,strscondft,vresid,xred,qgbt,use_gbt)
+ subroutine constrained_residual(c_dft,e_constrained_dft,grcondft,intgres,mpi_enreg,rhor,spinaxis,strscondft,vresid,xred,qgbt,use_gbt)
 
 !Arguments ------------------------------------
 !scalars
@@ -810,7 +810,7 @@ end subroutine constrained_dft_free
  real(dp),intent(in) :: rhor(c_dft%nfftf,c_dft%nspden)
  real(dp),intent(out) :: strscondft(6)
  real(dp),intent(inout) :: vresid(c_dft%nfftf,c_dft%nspden)
- real(dp),intent(in) :: xred(3,c_dft%natom),qgbt(3)
+ real(dp),intent(in) :: xred(3,c_dft%natom),qgbt(3),spinaxis(3)
 
 !Local variables-------------------------------
 !scalars
@@ -849,7 +849,7 @@ end subroutine constrained_dft_free
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,&
                     xred,1,cplex1,qgbt,use_gbt,intgden=intgden,gr_intgden=gr_intgden,rhomag=rhomag,strs_intgden=strs_intgden)
 
- call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
+ call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,spinaxis,c_dft%typat)
 
 !DEBUG
 !write(std_out,*) ' intgden(1:nspden,1:natom)=',intgden(1:nspden,1:natom)
@@ -887,7 +887,7 @@ end subroutine constrained_dft_free
  enddo
 
 !Print the potential residuals
- call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,[std_out],11,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
+ call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,[std_out],11,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,spinaxis,c_dft%typat)
  ABI_FREE(intgres_tmp)
 
 !Also exchanges the spin and atom indices to prepare the solution of the linear system of equation
@@ -1223,7 +1223,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred,qgbt,use_gbt)
 !arrays
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
- real(dp) :: rhomag(2,c_dft%nspden),spinat_normed(3)
+ real(dp) :: rhomag(2,c_dft%nspden),spinat_normed(3),spinaxis(3)
 ! ***********************************************************************************************
 
  magconon=c_dft%magconon
@@ -1239,7 +1239,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred,qgbt,use_gbt)
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
                     c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,cplex1,qgbt,use_gbt,intgden=intgden,rhomag=rhomag)
 
- call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
+ call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,spinaxis,c_dft%typat)
 
 !Loop over atoms
 !-------------------------------------------
@@ -1372,7 +1372,7 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
  real(dp) :: intmm(3), mag_1atom(3)
  real(dp), allocatable :: intgden(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),ucvol
- real(dp) :: rhomag(2,nspden),spinat_normed(3)
+ real(dp) :: rhomag(2,nspden),spinat_normed(3),spinaxis(3)
  character(len=500) :: msg
 ! *********************************************************************
 
@@ -1385,7 +1385,7 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
  call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
                     1,cplex1,qgbt,use_gbt,intgden=intgden,rhomag=rhomag)
 
- call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,ratsm,ratsph,rhomag,typat)
+ call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,ratsm,ratsph,rhomag,spinaxis,typat)
 
  Epen=0
  Econstr=0
@@ -1957,13 +1957,13 @@ end subroutine calcdenmagsph
 !!
 !! SOURCE
 
-subroutine prtdenmagsph(cplex, intgden, natom, nspden, ntypat, units, option, qgbt, ratsm, ratsph, rhomag, typat, ziontypat)
+subroutine prtdenmagsph(cplex, intgden, natom, nspden, ntypat, units, option, qgbt, ratsm, ratsph, rhomag, spinaxis, typat, ziontypat)
 
 !Arguments ---------------------------------------------
 !scalars
 integer,intent(in)  :: natom,nspden,ntypat
-integer,intent(in) :: units(:)
-real(dp),intent(in) :: ratsm
+integer,intent(in)  :: units(:)
+real(dp),intent(in) :: ratsm, spinaxis(3)
 integer ,intent(in) :: option
 integer, intent(in) :: cplex
 !arrays
@@ -1975,9 +1975,9 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
 !Local variables ------------------------------
 !scalars
  integer :: iatom,ix
- real(dp) :: mag_coll   , mag_x, mag_y, mag_z ! EB
+ real(dp) :: alpha, beta, mag_coll, mag_x, mag_y, mag_z ! EB
  real(dp) :: mag_coll_im, mag_x_im, mag_y_im, mag_z_im ! SPr
- real(dp) :: rho_tot, rho_tot_im
+ real(dp) :: Rspin(3,3), Rspin_t(3,3), rho_tot, rho_tot_im
  real(dp) :: sum_mag, sum_mag_x,sum_mag_y,sum_mag_z,sum_rho_up,sum_rho_dn,sum_rho_tot ! EB
  character(len=500) :: msg,msg1
 ! *************************************************************************
@@ -2006,6 +2006,29 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
    sum_rho_up=zero
    sum_rho_dn=zero
    sum_rho_tot=zero
+
+  !Print spinaxis angles and rotation matrices
+   if(any(abs(spinaxis(:) - (/0.0_dp, 0.0_dp, 1.0_dp/)) > tol8) ) then
+      call geteuler(spinaxis, alpha, beta)
+      msg=' Spinaxis rotation information:'
+      write(msg, '(3a)' ) trim(msg),ch10,' ------------------------------'; call wrtout(units,msg)
+      write(msg, '(a,f12.6)') ' Alpha rotation angle around z-axis (degrees):', alpha * 180.0_dp / pi; call wrtout(units,msg)
+      write(msg, '(a,f12.6)') ' Beta rotation angle around y-axis (degrees): ', beta  * 180.0_dp / pi; call wrtout(units,msg)
+      write(msg, '(a)') ' ---------------------------------------------------------'; call wrtout(units,msg)
+      call cart2spinaxis(alpha, beta, Rspin)
+      write(msg, '(a)') ' Rotation matrix from cartesian coordinate to spinaxis coordinate'; call wrtout(units,msg)
+      write(msg, '(3f14.8)') Rspin(1,1), Rspin(1,2), Rspin(1,3); call wrtout(units,msg)
+      write(msg, '(3f14.8)') Rspin(2,1), Rspin(2,2), Rspin(2,3); call wrtout(units,msg)
+      write(msg, '(3f14.8)') Rspin(3,1), Rspin(3,2), Rspin(3,3); call wrtout(units,msg)
+
+      Rspin_t = transpose(Rspin)
+      write(msg, '(a)') ' Rotation matrix from spinaxis coordinate to cartesian coordinate'; call wrtout(units,msg)
+      write(msg, '(3f14.8)') Rspin_t(1,1), Rspin_t(1,2), Rspin_t(1,3); call wrtout(units,msg)
+      write(msg, '(3f14.8)') Rspin_t(2,1), Rspin_t(2,2), Rspin_t(2,3); call wrtout(units,msg)
+      write(msg, '(3f14.8)') Rspin_t(3,1), Rspin_t(3,2), Rspin_t(3,3); call wrtout(units,msg)
+      write(msg, '(a)') ' ----------------------------------------------------------------'
+      call wrtout(units,msg)
+   end if
 
    if(option==1 .or. option==11 .or. option==21) then
 

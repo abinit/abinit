@@ -3880,6 +3880,15 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
     ABI_ERROR_NOSTOP(msg,ierr)
   end if
 
+!  spinaxis: only avaliable for SOC/cDFT/hspinfield
+!   if(any(abs(dt%spinaxis(:)-(/0.0_dp,0.0_dp,1.0_dp/)) > tol8)) then
+!     if(all(dt%so_psp(1:dt%ntypat)/=1) .and. & 
+!        all(abs(dt%hspinfield(:))<tol8) .and. &
+!        all(dt%constraint_kind(1:dt%ntypat)==0)) then
+!        ABI_ERROR_NOSTOP("spinaxis is defined but no SOC, hspinfield or cDFT is active. spinaxis will be ignored.", ierr)
+!     end if
+!   end if
+
 !  spinmagntarget
    if(abs(dt%spinmagntarget+99.99d0)>tol8 .and. abs(dt%spinmagntarget)>tol8)then
      if(nsppol==1)then
