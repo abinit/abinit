@@ -7170,6 +7170,12 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, wt_space, keep_file, filepath)
  ! Reopen the file in gwr%comm.
  NCF_CHECK(nctk_open_modify(ncid, filepath, gwr%comm%value))
 
+ if (wt_space == "omega") then
+   NCF_CHECK(nctk_prepare_mpiio(ncid, "mats_w"))
+ else if (wt_space == "tau") then
+   NCF_CHECK(nctk_prepare_mpiio(ncid, "mats_tau"))
+ end if
+
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iqi=1,gwr%my_nqibz
