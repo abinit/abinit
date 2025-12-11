@@ -15,12 +15,12 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu 11 Dec 2025.
-- ( at 11h02 )
+- ( at 11h11 )
   
-- input  file    -> /tmp/abinit/fix-nhat-overlap-threads_fftwopenblas_debug/Test_suite/v10_t31/t31.abi
-- output file    -> t31.abo
-- root for input  files -> t31i
-- root for output files -> t31o
+- input  file    -> /tmp/abinit/fix-nhat-overlap-threads_fftwopenblas_debug/Test_suite/v10_t39/t39.abi
+- output file    -> t39.abo
+- root for input  files -> t39i
+- root for output files -> t39o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /cea/home/l2/baguetl/PROGRAM/abinit/fix-nhat-overlap-threads/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
@@ -304,7 +304,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  2.000000000000  2.000000000000  2.000000000000 bohr
               =  1.058354417180  1.058354417180  1.058354417180 angstroms
- prteigrs : about to open file t31o_EIG
+ prteigrs : about to open file t39o_EIG
  Fermi (or HOMO) energy (hartree) =   5.21492   Average Vxc (hartree)=  -0.94681
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 24, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
