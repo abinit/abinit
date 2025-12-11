@@ -37,7 +37,7 @@ The default behavior is:
 [[gstore_qzone]] = "bz"
 
 These settings are OK if you need to compute electronic properties such as the electron self-energy
-required for ZPR or electronic transport calculations.
+required for the ZPR or electronic transport calculations.
 For the phonon self-energy, on the other hand, on should override the default behaviour using
 
 [[gstore_kzone]] = "bz"
@@ -53,13 +53,13 @@ For the phonon self-energy, on the other hand, on should override the default be
     of the GSTORE does not support symmetries.
 
 
-An additional reduction of the wavevectors can be achieved with the two
+An additional reduction of the number of wavevectors can be achieved with the two
 mutually exclusive variables [[gstore_use_lgq]] and [[gstore_use_lgk]].
 In some cases, the integration over the BZ can indeed be restricted by symmetry to the irreducible wedge defined by the "external" wavevector.
 The following examples will help clarify this point.
 
 The electron self-energy Sigma_\nk is defined by an integration over $\qq$-points in the full BZ,
-but one can use the symmetries of the little group of $\kk$ to restrict
+but one can use the symmetries of the little group of $\kk$ to restrict the integration to a smaller zone.
 
 $$
 Sigma_\nk = \int_BZ d\qq = \int_{IBZ_\kk} w^\kk(q) [...]
