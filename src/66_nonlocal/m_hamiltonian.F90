@@ -198,7 +198,7 @@ module m_hamiltonian
   ! Governs the choice of the GPU implementation:
   !        = 0 ==> do not use GPU
   !        > 0 ==> see defs_basis.F90 to have the list of possible GPU implementations
-
+  
   integer :: usecprj = -1
    ! usecprj= 1 if cprj projected WF are stored in memory
    !        = 0 if they are to be computed on the fly
@@ -339,6 +339,9 @@ module m_hamiltonian
 
   real(dp) :: kpt_kp(3)
    ! dimensionless k^prime point coordinates wrt reciprocal lattice vectors
+
+  real(dp) :: spinaxis(3)
+   ! spin quantization axis
 
   real(dp), allocatable :: nucdipmom(:,:)
    ! nucdipmom(3,natom)
@@ -747,7 +750,7 @@ end subroutine gsham_free
 subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
                      xred,nfft,mgfft,ngfft,rprimd,nloalg,&
                      ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&   ! optional
-                     electronpositron,fock,nucdipmom,gpu_option,use_gbt,zora) ! optional
+                     electronpositron,fock,nucdipmom,gpu_option,spinaxis,use_gbt,zora) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -762,7 +765,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  integer,optional,intent(in)  :: mpi_atmtab(:),mpi_spintab(2)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(in),target :: xred(3,natom)
- real(dp),optional,intent(in) :: nucdipmom(3,natom),ph1d(2,3*(2*mgfft+1)*natom)
+ real(dp),optional,intent(in) :: nucdipmom(3,natom),ph1d(2,3*(2*mgfft+1)*natom),spinaxis(3)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_ij_type),optional,intent(in) :: paw_ij(:)
 
@@ -789,6 +792,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  my_zora=0; if (present(zora)) my_zora=zora
 
  ham%use_gbt = 0; if (present(use_gbt)) ham%use_gbt = use_gbt
+ ham%spinaxis = zero; if (present(spinaxis)) ham%spinaxis = spinaxis
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -1421,6 +1425,7 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
  gs_hamk_out%n5 = gs_hamk_in%n5
  gs_hamk_out%n6 = gs_hamk_in%n6
  gs_hamk_out%gpu_option = gs_hamk_in%gpu_option
+ gs_hamk_out%spinaxis = gs_hamk_in%spinaxis
  gs_hamk_out%usecprj = gs_hamk_in%usecprj
  gs_hamk_out%usepaw = gs_hamk_in%usepaw
  gs_hamk_out%useylm = gs_hamk_in%useylm

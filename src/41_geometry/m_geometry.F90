@@ -79,7 +79,7 @@ MODULE m_geometry
  public :: d3lwsym
  public :: sylwtens             ! Determines the set of irreductible elements of the spatial-dispersion tensors
  public :: geteuler             ! Compute the Euler angles corresponding to the spin quantization axis
- public :: spinaxis2cart        ! Compute the rotation matrix from spinaxis to cartesian cordinate     
+ public :: cart2spinaxis        ! Compute the rotation matrix from cartesian to spinaxis coordinate     
 
  interface normv
   module procedure normv_rdp_vector
@@ -4088,7 +4088,6 @@ end subroutine sylwtens
 !!
 !! FUNCTION
 !! Compute the Euler angles (alpha, beta) corresponding to the spin quantization axis given in Cartesian coordinates.
-!! The Euler angles define the rotation that maps this axis to the (0,0,1) direction.
 !!
 !! INPUTS
 !! spinaxis(3)=spin quantization axis
@@ -4109,65 +4108,64 @@ subroutine geteuler(spinaxis, alpha, beta)
 
 !Local variables -------------------------
 !arrays
- real(dp) :: sx, sy, sz
+ real(dp) :: sx, sy, sz, norm
 !***********************************************************************
  sx = spinaxis(1)
  sy = spinaxis(2)
  sz = spinaxis(3)
 
  alpha = atan2(sy, sx)
- beta = atan2(sqrt(sx*sx + sy*sy), sz)
+ beta  = atan2(sqrt(sx*sx + sy*sy), sz)
 
 end subroutine geteuler
 !!***
 
-!!****f* m_geometry/spinaxis2cart
+!!****f* m_geometry/cart2spinaxis
 !! NAME
-!! spinaxis2cart
+!! cart2spinaxis
 !!
 !! FUNCTION
 !! Compute the rotation matrix R = Rz(alpha)*Ry(beta) and rotate a vector in 
-!! spinaxis condinate to cartsian cordinate
+!! cartesian coordinate to spinaxis coordinates
 !!
 !! INPUTS
 !! alpha=Euler angle for rotation around z-axis
 !! beta=Euler angle for rotation around y-axis
-!! vin(3)= 
+!! vin(3)=vector in the cartesian coordinate 
 !!
 !! OUTPUT
-!! R(3,3)=transformation matrix from spinaxis to cartsian cordinate
-!! vout(3)=rotated vector 
+!! R(3,3)=rotation matrix from cartesian to spinaxis coordinates
+!! vout(3)=vector in spinaxis coordinate
 !!
 !! SOURCE
 
-subroutine spinaxis2cart(alpha, beta, vin, vout, R)
+subroutine cart2spinaxis(alpha, beta, R, vin, vout)
 
 !Arguments -------------------------------
-!scalars
 !arrays
- real(dp),intent(in) :: alpha, beta, vin(3)
- real(dp),intent(out) :: vout(3), R(3,3)
-
-!Local variables -------------------------
-!arrays
+ real(dp),intent(in) :: alpha, beta
+ real(dp),intent(out) :: R(3,3)
+ real(dp),optional,intent(in) :: vin(3)
+ real(dp),optional,intent(out) :: vout(3)
 !***********************************************************************
 
-! Rotation matrix R = Rz^(alpha) * Ry^(beta)
  R(1,1) = cos(beta)*cos(alpha)
- R(1,2) = -sin(alpha)
- R(1,3) = sin(beta)*cos(alpha)
+ R(1,2) = cos(beta)*sin(alpha)
+ R(1,3) = -sin(beta)
 
- R(2,1) = cos(beta)*sin(alpha)
+ R(2,1) = -sin(alpha)
  R(2,2) = cos(alpha)
- R(2,3) = sin(beta)*sin(alpha)
+ R(2,3) = 0.0_dp
 
- R(3,1) = -sin(beta)
- R(3,2) = 0.0_dp
+ R(3,1) = sin(beta)*cos(alpha)
+ R(3,2) = sin(beta)*sin(alpha)
  R(3,3) = cos(beta)
 
- vout = matmul(R, vin)
+ if (present(vin) .and. present(vout)) then
+     vout = matmul(R, vin)
+ end if
 
-end subroutine spinaxis2cart
+end subroutine cart2spinaxis
 
 end module  m_geometry
 !!***

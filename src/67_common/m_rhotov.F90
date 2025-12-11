@@ -507,7 +507,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
      !If constrained_dft, must take into account the constraints, and recompute the residual and the new potential
      if( any(dtset%constraint_kind(:)/=0))then
        call constrained_residual(constrained_dft,energies%e_constrained_dft,&
-&        grcondft,intgres,mpi_enreg,rhor,strscondft,vresidnew,xred,dtset%qgbt,dtset%use_gbt)
+&        grcondft,intgres,mpi_enreg,rhor,dtset%spinaxis,strscondft,vresidnew,xred,dtset%qgbt,dtset%use_gbt)
        vnew(:,1:dtset%nspden)=vtrial(:,1:dtset%nspden)+vresidnew(:,1:dtset%nspden)
      endif
 
