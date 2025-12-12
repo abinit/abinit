@@ -53,15 +53,15 @@ usedmft1 0
 usedmft2 1
 dmftbandi 21
 dmftbandf 23 # include V t2g bands
-dmft_nwli 500
+dmft_triqs_n_iw 500
 dmft_iter 1
 dmft_mxsf 0.7
 dmft_dc 5
 dmft_t2g 1
 
 dmft_prtwan 1
-dmft_triqs_wmax 1.
-dmft_triqs_epsilon 1.d-4
+dmft_triqs_dlr_wmax 1.
+dmft_triqs_dlr_epsilon 1.d-4
 
 dmft_solv 6 # Density-density TRIQS
 
@@ -82,15 +82,16 @@ npband2 2
 npfft2 1
 nblock_lobpcg 1
 
-dmftctqmc_meas 10
-dmftctqmc_basis 0
-dmftqmc_therm 500
-dmftqmc_l 300
+dmft_triqs_length_cycle 10
+dmft_triqs_basis 0
+dmft_triqs_n_warmup_cycles_init 500
+dmft_triqs_n_tau 300
 dmft_triqs_off_diag 0
-dmftqmc_n 1.d6
+dmft_triqs_n_cycles 125000
+dmft_triqs_n_warmup_cycles_restart 0
 
-dmft_triqs_seed_a  33543
-dmft_triqs_seed_b  95321
+dmft_triqs_random_seed_a  33543
+dmft_triqs_random_seed_b  95321
 
 prtwf 0
 
@@ -111,6 +112,6 @@ pseudos "23v.paw, 38sr.paw, 8o.paw"
 #%% [extra_info]
 #%% authors = B. Amadon, E. Castiel
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for SrVO3 : test TRIQS interface with KGB parallelization
+#%% description = DFT+DMFT for SrVO3 with TRIQS: test KGB parallelization and Wannier functions with t2g orbitals
 #%% topics = DMFT, parallelism
 #%%<END TEST_INFO>

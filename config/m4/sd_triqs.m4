@@ -220,9 +220,9 @@ AC_DEFUN([SD_TRIQS_DETECT], [
           AC_DEFINE([HAVE_TRIQS_v3_2], 1,
             [Define to 1 if you have the TRIQS 3.2 libraries.])
           ;;
-        3.4)
-          AC_DEFINE([HAVE_TRIQS_v3_4], 1,
-            [Define to 1 if you have the TRIQS 3.4 libraries.])
+        internal)
+          AC_DEFINE([HAVE_TRIQS_INTERNAL], 1,
+            [Define to 1 if you have the TRIQS internal libraries.])
           ;;
         *)
           AC_MSG_ERROR([TRIQS API version ${sd_triqs_api_version} not implemented in the build system])
@@ -271,7 +271,7 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
   LDFLAGS="${LDFLAGS} ${sd_triqs_ldflags}"
   LIBS="${sd_triqs_libs} ${LIBS}"
 
-  # Check TRIQS internal C++ API
+  # Check TRIQS C++ API
   AC_MSG_CHECKING([whether you are linked against the internal TRIQS library])
   AC_LANG_PUSH([C++])
   AC_LINK_IFELSE([AC_LANG_PROGRAM(
@@ -285,13 +285,13 @@ AC_DEFUN([_SD_TRIQS_CHECK_USE], [
       triqs_cthyb::many_body_op_t H;
       auto paramCTQMC = triqs_cthyb::solve_parameters_t(H,1);
       paramCTQMC.time_invariance = true;
-    ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="3.4"], [sd_triqs_ok="no"])
+    ]])], [sd_triqs_ok="yes"; sd_triqs_api_version="internal"], [sd_triqs_ok="no"])
   AC_LANG_POP([C++])
   AC_MSG_RESULT([${sd_triqs_ok}])
 
   # Check TRIQS C++ API
   if test "${sd_triqs_ok}" != "yes"; then
-    AC_MSG_CHECKING([whether the TRIQS library works])
+    AC_MSG_CHECKING([whether you are linked against the official >=3.2.x TRIQS API])
     AC_LANG_PUSH([C++])
     AC_LINK_IFELSE([AC_LANG_PROGRAM(
       [[

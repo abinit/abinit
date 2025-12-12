@@ -1,0 +1,113 @@
+# Multi_dataset parameters
+ ndtset 2       # Two datasets
+ jdtset 1 2     # one followed by two
+ getden -1      # Second one takes the density of first
+
+ pawprtvol 3  # Printing additional information
+ prtvol 4
+
+############################
+# Structural Parameters
+############################
+#Definition of unit cell
+ acell 3*5.44761       # lattice parameter from J Phys. Condens. Matt
+ rprim -0.5  0.5  0.5  # Primitive cell
+        0.5 -0.5  0.5
+        0.5  0.5 -0.5
+
+#Definition atom
+ ntypat 1   # number of different types of atoms
+ znucl 26   # z number of atom
+
+#Definition of the atoms
+ natom 1           # number of atoms
+ typat 1           # type of atom
+ xred 0.0 0.0 0.0  # reduced coordinates for primitive cell
+
+#Definition pseudopotentials
+ pp_dirpath "$ABI_PSPDIR"            # repository with pseudopotentials
+ pseudos "26fe.lda2.paw"
+
+#Definition of the k-point grid
+ kptopt 1
+ ngkpt 6 6 6              # Reciprocal space vectors are built from
+                          # the rprim parameters. This is the size of the
+                          # reciprocal k-points.
+ nshiftk 2                # Convergence of the density with regular shifts.
+ shiftk 0.25  0.25  0.25
+       -0.25 -0.25 -0.25
+ istwfk *1
+
+############################
+# Energy Parameters
+############################
+
+ ecut 20         # Maximal plane-wave kinetic energy cut-off, in Hartree
+ pawecutdg 40    # PAW: Energy Cutoff for the Double Grid
+ nband 20        # Number of bands
+ occopt 3        # Smearing type
+ tsmear 3000 K   # Electronic smearing temperature
+
+############################
+# DFT Calculation
+############################
+
+ nstep1 30        # Number of iterations for the DFT convergence
+ tolvrs1 1.0d-12  # Tolerance of the density for DFT convergence
+
+#Definition of the spin properties
+ nsppol 1     # Spin polarized
+ nspden 1     # Collinear magnetism
+ nspinor 1    # No Spin-orbit
+
+############################
+# DMFT Calculation
+############################
+
+ usedmft2  1        # DMFT calculation
+ nstep2    1        # Number of iterations for the DFT+DMFT convergence
+ nline2    10       # Number of line minimisations
+ nnsclo2   10       # Number of non-self consistent loops
+ tolvrs2   1.0d-12  # Tolerance of the density for DFT+DMFT convergence
+
+#Definition for DMFT loop
+ dmftbandi 5             # First KS band included in the projection for Wannier orbitals
+ dmftbandf 13            # Last KS band included in the projection for Wannier orbitals
+ dmft_iter 1             # Number of iterations of the DMFT part.
+ dmft_dc   6             # Exact double counting formula
+ dmft_prtself 0          # Do not print self-energy at each iteration
+ dmft_prt_maxent 0       # Do not print files for analytical continuation
+ dmft_mxsf 1.0           # Mixing parameter for self-energy
+ dmft_triqs_entropy 1    # Compute entropy
+
+ dmft_triqs_compute_integral 1 # Compute impurity entropy from thermodynamic integration
+ dmft_triqs_gaussorder 5       # Order of Gauss-Legendre quadrature for each subdivision
+ dmft_triqs_nsubdivisions 1    # Number of regular subdivisions of [0,1]
+ dmft_triqs_shift_mu 0.0       # Target shift of the chemical potential
+ dmft_triqs_prt_entropy 1      # Print debug information for entropy calculation
+
+#Definition of impurity solver
+ dmft_solv 6                              # TRIQS/CT-HYB solver in density-density approximation
+ dmft_triqs_n_iw 500                      # Number of Matsubara frequencies
+ dmft_triqs_n_tau 200                     # Number of imaginary time points
+ dmft_triqs_n_cycles 250                  # Number of measurement cycles
+ dmft_triqs_n_warmup_cycles_init  100     # Number of warmup cycles for initial iteration
+ dmft_triqs_n_warmup_cycles_restart 0     # Number of warmup cycles when restarting
+ dmft_triqs_length_cycle 100              # Length of a cycle
+ dmft_triqs_basis 0                       # Basis for CT-QMC
+ dmft_triqs_off_diag 0                    # Neglect off-diagonal elements
+ dmft_triqs_dlr_wmax 30 eV                # Maximal frequency for DLR representation
+ dmft_triqs_dlr_epsilon 1.d-2             # Accuracy of DLR representation
+
+#Definition of interaction parameters
+ usepawu1    4
+ usepawu2    14          # Non-magnetic XC potential
+ lpawu       2           # Angular momentum for the projected Hamiltonian
+ upawu1      0.00 eV
+ upawu2      5.5  eV     # Values of U for each angular momentum
+ jpawu2      0.84 eV     # Values of J
+
+
+
+
+
