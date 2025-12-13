@@ -4751,6 +4751,7 @@ end subroutine fft_output_counters
 !!  uplan_init
 !!
 !! FUNCTION
+!!  Initialize the plan
 !!
 !! INPUTS
 !!
@@ -4781,9 +4782,11 @@ subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind
  ABI_MALLOC(uplan%gbound, (2 * uplan%mgfft + 8, 2))
  call sphereboundary(uplan%gbound, uplan%istwfk, uplan%kg_k, uplan%mgfft, uplan%npw)
 
- if (uplan%gpu_option /= ABI_GPU_DISABLED) then
-   ! Allocate memory on the device and transfer data.
-   NOT_IMPLEMENTED_ERROR()
+ if (uplan%gpu_option == ABI_GPU_OPENMP) then
+   ! Map data to GPU.
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:uplan%kg_k, uplan%gbound)
+#endif
  end if
 
 end subroutine uplan_init
@@ -4807,8 +4810,12 @@ subroutine uplan_free(uplan)
 ! *************************************************************************
 
  ABI_SFREE(uplan%gbound)
- if (uplan%gpu_option /= ABI_GPU_DISABLED) then
-   ! TODO: Free memory on the GPU
+
+ if (uplan%gpu_option == ABI_GPU_OPENMP) then
+   ! Free memory on the GPU
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:uplan%kg_k, uplan%gbound)
+#endif
  end if
 
 end subroutine uplan_free

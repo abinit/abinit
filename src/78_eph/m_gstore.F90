@@ -629,6 +629,9 @@ contains
   procedure :: compute_and_write_ph => gstore_compute_and_write_ph
   ! Compute phonon frequencies and eigenvectors in the IBZ. Write results to disk
 
+  procedure :: compute_and_write_vk => gstore_compute_and_write_vk
+  ! Compute electronic group velocities in the IBZ. Write results to disk
+
 end type gstore_t
 !!***
 
@@ -3690,94 +3693,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  end if
 
  ! Create ddkop object to compute group velocities (if needed)
- call ddkop%init(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
-
  if (gstore%with_vk /= 0 .and. ndone == 0) then
-   call wrtout(std_out, " Computing and writing velocity operator matrix elements in the IBZ", pre_newlines=1)
-   call wrtout(std_out, " Note that not all the k-points in the IBZ are computed when kfilter is activated!")
-   call cwtime(cpu, wall, gflops, "start")
-
-   ! On disk, we have:
-   !    nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz"))
-   !    nctkarr_t("vnk_mat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
-
-   ABI_MALLOC(cgwork, (2, mpw*wfd%nspinor))
-
-   do my_is=1,gstore%my_nspins
-     spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
-     nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
-
-     if (gstore%with_vk == 1) then
-       ABI_CALLOC(vnk_cart_ibz, (3, gqk%nb_k, gstore%nkibz))
-       !ABI_CALLOC(vkq_cart_ibz, (3, gqk%nb_kq, gstore%nkibz))
-     else
-       ABI_ERROR("gstore%with_vk 2 not implemented")
-     end if
-
-     NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
-     NCF_CHECK(nctk_prepare_mpiio(spin_ncid, "vk_cart_ibz"))
-
-     cnt = 0
-     do my_ik=1,gqk%my_nk
-       ! The k-point and the symmetries relating the BZ k-point to the IBZ.
-       kk_bz = gqk%my_kpts(:, my_ik)
-       weight_k = gqk%my_wtk(my_ik)
-
-       ik_ibz = gqk%my_k2ibz(1, my_ik); isym_k = gqk%my_k2ibz(2, my_ik)
-       trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5,my_ik)
-       isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-       if (.not. isirr_k) cycle
-
-       ! parallelize inside (q, pert) so that only one proc in the 3D grid
-       ! computes v_nk for this kpt in the BZ and we can use xmpi_sum_master.
-       cnt = cnt + 1
-       if (gqk%qpt_pert_comm%skip(cnt)) cycle
-
-       kk_ibz = ebands%kptns(:,ik_ibz)
-       npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
-       call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk_ibz, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
-
-       select case (gstore%with_vk)
-       case (1)
-         do in_k=1,gqk%nb_k
-           band_k = in_k + gqk%bstart_k - 1
-           call wfd%copy_cg(band_k, ik_ibz, spin, cgwork)
-           v_nk = ddkop%get_vdiag(ebands%eig(band_k, ik_ibz, spin), istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
-           vnk_cart_ibz(:, in_k, ik_ibz) = v_nk
-         end do
-
-         !if (gqk%nb_k == gqk%nb_kq .and. gqk%bstart_k == gqk%bstart_kq)
-         !  vmk_cart_ibz(:, im_kq, ik_ibz) = v_nk
-         !else
-         !do im_kq=1,gqk%nb_kq
-         !  band_k = im_kq + gqk%bstart_kq - 1
-         !  call wfd%copy_cg(band_k, ik_ibz, spin, cgwork)
-         !  v_nk = ddkop%get_vdiag(ebands%eig(band_k, ik_ibz, spin), istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
-         !  vmk_cart_ibz(:, im_kq, ik_ibz) = v_mk
-         !end do
-         !end if
-
-       case (2)
-         ABI_ERROR("with_vk 2")
-         !do in_k=1,nb_k
-         !  band_k = in_k + bstart_k - 1
-         !end do
-       end select
-     end do ! my_ik
-
-     call xmpi_sum(vnk_cart_ibz, gqk%comm%value, ierr)
-     !call xmpi_sum(vkq_cart_ibz, gqk%comm%value, ierr)
-
-     !if (gqk%comm%me == master) then
-       !NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
-       NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vnk_cart_ibz))
-     !end if
-     ABI_SFREE(vnk_cart_ibz)
-     !ABI_SFREE(vkq_cart_ibz)
-   end do ! my_is
-
-   ABI_FREE(cgwork)
-   call cwtime_report(sjoin(" Computation of v_k group velocities with with_vk:", itoa(gstore%with_vk)), cpu, wall, gflops)
+   call gstore%compute_and_write_vk(mpw, wfd, ebands, psps, pawtab, root_ncid)
  end if
 
  call wrtout(std_out, " Begin computation of e-ph matrix elements...", pre_newlines=1)
@@ -4071,7 +3988,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ABI_FREE(displ_cart_qibz)
  ABI_FREE(done_qbz_spin)
 
- call ddkop%free(); call gs_ham_kq%free(); call wfd%free()
+ call gs_ham_kq%free(); call wfd%free()
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
 
@@ -5785,5 +5702,137 @@ end function root_vid
 end subroutine gstore_compute_and_write_ph
 !!***
 
-end module m_gstore
+!!****f* m_gstore/gstore_compute_and_write_vk
+!! NAME
+!!  gstore_compute_and_write_vk
+!!
+!! FUNCTION
+!!  Compute electronic group velocities in the IBZ. Write results to disk
+!!
+!! SOURCE
+
+subroutine gstore_compute_and_write_vk(gstore, mpw, wfd, ebands, psps, pawtab, root_ncid)
+
+!Arguments ------------------------------------
+ class(gstore_t), intent(in) :: gstore
+ integer,intent(in) :: mpw
+ type(wfd_t),intent(in) :: wfd
+ type(ebands_t),target,intent(in) :: ebands
+ type(pseudopotential_type),intent(in) :: psps
+ type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+ integer,intent(in) :: root_ncid
+
+!Local variables-------------------------------
+!scalars
+ integer :: my_is, spin, nb_k, nb_kq, spin_ncid, band, in_k, my_ik, usecprj, ierr, ii, ik_ibz, isym_k, trev_k, npw_k, istwf_k
+ real(dp) :: cpu_kk, wall_kk, gflops_kk, eig0nk
+ logical :: isirr_k
+ type(ddkop_t) :: ddkop
+!arrays
+ integer :: g0_k(3)
+ integer,allocatable :: count_bk(:,:)
+ real(dp) :: kk(3), kk_ibz(3)
+ real(dp),allocatable :: vnk_cart_ibz(:,:,:), cg_work(:,:)
+ type(pawcprj_type),allocatable :: cwaveprj0(:,:)
+!----------------------------------------------------------------------
+
+ call wrtout(std_out, " computing and writing velocity operator matrix elements in the ibz")
+ call wrtout(std_out, " note that not all the k-points in the ibz are computed when kfilter is activated!")
+ call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
+
+ ! On disk, we have:
+ !    nctkarr_t("vk_cart_ibz", "dp", "three, nb_k, gstore_nkibz"))
+ !    nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
+
+ call ddkop%init(gstore%dtset, gstore%cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+ ABI_MALLOC(cg_work, (2, mpw*wfd%nspinor))
+
+ usecprj = gstore%dtset%usepaw
+ ABI_MALLOC(cwaveprj0, (gstore%cryst%natom, wfd%nspinor*usecprj))
+
+ do my_is=1,gstore%my_nspins
+   associate (gqk => gstore%gqk(my_is))
+   spin = gstore%my_spins(my_is)
+   nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
+
+   ! Be careful as wavefunctions might be replicated.
+   ! Use count_bk to count how many states have been computed
+   ! in parallel in order to rescale the results.
+   if (gstore%with_vk == 1) then
+     ABI_CALLOC(vnk_cart_ibz, (3, nb_k, gstore%nkibz))
+     ABI_ICALLOC(count_bk, (nb_k, gstore%nkibz))
+   else
+     ABI_ERROR("gstore%with_vk 2 not implemented")
+   end if
+
+   NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+   NCF_CHECK(nctk_prepare_mpiio(spin_ncid, "vk_cart_ibz"))
+
+   do my_ik=1,gqk%my_nk
+     ! The k-point and the symmetries relating the BZ k-point to the IBZ.
+     kk = gqk%my_kpts(:, my_ik)
+     ik_ibz = gqk%my_k2ibz(1, my_ik) ; isym_k = gqk%my_k2ibz(2, my_ik)
+     trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5,my_ik)
+     isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+     if (.not. isirr_k) cycle
+
+     ! parallelize inside (q, pert) so that only one proc in the 3D grid
+     ! computes v_nk for this kpt in the BZ and we can use xmpi_sum_master.
+     !cnt = cnt + 1
+     !if (gqk%qpt_pert_comm%skip(cnt)) cycle
+
+     npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
+     call ddkop%setup_spin_kpoint(gstore%dtset, gstore%cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
+
+     do band=gqk%bstart_k, gqk%bstop_k
+       call wfd%copy_cg(band, ik_ibz, spin, cg_work)
+       eig0nk = ebands%eig(band, ik_ibz, spin)
+       in_k = band - gqk%bstart_k + 1
+       vnk_cart_ibz(:, in_k, ik_ibz) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
+       count_bk(in_k, ik_ibz) = count_bk(in_k, ik_ibz) + 1
+     end do
+   end do ! my_ik
+
+   call xmpi_sum(count_bk, gqk%comm%value, ierr)
+   call xmpi_sum(vnk_cart_ibz, gqk%comm%value, ierr)
+
+   do ik_ibz=1, gstore%nkibz
+     do band=gqk%bstart_k, gqk%bstop_k
+       in_k = band - gqk%bstart_k + 1
+       if (count_bk(in_k, ik_ibz) == 0) cycle
+       do ii=1,3
+         vnk_cart_ibz(ii,in_k,ik_ibz) = vnk_cart_ibz(ii,in_k,ik_ibz) / count_bk(in_k, ik_ibz)
+       end do
+     end do
+   end do
+
+   ! Write v_nk to disk.
+   !if (gqk%comm%me == master) then
+     NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vnk_cart_ibz))
+   !end if
+
+   ABI_FREE(vnk_cart_ibz)
+   ABI_FREE(count_bk)
+   end associate
+ end do ! my_is
+
+ ABI_FREE(cg_work)
+ call ddkop%free()
+
+ call pawcprj_free(cwaveprj0)
+ ABI_FREE(cwaveprj0)
+
+ call cwtime_report(sjoin(" Computation of v_k group velocities with with_vk:", itoa(gstore%with_vk)), cpu_kk, wall_kk, gflops_kk)
+
+contains
+
+integer function spin_vid(var_name)
+  character(len=*),intent(in) :: var_name
+  spin_vid = nctk_idname(spin_ncid, var_name)
+end function spin_vid
+
+
+end subroutine gstore_compute_and_write_vk
 !!***
+
+end module m_gstore
