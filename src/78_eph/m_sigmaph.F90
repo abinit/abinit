@@ -452,6 +452,10 @@ module m_sigmaph
    ! Used if frohl_model == 1 and imag_only. This array depend on (ikcalc, spin)
    ! TODO: Finalize implementation
 
+  real(dp),allocatable :: E2(:)
+   ! E2(ntemp)
+   ! Second-order contribution to total energy
+
   integer, allocatable :: qp_done(:,:)
    ! qp_done(kcalc, spin)
    ! Keep track of the QP states already computed for restart of the calculation
@@ -464,6 +468,14 @@ module m_sigmaph
   complex(dp),allocatable :: fan_vals(:,:)
    ! fan_vals(ntemp, max_nbcalc)
    ! Fan-Migdal
+
+  complex(dp),allocatable :: E4_vals(:,:)
+   ! E4_vals(ntemp, max_nbcalc)
+   ! nk resolved 4th order contribution to total energy
+
+  complex(dp),allocatable :: E4_vals2(:,:)
+   ! E4_vals2(ntemp, max_nbcalc)
+   ! nk resolved 4th order contribution to total energy, alternative derivation with g^2
 
   complex(dp),allocatable :: fan_stern_vals(:,:)
    ! fan_stern_vals(ntemp, max_nbcalc)
@@ -683,6 +695,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gkq0_atm(:,:,:,:), gaussw_qnu(:)
  real(dp),allocatable :: cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
  real(dp),allocatable :: stern_ppb(:,:,:,:), stern_dw(:,:,:,:)
+ real(dp),allocatable :: E4stern_nk(:,:,:,:)
  logical,allocatable :: ihave_ikibz_spin(:,:), bks_mask(:,:,:),keep_ur(:,:,:)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
@@ -1242,6 +1255,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Zero self-energy matrix elements. Build frequency mesh for nk states.
      sigma%vals_e0ks = zero; sigma%dvals_de0ks = zero; sigma%dw_vals = zero
      sigma%fan_vals = zero; sigma%fan_stern_vals = zero; sigma%dw_stern_vals = zero
+     sigma%E2 = zero
+     sigma%E4_vals = zero
+     sigma%E4_vals2 = zero
      if (sigma%mrta > 0) then
        sigma%linewidth_mrta = zero
        ABI_MALLOC(alpha_mrta, (nbcalc_ks))
@@ -1728,6 +1744,9 @@ end if
          ! Compute S_pp' = <D_{qp} vscf u_nk|u'_{nk+q p'}>
          ABI_CALLOC(stern_ppb, (2, natom3, natom3, nbcalc_ks))
 
+         ! Compute <Psi_1|Psi_1>
+         ABI_CALLOC(E4stern_nk, (2, natom3, natom3, nbcalc_ks))
+
          do ib_k=1,nbcalc_ks
            if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum_comm
 
@@ -1743,6 +1762,10 @@ end if
 
            call cg_zgemm("C", "N", npw_kq*nspinor, natom3, natom3, &
              h1kets_kq_allperts(:,:,:,ib_k), cg1s_kq(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
+           !
+           ! We now compute <Psi_1|Psi_1>
+           call cg_zgemm("C", "N", npw_kq*nspinor, natom3, natom3, &
+             cg1s_kq(:,:,:,ib_k), cg1s_kq(:,:,:,ib_k), E4stern_nk(:,:,:,ib_k))
 
            ! Save data for Debye-Waller that is performed outside the q-loop.
            if (q_is_gamma) stern_dw(:,:,:,ib_k) = stern_ppb(:,:,:,ib_k)
@@ -1783,13 +1806,34 @@ end if
                !if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkq2 * cfact_wr(:)
              end do
 
+             ! Calculation of the 4th-order contribution to total energy due to electron-phonon interaction
+             ! SP - For E4 we multipy with eigendiplacement vectors
+             vec_natom3 = zero
+             call cg_zgemm("N", "N", natom3, natom3, 1, E4stern_nk(:,:,:,ib_k), displ_red(:,:,:,nu), vec_natom3)
+             dotri = cg_zdotc(natom3, displ_red(:,:,:,nu), vec_natom3)
+             rfact = dotri(1)
+             rfact = rfact * sigma%wtq_k(iq_ibz_k) / two
+             !
+             do it=1, sigma%ntemp
+               rtmp = (two * nqnu_tlist(it) + one) * rfact
+               sigma%E4_vals(it, ib_k) = sigma%E4_vals(it, ib_k) + rtmp
+             end do
+
              ! TODO Eliashberg functions with Sternheimer
              !if (dtset%prteliash /= 0) then
              !end if
            end do
-         end do ! imyp
+           !
+           ! Second-order contribution to the total energy.
+           ! This is he phonon contribution (\hbar\omega/2)
+           do it=1, sigma%ntemp
+             rtmp = (two * nqnu_tlist(it) + one) * wqnu * sigma%wtq_k(iq_ibz_k) / two
+             sigma%E2(it) = sigma%E2(it) + rtmp
+           enddo
+         end do  ! imyp
 
          ABI_FREE(stern_ppb)
+         ABI_FREE(E4stern_nk)
          call timab(1910, 2, tsec)
        end if ! eph_stern /= 0
 
