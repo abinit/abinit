@@ -446,7 +446,7 @@ There have been many improvements in the DMFT part of ABINIT, not yet though to 
 * Two extra components for the energy are printed.
 * New input variables (to be tested and documented): dmft_fermi_step, dmft_nominal, dmft_orbital, dmft_prt_maxent, dmft_prtwan, dmft_shiftself, dmft_test, dmft_use_all_bands, dmft_use_full_chipsi, dmft_wanrad, dmft_x2my2d.
 
-Input variables [[dmftctqmc_mov]], [[dmftctqmc_order]] and [[dmftctqmc_triqs_nleg]] are documented, but not tested.
+Input variables [[dmftctqmc_mov]], [[dmftctqmc_order]] and [[dmft_triqs_n_l]] are documented, but not tested.
 There has also been miscellaneous DMFT fixes and improvements
 
 By F. Castiel, F. Gendron, O. Gingras, B. Amadon (MR1063, 1077, 1084, 1107, 1148 give more details)
@@ -2883,7 +2883,7 @@ fully in the Sec. 3.7 of [[cite:Gonze2020]], as follows.
 Also, the DMFT k-resolved spectral function is available (MR 529, 490).
 
 List of tests: [[test:paral_84]], [[test:paral_86]], [[test:paral_99]], [[test:v8_01]].
-New input variables: [[dmft_charge_prec]] and [[dmft_kspectral_func]] (test to be provided for the latter).
+New input variables: [[dmft_charge_prec]] and [[dmft_kspectralfunc]] (test to be provided for the latter).
 Also [[dmft_occnd_imag]], but only for keeping backward compatibility for tests.
 
 By T. Cavignac, B. Amadon and O. Gingras.
@@ -3629,7 +3629,7 @@ fully in the Sec. 3.7 of [[cite:Gonze2020]], as follows.
 Also, the DMFT k-resolved spectral function is available (MR 529, 490).
 
 List of tests: [[test:paral_84]], [[test:paral_86]], [[test:paral_99]], [[test:v8_01]].
-New input variables: [[dmft_charge_prec]] and [[dmft_kspectral_func]] (test to be provided for the latter).
+New input variables: [[dmft_charge_prec]] and [[dmft_kspectralfunc]] (test to be provided for the latter).
 Also [[dmft_occnd_imag]], but only for keeping backward compatibility for tests.
 
 By T. Cavignac, B. Amadon and O. Gingras.
