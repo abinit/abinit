@@ -240,7 +240,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
  ! If fft size has changed, we realloc our buffers
  if((nfft_tot/=fft_size_fourwf) .or. (ndat/=ndat_fourwf)) then
-   call free_ompgpu_fourwf
+   call free_ompgpu_fourwf()
    call alloc_ompgpu_fourwf(ngfft,ndat)
  end if !end if "fft size changed"
 
