@@ -404,14 +404,14 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
      call gpu_fftbox_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, plan%batch_size, sp)
    end if
 
-   if (ndat /= plan%batch_size) then
+   if (ndat__ /= plan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
      call gpu_fft_plan_free(plan%gpu_plan_spc)
-     call gpu_fftbox_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, ndat, sp)
+     call gpu_fftbox_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, ndat__, sp)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
-    call gpu_fftbox_c2c_ip(plan%gpu_plan_spc, plan%nfft, ndat, isign, iscale__, sp, c_loc(ff))
+    call gpu_fftbox_c2c_ip(plan%gpu_plan_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff))
 !$OMP END TARGET DATA
    return
 #endif
@@ -461,6 +461,8 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
  ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
+ ! FIXME: ndat should not be optional to make the API compatibile with GPUs.
+
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
    ! Build plan if not yet done. note batch_size instead of ndat.
@@ -468,14 +470,14 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
      call gpu_fftbox_plan_init(plan%gpu_plan_dpc, plan%dims, plan%embed, plan%batch_size, dp)
    end if
 
-   if (ndat /= plan%batch_size) then
+   if (ndat__ /= plan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
      call gpu_fft_plan_free(plan%gpu_plan_dpc)
-     call gpu_fftbox_plan_init(plan%gpu_plan_dpc, plan%dims, plan%embed, ndat, dp)
+     call gpu_fftbox_plan_init(plan%gpu_plan_dpc, plan%dims, plan%embed, ndat__, dp)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
-    call gpu_fftbox_c2c_ip(plan%gpu_plan_dpc, plan%nfft, ndat, isign, iscale__, dp, c_loc(ff))
+    call gpu_fftbox_c2c_ip(plan%gpu_plan_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff))
 !$OMP END TARGET DATA
    return
 
@@ -533,14 +535,14 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
      call gpu_fftbox_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, plan%batch_size, sp)
    end if
 
-   if (ndat /= plan%batch_size) then
+   if (ndat__ /= plan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
      call gpu_fft_plan_free(plan%gpu_plan_spc)
-     call gpu_fftbox_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, ndat, sp)
+     call gpu_fftbox_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, ndat__, sp)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
-    call gpu_fftbox_c2c_op(plan%gpu_plan_spc, plan%nfft, ndat, isign, iscale__, sp, c_loc(ff), c_loc(gg))
+    call gpu_fftbox_c2c_op(plan%gpu_plan_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff), c_loc(gg))
 !$OMP END TARGET DATA
    return
 #endif
@@ -597,14 +599,14 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
      call gpu_fftbox_plan_init(plan%gpu_plan_dpc, plan%dims, plan%embed, plan%batch_size, dp)
    end if
 
-   if (ndat /= plan%batch_size) then
+   if (ndat__ /= plan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
      call gpu_fft_plan_free(plan%gpu_plan_dpc)
-     call gpu_fftbox_plan_init(plan%gpu_plan_dpc, plan%dims, plan%embed, ndat, dp)
+     call gpu_fftbox_plan_init(plan%gpu_plan_dpc, plan%dims, plan%embed, ndat__, dp)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
-    call gpu_fftbox_c2c_op(plan%gpu_plan_dpc, plan%nfft, ndat, isign, iscale__, dp, c_loc(ff), c_loc(gg))
+    call gpu_fftbox_c2c_op(plan%gpu_plan_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff), c_loc(gg))
 !$OMP END TARGET DATA
    return
 #endif
