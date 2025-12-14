@@ -169,21 +169,20 @@ MODULE m_fft
      integer(c_int), intent(in) :: f_dims(3), f_embed(3)
      integer(c_int), value     :: batch, kind
    end subroutine
-   subroutine gpu_plan_free(plan) bind(C)
+   subroutine gpu_fft_plan_free(plan) bind(C)
      use, intrinsic :: iso_c_binding
      type(c_ptr), value :: plan
    end subroutine
-   subroutine gpu_fftbox_c2c_ip(plan_pp, nfft, ndat, isign, iscale, kind, h_ff, d_ff) bind(C)
+   subroutine gpu_fftbox_c2c_ip(plan_pp, nfft, ndat, isign, iscale, kind, d_ff) bind(C)
      use, intrinsic :: iso_c_binding
      type(c_ptr),intent(inout) :: plan_pp
      integer(c_int),value, intent(in) :: nfft, ndat, isign, iscale, kind
-     type(c_ptr),intent(in) :: h_ff
-     type(c_ptr),intent(inout) :: d_ff
+     type(c_ptr),intent(in) :: d_ff
    end subroutine gpu_fftbox_c2c_ip
    subroutine xgpu_fftbox_c2c_op(plan_pp, nfft, ndat, isign, iscale, kind, d_ff, d_gg) bind(C)
      use, intrinsic :: iso_c_binding
      integer(c_int),value, intent(in) :: nfft, ndat, isign, iscale, kind
-     type(c_ptr),intent(inout) :: d_ff, d_gg
+     type(c_ptr),intent(in) :: d_ff, d_gg
    end subroutine xgpu_fftbox_c2c_op
  end interface
 #endif
