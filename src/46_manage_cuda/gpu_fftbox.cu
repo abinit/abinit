@@ -145,8 +145,8 @@ gpu_fftbox_c2c_ip(void **plan_pp, int nfft, int ndat, int isign, int iscale, int
 }
 
 extern "C" void
-xgpu_fftbox_c2c_op(void **plan_pp, int nfft, int ndat, int isign, int iscale, int kind,
-                   void **d_ff, void **d_gg) {
+gpu_fftbox_c2c_op(void **plan_pp, int nfft, int ndat, int isign, int iscale, int kind,
+                  void **d_ff, void **d_gg) {
 
   cufftType type;
   int direction;
