@@ -96,7 +96,7 @@ gpu_fftbox_plan_init(void **plan_pp, int *f_dims, int *f_embed, int ndat, int ki
 }
 
 extern "C" void
-gpu_plan_free(void *plan_p)
+gpu_fft_plan_free(void *plan_p)
 {
   cufftHandle *h = (cufftHandle *) plan_p;
   //printf("About to free GPU plan: %d @ %p\n", plan, &plan);
@@ -139,9 +139,9 @@ gpu_fftbox_c2c_ip(void **plan_pp, int nfft, int ndat, int isign, int iscale, int
   }
 
   //CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-  cudaStream_t stream;
-  cufftGetStream(plan, &stream);
-  CHECK_CUDA_ERROR(cudaStreamSynchronize(stream));
+  //cudaStream_t stream;
+  //cufftGetStream(plan, &stream);
+  //CHECK_CUDA_ERROR(cudaStreamSynchronize(stream));
 }
 
 extern "C" void
@@ -173,9 +173,9 @@ xgpu_fftbox_c2c_op(void **plan_pp, int nfft, int ndat, int isign, int iscale, in
   }
 
   //CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-  cudaStream_t stream;
-  cufftGetStream(plan, &stream);
-  CHECK_CUDA_ERROR(cudaStreamSynchronize(stream));
+  //cudaStream_t stream;
+  //cufftGetStream(plan, &stream);
+  //CHECK_CUDA_ERROR(cudaStreamSynchronize(stream));
 }
 
 #endif
