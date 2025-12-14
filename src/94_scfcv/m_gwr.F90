@@ -4602,13 +4602,13 @@ subroutine gwr_build_tchi(gwr)
            if (.not. use_mpi_for_k) then
              ! G(G',r) --> G(R',r) = sum_{k,g'} e^{-i(k+g').R'} G_k(g',r)
              if (gwr%kpt_comm%nproc > 1) call xmpi_sum(gt_scbox, gwr%kpt_comm%value, ierr)
-             call green_plan%execute(gt_scbox(:,1,1), -1, iscale=0)
+             call green_plan%execute(gt_scbox(:,1,1), -1, ndat, iscale=0)
 
              ! Compute tchi(R',r) for this r and store it in (:,:,1). Note that results are real so one might use r2c FFT.
              ! Then back to tchi(G'=q+g',r) immediately with isign + 1.
              gt_scbox(:,:,1) = gt_scbox(:,:,1) * conjg(gt_scbox(:,:,2))
              !max_abs_imag_chit = max(max_abs_imag_chit, maxval(abs(aimag(gt_scbox(:,:,1)))))
-             call green_plan%execute(gt_scbox(:,1,1), +1)
+             call green_plan%execute(gt_scbox(:,1,1), ndat, +1)
 
            else
              ! Reduce one G_k(tau) on the idat-1 proc and perform ndat FFTs in parallel.
@@ -5781,11 +5781,11 @@ if (.not. use_shmem_for_k) then
 
        ! G(G',r) --> G(R',r)
        if (gwr%kpt_comm%nproc > 1) call xmpi_wait(gt_request, ierr)
-       call green_plan%execute(gt_scbox(:,1,1), -1, iscale=0)
+       call green_plan%execute(gt_scbox(:,1,1), -1, ndat, iscale=0)
 
        ! Wc(G',r) --> Wc(R',r)
        if (gwr%kpt_comm%nproc > 1) call xmpi_wait(wct_request, ierr)
-       call wt_plan%execute(wct_scbox(:,1), -1, iscale=0)
+       call wt_plan%execute(wct_scbox(:,1), -1, ndat, iscale=0)
 
        ! Use gt_scbox to store GW (R',r, +/- i tau) for this set of ndat r-point
        gt_scbox(:,:,1) = gt_scbox(:,:,1) * wct_scbox(:,:) * sigma_fact
