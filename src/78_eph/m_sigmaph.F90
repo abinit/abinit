@@ -2012,12 +2012,13 @@ end if
                end if
              end if  ! prteliash /= 0
 
-             do it=1,sigma%ntemp
+             do it = 1, sigma%ntemp
                ! Compute electronic occ for this T (note mu_e(it) Fermi level)
                nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
                f_nk = occ_fd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
-               f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
-
+               ! SP - the + 1E-6 is needed because eig0mkq is not perfectly degenerate at \Gamma
+               f_mkq = occ_fd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it) + 1E-6)
+               !
                ! Here we have to handle 3 different logical values leading to 9 different cases:
                !
                ! qint_method         0      1
@@ -2054,8 +2055,8 @@ end if
                                 (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) ) * weight
                      else
                         cfact = cfact + ((two * nqnu + one) / (eig0nk - eig0mkq + sigma%ieta)) * weight
-                     endif
-                   enddo
+                     end if
+                   end do
                  else
                    ! No double-grid.
                    if (dtset%eph_ahc_type == 1) then
@@ -2090,8 +2091,18 @@ end if
 
                    sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + sig_cplx
                    sigma%fan_vals(it, ib_k) = sigma%fan_vals(it, ib_k) + sig_cplx
+                   !
+                   ! SP - Dec 2025
+                   ! Alternative way to compute E4 with sum-over-state.
+                   ! Note that the temperature factor (two * nqnu + one) is the logical extension but only the 0 K expression has
+                   ! been derived explicitely in https://arxiv.org/abs/2512.04897
+                   ! No eta is needed since we compute it for n=occ and m=unocc (on active space)
+                   if (f_nk > 1E-6 .and. f_mkq < 1E-6) then
+                     sigma%E4_vals2(it, ib_k) = sigma%E4_vals2(it, ib_k) + &
+                                 0.5d0 * gkq2 * (two * nqnu + one) * two * wqnu / (eig0mkq - eig0nk)**2
+                   end if
                  end if
-
+                 !
                else
 
                  ! ===================
@@ -3154,6 +3165,9 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ABI_ICALLOC(new%qp_done, (new%nkcalc, new%nsppol))
  ABI_CALLOC(new%vals_e0ks, (new%ntemp, new%max_nbcalc))
  ABI_CALLOC(new%fan_vals, (new%ntemp, new%max_nbcalc))
+ ABI_CALLOC(new%E2, (new%ntemp))
+ ABI_CALLOC(new%E4_vals, (new%ntemp, new%max_nbcalc))
+ ABI_CALLOC(new%E4_vals2, (new%ntemp, new%max_nbcalc))
  ABI_CALLOC(new%fan_stern_vals, (new%ntemp, new%max_nbcalc))
  ABI_CALLOC(new%dvals_de0ks, (new%ntemp, new%max_nbcalc))
  ABI_CALLOC(new%dw_vals, (new%ntemp, new%max_nbcalc))
@@ -3469,6 +3483,9 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
      nctkarr_t("qp_done", "int", "nkcalc, nsppol"), &
      nctkarr_t("vals_e0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("fan_vals", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("E2", "dp", "ntemp"), &
+     nctkarr_t("E4_vals", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("E4_vals2", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("fan_stern_vals", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("dvals_de0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("dw_vals", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
@@ -4025,10 +4042,13 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%phmesh)
  ABI_SFREE(self%gf_nnuq)
  ABI_SFREE(self%scratew)
+ ABI_SFREE(self%E2)
 
  ! complex
  ABI_SFREE(self%vals_e0ks)
  ABI_SFREE(self%fan_vals)
+ ABI_SFREE(self%E4_vals)
+ ABI_SFREE(self%E4_vals2)
  ABI_SFREE(self%fan_stern_vals)
  ABI_SFREE(self%dvals_de0ks)
  ABI_SFREE(self%dw_vals)
@@ -4547,7 +4567,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  logical :: iwrite
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  real(dp) :: cpu, wall, gflops, invsig2fmts, tau, ravg2
- complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3,cavg4
+ complex(dp) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2,cavg3,cavg4,cavg5,cavg6
  !character(len=5000) :: msg
  integer :: grp_ncid, ncerr
 !arrays
@@ -4568,6 +4588,9 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  iwrite = self%ncwrite_comm%value /= xmpi_comm_null
  call xmpi_sum_master(self%vals_e0ks, master, comm, ierr)
  call xmpi_sum_master(self%fan_vals, master, comm, ierr)
+ call xmpi_sum_master(self%E2, master, comm, ierr)
+ call xmpi_sum_master(self%E4_vals, master, comm, ierr)
+ call xmpi_sum_master(self%E4_vals2, master, comm, ierr)
  call xmpi_sum_master(self%fan_stern_vals, master, comm, ierr)
  call xmpi_sum_master(self%dvals_de0ks, master, comm, ierr)
  call xmpi_sum_master(self%dw_vals, master, comm, ierr)
@@ -4679,6 +4702,8 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
        cavg2 = sum(self%dvals_de0ks(it, bids(:))) / nstates
        cavg3 = sum(self%fan_vals(it, bids(:))) / nstates
        cavg4 = sum(self%fan_stern_vals(it, bids(:))) / nstates
+       cavg5 = sum(self%E4_vals(it, bids(:))) / nstates
+       cavg6 = sum(self%E4_vals2(it, bids(:))) / nstates
        ravg = sum(self%dw_vals(it, bids(:))) / nstates
        ravg2 = sum(self%dw_stern_vals(it, bids(:))) / nstates
        do ii=1,nstates
@@ -4686,6 +4711,8 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
          self%dvals_de0ks(it, bids(ii)) = cavg2
          self%fan_vals(it, bids(ii)) = cavg3
          self%fan_stern_vals(it, bids(ii)) = cavg4
+         self%E4_vals(it, bids(ii)) = cavg5
+         self%E4_vals2(it, bids(ii)) = cavg6
          self%dw_vals(it, bids(ii)) = ravg
          self%dw_stern_vals(it, bids(ii)) = ravg2
        end do
@@ -4881,6 +4908,8 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), c2r(self%vals_e0ks), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), c2r(self%vals_e0ks), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "fan_vals"), c2r(self%fan_vals), start=[1,1,1,ikcalc,spin]))
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "E4_vals"), c2r(self%E4_vals), start=[1,1,1,ikcalc,spin]))
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "E4_vals2"), c2r(self%E4_vals2), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "fan_stern_vals"), c2r(self%fan_stern_vals), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dvals_de0ks"), c2r(self%dvals_de0ks), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dw_vals"), self%dw_vals, start=[1,1,ikcalc,spin]))
@@ -4889,6 +4918,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  ! Dump QP energies and gaps for this (kpt, spin)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpoms_enes"), c2r(qpoms_enes), start=[1,1,1,ikcalc,spin]))
 
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "E2"), self%E2, start=[1]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_enes"), c2r(qp_enes), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ze0_vals"), ze0_vals, start=[1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ks_enes"), ks_enes, start=[1,ikcalc,spin]))
