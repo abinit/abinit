@@ -373,6 +373,7 @@ end subroutine fftbox_plan3_free
 !! INPUTS
 !!  plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !!  isign= Sign of the exponential in the FFT
+!!  ndat: Number of FFTs.
 !!  [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! SIDE EFFECTS
@@ -387,14 +388,14 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),target,intent(inout) :: plan
- integer,intent(in) :: isign
- integer,optional,intent(in) :: ndat, iscale
+ integer,intent(in) :: isign, ndat
+ integer,optional,intent(in) :: iscale
 !arrays
  complex(sp),target,intent(inout) :: ff(*)
 ! *************************************************************************
 
  integer :: ndat__, iscale__
- ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
@@ -437,6 +438,7 @@ end subroutine fftbox_execute_ip_spc
 !! INPUTS
 !!  plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !!  isign= Sign of the exponential in the FFT
+!!  ndat: Number of FFTs.
 !!  [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! SIDE EFFECTS
@@ -451,14 +453,14 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),target,intent(inout) :: plan
- integer,intent(in) :: isign
- integer,optional,intent(in) :: ndat, iscale
+ integer,intent(in) :: isign, ndat
+ integer,optional,intent(in) :: iscale
 !arrays
  complex(dp),target,intent(inout) :: ff(*)
 ! *************************************************************************
 
  integer :: ndat__, iscale__
- ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
  ! FIXME: ndat should not be optional to make the API compatibile with GPUs.
@@ -505,6 +507,7 @@ end subroutine fftbox_execute_ip_dpc
 !! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !! ff(plan%ldxyz*plan%batch_size)=The input array to be transformed.
 !! isign= Sign of the exponential in the FFT
+!! ndat= Number of FFTs.
 !! [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! OUTPUT
@@ -517,15 +520,15 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),intent(inout) :: plan
- integer,intent(in) :: isign
- integer,optional,intent(in) :: ndat, iscale
+ integer,intent(in) :: isign, ndat
+ integer,optional,intent(in) :: iscale
 !arrays
  complex(sp),target,intent(in) :: ff(*)
  complex(sp),target,intent(inout) :: gg(*)
 ! *************************************************************************
 
  integer :: ndat__, iscale__
- ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
@@ -569,6 +572,7 @@ end subroutine fftbox_execute_op_spc
 !! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !! ff(plan%ldxyz*plan%batch_size)=The input array to be transformed.
 !! isign= Sign of the exponential in the FFT
+!! ndat=Number of FFTs.
 !! [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! OUTPUT
@@ -581,15 +585,15 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),intent(inout) :: plan
- integer,intent(in) :: isign
- integer,optional,intent(in) :: ndat, iscale
+ integer,intent(in) :: isign, ndat
+ integer,optional,intent(in) :: iscale
 !arrays
  complex(dp),target,intent(in) :: ff(*)
  complex(dp),target,intent(inout) :: gg(*)
 ! *************************************************************************
 
  integer :: ndat__, iscale__
- ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
@@ -1200,7 +1204,7 @@ end subroutine fft_use_lib_threads
 !! fftalg =fftalg input variable.
 !! ndat = Number of transform to execute
 !! nthreads = Number of OpenMP threads.
-!! gpu_option=  GPU version to active (0: no GPU).
+!! gpu_option= GPU version to active (0: no GPU).
 !! [unit]=Output Unit number (DEFAULT std_out)
 !!
 !! OUTPUT
@@ -1282,12 +1286,12 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    ffsp = ff_refsp
 
    ! in-place version.
-   call box_plan%execute(ffsp, +1)
-   call box_plan%execute(ffsp, -1)
+   call box_plan%execute(ffsp, +1, ndat)
+   call box_plan%execute(ffsp, -1, ndat)
 
    ! do it twice to test GPU version
-   !call box_plan%execute(ffsp, +1)
-   !call box_plan%execute(ffsp, -1)
+   !call box_plan%execute(ffsp, +1, ndat)
+   !call box_plan%execute(ffsp, -1, ndat)
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
@@ -1303,8 +1307,8 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
 
    ! out-of-place version.
    ffsp = ff_refsp
-   call box_plan%execute(ffsp, ggsp, +1)
-   call box_plan%execute(ggsp, ffsp, -1)
+   call box_plan%execute(ffsp, ggsp, +1, ndat)
+   call box_plan%execute(ggsp, ffsp, -1, ndat)
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
@@ -1339,8 +1343,8 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    ff = ff_ref
 
    ! in-place version.
-   call box_plan%execute(ff, +1)
-   call box_plan%execute(ff, -1)
+   call box_plan%execute(ff, +1, ndat)
+   call box_plan%execute(ff, -1, ndat)
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
@@ -1356,8 +1360,8 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
 
    ! out-of-place version.
    ff = ff_ref
-   call box_plan%execute(ff, gg, +1)
-   call box_plan%execute(gg, ff, -1)
+   call box_plan%execute(ff, gg, +1, ndat)
+   call box_plan%execute(gg, ff, -1, ndat)
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
