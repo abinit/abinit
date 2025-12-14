@@ -1290,14 +1290,14 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    ffsp = ff_refsp
 
    ! in-place version.
-#ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(tofrom:ffsp) IF (gpu_option == ABI_GPU_OPENMP)
-#endif
+!#ifdef HAVE_OPENMP_OFFLOAD
+!   !$OMP TARGET ENTER DATA MAP(tofrom:ffsp) IF (gpu_option == ABI_GPU_OPENMP)
+!#endif
    call box_plan%execute(ffsp, +1, ndat)
    call box_plan%execute(ffsp, -1, ndat)
-#ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA
-#endif
+!#ifdef HAVE_OPENMP_OFFLOAD
+!   !$OMP TARGET EXIT DATA
+!#endif
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
