@@ -401,6 +401,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
  integer :: ndat__, iscale__
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
+ call wrtout(std_out, "in fftbox_execute_ip_spc")
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
@@ -466,6 +467,8 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
  integer :: ndat__, iscale__
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
+
+ call wrtout(std_out, "in fftbox_execute_ip_dpc")
 
  ! FIXME: ndat should not be optional to make the API compatibile with GPUs.
 
@@ -535,6 +538,8 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
+ call wrtout(std_out, "in fftbox_execute_op_spc")
+
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
    ! Build plan if not yet done. note batch_size instead of ndat.
@@ -599,6 +604,8 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
  integer :: ndat__, iscale__
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
+
+ call wrtout(std_out, "in fftbox_execute_op_dpc")
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
