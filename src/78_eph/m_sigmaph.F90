@@ -456,6 +456,10 @@ module m_sigmaph
    ! E2(ntemp)
    ! Second-order contribution to total energy
 
+   real(dp),allocatable :: E4(:)
+   ! E4(ntemp)
+   ! Temperature resolved 4th order contribution to total energy
+
   integer, allocatable :: qp_done(:,:)
    ! qp_done(kcalc, spin)
    ! Keep track of the QP states already computed for restart of the calculation
@@ -1200,6 +1204,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
+ E4 = zero
  ! Loop over k-points in Sigma_nk. Loop over spin is internal as we operate on nspden components at once.
  do my_ikcalc=1,sigma%my_nkcalc
    !if (my_ikcalc > 1) exit
@@ -2520,6 +2525,18 @@ end if
      ABI_SFREE(root_bcalc)
    end do ! spin
 
+   ! Print total energies
+   ! DBSP
+   ! Temperature
+   do it = 1, self%ntemp
+     do ik = 1, ebands%nkpt
+       ! Loop over bands for this k-point and spin
+       do ibc = 1,self%nbcalc_ks(ikcalc, spin)
+         E4(it) = E4(it) + self%E4_vals[it,ik] * ebands%wtk(ik)
+       enddo
+     enddo
+   enddo
+
    ABI_FREE(kg_k)
    ABI_FREE(kg_kq)
    ABI_SFREE(kpg_kq)
@@ -2531,6 +2548,16 @@ end if
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
    call pstat_proc%print(_PSTAT_ARGS_)
  end do ! my_ikcalc
+
+ ! Print total energies
+ ! DBSP
+ write(ab_out,"(a)")" "
+ write(ab_out,"(a)")" Contributions to total energies (in eV)"
+ write(ab_out,"(a)")" "
+ do it = 1, self%ntemp
+   write(ab_out, "(2(a,f12.6),a)")" Temperature =  ", it
+   write(ab_out, "(2(a,f12.6),a)")" E^(elph) ",E4(it) * Ha_eV
+ endif
 
  call cwtime_report(" Sigma_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
@@ -4905,7 +4932,6 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  ! NB: Only master writes
  ! (use, intrinsic :: iso_c_binding to associate a real pointer to complex data because netcdf does not support complex types).
  ! Well, cannot use c_loc with gcc <= 4.8 due to internal compiler error so use c2r and stack memory.
- NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), c2r(self%vals_e0ks), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), c2r(self%vals_e0ks), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "fan_vals"), c2r(self%fan_vals), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "E4_vals"), c2r(self%E4_vals), start=[1,1,1,ikcalc,spin]))
