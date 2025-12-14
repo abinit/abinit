@@ -396,7 +396,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
  ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
- if (plan%gpu_option == ABI_GPU_OPENMPD) then
+ if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (c_associated(plan%gpu_plan_spc, C_NULL_PTR)) then
@@ -525,7 +525,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
  ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
- if (plan%gpu_option == ABI_GPU_OPENMPD) then
+ if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (c_associated(plan%gpu_plan_spc, C_NULL_PTR)) then
