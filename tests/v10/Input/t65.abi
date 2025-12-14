@@ -1,0 +1,71 @@
+# Test calculation and printing of the electron-phonon contribution to the total energy
+# Diamond test
+ ndtset 2
+
+ ngkpt 4 4 4
+ nshiftk 1
+ shiftk 0.0 0.0 0.0
+
+ tolwfr1 1.0d-6  # Unconverged
+
+ iscf1 -2
+ getden_filepath1 "t61o_DS11_DEN"
+
+ optdriver2        7
+ eph_task2         4
+ ddb_ngqpt2        2 2 2
+ tmesh2            0 300 1
+ eph_stern2        1
+ eph_ahc_type2     0  # adibatic
+ eph_ngqpt_fine2   4 4 4
+ dvdb_add_lr2      1 # Add long-range quadrupoles
+ getddb_filepath2 "t63.ddb.out"
+ getdvdb_filepath2 "t64.dvdb.out"
+ getwfk2          -1
+ getpot_filepath2  "t61o_DS11_POT"
+ prtphdos2 0       # Disable computation of PHDOS to save some time
+ zcut2             0.005 eV  # Smearing delta
+ nkptgw2  3
+ bdgw2
+1 4
+1 4
+1 4
+ kptgw2
+     0.000000     0.000000     0.000000
+     0.500000     0.000000     0.000000
+     0.500000     0.500000     0.000000
+
+ acell 3*6.751
+ rprim 0 .5 .5 .5 0 .5 .5 .5 0
+ nstep 200
+ natom 2
+ typat 1 1
+ xred 3*0.0 3*0.25
+ nband 4
+ ntypat 1
+ znucl 6
+ diemac 4
+ ecut 20
+ enunit 2
+ istwfk *1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain =  t61.abi, t62.abi, t63.abi, t64.abi, t65.abi
+#%% [files]
+#%% files_to_test =
+#%%   t65.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = S. Ponce'
+#%% keywords =
+#%% description =
+#%%   Test to compute the electron-phonon contribution to total energy.
+#%%   Consider diamond with low ecut and number of k points.
+#%%<END TEST_INFO>
+
