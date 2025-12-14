@@ -3372,7 +3372,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,option,optprt
- complex(dp), allocatable, intent(out) :: mu
+ complex(dp), allocatable, intent(inout) :: mu(:)
 !arrays
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
@@ -3513,11 +3513,10 @@ end subroutine add_matlu
      ! Trace of matrix product
      !=====================================
 
-   mu=czero
    do im1=1,tndim
      do im2=1,tndim
        if(im1==im2) then
-         mu = mu + gathermatlu(iatom)%value(im1,im2)
+         mu(iatom) = mu(iatom) + gathermatlu(iatom)%value(im1,im2)
        end if
      end do
    end do
@@ -3613,7 +3612,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,option,optprt
- complex(dp), allocatable, intent(out) :: mu
+ complex(dp), allocatable, intent(inout) :: mu(:)
 !arrays
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
@@ -3777,11 +3776,10 @@ end subroutine add_matlu
      ! Trace of matrix product
      !=====================================
 
-   mu=czero
    do im1=1,tndim
      do im2=1,tndim
        if(im1==im2) then
-         mu = mu + gathermatlu(iatom)%value(im1,im2)
+         mu(iatom) = mu(iatom) + gathermatlu(iatom)%value(im1,im2)
        end if
      end do
    end do
@@ -3879,7 +3877,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,option,optprt
- complex(dp), allocatable, intent(out) :: mu
+ complex(dp), allocatable, intent(inout) :: mu(:)
 !arrays
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
@@ -4072,11 +4070,10 @@ end subroutine add_matlu
      ! Trace of matrix product
      !=====================================
 
-   mu=czero
    do im1=1,tndim
      do im2=1,tndim
        if(im1==im2) then
-         mu = mu + gathermatlu(iatom)%value(im1,im2)
+         mu(iatom) = mu(iatom) + gathermatlu(iatom)%value(im1,im2)
        end if
      end do
    end do
@@ -4129,7 +4126,6 @@ end subroutine add_matlu
  end do
  ABI_FREE(gathermatlu)
  ABI_FREE(muzeeman)
-
  end subroutine magmomfzeeman_matlu
 
 !!***
