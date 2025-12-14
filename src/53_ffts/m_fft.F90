@@ -134,20 +134,15 @@ MODULE m_fft
    integer :: gpu_option = ABI_GPU_DISABLED  ! /= 0 if FFTs should be offloaded to the GPU
 
    type(c_ptr) :: gpu_plan_ip_spc = c_null_ptr
-   type(c_ptr) :: gpu_data_ip_spc = c_null_ptr
    type(c_ptr) :: gpu_plan_ip_dpc = c_null_ptr
-   type(c_ptr) :: gpu_data_ip_dpc = c_null_ptr
    type(c_ptr) :: gpu_plan_op_spc = c_null_ptr
-   type(c_ptr) :: gpu_idata_op_spc = c_null_ptr
-   type(c_ptr) :: gpu_odata_op_spc = c_null_ptr
    type(c_ptr) :: gpu_plan_op_dpc = c_null_ptr
-   type(c_ptr) :: gpu_idata_op_dpc = c_null_ptr
-   type(c_ptr) :: gpu_odata_op_dpc = c_null_ptr
 
  contains
 
    procedure :: init => fftbox_plan3_init                 ! Low-level constructor
    procedure :: from_ngfft => fftbox_plan3_from_ngfft     ! Build object from ngfft.
+
    procedure :: execute_ip_spc => fftbox_execute_ip_spc
    procedure :: execute_ip_dpc => fftbox_execute_ip_dpc
    procedure :: execute_op_spc => fftbox_execute_op_spc
@@ -168,31 +163,30 @@ MODULE m_fft
 
 #if defined HAVE_GPU_CUDA
  interface
-   subroutine gpu_planpp_free(plan_pp) bind(C)
+   subroutine gpu_fftbox_plan_init(plan, f_dims, f_embed, batch, kind) bind(C)
+     use, intrinsic :: iso_c_binding
+     type(c_ptr), intent(out) :: plan
+     integer(c_int), intent(in) :: f_dims(3), f_embed(3)
+     integer(c_int), value     :: batch, kind
+   end subroutine
+   subroutine gpu_plan_free(plan) bind(C)
+     use, intrinsic :: iso_c_binding
+     type(c_ptr), value :: plan
+   end subroutine
+   subroutine gpu_fftbox_c2c_ip(plan_pp, nfft, ndat, isign, iscale, kind, h_ff, d_ff) bind(C)
      use, intrinsic :: iso_c_binding
      type(c_ptr),intent(inout) :: plan_pp
-   end subroutine gpu_planpp_free
-   subroutine devpp_free(dev_pp) bind(C)
-     use, intrinsic :: iso_c_binding
-     type(c_ptr),intent(inout) :: dev_pp
-   end subroutine devpp_free
-   subroutine xgpu_fftbox_c2c_ip(f_dims, f_embed, ndat, isign, kind, iscale, h_ff, plan_pp, d_ff) bind(C)
-     use, intrinsic :: iso_c_binding
-     integer(c_int),intent(in) :: f_dims(3), f_embed(3)
-     integer(c_int),value, intent(in) :: ndat, isign, kind, iscale
+     integer(c_int),value, intent(in) :: nfft, ndat, isign, iscale, kind
      type(c_ptr),intent(in) :: h_ff
-     type(c_ptr),intent(inout) :: plan_pp, d_ff
-   end subroutine xgpu_fftbox_c2c_ip
-   subroutine xgpu_fftbox_c2c_op(f_dims, f_embed, ndat, isign, kind, iscale, h_ff, h_gg, plan_pp, d_ff, d_gg) bind(C)
+     type(c_ptr),intent(inout) :: d_ff
+   end subroutine gpu_fftbox_c2c_ip
+   subroutine xgpu_fftbox_c2c_op(plan_pp, nfft, ndat, isign, iscale, kind, d_ff, d_gg) bind(C)
      use, intrinsic :: iso_c_binding
-     integer(c_int),intent(in) :: f_dims(3), f_embed(3)
-     integer(c_int),value, intent(in) :: ndat, isign, kind, iscale
-     type(c_ptr),intent(in) :: h_ff, h_gg
-     type(c_ptr),intent(inout) :: plan_pp, d_ff, d_gg
+     integer(c_int),value, intent(in) :: nfft, ndat, isign, iscale, kind
+     type(c_ptr),intent(inout) :: d_ff, d_gg
    end subroutine xgpu_fftbox_c2c_op
  end interface
 #endif
-
 
 !----------------------------------------------------------------------
 
@@ -360,16 +354,10 @@ subroutine fftbox_plan3_free(plan)
  ABI_UNUSED(plan%ldxyz)
 
 #if defined HAVE_GPU_CUDA
- call gpu_planpp_free(plan%gpu_plan_ip_spc)
- call devpp_free(plan%gpu_data_ip_spc)
- call gpu_planpp_free(plan%gpu_plan_ip_dpc)
- call devpp_free(plan%gpu_data_ip_dpc)
- call gpu_planpp_free(plan%gpu_plan_op_spc)
- call devpp_free(plan%gpu_idata_op_spc)
- call devpp_free(plan%gpu_odata_op_spc)
- call gpu_planpp_free(plan%gpu_plan_op_dpc)
- call devpp_free(plan%gpu_idata_op_dpc)
- call devpp_free(plan%gpu_odata_op_dpc)
+ !call gpu_planpp_free(plan%gpu_plan_ip_spc)
+ !call gpu_planpp_free(plan%gpu_plan_ip_dpc)
+ !call gpu_planpp_free(plan%gpu_plan_op_spc)
+ !call gpu_planpp_free(plan%gpu_plan_op_dpc)
 #endif
 
 end subroutine fftbox_plan3_free
@@ -413,13 +401,26 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
  ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
-#if defined HAVE_GPU_CUDA
  if (plan%gpu_option /= ABI_GPU_DISABLED) then
-   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, sp, iscale__, c_loc(ff), &
-                           plan%gpu_plan_ip_spc, plan%gpu_data_ip_spc)
+
+#if defined HAVE_GPU_CUDA
+   ! Build plan if not yet done. note batch_size instead of ndat.
+   if (c_associated(plan%gpu_plan_ip_spc, C_NULL_PTR)) then
+     call gpu_fftbox_plan_init(plan%gpu_plan_ip_spc, plan%dims, plan%embed, plan%batch_size, sp)
+   end if
+
+   if (ndat /= plan%batch_size) then
+     ! Have to rebuild the plan with batch_size == ndat.
+     call gpu_fft_plan_free(plan%gpu_plan_ip_spc)
+     call gpu_fftbox_plan_init(plan%gpu_plan_ip_spc, plan%dims, plan%embed, ndat, sp)
+   end if
+
+!$OMP TARGET DATA USE_DEVICE_ADDR(ff)
+    call gpu_fftbox_c2c_ip(plan%gpu_plan_ip_spc, plan%nfft, ndat, isign, iscale__, sp, c_loc(ff))
+!$OMP END TARGET DATA
    return
- end if
 #endif
+ end if
 
  ! CPU version
 #include "fftbox_ip_driver.finc"
@@ -465,13 +466,13 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
  ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
-#if defined HAVE_GPU_CUDA
  if (plan%gpu_option /= ABI_GPU_DISABLED) then
-   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, dp, iscale__, c_loc(ff), &
-                           plan%gpu_plan_ip_dpc, plan%gpu_data_ip_dpc)
-   return
- end if
+#if defined HAVE_GPU_CUDA
+   !call gpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, dp, iscale__, c_loc(ff), &
+   !                        plan%gpu_plan_ip_dpc, plan%gpu_data_ip_dpc)
+   !return
 #endif
+ end if
 
  ! CPU version
 #include "fftbox_ip_driver.finc"
@@ -517,13 +518,14 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
  ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
-#if defined HAVE_GPU_CUDA
+
  if (plan%gpu_option /= ABI_GPU_DISABLED) then
-   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, sp, iscale__, c_loc(ff), c_loc(gg), &
-                           plan%gpu_plan_op_spc, plan%gpu_idata_op_spc, plan%gpu_odata_op_spc)
-   return
- end if
+#if defined HAVE_GPU_CUDA
+   !call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, sp, iscale__, c_loc(ff), c_loc(gg), &
+   !                        plan%gpu_plan_op_spc, plan%gpu_idata_op_spc, plan%gpu_odata_op_spc)
+   !return
 #endif
+ end if
 
  ! CPU version
 #include "fftbox_op_driver.finc"
@@ -569,13 +571,13 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
  ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
-#if defined HAVE_GPU_CUDA
  if (plan%gpu_option /= ABI_GPU_DISABLED) then
-   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, dp, iscale__, c_loc(ff), c_loc(gg), &
-                           plan%gpu_plan_op_dpc, plan%gpu_idata_op_dpc, plan%gpu_odata_op_dpc)
-   return
- end if
+#if defined HAVE_GPU_CUDA
+   !call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, dp, iscale__, c_loc(ff), c_loc(gg), &
+   !                        plan%gpu_plan_op_dpc, plan%gpu_idata_op_dpc, plan%gpu_odata_op_dpc)
+   !return
 #endif
+ end if
 
  ! CPU version
 #include "fftbox_op_driver.finc"
