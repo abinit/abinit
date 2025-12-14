@@ -17,10 +17,10 @@ _get_direction(int isign, int *direction){
 
   switch (isign) {
   case 1:
-    *direction = cufft_inverse;
+    *direction = CUFFT_INVERSE;
     break;
   case -1:
-    *direction = cufft_forward;
+    *direction = CUFFT_FORWARD;
     break;
   default:
     printf("invalid isign: %d\n", isign);
@@ -30,16 +30,16 @@ _get_direction(int isign, int *direction){
 
 
 static void
-_get_type_nbytes(int dist_ndat, int kind, cuffttype *type, size_t *nbytes){
+_get_type_nbytes(int dist_ndat, int kind, cufftType *type, size_t *nbytes){
 
   switch (kind) {
   case 4:
-    *type = cufft_c2c;
-    *nbytes = dist_ndat * sizeof(cufftcomplex);
+    *type = CUFFT_C2C;
+    *nbytes = dist_ndat * sizeof(cufftComplex);
     break;
   case 8:
-    *type = cufft_z2z;
-    *nbytes = dist_ndat * sizeof(cufftdoublecomplex);
+    *type = CUFFT_Z2Z;
+    *nbytes = dist_ndat * sizeof(cufftDoubleComplex);
     break;
   default:
     printf("invalid kind: %d\n", kind);
@@ -52,7 +52,7 @@ gpu_fftbox_plan_init(void **plan_pp, int *f_dims, int *f_embed, int ndat, int ki
 
   const int RANK3 = 3, stride1 = 1;
   size_t nbytes;
-  int c_dims[RANK3], c_embed[RANK3]
+  int c_dims[RANK3], c_embed[RANK3];
   c_dims[0] = f_dims[2]; c_dims[1] = f_dims[1]; c_dims[2] = f_dims[0];
   c_embed[0] = f_embed[2]; c_embed[1] = f_embed[1]; c_embed[2] = f_embed[0];
   int dist = f_embed[0] * f_embed[1] * f_embed[2];
@@ -65,7 +65,7 @@ gpu_fftbox_plan_init(void **plan_pp, int *f_dims, int *f_embed, int ndat, int ki
   */
 
   cufftType type;
-  _get_type_nbytes(dist * ndat, kind, &type, &nbytes)
+  _get_type_nbytes(dist * ndat, kind, &type, &nbytes);
 
   /* Allocate the handle */
   cufftHandle *plan_p = (cufftHandle *) malloc(sizeof(cufftHandle));
@@ -114,11 +114,12 @@ extern "C" void
 gpu_fftbox_c2c_ip(void **plan_pp, int nfft, int ndat, int isign, int iscale, int kind, void **d_ff) {
 
   cufftType type;
-  cufftHandle plan;
   int direction;
   size_t nbytes;
   _get_direction(isign, &direction);
-  _get_type_nbytes_dir_cc(0, kind, &type, &nbytes);
+  _get_type_nbytes(0, kind, &type, &nbytes);
+
+  cufftHandle plan = *(cufftHandle *)(*plan_pp);
 
   // Transform the signal in place.
   if (type == CUFFT_C2C) {
@@ -137,19 +138,23 @@ gpu_fftbox_c2c_ip(void **plan_pp, int nfft, int ndat, int isign, int iscale, int
     }
   }
 
-  CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+  //CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+  cudaStream_t stream;
+  cufftGetStream(plan, &stream);
+  CHECK_CUDA_ERROR(cudaStreamSynchronize(stream));
 }
 
 extern "C" void
-xgpu_fftbox_c2c_op(void **plan_pp, int nfft, int batch, int isign, int iscale, int kind,
+xgpu_fftbox_c2c_op(void **plan_pp, int nfft, int ndat, int isign, int iscale, int kind,
                    void **d_ff, void **d_gg) {
 
   cufftType type;
-  cufftHandle plan;
   int direction;
   size_t nbytes;
   _get_direction(isign, &direction);
-  _get_type_nbytes_dir_cc(0, kind, &type, &nbytes);
+  _get_type_nbytes(0, kind, &type, &nbytes);
+
+  cufftHandle plan = *(cufftHandle *)(*plan_pp);
 
   // Transform the signal out of place.
   if (type == CUFFT_C2C) {
@@ -167,7 +172,10 @@ xgpu_fftbox_c2c_op(void **plan_pp, int nfft, int batch, int isign, int iscale, i
      }
   }
 
-  CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+  //CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+  cudaStream_t stream;
+  cufftGetStream(plan, &stream);
+  CHECK_CUDA_ERROR(cudaStreamSynchronize(stream));
 }
 
 #endif
