@@ -173,12 +173,13 @@ MODULE m_fft
    end subroutine
    subroutine gpu_fftbox_c2c_ip(plan_pp, nfft, ndat, isign, iscale, kind, d_ff) bind(C)
      use, intrinsic :: iso_c_binding
-     type(c_ptr),intent(inout) :: plan_pp
+     type(c_ptr),intent(in) :: plan_pp
      integer(c_int),value, intent(in) :: nfft, ndat, isign, iscale, kind
      type(c_ptr),intent(in) :: d_ff
    end subroutine gpu_fftbox_c2c_ip
    subroutine gpu_fftbox_c2c_op(plan_pp, nfft, ndat, isign, iscale, kind, d_ff, d_gg) bind(C)
      use, intrinsic :: iso_c_binding
+     type(c_ptr),intent(in) :: plan_pp
      integer(c_int),value, intent(in) :: nfft, ndat, isign, iscale, kind
      type(c_ptr),intent(in) :: d_ff, d_gg
    end subroutine gpu_fftbox_c2c_op
