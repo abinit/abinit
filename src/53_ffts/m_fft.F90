@@ -315,7 +315,7 @@ subroutine fftbox_plan3_init(plan, batch_size, dims, embed, fftalg, fftcache, gp
 
  if (gpu_option /= ABI_GPU_DISABLED) then
    if (any(dims /= embed)) then
-     ABI_ERROR("FFT on GPUs do not support dims != embed")
+     ABI_ERROR("FFTs on GPUs with fftbox_plan3 do not support dims != embed")
    end if
  end if
 
@@ -415,24 +415,18 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
    ! Build plan if not yet done. note batch_size instead of ndat.
-   !print *, "hello associated", c_associated(plan%gpu_plan_spc)
    if (.not. c_associated(plan%gpu_plan_spc)) then
-     !print *, "before gpu_fftbox_plan_init"
      call gpu_fftbox_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, plan%batch_size, sp)
-     !print *, "after gpu_fftbox_plan_init"
    end if
 
    if (ndat__ /= plan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
-     !print *, "before gpu_fftbox_plan_init new"
      call gpu_fft_plan_free(plan%gpu_plan_spc)
      call gpu_fftbox_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, ndat__, sp)
-     !print *, "after gpu_fftbox_plan_init new"
    end if
 
-  !print *, "before target"
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
-    !call gpu_fftbox_c2c_ip(plan%gpu_plan_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff))
+    call gpu_fftbox_c2c_ip(plan%gpu_plan_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff))
 !$OMP END TARGET DATA
    return
 #endif
@@ -485,8 +479,6 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
 
  !call wrtout(std_out, "in fftbox_execute_ip_dpc")
 
- ! FIXME: ndat should not be optional to make the API compatibile with GPUs.
-
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
    ! Build plan if not yet done. note batch_size instead of ndat.
@@ -504,7 +496,6 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
     call gpu_fftbox_c2c_ip(plan%gpu_plan_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff))
 !$OMP END TARGET DATA
    return
-
 #endif
  end if
 
@@ -1384,7 +1375,6 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    ff = ff_ref
 
    ! in-place version.
-   !print *, "in place with dp"
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(to:ff) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -1393,7 +1383,6 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET EXIT DATA MAP(from:ff) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
-   !print *, "after in place with dp"
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
