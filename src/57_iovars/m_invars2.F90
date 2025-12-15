@@ -3239,11 +3239,14 @@ if (dtset%usekden==1) then
    call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'rcpaw_sc',tread,'DPR')
    if(tread==1) dtset%rcpaw_sc(1:ntypat) = dprarr(1:ntypat)
 
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_orbshift',tread,'INT')
-   if(tread==1) dtset%rcpaw_orbshift = intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_elin',tread,'INT')
+   if(tread==1) dtset%rcpaw_elin = intarr(1)
 
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_potshift',tread,'INT')
-   if(tread==1) dtset%rcpaw_potshift = intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_tpaw',tread,'INT')
+   if(tread==1) dtset%rcpaw_tpaw = intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rcpaw_vhtnzc',tread,'INT')
+   if(tread==1) dtset%rcpaw_vhtnzc = intarr(1)
  endif
 
 ! Print variables
