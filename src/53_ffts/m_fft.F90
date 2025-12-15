@@ -46,7 +46,7 @@ MODULE m_fft
  use m_geometry,      only : metric
  use m_hide_blas,     only : xscal
  use m_fftcore,       only : get_cache_kb, kpgsph, get_kg, sphere_fft, sphere_fft1, sphere, change_istwfk, &
-                             fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary
+                             fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary, ngfft_seq
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, ptabs_fourwf, initmpi_seq
  use m_distribfft,    only : distribfft_type
 
@@ -497,7 +497,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
-    call gpu_fftbox_c2c_ip(plan%gpu_plan_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff))
+   call gpu_fftbox_c2c_ip(plan%gpu_plan_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff))
 !$OMP END TARGET DATA
    return
 #endif
@@ -564,7 +564,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
-    call gpu_fftbox_c2c_op(plan%gpu_plan_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff), c_loc(gg))
+   call gpu_fftbox_c2c_op(plan%gpu_plan_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff), c_loc(gg))
 !$OMP END TARGET DATA
    return
 #endif
@@ -631,7 +631,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
-    call gpu_fftbox_c2c_op(plan%gpu_plan_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff), c_loc(gg))
+   call gpu_fftbox_c2c_op(plan%gpu_plan_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff), c_loc(gg))
 !$OMP END TARGET DATA
    return
 #endif
@@ -1062,8 +1062,7 @@ subroutine fftpad_dpc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, 
  integer :: ivz !vz_d
  character(len=500) :: msg
 !arrays
- real(dp),allocatable :: fofr(:,:,:,:,:)
- real(dp),allocatable :: fofrvz(:,:) !vz_d
+ real(dp),allocatable :: fofr(:,:,:,:,:), fofrvz(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: fpt_ftarr(:,:,:,:,:)
 ! *************************************************************************
 
@@ -1085,16 +1084,16 @@ subroutine fftpad_dpc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, 
    ncount = ldx*ldy*ldz*ndat
 
    ABI_MALLOC(fofr, (2,ldx,ldy,ldz,ndat))
-!  call ZCOPY(ncount,ff,1,fofr,1) !vz_d
-!  call DCOPY(2*ncount,ff,1,fofr,1)  ! MG
-   ! alternatif of ZCOPY from vz
-   ABI_MALLOC(fofrvz,(2,ncount))     !vz_d
-   do ivz=1,ncount                !vz_d
-     fofrvz(1,ivz)= real(ff(ivz))  !vz_d
-     fofrvz(2,ivz)=aimag(ff(ivz))  !vz_d
-   end do                         !vz_d
-   call DCOPY(2*ncount,fofrvz,1,fofr,1) !vz_d
-   ABI_FREE(fofrvz)             !vz_d
+   !call ZCOPY(ncount,ff,1,fofr,1) !vz_d
+   !call DCOPY(2*ncount,ff,1,fofr,1)  ! MG
+   ! alternative of ZCOPY from vz
+   ABI_MALLOC(fofrvz,(2,ncount))
+   do ivz=1,ncount
+     fofrvz(1,ivz)= real(ff(ivz))
+     fofrvz(2,ivz)=aimag(ff(ivz))
+   end do
+   call DCOPY(2*ncount,fofrvz,1,fofr,1)
+   ABI_FREE(fofrvz)
 
    call C_F_pointer(C_loc(ff),fpt_ftarr, shape=(/2,ldx,ldy,ldz,ndat/))
 
@@ -1202,7 +1201,6 @@ end subroutine fft_poisson
 subroutine fft_use_lib_threads(logvar)
 
 !Arguments ------------------------------------
-!scalars
  logical,intent(in) :: logvar
 ! *************************************************************************
 
@@ -1246,12 +1244,12 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
  integer :: ifft,ierr,ldxyz,old_nthreads,ount,cplex,ii
  integer :: iset,nx,ny,nz,ldx,ldy,ldz,fftalga,fftalgc
  !integer :: ix,iy,iz,padat,dat
- real(dp),parameter :: ATOL_SP=tol6,ATOL_DP=tol12 ! Tolerances on the absolute error
+ real(dp),parameter :: ATOL_SP=tol6,ATOL_DP=tol12 ! Tolerances on the absolute errors
  real(dp) :: max_abserr
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
  type(fftbox_plan3_t) :: box_plan
 !arrays
- integer :: pars(6,NSETS)
+ integer :: pars(6,NSETS), ngfft(18)
  real(dp) :: crand(2)
  real(dp),allocatable :: fofg(:),fofr_ref(:),fofr(:)
  complex(dp),allocatable :: ff(:),ff_ref(:),gg(:)
@@ -1292,11 +1290,14 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    nx =pars(1,iset);  ny=pars(2,iset);  nz=pars(3,iset)
    ldx=pars(4,iset); ldy=pars(5,iset); ldz=pars(6,iset)
 
+   call ngfft_seq(ngfft, [nx,ny,nz])
+   ngfft(4:6) = [ldx, ldy, ldz]
+
    ! Create the FFT plan
    call box_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, gpu_option)
 
    ldxyz = ldx*ldy*ldz
-   !
+
    ! ======================================
    ! === TEST the single precision version
    ! ======================================
@@ -1444,8 +1445,6 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      ! when FFT_DFTI is used.
      ! Note however that we never call fourdp with ngfft(1:3) != ngftt(4:6) so this is not a serious problem.
      ! An additional check is done inside dfti_seqfourdp
-
-     !
      if (fftalga == FFT_DFTI) then
        ldx=nx; ldy=ny; ldz=nz
        ldxyz = ldx*ldy*ldz
@@ -1459,19 +1458,27 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr_ref)
      fofr = fofr_ref
 
-     select case (fftalga)
-     case (FFT_FFTW3)
-       call fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,-1,fofg,fofr)
-       call fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,+1,fofg,fofr)
+     if (gpu_option == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       call ompgpu_fourdp(cplex, ngfft, ldx, ldy, ldz, ndat, -1, fofg, fofr)
+       call ompgpu_fourdp(cplex, ngfft, ldx, ldy, ldz, ndat, +1, fofg, fofr)
+#endif
+     else
+       ! CPU version.
+       select case (fftalga)
+       case (FFT_FFTW3)
+         call fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,-1,fofg,fofr)
+         call fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,+1,fofg,fofr)
 
-     case (FFT_DFTI)
-       call dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,-1,fofg,fofr)
-       call dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,+1,fofg,fofr)
+       case (FFT_DFTI)
+         call dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,-1,fofg,fofr)
+         call dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,+1,fofg,fofr)
 
-     case default
-       ! TODO
-       continue
-     end select
+       case default
+         ! TODO
+         continue
+       end select
+     end if
 
      call cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,fofr)
 
@@ -1483,7 +1490,6 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      if (ierr /= 0) then
        max_abserr = MAXVAL(ABS(fofr - fofr_ref))
        write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
-
        !write(std_out, *)"abs_diff fofr fofr_ref"
        !do ifft=1,cplex*ldxyz*ndat
        !  write(std_out, *)abs(fofr(ifft) - fofr_ref(ifft)), fofr(ifft), fofr_ref(ifft)
