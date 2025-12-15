@@ -581,7 +581,7 @@ CONTAINS !===========================================================
 !! Inspired from atompaw program
 
 subroutine atompaw_solve(atp,pawrad,pawtab,&
-  & nval,mqgrid_vl,qgrid_vl,epsatm,vlspl,&
+  & nval,tnval,mqgrid_vl,qgrid_vl,epsatm,vlspl,&
 & zion,update_paw,update_tnc,atm)
 
 ! TODO : vtau,dirac
@@ -598,7 +598,7 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  type(pawtab_type),intent(inout) :: pawtab
  type(atomorb_type), intent(inout) :: atm
  !arrays
- real(dp), intent(in) :: nval(:)
+ real(dp), intent(in) :: nval(:),tnval(:)
  real(dp), intent(in) :: qgrid_vl(mqgrid_vl)
  real(dp),intent(out) :: vlspl(mqgrid_vl,2)
 !Local variables-------------------------------
@@ -614,7 +614,6 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  type(pawrad_type) :: radmesh,vloc_mesh
  real(dp) , allocatable :: nhatc(:),vhatc(:)
  real(dp) , allocatable :: pot_orig(:),x1(:),x2(:),f1(:),f2(:)
- logical,allocatable :: converged(:)
  
 ! *************************************************************************
 
@@ -622,11 +621,16 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  LIBPAW_ALLOCATE(coredens,(size(atp%Orbit%coreden)))
  atp%Orbit%valeden=zero
  atp%PAW%den=zero
+ atp%PAW%tden=zero
  do io=1,pawtab%mesh_size
    atp%PAW%den(io)=nval(io)
    atp%Orbit%valeden(io)=nval(io)
+   atp%PAW%tden(io)=tnval(io)
  enddo
- call smoothpower(atp%Grid,2,atp%PAW%den,atp%PAW%tden,atp%PAW)
+ if(any(atp%PAW%tden<zero)) then
+   write(std_out,*) 'atompaw_solve : tden is negative for some r ! Smoothening den instead'
+   call smoothpower(atp%Grid,2,atp%PAW%den,atp%PAW%tden,atp%PAW)
+ endif
  atp%Orbit%den=atp%Orbit%valeden+atp%Orbit%coreden
  coredens=atp%Orbit%coreden
  delta_zcore=zero
@@ -815,8 +819,8 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
    call pawrad_init(vloc_mesh,mesh_size=size(pawtab%vhtnzc),mesh_type=pawrad%mesh_type,&
 &   rstep=pawrad%rstep,lstep=pawrad%lstep)
    if(atp%vhtnzc_mode==2) then
-     call FindVlocfromVeff(atp%Grid,atp%Orbit,atp%PAW,atp,potshift)
-     if(.false.) then ! TODO usexcnhat, shapebes
+     call FindVlocfromVeff(atp%Grid,atp%PAW,atp,potshift)
+     if(pawtab%usexcnhat==1) then
        pawtab%vhtnzc(1:size(pawtab%vhtnzc))=half*atp%PAW%abinitvloc(1:size(pawtab%vhtnzc))
      else
        pawtab%vhtnzc(1:size(pawtab%vhtnzc))=half*atp%PAW%abinitnohat(1:size(pawtab%vhtnzc))
@@ -4700,6 +4704,36 @@ END SUBROUTINE DoAndersonMix
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! subroutine shapebes(al,ql,ll,rc)
+!!    Find al and ql parameters for a "Bessel" shape function:
+!!    Shape(r)=al1.jl(ql1.r)+al2.jl(ql2.r)
+!!      such as Shape(r) and 2 derivatives are zero at r=rc
+!!              Intg_0_rc[Shape(r).r^(l+2).dr]=1
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+SUBROUTINE shapebes(al,ql,ll,rc)
+  INTEGER,INTENT(IN) :: ll
+  REAL(dp),INTENT(IN) :: rc
+  REAL(dp),INTENT(OUT) :: al(2),ql(2)
+  INTEGER :: i
+  REAL(dp) :: alpha,beta,det,qr,jbes,jbesp,jbespp,amat(2,2),bb(2)
+  alpha=1.D0;beta=0.D0
+  CALL solvbes(ql,alpha,beta,ll,2)
+  ql(1:2)=ql(1:2)/rc
+  DO i=1,2
+    qr=ql(i)*rc
+    CALL jbessel(jbes,jbesp,jbespp,ll,1,qr)
+    amat(1,i)=jbesp*ql(i)
+    CALL jbessel(jbes,jbesp,jbespp,ll+1,0,qr)
+    amat(2,i)=jbes*rc**(ll+2)/ql(i)  !  Intg_0_rc[jl(qr).r^(l+2).dr]
+  ENDDO
+  bb(1)=0.d0;bb(2)=1.d0
+  det=amat(1,1)*amat(2,2)-amat(1,2)*amat(2,1)
+  al(1)=(amat(2,2)*bb(1)-amat(1,2)*bb(2))/det
+  al(2)=(amat(1,1)*bb(2)-amat(2,1)*bb(1))/det
+END SUBROUTINE shapebes
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!  ddexp
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 FUNCTION ddexp(arg)
@@ -6709,7 +6743,6 @@ END SUBROUTINE initgridwithn
 
 
 SUBROUTINE sethat(Grid,PAW,gaussparam,besselopt)
-  ! TODO : bessel
   TYPE(GridInfo), INTENT(IN) :: Grid
   TYPE(PseudoInfo), INTENT(INOUT) :: PAW
   INTEGER,INTENT(IN), OPTIONAL :: besselopt
@@ -6742,12 +6775,12 @@ SUBROUTINE sethat(Grid,PAW,gaussparam,besselopt)
     PAW%irc_shap=PAW%irc
     PAW%rc_shap=PAW%rc
   else if(present(besselopt)) then
-    !call shapebes(al,ql,0,rc_shap)
-    !DO i=1,irc_shap-1
-    !  qr=ql(1)*r(i);CALL jbessel(jbes1,d,dd,0,0,qr)
-    !  qr=ql(2)*r(i);CALL jbessel(jbes2,d,dd,0,0,qr)
-    !  PAW%hatshape(i)=al(1)*jbes1+al(2)*jbes2
-    !ENDDO
+    call shapebes(al,ql,0,rc_shap)
+    DO i=1,irc_shap-1
+      qr=ql(1)*r(i);CALL jbessel(jbes1,d,dd,0,0,qr)
+      qr=ql(2)*r(i);CALL jbessel(jbes2,d,dd,0,0,qr)
+      PAW%hatshape(i)=al(1)*jbes1+al(2)*jbes2
+    ENDDO
   else
     DO i=2,irc_shap-1
       PAW%hatshape(i)=(SIN(pi*r(i)/rc_shap)/(pi*r(i)/rc_shap))**2
@@ -6755,11 +6788,11 @@ SUBROUTINE sethat(Grid,PAW,gaussparam,besselopt)
   endif
   PAW%hatden(1:irc)=PAW%hatshape(1:irc)*(r(1:irc)**2)
   !  normalize
-  !if (.not.besselshapefunction) then
+  if (.not.present(besselopt)) then
     con=integrator(Grid,PAW%hatden,1,PAW%irc_shap)
     if(has_to_print) WRITE(STD_OUT,*) ' check hatden normalization', con
     PAW%hatden=PAW%hatden/con
-  !endif
+  endif
   CALL atompaw_poisson(Grid,con,PAW%hatden,PAW%hatpot,selfen)
   if(has_to_print) WRITE(STD_OUT,*) 'Self energy for L=0 hat density  ', selfen
   if(has_to_print) WRITE(STD_OUT,*) 'hatden charge  ', con
@@ -6771,19 +6804,18 @@ END SUBROUTINE sethat
 !  Assumes prior call to SUBROUTINE calculate_tvtau
 !  which now fills PAW%tden and PAW%ttau
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE FindVlocfromVeff(Grid,Orbit,PAW,atp,potshift)
+SUBROUTINE FindVlocfromVeff(Grid,PAW,atp,potshift)
   ! TODO : needvtau,allocates
   TYPE(GridInfo), INTENT(INOUT) :: Grid
-  TYPE(OrbitInfo), INTENT(IN) :: Orbit
   type(atompaw_type),intent(inout) :: atp
   TYPE(PseudoInfo), INTENT(INOUT) :: PAW
   real(dp),intent(in) :: potshift
   REAL(dp), POINTER  :: r(:)
-  REAL(dp) :: h,qeff,tq,rat,q00,ecoul,etxc,eexc,occ,fac
-  INTEGER :: n,i,irc,io,nbase,ib,ic,ir
-  REAL(dp), allocatable :: d(:),dv(:),dvx(:),v(:),vv(:),vxB(:),vxK(:)
+  REAL(dp) :: h,tq,rat,q00,etxc,eexc
+  INTEGER :: n,irc,nbase
+  REAL(dp), allocatable :: d(:),v(:),vxB(:),vxK(:)
   REAL(dp), allocatable :: t(:),vt(:),vthat(:)
-  CALL FillHat(Grid,PAW)
+  CALL FillHat(Grid,PAW,atp%besselshapefunction)
   !if (Vlocalindex == SETVLOC) then
   !  write(std_out,*) 'Vloc == VlocCoef*shapefunc  '
   !  return
@@ -6794,8 +6826,13 @@ SUBROUTINE FindVlocfromVeff(Grid,Orbit,PAW,atp,potshift)
   irc=max(PAW%irc,PAW%irc_shap,PAW%irc_vloc,PAW%irc_core)
   ! Recalculate den and tau      
   PAW%valetau=0.d0;PAW%tvaletau=0.d0
-  allocate(d(n),vxB(n),v(n),vxK(n),STAT=i)
-  allocate(t(n),vt(n),vthat(n))      
+  LIBPAW_ALLOCATE(d,(n))
+  LIBPAW_ALLOCATE(vxB,(n))
+  LIBPAW_ALLOCATE(v,(n))
+  LIBPAW_ALLOCATE(vxK,(n))
+  LIBPAW_ALLOCATE(t,(n))
+  LIBPAW_ALLOCATE(vt,(n))
+  LIBPAW_ALLOCATE(vthat,(n))      
   d=PAW%den-PAW%tden
   tq=integrator(Grid,d,1,irc)
   if(has_to_print) write(std_out,*) ' Delta Qval = ', tq
@@ -6822,8 +6859,12 @@ SUBROUTINE FindVlocfromVeff(Grid,Orbit,PAW,atp,potshift)
   ! Reassess poscorenhat      
   ! check if PAW%tcore+PAW%tden+tq*PAW%hatden is positive      
   PAW%poscorenhat=.true.
-  deallocate(v,vxB,vxK)
-  deallocate(d,vt,vthat)
+  LIBPAW_DEALLOCATE(v)
+  LIBPAW_DEALLOCATE(vxB)
+  LIBPAW_DEALLOCATE(vxK)
+  LIBPAW_DEALLOCATE(d)
+  LIBPAW_DEALLOCATE(vt)
+  LIBPAW_DEALLOCATE(vthat)
 END SUBROUTINE FindVlocfromVeff
 
 
@@ -7667,11 +7708,11 @@ END SUBROUTINE calculate_tvtau
 !!   Calculates density associated with L component
 !!    normalized to unity
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE hatL(Grid,PAW,l,dhat)
-  ! TODO : besselshape
+SUBROUTINE hatL(Grid,PAW,l,dhat,besselshapefunction)
   TYPE(GridInfo), INTENT(IN) :: Grid
   TYPE(PseudoInfo), INTENT(IN) :: PAW
   INTEGER, INTENT(IN) :: l
+  logical, intent(in) :: besselshapefunction
   REAL(dp), INTENT(OUT) :: dhat(:)
   INTEGER :: n,irc,i
   REAL(dp), POINTER :: r(:)
@@ -7684,15 +7725,14 @@ SUBROUTINE hatL(Grid,PAW,l,dhat)
   irc=PAW%irc
   LIBPAW_ALLOCATE(den,(n))
   LIBPAW_ALLOCATE(a,(n))
-  if(.false.) then
-   !IF (besselshapefunction) THEN
-   ! CALL shapebes(al,ql,l,PAW%rc_shap)
-   ! DO i=1,PAW%irc_shap
-   !   qr=ql(1)*r(i);CALL jbessel(jbes1,dum1,dum2,l,0,qr)
-   !   qr=ql(2)*r(i);CALL jbessel(jbes2,dum1,dum2,l,0,qr)
-   !   den(i)=(al(1)*jbes1+al(2)*jbes2)*r(i)**2
-   ! ENDDO
-   ! IF (n>PAW%irc_shap) den(PAW%irc_shap+1:n)=0.d0
+  IF (besselshapefunction) THEN
+    CALL shapebes(al,ql,l,PAW%rc_shap)
+    DO i=1,PAW%irc_shap
+      qr=ql(1)*r(i);CALL jbessel(jbes1,dum1,dum2,l,0,qr)
+      qr=ql(2)*r(i);CALL jbessel(jbes2,dum1,dum2,l,0,qr)
+      den(i)=(al(1)*jbes1+al(2)*jbes2)*r(i)**2
+    ENDDO
+    IF (n>PAW%irc_shap) den(PAW%irc_shap+1:n)=0.d0
   ELSE
     DO i=1,n
       den(i)=(r(i)**l)*PAW%hatden(i)
@@ -7711,7 +7751,8 @@ END SUBROUTINE hatL
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!   SUBROUTINE FillHat(Grid,PAW)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE FillHat(Grid,PAW)
+SUBROUTINE FillHat(Grid,PAW,besselshape)
+  logical,intent(in) :: besselshape
   TYPE(GridInfo) , INTENT(IN):: Grid
   TYPE(PseudoInfo), INTENT(INOUT) :: PAW
   INTEGER :: ll,n,l
@@ -7719,7 +7760,7 @@ SUBROUTINE FillHat(Grid,PAW)
   n=Grid%n
   LIBPAW_ALLOCATE(PAW%g,(n,ll+1))
   DO l=0,ll
-    CALL hatL(Grid,PAW,l,PAW%g(:,l+1))
+    CALL hatL(Grid,PAW,l,PAW%g(:,l+1),besselshape)
   ENDDO
 END SUBROUTINE FillHat
 
