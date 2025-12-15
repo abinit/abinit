@@ -23,7 +23,7 @@ _get_direction(int isign, int *direction){
     *direction = CUFFT_FORWARD;
     break;
   default:
-    printf("invalid isign: %d\n", isign);
+    printf("Invalid isign: %d\n", isign);
     abi_cabort();
   }
 }
@@ -42,7 +42,7 @@ _get_type_nbytes(int dist_ndat, int kind, cufftType *type, size_t *nbytes){
     *nbytes = dist_ndat * sizeof(cufftDoubleComplex);
     break;
   default:
-    printf("invalid kind: %d\n", kind);
+    printf("Invalid kind: %d\n", kind);
     abi_cabort();
   }
 }
@@ -59,21 +59,18 @@ gpu_fftbox_plan_init(void **plan_pp, int *f_dims, int *f_embed, int ndat, int ki
 
   //printf("in C gpu_fftbox_plan_init\n");
 
-  /* Create a 3D FFT plan.
-  cufftResult = cufftPlanMany(cufftHandle *plan, int rank, int *c_dims,
-                              int *inembed, int istride, int idist,
-                              int *onembed, int ostride, int odist,
-                              cufftType type, int batch);
-  */
+  //cufftResult = cufftPlanMany(cufftHandle *plan, int rank, int *c_dims,
+  //                            int *inembed, int istride, int idist,
+  //                            int *onembed, int ostride, int odist,
+  //                            cufftType type, int batch);
 
   cufftType type;
   _get_type_nbytes(dist * ndat, kind, &type, &nbytes);
 
-  /* Allocate the handle */
+  // Allocate the handle
   cufftHandle *plan_p = (cufftHandle *) malloc(sizeof(cufftHandle));
 
   if (!plan_p) {
-    /* handle allocation failure */
     *plan_pp = NULL;
     return;
   }
@@ -93,7 +90,10 @@ gpu_fftbox_plan_init(void **plan_pp, int *f_dims, int *f_embed, int ndat, int ki
   /* Associate plan with stream */
   //cufftSetStream(p->handle, p->stream);
 
-  /* Return opaque pointer to Fortran */
+  //CUDA_API_CHECK( cudaStreamCreate(&stream_compute[*fft_plan_id]) );
+  //CUDA_API_CHECK( cufftSetStream(plan_fft[*fft_plan_id],stream_compute[*fft_plan_id]) );
+
+  // Return opaque pointer to Fortran
   *plan_pp = (void *) plan_p;
 }
 
@@ -118,7 +118,6 @@ extern "C" void
 gpu_fftbox_c2c_ip(void **plan_pp, int nfft, int ndat, int isign, int iscale, int kind, void **d_ff) {
 
   //printf("in gpu_fftbox_c2c_ip");
-
   cufftType type;
   int direction;
   size_t nbytes;
@@ -162,7 +161,7 @@ gpu_fftbox_c2c_op(void **plan_pp, int nfft, int ndat, int isign, int iscale, int
   _get_direction(isign, &direction);
   _get_type_nbytes(0, kind, &type, &nbytes);
 
-  cufftHandle plan = *(cufftHandle *)(*plan_pp);
+  cufftHandle plan = *(cufftHandle *) (*plan_pp);
 
   // Transform the signal out of place.
   if (type == CUFFT_C2C) {

@@ -4608,7 +4608,7 @@ subroutine gwr_build_tchi(gwr)
              ! Then back to tchi(G'=q+g',r) immediately with isign + 1.
              gt_scbox(:,:,1) = gt_scbox(:,:,1) * conjg(gt_scbox(:,:,2))
              !max_abs_imag_chit = max(max_abs_imag_chit, maxval(abs(aimag(gt_scbox(:,:,1)))))
-             call green_plan%execute(gt_scbox(:,1,1), ndat, +1)
+             call green_plan%execute(gt_scbox(:,1,1), +1, ndat)
 
            else
              ! Reduce one G_k(tau) on the idat-1 proc and perform ndat FFTs in parallel.
