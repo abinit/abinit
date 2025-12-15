@@ -603,17 +603,16 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  real(dp),intent(out) :: vlspl(mqgrid_vl,2)
 !Local variables-------------------------------
 !scalars
- integer :: io,ir,icor,ii,jj,io2
+ integer :: io,ir,icor,io2
  logical :: success,paw_proj
  character(len=500) :: msg
- real(dp) :: insph,norm,potshift,eshift,temp,ovl
+ real(dp) :: insph,norm,potshift,ovl
  real(dp) :: yp1,ypn,ekin,delta_zcore,int_pot
 !arrays
  real(dp),ALLOCATABLE:: coredens(:),tcoredens(:),vhnzc_tmp(:)
- real(dp),ALLOCATABLE:: ff(:),eshift_orig(:)
+ real(dp),ALLOCATABLE:: ff(:)
  type(pawrad_type) :: radmesh,vloc_mesh
  real(dp) , allocatable :: nhatc(:),vhatc(:)
- real(dp) , allocatable :: pot_orig(:),x1(:),x2(:),f1(:),f2(:)
  
 ! *************************************************************************
 
