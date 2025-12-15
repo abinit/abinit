@@ -70,14 +70,6 @@ gpu_fftbox_plan_init(void **plan_pp, int *f_dims, int *f_embed, int ndat, int ki
   // Allocate the handle
   cufftHandle *plan_p = (cufftHandle *) malloc(sizeof(cufftHandle));
 
-  /* Create a CUDA stream */
-  //cudaError_t cerr = cudaStreamCreate(&p->stream);
-  //if (cerr != cudaSuccess) {
-  //    free(p);
-  //    *plan_pp = NULL;
-  //    return;
-  //}
-
   CHECK_CUDA_ERROR(cufftPlanMany(plan_p, RANK3, c_dims, c_embed, stride1, dist, c_embed, stride1, dist, type, ndat));
   //printf("Creating new GPU plan_p: %d @ %p\n", plan, *plan_p);
   //printf("plan_pp: %p, *plan_pp: %p\n", plan_pp, *plan_pp);
@@ -85,8 +77,10 @@ gpu_fftbox_plan_init(void **plan_pp, int *f_dims, int *f_embed, int ndat, int ki
   /* Associate plan with stream */
   //cufftSetStream(p->handle, p->stream);
 
-  //CUDA_API_CHECK( cudaStreamCreate(&stream_compute[*fft_plan_id]) );
-  //CUDA_API_CHECK( cufftSetStream(plan_fft[*fft_plan_id],stream_compute[*fft_plan_id]) );
+  // see gpu_fft.cu
+  //cudaStream_t stream_compute;
+  //CHECK_CUDA_ERROR(cudaStreamCreate(&stream_compute));
+  //CHECK_CUDA_ERROR(cufftSetStream(*plan_p, stream_compute));
 
   // Return opaque pointer to Fortran
   *plan_pp = (void *) plan_p;
@@ -95,15 +89,13 @@ gpu_fftbox_plan_init(void **plan_pp, int *f_dims, int *f_embed, int ndat, int ki
 extern "C" void
 gpu_fft_plan_free(void *plan_p)
 {
-
-  //printf("in gpu_fft_plan_free");
   cufftHandle *h = (cufftHandle *) plan_p;
+  //printf("in gpu_fft_plan_free");
   //printf("About to free GPU plan: %d @ %p\n", plan, &plan);
   //printf("plan_pp: %p, *plan_pp: %p\n", plan_pp, *plan_pp);
 
   if (h) {
-    /* Destroy stream */
-    //cudaStreamDestroy(p->stream);
+    /* Destroy plan */
     CHECK_CUDA_ERROR(cufftDestroy(*h));
     free(h);
   }
@@ -119,7 +111,7 @@ gpu_fftbox_c2c_ip(void **plan_pp, int nfft, int ndat, int isign, int iscale, int
   _get_direction(isign, &direction);
   _get_type_nbytes(0, kind, &type, &nbytes);
 
-  cufftHandle plan = *(cufftHandle *)(*plan_pp);
+  cufftHandle plan = *(cufftHandle *) (*plan_pp);
 
   // Transform the signal in place.
   if (type == CUFFT_C2C) {
@@ -139,9 +131,6 @@ gpu_fftbox_c2c_ip(void **plan_pp, int nfft, int ndat, int isign, int iscale, int
   }
 
   CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-  //cudaStream_t stream;
-  //cufftGetStream(plan, &stream);
-  //CHECK_CUDA_ERROR(cudaStreamSynchronize(stream));
 }
 
 extern "C" void
@@ -175,9 +164,6 @@ gpu_fftbox_c2c_op(void **plan_pp, int nfft, int ndat, int isign, int iscale, int
   }
 
   CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-  //cudaStream_t stream;
-  //cufftGetStream(plan, &stream);
-  //CHECK_CUDA_ERROR(cudaStreamSynchronize(stream));
 }
 
 #endif
