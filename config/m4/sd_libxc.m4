@@ -292,7 +292,7 @@ AC_DEFUN([SD_LIBXC_DETECT], [
     else
         sd_libxc_ok="yes"
         sd_libxc_cppflags=""
-        sd_libxc_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version}}/include"
+        sd_libxc_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version}/include"
         sd_libxc_fcflags=""
         sd_libxc_ldflags=""
         sd_libxc_kxc_ok="no"
