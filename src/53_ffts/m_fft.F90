@@ -313,6 +313,12 @@ subroutine fftbox_plan3_init(plan, batch_size, dims, embed, fftalg, fftcache, gp
  plan%gpu_plan_spc = c_null_ptr
  plan%gpu_plan_dpc = c_null_ptr
 
+ if (gpu_option /= ABI_GPU_DISABLED) then
+   if (any(dims /= embed)) then
+     ABI_ERROR("FFT on GPUs do not support dims != embed")
+   end if
+ end if
+
 end subroutine fftbox_plan3_init
 !!***
 
@@ -1242,7 +1248,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
 !Local variables-------------------------------
 !scalars
  integer,parameter :: NSETS=6, fftcache0 = 0
- integer :: ifft,ierr,ldxyz,old_nthreads,ount,cplex
+ integer :: ifft,ierr,ldxyz,old_nthreads,ount,cplex,ii
  integer :: iset,nx,ny,nz,ldx,ldy,ldz,fftalga,fftalgc
  !integer :: ix,iy,iz,padat,dat
  real(dp),parameter :: ATOL_SP=tol6,ATOL_DP=tol12 ! Tolerances on the absolute error
@@ -1275,6 +1281,13 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    12, 18, 15, 13, 18, 15, &
    12, 18, 15, 15, 21, 18  &
  ], [6, NSETS])
+
+ if (gpu_option /= ABI_GPU_DISABLED) then
+   ! Agumentation is not supported for GPUS.
+   do ii=1,NSETS
+     pars(4:6, ii) = pars(1:3, ii)
+   end do
+ end if
 
  fftalga=fftalg/100; fftalgc=mod(fftalg,10)
 
