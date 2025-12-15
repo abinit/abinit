@@ -110,9 +110,10 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
  integer :: ierr,ii,itime,itime_next,itime_prev
  real(dp) :: volume
 !arrays
- real(dp) :: rprimd(3,3),rprimd_next(3,3),rprimd_prev(3,3),vel_cell(3,3)
+ real(dp) :: rprimd(3,3),rprimd_next(3,3),rprimd_prev(3,3),vel_cell(3,3),vel_cell_next(3,3)
  real(dp),allocatable :: mpibuf(:),mpibuffer(:,:,:),mpibuffer_all(:,:,:)
- real(dp),allocatable :: etotal(:),forces(:,:,:),stressin(:,:,:),vel(:,:,:)
+ real(dp),allocatable :: etotal(:),forces(:,:,:),stressin(:,:,:)
+  real(dp),allocatable :: vel(:,:,:),vel_next(:,:,:)
  real(dp),allocatable :: xred(:,:,:),xred_next(:,:,:),xred_prev(:,:,:)
 
 ! *************************************************************************
@@ -133,6 +134,7 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
      ABI_MALLOC(forces,(3,natom,nimage_tot))
      ABI_MALLOC(stressin,(3,3,nimage_tot))
      ABI_MALLOC(vel,(3,natom,nimage_tot))
+     ABI_MALLOC(vel_next,(3,natom,nimage_tot))
    end if
 
 !  Parallelism: Gather positions/forces/velocities/stresses/energy from all images
@@ -226,11 +228,11 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
        select case(pimd_param%optcell)
        case(0)  !NVT
          call pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
-&         rprimd,stressin,nimage_tot,vel,volume,xred,xred_next,xred_prev)
+&         rprimd,stressin,nimage_tot,vel,vel_next,volume,xred,xred_next,xred_prev)
        case(2)  !NPT
          call pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
-&         rprimd,rprimd_next,rprimd_prev,stressin,nimage_tot,vel,vel_cell,&
-&         volume,xred,xred_next,xred_prev)
+&         rprimd,rprimd_next,rprimd_prev,stressin,nimage_tot,vel,vel_next,vel_cell,&
+&         vel_cell_next,volume,xred,xred_next,xred_prev)
        end select
 
      case(13)  !Nose Hoover chains
@@ -238,11 +240,11 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
        select case(pimd_param%optcell)
        case(0)  !NVT
          call pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
-&         rprimd,stressin,nimage_tot,vel,volume,xred,xred_next,xred_prev)
+&         rprimd,stressin,nimage_tot,vel,vel_next,volume,xred,xred_next,xred_prev)
        case(2)  !NPT
          call pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
-&         rprimd,rprimd_next,rprimd_prev,stressin,nimage_tot,vel,vel_cell,&
-&         volume,xred,xred_next,xred_prev)
+&         rprimd,rprimd_next,rprimd_prev,stressin,nimage_tot,vel,vel_next,vel_cell,&
+&         vel_cell_next,volume,xred,xred_next,xred_prev)
        end select
 
      end select
@@ -254,23 +256,27 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
 !  Parallelism: dispatch results
 !  The trick: use (9,natom) to store xred,xred_next,vel for all atoms
 !  use (9      ) to store rprimd_next
-   ABI_MALLOC(mpibuffer,(9,natom+3,nimage))
+   ABI_MALLOC(mpibuffer,(12,natom+4,nimage))
    if (mpi_enreg%paral_img==1) then
      if (mpi_enreg%me_img==0) then
-       ABI_MALLOC(mpibuffer_all,(9,natom+3,nimage_tot))
+       ABI_MALLOC(mpibuffer_all,(12,natom+4,nimage_tot))
        do ii=1,nimage_tot
          mpibuffer_all(1:3,1:natom,ii)=xred_next(1:3,1:natom,ii)
          mpibuffer_all(4:6,1:natom,ii)=xred(1:3,1:natom,ii)
-         mpibuffer_all(7:9,1:natom,ii)=vel(1:3,1:natom,ii)
+         mpibuffer_all(7:9,1:natom,ii)=vel_next(1:3,1:natom,ii)
+         mpibuffer_all(10:12,1:natom,ii)=vel(1:3,1:natom,ii)
          mpibuffer_all(1:3,natom+1,ii)=rprimd_next(1:3,1)
          mpibuffer_all(4:6,natom+1,ii)=rprimd_next(1:3,2)
          mpibuffer_all(7:9,natom+1,ii)=rprimd_next(1:3,3)
-         mpibuffer_all(1:3,natom+2,ii)=vel_cell(1:3,1)
-         mpibuffer_all(4:6,natom+2,ii)=vel_cell(1:3,2)
-         mpibuffer_all(7:9,natom+2,ii)=vel_cell(1:3,3)
          mpibuffer_all(1:3,natom+3,ii)=rprimd(1:3,1)
          mpibuffer_all(4:6,natom+3,ii)=rprimd(1:3,2)
          mpibuffer_all(7:9,natom+3,ii)=rprimd(1:3,3)
+         mpibuffer_all(1:3,natom+2,ii)=vel_cell_next(1:3,1)
+         mpibuffer_all(4:6,natom+2,ii)=vel_cell_next(1:3,2)
+         mpibuffer_all(7:9,natom+2,ii)=vel_cell_next(1:3,3)
+         mpibuffer_all(1:3,natom+2,ii)=vel_cell(1:3,1)
+         mpibuffer_all(4:6,natom+2,ii)=vel_cell(1:3,2)
+         mpibuffer_all(7:9,natom+2,ii)=vel_cell(1:3,3)
        end do
      end if
      call scatter_array_img(mpibuffer,mpibuffer_all,mpi_enreg)
@@ -281,16 +287,20 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
      do ii=1,nimage
        mpibuffer(1:3,1:natom,ii)=xred_next(1:3,1:natom,ii)
        mpibuffer(4:6,1:natom,ii)=xred(1:3,1:natom,ii)
-       mpibuffer(7:9,1:natom,ii)=vel(1:3,1:natom,ii)
+       mpibuffer(7:9,1:natom,ii)=vel_next(1:3,1:natom,ii)
+       mpibuffer(10:12,1:natom,ii)=vel(1:3,1:natom,ii)
        mpibuffer(1:3,natom+1,ii)=rprimd_next(1:3,1)
        mpibuffer(4:6,natom+1,ii)=rprimd_next(1:3,2)
        mpibuffer(7:9,natom+1,ii)=rprimd_next(1:3,3)
-       mpibuffer(1:3,natom+2,ii)=vel_cell(1:3,1)
-       mpibuffer(4:6,natom+2,ii)=vel_cell(1:3,2)
-       mpibuffer(7:9,natom+2,ii)=vel_cell(1:3,3)
        mpibuffer(1:3,natom+3,ii)=rprimd(1:3,1)
        mpibuffer(4:6,natom+3,ii)=rprimd(1:3,2)
        mpibuffer(7:9,natom+3,ii)=rprimd(1:3,3)
+       mpibuffer(1:3,natom+2,ii)=vel_cell_next(1:3,1)
+       mpibuffer(4:6,natom+2,ii)=vel_cell_next(1:3,2)
+       mpibuffer(7:9,natom+2,ii)=vel_cell_next(1:3,3)
+       mpibuffer(1:3,natom+2,ii)=vel_cell(1:3,1)
+       mpibuffer(4:6,natom+2,ii)=vel_cell(1:3,2)
+       mpibuffer(7:9,natom+2,ii)=vel_cell(1:3,3)
      end do
    end if
 
@@ -302,10 +312,11 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
      ABI_FREE(forces)
      ABI_FREE(stressin)
      ABI_FREE(vel)
+     ABI_FREE(vel_next)
    end if
 
  else
-   ABI_MALLOC(mpibuffer,(9,natom+3,nimage))
+   ABI_MALLOC(mpibuffer,(12,natom+4,nimage))
 
  end if ! mpi_enreg%me_cell==0
 
@@ -320,6 +331,7 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
    results_img(ii,itime_next)%xred(1:3,1:natom)=mpibuffer(1:3,1:natom,ii)
    results_img(ii,itime)%xred(1:3,1:natom)=mpibuffer(4:6,1:natom,ii)
    results_img(ii,itime_next)%vel(1:3,1:natom)=mpibuffer(7:9,1:natom,ii)
+   results_img(ii,itime)%vel(1:3,1:natom)=mpibuffer(10:12,1:natom,ii)
  end do
  if (pimd_param%optcell/=0) then
    do ii=1,nimage
@@ -327,13 +339,16 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
      rprimd(1:3,2)=mpibuffer(4:6,natom+1,ii)
      rprimd(1:3,3)=mpibuffer(7:9,natom+1,ii)
      call mkradim(results_img(ii,itime_next)%acell,results_img(ii,itime_next)%rprim,rprimd)
-     rprimd_prev(1:3,1)=mpibuffer(1:3,natom+3,ii)
-     rprimd_prev(1:3,2)=mpibuffer(4:6,natom+3,ii)
-     rprimd_prev(1:3,3)=mpibuffer(7:9,natom+3,ii)
+     rprimd_prev(1:3,1)=mpibuffer(1:3,natom+2,ii)
+     rprimd_prev(1:3,2)=mpibuffer(4:6,natom+2,ii)
+     rprimd_prev(1:3,3)=mpibuffer(7:9,natom+2,ii)
      call mkradim(results_img(ii,itime)%acell,results_img(ii,itime)%rprim,rprimd_prev)
-     results_img(ii,itime_next)%vel_cell(1:3,1)=mpibuffer(1:3,natom+2,ii)
-     results_img(ii,itime_next)%vel_cell(1:3,2)=mpibuffer(4:6,natom+2,ii)
-     results_img(ii,itime_next)%vel_cell(1:3,3)=mpibuffer(7:9,natom+2,ii)
+     results_img(ii,itime_next)%vel_cell(1:3,1)=mpibuffer(1:3,natom+3,ii)
+     results_img(ii,itime_next)%vel_cell(1:3,2)=mpibuffer(4:6,natom+3,ii)
+     results_img(ii,itime_next)%vel_cell(1:3,3)=mpibuffer(7:9,natom+3,ii)
+     results_img(ii,itime)%vel_cell(1:3,1)=mpibuffer(1:3,natom+4,ii)
+     results_img(ii,itime)%vel_cell(1:3,2)=mpibuffer(4:6,natom+4,ii)
+     results_img(ii,itime)%vel_cell(1:3,3)=mpibuffer(7:9,natom+4,ii)
    end do
  end if
  ABI_FREE(mpibuffer)
