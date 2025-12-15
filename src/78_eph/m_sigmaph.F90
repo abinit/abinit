@@ -456,10 +456,6 @@ module m_sigmaph
    ! E2(ntemp)
    ! Second-order contribution to total energy
 
-   real(dp),allocatable :: E4(:)
-   ! E4(ntemp)
-   ! Temperature resolved 4th order contribution to total energy
-
   integer, allocatable :: qp_done(:,:)
    ! qp_done(kcalc, spin)
    ! Keep track of the QP states already computed for restart of the calculation
@@ -689,7 +685,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,allocatable :: ibzspin_2ikcalc(:,:)
  integer, allocatable :: recvcounts(:), displs(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
- real(dp) :: vk(3), vkq(3), tsec(2), eminmax(2)
+ real(dp) :: vk(3), vkq(3), tsec(2), eminmax(2), etot
  real(dp) :: zpr_frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,eig0nk,eig0mk,eig0mkq,f_mkq,f_nk, gdw2, gdw2_stern, rtmp
  real(dp) :: fermie1_idir_ipert(3,cryst%natom)
@@ -708,7 +704,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: delta_e_minus_emkq(:), gkq_allgather(:,:,:),f_tlist_b(:,:)
  !real(dp),allocatable :: phfreqs_qibz(:,:), pheigvec_qibz(:,:,:,:), eigvec_qpt(:,:,:)
  logical,allocatable :: osc_mask(:)
- real(dp),allocatable :: gkq2_lr(:,:,:)
+ real(dp),allocatable :: gkq2_lr(:,:,:), E4(:)
  complex(dp) :: cp3(3)
  complex(dp),allocatable :: osc_ks(:,:), fmw_frohl_sphcorr(:,:,:,:), cfact_wr(:), tpp_red(:,:)
  complex(gwp),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
@@ -1095,6 +1091,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_CALLOC(vtrial, (nfftf, nspden))
  ABI_CALLOC(vlocal, (n4, n5, n6, gs_ham_kq%nvloc))
 
+ ! DBSP
+ etot = zero
  if (dtset%eph_stern /= 0) then
    ! Read the GS potential (vtrial) from input POT file
    ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
@@ -1105,6 +1103,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    if (cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
      ABI_ERROR("Crystal structure from WFK and POT do not agree! Check messages above!")
    end if
+   etot = pot_hdr%etot
    call pot_cryst%free(); call pot_hdr%free()
  end if
 
@@ -1204,7 +1203,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  call pstat_proc%print(_PSTAT_ARGS_)
 
- E4 = zero
+ ! Temperature resolved 4th order contribution to total energy
+ ABI_CALLOC(E4, (sigma%ntemp))
+ !
  ! Loop over k-points in Sigma_nk. Loop over spin is internal as we operate on nspden components at once.
  do my_ikcalc=1,sigma%my_nkcalc
    !if (my_ikcalc > 1) exit
@@ -2525,17 +2526,16 @@ end if
      ABI_SFREE(root_bcalc)
    end do ! spin
 
-   ! Print total energies
-   ! DBSP
-   ! Temperature
-   do it = 1, self%ntemp
-     do ik = 1, ebands%nkpt
-       ! Loop over bands for this k-point and spin
-       do ibc = 1,self%nbcalc_ks(ikcalc, spin)
-         E4(it) = E4(it) + self%E4_vals[it,ik] * ebands%wtk(ik)
-       enddo
-     enddo
-   enddo
+   ! Gather total energies
+   ikcalc = sigma%my_ikcalc(my_ikcalc)
+   ik_ibz = sigma%kcalc2ibz(ikcalc, 1)
+   do spin=1,sigma%nsppol
+     do ib_k=1,nbcalc_ks
+       do it = 1, sigma%ntemp
+         E4(it) = E4(it) + sigma%E4_vals(it, ib_k) * ebands%wtk(ik_ibz)
+       end do
+     end do
+   end do
 
    ABI_FREE(kg_k)
    ABI_FREE(kg_kq)
@@ -2551,17 +2551,22 @@ end if
 
  ! Print total energies
  ! DBSP
- write(ab_out,"(a)")" "
- write(ab_out,"(a)")" Contributions to total energies (in eV)"
- write(ab_out,"(a)")" "
- do it = 1, self%ntemp
-   write(ab_out, "(2(a,f12.6),a)")" Temperature =  ", it
-   write(ab_out, "(2(a,f12.6),a)")" E^(elph) ",E4(it) * Ha_eV
- endif
+ call xmpi_sum_master(E4, master, comm, ierr)
+ if (my_rank == master .and. dtset%eph_task == 4) then
+   write(ab_out,"(a)")" "
+   write(ab_out,"(a)")" Contributions to total energies (in eV)"
+   write(ab_out,"(a)")" "
+   do it = 1, sigma%ntemp
+     write(ab_out, "(2(a,f12.6),a)")" Temperature =  ", sigma%kTmesh(it) / kb_HaK, " K"
+     write(ab_out, "(2(a,f12.6),a)")" E^(BO) ",   etot * Ha_eV
+     write(ab_out, "(2(a,f12.6),a)")" E^(elph) ", E4(it) * Ha_eV
+   end do
+ end if
 
  call cwtime_report(" Sigma_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ! Free memory
+ ABI_FREE(E4)
  ABI_FREE(ihave_ikibz_spin)
  ABI_FREE(grad_berry)
  ABI_FREE(vtrial)
