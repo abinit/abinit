@@ -645,7 +645,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_k,my_npert ! iq_ibz_frohl,iq_bz_frohl,
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs, qptopt ! = 1
  integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, u1_band, ibsum, ii, jj, iw !ib_kq,
- integer :: u1_master, ip
+ integer :: u1_master, ip, sfact
  integer :: ig, ispinor, ifft !nband_kq,
  integer :: idir,ipert,ip1,ip2 !,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, isym_q, trev_q
@@ -827,6 +827,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Each node needs the wavefunctions for Sigma_{nk}
  ! TODO: kcalc should depend on the spin!
+
  do spin=1,sigma%nsppol
    do ikcalc=1,sigma%nkcalc
      ik_ibz = sigma%kcalc2ibz(ikcalc, 1)
@@ -2553,13 +2554,21 @@ end if
  ! DBSP
  call xmpi_sum_master(E4, master, comm, ierr)
  if (my_rank == master .and. dtset%eph_task == 4) then
+   ! Spin factor
+   if (dtset%nsppol == 1 .and. dtset%nspinor == 1) then
+     sfact = two
+   else
+     sfact = one
+   endif
+   !
    write(ab_out,"(a)")" "
    write(ab_out,"(a)")" Contributions to total energies (in eV)"
    write(ab_out,"(a)")" "
    do it = 1, sigma%ntemp
      write(ab_out, "(2(a,f12.6),a)")" Temperature =  ", sigma%kTmesh(it) / kb_HaK, " K"
      write(ab_out, "(2(a,f12.6),a)")" E^(BO) ",   etot * Ha_eV
-     write(ab_out, "(2(a,f12.6),a)")" E^(elph) ", E4(it) * Ha_eV
+     ! We need the spin factor.
+     write(ab_out, "(2(a,f12.6),a)")" E^(elph) ", sfact * E4(it) * Ha_eV
    end do
  end if
 
