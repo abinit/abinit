@@ -57,7 +57,7 @@ gpu_fftbox_plan_init(void **plan_pp, int *f_dims, int *f_embed, int ndat, int ki
   c_embed[0] = f_embed[2]; c_embed[1] = f_embed[1]; c_embed[2] = f_embed[0];
   int dist = f_embed[0] * f_embed[1] * f_embed[2];
 
-  printf("in gpu_fftbox_plan_init");
+  printf("in C gpu_fftbox_plan_init\n");
 
   /* Create a 3D FFT plan.
   cufftResult = cufftPlanMany(cufftHandle *plan, int rank, int *c_dims,
