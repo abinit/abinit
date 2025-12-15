@@ -196,7 +196,6 @@ subroutine fft_test_init(Ftest, fft_setup, kpoint, ecut, boxcutmin, rprimd, nsym
  real(dp),parameter :: k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: tnons(:,:)
-
 ! *************************************************************************
 
  call nullify_mpi_enreg(Ftest%MPI_enreg)
@@ -270,7 +269,6 @@ subroutine fft_test_free_0D(Ftest)
 
 !Arguments -----------------------------------
  class(FFT_test_t),intent(inout) :: Ftest
-
 ! *********************************************************************
 
  ABI_SFREE(Ftest%indpw_k)
@@ -304,7 +302,6 @@ subroutine fft_test_free_1D(Ftest)
 
 !Local variables-------------------------------
  integer :: ii
-
 ! *********************************************************************
 
  do ii=LBOUND(Ftest,DIM=1),UBOUND(Ftest,DIM=1)
@@ -382,7 +379,6 @@ character(len=TNAME_LEN) function get_name(Ftest)
 
 !Local variables-------------------------------
  character(len=TNAME_LEN) :: library_name,cplex_mode,padding_mode
-
 ! *********************************************************************
 
  if (ftest%gpu_option == 0) then
@@ -456,7 +452,6 @@ subroutine fftprof_free_0D(Ftprof)
 
 !Arguments -----------------------------------
  class(FFT_prof_t),intent(inout) :: Ftprof
-
 ! *********************************************************************
 
  ABI_SFREE(Ftprof%results)
@@ -524,7 +519,6 @@ subroutine fftprofs_print(Fprof, header, unit, mode_paral, prtvol)
  real(dp) :: mabs_err,mean_err,check_mabs_err,check_mean_err, ref_wtime,para_eff
  character(len=4) :: my_mode
  character(len=500) :: ofmt,hfmt,nafmt,msg
-
 ! *********************************************************************
 
  my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
@@ -809,14 +803,14 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
  case (0)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call plan%execute(ffc, ggc, isign)
+     call plan%execute(ffc, ggc, isign, ndat)
      ! Store results at the first call.
      if (icall == 1) results = ggc
    end do
  case (1)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call plan%execute(ffc, isign)
+     call plan%execute(ffc, isign, ndat)
      ! Store results at the first call.
      if (icall == 1) results = ffc
    end do
@@ -952,8 +946,8 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
          do i2=0,n2-1
            do i1=0,n1-1
              g0dotr= two_pi*( g0(1)*(i1/DBLE(n1)) &
-&                            +g0(2)*(i2/DBLE(n2)) &
-&                            +g0(3)*(i3/DBLE(n3)) )
+                             +g0(2)*(i2/DBLE(n2)) &
+                             +g0(3)*(i3/DBLE(n3)) )
              denpot(i1+1,i2+1,i3+1)=COS(g0dotr)
            end do
          end do
@@ -964,8 +958,8 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
            idx=1
            do i1=0,n1-1
              g0dotr= two_pi*( g0(1)*(i1/DBLE(n1)) &
-&                            +g0(2)*(i2/DBLE(n2)) &
-&                            +g0(3)*(i3/DBLE(n3)) )
+                             +g0(2)*(i2/DBLE(n2)) &
+                             +g0(3)*(i3/DBLE(n3)) )
 
              denpot(idx,  i2+1,i3+1)= COS(g0dotr)
              denpot(idx+1,i2+1,i3+1)= SIN(g0dotr)
@@ -1360,8 +1354,8 @@ subroutine time_fftu(Ftest, isign, header, Ftprof)
      do i2=0,n2-1
        do i1=0,n1-1
          g0dotr= two_pi*( g0(1)*(i1/DBLE(n1)) &
-&                        +g0(2)*(i2/DBLE(n2)) &
-&                        +g0(3)*(i3/DBLE(n3)) )
+                         +g0(2)*(i2/DBLE(n2)) &
+                         +g0(3)*(i3/DBLE(n3)) )
          ifft = 1 + i1 + i2*n1 + i3*n2*n3
          ur(ifft)=DCMPLX(DCOS(g0dotr),DSIN(g0dotr))
        end do
@@ -1732,7 +1726,6 @@ integer function empty_cache(kbsize) result(fake)
 !Local variables-------------------------------
  integer :: sz
  real(dp),allocatable :: chunk(:)
-
 ! *********************************************************************
 
  fake = 0

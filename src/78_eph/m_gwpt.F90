@@ -74,7 +74,6 @@ module m_gwpt
  use m_pawrhoij,       only : pawrhoij_type
  use m_pawfgr,         only : pawfgr_type
  use m_dfpt_cgwf,      only : stern_t
- use m_ddk,            only : ddkop_t
  use m_phonons,        only : pheigvec_rotate
  use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph, read_screening
  use m_vcoul,          only : vcoul_t
@@ -257,7 +256,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kqmp, gs_ham_kmp
  type(rf_hamiltonian_type) :: rf_ham_kqmp, rf_ham_kmp
- type(ddkop_t) :: ddkop
  type(crystal_t) :: pot_cryst, den_cryst
  type(hdr_type) :: pot_hdr, den_hdr
  type(stern_t) :: stern_kmp, stern_kqmp
@@ -281,18 +279,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), kg_kmp(:,:), kg_kqmp(:,:), my_pp_inds(:)
  integer,allocatable :: gbound_k(:,:), gbound_kq(:,:), gbound_kmp(:,:), gbound_kqmp(:,:), gbound_c(:,:), gbound_x(:,:)
- integer,allocatable :: nband(:,:), wfd_istwfk(:), count_bk(:,:), qibz2dvdb(:)
+ integer,allocatable :: nband(:,:), wfd_istwfk(:), qibz2dvdb(:) ! count_bk(:,:),
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:)
  integer(i1b),allocatable :: itreat_qibz(:)
  integer, contiguous, pointer :: kg_c(:,:), kg_x(:,:)
- real(dp) :: eig0nk !, cpu, wall, gflops !, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
+ !real(dp) :: eig0nk !, cpu, wall, gflops !, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
  complex(gwp) :: ctmp_gwpc, xdot_tmp
  complex(dp) :: ctmp_dp
  !type(bins_t) :: bins
 !arrays
  real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0), tsec(2)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3), qq_ibz(3), qq_bz(3)
- real(dp),allocatable :: qlwl(:,:), vnk_cart_ibz(:,:,:), kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:)
+ real(dp),allocatable :: qlwl(:,:), kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:)
  real(dp),allocatable :: ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:), kinpw_kqmp(:), kinpw_kmp(:), ph3d_kqmp(:,:,:), ph3d_kmp(:,:,:)
  real(dp),allocatable, target :: vxc1_qq(:,:,:,:)
  real(dp),allocatable :: gxc_atm(:,:,:,:), gks_atm(:,:,:,:), gks_atm2(:,:,:,:), gsig_atm(:,:,:,:)
@@ -580,77 +578,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! TODO: A similar section of code is found in gstore%compute. Should have common routine.
 
  if (gstore%with_vk /= 0 .and. ndone == 0) then
-   call wrtout(std_out, " computing and writing velocity operator matrix elements in the ibz")
-   call wrtout(std_out, " note that not all the k-points in the ibz are computed when kfilter is activated!")
-   call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
-
-   ! On disk, we have:
-   !    nctkarr_t("vk_cart_ibz", "dp", "three, nb_k, gstore_nkibz"))
-   !    nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
-
-   call ddkop%init(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
-
-   do my_is=1,gstore%my_nspins
-     spin = gstore%my_spins(my_is); gqk => gstore%gqk(my_is)
-     nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
-
-     ! Be careful as wavefunctions might be replicated.
-     ! Use count_bk to count how many states have been computed
-     ! in parallel in order to rescale the results.
-     if (gstore%with_vk == 1) then
-       ABI_CALLOC(vnk_cart_ibz, (3, nb_k, gstore%nkibz))
-       ABI_ICALLOC(count_bk, (nb_k, gstore%nkibz))
-     else
-       ABI_ERROR("gstore%with_vk 2 not implemented")
-     end if
-
-     NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
-     NCF_CHECK(nctk_prepare_mpiio(spin_ncid, "vk_cart_ibz"))
-
-     do my_ik=1,gqk%my_nk
-       ! The k-point and the symmetries relating the BZ k-point to the IBZ.
-       kk = gqk%my_kpts(:, my_ik)
-       ik_ibz = gqk%my_k2ibz(1, my_ik) ; isym_k = gqk%my_k2ibz(2, my_ik)
-       trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5,my_ik)
-       isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-       if (.not. isirr_k) cycle
-
-       npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
-       call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
-
-       do band=gqk%bstart_k, gqk%bstop_k
-         call wfd%copy_cg(band, ik_ibz, spin, cg_work)
-         eig0nk = ebands%eig(band, ik_ibz, spin)
-         in_k = band - gqk%bstart_k + 1
-         vnk_cart_ibz(:, in_k, ik_ibz) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
-         count_bk(in_k, ik_ibz) = count_bk(in_k, ik_ibz) + 1
-       end do
-     end do ! my_ik
-
-     call xmpi_sum(count_bk, gqk%comm%value, ierr)
-     call xmpi_sum(vnk_cart_ibz, gqk%comm%value, ierr)
-
-     do ik_ibz=1, gstore%nkibz
-       do band=gqk%bstart_k, gqk%bstop_k
-         in_k = band - gqk%bstart_k + 1
-         if (count_bk(in_k, ik_ibz) == 0) cycle
-         do ii=1,3
-           vnk_cart_ibz(ii,in_k,ik_ibz) = vnk_cart_ibz(ii,in_k,ik_ibz) / count_bk(in_k, ik_ibz)
-         end do
-       end do
-     end do
-
-     ! Write v_nk to disk.
-     !if (gqk%comm%me == master) then
-       NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vnk_cart_ibz))
-     !end if
-
-     ABI_FREE(vnk_cart_ibz)
-     ABI_FREE(count_bk)
-   end do ! my_is
-
-   call ddkop%free()
-   call cwtime_report(sjoin(" Computation of v_k group velocities with with_vk:", itoa(gstore%with_vk)), cpu_kk, wall_kk, gflops_kk)
+   call gstore%compute_and_write_vk(mpw, wfd, ebands, psps, pawtab, root_ncid)
  end if ! ndone /= 0
 
  ! Radius of sphere with volume equivalent to the micro zone.

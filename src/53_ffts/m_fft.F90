@@ -133,21 +133,14 @@ MODULE m_fft
    integer :: embed(3) = -1      ! Leading dimensions of the input, output arrays.
    integer :: gpu_option = ABI_GPU_DISABLED  ! /= 0 if FFTs should be offloaded to the GPU
 
-   type(c_ptr) :: gpu_plan_ip_spc = c_null_ptr
-   type(c_ptr) :: gpu_data_ip_spc = c_null_ptr
-   type(c_ptr) :: gpu_plan_ip_dpc = c_null_ptr
-   type(c_ptr) :: gpu_data_ip_dpc = c_null_ptr
-   type(c_ptr) :: gpu_plan_op_spc = c_null_ptr
-   type(c_ptr) :: gpu_idata_op_spc = c_null_ptr
-   type(c_ptr) :: gpu_odata_op_spc = c_null_ptr
-   type(c_ptr) :: gpu_plan_op_dpc = c_null_ptr
-   type(c_ptr) :: gpu_idata_op_dpc = c_null_ptr
-   type(c_ptr) :: gpu_odata_op_dpc = c_null_ptr
+   type(c_ptr) :: gpu_plan_spc = c_null_ptr
+   type(c_ptr) :: gpu_plan_dpc = c_null_ptr
 
  contains
 
    procedure :: init => fftbox_plan3_init                 ! Low-level constructor
    procedure :: from_ngfft => fftbox_plan3_from_ngfft     ! Build object from ngfft.
+
    procedure :: execute_ip_spc => fftbox_execute_ip_spc
    procedure :: execute_ip_dpc => fftbox_execute_ip_dpc
    procedure :: execute_op_spc => fftbox_execute_op_spc
@@ -168,31 +161,30 @@ MODULE m_fft
 
 #if defined HAVE_GPU_CUDA
  interface
-   subroutine gpu_planpp_free(plan_pp) bind(C)
+   subroutine gpu_fftbox_plan_init(plan, f_dims, f_embed, batch, kind) bind(C)
      use, intrinsic :: iso_c_binding
-     type(c_ptr),intent(inout) :: plan_pp
-   end subroutine gpu_planpp_free
-   subroutine devpp_free(dev_pp) bind(C)
+     type(c_ptr), intent(out) :: plan
+     integer(c_int), intent(in) :: f_dims(3), f_embed(3)
+     integer(c_int), value     :: batch, kind
+   end subroutine
+   subroutine gpu_fft_plan_free(plan) bind(C)
      use, intrinsic :: iso_c_binding
-     type(c_ptr),intent(inout) :: dev_pp
-   end subroutine devpp_free
-   subroutine xgpu_fftbox_c2c_ip(f_dims, f_embed, ndat, isign, kind, iscale, h_ff, plan_pp, d_ff) bind(C)
+     type(c_ptr), value :: plan
+   end subroutine
+   subroutine gpu_fftbox_c2c_ip(plan_pp, nfft, ndat, isign, iscale, kind, d_ff) bind(C)
      use, intrinsic :: iso_c_binding
-     integer(c_int),intent(in) :: f_dims(3), f_embed(3)
-     integer(c_int),value, intent(in) :: ndat, isign, kind, iscale
-     type(c_ptr),intent(in) :: h_ff
-     type(c_ptr),intent(inout) :: plan_pp, d_ff
-   end subroutine xgpu_fftbox_c2c_ip
-   subroutine xgpu_fftbox_c2c_op(f_dims, f_embed, ndat, isign, kind, iscale, h_ff, h_gg, plan_pp, d_ff, d_gg) bind(C)
+     type(c_ptr),intent(in) :: plan_pp
+     integer(c_int),value, intent(in) :: nfft, ndat, isign, iscale, kind
+     type(c_ptr),intent(in) :: d_ff
+   end subroutine gpu_fftbox_c2c_ip
+   subroutine gpu_fftbox_c2c_op(plan_pp, nfft, ndat, isign, iscale, kind, d_ff, d_gg) bind(C)
      use, intrinsic :: iso_c_binding
-     integer(c_int),intent(in) :: f_dims(3), f_embed(3)
-     integer(c_int),value, intent(in) :: ndat, isign, kind, iscale
-     type(c_ptr),intent(in) :: h_ff, h_gg
-     type(c_ptr),intent(inout) :: plan_pp, d_ff, d_gg
-   end subroutine xgpu_fftbox_c2c_op
+     type(c_ptr),intent(in) :: plan_pp
+     integer(c_int),value, intent(in) :: nfft, ndat, isign, iscale, kind
+     type(c_ptr),intent(in) :: d_ff, d_gg
+   end subroutine gpu_fftbox_c2c_op
  end interface
 #endif
-
 
 !----------------------------------------------------------------------
 
@@ -217,6 +209,10 @@ MODULE m_fft
    integer :: ngfft(18)
    integer, contiguous, pointer :: kg_k(:,:)
    integer, allocatable :: gbound(:,:)
+
+   ! TODO
+   !type(c_ptr) :: gpu_plan_spc = c_null_ptr
+   !type(c_ptr) :: gpu_plan_dpc = c_null_ptr
 
  contains
    procedure :: init => uplan_init    ! Build object
@@ -314,6 +310,15 @@ subroutine fftbox_plan3_init(plan, batch_size, dims, embed, fftalg, fftcache, gp
  plan%nfft  = product(plan%dims)
  plan%ldxyz = product(plan%embed)
 
+ plan%gpu_plan_spc = c_null_ptr
+ plan%gpu_plan_dpc = c_null_ptr
+
+ if (gpu_option /= ABI_GPU_DISABLED) then
+   if (any(dims /= embed)) then
+     ABI_ERROR("FFTs on GPUs with fftbox_plan3 do not support dims != embed")
+   end if
+ end if
+
 end subroutine fftbox_plan3_init
 !!***
 
@@ -359,17 +364,9 @@ subroutine fftbox_plan3_free(plan)
 
  ABI_UNUSED(plan%ldxyz)
 
-#if defined HAVE_GPU_CUDA
- call gpu_planpp_free(plan%gpu_plan_ip_spc)
- call devpp_free(plan%gpu_data_ip_spc)
- call gpu_planpp_free(plan%gpu_plan_ip_dpc)
- call devpp_free(plan%gpu_data_ip_dpc)
- call gpu_planpp_free(plan%gpu_plan_op_spc)
- call devpp_free(plan%gpu_idata_op_spc)
- call devpp_free(plan%gpu_odata_op_spc)
- call gpu_planpp_free(plan%gpu_plan_op_dpc)
- call devpp_free(plan%gpu_idata_op_dpc)
- call devpp_free(plan%gpu_odata_op_dpc)
+#ifdef HAVE_GPU_CUDA
+ call gpu_fft_plan_free(plan%gpu_plan_spc)
+ call gpu_fft_plan_free(plan%gpu_plan_dpc)
 #endif
 
 end subroutine fftbox_plan3_free
@@ -389,6 +386,7 @@ end subroutine fftbox_plan3_free
 !! INPUTS
 !!  plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !!  isign= Sign of the exponential in the FFT
+!!  ndat: Number of FFTs.
 !!  [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! SIDE EFFECTS
@@ -403,23 +401,36 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),target,intent(inout) :: plan
- integer,intent(in) :: isign
- integer,optional,intent(in) :: ndat, iscale
+ integer,intent(in) :: isign, ndat
+ integer,optional,intent(in) :: iscale
 !arrays
  complex(sp),target,intent(inout) :: ff(*)
 ! *************************************************************************
 
  integer :: ndat__, iscale__
- ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
+ !call wrtout(std_out, "in fftbox_execute_ip_spc")
 
-#if defined HAVE_GPU_CUDA
- if (plan%gpu_option /= ABI_GPU_DISABLED) then
-   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, sp, iscale__, c_loc(ff), &
-                           plan%gpu_plan_ip_spc, plan%gpu_data_ip_spc)
+ if (plan%gpu_option == ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
+   ! Build plan if not yet done. note batch_size instead of ndat.
+   if (.not. c_associated(plan%gpu_plan_spc)) then
+     call gpu_fftbox_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, plan%batch_size, sp)
+   end if
+
+   if (ndat__ /= plan%batch_size) then
+     ! Have to rebuild the plan with batch_size == ndat.
+     call gpu_fft_plan_free(plan%gpu_plan_spc)
+     call gpu_fftbox_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, ndat__, sp)
+   end if
+
+!$OMP TARGET DATA USE_DEVICE_ADDR(ff)
+    call gpu_fftbox_c2c_ip(plan%gpu_plan_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff))
+!$OMP END TARGET DATA
    return
- end if
 #endif
+ end if
 
  ! CPU version
 #include "fftbox_ip_driver.finc"
@@ -441,6 +452,7 @@ end subroutine fftbox_execute_ip_spc
 !! INPUTS
 !!  plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !!  isign= Sign of the exponential in the FFT
+!!  ndat: Number of FFTs.
 !!  [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! SIDE EFFECTS
@@ -455,23 +467,37 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),target,intent(inout) :: plan
- integer,intent(in) :: isign
- integer,optional,intent(in) :: ndat, iscale
+ integer,intent(in) :: isign, ndat
+ integer,optional,intent(in) :: iscale
 !arrays
  complex(dp),target,intent(inout) :: ff(*)
 ! *************************************************************************
 
  integer :: ndat__, iscale__
- ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
-#if defined HAVE_GPU_CUDA
- if (plan%gpu_option /= ABI_GPU_DISABLED) then
-   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, dp, iscale__, c_loc(ff), &
-                           plan%gpu_plan_ip_dpc, plan%gpu_data_ip_dpc)
+ !call wrtout(std_out, "in fftbox_execute_ip_dpc")
+
+ if (plan%gpu_option == ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
+   ! Build plan if not yet done. note batch_size instead of ndat.
+   if (.not. c_associated(plan%gpu_plan_dpc)) then
+     call gpu_fftbox_plan_init(plan%gpu_plan_dpc, plan%dims, plan%embed, plan%batch_size, dp)
+   end if
+
+   if (ndat__ /= plan%batch_size) then
+     ! Have to rebuild the plan with batch_size == ndat.
+     call gpu_fft_plan_free(plan%gpu_plan_dpc)
+     call gpu_fftbox_plan_init(plan%gpu_plan_dpc, plan%dims, plan%embed, ndat__, dp)
+   end if
+
+!$OMP TARGET DATA USE_DEVICE_ADDR(ff)
+    call gpu_fftbox_c2c_ip(plan%gpu_plan_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff))
+!$OMP END TARGET DATA
    return
- end if
 #endif
+ end if
 
  ! CPU version
 #include "fftbox_ip_driver.finc"
@@ -494,6 +520,7 @@ end subroutine fftbox_execute_ip_dpc
 !! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !! ff(plan%ldxyz*plan%batch_size)=The input array to be transformed.
 !! isign= Sign of the exponential in the FFT
+!! ndat= Number of FFTs.
 !! [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! OUTPUT
@@ -506,24 +533,38 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),intent(inout) :: plan
- integer,intent(in) :: isign
- integer,optional,intent(in) :: ndat, iscale
+ integer,intent(in) :: isign, ndat
+ integer,optional,intent(in) :: iscale
 !arrays
  complex(sp),target,intent(in) :: ff(*)
  complex(sp),target,intent(inout) :: gg(*)
 ! *************************************************************************
 
  integer :: ndat__, iscale__
- ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
-#if defined HAVE_GPU_CUDA
- if (plan%gpu_option /= ABI_GPU_DISABLED) then
-   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, sp, iscale__, c_loc(ff), c_loc(gg), &
-                           plan%gpu_plan_op_spc, plan%gpu_idata_op_spc, plan%gpu_odata_op_spc)
+ !call wrtout(std_out, "in fftbox_execute_op_spc")
+
+ if (plan%gpu_option == ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
+   ! Build plan if not yet done. note batch_size instead of ndat.
+   if (.not. c_associated(plan%gpu_plan_spc)) then
+     call gpu_fftbox_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, plan%batch_size, sp)
+   end if
+
+   if (ndat__ /= plan%batch_size) then
+     ! Have to rebuild the plan with batch_size == ndat.
+     call gpu_fft_plan_free(plan%gpu_plan_spc)
+     call gpu_fftbox_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, ndat__, sp)
+   end if
+
+!$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
+    call gpu_fftbox_c2c_op(plan%gpu_plan_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff), c_loc(gg))
+!$OMP END TARGET DATA
    return
- end if
 #endif
+ end if
 
  ! CPU version
 #include "fftbox_op_driver.finc"
@@ -546,6 +587,7 @@ end subroutine fftbox_execute_op_spc
 !! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !! ff(plan%ldxyz*plan%batch_size)=The input array to be transformed.
 !! isign= Sign of the exponential in the FFT
+!! ndat=Number of FFTs.
 !! [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! OUTPUT
@@ -558,24 +600,38 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),intent(inout) :: plan
- integer,intent(in) :: isign
- integer,optional,intent(in) :: ndat, iscale
+ integer,intent(in) :: isign, ndat
+ integer,optional,intent(in) :: iscale
 !arrays
  complex(dp),target,intent(in) :: ff(*)
  complex(dp),target,intent(inout) :: gg(*)
 ! *************************************************************************
 
  integer :: ndat__, iscale__
- ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
-#if defined HAVE_GPU_CUDA
- if (plan%gpu_option /= ABI_GPU_DISABLED) then
-   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, dp, iscale__, c_loc(ff), c_loc(gg), &
-                           plan%gpu_plan_op_dpc, plan%gpu_idata_op_dpc, plan%gpu_odata_op_dpc)
+ !call wrtout(std_out, "in fftbox_execute_op_dpc")
+
+ if (plan%gpu_option == ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
+   ! Build plan if not yet done. note batch_size instead of ndat.
+   if (.not. c_associated(plan%gpu_plan_dpc)) then
+     call gpu_fftbox_plan_init(plan%gpu_plan_dpc, plan%dims, plan%embed, plan%batch_size, dp)
+   end if
+
+   if (ndat__ /= plan%batch_size) then
+     ! Have to rebuild the plan with batch_size == ndat.
+     call gpu_fft_plan_free(plan%gpu_plan_dpc)
+     call gpu_fftbox_plan_init(plan%gpu_plan_dpc, plan%dims, plan%embed, ndat__, dp)
+   end if
+
+!$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
+    call gpu_fftbox_c2c_op(plan%gpu_plan_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff), c_loc(gg))
+!$OMP END TARGET DATA
    return
- end if
 #endif
+ end if
 
  ! CPU version
 #include "fftbox_op_driver.finc"
@@ -1165,7 +1221,7 @@ end subroutine fft_use_lib_threads
 !! fftalg =fftalg input variable.
 !! ndat = Number of transform to execute
 !! nthreads = Number of OpenMP threads.
-!! gpu_option=  GPU version to active (0: no GPU).
+!! gpu_option= GPU version to active (0: no GPU).
 !! [unit]=Output Unit number (DEFAULT std_out)
 !!
 !! OUTPUT
@@ -1183,7 +1239,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
 !Local variables-------------------------------
 !scalars
  integer,parameter :: NSETS=6, fftcache0 = 0
- integer :: ifft,ierr,ldxyz,old_nthreads,ount,cplex
+ integer :: ifft,ierr,ldxyz,old_nthreads,ount,cplex,ii
  integer :: iset,nx,ny,nz,ldx,ldy,ldz,fftalga,fftalgc
  !integer :: ix,iy,iz,padat,dat
  real(dp),parameter :: ATOL_SP=tol6,ATOL_DP=tol12 ! Tolerances on the absolute error
@@ -1217,6 +1273,13 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    12, 18, 15, 15, 21, 18  &
  ], [6, NSETS])
 
+ if (gpu_option /= ABI_GPU_DISABLED) then
+   ! Agumentation is not supported for GPUS.
+   do ii=1,NSETS
+     pars(4:6, ii) = pars(1:3, ii)
+   end do
+ end if
+
  fftalga=fftalg/100; fftalgc=mod(fftalg,10)
 
  call fftalg_info(fftalg, library, cplex_mode, padding_mode)
@@ -1247,12 +1310,14 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    ffsp = ff_refsp
 
    ! in-place version.
-   call box_plan%execute(ffsp, +1)
-   call box_plan%execute(ffsp, -1)
-
-   ! do it twice to test GPU version
-   !call box_plan%execute(ffsp, +1)
-   !call box_plan%execute(ffsp, -1)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:ffsp) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
+   call box_plan%execute(ffsp, +1, ndat)
+   call box_plan%execute(ffsp, -1, ndat)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(from:ffsp) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
@@ -1264,12 +1329,18 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg))
+   call wrtout(ount, sjoin(info,msg))
 
    ! out-of-place version.
    ffsp = ff_refsp
-   call box_plan%execute(ffsp, ggsp, +1)
-   call box_plan%execute(ggsp, ffsp, -1)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:ffsp, ggsp) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
+   call box_plan%execute(ffsp, ggsp, +1, ndat)
+   call box_plan%execute(ggsp, ffsp, -1, ndat)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(from:ffsp, ggsp) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
@@ -1304,8 +1375,14 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    ff = ff_ref
 
    ! in-place version.
-   call box_plan%execute(ff, +1)
-   call box_plan%execute(ff, -1)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:ff) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
+   call box_plan%execute(ff, +1, ndat)
+   call box_plan%execute(ff, -1, ndat)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(from:ff) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
@@ -1321,8 +1398,14 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
 
    ! out-of-place version.
    ff = ff_ref
-   call box_plan%execute(ff, gg, +1)
-   call box_plan%execute(gg, ff, -1)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:ff, gg) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
+   call box_plan%execute(ff, gg, +1, ndat)
+   call box_plan%execute(gg, ff, -1, ndat)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(from:ff, gg) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
@@ -3384,7 +3467,6 @@ end subroutine fourdp
 
 subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: isign,n1,n2,n3,n4,n5,n6,ndat,option,comm_fft
@@ -4751,6 +4833,7 @@ end subroutine fft_output_counters
 !!  uplan_init
 !!
 !! FUNCTION
+!!  Initialize the plan
 !!
 !! INPUTS
 !!
@@ -4781,9 +4864,13 @@ subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind
  ABI_MALLOC(uplan%gbound, (2 * uplan%mgfft + 8, 2))
  call sphereboundary(uplan%gbound, uplan%istwfk, uplan%kg_k, uplan%mgfft, uplan%npw)
 
- if (uplan%gpu_option /= ABI_GPU_DISABLED) then
-   ! Allocate memory on the device and transfer data.
-   NOT_IMPLEMENTED_ERROR()
+ if (uplan%gpu_option == ABI_GPU_OPENMP) then
+   ! Map data to GPU.
+   ! TODO: I don't think we ween kg_k, gbound for the GPU
+   ! Just compute the index of kg_k in the FFT box on the GPU and use it to fill ur from ug and do FFT in-place
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:uplan%kg_k, uplan%gbound)
+#endif
  end if
 
 end subroutine uplan_init
@@ -4807,8 +4894,14 @@ subroutine uplan_free(uplan)
 ! *************************************************************************
 
  ABI_SFREE(uplan%gbound)
- if (uplan%gpu_option /= ABI_GPU_DISABLED) then
-   ! TODO: Free memory on the GPU
+
+ if (uplan%gpu_option == ABI_GPU_OPENMP) then
+   ! Free memory on the GPU
+   !call gpu_fft_plan_free(uplan%gpu_plan_spc)
+   !call gpu_fft_plan_free(uplan%gpu_plan_dpc)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:uplan%kg_k, uplan%gbound)
+#endif
  end if
 
 end subroutine uplan_free
@@ -4921,6 +5014,22 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
 
  else
    NOT_IMPLEMENTED_ERROR()
+!#ifdef HAVE_GPU_CUDA
+!   ! Build plan if not yet done. note batch_size instead of ndat.
+!   if (c_associated(uplan%gpu_plan_dpc, C_NULL_PTR)) then
+!     call gpu_fftbox_plan_init(uplan%gpu_plan_dpc, uplan%ngfft, uplan%ngfft, uplan%batch_size, dp)
+!   end if
+!
+!   if (ndat /= uplan%batch_size) then
+!     ! Have to rebuild the plan with batch_size == ndat.
+!     call gpu_fft_plan_free(uplan%gpu_plan_dpc)
+!     call gpu_fftbox_plan_init(uplan%gpu_plan_dpc, uplan%ngfft, uplan%ngfft, ndat, dp)
+!   end if
+!
+!!$OMP TARGET DATA USE_DEVICE_ADDR(ug, ur, uplan%ig2ifft)
+!    call gpu_fft_ug2r(uplan%gpu_plan_dpc, uplan%nfft, ndat, isign__, iscale__, dp, c_loc(uplan%ig2ifft), c_loc(ug), c_loc(ur))
+!!$OMP END TARGET DATA
+!#endif
  end if
 
 end subroutine uplan_execute_gr_dpc
@@ -4975,6 +5084,22 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
 
  else
    NOT_IMPLEMENTED_ERROR()
+!#ifdef HAVE_GPU_CUDA
+!   ! Build plan if not yet done. note batch_size instead of ndat.
+!   if (c_associated(uplan%gpu_plan_spc, C_NULL_PTR)) then
+!     call gpu_fftbox_plan_init(uplan%gpu_plan_spc, uplan%ngfft, uplan%ngfft, uplan%batch_size, sp)
+!   end if
+!
+!   if (ndat /= uplan%batch_size) then
+!     ! Have to rebuild the plan with batch_size == ndat.
+!     call gpu_fft_plan_free(uplan%gpu_plan_spc)
+!     call gpu_fftbox_plan_init(uplan%gpu_plan_spc, uplan%ngfft, uplan%ngfft, ndat, sp)
+!   end if
+!
+!!$OMP TARGET DATA USE_DEVICE_ADDR(ug, ur, uplan%ig2ifft)
+!    call gpu_fft_ur2g(uplan%gpu_plan_spc, uplan%nfft, ndat, isign__, iscale__, sp, c_loc(uplan%ig2ifft), c_loc(ur), c_loc(ug))
+!!$OMP END TARGET DATA
+!#endif
  end if
 
 end subroutine uplan_execute_rg_spc
