@@ -70,11 +70,6 @@ gpu_fftbox_plan_init(void **plan_pp, int *f_dims, int *f_embed, int ndat, int ki
   // Allocate the handle
   cufftHandle *plan_p = (cufftHandle *) malloc(sizeof(cufftHandle));
 
-  if (!plan_p) {
-    *plan_pp = NULL;
-    return;
-  }
-
   /* Create a CUDA stream */
   //cudaError_t cerr = cudaStreamCreate(&p->stream);
   //if (cerr != cudaSuccess) {
@@ -143,7 +138,7 @@ gpu_fftbox_c2c_ip(void **plan_pp, int nfft, int ndat, int isign, int iscale, int
     }
   }
 
-  //CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+  CHECK_CUDA_ERROR(cudaDeviceSynchronize());
   //cudaStream_t stream;
   //cufftGetStream(plan, &stream);
   //CHECK_CUDA_ERROR(cudaStreamSynchronize(stream));
@@ -179,7 +174,7 @@ gpu_fftbox_c2c_op(void **plan_pp, int nfft, int ndat, int isign, int iscale, int
      }
   }
 
-  //CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+  CHECK_CUDA_ERROR(cudaDeviceSynchronize());
   //cudaStream_t stream;
   //cufftGetStream(plan, &stream);
   //CHECK_CUDA_ERROR(cudaStreamSynchronize(stream));
