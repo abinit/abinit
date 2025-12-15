@@ -404,7 +404,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
  integer :: ndat__, iscale__
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
- call wrtout(std_out, "in fftbox_execute_ip_spc")
+ !call wrtout(std_out, "in fftbox_execute_ip_spc")
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
@@ -413,18 +413,18 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
    if (.not. c_associated(plan%gpu_plan_spc)) then
      !print *, "before gpu_fftbox_plan_init"
      call gpu_fftbox_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, plan%batch_size, sp)
-     print *, "after gpu_fftbox_plan_init"
+     !print *, "after gpu_fftbox_plan_init"
    end if
 
    if (ndat__ /= plan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
-     print *, "before gpu_fftbox_plan_init new"
+     !print *, "before gpu_fftbox_plan_init new"
      call gpu_fft_plan_free(plan%gpu_plan_spc)
      call gpu_fftbox_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, ndat__, sp)
-     print *, "after gpu_fftbox_plan_init new"
+     !print *, "after gpu_fftbox_plan_init new"
    end if
 
-  print *, "before target"
+  !print *, "before target"
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
     !call gpu_fftbox_c2c_ip(plan%gpu_plan_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff))
 !$OMP END TARGET DATA
@@ -477,7 +477,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
- call wrtout(std_out, "in fftbox_execute_ip_dpc")
+ !call wrtout(std_out, "in fftbox_execute_ip_dpc")
 
  ! FIXME: ndat should not be optional to make the API compatibile with GPUs.
 
@@ -547,7 +547,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
- call wrtout(std_out, "in fftbox_execute_op_spc")
+ !call wrtout(std_out, "in fftbox_execute_op_spc")
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
@@ -614,7 +614,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
 
- call wrtout(std_out, "in fftbox_execute_op_dpc")
+ !call wrtout(std_out, "in fftbox_execute_op_dpc")
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
@@ -1325,7 +1325,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    else
      write(msg,"(a)")" OK"
    end if
-   call wrtout(ount,sjoin(info,msg))
+   call wrtout(ount, sjoin(info,msg))
 
    ! out-of-place version.
    ffsp = ff_refsp
@@ -1371,7 +1371,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    ff = ff_ref
 
    ! in-place version.
-   print *, "in place with dp"
+   !print *, "in place with dp"
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(to:ff) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -1380,7 +1380,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET EXIT DATA MAP(from:ff) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
-   print *, "after in place with dp"
+   !print *, "after in place with dp"
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
    nfailed = nfailed + ierr
@@ -3464,7 +3464,6 @@ end subroutine fourdp
 !! SOURCE
 
 subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
-
 
 !Arguments ------------------------------------
 !scalars

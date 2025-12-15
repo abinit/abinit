@@ -57,7 +57,7 @@ gpu_fftbox_plan_init(void **plan_pp, int *f_dims, int *f_embed, int ndat, int ki
   c_embed[0] = f_embed[2]; c_embed[1] = f_embed[1]; c_embed[2] = f_embed[0];
   int dist = f_embed[0] * f_embed[1] * f_embed[2];
 
-  printf("in C gpu_fftbox_plan_init\n");
+  //printf("in C gpu_fftbox_plan_init\n");
 
   /* Create a 3D FFT plan.
   cufftResult = cufftPlanMany(cufftHandle *plan, int rank, int *c_dims,
@@ -101,7 +101,7 @@ extern "C" void
 gpu_fft_plan_free(void *plan_p)
 {
 
-  printf("in gpu_fft_plan_free");
+  //printf("in gpu_fft_plan_free");
   cufftHandle *h = (cufftHandle *) plan_p;
   //printf("About to free GPU plan: %d @ %p\n", plan, &plan);
   //printf("plan_pp: %p, *plan_pp: %p\n", plan_pp, *plan_pp);
@@ -117,7 +117,7 @@ gpu_fft_plan_free(void *plan_p)
 extern "C" void
 gpu_fftbox_c2c_ip(void **plan_pp, int nfft, int ndat, int isign, int iscale, int kind, void **d_ff) {
 
-  printf("in gpu_fftbox_c2c_ip");
+  //printf("in gpu_fftbox_c2c_ip");
 
   cufftType type;
   int direction;
@@ -154,7 +154,7 @@ extern "C" void
 gpu_fftbox_c2c_op(void **plan_pp, int nfft, int ndat, int isign, int iscale, int kind,
                   void **d_ff, void **d_gg) {
 
-  printf("in gpu_fftbox_c2c_op");
+  //printf("in gpu_fftbox_c2c_op");
 
   cufftType type;
   int direction;
