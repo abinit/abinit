@@ -1013,6 +1013,7 @@ ABI_TRIGGERS_SUMMARY
 
 status=""
 mandatory=""
+fb_path=""
 
 # Check linalg
 if test "${sd_linalg_flavor_req}" != "auto"; then
@@ -1030,6 +1031,9 @@ fi
 if test "${sd_hdf5_enable}" = "no" -o "${sd_hdf5_init}" = "fb"; then
       ABI_MSG_NOTICE_L([hdf5-mandatory],[__CAUTION__ : HDF5 is __MANDATORY__ !])
       mandatory="#"
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
 else
   if test "${sd_hdf5_ok}" != "yes";then
       ABI_MSG_NOTICE_L([hdf5-nw],[__WARNING__ : HDF5 is not __WORKING__ !])
@@ -1042,6 +1046,9 @@ if test "${sd_hdf5_ok}" = "yes" -o "${sd_hdf5_init}" = "fb";then
   if test "${sd_netcdf_enable}" = "no" -o "${sd_netcdf_init}" = "fb"; then
       ABI_MSG_NOTICE_L([netcdf-mandatory],[__CAUTION__ : NetCDF is __MANDATORY__ !])
       mandatory="#"
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
   else
      if test "${sd_netcdf_ok}" != "yes";then
         ABI_MSG_NOTICE_L([netcdf-nw],[__WARNING__ : NetCDF is not __WORKING__ !])
@@ -1053,6 +1060,9 @@ if test "${sd_hdf5_ok}" = "yes" -o "${sd_hdf5_init}" = "fb";then
   if test "${sd_netcdf_fortran_enable}" = "no" -o "${sd_netcdf_fortran_init}" = "fb"; then
       ABI_MSG_NOTICE_L([netcdf_fortran-mandatory],[__CAUTION__ : NetCDF Fortran is __MANDATORY__ !])
       mandatory="#"
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
   else
     if test "${sd_netcdf_fortran_ok}" != "yes";then
       ABI_MSG_NOTICE_L([netcdf_fortran-nw],[__WARNING__ : NetCDF Fortran is not __WORKING__ !])
@@ -1065,6 +1075,7 @@ fi
 if test "${sd_libxc_enable}" = "no" -o "${sd_libxc_init}" = "fb"; then
       ABI_MSG_NOTICE_L([libxc-mandatory],[__CAUTION__ : LibXC is __MANDATORY__ !])
       mandatory="#"
+      fb_path+=" --with-libxc=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version} "
 else
   if test "${sd_libxc_ok}" != "yes";then
       ABI_MSG_NOTICE_L([libxc-nw],[__WARNING__ : LibXC is not __WORKING__ !])
@@ -1296,13 +1307,17 @@ ABI_MSG_END
 
 
 
+FALLBACKS_SUBDIRS=""
 if test "x${mandatory}" = "x#"; then
-  FALLBACKS_SUBDIRS="fallbacks"
-else
-  FALLBACKS_SUBDIRS=""
+  AC_MSG_NOTICE(["running cp ${abinit_srcdir}/config/scripts/install_fallbacks.sh ${abinit_builddir}"])	
+  cp ${abinit_srcdir}/config/scripts/install_fallbacks.sh .
+  printf '%s/configure %s %s\n' "${abinit_srcdir}"  "$ac_configure_args" "$fb_path" > ${abinit_builddir}/.reconfigure
+  chmod +x ${abinit_builddir}/.reconfigure
+  chmod +x ${abinit_builddir}/install_fallbacks.sh
+#  FALLBACKS_SUBDIRS="fallbacks"
+#else
 fi
-
-AC_SUBST(FALLBACKS_SUBDIRS)
+#AC_SUBST(FALLBACKS_SUBDIRS)
 
 AC_OUTPUT
 
