@@ -3215,6 +3215,9 @@ if (dtset%usekden==1) then
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fix_korq',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%eph_fix_korq = key_value(1:1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cwfs_wouth',tread,'INT')
+ if(tread==1) dtset%cwfs_wouth = intarr(1)
+
  ! RCPAW variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_rcpaw',tread,'INT')
  if(tread==1) dtset%use_rcpaw = intarr(1)

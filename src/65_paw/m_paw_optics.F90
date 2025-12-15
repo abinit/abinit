@@ -910,7 +910,7 @@ end if
  integer,parameter :: master=0
  integer :: bdtot_index,cplex,etiq,iatom,ic,ibg,idir
  integer :: ierr,ikpt,ilmn,iln,ount,is,my_jb
- integer :: iorder_cprj,ispinor,isppol,istwf_k,itypat
+ integer :: iorder_cprj,ispinor,isppol,istwf_k,itypat,itypat2
  integer :: jb,jbsp,jlmn,lmn_size,lmncmax,mband_cprj,ncid,varid
  integer :: me,my_nspinor,nband_cprj_k,option_core,pnp_size
  integer :: nband_k,nphicor,ncorespinor,sender,iomode,fformopt,master_spfftband
@@ -998,6 +998,25 @@ end if
      call pawpsp_init_core(atm(itypat),filpsp(itypat),radmesh=pawrad(itypat))
    endif
  enddo
+
+ if(dtset%cwfs_wouth==1) then
+   do itypat=1,dtset%ntypat
+     if(atm(itypat)%mult==1) then
+       do itypat2=1,dtset%ntypat
+         if(atm(itypat2)%mult>1.and.atm(itypat2)%znucl==atm(itypat)%znucl.and.&
+&           atm(itypat2)%mesh_size==atm(itypat)%mesh_size.and.&
+&           atm(itypat2)%ln_size==atm(itypat)%ln_size.and.&
+&           atm(itypat2)%nsppol==atm(itypat)%nsppol.and.&
+&           atm(itypat2)%zcore_orig>atm(itypat)%zcore_orig) then
+           write(std_out,*) 'Core wfs of typat ',itypat,' replaced by those of typat ',itypat2
+           atm(itypat)%phi=atm(itypat2)%phi
+           exit
+         endif
+       enddo
+     endif
+   enddo
+ endif
+
 
  nphicor=0
  ncorespinor=0

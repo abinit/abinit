@@ -468,7 +468,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
      rho1=rcpaw%val(iatom)%rho1
      trho1=rcpaw%val(iatom)%trho1
      if(usenhat==1) nhat1=rcpaw%val(iatom)%nhat1
-     compch_sph=rcpaw%val(iatom)%compch_sph
+     if(opt_compch==1) compch_sph=compch_sph+rcpaw%val(iatom)%compch_sph
    else
      call pawdensities(compch_sph,cplex,iatom_tot,lmselect_cur,paw_an(iatom)%lmselect,lm_size,&
 &     nhat1,nspden,nzlmopt,opt_compch,1-usenhat,-1,1,pawang,pawprtvol,pawrad(itypat),&
@@ -836,7 +836,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
        ff(1:mesh_size)=(pawtab(itypat)%vhnzc(1:mesh_size)-pawtab(itypat)%vhtnzc(1:mesh_size))*&
 &                      four_pi*pawrad(itypat)%rad(1:mesh_size)**2
        call simp_gen(eshift,ff,pawrad(itypat))
-       ehpw=eshift*extfpmd_rho
+       ehpw=ehpw+eshift*extfpmd_rho
        extfpmd%eshift_paw=extfpmd%eshift_paw+eshift/ucvol
        rho(1:mesh_size)=extfpmd_rho*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
        call poisson(rho,0,pawrad(itypat),vh)

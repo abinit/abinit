@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 15 Dec 2025.
-- ( at 11h07 )
+- ( at 12h55 )
   
 - input  file    -> t108.abi
 - output file    -> t108.abo
@@ -34,11 +34,10 @@
     occopt =       3   xclevel =       2
 -    mband =          38        mffmem =           1         mkmem =           1
        mpw =         619          nfft =       13824          nkpt =           1
-Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        48    nfftf =    110592
 ================================================================================
-P This job should need less than                      48.314 Mbytes of memory.
+P This job should need less than                      52.865 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.361 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 ================================================================================
@@ -53,11 +52,10 @@ _ WF disk file :      0.361 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
     occopt =       3   xclevel =       2
 -    mband =          38        mffmem =           1         mkmem =           1
        mpw =         619          nfft =       13824          nkpt =           1
-Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        48    nfftf =    110592
 ================================================================================
-P This job should need less than                      48.314 Mbytes of memory.
+P This job should need less than                      52.865 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.361 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 ================================================================================
@@ -130,8 +128,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 14, omp_nthreads: 1 (-1 if OMP is not activated)
--    --> not optimal distribution: autoparal keyword recommended in input file <--
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -451,7 +448,7 @@ band_energy         :  2.09714578003905E-02
 Ewald energy        : -3.56489332228662E+00
 psp_core            : -3.17095761467905E-02
 xc_dc               : -3.49763305345529E-01
-PAW spherical_terms :  2.07224105019165E-01
+PAW spherical_terms :  2.07224105019161E-01
 PAW core dc         : -4.80586377085421E+02
 internal            : -4.84304547726380E+02
 '-kT*entropy'       : -1.01873612914774E-02
@@ -472,8 +469,7 @@ total_energy_dc_eV  : -1.31788741655249E+04
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 14, omp_nthreads: 1 (-1 if OMP is not activated)
--    --> not optimal distribution: autoparal keyword recommended in input file <--
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -982,10 +978,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         39.4  wall=         40.4
+- Proc.   0 individual time (sec): cpu=         29.1  wall=         30.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        563.9  wall=        564.3
+.Delivered  38 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=         29.1  wall=         30.2
