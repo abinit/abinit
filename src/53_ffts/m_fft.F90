@@ -135,6 +135,8 @@ MODULE m_fft
 
    type(c_ptr) :: gpu_plan_spc = c_null_ptr
    type(c_ptr) :: gpu_plan_dpc = c_null_ptr
+   !type(c_ptr) :: gpu_stream_spc = c_null_ptr
+   !type(c_ptr) :: gpu_stream_dpc = c_null_ptr
 
  contains
 
@@ -213,6 +215,8 @@ MODULE m_fft
    ! TODO
    !type(c_ptr) :: gpu_plan_spc = c_null_ptr
    !type(c_ptr) :: gpu_plan_dpc = c_null_ptr
+   !type(c_ptr) :: gpu_stream_spc = c_null_ptr
+   !type(c_ptr) :: gpu_stream_dpc = c_null_ptr
 
  contains
    procedure :: init => uplan_init    ! Build object
@@ -1274,7 +1278,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
  ], [6, NSETS])
 
  if (gpu_option /= ABI_GPU_DISABLED) then
-   ! Agumentation is not supported for GPUS.
+   ! Augmentation is not supported for GPUS.
    do ii=1,NSETS
      pars(4:6, ii) = pars(1:3, ii)
    end do
