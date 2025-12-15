@@ -656,8 +656,9 @@ type, public :: dataset_type
  integer :: rmm_diis_savemem = 0
  integer :: rcpaw_frocc = 0
  integer :: rcpaw_updatetnc
- integer :: rcpaw_orbshift = 0
- integer :: rcpaw_potshift = 0
+ integer :: rcpaw_elin = 1
+ integer :: rcpaw_tpaw = 1
+ integer :: rcpaw_vhtnzc = 1
 !S
  integer :: sigma_nshiftk = 1      ! Number of shifts in k-mesh for Sigma_{nk}.
  integer :: signperm
@@ -2162,8 +2163,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%random_atpos       = dtin%random_atpos
  dtout%rcpaw_frocc        = dtin%rcpaw_frocc
  dtout%rcpaw_updatetnc    = dtin%rcpaw_updatetnc
- dtout%rcpaw_orbshift     = dtin%rcpaw_orbshift
- dtout%rcpaw_potshift     = dtin%rcpaw_potshift
+ dtout%rcpaw_elin         = dtin%rcpaw_elin
+ dtout%rcpaw_tpaw         = dtin%rcpaw_tpaw
+ dtout%rcpaw_vhtnzc       = dtin%rcpaw_vhtnzc
  dtout%recgratio          = dtin%recgratio
  dtout%recnpath           = dtin%recnpath
  dtout%recnrec            = dtin%recnrec
@@ -3868,7 +3870,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
  list_vars=trim(list_vars)//' rfstrs rfstrs_ref rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  list_vars=trim(list_vars)//' rmm_diis rmm_diis_savemem'
- list_vars=trim(list_vars)//' rcpaw_frocc rcpaw_orbshift rcpaw_potshift rcpaw_rctypat rcpaw_sc rcpaw_tolnc rcpaw_updatepaw rcpaw_updatetnc'
+ list_vars=trim(list_vars)//' rcpaw_frocc rcpaw_elin rcpaw_tpaw rcpaw_vhtnzc rcpaw_rctypat'
+ list_vars=trim(list_vars)//' rcpaw_sc rcpaw_tolnc rcpaw_updatepaw rcpaw_updatetnc'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' sel_EFS'
