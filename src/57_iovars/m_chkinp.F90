@@ -4615,7 +4615,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ! If SCF calculations, one and only one of these can differ from zero
      if ( (dt%iscf>0 .or. dt%iscf==-3) .and. &
        & ( (ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag>1) .or. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag/=1) ) ) then
-       write(msg,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,i0,2a)' )&
+       write(msg,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,es14.6,a,i0,2a)' )&
         'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
         'toldff, tolrff, toldfe, toldmag or tolvrs ','must differ from zero, while they are',ch10,&
         'toldff=',dt%toldff,', tolrff=',dt%tolrff,', toldfe=',dt%toldfe,ch10,&

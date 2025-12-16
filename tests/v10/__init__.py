@@ -40,6 +40,7 @@ inp_files = [
     "t28.abi" ,  # test stress for GBT using Finite difference
     "t29.abi" ,  # test force for GBT using Finite difference
     "t30.abi" ,  # test axial vector symmetry with hspinfield along x,y and z directions.
+    "t39.abi" ,  # test overlapping of PAW sphere with itself (possible if small unit cell)
     "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole
     "t41.abi" ,  # test orbmag calculation using R2SCAN mGGA
     "t42.abi" ,  # test orbmag calculation using R2SCAN mGGA, nspinor 2, zora
