@@ -3881,12 +3881,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
   end if
 
 !  spinaxis: only avaliable for SOC/cDFT/hspinfield
-!  if spinaxis(1:2)=0, then spinaxis along the z
-   if(any(abs(dt%spinaxis(:)-(/0.0_dp,0.0_dp,1.0_dp/)) > tol8)) then
+   if (dt%spinaxis(1)**2 + dt%spinaxis(2)**2 > tol8*tol8 ) then
      if(all(dt%so_psp(1:dt%ntypat)/=1) .and. & 
         all(abs(dt%hspinfield(:))<tol8) .and. &
         all(dt%constraint_kind(1:dt%ntypat)==0)) then
-        ABI_WARNING("spinaxis is defined but no SOC, hspinfield or cDFT is active. spinaxis will be ignored.")
+        ABI_WARNING("Spinaxis is defined but no SOC, hspinfield or cDFT is active. spinaxis will be ignored.")
      end if
    end if
 
