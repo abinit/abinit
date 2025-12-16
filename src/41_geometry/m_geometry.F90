@@ -4102,20 +4102,29 @@ subroutine geteuler(spinaxis, alpha, beta)
 
 !Arguments -------------------------------
 !scalars
+ real(dp),intent(out) :: alpha, beta
 !arrays
  real(dp),intent(in) :: spinaxis(3)
- real(dp),intent(out) :: alpha, beta
 
 !Local variables -------------------------
-!arrays
- real(dp) :: sx, sy, sz, norm
+!scalars
+ real(dp) :: sx, sy, sz, norm, rxy
 !***********************************************************************
- sx = spinaxis(1)
- sy = spinaxis(2)
- sz = spinaxis(3)
+ norm = DOT_PRODUCT(spinaxis(:), spinaxis(:))
+ if (norm < tol8*tol8) then
+   alpha = 0._dp; beta = 0._dp
+   return
+ end if
 
- alpha = atan2(sy, sx)
- beta  = atan2(sqrt(sx*sx + sy*sy), sz)
+ sx = spinaxis(1); sy = spinaxis(2); sz = spinaxis(3)
+ rxy = sqrt(sx*sx + sy*sy)
+ if (rxy < tol8) then
+   alpha = 0._dp
+ else
+   alpha = atan2(sy, sx)
+ end if
+
+ beta  = atan2(rxy, sz)
 
 end subroutine geteuler
 !!***
@@ -4142,30 +4151,31 @@ end subroutine geteuler
 subroutine cart2spinaxis(alpha, beta, R, vin, vout)
 
 !Arguments -------------------------------
-!arrays
+!scalars
  real(dp),intent(in) :: alpha, beta
+!arrays
  real(dp),intent(out) :: R(3,3)
  real(dp),optional,intent(in) :: vin(3)
  real(dp),optional,intent(out) :: vout(3)
+
+!Local variables -------------------------
+!scalars
+ real(dp) :: sb, cb, sa, ca
 !***********************************************************************
 
- R(1,1) = cos(beta)*cos(alpha)
- R(1,2) = cos(beta)*sin(alpha)
- R(1,3) = -sin(beta)
+ sb = sin(beta); cb = cos(beta)
+ sa = sin(alpha); ca = cos(alpha)
 
- R(2,1) = -sin(alpha)
- R(2,2) = cos(alpha)
- R(2,3) = 0.0_dp
-
- R(3,1) = sin(beta)*cos(alpha)
- R(3,2) = sin(beta)*sin(alpha)
- R(3,3) = cos(beta)
+ R(1,1) = cb*ca; R(1,2) = cb*sa; R(1,3) = -sb
+ R(2,1) = -sa; R(2,2) = ca; R(2,3) = 0.0_dp
+ R(3,1) = sb*ca; R(3,2) = sb*sa; R(3,3) = cb
 
  if (present(vin) .and. present(vout)) then
-     vout = matmul(R, vin)
+     vout(:) = matmul(R, vin)
  end if
 
 end subroutine cart2spinaxis
-
+!!***
+ 
 end module  m_geometry
 !!***

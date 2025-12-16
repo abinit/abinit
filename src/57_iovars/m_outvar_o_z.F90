@@ -982,18 +982,54 @@ contains
  intarr(1,:)=dtsets(:)%spgroup
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'spgroup','INT',0)
 
-!spinat
- dprarr(:,0)=0.0_dp
+!spinat_cart
+! dprarr(:,0)=0.0_dp
+ dprarr(1:narr,0:ndtset_alloc) = 0._dp
  narr=3*natom ! default size for all datasets
- do idtset=1,ndtset_alloc       ! specific size for each dataset
-   narrm(idtset)=3*dtsets(idtset)%natom
-   if (narrm(idtset)>0) then
-     dprarr(1:narrm(idtset),idtset)=reshape(dtsets(idtset)%spinat(1:3,1:dtsets(idtset)%natom), (/narrm(idtset)/))
-   end if
-   if(sum(abs( dtsets(idtset)%spinat(1:3,1:dtsets(idtset)%natom))) < tol12 ) narrm(idtset)=0
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'spinat','DPR',multivals%natom)
+! do idtset=1,ndtset_alloc       ! specific size for each dataset
+!   narrm(idtset)=3*dtsets(idtset)%natom
+!   if (narrm(idtset)>0) then
+!     dprarr(1:narrm(idtset),idtset)=reshape(dtsets(idtset)%spinat(1:3,1:dtsets(idtset)%natom), (/narrm(idtset)/))
+!   end if
+!   if(sum(abs( dtsets(idtset)%spinat(1:3,1:dtsets(idtset)%natom))) < tol12 ) narrm(idtset)=0
+! end do
+! call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'spinat','DPR',multivals%natom)
 
+ do idtset = 0, ndtset_alloc
+   narrm(idtset) = 0
+ end do
+ do idtset = 1, ndtset_alloc
+   if (dtsets(idtset)%natom <= 0) cycle
+
+   if (sum(abs(dtsets(idtset)%spinat_cart(1:3,1:dtsets(idtset)%natom))) > tol12) then
+     narrm(idtset) = 3*dtsets(idtset)%natom
+     dprarr(1:narrm(idtset),idtset) = reshape(dtsets(idtset)%spinat_cart(1:3,1:dtsets(idtset)%natom), (/narrm(idtset)/))
+   end if
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'spinat_cart','DPR',1)
+
+! spinat
+! dprarr(:,0) = 0.0_dp
+ dprarr(1:narr,0:ndtset_alloc) = 0._dp  
+ narr = 3*natom
+ do idtset = 0, ndtset_alloc
+   narrm(idtset) = 0
+ end do
+ 
+ do idtset = 1, ndtset_alloc
+   if (dtsets(idtset)%natom <= 0) cycle
+
+   if (sum(abs(dtsets(idtset)%spinat_cart(1:3,1:dtsets(idtset)%natom))) <= tol12) then
+     if (sum(abs(dtsets(idtset)%spinat(1:3,1:dtsets(idtset)%natom))) > tol12) then
+       narrm(idtset) = 3*dtsets(idtset)%natom
+       dprarr(1:narrm(idtset),idtset) = reshape(dtsets(idtset)%spinat(1:3,1:dtsets(idtset)%natom), (/narrm(idtset)/))
+     end if
+   end if
+ end do
+
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'spinat','DPR',1)
+
+! spinaxis
  dprarr(1,:)=dtsets(:)%spinaxis(1)
  dprarr(2,:)=dtsets(:)%spinaxis(2)
  dprarr(3,:)=dtsets(:)%spinaxis(3)

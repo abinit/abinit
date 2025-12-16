@@ -2062,16 +2062,17 @@ subroutine metric_so(amet,soc_weight,gprimd,pauli,alpha,beta)
 
 !Arguments ------------------------------------
 !arrays
+ real(dp),intent(in) :: alpha, beta
+!scalars
  real(dp),intent(in) :: gprimd(3,3),soc_weight(3)
  real(dp),intent(out) :: amet(2,3,3,2,2),pauli(2,2,2,3)
- real(dp),intent(in),optional :: alpha, beta
 
 !Local variables-------------------------------
 !scalars
- integer :: iy1,iy2,m1,m2,n
+ integer :: iy1,iy2,m1,m2,n,cb2,sb2
 !arrays
  real(dp) :: buffer1(3,3,2,2) !,buffer2(3,3,3,3,2,2)
- complex(dp) :: S(2,2,3), Srot(2,2), U(2,2)
+ complex(dp) :: S(2,2,3), Srot(2,2), U(2,2), ep, em
 
 ! **********************************************************************
 
@@ -2083,39 +2084,23 @@ subroutine metric_so(amet,soc_weight,gprimd,pauli,alpha,beta)
  pauli(1,1,1,3)= 1.d0;pauli(1,2,2,3)=-1.d0
  pauli(:,:,:,:)= 0.5d0*pauli(:,:,:,:)
 
- if (present(alpha) .and. present(beta)) then
-! get Sx, Sy, Sz 2*2 matrix
-!    do n = 1, 3
-!      do is1 = 1, 2
-!        do is2 = 1, 2
-!          S(is1,is2,n) = cmplx(pauli(1,is1,is2,n), &
-!     &                         pauli(2,is1,is2,n), kind=dp)
-!        end do
-!      end do
-!    end do
-   S(:,:,:) = cmplx(pauli(1,:,:,:), pauli(2,:,:,:), kind=dp)
-   U(1,1) = cos(beta/2.0_dp) * exp(-j_dpc*alpha/2.0_dp)
-   U(1,2) = -sin(beta/2.0_dp) * exp(-j_dpc*alpha/2.0_dp)
-   U(2,1) =  sin(beta/2.0_dp) * exp( j_dpc*alpha/2.0_dp)
-   U(2,2) =  cos(beta/2.0_dp) * exp( j_dpc*alpha/2.0_dp)
+ ! test the beta and alpha is zero
+ S(:,:,:) = cmplx(pauli(1,:,:,:), pauli(2,:,:,:), kind=dp)
 
-   do n = 1, 3
-     Srot(:,:) = matmul(conjg(transpose(U)), matmul(S(:,:,n), U))
-     S(:,:,n)  = Srot(:,:)
-   end do
+ cb2 = cos(half*beta); sb2 = sin(half*beta)
+ em = exp(-j_dpc*0.5_dp*alpha); ep = conjg(em)
+
+ U(1,1) =  cb2 * em; U(1,2) = -sb2 * em
+ U(2,1) =  sb2 * ep; U(2,2) =  cb2 * ep
+
+ do n = 1, 3
+   Srot(:,:) = matmul(conjg(transpose(U)), matmul(S(:,:,n), U))
+   S(:,:,n)  = Srot(:,:)
+ end do
     
-   pauli(:,:,:,:) = 0.0_dp
-   pauli(1,:,:,:) = real(S(:,:,:), kind=dp)
-   pauli(2,:,:,:) = aimag(S(:,:,:))
-!    do n = 1, 3
-!      do is1 = 1, 2
-!        do is2 = 1, 2
-!          pauli(1,is1,is2,n) = real(S(is1,is2,n), kind=dp)
-!          pauli(2,is1,is2,n) = aimag(S(is1,is2,n))
-!        end do
-!      end do
-!    end do
- end if 
+ pauli(:,:,:,:) = 0.0_dp
+ pauli(1,:,:,:) = real(S(:,:,:), kind=dp)
+ pauli(2,:,:,:) = aimag(S(:,:,:))
 
 !Construct the antisymmetric tensor:
  amet(:,:,:,:,:)=0.d0
