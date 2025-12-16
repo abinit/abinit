@@ -110,8 +110,6 @@ upawu2      6.00  eV  # Values of U for each angular momentum
 jpawu1      0.00 eV
 jpawu2      0.70 eV  # Values of J
 
-
-
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

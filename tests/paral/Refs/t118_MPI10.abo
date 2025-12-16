@@ -932,7 +932,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  9.259658051140  9.259658051140  9.259658051140 bohr
               =  4.900000000000  4.900000000000  4.900000000000 angstroms
- prteigrs : about to open file t118o_DS1_EIG
+ prteigrs : about to open file t118_MPI10o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.37543   Average Vxc (hartree)=  -0.39566
  Eigenvalues (hartree) for nkpt=  12  k points:
  kpt#   1, nband= 44, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
@@ -1612,7 +1612,7 @@ force_length_stats: {min: null, max: null, mean: null, }
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  9.259658051140  9.259658051140  9.259658051140 bohr
               =  4.900000000000  4.900000000000  4.900000000000 angstroms
- prteigrs : about to open file t118o_DS2_EIG
+ prteigrs : about to open file t118_MPI10o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.37543   Average Vxc (hartree)=  -0.39566
  Eigenvalues (hartree) for nkpt=  12  k points:
  kpt#   1, nband= 44, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
@@ -2098,8 +2098,3 @@ P           mkmem           2
  Calculation completed.
 .Delivered   1 WARNINGs and   0 COMMENTs to log file.
 +Overall time at end (sec) : cpu=        593.7  wall=        596.4
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 161 allocations and 161 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 2054985 allocations and 2054985 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
