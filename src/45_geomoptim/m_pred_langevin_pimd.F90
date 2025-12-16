@@ -77,10 +77,11 @@ contains
     ! Arrays
     real(dp) :: acell(3),rprimd(3,3),rprimd_next(3,3),rprimd_prev(3,3),gprimd(3,3)
     real(dp) :: gmet(3,3),rmet(3,3),strten(6),fcart(3,ab_mover%natom)
-    real(dp) :: xred(3,ab_mover%natom),vel(3,ab_mover%natom),vel_cell(3,3)
+    real(dp) :: xred(3,ab_mover%natom),vel(3,ab_mover%natom),vel_cell(3,3),vel_cell_next(3,3)
     real(dp) :: pimd_etotal(1),pimd_stressin(3,3,1),pimd_xred(3,ab_mover%natom,1)
     real(dp) :: pimd_xred_next(3,ab_mover%natom,1),pimd_xred_prev(3,ab_mover%natom,1)
     real(dp) :: pimd_forces(3,ab_mover%natom,1),pimd_vel(3,ab_mover%natom,1)
+    real(dp) :: pimd_vel_next(3,ab_mover%natom,1)
 
     ! *********************************************************************
     ! Initialize arrays
@@ -99,6 +100,7 @@ contains
     xred=zero
     vel=zero
     vel_cell=zero
+    vel_cell_next=zero
     pimd_etotal=zero
     pimd_stressin=zero
     pimd_xred=zero
@@ -106,6 +108,7 @@ contains
     pimd_xred_prev=zero
     pimd_forces=zero
     pimd_vel=zero
+    pimd_vel_next=zero
     ! Get last positions
     call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
     fcart(:,:)=hist%fcart(:,:,hist%ihist)
@@ -139,12 +142,13 @@ contains
     ! Compute next values
     if(pimd_param%optcell==0) then
       call pimd_langevin_nvt(pimd_etotal,pimd_forces,itime,ab_mover%natom,pimd_param,&
-      & 0,rprimd,pimd_stressin,1,pimd_vel,ucvol,pimd_xred,pimd_xred_next,pimd_xred_prev)
+      & 0,rprimd,pimd_stressin,1,pimd_vel,pimd_vel_next,ucvol,pimd_xred,pimd_xred_next,pimd_xred_prev)
       rprimd_next=rprimd ! We do not change primitive vectors
       vel_cell=zero      ! Cell velocities are set to zero
     elseif(pimd_param%optcell==2) then
       call pimd_langevin_npt(pimd_etotal,pimd_forces,itime,ab_mover%natom,pimd_param,&
-      & 0,rprimd,rprimd_next,rprimd_prev,pimd_stressin,1,pimd_vel,vel_cell,ucvol,&
+      & 0,rprimd,rprimd_next,rprimd_prev,pimd_stressin,1,pimd_vel,pimd_vel_next,vel_cell,&
+      & vel_cell_next,ucvol,&
       & pimd_xred,pimd_xred_next,pimd_xred_prev)
     endif
 

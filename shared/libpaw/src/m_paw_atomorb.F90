@@ -249,8 +249,8 @@ MODULE m_paw_atomorb
 
 !----------------------------------------------------------------------
 
- integer,public,parameter :: ORB_FROZEN       =1
- integer,public,parameter :: ORB_RELAXED_CORE =0
+ integer,public,parameter :: ORB_FROZEN       =0
+ integer,public,parameter :: ORB_RELAXED_CORE =1
  integer,public,parameter :: ORB_VALENCE      =2
 
 

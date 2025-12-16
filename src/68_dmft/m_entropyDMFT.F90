@@ -689,7 +689,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 &        is_dfpt,jpawu,dt%lexexch,dt%lpawu,dt%nspinor,dt%ntypat,dt%optdcmagpawu,pawang,dt%pawprtvol,&
 &        pawrad,pawtab,upawu,dt%usedmft,dt%useexexch,dt%usepawu,dmft_orbital=dt%dmft_orbital, &
 &        dmft_dc=dt%dmft_dc,dmft_orbital_filepath=dt%dmft_orbital_filepath,dmft_yukawa_param=dt%dmft_yukawa_param, &
-&        dmft_lambda_yukawa=dt%dmft_lambda_yukawa,dmft_epsilon_yukawa=dt%dmft_epsilon_yukawa)
+&        dmft_yukawa_lambda=dt%dmft_yukawa_lambda,dmft_yukawa_epsilon=dt%dmft_yukawa_epsilon)
       ABI_FREE(upawu)
       ABI_FREE(jpawu)
     end if

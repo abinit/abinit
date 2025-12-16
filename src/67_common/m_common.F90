@@ -44,7 +44,8 @@ module m_common
  use m_yaml
  use m_invars2
  use m_dtset
-
+ 
+ use m_rcpaw,             only : rcpaw_type
  use m_fstrings,          only : indent, endswith, sjoin, itoa
  use m_electronpositron,  only : electronpositron_type
  use m_energies,          only : energies_type
@@ -188,7 +189,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
 &  nband,nkpt,nstep,occ,optres,&
 &  prtfor,prtxml,quit,res2,resid,residm,response,tollist,usepaw,&
 &  vxcavg,wtk,xred,conv_retcode,&
-&  electronpositron, fock) ! optional arguments)
+&  electronpositron, fock,rcpaw) ! optional arguments)
 
 !Arguments ------------------------------------
 !scalars
@@ -203,6 +204,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
  type(fock_type),pointer,optional :: fock
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
+ type(rcpaw_type),intent(inout),optional,pointer :: rcpaw
 !arrays
  integer,intent(in) :: nband(nkpt*dtset%nsppol)
  real(dp),intent(in) :: eigen(dtset%mband*nkpt*dtset%nsppol),favg(3)
@@ -610,6 +612,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
        else
          use_dpfft = residm < tol7
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.residm < (tolwfr)**third) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep 
+           endif
+         endif
+       endif
      end if
 
      ! Here treat the toldff criterion: if maximum change of fcart is less than
@@ -631,6 +640,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
          toldff_ok=0
          use_dpfft = diffor < tol6
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.diffor < (toldff)**third) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep
+           endif
+         endif
+       endif
 
        if(toldff_ok>=2 .and..not.noquit)then
          if (ttolwfr==0) then
@@ -701,6 +717,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
          tolrff_ok=0
          use_dpfft = diffor < tolrff * maxfor * five
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.(diffor < ( tolrff*maxfor)**third.or.(maxfor < tol6 .and. diffor < tol6))) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep
+           endif
+         endif
+       endif
        if(tolrff_ok>=2 .and. (.not.noquit))then
          if (ttolwfr==0) then
            write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
@@ -731,6 +754,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
          toldfe_ok=0
          use_dpfft = abs(deltae) < tol8
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.abs(deltae) < (toldfe)**third) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep
+           endif
+         endif
+       endif
        ! Fock : tolwfr not taken into account
        if(usefock/=0.and.nnsclohf>=2) then
          if (toldfe_ok==2 .and. (.not.noquit))then
@@ -831,6 +861,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
            use_dpfft = res2 < tol5
          end if
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.res2 < (tolvrs)**third) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep
+           endif
+         endif
+       endif
      end if
 
      if (quit==1.and.noquit) then
@@ -846,6 +883,15 @@ subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
      if (fftcore_mixprec == 1) call wrtout(std_out, " Approaching convergence. Activating FFT in double-precision")
      ii = fftcore_set_mixprec(0)
    end if
+
+   ! Additional stuff for rcpaw
+   if(present(rcpaw)) then
+     if(associated(rcpaw)) then
+       if(rcpaw%updatepaw(2)>0.and.rcpaw%frocc) rcpaw%updateocc=rcpaw%updatepaw(2) 
+       if(rcpaw%updatetnc==0)rcpaw%updatetnc=rcpaw%updatepaw(2)
+       if(quit==1.and.(rcpaw%istep<rcpaw%updatepaw(2).or.rcpaw%updatepaw(2)==0))quit=0
+     endif
+   endif
 
  case (3)
    ! If wavefunction convergence was not reached (for nstep>0) print a warning and return conv_retcode
