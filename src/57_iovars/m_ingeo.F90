@@ -33,7 +33,7 @@ module m_ingeo
 &                         symmetrize_rprimd, symmetrize_tnons,symmetrize_xred
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
  use m_symfind,    only : symfind, symfind_expert, symanal, symlatt
- use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric, reduce2primitive
+ use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric, reduce2primitive, geteuler, cart2spinaxis
  use m_parser,     only : intagm, intagm_img, geo_t, geo_from_abivar_string, get_acell_rprim
 
  implicit none
@@ -135,7 +135,7 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_ax
   genafm,iatfix,iatnd,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
   msym,natnd,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
   nucdipmom,nzchempot,pawspnorb,&
-  ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
+  ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,spinat_cart,string,supercell_lattice,symafm,&
   symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl,comm)
 
 !Arguments ------------------------------------
@@ -156,7 +156,7 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_ax
  integer,intent(out) :: typat(natom)
  real(dp),intent(inout) :: atndlist(3,natnd),chrgat(natom)
  real(dp),intent(inout) :: nucdipmom(3,natom),ratsph(ntypat)
- real(dp),intent(inout) :: spinat(3,natom)
+ real(dp),intent(inout) :: spinat(3,natom), spinat_cart(3,natom)
  real(dp),intent(out) :: acell(3),amu(ntypat),field_red(3),field_red_axial(3)
  real(dp),intent(out) :: genafm(3),mixalch(npspalch,ntypalch)
  real(dp),intent(inout) :: rprim(3,3),tnons(3,msym) !vz_i
@@ -171,10 +171,10 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_ax
  integer :: bckbrvltt,brvltt,chkprim,chkprim_fake,expert_user
  integer :: fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
  integer :: invar_z,ipsp,irreducible,isym,itranslat,itypat,jsym,marr,mismatch_fft_tnons,multi,multiplicity,natom_uc,natfix,natrd
- integer :: nobj,noncoll,nptsym,nsym_now,ntranslat,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
- integer :: spgroupma,tgenafm,tnatrd,tread,try_primitive,tscalecart,tspgroupma, tread_geo
+ integer :: nobj,noncoll,norm,nptsym,nsym_now,ntranslat,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
+ integer :: spgroupma,tgenafm,tnatrd,tread,try_primitive,tscalecart,tspgroupma,tread_geo,tread_cart
  integer :: txcart,txred,txrandom,use_inversion
- real(dp) :: amu_default,ucvol,sumalch
+ real(dp) :: amu_default,ucvol,sumalch,alpha,beta
  character(len=1000) :: msg
  character(len=lenstr) :: geo_string
  type(atomdata_t) :: atom
@@ -184,7 +184,7 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_ax
  integer,allocatable :: intarr(:)
  integer,allocatable :: is_translation(:)
  integer,allocatable :: ptsymrel(:,:,:),typat_read(:)
- real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
+ real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3),spinaxis(3),m_cart(3),m_local(3),R(3,3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),rprimd_primitive(3,3),scalecart(3)
  real(dp),allocatable :: mass_psp(:),tnons_cart(:,:),tnons_new(:,:),translations(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
@@ -565,13 +565,61 @@ end do
 
    ! Spinat is read for each atom, from 1 to natom
    call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'spinat',tread,'DPR')
-   if(tread==1) then
-     spinat(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
-   else if (nspden==4.or.(nspden==2.and.nsppol==1)) then
+   if(tread==1) spinat(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
+
+   call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'spinat_cart',tread_cart,'DPR')
+   if(tread_cart==1) spinat_cart(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
+   spinaxis(:) = dtset%spinaxis(:)
+   norm = sqrt(dot_product(dtset%spinaxis(1:3), dtset%spinaxis(1:3)))
+   spinaxis(:) = spinaxis(:)/norm
+
+   if (all(abs(spinaxis(:)-(/ 0.0_dp, 0.0_dp, 1.0_dp /)) < tol8)) then
+     if (tread_cart==1) then
+       if (tread==1) then
+         ABI_COMMENT('Both spinat and spinat_cart are set; spinat_cart will be used.')
+       end if
+       spinat(1:3,1:natom) = reshape(dprarr(1:3*natom), [3, natom])
+       tread = 1
+     end if
+
+   else
+
+     if (tread_cart==0 .and. tread==0) then
+       if (nspden==4 .or. (nspden==2 .and. nsppol==1)) then
+         write(msg, '(5a)' )&
+         'When nspden=4 or (nspden==2 and nsppol==1), and a non-trivial spinaxis is set,',ch10,&
+         'one of spinat or spinat_cart must be defined in the input file.',ch10,&
+         'Action: define spinat_cart (Cartesian) or spinat (local spin frame),',ch10,&
+         'or use nspden=1 in your input file.'
+         ABI_ERROR(msg)
+       end if
+     else if (tread_cart==0) then
+       write(msg,'(3a)') 'Spinaxis is defined, but only spinat is present.',ch10,&
+                         'Action: please use spinat_cart (Cartesian) instead of spinat when spinaxis is set.'
+       ABI_ERROR(msg)
+     else ! tread_cart=1, tread=0/1
+       if (tread==1) then
+         ABI_COMMENT('Both spinat and spinat_cart are set; spinat_cart will be used.')
+       end if
+
+       call geteuler(spinaxis, alpha, beta)
+
+       do iatom = 1, natom
+         m_cart(1) = dprarr(3*(iatom-1)+1)
+         m_cart(2) = dprarr(3*(iatom-1)+2)
+         m_cart(3) = dprarr(3*(iatom-1)+3)
+
+         call cart2spinaxis(alpha, beta, R, m_cart, m_local)
+         spinat(1:3,iatom) = m_local(1:3)
+       end do
+       tread = 1
+     end if
+   end if
+   if (tread==0 .and. (nspden==4.or.(nspden==2.and.nsppol==1))) then
      write(msg, '(5a)' )&
-      'When nspden=4 or (nspden==2 and nsppol==1), the input variable spinat must be',ch10,&
+      'When nspden=4 or (nspden==2 and nsppol==1), one of spinat or spinat_cart must be',ch10,&
       'defined in the input file, which is apparently not the case.',ch10,&
-      'Action: define spinat or use nspden=1 in your input file.'
+      'Action: define spinat (local frame) or spinat_cart (Cartesian), or use nspden=1 in your input file.'
      ABI_ERROR(msg)
    end if
 
@@ -622,6 +670,38 @@ end do
    ! Spinat is read for each irreducible atom, from 1 to natrd
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'spinat',tread,'DPR')
    if(tread==1)spinat(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
+
+   call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'spinat_cart',tread_cart,'DPR')
+   if(tread_cart==1) spinat_cart(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natom])
+   spinaxis(:) = dtset%spinaxis(:)
+   norm = sqrt(dot_product(dtset%spinaxis(1:3), dtset%spinaxis(1:3)))
+   spinaxis(:) = spinaxis(:)/norm
+   if (tread_cart==0) then
+     if (any(abs(spinaxis(:)-(/ 0.0_dp, 0.0_dp, 1.0_dp /)) > tol8)) then
+       if (tread==1) then
+         write(msg,'(3a)') 'Spinaxis is defined, but only spinat is present.',ch10,&
+                           'Action: please use spinat_cart (Cartesian) instead of spinat when spinaxis is set.'
+         ABI_ERROR(msg)
+       end if
+     end if
+   else 
+     if (tread==1) then
+       ABI_COMMENT('Both spinat and spinat_cart are set; spinat_cart will be used.')
+     end if
+     if (all(abs(spinaxis(:)-(/ 0.0_dp, 0.0_dp, 1.0_dp /)) < tol8)) then
+       spinat(1:3,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
+     else
+       call geteuler(spinaxis, alpha, beta)
+
+       do iatom = 1, natrd
+         m_cart(1) = dprarr(3*(iatom-1)+1)
+         m_cart(2) = dprarr(3*(iatom-1)+2)
+         m_cart(3) = dprarr(3*(iatom-1)+3)
+         call cart2spinaxis(alpha, beta, R, m_cart, m_local)
+         spinat(1:3,iatom) = m_local(1:3)
+       end do
+     end if
+   end if
 
    ! nucdipmom is read for each irreducible atom, from 1 to natrd
    nucdipmom=zero

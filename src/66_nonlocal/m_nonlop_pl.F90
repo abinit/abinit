@@ -288,10 +288,8 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
    if (use_gbt == 2) then
      soc_weight(1:2) = 0
      if (ispin_gbt == 2) soc_weight(3) = -1
-   end if
+   end if 
    call geteuler(spinaxis,alpha,beta)
-   write(std_out,*) ' SPINAXIS = ', spinaxis(1), spinaxis(2), spinaxis(3)
-   write(std_out,*) ' alpha (rad) = ', alpha, ' beta (rad) = ', beta
    call metric_so(amet,soc_weight,gprimd,pauli,alpha,beta)
  end if
 

@@ -869,7 +869,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
 !    Legendre Polynomials version
      if (hamk%useylm==0) then
-        write(std_out,*) ' hamk%spinaxis = ',hamk%spinaxis
        call nonlop_pl(choice,dimenl1,dimenl2_,dimffnlin,dimffnlout,enl__,&
 &       enlout(b4:e4),ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,idir,indlmn_,hamk%ispin_gbt,istwf_k,&
 &       kgin,kgout,kpgin,kpgout,kptin,kptout,hamk%lmnmax,matblk_,hamk%mgfft,&
