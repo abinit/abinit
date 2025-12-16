@@ -120,6 +120,7 @@ contains
 !!   | nsppol=1 for unpolarized, 2 for spin-polarized
 !!   | nsym=number of symmetries in space group
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  grchempottn(3,natom)=d(E_chemical_potential)/d(xred) (hartree)
 !!  grcondft(3,natom)=d(E_constrained_DFT)/d(xred) (hartree)
@@ -693,13 +694,13 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    if (psps%usepaw==0) then
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&     option=1,extfpmd=extfpmd)
+&     option=1)
    else
      ABI_MALLOC(tauwfg,(2,dtset%nfft))
      ABI_MALLOC(tauwfr,(dtset%nfft,dtset%nspden))
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &     npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&     option=1,extfpmd=extfpmd)
+&     option=1)
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
      ABI_FREE(tauwfg)
      ABI_FREE(tauwfr)
@@ -1097,6 +1098,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%vxcavg     =vxcavg
  if (ngrvdw>0) results_gs%grvdw(1:3,1:ngrvdw)=grvdw(1:3,1:ngrvdw)
  if (associated(extfpmd)) then
+   if(dtset%extfpmd_prterr==1) then
+     call extfpmd_err(extfpmd,eigen,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,&
+&         dtset%wtk,trim(dtfil%filnam_ds(4))//'_EXTFPMD_ERR')
+   endif
    results_gs%nelect_extfpmd=extfpmd%nelect
    results_gs%extfpmd_eshift=extfpmd%eshift
  end if
