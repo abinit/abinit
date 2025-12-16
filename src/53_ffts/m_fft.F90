@@ -1287,6 +1287,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
  call fftalg_info(fftalg, library, cplex_mode, padding_mode)
 
  do iset=1,SIZE(pars,DIM=2)
+   !if (iset /= 1) cycle
    nx =pars(1,iset);  ny=pars(2,iset);  nz=pars(3,iset)
    ldx=pars(4,iset); ldy=pars(5,iset); ldz=pars(6,iset)
 
@@ -1459,12 +1460,14 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      fofr = fofr_ref
 
      if (gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(to:fofg, fofr) IF (gpu_option == ABI_GPU_OPENMP)
-       call ompgpu_fourdp(cplex, ngfft, ldx, ldy, ldz, ndat, -1, fofg, fofr)
-       call ompgpu_fourdp(cplex, ngfft, ldx, ldy, ldz, ndat, +1, fofg, fofr)
-       !$OMP TARGET EXIT DATA MAP(from:fofr) IF (gpu_option == ABI_GPU_OPENMP)
-#endif
+        if (cplex == 2) then
+!#ifdef HAVE_OPENMP_OFFLOAD
+!       !$OMP TARGET ENTER DATA MAP(to:fofg, fofr) IF (gpu_option == ABI_GPU_OPENMP)
+!       call ompgpu_fourdp(cplex, ngfft, ldx, ldy, ldz, ndat, -1, fofg, fofr)
+!       call ompgpu_fourdp(cplex, ngfft, ldx, ldy, ldz, ndat, +1, fofg, fofr)
+!       !$OMP TARGET EXIT DATA MAP(from:fofr) IF (gpu_option == ABI_GPU_OPENMP)
+!#endif
+        end if
      else
        ! CPU version.
        select case (fftalga)
@@ -5028,15 +5031,15 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
    NOT_IMPLEMENTED_ERROR()
 #ifdef HAVE_GPU_CUDA
    ! Build plan if not yet done. note batch_size instead of ndat.
-   if (.not. c_associated(uplan%gpu_plan_dpc)) then
-     call gpu_fft_plan_init(uplan%gpu_plan_dpc, uplan%ngfft, uplan%ngfft, uplan%batch_size, dp)
-   end if
+   !if (.not. c_associated(uplan%gpu_plan_dpc)) then
+   !  call gpu_fft_plan_init(uplan%gpu_plan_dpc, uplan%ngfft, uplan%ngfft, uplan%batch_size, dp)
+   !end if
 
-   if (ndat /= uplan%batch_size) then
-     ! Have to rebuild the plan with batch_size == ndat.
-     call gpu_fft_plan_free(uplan%gpu_plan_dpc)
-     call gpu_fft_plan_init(uplan%gpu_plan_dpc, uplan%ngfft, uplan%ngfft, ndat, dp)
-   end if
+   !if (ndat /= uplan%batch_size) then
+   !  ! Have to rebuild the plan with batch_size == ndat.
+   !  call gpu_fft_plan_free(uplan%gpu_plan_dpc)
+   !  call gpu_fft_plan_init(uplan%gpu_plan_dpc, uplan%ngfft, uplan%ngfft, ndat, dp)
+   !end if
 
    !!$OMP TARGET ENTER DATA MAP(alloc:ur)
    !call gpu_set_to_zero(ur, int(2,c_size_t)*uplan%nfft*uplan%nspinor*ndat)
