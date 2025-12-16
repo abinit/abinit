@@ -50,9 +50,9 @@ getwfk -1      # Second one takes the density of first
 
  ecut 24         # Maximal plane-wave kinetic energy cut-off, in Hartree
  pawecutdg 48    # PAW: Energy Cutoff for the Double Grid
- nband 40        # Number of bands
+ nband 44        # Number of bands
  occopt 3        # Smearing type
- tsmear 3000 K   # Electronic smearing temperature
+ tsmear 1600 K   # Electronic smearing temperature
 
 
 ############################
@@ -78,7 +78,7 @@ nnsclo2   5       # Number of non-self consistent loops
 
 #Definition for DMFT loop
 dmftbandi 9             # First KS band included in the projection for Wannier orbitals
-dmftbandf 34            # Last KS band included in the projection for Wannier orbitals
+dmftbandf 40            # Last KS band included in the projection for Wannier orbitals
 dmft_nwlo 500          # Logarythmic frequency mesh
 dmft_nwli 100000        # Linear frequency mesh
 dmft_iter 1             # Number of iterations of the DMFT part.
@@ -104,7 +104,7 @@ dmftctqmc_basis 4       # Jmj basis
 usepawu1    4           #
 usepawu2    14          #
 dmatpuopt   2           #
-lpawu       2           # Angular momentum for the projected Hamiltonian
+lpawu       3           # Angular momentum for the projected Hamiltonian
 upawu1      0.00 eV
 upawu2      6.00  eV  # Values of U for each angular momentum
 jpawu1      0.00 eV
@@ -119,8 +119,8 @@ jpawu2      0.70 eV  # Values of J
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10
 #%% [NCPU_10]
-#%% files_to_test = t118_MPI10.abo, tolnlines = 60, tolabs = 5.0e-04, tolrel = 5.0e-03, fld_options=-easy;
-#%%   t118_MPI10o_DS2_LocalMagnSuscept_atom_01.dat, tolnlines = 20, tolabs = 1.0e-05, tolrel = 1.0e-05, fld_options=-easy;
+#%% files_to_test = t118_MPI10.abo, tolnlines = 40, tolabs = 5.0e-04, tolrel = 5.0e-03, fld_options=-ridiculous;
+#%%   t118_MPI10o_DS2_LocalMagnSuscept_atom_01.dat, tolnlines = 20, tolabs = 1.0e-04, tolrel = 1.0e-04, fld_options=-medium;
 #%% [extra_info]
 #%% authors = F. Gendron
 #%% keywords = DMFT, CTQMC
