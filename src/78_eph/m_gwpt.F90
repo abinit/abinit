@@ -1824,6 +1824,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  ! DEBUG
                  !if (qq_is_gamma .and. im_kq <= 10  .and. in_k <= 10 .and. ipp_bz == 1 .and. ib_sum == 1 .and. my_rank == master) then
                  !if (qq_is_gamma .and. ipp_bz == 1 .and. sum(kk**2) < tol14 .and. my_rank == master) then
+                 !if (qq_is_gamma .and. pp_is_gamma) then
                  !  ! kk is gamma
                  !  !print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'im_kq', 'in_k', 'ipp_bz', 'ib_sum', 'ipc'
                  !  !print '(I7, I7, I7, I7, I7, I7)', my_is,  im_kq,  in_k,  ipp_bz,  ib_sum,  ipc
