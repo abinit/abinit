@@ -376,7 +376,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
  extfpmd_pawsph=.false.
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
-     extfpmd%eshift=zero
+     extfpmd%eshift_paw=zero
      if(extfpmd%pawsph) then
        extfpmd_pawsph=.true.
        extfpmd_rho=extfpmd%nelect/ucvol
@@ -468,7 +468,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
      rho1=rcpaw%val(iatom)%rho1
      trho1=rcpaw%val(iatom)%trho1
      if(usenhat==1) nhat1=rcpaw%val(iatom)%nhat1
-     compch_sph=rcpaw%val(iatom)%compch_sph
+     if(opt_compch==1) compch_sph=compch_sph+rcpaw%val(iatom)%compch_sph
    else
      call pawdensities(compch_sph,cplex,iatom_tot,lmselect_cur,paw_an(iatom)%lmselect,lm_size,&
 &     nhat1,nspden,nzlmopt,opt_compch,1-usenhat,-1,1,pawang,pawprtvol,pawrad(itypat),&
@@ -588,7 +588,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
        do ispden=1,nspden
          ff(1:mesh_size)=paw_an(iatom)%vxc1(1:mesh_size,1,ispden)*sqrt(four_pi)*pawrad(itypat)%rad(1:mesh_size)**2
          call simp_gen(eshift,ff,pawrad(itypat))
-         extfpmd%eshift=extfpmd%eshift+eshift/ucvol/nspden
+         extfpmd%eshift_paw=extfpmd%eshift_paw+eshift/ucvol/nspden
        enddo
        ABI_FREE(ff)
      endif
@@ -665,7 +665,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
        do ispden=1,nspden
          ff(1:mesh_size)=paw_an(iatom)%vxct1(1:mesh_size,1,ispden)*sqrt(four_pi)*pawrad(itypat)%rad(1:mesh_size)**2
          call simp_gen(eshift,ff,pawrad(itypat))
-         extfpmd%eshift=extfpmd%eshift-eshift/ucvol/nspden
+         extfpmd%eshift_paw=extfpmd%eshift_paw-eshift/ucvol/nspden
        enddo
        ABI_FREE(ff)
      endif
@@ -836,8 +836,8 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
        ff(1:mesh_size)=(pawtab(itypat)%vhnzc(1:mesh_size)-pawtab(itypat)%vhtnzc(1:mesh_size))*&
 &                      four_pi*pawrad(itypat)%rad(1:mesh_size)**2
        call simp_gen(eshift,ff,pawrad(itypat))
-       ehpw=eshift*extfpmd_rho
-       extfpmd%eshift=extfpmd%eshift+eshift/ucvol
+       ehpw=ehpw+eshift*extfpmd_rho
+       extfpmd%eshift_paw=extfpmd%eshift_paw+eshift/ucvol
        rho(1:mesh_size)=extfpmd_rho*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
        call poisson(rho,0,pawrad(itypat),vh)
        do il=2,mesh_size
@@ -872,7 +872,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
          call pawrad_deducer0(vh,mesh_size,pawrad(itypat))
          vh(1:mesh_size)=vh(1:mesh_size)*four_pi*pawrad(itypat)%rad(1:mesh_size)**2
          call simp_gen(eshift,vh,pawrad(itypat))
-         extfpmd%eshift=extfpmd%eshift+eshift/ucvol/nspden
+         extfpmd%eshift_paw=extfpmd%eshift_paw+eshift/ucvol/nspden
        enddo
        ABI_FREE(vh)
        ABI_FREE(ff)
@@ -1241,7 +1241,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
      call timab(48,2,tsec)
    end if
    if(extfpmd_pawsph) then
-     call xmpi_sum(extfpmd%eshift,my_comm_atom,ierr)
+     call xmpi_sum(extfpmd%eshift_paw,my_comm_atom,ierr)
    endif
  end if
 
@@ -2574,6 +2574,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect_cur(:)
  real(dp), allocatable :: nval(:),nval_tmp(:)
+ real(dp), allocatable :: tnval(:),tnval_tmp(:)
 
 !******************************************************************************************
 
@@ -2603,10 +2604,14 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
    ABI_MALLOC(nval,(mesh_size))
    ABI_MALLOC(nval_tmp,(mesh_size))
    nval=zero
+   ABI_MALLOC(tnval,(mesh_size))
+   ABI_MALLOC(tnval_tmp,(mesh_size))
+   tnval=zero
    do iat=1,my_natom
      iatom=iat;if (paral_atom) iatom=my_atmtab(iat)
      if(dtset%typat(iatom)==itypat) then ! Average over atoms of same typat
        nval_tmp=zero
+       tnval_tmp=zero
        mesh_size=pawtab(itypat)%mesh_size
        lm_size=pawtab(itypat)%lcut_size**2
        ABI_MALLOC(lmselect_cur,(lm_size))
@@ -2621,18 +2626,25 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
        do ispden=1,dtset%nspden
          nval_tmp(1:pawtab(itypat)%mesh_size)=nval_tmp(1:pawtab(itypat)%mesh_size)+rcpaw%val(iat)%rho1(1:pawtab(itypat)%mesh_size,1,ispden)*&
 &              sqrt(four*pi)*pawrad(itypat)%rad(1:pawtab(itypat)%mesh_size)**2
+         tnval_tmp(1:pawtab(itypat)%mesh_size)=tnval_tmp(1:pawtab(itypat)%mesh_size)+rcpaw%val(iat)%trho1(1:pawtab(itypat)%mesh_size,1,ispden)*&
+&              sqrt(four*pi)*pawrad(itypat)%rad(1:pawtab(itypat)%mesh_size)**2
        end do
        ABI_FREE(lmselect_cur)
        nval=nval+nval_tmp
+       tnval=tnval+tnval_tmp
      endif
    enddo
    ABI_FREE(nval_tmp)
+   ABI_FREE(tnval_tmp)
    ! mpi reduction
    if(paral_atom) then 
      call xmpi_sum(nval,my_comm_atom,ierr)
      call xmpi_bcast(nval,0,my_comm_atom,ierr)
+     call xmpi_sum(tnval,my_comm_atom,ierr)
+     call xmpi_bcast(tnval,0,my_comm_atom,ierr)
    endif
    nval=nval/rcpaw%atm(itypat)%mult ! Average over atoms of same typat
+   tnval=tnval/rcpaw%atm(itypat)%mult ! Average over atoms of same typat
    if(rcpaw%atm(itypat)%mode(1,1)==orb_relaxed_core) then ! Relax the core
      write(std_out,*) 'RCPAW: core relaxation for typat',itypat,psps%ziontypat(itypat)
      if(rcpaw%istep>=rcpaw%updatepaw(1).and.rcpaw%istep<=rcpaw%updatepaw(2)) then
@@ -2645,13 +2657,14 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
        write(std_out,*) 'RCPAW: freezing tnc at istep = ',rcpaw%istep
      endif
      call atompaw_solve(rcpaw%atp(itypat),pawrad(itypat),pawtab(itypat),&
-& nval,psps%mqgrid_vl,psps%qgrid_vl,psps%epsatm(itypat),psps%vlspl(:,:,itypat),&
+& nval,tnval,psps%mqgrid_vl,psps%qgrid_vl,psps%epsatm(itypat),psps%vlspl(:,:,itypat),&
 &          psps%ziontypat(itypat),&
 &(rcpaw%istep>=rcpaw%updatepaw(1).and.rcpaw%istep<=rcpaw%updatepaw(2)),&
 &((rcpaw%istep<=rcpaw%updatetnc.or.rcpaw%updatetnc==0).and.rcpaw%atm(itypat)%zcore_orig>0),&
 &          rcpaw%atm(itypat))
    endif
    ABI_FREE(nval)
+   ABI_FREE(tnval)
  enddo
 
  ! Updae PAW transform related quantities

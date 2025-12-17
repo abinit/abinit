@@ -767,11 +767,14 @@ contains
  intarr(1,:)=dtsets(:)%rcpaw_updatetnc
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_updatetnc','INT',0)
 
- intarr(1,:)=dtsets(:)%rcpaw_orbshift
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_orbshift','INT',0)
+ intarr(1,:)=dtsets(:)%rcpaw_elin
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_elin','INT',0)
 
- intarr(1,:)=dtsets(:)%rcpaw_potshift
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_potshift','INT',0)
+ intarr(1,:)=dtsets(:)%rcpaw_tpaw
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_tpaw','INT',0)
+
+ intarr(1,:)=dtsets(:)%rcpaw_vhtnzc
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_vhtnzc','INT',0)
 
  dprarr(1,:)=dtsets(:)%rcpaw_tolnc
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_tolnc','DPR',0)
