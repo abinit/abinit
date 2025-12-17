@@ -70,6 +70,7 @@ program fftprof
  use m_errors
  use m_abicore
  use m_dfti
+ use m_abi_linalg
 #ifdef HAVE_GPU_CUDA
  use m_gpu_toolbox
  use m_manage_cuda
@@ -93,9 +94,9 @@ program fftprof
 
 !Arguments -----------------------------------
 !scalars
- integer,parameter :: MAX_NFFTALGS = 50, MAX_NSYM = 48
- integer,parameter :: paral_kgb0 = 0, me_fft0 = 0, nproc_fft1 = 1, master = 0
- integer :: ii,fftcache,it,cplex,ntests,option_fourwf,osc_npw
+ integer,parameter :: MAX_NFFTALGS = 50, MAX_NSYM = 48, wfoptalg = 4
+ integer,parameter :: paral_kgb0 = 0, me_fft0 = 0, nproc_fft1 = 1, master = 0, np_slk1 = 1, use_slk0 = 0
+ integer :: ii,fftcache,it,cplex,ntests,option_fourwf,osc_npw, linalg_max_size
  integer :: map2sphere,use_padfft,isign,nthreads,comm,nprocs,my_rank
  integer :: iset,iall,inplace,nsets,avail,ith,idx,ut_nfft,ut_mgfft
  integer :: nfftalgs,alg,fftalg,fftalga,fftalgc,nfailed,ierr,paral_kgb,abimem_level
@@ -240,6 +241,11 @@ program fftprof
    call gpu_linalg_init()
  end if
 #endif
+
+ ! linalg initialisation (required by subdiago)
+ linalg_max_size = 1
+ call abi_linalg_init(linalg_max_size, RUNL_GSTATE, wfoptalg, paral_kgb0,&
+                      init_gpu_flavor, use_slk0, np_slk1, xmpi_comm_self)
 
  if (do_mpi_utests) then
    ! Execute unit tests for MPI FFTs and terminate execution.
@@ -507,6 +513,8 @@ program fftprof
  call fftprofs_free(Ftprof)
  ABI_FREE(Ftprof)
  call destroy_mpi_enreg(MPI_enreg)
+
+ call abi_linalg_finalize(init_gpu_flavor)
 
 #if defined HAVE_GPU_CUDA
  if (init_gpu_flavor /= ABI_GPU_DISABLED) then
