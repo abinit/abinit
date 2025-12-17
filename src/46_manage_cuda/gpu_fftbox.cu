@@ -99,11 +99,11 @@ gpu_fft_plan_free(void *void_ptr)
 extern "C" void
 gpu_stream_free(void *void_ptr)
 {
-  cudaStream_t *stream =  (cudaStreamt *) void_ptr;
+  cudaStream_t *stream =  (cudaStream_t *) void_ptr;
   //printf("In gpu_stream_free. About to free GPU stream: %d @ %p\n", *stream, stream);
 
   if (stream) {
-    CHECK_CUDA_ERROR(cudaStreamDestroy(stream);
+    CHECK_CUDA_ERROR(cudaStreamDestroy(*stream));
     free(stream);
   }
 }
