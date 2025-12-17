@@ -548,6 +548,10 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%cprj_update_lvl
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'cprj_update_lvl','INT',0)
 
+ intarr(1,:)=dtsets(:)%cwfs_wouth
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'cwfs_wouth','INT',0)
+
+
 !###########################################################
 !### 03. Print all the input variables (D)
 !##

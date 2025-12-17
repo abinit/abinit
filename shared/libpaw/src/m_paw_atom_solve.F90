@@ -530,6 +530,7 @@ END  TYPE splinesolvinfo
   integer :: ixc
   integer :: xclevel
   integer :: npsc,nppc,npdc,npfc,npgc
+  integer :: vhtnzc_mode, tpaw_mode, elin_mode
   real(dp) :: electrons
   real(dp) :: pot_ref
   real(dp), allocatable :: pot_refo(:)
@@ -540,8 +541,6 @@ END  TYPE splinesolvinfo
   TYPE(Pseudoinfo) :: PAW
   type(splinesolvinfo) :: spline
   logical :: has_to_print
-  real(dp), allocatable :: eshift(:) 
-  integer :: potshift,orbshift
  end type atompaw_type
 !!***
 
@@ -582,7 +581,7 @@ CONTAINS !===========================================================
 !! Inspired from atompaw program
 
 subroutine atompaw_solve(atp,pawrad,pawtab,&
-  & nval,mqgrid_vl,qgrid_vl,epsatm,vlspl,&
+  & nval,tnval,mqgrid_vl,qgrid_vl,epsatm,vlspl,&
 & zion,update_paw,update_tnc,atm)
 
 ! TODO : vtau,dirac
@@ -599,23 +598,21 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  type(pawtab_type),intent(inout) :: pawtab
  type(atomorb_type), intent(inout) :: atm
  !arrays
- real(dp), intent(in) :: nval(:)
+ real(dp), intent(in) :: nval(:),tnval(:)
  real(dp), intent(in) :: qgrid_vl(mqgrid_vl)
  real(dp),intent(out) :: vlspl(mqgrid_vl,2)
 !Local variables-------------------------------
 !scalars
- integer :: io,ir,icor,ii,jj
- logical :: success
+ integer :: io,ir,icor,io2
+ logical :: success,paw_proj
  character(len=500) :: msg
- real(dp) :: insph,norm,shift,eshift,temp
- real(dp) :: yp1,ypn,ekin,delta_zcore
+ real(dp) :: insph,norm,potshift,ovl
+ real(dp) :: yp1,ypn,ekin,delta_zcore,int_pot
 !arrays
  real(dp),ALLOCATABLE:: coredens(:),tcoredens(:),vhnzc_tmp(:)
- real(dp),ALLOCATABLE:: ff(:),eshift_orig(:)
+ real(dp),ALLOCATABLE:: ff(:)
  type(pawrad_type) :: radmesh,vloc_mesh
  real(dp) , allocatable :: nhatc(:),vhatc(:)
- real(dp) , allocatable :: pot_orig(:),x1(:),x2(:),f1(:),f2(:)
- logical,allocatable :: converged(:)
  
 ! *************************************************************************
 
@@ -623,10 +620,16 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
  LIBPAW_ALLOCATE(coredens,(size(atp%Orbit%coreden)))
  atp%Orbit%valeden=zero
  atp%PAW%den=zero
+ atp%PAW%tden=zero
  do io=1,pawtab%mesh_size
    atp%PAW%den(io)=nval(io)
    atp%Orbit%valeden(io)=nval(io)
+   atp%PAW%tden(io)=tnval(io)
  enddo
+ if(any(atp%PAW%tden<zero)) then
+   write(std_out,*) 'atompaw_solve : tden is negative for some r ! Smoothening den instead'
+   call smoothpower(atp%Grid,2,atp%PAW%den,atp%PAW%tden,atp%PAW)
+ endif
  atp%Orbit%den=atp%Orbit%valeden+atp%Orbit%coreden
  coredens=atp%Orbit%coreden
  delta_zcore=zero
@@ -744,125 +747,65 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
    LIBPAW_DEALLOCATE(tcoredens)
  endif
 
- ! Update PAW
- if(update_paw) then
+ ! Update PAW stuff
+ if(update_paw.or.atp%vhtnzc_mode==2) then
    ! Compute potential shift
-   if(atp%potshift==0) then
-     call simp_gen(shift,atp%Pot%rv(1:pawtab%mesh_size)*pawrad%rad(1:pawtab%mesh_size)*pawtab%shapefunc(1:pawtab%mesh_size,1),pawrad)
-   elseif(atp%potshift==1) then
-     call simp_gen(shift,atp%Pot%rv(1:pawrad%mesh_size)*pawrad%rad(1:pawrad%mesh_size)*3/(pawrad%rad(pawtab%mesh_size)**3),pawrad)
+   if(atp%elin_mode==1) then
+     call simp_gen(int_pot,atp%Pot%rv(1:pawtab%mesh_size)*pawrad%rad(1:pawtab%mesh_size)*pawtab%shapefunc(1:pawtab%mesh_size,1),pawrad)
+     potshift=int_pot-atp%pot_ref
+   else
+     LIBPAW_ERROR('Not ready yet')
+     potshift=atm%eigshift
    endif
-   shift=shift-atp%pot_ref
-  do io=1,atp%Grid%n
-    atp%Pot%rvh(io)=atp%Pot%rvh(io)-shift*atp%Grid%r(io)
-    atp%Pot%rv(io)=atp%Pot%rv(io)-shift*atp%Grid%r(io)
-  enddo
-  atp%Pot%v0=atp%Pot%v0-shift
-  do io=1,atp%Orbit%norbit
-    if(.not.atp%Orbit%iscore(io).and.atp%Orbit%issemicore(io)) then
-      atp%Orbit%eig(io)=atp%Orbit%eig(io)-shift
-    endif
-  enddo
-  if(.not.allocated(atp%eshift)) LIBPAW_ALLOCATE(atp%eshift,(pawtab%basis_size))
-  atp%eshift=zero
-  if(atp%orbshift==0) then
-    call setbasis(atp%Grid,atp%Pot,atp%Orbit,atp%PAW,atp)  
-  else 
-    LIBPAW_ALLOCATE(ff,(pawtab%mesh_size))
-    ff(2:pawtab%mesh_size)=atp%Pot%rv(2:pawtab%mesh_size)/atp%grid%r(2:pawtab%mesh_size)
-    call extrapolate(ff)
-    LIBPAW_ALLOCATE(pot_orig,(pawtab%basis_size))
-    pot_orig=atp%pot_refo
-    do io=1,pawtab%basis_size
-      call simp_gen(eshift,ff(1:pawtab%mesh_size)*(pawtab%phi(1:pawtab%mesh_size,io))**2,pawrad)
-      atp%eshift(io)=eshift-atp%pot_refo(io)
-      atp%pot_refo(io)=eshift
-      call simp_gen(eshift,(pawtab%phi(1:pawtab%mesh_size,io))**2,pawrad)
-      atp%eshift(io)=atp%eshift(io)/eshift
-      pot_orig(io)=pot_orig(io)/eshift
-    enddo
-    ! Compute new PAW transform
-    call setbasis(atp%Grid,atp%Pot,atp%Orbit,atp%PAW,atp)
-    if(atp%orbshift==2) then
-      LIBPAW_ALLOCATE(x1,(pawtab%basis_size))
-      LIBPAW_ALLOCATE(x2,(pawtab%basis_size))
-      LIBPAW_ALLOCATE(f1,(pawtab%basis_size))
-      LIBPAW_ALLOCATE(f2,(pawtab%basis_size))
-      LIBPAW_ALLOCATE(eshift_orig,(pawtab%basis_size))
-      LIBPAW_ALLOCATE(converged,(pawtab%basis_size))
-      converged=.false.
-      eshift_orig=atp%eshift
-      do jj=1,6
-        do io=1,pawtab%basis_size
-          x2(io)=zero
-          f2(io)=eshift_orig(io)
-          x1(io)=eshift_orig(io)
-        enddo
-        do io=1,pawtab%basis_size
-            if(.not.converged(io)) then
-              atp%eshift(io)=eshift_orig(io)
-            endif
-        enddo
-        call setbasis(atp%Grid,atp%Pot,atp%Orbit,atp%PAW,atp)
-        do io=1,pawtab%basis_size
-          call simp_gen(temp,ff(1:pawtab%mesh_size)*(atp%PAW%phi(1:pawtab%mesh_size,io))**2,pawrad)
-          call simp_gen(eshift,(atp%PAW%phi(1:pawtab%mesh_size,io))**2,pawrad)
-          f1(io)=temp/eshift-pot_orig(io)-eshift_orig(io)
-        enddo
-        call setbasis(atp%Grid,atp%Pot,atp%Orbit,atp%PAW,atp)
-        do io=1,pawtab%basis_size
-          if(abs(f1(io))<tol2) converged(io)=.true.
-        enddo
-        outer : do ii=1,200
-           do io=1,pawtab%basis_size
-            if(.not.converged(io)) then
-              atp%eshift(io)=atp%eshift(io)-f1(io)*(x1(io)-x2(io))/(f1(io)-f2(io))/2.0_dp**jj
-              call simp_gen(temp,ff(1:pawtab%mesh_size)*(atp%PAW%phi(1:pawtab%mesh_size,io))**2,pawrad)
-              call simp_gen(eshift,(atp%PAW%phi(1:pawtab%mesh_size,io))**2,pawrad)
-              f2(io)=f1(io)
-              x2(io)=x1(io)
-              x1(io)=atp%eshift(io)
-              f1(io)=temp/eshift-pot_orig(io)-atp%eshift(io)
-              if(abs(f1(io))>five*abs(f2(io))) exit outer
-              if(abs(f1(io))<tol2) converged(io)=.true.
-            endif
-           enddo
-          call setbasis(atp%Grid,atp%Pot,atp%Orbit,atp%PAW,atp)
-        enddo outer
-        if(all(converged)) exit
-      enddo
-      if(any(.not.converged)) then
-        LIBPAW_ERROR('SC ORBITAL SHIFT DID NOT CONVERGED')
-      endif
-      LIBPAW_DEALLOCATE(x1)
-      LIBPAW_DEALLOCATE(x2)
-      LIBPAW_DEALLOCATE(f1)
-      LIBPAW_DEALLOCATE(f2)
-      LIBPAW_DEALLOCATE(converged)
-      LIBPAW_DEALLOCATE(eshift_orig)
-    endif
-   LIBPAW_DEALLOCATE(ff)
-   LIBPAW_DEALLOCATE(pot_orig)
- endif
+   do io=1,atp%Grid%n
+     atp%Pot%rvh(io)=atp%Pot%rvh(io)-potshift*atp%Grid%r(io)
+     atp%Pot%rv(io)=atp%Pot%rv(io)-potshift*atp%Grid%r(io)
+   enddo
+   atp%Pot%v0=atp%Pot%v0-potshift
+   call setbasis(atp%Grid,atp%Pot,atp%Orbit,atp%PAW,atp,potshift)  
    call SetPAWOptions2(atp,success)
-   do io=1,atp%Orbit%norbit
-     if(.not.atp%Orbit%iscore(io).and.atp%Orbit%issemicore(io)) then
-       atp%Orbit%eig(io)=atp%Orbit%eig(io)+shift
-     endif
-   enddo
    ! Update PAW transform
-   do io=1,pawtab%basis_size
-     do ir=1,pawtab%mesh_size
-       pawtab%phi(ir,io)=atp%PAW%ophi(ir,io)
-       pawtab%tphi(ir,io)=atp%PAW%otphi(ir,io)
-    enddo
-   enddo
-   ! Update Kij
-   if(.not.allocated(pawtab%kij)) then
-     LIBPAW_ALLOCATE(pawtab%kij,(pawtab%lmn2_size))
+   if(update_paw) then
+     if(atp%tpaw_mode>1) then
+       do io=1,pawtab%basis_size
+         paw_proj=.true.
+         do io2=1,atp%Orbit%norbit
+           if(atp%PAW%valencemap(io2)==io) then
+             if(atp%orbit%issemicore(io2).or.atp%tpaw_mode==3) then
+               paw_proj=.false.
+             endif
+           endif 
+         enddo
+         if(paw_proj) then
+           atp%PAW%ophi(:,io)=zero
+           atp%PAW%otphi(:,io)=zero
+           do ir=1,pawtab%mesh_size
+             atp%PAW%ophi(ir,io)=pawtab%phi(ir,io)
+             atp%PAW%otphi(ir,io)=pawtab%tphi(ir,io)
+           enddo
+           do io2=1,atp%Orbit%norbit
+             if(atp%Orbit%iscore(io2).and.atp%orbit%l(io2)==atp%PAW%l(io)) then
+               ovl=overlap(atp%grid,atp%PAW%ophi(1:atp%PAW%irc-5,io),atp%orbit%wfn(1:atp%PAW%irc-5,io2),1,atp%PAW%irc-5)
+               atp%PAW%ophi(1:atp%PAW%irc-5,io)=atp%PAW%ophi(1:atp%PAW%irc-5,io)-&
+&                                               ovl*atp%orbit%wfn(1:atp%PAW%irc-5,io2)
+             endif
+           enddo
+         endif
+       enddo
+     endif
+     do io=1,pawtab%basis_size
+       do ir=1,pawtab%mesh_size
+         pawtab%phi(ir,io)=atp%PAW%ophi(ir,io)
+         pawtab%tphi(ir,io)=atp%PAW%otphi(ir,io)
+      enddo
+     enddo
+     ! Update Kij
+     if(.not.allocated(pawtab%kij)) then
+       LIBPAW_ALLOCATE(pawtab%kij,(pawtab%lmn2_size))
+     endif
+     call calc_kij(atp%PAW,atp%Grid,pawtab%kij,pawtab,&
+&     atp%scalarrelativistic,atp%needvtau)
    endif
-   call calc_kij(atp%PAW,atp%Grid,pawtab%kij,pawtab,&
-& atp%scalarrelativistic,atp%needvtau)
  endif
 
  ! Update vhtnzc, zion and epsatm
@@ -872,24 +815,33 @@ subroutine atompaw_solve(atp,pawrad,pawtab,&
    delta_zcore=atm%zcore-atm%zcore_orig
    write(msg,*) 'atompaw_solve: delta_zcore',delta_zcore
    call wrtout(std_out,msg,'COLL')
-   ! Compute nhatc=shapefunction*delta_zcore
    call pawrad_init(vloc_mesh,mesh_size=size(pawtab%vhtnzc),mesh_type=pawrad%mesh_type,&
 &   rstep=pawrad%rstep,lstep=pawrad%lstep)
-   LIBPAW_ALLOCATE(nhatc,(size(pawtab%vhtnzc)))
-   nhatc=zero
-   do ir=1,size(pawtab%shapefunc(:,1))
-     nhatc(ir)=delta_zcore*pawtab%shapefunc(ir,1)*vloc_mesh%rad(ir)**2
-   enddo
-   LIBPAW_ALLOCATE(vhatc,(size(pawtab%vhtnzc)))
-   call poisson(nhatc,0,vloc_mesh,vhatc)
-   do ir=2,vloc_mesh%mesh_size
-     vhatc(ir)=vhatc(ir)/vloc_mesh%rad(ir)
-   enddo
-   call pawrad_deducer0(vhatc,vloc_mesh%mesh_size,vloc_mesh)
-   LIBPAW_DEALLOCATE(nhatc)
-   ! Add it to original vhtnzc
-   pawtab%vhtnzc=atm%vhtnzc_orig+vhatc
-   LIBPAW_DEALLOCATE(vhatc)
+   if(atp%vhtnzc_mode==2) then
+     call FindVlocfromVeff(atp%Grid,atp%PAW,atp,potshift)
+     if(pawtab%usexcnhat==1) then
+       pawtab%vhtnzc(1:size(pawtab%vhtnzc))=half*atp%PAW%abinitvloc(1:size(pawtab%vhtnzc))
+     else
+       pawtab%vhtnzc(1:size(pawtab%vhtnzc))=half*atp%PAW%abinitnohat(1:size(pawtab%vhtnzc))
+     endif
+   elseif(atp%vhtnzc_mode==1) then
+     ! Compute nhatc=shapefunction*delta_zcore
+     LIBPAW_ALLOCATE(nhatc,(size(pawtab%vhtnzc)))
+     nhatc=zero
+     do ir=1,size(pawtab%shapefunc(:,1))
+       nhatc(ir)=delta_zcore*pawtab%shapefunc(ir,1)*vloc_mesh%rad(ir)**2
+     enddo
+     LIBPAW_ALLOCATE(vhatc,(size(pawtab%vhtnzc)))
+     call poisson(nhatc,0,vloc_mesh,vhatc)
+     do ir=2,vloc_mesh%mesh_size
+       vhatc(ir)=vhatc(ir)/vloc_mesh%rad(ir)
+     enddo
+     call pawrad_deducer0(vhatc,vloc_mesh%mesh_size,vloc_mesh)
+     LIBPAW_DEALLOCATE(nhatc)
+     ! Add it to original vhtnzc
+     pawtab%vhtnzc=atm%vhtnzc_orig+vhatc
+     LIBPAW_DEALLOCATE(vhatc)
+   endif
    call pawpsp_lo(epsatm,mqgrid_vl,qgrid_vl,vlspl(:,1),&
 &                     vloc_mesh,pawtab%vhtnzc,yp1,ypn,&
 &                     zion)
@@ -930,12 +882,12 @@ end subroutine atompaw_solve
 !! SOURCE
 !! Inspired from SCFatom_init in atompaw
 
-subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,orbshift,potshift)
+subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,elin_mode,vhtnzc_mode,tpaw_mode)
  ! TODO : BDsolve
  implicit none
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: znucl,potshift,orbshift
+ integer, intent(in) :: znucl,elin_mode,vhtnzc_mode,tpaw_mode
  real(dp), intent(in) :: sctol
  type(pawtab_type), intent(inout) :: pawtab
  type(pawrad_type), intent(in) :: pawrad
@@ -956,7 +908,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,orbshift,potshift)
 
 ! *************************************************************************
 
- ! File to read (temporary)
+ ! File to read
  input_file=trim(atm%fname)
  fnln=len(trim(atm%fname))
  fmt_xml=.false.
@@ -984,9 +936,10 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,orbshift,potshift)
  maxexparg=-LOG(machine_precision);  maxexp=EXP(maxexparg)
  has_to_print=.false.
 
- ! Read atp input and initialize (temporary)
- atp%orbshift=orbshift
- atp%potshift=potshift
+ ! Read atp input and initialize
+ atp%elin_mode=elin_mode
+ atp%vhtnzc_mode=vhtnzc_mode
+ atp%tpaw_mode=tpaw_mode
  call input_dataset_read(atp,input_file)
  atp%npsc=0
  atp%nppc=1
@@ -1070,14 +1023,9 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,orbshift,potshift)
  atp%PAW%lmax=atp%lmax
  call InitPAW(atp%PAW,atp%Grid,atp%Orbit)
 
- ! Re-solve (temporary, this will be added to atompaw)
+ ! Re-solve (temporary, this should be added to atompaw)
  call SCFatom(atp,.true.)
- if(atp%potshift==0) then
-   call simp_gen(atp%pot_ref,atp%Pot%rv(1:pawtab%mesh_size)*pawrad%rad(1:pawtab%mesh_size)*pawtab%shapefunc(1:pawtab%mesh_size,1),pawrad)
- elseif(atp%potshift==1) then
-   call simp_gen(atp%pot_ref,atp%Pot%rv(1:pawrad%mesh_size)*pawrad%rad(1:pawrad%mesh_size)*3/(pawrad%rad(pawtab%mesh_size)**3),pawrad)
- endif
- !!!
+ call simp_gen(atp%pot_ref,atp%Pot%rv(1:pawtab%mesh_size)*pawrad%rad(1:pawtab%mesh_size)*pawtab%shapefunc(1:pawtab%mesh_size,1),pawrad)
  write(msg,'(a)') 'atompaw_init: orbital, %out of sphere, core, semicore' 
  call wrtout(std_out,msg,'COLL')
  do io=1,atp%Orbit%norbit
@@ -1088,6 +1036,7 @@ subroutine atompaw_init(pawtab,pawrad,atp,znucl,atm,sctol,orbshift,potshift)
      call wrtout(std_out,msg,'COLL')
  enddo
  !!!
+
  LIBPAW_ALLOCATE(atp%pot_refo,(pawtab%basis_size))
  LIBPAW_ALLOCATE(ff,(pawtab%mesh_size))
  ff(2:pawtab%mesh_size)=atp%Pot%rv(2:pawtab%mesh_size)/atp%grid%r(2:pawtab%mesh_size)
@@ -1216,9 +1165,6 @@ subroutine atompaw_destroy(atp)
  if(allocated(atp%basis_func_rc)) then
    LIBPAW_DEALLOCATE(atp%basis_func_rc)
  endif
- if(allocated(atp%eshift)) then
-   LIBPAW_DEALLOCATE(atp%eshift)
- endif
  if(allocated(atp%pot_refo)) then
    LIBPAW_DEALLOCATE(atp%pot_refo)
  endif
@@ -1294,7 +1240,7 @@ subroutine makebasis_marsman(atp)
  if(ng>0) call marsman_tphi(atp,map,4,ng)
  ! renormalize phis
  do io=1,atp%PAW%nbase
-   atp%PAW%otphi=atp%PAW%tphi
+   atp%PAW%otphi(:,io)=atp%PAW%tphi(:,io)
    atp%PAW%ophi(:,io)=atp%PAW%phi(:,io)*atp%PAW%otphi(atp%PAW%irc,io)/atp%PAW%phi(atp%PAW%irc,io)
    atp%PAW%Kop(1,io)=zero
    atp%PAW%Kop(2:atp%Grid%n,io)=(atp%PAW%eig(io)-atp%Pot%rv(2:atp%Grid%n)/&
@@ -4757,6 +4703,36 @@ END SUBROUTINE DoAndersonMix
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! subroutine shapebes(al,ql,ll,rc)
+!!    Find al and ql parameters for a "Bessel" shape function:
+!!    Shape(r)=al1.jl(ql1.r)+al2.jl(ql2.r)
+!!      such as Shape(r) and 2 derivatives are zero at r=rc
+!!              Intg_0_rc[Shape(r).r^(l+2).dr]=1
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+SUBROUTINE shapebes(al,ql,ll,rc)
+  INTEGER,INTENT(IN) :: ll
+  REAL(dp),INTENT(IN) :: rc
+  REAL(dp),INTENT(OUT) :: al(2),ql(2)
+  INTEGER :: i
+  REAL(dp) :: alpha,beta,det,qr,jbes,jbesp,jbespp,amat(2,2),bb(2)
+  alpha=1.D0;beta=0.D0
+  CALL solvbes(ql,alpha,beta,ll,2)
+  ql(1:2)=ql(1:2)/rc
+  DO i=1,2
+    qr=ql(i)*rc
+    CALL jbessel(jbes,jbesp,jbespp,ll,1,qr)
+    amat(1,i)=jbesp*ql(i)
+    CALL jbessel(jbes,jbesp,jbespp,ll+1,0,qr)
+    amat(2,i)=jbes*rc**(ll+2)/ql(i)  !  Intg_0_rc[jl(qr).r^(l+2).dr]
+  ENDDO
+  bb(1)=0.d0;bb(2)=1.d0
+  det=amat(1,1)*amat(2,2)-amat(1,2)*amat(2,1)
+  al(1)=(amat(2,2)*bb(1)-amat(1,2)*bb(2))/det
+  al(2)=(amat(1,1)*bb(2)-amat(2,1)*bb(1))/det
+END SUBROUTINE shapebes
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!  ddexp
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 FUNCTION ddexp(arg)
@@ -6761,6 +6737,137 @@ END SUBROUTINE initgridwithn
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! SUBROUTINE sethat(Grid,PAW,gaussparam,besselopt)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+SUBROUTINE sethat(Grid,PAW,gaussparam,besselopt)
+  TYPE(GridInfo), INTENT(IN) :: Grid
+  TYPE(PseudoInfo), INTENT(INOUT) :: PAW
+  INTEGER,INTENT(IN), OPTIONAL :: besselopt
+  REAL(dp),INTENT(IN), OPTIONAL :: gaussparam
+  INTEGER :: n,irc,irc_shap,i
+  REAL(dp), POINTER :: r(:)
+  REAL(dp) :: h,con,rc,rc_shap,selfen,d,dd,jbes1,jbes2,qr
+  REAL(dp) :: al(2),ql(2)
+  n=Grid%n
+  h=Grid%h
+  irc=PAW%irc
+  rc=PAW%rc
+  irc_shap=PAW%irc_shap
+  rc_shap=PAW%rc_shap
+  r=>Grid%r
+  PAW%hatden=0
+  PAW%projshape=0
+  PAW%hatshape=0
+  PAW%projshape(1)=1
+  PAW%hatshape(1)=1
+  DO i=2,irc-1
+    PAW%projshape(i)=(SIN(pi*r(i)/rc)/(pi*r(i)/rc))**2
+  ENDDO
+  if(present(gaussparam)) then
+    d=rc_shap/SQRT(LOG(1.d0/gaussparam))
+    PAW%gausslength=d
+    DO i=2,irc
+      PAW%hatshape(i)=EXP(-(r(i)/d)**2)
+    ENDDO
+    PAW%irc_shap=PAW%irc
+    PAW%rc_shap=PAW%rc
+  else if(present(besselopt)) then
+    call shapebes(al,ql,0,rc_shap)
+    DO i=1,irc_shap-1
+      qr=ql(1)*r(i);CALL jbessel(jbes1,d,dd,0,0,qr)
+      qr=ql(2)*r(i);CALL jbessel(jbes2,d,dd,0,0,qr)
+      PAW%hatshape(i)=al(1)*jbes1+al(2)*jbes2
+    ENDDO
+  else
+    DO i=2,irc_shap-1
+      PAW%hatshape(i)=(SIN(pi*r(i)/rc_shap)/(pi*r(i)/rc_shap))**2
+    ENDDO
+  endif
+  PAW%hatden(1:irc)=PAW%hatshape(1:irc)*(r(1:irc)**2)
+  !  normalize
+  if (.not.present(besselopt)) then
+    con=integrator(Grid,PAW%hatden,1,PAW%irc_shap)
+    if(has_to_print) WRITE(STD_OUT,*) ' check hatden normalization', con
+    PAW%hatden=PAW%hatden/con
+  endif
+  CALL atompaw_poisson(Grid,con,PAW%hatden,PAW%hatpot,selfen)
+  if(has_to_print) WRITE(STD_OUT,*) 'Self energy for L=0 hat density  ', selfen
+  if(has_to_print) WRITE(STD_OUT,*) 'hatden charge  ', con
+END SUBROUTINE sethat
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!  SUBROUTINE FindVlocfromVeff(Grid,Orbit,PAW)
+!  Assumes prior call to SUBROUTINE calculate_tvtau
+!  which now fills PAW%tden and PAW%ttau
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+SUBROUTINE FindVlocfromVeff(Grid,PAW,atp,potshift)
+  ! TODO : needvtau,allocates
+  TYPE(GridInfo), INTENT(INOUT) :: Grid
+  type(atompaw_type),intent(inout) :: atp
+  TYPE(PseudoInfo), INTENT(INOUT) :: PAW
+  real(dp),intent(in) :: potshift
+  REAL(dp), POINTER  :: r(:)
+  REAL(dp) :: h,tq,rat,q00,etxc,eexc
+  INTEGER :: n,irc,nbase
+  REAL(dp), allocatable :: d(:),v(:),vxB(:),vxK(:)
+  REAL(dp), allocatable :: t(:),vt(:),vthat(:)
+  CALL FillHat(Grid,PAW,atp%besselshapefunction)
+  !if (Vlocalindex == SETVLOC) then
+  !  write(std_out,*) 'Vloc == VlocCoef*shapefunc  '
+  !  return
+  !endif
+  n=Grid%n;irc=PAW%irc
+  nbase=PAW%nbase
+  h=Grid%h ; r=>Grid%r
+  irc=max(PAW%irc,PAW%irc_shap,PAW%irc_vloc,PAW%irc_core)
+  ! Recalculate den and tau      
+  PAW%valetau=0.d0;PAW%tvaletau=0.d0
+  LIBPAW_ALLOCATE(d,(n))
+  LIBPAW_ALLOCATE(vxB,(n))
+  LIBPAW_ALLOCATE(v,(n))
+  LIBPAW_ALLOCATE(vxK,(n))
+  LIBPAW_ALLOCATE(t,(n))
+  LIBPAW_ALLOCATE(vt,(n))
+  LIBPAW_ALLOCATE(vthat,(n))      
+  d=PAW%den-PAW%tden
+  tq=integrator(Grid,d,1,irc)
+  if(has_to_print) write(std_out,*) ' Delta Qval = ', tq
+  !     Compute VH(tDEN+hatDEN)
+  d=PAW%tden+tq*PAW%hatden
+  call poisson_marc(Grid,q00,d,v,rat)
+  if(has_to_print) write(std_out,*) ' Completed Poisson with q00 = ', q00
+  if(has_to_print) write(std_out,*) ' Completed Poisson with v(n) = ', v(n)
+  !  Compute Blochl exc      
+  d=PAW%tden+PAW%tcore
+  t=PAW%tcoretau+PAW%tvaletau
+  CALL exch(Grid,d,vxB,etxc,eexc,itype=atp%itype,needvtau=atp%Pot%needvtau,&
+&           tau=t,vtau=vt,xc_functionals=atp%xc_functionals)
+  !     Compute Kresse   exc Vxc(tcore+tDEN+hatDEN)
+  d=PAW%tcore+PAW%tden+tq*PAW%hatden
+  t=PAW%tcoretau+PAW%tvaletau
+  CALL exch(Grid,d,vxK,etxc,eexc,itype=atp%itype,needvtau=atp%Pot%needvtau,&
+&           tau=t,vtau=vthat,xc_functionals=atp%xc_functionals)
+  PAW%abinitvloc=zero; PAW%abinitnohat=zero
+  PAW%abinitnohat(2:n)=(PAW%rveff(2:n)-v(2:n)-vxB(2:n))/r(2:n)+potshift
+  call extrapolate(PAW%abinitnohat)
+  PAW%abinitvloc(2:n)=(PAW%rveff(2:n)-v(2:n)-vxK(2:n))/r(2:n)+potshift  
+  call extrapolate(PAW%abinitvloc)
+  ! Reassess poscorenhat      
+  ! check if PAW%tcore+PAW%tden+tq*PAW%hatden is positive      
+  PAW%poscorenhat=.true.
+  LIBPAW_DEALLOCATE(v)
+  LIBPAW_DEALLOCATE(vxB)
+  LIBPAW_DEALLOCATE(vxK)
+  LIBPAW_DEALLOCATE(d)
+  LIBPAW_DEALLOCATE(vt)
+  LIBPAW_DEALLOCATE(vthat)
+END SUBROUTINE FindVlocfromVeff
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!   SUBROUTINE SetPAWOptions2(Grid,Orbit,Pot,success,atp)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SetPAWOptions2(atp,success)
@@ -6797,6 +6904,16 @@ SUBROUTINE SetPAWOptions2(atp,success)
 &      '("Vloc: truncated form - Vps(r)=A.sin(qr)/r for r<rc")')
    endif
  endif
+ !Shape function parameters (from input dataset)
+ if (atp%shapefunc_type==SHAPEFUNC_TYPE_GAUSSIAN) then
+   atp%gaussianshapefunction=.true.
+   CALL sethat(atp%Grid,atp%PAW,gaussparam=atp%shapefunc_gaussian_param)    !Gaussian shape function
+ else if (atp%shapefunc_type==SHAPEFUNC_TYPE_BESSEL) then
+   atp%besselshapefunction=.true.
+   CALL sethat(atp%Grid,atp%PAW,besselopt=0)               ! Bessel shape function
+ else
+   CALL sethat(atp%Grid,atp%PAW)                          ! sinc^2 shape function
+ endif
  !Call the routine computing Vloc - Not mGGA
  IF (.NOT.atp%needvtau) THEN
    IF (Vlocalindex==MTROULLIER.and.Projectorindex/=HFPROJ) THEN
@@ -6807,26 +6924,26 @@ SUBROUTINE SetPAWOptions2(atp,success)
    call makebasis_marsman(atp)
  ENDIF
  !Call the routine computing Vloc - mGGA case
- IF (atp%needvtau) THEN
-    !All compatibility checks in input_dataset_read routine
-    if(has_to_print) WRITE(STD_OUT,*) 'Sequence of dataset construction modified for MGGA'      
-    if(has_to_print) WRITE(STD_OUT,*) ' Not all possibilites tested carefully yet.... '
-    if(has_to_print) WRITE(STD_OUT,*) ' Some possibilites not yet programmed.... '
-    !Calculate PAW%vtau and PAW%tvtau     
-    CALL calculate_tvtau(atp%Grid,atp%PAW,atp%itype)
-    !Set pseudoptentials     
- !   IF (Vlocalindex==MTROULLIER.and.(TRIM(atp%Orbit%exctype)/='HF')) then
- !     if(has_to_print) WRITE(STD_OUT,*) 'TROULLIER PS not available for MGGA '
- !     if(has_to_print) WRITE(STD_OUT,*) ' calling VPSmatch with norm conservation instead '     
- !     CALL VPSmatch(atp%Grid,atp%Pot,atp%PAW,l,e,.true.,atp%scalarrelativistic)
- !   ENDIF         
-    IF (Vlocalindex==VPSMATCHNNC) CALL VPSmatch(atp%Grid,atp%Pot,atp%PAW,l,e,.false.,atp%scalarrelativistic)
-    IF (Vlocalindex==VPSMATCHNC) CALL VPSmatch(atp%Grid,atp%Pot,atp%PAW,l,e,.true.,atp%scalarrelativistic)
-    IF (Vlocalindex==ULTRASOFT) CALL nonncps(atp%Grid,atp%Pot,atp%PAW,l,e,atp%scalarrelativistic)
-    IF (Vlocalindex==BESSEL) CALL besselps(atp%Grid,atp%Pot,atp%PAW)
-    !Calculate projectors
-    call makebasis_marsman(atp)
- ENDIF
+! IF (atp%needvtau) THEN
+!    !All compatibility checks in input_dataset_read routine
+!    if(has_to_print) WRITE(STD_OUT,*) 'Sequence of dataset construction modified for MGGA'      
+!    if(has_to_print) WRITE(STD_OUT,*) ' Not all possibilites tested carefully yet.... '
+!    if(has_to_print) WRITE(STD_OUT,*) ' Some possibilites not yet programmed.... '
+!    !Calculate PAW%vtau and PAW%tvtau     
+!    CALL calculate_tvtau(atp%Grid,atp%PAW,atp%itype)
+!    !Set pseudoptentials     
+! !   IF (Vlocalindex==MTROULLIER.and.(TRIM(atp%Orbit%exctype)/='HF')) then
+! !     if(has_to_print) WRITE(STD_OUT,*) 'TROULLIER PS not available for MGGA '
+! !     if(has_to_print) WRITE(STD_OUT,*) ' calling VPSmatch with norm conservation instead '     
+! !     CALL VPSmatch(atp%Grid,atp%Pot,atp%PAW,l,e,.true.,atp%scalarrelativistic)
+! !   ENDIF         
+!    IF (Vlocalindex==VPSMATCHNNC) CALL VPSmatch(atp%Grid,atp%Pot,atp%PAW,l,e,.false.,atp%scalarrelativistic)
+!    IF (Vlocalindex==VPSMATCHNC) CALL VPSmatch(atp%Grid,atp%Pot,atp%PAW,l,e,.true.,atp%scalarrelativistic)
+!    IF (Vlocalindex==ULTRASOFT) CALL nonncps(atp%Grid,atp%Pot,atp%PAW,l,e,atp%scalarrelativistic)
+!    IF (Vlocalindex==BESSEL) CALL besselps(atp%Grid,atp%Pot,atp%PAW)
+!    !Calculate projectors
+!    call makebasis_marsman(atp)
+! ENDIF
   !Output in summary file
  IF (atp%needvtau) THEN
    if(has_to_print) WRITE(std_out,*) 'Sequence of dataset construction steps modified for mGGA'      
@@ -6970,8 +7087,9 @@ END SUBROUTINE StoreTOCCWFN
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! SUBROUTINE setbasis(Grid,Pot,Orbit,PAW,atp)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE setbasis(Grid,Pot,Orbit,PAW,atp)
+SUBROUTINE setbasis(Grid,Pot,Orbit,PAW,atp,potshift)
  TYPE(GridInfo), INTENT(IN) :: Grid
+ real(dp), intent(in) :: potshift
  TYPE(PotentialInfo), INTENT(INout) :: Pot
  TYPE(OrbitInfo), INTENT(INOUT) :: Orbit
  TYPE(PseudoInfo), intent(inout) :: PAW
@@ -7043,7 +7161,8 @@ SUBROUTINE setbasis(Grid,Pot,Orbit,PAW,atp)
          PAW%l(nbase)=l
          PAW%nodes(nbase)=PAW%np(nbase)-l-1
          if(has_to_print) write(std_out,*) 'l,nbase,node',l,nbase,currentnode
-         PAW%eig(nbase)=Orbit%eig(io)+atp%eshift(nbase)
+         PAW%eig(nbase)=Orbit%eig(io)
+         if(Orbit%issemicore(io)) PAW%eig(nbase)=PAW%eig(nbase)-potshift
          PAW%occ(nbase)=Orbit%occ(io)
          if(Orbit%frozenvalecalculation.and.(.not.Orbit%issemicore(io))) then
            energy=PAW%eig(nbase)
@@ -7068,7 +7187,7 @@ SUBROUTINE setbasis(Grid,Pot,Orbit,PAW,atp)
    generalizedloop: DO
      IF (ibasis_add>atp%nbasis_add) EXIT generalizedloop
      IF (atp%basis_add_l(ibasis_add)/=l) EXIT generalizedloop
-     energy=atp%basis_add_energy(ibasis_add)+atp%eshift(nbase+1)
+     energy=atp%basis_add_energy(ibasis_add)
      IF (energy<0._dp.and.has_to_print) then
        WRITE(STD_OUT,*) 'energy is negative',energy,' -- WARNING WARNING !!!'
      endif
@@ -7581,6 +7700,68 @@ END SUBROUTINE calculate_tvtau
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! 11. Pseudo_sub
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! subroutine hatL
+!!   Calculates density associated with L component
+!!    normalized to unity
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+SUBROUTINE hatL(Grid,PAW,l,dhat,besselshapefunction)
+  TYPE(GridInfo), INTENT(IN) :: Grid
+  TYPE(PseudoInfo), INTENT(IN) :: PAW
+  INTEGER, INTENT(IN) :: l
+  logical, intent(in) :: besselshapefunction
+  REAL(dp), INTENT(OUT) :: dhat(:)
+  INTEGER :: n,irc,i
+  REAL(dp), POINTER :: r(:)
+  REAL(dp), ALLOCATABLE :: den(:),a(:)
+  REAL(dp) :: h,con
+  REAL(dp) :: qr,jbes1,jbes2,dum1,dum2,al(2),ql(2)
+  n=Grid%n
+  h=Grid%h
+  r=>Grid%r
+  irc=PAW%irc
+  LIBPAW_ALLOCATE(den,(n))
+  LIBPAW_ALLOCATE(a,(n))
+  IF (besselshapefunction) THEN
+    CALL shapebes(al,ql,l,PAW%rc_shap)
+    DO i=1,PAW%irc_shap
+      qr=ql(1)*r(i);CALL jbessel(jbes1,dum1,dum2,l,0,qr)
+      qr=ql(2)*r(i);CALL jbessel(jbes2,dum1,dum2,l,0,qr)
+      den(i)=(al(1)*jbes1+al(2)*jbes2)*r(i)**2
+    ENDDO
+    IF (n>PAW%irc_shap) den(PAW%irc_shap+1:n)=0.d0
+  ELSE
+    DO i=1,n
+      den(i)=(r(i)**l)*PAW%hatden(i)
+    ENDDO
+    a(1:n)=den(1:n)*(r(1:n)**l)
+    con=integrator(Grid,a,1,PAW%irc_shap)
+    den=den/con
+  ENDIF
+  dhat=zero
+  dhat(1:n)=den(1:n)
+  LIBPAW_DEALLOCATE(den)
+  LIBPAW_DEALLOCATE(a)
+END SUBROUTINE hatL
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!   SUBROUTINE FillHat(Grid,PAW)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+SUBROUTINE FillHat(Grid,PAW,besselshape)
+  logical,intent(in) :: besselshape
+  TYPE(GridInfo) , INTENT(IN):: Grid
+  TYPE(PseudoInfo), INTENT(INOUT) :: PAW
+  INTEGER :: ll,n,l
+  ll=MAXVAL(PAW%TOCCWFN%l(:)); ll=MAX(ll,PAW%lmax); ll=2*ll
+  n=Grid%n
+  LIBPAW_ALLOCATE(PAW%g,(n,ll+1))
+  DO l=0,ll
+    CALL hatL(Grid,PAW,l,PAW%g(:,l+1),besselshape)
+  ENDDO
+END SUBROUTINE FillHat
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

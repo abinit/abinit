@@ -321,6 +321,7 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,cplex,my_natom,com
    rcpaw%atm(itypat)%vhtnzc_orig=pawtab(itypat)%vhtnzc
    rcpaw%atm(itypat)%mult=mult(itypat)
    rcpaw%atm(itypat)%nspden=dtset%nspden
+   rcpaw%atm(itypat)%eigshift=zero
    if(rcpaw%atm(itypat)%mode(1,1)==orb_relaxed_core) then
      rcpaw%all_atoms_relaxed=.false.
    else
@@ -335,7 +336,7 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,cplex,my_natom,com
      rcpaw%atp(itypat)%electrons=dtset%nelect
      call atompaw_init(pawtab(itypat),pawrad(itypat),rcpaw%atp(itypat),&
 &    int(rcpaw%atm(itypat)%znucl),rcpaw%atm(itypat),dtset%rcpaw_sc(itypat),&
-&    dtset%rcpaw_orbshift,dtset%rcpaw_potshift)
+&    dtset%rcpaw_elin,dtset%rcpaw_vhtnzc,dtset%rcpaw_tpaw)
  enddo
  
  ! Init val
@@ -570,9 +571,10 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
        call xmpi_sum(est_err,my_comm_atom,ierr)
        call xmpi_bcast(est_err,0,my_comm_atom,ierr)
      endif
+     rcpaw%atm(itypat)%eigshift=eigshift/rcpaw%atm(itypat)%mult
      write(std_out,*) 'ESTIMATED ERROR ON CORE EIGS OF TYPAT',itypat,' = ',est_err*27.211, ' eV'
      if(allocated(rcpaw%atm(itypat)%eig)) rcpaw%atm(itypat)%eig=rcpaw%atm(itypat)%eig+eigshift/rcpaw%atm(itypat)%mult ! Average on atoms of same type
-     if(rcpaw%atm(itypat)%nresid_c<rcpaw%tolnc.and.rcpaw%istep>rcpaw%updatepaw(2).and.rcpaw%updatepaw(2)>0)then
+     if(rcpaw%atm(itypat)%nresid_c<rcpaw%tolnc.and.rcpaw%istep>rcpaw%updatepaw(2).and.rcpaw%updatepaw(2)/=0)then
         rcpaw%atm(itypat)%nc_conv=.true.
      endif
    endif
