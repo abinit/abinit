@@ -60,7 +60,7 @@ module m_extfpmd
     logical :: truecg,pawsph
     integer :: bcut,mband,nbcut,nbdbuf,nfftf,nspden,version
     real(dp) :: ebcut,edc_kinetic,e_kinetic,entropy
-    real(dp) :: nelect,eshift,ucvol,el_temp,bandshift
+    real(dp) :: nelect,eshift,ucvol,el_temp,bandshift,eshift_paw
     real(dp) :: nelect_res, nelect_respc
     real(dp),allocatable :: vtrial(:,:)
     real(dp),allocatable :: nelectarr(:,:)
@@ -146,6 +146,7 @@ contains
     ABI_MALLOC(this%bandshiftk,(nkpt*nsppol))
     this%bandshiftk(:)=zero
     this%eshift=extfpmd_eshift
+    this%eshift_paw=zero
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
     this%el_temp=merge(tphysel,tsmear,tphysel>tol8.and.occopt/=3.and.occopt/=9)
     this%pawsph=pawsph
@@ -208,6 +209,7 @@ contains
     this%nelect_respc=zero
     this%bandshift=zero
     this%eshift=zero
+    this%eshift_paw=zero
     this%ucvol=zero
     this%el_temp=zero
     this%pawsph=.false.
@@ -296,7 +298,7 @@ contains
       ! Computes U_0 from the sum of local
       ! potentials (vtrial), averaging over all space.
       ! Simplest and most precise way to evaluate U_0.
-      this%eshift=this%eshift+sum(this%vtrial)/(nfftf*nspden)
+      this%eshift=sum(this%vtrial)/(nfftf*nspden)+this%eshift_paw
     end if
 
     ! Get extended FPMD band energy cutoff
