@@ -34,6 +34,7 @@ MODULE m_forctqmc
  use m_data4entropyDMFT
  use m_errors
  use m_GreenHyb
+ use m_time
 
  use m_crystal, only : crystal_t
  use m_datafordmft, only : compute_levels,hybridization_asymptotic_coefficient
@@ -141,11 +142,14 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  character(len=13) :: tag
  character(len=2)  :: tag_atom
  character(len=500) :: message
+ real(dp) :: tsec(2)
 #ifdef HAVE_OPENMP_OFFLOAD
  type(oper_type) :: green_oper_ndat
 #endif
 ! ************************************************************************
 
+ call timab(701,1,tsec(:))
+ call timab(702,1,tsec(:))
  !mbandc=paw_dmft%mbandc
  !nkpt=paw_dmft%nkpt
  natom   = paw_dmft%natom
@@ -1185,10 +1189,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  end if ! dmftctqmc_localprop
  !======================
 
+ call timab(702,2,tsec(:))
  ! =========================================================================================
  ! Start big loop over atoms to compute hybridization and do the CTQMC
  ! =========================================================================================
 
+ call timab(703,1,tsec(:))
  do iatom=1,natom
 
    lpawu = paw_dmft%lpawu(iatom)
@@ -1488,6 +1494,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    ABI_MALLOC(gtmp_nd,(paw_dmft%dmftqmc_l,nflavor,nflavor))
    call flush_unit(std_out)
 
+   call timab(704,1,tsec(:))
      ! =================================================================
      !    BEGIN CALL TO CTQMC SOLVERS
      ! =================================================================
@@ -1596,6 +1603,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      end if
 
    end if
+   call timab(704,2,tsec(:))
    ! =================================================================
    !    END CALL TO CTQMC SOLVERS
    ! =================================================================
@@ -1660,10 +1668,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
   ! end if
 
  end do ! iatom
+ call timab(703,2,tsec(:))
  ! ==================================================================
  !  End big loop over atoms to compute hybridization and do the CTQMC
  ! ==================================================================
 
+ call timab(705,1,tsec(:))
  if (paw_dmft%dmft_prgn == 1) then
    call print_green('QMC_diag_notsym',green,1,paw_dmft,opt_wt=2)
    call print_green('QMC_diag_notsym',green,1,paw_dmft,opt_wt=1)
@@ -2037,6 +2047,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
  call destroy_vee(paw_dmft,vee_rotated(:))
  ABI_FREE(vee_rotated)
+ call timab(705,2,tsec(:))
+ call timab(701,2,tsec(:))
 
 end subroutine qmc_prep_ctqmc
 !!***
