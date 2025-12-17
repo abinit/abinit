@@ -133,10 +133,8 @@ MODULE m_fft
    integer :: embed(3) = -1      ! Leading dimensions of the input, output arrays.
    integer :: gpu_option = ABI_GPU_DISABLED  ! /= 0 if FFTs should be offloaded to the GPU
 
-   type(c_ptr) :: gpu_plan_spc = c_null_ptr
-   type(c_ptr) :: gpu_plan_dpc = c_null_ptr
-   !type(c_ptr) :: gpu_stream_spc = c_null_ptr
-   !type(c_ptr) :: gpu_stream_dpc = c_null_ptr
+   type(c_ptr) :: gpu_plan_spc = c_null_ptr, gpu_stream_spc = c_null_ptr
+   type(c_ptr) :: gpu_plan_dpc = c_null_ptr, gpu_stream_dpc = c_null_ptr
 
  contains
 
@@ -163,15 +161,19 @@ MODULE m_fft
 
 #if defined HAVE_GPU_CUDA
  interface
-   subroutine gpu_fft_plan_init(plan, f_dims, f_embed, batch, kind) bind(C)
+   subroutine gpu_fft_plan_init(plan, stream, f_dims, f_embed, batch, kind) bind(C)
      use, intrinsic :: iso_c_binding
-     type(c_ptr), intent(out) :: plan
+     type(c_ptr), intent(out) :: plan, stream
      integer(c_int), intent(in) :: f_dims(3), f_embed(3)
      integer(c_int), value :: batch, kind
    end subroutine
    subroutine gpu_fft_plan_free(plan) bind(C)
      use, intrinsic :: iso_c_binding
      type(c_ptr), value :: plan
+   end subroutine
+   subroutine gpu_stream_free(stream) bind(C)
+     use, intrinsic :: iso_c_binding
+     type(c_ptr), value :: stream
    end subroutine
    subroutine gpu_fftbox_c2c_ip(plan_pp, nfft, ndat, isign, iscale, kind, d_ff) bind(C)
      use, intrinsic :: iso_c_binding
@@ -213,10 +215,8 @@ MODULE m_fft
    integer, allocatable :: gbound(:,:)
 
    ! TODO
-   !type(c_ptr) :: gpu_plan_spc = c_null_ptr
-   !type(c_ptr) :: gpu_plan_dpc = c_null_ptr
-   !type(c_ptr) :: gpu_stream_spc = c_null_ptr
-   !type(c_ptr) :: gpu_stream_dpc = c_null_ptr
+   !type(c_ptr) :: gpu_plan_spc = c_null_ptr, gpu_stream_spc = c_null_ptr
+   !type(c_ptr) :: gpu_plan_dpc = c_null_ptr, gpu_stream_dpc = c_null_ptr
 
  contains
    procedure :: init => uplan_init    ! Build object
@@ -314,8 +314,8 @@ subroutine fftbox_plan3_init(plan, batch_size, dims, embed, fftalg, fftcache, gp
  plan%nfft  = product(plan%dims)
  plan%ldxyz = product(plan%embed)
 
- plan%gpu_plan_spc = c_null_ptr
- plan%gpu_plan_dpc = c_null_ptr
+ plan%gpu_plan_spc = c_null_ptr; plan%gpu_stream_spc = c_null_ptr
+ plan%gpu_plan_dpc = c_null_ptr; plan%gpu_stream_dpc = c_null_ptr
 
  if (gpu_option /= ABI_GPU_DISABLED) then
    if (any(dims /= embed)) then
@@ -370,7 +370,9 @@ subroutine fftbox_plan3_free(plan)
 
 #ifdef HAVE_GPU_CUDA
  call gpu_fft_plan_free(plan%gpu_plan_spc)
+ call gpu_stream_free(plan%gpu_stream_spc)
  call gpu_fft_plan_free(plan%gpu_plan_dpc)
+ call gpu_stream_free(plan%gpu_stream_dpc)
 #endif
 
 end subroutine fftbox_plan3_free
@@ -420,13 +422,13 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
 #ifdef HAVE_GPU_CUDA
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(plan%gpu_plan_spc)) then
-     call gpu_fft_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, plan%batch_size, sp)
+     call gpu_fft_plan_init(plan%gpu_plan_spc, plan%stream_spc, plan%dims, plan%embed, plan%batch_size, sp)
    end if
 
    if (ndat__ /= plan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
-     call gpu_fft_plan_free(plan%gpu_plan_spc)
-     call gpu_fft_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, ndat__, sp)
+     call gpu_fft_plan_free(plan%gpu_plan_spc); call gpu_stream_free(plan%stream_spc)
+     call gpu_fft_plan_init(plan%gpu_plan_spc, plan%stream_spc, plan%dims, plan%embed, ndat__, sp)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
@@ -487,13 +489,14 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
 #ifdef HAVE_GPU_CUDA
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(plan%gpu_plan_dpc)) then
-     call gpu_fft_plan_init(plan%gpu_plan_dpc, plan%dims, plan%embed, plan%batch_size, dp)
+     call gpu_fft_plan_init(plan%gpu_plan_dpc, plan%gpu_stream_dpc, plan%dims, plan%embed, plan%batch_size, dp)
    end if
 
    if (ndat__ /= plan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
      call gpu_fft_plan_free(plan%gpu_plan_dpc)
-     call gpu_fft_plan_init(plan%gpu_plan_dpc, plan%dims, plan%embed, ndat__, dp)
+     call gpu_fft_stream_free(plan%stream_dpc)
+     call gpu_fft_plan_init(plan%gpu_plan_dpc, plan%gpu_stream_dpc, plan%dims, plan%embed, ndat__, dp)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
@@ -554,13 +557,13 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
 #ifdef HAVE_GPU_CUDA
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(plan%gpu_plan_spc)) then
-     call gpu_fft_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, plan%batch_size, sp)
+     call gpu_fft_plan_init(plan%gpu_plan_spc, plan%stream_spc, plan%dims, plan%embed, plan%batch_size, sp)
    end if
 
    if (ndat__ /= plan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
-     call gpu_fft_plan_free(plan%gpu_plan_spc)
-     call gpu_fft_plan_init(plan%gpu_plan_spc, plan%dims, plan%embed, ndat__, sp)
+     call gpu_fft_plan_free(plan%gpu_plan_spc); call gpu_stream_free(plan%gpu_stream_spc)
+     call gpu_fft_plan_init(plan%gpu_plan_spc, plan%stream_spc, plan%dims, plan%embed, ndat__, sp)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
@@ -621,13 +624,13 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
 #ifdef HAVE_GPU_CUDA
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(plan%gpu_plan_dpc)) then
-     call gpu_fft_plan_init(plan%gpu_plan_dpc, plan%dims, plan%embed, plan%batch_size, dp)
+     call gpu_fft_plan_init(plan%gpu_plan_dpc, plan%stream_dpc, plan%dims, plan%embed, plan%batch_size, dp)
    end if
 
    if (ndat__ /= plan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
-     call gpu_fft_plan_free(plan%gpu_plan_dpc)
-     call gpu_fft_plan_init(plan%gpu_plan_dpc, plan%dims, plan%embed, ndat__, dp)
+     call gpu_fft_plan_free(plan%gpu_plan_dpc); call gpu_stream_free(plan%gpu_stream_dpc)
+     call gpu_fft_plan_init(plan%gpu_plan_dpc, plan%gpu_stream_dpc, plan%dims, plan%embed, ndat__, dp)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
@@ -1461,12 +1464,12 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
 
      if (gpu_option == ABI_GPU_OPENMP) then
         if (cplex == 2) then
-!#ifdef HAVE_OPENMP_OFFLOAD
-!       !$OMP TARGET ENTER DATA MAP(to:fofg, fofr) IF (gpu_option == ABI_GPU_OPENMP)
-!       call ompgpu_fourdp(cplex, ngfft, ldx, ldy, ldz, ndat, -1, fofg, fofr)
-!       call ompgpu_fourdp(cplex, ngfft, ldx, ldy, ldz, ndat, +1, fofg, fofr)
-!       !$OMP TARGET EXIT DATA MAP(from:fofr) IF (gpu_option == ABI_GPU_OPENMP)
-!#endif
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(to:fofg, fofr) IF (gpu_option == ABI_GPU_OPENMP)
+       call ompgpu_fourdp(cplex, ngfft, ldx, ldy, ldz, ndat, -1, fofg, fofr)
+       call ompgpu_fourdp(cplex, ngfft, ldx, ldy, ldz, ndat, +1, fofg, fofr)
+       !$OMP TARGET EXIT DATA MAP(from:fofr) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
         end if
      else
        ! CPU version.

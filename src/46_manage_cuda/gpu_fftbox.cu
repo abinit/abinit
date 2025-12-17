@@ -47,7 +47,7 @@ _get_type_nbytes(int dist_batch, int kind, cufftType *type, size_t *nbytes){
 }
 
 extern "C" void
-gpu_fft_plan_init(void **plan_pp, int *f_dims, int *f_embed, int batch, int kind) {
+gpu_fft_plan_init(void **plan_pp, void **stream_pp, int *f_dims, int *f_embed, int batch, int kind) {
 
   const int RANK3 = 3, stride1 = 1;
   size_t nbytes;
@@ -75,26 +75,36 @@ gpu_fft_plan_init(void **plan_pp, int *f_dims, int *f_embed, int batch, int kind
 
   /* Associate plan with stream */
   // see gpu_fft.cu
-  //cudaStream_t stream_compute;
-  //CHECK_CUDA_ERROR(cudaStreamCreate(&stream_compute));
-  //CHECK_CUDA_ERROR(cufftSetStream(*plan_p, stream_compute));
+  cudaStream_t *fft_stream = (cudaStream_t *) malloc(sizeof(cudaStream_t));
+  CHECK_CUDA_ERROR(cudaStreamCreate(fft_stream));
+  CHECK_CUDA_ERROR(cufftSetStream(*plan_p, *fft_stream));
 
   // Return opaque pointer to Fortran
   *plan_pp = (void *) plan_p;
+  *stream_pp = (void *) fft_stream;
 }
 
 extern "C" void
-gpu_fft_plan_free(void *plan_p)
+gpu_fft_plan_free(void *void_ptr)
 {
-  cufftHandle *h = (cufftHandle *) plan_p;
-  //printf("in gpu_fft_plan_free");
-  //printf("About to free GPU plan: %d @ %p\n", plan, &plan);
-  //printf("plan_pp: %p, *plan_pp: %p\n", plan_pp, *plan_pp);
+  cufftHandle *plan = (cufftHandle *) void_ptr;
+  //printf("In gpu_fft_plan_free. About to free GPU plan: %d @ %p\n", *plan, plan);
 
-  if (h) {
-    /* Destroy plan */
-    CHECK_CUDA_ERROR(cufftDestroy(*h));
-    free(h);
+  if (plan) {
+    CHECK_CUDA_ERROR(cufftDestroy(*plan));
+    free(plan);
+  }
+}
+
+extern "C" void
+gpu_stream_free(void *void_ptr)
+{
+  cudaStream_t *stream =  (cudaStreamt *) void_ptr;
+  //printf("In gpu_stream_free. About to free GPU stream: %d @ %p\n", *stream, stream);
+
+  if (stream) {
+    CHECK_CUDA_ERROR(cudaStreamDestroy(stream);
+    free(stream);
   }
 }
 
@@ -128,7 +138,7 @@ gpu_fftbox_c2c_ip(void **plan_pp, int nfft, int batch, int isign, int iscale, in
   }
 
   CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-  //CHECK_CUDA_ERROR(cudaStreamSynchronize(stream_compute));
+  //CHECK_CUDA_ERROR(cudaStreamSynchronize(fft_stream));
 }
 
 extern "C" void
@@ -162,7 +172,7 @@ gpu_fftbox_c2c_op(void **plan_pp, int nfft, int batch, int isign, int iscale, in
   }
 
   CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-  //CHECK_CUDA_ERROR(cudaStreamSynchronize(stream_compute));
+  //CHECK_CUDA_ERROR(cudaStreamSynchronize(fft_stream));
 }
 
 #endif
