@@ -320,50 +320,54 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  end do 
 
 !Time-dispersion perturbations
- d3e_pert1(:) = 0 ; d3e_pert2(:) = 0 ; d3e_pert3(:) = 0
- d3e_dir1(:) = 0 ; d3e_dir2(:) = 0 ; d3e_dir3(:) = 0
+! d3e_pert1(:) = 0 ; d3e_pert2(:) = 0 ; d3e_pert3(:) = 0
+! d3e_dir1(:) = 0 ; d3e_dir2(:) = 0 ; d3e_dir3(:) = 0
  if (dtset%timdisp==1) then
    d3e_pert3(natom+9)=1
    d3e_dir3(1)=1
    d3e_dir3(2)=0
    d3e_dir3(3)=0
- end if
 
- !Atomic displacements
- if (dtset%d3e_pert1_phon==1) d3e_pert1(dtset%d3e_pert1_atpol(1):dtset%d3e_pert1_atpol(2))=1
- if (dtset%d3e_pert2_phon==1) d3e_pert2(dtset%d3e_pert2_atpol(1):dtset%d3e_pert2_atpol(2))=1
+   !Atomic displacements
+   if (dtset%d3e_pert1_phon==1) d3e_pert1(dtset%d3e_pert1_atpol(1):dtset%d3e_pert1_atpol(2))=1
+   if (dtset%d3e_pert2_phon==1) d3e_pert2(dtset%d3e_pert2_atpol(1):dtset%d3e_pert2_atpol(2))=1
 
- !Electric fields
- if (dtset%d3e_pert1_elfd/=0) d3e_pert1(natom+2)=1
- if (dtset%d3e_pert2_elfd/=0) d3e_pert2(natom+2)=1
+   !Electric fields
+   if (dtset%d3e_pert1_elfd/=0) d3e_pert1(natom+2)=1
+   if (dtset%d3e_pert2_elfd/=0) d3e_pert2(natom+2)=1
 
- !Local Zeemans
- if (dtset%d3e_pert1_magn==2) d3e_pert1(natom+11+dtset%d3e_pert1_magat(1):natom+11+dtset%d3e_pert1_magat(2))=1
- if (dtset%d3e_pert2_magn==2) d3e_pert2(natom+11+dtset%d3e_pert2_magat(1):natom+11+dtset%d3e_pert2_magat(2))=1
+   !Macroscopic Zeeman
+   if (dtset%d3e_pert1_magn==1) d3e_pert1(natom+5)=1
+   if (dtset%d3e_pert2_magn==1) d3e_pert2(natom+5)=1
 
- perm(:)=0
- do i1pert = 1, mpert
-   d3e_dir1(:)=dtset%d3e_pert1_dir(:)
-   if (i1pert>natom+11.and.i1pert<=2*natom+11) &
- & d3e_dir1(:)=dtset%d3e_pert1_magdir(:)
-   do i1dir = 1, 3
-     do i2pert = 1, mpert
-       d3e_dir2(:)=dtset%d3e_pert2_dir(:)
-       if (i2pert>natom+11.and.i2pert<=2*natom+11) &
-     & d3e_dir2(:)=dtset%d3e_pert2_magdir(:)
-       do i2dir = 1, 3
-         do i3pert = 1, mpert
-           do i3dir = 1, 3
-             perm(1)=d3e_pert1(i1pert)*d3e_dir1(i1dir)* &
-           &         d3e_pert2(i2pert)*d3e_dir2(i2dir)* &
-           &         d3e_pert3(i3pert)*d3e_dir3(i3dir)
-             if ( sum(perm(:)) > 0 ) rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=1
+   !Local Zeemans
+   if (dtset%d3e_pert1_magn==2) d3e_pert1(natom+11+dtset%d3e_pert1_magat(1):natom+11+dtset%d3e_pert1_magat(2))=1
+   if (dtset%d3e_pert2_magn==2) d3e_pert2(natom+11+dtset%d3e_pert2_magat(1):natom+11+dtset%d3e_pert2_magat(2))=1
+
+   perm(:)=0
+   do i1pert = 1, mpert
+     d3e_dir1(:)=dtset%d3e_pert1_dir(:)
+     if (i1pert>natom+11.and.i1pert<=2*natom+11) &
+   & d3e_dir1(:)=dtset%d3e_pert1_magdir(:)
+     do i1dir = 1, 3
+       do i2pert = 1, mpert
+         d3e_dir2(:)=dtset%d3e_pert2_dir(:)
+         if (i2pert>natom+11.and.i2pert<=2*natom+11) &
+       & d3e_dir2(:)=dtset%d3e_pert2_magdir(:)
+         do i2dir = 1, 3
+           do i3pert = natom+9, natom+9
+             do i3dir = 1, 3
+               perm(1)=d3e_pert1(i1pert)*d3e_dir1(i1dir)* &
+             &         d3e_pert2(i2pert)*d3e_dir2(i2dir)* &
+             &         d3e_pert3(i3pert)*d3e_dir3(i3dir)
+               if ( sum(perm(:)) > 0 ) rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=1
+             end do
            end do
          end do
        end do
      end do
-   end do
- end do 
+   end do 
+ end if
 
 !Do symmetry stuff
  ABI_MALLOC(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
