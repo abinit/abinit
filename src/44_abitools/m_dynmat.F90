@@ -840,28 +840,30 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
  end do
 
 !Local Zeemans
- do ipert1= natom+12,2*natom+11 
-   do idir1=1,3
-     do ipert2= 1, mpert
-       do idir2=1,3
-         if (mflg(idir1,ipert1,idir2,ipert2)==0) then
-           do ii=1,2
-             d2cart(ii,idir1,ipert1,idir2,ipert2)=&
-&            -one*d2cart(ii,idir1,ipert1,idir2,ipert2)
-             mflg(idir1,ipert1,idir2,ipert2)=1
-           end do
-         end if
-         if (mflg(idir2,ipert2,idir1,ipert1)==0) then
-           do ii=1,2
-             d2cart(ii,idir2,ipert2,idir1,ipert1)=&
-&            -one*d2cart(ii,idir2,ipert2,idir1,ipert1)
-             mflg(idir2,ipert2,idir1,ipert1)=1
-           end do
-         end if
+ if (mpert>natom+MPERT_MAX) then
+   do ipert1= natom+12,2*natom+11 
+     do idir1=1,3
+       do ipert2= 1, mpert
+         do idir2=1,3
+           if (mflg(idir1,ipert1,idir2,ipert2)==0) then
+             do ii=1,2
+               d2cart(ii,idir1,ipert1,idir2,ipert2)=&
+&              -one*d2cart(ii,idir1,ipert1,idir2,ipert2)
+               mflg(idir1,ipert1,idir2,ipert2)=1
+             end do
+           end if
+           if (mflg(idir2,ipert2,idir1,ipert1)==0) then
+             do ii=1,2
+               d2cart(ii,idir2,ipert2,idir1,ipert1)=&
+&              -one*d2cart(ii,idir2,ipert2,idir1,ipert1)
+               mflg(idir2,ipert2,idir1,ipert1)=1
+             end do
+           end if
+         end do
        end do
      end do
-   end do
- end do 
+   end do 
+ end if
 
 end subroutine cart29
 !!***

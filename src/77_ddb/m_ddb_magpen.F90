@@ -1612,7 +1612,7 @@ contains
        & 3*((ipert1 - 1) + mpert*((idir2 - 1) + &
        & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
 
-         bc_barmagsus(irow,icol)= -one* &
+         bc_barmagsus(irow,icol)= -one* & !To convert from d3etot to local susc.
        & cmplx(ddb_lw%val(1,index,iblok),ddb_lw%val(2,index,iblok),16)
 
        end do
@@ -1632,7 +1632,6 @@ contains
 !   end do 
 ! close(10)
 
-
  if (prtvol>1) then
    call wrtout([ab_out,std_out], ' Fixed-spin Berry curvature of the inverse spin susceptibility ')
    call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
@@ -1647,7 +1646,7 @@ contains
    call wrtout([ab_out,std_out], '   ')
  end if
 
-!Store the FM flavor in the DDB file
+!Store the FM flavor in the DDB object 
  ipert2_red= 0
  do iat2= mpatpol(1), mpatpol(2)
    ipert2= natom + 11 + iat2
@@ -1763,7 +1762,7 @@ contains
        & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
          
          if (iblok /=0 .and. ipert2 <= natom) then
-           bc_barsp(irow,icol)= -one* &
+           bc_barsp(irow,icol)= -one* &  !To go from d3etot to induced local field
          & cmplx(ddb_lw%val(1,index,iblok),ddb_lw%val(2,index,iblok),16)
          else if (jblok /=0 .and. ipert2 == natom+2) then
            bc_barsp(irow,icol)= -one* &

@@ -9,6 +9,7 @@ keywords = [
 ]
 
 subsuites = [
+"cdfpt",
 "elast",
 "eph_legacy",
 "eph_tdep_legacy",
@@ -25,6 +26,13 @@ subsuites = [
 
 #: List of input files
 inp_files = [
+"tcdfpt_1.abi", 
+"tcdfpt_2.abi",
+"tcdfpt_3.abi",
+"tcdfpt_4.abi",
+"tcdfpt_5.abi",
+"tcdfpt_6.abi",
+#
 "teph_tdep_legacy_1.abi",
 "teph_tdep_legacy_2.abi",
 "teph_tdep_legacy_3.abi",
