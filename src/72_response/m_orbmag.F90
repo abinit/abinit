@@ -517,12 +517,14 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
        pcg1_k(1:2,1:mcgk,1:3) = cg1_k(1:2,1:mcgk,1:3)
      end if
 
-     ! regauge P_c|cg1>
-     ABI_MALLOC(diagcg1_k,(2,mcgk,3))
-     call para_to_diag(atindx,cg_k,pcg1_k,cprj_k,diagcg1_k,dimlmn,dtset,eig_k,gs_hamk,&
-       & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k)
-     pcg1_k(1:2,1:mcgk,1:3) = diagcg1_k(1:2,1:mcgk,1:3)
-     ABI_FREE(diagcg1_k)
+     ! change P_c|cg1> to diagonal change if requested
+     if (dtset%orbmag .EQ. 3) then
+       ABI_MALLOC(diagcg1_k,(2,mcgk,3))
+       call para_to_diag(atindx,cg_k,pcg1_k,cprj_k,diagcg1_k,dimlmn,dtset,eig_k,gs_hamk,&
+         & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k)
+       pcg1_k(1:2,1:mcgk,1:3) = diagcg1_k(1:2,1:mcgk,1:3)
+       ABI_FREE(diagcg1_k)
+     end if
 
      ! compute <p|Pc cg1> cprjs
      ABI_MALLOC(cprj1_k,(dtset%natom,mcprjk,3))
@@ -1437,8 +1439,6 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dtset,eig_k,gs
         cwavef(1:2,1:npwsp)=cg_k(1:2,(jband-1)*npwsp+1:jband*npwsp)
         dotr = DOT_PRODUCT(cwavef(1,:),vectout(1,:))+DOT_PRODUCT(cwavef(2,:),vectout(2,:))
         doti = DOT_PRODUCT(cwavef(1,:),vectout(2,:))-DOT_PRODUCT(cwavef(2,:),vectout(1,:))
-        write(std_out,'(a,2i4,3es16.8)')'JWZ debug iband jband deltae dotr doti',iband,jband,&
-          & deltae,dotr,doti
         vcg1(1,:) = vcg1(1,:) + (dotr*cwavef(1,:) - doti*cwavef(2,:))*deltae
         vcg1(2,:) = vcg1(2,:) + (dotr*cwavef(2,:) + doti*cwavef(1,:))*deltae
       end do
@@ -1446,7 +1446,6 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dtset,eig_k,gs
       ! subtract vcg1 from cg1_k to obtain diagonal gauge representation
       diagcg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir) =cg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir)-&
         &  vcg1(1:2,1:npwsp)
-      !diagcg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir) =cg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir)
 
     end do
   end do
@@ -2173,7 +2172,7 @@ subroutine orbmag_output(chern_terms,chern_trace,dtset,omlamb,orbmag_terms,orbma
  write(message,'(3es16.8)') (berry_total(adir),adir=1,3)
  call wrtout(ab_out,message,'COLL')
 
- if(dtset%orbmag .EQ. 2) then
+ if(dtset%orbmag .GE. 2) then
    write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
@@ -2202,7 +2201,7 @@ subroutine orbmag_output(chern_terms,chern_trace,dtset,omlamb,orbmag_terms,orbma
    call wrtout(ab_out,message,'COLL')
  end if
 
- if(dtset%orbmag .EQ. 2) then
+ if(dtset%orbmag .GE. 2) then
    write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Term-by-term breakdowns for each band : '
