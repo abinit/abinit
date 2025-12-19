@@ -502,19 +502,19 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
  case(1)
    if (nspden==4) then
      if(idir==3)then       ! Zeeman field along the 3rd axis (z)
-       v1zeeman(:,1)=-1.0d0
-       v1zeeman(:,2)=+1.0d0
+       v1zeeman(:,1)=-0.5d0
+       v1zeeman(:,2)=+0.5d0
        v1zeeman(:,3)= 0.0d0
        v1zeeman(:,4)= 0.0d0
      else if(idir==2)then  ! Zeeman field along the 2nd axis (y)
        v1zeeman(:,1)= 0.0d0
        v1zeeman(:,2)= 0.0d0
        v1zeeman(:,3)= 0.0d0
-       v1zeeman(:,4)=+1.0d0
+       v1zeeman(:,4)=+0.5d0
      else if(idir==1)then  ! Zeeman field along the 1st axis (x)
        v1zeeman(:,1)= 0.0d0
        v1zeeman(:,2)= 0.0d0
-       v1zeeman(:,3)=-1.0d0
+       v1zeeman(:,3)=-0.5d0
        v1zeeman(:,4)= 0.0d0
      else if(idir==4)then  ! Scalar potential
        v1zeeman(:,1)=-1.0d0
@@ -524,11 +524,11 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
      end if
    else if (nspden==2) then
      if (idir==4) then
-       v1zeeman(:,1)=-1.0d0
-       v1zeeman(:,2)=-1.0d0
+       v1zeeman(:,1)=-0.5d0
+       v1zeeman(:,2)=-0.5d0
      else
-       v1zeeman(:,1)=-1.0d0
-       v1zeeman(:,2)= 1.0d0
+       v1zeeman(:,1)=-0.5d0
+       v1zeeman(:,2)= 0.5d0
      end if
    else
      v1zeeman(:,1)= 0.0d0
@@ -537,16 +537,16 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
    if (nspden==2) then
      if (idir==4) then
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)  =-1.0e0
+         v1zeeman(2*ifft-1,1)  =-0.5e0
          v1zeeman(2*ifft  ,1)  = 0.0e0
-         v1zeeman(2*ifft-1,2)  =-1.0e0
+         v1zeeman(2*ifft-1,2)  =-0.5e0
          v1zeeman(2*ifft  ,2)  = 0.0e0
        end do
      else
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)  =-1.0e0
+         v1zeeman(2*ifft-1,1)  =-0.5e0
          v1zeeman(2*ifft  ,1)  = 0.0e0
-         v1zeeman(2*ifft-1,2)  = 1.0e0
+         v1zeeman(2*ifft-1,2)  = 0.5e0
          v1zeeman(2*ifft  ,2)  = 0.0e0
        end do
      end if
@@ -558,10 +558,10 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
          v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
          v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
          v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
-         v1zeeman(2*ifft-1,3)=-1.0e0 !Re[V^12]
+         v1zeeman(2*ifft-1,3)=-0.5e0 !Re[V^12]
          v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
          v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]=Im[V^12]
-         v1zeeman(2*ifft  ,4)=-1.0e0 !Im[i.V^21]=Re[V^12]
+         v1zeeman(2*ifft  ,4)=-0.5e0 !Im[i.V^21]=Re[V^12]
        end do
      case(2) !along y, v1 = -sigma_y
        do ifft=1,nfft
@@ -570,15 +570,15 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
          v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
          v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
          v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
-         v1zeeman(2*ifft  ,3)=+1.0e0 !Im[V^12]
-         v1zeeman(2*ifft-1,4)=+1.0e0 !Re[i.V^21]=Im[V^12]
+         v1zeeman(2*ifft  ,3)=+0.5e0 !Im[V^12]
+         v1zeeman(2*ifft-1,4)=+0.5e0 !Re[i.V^21]=Im[V^12]
          v1zeeman(2*ifft  ,4)= 0.0e0 !Im[i.V^21]=Re[V^12]
        end do
      case(3)
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)=-1.0e0 !Re[V^11]
+         v1zeeman(2*ifft-1,1)=-0.5e0 !Re[V^11]
          v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
-         v1zeeman(2*ifft-1,2)= 1.0e0 !Re[V^22]
+         v1zeeman(2*ifft-1,2)= 0.5e0 !Re[V^22]
          v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
          v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
          v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
@@ -587,9 +587,9 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
        end do
      case(4)
        do ifft=1,nfft
-         v1zeeman(2*ifft-1,1)=-1.0e0 !Re[V^11]
+         v1zeeman(2*ifft-1,1)=-0.5e0 !Re[V^11]
          v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
-         v1zeeman(2*ifft-1,2)=-1.0e0 !Re[V^22]
+         v1zeeman(2*ifft-1,2)=-0.5e0 !Re[V^22]
          v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
          v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
          v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
@@ -683,7 +683,8 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
 !Compute magnetic penalty from cell-integrated magnetic moments
  if (magpen < zero) then
 
-   rhomag_eff=rhomag
+   rhomag_eff(:,1)=rhomag(:,1)
+   rhomag_eff(:,2:4)=half*rhomag(:,2:4) !Convert from mu_B to a.u. 
    do i=1,3 
      if (mpdir(i)==0) rhomag_eff(:,1+i) = zero
    end do
@@ -726,7 +727,8 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
    Blocy=zero
    Blocz=zero
 
-   intgden_eff=intgden
+   intgden_eff(:,1,:)=intgden(:,1,:)
+   intgden_eff(:,2:4,:)=half*intgden(:,2:4,:) !Convert from mu_B to a.u.
    do iatom=mpatpol(1),mpatpol(2)
 
      do i=1,3 
@@ -886,17 +888,17 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
  !Define the local magnetic field
  if (cplex==1) then
    do ifft=1,nfft
-     Bloc(ifft)=-one*fatsph(ifft,iatom)
+     Bloc(ifft)=-half*fatsph(ifft,iatom)
    end do
  else if (cplex==2) then
    do ifft=1,nfft
      re=2*ifft-1
      im=2*ifft
      if (sum(qphon(:)**2)<tol8) then 
-       Bloc(re)=-one*fatsph(ifft,iatom)
+       Bloc(re)=-half*fatsph(ifft,iatom)
        Bloc(im)=zero
      else 
-       Bloc_re=-one*fatsph(ifft,iatom)
+       Bloc_re=-half*fatsph(ifft,iatom)
        Bloc_im=zero
        arg=two_pi*dot_product(qphon,-taumr(ifft,iatom,:))
        phr1d_re=dcos(arg)
