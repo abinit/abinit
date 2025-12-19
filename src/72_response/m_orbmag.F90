@@ -182,6 +182,7 @@ module m_orbmag
 
   private :: lamb_core
   private :: make_pcg1
+  private :: para_to_diag
   private :: orbmag_mesh_alloc
   private :: orbmag_mesh_free
   private :: sum_orbmag_mesh
@@ -294,7 +295,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  real(dp) :: kpoint(3),omlamb(3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: chern_terms(:,:,:,:),chern_trace(:,:),cg_k(:,:),cg1_k(:,:,:),cwavef(:,:)
- real(dp),allocatable :: eig_k(:),ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:)
+ real(dp),allocatable :: diagcg1_k(:,:,:),eig_k(:),ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: occ_k(:),orbmag_terms(:,:,:,:),orbmag_trace(:,:)
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:)
  real(dp),allocatable :: vectornd(:,:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
@@ -515,6 +516,13 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
        ! we are using berryopt PEAD DDK functions which are already projected by construction
        pcg1_k(1:2,1:mcgk,1:3) = cg1_k(1:2,1:mcgk,1:3)
      end if
+
+     ! regauge P_c|cg1>
+     ABI_MALLOC(diagcg1_k,(2,mcgk,3))
+     call para_to_diag(atindx,cg_k,pcg1_k,cprj_k,diagcg1_k,dimlmn,dtset,eig_k,gs_hamk,&
+       & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k)
+     pcg1_k(1:2,1:mcgk,1:3) = diagcg1_k(1:2,1:mcgk,1:3)
+     ABI_FREE(diagcg1_k)
 
      ! compute <p|Pc cg1> cprjs
      ABI_MALLOC(cprj1_k,(dtset%natom,mcprjk,3))
@@ -1325,6 +1333,134 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs_hamk,&
 
 end subroutine orbmag_vv_k
 !!***
+
+!!****f* ABINIT/para_to_diag
+!! NAME
+!! para_to_diag
+!!
+!! FUNCTION
+!! convert ddk in parallel gauge to diagonal gauge
+!!
+!! INPUTS
+!!  atindx(natom)=index table for atoms (see gstate.f)
+!!  cg_k(2,mcgk)=ground state wavefunctions at this k point
+!!  cg1_k(2,mcgk,3)=DDK wavefunctions at this k point, all 3 directions
+!!  cprj_k(dtset%natom,mcprjk)<type(pawcprj_type)>=cprj for cg_k
+!!  dimlmn(dtset%natom)=cprj lmn dimensions
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  gs_hamk<type(gs_hamiltonian_type)>=ground state Hamiltonian at this k
+!!  ikpt=current k pt
+!!  isppol=current spin polarization
+!!  mcgk=dimension of cg_k
+!!  mcprjk=dimension of cprj_k
+!!  mkmem_rbz=kpts in memory
+!!  mpi_enreg<type(MPI_type)>=information about MPI parallelization
+!!  nband_k=bands at this kpt
+!!  npw_k=number of planewaves at this kpt
+!!  occ_k=band occupations at this kpt
+!!
+!! OUTPUT
+!!  diagcg1_k(2,mcgk,3)=cg1_k converted to diagonal gauge
+!!
+!! NOTES
+!! based on XG Magnetization Gauge notes 16/5/22 Eq. 16
+!!
+!! SOURCE
+
+subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dtset,eig_k,gs_hamk,&
+    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,npw_k
+  type(dataset_type),intent(in) :: dtset
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
+  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3),eig_k(nband_k),occ_k(nband_k)
+  real(dp),intent(out) :: diagcg1_k(2,mcgk,3)
+  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,mcprjk)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,choice,cpopt,iband,jband
+  integer :: ndat,nnlout,npwsp,paw_opt,signs,tim_nonlop
+  real(dp) :: deltae,doti,dotr
+  !arrays
+  real(dp) :: lambda(1)
+  real(dp),allocatable :: cwavef(:,:),enlout(:),svectout(:,:)
+  real(dp),allocatable :: vcg1(:,:),vectout(:,:)
+  type(pawcprj_type),allocatable :: cwaveprj(:,:)
+
+!--------------------------------------------------------------------
+
+  choice = 5 ! first deriv w.r.t. k
+  cpopt = 4 ! cprj and derivatives already in memory
+  paw_opt = 2 ! Vnl - lambda.Sij 
+  signs = 2
+  tim_nonlop = 0
+  nnlout = 0
+  ndat = 1
+
+  npwsp = npw_k*dtset%nspinor
+
+  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
+  call pawcprj_alloc(cwaveprj,3,dimlmn)
+  ABI_MALLOC(cwavef,(2,npwsp))
+  ABI_MALLOC(vectout,(2,npwsp))
+  ABI_MALLOC(svectout,(2,npwsp))
+  ABI_MALLOC(vcg1,(2,npwsp))
+
+  diagcg1_k = zero
+
+  do adir = 1, 3
+
+    do iband = 1, nband_k
+
+      cwavef(1:2,1:npwsp)=cg_k(1:2,(iband-1)*npwsp+1:iband*npwsp)
+
+      call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,iband,0,ikpt,0,isppol,dtset%mband,&
+        & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
+
+      ! compute H^1-eig^0_i S^1|u_i^0> , output to vectout
+      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,adir,eig_k(iband),mpi_enreg,ndat,&
+        & nnlout,paw_opt,signs,svectout,tim_nonlop,cwavef,vectout)
+
+      !! form vcg1 = \sum |u_j^0><u_j^0|(H^1-e^0(i)S^1|u_i^0>/(e^0(j)-e^0(i))
+      vcg1 = zero
+      do jband = 1, nband_k
+        if(jband.EQ.iband) cycle
+        deltae = eig_k(jband) - eig_k(iband)
+        if ( abs(deltae) .LT. tol8 ) cycle
+        cwavef(1:2,1:npwsp)=cg_k(1:2,(jband-1)*npwsp+1:jband*npwsp)
+        dotr = DOT_PRODUCT(cwavef(1,:),vectout(1,:))+DOT_PRODUCT(cwavef(2,:),vectout(2,:))
+        doti = DOT_PRODUCT(cwavef(1,:),vectout(2,:))-DOT_PRODUCT(cwavef(2,:),vectout(1,:))
+        write(std_out,'(a,2i4,3es16.8)')'JWZ debug iband jband deltae dotr doti',iband,jband,&
+          & deltae,dotr,doti
+        vcg1(1,:) = vcg1(1,:) + (dotr*cwavef(1,:) - doti*cwavef(2,:))*deltae
+        vcg1(2,:) = vcg1(2,:) + (dotr*cwavef(2,:) + doti*cwavef(1,:))*deltae
+      end do
+
+      ! subtract vcg1 from cg1_k to obtain diagonal gauge representation
+      diagcg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir) =cg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir)-&
+        &  vcg1(1:2,1:npwsp)
+      !diagcg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir) =cg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir)
+
+    end do
+  end do
+
+  ABI_FREE(cwavef)
+  ABI_FREE(vectout)
+  ABI_FREE(vcg1)
+  ABI_FREE(svectout)
+  call pawcprj_free(cwaveprj)
+  ABI_FREE(cwaveprj)
+
+end subroutine para_to_diag
+!!***
+
 
 !!****f* ABINIT/make_pcg1
 !! NAME
