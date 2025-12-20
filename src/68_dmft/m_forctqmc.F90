@@ -34,6 +34,7 @@ MODULE m_forctqmc
  use m_data4entropyDMFT
  use m_errors
  use m_GreenHyb
+ use m_time
 
  use m_crystal, only : crystal_t
  use m_datafordmft, only : compute_levels,hybridization_asymptotic_coefficient
@@ -50,7 +51,8 @@ MODULE m_forctqmc
      & magmomfzeeman_matlu,matlu_type,print_matlu,printplot_matlu,prod_matlu,rotate_matlu,shift_matlu, &
      & slm2ylm_matlu,sym_matlu,symmetrize_matlu,xmpi_matlu,ylm2jmj_matlu,zero_matlu,magnfield_matlu,magmomjmj_matlu
  use m_numeric_tools, only : coeffs_gausslegint
- use m_oper, only : destroy_oper,gather_oper,identity_oper,init_oper,inverse_oper,oper_type
+ use m_oper, only : destroy_oper,gather_oper,identity_oper,init_oper,inverse_oper,oper_type, &
+     & init_oper_ndat,copy_oper_to_ndat,copy_oper_from_ndat
  use m_paw_correlations, only : calc_vee
  use m_paw_dmft, only : paw_dmft_type
  use m_paw_numeric, only : jbessel => paw_jbessel
@@ -140,8 +142,14 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  character(len=13) :: tag
  character(len=2)  :: tag_atom
  character(len=500) :: message
- ! ************************************************************************
+ real(dp) :: tsec(2)
+#ifdef HAVE_OPENMP_OFFLOAD
+ type(oper_type) :: green_oper_ndat
+#endif
+! ************************************************************************
 
+ call timab(701,1,tsec(:))
+ call timab(702,1,tsec(:))
  !mbandc=paw_dmft%mbandc
  !nkpt=paw_dmft%nkpt
  natom   = paw_dmft%natom
@@ -1181,10 +1189,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  end if ! dmftctqmc_localprop
  !======================
 
+ call timab(702,2,tsec(:))
  ! =========================================================================================
  ! Start big loop over atoms to compute hybridization and do the CTQMC
  ! =========================================================================================
 
+ call timab(703,1,tsec(:))
  do iatom=1,natom
 
    lpawu = paw_dmft%lpawu(iatom)
@@ -1422,7 +1432,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        nomega = paw_dmft%dmftqmc_l
        call CtqmcInterface_init(hybrid,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
          & paw_dmft%dmftqmc_therm,paw_dmft%dmftctqmc_meas,nflavor,paw_dmft%dmftqmc_l,&
-         & one/paw_dmft%temp,zero,std_out,paw_dmft%spacecomm,paw_dmft%nspinor)
+         & one/paw_dmft%temp,zero,std_out,paw_dmft%dmftctqmc_chains,paw_dmft%spacecomm,paw_dmft%nspinor)
        !    options
        ! =================================================================
        call CtqmcInterface_setOpts(hybrid, &
@@ -1484,6 +1494,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    ABI_MALLOC(gtmp_nd,(paw_dmft%dmftqmc_l,nflavor,nflavor))
    call flush_unit(std_out)
 
+   call timab(704,1,tsec(:))
      ! =================================================================
      !    BEGIN CALL TO CTQMC SOLVERS
      ! =================================================================
@@ -1592,6 +1603,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      end if
 
    end if
+   call timab(704,2,tsec(:))
    ! =================================================================
    !    END CALL TO CTQMC SOLVERS
    ! =================================================================
@@ -1656,10 +1668,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
   ! end if
 
  end do ! iatom
+ call timab(703,2,tsec(:))
  ! ==================================================================
  !  End big loop over atoms to compute hybridization and do the CTQMC
  ! ==================================================================
 
+ call timab(705,1,tsec(:))
  if (paw_dmft%dmft_prgn == 1) then
    call print_green('QMC_diag_notsym',green,1,paw_dmft,opt_wt=2)
    call print_green('QMC_diag_notsym',green,1,paw_dmft,opt_wt=1)
@@ -1953,9 +1967,35 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  do itau=1,1 !paw_dmft%dmftqmc_l
    call sym_matlu(green%oper_tau(itau)%matlu(:),paw_dmft)
  end do ! itau
- do ifreq=1,paw_dmft%dmft_nwlo
-   call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
- end do ! ifreq
+
+ ! Perform symetry on GPU if requested
+ if (paw_dmft%gpu_option == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   ! 1) Init green_oper_ndat
+   call init_oper_ndat(paw_dmft,green_oper_ndat,nwlo,nkpt=green%oper(1)%nkpt,opt_ksloc=2,gpu_option=paw_dmft%gpu_option)
+   if (green%oper(1)%has_operks == 0) then
+     green_oper_ndat%paral  = 1
+     green_oper_ndat%shiftk = green%distrib%shiftk
+   end if
+   ! 2) Copy green%oper(:)%matlu into green_oper_ndat (CPU->GPU transfer)
+   call copy_oper_to_ndat(green%oper,green_oper_ndat,nwlo,green%nw,green%distrib%proct,green%distrib%me_freq,.false.)
+
+   ! 3) Perform sym_matlu on green_oper_ndat (GPU enabled)
+   call sym_matlu(green_oper_ndat%matlu(:),paw_dmft)
+
+   ! 4) Copy back green%oper(:)%matlu from green_oper_ndat (GPU->CPU transfer)
+   call copy_oper_from_ndat(green_oper_ndat,green%oper,nwlo,green%nw,green%distrib%proct,&
+   &    green%distrib%me_freq,.false.)
+   ! 5) Destroy green_oper_ndat
+   call destroy_oper(green_oper_ndat)
+#endif
+ else
+   do ifreq=1,paw_dmft%dmft_nwlo
+     call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
+   end do ! ifreq
+ end if
+
+
  if (pawprtvol >= 3) then
    write(message,'(a,2x,a)') ch10, &  ! debug
       & " == Print Green's function for tau=0+ after symmetrization"  !  debug
@@ -2007,6 +2047,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
  call destroy_vee(paw_dmft,vee_rotated(:))
  ABI_FREE(vee_rotated)
+ call timab(705,2,tsec(:))
+ call timab(701,2,tsec(:))
 
 end subroutine qmc_prep_ctqmc
 !!***
