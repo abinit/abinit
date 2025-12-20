@@ -1,5 +1,5 @@
 
-.Version 10.5.6.3 of ABINIT, released Sep 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Oct 2025.
-- ( at 23h19 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h16 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/TestBot_MPI1/v9_t41/t41.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v9_t41/t41.abi
 - output file    -> t41.abo
 - root for input  files -> t41i
 - root for output files -> t41o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  DATASET    1 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -466,9 +466,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.15090
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__srostami/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -660,7 +660,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  4.800000000000  4.800000000000  4.800000000000 bohr
-              =  2.540050601232  2.540050601232  2.540050601232 angstroms
+              =  2.540050610611  2.540050610611  2.540050610611 angstroms
  prteigrs : about to open file t41o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.53396   Average Vxc (hartree)=  -0.53430
  Magnetization (Bohr magneton)=  1.29298214E+00
@@ -697,7 +697,7 @@ PAW spherical_terms : -1.15138125174552E+01
 internal            : -1.24346761067678E+02
 '-kT*entropy'       : -1.50816510095134E-03
 total_energy        : -1.24348269232779E+02
-total_energy_eV     : -3.38368848641978E+03
+total_energy_eV     : -3.38368878311238E+03
 ...
 
 
@@ -712,7 +712,7 @@ PAW spherical_terms : -8.01232037868183E+00
 internal            : -1.24346761103112E+02
 '-kT*entropy'       : -1.50816510095134E-03
 total_energy_dc     : -1.24348269268213E+02
-total_energy_dc_eV  : -3.38368848738400E+03
+total_energy_dc_eV  : -3.38368878407661E+03
 ...
 
 
@@ -721,8 +721,8 @@ iteration_state     : {dtset: 1, }
 comment             : 'Components of total free energy, including PAW core contributions'
 Total energy        : -1.27269132666183E+03
 Total energy DC     : -1.27269132669727E+03
-Total energy (eV)   : -3.46316922250877E+04
-Total energy DC (eV): -3.46316922260520E+04
+Total energy (eV)   : -3.46316952617051E+04
+Total energy DC (eV): -3.46316952626693E+04
 ...
 
 
@@ -732,9 +732,9 @@ Total energy DC (eV): -3.46316922260520E+04
   sigma(3 3)=  2.51703996E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -7.4054E+01 GPa]
-- sigma(1 1)=  7.40538597E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  7.40538597E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  7.40538597E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  7.40538722E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  7.40538722E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  7.40538722E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -872,7 +872,7 @@ tolerances: {tolvrs: 1.00E-05, }
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =   7.39955406E+02
  Resulting in :
- 2DEtotal=    0.1158838649E+01 Ha. Also 2DEtotal=    0.315336033219E+02 eV
+ 2DEtotal=    0.1158838649E+01 Ha. Also 2DEtotal=    0.315336060868E+02 eV
     (2DErelax=   -1.0938255223E+02 Ha. 2DEnonrelax=    1.1054139088E+02 Ha)
     (  non-var. 2DEtotal :   -9.0072091988E+00 Ha)
 
@@ -952,7 +952,7 @@ tolerances: {tolvrs: 1.00E-05, }
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =   1.02585621E+03
  Resulting in :
- 2DEtotal=    0.7680397628E+01 Ha. Also 2DEtotal=    0.208994248047E+03 eV
+ 2DEtotal=    0.7680397628E+01 Ha. Also 2DEtotal=    0.208994266373E+03 eV
     (2DErelax=   -8.2056017852E+01 Ha. 2DEnonrelax=    8.9736415479E+01 Ha)
     (  non-var. 2DEtotal :   -1.2376204112E+00 Ha)
 
@@ -1469,10 +1469,10 @@ P          mk1mem          64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         16.5  wall=         16.6
+- Proc.   0 individual time (sec): cpu=         16.4  wall=         16.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.5  wall=         16.6
++Overall time at end (sec) : cpu=         16.4  wall=         16.4

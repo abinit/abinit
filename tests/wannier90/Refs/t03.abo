@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h17 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/wannier90_t03/t03.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h18 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/wannier90_t03/t03.abi
 - output file    -> t03.abo
 - root for input  files -> t03i
 - root for output files -> t03o
@@ -508,7 +508,7 @@ P           mkmem7         64
         w90iniprj6          1
         w90iniprj7          2
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3577364229E+00  1.3577364229E+00  1.3577364229E+00
+                       1.3577364280E+00  1.3577364280E+00  1.3577364280E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5657500000E+00  2.5657500000E+00  2.5657500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -567,8 +567,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -606,7 +606,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  5  -8.8581701412699    -4.244E-07 4.308E-08 9.610E-07
  ETOT  6  -8.8581701420486    -7.787E-10 2.928E-09 1.242E-08
 
- At SCF step    6, etot is converged :
+ At SCF step    6, etot is converged : 
   for the second time, diff in etot=  7.787E-10 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -662,7 +662,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35773642293979     1.35773642293979     1.35773642293979
+    2      1.35773642795327     1.35773642795327     1.35773642795327
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -674,7 +674,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.263000000000 10.263000000000 10.263000000000 bohr
-              =  5.430945691759  5.430945691759  5.430945691759 angstroms
+              =  5.430945711813  5.430945711813  5.430945711813 angstroms
  prteigrs : about to open file t03o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.21497   Average Vxc (hartree)=  -0.35216
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -700,7 +700,7 @@ psp_core            :  8.48919894711432E-02
 local_psp           : -2.49365546920455E+00
 non_local_psp       :  1.91753317090770E+00
 total_energy        : -8.85817014204861E+00
-total_energy_eV     : -2.41043068032475E+02
+total_energy_eV     : -2.41043089167901E+02
 band_energy         :  2.24827382054822E-01
 ...
 
@@ -711,9 +711,9 @@ band_energy         :  2.24827382054822E-01
   sigma(3 3)=  9.91770864E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.9179E+00 GPa]
-- sigma(1 1)=  2.91789013E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  2.91789013E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.91789013E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  2.91789062E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  2.91789062E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.91789062E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -812,9 +812,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35773642293979     1.35773642293979     1.35773642293979
+    2      1.35773642795327     1.35773642795327     1.35773642795327
  length scales= 10.263000000000 10.263000000000 10.263000000000 bohr
-              =  5.430945691759  5.430945691759  5.430945691759 angstroms
+              =  5.430945711813  5.430945711813  5.430945711813 angstroms
  prteigrs : about to open file t03o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 30, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -827,9 +827,9 @@ force_length_stats: {min: null, max: null, mean: null, }
  Eigenvalues (   eV  ) for nkpt=   8  k points:
  kpt#   1, nband= 30, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -6.16233    5.84953    5.84953    5.84953    8.37088    8.37088    8.37088    8.96589
-  13.41946   13.85410   13.85410   16.96919   16.96919   16.96919   20.77165   29.46922
-  29.46922   29.46922   30.91150   30.91150   31.23992   31.23992   31.23992   35.27390
-  35.27390   35.27390   40.93027   42.27207   42.27207   42.27207
+  13.41946   13.85410   13.85410   16.96920   16.96920   16.96920   20.77165   29.46922
+  29.46922   29.46922   30.91151   30.91151   31.23993   31.23993   31.23993   35.27390
+  35.27390   35.27390   40.93028   42.27208   42.27208   42.27208
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -853,7 +853,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices
+ SCREENING: Calculation of the susceptibility and dielectric matrices 
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -867,8 +867,8 @@ meta: {optdriver: 3, gwcalctyp: 28, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -889,7 +889,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -900,13 +900,13 @@ meta: {optdriver: 3, gwcalctyp: 28, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -917,7 +917,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    64 points in the full Brillouin Zone.
 
 
@@ -929,14 +929,14 @@ meta: {optdriver: 3, gwcalctyp: 28, }
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
 
- rdqps: reading QP wavefunctions of the previous step
+ rdqps: reading QP wavefunctions of the previous step 
         looking for file t03i_DS3_QPS
- file not found, 1st iteration initialized with KS eigenelements
+ file not found, 1st iteration initialized with KS eigenelements 
 
  Number of electrons calculated from density =    7.9979; Expected =    8.0000
  average of density, n =  0.029595
  r_s =    2.0055
- omega_plasma =   16.5944 [eV]
+ omega_plasma =   16.5945 [eV]
 
 
  calculating chi0 at frequencies [eV] :
@@ -955,7 +955,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
     2   0.000 -11.867  -0.137  -0.176  -0.145   0.000  -0.000  -0.000  -0.000
        -0.000   0.000   0.000  -0.000   0.000  -5.045  -0.190  -0.229  -0.197
 
-  chi0(G,G') at the    2 th omega   0.0000  16.5944 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  16.5945 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
         0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
@@ -968,7 +968,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   dielectric constant without local fields =  25.8182
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     17.78  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G')
+  Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -979,7 +979,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
      -0.000  -0.004   0.012  -0.012   0.004  -0.004   0.012  -0.012   0.004
 
 
-   Upper and lower wings at the    2 th omega   0.0000  16.5944 [eV]
+   Upper and lower wings at the    2 th omega   0.0000  16.5945 [eV]
        1       2       3       4       5       6       7       8       9
       0.490   0.008  -0.022   0.022  -0.008  -0.008   0.022  -0.022   0.008
       0.000   0.008  -0.022   0.022  -0.008   0.008  -0.022   0.022  -0.008
@@ -1001,7 +1001,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
     2  -1.486  -9.900  -0.518  -0.524  -0.519   0.000  -0.000  -0.000  -0.000
         1.486   0.000  -0.000  -0.000  -0.000  -4.423   0.123   0.101   0.119
 
-  chi0(G,G') at the    2 th omega   0.0000  16.5944 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  16.5945 [eV]
        1       2       3       4       5       6       7       8       9
     1  -1.039  -0.370  -0.070  -0.071  -0.070   0.376  -0.266  -0.262  -0.266
         0.000  -0.370  -0.070  -0.071  -0.070  -0.376   0.266   0.262   0.265
@@ -1023,7 +1023,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
     2  -1.612  -7.576   0.268   0.265   0.267   0.000  -0.000  -0.000  -0.000
         1.612   0.000  -0.000  -0.000  -0.000  -4.005   0.277   0.262   0.274
 
-  chi0(G,G') at the    2 th omega   0.0000  16.5944 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  16.5945 [eV]
        1       2       3       4       5       6       7       8       9
     1  -2.776  -0.520  -0.378  -0.379  -0.378   0.550  -0.493  -0.487  -0.492
         0.000  -0.520  -0.378  -0.379  -0.378  -0.550   0.493   0.487   0.492
@@ -1045,7 +1045,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
     2  -2.123 -10.614  -0.436  -0.475  -0.564   0.000  -0.000  -0.000  -0.000
         2.123   0.000  -0.000  -0.000  -0.000  -3.454   0.262   0.255  -0.221
 
-  chi0(G,G') at the    2 th omega   0.0000  16.5944 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  16.5945 [eV]
        1       2       3       4       5       6       7       8       9
     1  -1.327  -0.355   0.021   0.021  -0.355   0.021  -0.355  -0.355   0.021
        -0.000  -0.355   0.021   0.021  -0.355  -0.021   0.355   0.355  -0.021
@@ -1067,7 +1067,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
     2  -2.037  -8.248  -0.027  -0.036  -0.026   0.000  -0.000  -0.000  -0.000
         2.037   0.000  -0.000  -0.000  -0.000  -3.192   0.364   0.359  -0.005
 
-  chi0(G,G') at the    2 th omega   0.0000  16.5944 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  16.5945 [eV]
        1       2       3       4       5       6       7       8       9
     1  -2.647  -0.502  -0.230  -0.233  -0.487   0.221  -0.489  -0.488  -0.411
        -0.000  -0.502  -0.230  -0.233  -0.487  -0.221   0.489   0.488   0.411
@@ -1089,7 +1089,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
     2   0.232 -14.788   0.892   0.855  -0.127   0.000  -0.000  -0.000   0.000
        -0.232   0.000   0.000   0.000   0.000  -3.307  -0.078  -0.077  -1.800
 
-  chi0(G,G') at the    2 th omega   0.0000  16.5944 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  16.5945 [eV]
        1       2       3       4       5       6       7       8       9
     1  -2.184   0.177  -0.381  -0.378  -0.469  -0.469  -0.378  -0.381   0.177
         0.000   0.177  -0.381  -0.378  -0.469   0.469   0.378   0.381  -0.177
@@ -1111,7 +1111,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
     2  -2.330  -8.512   0.052   0.015   0.073  -0.000  -0.000  -0.000  -0.000
         2.330   0.000  -0.000  -0.000  -0.000  -2.155   0.352   0.350  -0.174
 
-  chi0(G,G') at the    2 th omega   0.0000  16.5944 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  16.5945 [eV]
        1       2       3       4       5       6       7       8       9
     1  -3.173  -0.530  -0.305  -0.305  -0.530  -0.305  -0.530  -0.530  -0.305
        -0.000  -0.530  -0.305  -0.305  -0.530   0.305   0.530   0.530   0.305
@@ -1133,7 +1133,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
     2  -1.564 -16.089  -0.149   1.829  -0.239  -0.000  -0.000  -0.000   0.000
         1.564   0.000   0.000   0.000   0.000  -2.360  -0.000   0.113   0.000
 
-  chi0(G,G') at the    2 th omega   0.0000  16.5944 [eV]
+  chi0(G,G') at the    2 th omega   0.0000  16.5945 [eV]
        1       2       3       4       5       6       7       8       9
     1  -3.292  -0.165  -0.530  -0.480  -0.502  -0.502  -0.480  -0.530  -0.165
        -0.000  -0.165  -0.530  -0.480  -0.502   0.502   0.480   0.530   0.165
@@ -1165,7 +1165,7 @@ meta: {optdriver: 4, gwcalctyp: 28, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- SIGMA: Calculation of the GW corrections
+ SIGMA: Calculation of the GW corrections 
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1181,7 +1181,7 @@ meta: {optdriver: 4, gwcalctyp: 28, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -1192,13 +1192,13 @@ meta: {optdriver: 4, gwcalctyp: 28, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -1209,7 +1209,7 @@ meta: {optdriver: 4, gwcalctyp: 28, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    64 points in the full Brillouin Zone.
 
 
@@ -1223,22 +1223,22 @@ meta: {optdriver: 4, gwcalctyp: 28, }
  Number of electrons calculated from density =    7.9979; Expected =    8.0000
  average of density, n =  0.029595
  r_s =    2.0055
- omega_plasma =   16.5944 [eV]
+ omega_plasma =   16.5945 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step
+ rdqps: reading QP wavefunctions of the previous step 
         looking for file t03i_DS4_QPS
- file not found, 1st iteration initialized with KS eigenelements
+ file not found, 1st iteration initialized with KS eigenelements 
 
  Number of electrons calculated from density =    7.9979; Expected =    8.0000
  average of density, n =  0.029595
  r_s =    2.0055
- omega_plasma =   16.5944 [eV]
+ omega_plasma =   16.5945 [eV]
 
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace:
+ QP results after the unitary transformation in the KS subspace: 
 
   Number of electrons    =    7.9979
 
@@ -1445,8 +1445,8 @@ data: !SigmaeeData |
 ...
 
 
- New Fermi energy :        2.752284E-01 Ha ,    7.489346E+00 eV
- New Exchange energy :    -2.048680E+00 Ha ,   -5.574742E+01 eV
+ New Fermi energy :        2.752284E-01 Ha ,    7.489347E+00 eV
+ New Exchange energy :    -2.048680E+00 Ha ,   -5.574743E+01 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -1489,7 +1489,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices
+ SCREENING: Calculation of the susceptibility and dielectric matrices 
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1505,7 +1505,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -1516,13 +1516,13 @@ meta: {optdriver: 3, gwcalctyp: 28, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -1533,7 +1533,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    64 points in the full Brillouin Zone.
 
 
@@ -1545,7 +1545,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
 
- rdqps: reading QP wavefunctions of the previous step
+ rdqps: reading QP wavefunctions of the previous step 
         looking for file t03o_DS4_QPS
  Number of iteration(s) already performed:    1
 
@@ -1584,7 +1584,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   dielectric constant without local fields =  12.2643
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     18.63  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G')
+  Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1783,7 +1783,7 @@ meta: {optdriver: 4, gwcalctyp: 28, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- SIGMA: Calculation of the GW corrections
+ SIGMA: Calculation of the GW corrections 
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1799,7 +1799,7 @@ meta: {optdriver: 4, gwcalctyp: 28, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -1810,13 +1810,13 @@ meta: {optdriver: 4, gwcalctyp: 28, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    64 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -1827,8 +1827,9 @@ meta: {optdriver: 4, gwcalctyp: 28, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    64 points in the full Brillouin Zone.
+
 
 
  vcoul_init : cutoff-mode = CRYSTAL
@@ -1840,10 +1841,10 @@ meta: {optdriver: 4, gwcalctyp: 28, }
  Number of electrons calculated from density =    7.9979; Expected =    8.0000
  average of density, n =  0.029595
  r_s =    2.0055
- omega_plasma =   16.5944 [eV]
+ omega_plasma =   16.5945 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step
+ rdqps: reading QP wavefunctions of the previous step 
         looking for file t03o_DS4_QPS
  Number of iteration(s) already performed:    1
 
@@ -1855,7 +1856,7 @@ meta: {optdriver: 4, gwcalctyp: 28, }
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace:
+ QP results after the unitary transformation in the KS subspace: 
 
   Number of electrons    =    7.9979
 
@@ -2063,7 +2064,7 @@ data: !SigmaeeData |
 
 
  New Fermi energy :        2.745855E-01 Ha ,    7.471853E+00 eV
- New Exchange energy :    -2.049800E+00 Ha ,   -5.577790E+01 eV
+ New Exchange energy :    -2.049800E+00 Ha ,   -5.577791E+01 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -2126,8 +2127,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2174,7 +2175,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 ...
 
 
- rdqps: reading QP wavefunctions of the previous step
+ rdqps: reading QP wavefunctions of the previous step 
         looking for file t03o_DS6_QPS
  Number of iteration(s) already performed:    2
 
@@ -2185,8 +2186,8 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 ---------------------------------------------------------------
 
-  Calculation of overlap and call to wannier90 library
-  to obtain maximally localized wannier functions
+  Calculation of overlap and call to wannier90 library 
+  to obtain maximally localized wannier functions 
 
   - t03o_DS7_w90.win is a mandatory secondary input
   - t03o_DS7_w90.wout is the output for the library
@@ -2247,9 +2248,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35773642293979     1.35773642293979     1.35773642293979
+    2      1.35773642795327     1.35773642795327     1.35773642795327
  length scales= 10.263000000000 10.263000000000 10.263000000000 bohr
-              =  5.430945691759  5.430945691759  5.430945691759 angstroms
+              =  5.430945711813  5.430945711813  5.430945711813 angstroms
  prteigrs : about to open file t03o_DS7_EIG
  Eigenvalues (hartree) for nkpt=  64  k points:
  kpt#   1, nband= 10, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2266,7 +2267,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0263000000E+01  1.0263000000E+01  1.0263000000E+01 Bohr
               amu      2.80855000E+01
@@ -2656,7 +2657,7 @@ P           mkmem7         64
         w90iniprj6          1
         w90iniprj7          2
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3577364229E+00  1.3577364229E+00  1.3577364229E+00
+                       1.3577364280E+00  1.3577364280E+00  1.3577364280E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5657500000E+00  2.5657500000E+00  2.5657500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2707,7 +2708,7 @@ P           mkmem7         64
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2719,12 +2720,12 @@ P           mkmem7         64
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2742,7 +2743,7 @@ P           mkmem7         64
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -2757,15 +2758,15 @@ P           mkmem7         64
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          6.5  wall=          6.6
+- Proc.   0 individual time (sec): cpu=          6.6  wall=          6.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  45 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.5  wall=          6.6
++Overall time at end (sec) : cpu=          6.6  wall=          6.6
