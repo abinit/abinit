@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 17h56 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h03 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/rttddft_suite_t04/t04.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/rttddft_suite_t04/t04.abi
 - output file    -> t04.abo
 - root for input  files -> t04i
 - root for output files -> t04o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
  DATASET    1 : the unit cell is not primitive
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -89,7 +89,7 @@ _ WF disk file :      0.740 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
-            acell      6.3324722713E+00  6.3324722713E+00  6.3324722713E+00 Bohr
+            acell      6.3324722479E+00  6.3324722479E+00  6.3324722479E+00 Bohr
               amu      5.86900000E+01
            bandpp1          1
            bandpp2         42
@@ -354,9 +354,9 @@ P           mkmem           4
                        0.0000000  0.0000000  0.0000000     0.0000000  0.5000000  0.5000000
                        0.5000000  0.0000000  0.5000000     0.5000000  0.5000000  0.0000000
            tolvrs      1.00000000E-12
-           tsmear1     9.50044626E-04 Hartree
-           tsmear2     6.33363084E-03 Hartree
-           tsmear3     6.33363084E-03 Hartree
+           tsmear1     9.50043469E-04 Hartree
+           tsmear2     6.33362313E-03 Hartree
+           tsmear3     6.33362313E-03 Hartree
             typat      1  1  1  1
            useylm           1
               wtk        0.12500    0.37500    0.37500    0.12500
@@ -365,9 +365,9 @@ P           mkmem           4
                        1.6755000000E+00  0.0000000000E+00  1.6755000000E+00
                        1.6755000000E+00  1.6755000000E+00  0.0000000000E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  3.1662361356E+00  3.1662361356E+00
-                       3.1662361356E+00  0.0000000000E+00  3.1662361356E+00
-                       3.1662361356E+00  3.1662361356E+00  0.0000000000E+00
+                       0.0000000000E+00  3.1662361240E+00  3.1662361240E+00
+                       3.1662361240E+00  0.0000000000E+00  3.1662361240E+00
+                       3.1662361240E+00  3.1662361240E+00  0.0000000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
@@ -391,15 +391,15 @@ P           mkmem           4
 iteration_state: {dtset: 1, }
 dimensions: {natom: 4, nkpt: 4, mband: 42, nsppol: 1, nspinor: 1, nspden: 1, mpw: 288, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  16.0, }
-electrons: {nelect:   7.20000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   9.50044626E-04, }
+electrons: {nelect:   7.20000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   9.50043469E-04, }
 meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 ...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  6.3324723  0.0000000  0.0000000  G(1)=  0.1579162  0.0000000  0.0000000
- R(2)=  0.0000000  6.3324723  0.0000000  G(2)=  0.0000000  0.1579162  0.0000000
- R(3)=  0.0000000  0.0000000  6.3324723  G(3)=  0.0000000  0.0000000  0.1579162
- Unit cell volume ucvol=  2.5393344E+02 bohr^3
+ R(1)=  6.3324722  0.0000000  0.0000000  G(1)=  0.1579162  0.0000000  0.0000000
+ R(2)=  0.0000000  6.3324722  0.0000000  G(2)=  0.0000000  0.1579162  0.0000000
+ R(3)=  0.0000000  0.0000000  6.3324722  G(3)=  0.0000000  0.0000000  0.1579162
+ Unit cell volume ucvol=  2.5393343E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
  Coarse grid specifications (used for wave-functions):
@@ -420,9 +420,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     16.000   => boxcut(ratio)=   2.10481
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Ni.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 1.81432190
@@ -454,44 +454,44 @@ tolerances: {tolvrs: 1.00E-12, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -651.01050183964    -6.510E+02 8.834E+00 1.089E+03
- ETOT  2  -634.34146297606     1.667E+01 4.543E-02 6.528E+01
- ETOT  3  -633.77006702630     5.714E-01 6.762E-03 5.184E+00
- ETOT  4  -633.74254394823     2.752E-02 2.480E-04 2.790E-02
- ETOT  5  -633.74207531002     4.686E-04 5.978E-05 4.463E-04
- ETOT  6  -633.74207058130     4.729E-06 1.582E-06 5.331E-05
- ETOT  7  -633.74206949816     1.083E-06 1.715E-06 7.590E-07
- ETOT  8  -633.74206948499     1.317E-08 4.070E-08 5.287E-08
- ETOT  9  -633.74206948246     2.534E-09 6.091E-08 5.437E-10
- ETOT 10  -633.74206948198     4.776E-10 1.951E-09 9.681E-12
- ETOT 11  -633.74206948184     1.415E-10 9.946E-10 7.058E-13
+ ETOT  1  -651.01026559673    -6.510E+02 8.834E+00 1.089E+03
+ ETOT  2  -634.34140955443     1.667E+01 4.543E-02 6.528E+01
+ ETOT  3  -633.77007119435     5.713E-01 6.761E-03 5.183E+00
+ ETOT  4  -633.74254448585     2.753E-02 2.480E-04 2.786E-02
+ ETOT  5  -633.74207658867     4.679E-04 5.976E-05 4.459E-04
+ ETOT  6  -633.74207188277     4.706E-06 1.582E-06 5.340E-05
+ ETOT  7  -633.74207079706     1.086E-06 1.716E-06 7.648E-07
+ ETOT  8  -633.74207078375     1.330E-08 4.067E-08 5.316E-08
+ ETOT  9  -633.74207078121     2.544E-09 6.091E-08 5.362E-10
+ ETOT 10  -633.74207078074     4.678E-10 1.951E-09 1.004E-11
+ ETOT 11  -633.74207078059     1.501E-10 9.931E-10 6.881E-13
 
- At SCF step   11       nres2   =  7.06E-13 < tolvrs=  1.00E-12 =>converged.
+ At SCF step   11       nres2   =  6.88E-13 < tolvrs=  1.00E-12 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.62487447E-01  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  4.62487447E-01  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.62487447E-01  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  4.62487446E-01  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.62487446E-01  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.62487446E-01  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
 lattice_vectors:
-- [  6.3324723,   0.0000000,   0.0000000, ]
-- [  0.0000000,   6.3324723,   0.0000000, ]
-- [  0.0000000,   0.0000000,   6.3324723, ]
+- [  6.3324722,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.3324722,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.3324722, ]
 lattice_lengths: [   6.33247,    6.33247,    6.33247, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
-lattice_volume:   2.5393344E+02
-convergence: {deltae:  1.415E-10, res2:  7.058E-13, residm:  9.946E-10, diffor: null, }
-etotal    :  -6.33742069E+02
+lattice_volume:   2.5393343E+02
+convergence: {deltae:  1.501E-10, res2:  6.881E-13, residm:  9.931E-10, diffor: null, }
+etotal    :  -6.33742071E+02
 entropy   :   0.00000000E+00
-fermie    :   6.76370937E-01
+fermie    :   6.76370940E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  4.62487447E-01,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   4.62487447E-01,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   4.62487447E-01, ]
+- [  4.62487446E-01,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.62487446E-01,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.62487446E-01, ]
 pressure_GPa:  -1.3607E+04
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ni]
@@ -517,8 +517,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     17.168591213848632
- Compensation charge over fine fft grid    =     17.169430396634315
+ Compensation charge over spherical meshes =     17.168591460427891
+ Compensation charge over fine fft grid    =     17.169430640453587
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -588,7 +588,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   94.238E-13; max=  99.456E-11
+ Mean square residual over all n,k,spin=   94.189E-13; max=  99.307E-11
  reduced coordinates (array xred) for    4 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.000000000000      0.500000000000      0.500000000000
@@ -619,7 +619,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     3     -0.00000000000000    -0.00000000000000    -0.00000000000000
     4     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
- length scales=  6.332472271300  6.332472271300  6.332472271300 bohr
+ length scales=  6.332472247917  6.332472247917  6.332472247917 bohr
               =  3.351000000000  3.351000000000  3.351000000000 angstroms
  Fermi (or HOMO) energy (hartree) =   0.67637   Average Vxc (hartree)=  -0.56273
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -643,54 +643,54 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.57357942304444E+02
-hartree             :  9.75565271142170E+01
-xc                  : -3.52134524779791E+01
-Ewald energy        : -4.69167569432709E+02
-psp_core            :  2.49424417536982E+01
-local_psp           : -3.57883907328227E+02
-PAW spherical_terms : -5.13322362089007E+01
-internal            : -6.33740254275456E+02
-'-kT*entropy'       : -1.81416540773817E-03
-total_energy        : -6.33742068440863E+02
-total_energy_eV     : -1.72449986925747E+04
+kinetic             :  1.57357942224752E+02
+hartree             :  9.75565275788355E+01
+xc                  : -3.52134523778568E+01
+Ewald energy        : -4.69167571165121E+02
+psp_core            :  2.49424420300000E+01
+local_psp           : -3.57883907770043E+02
+PAW spherical_terms : -5.13322360913356E+01
+internal            : -6.33740255570769E+02
+'-kT*entropy'       : -1.81416319842317E-03
+total_energy        : -6.33742069733967E+02
+total_energy_eV     : -1.72450002398584E+04
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -8.65056754004485E+01
-Ewald energy        : -4.69167569432709E+02
-psp_core            :  2.49424417536982E+01
-xc_dc               : -8.68707406845855E+01
-PAW spherical_terms : -1.61387115523882E+01
-internal            : -6.33740255316433E+02
-'-kT*entropy'       : -1.81416540773817E-03
-total_energy_dc     : -6.33742069481841E+02
-total_energy_dc_eV  : -1.72449987209012E+04
+band_energy         : -8.65056742956268E+01
+Ewald energy        : -4.69167571165121E+02
+psp_core            :  2.49424420300000E+01
+xc_dc               : -8.68707411808984E+01
+PAW spherical_terms : -1.61387120057464E+01
+internal            : -6.33740256617392E+02
+'-kT*entropy'       : -1.81416319842317E-03
+total_energy_dc     : -6.33742070780591E+02
+total_energy_dc_eV  : -1.72450002683385E+04
 ...
 
 
 --- !EnergyTermsWithPAWCore
 iteration_state     : {dtset: 1, }
 comment             : 'Components of total free energy, including PAW core contributions'
-Total energy        : -6.03345223527425E+03
-Total energy DC     : -6.03345223631523E+03
-Total energy (eV)   : -1.64178584775023E+05
-Total energy DC (eV): -1.64178584803349E+05
+Total energy        : -6.03345223656736E+03
+Total energy DC     : -6.03345223761398E+03
+Total energy (eV)   : -1.64178599205912E+05
+Total energy DC (eV): -1.64178599234392E+05
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  4.62487447E-01  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  4.62487447E-01  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  4.62487447E-01  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  4.62487446E-01  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.62487446E-01  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.62487446E-01  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.3607E+04 GPa]
-- sigma(1 1)=  1.36068482E+04  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.36068482E+04  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.36068482E+04  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.36068504E+04  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.36068504E+04  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.36068504E+04  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -701,7 +701,7 @@ Total energy DC (eV): -1.64178584803349E+05
 iteration_state: {dtset: 2, }
 dimensions: {natom: 4, nkpt: 4, mband: 42, nsppol: 1, nspinor: 1, nspden: 1, mpw: 288, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  16.0, }
-electrons: {nelect:   7.20000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   6.33363084E-03, }
+electrons: {nelect:   7.20000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   6.33362313E-03, }
 meta: {optdriver: 9, }
 ...
 
@@ -716,10 +716,10 @@ meta: {optdriver: 9, }
 ---------------------------   Initialization   ----------------------------
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  6.3324723  0.0000000  0.0000000  G(1)=  0.1579162  0.0000000  0.0000000
- R(2)=  0.0000000  6.3324723  0.0000000  G(2)=  0.0000000  0.1579162  0.0000000
- R(3)=  0.0000000  0.0000000  6.3324723  G(3)=  0.0000000  0.0000000  0.1579162
- Unit cell volume ucvol=  2.5393344E+02 bohr^3
+ R(1)=  6.3324722  0.0000000  0.0000000  G(1)=  0.1579162  0.0000000  0.0000000
+ R(2)=  0.0000000  6.3324722  0.0000000  G(2)=  0.0000000  0.1579162  0.0000000
+ R(3)=  0.0000000  0.0000000  6.3324722  G(3)=  0.0000000  0.0000000  0.1579162
+ Unit cell volume ucvol=  2.5393343E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
  Coarse grid specifications (used for wave-functions):
@@ -750,7 +750,7 @@ meta: {optdriver: 9, }
 
 --- Iteration 1
 
-Total energy =    -633.738017 Ha
+Total energy =    -633.738018 Ha
 Integrated density (ie. total nb of electrons) =      72.0008313694
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
@@ -764,13 +764,13 @@ Integrated density (ie. total nb of electrons) =      72.0008313694
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.29    0.29
+- Time - cpu, wall (sec):    0.30    0.30
 
 
 --- Iteration 2
 
-Total energy =    -633.737977 Ha
-Integrated density (ie. total nb of electrons) =      72.0008232444
+Total energy =    -633.737978 Ha
+Integrated density (ie. total nb of electrons) =      72.0008232445
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -783,12 +783,12 @@ Integrated density (ie. total nb of electrons) =      72.0008232444
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 3
 
-Total energy =    -633.737937 Ha
+Total energy =    -633.737938 Ha
 Integrated density (ie. total nb of electrons) =      72.0008151156
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
@@ -802,12 +802,12 @@ Integrated density (ie. total nb of electrons) =      72.0008151156
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 4
 
-Total energy =    -633.737897 Ha
+Total energy =    -633.737898 Ha
 Integrated density (ie. total nb of electrons) =      72.0008069832
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
@@ -821,12 +821,12 @@ Integrated density (ie. total nb of electrons) =      72.0008069832
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 5
 
-Total energy =    -633.737857 Ha
+Total energy =    -633.737858 Ha
 Integrated density (ie. total nb of electrons) =      72.0007988479
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
@@ -840,12 +840,12 @@ Integrated density (ie. total nb of electrons) =      72.0007988479
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 6
 
-Total energy =    -633.737817 Ha
+Total energy =    -633.737818 Ha
 Integrated density (ie. total nb of electrons) =      72.0007907104
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
@@ -859,12 +859,12 @@ Integrated density (ie. total nb of electrons) =      72.0007907104
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 7
 
-Total energy =    -633.737777 Ha
+Total energy =    -633.737778 Ha
 Integrated density (ie. total nb of electrons) =      72.0007825713
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
@@ -878,12 +878,12 @@ Integrated density (ie. total nb of electrons) =      72.0007825713
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 8
 
-Total energy =    -633.737737 Ha
+Total energy =    -633.737738 Ha
 Integrated density (ie. total nb of electrons) =      72.0007744315
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
@@ -897,12 +897,12 @@ Integrated density (ie. total nb of electrons) =      72.0007744315
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 9
 
-Total energy =    -633.737697 Ha
+Total energy =    -633.737698 Ha
 Integrated density (ie. total nb of electrons) =      72.0007662915
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
@@ -921,7 +921,7 @@ Integrated density (ie. total nb of electrons) =      72.0007662915
 
 --- Iteration 10
 
-Total energy =    -633.737657 Ha
+Total energy =    -633.737658 Ha
 Integrated density (ie. total nb of electrons) =      72.0007581519
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
@@ -935,7 +935,7 @@ Integrated density (ie. total nb of electrons) =      72.0007581519
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 ---------------------------------------------------------------------------
@@ -952,7 +952,7 @@ Integrated density (ie. total nb of electrons) =      72.0007581519
 iteration_state: {dtset: 3, }
 dimensions: {natom: 4, nkpt: 4, mband: 42, nsppol: 1, nspinor: 1, nspden: 1, mpw: 288, }
 cutoff_energies: {ecut:   8.0, pawecutdg:  16.0, }
-electrons: {nelect:   7.20000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   6.33363084E-03, }
+electrons: {nelect:   7.20000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   6.33362313E-03, }
 meta: {optdriver: 9, }
 ...
 
@@ -965,10 +965,10 @@ meta: {optdriver: 9, }
 ---------------------------   Initialization   ----------------------------
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  6.3324723  0.0000000  0.0000000  G(1)=  0.1579162  0.0000000  0.0000000
- R(2)=  0.0000000  6.3324723  0.0000000  G(2)=  0.0000000  0.1579162  0.0000000
- R(3)=  0.0000000  0.0000000  6.3324723  G(3)=  0.0000000  0.0000000  0.1579162
- Unit cell volume ucvol=  2.5393344E+02 bohr^3
+ R(1)=  6.3324722  0.0000000  0.0000000  G(1)=  0.1579162  0.0000000  0.0000000
+ R(2)=  0.0000000  6.3324722  0.0000000  G(2)=  0.0000000  0.1579162  0.0000000
+ R(3)=  0.0000000  0.0000000  6.3324722  G(3)=  0.0000000  0.0000000  0.1579162
+ Unit cell volume ucvol=  2.5393343E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
  Coarse grid specifications (used for wave-functions):
@@ -1003,8 +1003,8 @@ meta: {optdriver: 9, }
 
 --- Iteration 11
 
-Total energy =    -633.737617 Ha
-Integrated density (ie. total nb of electrons) =      72.0007500130
+Total energy =    -633.737618 Ha
+Integrated density (ie. total nb of electrons) =      72.0007500131
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -1017,13 +1017,13 @@ Integrated density (ie. total nb of electrons) =      72.0007500130
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.29    0.29
+- Time - cpu, wall (sec):    0.30    0.30
 
 
 --- Iteration 12
 
-Total energy =    -633.737577 Ha
-Integrated density (ie. total nb of electrons) =      72.0007418751
+Total energy =    -633.737578 Ha
+Integrated density (ie. total nb of electrons) =      72.0007418752
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -1036,13 +1036,13 @@ Integrated density (ie. total nb of electrons) =      72.0007418751
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 13
 
-Total energy =    -633.737537 Ha
-Integrated density (ie. total nb of electrons) =      72.0007337383
+Total energy =    -633.737538 Ha
+Integrated density (ie. total nb of electrons) =      72.0007337384
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -1055,13 +1055,13 @@ Integrated density (ie. total nb of electrons) =      72.0007337383
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 14
 
-Total energy =    -633.737497 Ha
-Integrated density (ie. total nb of electrons) =      72.0007256025
+Total energy =    -633.737498 Ha
+Integrated density (ie. total nb of electrons) =      72.0007256026
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -1074,13 +1074,13 @@ Integrated density (ie. total nb of electrons) =      72.0007256025
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 15
 
-Total energy =    -633.737457 Ha
-Integrated density (ie. total nb of electrons) =      72.0007174676
+Total energy =    -633.737458 Ha
+Integrated density (ie. total nb of electrons) =      72.0007174677
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -1093,12 +1093,12 @@ Integrated density (ie. total nb of electrons) =      72.0007174676
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 16
 
-Total energy =    -633.737417 Ha
+Total energy =    -633.737418 Ha
 Integrated density (ie. total nb of electrons) =      72.0007093335
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
@@ -1112,13 +1112,13 @@ Integrated density (ie. total nb of electrons) =      72.0007093335
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 17
 
-Total energy =    -633.737377 Ha
-Integrated density (ie. total nb of electrons) =      72.0007011998
+Total energy =    -633.737378 Ha
+Integrated density (ie. total nb of electrons) =      72.0007011999
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -1131,13 +1131,13 @@ Integrated density (ie. total nb of electrons) =      72.0007011998
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 18
 
-Total energy =    -633.737337 Ha
-Integrated density (ie. total nb of electrons) =      72.0006930665
+Total energy =    -633.737338 Ha
+Integrated density (ie. total nb of electrons) =      72.0006930666
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -1150,12 +1150,12 @@ Integrated density (ie. total nb of electrons) =      72.0006930665
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 19
 
-Total energy =    -633.737297 Ha
+Total energy =    -633.737298 Ha
 Integrated density (ie. total nb of electrons) =      72.0006849334
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
@@ -1169,12 +1169,12 @@ Integrated density (ie. total nb of electrons) =      72.0006849334
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 --- Iteration 20
 
-Total energy =    -633.737257 Ha
+Total energy =    -633.737258 Ha
 Integrated density (ie. total nb of electrons) =      72.0006768002
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
@@ -1188,7 +1188,7 @@ Integrated density (ie. total nb of electrons) =      72.0006768002
    1.08669    1.08669
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.23    0.23
+- Time - cpu, wall (sec):    0.24    0.24
 
 
 ---------------------------------------------------------------------------
@@ -1200,7 +1200,7 @@ Integrated density (ie. total nb of electrons) =      72.0006768002
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
-            acell      6.3324722713E+00  6.3324722713E+00  6.3324722713E+00 Bohr
+            acell      6.3324722479E+00  6.3324722479E+00  6.3324722479E+00 Bohr
               amu      5.86900000E+01
            bandpp1          1
            bandpp2         42
@@ -1208,7 +1208,7 @@ Integrated density (ie. total nb of electrons) =      72.0006768002
           chkprim           0
             dtele      4.00000000E-02
              ecut      8.00000000E+00 Hartree
-           etotal1    -6.3374206948E+02
+           etotal1    -6.3374207078E+02
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -1343,7 +1343,7 @@ P           mkmem           4
             prtwf1          1
             prtwf2          0
             prtwf3          0
-           strten1     4.6248744727E-01  4.6248744727E-01  4.6248744727E-01
+           strten1     4.6248744635E-01  4.6248744635E-01  4.6248744635E-01
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1542,9 +1542,9 @@ P           mkmem           4
                        0.0000000  0.0000000  0.0000000     0.0000000  0.5000000  0.5000000
                        0.5000000  0.0000000  0.5000000     0.5000000  0.5000000  0.0000000
            tolvrs      1.00000000E-12
-           tsmear1     9.50044626E-04 Hartree
-           tsmear2     6.33363084E-03 Hartree
-           tsmear3     6.33363084E-03 Hartree
+           tsmear1     9.50043469E-04 Hartree
+           tsmear2     6.33362313E-03 Hartree
+           tsmear3     6.33362313E-03 Hartree
             typat      1  1  1  1
            useylm           1
               wtk        0.12500    0.37500    0.37500    0.12500
@@ -1553,9 +1553,9 @@ P           mkmem           4
                        1.6755000000E+00  0.0000000000E+00  1.6755000000E+00
                        1.6755000000E+00  1.6755000000E+00  0.0000000000E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  3.1662361356E+00  3.1662361356E+00
-                       3.1662361356E+00  0.0000000000E+00  3.1662361356E+00
-                       3.1662361356E+00  3.1662361356E+00  0.0000000000E+00
+                       0.0000000000E+00  3.1662361240E+00  3.1662361240E+00
+                       3.1662361240E+00  0.0000000000E+00  3.1662361240E+00
+                       3.1662361240E+00  3.1662361240E+00  0.0000000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
@@ -1647,10 +1647,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          8.4  wall=          8.4
+- Proc.   0 individual time (sec): cpu=          8.6  wall=          8.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  18 WARNINGs and  18 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.4  wall=          8.4
+.Delivered   3 WARNINGs and  27 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.6  wall=          8.7

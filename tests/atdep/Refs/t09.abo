@@ -1,6 +1,6 @@
- 
+  
 .Version    4.0 of ATDEP
-.Copyright (C) 1998-2025 ABINIT group (FB,JB).
+.Copyright (C) 1998-2025 ABINIT group (FB,JB,GA).
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -13,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : 16 Feb 2025.
+.Starting date : 20 Dec 2025.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -2002,10 +2002,10 @@
  
  ========== For an Anisotropic Material =======================================
  Sijkl [in GPa-1]=
- | S11 S12 S13 S14 S15 S16 |      0.012   -0.004   -0.004   -0.000   -0.000   -0.000
- | S21 S22 S23 S24 S25 S26 |     -0.004    0.012   -0.004   -0.000   -0.000   -0.000
- | S31 S32 S33 S34 S35 S36 |     -0.004   -0.004    0.012   -0.000   -0.000   -0.000
- | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.012   -0.000   -0.000
+ | S11 S12 S13 S14 S15 S16 |      0.012   -0.004   -0.004    0.000    0.000   -0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.004    0.012   -0.004    0.000    0.000   -0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.004   -0.004    0.012    0.000    0.000   -0.000
+ | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.012    0.000   -0.000
  | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.012   -0.000
  | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.012
  
@@ -2026,7 +2026,7 @@
  ISOTHERMAL modulus [in GPa]: Bulk Kt=   83.950 and Shear G=   64.448
  Average of Young modulus E [in GPa]=  153.949 Lame modulus Lambda [in GPa]=   40.985 and Poisson ratio Nu=    0.194
  Velocities [in m.s-1]: compressional Vp= 8467.355  shear Vs= 5215.311  and bulk Vphi= 5952.322
- Debye velocity [in m.s-1]= 5754.151  and temperature [in K]=  634.493
+ Debye velocity [in m.s-1]= 5754.151  and temperature [in K]=  634.494
  
  ========================= Reuss average (constant stress) ===================
  ISOTHERMAL modulus [in GPa]: Bulk Kt=   83.950 and Shear G=   51.318
@@ -2038,11 +2038,11 @@
  ISOTHERMAL modulus [in GPa]: Bulk Kt=   83.950 and Shear G=   57.883
  Average of Young modulus E [in GPa]=  141.197 Lame modulus Lambda [in GPa]=   45.362 and Poisson ratio Nu=    0.220
  Velocities [in m.s-1]: compressional Vp= 8246.316  shear Vs= 4942.539  and bulk Vphi= 5952.322
- Debye velocity [in m.s-1]= 5468.215  and temperature [in K]=  602.963
+ Debye velocity [in m.s-1]= 5468.215  and temperature [in K]=  602.964
  
  ========================= Elastic anisotropy =================================
  Elastic anisotropy index : A_U= 5*G_V/G_R + K_V/K_R - 6 =    1.279
- Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =   -0.000
+ Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =    0.000
  Shear anisotropy ratio : A_G= (G_V-G_R)/(G_V+G_R) =    0.113
   
  #############################################################################
@@ -2059,7 +2059,7 @@
   Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 
   Sigma   = (< (F_MD - F_TDEP)^2 >/<F_MD**2>)**0.5 
      <U_MD>            U_0              U_1              U_2            Delta_U          Delta_U2          Delta_F2          Sigma
-  -108.17115       -108.29891          0.00000          0.12775          0.00000          0.05960          0.00635          0.32501
+  -108.17116       -108.29892          0.00000          0.12775          0.00000          0.05960          0.00635          0.32501
  NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=      0.12926
  
  See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files
