@@ -175,15 +175,17 @@ MODULE m_fft
      use, intrinsic :: iso_c_binding
      type(c_ptr), value :: stream
    end subroutine
-   subroutine gpu_fftbox_c2c_ip(plan_pp, nfft, ndat, isign, iscale, kind, d_ff) bind(C)
+   subroutine gpu_fftbox_c2c_ip(plan_pp, stream, nfft, ndat, isign, iscale, kind, d_ff) bind(C)
      use, intrinsic :: iso_c_binding
      type(c_ptr),intent(in) :: plan_pp
+     type(c_ptr),value,intent(in) :: stream
      integer(c_int),value, intent(in) :: nfft, ndat, isign, iscale, kind
      type(c_ptr),intent(in) :: d_ff
    end subroutine gpu_fftbox_c2c_ip
-   subroutine gpu_fftbox_c2c_op(plan_pp, nfft, ndat, isign, iscale, kind, d_ff, d_gg) bind(C)
+   subroutine gpu_fftbox_c2c_op(plan_pp, stream, nfft, ndat, isign, iscale, kind, d_ff, d_gg) bind(C)
      use, intrinsic :: iso_c_binding
      type(c_ptr),intent(in) :: plan_pp
+     type(c_ptr),value,intent(in) :: stream
      integer(c_int),value, intent(in) :: nfft, ndat, isign, iscale, kind
      type(c_ptr),intent(in) :: d_ff, d_gg
    end subroutine gpu_fftbox_c2c_op
@@ -432,7 +434,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
-   call gpu_fftbox_c2c_ip(plan%gpu_plan_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff))
+   call gpu_fftbox_c2c_ip(plan%gpu_plan_spc, plan%gpu_stream_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff))
 !$OMP END TARGET DATA
    return
 #endif
@@ -499,7 +501,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
-   call gpu_fftbox_c2c_ip(plan%gpu_plan_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff))
+   call gpu_fftbox_c2c_ip(plan%gpu_plan_dpc, plan%gpu_stream_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff))
 !$OMP END TARGET DATA
    return
 #endif
@@ -566,7 +568,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
-   call gpu_fftbox_c2c_op(plan%gpu_plan_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff), c_loc(gg))
+   call gpu_fftbox_c2c_op(plan%gpu_plan_spc, plan%gpu_stream_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff), c_loc(gg))
 !$OMP END TARGET DATA
    return
 #endif
@@ -633,7 +635,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
    end if
 
 !$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
-   call gpu_fftbox_c2c_op(plan%gpu_plan_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff), c_loc(gg))
+   call gpu_fftbox_c2c_op(plan%gpu_plan_dpc, plan%gpu_stream_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff), c_loc(gg))
 !$OMP END TARGET DATA
    return
 #endif
@@ -1060,8 +1062,7 @@ subroutine fftpad_dpc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, 
 
 !Local variables-------------------------------
 !scalars
- integer :: fftalg,fftalga,fftalgc,ncount
- integer :: ivz !vz_d
+ integer :: fftalg,fftalga,fftalgc,ncount, ivz
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: fofr(:,:,:,:,:), fofrvz(:,:)
@@ -1276,6 +1277,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    12, 18, 15, 13, 18, 15, &
    12, 18, 15, 15, 21, 18  &
  ], [6, NSETS])
+ !pars = 10 * pars
 
  if (gpu_option /= ABI_GPU_DISABLED) then
    ! Augmentation is not supported for GPUS.
@@ -1289,7 +1291,6 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
  call fftalg_info(fftalg, library, cplex_mode, padding_mode)
 
  do iset=1,SIZE(pars,DIM=2)
-   !if (iset /= 1) cycle
    nx =pars(1,iset);  ny=pars(2,iset);  nz=pars(3,iset)
    ldx=pars(4,iset); ldy=pars(5,iset); ldz=pars(6,iset)
 
@@ -1347,7 +1348,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    call box_plan%execute(ffsp, ggsp, +1, ndat)
    call box_plan%execute(ggsp, ffsp, -1, ndat)
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(from:ffsp, ggsp) IF (gpu_option == ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(from:ffsp) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
@@ -1412,7 +1413,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    call box_plan%execute(ff, gg, +1, ndat)
    call box_plan%execute(gg, ff, -1, ndat)
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(from:ff, gg) IF (gpu_option == ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(from:ff) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
 
    ierr = COUNT(ABS(ff - ff_ref) > ATOL_DP)
@@ -5059,7 +5060,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
    !end do
 
 !!$OMP TARGET DATA USE_DEVICE_ADDR(ur)
-!    call gpu_fftbox_c2c_ip(plan%gpu_plan_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ur))
+!    call gpu_fftbox_c2c_ip(plan%gpu_plan_spc, plan%gpu_stream_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ur))
 !!$OMP END TARGET DATA
 #endif
  end if
