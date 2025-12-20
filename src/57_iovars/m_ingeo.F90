@@ -43,6 +43,7 @@ module m_ingeo
 
  public :: ingeo        ! Initialize geometry variables for the ABINIT code.
  public :: invacuum     ! Determine whether there is vacuum along some of the primitive directions
+ public :: checkspvec   ! Check the consistency of spin-related input vectors with the spin quantization axis
 !!***
 
 contains
@@ -171,10 +172,10 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_ax
  integer :: bckbrvltt,brvltt,chkprim,chkprim_fake,expert_user
  integer :: fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
  integer :: invar_z,ipsp,irreducible,isym,itranslat,itypat,jsym,marr,mismatch_fft_tnons,multi,multiplicity,natom_uc,natfix,natrd
- integer :: nobj,noncoll,norm,nptsym,nsym_now,ntranslat,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
+ integer :: nobj,noncoll,nptsym,nsym_now,ntranslat,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tgenafm,tnatrd,tread,try_primitive,tscalecart,tspgroupma,tread_geo,tread_cart
  integer :: txcart,txred,txrandom,use_inversion
- real(dp) :: amu_default,ucvol,sumalch,alpha,beta
+ real(dp) :: amu_default,ucvol,sumalch
  character(len=1000) :: msg
  character(len=lenstr) :: geo_string
  type(atomdata_t) :: atom
@@ -184,7 +185,7 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_ax
  integer,allocatable :: intarr(:)
  integer,allocatable :: is_translation(:)
  integer,allocatable :: ptsymrel(:,:,:),typat_read(:)
- real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3),spinaxis(3),m_cart(3),m_local(3),R(3,3)
+ real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),rprimd_primitive(3,3),scalecart(3)
  real(dp),allocatable :: mass_psp(:),tnons_cart(:,:),tnons_new(:,:),translations(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
@@ -569,59 +570,8 @@ end do
 
    call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'spinat_cart',tread_cart,'DPR')
    if(tread_cart==1) spinat_cart(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
-   spinaxis(:) = dtset%spinaxis(:)
-   norm = sqrt(dot_product(dtset%spinaxis(1:3), dtset%spinaxis(1:3)))
-   spinaxis(:) = spinaxis(:)/norm
-
-   if (all(abs(spinaxis(:)-(/ 0.0_dp, 0.0_dp, 1.0_dp /)) < tol8)) then
-     if (tread_cart==1) then
-       if (tread==1) then
-         ABI_COMMENT('Both spinat and spinat_cart are set; spinat_cart will be used.')
-       end if
-       spinat(1:3,1:natom) = reshape(dprarr(1:3*natom), [3, natom])
-       tread = 1
-     end if
-
-   else
-
-     if (tread_cart==0 .and. tread==0) then
-       if (nspden==4 .or. (nspden==2 .and. nsppol==1)) then
-         write(msg, '(5a)' )&
-         'When nspden=4 or (nspden==2 and nsppol==1), and a non-trivial spinaxis is set,',ch10,&
-         'one of spinat or spinat_cart must be defined in the input file.',ch10,&
-         'Action: define spinat_cart (Cartesian) or spinat (local spin frame),',ch10,&
-         'or use nspden=1 in your input file.'
-         ABI_ERROR(msg)
-       end if
-     else if (tread_cart==0) then
-       write(msg,'(3a)') 'Spinaxis is defined, but only spinat is present.',ch10,&
-                         'Action: please use spinat_cart (Cartesian) instead of spinat when spinaxis is set.'
-       ABI_ERROR(msg)
-     else ! tread_cart=1, tread=0/1
-       if (tread==1) then
-         ABI_COMMENT('Both spinat and spinat_cart are set; spinat_cart will be used.')
-       end if
-
-       call geteuler(spinaxis, alpha, beta)
-
-       do iatom = 1, natom
-         m_cart(1) = dprarr(3*(iatom-1)+1)
-         m_cart(2) = dprarr(3*(iatom-1)+2)
-         m_cart(3) = dprarr(3*(iatom-1)+3)
-
-         call cart2spinaxis(alpha, beta, R, m_cart, m_local)
-         spinat(1:3,iatom) = m_local(1:3)
-       end do
-       tread = 1
-     end if
-   end if
-   if (tread==0 .and. (nspden==4.or.(nspden==2.and.nsppol==1))) then
-     write(msg, '(5a)' )&
-      'When nspden=4 or (nspden==2 and nsppol==1), one of spinat or spinat_cart must be',ch10,&
-      'defined in the input file, which is apparently not the case.',ch10,&
-      'Action: define spinat (local frame) or spinat_cart (Cartesian), or use nspden=1 in your input file.'
-     ABI_ERROR(msg)
-   end if
+   
+   call checkspvec('spinat',natom,dtset%spinaxis,tread,tread_cart,spinat,spinat_cart,spinat) 
 
    ! nucdipmom is read for each irreducible atom, from 1 to natom
    nucdipmom=zero
@@ -673,36 +623,8 @@ end do
 
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'spinat_cart',tread_cart,'DPR')
    if(tread_cart==1) spinat_cart(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natom])
-   spinaxis(:) = dtset%spinaxis(:)
-   norm = sqrt(dot_product(dtset%spinaxis(1:3), dtset%spinaxis(1:3)))
-   spinaxis(:) = spinaxis(:)/norm
-   if (tread_cart==0) then
-     if (any(abs(spinaxis(:)-(/ 0.0_dp, 0.0_dp, 1.0_dp /)) > tol8)) then
-       if (tread==1) then
-         write(msg,'(3a)') 'Spinaxis is defined, but only spinat is present.',ch10,&
-                           'Action: please use spinat_cart (Cartesian) instead of spinat when spinaxis is set.'
-         ABI_ERROR(msg)
-       end if
-     end if
-   else 
-     if (tread==1) then
-       ABI_COMMENT('Both spinat and spinat_cart are set; spinat_cart will be used.')
-     end if
-     if (all(abs(spinaxis(:)-(/ 0.0_dp, 0.0_dp, 1.0_dp /)) < tol8)) then
-       spinat(1:3,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
-     else
-       call geteuler(spinaxis, alpha, beta)
-
-       do iatom = 1, natrd
-         m_cart(1) = dprarr(3*(iatom-1)+1)
-         m_cart(2) = dprarr(3*(iatom-1)+2)
-         m_cart(3) = dprarr(3*(iatom-1)+3)
-         call cart2spinaxis(alpha, beta, R, m_cart, m_local)
-         spinat(1:3,iatom) = m_local(1:3)
-       end do
-     end if
-   end if
-
+   call checkspvec('spinat',natrd,dtset%spinaxis,tread,tread_cart,spinat,spinat_cart,spinat) 
+    
    ! nucdipmom is read for each irreducible atom, from 1 to natrd
    nucdipmom=zero
    if(natnd > 0) then
@@ -2229,6 +2151,123 @@ subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
  ABI_FREE(dprarr)
 
 end subroutine invacuum
+!!***
+
+!!****f* m_ingeo/checkspvec
+!!
+!! NAME
+!! checkspvec
+!!
+!! FUNCTION
+!! Check the consistency of spin-related input vectors (such as spinat or
+!! hspinfield) with the spin quantization axis (spinaxis), and convert
+!! Cartesian coordnate to the local spinaxis coordinate when needed
+!!
+!! INPUTS
+!! name=character string identifying the spin-related quantity: 'spinat' or 'hspinfield'
+!! nitem=number of spin vectors to be treated: natom for spinat, 1 for hspinfield
+!! spinaxis(3)=spin quantization axis
+!! tread=integer flag (0 or 1), set to 1 if the local-frame quantity
+!!       (spinat or hspinfield) is provided in the input
+!! tread_cart=integer flag (0 or 1), set to 1 if the Cartesian quantity
+!!            (spinat_cart or hspinfield_cart) is provided in the input 
+!! vec_local(nvec,natom)=spin vectors defined in the local spin reference frame
+!! vec_cart(nvec,natom)=spin vectors defined in Cartesian coordinates
+!!
+!! OUTPUT
+!! vec_out=spin vectors in the local spin reference frame
+!!
+!! SOURCE
+
+subroutine checkspvec(name,nitem,spinaxis_in,tread,tread_cart,vec_local,vec_cart,vec_out)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nitem, tread, tread_cart
+ character(len=*),intent(in) :: name
+!arrays
+ real(dp),intent(in) :: spinaxis_in(3), vec_local(3,nitem), vec_cart(3,nitem)
+ real(dp),intent(out) :: vec_out(3,nitem)
+
+!Local variables-------------------------------
+!scalars
+ integer :: i
+ real(dp) :: alpha, beta, norm
+!arrays
+ real(dp) :: spinaxis(3), R(3,3), v_cart(3), v_tmp(3)
+ logical  :: trivial_axis
+ character(len=1000) :: msg
+
+! *************************************************************************
+
+ spinaxis(:) = spinaxis_in(:)
+ norm = sqrt(dot_product(spinaxis, spinaxis))
+ if (norm > tol8) spinaxis(:) = spinaxis(:) / norm
+ trivial_axis = all(abs(spinaxis(:) - (/0.0_dp, 0.0_dp, 1.0_dp/)) < tol8)
+
+! case 0: nothing provided 
+ if (tread == 0 .and. tread_cart == 0) return
+
+! case 1: only _cart provided
+ if (tread == 0 .and. tread_cart == 1) then
+
+   if (trivial_axis) then
+     vec_out(:,:) = vec_cart(:,:)
+   else
+     call geteuler(spinaxis, alpha, beta)
+     do i = 1, nitem
+       v_cart(:) = vec_cart(:, i)
+       call cart2spinaxis(alpha, beta, R, v_cart, v_tmp)
+       vec_out(:, i) = v_tmp(:)
+     end do
+   end if
+   return
+ end if
+ 
+! case 2: only local provided
+ if (tread == 1 .and. tread_cart == 0) then  
+   
+   if (trivial_axis) then
+     vec_out(:,:) = vec_local(:,:)
+   else
+     write(msg,'(a)') 'Spinaxis is defined, but only ' // trim(name) // ' is present.' // ch10 // &
+                 'Action: please use ' // trim(name) // '_cart (Cartesian) instead of ' // trim(name) // &
+                 ' when spinaxis is set.'
+     ABI_ERROR(msg)
+   end if
+   return
+ end if
+    
+! case 3: both provided and check consistency
+ if (tread == 1 .and. tread_cart == 1) then
+   
+   if (.not. trivial_axis) then
+     call geteuler(spinaxis, alpha, beta)
+   end if 
+
+   do i = 1, nitem
+     if (trivial_axis) then
+       v_tmp(:) = vec_cart(:,i)
+     else
+       v_cart(:) = vec_cart(:,i)
+       call cart2spinaxis(alpha, beta, R, v_cart, v_tmp)
+     end if
+     ! shule-CHECK: spinat == spinat_cart or rotate spinat_cart !!!!!
+     ! not consistent for local and _cart      
+     if (maxval(abs(v_tmp(:) - vec_local(:,i))) > tol8) then
+       write(msg,'(a,a,a,a,a,a,a,3(1x,es16.8),a,a,3(1x,es16.8),a,a)') &
+        'Both ', trim(name), ' and ', trim(name), '_cart are set but inconsistent.', ch10, &
+         trim(name)//' (local) =', vec_local(1,i), vec_local(2,i), vec_local(3,i), ch10, &
+         trim(name)//'_cart (cart) =', vec_cart(1,i), vec_cart(2,i), vec_cart(3,i), ch10, &
+        'Action: make them consistent or provide only one of them.'
+       ABI_ERROR(msg)
+     end if
+     vec_out(:,i) = v_tmp(:)
+   end do
+   return
+ end if
+
+end subroutine checkspvec
 !!***
 
 end module m_ingeo
