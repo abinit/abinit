@@ -1,6 +1,6 @@
   
 .Version    4.0 of ATDEP
-.Copyright (C) 1998-2025 ABINIT group (FB,JB).
+.Copyright (C) 1998-2025 ABINIT group (FB,JB,GA).
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -13,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date :  6 Apr 2025.
+.Starting date : 20 Dec 2025.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -304,7 +304,7 @@
  ISOTHERMAL modulus [in GPa]: Bulk Kt=   31.048 and Shear G=   17.594
  Average of Young modulus E [in GPa]=   44.397 Lame modulus Lambda [in GPa]=   19.318 and Poisson ratio Nu=    0.262
  Velocities [in m.s-1]: compressional Vp= 5612.318  shear Vs= 3188.619  and bulk Vphi= 4235.767
- Debye velocity [in m.s-1]= 3544.861  and temperature [in K]=  369.385
+ Debye velocity [in m.s-1]= 3544.861  and temperature [in K]=  369.386
  
  ========================= Reuss average (constant stress) ===================
  ISOTHERMAL modulus [in GPa]: Bulk Kt=   31.048 and Shear G=   14.962
@@ -316,11 +316,11 @@
  ISOTHERMAL modulus [in GPa]: Bulk Kt=   31.048 and Shear G=   16.278
  Average of Young modulus E [in GPa]=   41.569 Lame modulus Lambda [in GPa]=   20.196 and Poisson ratio Nu=    0.277
  Velocities [in m.s-1]: compressional Vp= 5521.223  shear Vs= 3067.024  and bulk Vphi= 4235.767
- Debye velocity [in m.s-1]= 3415.940  and temperature [in K]=  355.951
+ Debye velocity [in m.s-1]= 3415.940  and temperature [in K]=  355.952
  
  ========================= Elastic anisotropy =================================
  Elastic anisotropy index : A_U= 5*G_V/G_R + K_V/K_R - 6 =    0.880
- Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =   -0.000
+ Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =    0.000
  Shear anisotropy ratio : A_G= (G_V-G_R)/(G_V+G_R) =    0.081
   
  #############################################################################
@@ -337,7 +337,7 @@
   Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 
   Sigma   = (< (F_MD - F_TDEP)^2 >/<F_MD**2>)**0.5 
      <U_MD>            U_0              U_1              U_2            Delta_U          Delta_U2          Delta_F2          Sigma
- -1616.27747      -1616.28222          0.00000          0.00475          0.00000          0.02726          0.00350          0.88156
+ -1616.27761      -1616.28236          0.00000          0.00475          0.00000          0.02726          0.00350          0.88156
  NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=      0.03878
  
  See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files
