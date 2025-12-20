@@ -572,7 +572,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
        call xmpi_bcast(est_err,0,my_comm_atom,ierr)
      endif
      rcpaw%atm(itypat)%eigshift=eigshift/rcpaw%atm(itypat)%mult
-     write(std_out,*) 'ESTIMATED ERROR ON CORE EIGS OF TYPAT',itypat,' = ',est_err*27.211, ' eV'
+     write(std_out,*) 'ESTIMATED ERROR ON CORE EIGS OF TYPAT',itypat,' = ',est_err*Ha_eV, ' eV'
      if(allocated(rcpaw%atm(itypat)%eig)) rcpaw%atm(itypat)%eig=rcpaw%atm(itypat)%eig+eigshift/rcpaw%atm(itypat)%mult ! Average on atoms of same type
      if(rcpaw%atm(itypat)%nresid_c<rcpaw%tolnc.and.rcpaw%istep>rcpaw%updatepaw(2).and.rcpaw%updatepaw(2)/=0)then
         rcpaw%atm(itypat)%nc_conv=.true.
