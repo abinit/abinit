@@ -948,7 +948,6 @@ type, public :: dataset_type
  real(dp) :: slabzend
  real(dp) :: spbroad
  real(dp) :: spinmagntarget
- real(dp) :: spinmagntarget_cart
  real(dp) :: spnorbscl
  real(dp) :: stmbias
  real(dp) :: strfact
@@ -2383,7 +2382,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dfpt_sciss         = dtin%dfpt_sciss
  dtout%mbpt_sciss         = dtin%mbpt_sciss
  dtout%spinmagntarget     = dtin%spinmagntarget
- dtout%spinmagntarget_cart= dtin%spinmagntarget_cart
  dtout%spbroad            = dtin%spbroad
  dtout%spnorbscl          = dtin%spnorbscl
  dtout%stmbias            = dtin%stmbias
@@ -3853,7 +3851,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' spin_temperature_nstep spin_temperature_start'
  !list_vars=trim(list_vars)//' spin_tolavg spin_tolvar'
  list_vars=trim(list_vars)//' spin_var_temperature spin_write_traj'
- list_vars=trim(list_vars)//' spinat spinaxis spinat_cart spinmagntarget spinmagntarget_cart spmeth'
+ list_vars=trim(list_vars)//' spinat spinaxis spinat_cart spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
  list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'
  list_vars=trim(list_vars)//' structure '

@@ -42,7 +42,7 @@ module m_invars1
  use m_geometry, only : mkrdim, geteuler, cart2spinaxis
  use m_parser,   only : intagm, intagm_img, chkint_ge, ab_dimensions, geo_t, geo_from_abivar_string
  use m_inkpts,   only : inkpts, inqpt
- use m_ingeo,    only : ingeo, invacuum
+ use m_ingeo,    only : ingeo, invacuum, checkspvec
  use m_matrix,   only : mati3det
  use m_mep,      only : MEP_SOLVER_STEEPEST,NEB_ALGO_IMPROVED_TAN,NEB_CELL_ALGO_NONE,STRING_ALGO_SIMPLIFIED_EQUAL
  use m_fftcore,      only : get_cache_kb, fftalg_for_npfft
@@ -242,7 +242,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  dtsets(:)%ntypat=1 ; dtsets(0)%ntypat=0    ! Will always echo ntypat
  dtsets(:)%macro_uj=0
  dtsets(:)%maxnsym=384
-! dtsets(:)%use_gbt=0
  dtsets(:)%useria=0
  dtsets(:)%userib=0
  dtsets(:)%useric=0
@@ -372,10 +371,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! Read extfpmd calculations
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useextfpmd',tread,'INT')
    if(tread==1) dtsets(idtset)%useextfpmd=intarr(1)
-
-   ! Read use_gbt
-!   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gbt',tread,'INT')
-!   if (tread==1) dtsets(idtset)%use_gbt=intarr(1)
 
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
@@ -1193,7 +1188,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt,tread_cart, my_rank, nprocs
- real(dp) :: alpha,beta,cellcharge,cellcharge_min, fband,kptnrm,kptrlen,norm,sum_spinat,zelect,zval
+ real(dp) :: cellcharge,cellcharge_min, fband,kptnrm,kptrlen,norm,sum_spinat,zelect,zval
  character(len=1) :: blank=' ',string1
  character(len=2) :: string2,symbol
  character(len=500) :: msg
@@ -1201,7 +1196,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !arrays
  integer :: cond_values(4),vacuum(3)
  integer,allocatable :: iatfix(:,:),iatnd(:),intarr(:),istwfk(:),nband(:),typat(:)
- real(dp) :: acell(3),rprim(3,3),spinaxis(3),R(3,3),field_loc(3),field_cart(3),field_tmp(3)
+ real(dp) :: acell(3),rprim(3,3),field_loc(3),field_cart(3),hloc(3,1),hcart(3,1),hout(3,1) 
  real(dp),allocatable :: amu(:),atndlist(:,:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:)
  real(dp),allocatable :: nucdipmom(:,:),ratsph(:),reaalloc(:),spinat(:,:),spinat_cart(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
@@ -1436,11 +1431,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spinaxis',tread,'DPR')
  if (tread==1) dtset%spinaxis(1:3) = dprarr(1:3)
- norm = sqrt(sum(dtset%spinaxis(1:3)**2))
- if (norm < tol16) then
-   ABI_COMMENT('spinaxis is near zero; using default (0,0,1).')
-   dtset%spinaxis(1:3) = (/ 0._dp, 0._dp, 1._dp /)
- end if
 
 ! here are ZORA, nspinor, pawspnorb flags
 ! flag for ZORA (zeroth order regularized approximation for relativistic terms)
@@ -1528,20 +1518,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
  end if
 
-! if(tread==1) then
-!   if(dtset%nspden == 2)then
-!     write(msg,'(7a)')&
-!      'A spin magnetic field (hspinfield) has been specified without noncollinear spins.',ch10,&
-!      'Only the z-component of the magnetic field will be used.'
-!     ABI_WARNING(msg)
-!   else if (dtset%nspden == 1)then
-!     write(msg, '(a,a,a)' )&
-!      'A spin magnetic field (hspinfield) has been specified for a non-spin-polarized calculation.',ch10,&
-!      'Action: check the input file.'
-!     ABI_ERROR(msg)
-!   end if
-
-!   dtset%hspinfield(1:3) = dprarr(1:3)
  if (tread == 1) field_loc(1:3) = dprarr(1:3)
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'hspinfield_cart',tread_cart,'BFI')
@@ -1549,37 +1525,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    field_cart(1:3) = dprarr(1:3)
    dtset%hspinfield_cart(1:3) = field_cart(1:3)
  end if
- if (norm > tol8) spinaxis(:) = dtset%spinaxis(:)/norm
- trivial_axis = (all(abs(spinaxis(:)-(/ 0.0_dp, 0.0_dp, 1.0_dp /)) < tol8))
- if (tread==0 .and. tread_cart==1) then
-   if (trivial_axis) then
-     dtset%hspinfield(1:3) = field_cart(1:3)
-   else
-     call geteuler(spinaxis, alpha, beta)
-     call cart2spinaxis(alpha, beta, R, field_cart, field_tmp)
-     dtset%hspinfield(1:3) = field_tmp(1:3)
-   end if
 
- else if (tread==1 .and. tread_cart==0) then
-   if (trivial_axis) then
-     dtset%hspinfield(1:3) = field_loc(1:3)
-   else
-     write(msg,'(3a)') 'Spinaxis is defined, but only hspinfield is present.',ch10,&
-                       'Action: please use hspinfield_cart (Cartesian) instead of hspinfield when spinaxis is set.'
-     ABI_ERROR(msg)
-   end if
-
- else if (tread == 1 .and. tread_cart == 1) then
-    
-   ABI_COMMENT('Both hspinfield and hspinfield_cart are set; hspinfield_cart will be used.')
-   if (trivial_axis) then
-     dtset%hspinfield(1:3) = field_cart(1:3)
-   else
-     call geteuler(spinaxis, alpha, beta)
-     call cart2spinaxis(alpha, beta, R, field_cart, field_tmp)
-     dtset%hspinfield(1:3) = field_tmp(1:3)
-   end if
- end if
+ hloc(:,1)  = field_loc(:); hcart(:,1) = field_cart(:)
+ call checkspvec('hspinfield',1,dtset%spinaxis,tread,tread_cart,hloc,hcart,hout)
+ dtset%hspinfield(1:3) = hout(:,1) 
 
  if(tread==1 .or. tread_cart==1) then
    if(dtset%nspden == 2)then

@@ -98,7 +98,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  logical :: test,twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
  logical :: xc_is_lda,xc_is_gga,xc_is_mgga,xc_is_hybrid,xc_is_pot_only,xc_need_kden
- real(dp) :: dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom,zval
+ real(dp) :: dotval,dz,norm_spinat,norm_spinaxis,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom,zval
  character(len=1000) :: msg
  type(dataset_type) :: dt
 !arrays
@@ -3881,11 +3881,27 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
   end if
 
 !  spinaxis: only avaliable for SOC/cDFT/hspinfield
-   if (dt%spinaxis(1)**2 + dt%spinaxis(2)**2 > tol8*tol8 ) then
-     if(all(dt%so_psp(1:dt%ntypat)/=1) .and. & 
+  norm_spinaxis = sqrt(dot_product(dt%spinaxis, dt%spinaxis))
+  ABI_CHECK_NOSTOP(norm_spinaxis > tol8, 'Spinaxis must be a non-zero vector', ierr)
+  if (dt%nspden == 2) then
+    do iatom = 1, dt%natom 
+      norm_spinat = sqrt(dot_product(dt%spinat(:,iatom),dt%spinat(:,iatom)))
+      if (norm_spinat < tol8) cycle
+      dotval = dot_product(dt%spinat(:,iatom), dt%spinaxis)
+      if (abs(abs(dotval) - norm_spinat*norm_spinaxis) > tol8*norm_spinat*norm_spinaxis) then
+        write(msg, '(3a)')&
+         'In collinear (nspden=2) calculation, spinat must be parallel to spin quantization axis',ch10,&
+         'Action: modify spinat or spinaxis in your input file '
+        ABI_ERROR_NOSTOP(msg,ierr)
+      end if
+    end do
+  end if
+
+  if (dt%spinaxis(1)**2 + dt%spinaxis(2)**2 > tol8*tol8 ) then
+    if(all(dt%so_psp(1:dt%ntypat)/=1) .and. & 
         all(abs(dt%hspinfield(:))<tol8) .and. &
         all(dt%constraint_kind(1:dt%ntypat)==0)) then
-        ABI_WARNING("Spinaxis is defined but no SOC, hspinfield or cDFT is active. spinaxis will be ignored.")
+        ABI_WARNING("Spinaxis is defined but no SOC, hspinfield or cDFT is active. spinaxis will not affect the calculation.")
      end if
    end if
 
