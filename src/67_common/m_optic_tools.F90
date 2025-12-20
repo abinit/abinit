@@ -243,7 +243,7 @@ integer :: isp,i,j,isym,lx,ly,ik,ist1,ist2,iw,nkpt
 integer :: my_rank, nproc, my_k1, my_k2, ierr, fout1, mband, nsppol
 integer :: ncerr
 logical :: do_linewidth
-real(dp) :: deltav1v2, ha2ev, tmpabs, renorm_factor,emin,emax
+real(dp) :: deltav1v2, tmpabs, renorm_factor,emin,emax
 real(dp) :: ene,abs_eps,re_eps
 complex(dp) :: e1,e2,e12, e1_ep,e2_ep,e12_ep, b11,b12, ieta, w
 character(len=fnlen) :: fnam1
@@ -334,7 +334,6 @@ complex(dp), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:,
  ABI_MALLOC(re_refract, (nmesh))
  ieta=(zero, 1._dp)*brod
  renorm_factor=1._dp/(cryst%ucvol*dble(cryst%nsym))
- ha2ev=13.60569172*2._dp
 
  ! output file names
  fnam1=trim(fnam)//'-linopt.out'
@@ -443,7 +442,7 @@ complex(dp), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:,
  eps(1) = zero
  deltav1v2=zero; if (v1 == v2) deltav1v2=one
  do iw=2,nmesh
-   eps(iw)=deltav1v2+4._dp*pi*sum(chi(iw,:))
+   eps(iw)=deltav1v2+four*pi*sum(chi(iw,:))
  end do
 
  if (my_rank == master) then
@@ -458,13 +457,13 @@ complex(dp), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:,
    write(std_out,*) ' with broadening:',ieta
    write(fout1, '(a,es16.6)' ) ' #scissors shift:',sc
    write(std_out,*) 'and scissors shift:',sc
-   write(fout1, '(a,es16.6,a,es16.6,a)' ) ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
-   write(std_out,*) 'energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout1, '(a,es16.6,a,es16.6,a)' ) ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
+   write(std_out,*) 'energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout1,*)
    if(nsppol==1)write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))'
    if(nsppol==2)write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))         Spin up       Spin down '
    do iw=2,nmesh
-     ene=(iw-1)*de*ha2ev
+     ene=(iw-1)*de*Ha_eV
      if(nsppol==1)write(fout1, '(2es16.6)' ) ene,aimag(eps(iw))
      if(nsppol==2)write(fout1, '(4es16.6)' ) ene,aimag(eps(iw)),4._dp*pi*aimag(chi(iw,1)),4._dp*pi*aimag(chi(iw,2))
    end do
@@ -473,7 +472,7 @@ complex(dp), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:,
    if(nsppol==1)write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))'
    if(nsppol==2)write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))         Spin up       Spin down    +delta(diag) '
    do iw=2,nmesh
-     ene=(iw-1)*de*ha2ev
+     ene=(iw-1)*de*Ha_eV
      if(nsppol==1)write(fout1, '(2es16.6)' ) ene,dble(eps(iw))
      if(nsppol==2)write(fout1, '(5es16.6)' ) ene,dble(eps(iw)),4._dp*pi*dble(chi(iw,1)),4._dp*pi*dble(chi(iw,2)),deltav1v2
    end do
@@ -481,7 +480,7 @@ complex(dp), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:,
    write(fout1,*)
    write(fout1, '(a)' )' # Energy(eV)         abs(eps(w))'
    do iw=2,nmesh
-     ene=(iw-1)*de*ha2ev
+     ene=(iw-1)*de*Ha_eV
      abs_eps=abs(eps(iw))
      re_eps=dble(eps(iw))
      write(fout1, '(2es16.6)' ) ene,abs_eps
@@ -492,21 +491,21 @@ complex(dp), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:,
    write(fout1,*)
    write(fout1, '(a)' )' # Energy(eV)         Im(refractive index(w)) aka kappa'
    do iw=2,nmesh
-     ene=(iw-1)*de*ha2ev
+     ene=(iw-1)*de*Ha_eV
      write(fout1, '(2es16.6)' ) ene,im_refract(iw)
    end do
    write(fout1,*)
    write(fout1,*)
    write(fout1, '(a)' )' # Energy(eV)         Re(refractive index(w)) aka n'
    do iw=2,nmesh
-     ene=(iw-1)*de*ha2ev
+     ene=(iw-1)*de*Ha_eV
      write(fout1, '(2es16.6)' ) ene,re_refract(iw)
    end do
    write(fout1,*)
    write(fout1,*)
    write(fout1, '(a)' )' # Energy(eV)         Reflectivity(w) from vacuum, at normal incidence'
    do iw=2,nmesh
-     ene=(iw-1)*de*ha2ev
+     ene=(iw-1)*de*Ha_eV
      write(fout1, '(2es16.6)' ) ene, ((re_refract(iw)-one)**2+im_refract(iw)**2)/((re_refract(iw)+one)**2+im_refract(iw)**2)
    end do
    write(fout1,*)
@@ -518,7 +517,7 @@ complex(dp), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:,
      if ( re_refract(iw) > tol10 ) then
        tmpabs = aimag(eps(iw))*ene / re_refract(iw) / Sp_Lt / Bohr_meter * 1.0d-6
      end if
-     write(fout1, '(2es16.6)' ) ha2ev*ene, tmpabs
+     write(fout1, '(2es16.6)' ) Ha_eV*ene, tmpabs
    end do
 
    ! close output file
@@ -621,7 +620,7 @@ integer :: iw, mband,i,j,k,lx,ly,lz
 integer :: isp,isym,ik,ist1,ist2,istl,istn,istm
 integer :: my_rank, nproc, my_k1, my_k2, ierr
 integer :: fout1,fout2,fout3,fout4,fout5,fout6,fout7
-real(dp) :: f1,f2,f3, ha2ev
+real(dp) :: f1,f2,f3
 real(dp) :: ene,totre,totabs,totim
 real(dp) :: el,en,em,emin,emax,my_emin,my_emax
 real(dp) :: const_esu,const_au,au2esu,wmn,wnm,wln,wnl,wml,wlm, t1
@@ -697,18 +696,16 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
  idel=zi*brod
  !const_au=-1._dp/(cryst%ucvol*dble(cryst%nsym)) ! VT: 1 instead of 2 bc 2 is unexplained
  const_au=-2._dp/(cryst%ucvol*dble(cryst%nsym))
- au2esu=5.8300348177d-8
+ au2esu=5.8300348177d-8   ! REPLACE WITH DATA FROM DEFS_BASIS
  const_esu=const_au*au2esu
- ha2ev=13.60569172*2._dp
  if (do_decompo) then
-   ev2ha = 1._dp/ha2ev
+   ev2ha = 1._dp/Ha_eV
  end if ! do_decompo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !5.8300348177d-8 : au2esu : bohr*c*10^4/4pi*2*ry2ev
 !bohr: 5.2917ifc nlinopt.f907E-11
-!c: 2.99792458   velocity of sound
-!ry2ev: 13.60569172
-!au2esu=(5.29177E-11*2.99792458*1.0E4)/(13.60569172*2)
+!c: 2.99792458   velocity of light
+!au2esu=(5.29177E-11*2.99792458*1.0E4)/Ha_eV
 !this const includes (e^3*hbar^3*hbar^3)/(vol*hbar^5*m_e^3)
 !mass comes from converting P_mn to r_mn
 !hbar^3 comes from converting all frequencies to energies in denominator
@@ -1757,7 +1754,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    write(fout1, '(a,es16.6)' ) ' #tolerance:',tol
    write(fout1, '(a,es16.6,a)' ) ' #broadening:',brod,'Ha'
    write(fout1, '(a,es16.6,a)' ) ' #scissors shift:',sc,'Ha'
-   write(fout1, '(a,es16.6,a,es16.6,a)' ) ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout1, '(a,es16.6,a,es16.6,a)' ) ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout1, '(a)' )' # Energy      Tot-Im Chi(-2w,w,w)  Tot-Im Chi(-2w,w,w)'
    write(fout1, '(a)' )' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout1, '(a)' )' # '
@@ -1766,7 +1763,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    write(fout2, '(a,es16.6)') ' #tolerance:',tol
    write(fout2, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout2, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout2, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout2, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout2, '(a)')' # Energy      Tot-Re Chi(-2w,w,w)  Tot-Re Chi(-2w,w,w)'
    write(fout2, '(a)')' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout2, '(a)')' # '
@@ -1775,7 +1772,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    write(fout3, '(a,es16.6)') ' #tolerance:',tol
    write(fout3, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout3, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout3, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout3, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout3, '(a)')' # Energy(eV) Inter(2w) inter(1w) intra(2w) intra(1w)'
    write(fout3, '(a)')' # in esu'
    write(fout3, '(a)')' # '
@@ -1784,7 +1781,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    write(fout4, '(a,es16.6)') ' #tolerance:',tol
    write(fout4, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout4, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout4, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout4, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout4, '(a)')' # Energy(eV) Inter(2w) inter(1w) intra(2w) intra(1w)'
    write(fout4, '(a)')' # in esu'
    write(fout4, '(a)')' # '
@@ -1793,7 +1790,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    write(fout5, '(a,es16.6)') ' #tolerance:',tol
    write(fout5, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout5, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout5, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout5, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout5, '(a)')' # Energy(eV)  |TotChi(-2w,w,w)|   |Tot Chi(-2w,w,w)|'
    write(fout5, '(a)')' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout5, '(a)')' # '
@@ -1802,7 +1799,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    write(fout6, '(a,es16.6)') ' #tolerance:',tol
    write(fout6, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout6, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout6, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout6, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout6, '(a)')' # Energy(eV) Chi(w) Eta(w) Sigma(w)'
    write(fout6, '(a)')' # in esu'
    write(fout6, '(a)')' # '
@@ -1811,7 +1808,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    write(fout7, '(a,es16.6)') ' #tolerance:',tol
    write(fout7, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout7, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout7, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout7, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout7, '(a)')' # Energy(eV) Chi(w) Eta(w) Sigma(w)'
    write(fout7, '(a)')' # in esu'
    write(fout7, '(a)')' # '
@@ -1823,7 +1820,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        write(fout8, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
        write(fout8, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
        write(fout8, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
-       write(fout8, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+       write(fout8, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
        write(fout8, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Inter2w             Im Inter2w'
        write(fout8, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
        write(fout8, '(a)')' # '
@@ -1835,7 +1832,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        write(fout9, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
        write(fout9, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
        write(fout9, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
-       write(fout9, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+       write(fout9, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
        write(fout9, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Inter1w             Im Inter1w'
        write(fout9, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
        write(fout9, '(a)')' # '
@@ -1847,7 +1844,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        write(fout10, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
        write(fout10, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
        write(fout10, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
-       write(fout10, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+       write(fout10, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
        write(fout10, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Intra2w             Im Intra2w'
        write(fout10, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
        write(fout10, '(a)')' # '
@@ -1859,7 +1856,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        write(fout11, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
        write(fout11, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
        write(fout11, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
-       write(fout11, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+       write(fout11, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
        write(fout11, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Intra1w             Im Intra1w'
        write(fout11, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
        write(fout11, '(a)')' # '
@@ -1871,7 +1868,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        write(fout12, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
        write(fout12, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
        write(fout12, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
-       write(fout12, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+       write(fout12, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
        write(fout12, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Intra1wS            Im Intra1wS'
        write(fout12, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
        write(fout12, '(a)')' # '
@@ -1884,7 +1881,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        write(fout13, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
        write(fout13, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
        write(fout13, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
-       write(fout13, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+       write(fout13, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
        write(fout13, '(a)')' # Energy(eV)  n valence   m conduction   Re Intra2w             Im Intra2w'
        write(fout13, '(a)')' # eV                                     *10^-12 m/V SI units   *10^-12 m/V SI units '
        write(fout13, '(a)')' # '
@@ -1894,7 +1891,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
        write(fout14, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
        write(fout14, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
        write(fout14, '(a,es16.6,a)') ' #energy decompo input:',w_decompo,'eV'
-       write(fout14, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+       write(fout14, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
        write(fout14, '(a)')' # Energy(eV)  n valence   m conduction   Re Intra2w             Im Intra2w'
        write(fout14, '(a)')' # eV                                     *10^-12 m/V SI units   *10^-12 m/V SI units '
        write(fout14, '(a)')' # '
@@ -1907,7 +1904,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    if (.not.do_antiresonant) then
      do iw=2,nmesh
        ene=(iw-1)*de
-       ene=ene*ha2ev
+       ene=ene*Ha_eV
 
        totim=aimag(inter2w(iw)+inter1w(iw)+intra2w(iw)+intra1w(iw)+intra1wS(iw) + &
                    inter2wa(iw)+inter1wa(iw)+intra2wa(iw)+intra1wa(iw)+intra1wSa(iw))/1.d-7
@@ -1945,7 +1942,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
    else
      do iw=2,nmesh
        ene=(iw-1)*de
-       ene=ene*ha2ev
+       ene=ene*Ha_eV
 
        totim=aimag(inter2w(iw)+inter1w(iw)+intra2w(iw)+intra1w(iw)+intra1wS(iw))/1.d-7
        write(fout1,'(f15.6,2es15.6)') ene,totim,totim*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
@@ -1977,7 +1974,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
      do iw=2,nmesh
        if (iw==iw_tgt) then
          ene=(iw-1)*de
-         ene=ene*ha2ev
+         ene=ene*Ha_eV
 
          do istn=1,nband_sum
            do istm=1,nband_sum
@@ -2081,7 +2078,7 @@ complex(dp), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
      write(std_out,*) ' '
    end if
    write(std_out,*) 'scissors shift:',sc,'Hartree'
-   write(std_out,*) 'energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Hartree'
+   write(std_out,*) 'energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Hartree'
  end if
 
  ! deallocate local arrays
@@ -2204,7 +2201,6 @@ subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
  integer :: i,j,k,lx,ly,lz
  integer :: isp,isym,ik
  integer :: ist1,istl,istn,istm, mband
- real(dp) :: ha2ev
  real(dp) :: ene,totre,totabs,totim
  real(dp) :: el,en,em
  real(dp) :: emin,emax,my_emin,my_emax
@@ -2245,15 +2241,13 @@ subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
  idel=zi*brod
 ! Disable symmetries for now
  const_au=-2._dp/(cryst%ucvol*dble(cryst%nsym))
- au2esu=5.8300348177d-8
+ au2esu=5.8300348177d-8   ! REPLACE WITH DATA FROM DEFS_BASIS
  const_esu=const_au*au2esu
- ha2ev=13.60569172*2._dp
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !5.8300348177d-8 : au2esu : bohr*c*10^4/4pi*2*ry2ev
 !bohr: 5.2917ifc nlinopt.f907E-11
-!c: 2.99792458   velocity of sound
-!ry2ev: 13.60569172
-!au2esu=(5.29177E-11*2.99792458*1.0E4)/(13.60569172*2)
+!c: 2.99792458   velocity of light
+!au2esu=(5.29177E-11*2.99792458*1.0E4)/Ha_eV
 !this const includes (e^3*hbar^3*hbar^3)/(vol*hbar^5*m_e^3)
 !mass comes from converting P_mn to r_mn
 !hbar^3 comes from converting all frequencies to energies in denominator
@@ -2556,7 +2550,7 @@ subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
    write(fout1, '(a,es16.6)' ) ' #tolerance:',tol
    write(fout1, '(a,es16.6,a)' ) ' #broadening:',brod,'Ha'
    write(fout1, '(a,es16.6,a)' ) ' #scissors shift:',sc,'Ha'
-   write(fout1, '(a,es16.6,a,es16.6,a)' ) ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout1, '(a,es16.6,a,es16.6,a)' ) ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout1, '(a)' )' # Energy      Tot-Im Chi(-w,w,0)  Tot-Im Chi(-w,w,0)'
    write(fout1, '(a)' )' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout1, '(a)' )' # '
@@ -2565,7 +2559,7 @@ subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
    write(fout2, '(a,es16.6)') ' #tolerance:',tol
    write(fout2, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout2, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout2, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout2, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout2, '(a)')' # Energy      Tot-Re Chi(-w,w,0)  Tot-Re Chi(-w,w,0)'
    write(fout2, '(a)')' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout2, '(a)')' # '
@@ -2574,7 +2568,7 @@ subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
    write(fout3, '(a,es16.6)') ' #tolerance:',tol
    write(fout3, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout3, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout3, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout3, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout3, '(a)')' # Energy(eV) Chi(w) Eta(w) Sigma(w)'
    write(fout3, '(a)')' # in esu'
    write(fout3, '(a)')' # '
@@ -2583,7 +2577,7 @@ subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
    write(fout4, '(a,es16.6)') ' #tolerance:',tol
    write(fout4, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout4, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout4, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout4, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout4, '(a)')' # Energy(eV) Chi(w) Eta(w) Sigma(w)'
    write(fout4, '(a)')' # in esu'
    write(fout4, '(a)')' # '
@@ -2592,7 +2586,7 @@ subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
    write(fout5, '(a,es16.6)') ' #tolerance:',tol
    write(fout5, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout5, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout5, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout5, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout5, '(a)')' # Energy(eV)  |TotChi(-w,w,0)|   |Tot Chi(-w,w,0)|'
    write(fout5, '(a)')' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout5, '(a)')' # '
@@ -2602,7 +2596,7 @@ subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
    totabs=zero
    do iw=2,nmesh
      ene=(iw-1)*de
-     ene=ene*ha2ev
+     ene=ene*Ha_eV
      totim=aimag(chi(iw)+eta(iw)+sigma(iw))/1.d-7
      write(fout1,'(f15.6,2es15.6)') ene,totim,totim*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
      totim=zero
@@ -2641,7 +2635,7 @@ subroutine linelop(icomp, itemp, nband_sum, cryst, ks_ebands, &
      write(std_out,*) ' '
    end if
    write(std_out,*) 'scissors shift:',sc,'Hartree'
-   write(std_out,*) 'energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Hartree'
+   write(std_out,*) 'energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Hartree'
 
  end if
 
@@ -2723,7 +2717,6 @@ logical, intent(in) :: do_antiresonant
 !Local variables -------------------------
 integer :: iw,i,j,k,lx,ly,lz,mband
 integer :: isp,isym,ik,ist1,istl,istn,istm
-real(dp) :: ha2ev
 real(dp) :: ene,totre,totabs,totim
 real(dp) :: el,en,em
 real(dp) :: emin,emax, my_emin,my_emax
@@ -2771,15 +2764,13 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  idel=zi*brod
  const_au=-2._dp/(cryst%ucvol*dble(cryst%nsym))
  !const_au=-2._dp/(cryst%ucvol)
- au2esu=5.8300348177d-8
+ au2esu=5.8300348177d-8 ! REPLACE WITH DATA FROM DEFS_BASIS
  const_esu=const_au*au2esu
- ha2ev=13.60569172*2._dp
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !5.8300348177d-8 : au2esu : bohr*c*10^4/4pi*2*ry2ev
 !bohr: 5.2917ifc nlinopt.f907E-11
-!c: 2.99792458   velocity of sound
-!ry2ev: 13.60569172
-!au2esu=(5.29177E-11*2.99792458*1.0E4)/(13.60569172*2)
+!c: 2.99792458   velocity of light
+!au2esu=(5.29177E-11*2.99792458*1.0E4)/Ha_eV
 !this const includes (e^3*hbar^3*hbar^3)/(vol*hbar^5*m_e^3)
 !mass comes from converting P_mn to r_mn
 !hbar^3 comes from converting all frequencies to energies in denominator
@@ -3125,7 +3116,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout1, '(a,es16.6)' ) ' #tolerance:',tol
    write(fout1, '(a,es16.6,a)' ) ' #broadening:',brod,'Ha'
    write(fout1, '(a,es16.6,a)' ) ' #scissors shift:',sc,'Ha'
-   write(fout1, '(a,es16.6,a,es16.6,a)' ) ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout1, '(a,es16.6,a,es16.6,a)' ) ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout1, '(a)' )' # Energy      Tot-Im Chi(-w,w,0)  Tot-Im Chi(-w,w,0)'
    write(fout1, '(a)' )' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout1, '(a)' )' # '
@@ -3134,7 +3125,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout2, '(a,es16.6)') ' #tolerance:',tol
    write(fout2, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout2, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout2, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout2, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout2, '(a)')' # Energy      Tot-Re Chi(-w,w,0)  Tot-Re Chi(-w,w,0)'
    write(fout2, '(a)')' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout2, '(a)')' # '
@@ -3143,7 +3134,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout3, '(a,es16.6)') ' #tolerance:',tol
    write(fout3, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout3, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout3, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout3, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout3, '(a)')' # Energy(eV) Inter(2w) inter(1w) intra(2w) intra(1w)'
    write(fout3, '(a)')' # in esu'
    write(fout3, '(a)')' # '
@@ -3152,7 +3143,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout4, '(a,es16.6)') ' #tolerance:',tol
    write(fout4, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout4, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout4, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout4, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout4, '(a)')' # Energy(eV) Inter(2w) inter(1w) intra(2w) intra(1w)'
    write(fout4, '(a)')' # in esu'
    write(fout4, '(a)')' # '
@@ -3161,7 +3152,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout5, '(a,es16.6)') ' #tolerance:',tol
    write(fout5, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout5, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout5, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout5, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout5, '(a)')' # Energy(eV)  |TotChi(-w,w,0)|   |Tot Chi(-w,w,0)|'
    write(fout5, '(a)')' # eV          *10^-7 esu        *10^-12 m/V SI units '
    write(fout5, '(a)')' # '
@@ -3170,7 +3161,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout6, '(a,es16.6)') ' #tolerance:',tol
    write(fout6, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout6, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout6, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout6, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout6, '(a)')' # Energy(eV) Chi(w) Eta(w) Sigma(w)'
    write(fout6, '(a)')' # in esu'
    write(fout6, '(a)')' # '
@@ -3179,7 +3170,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(fout7, '(a,es16.6)') ' #tolerance:',tol
    write(fout7, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
    write(fout7, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
-   write(fout7, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+   write(fout7, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Ha'
    write(fout7, '(a)')' # Energy(eV) Chi(w) Eta(w) Sigma(w)'
    write(fout7, '(a)')' # in esu'
    write(fout7, '(a)')' # '
@@ -3189,7 +3180,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    totabs=zero
    do iw=2,nmesh
      ene=(iw-1)*de
-     ene=ene*ha2ev
+     ene=ene*Ha_eV
 
      totim=aimag(chiw(iw)+chi2w(iw)+etaw(iw)+eta2w(iw)+sigmaw(iw))/1.d-7
      write(fout1,'(f15.6,2es15.6)') ene,totim,totim*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
@@ -3242,7 +3233,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
      write(std_out,*) ' '
    end if
    write(std_out,*) 'scissors shift:',sc,'Hartree'
-   write(std_out,*) 'energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Hartree'
+   write(std_out,*) 'energy window:',(emax-emin)*Ha_eV,'eV',(emax-emin),'Hartree'
 
  end if
 
