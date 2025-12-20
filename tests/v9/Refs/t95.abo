@@ -1,5 +1,5 @@
 
-.Version 10.5.8.4 of ABINIT, released Oct 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Nov 2025.
-- ( at 21h22 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h17 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/TestBot_MPI1/v9_t95/t95.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v9_t95/t95.abi
 - output file    -> t95.abo
 - root for input  files -> t95i
 - root for output files -> t95o
@@ -105,7 +105,7 @@ P           mkmem           1
            tsmear      1.00000000E-04 Hartree
             typat      1
           usekden           1
-           xangst      3.9688290644E+00  3.9688290644E+00  3.9688290644E+00
+           xangst      3.9688290791E+00  3.9688290791E+00  3.9688290791E+00
             xcart      7.5000000000E+00  7.5000000000E+00  7.5000000000E+00
              xred      5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl       29.00000
@@ -138,8 +138,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.11938
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/29_Cu_m.upf
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/29_Cu_m.upf
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/29_Cu_m.upf
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/29_Cu_m.upf
 - Cu Generated using ONCVPSP code by D. R. Hamann
 - 29.00000  19.00000  231026                  znucl, zion, pspdat
 12 -645642 2 -1 1516                          pspcod,pspxc,lmax,lloc,mmax
@@ -257,7 +257,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1      3.96882906442500     3.96882906442500     3.96882906442500
+    1      3.96882907908000     3.96882907908000     3.96882907908000
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -267,7 +267,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 15.000000000000 15.000000000000 15.000000000000 bohr
-              =  7.937658128850  7.937658128850  7.937658128850 angstroms
+              =  7.937658158160  7.937658158160  7.937658158160 angstroms
  prteigrs : about to open file t95o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.16379   Average Vxc (hartree)=  -0.16034
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -315,9 +315,9 @@ total_energy_dc     : -1.84723084097865E+02
   sigma(3 3)=  8.24216605E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.4249E+00 GPa]
-- sigma(1 1)=  2.42492856E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  2.42492856E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.42492856E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  2.42492897E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  2.42492897E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.42492897E+00  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -383,7 +383,7 @@ P           mkmem           1
            tsmear      1.00000000E-04 Hartree
             typat      1
           usekden           1
-           xangst      3.9688290644E+00  3.9688290644E+00  3.9688290644E+00
+           xangst      3.9688290791E+00  3.9688290791E+00  3.9688290791E+00
             xcart      7.5000000000E+00  7.5000000000E+00  7.5000000000E+00
              xred      5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl       29.00000
@@ -483,10 +483,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         41.6  wall=         41.7
+- Proc.   0 individual time (sec): cpu=         42.2  wall=         42.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         41.6  wall=         41.7
++Overall time at end (sec) : cpu=         42.2  wall=         42.2

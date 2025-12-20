@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 13 Sep 2025.
-- ( at 10h23 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h08 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v1_t45-t46-t47/t47.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v1_t45-t46-t47/t47.abi
 - output file    -> t47.abo
 - root for input  files -> t46o
 - root for output files -> t47o
@@ -94,8 +94,8 @@ P           mkmem           1
           spgroup           1
            toldfe      1.00000000E-12 Hartree
             typat      1  1
-           xangst     -1.1727785762E+00 -4.3578336881E-07 -5.5734578296E-08
-                       1.1727785762E+00  4.3578336881E-07  5.5734578296E-08
+           xangst     -1.1727785806E+00 -4.3578337042E-07 -5.5734578502E-08
+                       1.1727785806E+00  4.3578337042E-07  5.5734578502E-08
             xcart     -2.2162303236E+00 -8.2351122032E-07 -1.0532308911E-07
                        2.2162303236E+00  8.2351122032E-07  1.0532308911E-07
              xred     -1.8468586030E-01 -1.0293890254E-07 -1.3165386139E-08
@@ -135,8 +135,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 1, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -187,9 +187,9 @@ tolerances: {toldfe: 1.00E-12, }
   -9.75294   -6.05873   -2.65769   -1.04747   -1.04747
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -8.78954   -5.25777   -2.21784
+  -8.78954   -5.25778   -2.21784
 
- ETOT  2  -8.6731752244948     2.316E-07 1.346E-11 2.772E-04 5.343E-05 3.366E-01
+ ETOT  2  -8.6731752244947     2.316E-07 1.346E-11 2.772E-04 5.343E-05 3.366E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03853   Average Vxc (hartree)=  -0.22385
@@ -210,7 +210,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -6.7918E-01
  scfeig : Convergence criterion value (->0 at convergency)  -2.3614E-02
 
- ETOT  3  -8.6731751864806     3.801E-08 4.037E-10 3.709E-04 9.426E-05 3.367E-01
+ ETOT  3  -8.6731751864802     3.801E-08 4.037E-10 3.709E-04 9.426E-05 3.367E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03852   Average Vxc (hartree)=  -0.22385
@@ -223,7 +223,7 @@ tolerances: {toldfe: 1.00E-12, }
  Fermi (or HOMO) energy (eV) =  -1.04815   Average Vxc (eV)=  -6.09125
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75415   -6.05974   -2.65856   -1.04815   -1.04815
+  -9.75415   -6.05975   -2.65856   -1.04815   -1.04815
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79080   -5.25880   -2.21871
@@ -231,7 +231,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -1.0262E+00
  scfeig : Convergence criterion value (->0 at convergency)  -1.9809E-01
 
- ETOT  4  -8.6731749033325     2.831E-07 2.985E-09 1.323E-03 3.148E-04 3.370E-01
+ ETOT  4  -8.6731749033300     2.832E-07 2.985E-09 1.323E-03 3.148E-04 3.370E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03851   Average Vxc (hartree)=  -0.22385
@@ -244,7 +244,7 @@ tolerances: {toldfe: 1.00E-12, }
  Fermi (or HOMO) energy (eV) =  -1.04798   Average Vxc (eV)=  -6.09138
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75387   -6.05921   -2.65806   -1.04798   -1.04798
+  -9.75387   -6.05922   -2.65806   -1.04798   -1.04798
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79047   -5.25825   -2.21821
@@ -252,7 +252,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -2.7542E+00
  scfeig : Convergence criterion value (->0 at convergency)  -4.2961E-01
 
- ETOT  5  -8.6731746604867     2.428E-07 2.526E-09 2.140E-03 1.570E-04 3.371E-01
+ ETOT  5  -8.6731746604862     2.428E-07 2.526E-09 2.140E-03 1.570E-04 3.371E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03850   Average Vxc (hartree)=  -0.22386
@@ -271,9 +271,9 @@ tolerances: {toldfe: 1.00E-12, }
   -8.78978   -5.25775   -2.21779
  scfeig : Operator expectation value  -4.5902E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -3.6365E+00
- scfeig : Convergence criterion value (->0 at convergency)  -4.6239E-02
+ scfeig : Convergence criterion value (->0 at convergency)  -4.6238E-02
 
- ETOT  6  -8.6731746181169     4.237E-08 1.774E-10 2.257E-03 2.437E-05 3.372E-01
+ ETOT  6  -8.6731746181168     4.237E-08 1.774E-10 2.257E-03 2.437E-05 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03850   Average Vxc (hartree)=  -0.22386
@@ -292,7 +292,7 @@ tolerances: {toldfe: 1.00E-12, }
   -8.78962   -5.25776   -2.21782
  scfeig : Operator expectation value  -4.7485E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -3.7516E+00
- scfeig : Convergence criterion value (->0 at convergency)  -3.1319E-03
+ scfeig : Convergence criterion value (->0 at convergency)  -3.1318E-03
 
  ETOT  7  -8.6731746132928     4.824E-09 7.584E-12 2.269E-03 2.951E-06 3.372E-01
 
@@ -304,16 +304,16 @@ tolerances: {toldfe: 1.00E-12, }
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.32301   -0.19322   -0.08150
- Fermi (or HOMO) energy (eV) =  -1.04748   Average Vxc (eV)=  -6.09158
+ Fermi (or HOMO) energy (eV) =  -1.04749   Average Vxc (eV)=  -6.09158
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75297   -6.05873   -2.65768   -1.04748   -1.04748
+  -9.75297   -6.05873   -2.65768   -1.04749   -1.04749
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78956   -5.25777   -2.21783
  scfeig : Operator expectation value  -4.7632E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -3.7635E+00
- scfeig : Convergence criterion value (->0 at convergency)  -2.2517E-04
+ scfeig : Convergence criterion value (->0 at convergency)  -2.2516E-04
 
  ETOT  8  -8.6731746119130     1.380E-09 6.937E-13 2.272E-03 7.823E-07 3.372E-01
 
@@ -355,9 +355,9 @@ tolerances: {toldfe: 1.00E-12, }
   -8.78954   -5.25777   -2.21784
  scfeig : Operator expectation value  -4.7675E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -3.7675E+00
- scfeig : Convergence criterion value (->0 at convergency)  -1.9607E-06
+ scfeig : Convergence criterion value (->0 at convergency)  -1.9606E-06
 
- ETOT 10  -8.6731746114350     9.994E-11 6.958E-15 2.273E-03 5.735E-08 3.372E-01
+ ETOT 10  -8.6731746114350     9.996E-11 6.958E-15 2.273E-03 5.735E-08 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -378,7 +378,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -3.7678E+00
  scfeig : Convergence criterion value (->0 at convergency)  -2.0558E-07
 
- ETOT 11  -8.6731746114054     2.963E-11 7.373E-16 2.273E-03 1.635E-08 3.372E-01
+ ETOT 11  -8.6731746114053     2.964E-11 7.373E-16 2.273E-03 1.635E-08 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -397,9 +397,9 @@ tolerances: {toldfe: 1.00E-12, }
   -8.78954   -5.25777   -2.21784
  scfeig : Operator expectation value  -4.7678E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -3.7678E+00
- scfeig : Convergence criterion value (->0 at convergency)  -2.1984E-08
+ scfeig : Convergence criterion value (->0 at convergency)  -2.1983E-08
 
- ETOT 12  -8.6731746113971     8.235E-12 7.994E-17 2.273E-03 4.911E-09 3.372E-01
+ ETOT 12  -8.6731746113971     8.228E-12 7.994E-17 2.273E-03 4.911E-09 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -412,15 +412,15 @@ tolerances: {toldfe: 1.00E-12, }
  Fermi (or HOMO) energy (eV) =  -1.04747   Average Vxc (eV)=  -6.09158
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75294   -6.05873   -2.65769   -1.04747   -1.04747
+  -9.75295   -6.05873   -2.65769   -1.04747   -1.04747
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78954   -5.25777   -2.21784
  scfeig : Operator expectation value  -4.7679E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -3.7679E+00
- scfeig : Convergence criterion value (->0 at convergency)  -2.4329E-09
+ scfeig : Convergence criterion value (->0 at convergency)  -2.4328E-09
 
- ETOT 13  -8.6731746113946     2.556E-12 8.855E-18 2.273E-03 1.472E-09 3.372E-01
+ ETOT 13  -8.6731746113945     2.570E-12 8.855E-18 2.273E-03 1.472E-09 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -433,7 +433,7 @@ tolerances: {toldfe: 1.00E-12, }
  Fermi (or HOMO) energy (eV) =  -1.04747   Average Vxc (eV)=  -6.09158
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75294   -6.05873   -2.65769   -1.04747   -1.04747
+  -9.75295   -6.05873   -2.65769   -1.04747   -1.04747
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78954   -5.25777   -2.21784
@@ -441,7 +441,7 @@ tolerances: {toldfe: 1.00E-12, }
  scfeig : Inverse of renormalization factor  -3.7679E+00
  scfeig : Convergence criterion value (->0 at convergency)  -2.6976E-10
 
- ETOT 14  -8.6731746113938     7.869E-13 9.891E-19 2.273E-03 4.587E-10 3.372E-01
+ ETOT 14  -8.6731746113938     7.638E-13 9.891E-19 2.273E-03 4.587E-10 3.372E-01
 
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
@@ -454,13 +454,13 @@ tolerances: {toldfe: 1.00E-12, }
  Fermi (or HOMO) energy (eV) =  -1.04747   Average Vxc (eV)=  -6.09158
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75294   -6.05873   -2.65769   -1.04747   -1.04747
+  -9.75295   -6.05873   -2.65769   -1.04747   -1.04747
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78954   -5.25777   -2.21784
  scfeig : Operator expectation value  -4.7679E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -3.7679E+00
- scfeig : Convergence criterion value (->0 at convergency)  -3.0475E-11
+ scfeig : Convergence criterion value (->0 at convergency)  -3.0494E-11
 
  ETOT 15  -8.6731746113935     2.434E-13 1.115E-19 2.273E-03 1.410E-10 3.372E-01
 
@@ -475,18 +475,18 @@ tolerances: {toldfe: 1.00E-12, }
  Fermi (or HOMO) energy (eV) =  -1.04747   Average Vxc (eV)=  -6.09158
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75294   -6.05873   -2.65769   -1.04747   -1.04747
+  -9.75295   -6.05873   -2.65769   -1.04747   -1.04747
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78954   -5.25777   -2.21784
  scfeig : Operator expectation value  -4.7679E+00 (extremal eigenvalue * diemix)
  scfeig : Inverse of renormalization factor  -3.7679E+00
- scfeig : Convergence criterion value (->0 at convergency)  -3.4266E-12
+ scfeig : Convergence criterion value (->0 at convergency)  -3.3817E-12
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.53919288E-04  sigma(3 2)=  1.68313845E-15
-  sigma(2 2)=  1.11135830E-04  sigma(3 1)= -2.17488470E-11
-  sigma(3 3)=  1.11135830E-04  sigma(2 1)=  9.68906184E-11
+  sigma(1 1)=  2.53919288E-04  sigma(3 2)=  1.68274593E-15
+  sigma(2 2)=  1.11135830E-04  sigma(3 1)= -2.17488480E-11
+  sigma(3 3)=  1.11135830E-04  sigma(2 1)=  9.68906180E-11
 
 
 --- !ResultsGS
@@ -504,16 +504,16 @@ etotal    :  -8.67317461E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.84939643E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.53919288E-04,   9.68906184E-11,  -2.17488470E-11, ]
-- [  9.68906184E-11,   1.11135830E-04,   1.68313845E-15, ]
-- [ -2.17488470E-11,   1.68313845E-15,   1.11135830E-04, ]
+- [  2.53919288E-04,   9.68906180E-11,  -2.17488480E-11, ]
+- [  9.68906180E-11,   1.11135830E-04,   1.68274593E-15, ]
+- [ -2.17488480E-11,   1.68274593E-15,   1.11135830E-04, ]
 pressure_GPa:  -4.6700E+00
 xred      :
 - [ -1.8469E-01,  -1.0294E-07,  -1.3165E-08, Si]
 - [  1.8469E-01,   1.0294E-07,   1.3165E-08, Si]
 cartesian_forces: # hartree/bohr
-- [ -1.10896509E-05,   3.36030411E-08,   5.11342803E-09, ]
-- [  1.10896509E-05,  -3.36030411E-08,  -5.11342803E-09, ]
+- [ -1.10896509E-05,   3.36030411E-08,   5.11342781E-09, ]
+- [  1.10896509E-05,  -3.36030411E-08,  -5.11342781E-09, ]
 force_length_stats: {min:   1.10897030E-05, max:   1.10897030E-05, mean:   1.10897030E-05, }
 ...
 
@@ -532,21 +532,21 @@ force_length_stats: {min:   1.10897030E-05, max:   1.10897030E-05, mean:   1.108
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   52.460E-21; max=  11.148E-20
-   0.0000  0.0000  0.0000    1  9.48488E-20 kpt; spin; max resid(k); each band:
+ Mean square residual over all n,k,spin=   52.459E-21; max=  11.148E-20
+   0.0000  0.0000  0.0000    1  9.48470E-20 kpt; spin; max resid(k); each band:
   8.48E-20 5.73E-21 9.48E-20 7.43E-21 7.50E-21
-   0.0000  0.0000  0.0000    2  1.11484E-19 kpt; spin; max resid(k); each band:
+   0.0000  0.0000  0.0000    2  1.11482E-19 kpt; spin; max resid(k); each band:
   1.02E-19 6.12E-21 1.11E-19
  reduced coordinates (array xred) for    2 atoms
       -0.184685860300     -0.000000102939     -0.000000013165
        0.184685860300      0.000000102939      0.000000013165
  rms dE/dt=  1.0844E-04; max dE/dt=  2.6563E-04; dE/dt below (all hartree)
-    1       0.000265628587     -0.000000268838     -0.000000040918
-    2      -0.000000523034      0.000000268811      0.000000040897
+    1       0.000265628590     -0.000000268838     -0.000000040918
+    2      -0.000000523031      0.000000268811      0.000000040897
 
  cartesian coordinates (angstrom) at end:
-    1     -1.17277857623516    -0.00000043578337    -0.00000005573458
-    2      1.17277857623516     0.00000043578337     0.00000005573458
+    1     -1.17277858056567    -0.00000043578337    -0.00000005573458
+    2      1.17277858056567     0.00000043578337     0.00000005573458
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00001108965087     0.00000003360304     0.00000000511343
@@ -554,11 +554,11 @@ force_length_stats: {min:   1.10897030E-05, max:   1.10897030E-05, mean:   1.108
  frms,max,avg= 6.4026430E-06 1.1089651E-05  -1.105E-05  1.666E-12  1.311E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00057025272795     0.00000172793770     0.00000026294302
-    2      0.00057025272795    -0.00000172793770    -0.00000026294302
- frms,max,avg= 3.2923711E-04 5.7025273E-04  -5.680E-04  8.568E-11  6.742E-11 e/A
+    1     -0.00057025277586     0.00000172793785     0.00000026294303
+    2      0.00057025277586    -0.00000172793785    -0.00000026294303
+ frms,max,avg= 3.2923714E-04 5.7025278E-04  -5.680E-04  8.568E-11  6.742E-11 e/A
  length scales= 12.000000000000  8.000000000000  8.000000000000 bohr
-              =  6.350126503080  4.233417668720  4.233417668720 angstroms
+              =  6.350126526528  4.233417684352  4.233417684352 angstroms
  prteigrs : about to open file t47o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -570,7 +570,7 @@ force_length_stats: {min:   1.10897030E-05, max:   1.10897030E-05, mean:   1.108
  Fermi (or HOMO) energy (eV) =  -1.04747   Average Vxc (eV)=  -6.09158
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75294   -6.05873   -2.65769   -1.04747   -1.04747
+  -9.75295   -6.05873   -2.65769   -1.04747   -1.04747
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78954   -5.25777   -2.21784
@@ -607,16 +607,16 @@ force_length_stats: {min:   1.10897030E-05, max:   1.10897030E-05, mean:   1.108
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.53918649768307E+00
-hartree             :  1.45934092244596E+00
-xc                  : -3.21819921316635E+00
+kinetic             :  2.53918649768305E+00
+hartree             :  1.45934092244593E+00
+xc                  : -3.21819921316634E+00
 Ewald energy        : -5.59006397620961E+00
 psp_core            :  2.98722879456821E-02
-local_psp           : -5.84110951489666E+00
-non_local_psp       :  1.94779838480438E+00
-total_energy        : -8.67317461139353E+00
-total_energy_eV     : -2.36009083635436E+02
-band_energy         : -1.35345828356958E+00
+local_psp           : -5.84110951489660E+00
+non_local_psp       :  1.94779838480435E+00
+total_energy        : -8.67317461139354E+00
+total_energy_eV     : -2.36009104329466E+02
+band_energy         : -1.35345828356956E+00
 ...
 
 
@@ -634,18 +634,18 @@ band_energy         : -1.35345828356958E+00
     1      -0.085998475236     -0.000000033634     -0.000000058440
     2       0.086013434356      0.000000033445      0.000000058243
  residual contribution to red. grads
-    1       0.003463888090      0.000000093427      0.000000237250
-    2       0.003469672419     -0.000000091797     -0.000000236754
+    1       0.003463888092      0.000000093427      0.000000237250
+    2       0.003469672422     -0.000000091797     -0.000000236754
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.53919288E-04  sigma(3 2)=  1.68313845E-15
-  sigma(2 2)=  1.11135830E-04  sigma(3 1)= -2.17488470E-11
-  sigma(3 3)=  1.11135830E-04  sigma(2 1)=  9.68906184E-11
+  sigma(1 1)=  2.53919288E-04  sigma(3 2)=  1.68274593E-15
+  sigma(2 2)=  1.11135830E-04  sigma(3 1)= -2.17488480E-11
+  sigma(3 3)=  1.11135830E-04  sigma(2 1)=  9.68906180E-11
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -4.6700E+00 GPa]
-- sigma(1 1)=  7.47056213E+00  sigma(3 2)=  4.95196346E-11
-- sigma(2 2)=  3.26972845E+00  sigma(3 1)= -6.39873063E-07
-- sigma(3 3)=  3.26972845E+00  sigma(2 1)=  2.85061993E-06
+- sigma(1 1)=  7.47056338E+00  sigma(3 2)=  4.95080947E-11
+- sigma(2 2)=  3.26972900E+00  sigma(3 1)= -6.39873200E-07
+- sigma(3 3)=  3.26972900E+00  sigma(2 1)=  2.85062040E-06
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -657,8 +657,8 @@ band_energy         : -1.35345828356958E+00
              ecut      7.00000000E+00 Hartree
            enunit           2
            etotal     -8.6731746114E+00
-            fcart     -1.1089650873E-05  3.3603041091E-08  5.1134280274E-09
-                       1.1089650873E-05 -3.3603041091E-08 -5.1134280274E-09
+            fcart     -1.1089650873E-05  3.3603041071E-08  5.1134278105E-09
+                       1.1089650873E-05 -3.3603041071E-08 -5.1134278105E-09
 -          fftalg         512
             intxc           1
            irdwfk           1
@@ -683,11 +683,11 @@ P           mkmem           1
            prtvol          10
           spgroup           1
            strten      2.5391928838E-04  1.1113582994E-04  1.1113582987E-04
-                       1.6831384522E-15 -2.1748847027E-11  9.6890618419E-11
+                       1.6827459349E-15 -2.1748848011E-11  9.6890617966E-11
            toldfe      1.00000000E-12 Hartree
             typat      1  1
-           xangst     -1.1727785762E+00 -4.3578336881E-07 -5.5734578296E-08
-                       1.1727785762E+00  4.3578336881E-07  5.5734578296E-08
+           xangst     -1.1727785806E+00 -4.3578337042E-07 -5.5734578502E-08
+                       1.1727785806E+00  4.3578337042E-07  5.5734578502E-08
             xcart     -2.2162303236E+00 -8.2351122032E-07 -1.0532308911E-07
                        2.2162303236E+00  8.2351122032E-07  1.0532308911E-07
              xred     -1.8468586030E-01 -1.0293890254E-07 -1.3165386139E-08
@@ -788,10 +788,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.5  wall=          0.6
+- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.5  wall=          0.6
++Overall time at end (sec) : cpu=          0.6  wall=          0.7

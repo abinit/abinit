@@ -1,5 +1,5 @@
 
-.Version 10.3.6 of ABINIT, released Feb 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  9 Apr 2025.
-- ( at 00h52 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h17 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gallemand_develop/tests/TestBot_MPI1/v9_t62-t63-t64-t65/t65.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v9_t62-t63-t64-t65/t65.abi
 - output file    -> t65.abo
 - root for input  files -> t65i
 - root for output files -> t65o
@@ -386,7 +386,7 @@ P           mkmem2        145
                        1.3968612519E+00  3.9509202543E+00  2.4194346594E+00
                        0.0000000000E+00  0.0000000000E+00  4.8388693187E+00
      sigma_erange1     0.00000000E+00  0.00000000E+00 Hartree
-     sigma_erange2    -7.34986508E-03 -7.34986508E-03 Hartree
+     sigma_erange2    -7.34986444E-03 -7.34986444E-03 Hartree
           spgroup         225
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -468,8 +468,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05308
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gallemand_develop/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/gallemand_develop/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998)
 - 29.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -619,7 +619,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
-              =  0.529177208590  0.529177208590  0.529177208590 angstroms
+              =  0.529177210544  0.529177210544  0.529177210544 angstroms
  prteigrs : about to open file t65o_DS1_EIG
  Eigenvalues (hartree) for nkpt=  10  k points:
  kpt#   1, nband= 20, wtk=  0.00586, kpt= -0.4375  0.0625  0.0000 (reduced coord)
@@ -722,12 +722,12 @@ meta: {optdriver: 7, eph_task: -4, }
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:    -0.4714031653E-03 (at units)
+ Average speed of sound partial sums:    -0.4714031651E-03 (at units)
 -                                   =          -1.0313 [km/s]
 
- Debye frequency from partial sums:    -0.4262233754E-03 (Ha)
--                                 =    -0.2804415090E+01 (THz)
--Debye temperature from partial sums:    -0.1345905372E+03 (K)
+ Debye frequency from partial sums:    -0.4262233752E-03 (Ha)
+-                                 =    -0.2804415088E+01 (THz)
+-Debye temperature from partial sums:    -0.1345906969E+03 (K)
 
 - Writing phonon DOS to netcdf file: t65o_DS2_PHDOS.nc
 --------------------------------------------------------------------------------
@@ -854,13 +854,13 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
 - Reading SERTA lifetimes and e-ph scattering operator from: t65o_DS2_SIGEPH.nc
 
 
- === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ === Computation of DOS, VV_DOS and VVTAU_DOS ===
  Linear tetrahedron method.
  Mesh step:  27.2 (meV) with npts: 4079
  From emin: -11.9 to emax:  99.1 (eV)
  Number of k-points in the IBZ: 145
- Fermi level:  -3.93798533E+00 (eV)
- Total electron DOS at Fermi level in states/eV:   2.11107940E-01
+ Fermi level:  -3.93798567E+00 (eV)
+ Total electron DOS at Fermi level in states/eV:   2.11107922E-01
  Total number of electrons at eF:    1.0
 
 
@@ -870,14 +870,14 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
  Temperature (K)              xx              yy              zz
             0.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
-          300.00    0.135174E+05    0.135174E+05    0.135174E+05
+          300.00    0.135173E+05    0.135173E+05    0.135173E+05
 
 
  Resistivity [micro-Ohm cm] using SERTA approximation
  Temperature (K)              xx              yy              zz
             0.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
-          300.00    0.369894E+02    0.369894E+02    0.369894E+02
+          300.00    0.369897E+02    0.369897E+02    0.369897E+02
 
 
  Seebeck [Volts / Kelvin] using SERTA approximation
@@ -891,7 +891,7 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
  Temperature (K)              xx              yy              zz
             1.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
-          300.00   -0.307289E-13    0.307289E-13   -0.307289E-13
+          300.00    0.614578E-13    0.000000E+00    0.307289E-13
 
 
  Peltier [Volts] using SERTA approximation
@@ -912,7 +912,7 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
  Temperature (K)              xx              yy              zz
             0.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
-          300.00    0.454780E+02    0.454780E+02    0.454780E+02
+          300.00    0.454783E+02    0.454783E+02    0.454783E+02
 
 
  Seebeck [Volts / Kelvin] using MRTA approximation
@@ -926,7 +926,7 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
  Temperature (K)              xx              yy              zz
             1.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
-          300.00    0.000000E+00    0.000000E+00    0.000000E+00
+          300.00    0.000000E+00   -0.307289E-13    0.307289E-13
 
 
  Peltier [Volts] using MRTA approximation
@@ -949,7 +949,7 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
  Resistivity [micro-Ohm cm] using IBTE
  Temperature (K)              xx              yy              zz       Converged
             0.00    0.000000E+00    0.000000E+00    0.000000E+00             yes
-          300.00    0.839254E+02    0.839254E+02    0.839254E+02             yes
+          300.00    0.839260E+02    0.839260E+02    0.839260E+02             yes
 
 
  Seebeck [Volts / Kelvin] using IBTE
@@ -961,7 +961,7 @@ K-point: [ 5.0000E-01,  3.1250E-01,  1.2500E-01], T:  300.0 [K], mu_e:   -4.054
  Kappa [W/m*K] using IBTE
  Temperature (K)              xx              yy              zz       Converged
             0.00    0.000000E+00    0.000000E+00    0.000000E+00             yes
-          300.00   -0.614578E-13    0.614578E-13    0.614578E-13             yes
+          300.00   -0.184373E-12   -0.921867E-13    0.921867E-13             yes
 
 
  Peltier [Volts] using IBTE
@@ -1239,7 +1239,7 @@ P           mkmem2        145
                        1.3968612519E+00  3.9509202543E+00  2.4194346594E+00
                        0.0000000000E+00  0.0000000000E+00  4.8388693187E+00
      sigma_erange1     0.00000000E+00  0.00000000E+00 Hartree
-     sigma_erange2    -7.34986508E-03 -7.34986508E-03 Hartree
+     sigma_erange2    -7.34986444E-03 -7.34986444E-03 Hartree
           spgroup         225
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1361,11 +1361,10 @@ P           mkmem2        145
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.5  wall=          8.6
+- Proc.   0 individual time (sec): cpu=          8.7  wall=          8.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.5  wall=          8.6
-
++Overall time at end (sec) : cpu=          8.7  wall=          8.8

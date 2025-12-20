@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h10 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v5_t43/t43.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h12 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v5_t43/t43.abi
 - output file    -> t43.abo
 - root for input  files -> t43i
 - root for output files -> t43o
@@ -112,8 +112,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.02789
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -125,8 +125,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -210,7 +210,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=300.000000000000  4.000000000000  4.000000000000 bohr
-              =158.753162577000  2.116708834360  2.116708834360 angstroms
+              =158.753163163200  2.116708842176  2.116708842176 angstroms
  prteigrs : about to open file t43o_EIG
  Fermi (or HOMO) energy (hartree) =   0.00642   Average Vxc (hartree)=  -0.00804
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -228,7 +228,7 @@ psp_core            : -1.00074591287442E-06
 local_psp           : -1.98725449177370E+01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.43784840190044E-01
-total_energy_eV     : -6.63372286566003E+00
+total_energy_eV     : -6.63372344732603E+00
 band_energy         :  6.42132376351069E-03
 ...
 
@@ -239,13 +239,13 @@ band_energy         :  6.42132376351069E-03
   sigma(3 3)= -7.07010697E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4088E+00 GPa]
-- sigma(1 1)= -6.63221704E-02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -2.08009694E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -2.08009694E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -6.63221816E-02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -2.08009729E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -2.08009729E+00  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      3.0000000000E+02  4.0000000000E+00  4.0000000000E+00 Bohr
               amu      1.00794000E+00
@@ -315,7 +315,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -327,12 +327,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -350,7 +350,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -365,15 +365,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        199.8  wall=        200.0
+- Proc.   0 individual time (sec): cpu=        211.0  wall=        211.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        199.8  wall=        200.0
++Overall time at end (sec) : cpu=        211.0  wall=        211.2

@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h07 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t31-t32/t32.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h08 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v1_t31-t32/t32.abi
 - output file    -> t32.abo
 - root for input  files -> t31o
 - root for output files -> t32o
@@ -95,7 +95,7 @@ P           mkmem           1
                        1  0  0   0 -1  0   0  0 -1      -1  0  0   0 -1  0   0  0 -1
            tolwfr      1.00000000E-16
             typat      1
-           xangst      3.1750632515E+00  3.1750632515E+00  3.1750632515E+00
+           xangst      3.1750632633E+00  3.1750632633E+00  3.1750632633E+00
             xcart      6.0000000000E+00  6.0000000000E+00  6.0000000000E+00
              xred      5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl       50.00000
@@ -133,8 +133,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     14.000   => boxcut(ratio)=   2.17692
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/50sn.4.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/50sn.4.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/50sn.4.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/50sn.4.hgh
 - Hartwigsen-Goedecker-Hutter psp for Sn,  from PRB58, 3641 (1998)
 - 50.00000   4.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -149,8 +149,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   25.28057109
          --- l  ekb(1:nproj) -->
@@ -302,7 +302,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1      3.17506325154000     3.17506325154000     3.17506325154000
+    1      3.17506326326400     3.17506326326400     3.17506326326400
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -312,7 +312,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 12.000000000000 12.000000000000 12.000000000000 bohr
-              =  6.350126503080  6.350126503080  6.350126503080 angstroms
+              =  6.350126526528  6.350126526528  6.350126526528 angstroms
  prteigrs : about to open file t32o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.11329   Average Vxc (hartree)=  -0.11018
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -340,7 +340,7 @@ psp_core            :  5.85198404839813E-02
 local_psp           : -2.77208187202068E+00
 non_local_psp       :  1.01629640146606E-01
 total_energy        : -3.40512004110284E+00
-total_energy_eV     : -9.26580285278284E+01
+total_energy_eV     : -9.26580366523801E+01
 band_energy         : -9.63979875426638E-01
 ...
 
@@ -361,13 +361,13 @@ band_energy         : -9.63979875426638E-01
   sigma(3 3)=  2.70971505E-06  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -7.9723E-02 GPa]
-- sigma(1 1)=  7.97225564E-02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  7.97225526E-02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  7.97225557E-02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  7.97225698E-02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  7.97225661E-02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  7.97225691E-02  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.2000000000E+01  1.2000000000E+01  1.2000000000E+01 Bohr
               amu      1.18710000E+02
@@ -403,7 +403,7 @@ P           mkmem           1
                        1  0  0   0 -1  0   0  0 -1      -1  0  0   0 -1  0   0  0 -1
            tolwfr      1.00000000E-16
             typat      1
-           xangst      3.1750632515E+00  3.1750632515E+00  3.1750632515E+00
+           xangst      3.1750632633E+00  3.1750632633E+00  3.1750632633E+00
             xcart      6.0000000000E+00  6.0000000000E+00  6.0000000000E+00
              xred      5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl       50.00000
@@ -447,7 +447,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -459,12 +459,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -482,7 +482,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -497,15 +497,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.6  wall=          1.4
+- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.6  wall=          1.4
++Overall time at end (sec) : cpu=          0.8  wall=          0.8

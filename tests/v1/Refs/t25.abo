@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h12 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h08 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v1_t25/t25.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v1_t25/t25.abi
 - output file    -> t25.abo
 - root for input  files -> t25i
 - root for output files -> t25o
@@ -158,8 +158,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     25.000   => boxcut(ratio)=   2.13258
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/01h.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/01h.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/01h.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/01h.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -178,8 +178,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/01h.bare2
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/01h.bare2
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/01h.bare2
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/01h.bare2
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -283,7 +283,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 30.000000000000 30.000000000000 30.000000000000 bohr
-              = 15.875316257700 15.875316257700 15.875316257700 angstroms
+              = 15.875316316320 15.875316316320 15.875316316320 angstroms
  prteigrs : about to open file t25o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.40170   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -304,7 +304,7 @@ psp_core            :  5.81776417331443E-09
 local_psp           : -8.86456460936044E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -4.48986040234983E-01
-total_energy_eV     : -1.22175314886155E+01
+total_energy_eV     : -1.22175325598877E+01
 band_energy         : -4.01697754728662E-01
 ...
 
@@ -315,9 +315,9 @@ band_energy         : -4.01697754728662E-01
   sigma(3 3)=  6.03959720E-06  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.7769E-01 GPa]
-- sigma(1 1)=  1.77691055E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.77691055E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.77691055E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.77691084E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.77691084E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.77691084E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -346,8 +346,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=   2500.000   => boxcut(ratio)=   2.13258
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/01h.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/01h.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/01h.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/01h.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -366,8 +366,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/01h.bare2
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/01h.bare2
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/01h.bare2
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/01h.bare2
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -471,7 +471,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  3.000000000000  3.000000000000  3.000000000000 bohr
-              =  1.587531625770  1.587531625770  1.587531625770 angstroms
+              =  1.587531631632  1.587531631632  1.587531631632 angstroms
  prteigrs : about to open file t25o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =  -4.01698   Average Vxc (hartree)=  -0.00000
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -492,7 +492,7 @@ psp_core            :  5.81776417331443E-08
 local_psp           : -8.86456460936175E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -4.48986040235119E+00
-total_energy_eV     : -1.22175314886192E+02
+total_energy_eV     : -1.22175325598914E+02
 band_energy         : -4.01697754728731E+00
 ...
 
@@ -503,9 +503,9 @@ band_energy         : -4.01697754728731E+00
   sigma(3 3)=  6.03959720E-02  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.7769E+03 GPa]
-- sigma(1 1)=  1.77691055E+03  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.77691055E+03  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.77691055E+03  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.77691084E+03  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.77691084E+03  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.77691084E+03  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -668,10 +668,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         15.0  wall=         15.1
+- Proc.   0 individual time (sec): cpu=         16.5  wall=         16.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.0  wall=         15.1
++Overall time at end (sec) : cpu=         16.5  wall=         16.6

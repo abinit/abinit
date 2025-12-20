@@ -1,5 +1,5 @@
 
-.Version 10.1.4.3 of ANADDB, released Jul 2025.
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 20 Aug 2025.
-- ( at 05h38 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h12 )
   
 
 ================================================================================
@@ -146,8 +146,8 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0  0.0 -0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
 ================================================================================
 
@@ -215,15 +215,15 @@
  mka2f: lambda <omega^4> =     1.146377E-12
  mka2f: lambda <omega^5> =     1.461090E-15
  mka2f: isotropic lambda =     1.312134E+00
- mka2f: omegalog  =     6.231060E-04 (Ha)     1.967611E+02 (Kelvin)
+ mka2f: omegalog  =     6.231060E-04 (Ha)     1.967613E+02 (Kelvin)
  mka2f: input mustar =     1.360000E-01
--mka2f: MacMillan Tc =     5.435764E-05 (Ha)     1.716476E+01 (Kelvin)
+-mka2f: MacMillan Tc =     5.435764E-05 (Ha)     1.716478E+01 (Kelvin)
  mka2f_tr_lova: 1/3 trace of TRANSPORT lambda for isppol   1 =      3.507203E-01
 -
-- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.6
+- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.7
 
 ================================================================================
 
-+Total cpu time      0.594  and wall time      0.642 sec
++Total cpu time      0.592  and wall time      0.676 sec
 
  anaddb : the run completed successfully.

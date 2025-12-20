@@ -1,5 +1,5 @@
 
-.Version 10.1.4.3 of ANADDB, released Jul 2025.
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 20 Aug 2025.
-- ( at 00h02 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h15 )
   
 
 ================================================================================
@@ -166,19 +166,19 @@
 
  Calculation of phonon density of states 
 
- Average speed of sound partial sums:     0.2090212568E-02 (at units)
+ Average speed of sound partial sums:     0.2090212567E-02 (at units)
 -                                   =           4.5727 [km/s]
 
- Debye frequency from partial sums:     0.8854083071E-03 (Ha)
--                                 =     0.5825706802E+01 (THz)
--Debye temperature from partial sums:     0.2795894983E+03 (K)
+ Debye frequency from partial sums:     0.8854083066E-03 (Ha)
+-                                 =     0.5825706798E+01 (THz)
+-Debye temperature from partial sums:     0.2795898300E+03 (K)
 
- Average speed of sound:     0.1827915833E-02 (at units) 
+ Average speed of sound:     0.1827915832E-02 (at units) 
 -                      =           3.9989 [km/s]
 
- Debye frequency from DOS:     0.7743001300E-03 (Ha) 
--                        =     0.5094650115E+01 (THz)
--Debye temperature from DOS:     0.2445043526E+03 (K)
+ Debye frequency from DOS:     0.7743001296E-03 (Ha) 
+-                        =     0.5094650112E+01 (THz)
+-Debye temperature from DOS:     0.2445046426E+03 (K)
 
 
 ================================================================================
@@ -207,47 +207,47 @@
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -1.0  0.0 -1.0 -0.0 -1.0
+  3.0 -1.0 -0.0 -1.0 -0.0 -1.0
  Symmetry characters of vibration mode #   4
         degenerate with vibration mode #   5
-  2.0 -0.0 -1.0 -0.0 -1.0  0.0
+  2.0 -0.0 -1.0  0.0 -1.0  0.0
  Symmetry characters of vibration mode #   6
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #   7
         degenerate with vibration mode #   8
-  2.0 -0.0 -1.0 -0.0 -1.0  0.0
+  2.0 -0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #   9
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  10
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  11
         degenerate with vibration mode #  12
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #  13
         degenerate with vibration mode #  14
-  2.0 -0.0 -1.0  0.0 -1.0  0.0
+  2.0 -0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  15
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  16
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  17
         degenerate with vibration mode #  18
-  2.0 -0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #  19
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  20
         degenerate with vibration mode #  21
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0  0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #  22
         degenerate with vibration mode #  23
-  2.0 -0.0 -1.0  0.0 -1.0 -0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  24
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  25
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  26
         degenerate with vibration mode #  27
-  2.0 -0.0 -1.0  0.0 -1.0  0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0
 
   Phonon wavevector (reduced coordinates) :  0.16667  0.00000  0.00000
  Phonon energies in Hartree :
@@ -265,25 +265,25 @@
 -  7.922341E+02  1.054752E+03  1.063836E+03  1.072071E+03  1.138993E+03
 -  1.144856E+03  1.208498E+03
  Speed of sound for this q and mode:
-   in atomic units:     0.1449288542E-02
+   in atomic units:     0.1449288541E-02
    in units km/s:              3.17060
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.6139146645E-03
-   in SI units K  :            193.85869
+   in atomic units:     0.6139146642E-03
+   in SI units K  :            193.85892
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1964314900E-02
+   in atomic units:     0.1964314899E-02
    in units km/s:              4.29731
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8320784217E-03
-   in SI units K  :            262.74927
+   in atomic units:     0.8320784213E-03
+   in SI units K  :            262.74958
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2417853382E-02
+   in atomic units:     0.2417853380E-02
    in units km/s:              5.28952
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1024196083E-02
-   in SI units K  :            323.41516
+   in atomic units:     0.1024196082E-02
+   in SI units K  :            323.41554
 
 
   Phonon wavevector (reduced coordinates) :  0.33333  0.00000  0.00000
@@ -382,25 +382,25 @@
 -  7.951219E+02  1.053239E+03  1.064812E+03  1.070862E+03  1.139119E+03
 -  1.153097E+03  1.198956E+03
  Speed of sound for this q and mode:
-   in atomic units:     0.2265766752E-02
+   in atomic units:     0.2265766750E-02
    in units km/s:              4.95680
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9597726021E-03
-   in SI units K  :            303.07186
+   in atomic units:     0.9597726016E-03
+   in SI units K  :            303.07222
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1964314900E-02
+   in atomic units:     0.1964314899E-02
    in units km/s:              4.29731
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8320784217E-03
-   in SI units K  :            262.74927
+   in atomic units:     0.8320784213E-03
+   in SI units K  :            262.74958
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2417853382E-02
+   in atomic units:     0.2417853380E-02
    in units km/s:              5.28952
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1024196083E-02
-   in SI units K  :            323.41516
+   in atomic units:     0.1024196082E-02
+   in SI units K  :            323.41554
 
 
   Phonon wavevector (reduced coordinates) :  0.08333  0.08333  0.00000
@@ -419,25 +419,25 @@
 -  7.914633E+02  1.055273E+03  1.063707E+03  1.072209E+03  1.138433E+03
 -  1.144521E+03  1.209488E+03
  Speed of sound for this q and mode:
-   in atomic units:     0.1413161101E-02
+   in atomic units:     0.1413161100E-02
    in units km/s:              3.09156
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.5986111791E-03
-   in SI units K  :            189.02624
+   in atomic units:     0.5986111788E-03
+   in SI units K  :            189.02646
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2255638818E-02
+   in atomic units:     0.2255638817E-02
    in units km/s:              4.93464
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9554824371E-03
-   in SI units K  :            301.71713
+   in atomic units:     0.9554824366E-03
+   in SI units K  :            301.71749
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2272614879E-02
+   in atomic units:     0.2272614877E-02
    in units km/s:              4.97178
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9626734500E-03
-   in SI units K  :            303.98787
+   in atomic units:     0.9626734495E-03
+   in SI units K  :            303.98823
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -461,47 +461,47 @@
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -1.0  0.0 -1.0 -0.0 -1.0
+  3.0 -1.0 -0.0 -1.0 -0.0 -1.0
  Symmetry characters of vibration mode #   4
         degenerate with vibration mode #   5
-  2.0 -0.0 -1.0 -0.0 -1.0  0.0
+  2.0 -0.0 -1.0  0.0 -1.0  0.0
  Symmetry characters of vibration mode #   6
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #   7
         degenerate with vibration mode #   8
-  2.0 -0.0 -1.0 -0.0 -1.0  0.0
+  2.0 -0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #   9
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  10
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  11
         degenerate with vibration mode #  12
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #  13
         degenerate with vibration mode #  14
-  2.0 -0.0 -1.0  0.0 -1.0  0.0
+  2.0 -0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  15
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  16
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  17
         degenerate with vibration mode #  18
-  2.0 -0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #  19
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  20
         degenerate with vibration mode #  21
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0  0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #  22
         degenerate with vibration mode #  23
-  2.0 -0.0 -1.0  0.0 -1.0 -0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  24
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  25
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  26
         degenerate with vibration mode #  27
-  2.0 -0.0 -1.0  0.0 -1.0  0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.16667
  Phonon energies in Hartree :
@@ -519,25 +519,25 @@
 -  7.783589E+02  1.052481E+03  1.059766E+03  1.072105E+03  1.121301E+03
 -  1.162220E+03  1.219272E+03
  Speed of sound for this q and mode:
-   in atomic units:     0.1538789009E-02
+   in atomic units:     0.1538789008E-02
    in units km/s:              3.36640
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.6518268177E-03
-   in SI units K  :            205.83039
+   in atomic units:     0.6518268173E-03
+   in SI units K  :            205.83063
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2470784001E-02
+   in atomic units:     0.2470784000E-02
    in units km/s:              5.40531
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1046617349E-02
-   in SI units K  :            330.49523
+   in atomic units:     0.1046617348E-02
+   in SI units K  :            330.49562
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2567429863E-02
+   in atomic units:     0.2567429862E-02
    in units km/s:              5.61674
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1087556272E-02
-   in SI units K  :            343.42270
+   in atomic units:     0.1087556271E-02
+   in SI units K  :            343.42311
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.33333
@@ -856,7 +856,7 @@
 -  8.852113E+01  1.018666E+02  1.269807E+02  1.933660E+02  2.021837E+02
 -  2.101376E+02  2.627103E+02  2.636352E+02  2.820820E+02  3.560157E+02
 -  3.633373E+02  3.755551E+02  3.808772E+02  4.348992E+02  4.445930E+02
--  5.398328E+02  5.714470E+02  7.123405E+02  7.776125E+02  7.866150E+02
+-  5.398328E+02  5.714470E+02  7.123405E+02  7.776125E+02  7.866149E+02
 -  7.988141E+02  1.052282E+03  1.064523E+03  1.067282E+03  1.154468E+03
 -  1.158638E+03  1.173955E+03
 
@@ -900,30 +900,30 @@
 -     1         -0.000000    -0.000001    -0.000000     0.000001
 -     2         -0.000000    -0.000000     0.000005     0.000005
 -     3         -0.000001     0.000000    -0.000000     0.000001
--     4          0.015028    -0.002396    -0.000000     0.015217
--     5          0.002396     0.015028    -0.000000     0.015217
+-     4          0.015023    -0.002424    -0.000000     0.015217
+-     5          0.002424     0.015023    -0.000000     0.015217
 ;     6         -0.000000     0.000000    -0.000000     0.000000
--     7          0.240019    -0.277776    -0.000000     0.367109
--     8          0.277776     0.240019     0.000000     0.367109
+-     7          0.240004    -0.277789    -0.000000     0.367109
+-     8          0.277789     0.240004     0.000000     0.367109
 ;     9          0.000000    -0.000000    -0.000000     0.000000
 ;    10          0.000000     0.000000     1.862737     1.862737
--    11         -0.849689     1.263490    -0.000000     1.522622
--    12          1.263490     0.849689    -0.000000     1.522622
--    13          2.223670     1.122594    -0.000000     2.490969
--    14          1.122594    -2.223670     0.000000     2.490969
+-    11         -0.849791     1.263422    -0.000000     1.522622
+-    12          1.263422     0.849791    -0.000000     1.522622
+-    13          2.223759     1.122418    -0.000000     2.490969
+-    14          1.122418    -2.223759     0.000000     2.490969
 ;    15          0.000000     0.000000     0.000000     0.000000
 ;    16          0.000000     0.000000     2.609041     2.609041
--    17          0.706327     0.268864    -0.000000     0.755769
--    18         -0.268864     0.706327    -0.000000     0.755769
+-    17          0.706259     0.269044    -0.000000     0.755769
+-    18         -0.269044     0.706259    -0.000000     0.755769
 ;    19         -0.000000    -0.000000    -1.913084     1.913084
--    20         -1.757595    -0.709002     0.000000     1.895211
--    21          0.709002    -1.757595     0.000000     1.895211
--    22          5.280459     2.086664     0.000000     5.677800
--    23          2.086664    -5.280459    -0.000000     5.677800
+-    20         -1.757643    -0.708883     0.000000     1.895211
+-    21          0.708883    -1.757643     0.000000     1.895211
+-    22          5.280465     2.086646     0.000000     5.677800
+-    23          2.086646    -5.280465    -0.000000     5.677800
 ;    24         -0.000000    -0.000000     5.830963     5.830963
 ;    25         -0.000000     0.000000     0.000000     0.000000
--    26         -0.228446     0.582936    -0.000000     0.626100
--    27          0.582936     0.228446    -0.000000     0.626100
+-    26         -0.228449     0.582934    -0.000000     0.626100
+-    27          0.582934     0.228449    -0.000000     0.626100
   
  Oscillator strengths (in a.u. ; 1 a.u.=253.2638413 m3/s2). Set to zero if abs()<tol14.
  Mode number.       xx          yy          zz          xy          xz          yz          trace
@@ -933,53 +933,53 @@
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 -   3     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   4     Real    7.5660E-09  1.9226E-10  0.0000E+00 -1.2061E-09  0.0000E+00  0.0000E+00  7.7583E-09
+-   4     Real    7.5614E-09  1.9688E-10  0.0000E+00 -1.2201E-09  0.0000E+00  0.0000E+00  7.7583E-09
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   5     Real    1.9226E-10  7.5660E-09  0.0000E+00  1.2061E-09  0.0000E+00  0.0000E+00  7.7583E-09
+-   5     Real    1.9688E-10  7.5614E-09  0.0000E+00  1.2201E-09  0.0000E+00  0.0000E+00  7.7583E-09
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;   6     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   7     Real    1.8914E-06  2.5333E-06  0.0000E+00 -2.1890E-06  0.0000E+00  0.0000E+00  4.4247E-06
+-   7     Real    1.8912E-06  2.5335E-06  0.0000E+00 -2.1889E-06  0.0000E+00  0.0000E+00  4.4247E-06
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   8     Real    2.5333E-06  1.8914E-06  0.0000E+00  2.1890E-06  0.0000E+00  0.0000E+00  4.4247E-06
+-   8     Real    2.5335E-06  1.8912E-06  0.0000E+00  2.1889E-06  0.0000E+00  0.0000E+00  4.4247E-06
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;   9     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  10     Real    0.0000E+00  0.0000E+00  1.1308E-04  0.0000E+00  0.0000E+00  0.0000E+00  1.1308E-04
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  11     Real    2.1776E-05  4.8152E-05  0.0000E+00 -3.2382E-05  0.0000E+00  0.0000E+00  6.9928E-05
+-  11     Real    2.1782E-05  4.8146E-05  0.0000E+00 -3.2384E-05  0.0000E+00  0.0000E+00  6.9928E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  12     Real    4.8152E-05  2.1776E-05  0.0000E+00  3.2382E-05  0.0000E+00  0.0000E+00  6.9928E-05
+-  12     Real    4.8146E-05  2.1782E-05  0.0000E+00  3.2384E-05  0.0000E+00  0.0000E+00  6.9928E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  13     Real    1.5466E-04  3.9416E-05  0.0000E+00  7.8076E-05  0.0000E+00  0.0000E+00  1.9407E-04
+-  13     Real    1.5467E-04  3.9403E-05  0.0000E+00  7.8067E-05  0.0000E+00  0.0000E+00  1.9407E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  14     Real    3.9416E-05  1.5466E-04  0.0000E+00 -7.8076E-05  0.0000E+00  0.0000E+00  1.9407E-04
+-  14     Real    3.9403E-05  1.5467E-04  0.0000E+00 -7.8067E-05  0.0000E+00  0.0000E+00  1.9407E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  15     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  16     Real    0.0000E+00  0.0000E+00  2.0880E-04  0.0000E+00  0.0000E+00  0.0000E+00  2.0880E-04
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  17     Real    1.1848E-05  1.7168E-06  0.0000E+00  4.5101E-06  0.0000E+00  0.0000E+00  1.3565E-05
+-  17     Real    1.1846E-05  1.7191E-06  0.0000E+00  4.5127E-06  0.0000E+00  0.0000E+00  1.3565E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  18     Real    1.7168E-06  1.1848E-05  0.0000E+00 -4.5101E-06  0.0000E+00  0.0000E+00  1.3565E-05
+-  18     Real    1.7191E-06  1.1846E-05  0.0000E+00 -4.5127E-06  0.0000E+00  0.0000E+00  1.3565E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
-;  19     Real    0.0000E+00  0.0000E+00  7.5330E-05  0.0000E+00  1.4457E-14  1.4645E-14  7.5330E-05
+;  19     Real    0.0000E+00  0.0000E+00  7.5330E-05  0.0000E+00  1.4458E-14  1.4644E-14  7.5330E-05
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  20     Real    6.9707E-05  1.1343E-05  0.0000E+00  2.8119E-05 -1.8253E-14  0.0000E+00  8.1050E-05
+-  20     Real    6.9711E-05  1.1339E-05  0.0000E+00  2.8115E-05 -1.8254E-14  0.0000E+00  8.1050E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  21     Real    1.1343E-05  6.9707E-05  0.0000E+00 -2.8119E-05  0.0000E+00  0.0000E+00  8.1050E-05
+-  21     Real    1.1339E-05  6.9711E-05  0.0000E+00 -2.8115E-05  0.0000E+00  0.0000E+00  8.1050E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  22     Real    8.5700E-04  1.3383E-04  0.0000E+00  3.3866E-04  6.7262E-14  2.6580E-14  9.9083E-04
+-  22     Real    8.5701E-04  1.3383E-04  0.0000E+00  3.3866E-04  6.7249E-14  2.6574E-14  9.9083E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  23     Real    1.3383E-04  8.5700E-04  0.0000E+00 -3.3866E-04 -1.2959E-14  3.2793E-14  9.9083E-04
+-  23     Real    1.3383E-04  8.5701E-04  0.0000E+00 -3.3866E-04 -1.2958E-14  3.2791E-14  9.9083E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
-;  24     Real    0.0000E+00  0.0000E+00  1.0434E-03  0.0000E+00 -4.9299E-14 -5.3743E-14  1.0434E-03
+;  24     Real    0.0000E+00  0.0000E+00  1.0434E-03  0.0000E+00 -4.9287E-14 -5.3735E-14  1.0434E-03
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  25     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  26     Real    1.6756E-06  1.0911E-05  0.0000E+00 -4.2758E-06  0.0000E+00  0.0000E+00  1.2586E-05
+-  26     Real    1.6757E-06  1.0911E-05  0.0000E+00 -4.2759E-06  0.0000E+00  0.0000E+00  1.2586E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  27     Real    1.0911E-05  1.6756E-06  0.0000E+00  4.2758E-06  0.0000E+00  0.0000E+00  1.2586E-05
+-  27     Real    1.0911E-05  1.6757E-06  0.0000E+00  4.2759E-06  0.0000E+00  0.0000E+00  1.2586E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 
  Electronic dielectric tensor
@@ -1006,6 +1006,6 @@
 
 ================================================================================
 
-+Total cpu time     11.884  and wall time     11.887 sec
++Total cpu time     11.851  and wall time     11.854 sec
 
  anaddb : the run completed successfully.

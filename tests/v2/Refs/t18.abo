@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h08 )
-
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h10 )
+  
 
 ================================================================================
 
@@ -65,11 +65,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -85,7 +85,7 @@
        3               2       -0.000000        0.000000
        3               3        0.012174        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -108,7 +108,7 @@
 
 ================================================================================
 
- Treat the first list of vectors
+ Treat the first list of vectors 
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -141,14 +141,14 @@
  -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  10
        degenerate with vibration modes #  11 to   12
-  3.0  0.0  0.0 -1.0 -1.0 -1.0  1.0  0.0  0.0  1.0 -1.0 -1.0  1.0  0.0 -0.0 -1.0
- -1.0  1.0  1.0 -0.0  0.0 -1.0  1.0 -1.0 -3.0 -0.0 -0.0  1.0  1.0  1.0 -1.0 -0.0
- -0.0 -1.0  1.0  1.0 -1.0 -0.0  0.0  1.0  1.0 -1.0 -1.0  0.0 -0.0  1.0 -1.0  1.0
+  3.0  0.0  0.0 -1.0 -1.0 -1.0  1.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -0.0  0.0 -1.0
+ -1.0  1.0  1.0  0.0  0.0 -1.0  1.0 -1.0 -3.0 -0.0 -0.0  1.0  1.0  1.0 -1.0 -0.0
+  0.0 -1.0  1.0  1.0 -1.0  0.0 -0.0  1.0  1.0 -1.0 -1.0 -0.0 -0.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #  13
        degenerate with vibration modes #  14 to   15
-  3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
-  1.0 -1.0  1.0  0.0  0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0 -0.0
-  0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
+  3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0 -0.0  1.0
+  1.0 -1.0  1.0 -0.0 -0.0  1.0 -1.0  1.0 -3.0  0.0  0.0 -1.0 -1.0 -1.0 -1.0  0.0
+ -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -162,7 +162,7 @@
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.50000
  Phonon energies in Hartree :
-  -7.616279E-04  4.676215E-04  4.735931E-04  4.735931E-04  9.478701E-04
+  -7.616278E-04  4.676215E-04  4.735931E-04  4.735931E-04  9.478701E-04
    1.227972E-03  1.227972E-03  1.518586E-03  1.569357E-03  1.569357E-03
    1.614003E-03  1.982981E-03  1.982981E-03  2.075685E-03  3.112649E-03
  Phonon frequencies in cm-1    :
@@ -190,25 +190,25 @@
 -  1.800358E+02  1.843564E+02  1.843564E+02  2.715171E+02  3.104355E+02
 -  3.104355E+02  4.468197E+02  4.468197E+02  4.610483E+02  6.448836E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1763182878E-02
+   in atomic units:     0.1763182877E-02
    in units km/s:              3.85730
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9091923200E-03
-   in SI units K  :            287.09989
+   in atomic units:     0.9091923195E-03
+   in SI units K  :            287.10023
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1763182878E-02
+   in atomic units:     0.1763182877E-02
    in units km/s:              3.85730
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9091923200E-03
-   in SI units K  :            287.09989
+   in atomic units:     0.9091923195E-03
+   in SI units K  :            287.10023
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2615963963E-02
+   in atomic units:     0.2615963961E-02
    in units km/s:              5.72292
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1348932305E-02
-   in SI units K  :            425.95863
+   in atomic units:     0.1348932304E-02
+   in SI units K  :            425.95913
 
 
   Phonon wavevector (reduced coordinates) :  0.25000  0.25000  0.25000
@@ -242,7 +242,7 @@
 
 ================================================================================
 
- Treat the second list of vectors
+ Treat the second list of vectors 
 
 
   Phonon at Gamma, with non-analyticity in the
@@ -260,6 +260,6 @@
 
 ================================================================================
 
-+Total cpu time      0.056  and wall time      0.100 sec
++Total cpu time      0.064  and wall time      0.064 sec
 
  anaddb : the run completed successfully.

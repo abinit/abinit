@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h16 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v9_t62-t63-t64-t65/t62.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h16 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v9_t62-t63-t64-t65/t62.abi
 - output file    -> t62.abo
 - root for input  files -> t62i
 - root for output files -> t62o
@@ -65,6 +65,7 @@ _ WF disk file :      0.881 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =          64
 -   mkqmem =          64        mk1mem =          64           mpw =         360
       nfft =        8000          nkpt =          64
+- my_mband =          20
 ================================================================================
 P This job should need less than                      25.259 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -82,6 +83,7 @@ _ WF disk file :      7.033 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =          64
 -   mkqmem =          64        mk1mem =          64           mpw =         360
       nfft =        8000          nkpt =          64
+- my_mband =          20
 ================================================================================
 P This job should need less than                      25.698 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -99,6 +101,7 @@ _ WF disk file :      7.033 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =          64
 -   mkqmem =          64        mk1mem =          64           mpw =         360
       nfft =        8000          nkpt =          64
+- my_mband =          20
 ================================================================================
 P This job should need less than                      25.698 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -116,6 +119,7 @@ _ WF disk file :      7.033 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =          64
 -   mkqmem =          64        mk1mem =          64           mpw =         360
       nfft =        8000          nkpt =          64
+- my_mband =          20
 ================================================================================
 P This job should need less than                      25.698 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -1409,7 +1413,7 @@ P          mk1mem7          8
      sigma_erange4     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange5     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange6     0.00000000E+00  0.00000000E+00 Hartree
-     sigma_erange7    -7.34986508E-03 -7.34986508E-03 Hartree
+     sigma_erange7    -7.34986444E-03 -7.34986444E-03 Hartree
       sigma_ngkpt1       0    0    0
       sigma_ngkpt2       0    0    0
       sigma_ngkpt3       0    0    0
@@ -1554,8 +1558,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05308
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998)
 - 29.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1570,8 +1574,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    2.11366354
          --- l  ekb(1:nproj) -->
@@ -1659,7 +1663,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
-              =  0.529177208590  0.529177208590  0.529177208590 angstroms
+              =  0.529177210544  0.529177210544  0.529177210544 angstroms
  prteigrs : about to open file t62o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.13063   Average Vxc (hartree)=  -0.26990
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -1687,7 +1691,7 @@ non_local_psp       : -2.24329054265800E-01
 internal            : -4.98604102746009E-01
 '-kT*entropy'       : -4.09514521248240E-03
 total_energy        : -5.02699247958492E-01
-total_energy_eV     : -1.36791422023318E+01
+total_energy_eV     : -1.36791434017627E+01
 band_energy         : -2.52494538071675E-01
 ...
 
@@ -1698,9 +1702,9 @@ band_energy         : -2.52494538071675E-01
   sigma(3 3)=  2.43020594E-03  sigma(2 1)= -2.32822414E-14
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -7.1499E+01 GPa]
-- sigma(1 1)=  7.14991152E+01  sigma(3 2)= -6.84977583E-10
-- sigma(2 2)=  7.14991152E+01  sigma(3 1)= -9.68705762E-10
-- sigma(3 3)=  7.14991152E+01  sigma(2 1)= -6.84987076E-10
+- sigma(1 1)=  7.14991273E+01  sigma(3 2)= -6.84977698E-10
+- sigma(2 2)=  7.14991273E+01  sigma(3 1)= -9.68705925E-10
+- sigma(3 3)=  7.14991273E+01  sigma(2 1)= -6.84987191E-10
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -1785,7 +1789,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
-              =  0.529177208590  0.529177208590  0.529177208590 angstroms
+              =  0.529177210544  0.529177210544  0.529177210544 angstroms
  prteigrs : about to open file t62o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 20, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1828,7 +1832,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1887,7 +1891,7 @@ tolerances: {tolvrs: 1.00E-06, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=   -0.1583022846E-05 Ha. Also 2DEtotal=   -0.430762423255E-04 eV
+ 2DEtotal=   -0.1583022846E-05 Ha. Also 2DEtotal=   -0.430762461026E-04 eV
     (2DErelax=   -3.4577045761E+00 Ha. 2DEnonrelax=    3.4577029931E+00 Ha)
     (  non-var. 2DEtotal :   -1.5530615487E-06 Ha)
 
@@ -1897,53 +1901,53 @@ tolerances: {tolvrs: 1.00E-06, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1        -0.0000015531         0.0000000000
    1    1   2    1        -0.0000007765         0.0000000000
    1    1   3    1        -0.0000007765         0.0000000000
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
-
+  
    2    1   1    1        -0.0000007765         0.0000000000
    2    1   2    1        -0.0000015531         0.0000000000
    2    1   3    1        -0.0000007765         0.0000000000
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
-
+  
    3    1   1    1        -0.0000007765         0.0000000000
    3    1   2    1        -0.0000007765         0.0000000000
    3    1   3    1        -0.0000015531         0.0000000000
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
-
+  
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-
+  
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-
+  
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0000000000         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000000000         0.0000000000
@@ -1986,8 +1990,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.95178
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998)
 - 29.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2002,8 +2006,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    2.11366354
          --- l  ekb(1:nproj) -->
@@ -2015,7 +2019,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2074,7 +2078,7 @@ tolerances: {tolvrs: 1.00E-06, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=   -0.1708867750E+01 Ha. Also 2DEtotal=   -0.465006563157E+02 eV
+ 2DEtotal=   -0.1708867750E+01 Ha. Also 2DEtotal=   -0.465006603930E+02 eV
     (2DErelax=   -7.4473585652E+00 Ha. 2DEnonrelax=    5.7384908150E+00 Ha)
     (  non-var. 2DEtotal :   -1.7088667690E+00 Ha)
 
@@ -2084,26 +2088,26 @@ tolerances: {tolvrs: 1.00E-06, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1        -1.7088667690         0.0000000000
    1    1   2    1         0.1357662622        -0.0000120446
    1    1   3    1         0.1357662622        -0.0000120446
-
+  
    2    1   1    1         0.1357662622         0.0000120446
-
+  
    3    1   1    1         0.1357662622         0.0000120446
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -2146,7 +2150,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 2    ipert=   1
@@ -2204,7 +2208,7 @@ tolerances: {tolvrs: 1.00E-06, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.2715120345E+00 Ha. Also 2DEtotal=    0.738821819307E+01 eV
+ 2DEtotal=    0.2715120345E+00 Ha. Also 2DEtotal=    0.738821884090E+01 eV
     (2DErelax=   -3.3538445090E+00 Ha. 2DEnonrelax=    3.6253565435E+00 Ha)
     (  non-var. 2DEtotal :    2.7151208126E-01 Ha)
 
@@ -2214,33 +2218,33 @@ tolerances: {tolvrs: 1.00E-06, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   2    1         0.1357654929        -0.0000162097
    1    1   3    1         0.1357654929        -0.0000162097
-
+  
    2    1   1    1         0.1357654929         0.0000162097
    2    1   2    1         0.2715120812         0.0000000000
    2    1   3    1         0.1357786942         0.0000123299
-
+  
    3    1   1    1         0.1357654929         0.0000162097
    3    1   2    1         0.1357786942        -0.0000123299
    3    1   3    1         0.2715120812         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   3    1         0.0000004661        -0.0000007994
-
+  
    2    1   3    1         0.0000010201         0.0000009276
-
+  
    3    1   1    1         0.0000004661         0.0000007994
    3    1   2    1         0.0000010201        -0.0000009276
    3    1   3    1         0.0115958175         0.0000000000
@@ -2285,8 +2289,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.95313
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998)
 - 29.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2301,8 +2305,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    2.11366354
          --- l  ekb(1:nproj) -->
@@ -2314,7 +2318,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2372,7 +2376,7 @@ tolerances: {tolvrs: 1.00E-06, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.5106444350E-01 Ha. Also 2DEtotal=    0.138953417361E+01 eV
+ 2DEtotal=    0.5106444350E-01 Ha. Also 2DEtotal=    0.138953429545E+01 eV
     (2DErelax=   -4.9475143883E+00 Ha. 2DEnonrelax=    4.9985788318E+00 Ha)
     (  non-var. 2DEtotal :    5.1055026170E-02 Ha)
 
@@ -2382,38 +2386,38 @@ tolerances: {tolvrs: 1.00E-06, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         0.0510550261         0.0000000000
    1    1   2    1        -0.2621025317         0.0000000000
    1    1   3    1         0.3131575578         0.0000000000
-
+  
    2    1   1    1        -0.2621025317         0.0000000000
    2    1   2    1         0.0510550261         0.0000000000
    2    1   3    1         0.3131575578         0.0000000000
-
+  
    3    1   1    1         0.3131575578         0.0000000000
    3    1   2    1         0.3131575578         0.0000000000
    3    1   3    1         0.6263151157         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1        -0.0060089858         0.0000000000
    1    1   2    1        -0.0231632874         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-
+  
    2    1   1    1        -0.0231632874         0.0000000000
    2    1   2    1         0.0103699318         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
-
+  
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0267488494         0.0000000000
@@ -2447,8 +2451,8 @@ meta: {optdriver: 8, wfk_task: 8, }
 - Reading GS states from WFK file: t62o_DS2_WFK
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/29cu.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998)
 - 29.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2463,8 +2467,8 @@ meta: {optdriver: 8, wfk_task: 8, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    2.11366354
          --- l  ekb(1:nproj) -->
@@ -2483,13 +2487,13 @@ meta: {optdriver: 8, wfk_task: 8, }
  Finding k-points inside energy window around Fermi level (assuming metal).
  Using sigma_erange: -0.200 -0.200  (eV)
  SKW parameters (einterp): [   1.0000E+00,    5.0000E+00,    0.0000E+00,    0.0000E+00]
-============================================================================================
+============================================================================================ 
 
 Using Fermi level: -3.55  (eV)
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      6.35460000E+01
@@ -3763,7 +3767,7 @@ P          mk1mem7          8
      sigma_erange4     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange5     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange6     0.00000000E+00  0.00000000E+00 Hartree
-     sigma_erange7    -7.34986508E-03 -7.34986508E-03 Hartree
+     sigma_erange7    -7.34986444E-03 -7.34986444E-03 Hartree
       sigma_ngkpt1       0    0    0
       sigma_ngkpt2       0    0    0
       sigma_ngkpt3       0    0    0
@@ -3909,7 +3913,7 @@ P          mk1mem7          8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -3932,12 +3936,12 @@ P          mk1mem7          8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -3955,15 +3959,15 @@ P          mk1mem7          8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         14.8  wall=         14.9
+- Proc.   0 individual time (sec): cpu=         15.7  wall=         15.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  14 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.8  wall=         14.9
+.Delivered   9 WARNINGs and  15 COMMENTs to log file.
++Overall time at end (sec) : cpu=         15.7  wall=         15.7
