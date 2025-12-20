@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h07 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tspin_5/tspin_5.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h08 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tspin_5/tspin_5.abi
 - output file    -> tspin_5.abo
 - root for input  files -> tspin_5i
 - root for output files -> tspin_5o
@@ -164,8 +164,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.16443
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Ta.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Ta.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Ta.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Ta.psp8
 - Ta    ONCVPSP-3.3.0  r_core=   1.71294   1.71294   1.71294   2.25368
 - 73.00000  13.00000    180420                znucl, zion, pspdat
     8   11    3    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -216,7 +216,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  7  -64.639047034312    -3.878E-08 9.325E-09 8.028E-05
  ETOT  8  -64.639047035492    -1.180E-09 5.702E-10 1.558E-05
 
- At SCF step    8, etot is converged :
+ At SCF step    8, etot is converged : 
   for the second time, diff in etot=  1.180E-09 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -276,7 +276,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 15.000000000000 15.000000000000 15.000000000000 bohr
-              =  7.937658128850  7.937658128850  7.937658128850 angstroms
+              =  7.937658158160  7.937658158160  7.937658158160 angstroms
  prteigrs : about to open file tspin_5o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.09470   Average Vxc (hartree)=  -0.12489
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -293,10 +293,10 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Fermi (or HOMO) energy (eV) =  -2.57695   Average Vxc (eV)=  -3.39832
  Eigenvalues (   eV  ) for nkpt=   1  k points:
  kpt#   1, nband= 26, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -70.96498  -39.01569  -39.01569  -39.01569   -4.04108   -2.48758   -2.48758   -2.48758
+ -70.96498  -39.01570  -39.01570  -39.01570   -4.04108   -2.48758   -2.48758   -2.48758
   -2.45803   -2.45803    0.72313    0.72313    0.72313    1.52482    4.06275    4.06275
    4.06275    4.16894    4.16894    4.16894    4.41125    4.41125    7.60614    7.60614
-   7.60614    8.50017
+   7.60614    8.50018
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
@@ -311,7 +311,7 @@ non_local_psp       :  4.76235946324485E+00
 internal            : -6.46145301212831E+01
 '-kT*entropy'       : -2.45169142090512E-02
 total_energy        : -6.46390470354922E+01
-total_energy_eV     : -1.75891792122737E+03
+total_energy_eV     : -1.75891807545491E+03
 band_energy         : -1.43887314072226E+01
 ...
 
@@ -322,9 +322,9 @@ band_energy         : -1.43887314072226E+01
   sigma(3 3)=  2.73907128E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -8.0586E+00 GPa]
-- sigma(1 1)=  8.05862458E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  8.05862458E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  8.05862458E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  8.05862594E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  8.05862594E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  8.05862594E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -355,8 +355,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.16443
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Ta.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Ta.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Ta.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_fr_04_pbe_std_psp8/Ta.psp8
 - Ta    ONCVPSP-3.3.0  r_core=   1.71294   1.71294   1.71294   2.25368
 - 73.00000  13.00000    180420                znucl, zion, pspdat
     8   11    3    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -397,7 +397,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  7  -64.721995941142    -8.956E-08 1.881E-09 6.991E-05
  ETOT  8  -64.721995941990    -8.477E-10 1.582E-11 2.222E-05
 
- At SCF step    8, etot is converged :
+ At SCF step    8, etot is converged : 
   for the second time, diff in etot=  8.477E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -457,7 +457,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 15.000000000000 15.000000000000 15.000000000000 bohr
-              =  7.937658128850  7.937658128850  7.937658128850 angstroms
+              =  7.937658158160  7.937658158160  7.937658158160 angstroms
  prteigrs : about to open file tspin_5o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.09337   Average Vxc (hartree)=  -0.12494
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -474,7 +474,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Fermi (or HOMO) energy (eV) =  -2.54082   Average Vxc (eV)=  -3.39972
  Eigenvalues (   eV  ) for nkpt=   1  k points:
  kpt#   1, nband= 26, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -70.66902  -70.66902  -44.97164  -44.97164  -36.06702  -36.06702  -36.06702  -36.06702
+ -70.66902  -70.66902  -44.97165  -44.97165  -36.06702  -36.06702  -36.06702  -36.06702
   -3.99008   -3.99008   -2.65586   -2.65586   -2.65586   -2.65586   -2.14447   -2.14447
   -2.12385   -2.12385   -2.12385   -2.12385    0.28406    0.28406    0.97892    0.97892
    0.97892    0.97892
@@ -492,7 +492,7 @@ non_local_psp       :  4.61805349008529E+00
 internal            : -6.47108044216034E+01
 '-kT*entropy'       : -1.11915203863230E-02
 total_energy        : -6.47219959419897E+01
-total_energy_eV     : -1.76117507576284E+03
+total_energy_eV     : -1.76117523018830E+03
 band_energy         : -1.43853328694378E+01
 ...
 
@@ -503,13 +503,13 @@ band_energy         : -1.43853328694378E+01
   sigma(3 3)=  3.01080027E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -8.8581E+00 GPa]
-- sigma(1 1)=  8.85807871E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  8.85807871E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  8.85807871E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  8.85808020E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  8.85808020E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  8.85808020E+00  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.5000000000E+01  1.5000000000E+01  1.5000000000E+01 Bohr
               amu      1.80947900E+02
@@ -617,7 +617,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -634,12 +634,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -657,7 +657,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -672,15 +672,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.2  wall=          8.2
+- Proc.   0 individual time (sec): cpu=          8.6  wall=          8.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.2  wall=          8.2
++Overall time at end (sec) : cpu=          8.6  wall=          8.7

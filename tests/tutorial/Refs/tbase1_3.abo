@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h05 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tbase1_3/tbase1_3.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h05 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tbase1_3/tbase1_3.abi
 - output file    -> tbase1_3.abo
 - root for input  files -> tbase1_3i
 - root for output files -> tbase1_3o
@@ -81,8 +81,8 @@ P           mkmem           1
            tolmxf      5.00000000E-04
            tolrff      2.00000000E-02
             typat      1  1
-           xangst     -3.7042404601E-01  0.0000000000E+00  0.0000000000E+00
-                       3.7042404601E-01  0.0000000000E+00  0.0000000000E+00
+           xangst     -3.7042404738E-01  0.0000000000E+00  0.0000000000E+00
+                       3.7042404738E-01  0.0000000000E+00  0.0000000000E+00
             xcart     -7.0000000000E-01  0.0000000000E+00  0.0000000000E+00
                        7.0000000000E-01  0.0000000000E+00  0.0000000000E+00
              xred     -7.0000000000E-02  0.0000000000E+00  0.0000000000E+00
@@ -117,8 +117,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
 - H     ONCVPSP-3.3.0  r_core=   1.00957   0.90680
 -  1.00000   1.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       300   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -160,7 +160,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  5  -1.1171843456996    -6.165E-08 2.922E-11 9.525E-06 5.475E-05 2.691E-02
  ETOT  6  -1.1171843463486    -6.490E-10 1.734E-12 3.695E-07 1.013E-05 2.690E-02
 
- At SCF step    6, forces are sufficiently converged :
+ At SCF step    6, forces are sufficiently converged : 
   for the second time, max diff in force=  1.013E-05 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -212,11 +212,11 @@ force_length_stats: {min:   2.69019375E-02, max:   2.69019375E-02, mean:   2.690
  -7.00000000000000E-02  0.00000000000000E+00  0.00000000000000E+00
   7.00000000000000E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.69019E-02 1.55318E-02 (free atoms)
- -2.69019375251381E-02 -0.00000000000000E+00 -0.00000000000000E+00
-  2.69019375251381E-02 -0.00000000000000E+00 -0.00000000000000E+00
+ -2.69019375251367E-02 -0.00000000000000E+00 -0.00000000000000E+00
+  2.69019375251367E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  2.69019375251381E-01  0.00000000000000E+00  0.00000000000000E+00
- -2.69019375251381E-01 -0.00000000000000E+00 -0.00000000000000E+00
+  2.69019375251367E-01  0.00000000000000E+00  0.00000000000000E+00
+ -2.69019375251367E-01 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.11718434634860E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -236,7 +236,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  3  -1.1181409536076    -1.507E-07 1.295E-09 1.267E-04 1.571E-04 9.251E-03
  ETOT  4  -1.1181409705200    -1.691E-08 9.301E-11 2.737E-06 3.907E-05 9.212E-03
 
- At SCF step    4, forces are sufficiently converged :
+ At SCF step    4, forces are sufficiently converged : 
   for the second time, max diff in force=  3.907E-05 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -282,17 +282,17 @@ force_length_stats: {min:   9.21224104E-03, max:   9.21224104E-03, mean:   9.212
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -7.26901937525138E-01  0.00000000000000E+00  0.00000000000000E+00
-  7.26901937525138E-01  0.00000000000000E+00  0.00000000000000E+00
+ -7.26901937525137E-01  0.00000000000000E+00  0.00000000000000E+00
+  7.26901937525137E-01  0.00000000000000E+00  0.00000000000000E+00
  Reduced coordinates (xred)
- -7.26901937525138E-02  0.00000000000000E+00  0.00000000000000E+00
-  7.26901937525138E-02  0.00000000000000E+00  0.00000000000000E+00
+ -7.26901937525137E-02  0.00000000000000E+00  0.00000000000000E+00
+  7.26901937525137E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.21224E-03 5.31869E-03 (free atoms)
- -9.21224103516575E-03 -0.00000000000000E+00 -0.00000000000000E+00
-  9.21224103516575E-03 -0.00000000000000E+00 -0.00000000000000E+00
+ -9.21224103518608E-03 -0.00000000000000E+00 -0.00000000000000E+00
+  9.21224103518608E-03 -0.00000000000000E+00 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  9.21224103516575E-02  0.00000000000000E+00  0.00000000000000E+00
- -9.21224103516575E-02 -0.00000000000000E+00 -0.00000000000000E+00
+  9.21224103518608E-02  0.00000000000000E+00  0.00000000000000E+00
+ -9.21224103518608E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.11814097051997E+00
 
  Difference of energy with previous step (new-old):
@@ -311,13 +311,13 @@ tolerances: {tolrff: 2.00E-02, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
- ETOT  1  -1.1182837181775    -1.118E+00 3.403E-11 7.018E-03 7.950E-03 1.262E-03
+ ETOT  1  -1.1182837181775    -1.118E+00 3.402E-11 7.018E-03 7.950E-03 1.262E-03
  ETOT  2  -1.1182854751204    -1.757E-06 3.783E-13 1.843E-04 9.169E-05 1.171E-03
  ETOT  3  -1.1182855140288    -3.891E-08 3.322E-10 3.309E-05 7.828E-05 1.249E-03
  ETOT  4  -1.1182855183094    -4.281E-09 2.352E-11 7.304E-07 1.916E-05 1.230E-03
- ETOT  5  -1.1182855183625    -5.313E-11 4.421E-14 1.157E-08 1.112E-06 1.231E-03
+ ETOT  5  -1.1182855183625    -5.314E-11 4.421E-14 1.157E-08 1.112E-06 1.231E-03
 
- At SCF step    5, forces are sufficiently converged :
+ At SCF step    5, forces are sufficiently converged : 
   for the second time, max diff in force=  1.112E-06 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -336,7 +336,7 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae: -5.313E-11, res2:  1.157E-08, residm:  4.421E-14, diffor:  1.112E-06, }
+convergence: {deltae: -5.314E-11, res2:  1.157E-08, residm:  4.421E-14, diffor:  1.112E-06, }
 etotal    :  -1.11828552E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.62339980E-01
@@ -363,17 +363,17 @@ force_length_stats: {min:   1.23077796E-03, max:   1.23077796E-03, mean:   1.230
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -7.40911625760039E-01  0.00000000000000E+00  0.00000000000000E+00
-  7.40911625760039E-01  0.00000000000000E+00  0.00000000000000E+00
+ -7.40911625760085E-01  0.00000000000000E+00  0.00000000000000E+00
+  7.40911625760085E-01  0.00000000000000E+00  0.00000000000000E+00
  Reduced coordinates (xred)
- -7.40911625760039E-02  0.00000000000000E+00  0.00000000000000E+00
-  7.40911625760039E-02  0.00000000000000E+00  0.00000000000000E+00
+ -7.40911625760085E-02  0.00000000000000E+00  0.00000000000000E+00
+  7.40911625760085E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.23078E-03 7.10590E-04 (free atoms)
- -1.23077795520353E-03 -0.00000000000000E+00 -0.00000000000000E+00
-  1.23077795520353E-03 -0.00000000000000E+00 -0.00000000000000E+00
+ -1.23077795517666E-03 -0.00000000000000E+00 -0.00000000000000E+00
+  1.23077795517666E-03 -0.00000000000000E+00 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  1.23077795520353E-02  0.00000000000000E+00  0.00000000000000E+00
- -1.23077795520353E-02 -0.00000000000000E+00 -0.00000000000000E+00
+  1.23077795517666E-02  0.00000000000000E+00  0.00000000000000E+00
+ -1.23077795517666E-02 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.11828551836253E+00
 
  Difference of energy with previous step (new-old):
@@ -396,10 +396,10 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  2  -1.1182883127945    -4.082E-08 8.627E-15 4.264E-06 1.536E-05 5.682E-05
  ETOT  3  -1.1182883137014    -9.069E-10 7.711E-12 7.663E-07 1.193E-05 6.875E-05
  ETOT  4  -1.1182883137993    -9.791E-11 5.391E-13 1.744E-08 2.879E-06 6.587E-05
- ETOT  5  -1.1182883138008    -1.438E-12 1.038E-15 2.642E-10 1.697E-07 6.604E-05
- ETOT  6  -1.1182883138007     1.279E-13 2.667E-18 6.445E-12 7.190E-09 6.603E-05
+ ETOT  5  -1.1182883138008    -1.428E-12 1.038E-15 2.642E-10 1.697E-07 6.604E-05
+ ETOT  6  -1.1182883138007     1.210E-13 2.667E-18 6.445E-12 7.190E-09 6.603E-05
 
- At SCF step    6, forces are sufficiently converged :
+ At SCF step    6, forces are sufficiently converged : 
   for the second time, max diff in force=  7.190E-09 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -418,7 +418,7 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae:  1.279E-13, res2:  6.445E-12, residm:  2.667E-18, diffor:  7.190E-09, }
+convergence: {deltae:  1.210E-13, res2:  6.445E-12, residm:  2.667E-18, diffor:  7.190E-09, }
 etotal    :  -1.11828831E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.61980956E-01
@@ -445,24 +445,24 @@ force_length_stats: {min:   6.60322237E-05, max:   6.60322237E-05, mean:   6.603
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -7.43071983487193E-01  0.00000000000000E+00  0.00000000000000E+00
-  7.43071983487193E-01  0.00000000000000E+00  0.00000000000000E+00
+ -7.43071983487187E-01  0.00000000000000E+00  0.00000000000000E+00
+  7.43071983487187E-01  0.00000000000000E+00  0.00000000000000E+00
  Reduced coordinates (xred)
- -7.43071983487193E-02  0.00000000000000E+00  0.00000000000000E+00
-  7.43071983487193E-02  0.00000000000000E+00  0.00000000000000E+00
+ -7.43071983487187E-02  0.00000000000000E+00  0.00000000000000E+00
+  7.43071983487187E-02  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 6.60322E-05 3.81237E-05 (free atoms)
- -6.60322237226004E-05 -0.00000000000000E+00 -0.00000000000000E+00
-  6.60322237226004E-05 -0.00000000000000E+00 -0.00000000000000E+00
+ -6.60322237264216E-05 -0.00000000000000E+00 -0.00000000000000E+00
+  6.60322237264216E-05 -0.00000000000000E+00 -0.00000000000000E+00
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  6.60322237226004E-04  0.00000000000000E+00  0.00000000000000E+00
- -6.60322237226004E-04 -0.00000000000000E+00 -0.00000000000000E+00
+  6.60322237264216E-04  0.00000000000000E+00  0.00000000000000E+00
+ -6.60322237264216E-04 -0.00000000000000E+00 -0.00000000000000E+00
  Total energy (etotal) [Ha]= -1.11828831380065E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-2.79544E-06
            Relative     =-2.49975E-06
 
- At Broyd/MD step   4, gradients are converged :
+ At Broyd/MD step   4, gradients are converged : 
   max grad (force/stress) = 6.6032E-05 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -478,20 +478,20 @@ force_length_stats: {min:   6.60322237E-05, max:   6.60322237E-05, mean:   6.603
     2      -0.000660322237      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1     -0.39321675800319     0.00000000000000     0.00000000000000
-    2      0.39321675800319     0.00000000000000     0.00000000000000
+    1     -0.39321675945515     0.00000000000000     0.00000000000000
+    2      0.39321675945515     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00006603222372    -0.00000000000000    -0.00000000000000
-    2      0.00006603222372    -0.00000000000000    -0.00000000000000
+    1     -0.00006603222373    -0.00000000000000    -0.00000000000000
+    2      0.00006603222373    -0.00000000000000    -0.00000000000000
  frms,max,avg= 3.8123722E-05 6.6032224E-05   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00339551318099    -0.00000000000000    -0.00000000000000
-    2      0.00339551318099    -0.00000000000000    -0.00000000000000
- frms,max,avg= 1.9604004E-03 3.3955132E-03   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00339551346637    -0.00000000000000    -0.00000000000000
+    2      0.00339551346637    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 1.9604006E-03 3.3955135E-03   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file tbase1_3o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.36198   Average Vxc (hartree)=  -0.07525
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -501,16 +501,16 @@ force_length_stats: {min:   6.60322237E-05, max:   6.60322237E-05, mean:   6.603
 --- !EnergyTerms
 iteration_state     : {dtset: 1, itime: 4, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.77513704261894E-01
-hartree             :  6.97324256766167E-01
-xc                  : -6.25836844129808E-01
-Ewald energy        :  1.10200870637772E-01
+kinetic             :  9.77513704261900E-01
+hartree             :  6.97324256766169E-01
+xc                  : -6.25836844129810E-01
+Ewald energy        :  1.10200870637778E-01
 psp_core            :  1.41966018330111E-03
-local_psp           : -2.12634774954399E+00
-non_local_psp       : -1.52562211975990E-01
+local_psp           : -2.12634774954400E+00
+non_local_psp       : -1.52562211975992E-01
 total_energy        : -1.11828831380065E+00
-total_energy_eV     : -3.04301725729817E+01
-band_energy         : -7.23961912630880E-01
+total_energy_eV     : -3.04301752411964E+01
+band_energy         : -7.23961912630883E-01
 ...
 
  rms coord change=  2.4868E-03   atom, delta coord (reduced):
@@ -523,21 +523,21 @@ band_energy         : -7.23961912630880E-01
   sigma(3 3)=  3.34916913E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.0362E+00 GPa]
-- sigma(1 1)=  1.13779658E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  9.85359413E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  9.85359413E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.13779677E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  9.85359578E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  9.85359578E-01  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00794000E+00
            diemac      2.00000000E+00
              ecut      1.00000000E+01 Hartree
            etotal     -1.1182883138E+00
-            fcart     -6.6032223723E-05 -0.0000000000E+00 -0.0000000000E+00
-                       6.6032223723E-05 -0.0000000000E+00 -0.0000000000E+00
+            fcart     -6.6032223726E-05 -0.0000000000E+00 -0.0000000000E+00
+                       6.6032223726E-05 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         512
            ionmov           2
            istwfk        2
@@ -568,8 +568,8 @@ P           mkmem           1
            tolmxf      5.00000000E-04
            tolrff      2.00000000E-02
             typat      1  1
-           xangst     -3.9321675800E-01  0.0000000000E+00  0.0000000000E+00
-                       3.9321675800E-01  0.0000000000E+00  0.0000000000E+00
+           xangst     -3.9321675946E-01  0.0000000000E+00  0.0000000000E+00
+                       3.9321675946E-01  0.0000000000E+00  0.0000000000E+00
             xcart     -7.4307198349E-01  0.0000000000E+00  0.0000000000E+00
                        7.4307198349E-01  0.0000000000E+00  0.0000000000E+00
              xred     -7.4307198349E-02  0.0000000000E+00  0.0000000000E+00
@@ -616,7 +616,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -633,12 +633,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -656,15 +656,15 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          0.9  wall=          2.8
+- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  22 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.9  wall=          2.8
++Overall time at end (sec) : cpu=          0.8  wall=          0.9

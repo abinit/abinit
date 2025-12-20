@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h06 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_2.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h06 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_2.abi
 - output file    -> tgw2_2.abo
 - root for input  files -> tgw2_2i
 - root for output files -> tgw2_2o
@@ -182,7 +182,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices
+ SCREENING: Calculation of the susceptibility and dielectric matrices 
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -196,8 +196,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -216,7 +216,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -227,7 +227,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 48 symmetry operations and time-reversal symmetry
+ Together with 48 symmetry operations and time-reversal symmetry 
  yields    64 points in the full Brillouin Zone.
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -297,7 +297,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     8
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -308,7 +308,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
      7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
      8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
 
- Together with 48 symmetry operations and time-reversal symmetry
+ Together with 48 symmetry operations and time-reversal symmetry 
  yields    64 points in the full Brillouin Zone.
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -384,7 +384,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
 
-- screening: taking advantage of time-reversal symmetry
+- screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 14
 - Remaining bands to be divided among processors   nbcw = 16
 - Number of bands treated by each node ~16
@@ -398,18 +398,18 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  calculating chi0 at frequencies [eV] :
   1    0.000000E+00    0.000000E+00
   2    3.023487E+00    0.000000E+00
-  3    6.046974E+00    0.000000E+00
-  4    9.070461E+00    0.000000E+00
+  3    6.046975E+00    0.000000E+00
+  4    9.070462E+00    0.000000E+00
   5    1.209395E+01    0.000000E+00
   6    1.511744E+01    0.000000E+00
   7    1.814092E+01    0.000000E+00
   8    2.116441E+01    0.000000E+00
   9    2.418790E+01    0.000000E+00
- 10    2.721138E+01    0.000000E+00
+ 10    2.721139E+01    0.000000E+00
  11    0.000000E+00    3.899779E+00
  12    0.000000E+00    1.068969E+01
  13    0.000000E+00    2.251161E+01
- 14    0.000000E+00    4.309476E+01
+ 14    0.000000E+00    4.309477E+01
 
 
 --------------------------------------------------------------------------------
@@ -532,7 +532,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   dielectric constant without local fields =  68.9438
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     88.22  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G')
+  Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1489,7 +1489,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      7.6520000000E+00  7.6520000000E+00  7.6520000000E+00 Bohr
               amu      2.69815390E+01
@@ -1640,7 +1640,7 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1657,12 +1657,12 @@ P           mkmem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1680,7 +1680,7 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1695,15 +1695,15 @@ P           mkmem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          2.0
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.4  wall=          2.0
++Overall time at end (sec) : cpu=          1.6  wall=          1.7

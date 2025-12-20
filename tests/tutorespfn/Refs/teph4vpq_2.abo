@@ -1,5 +1,5 @@
 
-.Version 10.3.4.7 of ABINIT, released Dec 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 23 Feb 2025.
-- ( at 16h06 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h04 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_2.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_2.abi
 - output file    -> teph4vpq_2.abo
 - root for input  files -> teph4vpq_2i
 - root for output files -> teph4vpq_2o
@@ -259,7 +259,7 @@ P           mkmem4         84
                          0.00546    0.01092
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.0307175380E+00  2.0307175380E+00  2.0307175380E+00
+                       2.0307175455E+00  2.0307175455E+00  2.0307175455E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        3.8375000000E+00  3.8375000000E+00  3.8375000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -314,8 +314,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
 - Li    ONCVPSP-3.2.3.1  r_core=   1.40824   1.10935
 -  3.00000   3.00000    170503                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -328,8 +328,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
              1   -2.250662   -0.474685
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
 - F     ONCVPSP-3.2.3.1  r_core=   1.30942   1.45782   1.60379
 -  9.00000   7.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -394,9 +394,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      2.03071753796412     2.03071753796412     2.03071753796412
+    2      2.03071754546260     2.03071754546260     2.03071754546260
  length scales=  7.675000000000  7.675000000000  7.675000000000 bohr
-              =  4.061435075928  4.061435075928  4.061435075928 angstroms
+              =  4.061435090925  4.061435090925  4.061435090925 angstroms
  prteigrs : about to open file teph4vpq_2o_DS1_EIG
  Eigenvalues (hartree) for nkpt=   4  k points:
  kpt#   1, nband=  6, wtk=  0.03704, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -491,9 +491,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      2.03071753796412     2.03071753796412     2.03071753796412
+    2      2.03071754546260     2.03071754546260     2.03071754546260
  length scales=  7.675000000000  7.675000000000  7.675000000000 bohr
-              =  4.061435075928  4.061435075928  4.061435075928 angstroms
+              =  4.061435090925  4.061435090925  4.061435090925 angstroms
  prteigrs : about to open file teph4vpq_2o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  6, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -588,9 +588,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      2.03071753796412     2.03071753796412     2.03071753796412
+    2      2.03071754546260     2.03071754546260     2.03071754546260
  length scales=  7.675000000000  7.675000000000  7.675000000000 bohr
-              =  4.061435075928  4.061435075928  4.061435075928 angstroms
+              =  4.061435090925  4.061435090925  4.061435090925 angstroms
  prteigrs : about to open file teph4vpq_2o_DS3_EIG
  Eigenvalues (hartree) for nkpt=  10  k points:
  kpt#   1, nband=  6, wtk=  0.00800, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -685,9 +685,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      2.03071753796412     2.03071753796412     2.03071753796412
+    2      2.03071754546260     2.03071754546260     2.03071754546260
  length scales=  7.675000000000  7.675000000000  7.675000000000 bohr
-              =  4.061435075928  4.061435075928  4.061435075928 angstroms
+              =  4.061435090925  4.061435090925  4.061435090925 angstroms
  prteigrs : about to open file teph4vpq_2o_DS4_EIG
  Eigenvalues (hartree) for nkpt=  84  k points:
  kpt#   1, nband=  6, wtk=  0.00046, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -861,7 +861,7 @@ P           mkmem4         84
                          0.00546    0.01092
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.0307175380E+00  2.0307175380E+00  2.0307175380E+00
+                       2.0307175455E+00  2.0307175455E+00  2.0307175455E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        3.8375000000E+00  3.8375000000E+00  3.8375000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -962,10 +962,10 @@ P           mkmem4         84
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.3  wall=          9.4
+- Proc.   0 individual time (sec): cpu=          9.6  wall=          9.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.3  wall=          9.4
++Overall time at end (sec) : cpu=          9.6  wall=          9.7

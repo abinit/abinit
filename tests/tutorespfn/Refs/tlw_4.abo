@@ -1,5 +1,5 @@
 
-.Version 10.5.1.4 of ABINIT, released May 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  4 Jul 2025.
-- ( at 13h05 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h04 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/TestBot_MPI1/tutorespfn_tlw_4-tlw_5-tlw_6-tlw_7/tlw_4.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_tlw_4-tlw_5-tlw_6-tlw_7/tlw_4.abi
 - output file    -> tlw_4.abo
 - root for input  files -> tlw_4i
 - root for output files -> tlw_4o
@@ -49,6 +49,7 @@ _ WF disk file :      0.090 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =         144
       nfft =        4096          nkpt =         128
+- my_mband =           4
 ================================================================================
 P This job should need less than                       7.917 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -66,6 +67,7 @@ _ WF disk file :      1.127 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =         144
       nfft =        4096          nkpt =         128
+- my_mband =           4
 ================================================================================
 P This job should need less than                       7.917 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -83,6 +85,7 @@ _ WF disk file :      1.127 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =         144
       nfft =        4096          nkpt =         128
+- my_mband =           4
 ================================================================================
 P This job should need less than                       8.313 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -100,6 +103,7 @@ _ WF disk file :      1.127 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =         144
       nfft =        4096          nkpt =         128
+- my_mband =           4
 ================================================================================
 P This job should need less than                       8.311 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -117,6 +121,7 @@ _ WF disk file :      1.127 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =         144
       nfft =        4096          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                      14.653 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -134,6 +139,7 @@ _ WF disk file :      2.252 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =         144
       nfft =        4096          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                      14.653 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -151,6 +157,7 @@ _ WF disk file :      2.252 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =         144
       nfft =        4096          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                      14.653 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -168,6 +175,7 @@ _ WF disk file :      2.252 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =         144
       nfft =        4096          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                      14.653 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -185,6 +193,7 @@ _ WF disk file :      2.252 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =         144
       nfft =        4096          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                      14.653 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -202,6 +211,7 @@ _ WF disk file :      2.252 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =         144
       nfft =        4096          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                      14.653 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -219,6 +229,7 @@ _ WF disk file :      2.252 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =         144
       nfft =        4096          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                      14.653 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -1223,7 +1234,7 @@ P          mk1mem12       256
                          0.00391    0.00391
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3290328148E+00  1.3290328148E+00  1.3290328148E+00
+                       1.3290328197E+00  1.3290328197E+00  1.3290328197E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5115080415E+00  2.5115080415E+00  2.5115080415E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1292,8 +1303,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/Pspdir/31-Ga.LDA.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/Pspdir/31-Ga.LDA.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/31-Ga.LDA.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/31-Ga.LDA.fhi
 - gallium, fhi98PP : Trouiller-Martins-type, LDA Ceperley/Alder Perdew/Wang (1992), l= 0 local
 - 31.00000   3.00000     11001                znucl, zion, pspdat
     6    7    3    0       529   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1306,8 +1317,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              3   -1.913945
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/Pspdir/15-P.LDA.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__gonze/tests/Pspdir/15-P.LDA.fhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/15-P.LDA.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/15-P.LDA.fhi
 - phosphorus, fhi98PP : Trouiller-Martins-type, LDA Ceperley/Alder Perdew/Wang (1992), l= 2 local
 - 15.00000   5.00000     21003                znucl, zion, pspdat
     6    7    3    2       499   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1401,7 +1412,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.32903281475284     1.32903281475284     1.32903281475284
+    2      1.32903281966032     1.32903281966032     1.32903281966032
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -1413,7 +1424,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
-              =  0.529177208590  0.529177208590  0.529177208590 angstroms
+              =  0.529177210544  0.529177210544  0.529177210544 angstroms
  prteigrs : about to open file tlw_4o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.13347   Average Vxc (hartree)=  -0.33878
  Eigenvalues (hartree) for nkpt=  10  k points:
@@ -1433,7 +1444,7 @@ psp_core            :  6.41723490646402E-01
 local_psp           : -3.99119382936853E+00
 non_local_psp       :  1.76213773382979E+00
 total_energy        : -8.84137272549210E+00
-total_energy_eV     : -2.40585987082700E+02
+total_energy_eV     : -2.40586008178047E+02
 band_energy         : -4.88486252690455E-01
 ...
 
@@ -1444,9 +1455,9 @@ band_energy         : -4.88486252690455E-01
   sigma(3 3)=  2.07087043E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.0927E+00 GPa]
-- sigma(1 1)=  6.09271012E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  6.09271012E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  6.09271012E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  6.09271114E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  6.09271114E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  6.09271114E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -1558,7 +1569,7 @@ tolerances: {tolwfr: 1.00E-20, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.12550314E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1125503143E+02 Ha. Also 2DEtotal=   -0.306264980638E+03 eV
+ 2DEtotal=   -0.1125503143E+02 Ha. Also 2DEtotal=   -0.306265007493E+03 eV
     (  non-var. 2DEtotal :   -1.1255031431E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -1622,7 +1633,7 @@ tolerances: {tolwfr: 1.00E-20, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.12550314E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1125503143E+02 Ha. Also 2DEtotal=   -0.306264980636E+03 eV
+ 2DEtotal=   -0.1125503143E+02 Ha. Also 2DEtotal=   -0.306265007490E+03 eV
     (  non-var. 2DEtotal :   -1.1255031431E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -1686,7 +1697,7 @@ tolerances: {tolwfr: 1.00E-20, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.12550314E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1125503143E+02 Ha. Also 2DEtotal=   -0.306264980633E+03 eV
+ 2DEtotal=   -0.1125503143E+02 Ha. Also 2DEtotal=   -0.306265007487E+03 eV
     (  non-var. 2DEtotal :   -1.1255031431E+01 Ha)
 ================================================================================
 
@@ -2256,7 +2267,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.7399267334E+01 Ha. Also 2DEtotal=    0.201344303714E+03 eV
+ 2DEtotal=    0.7399267334E+01 Ha. Also 2DEtotal=    0.201344321368E+03 eV
     (2DErelax=   -4.7625781208E+01 Ha. 2DEnonrelax=    5.5025048542E+01 Ha)
     (  non-var. 2DEtotal :    7.3992680799E+00 Ha)
 
@@ -2316,7 +2327,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.7400202808E+01 Ha. Also 2DEtotal=    0.201369759258E+03 eV
+ 2DEtotal=    0.7400202808E+01 Ha. Also 2DEtotal=    0.201369776915E+03 eV
     (2DErelax=   -1.0538018708E+02 Ha. 2DEnonrelax=    1.1278038989E+02 Ha)
     (  non-var. 2DEtotal :    7.4002030653E+00 Ha)
 
@@ -2372,7 +2383,7 @@ tolerances: {tolvrs: 1.00E-10, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -2.09081121E+02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.2090811212E+03 Ha. Also 2DEtotal=   -0.568938664607E+04 eV
+ 2DEtotal=   -0.2090811212E+03 Ha. Also 2DEtotal=   -0.568938714494E+04 eV
     (  non-var. 2DEtotal :   -2.0908111955E+02 Ha)
 
 --------------------------------------------------------------------------------
@@ -2426,7 +2437,7 @@ tolerances: {tolvrs: 1.00E-10, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -2.09081121E+02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.2090811212E+03 Ha. Also 2DEtotal=   -0.568938664614E+04 eV
+ 2DEtotal=   -0.2090811212E+03 Ha. Also 2DEtotal=   -0.568938714501E+04 eV
     (  non-var. 2DEtotal :   -2.0908111955E+02 Ha)
 ================================================================================
 
@@ -3097,7 +3108,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.9094817641E+01 Ha. Also 2DEtotal=    0.247482573977E+03 eV
+ 2DEtotal=    0.9094817641E+01 Ha. Also 2DEtotal=    0.247482595677E+03 eV
     (2DErelax=   -6.0424004462E+01 Ha. 2DEnonrelax=    6.9518822103E+01 Ha)
     (  non-var. 2DEtotal :    9.0948178624E+00 Ha)
 
@@ -3153,7 +3164,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.7489489318E+01 Ha. Also 2DEtotal=    0.203799368760E+03 eV
+ 2DEtotal=    0.7489489318E+01 Ha. Also 2DEtotal=    0.203799386629E+03 eV
     (2DErelax=   -4.8052333596E+01 Ha. 2DEnonrelax=    5.5541822915E+01 Ha)
     (  non-var. 2DEtotal :    7.4894894697E+00 Ha)
 
@@ -3214,7 +3225,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.9237692508E+01 Ha. Also 2DEtotal=    0.251370396812E+03 eV
+ 2DEtotal=    0.9237692508E+01 Ha. Also 2DEtotal=    0.251370418853E+03 eV
     (2DErelax=   -1.4380317949E+02 Ha. 2DEnonrelax=    1.5304087200E+02 Ha)
     (  non-var. 2DEtotal :    9.2376922441E+00 Ha)
 
@@ -3271,7 +3282,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.7917915607E+01 Ha. Also 2DEtotal=    0.215457440962E+03 eV
+ 2DEtotal=    0.7917915607E+01 Ha. Also 2DEtotal=    0.215457459854E+03 eV
     (2DErelax=   -1.0629795865E+02 Ha. 2DEnonrelax=    1.1421587426E+02 Ha)
     (  non-var. 2DEtotal :    7.9179166651E+00 Ha)
 
@@ -3492,7 +3503,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1006405391E+02 Ha. Also 2DEtotal=    0.273856834116E+03 eV
+ 2DEtotal=    0.1006405391E+02 Ha. Also 2DEtotal=    0.273856858128E+03 eV
     (2DErelax=   -5.8943716586E+01 Ha. 2DEnonrelax=    6.9007770496E+01 Ha)
     (  non-var. 2DEtotal :    1.0064053301E+01 Ha)
 
@@ -3548,7 +3559,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.7749789775E+01 Ha. Also 2DEtotal=    0.210882504399E+03 eV
+ 2DEtotal=    0.7749789775E+01 Ha. Also 2DEtotal=    0.210882522890E+03 eV
     (2DErelax=   -4.8303084748E+01 Ha. 2DEnonrelax=    5.6052874523E+01 Ha)
     (  non-var. 2DEtotal :    7.7497857346E+00 Ha)
 
@@ -3607,7 +3618,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1024200173E+02 Ha. Also 2DEtotal=    0.278699040648E+03 eV
+ 2DEtotal=    0.1024200173E+02 Ha. Also 2DEtotal=    0.278699065085E+03 eV
     (2DErelax=   -1.4137928247E+02 Ha. 2DEnonrelax=    1.5162128420E+02 Ha)
     (  non-var. 2DEtotal :    1.0242003801E+01 Ha)
 
@@ -3664,7 +3675,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.8253114283E+01 Ha. Also 2DEtotal=    0.224578660803E+03 eV
+ 2DEtotal=    0.8253114283E+01 Ha. Also 2DEtotal=    0.224578680495E+03 eV
     (2DErelax=   -1.0738234777E+02 Ha. 2DEnonrelax=    1.1563546205E+02 Ha)
     (  non-var. 2DEtotal :    8.2531170212E+00 Ha)
 
@@ -3892,7 +3903,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.8841191804E+01 Ha. Also 2DEtotal=    0.240581063953E+03 eV
+ 2DEtotal=    0.8841191804E+01 Ha. Also 2DEtotal=    0.240581085048E+03 eV
     (2DErelax=   -5.6564775905E+01 Ha. 2DEnonrelax=    6.5405967709E+01 Ha)
     (  non-var. 2DEtotal :    8.8411919025E+00 Ha)
 
@@ -3950,7 +3961,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.9141465040E+01 Ha. Also 2DEtotal=    0.248751914247E+03 eV
+ 2DEtotal=    0.9141465040E+01 Ha. Also 2DEtotal=    0.248751936058E+03 eV
     (2DErelax=   -1.3247481142E+02 Ha. 2DEnonrelax=    1.4161627646E+02 Ha)
     (  non-var. 2DEtotal :    9.1414696100E+00 Ha)
 
@@ -4162,7 +4173,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.9512409208E+01 Ha. Also 2DEtotal=    0.258845818382E+03 eV
+ 2DEtotal=    0.9512409208E+01 Ha. Also 2DEtotal=    0.258845841078E+03 eV
     (2DErelax=   -5.7490874754E+01 Ha. 2DEnonrelax=    6.7003283962E+01 Ha)
     (  non-var. 2DEtotal :    9.5124065217E+00 Ha)
 
@@ -4220,7 +4231,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.8574480930E+01 Ha. Also 2DEtotal=    0.233323491973E+03 eV
+ 2DEtotal=    0.8574480930E+01 Ha. Also 2DEtotal=    0.233323512432E+03 eV
     (2DErelax=   -5.1777580855E+01 Ha. 2DEnonrelax=    6.0352061784E+01 Ha)
     (  non-var. 2DEtotal :    8.5744803646E+00 Ha)
 
@@ -4276,7 +4287,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.7602289702E+01 Ha. Also 2DEtotal=    0.206868823300E+03 eV
+ 2DEtotal=    0.7602289702E+01 Ha. Also 2DEtotal=    0.206868841439E+03 eV
     (2DErelax=   -4.9731885503E+01 Ha. 2DEnonrelax=    5.7334175205E+01 Ha)
     (  non-var. 2DEtotal :    7.6022841882E+00 Ha)
 
@@ -4334,7 +4345,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1018788221E+02 Ha. Also 2DEtotal=    0.277226373544E+03 eV
+ 2DEtotal=    0.1018788221E+02 Ha. Also 2DEtotal=    0.277226397852E+03 eV
     (2DErelax=   -1.3586538384E+02 Ha. 2DEnonrelax=    1.4605326605E+02 Ha)
     (  non-var. 2DEtotal :    1.0187885393E+01 Ha)
 
@@ -4392,7 +4403,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.9427429486E+01 Ha. Also 2DEtotal=    0.256533402568E+03 eV
+ 2DEtotal=    0.9427429486E+01 Ha. Also 2DEtotal=    0.256533425061E+03 eV
     (2DErelax=   -1.1815021941E+02 Ha. 2DEnonrelax=    1.2757764889E+02 Ha)
     (  non-var. 2DEtotal :    9.4274273398E+00 Ha)
 
@@ -4449,7 +4460,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.8758855181E+01 Ha. Also 2DEtotal=    0.238340570498E+03 eV
+ 2DEtotal=    0.8758855181E+01 Ha. Also 2DEtotal=    0.238340591397E+03 eV
     (2DErelax=   -1.1043577544E+02 Ha. 2DEnonrelax=    1.1919463062E+02 Ha)
     (  non-var. 2DEtotal :    8.7588567522E+00 Ha)
 
@@ -4669,7 +4680,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.8510945649E+01 Ha. Also 2DEtotal=    0.231594609074E+03 eV
+ 2DEtotal=    0.8510945649E+01 Ha. Also 2DEtotal=    0.231594629381E+03 eV
     (2DErelax=   -5.3419859116E+01 Ha. 2DEnonrelax=    6.1930804765E+01 Ha)
     (  non-var. 2DEtotal :    8.5109451922E+00 Ha)
 
@@ -4725,7 +4736,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.7517329982E+01 Ha. Also 2DEtotal=    0.204556951753E+03 eV
+ 2DEtotal=    0.7517329982E+01 Ha. Also 2DEtotal=    0.204556969690E+03 eV
     (2DErelax=   -4.8570304772E+01 Ha. 2DEnonrelax=    5.6087634755E+01 Ha)
     (  non-var. 2DEtotal :    7.5173255386E+00 Ha)
 
@@ -4783,7 +4794,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.9465833690E+01 Ha. Also 2DEtotal=    0.257578434088E+03 eV
+ 2DEtotal=    0.9465833690E+01 Ha. Also 2DEtotal=    0.257578456673E+03 eV
     (2DErelax=   -1.2249721237E+02 Ha. 2DEnonrelax=    1.3196304606E+02 Ha)
     (  non-var. 2DEtotal :    9.4658303511E+00 Ha)
 
@@ -4840,7 +4851,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.8390067246E+01 Ha. Also 2DEtotal=    0.228305340441E+03 eV
+ 2DEtotal=    0.8390067246E+01 Ha. Also 2DEtotal=    0.228305360459E+03 eV
     (2DErelax=   -1.0734195101E+02 Ha. 2DEnonrelax=    1.1573201825E+02 Ha)
     (  non-var. 2DEtotal :    8.3900693088E+00 Ha)
 
@@ -5067,7 +5078,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.9847827695E+01 Ha. Also 2DEtotal=    0.267973019582E+03 eV
+ 2DEtotal=    0.9847827695E+01 Ha. Also 2DEtotal=    0.267973043079E+03 eV
     (2DErelax=   -5.4623798127E+01 Ha. 2DEnonrelax=    6.4471625821E+01 Ha)
     (  non-var. 2DEtotal :    9.8478264872E+00 Ha)
 
@@ -5124,7 +5135,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1008680298E+02 Ha. Also 2DEtotal=    0.274475867701E+03 eV
+ 2DEtotal=    0.1008680298E+02 Ha. Also 2DEtotal=    0.274475891768E+03 eV
     (2DErelax=   -1.2893407935E+02 Ha. 2DEnonrelax=    1.3902088233E+02 Ha)
     (  non-var. 2DEtotal :    1.0086793656E+01 Ha)
 
@@ -5343,7 +5354,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.8392221575E+01 Ha. Also 2DEtotal=    0.228363962710E+03 eV
+ 2DEtotal=    0.8392221575E+01 Ha. Also 2DEtotal=    0.228363982734E+03 eV
     (2DErelax=   -5.3432142878E+01 Ha. 2DEnonrelax=    6.1824364453E+01 Ha)
     (  non-var. 2DEtotal :    8.3922157995E+00 Ha)
 
@@ -5400,7 +5411,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.9178439757E+01 Ha. Also 2DEtotal=    0.249758047453E+03 eV
+ 2DEtotal=    0.9178439757E+01 Ha. Also 2DEtotal=    0.249758069353E+03 eV
     (2DErelax=   -5.4763798864E+01 Ha. 2DEnonrelax=    6.3942238621E+01 Ha)
     (  non-var. 2DEtotal :    9.1784366791E+00 Ha)
 
@@ -5458,7 +5469,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.9833857818E+01 Ha. Also 2DEtotal=    0.267592879921E+03 eV
+ 2DEtotal=    0.9833857818E+01 Ha. Also 2DEtotal=    0.267592903385E+03 eV
     (2DErelax=   -1.2183352071E+02 Ha. 2DEnonrelax=    1.3166737853E+02 Ha)
     (  non-var. 2DEtotal :    9.8338607508E+00 Ha)
 
@@ -5515,7 +5526,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1016079960E+02 Ha. Also 2DEtotal=    0.276489418218E+03 eV
+ 2DEtotal=    0.1016079960E+02 Ha. Also 2DEtotal=    0.276489442462E+03 eV
     (2DErelax=   -1.2738956273E+02 Ha. 2DEnonrelax=    1.3755036233E+02 Ha)
     (  non-var. 2DEtotal :    1.0160799099E+01 Ha)
 
@@ -6672,7 +6683,7 @@ P          mk1mem12       256
                          0.00391    0.00391
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3290328148E+00  1.3290328148E+00  1.3290328148E+00
+                       1.3290328197E+00  1.3290328197E+00  1.3290328197E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5115080415E+00  2.5115080415E+00  2.5115080415E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -6775,10 +6786,10 @@ P          mk1mem12       256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        134.0  wall=        134.0
+- Proc.   0 individual time (sec): cpu=        137.3  wall=        137.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  39 WARNINGs and  82 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        134.0  wall=        134.0
++Overall time at end (sec) : cpu=        137.3  wall=        137.4
