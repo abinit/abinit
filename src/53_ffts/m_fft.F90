@@ -4966,7 +4966,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
 
    if (ndat /= uplan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
-     call gpu_fft_plan_free(uplan%gpu_plan_spc); call gpu_stream_free(plan%gpu_stream_spc)
+     call gpu_fft_plan_free(uplan%gpu_plan_spc); call gpu_stream_free(uplan%gpu_stream_spc)
      call gpu_fft_plan_init(uplan%gpu_plan_spc, uplan%gpu_stream_spc, uplan%ngfft, uplan%ngfft, ndat, sp)
    end if
 
@@ -4993,7 +4993,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
    end do ! idat
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
-   call gpu_fftbox_c2c_ip(plan%gpu_plan_spc, plan%gpu_stream_spc, plan%nfft, ndat, isign__, iscale__, sp, c_loc(ur))
+   call gpu_fftbox_c2c_ip(uplan%gpu_plan_spc, uplan%gpu_stream_spc, uplan%nfft, ndat, isign__, iscale__, sp, c_loc(ur))
    !$OMP END TARGET DATA
 #endif
  end if
@@ -5062,7 +5062,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
 
    if (ndat /= uplan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
-     call gpu_fft_plan_free(uplan%gpu_plan_dpc); call gpu_stream_free(plan%gpu_stream_dpc)
+     call gpu_fft_plan_free(uplan%gpu_plan_dpc); call gpu_stream_free(uplan%gpu_stream_dpc)
      call gpu_fft_plan_init(uplan%gpu_plan_dpc, uplan%gpu_stream_dpc, uplan%ngfft, uplan%ngfft, ndat, dp)
    end if
 
@@ -5089,7 +5089,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
    !end do ! idat
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
-   call gpu_fftbox_c2c_ip(plan%gpu_plan_dpc, plan%gpu_stream_dpc, plan%nfft, ndat, isign__, iscale__, dp, c_loc(ur))
+   call gpu_fftbox_c2c_ip(uplan%gpu_plan_dpc, uplan%gpu_stream_dpc, uplan%nfft, ndat, isign__, iscale__, dp, c_loc(ur))
    !$OMP END TARGET DATA
 #endif
  end if
@@ -5156,7 +5156,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
 
    if (ndat /= uplan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
-     call gpu_fft_plan_free(uplan%gpu_plan_spc); call gpu_stream_free(plan%gpu_stream_spc)
+     call gpu_fft_plan_free(uplan%gpu_plan_spc); call gpu_stream_free(uplan%gpu_stream_spc)
      call gpu_fft_plan_init(uplan%gpu_plan_spc, uplan%gpu_stream_spc, uplan%ngfft, uplan%ngfft, ndat, sp)
    end if
 
@@ -5241,7 +5241,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
 
    if (ndat /= uplan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
-     call gpu_fft_plan_free(uplan%gpu_plan_dpc); call gpu_stream_free(plan%gpu_stream_dpc)
+     call gpu_fft_plan_free(uplan%gpu_plan_dpc); call gpu_stream_free(uplan%gpu_stream_dpc)
      call gpu_fft_plan_init(uplan%gpu_plan_dpc, uplan%gpu_stream_dpc, uplan%ngfft, uplan%ngfft, ndat, dp)
    end if
 
