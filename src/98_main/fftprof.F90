@@ -333,7 +333,7 @@ program fftprof
      call Ftest(it)%print() !,header)
    end if
  end do
- !
+
  ! =======================
  ! ==== fourdp timing ====
  ! =======================
@@ -348,7 +348,7 @@ program fftprof
      end do
    end do
  end if
- !
+
  ! =======================
  ! ==== fourwf timing ====
  ! =======================
@@ -374,7 +374,7 @@ program fftprof
    end do
    ABI_FREE(fourwf_params)
  end if
- !
+
  ! ==========================
  ! ==== Test GW routines ====
  ! ==========================
@@ -424,7 +424,6 @@ program fftprof
 
  if (do_seq_utests) then
    call wrtout(std_out, "=== FFT Unit Tests ===")
-
    nfailed = 0
    do idx=1,ntests
      ! fft_setups(:,idx) = [fftalg,fftcache,ndat,ith,avail,gpu_option]
@@ -433,12 +432,11 @@ program fftprof
      ndat     = fft_setups(3, idx)
      nthreads = fft_setups(4, idx)
      ! Skip the test if library is not available.
-     if (fft_setups(5,idx) == 0) CYCLE
+     if (fft_setups(5, idx) == 0) CYCLE
      gpu_option = fft_setups(6, idx)
 
      write(msg,"(3(a,i0))")"fftbox_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
      call wrtout(std_out, msg)
-
      nfailed = nfailed + fftbox_utests(fftalg, ndat, nthreads, gpu_option)
 
      ! Initialize ngfft(7:8) here.
@@ -451,7 +449,6 @@ program fftprof
 
      write(msg,"(3(a,i0))")"fftu_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
      call wrtout(std_out, msg)
-
      nfailed = nfailed + fftu_utests(ecut, ut_ngfft, rprimd, ndat, nthreads)
    end do
 
@@ -499,7 +496,7 @@ program fftprof
       rprimd,nsym,symrel,gmet,MPI_enreg)
    end if
  end if
- !
+
  !===============================
  !=== End of run, free memory ===
  !===============================
