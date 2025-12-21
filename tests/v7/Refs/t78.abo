@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h14 )
+.Starting date : Sun 21 Dec 2025.
+- ( at 16h46 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v7_t78/t78.abi
 - output file    -> t78.abo
@@ -1428,7 +1428,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis
 
-   (The band structure is shifted by fermie =      15.6640 eV )
+   (The band structure is shifted by fermie =      15.6642 eV )
 
  Wannier band structure for atom  1
  1      -1.646      -1.646       3.514       4.044       4.044
@@ -3425,10 +3425,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         21.2  wall=         21.2
+- Proc.   0 individual time (sec): cpu=         20.8  wall=         20.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  59 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         21.2  wall=         21.2
++Overall time at end (sec) : cpu=         20.8  wall=         20.8

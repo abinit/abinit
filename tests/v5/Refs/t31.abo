@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h12 )
+.Starting date : Sun 21 Dec 2025.
+- ( at 16h44 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v5_t31/t31.abi
 - output file    -> t31.abo
@@ -341,13 +341,13 @@ force_length_stats: {min:   3.61400724E-20, max:   2.41724531E-03, mean:   1.611
 
    Nuclear quad. mom. (barns) :    0.0000   Cq (MHz) :    0.0000   eta :    0.0000
 
-      efg eigval (au) :     -0.146860 ; (V/m^2) :  -1.42709582E+21
+      efg eigval (au) :     -0.146860 ; (1.0E+21 V/m^2) :      -1.42709578
 -         eigvec :      0.000000     0.000000     1.000000
 
-      efg eigval (au) :     -0.056199 ; (V/m^2) :  -5.46103142E+20
+      efg eigval (au) :     -0.056199 ; (1.0E+21 V/m^2) :      -0.54610312
 -         eigvec :     -0.707107     0.707107     0.000000
 
-      efg eigval (au) :      0.203059 ; (V/m^2) :   1.97319896E+21
+      efg eigval (au) :      0.203059 ; (1.0E+21 V/m^2) :       1.97319890
 -         eigvec :      0.707107     0.707107     0.000000
 
       total efg :      0.073430     0.129629     0.000000
@@ -372,13 +372,13 @@ force_length_stats: {min:   3.61400724E-20, max:   2.41724531E-03, mean:   1.611
 
    Nuclear quad. mom. (barns) :    0.0000   Cq (MHz) :    0.0000   eta :    0.0000
 
-      efg eigval (au) :     -0.146860 ; (V/m^2) :  -1.42709582E+21
+      efg eigval (au) :     -0.146860 ; (1.0E+21 V/m^2) :      -1.42709578
 -         eigvec :      0.000000     0.000000     1.000000
 
-      efg eigval (au) :     -0.056199 ; (V/m^2) :  -5.46103142E+20
+      efg eigval (au) :     -0.056199 ; (1.0E+21 V/m^2) :      -0.54610312
 -         eigvec :      0.707107     0.707107     0.000000
 
-      efg eigval (au) :      0.203059 ; (V/m^2) :   1.97319896E+21
+      efg eigval (au) :      0.203059 ; (1.0E+21 V/m^2) :       1.97319890
 -         eigvec :      0.707107    -0.707107     0.000000
 
       total efg :      0.073430    -0.129629     0.000000
@@ -403,13 +403,13 @@ force_length_stats: {min:   3.61400724E-20, max:   2.41724531E-03, mean:   1.611
 
    Nuclear quad. mom. (barns) :   -0.0261   Cq (MHz) :    5.2166   eta :    0.1245
 
-      efg eigval (au) :     -0.850637 ; (V/m^2) :  -8.26595097E+21
+      efg eigval (au) :     -0.850637 ; (1.0E+21 V/m^2) :      -8.26595071
 -         eigvec :      0.707107    -0.707107     0.000000
 
-      efg eigval (au) :      0.372373 ; (V/m^2) :   3.61848113E+21
+      efg eigval (au) :      0.372373 ; (1.0E+21 V/m^2) :       3.61848102
 -         eigvec :      0.000000     0.000000     1.000000
 
-      efg eigval (au) :      0.478265 ; (V/m^2) :   4.64746984E+21
+      efg eigval (au) :      0.478265 ; (1.0E+21 V/m^2) :       4.64746969
 -         eigvec :      0.707107     0.707107     0.000000
 
       total efg :     -0.186186     0.664451     0.000000
@@ -434,13 +434,13 @@ force_length_stats: {min:   3.61400724E-20, max:   2.41724531E-03, mean:   1.611
 
    Nuclear quad. mom. (barns) :   -0.0261   Cq (MHz) :    5.2166   eta :    0.1245
 
-      efg eigval (au) :     -0.850637 ; (V/m^2) :  -8.26595097E+21
+      efg eigval (au) :     -0.850637 ; (1.0E+21 V/m^2) :      -8.26595071
 -         eigvec :      0.707107    -0.707107     0.000000
 
-      efg eigval (au) :      0.372373 ; (V/m^2) :   3.61848113E+21
+      efg eigval (au) :      0.372373 ; (1.0E+21 V/m^2) :       3.61848102
 -         eigvec :      0.000000     0.000000     1.000000
 
-      efg eigval (au) :      0.478265 ; (V/m^2) :   4.64746984E+21
+      efg eigval (au) :      0.478265 ; (1.0E+21 V/m^2) :       4.64746969
 -         eigvec :      0.707107     0.707107     0.000000
 
       total efg :     -0.186186     0.664451     0.000000
@@ -465,13 +465,13 @@ force_length_stats: {min:   3.61400724E-20, max:   2.41724531E-03, mean:   1.611
 
    Nuclear quad. mom. (barns) :   -0.0261   Cq (MHz) :    5.2166   eta :    0.1245
 
-      efg eigval (au) :     -0.850637 ; (V/m^2) :  -8.26595097E+21
+      efg eigval (au) :     -0.850637 ; (1.0E+21 V/m^2) :      -8.26595071
 -         eigvec :      0.707107     0.707107     0.000000
 
-      efg eigval (au) :      0.372373 ; (V/m^2) :   3.61848113E+21
+      efg eigval (au) :      0.372373 ; (1.0E+21 V/m^2) :       3.61848102
 -         eigvec :      0.000000     0.000000     1.000000
 
-      efg eigval (au) :      0.478265 ; (V/m^2) :   4.64746984E+21
+      efg eigval (au) :      0.478265 ; (1.0E+21 V/m^2) :       4.64746969
 -         eigvec :     -0.707107     0.707107     0.000000
 
       total efg :     -0.186186    -0.664451     0.000000
@@ -496,13 +496,13 @@ force_length_stats: {min:   3.61400724E-20, max:   2.41724531E-03, mean:   1.611
 
    Nuclear quad. mom. (barns) :   -0.0261   Cq (MHz) :    5.2166   eta :    0.1245
 
-      efg eigval (au) :     -0.850637 ; (V/m^2) :  -8.26595097E+21
+      efg eigval (au) :     -0.850637 ; (1.0E+21 V/m^2) :      -8.26595071
 -         eigvec :      0.707107     0.707107     0.000000
 
-      efg eigval (au) :      0.372373 ; (V/m^2) :   3.61848113E+21
+      efg eigval (au) :      0.372373 ; (1.0E+21 V/m^2) :       3.61848102
 -         eigvec :      0.000000     0.000000     1.000000
 
-      efg eigval (au) :      0.478265 ; (V/m^2) :   4.64746984E+21
+      efg eigval (au) :      0.478265 ; (1.0E+21 V/m^2) :       4.64746969
 -         eigvec :     -0.707107     0.707107     0.000000
 
       total efg :     -0.186186    -0.664451     0.000000
@@ -788,10 +788,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
+- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.4  wall=          1.4
++Overall time at end (sec) : cpu=          1.3  wall=          1.4

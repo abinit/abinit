@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h13 )
+.Starting date : Sun 21 Dec 2025.
+- ( at 16h44 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v6_t44/t44.abi
 - output file    -> t44.abo
@@ -331,13 +331,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
    Nuclear quad. mom. (barns) :    0.7700   Cq (MHz) :   52.8075   eta :    0.0000
 
-      efg eigval (au) :     -0.145939 ; (V/m^2) :  -1.41814490E+21
+      efg eigval (au) :     -0.145939 ; (1.0E+21 V/m^2) :      -1.41814485
 -         eigvec :      0.707107    -0.707107     0.000000
 
-      efg eigval (au) :     -0.145939 ; (V/m^2) :  -1.41814490E+21
+      efg eigval (au) :     -0.145939 ; (1.0E+21 V/m^2) :      -1.41814485
 -         eigvec :      0.707107     0.707107     0.000000
 
-      efg eigval (au) :      0.291879 ; (V/m^2) :   2.83628979E+21
+      efg eigval (au) :      0.291879 ; (1.0E+21 V/m^2) :       2.83628970
 -         eigvec :      0.000000     0.000000     1.000000
 
       total efg :     -0.145939     0.000000     0.000000

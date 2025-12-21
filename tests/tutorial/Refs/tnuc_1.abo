@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h06 )
+.Starting date : Sun 21 Dec 2025.
+- ( at 16h38 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tnuc_1/tnuc_1.abi
 - output file    -> tnuc_1.abo
@@ -387,13 +387,13 @@ force_length_stats: {min:   0.00000000E+00, max:   2.44252273E-04, mean:   1.628
 
    Nuclear quad. mom. (barns) :    0.0000   Cq (MHz) :    0.0000   eta :    0.0000
 
-      efg eigval (au) :     -0.152323 ; (V/m^2) :  -1.48017693E+21
+      efg eigval (au) :     -0.152323 ; (1.0E+21 V/m^2) :      -1.48017689
 -         eigvec :      0.000000     0.000000     1.000000
 
-      efg eigval (au) :     -0.054274 ; (V/m^2) :  -5.27401886E+20
+      efg eigval (au) :     -0.054274 ; (1.0E+21 V/m^2) :      -0.52740187
 -         eigvec :     -0.707107     0.707107     0.000000
 
-      efg eigval (au) :      0.206597 ; (V/m^2) :   2.00757882E+21
+      efg eigval (au) :      0.206597 ; (1.0E+21 V/m^2) :       2.00757876
 -         eigvec :     -0.707107    -0.707107     0.000000
 
       total efg :      0.076161     0.130436     0.000000
@@ -418,13 +418,13 @@ force_length_stats: {min:   0.00000000E+00, max:   2.44252273E-04, mean:   1.628
 
    Nuclear quad. mom. (barns) :    0.0000   Cq (MHz) :    0.0000   eta :    0.0000
 
-      efg eigval (au) :     -0.152323 ; (V/m^2) :  -1.48017693E+21
+      efg eigval (au) :     -0.152323 ; (1.0E+21 V/m^2) :      -1.48017689
 -         eigvec :      0.000000     0.000000     1.000000
 
-      efg eigval (au) :     -0.054274 ; (V/m^2) :  -5.27401886E+20
+      efg eigval (au) :     -0.054274 ; (1.0E+21 V/m^2) :      -0.52740187
 -         eigvec :     -0.707107    -0.707107    -0.000000
 
-      efg eigval (au) :      0.206597 ; (V/m^2) :   2.00757882E+21
+      efg eigval (au) :      0.206597 ; (1.0E+21 V/m^2) :       2.00757876
 -         eigvec :     -0.707107     0.707107     0.000000
 
       total efg :      0.076161    -0.130436     0.000000
@@ -449,13 +449,13 @@ force_length_stats: {min:   0.00000000E+00, max:   2.44252273E-04, mean:   1.628
 
    Nuclear quad. mom. (barns) :   -0.0256   Cq (MHz) :    6.6150   eta :    0.1403
 
-      efg eigval (au) :     -1.100599 ; (V/m^2) :  -1.06949233E+22
+      efg eigval (au) :     -1.100599 ; (1.0E+21 V/m^2) :     -10.69492294
 -         eigvec :      0.707107    -0.707107     0.000000
 
-      efg eigval (au) :      0.473085 ; (V/m^2) :   4.59714112E+21
+      efg eigval (au) :      0.473085 ; (1.0E+21 V/m^2) :       4.59714098
 -         eigvec :     -0.000000    -0.000000     1.000000
 
-      efg eigval (au) :      0.627514 ; (V/m^2) :   6.09778216E+21
+      efg eigval (au) :      0.627514 ; (1.0E+21 V/m^2) :       6.09778197
 -         eigvec :     -0.707107    -0.707107    -0.000000
 
       total efg :     -0.236543     0.864057     0.000000
@@ -480,13 +480,13 @@ force_length_stats: {min:   0.00000000E+00, max:   2.44252273E-04, mean:   1.628
 
    Nuclear quad. mom. (barns) :   -0.0256   Cq (MHz) :    6.6150   eta :    0.1403
 
-      efg eigval (au) :     -1.100599 ; (V/m^2) :  -1.06949233E+22
+      efg eigval (au) :     -1.100599 ; (1.0E+21 V/m^2) :     -10.69492294
 -         eigvec :      0.707107     0.707107     0.000000
 
-      efg eigval (au) :      0.473085 ; (V/m^2) :   4.59714112E+21
+      efg eigval (au) :      0.473085 ; (1.0E+21 V/m^2) :       4.59714098
 -         eigvec :      0.000000     0.000000     1.000000
 
-      efg eigval (au) :      0.627514 ; (V/m^2) :   6.09778216E+21
+      efg eigval (au) :      0.627514 ; (1.0E+21 V/m^2) :       6.09778197
 -         eigvec :     -0.707107     0.707107     0.000000
 
       total efg :     -0.236543    -0.864057     0.000000
@@ -511,13 +511,13 @@ force_length_stats: {min:   0.00000000E+00, max:   2.44252273E-04, mean:   1.628
 
    Nuclear quad. mom. (barns) :   -0.0256   Cq (MHz) :    6.6150   eta :    0.1403
 
-      efg eigval (au) :     -1.100599 ; (V/m^2) :  -1.06949233E+22
+      efg eigval (au) :     -1.100599 ; (1.0E+21 V/m^2) :     -10.69492294
 -         eigvec :      0.707107     0.707107     0.000000
 
-      efg eigval (au) :      0.473085 ; (V/m^2) :   4.59714112E+21
+      efg eigval (au) :      0.473085 ; (1.0E+21 V/m^2) :       4.59714098
 -         eigvec :      0.000000     0.000000     1.000000
 
-      efg eigval (au) :      0.627514 ; (V/m^2) :   6.09778216E+21
+      efg eigval (au) :      0.627514 ; (1.0E+21 V/m^2) :       6.09778197
 -         eigvec :     -0.707107     0.707107     0.000000
 
       total efg :     -0.236543    -0.864057     0.000000
@@ -542,13 +542,13 @@ force_length_stats: {min:   0.00000000E+00, max:   2.44252273E-04, mean:   1.628
 
    Nuclear quad. mom. (barns) :   -0.0256   Cq (MHz) :    6.6150   eta :    0.1403
 
-      efg eigval (au) :     -1.100599 ; (V/m^2) :  -1.06949233E+22
+      efg eigval (au) :     -1.100599 ; (1.0E+21 V/m^2) :     -10.69492294
 -         eigvec :      0.707107    -0.707107     0.000000
 
-      efg eigval (au) :      0.473085 ; (V/m^2) :   4.59714112E+21
+      efg eigval (au) :      0.473085 ; (1.0E+21 V/m^2) :       4.59714098
 -         eigvec :     -0.000000    -0.000000     1.000000
 
-      efg eigval (au) :      0.627514 ; (V/m^2) :   6.09778216E+21
+      efg eigval (au) :      0.627514 ; (1.0E+21 V/m^2) :       6.09778197
 -         eigvec :     -0.707107    -0.707107    -0.000000
 
       total efg :     -0.236543     0.864057     0.000000
