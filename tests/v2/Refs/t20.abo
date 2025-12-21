@@ -1,5 +1,5 @@
 
-.Version 10.1.4.3 of ANADDB, released Jul 2025.
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 19 Aug 2025.
-- ( at 23h57 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h10 )
   
 
 ================================================================================
@@ -1073,9 +1073,9 @@
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0 -0.0  1.0
-  1.0 -1.0  1.0 -0.0 -0.0  1.0 -1.0  1.0 -3.0  0.0  0.0 -1.0 -1.0 -1.0 -1.0  0.0
- -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
+  3.0  0.0  0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0  0.0  1.0
+  1.0 -1.0  1.0  0.0 -0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0  0.0
+ -0.0  1.0 -1.0 -1.0 -1.0 -0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0  0.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
   3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
@@ -1088,14 +1088,14 @@
  -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  10
        degenerate with vibration modes #  11 to   12
-  3.0  0.0  0.0 -1.0 -1.0 -1.0  1.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -0.0  0.0 -1.0
- -1.0  1.0  1.0  0.0  0.0 -1.0  1.0 -1.0 -3.0 -0.0 -0.0  1.0  1.0  1.0 -1.0 -0.0
-  0.0 -1.0  1.0  1.0 -1.0  0.0 -0.0  1.0  1.0 -1.0 -1.0 -0.0 -0.0  1.0 -1.0  1.0
+  3.0 -0.0 -0.0 -1.0 -1.0 -1.0  1.0 -0.0  0.0  1.0 -1.0 -1.0  1.0  0.0 -0.0 -1.0
+ -1.0  1.0  1.0 -0.0 -0.0 -1.0  1.0 -1.0 -3.0  0.0  0.0  1.0  1.0  1.0 -1.0  0.0
+ -0.0 -1.0  1.0  1.0 -1.0 -0.0  0.0  1.0  1.0 -1.0 -1.0  0.0  0.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #  13
        degenerate with vibration modes #  14 to   15
-  3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
-  1.0 -1.0  1.0  0.0  0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0 -0.0
-  0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
+  3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0 -0.0  1.0
+  1.0 -1.0  1.0 -0.0 -0.0  1.0 -1.0  1.0 -3.0  0.0  0.0 -1.0 -1.0 -1.0 -1.0  0.0
+  0.0  1.0 -1.0 -1.0 -1.0  0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -1109,7 +1109,7 @@
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.50000
  Phonon energies in Hartree :
-  -7.616279E-04  4.676215E-04  4.735931E-04  4.735931E-04  9.478701E-04
+  -7.616278E-04  4.676215E-04  4.735931E-04  4.735931E-04  9.478701E-04
    1.227972E-03  1.227972E-03  1.518586E-03  1.569357E-03  1.569357E-03
    1.614003E-03  1.982981E-03  1.982981E-03  2.075685E-03  3.112649E-03
  Phonon frequencies in cm-1    :
@@ -1137,25 +1137,25 @@
 -  1.831630E+02  1.831630E+02  1.832935E+02  2.719950E+02  3.088129E+02
 -  3.088129E+02  4.475647E+02  4.475647E+02  4.595976E+02  6.418689E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1743715980E-02
+   in atomic units:     0.1743715979E-02
    in units km/s:              3.81471
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8991541359E-03
-   in SI units K  :            283.93008
+   in atomic units:     0.8991541354E-03
+   in SI units K  :            283.93042
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1743715980E-02
+   in atomic units:     0.1743715979E-02
    in units km/s:              3.81471
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8991541359E-03
-   in SI units K  :            283.93008
+   in atomic units:     0.8991541354E-03
+   in SI units K  :            283.93042
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2631781958E-02
+   in atomic units:     0.2631781956E-02
    in units km/s:              5.75753
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1357088918E-02
-   in SI units K  :            428.53428
+   in atomic units:     0.1357088917E-02
+   in SI units K  :            428.53479
 
 
   Phonon wavevector (reduced coordinates) :  0.25000  0.25000  0.25000
@@ -1207,6 +1207,6 @@
 
 ================================================================================
 
-+Total cpu time      0.185  and wall time      0.185 sec
++Total cpu time      0.206  and wall time      0.207 sec
 
  anaddb : the run completed successfully.

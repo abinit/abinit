@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 13 Sep 2025.
-- ( at 10h16 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h01 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/fast_t17-t19-t20-t21-t23/t19.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/fast_t17-t19-t20-t21-t23/t19.abi
 - output file    -> t19.abo
 - root for input  files -> t17o
 - root for output files -> t19o
@@ -77,8 +77,8 @@ P           mkmem           1
           spgroup           1
            tolwfr      1.00000000E-12
             typat      1  1
-           xangst     -1.1229140366E+00  0.0000000000E+00  0.0000000000E+00
-                       1.1229140366E+00  0.0000000000E+00  0.0000000000E+00
+           xangst     -1.1229140408E+00  0.0000000000E+00  0.0000000000E+00
+                       1.1229140408E+00  0.0000000000E+00  0.0000000000E+00
             xcart     -2.1220000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.1220000000E+00  0.0000000000E+00  0.0000000000E+00
              xred     -1.7683333333E-01  0.0000000000E+00  0.0000000000E+00
@@ -118,8 +118,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -194,8 +194,8 @@ xred      :
 - [ -1.7683E-01,   0.0000E+00,   0.0000E+00, Si]
 - [  1.7683E-01,   0.0000E+00,   0.0000E+00, Si]
 cartesian_forces: # hartree/bohr
-- [ -1.77516724E-02,   1.82581561E-14,  -1.23476236E-13, ]
-- [  1.77516724E-02,  -1.82581561E-14,   1.23476236E-13, ]
+- [ -1.77516724E-02,   1.82581563E-14,  -1.23476237E-13, ]
+- [  1.77516724E-02,  -1.82581563E-14,   1.23476237E-13, ]
 force_length_stats: {min:   1.77516724E-02, max:   1.77516724E-02, mean:   1.77516724E-02, }
 ...
 
@@ -223,8 +223,8 @@ force_length_stats: {min:   1.77516724E-02, max:   1.77516724E-02, mean:   1.775
     2      -0.213020054462      0.000000000011     -0.000000000002
 
  cartesian coordinates (angstrom) at end:
-    1     -1.12291403662798     0.00000000000000     0.00000000000000
-    2      1.12291403662798     0.00000000000000     0.00000000000000
+    1     -1.12291404077437     0.00000000000000     0.00000000000000
+    2      1.12291404077437     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1     -0.01775167241644     0.00000000000002    -0.00000000000012
@@ -232,11 +232,11 @@ force_length_stats: {min:   1.77516724E-02, max:   1.77516724E-02, mean:   1.775
  frms,max,avg= 1.0248933E-02 1.7751672E-02  -1.211E-09 -1.416E-12  1.231E-13 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.91282762076582     0.00000000000094    -0.00000000000635
-    2      0.91282762076582    -0.00000000000094     0.00000000000635
- frms,max,avg= 5.2702127E-01 9.1282762E-01  -6.229E-08 -7.283E-11  6.329E-12 e/A
+    1     -0.91282769743500     0.00000000000094    -0.00000000000635
+    2      0.91282769743500    -0.00000000000094     0.00000000000635
+ frms,max,avg= 5.2702132E-01 9.1282770E-01  -6.229E-08 -7.283E-11  6.329E-12 e/A
  length scales= 12.000000000000  8.000000000000  8.000000000000 bohr
-              =  6.350126503080  4.233417668720  4.233417668720 angstroms
+              =  6.350126526528  4.233417684352  4.233417684352 angstroms
  prteigrs : about to open file t19o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22294
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -264,7 +264,7 @@ psp_core            :  2.98722879456821E-02
 local_psp           : -6.11150555404362E+00
 non_local_psp       :  1.96150768232113E+00
 total_energy        : -8.67163161222970E+00
-total_energy_eV     : -2.35967096492893E+02
+total_energy_eV     : -2.35967117183241E+02
 band_energy         : -1.38440898403221E+00
 ...
 
@@ -275,9 +275,9 @@ band_energy         : -1.38440898403221E+00
   sigma(3 3)=  1.10398124E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.5061E+00 GPa]
-- sigma(1 1)=  4.02236529E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.24802441E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.24802440E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  4.02236597E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.24802495E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.24802495E+00  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -290,8 +290,8 @@ band_energy         : -1.38440898403221E+00
              ecut      7.00000000E+00 Hartree
            enunit           2
            etotal     -8.6716316122E+00
-            fcart     -1.7751672416E-02  1.8258156101E-14 -1.2347623644E-13
-                       1.7751672416E-02 -1.8258156101E-14  1.2347623644E-13
+            fcart     -1.7751672416E-02  1.8258156275E-14 -1.2347623718E-13
+                       1.7751672416E-02 -1.8258156275E-14  1.2347623718E-13
 -          fftalg         512
             intxc           1
            irdwfk           1
@@ -316,8 +316,8 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            tolwfr      1.00000000E-12
             typat      1  1
-           xangst     -1.1229140366E+00  0.0000000000E+00  0.0000000000E+00
-                       1.1229140366E+00  0.0000000000E+00  0.0000000000E+00
+           xangst     -1.1229140408E+00  0.0000000000E+00  0.0000000000E+00
+                       1.1229140408E+00  0.0000000000E+00  0.0000000000E+00
             xcart     -2.1220000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.1220000000E+00  0.0000000000E+00  0.0000000000E+00
              xred     -1.7683333333E-01  0.0000000000E+00  0.0000000000E+00
