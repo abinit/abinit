@@ -13,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : 20 Dec 2025.
+.Starting date : 21 Dec 2025.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -960,25 +960,25 @@
  | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.011    0.000    0.000
  | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.008    0.000
  | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.013
- For density rho [in kg.m-3]=19032.880
+ For density rho [in kg.m-3]=19032.436
  
  ========================= Voigt average (constant strain) ===================
  ISOTHERMAL modulus [in GPa]: Bulk Kt=  103.338 and Shear G=   97.565
  Average of Young modulus E [in GPa]=  222.631 Lame modulus Lambda [in GPa]=   38.295 and Poisson ratio Nu=    0.141
- Velocities [in m.s-1]: compressional Vp= 3502.042  shear Vs= 2264.097  and bulk Vphi= 2330.118
- Debye velocity [in m.s-1]= 2484.541  and temperature [in K]=  269.109
+ Velocities [in m.s-1]: compressional Vp= 3502.083  shear Vs= 2264.123  and bulk Vphi= 2330.145
+ Debye velocity [in m.s-1]= 2484.570  and temperature [in K]=  269.112
  
  ========================= Reuss average (constant stress) ===================
  ISOTHERMAL modulus [in GPa]: Bulk Kt=  100.703 and Shear G=   83.513
  Average of Young modulus E [in GPa]=  196.281 Lame modulus Lambda [in GPa]=   45.028 and Poisson ratio Nu=    0.175
- Velocities [in m.s-1]: compressional Vp= 3337.883  shear Vs= 2094.715  and bulk Vphi= 2300.223
- Debye velocity [in m.s-1]= 2306.506  and temperature [in K]=  249.825
+ Velocities [in m.s-1]: compressional Vp= 3337.922  shear Vs= 2094.739  and bulk Vphi= 2300.250
+ Debye velocity [in m.s-1]= 2306.533  and temperature [in K]=  249.828
  
  ============================== Hill average =================================
  ISOTHERMAL modulus [in GPa]: Bulk Kt=  102.021 and Shear G=   90.539
  Average of Young modulus E [in GPa]=  209.610 Lame modulus Lambda [in GPa]=   41.661 and Poisson ratio Nu=    0.158
- Velocities [in m.s-1]: compressional Vp= 3420.947  shear Vs= 2181.051  and bulk Vphi= 2315.219
- Debye velocity [in m.s-1]= 2397.311  and temperature [in K]=  259.661
+ Velocities [in m.s-1]: compressional Vp= 3420.987  shear Vs= 2181.076  and bulk Vphi= 2315.246
+ Debye velocity [in m.s-1]= 2397.339  and temperature [in K]=  259.664
  
  ========================= Elastic anisotropy =================================
  Elastic anisotropy index : A_U= 5*G_V/G_R + K_V/K_R - 6 =    0.867
@@ -1043,8 +1043,8 @@
  Heat capacity at constant P (k_B/f.u.): C_p=           5.912
  Isothermal Bulk Modulus (GPa):          B_T=         102.021
  Isentropic Bulk Modulus (GPa):          B_S=         102.021
- Longitudinal sound velocity (m.s-1):     Vp=        3420.947
- Transverse sound velocity (m.s-1):       Vs=        2181.051
+ Longitudinal sound velocity (m.s-1):     Vp=        3420.987
+ Transverse sound velocity (m.s-1):       Vs=        2181.076
   
  #############################################################################
  ######################### CALCULATION COMPLETED #############################

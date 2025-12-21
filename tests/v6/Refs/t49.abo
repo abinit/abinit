@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h13 )
+.Starting date : Sun 21 Dec 2025.
+- ( at 16h44 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v6_t49/t49.abi
 - output file    -> t49.abo
@@ -353,13 +353,13 @@ force_length_stats: {min:   1.43944905E-02, max:   1.43944905E-02, mean:   1.439
 
    Nuclear quad. mom. (barns) :   -0.6960   Cq (MHz) : *********   eta :    0.0000
 
-      efg eigval (au) :     -8.967208 ; (V/m^2) :  -8.71376131E+22
+      efg eigval (au) :     -8.967208 ; (1.0E+21 V/m^2) :     -87.13761038
 -         eigvec :      1.000000     0.000000     0.000000
 
-      efg eigval (au) :     -8.967208 ; (V/m^2) :  -8.71376131E+22
+      efg eigval (au) :     -8.967208 ; (1.0E+21 V/m^2) :     -87.13761038
 -         eigvec :     -0.000000     1.000000     0.000000
 
-      efg eigval (au) :     17.934416 ; (V/m^2) :   1.74275226E+23
+      efg eigval (au) :     17.934416 ; (1.0E+21 V/m^2) :     174.27522076
 -         eigvec :      0.000000     0.000000     1.000000
 
       total efg :     -8.967208     0.000000     0.000000
@@ -384,13 +384,13 @@ force_length_stats: {min:   1.43944905E-02, max:   1.43944905E-02, mean:   1.439
 
    Nuclear quad. mom. (barns) :   -0.0817   Cq (MHz) :  -67.4498   eta :    0.0000
 
-      efg eigval (au) :     -1.757889 ; (V/m^2) :  -1.70820489E+22
+      efg eigval (au) :     -1.757889 ; (1.0E+21 V/m^2) :     -17.08204840
 -         eigvec :     -0.000000     1.000000     0.000000
 
-      efg eigval (au) :     -1.757889 ; (V/m^2) :  -1.70820489E+22
+      efg eigval (au) :     -1.757889 ; (1.0E+21 V/m^2) :     -17.08204840
 -         eigvec :      1.000000     0.000000     0.000000
 
-      efg eigval (au) :      3.515779 ; (V/m^2) :   3.41640979E+22
+      efg eigval (au) :      3.515779 ; (1.0E+21 V/m^2) :      34.16409679
 -         eigvec :      0.000000     0.000000     1.000000
 
       total efg :     -1.757889     0.000000     0.000000
@@ -913,13 +913,13 @@ force_length_stats: {min:   1.77711138E-02, max:   1.77711138E-02, mean:   1.777
 
    Nuclear quad. mom. (barns) :   -0.6960   Cq (MHz) : *********   eta :    0.0000
 
-      efg eigval (au) :     -8.646586 ; (V/m^2) :  -8.40220158E+22
+      efg eigval (au) :     -8.646586 ; (1.0E+21 V/m^2) :     -84.02201311
 -         eigvec :      1.000000     0.000000     0.000000
 
-      efg eigval (au) :     -8.646586 ; (V/m^2) :  -8.40220158E+22
+      efg eigval (au) :     -8.646586 ; (1.0E+21 V/m^2) :     -84.02201311
 -         eigvec :     -0.000000     1.000000     0.000000
 
-      efg eigval (au) :     17.293172 ; (V/m^2) :   1.68044032E+23
+      efg eigval (au) :     17.293172 ; (1.0E+21 V/m^2) :     168.04402622
 -         eigvec :      0.000000     0.000000     1.000000
 
       total efg :     -8.646586     0.000000     0.000000
@@ -944,13 +944,13 @@ force_length_stats: {min:   1.77711138E-02, max:   1.77711138E-02, mean:   1.777
 
    Nuclear quad. mom. (barns) :   -0.0817   Cq (MHz) :  -65.7507   eta :    0.0000
 
-      efg eigval (au) :     -1.713609 ; (V/m^2) :  -1.66517563E+22
+      efg eigval (au) :     -1.713609 ; (1.0E+21 V/m^2) :     -16.65175573
 -         eigvec :     -0.000000     1.000000     0.000000
 
-      efg eigval (au) :     -1.713609 ; (V/m^2) :  -1.66517563E+22
+      efg eigval (au) :     -1.713609 ; (1.0E+21 V/m^2) :     -16.65175573
 -         eigvec :      1.000000     0.000000     0.000000
 
-      efg eigval (au) :      3.427217 ; (V/m^2) :   3.33035125E+22
+      efg eigval (au) :      3.427217 ; (1.0E+21 V/m^2) :      33.30351146
 -         eigvec :      0.000000     0.000000     1.000000
 
       total efg :     -1.713609     0.000000     0.000000
@@ -1209,10 +1209,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.8  wall=          5.9
+- Proc.   0 individual time (sec): cpu=          5.7  wall=          5.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  23 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.8  wall=          5.9
++Overall time at end (sec) : cpu=          5.7  wall=          5.8
