@@ -4253,7 +4253,7 @@ integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, kg(3), gg(3), ifft
  end if
 
  ! Insert cg into cfft
-!$OMP PARALLEL DO PRIVATE(i1, i2, i3) IF (ndat > 1)
+!$OMP PARALLEL DO PRIVATE(ifft) IF (ndat > 1)
  do idat=1,ndat
    do ipw=1,desc%npw
      !if (any(kg_k(:,ipw) > sc_ngfft(1:3)/2) .or. any(kg_k(:,ipw) < -(sc_ngfft(1:3)-1)/2) ) then
