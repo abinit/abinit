@@ -1,8 +1,8 @@
 
-.Version 10.3.6.4 of ABINIT, released Feb 2025.
-.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  3 Apr 2025.
-- ( at 17h08 )
-
-- input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/tutorial_tgwr_1-tgwr_2-tgwr_3-tgwr_4-tgwr_5/tgwr_2.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h06 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tgwr_1-tgwr_2-tgwr_3-tgwr_4-tgwr_5/tgwr_2.abi
 - output file    -> tgwr_2.abo
 - root for input  files -> tgwr_2i
 - root for output files -> tgwr_2o
@@ -75,7 +75,7 @@ _ WF disk file :     81.740 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
@@ -86,7 +86,7 @@ _ WF disk file :     81.740 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
              ecut      1.60000000E+01 Hartree
          ecutsigx      1.60000000E+01 Hartree
           ecutwfn      1.60000000E+01 Hartree
--          fftalg         312
+-          fftalg         512
            istwfk1       2    3    7
            istwfk2       2    0    3    0    0    0    7    0
            istwfk3       2    0    0    3    0    0    0    0    0    0
@@ -402,7 +402,7 @@ P           mkmem3         16
                          0.11111    0.11111    0.05556    0.02778    0.11111    0.05556
                          0.01389    0.11111    0.11111    0.05556
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3573395400E+00  1.3573395400E+00  1.3573395400E+00
+                       1.3573395450E+00  1.3573395450E+00  1.3573395450E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5650000000E+00  2.5650000000E+00  2.5650000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -445,8 +445,8 @@ meta: {optdriver: 6, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/giantomassi/git_repos/abinit/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
-- pspatm: opening atomic psp file    /Users/giantomassi/git_repos/abinit/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
 - Si    ONCVPSP-3.2.3.1  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    170510                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -587,7 +587,7 @@ meta: {optdriver: 6, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
@@ -603,7 +603,7 @@ meta: {optdriver: 6, }
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            istwfk1       2    3    7
            istwfk2       2    0    3    0    0    0    7    0
            istwfk3       2    0    0    3    0    0    0    0    0    0
@@ -925,7 +925,7 @@ P           mkmem3         16
                          0.11111    0.11111    0.05556    0.02778    0.11111    0.05556
                          0.01389    0.11111    0.11111    0.05556
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3573395400E+00  1.3573395400E+00  1.3573395400E+00
+                       1.3573395450E+00  1.3573395450E+00  1.3573395450E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5650000000E+00  2.5650000000E+00  2.5650000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -966,7 +966,7 @@ P           mkmem3         16
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -983,12 +983,12 @@ P           mkmem3         16
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1006,7 +1006,7 @@ P           mkmem3         16
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1021,20 +1021,15 @@ P           mkmem3         16
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         14.2  wall=         14.3
+- Proc.   0 individual time (sec): cpu=         19.4  wall=         19.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.2  wall=         14.3
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 90 allocations and 90 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 1149593 allocations and 1149593 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
+.Delivered  27 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=         19.4  wall=         19.5

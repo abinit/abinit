@@ -1,8 +1,8 @@
 
-.Version 10.5.0 of ABINIT, released Apr 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 14 Apr 2025.
-- ( at 01h44 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/rgupta_develop/tests/TestBot_MPI1/v10_t104-t105-t106-t107/t107.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h15 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v10_t104-t105-t106-t107/t107.abi
 - output file    -> t107.abo
 - root for input  files -> t107i
 - root for output files -> t107o
@@ -156,8 +156,8 @@ _ WF disk file :      6.691 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
       eph_extrael3     0.00000000E+00
       eph_extrael4     0.00000000E+00
       eph_extrael5     0.00000000E+00
-      eph_extrael6     4.08882913E-05
-      eph_extrael7     4.08882913E-05
+      eph_extrael6     4.08882917E-05
+      eph_extrael7     4.08882917E-05
       eph_intmeth1          1
       eph_intmeth2          1
       eph_intmeth3          2
@@ -187,8 +187,8 @@ _ WF disk file :      6.691 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
          eph_task6          4
          eph_task7          9
 -          fftalg         512
-        freqspmax      3.67493254E-02 Hartree
-        freqspmin     -3.67493254E-02 Hartree
+        freqspmax      3.67493222E-02 Hartree
+        freqspmin     -3.67493222E-02 Hartree
            getddb          20
           getdvdb1          0
           getdvdb2          0
@@ -328,7 +328,7 @@ P           mkmem           8
         optdriver           7
          ph_ngqpt       16   16   16
         ph_nqpath           3
-         ph_smear      3.67493254E-05 Hartree
+         ph_smear      3.67493222E-05 Hartree
         prteliash           1
            prtvol           1
             rprim      6.3285005244E+00  0.0000000000E+00  3.6537614813E+00
@@ -339,8 +339,8 @@ P           mkmem           8
      sigma_erange3     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange4     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange5     0.00000000E+00  0.00000000E+00 Hartree
-     sigma_erange6     0.00000000E+00  3.67493254E-02 Hartree
-     sigma_erange7     0.00000000E+00  3.67493254E-02 Hartree
+     sigma_erange6     0.00000000E+00  3.67493222E-02 Hartree
+     sigma_erange7     0.00000000E+00  3.67493222E-02 Hartree
           spgroup         227
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -403,7 +403,7 @@ P           mkmem           8
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.1162994140E+00  7.8934288549E-01  1.9334873015E+00
+                       1.1162994181E+00  7.8934288841E-01  1.9334873087E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.1095001748E+00  1.4916418785E+00  3.6537614813E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -491,19 +491,19 @@ meta: {optdriver: 7, eph_task: 4, }
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2127800742E-02 (at units)
+ Average speed of sound partial sums:     0.2127800741E-02 (at units)
 -                                   =           4.6550 [km/s]
 
- Debye frequency from partial sums:     0.1273941323E-02 (Ha)
--                                 =     0.8382131240E+01 (THz)
--Debye temperature from partial sums:     0.4022783754E+03 (K)
+ Debye frequency from partial sums:     0.1273941322E-02 (Ha)
+-                                 =     0.8382131235E+01 (THz)
+-Debye temperature from partial sums:     0.4022788527E+03 (K)
 
 - Writing phonon DOS to file: t107o_DS1_PHDOS
 - Writing phonon DOS to netcdf file: t107o_DS1_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/rgupta_develop/tests/Pspdir/Si-GGA.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/rgupta_develop/tests/Pspdir/Si-GGA.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Si-GGA.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Si-GGA.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    150713                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -580,8 +580,8 @@ P Number of k-point in Sigma_nk treated by this proc: 2 of 2
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
-
-
+ 
+ 
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    2   4.211    4.108   -0.103    0.111   -0.903   -0.929   -0.918    1.029    0.000    0.000
@@ -590,11 +590,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
    5   6.740    7.115    0.375    0.155   -0.336    2.410   -0.423    0.578    2.529    3.007
    6   6.740    7.115    0.375    0.155   -0.336    2.410   -0.423    0.578    0.000    0.000
    7   6.740    7.115    0.375    0.155   -0.336    2.410   -0.423    0.578    0.000    0.000
-
+ 
  KS gap:    2.529 (assuming bval:4 ==> bcond:5)
  QP gap:    3.007 (OTMS:    2.573)
  QP_gap - KS_gap:    0.478 (OTMS:    0.044)
-
+ 
 ============================================================================================
  omega and Eliashberg function gf_{nk}(omega) for testing purposes:
 For band:2
@@ -639,11 +639,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
    4   1.402    2.076    0.674    0.099   -0.219    6.828   -0.634    0.733    0.000    0.000
    5   4.944    4.989    0.045   -0.134   -0.908   -0.338    0.131   -0.265    3.542    2.913
    6   4.944    4.989    0.045   -0.134   -0.908   -0.338    0.131   -0.265    0.000    0.000
-
+ 
  KS gap:    3.542 (assuming bval:4 ==> bcond:5)
  QP gap:    2.913 (OTMS:    3.309)
  QP_gap - KS_gap:   -0.629 (OTMS:   -0.233)
-
+ 
 ============================================================================================
 
 ================================================================================
@@ -704,12 +704,12 @@ meta: {optdriver: 7, eph_task: 4, }
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2127800742E-02 (at units)
+ Average speed of sound partial sums:     0.2127800741E-02 (at units)
 -                                   =           4.6550 [km/s]
 
- Debye frequency from partial sums:     0.1273941323E-02 (Ha)
--                                 =     0.8382131240E+01 (THz)
--Debye temperature from partial sums:     0.4022783754E+03 (K)
+ Debye frequency from partial sums:     0.1273941322E-02 (Ha)
+-                                 =     0.8382131235E+01 (THz)
+-Debye temperature from partial sums:     0.4022788527E+03 (K)
 
 - Writing phonon DOS to file: t107o_DS2_PHDOS
 - Writing phonon DOS to netcdf file: t107o_DS2_PHDOS.nc
@@ -775,8 +775,8 @@ P Number of k-point in Sigma_nk treated by this proc: 2 of 2
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
-
-
+ 
+ 
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    2   4.211    4.108   -0.103    0.111   -0.903   -0.929   -0.918    1.029    0.000    0.000
@@ -785,11 +785,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
    5   6.740    7.115    0.375    0.155   -0.336    2.410   -0.423    0.578    2.529    3.007
    6   6.740    7.115    0.375    0.155   -0.336    2.410   -0.423    0.578    0.000    0.000
    7   6.740    7.115    0.375    0.155   -0.336    2.410   -0.423    0.578    0.000    0.000
-
+ 
  KS gap:    2.529 (assuming bval:4 ==> bcond:5)
  QP gap:    3.007 (OTMS:    2.573)
  QP_gap - KS_gap:    0.478 (OTMS:    0.044)
-
+ 
 ============================================================================================
  omega and Eliashberg function gf_{nk}(omega) for testing purposes:
 For band:2
@@ -834,11 +834,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
    4   1.402    2.076    0.674    0.099   -0.219    6.828   -0.634    0.733    0.000    0.000
    5   4.944    4.989    0.045   -0.134   -0.908   -0.338    0.131   -0.265    3.542    2.913
    6   4.944    4.989    0.045   -0.134   -0.908   -0.338    0.131   -0.265    0.000    0.000
-
+ 
  KS gap:    3.542 (assuming bval:4 ==> bcond:5)
  QP gap:    2.913 (OTMS:    3.309)
  QP_gap - KS_gap:   -0.629 (OTMS:   -0.233)
-
+ 
 ============================================================================================
 
 ================================================================================
@@ -898,12 +898,12 @@ meta: {optdriver: 7, eph_task: 5, }
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2127800742E-02 (at units)
+ Average speed of sound partial sums:     0.2127800741E-02 (at units)
 -                                   =           4.6550 [km/s]
 
- Debye frequency from partial sums:     0.1273941323E-02 (Ha)
--                                 =     0.8382131240E+01 (THz)
--Debye temperature from partial sums:     0.4022783754E+03 (K)
+ Debye frequency from partial sums:     0.1273941322E-02 (Ha)
+-                                 =     0.8382131235E+01 (THz)
+-Debye temperature from partial sums:     0.4022788527E+03 (K)
 
 - Writing phonon DOS to file: t107o_DS3_PHDOS
 - Writing phonon DOS to netcdf file: t107o_DS3_PHDOS.nc
@@ -977,12 +977,12 @@ meta: {optdriver: 7, eph_task: 4, }
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2127800742E-02 (at units)
+ Average speed of sound partial sums:     0.2127800741E-02 (at units)
 -                                   =           4.6550 [km/s]
 
- Debye frequency from partial sums:     0.1273941323E-02 (Ha)
--                                 =     0.8382131240E+01 (THz)
--Debye temperature from partial sums:     0.4022783754E+03 (K)
+ Debye frequency from partial sums:     0.1273941322E-02 (Ha)
+-                                 =     0.8382131235E+01 (THz)
+-Debye temperature from partial sums:     0.4022788527E+03 (K)
 
 - Writing phonon DOS to file: t107o_DS4_PHDOS
 - Writing phonon DOS to netcdf file: t107o_DS4_PHDOS.nc
@@ -1048,8 +1048,8 @@ P Number of k-point in Sigma_nk treated by this proc: 2 of 2
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
-
-
+ 
+ 
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    2   4.211    4.519    0.307    0.424   -0.178    0.725   -0.832    1.256    0.000    0.000
@@ -1058,11 +1058,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
    5   6.740    6.878    0.138    0.160   -0.284    0.864   -0.546    0.706    2.529    2.360
    6   6.740    6.878    0.138    0.160   -0.284    0.864   -0.546    0.706    0.000    0.000
    7   6.740    6.878    0.138    0.160   -0.284    0.864   -0.546    0.706    0.000    0.000
-
+ 
  KS gap:    2.529 (assuming bval:4 ==> bcond:5)
  QP gap:    2.360 (OTMS:    2.265)
  QP_gap - KS_gap:   -0.169 (OTMS:   -0.264)
-
+ 
 ============================================================================================
  omega and Eliashberg function gf_{nk}(omega) for testing purposes:
 For band:2
@@ -1107,11 +1107,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
    4   1.402    1.607    0.205    0.320   -0.096    0.642   -0.575    0.895    0.000    0.000
    5   4.944    4.537   -0.406   -0.441   -0.174    0.920   -0.118   -0.323    3.542    2.930
    6   4.944    4.537   -0.406   -0.441   -0.174    0.920   -0.118   -0.323    0.000    0.000
-
+ 
  KS gap:    3.542 (assuming bval:4 ==> bcond:5)
  QP gap:    2.930 (OTMS:    2.781)
  QP_gap - KS_gap:   -0.611 (OTMS:   -0.761)
-
+ 
 ============================================================================================
 
 ================================================================================
@@ -1176,12 +1176,12 @@ meta: {optdriver: 7, eph_task: 4, }
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2127800742E-02 (at units)
+ Average speed of sound partial sums:     0.2127800741E-02 (at units)
 -                                   =           4.6550 [km/s]
 
- Debye frequency from partial sums:     0.1273941323E-02 (Ha)
--                                 =     0.8382131240E+01 (THz)
--Debye temperature from partial sums:     0.4022783754E+03 (K)
+ Debye frequency from partial sums:     0.1273941322E-02 (Ha)
+-                                 =     0.8382131235E+01 (THz)
+-Debye temperature from partial sums:     0.4022788527E+03 (K)
 
 - Writing phonon DOS to file: t107o_DS5_PHDOS
 - Writing phonon DOS to netcdf file: t107o_DS5_PHDOS.nc
@@ -1250,8 +1250,8 @@ P Number of k-point in Sigma_nk treated by this proc: 2 of 2
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
-
-
+ 
+ 
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    2   4.211    4.503    0.292    0.398   -0.176    0.733   -3.651    4.049    0.000    0.000
@@ -1260,11 +1260,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
    5   6.740    6.808    0.068    0.079   -0.281    0.857   -3.201    3.280    2.529    2.305
    6   6.740    6.808    0.068    0.079   -0.281    0.857   -3.201    3.280    0.000    0.000
    7   6.740    6.808    0.068    0.079   -0.281    0.857   -3.201    3.280    0.000    0.000
-
+ 
  KS gap:    2.529 (assuming bval:4 ==> bcond:5)
  QP gap:    2.305 (OTMS:    2.210)
  QP_gap - KS_gap:   -0.224 (OTMS:   -0.319)
-
+ 
 ============================================================================================
  omega and Eliashberg function gf_{nk}(omega) for testing purposes:
 For band:2
@@ -1309,11 +1309,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
    4   1.402    1.618    0.216    0.328   -0.092    0.659   -2.455    2.784    0.000    0.000
    5   4.944    4.626   -0.318   -0.342   -0.173    0.930   -2.608    2.266    3.542    3.008
    6   4.944    4.626   -0.318   -0.342   -0.173    0.930   -2.608    2.266    0.000    0.000
-
+ 
  KS gap:    3.542 (assuming bval:4 ==> bcond:5)
  QP gap:    3.008 (OTMS:    2.872)
  QP_gap - KS_gap:   -0.534 (OTMS:   -0.670)
-
+ 
 ============================================================================================
 
 ================================================================================
@@ -1385,12 +1385,12 @@ meta: {optdriver: 7, eph_task: 4, }
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2127800742E-02 (at units)
+ Average speed of sound partial sums:     0.2127800741E-02 (at units)
 -                                   =           4.6550 [km/s]
 
- Debye frequency from partial sums:     0.1273941323E-02 (Ha)
--                                 =     0.8382131240E+01 (THz)
--Debye temperature from partial sums:     0.4022783754E+03 (K)
+ Debye frequency from partial sums:     0.1273941322E-02 (Ha)
+-                                 =     0.8382131235E+01 (THz)
+-Debye temperature from partial sums:     0.4022788527E+03 (K)
 
 - Writing phonon DOS to file: t107o_DS6_PHDOS
 - Writing phonon DOS to netcdf file: t107o_DS6_PHDOS.nc
@@ -1462,8 +1462,8 @@ P Number of k-point in Sigma_nk treated by this proc: 4 of 4
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
-
-
+ 
+ 
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    5   5.658    5.370   -0.288   -1.151   -0.505    0.250   -5.826    4.675    0.000    0.000
@@ -1566,12 +1566,12 @@ meta: {optdriver: 7, eph_task: 9, }
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2127800742E-02 (at units)
+ Average speed of sound partial sums:     0.2127800741E-02 (at units)
 -                                   =           4.6550 [km/s]
 
- Debye frequency from partial sums:     0.1273941323E-02 (Ha)
--                                 =     0.8382131240E+01 (THz)
--Debye temperature from partial sums:     0.4022783754E+03 (K)
+ Debye frequency from partial sums:     0.1273941322E-02 (Ha)
+-                                 =     0.8382131235E+01 (THz)
+-Debye temperature from partial sums:     0.4022788527E+03 (K)
 
 - Writing phonon DOS to file: t107o_DS7_PHDOS
 - Writing phonon DOS to netcdf file: t107o_DS7_PHDOS.nc
@@ -1596,7 +1596,7 @@ meta: {optdriver: 7, eph_task: 9, }
  Print first 10 frequencies in gw_vals array (re-im) for testing purposes:
  spin: 1, ikcalc: 1
  gw_vals for itemp:1ib: 1
- -1.70647E+01 -1.50767E+01 -1.30556E+01 -1.10067E+01 -8.93600E+00 -6.84901E+00 -4.75149E+00 -2.64911E+00 -5.47504E-01  1.54776E+00
+ -1.70649E+01 -1.50769E+01 -1.30557E+01 -1.10069E+01 -8.93615E+00 -6.84916E+00 -4.75164E+00 -2.64925E+00 -5.47639E-01  1.54763E+00
  -1.25872E+02 -1.26630E+02 -1.27286E+02 -1.27838E+02 -1.28285E+02 -1.28627E+02 -1.28864E+02 -1.28994E+02 -1.29019E+02 -1.28939E+02
 
  Print first 5 temperatures of diagonal mobility_mu  > 1e-6 (with ieh as electrons or holes) for testing purposes:
@@ -1610,7 +1610,7 @@ meta: {optdriver: 7, eph_task: 9, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      2.80855000E+01
@@ -1623,8 +1623,8 @@ meta: {optdriver: 7, eph_task: 9, }
       eph_extrael3     0.00000000E+00
       eph_extrael4     0.00000000E+00
       eph_extrael5     0.00000000E+00
-      eph_extrael6     4.08882913E-05
-      eph_extrael7     4.08882913E-05
+      eph_extrael6     4.08882917E-05
+      eph_extrael7     4.08882917E-05
       eph_intmeth1          1
       eph_intmeth2          1
       eph_intmeth3          2
@@ -1675,8 +1675,8 @@ meta: {optdriver: 7, eph_task: 9, }
             fcart7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         512
-        freqspmax      3.67493254E-02 Hartree
-        freqspmin     -3.67493254E-02 Hartree
+        freqspmax      3.67493222E-02 Hartree
+        freqspmin     -3.67493222E-02 Hartree
            getddb          20
           getdvdb1          0
           getdvdb2          0
@@ -1807,7 +1807,7 @@ P           mkmem           8
         optdriver           7
          ph_ngqpt       16   16   16
         ph_nqpath           3
-         ph_smear      3.67493254E-05 Hartree
+         ph_smear      3.67493222E-05 Hartree
         prteliash           1
            prtvol           1
             rprim      6.3285005244E+00  0.0000000000E+00  3.6537614813E+00
@@ -1818,8 +1818,8 @@ P           mkmem           8
      sigma_erange3     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange4     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange5     0.00000000E+00  0.00000000E+00 Hartree
-     sigma_erange6     0.00000000E+00  3.67493254E-02 Hartree
-     sigma_erange7     0.00000000E+00  3.67493254E-02 Hartree
+     sigma_erange6     0.00000000E+00  3.67493222E-02 Hartree
+     sigma_erange7     0.00000000E+00  3.67493222E-02 Hartree
           spgroup         227
            strten1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1894,7 +1894,7 @@ P           mkmem           8
             tmesh      3.00000000E+03  5.00000000E+01  1.00000000E+00
             typat      1  1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.1162994140E+00  7.8934288549E-01  1.9334873015E+00
+                       1.1162994181E+00  7.8934288841E-01  1.9334873087E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.1095001748E+00  1.4916418785E+00  3.6537614813E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1942,7 +1942,7 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1959,12 +1959,12 @@ P           mkmem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1982,7 +1982,7 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1997,15 +1997,15 @@ P           mkmem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         34.3  wall=         34.4
+- Proc.   0 individual time (sec): cpu=         35.7  wall=         35.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  18 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         34.3  wall=         34.4
++Overall time at end (sec) : cpu=         35.7  wall=         35.8

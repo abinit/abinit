@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h04 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_teph4isotc_1-teph4isotc_2-teph4isotc_3-teph4isotc_4-teph4isotc_5-teph4isotc_6-teph4isotc_7/teph4isotc_5.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h04 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_teph4isotc_1-teph4isotc_2-teph4isotc_3-teph4isotc_4-teph4isotc_5-teph4isotc_6-teph4isotc_7/teph4isotc_5.abi
 - output file    -> teph4isotc_5.abo
 - root for input  files -> teph4isotc_5i
 - root for output files -> teph4isotc_5o
@@ -55,8 +55,8 @@ _ WF disk file :    100.000 Mbytes ; DEN or POT disk file :      0.061 Mbytes.
         ddb_ngqpt        4    4    4
            dipdip           0
              ecut      3.80000000E+01 Hartree
-       eph_fsewin      1.10247976E-02 Hartree
-       eph_fsmear      3.67493254E-03 Hartree
+       eph_fsewin      1.10247967E-02 Hartree
+       eph_fsmear      3.67493222E-03 Hartree
       eph_intmeth           1
    eph_ngqpt_fine        6    6    6
 -          fftalg         512
@@ -261,8 +261,8 @@ P           mkmem         370
                          0.00412    0.00412
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -8.9085146186E-01  1.5429999939E+00  1.7614999931E+00
-                       8.9085146186E-01  1.5429999939E+00  1.7614999931E+00
+                      -8.9085146515E-01  1.5429999996E+00  1.7614999996E+00
+                       8.9085146515E-01  1.5429999996E+00  1.7614999996E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                       -1.6834652880E+00  2.9158474116E+00  3.3287525700E+00
                        1.6834652880E+00  2.9158474116E+00  3.3287525700E+00
@@ -387,18 +387,18 @@ meta: {optdriver: 7, eph_task: 1, }
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.3310080577E-02 (at units)
+ Average speed of sound partial sums:     0.3310080576E-02 (at units)
 -                                   =           7.2414 [km/s]
 
- Debye frequency from partial sums:     0.2220811270E-02 (Ha)
+ Debye frequency from partial sums:     0.2220811269E-02 (Ha)
 -                                 =     0.1461223620E+02 (THz)
--Debye temperature from partial sums:     0.7012759015E+03 (K)
+-Debye temperature from partial sums:     0.7012767335E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4isotc_5o_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Mg-low.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Mg-low.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Mg-low.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Mg-low.psp8
 - Mg    ONCVPSP-3.3.0  r_core=   2.31813   2.10714
 - 12.00000   2.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       400   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -411,8 +411,8 @@ meta: {optdriver: 7, eph_task: 1, }
              1    4.197993    0.757155
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/B.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/B.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/B.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/B.psp8
 - B     ONCVPSP-3.3.0  r_core=   1.20849   1.20849
 -  5.00000   3.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -434,11 +434,11 @@ meta: {optdriver: 7, eph_task: 1, }
  Mesh step:  10.0 (meV) with npts: 2749
  From emin:  -5.1 to emax:  22.4 (eV)
  Number of k-points in the IBZ: 370
- Fermi level:   7.66392108E+00 (eV)
- Total electron DOS at Fermi level in states/eV:   7.17582741E-01
+ Fermi level:   7.66392064E+00 (eV)
+ Total electron DOS at Fermi level in states/eV:   7.17582679E-01
  Total number of electrons at eF:    8.0
 
-- Writing electron DOS to file: teph4isotc_5o_EDOS
+- Writing electron DOS to file: teph4isotc_5o_EDOS 
 
  ==== Fermi surface info ====
  FS integration done with gaussian method and broadening:  0.1 (meV)
@@ -455,48 +455,48 @@ meta: {optdriver: 7, eph_task: 1, }
     1        0.000000E+00    0.000000E+00    0.000000E+00
     2        0.000000E+00    0.000000E+00    0.000000E+00
     3        0.000000E+00    0.000000E+00    0.000000E+00
-    4        1.444402E-03    3.229356E-07    2.523291E-03
-    5        1.444402E-03    3.229356E-07    2.523291E-03
-    6        1.674636E-03    6.177142E-15    3.590658E-11
+    4        1.444402E-03    3.229355E-07    2.523290E-03
+    5        1.444402E-03    3.229355E-07    2.523290E-03
+    6        1.674636E-03    6.177143E-15    3.590658E-11
     7        2.426616E-03    1.951007E-03    5.401125E+00
     8        2.426616E-03    1.951007E-03    5.401125E+00
-    9        3.127043E-03    4.075260E-07    6.793839E-04
+    9        3.127043E-03    4.075261E-07    6.793839E-04
 
  q-point =    1.666667E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        4.943079E-04    2.560168E-09    1.708051E-04
     2        7.097618E-04    4.018380E-06    1.300329E-01
-    3        9.663813E-04    8.283116E-07    1.445853E-02
-    4        1.618651E-03    7.755468E-06    4.825354E-02
+    3        9.663813E-04    8.283117E-07    1.445853E-02
+    4        1.618651E-03    7.755469E-06    4.825354E-02
     5        1.636151E-03    2.227227E-09    1.356268E-05
-    6        1.839901E-03    1.353106E-05    6.515841E-02
-    7        2.726974E-03    2.672932E-04    5.859403E-01
-    8        2.748690E-03    3.289269E-04    7.097008E-01
+    6        1.839901E-03    1.353106E-05    6.515842E-02
+    7        2.726974E-03    2.672933E-04    5.859404E-01
+    8        2.748690E-03    3.289268E-04    7.097008E-01
     9        3.083473E-03    5.058836E-09    8.673572E-06
 
  q-point =    3.333333E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        9.343367E-04    2.595831E-06    4.847269E-02
-    2        1.011905E-03    4.539995E-06    7.227750E-02
-    3        1.334010E-03    3.147665E-06    2.883353E-02
-    4        1.592381E-03    2.364046E-05    1.519811E-01
-    5        1.892482E-03    1.878293E-05    8.549238E-02
-    6        2.648172E-03    3.267384E-05    7.595132E-02
-    7        2.753692E-03    5.876564E-06    1.263340E-02
+    2        1.011905E-03    4.539995E-06    7.227751E-02
+    3        1.334010E-03    3.147665E-06    2.883354E-02
+    4        1.592381E-03    2.364047E-05    1.519811E-01
+    5        1.892482E-03    1.878293E-05    8.549239E-02
+    6        2.648172E-03    3.267384E-05    7.595133E-02
+    7        2.753692E-03    5.876565E-06    1.263340E-02
     8        3.101886E-03    1.286435E-05    2.179535E-02
-    9        3.302373E-03    1.368741E-04    2.045957E-01
+    9        3.302373E-03    1.368741E-04    2.045958E-01
 
  q-point =    5.000000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        1.098969E-03    2.352129E-06    3.174813E-02
-    2        1.101708E-03    6.167161E-07    8.282852E-03
+    2        1.101708E-03    6.167161E-07    8.282853E-03
     3        1.438751E-03    1.397328E-05    1.100410E-01
     4        1.880495E-03    4.448897E-05    2.050857E-01
-    5        2.076873E-03    4.732899E-05    1.788688E-01
+    5        2.076873E-03    4.732899E-05    1.788689E-01
     6        2.226540E-03    7.252551E-05    2.384828E-01
     7        3.128503E-03    1.379760E-06    2.298041E-03
     8        3.175605E-03    3.550215E-06    5.738908E-03
-    9        3.386380E-03    3.550211E-04    5.046733E-01
+    9        3.386380E-03    3.550212E-04    5.046733E-01
 
  q-point =    1.666667E-01    1.666667E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -505,69 +505,69 @@ meta: {optdriver: 7, eph_task: 1, }
     3        1.249482E-03    1.913477E-06    1.997979E-02
     4        1.581228E-03    1.183257E-06    7.714672E-03
     5        1.977711E-03    1.341357E-05    5.590441E-02
-    6        2.320525E-03    2.457658E-05    7.440064E-02
+    6        2.320525E-03    2.457658E-05    7.440065E-02
     7        2.900259E-03    1.040621E-06    2.016724E-03
     8        3.075766E-03    2.421506E-05    4.172596E-02
     9        3.210471E-03    1.385164E-04    2.190741E-01
 
  q-point =    3.333333E-01    1.666667E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        1.086748E-03    9.011349E-07    1.243826E-02
+    1        1.086748E-03    9.011350E-07    1.243826E-02
     2        1.138167E-03    3.055874E-06    3.845482E-02
     3        1.379914E-03    5.096204E-06    4.362852E-02
     4        1.740654E-03    2.187135E-05    1.176734E-01
-    5        2.372034E-03    1.282743E-05    3.716426E-02
-    6        2.421944E-03    3.584157E-05    9.960618E-02
-    7        2.977606E-03    2.276803E-05    4.186186E-02
+    5        2.372034E-03    1.282743E-05    3.716427E-02
+    6        2.421944E-03    3.584157E-05    9.960619E-02
+    7        2.977606E-03    2.276804E-05    4.186186E-02
     8        3.277496E-03    2.890403E-06    4.386332E-03
     9        3.454554E-03    3.931701E-05    5.370616E-02
 
  q-point =    3.333333E-01    3.333333E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        1.119259E-03    3.220988E-06    4.191367E-02
+    1        1.119259E-03    3.220989E-06    4.191368E-02
     2        1.288130E-03    1.901306E-05    1.867927E-01
     3        1.288130E-03    1.901306E-05    1.867927E-01
     4        2.061819E-03    5.666894E-05    2.173058E-01
     5        2.061819E-03    5.666894E-05    2.173058E-01
-    6        3.070473E-03    4.976633E-05    8.605032E-02
+    6        3.070473E-03    4.976634E-05    8.605033E-02
     7        3.184539E-03    2.848440E-05    4.578692E-02
     8        3.184539E-03    2.848440E-05    4.578692E-02
     9        3.384363E-03    7.218768E-06    1.027393E-02
 
  q-point =    0.000000E+00    0.000000E+00    1.666667E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        3.503743E-04    7.422511E-07    9.856300E-02
-    2        3.503743E-04    7.422511E-07    9.856300E-02
-    3        6.353194E-04    5.224645E-06    2.110085E-01
+    1        3.503743E-04    7.422510E-07    9.856299E-02
+    2        3.503743E-04    7.422510E-07    9.856299E-02
+    3        6.353194E-04    5.224645E-06    2.110086E-01
     4        1.388641E-03    1.904956E-06    1.610396E-02
     5        1.388641E-03    1.904956E-06    1.610396E-02
-    6        1.702382E-03    7.925520E-06    4.458011E-02
+    6        1.702382E-03    7.925521E-06    4.458011E-02
     7        2.396774E-03    1.162979E-03    3.300238E+00
     8        2.396774E-03    1.162979E-03    3.300238E+00
-    9        3.095505E-03    4.257995E-08    7.243853E-05
+    9        3.095505E-03    4.257994E-08    7.243851E-05
 
  q-point =    1.666667E-01    0.000000E+00    1.666667E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        7.316188E-04    1.703072E-06    5.186695E-02
+    1        7.316188E-04    1.703072E-06    5.186696E-02
     2        7.777807E-04    1.833487E-06    4.940728E-02
-    3        1.032561E-03    1.056914E-06    1.615980E-02
+    3        1.032561E-03    1.056915E-06    1.615980E-02
     4        1.579318E-03    4.731325E-06    3.092227E-02
     5        1.653827E-03    5.592903E-06    3.333377E-02
     6        1.840096E-03    1.660767E-05    7.995678E-02
     7        2.706319E-03    1.939009E-04    4.315682E-01
-    8        2.741571E-03    4.569582E-04    9.910717E-01
+    8        2.741571E-03    4.569583E-04    9.910717E-01
     9        3.059615E-03    3.714804E-05    6.468890E-02
 
  q-point =    3.333333E-01    0.000000E+00    1.666667E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        1.009363E-03    1.844632E-06    2.951500E-02
-    2        1.030602E-03    7.492184E-07    1.149884E-02
+    2        1.030602E-03    7.492183E-07    1.149884E-02
     3        1.322616E-03    1.888735E-06    1.760074E-02
     4        1.684824E-03    1.949114E-05    1.119324E-01
-    5        1.886524E-03    5.444176E-06    2.493646E-02
+    5        1.886524E-03    5.444176E-06    2.493647E-02
     6        2.656370E-03    8.287828E-06    1.914657E-02
     7        2.724523E-03    1.176170E-05    2.582954E-02
-    8        3.101259E-03    5.568391E-06    9.438023E-03
+    8        3.101259E-03    5.568391E-06    9.438024E-03
     9        3.341908E-03    5.017135E-05    7.323089E-02
 
  q-point =    5.000000E-01    0.000000E+00    1.666667E-01
@@ -578,45 +578,45 @@ meta: {optdriver: 7, eph_task: 1, }
     4        1.961399E-03    3.707234E-05    1.570890E-01
     5        2.079480E-03    3.887211E-06    1.465400E-02
     6        2.254363E-03    7.752724E-05    2.486761E-01
-    7        3.143924E-03    5.649668E-07    9.317652E-04
+    7        3.143924E-03    5.649669E-07    9.317652E-04
     8        3.214681E-03    5.188481E-07    8.184499E-04
     9        3.388502E-03    7.497649E-06    1.064479E-02
 
  q-point =    1.666667E-01    1.666667E-01    1.666667E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        9.331457E-04    4.249848E-07    7.956132E-03
-    2        1.012249E-03    2.741466E-06    4.361497E-02
+    1        9.331457E-04    4.249848E-07    7.956133E-03
+    2        1.012249E-03    2.741467E-06    4.361498E-02
     3        1.258080E-03    1.540724E-06    1.586851E-02
     4        1.654325E-03    3.745624E-06    2.231054E-02
-    5        1.966160E-03    1.044575E-05    4.404836E-02
-    6        2.326635E-03    1.101849E-05    3.318128E-02
-    7        2.846852E-03    8.801944E-06    1.770421E-02
+    5        1.966160E-03    1.044576E-05    4.404837E-02
+    6        2.326635E-03    1.101850E-05    3.318129E-02
+    7        2.846852E-03    8.801945E-06    1.770421E-02
     8        3.063225E-03    1.324637E-05    2.301264E-02
     9        3.256563E-03    6.665278E-05    1.024535E-01
 
  q-point =    3.333333E-01    1.666667E-01    1.666667E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        1.107316E-03    5.671731E-07    7.540499E-03
+    1        1.107316E-03    5.671732E-07    7.540499E-03
     2        1.146969E-03    3.449794E-06    4.274818E-02
-    3        1.363631E-03    5.101643E-06    4.472432E-02
+    3        1.363631E-03    5.101644E-06    4.472432E-02
     4        1.833924E-03    3.149304E-05    1.526439E-01
     5        2.372310E-03    1.020869E-05    2.957021E-02
-    6        2.429803E-03    3.831981E-05    1.058056E-01
+    6        2.429803E-03    3.831982E-05    1.058056E-01
     7        2.988919E-03    1.497032E-05    2.731684E-02
     8        3.266131E-03    1.951263E-06    2.981784E-03
-    9        3.471215E-03    6.574876E-05    8.895128E-02
+    9        3.471215E-03    6.574877E-05    8.895128E-02
 
  q-point =    3.333333E-01    3.333333E-01    1.666667E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        1.127546E-03    2.113660E-06    2.710157E-02
     2        1.290503E-03    4.949561E-06    4.844802E-02
     3        1.290503E-03    4.949561E-06    4.844802E-02
-    4        2.112927E-03    5.746055E-05    2.098110E-01
-    5        2.112927E-03    5.746055E-05    2.098110E-01
-    6        3.068223E-03    5.917526E-05    1.024693E-01
+    4        2.112927E-03    5.746056E-05    2.098111E-01
+    5        2.112927E-03    5.746056E-05    2.098111E-01
+    6        3.068223E-03    5.917526E-05    1.024694E-01
     7        3.187829E-03    1.099077E-05    1.763055E-02
     8        3.187829E-03    1.099077E-05    1.763055E-02
-    9        3.350292E-03    5.349146E-06    7.768668E-03
+    9        3.350292E-03    5.349146E-06    7.768669E-03
 
  q-point =    0.000000E+00    0.000000E+00    3.333333E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -634,7 +634,7 @@ meta: {optdriver: 7, eph_task: 1, }
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        9.221247E-04    1.028399E-06    1.971560E-02
     2        9.660269E-04    3.380524E-06    5.905179E-02
-    3        1.190001E-03    4.423673E-06    5.092321E-02
+    3        1.190001E-03    4.423673E-06    5.092322E-02
     4        1.471356E-03    3.995316E-06    3.008453E-02
     5        1.667759E-03    7.360282E-06    4.313753E-02
     6        1.827026E-03    1.559859E-05    7.617689E-02
@@ -648,19 +648,19 @@ meta: {optdriver: 7, eph_task: 1, }
     2        1.121225E-03    2.378607E-06    3.084359E-02
     3        1.288306E-03    2.437634E-06    2.394185E-02
     4        1.834582E-03    1.604252E-05    7.770084E-02
-    5        1.883009E-03    4.667593E-06    2.145932E-02
-    6        2.676077E-03    2.340870E-05    5.328531E-02
-    7        2.704909E-03    2.850153E-05    6.350244E-02
-    8        3.116525E-03    3.276502E-06    5.499165E-03
+    5        1.883009E-03    4.667594E-06    2.145932E-02
+    6        2.676077E-03    2.340870E-05    5.328532E-02
+    7        2.704909E-03    2.850153E-05    6.350245E-02
+    8        3.116525E-03    3.276502E-06    5.499166E-03
     9        3.420413E-03    1.058391E-04    1.474743E-01
 
  q-point =    5.000000E-01    0.000000E+00    3.333333E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        1.110820E-03    1.723790E-06    2.277320E-02
+    1        1.110820E-03    1.723790E-06    2.277321E-02
     2        1.142757E-03    2.722000E-07    3.397880E-03
     3        1.377687E-03    3.994862E-06    3.431061E-02
-    4        2.084748E-03    7.874608E-06    2.953585E-02
-    5        2.085516E-03    2.172107E-05    8.141075E-02
+    4        2.084748E-03    7.874609E-06    2.953585E-02
+    5        2.085516E-03    2.172107E-05    8.141074E-02
     6        2.309069E-03    7.224998E-05    2.208978E-01
     7        3.170226E-03    3.007806E-06    4.878619E-03
     8        3.274504E-03    1.337366E-06    2.033231E-03
@@ -669,74 +669,74 @@ meta: {optdriver: 7, eph_task: 1, }
  q-point =    1.666667E-01    1.666667E-01    3.333333E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        1.066452E-03    1.383476E-06    1.982971E-02
-    2        1.085030E-03    1.773129E-06    2.455185E-02
+    2        1.085030E-03    1.773129E-06    2.455186E-02
     3        1.251123E-03    1.319723E-06    1.374391E-02
     4        1.781293E-03    6.228114E-07    3.199730E-03
-    5        1.941467E-03    9.866477E-06    4.267069E-02
-    6        2.355469E-03    9.079013E-06    2.667543E-02
+    5        1.941467E-03    9.866478E-06    4.267069E-02
+    6        2.355469E-03    9.079014E-06    2.667543E-02
     7        2.794353E-03    5.135560E-06    1.072143E-02
-    8        3.046394E-03    6.590372E-06    1.157618E-02
-    9        3.337373E-03    6.782955E-05    9.927432E-02
+    8        3.046394E-03    6.590373E-06    1.157618E-02
+    9        3.337373E-03    6.782955E-05    9.927433E-02
 
  q-point =    3.333333E-01    1.666667E-01    3.333333E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        1.144270E-03    5.427001E-07    6.756632E-03
     2        1.165648E-03    1.382317E-06    1.658442E-02
-    3        1.339126E-03    5.926470E-06    5.387422E-02
+    3        1.339126E-03    5.926471E-06    5.387422E-02
     4        1.974704E-03    4.148874E-05    1.734417E-01
-    5        2.374472E-03    9.647481E-06    2.789379E-02
-    6        2.441850E-03    3.487391E-05    9.534328E-02
+    5        2.374472E-03    9.647482E-06    2.789379E-02
+    6        2.441850E-03    3.487392E-05    9.534328E-02
     7        3.007988E-03    3.609207E-05    6.502602E-02
-    8        3.219532E-03    4.016089E-06    6.316046E-03
+    8        3.219532E-03    4.016090E-06    6.316047E-03
     9        3.496422E-03    1.045157E-04    1.393675E-01
 
  q-point =    3.333333E-01    3.333333E-01    3.333333E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        1.147311E-03    1.440422E-06    1.783837E-02
-    2        1.299474E-03    6.030243E-06    5.821396E-02
-    3        1.299474E-03    6.030243E-06    5.821396E-02
+    2        1.299474E-03    6.030243E-06    5.821397E-02
+    3        1.299474E-03    6.030243E-06    5.821397E-02
     4        2.176487E-03    5.098144E-05    1.754396E-01
     5        2.176487E-03    5.098144E-05    1.754396E-01
     6        3.049983E-03    1.248251E-04    2.187433E-01
     7        3.167874E-03    1.525773E-05    2.478458E-02
     8        3.167874E-03    1.525773E-05    2.478458E-02
-    9        3.246766E-03    4.839953E-06    7.484570E-03
+    9        3.246766E-03    4.839954E-06    7.484570E-03
 
  q-point =    0.000000E+00    0.000000E+00    5.000000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        9.602792E-04    7.326440E-06    1.295166E-01
-    2        9.602792E-04    7.326440E-06    1.295166E-01
+    1        9.602792E-04    7.326441E-06    1.295166E-01
+    2        9.602792E-04    7.326441E-06    1.295166E-01
     3        9.719371E-04    3.807696E-08    6.570727E-04
     4        9.719371E-04    3.807696E-08    6.570727E-04
     5        1.321742E-03    1.613658E-05    1.505725E-01
     6        1.658837E-03    1.386069E-06    8.211167E-03
     7        2.094124E-03    1.081716E-03    4.021018E+00
     8        2.094124E-03    1.081716E-03    4.021018E+00
-    9        2.815751E-03    9.779876E-06    2.010816E-02
+    9        2.815751E-03    9.779876E-06    2.010817E-02
 
  q-point =    1.666667E-01    0.000000E+00    5.000000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        1.015038E-03    8.722734E-08    1.380117E-03
+    1        1.015038E-03    8.722735E-08    1.380117E-03
     2        1.052365E-03    3.196575E-07    4.705213E-03
-    3        1.247562E-03    9.597842E-06    1.005256E-01
-    4        1.387688E-03    4.237534E-06    3.587211E-02
+    3        1.247562E-03    9.597843E-06    1.005256E-01
+    4        1.387688E-03    4.237534E-06    3.587212E-02
     5        1.721590E-03    1.400375E-06    7.702154E-03
-    6        1.761761E-03    1.402640E-05    7.366820E-02
-    7        2.618524E-03    7.835419E-05    1.862844E-01
-    8        2.777104E-03    9.285726E-04    1.962724E+00
+    6        1.761761E-03    1.402641E-05    7.366821E-02
+    7        2.618524E-03    7.835418E-05    1.862844E-01
+    8        2.777104E-03    9.285727E-04    1.962724E+00
     9        2.865251E-03    1.323469E-05    2.627944E-02
 
  q-point =    3.333333E-01    0.000000E+00    5.000000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        1.085145E-03    2.930162E-07    4.056425E-03
+    1        1.085145E-03    2.930162E-07    4.056426E-03
     2        1.194046E-03    2.099887E-06    2.400939E-02
     3        1.239542E-03    3.626919E-06    3.848071E-02
-    4        1.885537E-03    1.800095E-06    8.253778E-03
+    4        1.885537E-03    1.800095E-06    8.253780E-03
     5        1.891717E-03    1.385645E-05    6.312006E-02
     6        2.699691E-03    1.073979E-05    2.402122E-02
-    7        2.700355E-03    1.654175E-05    3.698001E-02
-    8        3.132377E-03    1.591817E-06    2.644678E-03
-    9        3.461077E-03    5.397545E-05    7.345161E-02
+    7        2.700355E-03    1.654175E-05    3.698002E-02
+    8        3.132377E-03    1.591818E-06    2.644678E-03
+    9        3.461077E-03    5.397546E-05    7.345162E-02
 
  q-point =    5.000000E-01    0.000000E+00    5.000000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -744,53 +744,53 @@ meta: {optdriver: 7, eph_task: 1, }
     2        1.154295E-03    1.390016E-07    1.700645E-03
     3        1.364368E-03    3.895641E-06    3.411482E-02
     4        2.087408E-03    2.903777E-06    1.086365E-02
-    5        2.133413E-03    1.397874E-05    5.006631E-02
-    6        2.335951E-03    7.617528E-05    2.275696E-01
+    5        2.133413E-03    1.397873E-05    5.006630E-02
+    6        2.335951E-03    7.617529E-05    2.275696E-01
     7        3.181130E-03    2.889266E-06    4.654278E-03
     8        3.295781E-03    1.706356E-06    2.560828E-03
-    9        3.392392E-03    3.504040E-05    4.963459E-02
+    9        3.392392E-03    3.504039E-05    4.963458E-02
 
  q-point =    1.666667E-01    1.666667E-01    5.000000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        1.094320E-03    2.014522E-07    2.742275E-03
-    2        1.172257E-03    7.528036E-07    8.930250E-03
+    2        1.172257E-03    7.528037E-07    8.930251E-03
     3        1.210332E-03    1.068440E-06    1.188965E-02
     4        1.830336E-03    1.158509E-06    5.637223E-03
-    5        1.928038E-03    9.450249E-06    4.144188E-02
-    6        2.377083E-03    1.429894E-05    4.125178E-02
+    5        1.928038E-03    9.450250E-06    4.144188E-02
+    6        2.377083E-03    1.429894E-05    4.125179E-02
     7        2.788419E-03    1.860798E-05    3.901314E-02
-    8        3.042126E-03    7.892001E-06    1.390146E-02
-    9        3.378997E-03    1.159258E-04    1.655129E-01
+    8        3.042126E-03    7.892002E-06    1.390146E-02
+    9        3.378997E-03    1.159258E-04    1.655130E-01
 
  q-point =    3.333333E-01    1.666667E-01    5.000000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        1.162611E-03    6.440159E-07    7.767031E-03
+    1        1.162611E-03    6.440159E-07    7.767032E-03
     2        1.175446E-03    8.730413E-07    1.030047E-02
     3        1.327350E-03    4.809638E-06    4.450089E-02
     4        2.026976E-03    4.088673E-05    1.622231E-01
     5        2.375968E-03    4.514748E-06    1.303707E-02
     6        2.446228E-03    2.885446E-05    7.860434E-02
-    7        3.015979E-03    2.310498E-05    4.140724E-02
-    8        3.183598E-03    2.289004E-06    3.681607E-03
-    9        3.505214E-03    7.713560E-05    1.023419E-01
+    7        3.015979E-03    2.310498E-05    4.140725E-02
+    8        3.183598E-03    2.289004E-06    3.681608E-03
+    9        3.505214E-03    7.713561E-05    1.023419E-01
 
  q-point =    3.333333E-01    3.333333E-01    5.000000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        1.157785E-03    1.363579E-07    1.658257E-03
-    2        1.306278E-03    5.634213E-06    5.382566E-02
-    3        1.306278E-03    5.634213E-06    5.382566E-02
+    2        1.306278E-03    5.634213E-06    5.382567E-02
+    3        1.306278E-03    5.634213E-06    5.382567E-02
     4        2.190313E-03    5.386281E-05    1.830224E-01
     5        2.190313E-03    5.386281E-05    1.830224E-01
     6        3.033911E-03    6.980298E-06    1.236220E-02
     7        3.144188E-03    3.679961E-06    6.068113E-03
     8        3.144188E-03    3.679961E-06    6.068113E-03
-    9        3.176503E-03    3.680710E-06    5.946489E-03
+    9        3.176503E-03    3.680710E-06    5.946490E-03
 
  lambda=   0.9589
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      2.43050000E+01  1.08110000E+01
@@ -798,8 +798,8 @@ meta: {optdriver: 7, eph_task: 1, }
         ddb_ngqpt        4    4    4
            dipdip           0
              ecut      3.80000000E+01 Hartree
-       eph_fsewin      1.10247976E-02 Hartree
-       eph_fsmear      3.67493254E-03 Hartree
+       eph_fsewin      1.10247967E-02 Hartree
+       eph_fsmear      3.67493222E-03 Hartree
       eph_intmeth           1
    eph_ngqpt_fine        6    6    6
            etotal      0.0000000000E+00
@@ -943,8 +943,8 @@ P           mkmem         370
            tsmear      2.00000000E-02 Hartree
             typat      1  2  2
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -8.9085146186E-01  1.5429999939E+00  1.7614999931E+00
-                       8.9085146186E-01  1.5429999939E+00  1.7614999931E+00
+                      -8.9085146515E-01  1.5429999996E+00  1.7614999996E+00
+                       8.9085146515E-01  1.5429999996E+00  1.7614999996E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                       -1.6834652880E+00  2.9158474116E+00  3.3287525700E+00
                        1.6834652880E+00  2.9158474116E+00  3.3287525700E+00
@@ -993,7 +993,7 @@ P           mkmem         370
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1010,12 +1010,12 @@ P           mkmem         370
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1033,15 +1033,15 @@ P           mkmem         370
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         46.3  wall=         46.7
+- Proc.   0 individual time (sec): cpu=         39.6  wall=         39.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         46.3  wall=         46.7
++Overall time at end (sec) : cpu=         39.6  wall=         39.7

@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h13 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t67/t67.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h14 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v7_t67/t67.abi
 - output file    -> t67.abo
 - root for input  files -> t67i
 - root for output files -> t67o
@@ -187,7 +187,7 @@ P           mkmem           4
           usefock2          1
               wtk        0.03704    0.29630    0.22222    0.44444
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -229,8 +229,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -242,8 +242,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -4.40972757
          --- l  ekb(1:nproj) -->
@@ -333,7 +333,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -345,7 +345,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t67o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.26000   Average Vxc (hartree)=  -0.32570
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -365,7 +365,7 @@ psp_core            : -2.64619322653027E-01
 local_psp           : -2.30236478319590E+00
 non_local_psp       :  1.75105921149189E+00
 total_energy        : -7.90874835159562E+00
-total_energy_eV     : -2.15207987247411E+02
+total_energy_eV     : -2.15208006117534E+02
 band_energy         :  6.57987962426285E-01
 ...
 
@@ -376,9 +376,9 @@ band_energy         :  6.57987962426285E-01
   sigma(3 3)=  8.40962390E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.4742E+00 GPa]
-- sigma(1 1)=  2.47419636E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  2.47419636E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.47419636E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  2.47419677E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  2.47419677E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.47419677E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -409,8 +409,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -422,8 +422,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -4.40972757
          --- l  ekb(1:nproj) -->
@@ -447,73 +447,73 @@ tolerances: {toldfe: 1.00E-12, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -7.6210062174445    -7.621E+00 9.152E-10 7.389E-02
  ETOT  2  -7.6210326074269    -2.639E-05 1.417E-12 8.142E-04
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
   diff in etot=  2.639E-05 > toldfe=  1.000E-12
  ETOT  3  -7.6236071024372    -2.574E-03 3.700E-06 1.421E-03
  ETOT  4  -7.6236081413592    -1.039E-06 1.089E-08 1.178E-05
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
   diff in etot=  1.039E-06 > toldfe=  1.000E-12
- ETOT  5  -7.6240820437141    -4.739E-04 8.099E-07 3.596E-04
- ETOT  6  -7.6240823127983    -2.691E-07 4.900E-09 2.973E-06
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
+ ETOT  5  -7.6240820437142    -4.739E-04 8.099E-07 3.596E-04
+ ETOT  6  -7.6240823127984    -2.691E-07 4.900E-09 2.973E-06
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
   diff in etot=  2.691E-07 > toldfe=  1.000E-12
  ETOT  7  -7.6241879126977    -1.056E-04 1.932E-07 8.812E-05
- ETOT  8  -7.6241879792469    -6.655E-08 1.510E-09 7.246E-07
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
+ ETOT  8  -7.6241879792468    -6.655E-08 1.510E-09 7.246E-07
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
   diff in etot=  6.655E-08 > toldfe=  1.000E-12
  ETOT  9  -7.6242123899285    -2.441E-05 4.987E-08 2.078E-05
  ETOT 10  -7.6242124057393    -1.581E-08 4.011E-10 1.768E-07
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
   diff in etot=  1.581E-08 > toldfe=  1.000E-12
  ETOT 11  -7.6242181443145    -5.739E-06 1.328E-08 4.873E-06
  ETOT 12  -7.6242181480389    -3.724E-09 1.012E-10 4.340E-08
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
   diff in etot=  3.724E-09 > toldfe=  1.000E-12
- ETOT 13  -7.6242195117720    -1.364E-06 3.549E-09 1.146E-06
- ETOT 14  -7.6242195126485    -8.765E-10 2.502E-11 1.064E-08
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
-  diff in etot=  8.765E-10 > toldfe=  1.000E-12
+ ETOT 13  -7.6242195117719    -1.364E-06 3.549E-09 1.146E-06
+ ETOT 14  -7.6242195126485    -8.766E-10 2.502E-11 1.064E-08
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
+  diff in etot=  8.766E-10 > toldfe=  1.000E-12
  ETOT 15  -7.6242198392619    -3.266E-07 9.394E-10 2.707E-07
  ETOT 16  -7.6242198394696    -2.077E-10 6.125E-12 2.665E-09
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
   diff in etot=  2.077E-10 > toldfe=  1.000E-12
  ETOT 17  -7.6242199181446    -7.868E-08 2.454E-10 6.435E-08
  ETOT 18  -7.6242199181942    -4.959E-11 1.495E-12 6.480E-10
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
   diff in etot=  4.959E-11 > toldfe=  1.000E-12
  ETOT 19  -7.6242199371855    -1.899E-08 6.333E-11 1.532E-08
- ETOT 20  -7.6242199371973    -1.180E-11 3.629E-13 1.592E-10
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
-  diff in etot=  1.180E-11 > toldfe=  1.000E-12
+ ETOT 20  -7.6242199371973    -1.177E-11 3.629E-13 1.592E-10
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
+  diff in etot=  1.177E-11 > toldfe=  1.000E-12
  ETOT 21  -7.6242199418097    -4.612E-09 1.616E-11 3.668E-09
- ETOT 22  -7.6242199418125    -2.801E-12 8.826E-14 3.902E-11
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
-  diff in etot=  2.801E-12 > toldfe=  1.000E-12
- ETOT 23  -7.6242199429273    -1.115E-09 4.085E-12 8.795E-10
- ETOT 24  -7.6242199429279    -6.501E-13 2.142E-14 9.535E-12
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
-  diff in etot=  6.501E-13 > toldfe=  1.000E-12
- ETOT 25  -7.6242199431991    -2.711E-10 1.025E-12 2.114E-10
- ETOT 26  -7.6242199431992    -1.847E-13 5.200E-15 2.329E-12
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
-  diff in etot=  1.847E-13 > toldfe=  1.000E-12
- ETOT 27  -7.6242199432651    -6.583E-11 2.555E-13 5.094E-11
- ETOT 28  -7.6242199432652    -1.172E-13 1.262E-15 5.679E-13
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
-  diff in etot=  1.172E-13 > toldfe=  1.000E-12
- ETOT 29  -7.6242199432811    -1.590E-11 6.340E-14 1.229E-11
- ETOT 30  -7.6242199432810     6.750E-14 3.064E-16 1.385E-13
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
-  diff in etot=  6.750E-14 > toldfe=  1.000E-12
- ETOT 31  -7.6242199432850    -3.958E-12 1.567E-14 2.971E-12
- ETOT 32  -7.6242199432850    -1.599E-14 7.440E-17 3.377E-14
- Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged :
-  diff in etot=  1.599E-14 > toldfe=  1.000E-12
- ETOT 33  -7.6242199432859    -9.130E-13 3.859E-15 7.190E-13
- Outer loop step  1 - inner step  1 - frozen Fock etot converged :
-  for the second time, diff in etot=  9.130E-13 < toldfe=  1.000E-12
- Outer loop step  1 - inner step  1 - etot converged :
-  update of Fock operator yields diff in etot=  9.130E-13 < toldfe=  1.000E-12
+ ETOT 22  -7.6242199418124    -2.784E-12 8.826E-14 3.902E-11
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
+  diff in etot=  2.784E-12 > toldfe=  1.000E-12
+ ETOT 23  -7.6242199429272    -1.115E-09 4.085E-12 8.795E-10
+ ETOT 24  -7.6242199429279    -6.892E-13 2.142E-14 9.535E-12
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
+  diff in etot=  6.892E-13 > toldfe=  1.000E-12
+ ETOT 25  -7.6242199431990    -2.711E-10 1.025E-12 2.114E-10
+ ETOT 26  -7.6242199431992    -1.990E-13 5.200E-15 2.329E-12
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
+  diff in etot=  1.990E-13 > toldfe=  1.000E-12
+ ETOT 27  -7.6242199432651    -6.581E-11 2.555E-13 5.094E-11
+ ETOT 28  -7.6242199432652    -1.137E-13 1.262E-15 5.679E-13
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
+  diff in etot=  1.137E-13 > toldfe=  1.000E-12
+ ETOT 29  -7.6242199432811    -1.591E-11 6.340E-14 1.229E-11
+ ETOT 30  -7.6242199432810     6.217E-14 3.064E-16 1.385E-13
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
+  diff in etot=  6.217E-14 > toldfe=  1.000E-12
+ ETOT 31  -7.6242199432850    -3.959E-12 1.567E-14 2.971E-12
+ ETOT 32  -7.6242199432850    -1.954E-14 7.440E-17 3.377E-14
+ Outer loop step  1 - inner step  2 - frozen Fock etot NOT converged : 
+  diff in etot=  1.954E-14 > toldfe=  1.000E-12
+ ETOT 33  -7.6242199432859    -9.077E-13 3.859E-15 7.190E-13
+ Outer loop step  1 - inner step  1 - frozen Fock etot converged : 
+  for the second time, diff in etot=  9.077E-13 < toldfe=  1.000E-12
+ Outer loop step  1 - inner step  1 - etot converged : 
+  update of Fock operator yields diff in etot=  9.077E-13 < toldfe=  1.000E-12
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.89386021E-03  sigma(3 2)=  0.00000000E+00
@@ -531,7 +531,7 @@ lattice_vectors:
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6663072E+02
-convergence: {deltae: -9.130E-13, res2:  7.190E-13, residm:  3.859E-15, diffor: null, }
+convergence: {deltae: -9.077E-13, res2:  7.190E-13, residm:  3.859E-15, diffor: null, }
 etotal    :  -7.62421994E+00
 entropy   :   0.00000000E+00
 fermie    :   1.76482384E-01
@@ -544,9 +544,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  3.29431979E-29,  -1.97659187E-29,   6.58863958E-30, ]
-- [ -3.29431979E-29,   1.97659187E-29,  -6.58863958E-30, ]
-force_length_stats: {min:   3.89789174E-29, max:   3.89789174E-29, mean:   3.89789174E-29, }
+- [ -3.95318375E-29,  -6.58863958E-30,   4.61204771E-29, ]
+- [  3.95318375E-29,   6.58863958E-30,  -4.61204771E-29, ]
+force_length_stats: {min:   6.11005299E-29, max:   6.11005299E-29, mean:   6.11005299E-29, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -562,25 +562,25 @@ force_length_stats: {min:   3.89789174E-29, max:   3.89789174E-29, mean:   3.897
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  1.5052E-28; max dE/dt=  6.7316E-29; dE/dt below (all hartree)
-    1       0.000000000000     -0.000000000000     -0.000000000000
-    2      -0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  2.0565E-28; max dE/dt=  2.6926E-28; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 2.2504488E-29 3.2943198E-29   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 3.5276407E-29 4.6120477E-29   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.1572272E-27 1.6940072E-27   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000    -0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 1.8139858E-27 2.3716103E-27   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t67o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.17648   Average Vxc (hartree)=  -0.32645
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -594,11 +594,11 @@ iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.18445760665625E+00
 hartree             :  6.16645408022473E-01
-xc                  : -2.22044604925031E-14
+xc                  : -2.04281036531029E-14
 Ewald energy        : -8.43581958561899E+00
 psp_core            : -2.64619322653027E-01
 local_psp           : -2.31756716219704E+00
-non_local_psp+x     : -4.07316887495541E-01
+non_local_psp+x     : -4.07316887495542E-01
 total_energy        : -7.62421994328590E+00
 ...
 
@@ -606,7 +606,7 @@ total_energy        : -7.62421994328590E+00
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -5.09660408238581E-01
+band_energy         : -5.09660408238582E-01
 Ewald energy        : -8.43581958561899E+00
 psp_core            : -2.64619322653027E-01
 xc_dc               :  1.58587920733009E+00
@@ -620,13 +620,13 @@ total_energy_dc     : -7.62422010918051E+00
   sigma(3 3)=  2.89386021E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -8.5140E+01 GPa]
-- sigma(1 1)=  8.51402925E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  8.51402925E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  8.51402925E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  8.51403068E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  8.51403068E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  8.51403068E+01  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
@@ -637,8 +637,8 @@ total_energy_dc     : -7.62422010918051E+00
            etotal2    -7.6242199433E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart2     3.2943197895E-29 -1.9765918737E-29  6.5886395790E-30
-                      -3.2943197895E-29  1.9765918737E-29 -6.5886395790E-30
+            fcart2    -3.9531837474E-29 -6.5886395790E-30  4.6120477053E-29
+                       3.9531837474E-29  6.5886395790E-30 -4.6120477053E-29
 -          fftalg         512
        fockoptmix          11
            getwfk1          0
@@ -760,7 +760,7 @@ P           mkmem           4
           usefock2          1
               wtk        0.03704    0.29630    0.22222    0.44444
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -801,7 +801,7 @@ P           mkmem           4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -813,12 +813,12 @@ P           mkmem           4
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -836,7 +836,7 @@ P           mkmem           4
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -851,15 +851,15 @@ P           mkmem           4
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.8  wall=          6.2
+- Proc.   0 individual time (sec): cpu=          6.3  wall=          6.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  20 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.8  wall=          6.2
++Overall time at end (sec) : cpu=          6.3  wall=          6.3

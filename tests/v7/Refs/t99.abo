@@ -1,8 +1,8 @@
 
-.Version 10.5.4.4 of ABINIT, released Jul 2025.
-.(sequential version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 18 Jul 2025.
-- ( at 12h07 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_dilatmx-gs-only/tests/TestBot_MPI1/v7_t99/t99.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h14 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v7_t99/t99.abi
 - output file    -> t99.abo
 - root for input  files -> t99i
 - root for output files -> t99o
@@ -49,6 +49,7 @@ _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.013 Mbytes.
 -    mband =           6        mffmem =           1         mkmem =           4
 -   mkqmem =           4        mk1mem =           4           mpw =          78
       nfft =        1500          nkpt =           4
+- my_mband =           6
 ================================================================================
 P This job should need less than                       1.001 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -133,8 +134,8 @@ P          mk1mem2          4
            vdw_xc           7
               wtk1       0.25000    0.75000
               wtk2       0.25000    0.25000    0.25000    0.25000
-           xangst      4.9839840983E-17  8.6325136823E-17  8.1394637241E-01
-                       4.2266471157E-16  1.4484100936E+00  2.5435824138E+00
+           xangst      4.9839841167E-17  8.6325137142E-17  8.1394637542E-01
+                       4.2266471313E-16  1.4484100990E+00  2.5435824232E+00
             xcart      9.4183649964E-17  1.6313086698E-16  1.5381357307E+00
                        7.9872055091E-16  2.7370984051E+00  4.8066741585E+00
              xred     -3.3266694474E-33  2.8363063747E-33  2.4000000000E-01
@@ -176,8 +177,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10948
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_dilatmx-gs-only/tests/Pspdir/B-q3
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_dilatmx-gs-only/tests/Pspdir/B-q3
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/B-q3
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/B-q3
 - Goedecker pseudopotential for B
 -  5.00000   3.00000     70301                znucl, zion, pspdat
    10   11    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -198,8 +199,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.33797878
          --- l  ekb(1:nproj) -->
@@ -207,8 +208,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_dilatmx-gs-only/tests/Pspdir/PseudosHGH_pwteter/7n.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_dilatmx-gs-only/tests/Pspdir/PseudosHGH_pwteter/7n.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/7n.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/7n.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for N,  from PRB58, 3641 (1998)
 -  7.00000   5.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -221,8 +222,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.01437983
          --- l  ekb(1:nproj) -->
@@ -315,8 +316,8 @@ force_length_stats: {min:   1.40481240E-02, max:   1.40481240E-02, mean:   1.404
     2       0.000000000000      0.000000000000      0.089966117910
 
  cartesian coordinates (angstrom) at end:
-    1      0.00000000000000     0.00000000000000     0.81394637241495
-    2      0.00000000000000     1.44841009363201     2.54358241379672
+    1      0.00000000000000     0.00000000000000     0.81394637542047
+    2      0.00000000000000     1.44841009898030     2.54358242318896
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000     0.01404812402562
@@ -324,11 +325,11 @@ force_length_stats: {min:   1.40481240E-02, max:   1.40481240E-02, mean:   1.404
  frms,max,avg= 8.1106882E-03 1.4048124E-02   0.000E+00  0.000E+00  1.044E-05 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     0.72238352137760
-    2     -0.00000000000000    -0.00000000000000    -0.72238352137760
- frms,max,avg= 4.1706832E-01 7.2238352E-01   0.000E+00  0.000E+00  5.367E-04 e/A
+    1     -0.00000000000000    -0.00000000000000     0.72238358205107
+    2     -0.00000000000000    -0.00000000000000    -0.72238358205107
+ frms,max,avg= 4.1706836E-01 7.2238358E-01   0.000E+00  0.000E+00  5.367E-04 e/A
  length scales=  4.740793502900  4.740793502900  6.408898878000 bohr
-              =  2.508719872366  2.508719872366  3.391443218396 angstroms
+              =  2.508719881630  2.508719881630  3.391443230919 angstroms
  prteigrs : about to open file t99o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.48172   Average Vxc (hartree)=  -0.42663
  Eigenvalues (hartree) for nkpt=   2  k points:
@@ -349,7 +350,7 @@ local_psp           : -5.00382523010668E+00
 non_local_psp       :  2.51711783176324E+00
 VdWaals_dft_d       : -1.93002534828655E-02
 total_energy        : -1.14558046348694E+01
-total_energy_eV     : -3.11728297344598E+02
+total_energy_eV     : -3.11728324677930E+02
 band_energy         :  4.55282665649175E-01
 ...
 
@@ -360,9 +361,9 @@ band_energy         :  4.55282665649175E-01
   sigma(3 3)=  3.90892824E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.3850E+02 GPa]
-- sigma(1 1)= -2.65254144E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -2.65254144E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.15004620E+02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -2.65254188E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -2.65254188E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.15004639E+02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -398,7 +399,7 @@ meta: {optdriver: 1, rfphon: 1, rfstrs: 3, }
 
  symkchk : k-point set has full space-group symmetry.
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -478,7 +479,7 @@ tolerances: {tolvrs: 1.00E-16, }
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  15 Contribution from van der Waals DFT-D: evdw =   6.84479489E-02
  Resulting in :
- 2DEtotal=   -0.9418808338E+00 Ha. Also 2DEtotal=   -0.256298809199E+02 eV
+ 2DEtotal=   -0.9418808338E+00 Ha. Also 2DEtotal=   -0.256298831672E+02 eV
     (2DErelax=   -2.1905807608E+01 Ha. 2DEnonrelax=    2.0963926774E+01 Ha)
     (  non-var. 2DEtotal :   -9.4188083386E-01 Ha)
 
@@ -539,7 +540,7 @@ tolerances: {tolvrs: 1.00E-16, }
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  15 Contribution from van der Waals DFT-D: evdw =   5.08445363E-01
  Resulting in :
- 2DEtotal=    0.9039569559E+01 Ha. Also 2DEtotal=    0.245979197208E+03 eV
+ 2DEtotal=    0.9039569559E+01 Ha. Also 2DEtotal=    0.245979218776E+03 eV
     (2DErelax=   -5.0903960008E+01 Ha. 2DEnonrelax=    5.9943529567E+01 Ha)
     (  non-var. 2DEtotal :    9.0395695591E+00 Ha)
 
@@ -598,7 +599,7 @@ tolerances: {tolvrs: 1.00E-16, }
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  15 Contribution from van der Waals DFT-D: evdw =   6.84479489E-02
  Resulting in :
- 2DEtotal=   -0.7789905017E+00 Ha. Also 2DEtotal=   -0.211974095661E+02 eV
+ 2DEtotal=   -0.7789905017E+00 Ha. Also 2DEtotal=   -0.211974114247E+02 eV
     (2DErelax=   -1.1124378732E+02 Ha. 2DEnonrelax=    1.1046479682E+02 Ha)
     (  non-var. 2DEtotal :   -7.7899050390E-01 Ha)
 
@@ -659,7 +660,7 @@ tolerances: {tolvrs: 1.00E-16, }
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  15 Contribution from van der Waals DFT-D: evdw =   5.08445363E-01
  Resulting in :
- 2DEtotal=    0.9043288951E+01 Ha. Also 2DEtotal=    0.246080406989E+03 eV
+ 2DEtotal=    0.9043288951E+01 Ha. Also 2DEtotal=    0.246080428566E+03 eV
     (2DErelax=   -2.2472264694E+02 Ha. 2DEnonrelax=    2.3376593589E+02 Ha)
     (  non-var. 2DEtotal :    9.0432889490E+00 Ha)
 
@@ -721,7 +722,7 @@ tolerances: {tolvrs: 1.00E-16, }
   pspcore=  -2.25974140E-02
  18 Contribution from van der Waals DFT-D: evdw =   3.11915795E-01
  Resulting in :
- 2DEtotal=    0.8494228307E+00 Ha. Also 2DEtotal=    0.231139707046E+02 eV
+ 2DEtotal=    0.8494228307E+00 Ha. Also 2DEtotal=    0.231139727313E+02 eV
     (2DErelax=   -1.8870692803E+02 Ha. 2DEnonrelax=    1.8955635087E+02 Ha)
     (  non-var. 2DEtotal :    8.4942283052E-01 Ha)
 
@@ -784,7 +785,7 @@ tolerances: {tolvrs: 1.00E-16, }
   pspcore=  -2.25974140E-02
  18 Contribution from van der Waals DFT-D: evdw =   3.11915795E-01
  Resulting in :
- 2DEtotal=    0.8494227401E+00 Ha. Also 2DEtotal=    0.231139682398E+02 eV
+ 2DEtotal=    0.8494227401E+00 Ha. Also 2DEtotal=    0.231139702665E+02 eV
     (2DErelax=   -1.8870692824E+02 Ha. 2DEnonrelax=    1.8955635098E+02 Ha)
     (  non-var. 2DEtotal :    8.4942274005E-01 Ha)
 
@@ -846,7 +847,7 @@ tolerances: {tolvrs: 1.00E-16, }
   pspcore=  -2.25974140E-02
  18 Contribution from van der Waals DFT-D: evdw =   6.08596117E-01
  Resulting in :
- 2DEtotal=    0.8566208784E+01 Ha. Also 2DEtotal=    0.233098395453E+03 eV
+ 2DEtotal=    0.8566208784E+01 Ha. Also 2DEtotal=    0.233098415892E+03 eV
     (2DErelax=   -1.2966045977E+01 Ha. 2DEnonrelax=    2.1532254761E+01 Ha)
     (  non-var. 2DEtotal :    8.5662087843E+00 Ha)
 
@@ -908,7 +909,7 @@ tolerances: {tolvrs: 1.00E-16, }
   pspcore=   0.00000000E+00
  18 Contribution from van der Waals DFT-D: evdw =   3.32892601E-02
  Resulting in :
- 2DEtotal=    0.8540312845E+01 Ha. Also 2DEtotal=    0.232393731123E+03 eV
+ 2DEtotal=    0.8540312845E+01 Ha. Also 2DEtotal=    0.232393751500E+03 eV
     (2DErelax=   -2.2299402355E+01 Ha. 2DEnonrelax=    3.0839715200E+01 Ha)
     (  non-var. 2DEtotal :    8.5403128455E+00 Ha)
 
@@ -968,7 +969,7 @@ tolerances: {tolvrs: 1.00E-16, }
   pspcore=   0.00000000E+00
  18 Contribution from van der Waals DFT-D: evdw =   3.32892601E-02
  Resulting in :
- 2DEtotal=    0.8540312851E+01 Ha. Also 2DEtotal=    0.232393731281E+03 eV
+ 2DEtotal=    0.8540312851E+01 Ha. Also 2DEtotal=    0.232393751658E+03 eV
     (2DErelax=   -2.2299402343E+01 Ha. 2DEnonrelax=    3.0839715194E+01 Ha)
     (  non-var. 2DEtotal :    8.5403128513E+00 Ha)
 
@@ -1028,7 +1029,7 @@ tolerances: {tolvrs: 1.00E-16, }
   pspcore=   0.00000000E+00
  18 Contribution from van der Waals DFT-D: evdw =   1.64140543E-02
  Resulting in :
- 2DEtotal=   -0.1713197448E+00 Ha. Also 2DEtotal=   -0.466184733954E+01 eV
+ 2DEtotal=   -0.1713197448E+00 Ha. Also 2DEtotal=   -0.466184774831E+01 eV
     (2DErelax=   -6.6213027098E+01 Ha. 2DEnonrelax=    6.6041707354E+01 Ha)
     (  non-var. 2DEtotal :   -1.7131974486E-01 Ha)
 
@@ -1038,14 +1039,14 @@ tolerances: {tolvrs: 1.00E-16, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
-  cartesian coordinates for strain terms (1/ucvol factor
-   for elastic tensor components not included)
+  cartesian coordinates for strain terms (1/ucvol factor 
+   for elastic tensor components not included) 
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1        -0.9418808339         0.0000000000
    1    1   2    1         0.4709404169         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
@@ -1060,7 +1061,7 @@ tolerances: {tolvrs: 1.00E-16, }
    1    1   1    6        -0.0000000000         0.0000000000
    1    1   2    6         0.2250747392         0.0000000000
    1    1   3    6        -0.7881939605         0.0000000000
-
+  
    2    1   1    1         0.4709404169         0.0000000000
    2    1   2    1        -0.9418808339         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
@@ -1075,7 +1076,7 @@ tolerances: {tolvrs: 1.00E-16, }
    2    1   1    6         0.1949204419         0.0000000000
    2    1   2    6        -0.1125373697         0.0000000000
    2    1   3    6         0.3940969803         0.0000000000
-
+  
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         9.0395695591         0.0000000000
@@ -1088,7 +1089,7 @@ tolerances: {tolvrs: 1.00E-16, }
    3    1   1    6        -0.0000000007         0.0000000000
    3    1   2    6        -0.0000000000         0.0000000000
    3    1   3    6         0.0000000000         0.0000000000
-
+  
    1    2   1    1         0.9298386859         0.0000000000
    1    2   2    1        -0.4649193429         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
@@ -1103,7 +1104,7 @@ tolerances: {tolvrs: 1.00E-16, }
    1    2   1    6         0.0000000000         0.0000000000
    1    2   2    6        -0.2251095173         0.0000000000
    1    2   3    6         0.7833800009         0.0000000000
-
+  
    2    2   1    1        -0.4649193429         0.0000000000
    2    2   2    1         0.9298386859        -0.0000000000
    2    2   3    1         0.0000000000        -0.0000000000
@@ -1118,7 +1119,7 @@ tolerances: {tolvrs: 1.00E-16, }
    2    2   1    6        -0.1949505602         0.0000000000
    2    2   2    6         0.1125547584         0.0000000000
    2    2   3    6        -0.3916900004         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000        -0.0000000000
    3    2   3    1        -9.0456646955        -0.0000000000
@@ -1131,194 +1132,194 @@ tolerances: {tolvrs: 1.00E-16, }
    3    2   1    6         0.0000000011         0.0000000000
    3    2   2    6         0.0000000000         0.0000000000
    3    2   3    6         0.0000000000         0.0000000000
-
+  
    1    4   2    1         0.0000000000         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
-
+  
    2    4   1    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
-
+  
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-
+  
    1    5   1    5         0.8494228305         0.0000000000
    1    5   2    5         1.1920623168         0.0000000000
    1    5   3    5         8.0457543002         0.0000000000
    1    5   1    6        -0.1146890888         0.0000000000
    1    5   2    6         0.0000000000         0.0000000000
    1    5   3    6         0.0000000005         0.0000000000
-
+  
    2    5   1    5         1.1920623170         0.0000000000
    2    5   2    5         0.8494227401         0.0000000000
    2    5   3    5         8.0457543058         0.0000000000
    2    5   1    6         0.1146890896         0.0000000000
    2    5   2    6         0.0000000000         0.0000000000
    2    5   3    6         0.0000000000         0.0000000000
-
+  
    3    5   1    5         8.0457543074         0.0000000000
    3    5   2    5         8.0457543019         0.0000000000
    3    5   3    5         8.5662087843         0.0000000000
    3    5   1    6         0.0000000001         0.0000000000
    3    5   2    6         0.0000000000         0.0000000000
    3    5   3    6         0.0000000002         0.0000000000
-
+  
    1    6   1    5        -0.1146890887         0.0000000000
    1    6   2    5         0.1146890896         0.0000000000
    1    6   3    5        -0.0000000001         0.0000000000
    1    6   1    6         8.5403128455         0.0000000000
    1    6   2    6         0.0000000001         0.0000000000
    1    6   3    6         0.0000000000         0.0000000000
-
+  
    2    6   1    5        -0.0000000001         0.0000000000
    2    6   2    5        -0.0000000000         0.0000000000
    2    6   3    5        -0.0000000000         0.0000000000
    2    6   1    6        -0.0000000006         0.0000000000
    2    6   2    6         8.5403128513         0.0000000000
    2    6   3    6        -0.1146890887         0.0000000000
-
+  
    3    6   1    5        -0.0000000018         0.0000000000
    3    6   2    5        -0.0000000002         0.0000000000
    3    6   3    5        -0.0000000006         0.0000000000
    3    6   1    6        -0.0000000000         0.0000000000
    3    6   2    6        -0.1146890887         0.0000000000
    3    6   3    6        -0.1713197449         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1        -0.0413719064         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2         0.0413719064        -0.0000000000
    1    1   2    2        -0.0000000000        -0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1        -0.0413719064         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000        -0.0000000000
    2    1   2    2         0.0413719064        -0.0000000000
    2    1   3    2         0.0000000000        -0.0000000000
-
+  
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.2202285640        -0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2         0.0000000000        -0.0000000000
    3    1   3    2        -0.2202285640         0.0000000000
-
+  
    1    2   1    1         0.0413719064         0.0000000000
    1    2   2    1        -0.0000000000         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2        -0.0413719064        -0.0000000000
    1    2   2    2         0.0000000000        -0.0000000000
    1    2   3    2        -0.0000000000        -0.0000000000
-
+  
    2    2   1    1        -0.0000000000         0.0000000000
    2    2   2    1         0.0413719064         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2         0.0000000000        -0.0000000000
    2    2   2    2        -0.0413719064        -0.0000000000
    2    2   3    2        -0.0000000000        -0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1        -0.2202285640        -0.0000000000
    3    2   1    2        -0.0000000000        -0.0000000000
    3    2   2    2        -0.0000000000        -0.0000000000
    3    2   3    2         0.2202285640         0.0000000000
-
+  
   Rigid-atom elastic tensor , in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    5   1    5         0.0068093836         0.0000000000
    1    5   2    5         0.0095561472         0.0000000000
    1    5   3    5         0.0644986519         0.0000000000
    1    5   1    6        -0.0009194031         0.0000000000
    1    5   2    6         0.0000000000         0.0000000000
    1    5   3    6         0.0000000000         0.0000000000
-
+  
    2    5   1    5         0.0095561472         0.0000000000
    2    5   2    5         0.0068093829         0.0000000000
    2    5   3    5         0.0644986519         0.0000000000
    2    5   1    6         0.0009194031         0.0000000000
    2    5   2    6         0.0000000000         0.0000000000
    2    5   3    6         0.0000000000         0.0000000000
-
+  
    3    5   1    5         0.0644986519         0.0000000000
    3    5   2    5         0.0644986519         0.0000000000
    3    5   3    5         0.0686708664         0.0000000000
    3    5   1    6         0.0000000000         0.0000000000
    3    5   2    6         0.0000000000         0.0000000000
    3    5   3    6         0.0000000000         0.0000000000
-
+  
    1    6   1    5        -0.0009194031         0.0000000000
    1    6   2    5         0.0009194031         0.0000000000
    1    6   3    5        -0.0000000000         0.0000000000
    1    6   1    6         0.0684632720         0.0000000000
    1    6   2    6         0.0000000000         0.0000000000
    1    6   3    6         0.0000000000         0.0000000000
-
+  
    2    6   1    5        -0.0000000000         0.0000000000
    2    6   2    5        -0.0000000000         0.0000000000
    2    6   3    5        -0.0000000000         0.0000000000
    2    6   1    6        -0.0000000000         0.0000000000
    2    6   2    6         0.0684632720         0.0000000000
    2    6   3    6        -0.0009194031         0.0000000000
-
+  
    3    6   1    5        -0.0000000000         0.0000000000
    3    6   2    5        -0.0000000000         0.0000000000
    3    6   3    5        -0.0000000000         0.0000000000
    3    6   1    6        -0.0000000000         0.0000000000
    3    6   2    6        -0.0009194031         0.0000000000
    3    6   3    6        -0.0013733818         0.0000000000
-
+  
   Internal strain coupling parameters, in cartesian coordinates,
-   zero average net force deriv. has been imposed
+   zero average net force deriv. has been imposed  
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    5        -0.0000000000         0.0000000000
    1    1   2    5        -0.0000000000         0.0000000000
    1    1   3    5        -0.0000000000         0.0000000000
    1    1   1    6         0.0000000000         0.0000000000
    1    1   2    6        -0.0474798424         0.0000000000
    1    1   3    6         0.1657500965         0.0000000000
-
+  
    2    1   1    5         0.1657500966         0.0000000000
    2    1   2    5        -0.1657500963         0.0000000000
    2    1   3    5         0.0000000000         0.0000000000
    2    1   1    6        -0.0474798423         0.0000000000
    2    1   2    6        -0.0000000000         0.0000000000
    2    1   3    6         0.0000000000         0.0000000000
-
+  
    3    1   1    5        -0.0528063912         0.0000000000
    3    1   2    5        -0.0528063910         0.0000000000
    3    1   3    5        -0.0443851515         0.0000000000
    3    1   1    6         0.0000000001         0.0000000000
    3    1   2    6         0.0000000000         0.0000000000
    3    1   3    6         0.0000000000         0.0000000000
-
+  
    1    2   1    5         0.0000000000         0.0000000000
    1    2   2    5         0.0000000000         0.0000000000
    1    2   3    5         0.0000000000         0.0000000000
    1    2   1    6        -0.0000000000         0.0000000000
    1    2   2    6         0.0474798424         0.0000000000
    1    2   3    6        -0.1657500965         0.0000000000
-
+  
    2    2   1    5        -0.1657500966         0.0000000000
    2    2   2    5         0.1657500963         0.0000000000
    2    2   3    5        -0.0000000000         0.0000000000
    2    2   1    6         0.0474798423         0.0000000000
    2    2   2    6         0.0000000000         0.0000000000
    2    2   3    6        -0.0000000000         0.0000000000
-
+  
    3    2   1    5         0.0528063912         0.0000000000
    3    2   2    5         0.0528063910         0.0000000000
    3    2   3    5         0.0443851515         0.0000000000
@@ -1336,7 +1337,7 @@ tolerances: {tolvrs: 1.00E-16, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      4.7407935029E+00  4.7407935029E+00  6.4088988780E+00 Bohr
               amu      1.08110000E+01  1.40067400E+01
@@ -1415,8 +1416,8 @@ P          mk1mem2          4
            vdw_xc           7
               wtk1       0.25000    0.75000
               wtk2       0.25000    0.25000    0.25000    0.25000
-           xangst      4.9839840983E-17  8.6325136823E-17  8.1394637241E-01
-                       4.2266471157E-16  1.4484100936E+00  2.5435824138E+00
+           xangst      4.9839841167E-17  8.6325137142E-17  8.1394637542E-01
+                       4.2266471313E-16  1.4484100990E+00  2.5435824232E+00
             xcart      9.4183649964E-17  1.6313086698E-16  1.5381357307E+00
                        7.9872055091E-16  2.7370984051E+00  4.8066741585E+00
              xred     -3.3266694474E-33  2.8363063747E-33  2.4000000000E-01
@@ -1425,70 +1426,10 @@ P          mk1mem2          4
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          2.1        0.04      0.001
-- Total wall clock time (s,m,h):          2.1        0.04      0.001
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0
--
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            2.1, wall_time =            2.1
--
-- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
--                                                                                (-1=no count)
-- fourwf%(pot)                              0.275  13.1         0.317  14.9           9533      -1.00        0.87       0.87
-- ewald                                     0.270  12.8         0.270  12.7              1      -1.00        1.00       1.00
-- stress                                    0.236  11.2         0.237  11.1              1      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)                        0.236  11.2         0.236  11.1              1      -1.00        1.00       1.00
-- timing timab                              0.116   5.5         0.116   5.4             10      -1.00        1.00       1.00
-- dfpt_cgwf-O(npw)                          0.083   4.0         0.075   3.5             -1      -1.00        1.11       1.11
-- fourwf%(G->r)                             0.061   2.9         0.059   2.8           3936      -1.00        1.03       1.03
-- nonlop(apply)                             0.058   2.7         0.056   2.6           7565      -1.00        1.03       1.03
-- get_dtsets_pspheads                       0.054   2.6         0.054   2.5              1      -1.00        1.00       1.00
-- getghc(/=fourXX,nonlop,fock_XX)           0.048   2.3         0.047   2.2             -1      -1.00        1.02       1.02
-- fourdp                                    0.046   2.2         0.051   2.4           3072      -1.00        0.90       0.90
-- projbd                                    0.041   1.9         0.039   1.8          14674      -1.00        1.05       1.05
-- dfpt_vtowfk(contrib)                      0.028   1.3         0.028   1.3             -1      -1.00        1.01       1.01
-- abinit(outvars)                           0.026   1.2         0.026   1.2              1      -1.00        0.99       0.99
-- abinit(after driver)                      0.024   1.2         0.024   1.1              1      -1.00        1.01       1.01
-- nonlop(forces)                            0.023   1.1         0.019   0.9           2544      -1.00        1.20       1.20
-- xc:pot/=fourdp                            0.019   0.9         0.024   1.1            285      -1.00        0.78       0.78
-- abinit(chkinp,chkvars)                    0.018   0.9         0.018   0.8              1      -1.00        1.00       1.00
-- others (141)                              0.045   2.1         0.041   1.9             -1      -1.00        1.10       1.10
--<END_TIMER>
--
-- subtotal                                  1.706  81.2         1.737  81.4                                  0.98       0.98
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           2.1, wall_time =           2.1
--
-- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
--                                                                                (-1=no count)
-- fourwf%(pot)                              0.275  13.1         0.317  14.9           9533      -1.00        0.87       0.87
-- ewald                                     0.270  12.8         0.270  12.7              1      -1.00        1.00       1.00
-- stress                                    0.236  11.2         0.237  11.1              1      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)                        0.236  11.2         0.236  11.1              1      -1.00        1.00       1.00
-- timing timab                              0.116   5.5         0.116   5.4             10      -1.00        1.00       1.00
-- dfpt_cgwf-O(npw)                          0.083   4.0         0.075   3.5             -1      -1.00        1.11       1.11
-- fourwf%(G->r)                             0.061   2.9         0.059   2.8           3936      -1.00        1.03       1.03
-- nonlop(apply)                             0.058   2.7         0.056   2.6           7565      -1.00        1.03       1.03
-- get_dtsets_pspheads                       0.054   2.6         0.054   2.5              1      -1.00        1.00       1.00
-- getghc(/=fourXX,nonlop,fock_XX)           0.048   2.3         0.047   2.2             -1      -1.00        1.02       1.02
-- fourdp                                    0.046   2.2         0.051   2.4           3072      -1.00        0.90       0.90
-- projbd                                    0.041   1.9         0.039   1.8          14674      -1.00        1.05       1.05
-- dfpt_vtowfk(contrib)                      0.028   1.3         0.028   1.3             -1      -1.00        1.01       1.01
-- abinit(outvars)                           0.026   1.2         0.026   1.2              1      -1.00        0.99       0.99
-- abinit(after driver)                      0.024   1.2         0.024   1.1              1      -1.00        1.01       1.01
-- nonlop(forces)                            0.023   1.1         0.019   0.9           2544      -1.00        1.20       1.20
-- xc:pot/=fourdp                            0.019   0.9         0.024   1.1            285      -1.00        0.78       0.78
-- abinit(chkinp,chkvars)                    0.018   0.9         0.018   0.8              1      -1.00        1.00       1.00
-- others (141)                              0.045   2.1         0.041   1.9             -1      -1.00        1.10       1.10
--<END_TIMER>
 
-- subtotal                                  1.706  81.2         1.737  81.4                                  0.98       0.98
 
 ================================================================================
 
@@ -1511,7 +1452,7 @@ P          mk1mem2          4
 - Strong suggestion to cite this paper in your publications.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#vantroeye2016
 -
-- [2] Metric tensor formulation of strain in density-functional perturbation theory,
+- [2] Metric tensor formulation of strain in density-functional perturbation theory, 
 - D. R. Hamann, X. Wu, K. M. Rabe, and D. Vanderbilt, Phys. Rev. B71, 035117 (2005).
 - Comment: Non-vanishing rfstrs. Strong suggestion to cite this paper in your publications.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2005
@@ -1528,7 +1469,7 @@ P          mk1mem2          4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1551,12 +1492,12 @@ P          mk1mem2          4
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1574,15 +1515,15 @@ P          mk1mem2          4
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.1
+- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  19 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.1  wall=          2.1
+.Delivered  18 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.8  wall=          1.8

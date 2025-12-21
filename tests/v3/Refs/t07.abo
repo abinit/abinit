@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h08 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v3_t07/t07.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h11 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v3_t07/t07.abi
 - output file    -> t07.abo
 - root for input  files -> t07i
 - root for output files -> t07o
@@ -113,6 +113,7 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
 -   mkqmem =           1        mk1mem =           1           mpw =         559
       nfft =        9600          nkpt =           1
+- my_mband =           1
 ================================================================================
 P This job should need less than                       2.538 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -212,18 +213,18 @@ P          mk1mem           1
                        1  0  0   0 -1  0   0  0  1       1  0  0   0 -1  0   0  0 -1
            tolvrs      1.00000000E-08
             typat      1  1
-           xangst1    -2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
-                       2.9782093299E-01  0.0000000000E+00  0.0000000000E+00
-           xangst2    -2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
-                       2.9813843932E-01  0.0000000000E+00  0.0000000000E+00
-           xangst3    -2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
-                       2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
-           xangst4    -2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
-                       2.9877345197E-01  0.0000000000E+00  0.0000000000E+00
-           xangst5    -2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
-                       2.9909095830E-01  0.0000000000E+00  0.0000000000E+00
-           xangst6    -2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
-                       2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
+           xangst1    -2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
+                       2.9782093409E-01  0.0000000000E+00  0.0000000000E+00
+           xangst2    -2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
+                       2.9813844042E-01  0.0000000000E+00  0.0000000000E+00
+           xangst3    -2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
+                       2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
+           xangst4    -2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
+                       2.9877345307E-01  0.0000000000E+00  0.0000000000E+00
+           xangst5    -2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
+                       2.9909095940E-01  0.0000000000E+00  0.0000000000E+00
+           xangst6    -2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
+                       2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
             xcart1    -5.6400000000E-01  0.0000000000E+00  0.0000000000E+00
                        5.6280000000E-01  0.0000000000E+00  0.0000000000E+00
             xcart2    -5.6400000000E-01  0.0000000000E+00  0.0000000000E+00
@@ -293,8 +294,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.500   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -384,8 +385,8 @@ force_length_stats: {min:   2.58137395E-01, max:   2.58137395E-01, mean:   2.581
     2      -3.097648264787      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1     -0.29845594564476     0.00000000000000     0.00000000000000
-    2      0.29782093299445     0.00000000000000     0.00000000000000
+    1     -0.29845594674682     0.00000000000000     0.00000000000000
+    2      0.29782093409416     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1     -0.25813739486820    -0.00000000000000    -0.00000000000000
@@ -393,11 +394,11 @@ force_length_stats: {min:   2.58137395E-01, max:   2.58137395E-01, mean:   2.581
  frms,max,avg= 1.4903569E-01 2.5813739E-01  -3.947E-08  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    -13.27395743118894    -0.00000000000000    -0.00000000000000
-    2     13.27395743118894    -0.00000000000000    -0.00000000000000
- frms,max,avg= 7.6637229E+00 1.3273957E+01  -2.030E-06  0.000E+00  0.000E+00 e/A
+    1    -13.27395854607746    -0.00000000000000    -0.00000000000000
+    2     13.27395854607746    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 7.6637235E+00 1.3273959E+01  -2.030E-06  0.000E+00  0.000E+00 e/A
  length scales= 12.000000000000 10.000000000000 10.000000000000 bohr
-              =  6.350126503080  5.291772085900  5.291772085900 angstroms
+              =  6.350126526528  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file t07o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.37584   Average Vxc (hartree)=  -0.06014
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -415,7 +416,7 @@ psp_core            :  1.39956766170961E-04
 local_psp           : -2.68177183073720E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.03983802530068E+00
-total_energy_eV     : -2.82954316586813E+01
+total_energy_eV     : -2.82954341397150E+01
 band_energy         : -7.51679448383716E-01
 ...
 
@@ -426,9 +427,9 @@ band_energy         : -7.51679448383716E-01
   sigma(3 3)=  1.15673558E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.7693E-01 GPa]
-- sigma(1 1)= -5.97566827E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.40323300E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.40323300E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -5.97566927E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.40323357E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.40323357E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -534,8 +535,8 @@ force_length_stats: {min:   2.57347031E-01, max:   2.57347031E-01, mean:   2.573
     2      -3.088164121443      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1     -0.29845594564476     0.00000000000000     0.00000000000000
-    2      0.29813843931961     0.00000000000000     0.00000000000000
+    1     -0.29845594674682     0.00000000000000     0.00000000000000
+    2      0.29813844042049     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1     -0.25734703068817    -0.00000000000000    -0.00000000000000
@@ -543,11 +544,11 @@ force_length_stats: {min:   2.57347031E-01, max:   2.57347031E-01, mean:   2.573
  frms,max,avg= 1.4857938E-01 2.5734703E-01  -2.057E-08  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    -13.23331527437827    -0.00000000000000    -0.00000000000000
-    2     13.23331527437827    -0.00000000000000    -0.00000000000000
- frms,max,avg= 7.6402581E+00 1.3233315E+01  -1.058E-06  0.000E+00  0.000E+00 e/A
+    1    -13.23331638585324    -0.00000000000000    -0.00000000000000
+    2     13.23331638585324    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 7.6402588E+00 1.3233316E+01  -1.058E-06  0.000E+00  0.000E+00 e/A
  length scales= 12.000000000000 10.000000000000 10.000000000000 bohr
-              =  6.350126503080  5.291772085900  5.291772085900 angstroms
+              =  6.350126526528  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file t07o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.37577   Average Vxc (hartree)=  -0.06015
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -565,7 +566,7 @@ psp_core            :  1.39956766170961E-04
 local_psp           : -2.68103754869034E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.03999267053394E+00
-total_energy_eV     : -2.82996397694855E+01
+total_energy_eV     : -2.82996422508882E+01
 band_energy         : -7.51530989588326E-01
 ...
 
@@ -576,9 +577,9 @@ band_energy         : -7.51530989588326E-01
   sigma(3 3)=  1.15593581E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.8065E-01 GPa]
-- sigma(1 1)= -5.95980627E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.40087999E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.40087999E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -5.95980727E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.40088056E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.40088056E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -684,8 +685,8 @@ force_length_stats: {min:   2.56558260E-01, max:   2.56558260E-01, mean:   2.565
     2      -3.078699114878      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1     -0.29845594564476     0.00000000000000     0.00000000000000
-    2      0.29845594564476     0.00000000000000     0.00000000000000
+    1     -0.29845594674682     0.00000000000000     0.00000000000000
+    2      0.29845594674682     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1     -0.25655825979639    -0.00000000000000    -0.00000000000000
@@ -693,11 +694,11 @@ force_length_stats: {min:   2.56558260E-01, max:   2.56558260E-01, mean:   2.565
  frms,max,avg= 1.4812398E-01 2.5655826E-01  -2.232E-10  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    -13.19275504773714    -0.00000000000000    -0.00000000000000
-    2     13.19275504773714    -0.00000000000000    -0.00000000000000
- frms,max,avg= 7.6168407E+00 1.3192755E+01  -1.148E-08  0.000E+00  0.000E+00 e/A
+    1    -13.19275615580543    -0.00000000000000    -0.00000000000000
+    2     13.19275615580543    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 7.6168413E+00 1.3192756E+01  -1.148E-08  0.000E+00  0.000E+00 e/A
  length scales= 12.000000000000 10.000000000000 10.000000000000 bohr
-              =  6.350126503080  5.291772085900  5.291772085900 angstroms
+              =  6.350126526528  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file t07o_DS3_EIG
  Fermi (or HOMO) energy (hartree) =  -0.37569   Average Vxc (hartree)=  -0.06016
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -715,7 +716,7 @@ psp_core            :  1.39956766170961E-04
 local_psp           : -2.68030350167111E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.04014684203294E+00
-total_energy_eV     : -2.83038349893250E+01
+total_energy_eV     : -2.83038374710956E+01
 band_energy         : -7.51382649728407E-01
 ...
 
@@ -726,9 +727,9 @@ band_energy         : -7.51382649728407E-01
   sigma(3 3)=  1.15513603E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.8436E-01 GPa]
-- sigma(1 1)= -5.94396161E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.39852696E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.39852696E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -5.94396261E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.39852753E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.39852753E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -834,8 +835,8 @@ force_length_stats: {min:   2.55771098E-01, max:   2.55771098E-01, mean:   2.557
     2      -3.069253419286      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1     -0.29845594564476     0.00000000000000     0.00000000000000
-    2      0.29877345196991     0.00000000000000     0.00000000000000
+    1     -0.29845594674682     0.00000000000000     0.00000000000000
+    2      0.29877345307314     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1     -0.25577109781936    -0.00000000000000    -0.00000000000000
@@ -843,11 +844,11 @@ force_length_stats: {min:   2.55771098E-01, max:   2.55771098E-01, mean:   2.557
  frms,max,avg= 1.4766951E-01 2.5577110E-01   2.045E-08  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    -13.15227755481171    -0.00000000000000    -0.00000000000000
-    2     13.15227755481171    -0.00000000000000    -0.00000000000000
- frms,max,avg= 7.5934710E+00 1.3152278E+01   1.052E-06  0.000E+00  0.000E+00 e/A
+    1    -13.15227865948027    -0.00000000000000    -0.00000000000000
+    2     13.15227865948027    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 7.5934716E+00 1.3152279E+01   1.052E-06  0.000E+00  0.000E+00 e/A
  length scales= 12.000000000000 10.000000000000 10.000000000000 bohr
-              =  6.350126503080  5.291772085900  5.291772085900 angstroms
+              =  6.350126526528  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file t07o_DS4_EIG
  Fermi (or HOMO) energy (hartree) =  -0.37562   Average Vxc (hartree)=  -0.06017
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -865,7 +866,7 @@ psp_core            :  1.39956766170961E-04
 local_psp           : -2.67956952694159E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.04030054076455E+00
-total_energy_eV     : -2.83080173445097E+01
+total_energy_eV     : -2.83080198266470E+01
 band_energy         : -7.51234361161007E-01
 ...
 
@@ -876,9 +877,9 @@ band_energy         : -7.51234361161007E-01
   sigma(3 3)=  1.15433671E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.8807E-01 GPa]
-- sigma(1 1)= -5.92813411E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.39617528E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.39617528E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -5.92813511E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.39617585E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.39617585E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -984,8 +985,8 @@ force_length_stats: {min:   2.54985543E-01, max:   2.54985543E-01, mean:   2.549
     2      -3.059827005363      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1     -0.29845594564476     0.00000000000000     0.00000000000000
-    2      0.29909095829507     0.00000000000000     0.00000000000000
+    1     -0.29845594674682     0.00000000000000     0.00000000000000
+    2      0.29909095939947     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1     -0.25498554267916    -0.00000000000000    -0.00000000000000
@@ -993,11 +994,11 @@ force_length_stats: {min:   2.54985543E-01, max:   2.54985543E-01, mean:   2.549
  frms,max,avg= 1.4721597E-01 2.5498554E-01   4.110E-08  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    -13.11188268875130    -0.00000000000000    -0.00000000000000
-    2     13.11188268875130    -0.00000000000000    -0.00000000000000
- frms,max,avg= 7.5701490E+00 1.3111883E+01   2.114E-06  0.000E+00  0.000E+00 e/A
+    1    -13.11188379002707    -0.00000000000000    -0.00000000000000
+    2     13.11188379002707    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 7.5701496E+00 1.3111884E+01   2.114E-06  0.000E+00  0.000E+00 e/A
  length scales= 12.000000000000 10.000000000000 10.000000000000 bohr
-              =  6.350126503080  5.291772085900  5.291772085900 angstroms
+              =  6.350126526528  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file t07o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =  -0.37554   Average Vxc (hartree)=  -0.06018
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -1015,7 +1016,7 @@ psp_core            :  1.39956766170961E-04
 local_psp           : -2.67883561531124E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -1.04045376769361E+00
-total_energy_eV     : -2.83121868612941E+01
+total_energy_eV     : -2.83121893437970E+01
 band_energy         : -7.51086119091980E-01
 ...
 
@@ -1026,9 +1027,9 @@ band_energy         : -7.51086119091980E-01
   sigma(3 3)=  1.15353787E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.9178E-01 GPa]
-- sigma(1 1)= -5.91232373E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.39382503E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.39382503E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -5.91232472E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.39382560E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.39382560E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1063,7 +1064,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   2
@@ -1125,7 +1126,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1891069039E+03 Ha. Also 2DEtotal=    0.514586055335E+04 eV
+ 2DEtotal=    0.1891069039E+03 Ha. Also 2DEtotal=    0.514586100456E+04 eV
     (2DErelax=   -1.0617610369E+02 Ha. 2DEnonrelax=    2.9528300762E+02 Ha)
     (  non-var. 2DEtotal :    1.8910690359E+02 Ha)
 
@@ -1135,12 +1136,12 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2      -189.1167560782         0.0000000000
@@ -1148,21 +1149,21 @@ tolerances: {tolvrs: 1.00E-08, }
    1    1   3    2         0.0000000000        -0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
-
+  
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   1    2        -0.0000000000        -0.0000000000
    3    1   2    2         0.0000000000         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
-
+  
    1    2   1    1      -189.1167560782        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1        -0.0000000000         0.0000000000
@@ -1171,76 +1172,76 @@ tolerances: {tolvrs: 1.00E-08, }
    1    2   3    2         0.0000000000         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
-
+  
    2    2   1    1        -0.0000000000        -0.0000000000
    2    2   3    1         0.0000000000        -0.0000000000
    2    2   1    2        -0.0000000000         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000        -0.0000000000
    3    2   1    2         0.0000000000         0.0000000000
    3    2   2    2        -0.0000000000         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-
+  
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
    1    4   2    4         0.0000000000         0.0000000000
    1    4   3    4         0.0000000000         0.0000000000
-
+  
    2    4   1    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
    2    4   1    4         0.0000000000         0.0000000000
    2    4   3    4         0.0000000000         0.0000000000
-
+  
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
    3    4   1    4         0.0000000000         0.0000000000
    3    4   2    4         0.0000000000         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -1.3133108061         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
-
+  
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   1    2        -0.0000000000        -0.0000000000
    3    1   2    2         0.0000000000         0.0000000000
-
+  
    1    2   1    1        -1.3133108061        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1        -0.0000000000         0.0000000000
    1    2   1    2         1.3132423860         0.0000000000
    1    2   2    2        -0.0000000000         0.0000000000
    1    2   3    2         0.0000000000         0.0000000000
-
+  
    2    2   1    1        -0.0000000000        -0.0000000000
    2    2   3    1         0.0000000000        -0.0000000000
    2    2   1    2        -0.0000000000         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000        -0.0000000000
    3    2   1    2         0.0000000000         0.0000000000
@@ -1258,7 +1259,7 @@ tolerances: {tolvrs: 1.00E-08, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.2000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00800000E+00
@@ -1372,18 +1373,18 @@ P          mk1mem           1
                        1  0  0   0 -1  0   0  0  1       1  0  0   0 -1  0   0  0 -1
            tolvrs      1.00000000E-08
             typat      1  1
-           xangst1    -2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
-                       2.9782093299E-01  0.0000000000E+00  0.0000000000E+00
-           xangst2    -2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
-                       2.9813843932E-01  0.0000000000E+00  0.0000000000E+00
-           xangst3    -2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
-                       2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
-           xangst4    -2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
-                       2.9877345197E-01  0.0000000000E+00  0.0000000000E+00
-           xangst5    -2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
-                       2.9909095830E-01  0.0000000000E+00  0.0000000000E+00
-           xangst6    -2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
-                       2.9845594564E-01  0.0000000000E+00  0.0000000000E+00
+           xangst1    -2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
+                       2.9782093409E-01  0.0000000000E+00  0.0000000000E+00
+           xangst2    -2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
+                       2.9813844042E-01  0.0000000000E+00  0.0000000000E+00
+           xangst3    -2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
+                       2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
+           xangst4    -2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
+                       2.9877345307E-01  0.0000000000E+00  0.0000000000E+00
+           xangst5    -2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
+                       2.9909095940E-01  0.0000000000E+00  0.0000000000E+00
+           xangst6    -2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
+                       2.9845594675E-01  0.0000000000E+00  0.0000000000E+00
             xcart1    -5.6400000000E-01  0.0000000000E+00  0.0000000000E+00
                        5.6280000000E-01  0.0000000000E+00  0.0000000000E+00
             xcart2    -5.6400000000E-01  0.0000000000E+00  0.0000000000E+00
@@ -1449,7 +1450,7 @@ P          mk1mem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1472,12 +1473,12 @@ P          mk1mem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1495,15 +1496,15 @@ P          mk1mem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.4
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  40 WARNINGs and  25 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.3  wall=          1.4
++Overall time at end (sec) : cpu=          1.2  wall=          1.3

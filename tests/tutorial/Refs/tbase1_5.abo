@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h09 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h05 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/tutorial_tbase1_5/tbase1_5.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tbase1_5/tbase1_5.abi
 - output file    -> tbase1_5.abo
 - root for input  files -> tbase1_5i
 - root for output files -> tbase1_5o
@@ -129,8 +129,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/H.psp8
 - H     ONCVPSP-3.3.0  r_core=   1.00957   0.90680
 -  1.00000   1.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       300   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -217,7 +217,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Mean square residual over all n,k,spin=   15.159E-13; max=  18.555E-13
    0.0000  0.0000  0.0000    1  1.17622E-12 kpt; spin; max resid(k); each band:
   1.18E-12
-   0.0000  0.0000  0.0000    2  1.85554E-12 kpt; spin; max resid(k); each band:
+   0.0000  0.0000  0.0000    2  1.85553E-12 kpt; spin; max resid(k); each band:
   1.86E-12
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
@@ -235,7 +235,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file tbase1_5o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.26661   Average Vxc (hartree)=  -0.06841
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -277,16 +277,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  4.14382372269276E-01
-hartree             :  1.50459020296560E-01
-xc                  : -2.65640701207868E-01
+kinetic             :  4.14382372269702E-01
+hartree             :  1.50459020296766E-01
+xc                  : -2.65640701208059E-01
 Ewald energy        : -1.41864873974033E-01
 psp_core            :  3.54915045825276E-04
-local_psp           : -5.80289532817019E-01
-non_local_psp       : -5.13322364963362E-02
-total_energy        : -4.73931036883594E-01
-total_energy_eV     : -1.28963193678073E+01
-band_energy         : -2.66611263131906E-01
+local_psp           : -5.80289532817421E-01
+non_local_psp       : -5.13322364963665E-02
+total_energy        : -4.73931036883585E-01
+total_energy_eV     : -1.28963204985975E+01
+band_energy         : -2.66611263131748E-01
 ...
 
 
@@ -296,9 +296,9 @@ band_energy         : -2.66611263131906E-01
   sigma(3 3)=  1.75098943E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.1516E-01 GPa]
-- sigma(1 1)=  5.15158790E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  5.15158790E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.15158790E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  5.15158876E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.15158876E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.15158876E-01  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -445,10 +445,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
+- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.3  wall=          0.3
++Overall time at end (sec) : cpu=          0.3  wall=          0.4

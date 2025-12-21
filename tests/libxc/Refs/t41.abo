@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h01 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/libxc_t41/t41.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h02 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/libxc_t41/t41.abi
 - output file    -> t41.abo
 - root for input  files -> t41i
 - root for output files -> t41o
@@ -385,7 +385,7 @@ P           mkmem          19
                          0.04688    0.01172    0.04688    0.02344    0.03125    0.01563
                          0.00391
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.9174999628E-01  8.9174999628E-01  8.9174999628E-01
+                       8.9174999957E-01  8.9174999957E-01  8.9174999957E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.6851632720E+00  1.6851632720E+00  1.6851632720E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -431,8 +431,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -522,7 +522,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.89174999627579     0.89174999627579     0.89174999627579
+    2      0.89174999956860     0.89174999956860     0.89174999956860
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -534,12 +534,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740653087852  6.740653087852  6.740653087852 bohr
-              =  3.566999985103  3.566999985103  3.566999985103 angstroms
+              =  3.566999998274  3.566999998274  3.566999998274 angstroms
  prteigrs : about to open file t41o_DS1_EIG
  Fermi (or HOMO) energy (eV) =  12.95108   Average Vxc (eV)= -13.73907
  Eigenvalues (   eV  ) for nkpt=  19  k points:
  kpt#   1, nband=  8, wtk=  0.02344, kpt= -0.1250 -0.1250  0.0000 (reduced coord)
-  -8.37112   11.24733   11.24733   11.72011   18.16431   20.83144   20.83144   25.87565
+  -8.37112   11.24734   11.24734   11.72011   18.16431   20.83144   20.83144   25.87565
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -554,7 +554,7 @@ psp_core            :  1.93481650847052E-01
 local_psp           : -5.24205111134754E+00
 non_local_psp       :  1.39129614197111E+00
 total_energy        : -1.19286480875809E+01
-total_energy_eV     : -3.24595022042017E+02
+total_energy_eV     : -3.24595050503545E+02
 band_energy         :  1.13818376545443E+00
 ...
 
@@ -565,9 +565,9 @@ band_energy         :  1.13818376545443E+00
   sigma(3 3)=  3.65049667E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.0740E+02 GPa]
-- sigma(1 1)=  1.07401302E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.07401302E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.07401302E+02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.07401320E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.07401320E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.07401320E+02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -589,7 +589,7 @@ meta: {optdriver: 4, gwcalctyp: 15, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- SIGMA: Calculation of the GW corrections
+ SIGMA: Calculation of the GW corrections 
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -603,8 +603,8 @@ meta: {optdriver: 4, gwcalctyp: 15, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -622,7 +622,7 @@ meta: {optdriver: 4, gwcalctyp: 15, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :    19
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)    -1.25000000E-01 -1.25000000E-01  0.00000000E+00       0.02344
      2)    -1.25000000E-01 -3.75000000E-01  0.00000000E+00       0.09375
@@ -644,17 +644,17 @@ meta: {optdriver: 4, gwcalctyp: 15, }
     18)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.01563
     19)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.00391
 
- Together with 48 symmetry operations and time-reversal symmetry
+ Together with 48 symmetry operations and time-reversal symmetry 
  yields   256 points in the full Brillouin Zone.
 
 
 
- COMMENT: In a self-consistent GW run, the QP corrections should be calculated for all the k-points of the KSS file
+ COMMENT: In a self-consistent GW run, the QP corrections should be calculated for all the k-points of the KSS file 
  but nkptgw= 1 and WFK nkpt= 19
  Assuming expert user. Execution will continue.
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :    19
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.00391
      2)     2.50000000E-01  2.50000000E-01  0.00000000E+00       0.02344
@@ -676,14 +676,14 @@ meta: {optdriver: 4, gwcalctyp: 15, }
     18)     3.75000000E-01  5.00000000E-01 -1.25000000E-01       0.04688
     19)     2.50000000E-01  5.00000000E-01 -2.50000000E-01       0.02344
 
- Together with 48 symmetry operations and time-reversal symmetry
+ Together with 48 symmetry operations and time-reversal symmetry 
  yields   256 points in the full Brillouin Zone.
 
 
 
- === Complement Error function cutoff ===
+ === Complement Error function cutoff === 
 
-  Cutoff radius .........     9.0909 [Bohr]
+  Cutoff radius .........     9.0909 [Bohr] 
 
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
@@ -696,9 +696,9 @@ meta: {optdriver: 4, gwcalctyp: 15, }
  omega_plasma =   31.1769 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step
+ rdqps: reading QP wavefunctions of the previous step 
         looking for file t41i_DS2_QPS
- file not found, 1st iteration initialized with KS eigenelements
+ file not found, 1st iteration initialized with KS eigenelements 
 
  Number of electrons calculated from density =    7.9984; Expected =    8.0000
  average of density, n =  0.104461
@@ -708,7 +708,7 @@ meta: {optdriver: 4, gwcalctyp: 15, }
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace:
+ QP results after the unitary transformation in the KS subspace: 
 
   Number of electrons    =    7.9984
 
@@ -791,7 +791,7 @@ meta: {optdriver: 4, gwcalctyp: 15, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- SIGMA: Calculation of the GW corrections
+ SIGMA: Calculation of the GW corrections 
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -805,8 +805,8 @@ meta: {optdriver: 4, gwcalctyp: 15, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -824,7 +824,7 @@ meta: {optdriver: 4, gwcalctyp: 15, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :    19
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)    -1.25000000E-01 -1.25000000E-01  0.00000000E+00       0.02344
      2)    -1.25000000E-01 -3.75000000E-01  0.00000000E+00       0.09375
@@ -846,17 +846,17 @@ meta: {optdriver: 4, gwcalctyp: 15, }
     18)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.01563
     19)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.00391
 
- Together with 48 symmetry operations and time-reversal symmetry
+ Together with 48 symmetry operations and time-reversal symmetry 
  yields   256 points in the full Brillouin Zone.
 
 
 
- COMMENT: In a self-consistent GW run, the QP corrections should be calculated for all the k-points of the KSS file
+ COMMENT: In a self-consistent GW run, the QP corrections should be calculated for all the k-points of the KSS file 
  but nkptgw= 1 and WFK nkpt= 19
  Assuming expert user. Execution will continue.
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :    19
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.00391
      2)     2.50000000E-01  2.50000000E-01  0.00000000E+00       0.02344
@@ -878,7 +878,7 @@ meta: {optdriver: 4, gwcalctyp: 15, }
     18)     3.75000000E-01  5.00000000E-01 -1.25000000E-01       0.04688
     19)     2.50000000E-01  5.00000000E-01 -2.50000000E-01       0.02344
 
- Together with 48 symmetry operations and time-reversal symmetry
+ Together with 48 symmetry operations and time-reversal symmetry 
  yields   256 points in the full Brillouin Zone.
 
 
@@ -895,9 +895,9 @@ meta: {optdriver: 4, gwcalctyp: 15, }
  omega_plasma =   31.1769 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step
+ rdqps: reading QP wavefunctions of the previous step 
         looking for file t41i_DS3_QPS
- file not found, 1st iteration initialized with KS eigenelements
+ file not found, 1st iteration initialized with KS eigenelements 
 
  Number of electrons calculated from density =    7.9984; Expected =    8.0000
  average of density, n =  0.104461
@@ -907,7 +907,7 @@ meta: {optdriver: 4, gwcalctyp: 15, }
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace:
+ QP results after the unitary transformation in the KS subspace: 
 
   Number of electrons    =    7.9984
 
@@ -990,7 +990,7 @@ meta: {optdriver: 4, gwcalctyp: 15, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- SIGMA: Calculation of the GW corrections
+ SIGMA: Calculation of the GW corrections 
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1004,8 +1004,8 @@ meta: {optdriver: 4, gwcalctyp: 15, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1023,7 +1023,7 @@ meta: {optdriver: 4, gwcalctyp: 15, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :    19
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)    -1.25000000E-01 -1.25000000E-01  0.00000000E+00       0.02344
      2)    -1.25000000E-01 -3.75000000E-01  0.00000000E+00       0.09375
@@ -1045,17 +1045,17 @@ meta: {optdriver: 4, gwcalctyp: 15, }
     18)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.01563
     19)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.00391
 
- Together with 48 symmetry operations and time-reversal symmetry
+ Together with 48 symmetry operations and time-reversal symmetry 
  yields   256 points in the full Brillouin Zone.
 
 
 
- COMMENT: In a self-consistent GW run, the QP corrections should be calculated for all the k-points of the KSS file
+ COMMENT: In a self-consistent GW run, the QP corrections should be calculated for all the k-points of the KSS file 
  but nkptgw= 1 and WFK nkpt= 19
  Assuming expert user. Execution will continue.
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :    19
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.00391
      2)     2.50000000E-01  2.50000000E-01  0.00000000E+00       0.02344
@@ -1077,7 +1077,7 @@ meta: {optdriver: 4, gwcalctyp: 15, }
     18)     3.75000000E-01  5.00000000E-01 -1.25000000E-01       0.04688
     19)     2.50000000E-01  5.00000000E-01 -2.50000000E-01       0.02344
 
- Together with 48 symmetry operations and time-reversal symmetry
+ Together with 48 symmetry operations and time-reversal symmetry 
  yields   256 points in the full Brillouin Zone.
 
 
@@ -1094,9 +1094,9 @@ meta: {optdriver: 4, gwcalctyp: 15, }
  omega_plasma =   31.1769 [eV]
 
 
- rdqps: reading QP wavefunctions of the previous step
+ rdqps: reading QP wavefunctions of the previous step 
         looking for file t41i_DS4_QPS
- file not found, 1st iteration initialized with KS eigenelements
+ file not found, 1st iteration initialized with KS eigenelements 
 
  Number of electrons calculated from density =    7.9984; Expected =    8.0000
  average of density, n =  0.104461
@@ -1106,7 +1106,7 @@ meta: {optdriver: 4, gwcalctyp: 15, }
 
 --------------------------------------------------------------------------------
 
- QP results after the unitary transformation in the KS subspace:
+ QP results after the unitary transformation in the KS subspace: 
 
   Number of electrons    =    7.9984
 
@@ -1171,7 +1171,7 @@ data: !SigmaeeData |
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      6.7406530879E+00  6.7406530879E+00  6.7406530879E+00 Bohr
               amu      1.20110000E+01
@@ -1481,7 +1481,7 @@ P           mkmem          19
                          0.04688    0.01172    0.04688    0.02344    0.03125    0.01563
                          0.00391
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.9174999628E-01  8.9174999628E-01  8.9174999628E-01
+                       8.9174999957E-01  8.9174999957E-01  8.9174999957E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.6851632720E+00  1.6851632720E+00  1.6851632720E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1527,7 +1527,7 @@ P           mkmem          19
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1539,12 +1539,12 @@ P           mkmem          19
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1562,7 +1562,7 @@ P           mkmem          19
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1577,15 +1577,15 @@ P           mkmem          19
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.6
+- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.5  wall=          2.6
++Overall time at end (sec) : cpu=          2.3  wall=          2.4
