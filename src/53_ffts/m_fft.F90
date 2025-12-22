@@ -1251,7 +1251,6 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
  integer,parameter :: NSETS=6, fftcache0 = 0
  integer :: ifft,ierr,ldxyz,old_nthreads,ount,cplex,ii
  integer :: iset,nx,ny,nz,ldx,ldy,ldz,fftalga,fftalgc
- !integer :: ix,iy,iz,padat,dat
  real(dp),parameter :: ATOL_SP=tol6,ATOL_DP=tol12 ! Tolerances on the absolute errors
  real(dp) :: max_abserr
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
@@ -1320,12 +1319,11 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      call RANDOM_NUMBER(crand)
      ff_refsp(ifft) = DCMPLX(crand(1), crand(2))
    end do
-
    ! Set the augmentation region to zero to avoid SIGFPE, as FFTW3 wrappers use zscal to scale the results.
    call cplx_setaug_zero_spc(nx,ny,nz,ldx,ldy,ldz,ndat,ff_refsp)
-   ffsp = ff_refsp
 
    ! in-place version.
+   ffsp = ff_refsp
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(to:ffsp) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -1337,13 +1335,11 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
-
    info = sjoin(library, "c2c_ip_spc :")
+   write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ffsp - ff_refsp))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
-   else
-     write(msg,"(a)")" OK"
    end if
    call wrtout(ount, sjoin(info,msg))
 
@@ -1361,13 +1357,11 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
 
    ierr = COUNT(ABS(ffsp - ff_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
-
    info = sjoin(library, "c2c_op_spc :")
+   write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ffsp - ff_refsp))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
-   else
-     write(msg,"(a)")" OK"
    end if
    call wrtout(ount, sjoin(info, msg))
 
@@ -1390,9 +1384,9 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
 
    ! Set the augmentation region to zero to avoid SIGFPE, as FFTW3 wrappers use zscal to scale the results.
    call cplx_setaug_zero_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff_ref)
-   ff = ff_ref
 
    ! in-place version.
+   ff = ff_ref
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(to:ff) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -1406,11 +1400,10 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    nfailed = nfailed + ierr
 
    info = sjoin(library, "c2c_ip_dpc :")
+   write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ff - ff_ref))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
-   else
-     write(msg,"(a)")" OK"
    end if
    call wrtout(ount,sjoin(info, msg))
 
@@ -1430,11 +1423,10 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    nfailed = nfailed + ierr
 
    info = sjoin(library, "c2c_op_dpc :")
+   write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ff - ff_ref))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
-   else
-     write(msg,"(a)")" OK"
    end if
    call wrtout(ount, sjoin(info, msg))
 
@@ -1443,8 +1435,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    ABI_FREE(gg)
    ABI_FREE(ff_ref)
 
-   call box_plan%free()
-   !stop
+   call box_plan%free() !; stop
 
    do cplex=1,2
      !if (fftalga == FFT_FFTW3 .and. ndat > 1 .and. cplex==1) then
@@ -1505,6 +1496,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
 
      write(info,"(a,i1,a)")sjoin(library, "fourdp (cplex "),cplex,") :"
      !write(info,"(2a,i1,a,i0,a)")trim(library), "fourdp (cplex ", cplex,"), ndata = ",ndat," :"
+     write(msg,"(a)")" OK"
      if (ierr /= 0) then
        max_abserr = MAXVAL(ABS(fofr - fofr_ref))
        write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
@@ -1512,8 +1504,6 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
        !do ifft=1,cplex*ldxyz*ndat
        !  write(std_out, *)abs(fofr(ifft) - fofr_ref(ifft)), fofr(ifft), fofr_ref(ifft)
        !end do
-     else
-       write(msg,"(a)")" OK"
      end if
      call wrtout(ount,sjoin(info, msg))
 
@@ -1525,7 +1515,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
       ! Revert changes. See comment above.
       ldx=pars(4,iset); ldy=pars(5,iset); ldz=pars(6,iset)
       ldxyz = ldx*ldy*ldz
-    endif
+    end if
 
    end do
  end do
@@ -1658,11 +1648,10 @@ integer function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(n
    nfailed = nfailed + ierr
 
    write(info,"(a,i1,a)")sjoin(library,"fftu_spc, istwfk "),istwf_k," :"
+   write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ugsp - ug_refsp))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
-   else
-     write(msg,"(a)")" OK"
    end if
    call wrtout(ount,sjoin(info, msg))
 
@@ -1688,11 +1677,10 @@ integer function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(n
    nfailed = nfailed + ierr
 
    write(info,"(a,i1,a)")sjoin(library,"fftu_dpc, istwfk "),istwf_k," :"
+   write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ug - ug_ref))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
-   else
-     write(msg,"(a)")" OK"
    end if
    call wrtout(ount, sjoin(info, msg))
 
@@ -1846,11 +1834,10 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
    nfailed = nfailed + ierr
 
    write(info,"(a,i1,a)")sjoin(library,"uplan_k spc, istwfk "),istwf_k," :"
+   write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ugsp - ug_refsp))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
-   else
-     write(msg,"(a)")" OK"
    end if
    call wrtout(ount,sjoin(info, msg))
 
@@ -1887,11 +1874,10 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
    nfailed = nfailed + ierr
 
    write(info,"(a,i1,a)")sjoin(library,"uplan_k, dp, istwfk "),istwf_k," :"
+   write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ug - ug_ref))
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
-   else
-     write(msg,"(a)")" OK"
    end if
    call wrtout(ount, sjoin(info, msg))
 
@@ -2050,13 +2036,12 @@ integer function fftbox_mpi_utests(fftalg, cplex, ndat, nthreads, comm_fft, unit
    if (cplex == 1) info = sjoin(library,"r2c --> c2r :")
    if (cplex == 2) info = sjoin(library,"c2c :")
 
+   write(msg,"(a)")" OK"
    if (ierr /= 0) then
      ! Compute the maximum of the absolute error.
      max_abserr = MAXVAL(ABS(fofr - fofr_copy))
      call xmpi_max(max_abserr,comm_fft,mpierr)
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
-   else
-     write(msg,"(a)")" OK"
    end if
    call wrtout(ount,sjoin(info, msg))
 
@@ -2297,12 +2282,11 @@ integer function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft,
 
    write(info,"(a,i1,a)")sjoin(library,"fftu_mpi, istwfk "),istwf_k," :"
 
+   write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(fofg - ref_fofg))
      call xmpi_max(max_abserr,comm_fft,mpierr)
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
-   else
-     write(msg,"(a)")" OK"
    end if
    call wrtout(ount,sjoin(info, msg))
 
@@ -2365,10 +2349,9 @@ integer function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft,
    call xmpi_max(max_relerr,comm_fft,mpierr)
 
    write(info,"(a,i1,a)")sjoin(library,"accrho_mpi, istwfk "),istwf_k," :"
+   write(msg,"(a)")" OK"
    if (max_relerr > RTOL_DP) then
      write(msg,"(a,es9.2,a)")" FAILED (max_relerr = ",max_relerr,")"
-   else
-     write(msg,"(a)")" OK"
    end if
    call wrtout(ount, sjoin(info, msg))
 
@@ -2411,14 +2394,12 @@ integer function fftu_mpi_utests(fftalg, ecut, rprimd, ndat, nthreads, comm_fft,
    nfailed = nfailed + ierr
 
    write(info,"(a,i1,a)")sjoin(library,"<G|vloc|u>, istwfk "),istwf_k," :"
-
+   write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(fofg - ref_fofg))
      call xmpi_max(max_abserr,comm_fft,mpierr)
      write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
      !if (me_fft == 0) write(std_out,*)(fofg(:,ig),ref_fofg(:,ig), ig=1,npw_k*ndat)
-   else
-     write(msg,"(a)")" OK"
    end if
    call wrtout(ount, sjoin(info, msg))
 

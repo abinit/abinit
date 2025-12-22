@@ -242,8 +242,8 @@ program fftprof
 
  ! linalg initialisation (required by subdiago)
  linalg_max_size = 1
- call abi_linalg_init(linalg_max_size, RUNL_GSTATE, wfoptalg, paral_kgb0,&
-                      init_gpu_flavor, use_slk0, np_slk1, xmpi_comm_self)
+ !call abi_linalg_init(linalg_max_size, RUNL_GSTATE, wfoptalg, paral_kgb0,&
+ !                     init_gpu_flavor, use_slk0, np_slk1, xmpi_comm_self)
 
  if (do_mpi_utests) then
    ! Execute unit tests for MPI FFTs and terminate execution.
@@ -436,6 +436,7 @@ program fftprof
      gpu_option = fft_setups(6, idx)
 
      write(msg,"(3(a,i0))")"fftbox_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
+     !write(msg,"(4(a,i0))")"fftbox_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
      call wrtout(std_out, msg)
      nfailed = nfailed + fftbox_utests(fftalg, ndat, nthreads, gpu_option)
 
@@ -448,8 +449,9 @@ program fftprof
        paral_kgb0,symrel,tnons, unit=dev_null, gpu_option=gpu_option)
 
      write(msg,"(3(a,i0))")"fftu_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
+     !write(msg,"(4(a,i0))")"fftu_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
      call wrtout(std_out, msg)
-     !nfailed = nfailed + fftu_utests(ecut, ut_ngfft, rprimd, ndat, nthreads)
+     nfailed = nfailed + fftu_utests(ecut, ut_ngfft, rprimd, ndat, nthreads)
 
      write(msg,"(4(a,i0))")"uplan_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
      call wrtout(std_out, msg)
