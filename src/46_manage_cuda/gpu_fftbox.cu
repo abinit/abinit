@@ -142,6 +142,7 @@ gpu_fftbox_c2c_ip(void **plan_pp, void *stream, int nfft, int batch, int isign, 
 
   cudaStream_t *fft_stream = (cudaStream_t *) stream;
   CHECK_CUDA_ERROR(cudaStreamSynchronize(*fft_stream));
+  //CHECK_CUDA_ERROR(cudaDeviceSynchronize());
 }
 
 
@@ -177,6 +178,7 @@ gpu_fftbox_c2c_op(void **plan_pp, void *stream, int nfft, int batch, int isign, 
 
   cudaStream_t *fft_stream = (cudaStream_t *) stream;
   CHECK_CUDA_ERROR(cudaStreamSynchronize(*fft_stream));
+  //CHECK_CUDA_ERROR(cudaDeviceSynchronize());
 }
 
 #endif
