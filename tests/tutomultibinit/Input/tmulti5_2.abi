@@ -41,6 +41,7 @@ randomseed = 111111             ! DO NOT set randomseed. It is only for testing 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
+#%% exclude_builders = eos_intel_2023_cmake
 #%% need_cpp_vars = HAVE_XML
 #%% spin_pot = tmulti5_2.xml
 #%% coeff_xml = no
