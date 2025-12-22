@@ -249,6 +249,7 @@ MODULE m_fft
  ! unit tests
  public :: fftbox_utests          ! Unit tests for FFTs on the full box.
  public :: fftu_utests            ! Unit tests for the FFTs of wavefunctions.
+ public :: uplan_utests           ! Unit tests for the FFTs of wavefunctions (including GPU support)
  public :: fftbox_mpi_utests      ! Unit tests for MPI-FFT on the full box.
  public :: fftu_mpi_utests        ! Unit tests for MPI-FFT of the wavefunctions.
 !!***
@@ -1644,7 +1645,6 @@ integer function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(n
    end if
 
    ugsp = ug_refsp
-
    call fft_ug(npw_k,nxyz,nspinor1,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ugsp,ursp)
    call fft_ur(npw_k,nxyz,nspinor1,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ursp,ugsp)
 
@@ -1675,7 +1675,6 @@ integer function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(n
    end if
 
    ug = ug_ref
-
    call fft_ug(npw_k,nxyz,nspinor1,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
    call fft_ur(npw_k,nxyz,nspinor1,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
 
@@ -1710,6 +1709,208 @@ integer function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(n
 
 end function fftu_utests
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft/uplan_utests
+!! NAME
+!! uplan_utests
+!!
+!! FUNCTION
+!! Unit tests for the FFTs of wavefunctions (sequential version).
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!  nfailed=number of failed tests.
+!!
+!! SOURCE
+
+integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, unit) result(nfailed)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: ecut
+ integer,intent(in) :: ndat, nthreads, gpu_option
+ integer,optional,intent(in) :: unit
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: rprimd(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: nspinor1=1,mkmem1=1,exchn2n3d0=0,ikg0=0
+ integer :: nx,ny,nz,nxyz,ldx,ldy,ldz,ierr,npw_k,mgfft,istwf_k,ikpt,ldxyz,ipw,old_nthreads,ount, fftalg,npw_k_test
+ real(dp),parameter :: ATOL_SP=tol6, ATOL_DP=tol12 ! Tolerances on the absolute error
+ real(dp) :: max_abserr,ucvol
+ character(len=500) :: msg,info,library,cplex_mode,padding_mode
+!arrays
+ integer :: kg_dum(3,0)
+ integer,allocatable :: kg_k(:,:)
+ real(dp) :: kpoint(3),crand(2),kpoints(3,1), gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp),allocatable :: cg(:,:),cg_ref(:,:),cr(:,:)
+ complex(sp),allocatable :: ugsp(:),ug_refsp(:),ursp(:)
+ complex(dp),allocatable :: ug(:),ug_ref(:),ur(:)
+ type(MPI_type) :: MPI_enreg_seq
+ type(uplan_t) :: uplan_k
+! *************************************************************************
+
+ ount = std_out; if (PRESENT(unit)) ount = unit
+
+ nfailed = 0
+ fftalg = ngfft(7)
+
+ if (nthreads > 0) then
+   old_nthreads = xomp_get_max_threads()
+   call xomp_set_num_threads(nthreads)
+ end if
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+ nx  = ngfft(1);  ny = ngfft(2);  nz = ngfft(3)
+ ldx = ngfft(4); ldy = ngfft(5); ldz = ngfft(6)
+ mgfft = MAXVAL(ngfft(1:3))
+
+ nxyz =  nx* ny* nz
+ ldxyz = ldx*ldy*ldz
+
+ ABI_CALLOC(cg_ref, (2, ldxyz*ndat))
+ ABI_CALLOC(cg,     (2, ldxyz*ndat))
+ ABI_CALLOC(cr,     (2, ldxyz*ndat))
+ ABI_CALLOC(ug_ref, (ldxyz*ndat))
+ ABI_CALLOC(ug,     (ldxyz*ndat))
+ ABI_CALLOC(ur,     (ldxyz*ndat))
+ ABI_CALLOC(ug_refsp, (ldxyz*ndat))
+ ABI_CALLOC(ugsp,     (ldxyz*ndat))
+ ABI_CALLOC(ursp,     (ldxyz*ndat))
+
+ kpoints = RESHAPE([ &
+   0.1, 0.2, 0.3   &
+   !0.0, 0.0, 0.0, &
+   !0.5, 0.0, 0.0, &
+   !0.0, 0.0, 0.5, &
+   !0.5, 0.0, 0.5, &
+   !0.0, 0.5, 0.0, &
+   !0.5, 0.5, 0.0, &
+   !0.0, 0.5, 0.5, &
+   !0.5, 0.5, 0.5
+   ], [3, 1])
+
+ call fftalg_info(fftalg, library, cplex_mode, padding_mode)
+ call initmpi_seq(MPI_enreg_seq)
+
+ do ikpt=1,SIZE(kpoints,DIM=2)
+   kpoint = kpoints(:,ikpt)
+   istwf_k = set_istwfk(kpoint)
+
+   ! Calculate the number of G-vectors for this k-point.
+   call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_dum,kpoint,0,MPI_enreg_seq,0,npw_k)
+
+   ! Allocate and calculate the set of G-vectors.
+   ABI_MALLOC(kg_k, (3,npw_k))
+   call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_k,kpoint,mkmem1,MPI_enreg_seq,npw_k,npw_k_test)
+
+   ! =================================================
+   ! === Test the single precision complex version ===
+   ! =================================================
+   do ipw=1,npw_k*ndat
+     call RANDOM_NUMBER(crand)
+     ug_refsp(ipw) = CMPLX(crand(1), crand(2))
+   end do
+
+   if (istwf_k == 2) then
+     do ipw=1,npw_k*ndat,npw_k
+       ug_refsp(ipw) = REAL(ug_refsp(ipw))
+     end do
+   end if
+
+   ugsp = ug_refsp
+   !call fft_ug(npw_k,nxyz,nspinor1,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ugsp,ursp)
+   !call fft_ur(npw_k,nxyz,nspinor1,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ursp,ugsp)
+
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:ugsp, ursp) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
+   call uplan_k%init(npw_k, nspinor1, ndat, ngfft, istwf_k, kg_k, sp, gpu_option)
+   call uplan_k%execute_gr(ndat, ugsp, ursp)
+   call uplan_k%execute_rg(ndat, ursp, ugsp)
+   call uplan_k%free()
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(from:ugsp) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
+
+   ierr = COUNT(ABS(ugsp - ug_refsp) > ATOL_SP)
+   nfailed = nfailed + ierr
+
+   write(info,"(a,i1,a)")sjoin(library,"uplan_spc, istwfk "),istwf_k," :"
+   if (ierr /= 0) then
+     max_abserr = MAXVAL(ABS(ugsp - ug_refsp))
+     write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
+   else
+     write(msg,"(a)")" OK"
+   end if
+   call wrtout(ount,sjoin(info, msg))
+
+   ! =================================================
+   ! === Test the double precision complex version ===
+   ! =================================================
+   do ipw=1,npw_k*ndat
+     call RANDOM_NUMBER(crand)
+     ug_ref(ipw) = DCMPLX(crand(1), crand(2))
+   end do
+
+   if (istwf_k == 2) then
+     do ipw=1,npw_k*ndat,npw_k
+       ug_ref(ipw) = REAL(ug_ref(ipw))
+     end do
+   end if
+
+   ! Test uplan_k transforms with double precision.
+   ug = ug_ref
+
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:ug, ur) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
+   call uplan_k%init(npw_k, nspinor1, ndat, ngfft, istwf_k, kg_k, dp, gpu_option)
+   call uplan_k%execute_gr(ndat, ug, ur)
+   call uplan_k%execute_rg(ndat, ur, ug)
+   call uplan_k%free()
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(from:ug) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
+
+   ierr = COUNT(ABS(ug - ug_ref) > ATOL_DP)
+   nfailed = nfailed + ierr
+
+   write(info,"(a,i1,a)")sjoin(library,"uplan_k, istwfk "),istwf_k," :"
+   if (ierr /= 0) then
+     max_abserr = MAXVAL(ABS(ug - ug_ref))
+     write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
+   else
+     write(msg,"(a)")" OK"
+   end if
+   call wrtout(ount, sjoin(info, msg))
+
+   ABI_FREE(kg_k)
+ end do
+
+ ABI_FREE(cg_ref)
+ ABI_FREE(cg)
+ ABI_FREE(cr)
+ ABI_FREE(ug_ref)
+ ABI_FREE(ug)
+ ABI_FREE(ur)
+ ABI_FREE(ug_refsp)
+ ABI_FREE(ugsp)
+ ABI_FREE(ursp)
+ call destroy_mpi_enreg(MPI_enreg_seq)
+
+ if (nthreads > 0) call xomp_set_num_threads(old_nthreads)
+
+end function uplan_utests
+!!***
+
+
 
 !----------------------------------------------------------------------
 
@@ -5070,23 +5271,23 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
    !!$OMP TARGET ENTER DATA MAP(alloc:ur)
    !call gpu_set_to_zero(ur, int(2,c_size_t)*uplan%nfft*uplan%nspinor*ndat)
 
-   !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
-   !do ifft=1, uplan%nfft*uplan%nspinor*ndat
-   !  ur(ifft) = czero
-   !end do
+   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
+   do ifft=1, uplan%nfft*uplan%nspinor*ndat
+     ur(ifft) = czero
+   end do
 
-   !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ifft, offset, ir, ig) COLLAPSE(3) MAP(to:ug, uplan%ig2ifft)
-   !do idat=1,ndat
-   !  do ispinor=1,uplan%nspinor
-   !    do ipw = 1, uplan%npw
-   !      ifft = uplan%ig2ifft(ipw)
-   !      offset = (idat-1) * uplan%nspinor + (ispinor-1)
-   !      ir = ifft + uplan%nfft * offset
-   !      ig = ipw  + uplan%npw  * offset
-   !      ur(ir) = ug(ig)
-   !    end do ! ipw
-   !  end do ! ispinor
-   !end do ! idat
+   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ifft, offset, ir, ig) COLLAPSE(3) MAP(to:ug, uplan%ig2ifft)
+   do idat=1,ndat
+     do ispinor=1,uplan%nspinor
+       do ipw = 1, uplan%npw
+         ifft = uplan%ig2ifft(ipw)
+         offset = (idat-1) * uplan%nspinor + (ispinor-1)
+         ir = ifft + uplan%nfft * offset
+         ig = ipw  + uplan%npw  * offset
+         ur(ir) = ug(ig)
+       end do ! ipw
+     end do ! ispinor
+   end do ! idat
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_plan_dpc, uplan%gpu_stream_dpc, uplan%nfft, ndat, isign__, iscale__, dp, c_loc(ur))
@@ -5164,18 +5365,18 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
     call gpu_fftbox_c2c_ip(uplan%gpu_plan_spc, uplan%gpu_stream_spc, uplan%nfft, ndat, isign__, iscale__, sp, c_loc(ur))
     !$OMP END TARGET DATA
 
-    !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw, offset, ir, ig) COLLAPSE(3) MAP(to:ug, uplan%ig2ifft)
-    !do idat=1,ndat
-    !  do ispinor=1,uplan%nspinor
-    !    do ifft = 1, uplan%nfft
-    !      ipw = uplan%ifft2ig(ifft)
-    !      offset = (idat-1) * uplan%nspinor + (ispinor-1)
-    !      ir = ifft + uplan%nfft * offset
-    !      ig = ipw  + uplan%npw  * offset
-    !      ug(ig) = ur(ir)
-    !    end do ! ipw
-    !  end do ! ispinor
-    !end do ! idat
+    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw, offset, ir, ig) COLLAPSE(3) MAP(to:ug, uplan%ig2ifft)
+    do idat=1,ndat
+      do ispinor=1,uplan%nspinor
+        do ifft = 1, uplan%nfft
+          ipw = uplan%ifft2ig(ifft)
+          offset = (idat-1) * uplan%nspinor + (ispinor-1)
+          ir = ifft + uplan%nfft * offset
+          ig = ipw  + uplan%npw  * offset
+          ug(ig) = ur(ir)
+        end do ! ipw
+      end do ! ispinor
+    end do ! idat
 #endif
  end if
 
@@ -5248,6 +5449,19 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_plan_dpc, uplan%gpu_stream_dpc, uplan%nfft, ndat, isign__, iscale__, dp, c_loc(ur))
    !$OMP END TARGET DATA
+
+    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw, offset, ir, ig) COLLAPSE(3) MAP(to:ug, uplan%ig2ifft)
+    do idat=1,ndat
+      do ispinor=1,uplan%nspinor
+        do ifft = 1, uplan%nfft
+          ipw = uplan%ifft2ig(ifft)
+          offset = (idat-1) * uplan%nspinor + (ispinor-1)
+          ir = ifft + uplan%nfft * offset
+          ig = ipw  + uplan%npw  * offset
+          ug(ig) = ur(ir)
+        end do ! ipw
+      end do ! ispinor
+    end do ! idat
 #endif
  end if
 
