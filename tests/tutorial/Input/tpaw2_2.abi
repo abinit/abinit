@@ -56,7 +56,7 @@ shiftk            # with different shifts:
 
 #Parameters for the SCF procedure
 nstep 35          # Maximal number of SCF cycles
-tolvrs 5.0d-13    # Will stop when the potential residual is less than tolvrs
+tolvrs 2.0d-11    # Will stop when the potential residual is less than tolvrs
 
 #Miscelaneous parameters
 prtwf 1           # Print wavefunctions (re-used from one dataset to the other)
