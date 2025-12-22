@@ -84,7 +84,7 @@ program fftprof
  use m_io_tools,     only : flush_unit
  use m_geometry,     only : metric
  use m_fftcore,      only : get_cache_kb, get_kg, fftalg_isavailable, fftalg_has_mpi, getng, fftcore_set_mixprec
- use m_fft,          only : fft_use_lib_threads, fftbox_utests, fftu_utests, fftbox_mpi_utests, fftu_mpi_utests
+ use m_fft,          only : fft_use_lib_threads, fftbox_utests, fftu_utests, fftbox_mpi_utests, fftu_mpi_utests, uplan_utests
  use m_fftw3,        only : fftw3_init_threads
  use m_fft_prof,     only : fft_test_t, fft_prof_t, fft_tests_free, fftprof_ncalls_per_test, fftprofs_free, &
                             fftprofs_print, prof_fourdp, prof_fourwf, prof_rhotwg
@@ -445,11 +445,15 @@ program fftprof
      ut_ngfft(8) = fftcache
 
      call getng(boxcutmin2,0,ecut,gmet,k0,me_fft0,ut_mgfft,ut_nfft,ut_ngfft,nproc_fft1,nsym,&
-       paral_kgb0,symrel,tnons,unit=dev_null)
+       paral_kgb0,symrel,tnons, unit=dev_null, gpu_option=gpu_option)
 
      write(msg,"(3(a,i0))")"fftu_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
      call wrtout(std_out, msg)
      nfailed = nfailed + fftu_utests(ecut, ut_ngfft, rprimd, ndat, nthreads)
+
+     write(msg,"(4(a,i0))")"uplan_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option", gpu_option
+     call wrtout(std_out, msg)
+     nfailed = nfailed + uplan_utests(ecut, ut_ngfft, rprimd, ndat, nthreads, gpu_option)
    end do
 
    write(msg,'(a,i0)')"Total number of failed tests = ",nfailed
