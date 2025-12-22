@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_nvhpc24.9-0 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 13 Sep 2025.
-- ( at 11h46 )
+.Starting date : Mon 22 Dec 2025.
+- ( at 07h36 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/TestBot_MPI1/gpu_omp_t16_MPI1/t16.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/TestBot_MPI1/gpu_omp_t16_MPI1/t16.abi
 - output file    -> t16_MPI1.abo
 - root for input  files -> t16_MPI1i
 - root for output files -> t16_MPI1o
@@ -105,7 +105,7 @@ P           mkmem           1
 -          useylm           1
 -        wfoptalg         114
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.1493290123E-01  8.1493290123E-01  8.1493290123E-01
+                       8.1493290424E-01  8.1493290424E-01  8.1493290424E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.5400000000E+00  1.5400000000E+00  1.5400000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -150,8 +150,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.09226
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_test/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -260,7 +260,7 @@ force_length_stats: {min:   4.05939413E-01, max:   4.05939413E-01, mean:   4.059
  
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.81493290122860     0.81493290122860     0.81493290122860
+    2      0.81493290423776     0.81493290423776     0.81493290423776
  
  cartesian forces (hartree/bohr) at end:
     1     -0.23436922925221    -0.23436922925221    -0.23436922925221
@@ -268,11 +268,11 @@ force_length_stats: {min:   4.05939413E-01, max:   4.05939413E-01, mean:   4.059
  frms,max,avg= 2.3436923E-01 2.3436923E-01   0.000E+00  0.000E+00  0.000E+00 h/b
  
  cartesian forces (eV/Angstrom) at end:
-    1    -12.05174931692008   -12.05174931692009   -12.05174931692008
-    2     12.05174931692008    12.05174931692009    12.05174931692008
- frms,max,avg= 1.2051749E+01 1.2051749E+01   0.000E+00  0.000E+00  0.000E+00 e/A
+    1    -12.05175032915454   -12.05175032915455   -12.05175032915454
+    2     12.05175032915454    12.05175032915455    12.05175032915454
+ frms,max,avg= 1.2051750E+01 1.2051750E+01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  7.000000000000  7.000000000000 bohr
-              =  3.704240460130  3.704240460130  3.704240460130 angstroms
+              =  3.704240473808  3.704240473808  3.704240473808 angstroms
  prteigrs : about to open file t16_MPI1o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.52339   Average Vxc (hartree)=  -0.46702
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -286,11 +286,11 @@ force_length_stats: {min:   4.05939413E-01, max:   4.05939413E-01, mean:   4.059
  Fermi (or HOMO) energy (eV) =  14.24215   Average Vxc (eV)= -12.70814
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -8.47588    9.57162   14.24215   14.24215   15.71368   15.71368   20.28928   23.23438
+  -8.47588    9.57162   14.24215   14.24215   15.71369   15.71369   20.28929   23.23438
   28.18960   35.60077   35.60077   36.74531
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -8.47588    9.57162   14.24215   14.24215   15.71368   15.71368   20.28928   23.23438
+  -8.47588    9.57162   14.24215   14.24215   15.71369   15.71369   20.28929   23.23438
   28.18960   35.60077   35.60077   36.74531
 
 --- !EnergyTerms
@@ -304,7 +304,7 @@ psp_core            :  1.72763340806685E-01
 local_psp           : -7.30529939675755E+00
 non_local_psp       :  6.83571906899638E-01
 total_energy        : -1.09345323602476E+01
-total_energy_eV     : -2.97543757384290E+02
+total_energy_eV     : -2.97543783473876E+02
 band_energy         :  2.17409356020675E+00
 ...
 
@@ -315,9 +315,9 @@ band_energy         :  2.17409356020675E+00
   sigma(3 3)= -5.77543783E-03  sigma(2 1)= -1.59085611E-03
  
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.6992E+02 GPa]
-- sigma(1 1)= -1.69919219E+02  sigma(3 2)= -4.68045949E+01
-- sigma(2 2)= -1.69919219E+02  sigma(3 1)= -4.68045949E+01
-- sigma(3 3)= -1.69919219E+02  sigma(2 1)= -4.68045949E+01
+- sigma(1 1)= -1.69919247E+02  sigma(3 2)= -4.68046027E+01
+- sigma(2 2)= -1.69919247E+02  sigma(3 1)= -4.68046027E+01
+- sigma(3 3)= -1.69919247E+02  sigma(2 1)= -4.68046027E+01
  
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -384,7 +384,7 @@ P           mkmem           1
 -          useylm           1
 -        wfoptalg         114
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.1493290123E-01  8.1493290123E-01  8.1493290123E-01
+                       8.1493290424E-01  8.1493290424E-01  8.1493290424E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.5400000000E+00  1.5400000000E+00  1.5400000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -487,10 +487,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.6  wall=          2.6
+- Proc.   0 individual time (sec): cpu=          2.7  wall=          2.7
  
 ================================================================================
  
  Calculation completed.
 .Delivered   3 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.6  wall=          2.6
++Overall time at end (sec) : cpu=          2.7  wall=          2.7
