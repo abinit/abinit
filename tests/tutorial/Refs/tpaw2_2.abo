@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 22 Dec 2025.
-- ( at 15h25 )
+- ( at 20h53 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Test_suite/tutorial_tpaw2_2/tpaw2_2.abi
 - output file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Test_suite/tutorial_tpaw2_2/tpaw2_2.abo
@@ -362,7 +362,7 @@ P           mkmem          60
                        1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
-           tolvrs      2.00000000E-11
+           tolvrs      7.00000000E-11
            tsmear      7.50000000E-03 Hartree
             typat      1
            useylm           1
@@ -457,7 +457,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     203.508     203.480
 --- !BeginCycle
 iteration_state: {dtset: 1, }
 solver: {iscf: 17, nstep: 35, nline: 4, wfoptalg: 10, }
-tolerances: {tolvrs: 2.00E-11, }
+tolerances: {tolvrs: 7.00E-11, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
@@ -487,7 +487,7 @@ tolerances: {tolvrs: 2.00E-11, }
  ETOT 24  -39.628080766354    -1.279E-11 1.929E-03 1.162E-09 3.349E-06 6.287E-01
  ETOT 25  -39.628080766344     1.001E-11 1.074E-03 1.119E-11 8.739E-07 6.287E-01
 
- At SCF step   25       nres2   =  1.12E-11 < tolvrs=  2.00E-11 =>converged.
+ At SCF step   25       nres2   =  1.12E-11 < tolvrs=  7.00E-11 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.46185010E-05  sigma(3 2)=  0.00000000E+00
@@ -1015,7 +1015,7 @@ P           mkmem          60
                        1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
-           tolvrs      2.00000000E-11
+           tolvrs      7.00000000E-11
            tsmear      7.50000000E-03 Hartree
             typat      1
            useylm           1
@@ -1116,10 +1116,10 @@ P           mkmem          60
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         19.3  wall=         19.3
+- Proc.   0 individual time (sec): cpu=         18.9  wall=         18.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.3  wall=         19.3
++Overall time at end (sec) : cpu=         18.9  wall=         18.9
