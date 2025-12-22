@@ -99,7 +99,7 @@ use_yaml 1
 #%% max_nprocs = 10
 #%% [NCPU_4]
 #%% files_to_test =
-#%%   t92_MPI4.abo, use_yaml = yes , tolnlines=  178, tolabs=  0.03, tolrel= 1.01, fld_options = -medium
+#%%   t92_MPI4.abo, use_yaml = yes , tolnlines=  178, tolabs=  0.03, tolrel= 1.0, fld_options = -medium
 #%% file = ./t92_MPI4.yaml
 #%% [NCPU_10]
 #%% files_to_test =
