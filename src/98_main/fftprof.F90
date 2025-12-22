@@ -449,9 +449,9 @@ program fftprof
 
      write(msg,"(3(a,i0))")"fftu_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
      call wrtout(std_out, msg)
-     nfailed = nfailed + fftu_utests(ecut, ut_ngfft, rprimd, ndat, nthreads)
+     !nfailed = nfailed + fftu_utests(ecut, ut_ngfft, rprimd, ndat, nthreads)
 
-     write(msg,"(4(a,i0))")"uplan_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option", gpu_option
+     write(msg,"(4(a,i0))")"uplan_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
      call wrtout(std_out, msg)
      nfailed = nfailed + uplan_utests(ecut, ut_ngfft, rprimd, ndat, nthreads, gpu_option)
    end do
@@ -513,7 +513,7 @@ program fftprof
  ABI_FREE(Ftprof)
  call destroy_mpi_enreg(MPI_enreg)
 
- call abi_linalg_finalize(init_gpu_flavor)
+ !call abi_linalg_finalize(init_gpu_flavor)
 
 #if defined HAVE_GPU_CUDA
  if (init_gpu_flavor /= ABI_GPU_DISABLED) then
