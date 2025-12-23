@@ -5097,7 +5097,7 @@ end subroutine uplan_free
 subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
 
 !Arguments ------------------------------------
- class(uplan_t),intent(in) :: uplan
+ class(uplan_t),target,intent(in) :: uplan
  integer,intent(in) :: ndat
  complex(sp),target,intent(in) :: ug(*)  ! (uplan%npw*uplan%nspinor*ndat)
  complex(sp),target,intent(out) :: ur(*) ! (uplan%nfft*uplan%nspinor*ndat)
@@ -5107,6 +5107,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft
 #ifdef HAVE_GPU_CUDA
  integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
+ integer, contiguous, pointer :: ig2ifft(:)
 #endif
 ! *************************************************************************
 
@@ -5151,24 +5152,23 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
    !!$OMP TARGET ENTER DATA MAP(alloc:ur)
    !call gpu_set_to_zero(ur, int(2,c_size_t)*uplan%nfft*uplan%nspinor*ndat)
    !print *, "in execute_gr", xomp_target_is_present(c_loc(ur))
-   print *, "in execute_gr", xomp_target_is_present(c_loc(uplan%ig2ifft))
+   !print *, "in execute_gr", xomp_target_is_present(c_loc(uplan%ig2ifft))
 
+   ! NVHPC does not reliably support mapping derived_type components 
    nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
    bufsize = uplan%nfft * uplan%nspinor * ndat
+   ig2ifft => uplan%ig2ifft
+
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
    do ifft=1, bufsize
      ur(ifft) = zero
    end do
 
-   print *, "in execute_gr1"
-   !!!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ifft, offset, ir, ig) COLLAPSE(3) MAP(to:ug, uplan%ig2ifft)
-   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ug, uplan%ig2ifft)
+   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ifft, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ig2ifft)
    do idat=1,ndat
      do ispinor=1,nspinor
-       !$OMP PARALLEL DO PRIVATE(ifft, offset, ir, ig)
        do ipw=1,npw
-         ifft = uplan%ig2ifft(ipw)
-         !ifft = 1
+         ifft = ig2ifft(ipw)
          offset = (idat-1) * nspinor + (ispinor-1)
          ir = ifft + nfft * offset
          ig = ipw  + npw  * offset
@@ -5177,13 +5177,9 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
      end do ! ispinor
    end do ! idat
 
-   print *, "in execute_gr2"
-   !$omp target update to(ur)
-
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_plan_spc, uplan%gpu_stream_spc, uplan%nfft, ndat, isign__, iscale__, sp, c_loc(ur))
    !$OMP END TARGET DATA
-   !print *, "after execute_gr"
 #endif
  end if
 
@@ -5205,16 +5201,17 @@ end subroutine uplan_execute_gr_spc
 subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
 
 !Arguments ------------------------------------
- class(uplan_t),intent(in) :: uplan
+ class(uplan_t),target,intent(in) :: uplan
  integer,intent(in) :: ndat
  complex(dp),target,intent(in) :: ug(*) ! uplan%npw*uplan%nspinor*ndat)
  complex(dp),target,intent(out) :: ur(*) ! uplan%nfft*uplan%nspinor*ndat)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft
 #ifdef HAVE_GPU_CUDA
- integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset
+ integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
+ integer, contiguous, pointer :: ig2ifft(:)
 #endif
 ! *************************************************************************
 
@@ -5259,25 +5256,28 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
    !!$OMP TARGET ENTER DATA MAP(alloc:ur)
    !call gpu_set_to_zero(ur, int(2,c_size_t)*uplan%nfft*uplan%nspinor*ndat)
 
-   !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
-   do ifft=1,uplan%nfft*uplan%nspinor*ndat
+   ! NVHPC does not reliably support mapping derived_type components 
+   nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
+   bufsize = uplan%nfft * uplan%nspinor * ndat
+   ig2ifft => uplan%ig2ifft
+
+   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
+   do ifft=1,bufsize
      ur(ifft) = czero
    end do
 
-   !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ifft, offset, ir, ig) COLLAPSE(3) MAP(to:ug, uplan%ig2ifft)
+   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ifft, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ig2ifft)
    do idat=1,ndat
-     do ispinor=1,uplan%nspinor
-       do ipw = 1, uplan%npw
-         ifft = uplan%ig2ifft(ipw)
-         offset = (idat-1) * uplan%nspinor + (ispinor-1)
-         ir = ifft + uplan%nfft * offset
-         ig = ipw  + uplan%npw  * offset
+     do ispinor=1,nspinor
+       do ipw=1,npw
+         ifft = ig2ifft(ipw)
+         offset = (idat-1) * nspinor + (ispinor-1)
+         ir = ifft + nfft * offset
+         ig = ipw  + npw  * offset
          ur(ir) = ug(ig)
        end do ! ipw
      end do ! ispinor
    end do ! idat
-
-   !$omp target update to(ur)
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_plan_dpc, uplan%gpu_stream_dpc, uplan%nfft, ndat, isign__, iscale__, dp, c_loc(ur))
@@ -5303,16 +5303,17 @@ end subroutine uplan_execute_gr_dpc
 subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
 
 !Arguments ------------------------------------
- class(uplan_t),intent(in) :: uplan
+ class(uplan_t),target,intent(in) :: uplan
  integer,intent(in) :: ndat
  complex(sp),target,intent(inout) :: ur(*) ! uplan%nfft*uplan%nspinor*ndat)
  complex(sp),target,intent(out) :: ug(*)   ! uplan%npw*uplan%nspinor*ndat)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft
 #ifdef HAVE_GPU_CUDA
- integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset
+ integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset !, bufsize
+ integer, contiguous, pointer :: ifft2ig(:)
 #endif
 ! *************************************************************************
 
@@ -5351,23 +5352,27 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
      call gpu_fft_plan_init(uplan%gpu_plan_spc, uplan%gpu_stream_spc, uplan%ngfft, uplan%ngfft, ndat, sp)
    end if
 
-    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
-    call gpu_fftbox_c2c_ip(uplan%gpu_plan_spc, uplan%gpu_stream_spc, uplan%nfft, ndat, isign__, iscale__, sp, c_loc(ur))
-    !$OMP END TARGET DATA
+   ! NVHPC does not reliably support mapping derived_type components 
+   nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
+   !bufsize = uplan%nfft * uplan%nspinor * ndat
+   ifft2ig => uplan%ifft2ig
 
-    !$omp target update from(ur)
-    !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ur, uplan%ig2ifft)
-    do idat=1,ndat
-      do ispinor=1,uplan%nspinor
-        do ifft = 1, uplan%nfft
-          ipw = uplan%ifft2ig(ifft)
-          offset = (idat-1) * uplan%nspinor + (ispinor-1)
-          ir = ifft + uplan%nfft * offset
-          ig = ipw  + uplan%npw  * offset
-          ug(ig) = ur(ir)
-        end do ! ipw
-      end do ! ispinor
-    end do ! idat
+   !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
+   call gpu_fftbox_c2c_ip(uplan%gpu_plan_spc, uplan%gpu_stream_spc, uplan%nfft, ndat, isign__, iscale__, sp, c_loc(ur))
+   !$OMP END TARGET DATA
+
+   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ur, ifft2ig)
+   do idat=1,ndat
+     do ispinor=1,nspinor
+       do ifft = 1, nfft
+         ipw = ifft2ig(ifft); if (ipw == 0) cycle
+         offset = (idat-1) * nspinor + (ispinor-1)
+         ir = ifft + nfft * offset
+         ig = ipw  + npw  * offset
+         ug(ig) = ur(ir)
+       end do ! ipw
+     end do ! ispinor
+   end do ! idat
 #endif
  end if
 
@@ -5389,16 +5394,17 @@ end subroutine uplan_execute_rg_spc
 subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
 
 !Arguments ------------------------------------
- class(uplan_t),intent(in) :: uplan
+ class(uplan_t),target,intent(in) :: uplan
  integer,intent(in) :: ndat
  complex(dp),target,intent(inout) :: ur(*) ! uplan%nfft*uplan%nspinor*ndat)
  complex(dp),target,intent(out) :: ug(*) ! uplan%npw*uplan%nspinor*ndat)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft
 #ifdef HAVE_GPU_CUDA
- integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset
+ integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
+ integer, contiguous, pointer :: ifft2ig(:)
 #endif
 ! *************************************************************************
 
@@ -5437,19 +5443,23 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
      call gpu_fft_plan_init(uplan%gpu_plan_dpc, uplan%gpu_stream_dpc, uplan%ngfft, uplan%ngfft, ndat, dp)
    end if
 
+   ! NVHPC does not reliably support mapping derived_type components 
+   nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
+   !bufsize = uplan%nfft * uplan%nspinor * ndat
+   ifft2ig => uplan%ifft2ig
+
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_plan_dpc, uplan%gpu_stream_dpc, uplan%nfft, ndat, isign__, iscale__, dp, c_loc(ur))
    !$OMP END TARGET DATA
 
-   !$omp target update from(ur)
-   !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ur, uplan%ig2ifft)
+   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ur, ifft2ig)
    do idat=1,ndat
-     do ispinor=1,uplan%nspinor
-       do ifft = 1, uplan%nfft
-         ipw = uplan%ifft2ig(ifft)
-         offset = (idat-1) * uplan%nspinor + (ispinor-1)
-         ir = ifft + uplan%nfft * offset
-         ig = ipw  + uplan%npw  * offset
+     do ispinor=1,nspinor
+       do ifft = 1, nfft
+         ipw = ifft2ig(ifft); if (ipw == 0) cycle
+         offset = (idat-1) * nspinor + (ispinor-1)
+         ir = ifft + nfft * offset
+         ig = ipw  + npw  * offset
          ug(ig) = ur(ir)
        end do ! ipw
      end do ! ispinor
