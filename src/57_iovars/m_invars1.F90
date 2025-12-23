@@ -682,6 +682,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%so_psp,(npsp))
    ABI_MALLOC(dtsets(idtset)%spinat,(3,mxnatom))
    ABI_MALLOC(dtsets(idtset)%spinat_cart,(3,mxnatom))
+   ABI_MALLOC(dtsets(idtset)%spinat_in,(3,mxnatom))
    ABI_MALLOC(dtsets(idtset)%shiftk,(3,MAX_NSHIFTK))
    ABI_MALLOC(dtsets(idtset)%typat,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%upawu,(mxntypat,mxnimage))
@@ -999,6 +1000,7 @@ subroutine indefo1(dtset)
 !H
  dtset%hspinfield(:)=zero
  dtset%hspinfield_cart(:)=zero
+ dtset%hspinfield_in(:)=zero
 !I
  dtset%iatfix(:,:)=0
  dtset%iatnd(:)=0
@@ -1077,6 +1079,7 @@ subroutine indefo1(dtset)
  dtset%so_psp(:)=1
  dtset%spinat(:,:)=zero
  dtset%spinat_cart(:,:)=zero
+ dtset%spinat_in(:,:)=zero
  dtset%spinaxis(1:2)=zero
  dtset%spinaxis(3)=1
 !T
@@ -1518,7 +1521,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
  end if
 
- if (tread == 1) field_loc(1:3) = dprarr(1:3)
+ if (tread == 1) then
+   field_loc(1:3) = dprarr(1:3)
+   dtset%hspinfield_in(1:3)=field_loc(1:3)
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'hspinfield_cart',tread_cart,'BFI')
  if (tread_cart==1) then
