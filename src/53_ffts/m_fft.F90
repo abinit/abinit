@@ -223,7 +223,6 @@ MODULE m_fft
    ! (nfft)
    ! Mapping FFT box -> gvec index. 0 if FFT point is not in g-sphere.
 
-   ! TODO
    type(c_ptr) :: gpu_plan_spc = c_null_ptr, gpu_stream_spc = c_null_ptr
    type(c_ptr) :: gpu_plan_dpc = c_null_ptr, gpu_stream_dpc = c_null_ptr
 
@@ -1410,7 +1409,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    ! out-of-place version.
    ff = ff_ref
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(to:ff) MAP(alloc:gg)  IF (gpu_option == ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(to:ff) MAP(alloc:gg) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
    call box_plan%execute(ff, gg, +1, ndat)
    ff = zero
@@ -1507,9 +1506,10 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
      end if
      call wrtout(ount,sjoin(info, msg))
 
+     !!$OMP TARGET EXIT DATA MAP(delete: fofg, fofr) if (gpu_option == ABI_GPU_OPENMP)
      ABI_FREE(fofg)
-     ABI_FREE(fofr_ref)
      ABI_FREE(fofr)
+     ABI_FREE(fofr_ref)
 
     if (fftalga == FFT_DFTI) then
       ! Revert changes. See comment above.
@@ -1815,9 +1815,6 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
    end if
 
    ugsp = ug_refsp
-   !call fft_ug(npw_k,nxyz,nspinor1,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ugsp,ursp)
-   !call fft_ur(npw_k,nxyz,nspinor1,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ursp,ugsp)
-
    call uplan_k%init(npw_k, nspinor1, ndat, ngfft, istwf_k, kg_k, sp, gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(to:ugsp, ursp) IF (gpu_option == ABI_GPU_OPENMP)
