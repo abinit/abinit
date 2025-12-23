@@ -112,8 +112,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !Local variables-------------------------------
 !scalars
  integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm
- integer :: tread_pseudos,cnt,tread_geo,tread_gpu_option,treads
- integer :: idev,gpu_option
+ integer :: tread_pseudos,cnt,tread_geo,tread_gpu_option,treads, idev,gpu_option
  real(dp) :: cpus
  character(len=500) :: msg
  character(len=fnlen) :: pp_dirpath,gpu_option_string
@@ -2141,7 +2140,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%constraint_kind(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
 !Some special cases are not compatible with GPU implementation
- if (dtset%optdriver/=RUNL_GSTATE .and. dtset%optdriver/=RUNL_RESPFN) then
+!MG FIXME: I don't understand why we are not stopping the code here instead of changing gpu_option!
+ if (all(dtset%optdriver /= [RUNL_GSTATE, RUNL_RESPFN, RUNL_GWR])) then
    dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS and RESPFN
  end if
  if (dtset%optdriver==RUNL_RESPFN .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
