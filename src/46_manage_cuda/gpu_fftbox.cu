@@ -52,6 +52,7 @@ gpu_fft_plan_init(void **plan_pp, void **stream_pp, int *f_dims, int *f_embed, i
   const int RANK3 = 3, stride1 = 1;
   size_t nbytes;
   int c_dims[RANK3], c_embed[RANK3];
+  // Fortran to C
   c_dims[0] = f_dims[2]; c_dims[1] = f_dims[1]; c_dims[2] = f_dims[0];
   c_embed[0] = f_embed[2]; c_embed[1] = f_embed[1]; c_embed[2] = f_embed[0];
   int dist = f_embed[0] * f_embed[1] * f_embed[2];
@@ -74,7 +75,6 @@ gpu_fft_plan_init(void **plan_pp, void **stream_pp, int *f_dims, int *f_embed, i
   //printf("plan_pp: %p, *plan_pp: %p\n", plan_pp, *plan_pp);
 
   /* Associate plan with stream */
-  // see gpu_fft.cu
   cudaStream_t *fft_stream = (cudaStream_t *) malloc(sizeof(cudaStream_t));
   CHECK_CUDA_ERROR(cudaStreamCreate(fft_stream));
   CHECK_CUDA_ERROR(cufftSetStream(*plan_p, *fft_stream));
@@ -89,9 +89,9 @@ extern "C" void
 gpu_fft_plan_free(void *void_ptr)
 {
   cufftHandle *plan = (cufftHandle *) void_ptr;
-  //printf("In gpu_fft_plan_free. About to free GPU plan: %d @ %p\n", *plan, plan);
 
   if (plan) {
+    //printf("In gpu_fft_plan_free. About to free GPU plan: %p\n", plan);
     CHECK_CUDA_ERROR(cufftDestroy(*plan));
     free(plan);
   }
@@ -141,6 +141,7 @@ gpu_fftbox_c2c_ip(void **plan_pp, void *stream, int nfft, int batch, int isign, 
   }
 
   cudaStream_t *fft_stream = (cudaStream_t *) stream;
+  printf("fft stream ptr %p\n", fft_stream);
   CHECK_CUDA_ERROR(cudaStreamSynchronize(*fft_stream));
   //CHECK_CUDA_ERROR(cudaDeviceSynchronize());
 }
@@ -177,6 +178,7 @@ gpu_fftbox_c2c_op(void **plan_pp, void *stream, int nfft, int batch, int isign, 
   }
 
   cudaStream_t *fft_stream = (cudaStream_t *) stream;
+  printf("fft stream ptr %p\n", fft_stream);
   CHECK_CUDA_ERROR(cudaStreamSynchronize(*fft_stream));
   //CHECK_CUDA_ERROR(cudaDeviceSynchronize());
 }
