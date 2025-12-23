@@ -318,8 +318,8 @@ program fftprof
  end do
 
  ! Init Ftest objects.
- ABI_MALLOC(Ftest,(ntests))
- ABI_MALLOC(Ftprof,(ntests))
+ ABI_MALLOC(Ftest, (ntests))
+ ABI_MALLOC(Ftprof, (ntests))
 
  do it=1,ntests
    call Ftest(it)%init(fft_setups(:,it), kpoint, ecut, boxcutmin2, rprimd, nsym, symrel, MPI_enreg)

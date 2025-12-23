@@ -5054,7 +5054,6 @@ subroutine uplan_free(uplan)
 
  ABI_SFREE(uplan%gbound)
 
- !print *, "in free"
  if (uplan%gpu_option == ABI_GPU_OPENMP) then
    ! Free memory on the GPU
 #ifdef HAVE_GPU_CUDA
@@ -5139,8 +5138,6 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
    ! TODO
    !!$OMP TARGET ENTER DATA MAP(alloc:ur)
    !call gpu_set_to_zero(ur, int(2,c_size_t)*uplan%nfft*uplan%nspinor*ndat)
-   !print *, "in execute_gr", xomp_target_is_present(c_loc(ur))
-   !print *, "in execute_gr", xomp_target_is_present(c_loc(uplan%ig2ifft))
 
    ! NVHPC does not reliably support mapping derived_type components
    nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
