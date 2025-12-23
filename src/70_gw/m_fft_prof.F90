@@ -558,7 +558,7 @@ subroutine fftprofs_print(Fprof, header, unit, mode_paral, prtvol)
  check_mabs_err=zero; check_mean_err=zero
  do ii=1,SIZE(Fprof)
    ncalls = Fprof(ii)%ncalls
-   if (ncalls>0) then
+   if (ncalls > 0) then
      mabs_err = zero; mean_err=zero
      if (ref_lib>0) then
        mabs_err = MAXVAL( ABS(Fprof(ii)%results - Fprof(ref_lib)%results) )
@@ -581,7 +581,7 @@ subroutine fftprofs_print(Fprof, header, unit, mode_paral, prtvol)
    end if
  end do
 
- if (ref_lib>0) then
+ if (ref_lib > 0) then
    write(std_out,'(/,2(a,es9.2),2a)')&
     " Consistency check: MAX(Max_|Err|) = ",check_mabs_err,&
     ", Max(<|Err|>) = ",check_mean_err,", reference_lib: ",TRIM(Fprof(ref_lib)%test_name)
@@ -633,7 +633,7 @@ subroutine time_fourdp(Ftest, isign, cplex, header, Ftprof)
 
  write(header,'(2(a,i2),a)')" fourdp with cplex ",cplex,", isign ",isign,", ndat 1"
 
- if (Ftest%available==0) then
+ if (Ftest%available == 0) then
    call Ftprof%init(test_name,0,0,0,0,zero,zero,zero)
    RETURN
  end if
@@ -762,8 +762,8 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
  nfft = Ftest%nfft; ndat = Ftest%ndat
  write(header,'(3(a,i2))')" fftbox with isign ",isign,", in-place ",inplace,", ndat ",ndat
 
- ABI_CALLOC(ffc,(nfft*ndat))
- ABI_CALLOC(ggc,(nfft*ndat))
+ ABI_CALLOC(ffc, (nfft*ndat))
+ ABI_CALLOC(ggc, (nfft*ndat))
  ABI_CALLOC(results, (nfft*ndat))
 
  if (isign==-1) then
@@ -799,20 +799,36 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
  ! No augmentation here.
  call plan%init(ndat, Ftest%ngfft(1:3), Ftest%ngfft(1:3), Ftest%ngfft(7), fftcache0, ftest%gpu_option)
 
+ if (plan%gpu_option == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:ffc, ggc)
+#endif
+ end if
+
  select case (inplace)
  case (0)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
      call plan%execute(ffc, ggc, isign, ndat)
      ! Store results at the first call.
-     if (icall == 1) results = ggc
+     if (icall == 1) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$omp target update from(ggc)
+#endif
+       results = ggc
+     end if
    end do
  case (1)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
      call plan%execute(ffc, isign, ndat)
      ! Store results at the first call.
-     if (icall == 1) results = ffc
+     if (icall == 1) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$omp target update from(ffc)
+#endif
+       results = ffc
+     end if
    end do
  case default
    ABI_ERROR(sjoin("Wrong value for inplace:", itoa(inplace)))
@@ -823,6 +839,12 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
                   cpu_time,wall_time,gflops,results=results)
 
  call plan%free()
+
+ if (plan%gpu_option == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:ffc, ggc)
+#endif
+ end if
  ABI_FREE(ffc)
  ABI_FREE(ggc)
  ABI_FREE(results)
