@@ -12,6 +12,14 @@
 #include <gpu_linalg.h>
 #include "cuda_api_error_check.h"
 
+
+typedef struct {
+  cufftHandle     fft_plan;
+  cudaStream_t    stream;
+  cublasHandle_t  cublas_handle;
+} gpu_context_t;
+
+
 static void
 _get_direction(int isign, int *direction){
 
@@ -47,7 +55,7 @@ _get_type_nbytes(int dist_batch, int kind, cufftType *type, size_t *nbytes){
 }
 
 extern "C" void
-gpu_fft_plan_init(void **plan_pp, void **stream_pp, int *f_dims, int *f_embed, int batch, int kind) {
+gpu_ctx_init(void **void_ctx, int *f_dims, int *f_embed, int batch, int kind) {
 
   const int RANK3 = 3, stride1 = 1;
   size_t nbytes;
@@ -67,52 +75,43 @@ gpu_fft_plan_init(void **plan_pp, void **stream_pp, int *f_dims, int *f_embed, i
   cufftType type;
   _get_type_nbytes(dist * batch, kind, &type, &nbytes);
 
-  // Allocate the handle
-  cufftHandle *plan_p = (cufftHandle *) malloc(sizeof(cufftHandle));
+  gpu_context_t *ctx = (gpu_context_t *) calloc(1, sizeof(*ctx))
 
-  CHECK_CUDA_ERROR(cufftPlanMany(plan_p, RANK3, c_dims, c_embed, stride1, dist, c_embed, stride1, dist, type, batch));
+  CHECK_CUDA_ERROR(cufftPlanMany(&ctx->fft_plan,
+                   RANK3, c_dims, c_embed, stride1, dist, c_embed, stride1, dist, type, batch));
   //printf("Creating new GPU plan_p: %d @ %p\n", plan, *plan_p);
   //printf("plan_pp: %p, *plan_pp: %p\n", plan_pp, *plan_pp);
 
   /* Associate plan with stream */
-  cudaStream_t *fft_stream = (cudaStream_t *) malloc(sizeof(cudaStream_t));
-  CHECK_CUDA_ERROR(cudaStreamCreate(fft_stream));
-  CHECK_CUDA_ERROR(cufftSetStream(*plan_p, *fft_stream));
+  //cudaStream_t *fft_stream = (cudaStream_t *) malloc(sizeof(cudaStream_t));
+  CHECK_CUDA_ERROR(cudaStreamCreate(&ctx->stream));
+  CHECK_CUDA_ERROR(cufftSetStream(ctx->fft_plan, ctx->stream));
+
+  /* cuBLAS */
+  CHECK_CUBLAS(cublasCreate(&ctx->cublas_handle));
+  CHECK_CUBLAS(cublasSetStream(ctx->cublas_handle, ctx->stream));
 
   // Return void pointers to Fortran
-  *plan_pp = (void *) plan_p;
-  *stream_pp = (void *) fft_stream;
+  *void_ctx = (void *) ctx;
 }
 
 
 extern "C" void
-gpu_fft_plan_free(void *void_ptr)
+gpu_ctx_free(void *void_ctx)
 {
-  cufftHandle *plan = (cufftHandle *) void_ptr;
+  if (!ptr) return;
 
-  if (plan) {
-    //printf("In gpu_fft_plan_free. About to free GPU plan: %p\n", plan);
-    CHECK_CUDA_ERROR(cufftDestroy(*plan));
-    free(plan);
-  }
+  gpu_context_t *ctx = (gpu_context_t *) void_ctx;
+
+  cufftDestroy(ctx->fft_plan);
+  cublasDestroy(ctx->cublas_handle);
+  cudaStreamDestroy(ctx->stream);
+  free(ctx);
 }
 
 
 extern "C" void
-gpu_stream_free(void *void_ptr)
-{
-  cudaStream_t *stream =  (cudaStream_t *) void_ptr;
-  //printf("In gpu_stream_free. About to free GPU stream: %d @ %p\n", *stream, stream);
-
-  if (stream) {
-    CHECK_CUDA_ERROR(cudaStreamDestroy(*stream));
-    free(stream);
-  }
-}
-
-
-extern "C" void
-gpu_fftbox_c2c_ip(void **plan_pp, void *stream, int nfft, int batch, int isign, int iscale, int kind, void **d_ff) {
+gpu_fftbox_c2c_ip(void *void_cxt, void **plan_pp, int nfft, int batch, int isign, int iscale, int kind, void **d_ff) {
 
   //printf("in gpu_fftbox_c2c_ip");
   cufftType type;
@@ -121,70 +120,66 @@ gpu_fftbox_c2c_ip(void **plan_pp, void *stream, int nfft, int batch, int isign, 
   _get_direction(isign, &direction);
   _get_type_nbytes(0, kind, &type, &nbytes);
 
-  cufftHandle plan = *(cufftHandle *) (*plan_pp);
+  gpu_context_t *ctx = (gpu_context_t *) void_cxt;
+  //cufftHandle plan = *(cufftHandle *) (*plan_pp);
 
   // Transform the signal in place.
   if (type == CUFFT_C2C) {
-    CHECK_CUDA_ERROR(cufftExecC2C(plan, (cufftComplex *) *d_ff, (cufftComplex *) *d_ff, direction));
+    CHECK_CUDA_ERROR(cufftExecC2C(ctx->fft_plan, (cufftComplex *) *d_ff, (cufftComplex *) *d_ff, direction));
     if (direction == CUFFT_FORWARD and iscale != 0){
         float alpha_sp = 1.0f / nfft;
-        CHECK_CUDA_ERROR(cublasCsscal(cublas_handle, nfft*batch, &alpha_sp, (cuComplex *) *d_ff, 1));
+        CHECK_CUDA_ERROR(cublasCsscal(ctx->cublas_handle, nfft*batch, &alpha_sp, (cuComplex *) *d_ff, 1));
     }
   }
 
   if (type == CUFFT_Z2Z) {
-    CHECK_CUDA_ERROR(cufftExecZ2Z(plan, (cufftDoubleComplex *) *d_ff, (cufftDoubleComplex *) *d_ff, direction));
+    CHECK_CUDA_ERROR(cufftExecZ2Z(ctx->fft_plan, (cufftDoubleComplex *) *d_ff, (cufftDoubleComplex *) *d_ff, direction));
     if (direction == CUFFT_FORWARD and iscale != 0){
         double alpha_dp = 1.0 / nfft;
-        CHECK_CUDA_ERROR(cublasZdscal(cublas_handle, nfft*batch, &alpha_dp, (cuDoubleComplex *) *d_ff, 1));
+        CHECK_CUDA_ERROR(cublasZdscal(ctx->cublas_handle, nfft*batch, &alpha_dp, (cuDoubleComplex *) *d_ff, 1));
     }
   }
 
-  cudaStream_t *fft_stream = (cudaStream_t *) stream;
+  //cudaStream_t *fft_stream = (cudaStream_t *) stream;
   //printf("fft stream ptr %p\n", fft_stream);
-  CHECK_CUDA_ERROR(cudaStreamSynchronize(*fft_stream));
-
-  // DEBUGGING
-  CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+  //CHECK_CUDA_ERROR(cudaStreamSynchronize(*fft_stream));
+  CHECK_CUDA_ERROR(cudaStreamSynchronize(ctx->stream));
 }
 
 
 extern "C" void
-gpu_fftbox_c2c_op(void **plan_pp, void *stream, int nfft, int batch, int isign, int iscale, int kind,
+gpu_fftbox_c2c_op(void *void_ctx, int nfft, int batch, int isign, int iscale, int kind,
                   void **d_ff, void **d_gg) {
 
   //printf("in gpu_fftbox_c2c_op");
-
   cufftType type;
   int direction;
   size_t nbytes;
   _get_direction(isign, &direction);
   _get_type_nbytes(0, kind, &type, &nbytes);
 
-  cufftHandle plan = *(cufftHandle *) (*plan_pp);
+  gpu_context_t *ctx = (gpu_context_t *) void_ctx;
+  //cufftHandle plan = *(cufftHandle *) (*plan_pp);
 
   // Transform the signal out of place.
   if (type == CUFFT_C2C) {
-     CHECK_CUDA_ERROR(cufftExecC2C(plan, (cufftComplex *) *d_ff, (cufftComplex *) *d_gg, direction));
+     CHECK_CUDA_ERROR(cufftExecC2C(ctx->fft_plan, (cufftComplex *) *d_ff, (cufftComplex *) *d_gg, direction));
      if (direction == CUFFT_FORWARD and iscale != 0){
          float alpha_sp = 1.0f / nfft;
-         CHECK_CUDA_ERROR(cublasCsscal(cublas_handle, nfft*batch, &alpha_sp, (cuComplex *) *d_gg, 1));
+         CHECK_CUDA_ERROR(cublasCsscal(ctx->cublas_handle, nfft*batch, &alpha_sp, (cuComplex *) *d_gg, 1));
      }
   }
   if (type == CUFFT_Z2Z) {
-     CHECK_CUDA_ERROR(cufftExecZ2Z(plan, (cufftDoubleComplex *) *d_ff, (cufftDoubleComplex *) *d_gg, direction));
+     CHECK_CUDA_ERROR(cufftExecZ2Z(ctx->fft_plan, (cufftDoubleComplex *) *d_ff, (cufftDoubleComplex *) *d_gg, direction));
      if (direction == CUFFT_FORWARD and iscale != 0){
          double alpha_dp = 1.0 / nfft;
-         CHECK_CUDA_ERROR(cublasZdscal(cublas_handle, nfft*batch, &alpha_dp, (cuDoubleComplex *) *d_gg, 1));
+         CHECK_CUDA_ERROR(cublasZdscal(ctx->cublas_handle, nfft*batch, &alpha_dp, (cuDoubleComplex *) *d_gg, 1));
      }
   }
 
-  cudaStream_t *fft_stream = (cudaStream_t *) stream;
+  //cudaStream_t *fft_stream = (cudaStream_t *) stream;
   //printf("fft stream ptr %p\n", fft_stream);
-  CHECK_CUDA_ERROR(cudaStreamSynchronize(*fft_stream));
-
-  // DEBUGGING
-  CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+  CHECK_CUDA_ERROR(cudaStreamSynchronize(ctx->stream));
 }
 
 #endif
