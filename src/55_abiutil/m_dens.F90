@@ -1963,22 +1963,23 @@ subroutine prtdenmagsph(cplex, intgden, natom, nspden, ntypat, units, option, qg
 !scalars
 integer,intent(in)  :: natom,nspden,ntypat
 integer,intent(in)  :: units(:)
-real(dp),intent(in) :: ratsm, spinaxis(3)
+real(dp),intent(in) :: ratsm
 integer ,intent(in) :: option
 integer, intent(in) :: cplex
 !arrays
 integer,intent(in)  :: typat(natom)
 real(dp),intent(in) :: intgden(nspden,natom), qgbt(3)
-real(dp),intent(in) :: ratsph(ntypat),rhomag(2,nspden)
+real(dp),intent(in) :: ratsph(ntypat),rhomag(2,nspden),spinaxis(3)
 real(dp),intent(in),optional :: ziontypat(ntypat)
 
 !Local variables ------------------------------
 !scalars
  integer :: iatom,ix
- real(dp) :: alpha, beta, mag_coll, mag_x, mag_y, mag_z ! EB
+ real(dp) :: alpha, beta, charge_val, mag_coll, mag_x, mag_y, mag_z ! EB
  real(dp) :: mag_coll_im, mag_x_im, mag_y_im, mag_z_im ! SPr
  real(dp) :: Rspin(3,3), Rspin_t(3,3), rho_tot, rho_tot_im
  real(dp) :: sum_mag, sum_mag_x,sum_mag_y,sum_mag_z,sum_rho_up,sum_rho_dn,sum_rho_tot ! EB
+ real(dp) :: mag_cart(3), mag_spin(3), mag_tot_cart(3), mag_tot_cart_im(3)
  character(len=500) :: msg,msg1
 ! *************************************************************************
 
@@ -2007,8 +2008,13 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
    sum_rho_dn=zero
    sum_rho_tot=zero
 
-  !Print spinaxis angles and rotation matrices
-   if(any(abs(spinaxis(:) - (/0.0_dp, 0.0_dp, 1.0_dp/)) > tol8) ) then
+  !Rotation matrices identity by default
+   Rspin(:,:)=zero ; Rspin_t(:,:)=zero
+   Rspin(1,1)=one ; Rspin(2,2)=one ; Rspin(3,3)=one
+   Rspin_t(:,:)=Rspin(:,:)
+
+  !Print spinaxis info only if axis not aligned with z
+   if (abs(spinaxis(1))>tol8 .or. abs(spinaxis(2))>tol8) then
       call geteuler(spinaxis, alpha, beta)
       msg=' Spinaxis rotation information:'
       write(msg, '(3a)' ) trim(msg),ch10,' ------------------------------'; call wrtout(units,msg)
@@ -2028,6 +2034,17 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
       write(msg, '(3f14.8)') Rspin_t(3,1), Rspin_t(3,2), Rspin_t(3,3); call wrtout(units,msg)
       write(msg, '(a)') ' ----------------------------------------------------------------'
       call wrtout(units,msg)
+   end if
+
+   mag_tot_cart=zero
+   mag_tot_cart_im=zero
+   if (nspden==4) then
+     mag_spin = (/mag_x,mag_y,mag_z/)
+     mag_tot_cart = matmul(Rspin_t,mag_spin)
+     if (cplex==2) then
+       mag_spin = (/mag_x_im,mag_y_im,mag_z_im/)
+       mag_tot_cart_im = matmul(Rspin_t,mag_spin)
+     end if
    end if
 
    if(option==1 .or. option==11 .or. option==21) then
@@ -2125,18 +2142,21 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
      elseif(nspden==4) then
 
        do iatom=1,natom
+         mag_spin(:)=intgden(2:4,iatom)
+         mag_cart(:)=matmul(Rspin_t,mag_spin)
          if(option/=21)then
-           write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),intgden(1,iatom),'  ',(intgden(ix,iatom),ix=2,4)
+           charge_val=intgden(1,iatom)
          else
-           write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),-intgden(1,iatom),'  ',(intgden(ix,iatom),ix=2,4)
+           charge_val=-intgden(1,iatom)
          endif
+         write(msg, '(i5,f10.5,f16.6,a,3f12.6)' ) iatom,ratsph(typat(iatom)),charge_val,'  ',mag_cart(1),mag_cart(2),mag_cart(3)
          if(option==1 .and. present(ziontypat))&
 &          write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-intgden(1,iatom)
          call wrtout(units,msg)
          ! Compute the sum of the magnetization in x, y and z directions
-         sum_mag_x=sum_mag_x+intgden(2,iatom)
-         sum_mag_y=sum_mag_y+intgden(3,iatom)
-         sum_mag_z=sum_mag_z+intgden(4,iatom)
+         sum_mag_x=sum_mag_x+mag_cart(1)
+         sum_mag_y=sum_mag_y+mag_cart(2)
+         sum_mag_z=sum_mag_z+mag_cart(3)
        end do
        write(msg, '(a)') ' ---------------------------------------------------------------------'
        call wrtout(units,msg)
@@ -2146,12 +2166,12 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
            write(msg, '(a,f12.6,f12.6,f12.6)') ' Cell sum of sphere magnetization', sum_mag_x, sum_mag_y, sum_mag_z
            call wrtout(units,msg)
 
-           write(msg, '(a,f10.6,f12.6,f12.6)') ' Integral of periodic magnetization', mag_x, mag_y, mag_z
+           write(msg, '(a,f10.6,f12.6,f12.6)') ' Integral of periodic magnetization', mag_tot_cart(1), mag_tot_cart(2), mag_tot_cart(3)
            call wrtout(units,msg)
          else
            write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (spheres)   ', sum_mag_x,sum_mag_y,sum_mag_z
            call wrtout(units,msg)
-           write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact)     ', mag_x,mag_y,mag_z
+           write(msg, '(a,f12.6,f12.6,f12.6)') ' Total magnetization (exact)     ', mag_tot_cart(1),mag_tot_cart(2),mag_tot_cart(3)
            call wrtout(units,msg)
          endif
        endif
@@ -2188,11 +2208,11 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
        end if
        call wrtout(units,msg)
      elseif (nspden==4) then
-       write(msg, '(a,f13.8)') '     mx_f  = ',mag_x
+       write(msg, '(a,f13.8)') '     mx_f  = ',mag_tot_cart(1)
        call wrtout(units,msg)
-       write(msg, '(a,f13.8)') '     my_f  = ',mag_y
+       write(msg, '(a,f13.8)') '     my_f  = ',mag_tot_cart(2)
        call wrtout(units,msg)
-       write(msg, '(a,f13.8)') '     mz_f  = ',mag_z
+       write(msg, '(a,f13.8)') '     mz_f  = ',mag_tot_cart(3)
        call wrtout(units,msg)
      end if
 
@@ -2239,18 +2259,18 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
 
      elseif (nspden==4) then
        if(cplex==1) then
-         write(msg, '(a,e16.8)') '     mx^(1)   = ', mag_x
+         write(msg, '(a,e16.8)') '     mx^(1)   = ', mag_tot_cart(1)
          call wrtout(units,msg)
-         write(msg, '(a,e16.8)') '     my^(1)   = ', mag_y
+         write(msg, '(a,e16.8)') '     my^(1)   = ', mag_tot_cart(2)
          call wrtout(units,msg)
-         write(msg, '(a,e16.8)') '     mz^(1)   = ', mag_z
+         write(msg, '(a,e16.8)') '     mz^(1)   = ', mag_tot_cart(3)
          call wrtout(units,msg)
        else
-         write(msg, '(a,e16.8,a,e16.8)') '  Re[mx^(1)]= ',  mag_x, "   Im[mx^(1)]= ", mag_x_im
+         write(msg, '(a,e16.8,a,e16.8)') '  Re[mx^(1)]= ',  mag_tot_cart(1), "   Im[mx^(1)]= ", mag_tot_cart_im(1)
          call wrtout(units,msg)
-         write(msg, '(a,e16.8,a,e16.8)') '  Re[my^(1)]= ',  mag_y, "   Im[my^(1)]= ", mag_y_im
+         write(msg, '(a,e16.8,a,e16.8)') '  Re[my^(1)]= ',  mag_tot_cart(2), "   Im[my^(1)]= ", mag_tot_cart_im(2)
          call wrtout(units,msg)
-         write(msg, '(a,e16.8,a,e16.8)') '  Re[mz^(1)]= ',  mag_z, "   Im[mz^(1)]= ", mag_z_im
+         write(msg, '(a,e16.8,a,e16.8)') '  Re[mz^(1)]= ',  mag_tot_cart(3), "   Im[mz^(1)]= ", mag_tot_cart_im(3)
          call wrtout(units,msg)
        end if
      end if

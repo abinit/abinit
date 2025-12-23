@@ -163,7 +163,7 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_ax
  real(dp),intent(inout) :: rprim(3,3),tnons(3,msym) !vz_i
  real(dp),intent(out) :: vel(3,natom),vel_cell(3,3),xred(3,natom)
  real(dp),intent(in) :: znucl(npsp)
- type(dataset_type),intent(in) :: dtset
+ type(dataset_type),intent(inout) :: dtset
 
 !Local variables-------------------------------
  character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
@@ -566,7 +566,10 @@ end do
 
    ! Spinat is read for each atom, from 1 to natom
    call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'spinat',tread,'DPR')
-   if(tread==1) spinat(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
+   if(tread==1) then
+     spinat(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
+     dtset%spinat_in(1:3,1:natom) = spinat(1:3,1:natom)
+   end if
 
    call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'spinat_cart',tread_cart,'DPR')
    if(tread_cart==1) spinat_cart(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
@@ -619,7 +622,10 @@ end do
 
    ! Spinat is read for each irreducible atom, from 1 to natrd
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'spinat',tread,'DPR')
-   if(tread==1)spinat(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
+   if(tread==1) then
+     spinat(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
+     dtset%spinat_in(1:3,1:natrd) = spinat(1:3,1:natrd)
+   end if
 
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'spinat_cart',tread_cart,'DPR')
    if(tread_cart==1) spinat_cart(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natom])
@@ -651,6 +657,7 @@ end do
              xcart(:,iatom_supercell) = xcart_read(:,iatom) + matmul(rprimd_read,(/i1-1,i2-1,i3-1/))
              chrgat(iatom_supercell) = chrgat(iatom)
              spinat(1:3,iatom_supercell) = spinat(1:3,iatom)
+             dtset%spinat_in(1:3,iatom_supercell) = dtset%spinat_in(1:3,iatom)
              typat(iatom_supercell) = typat_read(iatom)
            end do
          end do

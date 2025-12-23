@@ -1549,40 +1549,16 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'hmctt','INT',0)
 
 !hspinfield
-! dprarr(1,:)=dtsets(:)%hspinfield(1)
-! dprarr(2,:)=dtsets(:)%hspinfield(2)
-! dprarr(3,:)=dtsets(:)%hspinfield(3)
-! call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'hspinfield','BFI',0)
+ dprarr(1,:)=dtsets(:)%hspinfield_in(1)
+ dprarr(2,:)=dtsets(:)%hspinfield_in(2)
+ dprarr(3,:)=dtsets(:)%hspinfield_in(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'hspinfield','BFI',0)
 
 !hspinfield_cart
  dprarr(1,:) = dtsets(:)%hspinfield_cart(1)
  dprarr(2,:) = dtsets(:)%hspinfield_cart(2)
  dprarr(3,:) = dtsets(:)%hspinfield_cart(3)
- 
- do idtset = 0, ndtset_alloc
-  narrm(idtset) = 0
-  if (abs(dprarr(1,idtset)) + abs(dprarr(2,idtset)) + abs(dprarr(3,idtset)) > tol12) then
-    narrm(idtset) = 3
-  end if
- end do
-
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'hspinfield_cart','BFI',1)
-
- dprarr(1,:) = dtsets(:)%hspinfield(1)
- dprarr(2,:) = dtsets(:)%hspinfield(2)
- dprarr(3,:) = dtsets(:)%hspinfield(3)
-
- do idtset = 0, ndtset_alloc
-   narrm(idtset) = 0
-   if (abs(dtsets(idtset)%hspinfield_cart(1)) + abs(dtsets(idtset)%hspinfield_cart(2)) + &
-&     abs(dtsets(idtset)%hspinfield_cart(3)) <= tol12) then
-     if (abs(dprarr(1,idtset)) + abs(dprarr(2,idtset)) + abs(dprarr(3,idtset)) > tol12) then
-      narrm(idtset) = 3
-    end if
-  end if
- end do
-
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'hspinfield','BFI',1)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'hspinfield_cart','BFI',0)
 
  intarr(1,:)=dtsets(:)%extfpmd_nbcut
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'extfpmd_nbcut','INT',0)
