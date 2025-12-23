@@ -4440,8 +4440,8 @@ subroutine gwr_build_tchi(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, nrsp, npwsp, ncol_glob, col_bsize, my_iqi, gt_scbox_win
- integer :: idat, ndat, max_ndat, sc_nfft, sc_nfftsp, spin, ik_bz, iq_ibz, ikq_ibz, ikq_bz, ierr, ipm, itau, ig2 !, ii
+ integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, nrsp, npwsp, ncol_glob, col_bsize, my_iqi, gt_scbox_win, gpu_option
+ integer :: idat, ndat, max_ndat, sc_nfft, sc_nfftsp, spin, ik_bz, iq_ibz, ikq_ibz, ikq_bz, ierr, ipm, itau, ig2, ifft !, ii
  integer :: use_umklp ! ik_ibz, isym_k, trev_k, tsign_k, ! g0_k(3),
  !integer :: my_ikf_start, my_ikf_stop !, nkf_batch_size, nkf_now, op_type
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
@@ -4477,6 +4477,8 @@ subroutine gwr_build_tchi(gwr)
 
  ABI_CHECK(gwr%tchi_space == "none", sjoin("tchi_space: ", gwr%tchi_space, " != none"))
  gwr%tchi_space = "itau"
+
+ gpu_option = gwr%dtset%gpu_option
 
  ! Allocate tchi_q(g,g') matrices
  mask_qibz = 0; mask_qibz(gwr%my_qibz_inds(:)) = 1
@@ -4522,6 +4524,9 @@ subroutine gwr_build_tchi(gwr)
 
    if (.not. use_shmem_for_k) then
      ABI_MALLOC(gt_scbox, (sc_nfftsp, max_ndat, 2))
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET ENTER DATA MAP(to:gt_scbox) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
    end if
 
    ! Build plan for dense FFTs.
@@ -4598,6 +4603,7 @@ subroutine gwr_build_tchi(gwr)
 
            ! Insert G_k(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir).
            call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr, gt_scbox)
+           !$omp target update to(gt_scbox)
 
            if (.not. use_mpi_for_k) then
              ! G(G',r) --> G(R',r) = sum_{k,g'} e^{-i(k+g').R'} G_k(g',r)
@@ -4606,10 +4612,18 @@ subroutine gwr_build_tchi(gwr)
 
              ! Compute tchi(R',r) for this r and store it in (:,:,1). Note that results are real so one might use r2c FFT.
              ! Then back to tchi(G'=q+g',r) immediately with isign + 1.
-             gt_scbox(:,:,1) = gt_scbox(:,:,1) * conjg(gt_scbox(:,:,2))
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:gt_scbox)
+#endif
+             do idat=1,ndat
+               do ifft=1,sc_nfftsp
+                  gt_scbox(ifft,idat,1) = gt_scbox(ifft,idat,1) * conjg(gt_scbox(ifft,idat,2))
+               end do
+             end do
              !max_abs_imag_chit = max(max_abs_imag_chit, maxval(abs(aimag(gt_scbox(:,:,1)))))
 
              call green_plan%execute(gt_scbox(:,1,1), +1, gwr%nspinor*max_ndat*2)
+             !$omp target update from(gt_scbox)
 
            else
              ! Reduce one G_k(tau) on the idat-1 proc and perform ndat FFTs in parallel.
@@ -4736,6 +4750,9 @@ subroutine gwr_build_tchi(gwr)
    if (use_shmem_for_k) then
      call xmpi_win_free(gt_scbox_win, ierr)
    else
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET EXIT DATA MAP(delete: gt_scbox) if (gpu_option == ABI_GPU_OPENMP)
+#endif
      ABI_FREE(gt_scbox)
    end if
 
