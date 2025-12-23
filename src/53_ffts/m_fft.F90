@@ -5104,9 +5104,9 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft
 #ifdef HAVE_GPU_CUDA
- integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset
+ integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
 #endif
 ! *************************************************************************
 
@@ -5151,29 +5151,33 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
    !!$OMP TARGET ENTER DATA MAP(alloc:ur)
    !call gpu_set_to_zero(ur, int(2,c_size_t)*uplan%nfft*uplan%nspinor*ndat)
    !print *, "in execute_gr", xomp_target_is_present(c_loc(ur))
+   print *, "in execute_gr", xomp_target_is_present(c_loc(uplan%ig2ifft))
 
-   !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
-   do ifft=1, uplan%nfft*uplan%nspinor*ndat
+   nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
+   bufsize = uplan%nfft * uplan%nspinor * ndat
+   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
+   do ifft=1, bufsize
      ur(ifft) = zero
    end do
 
-   !print *, "in execute_gr1"
-
-   !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ifft, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ur, uplan%ig2ifft)
+   print *, "in execute_gr1"
+   !!!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ifft, offset, ir, ig) COLLAPSE(3) MAP(to:ug, uplan%ig2ifft)
+   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ug, uplan%ig2ifft)
    do idat=1,ndat
-     do ispinor=1,uplan%nspinor
-       do ipw=1,uplan%npw
+     do ispinor=1,nspinor
+       !$OMP PARALLEL DO PRIVATE(ifft, offset, ir, ig)
+       do ipw=1,npw
          ifft = uplan%ig2ifft(ipw)
-         offset = (idat-1) * uplan%nspinor + (ispinor-1)
-         ir = ifft + uplan%nfft * offset
-         ig = ipw  + uplan%npw  * offset
+         !ifft = 1
+         offset = (idat-1) * nspinor + (ispinor-1)
+         ir = ifft + nfft * offset
+         ig = ipw  + npw  * offset
          ur(ir) = ug(ig)
        end do ! ipw
      end do ! ispinor
    end do ! idat
 
-   !print *, "in execute_gr2"
-
+   print *, "in execute_gr2"
    !$omp target update to(ur)
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
