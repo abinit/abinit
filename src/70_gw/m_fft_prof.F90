@@ -1448,7 +1448,6 @@ subroutine prof_fourdp(fft_setups, isign, cplex, necut, ecut_arth, boxcutmin, rp
  real(dp),parameter :: k_gamma(3)=zero
  real(dp) :: ecut_list(necut)
  real(dp),allocatable :: prof_res(:,:,:)
-
 ! *********************************************************************
 
  nsetups = size(fft_setups, dim=2)
@@ -1543,7 +1542,6 @@ subroutine prof_fourwf(fft_setups, cplex, option, kpoint, necut, ecut_arth, &
  integer :: ngfft_ecut(18,necut)
  real(dp) :: ecut_list(necut)
  real(dp),allocatable :: prof_res(:,:,:)
-
 ! *********************************************************************
 
  nsetups = size(fft_setups, dim=2)
@@ -1640,7 +1638,6 @@ subroutine prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut
  real(dp),parameter :: k_gamma(3)=zero
  real(dp) :: ecut_list(necut)
  real(dp),allocatable :: prof_res(:,:,:)
-
 ! *********************************************************************
 
  nsetups = size(fft_setups, dim=2)
