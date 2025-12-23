@@ -2635,7 +2635,6 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, select_my_kbz, desc_mykbz, green_scgve
  type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
  integer,intent(in) :: my_ir, ndat
  complex(gwp),intent(out) :: gt_scbox(product(sc_ngfft(4:6))*gwr%nspinor, gwr%sc_batch_size, 2)
- !complex(gwp),intent(out) :: gt_scbox(:,:,:)
  integer,optional,intent(inout) :: gt_scbox_win
 
 !Local variables-------------------------------
@@ -3015,7 +3014,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
  call cwtime(cpu, wall, gflops, "start")
 
  mem_mb = two * gwr%my_nkbz * two * gwp * gwr%g_nfft * gwr%green_mpw * b2Mb /  gwr%g_slkproc%grid%nprocs
- call wrtout(std_out, sjoin("Estimated local memory for Green's functions: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+ call wrtout(std_out, sjoin(" Estimated local memory for Green's functions: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
  ABI_MALLOC(ceikr, (gwr%g_nfft * gwr%nspinor))
 
@@ -3031,7 +3030,8 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
 
    associate (desc_k => desc_mykbz(my_ikf))
    call uplan_k%init(desc_k%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_k%istwfk, &
-                     desc_k%gvec, gwp, gwr%dtset%gpu_option)
+                     desc_k%gvec, gwp, 0) ! FIXME gpu_option
+                     !gwr%dtset%gpu_option)
 
    do ipm=1,2
      ! Allocate rgp PBLAS matrix to store G_kbz(r,g')
@@ -3476,7 +3476,8 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
    call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_q%istwfk, size_blocs=[-1, col_bsize])
 
    call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_q%istwfk, &
-                     desc_q%gvec, gwp, gwr%dtset%gpu_option)
+                     desc_q%gvec, gwp, 0) ! FIXME: gpu_option
+                     !gwr%dtset%gpu_option)
 
    ! FFT and store results in rgp
    do ig2=1,wc_qbz%size_local(2), gwr%uc_batch_size
@@ -4440,7 +4441,7 @@ subroutine gwr_build_tchi(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, nrsp, npwsp, ncol_glob, col_bsize, my_iqi, gt_scbox_win, gpu_option
+ integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, nrsp, npwsp, ncol_glob, col_bsize, my_iqi, gt_scbox_win, nspinor
  integer :: idat, ndat, max_ndat, sc_nfft, sc_nfftsp, spin, ik_bz, iq_ibz, ikq_ibz, ikq_bz, ierr, ipm, itau, ig2, ifft !, ii
  integer :: use_umklp ! ik_ibz, isym_k, trev_k, tsign_k, ! g0_k(3),
  !integer :: my_ikf_start, my_ikf_stop !, nkf_batch_size, nkf_now, op_type
@@ -4474,11 +4475,10 @@ subroutine gwr_build_tchi(gwr)
  call timab(1923, 1, tsec)
 
  units = [std_out, ab_out]
+ nspinor = gwr%nspinor
 
  ABI_CHECK(gwr%tchi_space == "none", sjoin("tchi_space: ", gwr%tchi_space, " != none"))
  gwr%tchi_space = "itau"
-
- gpu_option = gwr%dtset%gpu_option
 
  ! Allocate tchi_q(g,g') matrices
  mask_qibz = 0; mask_qibz(gwr%my_qibz_inds(:)) = 1
@@ -4525,7 +4525,7 @@ subroutine gwr_build_tchi(gwr)
    if (.not. use_shmem_for_k) then
      ABI_MALLOC(gt_scbox, (sc_nfftsp, max_ndat, 2))
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET ENTER DATA MAP(to:gt_scbox) IF (gpu_option == ABI_GPU_OPENMP)
+     !$OMP TARGET ENTER DATA MAP(alloc:gt_scbox) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
 #endif
    end if
 
@@ -4612,10 +4612,11 @@ subroutine gwr_build_tchi(gwr)
 
              ! Compute tchi(R',r) for this r and store it in (:,:,1). Note that results are real so one might use r2c FFT.
              ! Then back to tchi(G'=q+g',r) immediately with isign + 1.
-#ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:gt_scbox)
-#endif
-             do idat=1,ndat
+             !gt_scbox(:,:,1) = gt_scbox(:,:,1) * conjg(gt_scbox(:,:,2))
+!#ifdef HAVE_OPENMP_OFFLOAD
+!             !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:gt_scbox)
+!#endif
+             do idat=1,max_ndat
                do ifft=1,sc_nfftsp
                   gt_scbox(ifft,idat,1) = gt_scbox(ifft,idat,1) * conjg(gt_scbox(ifft,idat,2))
                end do
@@ -4712,7 +4713,8 @@ subroutine gwr_build_tchi(gwr)
 
          ! FFT tchi_q(r,g') --> tchi_q(g,g'). Results stored in gwr%tchi_qibz.
          call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, istwfk1, &
-                           desc_q%gvec, gwp, gwr%dtset%gpu_option)
+                           desc_q%gvec, gwp, 0) ! FIXME GPU OPTION
+                           !gwr%dtset%gpu_option)
 
          do ig2=1, chi_rgp%size_local(2), gwr%uc_batch_size
            ndat = blocked_loop(ig2, chi_rgp%size_local(2), gwr%uc_batch_size)
@@ -4751,7 +4753,7 @@ subroutine gwr_build_tchi(gwr)
      call xmpi_win_free(gt_scbox_win, ierr)
    else
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET EXIT DATA MAP(delete: gt_scbox) if (gpu_option == ABI_GPU_OPENMP)
+     !$OMP TARGET EXIT DATA MAP(delete: gt_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
 #endif
      ABI_FREE(gt_scbox)
    end if
@@ -5566,14 +5568,14 @@ subroutine gwr_build_sigmac(gwr)
 !scalars
  integer,parameter :: master = 0
  integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii, jj, irow
- integer :: iq_ibz, iq_bz, itau, ierr, ibc, ib1, ib2, bmin, bmax, band, band1
+ integer :: iq_ibz, iq_bz, itau, ierr, ibc, ib1, ib2, bmin, bmax, band, band1, ifft
  integer :: band2, band2_start, band2_stop, nbc
  integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp
  integer :: isym_k, trev_k, g0_k(3), tsign_k !, b1gw, b2gw, ! npwsp, my_iqi, sc_ir, ig, my_iqf
  integer :: gt_request, wct_request
  integer :: band_val, ibv, ncerr, unt_it, unt_iw, unt_rw
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
- integer :: gt_scbox_win, wct_scbox_win, use_umklp, ideg, nstates, nb1, nb2
+ integer :: gt_scbox_win, wct_scbox_win, use_umklp, ideg, nstates, nb1, nb2, nspinor
  !integer :: my_ikf_start, my_ikf_stop, nkf_batch_size, nkf_now, op_type
  real(dp) :: e0, ks_gap, qp_gap, qp_pade_gap, sigx, vxc_val, vu, v_meanf, eshift, sigma_fact
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
@@ -5619,6 +5621,7 @@ subroutine gwr_build_sigmac(gwr)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1925, 1, tsec)
 
+ nspinor = gwr%nspinor
  units = [std_out, ab_out]
  if (gwr%sig_diago) then
    call wrtout(units, " Computing diagonal matrix elements of Sigma_c", pre_newlines=1)
@@ -5721,6 +5724,9 @@ if (gwr%use_supercell_for_sigma) then
  if (.not. use_shmem_for_k) then
    ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor, max_ndat, 2))
    ABI_CALLOC(wct_scbox, (sc_nfft * gwr%nspinor, max_ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:gt_scbox, wct_scbox) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
  end if
 
  ! Build plans for dense FFTs.
@@ -5791,10 +5797,12 @@ if (.not. use_shmem_for_k) then
 
        ! Insert G_k(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir).
        call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr, gt_scbox)
+       !$omp target update to(gt_scbox)
        if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(gt_scbox, gwr%kpt_comm%value, gt_request, ierr)
 
        ! Insert Wc_q(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir)
        call gwr%wcq_to_scbox(sc_ngfft, select_my_qbz, desc_myqbz, wc_scgvec, my_ir, ndat, wc_gpr, wct_scbox)
+       !$omp target update to(wct_scbox)
        if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(wct_scbox, gwr%kpt_comm%value, wct_request, ierr)
 
        ! G(G',r) --> G(R',r)
@@ -5806,8 +5814,18 @@ if (.not. use_shmem_for_k) then
        call wt_plan%execute(wct_scbox(:,1), -1, gwr%nspinor*max_ndat, iscale=0)
 
        ! Use gt_scbox to store GW (R',r, +/- i tau) for this set of ndat r-point
-       gt_scbox(:,:,1) = gt_scbox(:,:,1) * wct_scbox(:,:) * sigma_fact
-       gt_scbox(:,:,2) = gt_scbox(:,:,2) * wct_scbox(:,:) * sigma_fact
+       !gt_scbox(:,:,1) = gt_scbox(:,:,1) * wct_scbox(:,:) * sigma_fact
+       !gt_scbox(:,:,2) = gt_scbox(:,:,2) * wct_scbox(:,:) * sigma_fact
+!#ifdef HAVE_OPENMP_OFFLOAD
+!       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:gt_scbox, wct_scbox)
+!#endif
+       do ipm=1,2
+         do idat=1,max_ndat
+           do ifft=1,sc_nfft * nspinor
+             gt_scbox(ifft,idat,ipm) = gt_scbox(ifft,idat,ipm) * wct_scbox(ifft,idat) * sigma_fact
+           end do
+         end do
+       end do
        !print *, "Maxval abs imag G:", maxval(abs(aimag(gt_scbox)))
 
 else
@@ -5885,6 +5903,9 @@ end if
  !call wrtout(std_out, sjoin(" Maxval abs re W:", ftoa(max_abs_re_wct)))
  !call wrtout(std_out, sjoin(" Maxval abs imag W:", ftoa(max_abs_imag_wct)))
  if (.not. use_shmem_for_k) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete: gt_scbox, wct_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
    ABI_FREE(gt_scbox)
    ABI_FREE(wct_scbox)
  else
