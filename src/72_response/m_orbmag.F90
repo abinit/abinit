@@ -46,7 +46,8 @@ module m_orbmag
   use m_dtfil
   use m_ebands
   use m_getghc,           only : getghc
-  use m_hamiltonian,      only : gs_hamiltonian_type, gspot_transgrid_and_pack
+  use m_getgh1c
+  use m_hamiltonian
   use m_hdr
   use m_kg,               only : getph,mkkin,mkkpg,ph1d3d
   use m_mkffnl,           only : mkffnl
@@ -282,7 +283,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  integer :: iat,iatom,icg,icprj,ider,idir,ierr
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,itypat,lmn2max
  integer :: me,mcgk,mcprjk,my_lmax,my_nspinor,nband_k,nband_me,ncid,ngfft1,ngfft2,ngfft3,ngfft4
- integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,spaceComm
+ integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,nucdip_dirs,spaceComm
  integer,parameter :: master=0
  real(dp) :: arg,ecut_eff,fermie
  logical :: has_nucdip
@@ -295,7 +296,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  real(dp) :: kpoint(3),omlamb(3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: chern_terms(:,:,:,:),chern_trace(:,:),cg_k(:,:),cg1_k(:,:,:),cwavef(:,:)
- real(dp),allocatable :: diagcg1_k(:,:,:),eig_k(:),ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:)
+ real(dp),allocatable :: diagcg1_k(:,:,:),dkinpw(:,:),eig_k(:),ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: occ_k(:),orbmag_terms(:,:,:,:),orbmag_trace(:,:)
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:)
  real(dp),allocatable :: vectornd(:,:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
@@ -342,6 +343,9 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
  ABI_MALLOC(kg_k,(3,mpw))
  ABI_MALLOC(kinpw,(mpw))
+ if (dtset%orbmag .GT. 2) then
+   ABI_MALLOC(dkinpw,(mpw,3))
+ end if
 
  ABI_MALLOC(dimlmn,(dtset%natom))
  call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
@@ -392,14 +396,16 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
    !========  compute nuclear dipole vector potential (may be zero) ==========
    has_nucdip = ANY( ABS(dtset%nucdipmom) .GT. tol8 )
+   nucdip_dirs=0
    if(has_nucdip) then
-     ABI_MALLOC(vectornd,(nfftf,dtset%nspden,3))
+     nucdip_dirs=3
+     ABI_MALLOC(vectornd,(nfftf,dtset%nspden,nucdip_dirs))
      vectornd = zero
      call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,&
        & dtset%nspden,dtset%nucdipmom,crystal%rprimd,vectornd,crystal%xred)
-     ABI_MALLOC(vectornd_pac,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,3))
+     ABI_MALLOC(vectornd_pac,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,nucdip_dirs))
      call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
-          & dtset%nspden, gs_hamk%nvloc, 3, pawfgr, mpi_enreg, vectornd,vectornd_pac)
+          & dtset%nspden, gs_hamk%nvloc, nucdip_dirs, pawfgr, mpi_enreg, vectornd,vectornd_pac)
      ABI_FREE(vectornd)
      call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
    end if
@@ -448,7 +454,14 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! Compute kinetic energy at kpt
      kinpw(:) = zero
-     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,crystal%gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,crystal%gmet,&
+       & kg_k,kinpw,kpoint,npw_k,0,0)
+     if (dtset%orbmag.GT.2) then
+       do adir=1,3
+         call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,crystal%gmet,&
+           & kg_k,dkinpw(:,adir),kpoint,npw_k,adir,0)
+       end do
+     end if
 
      ! Compute k+G at this k point
      nkpg = 3
@@ -517,11 +530,12 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
        pcg1_k(1:2,1:mcgk,1:3) = cg1_k(1:2,1:mcgk,1:3)
      end if
 
-     ! change P_c|cg1> to diagonal change if requested
+     ! transform P_c|cg1> to diagonal gauge if requested
      if (dtset%orbmag .EQ. 3) then
        ABI_MALLOC(diagcg1_k,(2,mcgk,3))
-       call para_to_diag(atindx,cg_k,pcg1_k,cprj_k,diagcg1_k,dimlmn,dtset,eig_k,gs_hamk,&
-         & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k)
+       call para_to_diag(atindx,cg_k,pcg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,eig_k,gs_hamk,&
+         & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
+         & nucdip_dirs,occ_k,vectornd_pac)
        pcg1_k(1:2,1:mcgk,1:3) = diagcg1_k(1:2,1:mcgk,1:3)
        ABI_FREE(diagcg1_k)
      end if
@@ -679,6 +693,9 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
  ABI_FREE(kg_k)
  ABI_FREE(kinpw)
+ if(allocated(dkinpw)) then
+   ABI_FREE(dkinpw)
+ end if
  ABI_FREE(ph1d)
 
  ABI_FREE(realgnt)
@@ -1369,55 +1386,76 @@ end subroutine orbmag_vv_k
 !!
 !! SOURCE
 
-subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dtset,eig_k,gs_hamk,&
-    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k)
+subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,eig_k,gs_hamk,&
+    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
+    & nucdip_dirs,occ_k,vectornd_pac)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,npw_k
+  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpw,nband_k,ngfft4,ngfft5,ngfft6
+  integer,intent(in) :: npw_k,nucdip_dirs
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3),eig_k(nband_k),occ_k(nband_k)
+  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3),eig_k(nband_k),dkinpw(mpw,3),occ_k(nband_k)
+  real(dp),intent(in) :: vectornd_pac(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,nucdip_dirs)
   real(dp),intent(out) :: diagcg1_k(2,mcgk,3)
   type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,mcprjk)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,choice,cpopt,iband,jband
-  integer :: ndat,nnlout,npwsp,paw_opt,signs,tim_nonlop
+  integer :: adir,berryopt,cplex,iband,ipert,jband,ndat,npwsp
+  integer :: optlocal,optnl,opt_gvnlx1,sij_opt,tim_getgh1c,usevnl
   real(dp) :: deltae,doti,dotr
+  type(rf_hamiltonian_type) :: rf_hamk
   !arrays
-  real(dp) :: lambda(1)
-  real(dp),allocatable :: cwavef(:,:),enlout(:),svectout(:,:)
-  real(dp),allocatable :: vcg1(:,:),vectout(:,:)
+  real(dp),allocatable :: cwavef(:,:),dcg1(:,:),gh1c(:,:)
+  real(dp),allocatable :: grad_berry(:,:),gs1c(:,:),gvnlx1(:,:)
+  real(dp),allocatable :: vectornd_pac_idir(:,:,:,:)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 !--------------------------------------------------------------------
 
-  choice = 5 ! first deriv w.r.t. k
-  cpopt = 4 ! cprj and derivatives already in memory
-  paw_opt = 2 ! Vnl - lambda.Sij 
-  signs = 2
-  tim_nonlop = 0
-  nnlout = 0
-  ndat = 1
+  berryopt=0
+  ndat=1
+  optlocal=0
+  optnl=2
+  opt_gvnlx1=0
+  sij_opt=-1
+  tim_getgh1c=0
+  usevnl = 0
+
+  ipert=dtset%natom+1 ! DDK
+  cplex=1 ! real space 1-order functions on FFT grid are REAL 
+  call rf_hamk%init(cplex,gs_hamk,ipert)
 
   npwsp = npw_k*dtset%nspinor
 
   ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
   call pawcprj_alloc(cwaveprj,3,dimlmn)
   ABI_MALLOC(cwavef,(2,npwsp))
-  ABI_MALLOC(vectout,(2,npwsp))
-  ABI_MALLOC(svectout,(2,npwsp))
-  ABI_MALLOC(vcg1,(2,npwsp))
+  ABI_MALLOC(gh1c,(2,gs_hamk%npw_kp*gs_hamk%nspinor*ndat))
+  ABI_MALLOC(gs1c,(2,gs_hamk%npw_kp*gs_hamk%nspinor*ndat))
+  ABI_MALLOC(gvnlx1,(2,gs_hamk%npw_kp*gs_hamk%nspinor*ndat))
+  ABI_MALLOC(dcg1,(2,npwsp))
+
+  if (nucdip_dirs .EQ. 3) then
+    ABI_MALLOC(vectornd_pac_idir,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc))
+  end if
 
   diagcg1_k = zero
 
   do adir = 1, 3
+
+    call rf_hamk%load_k(dkinpw_k=dkinpw(:,adir))
+
+    if (nucdip_dirs .EQ. 3) then
+      vectornd_pac_idir(:,:,:,:)=vectornd_pac(:,:,:,:,adir)
+      call rf_hamk%load_spin(isppol, vectornd=vectornd_pac_idir)
+    end if
 
     do iband = 1, nband_k
 
@@ -1426,36 +1464,37 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dtset,eig_k,gs
       call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,iband,0,ikpt,0,isppol,dtset%mband,&
         & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
 
-      ! compute H^1-eig^0_i S^1|u_i^0> , output to vectout
-      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,adir,eig_k(iband),mpi_enreg,ndat,&
-        & nnlout,paw_opt,signs,svectout,tim_nonlop,cwavef,vectout)
+      call getgh1c(berryopt,cwavef,cwaveprj,gh1c,grad_berry,gs1c,gs_hamk,gvnlx1,adir,ipert,&
+        & eig_k(iband),mpi_enreg,ndat,optlocal,optnl,opt_gvnlx1,rf_hamk,sij_opt,&
+        & tim_getgh1c,usevnl)
 
-      !! form vcg1 = \sum |u_j^0><u_j^0|(H^1-e^0(i)S^1|u_i^0>/(e^0(j)-e^0(i))
-      vcg1 = zero
+      dcg1=zero
       do jband = 1, nband_k
-        if(jband.EQ.iband) cycle
-        deltae = eig_k(jband) - eig_k(iband)
-        if ( abs(deltae) .LT. tol8 ) cycle
+        if (jband .EQ. iband) cycle
+        deltae = eig_k(iband) - eig_k(jband)
+        if (abs(deltae) .LT. 0.001) cycle
         cwavef(1:2,1:npwsp)=cg_k(1:2,(jband-1)*npwsp+1:jband*npwsp)
-        dotr = DOT_PRODUCT(cwavef(1,:),vectout(1,:))+DOT_PRODUCT(cwavef(2,:),vectout(2,:))
-        doti = DOT_PRODUCT(cwavef(1,:),vectout(2,:))-DOT_PRODUCT(cwavef(2,:),vectout(1,:))
-        vcg1(1,:) = vcg1(1,:) + (dotr*cwavef(1,:) - doti*cwavef(2,:))*deltae
-        vcg1(2,:) = vcg1(2,:) + (dotr*cwavef(2,:) + doti*cwavef(1,:))*deltae
+        dotr = DOT_PRODUCT(cwavef(1,:),gh1c(1,:))+DOT_PRODUCT(cwavef(2,:),gh1c(2,:))
+        doti = DOT_PRODUCT(cwavef(1,:),gh1c(2,:))-DOT_PRODUCT(cwavef(2,:),gh1c(1,:))
+        dcg1(1,:) = dcg1(1,:) + ( dotr*cwavef(1,:) - doti*cwavef(2,:))/deltae
+        dcg1(2,:) = dcg1(2,:) + ( dotr*cwavef(2,:) + doti*cwavef(1,:))/deltae
       end do
-
-      ! subtract vcg1 from cg1_k to obtain diagonal gauge representation
-      diagcg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir) =cg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir)-&
-        &  vcg1(1:2,1:npwsp)
-
+      diagcg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir) =cg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir)+&
+        &  dcg1(1:2,1:npwsp)
     end do
   end do
 
+  call rf_hamk%free()
+  if(allocated(vectornd_pac_idir)) then
+    ABI_FREE(vectornd_pac_idir)
+  end if
   ABI_FREE(cwavef)
-  ABI_FREE(vectout)
-  ABI_FREE(vcg1)
-  ABI_FREE(svectout)
   call pawcprj_free(cwaveprj)
   ABI_FREE(cwaveprj)
+  ABI_FREE(gh1c)
+  ABI_FREE(gs1c)
+  ABI_FREE(gvnlx1)
+  ABI_FREE(dcg1)
 
 end subroutine para_to_diag
 !!***
