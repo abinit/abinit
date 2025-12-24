@@ -180,7 +180,7 @@ module m_gwr
  use m_chi0tk,        only : chi0_bbp_mask, accumulate_head_wings_imagw, symmetrize_afm_chi0
  use m_sigx,          only : sigx_symmetrize
  use m_dyson_solver,  only : sigma_pade_t
- use minimax_grids,   only : gx_minimax_grid !, gx_get_error_message
+ use minimax_grids,   only : gx_minimax_grid
  use m_occ,           only : get_fact_spin_tol_empty
 
  implicit none
@@ -2659,25 +2659,14 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, select_my_kbz, desc_mykbz, green_scgve
 
    ! Zero output array.
    gt_scbox = czero_gw
+
    do my_ikf=1,gwr%my_nkbz
      if (.not. select_my_kbz(my_ikf)) continue
      ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:,ik_bz) * gwr%ngkpt)
-#if 1
      do ipm=1,2
        call desc_mykbz(my_ikf)%to_scbox(gwr%kbz(:,ik_bz), gwr%ngkpt, sc_ngfft, gwr%nspinor*ndat, &
                                         gt_gpr(ipm, my_ikf)%buffer_cplx(1,my_ir), gt_scbox(:,:,ipm))
      end do
-#else
-     associate (desc_k => desc_mykbz(my_ikf))
-     do ig=1,desc_k%npw
-       green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)  ! k+g
-     end do
-     do ipm=1,2
-       call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor*ndat, green_scgvec, &
-                     gt_gpr(ipm, my_ikf)%buffer_cplx(1,my_ir), gt_scbox(:,:,ipm))
-     end do
-     end associate
-#endif
    end do ! my_ikf
 
  else
@@ -2698,22 +2687,10 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, select_my_kbz, desc_mykbz, green_scgve
      do my_ikf=1,gwr%my_nkbz
        if (.not. select_my_kbz(my_ikf)) continue
        ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
-#if 1
        do ipm=1,2
          call desc_mykbz(my_ikf)%to_scbox(gwr%kbz(:,ik_bz), gwr%ngkpt, sc_ngfft, gwr%nspinor * ndat1, &
                                           gt_gpr(ipm, my_ikf)%buffer_cplx(1,my_ir+idat-1), gt_scbox(:,idat,ipm))
        end do
-#else
-       associate (desc_k => desc_mykbz(my_ikf))
-       do ig=1,desc_k%npw
-         green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig) ! k+g
-       end do
-       do ipm=1,2
-         call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat1, green_scgvec, &
-                       gt_gpr(ipm, my_ikf)%buffer_cplx(1,my_ir+idat-1), gt_scbox(:,idat,ipm))
-       end do
-       end associate
-#endif
      end do ! my_ikf
      10 continue
      !call xmpi_barrier(gwr%kpt_comm%value)
@@ -2774,19 +2751,8 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, select_my_qbz, desc_myqbz, wc_scgvec,
      if (.not. select_my_qbz(my_iqf)) continue
      iq_bz = gwr%my_qbz_inds(my_iqf)
 
-#if 1
      call desc_myqbz(my_iqf)%to_scbox(gwr%qbz(:,iq_bz), gwr%ngqpt, sc_ngfft, gwr%nspinor*ndat, &
                                       wc_gpr(my_iqf)%buffer_cplx(1,my_ir), wct_scbox)
-#else
-     gg = nint(gwr%qbz(:, iq_bz) * gwr%ngqpt)
-     associate (desc_q => desc_myqbz(my_iqf))
-     do ig=1,desc_q%npw
-       wc_scgvec(:,ig) = gg + gwr%ngqpt * desc_q%gvec(:,ig) ! q + g'
-     end do
-     call gsph2box(sc_ngfft, desc_q%npw, gwr%nspinor * ndat, wc_scgvec, &
-                   wc_gpr(my_iqf)%buffer_cplx(1,my_ir), wct_scbox)
-     end associate
-#endif
    end do ! my_iqf
 
  else
@@ -2802,19 +2768,8 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, select_my_qbz, desc_myqbz, wc_scgvec,
      do my_iqf=1,gwr%my_nkbz
        if (.not. select_my_qbz(my_iqf)) continue
        iq_bz = gwr%my_qbz_inds(my_iqf)
-#if 1
        call desc_myqbz(my_iqf)%to_scbox(gwr%qbz(:,iq_bz), gwr%ngqpt, sc_ngfft, gwr%nspinor * ndat1, &
                                         wc_gpr(my_iqf)%buffer_cplx(1,my_ir+idat-1), wct_scbox(:,idat))
-#else
-       gg = nint(gwr%qbz(:, iq_bz) * gwr%ngqpt)
-       associate (desc_q => desc_myqbz(my_iqf))
-       do ig=1,desc_q%npw
-         wc_scgvec(:,ig) = gg + gwr%ngqpt * desc_q%gvec(:,ig) ! q + g'
-       end do
-       call gsph2box(sc_ngfft, desc_q%npw, gwr%nspinor * ndat1, wc_scgvec, &
-                     wc_gpr(my_iqf)%buffer_cplx(1,my_ir+idat-1), wct_scbox(:,idat))
-       end associate
-#endif
      end do ! my_iqf
      10 continue
      !call xmpi_barrier(gwr%kpt_comm%value)
@@ -4233,15 +4188,15 @@ subroutine desc_to_scbox(desc, kk, ngkpt, sc_ngfft, ndat, cg, cfft)
  complex(gwp),intent(inout) :: cfft(sc_ngfft(4)*sc_ngfft(5)*sc_ngfft(6),ndat)
 
 !Local variables-------------------------------
-integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, kg(3), gg(3), ifft
+integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, kg(3), gg(3), ifft, npw
  logical :: compute_mapping
- !real(dp) :: tsec(2) !, cpu, wall, gflops
- !character(len=500) :: msg
+ !real(dp) :: tsec(2)
 ! *************************************************************************
 
  ! TODO: Add op_type
  !call timab(1931, 1, tsec)
 
+ npw = desc%npw
  n1 = sc_ngfft(1); n2 = sc_ngfft(2); n3 = sc_ngfft(3)
  n4 = sc_ngfft(4); n5 = sc_ngfft(5); n6 = sc_ngfft(6)
  gg = nint(kk * ngkpt)
@@ -4250,24 +4205,27 @@ integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, kg(3), gg(3), ifft
 
  ! FIXME This is not thread safe
  if (compute_mapping) then
-   ABI_REMALLOC(desc%g2box, (desc%npw))
+   ABI_REMALLOC(desc%g2box, (npw))
    desc%cached_sc_ngfft = sc_ngfft(1:6)
-   do ipw=1,desc%npw
+   do ipw=1,npw
      kg = gg + ngkpt * desc%gvec(:,ipw)  ! k+g
-     i1 = modulo(kg(1), n1) !+ 1
-     i2 = modulo(kg(2), n2) !+ 1
-     i3 = modulo(kg(3), n3) !+ 1
+     i1 = modulo(kg(1), n1)
+     i2 = modulo(kg(2), n2)
+     i3 = modulo(kg(3), n3)
      desc%g2box(ipw) = 1 + i1 + n4*(i2+i3*n5)
    end do
  end if
 
+ !do ipw=1,npw
+ !  if (any(desc%gvec(:,ipw) > sc_ngfft(1:3)/2) .or. any(desc%gvec(:,ipw) < -(sc_ngfft(1:3)-1)/2) ) then
+ !    ABI_ERROR(sjoin(" The G-vector: ",ltoa(desc%gvec(:, ipw))," falls outside the FFT box. Increase boxcutmin (?)"))
+ !  end if
+ !end do
+
  ! Insert cg into cfft
 !$OMP PARALLEL DO PRIVATE(ifft) IF (ndat > 1)
  do idat=1,ndat
-   do ipw=1,desc%npw
-     !if (any(kg_k(:,ipw) > sc_ngfft(1:3)/2) .or. any(kg_k(:,ipw) < -(sc_ngfft(1:3)-1)/2) ) then
-     !  ABI_ERROR(sjoin(" The G-vector: ",ltoa(kg_k(:, ipw))," falls outside the FFT box. Increase boxcutmin (?)"))
-     !end if
+   do ipw=1,npw
      ifft = desc%g2box(ipw)
      cfft(ifft,idat) = cg(ipw,idat)
    end do
@@ -4611,7 +4569,9 @@ subroutine gwr_build_tchi(gwr)
 
            ! Insert G_k(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir).
            call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr, gt_scbox)
-           !$omp target update to(gt_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP) 
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$omp target update to(gt_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
 
            if (.not. use_mpi_for_k) then
              ! G(G',r) --> G(R',r) = sum_{k,g'} e^{-i(k+g').R'} G_k(g',r)
@@ -4632,7 +4592,9 @@ subroutine gwr_build_tchi(gwr)
              !max_abs_imag_chit = max(max_abs_imag_chit, maxval(abs(aimag(gt_scbox(:,:,1)))))
 
              call green_plan%execute(gt_scbox(:,1,1), +1, gwr%nspinor*max_ndat*2)
+#ifdef HAVE_OPENMP_OFFLOAD
              !$omp target update from(gt_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
 
            else
              ! Reduce one G_k(tau) on the idat-1 proc and perform ndat FFTs in parallel.
@@ -5805,12 +5767,16 @@ if (.not. use_shmem_for_k) then
 
        ! Insert G_k(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir).
        call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr, gt_scbox)
+#ifdef HAVE_OPENMP_OFFLOAD
        !$omp target update to(gt_scbox)
+#endif
        if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(gt_scbox, gwr%kpt_comm%value, gt_request, ierr)
 
        ! Insert Wc_q(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir)
        call gwr%wcq_to_scbox(sc_ngfft, select_my_qbz, desc_myqbz, wc_scgvec, my_ir, ndat, wc_gpr, wct_scbox)
+#ifdef HAVE_OPENMP_OFFLOAD
        !$omp target update to(wct_scbox)
+#endif
        if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(wct_scbox, gwr%kpt_comm%value, wct_request, ierr)
 
        ! G(G',r) --> G(R',r)
@@ -5834,7 +5800,9 @@ if (.not. use_shmem_for_k) then
            end do
          end do
        end do
+#ifdef HAVE_OPENMP_OFFLOAD
        !$omp target update from(gt_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
        !print *, "Maxval abs imag G:", maxval(abs(aimag(gt_scbox)))
 
 else
