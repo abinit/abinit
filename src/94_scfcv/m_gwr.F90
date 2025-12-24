@@ -1482,7 +1482,11 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  else
    ! Automatic detection
    gwr%uc_batch_size = 1 * omp_nt
-   if (gwr%dtset%gpu_option /= ABI_GPU_DISABLED) gwr%uc_batch_size = 4 * omp_nt
+   if (gwr%dtset%gpu_option /= ABI_GPU_DISABLED) then
+     ! TODO: Optimize
+     gwr%uc_batch_size = 4 * omp_nt
+     !gwr%uc_batch_size = 1
+   end if
  end if
 
  if (gwr%dtset%gwr_ucsc_batch(2) > 0) then
@@ -1491,7 +1495,11 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  else
    ! Automatic detection
    gwr%sc_batch_size = 1 * omp_nt
-   if (gwr%dtset%gpu_option /= ABI_GPU_DISABLED) gwr%sc_batch_size = 4 * omp_nt
+   if (gwr%dtset%gpu_option /= ABI_GPU_DISABLED) then
+     ! TODO: Optimize
+     gwr%sc_batch_size = 4 * omp_nt
+     !gwr%sc_batch_size = 1
+   end if
  end if
 
  ! Make sure all procs agree.
@@ -4603,7 +4611,7 @@ subroutine gwr_build_tchi(gwr)
 
            ! Insert G_k(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir).
            call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr, gt_scbox)
-           !$omp target update to(gt_scbox)
+           !$omp target update to(gt_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP) 
 
            if (.not. use_mpi_for_k) then
              ! G(G',r) --> G(R',r) = sum_{k,g'} e^{-i(k+g').R'} G_k(g',r)
@@ -4613,9 +4621,9 @@ subroutine gwr_build_tchi(gwr)
              ! Compute tchi(R',r) for this r and store it in (:,:,1). Note that results are real so one might use r2c FFT.
              ! Then back to tchi(G'=q+g',r) immediately with isign + 1.
              !gt_scbox(:,:,1) = gt_scbox(:,:,1) * conjg(gt_scbox(:,:,2))
-!#ifdef HAVE_OPENMP_OFFLOAD
-!             !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:gt_scbox)
-!#endif
+#ifdef HAVE_OPENMP_OFFLOAD
+            !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:gt_scbox) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
              do idat=1,max_ndat
                do ifft=1,sc_nfftsp
                   gt_scbox(ifft,idat,1) = gt_scbox(ifft,idat,1) * conjg(gt_scbox(ifft,idat,2))
@@ -4624,7 +4632,7 @@ subroutine gwr_build_tchi(gwr)
              !max_abs_imag_chit = max(max_abs_imag_chit, maxval(abs(aimag(gt_scbox(:,:,1)))))
 
              call green_plan%execute(gt_scbox(:,1,1), +1, gwr%nspinor*max_ndat*2)
-             !$omp target update from(gt_scbox)
+             !$omp target update from(gt_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
 
            else
              ! Reduce one G_k(tau) on the idat-1 proc and perform ndat FFTs in parallel.
@@ -5816,9 +5824,9 @@ if (.not. use_shmem_for_k) then
        ! Use gt_scbox to store GW (R',r, +/- i tau) for this set of ndat r-point
        !gt_scbox(:,:,1) = gt_scbox(:,:,1) * wct_scbox(:,:) * sigma_fact
        !gt_scbox(:,:,2) = gt_scbox(:,:,2) * wct_scbox(:,:) * sigma_fact
-!#ifdef HAVE_OPENMP_OFFLOAD
-!       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:gt_scbox, wct_scbox)
-!#endif
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) MAP(to:gt_scbox, wct_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
        do ipm=1,2
          do idat=1,max_ndat
            do ifft=1,sc_nfft * nspinor
@@ -5826,6 +5834,7 @@ if (.not. use_shmem_for_k) then
            end do
          end do
        end do
+       !$omp target update from(gt_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
        !print *, "Maxval abs imag G:", maxval(abs(aimag(gt_scbox)))
 
 else

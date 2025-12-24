@@ -16,7 +16,7 @@
 
 #include "abi_common.h"
 
-MODULE m_FFT_prof
+module m_FFT_prof
 
  use defs_basis
  use m_xomp
@@ -809,7 +809,7 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
  case (0)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call plan%execute(ffc, ggc, isign, ndat)
+     call plan%execute(ffc, ggc, isign, ndat, iscale=0)
      ! Store results at the first call.
      if (icall == 1) then
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -821,7 +821,7 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
  case (1)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call plan%execute(ffc, isign, ndat)
+     call plan%execute(ffc, isign, ndat, iscale=0)
      ! Store results at the first call.
      if (icall == 1) then
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -1762,5 +1762,5 @@ end function empty_cache
 
 !----------------------------------------------------------------------
 
-END MODULE m_FFT_prof
+end module m_FFT_prof
 !!***
