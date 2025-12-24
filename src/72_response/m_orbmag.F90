@@ -1472,7 +1472,10 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,e
       do jband = 1, nband_k
         if (jband .EQ. iband) cycle
         deltae = eig_k(iband) - eig_k(jband)
-        if (abs(deltae) .LT. 0.001) cycle
+        if (abs(deltae) .LT. dtset%userra) then
+          write(std_out,'(a,3i4,es16.8)')'JWZ debug adir iband jband deltae',adir,iband,jband,deltae
+          cycle
+        end if
         cwavef(1:2,1:npwsp)=cg_k(1:2,(jband-1)*npwsp+1:jband*npwsp)
         dotr = DOT_PRODUCT(cwavef(1,:),gh1c(1,:))+DOT_PRODUCT(cwavef(2,:),gh1c(2,:))
         doti = DOT_PRODUCT(cwavef(1,:),gh1c(2,:))-DOT_PRODUCT(cwavef(2,:),gh1c(1,:))
