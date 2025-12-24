@@ -387,7 +387,6 @@ end subroutine fftbox_plan3_free
 !!  TARGET: spc arrays
 !!
 !! INPUTS
-!!  plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !!  isign= Sign of the exponential in the FFT
 !!  ndat: Number of FFTs.
 !!  [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
@@ -428,9 +427,16 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
      call gpu_ctx_init(plan%gpu_ctx_spc, plan%dims, plan%embed, ndat__, sp)
    end if
 
+   !!transfer_ff = .not. xomp_target_is_present(c_loc(ff))
+   !! !$OMP TARGET ENTER DATA MAP(alloc:ff) IF(transfer_ff)
+   !! !$OMP TARGET UPDATE TO(ff) IF(transfer_ff)
+
    !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
    call gpu_fftbox_c2c_ip(plan%gpu_ctx_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff))
    !$OMP END TARGET DATA
+
+   !! !$OMP TARGET UPDATE FROM(ff) IF(transfer_ff)
+   !! !$OMP TARGET EXIT DATA MAP(delete:ff) IF(transfer_ff)
    return
 #endif
  end if
@@ -453,7 +459,6 @@ end subroutine fftbox_execute_ip_spc
 !!  TARGET: dp arrays
 !!
 !! INPUTS
-!!  plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !!  isign= Sign of the exponential in the FFT
 !!  ndat: Number of FFTs.
 !!  [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
@@ -520,7 +525,6 @@ end subroutine fftbox_execute_ip_dpc
 !!  TARGET: spc arrays
 !!
 !! INPUTS
-!! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !! ff(plan%ldxyz*plan%batch_size)=The input array to be transformed.
 !! isign= Sign of the exponential in the FFT
 !! ndat= Number of FFTs.
@@ -587,7 +591,6 @@ end subroutine fftbox_execute_op_spc
 !!  TARGET: dp arrays
 !!
 !! INPUTS
-!! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !! ff(plan%ldxyz*plan%batch_size)=The input array to be transformed.
 !! isign= Sign of the exponential in the FFT
 !! ndat=Number of FFTs.
