@@ -217,45 +217,45 @@ module defs_basis
 
 ! Previous values from NIST 2006 from http://physics.nist.gov/cuu/Constants/index.html
 
-!real(dp), parameter :: Bohr_Ang=0.52917720859_dp    ! 1 Bohr, in Angstrom
-!real(dp), parameter :: Ang_Bohr = one / Bohr_Ang  ! 1 Angstrom in Bohr
-!real(dp), parameter :: Bohr_meter=Bohr_Ang * 1.d-10 ! 1 Bohr in meter
-!real(dp), parameter :: Bohr_cm=Bohr_meter * 100_dp ! 1 Bohr in cm
-!real(dp), parameter :: Ha_cmm1=219474.6313705_dp  ! 1 Hartree in cm^-1
-!real(dp), parameter :: Ha_eV=27.21138386_dp ! 1 Hartree in eV
-!real(dp), parameter :: eV_Ha=one/Ha_eV      ! 1 eV in Hartree
-!real(dp), parameter :: Ha_meV=Ha_eV*1000_dp ! 1 Hartree in meV
-!real(dp), parameter :: Ha_K=315774.65_dp ! 1Hartree in Kelvin
-!real(dp), parameter :: Ha_THz=6579.683920722_dp ! 1 Hartree in THz
-!real(dp), parameter :: Ha_s=Ha_THz*1e12*two_pi ! 1 Hartree in s
-!real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree in J
+ real(dp), parameter :: Bohr_Ang=0.52917720859_dp    ! 1 Bohr, in Angstrom
+ real(dp), parameter :: Ang_Bohr = one / Bohr_Ang  ! 1 Angstrom in Bohr
+ real(dp), parameter :: Bohr_meter=Bohr_Ang * 1.d-10 ! 1 Bohr in meter
+ real(dp), parameter :: Bohr_cm=Bohr_meter * 100_dp ! 1 Bohr in cm
+ real(dp), parameter :: Ha_cmm1=219474.6313705_dp  ! 1 Hartree in cm^-1
+ real(dp), parameter :: Ha_eV=27.21138386_dp ! 1 Hartree in eV
+ real(dp), parameter :: eV_Ha=one/Ha_eV      ! 1 eV in Hartree
+ real(dp), parameter :: Ha_meV=Ha_eV*1000_dp ! 1 Hartree in meV
+ real(dp), parameter :: Ha_K=315774.65_dp ! 1Hartree in Kelvin
+ real(dp), parameter :: Ha_THz=6579.683920722_dp ! 1 Hartree in THz
+ real(dp), parameter :: Ha_s=Ha_THz*1e12*two_pi ! 1 Hartree in s
+ real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree in J
 
-!real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge in Coulomb
-!real(dp), parameter :: kb_SI=1.380649d-23  ! Boltzmann constant in Joule/K (CODATA 2017 value.)
-!real(dp), parameter :: Avogadro=6.02214179d23 ! per mole
-!real(dp), parameter :: Sp_Lt_SI=2.99792458d8 ! speed of light in SI
+ real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge in Coulomb
+ real(dp), parameter :: kb_SI=1.380649d-23  ! Boltzmann constant in Joule/K (CODATA 2017 value.)
+ real(dp), parameter :: Avogadro=6.02214179d23 ! per mole
+ real(dp), parameter :: Sp_Lt_SI=2.99792458d8 ! speed of light in SI
 
 ! 09/2025 [SP] update with 2022 NIST values from the same website.
 !         See also P. J. Mohr et al., Review Mod. Phys. 97, 025002 (2025)
 !
- real(dp), parameter :: Bohr_Ang     = 0.529177210544_dp      ! 1 Bohr, in Angstrom
- real(dp), parameter :: Ang_Bohr     = one / Bohr_Ang         ! 1 Angstrom in Bohr
- real(dp), parameter :: Bohr_meter   = Bohr_Ang * 1.d-10      ! 1 Bohr in meter
- real(dp), parameter :: Bohr_cm      = Bohr_meter * 100_dp    ! 1 Bohr in cm
- real(dp), parameter :: Ha_eV        = 27.211386245981_dp     ! 1 Hartree in eV
- real(dp), parameter :: Ha_cmm1      = 219474.63136314_dp     ! 1 Hartree in cm^-1
- real(dp), parameter :: eV_Ha        = one / Ha_eV            ! 1 eV in Hartree
- real(dp), parameter :: Ha_meV       = Ha_eV * 1000_dp        ! 1 Hartree in meV
- real(dp), parameter :: Ha_K         = 315775.02480398_dp     ! 1 Hartree in Kelvin
- real(dp), parameter :: Ha_THz       = 6579.6839204999_dp     ! 1 Hartree in THz
- real(dp), parameter :: Ha_s         = Ha_THz * 1e12 * two_pi ! 1 Hartree in s
- real(dp), parameter :: Ha_J         = 4.3597447222060d-18    ! 1 Hartree in J
+!real(dp), parameter :: Bohr_Ang     = 0.529177210544_dp      ! 1 Bohr, in Angstrom
+!real(dp), parameter :: Ang_Bohr     = one / Bohr_Ang         ! 1 Angstrom in Bohr
+!real(dp), parameter :: Bohr_meter   = Bohr_Ang * 1.d-10      ! 1 Bohr in meter
+!real(dp), parameter :: Bohr_cm      = Bohr_meter * 100_dp    ! 1 Bohr in cm
+!real(dp), parameter :: Ha_eV        = 27.211386245981_dp     ! 1 Hartree in eV
+!real(dp), parameter :: Ha_cmm1      = 219474.63136314_dp     ! 1 Hartree in cm^-1
+!real(dp), parameter :: eV_Ha        = one / Ha_eV            ! 1 eV in Hartree
+!real(dp), parameter :: Ha_meV       = Ha_eV * 1000_dp        ! 1 Hartree in meV
+!real(dp), parameter :: Ha_K         = 315775.02480398_dp     ! 1 Hartree in Kelvin
+!real(dp), parameter :: Ha_THz       = 6579.6839204999_dp     ! 1 Hartree in THz
+!real(dp), parameter :: Ha_s         = Ha_THz * 1e12 * two_pi ! 1 Hartree in s
+!real(dp), parameter :: Ha_J         = 4.3597447222060d-18    ! 1 Hartree in J
 
  ! Since 2019, the following constants have been defined and are now exact [SP].
- real(dp), parameter :: e_Cb         = 1.602176634d-19        ! minus the electron charge in Coulomb
- real(dp), parameter :: kb_SI        = 1.380649d-23           ! Boltzmann constant in Joule/K
- real(dp), parameter :: Avogadro     = 6.02214076d23          ! per mole
- real(dp), parameter :: Sp_Lt_SI     = 299792458_dp           ! Speed of light in vacuum (m/s)
+!real(dp), parameter :: e_Cb         = 1.602176634d-19        ! minus the electron charge in Coulomb
+!real(dp), parameter :: kb_SI        = 1.380649d-23           ! Boltzmann constant in Joule/K
+!real(dp), parameter :: Avogadro     = 6.02214076d23          ! per mole
+!real(dp), parameter :: Sp_Lt_SI     = 299792458_dp           ! Speed of light in vacuum (m/s)
  ! Note: In SI, c is fixed and the fine structure constant (alpha) is measured.
  !       In a.u., alpha is fixed and c is measured. Be carefull when using them. 
  !       Here we defined c.
@@ -265,25 +265,24 @@ module defs_basis
 
 ! Previous values from NIST 2006 from http://physics.nist.gov/cuu/Constants/index.html
 
-! real(dp), parameter :: kb_HaK=8.617343d-5/Ha_eV ! Boltzmann constant in Ha/K
-! real(dp), parameter :: kb_THzK=kb_HaK*Ha_THz ! Boltzmann constant in THz/K
-! real(dp), parameter :: amu_emass=1.660538782d-27/9.10938215d-31 ! 1 atomic mass unit in electronic mass
-! real(dp), parameter :: HaBohr3_GPa=Ha_eV/Bohr_Ang**3*e_Cb*1.0d+21 ! 1 Ha/Bohr^3 in GPa
-! real(dp), parameter :: Ohmcm=two*pi*Ha_THz*ninth*ten ! 1 Ohm.cm in atomic units
-!!real(dp), parameter :: eps0=8.854187817d-12 ! permittivity of free space in F/m
-! real(dp), parameter :: eps0=one/(four_pi*0.0000001_dp*299792458.0_dp**2)
-! real(dp), parameter :: AmuBohr2_Cm2=e_Cb*1.0d20/(Bohr_Ang*Bohr_Ang)
+ real(dp), parameter :: kb_HaK=8.617343d-5/Ha_eV ! Boltzmann constant in Ha/K
+ real(dp), parameter :: kb_THzK=kb_HaK*Ha_THz ! Boltzmann constant in THz/K
+ real(dp), parameter :: amu_emass=1.660538782d-27/9.10938215d-31 ! 1 atomic mass unit in electronic mass
+ real(dp), parameter :: HaBohr3_GPa=Ha_eV/Bohr_Ang**3*e_Cb*1.0d+21 ! 1 Ha/Bohr^3 in GPa
+ real(dp), parameter :: Ohmcm=two*pi*Ha_THz*ninth*ten ! 1 Ohm.cm in atomic units
+!real(dp), parameter :: eps0=8.854187817d-12 ! permittivity of free space in F/m
+ real(dp), parameter :: eps0=one/(four_pi*0.0000001_dp*299792458.0_dp**2)
+ real(dp), parameter :: AmuBohr2_Cm2=e_Cb*1.0d20/(Bohr_Ang*Bohr_Ang)
 
 ! 09/2025 [SP] update with 2022 NIST values from the same website.
 !         See also P. J. Mohr et al., Review Mod. Phys. 97, 025002 (2025)
 
- real(dp), parameter :: kb_HaK       = kb_SI / Ha_J           ! Boltzmann constant in Ha/K
- real(dp), parameter :: kb_THzK      = kb_HaK * Ha_THz        ! Boltzmann constant in THz/K
- real(dp), parameter :: amu_emass    = 1.66053906892d-27 / 9.1093837139d-31         ! 1 atomic mass unit in electronic mass
- real(dp), parameter :: HaBohr3_GPa  = Ha_eV / Bohr_Ang**3 * e_Cb * 1.0d+21         ! 1 Ha/Bohr^3 in GPa
- real(dp), parameter :: Ohmcm        = two * pi * Ha_THz * ninth * ten              ! 1 Ohm.cm in atomic units
- real(dp), parameter :: eps0         = one / (four_pi * 0.0000001_dp * Sp_Lt_SI**2) ! permittivity of free space in F/m
- real(dp), parameter :: AmuBohr2_Cm2 = e_Cb * 1.0d20 / (Bohr_Ang * Bohr_Ang)
+!real(dp), parameter :: kb_THzK      = kb_HaK * Ha_THz        ! Boltzmann constant in THz/K
+!real(dp), parameter :: amu_emass    = 1.66053906892d-27 / 9.1093837139d-31         ! 1 atomic mass unit in electronic mass
+!real(dp), parameter :: HaBohr3_GPa  = Ha_eV / Bohr_Ang**3 * e_Cb * 1.0d+21         ! 1 Ha/Bohr^3 in GPa
+!real(dp), parameter :: Ohmcm        = two * pi * Ha_THz * ninth * ten              ! 1 Ohm.cm in atomic units
+!real(dp), parameter :: eps0         = one / (four_pi * 0.0000001_dp * Sp_Lt_SI**2) ! permittivity of free space in F/m
+!real(dp), parameter :: AmuBohr2_Cm2 = e_Cb * 1.0d20 / (Bohr_Ang * Bohr_Ang)
 
 !=========================================================
 !Third part of physical constant definitions
@@ -291,11 +290,11 @@ module defs_basis
 ! Real physical constants
 ! Previous values from NIST 2006 from http://physics.nist.gov/cuu/Constants/index.html
 
-! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
-! real(dp), parameter :: FineStructureConstant=0.0072973525664_dp ! 2014 CODATA value
-! real(dp), parameter :: FineStructureConstant2=0.000053251354478_dp ! Square of fine structure constant
-! real(dp), parameter :: Sp_Lt=Sp_lt_SI/2.1876912633d6 ! speed of light in atomic units
-  real(dp), parameter :: Time_Sec=2.418884326505D-17 !  Atomic unit of time in seconds
+ real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
+ real(dp), parameter :: FineStructureConstant=0.0072973525664_dp ! 2014 CODATA value
+ real(dp), parameter :: FineStructureConstant2=0.000053251354478_dp ! Square of fine structure constant
+ real(dp), parameter :: Sp_Lt=Sp_lt_SI/2.1876912633d6 ! speed of light in atomic units
+ real(dp), parameter :: Time_Sec=2.418884326505D-17 !  Atomic unit of time in seconds
 
 ! 09/2025 [SP] update with 2022 NIST values from the same website.
 !         See also P. J. Mohr et al., Review Mod. Phys. 97, 025002 (2025)
@@ -304,13 +303,16 @@ module defs_basis
 !       In a.u., alpha is fixed and c is measured. Be carefull when used them. 
 !       Here we defined c.
 
- real(dp), parameter :: InvFineStruct= 137.035999177_dp                   ! Inverse of fine structure constant
- real(dp), parameter :: FineStructureConstant  = 0.0072973525643_dp       ! Fine structure constant
- real(dp), parameter :: FineStructureConstant2 = FineStructureConstant**2 ! Square of fine structure constant
+!real(dp), parameter :: InvFineStruct= 137.035999177_dp                   ! Inverse of fine structure constant
+!real(dp), parameter :: FineStructureConstant  = 0.0072973525643_dp       ! Fine structure constant
+!real(dp), parameter :: FineStructureConstant2 = FineStructureConstant**2 ! Square of fine structure constant
+
+!Works until now 
+
 !The compiler nvhpc has a problem with this line ?!?
 !real(dp), parameter :: Sp_Lt        = InvFineStruct                      ! Speed of light in atomic units
-!So, replace with this line ??  (Just try to rewrite it ...)
- real(dp), parameter :: Sp_Lt= 137.035999177_dp
+!So, replace with this line with straight value of Sp_Lt
+!real(dp), parameter :: Sp_Lt= 137.035999177_dp
 
 !
 !real(dp), parameter :: Time_Sec     = 2.4188843265864D-17                ! Atomic unit of time in seconds
