@@ -1,5 +1,5 @@
 
-.Version 10.3.4.6 of ABINIT, released Dec 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 25 Feb 2025.
-- ( at 09h11 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h09 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/TestBot_MPI1/v10_t14/t14.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v10_t14/t14.abi
 - output file    -> t14.abo
 - root for input  files -> t14i
 - root for output files -> t14o
@@ -216,7 +216,7 @@ P           mkmem           8
          wfoptalg6        111
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
                          0.12500    0.12500
-           xangst      1.3335265656E+00  1.2938382750E+00  1.3097135913E+00
+           xangst      1.3335265706E+00  1.2938382798E+00  1.3097135961E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             xcart      2.5200000000E+00  2.4450000000E+00  2.4750000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -274,8 +274,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
 - P     ONCVPSP-3.3.0  r_core=   1.46089   1.55067   1.70594
 - 15.00000   5.00000    180423                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -296,8 +296,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -395,7 +395,7 @@ force_length_stats: {min:   8.75909543E-03, max:   8.75909543E-03, mean:   8.759
     2       0.054976724176      0.003869662126      0.025789161199
 
  cartesian coordinates (angstrom) at end:
-    1      1.33352656564680     1.29383827500255     1.30971359126025
+    1      1.33352657057088     1.29383827978008     1.30971359609640
     2      0.00000000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
@@ -404,11 +404,11 @@ force_length_stats: {min:   8.75909543E-03, max:   8.75909543E-03, mean:   8.759
  frms,max,avg= 5.0570661E-03 7.7069836E-03   7.496E-07  1.736E-05 -1.484E-06 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.13015132283266     0.39630899877942     0.16991074806915
-    2      0.13015132283266    -0.39630899877942    -0.16991074806915
- frms,max,avg= 2.6004477E-01 3.9630900E-01   3.855E-05  8.928E-04 -7.632E-05 e/A
+    1     -0.13015133376415     0.39630903206568     0.16991076234007
+    2      0.13015133376415    -0.39630903206568    -0.16991076234007
+ frms,max,avg= 2.6004479E-01 3.9630903E-01   3.855E-05  8.928E-04 -7.632E-05 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  Fermi (or HOMO) energy (hartree) =   0.18553   Average Vxc (hartree)=  -0.34034
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  8, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -427,7 +427,7 @@ psp_core            :  3.88592547592228E-01
 local_psp           : -3.30918202648246E+00
 non_local_psp       :  1.44240817913934E+00
 total_energy        : -9.14893581844649E+00
-total_energy_eV     : -2.48955204466251E+02
+total_energy_eV     : -2.48955226295438E+02
 band_energy         :  1.83211223387796E-01
 ...
 
@@ -438,9 +438,9 @@ band_energy         :  1.83211223387796E-01
   sigma(3 3)= -3.32345345E-04  sigma(2 1)= -2.21437308E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  9.7622E+00 GPa]
-- sigma(1 1)= -9.78282911E+00  sigma(3 2)=  4.76728081E-01
-- sigma(2 2)= -9.72589543E+00  sigma(3 1)= -1.48383099E+00
-- sigma(3 3)= -9.77793598E+00  sigma(2 1)= -6.51490942E-01
+- sigma(1 1)= -9.78283075E+00  sigma(3 2)=  4.76728162E-01
+- sigma(2 2)= -9.72589706E+00  sigma(3 1)= -1.48383124E+00
+- sigma(3 3)= -9.77793763E+00  sigma(2 1)= -6.51491052E-01
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -478,8 +478,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
 - P     ONCVPSP-3.3.0  r_core=   1.46089   1.55067   1.70594
 - 15.00000   5.00000    180423                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -518,8 +518,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -616,7 +616,7 @@ force_length_stats: {min:   8.75909543E-03, max:   8.75909543E-03, mean:   8.759
     2       0.054976724179      0.003869662126      0.025789161195
 
  cartesian coordinates (angstrom) at end:
-    1      1.33352656564680     1.29383827500255     1.30971359126025
+    1      1.33352657057088     1.29383827978008     1.30971359609640
     2      0.00000000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
@@ -625,11 +625,11 @@ force_length_stats: {min:   8.75909543E-03, max:   8.75909543E-03, mean:   8.759
  frms,max,avg= 5.0570661E-03 7.7069836E-03   7.496E-07  1.736E-05 -1.484E-06 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.13015132287084     0.39630899877855     0.16991074810854
-    2      0.13015132287084    -0.39630899877855    -0.16991074810854
- frms,max,avg= 2.6004477E-01 3.9630900E-01   3.855E-05  8.928E-04 -7.632E-05 e/A
+    1     -0.13015133380234     0.39630903206481     0.16991076237946
+    2      0.13015133380234    -0.39630903206481    -0.16991076237946
+ frms,max,avg= 2.6004479E-01 3.9630903E-01   3.855E-05  8.928E-04 -7.632E-05 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  Fermi (or HOMO) energy (hartree) =   0.18553   Average Vxc (hartree)=  -0.34034
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  8, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -648,7 +648,7 @@ psp_core            :  3.88592547592228E-01
 local_psp           : -3.30918202648239E+00
 non_local_psp       :  1.44240817913938E+00
 total_energy        : -9.14893581844645E+00
-total_energy_eV     : -2.48955204466250E+02
+total_energy_eV     : -2.48955226295437E+02
 band_energy         :  1.83211223387810E-01
 ...
 
@@ -659,9 +659,9 @@ band_energy         :  1.83211223387810E-01
   sigma(3 3)= -3.32345345E-04  sigma(2 1)= -2.21437308E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  9.7622E+00 GPa]
-- sigma(1 1)= -9.78282911E+00  sigma(3 2)=  4.76728082E-01
-- sigma(2 2)= -9.72589543E+00  sigma(3 1)= -1.48383099E+00
-- sigma(3 3)= -9.77793598E+00  sigma(2 1)= -6.51490942E-01
+- sigma(1 1)= -9.78283075E+00  sigma(3 2)=  4.76728162E-01
+- sigma(2 2)= -9.72589706E+00  sigma(3 1)= -1.48383124E+00
+- sigma(3 3)= -9.77793763E+00  sigma(2 1)= -6.51491052E-01
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -699,8 +699,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
 - P     ONCVPSP-3.3.0  r_core=   1.46089   1.55067   1.70594
 - 15.00000   5.00000    180423                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -721,8 +721,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -822,7 +822,7 @@ force_length_stats: {min:   8.75909547E-03, max:   8.75909547E-03, mean:   8.759
     2       0.054976724020      0.003869662082      0.025789161129
 
  cartesian coordinates (angstrom) at end:
-    1      1.33352656564680     1.29383827500255     1.30971359126025
+    1      1.33352657057088     1.29383827978008     1.30971359609640
     2      0.00000000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
@@ -831,11 +831,11 @@ force_length_stats: {min:   8.75909547E-03, max:   8.75909547E-03, mean:   8.759
  frms,max,avg= 5.0570661E-03 7.7069837E-03   7.496E-07  1.736E-05 -1.484E-06 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.13015132302889     0.39630900063680     0.16991074842047
-    2      0.13015132302889    -0.39630900063680    -0.16991074842047
- frms,max,avg= 2.6004477E-01 3.9630900E-01   3.855E-05  8.928E-04 -7.632E-05 e/A
+    1     -0.13015133396039     0.39630903392306     0.16991076269139
+    2      0.13015133396039    -0.39630903392306    -0.16991076269139
+ frms,max,avg= 2.6004480E-01 3.9630903E-01   3.855E-05  8.928E-04 -7.632E-05 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  Fermi (or HOMO) energy (hartree) =   0.18553   Average Vxc (hartree)=  -0.34034
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  8, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -854,7 +854,7 @@ psp_core            :  3.88592547592228E-01
 local_psp           : -3.30918202653019E+00
 non_local_psp       :  1.44240817912987E+00
 total_energy        : -9.14893581844648E+00
-total_energy_eV     : -2.48955204466251E+02
+total_energy_eV     : -2.48955226295438E+02
 band_energy         :  1.83211223412069E-01
 ...
 
@@ -865,9 +865,9 @@ band_energy         :  1.83211223412069E-01
   sigma(3 3)= -3.32345345E-04  sigma(2 1)= -2.21437307E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  9.7622E+00 GPa]
-- sigma(1 1)= -9.78282911E+00  sigma(3 2)=  4.76728082E-01
-- sigma(2 2)= -9.72589543E+00  sigma(3 1)= -1.48383099E+00
-- sigma(3 3)= -9.77793599E+00  sigma(2 1)= -6.51490940E-01
+- sigma(1 1)= -9.78283075E+00  sigma(3 2)=  4.76728162E-01
+- sigma(2 2)= -9.72589706E+00  sigma(3 1)= -1.48383124E+00
+- sigma(3 3)= -9.77793763E+00  sigma(2 1)= -6.51491049E-01
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -905,8 +905,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/P.psp8
 - P     ONCVPSP-3.3.0  r_core=   1.46089   1.55067   1.70594
 - 15.00000   5.00000    180423                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -945,8 +945,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_testcase-dilatmx/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1046,7 +1046,7 @@ force_length_stats: {min:   8.75909547E-03, max:   8.75909547E-03, mean:   8.759
     2       0.054976724023      0.003869662082      0.025789161125
 
  cartesian coordinates (angstrom) at end:
-    1      1.33352656564680     1.29383827500255     1.30971359126025
+    1      1.33352657057088     1.29383827978008     1.30971359609640
     2      0.00000000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
@@ -1055,11 +1055,11 @@ force_length_stats: {min:   8.75909547E-03, max:   8.75909547E-03, mean:   8.759
  frms,max,avg= 5.0570661E-03 7.7069837E-03   7.496E-07  1.736E-05 -1.484E-06 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.13015132306709     0.39630900063593     0.16991074845986
-    2      0.13015132306709    -0.39630900063593    -0.16991074845986
- frms,max,avg= 2.6004477E-01 3.9630900E-01   3.855E-05  8.928E-04 -7.632E-05 e/A
+    1     -0.13015133399859     0.39630903392219     0.16991076273077
+    2      0.13015133399859    -0.39630903392219    -0.16991076273077
+ frms,max,avg= 2.6004480E-01 3.9630903E-01   3.855E-05  8.928E-04 -7.632E-05 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  Fermi (or HOMO) energy (hartree) =   0.18553   Average Vxc (hartree)=  -0.34034
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  8, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1078,7 +1078,7 @@ psp_core            :  3.88592547592228E-01
 local_psp           : -3.30918202653015E+00
 non_local_psp       :  1.44240817912990E+00
 total_energy        : -9.14893581844644E+00
-total_energy_eV     : -2.48955204466249E+02
+total_energy_eV     : -2.48955226295436E+02
 band_energy         :  1.83211223412096E-01
 ...
 
@@ -1089,9 +1089,9 @@ band_energy         :  1.83211223412096E-01
   sigma(3 3)= -3.32345345E-04  sigma(2 1)= -2.21437307E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  9.7622E+00 GPa]
-- sigma(1 1)= -9.78282911E+00  sigma(3 2)=  4.76728082E-01
-- sigma(2 2)= -9.72589543E+00  sigma(3 1)= -1.48383099E+00
-- sigma(3 3)= -9.77793599E+00  sigma(2 1)= -6.51490940E-01
+- sigma(1 1)= -9.78283075E+00  sigma(3 2)=  4.76728163E-01
+- sigma(2 2)= -9.72589706E+00  sigma(3 1)= -1.48383124E+00
+- sigma(3 3)= -9.77793763E+00  sigma(2 1)= -6.51491050E-01
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1213,7 +1213,7 @@ force_length_stats: {min:   8.75909547E-03, max:   8.75909547E-03, mean:   8.759
     2       0.054976724023      0.003869662082      0.025789161125
 
  cartesian coordinates (angstrom) at end:
-    1      1.33352656564680     1.29383827500255     1.30971359126025
+    1      1.33352657057088     1.29383827978008     1.30971359609640
     2      0.00000000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
@@ -1222,11 +1222,11 @@ force_length_stats: {min:   8.75909547E-03, max:   8.75909547E-03, mean:   8.759
  frms,max,avg= 5.0570661E-03 7.7069837E-03   7.496E-07  1.736E-05 -1.484E-06 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.13015132306709     0.39630900063593     0.16991074845986
-    2      0.13015132306709    -0.39630900063593    -0.16991074845986
- frms,max,avg= 2.6004477E-01 3.9630900E-01   3.855E-05  8.928E-04 -7.632E-05 e/A
+    1     -0.13015133399859     0.39630903392219     0.16991076273077
+    2      0.13015133399859    -0.39630903392219    -0.16991076273077
+ frms,max,avg= 2.6004480E-01 3.9630903E-01   3.855E-05  8.928E-04 -7.632E-05 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  Fermi (or HOMO) energy (hartree) =   0.18553   Average Vxc (hartree)=  -0.34034
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  8, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1245,7 +1245,7 @@ psp_core            :  3.88592547592228E-01
 local_psp           : -3.30918202653015E+00
 non_local_psp       :  1.44240817912990E+00
 total_energy        : -9.14893581844644E+00
-total_energy_eV     : -2.48955204466249E+02
+total_energy_eV     : -2.48955226295436E+02
 band_energy         :  1.83211223412096E-01
 ...
 
@@ -1256,9 +1256,9 @@ band_energy         :  1.83211223412096E-01
   sigma(3 3)= -3.32345345E-04  sigma(2 1)= -2.21437307E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  9.7622E+00 GPa]
-- sigma(1 1)= -9.78282911E+00  sigma(3 2)=  4.76728082E-01
-- sigma(2 2)= -9.72589543E+00  sigma(3 1)= -1.48383099E+00
-- sigma(3 3)= -9.77793599E+00  sigma(2 1)= -6.51490940E-01
+- sigma(1 1)= -9.78283075E+00  sigma(3 2)=  4.76728163E-01
+- sigma(2 2)= -9.72589706E+00  sigma(3 1)= -1.48383124E+00
+- sigma(3 3)= -9.77793763E+00  sigma(2 1)= -6.51491050E-01
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1371,7 +1371,7 @@ force_length_stats: {min:   8.75909547E-03, max:   8.75909547E-03, mean:   8.759
     2       0.054976724023      0.003869662082      0.025789161125
 
  cartesian coordinates (angstrom) at end:
-    1      1.33352656564680     1.29383827500255     1.30971359126025
+    1      1.33352657057088     1.29383827978008     1.30971359609640
     2      0.00000000000000     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
@@ -1380,11 +1380,11 @@ force_length_stats: {min:   8.75909547E-03, max:   8.75909547E-03, mean:   8.759
  frms,max,avg= 5.0570661E-03 7.7069837E-03   7.496E-07  1.736E-05 -1.484E-06 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.13015132306709     0.39630900063593     0.16991074845986
-    2      0.13015132306709    -0.39630900063593    -0.16991074845986
- frms,max,avg= 2.6004477E-01 3.9630900E-01   3.855E-05  8.928E-04 -7.632E-05 e/A
+    1     -0.13015133399859     0.39630903392219     0.16991076273077
+    2      0.13015133399859    -0.39630903392219    -0.16991076273077
+ frms,max,avg= 2.6004480E-01 3.9630903E-01   3.855E-05  8.928E-04 -7.632E-05 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  Fermi (or HOMO) energy (hartree) =   0.18553   Average Vxc (hartree)=  -0.34034
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  8, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1403,7 +1403,7 @@ psp_core            :  3.88592547592228E-01
 local_psp           : -3.30918202653015E+00
 non_local_psp       :  1.44240817912990E+00
 total_energy        : -9.14893581844644E+00
-total_energy_eV     : -2.48955204466249E+02
+total_energy_eV     : -2.48955226295436E+02
 band_energy         :  1.83211223412096E-01
 ...
 
@@ -1529,7 +1529,7 @@ P           mkmem           8
          wfoptalg6        111
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
                          0.12500    0.12500
-           xangst      1.3335265656E+00  1.2938382750E+00  1.3097135913E+00
+           xangst      1.3335265706E+00  1.2938382798E+00  1.3097135961E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             xcart      2.5200000000E+00  2.4450000000E+00  2.4750000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1622,10 +1622,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.5  wall=          5.5
+- Proc.   0 individual time (sec): cpu=          5.7  wall=          5.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and  47 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.5  wall=          5.5
+.Delivered  94 WARNINGs and  47 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.7  wall=          5.8

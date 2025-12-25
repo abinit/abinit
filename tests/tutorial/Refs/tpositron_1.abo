@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h00 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h07 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/tutorial_tpositron_1/tpositron_1.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tpositron_1/tpositron_1.abi
 - output file    -> tpositron_1.abo
 - root for input  files -> tpositron_1i
 - root for output files -> tpositron_1o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Si.xml
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -71,7 +71,7 @@ _ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
-            acell      1.0261212902E+01  1.0261212902E+01  1.0261212902E+01 Bohr
+            acell      1.0261212864E+01  1.0261212864E+01  1.0261212864E+01 Bohr
               amu      2.80855000E+01
              ecut      8.00000000E+00 Hartree
 -          fftalg         512
@@ -93,7 +93,7 @@ _ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
            kptopt1          1
            kptopt2          0
          kptrlatt        4    0    0      0    4    0      0    0    4
-          kptrlen1     2.90230929E+01
+          kptrlen1     2.90230928E+01
           kptrlen2     3.00000000E+01
 P           mkmem1          8
 P           mkmem2          1
@@ -180,7 +180,7 @@ P           mkmem2          1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.3575000000E+00  1.3575000000E+00  1.3575000000E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.5653032254E+00  2.5653032254E+00  2.5653032254E+00
+                       2.5653032159E+00  2.5653032159E+00  2.5653032159E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl       14.00000
@@ -205,9 +205,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 ...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1306065  5.1306065  G(1)= -0.0974544  0.0974544  0.0974544
- R(2)=  5.1306065  0.0000000  5.1306065  G(2)=  0.0974544 -0.0974544  0.0974544
- R(3)=  5.1306065  5.1306065  0.0000000  G(3)=  0.0974544  0.0974544 -0.0974544
+ R(1)=  0.0000000  5.1306064  5.1306064  G(1)= -0.0974544  0.0974544  0.0974544
+ R(2)=  5.1306064  0.0000000  5.1306064  G(2)=  0.0974544 -0.0974544  0.0974544
+ R(3)=  5.1306064  5.1306064  0.0000000  G(3)=  0.0974544  0.0974544 -0.0974544
  Unit cell volume ucvol=  2.7010716E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
@@ -222,9 +222,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.05836
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Si.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
@@ -256,14 +256,14 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.0108208485193    -8.011E+00 3.815E-02 9.591E-01
- ETOT  2  -8.0340187729995    -2.320E-02 5.983E-04 1.747E-01
- ETOT  3  -8.0317676715838     2.251E-03 1.128E-03 2.975E-03
- ETOT  4  -8.0318001080423    -3.244E-05 2.127E-04 9.767E-04
- ETOT  5  -8.0318088137873    -8.706E-06 2.551E-04 4.056E-05
- ETOT  6  -8.0318082871471     5.266E-07 3.074E-05 2.193E-06
- ETOT  7  -8.0318082657245     2.142E-08 4.997E-05 3.018E-08
- ETOT  8  -8.0318082651191     6.054E-10 5.622E-06 1.923E-09
+ ETOT  1  -8.0108208514839    -8.011E+00 3.815E-02 9.591E-01
+ ETOT  2  -8.0340187731631    -2.320E-02 5.983E-04 1.747E-01
+ ETOT  3  -8.0317676716905     2.251E-03 1.128E-03 2.975E-03
+ ETOT  4  -8.0318001081525    -3.244E-05 2.127E-04 9.767E-04
+ ETOT  5  -8.0318088138975    -8.706E-06 2.551E-04 4.056E-05
+ ETOT  6  -8.0318082872571     5.266E-07 3.074E-05 2.193E-06
+ ETOT  7  -8.0318082658344     2.142E-08 4.997E-05 3.018E-08
+ ETOT  8  -8.0318082652292     6.053E-10 5.622E-06 1.923E-09
 
  At SCF step    8       nres2   =  1.92E-09 < tolvrs=  1.00E-08 =>converged.
 
@@ -271,16 +271,16 @@ tolerances: {tolvrs: 1.00E-08, }
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
 lattice_vectors:
-- [  0.0000000,   5.1306065,   5.1306065, ]
-- [  5.1306065,   0.0000000,   5.1306065, ]
-- [  5.1306065,   5.1306065,   0.0000000, ]
+- [  0.0000000,   5.1306064,   5.1306064, ]
+- [  5.1306064,   0.0000000,   5.1306064, ]
+- [  5.1306064,   5.1306064,   0.0000000, ]
 lattice_lengths: [   7.25577,    7.25577,    7.25577, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7010716E+02
-convergence: {deltae:  6.054E-10, res2:  1.923E-09, residm:  5.622E-06, diffor:  0.000E+00, }
+convergence: {deltae:  6.053E-10, res2:  1.923E-09, residm:  5.622E-06, diffor:  0.000E+00, }
 etotal    :  -8.03180827E+00
 entropy   :   0.00000000E+00
-fermie    :   1.96471154E-01
+fermie    :   1.96471158E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 xred      :
@@ -293,14 +293,14 @@ force_length_stats: {min: null, max: null, mean: null, }
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        1.90945          1.56584650
-    2        1.90945          1.57745499
+    1        1.90945          1.56584649
+    2        1.90945          1.57745498
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.200724833324404
- Compensation charge over fine fft grid    =     -0.200725393100038
+ Compensation charge over spherical meshes =     -0.200724832393544
+ Compensation charge over fine fft grid    =     -0.200725392165424
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -373,7 +373,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.35750000000000     1.35750000000000     1.35750000000000
- length scales= 10.261212901569 10.261212901569 10.261212901569 bohr
+ length scales= 10.261212863679 10.261212863679 10.261212863679 bohr
               =  5.430000000000  5.430000000000  5.430000000000 angstroms
  Fermi (or HOMO) energy (hartree) =   0.19647   Average Vxc (hartree)=  -0.35576
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -385,38 +385,38 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.04564981046635E+00
-hartree             :  5.57278095123464E-01
-xc                  : -4.77993958370001E+00
-Ewald energy        : -8.39947182979608E+00
-psp_core            :  2.32205073265260E-01
-local_psp           : -2.37382699061213E+00
-PAW spherical_terms :  3.68633301447231E+00
-total_energy        : -8.03177241078083E+00
-total_energy_eV     : -2.18555642145915E+02
+kinetic             :  3.04564982455954E+00
+hartree             :  5.57278090412635E-01
+xc                  : -4.77993958962269E+00
+Ewald energy        : -8.39947186081134E+00
+psp_core            :  2.32205075837529E-01
+local_psp           : -2.37382696959291E+00
+PAW spherical_terms :  3.68633301832883E+00
+total_energy        : -8.03177241088841E+00
+total_energy_eV     : -2.18555661312498E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  7.88294838228788E-02
-Ewald energy        : -8.39947182979608E+00
-psp_core            :  2.32205073265260E-01
-xc_dc               : -1.87063377137100E+00
-PAW spherical_terms :  1.92726277895984E+00
-total_energy_dc     : -8.03180826511910E+00
-total_energy_dc_eV  : -2.18556617792076E+02
+band_energy         :  7.88295061322928E-02
+Ewald energy        : -8.39947186081134E+00
+psp_core            :  2.32205075837529E-01
+xc_dc               : -1.87063376508825E+00
+PAW spherical_terms :  1.92726277870060E+00
+total_energy_dc     : -8.03180826522916E+00
+total_energy_dc_eV  : -2.18556636958813E+02
 ...
 
 
 --- !EnergyTermsWithPAWCore
 iteration_state     : {dtset: 1, }
 comment             : 'Components of total free energy, including PAW core contributions'
-Total energy        : -5.78072495215114E+02
-Total energy DC     : -5.78072531069452E+02
-Total energy (eV)   : -1.57301525662065E+04
-Total energy DC (eV): -1.57301535418526E+04
+Total energy        : -5.78072495215221E+02
+Total energy DC     : -5.78072531069562E+02
+Total energy (eV)   : -1.57301539454794E+04
+Total energy DC (eV): -1.57301549211257E+04
 ...
 
 
@@ -436,9 +436,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.1306065  5.1306065  G(1)= -0.0974544  0.0974544  0.0974544
- R(2)=  5.1306065  0.0000000  5.1306065  G(2)=  0.0974544 -0.0974544  0.0974544
- R(3)=  5.1306065  5.1306065  0.0000000  G(3)=  0.0974544  0.0974544 -0.0974544
+ R(1)=  0.0000000  5.1306064  5.1306064  G(1)= -0.0974544  0.0974544  0.0974544
+ R(2)=  5.1306064  0.0000000  5.1306064  G(2)=  0.0974544 -0.0974544  0.0974544
+ R(3)=  5.1306064  5.1306064  0.0000000  G(3)=  0.0974544  0.0974544 -0.0974544
  Unit cell volume ucvol=  2.7010716E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
@@ -453,9 +453,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.05836
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Si.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
@@ -486,12 +486,12 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -8.4546837868825    -8.455E+00 1.092E-02 1.270E-01
- ETOT  2  -8.4550234840010    -3.397E-04 2.901E-03 4.433E-02
- ETOT  3  -8.4550293735338    -5.890E-06 2.699E-03 1.465E-04
- ETOT  4  -8.4550302605447    -8.870E-07 2.185E-04 3.904E-06
- ETOT  5  -8.4550303961720    -1.356E-07 3.354E-04 6.940E-08
- ETOT  6  -8.4550304171352    -2.096E-08 4.586E-05 1.148E-10
+ ETOT  1  -8.4546837880241    -8.455E+00 1.092E-02 1.270E-01
+ ETOT  2  -8.4550234851495    -3.397E-04 2.901E-03 4.433E-02
+ ETOT  3  -8.4550293746824    -5.890E-06 2.699E-03 1.465E-04
+ ETOT  4  -8.4550302616933    -8.870E-07 2.185E-04 3.904E-06
+ ETOT  5  -8.4550303973205    -1.356E-07 3.354E-04 6.940E-08
+ ETOT  6  -8.4550304182837    -2.096E-08 4.586E-05 1.148E-10
 
  At SCF step    6       nres2   =  1.15E-10 < tolvrs=  1.00E-08 =>converged.
 
@@ -499,16 +499,16 @@ tolerances: {tolvrs: 1.00E-08, }
 iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
 lattice_vectors:
-- [  0.0000000,   5.1306065,   5.1306065, ]
-- [  5.1306065,   0.0000000,   5.1306065, ]
-- [  5.1306065,   5.1306065,   0.0000000, ]
+- [  0.0000000,   5.1306064,   5.1306064, ]
+- [  5.1306064,   0.0000000,   5.1306064, ]
+- [  5.1306064,   5.1306064,   0.0000000, ]
 lattice_lengths: [   7.25577,    7.25577,    7.25577, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7010716E+02
 convergence: {deltae: -2.096E-08, res2:  1.148E-10, residm:  4.586E-05, diffor:  0.000E+00, }
 etotal    :  -8.45503042E+00
 entropy   :   0.00000000E+00
-fermie    :  -4.23222152E-01
+fermie    :  -4.23222153E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 xred      :
@@ -527,8 +527,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.002461933624596
- Compensation charge over fine fft grid    =     -0.002456772605800
+ Compensation charge over spherical meshes =     -0.002461933673604
+ Compensation charge over fine fft grid    =     -0.002456772654348
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -589,24 +589,24 @@ force_length_stats: {min: null, max: null, mean: null, }
  # Enhancement factor of Boronski & Nieminen
    Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)
 
- Positron lifetime                         (ps)   =  2.66579257E+02
- Positron lifetime with IPM for core elec. (ps)   =  2.70359071E+02
- Annihilation rate                         (ns-1) =  3.75122959E+00
- Annihilation rate with IPM for core elec. (ns-1) =  3.69878472E+00
+ Positron lifetime                         (ps)   =  2.66579252E+02
+ Positron lifetime with IPM for core elec. (ps)   =  2.70359066E+02
+ Annihilation rate                         (ns-1) =  3.75122967E+00
+ Annihilation rate with IPM for core elec. (ns-1) =  3.69878479E+00
 
  Annihilation rate core/valence decomposition:
-   Core    contribution to ann.rate          (ns-1) =  2.19727516E-01
-   Valence contribution to ann.rate          (ns-1) =  3.53150208E+00
-   Core    contribution to ann.rate with IPM (ns-1) =  1.60145939E-01
-   Valence contribution to ann.rate with IPM (ns-1) =  3.53863878E+00
+   Core    contribution to ann.rate          (ns-1) =  2.19727523E-01
+   Valence contribution to ann.rate          (ns-1) =  3.53150215E+00
+   Core    contribution to ann.rate with IPM (ns-1) =  1.60145944E-01
+   Valence contribution to ann.rate with IPM (ns-1) =  3.53863885E+00
 
  Annihilation rate PAW decomposition:
-   Plane-wave contribution to ann.rate          (ns-1) =  3.70675959E+00
-   Plane-wave valence contribution to ann.rate  (ns-1) =  3.54093351E+00
-   On-site core contribution to ann.rate        (ns-1) =  5.39014322E-02
-   On-site valence contribution to ann.rate     (ns-1) = -9.43142711E-03
-   Plane-wave contribution to ann.rate with IPM (ns-1) =  3.63406154E+00
-   Plane-wave core contrb. to ann.rate with IPM (ns-1) =  7.89390079E-02
+   Plane-wave contribution to ann.rate          (ns-1) =  3.70675966E+00
+   Plane-wave valence contribution to ann.rate  (ns-1) =  3.54093357E+00
+   On-site core contribution to ann.rate        (ns-1) =  5.39014335E-02
+   On-site valence contribution to ann.rate     (ns-1) = -9.43142736E-03
+   Plane-wave contribution to ann.rate with IPM (ns-1) =  3.63406161E+00
+   Plane-wave core contrb. to ann.rate with IPM (ns-1) =  7.89390103E-02
 
 ########## Lifetime computation 2
 
@@ -615,24 +615,24 @@ force_length_stats: {min: null, max: null, mean: null, }
  # Enhancement factor of Boronski & Nieminen IN THE RPA LIMIT
    Ref.: Boronski and R.M. Nieminen, Phys. Rev. B 34, 3820 (1986)
 
- Positron lifetime                         (ps)   =  2.22879743E+02
- Positron lifetime with IPM for core elec. (ps)   =  2.25505650E+02
- Annihilation rate                         (ns-1) =  4.48672448E+00
- Annihilation rate with IPM for core elec. (ns-1) =  4.43447870E+00
+ Positron lifetime                         (ps)   =  2.22879739E+02
+ Positron lifetime with IPM for core elec. (ps)   =  2.25505646E+02
+ Annihilation rate                         (ns-1) =  4.48672456E+00
+ Annihilation rate with IPM for core elec. (ns-1) =  4.43447878E+00
 
  Annihilation rate core/valence decomposition:
-   Core    contribution to ann.rate          (ns-1) =  2.19800716E-01
-   Valence contribution to ann.rate          (ns-1) =  4.26692377E+00
-   Core    contribution to ann.rate with IPM (ns-1) =  1.60145939E-01
-   Valence contribution to ann.rate with IPM (ns-1) =  4.27433276E+00
+   Core    contribution to ann.rate          (ns-1) =  2.19800723E-01
+   Valence contribution to ann.rate          (ns-1) =  4.26692384E+00
+   Core    contribution to ann.rate with IPM (ns-1) =  1.60145944E-01
+   Valence contribution to ann.rate with IPM (ns-1) =  4.27433283E+00
 
  Annihilation rate PAW decomposition:
-   Plane-wave contribution to ann.rate          (ns-1) =  4.44237253E+00
-   Plane-wave valence contribution to ann.rate  (ns-1) =  4.27635461E+00
-   On-site core contribution to ann.rate        (ns-1) =  5.37827950E-02
-   On-site valence contribution to ann.rate     (ns-1) = -9.43083994E-03
-   Plane-wave contribution to ann.rate with IPM (ns-1) =  4.36989253E+00
-   Plane-wave core contrb. to ann.rate with IPM (ns-1) =  7.89390079E-02
+   Plane-wave contribution to ann.rate          (ns-1) =  4.44237261E+00
+   Plane-wave valence contribution to ann.rate  (ns-1) =  4.27635468E+00
+   On-site core contribution to ann.rate        (ns-1) =  5.37827963E-02
+   On-site valence contribution to ann.rate     (ns-1) = -9.43084020E-03
+   Plane-wave contribution to ann.rate with IPM (ns-1) =  4.36989261E+00
+   Plane-wave core contrb. to ann.rate with IPM (ns-1) =  7.89390103E-02
 
       (*) IPM=Independent particle Model
 
@@ -651,7 +651,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.35750000000000     1.35750000000000     1.35750000000000
- length scales= 10.261212901569 10.261212901569 10.261212901569 bohr
+ length scales= 10.261212863679 10.261212863679 10.261212863679 bohr
               =  5.430000000000  5.430000000000  5.430000000000 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.42322   Average Vxc (hartree)=  -0.31887
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -661,28 +661,28 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.24452111408491E-01
-local_psp           : -3.87697206068127E-01
-PAW spherical_terms : -1.17393758927716E-02
-positronic          : -2.74984470552408E-01
-electronic          : -8.03180826511910E+00
-electron_positron_interaction: -1.48251443117367E-01
-total_energy        : -8.45504417878887E+00
-total_energy_eV     : -2.30073452702283E+02
+kinetic             :  1.24452113132905E-01
+local_psp           : -3.87697208126643E-01
+PAW spherical_terms : -1.17393761290859E-02
+positronic          : -2.74984471122825E-01
+electronic          : -8.03180826522916E+00
+electron_positron_interaction: -1.48251443586760E-01
+total_energy        : -8.45504417993875E+00
+total_energy_eV     : -2.30073472907147E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -4.23222152016116E-01
+band_energy         : -4.23222153054579E-01
 PAW spherical_terms :  0.00000000000000E+00
-electron_positron_dc:  1.48251443117375E-01
-positronic          : -2.74970708898742E-01
-electronic          : -8.03180826511910E+00
-electron_positron_interaction: -1.48251443117367E-01
-total_energy_dc     : -8.45503041713521E+00
-total_energy_dc_eV  : -2.30073078228642E+02
+electron_positron_dc:  1.48251443586758E-01
+positronic          : -2.74970709467822E-01
+electronic          : -8.03180826522916E+00
+electron_positron_interaction: -1.48251443586760E-01
+total_energy_dc     : -8.45503041828375E+00
+total_energy_dc_eV  : -2.30073098433437E+02
 ...
 
 
@@ -690,11 +690,11 @@ total_energy_dc_eV  : -2.30073078228642E+02
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
-            acell      1.0261212902E+01  1.0261212902E+01  1.0261212902E+01 Bohr
+            acell      1.0261212864E+01  1.0261212864E+01  1.0261212864E+01 Bohr
               amu      2.80855000E+01
              ecut      8.00000000E+00 Hartree
-           etotal1    -8.0318082651E+00
-           etotal2    -8.4550304171E+00
+           etotal1    -8.0318082652E+00
+           etotal2    -8.4550304183E+00
             fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
             fcart2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
@@ -718,7 +718,7 @@ total_energy_dc_eV  : -2.30073078228642E+02
            kptopt1          1
            kptopt2          0
          kptrlatt        4    0    0      0    4    0      0    0    4
-          kptrlen1     2.90230929E+01
+          kptrlen1     2.90230928E+01
           kptrlen2     3.00000000E+01
 P           mkmem1          8
 P           mkmem2          1
@@ -809,7 +809,7 @@ P           mkmem2          1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.3575000000E+00  1.3575000000E+00  1.3575000000E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.5653032254E+00  2.5653032254E+00  2.5653032254E+00
+                       2.5653032159E+00  2.5653032159E+00  2.5653032159E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl       14.00000
@@ -906,10 +906,10 @@ P           mkmem2          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.7
+- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  32 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.7  wall=          1.7
++Overall time at end (sec) : cpu=          1.7  wall=          1.8
