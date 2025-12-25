@@ -447,7 +447,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, &
    end if
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
-   call gpu_fftbox_c2c_ip(plan%gpu_ctx_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff))
+   call gpu_fftbox_c2c_ip(plan%gpu_ctx_spc, int(plan%nfft), ndat__, isign, iscale__, sp, c_loc(ff))
    !$OMP END TARGET DATA
 
    if (gpu_map__ /= 0) then
@@ -533,7 +533,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, &
    end if
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
-   call gpu_fftbox_c2c_ip(plan%gpu_ctx_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff))
+   call gpu_fftbox_c2c_ip(plan%gpu_ctx_dpc, int(plan%nfft), ndat__, isign, iscale__, dp, c_loc(ff))
    !$OMP END TARGET DATA
 
    if (gpu_map__ /= 0) then
@@ -621,7 +621,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, &
    end if
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
-   call gpu_fftbox_c2c_op(plan%gpu_ctx_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff), c_loc(gg))
+   call gpu_fftbox_c2c_op(plan%gpu_ctx_spc, int(plan%nfft), ndat__, isign, iscale__, sp, c_loc(ff), c_loc(gg))
    !$OMP END TARGET DATA
 
    if (gpu_map__ /= 0) then
@@ -710,7 +710,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, &
    end if
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
-   call gpu_fftbox_c2c_op(plan%gpu_ctx_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff), c_loc(gg))
+   call gpu_fftbox_c2c_op(plan%gpu_ctx_dpc, int(plan%nfft), ndat__, isign, iscale__, dp, c_loc(ff), c_loc(gg))
    !$OMP END TARGET DATA
 
    if (gpu_map__ /= 0) then
@@ -5278,7 +5278,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
    end do ! idat
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
-   call gpu_fftbox_c2c_ip(uplan%gpu_ctx_spc, uplan%nfft, ndat, isign__, iscale__, sp, c_loc(ur))
+   call gpu_fftbox_c2c_ip(uplan%gpu_ctx_spc, int(uplan%nfft), ndat, isign__, iscale__, sp, c_loc(ur))
    !$OMP END TARGET DATA
 
    ! Multiply by e^{ik.r}
@@ -5425,7 +5425,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
    end do ! idat
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
-   call gpu_fftbox_c2c_ip(uplan%gpu_ctx_dpc, uplan%nfft, ndat, isign__, iscale__, dp, c_loc(ur))
+   call gpu_fftbox_c2c_ip(uplan%gpu_ctx_dpc, int(uplan%nfft), ndat, isign__, iscale__, dp, c_loc(ur))
    !$OMP END TARGET DATA
 
    ! Multiply by e^{ik.r}
@@ -5535,7 +5535,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
 
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
-   call gpu_fftbox_c2c_ip(uplan%gpu_ctx_spc, uplan%nfft, ndat, isign__, iscale__, sp, c_loc(ur))
+   call gpu_fftbox_c2c_ip(uplan%gpu_ctx_spc, int(uplan%nfft), ndat, isign__, iscale__, sp, c_loc(ur))
    !$OMP END TARGET DATA
 
    ifft2ig => uplan%ifft2ig
@@ -5590,6 +5590,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
 #ifdef HAVE_GPU_CUDA
  integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
+ logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ifft2ig(:)
 #endif
 ! *************************************************************************
@@ -5646,7 +5647,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
    !bufsize = uplan%nfft * uplan%nspinor * ndat
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
-   call gpu_fftbox_c2c_ip(uplan%gpu_ctx_dpc, uplan%nfft, ndat, isign__, iscale__, dp, c_loc(ur))
+   call gpu_fftbox_c2c_ip(uplan%gpu_ctx_dpc, int(uplan%nfft), ndat, isign__, iscale__, dp, c_loc(ur))
    !$OMP END TARGET DATA
 
    ifft2ig => uplan%ifft2ig
