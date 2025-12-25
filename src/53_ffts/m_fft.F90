@@ -5249,9 +5249,9 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
    if (gpu_map__ /= 0) then
      transfer_ug = .not. xomp_target_is_present(c_loc(ug))
      transfer_ur = .not. xomp_target_is_present(c_loc(ur))
-     !$OMP TARGET ENTER DATA MAP(alloc:ug) IF(transfer_ug)
-     !$OMP TARGET UPDATE TO(ug) IF(transfer_ug)
-     !$OMP TARGET ENTER DATA MAP(alloc:ur) IF(transfer_ur)
+     !$OMP TARGET ENTER DATA MAP(alloc:ug) IF (transfer_ug)
+     !$OMP TARGET UPDATE TO(ug) IF (transfer_ug)
+     !$OMP TARGET ENTER DATA MAP(alloc:ur) IF (transfer_ur)
    end if
 
    ! TODO
@@ -5295,9 +5295,9 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
    end if
 
    if (gpu_map__ /= 0) then
-     !$OMP TARGET EXIT DATA MAP(delete:ug) IF(transfer_ug)
-     !$OMP TARGET UPDATE FROM(ur) IF(transfer_ur)
-     !$OMP TARGET EXIT DATA MAP(delete:ur) IF(transfer_ur)
+     !$OMP TARGET EXIT DATA MAP(delete:ug) IF (transfer_ug)
+     !$OMP TARGET UPDATE FROM(ur) IF (transfer_ur)
+     !$OMP TARGET EXIT DATA MAP(delete:ur) IF (transfer_ur)
    end if
 #endif
  end if
@@ -5397,9 +5397,9 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
    if (gpu_map__ /= 0) then
      transfer_ug = .not. xomp_target_is_present(c_loc(ug))
      transfer_ur = .not. xomp_target_is_present(c_loc(ur))
-     !$OMP TARGET ENTER DATA MAP(alloc:ug) IF(transfer_ug)
-     !$OMP TARGET UPDATE TO(ug) IF(transfer_ug)
-     !$OMP TARGET ENTER DATA MAP(alloc:ur) IF(transfer_ur)
+     !$OMP TARGET ENTER DATA MAP(alloc:ug) IF (transfer_ug)
+     !$OMP TARGET UPDATE TO(ug) IF (transfer_ug)
+     !$OMP TARGET ENTER DATA MAP(alloc:ur) IF (transfer_ur)
    end if
 
    ! TODO
@@ -5443,9 +5443,9 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
    end if
 
    if (gpu_map__ /= 0) then
-     !$OMP TARGET EXIT DATA MAP(delete:ug) IF(transfer_ug)
-     !$OMP TARGET UPDATE FROM(ur) IF(transfer_ur)
-     !$OMP TARGET EXIT DATA MAP(delete:ur) IF(transfer_ur)
+     !$OMP TARGET EXIT DATA MAP(delete:ug) IF (transfer_ug)
+     !$OMP TARGET UPDATE FROM(ur) IF (transfer_ur)
+     !$OMP TARGET EXIT DATA MAP(delete:ur) IF (transfer_ur)
    end if
 #endif
  end if
