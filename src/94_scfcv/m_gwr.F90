@@ -3466,8 +3466,8 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
    call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_q%istwfk, size_blocs=[-1, col_bsize])
 
    call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_q%istwfk, &
-                     desc_q%gvec, &
-                     gwp, 0) ! FIXME: gpu_option
+                     desc_q%gvec, gwp, &
+                     0) ! FIXME: gpu_option
                      !gwp, gwr%dtset%gpu_option)
 
    ! FFT and store results in rgp
@@ -3556,7 +3556,9 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  call rgp%init(nrsp, npwsp, gwr%g_slkproc, desc_qbz%istwfk, size_blocs=[-1, col_bsize])
 
  call uplan_k%init(desc_qbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_qbz%istwfk, &
-                   desc_qbz%gvec, gwp, gwr%dtset%gpu_option)
+                   desc_qbz%gvec, gwp, &
+                   0)  ! FIXME gpu_option
+                   !gwr%dtset%gpu_option)
 
  ! FFT Wc(g,g') -> Wc(r,g') and store results in rgp
  do ig2=1,wc_ggp%size_local(2), gwr%uc_batch_size
@@ -4721,7 +4723,8 @@ subroutine gwr_build_tchi(gwr)
 
          ! FFT tchi_q(r,g') --> tchi_q(g,g'). Results stored in gwr%tchi_qibz.
          call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, istwfk1, &
-                           desc_q%gvec, gwp, 0) ! FIXME GPU OPTION
+                           desc_q%gvec, gwp, &
+                           0) ! FIXME GPU OPTION
                            !gwr%dtset%gpu_option)
 
          do ig2=1, chi_rgp%size_local(2), gwr%uc_batch_size
