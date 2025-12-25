@@ -5182,8 +5182,9 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
- integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
+ integer(c_size_t) :: idat, ir, offset, bufsize
 #ifdef HAVE_GPU_CUDA
+ integer(c_size_t) :: ispinor, ipw, ifft, ig
  logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ig2ifft(:)
 #endif
@@ -5329,8 +5330,9 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
- integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
+ integer(c_size_t) :: idat, ir, offset, bufsize
 #ifdef HAVE_GPU_CUDA
+ integer(c_size_t) :: ispinor, ipw, ifft, ig
  logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ig2ifft(:)
 #endif
@@ -5588,8 +5590,9 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
+ integer(c_size_t) :: idat, ir, offset, bufsize
 #ifdef HAVE_GPU_CUDA
- integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
+ integer(c_size_t) :: ispinor, ipw, ifft, ig
  logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ifft2ig(:)
 #endif
