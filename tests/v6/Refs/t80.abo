@@ -1,5 +1,5 @@
 
-.Version 10.1.4.3 of ANADDB, released Jul 2025.
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 19 Aug 2025.
-- ( at 23h59 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h13 )
   
 
 ================================================================================
@@ -460,77 +460,77 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
   Phonon wavevector (reduced coordinates) :  0.10000  0.10000  0.00000
  Phonon energies in Hartree :
   -3.018710E-04  1.678708E-04  1.678708E-04
  Phonon energies in meV     :
-- -8.214328E+00  4.567998E+00  4.567998E+00
+- -8.214329E+00  4.567998E+00  4.567998E+00
  Phonon frequencies in cm-1    :
 - -6.625303E+01  3.684339E+01  3.684339E+01
  Phonon frequencies in Thz     :
 - -1.986216E+00  1.104537E+00  1.104537E+00
  Phonon energies in Kelvin  :
-- -9.532321E+01  5.300935E+01  5.300935E+01
+- -9.532333E+01  5.300942E+01  5.300942E+01
  Speed of sound for this q and mode:
-   in atomic units:    -0.1825682086E-02
+   in atomic units:    -0.1825682085E-02
    in units km/s:             -3.99403
  Partial Debye temperature for this q and mode:
-   in atomic units:    -0.1486329934E-02
-   in SI units K  :           -469.34531
+   in atomic units:    -0.1486329933E-02
+   in SI units K  :           -469.34587
 
  Speed of sound for this q and mode:
    in atomic units:     0.1015263998E-02
    in units km/s:              2.22108
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8265498592E-03
-   in SI units K  :            261.00349
+   in atomic units:     0.8265498587E-03
+   in SI units K  :            261.00380
 
  Speed of sound for this q and mode:
    in atomic units:     0.1015263998E-02
    in units km/s:              2.22108
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8265498592E-03
-   in SI units K  :            261.00349
+   in atomic units:     0.8265498587E-03
+   in SI units K  :            261.00380
 
 
   Phonon wavevector (reduced coordinates) :  0.20000  0.20000  0.00000
  Phonon energies in Hartree :
   -2.188300E-04  2.947318E-04  2.947318E-04
  Phonon energies in meV     :
-- -5.954668E+00  8.020060E+00  8.020060E+00
+- -5.954668E+00  8.020061E+00  8.020061E+00
  Phonon frequencies in cm-1    :
 - -4.802764E+01  6.468615E+01  6.468615E+01
  Phonon frequencies in Thz     :
 - -1.439832E+00  1.939242E+00  1.939242E+00
  Phonon energies in Kelvin  :
-- -6.910097E+01  9.306883E+01  9.306883E+01
+- -6.910106E+01  9.306894E+01  9.306894E+01
 
   Phonon wavevector (reduced coordinates) :  0.30000  0.30000  0.00000
  Phonon energies in Hartree :
    3.594771E-04  3.594771E-04  7.544415E-04
  Phonon energies in meV     :
--  9.781870E+00  9.781870E+00  2.052940E+01
+-  9.781871E+00  9.781871E+00  2.052940E+01
  Phonon frequencies in cm-1    :
 -  7.889611E+01  7.889611E+01  1.655808E+02
  Phonon frequencies in Thz     :
 -  2.365246E+00  2.365246E+00  4.963987E+00
  Phonon energies in Kelvin  :
--  1.135138E+02  1.135138E+02  2.382335E+02
+-  1.135139E+02  1.135139E+02  2.382338E+02
 
   Phonon wavevector (reduced coordinates) :  0.40000  0.40000  0.00000
  Phonon energies in Hartree :
    3.729244E-04  3.729244E-04  1.234658E-03
  Phonon energies in meV     :
--  1.014779E+01  1.014779E+01  3.359675E+01
+-  1.014779E+01  1.014779E+01  3.359676E+01
  Phonon frequencies in cm-1    :
 -  8.184744E+01  8.184744E+01  2.709761E+02
  Phonon frequencies in Thz     :
 -  2.453724E+00  2.453724E+00  8.123660E+00
  Phonon energies in Kelvin  :
--  1.177601E+02  1.177601E+02  3.898737E+02
+-  1.177602E+02  1.177602E+02  3.898742E+02
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
  Phonon energies in Hartree :
@@ -542,43 +542,43 @@
  Phonon frequencies in Thz     :
 -  2.435994E+00  2.435994E+00  9.297808E+00
  Phonon energies in Kelvin  :
--  1.169091E+02  1.169091E+02  4.462239E+02
+-  1.169093E+02  1.169093E+02  4.462244E+02
 
   Phonon wavevector (reduced coordinates) :  0.42900  0.42900  0.85800
  Phonon energies in Hartree :
    3.357505E-04  3.764737E-04  1.228167E-03
  Phonon energies in meV     :
--  9.136236E+00  1.024437E+01  3.342013E+01
+-  9.136237E+00  1.024437E+01  3.342013E+01
  Phonon frequencies in cm-1    :
 -  7.368872E+01  8.262643E+01  2.695516E+02
  Phonon frequencies in Thz     :
 -  2.209132E+00  2.477078E+00  8.080953E+00
  Phonon energies in Kelvin  :
--  1.060215E+02  1.188808E+02  3.878241E+02
+-  1.060216E+02  1.188810E+02  3.878246E+02
 
   Phonon wavevector (reduced coordinates) :  0.35800  0.35800  0.71600
  Phonon energies in Hartree :
    4.015831E-04  5.056563E-04  9.035459E-04
  Phonon energies in meV     :
--  1.092763E+01  1.375961E+01  2.458673E+01
+-  1.092763E+01  1.375961E+01  2.458674E+01
  Phonon frequencies in cm-1    :
 -  8.813731E+01  1.109787E+02  1.983054E+02
  Phonon frequencies in Thz     :
 -  2.642290E+00  3.327059E+00  5.945046E+00
  Phonon energies in Kelvin  :
--  1.268098E+02  1.596734E+02  2.853169E+02
+-  1.268099E+02  1.596736E+02  2.853172E+02
 
   Phonon wavevector (reduced coordinates) :  0.28600  0.28600  0.57200
  Phonon energies in Hartree :
    5.332439E-04  6.575096E-04  8.515097E-04
  Phonon energies in meV     :
--  1.451030E+01  1.789175E+01  2.317076E+01
+-  1.451031E+01  1.789175E+01  2.317076E+01
  Phonon frequencies in cm-1    :
 -  1.170335E+02  1.443067E+02  1.868848E+02
  Phonon frequencies in Thz     :
 -  3.508576E+00  4.326205E+00  5.602665E+00
  Phonon energies in Kelvin  :
--  1.683849E+02  2.076248E+02  2.688852E+02
+-  1.683851E+02  2.076251E+02  2.688855E+02
 
   Phonon wavevector (reduced coordinates) :  0.21500  0.21500  0.43000
  Phonon energies in Hartree :
@@ -590,7 +590,7 @@
  Phonon frequencies in Thz     :
 -  3.078164E+00  3.987396E+00  5.587043E+00
  Phonon energies in Kelvin  :
--  1.477284E+02  1.913646E+02  2.681354E+02
+-  1.477286E+02  1.913648E+02  2.681358E+02
 
   Phonon wavevector (reduced coordinates) :  0.14300  0.14300  0.28600
  Phonon energies in Hartree :
@@ -602,39 +602,39 @@
  Phonon frequencies in Thz     :
 -  6.806481E-01  2.142957E+00  3.927525E+00
  Phonon energies in Kelvin  :
--  3.266592E+01  1.028456E+02  1.884912E+02
+-  3.266596E+01  1.028457E+02  1.884915E+02
 
   Phonon wavevector (reduced coordinates) :  0.07200  0.07200  0.14400
  Phonon energies in Hartree :
   -2.023851E-04 -1.057817E-04  2.381746E-04
  Phonon energies in meV     :
-- -5.507179E+00 -2.878467E+00  6.481059E+00
+- -5.507180E+00 -2.878467E+00  6.481060E+00
  Phonon frequencies in cm-1    :
 - -4.441840E+01 -2.321640E+01  5.227327E+01
  Phonon frequencies in Thz     :
 - -1.331630E+00 -6.960102E-01  1.567113E+00
  Phonon energies in Kelvin  :
-- -6.390809E+01 -3.340318E+01  7.520949E+01
+- -6.390817E+01 -3.340322E+01  7.520958E+01
  Speed of sound for this q and mode:
    in atomic units:    -0.1202084036E-02
    in units km/s:             -2.62979
  Partial Debye temperature for this q and mode:
-   in atomic units:    -0.9786443653E-03
-   in SI units K  :           -309.03108
+   in atomic units:    -0.9786443647E-03
+   in SI units K  :           -309.03145
 
  Speed of sound for this q and mode:
-   in atomic units:    -0.6282996136E-03
+   in atomic units:    -0.6282996132E-03
    in units km/s:             -1.37453
  Partial Debye temperature for this q and mode:
-   in atomic units:    -0.5115132202E-03
-   in SI units K  :           -161.52291
+   in atomic units:    -0.5115132200E-03
+   in SI units K  :           -161.52310
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1414658480E-02
+   in atomic units:     0.1414658479E-02
    in units km/s:              3.09484
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1151706127E-02
-   in SI units K  :            363.67960
+   in atomic units:     0.1151706126E-02
+   in SI units K  :            363.68003
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -655,82 +655,82 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
   Phonon wavevector (reduced coordinates) :  0.12500  0.12500  0.12500
  Phonon energies in Hartree :
   -1.079608E-04 -1.079608E-04  2.296071E-04
  Phonon energies in meV     :
-- -2.937761E+00 -2.937761E+00  6.247928E+00
+- -2.937762E+00 -2.937762E+00  6.247928E+00
  Phonon frequencies in cm-1    :
 - -2.369465E+01 -2.369465E+01  5.039294E+01
  Phonon frequencies in Thz     :
 - -7.103476E-01 -7.103476E-01  1.510742E+00
  Phonon energies in Kelvin  :
-- -3.409127E+01 -3.409127E+01  7.250411E+01
+- -3.409131E+01 -3.409131E+01  7.250420E+01
  Speed of sound for this q and mode:
-   in atomic units:    -0.6031550694E-03
+   in atomic units:    -0.6031550691E-03
    in units km/s:             -1.31952
  Partial Debye temperature for this q and mode:
-   in atomic units:    -0.4910424664E-03
-   in SI units K  :           -155.05876
+   in atomic units:    -0.4910424661E-03
+   in SI units K  :           -155.05895
 
  Speed of sound for this q and mode:
-   in atomic units:    -0.6031550694E-03
+   in atomic units:    -0.6031550691E-03
    in units km/s:             -1.31952
  Partial Debye temperature for this q and mode:
-   in atomic units:    -0.4910424664E-03
-   in SI units K  :           -155.05876
+   in atomic units:    -0.4910424661E-03
+   in SI units K  :           -155.05895
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1282768979E-02
+   in atomic units:     0.1282768978E-02
    in units km/s:              2.80630
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1044331839E-02
-   in SI units K  :            329.77352
+   in SI units K  :            329.77391
 
 
   Phonon wavevector (reduced coordinates) :  0.25000  0.25000  0.25000
  Phonon energies in Hartree :
    2.842198E-04  2.842198E-04  7.409979E-04
  Phonon energies in meV     :
--  7.734014E+00  7.734014E+00  2.016358E+01
+-  7.734015E+00  7.734015E+00  2.016358E+01
  Phonon frequencies in cm-1    :
 -  6.237904E+01  6.237904E+01  1.626302E+02
  Phonon frequencies in Thz     :
 -  1.870077E+00  1.870077E+00  4.875532E+00
  Phonon energies in Kelvin  :
--  8.974941E+01  8.974941E+01  2.339883E+02
+-  8.974952E+01  8.974952E+01  2.339886E+02
 
   Phonon wavevector (reduced coordinates) :  0.37500  0.37500  0.37500
  Phonon energies in Hartree :
    4.145196E-04  4.145196E-04  1.181308E-03
  Phonon energies in meV     :
--  1.127965E+01  1.127965E+01  3.214501E+01
+-  1.127965E+01  1.127965E+01  3.214502E+01
  Phonon frequencies in cm-1    :
 -  9.097653E+01  9.097653E+01  2.592670E+02
  Phonon frequencies in Thz     :
 -  2.727408E+00  2.727408E+00  7.772630E+00
  Phonon energies in Kelvin  :
--  1.308948E+02  1.308948E+02  3.730270E+02
+-  1.308949E+02  1.308949E+02  3.730274E+02
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
    3.984722E-04  3.984722E-04  1.340991E-03
  Phonon energies in meV     :
--  1.084298E+01  1.084298E+01  3.649023E+01
+-  1.084298E+01  1.084298E+01  3.649024E+01
  Phonon frequencies in cm-1    :
 -  8.745453E+01  8.745453E+01  2.943136E+02
  Phonon frequencies in Thz     :
 -  2.621821E+00  2.621821E+00  8.823300E+00
  Phonon energies in Kelvin  :
--  1.258274E+02  1.258274E+02  4.234511E+02
+-  1.258276E+02  1.258276E+02  4.234516E+02
 -
 - Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.059  and wall time      0.059 sec
++Total cpu time      0.057  and wall time      0.057 sec
 
  anaddb : the run completed successfully.

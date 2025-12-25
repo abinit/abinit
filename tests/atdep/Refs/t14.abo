@@ -1,6 +1,6 @@
- 
+  
 .Version    4.0 of ATDEP
-.Copyright (C) 1998-2025 ABINIT group (FB,JB).
+.Copyright (C) 1998-2025 ABINIT group (FB,JB,GA).
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -13,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : 16 Feb 2025.
+.Starting date : 21 Dec 2025.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -833,10 +833,10 @@
  
  ========== For an Anisotropic Material =======================================
  Sijkl [in GPa-1]=
- | S11 S12 S13 S14 S15 S16 |      0.004   -0.001   -0.000   -0.000   -0.000   -0.000
- | S21 S22 S23 S24 S25 S26 |     -0.001    0.007   -0.002   -0.000   -0.000   -0.000
- | S31 S32 S33 S34 S35 S36 |     -0.000   -0.002    0.006   -0.000   -0.000   -0.000
- | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.009   -0.000   -0.000
+ | S11 S12 S13 S14 S15 S16 |      0.004   -0.001   -0.000    0.000    0.000   -0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.001    0.007   -0.002    0.000    0.000   -0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.000   -0.002    0.006    0.000    0.000   -0.000
+ | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.009    0.000   -0.000
  | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.011   -0.000
  | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.015
  
@@ -851,25 +851,25 @@
  | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.009    0.000    0.000
  | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.011    0.000
  | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.015
- For density rho [in kg.m-3]=19032.880
+ For density rho [in kg.m-3]=19032.436
  
  ========================= Voigt average (constant strain) ===================
  ISOTHERMAL modulus [in GPa]: Bulk Kt=  107.541 and Shear G=   88.546
  Average of Young modulus E [in GPa]=  208.433 Lame modulus Lambda [in GPa]=   48.510 and Poisson ratio Nu=    0.177
- Velocities [in m.s-1]: compressional Vp= 3442.864  shear Vs= 2156.913  and bulk Vphi= 2377.032
- Debye velocity [in m.s-1]= 2375.438  and temperature [in K]=  257.291
+ Velocities [in m.s-1]: compressional Vp= 3442.904  shear Vs= 2156.938  and bulk Vphi= 2377.060
+ Debye velocity [in m.s-1]= 2375.466  and temperature [in K]=  257.295
  
  ========================= Reuss average (constant stress) ===================
  ISOTHERMAL modulus [in GPa]: Bulk Kt=  106.212 and Shear G=   82.520
  Average of Young modulus E [in GPa]=  196.635 Lame modulus Lambda [in GPa]=   51.198 and Poisson ratio Nu=    0.191
- Velocities [in m.s-1]: compressional Vp= 3370.651  shear Vs= 2082.221  and bulk Vphi= 2362.293
- Debye velocity [in m.s-1]= 2296.643  and temperature [in K]=  248.757
+ Velocities [in m.s-1]: compressional Vp= 3370.690  shear Vs= 2082.246  and bulk Vphi= 2362.320
+ Debye velocity [in m.s-1]= 2296.670  and temperature [in K]=  248.760
  
  ============================== Hill average =================================
  ISOTHERMAL modulus [in GPa]: Bulk Kt=  106.876 and Shear G=   85.533
  Average of Young modulus E [in GPa]=  202.562 Lame modulus Lambda [in GPa]=   49.854 and Poisson ratio Nu=    0.184
- Velocities [in m.s-1]: compressional Vp= 3406.949  shear Vs= 2119.896  and bulk Vphi= 2369.674
- Debye velocity [in m.s-1]= 2336.400  and temperature [in K]=  253.063
+ Velocities [in m.s-1]: compressional Vp= 3406.989  shear Vs= 2119.921  and bulk Vphi= 2369.702
+ Debye velocity [in m.s-1]= 2336.428  and temperature [in K]=  253.066
  
  ========================= Elastic anisotropy =================================
  Elastic anisotropy index : A_U= 5*G_V/G_R + K_V/K_R - 6 =    0.378
@@ -890,7 +890,7 @@
   Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 
   Sigma   = (< (F_MD - F_TDEP)^2 >/<F_MD**2>)**0.5 
      <U_MD>            U_0              U_1              U_2            Delta_U          Delta_U2          Delta_F2          Sigma
- -1416.73102      -1416.77521          0.00000          0.04419          0.00000          0.05294          0.00354          0.40455
+ -1416.73115      -1416.77534          0.00000          0.04419          0.00000          0.05294          0.00354          0.40455
  NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=      0.03878
  
  See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files

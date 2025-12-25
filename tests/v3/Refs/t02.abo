@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h08 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v3_t02/t02.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h11 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v3_t02/t02.abi
 - output file    -> t02.abo
 - root for input  files -> t02i
 - root for output files -> t02o
@@ -129,6 +129,7 @@ _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           3
 -   mkqmem =           3        mk1mem =           3           mpw =          65
       nfft =        1728          nkpt =           3
+- my_mband =           5
 ================================================================================
 P This job should need less than                       1.043 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
@@ -188,6 +189,7 @@ _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           3
 -   mkqmem =           3        mk1mem =           3           mpw =          65
       nfft =        1728          nkpt =           3
+- my_mband =          10
 ================================================================================
 P This job should need less than                       1.196 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
@@ -311,6 +313,7 @@ _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           3
 -   mkqmem =           3        mk1mem =           3           mpw =          65
       nfft =        1728          nkpt =           3
+- my_mband =          10
 ================================================================================
 P This job should need less than                       1.343 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
@@ -483,26 +486,26 @@ P          mk1mem           3
            tolvrs10    0.00000000E+00
             typat      1  1
               wtk        0.25000    0.25000    0.50000
-           xangst1    -2.6346105749E-04 -2.1064633146E-17  2.7490878086E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst2    -1.3096941300E-18 -2.5642383897E-17  2.7494845596E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst3     2.6346105749E-04 -8.4392856006E-17  2.7498813106E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst4    -1.3096941300E-18 -2.5642383897E-17  2.7494845596E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst5    -1.3096941300E-18 -2.5642383897E-17  2.7494845596E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst6    -1.3096941300E-18 -2.5642383897E-17  2.7494845596E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst7    -2.6346105749E-04 -2.1064633146E-17  2.7490878086E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst8    -1.3096941300E-18 -2.5642383897E-17  2.7494845596E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst9     2.6346105749E-04 -8.4392856006E-17  2.7498813106E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst10   -1.3096941300E-18 -2.5642383897E-17  2.7494845596E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
+           xangst1    -2.6346105847E-04 -2.1064633224E-17  2.7490878187E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst2    -1.3096941348E-18 -2.5642383992E-17  2.7494845697E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst3     2.6346105847E-04 -8.4392856317E-17  2.7498813207E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst4    -1.3096941348E-18 -2.5642383992E-17  2.7494845697E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst5    -1.3096941348E-18 -2.5642383992E-17  2.7494845697E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst6    -1.3096941348E-18 -2.5642383992E-17  2.7494845697E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst7    -2.6346105847E-04 -2.1064633224E-17  2.7490878187E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst8    -1.3096941348E-18 -2.5642383992E-17  2.7494845697E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst9     2.6346105847E-04 -8.4392856317E-17  2.7498813207E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst10   -1.3096941348E-18 -2.5642383992E-17  2.7494845697E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
             xcart1    -4.9786924535E-04 -3.9806387736E-17  5.1950230734E+00
                        2.4749632235E-18  4.8457082961E-17 -5.1957728242E+00
             xcart2    -2.4749632235E-18 -4.8457082961E-17  5.1957728242E+00
@@ -596,8 +599,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -612,8 +615,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -844,8 +847,8 @@ force_length_stats: {min:   1.01237417E-02, max:   1.01237417E-02, mean:   1.012
     2       0.076020721244      0.075843576410      0.075843576410
 
  cartesian coordinates (angstrom) at end:
-    1     -0.00026346105749    -0.00000000000000     2.74908780855441
-    2      0.00000000000000     0.00000000000000    -2.74948455957311
+    1     -0.00026346105847    -0.00000000000000     2.74908781870549
+    2      0.00000000000000     0.00000000000000    -2.74948456972565
 
  cartesian forces (hartree/bohr) at end:
     1      0.00002372045923     0.00000000000000     0.01012371387053
@@ -853,11 +856,11 @@ force_length_stats: {min:   1.01237417E-02, max:   1.01237417E-02, mean:   1.012
  frms,max,avg= 5.8449450E-03 1.0123714E-02   6.333E-11  0.000E+00 -2.888E-10 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00121975495356     0.00000000000000     0.52058225439056
-    2     -0.00121975495356    -0.00000000000000    -0.52058225439056
- frms,max,avg= 3.0055913E-01 5.2058225E-01   3.257E-09  0.000E+00 -1.485E-08 e/A
+    1      0.00121975505601     0.00000000000000     0.52058229811461
+    2     -0.00121975505601    -0.00000000000000    -0.52058229811461
+ frms,max,avg= 3.0055915E-01 5.2058230E-01   3.257E-09  0.000E+00 -1.485E-08 e/A
  length scales=  9.000000000000  9.000000000000  9.000000000000 bohr
-              =  4.762594877310  4.762594877310  4.762594877310 angstroms
+              =  4.762594894896  4.762594894896  4.762594894896 angstroms
  prteigrs : about to open file t02o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.04304   Average Vxc (hartree)=  -0.30593
  Eigenvalues (hartree) for nkpt=   3  k points:
@@ -885,7 +888,7 @@ psp_core            :  1.44126513565306E+00
 local_psp           : -1.95568574758758E+00
 non_local_psp       :  5.63309309288943E-01
 total_energy        : -1.06896108209637E+01
-total_energy_eV     : -2.90879103363252E+02
+total_energy_eV     : -2.90879128868460E+02
 band_energy         : -1.21895017669056E+00
 ...
 
@@ -910,9 +913,9 @@ band_energy         : -1.21895017669056E+00
   sigma(3 3)=  1.02430949E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.0398E+01 GPa]
-- sigma(1 1)=  1.55315471E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.55258148E+01  sigma(3 1)= -4.84058904E-03
-- sigma(3 3)=  3.01362205E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.55315497E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.55258174E+01  sigma(3 1)= -4.84058986E-03
+- sigma(3 3)=  3.01362256E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -1088,8 +1091,8 @@ xred      :
 - [  2.3100E-01,   2.3100E-01,   2.3100E-01, Bi]
 - [ -2.3100E-01,  -2.3100E-01,  -2.3100E-01, Bi]
 cartesian_forces: # hartree/bohr
-- [  4.20987976E-11,  -1.96119678E-19,   1.01080304E-02, ]
-- [ -4.20987976E-11,   1.96119678E-19,  -1.01080304E-02, ]
+- [  4.20987977E-11,  -3.84214291E-19,   1.01080304E-02, ]
+- [ -4.20987977E-11,   3.84214291E-19,  -1.01080304E-02, ]
 force_length_stats: {min:   1.01080304E-02, max:   1.01080304E-02, mean:   1.01080304E-02, }
 ...
 
@@ -1117,8 +1120,8 @@ force_length_stats: {min:   1.01080304E-02, max:   1.01080304E-02, mean:   1.010
     2       0.075785035991      0.075785035660      0.075785035660
 
  cartesian coordinates (angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     2.74948455957311
-    2      0.00000000000000     0.00000000000000    -2.74948455957311
+    1     -0.00000000000000    -0.00000000000000     2.74948456972565
+    2      0.00000000000000     0.00000000000000    -2.74948456972565
 
  cartesian forces (hartree/bohr) at end:
     1      0.00000000004210    -0.00000000000000     0.01010803042703
@@ -1126,11 +1129,11 @@ force_length_stats: {min:   1.01080304E-02, max:   1.01080304E-02, mean:   1.010
  frms,max,avg= 5.8358741E-03 1.0108030E-02  -2.107E-12  0.000E+00  1.903E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000216481    -0.00000000000000     0.51977577936753
-    2     -0.00000000216481     0.00000000000000    -0.51977577936753
- frms,max,avg= 3.0009269E-01 5.1977578E-01  -1.083E-10  0.000E+00  9.788E-11 e/A
+    1      0.00000000216481    -0.00000000000000     0.51977582302385
+    2     -0.00000000216481     0.00000000000000    -0.51977582302385
+ frms,max,avg= 3.0009271E-01 5.1977582E-01  -1.083E-10  0.000E+00  9.788E-11 e/A
  length scales=  9.000000000000  9.000000000000  9.000000000000 bohr
-              =  4.762594877310  4.762594877310  4.762594877310 angstroms
+              =  4.762594894896  4.762594894896  4.762594894896 angstroms
  prteigrs : about to open file t02o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.04304   Average Vxc (hartree)=  -0.30593
  Eigenvalues (hartree) for nkpt=   3  k points:
@@ -1158,7 +1161,7 @@ psp_core            :  1.44126513565306E+00
 local_psp           : -1.95539062759238E+00
 non_local_psp       :  5.63285770546996E-01
 total_energy        : -1.06896184112477E+01
-total_energy_eV     : -2.90879309905385E+02
+total_energy_eV     : -2.90879335410611E+02
 band_energy         : -1.21889787987893E+00
 ...
 
@@ -1183,9 +1186,9 @@ band_energy         : -1.21889787987893E+00
   sigma(3 3)=  1.02442017E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.0403E+01 GPa]
-- sigma(1 1)=  1.55346032E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.55346032E+01  sigma(3 1)=  6.31574518E-09
-- sigma(3 3)=  3.01394769E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.55346058E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.55346058E+01  sigma(3 1)=  6.31574624E-09
+- sigma(3 3)=  3.01394820E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -1361,8 +1364,8 @@ xred      :
 - [  2.3110E-01,   2.3100E-01,   2.3100E-01, Bi]
 - [ -2.3100E-01,  -2.3100E-01,  -2.3100E-01, Bi]
 cartesian_forces: # hartree/bohr
-- [ -2.36760418E-05,   4.14498095E-19,   1.00923752E-02, ]
-- [  2.36760418E-05,  -4.14498095E-19,  -1.00923752E-02, ]
+- [ -2.36760418E-05,   3.51799891E-19,   1.00923752E-02, ]
+- [  2.36760418E-05,  -3.51799891E-19,  -1.00923752E-02, ]
 force_length_stats: {min:   1.00924029E-02, max:   1.00924029E-02, mean:   1.00924029E-02, }
 ...
 
@@ -1390,8 +1393,8 @@ force_length_stats: {min:   1.00924029E-02, max:   1.00924029E-02, mean:   1.009
     2       0.075549782828      0.075726595906      0.075726595906
 
  cartesian coordinates (angstrom) at end:
-    1      0.00026346105749    -0.00000000000000     2.74988131059181
-    2      0.00000000000000     0.00000000000000    -2.74948455957311
+    1      0.00026346105847    -0.00000000000000     2.74988132074581
+    2      0.00000000000000     0.00000000000000    -2.74948456972565
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00002367604181     0.00000000000000     0.01009237517736
@@ -1399,11 +1402,11 @@ force_length_stats: {min:   1.00924029E-02, max:   1.00924029E-02, mean:   1.009
  frms,max,avg= 5.8268516E-03 1.0092375E-02  -6.925E-11  0.000E+00  2.957E-10 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00121747091828     0.00000000000000     0.51897075413009
-    2      0.00121747091828    -0.00000000000000    -0.51897075413009
- frms,max,avg= 2.9962873E-01 5.1897075E-01  -3.561E-09  0.000E+00  1.520E-08 e/A
+    1     -0.00121747102054     0.00000000000000     0.51897079771879
+    2      0.00121747102054    -0.00000000000000    -0.51897079771879
+ frms,max,avg= 2.9962875E-01 5.1897080E-01  -3.561E-09  0.000E+00  1.520E-08 e/A
  length scales=  9.000000000000  9.000000000000  9.000000000000 bohr
-              =  4.762594877310  4.762594877310  4.762594877310 angstroms
+              =  4.762594894896  4.762594894896  4.762594894896 angstroms
  prteigrs : about to open file t02o_DS3_EIG
  Fermi (or HOMO) energy (hartree) =   0.04303   Average Vxc (hartree)=  -0.30594
  Eigenvalues (hartree) for nkpt=   3  k points:
@@ -1431,7 +1434,7 @@ psp_core            :  1.44126513565306E+00
 local_psp           : -1.95509579308388E+00
 non_local_psp       :  5.63262258542176E-01
 total_energy        : -1.06896259779852E+01
-total_energy_eV     : -2.90879515806782E+02
+total_energy_eV     : -2.90879541312027E+02
 band_energy         : -1.21884565101736E+00
 ...
 
@@ -1456,9 +1459,9 @@ band_energy         : -1.21884565101736E+00
   sigma(3 3)=  1.02453090E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.0408E+01 GPa]
-- sigma(1 1)=  1.55376544E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.55433785E+01  sigma(3 1)=  4.83624917E-03
-- sigma(3 3)=  3.01427346E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.55376570E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.55433811E+01  sigma(3 1)=  4.83624998E-03
+- sigma(3 3)=  3.01427397E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1493,7 +1496,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1539,7 +1542,7 @@ tolerances: {toldfe: 1.00E-07, }
 
  ETOT  9   2.3546579102759     -1.065E-10 1.070E-13 2.267E-10
 
- At SCF step    9, etot is converged :
+ At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.065E-10 < toldfe=  1.000E-07
 ================================================================================
 
@@ -1568,7 +1571,7 @@ tolerances: {toldfe: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.2354657910E+01 Ha. Also 2DEtotal=    0.640735002555E+02 eV
+ 2DEtotal=    0.2354657910E+01 Ha. Also 2DEtotal=    0.640735058737E+02 eV
     (2DErelax=   -6.3994197655E+01 Ha. 2DEnonrelax=    6.6348855566E+01 Ha)
     (  non-var. 2DEtotal :    2.3546566730E+00 Ha)
 
@@ -1578,147 +1581,147 @@ tolerances: {toldfe: 1.00E-07, }
 
 
  ==> Compute Derivative Database <==
-
+  
   Ewald part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1        16.8042009016         0.0000000000
-
+  
    2    1   1    1         8.4162816063         0.0000000000
-
+  
    3    1   1    1         8.4162816063        -0.0000000000
-
+  
    1    2   1    1       -16.8042009016        -0.0000000000
-
+  
    2    2   1    1        -8.4162816063        -0.0000000000
-
+  
    3    2   1    1        -8.4162816063        -0.0000000000
-
+  
   Frozen wf local part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1        35.4427007036         0.0000000000
-
+  
    2    1   1    1        20.0323800168         0.0000000000
-
+  
    3    1   1    1        20.0323800168         0.0000000000
-
+  
    1    2   1    1         0.0000000000         0.0000000000
-
+  
    2    2   1    1         0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
-
+  
   Frozen wf non-local part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1        14.1019539604         0.0000000000
-
+  
    2    1   1    1         7.2080335519         0.0000000000
-
+  
    3    1   1    1         7.2080335519         0.0000000000
-
+  
    1    2   1    1         0.0000000000         0.0000000000
-
+  
    2    2   1    1         0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
-
+  
   Frozen wf xc core (1) part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
-
+  
    1    2   1    1         0.0000000000         0.0000000000
-
+  
    2    2   1    1         0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
-
+  
   Frozen wf xc core (2) part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
-
+  
    1    2   1    1         0.0000000000         0.0000000000
-
+  
    2    2   1    1         0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
-
+  
   Non-stationary local part of the 2-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1       -49.8689160752         0.0000000000
-
+  
    2    1   1    1       -28.4851712854         0.0000000000
-
+  
    3    1   1    1       -28.4851712854         0.0000000000
-
+  
    1    2   1    1        14.4262101811         0.0000000000
-
+  
    2    2   1    1         8.4527770535         0.0000000000
-
+  
    3    2   1    1         8.4527770535         0.0000000000
-
+  
   Non-stationary non-local part of the 2nd-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1       -14.1252828175         0.0930610015
-
+  
    2    1   1    1        -6.5866682111         0.2268964679
-
+  
    3    1   1    1        -6.5866682111         0.2268964679
-
+  
    1    2   1    1         0.0233009866         0.7757231282
-
+  
    2    2   1    1        -0.6213964108         0.6447014372
-
+  
    3    2   1    1        -0.6213964108         0.6447014372
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         2.3546566730         0.0000000000
    1    1   2    1         0.5848556784         0.0000000000
    1    1   3    1         0.5848556784         0.0000000000
    1    1   1    2        -2.3546897338         0.0000000000
    1    1   2    2        -0.5849009636         0.0000000000
    1    1   3    2        -0.5849009636         0.0000000000
-
+  
    2    1   1    1         0.5848556784         0.0000000000
-
+  
    3    1   1    1         0.5848556784         0.0000000000
-
+  
    1    2   1    1        -2.3546897338        -0.0000000000
-
+  
    2    2   1    1        -0.5849009636        -0.0000000000
-
+  
    3    2   1    1        -0.5849009636        -0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -1823,8 +1826,8 @@ xred      :
 - [  2.3100E-01,   2.3100E-01,   2.3100E-01, Bi]
 - [ -2.3100E-01,  -2.3100E-01,  -2.3100E-01, Bi]
 cartesian_forces: # hartree/bohr
-- [ -4.27092403E-12,  -5.26704756E-19,   1.01080303E-02, ]
-- [  4.27092403E-12,   5.26704756E-19,  -1.01080303E-02, ]
+- [ -4.27092406E-12,  -4.64006551E-19,   1.01080303E-02, ]
+- [  4.27092406E-12,   4.64006551E-19,  -1.01080303E-02, ]
 force_length_stats: {min:   1.01080303E-02, max:   1.01080303E-02, mean:   1.01080303E-02, }
 ...
 
@@ -1855,8 +1858,8 @@ force_length_stats: {min:   1.01080303E-02, max:   1.01080303E-02, mean:   1.010
     2       0.075785035088      0.075785035135      0.075785035135
 
  cartesian coordinates (angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     2.74948455957311
-    2      0.00000000000000     0.00000000000000    -2.74948455957311
+    1     -0.00000000000000    -0.00000000000000     2.74948456972565
+    2      0.00000000000000     0.00000000000000    -2.74948456972565
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000427    -0.00000000000000     0.01010803033972
@@ -1864,11 +1867,11 @@ force_length_stats: {min:   1.01080303E-02, max:   1.01080303E-02, mean:   1.010
  frms,max,avg= 5.8358740E-03 1.0108030E-02   1.950E-12  0.000E+00  1.436E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000021962    -0.00000000000000     0.51977577487788
-    2      0.00000000021962     0.00000000000000    -0.51977577487788
- frms,max,avg= 3.0009268E-01 5.1977577E-01   1.003E-10  0.000E+00  7.383E-11 e/A
+    1     -0.00000000021962    -0.00000000000000     0.51977581853419
+    2      0.00000000021962     0.00000000000000    -0.51977581853419
+ frms,max,avg= 3.0009271E-01 5.1977582E-01   1.003E-10  0.000E+00  7.383E-11 e/A
  length scales=  9.000000000000  9.000000000000  9.000000000000 bohr
-              =  4.762594877310  4.762594877310  4.762594877310 angstroms
+              =  4.762594894896  4.762594894896  4.762594894896 angstroms
  prteigrs : about to open file t02o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.04304   Average Vxc (hartree)=  -0.30593
  Eigenvalues (hartree) for nkpt=   3  k points:
@@ -1899,7 +1902,7 @@ psp_core            :  1.44126513565306E+00
 local_psp           : -1.95539062796530E+00
 non_local_psp       :  5.63285770662759E-01
 total_energy        : -1.06896184112477E+01
-total_energy_eV     : -2.90879309905385E+02
+total_energy_eV     : -2.90879335410611E+02
 band_energy         : -1.21889788007196E+00
 ...
 
@@ -1924,9 +1927,9 @@ band_energy         : -1.21889788007196E+00
   sigma(3 3)=  1.02442017E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.0403E+01 GPa]
-- sigma(1 1)=  1.55346032E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.55346032E+01  sigma(3 1)= -9.07310701E-10
-- sigma(3 3)=  3.01394768E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.55346058E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.55346058E+01  sigma(3 1)= -9.07310854E-10
+- sigma(3 3)=  3.01394819E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1961,7 +1964,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2007,7 +2010,7 @@ tolerances: {toldfe: 1.00E-07, }
 
  ETOT  9   2.3546579117909     -1.057E-10 1.070E-13 2.251E-10
 
- At SCF step    9, etot is converged :
+ At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.057E-10 < toldfe=  1.000E-07
 ================================================================================
 
@@ -2039,7 +2042,7 @@ tolerances: {toldfe: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.2354657912E+01 Ha. Also 2DEtotal=    0.640735002967E+02 eV
+ 2DEtotal=    0.2354657912E+01 Ha. Also 2DEtotal=    0.640735059149E+02 eV
     (2DErelax=   -6.3994197651E+01 Ha. 2DEnonrelax=    6.6348855562E+01 Ha)
     (  non-var. 2DEtotal :    2.3546566451E+00 Ha)
 
@@ -2049,147 +2052,147 @@ tolerances: {toldfe: 1.00E-07, }
 
 
  ==> Compute Derivative Database <==
-
+  
   Ewald part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1        16.8042009016         0.0000000000
-
+  
    2    1   1    1         8.4162816063         0.0000000000
-
+  
    3    1   1    1         8.4162816063        -0.0000000000
-
+  
    1    2   1    1       -16.8042009016        -0.0000000000
-
+  
    2    2   1    1        -8.4162816063        -0.0000000000
-
+  
    3    2   1    1        -8.4162816063        -0.0000000000
-
+  
   Frozen wf local part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1        35.4427007029         0.0000000000
-
+  
    2    1   1    1        20.0323800217         0.0000000000
-
+  
    3    1   1    1        20.0323800217         0.0000000000
-
+  
    1    2   1    1         0.0000000000         0.0000000000
-
+  
    2    2   1    1         0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
-
+  
   Frozen wf non-local part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1        14.1019539580         0.0000000000
-
+  
    2    1   1    1         7.2080335495         0.0000000000
-
+  
    3    1   1    1         7.2080335495         0.0000000000
-
+  
    1    2   1    1         0.0000000000         0.0000000000
-
+  
    2    2   1    1         0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
-
+  
   Frozen wf xc core (1) part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
-
+  
    1    2   1    1         0.0000000000         0.0000000000
-
+  
    2    2   1    1         0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
-
+  
   Frozen wf xc core (2) part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
-
+  
    1    2   1    1         0.0000000000         0.0000000000
-
+  
    2    2   1    1         0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
-
+  
   Non-stationary local part of the 2-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1       -49.8689161089         0.0000000000
-
+  
    2    1   1    1       -28.4851712995         0.0000000000
-
+  
    3    1   1    1       -28.4851712995         0.0000000000
-
+  
    1    2   1    1        14.4262101810         0.0000000000
-
+  
    2    2   1    1         8.4527770656         0.0000000000
-
+  
    3    2   1    1         8.4527770656         0.0000000000
-
+  
   Non-stationary non-local part of the 2nd-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1       -14.1252828084         0.0930610017
-
+  
    2    1   1    1        -6.5866682068         0.2268964667
-
+  
    3    1   1    1        -6.5866682068         0.2268964667
-
+  
    1    2   1    1         0.0233009832         0.7757231281
-
+  
    2    2   1    1        -0.6213964149         0.6447014380
-
+  
    3    2   1    1        -0.6213964149         0.6447014380
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         2.3546566451         0.0000000000
    1    1   2    1         0.5848556712         0.0000000000
    1    1   3    1         0.5848556712         0.0000000000
    1    1   1    2        -2.3546897374         0.0000000000
    1    1   2    2        -0.5849009557         0.0000000000
    1    1   3    2        -0.5849009557         0.0000000000
-
+  
    2    1   1    1         0.5848556712         0.0000000000
-
+  
    3    1   1    1         0.5848556712         0.0000000000
-
+  
    1    2   1    1        -2.3546897374        -0.0000000000
-
+  
    2    2   1    1        -0.5849009557        -0.0000000000
-
+  
    3    2   1    1        -0.5849009557        -0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -2230,8 +2233,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2246,8 +2249,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -2501,8 +2504,8 @@ xred      :
 - [  2.3090E-01,   2.3100E-01,   2.3100E-01, Bi]
 - [ -2.3100E-01,  -2.3100E-01,  -2.3100E-01, Bi]
 cartesian_forces: # hartree/bohr
-- [  1.99001490E-05,  -2.32639233E-20,   3.53099218E-03, ]
-- [ -1.99001490E-05,   2.32639233E-20,  -3.53099218E-03, ]
+- [  1.99001490E-05,   3.94342808E-20,   3.53099218E-03, ]
+- [ -1.99001490E-05,  -3.94342808E-20,  -3.53099218E-03, ]
 force_length_stats: {min:   3.53104826E-03, max:   3.53104826E-03, mean:   3.53104826E-03, }
 ...
 
@@ -2533,20 +2536,20 @@ force_length_stats: {min:   3.53104826E-03, max:   3.53104826E-03, mean:   3.531
     2       0.026572721319      0.026424106924      0.026424106924
 
  cartesian coordinates (angstrom) at end:
-    1     -0.00026346105749    -0.00000000000000     2.74908780855441
-    2      0.00000000000000     0.00000000000000    -2.74948455957311
+    1     -0.00026346105847    -0.00000000000000     2.74908781870549
+    2      0.00000000000000     0.00000000000000    -2.74948456972565
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00001990014902    -0.00000000000000     0.00353099218370
-    2     -0.00001990014902     0.00000000000000    -0.00353099218370
+    1      0.00001990014902     0.00000000000000     0.00353099218370
+    2     -0.00001990014902    -0.00000000000000    -0.00353099218370
  frms,max,avg= 2.0386517E-03 3.5309922E-03   9.213E-11  0.000E+00 -5.375E-10 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00102330672060    -0.00000000000000     0.18157090320134
-    2     -0.00102330672060     0.00000000000000    -0.18157090320134
- frms,max,avg= 1.0483167E-01 1.8157090E-01   4.737E-09  0.000E+00 -2.764E-08 e/A
+    1      0.00102330680655     0.00000000000000     0.18157091845160
+    2     -0.00102330680655    -0.00000000000000    -0.18157091845160
+ frms,max,avg= 1.0483168E-01 1.8157092E-01   4.737E-09  0.000E+00 -2.764E-08 e/A
  length scales=  9.000000000000  9.000000000000  9.000000000000 bohr
-              =  4.762594877310  4.762594877310  4.762594877310 angstroms
+              =  4.762594894896  4.762594894896  4.762594894896 angstroms
  prteigrs : about to open file t02o_DS7_EIG
  Fermi (or HOMO) energy (hartree) =   0.04003   Average Vxc (hartree)=  -0.30516
  Eigenvalues (hartree) for nkpt=   3  k points:
@@ -2577,7 +2580,7 @@ psp_core            :  1.44126513565306E+00
 local_psp           : -2.04105124139121E+00
 non_local_psp       :  4.74001826855133E-01
 total_energy        : -1.07432669455801E+01
-total_energy_eV     : -2.92339160766629E+02
+total_energy_eV     : -2.92339186399860E+02
 band_energy         : -1.25089342235642E+00
 ...
 
@@ -2602,9 +2605,9 @@ band_energy         : -1.25089342235642E+00
   sigma(3 3)=  1.03855585E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.0242E+01 GPa]
-- sigma(1 1)=  1.50873713E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.50839845E+01  sigma(3 1)= -4.05011043E-03
-- sigma(3 3)=  3.05553628E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.50873739E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.50839870E+01  sigma(3 1)= -4.05011111E-03
+- sigma(3 3)=  3.05553679E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  8 ==================================================================
@@ -2792,7 +2795,7 @@ tolerances: {tolvrs: 1.00E-16, }
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.12937927E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  5.12937927E-04  sigma(3 1)= -6.58976329E-15
+  sigma(2 2)=  5.12937927E-04  sigma(3 1)= -6.59019697E-15
   sigma(3 3)=  1.03867893E-03  sigma(2 1)=  0.00000000E+00
 
 
@@ -2811,16 +2814,16 @@ etotal    :  -1.07432696E+01
 entropy   :   0.00000000E+00
 fermie    :   4.00443542E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [  5.12937927E-04,   0.00000000E+00,  -6.58976329E-15, ]
+- [  5.12937927E-04,   0.00000000E+00,  -6.59019697E-15, ]
 - [  0.00000000E+00,   5.12937927E-04,   0.00000000E+00, ]
-- [ -6.58976329E-15,   0.00000000E+00,   1.03867893E-03, ]
+- [ -6.59019697E-15,   0.00000000E+00,   1.03867893E-03, ]
 pressure_GPa:  -2.0247E+01
 xred      :
 - [  2.3100E-01,   2.3100E-01,   2.3100E-01, Bi]
 - [ -2.3100E-01,  -2.3100E-01,  -2.3100E-01, Bi]
 cartesian_forces: # hartree/bohr
-- [  1.29268345E-11,  -1.05707858E-19,   3.51107577E-03, ]
-- [ -1.29268345E-11,   1.05707858E-19,  -3.51107577E-03, ]
+- [  1.29268350E-11,   4.84343728E-20,   3.51107577E-03, ]
+- [ -1.29268350E-11,  -4.84343728E-20,  -3.51107577E-03, ]
 force_length_stats: {min:   3.51107577E-03, max:   3.51107577E-03, mean:   3.51107577E-03, }
 ...
 
@@ -2851,20 +2854,20 @@ force_length_stats: {min:   3.51107577E-03, max:   3.51107577E-03, mean:   3.511
     2       0.026324317562      0.026324317526      0.026324317526
 
  cartesian coordinates (angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     2.74948455957311
-    2      0.00000000000000     0.00000000000000    -2.74948455957311
+    1     -0.00000000000000    -0.00000000000000     2.74948456972565
+    2      0.00000000000000     0.00000000000000    -2.74948456972565
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000001293    -0.00000000000000     0.00351107577223
-    2     -0.00000000001293     0.00000000000000    -0.00351107577223
+    1      0.00000000001293     0.00000000000000     0.00351107577223
+    2     -0.00000000001293    -0.00000000000000    -0.00351107577223
  frms,max,avg= 2.0271205E-03 3.5110758E-03   8.161E-12  0.000E+00  5.238E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000066472    -0.00000000000000     0.18054676023248
-    2     -0.00000000066472     0.00000000000000    -0.18054676023248
- frms,max,avg= 1.0423872E-01 1.8054676E-01   4.196E-10  0.000E+00  2.693E-10 e/A
+    1      0.00000000066472     0.00000000000000     0.18054677539672
+    2     -0.00000000066472    -0.00000000000000    -0.18054677539672
+ frms,max,avg= 1.0423873E-01 1.8054678E-01   4.196E-10  0.000E+00  2.693E-10 e/A
  length scales=  9.000000000000  9.000000000000  9.000000000000 bohr
-              =  4.762594877310  4.762594877310  4.762594877310 angstroms
+              =  4.762594894896  4.762594894896  4.762594894896 angstroms
  prteigrs : about to open file t02o_DS8_EIG
  Fermi (or HOMO) energy (hartree) =   0.04004   Average Vxc (hartree)=  -0.30516
  Eigenvalues (hartree) for nkpt=   3  k points:
@@ -2895,7 +2898,7 @@ psp_core            :  1.44126513565306E+00
 local_psp           : -2.04075469975689E+00
 non_local_psp       :  4.73976100958885E-01
 total_energy        : -1.07432695904277E+01
-total_energy_eV     : -2.92339232736592E+02
+total_energy_eV     : -2.92339258369829E+02
 band_energy         : -1.25083906480907E+00
 ...
 
@@ -2916,13 +2919,13 @@ band_energy         : -1.25083906480907E+00
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.12937927E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  5.12937927E-04  sigma(3 1)= -6.58976329E-15
+  sigma(2 2)=  5.12937927E-04  sigma(3 1)= -6.59019697E-15
   sigma(3 3)=  1.03867893E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.0247E+01 GPa]
-- sigma(1 1)=  1.50911523E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.50911523E+01  sigma(3 1)= -1.93877497E-10
-- sigma(3 3)=  3.05589842E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.50911548E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.50911548E+01  sigma(3 1)= -1.93890289E-10
+- sigma(3 3)=  3.05589893E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  9 ==================================================================
@@ -3137,8 +3140,8 @@ xred      :
 - [  2.3110E-01,   2.3100E-01,   2.3100E-01, Bi]
 - [ -2.3100E-01,  -2.3100E-01,  -2.3100E-01, Bi]
 cartesian_forces: # hartree/bohr
-- [ -1.98572077E-05,  -1.22738002E-19,   3.49119503E-03, ]
-- [  1.98572077E-05,   1.22738002E-19,  -3.49119503E-03, ]
+- [ -1.98572077E-05,  -1.54087104E-19,   3.49119503E-03, ]
+- [  1.98572077E-05,   1.54087104E-19,  -3.49119503E-03, ]
 force_length_stats: {min:   3.49125150E-03, max:   3.49125150E-03, mean:   3.49125150E-03, }
 ...
 
@@ -3169,8 +3172,8 @@ force_length_stats: {min:   3.49125150E-03, max:   3.49125150E-03, mean:   3.491
     2       0.026076394939      0.026224688662      0.026224688662
 
  cartesian coordinates (angstrom) at end:
-    1      0.00026346105749    -0.00000000000000     2.74988131059181
-    2      0.00000000000000     0.00000000000000    -2.74948455957311
+    1      0.00026346105847    -0.00000000000000     2.74988132074581
+    2      0.00000000000000     0.00000000000000    -2.74948456972565
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00001985720774    -0.00000000000000     0.00349119502960
@@ -3178,11 +3181,11 @@ force_length_stats: {min:   3.49125150E-03, max:   3.49125150E-03, mean:   3.491
  frms,max,avg= 2.0156750E-03 3.4911950E-03  -9.015E-11  0.000E+00  5.516E-10 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00102109859102    -0.00000000000000     0.17952445142856
-    2      0.00102109859102     0.00000000000000    -0.17952445142856
- frms,max,avg= 1.0365017E-01 1.7952445E-01  -4.636E-09  0.000E+00  2.837E-08 e/A
+    1     -0.00102109867678    -0.00000000000000     0.17952446650694
+    2      0.00102109867678     0.00000000000000    -0.17952446650694
+ frms,max,avg= 1.0365018E-01 1.7952447E-01  -4.636E-09  0.000E+00  2.837E-08 e/A
  length scales=  9.000000000000  9.000000000000  9.000000000000 bohr
-              =  4.762594877310  4.762594877310  4.762594877310 angstroms
+              =  4.762594894896  4.762594894896  4.762594894896 angstroms
  prteigrs : about to open file t02o_DS9_EIG
  Fermi (or HOMO) energy (hartree) =   0.04006   Average Vxc (hartree)=  -0.30516
  Eigenvalues (hartree) for nkpt=   3  k points:
@@ -3213,7 +3216,7 @@ psp_core            :  1.44126513565306E+00
 local_psp           : -2.04045844366981E+00
 non_local_psp       :  4.73950398372857E-01
 total_energy        : -1.07432722104596E+01
-total_energy_eV     : -2.92339304031288E+02
+total_energy_eV     : -2.92339329664531E+02
 band_energy         : -1.25078477527720E+00
 ...
 
@@ -3238,9 +3241,9 @@ band_energy         : -1.25078477527720E+00
   sigma(3 3)=  1.03880201E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.0252E+01 GPa]
-- sigma(1 1)=  1.50949310E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.50983069E+01  sigma(3 1)=  4.04747626E-03
-- sigma(3 3)=  3.05626050E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.50949336E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.50983094E+01  sigma(3 1)=  4.04747694E-03
+- sigma(3 3)=  3.05626102E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 10 ==================================================================
@@ -3275,7 +3278,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -3321,7 +3324,7 @@ tolerances: {toldfe: 1.00E-07, }
 
  ETOT  9   2.4815612439214     -1.387E-09 1.460E-11 7.204E-09
 
- At SCF step    9, etot is converged :
+ At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.387E-09 < toldfe=  1.000E-07
 ================================================================================
 
@@ -3353,7 +3356,7 @@ tolerances: {toldfe: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.2481561244E+01 Ha. Also 2DEtotal=    0.675267155804E+02 eV
+ 2DEtotal=    0.2481561244E+01 Ha. Also 2DEtotal=    0.675267215014E+02 eV
     (2DErelax=   -7.2193880297E+01 Ha. 2DEnonrelax=    7.4675441541E+01 Ha)
     (  non-var. 2DEtotal :    2.4815467088E+00 Ha)
 
@@ -3363,147 +3366,147 @@ tolerances: {toldfe: 1.00E-07, }
 
 
  ==> Compute Derivative Database <==
-
+  
   Ewald part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1        16.8042009016         0.0000000000
-
+  
    2    1   1    1         8.4162816063         0.0000000000
-
+  
    3    1   1    1         8.4162816063        -0.0000000000
-
+  
    1    2   1    1       -16.8042009016        -0.0000000000
-
+  
    2    2   1    1        -8.4162816063        -0.0000000000
-
+  
    3    2   1    1        -8.4162816063        -0.0000000000
-
+  
   Frozen wf local part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1        38.1844648659         0.0000000000
-
+  
    2    1   1    1        21.5961243193         0.0000000000
-
+  
    3    1   1    1        21.5961243193         0.0000000000
-
+  
    1    2   1    1         0.0000000000         0.0000000000
-
+  
    2    2   1    1         0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
-
+  
   Frozen wf non-local part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1        19.6867757732         0.0000000000
-
+  
    2    1   1    1         9.9808986691         0.0000000000
-
+  
    3    1   1    1         9.9808986691         0.0000000000
-
+  
    1    2   1    1         0.0000000000         0.0000000000
-
+  
    2    2   1    1         0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
-
+  
   Frozen wf xc core (1) part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
-
+  
    1    2   1    1         0.0000000000         0.0000000000
-
+  
    2    2   1    1         0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
-
+  
   Frozen wf xc core (2) part of the dynamical matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
-
+  
    1    2   1    1         0.0000000000         0.0000000000
-
+  
    2    2   1    1         0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
-
+  
   Non-stationary local part of the 2-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1       -51.9178047040         0.0000000000
-
+  
    2    1   1    1       -29.3603132951         0.0000000000
-
+  
    3    1   1    1       -29.3603132951         0.0000000000
-
+  
    1    2   1    1        13.7333147746         0.0000000000
-
+  
    2    2   1    1         7.7641548720         0.0000000000
-
+  
    3    2   1    1         7.7641548720         0.0000000000
-
+  
   Non-stationary non-local part of the 2nd-order matrix
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
-
+  
    1    1   1    1       -20.2760901279         0.0711878129
-
+  
    2    1   1    1        -9.6360033353         0.0806679742
-
+  
    3    1   1    1        -9.6360033353         0.0806679742
-
+  
    1    2   1    1         0.5892616254         0.4410723935
-
+  
    2    2   1    1        -0.3449556176         0.1502933805
-
+  
    3    2   1    1        -0.3449556176         0.1502933805
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         2.4815467088         0.0000000000
    1    1   2    1         0.9969879644         0.0000000000
    1    1   3    1         0.9969879644         0.0000000000
    1    1   1    2        -2.4816245016         0.0000000000
    1    1   2    2        -0.9970823519         0.0000000000
    1    1   3    2        -0.9970823519         0.0000000000
-
+  
    2    1   1    1         0.9969879644         0.0000000000
-
+  
    3    1   1    1         0.9969879644         0.0000000000
-
+  
    1    2   1    1        -2.4816245016        -0.0000000000
-
+  
    2    2   1    1        -0.9970823519        -0.0000000000
-
+  
    3    2   1    1        -0.9970823519        -0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -3517,7 +3520,7 @@ tolerances: {toldfe: 1.00E-07, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      9.0000000000E+00  9.0000000000E+00  9.0000000000E+00 Bohr
               amu      2.08980370E+02
@@ -3534,22 +3537,22 @@ tolerances: {toldfe: 1.00E-07, }
            etotal10    2.4815612439E+00
             fcart1     2.3720459232E-05  6.8578363680E-19  1.0123713871E-02
                       -2.3720459232E-05 -6.8578363680E-19 -1.0123713871E-02
-            fcart2     4.2098797589E-11 -1.9611967825E-19  1.0108030427E-02
-                      -4.2098797589E-11  1.9611967825E-19 -1.0108030427E-02
-            fcart3    -2.3676041814E-05  4.1449809530E-19  1.0092375177E-02
-                       2.3676041814E-05 -4.1449809530E-19 -1.0092375177E-02
+            fcart2     4.2098797682E-11 -3.8421429082E-19  1.0108030427E-02
+                      -4.2098797682E-11  3.8421429082E-19 -1.0108030427E-02
+            fcart3    -2.3676041814E-05  3.5179989111E-19  1.0092375177E-02
+                       2.3676041814E-05 -3.5179989111E-19 -1.0092375177E-02
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-            fcart5    -4.2709240293E-12 -5.2670475553E-19  1.0108030340E-02
-                       4.2709240293E-12  5.2670475553E-19 -1.0108030340E-02
+            fcart5    -4.2709240601E-12 -4.6400655134E-19  1.0108030340E-02
+                       4.2709240601E-12  4.6400655134E-19 -1.0108030340E-02
             fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-            fcart7     1.9900149023E-05 -2.3263923341E-20  3.5309921837E-03
-                      -1.9900149023E-05  2.3263923341E-20 -3.5309921837E-03
-            fcart8     1.2926834518E-11 -1.0570785752E-19  3.5110757722E-03
-                      -1.2926834518E-11  1.0570785752E-19 -3.5110757722E-03
-            fcart9    -1.9857207736E-05 -1.2273800216E-19  3.4911950296E-03
-                       1.9857207736E-05  1.2273800216E-19 -3.4911950296E-03
+            fcart7     1.9900149023E-05  3.9434280848E-20  3.5309921837E-03
+                      -1.9900149023E-05 -3.9434280848E-20 -3.5309921837E-03
+            fcart8     1.2926834982E-11  4.8434372790E-20  3.5110757722E-03
+                      -1.2926834982E-11 -4.8434372790E-20 -3.5110757722E-03
+            fcart9    -1.9857207736E-05 -1.5408710426E-19  3.4911950296E-03
+                       1.9857207736E-05  1.5408710426E-19 -3.4911950296E-03
             fcart10    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         512
@@ -3686,7 +3689,7 @@ P          mk1mem           3
            strten7     5.1280941527E-04  5.1269429867E-04  1.0385558456E-03
                        0.0000000000E+00 -1.3766047866E-07  0.0000000000E+00
            strten8     5.1293792748E-04  5.1293792703E-04  1.0386789349E-03
-                       0.0000000000E+00 -6.5897632858E-15  0.0000000000E+00
+                       0.0000000000E+00 -6.5901969667E-15  0.0000000000E+00
            strten9     5.1306636359E-04  5.1318110664E-04  1.0388020063E-03
                        0.0000000000E+00  1.3757094501E-07  0.0000000000E+00
            strten10    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3714,26 +3717,26 @@ P          mk1mem           3
            tolvrs10    0.00000000E+00
             typat      1  1
               wtk        0.25000    0.25000    0.50000
-           xangst1    -2.6346105749E-04 -2.1064633146E-17  2.7490878086E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst2    -1.3096941300E-18 -2.5642383897E-17  2.7494845596E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst3     2.6346105749E-04 -8.4392856006E-17  2.7498813106E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst4    -1.3096941300E-18 -2.5642383897E-17  2.7494845596E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst5    -1.3096941300E-18 -2.5642383897E-17  2.7494845596E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst6    -1.3096941300E-18 -2.5642383897E-17  2.7494845596E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst7    -2.6346105749E-04 -2.1064633146E-17  2.7490878086E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst8    -1.3096941300E-18 -2.5642383897E-17  2.7494845596E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst9     2.6346105749E-04 -8.4392856006E-17  2.7498813106E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
-           xangst10   -1.3096941300E-18 -2.5642383897E-17  2.7494845596E+00
-                       1.3096941300E-18  2.5642383897E-17 -2.7494845596E+00
+           xangst1    -2.6346105847E-04 -2.1064633224E-17  2.7490878187E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst2    -1.3096941348E-18 -2.5642383992E-17  2.7494845697E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst3     2.6346105847E-04 -8.4392856317E-17  2.7498813207E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst4    -1.3096941348E-18 -2.5642383992E-17  2.7494845697E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst5    -1.3096941348E-18 -2.5642383992E-17  2.7494845697E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst6    -1.3096941348E-18 -2.5642383992E-17  2.7494845697E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst7    -2.6346105847E-04 -2.1064633224E-17  2.7490878187E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst8    -1.3096941348E-18 -2.5642383992E-17  2.7494845697E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst9     2.6346105847E-04 -8.4392856317E-17  2.7498813207E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
+           xangst10   -1.3096941348E-18 -2.5642383992E-17  2.7494845697E+00
+                       1.3096941348E-18  2.5642383992E-17 -2.7494845697E+00
             xcart1    -4.9786924535E-04 -3.9806387736E-17  5.1950230734E+00
                        2.4749632235E-18  4.8457082961E-17 -5.1957728242E+00
             xcart2    -2.4749632235E-18 -4.8457082961E-17  5.1957728242E+00
@@ -3815,7 +3818,7 @@ P          mk1mem           3
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -3838,12 +3841,12 @@ P          mk1mem           3
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -3861,7 +3864,7 @@ P          mk1mem           3
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

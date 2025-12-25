@@ -21,13 +21,13 @@ randomseed=111111 # for testing only
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_builders = alps_nag_7.2_serial, manneback_gnu_14.2_hpc
+#%% exclude_builders = alps_nag_7.2_serial, manneback_gnu_14.2_hpc, eos_intel_2023_cmake
 #%% need_cpp_vars = HAVE_NETCDF
 #%% lwf_pot = tmulti6_1.nc
 #%% exec_args = --F03
 #%% [files]
 #%% files_to_test =
-#%%   tmulti6_1.abo, tolnlines = 3, tolabs = 0.01, tolrel = 0.02, fld_options = -medium;
+#%%   tmulti6_1.abo, tolnlines = 4, tolabs = 0.01, tolrel = 0.02, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

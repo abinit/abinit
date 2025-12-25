@@ -1380,7 +1380,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
    ! loop over temperatures
    do itemper = 1, ntemper
      temperature_K = tempermin + dble(itemper-1)*temperinc  ! this is in Kelvin
-     temperature = temperature_K / Ha_K !=315774.65_dp
+     temperature = temperature_K / Ha_K 
 
      ! trick supercell object into using present q point
      thm_scells(itemper)%qphon(:) = qibz(:,iq)

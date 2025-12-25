@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  6 Oct 2024.
-- ( at 12h27 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t85-t86-t87-t88-t89/t88.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h15 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v7_t85-t86-t87-t88-t89/t88.abi
 - output file    -> t88.abo
 - root for input  files -> t88i
 - root for output files -> t88o
@@ -135,13 +135,13 @@ _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
            chneut           0
         ddb_ngqpt        4    4    4
              ecut      6.00000000E+00 Hartree
-       eph_fsewin      2.93994603E-02 Hartree
+       eph_fsewin      2.93994577E-02 Hartree
        eph_fsmear1     1.00000000E-02 Hartree
-       eph_fsmear2     7.34986508E-03 Hartree
+       eph_fsmear2     7.34986444E-03 Hartree
        eph_fsmear3     1.00000000E-02 Hartree
        eph_fsmear4     1.00000000E-02 Hartree
-       eph_fsmear5    -3.67493254E-02 Hartree
-       eph_fsmear6    -3.67493254E-02 Hartree
+       eph_fsmear5    -3.67493222E-02 Hartree
+       eph_fsmear6    -3.67493222E-02 Hartree
       eph_intmeth1          2
       eph_intmeth2          1
       eph_intmeth3          2
@@ -254,7 +254,7 @@ P           mkmem          29
        ph_intmeth6       2
          ph_ngqpt       16   16   16
         ph_nqpath           3
-         ph_smear      3.67493254E-05 Hartree
+         ph_smear      3.67493222E-05 Hartree
        prtbltztrp1          1
        prtbltztrp2          0
        prtbltztrp3          0
@@ -468,16 +468,16 @@ meta: {optdriver: 7, eph_task: 1, }
  Average speed of sound partial sums:     0.1020483061E-02 (at units)
 -                                   =           2.2325 [km/s]
 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
+ Debye frequency from partial sums:     0.8418761313E-03 (Ha)
+-                                 =     0.5539278844E+01 (THz)
+-Debye temperature from partial sums:     0.2658434562E+03 (K)
 
  Average speed of sound partial sums:     0.1020483061E-02 (at units)
 -                                   =           2.2325 [km/s]
 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
+ Debye frequency from partial sums:     0.8418761313E-03 (Ha)
+-                                 =     0.5539278844E+01 (THz)
+-Debye temperature from partial sums:     0.2658434562E+03 (K)
 
 - Writing phonon DOS to file: t88o_DS1_PHDOS
 - Writing phonon DOS to netcdf file: t88o_DS1_PHDOS.nc
@@ -486,8 +486,8 @@ meta: {optdriver: 7, eph_task: 1, }
 - Writing phonon frequencies in Xcrysden format to file: t88o_DS1_PH.bxsf
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -510,11 +510,11 @@ meta: {optdriver: 7, eph_task: 1, }
  Mesh step:  10.0 (meV) with npts: 3100
  From emin:  -4.8 to emax:  26.2 (eV)
  Number of k-points in the IBZ: 29
- Fermi level:   7.16066825E+00 (eV)
- Total electron DOS at Fermi level in states/eV:   3.22193685E-01
+ Fermi level:   7.16066783E+00 (eV)
+ Total electron DOS at Fermi level in states/eV:   3.22193656E-01
  Total number of electrons at eF:    3.0
 
-- Writing electron DOS to file: t88o_DS1_EDOS
+- Writing electron DOS to file: t88o_DS1_EDOS 
 
  ==== Fermi surface info ====
  FS integration done with tetrahedron method
@@ -691,16 +691,16 @@ meta: {optdriver: 7, eph_task: 1, }
  Average speed of sound partial sums:     0.1020483061E-02 (at units)
 -                                   =           2.2325 [km/s]
 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
+ Debye frequency from partial sums:     0.8418761313E-03 (Ha)
+-                                 =     0.5539278844E+01 (THz)
+-Debye temperature from partial sums:     0.2658434562E+03 (K)
 
  Average speed of sound partial sums:     0.1020483061E-02 (at units)
 -                                   =           2.2325 [km/s]
 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
+ Debye frequency from partial sums:     0.8418761313E-03 (Ha)
+-                                 =     0.5539278844E+01 (THz)
+-Debye temperature from partial sums:     0.2658434562E+03 (K)
 
 - Writing phonon DOS to file: t88o_DS2_PHDOS
 - Writing phonon DOS to netcdf file: t88o_DS2_PHDOS.nc
@@ -712,11 +712,11 @@ meta: {optdriver: 7, eph_task: 1, }
  Mesh step:  10.0 (meV) with npts: 3100
  From emin:  -4.8 to emax:  26.2 (eV)
  Number of k-points in the IBZ: 29
- Fermi level:   7.16066825E+00 (eV)
- Total electron DOS at Fermi level in states/eV:   3.22193685E-01
+ Fermi level:   7.16066783E+00 (eV)
+ Total electron DOS at Fermi level in states/eV:   3.22193656E-01
  Total number of electrons at eF:    3.0
 
-- Writing electron DOS to file: t88o_DS2_EDOS
+- Writing electron DOS to file: t88o_DS2_EDOS 
 
  ==== Fermi surface info ====
  FS integration done with gaussian method and broadening:  0.2 (meV)
@@ -737,43 +737,43 @@ meta: {optdriver: 7, eph_task: 1, }
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        2.602749E-04    4.616238E-07    2.474036E-01
     2        2.602749E-04    4.616238E-07    2.474036E-01
-    3        9.809668E-04    8.462158E-06    3.192677E-01
+    3        9.809668E-04    8.462157E-06    3.192676E-01
 
  q-point =    5.000000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        4.272260E-04    2.147038E-07    4.270778E-02
-    2        4.272260E-04    2.147038E-07    4.270778E-02
-    3        1.431326E-03    4.079272E-06    7.229158E-02
+    1        4.272260E-04    2.147038E-07    4.270777E-02
+    2        4.272260E-04    2.147038E-07    4.270777E-02
+    3        1.431326E-03    4.079271E-06    7.229156E-02
 
  q-point =    2.500000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        3.759487E-04    1.335968E-10    3.431795E-05
-    2        3.759487E-04    1.335968E-10    3.431795E-05
-    3        9.031819E-04    5.222996E-06    2.324619E-01
+    1        3.759487E-04    1.335968E-10    3.431794E-05
+    2        3.759487E-04    1.335968E-10    3.431794E-05
+    3        9.031819E-04    5.222995E-06    2.324618E-01
 
  q-point =    5.000000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        4.474897E-04    1.891301E-06    3.429076E-01
+    1        4.474897E-04    1.891301E-06    3.429075E-01
     2        9.250340E-04    6.216409E-06    2.637586E-01
     3        1.227511E-03    1.246655E-05    3.003848E-01
 
  q-point =   -2.500000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        5.408550E-04    1.418664E-06    1.760761E-01
-    2        9.955170E-04    3.399361E-06    1.245324E-01
+    1        5.408550E-04    1.418664E-06    1.760760E-01
+    2        9.955170E-04    3.399360E-06    1.245324E-01
     3        1.411204E-03    3.767262E-05    6.867979E-01
 
  q-point =    5.000000E-01    5.000000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        6.183407E-04    7.282220E-06    6.914974E-01
     2        6.183407E-04    7.282220E-06    6.914974E-01
-    3        1.278977E-03    8.425234E-06    1.869989E-01
+    3        1.278977E-03    8.425232E-06    1.869988E-01
 
  q-point =   -2.500000E-01    5.000000E-01    2.500000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        9.643037E-04    6.973742E-07    2.722831E-02
-    2        1.101344E-03    1.417774E-06    4.243687E-02
-    3        1.101344E-03    1.417774E-06    4.243687E-02
+    1        9.643037E-04    6.973740E-07    2.722830E-02
+    2        1.101344E-03    1.417774E-06    4.243686E-02
+    3        1.101344E-03    1.417774E-06    4.243686E-02
 
  lambda=   0.7428
 
@@ -892,16 +892,16 @@ meta: {optdriver: 7, eph_task: 5, }
  Average speed of sound partial sums:     0.1020483061E-02 (at units)
 -                                   =           2.2325 [km/s]
 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
+ Debye frequency from partial sums:     0.8418761313E-03 (Ha)
+-                                 =     0.5539278844E+01 (THz)
+-Debye temperature from partial sums:     0.2658434562E+03 (K)
 
  Average speed of sound partial sums:     0.1020483061E-02 (at units)
 -                                   =           2.2325 [km/s]
 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
+ Debye frequency from partial sums:     0.8418761313E-03 (Ha)
+-                                 =     0.5539278844E+01 (THz)
+-Debye temperature from partial sums:     0.2658434562E+03 (K)
 
 - Writing phonon DOS to file: t88o_DS3_PHDOS
 - Writing phonon DOS to netcdf file: t88o_DS3_PHDOS.nc
@@ -1033,16 +1033,16 @@ meta: {optdriver: 7, eph_task: 1, }
  Average speed of sound partial sums:     0.1020483061E-02 (at units)
 -                                   =           2.2325 [km/s]
 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
+ Debye frequency from partial sums:     0.8418761313E-03 (Ha)
+-                                 =     0.5539278844E+01 (THz)
+-Debye temperature from partial sums:     0.2658434562E+03 (K)
 
  Average speed of sound partial sums:     0.1020483061E-02 (at units)
 -                                   =           2.2325 [km/s]
 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
+ Debye frequency from partial sums:     0.8418761313E-03 (Ha)
+-                                 =     0.5539278844E+01 (THz)
+-Debye temperature from partial sums:     0.2658434562E+03 (K)
 
 - Writing phonon DOS to file: t88o_DS4_PHDOS
 - Writing phonon DOS to netcdf file: t88o_DS4_PHDOS.nc
@@ -1054,11 +1054,11 @@ meta: {optdriver: 7, eph_task: 1, }
  Mesh step:  10.0 (meV) with npts: 3100
  From emin:  -4.8 to emax:  26.2 (eV)
  Number of k-points in the IBZ: 29
- Fermi level:   7.16066825E+00 (eV)
- Total electron DOS at Fermi level in states/eV:   3.22193685E-01
+ Fermi level:   7.16066783E+00 (eV)
+ Total electron DOS at Fermi level in states/eV:   3.22193656E-01
  Total number of electrons at eF:    3.0
 
-- Writing electron DOS to file: t88o_DS4_EDOS
+- Writing electron DOS to file: t88o_DS4_EDOS 
 
  ==== Fermi surface info ====
  FS integration done with tetrahedron method
@@ -1091,7 +1091,7 @@ meta: {optdriver: 7, eph_task: 1, }
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        4.258067E-04    5.800967E-08    1.161603E-02
     2        4.258067E-04    5.800967E-08    1.161603E-02
-    3        1.324735E-03    3.754196E-07    7.766785E-03
+    3        1.324735E-03    3.754195E-07    7.766785E-03
 
  q-point =    5.000000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -1361,16 +1361,16 @@ meta: {optdriver: 7, eph_task: 1, }
  Average speed of sound partial sums:     0.1020483061E-02 (at units)
 -                                   =           2.2325 [km/s]
 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
+ Debye frequency from partial sums:     0.8418761313E-03 (Ha)
+-                                 =     0.5539278844E+01 (THz)
+-Debye temperature from partial sums:     0.2658434562E+03 (K)
 
  Average speed of sound partial sums:     0.1020483061E-02 (at units)
 -                                   =           2.2325 [km/s]
 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
+ Debye frequency from partial sums:     0.8418761313E-03 (Ha)
+-                                 =     0.5539278844E+01 (THz)
+-Debye temperature from partial sums:     0.2658434562E+03 (K)
 
 - Writing phonon DOS to file: t88o_DS5_PHDOS
 - Writing phonon DOS to netcdf file: t88o_DS5_PHDOS.nc
@@ -1382,11 +1382,11 @@ meta: {optdriver: 7, eph_task: 1, }
  Mesh step:  10.0 (meV) with npts: 3100
  From emin:  -4.8 to emax:  26.2 (eV)
  Number of k-points in the IBZ: 29
- Fermi level:   7.16066825E+00 (eV)
- Total electron DOS at Fermi level in states/eV:   3.22193685E-01
+ Fermi level:   7.16066783E+00 (eV)
+ Total electron DOS at Fermi level in states/eV:   3.22193656E-01
  Total number of electrons at eF:    3.0
 
-- Writing electron DOS to file: t88o_DS5_EDOS
+- Writing electron DOS to file: t88o_DS5_EDOS 
 
  ==== Fermi surface info ====
  FS integration done with adaptive gaussian method
@@ -1560,26 +1560,26 @@ meta: {optdriver: 7, eph_task: 1, }
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1020483004E-02 (at units)
+ Average speed of sound partial sums:     0.1020483061E-02 (at units)
 -                                   =           2.2325 [km/s]
 
- Debye frequency from partial sums:     0.8418760840E-03 (Ha)
--                                 =     0.5539278533E+01 (THz)
--Debye temperature from partial sums:     0.2658431258E+03 (K)
+ Debye frequency from partial sums:     0.8418761313E-03 (Ha)
+-                                 =     0.5539278844E+01 (THz)
+-Debye temperature from partial sums:     0.2658434562E+03 (K)
 
- Average speed of sound partial sums:     0.1020483004E-02 (at units)
+ Average speed of sound partial sums:     0.1020483061E-02 (at units)
 -                                   =           2.2325 [km/s]
 
- Debye frequency from partial sums:     0.8418760840E-03 (Ha)
--                                 =     0.5539278533E+01 (THz)
--Debye temperature from partial sums:     0.2658431258E+03 (K)
+ Debye frequency from partial sums:     0.8418761313E-03 (Ha)
+-                                 =     0.5539278844E+01 (THz)
+-Debye temperature from partial sums:     0.2658434562E+03 (K)
 
 - Writing phonon DOS to file: t88o_DS6_PHDOS
 - Writing phonon DOS to netcdf file: t88o_DS6_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/giantomassi/git_repos/abinit/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /Users/giantomassi/git_repos/abinit/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1601,11 +1601,11 @@ meta: {optdriver: 7, eph_task: 1, }
  Mesh step:  10.0 (meV) with npts: 3100
  From emin:  -4.8 to emax:  26.2 (eV)
  Number of k-points in the IBZ: 29
- Fermi level:   7.16066825E+00 (eV)
- Total electron DOS at Fermi level in states/eV:   3.22193685E-01
+ Fermi level:   7.16066783E+00 (eV)
+ Total electron DOS at Fermi level in states/eV:   3.22193656E-01
  Total number of electrons at eF:    3.0
 
-- Writing electron DOS to file: t88o_DS6_EDOS
+- Writing electron DOS to file: t88o_DS6_EDOS 
 
  ==== Fermi surface info ====
  FS integration done with adaptive gaussian method
@@ -1661,14 +1661,14 @@ meta: {optdriver: 7, eph_task: 1, }
  q-point =   -2.500000E-01    5.000000E-01    2.500000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        9.643037E-04    1.411427E-06    5.510781E-02
-    2        1.101344E-03    3.244125E-06    9.710330E-02
-    3        1.101344E-03    3.244125E-06    9.710330E-02
+    2        1.101344E-03    3.244125E-06    9.710329E-02
+    3        1.101344E-03    3.244125E-06    9.710329E-02
 
  lambda=   0.4280
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      7.5000000000E+00  7.5000000000E+00  7.5000000000E+00 Bohr
               amu      2.69815390E+01
@@ -1676,13 +1676,13 @@ meta: {optdriver: 7, eph_task: 1, }
            chneut           0
         ddb_ngqpt        4    4    4
              ecut      6.00000000E+00 Hartree
-       eph_fsewin      2.93994603E-02 Hartree
+       eph_fsewin      2.93994577E-02 Hartree
        eph_fsmear1     1.00000000E-02 Hartree
-       eph_fsmear2     7.34986508E-03 Hartree
+       eph_fsmear2     7.34986444E-03 Hartree
        eph_fsmear3     1.00000000E-02 Hartree
        eph_fsmear4     1.00000000E-02 Hartree
-       eph_fsmear5    -3.67493254E-02 Hartree
-       eph_fsmear6    -3.67493254E-02 Hartree
+       eph_fsmear5    -3.67493222E-02 Hartree
+       eph_fsmear6    -3.67493222E-02 Hartree
       eph_intmeth1          2
       eph_intmeth2          1
       eph_intmeth3          2
@@ -1715,7 +1715,7 @@ meta: {optdriver: 7, eph_task: 1, }
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getddb          20
           getdvdb1          0
           getdvdb2          0
@@ -1775,7 +1775,7 @@ P           mkmem          29
        ph_intmeth6       2
          ph_ngqpt       16   16   16
         ph_nqpath           3
-         ph_smear      3.67493254E-05 Hartree
+         ph_smear      3.67493222E-05 Hartree
        prtbltztrp1          1
        prtbltztrp2          0
        prtbltztrp3          0
@@ -1898,7 +1898,7 @@ P           mkmem          29
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1915,12 +1915,12 @@ P           mkmem          29
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1938,7 +1938,7 @@ P           mkmem          29
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1953,15 +1953,15 @@ P           mkmem          29
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.8  wall=          6.1
+- Proc.   0 individual time (sec): cpu=          6.8  wall=          6.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.8  wall=          6.1
+.Delivered   8 WARNINGs and  15 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.8  wall=          6.9

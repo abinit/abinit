@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h11 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h07 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/tutorial_tspin_1/tspin_1.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tspin_1/tspin_1.abi
 - output file    -> tspin_1.abo
 - root for input  files -> tspin_1i
 - root for output files -> tspin_1o
@@ -199,8 +199,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.00790
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Fe.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Fe.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Fe.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Fe.psp8
 - Fe    ONCVPSP-3.3.0  r_core=   1.26437   1.20546   1.56719
 - 26.00000  16.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -298,7 +298,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.420000000000  5.420000000000  5.420000000000 bohr
-              =  2.868140470558  2.868140470558  2.868140470558 angstroms
+              =  2.868140481148  2.868140481148  2.868140481148 angstroms
  prteigrs : about to open file tspin_1o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.50209   Average Vxc (hartree)=  -0.52688
  Eigenvalues (hartree) for nkpt=   6  k points:
@@ -324,7 +324,7 @@ non_local_psp       : -4.32811628543502E+00
 internal            : -1.23407255136547E+02
 '-kT*entropy'       : -2.09419972463979E-02
 total_energy        : -1.23428197133793E+02
-total_energy_eV     : -3.35865205135541E+03
+total_energy_eV     : -3.35865234585274E+03
 band_energy         : -1.32720405266836E+01
 ...
 
@@ -335,9 +335,9 @@ band_energy         : -1.32720405266836E+01
   sigma(3 3)=  5.86945036E-02  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.7269E+03 GPa]
-- sigma(1 1)=  1.72685162E+03  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.72685162E+03  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.72685162E+03  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.72685192E+03  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.72685192E+03  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.72685192E+03  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -378,12 +378,12 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  2  -122.79583702854     1.185E-01 4.467E-02 9.971E+02 4.845E-02 1.733E+00
  ETOT  3  -123.42788527642    -6.320E-01 1.558E-02 3.896E+00 1.125E-01 1.620E+00
  ETOT  4  -123.43135426888    -3.469E-03 2.699E-04 1.188E-02 4.265E-02 1.578E+00
- ETOT  5  -123.43139664974    -4.238E-05 6.581E-05 4.092E-03 3.480E-02 1.543E+00
+ ETOT  5  -123.43139664975    -4.238E-05 6.581E-05 4.092E-03 3.480E-02 1.543E+00
  ETOT  6  -123.43140690077    -1.025E-05 4.295E-06 5.117E-04 1.442E-02 1.528E+00
  ETOT  7  -123.43141301170    -6.111E-06 9.534E-07 6.710E-06 2.522E-02 1.503E+00
  ETOT  8  -123.43141307036    -5.866E-08 1.077E-07 6.148E-07 2.794E-03 1.500E+00
- ETOT  9  -123.43141307094    -5.800E-10 1.924E-08 1.693E-09 8.764E-05 1.500E+00
- ETOT 10  -123.43141307095    -1.117E-11 3.097E-09 4.907E-11 3.493E-05 1.500E+00
+ ETOT  9  -123.43141307094    -5.774E-10 1.924E-08 1.693E-09 8.764E-05 1.500E+00
+ ETOT 10  -123.43141307096    -1.562E-11 3.097E-09 4.907E-11 3.493E-05 1.500E+00
 
  At SCF step   10       vres2   =  4.91E-11 < tolvrs=  1.00E-10 =>converged.
 
@@ -403,7 +403,7 @@ lattice_vectors:
 lattice_lengths: [   4.69386,    4.69386,    4.69386, ]
 lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   7.9610044E+01
-convergence: {deltae: -1.117E-11, res2:  4.907E-11, residm:  3.097E-09, diffor: null, }
+convergence: {deltae: -1.562E-11, res2:  4.907E-11, residm:  3.097E-09, diffor: null, }
 etotal    :  -1.23431413E+02
 entropy   :   0.00000000E+00
 fermie    :   5.01569440E-01
@@ -450,7 +450,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.420000000000  5.420000000000  5.420000000000 bohr
-              =  2.868140470558  2.868140470558  2.868140470558 angstroms
+              =  2.868140481148  2.868140481148  2.868140481148 angstroms
  prteigrs : about to open file tspin_1o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.50157   Average Vxc (hartree)=  -0.52662
  Magnetization (Bohr magneton)=  1.57103984E+00
@@ -477,18 +477,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.13703722486271E+01
-hartree             :  2.72606018866745E+01
-xc                  : -1.68795367954713E+01
+kinetic             :  5.13703722486372E+01
+hartree             :  2.72606018866833E+01
+xc                  : -1.68795367954726E+01
 Ewald energy        : -8.59449965935601E+01
 psp_core            :  3.04389195498897E+00
-local_psp           : -9.79481331981392E+01
-non_local_psp       : -4.32135215659425E+00
-internal            : -1.23419152653474E+02
-'-kT*entropy'       : -1.22604174797783E-02
-total_energy        : -1.23431413070954E+02
-total_energy_eV     : -3.35873956145595E+03
-band_energy         : -1.33063491100111E+01
+local_psp           : -9.79481331981559E+01
+non_local_psp       : -4.32135215659667E+00
+internal            : -1.23419152653476E+02
+'-kT*entropy'       : -1.22604174797607E-02
+total_energy        : -1.23431413070956E+02
+total_energy_eV     : -3.35873985596100E+03
+band_energy         : -1.33063491100180E+01
 ...
 
 
@@ -498,9 +498,9 @@ band_energy         : -1.33063491100111E+01
   sigma(3 3)=  5.85338306E-02  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.7221E+03 GPa]
-- sigma(1 1)=  1.72212446E+03  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.72212446E+03  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.72212446E+03  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.72212475E+03  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.72212475E+03  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.72212475E+03  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -703,10 +703,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.3
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  20 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          2.3
++Overall time at end (sec) : cpu=          2.4  wall=          2.5

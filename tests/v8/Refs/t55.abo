@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h14 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t55/t55.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h15 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v8_t55/t55.abi
 - output file    -> t55.abo
 - root for input  files -> t55i
 - root for output files -> t55o
@@ -65,6 +65,7 @@ _ WF disk file :      0.090 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
 -   mkqmem =           1        mk1mem =           1           mpw =         965
       nfft =       27000          nkpt =           1
+- my_mband =          12
 ================================================================================
 P This job should need less than                       8.431 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -199,7 +200,7 @@ P          mk1mem3          1
               wtk2       1.00000
               wtk3       1.00000
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.1263588488E+00  2.1263588488E+00  2.1263588488E+00
+                       2.1263588567E+00  2.1263588567E+00  2.1263588567E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        4.0182358845E+00  4.0182358845E+00  4.0182358845E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -243,8 +244,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.14352
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mg-sp-gw.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -257,8 +258,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -6.605901   -2.664074
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -356,7 +357,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      2.12635884881445     2.12635884881445     2.12635884881445
+    2      2.12635885666608     2.12635885666608     2.12635885666608
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -368,7 +369,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  8.036471768995  8.036471768995  8.036471768995 bohr
-              =  4.252717697629  4.252717697629  4.252717697629 angstroms
+              =  4.252717713332  4.252717713332  4.252717713332 angstroms
  prteigrs : about to open file t55o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.16568   Average Vxc (hartree)=  -0.41340
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -389,7 +390,7 @@ psp_core            :  1.90126569223953E+00
 local_psp           : -6.42389313151317E+01
 non_local_psp       : -2.06156934029011E+01
 total_energy        : -7.60325914999403E+01
-total_energy_eV     : -2.06895203317545E+03
+total_energy_eV     : -2.06895221458777E+03
 band_energy         : -1.29734553139316E+01
 ...
 
@@ -400,9 +401,9 @@ band_energy         : -1.29734553139316E+01
   sigma(3 3)=  1.61554058E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -4.7531E+01 GPa]
-- sigma(1 1)=  4.75308367E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  4.75308367E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  4.75308367E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  4.75308447E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  4.75308447E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  4.75308447E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -484,9 +485,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      2.12635884881445     2.12635884881445     2.12635884881445
+    2      2.12635885666608     2.12635885666608     2.12635885666608
  length scales=  8.036471768995  8.036471768995  8.036471768995 bohr
-              =  4.252717697629  4.252717697629  4.252717697629 angstroms
+              =  4.252717713332  4.252717713332  4.252717713332 angstroms
  prteigrs : about to open file t55o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -526,8 +527,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.14352
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mg-sp-gw.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -540,8 +541,8 @@ meta: {optdriver: 1, rfelfd: 2, }
              1   -6.605901   -2.664074
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -558,7 +559,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -624,7 +625,7 @@ tolerances: {tolwfr: 1.00E-22, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -4.53086846E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.4530868464E+02 Ha. Also 2DEtotal=   -0.123291200996E+04 eV
+ 2DEtotal=   -0.4530868464E+02 Ha. Also 2DEtotal=   -0.123291211807E+04 eV
     (  non-var. 2DEtotal :   -4.5308684641E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -681,7 +682,7 @@ tolerances: {tolwfr: 1.00E-22, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -4.53086846E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.4530868464E+02 Ha. Also 2DEtotal=   -0.123291200993E+04 eV
+ 2DEtotal=   -0.4530868464E+02 Ha. Also 2DEtotal=   -0.123291211803E+04 eV
     (  non-var. 2DEtotal :   -4.5308684640E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -738,7 +739,7 @@ tolerances: {tolwfr: 1.00E-22, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -4.53086846E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.4530868464E+02 Ha. Also 2DEtotal=   -0.123291200989E+04 eV
+ 2DEtotal=   -0.4530868464E+02 Ha. Also 2DEtotal=   -0.123291211800E+04 eV
     (  non-var. 2DEtotal :   -4.5308684639E+01 Ha)
 
  CALCULATION OF EFFECTIVE MASSES
@@ -762,7 +763,7 @@ tolerances: {tolwfr: 1.00E-22, }
     6:   0.707107  0.000000  0.707107 /   0.408248  0.816497  0.408248 ->   2.3573950688
     7:   0.707107  0.707107  0.000000 /   0.408248  0.408248  0.816497 ->   2.3573950689
 
- COMMENTS:
+ COMMENTS: 
  - At k-point ( 0.000, 0.000, 0.000), bands     6 through     8
    are DEGENERATE (effective mass tensor is therefore not defined).
    See Section IIIB Eqs. (67)-(70) and Appendix E of PRB 93 205147 (2016).
@@ -871,7 +872,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      8.0364717690E+00  8.0364717690E+00  8.0364717690E+00 Bohr
               amu      2.43050000E+01  1.59994000E+01
@@ -1000,7 +1001,7 @@ P          mk1mem3          1
               wtk2       1.00000
               wtk3       1.00000
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.1263588488E+00  2.1263588488E+00  2.1263588488E+00
+                       2.1263588567E+00  2.1263588567E+00  2.1263588567E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        4.0182358845E+00  4.0182358845E+00  4.0182358845E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1047,7 +1048,7 @@ P          mk1mem3          1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1075,12 +1076,12 @@ P          mk1mem3          1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1098,15 +1099,15 @@ P          mk1mem3          1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.5  wall=          4.6
+- Proc.   0 individual time (sec): cpu=          4.6  wall=          4.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.5  wall=          4.6
++Overall time at end (sec) : cpu=          4.6  wall=          4.7

@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h26 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI2/paral_t03_MPI2/t03.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h21 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI2/paral_t03_MPI2/t03.abi
 - output file    -> t03_MPI2.abo
 - root for input  files -> t03_MPI2i
 - root for output files -> t03_MPI2o
@@ -121,11 +121,11 @@ P           mkmem           2
            tsmear      4.00000000E-02 Hartree
             typat      1  1  1  1  1
               wtk        0.25000    0.25000    0.25000    0.25000
-           xangst      0.0000000000E+00  0.0000000000E+00  1.2784921360E-02
-                       1.5981151699E+00  1.5981151699E+00  1.5981151699E+00
-                       0.0000000000E+00  0.0000000000E+00  3.1962303399E+00
-                       1.5981151699E+00  1.5981151699E+00 -1.5981151699E+00
-                       0.0000000000E+00  0.0000000000E+00 -3.1962303399E+00
+           xangst      0.0000000000E+00  0.0000000000E+00  1.2784921407E-02
+                       1.5981151758E+00  1.5981151758E+00  1.5981151758E+00
+                       0.0000000000E+00  0.0000000000E+00  3.1962303517E+00
+                       1.5981151758E+00  1.5981151758E+00 -1.5981151758E+00
+                       0.0000000000E+00  0.0000000000E+00 -3.1962303517E+00
             xcart      0.0000000000E+00  0.0000000000E+00  2.4160000000E-02
                        3.0200000000E+00  3.0200000000E+00  3.0200000000E+00
                        0.0000000000E+00  0.0000000000E+00  6.0400000000E+00
@@ -171,8 +171,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.500   => boxcut(ratio)=   2.16250
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/42mo.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/42mo.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/42mo.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/42mo.pspnc
 -  Troullier-Martins psp for element  Mo        Thu Oct 27 17:40:28 EDT 1994
 - 42.00000   6.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -211,11 +211,11 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  1  -42.488600810328    -4.249E+01 6.845E-03 4.406E+02 1.112E-01 1.112E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  0.00E+00  0.00E+00  2.14E-04
-    1     0.00000000000E+00    0.00000000000E+00   -7.60313755191E-03
-    2     0.00000000000E+00    0.00000000000E+00    4.17746781469E-02
-    3     0.00000000000E+00    0.00000000000E+00    1.10025280056E-01
-    4     0.00000000000E+00    0.00000000000E+00   -3.29842278045E-02
-    5     0.00000000000E+00    0.00000000000E+00   -1.11212592847E-01
+    1     0.00000000000E+00    0.00000000000E+00   -7.60313757912E-03
+    2     0.00000000000E+00    0.00000000000E+00    4.17746782793E-02
+    3     0.00000000000E+00    0.00000000000E+00    1.10025281862E-01
+    4     0.00000000000E+00    0.00000000000E+00   -3.29842279252E-02
+    5     0.00000000000E+00    0.00000000000E+00   -1.11212594638E-01
  prteigrs : about to open file t03_MPI2o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04817   Average Vxc (hartree)=  -0.38263
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -251,10 +251,10 @@ tolerances: {toldff: 5.00E-05, }
    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000
    2.00007    2.00017    2.00064    2.00511    2.13105    2.13592    1.35328    0.93938
    0.03052    0.02110    0.00517    0.00089
- Fermi (or HOMO) energy (eV) =  -1.31077   Average Vxc (eV)= -10.41180
+ Fermi (or HOMO) energy (eV) =  -1.31077   Average Vxc (eV)= -10.41181
  Eigenvalues (   eV  ) for nkpt=   4  k points:
  kpt#   1, nband= 20, wtk=  0.25000, kpt=  0.1250  0.1250  0.2500 (reduced coord)
- -15.64728  -13.64256  -11.01803   -8.71091   -8.42510   -8.24449   -7.21322   -5.13044
+ -15.64729  -13.64256  -11.01803   -8.71091   -8.42510   -8.24449   -7.21322   -5.13044
   -3.93264   -3.75128   -3.13608   -3.06477   -2.22599   -1.68044   -1.48444   -0.77766
   -0.48670   -0.23092    0.15232    0.57998
  kpt#   2, nband= 20, wtk=  0.25000, kpt=  0.3750  0.3750  0.2500 (reduced coord)
@@ -266,7 +266,7 @@ tolerances: {toldff: 5.00E-05, }
   -4.95377   -4.79530   -4.55720   -4.06579   -2.81918   -2.50101   -1.62675   -1.37168
   -0.37355   -0.27725    1.04992    1.40021
  kpt#   4, nband= 20, wtk=  0.25000, kpt=  0.3750  0.1250  0.2500 (reduced coord)
- -13.43669  -11.78017  -10.16320   -9.65354   -8.97439   -6.91143   -6.80547   -6.51623
+ -13.43669  -11.78017  -10.16320   -9.65354   -8.97440   -6.91143   -6.80547   -6.51624
   -4.95320   -4.79686   -4.53314   -4.06579   -2.81626   -2.53400   -1.63033   -1.37311
   -0.38408   -0.33151    0.69283    1.50349
 
@@ -276,11 +276,11 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  2  -42.750411577972    -2.618E-01 4.844E-04 1.743E+01 7.728E-02 1.873E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  0.00E+00  0.00E+00 -1.90E-05
-    1     0.00000000000E+00    0.00000000000E+00   -1.22817677177E-02
-    2     0.00000000000E+00    0.00000000000E+00    2.18301294691E-02
-    3     0.00000000000E+00    0.00000000000E+00    1.87301758055E-01
-    4     0.00000000000E+00    0.00000000000E+00   -1.36503794468E-02
-    5     0.00000000000E+00    0.00000000000E+00   -1.83199740359E-01
+    1     0.00000000000E+00    0.00000000000E+00   -1.22817677226E-02
+    2     0.00000000000E+00    0.00000000000E+00    2.18301293743E-02
+    3     0.00000000000E+00    0.00000000000E+00    1.87301758405E-01
+    4     0.00000000000E+00    0.00000000000E+00   -1.36503793219E-02
+    5     0.00000000000E+00    0.00000000000E+00   -1.83199740735E-01
  prteigrs : about to open file t03_MPI2o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.06811   Average Vxc (hartree)=  -0.38330
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -319,30 +319,30 @@ tolerances: {toldff: 5.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.85327   Average Vxc (eV)= -10.43022
  Eigenvalues (   eV  ) for nkpt=   4  k points:
  kpt#   1, nband= 20, wtk=  0.25000, kpt=  0.1250  0.1250  0.2500 (reduced coord)
- -15.01723  -13.27990  -10.82058   -8.43329   -8.20350   -7.99016   -6.97857   -5.07290
+ -15.01723  -13.27990  -10.82058   -8.43330   -8.20350   -7.99016   -6.97857   -5.07290
   -3.98542   -3.80667   -3.01374   -2.99109   -2.60562   -1.83348   -1.78791   -1.35009
   -0.82562   -0.56651    0.03157    0.27407
  kpt#   2, nband= 20, wtk=  0.25000, kpt=  0.3750  0.3750  0.2500 (reduced coord)
- -11.09331   -9.58805   -9.08648   -7.67235   -7.41940   -7.40177   -7.09147   -6.33050
-  -6.22808   -5.93083   -5.36952   -5.17304   -4.71558   -3.08215   -2.41514   -1.69481
+ -11.09332   -9.58805   -9.08648   -7.67235   -7.41940   -7.40177   -7.09147   -6.33050
+  -6.22808   -5.93083   -5.36952   -5.17304   -4.71559   -3.08215   -2.41514   -1.69481
   -1.22628   -0.12155    0.45895    1.66936
  kpt#   3, nband= 20, wtk=  0.25000, kpt=  0.1250  0.3750  0.2500 (reduced coord)
  -12.81107  -11.39710   -9.61153   -9.40329   -8.71370   -6.62660   -6.59236   -6.21702
-  -4.86336   -4.46330   -4.26737   -3.98094   -2.95471   -2.77485   -2.23236   -1.89135
+  -4.86336   -4.46330   -4.26738   -3.98094   -2.95471   -2.77485   -2.23236   -1.89135
   -1.06313   -0.90446    0.05050    0.64657
  kpt#   4, nband= 20, wtk=  0.25000, kpt=  0.3750  0.1250  0.2500 (reduced coord)
  -12.81107  -11.39710   -9.61153   -9.40329   -8.71370   -6.62660   -6.59236   -6.21702
-  -4.86336   -4.46330   -4.26738   -3.98094   -2.95472   -2.77485   -2.23236   -1.89136
+  -4.86336   -4.46330   -4.26738   -3.98094   -2.95472   -2.77486   -2.23236   -1.89136
   -1.06325   -0.90448    0.04772    0.64937
 
  ETOT  3  -42.758984732011    -8.573E-03 1.439E-04 2.214E+00 1.104E-02 1.973E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  0.00E+00  0.00E+00  9.16E-06
-    1     0.00000000000E+00    0.00000000000E+00   -1.29588679178E-02
-    2     0.00000000000E+00    0.00000000000E+00    1.84128174345E-02
-    3     0.00000000000E+00    0.00000000000E+00    1.97327475436E-01
-    4     0.00000000000E+00    0.00000000000E+00   -8.53837855775E-03
-    5     0.00000000000E+00    0.00000000000E+00   -1.94243046394E-01
+    1     0.00000000000E+00    0.00000000000E+00   -1.29588679147E-02
+    2     0.00000000000E+00    0.00000000000E+00    1.84128174799E-02
+    3     0.00000000000E+00    0.00000000000E+00    1.97327475475E-01
+    4     0.00000000000E+00    0.00000000000E+00   -8.53837861156E-03
+    5     0.00000000000E+00    0.00000000000E+00   -1.94243046429E-01
  prteigrs : about to open file t03_MPI2o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.07035   Average Vxc (hartree)=  -0.38196
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -385,26 +385,26 @@ tolerances: {toldff: 5.00E-05, }
   -4.04977   -3.90179   -3.19725   -3.15281   -2.65272   -1.92705   -1.89934   -1.45763
   -0.89095   -0.71335   -0.20207    0.11641
  kpt#   2, nband= 20, wtk=  0.25000, kpt=  0.3750  0.3750  0.2500 (reduced coord)
- -11.21956   -9.62510   -9.24508   -7.74205   -7.54303   -7.49882   -7.14042   -6.46908
+ -11.21956   -9.62510   -9.24508   -7.74206   -7.54303   -7.49882   -7.14042   -6.46908
   -6.26970   -5.97917   -5.35257   -5.20872   -4.83905   -3.13104   -2.48040   -1.71138
   -1.25044   -0.25446    0.37223    1.51384
  kpt#   3, nband= 20, wtk=  0.25000, kpt=  0.1250  0.3750  0.2500 (reduced coord)
- -12.93136  -11.43702   -9.73344   -9.47065   -8.76780   -6.70471   -6.63847   -6.25157
+ -12.93136  -11.43702   -9.73345   -9.47065   -8.76781   -6.70472   -6.63847   -6.25157
   -4.91490   -4.62920   -4.41026   -4.10196   -3.02858   -2.83318   -2.27140   -1.95082
   -1.12076   -0.95343   -0.05178    0.50114
  kpt#   4, nband= 20, wtk=  0.25000, kpt=  0.3750  0.1250  0.2500 (reduced coord)
- -12.93136  -11.43702   -9.73344   -9.47065   -8.76780   -6.70472   -6.63846   -6.25157
+ -12.93136  -11.43702   -9.73345   -9.47065   -8.76781   -6.70472   -6.63847   -6.25157
   -4.91490   -4.62920   -4.41026   -4.10196   -3.02858   -2.83318   -2.27140   -1.95082
   -1.12077   -0.95342   -0.05204    0.50194
 
  ETOT  4  -42.759965291817    -9.806E-04 6.339E-05 2.266E-02 1.800E-03 1.991E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  0.00E+00  0.00E+00  1.06E-06
-    1     0.00000000000E+00    0.00000000000E+00   -1.29455319041E-02
-    2     0.00000000000E+00    0.00000000000E+00    1.94076213493E-02
-    3     0.00000000000E+00    0.00000000000E+00    1.99127034374E-01
-    4     0.00000000000E+00    0.00000000000E+00   -9.72498583378E-03
-    5     0.00000000000E+00    0.00000000000E+00   -1.95864137986E-01
+    1     0.00000000000E+00    0.00000000000E+00   -1.29455319036E-02
+    2     0.00000000000E+00    0.00000000000E+00    1.94076213454E-02
+    3     0.00000000000E+00    0.00000000000E+00    1.99127034377E-01
+    4     0.00000000000E+00    0.00000000000E+00   -9.72498583004E-03
+    5     0.00000000000E+00    0.00000000000E+00   -1.95864137988E-01
  prteigrs : about to open file t03_MPI2o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.06943   Average Vxc (hartree)=  -0.38205
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -447,7 +447,7 @@ tolerances: {toldff: 5.00E-05, }
   -4.00885   -3.85283   -3.12671   -3.08571   -2.61439   -1.88524   -1.86101   -1.44121
   -0.86866   -0.68729   -0.10844    0.15327
  kpt#   2, nband= 20, wtk=  0.25000, kpt=  0.3750  0.3750  0.2500 (reduced coord)
- -11.12968   -9.56497   -9.15728   -7.67689   -7.43994   -7.43730   -7.06944   -6.37895
+ -11.12969   -9.56497   -9.15728   -7.67690   -7.43994   -7.43730   -7.06944   -6.37895
   -6.21379   -5.92221   -5.32119   -5.16948   -4.76908   -3.11126   -2.45913   -1.70626
   -1.24222   -0.22817    0.37638    1.54381
  kpt#   3, nband= 20, wtk=  0.25000, kpt=  0.1250  0.3750  0.2500 (reduced coord)
@@ -540,36 +540,36 @@ force_length_stats: {min:   9.72498583E-03, max:   1.99127034E-01, mean:   8.741
        0.500000000000      0.500000000000     -0.125000000000
        0.000000000000      0.000000000000     -0.250000000000
  rms dE/dt=  1.7495E+00; max dE/dt=  4.7321E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.312738438650
-    2       0.000000000000      0.000000000000     -0.468913743951
-    3       0.000000000000      0.000000000000     -4.810934762630
-    4       0.000000000000      0.000000000000      0.234930045592
-    5       0.000000000000      0.000000000000      4.732051961578
+    1       0.000000000000      0.000000000000      0.312738438636
+    2       0.000000000000      0.000000000000     -0.468913743860
+    3       0.000000000000      0.000000000000     -4.810934762696
+    4       0.000000000000      0.000000000000      0.234930045499
+    5       0.000000000000      0.000000000000      4.732051961646
 
  cartesian coordinates (angstrom) at end:
-    1      0.00000000000000     0.00000000000000     0.01278492135953
-    2      1.59811516994180     1.59811516994180     1.59811516994180
-    3      0.00000000000000     0.00000000000000     3.19623033988360
-    4      1.59811516994180     1.59811516994180    -1.59811516994180
-    5      0.00000000000000     0.00000000000000    -3.19623033988360
+    1      0.00000000000000     0.00000000000000     0.01278492140674
+    2      1.59811517584288     1.59811517584288     1.59811517584288
+    3      0.00000000000000     0.00000000000000     3.19623035168576
+    4      1.59811517584288     1.59811517584288    -1.59811517584288
+    5      0.00000000000000     0.00000000000000    -3.19623035168576
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.01294553190406
-    2     -0.00000000000000    -0.00000000000000     0.01940762134931
-    3     -0.00000000000000    -0.00000000000000     0.19912703437406
-    4     -0.00000000000000    -0.00000000000000    -0.00972498583378
-    5     -0.00000000000000    -0.00000000000000    -0.19586413798553
+    1     -0.00000000000000    -0.00000000000000    -0.01294553190361
+    2     -0.00000000000000    -0.00000000000000     0.01940762134541
+    3     -0.00000000000000    -0.00000000000000     0.19912703437669
+    4     -0.00000000000000    -0.00000000000000    -0.00972498583004
+    5     -0.00000000000000    -0.00000000000000    -0.19586413798844
  frms,max,avg= 7.2412317E-02 1.9912703E-01   0.000E+00  0.000E+00  1.060E-06 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.66568595962772
-    2     -0.00000000000000    -0.00000000000000     0.99797993143490
-    3     -0.00000000000000    -0.00000000000000    10.23952294486328
-    4     -0.00000000000000    -0.00000000000000    -0.50007883608798
-    5     -0.00000000000000    -0.00000000000000   -10.07173808058248
- frms,max,avg= 3.7235907E+00 1.0239523E+01   0.000E+00  0.000E+00  5.451E-05 e/A
+    1     -0.00000000000000    -0.00000000000000    -0.66568601551592
+    2     -0.00000000000000    -0.00000000000000     0.99798001505519
+    3     -0.00000000000000    -0.00000000000000    10.23952380502260
+    4     -0.00000000000000    -0.00000000000000    -0.50007887789787
+    5     -0.00000000000000    -0.00000000000000   -10.07173892666400
+ frms,max,avg= 3.7235910E+00 1.0239524E+01   0.000E+00  0.000E+00  5.451E-05 e/A
  length scales=  6.040000000000  6.040000000000 24.160000000000 bohr
-              =  3.196230339884  3.196230339884 12.784921359534 angstroms
+              =  3.196230351686  3.196230351686 12.784921406743 angstroms
  prteigrs : about to open file t03_MPI2o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.06943   Average Vxc (hartree)=  -0.38205
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -612,7 +612,7 @@ force_length_stats: {min:   9.72498583E-03, max:   1.99127034E-01, mean:   8.741
   -4.00885   -3.85283   -3.12671   -3.08571   -2.61439   -1.88524   -1.86101   -1.44121
   -0.86866   -0.68729   -0.10844    0.15327
  kpt#   2, nband= 20, wtk=  0.25000, kpt=  0.3750  0.3750  0.2500 (reduced coord)
- -11.12968   -9.56497   -9.15728   -7.67689   -7.43994   -7.43730   -7.06944   -6.37895
+ -11.12969   -9.56497   -9.15728   -7.67690   -7.43994   -7.43730   -7.06944   -6.37895
   -6.21379   -5.92221   -5.32119   -5.16948   -4.76908   -3.11126   -2.45913   -1.70626
   -1.24222   -0.22817    0.37638    1.54381
  kpt#   3, nband= 20, wtk=  0.25000, kpt=  0.1250  0.3750  0.2500 (reduced coord)
@@ -643,7 +643,7 @@ non_local_psp       : -6.27534515929057E+00
 internal            : -4.27567662951869E+01
 '-kT*entropy'       : -3.19899663025946E-03
 total_energy        : -4.27599652918172E+01
-total_energy_eV     : -1.16355782939591E+03
+total_energy_eV     : -1.16355793142038E+03
 band_energy         : -7.15993585903141E+00
 ...
 
@@ -674,11 +674,11 @@ band_energy         : -7.15993585903141E+00
     4      -0.000000000000     -0.000000000000     -0.015782796772
     5       0.000000000000      0.000000000000     -1.641927012670
  residual contribution to red. grads
-    1       0.000000000000     -0.000000000000     -0.016699791610
-    2       0.000000000000      0.000000000000      0.096244490199
-    3      -0.000000000000     -0.000000000000      0.073404779402
-    4       0.000000000000      0.000000000000     -0.125200564789
-    5      -0.000000000000      0.000000000000     -0.078545239676
+    1       0.000000000000     -0.000000000000     -0.016699791623
+    2       0.000000000000      0.000000000000      0.096244490290
+    3      -0.000000000000     -0.000000000000      0.073404779336
+    4       0.000000000000      0.000000000000     -0.125200564882
+    5      -0.000000000000      0.000000000000     -0.078545239609
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.54878874E-04  sigma(3 2)=  0.00000000E+00
@@ -686,13 +686,13 @@ band_energy         : -7.15993585903141E+00
   sigma(3 3)=  3.14337201E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.2005E+01 GPa]
-- sigma(1 1)=  1.33829963E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.33829963E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  9.24811819E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.33829985E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.33829985E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  9.24811974E+00  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      6.0400000000E+00  6.0400000000E+00  2.4160000000E+01 Bohr
               amu      9.59400000E+01
@@ -701,9 +701,9 @@ band_energy         : -7.15993585903141E+00
            enunit           2
            etotal     -4.2759965292E+01
             fcart     -0.0000000000E+00 -0.0000000000E+00 -1.2945531904E-02
-                      -0.0000000000E+00 -0.0000000000E+00  1.9407621349E-02
-                      -0.0000000000E+00 -0.0000000000E+00  1.9912703437E-01
-                      -0.0000000000E+00 -0.0000000000E+00 -9.7249858338E-03
+                      -0.0000000000E+00 -0.0000000000E+00  1.9407621345E-02
+                      -0.0000000000E+00 -0.0000000000E+00  1.9912703438E-01
+                      -0.0000000000E+00 -0.0000000000E+00 -9.7249858300E-03
                       -0.0000000000E+00 -0.0000000000E+00 -1.9586413799E-01
 -          fftalg         512
             intxc           1
@@ -753,11 +753,11 @@ P           mkmem           2
            tsmear      4.00000000E-02 Hartree
             typat      1  1  1  1  1
               wtk        0.25000    0.25000    0.25000    0.25000
-           xangst      0.0000000000E+00  0.0000000000E+00  1.2784921360E-02
-                       1.5981151699E+00  1.5981151699E+00  1.5981151699E+00
-                       0.0000000000E+00  0.0000000000E+00  3.1962303399E+00
-                       1.5981151699E+00  1.5981151699E+00 -1.5981151699E+00
-                       0.0000000000E+00  0.0000000000E+00 -3.1962303399E+00
+           xangst      0.0000000000E+00  0.0000000000E+00  1.2784921407E-02
+                       1.5981151758E+00  1.5981151758E+00  1.5981151758E+00
+                       0.0000000000E+00  0.0000000000E+00  3.1962303517E+00
+                       1.5981151758E+00  1.5981151758E+00 -1.5981151758E+00
+                       0.0000000000E+00  0.0000000000E+00 -3.1962303517E+00
             xcart      0.0000000000E+00  0.0000000000E+00  2.4160000000E-02
                        3.0200000000E+00  3.0200000000E+00  3.0200000000E+00
                        0.0000000000E+00  0.0000000000E+00  6.0400000000E+00
@@ -772,63 +772,61 @@ P           mkmem           2
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          2.8        0.05      0.001
-- Total wall clock time (s,m,h):          2.9        0.05      0.001
+- Total cpu        time (s,m,h):          2.7        0.05      0.001
+- Total wall clock time (s,m,h):          2.8        0.05      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 2, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            1.4, wall_time =            1.5
+- cpu_time =            1.4, wall_time =            1.4
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- stress                                    0.405  14.3         0.406  13.9              1      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)                        0.403  14.2         0.403  13.8              1      -1.00        1.00       1.00
-- ewald                                     0.358  12.6         0.358  12.3              1      -1.00        1.00       1.00
-- pspini                                    0.159   5.6         0.159   5.4              1      -1.00        1.00       1.00
-- get_dtsets_pspheads                       0.102   3.6         0.102   3.5              1      -1.00        1.00       1.00
-- fourwf%(pot)                              0.088   3.1         0.088   3.0           1199      -1.00        1.00       1.00
-- nonlop(apply)                             0.033   1.2         0.033   1.1           1199      -1.00        1.00       1.00
-- abinit(chkinp,chkvars)                    0.027   0.9         0.027   0.9              1      -1.00        1.00       1.00
-- abinit(outvars)                           0.020   0.7         0.020   0.7              1      -1.00        1.00       1.00
-- projbd                                    0.019   0.7         0.020   0.7           1918      -1.00        1.00       1.00
-- abinit(after driver)                      0.017   0.6         0.017   0.6              1      -1.00        1.00       1.00
-- fourdp                                    0.016   0.6         0.051   1.7             45      -1.00        0.31       0.31
-- others (148)                              0.088   3.1         0.088   3.0             -1      -1.00        1.00       1.00
+- ewald                                     0.464  17.0         0.464  16.4              1      -1.00        1.00       1.00
+- stress                                    0.325  11.9         0.325  11.5              1      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)                        0.323  11.8         0.323  11.4              1      -1.00        1.00       1.00
+- pspini                                    0.159   5.8         0.159   5.6              1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.101   3.7         0.102   3.6           1199      -1.00        0.99       0.99
+- get_dtsets_pspheads                       0.045   1.6         0.045   1.6              1      -1.00        1.00       1.00
+- nonlop(apply)                             0.035   1.3         0.035   1.3           1199      -1.00        0.99       0.99
+- abinit(chkinp,chkvars)                    0.026   1.0         0.026   0.9              1      -1.00        1.00       1.00
+- projbd                                    0.021   0.8         0.021   0.7           1918      -1.00        0.99       0.99
+- fourdp                                    0.020   0.7         0.062   2.2             45      -1.00        0.32       0.32
+- abinit(outvars)                           0.015   0.6         0.015   0.5              1      -1.00        1.00       1.00
+- others (199)                              0.099   3.6         0.101   3.6             -1      -1.00        0.98       0.98
 -<END_TIMER>
 -
-- subtotal                                  1.737  61.2         1.773  60.8                                  0.98       0.98
+- subtotal                                  1.632  59.8         1.678  59.5                                  0.97       0.97
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls
+- as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 2, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           2.8, wall_time =           2.9
+- cpu_time =           2.7, wall_time =           2.8
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- stress                                    0.818  28.8         0.818  28.1              2      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)                        0.814  28.7         0.814  27.9              2      -1.00        1.00       1.00
-- ewald                                     0.709  25.0         0.709  24.3              2      -1.00        1.00       1.00
-- pspini                                    0.318  11.2         0.318  10.9              2      -1.00        1.00       1.00
-- get_dtsets_pspheads                       0.197   6.9         0.197   6.8              2      -1.00        1.00       1.00
-- fourwf%(pot)                              0.175   6.2         0.175   6.0           2399      -1.00        1.00       1.00
-- abinit(chkinp,chkvars)                    0.076   2.7         0.076   2.6              2      -1.00        1.00       1.00
-- nonlop(apply)                             0.065   2.3         0.065   2.2           2399      -1.00        1.00       1.00
-- projbd                                    0.038   1.4         0.038   1.3           3838      -1.00        1.00       1.00
-- fourdp                                    0.031   1.1         0.101   3.5             90      -1.00        0.31       0.31
-- abinit(outvars)                           0.023   0.8         0.023   0.8              2      -1.00        1.00       1.00
-- abinit(init,iofn1,herald)                 0.018   0.6         0.018   0.6              2      -1.00        0.98       0.98
-- abinit(after driver)                      0.017   0.6         0.017   0.6              2      -1.00        1.00       1.00
-- fourwf%(r->G)                             0.016   0.5         0.015   0.5            840      -1.00        1.00       1.00
-- vtowfk(ssdiag)                            0.015   0.5         0.015   0.5             -2      -1.00        1.00       1.00
-- fourwf%(den)                              0.015   0.5         0.015   0.5            320      -1.00        1.00       1.00
-- vtorho(MPI)                               0.015   0.5         0.015   0.5              8      -1.00        1.00       1.00
-- others (143)                              0.110   3.9         0.109   3.8             -1      -1.00        1.01       1.01
+- ewald                                     0.814  29.8         0.815  28.9              2      -1.00        1.00       1.00
+- stress                                    0.649  23.8         0.649  23.0              2      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)                        0.645  23.6         0.646  22.9              2      -1.00        1.00       1.00
+- pspini                                    0.319  11.7         0.319  11.3              2      -1.00        1.00       1.00
+- fourwf%(pot)                              0.192   7.0         0.193   6.9           2399      -1.00        1.00       1.00
+- vtorho(MPI)                               0.136   5.0         0.136   4.8              8      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.091   3.3         0.091   3.2              2      -1.00        1.00       1.00
+- nonlop(apply)                             0.066   2.4         0.067   2.4           2399      -1.00        0.99       0.99
+- abinit(chkinp,chkvars)                    0.058   2.1         0.058   2.0              2      -1.00        1.00       1.00
+- projbd                                    0.040   1.5         0.041   1.4           3838      -1.00        0.99       0.99
+- fourdp                                    0.038   1.4         0.123   4.3             90      -1.00        0.31       0.31
+- getghc(/=fourXX,nonlop,fock_XX)           0.020   0.7         0.019   0.7             -2      -1.00        1.05       1.05
+- abinit(outvars)                           0.017   0.6         0.017   0.6              2      -1.00        1.00       1.00
+- vtowfk(ssdiag)                            0.017   0.6         0.017   0.6             -2      -1.00        0.97       0.97
+- fourwf%(r->G)                             0.016   0.6         0.016   0.6            840      -1.00        1.00       1.00
+- abinit(init,iofn1,herald)                 0.014   0.5         0.016   0.6              2      -1.00        0.91       0.91
+- others (194)                              0.115   4.2         0.115   4.1             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                                  3.469 122.3         3.540 121.5                                  0.98       0.98
+- subtotal                                  3.249 118.9         3.337 118.3                                  0.97       0.97
 
 ================================================================================
 
@@ -862,7 +860,7 @@ P           mkmem           2
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -874,12 +872,12 @@ P           mkmem           2
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -897,7 +895,7 @@ P           mkmem           2
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -912,15 +910,15 @@ P           mkmem           2
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.9  wall=          2.9
++Overall time at end (sec) : cpu=          2.7  wall=          2.8

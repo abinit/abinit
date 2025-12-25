@@ -1,8 +1,8 @@
 
-.Version 10.4.0.2 of MRGSCR, released Apr 2025.
-.(MPI version, prepared for a x86_64_linux_intel2025.0 computer)
+.Version 10.5.8.2 of MRGSCR, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  MRGSCR comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,19 +14,19 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 15 May 2025.
-- ( at 17h38 )
-
-->>  Enter the number of files to merge:
-->>  Enter the prefix for the final output file:
-->>  Enter the name for the partial screening file no.   1
-->>  Enter the name for the partial screening file no.   2
+.Starting date : Sun 21 Dec 2025.
+- ( at 08h16 )
+  
+->>  Enter the number of files to merge: 
+->>  Enter the prefix for the final output file: 
+->>  Enter the name for the partial screening file no.   1 
+->>  Enter the name for the partial screening file no.   2 
  SCR file: epsilon^-1 , calculated using inclvkb = 0
  TESTPARTICLE RPA
  Identifier                       4
  Kxc kernel                       0
  Treatment of q-->0 limit         0
-- headform                        80
+- headform                        81
  fform                         1004
  gwcalctyp                        2
  Number of components             1       1
@@ -70,7 +70,7 @@
  Identifier                       4
  Kxc kernel                       0
  Treatment of q-->0 limit         0
-- headform                        80
+- headform                        81
  fform                         1004
  gwcalctyp                        2
  Number of components             1       1
@@ -132,11 +132,11 @@
  Found real frequency:     8.571429E+01 [eV], number: 13, in file: 2 local index: 3
  Found real frequency:     9.285714E+01 [eV], number: 14, in file: 2 local index: 4
  Found real frequency:     1.000000E+02 [eV], number: 15, in file: 2 local index: 5
- Found imag frequency:     3.271590E+00 [eV], number: 1, in file: 2 local index: 6
- Found imag frequency:     8.464916E+00 [eV], number: 2, in file: 2 local index: 7
+ Found imag frequency:     3.271591E+00 [eV], number: 1, in file: 2 local index: 6
+ Found imag frequency:     8.464917E+00 [eV], number: 2, in file: 2 local index: 7
  Found imag frequency:     1.670881E+01 [eV], number: 3, in file: 2 local index: 8
  Found imag frequency:     2.979517E+01 [eV], number: 4, in file: 2 local index: 9
- Found imag frequency:     5.056847E+01 [eV], number: 5, in file: 2 local index: 10
+ Found imag frequency:     5.056848E+01 [eV], number: 5, in file: 2 local index: 10
 
  Merging 20 frequencies.
  15 real, and 5 imaginary.
@@ -147,7 +147,7 @@
  Identifier                       4
  Kxc kernel                       0
  Treatment of q-->0 limit         0
-- headform                        80
+- headform                        81
  fform                         1004
  gwcalctyp                        2
  Number of components             1       1
@@ -197,14 +197,14 @@
  19   0.00  29.80
  20   0.00  50.57
 
- ==== Files have been merged successfully ===
+ ==== Files have been merged successfully === 
 
 
- Checking if the list of q-points is complete.
+ Checking if the list of q-points is complete. 
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -213,13 +213,13 @@
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry
+ Together with 48 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -228,17 +228,12 @@
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry
+ Together with 48 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
 
 
 
-.File t58o_SCR contains a complete list of q-points
+.File t58o_SCR contains a complete list of q-points 
 
 -
 - Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 0 allocations and 0 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 548 allocations and 548 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0

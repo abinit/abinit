@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h09 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t01/t01.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h11 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v4_t01/t01.abi
 - output file    -> t01.abo
 - root for input  files -> t01i
 - root for output files -> t01o
@@ -106,7 +106,7 @@ P           mkmem           2
            useylm2          1
               wtk        0.25000    0.75000
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3849059948E+00  1.3034409363E+00  1.2762859168E+00
+                       1.3849059999E+00  1.3034409411E+00  1.2762859215E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6170930500E+00  2.4631464000E+00  2.4118308500E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -155,8 +155,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -252,7 +252,7 @@ force_length_stats: {min:   2.93378745E-02, max:   2.93378745E-02, mean:   2.933
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.38490599481929     1.30344093630051     1.27628591679425
+    2      1.38490599993309     1.30344094111350     1.27628592150696
 
  cartesian forces (hartree/bohr) at end:
     1      0.01009146843232    -0.01353488100302    -0.02399333532059
@@ -260,11 +260,11 @@ force_length_stats: {min:   2.93378745E-02, max:   2.93378745E-02, mean:   2.933
  frms,max,avg= 1.6938230E-02 2.3993335E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.51892412742922    -0.69599150623670    -1.23378680504755
-    2     -0.51892412742922     0.69599150623670     1.23378680504755
- frms,max,avg= 8.7099872E-01 1.2337868E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.51892417101400    -0.69599156469349    -1.23378690867412
+    2     -0.51892417101400     0.69599156469349     1.23378690867412
+ frms,max,avg= 8.7099879E-01 1.2337869E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.263110000000 10.263110000000 10.263110000000 bohr
-              =  5.431003901252  5.431003901252  5.431003901252 angstroms
+              =  5.431003921306  5.431003921306  5.431003921306 angstroms
  prteigrs : about to open file t01o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.22898   Average Vxc (hartree)=  -0.35154
  Eigenvalues (hartree) for nkpt=   2  k points:
@@ -280,7 +280,7 @@ force_length_stats: {min:   2.93378745E-02, max:   2.93378745E-02, mean:   2.933
  Eigenvalues (   eV  ) for nkpt=   2  k points:
  kpt#   1, nband= 12, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -5.34791    1.71814    4.93089    5.44160    7.74986    9.06303    9.68177   12.45275
-  13.02745   13.19281   14.49501   17.59272
+  13.02745   13.19281   14.49502   17.59272
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -297,7 +297,7 @@ non_local_psp       :  1.92080933685433E+00
 internal            : -8.85350850979438E+00
 '-kT*entropy'       : -6.44759646928271E-07
 total_energy        : -8.85350915455402E+00
-total_energy_eV     : -2.40916236112594E+02
+total_energy_eV     : -2.40916257236898E+02
 band_energy         :  2.30036075729871E-01
 ...
 
@@ -308,9 +308,9 @@ band_energy         :  2.30036075729871E-01
   sigma(3 3)=  1.21864126E-04  sigma(2 1)= -4.86355198E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.4222E+00 GPa]
-- sigma(1 1)=  6.99001782E-01  sigma(3 2)=  1.82018944E+01
-- sigma(2 2)=  2.98233712E+00  sigma(3 1)=  2.08867302E-01
-- sigma(3 3)=  3.58536577E+00  sigma(2 1)= -1.43090615E+00
+- sigma(1 1)=  6.99001899E-01  sigma(3 2)=  1.82018975E+01
+- sigma(2 2)=  2.98233762E+00  sigma(3 1)=  2.08867337E-01
+- sigma(3 3)=  3.58536638E+00  sigma(2 1)= -1.43090639E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -348,8 +348,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -444,7 +444,7 @@ force_length_stats: {min:   2.93378745E-02, max:   2.93378745E-02, mean:   2.933
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.38490599481929     1.30344093630051     1.27628591679425
+    2      1.38490599993309     1.30344094111350     1.27628592150696
 
  cartesian forces (hartree/bohr) at end:
     1      0.01009146843313    -0.01353488100296    -0.02399333532155
@@ -452,11 +452,11 @@ force_length_stats: {min:   2.93378745E-02, max:   2.93378745E-02, mean:   2.933
  frms,max,avg= 1.6938230E-02 2.3993335E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.51892412747063    -0.69599150623327    -1.23378680509701
-    2     -0.51892412747063     0.69599150623327     1.23378680509701
- frms,max,avg= 8.7099872E-01 1.2337868E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.51892417105542    -0.69599156469006    -1.23378690872359
+    2     -0.51892417105542     0.69599156469006     1.23378690872359
+ frms,max,avg= 8.7099879E-01 1.2337869E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.263110000000 10.263110000000 10.263110000000 bohr
-              =  5.431003901252  5.431003901252  5.431003901252 angstroms
+              =  5.431003921306  5.431003921306  5.431003921306 angstroms
  prteigrs : about to open file t01o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.22898   Average Vxc (hartree)=  -0.35154
  Eigenvalues (hartree) for nkpt=   2  k points:
@@ -472,7 +472,7 @@ force_length_stats: {min:   2.93378745E-02, max:   2.93378745E-02, mean:   2.933
  Eigenvalues (   eV  ) for nkpt=   2  k points:
  kpt#   1, nband= 12, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -5.34791    1.71814    4.93089    5.44160    7.74986    9.06303    9.68177   12.45275
-  13.02745   13.19281   14.49501   17.59272
+  13.02745   13.19281   14.49502   17.59272
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -489,7 +489,7 @@ non_local_psp       :  1.92080933685431E+00
 internal            : -8.85350850979439E+00
 '-kT*entropy'       : -6.44759647006239E-07
 total_energy        : -8.85350915455404E+00
-total_energy_eV     : -2.40916236112594E+02
+total_energy_eV     : -2.40916257236899E+02
 band_energy         :  2.30036075729574E-01
 ...
 
@@ -500,13 +500,13 @@ band_energy         :  2.30036075729574E-01
   sigma(3 3)=  1.21864126E-04  sigma(2 1)= -4.86355198E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.4222E+00 GPa]
-- sigma(1 1)=  6.99001782E-01  sigma(3 2)=  1.82018944E+01
-- sigma(2 2)=  2.98233712E+00  sigma(3 1)=  2.08867302E-01
-- sigma(3 3)=  3.58536577E+00  sigma(2 1)= -1.43090615E+00
+- sigma(1 1)=  6.99001899E-01  sigma(3 2)=  1.82018975E+01
+- sigma(2 2)=  2.98233762E+00  sigma(3 1)=  2.08867337E-01
+- sigma(3 3)=  3.58536638E+00  sigma(2 1)= -1.43090639E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0263110000E+01  1.0263110000E+01  1.0263110000E+01 Bohr
               amu      2.80855000E+01
@@ -559,7 +559,7 @@ P           mkmem           2
            useylm2          1
               wtk        0.25000    0.75000
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3849059948E+00  1.3034409363E+00  1.2762859168E+00
+                       1.3849059999E+00  1.3034409411E+00  1.2762859215E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6170930500E+00  2.4631464000E+00  2.4118308500E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -600,7 +600,7 @@ P           mkmem           2
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -612,12 +612,12 @@ P           mkmem           2
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -635,7 +635,7 @@ P           mkmem           2
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -650,15 +650,15 @@ P           mkmem           2
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.8
+- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.8  wall=          0.8
++Overall time at end (sec) : cpu=          0.8  wall=          0.9

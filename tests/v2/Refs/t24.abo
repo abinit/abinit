@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h08 )
-
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h10 )
+  
 
 ================================================================================
 
@@ -57,11 +57,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -77,7 +77,7 @@
        3               2       -0.000000        0.000000
        3               3        0.012174        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -100,7 +100,7 @@
 
 ================================================================================
 
- Treat the first list of vectors
+ Treat the first list of vectors 
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -118,14 +118,14 @@
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
-  1.0 -1.0  1.0  0.0  0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0 -0.0
-  0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
- Symmetry characters of vibration mode #   4
-       degenerate with vibration modes #   5 to    6
   3.0  0.0  0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0 -0.0  1.0
   1.0 -1.0  1.0 -0.0 -0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0  0.0
  -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
+ Symmetry characters of vibration mode #   4
+       degenerate with vibration modes #   5 to    6
+  3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
+  1.0 -1.0  1.0  0.0  0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0 -0.0
+  0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #   7
        degenerate with vibration modes #   8 to    9
   3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0 -0.0  1.0
@@ -138,9 +138,9 @@
   0.0 -1.0  1.0  1.0 -1.0  0.0 -0.0  1.0  1.0 -1.0 -1.0 -0.0 -0.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #  13
        degenerate with vibration modes #  14 to   15
-  3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0  0.0 -1.0  1.0  1.0  1.0  0.0  0.0  1.0
-  1.0 -1.0  1.0  0.0  0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0 -0.0
- -0.0  1.0 -1.0 -1.0 -1.0 -0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
+  3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0 -0.0  1.0
+  1.0 -1.0  1.0 -0.0 -0.0  1.0 -1.0  1.0 -3.0  0.0  0.0 -1.0 -1.0 -1.0 -1.0  0.0
+ -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -154,7 +154,7 @@
 
 ================================================================================
 
- Treat the second list of vectors
+ Treat the second list of vectors 
 
 
   Phonon at Gamma, with non-analyticity in the
@@ -168,10 +168,10 @@
 -  1.998190E+02  2.629638E+02  2.629638E+02  3.886644E+02  3.886644E+02
 -  3.886644E+02  5.127796E+02  5.241847E+02  5.241847E+02  6.747139E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.049  and wall time      0.068 sec
++Total cpu time      0.051  and wall time      0.052 sec
 
  anaddb : the run completed successfully.
