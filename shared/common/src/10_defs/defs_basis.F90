@@ -291,9 +291,9 @@ module defs_basis
 ! Real physical constants
 ! Previous values from NIST 2006 from http://physics.nist.gov/cuu/Constants/index.html
 
- real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
- real(dp), parameter :: FineStructureConstant=0.0072973525664_dp ! 2014 CODATA value
- real(dp), parameter :: FineStructureConstant2=0.000053251354478_dp ! Square of fine structure constant
+!real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
+!real(dp), parameter :: FineStructureConstant=0.0072973525664_dp ! 2014 CODATA value
+!real(dp), parameter :: FineStructureConstant2=0.000053251354478_dp ! Square of fine structure constant
  real(dp), parameter :: Sp_Lt=Sp_lt_SI/2.1876912633d6 ! speed of light in atomic units
 !real(dp), parameter :: Time_Sec=2.418884326505D-17 !  Atomic unit of time in seconds
 
@@ -304,9 +304,9 @@ module defs_basis
 !       In a.u., alpha is fixed and c is measured. Be carefull when used them. 
 !       Here we defined c.
 
-!real(dp), parameter :: InvFineStruct= 137.035999177_dp                   ! Inverse of fine structure constant
-!real(dp), parameter :: FineStructureConstant  = 0.0072973525643_dp       ! Fine structure constant
-!real(dp), parameter :: FineStructureConstant2 = FineStructureConstant**2 ! Square of fine structure constant
+ real(dp), parameter :: InvFineStruct= 137.035999177_dp                   ! Inverse of fine structure constant
+ real(dp), parameter :: FineStructureConstant  = 0.0072973525643_dp       ! Fine structure constant
+ real(dp), parameter :: FineStructureConstant2 = FineStructureConstant**2 ! Square of fine structure constant
 
 !Works until now 
 
