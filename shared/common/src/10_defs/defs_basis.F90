@@ -324,13 +324,13 @@ module defs_basis
 ! Real physical constants
 ! Previous values from NIST 2006 from http://physics.nist.gov/cuu/Constants/index.html
 
- real(dp), parameter :: BField_Tesla=4.254383d-6 ! Tesla in a.u.
- real(dp), parameter :: dipole_moment_debye=0.393430307_dp ! Debye unit in a.u.
- real(dp), parameter :: siemens_SI=e_Cb**2 / Ha_J / Time_Sec ! Siemens in SI: A/V = C^2 / (J * s)
- real(dp), parameter :: volt_SI=Ha_J/e_Cb ! Volt in SI: J/C
-!EB suppress *0.5_dp  ! Atomic unit of induction field (in Tesla) * mu_B (in atomic units).
- real(dp), parameter :: mu_B_SI=9.274009994D-24   ! Bohr magneton in SI
- real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units
+! real(dp), parameter :: BField_Tesla=4.254383d-6 ! Tesla in a.u.
+! real(dp), parameter :: dipole_moment_debye=0.393430307_dp ! Debye unit in a.u.
+! real(dp), parameter :: siemens_SI=e_Cb**2 / Ha_J / Time_Sec ! Siemens in SI: A/V = C^2 / (J * s)
+! real(dp), parameter :: volt_SI=Ha_J/e_Cb ! Volt in SI: J/C
+!!EB suppress *0.5_dp  ! Atomic unit of induction field (in Tesla) * mu_B (in atomic units).
+! real(dp), parameter :: mu_B_SI=9.274009994D-24   ! Bohr magneton in SI
+! real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units
 
 ! 09/2025 [SP] update with 2022 NIST values from the same website.
 !         See also P. J. Mohr et al., Review Mod. Phys. 97, 025002 (2025)
@@ -338,12 +338,12 @@ module defs_basis
 ! Note: In SI, c is fixed and the fine structure constant (alpha) is measured.
 !       In a.u., alpha is fixed and c is measured. Be carefull when used them. Here we defined c.
 
-!real(dp), parameter :: mu_B_SI      = 9.2740100657D-24                   ! Bohr magneton in SI
-!real(dp), parameter :: mu_B         = 0.5_dp                             ! Bohr magneton in atomic units
-!real(dp), parameter :: BField_Tesla = mu_B_SI / (Ha_J * mu_B)            ! Tesla in a.u.
-!real(dp), parameter :: dipole_moment_debye = 0.393430307_dp              ! Debye unit in a.u.
-!real(dp), parameter :: siemens_SI   = e_Cb**2 / Ha_J / Time_Sec          ! Siemens in SI: A/V = C^2 / (J * s)
-!real(dp), parameter :: volt_SI      = Ha_J / e_Cb                        ! Volt in SI: J/C
+ real(dp), parameter :: mu_B_SI      = 9.2740100657D-24                   ! Bohr magneton in SI
+ real(dp), parameter :: mu_B         = 0.5_dp                             ! Bohr magneton in atomic units
+ real(dp), parameter :: BField_Tesla = mu_B_SI / (Ha_J * mu_B)            ! Tesla in a.u.
+ real(dp), parameter :: dipole_moment_debye = 0.393430307_dp              ! Debye unit in a.u.
+ real(dp), parameter :: siemens_SI   = e_Cb**2 / Ha_J / Time_Sec          ! Siemens in SI: A/V = C^2 / (J * s)
+ real(dp), parameter :: volt_SI      = Ha_J / e_Cb                        ! Volt in SI: J/C
 
 !End of physical constants
 !=========================================================
