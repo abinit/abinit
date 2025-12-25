@@ -265,24 +265,25 @@ module defs_basis
 
 ! Previous values from NIST 2006 from http://physics.nist.gov/cuu/Constants/index.html
 
- real(dp), parameter :: kb_HaK=8.617343d-5/Ha_eV ! Boltzmann constant in Ha/K
- real(dp), parameter :: kb_THzK=kb_HaK*Ha_THz ! Boltzmann constant in THz/K
- real(dp), parameter :: amu_emass=1.660538782d-27/9.10938215d-31 ! 1 atomic mass unit in electronic mass
- real(dp), parameter :: HaBohr3_GPa=Ha_eV/Bohr_Ang**3*e_Cb*1.0d+21 ! 1 Ha/Bohr^3 in GPa
- real(dp), parameter :: Ohmcm=two*pi*Ha_THz*ninth*ten ! 1 Ohm.cm in atomic units
-!real(dp), parameter :: eps0=8.854187817d-12 ! permittivity of free space in F/m
- real(dp), parameter :: eps0=one/(four_pi*0.0000001_dp*299792458.0_dp**2)
- real(dp), parameter :: AmuBohr2_Cm2=e_Cb*1.0d20/(Bohr_Ang*Bohr_Ang)
+!real(dp), parameter :: kb_HaK=8.617343d-5/Ha_eV ! Boltzmann constant in Ha/K
+!real(dp), parameter :: kb_THzK=kb_HaK*Ha_THz ! Boltzmann constant in THz/K
+!real(dp), parameter :: amu_emass=1.660538782d-27/9.10938215d-31 ! 1 atomic mass unit in electronic mass
+!real(dp), parameter :: HaBohr3_GPa=Ha_eV/Bohr_Ang**3*e_Cb*1.0d+21 ! 1 Ha/Bohr^3 in GPa
+!real(dp), parameter :: Ohmcm=two*pi*Ha_THz*ninth*ten ! 1 Ohm.cm in atomic units
+!!real(dp), parameter :: eps0=8.854187817d-12 ! permittivity of free space in F/m
+!real(dp), parameter :: eps0=one/(four_pi*0.0000001_dp*299792458.0_dp**2)
+!real(dp), parameter :: AmuBohr2_Cm2=e_Cb*1.0d20/(Bohr_Ang*Bohr_Ang)
 
 ! 09/2025 [SP] update with 2022 NIST values from the same website.
 !         See also P. J. Mohr et al., Review Mod. Phys. 97, 025002 (2025)
 
-!real(dp), parameter :: kb_THzK      = kb_HaK * Ha_THz        ! Boltzmann constant in THz/K
-!real(dp), parameter :: amu_emass    = 1.66053906892d-27 / 9.1093837139d-31         ! 1 atomic mass unit in electronic mass
-!real(dp), parameter :: HaBohr3_GPa  = Ha_eV / Bohr_Ang**3 * e_Cb * 1.0d+21         ! 1 Ha/Bohr^3 in GPa
-!real(dp), parameter :: Ohmcm        = two * pi * Ha_THz * ninth * ten              ! 1 Ohm.cm in atomic units
-!real(dp), parameter :: eps0         = one / (four_pi * 0.0000001_dp * Sp_Lt_SI**2) ! permittivity of free space in F/m
-!real(dp), parameter :: AmuBohr2_Cm2 = e_Cb * 1.0d20 / (Bohr_Ang * Bohr_Ang)
+ real(dp), parameter :: kb_HaK       = kb_SI / Ha_J           ! Boltzmann constant in Ha/K
+ real(dp), parameter :: kb_THzK      = kb_HaK * Ha_THz        ! Boltzmann constant in THz/K
+ real(dp), parameter :: amu_emass    = 1.66053906892d-27 / 9.1093837139d-31         ! 1 atomic mass unit in electronic mass
+ real(dp), parameter :: HaBohr3_GPa  = Ha_eV / Bohr_Ang**3 * e_Cb * 1.0d+21         ! 1 Ha/Bohr^3 in GPa
+ real(dp), parameter :: Ohmcm        = two * pi * Ha_THz * ninth * ten              ! 1 Ohm.cm in atomic units
+ real(dp), parameter :: eps0         = one / (four_pi * 0.0000001_dp * Sp_Lt_SI**2) ! permittivity of free space in F/m
+ real(dp), parameter :: AmuBohr2_Cm2 = e_Cb * 1.0d20 / (Bohr_Ang * Bohr_Ang)
 
 !=========================================================
 !Third part of physical constant definitions
