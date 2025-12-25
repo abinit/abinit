@@ -5084,7 +5084,8 @@ end subroutine uplan_free
 !!
 !! SOURCE
 
-subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
+subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
+                                isign, iscale, phase) ! optional
 
 !Arguments ------------------------------------
  class(uplan_t),target,intent(in) :: uplan
@@ -5092,11 +5093,12 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
  complex(sp),target,intent(in) :: ug(*)  ! (uplan%npw*uplan%nspinor*ndat)
  complex(sp),target,intent(out) :: ur(*) ! (uplan%nfft*uplan%nspinor*ndat)
  integer,optional,intent(in) :: isign, iscale
+ complex(sp),optional,intent(in) :: phase(uplan%nfft*uplan%nspinor)
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft
-#ifdef HAVE_GPU_CUDA
  integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
+#ifdef HAVE_GPU_CUDA
  integer, contiguous, pointer :: ig2ifft(:)
 #endif
 ! *************************************************************************
@@ -5111,6 +5113,9 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
  nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
  ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
 
+ ! NVHPC does not reliably support mapping derived_type components
+ nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
+
  if (uplan%gpu_option == ABI_GPU_DISABLED) then
    select case (fftalga)
    case (FFT_FFTW3)
@@ -5124,6 +5129,18 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
    case default
      ABI_ERROR(sjoin("Wrong fftalga:", itoa(fftalga)))
    end select
+
+   ! Multiply by e^{ik.r}
+   if (present(phase)) then
+     bufsize = int(nfft, c_size_t) * nspinor
+     !$OMP PARALLEL DO PRIVATE(offset) IF (ndat > 1)
+     do idat=1,ndat
+       offset = (idat - 1) * bufsize
+       do ir=1,bufsize
+         ur(offset + ir) = ur(offset + ir) * phase(ir)
+       end do
+     end do
+   end if
 
  else
 #ifdef HAVE_GPU_CUDA
@@ -5141,12 +5158,9 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
    ! TODO
    !!$OMP TARGET ENTER DATA MAP(alloc:ur)
    !call gpu_set_to_zero(ur, int(2,c_size_t)*uplan%nfft*uplan%nspinor*ndat)
-
-   ! NVHPC does not reliably support mapping derived_type components
-   nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
-   bufsize = uplan%nfft * uplan%nspinor * ndat
    ig2ifft => uplan%ig2ifft
 
+   bufsize = uplan%nfft * uplan%nspinor * ndat
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
    do ifft=1, bufsize
      ur(ifft) = zero
@@ -5168,6 +5182,18 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_ctx_spc, uplan%nfft, ndat, isign__, iscale__, sp, c_loc(ur))
    !$OMP END TARGET DATA
+
+   ! Multiply by e^{ik.r}
+   if (present(phase)) then
+     bufsize = int(nfft, c_size_t) * nspinor
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(offset) COLLAPSE(2) MAP(to:ur, phase)
+     do idat=1,ndat
+       do ir=1,bufsize
+         offset = (idat - 1) * bufsize
+         ur(offset + ir) = ur(offset + ir) * phase(ir)
+       end do
+     end do
+   end if
 #endif
  end if
 
@@ -5186,7 +5212,8 @@ end subroutine uplan_execute_gr_spc
 !!
 !! SOURCE
 
-subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
+subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
+                                isign, iscale, phase) ! optional
 
 !Arguments ------------------------------------
  class(uplan_t),target,intent(in) :: uplan
@@ -5194,11 +5221,12 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
  complex(dp),target,intent(in) :: ug(*) ! uplan%npw*uplan%nspinor*ndat)
  complex(dp),target,intent(out) :: ur(*) ! uplan%nfft*uplan%nspinor*ndat)
  integer,optional,intent(in) :: isign, iscale
+ complex(dp),optional,intent(in) :: phase(uplan%nfft*uplan%nspinor)
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft
-#ifdef HAVE_GPU_CUDA
  integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
+#ifdef HAVE_GPU_CUDA
  integer, contiguous, pointer :: ig2ifft(:)
 #endif
 ! *************************************************************************
@@ -5213,6 +5241,9 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
  nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
  ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
 
+ ! NVHPC does not reliably support mapping derived_type components
+ nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
+
  if (uplan%gpu_option == ABI_GPU_DISABLED) then
    select case (fftalga)
    case (FFT_FFTW3)
@@ -5226,6 +5257,18 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
    case default
      ABI_ERROR(sjoin("Wrong fftalga:", itoa(fftalga)))
    end select
+
+   ! Multiply by e^{ik.r}
+   if (present(phase)) then
+     bufsize = int(nfft, c_size_t) * nspinor
+     !$OMP PARALLEL DO PRIVATE(offset) IF (ndat > 1)
+     do idat=1,ndat
+       offset = (idat - 1) * bufsize
+       do ir=1,bufsize
+         ur(offset + ir) = ur(offset + ir) * phase(ir)
+       end do
+     end do
+   end if
 
  else
 #ifdef HAVE_GPU_CUDA
@@ -5244,8 +5287,6 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
    !!$OMP TARGET ENTER DATA MAP(alloc:ur)
    !call gpu_set_to_zero(ur, int(2,c_size_t)*uplan%nfft*uplan%nspinor*ndat)
 
-   ! NVHPC does not reliably support mapping derived_type components
-   nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
    bufsize = uplan%nfft * uplan%nspinor * ndat
    ig2ifft => uplan%ig2ifft
 
@@ -5270,6 +5311,18 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_ctx_dpc, uplan%nfft, ndat, isign__, iscale__, dp, c_loc(ur))
    !$OMP END TARGET DATA
+
+   ! Multiply by e^{ik.r}
+   if (present(phase)) then
+     bufsize = int(nfft, c_size_t) * nspinor
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(offset) COLLAPSE(2) MAP(to:ur, phase)
+     do idat=1,ndat
+       do ir=1,bufsize
+         offset = (idat - 1) * bufsize
+         ur(offset + ir) = ur(offset + ir) * phase(ir)
+       end do
+     end do
+   end if
 #endif
  end if
 
