@@ -3018,15 +3018,6 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
        else
          call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), phase=ceikr)
        end if
-
-       !call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
-       !if (.not. k_is_gamma) then
-       !  ! Multiply by e^{ik.r}
-       !  !$OMP PARALLEL DO
-       !  do idat=0,ndat-1
-       !    rgp%buffer_cplx(:, ig2 + idat) = ceikr(:) * rgp%buffer_cplx(:, ig2 + idat)
-       !  end do
-       !end if
      end do ! ig2
 
      ! MPI transpose: G_k(r,g') -> G_k(g',r)
@@ -3135,14 +3126,6 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
      else
        call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2))
      end if
-
-     !call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2))
-     !! Multiply by e^{ig0.r}
-     !if (have_g0) then
-     !  do idat=0,ndat-1
-     !    rgp%buffer_cplx(:,ig2+idat) = ceig0r(:) * rgp%buffer_cplx(:,ig2+idat)
-     !  end do
-     !end if
    end do ! ig2
    end associate
 
@@ -3158,14 +3141,6 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
      else
        call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), isign=-1, iscale=0)
      end if
-
-     !call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), isign=-1, iscale=0)
-     !! Multiply by e^{ig0.r}.
-     !if (have_g0) then
-     !  do idat=0,ndat-1
-     !    gk_rpr_pm(ipm)%buffer_cplx(:, ir1+idat) = conjg(ceig0r) * gk_rpr_pm(ipm)%buffer_cplx(:, ir1+idat)
-     !  end do
-     !end if
    end do ! ir1
    call gpr%free()
 
@@ -3490,15 +3465,6 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
      else
        call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), phase=ceiqr)
      end if
-
-     !call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))
-     !! Multiply by e^{iq.r}
-     !if (.not. q_is_gamma) then
-     !  !$OMP PARALLEL DO
-     !  do idat=0,ndat-1
-     !    rgp%buffer_cplx(:, ig2+idat) = ceiqr(:) * rgp%buffer_cplx(:, ig2+idat)
-     !  end do
-     !end if
    end do ! ig2
 
    call uplan_q%free()
@@ -3586,14 +3552,6 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
    else
      call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2))
    end if
-
-   !call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2))
-   !! Multiply by e^{ig0.r}
-   !if (any(g0_q /= 0)) then
-   !  do idat=0,ndat-1
-   !    rgp%buffer_cplx(:, ig2+idat) = ceig0r(:) * rgp%buffer_cplx(:, ig2+idat)
-   !  end do
-   !end if
  end do ! ig2
 
  ! MPI transpose: Wc(r,g') -> Wc(g',r)
@@ -3608,14 +3566,6 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
    else
      call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), isign=-1, iscale=0)
    end if
-
-   !call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), isign=-1, iscale=0)
-   !! Multiply by e^{ig0.r}
-   !if (any(g0_q /= 0)) then
-   !  do idat=0,ndat-1
-   !    wc_rpr%buffer_cplx(:, ir1+idat) = conjg(ceig0r) * wc_rpr%buffer_cplx(:, ir1+idat)
-   !  end do
-   !end if
  end do ! ir1
 
  call uplan_k%free(); call gpr%free(); call desc_qbz%free(); call wc_ggp%free()

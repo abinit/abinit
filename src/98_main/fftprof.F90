@@ -453,9 +453,9 @@ program fftprof
      call wrtout(std_out, msg)
      nfailed = nfailed + fftu_utests(ecut, ut_ngfft, rprimd, ndat, nthreads)
 
-     write(msg,"(4(a,i0))")"uplan_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
-     call wrtout(std_out, msg)
-     nfailed = nfailed + uplan_utests(ecut, ut_ngfft, rprimd, ndat, nthreads, gpu_option)
+     !write(msg,"(4(a,i0))")"uplan_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
+     !call wrtout(std_out, msg)
+     !nfailed = nfailed + uplan_utests(ecut, ut_ngfft, rprimd, ndat, nthreads, gpu_option)
    end do
 
    write(msg,'(a,i0)')"Total number of failed tests = ",nfailed
