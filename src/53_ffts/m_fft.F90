@@ -4514,10 +4514,6 @@ end subroutine zerosym
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,tim_fourdp)
@@ -4985,13 +4981,14 @@ subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind
 
 !Arguments ------------------------------------
 !scalars
- class(uplan_t),intent(out) :: uplan
+ class(uplan_t),target,intent(out) :: uplan
  integer,intent(in) :: npw, nspinor, batch_size, istwfk, kind, gpu_option
 !Local variables-------------------------------
  integer :: ig, ig1, ig2, ig3, n1, n2, n3, ifft
 !arrays
  integer,intent(in) :: ngfft(18)
  integer,target,intent(in) :: kg_k(3,npw)
+ integer, contiguous, pointer :: ig2ifft(:), ifft2ig(:)
 ! *************************************************************************
 
  uplan%npw = npw
@@ -5030,8 +5027,9 @@ subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind
    end do
 
    ! Map data to GPU.
+   ig2ifft => uplan%ig2ifft; ifft2ig => uplan%ifft2ig
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(to:uplan%ig2ifft, uplan%ifft2ig)
+   !$OMP TARGET ENTER DATA MAP(to:ig2ifft, ifft2ig)
 #endif
  end if
 
@@ -5052,17 +5050,21 @@ end subroutine uplan_init
 subroutine uplan_free(uplan)
 
 !Arguments ------------------------------------
- class(uplan_t),intent(inout) :: uplan
+ class(uplan_t),target,intent(inout) :: uplan
+
+!Local variables-------------------------------
+ integer, contiguous, pointer :: ig2ifft(:), ifft2ig(:)
 ! *************************************************************************
 
  ABI_SFREE(uplan%gbound)
 
  if (uplan%gpu_option == ABI_GPU_OPENMP) then
    ! Free memory on the GPU
+   ig2ifft => uplan%ig2ifft; ifft2ig => uplan%ifft2ig
 #ifdef HAVE_GPU_CUDA
    call gpu_ctx_free(uplan%gpu_ctx_spc)
    call gpu_ctx_free(uplan%gpu_ctx_dpc)
-   !$OMP TARGET EXIT DATA MAP(delete:uplan%ig2ifft, uplan%ifft2ig)
+   !$OMP TARGET EXIT DATA MAP(delete:ig2ifft, ifft2ig)
 #endif
  end if
 
