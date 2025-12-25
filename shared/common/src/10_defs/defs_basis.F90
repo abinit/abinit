@@ -217,48 +217,48 @@ module defs_basis
 
 ! Previous values from NIST 2006 from http://physics.nist.gov/cuu/Constants/index.html
 
- real(dp), parameter :: Bohr_Ang=0.52917720859_dp    ! 1 Bohr, in Angstrom
- real(dp), parameter :: Ang_Bohr = one / Bohr_Ang  ! 1 Angstrom in Bohr
- real(dp), parameter :: Bohr_meter=Bohr_Ang * 1.d-10 ! 1 Bohr in meter
- real(dp), parameter :: Bohr_cm=Bohr_meter * 100_dp ! 1 Bohr in cm
- real(dp), parameter :: Ha_cmm1=219474.6313705_dp  ! 1 Hartree in cm^-1
- real(dp), parameter :: Ha_eV=27.21138386_dp ! 1 Hartree in eV
- real(dp), parameter :: eV_Ha=one/Ha_eV      ! 1 eV in Hartree
- real(dp), parameter :: Ha_meV=Ha_eV*1000_dp ! 1 Hartree in meV
- real(dp), parameter :: Ha_K=315774.65_dp ! 1Hartree in Kelvin
- real(dp), parameter :: Ha_THz=6579.683920722_dp ! 1 Hartree in THz
- real(dp), parameter :: Ha_s=Ha_THz*1e12*two_pi ! 1 Hartree in s
- real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree in J
+!real(dp), parameter :: Bohr_Ang=0.52917720859_dp    ! 1 Bohr, in Angstrom
+!real(dp), parameter :: Ang_Bohr = one / Bohr_Ang  ! 1 Angstrom in Bohr
+!real(dp), parameter :: Bohr_meter=Bohr_Ang * 1.d-10 ! 1 Bohr in meter
+!real(dp), parameter :: Bohr_cm=Bohr_meter * 100_dp ! 1 Bohr in cm
+!real(dp), parameter :: Ha_cmm1=219474.6313705_dp  ! 1 Hartree in cm^-1
+!real(dp), parameter :: Ha_eV=27.21138386_dp ! 1 Hartree in eV
+!real(dp), parameter :: eV_Ha=one/Ha_eV      ! 1 eV in Hartree
+!real(dp), parameter :: Ha_meV=Ha_eV*1000_dp ! 1 Hartree in meV
+!real(dp), parameter :: Ha_K=315774.65_dp ! 1Hartree in Kelvin
+!real(dp), parameter :: Ha_THz=6579.683920722_dp ! 1 Hartree in THz
+!real(dp), parameter :: Ha_s=Ha_THz*1e12*two_pi ! 1 Hartree in s
+!real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree in J
 
- real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge in Coulomb
- real(dp), parameter :: kb_SI=1.380649d-23  ! Boltzmann constant in Joule/K (CODATA 2017 value.)
- real(dp), parameter :: Avogadro=6.02214179d23 ! per mole
- real(dp), parameter :: Sp_Lt_SI=2.99792458d8 ! speed of light in SI
+!real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge in Coulomb
+!real(dp), parameter :: kb_SI=1.380649d-23  ! Boltzmann constant in Joule/K (CODATA 2017 value.)
+!real(dp), parameter :: Avogadro=6.02214179d23 ! per mole
+!real(dp), parameter :: Sp_Lt_SI=2.99792458d8 ! speed of light in SI
 
 ! 09/2025 [SP] update with 2022 NIST values from the same website.
 !         See also P. J. Mohr et al., Review Mod. Phys. 97, 025002 (2025)
 !
-!real(dp), parameter :: Bohr_Ang     = 0.529177210544_dp      ! 1 Bohr, in Angstrom
-!real(dp), parameter :: Ang_Bohr     = one / Bohr_Ang         ! 1 Angstrom in Bohr
-!real(dp), parameter :: Bohr_meter   = Bohr_Ang * 1.d-10      ! 1 Bohr in meter
-!real(dp), parameter :: Bohr_cm      = Bohr_meter * 100_dp    ! 1 Bohr in cm
-!real(dp), parameter :: Ha_eV        = 27.211386245981_dp     ! 1 Hartree in eV
-!real(dp), parameter :: Ha_cmm1      = 219474.63136314_dp     ! 1 Hartree in cm^-1
-!real(dp), parameter :: eV_Ha        = one / Ha_eV            ! 1 eV in Hartree
-!real(dp), parameter :: Ha_meV       = Ha_eV * 1000_dp        ! 1 Hartree in meV
-!real(dp), parameter :: Ha_K         = 315775.02480398_dp     ! 1 Hartree in Kelvin
-!real(dp), parameter :: Ha_THz       = 6579.6839204999_dp     ! 1 Hartree in THz
-!real(dp), parameter :: Ha_s         = Ha_THz * 1e12 * two_pi ! 1 Hartree in s
-!real(dp), parameter :: Ha_J         = 4.3597447222060d-18    ! 1 Hartree in J
+ real(dp), parameter :: Bohr_Ang     = 0.529177210544_dp      ! 1 Bohr, in Angstrom
+ real(dp), parameter :: Ang_Bohr     = one / Bohr_Ang         ! 1 Angstrom in Bohr
+ real(dp), parameter :: Bohr_meter   = Bohr_Ang * 1.d-10      ! 1 Bohr in meter
+ real(dp), parameter :: Bohr_cm      = Bohr_meter * 100_dp    ! 1 Bohr in cm
+ real(dp), parameter :: Ha_eV        = 27.211386245981_dp     ! 1 Hartree in eV
+ real(dp), parameter :: Ha_cmm1      = 219474.63136314_dp     ! 1 Hartree in cm^-1
+ real(dp), parameter :: eV_Ha        = one / Ha_eV            ! 1 eV in Hartree
+ real(dp), parameter :: Ha_meV       = Ha_eV * 1000_dp        ! 1 Hartree in meV
+ real(dp), parameter :: Ha_K         = 315775.02480398_dp     ! 1 Hartree in Kelvin
+ real(dp), parameter :: Ha_THz       = 6579.6839204999_dp     ! 1 Hartree in THz
+ real(dp), parameter :: Ha_s         = Ha_THz * 1e12 * two_pi ! 1 Hartree in s
+ real(dp), parameter :: Ha_J         = 4.3597447222060d-18    ! 1 Hartree in J
 
  ! Since 2019, the following constants have been defined and are now exact [SP].
-!real(dp), parameter :: e_Cb         = 1.602176634d-19        ! minus the electron charge in Coulomb
-!real(dp), parameter :: kb_SI        = 1.380649d-23           ! Boltzmann constant in Joule/K
-!real(dp), parameter :: Avogadro     = 6.02214076d23          ! per mole
-!real(dp), parameter :: Sp_Lt_SI     = 299792458_dp           ! Speed of light in vacuum (m/s)
+ real(dp), parameter :: e_Cb         = 1.602176634d-19        ! minus the electron charge in Coulomb
+ real(dp), parameter :: kb_SI        = 1.380649d-23           ! Boltzmann constant in Joule/K
+ real(dp), parameter :: Avogadro     = 6.02214076d23          ! per mole
+ real(dp), parameter :: Sp_Lt_SI     = 299792458_dp           ! Speed of light in vacuum (m/s)
  ! Note: In SI, c is fixed and the fine structure constant (alpha) is measured.
  !       In a.u., alpha is fixed and c is measured. Be carefull when using them. 
- !       Here we defined c.
+ !       Here we define c.
 
 !=========================================================
 !Second part of physical constant definitions
