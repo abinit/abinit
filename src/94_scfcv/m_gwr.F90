@@ -2999,6 +2999,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
    ! Get G_kbz(+/- itau) in the BZ.
    call gwr%rotate_gpm(ik_bz, itau, spin, desc_mykbz(my_ikf), gt_pm)
 
+   ! FIXME bug if batch size > 1
    associate (desc_k => desc_mykbz(my_ikf))
    call uplan_k%init(desc_k%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_k%istwfk, &
                      desc_k%gvec, gwp, &
@@ -3102,8 +3103,8 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
      ABI_MALLOC(conjg_ceig0r, (gwr%g_nfft * gwr%nspinor))
      conjg_ceig0r = conjg(ceig0r)
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(alloc:ceig0r, conjg_ceig0r) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
- !$omp target update to(ceig0r, conjg_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+     !$OMP TARGET ENTER DATA MAP(alloc:ceig0r, conjg_ceig0r) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+     !$omp target update to(ceig0r, conjg_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
 #endif
    end if
  end if
@@ -3154,11 +3155,13 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
 
  call slk_array_free(gt_pm); call desc_kbz%free(); call uplan_k%free()
 
+ if (have_g0) then
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete: ceig0r, conjg_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete: ceig0r, conjg_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
 #endif
- ABI_SFREE(ceig0r)
- ABI_SFREE(conjg_ceig0r)
+   ABI_FREE(ceig0r)
+   ABI_FREE(conjg_ceig0r)
+ end if
 
  !call cwtime_report(" gwr_get_gkbz_rpr_pm:", cpu, wall, gflops)
 
@@ -3264,7 +3267,9 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
  call gp_r%init(npwsp, nrsp, gwr%g_slkproc, desc%istwfk, size_blocs=[-1, col_bsize])
 
  call uplan_k%init(desc%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc%istwfk, &
-                   desc%gvec, gwp, gwr%dtset%gpu_option)
+                   desc%gvec, gwp, &
+                   0)
+                   !gwr%dtset%gpu_option) ! FIXME GPU option
 
  isign = +1 ! This should be ok
  !isign = -1
@@ -3272,7 +3277,7 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
  ! F(r',r) --> F(g',r) and store results in gp_r.
  do ir2=1, rp_r%size_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir2, rp_r%size_local(2), gwr%uc_batch_size)
-   call uplan_k%execute_rg(ndat, rp_r%buffer_cplx(:,ir2), gp_r%buffer_cplx(:,ir2), isign=isign, iscale=0) ! this should be OK
+   call uplan_k%execute_rg(ndat, rp_r%buffer_cplx(:,ir2), gp_r%buffer_cplx(:,ir2), isign=isign, iscale=0, gpu_map=1) ! this should be OK
  end do
 
  ! F(g',r) --> F(r,g')
@@ -3283,11 +3288,10 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
  ! F(r,g') --> F(g,g') and store results in g_gp.
  do ig2=1, g_gp%size_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
-   call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=-isign, iscale=0) ! this should be OK
+   call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=-isign, iscale=0, gpu_map=1) ! this should be OK
  end do
 
  !g_gp%buffer_cplx = scale_fact * g_gp%buffer_cplx
-
  call uplan_k%free(); call r_gp%free()
 
 end subroutine gwr_rpr_to_ggp
@@ -3463,8 +3467,8 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
 
    call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_q%istwfk, &
                      desc_q%gvec, &
-                     !gwp, 0) ! FIXME: gpu_option
-                     gwp, gwr%dtset%gpu_option)
+                     gwp, 0) ! FIXME: gpu_option
+                     !gwp, gwr%dtset%gpu_option)
 
    ! FFT and store results in rgp
    do ig2=1,wc_qbz%size_local(2), gwr%uc_batch_size
@@ -3537,8 +3541,8 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
    call calc_ceigr(-g0_q, gwr%g_nfft, gwr%nspinor, gwr%g_ngfft, ceig0r)
    conjg_ceig0r = conjg(ceig0r)
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(alloc:ceig0r, conjg_ceig0r) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
- !$omp target update to(ceig0r, conjg_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(alloc:ceig0r, conjg_ceig0r) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+   !$omp target update to(ceig0r, conjg_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
 #endif
  end if
 
@@ -3580,11 +3584,13 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
 
  call uplan_k%free(); call gpr%free(); call desc_qbz%free(); call wc_ggp%free()
 
+ if (any(g0_q /= 0)) then
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete: ceig0r, conjg_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete: ceig0r, conjg_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
 #endif
- ABI_SFREE(ceig0r)
- ABI_SFREE(conjg_ceig0r)
+   ABI_SFREE(ceig0r)
+   ABI_SFREE(conjg_ceig0r)
+ end if
 
 end subroutine gwr_get_wc_rpr_qbz
 !!***
@@ -4551,7 +4557,7 @@ subroutine gwr_build_tchi(gwr)
    end do
 
    mem_mb = sum(slk_array_locmem_mb(chiq_gpr))
-   call wrtout(std_out, sjoin(" Local memory for chi_q(g',r) matrices: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+   call wrtout(std_out, sjoin(" Local memory for Chi_q(g',r) matrices: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
    if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
    select_my_kbz = .True.
@@ -4796,7 +4802,7 @@ subroutine gwr_build_tchi(gwr)
    end do
 
    mem_mb = sum(slk_array_locmem_mb(chiq_rpr)) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(gkq_rpr_pm))
-   call wrtout(std_out, sjoin(" Local memory for chi_q(r',r) (gt_gpr): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+   call wrtout(std_out, sjoin(" Local memory for Chi_q(r',r) (gt_gpr): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
    call pstat_proc%print(_PSTAT_ARGS_)
 
    ! The little group is needed when symchi == 1 (default)
