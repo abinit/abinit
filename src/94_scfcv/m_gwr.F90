@@ -3102,7 +3102,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
      ABI_MALLOC(conjg_ceig0r, (gwr%g_nfft * gwr%nspinor))
      conjg_ceig0r = conjg(ceig0r)
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(alloc:ceig0r, conj_ceig0r) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(alloc:ceig0r, conjg_ceig0r) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
  !$omp target update to(ceig0r, conjg_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
 #endif
    end if
@@ -3155,7 +3155,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
  call slk_array_free(gt_pm); call desc_kbz%free(); call uplan_k%free()
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete: ceig0r, conj_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete: ceig0r, conjg_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
 #endif
  ABI_SFREE(ceig0r)
  ABI_SFREE(conjg_ceig0r)
