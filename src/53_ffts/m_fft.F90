@@ -1875,6 +1875,9 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
    ABI_MALLOC(kg_k, (3,npw_k))
    call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_k,kpoint,mkmem1,MPI_enreg_seq,npw_k,npw_k_test)
 
+   ! TODO
+   !call get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k)
+
    ! =================================================
    ! === Test the single precision complex version ===
    ! =================================================
@@ -1889,8 +1892,23 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
      end do
    end if
 
-   ugsp = ug_refsp
    call uplan_k%init(npw_k, nspinor1, ndat, ngfft, istwf_k, kg_k, sp, gpu_option)
+
+   ! Test version with gpu_map 1 (GPU only)
+   ugsp = ug_refsp
+   call uplan_k%execute_gr(ndat, ugsp, ursp, gpu_map=1)
+   ugsp = zero
+   call uplan_k%execute_rg(ndat, ursp, ugsp, gpu_map=1)
+
+   ierr = COUNT(ABS(ugsp - ug_refsp) > ATOL_SP); nfailed = nfailed + ierr
+   write(info,"(a,i1,a)")sjoin(library,"uplan_k spc gpu_map 1, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
+   if (ierr /= 0) then
+     max_abserr = MAXVAL(ABS(ugsp - ug_refsp)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
+   end if
+   call wrtout(ount, sjoin(info, msg))
+
+   ! Test version with explicit GPU offloading.
+   ugsp = ug_refsp
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(to:ugsp, ursp) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -1902,16 +1920,12 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
 #endif
    call uplan_k%free()
 
-   ierr = COUNT(ABS(ugsp - ug_refsp) > ATOL_SP)
-   nfailed = nfailed + ierr
-
-   write(info,"(a,i1,a)")sjoin(library,"uplan_k spc, istwfk "),istwf_k," :"
-   write(msg,"(a)")" OK"
+   ierr = COUNT(ABS(ugsp - ug_refsp) > ATOL_SP); nfailed = nfailed + ierr
+   write(info,"(a,i1,a)")sjoin(library,"uplan_k spc gpu_map 0, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
    if (ierr /= 0) then
-     max_abserr = MAXVAL(ABS(ugsp - ug_refsp))
-     write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
+     max_abserr = MAXVAL(ABS(ugsp - ug_refsp)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
    end if
-   call wrtout(ount,sjoin(info, msg))
+   call wrtout(ount, sjoin(info, msg))
 
    ! =================================================
    ! === Test the double precision complex version ===
@@ -1928,9 +1942,23 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
    end if
 
    ! Test uplan_k transforms with double precision.
-   ug = ug_ref
-
    call uplan_k%init(npw_k, nspinor1, ndat, ngfft, istwf_k, kg_k, dp, gpu_option)
+
+   ! Test version with gpu_map 1 (GPU only)
+   ug = ug_ref
+   call uplan_k%execute_gr(ndat, ug, ur, gpu_map=1)
+   ug = zero
+   call uplan_k%execute_rg(ndat, ur, ug, gpu_map=1)
+
+   ierr = COUNT(ABS(ug - ug_ref) > ATOL_DP); nfailed = nfailed + ierr
+   write(info,"(a,i1,a)")sjoin(library,"uplan_k gpu_map 1, dp, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
+   if (ierr /= 0) then
+     max_abserr = MAXVAL(ABS(ug - ug_ref)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
+   end if
+   call wrtout(ount, sjoin(info, msg))
+
+   ! Test version with explicit GPU offloading.
+   ug = ug_ref
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(to:ug, ur) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -1942,14 +1970,10 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
 #endif
    call uplan_k%free()
 
-   ierr = COUNT(ABS(ug - ug_ref) > ATOL_DP)
-   nfailed = nfailed + ierr
-
-   write(info,"(a,i1,a)")sjoin(library,"uplan_k, dp, istwfk "),istwf_k," :"
-   write(msg,"(a)")" OK"
+   ierr = COUNT(ABS(ug - ug_ref) > ATOL_DP); nfailed = nfailed + ierr
+   write(info,"(a,i1,a)")sjoin(library,"uplan_k, dp, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
    if (ierr /= 0) then
-     max_abserr = MAXVAL(ABS(ug - ug_ref))
-     write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
+     max_abserr = MAXVAL(ABS(ug - ug_ref)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
    end if
    call wrtout(ount, sjoin(info, msg))
 
@@ -5476,9 +5500,9 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
  integer,optional,intent(in) :: isign, iscale, gpu_map
 
 !Local variables-------------------------------
- integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, gpu_map__, nfft
 #ifdef HAVE_GPU_CUDA
- integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset !, bufsize
+ integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset
  logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ifft2ig(:)
 #endif
@@ -5496,6 +5520,9 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
  fftalg = uplan%ngfft(7); fftcache = uplan%ngfft(8); fftalga = fftalg/100; fftalgc = mod(fftalg, 10)
  nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
  ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
+
+ ! NVHPC does not reliably support mapping derived_type components
+ nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
 
  if (uplan%gpu_option == ABI_GPU_DISABLED) then
    select case (fftalga)
@@ -5530,11 +5557,6 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
      !$OMP TARGET ENTER DATA MAP(alloc:ur) IF(transfer_ur)
      !$OMP TARGET UPDATE TO(ur) IF(transfer_ur)
    end if
-
-   ! NVHPC does not reliably support mapping derived_type components
-   nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
-   !bufsize = uplan%nfft * uplan%nspinor * ndat
-
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_ctx_spc, int(uplan%nfft), ndat, isign__, iscale__, sp, c_loc(ur))
@@ -5590,7 +5612,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
- integer(c_size_t) :: idat, ir, offset, bufsize
+ integer(c_size_t) :: idat, ir, offset
 #ifdef HAVE_GPU_CUDA
  integer(c_size_t) :: ispinor, ipw, ifft, ig
  logical :: transfer_ug, transfer_ur
@@ -5610,6 +5632,9 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
  fftalg = uplan%ngfft(7); fftcache = uplan%ngfft(8); fftalga = fftalg/100; fftalgc = mod(fftalg, 10)
  nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
  ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
+
+ ! NVHPC does not reliably support mapping derived_type components
+ nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
 
  if (uplan%gpu_option == ABI_GPU_DISABLED) then
    select case (fftalga)
@@ -5644,10 +5669,6 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
      !$OMP TARGET ENTER DATA MAP(alloc:ur) IF(transfer_ur)
      !$OMP TARGET UPDATE TO(ur) IF(transfer_ur)
    end if
-
-   ! NVHPC does not reliably support mapping derived_type components
-   nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
-   !bufsize = uplan%nfft * uplan%nspinor * ndat
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_ctx_dpc, int(uplan%nfft), ndat, isign__, iscale__, dp, c_loc(ur))
