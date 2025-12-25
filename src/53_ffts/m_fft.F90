@@ -125,8 +125,10 @@ module m_fft
 
    integer :: fftalg = 112       ! The library to call on the CPU
    integer :: fftcache = 16      ! Cache size in kB. Only used in SG routines.
-   integer :: nfft = -1          ! Total number of points in the FFT box.
-   integer :: ldxyz = -1         ! Physical dimension of the array to transform
+   integer(c_size_t) :: nfft = -1
+   integer(c_size_t) :: ldxyz = -1
+   !integer :: nfft = -1          ! Total number of points in the FFT box.
+   !integer :: ldxyz = -1         ! Physical dimension of the array to transform
    integer :: batch_size = -1    ! MAXIMUM number of FFTs associated to the plan.
    integer :: dims(3) = -1       ! The number of FFT divisions.
    integer :: embed(3) = -1      ! Leading dimensions of the input, output arrays.
@@ -196,13 +198,15 @@ module m_fft
 
  type, public :: uplan_t
 
-   integer :: npw = -1
+   !integer :: npw = -1
+   integer(c_size_t) :: npw = -1
    integer :: nspinor = -1
    integer :: batch_size = -1  ! MAXIMUM number of FFTs associated to the plan.
    integer :: istwfk = -1
    integer :: kind = -1
    integer :: gpu_option = ABI_GPU_DISABLED  ! /= 0 if FFTs should be offloaded to the GPU.
-   integer :: nfft = -1  ! Total number of points in the FFT box.
+   !integer :: nfft = -1  ! Total number of points in the FFT box.
+   integer(c_size_t) :: nfft = -1
    integer :: mgfft = -1
    integer :: ngfft(18)
    integer, contiguous, pointer :: kg_k(:,:)
@@ -392,27 +396,35 @@ end subroutine fftbox_plan3_free
 !!  [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! SIDE EFFECTS
-!!  ff(plan%ldxyz*plan%batch_size) =
+!!  ff(plan%ldxyz*ndat) =
 !!    In input: the data to transform.
 !!    Changed in output, filled with the FFT results.
 !!
 !! SOURCE
 
-subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
+subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, &
+                                 iscale, gpu_map)  ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),target,intent(inout) :: plan
  integer,intent(in) :: isign, ndat
- integer,optional,intent(in) :: iscale
+ integer,optional,intent(in) :: iscale, gpu_map
 !arrays
- complex(sp),target,intent(inout) :: ff(*)
+ complex(sp),target,intent(inout) :: ff(plan%ldxyz*ndat)
+
+!Local variables-------------------------------
+ integer :: ndat__, iscale__, gpu_map__
+#ifdef HAVE_GPU_CUDA
+ logical :: transfer_ff
+#endif
 ! *************************************************************************
 
- integer :: ndat__, iscale__
+ ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
+
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
- !call wrtout(std_out, "in fftbox_execute_ip_spc")
+ ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
@@ -427,16 +439,22 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
      call gpu_ctx_init(plan%gpu_ctx_spc, plan%dims, plan%embed, ndat__, sp)
    end if
 
-   !!transfer_ff = .not. xomp_target_is_present(c_loc(ff))
-   !! !$OMP TARGET ENTER DATA MAP(alloc:ff) IF(transfer_ff)
-   !! !$OMP TARGET UPDATE TO(ff) IF(transfer_ff)
+   transfer_ff = .False.
+   if (gpu_map__ /= 0) then
+     transfer_ff = .not. xomp_target_is_present(c_loc(ff))
+     !$OMP TARGET ENTER DATA MAP(alloc:ff) IF(transfer_ff)
+     !$OMP TARGET UPDATE TO(ff) IF(transfer_ff)
+   end if
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
    call gpu_fftbox_c2c_ip(plan%gpu_ctx_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff))
    !$OMP END TARGET DATA
 
-   !! !$OMP TARGET UPDATE FROM(ff) IF(transfer_ff)
-   !! !$OMP TARGET EXIT DATA MAP(delete:ff) IF(transfer_ff)
+   if (gpu_map__ /= 0) then
+     !$OMP TARGET UPDATE FROM(ff) IF(transfer_ff)
+     !$OMP TARGET EXIT DATA MAP(delete:ff) IF(transfer_ff)
+   end if
+
    return
 #endif
  end if
@@ -464,28 +482,35 @@ end subroutine fftbox_execute_ip_spc
 !!  [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! SIDE EFFECTS
-!!  ff(plan%ldxyz*plan%batch_size) =
+!!  ff(plan%ldxyz*ndat) =
 !!    In input: the data to transform.
 !!    Changed in output, filled with the FFT results.
 !!
 !! SOURCE
 
-subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
+subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, &
+                                 iscale, gpu_map)  ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),target,intent(inout) :: plan
  integer,intent(in) :: isign, ndat
- integer,optional,intent(in) :: iscale
+ integer,optional,intent(in) :: iscale, gpu_map
 !arrays
- complex(dp),target,intent(inout) :: ff(*)
+ complex(dp),target,intent(inout) :: ff(plan%ldxyz*ndat)
+!Local variables-------------------------------
+ integer :: ndat__, iscale__, gpu_map__
+#ifdef HAVE_GPU_CUDA
+ logical :: transfer_ff
+#endif
 ! *************************************************************************
 
- integer :: ndat__, iscale__
+ !call wrtout(std_out, "in fftbox_execute_ip_dpc")
+ ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
+
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
-
- !call wrtout(std_out, "in fftbox_execute_ip_dpc")
+ ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
@@ -500,9 +525,22 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
      call gpu_ctx_init(plan%gpu_ctx_dpc, plan%dims, plan%embed, ndat__, dp)
    end if
 
+   transfer_ff = .False.
+   if (gpu_map__ /= 0) then
+     transfer_ff = .not. xomp_target_is_present(c_loc(ff))
+     !$OMP TARGET ENTER DATA MAP(alloc:ff) IF(transfer_ff)
+     !$OMP TARGET UPDATE TO(ff) IF(transfer_ff)
+   end if
+
    !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
    call gpu_fftbox_c2c_ip(plan%gpu_ctx_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff))
    !$OMP END TARGET DATA
+
+   if (gpu_map__ /= 0) then
+     !$OMP TARGET UPDATE FROM(ff) IF(transfer_ff)
+     !$OMP TARGET EXIT DATA MAP(delete:ff) IF(transfer_ff)
+   end if
+
    return
 #endif
  end if
@@ -531,27 +569,34 @@ end subroutine fftbox_execute_ip_dpc
 !! [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! OUTPUT
-!!  gg(plan%ldxyz*plan%batch_size)= The FFT results.
+!!  gg(plan%ldxyz*ndat)= The FFT results.
 !!
 !! SOURCE
 
-subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
+subroutine fftbox_execute_op_spc(plan, ff, gg, isign, &
+                                 ndat, iscale, gpu_map)
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),intent(inout) :: plan
  integer,intent(in) :: isign, ndat
- integer,optional,intent(in) :: iscale
+ integer,optional,intent(in) :: iscale, gpu_map
 !arrays
- complex(sp),target,intent(in) :: ff(*)
- complex(sp),target,intent(inout) :: gg(*)
+ complex(sp),target,intent(in) :: ff(plan%ldxyz*ndat)
+ complex(sp),target,intent(inout) :: gg(plan%ldxyz*ndat)
+!Local variables-------------------------------
+ integer :: ndat__, iscale__, gpu_map__
+#ifdef HAVE_GPU_CUDA
+ logical :: transfer_ff, transfer_gg
+#endif
 ! *************************************************************************
 
- integer :: ndat__, iscale__
+ !call wrtout(std_out, "in fftbox_execute_op_spc")
+ ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
+
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
-
- !call wrtout(std_out, "in fftbox_execute_op_spc")
+ ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
@@ -566,9 +611,24 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
      call gpu_ctx_init(plan%gpu_ctx_spc, plan%dims, plan%embed, ndat__, sp)
    end if
 
+   transfer_ff = .False.; transfer_gg = .False.
+   if (gpu_map__ /= 0) then
+     transfer_ff = .not. xomp_target_is_present(c_loc(ff))
+     transfer_gg = .not. xomp_target_is_present(c_loc(gg))
+     !$OMP TARGET ENTER DATA MAP(alloc:ff) IF(transfer_ff)
+     !$OMP TARGET UPDATE TO(ff) IF(transfer_ff)
+     !$OMP TARGET ENTER DATA MAP(alloc:gg) IF(transfer_gg)
+   end if
+
    !$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
    call gpu_fftbox_c2c_op(plan%gpu_ctx_spc, plan%nfft, ndat__, isign, iscale__, sp, c_loc(ff), c_loc(gg))
    !$OMP END TARGET DATA
+
+   if (gpu_map__ /= 0) then
+     !$OMP TARGET UPDATE FROM(gg) IF(transfer_gg)
+     !$OMP TARGET EXIT DATA MAP(delete:gg) IF(transfer_gg)
+   end if
+
    return
 #endif
  end if
@@ -597,27 +657,35 @@ end subroutine fftbox_execute_op_spc
 !! [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! OUTPUT
-!!  gg(plan%ldxyz*plan%batch_size)= The FFT results.
+!!  gg(plan%ldxyz*ndat)= The FFT results.
 !!
 !! SOURCE
 
-subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
+subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, &
+                                 iscale, gpu_map)  ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),intent(inout) :: plan
  integer,intent(in) :: isign, ndat
- integer,optional,intent(in) :: iscale
+ integer,optional,intent(in) :: iscale, gpu_map
 !arrays
- complex(dp),target,intent(in) :: ff(*)
- complex(dp),target,intent(inout) :: gg(*)
+ complex(dp),target,intent(in) :: ff(plan%ldxyz*ndat)
+ complex(dp),target,intent(inout) :: gg(plan%ldxyz*ndat)
+
+!Local variables-------------------------------
+ integer :: ndat__, iscale__, gpu_map__
+#ifdef HAVE_GPU_CUDA
+ logical :: transfer_ff, transfer_gg
+#endif
 ! *************************************************************************
 
- integer :: ndat__, iscale__
+ !call wrtout(std_out, "in fftbox_execute_op_dpc")
+ ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
+
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
-
- !call wrtout(std_out, "in fftbox_execute_op_dpc")
+ ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_GPU_CUDA
@@ -632,9 +700,24 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
      call gpu_ctx_init(plan%gpu_ctx_dpc, plan%dims, plan%embed, ndat__, dp)
    end if
 
+   transfer_ff = .False.; transfer_gg = .False.
+   if (gpu_map__ /= 0) then
+     transfer_ff = .not. xomp_target_is_present(c_loc(ff))
+     transfer_gg = .not. xomp_target_is_present(c_loc(gg))
+     !$OMP TARGET ENTER DATA MAP(alloc:ff) IF(transfer_ff)
+     !$OMP TARGET UPDATE TO(ff) IF(transfer_ff)
+     !$OMP TARGET ENTER DATA MAP(alloc:gg) IF(transfer_gg)
+   end if
+
    !$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
    call gpu_fftbox_c2c_op(plan%gpu_ctx_dpc, plan%nfft, ndat__, isign, iscale__, dp, c_loc(ff), c_loc(gg))
    !$OMP END TARGET DATA
+
+   if (gpu_map__ /= 0) then
+     !$OMP TARGET UPDATE FROM(gg) IF(transfer_gg)
+     !$OMP TARGET EXIT DATA MAP(delete:gg) IF(transfer_gg)
+   end if
+
    return
 #endif
  end if
@@ -5003,7 +5086,7 @@ subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind
  uplan%kg_k => kg_k
 
  ABI_MALLOC(uplan%gbound, (2 * uplan%mgfft + 8, 2))
- call sphereboundary(uplan%gbound, uplan%istwfk, uplan%kg_k, uplan%mgfft, uplan%npw)
+ call sphereboundary(uplan%gbound, uplan%istwfk, uplan%kg_k, uplan%mgfft, int(uplan%npw))
 
  uplan%gpu_ctx_spc = c_null_ptr; uplan%gpu_ctx_dpc = c_null_ptr
 
@@ -5087,26 +5170,30 @@ end subroutine uplan_free
 !! SOURCE
 
 subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
-                                isign, iscale, phase) ! optional
+                                isign, iscale, gpu_map, phase) ! optional
 
 !Arguments ------------------------------------
  class(uplan_t),target,intent(in) :: uplan
  integer,intent(in) :: ndat
- complex(sp),target,intent(in) :: ug(*)  ! (uplan%npw*uplan%nspinor*ndat)
- complex(sp),target,intent(out) :: ur(*) ! (uplan%nfft*uplan%nspinor*ndat)
- integer,optional,intent(in) :: isign, iscale
+ complex(sp),target,intent(in) :: ug(uplan%npw*uplan%nspinor*ndat)
+ complex(sp),target,intent(out) :: ur(uplan%nfft*uplan%nspinor*ndat)
+ integer,optional,intent(in) :: isign, iscale, gpu_map
  complex(sp),optional,intent(in) :: phase(uplan%nfft*uplan%nspinor)
 
 !Local variables-------------------------------
- integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
  integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
 #ifdef HAVE_GPU_CUDA
+ logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ig2ifft(:)
 #endif
 ! *************************************************************************
 
+ !call wrtout(std_out, "in uplan_execute_gr_spc")
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
  ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
+
+ ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  isign__ = +1; if (present(isign)) isign__ = isign
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -5121,11 +5208,11 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
  if (uplan%gpu_option == ABI_GPU_DISABLED) then
    select case (fftalga)
    case (FFT_FFTW3)
-     call fftw3_fftug(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
+     call fftw3_fftug(fftalg, fftcache, int(uplan%npw), nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
                       uplan%istwfk, uplan%mgfft, uplan%kg_k, uplan%gbound, ug, ur, &
                       isign=isign__, iscale=iscale__)
    case (FFT_DFTI)
-     call dfti_fftug(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
+     call dfti_fftug(fftalg, fftcache, int(uplan%npw), nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
                      uplan%istwfk, uplan%mgfft, uplan%kg_k, uplan%gbound, ug, ur, &
                      isign=isign__, iscale=iscale__)
    case default
@@ -5157,10 +5244,18 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
      call gpu_ctx_init(uplan%gpu_ctx_spc, uplan%ngfft, uplan%ngfft, ndat, sp)
    end if
 
+   transfer_ug = .False.; transfer_ur = .False.
+   if (gpu_map__ /= 0) then
+     transfer_ug = .not. xomp_target_is_present(c_loc(ug))
+     transfer_ur = .not. xomp_target_is_present(c_loc(ur))
+     !$OMP TARGET ENTER DATA MAP(alloc:ug) IF(transfer_ug)
+     !$OMP TARGET UPDATE TO(ug) IF(transfer_ug)
+     !$OMP TARGET ENTER DATA MAP(alloc:ur) IF(transfer_ur)
+   end if
+
    ! TODO
    !!$OMP TARGET ENTER DATA MAP(alloc:ur)
    !call gpu_set_to_zero(ur, int(2,c_size_t)*uplan%nfft*uplan%nspinor*ndat)
-   ig2ifft => uplan%ig2ifft
 
    bufsize = uplan%nfft * uplan%nspinor * ndat
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
@@ -5168,6 +5263,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
      ur(ifft) = zero
    end do
 
+   ig2ifft => uplan%ig2ifft
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ifft, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ig2ifft)
    do idat=1,ndat
      do ispinor=1,nspinor
@@ -5195,6 +5291,12 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
          ur(offset + ir) = ur(offset + ir) * phase(ir)
        end do
      end do
+   end if
+
+   if (gpu_map__ /= 0) then
+     !$OMP TARGET EXIT DATA MAP(delete:ug) IF(transfer_ug)
+     !$OMP TARGET UPDATE FROM(ur) IF(transfer_ur)
+     !$OMP TARGET EXIT DATA MAP(delete:ur) IF(transfer_ur)
    end if
 #endif
  end if
@@ -5215,26 +5317,30 @@ end subroutine uplan_execute_gr_spc
 !! SOURCE
 
 subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
-                                isign, iscale, phase) ! optional
+                                isign, iscale, gpu_map, phase) ! optional
 
 !Arguments ------------------------------------
  class(uplan_t),target,intent(in) :: uplan
  integer,intent(in) :: ndat
- complex(dp),target,intent(in) :: ug(*) ! uplan%npw*uplan%nspinor*ndat)
- complex(dp),target,intent(out) :: ur(*) ! uplan%nfft*uplan%nspinor*ndat)
- integer,optional,intent(in) :: isign, iscale
+ complex(dp),target,intent(in) :: ug(uplan%npw*uplan%nspinor*ndat)
+ complex(dp),target,intent(out) :: ur(uplan%nfft*uplan%nspinor*ndat)
+ integer,optional,intent(in) :: isign, iscale, gpu_map
  complex(dp),optional,intent(in) :: phase(uplan%nfft*uplan%nspinor)
 
 !Local variables-------------------------------
- integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
  integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
 #ifdef HAVE_GPU_CUDA
+ logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ig2ifft(:)
 #endif
 ! *************************************************************************
 
+ !call wrtout(std_out, "in uplan_execute_gr_dpc")
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
  ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
+
+ ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  isign__ = +1; if (present(isign)) isign__ = isign
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -5249,11 +5355,11 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
  if (uplan%gpu_option == ABI_GPU_DISABLED) then
    select case (fftalga)
    case (FFT_FFTW3)
-     call fftw3_fftug(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
+     call fftw3_fftug(fftalg, fftcache, int(uplan%npw), nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
                       uplan%istwfk, uplan%mgfft, uplan%kg_k, uplan%gbound, ug, ur, &
                       isign=isign__, iscale=iscale__)
    case (FFT_DFTI)
-     call dfti_fftug(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
+     call dfti_fftug(fftalg, fftcache, int(uplan%npw), nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
                      uplan%istwfk, uplan%mgfft, uplan%kg_k, uplan%gbound, ug, ur, &
                      isign=isign__, iscale=iscale__)
    case default
@@ -5285,18 +5391,26 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
      call gpu_ctx_init(uplan%gpu_ctx_dpc, uplan%ngfft, uplan%ngfft, ndat, dp)
    end if
 
+   transfer_ug = .False.; transfer_ur = .False.
+   if (gpu_map__ /= 0) then
+     transfer_ug = .not. xomp_target_is_present(c_loc(ug))
+     transfer_ur = .not. xomp_target_is_present(c_loc(ur))
+     !$OMP TARGET ENTER DATA MAP(alloc:ug) IF(transfer_ug)
+     !$OMP TARGET UPDATE TO(ug) IF(transfer_ug)
+     !$OMP TARGET ENTER DATA MAP(alloc:ur) IF(transfer_ur)
+   end if
+
    ! TODO
    !!$OMP TARGET ENTER DATA MAP(alloc:ur)
    !call gpu_set_to_zero(ur, int(2,c_size_t)*uplan%nfft*uplan%nspinor*ndat)
 
    bufsize = uplan%nfft * uplan%nspinor * ndat
-   ig2ifft => uplan%ig2ifft
-
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
    do ifft=1,bufsize
      ur(ifft) = czero
    end do
 
+   ig2ifft => uplan%ig2ifft
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ifft, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ig2ifft)
    do idat=1,ndat
      do ispinor=1,nspinor
@@ -5325,6 +5439,12 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
        end do
      end do
    end if
+
+   if (gpu_map__ /= 0) then
+     !$OMP TARGET EXIT DATA MAP(delete:ug) IF(transfer_ug)
+     !$OMP TARGET UPDATE FROM(ur) IF(transfer_ur)
+     !$OMP TARGET EXIT DATA MAP(delete:ur) IF(transfer_ur)
+   end if
 #endif
  end if
 
@@ -5343,25 +5463,30 @@ end subroutine uplan_execute_gr_dpc
 !!
 !! SOURCE
 
-subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
+subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
+                                isign, iscale, gpu_map)
 
 !Arguments ------------------------------------
  class(uplan_t),target,intent(in) :: uplan
  integer,intent(in) :: ndat
- complex(sp),target,intent(inout) :: ur(*) ! uplan%nfft*uplan%nspinor*ndat)
- complex(sp),target,intent(out) :: ug(*)   ! uplan%npw*uplan%nspinor*ndat)
- integer,optional,intent(in) :: isign, iscale
+ complex(sp),target,intent(inout) :: ur(uplan%nfft*uplan%nspinor*ndat)
+ complex(sp),target,intent(out) :: ug(uplan%npw*uplan%nspinor*ndat)
+ integer,optional,intent(in) :: isign, iscale, gpu_map
 
 !Local variables-------------------------------
- integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
 #ifdef HAVE_GPU_CUDA
  integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset !, bufsize
+ logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ifft2ig(:)
 #endif
 ! *************************************************************************
 
+ !call wrtout(std_out, "in uplan_execute_rg_spc")
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
  ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
+
+ ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  isign__ = -1; if (present(isign)) isign__ = isign
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -5373,10 +5498,10 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
  if (uplan%gpu_option == ABI_GPU_DISABLED) then
    select case (fftalga)
    case (FFT_FFTW3)
-     call fftw3_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
+     call fftw3_fftur(fftalg, fftcache, int(uplan%npw), nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
                       uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
    case (FFT_DFTI)
-     call dfti_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
+     call dfti_fftur(fftalg, fftcache, int(uplan%npw), nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
                      uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
    case default
      ABI_ERROR(sjoin("Wrong fftalga:", itoa(fftalga)))
@@ -5395,15 +5520,25 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
      call gpu_ctx_init(uplan%gpu_ctx_spc, uplan%ngfft, uplan%ngfft, ndat, sp)
    end if
 
+   transfer_ug = .False.; transfer_ur = .False.
+   if (gpu_map__ /= 0) then
+     transfer_ug = .not. xomp_target_is_present(c_loc(ug))
+     transfer_ur = .not. xomp_target_is_present(c_loc(ur))
+     !$OMP TARGET ENTER DATA MAP(alloc:ug) IF(transfer_ug)
+     !$OMP TARGET ENTER DATA MAP(alloc:ur) IF(transfer_ur)
+     !$OMP TARGET UPDATE TO(ur) IF(transfer_ur)
+   end if
+
    ! NVHPC does not reliably support mapping derived_type components
    nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
    !bufsize = uplan%nfft * uplan%nspinor * ndat
-   ifft2ig => uplan%ifft2ig
+
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_ctx_spc, uplan%nfft, ndat, isign__, iscale__, sp, c_loc(ur))
    !$OMP END TARGET DATA
 
+   ifft2ig => uplan%ifft2ig
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ur, ifft2ig)
    do idat=1,ndat
      do ispinor=1,nspinor
@@ -5416,6 +5551,13 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
        end do ! ipw
      end do ! ispinor
    end do ! idat
+
+   if (gpu_map__ /= 0) then
+     !$OMP TARGET UPDATE FROM(ug) IF(transfer_ug)
+     !$OMP TARGET EXIT DATA MAP(delete:ug) IF(transfer_ug)
+     !$OMP TARGET EXIT DATA MAP(delete:ur) IF(transfer_ur)
+   end if
+
 #endif
  end if
 
@@ -5434,25 +5576,29 @@ end subroutine uplan_execute_rg_spc
 !!
 !! SOURCE
 
-subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
+subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
+                                isign, iscale, gpu_map) ! optional
 
 !Arguments ------------------------------------
  class(uplan_t),target,intent(in) :: uplan
  integer,intent(in) :: ndat
- complex(dp),target,intent(inout) :: ur(*) ! uplan%nfft*uplan%nspinor*ndat)
- complex(dp),target,intent(out) :: ug(*) ! uplan%npw*uplan%nspinor*ndat)
- integer,optional,intent(in) :: isign, iscale
+ complex(dp),target,intent(inout) :: ur(uplan%nfft*uplan%nspinor*ndat)
+ complex(dp),target,intent(out) :: ug(uplan%npw*uplan%nspinor*ndat)
+ integer,optional,intent(in) :: isign, iscale, gpu_map
 
 !Local variables-------------------------------
- integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
 #ifdef HAVE_GPU_CUDA
  integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
  integer, contiguous, pointer :: ifft2ig(:)
 #endif
 ! *************************************************************************
 
+ !call wrtout(std_out, "in uplan_execute_rg_dpc")
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
  ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
+
+ ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  isign__ = -1; if (present(isign)) isign__ = isign
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -5464,10 +5610,10 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
  if (uplan%gpu_option == ABI_GPU_DISABLED) then
    select case (fftalga)
    case (FFT_FFTW3)
-     call fftw3_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
+     call fftw3_fftur(fftalg, fftcache, int(uplan%npw), nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
                       uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
    case (FFT_DFTI)
-     call dfti_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
+     call dfti_fftur(fftalg, fftcache, int(uplan%npw), nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
                      uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
    case default
      ABI_ERROR(sjoin("Wrong fftalga:", itoa(fftalga)))
@@ -5486,15 +5632,24 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
      call gpu_ctx_init(uplan%gpu_ctx_dpc, uplan%ngfft, uplan%ngfft, ndat, dp)
    end if
 
+   transfer_ug = .False.; transfer_ur = .False.
+   if (gpu_map__ /= 0) then
+     transfer_ug = .not. xomp_target_is_present(c_loc(ug))
+     transfer_ur = .not. xomp_target_is_present(c_loc(ur))
+     !$OMP TARGET ENTER DATA MAP(alloc:ug) IF(transfer_ug)
+     !$OMP TARGET ENTER DATA MAP(alloc:ur) IF(transfer_ur)
+     !$OMP TARGET UPDATE TO(ur) IF(transfer_ur)
+   end if
+
    ! NVHPC does not reliably support mapping derived_type components
    nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
    !bufsize = uplan%nfft * uplan%nspinor * ndat
-   ifft2ig => uplan%ifft2ig
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_ctx_dpc, uplan%nfft, ndat, isign__, iscale__, dp, c_loc(ur))
    !$OMP END TARGET DATA
 
+   ifft2ig => uplan%ifft2ig
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ur, ifft2ig)
    do idat=1,ndat
      do ispinor=1,nspinor
@@ -5507,6 +5662,12 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
        end do ! ipw
      end do ! ispinor
    end do ! idat
+
+   if (gpu_map__ /= 0) then
+     !$OMP TARGET UPDATE FROM(ug) IF(transfer_ug)
+     !$OMP TARGET EXIT DATA MAP(delete:ug) IF(transfer_ug)
+     !$OMP TARGET EXIT DATA MAP(delete:ur) IF(transfer_ur)
+   end if
 #endif
  end if
 
