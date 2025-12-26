@@ -1629,8 +1629,8 @@ integer function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(n
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: nspinor1=1,mkmem1=1,exchn2n3d0=0,ikg0=0
- integer :: nx,ny,nz,nxyz,ldx,ldy,ldz,ierr,npw_k,mgfft,istwf_k,ikpt,ldxyz,ipw,old_nthreads,ount, fftalg,npw_k_test
+ integer,parameter :: nspinor1=1
+ integer :: nx,ny,nz,nxyz,ldx,ldy,ldz,ierr,npw_k,mgfft,istwf_k,ikpt,ldxyz,ipw,old_nthreads,ount, fftalg
  real(dp),parameter :: ATOL_SP=tol6, ATOL_DP=tol12 ! Tolerances on the absolute error
  real(dp) :: max_abserr,ucvol
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
@@ -1641,7 +1641,6 @@ integer function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(n
  real(dp),allocatable :: cg(:,:),cg_ref(:,:),cr(:,:)
  complex(sp),allocatable :: ugsp(:),ug_refsp(:),ursp(:)
  complex(dp),allocatable :: ug(:),ug_ref(:),ur(:)
- type(MPI_type) :: MPI_enreg_seq
 ! *************************************************************************
 
  ount = std_out; if (PRESENT(unit)) ount = unit
@@ -1685,18 +1684,13 @@ integer function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(n
    0.5, 0.5, 0.5], [3, 9])
 
  call fftalg_info(fftalg, library, cplex_mode, padding_mode)
- call initmpi_seq(MPI_enreg_seq)
 
  do ikpt=1,SIZE(kpoints,DIM=2)
    kpoint = kpoints(:,ikpt)
    istwf_k = set_istwfk(kpoint)
 
-   ! Calculate the number of G-vectors for this k-point.
-   call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_dum,kpoint,0,MPI_enreg_seq,0,npw_k)
-
    ! Allocate and calculate the set of G-vectors.
-   ABI_MALLOC(kg_k, (3,npw_k))
-   call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_k,kpoint,mkmem1,MPI_enreg_seq,npw_k,npw_k_test)
+   call get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k)
 
    ABI_MALLOC(gbound_k, (2*mgfft+8,2))
    call sphereboundary(gbound_k,istwf_k,kg_k,mgfft,npw_k)
@@ -1772,7 +1766,6 @@ integer function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(n
  ABI_FREE(ug_refsp)
  ABI_FREE(ugsp)
  ABI_FREE(ursp)
- call destroy_mpi_enreg(MPI_enreg_seq)
 
  if (nthreads > 0) call xomp_set_num_threads(old_nthreads)
 
@@ -1808,8 +1801,8 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: nspinor1=1,mkmem1=1,exchn2n3d0=0,ikg0=0
- integer :: nx,ny,nz,nxyz,ldx,ldy,ldz,ierr,npw_k,mgfft,istwf_k,ikpt,ldxyz,ipw,old_nthreads,ount, fftalg,npw_k_test
+ integer,parameter :: nspinor1=1
+ integer :: nx,ny,nz,nxyz,ldx,ldy,ldz,ierr,npw_k,mgfft,istwf_k,ikpt,ldxyz,ipw,old_nthreads,ount, fftalg
  real(dp),parameter :: ATOL_SP=tol6, ATOL_DP=tol12 ! Tolerances on the absolute error
  real(dp) :: max_abserr,ucvol
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
@@ -1819,7 +1812,6 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
  real(dp) :: kpoint(3),crand(2),kpoints(3,1), gmet(3,3),gprimd(3,3),rmet(3,3)
  complex(sp),allocatable :: ugsp(:),ug_refsp(:),ursp(:)
  complex(dp),allocatable :: ug(:),ug_ref(:),ur(:)
- type(MPI_type) :: MPI_enreg_seq
  type(uplan_t) :: uplan_k
 ! *************************************************************************
 
@@ -1862,21 +1854,13 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
    ], [3, 1])
 
  call fftalg_info(fftalg, library, cplex_mode, padding_mode)
- call initmpi_seq(MPI_enreg_seq)
 
  do ikpt=1,SIZE(kpoints,DIM=2)
    kpoint = kpoints(:,ikpt)
    istwf_k = set_istwfk(kpoint)
 
-   ! Calculate the number of G-vectors for this k-point.
-   call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_dum,kpoint,0,MPI_enreg_seq,0,npw_k)
-
    ! Allocate and calculate the set of G-vectors.
-   ABI_MALLOC(kg_k, (3,npw_k))
-   call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_k,kpoint,mkmem1,MPI_enreg_seq,npw_k,npw_k_test)
-
-   ! TODO
-   !call get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k)
+   call get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k)
 
    ! =================================================
    ! === Test the single precision complex version ===
@@ -1971,7 +1955,7 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
    call uplan_k%free()
 
    ierr = COUNT(ABS(ug - ug_ref) > ATOL_DP); nfailed = nfailed + ierr
-   write(info,"(a,i1,a)")sjoin(library,"uplan_k, dp, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
+   write(info,"(a,i1,a)")sjoin(library,"uplan_k, gpu_map 0, dp, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ug - ug_ref)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
    end if
@@ -1986,7 +1970,6 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
  ABI_FREE(ug_refsp)
  ABI_FREE(ugsp)
  ABI_FREE(ursp)
- call destroy_mpi_enreg(MPI_enreg_seq)
 
  if (nthreads > 0) call xomp_set_num_threads(old_nthreads)
 
@@ -3813,7 +3796,7 @@ end subroutine ccfft
 !! SOURCE
 
 subroutine fourdp_mpi(cplex,nfft,ngfft,ndat,isign,&
-&  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
+                     fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
 
 !Arguments ------------------------------------
 !scalars
@@ -4450,9 +4433,6 @@ end subroutine fftmpi_u
 !!              if not present, ig1=1+n1/2, ig2=1+n2/2, ig3=1+n3/2 for even n1,n2,n3
 !!              if igj=-1, nothing is done in direction j
 !!
-!! OUTPUT
-!!  (see side effects)
-!!
 !! SIDE EFFECTS
 !!  array(cplex,n1*n2*n3)=complex array to be symetrized
 !!
@@ -4636,8 +4616,7 @@ subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,tim_fourdp)
 !Local variables-------------------------------
 !scalars
  !integer,parameter :: cplex=2
- integer :: i1,i2,i3,ifft
- integer :: n1,n2,n3
+ integer :: i1,i2,i3,ifft, n1,n2,n3
 !arrays
  real(dp),allocatable :: fofg(:,:),fofr(:)
 ! *************************************************************************
@@ -4733,9 +4712,6 @@ end subroutine fourdp_6d
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  option= see description of side effects
 !!
-!! OUTPUT
-!!  (see side effects)
-!!
 !! SIDE EFFECTS
 !!  aa & bb arrays are treated as input or output depending on option:
 !!  option=1  aa(n1*n2*n3,ispden) <-- bb(nd1,nd2,nd3) real case
@@ -4769,15 +4745,13 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
  if (option==1.or.option==2) then
    if (nd1<n1.or.nd2<n2.or.nd3<n3) then
      write(msg,'(a,3i0,2a,3i0,a)')&
-      'Each of nd1,nd2,nd3=',nd1,nd2,nd3,ch10,&
-      'must be >= n1, n2, n3 =',n1,n2,n3,'.'
+      'Each of nd1,nd2,nd3=',nd1,nd2,nd3,ch10,'must be >= n1, n2, n3 =',n1,n2,n3,'.'
      ABI_BUG(msg)
    end if
  else
    if (2*nd1<n1.or.nd2<n2.or.nd3<n3) then
      write(msg,'(a,3i0,2a,3i0,a)')&
-     'Each of 2*nd1,nd2,nd3=',2*nd1,nd2,nd3,ch10,&
-     'must be >= (n1, n2, n3) =',n1,n2,n3,'.'
+     'Each of 2*nd1,nd2,nd3=',2*nd1,nd2,nd3,ch10,'must be >= (n1, n2, n3) =',n1,n2,n3,'.'
      ABI_BUG(msg)
    end if
  end if
@@ -4843,8 +4817,7 @@ subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,optio
    end do
 !  MF
  else
-   write(msg,'(a,i0,a)')' Bad option =',option,'.'
-   ABI_BUG(msg)
+   ABI_BUG(sjoin('Bad option =',itoa(option)))
  end if
 
 end subroutine fftpac
@@ -4929,7 +4902,6 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
     end if
  end do
 
-
  ABI_MALLOC(siz_slice,(nproc_fft))
  siz_slice(:)=0
  do i_global=1,sizeindex !look for the maximal size of slice of data
@@ -4968,18 +4940,18 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
 #if defined HAVE_MPI
   if(paral_kgb == 1) then
     call mpi_alltoall (right_send,2*siz_slice_max, &
-&                          MPI_double_precision, &
-&                          right_recv,2*siz_slice_max, &
-&                          MPI_double_precision,mpi_enreg%comm_fft,ierr)
+                       MPI_double_precision, &
+                       right_recv,2*siz_slice_max, &
+                       MPI_double_precision,mpi_enreg%comm_fft,ierr)
     call mpi_alltoall (index_send,siz_slice_max, &
-&                          MPI_integer, &
-&                          index_recv,siz_slice_max, &
-&                          MPI_integer,mpi_enreg%comm_fft,ierr)
+                       MPI_integer, &
+                       index_recv,siz_slice_max, &
+                       MPI_integer,mpi_enreg%comm_fft,ierr)
   endif
 #endif
  do ileft=1,siz_slice_max*nproc_fft
-!write(std_out,*)index_recv(ileft)
- if(index_recv(ileft) /=0 ) left(:,index_recv(ileft))=right_recv(:,ileft)
+   !write(std_out,*)index_recv(ileft)
+   if(index_recv(ileft) /=0 ) left(:,index_recv(ileft))=right_recv(:,ileft)
  end do
  ABI_FREE(right_recv)
  ABI_FREE(index_recv)
@@ -5194,7 +5166,7 @@ end subroutine uplan_free
 !! SOURCE
 
 subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
-                                isign, iscale, gpu_map, phase) ! optional
+                                isign, iscale, gpu_map, phase_r) ! optional
 
 !Arguments ------------------------------------
  class(uplan_t),target,intent(in) :: uplan
@@ -5202,7 +5174,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
  complex(sp),target,intent(in) :: ug(uplan%npw*uplan%nspinor*ndat)
  complex(sp),target,intent(out) :: ur(uplan%nfft*uplan%nspinor*ndat)
  integer,optional,intent(in) :: isign, iscale, gpu_map
- complex(sp),optional,intent(in) :: phase(uplan%nfft*uplan%nspinor)
+ complex(sp),optional,intent(in) :: phase_r(uplan%nfft*uplan%nspinor)
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
@@ -5245,13 +5217,13 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
    end select
 
    ! Multiply by e^{ik.r}
-   if (present(phase)) then
+   if (present(phase_r)) then
      bufsize = int(nfft, c_size_t) * nspinor
      !$OMP PARALLEL DO PRIVATE(offset) IF (ndat > 1)
      do idat=1,ndat
        offset = (idat - 1) * bufsize
        do ir=1,bufsize
-         ur(offset + ir) = ur(offset + ir) * phase(ir)
+         ur(offset + ir) = ur(offset + ir) * phase_r(ir)
        end do
      end do
    end if
@@ -5307,13 +5279,13 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
    !$OMP END TARGET DATA
 
    ! Multiply by e^{ik.r}
-   if (present(phase)) then
+   if (present(phase_r)) then
      bufsize = int(nfft, c_size_t) * nspinor
-     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(offset) COLLAPSE(2) MAP(to:ur, phase)
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(offset) COLLAPSE(2) MAP(to:ur, phase_r)
      do idat=1,ndat
        do ir=1,bufsize
          offset = (idat - 1) * bufsize
-         ur(offset + ir) = ur(offset + ir) * phase(ir)
+         ur(offset + ir) = ur(offset + ir) * phase_r(ir)
        end do
      end do
    end if
@@ -5342,7 +5314,7 @@ end subroutine uplan_execute_gr_spc
 !! SOURCE
 
 subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
-                                isign, iscale, gpu_map, phase) ! optional
+                                isign, iscale, gpu_map, phase_r) ! optional
 
 !Arguments ------------------------------------
  class(uplan_t),target,intent(in) :: uplan
@@ -5350,7 +5322,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
  complex(dp),target,intent(in) :: ug(uplan%npw*uplan%nspinor*ndat)
  complex(dp),target,intent(out) :: ur(uplan%nfft*uplan%nspinor*ndat)
  integer,optional,intent(in) :: isign, iscale, gpu_map
- complex(dp),optional,intent(in) :: phase(uplan%nfft*uplan%nspinor)
+ complex(dp),optional,intent(in) :: phase_r(uplan%nfft*uplan%nspinor)
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
@@ -5393,13 +5365,13 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
    end select
 
    ! Multiply by e^{ik.r}
-   if (present(phase)) then
+   if (present(phase_r)) then
      bufsize = int(nfft, c_size_t) * nspinor
      !$OMP PARALLEL DO PRIVATE(offset) IF (ndat > 1)
      do idat=1,ndat
        offset = (idat - 1) * bufsize
        do ir=1,bufsize
-         ur(offset + ir) = ur(offset + ir) * phase(ir)
+         ur(offset + ir) = ur(offset + ir) * phase_r(ir)
        end do
      end do
    end if
@@ -5455,13 +5427,13 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
    !$OMP END TARGET DATA
 
    ! Multiply by e^{ik.r}
-   if (present(phase)) then
+   if (present(phase_r)) then
      bufsize = int(nfft, c_size_t) * nspinor
-     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(offset) COLLAPSE(2) MAP(to:ur, phase)
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(offset) COLLAPSE(2) MAP(to:ur, phase_r)
      do idat=1,ndat
        do ir=1,bufsize
          offset = (idat - 1) * bufsize
-         ur(offset + ir) = ur(offset + ir) * phase(ir)
+         ur(offset + ir) = ur(offset + ir) * phase_r(ir)
        end do
      end do
    end if
@@ -5490,7 +5462,7 @@ end subroutine uplan_execute_gr_dpc
 !! SOURCE
 
 subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
-                                isign, iscale, gpu_map)
+                                isign, iscale, gpu_map, phase_r) ! optional
 
 !Arguments ------------------------------------
  class(uplan_t),target,intent(in) :: uplan
@@ -5498,11 +5470,12 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
  complex(sp),target,intent(inout) :: ur(uplan%nfft*uplan%nspinor*ndat)
  complex(sp),target,intent(out) :: ug(uplan%npw*uplan%nspinor*ndat)
  integer,optional,intent(in) :: isign, iscale, gpu_map
+ complex(sp),optional,intent(in) :: phase_r(uplan%nfft*uplan%nspinor)
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, gpu_map__, nfft
+ integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
 #ifdef HAVE_GPU_CUDA
- integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset
  logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ifft2ig(:)
 #endif
@@ -5525,6 +5498,19 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
  nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
 
  if (uplan%gpu_option == ABI_GPU_DISABLED) then
+
+   ! Multiply by e^{ik.r}
+   if (present(phase_r)) then
+     bufsize = int(nfft, c_size_t) * nspinor
+     !$OMP PARALLEL DO PRIVATE(offset) IF (ndat > 1)
+     do idat=1,ndat
+       offset = (idat - 1) * bufsize
+       do ir=1,bufsize
+         ur(offset + ir) = ur(offset + ir) * phase_r(ir)
+       end do
+     end do
+   end if
+
    select case (fftalga)
    case (FFT_FFTW3)
      call fftw3_fftur(fftalg, fftcache, int(uplan%npw), nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
@@ -5556,6 +5542,18 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
      !$OMP TARGET ENTER DATA MAP(alloc:ug) IF(transfer_ug)
      !$OMP TARGET ENTER DATA MAP(alloc:ur) IF(transfer_ur)
      !$OMP TARGET UPDATE TO(ur) IF(transfer_ur)
+   end if
+
+   ! Multiply by e^{ik.r}
+   if (present(phase_r)) then
+     bufsize = int(nfft, c_size_t) * nspinor
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(offset) COLLAPSE(2) MAP(to:ur, phase_r)
+     do idat=1,ndat
+       do ir=1,bufsize
+         offset = (idat - 1) * bufsize
+         ur(offset + ir) = ur(offset + ir) * phase_r(ir)
+       end do
+     end do
    end if
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
@@ -5601,7 +5599,7 @@ end subroutine uplan_execute_rg_spc
 !! SOURCE
 
 subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
-                                isign, iscale, gpu_map) ! optional
+                                isign, iscale, gpu_map, phase_r) ! optional
 
 !Arguments ------------------------------------
  class(uplan_t),target,intent(in) :: uplan
@@ -5609,10 +5607,11 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
  complex(dp),target,intent(inout) :: ur(uplan%nfft*uplan%nspinor*ndat)
  complex(dp),target,intent(out) :: ug(uplan%npw*uplan%nspinor*ndat)
  integer,optional,intent(in) :: isign, iscale, gpu_map
+ complex(dp),optional,intent(in) :: phase_r(uplan%nfft*uplan%nspinor)
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
- integer(c_size_t) :: idat, ir, offset
+ integer(c_size_t) :: idat, ir, offset, bufsize
 #ifdef HAVE_GPU_CUDA
  integer(c_size_t) :: ispinor, ipw, ifft, ig
  logical :: transfer_ug, transfer_ur
@@ -5637,6 +5636,19 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
  nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
 
  if (uplan%gpu_option == ABI_GPU_DISABLED) then
+
+   ! Multiply by e^{ik.r}
+   if (present(phase_r)) then
+     bufsize = int(nfft, c_size_t) * nspinor
+     !$OMP PARALLEL DO PRIVATE(offset) IF (ndat > 1)
+     do idat=1,ndat
+       offset = (idat - 1) * bufsize
+       do ir=1,bufsize
+         ur(offset + ir) = ur(offset + ir) * phase_r(ir)
+       end do
+     end do
+   end if
+
    select case (fftalga)
    case (FFT_FFTW3)
      call fftw3_fftur(fftalg, fftcache, int(uplan%npw), nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
@@ -5668,6 +5680,18 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
      !$OMP TARGET ENTER DATA MAP(alloc:ug) IF(transfer_ug)
      !$OMP TARGET ENTER DATA MAP(alloc:ur) IF(transfer_ur)
      !$OMP TARGET UPDATE TO(ur) IF(transfer_ur)
+   end if
+
+   ! Multiply by e^{ik.r}
+   if (present(phase_r)) then
+     bufsize = int(nfft, c_size_t) * nspinor
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(offset) COLLAPSE(2) MAP(to:ur, phase_r)
+     do idat=1,ndat
+       do ir=1,bufsize
+         offset = (idat - 1) * bufsize
+         ur(offset + ir) = ur(offset + ir) * phase_r(ir)
+       end do
+     end do
    end if
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)

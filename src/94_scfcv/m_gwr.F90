@@ -3022,7 +3022,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
        if (k_is_gamma) then
          call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), gpu_map=1)
        else
-         call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), phase=ceikr, gpu_map=1)
+         call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), phase_r=ceikr, gpu_map=1)
        end if
      end do ! ig2
 
@@ -3129,7 +3129,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
      ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
 
      if (have_g0) then
-       call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), phase=ceig0r, gpu_map=1)
+       call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), phase_r=ceig0r, gpu_map=1)
      else
        call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), gpu_map=1)
      end if
@@ -3144,7 +3144,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
      ndat = blocked_loop(ir1, gpr%size_local(2), gwr%uc_batch_size)
 
      if (have_g0) then
-       call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), isign=-1, iscale=0, phase=conjg_ceig0r, gpu_map=1)
+       call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), isign=-1, iscale=0, phase_r=conjg_ceig0r, gpu_map=1)
      else
        call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), isign=-1, iscale=0, gpu_map=1)
      end if
@@ -3477,7 +3477,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
      if (q_is_gamma) then
        call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), gpu_map=1)
      else
-       call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), phase=ceiqr, gpu_map=1)
+       call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), phase_r=ceiqr, gpu_map=1)
      end if
    end do ! ig2
 
@@ -3565,7 +3565,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
    ndat = blocked_loop(ig2, wc_ggp%size_local(2), gwr%uc_batch_size)
 
    if (any(g0_q /= 0)) then
-     call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), phase=ceig0r, gpu_map=1)
+     call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), phase_r=ceig0r, gpu_map=1)
    else
      call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), gpu_map=1)
    end if
@@ -3578,7 +3578,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  do ir1=1,gpr%size_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir1, gpr%size_local(2), gwr%uc_batch_size)
    if (any(g0_q /= 0)) then
-     call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), isign=-1, iscale=0, phase=conjg_ceig0r, gpu_map=1)
+     call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), isign=-1, iscale=0, phase_r=conjg_ceig0r, gpu_map=1)
    else
      call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), isign=-1, iscale=0, gpu_map=1)
    end if
@@ -4730,15 +4730,23 @@ subroutine gwr_build_tchi(gwr)
          do ig2=1, chi_rgp%size_local(2), gwr%uc_batch_size
            ndat = blocked_loop(ig2, chi_rgp%size_local(2), gwr%uc_batch_size)
 
-           if (.not. q_is_gamma) then
-             !$OMP PARALLEL DO
-             do idat=0,ndat-1
-               chi_rgp%buffer_cplx(:,ig2+idat) = cemiqr(:) * chi_rgp%buffer_cplx(:,ig2+idat)
-             end do
+           if (q_is_gamma) then
+             call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
+                                     gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2), gpu_map=1)
+           else
+             call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
+                                     gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2), phase_r=cemiqr, gpu_map=1)
            end if
 
-           call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
-                                   gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2))
+           !if (.not. q_is_gamma) then
+           !  !$OMP PARALLEL DO
+           !  do idat=0,ndat-1
+           !    chi_rgp%buffer_cplx(:,ig2+idat) = cemiqr(:) * chi_rgp%buffer_cplx(:,ig2+idat)
+           !  end do
+           !end if
+
+           !call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
+           !                        gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2))
 
            !$OMP PARALLEL DO
            do idat=0,ndat-1
