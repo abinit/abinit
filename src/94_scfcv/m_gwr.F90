@@ -2965,7 +2965,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
 
 !Local variables-------------------------------
 !scalars
- integer :: my_ikf, ik_bz, ig2, ipm, npwsp, col_bsize, ndat
+ integer :: my_ikf, ik_bz, ig2, ipm, npwsp, col_bsize, ndat, gpu_option
  logical :: k_is_gamma
  real(dp) :: kk_bz(3), cpu, wall, gflops, mem_mb
  complex(gwp),allocatable :: ceikr(:)
@@ -2975,13 +2975,14 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
+ gpu_option = gwr%dtset%gpu_option
 
  mem_mb = two * gwr%my_nkbz * two * gwp * gwr%g_nfft * gwr%green_mpw * b2Mb /  gwr%g_slkproc%grid%nprocs
  call wrtout(std_out, sjoin(" Estimated local memory for Green's functions: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
  ABI_MALLOC(ceikr, (gwr%g_nfft * gwr%nspinor))
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(alloc:ceikr) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(alloc:ceikr) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
 
  do my_ikf=1,gwr%my_nkbz
@@ -2992,7 +2993,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
    if (.not. k_is_gamma) then
      call calc_ceikr(kk_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, ceikr)
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$omp target update to(ceikr) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+     !$omp target update to(ceikr) if (gpu_option == ABI_GPU_OPENMP)
 #endif
    end if
 
@@ -3039,7 +3040,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
  call wrtout(std_out, sjoin(" Local memory for G_kbz(g',r,itau): ", ftoa(mem_mb, fmt="f8.1"), "[Mb] <<< MEM"))
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete: ceikr) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete: ceikr) if (gpu_option == ABI_GPU_OPENMP)
 #endif
  ABI_FREE(ceikr)
 
@@ -3074,7 +3075,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
 
 !Local variables-------------------------------
 !scalars
- integer :: ig2, ipm, npwsp, col_bsize, ir1, ndat, ii, num_pm, ipm_list__(2)
+ integer :: ig2, ipm, npwsp, col_bsize, ir1, ndat, ii, num_pm, ipm_list__(2), gpu_option
  logical :: have_g0
  !real(dp) :: cpu, wall, gflops
  type(__slkmat_t) :: rgp, gt_pm(2), gpr
@@ -3085,6 +3086,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
 ! *************************************************************************
 
  !call cwtime(cpu, wall, gflops, "start")
+ gpu_option = gwr%dtset%gpu_option
 
  num_pm = 2; ipm_list__ = [1, 2]
  if (present(ipm_list)) then
@@ -3103,8 +3105,8 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
      ABI_MALLOC(conjg_ceig0r, (gwr%g_nfft * gwr%nspinor))
      conjg_ceig0r = conjg(ceig0r)
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET ENTER DATA MAP(alloc:ceig0r, conjg_ceig0r) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
-     !$omp target update to(ceig0r, conjg_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+     !$OMP TARGET ENTER DATA MAP(alloc:ceig0r, conjg_ceig0r) IF (gpu_option == ABI_GPU_OPENMP)
+     !$omp target update to(ceig0r, conjg_ceig0r) if (gpu_option == ABI_GPU_OPENMP)
 #endif
    end if
  end if
@@ -3113,7 +3115,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
  call gwr%rotate_gpm(ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list=ipm_list__(1:num_pm))
 
  call uplan_k%init(desc_kbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_kbz%istwfk, &
-                   desc_kbz%gvec, gwp, gwr%dtset%gpu_option)
+                   desc_kbz%gvec, gwp, gpu_option)
 
  ! For each tau in imp_list__
  do ii=1,num_pm
@@ -3157,7 +3159,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
 
  if (have_g0) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete: ceig0r, conjg_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete: ceig0r, conjg_ceig0r) if (gpu_option == ABI_GPU_OPENMP)
 #endif
    ABI_FREE(ceig0r)
    ABI_FREE(conjg_ceig0r)
@@ -3430,7 +3432,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
 
 !Local variables-------------------------------
 !scalars
- integer :: my_iqf, iq_bz, ig2, npwsp, col_bsize, ndat
+ integer :: my_iqf, iq_bz, ig2, npwsp, col_bsize, ndat, gpu_option
  real(dp) :: cpu, wall, gflops, mem_mb, qq_bz(3)
  logical :: q_is_gamma
  character(len=500) :: msg
@@ -3440,9 +3442,11 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
+ gpu_option = gwr%dtset%gpu_option
+
  ABI_MALLOC(ceiqr, (gwr%g_nfft * gwr%nspinor))
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(alloc:ceiqr) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(alloc:ceiqr) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
 
  do my_iqf=1,gwr%my_nqbz
@@ -3452,7 +3456,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
    if (.not. q_is_gamma) then
      call calc_ceikr(qq_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, ceiqr)
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$omp target update to(ceiqr) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+     !$omp target update to(ceiqr) if (gpu_option == ABI_GPU_OPENMP)
 #endif
    end if
 
@@ -3490,7 +3494,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
  end do ! my_iqf
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete: ceiqr) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete: ceiqr) if (gpu_option == ABI_GPU_OPENMP)
 #endif
  ABI_FREE(ceiqr)
 
@@ -3526,13 +3530,15 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
 
 !Local variables-------------------------------
 !scalars
- integer :: ig2, npwsp, nrsp, col_bsize, ir1, ndat
+ integer :: ig2, npwsp, nrsp, col_bsize, ir1, ndat, gpu_option
  character(len=500) :: msg
  type(desc_t) :: desc_qbz
  type(__slkmat_t) :: wc_ggp, rgp, gpr
  type(uplan_t) :: uplan_k
  complex(gwp),allocatable :: ceig0r(:), conjg_ceig0r(:)
 ! *************************************************************************
+
+ gpu_option = gwr%dtset%gpu_option
 
  ! NB: Non-zero g0, requires the application of the phase.
  if (any(g0_q /= 0)) then
@@ -3541,8 +3547,8 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
    call calc_ceigr(-g0_q, gwr%g_nfft, gwr%nspinor, gwr%g_ngfft, ceig0r)
    conjg_ceig0r = conjg(ceig0r)
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(alloc:ceig0r, conjg_ceig0r) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
-   !$omp target update to(ceig0r, conjg_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(alloc:ceig0r, conjg_ceig0r) IF (gpu_option == ABI_GPU_OPENMP)
+   !$omp target update to(ceig0r, conjg_ceig0r) if (gpu_option == ABI_GPU_OPENMP)
 #endif
  end if
 
@@ -3588,7 +3594,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
 
  if (any(g0_q /= 0)) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete: ceig0r, conjg_ceig0r) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete: ceig0r, conjg_ceig0r) if (gpu_option == ABI_GPU_OPENMP)
 #endif
    ABI_SFREE(ceig0r)
    ABI_SFREE(conjg_ceig0r)
@@ -4445,7 +4451,7 @@ subroutine gwr_build_tchi(gwr)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, nrsp, npwsp, ncol_glob, col_bsize, my_iqi, gt_scbox_win, nspinor
+ integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, nrsp, npwsp, ncol_glob, col_bsize, my_iqi, gt_scbox_win, nspinor, gpu_option
  integer :: idat, ndat, max_ndat, sc_nfft, sc_nfftsp, spin, ik_bz, iq_ibz, ikq_ibz, ikq_bz, ierr, ipm, itau, ig2, ifft !, ii
  integer :: use_umklp ! ik_ibz, isym_k, trev_k, tsign_k, ! g0_k(3),
  !integer :: my_ikf_start, my_ikf_stop !, nkf_batch_size, nkf_now, op_type
@@ -4480,6 +4486,7 @@ subroutine gwr_build_tchi(gwr)
 
  units = [std_out, ab_out]
  nspinor = gwr%nspinor
+ gpu_option = gwr%dtset%gpu_option
 
  ABI_CHECK(gwr%tchi_space == "none", sjoin("tchi_space: ", gwr%tchi_space, " != none"))
  gwr%tchi_space = "itau"
@@ -4529,12 +4536,12 @@ subroutine gwr_build_tchi(gwr)
    if (.not. use_shmem_for_k) then
      ABI_MALLOC(gt_scbox, (sc_nfftsp, max_ndat, 2))
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET ENTER DATA MAP(alloc:gt_scbox) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+     !$OMP TARGET ENTER DATA MAP(alloc:gt_scbox) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
    end if
 
    ! Build plan for dense FFTs.
-   call green_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat*2, gwr%dtset%gpu_option)
+   call green_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat*2, gpu_option)
 
    ! The g-vectors in the supercell for G and tchi.
    ABI_MALLOC(green_scgvec, (3, gwr%green_mpw))
@@ -4545,9 +4552,8 @@ subroutine gwr_build_tchi(gwr)
 
    ABI_MALLOC(cemiqr, (gwr%g_nfft * gwr%nspinor)) ! The phase e^{-iq.r} in the unit cell.
 #ifdef HAVE_OPENMP_OFFLOAD
-  !$OMP TARGET ENTER DATA MAP(alloc:cemiqr) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+  !$OMP TARGET ENTER DATA MAP(alloc:cemiqr) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
-
 
    if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
    call wrtout(std_out, " Allocating PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.")
@@ -4613,7 +4619,7 @@ subroutine gwr_build_tchi(gwr)
            ! Insert G_k(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir).
            call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr, gt_scbox)
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$omp target update to(gt_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+           !$omp target update to(gt_scbox) if (gpu_option == ABI_GPU_OPENMP)
 #endif
 
            if (.not. use_mpi_for_k) then
@@ -4625,7 +4631,7 @@ subroutine gwr_build_tchi(gwr)
              ! Then back to tchi(G'=q+g',r) immediately with isign + 1.
              !gt_scbox(:,:,1) = gt_scbox(:,:,1) * conjg(gt_scbox(:,:,2))
 #ifdef HAVE_OPENMP_OFFLOAD
-            !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:gt_scbox) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+            !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:gt_scbox) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
              do idat=1,max_ndat
                do ifft=1,sc_nfftsp
@@ -4636,7 +4642,7 @@ subroutine gwr_build_tchi(gwr)
 
              call green_plan%execute(gt_scbox(:,1,1), +1, gwr%nspinor*max_ndat*2)
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$omp target update from(gt_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+             !$omp target update from(gt_scbox) if (gpu_option == ABI_GPU_OPENMP)
 #endif
 
            else
@@ -4722,7 +4728,7 @@ subroutine gwr_build_tchi(gwr)
          if (.not. q_is_gamma) then
            call calc_ceikr(-gwr%qibz(:,iq_ibz), gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, cemiqr)
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$omp target update to(cemiqr) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+           !$omp target update to(cemiqr) if (gpu_option == ABI_GPU_OPENMP)
 #endif
          end if
 
@@ -4733,7 +4739,7 @@ subroutine gwr_build_tchi(gwr)
          call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, istwfk1, &
                            desc_q%gvec, gwp, &
                            !0) ! FIXME GPU OPTION
-                           gwr%dtset%gpu_option)
+                           gpu_option)
 
          do ig2=1, chi_rgp%size_local(2), gwr%uc_batch_size
            ndat = blocked_loop(ig2, chi_rgp%size_local(2), gwr%uc_batch_size)
@@ -4780,7 +4786,7 @@ subroutine gwr_build_tchi(gwr)
      call xmpi_win_free(gt_scbox_win, ierr)
    else
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET EXIT DATA MAP(delete: gt_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+     !$OMP TARGET EXIT DATA MAP(delete: gt_scbox) if (gpu_option == ABI_GPU_OPENMP)
 #endif
      ABI_FREE(gt_scbox)
    end if
@@ -4794,7 +4800,7 @@ subroutine gwr_build_tchi(gwr)
    call green_plan%free()
 
 #ifdef HAVE_OPENMP_OFFLOAD
-  !$OMP TARGET EXIT DATA MAP(delete:cemiqr) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+  !$OMP TARGET EXIT DATA MAP(delete:cemiqr) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
    ABI_FREE(cemiqr)
 
@@ -5599,7 +5605,7 @@ subroutine gwr_build_sigmac(gwr)
 !scalars
  integer,parameter :: master = 0
  integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii, jj, irow
- integer :: iq_ibz, iq_bz, itau, ierr, ibc, ib1, ib2, bmin, bmax, band, band1, ifft
+ integer :: iq_ibz, iq_bz, itau, ierr, ibc, ib1, ib2, bmin, bmax, band, band1, ifft, gpu_option
  integer :: band2, band2_start, band2_stop, nbc
  integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp
  integer :: isym_k, trev_k, g0_k(3), tsign_k !, b1gw, b2gw, ! npwsp, my_iqi, sc_ir, ig, my_iqf
@@ -5654,6 +5660,7 @@ subroutine gwr_build_sigmac(gwr)
 
  nspinor = gwr%nspinor
  units = [std_out, ab_out]
+ gpu_option = gwr%dtset%gpu_option
  if (gwr%sig_diago) then
    call wrtout(units, " Computing diagonal matrix elements of Sigma_c", pre_newlines=1)
  else
@@ -5756,13 +5763,13 @@ if (gwr%use_supercell_for_sigma) then
    ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor, max_ndat, 2))
    ABI_CALLOC(wct_scbox, (sc_nfft * gwr%nspinor, max_ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(to:gt_scbox, wct_scbox) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(to:gt_scbox, wct_scbox) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
  end if
 
  ! Build plans for dense FFTs.
- call green_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat*2, gwr%dtset%gpu_option)
- call wt_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat, gwr%dtset%gpu_option)
+ call green_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat*2, gpu_option)
+ call wt_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat, gpu_option)
 
  sigma_fact = one / (sck_ucvol * scq_ucvol)
 
@@ -5829,14 +5836,14 @@ if (.not. use_shmem_for_k) then
        ! Insert G_k(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir).
        call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr, gt_scbox)
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$omp target update to(gt_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+       !$omp target update to(gt_scbox) if (gpu_option == ABI_GPU_OPENMP)
 #endif
        if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(gt_scbox, gwr%kpt_comm%value, gt_request, ierr)
 
        ! Insert Wc_q(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir)
        call gwr%wcq_to_scbox(sc_ngfft, select_my_qbz, desc_myqbz, wc_scgvec, my_ir, ndat, wc_gpr, wct_scbox)
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$omp target update to(wct_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+       !$omp target update to(wct_scbox) if (gpu_option == ABI_GPU_OPENMP)
 #endif
        if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(wct_scbox, gwr%kpt_comm%value, wct_request, ierr)
 
@@ -5852,7 +5859,7 @@ if (.not. use_shmem_for_k) then
        !gt_scbox(:,:,1) = gt_scbox(:,:,1) * wct_scbox(:,:) * sigma_fact
        !gt_scbox(:,:,2) = gt_scbox(:,:,2) * wct_scbox(:,:) * sigma_fact
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) MAP(to:gt_scbox, wct_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) MAP(to:gt_scbox, wct_scbox) if (gpu_option == ABI_GPU_OPENMP)
 #endif
        do ipm=1,2
          do idat=1,max_ndat
@@ -5862,7 +5869,7 @@ if (.not. use_shmem_for_k) then
          end do
        end do
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$omp target update from(gt_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+       !$omp target update from(gt_scbox) if (gpu_option == ABI_GPU_OPENMP)
 #endif
        !print *, "Maxval abs imag G:", maxval(abs(aimag(gt_scbox)))
 
@@ -5942,7 +5949,7 @@ end if
  !call wrtout(std_out, sjoin(" Maxval abs imag W:", ftoa(max_abs_imag_wct)))
  if (.not. use_shmem_for_k) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete: gt_scbox, wct_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete: gt_scbox, wct_scbox) if (gpu_option == ABI_GPU_OPENMP)
 #endif
    ABI_FREE(gt_scbox)
    ABI_FREE(wct_scbox)
