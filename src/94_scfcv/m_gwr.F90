@@ -3000,12 +3000,11 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
    ! Get G_kbz(+/- itau) in the BZ.
    call gwr%rotate_gpm(ik_bz, itau, spin, desc_mykbz(my_ikf), gt_pm)
 
-   ! FIXME bug if batch size > 1
    associate (desc_k => desc_mykbz(my_ikf))
    call uplan_k%init(desc_k%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_k%istwfk, &
                      desc_k%gvec, gwp, &
-                     !0) ! FIXME gpu_option
-                     gwr%dtset%gpu_option)
+                     0)             ! FIXME gpu_option
+                     !gpu_option)   ! FIXME bug if batch size > 1 with gpu, other calls look OK though
 
    do ipm=1,2
      ! Allocate rgp PBLAS matrix to store G_kbz(r,g')
@@ -3014,12 +3013,10 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
      npwsp = desc_k%npw * gwr%nspinor
      ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
      call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, size_blocs=[-1, col_bsize])
-     !ABI_CHECK_IEQ(size(g_gp%buffer_cplx, dim=2), size(rgp%buffer_cplx, dim=2), "len2")
 
      ! Perform FFT G_k(g,g') -> G_k(r,g') and store results in rgp.
      do ig2=1, g_gp%size_local(2), gwr%uc_batch_size
        ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
-
        if (k_is_gamma) then
          call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), gpu_map=1)
        else
@@ -3115,7 +3112,9 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
  call gwr%rotate_gpm(ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list=ipm_list__(1:num_pm))
 
  call uplan_k%init(desc_kbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_kbz%istwfk, &
-                   desc_kbz%gvec, gwp, gpu_option)
+                   desc_kbz%gvec, gwp, &
+                   0)
+                   !gpu_option) ! FIXME gpu_option
 
  ! For each tau in imp_list__
  do ii=1,num_pm
@@ -3279,7 +3278,7 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
  ! F(r',r) --> F(g',r) and store results in gp_r.
  do ir2=1, rp_r%size_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir2, rp_r%size_local(2), gwr%uc_batch_size)
-   call uplan_k%execute_rg(ndat, rp_r%buffer_cplx(:,ir2), gp_r%buffer_cplx(:,ir2), isign=isign, iscale=0, gpu_map=1) ! this should be OK
+   call uplan_k%execute_rg(ndat, rp_r%buffer_cplx(:,ir2), gp_r%buffer_cplx(:,ir2), isign=isign, iscale=0, gpu_map=1)
  end do
 
  ! F(g',r) --> F(r,g')
@@ -3290,7 +3289,7 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
  ! F(r,g') --> F(g,g') and store results in g_gp.
  do ig2=1, g_gp%size_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
-   call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=-isign, iscale=0, gpu_map=1) ! this should be OK
+   call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=-isign, iscale=0, gpu_map=1)
  end do
 
  !g_gp%buffer_cplx = scale_fact * g_gp%buffer_cplx
@@ -3471,8 +3470,8 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
 
    call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_q%istwfk, &
                      desc_q%gvec, gwp, &
-                     0) ! FIXME: gpu_option
-                     !gwp, gwr%dtset%gpu_option)
+                     0)           ! FIXME: gpu_option
+                     !gpu_option) ! FIXME bug if batch size > 1 with gpu, other calls look OK though
 
    ! FFT and store results in rgp
    do ig2=1,wc_qbz%size_local(2), gwr%uc_batch_size
@@ -5777,8 +5776,7 @@ if (gwr%use_supercell_for_sigma) then
  ABI_MALLOC(green_scgvec, (3, gwr%green_mpw))
  ABI_MALLOC(wc_scgvec, (3, gwr%tchi_mpw))
 
- select_my_kbz = .True.
- select_my_qbz = .True.
+ select_my_kbz = .True.; select_my_qbz = .True.
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
