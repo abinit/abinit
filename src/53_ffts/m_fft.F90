@@ -5250,11 +5250,8 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
      !$OMP TARGET ENTER DATA MAP(alloc:ur) IF (transfer_ur)
    end if
 
-   ! TODO
-   !!$OMP TARGET ENTER DATA MAP(alloc:ur)
-   !call gpu_set_to_zero(ur, int(2,c_size_t)*uplan%nfft*uplan%nspinor*ndat)
-
    bufsize = uplan%nfft * uplan%nspinor * ndat
+   ! TODO call gpu_set_to_zero(ur, bufsize)
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
    do ifft=1, bufsize
      ur(ifft) = zero
@@ -5398,11 +5395,8 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
      !$OMP TARGET ENTER DATA MAP(alloc:ur) IF (transfer_ur)
    end if
 
-   ! TODO
-   !!$OMP TARGET ENTER DATA MAP(alloc:ur)
-   !call gpu_set_to_zero(ur, int(2,c_size_t)*uplan%nfft*uplan%nspinor*ndat)
-
    bufsize = uplan%nfft * uplan%nspinor * ndat
+   ! TODO call gpu_set_to_zero(ur, bufsize)
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
    do ifft=1,bufsize
      ur(ifft) = czero
