@@ -515,7 +515,7 @@ complex(dp), allocatable :: chi(:,:), matrix_elements(:,:,:,:), renorm_eigs(:,:,
      ene=(iw-1)*de
      tmpabs=zero
      if ( re_refract(iw) > tol10 ) then
-       tmpabs = aimag(eps(iw))*ene / re_refract(iw) / Sp_Lt / Bohr_meter * 1.0d-6
+       tmpabs = aimag(eps(iw))*ene / re_refract(iw) / Speed_Light / Bohr_meter * 1.0d-6
      end if
      write(fout1, '(2es16.6)' ) Ha_eV*ene, tmpabs
    end do

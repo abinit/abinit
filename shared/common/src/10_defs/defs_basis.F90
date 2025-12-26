@@ -233,7 +233,7 @@ module defs_basis
 !real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge in Coulomb
 !real(dp), parameter :: kb_SI=1.380649d-23  ! Boltzmann constant in Joule/K (CODATA 2017 value.)
 !real(dp), parameter :: Avogadro=6.02214179d23 ! per mole
-!real(dp), parameter :: Sp_Lt_SI=2.99792458d8 ! speed of light in SI
+!real(dp), parameter :: Speed_Light_SI=2.99792458d8 ! speed of light in SI
 
 ! 09/2025 [SP] update with 2022 NIST values from the same website.
 !         See also P. J. Mohr et al., Review Mod. Phys. 97, 025002 (2025)
@@ -255,7 +255,7 @@ module defs_basis
  real(dp), parameter :: e_Cb         = 1.602176634d-19        ! minus the electron charge in Coulomb
  real(dp), parameter :: kb_SI        = 1.380649d-23           ! Boltzmann constant in Joule/K
  real(dp), parameter :: Avogadro     = 6.02214076d23          ! per mole
- real(dp), parameter :: Sp_Lt_SI     = 299792458_dp           ! Speed of light in vacuum (m/s)
+ real(dp), parameter :: Speed_Light_SI     = 299792458_dp           ! Speed of light in vacuum (m/s)
  ! Note: In SI, c is fixed and the fine structure constant (alpha) is measured.
  !       In a.u., alpha is fixed and c is measured. Be carefull when using them. 
  !       Here we define c.
@@ -282,7 +282,7 @@ module defs_basis
  real(dp), parameter :: amu_emass    = 1.66053906892d-27 / 9.1093837139d-31         ! 1 atomic mass unit in electronic mass
  real(dp), parameter :: HaBohr3_GPa  = Ha_eV / Bohr_Ang**3 * e_Cb * 1.0d+21         ! 1 Ha/Bohr^3 in GPa
  real(dp), parameter :: Ohmcm        = two * pi * Ha_THz * ninth * ten              ! 1 Ohm.cm in atomic units
- real(dp), parameter :: eps0         = one / (four_pi * 0.0000001_dp * Sp_Lt_SI**2) ! permittivity of free space in F/m
+ real(dp), parameter :: eps0         = one / (four_pi * 0.0000001_dp * Speed_Light_SI**2) ! permittivity of free space in F/m
  real(dp), parameter :: AmuBohr2_Cm2 = e_Cb * 1.0d20 / (Bohr_Ang * Bohr_Ang)
 
 !=========================================================
@@ -294,7 +294,7 @@ module defs_basis
 !real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
 !real(dp), parameter :: FineStructureConstant=0.0072973525664_dp ! 2014 CODATA value
 !real(dp), parameter :: FineStructureConstant2=0.000053251354478_dp ! Square of fine structure constant
- real(dp), parameter :: Sp_Lt=Sp_lt_SI/2.1876912633d6 ! speed of light in atomic units
+!real(dp), parameter :: Speed_Light=Speed_light_SI/2.1876912633d6 ! speed of light in atomic units
 !real(dp), parameter :: Time_Sec=2.418884326505D-17 !  Atomic unit of time in seconds
 
 ! 09/2025 [SP] update with 2022 NIST values from the same website.
@@ -311,9 +311,9 @@ module defs_basis
 !Works until now 
 
 !The compiler nvhpc has a problem with this line ?!?
-!real(dp), parameter :: Sp_Lt        = InvFineStruct                      ! Speed of light in atomic units
-!So, replace with this line with straight value of Sp_Lt
-!real(dp), parameter :: Sp_Lt= 137.035999177_dp
+ real(dp), parameter :: Speed_Light        = InvFineStruct                      ! Speed of light in atomic units
+!So, replace with this line with straight value of Speed_Light
+!real(dp), parameter :: Speed_Light= 137.035999177_dp
 
 !
  real(dp), parameter :: Time_Sec     = 2.4188843265864D-17                ! Atomic unit of time in seconds
