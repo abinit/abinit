@@ -4539,10 +4539,15 @@ subroutine gwr_build_tchi(gwr)
    ! The g-vectors in the supercell for G and tchi.
    ABI_MALLOC(green_scgvec, (3, gwr%green_mpw))
    ABI_MALLOC(chi_scgvec, (3, gwr%tchi_mpw))
-   ABI_MALLOC(cemiqr, (gwr%g_nfft * gwr%nspinor)) ! The phase e^{-iq.r} in the unit cell.
    ABI_MALLOC(gt_gpr, (2, gwr%my_nkbz))
    ABI_MALLOC(chiq_gpr, (gwr%my_nqibz))
    ABI_MALLOC(desc_mykbz, (gwr%my_nkbz))
+
+   ABI_MALLOC(cemiqr, (gwr%g_nfft * gwr%nspinor)) ! The phase e^{-iq.r} in the unit cell.
+#ifdef HAVE_OPENMP_OFFLOAD
+  !$OMP TARGET ENTER DATA MAP(alloc:cemiqr) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
+
 
    if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
    call wrtout(std_out, " Allocating PBLAS arrays for tchi_q(g',r) for all q in the IBZ treated by this MPI rank.")
@@ -4716,6 +4721,9 @@ subroutine gwr_build_tchi(gwr)
          ! Note the minus sign in q.
          if (.not. q_is_gamma) then
            call calc_ceikr(-gwr%qibz(:,iq_ibz), gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, cemiqr)
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$omp target update to(cemiqr) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
          end if
 
          ! MPI-transposition: tchi_q(g',r) => tchi_q(r,g')
@@ -4724,8 +4732,8 @@ subroutine gwr_build_tchi(gwr)
          ! FFT tchi_q(r,g') --> tchi_q(g,g'). Results stored in gwr%tchi_qibz.
          call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, istwfk1, &
                            desc_q%gvec, gwp, &
-                           0) ! FIXME GPU OPTION
-                           !gwr%dtset%gpu_option)
+                           !0) ! FIXME GPU OPTION
+                           gwr%dtset%gpu_option)
 
          do ig2=1, chi_rgp%size_local(2), gwr%uc_batch_size
            ndat = blocked_loop(ig2, chi_rgp%size_local(2), gwr%uc_batch_size)
@@ -4779,12 +4787,16 @@ subroutine gwr_build_tchi(gwr)
 
    ABI_FREE(green_scgvec)
    ABI_FREE(chi_scgvec)
-   ABI_FREE(cemiqr)
    ABI_FREE(gt_gpr)
    ABI_FREE(desc_mykbz)
    call slk_array_free(chiq_gpr)
    ABI_FREE(chiq_gpr)
    call green_plan%free()
+
+#ifdef HAVE_OPENMP_OFFLOAD
+  !$OMP TARGET EXIT DATA MAP(delete:cemiqr) IF (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
+   ABI_FREE(cemiqr)
 
  else ! not gwr%use_supercell_for_tchi
    ! ===================================================================
@@ -5817,14 +5829,14 @@ if (.not. use_shmem_for_k) then
        ! Insert G_k(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir).
        call gwr%gk_to_scbox(sc_ngfft, select_my_kbz, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr, gt_scbox)
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$omp target update to(gt_scbox)
+       !$omp target update to(gt_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
 #endif
        if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(gt_scbox, gwr%kpt_comm%value, gt_request, ierr)
 
        ! Insert Wc_q(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir)
        call gwr%wcq_to_scbox(sc_ngfft, select_my_qbz, desc_myqbz, wc_scgvec, my_ir, ndat, wc_gpr, wct_scbox)
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$omp target update to(wct_scbox)
+       !$omp target update to(wct_scbox) if (gwr%dtset%gpu_option == ABI_GPU_OPENMP)
 #endif
        if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(wct_scbox, gwr%kpt_comm%value, wct_request, ierr)
 
