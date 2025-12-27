@@ -7,7 +7,7 @@
  * or http://www.gnu.org/copyleft/gpl.txt .
  * for the initials of contributors, see ~abinit/doc/developers/contributors.txt.
  *
- * The main goal of this file is to contain cublas and magma encapsulation routines,
+ * The main goal of this file is to contain cublas and cufft encapsulation routines,
  * that will be callable from fortran routines
  *
  */
@@ -71,8 +71,8 @@ static cufftType select_cufft_type(const int fftType_int)
 
 extern "C"
 void gpu_fft_plan_many_cpp(int *fft_plan_id, int *rank, int **n, int **inembed,
-                       int *istride, int *idist, int **onembed, int *ostride,
-                       int *odist, int *fft_type, int *batch){
+                           int *istride, int *idist, int **onembed, int *ostride,
+                           int *odist, int *fft_type, int *batch){
 
   assert(CUFFT_Z2Z==0x69 && "cuFFT_Type enum value mismatch !(CUDA update?)");
   assert(CUFFT_FORWARD==-1 && "cuFFT direction enum value mismatch (CUDA update?)");
@@ -105,7 +105,8 @@ void gpu_fft_plan_many_cpp(int *fft_plan_id, int *rank, int **n, int **inembed,
  */
 /*=========================================================================*/
 
-extern "C" void gpu_fft_stream_synchronize_cpp(int *fft_plan_id)
+extern "C"
+void gpu_fft_stream_synchronize_cpp(int *fft_plan_id)
 {
   CUDA_API_CHECK( cudaStreamSynchronize(stream_compute[*fft_plan_id]) );
 }
@@ -132,7 +133,7 @@ void gpu_fft_plan_destroy_cpp(int *fft_plan_id){
  *  gpu_fft_exec_z2z
  *
  * FUNCTION
- *  Run a Fast Fourrier Transform on double-complex input and output
+ *  Run a Fast Fourier Transform on double-complex input and output
  *
  * INPUTS
  *   idata       Pointer to the complex input data (in GPU memory) to transform
@@ -157,7 +158,7 @@ void gpu_fft_exec_z2z_cpp(int *fft_plan_id, void **idata, void **odata, int *dir
  *  gpu_fft_exec_c2c
  *
  * FUNCTION
- *  Run a Fast Fourrier Transform on float complex input and output
+ *  Run a Fast Fourier Transform on float complex input and output
  *
  * INPUTS
  *   idata       Pointer to the complex input data (in GPU memory) to transform

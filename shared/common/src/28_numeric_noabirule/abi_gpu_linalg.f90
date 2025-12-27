@@ -12,6 +12,9 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
+!! TODO
+!! Should become a Fortran module
+!!
 !! SOURCE
 
 !!***
@@ -744,11 +747,11 @@ end subroutine gpu_xsygvd_bufferSize
 !!  array  = array to be set to zero
 !!
 !! SOURCE
+
 subroutine gpu_set_to_zero(array, sizea)
  use, intrinsic :: iso_c_binding
  integer(c_size_t),intent(in)  :: sizea
  real(dp),target,intent(out) :: array(sizea)
-
 ! *********************************************************************
 
 #if defined HAVE_OPENMP_OFFLOAD
@@ -784,6 +787,7 @@ end subroutine gpu_set_to_zero
 !!  array  = array to be set to zero
 !!
 !! SOURCE
+
 subroutine gpu_set_to_zero_complex(array, sizea)
  use, intrinsic :: iso_c_binding
  integer(c_size_t),intent(in)  :: sizea
@@ -810,8 +814,7 @@ end subroutine gpu_set_to_zero_complex
 !!***
 
 !------------------------------------------------------------------------------
-!                         gpu_copy
-!------------------------------------------------------------------------------
+
 !!****f* m_abi_gpu_linalg/gpu_copy
 !! NAME
 !!  gpu_copy
@@ -827,6 +830,7 @@ end subroutine gpu_set_to_zero_complex
 !!  dest = array to be set
 !!
 !! SOURCE
+
 subroutine gpu_copy(dest, src, sizea)
  use, intrinsic :: iso_c_binding
  integer(c_size_t),intent(in)  :: sizea
@@ -872,6 +876,7 @@ end subroutine gpu_copy
 !!  dest = array to be set
 !!
 !! SOURCE
+
 subroutine gpu_copy_complex(dest, src, sizea)
  use, intrinsic :: iso_c_binding
  integer(c_size_t),intent(in)  :: sizea
@@ -901,9 +906,6 @@ subroutine gpu_copy_complex(dest, src, sizea)
 end subroutine gpu_copy_complex
 !!***
 
-!------------------------------------------------------------------------------
-!                         abi_gpu_xgemm
-!------------------------------------------------------------------------------
 !!****f* m_abi_gpu_linalg/abi_gpu_xgemm
 !! NAME
 !!  abi_gpu_xgemm
@@ -978,7 +980,6 @@ subroutine abi_gpu_xgemm_d(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc
  character(len=1),intent(in) :: transa,transb
  real(dp),   intent(in),target :: a(*),b(*)
  real(dp),   intent(inout),target :: c(*)
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1120,8 +1121,7 @@ end subroutine abi_gpu_xgemm_2z
 !!***
 
 !------------------------------------------------------------------------------
-!                         abi_gpu_xgemm_strided
-!------------------------------------------------------------------------------
+
 !!****f* m_abi_gpu_linalg/abi_gpu_xgemm_strided
 !! NAME
 !!  abi_gpu_xgemm_strided
@@ -1361,8 +1361,6 @@ end subroutine abi_gpu_xgemm_strided_2z
 !!***
 
 !------------------------------------------------------------------------------
-!                         abi_gpu_xsymm
-!------------------------------------------------------------------------------
 !!****f* m_abi_gpu_linalg/abi_gpu_xsymm
 !! NAME
 !!  abi_gpu_xsymm
@@ -1584,8 +1582,6 @@ end subroutine abi_gpu_xsymm_2z
 !!***
 
 !------------------------------------------------------------------------------
-!                         abi_gpu_zhemm
-!------------------------------------------------------------------------------
 !!****f* m_abi_gpu_linalg/abi_gpu_zhemm
 !! NAME
 !!  abi_gpu_xhemm
@@ -1806,8 +1802,6 @@ end subroutine abi_gpu_zhemm_2z
 !!***
 
 !------------------------------------------------------------------------------
-!                         abi_gpu_xscal
-!------------------------------------------------------------------------------
 !!****f* m_abi_gpu_linalg/abi_gpu_xscal
 !! NAME
 !!  abi_gpu_xscal
@@ -1976,10 +1970,6 @@ subroutine abi_gpu_xscal_2z(cplx, size, alpha, x, incrx)
 end subroutine abi_gpu_xscal_2z
 !!***
 
-!------------------------------------------------------------------------------
-!                         abi_gpu_xaxpy
-!------------------------------------------------------------------------------
-
 !!****f* m_abi_gpu_linalg/abi_gpu_xaxpy
 !! NAME
 !!  abi_gpu_xaxpy
@@ -2037,7 +2027,7 @@ end subroutine abi_gpu_xaxpy_cptr
 
 subroutine abi_gpu_xaxpy_d(cplx, size, alpha, x, incrx, y, incry)
 
-  ! !Arguments ------------------------------------
+  !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
   complex(dp), intent(in)    :: alpha
@@ -2068,7 +2058,7 @@ end subroutine abi_gpu_xaxpy_d
 
 subroutine abi_gpu_xaxpy_z(cplx, size, alpha, x, incrx, y, incry)
 
-  ! !Arguments ------------------------------------
+  !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
   complex(dp), intent(in)    :: alpha
@@ -2099,7 +2089,7 @@ end subroutine abi_gpu_xaxpy_z
 
 subroutine abi_gpu_xaxpy_2d(cplx, size, alpha, x, incrx, y, incry)
 
-  ! !Arguments ------------------------------------
+  !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
   complex(dp), intent(in)    :: alpha
@@ -2130,7 +2120,7 @@ end subroutine abi_gpu_xaxpy_2d
 
 subroutine abi_gpu_xaxpy_2z(cplx, size, alpha, x, incrx, y, incry)
 
-  ! !Arguments ------------------------------------
+  !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
   complex(dp), intent(in)    :: alpha
@@ -2159,10 +2149,6 @@ subroutine abi_gpu_xaxpy_2z(cplx, size, alpha, x, incrx, y, incry)
 end subroutine abi_gpu_xaxpy_2z
 !!***
 
-!------------------------------------------------------------------------------
-!                         abi_gpu_xcopy
-!------------------------------------------------------------------------------
-
 !!****f* m_abi_gpu_linalg/abi_gpu_xcopy
 !! NAME
 !!  abi_gpu_xcopy
@@ -2180,6 +2166,7 @@ end subroutine abi_gpu_xaxpy_2z
 !!  incry  = stride between consecutive elements of y
 !!
 !! SOURCE
+
 subroutine abi_gpu_xcopy_cptr(cplx, size, x, incrx, y, incry)
 
   ! !Arguments ------------------------------------
@@ -2310,7 +2297,7 @@ end subroutine abi_gpu_xcopy_2d
 
 subroutine abi_gpu_xcopy_2z(cplx, size, x, incrx, y, incry)
 
-  ! !Arguments ------------------------------------
+  !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
   complex(dp), intent(in),target    :: x(size,*)
@@ -2337,10 +2324,6 @@ subroutine abi_gpu_xcopy_2z(cplx, size, x, incrx, y, incry)
 
 end subroutine abi_gpu_xcopy_2z
 !!***
-
-!------------------------------------------------------------------------------
-!                         abi_gpu_xtrsm
-!------------------------------------------------------------------------------
 
 !!****f* m_abi_gpu_linalg/abi_gpu_xtrsm
 !! NAME
@@ -2393,6 +2376,7 @@ end subroutine abi_gpu_xcopy_2z
 !!   the correct one is in 17_toolbox/gpu_linalg.cu
 !!
 !! SOURCE
+
 subroutine abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
 ! !Arguments ------------------------------------
@@ -2493,7 +2477,7 @@ end subroutine abi_gpu_xtrsm_z
 
 subroutine abi_gpu_xtrsm_2d(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
-! !Arguments ------------------------------------
+ !Arguments ------------------------------------
  integer, intent(in) :: cplx,lda,ldb,m,n
  complex(dp), intent(in) :: alpha
  character(len=1), intent(in) :: side,uplo,transa,diag
@@ -2524,7 +2508,7 @@ end subroutine abi_gpu_xtrsm_2d
 
 subroutine abi_gpu_xtrsm_2z(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
-! !Arguments ------------------------------------
+!Arguments ------------------------------------
  integer, intent(in) :: cplx,lda,ldb,m,n
  complex(dp), intent(in) :: alpha
  character(len=1), intent(in) :: side,uplo,transa,diag
@@ -2558,13 +2542,13 @@ end subroutine abi_gpu_xtrsm_2z
 !!
 !! NAME
 !! abi_gpu_work_resizeI
+
 subroutine abi_gpu_work_resizeI(array,array_managed,current_dim,asked_dim)
 
   integer, allocatable, intent(inout) :: array(:)
   integer(kind=c_int32_t), ABI_CONTIGUOUS pointer, intent(inout) :: array_managed(:)
   integer, intent(inout)  :: current_dim
   integer, intent(in   )  :: asked_dim
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -2606,7 +2590,6 @@ subroutine abi_gpu_work_resizeI(array,array_managed,current_dim,asked_dim)
 
 end subroutine abi_gpu_work_resizeI
 !!***
-
 
 !!****f* m_abi_gpu_linalg/abi_gpu_work_resizeR
 !!
@@ -2798,10 +2781,6 @@ subroutine abi_gpu_work_finalize()
 end subroutine abi_gpu_work_finalize
 !!***
 
-!------------------------------------------------------------------------------
-!                         abi_gpu_xhegvd
-!------------------------------------------------------------------------------
-
 !!****f* m_abi_gpu_linalg/abi_gpu_xhegvd
 !! NAME
 !!  abi_gpu_xhegvd
@@ -2831,6 +2810,7 @@ end subroutine abi_gpu_work_finalize
 !!  devInfo  =
 !!
 !! SOURCE
+
 subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
                    A, lda, &
                    B, ldb, &
@@ -2853,7 +2833,6 @@ subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
   ! Local variables ------------------------------
   integer     :: bufferSize
   type(c_ptr) :: gpu_ptr
-
 ! *************************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -3101,9 +3080,6 @@ subroutine abi_gpu_xhegvd_2z(cplx, itype, jobz, uplo, A_nrows, &
 end subroutine abi_gpu_xhegvd_2z
 !!***
 
-!------------------------------------------------------------------------------
-!                         abi_gpu_xheevd
-!------------------------------------------------------------------------------
 !!****f* m_abi_gpu_linalg/abi_gpu_xheevd
 !! NAME
 !!  abi_gpu_xheevd
@@ -3130,6 +3106,7 @@ end subroutine abi_gpu_xhegvd_2z
 !!  devInfo  =
 !!
 !! SOURCE
+
 subroutine abi_gpu_xheevd_cptr(cplx, jobz, uplo, A_nrows, &
                    A, lda, &
                    W,      &
@@ -3148,7 +3125,6 @@ subroutine abi_gpu_xheevd_cptr(cplx, jobz, uplo, A_nrows, &
   ! Local variables ------------------------------
   integer     :: bufferSize
   type(c_ptr) :: gpu_ptr
-
 ! *************************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -3370,9 +3346,6 @@ subroutine abi_gpu_xheevd_2z(cplx, jobz, uplo, A_nrows, &
 end subroutine abi_gpu_xheevd_2z
 !!***
 
-!------------------------------------------------------------------------------
-!                         abi_gpu_xpotrf
-!------------------------------------------------------------------------------
 !!****f* m_abi_gpu_linalg/abi_gpu_xpotrf
 !! NAME
 !!  abi_gpu_xpotrf
@@ -3487,7 +3460,6 @@ subroutine abi_gpu_xpotrf_d(cplx, uplo, A_nrows, &
   real(dp),        intent(in   ),target :: A(*)
   integer,         intent(in   ) :: lda
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -3640,7 +3612,6 @@ end subroutine abi_gpu_xpotrf_2z
 !!  blockvectorx  = on input, matrix of dimension (vectsize,blocksize) as a GPU ptr
 !!                  (e.g block of wavefunction)
 !!  blockvectorx  = on output, orthonormalized wavefunction. as a GPU ptr
-!!
 !!
 !! SOURCE
 

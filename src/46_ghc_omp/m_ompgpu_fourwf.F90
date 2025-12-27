@@ -376,7 +376,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
      end do
    end if
 
-   ! call backward fourrier transform on gpu work_gpu => fofr_gpu
+   ! call backward fourier transform on gpu work_gpu => fofr_gpu
 #if defined HAVE_GPU_HIP && defined FC_LLVM
    !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr_amdref)
    call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr_amdref), FFT_INVERSE)
