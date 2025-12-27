@@ -258,7 +258,7 @@ END SUBROUTINE CtqmcoffdiagInterface_setOpts
 !! SOURCE
 
 SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit,Magmom_orb,&
-&Magmom_spin,Magmom_tot,Iatom,fname) 
+&Magmom_spin,Magmom_tot,Iatom,fname,jmjbasis) 
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
@@ -277,6 +277,7 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
   DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_spin
   DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_tot
   INTEGER, INTENT(IN ) :: Iatom
+  INTEGER, OPTIONAL, INTENT(IN )  :: jmjbasis
   character(len=fnlen), INTENT(INOUT) :: fname
 !local variables--------------------------------
 !  INTEGER :: iflavor1,iflavor2
@@ -330,7 +331,7 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
  ! write(6,*) "op%Hybrid%stats",op%Hybrid%stats
  ! write(6,*) "opt_gMove",op%opt_gMove
 
-  CALL Ctqmcoffdiag_getResult(op%Hybrid,Iatom,fname)
+  CALL Ctqmcoffdiag_getResult(op%Hybrid,Iatom,fname,jmjbasis)
 
   IF ( PRESENT(opt_sym) ) THEN
     CALL Ctqmcoffdiag_symmetrizeGreen(op%Hybrid,opt_sym)

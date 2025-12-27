@@ -119,7 +119,7 @@ subroutine tdef_init(tdef,td_ef_type,td_ef_pol,td_ef_ezero,td_ef_tzero,td_ef_lam
  tdef%ef_type  = td_ef_type
  tdef%ef_ezero = td_ef_pol*td_ef_ezero
  tdef%ef_tau   = td_ef_tau
- tdef%ef_omega = 2.0_dp*pi*Sp_Lt/td_ef_lambda !2*pi*f=2*pi*c/lambda
+ tdef%ef_omega = 2.0_dp*pi*Speed_Light/td_ef_lambda !2*pi*f=2*pi*c/lambda
  tdef%ef_tzero = td_ef_tzero
  tdef%ef_sin_a = 2.0_dp*pi/td_ef_tau + tdef%ef_omega
  tdef%ef_sin_b = 2.0_dp*pi/td_ef_tau - tdef%ef_omega

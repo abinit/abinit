@@ -1,5 +1,5 @@
 
-.Version 10.5.8.4 of ABINIT, released Oct 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Nov 2025.
-- ( at 21h22 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h18 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/TestBot_MPI1/v9_t192/t192.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v9_t192/t192.abi
 - output file    -> t192.abo
 - root for input  files -> t192i
 - root for output files -> t192o
@@ -105,14 +105,14 @@ P           mkmem           1
            tolvrs      1.00000000E-10
             typat      1  1  1  1  2  2  2  2
           usekden           1
-           xangst     -1.4444496713E-06  2.1000740858E+00 -2.1501528211E-03
-                      -1.4444496713E-06  2.1000740858E+00  5.8734216101E+00
-                       1.8187167859E+00  1.0500382938E+00  2.9356357286E+00
-                       1.8187167859E+00  1.0500382938E+00  8.8112074915E+00
-                      -1.4444496713E-06  2.1000740858E+00  2.2231162791E+00
-                      -1.4444496713E-06  2.1000740858E+00  8.0986880420E+00
-                       1.8187167859E+00  1.0500382938E+00  5.1609021606E+00
-                       1.8187167859E+00  1.0500382938E+00  1.1036473923E+01
+           xangst     -1.4444496766E-06  2.1000740935E+00 -2.1501528290E-03
+                      -1.4444496766E-06  2.1000740935E+00  5.8734216318E+00
+                       1.8187167926E+00  1.0500382977E+00  2.9356357395E+00
+                       1.8187167926E+00  1.0500382977E+00  8.8112075241E+00
+                      -1.4444496766E-06  2.1000740935E+00  2.2231162873E+00
+                      -1.4444496766E-06  2.1000740935E+00  8.0986880719E+00
+                       1.8187167926E+00  1.0500382977E+00  5.1609021796E+00
+                       1.8187167926E+00  1.0500382977E+00  1.1036473964E+01
             xcart     -2.7296142915E-06  3.9685648809E+00 -4.0631999757E-03
                       -2.7296142915E-06  3.9685648809E+00  1.1099158306E+01
                        3.4368766386E+00  1.9842848043E+00  5.5475475530E+00
@@ -159,8 +159,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.03028
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/PseudosHGH_pwteter/49in.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/PseudosHGH_pwteter/49in.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/49in.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/49in.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for In,  from PRB58, 3641 (1998)
 - 49.00000   3.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -185,8 +185,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    3.321137
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/PseudosHGH_pwteter/7n.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpichT/trunk_develop/tests/Pspdir/PseudosHGH_pwteter/7n.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/7n.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/7n.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for N,  from PRB58, 3641 (1998)
 -  7.00000   5.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -302,16 +302,16 @@ force_length_stats: {min: null, max: null, mean: null, }
     8       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1     -0.00000144444967     2.10007408576353    -0.00215015282108
-    2     -0.00000144444967     2.10007408576353     5.87342161008046
-    3      1.81871678587577     1.05003829381188     2.93563572862969
-    4      1.81871678587577     1.05003829381188     8.81120749153123
-    5     -0.00000144444967     2.10007408576354     2.22311627913367
-    6     -0.00000144444967     2.10007408576354     8.09868804203520
-    7      1.81871678587577     1.05003829381188     5.16090216058443
-    8      1.81871678587577     1.05003829381188    11.03647392348597
+    1     -0.00000144444968     2.10007409351811    -0.00215015282901
+    2     -0.00000144444968     2.10007409351811     5.87342163176822
+    3      1.81871679259142     1.05003829768917     2.93563573946960
+    4      1.81871679259142     1.05003829768917     8.81120752406683
+    5     -0.00000144444968     2.10007409351811     2.22311628734258
+    6     -0.00000144444968     2.10007409351811     8.09868807193981
+    7      1.81871679259142     1.05003829768917     5.16090217964119
+    8      1.81871679259142     1.05003829768917    11.03647396423843
  length scales=  6.873756006790  6.873756006790 22.206443012000 bohr
-              =  3.637435016202  3.637435016202 11.751143525803 angstroms
+              =  3.637435029633  3.637435029633 11.751143569194 angstroms
  prteigrs : about to open file t192o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.07328   Average Vxc (hartree)=  -0.30043
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -330,7 +330,7 @@ psp_core            :  2.42916843616356E+00
 local_psp           : -3.45210723638985E+01
 non_local_psp       :  7.63395813859665E+00
 total_energy        : -3.20977285448051E+01
-total_energy_eV     : -8.73423612466769E+02
+total_energy_eV     : -8.73423689051340E+02
 band_energy         : -1.08737842874094E+01
 ...
 
@@ -406,14 +406,14 @@ P           mkmem           1
            tolvrs      1.00000000E-10
             typat      1  1  1  1  2  2  2  2
           usekden           1
-           xangst     -1.4444496713E-06  2.1000740858E+00 -2.1501528211E-03
-                      -1.4444496713E-06  2.1000740858E+00  5.8734216101E+00
-                       1.8187167859E+00  1.0500382938E+00  2.9356357286E+00
-                       1.8187167859E+00  1.0500382938E+00  8.8112074915E+00
-                      -1.4444496713E-06  2.1000740858E+00  2.2231162791E+00
-                      -1.4444496713E-06  2.1000740858E+00  8.0986880420E+00
-                       1.8187167859E+00  1.0500382938E+00  5.1609021606E+00
-                       1.8187167859E+00  1.0500382938E+00  1.1036473923E+01
+           xangst     -1.4444496766E-06  2.1000740935E+00 -2.1501528290E-03
+                      -1.4444496766E-06  2.1000740935E+00  5.8734216318E+00
+                       1.8187167926E+00  1.0500382977E+00  2.9356357395E+00
+                       1.8187167926E+00  1.0500382977E+00  8.8112075241E+00
+                      -1.4444496766E-06  2.1000740935E+00  2.2231162873E+00
+                      -1.4444496766E-06  2.1000740935E+00  8.0986880719E+00
+                       1.8187167926E+00  1.0500382977E+00  5.1609021796E+00
+                       1.8187167926E+00  1.0500382977E+00  1.1036473964E+01
             xcart     -2.7296142915E-06  3.9685648809E+00 -4.0631999757E-03
                       -2.7296142915E-06  3.9685648809E+00  1.1099158306E+01
                        3.4368766386E+00  1.9842848043E+00  5.5475475530E+00

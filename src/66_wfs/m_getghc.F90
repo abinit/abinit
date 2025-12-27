@@ -956,7 +956,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(ghc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
-     ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_mGGA(1:2,1:npw_k2*my_nspinor*ndat)
+     !LB-2025-12-16: intel19 crashes here when npw_k1 is too big. A solution is to write the loop explicitely
+     !ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_mGGA(1:2,1:npw_k2*my_nspinor*ndat)
+     do idat=1,npw_k1*my_nspinor*ndat
+       do ig=1,2
+         ghc(ig,idat)=ghc(ig,idat)+ghc_mGGA(ig,idat)
+       end do
+     end do
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE TO(ghc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -978,7 +984,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(ghc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
-     ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_vectornd(1:2,1:npw_k2*my_nspinor*ndat)
+     !LB-2025-12-16: intel19 crashes here when npw_k1 is too big. A solution is to write the loop explicitely
+     !ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_vectornd(1:2,1:npw_k2*my_nspinor*ndat)
+     do idat=1,npw_k1*my_nspinor*ndat
+       do ig=1,2
+         ghc(ig,idat)=ghc(ig,idat)+ghc_vectornd(ig,idat)
+       end do
+     end do
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE TO(ghc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
