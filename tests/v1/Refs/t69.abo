@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h08 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t69/t69.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h09 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v1_t69/t69.abi
 - output file    -> t69.abo
 - root for input  files -> t69i
 - root for output files -> t69o
@@ -239,8 +239,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.500   => boxcut(ratio)=   2.11083
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/12mg.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/12mg.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/12mg.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/12mg.pspnc
 -  Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
 - 12.00000   2.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -339,7 +339,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 17.999000000000 18.000000000000 18.001000000000 bohr
-              =  9.524660577411  9.525189754620  9.525718931829 angstroms
+              =  9.524660612581  9.525189789792  9.525718967003 angstroms
  prteigrs : about to open file t69o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.16804   Average Vxc (hartree)=  -0.04402
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -357,7 +357,7 @@ psp_core            : -5.29471358028214E-04
 local_psp           : -9.33940535442802E-01
 non_local_psp       :  2.69250361609208E-01
 total_energy        : -1.03587360586782E+00
-total_energy_eV     : -2.81875543197115E+01
+total_energy_eV     : -2.81875567912862E+01
 band_energy         : -3.36077438019782E-01
 ...
 
@@ -368,9 +368,9 @@ band_energy         : -3.36077438019782E-01
   sigma(3 3)=  1.11102877E-06  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.2685E-02 GPa]
-- sigma(1 1)=  3.26832641E-02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.26854230E-02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.26875895E-02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  3.26832696E-02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.26854285E-02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.26875950E-02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -416,7 +416,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   2.9430E-02  6.1943E-02  6.1949E-02  6.1954E-02
 
 
- *** TDDFT : computation of excited states ***
+ *** TDDFT : computation of excited states *** 
  Splitting of  10 states in   1 occupied states, and   9 unoccupied states,
  giving     9 excitations.
 
@@ -430,7 +430,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
    1->  3 1.27088E-01 3.45825E+00 -9.08785E-01 6.5472E-01 0.00E+00 1.96E+00 0.00E+00
    1->  4 1.27089E-01 3.45828E+00 -9.08784E-01 6.5473E-01 1.96E+00 0.00E+00 0.00E+00
    1->  5 1.59018E-01 4.32710E+00 -8.76856E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
-   1->  6 1.97466E-01 5.37331E+00 -8.38408E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
+   1->  6 1.97466E-01 5.37332E+00 -8.38408E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
    1->  7 1.97468E-01 5.37339E+00 -8.38405E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
    1->  8 2.29982E-01 6.25812E+00 -8.05892E-01 2.5458E-03 0.00E+00 0.00E+00 7.64E-03
    1->  9 2.29987E-01 6.25827E+00 -8.05886E-01 2.5443E-03 0.00E+00 7.63E-03 0.00E+00
@@ -438,14 +438,14 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   Sum of osc. strength :     1.971787E+00
 
   TDDFT singlet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.
+  and corresponding total energies.                
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.63652E-01   4.45321E+00   -8.722213E-01    1.00(  1->  5)  0.00(  1->  6)
    2    1.64513E-01   4.47663E+00   -8.713605E-01    0.93(  1->  2)  0.07(  1->  8)
    3    1.64515E-01   4.47669E+00   -8.713582E-01    0.93(  1->  3)  0.07(  1->  9)
-   4    1.64518E-01   4.47675E+00   -8.713559E-01    0.93(  1->  4)  0.07(  1-> 10)
+   4    1.64518E-01   4.47676E+00   -8.713559E-01    0.93(  1->  4)  0.07(  1-> 10)
    5    1.90270E-01   5.17752E+00   -8.456033E-01    1.00(  1->  6)  0.00(  1->  7)
-   6    1.90273E-01   5.17758E+00   -8.456009E-01    1.00(  1->  7)  0.00(  1->  6)
+   6    1.90273E-01   5.17759E+00   -8.456009E-01    1.00(  1->  7)  0.00(  1->  6)
    7    2.34858E-01   6.39080E+00   -8.010161E-01    0.93(  1->  8)  0.07(  1->  2)
    8    2.34861E-01   6.39090E+00   -8.010122E-01    0.93(  1->  9)  0.07(  1->  3)
    9    2.34865E-01   6.39101E+00   -8.010083E-01    0.93(  1-> 10)  0.07(  1->  4)
@@ -466,7 +466,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
     (-8)->  3.306E+06, (-10)->  1.217E+08, (-12)->  4.490E+09, (-14)->  1.657E+11
 
   TDDFT triplet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.
+  and corresponding total energies.                
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.03456E-01   2.81518E+00   -9.324178E-01    1.00(  1->  2)  0.00(  1->  8)
    2    1.03457E-01   2.81520E+00   -9.324171E-01    1.00(  1->  3)  0.00(  1->  9)
@@ -474,7 +474,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
    4    1.55601E-01   4.23413E+00   -8.802722E-01    1.00(  1->  5)  0.00(  1->  6)
    5    1.93160E-01   5.25615E+00   -8.427137E-01    1.00(  1->  6)  0.00(  1->  7)
    6    1.93162E-01   5.25620E+00   -8.427119E-01    1.00(  1->  7)  0.00(  1->  6)
-   7    2.25897E-01   6.14697E+00   -8.099764E-01    1.00(  1->  8)  0.00(  1->  2)
+   7    2.25897E-01   6.14698E+00   -8.099764E-01    1.00(  1->  8)  0.00(  1->  2)
    8    2.25903E-01   6.14714E+00   -8.099703E-01    1.00(  1->  9)  0.00(  1->  3)
    9    2.25909E-01   6.14731E+00   -8.099642E-01    1.00(  1-> 10)  0.00(  1->  4)
 
@@ -528,7 +528,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales= 17.999000000000 18.000000000000 18.001000000000 bohr
-              =  9.524660577411  9.525189754620  9.525718931829 angstroms
+              =  9.524660612581  9.525189789792  9.525718967003 angstroms
  prteigrs : about to open file t69o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -579,7 +579,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   2.9430E-02  6.1943E-02  6.1949E-02  6.1954E-02
 
 
- *** TDDFT : computation of excited states ***
+ *** TDDFT : computation of excited states *** 
  Splitting of  10 states in   1 occupied states, and   9 unoccupied states,
  giving     9 excitations.
 
@@ -593,7 +593,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
    1->  3 1.27088E-01 3.45825E+00 -9.08785E-01 6.5472E-01 0.00E+00 1.96E+00 0.00E+00
    1->  4 1.27089E-01 3.45828E+00 -9.08784E-01 6.5473E-01 1.96E+00 0.00E+00 0.00E+00
    1->  5 1.59018E-01 4.32710E+00 -8.76856E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
-   1->  6 1.97466E-01 5.37331E+00 -8.38408E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
+   1->  6 1.97466E-01 5.37332E+00 -8.38408E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
    1->  7 1.97468E-01 5.37339E+00 -8.38405E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
    1->  8 2.29982E-01 6.25812E+00 -8.05892E-01 2.5458E-03 0.00E+00 0.00E+00 7.64E-03
    1->  9 2.29987E-01 6.25827E+00 -8.05886E-01 2.5443E-03 0.00E+00 7.63E-03 0.00E+00
@@ -601,14 +601,14 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   Sum of osc. strength :     1.971787E+00
 
   TDDFT singlet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.
+  and corresponding total energies.                
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.63652E-01   4.45321E+00   -8.722213E-01    1.00(  1->  5)  0.00(  1->  6)
    2    1.64513E-01   4.47663E+00   -8.713605E-01    0.93(  1->  2)  0.07(  1->  8)
    3    1.64515E-01   4.47669E+00   -8.713582E-01    0.93(  1->  3)  0.07(  1->  9)
-   4    1.64518E-01   4.47675E+00   -8.713559E-01    0.93(  1->  4)  0.07(  1-> 10)
+   4    1.64518E-01   4.47676E+00   -8.713559E-01    0.93(  1->  4)  0.07(  1-> 10)
    5    1.90270E-01   5.17752E+00   -8.456033E-01    1.00(  1->  6)  0.00(  1->  7)
-   6    1.90273E-01   5.17758E+00   -8.456009E-01    1.00(  1->  7)  0.00(  1->  6)
+   6    1.90273E-01   5.17759E+00   -8.456009E-01    1.00(  1->  7)  0.00(  1->  6)
    7    2.34858E-01   6.39080E+00   -8.010161E-01    0.93(  1->  8)  0.07(  1->  2)
    8    2.34861E-01   6.39090E+00   -8.010122E-01    0.93(  1->  9)  0.07(  1->  3)
    9    2.34865E-01   6.39101E+00   -8.010083E-01    0.93(  1-> 10)  0.07(  1->  4)
@@ -629,7 +629,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
     (-8)->  3.306E+06, (-10)->  1.217E+08, (-12)->  4.490E+09, (-14)->  1.657E+11
 
   TDDFT triplet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.
+  and corresponding total energies.                
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.03456E-01   2.81518E+00   -9.324178E-01    1.00(  1->  2)  0.00(  1->  8)
    2    1.03457E-01   2.81520E+00   -9.324171E-01    1.00(  1->  3)  0.00(  1->  9)
@@ -637,7 +637,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
    4    1.55601E-01   4.23413E+00   -8.802722E-01    1.00(  1->  5)  0.00(  1->  6)
    5    1.93160E-01   5.25615E+00   -8.427137E-01    1.00(  1->  6)  0.00(  1->  7)
    6    1.93162E-01   5.25620E+00   -8.427119E-01    1.00(  1->  7)  0.00(  1->  6)
-   7    2.25897E-01   6.14697E+00   -8.099764E-01    1.00(  1->  8)  0.00(  1->  2)
+   7    2.25897E-01   6.14698E+00   -8.099764E-01    1.00(  1->  8)  0.00(  1->  2)
    8    2.25903E-01   6.14714E+00   -8.099703E-01    1.00(  1->  9)  0.00(  1->  3)
    9    2.25909E-01   6.14731E+00   -8.099642E-01    1.00(  1-> 10)  0.00(  1->  4)
 
@@ -691,7 +691,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales= 17.999000000000 18.000000000000 18.001000000000 bohr
-              =  9.524660577411  9.525189754620  9.525718931829 angstroms
+              =  9.524660612581  9.525189789792  9.525718967003 angstroms
  prteigrs : about to open file t69o_DS3_EIG
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -742,7 +742,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   2.9430E-02  6.1943E-02  6.1949E-02  6.1954E-02
 
 
- *** TDDFT : computation of excited states ***
+ *** TDDFT : computation of excited states *** 
  Splitting of  10 states in   1 occupied states, and   9 unoccupied states,
  giving     9 excitations.
 
@@ -756,19 +756,19 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
    1->  3 1.27088E-01 3.45825E+00 -9.08785E-01 6.5472E-01 0.00E+00 1.96E+00 0.00E+00
    1->  4 1.27089E-01 3.45828E+00 -9.08784E-01 6.5473E-01 1.96E+00 0.00E+00 0.00E+00
    1->  5 1.59018E-01 4.32710E+00 -8.76856E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
-   1->  6 1.97466E-01 5.37331E+00 -8.38408E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
+   1->  6 1.97466E-01 5.37332E+00 -8.38408E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
    1->  7 1.97468E-01 5.37339E+00 -8.38405E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
   Sum of osc. strength :     1.964154E+00
 
   TDDFT singlet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.
+  and corresponding total energies.                
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.63652E-01   4.45321E+00   -8.722213E-01    1.00(  1->  5)  0.00(  1->  6)
    2    1.70484E-01   4.63910E+00   -8.653898E-01    1.00(  1->  2)  0.00(  1->  4)
    3    1.70485E-01   4.63913E+00   -8.653885E-01    1.00(  1->  3)  0.00(  1->  4)
    4    1.70486E-01   4.63917E+00   -8.653872E-01    1.00(  1->  4)  0.00(  1->  3)
    5    1.90270E-01   5.17752E+00   -8.456033E-01    1.00(  1->  6)  0.00(  1->  7)
-   6    1.90273E-01   5.17758E+00   -8.456009E-01    1.00(  1->  7)  0.00(  1->  6)
+   6    1.90273E-01   5.17759E+00   -8.456009E-01    1.00(  1->  7)  0.00(  1->  6)
 
   Oscillator strengths :  (elements smaller than 1.e-6 are set to zero)
   Excit#   (Ha)   Average    XX        YY        ZZ         XY        XZ        YZ
@@ -783,7 +783,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
     (-8)->  2.752E+06, (-10)->  9.469E+07, (-12)->  3.258E+09, (-14)->  1.121E+11
 
   TDDFT triplet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.
+  and corresponding total energies.                
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.04197E-01   2.83535E+00   -9.316766E-01    1.00(  1->  2)  0.00(  1->  3)
    2    1.04198E-01   2.83536E+00   -9.316760E-01    1.00(  1->  3)  0.00(  1->  2)
@@ -839,7 +839,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales= 17.999000000000 18.000000000000 18.001000000000 bohr
-              =  9.524660577411  9.525189754620  9.525718931829 angstroms
+              =  9.524660612581  9.525189789792  9.525718967003 angstroms
  prteigrs : about to open file t69o_DS4_EIG
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -890,7 +890,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
   2.9430E-02  6.1943E-02  6.1949E-02  6.1954E-02
 
 
- *** TDDFT : computation of excited states ***
+ *** TDDFT : computation of excited states *** 
  Splitting of  10 states in   1 occupied states, and   9 unoccupied states,
  giving     9 excitations.
 
@@ -904,19 +904,19 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
    1->  3 1.27088E-01 3.45825E+00 -9.08785E-01 6.5472E-01 0.00E+00 1.96E+00 0.00E+00
    1->  4 1.27089E-01 3.45828E+00 -9.08784E-01 6.5473E-01 1.96E+00 0.00E+00 0.00E+00
    1->  5 1.59018E-01 4.32710E+00 -8.76856E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
-   1->  6 1.97466E-01 5.37331E+00 -8.38408E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
+   1->  6 1.97466E-01 5.37332E+00 -8.38408E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
    1->  7 1.97468E-01 5.37339E+00 -8.38405E-01 0.0000E+00 0.00E+00 0.00E+00 0.00E+00
   Sum of osc. strength :     1.964154E+00
 
   TDDFT singlet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.
+  and corresponding total energies.                
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.63652E-01   4.45321E+00   -8.722213E-01    1.00(  1->  5)  0.00(  1->  6)
    2    1.70484E-01   4.63910E+00   -8.653898E-01    1.00(  1->  2)  0.00(  1->  4)
    3    1.70485E-01   4.63913E+00   -8.653885E-01    1.00(  1->  3)  0.00(  1->  4)
    4    1.70486E-01   4.63917E+00   -8.653872E-01    1.00(  1->  4)  0.00(  1->  3)
    5    1.90270E-01   5.17752E+00   -8.456033E-01    1.00(  1->  6)  0.00(  1->  7)
-   6    1.90273E-01   5.17758E+00   -8.456009E-01    1.00(  1->  7)  0.00(  1->  6)
+   6    1.90273E-01   5.17759E+00   -8.456009E-01    1.00(  1->  7)  0.00(  1->  6)
 
   Oscillator strengths :  (elements smaller than 1.e-6 are set to zero)
   Excit#   (Ha)   Average    XX        YY        ZZ         XY        XZ        YZ
@@ -931,7 +931,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
     (-8)->  2.752E+06, (-10)->  9.469E+07, (-12)->  3.258E+09, (-14)->  1.121E+11
 
   TDDFT triplet excitation energies (at most 20 of them are printed),
-  and corresponding total energies.
+  and corresponding total energies.                
   Excit#   (Ha)    and    (eV)    total energy (Ha)    major contributions
    1    1.04197E-01   2.83535E+00   -9.316766E-01    1.00(  1->  2)  0.00(  1->  3)
    2    1.04198E-01   2.83536E+00   -9.316760E-01    1.00(  1->  3)  0.00(  1->  2)
@@ -987,7 +987,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales= 17.999000000000 18.000000000000 18.001000000000 bohr
-              =  9.524660577411  9.525189754620  9.525718931829 angstroms
+              =  9.524660612581  9.525189789792  9.525718967003 angstroms
  prteigrs : about to open file t69o_DS5_EIG
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -996,7 +996,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.7999000000E+01  1.8000000000E+01  1.8001000000E+01 Bohr
               amu      2.43050000E+01
@@ -1113,7 +1113,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1125,12 +1125,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1148,7 +1148,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1163,15 +1163,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  24 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.5  wall=          1.5
++Overall time at end (sec) : cpu=          1.4  wall=          1.5

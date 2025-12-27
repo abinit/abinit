@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h08 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t26-t27-t28/t26.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h10 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v2_t26-t27-t28/t26.abi
 - output file    -> t26.abo
 - root for input  files -> t26i
 - root for output files -> t26o
@@ -81,6 +81,7 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
 -   mkqmem =          32        mk1mem =          32           mpw =          22
       nfft =        1728          nkpt =          32
+- my_mband =           4
 ================================================================================
 P This job should need less than                       1.809 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -98,6 +99,7 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
 -   mkqmem =          32        mk1mem =          32           mpw =          22
       nfft =        1728          nkpt =          32
+- my_mband =           4
 ================================================================================
 P This job should need less than                       1.712 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -131,6 +133,7 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
 -   mkqmem =          32        mk1mem =          32           mpw =          22
       nfft =        1728          nkpt =          32
+- my_mband =           4
 ================================================================================
 P This job should need less than                       1.809 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -164,6 +167,7 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
 -   mkqmem =          32        mk1mem =          32           mpw =          22
       nfft =        1728          nkpt =          32
+- my_mband =           4
 ================================================================================
 P This job should need less than                       1.809 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -197,6 +201,7 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
 -   mkqmem =          32        mk1mem =          32           mpw =          22
       nfft =        1728          nkpt =          32
+- my_mband =           4
 ================================================================================
 P This job should need less than                       1.809 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -230,6 +235,7 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
 -   mkqmem =          32        mk1mem =          32           mpw =          22
       nfft =        1728          nkpt =          32
+- my_mband =           4
 ================================================================================
 P This job should need less than                       1.809 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -1236,8 +1242,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1330,7 +1336,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
-              =  4.021746785284  4.021746785284  4.021746785284 angstroms
+              =  4.021746800134  4.021746800134  4.021746800134 angstroms
  prteigrs : about to open file t26o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.26886   Average Vxc (hartree)=  -0.34629
  Eigenvalues (hartree) for nkpt=   2  k points:
@@ -1343,7 +1349,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Fermi (or HOMO) energy (eV) =   7.31603   Average Vxc (eV)=  -9.42302
  Eigenvalues (   eV  ) for nkpt=   2  k points:
  kpt#   1, nband=  4, wtk=  0.75000, kpt= -0.2500  0.5000  0.0000 (reduced coord)
-   2.65916    7.00917   11.54552   14.71761
+   2.65917    7.00917   11.54553   14.71761
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -1360,7 +1366,7 @@ non_local_psp       :  4.78279142786697E-01
 internal            : -2.06391075831678E+00
 '-kT*entropy'       : -6.37661818835896E-03
 total_energy        : -2.07028737650514E+00
-total_energy_eV     : -5.63353845025937E+01
+total_energy_eV     : -5.63353894422600E+01
 band_energy         :  3.73848506069953E-01
 ...
 
@@ -1371,9 +1377,9 @@ band_energy         :  3.73848506069953E-01
   sigma(3 3)=  2.22148236E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.5358E+00 GPa]
-- sigma(1 1)=  6.53582566E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  6.53582566E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  6.53582566E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  6.53582676E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  6.53582676E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  6.53582676E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -1463,7 +1469,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
-              =  4.021746785284  4.021746785284  4.021746785284 angstroms
+              =  4.021746800134  4.021746800134  4.021746800134 angstroms
  prteigrs : about to open file t26o_DS2_EIG
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband=  4, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -1472,7 +1478,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Eigenvalues (   eV  ) for nkpt=  32  k points:
  kpt#   1, nband=  4, wtk=  0.03125, kpt= -0.2500  0.5000  0.0000 (reduced coord)
-   2.65916    7.00917   11.54552   14.71761
+   2.65917    7.00917   11.54553   14.71761
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -1564,7 +1570,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
-              =  4.021746785284  4.021746785284  4.021746785284 angstroms
+              =  4.021746800134  4.021746800134  4.021746800134 angstroms
  prteigrs : about to open file t26o_DS3_EIG
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.0000  0.7500  0.0000 (reduced coord)
@@ -1621,7 +1627,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1692,7 +1698,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.2114557204E+00 Ha. Also 2DEtotal=    0.575400277593E+01 eV
+ 2DEtotal=    0.2114557204E+00 Ha. Also 2DEtotal=    0.575400328046E+01 eV
     (2DErelax=   -1.6844578298E+01 Ha. 2DEnonrelax=    1.7056034019E+01 Ha)
     (  non-var. 2DEtotal :    2.1145571595E-01 Ha)
 
@@ -1702,38 +1708,38 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         0.2114557159        -0.0000000000
    1    1   2    1         0.1312914838         0.0000000000
    1    1   3    1         0.0801642322        -0.0000000000
-
+  
    2    1   1    1         0.1312914838         0.0000000000
    2    1   2    1         0.2114557159         0.0000000000
    2    1   3    1         0.0801642322         0.0000000000
-
+  
    3    1   1    1         0.0801642322        -0.0000000000
    3    1   2    1         0.0801642322         0.0000000000
    3    1   3    1         0.1603284644         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0055515396        -0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0055515396        -0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0090922080        -0.0000000000
@@ -1748,7 +1754,7 @@ tolerances: {tolvrs: 1.00E-10, }
  Phonon frequencies in Thz     :
 -  2.211423E+00  2.211423E+00  2.830087E+00
  Phonon energies in Kelvin  :
--  1.061314E+02  1.061314E+02  1.358226E+02
+-  1.061315E+02  1.061315E+02  1.358227E+02
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1792,7 +1798,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1861,7 +1867,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1019175732E-05 Ha. Also 2DEtotal=    0.277331820711E-04 eV
+ 2DEtotal=    0.1019175732E-05 Ha. Also 2DEtotal=    0.277331845029E-04 eV
     (2DErelax=   -3.3340530176E+00 Ha. 2DEnonrelax=    3.3340540367E+00 Ha)
     (  non-var. 2DEtotal :    9.8349724986E-07 Ha)
 
@@ -1871,60 +1877,60 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         0.0000009835         0.0000000000
    1    1   2    1         0.0000004917         0.0000000000
    1    1   3    1         0.0000004917         0.0000000000
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000004917         0.0000000000
    2    1   2    1         0.0000009835         0.0000000000
    2    1   3    1         0.0000004917         0.0000000000
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000004917         0.0000000000
    3    1   2    1         0.0000004917         0.0000000000
    3    1   3    1         0.0000009835         0.0000000000
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
-
+  
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-
+  
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-
+  
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0000000341         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0000000341         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000000341         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   8.324316E-07  8.324322E-07  8.324338E-07
+   8.324316E-07  8.324321E-07  8.324338E-07
  Phonon energies in meV     :
 -  2.265162E-02  2.265163E-02  2.265168E-02
  Phonon frequencies in cm-1    :
@@ -1932,7 +1938,7 @@ tolerances: {tolvrs: 1.00E-10, }
  Phonon frequencies in Thz     :
 -  5.477137E-03  5.477140E-03  5.477151E-03
  Phonon energies in Kelvin  :
--  2.628608E-01  2.628610E-01  2.628615E-01
+-  2.628611E-01  2.628613E-01  2.628618E-01
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -2022,7 +2028,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
-              =  4.021746785284  4.021746785284  4.021746785284 angstroms
+              =  4.021746800134  4.021746800134  4.021746800134 angstroms
  prteigrs : about to open file t26o_DS6_EIG
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.2500  1.0000  0.0000 (reduced coord)
@@ -2079,7 +2085,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2149,7 +2155,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1518799729E+01 Ha. Also 2DEtotal=    0.413286424323E+02 eV
+ 2DEtotal=    0.1518799729E+01 Ha. Also 2DEtotal=    0.413286460561E+02 eV
     (2DErelax=   -1.4302177887E+01 Ha. 2DEnonrelax=    1.5820977616E+01 Ha)
     (  non-var. 2DEtotal :    1.5187997107E+00 Ha)
 
@@ -2159,38 +2165,38 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         1.5187997107         0.0000000000
    1    1   2    1         1.4203960246         0.0000000000
    1    1   3    1         0.0984036861         0.0000000000
-
+  
    2    1   1    1         1.4203960246         0.0000000000
    2    1   2    1         1.5187997107         0.0000000000
    2    1   3    1         0.0984036861         0.0000000000
-
+  
    3    1   1    1         0.0984036861         0.0000000000
    3    1   2    1         0.0984036861         0.0000000000
    3    1   3    1         0.1968073721         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0068146597         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0068146597         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0983653757         0.0000000000
@@ -2199,13 +2205,13 @@ tolerances: {tolvrs: 1.00E-10, }
  Phonon energies in Hartree :
    3.723764E-04  3.723764E-04  1.414755E-03
  Phonon energies in meV     :
--  1.013288E+01  1.013288E+01  3.849743E+01
+-  1.013288E+01  1.013288E+01  3.849744E+01
  Phonon frequencies in cm-1    :
 -  8.172716E+01  8.172716E+01  3.105028E+02
  Phonon frequencies in Thz     :
 -  2.450119E+00  2.450119E+00  9.308638E+00
  Phonon energies in Kelvin  :
--  1.175870E+02  1.175870E+02  4.467436E+02
+-  1.175872E+02  1.175872E+02  4.467442E+02
 
 ================================================================================
 == DATASET  8 ==================================================================
@@ -2295,7 +2301,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
-              =  4.021746785284  4.021746785284  4.021746785284 angstroms
+              =  4.021746800134  4.021746800134  4.021746800134 angstroms
  prteigrs : about to open file t26o_DS8_EIG
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.2500  0.5000  0.0000 (reduced coord)
@@ -2304,7 +2310,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Eigenvalues (   eV  ) for nkpt=  32  k points:
  kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.2500  0.5000  0.0000 (reduced coord)
-   2.65916    7.00917   11.54552   14.71761
+   2.65917    7.00917   11.54553   14.71761
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -2352,7 +2358,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2418,7 +2424,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1781777218E+01 Ha. Also 2DEtotal=    0.484846238352E+02 eV
+ 2DEtotal=    0.1781777218E+01 Ha. Also 2DEtotal=    0.484846280865E+02 eV
     (2DErelax=   -2.0035286623E+01 Ha. 2DEnonrelax=    2.1817063841E+01 Ha)
     (  non-var. 2DEtotal :    1.7817779011E+00 Ha)
 
@@ -2474,7 +2480,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.2260429322E+00 Ha. Also 2DEtotal=    0.615094099661E+01 eV
+ 2DEtotal=    0.2260429322E+00 Ha. Also 2DEtotal=    0.615094153595E+01 eV
     (2DErelax=   -4.4666391125E+00 Ha. 2DEnonrelax=    4.6926820447E+00 Ha)
     (  non-var. 2DEtotal :    2.2604297599E-01 Ha)
 
@@ -2484,38 +2490,38 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         1.7817779210         0.0000000000
    1    1   2    1         0.1130214880         0.0000000000
    1    1   3    1         0.1130214880         0.0000000000
-
+  
    2    1   1    1         0.1130214880         0.0000000000
    2    1   2    1         0.2260429760         0.0000000000
    2    1   3    1         0.1130214880         0.0000000000
-
+  
    3    1   1    1         0.1130214880         0.0000000000
    3    1   2    1         0.1130214880         0.0000000000
    3    1   3    1         0.2260429760         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0347614421         0.0000000000
    1    1   2    1        -0.0269344693        -0.0000000000
    1    1   3    1        -0.0269344693        -0.0000000000
-
+  
    2    1   1    1        -0.0269344693        -0.0000000000
    2    1   2    1         0.0347614421         0.0000000000
    2    1   3    1         0.0269344693         0.0000000000
-
+  
    3    1   1    1        -0.0269344693        -0.0000000000
    3    1   2    1         0.0269344693         0.0000000000
    3    1   3    1         0.0347614421         0.0000000000
@@ -2530,7 +2536,7 @@ tolerances: {tolvrs: 1.00E-10, }
  Phonon frequencies in Thz     :
 -  2.625802E+00  2.625802E+00  8.836013E+00
  Phonon energies in Kelvin  :
--  1.260185E+02  1.260185E+02  4.240612E+02
+-  1.260186E+02  1.260186E+02  4.240617E+02
 
 ================================================================================
 == DATASET 10 ==================================================================
@@ -2620,7 +2626,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
-              =  4.021746785284  4.021746785284  4.021746785284 angstroms
+              =  4.021746800134  4.021746800134  4.021746800134 angstroms
  prteigrs : about to open file t26o_DS10_EIG
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.2500  0.7500  0.2500 (reduced coord)
@@ -2629,7 +2635,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Eigenvalues (   eV  ) for nkpt=  32  k points:
  kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.2500  0.7500  0.2500 (reduced coord)
-   2.65916    7.00917   11.54552   14.71761
+   2.65917    7.00917   11.54553   14.71761
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -2677,7 +2683,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2743,7 +2749,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.6289143432E+00 Ha. Also 2DEtotal=    0.171136296088E+02 eV
+ 2DEtotal=    0.6289143432E+00 Ha. Also 2DEtotal=    0.171136311093E+02 eV
     (2DErelax=   -2.4312083149E+01 Ha. 2DEnonrelax=    2.4940997492E+01 Ha)
     (  non-var. 2DEtotal :    6.2891311651E-01 Ha)
 
@@ -2800,7 +2806,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.8020600481E+00 Ha. Also 2DEtotal=    0.218251638481E+02 eV
+ 2DEtotal=    0.8020600481E+00 Ha. Also 2DEtotal=    0.218251657618E+02 eV
     (2DErelax=   -1.1660342561E+01 Ha. 2DEnonrelax=    1.2462402609E+01 Ha)
     (  non-var. 2DEtotal :    8.0205930056E-01 Ha)
 
@@ -2810,38 +2816,38 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         0.6289131165         0.0000000000
    1    1   2    1         0.3144565583         0.0000000000
    1    1   3    1         0.3144565583         0.0000000000
-
+  
    2    1   1    1         0.3144565583         0.0000000000
    2    1   2    1         0.8020593129         0.0000000000
    2    1   3    1         0.6001555185        -0.0000000000
-
+  
    3    1   1    1         0.3144565583         0.0000000000
    3    1   2    1         0.6001555185        -0.0000000000
    3    1   3    1         0.8020593129         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0376647601        -0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000        -0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0178795136         0.0000000000
    2    1   3    1         0.0038972564        -0.0000000000
-
+  
    3    1   1    1         0.0000000000        -0.0000000000
    3    1   2    1         0.0038972564        -0.0000000000
    3    1   3    1         0.0178795136         0.0000000000
@@ -2856,7 +2862,7 @@ tolerances: {tolvrs: 1.00E-10, }
  Phonon frequencies in Thz     :
 -  3.509568E+00  4.379876E+00  5.760135E+00
  Phonon energies in Kelvin  :
--  1.684325E+02  2.102006E+02  2.764425E+02
+-  1.684327E+02  2.102009E+02  2.764429E+02
 
 ================================================================================
 == DATASET 12 ==================================================================
@@ -2946,7 +2952,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
-              =  4.021746785284  4.021746785284  4.021746785284 angstroms
+              =  4.021746800134  4.021746800134  4.021746800134 angstroms
  prteigrs : about to open file t26o_DS12_EIG
  Eigenvalues (hartree) for nkpt=  32  k points:
  kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -3003,7 +3009,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -3068,7 +3074,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1113865528E+00 Ha. Also 2DEtotal=    0.303098224427E+01 eV
+ 2DEtotal=    0.1113865528E+00 Ha. Also 2DEtotal=    0.303098251003E+01 eV
     (2DErelax=   -1.5009822532E+01 Ha. 2DEnonrelax=    1.5121209084E+01 Ha)
     (  non-var. 2DEtotal :    1.1138645745E-01 Ha)
 
@@ -3126,7 +3132,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.4344669883E+00 Ha. Also 2DEtotal=    0.118224479937E+02 eV
+ 2DEtotal=    0.4344669883E+00 Ha. Also 2DEtotal=    0.118224490303E+02 eV
     (2DErelax=   -1.1887237884E+01 Ha. 2DEnonrelax=    1.2321704872E+01 Ha)
     (  non-var. 2DEtotal :    4.3446691385E-01 Ha)
 
@@ -3136,38 +3142,38 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         0.1113864633         0.0000000000
    1    1   2    1         0.0556932317         0.0000000000
    1    1   3    1         0.0556932317         0.0000000000
-
+  
    2    1   1    1         0.0556932317         0.0000000000
    2    1   2    1         0.4344669050         0.0000000000
    2    1   3    1         0.3787736733         0.0000000000
-
+  
    3    1   1    1         0.0556932317         0.0000000000
    3    1   2    1         0.3787736733         0.0000000000
    3    1   3    1         0.4344669050         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0262308638         0.0000000000
    1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1         0.0000000000        -0.0000000000
-
+  
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   2    1         0.0038568720         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000        -0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0038568720         0.0000000000
@@ -3176,17 +3182,17 @@ tolerances: {tolvrs: 1.00E-10, }
  Phonon energies in Hartree :
    2.801416E-04  2.801416E-04  7.305775E-04
  Phonon energies in meV     :
--  7.623041E+00  7.623041E+00  1.988003E+01
+-  7.623042E+00  7.623042E+00  1.988003E+01
  Phonon frequencies in cm-1    :
 -  6.148398E+01  6.148398E+01  1.603432E+02
  Phonon frequencies in Thz     :
 -  1.843243E+00  1.843243E+00  4.806969E+00
  Phonon energies in Kelvin  :
--  8.846162E+01  8.846162E+01  2.306979E+02
+-  8.846172E+01  8.846172E+01  2.306981E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      7.6000000000E+00  7.6000000000E+00  7.6000000000E+00 Bohr
               amu      2.69600000E+01
@@ -4175,7 +4181,7 @@ P          mk1mem13        32
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -4191,7 +4197,7 @@ P          mk1mem13        32
 - Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems,
+- [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
 - M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
@@ -4204,12 +4210,12 @@ P          mk1mem13        32
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -4227,15 +4233,15 @@ P          mk1mem13        32
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.6  wall=          7.1
+- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  44 WARNINGs and  79 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.6  wall=          7.1
+.Delivered  41 WARNINGs and  79 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.2  wall=          2.3

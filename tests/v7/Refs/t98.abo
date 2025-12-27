@@ -1,8 +1,8 @@
 
-.Version 10.5.4.4 of ABINIT, released Jul 2025.
-.(sequential version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 18 Jul 2025.
-- ( at 12h07 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_dilatmx-gs-only/tests/TestBot_MPI1/v7_t98/t98.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h14 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v7_t98/t98.abi
 - output file    -> t98.abo
 - root for input  files -> t98i
 - root for output files -> t98o
@@ -49,6 +49,7 @@ _ WF disk file :      0.069 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =          56
 -   mkqmem =          56        mk1mem =          56           mpw =          73
       nfft =        1728          nkpt =          56
+- my_mband =          10
 ================================================================================
 P This job should need less than                       2.884 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -82,6 +83,7 @@ _ WF disk file :      1.254 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =         108
 -   mkqmem =         108        mk1mem =         108           mpw =          76
       nfft =        1728          nkpt =         108
+- my_mband =          10
 ================================================================================
 P This job should need less than                       5.079 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -444,7 +446,7 @@ P          mk1mem4        108
                          0.00926    0.00926    0.00926    0.00926    0.00926    0.00926
                          0.00926    0.00926
                        outvars : Printing only first  50 k-points.
-           xangst      6.9050223514E-01  6.9050223514E-01 -3.4649716399E-34
+           xangst      6.9050223769E-01  6.9050223769E-01 -3.4649716527E-34
             xcart      1.3048601186E+00  1.3048601186E+00 -6.5478474576E-34
              xred     -3.8630816239E-18  3.8630816239E-18  2.5000000000E-01
             znucl       18.00000
@@ -488,8 +490,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.08505
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_dilatmx-gs-only/tests/Pspdir/18ar.revpbe
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_dilatmx-gs-only/tests/Pspdir/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -577,7 +579,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1       0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1      0.69050223514132     0.69050223514132    -0.00000000000000
+    1      0.69050223769102     0.69050223769102    -0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -587,7 +589,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.438880948500 10.438880948500 10.438880948500 bohr
-              =  5.524017881131  5.524017881131  5.524017881131 angstroms
+              =  5.524017901528  5.524017901528  5.524017901528 angstroms
  prteigrs : about to open file t98o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.22842   Average Vxc (hartree)=  -0.24700
  Eigenvalues (hartree) for nkpt=   6  k points:
@@ -609,7 +611,7 @@ local_psp           : -1.43953017208909E+01
 non_local_psp       :  9.71661246335769E-01
 VdWaals_dft_d       : -2.68669972132247E-03
 total_energy        : -2.01303967916279E+01
-total_energy_eV     : -5.47775954351099E+02
+total_energy_eV     : -5.47776002381843E+02
 band_energy         : -3.46085580061229E+00
 ...
 
@@ -620,9 +622,9 @@ band_energy         : -3.46085580061229E+00
   sigma(3 3)=  2.32568591E-06  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.8424E-02 GPa]
-- sigma(1 1)=  6.84240302E-02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  6.84240302E-02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  6.84240302E-02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  6.84240417E-02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  6.84240417E-02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  6.84240417E-02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -657,7 +659,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -729,7 +731,7 @@ tolerances: {tolvrs: 1.00E-16, }
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  15 Contribution from van der Waals DFT-D: evdw =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.6472732832E-01 Ha. Also 2DEtotal=    0.176132017711E+01 eV
+ 2DEtotal=    0.6472732832E-01 Ha. Also 2DEtotal=    0.176132033155E+01 eV
     (2DErelax=   -3.9520038196E+02 Ha. 2DEnonrelax=    3.9526510928E+02 Ha)
     (  non-var. 2DEtotal :    6.4727328736E-02 Ha)
 
@@ -739,53 +741,53 @@ tolerances: {tolvrs: 1.00E-16, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         0.0647273287         0.0000000000
    1    1   2    1         0.0323636644         0.0000000000
    1    1   3    1         0.0323636644         0.0000000000
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0323636644         0.0000000000
    2    1   2    1         0.0647273287         0.0000000000
    2    1   3    1         0.0323636644         0.0000000000
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0323636644         0.0000000000
    3    1   2    1         0.0323636644         0.0000000000
    3    1   3    1         0.0647273287         0.0000000000
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
-
+  
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-
+  
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-
+  
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0000000000         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000000000         0.0000000000
@@ -882,9 +884,9 @@ force_length_stats: {min: null, max: null, mean: null, }
       -0.000000000000      0.000000000000      0.250000000000
 
  cartesian coordinates (angstrom) at end:
-    1      0.69050223514132     0.69050223514132    -0.00000000000000
+    1      0.69050223769102     0.69050223769102    -0.00000000000000
  length scales= 10.438880948500 10.438880948500 10.438880948500 bohr
-              =  5.524017881131  5.524017881131  5.524017881131 angstroms
+              =  5.524017901528  5.524017901528  5.524017901528 angstroms
  prteigrs : about to open file t98o_DS3_EIG
  Eigenvalues (hartree) for nkpt= 108  k points:
  kpt#   1, nband= 10, wtk=  0.00926, kpt= -0.1667 -0.3333  0.5000 (reduced coord)
@@ -927,8 +929,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.91524
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_dilatmx-gs-only/tests/Pspdir/18ar.revpbe
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_dilatmx-gs-only/tests/Pspdir/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -942,7 +944,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1012,7 +1014,7 @@ tolerances: {tolvrs: 1.00E-16, }
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  15 Contribution from van der Waals DFT-D: evdw =   2.23507147E-03
  Resulting in :
- 2DEtotal=   -0.4452760203E+00 Ha. Also 2DEtotal=   -0.121165767109E+02 eV
+ 2DEtotal=   -0.4452760203E+00 Ha. Also 2DEtotal=   -0.121165777733E+02 eV
     (2DErelax=   -4.0274654444E+02 Ha. 2DEnonrelax=    4.0230126842E+02 Ha)
     (  non-var. 2DEtotal :   -4.4527599880E-01 Ha)
 
@@ -1075,7 +1077,7 @@ tolerances: {tolvrs: 1.00E-16, }
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  15 Contribution from van der Waals DFT-D: evdw =  -1.51868367E-02
  Resulting in :
- 2DEtotal=   -0.1690350482E+01 Ha. Also 2DEtotal=   -0.459967758356E+02 eV
+ 2DEtotal=   -0.1690350482E+01 Ha. Also 2DEtotal=   -0.459967798688E+02 eV
     (2DErelax=   -4.9263098934E+02 Ha. 2DEnonrelax=    4.9094063886E+02 Ha)
     (  non-var. 2DEtotal :   -1.6903491270E+00 Ha)
 
@@ -1085,38 +1087,38 @@ tolerances: {tolvrs: 1.00E-16, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1        -0.4454647463         0.0000000000
    1    1   2    1        -0.2227323731         0.0000000000
    1    1   3    1        -0.2227323731         0.0000000000
-
+  
    2    1   1    1        -0.2227323731         0.0000000000
    2    1   2    1        -0.4454647463         0.0000000000
    2    1   3    1        -0.2227323731         0.0000000000
-
+  
    3    1   1    1        -0.2227323731         0.0000000000
    3    1   2    1        -0.2227323731         0.0000000000
    3    1   3    1        -1.6905695376        -0.0000061349
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1        -0.0196019975        -0.0000000563
    1    1   2    1        -0.0114260999        -0.0000000563
    1    1   3    1         0.0114260999         0.0000000563
-
+  
    2    1   1    1        -0.0114260999        -0.0000000563
    2    1   2    1        -0.0196019975        -0.0000000563
    2    1   3    1         0.0114260999         0.0000000563
-
+  
    3    1   1    1         0.0114260999         0.0000000563
    3    1   2    1         0.0114260999         0.0000000563
    3    1   3    1        -0.0196019975        -0.0000000563
@@ -1129,7 +1131,7 @@ tolerances: {tolvrs: 1.00E-16, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0438880948E+01  1.0438880948E+01  1.0438880948E+01 Bohr
               amu      3.99480000E+01
@@ -1395,7 +1397,7 @@ P          mk1mem4        108
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         225
-           strten1     2.3256859072E-06  2.3256859072E-06  2.3256859072E-06
+           strten1     2.3256859073E-06  2.3256859073E-06  2.3256859073E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1488,73 +1490,17 @@ P          mk1mem4        108
                          0.00926    0.00926    0.00926    0.00926    0.00926    0.00926
                          0.00926    0.00926
                        outvars : Printing only first  50 k-points.
-           xangst      6.9050223514E-01  6.9050223514E-01 -3.4649716399E-34
+           xangst      6.9050223769E-01  6.9050223769E-01 -3.4649716527E-34
             xcart      1.3048601186E+00  1.3048601186E+00 -6.5478474576E-34
              xred     -3.8630816239E-18  3.8630816239E-18  2.5000000000E-01
             znucl       18.00000
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          8.6        0.14      0.002
-- Total wall clock time (s,m,h):          8.6        0.14      0.002
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0
--
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            8.6, wall_time =            8.6
--
-- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
--                                                                                (-1=no count)
-- fourwf%(pot)                              3.463  40.3         3.442  39.9         129578      -1.00        1.01       1.01
-- dfpt_cgwf-O(npw)                          0.866  10.1         0.874  10.1             -1      -1.00        0.99       0.99
-- getghc(/=fourXX,nonlop,fock_XX)           0.693   8.1         0.654   7.6             -1      -1.00        1.06       1.06
-- projbd                                    0.660   7.7         0.711   8.2         200556      -1.00        0.93       0.93
-- nonlop(apply)                             0.523   6.1         0.528   6.1         110478      -1.00        0.99       0.99
-- fourwf%(G->r)                             0.343   4.0         0.345   4.0          22920      -1.00        0.99       0.99
-- vtowfk(ssdiag)                            0.222   2.6         0.228   2.6             -1      -1.00        0.98       0.98
-- dfpt_vtowfk(contrib)                      0.208   2.4         0.223   2.6             -1      -1.00        0.93       0.93
-- nonlop(forces)                            0.185   2.2         0.193   2.2          24830      -1.00        0.96       0.96
-- get_dtsets_pspheads                       0.175   2.0         0.175   2.0              1      -1.00        1.00       1.00
-- timing timab                              0.114   1.3         0.115   1.3             10      -1.00        1.00       1.00
-- pspini                                    0.112   1.3         0.112   1.3              4      -1.00        1.00       1.00
-- ewald                                     0.060   0.7         0.060   0.7              2      -1.00        1.00       1.00
-- abinit(outvars)                           0.052   0.6         0.053   0.6              1      -1.00        0.99       0.99
-- dfpt_vtorho-kpt loop                      0.049   0.6         0.052   0.6             30      -1.00        0.95       0.95
-- abinit(after driver)                      0.048   0.6         0.048   0.6              1      -1.00        1.00       1.00
-- others (143)                              0.258   3.0         0.264   3.1             -1      -1.00        0.98       0.98
--<END_TIMER>
--
-- subtotal                                  8.032  93.6         8.077  93.7                                  0.99       0.99
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           8.6, wall_time =           8.6
--
-- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
--                                                                                (-1=no count)
-- fourwf%(pot)                              3.463  40.3         3.442  39.9         129578      -1.00        1.01       1.01
-- dfpt_cgwf-O(npw)                          0.866  10.1         0.874  10.1             -1      -1.00        0.99       0.99
-- getghc(/=fourXX,nonlop,fock_XX)           0.693   8.1         0.654   7.6             -1      -1.00        1.06       1.06
-- projbd                                    0.660   7.7         0.711   8.2         200556      -1.00        0.93       0.93
-- nonlop(apply)                             0.523   6.1         0.528   6.1         110478      -1.00        0.99       0.99
-- fourwf%(G->r)                             0.343   4.0         0.345   4.0          22920      -1.00        0.99       0.99
-- vtowfk(ssdiag)                            0.222   2.6         0.228   2.6             -1      -1.00        0.98       0.98
-- dfpt_vtowfk(contrib)                      0.208   2.4         0.223   2.6             -1      -1.00        0.93       0.93
-- nonlop(forces)                            0.185   2.2         0.193   2.2          24830      -1.00        0.96       0.96
-- get_dtsets_pspheads                       0.175   2.0         0.175   2.0              1      -1.00        1.00       1.00
-- timing timab                              0.114   1.3         0.115   1.3             10      -1.00        1.00       1.00
-- pspini                                    0.112   1.3         0.112   1.3              4      -1.00        1.00       1.00
-- ewald                                     0.060   0.7         0.060   0.7              2      -1.00        1.00       1.00
-- abinit(outvars)                           0.052   0.6         0.053   0.6              1      -1.00        0.99       0.99
-- dfpt_vtorho-kpt loop                      0.049   0.6         0.052   0.6             30      -1.00        0.95       0.95
-- abinit(after driver)                      0.048   0.6         0.048   0.6              1      -1.00        1.00       1.00
-- others (143)                              0.258   3.0         0.264   3.1             -1      -1.00        0.98       0.98
--<END_TIMER>
 
-- subtotal                                  8.032  93.6         8.077  93.7                                  0.99       0.99
 
 ================================================================================
 
@@ -1589,7 +1535,7 @@ P          mk1mem4        108
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1605,7 +1551,7 @@ P          mk1mem4        108
 - Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [5] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems,
+- [5] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
 - M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
@@ -1618,12 +1564,12 @@ P          mk1mem4        108
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1641,15 +1587,15 @@ P          mk1mem4        108
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          8.6  wall=          8.6
+- Proc.   0 individual time (sec): cpu=          5.7  wall=          5.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  14 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.6  wall=          8.6
+.Delivered  13 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.7  wall=          5.7

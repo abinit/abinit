@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h09 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h16 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/v8_t87-t88-t89/t88.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v8_t87-t88-t89/t88.abi
 - output file    -> t88.abo
 - root for input  files -> t88i
 - root for output files -> t88o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Al.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/As.LDA_PW-JTH_sp.xml
  DATASET    5 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5 (RF).
@@ -37,6 +37,7 @@
 -    mband =          12        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =          95
       nfft =        3375          nkpt =           8
+- my_mband =          12
 ================================================================================
 P This job should need less than                       2.589 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -54,6 +55,7 @@ _ WF disk file :      0.280 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =          95
       nfft =        3375          nkpt =           8
+- my_mband =          12
 ================================================================================
 P This job should need less than                       2.589 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -196,7 +198,7 @@ P          mk1mem           8
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
                          0.12500    0.12500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4076113748E+00  1.4076113748E+00  1.4076113748E+00
+                       1.4076113800E+00  1.4076113800E+00  1.4076113800E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6600000000E+00  2.6600000000E+00  2.6600000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -275,9 +277,9 @@ meta: {optdriver: 1, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -295,9 +297,9 @@ meta: {optdriver: 1, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/As.LDA_PW-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -2075,33 +2077,33 @@ NONLINEAR :  perts :  4.3 /  4.3 /  4.3
   Non-linear optical susceptibility tensor d (pm/V)
   in cartesian coordinates
    i1dir  i2dir  i3dir             d
-      1      1      1         45.760360573
-      1      1      2        -13.162994170
-      1      1      3        -22.114292236
-      1      2      1        -13.162994170
-      1      2      2        -22.114292232
-      1      2      3         62.047237850
-      1      3      1        -22.114292236
-      1      3      2         62.047237850
-      1      3      3        -31.065590309
-      2      1      1        -13.162994170
-      2      1      2        -22.114292232
-      2      1      3         62.047237850
-      2      2      1        -22.114292232
-      2      2      2         45.760360569
-      2      2      3        -31.065590311
-      2      3      1         62.047237850
-      2      3      2        -31.065590311
-      2      3      3        -40.016888371
-      3      1      1        -22.114292236
-      3      1      2         62.047237850
-      3      1      3        -31.065590309
-      3      2      1         62.047237850
-      3      2      2        -31.065590311
-      3      2      3        -40.016888371
-      3      3      1        -31.065590309
-      3      3      2        -40.016888371
-      3      3      3         45.760360565
+      1      1      1         45.760356712
+      1      1      2        -13.162993060
+      1      1      3        -22.114290370
+      1      2      1        -13.162993060
+      1      2      2        -22.114290367
+      1      2      3         62.047232615
+      1      3      1        -22.114290370
+      1      3      2         62.047232615
+      1      3      3        -31.065587688
+      2      1      1        -13.162993060
+      2      1      2        -22.114290367
+      2      1      3         62.047232615
+      2      2      1        -22.114290367
+      2      2      2         45.760356709
+      2      2      3        -31.065587690
+      2      3      1         62.047232615
+      2      3      2        -31.065587690
+      2      3      3        -40.016884995
+      3      1      1        -22.114290370
+      3      1      2         62.047232615
+      3      1      3        -31.065587688
+      3      2      1         62.047232615
+      3      2      2        -31.065587690
+      3      2      3        -40.016884995
+      3      3      1        -31.065587688
+      3      3      2        -40.016884995
+      3      3      3         45.760356705
  
 
   First-order change in the electronic dielectric 
@@ -2255,7 +2257,7 @@ P          mk1mem           8
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
                          0.12500    0.12500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4076113748E+00  1.4076113748E+00  1.4076113748E+00
+                       1.4076113800E+00  1.4076113800E+00  1.4076113800E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6600000000E+00  2.6600000000E+00  2.6600000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2362,10 +2364,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         12.7  wall=         12.7
+- Proc.   0 individual time (sec): cpu=         12.6  wall=         12.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered 297 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.7  wall=         12.7
++Overall time at end (sec) : cpu=         12.6  wall=         12.7

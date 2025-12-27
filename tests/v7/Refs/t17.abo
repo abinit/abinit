@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h17 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h14 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v7_t17/t17.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v7_t17/t17.abi
 - output file    -> t17.abo
 - root for input  files -> t17i
 - root for output files -> t17o
@@ -332,8 +332,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Pt-sp_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Pt-sp_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Pt-sp_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Pt-sp_r.psp8
 - Pt    ONCVPSP  r_core=  1.41  1.46  1.41
 - 78.00000  18.00000    160330                znucl, zion, pspdat
     8   11    2    4       500   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -433,7 +433,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.410000000000  7.410000000000  7.410000000000 bohr
-              =  3.921203115652  3.921203115652  3.921203115652 angstroms
+              =  3.921203130131  3.921203130131  3.921203130131 angstroms
  prteigrs : about to open file t17o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.61156   Average Vxc (hartree)=  -0.53428
  Eigenvalues (hartree) for nkpt=  10  k points:
@@ -463,7 +463,7 @@ non_local_psp       :  7.56753091373127E+00
 internal            : -1.29857840640968E+02
 '-kT*entropy'       : -1.05205175393782E-02
 total_energy        : -1.29868361158507E+02
-total_energy_eV     : -3.53389782675326E+03
+total_energy_eV     : -3.53389813661670E+03
 band_energy         : -9.37509305081993E+00
 ...
 
@@ -474,9 +474,9 @@ band_energy         : -9.37509305081993E+00
   sigma(3 3)=  5.13619851E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.5111E+02 GPa]
-- sigma(1 1)=  1.51112152E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.51112152E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.51112152E+02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.51112177E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.51112177E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.51112177E+02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -514,8 +514,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Pt-sp_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Pt-sp_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Pt-sp_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Pt-sp_r.psp8
 - Pt    ONCVPSP  r_core=  1.41  1.46  1.41
 - 78.00000  18.00000    160330                znucl, zion, pspdat
     8   11    2    4       500   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -625,7 +625,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.410000000000  7.410000000000  7.410000000000 bohr
-              =  3.921203115652  3.921203115652  3.921203115652 angstroms
+              =  3.921203130131  3.921203130131  3.921203130131 angstroms
  prteigrs : about to open file t17o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.60823   Average Vxc (hartree)=  -0.53419
  Magnetization (Bohr magneton)=  0.00000000E+00
@@ -670,7 +670,7 @@ non_local_psp       :  7.79954279672449E+00
 internal            : -1.29697464664292E+02
 '-kT*entropy'       : -1.10972329941733E-02
 total_energy        : -1.29708561897287E+02
-total_energy_eV     : -3.52954946771564E+03
+total_energy_eV     : -3.52954977719780E+03
 band_energy         : -9.23151222251328E+00
 ...
 
@@ -681,9 +681,9 @@ band_energy         : -9.23151222251328E+00
   sigma(3 3)=  5.09827964E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.5000E+02 GPa]
-- sigma(1 1)=  1.49996540E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.49996540E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.49996540E+02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.49996566E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.49996566E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.49996566E+02  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1016,10 +1016,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         20.0  wall=         20.1
+- Proc.   0 individual time (sec): cpu=         20.3  wall=         20.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         20.0  wall=         20.1
++Overall time at end (sec) : cpu=         20.3  wall=         20.4

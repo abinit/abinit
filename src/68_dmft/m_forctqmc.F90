@@ -34,6 +34,7 @@ MODULE m_forctqmc
  use m_data4entropyDMFT
  use m_errors
  use m_GreenHyb
+ use m_time
 
  use m_crystal, only : crystal_t
  use m_datafordmft, only : compute_levels,hybridization_asymptotic_coefficient
@@ -48,9 +49,10 @@ MODULE m_forctqmc
  use m_matlu, only : add_matlu,checkdiag_matlu,checkreal_matlu,chi_matlu,copy_matlu,destroy_matlu, &
      & diag_matlu,diff_matlu,fac_matlu,gather_matlu,init_matlu,magmomforb_matlu,magmomfspin_matlu, &
      & magmomfzeeman_matlu,matlu_type,print_matlu,printplot_matlu,prod_matlu,rotate_matlu,shift_matlu, &
-     & slm2ylm_matlu,sym_matlu,symmetrize_matlu,xmpi_matlu,ylm2jmj_matlu,zero_matlu,magnfield_matlu
+     & slm2ylm_matlu,sym_matlu,symmetrize_matlu,xmpi_matlu,ylm2jmj_matlu,zero_matlu,magnfield_matlu,magmomjmj_matlu
  use m_numeric_tools, only : coeffs_gausslegint
- use m_oper, only : destroy_oper,gather_oper,identity_oper,init_oper,inverse_oper,oper_type
+ use m_oper, only : destroy_oper,gather_oper,identity_oper,init_oper,inverse_oper,oper_type, &
+     & init_oper_ndat,copy_oper_to_ndat,copy_oper_from_ndat
  use m_paw_correlations, only : calc_vee
  use m_paw_dmft, only : paw_dmft_type
  use m_paw_numeric, only : jbessel => paw_jbessel
@@ -115,7 +117,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  integer :: iatom,icomp,ierr,if1,if2,iflavor1,iflavor2,ifreq,im1,im2,ima,imb,ispa,ispb,ispinor
  integer :: ispinor1,ispinor2,isppol,itau,itypat,lpawu,myproc,natom,ndim,nflavor,nomega,nproc
  integer :: nspinor,nsppol,nsppol_imp,ntypat,nwlo,opt_diag,opt_fk,opt_nondiag
- integer :: opt_rot,rot_type_vee,testcode,testrot,tndim,unt,unt2,useylm
+ integer :: opt_rot,rot_type_vee,testcode,testrot,tndim,unt,unt2,useylm,basis,usejmj
  integer, parameter :: optdb = 0
  logical :: nondiaglevels
  logical(kind=1) :: leg_measure = .true.
@@ -127,7 +129,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  real(dp) :: umod(2,2)
  complex(dp) :: integral(2,2)
  real(dp), allocatable :: docc(:,:),gtmp(:,:),gtmp_nd(:,:,:),levels_ctqmc(:),vee(:,:,:,:)
- complex(dp), allocatable :: muorb,muspin,muzeem
+ complex(dp), allocatable :: muorb(:),muspin(:),muzeem(:)
  complex(dp), allocatable :: fw1(:,:),fw1_nd(:,:,:),gw_tmp(:,:),gw_tmp_nd(:,:,:)
  complex(dp), allocatable :: gw1_nd(:,:,:),hybri_limit(:,:),levels_ctqmc_nd(:,:),shift(:)
  type(coeff2c_type), allocatable :: magmom_orb(:),magmom_spin(:),magmom_tot(:)
@@ -138,9 +140,16 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  type(matlu_type), allocatable :: levels_temp(:),magnfield(:)
  type(vee_type), allocatable :: vee_for_s(:),vee_rotated(:)
  character(len=13) :: tag
+ character(len=2)  :: tag_atom
  character(len=500) :: message
+ real(dp) :: tsec(2)
+#ifdef HAVE_OPENMP_OFFLOAD
+ type(oper_type) :: green_oper_ndat
+#endif
 ! ************************************************************************
 
+ call timab(701,1,tsec(:))
+ call timab(702,1,tsec(:))
  !mbandc=paw_dmft%mbandc
  !nkpt=paw_dmft%nkpt
  natom   = paw_dmft%natom
@@ -148,6 +157,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  nsppol  = paw_dmft%nsppol
  ntypat  = paw_dmft%ntypat
  nwlo    = paw_dmft%dmft_nwlo
+ basis   = paw_dmft%dmftctqmc_basis
  !greendft%whichgreen="DFT"
 
  call init_green(weiss_for_rot,paw_dmft,opt_oper_ksloc=2)
@@ -220,14 +230,26 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
  useylm = 0
  if (nspinor == 2) useylm = 1 ! to avoid complex G(tau)
+ if (basis .eq. 4) then
+   useylm = 1 ! first step before rotation to jmj
+   usejmj = 1 ! jmj local basis
+   opt_diag = 0 ! no diagonalization of local Hamiltonian
+   opt_nondiag = 1 ! off_diag element taken into account
+ else
+   usejmj = 0 
+ endif
 
  !write(6,*) "nspinor,useylm",nspinor,useylm
  if (useylm == 0) then
    write(std_out,*) " Slm (real spherical harmonics) basis is used (before a possible rotation)"
    rot_type_vee = 1 ! for rotatevee_hu
- else if (useylm == 1) then
+ else if (useylm == 1 .and. usejmj == 0) then
    write(std_out,*) " Ylm (complex spherical harmonics) basis is used (before rotation)"
    rot_type_vee = 4 ! for rotatevee_hu
+ else if (useylm == 1 .and. usejmj == 1) then
+   write(message,'(3a)') ch10,'   == Jmj local basis is used without diagonalization of local Hamiltonian ',ch10
+   call wrtout(std_out,message,'COLL')
+   rot_type_vee = 3 !  
  end if ! useylm
 
  ! if(useylm==1.and.opt_diag/=1) ABI_ERROR("useylm==1 and opt_diag/=0 is not possible")
@@ -282,7 +304,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      write(message,'(5a)') ch10,"   == Hamiltonian in local basis is diagonal in the Slm basis ",ch10, &
        & "      CTQMC will use this basis",ch10
    end if ! nondiaglevels
-   opt_diag = 0
+   opt_diag = 0      
  end if ! dmftctqmc_basis
  call wrtout(std_out,message,'COLL')
  if (opt_diag == 1) then
@@ -341,6 +363,19 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      ABI_FREE(levels_temp)
    endif !dmft_magnfield
  end if ! useylm
+
+ if (usejmj .eq. 1) then
+   !rotate form Ylm to jmj the atomic levels
+   call ylm2jmj_matlu(energy_level%matlu(:),natom,1,paw_dmft)
+
+   ! Print atomic energy levels in Ylm basis                             
+   ! --------------------------------                                    
+   if (pawprtvol >= 3) then                                              
+     write(message,'(2a)') ch10," == Print Energy levels in jmj basis"   
+     call wrtout(std_out,message,'COLL')                                 
+     call print_matlu(energy_level%matlu(:),natom,1)                     
+   end if ! pawprtvol>=3                                                 
+ endif
 
  ABI_MALLOC(vee_rotated,(natom))
  call init_vee(paw_dmft,vee_rotated(:))
@@ -401,8 +436,25 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        !  write(6,*) size(hu(itypat)%udens)
        !  write(6,*) udens_atoms(iatom)%value
        !  write(6,*) hu(itypat)%udens
-       udens_atoms(iatom)%mat(:,:,1)=hu(itypat)%udens(:,:)
+       !udens_atoms(iatom)%mat(:,:,1)=hu(itypat)%udens(:,:)
        vee_rotated(iatom)%mat(:,:,:,:) = hu(itypat)%veeslm2(:,:,:,:)
+       
+       if (usejmj == 1) then
+         do iflavor1=1,tndim
+           do iflavor2=1,tndim
+             if(iflavor1==iflavor2) then
+                eigvectmatlu(iatom)%mat(iflavor1,iflavor2,1)=cone
+             else
+                eigvectmatlu(iatom)%mat(iflavor1,iflavor2,1)=czero
+             end if 
+           end do
+         end do
+
+         call rotatevee_hu(hu(:),paw_dmft,pawprtvol,eigvectmatlu(:),rot_type_vee,udens_atoms(:),vee_rotated(:))
+ 
+       else
+         udens_atoms(iatom)%mat(:,:,1)=hu(itypat)%udens(:,:)
+       endif
      end do ! iatom
    end if ! opt_diag=0 or 1
  ! call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms)
@@ -485,7 +537,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  ! ===========================================================================================
  call xmpi_matlu(eigvectmatlu(:),natom,paw_dmft%spacecomm,master=0,option=2)
 
- if (opt_diag /= 0) then
+ if (opt_diag /= 0 ) then
    call rotatevee_hu(hu(:),paw_dmft,pawprtvol,eigvectmatlu(:), &
                    & rot_type_vee,udens_atoms(:),vee_rotated(:))
  end if
@@ -583,6 +635,16 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    end do
  end if
 
+ if(usejmj==1) then                                                                        
+   write(message,'(a,2x,a)') ch10, " == Rotation of weiss and greendft in the jmj Basis="  
+   call wrtout(std_out,message,'COLL')                                                     
+   do ifreq=1,nwlo                                                                         
+     call ylm2jmj_matlu(weiss_for_rot%oper(ifreq)%matlu(:),natom,1,paw_dmft)             
+     call ylm2jmj_matlu(weiss%oper(ifreq)%matlu(:),natom,1,paw_dmft)                     
+   end do                                                                                  
+ end if                                                                                    
+
+
  if (pawprtvol >= 3) then
    !   write(message,'(a,2x,a,f13.5)') ch10,& ! debug
    !   " == Print weiss for small freq 1 before rot" ! debug
@@ -621,16 +683,29 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !    call checkdiag_matlu(weiss_for_rot%oper(ifreq)%matlu,natom,tol6)
    end do ! ifreq
 
-   if (myproc == mod(nproc+1,nproc)) then
-     if (open_file(trim(paw_dmft%filapp)//"_atom_G0w_.dat",message,newunit=unt) /= 0) ABI_ERROR(message)
-     ndim = 2*paw_dmft%lpawu(natom) + 1
-     do ifreq=1,nwlo
-       write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),&
-         & (((weiss_for_rot%oper(ifreq)%matlu(natom)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol),&
-         & im1=1,3),ispinor=1,nspinor),isppol=1,nsppol)
-     end do ! ifreq
-     close(unt)
-   end if ! myproc=master
+   do iatom=1,natom
+
+     if (iatom < 10) then
+       write(tag_atom,'("0",I1)') iatom
+     else 
+       write(tag_atom,'(I2)') iatom
+     endif
+
+     !print Weiss field for correlated atoms
+     lpawu = paw_dmft%lpawu(iatom)             
+     if (lpawu == -1) cycle                    
+
+     if (myproc == mod(nproc+1,nproc)) then
+       if (open_file(trim(paw_dmft%filapp)//"_atom_"//tag_atom//"_G0w.dat",message,newunit=unt) /= 0) ABI_ERROR(message)
+       ndim = 2*paw_dmft%lpawu(iatom) + 1
+       do ifreq=1,nwlo
+         write(unt,'(29f21.14)') paw_dmft%omega_lo(ifreq),&
+           & (((weiss_for_rot%oper(ifreq)%matlu(iatom)%mat(im1+(ispinor-1)*ndim,im1+(ispinor-1)*ndim,isppol),&
+           & im1=1,3),ispinor=1,nspinor),isppol=1,nsppol)
+       end do ! ifreq
+       close(unit=unt)
+     end if ! myproc=master
+   enddo
 
    call flush_unit(std_out)
    if (pawprtvol >= 3) then
@@ -685,6 +760,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  ! ---------------------------------------
  if (useylm == 1) then
    call slm2ylm_matlu(hybri_coeff(:),natom,paw_dmft,1,pawprtvol)
+ end if
+ !rotate in jmj basis
+ if (usejmj == 1) then
+   call ylm2jmj_matlu(hybri_coeff(:),natom,1,paw_dmft)
  end if
 
  if (opt_diag /= 0)  then
@@ -1048,62 +1127,74 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    write(message,'(a,2x,2a)') ch10, " == Making rotation for magnetic moments", ch10
    call wrtout(std_out,message,'COLL')
 
+   if(usejmj .eq. 1) then
+   !  == Mj values
+     call init_matlu(natom=1,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)
+     call zero_matlu(matlumag_tot,natom=1)
+     call magmomjmj_matlu(matlumag_tot,natom=1)
+    !call print_matlu(matlumag_tot,natom=1,prtopt=1)
+     call gather_matlu(matlumag_tot,magmom_tot,natom=1,option=1,prtopt=0)
+     call destroy_matlu(matlumag_tot,natom=1)
+
+   else
    !create a rotation matrix for diagonal Hamiltonian
-   if(opt_diag == 0) then
-     write(message,'(a,2x,2a)') ch10, " --> Hamiltonian is already diagonal in Slm", ch10
-     call wrtout(std_out,message,'COLL')
-     do iatom = 1,paw_dmft%natom
-       if(paw_dmft%lpawu(iatom) /= -1) then
-         do iflavor1=1,tndim
-           do iflavor2=1,tndim
-             if(iflavor1==iflavor2) then
-               eigvectmatlu(iatom)%mat(iflavor1,iflavor2,1)=cone
-             else
-               eigvectmatlu(iatom)%mat(iflavor1,iflavor2,1)=czero
-             end if
+     if(opt_diag == 0) then
+       write(message,'(a,2x,2a)') ch10, " --> Hamiltonian is already diagonal in Slm", ch10
+       call wrtout(std_out,message,'COLL')
+       do iatom = 1,paw_dmft%natom
+          if(paw_dmft%lpawu(iatom) /= -1) then
+           do iflavor1=1,tndim
+             do iflavor2=1,tndim
+               if(iflavor1==iflavor2) then
+                 eigvectmatlu(iatom)%mat(iflavor1,iflavor2,1)=cone
+               else
+                 eigvectmatlu(iatom)%mat(iflavor1,iflavor2,1)=czero
+               end if
+             end do
            end do
-         end do
-       end if
-     end do
-   end if !end opt_diag=0
+         end if
+       end do
+     end if !end opt_diag=0
 
-   ! == orbital angular momentum
-   call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_orb)
-   call zero_matlu(matlumag_orb,natom=natom)
-   call chi_matlu(matlumag_orb,natom=natom,option=1,optprt=0)
-   call rotate_matlu(matlumag_orb,eigvectmatlu,natom=natom,inverse=1)
-   !call print_matlu(matlumag_orb,iatom,prtopt=1)
-   call gather_matlu(matlumag_orb,magmom_orb,natom=natom,option=1,prtopt=0)
-   call destroy_matlu(matlumag_orb,natom=natom)
+     ! == orbital angular momentum
+     call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_orb)
+     call zero_matlu(matlumag_orb,natom=natom)
+     call chi_matlu(matlumag_orb,natom=natom,option=1,optprt=0)
+     call rotate_matlu(matlumag_orb,eigvectmatlu,natom=natom,inverse=1)
+     !call print_matlu(matlumag_orb,iatom,prtopt=1)
+     call gather_matlu(matlumag_orb,magmom_orb,natom=natom,option=1,prtopt=0)
+     call destroy_matlu(matlumag_orb,natom=natom)
 
-   ! == spin angular momentum
-   call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_spin)
-   call zero_matlu(matlumag_spin,natom=natom)
-   call chi_matlu(matlumag_spin,natom=natom,option=2,optprt=0)
-   call rotate_matlu(matlumag_spin,eigvectmatlu,natom=natom,inverse=1)
-   !call print_matlu(matlumag_spin,natom,prtopt=1)
-   call gather_matlu(matlumag_spin,magmom_spin,natom=natom,option=1,prtopt=0)
-   call destroy_matlu(matlumag_spin,natom=natom)
+     ! == spin angular momentum
+     call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_spin)
+     call zero_matlu(matlumag_spin,natom=natom)
+     call chi_matlu(matlumag_spin,natom=natom,option=2,optprt=0)
+     call rotate_matlu(matlumag_spin,eigvectmatlu,natom=natom,inverse=1)
+     !call print_matlu(matlumag_spin,natom,prtopt=1)
+     call gather_matlu(matlumag_spin,magmom_spin,natom=natom,option=1,prtopt=0)
+     call destroy_matlu(matlumag_spin,natom=natom)
 
-   ! == total angular momentum
-   call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)
-   call zero_matlu(matlumag_tot,natom=natom)
-   call chi_matlu(matlumag_tot,natom=natom,option=3,optprt=0)
-   call rotate_matlu(matlumag_tot,eigvectmatlu,natom=natom,inverse=1)
-   !call print_matlu(matlumag_tot,natom=1,prtopt=1)
-   call gather_matlu(matlumag_tot,magmom_tot,natom=natom,option=1,prtopt=0)
-   call destroy_matlu(matlumag_tot,natom=natom)
-
+     ! == total angular momentum
+     call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag_tot)
+     call zero_matlu(matlumag_tot,natom=natom)
+     call chi_matlu(matlumag_tot,natom=natom,option=3,optprt=0)
+     call rotate_matlu(matlumag_tot,eigvectmatlu,natom=natom,inverse=1)
+     !call print_matlu(matlumag_tot,natom=1,prtopt=1)
+     call gather_matlu(matlumag_tot,magmom_tot,natom=natom,option=1,prtopt=0)
+     call destroy_matlu(matlumag_tot,natom=natom)
+   endif !usejmj
    write(message,'(a,2x,2a)') ch10, " ==> Rotation done", ch10
    call wrtout(std_out,message,'COLL')
 
  end if ! dmftctqmc_localprop
  !======================
 
+ call timab(702,2,tsec(:))
  ! =========================================================================================
  ! Start big loop over atoms to compute hybridization and do the CTQMC
  ! =========================================================================================
 
+ call timab(703,1,tsec(:))
  do iatom=1,natom
 
    lpawu = paw_dmft%lpawu(iatom)
@@ -1341,7 +1432,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        nomega = paw_dmft%dmftqmc_l
        call CtqmcInterface_init(hybrid,paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
          & paw_dmft%dmftqmc_therm,paw_dmft%dmftctqmc_meas,nflavor,paw_dmft%dmftqmc_l,&
-         & one/paw_dmft%temp,zero,std_out,paw_dmft%spacecomm,paw_dmft%nspinor)
+         & one/paw_dmft%temp,zero,std_out,paw_dmft%dmftctqmc_chains,paw_dmft%spacecomm,paw_dmft%nspinor)
        !    options
        ! =================================================================
        call CtqmcInterface_setOpts(hybrid, &
@@ -1403,6 +1494,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    ABI_MALLOC(gtmp_nd,(paw_dmft%dmftqmc_l,nflavor,nflavor))
    call flush_unit(std_out)
 
+   call timab(704,1,tsec(:))
      ! =================================================================
      !    BEGIN CALL TO CTQMC SOLVERS
      ! =================================================================
@@ -1441,7 +1533,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        call CtqmcoffdiagInterface_run(hybridoffdiag,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd(:,:,:),&
           & Gw=gw_tmp_nd(:,:,:),D=doccsum,E=green%ecorr_qmc(iatom),Noise=noise,matU=dble(udens_atoms(iatom)%mat(:,:,1)),&
           & Docc=docc(:,:),opt_levels=levels_ctqmc(:),hybri_limit=hybri_limit(:,:),Magmom_orb=REAL(magmom_orb(iatom)%value),&
-          & Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom,fname=paw_dmft%filapp)
+          & Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom,&
+          & fname=paw_dmft%filapp,jmjbasis=usejmj)
 
        ! For entropy (alternative formulation)
        if (paw_dmft%ientropy == 1) then
@@ -1510,6 +1603,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      end if
 
    end if
+   call timab(704,2,tsec(:))
    ! =================================================================
    !    END CALL TO CTQMC SOLVERS
    ! =================================================================
@@ -1574,10 +1668,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
   ! end if
 
  end do ! iatom
+ call timab(703,2,tsec(:))
  ! ==================================================================
  !  End big loop over atoms to compute hybridization and do the CTQMC
  ! ==================================================================
 
+ call timab(705,1,tsec(:))
  if (paw_dmft%dmft_prgn == 1) then
    call print_green('QMC_diag_notsym',green,1,paw_dmft,opt_wt=2)
    call print_green('QMC_diag_notsym',green,1,paw_dmft,opt_wt=1)
@@ -1664,6 +1760,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  ! =================================================================
  if (paw_dmft%nspinor .eq. 2) then
   ABI_MALLOC(matlumag,(natom))
+  ABI_MALLOC(muzeem,(natom))
+  ABI_MALLOC(muspin,(natom))
+  ABI_MALLOC(muorb,(natom))
   write(message,'(a,2x,a)') ch10,"== Magnetic moments from CT-QMC occupation matrix "
   call wrtout(std_out,message,'COLL')
 
@@ -1675,42 +1774,57 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
       ! == orbital angular momentum
       do icomp=1,3 !x,y,z components
-        muorb=czero
+        muorb(iatom)=czero
         call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
         call copy_matlu(green%occup_tau%matlu,matlumag,natom)
-        call rotate_matlu(matlumag,eigvectmatlu,natom=natom,inverse=0)
+        if (usejmj == 1) then
+          call ylm2jmj_matlu(matlumag,natom,2,paw_dmft)  
+        else    
+          call rotate_matlu(matlumag,eigvectmatlu,natom=natom,inverse=0)
+        endif
         call magmomforb_matlu(matlumag,muorb,natom=natom,option=icomp,optprt=0)
-        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Orbital angular momentum for axis ", icomp, " is ", REAL(muorb)
+        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Orbital angular momentum for axis ", icomp, " is ", REAL(muorb(iatom))
         call wrtout(std_out,message,'COLL')
         call destroy_matlu(matlumag,(natom))
       end do
 
       ! == spin angular momentum
       do icomp=1,3 !x,y,z components
-        muspin=czero
+        muspin(iatom)=czero
         call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
         call copy_matlu(green%occup_tau%matlu,matlumag,natom=natom)
-        call rotate_matlu(matlumag,eigvectmatlu,natom=natom,inverse=0)
+        if (usejmj == 1) then                                         
+          call ylm2jmj_matlu(matlumag,natom,2,paw_dmft)               
+        else                                                          
+          call rotate_matlu(matlumag,eigvectmatlu,natom=natom,inverse=0)
+        endif
         call magmomfspin_matlu(matlumag,muspin,natom=natom,option=icomp,optprt=0)
-        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Spin angular momentum for axis ", icomp, " is ", REAL(muspin)
+        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Spin angular momentum for axis ", icomp, " is ", REAL(muspin(iatom))
         call wrtout(std_out,message,'COLL')
         call destroy_matlu(matlumag,(natom))
       end do
 
       ! == total angular momentum (L_u + 2*S_u)
       do icomp=1,3 !x,y,z components
-        muzeem=czero
+        muzeem(iatom)=czero
         call init_matlu(natom=natom,nspinor=paw_dmft%nspinor,nsppol=paw_dmft%nsppol,lpawu_natom=paw_dmft%lpawu,matlu=matlumag)
         call copy_matlu(green%occup_tau%matlu,matlumag,natom=natom)
-        call rotate_matlu(matlumag,eigvectmatlu,natom=natom,inverse=0)
+        if (usejmj == 1) then                                         
+          call ylm2jmj_matlu(matlumag,natom,2,paw_dmft)               
+        else                                                          
+          call rotate_matlu(matlumag,eigvectmatlu,natom=natom,inverse=0)
+        endif
         call magmomfzeeman_matlu(matlumag,muzeem,natom=natom,option=icomp,optprt=0)
-        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Zeeman angular momentum for axis ", icomp, " is ", REAL(muzeem)
+        write(message,'(a,2x,a,i4,a,f8.4)') ch10," Zeeman angular momentum for axis ", icomp, " is ", REAL(muzeem(iatom))
         call wrtout(std_out,message,'COLL')
         call destroy_matlu(matlumag,(natom))
       end do
     endif !lpawu
   end do !iatom
   ABI_FREE(matlumag)
+  ABI_FREE(muzeem)
+  ABI_FREE(muspin)
+  ABI_FREE(muorb)
  end if !nspinor
  ! =================================================================
 
@@ -1731,6 +1845,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    if (opt_diag /= 0) then
      call rotate_matlu(green%oper_tau(itau)%matlu(:),eigvectmatlu(:),natom,0)
    end if
+   if (usejmj == 1) then
+     call ylm2jmj_matlu(green%oper_tau(itau)%matlu(:),natom,2,paw_dmft)
+   endif
    if (useylm == 1) then
      call slm2ylm_matlu(green%oper_tau(itau)%matlu(:),natom,paw_dmft,2,0)
    end if
@@ -1743,6 +1860,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  if (opt_diag /= 0) then
    call rotate_matlu(green%occup_tau%matlu(:),eigvectmatlu(:),natom,0)
  end if
+ if (usejmj == 1) then
+    write(message,'(a,2x,a)') ch10," == Occupations from G(tau=0-) in the jmj basis" 
+    call wrtout(std_out,message,'COLL')
+    call ylm2jmj_matlu(green%occup_tau%matlu(:),natom,2,paw_dmft)
+    call print_matlu(green%occup_tau%matlu(:),natom,1)
+ endif
  if (useylm == 1) then
    write(message,'(a,2x,a)') ch10," == Occupations from G(tau=0-) in the Ylm basis"
    call wrtout(std_out,message,'COLL')
@@ -1774,6 +1897,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      call rotate_matlu(green%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,0)
      call rotate_matlu(weiss%oper(ifreq)%matlu(:),eigvectmatlu(:),natom,0)
    end if
+   if (usejmj == 1) then
+     call ylm2jmj_matlu(green%oper(ifreq)%matlu(:),natom,2,paw_dmft)
+     call ylm2jmj_matlu(weiss%oper(ifreq)%matlu(:),natom,2,paw_dmft)   
+   endif        
    if (useylm == 1) then
      call slm2ylm_matlu(green%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
      call slm2ylm_matlu(weiss%oper(ifreq)%matlu(:),natom,paw_dmft,2,0)
@@ -1840,9 +1967,35 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  do itau=1,1 !paw_dmft%dmftqmc_l
    call sym_matlu(green%oper_tau(itau)%matlu(:),paw_dmft)
  end do ! itau
- do ifreq=1,paw_dmft%dmft_nwlo
-   call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
- end do ! ifreq
+
+ ! Perform symetry on GPU if requested
+ if (paw_dmft%gpu_option == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   ! 1) Init green_oper_ndat
+   call init_oper_ndat(paw_dmft,green_oper_ndat,nwlo,nkpt=green%oper(1)%nkpt,opt_ksloc=2,gpu_option=paw_dmft%gpu_option)
+   if (green%oper(1)%has_operks == 0) then
+     green_oper_ndat%paral  = 1
+     green_oper_ndat%shiftk = green%distrib%shiftk
+   end if
+   ! 2) Copy green%oper(:)%matlu into green_oper_ndat (CPU->GPU transfer)
+   call copy_oper_to_ndat(green%oper,green_oper_ndat,nwlo,green%nw,green%distrib%proct,green%distrib%me_freq,.false.)
+
+   ! 3) Perform sym_matlu on green_oper_ndat (GPU enabled)
+   call sym_matlu(green_oper_ndat%matlu(:),paw_dmft)
+
+   ! 4) Copy back green%oper(:)%matlu from green_oper_ndat (GPU->CPU transfer)
+   call copy_oper_from_ndat(green_oper_ndat,green%oper,nwlo,green%nw,green%distrib%proct,&
+   &    green%distrib%me_freq,.false.)
+   ! 5) Destroy green_oper_ndat
+   call destroy_oper(green_oper_ndat)
+#endif
+ else
+   do ifreq=1,paw_dmft%dmft_nwlo
+     call sym_matlu(green%oper(ifreq)%matlu(:),paw_dmft)
+   end do ! ifreq
+ end if
+
+
  if (pawprtvol >= 3) then
    write(message,'(a,2x,a)') ch10, &  ! debug
       & " == Print Green's function for tau=0+ after symmetrization"  !  debug
@@ -1894,6 +2047,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
  call destroy_vee(paw_dmft,vee_rotated(:))
  ABI_FREE(vee_rotated)
+ call timab(705,2,tsec(:))
+ call timab(701,2,tsec(:))
 
 end subroutine qmc_prep_ctqmc
 !!***
