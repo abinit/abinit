@@ -1,8 +1,8 @@
 
-.Version 10.3.3.2 of ABINIT, released Nov 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 24 Nov 2024.
-- ( at 07h23 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__mmignolet/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_5.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h05 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_5.abi
 - output file    -> teph4mob_5.abo
 - root for input  files -> teph4mob_5i
 - root for output files -> teph4mob_5o
@@ -54,7 +54,7 @@ _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
         boxcutmin      1.10000000E+00
         ddb_ngqpt        4    4    4
              ecut      3.00000000E+00 Hartree
-      eph_extrael      4.42475831E-08
+      eph_extrael      4.42475836E-08
    eph_ngqpt_fine       24   24   24
          eph_task          -4
 -          fftalg         512
@@ -232,7 +232,7 @@ P           mkmem         413
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
-     sigma_erange      0.00000000E+00  5.51239881E-03 Hartree
+     sigma_erange      0.00000000E+00  5.51239833E-03 Hartree
           spgroup         216
            symrel      1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
                       -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1
@@ -258,7 +258,7 @@ P           mkmem         413
                          0.00174    0.00174
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4036425458E+00  1.4036425458E+00  1.4036425458E+00
+                       1.4036425510E+00  1.4036425510E+00  1.4036425510E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6525000000E+00  2.6525000000E+00  2.6525000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -323,11 +323,11 @@ meta: {optdriver: 7, eph_task: -4, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -343,7 +343,7 @@ meta: {optdriver: 7, eph_task: -4, }
        3               2       -0.000000        0.000000
        3               3       -0.022872        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -425,18 +425,18 @@ meta: {optdriver: 7, eph_task: -4, }
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1673176172E-02 (at units)
+ Average speed of sound partial sums:     0.1673176171E-02 (at units)
 -                                   =           3.6604 [km/s]
 
- Debye frequency from partial sums:     0.9757306393E-03 (Ha)
--                                 =     0.6419999198E+01 (THz)
--Debye temperature from partial sums:     0.3081110011E+03 (K)
+ Debye frequency from partial sums:     0.9757306388E-03 (Ha)
+-                                 =     0.6419999195E+01 (THz)
+-Debye temperature from partial sums:     0.3081113667E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_5o_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_release-10.2/tests/Pspdir/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_release-10.2/tests/Pspdir/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -448,8 +448,8 @@ meta: {optdriver: 7, eph_task: -4, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_release-10.2/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_release-10.2/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -534,11 +534,11 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
-
-
+ 
+ 
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36716.2    0.000
+   5   3.573    0.000  36716.7    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -566,7 +566,7 @@ K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    411.9    0.000
+   5   3.608    0.001    412.0    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -594,7 +594,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  123.0 [K], mu_e:    3.428
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000  39521.3    0.000
+   5   3.525    0.000  39521.5    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -661,50 +661,50 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           300.00        0.10E+16        0.25E+05          379.23            0.00
 
 
- Seebeck [Volts / Kelvin] using SERTA approximation           
- Temperature (K)              xx              yy              zz                                                      
-            5.00   -0.792017E-03   -0.792017E-03   -0.792017E-03                        
- Temperature (K)              xx              yy              zz                        
-           64.00   -0.153592E-02   -0.153592E-02   -0.153592E-02                        
- Temperature (K)              xx              yy              zz                        
-          123.00   -0.120321E-02   -0.120321E-02   -0.120321E-02                        
- Temperature (K)              xx              yy              zz                        
-          182.00   -0.113053E-02   -0.113053E-02   -0.113053E-02                        
- Temperature (K)              xx              yy              zz                        
-          241.00   -0.109773E-02   -0.109773E-02   -0.109773E-02                        
- Temperature (K)              xx              yy              zz                        
-          300.00   -0.107558E-02   -0.107558E-02   -0.107558E-02                        
-                        
-                          
- Kappa [W/m*K] using SERTA approximation                                      
- Temperature (K)              xx              yy              zz                        
-            5.00    0.609746E-44    0.609746E-44    0.609746E-44                        
- Temperature (K)              xx              yy              zz                        
-           64.00    0.167162E-07    0.167162E-07    0.167162E-07                        
- Temperature (K)              xx              yy              zz                        
-          123.00    0.411505E-05    0.411505E-05    0.411505E-05                        
- Temperature (K)              xx              yy              zz                        
-          182.00    0.105968E-04    0.105968E-04    0.105968E-04                        
- Temperature (K)              xx              yy              zz                        
-          241.00    0.870767E-05    0.870767E-05    0.870767E-05                        
- Temperature (K)              xx              yy              zz                        
-          300.00    0.538426E-05    0.538426E-05    0.538426E-05                        
-                        
-                          
- Peltier [Volts] using SERTA approximation                      
- Temperature (K)              xx              yy              zz                        
-            5.00   -0.396009E-02   -0.396009E-02   -0.396009E-02                        
- Temperature (K)              xx              yy              zz                        
-           64.00   -0.982991E-01   -0.982991E-01   -0.982991E-01                        
- Temperature (K)              xx              yy              zz                        
-          123.00   -0.147995E+00   -0.147995E+00   -0.147995E+00                        
- Temperature (K)              xx              yy              zz                        
-          182.00   -0.205757E+00   -0.205757E+00   -0.205757E+00                        
- Temperature (K)              xx              yy              zz                        
-          241.00   -0.264552E+00   -0.264552E+00   -0.264552E+00                        
- Temperature (K)              xx              yy              zz                        
-          300.00   -0.322673E+00   -0.322673E+00   -0.322673E+00                        
-                        
+ Seebeck [Volts / Kelvin] using SERTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00   -0.792016E-03   -0.792016E-03   -0.792016E-03
+ Temperature (K)              xx              yy              zz
+           64.00   -0.153592E-02   -0.153592E-02   -0.153592E-02
+ Temperature (K)              xx              yy              zz
+          123.00   -0.120321E-02   -0.120321E-02   -0.120321E-02
+ Temperature (K)              xx              yy              zz
+          182.00   -0.113053E-02   -0.113053E-02   -0.113053E-02
+ Temperature (K)              xx              yy              zz
+          241.00   -0.109773E-02   -0.109773E-02   -0.109773E-02
+ Temperature (K)              xx              yy              zz
+          300.00   -0.107558E-02   -0.107558E-02   -0.107558E-02
+
+
+ Kappa [W/m*K] using SERTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00    0.000000E+00    0.000000E+00    0.000000E+00
+ Temperature (K)              xx              yy              zz
+           64.00    0.167161E-07    0.167161E-07    0.167161E-07
+ Temperature (K)              xx              yy              zz
+          123.00    0.411508E-05    0.411508E-05    0.411508E-05
+ Temperature (K)              xx              yy              zz
+          182.00    0.105968E-04    0.105968E-04    0.105968E-04
+ Temperature (K)              xx              yy              zz
+          241.00    0.870772E-05    0.870772E-05    0.870772E-05
+ Temperature (K)              xx              yy              zz
+          300.00    0.538428E-05    0.538428E-05    0.538428E-05
+
+
+ Peltier [Volts] using SERTA approximation
+ Temperature (K)              xx              yy              zz
+            5.00   -0.396008E-02   -0.396008E-02   -0.396008E-02
+ Temperature (K)              xx              yy              zz
+           64.00   -0.982991E-01   -0.982991E-01   -0.982991E-01
+ Temperature (K)              xx              yy              zz
+          123.00   -0.147995E+00   -0.147995E+00   -0.147995E+00
+ Temperature (K)              xx              yy              zz
+          182.00   -0.205757E+00   -0.205757E+00   -0.205757E+00
+ Temperature (K)              xx              yy              zz
+          241.00   -0.264552E+00   -0.264552E+00   -0.264552E+00
+ Temperature (K)              xx              yy              zz
+          300.00   -0.322673E+00   -0.322673E+00   -0.322673E+00
+
 
  Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
@@ -713,7 +713,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.39            0.00
+          300.00        0.10E+16        0.25E+05          411.40            0.00
 
 
  Cartesian component of MRTA mobility tensor: yy
@@ -723,7 +723,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.39            0.00
+          300.00        0.10E+16        0.25E+05          411.40            0.00
 
 
  Cartesian component of MRTA mobility tensor: zz
@@ -733,12 +733,12 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
           123.00        0.10E+16        0.00E+00          375.46            0.00
           182.00        0.10E+16        0.00E+00          471.05            0.00
           241.00        0.10E+16        0.00E+00          469.77            0.00
-          300.00        0.10E+16        0.25E+05          411.39            0.00
+          300.00        0.10E+16        0.25E+05          411.40            0.00
 
 
- Seebeck [Volts / Kelvin] using MRTA approximation                                                                   
+ Seebeck [Volts / Kelvin] using MRTA approximation
  Temperature (K)              xx              yy              zz
-            5.00   -0.792017E-03   -0.792017E-03   -0.792017E-03
+            5.00   -0.792016E-03   -0.792016E-03   -0.792016E-03
  Temperature (K)              xx              yy              zz
            64.00   -0.153594E-02   -0.153594E-02   -0.153594E-02
  Temperature (K)              xx              yy              zz
@@ -753,22 +753,22 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
 
  Kappa [W/m*K] using MRTA approximation
  Temperature (K)              xx              yy              zz
-            5.00    0.609746E-44    0.609746E-44    0.609746E-44
+            5.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
            64.00    0.167304E-07    0.167304E-07    0.167304E-07
  Temperature (K)              xx              yy              zz
-          123.00    0.414589E-05    0.414589E-05    0.414589E-05
+          123.00    0.414595E-05    0.414595E-05    0.414595E-05
  Temperature (K)              xx              yy              zz
-          182.00    0.111444E-04    0.111444E-04    0.111444E-04
+          182.00    0.111446E-04    0.111446E-04    0.111446E-04
  Temperature (K)              xx              yy              zz
-          241.00    0.950339E-05    0.950339E-05    0.950339E-05
+          241.00    0.950348E-05    0.950348E-05    0.950348E-05
  Temperature (K)              xx              yy              zz
-          300.00    0.599953E-05    0.599953E-05    0.599953E-05
+          300.00    0.599957E-05    0.599957E-05    0.599957E-05
 
 
  Peltier [Volts] using MRTA approximation
  Temperature (K)              xx              yy              zz
-            5.00   -0.396009E-02   -0.396009E-02   -0.396009E-02
+            5.00   -0.396008E-02   -0.396008E-02   -0.396008E-02
  Temperature (K)              xx              yy              zz
            64.00   -0.983004E-01   -0.983004E-01   -0.983004E-01
  Temperature (K)              xx              yy              zz
@@ -776,7 +776,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
  Temperature (K)              xx              yy              zz
           182.00   -0.205115E+00   -0.205115E+00   -0.205115E+00
  Temperature (K)              xx              yy              zz
-          241.00   -0.263840E+00   -0.263840E+00   -0.263840E+00
+          241.00   -0.263839E+00   -0.263839E+00   -0.263839E+00
  Temperature (K)              xx              yy              zz
           300.00   -0.322079E+00   -0.322079E+00   -0.322079E+00
 
@@ -786,14 +786,14 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0610000000E+01  1.0610000000E+01  1.0610000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
         boxcutmin      1.10000000E+00
         ddb_ngqpt        4    4    4
              ecut      3.00000000E+00 Hartree
-      eph_extrael      4.42475831E-08
+      eph_extrael      4.42475836E-08
    eph_ngqpt_fine       24   24   24
          eph_task          -4
            etotal      0.0000000000E+00
@@ -917,7 +917,7 @@ P           mkmem         413
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
-     sigma_erange      0.00000000E+00  5.51239881E-03 Hartree
+     sigma_erange      0.00000000E+00  5.51239833E-03 Hartree
           spgroup         216
            strten      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -935,7 +935,7 @@ P           mkmem         413
                        0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
             typat      1  2
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4036425458E+00  1.4036425458E+00  1.4036425458E+00
+                       1.4036425510E+00  1.4036425510E+00  1.4036425510E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6525000000E+00  2.6525000000E+00  2.6525000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -976,12 +976,12 @@ P           mkmem         413
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems,
+- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
 - M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
@@ -994,12 +994,12 @@ P           mkmem         413
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1017,7 +1017,7 @@ P           mkmem         413
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1032,7 +1032,7 @@ P           mkmem         413
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

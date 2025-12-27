@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h02 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h03 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_teph_tdep_legacy_2/teph_tdep_legacy_2.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_teph_tdep_legacy_2/teph_tdep_legacy_2.abi
 - output file    -> teph_tdep_legacy_2.abo
 - root for input  files -> teph_tdep_legacy_2i
 - root for output files -> teph_tdep_legacy_2o
@@ -53,7 +53,7 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
               amu      1.20110000E+01
            diemac      6.00000000E+00
              ecut      3.70000000E+01 Hartree
-    elph2_imagden      3.67493254E-03 Hartree
+    elph2_imagden      3.67493222E-03 Hartree
            enunit           2
 -          fftalg         512
            istwfk        1    0    1    0    0    0    1    0
@@ -138,7 +138,7 @@ P           mkmem           8
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.8306446683E-01  8.8306446683E-01  8.8306446683E-01
+                       8.8306447010E-01  8.8306447010E-01  8.8306447010E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.6687500000E+00  1.6687500000E+00  1.6687500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -163,10 +163,10 @@ P           mkmem           8
 
  abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.2
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.1  wall=          0.2
++Overall time at end (sec) : cpu=          0.1  wall=          0.1

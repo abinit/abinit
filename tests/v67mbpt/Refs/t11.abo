@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h11 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t11/t11.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h13 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v67mbpt_t11/t11.abi
 - output file    -> t11.abo
 - root for input  files -> t11i
 - root for output files -> t11o
@@ -187,14 +187,14 @@ _ WF disk file :      0.048 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
       bs_coupling6          0
       bs_coupling7          0
       bs_coupling8          1
-     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh3     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh4     0.00000000E+00  3.67493254E-01  3.67493254E-03 Hartree
-     bs_freq_mesh5     0.00000000E+00  3.67493254E-01  3.67493254E-03 Hartree
-     bs_freq_mesh6     0.00000000E+00  3.67493254E-01  3.67493254E-03 Hartree
-     bs_freq_mesh7     0.00000000E+00  3.67493254E-01  3.67493254E-03 Hartree
-     bs_freq_mesh8     0.00000000E+00  3.67493254E-01  3.67493254E-03 Hartree
+     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh3     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh4     0.00000000E+00  3.67493222E-01  3.67493222E-03 Hartree
+     bs_freq_mesh5     0.00000000E+00  3.67493222E-01  3.67493222E-03 Hartree
+     bs_freq_mesh6     0.00000000E+00  3.67493222E-01  3.67493222E-03 Hartree
+     bs_freq_mesh7     0.00000000E+00  3.67493222E-01  3.67493222E-03 Hartree
+     bs_freq_mesh8     0.00000000E+00  3.67493222E-01  3.67493222E-03 Hartree
  bs_haydock_niter1        100
  bs_haydock_niter2        100
  bs_haydock_niter3        100
@@ -297,11 +297,11 @@ _ WF disk file :      0.048 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
        mbpt_sciss1     0.00000000E+00 Hartree
        mbpt_sciss2     0.00000000E+00 Hartree
        mbpt_sciss3     0.00000000E+00 Hartree
-       mbpt_sciss4     2.93994603E-02 Hartree
-       mbpt_sciss5     2.93994603E-02 Hartree
-       mbpt_sciss6     2.93994603E-02 Hartree
-       mbpt_sciss7     2.93994603E-02 Hartree
-       mbpt_sciss8     2.93994603E-02 Hartree
+       mbpt_sciss4     2.93994577E-02 Hartree
+       mbpt_sciss5     2.93994577E-02 Hartree
+       mbpt_sciss6     2.93994577E-02 Hartree
+       mbpt_sciss7     2.93994577E-02 Hartree
+       mbpt_sciss8     2.93994577E-02 Hartree
        mdf_epsinf      1.20000000E+01
 P           mkmem           2
             natom           2
@@ -418,7 +418,7 @@ P           mkmem           2
             typat      1  1
               wtk        0.75000    0.25000
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -472,8 +472,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -511,7 +511,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  5  -8.8593207731087    -1.677E-07 3.442E-09 9.804E-07
  ETOT  6  -8.8593207746139    -1.505E-09 2.725E-11 7.713E-10
 
- At SCF step    6, etot is converged :
+ At SCF step    6, etot is converged : 
   for the second time, diff in etot=  1.505E-09 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -567,7 +567,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -579,7 +579,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t11o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.19080   Average Vxc (hartree)=  -0.35409
  Eigenvalues (hartree) for nkpt=   2  k points:
@@ -599,7 +599,7 @@ psp_core            :  8.60437873155177E-02
 local_psp           : -2.46091913373859E+00
 non_local_psp       :  1.92087853012529E+00
 total_energy        : -8.85932077461393E+00
-total_energy_eV     : -2.41074378336892E+02
+total_energy_eV     : -2.41074399475063E+02
 band_energy         :  2.51095269968235E-01
 ...
 
@@ -610,9 +610,9 @@ band_energy         :  2.51095269968235E-01
   sigma(3 3)=  6.29072695E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.8508E+00 GPa]
-- sigma(1 1)=  1.85079546E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.85079546E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.85079546E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.85079577E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.85079577E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.85079577E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -703,9 +703,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t11o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   2  k points:
  kpt#   1, nband= 35, wtk=  0.75000, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -737,7 +737,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices
+ SCREENING: Calculation of the susceptibility and dielectric matrices 
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -753,18 +753,18 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     2
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)    -2.50000000E-01  5.00000000E-01  0.00000000E+00       0.75000
      2)    -2.50000000E-01  0.00000000E+00  0.00000000E+00       0.25000
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)    -2.50000000E-01  0.00000000E+00  2.50000000E-01       0.37500
@@ -773,7 +773,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
      5)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01       0.18750
      6)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.18750
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
 
 
@@ -786,11 +786,11 @@ meta: {optdriver: 3, gwcalctyp: 0, }
      1)      0.000010    0.000020    0.000030
 
  The inverse dielectric matrix will be calculated on zero frequency only
- please note that the calculated epsilon^-1 cannot be used
+ please note that the calculated epsilon^-1 cannot be used 
  to calculate QP corrections using plasmonpole model 1
 
 
-- screening: taking advantage of time-reversal symmetry
+- screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 4
 - Remaining bands to be divided among processors   nbcw = 11
 - Number of bands treated by each node ~11
@@ -821,7 +821,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   dielectric constant without local fields =  28.4561
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     31.28  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G')
+  Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -925,10 +925,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation
- in frequency domain and reciprocal space on a transitions basis set.
- Based on a program developed by L. Reining, V. Olevano, F. Sottile,
- S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi.
+ Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation 
+ in frequency domain and reciprocal space on a transitions basis set. 
+ Based on a program developed by L. Reining, V. Olevano, F. Sottile, 
+ S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi. 
 
 .Using double precision arithmetic ; gwpc =  8
 
@@ -942,18 +942,18 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     2
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)    -2.50000000E-01  5.00000000E-01  0.00000000E+00       0.75000
      2)    -2.50000000E-01  0.00000000E+00  0.00000000E+00       0.25000
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)    -2.50000000E-01  0.00000000E+00  2.50000000E-01       0.37500
@@ -962,7 +962,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
      5)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01       0.18750
      6)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.18750
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
 
 
@@ -1023,9 +1023,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
  Last  excitonic eigenvalue=   13.20 [eV]
 
 
- GW  direct gap       3.52  0.00 [eV]
- EXC direct gap       3.33  0.00 [eV]
- EXC binding energy   0.19  0.00 [eV]
+ GW  direct gap       3.52  0.00 [eV] 
+ EXC direct gap       3.33  0.00 [eV] 
+ EXC binding energy   0.19  0.00 [eV] 
 
  Excitonic eigenvalues up to the GW energy gap [eV]
   1 (  3.33  0.00)
@@ -1044,9 +1044,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
  14 (  3.45  0.00)
  15 (  3.45  0.00)
  16 (  3.45  0.00)
-
+  
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
    0.0000  24.2067   0.0000  19.6703   0.0000  21.7046  -0.0000
    0.1000  24.2293   0.0454  19.6816   0.0227  21.7200   0.0309
    0.2000  24.2973   0.0914  19.7156   0.0456  21.7664   0.0622
@@ -1057,7 +1057,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
    0.7000  25.3747   0.3547  20.2428   0.1696  22.4895   0.2343
    0.8000  25.7595   0.4202  20.4258   0.1979  22.7428   0.2747
    0.9000  26.2126   0.4928  20.6380   0.2280  23.0378   0.3182
-
+  
  Writing KS-RPA macroscopic dielectric function without local fields to file: t11o_DS4_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t11o_DS4_GW_NLF_MDF
  Writing EXC Macroscopic dielectric function to file: t11o_DS4_EXC_MDF
@@ -1086,10 +1086,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation
- in frequency domain and reciprocal space on a transitions basis set.
- Based on a program developed by L. Reining, V. Olevano, F. Sottile,
- S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi.
+ Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation 
+ in frequency domain and reciprocal space on a transitions basis set. 
+ Based on a program developed by L. Reining, V. Olevano, F. Sottile, 
+ S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi. 
 
 .Using double precision arithmetic ; gwpc =  8
 
@@ -1103,18 +1103,18 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     2
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)    -2.50000000E-01  5.00000000E-01  0.00000000E+00       0.75000
      2)    -2.50000000E-01  0.00000000E+00  0.00000000E+00       0.25000
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)    -2.50000000E-01  0.00000000E+00  2.50000000E-01       0.37500
@@ -1123,7 +1123,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
      5)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01       0.18750
      6)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.18750
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
 
 
@@ -1180,9 +1180,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  >>> Haydock algorithm converged twice within haydock_tol=   2.00E-02 after less than 100 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=   2.00E-02 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t11o_DS5_EXC_MDF
-
+  
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
    0.0000  24.2067   0.0000  19.6703   0.0000  21.7046   0.0000
    0.1000  24.2293   0.0454  19.6816   0.0227  21.7200   0.0309
    0.2000  24.2973   0.0914  19.7156   0.0456  21.7664   0.0622
@@ -1193,7 +1193,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
    0.7000  25.3747   0.3547  20.2428   0.1696  22.4895   0.2343
    0.8000  25.7595   0.4202  20.4258   0.1979  22.7428   0.2747
    0.9000  26.2126   0.4928  20.6380   0.2280  23.0378   0.3182
-
+  
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1215,10 +1215,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation
- in frequency domain and reciprocal space on a transitions basis set.
- Based on a program developed by L. Reining, V. Olevano, F. Sottile,
- S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi.
+ Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation 
+ in frequency domain and reciprocal space on a transitions basis set. 
+ Based on a program developed by L. Reining, V. Olevano, F. Sottile, 
+ S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi. 
 
 .Using double precision arithmetic ; gwpc =  8
 
@@ -1232,18 +1232,18 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     2
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)    -2.50000000E-01  5.00000000E-01  0.00000000E+00       0.75000
      2)    -2.50000000E-01  0.00000000E+00  0.00000000E+00       0.25000
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)    -2.50000000E-01  0.00000000E+00  2.50000000E-01       0.37500
@@ -1252,7 +1252,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
      5)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01       0.18750
      6)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.18750
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
 
 
@@ -1310,9 +1310,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  >>> Haydock algorithm converged twice within haydock_tol=   2.00E-02 after less than 100 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=   2.00E-02 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t11o_DS6_EXC_MDF
-
+  
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
    0.0000  24.2067   0.0000  19.6703   0.0000  22.2842   0.0000
    0.1000  24.2293   0.0454  19.6816   0.0227  22.3010   0.0339
    0.2000  24.2973   0.0914  19.7156   0.0456  22.3518   0.0681
@@ -1323,7 +1323,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
    0.7000  25.3747   0.3547  20.2428   0.1696  23.1461   0.2581
    0.8000  25.7595   0.4202  20.4258   0.1979  23.4254   0.3032
    0.9000  26.2126   0.4928  20.6380   0.2280  23.7513   0.3520
-
+  
 
 ================================================================================
 == DATASET  7 ==================================================================
@@ -1345,10 +1345,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation
- in frequency domain and reciprocal space on a transitions basis set.
- Based on a program developed by L. Reining, V. Olevano, F. Sottile,
- S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi.
+ Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation 
+ in frequency domain and reciprocal space on a transitions basis set. 
+ Based on a program developed by L. Reining, V. Olevano, F. Sottile, 
+ S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi. 
 
 .Using double precision arithmetic ; gwpc =  8
 
@@ -1362,18 +1362,18 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     2
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)    -2.50000000E-01  5.00000000E-01  0.00000000E+00       0.75000
      2)    -2.50000000E-01  0.00000000E+00  0.00000000E+00       0.25000
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)    -2.50000000E-01  0.00000000E+00  2.50000000E-01       0.37500
@@ -1382,7 +1382,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
      5)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01       0.18750
      6)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.18750
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
 
 
@@ -1440,9 +1440,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  >>> Haydock algorithm converged twice within haydock_tol=   2.00E-02 after less than 100 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=   2.00E-02 after less than 100 iterations.
  Writing EXC Macroscopic dielectric function to file: t11o_DS7_EXC_MDF
-
+  
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
    0.0000  24.2067   0.0000  19.6703   0.0000  22.2842   0.0000
    0.1000  24.2293   0.0454  19.6816   0.0227  22.3010   0.0339
    0.2000  24.2973   0.0914  19.7156   0.0456  22.3518   0.0681
@@ -1453,7 +1453,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
    0.7000  25.3747   0.3547  20.2428   0.1696  23.1461   0.2581
    0.8000  25.7595   0.4202  20.4258   0.1979  23.4254   0.3032
    0.9000  26.2126   0.4928  20.6380   0.2280  23.7513   0.3520
-
+  
 
 ================================================================================
 == DATASET  8 ==================================================================
@@ -1479,10 +1479,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation
- in frequency domain and reciprocal space on a transitions basis set.
- Based on a program developed by L. Reining, V. Olevano, F. Sottile,
- S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi.
+ Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation 
+ in frequency domain and reciprocal space on a transitions basis set. 
+ Based on a program developed by L. Reining, V. Olevano, F. Sottile, 
+ S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi. 
 
 .Using double precision arithmetic ; gwpc =  8
 
@@ -1496,18 +1496,18 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     2
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)    -2.50000000E-01  5.00000000E-01  0.00000000E+00       0.75000
      2)    -2.50000000E-01  0.00000000E+00  0.00000000E+00       0.25000
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)    -2.50000000E-01  0.00000000E+00  2.50000000E-01       0.37500
@@ -1516,7 +1516,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
      5)    -2.50000000E-01  0.00000000E+00 -2.50000000E-01       0.18750
      6)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.18750
 
- Together with 24 symmetry operations and time-reversal symmetry
+ Together with 24 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
 
 
@@ -1570,9 +1570,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
  First excitonic eigenvalue:    3.33 [eV].
  Last  excitonic eigenvalue:   13.19 [eV].
 
- GW  direct gap       3.52  0.00 [eV]
- EXC direct gap       3.33  0.00 [eV]
- EXC binding energy   0.19  0.00 [eV]
+ GW  direct gap       3.52  0.00 [eV] 
+ EXC direct gap       3.33  0.00 [eV] 
+ EXC binding energy   0.19  0.00 [eV] 
 
  Excitonic eigenvalues up to the GW energy gap [eV]
 385 (  3.33  0.00)
@@ -1591,10 +1591,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
 398 (  3.45  0.00)
 399 (  3.45  0.00)
 400 (  3.45  0.00)
-
+  
  Macroscopic dielectric function:
- omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
-   0.0000  24.2067   0.0000  19.6703   0.0000  21.0330  -0.0000
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  24.2067   0.0000  19.6703   0.0000  21.0330   0.0000
    0.1000  24.2293   0.0454  19.6816   0.0227  21.0480   0.0301
    0.2000  24.2973   0.0914  19.7156   0.0456  21.0931   0.0605
    0.3000  24.4117   0.1387  19.7726   0.0688  21.1688   0.0916
@@ -1604,14 +1604,14 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
    0.7000  25.3747   0.3547  20.2428   0.1696  21.7975   0.2282
    0.8000  25.7595   0.4202  20.4258   0.1979  22.0443   0.2676
    0.9000  26.2126   0.4928  20.6380   0.2280  22.3317   0.3100
-
+  
  Writing KS-RPA macroscopic dielectric function without local fields to file: t11o_DS8_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t11o_DS8_GW_NLF_MDF
  Writing EXC Macroscopic dielectric function to file: t11o_DS8_EXC_MDF
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
@@ -1639,14 +1639,14 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
       bs_coupling6          0
       bs_coupling7          0
       bs_coupling8          1
-     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh3     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh4     0.00000000E+00  3.67493254E-01  3.67493254E-03 Hartree
-     bs_freq_mesh5     0.00000000E+00  3.67493254E-01  3.67493254E-03 Hartree
-     bs_freq_mesh6     0.00000000E+00  3.67493254E-01  3.67493254E-03 Hartree
-     bs_freq_mesh7     0.00000000E+00  3.67493254E-01  3.67493254E-03 Hartree
-     bs_freq_mesh8     0.00000000E+00  3.67493254E-01  3.67493254E-03 Hartree
+     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh3     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh4     0.00000000E+00  3.67493222E-01  3.67493222E-03 Hartree
+     bs_freq_mesh5     0.00000000E+00  3.67493222E-01  3.67493222E-03 Hartree
+     bs_freq_mesh6     0.00000000E+00  3.67493222E-01  3.67493222E-03 Hartree
+     bs_freq_mesh7     0.00000000E+00  3.67493222E-01  3.67493222E-03 Hartree
+     bs_freq_mesh8     0.00000000E+00  3.67493222E-01  3.67493222E-03 Hartree
  bs_haydock_niter1        100
  bs_haydock_niter2        100
  bs_haydock_niter3        100
@@ -1770,11 +1770,11 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
        mbpt_sciss1     0.00000000E+00 Hartree
        mbpt_sciss2     0.00000000E+00 Hartree
        mbpt_sciss3     0.00000000E+00 Hartree
-       mbpt_sciss4     2.93994603E-02 Hartree
-       mbpt_sciss5     2.93994603E-02 Hartree
-       mbpt_sciss6     2.93994603E-02 Hartree
-       mbpt_sciss7     2.93994603E-02 Hartree
-       mbpt_sciss8     2.93994603E-02 Hartree
+       mbpt_sciss4     2.93994577E-02 Hartree
+       mbpt_sciss5     2.93994577E-02 Hartree
+       mbpt_sciss6     2.93994577E-02 Hartree
+       mbpt_sciss7     2.93994577E-02 Hartree
+       mbpt_sciss8     2.93994577E-02 Hartree
        mdf_epsinf      1.20000000E+01
 P           mkmem           2
             natom           2
@@ -1905,7 +1905,7 @@ P           mkmem           2
             typat      1  1
               wtk        0.75000    0.25000
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1951,7 +1951,7 @@ P           mkmem           2
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1963,12 +1963,12 @@ P           mkmem           2
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1986,7 +1986,7 @@ P           mkmem           2
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -2001,15 +2001,15 @@ P           mkmem           2
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         15.4  wall=         18.5
+- Proc.   0 individual time (sec): cpu=         16.1  wall=         16.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  16 WARNINGs and  23 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.4  wall=         18.5
+.Delivered  16 WARNINGs and  26 COMMENTs to log file.
++Overall time at end (sec) : cpu=         16.1  wall=         16.2

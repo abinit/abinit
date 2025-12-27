@@ -1959,7 +1959,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
          call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111) 
        endif
        if(.not.rcpaw%all_atoms_relaxed.and.any(rcpaw%atm(:)%zcore_orig>0)) then
-         optn=1
+         optn=n3xccc/nfftf
          if(rcpaw%istep>rcpaw%updatetnc.and.rcpaw%updatetnc>0) optn=0
          call atm2fft(atindx1,xccc3d,vpsp,dummy01,dummy02,dummy03,dummy04,&
 &         gmet,gprimd,dummy05,dummy06,gsqcut,mgfftf,psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,psps%ntypat,&

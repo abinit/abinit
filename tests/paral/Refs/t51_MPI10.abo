@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h35 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI10/paral_t51_MPI10-t52_MPI10-t53_MPI10/t51.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h28 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI10/paral_t51_MPI10-t52_MPI10-t53_MPI10/t51.abi
 - output file    -> t51_MPI10.abo
 - root for input  files -> t51_MPI10i
 - root for output files -> t51_MPI10o
@@ -174,8 +174,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10256
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/13al.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosGTH_pwteter/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosGTH_pwteter/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -187,8 +187,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -5.99108991
          --- l  ekb(1:nproj) -->
@@ -269,19 +269,19 @@ tolerances: {tolvrs: 1.00E-18, }
  Fermi (or HOMO) energy (eV) =   9.67047   Average Vxc (eV)=  -9.43576
  Eigenvalues (   eV  ) for nkpt=  10  k points:
  kpt#   1, nband=  6, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
-  -0.15343   15.10087   18.73440   20.30314   21.53764   24.08842
+  -0.15343   15.10087   18.73440   20.30315   21.53765   24.08842
  kpt#   2, nband=  6, wtk=  0.09375, kpt= -0.1250  0.5000  0.0000 (reduced coord)
-   4.31696    6.56998   17.42282   18.71538   20.54351   24.93876
+   4.31696    6.56998   17.42283   18.71539   20.54351   24.93876
  kpt#   3, nband=  6, wtk=  0.09375, kpt= -0.2500 -0.3750  0.0000 (reduced coord)
-   2.09239   12.93197   15.35737   16.68144   18.27832   22.27609
+   2.09239   12.93197   15.35737   16.68145   18.27833   22.27610
  kpt#   4, nband=  6, wtk=  0.18750, kpt= -0.1250 -0.3750  0.1250 (reduced coord)
-   3.21236    9.76441   14.31987   16.44496   22.73060   24.88415
+   3.21236    9.76441   14.31988   16.44496   22.73060   24.88415
  kpt#   5, nband=  6, wtk=  0.09375, kpt= -0.1250  0.2500  0.0000 (reduced coord)
    0.97399   11.93212   16.40967   21.70840   23.85776   24.05740
  kpt#   6, nband=  6, wtk=  0.09375, kpt= -0.2500  0.3750  0.0000 (reduced coord)
-   5.41904    7.60266   12.24218   17.69882   19.62037   28.35649
+   5.41904    7.60266   12.24218   17.69883   19.62037   28.35649
  kpt#   7, nband=  6, wtk=  0.09375, kpt= -0.3750  0.5000  0.0000 (reduced coord)
-   5.37938   10.01773   11.90565   15.67519   17.19784   21.33641
+   5.37938   10.01773   11.90566   15.67519   17.19785   21.33641
  kpt#   8, nband=  6, wtk=  0.18750, kpt= -0.2500  0.5000  0.1250 (reduced coord)
    6.46886    8.66741   11.13489   13.36760   21.78101   25.97636
  kpt#   9, nband=  6, wtk=  0.03125, kpt= -0.1250  0.0000  0.0000 (reduced coord)
@@ -339,23 +339,23 @@ tolerances: {tolvrs: 1.00E-18, }
  kpt#   1, nband=  6, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
   -0.16868   15.06087   18.63133   20.28569   21.47618   23.98903
  kpt#   2, nband=  6, wtk=  0.09375, kpt= -0.1250  0.5000  0.0000 (reduced coord)
-   4.32423    6.56094   17.38604   18.64577   20.52232   24.74921
+   4.32424    6.56094   17.38604   18.64577   20.52232   24.74921
  kpt#   3, nband=  6, wtk=  0.09375, kpt= -0.2500 -0.3750  0.0000 (reduced coord)
    2.09450   12.92682   15.34154   16.62385   18.26960   22.22228
  kpt#   4, nband=  6, wtk=  0.18750, kpt= -0.1250 -0.3750  0.1250 (reduced coord)
    3.21556    9.76032   14.29963   16.40027   22.68944   24.83120
  kpt#   5, nband=  6, wtk=  0.09375, kpt= -0.1250  0.2500  0.0000 (reduced coord)
-   0.96814   11.91525   16.37080   21.60302   23.64597   23.78840
+   0.96814   11.91525   16.37080   21.60302   23.64597   23.78841
  kpt#   6, nband=  6, wtk=  0.09375, kpt= -0.2500  0.3750  0.0000 (reduced coord)
-   5.42613    7.59744   12.21948   17.63664   19.61031   27.80743
+   5.42613    7.59744   12.21948   17.63665   19.61031   27.80744
  kpt#   7, nband=  6, wtk=  0.09375, kpt= -0.3750  0.5000  0.0000 (reduced coord)
    5.38443   10.01722   11.88882   15.61985   17.19543   21.28564
  kpt#   8, nband=  6, wtk=  0.18750, kpt= -0.2500  0.5000  0.1250 (reduced coord)
-   6.47505    8.66608   11.12397   13.31649   21.74666   25.87001
+   6.47506    8.66608   11.12397   13.31649   21.74666   25.87001
  kpt#   9, nband=  6, wtk=  0.03125, kpt= -0.1250  0.0000  0.0000 (reduced coord)
-  -1.31381   18.15952   21.60446   21.60446   24.54874   25.50333
+  -1.31381   18.15953   21.60446   21.60446   24.54874   25.50333
  kpt#  10, nband=  6, wtk=  0.03125, kpt= -0.3750  0.0000  0.0000 (reduced coord)
-   2.09760    8.73883   20.64334   20.64334   22.73625   22.73739
+   2.09760    8.73883   20.64334   20.64334   22.73626   22.73739
 
  ETOT  3  -2.0931343747883    -9.205E-06 3.069E-05 7.170E-05
 
@@ -409,21 +409,21 @@ tolerances: {tolvrs: 1.00E-18, }
  kpt#   2, nband=  6, wtk=  0.09375, kpt= -0.1250  0.5000  0.0000 (reduced coord)
    4.31940    6.55301   17.37340   18.62637   20.51361   24.72887
  kpt#   3, nband=  6, wtk=  0.09375, kpt= -0.2500 -0.3750  0.0000 (reduced coord)
-   2.08899   12.91904   15.33210   16.60597   18.26220   22.20732
+   2.08899   12.91904   15.33211   16.60598   18.26220   22.20733
  kpt#   4, nband=  6, wtk=  0.18750, kpt= -0.1250 -0.3750  0.1250 (reduced coord)
    3.21009    9.75302   14.28950   16.38555   22.67572   24.81587
  kpt#   5, nband=  6, wtk=  0.09375, kpt= -0.1250  0.2500  0.0000 (reduced coord)
    0.96264   11.90704   16.35754   21.57752   23.63656   23.77289
  kpt#   6, nband=  6, wtk=  0.09375, kpt= -0.2500  0.3750  0.0000 (reduced coord)
-   5.42133    7.58996   12.20947   17.61793   19.60340   27.77782
+   5.42133    7.58996   12.20947   17.61793   19.60340   27.77783
  kpt#   7, nband=  6, wtk=  0.09375, kpt= -0.3750  0.5000  0.0000 (reduced coord)
-   5.37906   10.01143   11.87897   15.60245   17.18912   21.27121
+   5.37906   10.01143   11.87897   15.60246   17.18912   21.27121
  kpt#   8, nband=  6, wtk=  0.18750, kpt= -0.2500  0.5000  0.1250 (reduced coord)
    6.47019    8.65978   11.11613   13.30094   21.73452   25.85235
  kpt#   9, nband=  6, wtk=  0.03125, kpt= -0.1250  0.0000  0.0000 (reduced coord)
   -1.31925   18.14718   21.58409   21.58409   24.53489   25.47181
  kpt#  10, nband=  6, wtk=  0.03125, kpt= -0.3750  0.0000  0.0000 (reduced coord)
-   2.09213    8.73117   20.62069   20.62069   22.71921   22.71934
+   2.09213    8.73117   20.62069   20.62069   22.71922   22.71934
 
  ETOT  4  -2.0931344077723    -3.298E-08 1.325E-05 3.005E-07
 
@@ -475,23 +475,23 @@ tolerances: {tolvrs: 1.00E-18, }
  kpt#   1, nband=  6, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
   -0.17388   15.05100   18.61188   20.27644   21.45848   23.97533
  kpt#   2, nband=  6, wtk=  0.09375, kpt= -0.1250  0.5000  0.0000 (reduced coord)
-   4.31967    6.55307   17.37329   18.62585   20.51372   24.72834
+   4.31967    6.55307   17.37330   18.62586   20.51372   24.72834
  kpt#   3, nband=  6, wtk=  0.09375, kpt= -0.2500 -0.3750  0.0000 (reduced coord)
-   2.08923   12.91900   15.33219   16.60553   18.26221   22.20739
+   2.08923   12.91900   15.33220   16.60553   18.26222   22.20739
  kpt#   4, nband=  6, wtk=  0.18750, kpt= -0.1250 -0.3750  0.1250 (reduced coord)
    3.21032    9.75304   14.28958   16.38532   22.67550   24.81560
  kpt#   5, nband=  6, wtk=  0.09375, kpt= -0.1250  0.2500  0.0000 (reduced coord)
-   0.96290   11.90700   16.35741   21.57670   23.63668   23.77255
+   0.96290   11.90700   16.35741   21.57671   23.63668   23.77256
  kpt#   6, nband=  6, wtk=  0.09375, kpt= -0.2500  0.3750  0.0000 (reduced coord)
    5.42158    7.58998   12.20959   17.61745   19.60361   27.77624
  kpt#   7, nband=  6, wtk=  0.09375, kpt= -0.3750  0.5000  0.0000 (reduced coord)
    5.37922   10.01182   11.87879   15.60203   17.18920   21.27133
  kpt#   8, nband=  6, wtk=  0.18750, kpt= -0.2500  0.5000  0.1250 (reduced coord)
-   6.47038    8.65986   11.11638   13.30071   21.73435   25.85219
+   6.47038    8.65986   11.11638   13.30071   21.73435   25.85220
  kpt#   9, nband=  6, wtk=  0.03125, kpt= -0.1250  0.0000  0.0000 (reduced coord)
-  -1.31897   18.14690   21.58346   21.58346   24.53375   25.47071
+  -1.31897   18.14690   21.58346   21.58346   24.53375   25.47072
  kpt#  10, nband=  6, wtk=  0.03125, kpt= -0.3750  0.0000  0.0000 (reduced coord)
-   2.09238    8.73123   20.62000   20.62000   22.71885   22.71886
+   2.09238    8.73123   20.62000   20.62000   22.71885   22.71887
 
  ETOT  5  -2.0931344078394    -6.712E-11 5.884E-07 1.204E-08
 
@@ -543,23 +543,23 @@ tolerances: {tolvrs: 1.00E-18, }
  kpt#   1, nband=  6, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
   -0.17385   15.05102   18.61190   20.27644   21.45849   23.97534
  kpt#   2, nband=  6, wtk=  0.09375, kpt= -0.1250  0.5000  0.0000 (reduced coord)
-   4.31970    6.55309   17.37331   18.62587   20.51373   24.72835
+   4.31970    6.55309   17.37332   18.62587   20.51373   24.72835
  kpt#   3, nband=  6, wtk=  0.09375, kpt= -0.2500 -0.3750  0.0000 (reduced coord)
    2.08926   12.91902   15.33222   16.60555   18.26222   22.20739
  kpt#   4, nband=  6, wtk=  0.18750, kpt= -0.1250 -0.3750  0.1250 (reduced coord)
    3.21035    9.75306   14.28961   16.38534   22.67551   24.81560
  kpt#   5, nband=  6, wtk=  0.09375, kpt= -0.1250  0.2500  0.0000 (reduced coord)
-   0.96293   11.90702   16.35743   21.57670   23.63669   23.77258
+   0.96293   11.90702   16.35743   21.57671   23.63669   23.77258
  kpt#   6, nband=  6, wtk=  0.09375, kpt= -0.2500  0.3750  0.0000 (reduced coord)
-   5.42161    7.59000   12.20962   17.61747   19.60361   27.77611
+   5.42161    7.59000   12.20962   17.61747   19.60362   27.77611
  kpt#   7, nband=  6, wtk=  0.09375, kpt= -0.3750  0.5000  0.0000 (reduced coord)
-   5.37925   10.01186   11.87880   15.60206   17.18921   21.27133
+   5.37925   10.01186   11.87880   15.60206   17.18921   21.27134
  kpt#   8, nband=  6, wtk=  0.18750, kpt= -0.2500  0.5000  0.1250 (reduced coord)
    6.47041    8.65989   11.11641   13.30072   21.73435   25.85219
  kpt#   9, nband=  6, wtk=  0.03125, kpt= -0.1250  0.0000  0.0000 (reduced coord)
   -1.31894   18.14691   21.58347   21.58347   24.53353   25.47069
  kpt#  10, nband=  6, wtk=  0.03125, kpt= -0.3750  0.0000  0.0000 (reduced coord)
-   2.09241    8.73125   20.62001   20.62001   22.71887   22.71888
+   2.09241    8.73125   20.62001   20.62001   22.71888   22.71888
 
  ETOT  6  -2.0931344078402    -8.131E-13 4.707E-07 3.700E-11
 
@@ -619,7 +619,7 @@ tolerances: {tolvrs: 1.00E-18, }
  kpt#   5, nband=  6, wtk=  0.09375, kpt= -0.1250  0.2500  0.0000 (reduced coord)
    0.96293   11.90702   16.35743   21.57670   23.63669   23.77258
  kpt#   6, nband=  6, wtk=  0.09375, kpt= -0.2500  0.3750  0.0000 (reduced coord)
-   5.42162    7.59000   12.20962   17.61747   19.60362   27.77609
+   5.42162    7.59000   12.20962   17.61747   19.60362   27.77610
  kpt#   7, nband=  6, wtk=  0.09375, kpt= -0.3750  0.5000  0.0000 (reduced coord)
    5.37925   10.01186   11.87880   15.60206   17.18921   21.27134
  kpt#   8, nband=  6, wtk=  0.18750, kpt= -0.2500  0.5000  0.1250 (reduced coord)
@@ -627,7 +627,7 @@ tolerances: {tolvrs: 1.00E-18, }
  kpt#   9, nband=  6, wtk=  0.03125, kpt= -0.1250  0.0000  0.0000 (reduced coord)
   -1.31894   18.14691   21.58347   21.58347   24.53349   25.47069
  kpt#  10, nband=  6, wtk=  0.03125, kpt= -0.3750  0.0000  0.0000 (reduced coord)
-   2.09241    8.73125   20.62001   20.62001   22.71887   22.71887
+   2.09241    8.73125   20.62001   20.62001   22.71888   22.71888
 
  ETOT  7  -2.0931344078402    -2.087E-14 2.217E-08 3.017E-13
 
@@ -679,7 +679,7 @@ tolerances: {tolvrs: 1.00E-18, }
  kpt#   1, nband=  6, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
   -0.17385   15.05102   18.61190   20.27644   21.45849   23.97535
  kpt#   2, nband=  6, wtk=  0.09375, kpt= -0.1250  0.5000  0.0000 (reduced coord)
-   4.31970    6.55309   17.37332   18.62587   20.51373   24.72835
+   4.31970    6.55309   17.37332   18.62587   20.51373   24.72836
  kpt#   3, nband=  6, wtk=  0.09375, kpt= -0.2500 -0.3750  0.0000 (reduced coord)
    2.08927   12.91902   15.33222   16.60555   18.26222   22.20740
  kpt#   4, nband=  6, wtk=  0.18750, kpt= -0.1250 -0.3750  0.1250 (reduced coord)
@@ -691,11 +691,11 @@ tolerances: {tolvrs: 1.00E-18, }
  kpt#   7, nband=  6, wtk=  0.09375, kpt= -0.3750  0.5000  0.0000 (reduced coord)
    5.37925   10.01186   11.87880   15.60206   17.18921   21.27134
  kpt#   8, nband=  6, wtk=  0.18750, kpt= -0.2500  0.5000  0.1250 (reduced coord)
-   6.47041    8.65989   11.11642   13.30072   21.73435   25.85219
+   6.47041    8.65989   11.11642   13.30072   21.73436   25.85219
  kpt#   9, nband=  6, wtk=  0.03125, kpt= -0.1250  0.0000  0.0000 (reduced coord)
   -1.31894   18.14691   21.58347   21.58347   24.53348   25.47069
  kpt#  10, nband=  6, wtk=  0.03125, kpt= -0.3750  0.0000  0.0000 (reduced coord)
-   2.09241    8.73125   20.62001   20.62001   22.71887   22.71887
+   2.09241    8.73126   20.62001   20.62001   22.71888   22.71888
 
  ETOT  8  -2.0931344078402     1.732E-14 1.734E-08 1.223E-15
 
@@ -747,7 +747,7 @@ tolerances: {tolvrs: 1.00E-18, }
  kpt#   1, nband=  6, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
   -0.17385   15.05102   18.61190   20.27644   21.45849   23.97535
  kpt#   2, nband=  6, wtk=  0.09375, kpt= -0.1250  0.5000  0.0000 (reduced coord)
-   4.31970    6.55309   17.37332   18.62587   20.51373   24.72835
+   4.31970    6.55309   17.37332   18.62587   20.51373   24.72836
  kpt#   3, nband=  6, wtk=  0.09375, kpt= -0.2500 -0.3750  0.0000 (reduced coord)
    2.08927   12.91902   15.33222   16.60555   18.26222   22.20740
  kpt#   4, nband=  6, wtk=  0.18750, kpt= -0.1250 -0.3750  0.1250 (reduced coord)
@@ -759,11 +759,11 @@ tolerances: {tolvrs: 1.00E-18, }
  kpt#   7, nband=  6, wtk=  0.09375, kpt= -0.3750  0.5000  0.0000 (reduced coord)
    5.37925   10.01186   11.87880   15.60206   17.18921   21.27134
  kpt#   8, nband=  6, wtk=  0.18750, kpt= -0.2500  0.5000  0.1250 (reduced coord)
-   6.47041    8.65989   11.11642   13.30072   21.73435   25.85219
+   6.47041    8.65989   11.11642   13.30072   21.73436   25.85219
  kpt#   9, nband=  6, wtk=  0.03125, kpt= -0.1250  0.0000  0.0000 (reduced coord)
   -1.31894   18.14691   21.58347   21.58347   24.53348   25.47069
  kpt#  10, nband=  6, wtk=  0.03125, kpt= -0.3750  0.0000  0.0000 (reduced coord)
-   2.09241    8.73125   20.62001   20.62001   22.71887   22.71887
+   2.09241    8.73126   20.62001   20.62001   22.71888   22.71888
 
  ETOT  9  -2.0931344078402    -3.553E-15 8.629E-10 3.231E-18
 
@@ -815,7 +815,7 @@ tolerances: {tolvrs: 1.00E-18, }
  kpt#   1, nband=  6, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
   -0.17385   15.05102   18.61190   20.27644   21.45849   23.97535
  kpt#   2, nband=  6, wtk=  0.09375, kpt= -0.1250  0.5000  0.0000 (reduced coord)
-   4.31970    6.55309   17.37332   18.62587   20.51373   24.72835
+   4.31970    6.55309   17.37332   18.62587   20.51373   24.72836
  kpt#   3, nband=  6, wtk=  0.09375, kpt= -0.2500 -0.3750  0.0000 (reduced coord)
    2.08927   12.91902   15.33222   16.60555   18.26222   22.20740
  kpt#   4, nband=  6, wtk=  0.18750, kpt= -0.1250 -0.3750  0.1250 (reduced coord)
@@ -827,11 +827,11 @@ tolerances: {tolvrs: 1.00E-18, }
  kpt#   7, nband=  6, wtk=  0.09375, kpt= -0.3750  0.5000  0.0000 (reduced coord)
    5.37925   10.01186   11.87880   15.60206   17.18921   21.27134
  kpt#   8, nband=  6, wtk=  0.18750, kpt= -0.2500  0.5000  0.1250 (reduced coord)
-   6.47041    8.65989   11.11642   13.30072   21.73435   25.85219
+   6.47041    8.65989   11.11642   13.30072   21.73436   25.85219
  kpt#   9, nband=  6, wtk=  0.03125, kpt= -0.1250  0.0000  0.0000 (reduced coord)
   -1.31894   18.14691   21.58347   21.58347   24.53348   25.47069
  kpt#  10, nband=  6, wtk=  0.03125, kpt= -0.3750  0.0000  0.0000 (reduced coord)
-   2.09241    8.73125   20.62001   20.62001   22.71887   22.71887
+   2.09241    8.73126   20.62001   20.62001   22.71888   22.71888
 
  ETOT 10  -2.0931344078402     5.329E-15 6.458E-10 2.520E-21
 
@@ -883,7 +883,7 @@ tolerances: {tolvrs: 1.00E-18, }
  kpt#   1, nband=  6, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
   -0.17385   15.05102   18.61190   20.27644   21.45849   23.97535
  kpt#   2, nband=  6, wtk=  0.09375, kpt= -0.1250  0.5000  0.0000 (reduced coord)
-   4.31970    6.55309   17.37332   18.62587   20.51373   24.72835
+   4.31970    6.55309   17.37332   18.62587   20.51373   24.72836
  kpt#   3, nband=  6, wtk=  0.09375, kpt= -0.2500 -0.3750  0.0000 (reduced coord)
    2.08927   12.91902   15.33222   16.60555   18.26222   22.20740
  kpt#   4, nband=  6, wtk=  0.18750, kpt= -0.1250 -0.3750  0.1250 (reduced coord)
@@ -895,11 +895,11 @@ tolerances: {tolvrs: 1.00E-18, }
  kpt#   7, nband=  6, wtk=  0.09375, kpt= -0.3750  0.5000  0.0000 (reduced coord)
    5.37925   10.01186   11.87880   15.60206   17.18921   21.27134
  kpt#   8, nband=  6, wtk=  0.18750, kpt= -0.2500  0.5000  0.1250 (reduced coord)
-   6.47041    8.65989   11.11642   13.30072   21.73435   25.85219
+   6.47041    8.65989   11.11642   13.30072   21.73436   25.85219
  kpt#   9, nband=  6, wtk=  0.03125, kpt= -0.1250  0.0000  0.0000 (reduced coord)
   -1.31894   18.14691   21.58347   21.58347   24.53348   25.47069
  kpt#  10, nband=  6, wtk=  0.03125, kpt= -0.3750  0.0000  0.0000 (reduced coord)
-   2.09241    8.73125   20.62001   20.62001   22.71887   22.71887
+   2.09241    8.73126   20.62001   20.62001   22.71888   22.71888
 
  At SCF step   10       vres2   =  2.52E-21 < tolvrs=  1.00E-18 =>converged.
 
@@ -980,7 +980,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.560000000000  7.560000000000  7.560000000000 bohr
-              =  4.000579696940  4.000579696940  4.000579696940 angstroms
+              =  4.000579711713  4.000579711713  4.000579711713 angstroms
  prteigrs : about to open file t51_MPI10o_EIG
  Fermi (or HOMO) energy (hartree) =   0.35500   Average Vxc (hartree)=  -0.34673
  Eigenvalues (hartree) for nkpt=  10  k points:
@@ -1029,7 +1029,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  kpt#   1, nband=  6, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
   -0.17385   15.05102   18.61190   20.27644   21.45849   23.97535
  kpt#   2, nband=  6, wtk=  0.09375, kpt= -0.1250  0.5000  0.0000 (reduced coord)
-   4.31970    6.55309   17.37332   18.62587   20.51373   24.72835
+   4.31970    6.55309   17.37332   18.62587   20.51373   24.72836
  kpt#   3, nband=  6, wtk=  0.09375, kpt= -0.2500 -0.3750  0.0000 (reduced coord)
    2.08927   12.91902   15.33222   16.60555   18.26222   22.20740
  kpt#   4, nband=  6, wtk=  0.18750, kpt= -0.1250 -0.3750  0.1250 (reduced coord)
@@ -1041,11 +1041,11 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  kpt#   7, nband=  6, wtk=  0.09375, kpt= -0.3750  0.5000  0.0000 (reduced coord)
    5.37925   10.01186   11.87880   15.60206   17.18921   21.27134
  kpt#   8, nband=  6, wtk=  0.18750, kpt= -0.2500  0.5000  0.1250 (reduced coord)
-   6.47041    8.65989   11.11642   13.30072   21.73435   25.85219
+   6.47041    8.65989   11.11642   13.30072   21.73436   25.85219
  kpt#   9, nband=  6, wtk=  0.03125, kpt= -0.1250  0.0000  0.0000 (reduced coord)
   -1.31894   18.14691   21.58347   21.58347   24.53348   25.47069
  kpt#  10, nband=  6, wtk=  0.03125, kpt= -0.3750  0.0000  0.0000 (reduced coord)
-   2.09241    8.73125   20.62001   20.62001   22.71887   22.71887
+   2.09241    8.73126   20.62001   20.62001   22.71888   22.71888
  Total charge density [el/Bohr^3]
 )     Maximum=    3.3277E-02  at reduced coord.    0.8125    0.8750    0.8750
 )Next maximum=    3.3277E-02  at reduced coord.    0.4375    0.8750    0.8750
@@ -1066,7 +1066,7 @@ non_local_psp       :  3.74942589959988E-01
 internal            : -2.09218246968275E+00
 '-kT*entropy'       : -9.51938157439216E-04
 total_energy        : -2.09313440784019E+00
-total_energy_eV     : -5.69570838423132E+01
+total_energy_eV     : -5.69570888364921E+01
 band_energy         :  5.62669024855805E-01
 ...
 
@@ -1087,13 +1087,13 @@ band_energy         :  5.62669024855805E-01
   sigma(3 3)=  1.70547270E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.0177E-01 GPa]
-- sigma(1 1)=  5.01767306E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  5.01767306E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.01767306E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  5.01767391E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.01767391E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.01767391E-01  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      7.5600000000E+00  7.5600000000E+00  7.5600000000E+00 Bohr
               amu      2.69815390E+01
@@ -1177,52 +1177,54 @@ P           mkmem           1
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          3.3        0.06      0.001
-- Total wall clock time (s,m,h):          3.6        0.06      0.001
+- Total cpu        time (s,m,h):          3.6        0.06      0.001
+- Total wall clock time (s,m,h):          4.1        0.07      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            0.3, wall_time =            0.4
+- cpu_time =            0.4, wall_time =            0.4
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- get_dtsets_pspheads                       0.092   2.8         0.092   2.6              1      -1.00        1.00       1.00
-- abinit(chkinp,chkvars)                    0.045   1.3         0.045   1.3              1      -1.00        1.00       1.00
-- vtorho(MPI)                               0.023   0.7         0.023   0.7             10      -1.00        1.00       1.00
-- others (157)                              0.116   3.5         0.137   3.8             -1      -1.00        0.85       0.85
+- get_dtsets_pspheads                       0.097   2.7         0.097   2.4              1      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.051   1.4         0.051   1.2              1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.025   0.7         0.025   0.6            287      -1.00        1.00       1.00
+- fourdp                                    0.020   0.6         0.074   1.8             51      -1.00        0.27       0.27
+- others (206)                              0.093   2.6         0.094   2.3             -1      -1.00        0.99       0.99
 -<END_TIMER>
 -
-- subtotal                                  0.276   8.3         0.297   8.4                                  0.93       0.93
+- subtotal                                  0.287   8.0         0.342   8.3                                  0.84       0.84
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls
+- as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           3.3, wall_time =           3.6
+- cpu_time =           3.6, wall_time =           4.1
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- get_dtsets_pspheads                       0.850  25.4         0.850  23.9             10      -1.00        1.00       1.00
-- abinit(chkinp,chkvars)                    0.571  17.0         0.571  16.1             10      -1.00        1.00       1.00
-- fourwf%(pot)                              0.224   6.7         0.224   6.3           2870      -1.00        1.00       1.00
-- fourdp                                    0.182   5.4         0.383  10.8            510      -1.00        0.48       0.48
-- ewald                                     0.095   2.8         0.095   2.7             10      -1.00        1.00       1.00
-- stress                                    0.089   2.7         0.089   2.5             10      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)                        0.086   2.6         0.086   2.4             10      -1.00        1.00       1.00
-- abinit(init,iofn1,herald)                 0.086   2.6         0.086   2.4             10      -1.00        0.99       0.99
-- scfcv-scprqt                              0.057   1.7         0.057   1.6            100      -1.00        1.00       1.00
-- abinit(outvars)                           0.046   1.4         0.046   1.3             10      -1.00        1.00       1.00
-- vtorho(MPI)                               0.038   1.1         0.038   1.1            100      -1.00        1.00       1.00
-- nonlop(apply)                             0.036   1.1         0.036   1.0           2870      -1.00        0.99       0.99
-- mkrho/=                                   0.036   1.1         0.036   1.0            200      -1.00        1.00       1.00
-- xc:pot/=fourdp                            0.022   0.7         0.022   0.6            110      -1.00        1.00       1.00
-- projbd                                    0.020   0.6         0.020   0.6           4300      -1.00        1.00       1.00
-- others (145)                              0.113   3.4         0.112   3.2             -1      -1.00        1.01       1.01
+- get_dtsets_pspheads                       0.885  24.7         0.887  21.5             10      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.642  17.9         0.642  15.6             10      -1.00        1.00       1.00
+- fourwf%(pot)                              0.238   6.6         0.239   5.8           2870      -1.00        1.00       1.00
+- fourdp                                    0.206   5.7         0.741  18.0            510      -1.00        0.28       0.28
+- scfcv-scprqt                              0.114   3.2         0.114   2.8            100      -1.00        1.00       1.00
+- ewald                                     0.094   2.6         0.094   2.3             10      -1.00        1.00       1.00
+- abinit(init,iofn1,herald)                 0.088   2.5         0.089   2.2             10      -1.00        0.99       0.99
+- stress                                    0.084   2.4         0.084   2.0             10      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)                        0.081   2.3         0.081   2.0             10      -1.00        1.00       1.00
+- mkrho/=                                   0.074   2.1         0.074   1.8            200      -1.00        1.00       1.00
+- vtorho(MPI)                               0.050   1.4         0.050   1.2            100      -1.00        1.00       1.00
+- abinit(outvars)                           0.046   1.3         0.046   1.1             10      -1.00        1.00       1.00
+- nonlop(apply)                             0.036   1.0         0.036   0.9           2870      -1.00        0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.026   0.7         0.025   0.6            -10      -1.00        1.04       1.04
+- xc:pot/=fourdp                            0.022   0.6         0.022   0.5            110      -1.00        1.00       1.00
+- projbd                                    0.022   0.6         0.022   0.5           4300      -1.00        0.99       0.99
+- others (194)                              0.092   2.6         0.092   2.2             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                                  2.551  76.2         2.753  77.5                                  0.93       0.93
+- subtotal                                  2.802  78.2         3.340  81.0                                  0.84       0.84
 
 ================================================================================
 
@@ -1251,7 +1253,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1263,12 +1265,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1286,7 +1288,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1301,15 +1303,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.4
+- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.5  wall=          3.7
++Overall time at end (sec) : cpu=          3.7  wall=          4.2
