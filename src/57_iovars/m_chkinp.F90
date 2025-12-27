@@ -798,7 +798,19 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
        if (dt%dmft_solv>=5.and.dt%dmft_solv/=6.and.dt%dmft_solv/=7) then
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
-         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,3,(/0,1,2/),iout)
+         if (dt%dmft_solv == 6 .or. dt%dmft_solv == 7 ) then
+           call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,5,(/0,1,2,3,4/),iout)
+           if (dt%dmftctqmc_basis == 4) then
+             cond_string(1)='dmftctqmc_basis' ; cond_values(1)=dt%dmftctqmc_basis
+             call chkint_eq(0,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
+           end if
+         else
+           call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_basis',dt%dmftctqmc_basis,4,(/0,1,2,4/),iout)
+           if (dt%dmftctqmc_basis == 4) then
+              cond_string(1)='dmftctqmc_basis' ; cond_values(1)=dt%dmftctqmc_basis
+              call chkint_eq(0,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/2/),iout)
+            end if
+         end if
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmftctqmc_check',dt%dmftctqmc_check,4,(/0,1,2,3/),iout)
          cond_string(1)='dmft_solv' ; cond_values(1)=dt%dmft_solv
@@ -4603,7 +4615,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ! If SCF calculations, one and only one of these can differ from zero
      if ( (dt%iscf>0 .or. dt%iscf==-3) .and. &
        & ( (ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag>1) .or. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag/=1) ) ) then
-       write(msg,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,i0,2a)' )&
+       write(msg,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,es14.6,a,i0,2a)' )&
         'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
         'toldff, tolrff, toldfe, toldmag or tolvrs ','must differ from zero, while they are',ch10,&
         'toldff=',dt%toldff,', tolrff=',dt%tolrff,', toldfe=',dt%toldfe,ch10,&

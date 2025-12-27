@@ -1,5 +1,5 @@
 
-.Version 10.4.5.1 of ABINIT, released Sep 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  1 Oct 2025.
-- ( at 15h46 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h17 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t75.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t75.abi
 - output file    -> t75.abo
 - root for input  files -> t75i
 - root for output files -> t75o
@@ -51,7 +51,7 @@ _ WF disk file :      0.858 Mbytes ; DEN or POT disk file :      0.048 Mbytes.
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
-            acell      8.5037675980E+00  8.5037675980E+00  8.5037675980E+00 Bohr
+            acell      8.5037675666E+00  8.5037675666E+00  8.5037675666E+00 Bohr
               amu      5.49380500E+01  1.59994000E+01
           chkprim           0
       chksymbreak           0
@@ -72,7 +72,7 @@ _ WF disk file :      0.858 Mbytes ; DEN or POT disk file :      0.048 Mbytes.
                       -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
            kptopt           3
          kptrlatt        2    0    0      0    2    0      0    0    2
-          kptrlen      1.20261435E+01
+          kptrlen      1.20261434E+01
 P           mkmem           8
 P          mkqmem           8
 P          mk1mem           8
@@ -115,15 +115,15 @@ P          mk1mem           8
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
                          0.12500    0.12500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.2500000000E+00  2.2500000000E+00 -4.4916601543E-33
+                       2.2500000000E+00  2.2500000000E+00 -2.8577314912E-33
                        2.2500000000E+00  2.2500000000E+00  2.2500000000E+00
                        4.5000000000E+00  4.5000000000E+00  2.2500000000E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       4.2518837990E+00  4.2518837990E+00 -8.4880075737E-33
-                       4.2518837990E+00  4.2518837990E+00  4.2518837990E+00
-                       8.5037675980E+00  8.5037675980E+00  4.2518837990E+00
+                       4.2518837833E+00  4.2518837833E+00 -5.4003298598E-33
+                       4.2518837833E+00  4.2518837833E+00  4.2518837833E+00
+                       8.5037675666E+00  8.5037675666E+00  4.2518837833E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -5.0720826009E-17  5.0720826009E-17  5.0000000000E-01
+                       2.5454218466E-17 -2.5454218466E-17  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  2.5000000000E-01
                        5.0000000000E-01  5.0000000000E-01  7.5000000000E-01
             znucl       25.00000    8.00000
@@ -162,8 +162,8 @@ meta: {optdriver: 1, rfelfd: 3, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.15099
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
 - Mn    ONCVPSP-3.3.0  r_core=   1.41250   1.20960   1.61055
 - 25.00000  15.00000    171221                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -180,8 +180,8 @@ meta: {optdriver: 1, rfelfd: 3, }
   spin-orbit 2    0.007940    0.003946
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
 - O     ONCVPSP-3.3.0  r_core=   1.35509   1.45563   1.35509
 -  8.00000   6.00000    171117                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -230,41 +230,41 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1  -3931.7161684570     -3.932E+03 1.213E+02 1.602E+04 2.277E-02 2.277E-02
- ETOT  2  -4190.7043533234     -2.590E+02 3.214E+01 1.959E+02 1.384E-02 3.660E-02
- ETOT  3  -4218.3135798845     -2.761E+01 2.854E+00 5.718E+01 5.013E-03 4.162E-02
- ETOT  4  -4226.8023528343     -8.489E+00 2.316E+00 7.842E+00 1.157E-02 5.319E-02
- ETOT  5  -4229.7212009624     -2.919E+00 3.937E-01 1.589E+00 3.746E-03 5.694E-02
- ETOT  6  -4230.7784815522     -1.057E+00 3.335E-01 8.165E-01 8.474E-03 6.541E-02
- ETOT  7  -4231.1729366518     -3.945E-01 5.879E-02 3.159E-02 2.718E-03 6.813E-02
- ETOT  8  -4231.3213040507     -1.484E-01 4.918E-02 5.569E-02 5.264E-03 7.339E-02
- ETOT  9  -4231.3782454962     -5.694E-02 8.462E-03 1.740E-02 2.196E-03 7.559E-02
- ETOT 10  -4231.4004555998     -2.221E-02 7.188E-03 9.802E-03 3.195E-03 7.878E-02
- ETOT 11  -4231.4093722261     -8.917E-03 1.211E-03 1.858E-03 2.013E-03 8.079E-02
- ETOT 12  -4231.4130799593     -3.708E-03 1.029E-03 2.290E-03 1.635E-03 8.243E-02
- ETOT 13  -4231.4147244471     -1.644E-03 1.731E-04 6.903E-04 1.311E-03 8.374E-02
- ETOT 14  -4231.4155112241     -7.868E-04 1.494E-04 9.635E-04 1.464E-03 8.520E-02
+-ETOT  1  -3931.7161286440     -3.932E+03 1.213E+02 1.602E+04 2.277E-02 2.277E-02
+ ETOT  2  -4190.7043049570     -2.590E+02 3.214E+01 1.959E+02 1.384E-02 3.660E-02
+ ETOT  3  -4218.3135299736     -2.761E+01 2.854E+00 5.718E+01 5.013E-03 4.162E-02
+ ETOT  4  -4226.8023021458     -8.489E+00 2.316E+00 7.842E+00 1.157E-02 5.319E-02
+ ETOT  5  -4229.7211498904     -2.919E+00 3.937E-01 1.589E+00 3.746E-03 5.694E-02
+ ETOT  6  -4230.7784303431     -1.057E+00 3.335E-01 8.165E-01 8.474E-03 6.541E-02
+ ETOT  7  -4231.1728854021     -3.945E-01 5.879E-02 3.159E-02 2.718E-03 6.813E-02
+ ETOT  8  -4231.3212527004     -1.484E-01 4.918E-02 5.569E-02 5.264E-03 7.339E-02
+ ETOT  9  -4231.3781941052     -5.694E-02 8.462E-03 1.740E-02 2.196E-03 7.559E-02
+ ETOT 10  -4231.4004042094     -2.221E-02 7.188E-03 9.803E-03 3.195E-03 7.878E-02
+ ETOT 11  -4231.4093207928     -8.917E-03 1.211E-03 1.858E-03 2.013E-03 8.079E-02
+ ETOT 12  -4231.4130285139     -3.708E-03 1.029E-03 2.290E-03 1.635E-03 8.243E-02
+ ETOT 13  -4231.4146730559     -1.645E-03 1.731E-04 6.903E-04 1.311E-03 8.374E-02
+ ETOT 14  -4231.4154598163     -7.868E-04 1.494E-04 9.634E-04 1.464E-03 8.520E-02
 -open ddk wf file :t75i_1WF13
 
  scprqt:  WARNING -
   nstep=   14 was not enough SCF cycles to converge;
-  potential residual=  9.635E-04 exceeds tolvrs=  1.000E-08
+  potential residual=  9.634E-04 exceeds tolvrs=  1.000E-08
 
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
-    1 Mn   2.00000       -0.000458      0.000110   -0.000092    0.000038    0.000048   64.267296  157.586811
-    2 Mn   2.00000        0.000447      0.000111    0.000093   -0.000038   -0.000048  115.548395  -22.073607
-    3  O   2.00000       -0.018872      0.085202    0.085072   -0.003793    0.002767   88.139010   -2.552725
-    4  O   2.00000        0.018868      0.085201   -0.085072    0.003792   -0.002767   91.861155  177.447501
+    1 Mn   2.00000       -0.000458      0.000110   -0.000092    0.000038    0.000048   64.266454  157.587221
+    2 Mn   2.00000        0.000447      0.000111    0.000093   -0.000038   -0.000048  115.549486  -22.073024
+    3  O   2.00000       -0.018872      0.085202    0.085072   -0.003793    0.002767   88.139110   -2.552666
+    4  O   2.00000        0.018868      0.085201   -0.085071    0.003792   -0.002767   91.861056  177.447561
  ------------------------------------------------------------------------------------------------------------
  Total magnetization (spheres)
  (cart.coord.)                                      0.000001    0.000000    0.000000
- (sph.coord.)                           0.000001                                       89.836675    1.963985
+ (sph.coord.)                           0.000001                                       89.851643    1.940866
  Total magnetization (exact)
  (cart.coord.)                                      0.000001    0.000001    0.000000
- (sph.coord.)                           0.000001                                       81.051484    0.000000
+ (sph.coord.)                           0.000001                                       81.050826    0.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -273,16 +273,16 @@ tolerances: {tolvrs: 1.00E-08, }
 
  Seven components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   1.60611859E+05 eigvalue=  -5.96173217E+04  local=  -9.05714091E+04
+     kin0=   1.60611854E+05 eigvalue=  -5.96173200E+04  local=  -9.05714061E+04
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-    dotwf=  -8.46185858E+03  Hartree=   8.06697046E+01     xc=  -5.67526168E+01
+    dotwf=  -8.46185848E+03  Hartree=   8.06697043E+01     xc=  -5.67526160E+01
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=  -6.21660193E+03   enl1=   0.00000000E+00
+    edocc=   0.00000000E+00     enl0=  -6.21660181E+03   enl1=   0.00000000E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -4.23141551E+03
+   erelax=  -4.23141546E+03
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.4231415511E+04 Ha. Also 2DEtotal=   -0.115142671747E+06 eV
-    (  non-var. 2DEtotal :   -4.2309292918E+03 Ha)
+ 2DEtotal=   -0.4231415460E+04 Ha. Also 2DEtotal=   -0.115142680444E+06 eV
+    (  non-var. 2DEtotal :   -4.2309292404E+03 Ha)
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
@@ -326,43 +326,43 @@ tolerances: {tolvrs: 1.00E-08, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    6      -114.9594852238         0.0000000000
+   1    1   1    6      -114.9594853694         0.0000000000
   
-   2    1   1    6        18.0260013757         0.0000000000
+   2    1   1    6        18.0260011782         0.0000000000
   
-   3    1   1    6       -11.1676418381         0.0000000000
+   3    1   1    6       -11.1676424339         0.0000000000
   
-   1    2   1    6      -114.9537856130         0.0000000000
+   1    2   1    6      -114.9537856795         0.0000000000
   
-   2    2   1    6        17.9587695373         0.0000000000
+   2    2   1    6        17.9587694201         0.0000000000
   
-   3    2   1    6       -11.1347169544         0.0000000000
+   3    2   1    6       -11.1347174366         0.0000000000
   
-   1    3   1    6        11.8811384991         0.0000000000
+   1    3   1    6        11.8811384774         0.0000000000
   
-   2    3   1    6       -15.6686067151         0.0000000000
+   2    3   1    6       -15.6686065911         0.0000000000
   
-   3    3   1    6         4.2855661656         0.0000000000
+   3    3   1    6         4.2855663517         0.0000000000
   
-   1    4   1    6        11.8805840592         0.0000000000
+   1    4   1    6        11.8805840221         0.0000000000
   
-   2    4   1    6       -15.6691600663         0.0000000000
+   2    4   1    6       -15.6691599486         0.0000000000
   
-   3    4   1    6         4.2755237150         0.0000000000
+   3    4   1    6         4.2755242788         0.0000000000
   
-   1    6   1    1      -114.9594852238         0.0000000000
-   1    6   2    1        18.0260013757         0.0000000000
-   1    6   3    1       -11.1676418381         0.0000000000
-   1    6   1    2      -114.9537856130         0.0000000000
-   1    6   2    2        17.9587695373         0.0000000000
-   1    6   3    2       -11.1347169544         0.0000000000
-   1    6   1    3        11.8811384991         0.0000000000
-   1    6   2    3       -15.6686067151         0.0000000000
-   1    6   3    3         4.2855661656         0.0000000000
-   1    6   1    4        11.8805840592         0.0000000000
-   1    6   2    4       -15.6691600663         0.0000000000
-   1    6   3    4         4.2755237150         0.0000000000
-   1    6   1    6     -4230.9292918076         0.0000000000
+   1    6   1    1      -114.9594853694         0.0000000000
+   1    6   2    1        18.0260011782         0.0000000000
+   1    6   3    1       -11.1676424339         0.0000000000
+   1    6   1    2      -114.9537856795         0.0000000000
+   1    6   2    2        17.9587694201         0.0000000000
+   1    6   3    2       -11.1347174366         0.0000000000
+   1    6   1    3        11.8811384774         0.0000000000
+   1    6   2    3       -15.6686065911         0.0000000000
+   1    6   3    3         4.2855663517         0.0000000000
+   1    6   1    4        11.8805840221         0.0000000000
+   1    6   2    4       -15.6691599486         0.0000000000
+   1    6   3    4         4.2755242788         0.0000000000
+   1    6   1    6     -4230.9292403748         0.0000000000
   
   
   Dielectric tensor, in cartesian coordinates,
@@ -381,14 +381,14 @@ tolerances: {tolvrs: 1.00E-08, }
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
-            acell      8.5037675980E+00  8.5037675980E+00  8.5037675980E+00 Bohr
+            acell      8.5037675666E+00  8.5037675666E+00  8.5037675666E+00 Bohr
               amu      5.49380500E+01  1.59994000E+01
           chkprim           0
       chksymbreak           0
            diemac      2.00000000E+01
            diemix      8.00000000E-01
              ecut      5.00000000E+00 Hartree
-           etotal     -4.2314155112E+03
+           etotal     -4.2314154598E+03
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -407,7 +407,7 @@ tolerances: {tolvrs: 1.00E-08, }
                       -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
            kptopt           3
          kptrlatt        2    0    0      0    2    0      0    0    2
-          kptrlen      1.20261435E+01
+          kptrlen      1.20261434E+01
 P           mkmem           8
 P          mkqmem           8
 P          mk1mem           8
@@ -452,15 +452,15 @@ P          mk1mem           8
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
                          0.12500    0.12500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.2500000000E+00  2.2500000000E+00 -4.4916601543E-33
+                       2.2500000000E+00  2.2500000000E+00 -2.8577314912E-33
                        2.2500000000E+00  2.2500000000E+00  2.2500000000E+00
                        4.5000000000E+00  4.5000000000E+00  2.2500000000E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       4.2518837990E+00  4.2518837990E+00 -8.4880075737E-33
-                       4.2518837990E+00  4.2518837990E+00  4.2518837990E+00
-                       8.5037675980E+00  8.5037675980E+00  4.2518837990E+00
+                       4.2518837833E+00  4.2518837833E+00 -5.4003298598E-33
+                       4.2518837833E+00  4.2518837833E+00  4.2518837833E+00
+                       8.5037675666E+00  8.5037675666E+00  4.2518837833E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -5.0720826009E-17  5.0720826009E-17  5.0000000000E-01
+                       2.5454218466E-17 -2.5454218466E-17  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  2.5000000000E-01
                        5.0000000000E-01  5.0000000000E-01  7.5000000000E-01
             znucl       25.00000    8.00000
@@ -560,10 +560,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         17.2  wall=         17.3
+- Proc.   0 individual time (sec): cpu=         16.8  wall=         16.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.2  wall=         17.3
++Overall time at end (sec) : cpu=         16.8  wall=         16.9

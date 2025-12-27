@@ -34,6 +34,7 @@ USE m_Stat
 USE m_FFTHyb
 USE m_OurRng
 USE m_Vector
+USE m_errors
 use m_io_tools, only : open_file
 use defs_basis
 
@@ -84,118 +85,126 @@ TYPE, PUBLIC :: Ctqmc
   LOGICAL _PRIVATE :: inF  = .FALSE.
 ! Flag: is hybridization fct in input ?
 
-  LOGICAL _PRIVATE :: done = .FALSE.
-! Flag: is MC terminated ?
+  LOGICAL :: done = .FALSE.
+! Flag: is MC terminated ? (PUBLIC for parallel)
 
-  LOGICAL _PRIVATE :: para = .FALSE.
-! Flag:  do we have parameters in input
+  LOGICAL :: para = .FALSE.
+! Flag:  do we have parameters in input (PUBLIC for parallel)
 
   LOGICAL _PRIVATE :: have_MPI = .FALSE.
 ! Flag:
 
-  INTEGER _PRIVATE :: opt_movie = 0
-!
+  INTEGER :: opt_movie = 0
+! (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: opt_analysis = 0
-! correlations
+  INTEGER :: opt_analysis = 0
+! correlations (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: opt_check = 0
-! various check 0
+  INTEGER :: opt_check = 0
+! various check 0 (PUBLIC for parallel)
 ! various check 1 impurity
 ! various check 2 bath
 ! various check 3 both
 
-  INTEGER _PRIVATE :: opt_order = 0
-! nb of segments max for analysis
+  INTEGER :: opt_order = 0
+! nb of segments max for analysis (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: opt_histo = 0
-! Enable histograms
+  INTEGER :: opt_histo = 0
+! Enable histograms (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: opt_noise = 0
-! compute noise
+  INTEGER :: opt_noise = 0
+! compute noise (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: opt_spectra = 0
-! markov chain FT (correlation time)
+  INTEGER :: opt_spectra = 0
+! markov chain FT (correlation time) (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: opt_levels = 0
-! do we have energy levels
+  INTEGER :: opt_levels = 0
+! do we have energy levels (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: flavors
+  INTEGER :: flavors
+! (PUBLIC for parallel)
 !
-  INTEGER _PRIVATE :: endDensity
+  INTEGER :: endDensity
+! (PUBLIC for parallel)
 !
-  INTEGER _PRIVATE :: nspinor
+  INTEGER :: nspinor
+! (PUBLIC for parallel)
 !
-  INTEGER _PRIVATE :: measurements
-! nb of measure in the MC
+  INTEGER :: measurements
+! nb of measure in the MC (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: samples
-! nb of L points
+  INTEGER :: samples
+! nb of L points (PUBLIC for parallel)
 
-  INTEGER(8) _PRIVATE :: seed
-!
+  INTEGER(8) :: seed
+! (PUBLIC for parallel - critical for thread-local RNG)
 
-  INTEGER _PRIVATE :: sweeps
-!
+  INTEGER :: sweeps
+! (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: thermalization
-!
+  INTEGER :: thermalization
+! (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: ostream
-! output file
+  INTEGER :: ostream
+! output file (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: istream
-! input file
+  INTEGER :: istream
+! input file (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: modNoise1
-! measure the noise each modNoise1
+  INTEGER :: modNoise1
+! measure the noise each modNoise1 (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: modNoise2
-! measure the noise each modNoise2
+  INTEGER :: modNoise2
+! measure the noise each modNoise2 (PUBLIC for parallel)
 
   INTEGER _PRIVATE :: activeFlavor
 ! orbital on which one do sth now
 
-  INTEGER, DIMENSION(1:2) _PRIVATE :: modGlobalMove
-! 1: gloabl move each modglobalmove(1)
+  INTEGER, DIMENSION(1:2) :: modGlobalMove
+! 1: gloabl move each modglobalmove(1) (PUBLIC for parallel)
 ! 2: we have done modglobalmove(2) for two different orbitals.
 
-  INTEGER _PRIVATE :: Wmax
-! Max freq for FT
+  INTEGER :: Wmax
+! Max freq for FT (PUBLIC for parallel)
 
-  DOUBLE PRECISION, DIMENSION(1:6) _PRIVATE :: stats
-! to now how many negative determinant, antisegments,seeme.e.twfs...j
+  DOUBLE PRECISION, DIMENSION(1:6) :: stats
+! to now how many negative determinant, antisegments,seeme.e.twfs...j (PUBLIC for parallel)
 
-  DOUBLE PRECISION _PRIVATE :: swap
-! nb of successfull GM
+  DOUBLE PRECISION :: swap
+! nb of successfull GM (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: MY_COMM
-!
+  INTEGER :: MY_COMM
+! (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: rank
-!
+  INTEGER :: tid = 1
+! (PUBLIC for parallel)
 
-  INTEGER _PRIVATE :: size
-! size of MY_COMM
+  INTEGER :: rank
+! (PUBLIC for parallel)
+
+  INTEGER :: size
+! size of MY_COMM (PUBLIC for parallel)
 
   DOUBLE PRECISION _PRIVATE :: runTime ! time for the run routine
 !
 
-  DOUBLE PRECISION _PRIVATE :: beta
-!
+  DOUBLE PRECISION :: beta
+! (PUBLIC for parallel)
 
-  DOUBLE PRECISION _PRIVATE :: U
+  DOUBLE PRECISION :: U
+! (PUBLIC for parallel)
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) _PRIVATE :: mu
-! levels
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: mu
+! levels (PUBLIC for parallel)
 
-  TYPE(GreenHyb)  , ALLOCATABLE, DIMENSION(:    ) _PRIVATE :: Greens
+  TYPE(GreenHyb)  , ALLOCATABLE, DIMENSION(:    ) :: Greens
+! (PUBLIC for parallel)
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) _PRIVATE :: measN
-! measure of occupations (3or4,flavor)
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) :: measN
+! measure of occupations (3or4,flavor) (PUBLIC for parallel)
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) _PRIVATE :: measDE
-!  (flavor,flavor) double occupancies
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) :: measDE
+!  (flavor,flavor) double occupancies (PUBLIC for parallel)
 !  (1,1): total energy of correlation.
 
   DOUBLE PRECISION _PRIVATE :: a_Noise
@@ -244,9 +253,11 @@ TYPE, PUBLIC :: Ctqmc
   DOUBLE PRECISION _PRIVATE :: errorBath
 ! for check
 
-  TYPE(BathOperator) _PRIVATE              :: Bath
+  TYPE(BathOperator) :: Bath
+! (PUBLIC for parallel - needed for deep copy)
 
-  TYPE(ImpurityOperator) _PRIVATE          :: Impurity
+  TYPE(ImpurityOperator) :: Impurity
+! (PUBLIC for parallel - needed for deep copy)
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) _PRIVATE :: density
 
@@ -349,6 +360,7 @@ include 'mpif.h'
 
   this%ostream = ostream
   this%istream = istream
+  this%tid = 1
 
 ! --- RENICE ---
 !#ifdef __GFORTRAN__
@@ -1314,6 +1326,7 @@ END SUBROUTINE Ctqmc_computeF
 !END SUBROUTINE Ctqmc_computeFK
 !!***
 
+
 !!****f* ABINIT/m_Ctqmc/Ctqmc_run
 !! NAME
 !!  Ctqmc_run
@@ -1376,6 +1389,10 @@ include 'mpif.h'
   IF ( .NOT. this%setU ) &
     CALL ERROR("Ctqmc_run : QMC does not have a U this            ")
 
+#ifdef DEBUG_VERBOSE
+  write(this%ostream,'(a,i7,a,i3,a,i8,a,i15,a)') &
+    "Walker with rank ", this%rank, " and tid ", this%tid, " runs with seed ", this%seed, " for ", this%sweeps, " sweeps"
+#endif
 
 ! OPTIONS of the run
   IF ( PRESENT( opt_check ) ) THEN
@@ -1414,22 +1431,23 @@ include 'mpif.h'
   ilatex = 0
   IF ( this%opt_movie .EQ. 1 ) THEN
     Cchar ="0000"
-    WRITE(Cchar,'(I4)') this%rank
+    WRITE(Cchar,'(I4)') this%rank + (this%tid-1) * this%size
     ilatex = 87+this%rank
     OPEN(UNIT=ilatex, FILE="Movie_"//TRIM(ADJUSTL(Cchar))//".tex")
     WRITE(ilatex,'(A)') "\documentclass{beamer}"
     WRITE(ilatex,'(A)') "\usepackage{color}"
     WRITE(ilatex,'(A)') "\setbeamersize{sidebar width left=0pt}"
     WRITE(ilatex,'(A)') "\setbeamersize{sidebar width right=0pt}"
-    WRITE(ilatex,'(A)') "\setbeamersize{text width left=0pt}"
-    WRITE(ilatex,'(A)') "\setbeamersize{text width right=0pt}"
+    !FIXME Those lines don't work anymore, but output is still readable...
+    !WRITE(ilatex,'(A)') "\setbeamersize{text width left=0pt}"
+    !WRITE(ilatex,'(A)') "\setbeamersize{text width right=0pt}"
     WRITE(ilatex,*)
     WRITE(ilatex,'(A)') "\begin{document}"
     WRITE(ilatex,*)
   END IF
 !#endif
 
-  IF ( this%rank .EQ. 0 ) THEN
+  IF ( this%rank .EQ. 0 .AND. this%tid .EQ. 1 ) THEN
     WRITE(this%ostream,'(A29)') "Starting QMC (Thermalization)"
   END IF
 
@@ -1443,11 +1461,13 @@ include 'mpif.h'
 
   estimatedTime = this%runTime
 #ifdef HAVE_MPI
-  CALL MPI_REDUCE([this%runTime], estimatedTime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
-             0, this%MY_COMM, ierr)
+  IF ( this%tid .EQ. 1 ) THEN
+    CALL MPI_REDUCE([this%runTime], estimatedTime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
+               0, this%MY_COMM, ierr)
+  END IF
 #endif
 
-  IF ( this%rank .EQ. 0 ) THEN
+  IF ( this%rank .EQ. 0 .AND. this%tid .EQ. 1 ) THEN
     WRITE(this%ostream,'(A26,I6,A11)') "Thermalization done in    ", CEILING(estimatedTime), "    seconds"
     WRITE(this%ostream,'(A25,I7,A15,I5,A5)') "The QMC should run in    ", &
            CEILING(estimatedTime(1)*DBLE(this%sweeps)/DBLE(this%thermalization)),&
@@ -1589,7 +1609,7 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
     MALLOC(gtmp_old2,(1:sp1,1:flavors))
   END IF
 
-  IF ( this%rank .EQ. 0 ) THEN
+  IF ( this%rank .EQ. 0 .AND. this%tid .EQ. 1 ) THEN
     WRITE(this%ostream, '(1x,103A)') &
     "|----------------------------------------------------------------------------------------------------|"
     WRITE(this%ostream,'(1x,A)', ADVANCE="NO") "|"
@@ -1684,7 +1704,7 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
         END DO
       END IF
 
-      IF ( this%rank .EQ. 0 ) THEN
+      IF ( this%rank .EQ. 0 .AND. this%tid .EQ. 1 ) THEN
         new_percent = CEILING(DBLE(isweep)*100.d0/DBLE(itotal))
         DO ipercent = old_percent+1, new_percent
           WRITE(this%ostream,'(A)',ADVANCE="NO") "-"
@@ -1700,7 +1720,7 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
 
   END DO
 
-  IF ( this%rank .EQ. 0 ) THEN
+  IF ( this%rank .EQ. 0 .AND. this%tid .EQ. 1 ) THEN
     DO ipercent = old_percent+1, 100
       WRITE(this%ostream,'(A)',ADVANCE="NO") "-"
     END DO
@@ -2154,7 +2174,7 @@ END SUBROUTINE Ctqmc_measPerturbation
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmc_getResult(this,Iatom,fname)
+SUBROUTINE Ctqmc_getResult(this,num_chains,chains,Iatom,fname)
 
 
 #ifdef HAVE_MPI1
@@ -2162,7 +2182,8 @@ include 'mpif.h'
 #endif
 !Arguments ------------------------------------
   TYPE(Ctqmc)  , INTENT(INOUT)                    :: this
-  INTEGER, INTENT(IN ) :: Iatom
+  INTEGER, INTENT(IN ) :: Iatom, num_chains
+  TYPE(Ctqmc)  , INTENT(INOUT)                    :: chains(num_chains)
   character(len=fnlen), INTENT(IN)            :: fname
 !Local variables ------------------------------
   INTEGER                                       :: iflavor
@@ -2188,7 +2209,7 @@ include 'mpif.h'
   INTEGER                                       :: last
   INTEGER                                       :: n1
   INTEGER                                       :: n2,n3,quotient,remainder,signe
-  INTEGER                                       :: debut
+  INTEGER                                       :: debut,i
 !  INTEGER                                      :: fin
   character(len=2)                              :: atomnb
 !  character(len=fnlen)                          :: tmpfile
@@ -2213,14 +2234,16 @@ include 'mpif.h'
   inv_flavors = 1.d0 / DBLE(flavors)
 
 
-  inv_size = 1.d0 / DBLE(this%size)
+  inv_size = 1.d0 / DBLE(this%size*num_chains)
   sp1 = 0
   spAll = 0
 
 !#ifdef CTCtqmc_CHECK
   IF ( this%opt_check .GT. 0 ) THEN
-    this%errorImpurity = ImpurityOperator_getError(this%Impurity) * inv_flavors
-    this%errorBath     = BathOperator_getError    (this%Bath    ) * inv_flavors
+    do i=1, num_chains
+      chains(i)%errorImpurity = ImpurityOperator_getError(chains(i)%Impurity) * inv_flavors
+      chains(i)%errorBath     = BathOperator_getError    (chains(i)%Bath    ) * inv_flavors
+    end do
   END IF
 !#endif
 
@@ -2249,6 +2272,7 @@ include 'mpif.h'
 
     FREEIF(buffer)
     MALLOC(buffer,(1:spAll,1:MAX(2,flavors)))
+    buffer = 0.0d0
   END IF
 
 !  this%seg_added    = this%seg_added    * inv_flavors
@@ -2257,67 +2281,80 @@ include 'mpif.h'
 !  this%anti_added   = this%anti_added   * inv_flavors
 !  this%anti_removed = this%anti_removed * inv_flavors
 !  this%anti_sign    = this%anti_sign    * inv_flavors
-  this%stats(:) = this%stats(:) * inv_flavors
 
+  DO i = 1, num_chains
+    chains(i)%stats(:) = chains(i)%stats(:) * inv_flavors
+  END DO
+  DO i = 1, num_chains
   DO iflavor = 1, flavors
-    CALL GreenHyb_measHybrid(this%Greens(iflavor), this%Bath%M(iflavor), this%Impurity%Particles(iflavor), .TRUE.)
-    CALL GreenHyb_getHybrid(this%Greens(iflavor))
+    CALL GreenHyb_measHybrid(chains(i)%Greens(iflavor), chains(i)%Bath%M(iflavor), chains(i)%Impurity%Particles(iflavor), .TRUE.)
+    CALL GreenHyb_getHybrid(chains(i)%Greens(iflavor))
     ! Accumule les dernieres mesure de N
-    this%measN(1,iflavor) = this%measN(1,iflavor) + this%measN(3,iflavor)*this%measN(4,iflavor)
-    this%measN(2,iflavor) = this%measN(2,iflavor) + this%measN(4,iflavor)
+    chains(i)%measN(1,iflavor) = chains(i)%measN(1,iflavor) + chains(i)%measN(3,iflavor)*chains(i)%measN(4,iflavor)
+    chains(i)%measN(2,iflavor) = chains(i)%measN(2,iflavor) + chains(i)%measN(4,iflavor)
     ! Reduction
-    this%measN(1,iflavor)  = this%measN(1,iflavor) / ( this%measN(2,iflavor) * this%beta )
+    chains(i)%measN(1,iflavor)  = chains(i)%measN(1,iflavor) / ( chains(i)%measN(2,iflavor) * chains(i)%beta )
     ! Correction
-    CALL GreenHyb_setN(this%Greens(iflavor), this%measN(1,iflavor))
+    CALL GreenHyb_setN(chains(i)%Greens(iflavor), chains(i)%measN(1,iflavor))
 !#ifdef CTCtqmc_ANALYSIS
-    IF ( this%opt_order .GT. 0 ) &
-      this%measPerturbation(:   ,iflavor) = this%measPerturbation(:,iflavor) &
-                                    / SUM(this%measPerturbation(:,iflavor))
-    IF ( this%opt_analysis .EQ. 1 ) THEN
-      this%measCorrelation (:,1,iflavor) = this%measCorrelation  (:,1,iflavor) &
-                                    / SUM(this%measCorrelation (:,1,iflavor)) &
-                                    * this%inv_dt
-      this%measCorrelation (:,2,iflavor) = this%measCorrelation  (:,2,iflavor) &
-                                    / SUM(this%measCorrelation (:,2,iflavor)) &
-                                    * this%inv_dt
-      this%measCorrelation (:,3,iflavor) = this%measCorrelation  (:,3,iflavor) &
-                                    / SUM(this%measCorrelation (:,3,iflavor)) &
-                                    * this%inv_dt
+    IF ( chains(i)%opt_order .GT. 0 ) &
+      chains(i)%measPerturbation(:   ,iflavor) = chains(i)%measPerturbation(:,iflavor) &
+                                    / SUM(chains(i)%measPerturbation(:,iflavor))
+    IF ( chains(i)%opt_analysis .EQ. 1 ) THEN
+      chains(i)%measCorrelation (:,1,iflavor) = chains(i)%measCorrelation  (:,1,iflavor) &
+                                    / SUM(chains(i)%measCorrelation (:,1,iflavor)) &
+                                    * chains(i)%inv_dt
+      chains(i)%measCorrelation (:,2,iflavor) = chains(i)%measCorrelation  (:,2,iflavor) &
+                                    / SUM(chains(i)%measCorrelation (:,2,iflavor)) &
+                                    * chains(i)%inv_dt
+      chains(i)%measCorrelation (:,3,iflavor) = chains(i)%measCorrelation  (:,3,iflavor) &
+                                    / SUM(chains(i)%measCorrelation (:,3,iflavor)) &
+                                    * chains(i)%inv_dt
     END IF
 !#endif
-    IF ( this%opt_noise .EQ. 1 ) THEN
-      TabX(1) = DBLE(this%modNoise2)
-      TabX(2) = DBLE(this%modNoise1)
-      DO itau = 1, this%samples+1
-        this%measNoiseG(itau,iflavor,2)%vec = -this%measNoiseG(itau,iflavor,2)%vec*this%inv_dt &
-                                           /(this%beta*DBLE(this%modNoise2))
-        this%measNoiseG(itau,iflavor,1)%vec = -this%measNoiseG(itau,iflavor,1)%vec*this%inv_dt &
-                                           /(this%beta*DBLE(this%modNoise1))
-        n2 = this%measNoiseG(itau,iflavor,2)%tail
-        TabY(1) = Stat_deviation(this%measNoiseG(itau,iflavor,2)%vec(1:n2))!*SQRT(n2/(n2-1))
-        n1 = this%measNoiseG(itau,iflavor,1)%tail
-        TabY(2) = Stat_deviation(this%measNoiseG(itau,iflavor,1)%vec(1:n1))!*SQRT(n1/(n1-1))
+    IF ( chains(i)%opt_noise .EQ. 1 ) THEN
+      TabX(1) = DBLE(chains(i)%modNoise2)
+      TabX(2) = DBLE(chains(i)%modNoise1)
+      DO itau = 1, chains(i)%samples+1
+        chains(i)%measNoiseG(itau,iflavor,2)%vec = -chains(i)%measNoiseG(itau,iflavor,2)%vec*chains(i)%inv_dt &
+                                           /(chains(i)%beta*DBLE(chains(i)%modNoise2))
+        chains(i)%measNoiseG(itau,iflavor,1)%vec = -chains(i)%measNoiseG(itau,iflavor,1)%vec*chains(i)%inv_dt &
+                                           /(chains(i)%beta*DBLE(chains(i)%modNoise1))
+        n2 = chains(i)%measNoiseG(itau,iflavor,2)%tail
+        TabY(1) = Stat_deviation(chains(i)%measNoiseG(itau,iflavor,2)%vec(1:n2))!*SQRT(n2/(n2-1))
+        n1 = chains(i)%measNoiseG(itau,iflavor,1)%tail
+        TabY(2) = Stat_deviation(chains(i)%measNoiseG(itau,iflavor,1)%vec(1:n1))!*SQRT(n1/(n1-1))
         CALL Stat_powerReg(TabX,SQRT(2.d0*LOG(2.d0))*TabY,alpha(itau,iflavor),beta(itau,iflavor),r)
         ! ecart type -> 60%
         ! largeur a mi-hauteur d'une gaussienne -> sqrt(2*ln(2))*sigma
       END DO
     END IF
 
-    IF ( this%have_MPI .EQV. .TRUE. ) THEN
-      buffer(1:sp1, iflavor) = this%Greens(iflavor)%oper(1:sp1)
+    IF ( chains(i)%have_MPI .EQV. .TRUE. ) THEN
+      buffer(1:sp1, iflavor) = buffer(1:sp1, iflavor) + chains(i)%Greens(iflavor)%oper(1:sp1)
     END IF
+  END DO
+  chains(i)%measDE(:,:) = chains(i)%measDE(:,:) * DBLE(chains(i)%measurements) /(DBLE(chains(i)%sweeps)*chains(i)%beta)
   END DO
   last = sp1
 
-
-  this%measDE(:,:) = this%measDE(:,:) * DBLE(this%measurements) /(DBLE(this%sweeps)*this%beta)
   IF ( this%opt_histo .GT. 0 ) THEN
-    this%occup_histo_time(:) = this%occup_histo_time(:) / INT(this%sweeps/this%measurements)
-    this%occupconfig(:) = this%occupconfig(:) / INT(this%sweeps/this%measurements)
-    this%suscep(:,:) = this%suscep(:,:) / INT(this%sweeps/this%measurements)
-    this%chi(:,:) = this%chi(:,:) / INT(this%sweeps/this%measurements)
-    this%chicharge(:,:) = this%chicharge(:,:) / INT(this%sweeps/this%measurements)
-    this%ntot(:) = this%ntot(:) / INT(this%sweeps/this%measurements)
+    !Note: this == chains(1), so scale here and sum other chains
+    this%occup_histo_time(:) = chains(1)%occup_histo_time(:) / INT(chains(1)%sweeps/chains(1)%measurements)
+    this%occupconfig(:)      = chains(1)%occupconfig(:) / INT(chains(1)%sweeps/chains(1)%measurements)
+    this%suscep(:,:)         = chains(1)%suscep(:,:) / INT(chains(1)%sweeps/chains(1)%measurements)
+    this%chi(:,:)            = chains(1)%chi(:,:) / INT(chains(1)%sweeps/chains(1)%measurements)
+    this%chicharge(:,:)      = chains(1)%chicharge(:,:) / INT(chains(1)%sweeps/chains(1)%measurements)
+    this%ntot(:)             = chains(1)%ntot(:) / INT(chains(1)%sweeps/chains(1)%measurements)
+    do i = 2, num_chains
+      this%occup_histo_time(:) = this%occup_histo_time(:) &
+      &    + chains(i)%occup_histo_time(:) / INT(chains(i)%sweeps/chains(i)%measurements)
+      this%occupconfig(:)  = this%occupconfig(:) + chains(i)%occupconfig(:) / INT(chains(i)%sweeps/chains(i)%measurements)
+      this%suscep(:,:)     = this%suscep(:,:)    + chains(i)%suscep(:,:) / INT(chains(i)%sweeps/chains(i)%measurements)
+      this%chi(:,:)        = this%chi(:,:)       + chains(i)%chi(:,:) / INT(chains(i)%sweeps/chains(i)%measurements)
+      this%chicharge(:,:)  = this%chicharge(:,:) + chains(i)%chicharge(:,:) / INT(chains(i)%sweeps/chains(i)%measurements)
+      this%ntot(:)         = this%ntot(:)        + chains(i)%ntot(:) / INT(chains(i)%sweeps/chains(i)%measurements)
+    end do
   END IF
  ! write(6,*) "=== Histogram of occupations for complete simulation ====",INT(this%sweeps/this%measurements)
  ! sumh=0
@@ -2329,6 +2366,14 @@ include 'mpif.h'
 
   n1 = this%measNoise(1)%tail
   n2 = this%measNoise(2)%tail
+  CALL Vector_setSize(this%measNoise(1),n1*num_chains)
+  CALL Vector_setSize(this%measNoise(2),n2*num_chains)
+  do i = 2, num_chains
+    this%measNoise(1)%vec(n1*(i-1)+1:n1*i) = chains(i)%measNoise(1)%vec(1:n1)
+    this%measNoise(2)%vec(n2*(i-1)+1:n2*i) = chains(i)%measNoise(2)%vec(1:n2)
+  end do
+  n1 = n1 * num_chains
+  n2 = n2 * num_chains
 
   ! On utilise freqs comme tableau de regroupement
   ! Gather de Noise1
@@ -2471,51 +2516,57 @@ include 'mpif.h'
 
   !this%measDE(1,1) = SUM(this%measNoise(1)%vec(1:this%measNoise(1)%tail))/(DBLE(this%measNoise(1)%tail*this%modNoise1)*this%beta)
   !this%measDE(2:flavors,1:flavors) = this%measDE(2:flavors,1:flavors) /(DBLE(this%sweeps)*this%beta)
-  CALL ImpurityOperator_getErrorOverlap(this%Impurity,this%measDE)
+  do i = i, num_chains
+    CALL ImpurityOperator_getErrorOverlap(chains(i)%Impurity,chains(i)%measDE)
+  end do
+
   ! Add the difference between true calculation and quick calculation of the
   ! last sweep overlap to measDE(2,2)
-  !this%measDE = this%measDE * DBLE(this%measurements)
+  !chains(i)%measDE = chains(i)%measDE * DBLE(chains(i)%measurements)
   IF ( this%have_MPI .EQV. .TRUE. ) THEN
-    IF ( this%opt_analysis .EQ. 1 ) THEN
-      buffer(last+1:last+sp1,:) = this%measCorrelation(:,1,:)
+  do i = 1, num_chains
+    last = sp1
+    IF ( chains(i)%opt_analysis .EQ. 1 ) THEN
+      buffer(last+1:last+sp1,:) = buffer(last+1:last+sp1,:) + chains(i)%measCorrelation(:,1,:)
       last = last + sp1
-      buffer(last+1:last+sp1,:) = this%measCorrelation(:,2,:)
+      buffer(last+1:last+sp1,:) = buffer(last+1:last+sp1,:) + chains(i)%measCorrelation(:,2,:)
       last = last + sp1
-      buffer(last+1:last+sp1,:) = this%measCorrelation(:,3,:)
+      buffer(last+1:last+sp1,:) = buffer(last+1:last+sp1,:) + chains(i)%measCorrelation(:,3,:)
       last = last + sp1
     END IF
-    IF ( this%opt_order .GT. 0 ) THEN
-      buffer(last+1:last+this%opt_order, :) = this%measPerturbation(:,:)
-      last = last + this%opt_order
+    IF ( chains(i)%opt_order .GT. 0 ) THEN
+      buffer(last+1:last+chains(i)%opt_order, :) = buffer(last+1:last+chains(i)%opt_order, :) + chains(i)%measPerturbation(:,:)
+      last = last + chains(i)%opt_order
     END IF
-    IF ( this%opt_noise .EQ. 1 ) THEN
-      buffer(last+1:last+this%samples+1,:) = alpha(:,:)
-      last = last + this%samples + 1
-      buffer(last+1:last+this%samples+1,:) = beta(:,:)
-      last = last + this%samples + 1
+    IF ( chains(i)%opt_noise .EQ. 1 ) THEN
+      buffer(last+1:last+chains(i)%samples+1,:) = buffer(last+1:last+chains(i)%samples+1,:) + alpha(:,:)
+      last = last + chains(i)%samples + 1
+      buffer(last+1:last+chains(i)%samples+1,:) = buffer(last+1:last+chains(i)%samples+1,:) + beta(:,:)
+      last = last + chains(i)%samples + 1
     END IF
-!  this%measDE(2,2) = a*EXP(b*LOG(DBLE(this%sweeps*this%size)))
-    buffer(spall-(flavors+5):spAll-6,:) = this%measDE(:,:)
-!    buffer(spAll  ,1) = this%seg_added
-!    buffer(spAll-1,1) = this%seg_removed
-!    buffer(spAll-2,1) = this%seg_sign
-!    buffer(spAll  ,2) = this%anti_added
-!    buffer(spAll-1,2) = this%anti_removed
-!    buffer(spAll-2,2) = this%anti_sign
-    buffer(spAll  ,1) = this%stats(1)
-    buffer(spAll-1,1) = this%stats(2)
-    buffer(spAll-2,1) = this%stats(3)
-    buffer(spAll  ,2) = this%stats(4)
-    buffer(spAll-1,2) = this%stats(5)
-    buffer(spAll-2,2) = this%stats(6)
-    buffer(spAll-3,1) = this%swap
-    buffer(spAll-3,2) = DBLE(this%modGlobalMove(2))
-    buffer(spAll-4,1) = a
-    buffer(spAll-4,2) = b
+!  chains(i)%measDE(2,2) = a*EXP(b*LOG(DBLE(chains(i)%sweeps*chains(i)%size)))
+    buffer(spall-(flavors+5):spAll-6,:) = buffer(spall-(flavors+5):spAll-6,:) + chains(i)%measDE(:,:)
+!    buffer(spAll  ,1) = chains(i)%seg_added
+!    buffer(spAll-1,1) = chains(i)%seg_removed
+!    buffer(spAll-2,1) = chains(i)%seg_sign
+!    buffer(spAll  ,2) = chains(i)%anti_added
+!    buffer(spAll-1,2) = chains(i)%anti_removed
+!    buffer(spAll-2,2) = chains(i)%anti_sign
+    buffer(spAll  ,1) = buffer(spAll  ,1) + chains(i)%stats(1)
+    buffer(spAll-1,1) = buffer(spAll-1,1) + chains(i)%stats(2)
+    buffer(spAll-2,1) = buffer(spAll-2,1) + chains(i)%stats(3)
+    buffer(spAll  ,2) = buffer(spAll  ,2) + chains(i)%stats(4)
+    buffer(spAll-1,2) = buffer(spAll-1,2) + chains(i)%stats(5)
+    buffer(spAll-2,2) = buffer(spAll-2,2) + chains(i)%stats(6)
+    buffer(spAll-3,1) = buffer(spAll-3,1) + chains(i)%swap
+    buffer(spAll-3,2) = buffer(spAll-3,2) + DBLE(chains(i)%modGlobalMove(2))
+    buffer(spAll-4,1) = buffer(spAll-4,1) + a
+    buffer(spAll-4,2) = buffer(spAll-4,2) + b
 !#ifdef CTCtqmc_CHECK
-    buffer(spAll-5,1) = this%errorImpurity
-    buffer(spAll-5,2) = this%errorBath
+    buffer(spAll-5,1) = buffer(spAll-5,1) + chains(i)%errorImpurity
+    buffer(spAll-5,2) = buffer(spAll-5,2) + chains(i)%errorBath
 !#endif
+  end do
 
 #ifdef HAVE_MPI
     CALL MPI_ALLREDUCE([this%runTime], rtime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, this%MY_COMM, ierr)
@@ -2577,6 +2628,7 @@ include 'mpif.h'
     this%errorBath    = buffer(spAll-5,2)
 !#endif
 
+
     DO iflavor = 1, flavors
       this%Greens(iflavor)%oper          = buffer(1:sp1          , iflavor)
     END DO
@@ -2605,6 +2657,7 @@ include 'mpif.h'
     this%measDE(iflavor, iflavor+1:flavors) = this%measDE(iflavor+1:flavors,iflavor)
   END DO
   FREE(buffer)
+
 
   IF ( this%opt_spectra .GE. 1 ) THEN
 !PROBLEM eos_gnu_13.2_openmpi . %endDensity was introduced throughout
@@ -2642,8 +2695,8 @@ include 'mpif.h'
    ! write(6,*) "sumh over procs", sumh
     sumh=0
     do n1=1,this%flavors+1
-       write(this%ostream,'(i4,f10.4)')  n1-1, this%occup_histo_time(n1)/float(this%size)
-       sumh=sumh+this%occup_histo_time(n1)/float(this%size)
+       write(this%ostream,'(i4,f10.4)')  n1-1, this%occup_histo_time(n1)/float(this%size*num_chains)
+       sumh=sumh+this%occup_histo_time(n1)/float(this%size*num_chains)
     enddo
        write(this%ostream,'(a,f10.4)') " all" , sumh
     write(this%ostream,*) "================================="
@@ -2675,7 +2728,7 @@ include 'mpif.h'
         !if(n2>=7) signe =0
         spintot(n1)=spintot(n1)+occ(n1,n2)*signe
       enddo
-      this%occupconfig(n1)=this%occupconfig(n1)/float(this%size)
+      this%occupconfig(n1)=this%occupconfig(n1)/float(this%size*num_chains)
     enddo
 
     write(this%ostream,*) "=== Histogram of occupations of configurations for complete simulation  ===="
@@ -2738,7 +2791,7 @@ include 'mpif.h'
         open(unit=735,file=trim(fname)//'_LocalSpinSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
         write(735,*) '#Tau Total t2g eg'
         do n1=1,this%samples
-          this%suscep(:,n1)=this%suscep(:,n1)/float(this%size)/float(this%samples)
+          this%suscep(:,n1)=this%suscep(:,n1)/float(this%size*num_chains)/float(this%samples)
           write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*this%beta/this%samples,(this%suscep(n2,n1),n2=1,3)
         enddo
         !add tau=beta
@@ -2749,7 +2802,7 @@ include 'mpif.h'
         open (unit=735,file=trim(fname)//'_LocalMagnSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
         write(735,*) '#Tau Total Orbital Spin'
         do n1=1,this%samples
-          this%chi(:,n1)=this%chi(:,n1)/float(this%size)/float(this%samples)
+          this%chi(:,n1)=this%chi(:,n1)/float(this%size*num_chains)/float(this%samples)
           write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*this%beta/this%samples,(this%chi(n2,n1),n2=1,3)
         enddo
         !add tau=beta
@@ -2760,13 +2813,13 @@ include 'mpif.h'
 
     !Local Charge Susceptibility
     if(this%opt_histo .gt. 2) then
-      this%ntot(:)=this%ntot(:)/float(this%size)/float(this%samples)
+      this%ntot(:)=this%ntot(:)/float(this%size*num_chains)/float(this%samples)
       open (unit=735,file=trim(fname)//'_LocalChargeSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
       write(735,*) '#Tau Total <ntot> '
       do n1=1,this%samples
-        this%chicharge(1,n1)=(this%chicharge(1,n1)/float(this%size)/float(this%samples))-(this%ntot(1)*this%ntot(1))
-        !this%chicharge(2,n1)=(this%chicharge(2,n1)/float(this%size)/float(this%samples))-(this%ntot(2)*this%ntot(2))
-        !this%chicharge(3,n1)=(this%chicharge(3,n1)/float(this%size)/float(this%samples))-(this%ntot(3)*this%ntot(3))
+        this%chicharge(1,n1)=(this%chicharge(1,n1)/float(this%size*num_chains)/float(this%samples))-(this%ntot(1)*this%ntot(1))
+        !this%chicharge(2,n1)=(this%chicharge(2,n1)/float(this%size*num_chains)/float(this%samples))-(this%ntot(2)*this%ntot(2))
+        !this%chicharge(3,n1)=(this%chicharge(3,n1)/float(this%size*num_chains)/float(this%samples))-(this%ntot(3)*this%ntot(3))
         !write(735 '(1x,f14.8,2x,f14.8,2x,f14.8,2x,f14.8,2x,f14.8)') (n1-1)*this%beta/this%samples,(this%chicharge(n2,n1),n2=1,3),this%ntot(1)
         write(735, '(1x,f14.8,2x,f14.8,2x,f14.8)') (n1-1)*this%beta/this%samples,(this%chicharge(1,n1)),this%ntot(1)
       enddo
@@ -3050,15 +3103,16 @@ END SUBROUTINE Ctqmc_getE
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmc_printAll(this)
+SUBROUTINE Ctqmc_printAll(this, num_chains)
 
 !Arguments ------------------------------------
   TYPE(Ctqmc), INTENT(INOUT) :: this
+  INTEGER, INTENT(IN)        :: num_chains
 
   IF ( .NOT. this%done ) &
     CALL WARNALL("Ctqmc_printAll : Simulation not run                 ")
 
-  CALL Ctqmc_printQMC(this)
+  CALL Ctqmc_printQMC(this, num_chains)
 
   CALL Ctqmc_printGreen(this)
 
@@ -3073,6 +3127,7 @@ SUBROUTINE Ctqmc_printAll(this)
 !#endif
 
   CALL Ctqmc_printSpectra(this)
+  !ABI_BUG("toto")
 
 END SUBROUTINE Ctqmc_printAll
 !!***
@@ -3101,10 +3156,11 @@ END SUBROUTINE Ctqmc_printAll
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmc_printQMC(this)
+SUBROUTINE Ctqmc_printQMC(this, num_chains)
 
 !Arguments ------------------------------------
   TYPE(Ctqmc), INTENT(INOUT) :: this
+  INTEGER, INTENT(IN)        :: num_chains
 !Local variables ------------------------------
   INTEGER                  :: ostream
   INTEGER                  :: iflavor
@@ -3120,8 +3176,8 @@ SUBROUTINE Ctqmc_printQMC(this)
   sweeps    = DBLE(this%sweeps)
   invSweeps = 1.d0/sweeps
 
-  WRITE(ostream,'(1x,F13.0,A11,F10.2,A12,I5,A5)') sweeps*DBLE(this%size), " sweeps in ", this%runTime, &
-                 " seconds on ", this%size, " CPUs"
+  WRITE(ostream,'(1x,F13.0,A11,F10.2,A12,I5,A5)') sweeps*DBLE(this%size)*num_chains, " sweeps in ", this%runTime, &
+                 " seconds on ", this%size*num_chains, " CPUs"
   WRITE(ostream,'(A28,F6.2)') "Segments added        [%] : ", this%stats(CTQMC_SEGME+CTQMC_ADDED)*invSweeps*100.d0
   WRITE(ostream,'(A28,F6.2)') "Segments removed      [%] : ", this%stats(CTQMC_SEGME+CTQMC_REMOV)*invSweeps*100.d0
   WRITE(ostream,'(A28,F6.2)') "Segments sign         [%] : ", this%stats(CTQMC_SEGME+CTQMC_DETSI)*invSweeps*100.d0
@@ -3140,7 +3196,7 @@ SUBROUTINE Ctqmc_printQMC(this)
 !#endif
   WRITE(ostream,'(A28,ES22.14,A5,ES21.14)') "<Epot>                [U] : ", this%measDE(1,1), " +/- ",&
 !#ifdef HAVE_MPI
-         SUM(this%Impurity%mat_U)/(this%flavors*(this%flavors-1)) * this%a_Noise*(sweeps*DBLE(this%size))**this%b_Noise
+         SUM(this%Impurity%mat_U)/(this%flavors*(this%flavors-1)) * this%a_Noise*(sweeps*DBLE(this%size*num_chains))**this%b_Noise
 !#else
 !                                                              this%a_Noise*(sweeps)**this%b_Noise
 !#endif

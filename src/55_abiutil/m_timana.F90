@@ -628,6 +628,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(697)='exc_haydock_driver(matmul)      '
 !Slots up to 699 are reserved for bethe_salpeter code.
 
+ names(701)='qmc_prep_ctqmc                  '
+ names(702)='qmc_prep_ctqmc%(bef. loop)      '
+ names(703)='qmc_prep_ctqmc%(loop)           '
+ names(704)='qmc_prep_ctqmc%(loop%solve)     '
+ names(705)='qmc_prep_ctqmc%(aft. loop)      '
+
  names(710)='inwffil                         '
  names(711)='inwffil(read header)            '
  names(712)='inwffil(init params)            '
@@ -1927,6 +1933,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:9)=(/ (ii,ii=620,628,1) /)                            ; msg='dmft '
        case(47)
          list(:9)=(/ (ii,ii=1001,1009,1) /)                          ; msg='initberry '
+       case(48)
+         list(:5)=(/ (ii,ii=701,705,1) /)                            ; msg='dmft%impurity_solve: qmc_prep_ctqmc'
        case(50)
          list(:5)=(/1560,1561,1562,1563,1565/)                       ; msg='fock2ACE '
        case(51)

@@ -599,7 +599,7 @@ contains
      do i = 1,nfit
        dcost = dcost+fact(i)*sum((forc0_dum(:,i)-ffit(:,i))**2,dim=1)
      end do
-     dcost_rms = (sqrt((two*dcost)/nfit))*two*13.6058d0/0.529177d0
+     dcost_rms = (sqrt((two*dcost)/nfit))*Ha_eV/Bohr_Ang
 
     !--minimisation is achived
      if(dcost_rms < prec_lotf) exit
@@ -655,8 +655,8 @@ contains
 
      if(dcost  >  dcost_old)  nwarn = nwarn + 1
 
-     dcost_rm0 = (sqrt((two*dcost_old)/nfit))*two*13.6058d0/0.529177d0
-     dcost_rm1 = (sqrt((two*dcost)/nfit))*two*13.6058d0/0.529177d0
+     dcost_rm0 = (sqrt((two*dcost_old)/nfit))*Ha_eV/Bohr_Ang
+     dcost_rm1 = (sqrt((two*dcost)/nfit))*Ha_eV/Bohr_Ang
      d_dcost = dcost_rm1 - dcost_rm0
      dcost_old = dcost
 
@@ -704,7 +704,7 @@ contains
 
        call dlvsum(lotfvar%me-1,lotfvar%nproc,alpha_dum,3*ibn_tot)
 
-       dcost_rms=(sqrt((two*dcost)/nfit))*two*13.6058d0/0.529177d0
+       dcost_rms=(sqrt((two*dcost)/nfit))*Ha_eV/Bohr_Ang
 
       !--Minimization is not achived
       !if(dcost_rms >  prec_lotf)  cycle
@@ -742,7 +742,7 @@ contains
      write(message,'(a,2f12.8,a)')'FIT.PREC. : ',dcost, dcost_rms,' EV/A '
      call wrtout(std_out,message,'COLL')
 
-     toeva = 2.d0*13.6058d0/0.529177d0
+     toeva = Ha_eV/Bohr_Ang
      do i = 1,nfit
        dtest = zero
        do k=1,3

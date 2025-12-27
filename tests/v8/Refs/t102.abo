@@ -1,12 +1,12 @@
 ******************************************************************************************
-                                Welcome to MULTIBINIT,
+                                Welcome to MULTIBINIT,                         
  a software platform designed for the construction and use of second-principles models
                    for lattice, spin and electron degrees of freedom.
 
-.Version 10.0.0.3 of MULTIBINIT
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -17,7 +17,7 @@
 
 -----------------------------------------------------------------------------------------
 
-                          MULTIBINIT - LATTICE MODELS
+                          MULTIBINIT - LATTICE MODELS                   
 
  Project initiated and coordinated by Philippe GHOSEZ and his group at ULiege
    (Philippe.Ghosez@uliege.be).
@@ -32,27 +32,26 @@
 
 
 
-.Starting date : Wed 19 Mar 2025.
-- ( at 22h43 )
-
-- The starting date is more than 2 years after the initial release
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h16 )
+  
+- The starting date is more than 3 years after the initial release
 - of this version of ABINIT, namely Jul 2022.
-- Note that the use beyond 3 years after the release will not be supported.
+- This version of ABINIT is not supported anymore.
 - Action: please, switch to a more recent version of ABINIT.
-
 -  nproc =    1
 
 ================================================================================
 
- Read the information in the reference structure in
--/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/v8/Input/t102.ddb
+ Read the information in the reference structure in 
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/v8/Input/t102.ddb
  to initialize the multibinit input
 
 ================================================================================
 
  -outvars_multibinit: echo values of input variables ----------------------
 
- Flags :
+ Flags : 
      ifcflag         1
      strcpli        -1
  Molecular Dynamics :
@@ -114,11 +113,11 @@ dipdip_range         2         2         1
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -134,7 +133,7 @@ dipdip_range         2         2         1
        3               2        0.000000        0.000000
        3               3        0.001167        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -177,12 +176,12 @@ dipdip_range         2         2         1
 
  Extraction of the clamped elastic tensor (unit:10^2GPa)
 
-   3.6656606   1.0111729   1.0111729  -0.0000000   0.0000000  -0.0000000
-   1.0111729   3.6656606   1.0111729  -0.0000000   0.0000000  -0.0000000
-   1.0111729   1.0111729   3.6656606  -0.0000000   0.0000000  -0.0000000
-  -0.0000000   0.0000000   0.0000000   0.9855012  -0.0000000  -0.0000000
-  -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.9855012  -0.0000000
-  -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.9855012
+   3.6656613   1.0111731   1.0111731  -0.0000000   0.0000000  -0.0000000
+   1.0111731   3.6656612   1.0111731  -0.0000000   0.0000000  -0.0000000
+   1.0111731   1.0111731   3.6656612  -0.0000000   0.0000000  -0.0000000
+  -0.0000000   0.0000000   0.0000000   0.9855013  -0.0000000  -0.0000000
+  -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.9855013  -0.0000000
+  -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.9855014
 
 ================================================================================
 
@@ -267,13 +266,13 @@ dipdip_range         2         2         1
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/v8/Input/t102_coeffs.xml
--Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/v8/Input/t102_coeffs.xml with Fortran
+-Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/v8/Input/t102_coeffs.xml
+-Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/v8/Input/t102_coeffs.xml with Fortran
 
 ================================================================================
 
 --------------------------------------------------------------------------------
--Monte Carlo / Molecular Dynamics
+-Monte Carlo / Molecular Dynamics 
 
 
  The size of the supercell for the fit is   2   2   1
@@ -305,9 +304,9 @@ dipdip_range         2         2         1
   sigma(3 3)= -3.10085174E-06  sigma(2 1)=  1.19723104E-21
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.0009E-01 GPa]
-- sigma(1 1)=  3.45746314E-01  sigma(3 2)=  2.79163693E-17
-- sigma(2 2)=  3.45746314E-01  sigma(3 1)=  8.01006005E-18
-- sigma(3 3)= -9.12301924E-02  sigma(2 1)=  3.52237474E-17
+- sigma(1 1)=  3.45746372E-01  sigma(3 2)=  2.79163740E-17
+- sigma(2 2)=  3.45746372E-01  sigma(3 1)=  8.01006140E-18
+- sigma(3 3)= -9.12302078E-02  sigma(2 1)=  3.52237533E-17
 --------------------------------------------------------------------------------
 
 
@@ -335,9 +334,9 @@ dipdip_range         2         2         1
   sigma(3 3)= -4.47373888E-06  sigma(2 1)=  1.82222845E-08
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -9.1352E-02 GPa]
-- sigma(1 1)=  2.02734717E-01  sigma(3 2)=  3.56790572E-17
-- sigma(2 2)=  2.02943090E-01  sigma(3 1)=  3.87793390E-17
-- sigma(3 3)= -1.31621920E-01  sigma(2 1)=  5.36118030E-04
+- sigma(1 1)=  2.02734751E-01  sigma(3 2)=  3.56790632E-17
+- sigma(2 2)=  2.02943124E-01  sigma(3 1)=  3.87793456E-17
+- sigma(3 3)= -1.31621942E-01  sigma(2 1)=  5.36118120E-04
 --------------------------------------------------------------------------------
 
 
@@ -364,9 +363,9 @@ dipdip_range         2         2         1
   sigma(3 3)= -7.88378253E-05  sigma(2 1)=  1.67229177E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  6.4791E+00 GPa]
-- sigma(1 1)= -9.05971940E+00  sigma(3 2)=  2.40132639E-15
-- sigma(2 2)= -8.05806016E+00  sigma(3 1)=  2.69444760E-15
-- sigma(3 3)= -2.31948851E+00  sigma(2 1)=  4.92005141E-01
+- sigma(1 1)= -9.05972092E+00  sigma(3 2)=  2.40132679E-15
+- sigma(2 2)= -8.05806152E+00  sigma(3 1)=  2.69444805E-15
+- sigma(3 3)= -2.31948890E+00  sigma(2 1)=  4.92005224E-01
 --------------------------------------------------------------------------------
 
 
@@ -393,9 +392,9 @@ dipdip_range         2         2         1
   sigma(3 3)= -6.07341184E-06  sigma(2 1)= -9.95622257E-07
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.0619E+00 GPa]
-- sigma(1 1)= -1.48946446E+00  sigma(3 2)=  3.77533785E-16
-- sigma(2 2)= -1.51744203E+00  sigma(3 1)=  3.15992727E-16
-- sigma(3 3)= -1.78685915E-01  sigma(2 1)= -2.92922132E-02
+- sigma(1 1)= -1.48946471E+00  sigma(3 2)=  3.77533848E-16
+- sigma(2 2)= -1.51744229E+00  sigma(3 1)=  3.15992780E-16
+- sigma(3 3)= -1.78685945E-01  sigma(2 1)= -2.92922181E-02
 --------------------------------------------------------------------------------
 
 
@@ -422,9 +421,9 @@ dipdip_range         2         2         1
   sigma(3 3)= -3.37276360E-06  sigma(2 1)= -1.31419701E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4851E+00 GPa]
-- sigma(1 1)= -2.16378359E+00  sigma(3 2)=  6.26278200E-16
-- sigma(2 2)= -2.19223428E+00  sigma(3 1)=  4.28503546E-16
-- sigma(3 3)= -9.92301143E-02  sigma(2 1)= -3.86650045E-02
+- sigma(1 1)= -2.16378395E+00  sigma(3 2)=  6.26278306E-16
+- sigma(2 2)= -2.19223465E+00  sigma(3 1)=  4.28503618E-16
+- sigma(3 3)= -9.92301311E-02  sigma(2 1)= -3.86650110E-02
 --------------------------------------------------------------------------------
 
 
@@ -451,9 +450,9 @@ dipdip_range         2         2         1
   sigma(3 3)=  1.38867927E-05  sigma(2 1)= -8.95398863E-07
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.0398E+00 GPa]
-- sigma(1 1)= -1.83419068E+00  sigma(3 2)=  1.29741933E-15
-- sigma(2 2)= -1.69382853E+00  sigma(3 1)=  6.08254557E-16
-- sigma(3 3)=  4.08563478E-01  sigma(2 1)= -2.63435396E-02
+- sigma(1 1)= -1.83419099E+00  sigma(3 2)=  1.29741955E-15
+- sigma(2 2)= -1.69382881E+00  sigma(3 1)=  6.08254659E-16
+- sigma(3 3)=  4.08563547E-01  sigma(2 1)= -2.63435441E-02
 --------------------------------------------------------------------------------
 
 
@@ -480,9 +479,9 @@ dipdip_range         2         2         1
   sigma(3 3)=  7.44751026E-06  sigma(2 1)= -1.35202276E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.0879E+00 GPa]
-- sigma(1 1)= -1.73881058E+00  sigma(3 2)=  7.29624190E-16
-- sigma(2 2)= -1.74413678E+00  sigma(3 1)=  3.76876219E-16
-- sigma(3 3)=  2.19113280E-01  sigma(2 1)= -3.97778762E-02
+- sigma(1 1)= -1.73881087E+00  sigma(3 2)=  7.29624313E-16
+- sigma(2 2)= -1.74413707E+00  sigma(3 1)=  3.76876282E-16
+- sigma(3 3)=  2.19113317E-01  sigma(2 1)= -3.97778829E-02
 --------------------------------------------------------------------------------
 
 
@@ -509,9 +508,9 @@ dipdip_range         2         2         1
   sigma(3 3)=  1.02373007E-05  sigma(2 1)= -1.25059372E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  7.9014E-01 GPa]
-- sigma(1 1)= -1.34061334E+00  sigma(3 2)=  7.19421121E-16
-- sigma(2 2)= -1.33098682E+00  sigma(3 1)=  3.45509680E-16
-- sigma(3 3)=  3.01191734E-01  sigma(2 1)= -3.67937313E-02
+- sigma(1 1)= -1.34061357E+00  sigma(3 2)=  7.19421243E-16
+- sigma(2 2)= -1.33098704E+00  sigma(3 1)=  3.45509738E-16
+- sigma(3 3)=  3.01191785E-01  sigma(2 1)= -3.67937375E-02
 --------------------------------------------------------------------------------
 
 
@@ -538,9 +537,9 @@ dipdip_range         2         2         1
   sigma(3 3)=  1.10602138E-05  sigma(2 1)= -8.50451477E-07
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.9839E-01 GPa]
-- sigma(1 1)= -4.76011800E-01  sigma(3 2)=  5.89743507E-16
-- sigma(2 2)= -4.44568528E-01  sigma(3 1)=  3.91326390E-16
-- sigma(3 3)=  3.25402670E-01  sigma(2 1)= -2.50211421E-02
+- sigma(1 1)= -4.76011880E-01  sigma(3 2)=  5.89743606E-16
+- sigma(2 2)= -4.44568603E-01  sigma(3 1)=  3.91326456E-16
+- sigma(3 3)=  3.25402725E-01  sigma(2 1)= -2.50211463E-02
 --------------------------------------------------------------------------------
 
 
@@ -567,9 +566,9 @@ dipdip_range         2         2         1
   sigma(3 3)=  8.08486974E-06  sigma(2 1)= -4.56274184E-07
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.3895E-02 GPa]
-- sigma(1 1)= -5.43313495E-02  sigma(3 2)=  3.59043491E-16
-- sigma(2 2)= -2.18497377E-02  sigma(3 1)=  4.74977393E-16
-- sigma(3 3)=  2.37865040E-01  sigma(2 1)= -1.34240477E-02
+- sigma(1 1)= -5.43313586E-02  sigma(3 2)=  3.59043551E-16
+- sigma(2 2)= -2.18497414E-02  sigma(3 1)=  4.74977473E-16
+- sigma(3 3)=  2.37865080E-01  sigma(2 1)= -1.34240500E-02
 --------------------------------------------------------------------------------
 
 
@@ -596,9 +595,9 @@ dipdip_range         2         2         1
   sigma(3 3)= -6.20725791E-06  sigma(2 1)=  9.02321007E-07
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.8278E-01 GPa]
-- sigma(1 1)=  9.50039291E-01  sigma(3 2)= -1.67363158E-16
-- sigma(2 2)=  9.80924252E-01  sigma(3 1)=  7.95292266E-16
-- sigma(3 3)= -1.82623802E-01  sigma(2 1)=  2.65471961E-02
+- sigma(1 1)=  9.50039451E-01  sigma(3 2)= -1.67363186E-16
+- sigma(2 2)=  9.80924417E-01  sigma(3 1)=  7.95292399E-16
+- sigma(3 3)= -1.82623833E-01  sigma(2 1)=  2.65472006E-02
 --------------------------------------------------------------------------------
 
 
@@ -625,9 +624,9 @@ dipdip_range         2         2         1
   sigma(3 3)= -1.33175700E-05  sigma(2 1)=  1.26446436E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.9163E-01 GPa]
-- sigma(1 1)=  1.06962182E+00  sigma(3 2)= -3.33118408E-16
-- sigma(2 2)=  1.09707684E+00  sigma(3 1)=  1.00098090E-15
-- sigma(3 3)= -3.91816371E-01  sigma(2 1)=  3.72018197E-02
+- sigma(1 1)=  1.06962200E+00  sigma(3 2)= -3.33118464E-16
+- sigma(2 2)=  1.09707703E+00  sigma(3 1)=  1.00098107E-15
+- sigma(3 3)= -3.91816437E-01  sigma(2 1)=  3.72018259E-02
 --------------------------------------------------------------------------------
 
 
@@ -654,9 +653,9 @@ dipdip_range         2         2         1
   sigma(3 3)= -3.79579714E-05  sigma(2 1)=  1.87503271E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.4377E-01 GPa]
-- sigma(1 1)=  8.97794676E-01  sigma(3 2)= -1.08778028E-15
-- sigma(2 2)=  9.50280842E-01  sigma(3 1)=  1.92523443E-15
-- sigma(3 3)= -1.11676189E+00  sigma(2 1)=  5.51653577E-02
+- sigma(1 1)=  8.97794827E-01  sigma(3 2)= -1.08778046E-15
+- sigma(2 2)=  9.50281002E-01  sigma(3 1)=  1.92523476E-15
+- sigma(3 3)= -1.11676207E+00  sigma(2 1)=  5.51653670E-02
 --------------------------------------------------------------------------------
 
 
@@ -683,9 +682,9 @@ dipdip_range         2         2         1
   sigma(3 3)= -4.84416928E-05  sigma(2 1)=  1.48236362E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  2.7233E-01 GPa]
-- sigma(1 1)=  2.45086762E-01  sigma(3 2)= -1.60256318E-15
-- sigma(2 2)=  3.63113267E-01  sigma(3 1)=  2.55377027E-15
-- sigma(3 3)= -1.42520357E+00  sigma(2 1)=  4.36126360E-02
+- sigma(1 1)=  2.45086803E-01  sigma(3 2)= -1.60256345E-15
+- sigma(2 2)=  3.63113328E-01  sigma(3 1)=  2.55377070E-15
+- sigma(3 3)= -1.42520381E+00  sigma(2 1)=  4.36126433E-02
 --------------------------------------------------------------------------------
 
 
@@ -712,9 +711,9 @@ dipdip_range         2         2         1
   sigma(3 3)= -3.83360150E-05  sigma(2 1)=  3.79889456E-07
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  7.3372E-01 GPa]
-- sigma(1 1)= -6.09659441E-01  sigma(3 2)= -1.91261475E-15
-- sigma(2 2)= -4.63612328E-01  sigma(3 1)=  2.57282216E-15
-- sigma(3 3)= -1.12788431E+00  sigma(2 1)=  1.11767318E-02
+- sigma(1 1)= -6.09659543E-01  sigma(3 2)= -1.91261507E-15
+- sigma(2 2)= -4.63612406E-01  sigma(3 1)=  2.57282259E-15
+- sigma(3 3)= -1.12788450E+00  sigma(2 1)=  1.11767337E-02
 --------------------------------------------------------------------------------
 
 
@@ -741,9 +740,9 @@ dipdip_range         2         2         1
   sigma(3 3)= -8.30071576E-06  sigma(2 1)= -6.26103687E-07
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  7.4963E-01 GPa]
-- sigma(1 1)= -1.02742218E+00  sigma(3 2)= -1.79764947E-15
-- sigma(2 2)= -9.77251669E-01  sigma(3 1)=  1.31342998E-15
-- sigma(3 3)= -2.44215448E-01  sigma(2 1)= -1.84206033E-02
+- sigma(1 1)= -1.02742235E+00  sigma(3 2)= -1.79764977E-15
+- sigma(2 2)= -9.77251834E-01  sigma(3 1)=  1.31343020E-15
+- sigma(3 3)= -2.44215489E-01  sigma(2 1)= -1.84206064E-02
 --------------------------------------------------------------------------------
 
 
@@ -770,9 +769,9 @@ dipdip_range         2         2         1
   sigma(3 3)=  3.32176594E-05  sigma(2 1)= -1.40391099E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.3431E-01 GPa]
-- sigma(1 1)= -9.43319574E-01  sigma(3 2)= -1.54463087E-15
-- sigma(2 2)= -1.03692178E+00  sigma(3 1)= -1.34831588E-15
-- sigma(3 3)=  9.77297116E-01  sigma(2 1)= -4.13044803E-02
+- sigma(1 1)= -9.43319733E-01  sigma(3 2)= -1.54463113E-15
+- sigma(2 2)= -1.03692196E+00  sigma(3 1)= -1.34831611E-15
+- sigma(3 3)=  9.77297280E-01  sigma(2 1)= -4.13044872E-02
 --------------------------------------------------------------------------------
 
 
@@ -799,9 +798,9 @@ dipdip_range         2         2         1
   sigma(3 3)=  5.37112413E-05  sigma(2 1)= -1.58310798E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.5047E-01 GPa]
-- sigma(1 1)= -5.15126697E-01  sigma(3 2)= -1.49802053E-15
-- sigma(2 2)= -6.13701477E-01  sigma(3 1)= -4.05264130E-15
-- sigma(3 3)=  1.58023901E+00  sigma(2 1)= -4.65766370E-02
+- sigma(1 1)= -5.15126784E-01  sigma(3 2)= -1.49802078E-15
+- sigma(2 2)= -6.13701580E-01  sigma(3 1)= -4.05264198E-15
+- sigma(3 3)=  1.58023928E+00  sigma(2 1)= -4.65766449E-02
 --------------------------------------------------------------------------------
 
 
@@ -828,9 +827,9 @@ dipdip_range         2         2         1
   sigma(3 3)=  5.05857072E-05  sigma(2 1)= -1.17553522E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.6432E-01 GPa]
-- sigma(1 1)=  6.48342422E-02  sigma(3 2)= -1.65993225E-15
-- sigma(2 2)=  1.39841729E-01  sigma(3 1)= -7.32130843E-15
-- sigma(3 3)=  1.48828264E+00  sigma(2 1)= -3.45854344E-02
+- sigma(1 1)=  6.48342531E-02  sigma(3 2)= -1.65993253E-15
+- sigma(2 2)=  1.39841753E-01  sigma(3 1)= -7.32130966E-15
+- sigma(3 3)=  1.48828289E+00  sigma(2 1)= -3.45854402E-02
 --------------------------------------------------------------------------------
 
 
@@ -857,14 +856,14 @@ dipdip_range         2         2         1
   sigma(3 3)=  2.41499056E-05  sigma(2 1)= -3.89817425E-07
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.2103E-01 GPa]
-- sigma(1 1)=  2.67464341E-01  sigma(3 2)= -1.85955076E-15
-- sigma(2 2)=  5.85111051E-01  sigma(3 1)= -8.96916779E-15
-- sigma(3 3)=  7.10514634E-01  sigma(2 1)= -1.14688227E-02
+- sigma(1 1)=  2.67464386E-01  sigma(3 2)= -1.85955107E-15
+- sigma(2 2)=  5.85111149E-01  sigma(3 1)= -8.96916930E-15
+- sigma(3 3)=  7.10514753E-01  sigma(2 1)= -1.14688246E-02
 --------------------------------------------------------------------------------
 
 
  fconv : WARNING -
-  ntime=   20 was not enough Broyd/MD steps to converge gradients:
+  ntime=   20 was not enough Broyd/MD steps to converge gradients: 
   max grad (force/stress) = 6.3354E-03 > tolmxf= 2.0000E-05 ha/bohr (free atoms)
 
 
@@ -874,10 +873,10 @@ dipdip_range         2         2         1
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=         14.8  wall=         14.8
+- Proc.   0 individual time (sec): cpu=         14.3  wall=         14.3
 
 ================================================================================
 
-+Total cpu time     14.784  and wall time     14.788 sec
++Total cpu time     14.326  and wall time     14.330 sec
 
  multibinit : the run completed successfully.

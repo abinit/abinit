@@ -117,7 +117,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  integer :: ie2_left, ie2_right
  integer :: ik_this_proc, ierr,nrpt
  logical,parameter :: debug=.False.
- real(dp) :: Temp,chgu,chtu,chsu,chwu,diagerr,ucvol
+ real(dp) :: Temp,chgu,chwu,diagerr,ucvol
  real(dp) :: a2fprefactor, gtemp
  real(dp) :: lambda_tr,lor0,lorentz,maxerr,omega
  real(dp) :: rho,tau,wtherm,xtr
@@ -548,10 +548,8 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  end do !end isppol do
 
 !constant to change units of rho from au to SI
- chgu=2.173969*1.0d-7
- chtu=2.4188843265*1.0d-17
- chsu=8.617343101*1.0d-5 ! au to J/C/K
- chwu=9.270955772*1.0d-5 ! au to mK/W
+ chgu=2.173969*1.0d-7                    ! REPLACE WITH DATA FROM DEFS_BASIS
+ chwu=9.270955772*1.0d-5 ! au to mK/W    ! REPLACE WITH DATA FROM DEFS_BASIS
 
 !change the fermi level to zero, as required for q01 to vanish.
  tmp_fermie = elph_ds%fermie
@@ -817,7 +815,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 !        is tau energy dependent?
          tau = 2.0d0*ucvol/(q00(itemp,icomp,jcomp,isppol)*elph_tr_ds%dos_n0(itemp,isppol)*tmp_veloc_sq0)
          write(unit_rho,'(4D20.10)')temp,rho,rho*chgu,rho/temp
-         write(unit_tau,'(3D20.10)')temp,tau,tau*chtu
+         write(unit_tau,'(3D20.10)')temp,tau,tau*Time_Sec
          rho_T(itemp)=rho
        end do ! temperature = 1?
        write(unit_rho,*)
@@ -936,7 +934,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
 !      write(89,*) '# Rho for isppol, itrten = ', isppol, itrtensor
        do itemp=1,ntemper
          Temp=tempermin+temperinc*dble(itemp)
-         write(unit_sbk,'(3D20.10)')temp, seebeck(isppol,itemp,icomp,jcomp), seebeck(isppol,itemp,icomp,jcomp)*chsu
+         write(unit_sbk,'(3D20.10)')temp, seebeck(isppol,itemp,icomp,jcomp), seebeck(isppol,itemp,icomp,jcomp)*kb_HaK
 !        write(88,'(3D20.10)')temp, rho_nm(isppol,itemp,icomp,jcomp), rho_nm(isppol,itemp,icomp,jcomp)*chgu
 !        write(89,'(3D20.10)')temp, 0.5_dp/fullq(1,1), 0.5_dp*chgu/fullq(1,1)
        end do ! temperature
@@ -1065,7 +1063,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
  integer :: unit_a2f_tr, unit_a2f_trout, unit_a2f_trin, natom
  integer :: idir, iatom, k1, kdir,unit_lor,unit_rho,unit_tau,unit_therm
  integer :: itemp,nrpt,itrtensor, icomp, jcomp
- real(dp) :: Temp,chgu,chtu,femto,diagerr,firh,firhT,gaussfactor,domega
+ real(dp) :: Temp,chgu,femto,diagerr,firh,firhT,gaussfactor,domega
  real(dp) :: firh_tau,firhT_tau ! added by BX to get Tau
  real(dp) :: a2fprefactor_in, temp_in
  real(dp) :: a2fprefactor_out, temp_out
@@ -1471,7 +1469,6 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
 
 !constant to change units of rho from au to SI
  chgu=2.173969d-7
- chtu=2.4188843265d-17
  femto=1.0d-15
 
  do isppol=1,elph_ds%nsppol
@@ -1533,7 +1530,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
 !           tau=1.0d0/integtau(elph_ds%na2f)
 !         end if
          write(unit_rho,'(4D20.10)')temp,rho,rho*chgu,rho/temp
-         write(unit_tau,'(3D20.10)')temp,tau,tau*chtu/femto
+         write(unit_tau,'(3D20.10)')temp,tau,tau*Time_Sec/femto
          rho_T(itemp)=rho
          tau_T(itemp)=tau
        end do ! temperature
@@ -1686,11 +1683,11 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  real(dp) :: occ_omega,occ_e
  real(dp) :: xx,Temp,therm_factor
  real(dp) :: factor,dfermide
- real(dp) :: e_k,chu_tau,rate_e,mfp_e
+ real(dp) :: e_k,rate_e,mfp_e
  real(dp) :: ene,enemin,enemax,deltaene
  real(dp) :: omega,omega_min,omega_max,domega
  real(dp) :: diagerr
- real(dp) :: chu_mfp,chu_cond,chu_cth,chu_sbk,femto
+ real(dp) :: chu_cond,chu_cth,femto
  real(dp) :: displ_red(2,elph_ds%nbranch,elph_ds%nbranch)
  real(dp) :: eigval(elph_ds%nbranch),eigval2(elph_ds%nbranch)
  real(dp) :: imeigval(elph_ds%nbranch)
@@ -1734,11 +1731,8 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  ntemper  = elph_ds%ntemper
  nene = 2*elph_ds%na2f-1 ! only need e_k +- omega_max range, take deltaene=delta_oemga
 
- chu_tau  = 2.4188843265*1.0d-17
- chu_mfp  = 5.291772*1.0d-11
- chu_cond = 4.59988159904764*1.0d6
- chu_cth  = 1.078637439971599*1.0d4
- chu_sbk  = 8.617343101*1.0d-5
+ chu_cond = 4.59988159904764*1.0d6 ! REPLACE WITH DATA FROM DEFS_BASIS
+ chu_cth  = 1.078637439971599*1.0d4 ! REPLACE WITH DATA FROM DEFS_BASIS
  femto    = 1.0d-15
 
  tol_wtk = tol7/nkptirr/nband
@@ -2222,9 +2216,9 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
          end if
        end do ! nband
        write(unit_invtau,'(a,i8,a,3f12.6)') '# kpt# ', iFSkpt, '   kpt=', elph_ds%k_phon%kptirr(:,iFSkpt)
-       write(unit_invtau,'(100D16.8)') (inv_tau_k(itemp,isppol,iFSkpt,iband)*femto/chu_tau,iband=1,nband)
+       write(unit_invtau,'(100D16.8)') (inv_tau_k(itemp,isppol,iFSkpt,iband)*femto/Time_Sec,iband=1,nband)
        write(unit_tau,'(a,i8,a,3f12.6)') '# kpt# ', iFSkpt, '   kpt=', elph_ds%k_phon%kptirr(:,iFSkpt)
-       write(unit_tau,'(100D16.8)') (tau_k(itemp,isppol,iFSkpt,iband)*chu_tau/femto,iband=1,nband)
+       write(unit_tau,'(100D16.8)') (tau_k(itemp,isppol,iFSkpt,iband)*Time_Sec/femto,iband=1,nband)
      end do ! nkptirr
      write(unit_invtau,*) ' '
      write(unit_tau,*) ' '
@@ -2240,7 +2234,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
  do ikpt_irr = 1, new_nkptirr
    tmp_eigenGS(:,ikpt_irr,:) = eigenGS(:,elph_ds%k_phon%new_irredtoGS(ikpt_irr),:)
-   tmp_tau_k(:,:,ikpt_irr,:) = tau_k(:,:,elph_ds%k_phon%new_irredtoGS(ikpt_irr),:)*chu_tau
+   tmp_tau_k(:,:,ikpt_irr,:) = tau_k(:,:,elph_ds%k_phon%new_irredtoGS(ikpt_irr),:)*Time_Sec
  end do
 
 !BoltzTraP output files in SIESTA format
@@ -2299,7 +2293,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
        else
          rate_e = rate_e/nkpt/dos_e(isppol,iene)
        end if
-       write(unit_taue,"(3D16.8)") enemin+(iene-1)*deltaene*nspline, rate_e*femto/chu_tau, dos_e(isppol,iene)
+       write(unit_taue,"(3D16.8)") enemin+(iene-1)*deltaene*nspline, rate_e*femto/Time_Sec, dos_e(isppol,iene)
      end do ! number of energies
      write(unit_taue,*) ' '
    end do ! nsppol
@@ -2328,7 +2322,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
          else
            mfp_e = mfp_e/nkptirr/dos_e(isppol,iene)
          end if
-         write(unit_mfp,"(2D16.8)") enemin+(iene-1)*deltaene*nspline, mfp_e*chu_mfp/femto
+         write(unit_mfp,"(2D16.8)") enemin+(iene-1)*deltaene*nspline, mfp_e*Bohr_Ang*1.0d-10/femto
        end do ! number of energies
        write(unit_mfp,*) ' '
      end do ! icomp
@@ -2470,7 +2464,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
          cth(itemp,isppol,icomp,jcomp) = cth(itemp,isppol,icomp,jcomp)/(kb_HaK*Temp)/cryst%ucvol
          write(unit_cond,'(3D20.10)')Temp,cond(itemp,isppol,icomp,jcomp),cond(itemp,isppol,icomp,jcomp)*chu_cond
          write(unit_therm,'(3D20.10)')Temp,cth(itemp,isppol,icomp,jcomp),cth(itemp,isppol,icomp,jcomp)*chu_cth
-         write(unit_sbk,'(3D20.10)')Temp,seebeck(itemp,isppol,icomp,jcomp),seebeck(itemp,isppol,icomp,jcomp)*chu_sbk
+         write(unit_sbk,'(3D20.10)')Temp,seebeck(itemp,isppol,icomp,jcomp),seebeck(itemp,isppol,icomp,jcomp)*kb_HaK
        end do ! temperature
        write(unit_cond,*)
        write(unit_therm,*)

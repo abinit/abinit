@@ -1,8 +1,8 @@
 
-.Version 10.5.6.1 of ABINIT, released Sep 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 23 Feb 2025.
-- ( at 16h06 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_3.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h04 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_3.abi
 - output file    -> teph4vpq_3.abo
 - root for input  files -> teph4vpq_3i
 - root for output files -> teph4vpq_3o
@@ -177,7 +177,7 @@ P           mkmem3         10
               wtk3       0.00800    0.06400    0.06400    0.04800    0.19200    0.19200
                          0.09600    0.04800    0.09600    0.19200
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.0307175380E+00  2.0307175380E+00  2.0307175380E+00
+                       2.0307175455E+00  2.0307175455E+00  2.0307175455E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        3.8375000000E+00  3.8375000000E+00  3.8375000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -239,11 +239,11 @@ meta: {optdriver: 7, eph_task: 11, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -259,7 +259,7 @@ meta: {optdriver: 7, eph_task: 11, }
        3               2       -0.000000        0.000000
        3               3       -0.065315        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -304,25 +304,25 @@ meta: {optdriver: 7, eph_task: 11, }
  27)  -3.33333333E-01 -3.33333333E-01 -3.33333333E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2234217387E-02 (at units)
+ Average speed of sound partial sums:     0.2234217386E-02 (at units)
 -                                   =           4.8878 [km/s]
 
- Debye frequency from partial sums:     0.1801153402E-02 (Ha)
--                                 =     0.1185102008E+02 (THz)
--Debye temperature from partial sums:     0.5687585851E+03 (K)
+ Debye frequency from partial sums:     0.1801153401E-02 (Ha)
+-                                 =     0.1185102007E+02 (THz)
+-Debye temperature from partial sums:     0.5687592599E+03 (K)
 
- Average speed of sound partial sums:     0.2234217387E-02 (at units)
+ Average speed of sound partial sums:     0.2234217386E-02 (at units)
 -                                   =           4.8878 [km/s]
 
- Debye frequency from partial sums:     0.1801153402E-02 (Ha)
--                                 =     0.1185102008E+02 (THz)
--Debye temperature from partial sums:     0.5687585851E+03 (K)
+ Debye frequency from partial sums:     0.1801153401E-02 (Ha)
+-                                 =     0.1185102007E+02 (THz)
+-Debye temperature from partial sums:     0.5687592599E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4vpq_3o_DS1_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
 - Li    ONCVPSP-3.2.3.1  r_core=   1.40824   1.10935
 -  3.00000   3.00000    170503                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -335,8 +335,8 @@ meta: {optdriver: 7, eph_task: 11, }
              1   -2.250662   -0.474685
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
 - F     ONCVPSP-3.2.3.1  r_core=   1.30942   1.45782   1.60379
 -  9.00000   7.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -405,7 +405,7 @@ P Number of CPUs for parallelism over k-points: 1
  Max 10  k-points will be written. Use prtvol > 0 to print all of them.
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
  Little group operations won't be used
-
+ 
  gstore_completed: 1
  gstore_done_qbz_spin: 27
  gqk%nb_kq: 3
@@ -430,7 +430,7 @@ P Number of CPUs for parallelism over k-points: 1
  ib_k: 1     1.399647E-01
  ib_k: 2     6.669306E-02
  ib_k: 3     6.287284E-02
-
+ 
  E-PH matrix elements in the atom representation: pcase = (idir, iatom)
     iq    ik pcase im_kq  in_k        |g| in Ha
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
@@ -569,11 +569,11 @@ meta: {optdriver: 7, eph_task: 11, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -589,7 +589,7 @@ meta: {optdriver: 7, eph_task: 11, }
        3               2       -0.000000        0.000000
        3               3       -0.065315        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -634,19 +634,19 @@ meta: {optdriver: 7, eph_task: 11, }
  27)  -3.33333333E-01 -3.33333333E-01 -3.33333333E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2234217387E-02 (at units)
+ Average speed of sound partial sums:     0.2234217386E-02 (at units)
 -                                   =           4.8878 [km/s]
 
- Debye frequency from partial sums:     0.1801153402E-02 (Ha)
--                                 =     0.1185102008E+02 (THz)
--Debye temperature from partial sums:     0.5687585851E+03 (K)
+ Debye frequency from partial sums:     0.1801153401E-02 (Ha)
+-                                 =     0.1185102007E+02 (THz)
+-Debye temperature from partial sums:     0.5687592599E+03 (K)
 
- Average speed of sound partial sums:     0.2234217387E-02 (at units)
+ Average speed of sound partial sums:     0.2234217386E-02 (at units)
 -                                   =           4.8878 [km/s]
 
- Debye frequency from partial sums:     0.1801153402E-02 (Ha)
--                                 =     0.1185102008E+02 (THz)
--Debye temperature from partial sums:     0.5687585851E+03 (K)
+ Debye frequency from partial sums:     0.1801153401E-02 (Ha)
+-                                 =     0.1185102007E+02 (THz)
+-Debye temperature from partial sums:     0.5687592599E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4vpq_3o_DS2_PHDOS.nc
 --------------------------------------------------------------------------------
@@ -703,7 +703,7 @@ P Number of CPUs for parallelism over k-points: 1
  Max 10  k-points will be written. Use prtvol > 0 to print all of them.
  Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.
  Little group operations won't be used
-
+ 
  gstore_completed: 1
  gstore_done_qbz_spin: 64
  gqk%nb_kq: 3
@@ -728,7 +728,7 @@ P Number of CPUs for parallelism over k-points: 1
  ib_k: 1     1.557480E-04
  ib_k: 2     1.557480E-04
  ib_k: 3     2.987294E-08
-
+ 
  E-PH matrix elements in the atom representation: pcase = (idir, iatom)
     iq    ik pcase im_kq  in_k        |g| in Ha
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
@@ -867,11 +867,11 @@ meta: {optdriver: 7, eph_task: 11, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -887,7 +887,7 @@ meta: {optdriver: 7, eph_task: 11, }
        3               2       -0.000000        0.000000
        3               3       -0.065315        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -932,19 +932,19 @@ meta: {optdriver: 7, eph_task: 11, }
  27)  -3.33333333E-01 -3.33333333E-01 -3.33333333E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2234217387E-02 (at units)
+ Average speed of sound partial sums:     0.2234217386E-02 (at units)
 -                                   =           4.8878 [km/s]
 
- Debye frequency from partial sums:     0.1801153402E-02 (Ha)
--                                 =     0.1185102008E+02 (THz)
--Debye temperature from partial sums:     0.5687585851E+03 (K)
+ Debye frequency from partial sums:     0.1801153401E-02 (Ha)
+-                                 =     0.1185102007E+02 (THz)
+-Debye temperature from partial sums:     0.5687592599E+03 (K)
 
- Average speed of sound partial sums:     0.2234217387E-02 (at units)
+ Average speed of sound partial sums:     0.2234217386E-02 (at units)
 -                                   =           4.8878 [km/s]
 
- Debye frequency from partial sums:     0.1801153402E-02 (Ha)
--                                 =     0.1185102008E+02 (THz)
--Debye temperature from partial sums:     0.5687585851E+03 (K)
+ Debye frequency from partial sums:     0.1801153401E-02 (Ha)
+-                                 =     0.1185102007E+02 (THz)
+-Debye temperature from partial sums:     0.5687592599E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4vpq_3o_DS3_PHDOS.nc
 --------------------------------------------------------------------------------
@@ -1001,7 +1001,7 @@ P Number of CPUs for parallelism over k-points: 1
  Max 10  k-points will be written. Use prtvol > 0 to print all of them.
  Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.
  Little group operations won't be used
-
+ 
  gstore_completed: 1
  gstore_done_qbz_spin: 125
  gqk%nb_kq: 3
@@ -1026,7 +1026,7 @@ P Number of CPUs for parallelism over k-points: 1
  ib_k: 1     1.009799E-01
  ib_k: 2     1.389881E-01
  ib_k: 3     5.947260E-02
-
+ 
  E-PH matrix elements in the atom representation: pcase = (idir, iatom)
     iq    ik pcase im_kq  in_k        |g| in Ha
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
@@ -1120,7 +1120,7 @@ P Number of CPUs for parallelism over k-points: 1
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      7.6750000000E+00  7.6750000000E+00  7.6750000000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
@@ -1203,7 +1203,7 @@ P           mkmem3         10
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
             typat      1  2
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.0307175380E+00  2.0307175380E+00  2.0307175380E+00
+                       2.0307175455E+00  2.0307175455E+00  2.0307175455E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        3.8375000000E+00  3.8375000000E+00  3.8375000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1244,7 +1244,7 @@ P           mkmem3         10
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1261,12 +1261,12 @@ P           mkmem3         10
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1284,7 +1284,7 @@ P           mkmem3         10
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1299,15 +1299,15 @@ P           mkmem3         10
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         92.6  wall=         92.7
+- Proc.   0 individual time (sec): cpu=         94.4  wall=         94.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         92.6  wall=         92.7
++Overall time at end (sec) : cpu=         94.4  wall=         94.6

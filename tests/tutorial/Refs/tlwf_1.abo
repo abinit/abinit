@@ -1,5 +1,5 @@
 
-.Version 10.1.4.3 of ANADDB, released Jul 2025.
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 19 Aug 2025.
-- ( at 23h53 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h06 )
   
 
 ================================================================================
@@ -264,7 +264,7 @@
  Number of LWF: 3
  Anchor Points q-point:  0.00000 0.00000 0.00000
 Anchor point band indices set to [1, 2, 3]
-Columns selected: [5, 6, 4]
+Columns selected: [6, 5, 4]
  LWF is transformed to the real space cells: [4, 4, 4]
  Number of cells: 64
  R-vectors for cells in the real space :       64
@@ -341,6 +341,6 @@ Columns selected: [5, 6, 4]
 
 ================================================================================
 
-+Total cpu time      0.090  and wall time      0.091 sec
++Total cpu time      0.134  and wall time      0.135 sec
 
  anaddb : the run completed successfully.

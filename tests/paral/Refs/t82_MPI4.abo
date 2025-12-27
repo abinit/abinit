@@ -1,12 +1,12 @@
 ******************************************************************************************
-                                Welcome to MULTIBINIT,
+                                Welcome to MULTIBINIT,                         
  a software platform designed for the construction and use of second-principles models
                    for lattice, spin and electron degrees of freedom.
 
-.Version 10.0.0.3 of MULTIBINIT
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -17,7 +17,7 @@
 
 -----------------------------------------------------------------------------------------
 
-                          MULTIBINIT - LATTICE MODELS
+                          MULTIBINIT - LATTICE MODELS                   
 
  Project initiated and coordinated by Philippe GHOSEZ and his group at ULiege
    (Philippe.Ghosez@uliege.be).
@@ -32,27 +32,26 @@
 
 
 
-.Starting date : Sat 22 Mar 2025.
-- ( at 06h37 )
-
-- The starting date is more than 2 years after the initial release
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h25 )
+  
+- The starting date is more than 3 years after the initial release
 - of this version of ABINIT, namely Jul 2022.
-- Note that the use beyond 3 years after the release will not be supported.
+- This version of ABINIT is not supported anymore.
 - Action: please, switch to a more recent version of ABINIT.
-
 -  nproc =    4
 
 ================================================================================
 
- Read the information in the reference structure in
--/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_sys.xml
+ Read the information in the reference structure in 
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/paral/Input/t82_sys.xml
  to initialize the multibinit input
 
 ================================================================================
 
  -outvars_multibinit: echo values of input variables ----------------------
 
- Flags :
+ Flags : 
      ifcflag         1
    prt_model         1
      strcpli        -1
@@ -98,8 +97,8 @@ dipdip_range         1         1         1
 
 ================================================================================
 
--Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_sys.xml
--Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_sys.xml with Fortran
+-Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/paral/Input/t82_sys.xml
+-Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/paral/Input/t82_sys.xml with Fortran
 
  Bound for ifc SR:
 
@@ -138,8 +137,8 @@ dipdip_range         1         1         1
     0.000000    0.000000    1.000000
   - Elastic tensor (unit:10^2GPa):
     3.128144    1.018257    1.018257    0.000000    0.000000    0.000000
-    1.018253    3.128149    1.018253    0.000000    0.000000   -0.000000
-    1.018255    1.018255    3.128127   -0.000000   -0.000000   -0.000000
+    1.018254    3.128150    1.018254    0.000000    0.000000   -0.000000
+    1.018255    1.018255    3.128128   -0.000000   -0.000000   -0.000000
    -0.000000   -0.000001   -0.000001    0.654090    0.000000    0.000000
    -0.000003   -0.000000   -0.000003    0.000000    0.654092    0.000000
    -0.000001   -0.000001    0.000000    0.000000    0.000000    0.654094
@@ -186,13 +185,13 @@ dipdip_range         1         1         1
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_coeffs.xml
--Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t82_coeffs.xml with Fortran
+-Opening the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/paral/Input/t82_coeffs.xml
+-Reading the file /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/paral/Input/t82_coeffs.xml with Fortran
 
 ================================================================================
 
 -Reading the training-set file :
--/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/xuhe_merge_newbound/tests/paral/Input/t81_HIST
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/paral/Input/t81_HIST
 
 
 --------------------------------------------------------------------------------
@@ -205,7 +204,7 @@ dipdip_range         1         1         1
 
  The coefficients for the fit will be generated with all cross terms
 
- 48 coefficients generated
+ 48 coefficients generated 
 
 
  Goal function values at the begining of the fit process (eV^2/A^2):
@@ -243,6 +242,6 @@ dipdip_range         1         1         1
 
 ================================================================================
 
-+Total cpu time      2.803  and wall time      2.803 sec
++Total cpu time      2.904  and wall time      2.905 sec
 
  multibinit : the run completed successfully.

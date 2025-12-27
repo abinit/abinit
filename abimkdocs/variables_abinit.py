@@ -4575,6 +4575,26 @@ perform a fourier transform. The result can be plotted using the "Markov_id.dat"
 ),
 
 Variable(
+    abivarname="dmftctqmc_chains",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_useful'],
+    dimensions="scalar",
+    defaultval="number of [[OPENMP]] threads",
+    mnemonics="Dynamical Mean Field Theory: Continuous Time Quantum Monte Carlo Number of per-MPI tasks Chains",
+    characteristics=['[[DEVELOP]]'],
+    requires="[[dmft_solv]] == 5",
+    added_in_version="10.7",
+    text=r"""
+Number of chains each MPI task will run. Those chains will be parallelised using OpenMP threads.
+Default behaviour is that each MPI task run as many chains as OpenMP threads are defined.
+Therefore, user is expected to manage this parallelisation level through `OMP_NUM_THREADS` environment variable,
+while this variable is here for tuning or troubleshooting purposes.
+Implemented only for dmft_solv == 5.
+""",
+),
+
+Variable(
     abivarname="dmftctqmc_order",
     varset="dmft",
     vartype="integer",

@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,20 +14,20 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 10 Oct 2025.
-- ( at 09h10 )
+.Starting date : Mon 22 Dec 2025.
+- ( at 08h26 )
   
-- input  file    -> /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/TestBot_MPI24/tutoparal_tdmft_1_MPI24/tdmft_1.abi
+- input  file    -> /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/TestBot_MPI24/tutoparal_tdmft_1_MPI24/tdmft_1.abi
 - output file    -> tdmft_1_MPI24.abo
 - root for input  files -> tdmft_1_MPI24i
 - root for output files -> tdmft_1_MPI24o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/V.xml
+-   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/V.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
+-   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/O.xml
+-   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/O.xml
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -264,7 +264,7 @@ P           mkmem2          4
                        0  0 -1   0 -1  0   1  0  0       0  0  1   0  1  0  -1  0  0
                        0  0  1   0 -1  0  -1  0  0       0  0 -1   0  1  0   1  0  0
            tolwfr      1.00000000E-15
-           tsmear      3.80017850E-03 Hartree
+           tsmear      3.80017388E-03 Hartree
             typat      1  2  3  3  3
            useylm           1
               wtk1       0.22222    0.07407    0.11111    0.11111    0.22222    0.05556
@@ -280,10 +280,10 @@ P           mkmem2          4
                          1.00000    1.00000
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.9210455615E+00  1.9210455615E+00  1.9210455615E+00
-                       1.9210455615E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  1.9210455615E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.9210455615E+00
+                       1.9210455686E+00  1.9210455686E+00  1.9210455686E+00
+                       1.9210455686E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  1.9210455686E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.9210455686E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        3.6302500000E+00  3.6302500000E+00  3.6302500000E+00
                        3.6302500000E+00  0.0000000000E+00  0.0000000000E+00
@@ -312,7 +312,7 @@ P           mkmem2          4
 iteration_state: {dtset: 1, }
 dimensions: {natom: 5, nkpt: 10, mband: 30, nsppol: 1, nspinor: 1, nspden: 1, mpw: 770, }
 cutoff_energies: {ecut:  12.0, pawecutdg:  20.0, }
-electrons: {nelect:   4.10000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   3.80017850E-03, }
+electrons: {nelect:   4.10000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   3.80017388E-03, }
 meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 ...
 
@@ -334,9 +334,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/V.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/V.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/V.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/V.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -354,9 +354,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -374,9 +374,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/O.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -408,50 +408,50 @@ tolerances: {tolwfr: 1.00E-15, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -152.11758091818    -1.521E+02 1.136E-01 1.857E+01
- ETOT  2  -152.30640578018    -1.888E-01 5.478E-03 1.306E+02
- ETOT  3  -151.97049340863     3.359E-01 6.811E-04 4.096E+00
- ETOT  4  -151.94015432547     3.034E-02 1.662E-04 1.149E+00
- ETOT  5  -151.92994271246     1.021E-02 1.374E-03 1.205E-01
- ETOT  6  -151.92921225791     7.305E-04 8.869E-05 3.707E-03
- ETOT  7  -151.92917860283     3.366E-05 2.703E-04 9.381E-04
- ETOT  8  -151.92917054788     8.055E-06 5.418E-06 1.675E-04
- ETOT  9  -151.92916922785     1.320E-06 1.494E-05 8.012E-08
- ETOT 10  -151.92916922861    -7.569E-10 9.081E-07 1.768E-07
- ETOT 11  -151.92916922726     1.343E-09 7.345E-07 2.507E-11
- ETOT 12  -151.92916922726    -1.705E-13 1.849E-07 5.135E-11
- ETOT 13  -151.92916922726    -7.674E-13 9.814E-08 1.353E-13
- ETOT 14  -151.92916922726     6.821E-13 3.798E-08 4.895E-15
- ETOT 15  -151.92916922726    -3.979E-13 2.024E-08 1.137E-15
- ETOT 16  -151.92916922726     5.400E-13 7.823E-09 2.860E-16
- ETOT 17  -151.92916922726    -4.263E-13 4.178E-09 1.252E-17
- ETOT 18  -151.92916922726    -7.390E-13 1.614E-09 1.416E-18
- ETOT 19  -151.92916922726     1.563E-12 8.627E-10 4.268E-20
- ETOT 20  -151.92916922726     3.695E-13 3.333E-10 6.749E-22
- ETOT 21  -151.92916922726    -2.274E-13 1.782E-10 1.679E-22
- ETOT 22  -151.92916922726     8.811E-13 6.890E-11 3.923E-22
- ETOT 23  -151.92916922726     6.537E-13 3.680E-11 2.031E-23
- ETOT 24  -151.92916922726    -5.684E-13 1.426E-11 3.088E-22
- ETOT 25  -151.92916922726     5.684E-13 7.597E-12 2.630E-23
- ETOT 26  -151.92916922726    -3.126E-13 2.956E-12 3.132E-23
- ETOT 27  -151.92916922726     1.421E-13 1.568E-12 1.348E-21
- ETOT 28  -151.92916922726     2.842E-13 6.137E-13 7.074E-22
- ETOT 29  -151.92916922726    -2.274E-13 3.235E-13 2.230E-22
- ETOT 30  -151.92916922726     3.126E-13 1.275E-13 7.273E-23
- ETOT 31  -151.92916922726    -8.527E-14 6.676E-14 2.584E-24
- ETOT 32  -151.92916922726     1.990E-13 2.652E-14 1.405E-22
- ETOT 33  -151.92916922726    -1.421E-13 1.379E-14 2.457E-23
- ETOT 34  -151.92916922726     8.527E-14 5.512E-15 2.035E-24
- ETOT 35  -151.92916922726    -1.705E-13 2.850E-15 1.285E-23
- ETOT 36  -151.92916922726     8.527E-14 1.146E-15 7.162E-23
- ETOT 37  -151.92916922726     8.527E-14 9.970E-16 1.072E-22
+ ETOT  1  -152.11758091512    -1.521E+02 1.136E-01 1.857E+01
+ ETOT  2  -152.30640576997    -1.888E-01 5.478E-03 1.306E+02
+ ETOT  3  -151.97049340544     3.359E-01 6.811E-04 4.096E+00
+ ETOT  4  -151.94015432241     3.034E-02 1.662E-04 1.149E+00
+ ETOT  5  -151.92994270950     1.021E-02 1.374E-03 1.205E-01
+ ETOT  6  -151.92921225499     7.305E-04 8.869E-05 3.707E-03
+ ETOT  7  -151.92917859991     3.366E-05 2.703E-04 9.381E-04
+ ETOT  8  -151.92917054497     8.055E-06 5.418E-06 1.675E-04
+ ETOT  9  -151.92916922493     1.320E-06 1.494E-05 8.012E-08
+ ETOT 10  -151.92916922569    -7.566E-10 9.081E-07 1.768E-07
+ ETOT 11  -151.92916922435     1.343E-09 7.345E-07 2.507E-11
+ ETOT 12  -151.92916922435    -3.126E-13 1.849E-07 5.135E-11
+ ETOT 13  -151.92916922435     5.969E-13 9.814E-08 1.353E-13
+ ETOT 14  -151.92916922435    -2.842E-13 3.798E-08 4.896E-15
+ ETOT 15  -151.92916922435    -3.979E-13 2.024E-08 1.137E-15
+ ETOT 16  -151.92916922435     3.411E-13 7.823E-09 2.866E-16
+ ETOT 17  -151.92916922435    -2.842E-14 4.178E-09 1.228E-17
+ ETOT 18  -151.92916922435     8.242E-13 1.614E-09 1.452E-18
+ ETOT 19  -151.92916922435    -7.390E-13 8.627E-10 3.749E-20
+ ETOT 20  -151.92916922435    -1.933E-12 3.333E-10 7.172E-22
+ ETOT 21  -151.92916922435     1.450E-12 1.782E-10 1.144E-22
+ ETOT 22  -151.92916922435     5.684E-13 6.890E-11 4.975E-22
+ ETOT 23  -151.92916922435    -2.842E-13 3.680E-11 1.106E-22
+ ETOT 24  -151.92916922435     1.421E-13 1.426E-11 7.170E-22
+ ETOT 25  -151.92916922435     3.126E-13 7.597E-12 5.159E-23
+ ETOT 26  -151.92916922435    -1.705E-13 2.956E-12 9.692E-23
+ ETOT 27  -151.92916922435    -2.558E-13 1.568E-12 5.041E-22
+ ETOT 28  -151.92916922435    -1.421E-13 6.137E-13 2.441E-22
+ ETOT 29  -151.92916922435     5.684E-14 3.235E-13 2.878E-22
+ ETOT 30  -151.92916922435     0.000E+00 1.275E-13 2.609E-24
+ ETOT 31  -151.92916922435     2.558E-13 6.676E-14 6.148E-24
+ ETOT 32  -151.92916922435    -2.558E-13 2.652E-14 6.106E-24
+ ETOT 33  -151.92916922435     2.274E-13 1.379E-14 1.938E-22
+ ETOT 34  -151.92916922435    -3.411E-13 5.512E-15 4.039E-23
+ ETOT 35  -151.92916922435     3.411E-13 2.850E-15 1.059E-23
+ ETOT 36  -151.92916922435    -3.411E-13 1.146E-15 2.651E-22
+ ETOT 37  -151.92916922435     0.000E+00 9.970E-16 1.170E-23
 
  At SCF step   37   max residual=  9.97E-16 < tolwfr=  1.00E-15 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.08254394E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.08254394E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.08254394E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.08254395E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.08254395E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.08254395E-03  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -464,14 +464,14 @@ lattice_vectors:
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.8273624E+02
-convergence: {deltae:  8.527E-14, res2:  1.072E-22, residm:  9.970E-16, diffor: null, }
+convergence: {deltae:  0.000E+00, res2:  1.170E-23, residm:  9.970E-16, diffor: null, }
 etotal    :  -1.51929169E+02
 entropy   :   0.00000000E+00
-fermie    :   2.90759655E-01
+fermie    :   2.90759654E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.08254394E-03,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   2.08254394E-03,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   2.08254394E-03, ]
+- [  2.08254395E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.08254395E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.08254395E-03, ]
 pressure_GPa:  -6.1271E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  V]
@@ -500,8 +500,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      5.993800632297566
- Compensation charge over fine fft grid    =      5.994532801678689
+ Compensation charge over spherical meshes =      5.993800631172450
+ Compensation charge over fine fft grid    =      5.994532800552174
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -561,7 +561,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   40.355E-17; max=  99.701E-17
+ Mean square residual over all n,k,spin=   40.357E-17; max=  99.701E-17
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -577,10 +577,10 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.92104556148385     1.92104556148385     1.92104556148385
-    3      1.92104556148385     0.00000000000000     0.00000000000000
-    4      0.00000000000000     1.92104556148385     0.00000000000000
-    5      0.00000000000000     0.00000000000000     1.92104556148385
+    2      1.92104556857736     1.92104556857736     1.92104556857736
+    3      1.92104556857736     0.00000000000000     0.00000000000000
+    4      0.00000000000000     1.92104556857736     0.00000000000000
+    5      0.00000000000000     0.00000000000000     1.92104556857736
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -598,7 +598,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     5     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.260500000000  7.260500000000  7.260500000000 bohr
-              =  3.842091122968  3.842091122968  3.842091122968 angstroms
+              =  3.842091137155  3.842091137155  3.842091137155 angstroms
  prteigrs : about to open file tdmft_1_MPI24o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.29076   Average Vxc (hartree)=  -0.43942
  Eigenvalues (hartree) for nkpt=  10  k points:
@@ -618,54 +618,54 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  4.22086661458394E+01
-hartree             :  3.42917711013842E+01
-xc                  : -1.94915719027803E+01
+kinetic             :  4.22086661449253E+01
+hartree             :  3.42917710998474E+01
+xc                  : -1.94915719032062E+01
 Ewald energy        : -1.14220316979058E+02
 psp_core            :  6.33972391350157E+00
-local_psp           : -1.09492067264993E+02
-PAW spherical_terms :  8.43702154647807E+00
-internal            : -1.51926773439627E+02
-'-kT*entropy'       : -2.39578764027818E-03
-total_energy        : -1.51929169227267E+02
-total_energy_eV     : -4.13420294337407E+03
+local_psp           : -1.09492067260842E+02
+PAW spherical_terms :  8.43702154294436E+00
+internal            : -1.51926773441887E+02
+'-kT*entropy'       : -2.39578246113054E-03
+total_energy        : -1.51929169224348E+02
+total_energy_eV     : -4.13420330579475E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.47261679753933E+01
+band_energy         : -1.47261679799847E+01
 Ewald energy        : -1.14220316979058E+02
 psp_core            :  6.33972391350157E+00
-xc_dc               : -3.05315286800049E+01
-PAW spherical_terms :  1.21151628133308E+00
-internal            : -1.51926773439621E+02
-'-kT*entropy'       : -2.39578764027818E-03
-total_energy_dc     : -1.51929169227261E+02
-total_energy_dc_eV  : -4.13420294337391E+03
+xc_dc               : -3.05315286783406E+01
+PAW spherical_terms :  1.21151628199543E+00
+internal            : -1.51926773441886E+02
+'-kT*entropy'       : -2.39578246113054E-03
+total_energy_dc     : -1.51929169224347E+02
+total_energy_dc_eV  : -4.13420330579472E+03
 ...
 
 
 --- !EnergyTermsWithPAWCore
 iteration_state     : {dtset: 1, }
 comment             : 'Components of total free energy, including PAW core contributions'
-Total energy        : -4.34789146337168E+03
-Total energy DC     : -4.34789146337167E+03
-Total energy (eV)   : -1.18312143591424E+05
-Total energy DC (eV): -1.18312143591424E+05
+Total energy        : -4.34789146336876E+03
+Total energy DC     : -4.34789146336876E+03
+Total energy (eV)   : -1.18312153965331E+05
+Total energy DC (eV): -1.18312153965331E+05
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.08254394E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.08254394E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.08254394E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.08254395E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.08254395E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.08254395E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.1271E+01 GPa]
-- sigma(1 1)=  6.12705477E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  6.12705477E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  6.12705477E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  6.12705583E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  6.12705583E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  6.12705583E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -676,7 +676,7 @@ Total energy DC (eV): -1.18312143591424E+05
 iteration_state: {dtset: 2, }
 dimensions: {natom: 5, nkpt: 87, mband: 30, nsppol: 1, nspinor: 1, nspden: 1, mpw: 780, }
 cutoff_energies: {ecut:  12.0, pawecutdg:  20.0, }
-electrons: {nelect:   4.10000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   3.80017850E-03, }
+electrons: {nelect:   4.10000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   3.80017388E-03, }
 meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ...
 
@@ -704,7 +704,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ================================================================================
  prteigrs : about to open file tdmft_1_MPI24o_DS2_EIG
  Non-SCF case, kpt    1 (  0.25000  0.25000  0.25000), residuals and eigenvalues=
-  3.64E-16  3.28E-16  4.58E-16  8.21E-16  8.74E-16  5.41E-16  9.57E-16  3.87E-16
+  3.64E-16  3.28E-16  4.57E-16  8.22E-16  8.74E-16  5.41E-16  9.55E-16  3.86E-16
   5.11E-16  1.24E-16  7.36E-16  6.00E-16  1.43E-16  8.76E-16  5.64E-16  1.89E-16
   7.38E-16  2.80E-16  3.30E-16  4.15E-16  4.32E-16  5.11E-16  4.01E-16  4.25E-16
   5.46E-16  9.21E-16  7.53E-16  7.80E-16  7.85E-16  4.00E-10
@@ -714,17 +714,17 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.8583E-01  1.9802E-01  3.1167E-01  3.1534E-01  3.1534E-01  4.2538E-01
   4.2538E-01  5.0240E-01  5.0240E-01  5.1375E-01  5.6234E-01  5.6234E-01
  Non-SCF case, kpt    2 (  0.23611  0.23611  0.23611), residuals and eigenvalues=
-  4.28E-16  4.92E-16  4.02E-16  6.94E-16  9.47E-16  8.10E-16  8.84E-16  3.94E-16
+  4.28E-16  4.92E-16  4.02E-16  6.93E-16  9.47E-16  8.10E-16  8.85E-16  3.94E-16
   6.15E-16  6.05E-16  7.20E-16  8.42E-16  1.15E-16  1.70E-16  8.28E-16  2.92E-16
-  3.42E-16  4.11E-16  5.89E-16  5.47E-16  7.19E-16  5.22E-16  4.87E-16  4.85E-16
-  6.35E-16  3.50E-16  9.36E-16  9.28E-16  5.16E-16  1.04E-09
+  3.42E-16  4.11E-16  5.89E-16  5.47E-16  7.19E-16  5.23E-16  4.87E-16  4.86E-16
+  6.36E-16  3.50E-16  9.35E-16  9.28E-16  5.16E-16  1.04E-09
  -2.1017E+00 -1.1530E+00 -1.1530E+00 -1.1530E+00 -9.6446E-01 -4.1970E-01
  -3.8614E-01 -3.8614E-01 -3.0404E-01 -3.0404E-01 -2.9030E-01  5.8319E-02
   8.6563E-02  8.6563E-02  1.0738E-01  1.0738E-01  1.1046E-01  1.8498E-01
   1.8498E-01  1.9602E-01  3.0798E-01  3.1190E-01  3.1190E-01  4.1914E-01
   4.1914E-01  4.9695E-01  4.9695E-01  5.1263E-01  5.6188E-01  5.6188E-01
  Non-SCF case, kpt    3 (  0.22222  0.22222  0.22222), residuals and eigenvalues=
-  9.66E-16  3.62E-16  4.81E-16  5.86E-16  7.02E-16  4.65E-16  9.83E-16  5.43E-16
+  9.66E-16  3.62E-16  4.81E-16  5.86E-16  7.02E-16  4.65E-16  9.82E-16  5.43E-16
   8.64E-16  3.70E-16  7.83E-16  3.84E-16  8.43E-16  2.19E-16  1.45E-16  2.32E-16
   4.03E-16  5.73E-16  6.35E-16  2.13E-16  3.86E-16  7.28E-16  8.70E-16  6.59E-16
   7.28E-16  4.28E-16  5.84E-16  8.93E-16  8.42E-16  1.02E-09
@@ -734,10 +734,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.8447E-01  1.9365E-01  3.0424E-01  3.0822E-01  3.0822E-01  4.1275E-01
   4.1275E-01  4.9101E-01  4.9101E-01  5.1109E-01  5.6098E-01  5.6098E-01
  Non-SCF case, kpt    4 (  0.20833  0.20833  0.20833), residuals and eigenvalues=
-  4.68E-16  7.60E-16  2.71E-16  4.67E-16  5.24E-16  4.26E-16  2.82E-16  6.19E-16
+  4.68E-16  7.60E-16  2.71E-16  4.66E-16  5.24E-16  4.26E-16  2.82E-16  6.19E-16
   4.72E-16  2.12E-16  4.08E-16  5.58E-16  1.54E-16  8.85E-16  1.55E-16  6.54E-16
   3.72E-16  3.72E-16  6.11E-16  6.73E-16  4.32E-16  6.59E-16  9.48E-16  7.09E-16
-  2.90E-16  4.99E-16  8.55E-16  6.15E-16  8.29E-16  5.16E-08
+  2.90E-16  4.98E-16  8.55E-16  6.15E-16  8.29E-16  5.16E-08
  -2.1018E+00 -1.1529E+00 -1.1529E+00 -1.1529E+00 -9.6472E-01 -4.2279E-01
  -3.8642E-01 -3.8642E-01 -3.0347E-01 -3.0347E-01 -2.9118E-01  6.3218E-02
   9.0613E-02  9.0613E-02  1.1498E-01  1.1498E-01  1.2442E-01  1.8511E-01
@@ -754,20 +754,20 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.8521E-01  1.8981E-01  2.9694E-01  3.0105E-01  3.0105E-01  4.0015E-01
   4.0015E-01  4.7873E-01  4.7873E-01  5.0708E-01  5.5799E-01  5.5799E-01
  Non-SCF case, kpt    6 (  0.18056  0.18056  0.18056), residuals and eigenvalues=
-  5.87E-16  9.16E-16  2.16E-16  8.44E-16  4.29E-16  8.68E-16  8.71E-16  7.02E-16
+  5.87E-16  9.16E-16  2.16E-16  8.45E-16  4.29E-16  8.68E-16  8.70E-16  7.03E-16
   6.11E-16  7.99E-16  7.61E-16  3.12E-16  3.00E-16  1.35E-16  9.39E-16  1.76E-16
   4.85E-16  3.50E-16  5.55E-16  2.93E-16  2.34E-16  2.64E-16  7.71E-16  9.16E-16
-  8.95E-16  7.78E-16  7.24E-16  4.19E-16  4.33E-16  1.30E-07
+  8.95E-16  7.79E-16  7.24E-16  4.19E-16  4.33E-16  1.30E-07
  -2.1018E+00 -1.1528E+00 -1.1528E+00 -1.1528E+00 -9.6498E-01 -4.2519E-01
  -3.8645E-01 -3.8645E-01 -3.0334E-01 -3.0334E-01 -2.9297E-01  6.9133E-02
   9.3532E-02  9.3532E-02  1.2384E-01  1.2384E-01  1.3918E-01  1.8601E-01
   1.8601E-01  1.8804E-01  2.9314E-01  2.9738E-01  2.9738E-01  3.9387E-01
   3.9387E-01  4.7245E-01  4.7245E-01  5.0440E-01  5.5605E-01  5.5605E-01
  Non-SCF case, kpt    7 (  0.16667  0.16667  0.16667), residuals and eigenvalues=
-  8.63E-16  5.53E-16  7.42E-16  3.78E-16  9.33E-16  2.70E-16  9.50E-16  7.54E-16
+  8.63E-16  5.53E-16  7.43E-16  3.79E-16  9.33E-16  2.70E-16  9.49E-16  7.54E-16
   4.78E-16  2.54E-16  4.88E-16  2.01E-16  1.46E-16  8.62E-16  2.07E-16  8.15E-16
   2.93E-16  3.84E-16  8.43E-16  9.36E-16  7.05E-16  2.57E-16  3.98E-16  4.66E-16
-  6.29E-16  8.51E-16  8.29E-16  9.94E-16  7.63E-16  9.95E-06
+  6.29E-16  8.50E-16  8.29E-16  9.94E-16  7.63E-16  9.95E-06
  -2.1018E+00 -1.1528E+00 -1.1527E+00 -1.1527E+00 -9.6510E-01 -4.2614E-01
  -3.8639E-01 -3.8639E-01 -3.0341E-01 -3.0341E-01 -2.9411E-01  7.2589E-02
   9.5091E-02  9.5091E-02  1.2861E-01  1.2861E-01  1.4798E-01  1.8637E-01
@@ -777,14 +777,14 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   6.90E-16  6.66E-16  8.49E-16  3.03E-16  7.18E-16  9.89E-16  3.50E-16  9.79E-16
   2.46E-16  3.48E-16  2.94E-16  4.19E-16  2.79E-16  1.87E-16  3.31E-16  6.30E-16
   2.38E-16  2.74E-16  5.86E-16  3.74E-16  2.79E-16  5.47E-16  6.90E-16  8.83E-16
-  8.24E-16  6.93E-16  7.38E-16  7.01E-16  4.93E-16  4.22E-06
+  8.24E-16  6.92E-16  7.38E-16  7.01E-16  4.93E-16  4.22E-06
  -2.1018E+00 -1.1527E+00 -1.1527E+00 -1.1527E+00 -9.6522E-01 -4.2694E-01
  -3.8630E-01 -3.8630E-01 -3.0358E-01 -3.0358E-01 -2.9541E-01  7.6081E-02
   9.5673E-02  9.5673E-02  1.3266E-01  1.3266E-01  1.5453E-01  1.8383E-01
   1.8871E-01  1.8871E-01  2.8585E-01  2.8978E-01  2.8978E-01  3.8144E-01
   3.8144E-01  4.5984E-01  4.5984E-01  4.9769E-01  5.5118E-01  5.5121E-01
  Non-SCF case, kpt    9 (  0.13889  0.13889  0.13889), residuals and eigenvalues=
-  5.89E-16  6.25E-16  2.63E-16  2.71E-16  7.64E-16  3.16E-16  4.60E-16  9.26E-16
+  5.89E-16  6.25E-16  2.63E-16  2.71E-16  7.64E-16  3.16E-16  4.60E-16  9.28E-16
   2.41E-16  3.89E-16  2.84E-16  5.00E-16  3.18E-16  2.18E-16  4.09E-16  8.01E-16
   5.26E-16  3.71E-16  1.63E-16  8.39E-16  6.47E-16  7.47E-16  3.50E-16  6.27E-16
   3.83E-16  4.68E-16  6.84E-16  5.03E-16  7.58E-16  1.47E-05
@@ -794,18 +794,18 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.9055E-01  1.9055E-01  2.8218E-01  2.8599E-01  2.8599E-01  3.7557E-01
   3.7557E-01  4.5380E-01  4.5380E-01  4.9351E-01  5.4877E-01  5.4903E-01
  Non-SCF case, kpt   10 (  0.12500  0.12500  0.12500), residuals and eigenvalues=
-  8.39E-16  5.59E-16  7.22E-16  2.62E-16  3.62E-16  4.07E-16  3.49E-16  9.09E-16
+  8.39E-16  5.59E-16  7.21E-16  2.62E-16  3.62E-16  4.07E-16  3.49E-16  9.09E-16
   8.21E-16  7.77E-16  6.56E-16  5.54E-16  7.89E-16  5.05E-17  7.55E-16  3.40E-16
   5.10E-16  1.92E-16  7.65E-16  7.56E-16  3.97E-16  4.47E-16  4.04E-16  2.17E-16
-  3.38E-16  4.41E-16  5.83E-16  7.59E-16  3.84E-16  5.19E-06
+  3.38E-16  4.41E-16  5.84E-16  7.59E-16  3.84E-16  5.19E-06
  -2.1018E+00 -1.1526E+00 -1.1526E+00 -1.1526E+00 -9.6545E-01 -4.2812E-01
  -3.8599E-01 -3.8599E-01 -3.0407E-01 -3.0407E-01 -2.9816E-01  8.3355E-02
   9.7981E-02  9.7981E-02  1.4351E-01  1.4351E-01  1.6848E-01  1.8106E-01
   1.9267E-01  1.9267E-01  2.7862E-01  2.8233E-01  2.8233E-01  3.6994E-01
   3.6994E-01  4.4807E-01  4.4807E-01  4.8890E-01  5.4647E-01  5.4809E-01
  Non-SCF case, kpt   11 (  0.11111  0.11111  0.11111), residuals and eigenvalues=
-  6.10E-16  9.90E-16  8.14E-16  4.41E-16  9.94E-16  1.74E-16  9.24E-16  6.12E-16
-  3.75E-16  6.24E-16  2.03E-16  1.12E-16  7.27E-16  8.24E-17  8.35E-16  5.04E-16
+  6.10E-16  9.90E-16  8.16E-16  4.41E-16  9.94E-16  1.74E-16  9.18E-16  6.13E-16
+  3.74E-16  6.24E-16  2.03E-16  1.12E-16  7.27E-16  8.24E-17  8.35E-16  5.04E-16
   7.14E-16  9.04E-16  6.75E-16  9.37E-16  8.75E-16  8.71E-16  2.50E-16  6.50E-16
   8.67E-16  6.46E-16  4.95E-16  9.79E-16  3.67E-16  2.24E-07
  -2.1018E+00 -1.1526E+00 -1.1526E+00 -1.1526E+00 -9.6556E-01 -4.2854E-01
@@ -814,9 +814,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.9339E-01  1.9339E-01  2.7514E-01  2.7838E-01  2.7838E-01  3.6436E-01
   3.6436E-01  4.4248E-01  4.4248E-01  4.8390E-01  5.4400E-01  5.4405E-01
  Non-SCF case, kpt   12 (  0.09722  0.09722  0.09722), residuals and eigenvalues=
-  3.52E-16  4.57E-16  5.36E-16  8.17E-16  3.47E-16  8.07E-16  5.39E-16  9.85E-16
+  3.52E-16  4.57E-16  5.37E-16  8.18E-16  3.47E-16  8.07E-16  5.40E-16  9.82E-16
   8.73E-16  5.93E-16  2.46E-16  1.18E-16  1.61E-16  2.12E-16  4.78E-16  3.96E-16
-  6.24E-16  8.45E-16  9.77E-16  4.95E-16  5.61E-16  8.64E-16  4.59E-16  8.42E-16
+  6.24E-16  8.45E-16  9.77E-16  4.96E-16  5.61E-16  8.64E-16  4.59E-16  8.42E-16
   5.40E-16  6.16E-16  7.62E-16  7.28E-16  3.44E-07  6.37E-16
  -2.1018E+00 -1.1525E+00 -1.1525E+00 -1.1525E+00 -9.6565E-01 -4.2885E-01
  -3.8561E-01 -3.8561E-01 -3.0471E-01 -3.0471E-01 -3.0090E-01  9.0580E-02
@@ -827,16 +827,16 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   5.25E-16  4.48E-16  5.05E-16  3.60E-16  4.05E-16  8.23E-16  8.21E-16  4.46E-16
   6.95E-16  4.62E-16  9.66E-16  1.52E-16  2.56E-16  1.73E-16  5.83E-16  4.70E-16
   7.82E-16  5.58E-16  3.12E-16  2.83E-16  9.30E-16  4.35E-16  8.44E-16  8.57E-16
-  7.35E-16  4.35E-16  3.75E-16  9.31E-16  9.20E-07  8.24E-16
+  7.35E-16  4.35E-16  3.76E-16  9.31E-16  9.20E-07  8.24E-16
  -2.1018E+00 -1.1525E+00 -1.1525E+00 -1.1525E+00 -9.6573E-01 -4.2907E-01
  -3.8542E-01 -3.8542E-01 -3.0503E-01 -3.0503E-01 -3.0216E-01  9.3511E-02
   1.0086E-01  1.0086E-01  1.5765E-01  1.5765E-01  1.7763E-01  1.8722E-01
   1.9831E-01  1.9831E-01  2.6871E-01  2.7097E-01  2.7097E-01  3.5488E-01
   3.5488E-01  4.3279E-01  4.3279E-01  4.7383E-01  5.3918E-01  5.3981E-01
  Non-SCF case, kpt   14 (  0.06944  0.06944  0.06944), residuals and eigenvalues=
-  6.70E-16  3.98E-16  6.93E-16  9.49E-16  4.73E-16  8.91E-16  9.80E-16  5.39E-16
+  6.70E-16  3.98E-16  6.93E-16  9.49E-16  4.73E-16  8.91E-16  9.79E-16  5.38E-16
   1.68E-16  3.61E-16  7.98E-16  2.08E-16  2.67E-16  9.43E-16  7.29E-16  8.88E-16
-  7.89E-16  5.80E-16  3.05E-16  9.60E-16  2.71E-16  3.13E-16  3.66E-16  5.07E-16
+  7.89E-16  5.80E-16  3.05E-16  9.59E-16  2.71E-16  3.13E-16  3.66E-16  5.07E-16
   2.03E-16  5.25E-16  4.47E-16  8.54E-16  1.10E-06  6.17E-16
  -2.1018E+00 -1.1525E+00 -1.1525E+00 -1.1525E+00 -9.6581E-01 -4.2923E-01
  -3.8524E-01 -3.8524E-01 -3.0534E-01 -3.0534E-01 -3.0330E-01  9.6120E-02
@@ -844,17 +844,17 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   2.0063E-01  2.0063E-01  2.6576E-01  2.6747E-01  2.6747E-01  3.5083E-01
   3.5083E-01  4.2874E-01  4.2874E-01  4.6914E-01  5.3742E-01  5.3803E-01
  Non-SCF case, kpt   15 (  0.05556  0.05556  0.05556), residuals and eigenvalues=
-  8.46E-16  7.20E-16  2.41E-16  8.78E-16  1.88E-16  4.14E-16  6.40E-16  3.68E-16
+  8.46E-16  7.20E-16  2.41E-16  8.77E-16  1.88E-16  4.14E-16  6.41E-16  3.69E-16
   6.97E-16  9.32E-16  4.80E-16  3.59E-16  4.32E-16  6.20E-16  3.83E-16  9.70E-16
-  3.03E-16  5.25E-16  4.70E-16  4.85E-16  5.64E-16  8.49E-16  3.69E-16  5.64E-16
-  6.77E-16  4.81E-16  5.40E-16  7.63E-16  9.52E-07  4.61E-16
+  3.03E-16  5.25E-16  4.70E-16  4.85E-16  5.64E-16  8.48E-16  3.69E-16  5.64E-16
+  6.77E-16  4.81E-16  5.41E-16  7.63E-16  9.52E-07  4.61E-16
  -2.1018E+00 -1.1525E+00 -1.1525E+00 -1.1525E+00 -9.6587E-01 -4.2933E-01
  -3.8508E-01 -3.8508E-01 -3.0560E-01 -3.0560E-01 -3.0428E-01  9.8573E-02
   1.0177E-01  1.0177E-01  1.6636E-01  1.6636E-01  1.7607E-01  1.9788E-01
   2.0283E-01  2.0283E-01  2.6309E-01  2.6428E-01  2.6428E-01  3.4738E-01
   3.4738E-01  4.2533E-01  4.2533E-01  4.6499E-01  5.3631E-01  5.3654E-01
  Non-SCF case, kpt   16 (  0.04167  0.04167  0.04167), residuals and eigenvalues=
-  5.29E-16  9.61E-16  6.35E-16  6.24E-16  1.86E-16  2.93E-16  7.36E-16  8.26E-16
+  5.29E-16  9.61E-16  6.37E-16  6.27E-16  1.86E-16  2.93E-16  7.36E-16  8.24E-16
   8.52E-16  6.73E-16  4.23E-16  2.17E-16  1.85E-16  1.55E-16  2.38E-16  9.34E-16
   5.60E-16  8.00E-16  3.21E-16  4.53E-16  9.61E-16  4.56E-16  7.30E-16  7.52E-16
   6.48E-16  5.38E-16  6.07E-16  4.17E-16  9.19E-07  8.26E-16
@@ -864,7 +864,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   2.0477E-01  2.0477E-01  2.6078E-01  2.6148E-01  2.6148E-01  3.4458E-01
   3.4458E-01  4.2260E-01  4.2260E-01  4.6155E-01  5.3511E-01  5.3535E-01
  Non-SCF case, kpt   17 (  0.02778  0.02778  0.02778), residuals and eigenvalues=
-  4.88E-16  2.21E-16  3.97E-16  3.63E-16  1.88E-16  3.36E-16  7.22E-16  6.00E-16
+  4.88E-16  2.21E-16  3.97E-16  3.62E-16  1.88E-16  3.36E-16  7.24E-16  6.00E-16
   2.10E-16  4.98E-16  4.37E-16  2.37E-16  6.35E-16  6.30E-16  6.65E-16  7.67E-16
   7.02E-16  4.63E-16  2.45E-16  7.26E-16  5.29E-16  2.27E-16  5.90E-16  5.37E-16
   5.84E-16  3.95E-16  6.19E-16  5.12E-16  2.16E-07  9.22E-16
@@ -884,17 +884,17 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   2.0726E-01  2.0773E-01  2.5774E-01  2.5782E-01  2.5782E-01  3.4126E-01
   3.4126E-01  4.1939E-01  4.1939E-01  4.5738E-01  5.3391E-01  5.3394E-01
  Non-SCF case, kpt   19 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  6.90E-16  2.13E-16  8.42E-16  5.27E-16  6.38E-16  2.85E-16  4.93E-16  7.30E-16
+  6.90E-16  2.13E-16  8.40E-16  5.27E-16  6.38E-16  2.85E-16  4.93E-16  7.30E-16
   6.69E-16  3.63E-16  9.86E-16  2.17E-16  4.42E-16  8.43E-16  2.76E-16  2.56E-16
   2.30E-16  9.25E-16  7.36E-16  5.48E-16  5.97E-16  6.90E-16  6.48E-16  4.87E-16
-  4.76E-16  6.35E-16  7.61E-16  6.62E-16  6.22E-16  7.82E-16
+  4.76E-16  6.34E-16  7.61E-16  6.62E-16  6.22E-16  7.82E-16
  -2.1018E+00 -1.1524E+00 -1.1524E+00 -1.1524E+00 -9.6598E-01 -4.2946E-01
  -3.8475E-01 -3.8475E-01 -3.0614E-01 -3.0614E-01 -3.0614E-01  1.0292E-01
   1.0292E-01  1.0292E-01  1.7480E-01  1.7480E-01  1.7480E-01  2.0733E-01
   2.0733E-01  2.0733E-01  2.5732E-01  2.5732E-01  2.5732E-01  3.4083E-01
   3.4083E-01  4.1898E-01  4.1898E-01  4.5684E-01  5.3376E-01  5.3376E-01
  Non-SCF case, kpt   20 (  0.02500  0.00000  0.00000), residuals and eigenvalues=
-  6.52E-16  3.38E-16  2.47E-16  4.81E-17  6.85E-16  2.43E-16  2.99E-16  9.91E-16
+  6.52E-16  3.38E-16  2.47E-16  4.79E-17  6.85E-16  2.43E-16  2.99E-16  9.91E-16
   7.64E-16  5.67E-16  2.86E-16  1.43E-16  1.23E-16  6.57E-16  7.31E-16  9.48E-16
   2.28E-16  9.39E-16  2.35E-16  4.34E-16  4.98E-16  5.78E-16  3.96E-16  5.22E-16
   5.33E-16  2.92E-16  7.93E-16  7.85E-16  4.71E-07  6.77E-16
@@ -904,7 +904,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   2.0759E-01  2.0759E-01  2.5734E-01  2.5807E-01  2.5807E-01  3.4084E-01
   3.4175E-01  4.1940E-01  4.1945E-01  4.5742E-01  5.3381E-01  5.3405E-01
  Non-SCF case, kpt   21 (  0.05000  0.00000  0.00000), residuals and eigenvalues=
-  7.42E-16  2.51E-16  9.85E-16  2.66E-16  7.52E-16  2.54E-16  3.68E-16  2.91E-16
+  7.42E-16  2.51E-16  9.86E-16  2.66E-16  7.52E-16  2.54E-16  3.68E-16  2.91E-16
   6.95E-16  5.43E-16  2.99E-16  8.31E-16  6.30E-16  8.61E-16  6.01E-16  5.74E-16
   8.82E-16  3.98E-16  3.37E-16  2.81E-16  5.31E-16  1.78E-16  5.10E-16  9.67E-16
   8.82E-16  9.04E-16  5.03E-16  9.79E-16  5.01E-06  3.23E-16
@@ -924,7 +924,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   2.0560E-01  2.0560E-01  2.5756E-01  2.6354E-01  2.6354E-01  3.4089E-01
   3.4847E-01  4.2266E-01  4.2311E-01  4.6204E-01  5.3381E-01  5.3627E-01
  Non-SCF case, kpt   23 (  0.10000  0.00000  0.00000), residuals and eigenvalues=
-  3.38E-16  9.37E-16  6.35E-16  8.48E-16  3.97E-16  2.25E-16  6.63E-16  5.95E-16
+  3.38E-16  9.37E-16  6.33E-16  8.49E-16  3.97E-16  2.25E-16  6.63E-16  5.95E-16
   7.51E-16  5.42E-16  3.30E-16  2.40E-16  4.77E-16  3.09E-16  2.35E-16  6.49E-16
   6.51E-16  6.21E-16  8.85E-16  4.81E-16  9.80E-16  8.48E-16  3.67E-16  7.79E-16
   5.03E-16  6.25E-16  4.30E-16  7.23E-16  5.34E-06  6.72E-16
@@ -934,7 +934,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   2.0420E-01  2.0420E-01  2.5775E-01  2.6773E-01  2.6773E-01  3.4094E-01
   3.5368E-01  4.2546E-01  4.2621E-01  4.6599E-01  5.3305E-01  5.3816E-01
  Non-SCF case, kpt   24 (  0.12500  0.00000  0.00000), residuals and eigenvalues=
-  6.06E-16  4.23E-16  3.62E-16  4.18E-16  6.00E-16  3.86E-16  2.86E-16  3.95E-16
+  6.06E-16  4.23E-16  3.62E-16  4.17E-16  6.00E-16  3.86E-16  2.86E-16  3.95E-16
   9.44E-16  2.29E-16  7.88E-16  4.03E-16  3.52E-16  5.58E-16  4.59E-16  4.64E-16
   4.62E-16  7.20E-16  7.22E-16  5.91E-16  3.84E-16  8.43E-16  6.31E-16  8.39E-16
   6.37E-16  5.34E-16  8.52E-16  8.72E-16  5.23E-06  5.79E-16
@@ -944,7 +944,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   2.0271E-01  2.0271E-01  2.5798E-01  2.7247E-01  2.7247E-01  3.4098E-01
   3.5959E-01  4.2901E-01  4.2995E-01  4.7096E-01  5.3254E-01  5.4047E-01
  Non-SCF case, kpt   25 (  0.15000  0.00000  0.00000), residuals and eigenvalues=
-  5.17E-16  3.52E-16  2.81E-16  4.01E-16  5.31E-16  4.12E-16  2.59E-16  3.37E-16
+  5.17E-16  3.52E-16  2.80E-16  4.01E-16  5.31E-16  4.12E-16  2.59E-16  3.37E-16
   5.10E-16  8.61E-16  7.84E-16  3.71E-16  3.02E-16  9.24E-16  3.97E-16  3.75E-16
   4.82E-16  3.99E-16  5.54E-16  8.21E-16  5.46E-16  5.88E-16  7.91E-16  4.23E-16
   8.68E-16  5.53E-16  8.49E-16  6.48E-16  2.79E-06  4.06E-16
@@ -954,8 +954,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   2.0137E-01  2.0137E-01  2.5825E-01  2.7767E-01  2.7767E-01  3.4103E-01
   3.6602E-01  4.3326E-01  4.3440E-01  4.7689E-01  5.3199E-01  5.4323E-01
  Non-SCF case, kpt   26 (  0.17500  0.00000  0.00000), residuals and eigenvalues=
-  5.39E-16  4.00E-16  9.26E-16  3.50E-16  4.28E-16  5.20E-16  7.30E-16  2.84E-16
-  2.33E-16  4.97E-16  7.25E-16  3.80E-16  2.83E-16  5.21E-16  5.21E-16  3.35E-16
+  5.39E-16  4.00E-16  9.25E-16  3.50E-16  4.28E-16  5.20E-16  7.30E-16  2.84E-16
+  2.33E-16  4.98E-16  7.25E-16  3.80E-16  2.83E-16  5.21E-16  5.21E-16  3.35E-16
   9.45E-16  4.69E-16  3.85E-16  7.43E-16  5.97E-16  4.44E-16  4.00E-16  6.59E-16
   8.01E-16  5.97E-16  8.74E-16  9.66E-16  4.09E-07  9.57E-16
  -2.1018E+00 -1.1528E+00 -1.1524E+00 -1.1524E+00 -9.6564E-01 -4.2986E-01
@@ -964,7 +964,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   2.0009E-01  2.0009E-01  2.5855E-01  2.8311E-01  2.8311E-01  3.4109E-01
   3.7268E-01  4.3813E-01  4.3938E-01  4.8369E-01  5.3139E-01  5.4635E-01
  Non-SCF case, kpt   27 (  0.20000  0.00000  0.00000), residuals and eigenvalues=
-  2.51E-16  3.92E-16  3.36E-16  5.32E-16  6.89E-16  2.13E-16  4.32E-16  6.36E-16
+  2.51E-16  3.92E-16  3.37E-16  5.32E-16  6.89E-16  2.13E-16  4.32E-16  6.36E-16
   3.17E-16  4.01E-16  4.06E-16  1.65E-16  5.64E-16  5.81E-16  2.63E-16  9.94E-16
   7.00E-16  3.71E-16  5.36E-16  2.88E-16  7.13E-16  9.47E-16  9.73E-16  8.06E-16
   8.18E-16  5.18E-16  9.79E-16  7.47E-16  5.10E-08  7.47E-16
@@ -974,7 +974,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.9886E-01  1.9886E-01  2.5888E-01  2.8860E-01  2.8860E-01  3.4114E-01
   3.7929E-01  4.4355E-01  4.4465E-01  4.9128E-01  5.3075E-01  5.4971E-01
  Non-SCF case, kpt   28 (  0.22500  0.00000  0.00000), residuals and eigenvalues=
-  2.80E-16  5.86E-16  4.34E-16  7.30E-16  8.77E-16  4.72E-16  4.99E-16  6.06E-16
+  2.80E-16  5.86E-16  4.33E-16  7.30E-16  8.77E-16  4.72E-16  4.99E-16  6.06E-16
   3.09E-16  6.56E-16  3.54E-16  2.57E-16  4.35E-16  7.71E-17  3.23E-16  2.89E-16
   3.70E-16  9.70E-16  3.27E-16  8.14E-16  4.02E-16  5.61E-16  4.79E-16  4.33E-16
   7.95E-16  4.13E-16  4.32E-16  9.15E-16  5.67E-11  2.73E-16
@@ -994,7 +994,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.9758E-01  1.9758E-01  2.5960E-01  2.9963E-01  2.9963E-01  3.4124E-01
   3.9241E-01  4.5570E-01  4.5667E-01  5.0868E-01  5.2939E-01  5.5710E-01
  Non-SCF case, kpt   30 (  0.27500  0.00000  0.00000), residuals and eigenvalues=
-  9.81E-16  9.50E-16  2.42E-16  2.77E-16  6.41E-16  8.56E-16  4.57E-16  3.19E-16
+  9.81E-16  9.50E-16  2.41E-16  2.77E-16  6.41E-16  8.56E-16  4.57E-16  3.19E-16
   4.22E-16  3.35E-16  2.00E-16  2.02E-16  3.01E-16  4.57E-16  3.67E-16  6.38E-16
   9.20E-16  1.75E-16  5.30E-16  6.00E-16  5.68E-16  8.95E-16  6.36E-16  3.93E-16
   6.68E-16  5.19E-16  3.99E-16  4.56E-16  2.94E-14  6.60E-16
@@ -1004,8 +1004,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.9618E-01  1.9618E-01  2.5996E-01  3.0466E-01  3.0466E-01  3.4128E-01
   3.9827E-01  4.6213E-01  4.6254E-01  5.1824E-01  5.2866E-01  5.6070E-01
  Non-SCF case, kpt   31 (  0.30000  0.00000  0.00000), residuals and eigenvalues=
-  7.73E-16  6.67E-16  3.25E-16  4.95E-16  3.71E-16  5.91E-16  8.00E-16  2.41E-16
-  3.30E-16  4.47E-16  6.30E-16  5.04E-16  7.05E-16  7.29E-16  8.90E-16  5.48E-16
+  7.73E-16  6.67E-16  3.25E-16  4.94E-16  3.71E-16  5.91E-16  8.00E-16  2.41E-16
+  3.30E-16  4.48E-16  6.30E-16  5.04E-16  7.05E-16  7.29E-16  8.90E-16  5.48E-16
   4.98E-16  2.93E-16  8.33E-16  4.57E-16  4.12E-16  9.46E-16  7.82E-16  5.36E-16
   6.58E-16  5.62E-16  8.85E-16  1.14E-15  7.76E-14  7.67E-16
  -2.1018E+00 -1.1533E+00 -1.1524E+00 -1.1524E+00 -9.6516E-01 -4.3236E-01
@@ -1013,10 +1013,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.0026E-01  1.0026E-01  1.3930E-01  1.3930E-01  1.4669E-01  1.5216E-01
   1.9532E-01  1.9532E-01  2.6032E-01  3.0953E-01  3.0953E-01  3.4132E-01
   4.0388E-01  4.6832E-01  4.6866E-01  5.2797E-01  5.2854E-01  5.6438E-01
-  prteigrs : nnsclo,ikpt=   40   31 max resid (excl. the buffer)=  1.14110E-15
+  prteigrs : nnsclo,ikpt=   40   31 max resid (excl. the buffer)=  1.14111E-15
  Non-SCF case, kpt   32 (  0.32500  0.00000  0.00000), residuals and eigenvalues=
   3.90E-16  4.70E-16  9.36E-16  2.27E-16  6.36E-16  7.83E-16  3.29E-16  6.19E-16
-  3.45E-16  3.04E-16  9.47E-16  5.87E-16  2.58E-16  6.23E-16  1.22E-16  5.36E-16
+  3.46E-16  3.04E-16  9.47E-16  5.87E-16  2.58E-16  6.23E-16  1.22E-16  5.36E-16
   5.43E-16  4.67E-16  8.17E-16  6.59E-16  3.67E-16  4.45E-16  7.00E-16  3.24E-16
   4.55E-16  3.93E-16  8.51E-16  7.29E-16  1.04E-11  6.38E-16
  -2.1018E+00 -1.1535E+00 -1.1524E+00 -1.1524E+00 -9.6507E-01 -4.3304E-01
@@ -1025,7 +1025,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.9389E-01  1.9389E-01  2.6066E-01  3.1394E-01  3.1394E-01  3.4136E-01
   4.0863E-01  4.7386E-01  4.7493E-01  5.2732E-01  5.3871E-01  5.6780E-01
  Non-SCF case, kpt   33 (  0.35000  0.00000  0.00000), residuals and eigenvalues=
-  6.50E-16  5.33E-16  5.33E-16  8.86E-16  6.27E-16  9.03E-16  5.79E-16  2.78E-16
+  6.50E-16  5.33E-16  5.34E-16  8.86E-16  6.27E-16  9.03E-16  5.79E-16  2.78E-16
   2.59E-16  2.72E-16  5.73E-16  3.33E-16  3.60E-16  7.00E-16  2.49E-16  2.72E-16
   3.54E-16  4.05E-16  3.36E-16  8.88E-16  6.18E-16  4.52E-16  4.33E-16  7.71E-16
   4.11E-16  8.50E-16  9.27E-16  8.65E-16  1.53E-09  7.57E-16
@@ -1036,7 +1036,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.1288E-01  4.7871E-01  4.8097E-01  5.2666E-01  5.4968E-01  5.7066E-01
  Non-SCF case, kpt   34 (  0.37500  0.00000  0.00000), residuals and eigenvalues=
   9.19E-16  9.06E-16  3.13E-16  2.19E-16  2.53E-16  3.33E-16  9.81E-16  5.41E-16
-  7.67E-16  7.31E-16  4.19E-16  2.73E-16  7.11E-16  8.36E-16  5.86E-16  3.92E-16
+  7.67E-16  7.30E-16  4.19E-16  2.73E-16  7.11E-16  8.36E-16  5.86E-16  3.92E-16
   6.50E-16  7.23E-16  9.73E-16  4.79E-16  4.48E-16  4.56E-16  2.64E-16  5.05E-16
   8.71E-16  8.62E-16  5.91E-16  9.68E-16  3.65E-07  8.28E-16
  -2.1018E+00 -1.1536E+00 -1.1524E+00 -1.1524E+00 -9.6491E-01 -4.3431E-01
@@ -1065,7 +1065,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.9151E-01  1.9151E-01  2.6169E-01  3.2664E-01  3.2664E-01  3.4145E-01
   4.2255E-01  4.9122E-01  4.9543E-01  5.2528E-01  5.7824E-01  5.8062E-01
  Non-SCF case, kpt   37 (  0.45000  0.00000  0.00000), residuals and eigenvalues=
-  5.16E-16  2.01E-16  9.35E-16  8.55E-16  7.31E-16  2.91E-16  8.23E-16  1.91E-16
+  5.16E-16  2.01E-16  9.34E-16  8.55E-16  7.31E-16  2.91E-16  8.23E-16  1.91E-16
   3.22E-16  6.61E-16  3.67E-16  7.34E-16  5.91E-16  5.79E-16  6.09E-16  7.02E-16
   2.71E-16  9.41E-16  5.34E-16  2.90E-16  4.35E-16  4.52E-16  6.15E-16  8.17E-16
   7.61E-16  7.79E-16  7.93E-16  5.73E-16  8.03E-16  3.11E-05
@@ -1076,8 +1076,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   4.2418E-01  4.9307E-01  4.9840E-01  5.2500E-01  5.7970E-01  5.7982E-01
  Non-SCF case, kpt   38 (  0.47500  0.00000  0.00000), residuals and eigenvalues=
   4.19E-16  4.17E-16  2.95E-16  2.37E-16  9.57E-16  3.87E-16  3.04E-16  2.30E-16
-  8.53E-16  2.61E-16  6.65E-16  5.64E-16  1.04E-16  7.30E-16  4.51E-16  5.37E-16
-  3.23E-16  7.30E-16  4.17E-16  5.10E-16  7.10E-16  3.42E-16  7.72E-16  8.71E-16
+  8.54E-16  2.61E-16  6.65E-16  5.64E-16  1.04E-16  7.30E-16  4.51E-16  5.37E-16
+  3.23E-16  7.30E-16  4.17E-16  5.10E-16  7.10E-16  3.43E-16  7.72E-16  8.71E-16
   7.84E-16  6.00E-16  9.49E-16  7.80E-16  2.99E-15  1.05E-05
  -2.1018E+00 -1.1538E+00 -1.1524E+00 -1.1524E+00 -9.6473E-01 -4.3583E-01
  -3.8306E-01 -3.7921E-01 -3.0370E-01 -3.0370E-01 -2.8344E-01  4.7535E-02
@@ -1285,10 +1285,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.6115E-01  2.1857E-01  3.2853E-01  3.2887E-01  3.4180E-01  3.7853E-01
   4.9663E-01  5.2102E-01  5.3219E-01  5.8486E-01  5.8524E-01  6.1168E-01
  Non-SCF case, kpt   59 (  0.50000  0.50000  0.00000), residuals and eigenvalues=
-  5.03E-16  4.33E-16  4.90E-16  4.46E-16  4.54E-16  5.11E-16  8.82E-16  7.59E-16
-  4.65E-16  9.20E-16  2.14E-16  1.74E-16  7.60E-16  1.71E-16  2.58E-16  4.96E-16
+  5.03E-16  4.33E-16  4.90E-16  4.46E-16  4.54E-16  5.11E-16  8.88E-16  7.57E-16
+  4.65E-16  9.20E-16  2.14E-16  1.74E-16  7.60E-16  1.71E-16  2.58E-16  4.98E-16
   4.79E-16  8.63E-16  7.86E-16  4.01E-16  3.57E-16  2.73E-16  6.54E-16  4.91E-16
-  7.08E-16  8.23E-16  5.11E-16  9.75E-16  6.15E-16  1.18E-12
+  7.08E-16  8.23E-16  5.11E-16  9.76E-16  6.14E-16  1.18E-12
  -2.1017E+00 -1.1537E+00 -1.1537E+00 -1.1523E+00 -9.6384E-01 -4.0071E-01
  -3.9522E-01 -3.9522E-01 -3.0096E-01 -2.9195E-01 -2.9195E-01  3.5541E-02
   3.7795E-02  5.5426E-02  1.0465E-01  1.0465E-01  1.4124E-01  1.6117E-01
@@ -1565,10 +1565,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   2.0763E-01  2.0813E-01  2.5768E-01  2.5776E-01  2.5808E-01  3.4107E-01
   3.4154E-01  4.1942E-01  4.1945E-01  4.5744E-01  5.3389E-01  5.3396E-01
  Non-SCF case, kpt   87 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  6.90E-16  2.13E-16  8.42E-16  5.27E-16  6.38E-16  2.85E-16  4.93E-16  7.30E-16
+  6.90E-16  2.13E-16  8.40E-16  5.27E-16  6.38E-16  2.85E-16  4.93E-16  7.30E-16
   6.69E-16  3.63E-16  9.86E-16  2.17E-16  4.42E-16  8.43E-16  2.76E-16  2.56E-16
   2.30E-16  9.25E-16  7.36E-16  5.48E-16  5.97E-16  6.90E-16  6.48E-16  4.87E-16
-  4.76E-16  6.35E-16  7.61E-16  6.62E-16  6.22E-16  7.82E-16
+  4.76E-16  6.34E-16  7.61E-16  6.62E-16  6.22E-16  7.82E-16
  -2.1018E+00 -1.1524E+00 -1.1524E+00 -1.1524E+00 -9.6598E-01 -4.2946E-01
  -3.8475E-01 -3.8475E-01 -3.0614E-01 -3.0614E-01 -3.0614E-01  1.0292E-01
   1.0292E-01  1.0292E-01  1.7480E-01  1.7480E-01  1.7480E-01  2.0733E-01
@@ -1594,7 +1594,7 @@ lattice_volume:   3.8273624E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  1.141E-15, diffor:  0.000E+00, }
 etotal    :  -1.51929169E+02
 entropy   :   0.00000000E+00
-fermie    :   2.90759655E-01
+fermie    :   2.90759654E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 xred      :
@@ -1624,7 +1624,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
- Compensation charge over spherical meshes =      5.993800632299367
+ Compensation charge over spherical meshes =      5.993800631172912
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1701,12 +1701,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.92104556148385     1.92104556148385     1.92104556148385
-    3      1.92104556148385     0.00000000000000     0.00000000000000
-    4      0.00000000000000     1.92104556148385     0.00000000000000
-    5      0.00000000000000     0.00000000000000     1.92104556148385
+    2      1.92104556857736     1.92104556857736     1.92104556857736
+    3      1.92104556857736     0.00000000000000     0.00000000000000
+    4      0.00000000000000     1.92104556857736     0.00000000000000
+    5      0.00000000000000     0.00000000000000     1.92104556857736
  length scales=  7.260500000000  7.260500000000  7.260500000000 bohr
-              =  3.842091122968  3.842091122968  3.842091122968 angstroms
+              =  3.842091137155  3.842091137155  3.842091137155 angstroms
  prteigrs : about to open file tdmft_1_MPI24o_DS2_EIG
  Eigenvalues (hartree) for nkpt=  87  k points:
  kpt#   1, nband= 30, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -2152,7 +2152,7 @@ force_length_stats: {min: null, max: null, mean: null, }
             acell      7.2605000000E+00  7.2605000000E+00  7.2605000000E+00 Bohr
               amu      5.09415000E+01  8.76200000E+01  1.59994000E+01
              ecut      1.20000000E+01 Hartree
-           etotal1    -1.5192916923E+02
+           etotal1    -1.5192916922E+02
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -2263,7 +2263,7 @@ P           mkmem2          4
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  1.789346  0.003130  0.002355  0.000000
+                       2.000000  2.000000  1.789347  0.003130  0.002355  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
@@ -2288,7 +2288,7 @@ P           mkmem2          4
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
-                       2.000000  2.000000  1.999594  1.847523  1.847523  0.000004
+                       2.000000  2.000000  1.999594  1.847524  1.847524  0.000004
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
@@ -2317,7 +2317,7 @@ P           mkmem2          4
         pawprtvol           3
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         221
-           strten1     2.0825439378E-03  2.0825439378E-03  2.0825439378E-03
+           strten1     2.0825439475E-03  2.0825439475E-03  2.0825439475E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
@@ -2344,7 +2344,7 @@ P           mkmem2          4
                        0  0 -1   0 -1  0   1  0  0       0  0  1   0  1  0  -1  0  0
                        0  0  1   0 -1  0  -1  0  0       0  0 -1   0  1  0   1  0  0
            tolwfr      1.00000000E-15
-           tsmear      3.80017850E-03 Hartree
+           tsmear      3.80017388E-03 Hartree
             typat      1  2  3  3  3
            useylm           1
               wtk1       0.22222    0.07407    0.11111    0.11111    0.22222    0.05556
@@ -2360,10 +2360,10 @@ P           mkmem2          4
                          1.00000    1.00000
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.9210455615E+00  1.9210455615E+00  1.9210455615E+00
-                       1.9210455615E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  1.9210455615E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.9210455615E+00
+                       1.9210455686E+00  1.9210455686E+00  1.9210455686E+00
+                       1.9210455686E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  1.9210455686E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.9210455686E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        3.6302500000E+00  3.6302500000E+00  3.6302500000E+00
                        3.6302500000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2467,10 +2467,10 @@ P           mkmem2          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         21.0  wall=         21.8
+- Proc.   0 individual time (sec): cpu=         20.8  wall=         21.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        518.9  wall=        521.7
++Overall time at end (sec) : cpu=        503.7  wall=        509.2

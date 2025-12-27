@@ -1,5 +1,5 @@
 
-.Version 10.1.4.3 of ANADDB, released Jul 2025.
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 20 Aug 2025.
-- ( at 05h30 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h04 )
   
 
 ================================================================================
@@ -135,8 +135,8 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
 ================================================================================
 
@@ -156,7 +156,7 @@
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    3.558137E-22    0.000000E+00
+       1        0.000000E+00    3.558136E-22    0.000000E+00
        2        0.000000E+00    1.399298E-21    0.000000E+00
        3        0.000000E+00    9.979845E-22    0.000000E+00
 
@@ -168,7 +168,7 @@
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    3.558137E-22    0.000000E+00
+       1        0.000000E+00    3.558136E-22    0.000000E+00
        2        0.000000E+00    1.399298E-21    0.000000E+00
        3        0.000000E+00    9.979845E-22    0.000000E+00
 
@@ -204,14 +204,14 @@
  mka2f: lambda <omega^4> =     1.186907E-12
  mka2f: lambda <omega^5> =     1.676506E-15
  mka2f: isotropic lambda =     5.016728E-01
- mka2f: omegalog  =     1.070286E-03 (Ha)     3.379693E+02 (Kelvin)
+ mka2f: omegalog  =     1.070286E-03 (Ha)     3.379697E+02 (Kelvin)
  mka2f: input mustar =     1.360000E-01
--mka2f: MacMillan Tc =     7.126436E-06 (Ha)     2.250348E+00 (Kelvin)
+-mka2f: MacMillan Tc =     7.126436E-06 (Ha)     2.250350E+00 (Kelvin)
 -
 - Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
 
 ================================================================================
 
-+Total cpu time      1.419  and wall time      1.463 sec
++Total cpu time      1.428  and wall time      1.505 sec
 
  anaddb : the run completed successfully.

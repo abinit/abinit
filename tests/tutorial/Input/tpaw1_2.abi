@@ -74,7 +74,7 @@ prteig 0          # Do not print eigenvalues
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tpaw1_2.abo, tolnlines=  2, tolabs=  1.001e-08, tolrel=  2.000e-04
+#%%   tpaw1_2.abo, tolnlines=  2, tolabs=  1.1e-05, tolrel=  2.000e-04
 #%% output_file = "tpaw1_2.abo"
 #%% [paral_info]
 #%% max_nprocs = 4

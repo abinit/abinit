@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h17 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h24 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI4/paral_t66_MPI4/t66.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI4/paral_t66_MPI4/t66.abi
 - output file    -> t66_MPI4.abo
 - root for input  files -> t66_MPI4i
 - root for output files -> t66_MPI4o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Si.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/O.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/O.xml
  DATASET    1 : space group P3_2 2 1 (#154); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -56,6 +56,7 @@ _ WF disk file :      0.071 Mbytes ; DEN or POT disk file :      0.744 Mbytes.
 -    mband =          24        mffmem =           1         mkmem =           1
 -   mkqmem =           1        mk1mem =           1           mpw =        1497
       nfft =       28800          nkpt =           1
+- my_mband =          24
 Pmy_natom=         3
 ================================================================================
 P This job should need less than                      29.578 Mbytes of memory.
@@ -76,7 +77,7 @@ _ WF disk file :      0.550 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
  -outvars: echo values of preprocessed input variables --------
 -          iomode1          1
 -          iomode2          0
-            acell      9.2843000799E+00  9.2843000799E+00  1.0213270550E+01 Bohr
+            acell      9.2843000456E+00  9.2843000456E+00  1.0213270512E+01 Bohr
               amu      2.80855000E+01  1.59994000E+01
            bandpp1          6
            bandpp2          1
@@ -96,7 +97,7 @@ _ WF disk file :      0.550 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
            kptopt1          1
            kptopt2          2
          kptrlatt        1    0    0      0    1    0      0    0    1
-          kptrlen      9.28430008E+00
+          kptrlen      9.28430005E+00
 P           mkmem           1
 P          mkqmem           1
 P          mk1mem           1
@@ -135,9 +136,9 @@ P          mk1mem           1
            symrel      1  0  0   0  1  0   0  0  1       1  0  0  -1 -1  0   0  0 -1
                        0  1  0  -1 -1  0   0  0  1       0  1  0   1  0  0   0  0 -1
                       -1 -1  0   1  0  0   0  0  1      -1 -1  0   0  1  0   0  0 -1
-            tnons      0.0000000  0.0000000  0.0000000     0.0000000 -0.0000000  0.0000000
-                      -0.0000000  0.0000000 -0.3333333     0.0000000  0.0000000 -0.3333333
-                       0.0000000  0.0000000  0.3333333     0.0000000  0.0000000  0.3333333
+            tnons      0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000 -0.3333333     0.0000000  0.0000000 -0.3333333
+                      -0.0000000  0.0000000  0.3333333    -0.0000000  0.0000000  0.3333333
            tolvrs1     0.00000000E+00
            tolvrs2     1.00000000E-08
            tolwfr1     1.00000000E-18
@@ -149,24 +150,24 @@ P          mk1mem           1
          wfoptalg2         10
            xangst      1.1422818000E+00 -1.9784901142E+00  0.0000000000E+00
                        1.1422818000E+00  1.9784901142E+00  3.6030866667E+00
-                      -2.2845636000E+00  4.0347989381E-18  1.8015433333E+00
+                      -2.2845636000E+00  3.3071325791E-16  1.8015433333E+00
                        1.6876292400E+00 -6.0843889532E-01  6.4855560000E-01
                       -1.3707381600E+00 -1.1573103463E+00  2.4500989333E+00
                       -3.1689108000E-01  1.7657492417E+00  4.2516422667E+00
                       -3.1689108000E-01 -1.7657492417E+00 -6.4855560000E-01
                        1.6876292400E+00  6.0843889532E-01  2.9545310667E+00
                       -1.3707381600E+00  1.1573103463E+00  1.1529877333E+00
-            xcart      2.1585997686E+00 -3.7388044724E+00  0.0000000000E+00
-                       2.1585997686E+00  3.7388044724E+00  6.8088470331E+00
-                      -4.3171995372E+00  7.6246649943E-18  3.4044235165E+00
-                       3.1891570774E+00 -1.1497828807E+00  1.2255924659E+00
-                      -2.5903197223E+00 -2.1869996053E+00  4.6300159825E+00
-                      -5.9883735515E-01  3.3367824861E+00  8.0344394990E+00
-                      -5.9883735515E-01 -3.3367824861E+00 -1.2255924659E+00
-                       3.1891570774E+00  1.1497828807E+00  5.5832545671E+00
-                      -2.5903197223E+00  2.1869996053E+00  2.1788310506E+00
-             xred      4.6500000000E-01 -1.1657958272E-17  0.0000000000E+00
-                      -1.1657958272E-17  4.6500000000E-01  6.6666666667E-01
+            xcart      2.1585997606E+00 -3.7388044586E+00  0.0000000000E+00
+                       2.1585997606E+00  3.7388044586E+00  6.8088470079E+00
+                      -4.3171995212E+00  6.2495748365E-16  3.4044235040E+00
+                       3.1891570657E+00 -1.1497828765E+00  1.2255924614E+00
+                      -2.5903197127E+00 -2.1869995973E+00  4.6300159654E+00
+                      -5.9883735294E-01  3.3367824738E+00  8.0344394693E+00
+                      -5.9883735294E-01 -3.3367824738E+00 -1.2255924614E+00
+                       3.1891570657E+00  1.1497828765E+00  5.5832545465E+00
+                      -2.5903197127E+00  2.1869995973E+00  2.1788310425E+00
+             xred      4.6500000000E-01  8.5430400492E-18  0.0000000000E+00
+                       8.5430400492E-18  4.6500000000E-01  6.6666666667E-01
                       -4.6500000000E-01 -4.6500000000E-01  3.3333333333E-01
                        4.1500000000E-01  2.7200000000E-01  1.2000000000E-01
                       -1.4300000000E-01 -4.1500000000E-01  4.5333333333E-01
@@ -199,7 +200,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
  R(1)=  4.6421500 -8.0404397  0.0000000  G(1)=  0.1077087 -0.0621857  0.0000000
  R(2)=  4.6421500  8.0404397  0.0000000  G(2)=  0.1077087  0.0621857  0.0000000
  R(3)=  0.0000000  0.0000000 10.2132705  G(3)=  0.0000000  0.0000000  0.0979118
- Unit cell volume ucvol=  7.6241917E+02 bohr^3
+ Unit cell volume ucvol=  7.6241916E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
 
  Coarse grid specifications (used for wave-functions):
@@ -213,9 +214,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
          ecut(hartree)=     24.000   => boxcut(ratio)=   2.13111
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Si.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Si.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
@@ -233,9 +234,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/O.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -267,28 +268,28 @@ tolerances: {tolwfr: 1.00E-18, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -109.39501405038    -1.094E+02 5.571E-05 5.157E+01
- ETOT  2  -109.16767726697     2.273E-01 2.025E-08 2.391E+01
- ETOT  3  -109.09717284637     7.050E-02 1.696E-06 1.122E+00
- ETOT  4  -109.09492709822     2.246E-03 7.284E-07 1.054E-02
- ETOT  5  -109.09495551234    -2.841E-05 3.612E-08 4.956E-04
- ETOT  6  -109.09496047345    -4.961E-06 3.928E-09 1.106E-05
- ETOT  7  -109.09496077360    -3.001E-07 2.398E-10 3.024E-07
- ETOT  8  -109.09496077772    -4.119E-09 2.359E-11 3.560E-08
- ETOT  9  -109.09496077781    -8.613E-11 2.152E-12 1.569E-09
- ETOT 10  -109.09496077783    -2.520E-11 1.491E-13 1.556E-11
- ETOT 11  -109.09496077783     2.132E-13 5.740E-15 2.041E-12
- ETOT 12  -109.09496077783     1.279E-13 4.272E-16 6.140E-14
- ETOT 13  -109.09496077783     9.948E-14 2.630E-17 5.287E-15
- ETOT 14  -109.09496077783    -8.527E-13 2.673E-18 4.536E-16
- ETOT 15  -109.09496077783     3.695E-13 2.123E-19 2.552E-17
+ ETOT  1  -109.39501407189    -1.094E+02 5.571E-05 5.157E+01
+ ETOT  2  -109.16767728384     2.273E-01 2.025E-08 2.391E+01
+ ETOT  3  -109.09717286254     7.050E-02 1.696E-06 1.122E+00
+ ETOT  4  -109.09492711438     2.246E-03 7.284E-07 1.054E-02
+ ETOT  5  -109.09495552850    -2.841E-05 3.612E-08 4.956E-04
+ ETOT  6  -109.09496048961    -4.961E-06 3.928E-09 1.106E-05
+ ETOT  7  -109.09496078976    -3.001E-07 2.398E-10 3.024E-07
+ ETOT  8  -109.09496079388    -4.119E-09 2.359E-11 3.560E-08
+ ETOT  9  -109.09496079397    -8.639E-11 2.152E-12 1.569E-09
+ ETOT 10  -109.09496079399    -2.433E-11 1.491E-13 1.556E-11
+ ETOT 11  -109.09496079399    -5.542E-13 5.740E-15 2.040E-12
+ ETOT 12  -109.09496079399     2.132E-13 4.271E-16 6.140E-14
+ ETOT 13  -109.09496079399     3.268E-13 2.630E-17 5.284E-15
+ ETOT 14  -109.09496079399     3.126E-13 2.672E-18 4.519E-16
+ ETOT 15  -109.09496079399    -1.123E-12 2.121E-19 2.559E-17
 
  At SCF step   15   max residual=  2.12E-19 < tolwfr=  1.00E-18 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.90282893E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.90282893E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.93445004E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.90282881E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.90282881E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.93444993E-03  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -300,19 +301,19 @@ lattice_vectors:
 - [  0.0000000,   0.0000000,  10.2132705, ]
 lattice_lengths: [   9.28430,    9.28430,   10.21327, ]
 lattice_angles: [ 90.000,  90.000, 120.000, ] # degrees, (23, 13, 12)
-lattice_volume:   7.6241917E+02
-convergence: {deltae:  3.695E-13, res2:  2.552E-17, residm:  2.123E-19, diffor: null, }
+lattice_volume:   7.6241916E+02
+convergence: {deltae: -1.123E-12, res2:  2.559E-17, residm:  2.121E-19, diffor: null, }
 etotal    :  -1.09094961E+02
 entropy   :   0.00000000E+00
-fermie    :   2.12505333E-02
+fermie    :   2.12505360E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.90282893E-03,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   1.90282893E-03,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   1.93445004E-03, ]
+- [  1.90282881E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.90282881E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.93444993E-03, ]
 pressure_GPa:  -5.6293E+01
 xred      :
-- [  4.6500E-01,  -1.1658E-17,   0.0000E+00, Si]
-- [ -1.1658E-17,   4.6500E-01,   6.6667E-01, Si]
+- [  4.6500E-01,   8.5430E-18,   0.0000E+00, Si]
+- [  8.5430E-18,   4.6500E-01,   6.6667E-01, Si]
 - [ -4.6500E-01,  -4.6500E-01,   3.3333E-01, Si]
 - [  4.1500E-01,   2.7200E-01,   1.2000E-01,  O]
 - [ -1.4300E-01,  -4.1500E-01,   4.5333E-01,  O]
@@ -321,16 +322,16 @@ xred      :
 - [  2.7200E-01,   4.1500E-01,   5.4667E-01,  O]
 - [ -4.1500E-01,  -1.4300E-01,   2.1333E-01,  O]
 cartesian_forces: # hartree/bohr
-- [ -4.43069037E-03,   7.67418083E-03,  -7.70988212E-19, ]
-- [ -4.43069037E-03,  -7.67418083E-03,  -7.70988212E-19, ]
-- [  8.86138074E-03,  -2.32907950E-19,  -7.70988212E-19, ]
-- [ -1.70784033E-02,  -4.36692029E-03,  -1.38483543E-02, ]
-- [  4.75733776E-03,   1.69737913E-02,  -1.38483543E-02, ]
-- [  1.23210656E-02,  -1.26068710E-02,  -1.38483543E-02, ]
-- [  1.23210656E-02,   1.26068710E-02,   1.38483543E-02, ]
-- [ -1.70784033E-02,   4.36692029E-03,   1.38483543E-02, ]
-- [  4.75733776E-03,  -1.69737913E-02,   1.38483543E-02, ]
-force_length_stats: {min:   8.86138074E-03, max:   2.24169304E-02, mean:   1.78984139E-02, }
+- [ -4.43069066E-03,   7.67418134E-03,   5.78241159E-19, ]
+- [ -4.43069066E-03,  -7.67418134E-03,   5.78241159E-19, ]
+- [  8.86138133E-03,  -2.10176739E-19,   5.78241159E-19, ]
+- [ -1.70784045E-02,  -4.36691855E-03,  -1.38483557E-02, ]
+- [  4.75733984E-03,   1.69737914E-02,  -1.38483557E-02, ]
+- [  1.23210646E-02,  -1.26068729E-02,  -1.38483557E-02, ]
+- [  1.23210646E-02,   1.26068729E-02,   1.38483557E-02, ]
+- [ -1.70784045E-02,   4.36691855E-03,   1.38483557E-02, ]
+- [  4.75733984E-03,  -1.69737914E-02,   1.38483557E-02, ]
+force_length_stats: {min:   8.86138133E-03, max:   2.24169318E-02, mean:   1.78984150E-02, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -339,18 +340,18 @@ force_length_stats: {min:   8.86138074E-03, max:   2.24169304E-02, mean:   1.789
     1        1.90945          2.00540253
     2        1.90945          2.00540253
     3        1.90945          2.00540253
-    4        1.41465          4.76602157
-    5        1.41465          4.76602157
-    6        1.41465          4.76602157
-    7        1.41465          4.76602157
-    8        1.41465          4.76602157
-    9        1.41465          4.76602157
+    4        1.41465          4.76602155
+    5        1.41465          4.76602155
+    6        1.41465          4.76602155
+    7        1.41465          4.76602155
+    8        1.41465          4.76602155
+    9        1.41465          4.76602155
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      3.397454177706461
- Compensation charge over fine fft grid    =      3.397479271761838
+ Compensation charge over spherical meshes =      3.397454196004373
+ Compensation charge over fine fft grid    =      3.397479290042343
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -406,10 +407,10 @@ force_length_stats: {min:   8.86138074E-03, max:   2.24169304E-02, mean:   1.789
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   96.143E-22; max=  21.225E-20
+ Mean square residual over all n,k,spin=   96.055E-22; max=  21.211E-20
  reduced coordinates (array xred) for    9 atoms
-       0.465000000000     -0.000000000000      0.000000000000
-      -0.000000000000      0.465000000000      0.666666666667
+       0.465000000000      0.000000000000      0.000000000000
+       0.000000000000      0.465000000000      0.666666666667
       -0.465000000000     -0.465000000000      0.333333333333
        0.415000000000      0.272000000000      0.120000000000
       -0.143000000000     -0.415000000000      0.453333333333
@@ -418,15 +419,15 @@ force_length_stats: {min:   8.86138074E-03, max:   2.24169304E-02, mean:   1.789
        0.272000000000      0.415000000000      0.546666666667
       -0.415000000000     -0.143000000000      0.213333333333
  rms dE/dt=  1.0559E-01; max dE/dt=  1.4144E-01; dE/dt below (all hartree)
-    1       0.082271717883     -0.041135858941      0.000000000000
-    2      -0.041135858941      0.082271717883      0.000000000000
-    3      -0.041135858941     -0.041135858941      0.000000000000
-    4       0.044168551319      0.114392470149      0.141436988813
-    5       0.114392470149     -0.158561021468      0.141436988813
-    6      -0.158561021468      0.044168551319      0.141436988813
-    7       0.044168551319     -0.158561021468     -0.141436988813
-    8       0.114392470149      0.044168551319     -0.141436988813
-    9      -0.158561021468      0.114392470149     -0.141436988813
+    1       0.082271723045     -0.041135861522      0.000000000000
+    2      -0.041135861522      0.082271723045      0.000000000000
+    3      -0.041135861522     -0.041135861522      0.000000000000
+    4       0.044168570471      0.114392461042      0.141437002973
+    5       0.114392461042     -0.158561031513      0.141437002973
+    6      -0.158561031513      0.044168570471      0.141437002973
+    7       0.044168570471     -0.158561031513     -0.141437002973
+    8       0.114392461042      0.044168570471     -0.141437002973
+    9      -0.158561031513      0.114392461042     -0.141437002973
 
  cartesian coordinates (angstrom) at end:
     1      1.14228180000000    -1.97849011415109     0.00000000000000
@@ -440,29 +441,29 @@ force_length_stats: {min:   8.86138074E-03, max:   2.24169304E-02, mean:   1.789
     9     -1.37073816000000     1.15731034634214     1.15298773333333
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00443069036839     0.00767418083069    -0.00000000000000
-    2     -0.00443069036839    -0.00767418083069    -0.00000000000000
-    3      0.00886138073678    -0.00000000000000    -0.00000000000000
-    4     -0.01707840333720    -0.00436692029459    -0.01384835426875
-    5      0.00475733775720     0.01697379129346    -0.01384835426875
-    6      0.01232106558000    -0.01260687099888    -0.01384835426875
-    7      0.01232106558000     0.01260687099888     0.01384835426875
-    8     -0.01707840333720     0.00436692029459     0.01384835426875
-    9      0.00475733775720    -0.01697379129346     0.01384835426875
- frms,max,avg= 1.0972499E-02 1.7078403E-02   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00443069066276     0.00767418134055     0.00000000000000
+    2     -0.00443069066276    -0.00767418134055     0.00000000000000
+    3      0.00886138132551    -0.00000000000000     0.00000000000000
+    4     -0.01707840448217    -0.00436691855347    -0.01384835570633
+    5      0.00475733983754     0.01697379141448    -0.01384835570633
+    6      0.01232106464463    -0.01260687286100    -0.01384835570633
+    7      0.01232106464463     0.01260687286100     0.01384835570633
+    8     -0.01707840448217     0.00436691855347     0.01384835570633
+    9      0.00475733983754    -0.01697379141448     0.01384835570633
+ frms,max,avg= 1.0972500E-02 1.7078404E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.22783524010841     0.39462221162445    -0.00000000000000
-    2     -0.22783524010841    -0.39462221162445    -0.00000000000000
-    3      0.45567048021683    -0.00000000000000    -0.00000000000000
-    4     -0.87820673562792    -0.22455605134380    -0.71211094831622
-    5      0.24463212277770     0.87282736850418    -0.71211094831622
-    6      0.63357461285022    -0.64827131716038    -0.71211094831622
-    7      0.63357461285022     0.64827131716038     0.71211094831622
-    8     -0.87820673562792     0.22455605134380     0.71211094831622
-    9      0.24463212277770    -0.87282736850418     0.71211094831622
- frms,max,avg= 5.6422854E-01 8.7820674E-01   0.000E+00  0.000E+00  0.000E+00 e/A
- length scales=  9.284300079912  9.284300079912 10.213270549578 bohr
+    1     -0.22783527438145     0.39462227098708     0.00000000000000
+    2     -0.22783527438145    -0.39462227098708     0.00000000000000
+    3      0.45567054876289    -0.00000000000000     0.00000000000000
+    4     -0.87820686826555    -0.22455598067264    -0.71211108205021
+    5      0.24463225029954     0.87282744803615    -0.71211108205021
+    6      0.63357461796601    -0.64827146736352    -0.71211108205021
+    7      0.63357461796601     0.64827146736352     0.71211108205021
+    8     -0.87820686826555     0.22455598067264     0.71211108205021
+    9      0.24463225029954    -0.87282744803615     0.71211108205021
+ frms,max,avg= 5.6422862E-01 8.7820687E-01   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales=  9.284300045630  9.284300045630 10.213270511865 bohr
               =  4.913040000000  4.913040000000  5.404630000000 angstroms
  prteigrs : about to open file t66_MPI4o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.02125   Average Vxc (hartree)=  -0.35977
@@ -475,50 +476,50 @@ force_length_stats: {min:   8.86138074E-03, max:   2.24169304E-02, mean:   1.789
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.21007283422531E+01
-hartree             :  3.84347055779859E+01
-xc                  : -2.49923026414917E+01
-Ewald energy        : -6.95068319280860E+01
-psp_core            :  2.45699474372861E+00
-local_psp           : -1.18507580125944E+02
-PAW spherical_terms :  1.09193252540485E+01
-total_energy        : -1.09094960777506E+02
-total_energy_eV     : -2.96862485490836E+03
+kinetic             :  5.21007284100971E+01
+hartree             :  3.84347054727970E+01
+xc                  : -2.49923026595911E+01
+Ewald energy        : -6.95068321847419E+01
+psp_core            :  2.45699477094615E+00
+local_psp           : -1.18507579896500E+02
+PAW spherical_terms :  1.09193252932903E+01
+total_energy        : -1.09094960793702E+02
+total_energy_eV     : -2.96862511564759E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.05256731731292E+01
-Ewald energy        : -6.95068319280860E+01
-psp_core            :  2.45699474372861E+00
-xc_dc               : -3.48630503364207E+01
-PAW spherical_terms :  3.34359991607685E+00
-total_energy_dc     : -1.09094960777831E+02
-total_energy_dc_eV  : -2.96862485491719E+03
+band_energy         : -1.05256730699896E+01
+Ewald energy        : -6.95068321847419E+01
+psp_core            :  2.45699477094615E+00
+xc_dc               : -3.48630502275789E+01
+PAW spherical_terms :  3.34359991737330E+00
+total_energy_dc     : -1.09094960793991E+02
+total_energy_dc_eV  : -2.96862511565544E+03
 ...
 
 
 --- !EnergyTermsWithPAWCore
 iteration_state     : {dtset: 1, }
 comment             : 'Components of total free energy, including PAW core contributions'
-Total energy        : -1.31616410635440E+03
-Total energy DC     : -1.31616410635472E+03
-Total energy (eV)   : -3.58146467207634E+04
-Total energy DC (eV): -3.58146467207722E+04
+Total energy        : -1.31616410637059E+03
+Total energy DC     : -1.31616410637088E+03
+Total energy (eV)   : -3.58146498615467E+04
+Total energy DC (eV): -3.58146498615545E+04
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.90282893E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.90282893E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.93445004E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.90282881E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.90282881E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.93444993E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.6293E+01 GPa]
-- sigma(1 1)=  5.59831504E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  5.59831504E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.69134756E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  5.59831564E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.59831564E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.69134818E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -539,7 +540,7 @@ meta: {optdriver: 1, rfphon: 1, }
  R(1)=  4.6421500 -8.0404397  0.0000000  G(1)=  0.1077087 -0.0621857  0.0000000
  R(2)=  4.6421500  8.0404397  0.0000000  G(2)=  0.1077087  0.0621857  0.0000000
  R(3)=  0.0000000  0.0000000 10.2132705  G(3)=  0.0000000  0.0000000  0.0979118
- Unit cell volume ucvol=  7.6241917E+02 bohr^3
+ Unit cell volume ucvol=  7.6241916E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
  setup1 : take into account q-point for computing boxcut.
 
@@ -599,49 +600,49 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   97.800830794779     -3.005E+01 3.356E-02 1.385E+05
- ETOT  2   62.483612470554     -3.532E+01 2.539E-02 2.496E+04
- ETOT  3   41.754780938952     -2.073E+01 3.309E-03 6.698E+03
- ETOT  4   38.643072530422     -3.112E+00 5.681E-04 6.540E+01
- ETOT  5   38.642947269610     -1.253E-04 6.642E-05 4.655E+01
- ETOT  6   38.611199483533     -3.175E-02 6.664E-06 1.338E+00
- ETOT  7   38.611015093115     -1.844E-04 1.768E-06 8.737E-01
- ETOT  8   38.610394346745     -6.207E-04 2.445E-07 1.446E-02
- ETOT  9   38.610384359721     -9.987E-06 4.511E-08 5.841E-04
- ETOT 10   38.610383532531     -8.272E-07 6.345E-09 1.157E-04
- ETOT 11   38.610383476137     -5.639E-08 2.067E-09 4.552E-05
- ETOT 12   38.610383435685     -4.045E-08 3.578E-10 2.671E-06
- ETOT 13   38.610383433382     -2.303E-09 9.680E-11 1.068E-07
- ETOT 14   38.610383432857     -5.249E-10 2.023E-11 1.762E-09
+-ETOT  1   97.800813120022     -3.005E+01 3.356E-02 1.385E+05
+ ETOT  2   62.483581965270     -3.532E+01 2.539E-02 2.496E+04
+ ETOT  3   41.754787162765     -2.073E+01 3.309E-03 6.698E+03
+ ETOT  4   38.643074080614     -3.112E+00 5.681E-04 6.540E+01
+ ETOT  5   38.642948150224     -1.259E-04 6.643E-05 4.655E+01
+ ETOT  6   38.611200286766     -3.175E-02 6.664E-06 1.338E+00
+ ETOT  7   38.611015845802     -1.844E-04 1.769E-06 8.737E-01
+ ETOT  8   38.610395132306     -6.207E-04 2.445E-07 1.446E-02
+ ETOT  9   38.610385145369     -9.987E-06 4.510E-08 5.838E-04
+ ETOT 10   38.610384318514     -8.269E-07 6.345E-09 1.157E-04
+ ETOT 11   38.610384262138     -5.638E-08 2.068E-09 4.552E-05
+ ETOT 12   38.610384221685     -4.045E-08 3.578E-10 2.670E-06
+ ETOT 13   38.610384219382     -2.303E-09 9.681E-11 1.069E-07
+ ETOT 14   38.610384218857     -5.250E-10 2.023E-11 1.762E-09
 
  At SCF step   14       vres2   =  1.76E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   97.661E-14; max=  20.228E-12
+ Mean square residual over all n,k,spin=   97.662E-14; max=  20.228E-12
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   1.11847432E+02 eigvalue=   5.71746398E+00  local=  -7.22665950E+01
+     kin0=   1.11847432E+02 eigvalue=   5.71746382E+00  local=  -7.22665944E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =  -1.03670053E+02  Hartree=   2.64133572E+01     xc=  -5.64827582E+00
+ loc psp =  -1.03670052E+02  Hartree=   2.64133571E+01     xc=  -5.64827578E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=   1.85889643E+01   enl1=  -7.02414262E+01
- 10: eventually, PAW "on-site" Hxc contribution: epaw1=   1.41272457E-02
+    edocc=   0.00000000E+00     enl0=   1.85889641E+01   enl1=  -7.02414267E+01
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   1.41272479E-02
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -8.92450047E+01
+   erelax=  -8.92450046E+01
  11,12,13 Non-relaxation  contributions : frozen-wavefunctions and Ewald
- fr.local=  -2.61664592E+01 fr.nonlo=   1.02162255E+02  Ewald=   5.91787950E+01
+ fr.local=  -2.61664595E+01 fr.nonlo=   1.02162256E+02  Ewald=   5.91787952E+01
  14,15 Frozen wf xc core corrections (1) and (2)
- frxc 1  =  -7.67654099E+01  frxc 2 =   6.94462075E+01
+ frxc 1  =  -7.67654092E+01  frxc 2 =   6.94462068E+01
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -2.28926463E+00
  Resulting in :
- 2DEtotal=    0.3861038343E+02 Ha. Also 2DEtotal=    0.105064196457E+04 eV
-    (2DErelax=   -8.9245004670E+01 Ha. 2DEnonrelax=    1.2785538810E+02 Ha)
-    (  non-var. 2DEtotal :    3.8610384093E+01 Ha)
+ 2DEtotal=    0.3861038422E+02 Ha. Also 2DEtotal=    0.105064207809E+04 eV
+    (2DErelax=   -8.9245004650E+01 Ha. 2DEnonrelax=    1.2785538887E+02 Ha)
+    (  non-var. 2DEtotal :    3.8610384877E+01 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -664,50 +665,50 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   95.002270892418     -3.602E+01 4.144E-02 1.331E+05
- ETOT  2   60.881299526414     -3.412E+01 9.274E-03 2.065E+04
- ETOT  3   44.200379651631     -1.668E+01 4.538E-03 6.588E+03
- ETOT  4   40.972536831700     -3.228E+00 1.016E-03 5.867E+01
- ETOT  5   40.964789626617     -7.747E-03 8.276E-05 4.106E+01
- ETOT  6   40.939313104784     -2.548E-02 6.550E-06 3.297E+00
- ETOT  7   40.937506552085     -1.807E-03 1.129E-06 2.942E-01
- ETOT  8   40.937273586691     -2.330E-04 1.817E-07 7.282E-03
- ETOT  9   40.937266956741     -6.630E-06 1.767E-08 1.028E-03
- ETOT 10   40.937266149379     -8.074E-07 4.079E-09 9.381E-05
- ETOT 11   40.937266075914     -7.346E-08 4.782E-10 2.799E-05
- ETOT 12   40.937266053346     -2.257E-08 2.345E-10 1.018E-06
- ETOT 13   40.937266052079     -1.267E-09 2.239E-11 1.083E-07
- ETOT 14   40.937266051580     -4.993E-10 1.099E-11 5.621E-08
- ETOT 15   40.937266051589      8.754E-12 1.175E-12 2.535E-09
+-ETOT  1   95.002348260975     -3.602E+01 4.144E-02 1.331E+05
+ ETOT  2   60.881376521076     -3.412E+01 9.274E-03 2.065E+04
+ ETOT  3   44.200377579324     -1.668E+01 4.538E-03 6.588E+03
+ ETOT  4   40.972537582302     -3.228E+00 1.016E-03 5.867E+01
+ ETOT  5   40.964790529285     -7.747E-03 8.276E-05 4.106E+01
+ ETOT  6   40.939313947218     -2.548E-02 6.550E-06 3.297E+00
+ ETOT  7   40.937507354820     -1.807E-03 1.129E-06 2.942E-01
+ ETOT  8   40.937274389486     -2.330E-04 1.817E-07 7.281E-03
+ ETOT  9   40.937267760192     -6.629E-06 1.768E-08 1.028E-03
+ ETOT 10   40.937266952963     -8.072E-07 4.079E-09 9.377E-05
+ ETOT 11   40.937266879520     -7.344E-08 4.782E-10 2.798E-05
+ ETOT 12   40.937266856959     -2.256E-08 2.345E-10 1.017E-06
+ ETOT 13   40.937266855693     -1.267E-09 2.239E-11 1.080E-07
+ ETOT 14   40.937266855193     -4.994E-10 1.099E-11 5.610E-08
+ ETOT 15   40.937266855201      7.432E-12 1.175E-12 2.534E-09
 
  At SCF step   15       vres2   =  2.53E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   72.028E-15; max=  11.746E-13
+ Mean square residual over all n,k,spin=   72.021E-15; max=  11.746E-13
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   1.11242961E+02 eigvalue=   5.95114851E+00  local=  -7.22629439E+01
+     kin0=   1.11242960E+02 eigvalue=   5.95114836E+00  local=  -7.22629434E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =  -1.03140238E+02  Hartree=   2.67125991E+01     xc=  -5.71200469E+00
+ loc psp =  -1.03140237E+02  Hartree=   2.67125991E+01     xc=  -5.71200466E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=   1.94826272E+01   enl1=  -7.23963409E+01
- 10: eventually, PAW "on-site" Hxc contribution: epaw1=   3.86643064E-02
+    edocc=   0.00000000E+00     enl0=   1.94826270E+01   enl1=  -7.23963413E+01
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   3.86643088E-02
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -9.00835275E+01
  11,12,13 Non-relaxation  contributions : frozen-wavefunctions and Ewald
- fr.local=  -5.61804311E+01 fr.nonlo=   1.08264476E+02  Ewald=   8.69007434E+01
+ fr.local=  -5.61804314E+01 fr.nonlo=   1.08264477E+02  Ewald=   8.69007437E+01
  14,15 Frozen wf xc core corrections (1) and (2)
- frxc 1  =  -7.64522755E+01  frxc 2 =   6.84882809E+01
+ frxc 1  =  -7.64522748E+01  frxc 2 =   6.84882802E+01
  16 Contribution from 1st-order change of wavefunctions overlap
- eovl1 =  -2.31523801E+00
+ eovl1 =  -2.31523800E+00
  Resulting in :
- 2DEtotal=    0.4093726605E+02 Ha. Also 2DEtotal=    0.111395966071E+04 eV
-    (2DErelax=   -9.0083527548E+01 Ha. 2DEnonrelax=    1.3102079360E+02 Ha)
-    (  non-var. 2DEtotal :    4.0937266278E+01 Ha)
+ 2DEtotal=    0.4093726686E+02 Ha. Also 2DEtotal=    0.111395978025E+04 eV
+    (2DErelax=   -9.0083527528E+01 Ha. 2DEnonrelax=    1.3102079438E+02 Ha)
+    (  non-var. 2DEtotal :    4.0937267080E+01 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -730,50 +731,50 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   126.27797007013     -3.815E+01 7.306E-02 2.504E+05
- ETOT  2   74.752430278738     -5.153E+01 1.518E-02 2.213E+04
- ETOT  3   56.863049272647     -1.789E+01 4.229E-03 1.422E+04
- ETOT  4   51.784584861087     -5.078E+00 8.874E-04 1.632E+02
- ETOT  5   51.770269206580     -1.432E-02 1.615E-04 7.240E+01
- ETOT  6   51.732640784116     -3.763E-02 7.539E-06 5.440E+00
- ETOT  7   51.730381355977     -2.259E-03 2.579E-06 8.984E-01
- ETOT  8   51.729849969801     -5.314E-04 5.188E-07 2.971E-02
- ETOT  9   51.729831914214     -1.806E-05 5.715E-08 4.459E-03
- ETOT 10   51.729829394030     -2.520E-06 6.232E-09 8.809E-04
- ETOT 11   51.729828925031     -4.690E-07 1.113E-09 1.118E-04
- ETOT 12   51.729828835179     -8.985E-08 2.088E-10 2.204E-06
- ETOT 13   51.729828834097     -1.081E-09 2.455E-11 4.110E-07
- ETOT 14   51.729828833551     -5.461E-10 5.743E-12 1.604E-07
- ETOT 15   51.729828833441     -1.099E-10 7.388E-13 6.516E-09
+-ETOT  1   126.27794542656     -3.815E+01 7.306E-02 2.504E+05
+ ETOT  2   74.752412702973     -5.153E+01 1.518E-02 2.213E+04
+ ETOT  3   56.863047740458     -1.789E+01 4.229E-03 1.422E+04
+ ETOT  4   51.784585852130     -5.078E+00 8.873E-04 1.632E+02
+ ETOT  5   51.770269923261     -1.432E-02 1.615E-04 7.240E+01
+ ETOT  6   51.732641823745     -3.763E-02 7.540E-06 5.440E+00
+ ETOT  7   51.730382355387     -2.259E-03 2.580E-06 8.984E-01
+ ETOT  8   51.729850968142     -5.314E-04 5.189E-07 2.972E-02
+ ETOT  9   51.729832908438     -1.806E-05 5.715E-08 4.459E-03
+ ETOT 10   51.729830388376     -2.520E-06 6.233E-09 8.808E-04
+ ETOT 11   51.729829919423     -4.690E-07 1.113E-09 1.118E-04
+ ETOT 12   51.729829829589     -8.983E-08 2.088E-10 2.207E-06
+ ETOT 13   51.729829828504     -1.084E-09 2.455E-11 4.114E-07
+ ETOT 14   51.729829827957     -5.475E-10 5.744E-12 1.604E-07
+ ETOT 15   51.729829827849     -1.075E-10 7.389E-13 6.519E-09
 
  At SCF step   15       vres2   =  6.52E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   66.298E-15; max=  73.880E-14
+ Mean square residual over all n,k,spin=   66.315E-15; max=  73.895E-14
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   1.37883856E+02 eigvalue=   7.78522586E+00  local=  -9.49189607E+01
+     kin0=   1.37883856E+02 eigvalue=   7.78522567E+00  local=  -9.49189598E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =  -1.26004624E+02  Hartree=   3.43832660E+01     xc=  -6.92273737E+00
+ loc psp =  -1.26004624E+02  Hartree=   3.43832660E+01     xc=  -6.92273733E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=   2.82257090E+01   enl1=  -9.31407387E+01
- 10: eventually, PAW "on-site" Hxc contribution: epaw1=   6.99081871E-03
+    edocc=   0.00000000E+00     enl0=   2.82257086E+01   enl1=  -9.31407391E+01
+ 10: eventually, PAW "on-site" Hxc contribution: epaw1=   6.99082153E-03
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.12702013E+02
  11,12,13 Non-relaxation  contributions : frozen-wavefunctions and Ewald
- fr.local=  -6.88257967E+01 fr.nonlo=   1.28052296E+02  Ewald=   1.14635348E+02
+ fr.local=  -6.88257972E+01 fr.nonlo=   1.28052297E+02  Ewald=   1.14635348E+02
  14,15 Frozen wf xc core corrections (1) and (2)
- frxc 1  =  -9.26544649E+01  frxc 2 =   8.32244597E+01
+ frxc 1  =  -9.26544640E+01  frxc 2 =   8.32244588E+01
  16 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -3.12932761E+00
  Resulting in :
- 2DEtotal=    0.5172982883E+02 Ha. Also 2DEtotal=    0.140764022940E+04 eV
-    (2DErelax=   -1.1270201300E+02 Ha. 2DEnonrelax=    1.6443184183E+02 Ha)
-    (  non-var. 2DEtotal :    5.1729832886E+01 Ha)
+ 2DEtotal=    0.5172982983E+02 Ha. Also 2DEtotal=    0.140764037988E+04 eV
+    (2DErelax=   -1.1270201302E+02 Ha. 2DEnonrelax=    1.6443184285E+02 Ha)
+    (  non-var. 2DEtotal :    5.1729833883E+01 Ha)
 
 ================================================================================
 
@@ -787,441 +788,441 @@ tolerances: {tolvrs: 1.00E-08, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        38.6103840926         0.0000000000
-   1    1   2    1       -19.3051920470         0.0000000000
+   1    1   1    1        38.6103848770         0.0000000000
+   1    1   2    1       -19.3051924392         0.0000000000
    1    1   3    1         0.0000000002         0.0000000000
-   1    1   1    2        -2.0725181502        -0.0000000000
-   1    1   2    2        -3.6788654929        -0.0000000000
-   1    1   3    2        -0.8834520904         0.0000000000
-   1    1   1    3        -2.0725181499        -0.0000000000
-   1    1   2    3         5.7513836430         0.0000000000
-   1    1   3    3         0.8834520904        -0.0000000000
-   1    1   1    4        -8.4651158111         0.0000000000
-   1    1   2    4        10.2861726881         0.0000000000
-   1    1   3    4         4.4628314750         0.0000000000
-   1    1   1    5         0.1517189313         0.0000000000
-   1    1   2    5         0.3166315753        -0.0000000000
-   1    1   3    5        -0.7502191409        -0.0000000000
-   1    1   1    6        -8.9147482978         0.0000000000
-   1    1   2    6         1.5376634189         0.0000000000
-   1    1   3    6         9.4025293453         0.0000000000
-   1    1   1    7        -8.4651158124        -0.0000000000
-   1    1   2    7        -1.8210568758         0.0000000000
-   1    1   3    7        -4.4628314746        -0.0000000000
-   1    1   1    8         0.1517189315        -0.0000000000
-   1    1   2    8        -0.4683505067        -0.0000000000
-   1    1   3    8         0.7502191408        -0.0000000000
-   1    1   1    9        -8.9147482972         0.0000000000
-   1    1   2    9         7.3770848787        -0.0000000000
-   1    1   3    9        -9.4025293457        -0.0000000000
+   1    1   1    2        -2.0725181391         0.0000000000
+   1    1   2    2        -3.6788655012         0.0000000000
+   1    1   3    2        -0.8834520859         0.0000000000
+   1    1   1    3        -2.0725181389         0.0000000000
+   1    1   2    3         5.7513836402         0.0000000000
+   1    1   3    3         0.8834520858        -0.0000000000
+   1    1   1    4        -8.4651160068         0.0000000000
+   1    1   2    4        10.2861730830        -0.0000000000
+   1    1   3    4         4.4628316897        -0.0000000000
+   1    1   1    5         0.1517189441        -0.0000000000
+   1    1   2    5         0.3166315715        -0.0000000000
+   1    1   3    5        -0.7502191384        -0.0000000000
+   1    1   1    6        -8.9147485172         0.0000000000
+   1    1   2    6         1.5376633734        -0.0000000000
+   1    1   3    6         9.4025297331         0.0000000000
+   1    1   1    7        -8.4651160081        -0.0000000000
+   1    1   2    7        -1.8210570750        -0.0000000000
+   1    1   3    7        -4.4628316893         0.0000000000
+   1    1   1    8         0.1517189443         0.0000000000
+   1    1   2    8        -0.4683505157         0.0000000000
+   1    1   3    8         0.7502191384         0.0000000000
+   1    1   1    9        -8.9147485165        -0.0000000000
+   1    1   2    9         7.3770851435        -0.0000000000
+   1    1   3    9        -9.4025297335        -0.0000000000
    1    1   2   11         0.0000000000         0.0000000000
    1    1   3   11         0.0000000000         0.0000000000
   
-   2    1   1    1       -19.3051920470         0.0000000000
-   2    1   2    1        40.9373439629         0.0000000000
-   2    1   3    1         0.5176721601         0.0000000000
-   2    1   1    2        -0.7248420176        -0.0000000000
-   2    1   2    2        -2.0725101232         0.0000000000
-   2    1   3    2        -1.0378668032        -0.0000000000
-   2    1   1    3         2.7973601677         0.0000000000
-   2    1   2    3        -8.5487357838         0.0000000000
-   2    1   3    3        -1.9213188936         0.0000000000
-   2    1   1    4        10.9504403128         0.0000000000
-   2    1   2    4       -17.0045162026        -0.0000000000
-   2    1   3    4        -7.1675110605         0.0000000000
-   2    1   1    5         0.7402816348        -0.0000000000
-   2    1   2    5         0.4443183960         0.0000000000
-   2    1   3    5         1.3357369680        -0.0000000000
-   2    1   1    6         0.3764205845         0.0000000000
-   2    1   2    6        -2.0842325789        -0.0000000000
-   2    1   3    6         0.4816730125         0.0000000000
-   2    1   1    7        -2.4853245005         0.0000000000
-   2    1   2    7        -4.2330190138         0.0000000000
-   2    1   3    7        -2.7046795850         0.0000000000
-   2    1   1    8        -0.8920005662        -0.0000000000
-   2    1   2    8         1.6529505375        -0.0000000000
-   2    1   3    8         0.5855178271        -0.0000000000
-   2    1   1    9         8.5383277131        -0.0000000000
-   2    1   2    9        -9.0848968726        -0.0000000000
-   2    1   3    9         9.8842023578         0.0000000000
+   2    1   1    1       -19.3051924392         0.0000000000
+   2    1   2    1        40.9373447644         0.0000000000
+   2    1   3    1         0.5176721739         0.0000000000
+   2    1   1    2        -0.7248420333         0.0000000000
+   2    1   2    2        -2.0725101104        -0.0000000000
+   2    1   3    2        -1.0378668038        -0.0000000000
+   2    1   1    3         2.7973601723         0.0000000000
+   2    1   2    3        -8.5487357839        -0.0000000000
+   2    1   3    3        -1.9213188897        -0.0000000000
+   2    1   1    4        10.9504407080        -0.0000000000
+   2    1   2    4       -17.0045168253         0.0000000000
+   2    1   3    4        -7.1675113972        -0.0000000000
+   2    1   1    5         0.7402816308        -0.0000000000
+   2    1   2    5         0.4443184057        -0.0000000000
+   2    1   3    5         1.3357369577        -0.0000000000
+   2    1   1    6         0.3764205268        -0.0000000000
+   2    1   2    6        -2.0842325095        -0.0000000000
+   2    1   3    6         0.4816730467        -0.0000000000
+   2    1   1    7        -2.4853247000        -0.0000000000
+   2    1   2    7        -4.2330190421         0.0000000000
+   2    1   3    7        -2.7046797070         0.0000000000
+   2    1   1    8        -0.8920005750         0.0000000000
+   2    1   2    8         1.6529505522        -0.0000000000
+   2    1   3    8         0.5855178193         0.0000000000
+   2    1   1    9         8.5383279901        -0.0000000000
+   2    1   2    9        -9.0848971257        -0.0000000000
+   2    1   3    9         9.8842027798         0.0000000000
   
    3    1   1    1         0.0000000002         0.0000000000
-   3    1   2    1         0.5178503342         0.0000000000
-   3    1   3    1        51.7298328856         0.0000000000
-   3    1   1    2         1.0378747530         0.0000000000
-   3    1   2    2         0.8834547539        -0.0000000000
-   3    1   3    2        -7.3117515640        -0.0000000000
-   3    1   1    3        -1.0378747530        -0.0000000000
-   3    1   2    3         1.9213295069         0.0000000000
-   3    1   3    3        -7.3117515641         0.0000000000
-   3    1   1    4         5.3564516841         0.0000000000
-   3    1   2    4        -8.9143913957         0.0000000000
-   3    1   3    4        -7.4327279105         0.0000000000
-   3    1   1    5         1.4755708066        -0.0000000000
-   3    1   2    5        -1.3952801322        -0.0000000000
-   3    1   3    5         3.2065264110        -0.0000000000
-   3    1   1    6         9.2195715114         0.0000000000
-   3    1   2    6         0.6407881073         0.0000000000
-   3    1   3    6       -14.3315244978        -0.0000000000
-   3    1   1    7        -5.3564516837        -0.0000000000
-   3    1   2    7        -3.5579397111         0.0000000000
-   3    1   3    7        -7.4327279107        -0.0000000000
-   3    1   1    8        -1.4755708066        -0.0000000000
-   3    1   2    8         0.0802906744        -0.0000000000
-   3    1   3    8         3.2065264109         0.0000000000
-   3    1   1    9        -9.2195715119        -0.0000000000
-   3    1   2    9         9.8603596187         0.0000000000
-   3    1   3    9       -14.3315244987         0.0000000000
+   3    1   2    1         0.5178503455         0.0000000000
+   3    1   3    1        51.7298338830         0.0000000000
+   3    1   1    2         1.0378747534         0.0000000000
+   3    1   2    2         0.8834547501        -0.0000000000
+   3    1   3    2        -7.3117515543         0.0000000000
+   3    1   1    3        -1.0378747535        -0.0000000000
+   3    1   2    3         1.9213295036        -0.0000000000
+   3    1   3    3        -7.3117515545         0.0000000000
+   3    1   1    4         5.3564518814        -0.0000000000
+   3    1   2    4        -8.9143917153        -0.0000000000
+   3    1   3    4        -7.4327279797         0.0000000000
+   3    1   1    5         1.4755707917        -0.0000000000
+   3    1   2    5        -1.3952801272        -0.0000000000
+   3    1   3    5         3.2065264064        -0.0000000000
+   3    1   1    6         9.2195718904         0.0000000000
+   3    1   2    6         0.6407881402        -0.0000000000
+   3    1   3    6       -14.3315249287         0.0000000000
+   3    1   1    7        -5.3564518810         0.0000000000
+   3    1   2    7        -3.5579398334         0.0000000000
+   3    1   3    7        -7.4327279799        -0.0000000000
+   3    1   1    8        -1.4755707917         0.0000000000
+   3    1   2    8         0.0802906645         0.0000000000
+   3    1   3    8         3.2065264063        -0.0000000000
+   3    1   1    9        -9.2195718908        -0.0000000000
+   3    1   2    9         9.8603600306         0.0000000000
+   3    1   3    9       -14.3315249295        -0.0000000000
   
-   1    2   1    1        -2.0725101232         0.0000000000
-   1    2   2    1        -0.7248420176         0.0000000000
-   1    2   3    1         1.0378668032        -0.0000000000
-   1    2   1    2        40.9373439629         0.0000000000
-   1    2   2    2       -19.3051920470         0.0000000000
-   1    2   3    2        -0.5176721601         0.0000000000
-   1    2   1    3        -8.5487357838        -0.0000000000
-   1    2   2    3         2.7973601677        -0.0000000000
-   1    2   3    3         1.9213188936        -0.0000000000
-   1    2   1    4         1.6529505375        -0.0000000000
-   1    2   2    4        -0.8920005662        -0.0000000000
-   1    2   3    4        -0.5855178271        -0.0000000000
-   1    2   1    5        -9.0848968726        -0.0000000000
-   1    2   2    5         8.5383277131         0.0000000000
-   1    2   3    5        -9.8842023578         0.0000000000
-   1    2   1    6        -4.2330190138         0.0000000000
-   1    2   2    6        -2.4853245005        -0.0000000000
-   1    2   3    6         2.7046795850         0.0000000000
-   1    2   1    7        -2.0842325789         0.0000000000
-   1    2   2    7         0.3764205845        -0.0000000000
-   1    2   3    7        -0.4816730125         0.0000000000
-   1    2   1    8       -17.0045162026        -0.0000000000
-   1    2   2    8        10.9504403128         0.0000000000
-   1    2   3    8         7.1675110605        -0.0000000000
-   1    2   1    9         0.4443183960        -0.0000000000
-   1    2   2    9         0.7402816348        -0.0000000000
-   1    2   3    9        -1.3357369680         0.0000000000
+   1    2   1    1        -2.0725101104        -0.0000000000
+   1    2   2    1        -0.7248420333        -0.0000000000
+   1    2   3    1         1.0378668038        -0.0000000000
+   1    2   1    2        40.9373447644         0.0000000000
+   1    2   2    2       -19.3051924392         0.0000000000
+   1    2   3    2        -0.5176721739         0.0000000000
+   1    2   1    3        -8.5487357839        -0.0000000000
+   1    2   2    3         2.7973601723         0.0000000000
+   1    2   3    3         1.9213188897        -0.0000000000
+   1    2   1    4         1.6529505522         0.0000000000
+   1    2   2    4        -0.8920005750         0.0000000000
+   1    2   3    4        -0.5855178193         0.0000000000
+   1    2   1    5        -9.0848971257         0.0000000000
+   1    2   2    5         8.5383279901         0.0000000000
+   1    2   3    5        -9.8842027798        -0.0000000000
+   1    2   1    6        -4.2330190421        -0.0000000000
+   1    2   2    6        -2.4853247000        -0.0000000000
+   1    2   3    6         2.7046797070        -0.0000000000
+   1    2   1    7        -2.0842325095        -0.0000000000
+   1    2   2    7         0.3764205268        -0.0000000000
+   1    2   3    7        -0.4816730467        -0.0000000000
+   1    2   1    8       -17.0045168253         0.0000000000
+   1    2   2    8        10.9504407080        -0.0000000000
+   1    2   3    8         7.1675113972        -0.0000000000
+   1    2   1    9         0.4443184057         0.0000000000
+   1    2   2    9         0.7402816308         0.0000000000
+   1    2   3    9        -1.3357369577        -0.0000000000
   
-   2    2   1    1        -3.6788654929         0.0000000000
-   2    2   2    1        -2.0725181502        -0.0000000000
-   2    2   3    1         0.8834520904         0.0000000000
-   2    2   1    2       -19.3051920470         0.0000000000
-   2    2   2    2        38.6103840926         0.0000000000
+   2    2   1    1        -3.6788655012        -0.0000000000
+   2    2   2    1        -2.0725181391         0.0000000000
+   2    2   3    1         0.8834520859         0.0000000000
+   2    2   1    2       -19.3051924392         0.0000000000
+   2    2   2    2        38.6103848770         0.0000000000
    2    2   3    2        -0.0000000002         0.0000000000
-   2    2   1    3         5.7513836430        -0.0000000000
-   2    2   2    3        -2.0725181499         0.0000000000
-   2    2   3    3        -0.8834520904        -0.0000000000
-   2    2   1    4        -0.4683505067        -0.0000000000
-   2    2   2    4         0.1517189315        -0.0000000000
-   2    2   3    4        -0.7502191408         0.0000000000
-   2    2   1    5         7.3770848787         0.0000000000
-   2    2   2    5        -8.9147482972         0.0000000000
-   2    2   3    5         9.4025293457         0.0000000000
-   2    2   1    6        -1.8210568758        -0.0000000000
-   2    2   2    6        -8.4651158124         0.0000000000
-   2    2   3    6         4.4628314746         0.0000000000
-   2    2   1    7         1.5376634189        -0.0000000000
-   2    2   2    7        -8.9147482978         0.0000000000
-   2    2   3    7        -9.4025293453         0.0000000000
-   2    2   1    8        10.2861726881         0.0000000000
-   2    2   2    8        -8.4651158111        -0.0000000000
-   2    2   3    8        -4.4628314750        -0.0000000000
-   2    2   1    9         0.3166315753        -0.0000000000
-   2    2   2    9         0.1517189313         0.0000000000
-   2    2   3    9         0.7502191409         0.0000000000
+   2    2   1    3         5.7513836402         0.0000000000
+   2    2   2    3        -2.0725181389        -0.0000000000
+   2    2   3    3        -0.8834520858         0.0000000000
+   2    2   1    4        -0.4683505157         0.0000000000
+   2    2   2    4         0.1517189443         0.0000000000
+   2    2   3    4        -0.7502191384         0.0000000000
+   2    2   1    5         7.3770851435         0.0000000000
+   2    2   2    5        -8.9147485165         0.0000000000
+   2    2   3    5         9.4025297335        -0.0000000000
+   2    2   1    6        -1.8210570750        -0.0000000000
+   2    2   2    6        -8.4651160081         0.0000000000
+   2    2   3    6         4.4628316893        -0.0000000000
+   2    2   1    7         1.5376633734        -0.0000000000
+   2    2   2    7        -8.9147485172        -0.0000000000
+   2    2   3    7        -9.4025297331         0.0000000000
+   2    2   1    8        10.2861730830        -0.0000000000
+   2    2   2    8        -8.4651160068         0.0000000000
+   2    2   3    8        -4.4628316897         0.0000000000
+   2    2   1    9         0.3166315715         0.0000000000
+   2    2   2    9         0.1517189441         0.0000000000
+   2    2   3    9         0.7502191384         0.0000000000
    2    2   1   11         0.0000000000         0.0000000000
    2    2   3   11         0.0000000000         0.0000000000
   
-   3    2   1    1        -0.8834547539        -0.0000000000
-   3    2   2    1        -1.0378747530         0.0000000000
-   3    2   3    1        -7.3117515640         0.0000000000
-   3    2   1    2        -0.5178503342         0.0000000000
+   3    2   1    1        -0.8834547501        -0.0000000000
+   3    2   2    1        -1.0378747534         0.0000000000
+   3    2   3    1        -7.3117515543        -0.0000000000
+   3    2   1    2        -0.5178503455         0.0000000000
    3    2   2    2        -0.0000000002         0.0000000000
-   3    2   3    2        51.7298328856         0.0000000000
-   3    2   1    3        -1.9213295069        -0.0000000000
-   3    2   2    3         1.0378747530        -0.0000000000
-   3    2   3    3        -7.3117515641        -0.0000000000
-   3    2   1    4        -0.0802906744        -0.0000000000
-   3    2   2    4         1.4755708066         0.0000000000
-   3    2   3    4         3.2065264109         0.0000000000
-   3    2   1    5        -9.8603596187         0.0000000000
-   3    2   2    5         9.2195715119         0.0000000000
-   3    2   3    5       -14.3315244987         0.0000000000
-   3    2   1    6         3.5579397111         0.0000000000
-   3    2   2    6         5.3564516837         0.0000000000
-   3    2   3    6        -7.4327279107        -0.0000000000
-   3    2   1    7        -0.6407881073         0.0000000000
-   3    2   2    7        -9.2195715114         0.0000000000
-   3    2   3    7       -14.3315244978        -0.0000000000
-   3    2   1    8         8.9143913957        -0.0000000000
-   3    2   2    8        -5.3564516841        -0.0000000000
-   3    2   3    8        -7.4327279105        -0.0000000000
-   3    2   1    9         1.3952801322         0.0000000000
-   3    2   2    9        -1.4755708066         0.0000000000
-   3    2   3    9         3.2065264110        -0.0000000000
+   3    2   3    2        51.7298338830         0.0000000000
+   3    2   1    3        -1.9213295036        -0.0000000000
+   3    2   2    3         1.0378747535         0.0000000000
+   3    2   3    3        -7.3117515545        -0.0000000000
+   3    2   1    4        -0.0802906645         0.0000000000
+   3    2   2    4         1.4755707917         0.0000000000
+   3    2   3    4         3.2065264063         0.0000000000
+   3    2   1    5        -9.8603600306        -0.0000000000
+   3    2   2    5         9.2195718908        -0.0000000000
+   3    2   3    5       -14.3315249295        -0.0000000000
+   3    2   1    6         3.5579398334        -0.0000000000
+   3    2   2    6         5.3564518810        -0.0000000000
+   3    2   3    6        -7.4327279799        -0.0000000000
+   3    2   1    7        -0.6407881402        -0.0000000000
+   3    2   2    7        -9.2195718904         0.0000000000
+   3    2   3    7       -14.3315249287         0.0000000000
+   3    2   1    8         8.9143917153        -0.0000000000
+   3    2   2    8        -5.3564518814         0.0000000000
+   3    2   3    8        -7.4327279797        -0.0000000000
+   3    2   1    9         1.3952801272        -0.0000000000
+   3    2   2    9        -1.4755707917         0.0000000000
+   3    2   3    9         3.2065264064        -0.0000000000
   
-   1    3   1    1        -2.0725101230         0.0000000000
-   1    3   2    1         2.7973521407        -0.0000000000
-   1    3   3    1        -1.0378668033         0.0000000000
-   1    3   1    2        -8.5487357838         0.0000000000
-   1    3   2    2         5.7513756160         0.0000000000
-   1    3   3    2        -1.9213188937         0.0000000000
-   1    3   1    3        40.9373439611         0.0000000000
-   1    3   2    3       -21.6321519135         0.0000000000
-   1    3   3    3         0.5176721611         0.0000000000
-   1    3   1    4        -2.0842325787         0.0000000000
-   1    3   2    4         1.7078119941        -0.0000000000
-   1    3   3    4         0.4816730114        -0.0000000000
-   1    3   1    5       -17.0045162023         0.0000000000
-   1    3   2    5         6.0540758888        -0.0000000000
-   1    3   3    5        -7.1675110601         0.0000000000
-   1    3   1    6         0.4443183962        -0.0000000000
-   1    3   2    6        -1.1846000309         0.0000000000
-   1    3   3    6         1.3357369679        -0.0000000000
-   1    3   1    7         1.6529505375        -0.0000000000
-   1    3   2    7        -0.7609499714         0.0000000000
-   1    3   3    7         0.5855178271        -0.0000000000
-   1    3   1    8        -9.0848968731         0.0000000000
-   1    3   2    8         0.5465691597        -0.0000000000
-   1    3   3    8         9.8842023573        -0.0000000000
-   1    3   1    9        -4.2330190123         0.0000000000
-   1    3   2    9         6.7183435135        -0.0000000000
-   1    3   3    9        -2.7046795847        -0.0000000000
+   1    3   1    1        -2.0725101101        -0.0000000000
+   1    3   2    1         2.7973521436        -0.0000000000
+   1    3   3    1        -1.0378668039         0.0000000000
+   1    3   1    2        -8.5487357839         0.0000000000
+   1    3   2    2         5.7513756115        -0.0000000000
+   1    3   3    2        -1.9213188897         0.0000000000
+   1    3   1    3        40.9373447626         0.0000000000
+   1    3   2    3       -21.6321523229         0.0000000000
+   1    3   3    3         0.5176721749         0.0000000000
+   1    3   1    4        -2.0842325094         0.0000000000
+   1    3   2    4         1.7078119824         0.0000000000
+   1    3   3    4         0.4816730456         0.0000000000
+   1    3   1    5       -17.0045168251        -0.0000000000
+   1    3   2    5         6.0540761164        -0.0000000000
+   1    3   3    5        -7.1675113968         0.0000000000
+   1    3   1    6         0.4443184059        -0.0000000000
+   1    3   2    6        -1.1846000366         0.0000000000
+   1    3   3    6         1.3357369577         0.0000000000
+   1    3   1    7         1.6529505522         0.0000000000
+   1    3   2    7        -0.7609499773        -0.0000000000
+   1    3   3    7         0.5855178193         0.0000000000
+   1    3   1    8        -9.0848971262        -0.0000000000
+   1    3   2    8         0.5465691358        -0.0000000000
+   1    3   3    8         9.8842027794        -0.0000000000
+   1    3   1    9        -4.2330190407         0.0000000000
+   1    3   2    9         6.7183437413         0.0000000000
+   1    3   3    9        -2.7046797067        -0.0000000000
   
-   2    3   1    1         5.7513756160        -0.0000000000
-   2    3   2    1        -8.5487357838        -0.0000000000
-   2    3   3    1         1.9213188937        -0.0000000000
-   2    3   1    2         2.7973521407         0.0000000000
-   2    3   2    2        -2.0725101230        -0.0000000000
-   2    3   3    2         1.0378668033         0.0000000000
-   2    3   1    3       -21.6321519135         0.0000000000
-   2    3   2    3        40.9373439611         0.0000000000
-   2    3   3    3        -0.5176721611         0.0000000000
-   2    3   1    4         0.5465691597        -0.0000000000
-   2    3   2    4        -9.0848968731        -0.0000000000
-   2    3   3    4        -9.8842023573         0.0000000000
-   2    3   1    5         6.7183435135        -0.0000000000
-   2    3   2    5        -4.2330190123         0.0000000000
-   2    3   3    5         2.7046795847        -0.0000000000
-   2    3   1    6        -0.7609499714         0.0000000000
-   2    3   2    6         1.6529505375         0.0000000000
-   2    3   3    6        -0.5855178271        -0.0000000000
-   2    3   1    7        -1.1846000309         0.0000000000
-   2    3   2    7         0.4443183962        -0.0000000000
-   2    3   3    7        -1.3357369679         0.0000000000
-   2    3   1    8         1.7078119941        -0.0000000000
-   2    3   2    8        -2.0842325787         0.0000000000
-   2    3   3    8        -0.4816730114        -0.0000000000
-   2    3   1    9         6.0540758888        -0.0000000000
-   2    3   2    9       -17.0045162023         0.0000000000
-   2    3   3    9         7.1675110601        -0.0000000000
+   2    3   1    1         5.7513756115        -0.0000000000
+   2    3   2    1        -8.5487357839         0.0000000000
+   2    3   3    1         1.9213188897         0.0000000000
+   2    3   1    2         2.7973521436        -0.0000000000
+   2    3   2    2        -2.0725101101         0.0000000000
+   2    3   3    2         1.0378668039        -0.0000000000
+   2    3   1    3       -21.6321523229         0.0000000000
+   2    3   2    3        40.9373447626         0.0000000000
+   2    3   3    3        -0.5176721749         0.0000000000
+   2    3   1    4         0.5465691358         0.0000000000
+   2    3   2    4        -9.0848971262        -0.0000000000
+   2    3   3    4        -9.8842027794        -0.0000000000
+   2    3   1    5         6.7183437413        -0.0000000000
+   2    3   2    5        -4.2330190407        -0.0000000000
+   2    3   3    5         2.7046797067        -0.0000000000
+   2    3   1    6        -0.7609499773         0.0000000000
+   2    3   2    6         1.6529505522         0.0000000000
+   2    3   3    6        -0.5855178193         0.0000000000
+   2    3   1    7        -1.1846000366        -0.0000000000
+   2    3   2    7         0.4443184059         0.0000000000
+   2    3   3    7        -1.3357369577         0.0000000000
+   2    3   1    8         1.7078119824        -0.0000000000
+   2    3   2    8        -2.0842325094        -0.0000000000
+   2    3   3    8        -0.4816730456        -0.0000000000
+   2    3   1    9         6.0540761164         0.0000000000
+   2    3   2    9       -17.0045168251         0.0000000000
+   2    3   3    9         7.1675113968         0.0000000000
   
-   3    3   1    1         0.8834547539         0.0000000000
-   3    3   2    1        -1.9213295069        -0.0000000000
-   3    3   3    1        -7.3117515641        -0.0000000000
-   3    3   1    2         1.9213295069         0.0000000000
-   3    3   2    2        -0.8834547539         0.0000000000
-   3    3   3    2        -7.3117515641         0.0000000000
-   3    3   1    3         0.5178503353         0.0000000000
-   3    3   2    3        -0.5178503353         0.0000000000
-   3    3   3    3        51.7298328852         0.0000000000
-   3    3   1    4         0.6407881062        -0.0000000000
-   3    3   2    4        -9.8603596183         0.0000000000
-   3    3   3    4       -14.3315244979        -0.0000000000
-   3    3   1    5        -8.9143913954         0.0000000000
-   3    3   2    5         3.5579397108        -0.0000000000
-   3    3   3    5        -7.4327279106        -0.0000000000
-   3    3   1    6        -1.3952801322        -0.0000000000
-   3    3   2    6        -0.0802906744        -0.0000000000
-   3    3   3    6         3.2065264109         0.0000000000
-   3    3   1    7         0.0802906744        -0.0000000000
-   3    3   2    7         1.3952801322         0.0000000000
-   3    3   3    7         3.2065264109        -0.0000000000
-   3    3   1    8         9.8603596183        -0.0000000000
-   3    3   2    8        -0.6407881062        -0.0000000000
-   3    3   3    8       -14.3315244979         0.0000000000
-   3    3   1    9        -3.5579397108        -0.0000000000
-   3    3   2    9         8.9143913954        -0.0000000000
-   3    3   3    9        -7.4327279106        -0.0000000000
+   3    3   1    1         0.8834547501         0.0000000000
+   3    3   2    1        -1.9213295036         0.0000000000
+   3    3   3    1        -7.3117515545        -0.0000000000
+   3    3   1    2         1.9213295036         0.0000000000
+   3    3   2    2        -0.8834547501        -0.0000000000
+   3    3   3    2        -7.3117515545         0.0000000000
+   3    3   1    3         0.5178503465         0.0000000000
+   3    3   2    3        -0.5178503465         0.0000000000
+   3    3   3    3        51.7298338826         0.0000000000
+   3    3   1    4         0.6407881392         0.0000000000
+   3    3   2    4        -9.8603600301        -0.0000000000
+   3    3   3    4       -14.3315249288         0.0000000000
+   3    3   1    5        -8.9143917150         0.0000000000
+   3    3   2    5         3.5579398331        -0.0000000000
+   3    3   3    5        -7.4327279798        -0.0000000000
+   3    3   1    6        -1.3952801272         0.0000000000
+   3    3   2    6        -0.0802906645         0.0000000000
+   3    3   3    6         3.2065264063         0.0000000000
+   3    3   1    7         0.0802906645         0.0000000000
+   3    3   2    7         1.3952801272         0.0000000000
+   3    3   3    7         3.2065264063        -0.0000000000
+   3    3   1    8         9.8603600301        -0.0000000000
+   3    3   2    8        -0.6407881392        -0.0000000000
+   3    3   3    8       -14.3315249288        -0.0000000000
+   3    3   1    9        -3.5579398331        -0.0000000000
+   3    3   2    9         8.9143917150         0.0000000000
+   3    3   3    9        -7.4327279798        -0.0000000000
   
-   1    4   1    1        -8.4651158113        -0.0000000000
-   1    4   2    1        10.9504234392        -0.0000000000
-   1    4   3    1         5.3564657214        -0.0000000000
-   1    4   1    2         1.6529546995         0.0000000000
-   1    4   2    2        -0.4683505067         0.0000000000
-   1    4   3    2        -0.0802801157         0.0000000000
-   1    4   1    3        -2.0842620737        -0.0000000000
-   1    4   2    3         0.5465986547         0.0000000000
-   1    4   3    3         0.6407206622         0.0000000000
+   1    4   1    1        -8.4651160070        -0.0000000000
+   1    4   2    1        10.9504238359         0.0000000000
+   1    4   3    1         5.3564659183         0.0000000000
+   1    4   1    2         1.6529547125        -0.0000000000
+   1    4   2    2        -0.4683505157        -0.0000000000
+   1    4   3    2        -0.0802801058        -0.0000000000
+   1    4   1    3        -2.0842620025        -0.0000000000
+   1    4   2    3         0.5465986290        -0.0000000000
+   1    4   3    3         0.6407206958        -0.0000000000
   
-   2    4   1    1        10.2861726882        -0.0000000000
-   2    4   2    1       -17.0045549612         0.0000000000
-   2    4   3    1        -8.9144326917        -0.0000000000
-   2    4   1    2        -0.8919974662         0.0000000000
-   2    4   2    2         0.1517189315         0.0000000000
-   2    4   3    2         1.4755562038        -0.0000000000
-   2    4   1    3         1.7078653104         0.0000000000
-   2    4   2    3        -9.0849501894         0.0000000000
-   2    4   3    3        -9.8602909554        -0.0000000000
+   2    4   1    1        10.2861730831         0.0000000000
+   2    4   2    1       -17.0045555859        -0.0000000000
+   2    4   3    1        -8.9144330107         0.0000000000
+   2    4   1    2        -0.8919974749        -0.0000000000
+   2    4   2    2         0.1517189443        -0.0000000000
+   2    4   3    2         1.4755561891        -0.0000000000
+   2    4   1    3         1.7078652981        -0.0000000000
+   2    4   2    3        -9.0849504418         0.0000000000
+   2    4   3    3        -9.8602913677         0.0000000000
   
-   3    4   1    1         4.4628314750        -0.0000000000
-   3    4   2    1        -7.1675280237        -0.0000000000
-   3    4   3    1        -7.4327399450        -0.0000000000
-   3    4   1    2        -0.5855096997         0.0000000000
-   3    4   2    2        -0.7502191408        -0.0000000000
-   3    4   3    2         3.2065340603        -0.0000000000
-   3    4   1    3         0.4816636536         0.0000000000
-   3    4   2    3        -9.8841929994        -0.0000000000
-   3    4   3    3       -14.3315310860         0.0000000000
+   3    4   1    1         4.4628316897         0.0000000000
+   3    4   2    1        -7.1675283592         0.0000000000
+   3    4   3    1        -7.4327400135        -0.0000000000
+   3    4   1    2        -0.5855096921        -0.0000000000
+   3    4   2    2        -0.7502191384        -0.0000000000
+   3    4   3    2         3.2065340556        -0.0000000000
+   3    4   1    3         0.4816636852        -0.0000000000
+   3    4   2    3        -9.8841934189         0.0000000000
+   3    4   3    3       -14.3315315167        -0.0000000000
   
-   1    5   1    1         0.1517189313        -0.0000000000
-   1    5   2    1         0.7402785348         0.0000000000
-   1    5   3    1         1.4755562038         0.0000000000
-   1    5   1    2        -9.0849501889         0.0000000000
-   1    5   2    2         7.3770848787        -0.0000000000
-   1    5   3    2        -9.8602909558        -0.0000000000
-   1    5   1    3       -17.0045549609        -0.0000000000
-   1    5   2    3         6.7183822720         0.0000000000
-   1    5   3    3        -8.9144326913        -0.0000000000
+   1    5   1    1         0.1517189441         0.0000000000
+   1    5   2    1         0.7402785306         0.0000000000
+   1    5   3    1         1.4755561890         0.0000000000
+   1    5   1    2        -9.0849504413        -0.0000000000
+   1    5   2    2         7.3770851435        -0.0000000000
+   1    5   3    2        -9.8602913682         0.0000000000
+   1    5   1    3       -17.0045555857         0.0000000000
+   1    5   2    3         6.7183825018         0.0000000000
+   1    5   3    3        -8.9144330103        -0.0000000000
   
-   2    5   1    1         0.3166315753         0.0000000000
-   2    5   2    1         0.4443256580        -0.0000000000
-   2    5   3    1        -1.3952760881         0.0000000000
-   2    5   1    2         8.5383515344        -0.0000000000
-   2    5   2    2        -8.9147482971        -0.0000000000
-   2    5   3    2         9.2195702930        -0.0000000000
-   2    5   1    3         6.0541315210         0.0000000000
-   2    5   2    3        -4.2330746446        -0.0000000000
-   2    5   3    3         3.5579669695         0.0000000000
+   2    5   1    1         0.3166315714         0.0000000000
+   2    5   2    1         0.4443256663         0.0000000000
+   2    5   3    1        -1.3952760832         0.0000000000
+   2    5   1    2         8.5383518125        -0.0000000000
+   2    5   2    2        -8.9147485164        -0.0000000000
+   2    5   3    2         9.2195706717         0.0000000000
+   2    5   1    3         6.0541317490         0.0000000000
+   2    5   2    3        -4.2330746734         0.0000000000
+   2    5   3    3         3.5579670916         0.0000000000
   
-   3    5   1    1        -0.7502191409         0.0000000000
-   3    5   2    1         1.3357288405         0.0000000000
-   3    5   3    1         3.2065340605         0.0000000000
-   3    5   1    2        -9.8841929999        -0.0000000000
-   3    5   2    2         9.4025293457        -0.0000000000
-   3    5   3    2       -14.3315310868        -0.0000000000
-   3    5   1    3        -7.1675280233        -0.0000000000
-   3    5   2    3         2.7046965479         0.0000000000
-   3    5   3    3        -7.4327399450         0.0000000000
+   3    5   1    1        -0.7502191384         0.0000000000
+   3    5   2    1         1.3357288305         0.0000000000
+   3    5   3    1         3.2065340557         0.0000000000
+   3    5   1    2        -9.8841934194         0.0000000000
+   3    5   2    2         9.4025297335         0.0000000000
+   3    5   3    2       -14.3315315175         0.0000000000
+   3    5   1    3        -7.1675283588        -0.0000000000
+   3    5   2    3         2.7046966686         0.0000000000
+   3    5   3    3        -7.4327400136         0.0000000000
   
-   1    6   1    1        -8.9147482978        -0.0000000000
-   1    6   2    1         0.3763967631        -0.0000000000
-   1    6   3    1         9.2195702925        -0.0000000000
-   1    6   1    2        -4.2330746461        -0.0000000000
-   1    6   2    2        -1.8210568757         0.0000000000
-   1    6   3    2         3.5579669698        -0.0000000000
-   1    6   1    3         0.4443256582         0.0000000000
-   1    6   2    3        -0.7609572334        -0.0000000000
-   1    6   3    3        -1.3952760882         0.0000000000
+   1    6   1    1        -8.9147485171        -0.0000000000
+   1    6   2    1         0.3763967043         0.0000000000
+   1    6   3    1         9.2195706713        -0.0000000000
+   1    6   1    2        -4.2330746749         0.0000000000
+   1    6   2    2        -1.8210570750         0.0000000000
+   1    6   3    2         3.5579670920         0.0000000000
+   1    6   1    3         0.4443256664         0.0000000000
+   1    6   2    3        -0.7609572378        -0.0000000000
+   1    6   3    3        -1.3952760832        -0.0000000000
   
-   2    6   1    1         1.5376634189        -0.0000000000
-   2    6   2    1        -2.0842620739         0.0000000000
-   2    6   3    1         0.6407206633        -0.0000000000
-   2    6   1    2        -2.4853076267         0.0000000000
-   2    6   2    2        -8.4651158126        -0.0000000000
-   2    6   3    2         5.3564657211        -0.0000000000
-   2    6   1    3        -1.1846041930        -0.0000000000
-   2    6   2    3         1.6529546996        -0.0000000000
-   2    6   3    3        -0.0802801156         0.0000000000
+   2    6   1    1         1.5376633734         0.0000000000
+   2    6   2    1        -2.0842620027         0.0000000000
+   2    6   3    1         0.6407206969         0.0000000000
+   2    6   1    2        -2.4853078277         0.0000000000
+   2    6   2    2        -8.4651160082        -0.0000000000
+   2    6   3    2         5.3564659179         0.0000000000
+   2    6   1    3        -1.1846041970        -0.0000000000
+   2    6   2    3         1.6529547126        -0.0000000000
+   2    6   3    3        -0.0802801058        -0.0000000000
   
-   3    6   1    1         9.4025293452        -0.0000000000
-   3    6   2    1         0.4816636546        -0.0000000000
-   3    6   3    1       -14.3315310859         0.0000000000
-   3    6   1    2         2.7046965483        -0.0000000000
-   3    6   2    2         4.4628314746        -0.0000000000
-   3    6   3    2        -7.4327399451         0.0000000000
-   3    6   1    3         1.3357288405         0.0000000000
-   3    6   2    3        -0.5855096996         0.0000000000
-   3    6   3    3         3.2065340603        -0.0000000000
+   3    6   1    1         9.4025297331        -0.0000000000
+   3    6   2    1         0.4816636863         0.0000000000
+   3    6   3    1       -14.3315315166        -0.0000000000
+   3    6   1    2         2.7046966690         0.0000000000
+   3    6   2    2         4.4628316893         0.0000000000
+   3    6   3    2        -7.4327400137         0.0000000000
+   3    6   1    3         1.3357288305        -0.0000000000
+   3    6   2    3        -0.5855096921        -0.0000000000
+   3    6   3    3         3.2065340556        -0.0000000000
   
-   1    7   1    1        -8.4651158126         0.0000000000
-   1    7   2    1        -2.4853076267        -0.0000000000
-   1    7   3    1        -5.3564657211         0.0000000000
-   1    7   1    2        -2.0842620739        -0.0000000000
-   1    7   2    2         1.5376634189         0.0000000000
-   1    7   3    2        -0.6407206633        -0.0000000000
-   1    7   1    3         1.6529546996         0.0000000000
-   1    7   2    3        -1.1846041930        -0.0000000000
-   1    7   3    3         0.0802801156         0.0000000000
+   1    7   1    1        -8.4651160082         0.0000000000
+   1    7   2    1        -2.4853078277         0.0000000000
+   1    7   3    1        -5.3564659179        -0.0000000000
+   1    7   1    2        -2.0842620027         0.0000000000
+   1    7   2    2         1.5376633734         0.0000000000
+   1    7   3    2        -0.6407206969         0.0000000000
+   1    7   1    3         1.6529547126        -0.0000000000
+   1    7   2    3        -1.1846041970         0.0000000000
+   1    7   3    3         0.0802801058        -0.0000000000
   
-   2    7   1    1        -1.8210568757        -0.0000000000
-   2    7   2    1        -4.2330746461        -0.0000000000
-   2    7   3    1        -3.5579669698        -0.0000000000
-   2    7   1    2         0.3763967631         0.0000000000
-   2    7   2    2        -8.9147482978        -0.0000000000
-   2    7   3    2        -9.2195702925        -0.0000000000
-   2    7   1    3        -0.7609572334        -0.0000000000
-   2    7   2    3         0.4443256582         0.0000000000
-   2    7   3    3         1.3952760882        -0.0000000000
+   2    7   1    1        -1.8210570750         0.0000000000
+   2    7   2    1        -4.2330746749        -0.0000000000
+   2    7   3    1        -3.5579670920        -0.0000000000
+   2    7   1    2         0.3763967043         0.0000000000
+   2    7   2    2        -8.9147485171         0.0000000000
+   2    7   3    2        -9.2195706713        -0.0000000000
+   2    7   1    3        -0.7609572378         0.0000000000
+   2    7   2    3         0.4443256664        -0.0000000000
+   2    7   3    3         1.3952760832        -0.0000000000
   
-   3    7   1    1        -4.4628314746         0.0000000000
-   3    7   2    1        -2.7046965483        -0.0000000000
-   3    7   3    1        -7.4327399451         0.0000000000
-   3    7   1    2        -0.4816636546        -0.0000000000
-   3    7   2    2        -9.4025293452        -0.0000000000
-   3    7   3    2       -14.3315310859         0.0000000000
-   3    7   1    3         0.5855096996         0.0000000000
-   3    7   2    3        -1.3357288405        -0.0000000000
-   3    7   3    3         3.2065340603         0.0000000000
+   3    7   1    1        -4.4628316893        -0.0000000000
+   3    7   2    1        -2.7046966690        -0.0000000000
+   3    7   3    1        -7.4327400137         0.0000000000
+   3    7   1    2        -0.4816636863         0.0000000000
+   3    7   2    2        -9.4025297331        -0.0000000000
+   3    7   3    2       -14.3315315166        -0.0000000000
+   3    7   1    3         0.5855096921        -0.0000000000
+   3    7   2    3        -1.3357288305        -0.0000000000
+   3    7   3    3         3.2065340556         0.0000000000
   
-   1    8   1    1         0.1517189315         0.0000000000
-   1    8   2    1        -0.8919974662         0.0000000000
-   1    8   3    1        -1.4755562038         0.0000000000
-   1    8   1    2       -17.0045549612         0.0000000000
-   1    8   2    2        10.2861726882        -0.0000000000
-   1    8   3    2         8.9144326917         0.0000000000
-   1    8   1    3        -9.0849501894        -0.0000000000
-   1    8   2    3         1.7078653104         0.0000000000
-   1    8   3    3         9.8602909553         0.0000000000
+   1    8   1    1         0.1517189443        -0.0000000000
+   1    8   2    1        -0.8919974749        -0.0000000000
+   1    8   3    1        -1.4755561891        -0.0000000000
+   1    8   1    2       -17.0045555859        -0.0000000000
+   1    8   2    2        10.2861730831         0.0000000000
+   1    8   3    2         8.9144330107         0.0000000000
+   1    8   1    3        -9.0849504418         0.0000000000
+   1    8   2    3         1.7078652981         0.0000000000
+   1    8   3    3         9.8602913677         0.0000000000
   
-   2    8   1    1        -0.4683505067         0.0000000000
-   2    8   2    1         1.6529546995         0.0000000000
-   2    8   3    1         0.0802801157         0.0000000000
-   2    8   1    2        10.9504234392        -0.0000000000
-   2    8   2    2        -8.4651158113         0.0000000000
-   2    8   3    2        -5.3564657214         0.0000000000
-   2    8   1    3         0.5465986547         0.0000000000
-   2    8   2    3        -2.0842620737        -0.0000000000
-   2    8   3    3        -0.6407206622         0.0000000000
+   2    8   1    1        -0.4683505157        -0.0000000000
+   2    8   2    1         1.6529547125         0.0000000000
+   2    8   3    1         0.0802801058        -0.0000000000
+   2    8   1    2        10.9504238359         0.0000000000
+   2    8   2    2        -8.4651160070        -0.0000000000
+   2    8   3    2        -5.3564659183        -0.0000000000
+   2    8   1    3         0.5465986290         0.0000000000
+   2    8   2    3        -2.0842620025         0.0000000000
+   2    8   3    3        -0.6407206958         0.0000000000
   
-   3    8   1    1         0.7502191408         0.0000000000
-   3    8   2    1         0.5855096997         0.0000000000
-   3    8   3    1         3.2065340603        -0.0000000000
-   3    8   1    2         7.1675280237         0.0000000000
-   3    8   2    2        -4.4628314750         0.0000000000
-   3    8   3    2        -7.4327399450         0.0000000000
-   3    8   1    3         9.8841929994         0.0000000000
-   3    8   2    3        -0.4816636536         0.0000000000
-   3    8   3    3       -14.3315310860        -0.0000000000
+   3    8   1    1         0.7502191384        -0.0000000000
+   3    8   2    1         0.5855096921        -0.0000000000
+   3    8   3    1         3.2065340556         0.0000000000
+   3    8   1    2         7.1675283592         0.0000000000
+   3    8   2    2        -4.4628316897        -0.0000000000
+   3    8   3    2        -7.4327400135         0.0000000000
+   3    8   1    3         9.8841934189         0.0000000000
+   3    8   2    3        -0.4816636852         0.0000000000
+   3    8   3    3       -14.3315315167         0.0000000000
   
-   1    9   1    1        -8.9147482971        -0.0000000000
-   1    9   2    1         8.5383515344         0.0000000000
-   1    9   3    1        -9.2195702930         0.0000000000
-   1    9   1    2         0.4443256580         0.0000000000
-   1    9   2    2         0.3166315753         0.0000000000
-   1    9   3    2         1.3952760881        -0.0000000000
-   1    9   1    3        -4.2330746446        -0.0000000000
-   1    9   2    3         6.0541315210         0.0000000000
-   1    9   3    3        -3.5579669695         0.0000000000
+   1    9   1    1        -8.9147485164         0.0000000000
+   1    9   2    1         8.5383518125         0.0000000000
+   1    9   3    1        -9.2195706717         0.0000000000
+   1    9   1    2         0.4443256663        -0.0000000000
+   1    9   2    2         0.3166315714        -0.0000000000
+   1    9   3    2         1.3952760832         0.0000000000
+   1    9   1    3        -4.2330746734        -0.0000000000
+   1    9   2    3         6.0541317490        -0.0000000000
+   1    9   3    3        -3.5579670916         0.0000000000
   
-   2    9   1    1         7.3770848787         0.0000000000
-   2    9   2    1        -9.0849501889         0.0000000000
-   2    9   3    1         9.8602909558        -0.0000000000
-   2    9   1    2         0.7402785348         0.0000000000
-   2    9   2    2         0.1517189313        -0.0000000000
-   2    9   3    2        -1.4755562038        -0.0000000000
-   2    9   1    3         6.7183822720         0.0000000000
-   2    9   2    3       -17.0045549609        -0.0000000000
-   2    9   3    3         8.9144326913         0.0000000000
+   2    9   1    1         7.3770851435         0.0000000000
+   2    9   2    1        -9.0849504413         0.0000000000
+   2    9   3    1         9.8602913682        -0.0000000000
+   2    9   1    2         0.7402785306        -0.0000000000
+   2    9   2    2         0.1517189441        -0.0000000000
+   2    9   3    2        -1.4755561890        -0.0000000000
+   2    9   1    3         6.7183825018        -0.0000000000
+   2    9   2    3       -17.0045555857        -0.0000000000
+   2    9   3    3         8.9144330103        -0.0000000000
   
-   3    9   1    1        -9.4025293457         0.0000000000
-   3    9   2    1         9.8841929999        -0.0000000000
-   3    9   3    1       -14.3315310868        -0.0000000000
-   3    9   1    2        -1.3357288405        -0.0000000000
-   3    9   2    2         0.7502191409        -0.0000000000
-   3    9   3    2         3.2065340605         0.0000000000
-   3    9   1    3        -2.7046965479         0.0000000000
-   3    9   2    3         7.1675280233         0.0000000000
-   3    9   3    3        -7.4327399450         0.0000000000
+   3    9   1    1        -9.4025297335         0.0000000000
+   3    9   2    1         9.8841934194        -0.0000000000
+   3    9   3    1       -14.3315315175         0.0000000000
+   3    9   1    2        -1.3357288305         0.0000000000
+   3    9   2    2         0.7502191384        -0.0000000000
+   3    9   3    2         3.2065340557         0.0000000000
+   3    9   1    3        -2.7046966686         0.0000000000
+   3    9   2    3         7.1675283588        -0.0000000000
+   3    9   3    3        -7.4327400136         0.0000000000
   
    1   11   2    2         0.0000000000         0.0000000000
   
@@ -1236,437 +1237,437 @@ tolerances: {tolvrs: 1.00E-08, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.4748431911         0.0000000000
-   1    1   2    1         0.0156016042         0.0000000000
-   1    1   3    1         0.0057395968        -0.0000000000
-   1    1   1    2        -0.0991753077        -0.0000000000
-   1    1   2    2        -0.0197858083         0.0000000000
-   1    1   3    2        -0.0202621464         0.0000000000
-   1    1   1    3        -0.0240435351         0.0000000000
-   1    1   2    3        -0.0235914333         0.0000000000
-   1    1   3    3        -0.0109452986        -0.0000000000
-   1    1   1    4        -0.0491079586        -0.0000000000
-   1    1   2    4        -0.0616455852        -0.0000000000
-   1    1   3    4        -0.0285234345         0.0000000000
-   1    1   1    5         0.0191761545        -0.0000000000
-   1    1   2    5        -0.0008777686        -0.0000000000
+   1    1   1    1         0.4748432039        -0.0000000000
+   1    1   2    1         0.0156016044         0.0000000000
+   1    1   3    1         0.0057395970        -0.0000000000
+   1    1   1    2        -0.0991753084         0.0000000000
+   1    1   2    2        -0.0197858084        -0.0000000000
+   1    1   3    2        -0.0202621465        -0.0000000000
+   1    1   1    3        -0.0240435352         0.0000000000
+   1    1   2    3        -0.0235914336        -0.0000000000
+   1    1   3    3        -0.0109452987        -0.0000000000
+   1    1   1    4        -0.0491079593         0.0000000000
+   1    1   2    4        -0.0616455885        -0.0000000000
+   1    1   3    4        -0.0285234360        -0.0000000000
+   1    1   1    5         0.0191761548        -0.0000000000
+   1    1   2    5        -0.0008777686         0.0000000000
    1    1   3    5         0.0061748458        -0.0000000000
-   1    1   1    6        -0.1053954018         0.0000000000
-   1    1   2    6         0.0535282924        -0.0000000000
-   1    1   3    6         0.1042383726         0.0000000000
-   1    1   1    7        -0.1972722248         0.0000000000
-   1    1   2    7         0.0327955387         0.0000000000
-   1    1   3    7        -0.0755882631         0.0000000000
-   1    1   1    8         0.0051546117        -0.0000000000
-   1    1   2    8         0.0128927354        -0.0000000000
-   1    1   3    8         0.0140866246        -0.0000000000
-   1    1   1    9        -0.0241795293        -0.0000000000
-   1    1   2    9        -0.0089175753        -0.0000000000
-   1    1   3    9         0.0050797029        -0.0000000000
+   1    1   1    6        -0.1053954055         0.0000000000
+   1    1   2    6         0.0535282948        -0.0000000000
+   1    1   3    6         0.1042383779         0.0000000000
+   1    1   1    7        -0.1972722334        -0.0000000000
+   1    1   2    7         0.0327955400         0.0000000000
+   1    1   3    7        -0.0755882673         0.0000000000
+   1    1   1    8         0.0051546119         0.0000000000
+   1    1   2    8         0.0128927355        -0.0000000000
+   1    1   3    8         0.0140866246         0.0000000000
+   1    1   1    9        -0.0241795287        -0.0000000000
+   1    1   2    9        -0.0089175757        -0.0000000000
+   1    1   3    9         0.0050797033         0.0000000000
   
-   2    1   1    1         0.0156016042         0.0000000000
-   2    1   2    1         0.4568280104        -0.0000000000
-   2    1   3    1         0.0033137577         0.0000000000
-   2    1   1    2         0.0197859158         0.0000000000
-   2    1   2    2         0.0010003270         0.0000000000
+   2    1   1    1         0.0156016044         0.0000000000
+   2    1   2    1         0.4568280229        -0.0000000000
+   2    1   3    1         0.0033137579        -0.0000000000
+   2    1   1    2         0.0197859159        -0.0000000000
+   2    1   2    2         0.0010003272        -0.0000000000
    2    1   3    2        -0.0009401866        -0.0000000000
-   2    1   1    3        -0.0631631574         0.0000000000
-   2    1   2    3        -0.0741314456         0.0000000000
-   2    1   3    3        -0.0170774402         0.0000000000
-   2    1   1    4        -0.0527471403        -0.0000000000
-   2    1   2    4        -0.1806156426        -0.0000000000
-   2    1   3    4        -0.0708137956        -0.0000000000
-   2    1   1    5         0.0047973939        -0.0000000000
-   2    1   2    5        -0.0017822326         0.0000000000
+   2    1   1    3        -0.0631631579        -0.0000000000
+   2    1   2    3        -0.0741314461        -0.0000000000
+   2    1   3    3        -0.0170774403        -0.0000000000
+   2    1   1    4        -0.0527471435        -0.0000000000
+   2    1   2    4        -0.1806156502         0.0000000000
+   2    1   3    4        -0.0708137994         0.0000000000
+   2    1   1    5         0.0047973939         0.0000000000
+   2    1   2    5        -0.0017822325         0.0000000000
    2    1   3    5         0.0127007841        -0.0000000000
-   2    1   1    6         0.0379724306        -0.0000000000
-   2    1   2    6        -0.0499355388        -0.0000000000
-   2    1   3    6        -0.0543165169        -0.0000000000
-   2    1   1    7         0.0238970937         0.0000000000
-   2    1   2    7        -0.0324513765         0.0000000000
-   2    1   3    7         0.0107048789         0.0000000000
-   2    1   1    8         0.0072175729        -0.0000000000
-   2    1   2    8         0.0122393102         0.0000000000
-   2    1   3    8        -0.0010028187        -0.0000000000
+   2    1   1    6         0.0379724327        -0.0000000000
+   2    1   2    6        -0.0499355394         0.0000000000
+   2    1   3    6        -0.0543165194        -0.0000000000
+   2    1   1    7         0.0238970950         0.0000000000
+   2    1   2    7        -0.0324513761         0.0000000000
+   2    1   3    7         0.0107048796        -0.0000000000
+   2    1   1    8         0.0072175730        -0.0000000000
+   2    1   2    8         0.0122393104        -0.0000000000
+   2    1   3    8        -0.0010028188        -0.0000000000
    2    1   1    9         0.0066382865        -0.0000000000
-   2    1   2    9        -0.1311514113         0.0000000000
-   2    1   3    9         0.1174313372         0.0000000000
+   2    1   2    9        -0.1311514162        -0.0000000000
+   2    1   3    9         0.1174313430         0.0000000000
   
-   3    1   1    1         0.0050767032        -0.0000000000
-   3    1   2    1         0.0029310360         0.0000000000
-   3    1   3    1         0.4960072001        -0.0000000000
-   3    1   1    2         0.0202622583         0.0000000000
+   3    1   1    1         0.0050767034        -0.0000000000
+   3    1   2    1         0.0029310360        -0.0000000000
+   3    1   3    1         0.4960072132        -0.0000000000
+   3    1   1    2         0.0202622584        -0.0000000000
    3    1   2    2        -0.0009402188        -0.0000000000
-   3    1   3    2        -0.0700957608        -0.0000000000
+   3    1   3    2        -0.0700957612         0.0000000000
    3    1   1    3         0.0093168758        -0.0000000000
-   3    1   2    3         0.0180177398         0.0000000000
-   3    1   3    3        -0.0700957608         0.0000000000
-   3    1   1    4        -0.0375218791         0.0000000000
-   3    1   2    4        -0.0868910405        -0.0000000000
-   3    1   3    4        -0.0712555279         0.0000000000
-   3    1   1    5         0.0008467420        -0.0000000000
-   3    1   2    5        -0.0174797819        -0.0000000000
-   3    1   3    5         0.0307400910        -0.0000000000
-   3    1   1    6         0.1039869281         0.0000000000
-   3    1   2    6        -0.0522337336        -0.0000000000
-   3    1   3    6        -0.1373924023        -0.0000000000
-   3    1   1    7        -0.0940107880         0.0000000000
-   3    1   2    7         0.0109506198         0.0000000000
-   3    1   3    7        -0.0712555279        -0.0000000000
-   3    1   1    8        -0.0147145642        -0.0000000000
-   3    1   2    8         0.0094731911        -0.0000000000
-   3    1   3    8         0.0307400910         0.0000000000
-   3    1   1    9         0.0067577238        -0.0000000000
-   3    1   2    9         0.1161721883         0.0000000000
-   3    1   3    9        -0.1373924023         0.0000000000
+   3    1   2    3         0.0180177399        -0.0000000000
+   3    1   3    3        -0.0700957612         0.0000000000
+   3    1   1    4        -0.0375218806        -0.0000000000
+   3    1   2    4        -0.0868910443         0.0000000000
+   3    1   3    4        -0.0712555291         0.0000000000
+   3    1   1    5         0.0008467419        -0.0000000000
+   3    1   2    5        -0.0174797820        -0.0000000000
+   3    1   3    5         0.0307400912        -0.0000000000
+   3    1   1    6         0.1039869333         0.0000000000
+   3    1   2    6        -0.0522337361        -0.0000000000
+   3    1   3    6        -0.1373924075         0.0000000000
+   3    1   1    7        -0.0940107920         0.0000000000
+   3    1   2    7         0.0109506203        -0.0000000000
+   3    1   3    7        -0.0712555291        -0.0000000000
+   3    1   1    8        -0.0147145643         0.0000000000
+   3    1   2    8         0.0094731910        -0.0000000000
+   3    1   3    8         0.0307400911        -0.0000000000
+   3    1   1    9         0.0067577242         0.0000000000
+   3    1   2    9         0.1161721939         0.0000000000
+   3    1   3    9        -0.1373924075        -0.0000000000
   
-   1    2   1    1        -0.0991753077         0.0000000000
-   1    2   2    1         0.0197858083        -0.0000000000
-   1    2   3    1         0.0202621464        -0.0000000000
-   1    2   1    2         0.4748431911         0.0000000000
-   1    2   2    2        -0.0156016042        -0.0000000000
-   1    2   3    2        -0.0057395968        -0.0000000000
-   1    2   1    3        -0.0240435351         0.0000000000
-   1    2   2    3         0.0235914333         0.0000000000
-   1    2   3    3         0.0109452986        -0.0000000000
-   1    2   1    4         0.0051546117        -0.0000000000
-   1    2   2    4        -0.0128927354         0.0000000000
+   1    2   1    1        -0.0991753084        -0.0000000000
+   1    2   2    1         0.0197858084         0.0000000000
+   1    2   3    1         0.0202621465         0.0000000000
+   1    2   1    2         0.4748432039        -0.0000000000
+   1    2   2    2        -0.0156016044        -0.0000000000
+   1    2   3    2        -0.0057395970         0.0000000000
+   1    2   1    3        -0.0240435352        -0.0000000000
+   1    2   2    3         0.0235914336         0.0000000000
+   1    2   3    3         0.0109452987        -0.0000000000
+   1    2   1    4         0.0051546119         0.0000000000
+   1    2   2    4        -0.0128927355         0.0000000000
    1    2   3    4        -0.0140866246         0.0000000000
-   1    2   1    5        -0.0241795293         0.0000000000
-   1    2   2    5         0.0089175753         0.0000000000
-   1    2   3    5        -0.0050797029         0.0000000000
-   1    2   1    6        -0.1972722248         0.0000000000
-   1    2   2    6        -0.0327955387         0.0000000000
-   1    2   3    6         0.0755882631         0.0000000000
-   1    2   1    7        -0.1053954018        -0.0000000000
-   1    2   2    7        -0.0535282924         0.0000000000
-   1    2   3    7        -0.1042383726         0.0000000000
-   1    2   1    8        -0.0491079586        -0.0000000000
-   1    2   2    8         0.0616455852         0.0000000000
-   1    2   3    8         0.0285234345        -0.0000000000
-   1    2   1    9         0.0191761545        -0.0000000000
-   1    2   2    9         0.0008777686         0.0000000000
+   1    2   1    5        -0.0241795287         0.0000000000
+   1    2   2    5         0.0089175757         0.0000000000
+   1    2   3    5        -0.0050797033        -0.0000000000
+   1    2   1    6        -0.1972722334         0.0000000000
+   1    2   2    6        -0.0327955400         0.0000000000
+   1    2   3    6         0.0755882673        -0.0000000000
+   1    2   1    7        -0.1053954055        -0.0000000000
+   1    2   2    7        -0.0535282948        -0.0000000000
+   1    2   3    7        -0.1042383779        -0.0000000000
+   1    2   1    8        -0.0491079593        -0.0000000000
+   1    2   2    8         0.0616455885        -0.0000000000
+   1    2   3    8         0.0285234360        -0.0000000000
+   1    2   1    9         0.0191761548         0.0000000000
+   1    2   2    9         0.0008777686        -0.0000000000
    1    2   3    9        -0.0061748458         0.0000000000
   
-   2    2   1    1        -0.0197859158        -0.0000000000
-   2    2   2    1         0.0010003270        -0.0000000000
+   2    2   1    1        -0.0197859159         0.0000000000
+   2    2   2    1         0.0010003272         0.0000000000
    2    2   3    1        -0.0009401866         0.0000000000
-   2    2   1    2        -0.0156016042        -0.0000000000
-   2    2   2    2         0.4568280104        -0.0000000000
-   2    2   3    2         0.0033137577        -0.0000000000
-   2    2   1    3         0.0631631574         0.0000000000
-   2    2   2    3        -0.0741314456         0.0000000000
-   2    2   3    3        -0.0170774402         0.0000000000
-   2    2   1    4        -0.0072175729         0.0000000000
-   2    2   2    4         0.0122393102        -0.0000000000
-   2    2   3    4        -0.0010028187         0.0000000000
+   2    2   1    2        -0.0156016044        -0.0000000000
+   2    2   2    2         0.4568280229         0.0000000000
+   2    2   3    2         0.0033137579        -0.0000000000
+   2    2   1    3         0.0631631579         0.0000000000
+   2    2   2    3        -0.0741314461        -0.0000000000
+   2    2   3    3        -0.0170774403         0.0000000000
+   2    2   1    4        -0.0072175730         0.0000000000
+   2    2   2    4         0.0122393104        -0.0000000000
+   2    2   3    4        -0.0010028188         0.0000000000
    2    2   1    5        -0.0066382865         0.0000000000
-   2    2   2    5        -0.1311514113        -0.0000000000
-   2    2   3    5         0.1174313372         0.0000000000
-   2    2   1    6        -0.0238970937         0.0000000000
-   2    2   2    6        -0.0324513765         0.0000000000
-   2    2   3    6         0.0107048789        -0.0000000000
-   2    2   1    7        -0.0379724306         0.0000000000
-   2    2   2    7        -0.0499355388         0.0000000000
-   2    2   3    7        -0.0543165169        -0.0000000000
-   2    2   1    8         0.0527471403         0.0000000000
-   2    2   2    8        -0.1806156426        -0.0000000000
-   2    2   3    8        -0.0708137956         0.0000000000
-   2    2   1    9        -0.0047973939         0.0000000000
-   2    2   2    9        -0.0017822326         0.0000000000
+   2    2   2    5        -0.1311514162         0.0000000000
+   2    2   3    5         0.1174313430         0.0000000000
+   2    2   1    6        -0.0238970950         0.0000000000
+   2    2   2    6        -0.0324513761         0.0000000000
+   2    2   3    6         0.0107048796         0.0000000000
+   2    2   1    7        -0.0379724327        -0.0000000000
+   2    2   2    7        -0.0499355394        -0.0000000000
+   2    2   3    7        -0.0543165194         0.0000000000
+   2    2   1    8         0.0527471435        -0.0000000000
+   2    2   2    8        -0.1806156502         0.0000000000
+   2    2   3    8        -0.0708137994         0.0000000000
+   2    2   1    9        -0.0047973939        -0.0000000000
+   2    2   2    9        -0.0017822325         0.0000000000
    2    2   3    9         0.0127007841         0.0000000000
   
-   3    2   1    1        -0.0202622583        -0.0000000000
+   3    2   1    1        -0.0202622584         0.0000000000
    3    2   2    1        -0.0009402188         0.0000000000
-   3    2   3    1        -0.0700957608         0.0000000000
-   3    2   1    2        -0.0050767032        -0.0000000000
+   3    2   3    1        -0.0700957612        -0.0000000000
+   3    2   1    2        -0.0050767034         0.0000000000
    3    2   2    2         0.0029310360        -0.0000000000
-   3    2   3    2         0.4960072001         0.0000000000
+   3    2   3    2         0.4960072132        -0.0000000000
    3    2   1    3        -0.0093168758        -0.0000000000
-   3    2   2    3         0.0180177398         0.0000000000
-   3    2   3    3        -0.0700957608        -0.0000000000
-   3    2   1    4         0.0147145642         0.0000000000
-   3    2   2    4         0.0094731911         0.0000000000
-   3    2   3    4         0.0307400910         0.0000000000
-   3    2   1    5        -0.0067577238         0.0000000000
-   3    2   2    5         0.1161721883         0.0000000000
-   3    2   3    5        -0.1373924023         0.0000000000
-   3    2   1    6         0.0940107880         0.0000000000
-   3    2   2    6         0.0109506198        -0.0000000000
-   3    2   3    6        -0.0712555279        -0.0000000000
-   3    2   1    7        -0.1039869281         0.0000000000
-   3    2   2    7        -0.0522337336        -0.0000000000
-   3    2   3    7        -0.1373924023        -0.0000000000
-   3    2   1    8         0.0375218791        -0.0000000000
-   3    2   2    8        -0.0868910405         0.0000000000
-   3    2   3    8        -0.0712555279        -0.0000000000
-   3    2   1    9        -0.0008467420         0.0000000000
-   3    2   2    9        -0.0174797819         0.0000000000
-   3    2   3    9         0.0307400910        -0.0000000000
+   3    2   2    3         0.0180177399         0.0000000000
+   3    2   3    3        -0.0700957612        -0.0000000000
+   3    2   1    4         0.0147145643         0.0000000000
+   3    2   2    4         0.0094731910         0.0000000000
+   3    2   3    4         0.0307400911         0.0000000000
+   3    2   1    5        -0.0067577242        -0.0000000000
+   3    2   2    5         0.1161721939         0.0000000000
+   3    2   3    5        -0.1373924075        -0.0000000000
+   3    2   1    6         0.0940107920        -0.0000000000
+   3    2   2    6         0.0109506203         0.0000000000
+   3    2   3    6        -0.0712555291        -0.0000000000
+   3    2   1    7        -0.1039869333        -0.0000000000
+   3    2   2    7        -0.0522337361         0.0000000000
+   3    2   3    7        -0.1373924075         0.0000000000
+   3    2   1    8         0.0375218806        -0.0000000000
+   3    2   2    8        -0.0868910443         0.0000000000
+   3    2   3    8        -0.0712555291        -0.0000000000
+   3    2   1    9        -0.0008467419         0.0000000000
+   3    2   2    9        -0.0174797820         0.0000000000
+   3    2   3    9         0.0307400912        -0.0000000000
   
    1    3   1    1        -0.0240436283        -0.0000000000
-   1    3   2    1        -0.0631632112        -0.0000000000
+   1    3   2    1        -0.0631632117         0.0000000000
    1    3   3    1         0.0093168477         0.0000000000
-   1    3   1    2        -0.0240436283        -0.0000000000
-   1    3   2    2         0.0631632112        -0.0000000000
+   1    3   1    2        -0.0240436283         0.0000000000
+   1    3   2    2         0.0631632117        -0.0000000000
    1    3   3    2        -0.0093168477         0.0000000000
-   1    3   1    3         0.4478204200         0.0000000000
-   1    3   2    3        -0.0000000000         0.0000000000
-   1    3   3    3         0.0000000000         0.0000000000
-   1    3   1    4        -0.1034214799         0.0000000000
-   1    3   2    4        -0.0391120749        -0.0000000000
-   1    3   3    4        -0.0991586698         0.0000000000
-   1    3   1    5        -0.0982052185         0.0000000000
-   1    3   2    5         0.0810934565         0.0000000000
-   1    3   3    5        -0.0470648287         0.0000000000
-   1    3   1    6         0.0017601166         0.0000000000
-   1    3   2    6         0.0052577602         0.0000000000
-   1    3   3    6         0.0079117788        -0.0000000000
-   1    3   1    7         0.0017601166        -0.0000000000
-   1    3   2    7        -0.0052577602        -0.0000000000
+   1    3   1    3         0.4478204324        -0.0000000000
+   1    3   2    3         0.0000000000         0.0000000000
+   1    3   3    3         0.0000000000        -0.0000000000
+   1    3   1    4        -0.1034214832         0.0000000000
+   1    3   2    4        -0.0391120773        -0.0000000000
+   1    3   3    4        -0.0991586746         0.0000000000
+   1    3   1    5        -0.0982052215        -0.0000000000
+   1    3   2    5         0.0810934611        -0.0000000000
+   1    3   3    5        -0.0470648313         0.0000000000
+   1    3   1    6         0.0017601168        -0.0000000000
+   1    3   2    6         0.0052577603         0.0000000000
+   1    3   3    6         0.0079117788         0.0000000000
+   1    3   1    7         0.0017601168         0.0000000000
+   1    3   2    7        -0.0052577603        -0.0000000000
    1    3   3    7        -0.0079117788         0.0000000000
-   1    3   1    8        -0.1034214799        -0.0000000000
-   1    3   2    8         0.0391120749         0.0000000000
-   1    3   3    8         0.0991586698        -0.0000000000
-   1    3   1    9        -0.0982052185        -0.0000000000
-   1    3   2    9        -0.0810934565        -0.0000000000
-   1    3   3    9         0.0470648287        -0.0000000000
+   1    3   1    8        -0.1034214832        -0.0000000000
+   1    3   2    8         0.0391120773         0.0000000000
+   1    3   3    8         0.0991586746        -0.0000000000
+   1    3   1    9        -0.0982052215         0.0000000000
+   1    3   2    9        -0.0810934611         0.0000000000
+   1    3   3    9         0.0470648313         0.0000000000
   
-   2    3   1    1        -0.0235914871        -0.0000000000
-   2    3   2    1        -0.0741313525        -0.0000000000
-   2    3   3    1         0.0180176268        -0.0000000000
-   2    3   1    2         0.0235914871        -0.0000000000
-   2    3   2    2        -0.0741313525        -0.0000000000
-   2    3   3    2         0.0180176268        -0.0000000000
-   2    3   1    3        -0.0000000000         0.0000000000
-   2    3   2    3         0.4838507815        -0.0000000000
-   2    3   3    3        -0.0066275155        -0.0000000000
-   2    3   1    4        -0.0546679368        -0.0000000000
-   2    3   2    4        -0.0519094608         0.0000000000
-   2    3   3    4        -0.0631148203         0.0000000000
-   2    3   1    5         0.0899919014         0.0000000000
-   2    3   2    5        -0.1315183828         0.0000000000
-   2    3   3    5         0.0601089167        -0.0000000000
-   2    3   1    6         0.0109329228         0.0000000000
-   2    3   2    6         0.0156338053        -0.0000000000
-   2    3   3    6        -0.0116979654         0.0000000000
-   2    3   1    7        -0.0109329228        -0.0000000000
-   2    3   2    7         0.0156338053        -0.0000000000
-   2    3   3    7        -0.0116979654         0.0000000000
-   2    3   1    8         0.0546679368         0.0000000000
-   2    3   2    8        -0.0519094608         0.0000000000
-   2    3   3    8        -0.0631148203         0.0000000000
-   2    3   1    9        -0.0899919014        -0.0000000000
-   2    3   2    9        -0.1315183828         0.0000000000
-   2    3   3    9         0.0601089167         0.0000000000
+   2    3   1    1        -0.0235914874         0.0000000000
+   2    3   2    1        -0.0741313530         0.0000000000
+   2    3   3    1         0.0180176269         0.0000000000
+   2    3   1    2         0.0235914874        -0.0000000000
+   2    3   2    2        -0.0741313530         0.0000000000
+   2    3   3    2         0.0180176269        -0.0000000000
+   2    3   1    3         0.0000000000         0.0000000000
+   2    3   2    3         0.4838507944        -0.0000000000
+   2    3   3    3        -0.0066275157         0.0000000000
+   2    3   1    4        -0.0546679394        -0.0000000000
+   2    3   2    4        -0.0519094617         0.0000000000
+   2    3   3    4        -0.0631148236        -0.0000000000
+   2    3   1    5         0.0899919060        -0.0000000000
+   2    3   2    5        -0.1315183880        -0.0000000000
+   2    3   3    5         0.0601089199        -0.0000000000
+   2    3   1    6         0.0109329229         0.0000000000
+   2    3   2    6         0.0156338055        -0.0000000000
+   2    3   3    6        -0.0116979654        -0.0000000000
+   2    3   1    7        -0.0109329229        -0.0000000000
+   2    3   2    7         0.0156338055         0.0000000000
+   2    3   3    7        -0.0116979654        -0.0000000000
+   2    3   1    8         0.0546679394         0.0000000000
+   2    3   2    8        -0.0519094617        -0.0000000000
+   2    3   3    8        -0.0631148236        -0.0000000000
+   2    3   1    9        -0.0899919060         0.0000000000
+   2    3   2    9        -0.1315183880         0.0000000000
+   2    3   3    9         0.0601089199         0.0000000000
   
-   3    3   1    1        -0.0109453825         0.0000000000
-   3    3   2    1        -0.0170775210        -0.0000000000
-   3    3   3    1        -0.0700957608        -0.0000000000
-   3    3   1    2         0.0109453825         0.0000000000
-   3    3   2    2        -0.0170775210        -0.0000000000
-   3    3   3    2        -0.0700957608         0.0000000000
-   3    3   1    3         0.0000000000         0.0000000000
-   3    3   2    3        -0.0058620720        -0.0000000000
-   3    3   3    3         0.4960072001         0.0000000000
-   3    3   1    4        -0.0972292044         0.0000000000
-   3    3   2    4        -0.0639384546         0.0000000000
-   3    3   3    4        -0.1373924023        -0.0000000000
-   3    3   1    5        -0.0564889089         0.0000000000
-   3    3   2    5         0.0759404207        -0.0000000000
-   3    3   3    5        -0.0712555279        -0.0000000000
-   3    3   1    6        -0.0155613062        -0.0000000000
-   3    3   2    6         0.0080065909         0.0000000000
-   3    3   3    6         0.0307400910         0.0000000000
+   3    3   1    1        -0.0109453826         0.0000000000
+   3    3   2    1        -0.0170775211         0.0000000000
+   3    3   3    1        -0.0700957612        -0.0000000000
+   3    3   1    2         0.0109453826         0.0000000000
+   3    3   2    2        -0.0170775211        -0.0000000000
+   3    3   3    2        -0.0700957612         0.0000000000
+   3    3   1    3         0.0000000000        -0.0000000000
+   3    3   2    3        -0.0058620721         0.0000000000
+   3    3   3    3         0.4960072132         0.0000000000
+   3    3   1    4        -0.0972292091         0.0000000000
+   3    3   2    4        -0.0639384578        -0.0000000000
+   3    3   3    4        -0.1373924075         0.0000000000
+   3    3   1    5        -0.0564889114         0.0000000000
+   3    3   2    5         0.0759404240        -0.0000000000
+   3    3   3    5        -0.0712555291        -0.0000000000
+   3    3   1    6        -0.0155613062         0.0000000000
+   3    3   2    6         0.0080065910        -0.0000000000
+   3    3   3    6         0.0307400911         0.0000000000
    3    3   1    7         0.0155613062         0.0000000000
-   3    3   2    7         0.0080065909         0.0000000000
-   3    3   3    7         0.0307400910        -0.0000000000
-   3    3   1    8         0.0972292044        -0.0000000000
-   3    3   2    8        -0.0639384546         0.0000000000
-   3    3   3    8        -0.1373924023         0.0000000000
-   3    3   1    9         0.0564889089        -0.0000000000
-   3    3   2    9         0.0759404207         0.0000000000
-   3    3   3    9        -0.0712555279        -0.0000000000
+   3    3   2    7         0.0080065910        -0.0000000000
+   3    3   3    7         0.0307400911        -0.0000000000
+   3    3   1    8         0.0972292091        -0.0000000000
+   3    3   2    8        -0.0639384578        -0.0000000000
+   3    3   3    8        -0.1373924075        -0.0000000000
+   3    3   1    9         0.0564889114         0.0000000000
+   3    3   2    9         0.0759404240         0.0000000000
+   3    3   3    9        -0.0712555291        -0.0000000000
   
-   1    4   1    1        -0.0491086040         0.0000000000
-   1    4   2    1        -0.0527475129         0.0000000000
-   1    4   3    1        -0.0375221665        -0.0000000000
-   1    4   1    2         0.0051546960         0.0000000000
+   1    4   1    1        -0.0491086047        -0.0000000000
+   1    4   2    1        -0.0527475162         0.0000000000
+   1    4   3    1        -0.0375221681         0.0000000000
+   1    4   1    2         0.0051546961        -0.0000000000
    1    4   2    2        -0.0072176216        -0.0000000000
    1    4   3    2         0.0147145216        -0.0000000000
-   1    4   1    3        -0.1034214799        -0.0000000000
-   1    4   2    3        -0.0546682559         0.0000000000
-   1    4   3    3        -0.0972291915        -0.0000000000
+   1    4   1    3        -0.1034214832        -0.0000000000
+   1    4   2    3        -0.0546682586         0.0000000000
+   1    4   3    3        -0.0972291962        -0.0000000000
   
-   2    4   1    1        -0.0616457318         0.0000000000
-   2    4   2    1        -0.1806157273         0.0000000000
-   2    4   3    1        -0.0868913774         0.0000000000
-   2    4   1    2        -0.0128927425        -0.0000000000
-   2    4   2    2         0.0122393143         0.0000000000
-   2    4   3    2         0.0094730379        -0.0000000000
-   2    4   1    3        -0.0391120749         0.0000000000
-   2    4   2    3        -0.0519101013        -0.0000000000
-   2    4   3    3        -0.0639376259        -0.0000000000
+   2    4   1    1        -0.0616457351         0.0000000000
+   2    4   2    1        -0.1806157348        -0.0000000000
+   2    4   3    1        -0.0868913812        -0.0000000000
+   2    4   1    2        -0.0128927426        -0.0000000000
+   2    4   2    2         0.0122393145         0.0000000000
+   2    4   3    2         0.0094730378        -0.0000000000
+   2    4   1    3        -0.0391120773         0.0000000000
+   2    4   2    3        -0.0519101022        -0.0000000000
+   2    4   3    3        -0.0639376291         0.0000000000
   
-   3    4   1    1        -0.0285236134        -0.0000000000
-   3    4   2    1        -0.0708138989         0.0000000000
-   3    4   3    1        -0.0712556433        -0.0000000000
+   3    4   1    1        -0.0285236149         0.0000000000
+   3    4   2    1        -0.0708139027        -0.0000000000
+   3    4   3    1        -0.0712556444        -0.0000000000
    3    4   1    2        -0.0140865389        -0.0000000000
    3    4   2    2        -0.0010028682        -0.0000000000
-   3    4   3    2         0.0307401643        -0.0000000000
-   3    4   1    3        -0.0991586698        -0.0000000000
-   3    4   2    3        -0.0631147064        -0.0000000000
-   3    4   3    3        -0.1373924655         0.0000000000
+   3    4   3    2         0.0307401645        -0.0000000000
+   3    4   1    3        -0.0991586746        -0.0000000000
+   3    4   2    3        -0.0631147096         0.0000000000
+   3    4   3    3        -0.1373924706        -0.0000000000
   
-   1    5   1    1         0.0191762028         0.0000000000
-   1    5   2    1         0.0047974218         0.0000000000
-   1    5   3    1         0.0008466306         0.0000000000
-   1    5   1    2        -0.0241798715        -0.0000000000
-   1    5   2    2        -0.0066380890        -0.0000000000
-   1    5   3    2        -0.0067570125        -0.0000000000
-   1    5   1    3        -0.0982052185        -0.0000000000
-   1    5   2    3         0.0899916754        -0.0000000000
-   1    5   3    3        -0.0564890570        -0.0000000000
+   1    5   1    1         0.0191762031         0.0000000000
+   1    5   2    1         0.0047974218        -0.0000000000
+   1    5   3    1         0.0008466305         0.0000000000
+   1    5   1    2        -0.0241798708        -0.0000000000
+   1    5   2    2        -0.0066380889        -0.0000000000
+   1    5   3    2        -0.0067570129         0.0000000000
+   1    5   1    3        -0.0982052215         0.0000000000
+   1    5   2    3         0.0899916800         0.0000000000
+   1    5   3    3        -0.0564890595        -0.0000000000
   
-   2    5   1    1        -0.0008776992         0.0000000000
-   2    5   2    1        -0.0017821926        -0.0000000000
+   2    5   1    1        -0.0008776992        -0.0000000000
+   2    5   2    1        -0.0017821925        -0.0000000000
    2    5   3    1        -0.0174796684         0.0000000000
-   2    5   1    2         0.0089180920        -0.0000000000
-   2    5   2    2        -0.1311517096         0.0000000000
-   2    5   3    2         0.1161717628        -0.0000000000
-   2    5   1    3         0.0810934565        -0.0000000000
-   2    5   2    3        -0.1315191128        -0.0000000000
-   2    5   3    3         0.0759408381         0.0000000000
+   2    5   1    2         0.0089180923        -0.0000000000
+   2    5   2    2        -0.1311517145        -0.0000000000
+   2    5   3    2         0.1161717684        -0.0000000000
+   2    5   1    3         0.0810934611         0.0000000000
+   2    5   2    3        -0.1315191180         0.0000000000
+   2    5   3    3         0.0759408414         0.0000000000
   
    3    5   1    1         0.0061747601         0.0000000000
    3    5   2    1         0.0127007346         0.0000000000
-   3    5   3    1         0.0307401643         0.0000000000
-   3    5   1    2        -0.0050796042        -0.0000000000
-   3    5   2    2         0.1174312802        -0.0000000000
-   3    5   3    2        -0.1373924655        -0.0000000000
-   3    5   1    3        -0.0470648287        -0.0000000000
-   3    5   2    3         0.0601091232         0.0000000000
-   3    5   3    3        -0.0712556433         0.0000000000
+   3    5   3    1         0.0307401645         0.0000000000
+   3    5   1    2        -0.0050796045         0.0000000000
+   3    5   2    2         0.1174312860        -0.0000000000
+   3    5   3    2        -0.1373924706         0.0000000000
+   3    5   1    3        -0.0470648313        -0.0000000000
+   3    5   2    3         0.0601091264         0.0000000000
+   3    5   3    3        -0.0712556444         0.0000000000
   
-   1    6   1    1        -0.1053960203        -0.0000000000
-   1    6   2    1         0.0379720734         0.0000000000
-   1    6   3    1         0.1039862040        -0.0000000000
-   1    6   1    2        -0.1972726744        -0.0000000000
-   1    6   2    2        -0.0238968341        -0.0000000000
-   1    6   3    2         0.0940112235        -0.0000000000
-   1    6   1    3         0.0017601166        -0.0000000000
-   1    6   2    3         0.0109328812        -0.0000000000
-   1    6   3    3        -0.0155611522         0.0000000000
+   1    6   1    1        -0.1053960241        -0.0000000000
+   1    6   2    1         0.0379720756         0.0000000000
+   1    6   3    1         0.1039862091        -0.0000000000
+   1    6   1    2        -0.1972726831        -0.0000000000
+   1    6   2    2        -0.0238968354        -0.0000000000
+   1    6   3    2         0.0940112275         0.0000000000
+   1    6   1    3         0.0017601168         0.0000000000
+   1    6   2    3         0.0109328813        -0.0000000000
+   1    6   3    3        -0.0155611522        -0.0000000000
   
-   2    6   1    1         0.0535282544         0.0000000000
-   2    6   2    1        -0.0499355608         0.0000000000
-   2    6   3    1        -0.0522341369         0.0000000000
-   2    6   1    2        -0.0327950530        -0.0000000000
-   2    6   2    2        -0.0324516569        -0.0000000000
-   2    6   3    2         0.0109505393         0.0000000000
-   2    6   1    3         0.0052577602        -0.0000000000
-   2    6   2    3         0.0156338936         0.0000000000
-   2    6   3    3         0.0080066306        -0.0000000000
+   2    6   1    1         0.0535282568         0.0000000000
+   2    6   2    1        -0.0499355613        -0.0000000000
+   2    6   3    1        -0.0522341394         0.0000000000
+   2    6   1    2        -0.0327950544        -0.0000000000
+   2    6   2    2        -0.0324516565        -0.0000000000
+   2    6   3    2         0.0109505398        -0.0000000000
+   2    6   1    3         0.0052577603        -0.0000000000
+   2    6   2    3         0.0156338939         0.0000000000
+   2    6   3    3         0.0080066306         0.0000000000
   
-   3    6   1    1         0.1042382740        -0.0000000000
-   3    6   2    1        -0.0543165739         0.0000000000
-   3    6   3    1        -0.1373924655         0.0000000000
-   3    6   1    2         0.0755884420        -0.0000000000
-   3    6   2    2         0.0107047756         0.0000000000
-   3    6   3    2        -0.0712556433         0.0000000000
-   3    6   1    3         0.0079117788         0.0000000000
-   3    6   2    3        -0.0116978664        -0.0000000000
-   3    6   3    3         0.0307401643        -0.0000000000
+   3    6   1    1         0.1042382791        -0.0000000000
+   3    6   2    1        -0.0543165764         0.0000000000
+   3    6   3    1        -0.1373924706        -0.0000000000
+   3    6   1    2         0.0755884461         0.0000000000
+   3    6   2    2         0.0107047763        -0.0000000000
+   3    6   3    2        -0.0712556444         0.0000000000
+   3    6   1    3         0.0079117788        -0.0000000000
+   3    6   2    3        -0.0116978664         0.0000000000
+   3    6   3    3         0.0307401645        -0.0000000000
   
-   1    7   1    1        -0.1972726744        -0.0000000000
-   1    7   2    1         0.0238968341        -0.0000000000
-   1    7   3    1        -0.0940112235        -0.0000000000
-   1    7   1    2        -0.1053960203         0.0000000000
-   1    7   2    2        -0.0379720734        -0.0000000000
-   1    7   3    2        -0.1039862040        -0.0000000000
-   1    7   1    3         0.0017601166         0.0000000000
-   1    7   2    3        -0.0109328812         0.0000000000
+   1    7   1    1        -0.1972726831         0.0000000000
+   1    7   2    1         0.0238968354        -0.0000000000
+   1    7   3    1        -0.0940112275        -0.0000000000
+   1    7   1    2        -0.1053960241         0.0000000000
+   1    7   2    2        -0.0379720756         0.0000000000
+   1    7   3    2        -0.1039862091         0.0000000000
+   1    7   1    3         0.0017601168        -0.0000000000
+   1    7   2    3        -0.0109328813         0.0000000000
    1    7   3    3         0.0155611522        -0.0000000000
   
-   2    7   1    1         0.0327950530        -0.0000000000
-   2    7   2    1        -0.0324516569        -0.0000000000
-   2    7   3    1         0.0109505393        -0.0000000000
-   2    7   1    2        -0.0535282544        -0.0000000000
-   2    7   2    2        -0.0499355608        -0.0000000000
-   2    7   3    2        -0.0522341369         0.0000000000
-   2    7   1    3        -0.0052577602         0.0000000000
-   2    7   2    3         0.0156338936         0.0000000000
-   2    7   3    3         0.0080066306        -0.0000000000
+   2    7   1    1         0.0327950544        -0.0000000000
+   2    7   2    1        -0.0324516565        -0.0000000000
+   2    7   3    1         0.0109505398         0.0000000000
+   2    7   1    2        -0.0535282568         0.0000000000
+   2    7   2    2        -0.0499355613         0.0000000000
+   2    7   3    2        -0.0522341394        -0.0000000000
+   2    7   1    3        -0.0052577603         0.0000000000
+   2    7   2    3         0.0156338939        -0.0000000000
+   2    7   3    3         0.0080066306         0.0000000000
   
-   3    7   1    1        -0.0755884420        -0.0000000000
-   3    7   2    1         0.0107047756        -0.0000000000
-   3    7   3    1        -0.0712556433         0.0000000000
-   3    7   1    2        -0.1042382740        -0.0000000000
-   3    7   2    2        -0.0543165739         0.0000000000
-   3    7   3    2        -0.1373924655         0.0000000000
+   3    7   1    1        -0.0755884461        -0.0000000000
+   3    7   2    1         0.0107047763         0.0000000000
+   3    7   3    1        -0.0712556444         0.0000000000
+   3    7   1    2        -0.1042382791         0.0000000000
+   3    7   2    2        -0.0543165764        -0.0000000000
+   3    7   3    2        -0.1373924706        -0.0000000000
    3    7   1    3        -0.0079117788        -0.0000000000
-   3    7   2    3        -0.0116978664        -0.0000000000
-   3    7   3    3         0.0307401643         0.0000000000
+   3    7   2    3        -0.0116978664         0.0000000000
+   3    7   3    3         0.0307401645         0.0000000000
   
-   1    8   1    1         0.0051546960         0.0000000000
+   1    8   1    1         0.0051546961        -0.0000000000
    1    8   2    1         0.0072176216         0.0000000000
-   1    8   3    1        -0.0147145216         0.0000000000
-   1    8   1    2        -0.0491086040         0.0000000000
-   1    8   2    2         0.0527475129        -0.0000000000
-   1    8   3    2         0.0375221665         0.0000000000
-   1    8   1    3        -0.1034214799         0.0000000000
-   1    8   2    3         0.0546682559        -0.0000000000
-   1    8   3    3         0.0972291915         0.0000000000
+   1    8   3    1        -0.0147145216        -0.0000000000
+   1    8   1    2        -0.0491086047         0.0000000000
+   1    8   2    2         0.0527475162         0.0000000000
+   1    8   3    2         0.0375221681         0.0000000000
+   1    8   1    3        -0.1034214832         0.0000000000
+   1    8   2    3         0.0546682586        -0.0000000000
+   1    8   3    3         0.0972291962         0.0000000000
   
-   2    8   1    1         0.0128927425         0.0000000000
-   2    8   2    1         0.0122393143        -0.0000000000
-   2    8   3    1         0.0094730379         0.0000000000
-   2    8   1    2         0.0616457318        -0.0000000000
-   2    8   2    2        -0.1806157273         0.0000000000
-   2    8   3    2        -0.0868913774        -0.0000000000
-   2    8   1    3         0.0391120749        -0.0000000000
-   2    8   2    3        -0.0519101013        -0.0000000000
-   2    8   3    3        -0.0639376259        -0.0000000000
+   2    8   1    1         0.0128927426         0.0000000000
+   2    8   2    1         0.0122393145         0.0000000000
+   2    8   3    1         0.0094730378         0.0000000000
+   2    8   1    2         0.0616457351         0.0000000000
+   2    8   2    2        -0.1806157348        -0.0000000000
+   2    8   3    2        -0.0868913812        -0.0000000000
+   2    8   1    3         0.0391120773        -0.0000000000
+   2    8   2    3        -0.0519101022         0.0000000000
+   2    8   3    3        -0.0639376291         0.0000000000
   
-   3    8   1    1         0.0140865389         0.0000000000
+   3    8   1    1         0.0140865389        -0.0000000000
    3    8   2    1        -0.0010028682         0.0000000000
-   3    8   3    1         0.0307401643        -0.0000000000
-   3    8   1    2         0.0285236134         0.0000000000
-   3    8   2    2        -0.0708138989        -0.0000000000
-   3    8   3    2        -0.0712556433         0.0000000000
-   3    8   1    3         0.0991586698         0.0000000000
-   3    8   2    3        -0.0631147064        -0.0000000000
-   3    8   3    3        -0.1373924655        -0.0000000000
+   3    8   3    1         0.0307401645         0.0000000000
+   3    8   1    2         0.0285236149         0.0000000000
+   3    8   2    2        -0.0708139027        -0.0000000000
+   3    8   3    2        -0.0712556444         0.0000000000
+   3    8   1    3         0.0991586746         0.0000000000
+   3    8   2    3        -0.0631147096         0.0000000000
+   3    8   3    3        -0.1373924706         0.0000000000
   
-   1    9   1    1        -0.0241798715         0.0000000000
-   1    9   2    1         0.0066380890         0.0000000000
-   1    9   3    1         0.0067570125         0.0000000000
-   1    9   1    2         0.0191762028         0.0000000000
-   1    9   2    2        -0.0047974218        -0.0000000000
-   1    9   3    2        -0.0008466306        -0.0000000000
-   1    9   1    3        -0.0982052185         0.0000000000
-   1    9   2    3        -0.0899916754         0.0000000000
-   1    9   3    3         0.0564890570         0.0000000000
+   1    9   1    1        -0.0241798708         0.0000000000
+   1    9   2    1         0.0066380889         0.0000000000
+   1    9   3    1         0.0067570129        -0.0000000000
+   1    9   1    2         0.0191762031        -0.0000000000
+   1    9   2    2        -0.0047974218         0.0000000000
+   1    9   3    2        -0.0008466305        -0.0000000000
+   1    9   1    3        -0.0982052215        -0.0000000000
+   1    9   2    3        -0.0899916800        -0.0000000000
+   1    9   3    3         0.0564890595        -0.0000000000
   
-   2    9   1    1        -0.0089180920         0.0000000000
-   2    9   2    1        -0.1311517096        -0.0000000000
-   2    9   3    1         0.1161717628        -0.0000000000
-   2    9   1    2         0.0008776992        -0.0000000000
-   2    9   2    2        -0.0017821926        -0.0000000000
+   2    9   1    1        -0.0089180923         0.0000000000
+   2    9   2    1        -0.1311517145         0.0000000000
+   2    9   3    1         0.1161717684        -0.0000000000
+   2    9   1    2         0.0008776992         0.0000000000
+   2    9   2    2        -0.0017821925        -0.0000000000
    2    9   3    2        -0.0174796684        -0.0000000000
-   2    9   1    3        -0.0810934565         0.0000000000
-   2    9   2    3        -0.1315191128        -0.0000000000
-   2    9   3    3         0.0759408381        -0.0000000000
+   2    9   1    3        -0.0810934611        -0.0000000000
+   2    9   2    3        -0.1315191180        -0.0000000000
+   2    9   3    3         0.0759408414        -0.0000000000
   
-   3    9   1    1         0.0050796042         0.0000000000
-   3    9   2    1         0.1174312802        -0.0000000000
-   3    9   3    1        -0.1373924655        -0.0000000000
+   3    9   1    1         0.0050796045        -0.0000000000
+   3    9   2    1         0.1174312860        -0.0000000000
+   3    9   3    1        -0.1373924706         0.0000000000
    3    9   1    2        -0.0061747601        -0.0000000000
    3    9   2    2         0.0127007346        -0.0000000000
-   3    9   3    2         0.0307401643         0.0000000000
-   3    9   1    3         0.0470648287         0.0000000000
-   3    9   2    3         0.0601091232        -0.0000000000
-   3    9   3    3        -0.0712556433         0.0000000000
+   3    9   3    2         0.0307401645         0.0000000000
+   3    9   1    3         0.0470648313        -0.0000000000
+   3    9   2    3         0.0601091264        -0.0000000000
+   3    9   3    3        -0.0712556444         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -1692,7 +1693,7 @@ tolerances: {tolvrs: 1.00E-08, }
  -outvars: echo values of variables after computation  --------
 -          iomode1          1
 -          iomode2          0
-            acell      9.2843000799E+00  9.2843000799E+00  1.0213270550E+01 Bohr
+            acell      9.2843000456E+00  9.2843000456E+00  1.0213270512E+01 Bohr
               amu      2.80855000E+01  1.59994000E+01
            bandpp1          6
            bandpp2          1
@@ -1700,17 +1701,17 @@ tolerances: {tolvrs: 1.00E-08, }
      densfor_pred2          2
            diemac      4.00000000E+00
              ecut      1.20000000E+01 Hartree
-           etotal1    -1.0909496078E+02
-           etotal2     5.1729828833E+01
-            fcart1    -4.4306903684E-03  7.6741808307E-03 -7.7098821159E-19
-                      -4.4306903684E-03 -7.6741808307E-03 -7.7098821155E-19
-                       8.8613807368E-03 -2.3290795011E-19 -7.7098821155E-19
-                      -1.7078403337E-02 -4.3669202946E-03 -1.3848354269E-02
-                       4.7573377572E-03  1.6973791293E-02 -1.3848354269E-02
-                       1.2321065580E-02 -1.2606870999E-02 -1.3848354269E-02
-                       1.2321065580E-02  1.2606870999E-02  1.3848354269E-02
-                      -1.7078403337E-02  4.3669202946E-03  1.3848354269E-02
-                       4.7573377572E-03 -1.6973791293E-02  1.3848354269E-02
+           etotal1    -1.0909496079E+02
+           etotal2     5.1729829828E+01
+            fcart1    -4.4306906628E-03  7.6741813406E-03  5.7824115864E-19
+                      -4.4306906628E-03 -7.6741813406E-03  5.7824115866E-19
+                       8.8613813255E-03 -2.1017673902E-19  5.7824115866E-19
+                      -1.7078404482E-02 -4.3669185535E-03 -1.3848355706E-02
+                       4.7573398375E-03  1.6973791414E-02 -1.3848355706E-02
+                       1.2321064645E-02 -1.2606872861E-02 -1.3848355706E-02
+                       1.2321064645E-02  1.2606872861E-02  1.3848355706E-02
+                      -1.7078404482E-02  4.3669185535E-03  1.3848355706E-02
+                       4.7573398375E-03 -1.6973791414E-02  1.3848355706E-02
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1732,7 +1733,7 @@ tolerances: {tolvrs: 1.00E-08, }
            kptopt1          1
            kptopt2          2
          kptrlatt        1    0    0      0    1    0      0    0    1
-          kptrlen      9.28430008E+00
+          kptrlen      9.28430005E+00
 P           mkmem           1
 P          mkqmem           1
 P          mk1mem           1
@@ -1768,16 +1769,16 @@ P          mk1mem           1
                        5.0000000000E-01  8.6602540378E-01  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
           spgroup         154
-           strten1     1.9028289275E-03  1.9028289276E-03  1.9344500437E-03
+           strten1     1.9028288106E-03  1.9028288107E-03  1.9344499267E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1       1  0  0  -1 -1  0   0  0 -1
                        0  1  0  -1 -1  0   0  0  1       0  1  0   1  0  0   0  0 -1
                       -1 -1  0   1  0  0   0  0  1      -1 -1  0   0  1  0   0  0 -1
-            tnons      0.0000000  0.0000000  0.0000000     0.0000000 -0.0000000  0.0000000
-                      -0.0000000  0.0000000 -0.3333333     0.0000000  0.0000000 -0.3333333
-                       0.0000000  0.0000000  0.3333333     0.0000000  0.0000000  0.3333333
+            tnons      0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000 -0.3333333     0.0000000  0.0000000 -0.3333333
+                      -0.0000000  0.0000000  0.3333333    -0.0000000  0.0000000  0.3333333
            tolvrs1     0.00000000E+00
            tolvrs2     1.00000000E-08
            tolwfr1     1.00000000E-18
@@ -1789,24 +1790,24 @@ P          mk1mem           1
          wfoptalg2         10
            xangst      1.1422818000E+00 -1.9784901142E+00  0.0000000000E+00
                        1.1422818000E+00  1.9784901142E+00  3.6030866667E+00
-                      -2.2845636000E+00  4.0347989381E-18  1.8015433333E+00
+                      -2.2845636000E+00  3.3071325791E-16  1.8015433333E+00
                        1.6876292400E+00 -6.0843889532E-01  6.4855560000E-01
                       -1.3707381600E+00 -1.1573103463E+00  2.4500989333E+00
                       -3.1689108000E-01  1.7657492417E+00  4.2516422667E+00
                       -3.1689108000E-01 -1.7657492417E+00 -6.4855560000E-01
                        1.6876292400E+00  6.0843889532E-01  2.9545310667E+00
                       -1.3707381600E+00  1.1573103463E+00  1.1529877333E+00
-            xcart      2.1585997686E+00 -3.7388044724E+00  0.0000000000E+00
-                       2.1585997686E+00  3.7388044724E+00  6.8088470331E+00
-                      -4.3171995372E+00  7.6246649943E-18  3.4044235165E+00
-                       3.1891570774E+00 -1.1497828807E+00  1.2255924659E+00
-                      -2.5903197223E+00 -2.1869996053E+00  4.6300159825E+00
-                      -5.9883735515E-01  3.3367824861E+00  8.0344394990E+00
-                      -5.9883735515E-01 -3.3367824861E+00 -1.2255924659E+00
-                       3.1891570774E+00  1.1497828807E+00  5.5832545671E+00
-                      -2.5903197223E+00  2.1869996053E+00  2.1788310506E+00
-             xred      4.6500000000E-01 -1.1657958272E-17  0.0000000000E+00
-                      -1.1657958272E-17  4.6500000000E-01  6.6666666667E-01
+            xcart      2.1585997606E+00 -3.7388044586E+00  0.0000000000E+00
+                       2.1585997606E+00  3.7388044586E+00  6.8088470079E+00
+                      -4.3171995212E+00  6.2495748365E-16  3.4044235040E+00
+                       3.1891570657E+00 -1.1497828765E+00  1.2255924614E+00
+                      -2.5903197127E+00 -2.1869995973E+00  4.6300159654E+00
+                      -5.9883735294E-01  3.3367824738E+00  8.0344394693E+00
+                      -5.9883735294E-01 -3.3367824738E+00 -1.2255924614E+00
+                       3.1891570657E+00  1.1497828765E+00  5.5832545465E+00
+                      -2.5903197127E+00  2.1869995973E+00  2.1788310425E+00
+             xred      4.6500000000E-01  8.5430400492E-18  0.0000000000E+00
+                       8.5430400492E-18  4.6500000000E-01  6.6666666667E-01
                       -4.6500000000E-01 -4.6500000000E-01  3.3333333333E-01
                        4.1500000000E-01  2.7200000000E-01  1.2000000000E-01
                       -1.4300000000E-01 -4.1500000000E-01  4.5333333333E-01
@@ -1929,10 +1930,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          7.4  wall=          7.4
+- Proc.   0 individual time (sec): cpu=          8.3  wall=          8.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         29.4  wall=         29.6
++Overall time at end (sec) : cpu=         33.1  wall=         33.5

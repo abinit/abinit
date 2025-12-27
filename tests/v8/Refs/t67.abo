@@ -1,5 +1,5 @@
 
-.Version 10.4.5.9 of ABINIT, released Sep 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  1 Oct 2025.
-- ( at 11h03 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h15 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t67.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t67.abi
 - output file    -> t67.abo
 - root for input  files -> t67i
 - root for output files -> t67o
@@ -147,8 +147,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.07375
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -232,9 +232,9 @@ tolerances: {tolvrs: 1.00E-17, }
  At SCF step   41       vres2   =  5.60E-18 < tolvrs=  1.00E-17 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -6.35875039E-04  sigma(3 2)=  8.20573433E-12
-  sigma(2 2)= -6.35875039E-04  sigma(3 1)=  1.04569557E-15
-  sigma(3 3)= -6.35875039E-04  sigma(2 1)= -8.20348417E-12
+  sigma(1 1)= -6.35875039E-04  sigma(3 2)=  8.20573025E-12
+  sigma(2 2)= -6.35875039E-04  sigma(3 1)=  1.04979838E-15
+  sigma(3 3)= -6.35875039E-04  sigma(2 1)= -8.20348394E-12
 
 
 --- !ResultsGS
@@ -252,9 +252,9 @@ etotal    :  -2.49339173E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.65685981E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -6.35875039E-04,  -8.20348417E-12,   1.04569557E-15, ]
-- [ -8.20348417E-12,  -6.35875039E-04,   8.20573433E-12, ]
-- [  1.04569557E-15,   8.20573433E-12,  -6.35875039E-04, ]
+- [ -6.35875039E-04,  -8.20348394E-12,   1.04979838E-15, ]
+- [ -8.20348394E-12,  -6.35875039E-04,   8.20573025E-12, ]
+- [  1.04979838E-15,   8.20573025E-12,  -6.35875039E-04, ]
 pressure_GPa:   1.8708E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Fe]
@@ -296,7 +296,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00  -7.180E-12  4.555E-12  2.354E-12 e/A
  length scales=  5.420000000000  5.420000000000  5.420000000000 bohr
-              =  2.868140470558  2.868140470558  2.868140470558 angstroms
+              =  2.868140481148  2.868140481148  2.868140481148 angstroms
  prteigrs : about to open file t67o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.26569   Average Vxc (hartree)=  -0.51153
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -322,20 +322,20 @@ non_local_psp       : -2.94025096435231E+01
 internal            : -2.49220145806097E+01
 '-kT*entropy'       : -1.19027454038968E-02
 total_energy        : -2.49339173260136E+01
-total_energy_eV     : -6.78486395491662E+02
+total_energy_eV     : -6.78486454983515E+02
 band_energy         : -2.89895967197854E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -6.35875039E-04  sigma(3 2)=  8.20573433E-12
-  sigma(2 2)= -6.35875039E-04  sigma(3 1)=  1.04569557E-15
-  sigma(3 3)= -6.35875039E-04  sigma(2 1)= -8.20348417E-12
+  sigma(1 1)= -6.35875039E-04  sigma(3 2)=  8.20573025E-12
+  sigma(2 2)= -6.35875039E-04  sigma(3 1)=  1.04979838E-15
+  sigma(3 3)= -6.35875039E-04  sigma(2 1)= -8.20348394E-12
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.8708E+01 GPa]
-- sigma(1 1)= -1.87080864E+01  sigma(3 2)=  2.41420999E-07
-- sigma(2 2)= -1.87080864E+01  sigma(3 1)=  3.07654208E-11
-- sigma(3 3)= -1.87080864E+01  sigma(2 1)= -2.41354796E-07
+- sigma(1 1)= -1.87080895E+01  sigma(3 2)=  2.41420919E-07
+- sigma(2 2)= -1.87080895E+01  sigma(3 1)=  3.08861347E-11
+- sigma(3 3)= -1.87080895E+01  sigma(2 1)= -2.41354830E-07
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -403,7 +403,7 @@ P           mkmem           8
           spgroup           1
            spinat      0.0000000000E+00  0.0000000000E+00  2.1500000000E+00
            strten     -6.3587503914E-04 -6.3587503913E-04 -6.3587503914E-04
-                       8.2057343344E-12  1.0456955735E-15 -8.2034841724E-12
+                       8.2057302483E-12  1.0497983811E-15 -8.2034839409E-12
            tolvrs      1.00000000E-17
             typat      1
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
@@ -504,10 +504,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         26.7  wall=         26.8
+- Proc.   0 individual time (sec): cpu=         26.2  wall=         26.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         26.7  wall=         26.8
++Overall time at end (sec) : cpu=         26.2  wall=         26.3

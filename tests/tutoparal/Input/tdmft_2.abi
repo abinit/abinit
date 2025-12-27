@@ -87,6 +87,8 @@ dmftqmc_n        3.d6   # Number of QMC sweeps
 dmftqmc_therm    10000  # Thermalization
 dmftctqmc_gmove  0      # Global move occurence in QMC
 dmftctqmc_order  50     # Perturbation order
+dmftctqmc_chains  1     # force 1 chain per MPI task for testing purposes
+                        # auto-setting match OpenMP threads and alter convergence
 #DFT+U
 usepawu1    1
 usepawu     10

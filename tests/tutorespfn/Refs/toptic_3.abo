@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h05 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_toptic_3-toptic_4-toptic_5/toptic_3.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h05 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_toptic_3-toptic_4-toptic_5/toptic_3.abi
 - output file    -> toptic_3.abo
 - root for input  files -> toptic_3i
 - root for output files -> toptic_3o
@@ -81,6 +81,7 @@ _ WF disk file :      0.758 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           9        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =          43
       nfft =        1000          nkpt =         128
+- my_mband =           9
 ================================================================================
 P This job should need less than                       4.034 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -98,6 +99,7 @@ _ WF disk file :      0.758 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           9        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =          43
       nfft =        1000          nkpt =         128
+- my_mband =           9
 ================================================================================
 P This job should need less than                       4.034 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -115,6 +117,7 @@ _ WF disk file :      0.758 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           9        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =          43
       nfft =        1000          nkpt =         128
+- my_mband =           9
 ================================================================================
 P This job should need less than                       4.034 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -543,7 +546,7 @@ P          mk1mem6        128
                          0.00781    0.00781
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4023196028E+00  1.4023196028E+00  1.4023196028E+00
+                       1.4023196079E+00  1.4023196079E+00  1.4023196079E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6500000000E+00  2.6500000000E+00  2.6500000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -588,8 +591,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.11655
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_lrgcore_psp8/Ga-low.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_lrgcore_psp8/Ga-low.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_lrgcore_psp8/Ga-low.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_lrgcore_psp8/Ga-low.psp8
 - Ga    ONCVPSP-3.3.0  r_core=   1.85767   1.81388   2.62545
 - 31.00000   3.00000    171103                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -603,8 +606,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    1.406259    0.234121
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_lrgcore_psp8/As.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_lrgcore_psp8/As.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_lrgcore_psp8/As.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_lrgcore_psp8/As.psp8
 - As    ONCVPSP-3.3.0  r_core=   1.83037   1.80867   2.40819
 - 33.00000   5.00000    171103                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -699,7 +702,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.40231960276350     1.40231960276350     1.40231960276350
+    2      1.40231960794160     1.40231960794160     1.40231960794160
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -711,7 +714,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.600000000000 10.600000000000 10.600000000000 bohr
-              =  5.609278411054  5.609278411054  5.609278411054 angstroms
+              =  5.609278431766  5.609278431766  5.609278431766 angstroms
  prteigrs : about to open file toptic_3o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.17031   Average Vxc (hartree)=  -0.35699
  Eigenvalues (hartree) for nkpt=  10  k points:
@@ -731,7 +734,7 @@ psp_core            :  3.84840039201296E-02
 local_psp           : -2.50963319443699E+00
 non_local_psp       :  1.85947306434072E+00
 total_energy        : -1.09889405810172E+01
-total_energy_eV     : -2.99024280364791E+02
+total_energy_eV     : -2.99024306584195E+02
 band_energy         :  8.28583789363118E-02
 ...
 
@@ -742,9 +745,9 @@ band_energy         :  8.28583789363118E-02
   sigma(3 3)=  1.14753590E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.3762E+01 GPa]
-- sigma(1 1)=  3.37616663E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.37616663E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.37616663E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  3.37616719E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.37616719E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.37616719E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -826,9 +829,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.40231960276350     1.40231960276350     1.40231960276350
+    2      1.40231960794160     1.40231960794160     1.40231960794160
  length scales= 10.600000000000 10.600000000000 10.600000000000 bohr
-              =  5.609278411054  5.609278411054  5.609278411054 angstroms
+              =  5.609278431766  5.609278431766  5.609278431766 angstroms
  prteigrs : about to open file toptic_3o_DS2_EIG
  Eigenvalues (hartree) for nkpt=  10  k points:
  kpt#   1, nband=  9, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
@@ -917,9 +920,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.40231960276350     1.40231960276350     1.40231960276350
+    2      1.40231960794160     1.40231960794160     1.40231960794160
  length scales= 10.600000000000 10.600000000000 10.600000000000 bohr
-              =  5.609278411054  5.609278411054  5.609278411054 angstroms
+              =  5.609278431766  5.609278431766  5.609278431766 angstroms
  prteigrs : about to open file toptic_3o_DS3_EIG
  Eigenvalues (hartree) for nkpt= 128  k points:
  kpt#   1, nband=  9, wtk=  0.00781, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
@@ -956,7 +959,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -1012,7 +1015,7 @@ tolerances: {tolwfr: 1.00E-20, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -7.58512414E+00
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.7585124144E+01 Ha. Also 2DEtotal=   -0.206401724701E+03 eV
+ 2DEtotal=   -0.7585124144E+01 Ha. Also 2DEtotal=   -0.206401742799E+03 eV
     (  non-var. 2DEtotal :   -7.5851241437E+00 Ha)
 ================================================================================
 
@@ -1067,7 +1070,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 2    ipert=   3
@@ -1123,7 +1126,7 @@ tolerances: {tolwfr: 1.00E-20, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -7.58512414E+00
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.7585124144E+01 Ha. Also 2DEtotal=   -0.206401724698E+03 eV
+ 2DEtotal=   -0.7585124144E+01 Ha. Also 2DEtotal=   -0.206401742796E+03 eV
     (  non-var. 2DEtotal :   -7.5851241436E+00 Ha)
 ================================================================================
 
@@ -1178,7 +1181,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 3    ipert=   3
@@ -1234,7 +1237,7 @@ tolerances: {tolwfr: 1.00E-20, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -7.58512414E+00
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.7585124144E+01 Ha. Also 2DEtotal=   -0.206401724695E+03 eV
+ 2DEtotal=   -0.7585124144E+01 Ha. Also 2DEtotal=   -0.206401742793E+03 eV
     (  non-var. 2DEtotal :   -7.5851241435E+00 Ha)
 ================================================================================
 
@@ -1263,7 +1266,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0600000000E+01  1.0600000000E+01  1.0600000000E+01 Bohr
               amu      6.97230000E+01  7.49215900E+01
@@ -1684,7 +1687,7 @@ P          mk1mem6        128
                          0.00781    0.00781
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4023196028E+00  1.4023196028E+00  1.4023196028E+00
+                       1.4023196079E+00  1.4023196079E+00  1.4023196079E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6500000000E+00  2.6500000000E+00  2.6500000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1731,7 +1734,7 @@ P          mk1mem6        128
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1759,12 +1762,12 @@ P          mk1mem6        128
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1782,7 +1785,7 @@ P          mk1mem6        128
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

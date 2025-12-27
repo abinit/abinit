@@ -5,7 +5,7 @@
 prtvol 3
 pawprtvol -3
 nline 12
-tolvrs 1.0d-15
+tolvrs 1.0d-18
 chksymbreak 0
 
 ndtset 8

@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h04 )
-
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h05 )
+  
 
 ================================================================================
 
@@ -60,11 +60,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -80,7 +80,7 @@
        3               2       -0.000000        0.000000
        3               3       -0.077121        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -97,7 +97,7 @@
  Calculation of the tensors related to flexoelectric effect
 
 
- Type-II electronic (clamped ion) flexoelectric tensor (units= nC/m)
+ Type-II electronic (clamped ion) flexoelectric tensor (units= nC/m) 
 
             xx          yy          zz          yz          xz          xy
    xx   -1.437438   -1.010971   -1.010971    0.000000   -0.000000   -0.000000
@@ -110,7 +110,7 @@
    zx    0.000000    0.000000    0.000000    0.000000   -0.229349    0.000000
    yx   -0.000000   -0.000000   -0.000000    0.000000    0.000000   -0.229349
 
- First moment of Polarization induced by atomic displacement (1/ucvol factor not included) (units: e Bohr)
+ First moment of Polarization induced by atomic displacement (1/ucvol factor not included) (units: e Bohr) 
 
   atom   dir       Pxx         Pyy         Pzz         Pyz         Pxz         Pxy         Pzy         Pzx         Pyx
     1     x      0.000001    0.000000   -0.000000    6.736777   -0.000000   -0.000000    6.736777    0.000001    0.000000
@@ -153,17 +153,17 @@
    zx   -0.000000    0.000000    0.000000   -0.000000   -0.111311    0.000000
    yx   -0.000000   -0.000000    0.000000    0.000000    0.000000   -0.111311
 
- Lagrange elastic tensor from long wave magnitudes (clamped ion) (units= 10^2 GPa)
+ Lagrange elastic tensor from long wave magnitudes (clamped ion) (units= 10^2 GPa) 
 
        xx          yy          zz          yz          xz          xy
     1.948017    0.731743    0.731743    0.000000   -0.000000    0.000000
     0.731743    1.948017    0.731743    0.000000   -0.000000   -0.000000
     0.731743    0.731743    1.948017   -0.000000   -0.000000    0.000000
     0.000000    0.000000    0.000000    1.224052    0.000000   -0.000000
-   -0.000000   -0.000000   -0.000000    0.000000    1.224052   -0.000000
-   -0.000000   -0.000000    0.000000   -0.000000    0.000000    1.224052
+   -0.000000   -0.000000   -0.000000    0.000000    1.224053   -0.000000
+   -0.000000   -0.000000    0.000000   -0.000000    0.000000    1.224053
 
- Lagrange elastic tensor from long wave magnitudes (relaxed ion) (units= 10^2 GPa)
+ Lagrange elastic tensor from long wave magnitudes (relaxed ion) (units= 10^2 GPa) 
 
        xx          yy          zz          yz          xz          xy
     1.948017    0.731743    0.731743   -0.000000   -0.000000   -0.000000
@@ -176,24 +176,24 @@
  Flexoelectric force-response tensor (units: eV)
 
   atom   dir        xx           yy           zz           yz           xz           xy
-    1    xx     23.696870     8.242199     8.242198    -0.000000    -0.000000     0.000001
-    1    yy      8.242198    23.696870     8.242198     0.000001     0.000000     0.000001
-    1    zz      8.242197     8.242198    23.696868     0.000000    -0.000000     0.000001
-    1    yz      0.000000    -0.000000     0.000001    11.364638    -0.000000    -0.000000
-    1    xz     -0.000000     0.000000    -0.000000    -0.000000    11.364638     0.000000
-    1    xy      0.000001     0.000002     0.000000    -0.000000    -0.000000    11.364640
-    1    zy     -0.000000     0.000000    -0.000000    11.364638     0.000000    -0.000000
-    1    zx      0.000000     0.000000     0.000000    -0.000000    11.364638     0.000000
-    1    yx      0.000002     0.000001     0.000000     0.000000     0.000001    11.364639
-    2    xx     23.696770     8.242106     8.242106     0.000000    -0.000000    -0.000001
-    2    yy      8.242105    23.696770     8.242106    -0.000000    -0.000000    -0.000001
-    2    zz      8.242106     8.242106    23.696769     0.000000     0.000000    -0.000000
-    2    yz     -0.000000    -0.000000     0.000000    11.364609    -0.000000    -0.000000
-    2    xz     -0.000000    -0.000000    -0.000001    -0.000000    11.364609    -0.000000
-    2    xy     -0.000001    -0.000002    -0.000000     0.000000     0.000000    11.364610
-    2    zy     -0.000000    -0.000000    -0.000000    11.364610     0.000000     0.000000
-    2    zx     -0.000000     0.000000    -0.000000    -0.000000    11.364609    -0.000000
-    2    yx     -0.000002    -0.000001    -0.000000     0.000000     0.000000    11.364611
+    1    xx     23.696872     8.242200     8.242199    -0.000000    -0.000000     0.000001
+    1    yy      8.242199    23.696872     8.242198     0.000001     0.000000     0.000001
+    1    zz      8.242198     8.242198    23.696870     0.000000    -0.000000     0.000001
+    1    yz      0.000000    -0.000000     0.000001    11.364639    -0.000000    -0.000000
+    1    xz     -0.000000     0.000000    -0.000000    -0.000000    11.364639     0.000000
+    1    xy      0.000001     0.000002     0.000000    -0.000000    -0.000000    11.364641
+    1    zy     -0.000000     0.000000    -0.000000    11.364639     0.000000    -0.000000
+    1    zx      0.000000     0.000000     0.000000    -0.000000    11.364639     0.000000
+    1    yx      0.000002     0.000001     0.000000     0.000000     0.000001    11.364640
+    2    xx     23.696773     8.242106     8.242107     0.000000    -0.000000    -0.000001
+    2    yy      8.242106    23.696772     8.242107    -0.000000    -0.000000    -0.000001
+    2    zz      8.242106     8.242107    23.696771     0.000000     0.000000    -0.000000
+    2    yz     -0.000000    -0.000000     0.000000    11.364610    -0.000000    -0.000000
+    2    xz     -0.000000    -0.000000    -0.000001    -0.000000    11.364610    -0.000000
+    2    xy     -0.000001    -0.000002    -0.000000     0.000000     0.000000    11.364611
+    2    zy     -0.000000    -0.000000    -0.000000    11.364611     0.000000     0.000000
+    2    zx     -0.000000     0.000000    -0.000000    -0.000000    11.364610    -0.000000
+    2    yx     -0.000002    -0.000001    -0.000000     0.000000     0.000000    11.364612
 
  Displacement-response flexoelectric internal strain tensor (units: Bohr^2)
 
@@ -217,7 +217,7 @@
     2    zx     -0.000000    -0.000000    -0.000000    -0.000000    -0.000002    -0.000000
     2    yx     -0.000000    -0.000000    -0.000000    -0.000000    -0.000000    -0.000002
 
- Type-II lattice contribution to flexoelectric tensor (units= nC/m)
+ Type-II lattice contribution to flexoelectric tensor (units= nC/m) 
 
             xx          yy          zz          yz          xz          xy
    xx    0.000000    0.000000    0.000000    0.000000    0.000000    0.000000
@@ -230,7 +230,7 @@
    zx    0.000000    0.000000    0.000000    0.000000    0.000000    0.000000
    yx    0.000000    0.000000    0.000000    0.000000    0.000000    0.000000
 
- TOTAL flexoelectric tensor (units= nC/m)
+ TOTAL flexoelectric tensor (units= nC/m) 
 
             xx          yy          zz          yz          xz          xy
    xx   -1.437438   -1.010971   -1.010971   -0.000000    0.000000   -0.000000
@@ -247,6 +247,6 @@
 
 ================================================================================
 
-+Total cpu time      0.030  and wall time      0.030 sec
++Total cpu time      0.043  and wall time      0.043 sec
 
  anaddb : the run completed successfully.

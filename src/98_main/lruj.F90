@@ -70,7 +70,7 @@ program lruj
  integer                            :: ncid,nnat,natom,prtvol,nargs,nfiles,ndtpawuj,degarg
  integer                            :: ndata,nspden,macro_uj,pawujat,dmatpuopt
  integer                            :: degree,mdegree,ii,ipert
- real(dp)                           :: diem,ph0phiint,signum,Ha2eV !diemix, diemixmag,
+ real(dp)                           :: diem,ph0phiint,signum !diemix, diemixmag,
  type(yamldoc_t)                    :: ydoc
  !type(crystal_t)                    :: cryst
 
@@ -197,7 +197,6 @@ program lruj
  ABI_MALLOC(nspden_file, (nfiles))
 
  !Set macro_uj-specific variables, strings and constants.
- Ha2eV=27.2113961318d0
  if (macro_uj==4) then         !Calculation of the Hunds J parameter
    diem_token="diemixmag"     !Unscreened response in Hund's J impacted by diemixmag
    pertname='beta '           !Hund's J perturbation: +beta to spin up, -beta to down
@@ -249,7 +248,7 @@ program lruj
      write(std_out,'(2a)') "reexecute lruj utility. Exiting.",ch10
      goto 100
    else
-     perts(ii)=uj_perts(ii)*Ha2eV
+     perts(ii)=uj_perts(ii)*Ha_eV
      occs0(0)=luocc(1,ii)
      occs(0)=luocc(2,ii)
      occs0(ii)=luocc(3,ii)

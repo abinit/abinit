@@ -1,12 +1,12 @@
 ******************************************************************************************
-                                Welcome to MULTIBINIT,
+                                Welcome to MULTIBINIT,                         
  a software platform designed for the construction and use of second-principles models
                    for lattice, spin and electron degrees of freedom.
 
-.Version 10.1.4.5 of MULTIBINIT
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -17,7 +17,7 @@
 
 -----------------------------------------------------------------------------------------
 
-                          MULTIBINIT - LATTICE MODELS
+                          MULTIBINIT - LATTICE MODELS                   
 
  Project initiated and coordinated by Philippe GHOSEZ and his group at ULiege
    (Philippe.Ghosez@uliege.be).
@@ -32,27 +32,26 @@
 
 
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h02 )
-
-- The starting date is more than 2 years after the initial release
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h03 )
+  
+- The starting date is more than 3 years after the initial release
 - of this version of ABINIT, namely Jul 2022.
-- Note that the use beyond 3 years after the release will not be supported.
+- This version of ABINIT is not supported anymore.
 - Action: please, switch to a more recent version of ABINIT.
-
 -  nproc =    1
 
 ================================================================================
 
- Read the information in the reference structure in
--/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/tutomultibinit/Input/tmulti1_DDB
+ Read the information in the reference structure in 
+-/home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/tutomultibinit/Input/tmulti1_DDB
  to initialize the multibinit input
 
 ================================================================================
 
  -outvars_multibinit: echo values of input variables ----------------------
 
- Flags :
+ Flags : 
      ifcflag         1
    prt_model         1
      strcpli        -1
@@ -121,11 +120,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -141,7 +140,7 @@
        3               2        0.000000        0.000000
        3               3       -1.422018        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -244,12 +243,12 @@
 
  Extraction of the clamped elastic tensor (unit:10^2GPa)
 
-   3.9133823   1.3361329   1.1936863  -0.0000000  -0.0000000  -0.0000000
-   1.3361172   3.8023382   1.1335897  -0.0000000  -0.0000000  -0.0000000
-   1.1936770   1.1335796   4.0167474  -0.0000000  -0.0000000  -0.0000000
-  -0.0000000  -0.0000000   0.0000000   1.2884614  -0.0000000   0.0000000
-  -0.0000000   0.0000000  -0.0000000  -0.0000000   1.2158450   0.0000000
-  -0.0000000  -0.0000000  -0.0000000   0.0000000  -0.0000000   1.4230204
+   3.9133830   1.3361331   1.1936865  -0.0000000  -0.0000000  -0.0000000
+   1.3361174   3.8023389   1.1335899  -0.0000000  -0.0000000  -0.0000000
+   1.1936772   1.1335798   4.0167481  -0.0000000  -0.0000000  -0.0000000
+  -0.0000000  -0.0000000   0.0000000   1.2884616  -0.0000000   0.0000000
+  -0.0000000   0.0000000  -0.0000000  -0.0000000   1.2158452   0.0000000
+  -0.0000000  -0.0000000  -0.0000000   0.0000000  -0.0000000   1.4230207
 
 ================================================================================
 
@@ -397,10 +396,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
+- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.4
 
 ================================================================================
 
-+Total cpu time      0.295  and wall time      0.329 sec
++Total cpu time      0.284  and wall time      0.365 sec
 
  multibinit : the run completed successfully.

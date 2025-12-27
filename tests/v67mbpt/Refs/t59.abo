@@ -1,6 +1,6 @@
 
-.Version 10.4.0.2 of ABINIT, released Apr 2025.
-.(MPI version, prepared for a x86_64_linux_intel2025.0 computer) 
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,14 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 15 May 2025.
-- ( at 17h38 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h13 )
   
-- input  file    -> t59.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v67mbpt_t57-t58-t59/t59.abi
 - output file    -> t59.abo
 - root for input  files -> t59i
 - root for output files -> t59o
- 
+
  Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -37,7 +37,7 @@ P This job should need less than                       6.264 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.210 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ P           mkmem           6
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000
-       omegasimax      1.46997302E+00 Hartree
+       omegasimax      1.46997289E+00 Hartree
         optdriver           4
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
@@ -145,21 +145,21 @@ P           mkmem           6
             typat      1  1
               wtk        0.18750    0.37500    0.09375    0.18750    0.12500    0.03125
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl       14.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -170,30 +170,30 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 ...
 
  mkfilename: getwfk from: ./t57o_DS1_WFK
- 
+
  mkfilename: getscr from: ./t58o_SCR
- 
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
- 
+
  SIGMA: Calculation of the GW corrections 
- 
+
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
- 
+.Using double precision arithmetic ; gwpc =  8
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
  R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
  R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
  Unit cell volume ucvol=  2.6663072E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/tsaih/program/abinit.worktrees/gwr/tests/Pspdir/14si.psp
-- pspatm: opening atomic psp file    /home/tsaih/program/abinit.worktrees/gwr/tests/Pspdir/14si.psp
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/14si.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/14si.psp
 -   Si  Fri Oct 08 11:18:59 1993
 - 14.00000   4.00000    930920                znucl, zion, pspdat
     1    1    2    2      2001   0.00050      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -209,53 +209,53 @@ meta: {optdriver: 4, gwcalctyp: 2, }
              0    6.145711    4.476517
              1    3.209065    2.093525
  pspatm: atomic psp has been read  and splines computed
- 
+
   -6.35681610E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
+
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
  Reduced coordinates and weights : 
- 
+
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
      4)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.18750
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
- 
+
  Together with 48 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
- 
- 
+
+
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     6
  Reduced coordinates and weights : 
- 
+
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
      3)     5.00000000E-01  2.50000000E-01  2.50000000E-01       0.37500
      4)     0.00000000E+00  5.00000000E-01  0.00000000E+00       0.12500
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
- 
+
  Together with 48 symmetry operations and time-reversal symmetry 
  yields    32 points in the full Brillouin Zone.
- 
- 
- 
+
+
+
  vcoul_init : cutoff-mode = AUXILIARY_FUNCTION
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
  setmesh: FFT mesh size selected  =    20x   20x   20
           total number of points  =         8000
- 
+
  Number of electrons calculated from density =    8.0000; Expected =    8.0000
  average of density, n =  0.030004
  r_s =    1.9964
  omega_plasma =   16.7088 [eV]
- 
- 
+
+
  === KS Band Gaps ===
   >>>> For spin  1
    Minimum direct gap =   2.4723 [eV], located at k-point      :   0.0000  0.0000  0.0000
@@ -279,7 +279,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  number of omega for Sigma on real axis              0
  max omega for Sigma on real axis  [eV]           0.00
  zcut for avoiding poles [eV]                     0.10
- 
+
  EPSILON^-1 parameters (SCR file):
  dimension of the eps^-1 matrix on file             59
  dimension of the eps^-1 matrix used                59
@@ -289,9 +289,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  number of frequencies                              20
  number of real frequencies                         15
  number of imag frequencies                          5
- 
+
  matrix elements of self-energy operator (all in [eV])
- 
+
  Perturbative Calculation
 
 --- !SelfEnergy_ee
@@ -306,11 +306,11 @@ data: !SigmaeeData |
         1  -4.947 -10.428 -17.551   7.175   0.684  -0.461 -10.392   0.036  -4.911
         1   0.000   0.000   0.000   1.262   0.000   0.000   0.864   0.864   0.864
         2   7.380 -11.234 -13.145   1.858   0.756  -0.322 -11.274  -0.040   7.340
-        2   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
+        2   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
         3   7.380 -11.234 -13.145   1.858   0.756  -0.322 -11.274  -0.040   7.340
-        3   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
+        3   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
         4   7.380 -11.234 -13.145   1.858   0.756  -0.322 -11.274  -0.040   7.340
-        4   0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000
+        4   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
         5   9.853 -10.005  -5.495  -3.849   0.758  -0.319  -9.504   0.502  10.354
         5   0.000   0.000   0.000   0.007   0.000   0.000   0.005   0.005   0.005
         6   9.853 -10.005  -5.495  -3.849   0.758  -0.319  -9.504   0.502  10.354
@@ -347,7 +347,7 @@ data: !SigmaeeData |
         8   0.000   0.000   0.000  -0.388   0.000   0.000  -0.276  -0.276  -0.276
 ...
 
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -394,7 +394,7 @@ P           mkmem           6
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000
-       omegasimax      1.46997302E+00 Hartree
+       omegasimax      1.46997289E+00 Hartree
         optdriver           4
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
@@ -453,13 +453,13 @@ P           mkmem           6
             typat      1  1
               wtk        0.18750    0.37500    0.09375    0.18750    0.12500    0.03125
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl       14.00000
- 
+
 ================================================================================
 
 
@@ -549,15 +549,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.5
- 
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.2
+
 ================================================================================
- 
+
  Calculation completed.
-.Delivered   0 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.4  wall=          0.5
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 62 allocations and 62 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 60909 allocations and 60909 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
+.Delivered   0 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.1  wall=          1.2
