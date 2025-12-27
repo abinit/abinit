@@ -167,9 +167,9 @@ module m_fft
      integer(c_int), intent(in) :: f_dims(3), f_embed(3)
      integer(c_int), value :: batch, kind
    end subroutine
-   subroutine gpu_ctx_free(plan) bind(C)
+   subroutine gpu_ctx_free(ctx) bind(C)
      use, intrinsic :: iso_c_binding
-     type(c_ptr), value :: plan
+     type(c_ptr) :: ctx
    end subroutine
    subroutine gpu_fftbox_c2c_ip(ctx, nfft, ndat, isign, iscale, kind, d_ff) bind(C)
      use, intrinsic :: iso_c_binding

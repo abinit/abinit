@@ -94,18 +94,19 @@ gpu_ctx_init(void **void_ctx, int *f_dims, int *f_embed, int batch, int kind) {
 
 
 extern "C" void
-gpu_ctx_free(void *void_ctx)
+gpu_ctx_free(void **void_ctx)
 {
-  if (!void_ctx) return;
-
-  gpu_context_t *ctx = (gpu_context_t *) void_ctx;
-
   //printf("In gpu_ctx_free\n");
+  if (!void_ctx || !*void_ctx) return;
+
+  gpu_context_t *ctx = (gpu_context_t *)(*void_ctx);
+
   cufftDestroy(ctx->fft_plan);
   cublasDestroy(ctx->cublas_handle);
   cudaStreamDestroy(ctx->stream);
-  free(ctx);
 
+  free(ctx);
+  *void_ctx = NULL;
 }
 
 
