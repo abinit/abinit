@@ -4726,6 +4726,7 @@ subroutine gwr_build_tchi(gwr)
          ! Note the minus sign in q.
          if (.not. q_is_gamma) then
            call calc_ceikr(-gwr%qibz(:,iq_ibz), gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, cemiqr)
+           !cemiqr = cemiqr * tchi_rfact
 #ifdef HAVE_OPENMP_OFFLOAD
            !$omp target update to(cemiqr) if (gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -4751,23 +4752,11 @@ subroutine gwr_build_tchi(gwr)
                                      gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2), phase_r=cemiqr, gpu_map=1)
            end if
 
-           !if (.not. q_is_gamma) then
-           !  !$OMP PARALLEL DO
-           !  do idat=0,ndat-1
-           !    chi_rgp%buffer_cplx(:,ig2+idat) = cemiqr(:) * chi_rgp%buffer_cplx(:,ig2+idat)
-           !  end do
-           !end if
-
-           !call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
-           !                        gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2))
-
            !$OMP PARALLEL DO
            do idat=0,ndat-1
              gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2 + idat) = &
              gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2 + idat) * tchi_rfact
            end do
-           !call gwr%tchi_qibz(iq_ibz, itau, spin)%scale_rows(ig2, ndat, tchi_rfact)
-           !call xscal(npwsp, real(sqrt(gt_rfact), kind=gwp), work_gb%buffer_cplx(:,il_b), 1)
          end do ! ig2
 
          call uplan_q%free()
