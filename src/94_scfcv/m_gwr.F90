@@ -4718,19 +4718,20 @@ subroutine gwr_build_tchi(gwr)
        !     2) FFT along the first dimension to get tchi_q(g,g') and store it in gwr%tchi_qibz
        !
        tchi_rfact = one / gwr%g_nfft / gwr%cryst%ucvol / (gwr%nkbz * gwr%nqbz)
+
        do my_iqi=1,gwr%my_nqibz
          iq_ibz = gwr%my_qibz_inds(my_iqi)
          q_is_gamma = normv(gwr%qibz(:,iq_ibz), gwr%cryst%gmet, "G") < GW_TOLQ0
          desc_q => gwr%tchi_desc_qibz(iq_ibz)
 
          ! Note the minus sign in q.
-         if (.not. q_is_gamma) then
+         !if (.not. q_is_gamma) then
            call calc_ceikr(-gwr%qibz(:,iq_ibz), gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, cemiqr)
-           !cemiqr = cemiqr * tchi_rfact
+           cemiqr = cemiqr * tchi_rfact
 #ifdef HAVE_OPENMP_OFFLOAD
            !$omp target update to(cemiqr) if (gpu_option == ABI_GPU_OPENMP)
 #endif
-         end if
+         !end if
 
          ! MPI-transposition: tchi_q(g',r) => tchi_q(r,g')
          call chiq_gpr(my_iqi)%ptrans("N", chi_rgp)
@@ -4744,19 +4745,19 @@ subroutine gwr_build_tchi(gwr)
          do ig2=1, chi_rgp%size_local(2), gwr%uc_batch_size
            ndat = blocked_loop(ig2, chi_rgp%size_local(2), gwr%uc_batch_size)
 
-           if (q_is_gamma) then
-             call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
-                                     gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2), gpu_map=1)
-           else
-             call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
-                                     gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2), phase_r=cemiqr, gpu_map=1)
-           end if
+           !if (q_is_gamma) then
+           !  call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
+           !                          gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2), gpu_map=1)
+           !else
+           call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
+                                   gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2), phase_r=cemiqr, gpu_map=1)
+           !end if
 
-           !$OMP PARALLEL DO
-           do idat=0,ndat-1
-             gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2 + idat) = &
-             gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2 + idat) * tchi_rfact
-           end do
+           !!$OMP PARALLEL DO
+           !do idat=0,ndat-1
+           !  gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2 + idat) = &
+           !  gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2 + idat) * tchi_rfact
+           !end do
          end do ! ig2
 
          call uplan_q%free()
