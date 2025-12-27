@@ -2998,7 +2998,7 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_getResult(op,Iatom,fname)
+SUBROUTINE Ctqmcoffdiag_getResult(op,Iatom,fname,jmjbasis)
 
 
 #ifdef HAVE_MPI1
@@ -3008,6 +3008,7 @@ include 'mpif.h'
   TYPE(Ctqmcoffdiag)  , INTENT(INOUT)                    :: op
   INTEGER, INTENT(IN ) :: Iatom
   character(len=fnlen), INTENT(INOUT) :: fname
+  INTEGER, OPTIONAL, INTENT(IN )   :: jmjbasis
 !Local variables ------------------------------
   INTEGER                                       :: iflavor
 !  INTEGER                                       :: iflavor1
@@ -3048,6 +3049,7 @@ include 'mpif.h'
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: buffer2,buffer2s
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: fullempty
+  DOUBLE PRECISION                              :: xsum  
   TYPE(FFTHyb) :: FFTmrka
 
 #if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
@@ -3119,10 +3121,17 @@ include 'mpif.h'
     IF ( op%opt_order .GT. 0 ) &
       op%measPerturbation(:   ,iflavor) = op%measPerturbation(:,iflavor) &
                                     / SUM(op%measPerturbation(:,iflavor))
-    IF ( op%opt_order .GT. 0 ) &
-      op%meas_fullemptylines(:   ,iflavor) = op%meas_fullemptylines(:,iflavor) &
-                                    / SUM(op%meas_fullemptylines(:,iflavor))
-    !write(6,*) "sum fullempty",iflavor,op%meas_fullemptylines(:,iflavor)
+
+    IF ( op%opt_order .GT. 0 ) then 
+      xsum = SUM(op%meas_fullemptylines(:,iflavor))      
+      IF (xsum /= 0.0 ) then      
+        op%meas_fullemptylines(:   ,iflavor) = op%meas_fullemptylines(:,iflavor) &
+                                      / SUM(op%meas_fullemptylines(:,iflavor))
+      else
+       op%meas_fullemptylines(:   ,iflavor) = zero
+      ENDIF 
+      !write(6,*) "sum fullempty",iflavor,op%meas_fullemptylines(:,iflavor)
+    ENDIF
 
     IF ( op%opt_analysis .EQ. 1 ) THEN
       op%measCorrelation (:,1,iflavor) = op%measCorrelation  (:,1,iflavor) &
@@ -3667,14 +3676,29 @@ include 'mpif.h'
 
       else
         ! SOC
-        open (unit=735,file=trim(fname)//'_LocalMagnSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
-        write(735,*) '#Tau Total Orbital Spin'
-        do n1=1,op%samples
-          op%chi(:,n1) = op%chi(:,n1)/float(nbprocs)/float(op%samples)
-          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chi(n2,n1),n2=1,3)
-        end do
-        !add tau=beta
-        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%chi(n2,1),n2=1,3)
+        ! In the jmj local basis
+        if (jmjbasis .eq. 1) then
+          open (unit=735,file=trim(fname)//'_LocalMagnSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+          write(735,*) '#Tau <gjJz(tau).gjJz(0)>'
+          do n1=1,op%samples
+            op%chi(:,n1) = op%chi(:,n1)/float(nbprocs)/float(op%samples)
+            write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chi(1,n1))
+          end do
+          !add tau=beta
+          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%chi(1,1))
+
+        else
+        ! SOC
+        ! In the Ylm or CTQMC basis
+          open (unit=735,file=trim(fname)//'_LocalMagnSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+          write(735,*) '#Tau Total Orbital Spin'
+          do n1=1,op%samples
+            op%chi(:,n1) = op%chi(:,n1)/float(nbprocs)/float(op%samples)
+            write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chi(n2,n1),n2=1,3)
+          end do
+          !add tau=beta
+          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%chi(n2,1),n2=1,3)
+        endif
       endif
     close(unit=735)
     endif

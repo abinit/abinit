@@ -1,8 +1,8 @@
 
-.Version 10.3.4.7 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 23 Feb 2025.
-- ( at 16h11 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_9.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h09 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_9.abi
 - output file    -> teph4vpq_9.abo
 - root for input  files -> teph4vpq_9i
 - root for output files -> teph4vpq_9o
@@ -168,7 +168,7 @@ P           mkmem          84
                          0.00546    0.01092
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.0307175380E+00  2.0307175380E+00  2.0307175380E+00
+                       2.0307175455E+00  2.0307175455E+00  2.0307175455E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        3.8375000000E+00  3.8375000000E+00  3.8375000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -225,11 +225,11 @@ meta: {optdriver: 7, eph_task: 13, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -245,7 +245,7 @@ meta: {optdriver: 7, eph_task: 13, }
        3               2       -0.000000        0.000000
        3               3       -0.065315        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -290,25 +290,25 @@ meta: {optdriver: 7, eph_task: 13, }
  27)  -3.33333333E-01 -3.33333333E-01 -3.33333333E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2234217387E-02 (at units)
+ Average speed of sound partial sums:     0.2234217386E-02 (at units)
 -                                   =           4.8878 [km/s]
 
- Debye frequency from partial sums:     0.1801153402E-02 (Ha)
--                                 =     0.1185102008E+02 (THz)
--Debye temperature from partial sums:     0.5687585851E+03 (K)
+ Debye frequency from partial sums:     0.1801153401E-02 (Ha)
+-                                 =     0.1185102007E+02 (THz)
+-Debye temperature from partial sums:     0.5687592599E+03 (K)
 
- Average speed of sound partial sums:     0.2234217387E-02 (at units)
+ Average speed of sound partial sums:     0.2234217386E-02 (at units)
 -                                   =           4.8878 [km/s]
 
- Debye frequency from partial sums:     0.1801153402E-02 (Ha)
--                                 =     0.1185102008E+02 (THz)
--Debye temperature from partial sums:     0.5687585851E+03 (K)
+ Debye frequency from partial sums:     0.1801153401E-02 (Ha)
+-                                 =     0.1185102007E+02 (THz)
+-Debye temperature from partial sums:     0.5687592599E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4vpq_9o_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
 - Li    ONCVPSP-3.2.3.1  r_core=   1.40824   1.10935
 -  3.00000   3.00000    170503                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -321,8 +321,8 @@ meta: {optdriver: 7, eph_task: 13, }
              1   -2.250662   -0.474685
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/giantomassi/git_repos/abinit/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
-- pspatm: opening atomic psp file    /Users/giantomassi/git_repos/abinit/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
 - F     ONCVPSP-3.2.3.1  r_core=   1.30942   1.45782   1.60379
 -  9.00000   7.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -346,7 +346,7 @@ meta: {optdriver: 7, eph_task: 13, }
  Asking for with_cplex: 2
  Asking for gvals_name: gvals
  Asking for g(k,q=Gamma): no
- Initializing gstore object from: teph4vpq_8o_GSTORE.nc
+ Initializing gstore object from: teph4vpq_8o_GSTORE.nc 
 
  Reading KS e-ph matrix elements
 P qpt_comm can use shmem: yes
@@ -412,7 +412,7 @@ P Number of CPUs for parallelism over k-points: 1
 
  Long-range corrections:
    * Frohlich correction: yes
-   * Frohlich correction value: -2.138092E-01 eV
+   * Frohlich correction value: -2.138093E-01 eV
    * Frohlich correction included in matrix elements: yes
 
  Optimization parameters:
@@ -461,16 +461,16 @@ P Number of CPUs for parallelism over k-points: 1
      28  -9.3321E-03   4.9566E-03   1.4289E-02  -2.8577E-02  -2.3621E-02   1.0471E-07
      29  -9.3321E-03   4.9540E-03   1.4286E-02  -2.8572E-02  -2.3618E-02   8.9121E-08
    --------------------------------------------------------------------------------------
-   Converged: ||grad||=8.9121E-08 < vpq_tolgrs=1.0000E-07
-   E_pol (eV):  -2.53940094E-01
-     eps (eV):  -6.42684892E-01
+   Converged: ||grad||= 8.9121E-08 < vpq_tolgrs= 1.0000E-07
+   E_pol (eV):  -2.53940117E-01
+     eps (eV):  -6.42684949E-01
    --------------------------------------------------------------------------------------
 
  Saving results to: teph4vpq_9o_VPQ.nc
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      7.6750000000E+00  7.6750000000E+00  7.6750000000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
@@ -529,7 +529,7 @@ P           mkmem          84
         vpq_nstep         100
        vpq_tolgrs      1.0000000000E-07
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.0307175380E+00  2.0307175380E+00  2.0307175380E+00
+                       2.0307175455E+00  2.0307175455E+00  2.0307175455E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        3.8375000000E+00  3.8375000000E+00  3.8375000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -570,7 +570,7 @@ P           mkmem          84
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -587,12 +587,12 @@ P           mkmem          84
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -610,7 +610,7 @@ P           mkmem          84
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -625,15 +625,15 @@ P           mkmem          84
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         17.4  wall=         17.4
+- Proc.   0 individual time (sec): cpu=         18.0  wall=         18.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.4  wall=         17.4
++Overall time at end (sec) : cpu=         18.0  wall=         18.0
