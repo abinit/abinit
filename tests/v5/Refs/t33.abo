@@ -1,6 +1,6 @@
 
-.Version 10.5.8 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a x86_64_Linux_IntelLLVM_2025.3.0 computer) 
+.Version 10.5.8.2 of ABINIT, released Dec 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,13 +15,13 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 27 Dec 2025.
-- ( at 11h13 )
+- ( at 17h09 )
   
-- input  file    -> /home/jzwanzig/local/abinit-develop/tmp-intel/tests/Test_suite/v5_t33/t33.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_nucefg/tests/TestBot_MPI1/v5_t33/t33.abi
 - output file    -> t33.abo
 - root for input  files -> t33i
 - root for output files -> t33o
- 
+
  Symmetries : space group Pn -3 m (#224); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -39,23 +39,23 @@ P This job should need less than                      37.405 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.744 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 = 10
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      8.0645952149E+00  8.0645952149E+00  8.0645952149E+00 Bohr
               amu      6.35460000E+01  1.59994000E+01
         dmatpuopt           1
              ecut      1.00000000E+01 Hartree
--          fftalg         112
+-          fftalg         512
             jpawu      3.49118561E-02  0.00000000E+00 Hartree
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
          kptrlatt        2    0    0      0    2    0      0    0    2
@@ -167,20 +167,20 @@ P           mkmem           1
                       -2.5000000000E-01  2.5000000000E-01 -2.5000000000E-01
                       -2.5000000000E-01 -2.5000000000E-01  2.5000000000E-01
             znucl       29.00000    8.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency.
  This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=  2
  in which the target spin-polarization is zero.                  ... spinmagntarget=   0.00
  Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.
  In the former case, it is advantageous to use nsppol=1 and nspden=1,
  while in the latter  case, it is advantageous to use nsppol=1 and nspden=2.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -194,27 +194,27 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  8.0645952  0.0000000  0.0000000  G(1)=  0.1239988  0.0000000  0.0000000
  R(2)=  0.0000000  8.0645952  0.0000000  G(2)=  0.0000000  0.1239988  0.0000000
  R(3)=  0.0000000  0.0000000  8.0645952  G(3)=  0.0000000  0.0000000  0.1239988
  Unit cell volume ucvol=  5.2450269E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  24
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09056
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  40  40  40
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.01165
- 
+
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/jzwanzig/local/abinit-develop/tests/Pspdir/cu_ps.736.lda
-- pspatm: opening atomic psp file    /home/jzwanzig/local/abinit-develop/tests/Pspdir/cu_ps.736.lda
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_nucefg/tests/Pspdir/cu_ps.736.lda
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_nucefg/tests/Pspdir/cu_ps.736.lda
 - copper - PAW data extracted from US-psp (D.Vanderbilt) - generated by USpp2Abinit v2.2.1
 - 29.00000  11.00000  20071029                znucl, zion, pspdat
     7    2    2    0       605   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -234,9 +234,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Radial grid used for Vloc is grid 4
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
-- pspini: atom type   2  psp file is /home/jzwanzig/local/abinit-develop/tests/Pspdir/o_ps.736.lda
-- pspatm: opening atomic psp file    /home/jzwanzig/local/abinit-develop/tests/Pspdir/o_ps.736.lda
+
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_nucefg/tests/Pspdir/o_ps.736.lda
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/jzwanzig_nucefg/tests/Pspdir/o_ps.736.lda
 - oxygen - PAW data extracted from US-psp (D.Vanderbilt) - generated by USpp2Abinit v2.2.1
 -  8.00000   6.00000  20071017                znucl, zion, pspdat
     7    2    1    0       499   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -256,17 +256,17 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Radial grid used for Vloc is grid 4
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
+
    6.62252716E+03                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
+
 _setup2: Arith. and geom. avg. npw (full set) are     784.000     784.000
- 
- 
+
+
  ******************************************
  DFT+U Method used: FLL
  ******************************************
- 
+
 ================================================================================
 
 --- !BeginCycle
@@ -274,40 +274,40 @@ iteration_state: {dtset: 1, }
 solver: {iscf: 17, nstep: 50, nline: 4, wfoptalg: 10, }
 tolerances: {toldfe: 1.00E-08, }
 ...
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
  ETOT  1  -244.57868859869    -2.446E+02 4.817E-01 1.465E+04 0.000E+00 0.000E+00
- ETOT  2  -254.87207694822    -1.029E+01 2.778E-01 8.666E+03 0.000E+00 0.000E+00
- ETOT  3  -240.31511952475     1.456E+01 1.494E+00 1.161E+03 0.000E+00 0.000E+00
- ETOT  4  -238.98778953322     1.327E+00 4.406E-01 9.425E+02 0.000E+00 0.000E+00
- ETOT  5  -238.42367684251     5.641E-01 1.909E-02 5.165E+02 0.000E+00 0.000E+00
- ETOT  6  -238.15314775366     2.705E-01 6.979E-04 4.337E+02 0.000E+00 0.000E+00
- ETOT  7  -237.27120102144     8.819E-01 8.366E-03 1.277E+02 0.000E+00 0.000E+00
- ETOT  8  -237.16253420659     1.087E-01 7.725E-03 3.259E+01 0.000E+00 0.000E+00
- ETOT  9  -237.14719209241     1.534E-02 1.540E-04 2.794E+01 0.000E+00 0.000E+00
- ETOT 10  -237.16284902209    -1.566E-02 4.890E-05 2.731E+01 0.000E+00 0.000E+00
- ETOT 11  -237.11168557873     5.116E-02 2.164E-02 1.107E+01 0.000E+00 0.000E+00
- ETOT 12  -237.06889817899     4.279E-02 2.235E-03 2.326E+00 0.000E+00 0.000E+00
- ETOT 13  -237.06108300140     7.815E-03 1.106E-04 8.423E-01 0.000E+00 0.000E+00
- ETOT 14  -237.05755859580     3.524E-03 7.022E-04 2.154E-01 0.000E+00 0.000E+00
- ETOT 15  -237.05745836823     1.002E-04 3.283E-05 2.329E-01 0.000E+00 0.000E+00
- ETOT 16  -237.05746592848    -7.560E-06 7.293E-06 1.896E-01 0.000E+00 0.000E+00
- ETOT 17  -237.05698298014     4.829E-04 6.946E-06 2.322E-02 0.000E+00 0.000E+00
- ETOT 18  -237.05694390799     3.907E-05 1.578E-06 2.670E-03 0.000E+00 0.000E+00
+ ETOT  2  -254.87207694662    -1.029E+01 2.778E-01 8.666E+03 0.000E+00 0.000E+00
+ ETOT  3  -240.31511952572     1.456E+01 1.494E+00 1.161E+03 0.000E+00 0.000E+00
+ ETOT  4  -238.98778953298     1.327E+00 4.406E-01 9.425E+02 0.000E+00 0.000E+00
+ ETOT  5  -238.42367684252     5.641E-01 1.909E-02 5.165E+02 0.000E+00 0.000E+00
+ ETOT  6  -238.15314775279     2.705E-01 6.979E-04 4.337E+02 0.000E+00 0.000E+00
+ ETOT  7  -237.27120101868     8.819E-01 8.366E-03 1.277E+02 0.000E+00 0.000E+00
+ ETOT  8  -237.16253420630     1.087E-01 7.725E-03 3.259E+01 0.000E+00 0.000E+00
+ ETOT  9  -237.14719209192     1.534E-02 1.540E-04 2.794E+01 0.000E+00 0.000E+00
+ ETOT 10  -237.16284901295    -1.566E-02 4.890E-05 2.731E+01 0.000E+00 0.000E+00
+ ETOT 11  -237.11168550147     5.116E-02 2.164E-02 1.107E+01 0.000E+00 0.000E+00
+ ETOT 12  -237.06889817592     4.279E-02 2.235E-03 2.326E+00 0.000E+00 0.000E+00
+ ETOT 13  -237.06108300305     7.815E-03 1.106E-04 8.423E-01 0.000E+00 0.000E+00
+ ETOT 14  -237.05755859571     3.524E-03 7.022E-04 2.154E-01 0.000E+00 0.000E+00
+ ETOT 15  -237.05745837122     1.002E-04 3.283E-05 2.329E-01 0.000E+00 0.000E+00
+ ETOT 16  -237.05746593672    -7.565E-06 7.293E-06 1.896E-01 0.000E+00 0.000E+00
+ ETOT 17  -237.05698298060     4.830E-04 6.946E-06 2.322E-02 0.000E+00 0.000E+00
+ ETOT 18  -237.05694390801     3.907E-05 1.578E-06 2.670E-03 0.000E+00 0.000E+00
  ETOT 19  -237.05693803975     5.868E-06 7.666E-08 1.013E-04 0.000E+00 0.000E+00
  ETOT 20  -237.05693785088     1.889E-07 4.880E-09 1.213E-05 0.000E+00 0.000E+00
  ETOT 21  -237.05693778858     6.230E-08 1.024E-08 1.473E-06 0.000E+00 0.000E+00
- ETOT 22  -237.05693778949    -9.053E-10 2.825E-10 4.456E-07 0.000E+00 0.000E+00
+ ETOT 22  -237.05693778949    -9.076E-10 2.825E-10 4.456E-07 0.000E+00 0.000E+00
  ETOT 23  -237.05693779125    -1.760E-09 9.994E-11 4.032E-07 0.000E+00 0.000E+00
- 
+
  At SCF step   23, etot is converged : 
   for the second time, diff in etot=  1.760E-09 < toldfe=  1.000E-08
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.33125503E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.33125503E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.33125503E-03  sigma(2 1)=  0.00000000E+00
- 
+  sigma(1 1)=  1.33125504E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.33125504E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.33125504E-03  sigma(2 1)=  0.00000000E+00
+
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -324,9 +324,9 @@ etotal    :  -2.37056938E+02
 entropy   :   0.00000000E+00
 fermie    :   8.82124641E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.33125503E-03,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   1.33125503E-03,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   1.33125503E-03, ]
+- [  1.33125504E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.33125504E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.33125504E-03, ]
 pressure_GPa:  -3.9167E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  O]
@@ -336,12 +336,12 @@ xred      :
 - [ -2.5000E-01,   2.5000E-01,  -2.5000E-01, Cu]
 - [ -2.5000E-01,  -2.5000E-01,   2.5000E-01, Cu]
 cartesian_forces: # hartree/bohr
-- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
@@ -349,26 +349,26 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1  O   1.31818     2.088478     2.088478      4.176957    -0.000000
-    2  O   1.31818     2.088478     2.088478      4.176957    -0.000000
-    3 Cu   2.19286     4.981731     4.981731      9.963462     0.000000
-    4 Cu   2.19286     4.981731     4.981731      9.963462     0.000000
-    5 Cu   2.19286     4.981731     4.981731      9.963462     0.000000
-    6 Cu   2.19286     4.981731     4.981731      9.963462     0.000000
+    1  O   1.31818     2.088478     2.088478      4.176957     0.000000
+    2  O   1.31818     2.088478     2.088478      4.176957     0.000000
+    3 Cu   2.19286     4.981731     4.981731      9.963462    -0.000000
+    4 Cu   2.19286     4.981731     4.981731      9.963462    -0.000000
+    5 Cu   2.19286     4.981731     4.981731      9.963462    -0.000000
+    6 Cu   2.19286     4.981731     4.981731      9.963462    -0.000000
  ------------------------------------------------------------------------------------------------------------
-  Sum:                24.103880    24.103880     48.207761    -0.000000
- Total magnetization (from the atomic spheres):               -0.000000
+  Sum:                24.103880    24.103880     48.207761     0.000000
+ Total magnetization (from the atomic spheres):                0.000000
  Total magnetization (exact up - dn):                          0.000000
- 
- 
+
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     29.765219973708653
- Compensation charge over fine fft grid    =     29.765026308363655
- 
+ Compensation charge over spherical meshes =     29.765219971337078
+ Compensation charge over fine fft grid    =     29.765026301508506
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1 - Spin component 1
    1.01364   2.11490   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -416,8 +416,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00362   0.00181  -0.30965   0.00181 ...
   -0.00017  -0.00048   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00489   0.00489   0.00181  -0.30169 ...
    ...  only 12  components have been written...
- 
- 
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1 - Spin component 1
    1.22201  -0.08992   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
@@ -465,7 +465,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00400  -0.00200   1.02183  -0.00200 ...
    0.11276  -0.01375   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.02989  -0.02989  -0.00200   0.98764 ...
    ...  only 12  components have been written...
- 
+
  "PAW+U" part of augmentation waves occupancies Rhoij:
  Atom #  3 - L=2 ONLY - Spin component 1
    0.98764  -0.02989  -0.00400  -0.02989   0.00000   0.03964   0.01400   0.00149   0.01400   0.00000
@@ -555,304 +555,304 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00149   0.00074   0.02540   0.00074   0.00000  -0.00305  -0.00153   0.00671  -0.00153   0.00000
   -0.01400   0.01400   0.00075   0.03964   0.00131  -0.00985   0.00985  -0.00153   0.01513  -0.00264
    0.00000  -0.00129   0.00000   0.00129   0.02540   0.00000   0.00264   0.00000  -0.00264   0.00671
- 
+
  ---------- DFT+U DATA --------------------------------------------------- 
- 
+
  ====== For Atom     3, occupations for correlated orbitals. lpawu =   2
- 
+
  Atom   3. Occ. for lpawu and for spin  1 =   4.38780
  Atom   3. Occ. for lpawu and for spin  2 =   4.38780
- => On atom   3,  local Mag. for lpawu is        0.000000
- 
+ => On atom   3,  local Mag. for lpawu is       -0.000000
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for spin  1
      0.86098   -0.03706   -0.00553   -0.03706    0.00000
     -0.03706    0.86098    0.00277   -0.03706   -0.00479
     -0.00553    0.00277    0.90243    0.00277    0.00000
     -0.03706   -0.03706    0.00277    0.86098    0.00479
      0.00000   -0.00479    0.00000    0.00479    0.90243
- 
- 
+
+
  Occupation matrix for spin  2
      0.86098   -0.03706   -0.00553   -0.03706    0.00000
     -0.03706    0.86098    0.00277   -0.03706   -0.00479
     -0.00553    0.00277    0.90243    0.00277    0.00000
     -0.03706   -0.03706    0.00277    0.86098    0.00479
      0.00000   -0.00479    0.00000    0.00479    0.90243
- 
- 
+
+
  ====== For Atom     4, occupations for correlated orbitals. lpawu =   2
- 
+
  Atom   4. Occ. for lpawu and for spin  1 =   4.38780
  Atom   4. Occ. for lpawu and for spin  2 =   4.38780
- => On atom   4,  local Mag. for lpawu is        0.000000
- 
+ => On atom   4,  local Mag. for lpawu is       -0.000000
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for spin  1
      0.86098    0.03706    0.00553   -0.03706    0.00000
      0.03706    0.86098    0.00277    0.03706   -0.00479
      0.00553    0.00277    0.90243   -0.00277    0.00000
     -0.03706    0.03706   -0.00277    0.86098   -0.00479
      0.00000   -0.00479    0.00000   -0.00479    0.90243
- 
- 
+
+
  Occupation matrix for spin  2
      0.86098    0.03706    0.00553   -0.03706    0.00000
      0.03706    0.86098    0.00277    0.03706   -0.00479
      0.00553    0.00277    0.90243   -0.00277    0.00000
     -0.03706    0.03706   -0.00277    0.86098   -0.00479
      0.00000   -0.00479    0.00000   -0.00479    0.90243
- 
- 
+
+
  ====== For Atom     5, occupations for correlated orbitals. lpawu =   2
- 
+
  Atom   5. Occ. for lpawu and for spin  1 =   4.38780
  Atom   5. Occ. for lpawu and for spin  2 =   4.38780
- => On atom   5,  local Mag. for lpawu is        0.000000
- 
+ => On atom   5,  local Mag. for lpawu is       -0.000000
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for spin  1
      0.86098   -0.03706    0.00553    0.03706    0.00000
     -0.03706    0.86098   -0.00277    0.03706    0.00479
      0.00553   -0.00277    0.90243    0.00277    0.00000
      0.03706    0.03706    0.00277    0.86098    0.00479
      0.00000    0.00479    0.00000    0.00479    0.90243
- 
- 
+
+
  Occupation matrix for spin  2
      0.86098   -0.03706    0.00553    0.03706    0.00000
     -0.03706    0.86098   -0.00277    0.03706    0.00479
      0.00553   -0.00277    0.90243    0.00277    0.00000
      0.03706    0.03706    0.00277    0.86098    0.00479
      0.00000    0.00479    0.00000    0.00479    0.90243
- 
- 
+
+
  ====== For Atom     6, occupations for correlated orbitals. lpawu =   2
- 
+
  Atom   6. Occ. for lpawu and for spin  1 =   4.38780
  Atom   6. Occ. for lpawu and for spin  2 =   4.38780
- => On atom   6,  local Mag. for lpawu is        0.000000
- 
+ => On atom   6,  local Mag. for lpawu is       -0.000000
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for spin  1
      0.86098    0.03706   -0.00553    0.03706    0.00000
      0.03706    0.86098   -0.00277   -0.03706    0.00479
     -0.00553   -0.00277    0.90243   -0.00277    0.00000
      0.03706   -0.03706   -0.00277    0.86098   -0.00479
      0.00000    0.00479    0.00000   -0.00479    0.90243
- 
- 
+
+
  Occupation matrix for spin  2
      0.86098    0.03706   -0.00553    0.03706    0.00000
      0.03706    0.86098   -0.00277   -0.03706    0.00479
     -0.00553   -0.00277    0.90243   -0.00277    0.00000
      0.03706   -0.03706   -0.00277    0.86098   -0.00479
      0.00000    0.00479    0.00000   -0.00479    0.90243
- 
- 
- 
- 
+
+
+
+
  Electric Field Gradient Calculation 
- 
- 
+
+
    atom :    1   typat :    2
- 
+
    Nuclear quad. mom. (barns) :   -0.0256   Cq (MHz) :    0.0000   eta :    0.0000
- 
-      efg eigval (au) :      0.000000 ; (1.0E+21 V/m^2) :       0.00000000
--         eigvec :      0.000000     1.000000     0.000000
- 
-      efg eigval (au) :      0.000000 ; (1.0E+21 V/m^2) :       0.00000000
--         eigvec :      1.000000     0.000000     0.000000
- 
+
       efg eigval (au) :      0.000000 ; (1.0E+21 V/m^2) :       0.00000000
 -         eigvec :      0.000000     0.000000     1.000000
- 
-      total efg :      0.000000     0.000000     0.000000
-      total efg :      0.000000     0.000000     0.000000
-      total efg :      0.000000     0.000000     0.000000
- 
- 
-      efg_el :      0.000000     0.000000     0.000000
-      efg_el :      0.000000     0.000000     0.000000
-      efg_el :      0.000000     0.000000     0.000000
- 
-      efg_ion :      0.000000     0.000000     0.000000
-      efg_ion :      0.000000     0.000000     0.000000
-      efg_ion :      0.000000     0.000000     0.000000
- 
-      efg_paw :      0.000000     0.000000     0.000000
-      efg_paw :      0.000000    -0.000000     0.000000
-      efg_paw :      0.000000     0.000000     0.000000
- 
- 
-   atom :    2   typat :    2
- 
-   Nuclear quad. mom. (barns) :   -0.0256   Cq (MHz) :    0.0000   eta :    0.0000
- 
-      efg eigval (au) :      0.000000 ; (1.0E+21 V/m^2) :       0.00000000
--         eigvec :      0.000000     0.000000     1.000000
- 
-      efg eigval (au) :      0.000000 ; (1.0E+21 V/m^2) :       0.00000000
--         eigvec :      0.000000     1.000000     0.000000
- 
+
       efg eigval (au) :      0.000000 ; (1.0E+21 V/m^2) :       0.00000000
 -         eigvec :      1.000000     0.000000     0.000000
- 
+
+      efg eigval (au) :      0.000000 ; (1.0E+21 V/m^2) :       0.00000000
+-         eigvec :     -0.000000     1.000000     0.000000
+
       total efg :      0.000000     0.000000     0.000000
       total efg :      0.000000     0.000000     0.000000
       total efg :      0.000000     0.000000     0.000000
- 
- 
-      efg_el :     -0.000000     0.000000     0.000000
-      efg_el :      0.000000    -0.000000     0.000000
-      efg_el :      0.000000     0.000000    -0.000000
- 
+
+
+      efg_el :      0.000000     0.000000     0.000000
+      efg_el :      0.000000     0.000000     0.000000
+      efg_el :      0.000000     0.000000     0.000000
+
       efg_ion :      0.000000     0.000000     0.000000
       efg_ion :      0.000000     0.000000     0.000000
       efg_ion :      0.000000     0.000000     0.000000
- 
+
       efg_paw :      0.000000     0.000000     0.000000
       efg_paw :      0.000000     0.000000     0.000000
       efg_paw :      0.000000     0.000000    -0.000000
- 
- 
+
+
+   atom :    2   typat :    2
+
+   Nuclear quad. mom. (barns) :   -0.0256   Cq (MHz) :    0.0000   eta :    0.0000
+
+      efg eigval (au) :      0.000000 ; (1.0E+21 V/m^2) :       0.00000000
+-         eigvec :      1.000000     0.000000     0.000000
+
+      efg eigval (au) :      0.000000 ; (1.0E+21 V/m^2) :       0.00000000
+-         eigvec :     -0.000000     1.000000     0.000000
+
+      efg eigval (au) :      0.000000 ; (1.0E+21 V/m^2) :       0.00000000
+-         eigvec :      0.000000     0.000000     1.000000
+
+      total efg :      0.000000     0.000000     0.000000
+      total efg :      0.000000     0.000000     0.000000
+      total efg :      0.000000     0.000000     0.000000
+
+
+      efg_el :      0.000000     0.000000     0.000000
+      efg_el :      0.000000     0.000000     0.000000
+      efg_el :      0.000000     0.000000     0.000000
+
+      efg_ion :      0.000000     0.000000     0.000000
+      efg_ion :      0.000000     0.000000     0.000000
+      efg_ion :      0.000000     0.000000     0.000000
+
+      efg_paw :     -0.000000     0.000000     0.000000
+      efg_paw :      0.000000    -0.000000     0.000000
+      efg_paw :      0.000000     0.000000     0.000000
+
+
    atom :    3   typat :    1
- 
+
    Nuclear quad. mom. (barns) :    0.2200   Cq (MHz) :  -41.0700   eta :    0.0000
- 
-      efg eigval (au) :     -0.794510 ; (1.0E+21 V/m^2) :      -7.72053751
+
+      efg eigval (au) :     -0.794510 ; (1.0E+21 V/m^2) :      -7.72053743
 -         eigvec :      0.577350     0.577350     0.577350
- 
-      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026875
--         eigvec :      0.707107    -0.707107     0.000000
- 
-      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026875
--         eigvec :      0.408248     0.408248    -0.816497
- 
-      total efg :      0.000000    -0.397255    -0.397255
-      total efg :     -0.397255     0.000000    -0.397255
-      total efg :     -0.397255    -0.397255     0.000000
- 
- 
+
+      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026871
+-         eigvec :      0.816141    -0.428923    -0.387218
+
+      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026871
+-         eigvec :     -0.024078    -0.694760     0.718838
+
+      total efg :     -0.000000    -0.397255    -0.397255
+      total efg :     -0.397255    -0.000000    -0.397255
+      total efg :     -0.397255    -0.397255    -0.000000
+
+
       efg_el :     -0.000000    -0.178604    -0.178604
       efg_el :     -0.178604    -0.000000    -0.178604
       efg_el :     -0.178604    -0.178604    -0.000000
- 
+
       efg_ion :      0.000000     0.242984     0.242984
       efg_ion :      0.242984     0.000000     0.242984
       efg_ion :      0.242984     0.242984     0.000000
- 
+
       efg_paw :      0.000000    -0.461634    -0.461634
       efg_paw :     -0.461634     0.000000    -0.461634
       efg_paw :     -0.461634    -0.461634     0.000000
- 
- 
+
+
    atom :    4   typat :    1
- 
+
    Nuclear quad. mom. (barns) :    0.2200   Cq (MHz) :  -41.0700   eta :    0.0000
- 
-      efg eigval (au) :     -0.794510 ; (1.0E+21 V/m^2) :      -7.72053751
+
+      efg eigval (au) :     -0.794510 ; (1.0E+21 V/m^2) :      -7.72053743
 -         eigvec :      0.577350    -0.577350    -0.577350
- 
-      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026875
--         eigvec :     -0.794597    -0.559968    -0.234630
- 
-      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026875
--         eigvec :      0.187834    -0.594225     0.782059
- 
-      total efg :      0.000000     0.397255     0.397255
-      total efg :      0.397255     0.000000    -0.397255
-      total efg :      0.397255    -0.397255     0.000000
- 
- 
+
+      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026871
+-         eigvec :     -0.046907    -0.729392     0.682486
+
+      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026871
+-         eigvec :     -0.815148    -0.366952    -0.448196
+
+      total efg :     -0.000000     0.397255     0.397255
+      total efg :      0.397255    -0.000000    -0.397255
+      total efg :      0.397255    -0.397255    -0.000000
+
+
       efg_el :     -0.000000     0.178604     0.178604
       efg_el :      0.178604    -0.000000    -0.178604
       efg_el :      0.178604    -0.178604    -0.000000
- 
-      efg_ion :      0.000000    -0.242984    -0.242984
-      efg_ion :     -0.242984     0.000000     0.242984
-      efg_ion :     -0.242984     0.242984     0.000000
- 
+
+      efg_ion :     -0.000000    -0.242984    -0.242984
+      efg_ion :     -0.242984    -0.000000     0.242984
+      efg_ion :     -0.242984     0.242984    -0.000000
+
       efg_paw :      0.000000     0.461634     0.461634
       efg_paw :      0.461634     0.000000    -0.461634
-      efg_paw :      0.461634    -0.461634     0.000000
- 
- 
+      efg_paw :      0.461634    -0.461634    -0.000000
+
+
    atom :    5   typat :    1
- 
+
    Nuclear quad. mom. (barns) :    0.2200   Cq (MHz) :  -41.0700   eta :    0.0000
- 
-      efg eigval (au) :     -0.794510 ; (1.0E+21 V/m^2) :      -7.72053751
--         eigvec :      0.577350    -0.577350     0.577350
- 
-      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026875
--         eigvec :      0.816497     0.408248    -0.408248
- 
-      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026875
--         eigvec :     -0.000000    -0.707107    -0.707107
- 
+
+      efg eigval (au) :     -0.794510 ; (1.0E+21 V/m^2) :      -7.72053743
+-         eigvec :     -0.577350     0.577350    -0.577350
+
+      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026871
+-         eigvec :      0.788265     0.578465    -0.209800
+
+      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026871
+-         eigvec :     -0.212849     0.576234     0.789082
+
       total efg :     -0.000000     0.397255    -0.397255
       total efg :      0.397255    -0.000000     0.397255
       total efg :     -0.397255     0.397255    -0.000000
- 
- 
+
+
       efg_el :     -0.000000     0.178604    -0.178604
       efg_el :      0.178604    -0.000000     0.178604
       efg_el :     -0.178604     0.178604    -0.000000
- 
-      efg_ion :      0.000000    -0.242984     0.242984
-      efg_ion :     -0.242984     0.000000    -0.242984
-      efg_ion :      0.242984    -0.242984     0.000000
- 
+
+      efg_ion :     -0.000000    -0.242984     0.242984
+      efg_ion :     -0.242984    -0.000000    -0.242984
+      efg_ion :      0.242984    -0.242984    -0.000000
+
       efg_paw :     -0.000000     0.461634    -0.461634
       efg_paw :      0.461634     0.000000     0.461634
       efg_paw :     -0.461634     0.461634     0.000000
- 
- 
+
+
    atom :    6   typat :    1
- 
+
    Nuclear quad. mom. (barns) :    0.2200   Cq (MHz) :  -41.0700   eta :    0.0000
- 
-      efg eigval (au) :     -0.794510 ; (1.0E+21 V/m^2) :      -7.72053751
+
+      efg eigval (au) :     -0.794510 ; (1.0E+21 V/m^2) :      -7.72053743
 -         eigvec :     -0.577350    -0.577350     0.577350
- 
-      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026875
--         eigvec :      0.154303    -0.771517    -0.617213
- 
-      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026875
--         eigvec :     -0.801784     0.267261    -0.534522
- 
-      total efg :      0.000000    -0.397255     0.397255
-      total efg :     -0.397255     0.000000     0.397255
-      total efg :      0.397255     0.397255     0.000000
- 
- 
+
+      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026871
+-         eigvec :      0.187887    -0.782074    -0.594187
+
+      efg eigval (au) :      0.397255 ; (1.0E+21 V/m^2) :       3.86026871
+-         eigvec :     -0.794585     0.234577    -0.560008
+
+      total efg :     -0.000000    -0.397255     0.397255
+      total efg :     -0.397255    -0.000000     0.397255
+      total efg :      0.397255     0.397255    -0.000000
+
+
       efg_el :     -0.000000    -0.178604     0.178604
       efg_el :     -0.178604    -0.000000     0.178604
       efg_el :      0.178604     0.178604    -0.000000
- 
+
       efg_ion :      0.000000     0.242984    -0.242984
       efg_ion :      0.242984     0.000000    -0.242984
       efg_ion :     -0.242984    -0.242984     0.000000
- 
-      efg_paw :     -0.000000    -0.461634     0.461634
-      efg_paw :     -0.461634     0.000000     0.461634
+
+      efg_paw :      0.000000    -0.461634     0.461634
+      efg_paw :     -0.461634    -0.000000     0.461634
       efg_paw :      0.461634     0.461634     0.000000
- 
- 
- 
- 
- 
+
+
+
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
- Mean square residual over all n,k,spin=   38.354E-12; max=  99.944E-12
+
+ Mean square residual over all n,k,spin=   38.350E-12; max=  99.940E-12
  reduced coordinates (array xred) for    6 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -867,7 +867,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     4       0.000000000000      0.000000000000      0.000000000000
     5       0.000000000000      0.000000000000      0.000000000000
     6       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      2.13380000000000     2.13380000000000     2.13380000000000
@@ -875,28 +875,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     4      1.06690000000000    -1.06690000000000    -1.06690000000000
     5     -1.06690000000000     1.06690000000000    -1.06690000000000
     6     -1.06690000000000    -1.06690000000000     1.06690000000000
- 
+
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000     0.00000000000000
-    3      0.00000000000000     0.00000000000000     0.00000000000000
-    4      0.00000000000000     0.00000000000000     0.00000000000000
-    5      0.00000000000000     0.00000000000000     0.00000000000000
-    6      0.00000000000000     0.00000000000000     0.00000000000000
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    3     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    4     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    5     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    6     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
- 
+
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000     0.00000000000000
-    3      0.00000000000000     0.00000000000000     0.00000000000000
-    4      0.00000000000000     0.00000000000000     0.00000000000000
-    5      0.00000000000000     0.00000000000000     0.00000000000000
-    6      0.00000000000000     0.00000000000000     0.00000000000000
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    3     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    4     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    5     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    6     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  8.064595214924  8.064595214924  8.064595214924 bohr
               =  4.267600000000  4.267600000000  4.267600000000 angstroms
  Fermi (or HOMO) energy (hartree) =   0.08821   Average Vxc (hartree)=  -0.44293
- Magnetization (Bohr magneton)=  1.06581410E-13
+ Magnetization (Bohr magneton)=  9.94759830E-14
  Total spin up =  2.80000000E+01   Total spin down =  2.80000000E+01
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband= 31, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -924,45 +924,45 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.57173476521925E+01
-hartree             :  5.33047446786459E+01
-xc                  : -8.14540709385601E+01
+kinetic             :  3.57173476636793E+01
+hartree             :  5.33047446846802E+01
+xc                  : -8.14540709397447E+01
 Ewald energy        : -1.66952529950909E+02
-psp_core            :  1.26262977536838E+01
-local_psp           : -1.48927149181359E+02
-PAW spherical_terms :  5.86269536971545E+01
-internal            : -2.37058406289151E+02
-'-kT*entropy'       :  1.38280114840982E-03
-total_energy        : -2.37057023488003E+02
-total_energy_eV     : -6.45065022845464E+03
+psp_core            :  1.26262977536839E+01
+local_psp           : -1.48927149184485E+02
+PAW spherical_terms :  5.86269536830281E+01
+internal            : -2.37058406290068E+02
+'-kT*entropy'       :  1.38280114921865E-03
+total_energy        : -2.37057023488918E+02
+total_energy_eV     : -6.45065022847955E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -3.60252210711256E+00
+band_energy         : -3.60252210666834E+00
 Ewald energy        : -1.66952529950909E+02
-psp_core            :  1.26262977536838E+01
-xc_dc               : -8.40561587077715E+01
-PAW spherical_terms :  4.92659241971432E+00
-internal            : -2.37058320592395E+02
-'-kT*entropy'       :  1.38280114840982E-03
+psp_core            :  1.26262977536839E+01
+xc_dc               : -8.40561587136661E+01
+PAW spherical_terms :  4.92659242516370E+00
+internal            : -2.37058320592396E+02
+'-kT*entropy'       :  1.38280114921865E-03
 total_energy_dc     : -2.37056937791247E+02
-total_energy_dc_eV  : -6.45064789652710E+03
+total_energy_dc_eV  : -6.45064789652711E+03
 ...
 
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.33125503E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.33125503E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.33125503E-03  sigma(2 1)=  0.00000000E+00
- 
+  sigma(1 1)=  1.33125504E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.33125504E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.33125504E-03  sigma(2 1)=  0.00000000E+00
+
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.9167E+01 GPa]
-- sigma(1 1)=  3.91668752E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.91668752E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.91668752E+01  sigma(2 1)=  0.00000000E+00
- 
+- sigma(1 1)=  3.91668754E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.91668754E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.91668754E+01  sigma(2 1)=  0.00000000E+00
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -972,13 +972,13 @@ total_energy_dc_eV  : -6.45064789652710E+03
         dmatpuopt           1
              ecut      1.00000000E+01 Hartree
            etotal     -2.3705693779E+02
-            fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+            fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+-          fftalg         512
             jpawu      3.49118561E-02  0.00000000E+00 Hartree
               kpt      2.50000000E-01  2.50000000E-01  2.50000000E-01
          kptrlatt        2    0    0      0    2    0      0    0    2
@@ -1018,7 +1018,7 @@ P           mkmem           1
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         224
    spinmagntarget      0.00000000E+00
-           strten      1.3312550292E-03  1.3312550292E-03  1.3312550292E-03
+           strten      1.3312550375E-03  1.3312550375E-03  1.3312550375E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
@@ -1092,7 +1092,7 @@ P           mkmem           1
                       -2.5000000000E-01  2.5000000000E-01 -2.5000000000E-01
                       -2.5000000000E-01 -2.5000000000E-01  2.5000000000E-01
             znucl       29.00000    8.00000
- 
+
 ================================================================================
 
 
@@ -1182,10 +1182,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.2
- 
+- Proc.   0 individual time (sec): cpu=          6.5  wall=          6.6
+
 ================================================================================
- 
+
  Calculation completed.
 .Delivered  13 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.1  wall=          3.2
++Overall time at end (sec) : cpu=          6.5  wall=          6.6
