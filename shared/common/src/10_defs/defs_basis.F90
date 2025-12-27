@@ -344,6 +344,7 @@ module defs_basis
  real(dp), parameter :: dipole_moment_debye = 0.393430307_dp              ! Debye unit in a.u.
  real(dp), parameter :: siemens_SI   = e_Cb**2 / Ha_J / Time_Sec          ! Siemens in SI: A/V = C^2 / (J * s)
  real(dp), parameter :: volt_SI      = Ha_J / e_Cb                        ! Volt in SI: J/C
+ real(dp), parameter :: EFG_SI       = volt_SI / Bohr_meter**2            ! E-field gradient in SI : Volt/m^2 
 
 !End of physical constants
 !=========================================================

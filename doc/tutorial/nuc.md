@@ -72,38 +72,38 @@ isotope of oxygen with a non-zero quadrupole moment.
 After running the file *tnuc_1.abi* through Abinit, you can find the following
 near the end of the output file:
 
-	Electric Field Gradient Calculation 
-
-
-	   atom :    1   typat :    1
-
-	   Nuclear quad. mom. (barns) :    1.0000   Cq (MHz) :    0.0000   eta :    0.0000
-
-	      efg eigval (au) :     -0.152323 ; (V/m^2) :  -1.48017693E+21
-	-         eigvec :     -0.000000    -0.000000    -1.000000
-
-	      efg eigval (au) :     -0.054274 ; (V/m^2) :  -5.27401886E+20
-	-         eigvec :      0.707107    -0.707107     0.000000
-
-	      efg eigval (au) :      0.206597 ; (V/m^2) :   2.00757882E+21
-	-         eigvec :      0.707107     0.707107    -0.000000
-
-	      total efg :      0.076161     0.130436    -0.000000
-	      total efg :      0.130436     0.076161    -0.000000
-	      total efg :     -0.000000    -0.000000    -0.152323
-
-
-	      efg_el :      0.095557     0.004024    -0.000000
-	      efg_el :      0.004024     0.095557    -0.000000
-	      efg_el :     -0.000000    -0.000000    -0.191114
-
-	      efg_ion :     -0.099183     0.005966     0.000000
-	      efg_ion :      0.005966    -0.099183     0.000000
-	      efg_ion :      0.000000     0.000000     0.198365
-
-	      efg_paw :      0.079787     0.120445     0.000000
-	      efg_paw :      0.120445     0.079787     0.000000
-	      efg_paw :      0.000000     0.000000    -0.159574
+    Electric Field Gradient Calculation 
+    
+    
+       atom :    1   typat :    1
+     
+       Nuclear quad. mom. (barns) :    0.0000   Cq (MHz) :    0.0000   eta :    0.0000
+     
+          efg eigval (au) :     -0.152323 ; (1.0E+21 V/m^2) :      -1.48017682
+    -         eigvec :      0.000000     0.000000    -1.000000
+     
+          efg eigval (au) :     -0.054274 ; (1.0E+21 V/m^2) :      -0.52740185
+    -         eigvec :      0.707107    -0.707107     0.000000
+     
+          efg eigval (au) :      0.206597 ; (1.0E+21 V/m^2) :       2.00757867
+    -         eigvec :      0.707107     0.707107     0.000000
+     
+          total efg :      0.076161     0.130436     0.000000
+          total efg :      0.130436     0.076161     0.000000
+          total efg :      0.000000     0.000000    -0.152323
+     
+     
+          efg_el :      0.095557     0.004024     0.000000
+          efg_el :      0.004024     0.095557     0.000000
+          efg_el :      0.000000     0.000000    -0.191114
+     
+          efg_ion :     -0.099183     0.005966     0.000000
+          efg_ion :      0.005966    -0.099183     0.000000
+          efg_ion :      0.000000     0.000000     0.198365
+     
+          efg_paw :      0.079787     0.120445     0.000000
+          efg_paw :      0.120445     0.079787     0.000000
+          efg_paw :      0.000000     0.000000    -0.159574
 
 This fragment gives the gradient at the first atom, which was silicon. Note
 that the gradient is not zero, but the coupling is---that's because the
@@ -111,36 +111,36 @@ quadrupole moment of Si-29 is zero, so although there's a gradient there's
 nothing in the nucleus for it to couple to.
 
 Atom 3 is an oxygen atom, and its entry in the output is:
-
-	   atom :    3   typat :    2
-
-	   Nuclear quad. mom. (barns) :   -0.0256   Cq (MHz) :    6.6150   eta :    0.1403
-
-	      efg eigval (au) :     -1.100599 ; (V/m^2) :  -1.06949233E+22
-	-         eigvec :      0.707107    -0.707107     0.000000
-
-	      efg eigval (au) :      0.473085 ; (V/m^2) :   4.59714112E+21
-	-         eigvec :      0.000000     0.000000    -1.000000
-
-	      efg eigval (au) :      0.627514 ; (V/m^2) :   6.09778216E+21
-	-         eigvec :      0.707107     0.707107     0.000000
-
-	      total efg :     -0.236543     0.864057     0.000000
-	      total efg :      0.864057    -0.236543     0.000000
-	      total efg :      0.000000     0.000000     0.473085
-
-
-	      efg_el :     -0.036290    -0.075078     0.000000
-	      efg_el :     -0.075078    -0.036290     0.000000
-	      efg_el :      0.000000     0.000000     0.072579
-
-	      efg_ion :     -0.016807     0.291185    -0.000000
-	      efg_ion :      0.291185    -0.016807    -0.000000
-	      efg_ion :     -0.000000    -0.000000     0.033615
-
-	      efg_paw :     -0.183446     0.647950     0.000000
-	      efg_paw :      0.647950    -0.183446     0.000000
-	      efg_paw :      0.000000     0.000000     0.366891
+ 
+       atom :    3   typat :    2
+     
+       Nuclear quad. mom. (barns) :   -0.0256   Cq (MHz) :    6.6150   eta :    0.1403
+     
+          efg eigval (au) :     -1.100599 ; (1.0E+21 V/m^2) :     -10.69492247
+    -         eigvec :      0.707107    -0.707107     0.000000
+     
+          efg eigval (au) :      0.473085 ; (1.0E+21 V/m^2) :       4.59714077
+    -         eigvec :     -0.000000    -0.000000     1.000000
+     
+          efg eigval (au) :      0.627514 ; (1.0E+21 V/m^2) :       6.09778170
+    -         eigvec :     -0.707107    -0.707107    -0.000000
+     
+          total efg :     -0.236543     0.864057     0.000000
+          total efg :      0.864057    -0.236543     0.000000
+          total efg :      0.000000     0.000000     0.473085
+     
+     
+          efg_el :     -0.036290    -0.075078     0.000000
+          efg_el :     -0.075078    -0.036290     0.000000
+          efg_el :      0.000000     0.000000     0.072579
+     
+          efg_ion :     -0.016807     0.291185    -0.000000
+          efg_ion :      0.291185    -0.016807    -0.000000
+          efg_ion :      0.000000     0.000000     0.033615
+     
+          efg_paw :     -0.183446     0.647950     0.000000
+          efg_paw :      0.647950    -0.183446     0.000000
+          efg_paw :      0.000000     0.000000     0.366891
  
 Now we see the electric field gradient coupling, in frequency units, along
 with the asymmetry of the coupling tensor, and, finally, the three
