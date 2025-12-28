@@ -7,7 +7,7 @@ release are NOT described here...
 NOTE that problems are presently (for about three years) most often reported on the issue manager of the internal ABINIT Gitlab .
 Still, the list of platforms and corresponding failing tests is maintained in the present document.
 
-The present revision ABINITv10.5.8 is for developments
+The present revision ABINITv10.6.0 is for release, debuggibng and hot fixes
 
 0. List of platforms
 1. Batteries of tests
@@ -16,7 +16,7 @@ The present revision ABINITv10.5.8 is for developments
 ================================================================
 0. Platforms
 
-For ABINITv10.5.8, list closed on 2025 12 26
+For ABINITv10.6.0, list closed on 2026 01 27
 after installation and successful tests for the standard set of platforms,
 as mentioned on
 https://bbportal.abinit.org/#/status
@@ -42,7 +42,6 @@ On remote system manneback_gnu_14.2_hpc : tutomultibinit multi6_1 fails, out of 
 On remote system haicgu_gnu_14.1_hpc : excluded tests : v3#92, v8#97, mpiio#49 & 51, paral#66 & 78, and the tests for gwr and teph4vpq .
 
 Intel Ifort compiler (presently tested : 2023-OneAPI, 2025-OneAPI)
-Ifort 16.0 is mostly OK, except for tests v4#32,33,34, that are disactivated.
 2025-oneAPI is mostly OK, except :
    many atdep tests are disactivated (atdep#1,16,21,28,35,38, tutoatdep#atdep1_1);
    one test for GWR is disactivated (paral#78).
@@ -52,7 +51,7 @@ Ifort 16.0 is mostly OK, except for tests v4#32,33,34, that are disactivated.
 NAG Compiler (presently tested : 7.2 - sequential only)
 NAG 7.2, ABINIT sequential : tmulti6_1, teph_tdep_legacy_4 and v9#83-87 are disactivated.
 
-nvhpc compiler (presently tested : 23.9, 24.9)
+nvhpc compiler (presently tested : 23.9 temporarily(?) out of nightly , 24.9)
 nvhpc 23.9 : OK, but there are many exceptions,
   tutorespfn/teph4isotc#1-7, tutorespfn/teph4mob#1-7, tutorespfn/teph4mob#1-8, v7#83,85-89, paral#78,79
   also not with all tests gwr, and with gpu_01-05, v8_41-44, v9_50-65, gpu_omp_31,39,40.
