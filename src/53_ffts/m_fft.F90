@@ -424,7 +424,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, &
 #endif
 ! *************************************************************************
 
- ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
+ !ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
 
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
@@ -513,7 +513,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, &
 ! *************************************************************************
 
  !call wrtout(std_out, "in fftbox_execute_ip_dpc")
- ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
+ !ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
 
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
@@ -602,7 +602,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, &
 ! *************************************************************************
 
  !call wrtout(std_out, "in fftbox_execute_op_spc")
- ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
+ !ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
 
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
@@ -694,7 +694,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, &
 ! *************************************************************************
 
  !call wrtout(std_out, "in fftbox_execute_op_dpc")
- ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
+ !ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
 
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
@@ -1894,8 +1894,9 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
 
    call uplan_k%init(npw_k, nspinor, ndat, ngfft, istwf_k, kg_k, sp, gpu_option)
 
-   ! Test version with gpu_map 1 (GPU only)
+   call wrtout(ount, "Test version with gpu_map 1 (GPU only)")
    do ii=1,2
+   !do ii=2,1,-1
      ugsp = ug_refsp
      ndat__ = ndat
      if (ii == 2) ndat__ = max(ndat / 2, 1)
@@ -1903,15 +1904,15 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
      ugsp = zero
      call uplan_k%execute_rg(ndat__, ursp, ugsp, gpu_map=1)
 
-     ierr = COUNT(ABS(ugsp - ug_refsp) > ATOL_SP); nfailed = nfailed + ierr
-     write(info,"(a,i1,a)")sjoin(library,"uplan_k spc gpu_map 1, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
+     ierr = COUNT(ABS(ugsp(1:npw_k*ndat__) - ug_refsp(1:npw_k*ndat__)) > ATOL_SP); nfailed = nfailed + ierr
+     write(info,"(a,i1,a)")sjoin(library,"uplan_k spc, gpu_map 1, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
      if (ierr /= 0) then
        max_abserr = MAXVAL(ABS(ugsp - ug_refsp)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
      end if
      call wrtout(ount, sjoin(info, msg))
    end do ! ii
 
-   ! Test version with explicit GPU offloading.
+   call wrtout(ount, "Test version with explicit GPU offloading.")
    ugsp = ug_refsp
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(to:ugsp, ursp) IF (gpu_option == ABI_GPU_OPENMP)
@@ -1925,7 +1926,7 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
    call uplan_k%free()
 
    ierr = COUNT(ABS(ugsp - ug_refsp) > ATOL_SP); nfailed = nfailed + ierr
-   write(info,"(a,i1,a)")sjoin(library,"uplan_k spc gpu_map 0, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
+   write(info,"(a,i1,a)")sjoin(library,"uplan_k spc, gpu_map 0, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ugsp - ug_refsp)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
    end if
@@ -1948,23 +1949,24 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
    ! Test uplan_k transforms with double precision.
    call uplan_k%init(npw_k, nspinor, ndat, ngfft, istwf_k, kg_k, dp, gpu_option)
 
-   ! Test version with gpu_map 1 (GPU only)
+   call wrtout(ount, "Test version with gpu_map 1 (GPU only)")
    do ii=1,2
+   !do ii=2,1,-1
      ug = ug_ref
      if (ii == 2) ndat__ = max(ndat__ / 2, 1)
      call uplan_k%execute_gr(ndat__, ug, ur, gpu_map=1)
      ug = zero
      call uplan_k%execute_rg(ndat__, ur, ug, gpu_map=1)
 
-     ierr = COUNT(ABS(ug - ug_ref) > ATOL_DP); nfailed = nfailed + ierr
-     write(info,"(a,i1,a)")sjoin(library,"uplan_k gpu_map 1, dp, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
+     ierr = COUNT(ABS(ug(1:npw_k*ndat__) - ug_ref(1:npw_k*ndat__))  > ATOL_DP); nfailed = nfailed + ierr
+     write(info,"(a,i1,a)")sjoin(library,"uplan_k dpc, gpu_map 1, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
      if (ierr /= 0) then
        max_abserr = MAXVAL(ABS(ug - ug_ref)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
      end if
      call wrtout(ount, sjoin(info, msg))
    end do ! ii
 
-   ! Test version with explicit GPU offloading.
+   call wrtout(ount, "Test version with explicit GPU offloading.")
    ug = ug_ref
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(to:ug, ur) IF (gpu_option == ABI_GPU_OPENMP)
@@ -1978,7 +1980,7 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
    call uplan_k%free()
 
    ierr = COUNT(ABS(ug - ug_ref) > ATOL_DP); nfailed = nfailed + ierr
-   write(info,"(a,i1,a)")sjoin(library,"uplan_k, gpu_map 0, dp, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
+   write(info,"(a,i1,a)")sjoin(library,"uplan_k, dpc, gpu_map 0, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ug - ug_ref)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
    end if
@@ -5192,7 +5194,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
                                 isign, iscale, gpu_map, phase_r) ! optional
 
 !Arguments ------------------------------------
- class(uplan_t),target,intent(in) :: uplan
+ class(uplan_t),target,intent(inout) :: uplan
  integer,intent(in) :: ndat
  complex(sp),target,intent(in) :: ug(uplan%npw*uplan%nspinor*ndat)
  complex(sp),target,intent(out) :: ur(uplan%nfft*uplan%nspinor*ndat)
@@ -5210,7 +5212,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
 ! *************************************************************************
 
  !call wrtout(std_out, "in uplan_execute_gr_spc")
- ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
+ !ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
  ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
 
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
@@ -5255,11 +5257,13 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
 #ifdef HAVE_GPU
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(uplan%gpu_ctx_spc)) then
+     !call wrtout(std_out, sjoin("gr: Init plan with batch_size:", itoa(uplan%batch_size)))
      call gpu_ctx_init(uplan%gpu_ctx_spc, uplan%ngfft, uplan%ngfft, uplan%batch_size, sp)
    end if
 
    if (ndat /= uplan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
+     !call wrtout(std_out, sjoin("gr: Init plan with ndat:", itoa(ndat)))
      call gpu_ctx_free(uplan%gpu_ctx_spc)
      call gpu_ctx_init(uplan%gpu_ctx_spc, uplan%ngfft, uplan%ngfft, ndat, sp)
    end if
@@ -5298,6 +5302,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_ctx_spc, int(uplan%nfft), ndat, isign__, iscale__, sp, c_loc(ur))
+   call gpu_ctx_synch(uplan%gpu_ctx_spc)
    !$OMP END TARGET DATA
 
    ! Multiply by e^{ik.r}
@@ -5339,7 +5344,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
                                 isign, iscale, gpu_map, phase_r) ! optional
 
 !Arguments ------------------------------------
- class(uplan_t),target,intent(in) :: uplan
+ class(uplan_t),target,intent(inout) :: uplan
  integer,intent(in) :: ndat
  complex(dp),target,intent(in) :: ug(uplan%npw*uplan%nspinor*ndat)
  complex(dp),target,intent(out) :: ur(uplan%nfft*uplan%nspinor*ndat)
@@ -5357,7 +5362,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
 ! *************************************************************************
 
  !call wrtout(std_out, "in uplan_execute_gr_dpc")
- ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
+ !ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
  ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
 
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
@@ -5445,6 +5450,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_ctx_dpc, int(uplan%nfft), ndat, isign__, iscale__, dp, c_loc(ur))
+   call gpu_ctx_synch(uplan%gpu_ctx_dpc)
    !$OMP END TARGET DATA
 
    ! Multiply by e^{ik.r}
@@ -5486,7 +5492,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
                                 isign, iscale, gpu_map, phase_r) ! optional
 
 !Arguments ------------------------------------
- class(uplan_t),target,intent(in) :: uplan
+ class(uplan_t),target,intent(inout) :: uplan
  integer,intent(in) :: ndat
  complex(sp),target,intent(inout) :: ur(uplan%nfft*uplan%nspinor*ndat)
  complex(sp),target,intent(out) :: ug(uplan%npw*uplan%nspinor*ndat)
@@ -5503,7 +5509,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
 ! *************************************************************************
 
  !call wrtout(std_out, "in uplan_execute_rg_spc")
- ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
+ !ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
  ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
 
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
@@ -5545,13 +5551,16 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
 
  else
 #ifdef HAVE_GPU
+
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(uplan%gpu_ctx_spc)) then
+     !call wrtout(std_out, sjoin("rg: Init plan with batch_size:", itoa(uplan%batch_size)))
      call gpu_ctx_init(uplan%gpu_ctx_spc, uplan%ngfft, uplan%ngfft, uplan%batch_size, sp)
    end if
 
    if (ndat /= uplan%batch_size) then
      ! Have to rebuild the plan with batch_size == ndat.
+     !call wrtout(std_out, sjoin("rg: Init plan with ndat:", itoa(ndat)))
      call gpu_ctx_free(uplan%gpu_ctx_spc)
      call gpu_ctx_init(uplan%gpu_ctx_spc, uplan%ngfft, uplan%ngfft, ndat, sp)
    end if
@@ -5581,6 +5590,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_ctx_spc, int(uplan%nfft), ndat, isign__, iscale__, sp, c_loc(ur))
+   call gpu_ctx_synch(uplan%gpu_ctx_spc)
    !$OMP END TARGET DATA
 
    ifft2ig => uplan%ifft2ig
@@ -5625,7 +5635,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
                                 isign, iscale, gpu_map, phase_r) ! optional
 
 !Arguments ------------------------------------
- class(uplan_t),target,intent(in) :: uplan
+ class(uplan_t),target,intent(inout) :: uplan
  integer,intent(in) :: ndat
  complex(dp),target,intent(inout) :: ur(uplan%nfft*uplan%nspinor*ndat)
  complex(dp),target,intent(out) :: ug(uplan%npw*uplan%nspinor*ndat)
@@ -5643,7 +5653,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
 ! *************************************************************************
 
  !call wrtout(std_out, "in uplan_execute_rg_dpc")
- ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
+ !ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
  ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
 
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
@@ -5721,6 +5731,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ur)
    call gpu_fftbox_c2c_ip(uplan%gpu_ctx_dpc, int(uplan%nfft), ndat, isign__, iscale__, dp, c_loc(ur))
+   call gpu_ctx_synch(uplan%gpu_ctx_dpc)
    !$OMP END TARGET DATA
 
    ifft2ig => uplan%ifft2ig

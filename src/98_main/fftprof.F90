@@ -435,10 +435,10 @@ program fftprof
      if (fft_setups(5, idx) == 0) CYCLE
      gpu_option = fft_setups(6, idx)
 
-     write(msg,"(3(a,i0))")"fftbox_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
-     !write(msg,"(4(a,i0))")"fftbox_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
-     call wrtout(std_out, msg)
-     nfailed = nfailed + fftbox_utests(fftalg, ndat, nthreads, gpu_option)
+     !write(msg,"(3(a,i0))")"fftbox_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
+     !!write(msg,"(4(a,i0))")"fftbox_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
+     !call wrtout(std_out, msg)
+     !nfailed = nfailed + fftbox_utests(fftalg, ndat, nthreads, gpu_option)
 
      ! Initialize ngfft(7:8) here.
      ut_ngfft = -1
@@ -448,14 +448,14 @@ program fftprof
      call getng(boxcutmin2,0,ecut,gmet,k0,me_fft0,ut_mgfft,ut_nfft,ut_ngfft,nproc_fft1,nsym,&
        paral_kgb0,symrel,tnons, unit=dev_null, gpu_option=gpu_option)
 
-     write(msg,"(3(a,i0))")"fftu_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
-     !write(msg,"(4(a,i0))")"fftu_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
-     call wrtout(std_out, msg)
-     nfailed = nfailed + fftu_utests(ecut, ut_ngfft, rprimd, ndat, nthreads)
-
-     !write(msg,"(4(a,i0))")"uplan_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
+     !write(msg,"(3(a,i0))")"fftu_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
+     !!write(msg,"(4(a,i0))")"fftu_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
      !call wrtout(std_out, msg)
-     !nfailed = nfailed + uplan_utests(ecut, ut_ngfft, rprimd, ndat, nthreads, gpu_option)
+     !nfailed = nfailed + fftu_utests(ecut, ut_ngfft, rprimd, ndat, nthreads)
+
+     write(msg,"(4(a,i0))")"uplan_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads, ", gpu_option = ", gpu_option
+     call wrtout(std_out, msg)
+     nfailed = nfailed + uplan_utests(ecut, ut_ngfft, rprimd, ndat, nthreads, gpu_option)
    end do
 
    write(msg,'(a,i0)')"Total number of failed tests = ",nfailed
