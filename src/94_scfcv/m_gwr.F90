@@ -2909,12 +2909,10 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
    do il_g2=1, gk_f%size_local(2)
      ig2 = mod(gk_f%loc2gcol(il_g2) - 1, desc_kbz%npw) + 1
      g2 = desc_kbz%gvec(:,ig2)
-     !g2 = desc_kibz%gvec(:,ig2)
      ph2 = exp(+j_dpc * two_pi * dot_product(g2, tnon))
      do il_g1=1, gk_f%size_local(1)
        ig1 = mod(gk_f%loc2grow(il_g1) - 1, desc_kbz%npw) + 1
        g1 = desc_kbz%gvec(:,ig1)
-       !g1 = desc_kibz%gvec(:,ig1)
        ph1 = exp(-j_dpc * two_pi * dot_product(g1, tnon))
        gk_f%buffer_cplx(il_g1, il_g2) = gk_i%buffer_cplx(il_g1, il_g2) * ph1 * ph2
        if (trev_k == 1) gk_f%buffer_cplx(il_g1, il_g2) = conjg(gk_f%buffer_cplx(il_g1, il_g2))
@@ -3562,8 +3560,8 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
 
  call uplan_k%init(desc_qbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_qbz%istwfk, &
                    desc_qbz%gvec, gwp, &
-                   0)  ! FIXME gpu_option
-                   !gwr%dtset%gpu_option)
+                   0)             ! FIXME gpu_option
+                   !gpu_option)   ! FIXME bug if batch size > 1 with gpu, other calls look OK though
 
  ! FFT Wc(g,g') -> Wc(r,g') and store results in rgp
  do ig2=1,wc_ggp%size_local(2), gwr%uc_batch_size
@@ -4725,13 +4723,11 @@ subroutine gwr_build_tchi(gwr)
          desc_q => gwr%tchi_desc_qibz(iq_ibz)
 
          ! Note the minus sign in q.
-         !if (.not. q_is_gamma) then
-           call calc_ceikr(-gwr%qibz(:,iq_ibz), gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, cemiqr)
-           cemiqr = cemiqr * tchi_rfact
+         call calc_ceikr(-gwr%qibz(:,iq_ibz), gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, cemiqr)
+         cemiqr = cemiqr * tchi_rfact
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$omp target update to(cemiqr) if (gpu_option == ABI_GPU_OPENMP)
+         !$omp target update to(cemiqr) if (gpu_option == ABI_GPU_OPENMP)
 #endif
-         !end if
 
          ! MPI-transposition: tchi_q(g',r) => tchi_q(r,g')
          call chiq_gpr(my_iqi)%ptrans("N", chi_rgp)
@@ -4745,19 +4741,8 @@ subroutine gwr_build_tchi(gwr)
          do ig2=1, chi_rgp%size_local(2), gwr%uc_batch_size
            ndat = blocked_loop(ig2, chi_rgp%size_local(2), gwr%uc_batch_size)
 
-           !if (q_is_gamma) then
-           !  call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
-           !                          gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2), gpu_map=1)
-           !else
            call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
                                    gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2), phase_r=cemiqr, gpu_map=1)
-           !end if
-
-           !!$OMP PARALLEL DO
-           !do idat=0,ndat-1
-           !  gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2 + idat) = &
-           !  gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2 + idat) * tchi_rfact
-           !end do
          end do ! ig2
 
          call uplan_q%free()

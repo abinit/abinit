@@ -86,11 +86,6 @@ module m_gpu_toolbox
 
   interface
 
-    !integer(C_INT) function cuda_func() bind(C)
-    !  use iso_c_binding, only : C_INT,C_PTR
-    !  type(C_PTR) :: ptr
-    !end function cuda_func
-
     subroutine gpu_device_synchronize() bind(c, name='gpu_device_synchronize_cpp')
       use, intrinsic :: iso_c_binding
     end subroutine gpu_device_synchronize
@@ -152,8 +147,8 @@ module m_gpu_toolbox
     subroutine gpu_fft_exec_z2z(fft_plan_id, idata, odata, direction) bind(c, name='gpu_fft_exec_z2z_cpp')
       use, intrinsic :: iso_c_binding
       integer    , intent(in)  :: fft_plan_id
-      type(c_ptr), intent(in)    :: idata, odata
-      integer    , intent(in)    :: direction
+      type(c_ptr), intent(in)  :: idata, odata
+      integer    , intent(in)  :: direction
     end subroutine gpu_fft_exec_z2z
 
   end interface
@@ -184,16 +179,12 @@ contains
     ! if a device id is provided, use it
     ! if not, just probe driver to get current device id
     if (present(deviceId)) then
-
       if ( deviceId >= CPU_DEVICE_ID ) then
         call gpu_data_prefetch_async_f(dev_ptr, count, deviceId)
       end if
-
     else
-
       call gpu_get_device(currentDevId)
       call gpu_data_prefetch_async_f(dev_ptr, count, currentDevId)
-
     end if
 
   end subroutine gpu_data_prefetch_async
