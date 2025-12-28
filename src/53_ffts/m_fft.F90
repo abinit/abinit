@@ -1646,7 +1646,6 @@ integer function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(n
  real(dp) :: max_abserr,ucvol
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
 !arrays
- integer :: kg_dum(3,0)
  integer,allocatable :: gbound_k(:,:),kg_k(:,:)
  real(dp) :: kpoint(3),crand(2),kpoints(3,9), gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: cg(:,:),cg_ref(:,:),cr(:,:)
@@ -1818,7 +1817,6 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
  real(dp) :: max_abserr,ucvol
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
 !arrays
- integer :: kg_dum(3,0)
  integer,allocatable :: kg_k(:,:)
  real(dp) :: kpoint(3),crand(2),kpoints(3,1), gmet(3,3),gprimd(3,3),rmet(3,3)
  complex(sp),allocatable :: ugsp(:),ug_refsp(:),ursp(:)
@@ -5494,9 +5492,10 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, gpu_map__, nfft
- integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
+ integer(c_size_t) :: idat, ipw, ir, offset, bufsize
 #ifdef HAVE_GPU
  logical :: transfer_ug, transfer_ur
+ integer(c_size_t) :: ifft, ig, ispinor
  integer, contiguous, pointer :: ifft2ig(:)
 #endif
 ! *************************************************************************
