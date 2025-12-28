@@ -159,7 +159,7 @@ module m_fft
  end type fftbox_plan3_t
 !!***
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  interface
    subroutine gpu_ctx_init(ctx, f_dims, f_embed, batch, kind) bind(C)
      use, intrinsic :: iso_c_binding
@@ -167,6 +167,10 @@ module m_fft
      integer(c_int), intent(in) :: f_dims(3), f_embed(3)
      integer(c_int), value :: batch, kind
    end subroutine
+   subroutine gpu_ctx_synch(ctx) bind(C)
+     use, intrinsic :: iso_c_binding
+     type(c_ptr), value :: ctx
+   end subroutine gpu_ctx_synch(ctx) bind(C)
    subroutine gpu_ctx_free(ctx) bind(C)
      use, intrinsic :: iso_c_binding
      type(c_ptr) :: ctx
@@ -371,7 +375,7 @@ subroutine fftbox_plan3_free(plan)
 
  ABI_UNUSED(plan%ldxyz)
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  call gpu_ctx_free(plan%gpu_ctx_spc)
  call gpu_ctx_free(plan%gpu_ctx_dpc)
 #endif
@@ -415,7 +419,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, &
 
 !Local variables-------------------------------
  integer :: ndat__, iscale__, gpu_map__
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  logical :: transfer_ff
 #endif
 ! *************************************************************************
@@ -427,7 +431,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, &
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(plan%gpu_ctx_spc)) then
      call gpu_ctx_init(plan%gpu_ctx_spc, plan%dims, plan%embed, plan%batch_size, sp)
@@ -448,6 +452,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, &
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
    call gpu_fftbox_c2c_ip(plan%gpu_ctx_spc, int(plan%nfft), ndat__, isign, iscale__, sp, c_loc(ff))
+   call gpu_ctx_synch(plan%gpu_ctx_spc)
    !$OMP END TARGET DATA
 
    if (gpu_map__ /= 0) then
@@ -500,7 +505,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, &
  complex(dp),target,intent(inout) :: ff(plan%ldxyz*ndat)
 !Local variables-------------------------------
  integer :: ndat__, iscale__, gpu_map__
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  logical :: transfer_ff
 #endif
 ! *************************************************************************
@@ -513,7 +518,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, &
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(plan%gpu_ctx_dpc)) then
      call gpu_ctx_init(plan%gpu_ctx_dpc, plan%dims, plan%embed, plan%batch_size, dp)
@@ -534,6 +539,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, &
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ff)
    call gpu_fftbox_c2c_ip(plan%gpu_ctx_dpc, int(plan%nfft), ndat__, isign, iscale__, dp, c_loc(ff))
+   call gpu_ctx_synch(plan%gpu_ctx_dpc)
    !$OMP END TARGET DATA
 
    if (gpu_map__ /= 0) then
@@ -586,7 +592,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, &
  complex(sp),target,intent(inout) :: gg(plan%ldxyz*ndat)
 !Local variables-------------------------------
  integer :: ndat__, iscale__, gpu_map__
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  logical :: transfer_ff, transfer_gg
 #endif
 ! *************************************************************************
@@ -599,7 +605,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, &
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(plan%gpu_ctx_spc)) then
      call gpu_ctx_init(plan%gpu_ctx_spc, plan%dims, plan%embed, plan%batch_size, sp)
@@ -622,6 +628,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, &
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
    call gpu_fftbox_c2c_op(plan%gpu_ctx_spc, int(plan%nfft), ndat__, isign, iscale__, sp, c_loc(ff), c_loc(gg))
+   call gpu_ctx_synch(plan%gpu_ctx_spc)
    !$OMP END TARGET DATA
 
    if (gpu_map__ /= 0) then
@@ -675,7 +682,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, &
 
 !Local variables-------------------------------
  integer :: ndat__, iscale__, gpu_map__
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  logical :: transfer_ff, transfer_gg
 #endif
 ! *************************************************************************
@@ -688,7 +695,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, &
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(plan%gpu_ctx_dpc)) then
      call gpu_ctx_init(plan%gpu_ctx_dpc, plan%dims, plan%embed, plan%batch_size, dp)
@@ -711,6 +718,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, &
 
    !$OMP TARGET DATA USE_DEVICE_ADDR(ff, gg)
    call gpu_fftbox_c2c_op(plan%gpu_ctx_dpc, int(plan%nfft), ndat__, isign, iscale__, dp, c_loc(ff), c_loc(gg))
+   call gpu_ctx_synch(plan%gpu_ctx_dpc)
    !$OMP END TARGET DATA
 
    if (gpu_map__ /= 0) then
@@ -1629,7 +1637,7 @@ integer function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(n
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: nspinor1=1
+ integer,parameter :: nspinor=1
  integer :: nx,ny,nz,nxyz,ldx,ldy,ldz,ierr,npw_k,mgfft,istwf_k,ikpt,ldxyz,ipw,old_nthreads,ount, fftalg
  real(dp),parameter :: ATOL_SP=tol6, ATOL_DP=tol12 ! Tolerances on the absolute error
  real(dp) :: max_abserr,ucvol
@@ -1710,8 +1718,8 @@ integer function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(n
    end if
 
    ugsp = ug_refsp
-   call fft_ug(npw_k,nxyz,nspinor1,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ugsp,ursp)
-   call fft_ur(npw_k,nxyz,nspinor1,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ursp,ugsp)
+   call fft_ug(npw_k,nxyz,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ugsp,ursp)
+   call fft_ur(npw_k,nxyz,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ursp,ugsp)
 
    ierr = COUNT(ABS(ugsp - ug_refsp) > ATOL_SP)
    nfailed = nfailed + ierr
@@ -1739,8 +1747,8 @@ integer function fftu_utests(ecut, ngfft, rprimd, ndat, nthreads, unit) result(n
    end if
 
    ug = ug_ref
-   call fft_ug(npw_k,nxyz,nspinor1,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
-   call fft_ur(npw_k,nxyz,nspinor1,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
+   call fft_ug(npw_k,nxyz,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
+   call fft_ur(npw_k,nxyz,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
 
    ierr = COUNT(ABS(ug - ug_ref) > ATOL_DP)
    nfailed = nfailed + ierr
@@ -1801,8 +1809,8 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: nspinor1=1
- integer :: nx,ny,nz,nxyz,ldx,ldy,ldz,ierr,npw_k,mgfft,istwf_k,ikpt,ldxyz,ipw,old_nthreads,ount, fftalg
+ integer,parameter :: nspinor=1
+ integer :: nx,ny,nz,nxyz,ldx,ldy,ldz,ierr,npw_k,mgfft,istwf_k,ikpt,ldxyz,ipw,old_nthreads,ount, fftalg, ii, ndat__
  real(dp),parameter :: ATOL_SP=tol6, ATOL_DP=tol12 ! Tolerances on the absolute error
  real(dp) :: max_abserr,ucvol
  character(len=500) :: msg,info,library,cplex_mode,padding_mode
@@ -1876,20 +1884,24 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
      end do
    end if
 
-   call uplan_k%init(npw_k, nspinor1, ndat, ngfft, istwf_k, kg_k, sp, gpu_option)
+   call uplan_k%init(npw_k, nspinor, ndat, ngfft, istwf_k, kg_k, sp, gpu_option)
 
    ! Test version with gpu_map 1 (GPU only)
-   ugsp = ug_refsp
-   call uplan_k%execute_gr(ndat, ugsp, ursp, gpu_map=1)
-   ugsp = zero
-   call uplan_k%execute_rg(ndat, ursp, ugsp, gpu_map=1)
+   do ii=1,2
+     ugsp = ug_refsp
+     ndat__ = ndat
+     if (ii == 2) ndat__ = max(ndat / 2, 1)
+     call uplan_k%execute_gr(ndat__, ugsp, ursp, gpu_map=1)
+     ugsp = zero
+     call uplan_k%execute_rg(ndat__, ursp, ugsp, gpu_map=1)
 
-   ierr = COUNT(ABS(ugsp - ug_refsp) > ATOL_SP); nfailed = nfailed + ierr
-   write(info,"(a,i1,a)")sjoin(library,"uplan_k spc gpu_map 1, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
-   if (ierr /= 0) then
-     max_abserr = MAXVAL(ABS(ugsp - ug_refsp)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
-   end if
-   call wrtout(ount, sjoin(info, msg))
+     ierr = COUNT(ABS(ugsp - ug_refsp) > ATOL_SP); nfailed = nfailed + ierr
+     write(info,"(a,i1,a)")sjoin(library,"uplan_k spc gpu_map 1, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
+     if (ierr /= 0) then
+       max_abserr = MAXVAL(ABS(ugsp - ug_refsp)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
+     end if
+     call wrtout(ount, sjoin(info, msg))
+   end do ! ii
 
    ! Test version with explicit GPU offloading.
    ugsp = ug_refsp
@@ -1926,20 +1938,23 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
    end if
 
    ! Test uplan_k transforms with double precision.
-   call uplan_k%init(npw_k, nspinor1, ndat, ngfft, istwf_k, kg_k, dp, gpu_option)
+   call uplan_k%init(npw_k, nspinor, ndat, ngfft, istwf_k, kg_k, dp, gpu_option)
 
    ! Test version with gpu_map 1 (GPU only)
-   ug = ug_ref
-   call uplan_k%execute_gr(ndat, ug, ur, gpu_map=1)
-   ug = zero
-   call uplan_k%execute_rg(ndat, ur, ug, gpu_map=1)
+   do ii=1,2
+     ug = ug_ref
+     if (ii == 2) ndat__ = max(ndat__ / 2, 1)
+     call uplan_k%execute_gr(ndat__, ug, ur, gpu_map=1)
+     ug = zero
+     call uplan_k%execute_rg(ndat__, ur, ug, gpu_map=1)
 
-   ierr = COUNT(ABS(ug - ug_ref) > ATOL_DP); nfailed = nfailed + ierr
-   write(info,"(a,i1,a)")sjoin(library,"uplan_k gpu_map 1, dp, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
-   if (ierr /= 0) then
-     max_abserr = MAXVAL(ABS(ug - ug_ref)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
-   end if
-   call wrtout(ount, sjoin(info, msg))
+     ierr = COUNT(ABS(ug - ug_ref) > ATOL_DP); nfailed = nfailed + ierr
+     write(info,"(a,i1,a)")sjoin(library,"uplan_k gpu_map 1, dp, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
+     if (ierr /= 0) then
+       max_abserr = MAXVAL(ABS(ug - ug_ref)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
+     end if
+     call wrtout(ount, sjoin(info, msg))
+   end do ! ii
 
    ! Test version with explicit GPU offloading.
    ug = ug_ref
@@ -5140,7 +5155,7 @@ subroutine uplan_free(uplan)
  if (uplan%gpu_option == ABI_GPU_OPENMP) then
    ! Free memory on the GPU
    ig2ifft => uplan%ig2ifft; ifft2ig => uplan%ifft2ig
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
    call gpu_ctx_free(uplan%gpu_ctx_spc)
    call gpu_ctx_free(uplan%gpu_ctx_dpc)
    !$OMP TARGET EXIT DATA MAP(delete:ig2ifft, ifft2ig)
@@ -5179,7 +5194,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
  integer(c_size_t) :: idat, ir, offset, bufsize
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  integer(c_size_t) :: ispinor, ipw, ifft, ig
  logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ig2ifft(:)
@@ -5229,7 +5244,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
    end if
 
  else
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(uplan%gpu_ctx_spc)) then
      call gpu_ctx_init(uplan%gpu_ctx_spc, uplan%ngfft, uplan%ngfft, uplan%batch_size, sp)
@@ -5324,7 +5339,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
  integer(c_size_t) :: idat, ir, offset, bufsize
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  integer(c_size_t) :: ispinor, ipw, ifft, ig
  logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ig2ifft(:)
@@ -5374,7 +5389,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
    end if
 
  else
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(uplan%gpu_ctx_dpc)) then
      call gpu_ctx_init(uplan%gpu_ctx_dpc, uplan%ngfft, uplan%ngfft, uplan%batch_size, dp)
@@ -5469,7 +5484,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, gpu_map__, nfft
  integer(c_size_t) :: idat, ispinor, ipw, ifft, ir, ig, offset, bufsize
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ifft2ig(:)
 #endif
@@ -5517,7 +5532,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
    end select
 
  else
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(uplan%gpu_ctx_spc)) then
      call gpu_ctx_init(uplan%gpu_ctx_spc, uplan%ngfft, uplan%ngfft, uplan%batch_size, sp)
@@ -5606,7 +5621,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
  integer(c_size_t) :: idat, ir, offset, bufsize
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  integer(c_size_t) :: ispinor, ipw, ifft, ig
  logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ifft2ig(:)
@@ -5655,7 +5670,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
    end select
 
  else
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(uplan%gpu_ctx_dpc)) then
      call gpu_ctx_init(uplan%gpu_ctx_dpc, uplan%ngfft, uplan%ngfft, uplan%batch_size, dp)

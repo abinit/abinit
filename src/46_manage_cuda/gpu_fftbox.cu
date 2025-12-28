@@ -1,3 +1,20 @@
+/**
+ * @file gpu_fftbox.cu
+ * @brief CUDA GPU context and FFT execution utilities callable from Fortran.
+ *
+ * This file provides a minimal GPU execution context encapsulating:
+ *   - a CUDA stream,
+ *   - a cuFFT plan,
+ *   - a cuBLAS handle bound to the same stream.
+ *
+ * The API is designed to be called from Fortran via `ISO_C_BINDING`,
+ * using opaque `type(c_ptr)` handles on the Fortran side.
+ *
+ * All GPU resources are owned by the context and must be explicitly
+ * released via gpu_ctx_free().
+ *
+ * This code is compiled only when HAVE_GPU_CUDA is enabled.
+ */
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
@@ -13,12 +30,36 @@
 #include "cuda_api_error_check.h"
 
 
+/**
+ * @struct gpu_context_t
+ * @brief Opaque GPU execution context.
+ *
+ * This structure groups all GPU resources required for FFT-based
+ * operations:
+ *   - cuFFT plan for batched 3D complex-to-complex transforms,
+ *   - CUDA stream used for all operations,
+ *   - cuBLAS handle associated with the same stream.
+ *
+ * The structure is opaque to Fortran and accessed only through
+ * a `void *` handle.
+ */
+
 typedef struct {
   cufftHandle     fft_plan;
   cudaStream_t    stream;
   cublasHandle_t  cublas_handle;
 } gpu_context_t;
 
+/**
+ * @brief Convert Fortran FFT sign to cuFFT direction.
+ *
+ * @param[in]  isign     FFT sign convention (Fortran-style).
+ *                       +1 : inverse FFT
+ *                       -1 : forward FFT
+ * @param[out] direction Corresponding cuFFT direction constant.
+ *
+ * @abort On invalid value of isign.
+ */
 
 static void
 _get_direction(int isign, int *direction){
@@ -35,6 +76,17 @@ _get_direction(int isign, int *direction){
     abi_cabort();
   }
 }
+
+/**
+ * @brief Determine cuFFT type and buffer size from precision.
+ *
+ * @param[in]  dist_batch Total number of complex elements.
+ * @param[in]  kind       Fortran kind (4 = single, 8 = double).
+ * @param[out] type       cuFFT transform type (C2C or Z2Z).
+ * @param[out] nbytes     Required buffer size in bytes.
+ *
+ * @abort On unsupported kind.
+ */
 
 static void
 _get_type_nbytes(int dist_batch, int kind, cufftType *type, size_t *nbytes){
@@ -53,6 +105,27 @@ _get_type_nbytes(int dist_batch, int kind, cufftType *type, size_t *nbytes){
     abi_cabort();
   }
 }
+
+/**
+ * @brief Initialize a GPU FFT execution context.
+ *
+ * This routine:
+ *   - allocates a new GPU context,
+ *   - creates a CUDA stream,
+ *   - builds a batched 3D cuFFT plan,
+ *   - creates a cuBLAS handle bound to the same stream.
+ *
+ * Array dimensions are passed from Fortran and converted to C row-major order.
+ *
+ * @param[out] void_ctx Opaque GPU context pointer (Fortran c_ptr).
+ * @param[in]  f_dims   FFT dimensions (Fortran order, size 3).
+ * @param[in]  f_embed  Embedded dimensions (Fortran order, size 3).
+ * @param[in]  batch    Number of FFT batches.
+ * @param[in]  kind     Fortran kind (4 = single precision, 8 = double).
+ *
+ * @note Ownership of the context is transferred to the caller.
+ *       The context must be released with gpu_ctx_free().
+ */
 
 extern "C" void
 gpu_ctx_init(void **void_ctx, int *f_dims, int *f_embed, int batch, int kind) {
@@ -92,6 +165,36 @@ gpu_ctx_init(void **void_ctx, int *f_dims, int *f_embed, int batch, int kind) {
   *void_ctx = (void *) ctx;
 }
 
+/**
+ * @brief Synchronize the GPU stream associated with a context.
+ *
+ * Blocks until all previously issued operations on the stream
+ * have completed.
+ *
+ * @param[in] void_ctx Opaque GPU context pointer.
+ */
+
+extern "C" void
+gpu_ctx_synch(void *void_ctx) {
+
+  gpu_context_t *ctx = (gpu_context_t *) void_ctx;
+  CHECK_CUDA_ERROR(cudaStreamSynchronize(ctx->stream));
+}
+
+/**
+ * @brief Destroy a GPU context and release all associated resources.
+ *
+ * This routine:
+ *   - destroys the cuFFT plan,
+ *   - destroys the cuBLAS handle,
+ *   - destroys the CUDA stream,
+ *   - frees the context structure,
+ *   - sets the caller pointer to NULL.
+ *
+ * Safe to call multiple times.
+ *
+ * @param[in,out] void_ctx Pointer to opaque GPU context handle.
+ */
 
 extern "C" void
 gpu_ctx_free(void **void_ctx)
@@ -109,9 +212,23 @@ gpu_ctx_free(void **void_ctx)
   *void_ctx = NULL;
 }
 
+/**
+ * @brief In-place complex-to-complex FFT on the GPU.
+ *
+ * Executes a batched 3D FFT in-place using the context's cuFFT plan.
+ * Optional scaling is applied for forward transforms using cuBLAS.
+ *
+ * @param[in]     void_ctx Opaque GPU context pointer.
+ * @param[in]     nfft     Number of grid points per FFT.
+ * @param[in]     batch   Number of FFT batches.
+ * @param[in]     isign   FFT sign (+1 inverse, -1 forward).
+ * @param[in]     iscale  Apply scaling if non-zero.
+ * @param[in]     kind    Precision kind (4 = single, 8 = double).
+ * @param[in,out] d_ff    Device pointer to input/output data.
+ */
 
 extern "C" void
-gpu_fftbox_c2c_ip(void *void_cxt, int nfft, int batch, int isign, int iscale, int kind, void **d_ff) {
+gpu_fftbox_c2c_ip(void *void_ctx, int nfft, int batch, int isign, int iscale, int kind, void **d_ff) {
 
   //printf("in gpu_fftbox_c2c_ip");
   cufftType type;
@@ -120,7 +237,7 @@ gpu_fftbox_c2c_ip(void *void_cxt, int nfft, int batch, int isign, int iscale, in
   _get_direction(isign, &direction);
   _get_type_nbytes(0, kind, &type, &nbytes);
 
-  gpu_context_t *ctx = (gpu_context_t *) void_cxt;
+  gpu_context_t *ctx = (gpu_context_t *) void_ctx;
 
   // Transform the signal in place.
   if (type == CUFFT_C2C) {
@@ -139,9 +256,24 @@ gpu_fftbox_c2c_ip(void *void_cxt, int nfft, int batch, int isign, int iscale, in
     }
   }
 
-  CHECK_CUDA_ERROR(cudaStreamSynchronize(ctx->stream));
+  //CHECK_CUDA_ERROR(cudaStreamSynchronize(ctx->stream));
 }
 
+/**
+ * @brief Out-of-place complex-to-complex FFT on the GPU.
+ *
+ * Executes a batched 3D FFT using distinct input and output buffers.
+ * Optional scaling is applied for forward transforms using cuBLAS.
+ *
+ * @param[in]  void_ctx Opaque GPU context pointer.
+ * @param[in]  nfft     Number of grid points per FFT.
+ * @param[in]  batch   Number of FFT batches.
+ * @param[in]  isign   FFT sign (+1 inverse, -1 forward).
+ * @param[in]  iscale  Apply scaling if non-zero.
+ * @param[in]  kind    Precision kind (4 = single, 8 = double).
+ * @param[in]  d_ff    Device pointer to input data.
+ * @param[out] d_gg    Device pointer to output data.
+ */
 
 extern "C" void
 gpu_fftbox_c2c_op(void *void_ctx, int nfft, int batch, int isign, int iscale, int kind,
@@ -172,7 +304,7 @@ gpu_fftbox_c2c_op(void *void_ctx, int nfft, int batch, int isign, int iscale, in
     }
   }
 
-  CHECK_CUDA_ERROR(cudaStreamSynchronize(ctx->stream));
+  //CHECK_CUDA_ERROR(cudaStreamSynchronize(ctx->stream));
 }
 
 #endif
