@@ -170,7 +170,7 @@ module m_fft
    subroutine gpu_ctx_synch(ctx) bind(C)
      use, intrinsic :: iso_c_binding
      type(c_ptr), value :: ctx
-   end subroutine gpu_ctx_synch(ctx) bind(C)
+   end subroutine gpu_ctx_synch
    subroutine gpu_ctx_free(ctx) bind(C)
      use, intrinsic :: iso_c_binding
      type(c_ptr) :: ctx
@@ -443,6 +443,8 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, &
      call gpu_ctx_init(plan%gpu_ctx_spc, plan%dims, plan%embed, ndat__, sp)
    end if
 
+   plan%batch_size = ndat__
+
    transfer_ff = .False.
    if (gpu_map__ /= 0) then
      transfer_ff = .not. xomp_target_is_present(c_loc(ff))
@@ -530,6 +532,8 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, &
      call gpu_ctx_init(plan%gpu_ctx_dpc, plan%dims, plan%embed, ndat__, dp)
    end if
 
+   plan%batch_size = ndat__
+
    transfer_ff = .False.
    if (gpu_map__ /= 0) then
      transfer_ff = .not. xomp_target_is_present(c_loc(ff))
@@ -616,6 +620,8 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, &
      call gpu_ctx_free(plan%gpu_ctx_spc)
      call gpu_ctx_init(plan%gpu_ctx_spc, plan%dims, plan%embed, ndat__, sp)
    end if
+
+   plan%batch_size = ndat__
 
    transfer_ff = .False.; transfer_gg = .False.
    if (gpu_map__ /= 0) then
@@ -706,6 +712,8 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, &
      call gpu_ctx_free(plan%gpu_ctx_dpc)
      call gpu_ctx_init(plan%gpu_ctx_dpc, plan%dims, plan%embed, ndat__, dp)
    end if
+
+   plan%batch_size = ndat__
 
    transfer_ff = .False.; transfer_gg = .False.
    if (gpu_map__ /= 0) then
@@ -5256,6 +5264,8 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
      call gpu_ctx_init(uplan%gpu_ctx_spc, uplan%ngfft, uplan%ngfft, ndat, sp)
    end if
 
+   uplan%batch_size = ndat
+
    transfer_ug = .False.; transfer_ur = .False.
    if (gpu_map__ /= 0) then
      transfer_ug = .not. xomp_target_is_present(c_loc(ug))
@@ -5401,6 +5411,8 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
      call gpu_ctx_init(uplan%gpu_ctx_dpc, uplan%ngfft, uplan%ngfft, ndat, dp)
    end if
 
+   uplan%batch_size = ndat
+
    transfer_ug = .False.; transfer_ur = .False.
    if (gpu_map__ /= 0) then
      transfer_ug = .not. xomp_target_is_present(c_loc(ug))
@@ -5544,6 +5556,8 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
      call gpu_ctx_init(uplan%gpu_ctx_spc, uplan%ngfft, uplan%ngfft, ndat, sp)
    end if
 
+   uplan%batch_size = ndat
+
    transfer_ug = .False.; transfer_ur = .False.
    if (gpu_map__ /= 0) then
      transfer_ug = .not. xomp_target_is_present(c_loc(ug))
@@ -5681,6 +5695,8 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
      call gpu_ctx_free(uplan%gpu_ctx_dpc)
      call gpu_ctx_init(uplan%gpu_ctx_dpc, uplan%ngfft, uplan%ngfft, ndat, dp)
    end if
+
+   uplan%batch_size = ndat
 
    transfer_ug = .False.; transfer_ur = .False.
    if (gpu_map__ /= 0) then
