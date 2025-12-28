@@ -3001,8 +3001,8 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
    associate (desc_k => desc_mykbz(my_ikf))
    call uplan_k%init(desc_k%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_k%istwfk, &
                      desc_k%gvec, gwp, &
-                     0)             ! FIXME gpu_option
-                     !gpu_option)   ! FIXME bug if batch size > 1 with gpu, other calls look OK though
+                     !0)             ! FIXME gpu_option
+                     gpu_option)   ! FIXME bug if batch size > 1 with gpu, other calls look OK though
 
    do ipm=1,2
      ! Allocate rgp PBLAS matrix to store G_kbz(r,g')
@@ -3111,8 +3111,8 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
 
  call uplan_k%init(desc_kbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_kbz%istwfk, &
                    desc_kbz%gvec, gwp, &
-                   0)
-                   !gpu_option) ! FIXME gpu_option
+                   !0)
+                   gpu_option) ! FIXME gpu_option
 
  ! For each tau in imp_list__
  do ii=1,num_pm
@@ -3290,7 +3290,6 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
    call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=-isign, iscale=0, gpu_map=1)
  end do
 
- !g_gp%buffer_cplx = scale_fact * g_gp%buffer_cplx
  call uplan_k%free(); call r_gp%free()
 
 end subroutine gwr_rpr_to_ggp
@@ -3468,8 +3467,8 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
 
    call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_q%istwfk, &
                      desc_q%gvec, gwp, &
-                     0)           ! FIXME: gpu_option
-                     !gpu_option) ! FIXME bug if batch size > 1 with gpu, other calls look OK though
+                     !0)           ! FIXME: gpu_option
+                     gpu_option) ! FIXME bug if batch size > 1 with gpu, other calls look OK though
 
    ! FFT and store results in rgp
    do ig2=1,wc_qbz%size_local(2), gwr%uc_batch_size
@@ -3560,8 +3559,8 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
 
  call uplan_k%init(desc_qbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_qbz%istwfk, &
                    desc_qbz%gvec, gwp, &
-                   0)             ! FIXME gpu_option
-                   !gpu_option)   ! FIXME bug if batch size > 1 with gpu, other calls look OK though
+                   !0)             ! FIXME gpu_option
+                   gpu_option)   ! FIXME bug if batch size > 1 with gpu, other calls look OK though
 
  ! FFT Wc(g,g') -> Wc(r,g') and store results in rgp
  do ig2=1,wc_ggp%size_local(2), gwr%uc_batch_size
