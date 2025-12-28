@@ -424,8 +424,6 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, &
 #endif
 ! *************************************************************************
 
- !ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
-
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
@@ -513,7 +511,6 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, &
 ! *************************************************************************
 
  !call wrtout(std_out, "in fftbox_execute_ip_dpc")
- !ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
 
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
@@ -602,7 +599,6 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, &
 ! *************************************************************************
 
  !call wrtout(std_out, "in fftbox_execute_op_spc")
- !ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
 
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
@@ -694,7 +690,6 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, &
 ! *************************************************************************
 
  !call wrtout(std_out, "in fftbox_execute_op_dpc")
- !ABI_CHECK_ILEQ(ndat, plan%batch_size, "ndat > batch_size!")
 
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
@@ -5212,7 +5207,6 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
 ! *************************************************************************
 
  !call wrtout(std_out, "in uplan_execute_gr_spc")
- !ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
  ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
 
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
@@ -5362,7 +5356,6 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
 ! *************************************************************************
 
  !call wrtout(std_out, "in uplan_execute_gr_dpc")
- !ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
  ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
 
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
@@ -5509,7 +5502,6 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
 ! *************************************************************************
 
  !call wrtout(std_out, "in uplan_execute_rg_spc")
- !ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
  ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
 
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
@@ -5525,7 +5517,6 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
  nspinor = uplan%nspinor; npw = uplan%npw; nfft = uplan%nfft
 
  if (uplan%gpu_option == ABI_GPU_DISABLED) then
-
    ! Multiply by e^{ik.r}
    if (present(phase_r)) then
      bufsize = int(nfft, c_size_t) * nspinor
@@ -5653,7 +5644,6 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
 ! *************************************************************************
 
  !call wrtout(std_out, "in uplan_execute_rg_dpc")
- !ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
  ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
 
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
