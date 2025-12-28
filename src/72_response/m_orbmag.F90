@@ -1481,7 +1481,7 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,e
         doti = DOT_PRODUCT(cwavef(1,:),gh1c(2,:))-DOT_PRODUCT(cwavef(2,:),gh1c(1,:))
         deltapert = (dotr*dotr + doti*doti)/deltae
         if (abs(deltapert) .GT. dtset%userra) then
-          write(std_out,'(a,3i4,es16.8)')'JWZ debug adir iband jband deltae deltapert',& 
+          write(std_out,'(a,3i4,2es16.8)')'JWZ debug adir iband jband deltae deltapert',& 
             & adir,iband,jband,deltae,deltapert
           cycle
         end if
