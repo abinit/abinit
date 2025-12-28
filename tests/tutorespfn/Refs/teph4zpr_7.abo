@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h04 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h04 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7-teph4zpr_8/teph4zpr_7.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7-teph4zpr_8-teph4zpr_9/teph4zpr_7.abi
 - output file    -> teph4zpr_7.abo
 - root for input  files -> teph4zpr_7i
 - root for output files -> teph4zpr_7o
@@ -280,12 +280,12 @@ P           mkmem3         72
                          0.01389    0.02778
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.1263589907E+00  2.1263589907E+00  2.1263589907E+00
+                       2.1263589985E+00  2.1263589985E+00  2.1263589985E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        4.0182361526E+00  4.0182361526E+00  4.0182361526E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
-             zcut      3.67493254E-04 Hartree
+             zcut      3.67493222E-04 Hartree
             znucl        8.00000   12.00000
 
 ================================================================================
@@ -449,8 +449,8 @@ meta: {optdriver: 7, eph_task: 4, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -464,8 +464,8 @@ meta: {optdriver: 7, eph_task: 4, }
              2   -4.371486
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mg-sp-gw.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1235,12 +1235,12 @@ P           mkmem3         72
             tmesh      0.00000000E+00  1.00000000E+02  4.00000000E+00
             typat      2  1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.1263589907E+00  2.1263589907E+00  2.1263589907E+00
+                       2.1263589985E+00  2.1263589985E+00  2.1263589985E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        4.0182361526E+00  4.0182361526E+00  4.0182361526E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
-             zcut      3.67493254E-04 Hartree
+             zcut      3.67493222E-04 Hartree
             znucl        8.00000   12.00000
 
 ================================================================================
@@ -1337,10 +1337,10 @@ P           mkmem3         72
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         17.8  wall=         18.7
+- Proc.   0 individual time (sec): cpu=         18.2  wall=         18.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.8  wall=         18.7
++Overall time at end (sec) : cpu=         18.2  wall=         18.3

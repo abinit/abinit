@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h12 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h13 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t51/t51.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v67mbpt_t51/t51.abi
 - output file    -> t51.abo
 - root for input  files -> t51i
 - root for output files -> t51o
@@ -65,9 +65,9 @@ _ WF disk file :      0.196 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           3
        mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.281 Mbytes of memory.
+P This job should need less than                       3.266 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.209 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      0.196 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -99,10 +99,10 @@ _ WF disk file :      0.113 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
-     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh3     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh4     0.00000000E+00  3.67493254E-01  3.67493254E-04 Hartree
+     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh3     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh4     0.00000000E+00  3.67493222E-01  3.67493222E-04 Hartree
  bs_haydock_niter1        100
  bs_haydock_niter2        100
  bs_haydock_niter3        100
@@ -171,7 +171,7 @@ _ WF disk file :      0.113 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
        mbpt_sciss1     0.00000000E+00 Hartree
        mbpt_sciss2     0.00000000E+00 Hartree
        mbpt_sciss3     0.00000000E+00 Hartree
-       mbpt_sciss4     2.93994603E-02 Hartree
+       mbpt_sciss4     2.93994577E-02 Hartree
 P           mkmem1         10
 P           mkmem2          3
 P           mkmem3          3
@@ -292,12 +292,12 @@ P           mkmem4          3
               wtk3       0.12500    0.50000    0.37500
               wtk4       0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
-             zcut      3.67493254E-06 Hartree
+             zcut      3.67493222E-06 Hartree
             znucl       14.00000
 
 ================================================================================
@@ -339,8 +339,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -436,7 +436,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -448,7 +448,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t51o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.20600   Average Vxc (hartree)=  -0.35482
  Eigenvalues (hartree) for nkpt=  10  k points:
@@ -469,7 +469,7 @@ psp_core            :  8.60437873155177E-02
 local_psp           : -2.43141062809014E+00
 non_local_psp       :  1.88324866263482E+00
 total_energy        : -8.87565704142536E+00
-total_energy_eV     : -2.41518910763938E+02
+total_energy_eV     : -2.41518931941087E+02
 band_energy         :  2.28143225508712E-01
 ...
 
@@ -480,9 +480,9 @@ band_energy         :  2.28143225508712E-01
   sigma(3 3)=  3.38568146E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -9.9610E-01 GPa]
-- sigma(1 1)=  9.96101709E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  9.96101709E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  9.96101709E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  9.96101877E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  9.96101877E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  9.96101877E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -567,9 +567,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t51o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   3  k points:
  kpt#   1, nband= 14, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1032,7 +1032,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
    0.0500  62.6470   0.1209  48.8189   0.0565  57.1952   0.0976
    0.0600  62.6562   0.1451  48.8230   0.0678  57.2019   0.1172
    0.0700  62.6671   0.1693  48.8280   0.0791  57.2098   0.1367
-   0.0800  62.6797   0.1936  48.8336   0.0904  57.2189   0.1563
+   0.0800  62.6797   0.1936  48.8337   0.0904  57.2189   0.1563
    0.0900  62.6939   0.2179  48.8401   0.1017  57.2292   0.1759
 
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0010_RPA_NLF_MDF
@@ -1050,8 +1050,8 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
    0.0000  63.1123   0.0000  49.1046   0.0000  57.5518   0.0000
    0.0100  63.1132   0.0280  49.1050   0.0130  57.5524   0.0225
    0.0200  63.1157   0.0559  49.1061   0.0260  57.5543   0.0450
-   0.0300  63.1200   0.0839  49.1080   0.0389  57.5573   0.0675
-   0.0400  63.1260   0.1119  49.1107   0.0519  57.5617   0.0900
+   0.0300  63.1200   0.0839  49.1081   0.0389  57.5573   0.0675
+   0.0400  63.1260   0.1119  49.1108   0.0519  57.5617   0.0900
    0.0500  63.1337   0.1399  49.1142   0.0649  57.5672   0.1125
    0.0600  63.1432   0.1680  49.1185   0.0779  57.5740   0.1350
    0.0700  63.1543   0.1960  49.1235   0.0909  57.5820   0.1576
@@ -1065,10 +1065,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  -outvars: echo values of variables after computation  --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
-     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh3     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh4     0.00000000E+00  3.67493254E-01  3.67493254E-04 Hartree
+     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh3     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh4     0.00000000E+00  3.67493222E-01  3.67493222E-04 Hartree
  bs_haydock_niter1        100
  bs_haydock_niter2        100
  bs_haydock_niter3        100
@@ -1146,7 +1146,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
        mbpt_sciss1     0.00000000E+00 Hartree
        mbpt_sciss2     0.00000000E+00 Hartree
        mbpt_sciss3     0.00000000E+00 Hartree
-       mbpt_sciss4     2.93994603E-02 Hartree
+       mbpt_sciss4     2.93994577E-02 Hartree
 P           mkmem1         10
 P           mkmem2          3
 P           mkmem3          3
@@ -1273,12 +1273,12 @@ P           mkmem4          3
               wtk3       0.12500    0.50000    0.37500
               wtk4       0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
-             zcut      3.67493254E-06 Hartree
+             zcut      3.67493222E-06 Hartree
             znucl       14.00000
 
 ================================================================================
@@ -1370,10 +1370,10 @@ P           mkmem4          3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.8  wall=          3.9
+- Proc.   0 individual time (sec): cpu=          3.7  wall=          3.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.8  wall=          3.9
+.Delivered  12 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.7  wall=          3.9
