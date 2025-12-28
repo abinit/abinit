@@ -1,5 +1,5 @@
 
-.Version 10.5.8.7 of ABINIT, released Oct 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h04 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h05 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_teph4isotc_1-teph4isotc_2-teph4isotc_3-teph4isotc_4-teph4isotc_5-teph4isotc_6-teph4isotc_7/teph4isotc_6.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_teph4isotc_1-teph4isotc_2-teph4isotc_3-teph4isotc_4-teph4isotc_5-teph4isotc_6-teph4isotc_7/teph4isotc_6.abi
 - output file    -> teph4isotc_6.abo
 - root for input  files -> teph4isotc_6i
 - root for output files -> teph4isotc_6o
@@ -260,8 +260,8 @@ P           mkmem         370
                          0.00412    0.00412
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -8.9085146186E-01  1.5429999939E+00  1.7614999931E+00
-                       8.9085146186E-01  1.5429999939E+00  1.7614999931E+00
+                      -8.9085146515E-01  1.5429999996E+00  1.7614999996E+00
+                       8.9085146515E-01  1.5429999996E+00  1.7614999996E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                       -1.6834652880E+00  2.9158474116E+00  3.3287525700E+00
                        1.6834652880E+00  2.9158474116E+00  3.3287525700E+00
@@ -388,8 +388,8 @@ meta: {optdriver: 7, eph_task: 11, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Mg-low.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Mg-low.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Mg-low.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Mg-low.psp8
 - Mg    ONCVPSP-3.3.0  r_core=   2.31813   2.10714
 - 12.00000   2.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       400   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -402,8 +402,8 @@ meta: {optdriver: 7, eph_task: 11, }
              1    4.197993    0.757155
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/B.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/B.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/B.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/B.psp8
 - B     ONCVPSP-3.3.0  r_core=   1.20849   1.20849
 -  5.00000   3.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -726,8 +726,8 @@ P           mkmem         370
            tsmear      2.00000000E-02 Hartree
             typat      1  2  2
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -8.9085146186E-01  1.5429999939E+00  1.7614999931E+00
-                       8.9085146186E-01  1.5429999939E+00  1.7614999931E+00
+                      -8.9085146515E-01  1.5429999996E+00  1.7614999996E+00
+                       8.9085146515E-01  1.5429999996E+00  1.7614999996E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                       -1.6834652880E+00  2.9158474116E+00  3.3287525700E+00
                        1.6834652880E+00  2.9158474116E+00  3.3287525700E+00
@@ -821,10 +821,10 @@ P           mkmem         370
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        193.1  wall=        193.4
+- Proc.   0 individual time (sec): cpu=        177.6  wall=        177.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        193.1  wall=        193.4
++Overall time at end (sec) : cpu=        177.6  wall=        177.8
