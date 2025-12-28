@@ -205,7 +205,8 @@ contains
        ! Multiply Q by 1E-8 * Ang_Bohr**2 to get nuclear moment in Bohr^2
        ! resulting vzz*(eQ) is energy in Ha (recall e = 1 in au)
        ! then convert to MHz with Ha_THz*1.E6
-       cq = vzz*quadmom(typat(iatom))*1.0D-8*Ang_Bohr**2*Ha_THz*1.0D6
+       ! resulting factors are Ang_Bohr**2*Ha_THz*1.0D-2
+       cq = vzz*quadmom(typat(iatom))*Ang_Bohr**2*Ha_THz*1.0D-2
        if (abs(cq) > tol8) then
          eta = abs(vxx-vyy)/abs(vzz)
        else
@@ -271,7 +272,7 @@ contains
              vxx = eigval(3)
              vyy = eigval(2)
           end if
-          cq = vzz*quadmom(typat(iatom))*1.0D-8*Ang_Bohr**2*Ha_THz*1.0D6
+          cq = vzz*quadmom(typat(iatom))*Ang_Bohr**2*Ha_THz*1.0D-2
           if (abs(cq) > tol8) then
             eta = abs(vxx-vyy)/abs(vzz)
           else
