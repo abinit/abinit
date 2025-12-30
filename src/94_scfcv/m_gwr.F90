@@ -5949,7 +5949,7 @@ else
    call ltg_kcalc(ikcalc)%print([std_out], prtvol=gwr%dtset%prtvol)
  end do
 
- call wrtout(std_out, "Allocating PBLAS matrices to store Wc_q(r',r,tau), and Sigma_kcalc(r',r,+/-tau) in the unit cell.")
+ call wrtout(std_out, " Allocating PBLAS matrices to store Wc_q(r',r,tau), and Sigma_kcalc(r',r,+/-tau) in the unit cell.")
  nrsp = gwr%g_nfft * gwr%nspinor
  col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
 
@@ -6082,13 +6082,17 @@ else
            !   wtqp * gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx
            bufsize = sigc_rpr(1,ipm,ikcalc)%bufsize
            call cplx_mat_plus_bc(bufsize, sigc_rpr(1,ipm,ikcalc)%buffer_cplx(:,1), &
-                                 wtqp, "N", gk_rpr_pm(ipm)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), gpu_option)
+                                 wtqp, "N", gk_rpr_pm(ipm)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
+                                 0)
+                                 !gpu_option)
 
            if (abs(wtqm) > tol12) then
              ABI_ERROR(sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
 
              call cplx_mat_plus_bc(bufsize, sigc_rpr(2,ipm,ikcalc)%buffer_cplx(:,1), &
-                                   wtqm, "C", gk_rpr_pm(ipm)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), gpu_option)
+                                   wtqm, "C", gk_rpr_pm(ipm)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
+                                   0)
+                                   !gpu_option)
 
              !sigc_rpr(1, ipm, ikcalc)%buffer_cplx = sigc_rpr(1, ipm, ikcalc)%buffer_cplx + &
              !    (wtqp + wtqm) * real(gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx, kind=gwp) &
@@ -6123,7 +6127,7 @@ else
    end do ! my_it
 
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(delete:uc_psir_bk) IF (gpu_option == ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(delete:uc_psir_bk) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
    ABI_FREE(uc_psir_bk)
  end do ! my_is
@@ -6136,7 +6140,7 @@ else
      do ikcalc=1,gwr%nkcalc
        buf_cplx => sigc_rpr(1,ipm,ikcalc)%buffer_cplx
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(delete:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
+       !$OMP TARGET EXIT DATA MAP(delete:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
      end do
    end do
