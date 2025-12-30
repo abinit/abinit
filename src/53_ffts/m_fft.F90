@@ -429,7 +429,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, &
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_GPU
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(plan%gpu_ctx_spc)) then
      call gpu_ctx_init(plan%gpu_ctx_spc, plan%dims, plan%embed, plan%batch_size, sp)
@@ -517,7 +517,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, &
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_GPU
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(plan%gpu_ctx_dpc)) then
      call gpu_ctx_init(plan%gpu_ctx_dpc, plan%dims, plan%embed, plan%batch_size, dp)
@@ -593,7 +593,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, &
  complex(sp),target,intent(inout) :: gg(plan%ldxyz*ndat)
 !Local variables-------------------------------
  integer :: ndat__, iscale__, gpu_map__
-#ifdef HAVE_GPU
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
  logical :: transfer_ff, transfer_gg
 #endif
 ! *************************************************************************
@@ -605,7 +605,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, &
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_GPU
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(plan%gpu_ctx_spc)) then
      call gpu_ctx_init(plan%gpu_ctx_spc, plan%dims, plan%embed, plan%batch_size, sp)
@@ -684,7 +684,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, &
 
 !Local variables-------------------------------
  integer :: ndat__, iscale__, gpu_map__
-#ifdef HAVE_GPU
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
  logical :: transfer_ff, transfer_gg
 #endif
 ! *************************************************************************
@@ -696,7 +696,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, &
  ABI_DEFAULT(gpu_map__, gpu_map, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_GPU
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(plan%gpu_ctx_dpc)) then
      call gpu_ctx_init(plan%gpu_ctx_dpc, plan%dims, plan%embed, plan%batch_size, dp)
@@ -5158,7 +5158,7 @@ subroutine uplan_free(uplan)
  if (uplan%gpu_option == ABI_GPU_OPENMP) then
    ! Free memory on the GPU
    ig2ifft => uplan%ig2ifft; ifft2ig => uplan%ifft2ig
-#ifdef HAVE_GPU
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
    call gpu_ctx_free(uplan%gpu_ctx_spc)
    call gpu_ctx_free(uplan%gpu_ctx_dpc)
    !$OMP TARGET EXIT DATA MAP(delete:ig2ifft, ifft2ig)
@@ -5197,7 +5197,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
  integer(c_size_t) :: idat, ir, offset, bufsize
-#ifdef HAVE_GPU
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
  integer(c_size_t) :: ispinor, ipw, ifft, ig
  logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ig2ifft(:)
@@ -5246,7 +5246,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
    end if
 
  else
-#ifdef HAVE_GPU
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(uplan%gpu_ctx_spc)) then
      !call wrtout(std_out, sjoin("gr: Init plan with batch_size:", itoa(uplan%batch_size)))
@@ -5346,7 +5346,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
  integer(c_size_t) :: idat, ir, offset, bufsize
-#ifdef HAVE_GPU
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
  integer(c_size_t) :: ispinor, ipw, ifft, ig
  logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ig2ifft(:)
@@ -5395,7 +5395,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
    end if
 
  else
-#ifdef HAVE_GPU
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(uplan%gpu_ctx_dpc)) then
      call gpu_ctx_init(uplan%gpu_ctx_dpc, uplan%ngfft, uplan%ngfft, uplan%batch_size, dp)
@@ -5492,10 +5492,10 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
 
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, gpu_map__, nfft
- integer(c_size_t) :: idat, ipw, ir, offset, bufsize
-#ifdef HAVE_GPU
+ integer(c_size_t) :: idat, ir, offset, bufsize
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
  logical :: transfer_ug, transfer_ur
- integer(c_size_t) :: ifft, ig, ispinor
+ integer(c_size_t) :: ifft, ig, ispinor, ipw
  integer, contiguous, pointer :: ifft2ig(:)
 #endif
 ! *************************************************************************
@@ -5540,8 +5540,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
    end select
 
  else
-#ifdef HAVE_GPU
-
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(uplan%gpu_ctx_spc)) then
      !call wrtout(std_out, sjoin("rg: Init plan with batch_size:", itoa(uplan%batch_size)))
@@ -5635,7 +5634,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
 !Local variables-------------------------------
  integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
  integer(c_size_t) :: idat, ir, offset, bufsize
-#ifdef HAVE_GPU
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
  integer(c_size_t) :: ispinor, ipw, ifft, ig
  logical :: transfer_ug, transfer_ur
  integer, contiguous, pointer :: ifft2ig(:)
@@ -5683,7 +5682,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
    end select
 
  else
-#ifdef HAVE_GPU
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
    ! Build plan if not yet done. note batch_size instead of ndat.
    if (.not. c_associated(uplan%gpu_ctx_dpc)) then
      call gpu_ctx_init(uplan%gpu_ctx_dpc, uplan%ngfft, uplan%ngfft, uplan%batch_size, dp)
