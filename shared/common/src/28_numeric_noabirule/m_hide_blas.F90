@@ -341,18 +341,18 @@ interface xgemv
   !
   subroutine cgemv ( trans, m, n, alpha, a, lda, x, incx, beta, y, incy )
     use defs_basis
-    complex(sp),intent(in) :: alpha, beta
-    integer,intent(in) :: incx, incy, lda, m, n
     character(len=1),intent(in) :: trans
+    integer,intent(in) :: incx, incy, lda, m, n
+    complex(sp),intent(in) :: alpha, beta
     complex(sp),intent(in) :: a( lda, * ), x( * )
     complex(sp),intent(inout) :: y( * )
   end subroutine cgemv
   !
   subroutine zgemv ( trans, m, n, alpha, a, lda, x, incx, beta, y, incy )
     use defs_basis
-    complex(dp),intent(in) :: alpha, beta
-    integer,intent(in) :: incx, incy, lda, m, n
     character(len=1),intent(in) :: trans
+    integer,intent(in) :: incx, incy, lda, m, n
+    complex(dp),intent(in) :: alpha, beta
     complex(dp),intent(in) :: a( lda, * ), x( * )
     complex(dp),intent(inout) :: y( * )
   end subroutine zgemv

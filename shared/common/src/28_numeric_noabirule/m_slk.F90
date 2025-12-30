@@ -24,6 +24,7 @@
 
 module m_slk
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  USE_MPI
  use m_xmpi
@@ -138,6 +139,9 @@ module m_slk
 
    integer :: size_local(2) = -1
    ! dimensions of the local buffer.
+
+   integer(c_size_t) :: bufsize = -1
+   ! Size of the local buffer.
 
    integer :: size_global(2) = -1
    ! dimensions of the global matrix.
@@ -405,7 +409,7 @@ module m_slk
  complex(dp),external :: PZLATRA
 #endif
 
-CONTAINS  !==============================================================================
+contains  !==============================================================================
 !!***
 
 !!****f* m_slk/slk_grid_init
@@ -673,6 +677,8 @@ subroutine basemat_init(matrix, nbli_global, nbco_global, processor, istwf_k, &
 
  matrix%size_local(2) = NUMROC(nbco_global,matrix%size_blocs(2), &
                                processor%coords(2), 0, processor%grid%dims(2))
+
+ matrix%bufsize = int(matrix%size_local(1), c_size_t) * int(matrix%size_local(2), c_size_t)
 
  call matrix%idx_loc(matrix%size_global(1), matrix%size_global(2), &
                      matrix%size_local(1), matrix%size_local(2))
