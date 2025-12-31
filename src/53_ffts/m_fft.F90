@@ -1450,7 +1450,9 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    end if
    call wrtout(ount, sjoin(info, msg))
 
+#ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET EXIT DATA MAP(delete: ffsp, ggsp) if (gpu_option == ABI_GPU_OPENMP)
+#endif
    ABI_FREE(ffsp)
    ABI_FREE(ggsp)
    ABI_FREE(ff_refsp)
@@ -1515,7 +1517,9 @@ integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(
    end if
    call wrtout(ount, sjoin(info, msg))
 
+#ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET EXIT DATA MAP(delete: ff, gg) if (gpu_option == ABI_GPU_OPENMP)
+#endif
    ABI_FREE(ff)
    ABI_FREE(gg)
    ABI_FREE(ff_ref)
