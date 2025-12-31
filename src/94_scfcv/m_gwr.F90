@@ -169,7 +169,7 @@ module m_gwr
  use m_gsphere,       only : kg_map, gsphere_t
  use m_melemts,       only : melements_t
  use m_ioarr,         only : fftdatar_write
- use m_slk,           only : slkmat_dp_t, slkmat_sp_t, slk_processor_t, slk_array_free, slk_array_set, &
+ use m_slk,           only : slkmat_dp_t, slkmat_sp_t, slk_processor_t, slk_array_free, slk_array_set_zero, &
                              slk_array_locmem_mb, block_dist_1d, slk_pgemm
  use m_wfk,           only : wfk_read_ebands, wfk_t
  use m_wfd,           only : wfd_t, wfdgw_t
@@ -3139,11 +3139,12 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
    do ir1=1, gpr%size_local(2), gwr%uc_batch_size
      ! G_k(g',r) -> G_k(r',r) and store results in rgp.
      ndat = blocked_loop(ir1, gpr%size_local(2), gwr%uc_batch_size)
-
      if (have_g0) then
-       call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), isign=-1, iscale=0, phase_r=conjg_ceig0r, gpu_map=1)
+       call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), &
+                              isign=-1, iscale=0, phase_r=conjg_ceig0r, gpu_map=1)
      else
-       call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), isign=-1, iscale=0, gpu_map=1)
+       call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), &
+                               isign=-1, iscale=0, gpu_map=1)
      end if
    end do ! ir1
    call gpr%free()
@@ -4811,7 +4812,7 @@ subroutine gwr_build_tchi(gwr)
 
    ! The little group is needed when symchi == 1 (default)
    ! If use_umklp == 1 then symmetries requiring an umklapp to preserve qibz are included as well.
-   ! Note that TR is not yet supported so timrev is set to 1 even if TR has been used to generate the GS IBZ.
+   ! TODO: Note that TR is not yet supported so timrev is set to 1 even if TR has been used to generate the GS IBZ.
    ABI_MALLOC(ltg_qibz, (gwr%nqibz))
    use_umklp = 1
    do iq_ibz=1,gwr%nqibz
@@ -4847,7 +4848,7 @@ subroutine gwr_build_tchi(gwr)
      if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
      ! Sum over my k-points in the BZ.
-     call slk_array_set(chiq_rpr, czero)
+     call slk_array_set_zero(chiq_rpr)
 
      do my_ikf=1,gwr%my_nkbz
        print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
@@ -4924,7 +4925,7 @@ subroutine gwr_build_tchi(gwr)
        buf_cplx => chiq_rpr(iq_ibz)%buffer_cplx
 #ifdef HAVE_OPENMP_OFFLOAD
        if (iq_ibz == 1) call wrtout(std_out, " Deallocating Chi_q(r,r', +tau) on the GPU...")
-       !$OMP TARGET ENTER DATA MAP(delete:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
+       !$OMP TARGET EXIT DATA MAP(delete:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
      end do
    end if
@@ -6002,6 +6003,7 @@ else
    call wrtout(std_out, " Allocating Sigma_k(r,r', +/-tau) on the GPU...")
    do ipm=1,2
      do ikcalc=1,gwr%nkcalc
+       !call sigc_rpr(1,ipm,ikcalc)%gpu_map("alloc")
        buf_cplx => sigc_rpr(1,ipm,ikcalc)%buffer_cplx
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
@@ -6055,7 +6057,7 @@ else
      call gwr%redistrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "communicate")
      if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
-     call slk_array_set(sigc_rpr, czero)
+     call slk_array_set_zero(sigc_rpr)
 
      ! Sum over my k-points in the BZ.
      do my_ikf=1,gwr%my_nkbz
@@ -6162,9 +6164,10 @@ else
  sigc_it_mat = -sigc_it_mat * (one/gwr%g_nfft) ** 2
 
  if (gpu_option == ABI_GPU_OPENMP) then
-   call wrtout(std_out, " deallocating Sigma_k(r,r', +/-tau) on the GPU...")
+   call wrtout(std_out, " Deallocating Sigma_k(r,r', +/-tau) on the GPU...")
    do ipm=1,2
      do ikcalc=1,gwr%nkcalc
+       !call sigc_rpr(1,ipm,ikcalc)%gpu_map("delete")
        buf_cplx => sigc_rpr(1,ipm,ikcalc)%buffer_cplx
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET EXIT DATA MAP(delete:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)

@@ -28,15 +28,18 @@ module m_slk
  use defs_basis
  USE_MPI
  use m_xmpi
+ use m_xomp
  use m_errors
  use m_abicore
+
 #ifdef HAVE_LINALG_ELPA
  use m_elpa
 #endif
 
- use m_fstrings,      only : firstchar, toupper, itoa, sjoin, ltoa
+ use m_fstrings,      only : firstchar, toupper, itoa, sjoin, ltoa, string_in
  use m_time,          only : cwtime, cwtime_report
  use m_numeric_tools, only : blocked_loop !, print_arr
+ !use m_abi_linalg,    only : gpu_memset
 
  implicit none
 
@@ -115,10 +118,8 @@ module m_slk
    ! the grid to which the processor is associated to.
 
  contains
-   procedure :: init => slk_processor_init
-    ! Initializes an instance of processor ScaLAPACK from a MPI communicator.
-   procedure :: free => slk_processor_free
-    ! Free the object
+   procedure :: init => slk_processor_init     ! Initializes an instance of processor ScaLAPACK from a MPI communicator.
+   procedure :: free => slk_processor_free     ! Free the object
  end type slk_processor_t
 !!***
 
@@ -185,6 +186,9 @@ module m_slk
 
    procedure :: check_local_shape => basemat_check_local_shape
    !  Debugging tool to test the local shape `lshape` of the local buffer.
+
+   procedure :: gpu_map => basemat_gpu_map
+   !  Use Opemp to allocate/delete the local buffer on the GPU.
 
    procedure :: free => basemat_free
     ! Free memory
@@ -396,7 +400,8 @@ module m_slk
    module procedure slk_array4_free
  end interface slk_array_free
 
- public :: slk_array_set                       ! Elemental routine to set the value of the buffer to a costant value `cvalue`.
+ public :: slk_array_set_zero                  ! Elemental routine to zero the value of the local buffer.
+ !public :: slk_array_gpu_set_zero              ! Elemental routine to zero the value of the local buffer on the GPU
  public :: slk_array_locmem_mb                 ! Compute memory allocated for an array of slkmat_dp_t elements
 
  ! External functions.
@@ -1273,32 +1278,160 @@ end subroutine slk_array4_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_slk/slk_array_set
+!!****f* m_slk/slk_array_set_zero
 !! NAME
-!!  slk_array_set
+!!  slk_array_set_zero
 !!
 !! FUNCTION
-!!  Elemental routine to set the value of the PBLAS buffer to a costant value `cvalue`.
-!!  Usually used to zero all the buffers in an array of slkmat_dp_t objects.
+!!  Elemental routine to set the value of the PBLAS buffer to zero
 !!
 !! SOURCE
 
-elemental subroutine slk_array_set(mat, cvalue)
+elemental subroutine slk_array_set_zero(mat)
 
 !Arguments ------------------------------------
  class(basemat_t),intent(inout) :: mat
- complex(dp),intent(in) :: cvalue
 
  select type (mat)
  class is (slkmat_dp_t)
-   if (allocated(mat%buffer_cplx)) mat%buffer_cplx = cvalue
-   if (allocated(mat%buffer_real)) mat%buffer_real = real(cvalue, kind=dp)
+   if (allocated(mat%buffer_cplx)) mat%buffer_cplx = zero
+   if (allocated(mat%buffer_real)) mat%buffer_real = zero
  class is (slkmat_sp_t)
-   if (allocated(mat%buffer_cplx)) mat%buffer_cplx = cmplx(cvalue, kind=sp)
-   if (allocated(mat%buffer_real)) mat%buffer_real = real(cvalue, kind=sp)
+   if (allocated(mat%buffer_cplx)) mat%buffer_cplx = cmplx(zero, kind=sp)
+   if (allocated(mat%buffer_real)) mat%buffer_real = real(zero, kind=sp)
  end select
 
-end subroutine slk_array_set
+end subroutine slk_array_set_zero
+!!***
+
+!! !----------------------------------------------------------------------
+!!
+!! !!****f* m_slk/slk_array_gpu_set_zero
+!! !! NAME
+!! !!  slk_array_gpu_set
+!! !!
+!! !! FUNCTION
+!! !!  Elemental routine to set the value of the PBLAS buffer to zero
+!! !!
+!! !! SOURCE
+!!
+!! subroutine slk_array_gpu_set_zero(mat)
+!!
+!! !Arguments ------------------------------------
+!!  class(basemat_t),target,intent(inout) :: mat
+!!
+!! !Local variables-------------------------------
+!!  type(c_ptr) :: gpu_ptr
+!! ! *********************************************************************
+!!
+!! #ifdef HAVE_OPENMP_OFFLOAD
+!!  select type (mat)
+!!  class is (slkmat_dp_t)
+!!    if (allocated(mat%buffer_cplx)) then
+!!      gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_cplx)
+!!      ABI_CHECK_CNULL(gpu_ptr, "buffer_cplx not on GPU!")
+!!      call gpu_memset(gpu_ptr, 0, mat%bufsize*dp*2)
+!!    end if
+!!    if (allocated(mat%buffer_real)) then
+!!      gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_real)
+!!      ABI_CHECK_CNULL(gpu_ptr, "buffer_real not on GPU!")
+!!      call gpu_memset(gpu_ptr, 0, mat%bufsize*dp)
+!!    end if
+!!  class is (slkmat_sp_t)
+!!    if (allocated(mat%buffer_cplx)) then
+!!      mat%buffer_cplx = cmplx(cvalue, kind=sp)
+!!      gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_cplx)
+!!      ABI_CHECK_CNULL(gpu_ptr, "buffer_cplx not on GPU!")
+!!      call gpu_memset(gpu_ptr, 0, mat%bufsize*sp*2)
+!!    end if
+!!    if (allocated(mat%buffer_real)) then
+!!      gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_real)
+!!      ABI_CHECK_CNULL(gpu_ptr, "buffer_real not on GPU!")
+!!      call gpu_memset(gpu_ptr, 0, mat%bufsize*sp)
+!!    end if
+!!  end select
+!! #else
+!!  ABI_ERROR("slk_array_gpu_set cannot be used if HAVE_OPENMP_OFFLOAD is not defined!")
+!! #endif
+!!
+!! end subroutine slk_array_gpu_set_zero
+!! !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slk/basemat_gpu_map
+!! NAME
+!!  basemat_gpu_map
+!!
+!! FUNCTION
+!!  Use Opemp to allocate/delete the local buffer on the GPU.
+!!
+!! SOURCE
+
+subroutine basemat_gpu_map(mat, mode)
+
+!Arguments ------------------------------------
+ class(basemat_t),target,intent(in) :: mat
+ character(len=*), intent(in) :: mode
+
+!Local variables-------------------------------
+#ifdef HAVE_OPENMP_OFFLOAD
+ real(sp), contiguous, pointer :: buf_real_sp(:,:)
+ real(dp), contiguous, pointer :: buf_real_dp(:,:)
+ complex(sp), contiguous, pointer :: buf_cplx_sp(:,:)
+ complex(dp), contiguous, pointer :: buf_cplx_dp(:,:)
+#endif
+! *********************************************************************
+
+ if (.not. string_in(mode, "alloc, delete")) then
+   ABI_ERROR(sjoin("Invalid mode", mode))
+   ABI_UNUSED(mat%size_local(1))
+ end if
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ select type (mat)
+ class is (slkmat_dp_t)
+   if (allocated(mat%buffer_cplx)) then
+     buf_cplx_dp => mat%buffer_cplx
+     if (mode == "alloc") then
+       !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx_dp)
+     else if (mode == "delete") then
+       !$OMP TARGET EXIT DATA MAP(delete:buf_cplx_dp)
+     end if
+   end if
+   if (allocated(mat%buffer_real)) then
+     buf_real_dp => mat%buffer_real
+     if (mode == "alloc") then
+       !$OMP TARGET ENTER DATA MAP(alloc:buf_real_dp)
+     else if (mode == "delete") then
+       !$OMP TARGET EXIT DATA MAP(delete:buf_real_dp)
+     end if
+   end if
+
+ class is (slkmat_sp_t)
+   if (allocated(mat%buffer_cplx)) then
+     buf_cplx_sp => mat%buffer_cplx
+     if (mode == "alloc") then
+       !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx_sp)
+     else if (mode == "delete") then
+       !$OMP TARGET EXIT DATA MAP(delete:buf_cplx_sp)
+     end if
+   end if
+   if (allocated(mat%buffer_real)) then
+     buf_real_sp => mat%buffer_real
+     if (mode == "alloc") then
+       !$OMP TARGET ENTER DATA MAP(alloc:buf_real_sp)
+     else if (mode == "delete") then
+       !$OMP TARGET EXIT DATA MAP(delete:buf_real_sp)
+     end if
+   end if
+ end select
+
+#else
+ ABI_ERROR("slk_gpu_map cannot be used if HAVE_OPENMP_OFFLOAD is not defined!")
+#endif
+
+end subroutine basemat_gpu_map
 !!***
 
 !----------------------------------------------------------------------
