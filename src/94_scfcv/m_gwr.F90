@@ -3243,11 +3243,12 @@ end subroutine gwr_get_gkbz_rpr_pm
 !!
 !! SOURCE
 
-subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
+subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
 
 !Arguments ------------------------------------
  class(gwr_t),intent(in) :: gwr
  type(desc_t),intent(in) :: desc
+ real(dp),intent(in) :: rfact
  class(__slkmat_t),intent(inout) :: rp_r, g_gp
 
 !Local variables-------------------------------
@@ -3286,6 +3287,9 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
    ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
    call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=-isign, iscale=0, gpu_map=1)
  end do
+
+ ! Scale output.
+ g_gp%buffer_cplx = g_gp%buffer_cplx * rfact
 
  call uplan_k%free(); call r_gp%free()
 
@@ -3371,18 +3375,14 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  associate (wq_i => gwr%wc_qibz(iq_ibz, itau, spin), wq_f => wc_qbz)
  call wq_i%copy(wc_qbz)
 
- !!!$OMP PARALLEL DO PRIVATE(ig2, g2, phs2, ig1, g2, ph1)
+ !!!$OMP PARALLEL DO PRIVATE(ig2, g2, ph2, ig1, g2, ph1)
  do il_g2=1, wq_f%size_local(2)
    ig2 = mod(wq_f%loc2gcol(il_g2) - 1, desc_qbz%npw) + 1
    g2 = desc_qbz%gvec(:,ig2)
-   !g2 = desc_qibz%gvec(:,ig2)
-   !ph2 = exp(-j_dpc * two_pi * dot_product(g2, tnon))
    ph2 = exp(+j_dpc * two_pi * dot_product(g2, tnon))
    do il_g1=1, wq_f%size_local(1)
      ig1 = mod(wq_f%loc2grow(il_g1) - 1, desc_qbz%npw) + 1
      g1 = desc_qbz%gvec(:,ig1)
-     !g1 = desc_qibz%gvec(:,ig1)
-     !ph1 = exp(+j_dpc * two_pi * dot_product(g1, tnon))
      ph1 = exp(-j_dpc * two_pi * dot_product(g1, tnon))
      wq_f%buffer_cplx(il_g1, il_g2) = wq_i%buffer_cplx(il_g1, il_g2) * ph1 * ph2
      if (trev_q == 1) wq_f%buffer_cplx(il_g1, il_g2) = conjg(wq_f%buffer_cplx(il_g1, il_g2))
@@ -4447,7 +4447,8 @@ subroutine gwr_build_tchi(gwr)
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu_ir, wall_ir, gflops_ir
  real(dp) :: cpu_ikf, wall_ikf, gflops_ikf
- real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit, wtqp, wtqm
+ real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit
+ real(gwp) ::  wtqp, wtqm
  complex(gwp) :: head_q
  complex(dp) :: chq(3), wng(3)
  logical :: q_is_gamma, use_shmem_for_k, use_mpi_for_k, print_time, keep_tchim !, doit ! isirr_k,
@@ -4462,8 +4463,9 @@ subroutine gwr_build_tchi(gwr)
  real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3), tsec(2)
  complex(gwp) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:)
  complex(gwp),allocatable :: low_wing_q(:), up_wing_q(:), cemiqr(:)
+ complex(gwp),contiguous, pointer :: buf_cplx(:,:)
  type(__slkmat_t) :: gkq_rpr_pm(2), gk_rpr_pm(2)
- type(__slkmat_t),allocatable :: gt_gpr(:,:), chiq_gpr(:), chiq_rpr(:)
+ type(__slkmat_t),target,allocatable :: gt_gpr(:,:), chiq_gpr(:), chiq_rpr(:)
  type(desc_t),target,allocatable :: desc_mykbz(:)
  type(littlegroup_t),allocatable :: ltg_qibz(:)
  type(fftbox_plan3_t) :: green_plan
@@ -4781,10 +4783,19 @@ subroutine gwr_build_tchi(gwr)
    ! Need all nqibz matrices in chi_q here as the iq_ibz loop is the innermost one unlike in the legacy GW code.
    nrsp = gwr%g_nfft * gwr%nspinor
    col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
+
    ABI_MALLOC(chiq_rpr, (gwr%nqibz))
    do iq_ibz=1,gwr%nqibz
      call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+     buf_cplx => chiq_rpr(iq_ibz)%buffer_cplx
+     if (gpu_option == ABI_GPU_OPENMP) then
+       if (iq_ibz == 1) call wrtout(std_out, " Allocating Chi_q(r,r', +tau) on the GPU...")
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
+     end if
    end do
+
    call pstat_proc%print(_PSTAT_ARGS_)
 
    ! Allocate G_k(r',r, +/- tau) and G_kq(r',r, +/- tau)
@@ -4869,9 +4880,15 @@ subroutine gwr_build_tchi(gwr)
          end if
 
          ! Accumulate.
-         chiq_rpr(iq_ibz)%buffer_cplx = chiq_rpr(iq_ibz)%buffer_cplx + &
-           wtqp * gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)   ! RECHECK EQ. This one works but requires ptrans with C
-           !wtqp * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
+
+         !chiq_rpr(iq_ibz)%buffer_cplx = chiq_rpr(iq_ibz)%buffer_cplx + &
+         !  wtqp * gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)   ! RECHECK EQ. This one works but requires ptrans with C
+         !  !wtqp * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
+
+         call cplx_mat_plus_bc(chiq_rpr(iq_ibz)%bufsize, chiq_rpr(iq_ibz)%buffer_cplx(:,1), &
+                               wtqp, "C", gkq_rpr_pm(2)%buffer_cplx(:,1), gk_rpr_pm(1)%buffer_cplx(:,1), &
+                               0)
+                               !gpu_option) ! TODO
        end do ! iq_ibz
 
        if (print_time) then
@@ -4891,8 +4908,7 @@ subroutine gwr_build_tchi(gwr)
      tchi_rfact = one / gwr%cryst%ucvol
      do iq_ibz=1,gwr%nqibz
        if (.not. any(iq_ibz == gwr%my_qibz_inds)) cycle
-       call gwr%rpr_to_ggp(gwr%tchi_desc_qibz(iq_ibz), chiq_rpr(iq_ibz), gwr%tchi_qibz(iq_ibz,itau,spin)) ! tchi_rfact
-       gwr%tchi_qibz(iq_ibz,itau,spin)%buffer_cplx = gwr%tchi_qibz(iq_ibz,itau,spin)%buffer_cplx * tchi_rfact
+       call gwr%rpr_to_ggp(gwr%tchi_desc_qibz(iq_ibz), chiq_rpr(iq_ibz), tchi_rfact, gwr%tchi_qibz(iq_ibz,itau,spin))
      end do ! iq_ibz
 
      write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
@@ -4901,8 +4917,20 @@ subroutine gwr_build_tchi(gwr)
    end do ! spin
 
    ! Free memory
-   call slk_array_free(gk_rpr_pm); call slk_array_free(gkq_rpr_pm); call slk_array_free(chiq_rpr)
+   call slk_array_free(gk_rpr_pm); call slk_array_free(gkq_rpr_pm)
+
+   if (gpu_option == ABI_GPU_OPENMP) then
+     do iq_ibz=1,gwr%nqibz
+       buf_cplx => chiq_rpr(iq_ibz)%buffer_cplx
+#ifdef HAVE_OPENMP_OFFLOAD
+       if (iq_ibz == 1) call wrtout(std_out, " Deallocating Chi_q(r,r', +tau) on the GPU...")
+       !$OMP TARGET ENTER DATA MAP(delete:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
+#endif
+     end do
+   end if
+   call slk_array_free(chiq_rpr)
    ABI_FREE(chiq_rpr)
+
    do iq_ibz=1,gwr%nqibz
      call ltg_qibz(iq_ibz)%free()
    end do
@@ -6009,8 +6037,7 @@ else
    do my_ikf=1,gwr%my_nkbz
      ik_bz = gwr%my_kbz_inds(my_ikf); kk_bz = gwr%kbz(:, ik_bz)
      do ikcalc=1,gwr%nkcalc
-       qq_bz = gwr%kcalc(:,ikcalc) - kk_bz
-       !qq_bz = -qq_bz
+       qq_bz = gwr%kcalc(:,ikcalc) - kk_bz !; qq_bz = -qq_bz
        ! TODO: here I may need to take into account the umklapp
        call findqg0(iq_bz, g0_q, qq_bz, gwr%nqbz, gwr%qbz, gwr%mG0)
        !ABI_CHECK(all(g0_q == 0), sjoin("g0_q != 0, kcalc", ktoa(gwr%kcalc(:,ikcalc)), "kk_bz:", ktoa(kk_bz)))
@@ -6084,7 +6111,7 @@ else
            call cplx_mat_plus_bc(bufsize, sigc_rpr(1,ipm,ikcalc)%buffer_cplx(:,1), &
                                  wtqp, "N", gk_rpr_pm(ipm)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
                                  0)
-                                 !gpu_option)
+                                 !gpu_option) ! TODO
 
            if (abs(wtqm) > tol12) then
              ABI_ERROR(sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
@@ -6092,7 +6119,7 @@ else
              call cplx_mat_plus_bc(bufsize, sigc_rpr(2,ipm,ikcalc)%buffer_cplx(:,1), &
                                    wtqm, "C", gk_rpr_pm(ipm)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
                                    0)
-                                   !gpu_option)
+                                   !gpu_option) ! TODO
 
              !sigc_rpr(1, ipm, ikcalc)%buffer_cplx = sigc_rpr(1, ipm, ikcalc)%buffer_cplx + &
              !    (wtqp + wtqm) * real(gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx, kind=gwp) &
