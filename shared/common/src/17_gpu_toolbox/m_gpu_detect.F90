@@ -185,6 +185,5 @@ end subroutine find_set_gpu
 end subroutine get_topo
 !!***
 
-
 end module m_gpu_detect
 !!***
