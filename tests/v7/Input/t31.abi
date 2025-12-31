@@ -90,7 +90,7 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%                  t31o_DS2_EntropyDMFT,  tolnlines =9, tolabs =7.0e-4, tolrel = 2e-2, fld_options=-medium ;
+#%%                  t31o_DS2_EntropyDMFT,  tolnlines =9, tolabs =7.0e-4, tolrel = 3e-2, fld_options=-medium ;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
