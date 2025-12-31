@@ -2142,13 +2142,18 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !Some special cases are not compatible with GPU implementation
 !Warn user if value is changed at runtime.
+!We don't stop the code because we may want to run the test suite in GPU mode.
  if (all(dtset%optdriver /= [RUNL_GSTATE, RUNL_RESPFN, RUNL_GWR])) then
+   if (dtset%gpu_option /= ABI_GPU_DISABLED) then
+     call wrtout(units, "- WARNING: GPU only compatible with GS, RESPFN and GWR. gpu_option has been set to 0!")
+   end if
    dtset%gpu_option=ABI_GPU_DISABLED
-   call wrtout(units, "- WARNING: GPU only compatible with GS, RESPFN and GWR. gpu_option has been set to 0!")
  end if
  if (dtset%optdriver==RUNL_RESPFN .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
+   if (dtset%gpu_option /= ABI_GPU_DISABLED) then
+     call wrtout(units, "- WARNING: RESPFN on GPU only implemented with OpenMP. gpu_option has been set to 0!")
+   end if
    dtset%gpu_option=ABI_GPU_DISABLED
-   call wrtout(units, "- WARNING: RESPFN on GPU only implemented with OpenMP. gpu_option has been set to 0!")
  end if
  if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU implementation
  if (dtset%nspinor/=1) then
