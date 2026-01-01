@@ -3160,12 +3160,12 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
    ABI_FREE(conjg_ceig0r)
  end if
 
- !if (gpu_option == ABI_GPU_OPENMP) then
- !  do ii=1,num_pm
- !    ipm = ipm_list__(ii)
- !    call gk_rpr_pm(ipm)%gpu_map("update_to")
- !  end do
- !end if
+ if (gpu_option == ABI_GPU_OPENMP) then
+   do ii=1,num_pm
+     ipm = ipm_list__(ii)
+     call gk_rpr_pm(ipm)%gpu_map("update_to")
+   end do
+ end if
 
  !call cwtime_report(" gwr_get_gkbz_rpr_pm:", cpu, wall, gflops)
 
@@ -3489,6 +3489,10 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
    call rgp%ptrans("N", wc_gpr(my_iqf), free=.True.)
    end associate
    call wc_qbz%free()
+
+   !if (gpu_option == ABI_GPU_OPENMP) then
+   !  call wc_gpr(my_iqf)%gpu_map("update_to")
+   !end if
  end do ! my_iqf
 
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -4472,7 +4476,7 @@ subroutine gwr_build_tchi(gwr)
  real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3), tsec(2)
  complex(gwp) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:)
  complex(gwp),allocatable :: low_wing_q(:), up_wing_q(:), cemiqr(:)
- complex(gwp),contiguous, pointer :: buf_cplx(:,:)
+ !complex(gwp),contiguous, pointer :: buf_cplx(:,:)
  type(__slkmat_t) :: gkq_rpr_pm(2), gk_rpr_pm(2)
  type(__slkmat_t),target,allocatable :: gt_gpr(:,:), chiq_gpr(:), chiq_rpr(:)
  type(desc_t),target,allocatable :: desc_mykbz(:)
@@ -4796,13 +4800,9 @@ subroutine gwr_build_tchi(gwr)
    ABI_MALLOC(chiq_rpr, (gwr%nqibz))
    do iq_ibz=1,gwr%nqibz
      call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
-     buf_cplx => chiq_rpr(iq_ibz)%buffer_cplx
      if (gpu_option == ABI_GPU_OPENMP) then
        if (iq_ibz == 1) call wrtout(std_out, " Allocating Chi_q(r,r', +tau) on the GPU...")
        call chiq_rpr(iq_ibz)%gpu_map("alloc")
-!#ifdef HAVE_OPENMP_OFFLOAD
-!       !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
-!#endif
      end if
    end do
 
@@ -4936,11 +4936,6 @@ subroutine gwr_build_tchi(gwr)
    if (gpu_option == ABI_GPU_OPENMP) then
      do iq_ibz=1,gwr%nqibz
        call chiq_rpr(iq_ibz)%gpu_map("delete")
-!       buf_cplx => chiq_rpr(iq_ibz)%buffer_cplx
-!#ifdef HAVE_OPENMP_OFFLOAD
-!       if (iq_ibz == 1) call wrtout(std_out, " Deallocating Chi_q(r,r', +tau) on the GPU...")
-!       !$OMP TARGET EXIT DATA MAP(delete:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
-!#endif
      end do
    end if
    call slk_array_free(chiq_rpr)
@@ -5662,7 +5657,7 @@ subroutine gwr_build_sigmac(gwr)
  complex(dp) :: qpz_ene(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol), imag_zmesh(gwr%ntau)
  complex(dp) :: qp_pade(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigxc_rw_diag(gwr%nwr, gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
- complex(gwp),contiguous, pointer :: buf_cplx(:,:)
+ !complex(gwp),contiguous, pointer :: buf_cplx(:,:)
  type(sigijtab_t),allocatable :: Sigxij_tab(:,:), Sigcij_tab(:,:)
 ! *************************************************************************
 
@@ -6019,10 +6014,6 @@ else
    do ipm=1,2
      do ikcalc=1,gwr%nkcalc
        call sigc_rpr(1,ipm,ikcalc)%gpu_map("alloc")
-!       buf_cplx => sigc_rpr(1,ipm,ikcalc)%buffer_cplx
-!#ifdef HAVE_OPENMP_OFFLOAD
-!       !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
-!#endif
      end do
    end do
    call wrtout(std_out, " Allocation successful")
@@ -6193,13 +6184,9 @@ else
    do ipm=1,2
      do ikcalc=1,gwr%nkcalc
        call sigc_rpr(1,ipm,ikcalc)%gpu_map("delete")
-!       buf_cplx => sigc_rpr(1,ipm,ikcalc)%buffer_cplx
-!#ifdef HAVE_OPENMP_OFFLOAD
-!       !$OMP TARGET EXIT DATA MAP(delete:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
-!#endif
      end do
    end do
-   call wrtout(std_out, " dellocation successful")
+   call wrtout(std_out, " Dellocation successful")
  end if
 
  ABI_FREE(loc_cwork)
