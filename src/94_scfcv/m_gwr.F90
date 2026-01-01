@@ -6068,13 +6068,9 @@ else
      call gwr%redistrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "communicate")
      if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
-     !if (gpu_option == ABI_GPU_OPENMP) then
-     !  call slk_array_gpu_set_zero(sigc_rpr)
-     !  do ipm=1,2
-     !    do ikcalc=1,gwr%nkcalc
-     !      call sigc_rpr(1,ipm, ikcalc)%gpu_set_zero()
-     !    end do
-     !  end do
+     if (gpu_option == ABI_GPU_OPENMP) then
+       call slk_array_gpu_set_zero(sigc_rpr)
+     end if
      !else
        call slk_array_set_zero(sigc_rpr)
      !end if
