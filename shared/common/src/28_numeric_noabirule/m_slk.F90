@@ -1445,8 +1445,8 @@ subroutine basemat_gpu_map(mat, action)
 #endif
 ! *********************************************************************
 
- if (.not. string_in(action, "alloc, delete, update_from update_to")) then
- !if (.not. string_in(action, "alloc, alloc_zero, delete, update_from update_to")) then
+ if (.not. string_in(action, "alloc, delete, update_from, update_to")) then
+ !if (.not. string_in(action, "alloc, alloc_zero, delete, update_from, update_to")) then
    ABI_ERROR(sjoin("Invalid action", action))
    ABI_UNUSED(mat%size_local(1))
  end if
@@ -1456,60 +1456,60 @@ subroutine basemat_gpu_map(mat, action)
  class is (slkmat_dp_t)
    if (allocated(mat%buffer_cplx)) then
      buf_cplx_dp => mat%buffer_cplx
-     if (string_in(action, "alloc", "alloc_zero") then
+     if (string_in(action, "alloc, alloc_zero")) then
        !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx_dp)
        !if (action == "alloc_zero") call gpu_set_to_zero_complex(mat%buffer_cplx, mat%bufsize)
      else if (action == "delete") then
        !.and. c_associated(xomp_get_mapped_ptr(c_loc(buf_cplx_dp))
        !$OMP TARGET EXIT DATA MAP(delete:buf_cplx_dp)
      else if (action == "update_from") then
-       !$OMP TARGET UPDATE(from:buf_cplx_dp)
+       !$OMP TARGET UPDATE FROM(buf_cplx_dp)
      else if (action == "update_to") then
-       !$OMP TARGET UPDATE(to:buf_cplx_dp)
+       !$OMP TARGET UPDATE TO(buf_cplx_dp)
      end if
    end if
    if (allocated(mat%buffer_real)) then
      buf_real_dp => mat%buffer_real
-     if (string_in(action, "alloc", "alloc_zero") then
+     if (string_in(action, "alloc, alloc_zero")) then
        !$OMP TARGET ENTER DATA MAP(alloc:buf_real_dp)
        !if (action == "alloc_zero") call gpu_set_to_zero(mat%buffer_real, mat%bufsize)
      else if (action == "delete") then
        !.and. c_associated(xomp_get_mapped_ptr(c_loc(buf_real_dp))
        !$OMP TARGET EXIT DATA MAP(delete:buf_real_dp)
      else if (action == "update_from") then
-       !$OMP TARGET UPDATE(from:buf_real_dp)
+       !$OMP TARGET UPDATE FROM(buf_real_dp)
      else if (action == "update_to") then
-       !$OMP TARGET UPDATE(to:buf_real_dp)
+       !$OMP TARGET UPDATE TO(buf_real_dp)
      end if
    end if
 
  class is (slkmat_sp_t)
    if (allocated(mat%buffer_cplx)) then
      buf_cplx_sp => mat%buffer_cplx
-     if (string_in(action, "alloc", "alloc_zero") then
+     if (string_in(action, "alloc, alloc_zero")) then
        !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx_sp)
        !if (action == "alloc_zero") call gpu_set_to_zero_complex(mat%buffer_cplx, mat%bufsize)
      else if (action == "delete") then
        !.and. c_associated(xomp_get_mapped_ptr(c_loc(buf_cplx_sp))
        !$OMP TARGET EXIT DATA MAP(delete:buf_cplx_sp)
      else if (action == "update_from") then
-       !$OMP TARGET UPDATE(from:buf_cplx_sp)
+       !$OMP TARGET UPDATE FROM(buf_cplx_sp)
      else if (action == "update_to") then
-       !$OMP TARGET UPDATE(to:buf_cplx_sp)
+       !$OMP TARGET UPDATE TO(buf_cplx_sp)
      end if
    end if
    if (allocated(mat%buffer_real)) then
      buf_real_sp => mat%buffer_real
-     if (string_in(action, "alloc", "alloc_zero") then
+     if (string_in(action, "alloc, alloc_zero")) then
        !$OMP TARGET ENTER DATA MAP(alloc:buf_real_sp)
        !if (action == "alloc_zero") call gpu_set_to_zero(mat%buffer_real, mat%bufsize)
      else if (action == "delete") then
        !.and. c_associated(xomp_get_mapped_ptr(c_loc(buf_real_sp))
        !$OMP TARGET EXIT DATA MAP(delete:buf_real_sp)
      else if (action == "update_from") then
-       !$OMP TARGET UPDATE(from:buf_real_sp)
+       !$OMP TARGET UPDATE FROM(buf_real_sp)
      else if (action == "update_to") then
-       !$OMP TARGET UPDATE(to:buf_real_sp)
+       !$OMP TARGET UPDATE TO(buf_real_sp)
      end if
    end if
  end select
