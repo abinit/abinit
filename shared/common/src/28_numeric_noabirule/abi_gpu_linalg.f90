@@ -12,8 +12,8 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! TODO
-!! Should become a Fortran module
+!! NOTES
+!!  This is an include file.
 !!
 !! SOURCE
 

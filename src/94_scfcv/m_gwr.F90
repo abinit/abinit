@@ -169,7 +169,7 @@ module m_gwr
  use m_gsphere,       only : kg_map, gsphere_t
  use m_melemts,       only : melements_t
  use m_ioarr,         only : fftdatar_write
- use m_slk,           only : slkmat_dp_t, slkmat_sp_t, slk_processor_t, slk_array_free, slk_array_set_zero, &
+ use m_slk,           only : slkmat_dp_t, slkmat_sp_t, slk_processor_t, slk_array_free, slk_array_set_zero, slk_array_gpu_set_zero,&
                              slk_array_locmem_mb, block_dist_1d, slk_pgemm
  use m_wfk,           only : wfk_read_ebands, wfk_t
  use m_wfd,           only : wfd_t, wfdgw_t
@@ -3160,6 +3160,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
    ABI_FREE(conjg_ceig0r)
  end if
 
+ ! Transfer data from CPU to GPU.
  if (gpu_option == ABI_GPU_OPENMP) then
    do ii=1,num_pm
      ipm = ipm_list__(ii)
@@ -3278,6 +3279,8 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
  isign = +1 ! This should be ok
  !isign = -1
 
+ if (gwr%dtset%gpu_option == ABI_GPU_OPENMP) call rp_r%gpu_map("update_from") ! FIXME
+
  ! F(r',r) --> F(g',r) and store results in gp_r.
  do ir2=1, rp_r%size_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir2, rp_r%size_local(2), gwr%uc_batch_size)
@@ -3297,6 +3300,8 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
 
  ! Scale output.
  g_gp%buffer_cplx = g_gp%buffer_cplx * rfact
+
+ if (gwr%dtset%gpu_option == ABI_GPU_OPENMP) call g_gp%gpu_map("update_to") ! FIXME
 
  call uplan_k%free(); call r_gp%free()
 
@@ -4857,11 +4862,11 @@ subroutine gwr_build_tchi(gwr)
      if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
      ! Sum over my k-points in the BZ.
-     !if (gpu_option == ABI_GPU_OPENMP) then
-     !  call slk_array_gpu_set_zero(chiq_rpr)
-     !else
-     call slk_array_set_zero(chiq_rpr)
-     !end if
+     if (gpu_option == ABI_GPU_OPENMP) then
+       call slk_array_gpu_set_zero(chiq_rpr)
+     else
+       call slk_array_set_zero(chiq_rpr)
+     end if
 
      do my_ikf=1,gwr%my_nkbz
        print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
@@ -4901,8 +4906,8 @@ subroutine gwr_build_tchi(gwr)
 
          call cplx_mat_plus_bc(chiq_rpr(iq_ibz)%bufsize, chiq_rpr(iq_ibz)%buffer_cplx(:,1), &
                                wtqp, "C", gkq_rpr_pm(2)%buffer_cplx(:,1), gk_rpr_pm(1)%buffer_cplx(:,1), &
-                               0)
-                               !gpu_option) ! TODO
+                               !0)
+                               gpu_option) ! TODO
        end do ! iq_ibz
 
        if (print_time) then
