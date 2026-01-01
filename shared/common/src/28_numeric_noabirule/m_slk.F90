@@ -1350,24 +1350,23 @@ subroutine basemat_gpu_set_zero(mat)
  select type (mat)
  class is (slkmat_dp_t)
    if (allocated(mat%buffer_cplx)) then
-     gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_cplx)
+     gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_cplx))
      ABI_CHECK_CNULL(gpu_ptr, "buffer_cplx not on GPU!")
      call my_gpu_memset(gpu_ptr, 0, mat%bufsize*dp*2)
    end if
    if (allocated(mat%buffer_real)) then
-     gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_real)
+     gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_real))
      ABI_CHECK_CNULL(gpu_ptr, "buffer_real not on GPU!")
      call my_gpu_memset(gpu_ptr, 0, mat%bufsize*dp)
    end if
  class is (slkmat_sp_t)
    if (allocated(mat%buffer_cplx)) then
-     mat%buffer_cplx = cmplx(cvalue, kind=sp)
-     gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_cplx)
+     gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_cplx))
      ABI_CHECK_CNULL(gpu_ptr, "buffer_cplx not on GPU!")
      call my_gpu_memset(gpu_ptr, 0, mat%bufsize*sp*2)
    end if
    if (allocated(mat%buffer_real)) then
-     gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_real)
+     gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_real))
      ABI_CHECK_CNULL(gpu_ptr, "buffer_real not on GPU!")
      call my_gpu_memset(gpu_ptr, 0, mat%bufsize*sp)
    end if
