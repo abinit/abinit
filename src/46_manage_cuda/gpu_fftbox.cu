@@ -128,7 +128,7 @@ _get_type_nbytes(int dist_batch, int kind, cufftType *type, size_t *nbytes){
  */
 
 extern "C" void
-gpu_ctx_init(void **void_ctx, int *f_dims, int *f_embed, int batch, int kind) {
+gpu_ctx_init_cpp(void **void_ctx, int *f_dims, int *f_embed, int batch, int kind) {
 
   const int RANK3 = 3, stride1 = 1;
   size_t nbytes;
@@ -175,7 +175,7 @@ gpu_ctx_init(void **void_ctx, int *f_dims, int *f_embed, int batch, int kind) {
  */
 
 extern "C" void
-gpu_ctx_synch(void *void_ctx) {
+gpu_ctx_synch_cpp(void *void_ctx) {
 
   gpu_context_t *ctx = (gpu_context_t *) void_ctx;
   CHECK_CUDA_ERROR(cudaStreamSynchronize(ctx->stream));
@@ -197,9 +197,9 @@ gpu_ctx_synch(void *void_ctx) {
  */
 
 extern "C" void
-gpu_ctx_free(void **void_ctx)
+gpu_ctx_free_cpp(void **void_ctx)
 {
-  //printf("In gpu_ctx_free\n");
+  //printf("In gpu_ctx_free_cpp\n");
   if (!void_ctx || !*void_ctx) return;
 
   gpu_context_t *ctx = (gpu_context_t *)(*void_ctx);
@@ -228,9 +228,9 @@ gpu_ctx_free(void **void_ctx)
  */
 
 extern "C" void
-gpu_fftbox_c2c_ip(void *void_ctx, int nfft, int batch, int isign, int iscale, int kind, void **d_ff) {
+gpu_fftbox_c2c_ip_cpp(void *void_ctx, int nfft, int batch, int isign, int iscale, int kind, void **d_ff) {
 
-  //printf("in gpu_fftbox_c2c_ip");
+  //printf("in gpu_fftbox_c2c_ip_cpp");
   cufftType type;
   int direction;
   size_t nbytes;
@@ -276,10 +276,10 @@ gpu_fftbox_c2c_ip(void *void_ctx, int nfft, int batch, int isign, int iscale, in
  */
 
 extern "C" void
-gpu_fftbox_c2c_op(void *void_ctx, int nfft, int batch, int isign, int iscale, int kind,
+gpu_fftbox_c2c_op_cpp(void *void_ctx, int nfft, int batch, int isign, int iscale, int kind,
                   void **d_ff, void **d_gg) {
 
-  //printf("in gpu_fftbox_c2c_op");
+  //printf("in gpu_fftbox_c2c_op_cpp");
   cufftType type;
   int direction;
   size_t nbytes;

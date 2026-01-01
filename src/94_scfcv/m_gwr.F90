@@ -3148,7 +3148,6 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
      end if
    end do ! ir1
    call gpr%free()
-
  end do ! ii
 
  call slk_array_free(gt_pm); call desc_kbz%free(); call uplan_k%free()
@@ -3160,6 +3159,13 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
    ABI_FREE(ceig0r)
    ABI_FREE(conjg_ceig0r)
  end if
+
+ !if (gpu_option == ABI_GPU_OPENMP) then
+ !  do ii=1,num_pm
+ !    ipm = ipm_list__(ii)
+ !    call gk_rpr_pm(ipm)%gpu_map("update_to")
+ !  end do
+ !end if
 
  !call cwtime_report(" gwr_get_gkbz_rpr_pm:", cpu, wall, gflops)
 
@@ -3589,6 +3595,8 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
    ABI_SFREE(ceig0r)
    ABI_SFREE(conjg_ceig0r)
  end if
+
+ !if (gpu_option == ABI_GPU_OPENMP) call g_pr%gpu_map("update_to")
 
 end subroutine gwr_get_wc_rpr_qbz
 !!***
@@ -4791,9 +4799,10 @@ subroutine gwr_build_tchi(gwr)
      buf_cplx => chiq_rpr(iq_ibz)%buffer_cplx
      if (gpu_option == ABI_GPU_OPENMP) then
        if (iq_ibz == 1) call wrtout(std_out, " Allocating Chi_q(r,r', +tau) on the GPU...")
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
-#endif
+       call chiq_rpr(iq_ibz)%gpu_map("alloc")
+!#ifdef HAVE_OPENMP_OFFLOAD
+!       !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
+!#endif
      end if
    end do
 
@@ -4848,7 +4857,11 @@ subroutine gwr_build_tchi(gwr)
      if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
      ! Sum over my k-points in the BZ.
+     !if (gpu_option == ABI_GPU_OPENMP) then
+     !  call slk_array_gpu_set_zero(chiq_rpr)
+     !else
      call slk_array_set_zero(chiq_rpr)
+     !end if
 
      do my_ikf=1,gwr%my_nkbz
        print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
@@ -4922,11 +4935,12 @@ subroutine gwr_build_tchi(gwr)
 
    if (gpu_option == ABI_GPU_OPENMP) then
      do iq_ibz=1,gwr%nqibz
-       buf_cplx => chiq_rpr(iq_ibz)%buffer_cplx
-#ifdef HAVE_OPENMP_OFFLOAD
-       if (iq_ibz == 1) call wrtout(std_out, " Deallocating Chi_q(r,r', +tau) on the GPU...")
-       !$OMP TARGET EXIT DATA MAP(delete:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
-#endif
+       call chiq_rpr(iq_ibz)%gpu_map("delete")
+!       buf_cplx => chiq_rpr(iq_ibz)%buffer_cplx
+!#ifdef HAVE_OPENMP_OFFLOAD
+!       if (iq_ibz == 1) call wrtout(std_out, " Deallocating Chi_q(r,r', +tau) on the GPU...")
+!       !$OMP TARGET EXIT DATA MAP(delete:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
+!#endif
      end do
    end if
    call slk_array_free(chiq_rpr)
@@ -6001,13 +6015,14 @@ else
 
  if (gpu_option == ABI_GPU_OPENMP) then
    call wrtout(std_out, " Allocating Sigma_k(r,r', +/-tau) on the GPU...")
+   !call slk_array_gpu_map(sigc_rpr, "alloc")
    do ipm=1,2
      do ikcalc=1,gwr%nkcalc
-       !call sigc_rpr(1,ipm,ikcalc)%gpu_map("alloc")
-       buf_cplx => sigc_rpr(1,ipm,ikcalc)%buffer_cplx
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
-#endif
+       call sigc_rpr(1,ipm,ikcalc)%gpu_map("alloc")
+!       buf_cplx => sigc_rpr(1,ipm,ikcalc)%buffer_cplx
+!#ifdef HAVE_OPENMP_OFFLOAD
+!       !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
+!#endif
      end do
    end do
    call wrtout(std_out, " Allocation successful")
@@ -6057,7 +6072,16 @@ else
      call gwr%redistrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "communicate")
      if (my_it == 1 .and. gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
-     call slk_array_set_zero(sigc_rpr)
+     !if (gpu_option == ABI_GPU_OPENMP) then
+     !  call slk_array_gpu_set_zero(sigc_rpr)
+     !  do ipm=1,2
+     !    do ikcalc=1,gwr%nkcalc
+     !      call sigc_rpr(1,ipm, ikcalc)%gpu_set_zero()
+     !    end do
+     !  end do
+     !else
+       call slk_array_set_zero(sigc_rpr)
+     !end if
 
      ! Sum over my k-points in the BZ.
      do my_ikf=1,gwr%my_nkbz
@@ -6165,13 +6189,14 @@ else
 
  if (gpu_option == ABI_GPU_OPENMP) then
    call wrtout(std_out, " Deallocating Sigma_k(r,r', +/-tau) on the GPU...")
+   !call slk_array_gpu_map(sigc_rpr, "delete")
    do ipm=1,2
      do ikcalc=1,gwr%nkcalc
-       !call sigc_rpr(1,ipm,ikcalc)%gpu_map("delete")
-       buf_cplx => sigc_rpr(1,ipm,ikcalc)%buffer_cplx
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET EXIT DATA MAP(delete:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
-#endif
+       call sigc_rpr(1,ipm,ikcalc)%gpu_map("delete")
+!       buf_cplx => sigc_rpr(1,ipm,ikcalc)%buffer_cplx
+!#ifdef HAVE_OPENMP_OFFLOAD
+!       !$OMP TARGET EXIT DATA MAP(delete:buf_cplx) IF (gpu_option == ABI_GPU_OPENMP)
+!#endif
      end do
    end do
    call wrtout(std_out, " dellocation successful")
