@@ -161,27 +161,27 @@ module m_fft
 
 #if defined HAVE_GPU
  interface
-   subroutine gpu_ctx_init(ctx, f_dims, f_embed, batch, kind) bind(C)
+   subroutine gpu_ctx_init(ctx, f_dims, f_embed, batch, kind) bind(C, name="gpu_ctx_init_cpp")
      use, intrinsic :: iso_c_binding
      type(c_ptr), intent(out) :: ctx
      integer(c_int), intent(in) :: f_dims(3), f_embed(3)
      integer(c_int), value :: batch, kind
    end subroutine
-   subroutine gpu_ctx_synch(ctx) bind(C)
+   subroutine gpu_ctx_synch(ctx) bind(C, name="gpu_ctx_synch_cpp")
      use, intrinsic :: iso_c_binding
      type(c_ptr), value :: ctx
    end subroutine gpu_ctx_synch
-   subroutine gpu_ctx_free(ctx) bind(C)
+   subroutine gpu_ctx_free(ctx) bind(C, name="gpu_ctx_free_cpp")
      use, intrinsic :: iso_c_binding
      type(c_ptr) :: ctx
    end subroutine
-   subroutine gpu_fftbox_c2c_ip(ctx, nfft, ndat, isign, iscale, kind, d_ff) bind(C)
+   subroutine gpu_fftbox_c2c_ip(ctx, nfft, ndat, isign, iscale, kind, d_ff) bind(C, name="gpu_fftbox_c2c_ip_cpp")
      use, intrinsic :: iso_c_binding
      type(c_ptr),value,intent(in) :: ctx
      integer(c_int),value, intent(in) :: nfft, ndat, isign, iscale, kind
      type(c_ptr),intent(in) :: d_ff
    end subroutine gpu_fftbox_c2c_ip
-   subroutine gpu_fftbox_c2c_op(ctx, nfft, ndat, isign, iscale, kind, d_ff, d_gg) bind(C)
+   subroutine gpu_fftbox_c2c_op(ctx, nfft, ndat, isign, iscale, kind, d_ff, d_gg) bind(C, name="gpu_fftbox_c2c_op_cpp")
      use, intrinsic :: iso_c_binding
      type(c_ptr),value,intent(in) :: ctx
      integer(c_int),value, intent(in) :: nfft, ndat, isign, iscale, kind
