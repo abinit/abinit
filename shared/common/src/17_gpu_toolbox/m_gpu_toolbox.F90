@@ -25,7 +25,7 @@ module m_gpu_toolbox
  use m_initcuda
  use m_gpu_detect
 
- use, intrinsic :: iso_c_binding, only : C_INT32_T,C_SIZE_T
+ use, intrinsic :: iso_c_binding
 
  implicit none
 

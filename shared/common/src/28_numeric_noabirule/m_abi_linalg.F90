@@ -22,6 +22,7 @@
 
 module m_abi_linalg
 
+ use, intrinsic :: iso_c_binding
  USE_MPI
  use defs_basis
  use m_errors
@@ -29,7 +30,6 @@ module m_abi_linalg
  use m_xmpi
  use m_xomp
  use m_slk
- use, intrinsic :: iso_c_binding
 !#ifdef HAVE_LINALG_ELPA
 ! use m_elpa
 !#endif
@@ -140,12 +140,15 @@ module m_abi_linalg
  public :: abi_linalg_work_allocate ! Allocate work arrays
  !----------------------------------------------------------------------
 
+ ! TODO: These routines should be moved to m_gpu_toolboox.
  public :: gpu_set_to_zero
  public :: gpu_set_to_zero_sp
  public :: gpu_set_to_zero_complex
  public :: gpu_set_to_zero_complex_sp
  public :: gpu_copy
+ public :: gpu_copy_sp
  public :: gpu_copy_complex
+ public :: gpu_copy_complex_sp
 
 !BLAS INTERFACE
  !public :: abi_zgemm
