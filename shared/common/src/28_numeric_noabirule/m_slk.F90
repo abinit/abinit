@@ -1405,6 +1405,7 @@ subroutine basemat_gpu_set_zero(mat)
  end select
 #else
  ABI_ERROR("basemat_gpu_set cannot be used if HAVE_OPENMP_OFFLOAD is not defined!")
+ ABI_UNUSED(mat%size_local(1))
 #endif
 
 end subroutine basemat_gpu_set_zero
@@ -1515,6 +1516,8 @@ logical function basemat_is_gpu_mapped(mat, gpu_ptr) result(is_gpu_mapped)
      is_gpu_mapped = c_associated(gpu_ptr)
    end if
  end select
+#else
+ ABI_UNUSED(mat%size_local(1))
 #endif
 
 end function basemat_is_gpu_mapped
