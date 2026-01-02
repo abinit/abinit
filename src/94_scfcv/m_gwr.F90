@@ -3243,7 +3243,7 @@ end subroutine gwr_get_gkbz_rpr_pm
 !!
 !! FUNCTION
 !!  Helper function to FFT a two-point function: F_{r',r} --> F_{g,g'}
-!!  Note that rp_r is destroyed in output
+!!  Note that rp_r is destroyed in output.
 !!
 !! INPUTS
 !!
@@ -3603,7 +3603,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
    ABI_SFREE(conjg_ceig0r)
  end if
 
- !if (gpu_option == ABI_GPU_OPENMP) call g_pr%gpu_map("update_to")
+ if (gpu_option == ABI_GPU_OPENMP) call wc_rpr%gpu_map("update_to")
 
 end subroutine gwr_get_wc_rpr_qbz
 !!***
@@ -6126,16 +6126,16 @@ else
            bufsize = sigc_rpr(1,ipm,ikcalc)%bufsize
            call cplx_mat_plus_bc(bufsize, sigc_rpr(1,ipm,ikcalc)%buffer_cplx(:,1), &
                                  wtqp, "N", gk_rpr_pm(ipm)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
-                                 0)
-                                 !gpu_option) ! TODO
+                                 !0)
+                                 gpu_option) ! TODO
 
            if (abs(wtqm) > tol12) then
              ABI_ERROR(sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
 
              call cplx_mat_plus_bc(bufsize, sigc_rpr(2,ipm,ikcalc)%buffer_cplx(:,1), &
                                    wtqm, "C", gk_rpr_pm(ipm)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
-                                   0)
-                                   !gpu_option) ! TODO
+                                   !0)
+                                   gpu_option) ! TODO
 
              !sigc_rpr(1, ipm, ikcalc)%buffer_cplx = sigc_rpr(1, ipm, ikcalc)%buffer_cplx + &
              !    (wtqp + wtqm) * real(gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx, kind=gwp) &
@@ -6159,6 +6159,11 @@ else
      ! In case of k or g distribution, sigc_pm is a partial 6d integral that will be ALL_REDUCED in gwr%comm afterwards.
      ! TODO: Off-diagonal terms although this is not the most efficient algorithm
      do ikcalc=1,gwr%nkcalc
+       if (gpu_option == ABI_GPU_OPENMP) then
+         do ipm=1,2
+           call sigc_rpr(1,ipm,ikcalc)%gpu_map("update_from")
+         end do
+       end if
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
          call sig_braket_ur(sigc_rpr(:,:,ikcalc), gwr%g_nfft*gwr%nspinor, uc_psir_bk(:,band,ikcalc), loc_cwork, sigc_pm)
          if (gwr%sig_diago) sigc_it_mat(:, itau, band, 1, ikcalc, spin) = sigc_pm
@@ -6698,8 +6703,7 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, loc_cwork, sigm_pm)
    !ABI_MALLOC(loc_cwork, (rp_r%size_local(2)))
    !loc_cwork(:) = matmul(transpose(rp_r%buffer_cplx), ur_glob)
 
-   nrows = rp_r%size_local(1)
-   ncols = rp_r%size_local(2)
+   nrows = rp_r%size_local(1); ncols = rp_r%size_local(2)
    call xgemv('T', nrows, ncols, cone_gw, rp_r%buffer_cplx, nrows, ur_glob, 1, czero_gw, loc_cwork, 1)
 
    ! Integrate over r. Note complex conjugate.
