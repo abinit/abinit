@@ -159,7 +159,7 @@ module m_slk
  contains
 
    procedure :: init => basemat_init
-    ! Constructor
+    ! Basic Constructor
 
    procedure :: glob2loc => basemat_glob2loc
     ! Determine the local indices of an element from its global indices and return haveit bool flag.
@@ -639,13 +639,14 @@ end subroutine slk_processor_free
 !! SOURCE
 
 subroutine basemat_init(matrix, nbli_global, nbco_global, processor, istwf_k, &
-                        size_blocs) ! optional
+                        size_blocs, gpu_action) ! optional
 
 !Arguments ------------------------------------
  class(basemat_t),intent(inout) :: matrix
  integer,intent(in) :: nbli_global, nbco_global, istwf_k
  type(slk_processor_t),target,intent(in) :: processor
- integer,intent(in),optional :: size_blocs(2)
+ integer,optional,intent(in) :: size_blocs(2)
+ character(len=*),optional,intent(in) :: gpu_action
 
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables-------------------------------
@@ -745,6 +746,8 @@ subroutine basemat_init(matrix, nbli_global, nbco_global, processor, istwf_k, &
  class default
    ABI_ERROR("Wrong class")
  end select
+
+ if (present(gpu_action)) call matrix%gpu_map(gpu_action)
 #endif
 
 end subroutine basemat_init
@@ -1181,6 +1184,9 @@ subroutine basemat_free(mat)
 
 !Arguments ------------------------------------
  class(basemat_t),intent(inout) :: mat
+
+!Local variables-------------------------------
+ type(c_ptr) :: gpu_ptr
 ! *********************************************************************
 
  ! Don't free the grid. Just nullify the pointer as there might be other objects keeping a ref to processor.
@@ -1191,7 +1197,10 @@ subroutine basemat_free(mat)
  mat%size_local = 0
  mat%desc = 0
 
- !call mat%gpu_map("delete")
+ if (mat%is_gpu_mapped(gpu_ptr)) then
+   call wrtout(std_out, "Deallocating mat%buffer on the GPU")
+   call mat%gpu_map("delete")
+ end if
 
  select type (mat)
  class is (slkmat_dp_t)
@@ -1440,14 +1449,15 @@ end subroutine slk_array3_gpu_set_zero
 !!  basemat_is_gpu_mapped
 !!
 !! FUNCTION
-!!  True if the local buffer is mapped to the GPU.
+!!  Return True if the local buffer is mapped to the GPU and the pointer on the gpu.
 !!
 !! SOURCE
 
-logical function basemat_is_gpu_mapped(mat) result(gpu_mapped)
+logical function basemat_is_gpu_mapped(mat, gpu_ptr) result(gpu_mapped)
 
 !Arguments ------------------------------------
  class(basemat_t),target,intent(in) :: mat
+ type(c_ptr),intent(out) :: gpu_ptr
 
 !Local variables-------------------------------
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -1458,32 +1468,36 @@ logical function basemat_is_gpu_mapped(mat) result(gpu_mapped)
 #endif
 ! *********************************************************************
 
- gpu_mapped = .False.
+ gpu_mapped = .False.; gpu_ptr = c_null_ptr
 #ifdef HAVE_OPENMP_OFFLOAD
  select type (mat)
  class is (slkmat_dp_t)
    if (allocated(mat%buffer_cplx)) then
      buf_cplx_dp => mat%buffer_cplx
-     gpu_mapped = c_associated(xomp_get_mapped_ptr(c_loc(buf_cplx_dp))
+     gpu_ptr = xomp_get_mapped_ptr(c_loc(buf_cplx_dp))
+     gpu_mapped = c_associated(gpu_ptr)
    end if
    if (allocated(mat%buffer_real)) then
      buf_real_dp => mat%buffer_real
-     gpu_mapped = c_associated(xomp_get_mapped_ptr(c_loc(buf_real_dp))
+     gpu_ptr = xomp_get_mapped_ptr(c_loc(buf_real_dp))
+     gpu_mapped = c_associated(gpu_ptr)
    end if
 
  class is (slkmat_sp_t)
    if (allocated(mat%buffer_cplx)) then
      buf_cplx_sp => mat%buffer_cplx
-     gpu_mapped = c_associated(xomp_get_mapped_ptr(c_loc(buf_cplx_sp))
+     gpu_ptr= xomp_get_mapped_ptr(c_loc(buf_cplx_sp))
+     gpu_mapped = c_associated(gpu_ptr)
    end if
    if (allocated(mat%buffer_real)) then
      buf_real_sp => mat%buffer_real
-     gpu_mapped = c_associated(xomp_get_mapped_ptr(c_loc(buf_real_sp))
+     gpu_ptr = xomp_get_mapped_ptr(c_loc(buf_real_sp))
+     gpu_mapped = c_associated(gpu_ptr)
    end if
  end select
 #endif
 
-end subroutine basemat_is_gpu_mapped
+end function basemat_is_gpu_mapped
 !!***
 
 !----------------------------------------------------------------------
@@ -1497,11 +1511,11 @@ end subroutine basemat_is_gpu_mapped
 !!
 !! SOURCE
 
-subroutine basemat_gpu_map(mat, action)
+subroutine basemat_gpu_map(mat, gpu_action)
 
 !Arguments ------------------------------------
  class(basemat_t),target,intent(in) :: mat
- character(len=*), intent(in) :: action
+ character(len=*), intent(in) :: gpu_action
 
 !Local variables-------------------------------
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -1512,40 +1526,42 @@ subroutine basemat_gpu_map(mat, action)
 #endif
 ! *********************************************************************
 
- if (.not. string_in(action, "alloc, delete, update_from, update_to")) then
- !if (.not. string_in(action, "alloc, alloc_zero, delete, update_from, update_to")) then
-   ABI_ERROR(sjoin("Invalid action", action))
+ if (.not. string_in(gpu_action, "None, alloc, delete, update_from, update_to")) then
+ !if (.not. string_in(gpu_action, "alloc, alloc_zero, delete, update_from, update_to")) then
+   ABI_ERROR(sjoin("Invalid gpu_action", gpu_action))
    ABI_UNUSED(mat%size_local(1))
  end if
+
+ if (gpu_action == "None") return
 
 #ifdef HAVE_OPENMP_OFFLOAD
  select type (mat)
  class is (slkmat_dp_t)
    if (allocated(mat%buffer_cplx)) then
      buf_cplx_dp => mat%buffer_cplx
-     if (string_in(action, "alloc, alloc_zero")) then
+     if (string_in(gpu_action, "alloc, alloc_zero")) then
        !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx_dp)
-       !if (action == "alloc_zero") call gpu_set_to_zero_complex(mat%buffer_cplx, mat%bufsize)
-     else if (action == "delete") then
+       !if (gpu_action == "alloc_zero") call gpu_set_to_zero_complex(mat%buffer_cplx, mat%bufsize)
+     else if (gpu_action == "delete") then
        !.and. c_associated(xomp_get_mapped_ptr(c_loc(buf_cplx_dp))
        !$OMP TARGET EXIT DATA MAP(delete:buf_cplx_dp)
-     else if (action == "update_from") then
+     else if (gpu_action == "update_from") then
        !$OMP TARGET UPDATE FROM(buf_cplx_dp)
-     else if (action == "update_to") then
+     else if (gpu_action == "update_to") then
        !$OMP TARGET UPDATE TO(buf_cplx_dp)
      end if
    end if
    if (allocated(mat%buffer_real)) then
      buf_real_dp => mat%buffer_real
-     if (string_in(action, "alloc, alloc_zero")) then
+     if (string_in(gpu_action, "alloc, alloc_zero")) then
        !$OMP TARGET ENTER DATA MAP(alloc:buf_real_dp)
-       !if (action == "alloc_zero") call gpu_set_to_zero(mat%buffer_real, mat%bufsize)
-     else if (action == "delete") then
+       !if (gpu_action == "alloc_zero") call gpu_set_to_zero(mat%buffer_real, mat%bufsize)
+     else if (gpu_action == "delete") then
        !.and. c_associated(xomp_get_mapped_ptr(c_loc(buf_real_dp))
        !$OMP TARGET EXIT DATA MAP(delete:buf_real_dp)
-     else if (action == "update_from") then
+     else if (gpu_action == "update_from") then
        !$OMP TARGET UPDATE FROM(buf_real_dp)
-     else if (action == "update_to") then
+     else if (gpu_action == "update_to") then
        !$OMP TARGET UPDATE TO(buf_real_dp)
      end if
    end if
@@ -1553,29 +1569,29 @@ subroutine basemat_gpu_map(mat, action)
  class is (slkmat_sp_t)
    if (allocated(mat%buffer_cplx)) then
      buf_cplx_sp => mat%buffer_cplx
-     if (string_in(action, "alloc, alloc_zero")) then
+     if (string_in(gpu_action, "alloc, alloc_zero")) then
        !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx_sp)
-       !if (action == "alloc_zero") call gpu_set_to_zero_complex_sp(mat%buffer_cplx, mat%bufsize)
-     else if (action == "delete") then
+       !if (gpu_action == "alloc_zero") call gpu_set_to_zero_complex_sp(mat%buffer_cplx, mat%bufsize)
+     else if (gpu_action == "delete") then
        !.and. c_associated(xomp_get_mapped_ptr(c_loc(buf_cplx_sp))
        !$OMP TARGET EXIT DATA MAP(delete:buf_cplx_sp)
-     else if (action == "update_from") then
+     else if (gpu_action == "update_from") then
        !$OMP TARGET UPDATE FROM(buf_cplx_sp)
-     else if (action == "update_to") then
+     else if (gpu_action == "update_to") then
        !$OMP TARGET UPDATE TO(buf_cplx_sp)
      end if
    end if
    if (allocated(mat%buffer_real)) then
      buf_real_sp => mat%buffer_real
-     if (string_in(action, "alloc, alloc_zero")) then
+     if (string_in(gpu_action, "alloc, alloc_zero")) then
        !$OMP TARGET ENTER DATA MAP(alloc:buf_real_sp)
-       !if (action == "alloc_zero") call gpu_set_to_zero_sp(mat%buffer_real, mat%bufsize)
-     else if (action == "delete") then
+       !if (gpu_action == "alloc_zero") call gpu_set_to_zero_sp(mat%buffer_real, mat%bufsize)
+     else if (gpu_action == "delete") then
        !.and. c_associated(xomp_get_mapped_ptr(c_loc(buf_real_sp))
        !$OMP TARGET EXIT DATA MAP(delete:buf_real_sp)
-     else if (action == "update_from") then
+     else if (gpu_action == "update_from") then
        !$OMP TARGET UPDATE FROM(buf_real_sp)
-     else if (action == "update_to") then
+     else if (gpu_action == "update_to") then
        !$OMP TARGET UPDATE TO(buf_real_sp)
      end if
    end if

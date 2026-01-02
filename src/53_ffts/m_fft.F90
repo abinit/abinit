@@ -406,18 +406,18 @@ end subroutine fftbox_plan3_free
 !! SOURCE
 
 subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, &
-                                 iscale, gpu_map)  ! optional
+                                 iscale, gpu_mode)  ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),target,intent(inout) :: plan
  integer,intent(in) :: isign, ndat
- integer,optional,intent(in) :: iscale, gpu_map
+ integer,optional,intent(in) :: iscale, gpu_mode
 !arrays
  complex(sp),target,intent(inout) :: ff(plan%ldxyz*ndat)
 
 !Local variables-------------------------------
- integer :: ndat__, iscale__, gpu_map__
+ integer :: ndat__, iscale__, gpu_mode__
 #ifdef HAVE_GPU
  logical :: transfer_ff
 #endif
@@ -425,7 +425,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, &
 
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
- ABI_DEFAULT(gpu_map__, gpu_map, 0)
+ ABI_DEFAULT(gpu_mode__, gpu_mode, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
@@ -443,7 +443,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, &
    plan%batch_size = ndat__
 
    transfer_ff = .False.
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      transfer_ff = .not. xomp_target_is_present(c_loc(ff))
      !$OMP TARGET ENTER DATA MAP(alloc:ff) IF(transfer_ff)
      !$OMP TARGET UPDATE TO(ff) IF(transfer_ff)
@@ -454,7 +454,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, &
    call gpu_ctx_synch(plan%gpu_ctx_spc)
    !$OMP END TARGET DATA
 
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      !$OMP TARGET UPDATE FROM(ff) IF(transfer_ff)
      !$OMP TARGET EXIT DATA MAP(delete:ff) IF(transfer_ff)
    end if
@@ -493,17 +493,17 @@ end subroutine fftbox_execute_ip_spc
 !! SOURCE
 
 subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, &
-                                 iscale, gpu_map)  ! optional
+                                 iscale, gpu_mode)  ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),target,intent(inout) :: plan
  integer,intent(in) :: isign, ndat
- integer,optional,intent(in) :: iscale, gpu_map
+ integer,optional,intent(in) :: iscale, gpu_mode
 !arrays
  complex(dp),target,intent(inout) :: ff(plan%ldxyz*ndat)
 !Local variables-------------------------------
- integer :: ndat__, iscale__, gpu_map__
+ integer :: ndat__, iscale__, gpu_mode__
 #ifdef HAVE_GPU
  logical :: transfer_ff
 #endif
@@ -513,7 +513,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, &
 
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
- ABI_DEFAULT(gpu_map__, gpu_map, 0)
+ ABI_DEFAULT(gpu_mode__, gpu_mode, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
@@ -531,7 +531,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, &
    plan%batch_size = ndat__
 
    transfer_ff = .False.
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      transfer_ff = .not. xomp_target_is_present(c_loc(ff))
      !$OMP TARGET ENTER DATA MAP(alloc:ff) IF(transfer_ff)
      !$OMP TARGET UPDATE TO(ff) IF(transfer_ff)
@@ -542,7 +542,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, &
    call gpu_ctx_synch(plan%gpu_ctx_dpc)
    !$OMP END TARGET DATA
 
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      !$OMP TARGET UPDATE FROM(ff) IF(transfer_ff)
      !$OMP TARGET EXIT DATA MAP(delete:ff) IF(transfer_ff)
    end if
@@ -580,18 +580,18 @@ end subroutine fftbox_execute_ip_dpc
 !! SOURCE
 
 subroutine fftbox_execute_op_spc(plan, ff, gg, isign, &
-                                 ndat, iscale, gpu_map)
+                                 ndat, iscale, gpu_mode)
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),intent(inout) :: plan
  integer,intent(in) :: isign, ndat
- integer,optional,intent(in) :: iscale, gpu_map
+ integer,optional,intent(in) :: iscale, gpu_mode
 !arrays
  complex(sp),target,intent(in) :: ff(plan%ldxyz*ndat)
  complex(sp),target,intent(inout) :: gg(plan%ldxyz*ndat)
 !Local variables-------------------------------
- integer :: ndat__, iscale__, gpu_map__
+ integer :: ndat__, iscale__, gpu_mode__
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
  logical :: transfer_ff, transfer_gg
 #endif
@@ -601,7 +601,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, &
 
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
- ABI_DEFAULT(gpu_map__, gpu_map, 0)
+ ABI_DEFAULT(gpu_mode__, gpu_mode, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
@@ -619,7 +619,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, &
    plan%batch_size = ndat__
 
    transfer_ff = .False.; transfer_gg = .False.
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      transfer_ff = .not. xomp_target_is_present(c_loc(ff))
      transfer_gg = .not. xomp_target_is_present(c_loc(gg))
      !$OMP TARGET ENTER DATA MAP(alloc:ff) IF(transfer_ff)
@@ -632,7 +632,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, &
    call gpu_ctx_synch(plan%gpu_ctx_spc)
    !$OMP END TARGET DATA
 
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      !$OMP TARGET UPDATE FROM(gg) IF(transfer_gg)
      !$OMP TARGET EXIT DATA MAP(delete:gg) IF(transfer_gg)
    end if
@@ -670,19 +670,19 @@ end subroutine fftbox_execute_op_spc
 !! SOURCE
 
 subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, &
-                                 iscale, gpu_map)  ! optional
+                                 iscale, gpu_mode)  ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),intent(inout) :: plan
  integer,intent(in) :: isign, ndat
- integer,optional,intent(in) :: iscale, gpu_map
+ integer,optional,intent(in) :: iscale, gpu_mode
 !arrays
  complex(dp),target,intent(in) :: ff(plan%ldxyz*ndat)
  complex(dp),target,intent(inout) :: gg(plan%ldxyz*ndat)
 
 !Local variables-------------------------------
- integer :: ndat__, iscale__, gpu_map__
+ integer :: ndat__, iscale__, gpu_mode__
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
  logical :: transfer_ff, transfer_gg
 #endif
@@ -692,7 +692,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, &
 
  ndat__ = ndat
  ABI_DEFAULT(iscale__, iscale, 1)
- ABI_DEFAULT(gpu_map__, gpu_map, 0)
+ ABI_DEFAULT(gpu_mode__, gpu_mode, 0)
 
  if (plan%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
@@ -710,7 +710,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, &
    plan%batch_size = ndat__
 
    transfer_ff = .False.; transfer_gg = .False.
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      transfer_ff = .not. xomp_target_is_present(c_loc(ff))
      transfer_gg = .not. xomp_target_is_present(c_loc(gg))
      !$OMP TARGET ENTER DATA MAP(alloc:ff) IF(transfer_ff)
@@ -723,7 +723,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, &
    call gpu_ctx_synch(plan%gpu_ctx_dpc)
    !$OMP END TARGET DATA
 
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      !$OMP TARGET UPDATE FROM(gg) IF(transfer_gg)
      !$OMP TARGET EXIT DATA MAP(delete:gg) IF(transfer_gg)
    end if
@@ -1890,18 +1890,18 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
 
    call uplan_k%init(npw_k, nspinor, ndat, ngfft, istwf_k, kg_k, sp, gpu_option)
 
-   call wrtout(ount, "Test version with gpu_map 1 (GPU only)")
+   call wrtout(ount, "Test version with gpu_mode 1 (GPU only)")
    do ii=1,2
    !do ii=2,1,-1
      ugsp = ug_refsp
      ndat__ = ndat
      if (ii == 2) ndat__ = max(ndat / 2, 1)
-     call uplan_k%execute_gr(ndat__, ugsp, ursp, gpu_map=1)
+     call uplan_k%execute_gr(ndat__, ugsp, ursp, gpu_mode=1)
      ugsp = zero
-     call uplan_k%execute_rg(ndat__, ursp, ugsp, gpu_map=1)
+     call uplan_k%execute_rg(ndat__, ursp, ugsp, gpu_mode=1)
 
      ierr = COUNT(ABS(ugsp(1:npw_k*ndat__) - ug_refsp(1:npw_k*ndat__)) > ATOL_SP); nfailed = nfailed + ierr
-     write(info,"(a,i1,a)")sjoin(library,"uplan_k spc, gpu_map 1, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
+     write(info,"(a,i1,a)")sjoin(library,"uplan_k spc, gpu_mode 1, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
      if (ierr /= 0) then
        max_abserr = MAXVAL(ABS(ugsp - ug_refsp)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
      end if
@@ -1922,7 +1922,7 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
    call uplan_k%free()
 
    ierr = COUNT(ABS(ugsp - ug_refsp) > ATOL_SP); nfailed = nfailed + ierr
-   write(info,"(a,i1,a)")sjoin(library,"uplan_k spc, gpu_map 0, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
+   write(info,"(a,i1,a)")sjoin(library,"uplan_k spc, gpu_mode 0, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ugsp - ug_refsp)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
    end if
@@ -1945,17 +1945,17 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
    ! Test uplan_k transforms with double precision.
    call uplan_k%init(npw_k, nspinor, ndat, ngfft, istwf_k, kg_k, dp, gpu_option)
 
-   call wrtout(ount, "Test version with gpu_map 1 (GPU only)")
+   call wrtout(ount, "Test version with gpu_mode 1 (GPU only)")
    do ii=1,2
    !do ii=2,1,-1
      ug = ug_ref
      if (ii == 2) ndat__ = max(ndat__ / 2, 1)
-     call uplan_k%execute_gr(ndat__, ug, ur, gpu_map=1)
+     call uplan_k%execute_gr(ndat__, ug, ur, gpu_mode=1)
      ug = zero
-     call uplan_k%execute_rg(ndat__, ur, ug, gpu_map=1)
+     call uplan_k%execute_rg(ndat__, ur, ug, gpu_mode=1)
 
      ierr = COUNT(ABS(ug(1:npw_k*ndat__) - ug_ref(1:npw_k*ndat__))  > ATOL_DP); nfailed = nfailed + ierr
-     write(info,"(a,i1,a)")sjoin(library,"uplan_k dpc, gpu_map 1, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
+     write(info,"(a,i1,a)")sjoin(library,"uplan_k dpc, gpu_mode 1, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
      if (ierr /= 0) then
        max_abserr = MAXVAL(ABS(ug - ug_ref)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
      end if
@@ -1976,7 +1976,7 @@ integer function uplan_utests(ecut, ngfft, rprimd, ndat, nthreads, gpu_option, u
    call uplan_k%free()
 
    ierr = COUNT(ABS(ug - ug_ref) > ATOL_DP); nfailed = nfailed + ierr
-   write(info,"(a,i1,a)")sjoin(library,"uplan_k, dpc, gpu_map 0, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
+   write(info,"(a,i1,a)")sjoin(library,"uplan_k, dpc, gpu_mode 0, istwfk "),istwf_k," :"; write(msg,"(a)")" OK"
    if (ierr /= 0) then
      max_abserr = MAXVAL(ABS(ug - ug_ref)); write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
    end if
@@ -5187,18 +5187,18 @@ end subroutine uplan_free
 !! SOURCE
 
 subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
-                                isign, iscale, gpu_map, phase_r) ! optional
+                                isign, iscale, gpu_mode, phase_r) ! optional
 
 !Arguments ------------------------------------
  class(uplan_t),target,intent(inout) :: uplan
  integer,intent(in) :: ndat
  complex(sp),target,intent(in) :: ug(uplan%npw*uplan%nspinor*ndat)
  complex(sp),target,intent(out) :: ur(uplan%nfft*uplan%nspinor*ndat)
- integer,optional,intent(in) :: isign, iscale, gpu_map
+ integer,optional,intent(in) :: isign, iscale, gpu_mode
  complex(sp),optional,intent(in) :: phase_r(uplan%nfft*uplan%nspinor)
 
 !Local variables-------------------------------
- integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_mode__
  integer(c_size_t) :: idat, ir, offset, bufsize
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
  integer(c_size_t) :: ispinor, ipw, ifft, ig
@@ -5210,7 +5210,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
  !call wrtout(std_out, "in uplan_execute_gr_spc")
  ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
 
- ABI_DEFAULT(gpu_map__, gpu_map, 0)
+ ABI_DEFAULT(gpu_mode__, gpu_mode, 0)
 
  isign__ = +1; if (present(isign)) isign__ = isign
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -5266,7 +5266,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
    uplan%batch_size = ndat
 
    transfer_ug = .False.; transfer_ur = .False.
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      transfer_ug = .not. xomp_target_is_present(c_loc(ug))
      transfer_ur = .not. xomp_target_is_present(c_loc(ur))
      !$OMP TARGET ENTER DATA MAP(alloc:ug) IF (transfer_ug)
@@ -5308,7 +5308,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
      end do
    end if
 
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      !$OMP TARGET EXIT DATA MAP(delete:ug) IF (transfer_ug)
      !$OMP TARGET UPDATE FROM(ur) IF (transfer_ur)
      !$OMP TARGET EXIT DATA MAP(delete:ur) IF (transfer_ur)
@@ -5332,18 +5332,18 @@ end subroutine uplan_execute_gr_spc
 !! SOURCE
 
 subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
-                                isign, iscale, gpu_map, phase_r) ! optional
+                                isign, iscale, gpu_mode, phase_r) ! optional
 
 !Arguments ------------------------------------
  class(uplan_t),target,intent(inout) :: uplan
  integer,intent(in) :: ndat
  complex(dp),target,intent(in) :: ug(uplan%npw*uplan%nspinor*ndat)
  complex(dp),target,intent(out) :: ur(uplan%nfft*uplan%nspinor*ndat)
- integer,optional,intent(in) :: isign, iscale, gpu_map
+ integer,optional,intent(in) :: isign, iscale, gpu_mode
  complex(dp),optional,intent(in) :: phase_r(uplan%nfft*uplan%nspinor)
 
 !Local variables-------------------------------
- integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_mode__
  integer(c_size_t) :: idat, ir, offset, bufsize
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
  integer(c_size_t) :: ispinor, ipw, ifft, ig
@@ -5355,7 +5355,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
  !call wrtout(std_out, "in uplan_execute_gr_dpc")
  ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
 
- ABI_DEFAULT(gpu_map__, gpu_map, 0)
+ ABI_DEFAULT(gpu_mode__, gpu_mode, 0)
 
  isign__ = +1; if (present(isign)) isign__ = isign
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -5409,7 +5409,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
    uplan%batch_size = ndat
 
    transfer_ug = .False.; transfer_ur = .False.
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      transfer_ug = .not. xomp_target_is_present(c_loc(ug))
      transfer_ur = .not. xomp_target_is_present(c_loc(ur))
      !$OMP TARGET ENTER DATA MAP(alloc:ug) IF (transfer_ug)
@@ -5451,7 +5451,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
      end do
    end if
 
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      !$OMP TARGET EXIT DATA MAP(delete:ug) IF (transfer_ug)
      !$OMP TARGET UPDATE FROM(ur) IF (transfer_ur)
      !$OMP TARGET EXIT DATA MAP(delete:ur) IF (transfer_ur)
@@ -5475,18 +5475,18 @@ end subroutine uplan_execute_gr_dpc
 !! SOURCE
 
 subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
-                                isign, iscale, gpu_map, phase_r) ! optional
+                                isign, iscale, gpu_mode, phase_r) ! optional
 
 !Arguments ------------------------------------
  class(uplan_t),target,intent(inout) :: uplan
  integer,intent(in) :: ndat
  complex(sp),target,intent(inout) :: ur(uplan%nfft*uplan%nspinor*ndat)
  complex(sp),target,intent(out) :: ug(uplan%npw*uplan%nspinor*ndat)
- integer,optional,intent(in) :: isign, iscale, gpu_map
+ integer,optional,intent(in) :: isign, iscale, gpu_mode
  complex(sp),optional,intent(in) :: phase_r(uplan%nfft*uplan%nspinor)
 
 !Local variables-------------------------------
- integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, gpu_map__, nfft
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, gpu_mode__, nfft
  integer(c_size_t) :: idat, ir, offset, bufsize
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
  logical :: transfer_ug, transfer_ur
@@ -5498,7 +5498,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
  !call wrtout(std_out, "in uplan_execute_rg_spc")
  ABI_CHECK_IEQ(sp, uplan%kind, "Inconsistent kind!")
 
- ABI_DEFAULT(gpu_map__, gpu_map, 0)
+ ABI_DEFAULT(gpu_mode__, gpu_mode, 0)
 
  isign__ = -1; if (present(isign)) isign__ = isign
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -5552,7 +5552,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
    uplan%batch_size = ndat
 
    transfer_ug = .False.; transfer_ur = .False.
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      transfer_ug = .not. xomp_target_is_present(c_loc(ug))
      transfer_ur = .not. xomp_target_is_present(c_loc(ur))
      !$OMP TARGET ENTER DATA MAP(alloc:ug) IF(transfer_ug)
@@ -5591,7 +5591,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, &
      end do ! ispinor
    end do ! idat
 
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      !$OMP TARGET UPDATE FROM(ug) IF(transfer_ug)
      !$OMP TARGET EXIT DATA MAP(delete:ug) IF(transfer_ug)
      !$OMP TARGET EXIT DATA MAP(delete:ur) IF(transfer_ur)
@@ -5616,18 +5616,18 @@ end subroutine uplan_execute_rg_spc
 !! SOURCE
 
 subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
-                                isign, iscale, gpu_map, phase_r) ! optional
+                                isign, iscale, gpu_mode, phase_r) ! optional
 
 !Arguments ------------------------------------
  class(uplan_t),target,intent(inout) :: uplan
  integer,intent(in) :: ndat
  complex(dp),target,intent(inout) :: ur(uplan%nfft*uplan%nspinor*ndat)
  complex(dp),target,intent(out) :: ug(uplan%npw*uplan%nspinor*ndat)
- integer,optional,intent(in) :: isign, iscale, gpu_map
+ integer,optional,intent(in) :: isign, iscale, gpu_mode
  complex(dp),optional,intent(in) :: phase_r(uplan%nfft*uplan%nspinor)
 
 !Local variables-------------------------------
- integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_map__
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache, nspinor, npw, nfft, gpu_mode__
  integer(c_size_t) :: idat, ir, offset, bufsize
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
  integer(c_size_t) :: ispinor, ipw, ifft, ig
@@ -5639,7 +5639,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
  !call wrtout(std_out, "in uplan_execute_rg_dpc")
  ABI_CHECK_IEQ(dp, uplan%kind, "Inconsistent kind!")
 
- ABI_DEFAULT(gpu_map__, gpu_map, 0)
+ ABI_DEFAULT(gpu_mode__, gpu_mode, 0)
 
  isign__ = -1; if (present(isign)) isign__ = isign
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -5692,7 +5692,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
    uplan%batch_size = ndat
 
    transfer_ug = .False.; transfer_ur = .False.
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      transfer_ug = .not. xomp_target_is_present(c_loc(ug))
      transfer_ur = .not. xomp_target_is_present(c_loc(ur))
      !$OMP TARGET ENTER DATA MAP(alloc:ug) IF(transfer_ug)
@@ -5731,7 +5731,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, &
      end do ! ispinor
    end do ! idat
 
-   if (gpu_map__ /= 0) then
+   if (gpu_mode__ /= 0) then
      !$OMP TARGET UPDATE FROM(ug) IF(transfer_ug)
      !$OMP TARGET EXIT DATA MAP(delete:ug) IF(transfer_ug)
      !$OMP TARGET EXIT DATA MAP(delete:ur) IF(transfer_ur)

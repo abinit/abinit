@@ -3017,9 +3017,9 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
      do ig2=1, g_gp%size_local(2), gwr%uc_batch_size
        ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
        if (k_is_gamma) then
-         call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), gpu_map=1)
+         call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), gpu_mode=1)
        else
-         call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), phase_r=ceikr, gpu_map=1)
+         call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), phase_r=ceikr, gpu_mode=1)
        end if
      end do ! ig2
 
@@ -3126,9 +3126,9 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
      ! G_k(g,g') -> G_k(r,g') and store results in rgp.
      ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
      if (have_g0) then
-       call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), phase_r=ceig0r, gpu_map=1)
+       call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), phase_r=ceig0r, gpu_mode=1)
      else
-       call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), gpu_map=1)
+       call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), gpu_mode=1)
      end if
    end do ! ig2
    end associate
@@ -3141,10 +3141,10 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
      ndat = blocked_loop(ir1, gpr%size_local(2), gwr%uc_batch_size)
      if (have_g0) then
        call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), &
-                              isign=-1, iscale=0, phase_r=conjg_ceig0r, gpu_map=1)
+                              isign=-1, iscale=0, phase_r=conjg_ceig0r, gpu_mode=1)
      else
        call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), &
-                               isign=-1, iscale=0, gpu_map=1)
+                               isign=-1, iscale=0, gpu_mode=1)
      end if
    end do ! ir1
    call gpr%free()
@@ -3284,7 +3284,7 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
  ! F(r',r) --> F(g',r) and store results in gp_r.
  do ir2=1, rp_r%size_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir2, rp_r%size_local(2), gwr%uc_batch_size)
-   call uplan_k%execute_rg(ndat, rp_r%buffer_cplx(:,ir2), gp_r%buffer_cplx(:,ir2), isign=isign, iscale=0, gpu_map=1)
+   call uplan_k%execute_rg(ndat, rp_r%buffer_cplx(:,ir2), gp_r%buffer_cplx(:,ir2), isign=isign, iscale=0, gpu_mode=1)
  end do
 
  ! F(g',r) --> F(r,g')
@@ -3295,7 +3295,7 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
  ! F(r,g') --> F(g,g') and store results in g_gp.
  do ig2=1, g_gp%size_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
-   call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=-isign, iscale=0, gpu_map=1)
+   call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=-isign, iscale=0, gpu_mode=1)
  end do
 
  ! Scale output.
@@ -3482,9 +3482,9 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
      ndat = blocked_loop(ig2, wc_qbz%size_local(2), gwr%uc_batch_size)
 
      if (q_is_gamma) then
-       call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), gpu_map=1)
+       call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), gpu_mode=1)
      else
-       call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), phase_r=ceiqr, gpu_map=1)
+       call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), phase_r=ceiqr, gpu_mode=1)
      end if
    end do ! ig2
 
@@ -3574,9 +3574,9 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
    ndat = blocked_loop(ig2, wc_ggp%size_local(2), gwr%uc_batch_size)
 
    if (any(g0_q /= 0)) then
-     call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), phase_r=ceig0r, gpu_map=1)
+     call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), phase_r=ceig0r, gpu_mode=1)
    else
-     call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), gpu_map=1)
+     call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), gpu_mode=1)
    end if
  end do ! ig2
 
@@ -3587,9 +3587,9 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  do ir1=1,gpr%size_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir1, gpr%size_local(2), gwr%uc_batch_size)
    if (any(g0_q /= 0)) then
-     call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), isign=-1, iscale=0, phase_r=conjg_ceig0r, gpu_map=1)
+     call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), isign=-1, iscale=0, phase_r=conjg_ceig0r, gpu_mode=1)
    else
-     call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), isign=-1, iscale=0, gpu_map=1)
+     call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), isign=-1, iscale=0, gpu_mode=1)
    end if
  end do ! ir1
 
@@ -4469,6 +4469,7 @@ subroutine gwr_build_tchi(gwr)
  complex(dp) :: chq(3), wng(3)
  logical :: q_is_gamma, use_shmem_for_k, use_mpi_for_k, print_time, keep_tchim !, doit ! isirr_k,
  character(len=5000) :: msg
+ character(len=50) :: gpu_action
  type(desc_t),pointer :: desc_q ! desc_k,
  type(__slkmat_t) :: chi_rgp
  type(c_ptr) :: void_ptr
@@ -4750,7 +4751,7 @@ subroutine gwr_build_tchi(gwr)
            ndat = blocked_loop(ig2, chi_rgp%size_local(2), gwr%uc_batch_size)
 
            call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
-                                   gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2), phase_r=cemiqr, gpu_map=1)
+                                   gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2), phase_r=cemiqr, gpu_mode=1)
          end do ! ig2
 
          call uplan_q%free()
@@ -4800,13 +4801,13 @@ subroutine gwr_build_tchi(gwr)
    nrsp = gwr%g_nfft * gwr%nspinor
    col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
 
+   gpu_action = "None";
+   if (gpu_option == ABI_GPU_OPENMP) then
+     gpu_action = "alloc"; call wrtout(std_out, " Allocating Chi_q(r,r', +tau) on the GPU...")
+   end if
    ABI_MALLOC(chiq_rpr, (gwr%nqibz))
    do iq_ibz=1,gwr%nqibz
-     call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
-     if (gpu_option == ABI_GPU_OPENMP) then
-       if (iq_ibz == 1) call wrtout(std_out, " Allocating Chi_q(r,r', +tau) on the GPU...")
-       call chiq_rpr(iq_ibz)%gpu_map("alloc")
-     end if
+     call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
    end do
 
    call pstat_proc%print(_PSTAT_ARGS_)
@@ -4936,11 +4937,11 @@ subroutine gwr_build_tchi(gwr)
    ! Free memory
    call slk_array_free(gk_rpr_pm); call slk_array_free(gkq_rpr_pm)
 
-   if (gpu_option == ABI_GPU_OPENMP) then
-     do iq_ibz=1,gwr%nqibz
-       call chiq_rpr(iq_ibz)%gpu_map("delete")
-     end do
-   end if
+   !if (gpu_option == ABI_GPU_OPENMP) then
+   !  do iq_ibz=1,gwr%nqibz
+   !    call chiq_rpr(iq_ibz)%gpu_map("delete")
+   !  end do
+   !end if
    call slk_array_free(chiq_rpr)
    ABI_FREE(chiq_rpr)
 
@@ -5627,7 +5628,7 @@ subroutine gwr_build_sigmac(gwr)
  complex(dp) :: zz, zsc, sigc_e0__, dsigc_de0, z_e0, sig_xc, hhartree_bk, qp_ene, qp_ene_prev, alpha_c, sigc_zsc
  logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k, do_sigma_fit
  logical :: compute_this_kbz, print_time, define, sigc_is_herm, band_inversion
- character(len=500) :: msg
+ character(len=500) :: msg, gpu_action
  type(gaps_t) :: new_gaps
  type(yamldoc_t) :: ydoc
  type(c_ptr) :: void_ptr
@@ -5995,12 +5996,18 @@ else
  col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
 
  call wc_rpr%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+
+ gpu_action = "None"
+ if (gpu_option == ABI_GPU_OPENMP) then
+   gpu_action = "alloc"; call wrtout(std_out, " Allocating Sigma_k(r,r', +/-tau) on the GPU...")
+ end if
+
  do ipm=1,2
    call gk_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
    do ikcalc=1,gwr%nkcalc
-     call sigc_rpr(1,ipm,ikcalc)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+     call sigc_rpr(1,ipm,ikcalc)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
      ! For sigma we have to decompose it in hermitian/anti-hermitian part.
-     !call sigc_rpr(2,ipm,ikcalc)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+     !call sigc_rpr(2,ipm,ikcalc)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
    end do
  end do
 
@@ -6011,16 +6018,15 @@ else
  ii = sigc_rpr(1,1,1)%size_local(2)
  ABI_MALLOC(loc_cwork, (ii))
 
- if (gpu_option == ABI_GPU_OPENMP) then
-   call wrtout(std_out, " Allocating Sigma_k(r,r', +/-tau) on the GPU...")
-   !call slk_array_gpu_map(sigc_rpr, "alloc")
-   do ipm=1,2
-     do ikcalc=1,gwr%nkcalc
-       call sigc_rpr(1,ipm,ikcalc)%gpu_map("alloc")
-     end do
-   end do
-   call wrtout(std_out, " Allocation successful")
- end if
+ !if (gpu_option == ABI_GPU_OPENMP) then
+ !  call wrtout(std_out, " Allocating Sigma_k(r,r', +/-tau) on the GPU...")
+ !  do ipm=1,2
+ !    do ikcalc=1,gwr%nkcalc
+ !      call sigc_rpr(1,ipm,ikcalc)%gpu_map("alloc")
+ !    end do
+ !  end do
+ !  call wrtout(std_out, " Allocation successful")
+ !end if
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -6182,16 +6188,16 @@ else
 
  sigc_it_mat = -sigc_it_mat * (one/gwr%g_nfft) ** 2
 
- if (gpu_option == ABI_GPU_OPENMP) then
-   call wrtout(std_out, " Deallocating Sigma_k(r,r', +/-tau) on the GPU...")
-   !call slk_array_gpu_map(sigc_rpr, "delete")
-   do ipm=1,2
-     do ikcalc=1,gwr%nkcalc
-       call sigc_rpr(1,ipm,ikcalc)%gpu_map("delete")
-     end do
-   end do
-   call wrtout(std_out, " Dellocation successful")
- end if
+ !if (gpu_option == ABI_GPU_OPENMP) then
+ !  call wrtout(std_out, " Deallocating Sigma_k(r,r', +/-tau) on the GPU...")
+ !  !call slk_array_gpu_map(sigc_rpr, "delete")
+ !  do ipm=1,2
+ !    do ikcalc=1,gwr%nkcalc
+ !      call sigc_rpr(1,ipm,ikcalc)%gpu_map("delete")
+ !    end do
+ !  end do
+ !  call wrtout(std_out, " Dellocation successful")
+ !end if
 
  ABI_FREE(loc_cwork)
  call wc_rpr%free(); call slk_array_free(sigc_rpr); call slk_array_free(gk_rpr_pm)
