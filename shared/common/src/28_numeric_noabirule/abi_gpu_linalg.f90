@@ -418,7 +418,6 @@ end subroutine gpu_linalg_shutdown
 !! OUTPUT
 !!  c     = c matrix
 !!
-!!
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
@@ -496,6 +495,7 @@ end subroutine gpu_xgemm
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
 !! SOURCE
+
 subroutine gpu_xtrsm(cplx,side,uplo,transa,diag,m,n,alpha,a_gpu,lda,b_gpu,ldb)
 
 ! !Arguments ------------------------------------
@@ -731,8 +731,6 @@ end subroutine gpu_xsygvd_bufferSize
 #endif
 
 !------------------------------------------------------------------------------
-!                         gpu_set_to_zero
-!------------------------------------------------------------------------------
 !!****f* m_abi_gpu_linalg/gpu_set_to_zero
 !! NAME
 !!  gpu_set_to_zero
@@ -773,6 +771,47 @@ subroutine gpu_set_to_zero(array, sizea)
 end subroutine gpu_set_to_zero
 !!***
 
+!------------------------------------------------------------------------------
+!!****f* m_abi_gpu_linalg/gpu_set_to_zero_sp
+!! NAME
+!!  gpu_set_to_zero_sp
+!!
+!! FUNCTION
+!!  Set array content to zero
+!!
+!! INPUTS
+!!  size = size of array
+!!
+!! OUTPUT
+!!  array  = array to be set to zero
+!!
+!! SOURCE
+
+subroutine gpu_set_to_zero_sp(array, sizea)
+ use, intrinsic :: iso_c_binding
+ integer(c_size_t),intent(in)  :: sizea
+ real(sp),target,intent(out) :: array(sizea)
+! *********************************************************************
+
+#if defined HAVE_OPENMP_OFFLOAD
+ integer(c_size_t)  :: i
+
+#if defined HAVE_GPU_CUDA
+ !$OMP TARGET DATA USE_DEVICE_ADDR(array)
+ call gpu_memset(c_loc(array), 0, sizea*sp)
+ !$OMP END TARGET DATA
+#elif defined HAVE_GPU_HIP
+ !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:array)
+ do i=1,sizea
+   array(i)=zero_sp
+ end do
+#endif
+
+#endif
+
+end subroutine gpu_set_to_zero_sp
+
+!------------------------------------------------------------------------------
 !!****f* m_abi_gpu_linalg/gpu_set_to_zero_complex
 !! NAME
 !!  gpu_set_to_zero_complex
@@ -850,7 +889,7 @@ subroutine gpu_set_to_zero_complex_sp(array, sizea)
 
 #endif
 
-end subroutine gpu_set_to_zero_complex
+end subroutine gpu_set_to_zero_complex_sp
 !!***
 
 !------------------------------------------------------------------------------
@@ -876,7 +915,6 @@ subroutine gpu_copy(dest, src, sizea)
  integer(c_size_t),intent(in)  :: sizea
  real(dp),target,intent(in)  :: src(sizea)
  real(dp),target,intent(out) :: dest(sizea)
-
 ! *********************************************************************
 
 #if defined HAVE_OPENMP_OFFLOAD
