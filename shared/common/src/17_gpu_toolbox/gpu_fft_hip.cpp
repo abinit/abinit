@@ -1,4 +1,4 @@
-/* gpu_fft.cu */
+/* gpu_fft_hip.cu */
 
 /*
  * Copyright (C) 2008-2025 ABINIT Group
@@ -18,7 +18,7 @@
 hipfftHandle plan_fft[2];
 static hipStream_t stream_compute[2];
 
-//! utility function to select eigen type
+//! utility function to select FFT type
 static hipfftType select_hipfft_type(const int fftType_int)
 {
   switch(fftType_int){
@@ -39,7 +39,7 @@ static hipfftType select_hipfft_type(const int fftType_int)
 
 /*=========================================================================*/
 /* NAME
- *  gpu_fft_plan_many
+ *  gpu_fft_plan_many_cpp
  *
  * FUNCTION
  *  Initialize a FFT plan with custom dimension, strided and batch size.
@@ -98,7 +98,7 @@ void gpu_fft_plan_many_cpp(int *fft_plan_id, int *rank, int **n, int **inembed,
 
 /*=========================================================================*/
 /* NAME
- *  gpu_fft_stream_synchronize
+ *  gpu_fft_stream_synchronize_cpp
  *
  * FUNCTION
  *  Wait for any FFT operations still running on stream
@@ -114,7 +114,7 @@ void gpu_fft_stream_synchronize_cpp(int *fft_plan_id)
 
 /*=========================================================================*/
 // NAME
-//  gpu_fft_plan_destroy
+//  gpu_fft_plan_destroy_cpp
 //
 // FUNCTION
 //  Destroy FFT plan
@@ -130,7 +130,7 @@ void gpu_fft_plan_destroy_cpp(int *fft_plan_id){
 
 /*=========================================================================*/
 /* NAME
- *  gpu_fft_exec_z2z
+ *  gpu_fft_exec_z2z_cpp
  *
  * FUNCTION
  *  Run a Fast Fourier Transform on double-complex input and output
@@ -155,7 +155,7 @@ void gpu_fft_exec_z2z_cpp(int *fft_plan_id, void **idata, void **odata, int *dir
 
 /*=========================================================================*/
 /* NAME
- *  gpu_fft_exec_c2c
+ *  gpu_fft_exec_c2c_cpp
  *
  * FUNCTION
  *  Run a Fast Fourier Transform on float complex input and output
