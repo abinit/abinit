@@ -3495,9 +3495,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
    end associate
    call wc_qbz%free()
 
-   !if (gpu_option == ABI_GPU_OPENMP) then
-   !  call wc_gpr(my_iqf)%gpu_map("update_to")
-   !end if
+   !if (gpu_option == ABI_GPU_OPENMP) call wc_gpr(my_iqf)%gpu_map("update_to")
  end do ! my_iqf
 
 #ifdef HAVE_OPENMP_OFFLOAD

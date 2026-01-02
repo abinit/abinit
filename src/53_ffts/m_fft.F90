@@ -50,6 +50,7 @@ module m_fft
                              fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary, ngfft_seq
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, ptabs_fourwf, initmpi_seq
  use m_distribfft,    only : distribfft_type
+ use m_abi_linalg,    only : gpu_set_to_zero_complex, gpu_set_to_zero_complex_spc
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -160,6 +161,8 @@ module m_fft
 !!***
 
 #if defined HAVE_GPU
+ ! The c functions are declared in shared/common/src/17_gpu_toolbox
+ ! gpu_fft_cuda.cpp or gpu_fft_hip.cpp
  interface
    subroutine gpu_ctx_init(ctx, f_dims, f_embed, batch, kind) bind(C, name="gpu_ctx_init_cpp")
      use, intrinsic :: iso_c_binding
@@ -5276,11 +5279,11 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
    end if
 
    bufsize = uplan%nfft * uplan%nspinor * ndat
-   ! TODO call gpu_set_to_zero(ur, bufsize)
-   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
-   do ifft=1, bufsize
-     ur(ifft) = zero
-   end do
+   call gpu_set_to_zero_complex_sp(ur, bufsize)
+   !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
+   !do ifft=1, bufsize
+   !  ur(ifft) = zero
+   !end do
 
    ig2ifft => uplan%ig2ifft
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ifft, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ig2ifft)
@@ -5423,11 +5426,11 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
    end if
 
    bufsize = uplan%nfft * uplan%nspinor * ndat
-   ! TODO call gpu_set_to_zero(ur, bufsize)
-   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
-   do ifft=1,bufsize
-     ur(ifft) = czero
-   end do
+   call gpu_set_to_zero_complex(ur, bufsize)
+   !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
+   !do ifft=1,bufsize
+   !  ur(ifft) = czero
+   !end do
 
    ig2ifft => uplan%ig2ifft
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ifft, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ig2ifft)
