@@ -126,10 +126,8 @@ module m_fft
 
    integer :: fftalg = 112       ! The library to call on the CPU
    integer :: fftcache = 16      ! Cache size in kB. Only used in SG routines.
-   integer(c_size_t) :: nfft = -1
-   integer(c_size_t) :: ldxyz = -1
-   !integer :: nfft = -1          ! Total number of points in the FFT box.
-   !integer :: ldxyz = -1         ! Physical dimension of the array to transform
+   integer(c_size_t) :: nfft = -1  ! Total number of points in the FFT box.
+   integer(c_size_t) :: ldxyz = -1 ! Physical dimension of the array to transform
    integer :: batch_size = -1    ! MAXIMUM number of FFTs associated to the plan.
    integer :: dims(3) = -1       ! The number of FFT divisions.
    integer :: embed(3) = -1      ! Leading dimensions of the input, output arrays.
@@ -205,14 +203,12 @@ module m_fft
 
  type, public :: uplan_t
 
-   !integer :: npw = -1
    integer(c_size_t) :: npw = -1
    integer :: nspinor = -1
    integer :: batch_size = -1  ! MAXIMUM number of FFTs associated to the plan.
    integer :: istwfk = -1
    integer :: kind = -1
    integer :: gpu_option = ABI_GPU_DISABLED  ! /= 0 if FFTs should be offloaded to the GPU.
-   !integer :: nfft = -1  ! Total number of points in the FFT box.
    integer(c_size_t) :: nfft = -1
    integer :: mgfft = -1
    integer :: ngfft(18)
