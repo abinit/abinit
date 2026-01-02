@@ -50,7 +50,7 @@ module m_fft
                              fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary, ngfft_seq
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, ptabs_fourwf, initmpi_seq
  use m_distribfft,    only : distribfft_type
- use m_abi_linalg,    only : gpu_set_to_zero_complex, gpu_set_to_zero_complex_spc
+ use m_abi_linalg,    only : gpu_set_to_zero_complex, gpu_set_to_zero_complex_sp
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -5280,10 +5280,6 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, &
 
    bufsize = uplan%nfft * uplan%nspinor * ndat
    call gpu_set_to_zero_complex_sp(ur, bufsize)
-   !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
-   !do ifft=1, bufsize
-   !  ur(ifft) = zero
-   !end do
 
    ig2ifft => uplan%ig2ifft
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ifft, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ig2ifft)
@@ -5427,10 +5423,6 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, &
 
    bufsize = uplan%nfft * uplan%nspinor * ndat
    call gpu_set_to_zero_complex(ur, bufsize)
-   !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:ur)
-   !do ifft=1,bufsize
-   !  ur(ifft) = czero
-   !end do
 
    ig2ifft => uplan%ig2ifft
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ifft, offset, ir, ig) COLLAPSE(3) MAP(to:ug, ig2ifft)
