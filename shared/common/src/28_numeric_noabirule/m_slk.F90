@@ -186,6 +186,9 @@ module m_slk
    procedure :: check_local_shape => basemat_check_local_shape
    !  Debugging tool to test the local shape `lshape` of the local buffer.
 
+   procedure :: is_gpu_mapped => basemat_is_gpu_mapped
+   !  True if the local buffer is mapped to the GPU.
+
    procedure :: gpu_map => basemat_gpu_map
    ! Use Opemp to allocate/delete the local buffer on the GPU.
 
@@ -1432,6 +1435,59 @@ end subroutine slk_array3_gpu_set_zero
 
 !----------------------------------------------------------------------
 
+!!****f* m_slk/basemat_is_gpu_mapped
+!! NAME
+!!  basemat_is_gpu_mapped
+!!
+!! FUNCTION
+!!  True if the local buffer is mapped to the GPU.
+!!
+!! SOURCE
+
+logical function basemat_is_gpu_mapped(mat) result(gpu_mapped)
+
+!Arguments ------------------------------------
+ class(basemat_t),target,intent(in) :: mat
+
+!Local variables-------------------------------
+#ifdef HAVE_OPENMP_OFFLOAD
+ real(sp), contiguous, pointer :: buf_real_sp(:,:)
+ real(dp), contiguous, pointer :: buf_real_dp(:,:)
+ complex(sp), contiguous, pointer :: buf_cplx_sp(:,:)
+ complex(dp), contiguous, pointer :: buf_cplx_dp(:,:)
+#endif
+! *********************************************************************
+
+ gpu_mapped = .False.
+#ifdef HAVE_OPENMP_OFFLOAD
+ select type (mat)
+ class is (slkmat_dp_t)
+   if (allocated(mat%buffer_cplx)) then
+     buf_cplx_dp => mat%buffer_cplx
+     gpu_mapped = c_associated(xomp_get_mapped_ptr(c_loc(buf_cplx_dp))
+   end if
+   if (allocated(mat%buffer_real)) then
+     buf_real_dp => mat%buffer_real
+     gpu_mapped = c_associated(xomp_get_mapped_ptr(c_loc(buf_real_dp))
+   end if
+
+ class is (slkmat_sp_t)
+   if (allocated(mat%buffer_cplx)) then
+     buf_cplx_sp => mat%buffer_cplx
+     gpu_mapped = c_associated(xomp_get_mapped_ptr(c_loc(buf_cplx_sp))
+   end if
+   if (allocated(mat%buffer_real)) then
+     buf_real_sp => mat%buffer_real
+     gpu_mapped = c_associated(xomp_get_mapped_ptr(c_loc(buf_real_sp))
+   end if
+ end select
+#endif
+
+end subroutine basemat_is_gpu_mapped
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_slk/basemat_gpu_map
 !! NAME
 !!  basemat_gpu_map
@@ -1499,7 +1555,7 @@ subroutine basemat_gpu_map(mat, action)
      buf_cplx_sp => mat%buffer_cplx
      if (string_in(action, "alloc, alloc_zero")) then
        !$OMP TARGET ENTER DATA MAP(alloc:buf_cplx_sp)
-       !if (action == "alloc_zero") call gpu_set_to_zero_complex(mat%buffer_cplx, mat%bufsize)
+       !if (action == "alloc_zero") call gpu_set_to_zero_complex_sp(mat%buffer_cplx, mat%bufsize)
      else if (action == "delete") then
        !.and. c_associated(xomp_get_mapped_ptr(c_loc(buf_cplx_sp))
        !$OMP TARGET EXIT DATA MAP(delete:buf_cplx_sp)
@@ -1513,7 +1569,7 @@ subroutine basemat_gpu_map(mat, action)
      buf_real_sp => mat%buffer_real
      if (string_in(action, "alloc, alloc_zero")) then
        !$OMP TARGET ENTER DATA MAP(alloc:buf_real_sp)
-       !if (action == "alloc_zero") call gpu_set_to_zero(mat%buffer_real, mat%bufsize)
+       !if (action == "alloc_zero") call gpu_set_to_zero_sp(mat%buffer_real, mat%bufsize)
      else if (action == "delete") then
        !.and. c_associated(xomp_get_mapped_ptr(c_loc(buf_real_sp))
        !$OMP TARGET EXIT DATA MAP(delete:buf_real_sp)
