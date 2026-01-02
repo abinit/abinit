@@ -4815,8 +4815,8 @@ subroutine gwr_build_tchi(gwr)
    ! Allocate G_k(r',r, +/- tau) and G_kq(r',r, +/- tau)
    ! TODO: Can save memory here as we don't need +/- tau for each k+q.
    do ipm=1,2
-     call gk_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
-     call gkq_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+     call gk_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])  !, gpu_action=gpu_action)
+     call gkq_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize]) !, gpu_action=gpu_action)
    end do
 
    mem_mb = sum(slk_array_locmem_mb(chiq_rpr)) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(gkq_rpr_pm))
@@ -4935,14 +4935,7 @@ subroutine gwr_build_tchi(gwr)
    end do ! spin
 
    ! Free memory
-   call slk_array_free(gk_rpr_pm); call slk_array_free(gkq_rpr_pm)
-
-   !if (gpu_option == ABI_GPU_OPENMP) then
-   !  do iq_ibz=1,gwr%nqibz
-   !    call chiq_rpr(iq_ibz)%gpu_map("delete")
-   !  end do
-   !end if
-   call slk_array_free(chiq_rpr)
+   call slk_array_free(gk_rpr_pm); call slk_array_free(gkq_rpr_pm); call slk_array_free(chiq_rpr)
    ABI_FREE(chiq_rpr)
 
    do iq_ibz=1,gwr%nqibz
@@ -6018,16 +6011,6 @@ else
  ii = sigc_rpr(1,1,1)%size_local(2)
  ABI_MALLOC(loc_cwork, (ii))
 
- !if (gpu_option == ABI_GPU_OPENMP) then
- !  call wrtout(std_out, " Allocating Sigma_k(r,r', +/-tau) on the GPU...")
- !  do ipm=1,2
- !    do ikcalc=1,gwr%nkcalc
- !      call sigc_rpr(1,ipm,ikcalc)%gpu_map("alloc")
- !    end do
- !  end do
- !  call wrtout(std_out, " Allocation successful")
- !end if
-
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
 
@@ -6187,17 +6170,6 @@ else
  end do ! my_is
 
  sigc_it_mat = -sigc_it_mat * (one/gwr%g_nfft) ** 2
-
- !if (gpu_option == ABI_GPU_OPENMP) then
- !  call wrtout(std_out, " Deallocating Sigma_k(r,r', +/-tau) on the GPU...")
- !  !call slk_array_gpu_map(sigc_rpr, "delete")
- !  do ipm=1,2
- !    do ikcalc=1,gwr%nkcalc
- !      call sigc_rpr(1,ipm,ikcalc)%gpu_map("delete")
- !    end do
- !  end do
- !  call wrtout(std_out, " Dellocation successful")
- !end if
 
  ABI_FREE(loc_cwork)
  call wc_rpr%free(); call slk_array_free(sigc_rpr); call slk_array_free(gk_rpr_pm)

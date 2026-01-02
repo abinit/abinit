@@ -747,7 +747,6 @@ end subroutine gpu_xsygvd_bufferSize
 !! SOURCE
 
 subroutine gpu_set_to_zero(array, sizea)
- use, intrinsic :: iso_c_binding
  integer(c_size_t),intent(in)  :: sizea
  real(dp),target,intent(out) :: array(sizea)
 ! *********************************************************************
@@ -788,7 +787,6 @@ end subroutine gpu_set_to_zero
 !! SOURCE
 
 subroutine gpu_set_to_zero_sp(array, sizea)
- use, intrinsic :: iso_c_binding
  integer(c_size_t),intent(in)  :: sizea
  real(sp),target,intent(out) :: array(sizea)
 ! *********************************************************************
@@ -828,7 +826,6 @@ end subroutine gpu_set_to_zero_sp
 !! SOURCE
 
 subroutine gpu_set_to_zero_complex(array, sizea)
- use, intrinsic :: iso_c_binding
  integer(c_size_t),intent(in)  :: sizea
  complex(dp),target,intent(out) :: array(sizea)
 ! *********************************************************************
@@ -868,7 +865,6 @@ end subroutine gpu_set_to_zero_complex
 !! SOURCE
 
 subroutine gpu_set_to_zero_complex_sp(array, sizea)
- use, intrinsic :: iso_c_binding
  integer(c_size_t),intent(in)  :: sizea
  complex(sp),target,intent(out) :: array(sizea)
 ! *********************************************************************
@@ -911,7 +907,6 @@ end subroutine gpu_set_to_zero_complex_sp
 !! SOURCE
 
 subroutine gpu_copy(dest, src, sizea)
- use, intrinsic :: iso_c_binding
  integer(c_size_t),intent(in)  :: sizea
  real(dp),target,intent(in)  :: src(sizea)
  real(dp),target,intent(out) :: dest(sizea)
@@ -939,6 +934,50 @@ subroutine gpu_copy(dest, src, sizea)
 end subroutine gpu_copy
 !!***
 
+!!****f* m_abi_gpu_linalg/gpu_copy_sp
+!! NAME
+!!  gpu_copy_sp
+!!
+!! FUNCTION
+!!  Copy array content on GPU to another (single precision version)
+!!
+!! INPUTS
+!!  src  = array to be copied
+!!  size = size of src and dest
+!!
+!! OUTPUT
+!!  dest = array to be set
+!!
+!! SOURCE
+
+subroutine gpu_copy_sp(dest, src, sizea)
+ integer(c_size_t),intent(in)  :: sizea
+ real(sp),target,intent(in)  :: src(sizea)
+ real(sp),target,intent(out) :: dest(sizea)
+! *********************************************************************
+
+#if defined HAVE_OPENMP_OFFLOAD
+ integer(c_size_t)  :: i
+
+#if defined HAVE_GPU_CUDA
+ !$OMP TARGET DATA USE_DEVICE_ADDR(dest,src)
+ call copy_gpu_to_gpu(c_loc(dest), c_loc(src), sizea*sp)
+ !$OMP END TARGET DATA
+#elif defined HAVE_GPU_HIP
+ !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:src,dest)
+ do i=1,sizea
+   dest(i)=src(i)
+ end do
+#endif
+
+#else
+ ! Make testfarm happy
+ ABI_UNUSED((/src,dest/))
+#endif
+
+end subroutine gpu_copy_sp
+!!***
+
 !!****f* m_abi_gpu_linalg/gpu_copy_complex
 !! NAME
 !!  gpu_copy_complex
@@ -956,7 +995,6 @@ end subroutine gpu_copy
 !! SOURCE
 
 subroutine gpu_copy_complex(dest, src, sizea)
- use, intrinsic :: iso_c_binding
  integer(c_size_t),intent(in)  :: sizea
  complex(dp),target,intent(in)  :: src(sizea)
  complex(dp),target,intent(out) :: dest(sizea)
@@ -982,6 +1020,50 @@ subroutine gpu_copy_complex(dest, src, sizea)
 #endif
 
 end subroutine gpu_copy_complex
+!!***
+
+!!****f* m_abi_gpu_linalg/gpu_copy_complex_sp
+!! NAME
+!!  gpu_copy_complex_sp
+!!
+!! FUNCTION
+!!  Copy array content on GPU to another (single precision version)
+!!
+!! INPUTS
+!!  src  = array to be copied
+!!  size = size of src and dest
+!!
+!! OUTPUT
+!!  dest = array to be set
+!!
+!! SOURCE
+
+subroutine gpu_copy_complex_sp(dest, src, sizea)
+ integer(c_size_t),intent(in)  :: sizea
+ complex(sp),target,intent(in)  :: src(sizea)
+ complex(sp),target,intent(out) :: dest(sizea)
+! *********************************************************************
+
+#if defined HAVE_OPENMP_OFFLOAD
+ integer(c_size_t)  :: i
+
+#if defined HAVE_GPU_CUDA
+ !$OMP TARGET DATA USE_DEVICE_ADDR(dest,src)
+ call copy_gpu_to_gpu(c_loc(dest), c_loc(src), sizea*sp*2)
+ !$OMP END TARGET DATA
+#elif defined HAVE_GPU_HIP
+ !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:src,dest)
+ do i=1,sizea
+   dest(i)=src(i)
+ end do
+#endif
+
+#else
+ ! Make testfarm happy
+ ABI_UNUSED((/src,dest/))
+#endif
+
+end subroutine gpu_copy_complex_sp
 !!***
 
 !!****f* m_abi_gpu_linalg/abi_gpu_xgemm
@@ -1028,7 +1110,6 @@ subroutine abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,
   end if
 
 #ifdef HAVE_GPU
-
   call gpu_xgemm(cplx,transa,transb,m,n,k,alpha,&
       a,lda,b,ldb,beta,c,ldc)
 
@@ -3696,9 +3777,6 @@ end subroutine abi_gpu_xpotrf_2z
 subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spaceComm,&
 &                              sqgram_gpu,vectsize,&
 &                              x_cplx,timopt,tim_xortho) ! optional arguments
-
-  use, intrinsic :: iso_c_binding
-  implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -1129,6 +1129,16 @@ subroutine slkmat_dp_copy(in_mat, out_mat, empty)
    end if
  end if
 
+ !type(c_ptr) :: gpu_ptr
+ !if (in_mat%is_gpu_mapped(gpu_ptr)) then
+ !  call out_mat%gpu_map("alloc")
+ !  if (in_mat%istwf_k == 1) then
+ !    call gpu_copy_complex(out_mat%buffer_cplx, in_mat%buffer_cplx, in_mat%bufsize)
+ !  else
+ !    call gpu_copy(out_mat%buffer_real, in_mat%buffer_real, in_mat%bufsize)
+ !  end if
+ !end if
+
 end subroutine slkmat_dp_copy
 !!***
 
@@ -1165,6 +1175,16 @@ subroutine slkmat_sp_copy(in_mat, out_mat, empty)
      out_mat%buffer_real = in_mat%buffer_real
    end if
  end if
+
+ !type(c_ptr) :: gpu_ptr
+ !if (in_mat%is_gpu_mapped(gpu_ptr)) then
+ !  call out_mat%gpu_map("alloc")
+ !  if (in_mat%istwf_k == 1) then
+ !    call gpu_copy_complex_sp(out_mat%buffer_cplx, in_mat%buffer_cplx, in_mat%bufsize)
+ !  else
+ !    call gpu_copy_copy_sp(out_mat%buffer_real, in_mat%buffer_real, in_mat%bufsize)
+ !  end if
+ !end if
 
 end subroutine slkmat_sp_copy
 !!***
@@ -1453,7 +1473,7 @@ end subroutine slk_array3_gpu_set_zero
 !!
 !! SOURCE
 
-logical function basemat_is_gpu_mapped(mat, gpu_ptr) result(gpu_mapped)
+logical function basemat_is_gpu_mapped(mat, gpu_ptr) result(is_gpu_mapped)
 
 !Arguments ------------------------------------
  class(basemat_t),target,intent(in) :: mat
@@ -1468,31 +1488,31 @@ logical function basemat_is_gpu_mapped(mat, gpu_ptr) result(gpu_mapped)
 #endif
 ! *********************************************************************
 
- gpu_mapped = .False.; gpu_ptr = c_null_ptr
+ is_gpu_mapped = .False.; gpu_ptr = c_null_ptr
 #ifdef HAVE_OPENMP_OFFLOAD
  select type (mat)
  class is (slkmat_dp_t)
    if (allocated(mat%buffer_cplx)) then
      buf_cplx_dp => mat%buffer_cplx
      gpu_ptr = xomp_get_mapped_ptr(c_loc(buf_cplx_dp))
-     gpu_mapped = c_associated(gpu_ptr)
+     is_gpu_mapped = c_associated(gpu_ptr)
    end if
    if (allocated(mat%buffer_real)) then
      buf_real_dp => mat%buffer_real
      gpu_ptr = xomp_get_mapped_ptr(c_loc(buf_real_dp))
-     gpu_mapped = c_associated(gpu_ptr)
+     is_gpu_mapped = c_associated(gpu_ptr)
    end if
 
  class is (slkmat_sp_t)
    if (allocated(mat%buffer_cplx)) then
      buf_cplx_sp => mat%buffer_cplx
      gpu_ptr= xomp_get_mapped_ptr(c_loc(buf_cplx_sp))
-     gpu_mapped = c_associated(gpu_ptr)
+     is_gpu_mapped = c_associated(gpu_ptr)
    end if
    if (allocated(mat%buffer_real)) then
      buf_real_sp => mat%buffer_real
      gpu_ptr = xomp_get_mapped_ptr(c_loc(buf_real_sp))
-     gpu_mapped = c_associated(gpu_ptr)
+     is_gpu_mapped = c_associated(gpu_ptr)
    end if
  end select
 #endif
