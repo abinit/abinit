@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h17 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h14 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v7_t66/t66.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v7_t66/t66.abi
 - output file    -> t66.abo
 - root for input  files -> t66i
 - root for output files -> t66o
@@ -189,7 +189,7 @@ P           mkmem           4
           usefock2          1
               wtk        0.03704    0.29630    0.22222    0.44444
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -241,8 +241,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -348,7 +348,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -360,7 +360,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t66o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.26684   Average Vxc (hartree)=  -0.33626
  Eigenvalues (hartree) for nkpt=   4  k points, SPIN UP:
@@ -385,7 +385,7 @@ psp_core            : -2.64619322653027E-01
 local_psp           : -2.25612474878315E+00
 non_local_psp       :  1.82810663096450E+00
 total_energy        : -7.86733264530762E+00
-total_energy_eV     : -2.14081008565775E+02
+total_energy_eV     : -2.14081027337081E+02
 band_energy         :  6.59179494950963E-01
 ...
 
@@ -396,9 +396,9 @@ band_energy         :  6.59179494950963E-01
   sigma(3 3)=  1.12689960E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.3155E+00 GPa]
-- sigma(1 1)=  3.31545253E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.31545253E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.31545253E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  3.31545309E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.31545309E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.31545309E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -429,8 +429,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosGTH_pwteter/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -534,7 +534,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -546,7 +546,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t66o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.23501   Average Vxc (hartree)=  -0.26086
  Eigenvalues (hartree) for nkpt=   4  k points, SPIN UP:
@@ -591,9 +591,9 @@ total_energy_dc     : -7.89058415901845E+00
   sigma(3 3)=  1.50042199E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -4.4144E+00 GPa]
-- sigma(1 1)=  4.41439316E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  4.41439316E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  4.41439316E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  4.41439391E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  4.41439391E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  4.41439391E+00  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -733,7 +733,7 @@ P           mkmem           4
           usefock2          1
               wtk        0.03704    0.29630    0.22222    0.44444
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -829,10 +829,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.0  wall=          5.0
+- Proc.   0 individual time (sec): cpu=          5.0  wall=          5.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.0  wall=          5.0
++Overall time at end (sec) : cpu=          5.0  wall=          5.1

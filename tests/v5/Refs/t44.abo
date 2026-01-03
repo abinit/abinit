@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h10 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v5_t44/t44.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h12 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v5_t44/t44.abi
 - output file    -> t44.abo
 - root for input  files -> t44i
 - root for output files -> t44o
@@ -173,8 +173,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.04204
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/83bi_halfso.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/83bi_halfso.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/83bi_halfso.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/83bi_halfso.psphgh
 - HGH psp for Bismuth, from PRB58, 3641 (1998) paper - with spin-orbit reduced by a factor of 2 !!!
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -189,8 +189,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -201,8 +201,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.129098
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -217,8 +217,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -229,8 +229,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.258197
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -245,8 +245,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -278,7 +278,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  7  -5.5233491435718    -9.390E-09 3.749E-11 1.003E-06
  ETOT  8  -5.5233491437097    -1.380E-10 8.218E-13 1.914E-07
 
- At SCF step    8, etot is converged :
+ At SCF step    8, etot is converged : 
   for the second time, diff in etot=  1.380E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -338,7 +338,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00  -1.650E-06 -1.629E-06 -8.730E-07 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file t44o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.07676   Average Vxc (hartree)=  -0.14404
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -360,7 +360,7 @@ non_local_psp       : -1.35320555404757E-02
 internal            : -5.50537269811900E+00
 '-kT*entropy'       : -1.79764455907488E-02
 total_energy        : -5.52334914370975E+00
-total_energy_eV     : -1.50297973742288E+02
+total_energy_eV     : -1.50297986920894E+02
 band_energy         : -1.26619247851476E+00
 ...
 
@@ -371,9 +371,9 @@ band_energy         : -1.26619247851476E+00
   sigma(3 3)= -4.13078410E-05  sigma(2 1)=  1.79505554E-10
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.2152E+00 GPa]
-- sigma(1 1)= -1.21513617E+00  sigma(3 2)=  7.95593869E-06
-- sigma(2 2)= -1.21524300E+00  sigma(3 1)=  7.35754310E-05
-- sigma(3 3)= -1.21531843E+00  sigma(2 1)=  5.28123485E-06
+- sigma(1 1)= -1.21513637E+00  sigma(3 2)=  7.95594003E-06
+- sigma(2 2)= -1.21524320E+00  sigma(3 1)=  7.35754433E-05
+- sigma(3 3)= -1.21531864E+00  sigma(2 1)=  5.28123574E-06
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -404,8 +404,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.04204
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/83bi_halfso.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/83bi_halfso.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/83bi_halfso.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/83bi_halfso.psphgh
 - HGH psp for Bismuth, from PRB58, 3641 (1998) paper - with spin-orbit reduced by a factor of 2 !!!
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -420,8 +420,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -432,8 +432,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.129098
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -448,8 +448,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -460,8 +460,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.258197
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -476,8 +476,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -508,7 +508,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  7  -5.4725813733543    -6.162E-08 2.396E-10 8.611E-06
  ETOT  8  -5.4725813780947    -4.740E-09 2.819E-11 5.521E-07
 
- At SCF step    8, etot is converged :
+ At SCF step    8, etot is converged : 
   for the second time, diff in etot=  4.740E-09 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -568,7 +568,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00  -1.052E-05 -8.385E-06 -6.035E-06 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file t44o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.09111   Average Vxc (hartree)=  -0.14529
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -590,7 +590,7 @@ non_local_psp       :  2.69858718715934E-02
 internal            : -5.45226905828657E+00
 '-kT*entropy'       : -2.03123198081271E-02
 total_energy        : -5.47258137809470E+00
-total_energy_eV     : -1.48916512584423E+02
+total_energy_eV     : -1.48916525641898E+02
 band_energy         : -1.24819070401528E+00
 ...
 
@@ -601,9 +601,9 @@ band_energy         : -1.24819070401528E+00
   sigma(3 3)= -4.73403063E-05  sigma(2 1)= -5.88756667E-10
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.3927E+00 GPa]
-- sigma(1 1)= -1.39256834E+00  sigma(3 2)= -9.55539914E-05
-- sigma(2 2)= -1.39266796E+00  sigma(3 1)=  1.46254690E-04
-- sigma(3 3)= -1.39279966E+00  sigma(2 1)= -1.73218163E-05
+- sigma(1 1)= -1.39256858E+00  sigma(3 2)= -9.55540075E-05
+- sigma(2 2)= -1.39266819E+00  sigma(3 1)=  1.46254714E-04
+- sigma(3 3)= -1.39279990E+00  sigma(2 1)= -1.73218192E-05
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -634,8 +634,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.04204
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/83bi_halfso.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/83bi_halfso.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/83bi_halfso.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/83bi_halfso.psphgh
 - HGH psp for Bismuth, from PRB58, 3641 (1998) paper - with spin-orbit reduced by a factor of 2 !!!
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -650,8 +650,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -662,8 +662,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.129098
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -678,8 +678,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -690,8 +690,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.258197
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -706,8 +706,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -739,7 +739,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  8  -5.4483820353701    -2.166E-08 9.273E-11 9.693E-07
  ETOT  9  -5.4483820356030    -2.329E-10 5.842E-13 9.613E-08
 
- At SCF step    9, etot is converged :
+ At SCF step    9, etot is converged : 
   for the second time, diff in etot=  2.329E-10 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -799,7 +799,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00  -1.196E-06 -1.441E-06 -2.221E-06 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file t44o_DS3_EIG
  Fermi (or HOMO) energy (hartree) =  -0.09762   Average Vxc (hartree)=  -0.14656
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -821,7 +821,7 @@ non_local_psp       :  4.88929579929104E-02
 internal            : -5.41453075033809E+00
 '-kT*entropy'       : -3.38512852649434E-02
 total_energy        : -5.44838203560303E+00
-total_energy_eV     : -1.48258014986722E+02
+total_energy_eV     : -1.48258027986458E+02
 band_energy         : -1.23850299378502E+00
 ...
 
@@ -832,9 +832,9 @@ band_energy         : -1.23850299378502E+00
   sigma(3 3)= -5.24556045E-05  sigma(2 1)= -7.35509871E-11
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.5433E+00 GPa]
-- sigma(1 1)= -1.54333761E+00  sigma(3 2)=  4.27411133E-06
-- sigma(2 2)= -1.54331634E+00  sigma(3 1)=  1.02367220E-05
-- sigma(3 3)= -1.54329691E+00  sigma(2 1)= -2.16394439E-06
+- sigma(1 1)= -1.54333787E+00  sigma(3 2)=  4.27411205E-06
+- sigma(2 2)= -1.54331660E+00  sigma(3 1)=  1.02367237E-05
+- sigma(3 3)= -1.54329717E+00  sigma(2 1)= -2.16394475E-06
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -865,8 +865,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.04204
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/83bi_halfso.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/83bi_halfso.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/83bi_halfso.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/83bi_halfso.psphgh
 - HGH psp for Bismuth, from PRB58, 3641 (1998) paper - with spin-orbit reduced by a factor of 2 !!!
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -881,8 +881,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -893,8 +893,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.129098
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -909,8 +909,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -921,8 +921,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.258197
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -937,8 +937,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
@@ -969,7 +969,7 @@ tolerances: {toldfe: 1.00E-07, }
  ETOT  7  -5.4725813733543    -6.162E-08 2.396E-10 8.611E-06
  ETOT  8  -5.4725813780947    -4.740E-09 2.819E-11 5.521E-07
 
- At SCF step    8, etot is converged :
+ At SCF step    8, etot is converged : 
   for the second time, diff in etot=  4.740E-09 < toldfe=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1029,7 +1029,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00  -1.052E-05 -8.385E-06 -6.035E-06 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file t44o_DS4_EIG
  Fermi (or HOMO) energy (hartree) =  -0.09111   Average Vxc (hartree)=  -0.14529
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -1051,7 +1051,7 @@ non_local_psp       :  2.69858718715379E-02
 internal            : -5.45226905828660E+00
 '-kT*entropy'       : -2.03123198081273E-02
 total_energy        : -5.47258137809473E+00
-total_energy_eV     : -1.48916512584423E+02
+total_energy_eV     : -1.48916525641899E+02
 band_energy         : -1.24819070401527E+00
 ...
 
@@ -1062,13 +1062,13 @@ band_energy         : -1.24819070401527E+00
   sigma(3 3)= -4.73403063E-05  sigma(2 1)= -5.88756646E-10
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.3927E+00 GPa]
-- sigma(1 1)= -1.39256834E+00  sigma(3 2)= -9.55539895E-05
-- sigma(2 2)= -1.39266796E+00  sigma(3 1)=  1.46254689E-04
-- sigma(3 3)= -1.39279966E+00  sigma(2 1)= -1.73218157E-05
+- sigma(1 1)= -1.39256858E+00  sigma(3 2)= -9.55540056E-05
+- sigma(2 2)= -1.39266819E+00  sigma(3 1)=  1.46254714E-04
+- sigma(3 3)= -1.39279990E+00  sigma(2 1)= -1.73218186E-05
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      2.08980370E+02  2.08980370E+02
@@ -1168,7 +1168,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1180,12 +1180,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1203,7 +1203,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1218,15 +1218,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.0  wall=          4.0
+- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  37 WARNINGs and  25 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.0  wall=          4.0
++Overall time at end (sec) : cpu=          2.1  wall=          2.2
