@@ -50,7 +50,7 @@ module m_fft
                              fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary, ngfft_seq
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, ptabs_fourwf, initmpi_seq
  use m_distribfft,    only : distribfft_type
- use m_abi_linalg,    only : gpu_set_to_zero_complex, gpu_set_to_zero_complex_sp
+ use m_gputk     ,    only : gpu_set_to_zero_complex, gpu_set_to_zero_complex_sp
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda

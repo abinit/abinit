@@ -19,6 +19,7 @@
 
 module m_fock_getghc
 
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
  use defs_basis
  use m_abicore
  use m_errors
@@ -26,7 +27,6 @@ module m_fock_getghc
  use m_fock
  use m_pawcprj
  !use m_cgtools
- use, intrinsic :: iso_c_binding, only: c_size_t
 
  use defs_abitypes, only : mpi_type
  use defs_datatypes, only : pseudopotential_type
@@ -47,9 +47,8 @@ module m_fock_getghc
  use m_paw_ij,           only : paw_ij_type
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
+ use m_gputk
  use m_abi_linalg
-
- use, intrinsic :: iso_c_binding, only: c_loc
 
 #if defined(HAVE_GPU)
  use m_gpu_toolbox
