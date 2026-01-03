@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h09 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v3_t72/t72.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h11 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v3_t72/t72.abi
 - output file    -> t72.abo
 - root for input  files -> t72i
 - root for output files -> t72o
@@ -49,6 +49,7 @@ _ WF disk file :      0.016 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          64
 -   mkqmem =          64        mk1mem =          64           mpw =          78
       nfft =        1728          nkpt =          64
+- my_mband =           3
 ================================================================================
 P This job should need less than                       2.303 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -66,6 +67,7 @@ _ WF disk file :      0.231 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          64
 -   mkqmem =          64        mk1mem =          64           mpw =          78
       nfft =        1728          nkpt =          64
+- my_mband =           3
 ================================================================================
 P This job should need less than                       2.400 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -83,6 +85,7 @@ _ WF disk file :      0.231 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          64
 -   mkqmem =          64        mk1mem =          64           mpw =          78
       nfft =        1728          nkpt =          64
+- my_mband =           3
 ================================================================================
 P This job should need less than                       2.400 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -592,8 +595,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -605,8 +608,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.00480358
          --- l  ekb(1:nproj) -->
@@ -695,7 +698,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  2.600000000000  2.600000000000  2.600000000000 bohr
-              =  1.375860742334  1.375860742334  1.375860742334 angstroms
+              =  1.375860747414  1.375860747414  1.375860747414 angstroms
  prteigrs : about to open file t72o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.15595   Average Vxc (hartree)=  -0.42343
  Eigenvalues (hartree) for nkpt=   4  k points:
@@ -719,7 +722,7 @@ non_local_psp       :  0.00000000000000E+00
 internal            : -5.19115342429052E-01
 '-kT*entropy'       : -4.23327587065846E-02
 total_energy        : -5.61448101135636E-01
-total_energy_eV     : -1.52777797974699E+01
+total_energy_eV     : -1.52777811370744E+01
 band_energy         : -6.60406788528332E-02
 ...
 
@@ -730,9 +733,9 @@ band_energy         : -6.60406788528332E-02
   sigma(3 3)= -1.31370050E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.8650E+01 GPa]
-- sigma(1 1)= -3.86503967E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -3.86503967E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -3.86503967E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -3.86504032E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -3.86504032E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -3.86504032E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -774,7 +777,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 2    ipert=   1
@@ -811,7 +814,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  5  4.30219452063341E-06 -4.141E-11 4.863E-13 3.376E-10
  ETOT  6  4.30219442915103E-06 -9.148E-14 2.394E-15 1.322E-12
 
- At SCF step    6, etot is converged :
+ At SCF step    6, etot is converged : 
   for the second time, diff in etot=  9.148E-14 < toldfe=  1.000E-10
 ================================================================================
 
@@ -834,7 +837,7 @@ tolerances: {toldfe: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.4302194429E-05 Ha. Also 2DEtotal=    0.117068664052E-03 eV
+ 2DEtotal=    0.4302194429E-05 Ha. Also 2DEtotal=    0.117068674317E-03 eV
     (2DErelax=   -4.5877527076E+00 Ha. 2DEnonrelax=    4.5877570098E+00 Ha)
     (  non-var. 2DEtotal :    4.3295377274E-06 Ha)
 
@@ -844,59 +847,59 @@ tolerances: {toldfe: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         0.0000043295         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0000043295         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000043295         0.0000000000
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
-
+  
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
    1    3   2    3         0.0000000000         0.0000000000
    1    3   3    3         0.0000000000         0.0000000000
-
+  
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
    2    3   1    3         0.0000000000         0.0000000000
    2    3   3    3         0.0000000000         0.0000000000
-
+  
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
    3    3   1    3         0.0000000000         0.0000000000
    3    3   2    3         0.0000000000         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0000006405         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0000006405         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000006405         0.0000000000
@@ -940,7 +943,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 2    ipert=   1
@@ -978,7 +981,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  6  2.07681715165613E-02 -2.718E-13 5.335E-15 2.535E-13
  ETOT  7  2.07681715165897E-02  2.842E-14 1.528E-18 2.072E-16
 
- At SCF step    7, etot is converged :
+ At SCF step    7, etot is converged : 
   for the second time, diff in etot=  2.842E-14 < toldfe=  1.000E-10
 ================================================================================
 
@@ -1001,7 +1004,7 @@ tolerances: {toldfe: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.2076817152E-01 Ha. Also 2DEtotal=    0.565130687208E+00 eV
+ 2DEtotal=    0.2076817152E-01 Ha. Also 2DEtotal=    0.565130736761E+00 eV
     (2DErelax=   -4.3150921788E+00 Ha. 2DEnonrelax=    4.3358603503E+00 Ha)
     (  non-var. 2DEtotal :    2.0768171531E-02 Ha)
 
@@ -1011,36 +1014,36 @@ tolerances: {toldfe: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1        -0.0000000000        -0.0000000000
    2    1   2    1         0.0207681715         0.0000000000
    2    1   3    1        -0.0000000000        -0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0207681715         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1        -0.0000000000        -0.0000000000
    2    1   2    1         0.0030722147         0.0000000000
    2    1   3    1        -0.0000000000        -0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0030722147         0.0000000000
@@ -1086,7 +1089,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 2    ipert=   1
@@ -1124,7 +1127,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  6  1.10526684583068E-02 -4.565E-13 8.207E-15 2.166E-12
  ETOT  7  1.10526684583174E-02  1.066E-14 1.236E-17 3.716E-15
 
- At SCF step    7, etot is converged :
+ At SCF step    7, etot is converged : 
   for the second time, diff in etot=  1.066E-14 < toldfe=  1.000E-10
 ================================================================================
 
@@ -1147,7 +1150,7 @@ tolerances: {toldfe: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1105266846E-01 Ha. Also 2DEtotal=    0.300758404097E+00 eV
+ 2DEtotal=    0.1105266846E-01 Ha. Also 2DEtotal=    0.300758430468E+00 eV
     (2DErelax=   -4.4503291058E+00 Ha. 2DEnonrelax=    4.4613817742E+00 Ha)
     (  non-var. 2DEtotal :    1.1052669190E-02 Ha)
 
@@ -1157,36 +1160,36 @@ tolerances: {toldfe: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   2    1         0.0110526692        -0.0000000000
    2    1   3    1        -0.0000000000        -0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0110526692        -0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   2    1         0.0016350102        -0.0000000000
    2    1   3    1        -0.0000000000        -0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0016350102        -0.0000000000
@@ -1201,7 +1204,7 @@ tolerances: {toldfe: 1.00E-10, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      2.6000000000E+00  2.6000000000E+00  2.6000000000E+00 Bohr
               amu      1.00794000E+00
@@ -1699,7 +1702,7 @@ P          mk1mem4         64
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1722,12 +1725,12 @@ P          mk1mem4         64
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1745,7 +1748,7 @@ P          mk1mem4         64
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

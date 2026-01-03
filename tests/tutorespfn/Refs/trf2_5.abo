@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h06 )
-
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h06 )
+  
 
 ================================================================================
 
@@ -65,11 +65,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -85,7 +85,7 @@
        3               2       -0.000000        0.000000
        3               3       -0.022625        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -99,9 +99,8 @@
 
 ================================================================================
 
- Calculation of the interatomic forces
+ Calculation of the interatomic forces 
 
--begin at tcpu      0.028  and twall      0.028 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -173,7 +172,7 @@
 
 ================================================================================
 
- Treat the first list of vectors
+ Treat the first list of vectors 
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -189,12 +188,12 @@
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -1.0 -1.0 -1.0  1.0 -1.0  1.0 -1.0 -0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0
- -0.0 -0.0 -0.0  0.0  1.0  1.0 -1.0 -1.0
+  3.0 -1.0 -1.0 -1.0  1.0 -1.0  1.0 -1.0  0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0
+  0.0  0.0 -0.0  0.0  1.0  1.0 -1.0 -1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
-  3.0 -1.0 -1.0 -1.0  1.0 -1.0  1.0 -1.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0
-  0.0  0.0 -0.0 -0.0  1.0  1.0 -1.0 -1.0
+  3.0 -1.0 -1.0 -1.0  1.0 -1.0  1.0 -1.0  0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0
+ -0.0  0.0 -0.0  0.0  1.0  1.0 -1.0 -1.0
 
   Phonon wavevector (reduced coordinates) :  0.01250  0.01250  0.02500
  Phonon energies in Hartree :
@@ -204,25 +203,25 @@
 -  5.084305E+00  7.150432E+00  1.217753E+01  3.441289E+02  3.441908E+02
 -  3.797623E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1106439689E-02
+   in atomic units:     0.1106439688E-02
    in units km/s:              2.42055
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.6452321877E-03
-   in SI units K  :            203.74797
+   in atomic units:     0.6452321873E-03
+   in SI units K  :            203.74821
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1556067626E-02
+   in atomic units:     0.1556067625E-02
    in units km/s:              3.40420
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9074375483E-03
-   in SI units K  :            286.54577
+   in atomic units:     0.9074375478E-03
+   in SI units K  :            286.54611
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2650058301E-02
+   in atomic units:     0.2650058299E-02
    in units km/s:              5.79751
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1545409960E-02
-   in SI units K  :            488.00129
+   in atomic units:     0.1545409959E-02
+   in SI units K  :            488.00187
 
 
   Phonon wavevector (reduced coordinates) :  0.02500  0.02500  0.05000
@@ -233,25 +232,25 @@
 -  1.015572E+01  1.431609E+01  2.426016E+01  3.437470E+02  3.439855E+02
 -  3.795940E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1105037235E-02
+   in atomic units:     0.1105037234E-02
    in units km/s:              2.41748
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.6444143317E-03
-   in SI units K  :            203.48971
+   in atomic units:     0.6444143313E-03
+   in SI units K  :            203.48995
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1557723966E-02
+   in atomic units:     0.1557723965E-02
    in units km/s:              3.40782
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9084034607E-03
-   in SI units K  :            286.85078
+   in atomic units:     0.9084034602E-03
+   in SI units K  :            286.85113
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2639731801E-02
+   in atomic units:     0.2639731799E-02
    in units km/s:              5.77492
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1539387951E-02
-   in SI units K  :            486.09969
+   in atomic units:     0.1539387950E-02
+   in SI units K  :            486.10027
 
 
   Phonon wavevector (reduced coordinates) :  0.03750  0.03750  0.07500
@@ -262,25 +261,25 @@
 -  1.520140E+01  2.150845E+01  3.615582E+01  3.431410E+02  3.436457E+02
 -  3.792910E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1102702885E-02
+   in atomic units:     0.1102702884E-02
    in units km/s:              2.41237
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.6430530303E-03
-   in SI units K  :            203.05985
+   in atomic units:     0.6430530299E-03
+   in SI units K  :            203.06009
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1560213331E-02
+   in atomic units:     0.1560213330E-02
    in units km/s:              3.41327
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9098551610E-03
-   in SI units K  :            287.30920
+   in atomic units:     0.9098551605E-03
+   in SI units K  :            287.30954
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2622727157E-02
+   in atomic units:     0.2622727156E-02
    in units km/s:              5.73772
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1529471510E-02
-   in SI units K  :            482.96833
+   in atomic units:     0.1529471509E-02
+   in SI units K  :            482.96890
 
 
   Phonon wavevector (reduced coordinates) :  0.05000  0.05000  0.10000
@@ -291,25 +290,25 @@
 -  2.020857E+01  2.873191E+01  4.777804E+01  3.423537E+02  3.431746E+02
 -  3.788217E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1099440733E-02
+   in atomic units:     0.1099440732E-02
    in units km/s:              2.40524
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.6411506714E-03
-   in SI units K  :            202.45913
+   in atomic units:     0.6411506711E-03
+   in SI units K  :            202.45937
 
  Speed of sound for this q and mode:
    in atomic units:     0.1563150301E-02
    in units km/s:              3.41969
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9115678867E-03
-   in SI units K  :            287.85003
+   in atomic units:     0.9115678862E-03
+   in SI units K  :            287.85037
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2599348297E-02
+   in atomic units:     0.2599348296E-02
    in units km/s:              5.68657
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1515837877E-02
-   in SI units K  :            478.66317
+   in atomic units:     0.1515837876E-02
+   in SI units K  :            478.66374
 
 
   Phonon wavevector (reduced coordinates) :  0.06250  0.06250  0.12500
@@ -320,25 +319,25 @@
 -  2.516456E+01  3.598119E+01  5.904848E+01  3.414393E+02  3.425770E+02
 -  3.781469E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1095255569E-02
+   in atomic units:     0.1095255568E-02
    in units km/s:              2.39608
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.6387100482E-03
-   in SI units K  :            201.68844
+   in atomic units:     0.6387100478E-03
+   in SI units K  :            201.68868
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1566035937E-02
+   in atomic units:     0.1566035936E-02
    in units km/s:              3.42600
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9132506759E-03
-   in SI units K  :            288.38141
+   in atomic units:     0.9132506754E-03
+   in SI units K  :            288.38175
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2570010331E-02
+   in atomic units:     0.2570010329E-02
    in units km/s:              5.62239
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1498729127E-02
-   in SI units K  :            473.26067
+   in atomic units:     0.1498729126E-02
+   in SI units K  :            473.26123
 
 
   Phonon wavevector (reduced coordinates) :  0.07500  0.07500  0.15000
@@ -349,25 +348,25 @@
 -  3.005676E+01  4.323968E+01  6.989923E+01  3.404576E+02  3.418589E+02
 -  3.772231E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1090152053E-02
+   in atomic units:     0.1090152052E-02
    in units km/s:              2.38492
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.6357338778E-03
-   in SI units K  :            200.74864
+   in atomic units:     0.6357338775E-03
+   in SI units K  :            200.74888
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1568293844E-02
+   in atomic units:     0.1568293843E-02
    in units km/s:              3.43094
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9145673988E-03
-   in SI units K  :            288.79720
+   in atomic units:     0.9145673983E-03
+   in SI units K  :            288.79754
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2535229712E-02
+   in atomic units:     0.2535229710E-02
    in units km/s:              5.54630
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1478446435E-02
-   in SI units K  :            466.85591
+   in atomic units:     0.1478446434E-02
+   in SI units K  :            466.85646
 
 
   Phonon wavevector (reduced coordinates) :  0.08750  0.08750  0.17500
@@ -378,25 +377,25 @@
 -  3.487263E+01  5.047901E+01  8.027474E+01  3.394690E+02  3.410277E+02
 -  3.760073E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1084133823E-02
+   in atomic units:     0.1084133822E-02
    in units km/s:              2.37175
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.6322242826E-03
-   in SI units K  :            199.64040
+   in atomic units:     0.6322242822E-03
+   in SI units K  :            199.64064
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1569310785E-02
+   in atomic units:     0.1569310784E-02
    in units km/s:              3.43317
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9151604388E-03
-   in SI units K  :            288.98447
+   in atomic units:     0.9151604383E-03
+   in SI units K  :            288.98481
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2495611898E-02
+   in atomic units:     0.2495611896E-02
    in units km/s:              5.45963
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1455342881E-02
-   in SI units K  :            459.56039
+   in SI units K  :            459.56093
 
 
   Phonon wavevector (reduced coordinates) :  0.10000  0.10000  0.20000
@@ -407,25 +406,25 @@
 -  3.959964E+01  5.765971E+01  9.013329E+01  3.385272E+02  3.400921E+02
 -  3.744616E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1077202644E-02
+   in atomic units:     0.1077202643E-02
    in units km/s:              2.35659
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.6281822911E-03
-   in SI units K  :            198.36404
+   in atomic units:     0.6281822908E-03
+   in SI units K  :            198.36428
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1568478651E-02
+   in atomic units:     0.1568478650E-02
    in units km/s:              3.43135
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9146751708E-03
-   in SI units K  :            288.83123
+   in atomic units:     0.9146751703E-03
+   in SI units K  :            288.83157
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2451836134E-02
+   in atomic units:     0.2451836133E-02
    in units km/s:              5.36386
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1429814575E-02
-   in SI units K  :            451.49920
+   in atomic units:     0.1429814574E-02
+   in SI units K  :            451.49973
 
 
   Phonon wavevector (reduced coordinates) :  0.11250  0.11250  0.22500
@@ -478,7 +477,7 @@
 
   Phonon wavevector (reduced coordinates) :  0.18750  0.18750  0.37500
  Phonon energies in Hartree :
-   3.149015E-04  4.638913E-04  6.565665E-04  1.510796E-03  1.520775E-03
+   3.149015E-04  4.638913E-04  6.565664E-04  1.510796E-03  1.520775E-03
    1.616356E-03
  Phonon frequencies in cm-1    :
 -  6.911288E+01  1.018124E+02  1.440997E+02  3.315815E+02  3.337716E+02
@@ -665,7 +664,7 @@
    4.241365E-04  4.351881E-04  9.287844E-04  1.429441E-03  1.430229E-03
    1.704740E-03
  Phonon frequencies in cm-1    :
--  9.308721E+01  9.551274E+01  2.038446E+02  3.137260E+02  3.138991E+02
+-  9.308720E+01  9.551274E+01  2.038446E+02  3.137260E+02  3.138991E+02
 -  3.741471E+02
 
   Phonon wavevector (reduced coordinates) :  0.48750  0.48750  0.97500
@@ -839,22 +838,22 @@
    in atomic units:     0.1379634616E-02
    in units km/s:              3.01821
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8045487440E-03
-   in SI units K  :            254.05610
+   in atomic units:     0.8045487435E-03
+   in SI units K  :            254.05640
 
  Speed of sound for this q and mode:
    in atomic units:     0.1379634616E-02
    in units km/s:              3.01821
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8045487440E-03
-   in SI units K  :            254.05610
+   in atomic units:     0.8045487435E-03
+   in SI units K  :            254.05640
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2336354954E-02
+   in atomic units:     0.2336354952E-02
    in units km/s:              5.11122
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1362470484E-02
-   in SI units K  :            430.23364
+   in atomic units:     0.1362470483E-02
+   in SI units K  :            430.23415
 
 
   Phonon wavevector (reduced coordinates) :  0.85714  0.85714  1.00000
@@ -865,25 +864,25 @@
 -  5.198236E+01  5.198236E+01  8.769443E+01  3.358416E+02  3.358416E+02
 -  3.798624E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1399829761E-02
+   in atomic units:     0.1399829760E-02
    in units km/s:              3.06240
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8163257592E-03
-   in SI units K  :            257.77498
+   in atomic units:     0.8163257587E-03
+   in SI units K  :            257.77529
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1399829761E-02
+   in atomic units:     0.1399829760E-02
    in units km/s:              3.06240
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8163257592E-03
-   in SI units K  :            257.77498
+   in atomic units:     0.8163257587E-03
+   in SI units K  :            257.77529
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2361518005E-02
+   in atomic units:     0.2361518004E-02
    in units km/s:              5.16627
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1377144587E-02
-   in SI units K  :            434.86735
+   in SI units K  :            434.86787
 
 
   Phonon wavevector (reduced coordinates) :  0.87500  0.87500  1.00000
@@ -897,22 +896,22 @@
    in atomic units:     0.1417326816E-02
    in units km/s:              3.10067
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8265293553E-03
-   in SI units K  :            260.99702
+   in atomic units:     0.8265293548E-03
+   in SI units K  :            260.99733
 
  Speed of sound for this q and mode:
    in atomic units:     0.1417326816E-02
    in units km/s:              3.10067
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8265293553E-03
-   in SI units K  :            260.99702
+   in atomic units:     0.8265293548E-03
+   in SI units K  :            260.99733
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2384795643E-02
+   in atomic units:     0.2384795642E-02
    in units km/s:              5.21720
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1390719192E-02
-   in SI units K  :            439.15387
+   in SI units K  :            439.15439
 
 
   Phonon wavevector (reduced coordinates) :  0.89286  0.89286  1.00000
@@ -926,22 +925,22 @@
    in atomic units:     0.1432224180E-02
    in units km/s:              3.13326
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8352169131E-03
-   in SI units K  :            263.74033
+   in atomic units:     0.8352169126E-03
+   in SI units K  :            263.74064
 
  Speed of sound for this q and mode:
    in atomic units:     0.1432224180E-02
    in units km/s:              3.13326
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8352169131E-03
-   in SI units K  :            263.74033
+   in atomic units:     0.8352169126E-03
+   in SI units K  :            263.74064
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2405894767E-02
+   in atomic units:     0.2405894766E-02
    in units km/s:              5.26335
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1403023373E-02
-   in SI units K  :            443.03921
+   in atomic units:     0.1403023372E-02
+   in SI units K  :            443.03974
 
 
   Phonon wavevector (reduced coordinates) :  0.91071  0.91071  1.00000
@@ -952,25 +951,25 @@
 -  3.352861E+01  3.352861E+01  5.627071E+01  3.409121E+02  3.409121E+02
 -  3.799718E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1444623642E-02
+   in atomic units:     0.1444623641E-02
    in units km/s:              3.16039
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8424477921E-03
-   in SI units K  :            266.02366
+   in atomic units:     0.8424477916E-03
+   in SI units K  :            266.02397
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1444623642E-02
+   in atomic units:     0.1444623641E-02
    in units km/s:              3.16039
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8424477921E-03
-   in SI units K  :            266.02366
+   in atomic units:     0.8424477916E-03
+   in SI units K  :            266.02397
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2424496693E-02
+   in atomic units:     0.2424496692E-02
    in units km/s:              5.30405
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1413871286E-02
-   in SI units K  :            446.46471
+   in atomic units:     0.1413871285E-02
+   in SI units K  :            446.46524
 
 
   Phonon wavevector (reduced coordinates) :  0.92857  0.92857  1.00000
@@ -984,22 +983,22 @@
    in atomic units:     0.1454621849E-02
    in units km/s:              3.18226
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8482783543E-03
-   in SI units K  :            267.86480
+   in atomic units:     0.8482783539E-03
+   in SI units K  :            267.86512
 
  Speed of sound for this q and mode:
    in atomic units:     0.1454621849E-02
    in units km/s:              3.18226
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8482783543E-03
-   in SI units K  :            267.86480
+   in atomic units:     0.8482783539E-03
+   in SI units K  :            267.86512
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2440276781E-02
+   in atomic units:     0.2440276780E-02
    in units km/s:              5.33857
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1423073614E-02
-   in SI units K  :            449.37057
+   in atomic units:     0.1423073613E-02
+   in SI units K  :            449.37111
 
 
   Phonon wavevector (reduced coordinates) :  0.94643  0.94643  1.00000
@@ -1013,22 +1012,22 @@
    in atomic units:     0.1462304071E-02
    in units km/s:              3.19907
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8527583245E-03
-   in SI units K  :            269.27946
+   in atomic units:     0.8527583240E-03
+   in SI units K  :            269.27978
 
  Speed of sound for this q and mode:
    in atomic units:     0.1462304071E-02
    in units km/s:              3.19907
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8527583245E-03
-   in SI units K  :            269.27946
+   in atomic units:     0.8527583240E-03
+   in SI units K  :            269.27978
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2452926480E-02
+   in atomic units:     0.2452926479E-02
    in units km/s:              5.36625
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1430450422E-02
-   in SI units K  :            451.69998
+   in atomic units:     0.1430450421E-02
+   in SI units K  :            451.70052
 
 
   Phonon wavevector (reduced coordinates) :  0.96429  0.96429  1.00000
@@ -1039,25 +1038,25 @@
 -  1.362605E+01  1.362605E+01  2.285809E+01  3.437233E+02  3.437233E+02
 -  3.798561E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1467739909E-02
+   in atomic units:     0.1467739908E-02
    in units km/s:              3.21096
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8559282915E-03
-   in SI units K  :            270.28046
+   in atomic units:     0.8559282910E-03
+   in SI units K  :            270.28078
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1467739909E-02
+   in atomic units:     0.1467739908E-02
    in units km/s:              3.21096
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8559282915E-03
-   in SI units K  :            270.28046
+   in atomic units:     0.8559282910E-03
+   in SI units K  :            270.28078
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2462175931E-02
+   in atomic units:     0.2462175929E-02
    in units km/s:              5.38648
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1435844338E-02
-   in SI units K  :            453.40324
+   in atomic units:     0.1435844337E-02
+   in SI units K  :            453.40378
 
 
   Phonon wavevector (reduced coordinates) :  0.98214  0.98214  1.00000
@@ -1068,25 +1067,25 @@
 -  6.828066E+00  6.828066E+00  1.145522E+01  3.441254E+02  3.441254E+02
 -  3.798267E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1470980572E-02
+   in atomic units:     0.1470980571E-02
    in units km/s:              3.21805
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8578181192E-03
-   in SI units K  :            270.87722
+   in atomic units:     0.8578181187E-03
+   in SI units K  :            270.87754
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1470980572E-02
+   in atomic units:     0.1470980571E-02
    in units km/s:              3.21805
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8578181192E-03
-   in SI units K  :            270.87722
+   in atomic units:     0.8578181187E-03
+   in SI units K  :            270.87754
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2467814909E-02
+   in atomic units:     0.2467814908E-02
    in units km/s:              5.39882
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1439132769E-02
-   in SI units K  :            454.44165
+   in atomic units:     0.1439132768E-02
+   in SI units K  :            454.44219
 
 
   Phonon wavevector (reduced coordinates) :  1.00000  1.00000  1.00000
@@ -1105,25 +1104,25 @@
 -  5.812033E+00  5.812033E+00  1.299698E+01  3.441663E+02  3.441663E+02
 -  3.797385E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1239252722E-02
+   in atomic units:     0.1239252721E-02
    in units km/s:              2.71110
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.7226835344E-03
-   in SI units K  :            228.20514
+   in atomic units:     0.7226835340E-03
+   in SI units K  :            228.20541
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1239252722E-02
+   in atomic units:     0.1239252721E-02
    in units km/s:              2.71110
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.7226835344E-03
-   in SI units K  :            228.20514
+   in atomic units:     0.7226835340E-03
+   in SI units K  :            228.20541
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2771241018E-02
+   in atomic units:     0.2771241016E-02
    in units km/s:              6.06262
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1616078963E-02
-   in SI units K  :            510.31677
+   in atomic units:     0.1616078962E-02
+   in SI units K  :            510.31737
 
 
   Phonon wavevector (reduced coordinates) :  0.95833  0.95833  0.95833
@@ -1137,22 +1136,22 @@
    in atomic units:     0.1235131292E-02
    in units km/s:              2.70209
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.7202800786E-03
-   in SI units K  :            227.44619
+   in atomic units:     0.7202800782E-03
+   in SI units K  :            227.44646
 
  Speed of sound for this q and mode:
    in atomic units:     0.1235131292E-02
    in units km/s:              2.70209
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.7202800786E-03
-   in SI units K  :            227.44619
+   in atomic units:     0.7202800782E-03
+   in SI units K  :            227.44646
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2764724261E-02
+   in atomic units:     0.2764724259E-02
    in units km/s:              6.04836
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1612278646E-02
-   in SI units K  :            509.11673
+   in atomic units:     0.1612278645E-02
+   in SI units K  :            509.11733
 
 
   Phonon wavevector (reduced coordinates) :  0.93750  0.93750  0.93750
@@ -1166,22 +1165,22 @@
    in atomic units:     0.1228232571E-02
    in units km/s:              2.68699
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.7162570153E-03
-   in SI units K  :            226.17581
+   in atomic units:     0.7162570149E-03
+   in SI units K  :            226.17608
 
  Speed of sound for this q and mode:
    in atomic units:     0.1228232571E-02
    in units km/s:              2.68699
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.7162570153E-03
-   in SI units K  :            226.17581
+   in atomic units:     0.7162570149E-03
+   in SI units K  :            226.17608
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2753932320E-02
+   in atomic units:     0.2753932319E-02
    in units km/s:              6.02475
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1605985210E-02
-   in SI units K  :            507.12942
+   in atomic units:     0.1605985209E-02
+   in SI units K  :            507.13002
 
 
   Phonon wavevector (reduced coordinates) :  0.91667  0.91667  0.91667
@@ -1195,22 +1194,22 @@
    in atomic units:     0.1218515936E-02
    in units km/s:              2.66574
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.7105906552E-03
-   in SI units K  :            224.38652
+   in atomic units:     0.7105906548E-03
+   in SI units K  :            224.38678
 
  Speed of sound for this q and mode:
    in atomic units:     0.1218515936E-02
    in units km/s:              2.66574
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.7105906552E-03
-   in SI units K  :            224.38652
+   in atomic units:     0.7105906548E-03
+   in SI units K  :            224.38678
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2738968061E-02
+   in atomic units:     0.2738968060E-02
    in units km/s:              5.99202
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1597258642E-02
-   in SI units K  :            504.37379
+   in atomic units:     0.1597258641E-02
+   in SI units K  :            504.37439
 
 
   Phonon wavevector (reduced coordinates) :  0.89583  0.89583  0.89583
@@ -1221,25 +1220,25 @@
 -  2.827881E+01  2.827881E+01  6.378268E+01  3.420592E+02  3.420592E+02
 -  3.778623E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1205932332E-02
+   in atomic units:     0.1205932331E-02
    in units km/s:              2.63821
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.7032523911E-03
-   in SI units K  :            222.06928
+   in atomic units:     0.7032523907E-03
+   in SI units K  :            222.06954
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1205932332E-02
+   in atomic units:     0.1205932331E-02
    in units km/s:              2.63821
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.7032523911E-03
-   in SI units K  :            222.06928
+   in atomic units:     0.7032523907E-03
+   in SI units K  :            222.06954
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2719972848E-02
+   in atomic units:     0.2719972846E-02
    in units km/s:              5.95046
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1586181379E-02
-   in SI units K  :            500.87587
+   in atomic units:     0.1586181378E-02
+   in SI units K  :            500.87646
 
 
   Phonon wavevector (reduced coordinates) :  0.87500  0.87500  0.87500
@@ -1250,25 +1249,25 @@
 -  3.349840E+01  3.349840E+01  7.589623E+01  3.411754E+02  3.411754E+02
 -  3.769974E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1190432122E-02
+   in atomic units:     0.1190432121E-02
    in units km/s:              2.60430
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.6942132772E-03
-   in SI units K  :            219.21495
+   in atomic units:     0.6942132768E-03
+   in SI units K  :            219.21521
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1190432122E-02
+   in atomic units:     0.1190432121E-02
    in units km/s:              2.60430
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.6942132772E-03
-   in SI units K  :            219.21495
+   in atomic units:     0.6942132768E-03
+   in SI units K  :            219.21521
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2697123022E-02
+   in atomic units:     0.2697123020E-02
    in units km/s:              5.90047
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1572856258E-02
-   in SI units K  :            496.66813
+   in atomic units:     0.1572856257E-02
+   in SI units K  :            496.66872
 
 
   Phonon wavevector (reduced coordinates) :  0.85417  0.85417  0.85417
@@ -1561,7 +1560,7 @@
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.10417  0.50000
  Phonon energies in Hartree :
-   4.271279E-04  4.727989E-04  9.048944E-04  1.428584E-03  1.431417E-03
+   4.271279E-04  4.727989E-04  9.048943E-04  1.428584E-03  1.431417E-03
    1.680468E-03
  Phonon frequencies in cm-1    :
 -  9.374374E+01  1.037674E+02  1.986014E+02  3.135379E+02  3.141597E+02
@@ -1797,7 +1796,7 @@
    1.526536E-03
  Phonon frequencies in cm-1    :
 -  9.320673E+01  1.167966E+02  1.892170E+02  3.180337E+02  3.294417E+02
--  3.350359E+02
+-  3.350358E+02
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.38750  0.61250
  Phonon energies in Hartree :
@@ -1881,7 +1880,7 @@
 
 ================================================================================
 
- Treat the second list of vectors
+ Treat the second list of vectors 
 
 
   Phonon at Gamma, with non-analyticity in the
@@ -1897,6 +1896,6 @@
 
 ================================================================================
 
-+Total cpu time      0.713  and wall time      0.714 sec
++Total cpu time      0.730  and wall time      0.730 sec
 
  anaddb : the run completed successfully.

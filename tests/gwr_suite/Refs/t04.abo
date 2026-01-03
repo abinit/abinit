@@ -1,8 +1,8 @@
 
-.Version 10.3.6.1 of ABINIT, released Feb 2025.
-.(MPI version, prepared for a x86_64_linux_intel2021.9 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 18 Sep 2024.
-- ( at 17h21 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/gwr_t04/t04.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h01 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/gwr_suite_t04/t04.abi
 - output file    -> t04.abo
 - root for input  files -> t04i
 - root for output files -> t04o
@@ -125,9 +125,9 @@ _ WF disk file :      0.054 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
           ecutwfn3     4.00000000E+00 Hartree
           ecutwfn4     4.00000000E+00 Hartree
           ecutwfn5     4.00000000E+00 Hartree
--          fftalg         312
-        freqspmax      1.83746627E-01 Hartree
-        freqspmin     -1.83746627E-01 Hartree
+-          fftalg         512
+        freqspmax      1.83746611E-01 Hartree
+        freqspmin     -1.83746611E-01 Hartree
            getden1          0
            getden2          1
            getden3          1
@@ -142,7 +142,7 @@ _ WF disk file :      0.054 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
          gwr_ntau           6
        gw_qprange           8
         gwr_nstep           4
-       gwr_tolqpe      7.34986508E-04 Hartree
+       gwr_tolqpe      7.34986444E-04 Hartree
            istwfk        1
               ixc          11
            jdtset        1    2    3    4    5
@@ -252,7 +252,7 @@ P           mkmem           1
            tolvrs5     0.00000000E+00
             typat      1  1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3573395400E+00  1.3573395400E+00  1.3573395400E+00
+                       1.3573395450E+00  1.3573395450E+00  1.3573395450E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5650000000E+00  2.5650000000E+00  2.5650000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -300,8 +300,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.15429
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
 - Si    ONCVPSP-3.2.3.1  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    170510                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -363,14 +363,14 @@ cartesian_stress_tensor: # hartree/bohr^3
 - [ -1.34133715E-03,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,  -1.34133715E-03,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,  -1.34133715E-03, ]
-pressure_GPa:   3.9463E+01
+pressure_GPa:   3.9464E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  1.25971706E-27,  -9.65783082E-27,   1.46966991E-26, ]
-- [ -1.25971706E-27,   9.65783082E-27,  -1.46966991E-26, ]
-force_length_stats: {min:   1.76310393E-26, max:   1.76310393E-26, mean:   1.76310393E-26, }
+- [ -2.09952844E-26,   8.39811376E-27,   5.03886825E-27, ]
+- [  2.09952844E-26,  -8.39811376E-27,  -5.03886825E-27, ]
+force_length_stats: {min:   2.31672285E-26, max:   2.31672285E-26, mean:   2.31672285E-26, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -386,25 +386,25 @@ force_length_stats: {min:   1.76310393E-26, max:   1.76310393E-26, mean:   1.763
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  6.3024E-26; max dE/dt=  6.8932E-26; dE/dt below (all hartree)
-    1       0.000000000000     -0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000     -0.000000000000
+ rms dE/dt=  7.2604E-26; max dE/dt=  9.4781E-26; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000     -0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35733954003335     1.35733954003335     1.35733954003335
+    2      1.35733954504536     1.35733954504536     1.35733954504536
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.0179285E-26 1.4696699E-26   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 1.3375606E-26 2.0995284E-26   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 5.2343985E-25 7.5573459E-25   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 6.8780129E-25 1.0796209E-24   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.260000000000 10.260000000000 10.260000000000 bohr
-              =  5.429358160133  5.429358160133  5.429358160133 angstroms
+              =  5.429358180181  5.429358180181  5.429358180181 angstroms
  prteigrs : about to open file t04o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.19744   Average Vxc (hartree)=  -0.32537
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -422,7 +422,7 @@ psp_core            :  5.53648753925927E-01
 local_psp           : -2.61258029324710E+00
 non_local_psp       :  1.06752006856556E+00
 total_energy        : -7.77977274722753E+00
-total_energy_eV     : -2.11698382568375E+02
+total_energy_eV     : -2.11698401130765E+02
 band_energy         :  7.10792313517699E-01
 ...
 
@@ -432,10 +432,10 @@ band_energy         :  7.10792313517699E-01
   sigma(2 2)= -1.34133715E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -1.34133715E-03  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure=  3.9463E+01 GPa]
-- sigma(1 1)= -3.94634948E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -3.94634948E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -3.94634948E+01  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure=  3.9464E+01 GPa]
+- sigma(1 1)= -3.94635015E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -3.94635015E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -3.94635015E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -469,6 +469,7 @@ meta: {optdriver: 6, }
 )     Maximum=    1.2932E-01  at reduced coord.    0.1333    0.1333    0.6000
 )     Minimum=    2.4981E-03  at reduced coord.    0.8000    0.8000    0.6000
    Integrated=    8.0000E+00
+- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
 
  === KS gaps after direct diagonalization ===
  Direct band gap semiconductor
@@ -550,6 +551,10 @@ meta: {optdriver: 6, }
 - Temporary memory allocated inside the tau loops:
 - G_k(r,g): 1.8
 - chi_q(r,g): 0.9
+P kpt_comm can use shmem: yes
+P g_comm can use shmem: yes
+P tau_comm can use shmem: yes
+P spin_comm can use shmem yes
 - FFT uc_batch_size: 1
 - FFT sc_batch_size: 1
  ==== Info on the gwr_t object ====
@@ -575,8 +580,8 @@ gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, ]
 P np_qibz: [1, ]
-min_transition_energy_eV:   2.27138890E+00
-max_transition_energy_eV:   5.05854193E+01
+min_transition_energy_eV:   2.27138910E+00
+max_transition_energy_eV:   5.05854238E+01
 eratio:   2.22706993E+01
 ft_max_err_t2w_cos:   3.38096223E-03
 ft_max_err_w2t_cos:   1.13989226E-04
@@ -706,8 +711,8 @@ iteration_state: {dtset: 3, }
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 3, }
@@ -798,8 +803,8 @@ data: !Tabular |
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 3, }
@@ -902,8 +907,8 @@ data: !Tabular |
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 3, }
@@ -1006,8 +1011,8 @@ data: !Tabular |
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 3, }
@@ -1169,8 +1174,8 @@ gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, ]
 P np_qibz: [1, ]
-min_transition_energy_eV:   2.27138890E+00
-max_transition_energy_eV:   5.05854193E+01
+min_transition_energy_eV:   2.27138910E+00
+max_transition_energy_eV:   5.05854238E+01
 eratio:   2.22706993E+01
 ft_max_err_t2w_cos:   3.38096223E-03
 ft_max_err_w2t_cos:   1.13989226E-04
@@ -1300,8 +1305,8 @@ iteration_state: {dtset: 4, }
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 4, }
@@ -1474,8 +1479,8 @@ iteration_state: {dtset: 4, }
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 4, }
@@ -1648,8 +1653,8 @@ iteration_state: {dtset: 4, }
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 4, }
@@ -1822,8 +1827,8 @@ iteration_state: {dtset: 4, }
      E-Eprev: Difference between QP energy at iteration i and i-1
      E: Quasi-particle energy
      Occ(E): Occupancy of QP state
-
-
+ 
+ 
 
 --- !GWR_SelfEnergy_ee
 iteration_state: {dtset: 4, }
@@ -1985,8 +1990,8 @@ gwr_boxcutmin:   1.10000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, ]
 P np_qibz: [1, ]
-min_transition_energy_eV:   2.27138890E+00
-max_transition_energy_eV:   5.05854193E+01
+min_transition_energy_eV:   2.27138910E+00
+max_transition_energy_eV:   5.05854238E+01
 eratio:   2.22706993E+01
 ft_max_err_t2w_cos:   3.38096223E-03
 ft_max_err_w2t_cos:   1.13989226E-04
@@ -2012,7 +2017,7 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
 -          iomode           1
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
@@ -2031,8 +2036,8 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
            etotal3     0.0000000000E+00
            etotal4     0.0000000000E+00
            etotal5     0.0000000000E+00
-            fcart1     1.2597170635E-27 -9.6578308199E-27  1.4696699074E-26
-                      -1.2597170635E-27  9.6578308199E-27 -1.4696699074E-26
+            fcart1    -2.0995284391E-26  8.3981137564E-27  5.0388682539E-27
+                       2.0995284391E-26 -8.3981137564E-27 -5.0388682539E-27
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2042,8 +2047,8 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
             fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         512
-        freqspmax      1.83746627E-01 Hartree
-        freqspmin     -1.83746627E-01 Hartree
+        freqspmax      1.83746611E-01 Hartree
+        freqspmin     -1.83746611E-01 Hartree
            getden1          0
            getden2          1
            getden3          1
@@ -2058,7 +2063,7 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
          gwr_ntau           6
        gw_qprange           8
         gwr_nstep           4
-       gwr_tolqpe      7.34986508E-04 Hartree
+       gwr_tolqpe      7.34986444E-04 Hartree
            istwfk        1
               ixc          11
            jdtset        1    2    3    4    5
@@ -2178,7 +2183,7 @@ P           mkmem           1
            tolvrs5     0.00000000E+00
             typat      1  1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3573395400E+00  1.3573395400E+00  1.3573395400E+00
+                       1.3573395450E+00  1.3573395450E+00  1.3573395450E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5650000000E+00  2.5650000000E+00  2.5650000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2219,7 +2224,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2236,12 +2241,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2259,7 +2264,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -2274,15 +2279,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.6  wall=          4.6
+- Proc.   0 individual time (sec): cpu=          4.3  wall=          4.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.6  wall=          4.6
+.Delivered   4 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.3  wall=          4.4

@@ -301,6 +301,9 @@ MODULE m_paw_dmft
   ! ABINIT CTQMC: Gives movie for CTQMC
   ! 0 : nothing, 1 : 1 file Movie_RANK.tex for each cpu
 
+  integer :: dmftctqmc_chains
+  ! ABINIT CTQMC: Number of chains per MPI-tasks
+
   integer :: dmftctqmc_mrka
   ! ABINIT CTQMC: Write a temporary file Spectra_RANK.dat with the sweep evolution of
   ! the number of electron for each flavor
@@ -1129,6 +1132,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmftctqmc_mrka   = dtset%dmftctqmc_mrka
  paw_dmft%dmftctqmc_mov    = dtset%dmftctqmc_mov
  paw_dmft%dmftctqmc_order  = dtset%dmftctqmc_order
+ paw_dmft%dmftctqmc_chains = dtset%dmftctqmc_chains
  paw_dmft%dmftctqmc_localprop = dtset%dmftctqmc_localprop
 
  if (dmft_solv == 5 .or. dmft_solv >= 8) then
@@ -1773,11 +1777,11 @@ subroutine init_dmft(cryst_struc,dmatpawu,dtset,fermie_dft,filctqmcdatain,filsel
 #ifdef HAVE_MPI
      call CtqmcInterface_init(paw_dmft%hybrid(iatom),paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
         & paw_dmft%dmftqmc_therm,paw_dmft%dmftctqmc_meas,nflavor,paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
-        & std_out,paw_dmft%spacecomm,nspinor=paw_dmft%nspinor)
+        & std_out,paw_dmft%dmftctqmc_chains,paw_dmft%spacecomm,nspinor=paw_dmft%nspinor)
 #else
      call CtqmcInterface_init(paw_dmft%hybrid(iatom),paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
         & paw_dmft%dmftqmc_therm,paw_dmft%dmftctqmc_meas,nflavor,paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
-        & std_out,nspinor=paw_dmft%nspinor)
+        & std_out,paw_dmft%dmftctqmc_chains,nspinor=paw_dmft%nspinor)
 #endif
      call CtqmcInterface_setOpts(paw_dmft%hybrid(iatom),&
                                 &  opt_Fk       = 1,&

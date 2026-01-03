@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 10 Oct 2025.
-- ( at 08h36 )
+.Starting date : Mon 22 Dec 2025.
+- ( at 07h52 )
   
-- input  file    -> /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/TestBot_MPI2/v9_t72/t72.abi
+- input  file    -> /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/TestBot_MPI2/v9_t72/t72.abi
 - output file    -> t72.abo
 - root for input  files -> t72i
 - root for output files -> t72o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+-   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Al.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+-   /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/As.LDA_PW-JTH_sp.xml
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -331,7 +331,7 @@ P           mkmem           4
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
                          0.12500    0.12500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4357636023E+00  1.2724806829E+00  1.5258507303E+00
+                       1.4357636076E+00  1.2724806876E+00  1.5258507360E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.7132000000E+00  2.4046400000E+00  2.8834400000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -395,9 +395,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01527
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -415,9 +415,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/torrent_core_energies/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/scope_gnu_10.2_paral/trunk__codata2022/tests/Pspdir/As.LDA_PW-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -491,7 +491,7 @@ xred      :
 cartesian_forces: # hartree/bohr
 - [ -7.96293449E-03,   2.27932178E-02,   2.77733454E-02, ]
 - [  7.96293449E-03,  -2.27932178E-02,  -2.77733454E-02, ]
-force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.68007855E-02, }
+force_length_stats: {min:   3.68007856E-02, max:   3.68007856E-02, mean:   3.68007856E-02, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -559,24 +559,24 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
        0.000000000000      0.000000000000      0.000000000000
        0.240000000000      0.250000000000      0.260000000000
  rms dE/dt=  1.6611E-01; max dE/dt=  2.4382E-01; dE/dt below (all hartree)
-    1      -0.245709046330     -0.106123727838     -0.109046757560
-    2       0.243815218432      0.104659044155      0.107849135668
+    1      -0.245709046340     -0.106123727844     -0.109046757562
+    2       0.243815218442      0.104659044161      0.107849135671
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.43576360234639     1.27248068286386     1.52585073033675
+    2      1.43576360764798     1.27248068756252     1.52585073597099
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00796293449161     0.02279321778404     0.02777334539318
-    2      0.00796293449161    -0.02279321778404    -0.02777334539318
+    1     -0.00796293449192     0.02279321778456     0.02777334539466
+    2      0.00796293449192    -0.02279321778456    -0.02777334539466
  frms,max,avg= 2.1246943E-02 2.7773345E-02   1.688E-05  7.152E-05  1.208E-04 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.40947052062301     1.17207428524529     1.42816272186740
-    2      0.40947052062301    -1.17207428524529    -1.42816272186740
- frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
+    1     -0.40947055503067     1.17207438371489     1.42816284189593
+    2      0.40947055503067    -1.17207438371489    -1.42816284189593
+ frms,max,avg= 1.0925618E+00 1.4281628E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
-              =  5.630445499398  5.630445499398  5.630445499398 angstroms
+              =  5.630445520188  5.630445520188  5.630445520188 angstroms
  prteigrs : about to open file t72o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -596,7 +596,7 @@ psp_core            :  1.02189418686274E+00
 local_psp           : -1.65757317644467E+00
 PAW spherical_terms :  4.37885520575019E+00
 total_energy        : -8.53497146694158E+00
-total_energy_eV     : -2.32248384821095E+02
+total_energy_eV     : -2.32248405185374E+02
 ...
 
 
@@ -609,7 +609,7 @@ psp_core            :  1.02189418686274E+00
 xc_dc               : -4.32299131594797E+00
 PAW spherical_terms :  4.13298378985032E+00
 total_energy_dc     : -8.53849674490711E+00
-total_energy_dc_eV  : -2.32344312513028E+02
+total_energy_dc_eV  : -2.32344332885719E+02
 ...
 
 
@@ -618,8 +618,8 @@ iteration_state     : {dtset: 1, }
 comment             : 'Components of total free energy, including PAW core contributions'
 Total energy        : -2.49976448757304E+03
 Total energy DC     : -2.49976801285100E+03
-Total energy (eV)   : -6.80220510309462E+04
-Total energy DC (eV): -6.80221469586381E+04
+Total energy (eV)   : -6.80220569953367E+04
+Total energy DC (eV): -6.80221529230371E+04
 ...
 
 
@@ -629,9 +629,9 @@ Total energy DC (eV): -6.80221469586381E+04
   sigma(3 3)= -1.09831920E-03  sigma(2 1)=  4.42745221E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.0789E+01 GPa]
-- sigma(1 1)= -2.76433878E+01  sigma(3 2)=  5.62362297E-01
-- sigma(2 2)= -3.24106558E+01  sigma(3 1)=  1.46421306E+01
-- sigma(3 3)= -3.23136611E+01  sigma(2 1)=  1.30260119E+01
+- sigma(1 1)= -2.76433925E+01  sigma(3 2)=  5.62362392E-01
+- sigma(2 2)= -3.24106613E+01  sigma(3 1)=  1.46421331E+01
+- sigma(3 3)= -3.23136666E+01  sigma(2 1)=  1.30260141E+01
 
  --- NONLOP YLM COUNTERS -----------------------------------------------------
  Number of Calls in nonlop_ylm : NC =      2
@@ -735,7 +735,7 @@ xred      :
 cartesian_forces: # hartree/bohr
 - [ -7.96293449E-03,   2.27932178E-02,   2.77733454E-02, ]
 - [  7.96293449E-03,  -2.27932178E-02,  -2.77733454E-02, ]
-force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.68007855E-02, }
+force_length_stats: {min:   3.68007856E-02, max:   3.68007856E-02, mean:   3.68007856E-02, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -803,24 +803,24 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
        0.000000000000      0.000000000000      0.000000000000
        0.240000000000      0.250000000000      0.260000000000
  rms dE/dt=  1.6611E-01; max dE/dt=  2.4382E-01; dE/dt below (all hartree)
-    1      -0.245709046333     -0.106123727840     -0.109046757561
-    2       0.243815218434      0.104659044156      0.107849135670
+    1      -0.245709046343     -0.106123727846     -0.109046757564
+    2       0.243815218444      0.104659044163      0.107849135673
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.43576360234639     1.27248068286386     1.52585073033675
+    2      1.43576360764798     1.27248068756252     1.52585073597099
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00796293449161     0.02279321778425     0.02777334539348
-    2      0.00796293449161    -0.02279321778425    -0.02777334539348
+    1     -0.00796293449192     0.02279321778476     0.02777334539496
+    2      0.00796293449192    -0.02279321778476    -0.02777334539496
  frms,max,avg= 2.1246943E-02 2.7773345E-02   1.688E-05  7.152E-05  1.208E-04 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.40947052062323     1.17207428525564     1.42816272188282
-    2      0.40947052062323    -1.17207428525564    -1.42816272188282
- frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
+    1     -0.40947055503089     1.17207438372523     1.42816284191135
+    2      0.40947055503089    -1.17207438372523    -1.42816284191135
+ frms,max,avg= 1.0925618E+00 1.4281628E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
-              =  5.630445499398  5.630445499398  5.630445499398 angstroms
+              =  5.630445520188  5.630445520188  5.630445520188 angstroms
  prteigrs : about to open file t72o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -840,7 +840,7 @@ psp_core            :  1.02189418686274E+00
 local_psp           : -1.65757317644457E+00
 PAW spherical_terms :  4.37885520574094E+00
 total_energy        : -8.53497146695249E+00
-total_energy_eV     : -2.32248384821392E+02
+total_energy_eV     : -2.32248405185671E+02
 ...
 
 
@@ -853,7 +853,7 @@ psp_core            :  1.02189418686274E+00
 xc_dc               : -4.32299131595036E+00
 PAW spherical_terms :  4.13298378984551E+00
 total_energy_dc     : -8.53849674490706E+00
-total_energy_dc_eV  : -2.32344312513027E+02
+total_energy_dc_eV  : -2.32344332885718E+02
 ...
 
 
@@ -862,8 +862,8 @@ iteration_state     : {dtset: 2, }
 comment             : 'Components of total free energy, including PAW core contributions'
 Total energy        : -2.49976448757305E+03
 Total energy DC     : -2.49976801285100E+03
-Total energy (eV)   : -6.80220510309465E+04
-Total energy DC (eV): -6.80221469586381E+04
+Total energy (eV)   : -6.80220569953370E+04
+Total energy DC (eV): -6.80221529230371E+04
 ...
 
 
@@ -873,9 +873,9 @@ Total energy DC (eV): -6.80221469586381E+04
   sigma(3 3)= -1.09831920E-03  sigma(2 1)=  4.42745221E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.0789E+01 GPa]
-- sigma(1 1)= -2.76433878E+01  sigma(3 2)=  5.62362297E-01
-- sigma(2 2)= -3.24106558E+01  sigma(3 1)=  1.46421306E+01
-- sigma(3 3)= -3.23136611E+01  sigma(2 1)=  1.30260119E+01
+- sigma(1 1)= -2.76433925E+01  sigma(3 2)=  5.62362392E-01
+- sigma(2 2)= -3.24106613E+01  sigma(3 1)=  1.46421331E+01
+- sigma(3 3)= -3.23136666E+01  sigma(2 1)=  1.30260141E+01
 
  --- NONLOP YLM COUNTERS -----------------------------------------------------
  Number of Calls in nonlop_ylm : NC =      2
@@ -1047,24 +1047,24 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
        0.000000000000      0.000000000000      0.000000000000
        0.240000000000      0.250000000000      0.260000000000
  rms dE/dt=  1.6611E-01; max dE/dt=  2.4382E-01; dE/dt below (all hartree)
-    1      -0.245709046326     -0.106123727836     -0.109046757558
-    2       0.243815218427      0.104659044152      0.107849135666
+    1      -0.245709046336     -0.106123727842     -0.109046757560
+    2       0.243815218437      0.104659044159      0.107849135669
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.43576360234639     1.27248068286386     1.52585073033675
+    2      1.43576360764798     1.27248068756252     1.52585073597099
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00796293449155     0.02279321778368     0.02777334539267
-    2      0.00796293449155    -0.02279321778368    -0.02777334539267
+    1     -0.00796293449186     0.02279321778419     0.02777334539415
+    2      0.00796293449186    -0.02279321778419    -0.02777334539415
  frms,max,avg= 2.1246943E-02 2.7773345E-02   1.688E-05  7.152E-05  1.208E-04 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.40947052061983     1.17207428522652     1.42816272184136
-    2      0.40947052061983    -1.17207428522652    -1.42816272184136
- frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
+    1     -0.40947055502749     1.17207438369611     1.42816284186989
+    2      0.40947055502749    -1.17207438369611    -1.42816284186989
+ frms,max,avg= 1.0925618E+00 1.4281628E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
-              =  5.630445499398  5.630445499398  5.630445499398 angstroms
+              =  5.630445520188  5.630445520188  5.630445520188 angstroms
  prteigrs : about to open file t72o_DS3_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -1084,7 +1084,7 @@ psp_core            :  1.02189418686274E+00
 local_psp           : -1.65757317644596E+00
 PAW spherical_terms :  4.37885520573794E+00
 total_energy        : -8.53497146696224E+00
-total_energy_eV     : -2.32248384821657E+02
+total_energy_eV     : -2.32248405185937E+02
 ...
 
 
@@ -1097,7 +1097,7 @@ psp_core            :  1.02189418686274E+00
 xc_dc               : -4.32299131595126E+00
 PAW spherical_terms :  4.13298378984971E+00
 total_energy_dc     : -8.53849674490709E+00
-total_energy_dc_eV  : -2.32344312513027E+02
+total_energy_dc_eV  : -2.32344332885718E+02
 ...
 
 
@@ -1106,8 +1106,8 @@ iteration_state     : {dtset: 3, }
 comment             : 'Components of total free energy, including PAW core contributions'
 Total energy        : -2.49976448757306E+03
 Total energy DC     : -2.49976801285100E+03
-Total energy (eV)   : -6.80220510309467E+04
-Total energy DC (eV): -6.80221469586381E+04
+Total energy (eV)   : -6.80220569953373E+04
+Total energy DC (eV): -6.80221529230371E+04
 ...
 
 
@@ -1117,9 +1117,9 @@ Total energy DC (eV): -6.80221469586381E+04
   sigma(3 3)= -1.09831920E-03  sigma(2 1)=  4.42745221E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.0789E+01 GPa]
-- sigma(1 1)= -2.76433878E+01  sigma(3 2)=  5.62362297E-01
-- sigma(2 2)= -3.24106558E+01  sigma(3 1)=  1.46421306E+01
-- sigma(3 3)= -3.23136611E+01  sigma(2 1)=  1.30260119E+01
+- sigma(1 1)= -2.76433925E+01  sigma(3 2)=  5.62362392E-01
+- sigma(2 2)= -3.24106613E+01  sigma(3 1)=  1.46421331E+01
+- sigma(3 3)= -3.23136666E+01  sigma(2 1)=  1.30260141E+01
 
  --- NONLOP YLM COUNTERS -----------------------------------------------------
  Number of Calls in nonlop_ylm : NC =      2
@@ -1222,7 +1222,7 @@ xred      :
 cartesian_forces: # hartree/bohr
 - [ -7.96293449E-03,   2.27932178E-02,   2.77733454E-02, ]
 - [  7.96293449E-03,  -2.27932178E-02,  -2.77733454E-02, ]
-force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.68007855E-02, }
+force_length_stats: {min:   3.68007856E-02, max:   3.68007856E-02, mean:   3.68007856E-02, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1290,24 +1290,24 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
        0.000000000000      0.000000000000      0.000000000000
        0.240000000000      0.250000000000      0.260000000000
  rms dE/dt=  1.6611E-01; max dE/dt=  2.4382E-01; dE/dt below (all hartree)
-    1      -0.245709046332     -0.106123727839     -0.109046757561
-    2       0.243815218434      0.104659044157      0.107849135670
+    1      -0.245709046342     -0.106123727846     -0.109046757564
+    2       0.243815218444      0.104659044163      0.107849135673
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.43576360234639     1.27248068286386     1.52585073033675
+    2      1.43576360764798     1.27248068756252     1.52585073597099
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00796293449162     0.02279321778425     0.02777334539350
-    2      0.00796293449162    -0.02279321778425    -0.02777334539350
+    1     -0.00796293449193     0.02279321778476     0.02777334539498
+    2      0.00796293449193    -0.02279321778476    -0.02777334539498
  frms,max,avg= 2.1246943E-02 2.7773345E-02   1.688E-05  7.152E-05  1.208E-04 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.40947052062349     1.17207428525572     1.42816272188390
-    2      0.40947052062349    -1.17207428525572    -1.42816272188390
- frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
+    1     -0.40947055503116     1.17207438372531     1.42816284191243
+    2      0.40947055503116    -1.17207438372531    -1.42816284191243
+ frms,max,avg= 1.0925618E+00 1.4281628E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
-              =  5.630445499398  5.630445499398  5.630445499398 angstroms
+              =  5.630445520188  5.630445520188  5.630445520188 angstroms
  prteigrs : about to open file t72o_DS4_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -1327,7 +1327,7 @@ psp_core            :  1.02189418686274E+00
 local_psp           : -1.65757317644388E+00
 PAW spherical_terms :  4.37885520574695E+00
 total_energy        : -8.53497146694488E+00
-total_energy_eV     : -2.32248384821184E+02
+total_energy_eV     : -2.32248405185464E+02
 ...
 
 
@@ -1340,7 +1340,7 @@ psp_core            :  1.02189418686274E+00
 xc_dc               : -4.32299131594904E+00
 PAW spherical_terms :  4.13298378984551E+00
 total_energy_dc     : -8.53849674490702E+00
-total_energy_dc_eV  : -2.32344312513025E+02
+total_energy_dc_eV  : -2.32344332885716E+02
 ...
 
 
@@ -1349,8 +1349,8 @@ iteration_state     : {dtset: 4, }
 comment             : 'Components of total free energy, including PAW core contributions'
 Total energy        : -2.49976448757304E+03
 Total energy DC     : -2.49976801285100E+03
-Total energy (eV)   : -6.80220510309463E+04
-Total energy DC (eV): -6.80221469586381E+04
+Total energy (eV)   : -6.80220569953368E+04
+Total energy DC (eV): -6.80221529230371E+04
 ...
 
 
@@ -1360,9 +1360,9 @@ Total energy DC (eV): -6.80221469586381E+04
   sigma(3 3)= -1.09831920E-03  sigma(2 1)=  4.42745221E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.0789E+01 GPa]
-- sigma(1 1)= -2.76433878E+01  sigma(3 2)=  5.62362297E-01
-- sigma(2 2)= -3.24106558E+01  sigma(3 1)=  1.46421306E+01
-- sigma(3 3)= -3.23136611E+01  sigma(2 1)=  1.30260119E+01
+- sigma(1 1)= -2.76433925E+01  sigma(3 2)=  5.62362392E-01
+- sigma(2 2)= -3.24106613E+01  sigma(3 1)=  1.46421331E+01
+- sigma(3 3)= -3.23136666E+01  sigma(2 1)=  1.30260141E+01
 
  --- NONLOP YLM COUNTERS -----------------------------------------------------
  Number of Calls in nonlop_ylm : NC =      2
@@ -1466,7 +1466,7 @@ xred      :
 cartesian_forces: # hartree/bohr
 - [ -7.96293449E-03,   2.27932178E-02,   2.77733454E-02, ]
 - [  7.96293449E-03,  -2.27932178E-02,  -2.77733454E-02, ]
-force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.68007855E-02, }
+force_length_stats: {min:   3.68007856E-02, max:   3.68007856E-02, mean:   3.68007856E-02, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1534,24 +1534,24 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
        0.000000000000      0.000000000000      0.000000000000
        0.240000000000      0.250000000000      0.260000000000
  rms dE/dt=  1.6611E-01; max dE/dt=  2.4382E-01; dE/dt below (all hartree)
-    1      -0.245709046331     -0.106123727839     -0.109046757560
-    2       0.243815218432      0.104659044155      0.107849135669
+    1      -0.245709046341     -0.106123727845     -0.109046757563
+    2       0.243815218442      0.104659044161      0.107849135672
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.43576360234639     1.27248068286386     1.52585073033675
+    2      1.43576360764798     1.27248068756252     1.52585073597099
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00796293449160     0.02279321778411     0.02777334539327
-    2      0.00796293449160    -0.02279321778411    -0.02777334539327
+    1     -0.00796293449191     0.02279321778462     0.02777334539475
+    2      0.00796293449191    -0.02279321778462    -0.02777334539475
  frms,max,avg= 2.1246943E-02 2.7773345E-02   1.688E-05  7.152E-05  1.208E-04 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.40947052062275     1.17207428524845     1.42816272187213
-    2      0.40947052062275    -1.17207428524845    -1.42816272187213
- frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
+    1     -0.40947055503041     1.17207438371804     1.42816284190066
+    2      0.40947055503041    -1.17207438371804    -1.42816284190066
+ frms,max,avg= 1.0925618E+00 1.4281628E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
-              =  5.630445499398  5.630445499398  5.630445499398 angstroms
+              =  5.630445520188  5.630445520188  5.630445520188 angstroms
  prteigrs : about to open file t72o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -1571,7 +1571,7 @@ psp_core            :  1.02189418686274E+00
 local_psp           : -1.65757317644589E+00
 PAW spherical_terms :  4.37885520574268E+00
 total_energy        : -8.53497146695384E+00
-total_energy_eV     : -2.32248384821428E+02
+total_energy_eV     : -2.32248405185708E+02
 ...
 
 
@@ -1584,7 +1584,7 @@ psp_core            :  1.02189418686274E+00
 xc_dc               : -4.32299131594907E+00
 PAW spherical_terms :  4.13298378984703E+00
 total_energy_dc     : -8.53849674490719E+00
-total_energy_dc_eV  : -2.32344312513030E+02
+total_energy_dc_eV  : -2.32344332885721E+02
 ...
 
 
@@ -1593,8 +1593,8 @@ iteration_state     : {dtset: 5, }
 comment             : 'Components of total free energy, including PAW core contributions'
 Total energy        : -2.49976448757305E+03
 Total energy DC     : -2.49976801285100E+03
-Total energy (eV)   : -6.80220510309465E+04
-Total energy DC (eV): -6.80221469586381E+04
+Total energy (eV)   : -6.80220569953371E+04
+Total energy DC (eV): -6.80221529230371E+04
 ...
 
 
@@ -1604,9 +1604,9 @@ Total energy DC (eV): -6.80221469586381E+04
   sigma(3 3)= -1.09831920E-03  sigma(2 1)=  4.42745221E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.0789E+01 GPa]
-- sigma(1 1)= -2.76433878E+01  sigma(3 2)=  5.62362297E-01
-- sigma(2 2)= -3.24106558E+01  sigma(3 1)=  1.46421306E+01
-- sigma(3 3)= -3.23136611E+01  sigma(2 1)=  1.30260119E+01
+- sigma(1 1)= -2.76433925E+01  sigma(3 2)=  5.62362392E-01
+- sigma(2 2)= -3.24106613E+01  sigma(3 1)=  1.46421331E+01
+- sigma(3 3)= -3.23136666E+01  sigma(2 1)=  1.30260141E+01
 
  --- NONLOP YLM COUNTERS -----------------------------------------------------
  Number of Calls in nonlop_ylm : NC =      2
@@ -1710,7 +1710,7 @@ xred      :
 cartesian_forces: # hartree/bohr
 - [ -7.96293449E-03,   2.27932178E-02,   2.77733454E-02, ]
 - [  7.96293449E-03,  -2.27932178E-02,  -2.77733454E-02, ]
-force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.68007855E-02, }
+force_length_stats: {min:   3.68007856E-02, max:   3.68007856E-02, mean:   3.68007856E-02, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1778,24 +1778,24 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
        0.000000000000      0.000000000000      0.000000000000
        0.240000000000      0.250000000000      0.260000000000
  rms dE/dt=  1.6611E-01; max dE/dt=  2.4382E-01; dE/dt below (all hartree)
-    1      -0.245709046330     -0.106123727838     -0.109046757560
-    2       0.243815218431      0.104659044155      0.107849135668
+    1      -0.245709046340     -0.106123727844     -0.109046757562
+    2       0.243815218441      0.104659044161      0.107849135671
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.43576360234639     1.27248068286386     1.52585073033675
+    2      1.43576360764798     1.27248068756252     1.52585073597099
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00796293449159     0.02279321778403     0.02777334539318
-    2      0.00796293449159    -0.02279321778403    -0.02777334539318
+    1     -0.00796293449190     0.02279321778454     0.02777334539466
+    2      0.00796293449190    -0.02279321778454    -0.02777334539466
  frms,max,avg= 2.1246943E-02 2.7773345E-02   1.688E-05  7.152E-05  1.208E-04 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.40947052062225     1.17207428524467     1.42816272186736
-    2      0.40947052062225    -1.17207428524467    -1.42816272186736
- frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
+    1     -0.40947055502992     1.17207438371427     1.42816284189589
+    2      0.40947055502992    -1.17207438371427    -1.42816284189589
+ frms,max,avg= 1.0925618E+00 1.4281628E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
-              =  5.630445499398  5.630445499398  5.630445499398 angstroms
+              =  5.630445520188  5.630445520188  5.630445520188 angstroms
  prteigrs : about to open file t72o_DS6_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -1815,7 +1815,7 @@ psp_core            :  1.02189418686274E+00
 local_psp           : -1.65757317644636E+00
 PAW spherical_terms :  4.37885520574365E+00
 total_energy        : -8.53497146695371E+00
-total_energy_eV     : -2.32248384821425E+02
+total_energy_eV     : -2.32248405185704E+02
 ...
 
 
@@ -1828,7 +1828,7 @@ psp_core            :  1.02189418686274E+00
 xc_dc               : -4.32299131594945E+00
 PAW spherical_terms :  4.13298378984757E+00
 total_energy_dc     : -8.53849674490696E+00
-total_energy_dc_eV  : -2.32344312513024E+02
+total_energy_dc_eV  : -2.32344332885715E+02
 ...
 
 
@@ -1837,8 +1837,8 @@ iteration_state     : {dtset: 6, }
 comment             : 'Components of total free energy, including PAW core contributions'
 Total energy        : -2.49976448757305E+03
 Total energy DC     : -2.49976801285100E+03
-Total energy (eV)   : -6.80220510309465E+04
-Total energy DC (eV): -6.80221469586381E+04
+Total energy (eV)   : -6.80220569953371E+04
+Total energy DC (eV): -6.80221529230371E+04
 ...
 
 
@@ -1848,9 +1848,9 @@ Total energy DC (eV): -6.80221469586381E+04
   sigma(3 3)= -1.09831920E-03  sigma(2 1)=  4.42745221E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.0789E+01 GPa]
-- sigma(1 1)= -2.76433878E+01  sigma(3 2)=  5.62362297E-01
-- sigma(2 2)= -3.24106558E+01  sigma(3 1)=  1.46421306E+01
-- sigma(3 3)= -3.23136611E+01  sigma(2 1)=  1.30260119E+01
+- sigma(1 1)= -2.76433925E+01  sigma(3 2)=  5.62362392E-01
+- sigma(2 2)= -3.24106613E+01  sigma(3 1)=  1.46421331E+01
+- sigma(3 3)= -3.23136666E+01  sigma(2 1)=  1.30260141E+01
 
  --- NONLOP YLM COUNTERS -----------------------------------------------------
  Number of Calls in nonlop_ylm : NC =      2
@@ -2022,24 +2022,24 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
        0.000000000000      0.000000000000      0.000000000000
        0.240000000000      0.250000000000      0.260000000000
  rms dE/dt=  1.6611E-01; max dE/dt=  2.4382E-01; dE/dt below (all hartree)
-    1      -0.245709046327     -0.106123727836     -0.109046757558
-    2       0.243815218427      0.104659044153      0.107849135667
+    1      -0.245709046337     -0.106123727842     -0.109046757561
+    2       0.243815218438      0.104659044159      0.107849135669
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.43576360234639     1.27248068286386     1.52585073033675
+    2      1.43576360764798     1.27248068756252     1.52585073597099
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00796293449157     0.02279321778376     0.02777334539277
-    2      0.00796293449157    -0.02279321778376    -0.02777334539277
+    1     -0.00796293449188     0.02279321778427     0.02777334539425
+    2      0.00796293449188    -0.02279321778427    -0.02777334539425
  frms,max,avg= 2.1246943E-02 2.7773345E-02   1.688E-05  7.152E-05  1.208E-04 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.40947052062110     1.17207428523075     1.42816272184627
-    2      0.40947052062110    -1.17207428523075    -1.42816272184627
- frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
+    1     -0.40947055502877     1.17207438370035     1.42816284187480
+    2      0.40947055502877    -1.17207438370035    -1.42816284187480
+ frms,max,avg= 1.0925618E+00 1.4281628E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
-              =  5.630445499398  5.630445499398  5.630445499398 angstroms
+              =  5.630445520188  5.630445520188  5.630445520188 angstroms
  prteigrs : about to open file t72o_DS7_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -2059,7 +2059,7 @@ psp_core            :  1.02189418686274E+00
 local_psp           : -1.65757317644609E+00
 PAW spherical_terms :  4.37885520574454E+00
 total_energy        : -8.53497146695253E+00
-total_energy_eV     : -2.32248384821393E+02
+total_energy_eV     : -2.32248405185672E+02
 ...
 
 
@@ -2072,7 +2072,7 @@ psp_core            :  1.02189418686274E+00
 xc_dc               : -4.32299131594922E+00
 PAW spherical_terms :  4.13298378985224E+00
 total_energy_dc     : -8.53849674490696E+00
-total_energy_dc_eV  : -2.32344312513024E+02
+total_energy_dc_eV  : -2.32344332885715E+02
 ...
 
 
@@ -2081,8 +2081,8 @@ iteration_state     : {dtset: 7, }
 comment             : 'Components of total free energy, including PAW core contributions'
 Total energy        : -2.49976448757305E+03
 Total energy DC     : -2.49976801285100E+03
-Total energy (eV)   : -6.80220510309465E+04
-Total energy DC (eV): -6.80221469586381E+04
+Total energy (eV)   : -6.80220569953370E+04
+Total energy DC (eV): -6.80221529230371E+04
 ...
 
 
@@ -2092,9 +2092,9 @@ Total energy DC (eV): -6.80221469586381E+04
   sigma(3 3)= -1.09831920E-03  sigma(2 1)=  4.42745221E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.0789E+01 GPa]
-- sigma(1 1)= -2.76433878E+01  sigma(3 2)=  5.62362297E-01
-- sigma(2 2)= -3.24106558E+01  sigma(3 1)=  1.46421306E+01
-- sigma(3 3)= -3.23136611E+01  sigma(2 1)=  1.30260119E+01
+- sigma(1 1)= -2.76433925E+01  sigma(3 2)=  5.62362392E-01
+- sigma(2 2)= -3.24106613E+01  sigma(3 1)=  1.46421331E+01
+- sigma(3 3)= -3.23136666E+01  sigma(2 1)=  1.30260141E+01
 
  --- NONLOP YLM COUNTERS -----------------------------------------------------
  Number of Calls in nonlop_ylm : NC =      2
@@ -2265,24 +2265,24 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
        0.000000000000      0.000000000000      0.000000000000
        0.240000000000      0.250000000000      0.260000000000
  rms dE/dt=  1.6611E-01; max dE/dt=  2.4382E-01; dE/dt below (all hartree)
-    1      -0.245709046329     -0.106123727837     -0.109046757559
-    2       0.243815218429      0.104659044154      0.107849135668
+    1      -0.245709046339     -0.106123727843     -0.109046757562
+    2       0.243815218439      0.104659044160      0.107849135670
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.43576360234639     1.27248068286386     1.52585073033675
+    2      1.43576360764798     1.27248068756252     1.52585073597099
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00796293449156     0.02279321778390     0.02777334539298
-    2      0.00796293449156    -0.02279321778390    -0.02777334539298
+    1     -0.00796293449187     0.02279321778441     0.02777334539446
+    2      0.00796293449187    -0.02279321778441    -0.02777334539446
  frms,max,avg= 2.1246943E-02 2.7773345E-02   1.688E-05  7.152E-05  1.208E-04 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.40947052062072     1.17207428523774     1.42816272185728
-    2      0.40947052062072    -1.17207428523774    -1.42816272185728
- frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
+    1     -0.40947055502839     1.17207438370734     1.42816284188581
+    2      0.40947055502839    -1.17207438370734    -1.42816284188581
+ frms,max,avg= 1.0925618E+00 1.4281628E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
-              =  5.630445499398  5.630445499398  5.630445499398 angstroms
+              =  5.630445520188  5.630445520188  5.630445520188 angstroms
  prteigrs : about to open file t72o_DS8_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -2302,7 +2302,7 @@ psp_core            :  1.02189418686274E+00
 local_psp           : -1.65757317644447E+00
 PAW spherical_terms :  4.37885520574014E+00
 total_energy        : -8.53497146695546E+00
-total_energy_eV     : -2.32248384821472E+02
+total_energy_eV     : -2.32248405185752E+02
 ...
 
 
@@ -2315,7 +2315,7 @@ psp_core            :  1.02189418686274E+00
 xc_dc               : -4.32299131595012E+00
 PAW spherical_terms :  4.13298378984855E+00
 total_energy_dc     : -8.53849674490720E+00
-total_energy_dc_eV  : -2.32344312513030E+02
+total_energy_dc_eV  : -2.32344332885721E+02
 ...
 
 
@@ -2324,8 +2324,8 @@ iteration_state     : {dtset: 8, }
 comment             : 'Components of total free energy, including PAW core contributions'
 Total energy        : -2.49976448757305E+03
 Total energy DC     : -2.49976801285100E+03
-Total energy (eV)   : -6.80220510309465E+04
-Total energy DC (eV): -6.80221469586381E+04
+Total energy (eV)   : -6.80220569953371E+04
+Total energy DC (eV): -6.80221529230371E+04
 ...
 
 
@@ -2335,9 +2335,9 @@ Total energy DC (eV): -6.80221469586381E+04
   sigma(3 3)= -1.09831920E-03  sigma(2 1)=  4.42745221E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.0789E+01 GPa]
-- sigma(1 1)= -2.76433878E+01  sigma(3 2)=  5.62362297E-01
-- sigma(2 2)= -3.24106558E+01  sigma(3 1)=  1.46421306E+01
-- sigma(3 3)= -3.23136611E+01  sigma(2 1)=  1.30260119E+01
+- sigma(1 1)= -2.76433925E+01  sigma(3 2)=  5.62362392E-01
+- sigma(2 2)= -3.24106613E+01  sigma(3 1)=  1.46421331E+01
+- sigma(3 3)= -3.23136666E+01  sigma(2 1)=  1.30260141E+01
 
  --- NONLOP YLM COUNTERS -----------------------------------------------------
  Number of Calls in nonlop_ylm : NC =      2
@@ -2441,7 +2441,7 @@ xred      :
 cartesian_forces: # hartree/bohr
 - [ -7.96293449E-03,   2.27932178E-02,   2.77733454E-02, ]
 - [  7.96293449E-03,  -2.27932178E-02,  -2.77733454E-02, ]
-force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.68007855E-02, }
+force_length_stats: {min:   3.68007856E-02, max:   3.68007856E-02, mean:   3.68007856E-02, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2509,24 +2509,24 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
        0.000000000000      0.000000000000      0.000000000000
        0.240000000000      0.250000000000      0.260000000000
  rms dE/dt=  1.6611E-01; max dE/dt=  2.4382E-01; dE/dt below (all hartree)
-    1      -0.245709046330     -0.106123727838     -0.109046757559
-    2       0.243815218429      0.104659044154      0.107849135668
+    1      -0.245709046340     -0.106123727844     -0.109046757562
+    2       0.243815218440      0.104659044160      0.107849135671
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.43576360234639     1.27248068286386     1.52585073033675
+    2      1.43576360764798     1.27248068756252     1.52585073597099
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00796293449159     0.02279321778399     0.02777334539307
-    2      0.00796293449159    -0.02279321778399    -0.02777334539307
+    1     -0.00796293449190     0.02279321778450     0.02777334539455
+    2      0.00796293449190    -0.02279321778450    -0.02777334539455
  frms,max,avg= 2.1246943E-02 2.7773345E-02   1.688E-05  7.152E-05  1.208E-04 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.40947052062217     1.17207428524248     1.42816272186206
-    2      0.40947052062217    -1.17207428524248    -1.42816272186206
- frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
+    1     -0.40947055502983     1.17207438371208     1.42816284189060
+    2      0.40947055502983    -1.17207438371208    -1.42816284189060
+ frms,max,avg= 1.0925618E+00 1.4281628E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
-              =  5.630445499398  5.630445499398  5.630445499398 angstroms
+              =  5.630445520188  5.630445520188  5.630445520188 angstroms
  prteigrs : about to open file t72o_DS9_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -2546,7 +2546,7 @@ psp_core            :  1.02189418686274E+00
 local_psp           : -1.65757317644648E+00
 PAW spherical_terms :  4.37885520573666E+00
 total_energy        : -8.53497146696268E+00
-total_energy_eV     : -2.32248384821669E+02
+total_energy_eV     : -2.32248405185949E+02
 ...
 
 
@@ -2559,7 +2559,7 @@ psp_core            :  1.02189418686274E+00
 xc_dc               : -4.32299131595031E+00
 PAW spherical_terms :  4.13298378984690E+00
 total_energy_dc     : -8.53849674490709E+00
-total_energy_dc_eV  : -2.32344312513027E+02
+total_energy_dc_eV  : -2.32344332885718E+02
 ...
 
 
@@ -2568,8 +2568,8 @@ iteration_state     : {dtset: 9, }
 comment             : 'Components of total free energy, including PAW core contributions'
 Total energy        : -2.49976448757306E+03
 Total energy DC     : -2.49976801285100E+03
-Total energy (eV)   : -6.80220510309467E+04
-Total energy DC (eV): -6.80221469586381E+04
+Total energy (eV)   : -6.80220569953373E+04
+Total energy DC (eV): -6.80221529230371E+04
 ...
 
 
@@ -2579,9 +2579,9 @@ Total energy DC (eV): -6.80221469586381E+04
   sigma(3 3)= -1.09831920E-03  sigma(2 1)=  4.42745221E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.0789E+01 GPa]
-- sigma(1 1)= -2.76433878E+01  sigma(3 2)=  5.62362297E-01
-- sigma(2 2)= -3.24106558E+01  sigma(3 1)=  1.46421306E+01
-- sigma(3 3)= -3.23136611E+01  sigma(2 1)=  1.30260119E+01
+- sigma(1 1)= -2.76433925E+01  sigma(3 2)=  5.62362392E-01
+- sigma(2 2)= -3.24106613E+01  sigma(3 1)=  1.46421331E+01
+- sigma(3 3)= -3.23136666E+01  sigma(2 1)=  1.30260141E+01
 
  --- NONLOP YLM COUNTERS -----------------------------------------------------
  Number of Calls in nonlop_ylm : NC =      2
@@ -2752,24 +2752,24 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
        0.000000000000      0.000000000000      0.000000000000
        0.240000000000      0.250000000000      0.260000000000
  rms dE/dt=  1.6611E-01; max dE/dt=  2.4382E-01; dE/dt below (all hartree)
-    1      -0.245709046329     -0.106123727838     -0.109046757559
-    2       0.243815218430      0.104659044154      0.107849135668
+    1      -0.245709046339     -0.106123727844     -0.109046757562
+    2       0.243815218440      0.104659044160      0.107849135670
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.43576360234639     1.27248068286386     1.52585073033675
+    2      1.43576360764798     1.27248068756252     1.52585073597099
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00796293449156     0.02279321778391     0.02777334539304
-    2      0.00796293449156    -0.02279321778391    -0.02777334539304
+    1     -0.00796293449187     0.02279321778442     0.02777334539452
+    2      0.00796293449187    -0.02279321778442    -0.02777334539452
  frms,max,avg= 2.1246943E-02 2.7773345E-02   1.688E-05  7.152E-05  1.208E-04 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.40947052062032     1.17207428523853     1.42816272186032
-    2      0.40947052062032    -1.17207428523853    -1.42816272186032
- frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
+    1     -0.40947055502799     1.17207438370812     1.42816284188885
+    2      0.40947055502799    -1.17207438370812    -1.42816284188885
+ frms,max,avg= 1.0925618E+00 1.4281628E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
-              =  5.630445499398  5.630445499398  5.630445499398 angstroms
+              =  5.630445520188  5.630445520188  5.630445520188 angstroms
  prteigrs : about to open file t72o_DS10_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -2789,7 +2789,7 @@ psp_core            :  1.02189418686274E+00
 local_psp           : -1.65757317644439E+00
 PAW spherical_terms :  4.37885520574370E+00
 total_energy        : -8.53497146695014E+00
-total_energy_eV     : -2.32248384821327E+02
+total_energy_eV     : -2.32248405185607E+02
 ...
 
 
@@ -2802,7 +2802,7 @@ psp_core            :  1.02189418686274E+00
 xc_dc               : -4.32299131594946E+00
 PAW spherical_terms :  4.13298378984995E+00
 total_energy_dc     : -8.53849674490700E+00
-total_energy_dc_eV  : -2.32344312513025E+02
+total_energy_dc_eV  : -2.32344332885716E+02
 ...
 
 
@@ -2811,8 +2811,8 @@ iteration_state     : {dtset: 10, }
 comment             : 'Components of total free energy, including PAW core contributions'
 Total energy        : -2.49976448757305E+03
 Total energy DC     : -2.49976801285100E+03
-Total energy (eV)   : -6.80220510309464E+04
-Total energy DC (eV): -6.80221469586381E+04
+Total energy (eV)   : -6.80220569953370E+04
+Total energy DC (eV): -6.80221529230371E+04
 ...
 
 
@@ -2822,9 +2822,9 @@ Total energy DC (eV): -6.80221469586381E+04
   sigma(3 3)= -1.09831920E-03  sigma(2 1)=  4.42745221E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.0789E+01 GPa]
-- sigma(1 1)= -2.76433878E+01  sigma(3 2)=  5.62362297E-01
-- sigma(2 2)= -3.24106558E+01  sigma(3 1)=  1.46421306E+01
-- sigma(3 3)= -3.23136611E+01  sigma(2 1)=  1.30260119E+01
+- sigma(1 1)= -2.76433925E+01  sigma(3 2)=  5.62362392E-01
+- sigma(2 2)= -3.24106613E+01  sigma(3 1)=  1.46421331E+01
+- sigma(3 3)= -3.23136666E+01  sigma(2 1)=  1.30260141E+01
 
  --- NONLOP YLM COUNTERS -----------------------------------------------------
  Number of Calls in nonlop_ylm : NC =      2
@@ -2996,24 +2996,24 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
        0.000000000000      0.000000000000      0.000000000000
        0.240000000000      0.250000000000      0.260000000000
  rms dE/dt=  1.6611E-01; max dE/dt=  2.4382E-01; dE/dt below (all hartree)
-    1      -0.245709046328     -0.106123727837     -0.109046757558
-    2       0.243815218428      0.104659044153      0.107849135667
+    1      -0.245709046338     -0.106123727843     -0.109046757561
+    2       0.243815218438      0.104659044159      0.107849135670
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.43576360234639     1.27248068286386     1.52585073033675
+    2      1.43576360764798     1.27248068756252     1.52585073597099
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00796293449157     0.02279321778382     0.02777334539284
-    2      0.00796293449157    -0.02279321778382    -0.02777334539284
+    1     -0.00796293449188     0.02279321778433     0.02777334539432
+    2      0.00796293449188    -0.02279321778433    -0.02777334539432
  frms,max,avg= 2.1246943E-02 2.7773345E-02   1.688E-05  7.152E-05  1.208E-04 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.40947052062116     1.17207428523386     1.42816272185026
-    2      0.40947052062116    -1.17207428523386    -1.42816272185026
- frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
+    1     -0.40947055502883     1.17207438370345     1.42816284187880
+    2      0.40947055502883    -1.17207438370345    -1.42816284187880
+ frms,max,avg= 1.0925618E+00 1.4281628E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
-              =  5.630445499398  5.630445499398  5.630445499398 angstroms
+              =  5.630445520188  5.630445520188  5.630445520188 angstroms
  prteigrs : about to open file t72o_DS11_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -3033,7 +3033,7 @@ psp_core            :  1.02189418686274E+00
 local_psp           : -1.65757317644504E+00
 PAW spherical_terms :  4.37885520573796E+00
 total_energy        : -8.53497146696161E+00
-total_energy_eV     : -2.32248384821640E+02
+total_energy_eV     : -2.32248405185919E+02
 ...
 
 
@@ -3046,7 +3046,7 @@ psp_core            :  1.02189418686274E+00
 xc_dc               : -4.32299131595063E+00
 PAW spherical_terms :  4.13298378984719E+00
 total_energy_dc     : -8.53849674490703E+00
-total_energy_dc_eV  : -2.32344312513026E+02
+total_energy_dc_eV  : -2.32344332885717E+02
 ...
 
 
@@ -3055,8 +3055,8 @@ iteration_state     : {dtset: 11, }
 comment             : 'Components of total free energy, including PAW core contributions'
 Total energy        : -2.49976448757306E+03
 Total energy DC     : -2.49976801285100E+03
-Total energy (eV)   : -6.80220510309467E+04
-Total energy DC (eV): -6.80221469586381E+04
+Total energy (eV)   : -6.80220569953373E+04
+Total energy DC (eV): -6.80221529230371E+04
 ...
 
 
@@ -3066,9 +3066,9 @@ Total energy DC (eV): -6.80221469586381E+04
   sigma(3 3)= -1.09831920E-03  sigma(2 1)=  4.42745221E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.0789E+01 GPa]
-- sigma(1 1)= -2.76433878E+01  sigma(3 2)=  5.62362297E-01
-- sigma(2 2)= -3.24106558E+01  sigma(3 1)=  1.46421306E+01
-- sigma(3 3)= -3.23136611E+01  sigma(2 1)=  1.30260119E+01
+- sigma(1 1)= -2.76433925E+01  sigma(3 2)=  5.62362392E-01
+- sigma(2 2)= -3.24106613E+01  sigma(3 1)=  1.46421331E+01
+- sigma(3 3)= -3.23136666E+01  sigma(2 1)=  1.30260141E+01
 
  --- NONLOP YLM COUNTERS -----------------------------------------------------
  Number of Calls in nonlop_ylm : NC =      2
@@ -3240,24 +3240,24 @@ force_length_stats: {min:   3.68007855E-02, max:   3.68007855E-02, mean:   3.680
        0.000000000000      0.000000000000      0.000000000000
        0.240000000000      0.250000000000      0.260000000000
  rms dE/dt=  1.6611E-01; max dE/dt=  2.4382E-01; dE/dt below (all hartree)
-    1      -0.245709046328     -0.106123727837     -0.109046757559
-    2       0.243815218429      0.104659044154      0.107849135667
+    1      -0.245709046338     -0.106123727843     -0.109046757562
+    2       0.243815218439      0.104659044160      0.107849135670
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.43576360234639     1.27248068286386     1.52585073033675
+    2      1.43576360764798     1.27248068756252     1.52585073597099
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00796293449155     0.02279321778385     0.02777334539293
-    2      0.00796293449155    -0.02279321778385    -0.02777334539293
+    1     -0.00796293449186     0.02279321778436     0.02777334539441
+    2      0.00796293449186    -0.02279321778436    -0.02777334539441
  frms,max,avg= 2.1246943E-02 2.7773345E-02   1.688E-05  7.152E-05  1.208E-04 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.40947052061997     1.17207428523519     1.42816272185489
-    2      0.40947052061997    -1.17207428523519    -1.42816272185489
- frms,max,avg= 1.0925617E+00 1.4281627E+00   8.682E-04  3.678E-03  6.211E-03 e/A
+    1     -0.40947055502764     1.17207438370479     1.42816284188343
+    2      0.40947055502764    -1.17207438370479    -1.42816284188343
+ frms,max,avg= 1.0925618E+00 1.4281628E+00   8.682E-04  3.678E-03  6.211E-03 e/A
  length scales= 10.640000000000 10.640000000000 10.640000000000 bohr
-              =  5.630445499398  5.630445499398  5.630445499398 angstroms
+              =  5.630445520188  5.630445520188  5.630445520188 angstroms
  prteigrs : about to open file t72o_DS12_EIG
  Fermi (or HOMO) energy (hartree) =   0.15678   Average Vxc (hartree)=  -0.37108
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -3277,7 +3277,7 @@ psp_core            :  1.02189418686274E+00
 local_psp           : -1.65757317644429E+00
 PAW spherical_terms :  4.37885520574359E+00
 total_energy        : -8.53497146695095E+00
-total_energy_eV     : -2.32248384821350E+02
+total_energy_eV     : -2.32248405185629E+02
 ...
 
 
@@ -3290,7 +3290,7 @@ psp_core            :  1.02189418686274E+00
 xc_dc               : -4.32299131594915E+00
 PAW spherical_terms :  4.13298378985002E+00
 total_energy_dc     : -8.53849674490706E+00
-total_energy_dc_eV  : -2.32344312513027E+02
+total_energy_dc_eV  : -2.32344332885718E+02
 ...
 
 
@@ -3299,8 +3299,8 @@ iteration_state     : {dtset: 12, }
 comment             : 'Components of total free energy, including PAW core contributions'
 Total energy        : -2.49976448757305E+03
 Total energy DC     : -2.49976801285100E+03
-Total energy (eV)   : -6.80220510309464E+04
-Total energy DC (eV): -6.80221469586381E+04
+Total energy (eV)   : -6.80220569953370E+04
+Total energy DC (eV): -6.80221529230371E+04
 ...
 
 
@@ -3310,9 +3310,9 @@ Total energy DC (eV): -6.80221469586381E+04
   sigma(3 3)= -1.09831920E-03  sigma(2 1)=  4.42745221E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  3.0789E+01 GPa]
-- sigma(1 1)= -2.76433878E+01  sigma(3 2)=  5.62362297E-01
-- sigma(2 2)= -3.24106558E+01  sigma(3 1)=  1.46421306E+01
-- sigma(3 3)= -3.23136611E+01  sigma(2 1)=  1.30260119E+01
+- sigma(1 1)= -2.76433925E+01  sigma(3 2)=  5.62362392E-01
+- sigma(2 2)= -3.24106613E+01  sigma(3 1)=  1.46421331E+01
+- sigma(3 3)= -3.23136666E+01  sigma(2 1)=  1.30260141E+01
 
  --- NONLOP YLM COUNTERS -----------------------------------------------------
  Number of Calls in nonlop_ylm : NC =      2
@@ -3362,30 +3362,30 @@ Total energy DC (eV): -6.80221469586381E+04
            etotal10   -8.5384967449E+00
            etotal11   -8.5384967449E+00
            etotal12   -8.5384967449E+00
-            fcart1    -7.9629344916E-03  2.2793217784E-02  2.7773345393E-02
-                       7.9629344916E-03 -2.2793217784E-02 -2.7773345393E-02
-            fcart2    -7.9629344916E-03  2.2793217784E-02  2.7773345393E-02
-                       7.9629344916E-03 -2.2793217784E-02 -2.7773345393E-02
-            fcart3    -7.9629344915E-03  2.2793217784E-02  2.7773345393E-02
-                       7.9629344915E-03 -2.2793217784E-02 -2.7773345393E-02
-            fcart4    -7.9629344916E-03  2.2793217784E-02  2.7773345393E-02
-                       7.9629344916E-03 -2.2793217784E-02 -2.7773345393E-02
-            fcart5    -7.9629344916E-03  2.2793217784E-02  2.7773345393E-02
-                       7.9629344916E-03 -2.2793217784E-02 -2.7773345393E-02
-            fcart6    -7.9629344916E-03  2.2793217784E-02  2.7773345393E-02
-                       7.9629344916E-03 -2.2793217784E-02 -2.7773345393E-02
-            fcart7    -7.9629344916E-03  2.2793217784E-02  2.7773345393E-02
-                       7.9629344916E-03 -2.2793217784E-02 -2.7773345393E-02
-            fcart8    -7.9629344916E-03  2.2793217784E-02  2.7773345393E-02
-                       7.9629344916E-03 -2.2793217784E-02 -2.7773345393E-02
-            fcart9    -7.9629344916E-03  2.2793217784E-02  2.7773345393E-02
-                       7.9629344916E-03 -2.2793217784E-02 -2.7773345393E-02
-            fcart10   -7.9629344916E-03  2.2793217784E-02  2.7773345393E-02
-                       7.9629344916E-03 -2.2793217784E-02 -2.7773345393E-02
-            fcart11   -7.9629344916E-03  2.2793217784E-02  2.7773345393E-02
-                       7.9629344916E-03 -2.2793217784E-02 -2.7773345393E-02
-            fcart12   -7.9629344915E-03  2.2793217784E-02  2.7773345393E-02
-                       7.9629344915E-03 -2.2793217784E-02 -2.7773345393E-02
+            fcart1    -7.9629344919E-03  2.2793217785E-02  2.7773345395E-02
+                       7.9629344919E-03 -2.2793217785E-02 -2.7773345395E-02
+            fcart2    -7.9629344919E-03  2.2793217785E-02  2.7773345395E-02
+                       7.9629344919E-03 -2.2793217785E-02 -2.7773345395E-02
+            fcart3    -7.9629344919E-03  2.2793217784E-02  2.7773345394E-02
+                       7.9629344919E-03 -2.2793217784E-02 -2.7773345394E-02
+            fcart4    -7.9629344919E-03  2.2793217785E-02  2.7773345395E-02
+                       7.9629344919E-03 -2.2793217785E-02 -2.7773345395E-02
+            fcart5    -7.9629344919E-03  2.2793217785E-02  2.7773345395E-02
+                       7.9629344919E-03 -2.2793217785E-02 -2.7773345395E-02
+            fcart6    -7.9629344919E-03  2.2793217785E-02  2.7773345395E-02
+                       7.9629344919E-03 -2.2793217785E-02 -2.7773345395E-02
+            fcart7    -7.9629344919E-03  2.2793217784E-02  2.7773345394E-02
+                       7.9629344919E-03 -2.2793217784E-02 -2.7773345394E-02
+            fcart8    -7.9629344919E-03  2.2793217784E-02  2.7773345394E-02
+                       7.9629344919E-03 -2.2793217784E-02 -2.7773345394E-02
+            fcart9    -7.9629344919E-03  2.2793217785E-02  2.7773345395E-02
+                       7.9629344919E-03 -2.2793217785E-02 -2.7773345395E-02
+            fcart10   -7.9629344919E-03  2.2793217784E-02  2.7773345395E-02
+                       7.9629344919E-03 -2.2793217784E-02 -2.7773345395E-02
+            fcart11   -7.9629344919E-03  2.2793217784E-02  2.7773345394E-02
+                       7.9629344919E-03 -2.2793217784E-02 -2.7773345394E-02
+            fcart12   -7.9629344919E-03  2.2793217784E-02  2.7773345394E-02
+                       7.9629344919E-03 -2.2793217784E-02 -2.7773345394E-02
 -          fftalg         312
         fft_count           1
            istwfk        2    3    6    7    4    5    8    9
@@ -3461,7 +3461,7 @@ P           mkmem           4
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
                          0.12500    0.12500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4357636023E+00  1.2724806829E+00  1.5258507303E+00
+                       1.4357636076E+00  1.2724806876E+00  1.5258507360E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.7132000000E+00  2.4046400000E+00  2.8834400000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3559,10 +3559,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.8  wall=          7.8
+- Proc.   0 individual time (sec): cpu=          6.9  wall=          7.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.5  wall=         15.5
++Overall time at end (sec) : cpu=         14.6  wall=         15.5

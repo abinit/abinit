@@ -163,7 +163,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer :: rank_to_send,unit_anh,fit_iatom_in,unit_GF_val,nfix_and_impose,nfixcoeff_corr,atom_start,atom_end
  integer :: ncopy_terms
  real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS,tolGF,check_value
- real(dp),parameter :: HaBohr_eVAng = 27.21138386d0 / 0.529177249d0
+ real(dp),parameter :: HaBohr_eVAng = Ha_eV /Bohr_Ang 
  type(effective_potential_type) :: eff_pot_fixed
  logical :: iam_master,need_verbose,need_positive,converge,file_opened
  logical :: need_anharmstr,need_spcoupling,ditributed_coefficients,need_prt_anh
@@ -3643,7 +3643,7 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 !reals
   real(dp) :: factor,mse,msef,mses
   real(dp),allocatable :: sqomega(:),ucvol(:)
-  real(dp),parameter :: HaBohr_eVAng = 27.21138386d0 / 0.529177249d0
+  real(dp),parameter :: HaBohr_eVAng = Ha_eV /Bohr_Ang
 !scalar
   integer :: itime,unit_anh
   integer :: natom,ntime,ncoeff,my_rank
