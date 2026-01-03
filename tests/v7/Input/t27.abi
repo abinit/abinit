@@ -66,6 +66,8 @@ dmftqmc_l 50
 dmftqmc_n 1.d6
 dmftqmc_therm 10000
 dmftctqmc_gmove 100
+dmftctqmc_chains  1   # force 1 chain per MPI task for testing purposes
+                      # auto-setting match OpenMP threads and alter convergence
 
 # == DFT+U
 usepawu1    1

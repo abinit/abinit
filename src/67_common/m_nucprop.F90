@@ -127,6 +127,7 @@ contains
     !scalars
     integer :: ii,INFO,LDA,LWORK,N,iatom,my_comm_atom
     logical :: my_atmtab_allocated,paral_atom
+    !REPLACE WITH DATA FROM DEFS_BASIS (or transfer to defs_basis ...)
     real(dp),parameter :: efg_si = 9.7173624292E21 ! convert EFG in au to SI units V/m2
     real(dp) :: cq,eta,vxx,vyy,vzz
     character(len=500) :: message
@@ -201,7 +202,7 @@ contains
        ! Cq = (eq)*(eQ)/h where eq is the efg vzz; Q is the nuclear quad moment in barns (10E-28 m2)
        ! multiply vzz (in au) by efg_si to get volts/m^2
        ! multiply quadmom by e_Cb (the electric charge unit) and 1D-28 to get eQ in SI units
-       ! divide by Plancks Constant to get freq
+       ! divide by Plancks Constant to get freq ! Should tranfer to defs_basis (REPLACE WITH DATA FROM DEFS_BASIS)
        ! multiply by 1D-6 to get MHz
        cq = 1.0D-6*vzz*efg_si*quadmom(typat(iatom))*e_Cb*1.0D-28/6.62607015D-34
        if (abs(cq) > tol8) then
@@ -223,13 +224,13 @@ contains
        do ii=1,3 
          if (abs(eigval(ii))<tol8) eigval(ii)=zero
        end do 
-       write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      efg eigval (au) : ',eigval(1),' ; (V/m^2) : ',eigval(1)*efg_si,ch10,&
+       write(message,'(2a,f13.6,a,f16.8,a,a,3f13.6)')ch10,'      efg eigval (au) : ',eigval(1),' ; (1.0E+21 V/m^2) : ',eigval(1)*efg_si*1.0e-21,ch10,&
             &     '-         eigvec : ',matr(1,1),matr(2,1),matr(3,1)
        call wrtout(ab_out,message,'COLL')
-       write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      efg eigval (au) : ',eigval(2),' ; (V/m^2) : ',eigval(2)*efg_si,ch10,&
+       write(message,'(2a,f13.6,a,f16.8,a,a,3f13.6)')ch10,'      efg eigval (au) : ',eigval(2),' ; (1.0E+21 V/m^2) : ',eigval(2)*efg_si*1.0e-21,ch10,&
             &     '-         eigvec : ',matr(1,2),matr(2,2),matr(3,2)
        call wrtout(ab_out,message,'COLL')
-       write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      efg eigval (au) : ',eigval(3),' ; (V/m^2) : ',eigval(3)*efg_si,ch10,&
+       write(message,'(2a,f13.6,a,f16.8,a,a,3f13.6)')ch10,'      efg eigval (au) : ',eigval(3),' ; (1.0E+21 V/m^2) : ',eigval(3)*efg_si*1.0e-21,ch10,&
             &     '-         eigvec : ',matr(1,3),matr(2,3),matr(3,3)
        call wrtout(ab_out,message,'COLL')
        write(message,'(a,a,3f13.6)')ch10,'      total efg : ',efg(1,1,iatom),efg(1,2,iatom),efg(1,3,iatom)

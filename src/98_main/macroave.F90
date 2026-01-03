@@ -72,12 +72,11 @@ program macroave
 ! REAL*8   HARTREE: Conversion factor from Hartrees to Rydbergs
 !              1 hartree = 2 Ry
 ! REAL*8   RYDBERG: Conversion factor from Rydbergs to eV
-!              1 Ry = 13.6058 eV
 ! ----------------------------------------------------------------------
  integer, parameter ::  np=12
  integer, parameter ::  n=2**np
  real(dp), parameter :: hartree=two
- real(dp), parameter :: rydberg=13.6058d0
+ real(dp), parameter :: rydberg=Ha_eV *half
 ! --------- VARIABLES --------------------------------------------------
  integer :: i,ii,ij,ip,is,j,iomode
  integer :: nconv,npoints,npt,nsm,nspin,nz,nspden

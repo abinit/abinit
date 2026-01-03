@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h16 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h24 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI4/paral_t24_MPI4/t24.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI4/paral_t24_MPI4/t24.abi
 - output file    -> t24_MPI4.abo
 - root for input  files -> t24_MPI4i
 - root for output files -> t24_MPI4o
@@ -204,7 +204,7 @@ P           mkmem          15
                          0.02344    0.02344    0.04688    0.02344    0.04688    0.02344
                          0.02344    0.02344    0.00781    0.02344    0.02344    0.00781
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.1493290123E-01  8.1493290123E-01  8.1493290123E-01
+                       8.1493290424E-01  8.1493290424E-01  8.1493290424E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.5400000000E+00  1.5400000000E+00  1.5400000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -251,8 +251,8 @@ meta: {optdriver: 0, ionmov: 3, optcell: 1, iscf: 17, paral_kgb: 1, }
          ecut(hartree)=     60.500   => boxcut(ratio)=   2.07719
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/6c_lda.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/6c_lda.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -280,7 +280,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     159.641     159.632
 
 ================================================================================
 
-=== [ionmov= 3] Broyden-Fletcher-Goldfarb-Shanno method (forces,Tot energy) 
+=== [ionmov= 3] Broyden-Fletcher-Goldfarb-Shanno method (forces,Tot energy)
 ================================================================================
 
 --- Iteration: (1/3) Internal Cycle: (1/1)
@@ -774,9 +774,9 @@ force_length_stats: {min:   3.44975706E-03, max:   3.44975706E-03, mean:   3.449
  Lengths [Bohr]
   4.73034735114039E+00  4.73034735114039E+00  4.73034735114039E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -5.00614357064055E-05 -6.22375646753335E-06 -6.22375646753255E-06
- -6.22375646753335E-06 -5.00614357064073E-05 -6.22375646753334E-06
- -6.22375646753255E-06 -6.22375646753334E-06 -5.00614357064073E-05
+ -5.00614357064038E-05 -6.22375646753439E-06 -6.22375646753327E-06
+ -6.22375646753439E-06 -5.00614357064021E-05 -6.22375646753406E-06
+ -6.22375646753327E-06 -6.22375646753406E-06 -5.00614357064055E-05
  Total energy (etotal) [Ha]= -1.15075757386463E+01
 
  Difference of energy with previous step (new-old):
@@ -800,8 +800,8 @@ force_length_stats: {min:   3.44975706E-03, max:   3.44975706E-03, mean:   3.449
     2      -0.013324039607     -0.013324039607     -0.013324039607
 
  cartesian coordinates (angstrom) at end:
-    1     -0.05179112954163    -0.05179112954163    -0.05179112954163
-    2      0.83060170833734     0.83060170833734     0.83060170833734
+    1     -0.05179112973287    -0.05179112973287    -0.05179112973287
+    2      0.83060171140436     0.83060171140436     0.83060171140436
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00199171816766    -0.00199171816766    -0.00199171816766
@@ -809,11 +809,11 @@ force_length_stats: {min:   3.44975706E-03, max:   3.44975706E-03, mean:   3.449
  frms,max,avg= 1.9917182E-03 1.9917182E-03   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.10241825747839    -0.10241825747839    -0.10241825747839
-    2      0.10241825747839     0.10241825747839     0.10241825747839
- frms,max,avg= 1.0241826E-01 1.0241826E-01   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.10241826608057    -0.10241826608057    -0.10241826608057
+    2      0.10241826608057     0.10241826608057     0.10241826608057
+ frms,max,avg= 1.0241827E-01 1.0241827E-01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.689721378718  6.689721378718  6.689721378718 bohr
-              =  3.540048085435  3.540048085435  3.540048085435 angstroms
+              =  3.540048098507  3.540048098507  3.540048098507 angstroms
  prteigrs : about to open file t24_MPI4o_EIG
  Fermi (or HOMO) energy (hartree) =   0.52300   Average Vxc (hartree)=  -0.50272
  Eigenvalues (hartree) for nkpt=  30  k points:
@@ -829,7 +829,7 @@ force_length_stats: {min:   3.44975706E-03, max:   3.44975706E-03, mean:   3.449
  Eigenvalues (   eV  ) for nkpt=  30  k points:
  kpt#   1, nband= 12, wtk=  0.04688, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
   -8.66675    6.29645    8.46437    9.41798   17.31987   20.93686   21.00142   24.53395
-  31.91301   32.53867   37.56510   39.51236
+  31.91302   32.53868   37.56510   39.51236
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -846,7 +846,7 @@ PAW spherical_terms :  1.78493244048664E+00
 internal            : -1.15075758371578E+01
 '-kT*entropy'       : -7.55261880796143E-19
 total_energy        : -1.15075758371578E+01
-total_energy_eV     : -3.13137063402963E+02
+total_energy_eV     : -3.13137090859820E+02
 ...
 
 
@@ -861,7 +861,7 @@ PAW spherical_terms :  1.26637755207525E-01
 internal            : -1.15075757386463E+01
 '-kT*entropy'       : -7.55261880796143E-19
 total_energy_dc     : -1.15075757386463E+01
-total_energy_dc_eV  : -3.13137060722328E+02
+total_energy_dc_eV  : -3.13137088179185E+02
 ...
 
  rms coord change=  1.4630E-02   atom, delta coord (reduced):
@@ -874,9 +874,9 @@ total_energy_dc_eV  : -3.13137060722328E+02
   sigma(3 3)= -5.00614357E-05  sigma(2 1)= -6.22375647E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4729E+00 GPa]
-- sigma(1 1)= -1.47285804E+00  sigma(3 2)= -1.83109206E-01
-- sigma(2 2)= -1.47285804E+00  sigma(3 1)= -1.83109206E-01
-- sigma(3 3)= -1.47285804E+00  sigma(2 1)= -1.83109206E-01
+- sigma(1 1)= -1.47285829E+00  sigma(3 2)= -1.83109237E-01
+- sigma(2 2)= -1.47285829E+00  sigma(3 1)= -1.83109237E-01
+- sigma(3 3)= -1.47285829E+00  sigma(2 1)= -1.83109237E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1038,8 +1038,8 @@ P           mkmem          15
                          0.02344    0.04688    0.04688    0.02344    0.04688    0.02344
                          0.02344    0.02344    0.04688    0.02344    0.04688    0.02344
                          0.02344    0.02344    0.00781    0.02344    0.02344    0.00781
-           xangst     -5.1791129542E-02 -5.1791129542E-02 -5.1791129542E-02
-                       8.3060170834E-01  8.3060170834E-01  8.3060170834E-01
+           xangst     -5.1791129733E-02 -5.1791129733E-02 -5.1791129733E-02
+                       8.3060171140E-01  8.3060171140E-01  8.3060171140E-01
             xcart     -9.7871050946E-02 -9.7871050946E-02 -9.7871050946E-02
                        1.5696097543E+00  1.5696097543E+00  1.5696097543E+00
              xred     -1.4630063856E-02 -1.4630063856E-02 -1.4630063856E-02
@@ -1138,4 +1138,4 @@ P           mkmem          15
 
  Calculation completed.
 .Delivered   4 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.8  wall=         10.8
++Overall time at end (sec) : cpu=         10.9  wall=         10.9

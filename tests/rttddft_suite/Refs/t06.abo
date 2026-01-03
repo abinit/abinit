@@ -1,8 +1,8 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 17h56 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/rttddft_suite_t06/t06.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h03 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/rttddft_suite_t06/t06.abi
 - output file    -> t06.abo
 - root for input  files -> t06i
 - root for output files -> t06o
 
-- inpspheads : Reading pseudopotential header in XML form from
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/C.xml
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -89,7 +89,7 @@ _ WF disk file :      0.588 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
-            acell      6.6707332491E+00  6.6707332491E+00  6.6707332491E+00 Bohr
+            acell      6.6707332245E+00  6.6707332245E+00  6.6707332245E+00 Bohr
               amu      1.20110000E+01
            bandpp1          1
            bandpp2          8
@@ -135,7 +135,7 @@ _ WF disk file :      0.588 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
                        0.00000000E+00  0.00000000E+00 -2.50000000E-01
            kptopt           3
          kptrlatt        2   -2    2     -2    2    2     -2   -2    2
-          kptrlen      1.33414665E+01
+          kptrlen      1.33414664E+01
 P           mkmem          32
             natom           2
             nband           8
@@ -228,7 +228,7 @@ P           mkmem          32
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        8.8250000000E-01  8.8250000000E-01  8.8250000000E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.6676833123E+00  1.6676833123E+00  1.6676833123E+00
+                       1.6676833061E+00  1.6676833061E+00  1.6676833061E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl        6.00000
@@ -258,7 +258,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  R(1)=  0.0000000  3.3353666  3.3353666  G(1)= -0.1499086  0.1499086  0.1499086
  R(2)=  3.3353666  0.0000000  3.3353666  G(2)=  0.1499086 -0.1499086  0.1499086
  R(3)=  3.3353666  3.3353666  0.0000000  G(3)=  0.1499086  0.1499086 -0.1499086
- Unit cell volume ucvol=  7.4209710E+01 bohr^3
+ Unit cell volume ucvol=  7.4209709E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
  Coarse grid specifications (used for wave-functions):
@@ -279,9 +279,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/C.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/C.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/C.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -313,27 +313,27 @@ tolerances: {tolwfr: 1.00E-20, tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -11.490480756618    -1.149E+01 4.113E-01 6.256E+00
- ETOT  2  -11.520637934598    -3.016E-02 4.462E-05 7.609E-01
- ETOT  3  -11.517322548009     3.315E-03 6.328E-05 1.269E-02
- ETOT  4  -11.517344189448    -2.164E-05 6.390E-07 1.309E-03
- ETOT  5  -11.517343130412     1.059E-06 1.885E-08 6.078E-05
- ETOT  6  -11.517342993604     1.368E-07 4.283E-09 3.124E-06
- ETOT  7  -11.517343000151    -6.547E-09 7.762E-12 5.895E-08
- ETOT  8  -11.517343000061     9.062E-11 1.120E-12 1.181E-09
- ETOT  9  -11.517343000056     4.629E-12 8.506E-14 1.058E-11
- ETOT 10  -11.517343000056    -2.665E-14 6.397E-16 5.579E-13
- ETOT 11  -11.517343000056     1.776E-14 7.986E-18 5.034E-15
- ETOT 12  -11.517343000056    -8.882E-15 3.211E-19 8.511E-16
- ETOT 13  -11.517343000056    -3.553E-15 3.737E-20 2.351E-17
- ETOT 14  -11.517343000056     5.329E-15 9.694E-21 2.746E-19
+ ETOT  1  -11.490480752543    -1.149E+01 4.113E-01 6.256E+00
+ ETOT  2  -11.520637934951    -3.016E-02 4.462E-05 7.609E-01
+ ETOT  3  -11.517322548455     3.315E-03 6.328E-05 1.269E-02
+ ETOT  4  -11.517344189900    -2.164E-05 6.390E-07 1.309E-03
+ ETOT  5  -11.517343130861     1.059E-06 1.885E-08 6.078E-05
+ ETOT  6  -11.517342994053     1.368E-07 4.283E-09 3.124E-06
+ ETOT  7  -11.517343000600    -6.547E-09 7.762E-12 5.895E-08
+ ETOT  8  -11.517343000509     9.059E-11 1.120E-12 1.181E-09
+ ETOT  9  -11.517343000505     4.603E-12 8.506E-14 1.058E-11
+ ETOT 10  -11.517343000504     6.573E-14 6.397E-16 5.579E-13
+ ETOT 11  -11.517343000504    -1.599E-14 7.986E-18 5.034E-15
+ ETOT 12  -11.517343000505    -8.349E-14 3.211E-19 8.511E-16
+ ETOT 13  -11.517343000504     1.119E-13 3.737E-20 2.351E-17
+ ETOT 14  -11.517343000505    -7.283E-14 9.694E-21 2.746E-19
 
  At SCF step   14  max residual=  9.69E-21 < tolwfr=  1.00E-20 AND nres2   =  2.75E-19 < tolvrs=  1.00E-10 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  5.45323484E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  5.45323484E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  5.45323484E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  5.45323288E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  5.45323288E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  5.45323288E-04  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -345,36 +345,36 @@ lattice_vectors:
 - [  3.3353666,   3.3353666,   0.0000000, ]
 lattice_lengths: [   4.71692,    4.71692,    4.71692, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
-lattice_volume:   7.4209710E+01
-convergence: {deltae:  5.329E-15, res2:  2.746E-19, residm:  9.694E-21, diffor: null, }
+lattice_volume:   7.4209709E+01
+convergence: {deltae: -7.283E-14, res2:  2.746E-19, residm:  9.694E-21, diffor: null, }
 etotal    :  -1.15173430E+01
 entropy   :   0.00000000E+00
-fermie    :   3.18049359E-01
+fermie    :   3.18049364E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  5.45323484E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   5.45323484E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   5.45323484E-04, ]
+- [  5.45323288E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   5.45323288E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   5.45323288E-04, ]
 pressure_GPa:  -1.6044E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
 cartesian_forces: # hartree/bohr
-- [  1.08402250E-31,  -1.08402250E-31,   1.08402250E-31, ]
-- [ -1.08402250E-31,   1.08402250E-31,  -1.08402250E-31, ]
-force_length_stats: {min:   1.87758205E-31, max:   1.87758205E-31, mean:   1.87758205E-31, }
+- [ -1.97095002E-31,   1.97095002E-31,  -1.97095002E-31, ]
+- [  1.97095002E-31,  -1.97095002E-31,   1.97095002E-31, ]
+force_length_stats: {min:   3.41378557E-31, max:   3.41378557E-31, mean:   3.41378557E-31, }
 ...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        1.50737          2.70601149
-    2        1.50737          2.70601149
+    1        1.50737          2.70601148
+    2        1.50737          2.70601148
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.264987788607048
- Compensation charge over fine fft grid    =      0.264992672015407
+ Compensation charge over spherical meshes =      0.264987791430340
+ Compensation charge over fine fft grid    =      0.264992674836233
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -424,28 +424,28 @@ force_length_stats: {min:   1.87758205E-31, max:   1.87758205E-31, mean:   1.877
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   41.398E-22; max=  96.942E-22
+ Mean square residual over all n,k,spin=   41.399E-22; max=  96.941E-22
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  5.9043E-31; max dE/dt=  1.4462E-30; dE/dt below (all hartree)
+ rms dE/dt=  7.5908E-31; max dE/dt=  1.3148E-30; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000     -0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.88250000000000     0.88250000000000     0.88250000000000
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.0840225E-31 1.0840225E-31   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000     0.00000000000000    -0.00000000000000
+    2      0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 1.9709500E-31 1.9709500E-31   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 5.5742674E-30 5.5742674E-30   0.000E+00  0.000E+00  0.000E+00 e/A
- length scales=  6.670733249086  6.670733249086  6.670733249086 bohr
+    1     -0.00000000000000     0.00000000000000    -0.00000000000000
+    2      0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 1.0135032E-29 1.0135032E-29   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales=  6.670733224454  6.670733224454  6.670733224454 bohr
               =  3.530000000000  3.530000000000  3.530000000000 angstroms
  Fermi (or HOMO) energy (hartree) =   0.31805   Average Vxc (hartree)=  -0.50685
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -457,50 +457,50 @@ force_length_stats: {min:   1.87758205E-31, max:   1.87758205E-31, mean:   1.877
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  7.01772175413626E+00
-hartree             :  9.49630525076255E-01
-xc                  : -4.32199442993604E+00
-Ewald energy        : -1.29204340044738E+01
-psp_core            :  9.49042079795653E-01
-local_psp           : -4.60322384801814E+00
-PAW spherical_terms :  1.41191492322773E+00
-total_energy        : -1.15173430001921E+01
-total_energy_eV     : -3.13402841425512E+02
+kinetic             :  7.01772178303530E+00
+hartree             :  9.49630519698800E-01
+xc                  : -4.32199443747908E+00
+Ewald energy        : -1.29204340521829E+01
+psp_core            :  9.49042090308738E-01
+local_psp           : -4.60322382663592E+00
+PAW spherical_terms :  1.41191492261458E+00
+total_energy        : -1.15173430006405E+01
+total_energy_eV     : -3.13402868917873E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  4.00599397351785E-01
-Ewald energy        : -1.29204340044738E+01
-psp_core            :  9.49042079795653E-01
-xc_dc               : -7.17067013179330E-01
-PAW spherical_terms :  7.70516540449528E-01
-total_energy_dc     : -1.15173430000562E+01
-total_energy_dc_eV  : -3.13402841421814E+02
+band_energy         :  4.00599426281151E-01
+Ewald energy        : -1.29204340521829E+01
+psp_core            :  9.49042090308738E-01
+xc_dc               : -7.17067005694069E-01
+PAW spherical_terms :  7.70516540782524E-01
+total_energy_dc     : -1.15173430005045E+01
+total_energy_dc_eV  : -3.13402868914175E+02
 ...
 
 
 --- !EnergyTermsWithPAWCore
 iteration_state     : {dtset: 1, }
 comment             : 'Components of total free energy, including PAW core contributions'
-Total energy        : -7.56170350935731E+01
-Total energy DC     : -7.56170350934372E+01
-Total energy (eV)   : -2.05764416828631E+03
-Total energy DC (eV): -2.05764416828261E+03
+Total energy        : -7.56170350940214E+01
+Total energy DC     : -7.56170350938855E+01
+Total energy (eV)   : -2.05764434871932E+03
+Total energy DC (eV): -2.05764434871562E+03
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  5.45323484E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  5.45323484E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  5.45323484E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  5.45323288E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  5.45323288E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  5.45323288E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.6044E+01 GPa]
-- sigma(1 1)=  1.60439681E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.60439681E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.60439681E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.60439650E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.60439650E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.60439650E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -529,7 +529,7 @@ meta: {optdriver: 9, }
  R(1)=  0.0000000  3.3353666  3.3353666  G(1)= -0.1499086  0.1499086  0.1499086
  R(2)=  3.3353666  0.0000000  3.3353666  G(2)=  0.1499086 -0.1499086  0.1499086
  R(3)=  3.3353666  3.3353666  0.0000000  G(3)=  0.1499086  0.1499086 -0.1499086
- Unit cell volume ucvol=  7.4209710E+01 bohr^3
+ Unit cell volume ucvol=  7.4209709E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
  Coarse grid specifications (used for wave-functions):
@@ -569,7 +569,7 @@ Integrated density (ie. total nb of electrons) =       8.0000048834
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.11    0.12
+- Time - cpu, wall (sec):    0.12    0.12
 
 
 --- Iteration 2
@@ -583,7 +583,7 @@ Integrated density (ie. total nb of electrons) =       8.0000048834
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.11
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 3
@@ -625,7 +625,7 @@ Integrated density (ie. total nb of electrons) =       8.0004569891
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.11
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 6
@@ -639,7 +639,7 @@ Integrated density (ie. total nb of electrons) =       8.0004170921
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 7
@@ -653,7 +653,7 @@ Integrated density (ie. total nb of electrons) =       8.0003623978
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 8
@@ -667,7 +667,7 @@ Integrated density (ie. total nb of electrons) =       8.0002924193
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 9
@@ -681,7 +681,7 @@ Integrated density (ie. total nb of electrons) =       8.0002087808
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 10
@@ -695,7 +695,7 @@ Integrated density (ie. total nb of electrons) =       8.0001159950
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 11
@@ -709,7 +709,7 @@ Integrated density (ie. total nb of electrons) =       8.0000206796
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 12
@@ -723,7 +723,7 @@ Integrated density (ie. total nb of electrons) =       7.9999296663
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 13
@@ -737,13 +737,13 @@ Integrated density (ie. total nb of electrons) =       7.9998483829
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 14
 
 Total energy =     -11.501899 Ha
-Integrated density (ie. total nb of electrons) =       7.9997805386
+Integrated density (ie. total nb of electrons) =       7.9997805385
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -751,7 +751,7 @@ Integrated density (ie. total nb of electrons) =       7.9997805386
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 15
@@ -765,7 +765,7 @@ Integrated density (ie. total nb of electrons) =       7.9997289073
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 16
@@ -779,7 +779,7 @@ Integrated density (ie. total nb of electrons) =       7.9996961333
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 17
@@ -793,7 +793,7 @@ Integrated density (ie. total nb of electrons) =       7.9996847278
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.12    0.12
 
 
 --- Iteration 18
@@ -807,7 +807,7 @@ Integrated density (ie. total nb of electrons) =       7.9996963506
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.12    0.12
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 19
@@ -835,7 +835,7 @@ Integrated density (ie. total nb of electrons) =       7.9997871364
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 21
@@ -849,7 +849,7 @@ Integrated density (ie. total nb of electrons) =       7.9998613002
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 22
@@ -863,7 +863,7 @@ Integrated density (ie. total nb of electrons) =       7.9999493065
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 23
@@ -877,7 +877,7 @@ Integrated density (ie. total nb of electrons) =       8.0000462867
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 24
@@ -891,13 +891,13 @@ Integrated density (ie. total nb of electrons) =       8.0001469387
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 25
 
 Total energy =     -11.454881 Ha
-Integrated density (ie. total nb of electrons) =       8.0002456202
+Integrated density (ie. total nb of electrons) =       8.0002456203
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -905,7 +905,7 @@ Integrated density (ie. total nb of electrons) =       8.0002456202
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 26
@@ -919,7 +919,7 @@ Integrated density (ie. total nb of electrons) =       8.0003365411
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 27
@@ -933,13 +933,13 @@ Integrated density (ie. total nb of electrons) =       8.0004141302
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 28
 
 Total energy =     -11.441487 Ha
-Integrated density (ie. total nb of electrons) =       8.0004734520
+Integrated density (ie. total nb of electrons) =       8.0004734521
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -947,13 +947,13 @@ Integrated density (ie. total nb of electrons) =       8.0004734520
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 29
 
 Total energy =     -11.438924 Ha
-Integrated density (ie. total nb of electrons) =       8.0005104607
+Integrated density (ie. total nb of electrons) =       8.0005104608
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -961,7 +961,7 @@ Integrated density (ie. total nb of electrons) =       8.0005104607
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 30
@@ -975,7 +975,7 @@ Integrated density (ie. total nb of electrons) =       8.0005220443
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 31
@@ -989,7 +989,7 @@ Integrated density (ie. total nb of electrons) =       8.0005060632
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 32
@@ -1003,7 +1003,7 @@ Integrated density (ie. total nb of electrons) =       8.0004616199
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 33
@@ -1017,7 +1017,7 @@ Integrated density (ie. total nb of electrons) =       8.0003895132
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 34
@@ -1031,7 +1031,7 @@ Integrated density (ie. total nb of electrons) =       8.0002925291
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 35
@@ -1045,7 +1045,7 @@ Integrated density (ie. total nb of electrons) =       8.0001752430
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.12    0.12
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 36
@@ -1059,7 +1059,7 @@ Integrated density (ie. total nb of electrons) =       8.0000433795
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 37
@@ -1073,7 +1073,7 @@ Integrated density (ie. total nb of electrons) =       7.9999031334
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 38
@@ -1087,7 +1087,7 @@ Integrated density (ie. total nb of electrons) =       7.9997608374
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.11
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 39
@@ -1101,7 +1101,7 @@ Integrated density (ie. total nb of electrons) =       7.9996229775
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 40
@@ -1115,7 +1115,7 @@ Integrated density (ie. total nb of electrons) =       7.9994961697
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 41
@@ -1129,7 +1129,7 @@ Integrated density (ie. total nb of electrons) =       7.9993867060
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 42
@@ -1143,7 +1143,7 @@ Integrated density (ie. total nb of electrons) =       7.9992996807
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.11
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 43
@@ -1157,7 +1157,7 @@ Integrated density (ie. total nb of electrons) =       7.9992381745
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 44
@@ -1171,7 +1171,7 @@ Integrated density (ie. total nb of electrons) =       7.9992030557
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.11
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 45
@@ -1185,7 +1185,7 @@ Integrated density (ie. total nb of electrons) =       7.9991935680
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 46
@@ -1199,7 +1199,7 @@ Integrated density (ie. total nb of electrons) =       7.9992083070
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.11    0.12
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 47
@@ -1227,7 +1227,7 @@ Integrated density (ie. total nb of electrons) =       7.9993050864
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 49
@@ -1241,13 +1241,13 @@ Integrated density (ie. total nb of electrons) =       7.9993838229
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 50
 
 Total energy =     -11.414514 Ha
-Integrated density (ie. total nb of electrons) =       7.9994786540
+Integrated density (ie. total nb of electrons) =       7.9994786541
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1255,7 +1255,7 @@ Integrated density (ie. total nb of electrons) =       7.9994786540
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.11
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 ---------------------------------------------------------------------------
@@ -1288,7 +1288,7 @@ meta: {optdriver: 9, }
  R(1)=  0.0000000  3.3353666  3.3353666  G(1)= -0.1499086  0.1499086  0.1499086
  R(2)=  3.3353666  0.0000000  3.3353666  G(2)=  0.1499086 -0.1499086  0.1499086
  R(3)=  3.3353666  3.3353666  0.0000000  G(3)=  0.1499086  0.1499086 -0.1499086
- Unit cell volume ucvol=  7.4209710E+01 bohr^3
+ Unit cell volume ucvol=  7.4209709E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
  Coarse grid specifications (used for wave-functions):
@@ -1332,7 +1332,7 @@ Integrated density (ie. total nb of electrons) =       7.9995842058
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.11    0.11
+- Time - cpu, wall (sec):    0.12    0.12
 
 
 --- Iteration 52
@@ -1346,13 +1346,13 @@ Integrated density (ie. total nb of electrons) =       7.9996935525
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 53
 
 Total energy =     -11.394129 Ha
-Integrated density (ie. total nb of electrons) =       7.9997991414
+Integrated density (ie. total nb of electrons) =       7.9997991415
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1360,7 +1360,7 @@ Integrated density (ie. total nb of electrons) =       7.9997991414
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 54
@@ -1374,7 +1374,7 @@ Integrated density (ie. total nb of electrons) =       7.9998937684
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 55
@@ -1388,13 +1388,13 @@ Integrated density (ie. total nb of electrons) =       7.9999711025
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 56
 
 Total energy =     -11.380653 Ha
-Integrated density (ie. total nb of electrons) =       8.0000256784
+Integrated density (ie. total nb of electrons) =       8.0000256785
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1402,13 +1402,13 @@ Integrated density (ie. total nb of electrons) =       8.0000256784
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.12    0.12
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 57
 
 Total energy =     -11.378429 Ha
-Integrated density (ie. total nb of electrons) =       8.0000527474
+Integrated density (ie. total nb of electrons) =       8.0000527475
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1458,7 +1458,7 @@ Integrated density (ie. total nb of electrons) =       7.9999387157
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.12    0.12
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 61
@@ -1486,13 +1486,13 @@ Integrated density (ie. total nb of electrons) =       7.9997029234
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 63
 
 Total energy =     -11.386783 Ha
-Integrated density (ie. total nb of electrons) =       7.9995468418
+Integrated density (ie. total nb of electrons) =       7.9995468417
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1500,13 +1500,13 @@ Integrated density (ie. total nb of electrons) =       7.9995468418
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 64
 
 Total energy =     -11.390157 Ha
-Integrated density (ie. total nb of electrons) =       7.9993715393
+Integrated density (ie. total nb of electrons) =       7.9993715392
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1514,13 +1514,13 @@ Integrated density (ie. total nb of electrons) =       7.9993715393
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 65
 
 Total energy =     -11.393438 Ha
-Integrated density (ie. total nb of electrons) =       7.9991823210
+Integrated density (ie. total nb of electrons) =       7.9991823209
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1528,13 +1528,13 @@ Integrated density (ie. total nb of electrons) =       7.9991823210
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 66
 
 Total energy =     -11.396363 Ha
-Integrated density (ie. total nb of electrons) =       7.9989852292
+Integrated density (ie. total nb of electrons) =       7.9989852291
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1542,13 +1542,13 @@ Integrated density (ie. total nb of electrons) =       7.9989852292
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 67
 
 Total energy =     -11.398689 Ha
-Integrated density (ie. total nb of electrons) =       7.9987869815
+Integrated density (ie. total nb of electrons) =       7.9987869814
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1556,13 +1556,13 @@ Integrated density (ie. total nb of electrons) =       7.9987869815
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 68
 
 Total energy =     -11.400202 Ha
-Integrated density (ie. total nb of electrons) =       7.9985946278
+Integrated density (ie. total nb of electrons) =       7.9985946277
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1570,13 +1570,13 @@ Integrated density (ie. total nb of electrons) =       7.9985946278
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 69
 
 Total energy =     -11.400731 Ha
-Integrated density (ie. total nb of electrons) =       7.9984152374
+Integrated density (ie. total nb of electrons) =       7.9984152373
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1584,7 +1584,7 @@ Integrated density (ie. total nb of electrons) =       7.9984152374
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 70
@@ -1598,7 +1598,7 @@ Integrated density (ie. total nb of electrons) =       7.9982557711
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 71
@@ -1612,7 +1612,7 @@ Integrated density (ie. total nb of electrons) =       7.9981228669
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 72
@@ -1626,7 +1626,7 @@ Integrated density (ie. total nb of electrons) =       7.9980221383
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 73
@@ -1646,7 +1646,7 @@ Integrated density (ie. total nb of electrons) =       7.9979570329
 --- Iteration 74
 
 Total energy =     -11.386518 Ha
-Integrated density (ie. total nb of electrons) =       7.9979279144
+Integrated density (ie. total nb of electrons) =       7.9979279145
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1668,7 +1668,7 @@ Integrated density (ie. total nb of electrons) =       7.9979321248
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 76
@@ -1682,13 +1682,13 @@ Integrated density (ie. total nb of electrons) =       7.9979651188
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 77
 
 Total energy =     -11.367546 Ha
-Integrated density (ie. total nb of electrons) =       7.9980218924
+Integrated density (ie. total nb of electrons) =       7.9980218925
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1696,7 +1696,7 @@ Integrated density (ie. total nb of electrons) =       7.9980218924
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 78
@@ -1710,13 +1710,13 @@ Integrated density (ie. total nb of electrons) =       7.9980976728
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 79
 
 Total energy =     -11.353994 Ha
-Integrated density (ie. total nb of electrons) =       7.9981874715
+Integrated density (ie. total nb of electrons) =       7.9981874716
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1724,13 +1724,13 @@ Integrated density (ie. total nb of electrons) =       7.9981874715
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 80
 
 Total energy =     -11.347744 Ha
-Integrated density (ie. total nb of electrons) =       7.9982850681
+Integrated density (ie. total nb of electrons) =       7.9982850682
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1738,13 +1738,13 @@ Integrated density (ie. total nb of electrons) =       7.9982850681
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 81
 
 Total energy =     -11.342167 Ha
-Integrated density (ie. total nb of electrons) =       7.9983824383
+Integrated density (ie. total nb of electrons) =       7.9983824384
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1752,7 +1752,7 @@ Integrated density (ie. total nb of electrons) =       7.9983824383
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 82
@@ -1766,13 +1766,13 @@ Integrated density (ie. total nb of electrons) =       7.9984702504
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 83
 
 Total energy =     -11.333758 Ha
-Integrated density (ie. total nb of electrons) =       7.9985392321
+Integrated density (ie. total nb of electrons) =       7.9985392322
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1780,7 +1780,7 @@ Integrated density (ie. total nb of electrons) =       7.9985392321
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 84
@@ -1794,13 +1794,13 @@ Integrated density (ie. total nb of electrons) =       7.9985816655
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 85
 
 Total energy =     -11.329704 Ha
-Integrated density (ie. total nb of electrons) =       7.9985923243
+Integrated density (ie. total nb of electrons) =       7.9985923244
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1808,7 +1808,7 @@ Integrated density (ie. total nb of electrons) =       7.9985923243
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.11
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 86
@@ -1822,7 +1822,7 @@ Integrated density (ie. total nb of electrons) =       7.9985686496
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 87
@@ -1836,7 +1836,7 @@ Integrated density (ie. total nb of electrons) =       7.9985104141
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 88
@@ -1850,7 +1850,7 @@ Integrated density (ie. total nb of electrons) =       7.9984193032
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 89
@@ -1864,13 +1864,13 @@ Integrated density (ie. total nb of electrons) =       7.9982986960
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 90
 
 Total energy =     -11.336804 Ha
-Integrated density (ie. total nb of electrons) =       7.9981536295
+Integrated density (ie. total nb of electrons) =       7.9981536294
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1878,13 +1878,13 @@ Integrated density (ie. total nb of electrons) =       7.9981536295
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 91
 
 Total energy =     -11.339896 Ha
-Integrated density (ie. total nb of electrons) =       7.9979906759
+Integrated density (ie. total nb of electrons) =       7.9979906758
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1892,7 +1892,7 @@ Integrated density (ie. total nb of electrons) =       7.9979906759
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 92
@@ -1906,7 +1906,7 @@ Integrated density (ie. total nb of electrons) =       7.9978174596
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 93
@@ -1920,7 +1920,7 @@ Integrated density (ie. total nb of electrons) =       7.9976418236
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 94
@@ -1934,7 +1934,7 @@ Integrated density (ie. total nb of electrons) =       7.9974710135
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 95
@@ -1948,7 +1948,7 @@ Integrated density (ie. total nb of electrons) =       7.9973113221
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 96
@@ -1962,7 +1962,7 @@ Integrated density (ie. total nb of electrons) =       7.9971682853
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 97
@@ -1976,7 +1976,7 @@ Integrated density (ie. total nb of electrons) =       7.9970470192
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 98
@@ -1990,7 +1990,7 @@ Integrated density (ie. total nb of electrons) =       7.9969521327
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 99
@@ -2004,13 +2004,13 @@ Integrated density (ie. total nb of electrons) =       7.9968870517
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 100
 
 Total energy =     -11.342468 Ha
-Integrated density (ie. total nb of electrons) =       7.9968532103
+Integrated density (ie. total nb of electrons) =       7.9968532104
 
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=   0.00000
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -2018,7 +2018,7 @@ Integrated density (ie. total nb of electrons) =       7.9968532103
   -0.18832   -0.01749    0.13192    0.19989    0.60875    0.80917    0.86340    0.88834
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 ---------------------------------------------------------------------------
@@ -2028,19 +2028,19 @@ Integrated density (ie. total nb of electrons) =       7.9968532103
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
-            acell      6.6707332491E+00  6.6707332491E+00  6.6707332491E+00 Bohr
+            acell      6.6707332245E+00  6.6707332245E+00  6.6707332245E+00 Bohr
               amu      1.20110000E+01
            bandpp1          1
            bandpp2          8
            bandpp3          8
              ecut      1.20000000E+01 Hartree
-           etotal1    -1.1517343000E+01
+           etotal1    -1.1517343001E+01
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
-            fcart1     1.0840225046E-31 -1.0840225046E-31  1.0840225046E-31
-                      -1.0840225046E-31  1.0840225046E-31 -1.0840225046E-31
+            fcart1    -1.9709500157E-31  1.9709500157E-31 -1.9709500157E-31
+                       1.9709500157E-31 -1.9709500157E-31  1.9709500157E-31
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2085,7 +2085,7 @@ Integrated density (ie. total nb of electrons) =       7.9968532103
                        0.00000000E+00  0.00000000E+00 -2.50000000E-01
            kptopt           3
          kptrlatt        2   -2    2     -2    2    2     -2   -2    2
-          kptrlen      1.33414665E+01
+          kptrlen      1.33414664E+01
 P           mkmem          32
             natom           2
             nband           8
@@ -2117,7 +2117,7 @@ P           mkmem          32
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         227
-           strten1     5.4532348353E-04  5.4532348353E-04  5.4532348353E-04
+           strten1     5.4532328784E-04  5.4532328784E-04  5.4532328784E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2184,7 +2184,7 @@ P           mkmem          32
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        8.8250000000E-01  8.8250000000E-01  8.8250000000E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.6676833123E+00  1.6676833123E+00  1.6676833123E+00
+                       1.6676833061E+00  1.6676833061E+00  1.6676833061E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl        6.00000
@@ -2234,7 +2234,7 @@ P           mkmem          32
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2246,12 +2246,12 @@ P           mkmem          32
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2269,15 +2269,15 @@ P           mkmem          32
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         12.5  wall=         12.7
+- Proc.   0 individual time (sec): cpu=         12.9  wall=         13.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.5  wall=         12.7
++Overall time at end (sec) : cpu=         12.9  wall=         13.1
