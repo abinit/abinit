@@ -1549,8 +1549,7 @@ subroutine basemat_gpu_map(mat, gpu_action)
 #endif
 ! *********************************************************************
 
- !if (.not. string_in(gpu_action, "None, alloc, delete, update_from, update_to")) then
- if (.not. string_in(gpu_action, "alloc, alloc_zero, delete, update_from, update_to")) then
+ if (.not. string_in(gpu_action, "None, alloc, alloc_zero, delete, update_from, update_to")) then
    ABI_ERROR(sjoin("Invalid gpu_action", gpu_action))
    ABI_UNUSED(mat%size_local(1))
  end if
