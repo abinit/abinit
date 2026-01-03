@@ -30,8 +30,10 @@ module m_getgh1c
  use m_dtset
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
 
+ use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_size_t
  use defs_abitypes, only : MPI_type
  use defs_datatypes, only : pseudopotential_type
  use m_time,        only : timab
@@ -46,10 +48,6 @@ module m_getgh1c
  use m_cgtools,          only : projbd
  use m_nonlop,           only : nonlop
  use m_fourier_interpol, only : transgrid
-
-#ifdef HAVE_FC_ISO_C_BINDING
- use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_size_t
-#endif
 
 #if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data

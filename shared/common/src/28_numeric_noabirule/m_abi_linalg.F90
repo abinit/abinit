@@ -29,7 +29,9 @@ module m_abi_linalg
  use m_abicore
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_slk
+
 !#ifdef HAVE_LINALG_ELPA
 ! use m_elpa
 !#endif
@@ -139,16 +141,6 @@ module m_abi_linalg
  public :: abi_linalg_finalize      ! CleanuUp routine
  public :: abi_linalg_work_allocate ! Allocate work arrays
  !----------------------------------------------------------------------
-
- ! TODO: These routines should be moved to m_gpu_toolboox.
- public :: gpu_set_to_zero
- public :: gpu_set_to_zero_sp
- public :: gpu_set_to_zero_complex
- public :: gpu_set_to_zero_complex_sp
- public :: gpu_copy
- public :: gpu_copy_sp
- public :: gpu_copy_complex
- public :: gpu_copy_complex_sp
 
 !BLAS INTERFACE
  !public :: abi_zgemm
@@ -335,69 +327,8 @@ module m_abi_linalg
  public :: ortho_reim
  !----------------------------------------------------------------------
 
-#ifdef HAVE_GPU
-
-  interface
-
-    subroutine check_gpu_mem(str) bind(c, name="check_gpu_mem_")
-      use, intrinsic :: iso_c_binding
-      character (KIND=c_char), intent(in)  :: str(*)
-    end subroutine check_gpu_mem
-
-    subroutine alloc_on_gpu(gpu_ptr,size_in_bytes) bind(c, name="alloc_on_gpu_")
-      use, intrinsic :: iso_c_binding
-      type(c_ptr),                    intent(inout)  :: gpu_ptr
-      integer(kind=c_size_t),         intent(in)     :: size_in_bytes
-    end subroutine alloc_on_gpu
-
-    subroutine dealloc_on_gpu(gpu_ptr) bind(c, name="dealloc_on_gpu_")
-      use, intrinsic :: iso_c_binding
-      type(c_ptr),                    intent(inout)  :: gpu_ptr
-    end subroutine dealloc_on_gpu
-
-    subroutine copy_gpu_to_gpu(dest_gpu_ptr, src_gpu_ptr, size_in_bytes) bind(c, name="copy_gpu_to_gpu_cpp_")
-      use, intrinsic :: iso_c_binding
-      type(c_ptr)                                   :: dest_gpu_ptr
-      type(c_ptr)                                   :: src_gpu_ptr
-      integer(kind=c_size_t),        intent(in)    :: size_in_bytes
-    end subroutine copy_gpu_to_gpu
-
-    subroutine gpu_memset(gpu_ptr, val, size_in_bytes) bind(c, name="gpu_memset_cpp_")
-      use, intrinsic :: iso_c_binding
-      type(c_ptr),                    intent(in) :: gpu_ptr
-      integer(kind=c_int32_t),        intent(in)    :: val
-      integer(kind=c_size_t),         intent(in)    :: size_in_bytes
-    end subroutine gpu_memset
-
-    ! logical(kind=c_bool) function gpu_allocated(gpu_ptr) bind(c, name="gpu_allocated_")
-    !   use, intrinsic :: iso_c_binding
-    !   type(c_ptr),                    intent(in) :: gpu_ptr
-    ! end function gpu_allocated
-
-    subroutine gpu_allocated_impl(gpu_ptr, is_allocated) bind(c, name="gpu_allocated_impl_")
-      use, intrinsic :: iso_c_binding
-      type(c_ptr),                    intent(in)  :: gpu_ptr
-      logical(kind=c_bool),           intent(out) :: is_allocated
-    end subroutine gpu_allocated_impl
-
-    subroutine gpu_managed_ptr_status(gpu_ptr, str) bind(c, name="gpu_managed_ptr_status_")
-      use, intrinsic :: iso_c_binding
-      type(c_ptr),                    intent(in)  :: gpu_ptr
-      character (KIND=c_char),        intent(in)  :: str(*)
-    end subroutine gpu_managed_ptr_status
-
-  end interface
-
-#else
+#ifndef HAVE_GPU
  !dummy routines replace gpu helper routines
- public :: gpu_device_synchronize
- public :: check_gpu_mem
- public :: alloc_on_gpu
- public :: copy_from_gpu
- public :: copy_on_gpu
- public :: dealloc_on_gpu
- public :: gpu_allocated_impl
- public :: gpu_managed_ptr_status
  public :: gpu_linalg_init
  public :: gpu_linalg_shutdown
  public :: gpu_xgemm
@@ -408,10 +339,6 @@ module m_abi_linalg
  public :: gpu_xsygvd
  public :: gpu_xsygvd_bufferSize
 #endif
-
- public :: copy_gpu_to_gpu
- public :: gpu_memset
- public :: gpu_allocated
 
  public :: gpu_xorthonormalize
 
@@ -1169,22 +1096,6 @@ end function jobz_plasma
 !!***
 
 #endif
-
-!!
-!! this is just a wrapper arround gpu_allocated_cuda, because (strangely)
-!! I can't manage to bind a function (not a subroutine) through iso_c_binding
-!!
-function gpu_allocated(gpu_ptr) result(is_allocated)
-
-  use, intrinsic :: iso_c_binding
-
-  !Arguments ------------------------------------
-  type(c_ptr),                    intent(in) :: gpu_ptr
-  logical(kind=c_bool)                       :: is_allocated
-
-  call gpu_allocated_impl(gpu_ptr, is_allocated)
-
-end function gpu_allocated
 
 ! Include files providing wrappers for some of the most commonly used BLAS & LAPACK routines
 
