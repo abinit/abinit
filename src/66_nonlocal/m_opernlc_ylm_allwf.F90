@@ -24,6 +24,7 @@ module m_opernlc_ylm_allwf
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_gputk
  use m_abi_linalg
  use, intrinsic :: iso_c_binding
 
