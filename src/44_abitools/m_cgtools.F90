@@ -42,6 +42,7 @@ module m_cgtools
  use m_errors
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
 
  use m_fstrings,      only : toupper, itoa, sjoin
