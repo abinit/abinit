@@ -24,13 +24,11 @@ module m_ompgpu_fourwf
 
  use defs_basis
  use m_abicore
+ use m_gputk
  use m_abi_linalg
  use m_errors
  use m_xomp
-
-#ifdef HAVE_FC_ISO_C_BINDING
  use iso_c_binding
-#endif
 
 #ifdef HAVE_GPU
  use m_gpu_toolbox
