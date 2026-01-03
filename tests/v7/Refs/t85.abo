@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h13 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t85-t86-t87-t88-t89/t85.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h14 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v7_t85-t86-t87-t88-t89/t85.abi
 - output file    -> t85.abo
 - root for input  files -> t85i
 - root for output files -> t85o
@@ -49,6 +49,7 @@ _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =         512
 -   mkqmem =         512        mk1mem =         512           mpw =          80
       nfft =        1728          nkpt =         512
+- my_mband =           5
 ================================================================================
 P This job should need less than                      12.537 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -66,6 +67,7 @@ _ WF disk file :      3.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =         512
 -   mkqmem =         512        mk1mem =         512           mpw =          80
       nfft =        1728          nkpt =         512
+- my_mband =           5
 ================================================================================
 P This job should need less than                      12.634 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -83,6 +85,7 @@ _ WF disk file :      3.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =         512
 -   mkqmem =         512        mk1mem =         512           mpw =          80
       nfft =        1728          nkpt =         512
+- my_mband =           5
 ================================================================================
 P This job should need less than                      12.634 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -100,6 +103,7 @@ _ WF disk file :      3.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =         512
 -   mkqmem =         512        mk1mem =         512           mpw =          80
       nfft =        1728          nkpt =         512
+- my_mband =           5
 ================================================================================
 P This job should need less than                      12.634 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -117,6 +121,7 @@ _ WF disk file :      3.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =         512
 -   mkqmem =         512        mk1mem =         512           mpw =          80
       nfft =        1728          nkpt =         512
+- my_mband =           5
 ================================================================================
 P This job should need less than                      12.634 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -134,6 +139,7 @@ _ WF disk file :      3.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =         512
 -   mkqmem =         512        mk1mem =         512           mpw =          80
       nfft =        1728          nkpt =         512
+- my_mband =           5
 ================================================================================
 P This job should need less than                      12.634 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -151,6 +157,7 @@ _ WF disk file :      3.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =         512
 -   mkqmem =         512        mk1mem =         512           mpw =          80
       nfft =        1728          nkpt =         512
+- my_mband =           5
 ================================================================================
 P This job should need less than                      12.634 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -168,6 +175,7 @@ _ WF disk file :      3.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =         512
 -   mkqmem =         512        mk1mem =         512           mpw =          80
       nfft =        1728          nkpt =         512
+- my_mband =           5
 ================================================================================
 P This job should need less than                      12.634 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -1406,8 +1414,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1548,7 +1556,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.500000000000  7.500000000000  7.500000000000 bohr
-              =  3.968829064425  3.968829064425  3.968829064425 angstroms
+              =  3.968829079080  3.968829079080  3.968829079080 angstroms
  prteigrs : about to open file t85o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.26253   Average Vxc (hartree)=  -0.38241
  Eigenvalues (hartree) for nkpt=  29  k points:
@@ -1572,7 +1580,7 @@ non_local_psp       :  3.85623735703771E-01
 internal            : -3.26115202955011E+00
 '-kT*entropy'       : -8.57476871091891E-03
 total_energy        : -3.26972679826102E+00
-total_energy_eV     : -8.89737910248095E+01
+total_energy_eV     : -8.89737988263155E+01
 band_energy         :  2.90682605756507E-01
 ...
 
@@ -1583,9 +1591,9 @@ band_energy         :  2.90682605756507E-01
   sigma(3 3)= -2.15289603E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  6.3340E+00 GPa]
-- sigma(1 1)= -6.33403773E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -6.33403773E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -6.33403773E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -6.33403880E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -6.33403880E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -6.33403880E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -1620,7 +1628,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1688,7 +1696,7 @@ tolerances: {tolvrs: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.38344338E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=   -0.1533256853E+00 Ha. Also 2DEtotal=   -0.417220407745E+01 eV
+ 2DEtotal=   -0.1533256853E+00 Ha. Also 2DEtotal=   -0.417220444328E+01 eV
     (2DErelax=   -1.0238090895E+01 Ha. 2DEnonrelax=    1.0084765210E+01 Ha)
     (  non-var. 2DEtotal :   -1.5355312273E-01 Ha)
 
@@ -1698,53 +1706,53 @@ tolerances: {tolvrs: 1.00E-07, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1        -0.0338018626         0.0000000000
    1    1   2    1        -0.0169009313         0.0000000000
    1    1   3    1        -0.0169009313         0.0000000000
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
-
+  
    2    1   1    1        -0.0169009313         0.0000000000
    2    1   2    1        -0.0338018626         0.0000000000
    2    1   3    1        -0.0169009313         0.0000000000
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
-
+  
    3    1   1    1        -0.0169009313         0.0000000000
    3    1   2    1        -0.0169009313         0.0000000000
    3    1   3    1        -0.0338018626         0.0000000000
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
-
+  
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-
+  
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-
+  
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0000000000         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000000000         0.0000000000
@@ -1787,8 +1795,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.96751
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1805,7 +1813,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1871,7 +1879,7 @@ tolerances: {tolvrs: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.45042751E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.3990437617E+00 Ha. Also 2DEtotal=    0.108585329768E+02 eV
+ 2DEtotal=    0.3990437617E+00 Ha. Also 2DEtotal=    0.108585339289E+02 eV
     (2DErelax=   -2.8429868889E+01 Ha. 2DEnonrelax=    2.8828912651E+01 Ha)
     (  non-var. 2DEtotal :    3.9904115381E-01 Ha)
 
@@ -1927,7 +1935,7 @@ tolerances: {tolvrs: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.41973446E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=   -0.1060872185E+00 Ha. Also 2DEtotal=   -0.288678002430E+01 eV
+ 2DEtotal=   -0.1060872185E+00 Ha. Also 2DEtotal=   -0.288678027742E+01 eV
     (2DErelax=   -1.0520145888E+01 Ha. 2DEnonrelax=    1.0414058669E+01 Ha)
     (  non-var. 2DEtotal :   -1.0608660052E-01 Ha)
 
@@ -1937,38 +1945,38 @@ tolerances: {tolvrs: 1.00E-07, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         0.8848700463         0.0000000320
    1    1   2    1         0.0299538618        -0.0000000000
    1    1   3    1         0.0299538618        -0.0000000000
-
+  
    2    1   1    1         0.0299538618        -0.0000000000
    2    1   2    1         0.0599077235         0.0000000000
    2    1   3    1         0.0299538618         0.0000000000
-
+  
    3    1   1    1         0.0299538618        -0.0000000000
    3    1   2    1         0.0299538618         0.0000000000
    3    1   3    1         0.0599077235        -0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0167960492         0.0000000006
    1    1   2    1        -0.0146659968        -0.0000000006
    1    1   3    1        -0.0146659968        -0.0000000006
-
+  
    2    1   1    1        -0.0146659968        -0.0000000006
    2    1   2    1         0.0167960492         0.0000000006
    2    1   3    1         0.0146659968         0.0000000006
-
+  
    3    1   1    1        -0.0146659968        -0.0000000006
    3    1   2    1         0.0146659968         0.0000000006
    3    1   3    1         0.0167960492         0.0000000006
@@ -2011,8 +2019,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88496
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2029,7 +2037,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2094,7 +2102,7 @@ tolerances: {tolvrs: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.50603339E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.1212791848E+01 Ha. Also 2DEtotal=    0.330017445143E+02 eV
+ 2DEtotal=    0.1212791848E+01 Ha. Also 2DEtotal=    0.330017474080E+02 eV
     (2DErelax=   -2.6375523227E+01 Ha. 2DEnonrelax=    2.7588315075E+01 Ha)
     (  non-var. 2DEtotal :    1.2127900932E+00 Ha)
 
@@ -2149,7 +2157,7 @@ tolerances: {tolvrs: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.43680042E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.1382472029E-01 Ha. Also 2DEtotal=    0.376189770684E+00 eV
+ 2DEtotal=    0.1382472029E-01 Ha. Also 2DEtotal=    0.376189803669E+00 eV
     (2DErelax=   -1.0914113172E+01 Ha. 2DEnonrelax=    1.0927937892E+01 Ha)
     (  non-var. 2DEtotal :    1.3828400693E-02 Ha)
 
@@ -2159,38 +2167,38 @@ tolerances: {tolvrs: 1.00E-07, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         1.9396794264        -0.0000000020
    1    1   2    1         0.1093413035         0.0000000000
    1    1   3    1         0.1093413035         0.0000000000
-
+  
    2    1   1    1         0.1093413035         0.0000000000
    2    1   2    1         0.2186826069         0.0000000000
    2    1   3    1         0.1093413035         0.0000000000
-
+  
    3    1   1    1         0.1093413035         0.0000000000
    3    1   2    1         0.1093413035         0.0000000000
    3    1   3    1         0.2186826069         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0383708806        -0.0000000000
    1    1   2    1        -0.0305954990         0.0000000000
    1    1   3    1        -0.0305954990         0.0000000000
-
+  
    2    1   1    1        -0.0305954990         0.0000000000
    2    1   2    1         0.0383708806        -0.0000000000
    2    1   3    1         0.0305954990        -0.0000000000
-
+  
    3    1   1    1        -0.0305954990         0.0000000000
    3    1   2    1         0.0305954990        -0.0000000000
    3    1   3    1         0.0383708806        -0.0000000000
@@ -2233,8 +2241,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.96843
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2251,7 +2259,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2320,7 +2328,7 @@ tolerances: {tolvrs: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.46272406E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.2423112051E+00 Ha. Also 2DEtotal=    0.659362321565E+01 eV
+ 2DEtotal=    0.2423112051E+00 Ha. Also 2DEtotal=    0.659362379380E+01 eV
     (2DErelax=   -2.2954586897E+01 Ha. 2DEnonrelax=    2.3196898102E+01 Ha)
     (  non-var. 2DEtotal :    2.4062029049E-01 Ha)
 
@@ -2330,38 +2338,38 @@ tolerances: {tolvrs: 1.00E-07, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         0.6281635859         0.0000000000
    1    1   2    1         0.5473077965         0.0000000000
    1    1   3    1         0.0808557893         0.0000000000
-
+  
    2    1   1    1         0.5473077965         0.0000000000
    2    1   2    1         0.6281635859         0.0000000000
    2    1   3    1         0.0808557893         0.0000000000
-
+  
    3    1   1    1         0.0808557893         0.0000000000
    3    1   2    1         0.0808557893         0.0000000000
    3    1   3    1         0.1617115787        -0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0057497450         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.0057497450        -0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0389196655        -0.0000000000
@@ -2404,8 +2412,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88399
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2422,7 +2430,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2482,7 +2490,7 @@ tolerances: {tolvrs: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.51827685E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.9723019617E+00 Ha. Also 2DEtotal=    0.264576819076E+02 eV
+ 2DEtotal=    0.9723019617E+00 Ha. Also 2DEtotal=    0.264576842275E+02 eV
     (2DErelax=   -2.3808627012E+01 Ha. 2DEnonrelax=    2.4780928973E+01 Ha)
     (  non-var. 2DEtotal :    9.7229413127E-01 Ha)
 
@@ -2538,7 +2546,7 @@ tolerances: {tolvrs: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.47973799E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.4640448104E+00 Ha. Also 2DEtotal=    0.126273014652E+02 eV
+ 2DEtotal=    0.4640448104E+00 Ha. Also 2DEtotal=    0.126273025724E+02 eV
     (2DErelax=   -1.5793153797E+01 Ha. 2DEnonrelax=    1.6257198608E+01 Ha)
     (  non-var. 2DEtotal :    4.6404449042E-01 Ha)
 
@@ -2593,7 +2601,7 @@ tolerances: {tolvrs: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.44907178E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.2432128073E+00 Ha. Also 2DEtotal=    0.661815705878E+01 eV
+ 2DEtotal=    0.2432128073E+00 Ha. Also 2DEtotal=    0.661815763908E+01 eV
     (2DErelax=   -1.2278276493E+01 Ha. 2DEnonrelax=    1.2521489300E+01 Ha)
     (  non-var. 2DEtotal :    2.4321080064E-01 Ha)
 
@@ -2603,38 +2611,38 @@ tolerances: {tolvrs: 1.00E-07, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         1.5722501305        -0.0000000526
    1    1   2    1         0.4410705704        -0.0000009913
    1    1   3    1         0.1216009062         0.0000000000
-
+  
    2    1   1    1         0.4410616136         0.0000009310
    2    1   2    1         0.9364773243        -0.0000000123
    2    1   3    1         0.1216009062        -0.0000000000
-
+  
    3    1   1    1         0.1216009062         0.0000000000
    3    1   2    1         0.1216009062        -0.0000000000
    3    1   3    1         0.2432018124         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0332408370        -0.0000000001
    1    1   2    1        -0.0245936615         0.0000000001
    1    1   3    1        -0.0113027869         0.0000000349
-
+  
    2    1   1    1        -0.0245936615         0.0000000001
    2    1   2    1         0.0332408370        -0.0000000001
    2    1   3    1         0.0113027869        -0.0000000349
-
+  
    3    1   1    1        -0.0113024684        -0.0000000335
    3    1   2    1         0.0113024684         0.0000000335
    3    1   3    1         0.0559583614        -0.0000000022
@@ -2677,8 +2685,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.97214
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2695,7 +2703,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2759,7 +2767,7 @@ tolerances: {tolvrs: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.39325567E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.1454450019E+01 Ha. Also 2DEtotal=    0.395775977711E+02 eV
+ 2DEtotal=    0.1454450019E+01 Ha. Also 2DEtotal=    0.395776012414E+02 eV
     (2DErelax=   -1.7782252154E+01 Ha. 2DEnonrelax=    1.9236702173E+01 Ha)
     (  non-var. 2DEtotal :    1.4544441028E+00 Ha)
 
@@ -2816,7 +2824,7 @@ tolerances: {tolvrs: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.41249849E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.3714166086E+00 Ha. Also 2DEtotal=    0.101067599076E+02 eV
+ 2DEtotal=    0.3714166086E+00 Ha. Also 2DEtotal=    0.101067607937E+02 eV
     (2DErelax=   -1.0846100877E+01 Ha. 2DEnonrelax=    1.1217517486E+01 Ha)
     (  non-var. 2DEtotal :    3.7084961088E-01 Ha)
 
@@ -2826,38 +2834,38 @@ tolerances: {tolvrs: 1.00E-07, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         1.4415420103        -0.0000007413
    1    1   2    1         0.0810155233         0.0000007413
    1    1   3    1         0.1854247787         0.0000000000
-
+  
    2    1   1    1         0.0810155233         0.0000007413
    2    1   2    1         1.4415420103        -0.0000007413
    2    1   3    1         0.1854247787        -0.0000000000
-
+  
    3    1   1    1         0.1854247787         0.0000000000
    3    1   2    1         0.1854247787        -0.0000000000
    3    1   3    1         0.3708495574         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0549671561        -0.0000000527
    1    1   2    1        -0.0417813941         0.0000000527
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1        -0.0417813941         0.0000000527
    2    1   2    1         0.0549671561        -0.0000000527
    2    1   3    1         0.0000000000        -0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000        -0.0000000000
    3    1   3    1         0.0475424980         0.0000000000
@@ -2900,8 +2908,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88883
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2918,7 +2926,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -2987,7 +2995,7 @@ tolerances: {tolvrs: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.53519809E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.7437414065E+00 Ha. Also 2DEtotal=    0.202382329057E+02 eV
+ 2DEtotal=    0.7437414065E+00 Ha. Also 2DEtotal=    0.202382346803E+02 eV
     (2DErelax=   -2.0476892566E+01 Ha. 2DEnonrelax=    2.1220633973E+01 Ha)
     (  non-var. 2DEtotal :    7.4251314851E-01 Ha)
 
@@ -2997,38 +3005,38 @@ tolerances: {tolvrs: 1.00E-07, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         1.3620455165         0.0000000000
    1    1   2    1         1.1144955629         0.0000000000
    1    1   3    1         0.2475499536         0.0000000000
-
+  
    2    1   1    1         1.1144955629         0.0000000000
    2    1   2    1         1.3620455165         0.0000000000
    2    1   3    1         0.2475499536         0.0000000000
-
+  
    3    1   1    1         0.2475499536         0.0000000000
    3    1   2    1         0.2475499536         0.0000000000
    3    1   3    1         0.4950999071         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0176035523         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.0176035523         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0792530178         0.0000000000
@@ -3071,8 +3079,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.89270
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3089,7 +3097,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -3153,7 +3161,7 @@ tolerances: {tolvrs: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.42263423E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.1472054368E+01 Ha. Also 2DEtotal=    0.400566364733E+02 eV
+ 2DEtotal=    0.1472054368E+01 Ha. Also 2DEtotal=    0.400566399856E+02 eV
     (2DErelax=   -1.7328288570E+01 Ha. 2DEnonrelax=    1.8800342938E+01 Ha)
     (  non-var. 2DEtotal :    1.4720548590E+00 Ha)
 
@@ -3208,7 +3216,7 @@ tolerances: {tolvrs: 1.00E-07, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -3.51110071E+01  frxc 2 =   3.17735259E+01
  Resulting in :
- 2DEtotal=    0.9214325213E+00 Ha. Also 2DEtotal=    0.250734540390E+02 eV
+ 2DEtotal=    0.9214325213E+00 Ha. Also 2DEtotal=    0.250734562376E+02 eV
     (2DErelax=   -1.9831076529E+01 Ha. 2DEnonrelax=    2.0752509050E+01 Ha)
     (  non-var. 2DEtotal :    9.2140853024E-01 Ha)
 
@@ -3218,38 +3226,38 @@ tolerances: {tolvrs: 1.00E-07, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         1.4483040755         0.0000000030
    1    1   2    1         0.8220479252         0.0000000010
    1    1   3    1         0.6262561503         0.0000000020
-
+  
    2    1   1    1         0.8220479252         0.0000000010
    2    1   2    1         1.6440958503         0.0000000020
    2    1   3    1         0.8220479252         0.0000000010
-
+  
    3    1   1    1         0.6262561503         0.0000000020
    3    1   2    1         0.8220479252         0.0000000010
    3    1   3    1         1.4483040755         0.0000000030
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.0584567413         0.0000000001
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-
+  
    2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.0445337707         0.0000000001
    2    1   3    1         0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0584567413         0.0000000001
@@ -3262,7 +3270,7 @@ tolerances: {tolvrs: 1.00E-07, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      7.5000000000E+00  7.5000000000E+00  7.5000000000E+00 Bohr
               amu      2.69815390E+01
@@ -4506,7 +4514,7 @@ P          mk1mem9        512
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -4534,12 +4542,12 @@ P          mk1mem9        512
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -4557,15 +4565,15 @@ P          mk1mem9        512
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         37.0  wall=         37.1
+- Proc.   0 individual time (sec): cpu=         39.3  wall=         39.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  15 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         37.0  wall=         37.1
++Overall time at end (sec) : cpu=         39.3  wall=         39.4

@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 10 Sep 2025.
-- ( at 12h12 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h09 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v1_t50/t50.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v1_t50/t50.abi
 - output file    -> t50.abo
 - root for input  files -> t50i
 - root for output files -> t50o
@@ -98,8 +98,8 @@ P           mkmem           1
            toldff      1.00000000E-05
            tolmxf      1.00000000E-05
             typat      1  1
-           xangst     -1.1229140366E+00  0.0000000000E+00  0.0000000000E+00
-                       1.1229140366E+00  0.0000000000E+00  0.0000000000E+00
+           xangst     -1.1229140408E+00  0.0000000000E+00  0.0000000000E+00
+                       1.1229140408E+00  0.0000000000E+00  0.0000000000E+00
             xcart     -2.1220000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.1220000000E+00  0.0000000000E+00  0.0000000000E+00
              xred     -1.7683333333E-01  0.0000000000E+00  0.0000000000E+00
@@ -139,8 +139,8 @@ meta: {optdriver: 0, ionmov: 4, optcell: 0, iscf: 5, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -185,8 +185,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  1  -8.6491571620371    -8.649E+00 1.134E-02 1.958E+01 1.107E-02 1.107E-02 3.443E-01 3.443E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  6.77E-04 -4.53E-03 -1.18E-03
-    1     1.10681886942E-02    1.61867115921E-03   -8.95459825701E-04
-    2    -1.10681886942E-02   -1.61867115921E-03    8.95459825701E-04
+    1     1.10681882433E-02    1.61867115616E-03   -8.95459828245E-04
+    2    -1.10681882433E-02   -1.61867115616E-03    8.95459828245E-04
  prteigrs : about to open file t50o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03482   Average Vxc (hartree)=  -0.21934
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -206,8 +206,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  2  -8.6693184284725    -2.016E-02 8.153E-06 5.050E+00 1.622E-02 5.148E-03 5.946E-03 3.384E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  1.11E-04 -9.89E-05  6.19E-06
-    1    -5.14772306775E-03   -1.88096474341E-05   -3.51020687679E-05
-    2     5.14772306775E-03    1.88096474341E-05    3.51020687679E-05
+    1    -5.14772328886E-03   -1.88096450696E-05   -3.51020681547E-05
+    2     5.14772328886E-03    1.88096450696E-05    3.51020681547E-05
  prteigrs : about to open file t50o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03855   Average Vxc (hartree)=  -0.22177
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -216,7 +216,7 @@ tolerances: {toldff: 1.00E-05, }
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.34626   -0.19279   -0.08904
- Fermi (or HOMO) energy (eV) =  -1.04907   Average Vxc (eV)=  -6.03458
+ Fermi (or HOMO) energy (eV) =  -1.04907   Average Vxc (eV)=  -6.03459
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -10.07514   -5.81467   -2.89966   -1.05080   -1.04907
@@ -227,8 +227,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  3  -8.6704447294490    -1.126E-03 3.617E-05 3.366E+00 6.699E-03 1.185E-02 1.146E-03 3.389E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  6.96E-05  2.42E-05  7.59E-06
-    1    -1.18468600983E-02   -3.92424874547E-05   -6.50860880038E-05
-    2     1.18468600983E-02    3.92424874547E-05    6.50860880038E-05
+    1    -1.18468602180E-02   -3.92424838811E-05   -6.50860870770E-05
+    2     1.18468602180E-02    3.92424838811E-05    6.50860870770E-05
  prteigrs : about to open file t50o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03895   Average Vxc (hartree)=  -0.22265
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -240,7 +240,7 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.05985   Average Vxc (eV)=  -6.05851
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.96775   -5.84706   -2.82737   -1.06227   -1.05985
+  -9.96776   -5.84706   -2.82737   -1.06227   -1.05985
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.23441   -5.23533   -2.34715
@@ -248,8 +248,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  4  -8.6712432997627    -7.986E-04 4.972E-06 1.050E+00 2.042E-03 1.389E-02 3.807E-03 3.381E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -6.57E-05  6.06E-06 -3.98E-05
-    1    -1.38892226666E-02   -9.04555843226E-06   -4.08920974157E-05
-    2     1.38892226666E-02    9.04555843226E-06    4.08920974157E-05
+    1    -1.38892227462E-02   -9.04555668907E-06   -4.08920970524E-05
+    2     1.38892227462E-02    9.04555668907E-06    4.08920970524E-05
  prteigrs : about to open file t50o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04299   Average Vxc (hartree)=  -0.22272
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -261,7 +261,7 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.16990   Average Vxc (eV)=  -6.06051
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -10.03663   -5.89869   -2.76225   -1.17158   -1.16990
+ -10.03664   -5.89869   -2.76225   -1.17158   -1.16990
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.21714   -5.23314   -2.29170
@@ -269,8 +269,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  5  -8.6715505605144    -3.073E-04 6.958E-06 2.336E-01 3.927E-03 1.782E-02 4.467E-03 3.419E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -1.41E-04  6.78E-06 -4.64E-05
-    1    -1.78157414713E-02    8.21211669134E-06   -2.52231758069E-05
-    2     1.78157414713E-02   -8.21211669134E-06    2.52231758069E-05
+    1    -1.78157414838E-02    8.21211680202E-06   -2.52231760066E-05
+    2     1.78157414838E-02   -8.21211680202E-06    2.52231760066E-05
  prteigrs : about to open file t50o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04574   Average Vxc (hartree)=  -0.22303
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -282,7 +282,7 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.24474   Average Vxc (eV)=  -6.06899
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -10.04013   -5.92111   -2.63732   -1.24586   -1.24474
+ -10.04014   -5.92111   -2.63732   -1.24586   -1.24474
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.11365   -5.19003   -2.17655
@@ -290,8 +290,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  6  -8.6715948374510    -4.428E-05 2.065E-06 1.055E-01 1.863E-05 1.780E-02 7.061E-03 3.435E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  1.05E-04  1.74E-05  4.14E-05
-    1    -1.77971163620E-02    3.95794195909E-06   -1.81209880136E-05
-    2     1.77971163620E-02   -3.95794195909E-06    1.81209880136E-05
+    1    -1.77971163671E-02    3.95794202254E-06   -1.81209881000E-05
+    2     1.77971163671E-02   -3.95794202254E-06    1.81209881000E-05
  prteigrs : about to open file t50o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04665   Average Vxc (hartree)=  -0.22295
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -306,13 +306,13 @@ tolerances: {toldff: 1.00E-05, }
  -10.06271   -5.94609   -2.64550   -1.26993   -1.26930
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.10247   -5.19730   -2.19832
+  -9.10247   -5.19731   -2.19832
 
  ETOT  7  -8.6716231411989    -2.830E-05 6.926E-07 2.457E-02 1.488E-04 1.795E-02 4.543E-03 3.418E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -4.69E-05  2.65E-06 -1.77E-05
-    1    -1.79458716657E-02    5.42086865254E-06   -1.00603163107E-05
-    2     1.79458716657E-02   -5.42086865254E-06    1.00603163107E-05
+    1    -1.79458716655E-02    5.42086865817E-06   -1.00603163756E-05
+    2     1.79458716655E-02   -5.42086865817E-06    1.00603163756E-05
  prteigrs : about to open file t50o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04690   Average Vxc (hartree)=  -0.22295
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -332,8 +332,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  8  -8.6716297555512    -6.614E-06 2.220E-07 2.908E-03 7.760E-05 1.802E-02 1.765E-03 3.416E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  1.80E-05  3.45E-06  1.76E-05
-    1    -1.80234760289E-02    3.03458813412E-06   -5.33532804515E-06
-    2     1.80234760289E-02   -3.03458813412E-06    5.33532804515E-06
+    1    -1.80234760234E-02    3.03458810278E-06   -5.33532805790E-06
+    2     1.80234760234E-02   -3.03458810278E-06    5.33532805790E-06
  prteigrs : about to open file t50o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04732   Average Vxc (hartree)=  -0.22292
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -353,8 +353,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  9  -8.6716313758912    -1.620E-06 3.032E-08 4.513E-04 1.757E-04 1.785E-02 1.863E-04 3.414E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -5.50E-06 -1.55E-06 -5.11E-06
-    1    -1.78477907778E-02    9.97252003926E-07   -2.40630487917E-06
-    2     1.78477907778E-02   -9.97252003926E-07    2.40630487917E-06
+    1    -1.78477907761E-02    9.97252002992E-07   -2.40630488419E-06
+    2     1.78477907761E-02   -9.97252002992E-07    2.40630488419E-06
  prteigrs : about to open file t50o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04723   Average Vxc (hartree)=  -0.22294
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -366,7 +366,7 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.28512   Average Vxc (eV)=  -6.06645
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -10.07239   -5.95431   -2.63126   -1.28521   -1.28512
+ -10.07240   -5.95431   -2.63126   -1.28521   -1.28512
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06509   -5.17870   -2.19818
@@ -374,8 +374,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT 10  -8.6716314178371    -4.195E-08 2.998E-09 3.985E-04 4.523E-05 1.780E-02 2.029E-04 3.416E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -4.71E-06 -2.90E-07 -2.03E-06
-    1    -1.78025653386E-02    2.90470982127E-07   -2.05385986026E-06
-    2     1.78025653386E-02   -2.90470982127E-07    2.05385986026E-06
+    1    -1.78025653375E-02    2.90470993494E-07   -2.05385985374E-06
+    2     1.78025653375E-02   -2.90470993494E-07    2.05385985374E-06
  prteigrs : about to open file t50o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04727   Average Vxc (hartree)=  -0.22294
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -387,16 +387,16 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.28626   Average Vxc (eV)=  -6.06650
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -10.07373   -5.95485   -2.63173   -1.28631   -1.28626
+ -10.07373   -5.95485   -2.63173   -1.28632   -1.28626
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.06349   -5.17755   -2.19973
+  -9.06350   -5.17755   -2.19973
 
  ETOT 11  -8.6716314506896    -3.285E-08 7.938E-09 4.091E-04 2.984E-05 1.777E-02 4.221E-04 3.417E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  7.11E-06  1.66E-07  4.04E-06
-    1    -1.77727272580E-02    4.80669531568E-07   -9.51934001600E-07
-    2     1.77727272580E-02   -4.80669531568E-07    9.51934001600E-07
+    1    -1.77727272576E-02    4.80669531708E-07   -9.51934002598E-07
+    2     1.77727272576E-02   -4.80669531708E-07    9.51934002598E-07
  prteigrs : about to open file t50o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04725   Average Vxc (hartree)=  -0.22294
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -408,7 +408,7 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.28575   Average Vxc (eV)=  -6.06662
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -10.07330   -5.95385   -2.63131   -1.28577   -1.28575
+ -10.07331   -5.95385   -2.63131   -1.28577   -1.28575
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06309   -5.17689   -2.20028
@@ -416,8 +416,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT 12  -8.6716315742942    -1.236E-07 1.811E-09 5.846E-05 5.553E-06 1.777E-02 2.039E-04 3.415E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -1.00E-06 -6.72E-07 -3.56E-06
-    1    -1.77671738650E-02    1.62868749704E-07   -1.26064135420E-06
-    2     1.77671738650E-02   -1.62868749704E-07    1.26064135420E-06
+    1    -1.77671738646E-02    1.62868758141E-07   -1.26064135042E-06
+    2     1.77671738646E-02   -1.62868758141E-07    1.26064135042E-06
  prteigrs : about to open file t50o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22294
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -429,7 +429,7 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.28605   Average Vxc (eV)=  -6.06662
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -10.07370   -5.95405   -2.63154   -1.28608   -1.28605
+ -10.07370   -5.95406   -2.63154   -1.28608   -1.28605
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06298   -5.17668   -2.20040
@@ -463,8 +463,8 @@ xred      :
 - [ -1.7683E-01,   0.0000E+00,   0.0000E+00, Si]
 - [  1.7683E-01,   0.0000E+00,   0.0000E+00, Si]
 cartesian_forces: # hartree/bohr
-- [ -1.77671739E-02,   1.62868750E-07,  -1.26064135E-06, ]
-- [  1.77671739E-02,  -1.62868750E-07,   1.26064135E-06, ]
+- [ -1.77671739E-02,   1.62868758E-07,  -1.26064135E-06, ]
+- [  1.77671739E-02,  -1.62868758E-07,   1.26064135E-06, ]
 force_length_stats: {min:   1.77671739E-02, max:   1.77671739E-02, mean:   1.77671739E-02, }
 ...
 
@@ -489,11 +489,11 @@ force_length_stats: {min:   1.77671739E-02, max:   1.77671739E-02, mean:   1.776
  -1.76833333333333E-01  0.00000000000000E+00  0.00000000000000E+00
   1.76833333333333E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.77672E-02 1.02579E-02 (free atoms)
- -1.77671738649874E-02  1.62868749704044E-07 -1.26064135419967E-06
-  1.77671738649874E-02 -1.62868749704044E-07  1.26064135419967E-06
+ -1.77671738646459E-02  1.62868758140822E-07 -1.26064135041514E-06
+  1.77671738646459E-02 -1.62868758140822E-07  1.26064135041514E-06
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  2.13206086379848E-01 -1.30294999763235E-06  1.00851308335974E-05
- -2.13206086379848E-01  1.30294999763235E-06 -1.00851308335974E-05
+  2.13206086375750E-01 -1.30295006512658E-06  1.00851308033211E-05
+ -2.13206086375750E-01  1.30295006512658E-06 -1.00851308033211E-05
  Total energy (etotal) [Ha]= -8.67163157429425E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -515,8 +515,8 @@ tolerances: {toldff: 1.00E-05, }
     1    -1.76833333333E-01    0.00000000000E+00    0.00000000000E+00
     2     1.76833333333E-01    0.00000000000E+00    0.00000000000E+00
  cartesian forces (ha/bohr); non-corrected avg= -2.54E-06 -2.58E-08 -9.32E-08
-    1    -1.77527954409E-02    1.78773618655E-07   -2.10698821972E-07
-    2     1.77527954409E-02   -1.78773618655E-07    2.10698821972E-07
+    1    -1.77527954410E-02    1.78773611521E-07   -2.10698827777E-07
+    2     1.77527954410E-02   -1.78773611521E-07    2.10698827777E-07
  prteigrs : about to open file t50o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04725   Average Vxc (hartree)=  -0.22295
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -528,19 +528,19 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.28573   Average Vxc (eV)=  -6.06666
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -10.07335   -5.95352   -2.63118   -1.28574   -1.28573
+ -10.07335   -5.95353   -2.63118   -1.28574   -1.28573
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06302   -5.17684   -2.20103
 
- ETOT  2  -8.6723889838711    -7.574E-04 3.367E-08 2.628E-02 5.112E-03 1.264E-02 2.595E-03 3.439E-01
+ ETOT  2  -8.6723889838716    -7.574E-04 3.367E-08 2.628E-02 5.112E-03 1.264E-02 2.595E-03 3.439E-01
 
  reduced coordinates :
-    1    -1.78998731619E-01    3.27088842394E-08   -3.85500021150E-08
-    2     1.78998731619E-01   -3.27088842394E-08    3.85500021150E-08
+    1    -1.78998731619E-01    3.27088829342E-08   -3.85500031771E-08
+    2     1.78998731619E-01   -3.27088829342E-08    3.85500031771E-08
  cartesian forces (ha/bohr); non-corrected avg=  3.78E-06 -8.89E-09  6.30E-08
-    1    -1.26409000566E-02    8.03927340532E-08   -1.56795727994E-07
-    2     1.26409000566E-02   -8.03927340532E-08    1.56795727994E-07
+    1    -1.26409000163E-02    8.03927331775E-08   -1.56795729561E-07
+    2     1.26409000163E-02   -8.03927331775E-08    1.56795729561E-07
  prteigrs : about to open file t50o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04434   Average Vxc (hartree)=  -0.22325
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -557,14 +557,14 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.95634   -5.20019   -2.18391
 
- ETOT  3  -8.6729342555600    -5.453E-04 8.703E-05 3.052E-01 6.939E-03 5.702E-03 9.631E-03 3.350E-01
+ ETOT  3  -8.6729342555645    -5.453E-04 8.703E-05 3.052E-01 6.939E-03 5.702E-03 9.631E-03 3.350E-01
 
  reduced coordinates :
-    1    -1.82931556392E-01    9.21151888856E-08   -1.08565021674E-07
-    2     1.82931556392E-01   -9.21151888856E-08    1.08565021674E-07
+    1    -1.82931556411E-01    9.21151854928E-08   -1.08565024998E-07
+    2     1.82931556411E-01   -9.21151854928E-08    1.08565024998E-07
  cartesian forces (ha/bohr); non-corrected avg=  1.81E-05 -1.12E-07 -2.80E-07
-    1    -5.70239417595E-03   -1.14934868701E-07   -1.19528793315E-08
-    2     5.70239417595E-03    1.14934868701E-07    1.19528793315E-08
+    1    -5.70239401168E-03   -1.14934857782E-07   -1.19528710132E-08
+    2     5.70239401168E-03    1.14934857782E-07    1.19528710132E-08
  prteigrs : about to open file t50o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04007   Average Vxc (hartree)=  -0.22381
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -573,7 +573,7 @@ tolerances: {toldff: 1.00E-05, }
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.32248   -0.19317   -0.07854
- Fermi (or HOMO) energy (eV) =  -1.09049   Average Vxc (eV)=  -6.09011
+ Fermi (or HOMO) energy (eV) =  -1.09049   Average Vxc (eV)=  -6.09012
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.76220   -6.04357   -2.57862   -1.09049   -1.09049
@@ -581,14 +581,14 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.77508   -5.25632   -2.13722
 
- ETOT  4  -8.6731233788697    -1.891E-04 1.287E-06 7.233E-02 3.076E-03 2.626E-03 9.604E-04 3.345E-01
+ ETOT  4  -8.6731233788701    -1.891E-04 1.287E-06 7.233E-02 3.076E-03 2.626E-03 9.604E-04 3.345E-01
 
  reduced coordinates :
-    1    -1.83627106262E-01    7.10864076611E-08   -1.10751951430E-07
-    2     1.83627106262E-01   -7.10864076611E-08    1.10751951430E-07
+    1    -1.83627106261E-01    7.10864062661E-08   -1.10751953233E-07
+    2     1.83627106261E-01   -7.10864062661E-08    1.10751953233E-07
  cartesian forces (ha/bohr); non-corrected avg= -2.69E-05  3.01E-09  3.10E-07
-    1    -2.62613478415E-03   -2.22662497779E-08    1.36326802698E-08
-    2     2.62613478415E-03    2.22662497779E-08   -1.36326802698E-08
+    1    -2.62613473051E-03   -2.22662484991E-08    1.36326820791E-08
+    2     2.62613473051E-03    2.22662484991E-08   -1.36326820791E-08
  prteigrs : about to open file t50o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04027   Average Vxc (hartree)=  -0.22376
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -597,7 +597,7 @@ tolerances: {toldff: 1.00E-05, }
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.32393   -0.19345   -0.08045
- Fermi (or HOMO) energy (eV) =  -1.09568   Average Vxc (eV)=  -6.08883
+ Fermi (or HOMO) energy (eV) =  -1.09568   Average Vxc (eV)=  -6.08884
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.79508   -6.05961   -2.63053   -1.09568   -1.09568
@@ -605,14 +605,14 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.81456   -5.26402   -2.18904
 
- ETOT  5  -8.6731472210972    -2.384E-05 2.554E-07 8.142E-02 1.726E-03 8.997E-04 7.790E-04 3.353E-01
+ ETOT  5  -8.6731472210977    -2.384E-05 2.554E-07 8.142E-02 1.726E-03 8.997E-04 7.790E-04 3.353E-01
 
  reduced coordinates :
-    1    -1.84205643844E-01    6.46221322655E-08   -1.16136095439E-07
-    2     1.84205643844E-01   -6.46221322655E-08    1.16136095439E-07
+    1    -1.84205643848E-01    6.46221317793E-08   -1.16136096850E-07
+    2     1.84205643848E-01   -6.46221317793E-08    1.16136096850E-07
  cartesian forces (ha/bohr); non-corrected avg= -3.36E-05 -2.62E-08 -2.74E-08
-    1    -8.99673187211E-04   -3.32840591635E-08    4.95110709555E-08
-    2     8.99673187211E-04    3.32840591635E-08   -4.95110709555E-08
+    1    -8.99673149977E-04   -3.32840608795E-08    4.95110718326E-08
+    2     8.99673149977E-04    3.32840608795E-08   -4.95110718326E-08
  prteigrs : about to open file t50o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03979   Average Vxc (hartree)=  -0.22376
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -629,14 +629,14 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.81362   -5.26314   -2.20073
 
- ETOT  6  -8.6731661104269    -1.889E-05 1.019E-06 1.933E-02 4.767E-05 8.520E-04 1.897E-03 3.355E-01
+ ETOT  6  -8.6731661104268    -1.889E-05 1.019E-06 1.933E-02 4.767E-05 8.520E-04 1.897E-03 3.355E-01
 
  reduced coordinates :
-    1    -1.84339240320E-01    5.72083851074E-08   -1.05107916460E-07
-    2     1.84339240320E-01   -5.72083851074E-08    1.05107916460E-07
+    1    -1.84339240319E-01    5.72083842284E-08   -1.05107917660E-07
+    2     1.84339240319E-01   -5.72083842284E-08    1.05107917660E-07
  cartesian forces (ha/bohr); non-corrected avg=  5.10E-05 -1.54E-07 -1.26E-06
-    1    -8.52000636726E-04   -2.57696120501E-08    1.57843440072E-08
-    2     8.52000636726E-04    2.57696120501E-08   -1.57843440072E-08
+    1    -8.52000622700E-04   -2.57696125907E-08    1.57843441387E-08
+    2     8.52000622700E-04    2.57696125907E-08   -1.57843441387E-08
  prteigrs : about to open file t50o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03875   Average Vxc (hartree)=  -0.22384
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -656,11 +656,11 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  7  -8.6731709472612    -4.837E-06 2.679E-07 1.130E-02 5.916E-04 2.604E-04 4.474E-03 3.379E-01
 
  reduced coordinates :
-    1    -1.84543709624E-01    5.05023976233E-08   -1.00933589983E-07
-    2     1.84543709624E-01   -5.05023976233E-08    1.00933589983E-07
+    1    -1.84543709620E-01    5.05023966900E-08   -1.00933591135E-07
+    2     1.84543709620E-01   -5.05023966900E-08    1.00933591135E-07
  cartesian forces (ha/bohr); non-corrected avg= -3.99E-05  7.20E-08  6.43E-07
-    1    -2.60443744360E-04   -1.58345456620E-08    3.60518348517E-08
-    2     2.60443744360E-04    1.58345456620E-08   -3.60518348517E-08
+    1    -2.60443749297E-04   -1.58345453540E-08    3.60518360232E-08
+    2     2.60443749297E-04    1.58345453540E-08   -3.60518360232E-08
  prteigrs : about to open file t50o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03862   Average Vxc (hartree)=  -0.22384
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -677,14 +677,14 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79187   -5.25627   -2.21763
 
- ETOT  8  -8.6731747449131    -3.798E-06 6.058E-08 1.100E-03 2.559E-04 4.529E-06 1.350E-03 3.367E-01
+ ETOT  8  -8.6731747449130    -3.798E-06 6.058E-08 1.100E-03 2.559E-04 4.529E-06 1.350E-03 3.367E-01
 
  reduced coordinates :
-    1    -1.84557278183E-01    5.14233047961E-08   -1.03854445573E-07
-    2     1.84557278183E-01   -5.14233047961E-08    1.03854445573E-07
+    1    -1.84557278180E-01    5.14233041631E-08   -1.03854446577E-07
+    2     1.84557278180E-01   -5.14233041631E-08    1.03854446577E-07
  cartesian forces (ha/bohr); non-corrected avg=  1.11E-05  6.00E-08  5.07E-07
-    1    -4.52883085339E-06    4.65249012683E-09    5.01815770275E-08
-    2     4.52883085339E-06   -4.65249012683E-09   -5.01815770275E-08
+    1    -4.52883495575E-06    4.65248927952E-09    5.01815771767E-08
+    2     4.52883495575E-06   -4.65248927952E-09   -5.01815771767E-08
  prteigrs : about to open file t50o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03867   Average Vxc (hartree)=  -0.22384
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -701,14 +701,14 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79363   -5.25629   -2.21950
 
- ETOT  9  -8.6731748760834    -1.312E-07 1.394E-09 8.929E-04 3.538E-05 3.991E-05 1.098E-04 3.367E-01
+ ETOT  9  -8.6731748760835    -1.312E-07 1.394E-09 8.929E-04 3.538E-05 3.991E-05 1.098E-04 3.367E-01
 
  reduced coordinates :
-    1    -1.84562164575E-01    5.10501608536E-08   -1.03233431449E-07
-    2     1.84562164575E-01   -5.10501608536E-08    1.03233431449E-07
+    1    -1.84562164572E-01    5.10501601838E-08   -1.03233432484E-07
+    2     1.84562164572E-01   -5.10501601838E-08    1.03233432484E-07
  cartesian forces (ha/bohr); non-corrected avg= -3.16E-06 -3.69E-09 -4.14E-08
-    1    -3.99092657144E-05   -9.76657132932E-09    4.19285461907E-08
-    2     3.99092657144E-05    9.76657132932E-09   -4.19285461907E-08
+    1    -3.99092696834E-05   -9.76657221038E-09    4.19285464388E-08
+    2     3.99092696834E-05    9.76657221038E-09   -4.19285464388E-08
  prteigrs : about to open file t50o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03863   Average Vxc (hartree)=  -0.22384
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -725,14 +725,14 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79275   -5.25589   -2.21934
 
- ETOT 10  -8.6731750900889    -2.140E-07 5.754E-09 2.154E-04 1.036E-04 1.435E-04 1.096E-04 3.366E-01
+ ETOT 10  -8.6731750900888    -2.140E-07 5.754E-09 2.154E-04 1.036E-04 1.435E-04 1.096E-04 3.366E-01
 
  reduced coordinates :
-    1    -1.84567228516E-01    4.91912938295E-08   -9.52531905585E-08
-    2     1.84567228516E-01   -4.91912938295E-08    9.52531905585E-08
+    1    -1.84567228513E-01    4.91912929914E-08   -9.52531915432E-08
+    2     1.84567228513E-01   -4.91912929914E-08    9.52531915432E-08
  cartesian forces (ha/bohr); non-corrected avg=  2.15E-06 -1.19E-09 -2.45E-08
-    1    -1.43487892117E-04   -1.38584727940E-08    3.39162266706E-08
-    2     1.43487892117E-04    1.38584727940E-08   -3.39162266706E-08
+    1    -1.43487896048E-04   -1.38584718830E-08    3.39162277868E-08
+    2     1.43487896048E-04    1.38584718830E-08   -3.39162277868E-08
  prteigrs : about to open file t50o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03861   Average Vxc (hartree)=  -0.22385
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -749,14 +749,14 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79204   -5.25600   -2.21777
 
- ETOT 11  -8.6731751216025    -3.151E-08 2.338E-09 1.163E-04 4.932E-05 1.928E-04 4.566E-05 3.366E-01
+ ETOT 11  -8.6731751216024    -3.151E-08 2.338E-09 1.163E-04 4.932E-05 1.928E-04 4.566E-05 3.366E-01
 
  reduced coordinates :
-    1    -1.84571991978E-01    4.81834550366E-08   -9.14379591011E-08
-    2     1.84571991978E-01   -4.81834550366E-08    9.14379591011E-08
+    1    -1.84571991975E-01    4.81834540728E-08   -9.14379599140E-08
+    2     1.84571991975E-01   -4.81834540728E-08    9.14379599140E-08
  cartesian forces (ha/bohr); non-corrected avg= -2.50E-07 -4.50E-09 -4.92E-08
-    1    -1.92806109563E-04   -1.73897774991E-08    3.00254363664E-08
-    2     1.92806109563E-04    1.73897774991E-08   -3.00254363664E-08
+    1    -1.92806116065E-04   -1.73897770851E-08    3.00254365230E-08
+    2     1.92806116065E-04    1.73897770851E-08   -3.00254365230E-08
  prteigrs : about to open file t50o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03859   Average Vxc (hartree)=  -0.22385
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -768,19 +768,19 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.05008   Average Vxc (eV)=  -6.09133
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75671   -6.05683   -2.65734   -1.05008   -1.05008
+  -9.75671   -6.05683   -2.65735   -1.05008   -1.05008
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -8.79157   -5.25615   -2.21730
+  -8.79158   -5.25615   -2.21730
 
  ETOT 12  -8.6731752682628    -1.467E-07 1.248E-09 1.576E-05 4.259E-05 1.502E-04 2.308E-05 3.366E-01
 
  reduced coordinates :
-    1    -1.84598298154E-01    4.46245023588E-08   -8.52930209521E-08
-    2     1.84598298154E-01   -4.46245023588E-08    8.52930209521E-08
+    1    -1.84598298152E-01    4.46245014673E-08   -8.52930217114E-08
+    2     1.84598298152E-01   -4.46245014673E-08    8.52930217114E-08
  cartesian forces (ha/bohr); non-corrected avg= -6.58E-07 -5.82E-09 -5.66E-08
-    1    -1.50216004618E-04   -1.47758200935E-08    2.71279413405E-08
-    2     1.50216004618E-04    1.47758200935E-08   -2.71279413405E-08
+    1    -1.50216007797E-04   -1.47758201354E-08    2.71279414604E-08
+    2     1.50216007797E-04    1.47758201354E-08   -2.71279414604E-08
  prteigrs : about to open file t50o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03859   Average Vxc (hartree)=  -0.22385
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -798,9 +798,9 @@ tolerances: {toldff: 1.00E-05, }
   -8.79204   -5.25691   -2.21746
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.53517972E-04  sigma(3 2)=  2.19621856E-13
-  sigma(2 2)=  1.11607059E-04  sigma(3 1)=  2.21840465E-10
-  sigma(3 3)=  1.11607053E-04  sigma(2 1)= -9.41019465E-11
+  sigma(1 1)=  2.53517972E-04  sigma(3 2)=  2.19915384E-13
+  sigma(2 2)=  1.11607059E-04  sigma(3 1)=  2.21840468E-10
+  sigma(3 3)=  1.11607053E-04  sigma(2 1)= -9.41019461E-11
 
 
  scprqt:  WARNING -
@@ -823,17 +823,17 @@ etotal    :  -8.67317527E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.85919467E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.53517972E-04,  -9.41019465E-11,   2.21840465E-10, ]
-- [ -9.41019465E-11,   1.11607059E-04,   2.19621856E-13, ]
-- [  2.21840465E-10,   2.19621856E-13,   1.11607053E-04, ]
+- [  2.53517972E-04,  -9.41019461E-11,   2.21840468E-10, ]
+- [ -9.41019461E-11,   1.11607059E-04,   2.19915384E-13, ]
+- [  2.21840468E-10,   2.19915384E-13,   1.11607053E-04, ]
 pressure_GPa:  -4.6753E+00
 xred      :
 - [ -1.8465E-01,   3.6640E-08,  -7.0324E-08, Si]
 - [  1.8465E-01,  -3.6640E-08,   7.0324E-08, Si]
 cartesian_forces: # hartree/bohr
-- [ -1.50216005E-04,  -1.47758201E-08,   2.71279413E-08, ]
-- [  1.50216005E-04,   1.47758201E-08,  -2.71279413E-08, ]
-force_length_stats: {min:   1.50216008E-04, max:   1.50216008E-04, mean:   1.50216008E-04, }
+- [ -1.50216008E-04,  -1.47758201E-08,   2.71279415E-08, ]
+- [  1.50216008E-04,   1.47758201E-08,  -2.71279415E-08, ]
+force_length_stats: {min:   1.50216011E-04, max:   1.50216011E-04, mean:   1.50216011E-04, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -851,18 +851,18 @@ force_length_stats: {min:   1.50216008E-04, max:   1.50216008E-04, mean:   1.502
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.21583103859028E+00  2.93119228036717E-07 -5.62590139646832E-07
-  2.21583103859028E+00 -2.93119228036717E-07  5.62590139646832E-07
+ -2.21583103859023E+00  2.93119220266592E-07 -5.62590144233529E-07
+  2.21583103859023E+00 -2.93119220266592E-07  5.62590144233529E-07
  Reduced coordinates (xred)
- -1.84652586549190E-01  3.66399035045896E-08 -7.03237674558540E-08
-  1.84652586549190E-01 -3.66399035045896E-08  7.03237674558540E-08
+ -1.84652586549186E-01  3.66399025333240E-08 -7.03237680291911E-08
+  1.84652586549186E-01 -3.66399025333240E-08  7.03237680291911E-08
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.50216E-04 8.67273E-05 (free atoms)
- -1.50216004618180E-04 -1.47758200935309E-08  2.71279413405315E-08
-  1.50216004618180E-04  1.47758200935309E-08 -2.71279413405315E-08
+ -1.50216007796706E-04 -1.47758201353731E-08  2.71279414604440E-08
+  1.50216007796706E-04  1.47758201353731E-08 -2.71279414604440E-08
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  1.80259205541816E-03  1.18206560748247E-07 -2.17023530724252E-07
- -1.80259205541816E-03 -1.18206560748247E-07  2.17023530724252E-07
- Total energy (etotal) [Ha]= -8.67317526826281E+00
+  1.80259209356048E-03  1.18206561082985E-07 -2.17023531683552E-07
+ -1.80259209356048E-03 -1.18206561082985E-07  2.17023531683552E-07
+ Total energy (etotal) [Ha]= -8.67317526826278E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-1.54369E-03
@@ -884,8 +884,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  1  -8.6731747367068    -8.673E+00 2.876E-11 2.171E-03 9.656E-06 1.406E-04 3.366E-01 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  7.37E-07  8.04E-11 -2.03E-10
-    1    -1.40559935017E-04   -1.17133615671E-08    2.32836173391E-08
-    2     1.40559935017E-04    1.17133615671E-08   -2.32836173391E-08
+    1    -1.40559935726E-04   -1.17133611736E-08    2.32836178062E-08
+    2     1.40559935726E-04    1.17133611736E-08   -2.32836178062E-08
  prteigrs : about to open file t50o_TIM3_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03841   Average Vxc (hartree)=  -0.22387
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -897,16 +897,16 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.04515   Average Vxc (eV)=  -6.09180
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.74964   -6.05753   -2.65728   -1.04515   -1.04515
+  -9.74964   -6.05753   -2.65729   -1.04515   -1.04515
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78597   -5.25716   -2.21749
 
- ETOT  2  -8.6731753781565    -6.414E-07 3.451E-11 1.254E-04 8.653E-05 5.403E-05 9.334E-05 3.366E-01
+ ETOT  2  -8.6731753781564    -6.414E-07 3.451E-11 1.254E-04 8.653E-05 5.403E-05 9.334E-05 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -1.01E-06  3.28E-11  1.03E-10
-    1    -5.40251882161E-05   -1.18677275186E-08    2.31302432768E-08
-    2     5.40251882161E-05    1.18677275186E-08   -2.31302432768E-08
+    1    -5.40251873094E-05   -1.18677271340E-08    2.31302437623E-08
+    2     5.40251873094E-05    1.18677271340E-08   -2.31302437623E-08
  prteigrs : about to open file t50o_TIM3_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03857   Average Vxc (hartree)=  -0.22385
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -926,8 +926,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  3  -8.6731754197999    -4.164E-08 1.772E-09 1.113E-05 1.724E-05 7.127E-05 1.286E-05 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -4.21E-07 -5.84E-11 -4.51E-10
-    1    -7.12672455409E-05   -1.18668640833E-08    2.32394995709E-08
-    2     7.12672455409E-05    1.18668640833E-08   -2.32394995709E-08
+    1    -7.12672450055E-05   -1.18668637267E-08    2.32394999928E-08
+    2     7.12672450055E-05    1.18668637267E-08   -2.32394999928E-08
  prteigrs : about to open file t50o_TIM3_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03852   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -939,16 +939,16 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.04832   Average Vxc (eV)=  -6.09148
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75417   -6.05824   -2.65753   -1.04832   -1.04832
+  -9.75417   -6.05825   -2.65753   -1.04832   -1.04832
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79047   -5.25744   -2.21772
 
- ETOT  4  -8.6731754140802     5.720E-09 2.838E-10 2.645E-05 2.190E-06 6.908E-05 1.064E-04 3.366E-01
+ ETOT  4  -8.6731754140803     5.720E-09 2.838E-10 2.645E-05 2.190E-06 6.908E-05 1.064E-04 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  1.58E-06  1.31E-10  1.45E-09
-    1    -6.90775719238E-05   -1.19115576681E-08    2.26946369668E-08
-    2     6.90775719238E-05    1.19115576681E-08   -2.26946369668E-08
+    1    -6.90775724786E-05   -1.19115572680E-08    2.26946370756E-08
+    2     6.90775724786E-05    1.19115572680E-08   -2.26946370756E-08
  prteigrs : about to open file t50o_TIM3_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03853   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -963,13 +963,13 @@ tolerances: {toldff: 1.00E-05, }
   -9.75426   -6.05831   -2.65759   -1.04842   -1.04842
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -8.79060   -5.25746   -2.21777
+  -8.79060   -5.25747   -2.21777
 
  ETOT  5  -8.6731754236384    -9.558E-09 1.084E-10 7.375E-07 8.090E-07 6.989E-05 6.253E-05 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -2.40E-07 -3.63E-11 -6.93E-10
-    1    -6.98865933180E-05   -1.18319126186E-08    2.32247819761E-08
-    2     6.98865933180E-05    1.18319126186E-08   -2.32247819761E-08
+    1    -6.98865931847E-05   -1.18319122221E-08    2.32247822880E-08
+    2     6.98865931847E-05    1.18319122221E-08   -2.32247822880E-08
  prteigrs : about to open file t50o_TIM3_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03853   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -990,9 +990,9 @@ tolerances: {toldff: 1.00E-05, }
   for the second time, max diff in force=  8.090E-07 < toldff=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.53489127E-04  sigma(3 2)= -2.05727450E-14
-  sigma(2 2)=  1.11103774E-04  sigma(3 1)=  7.11855950E-11
-  sigma(3 3)=  1.11103774E-04  sigma(2 1)= -3.97182950E-11
+  sigma(1 1)=  2.53489127E-04  sigma(3 2)= -2.05528746E-14
+  sigma(2 2)=  1.11103774E-04  sigma(3 1)=  7.11855952E-11
+  sigma(3 3)=  1.11103774E-04  sigma(2 1)= -3.97182947E-11
 
 
 --- !ResultsGS
@@ -1010,17 +1010,17 @@ etotal    :  -8.67317542E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.85289347E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.53489127E-04,  -3.97182950E-11,   7.11855950E-11, ]
-- [ -3.97182950E-11,   1.11103774E-04,  -2.05727450E-14, ]
-- [  7.11855950E-11,  -2.05727450E-14,   1.11103774E-04, ]
+- [  2.53489127E-04,  -3.97182947E-11,   7.11855952E-11, ]
+- [ -3.97182947E-11,   1.11103774E-04,  -2.05528746E-14, ]
+- [  7.11855952E-11,  -2.05528746E-14,   1.11103774E-04, ]
 pressure_GPa:  -4.6652E+00
 xred      :
 - [ -1.8465E-01,   3.6640E-08,  -7.0324E-08, Si]
 - [  1.8465E-01,  -3.6640E-08,   7.0324E-08, Si]
 cartesian_forces: # hartree/bohr
-- [ -6.98865933E-05,  -1.18319126E-08,   2.32247820E-08, ]
-- [  6.98865933E-05,   1.18319126E-08,  -2.32247820E-08, ]
-force_length_stats: {min:   6.98865982E-05, max:   6.98865982E-05, mean:   6.98865982E-05, }
+- [ -6.98865932E-05,  -1.18319122E-08,   2.32247823E-08, ]
+- [  6.98865932E-05,   1.18319122E-08,  -2.32247823E-08, ]
+force_length_stats: {min:   6.98865980E-05, max:   6.98865980E-05, mean:   6.98865980E-05, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -1038,17 +1038,17 @@ force_length_stats: {min:   6.98865982E-05, max:   6.98865982E-05, mean:   6.988
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.21583103859028E+00  2.93119228036717E-07 -5.62590139646832E-07
-  2.21583103859028E+00 -2.93119228036717E-07  5.62590139646832E-07
+ -2.21583103859023E+00  2.93119220266592E-07 -5.62590144233529E-07
+  2.21583103859023E+00 -2.93119220266592E-07  5.62590144233529E-07
  Reduced coordinates (xred)
- -1.84652586549190E-01  3.66399035045896E-08 -7.03237674558540E-08
-  1.84652586549190E-01 -3.66399035045896E-08  7.03237674558540E-08
+ -1.84652586549186E-01  3.66399025333240E-08 -7.03237680291911E-08
+  1.84652586549186E-01 -3.66399025333240E-08  7.03237680291911E-08
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 6.98866E-05 4.03490E-05 (free atoms)
- -6.98865933180089E-05 -1.18319126186419E-08  2.32247819761332E-08
-  6.98865933180089E-05  1.18319126186419E-08 -2.32247819761332E-08
+ -6.98865931847347E-05 -1.18319122221366E-08  2.32247822879829E-08
+  6.98865931847347E-05  1.18319122221366E-08 -2.32247822879829E-08
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  8.38639119816106E-04  9.46553009491349E-08 -1.85798255809065E-07
- -8.38639119816106E-04 -9.46553009491349E-08  1.85798255809065E-07
+  8.38639118216816E-04  9.46552977770931E-08 -1.85798258303863E-07
+ -8.38639118216816E-04 -9.46552977770931E-08  1.85798258303863E-07
  Total energy (etotal) [Ha]= -8.67317542363837E+00
 
  Difference of energy with previous step (new-old):
@@ -1071,11 +1071,11 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  1  -8.6731754235909    -8.673E+00 3.642E-14 8.587E-07 1.869E-07 6.970E-05 3.366E-01 3.366E-01
 
  reduced coordinates :
-    1    -1.84652586549E-01    3.66399035046E-08   -7.03237674559E-08
-    2     1.84652586549E-01   -3.66399035046E-08    7.03237674559E-08
+    1    -1.84652586549E-01    3.66399025333E-08   -7.03237680292E-08
+    2     1.84652586549E-01   -3.66399025333E-08    7.03237680292E-08
  cartesian forces (ha/bohr); non-corrected avg= -2.36E-07  9.78E-12  4.29E-12
-    1    -6.96997415148E-05   -1.18564029885E-08    2.27258781831E-08
-    2     6.96997415148E-05    1.18564029885E-08   -2.27258781831E-08
+    1    -6.96997415339E-05   -1.18564025812E-08    2.27258782571E-08
+    2     6.96997415339E-05    1.18564025812E-08   -2.27258782571E-08
  prteigrs : about to open file t50o_TIM4_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03853   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1095,11 +1095,11 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  2  -8.6731754369823    -1.339E-08 1.947E-12 2.379E-06 1.600E-05 5.370E-05 3.296E-05 3.366E-01
 
  reduced coordinates :
-    1    -1.84662096277E-01    3.42133987855E-08   -6.56727404362E-08
-    2     1.84662096277E-01   -3.42133987855E-08    6.56727404362E-08
+    1    -1.84662096277E-01    3.42133978891E-08   -6.56727409781E-08
+    2     1.84662096277E-01   -3.42133978891E-08    6.56727409781E-08
  cartesian forces (ha/bohr); non-corrected avg=  3.49E-07  8.43E-12  3.36E-11
-    1    -5.37023436533E-05   -1.08331383346E-08    2.07896312188E-08
-    2     5.37023436533E-05    1.08331383346E-08   -2.07896312188E-08
+    1    -5.37023433852E-05   -1.08331383075E-08    2.07896315289E-08
+    2     5.37023433852E-05    1.08331383075E-08   -2.07896315289E-08
  prteigrs : about to open file t50o_TIM4_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03852   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1111,7 +1111,7 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.04811   Average Vxc (eV)=  -6.09151
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75378   -6.05840   -2.65753   -1.04811   -1.04811
+  -9.75379   -6.05840   -2.65753   -1.04811   -1.04811
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79022   -5.25754   -2.21771
@@ -1119,11 +1119,11 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  3  -8.6731754436635    -6.681E-09 5.884E-10 1.503E-05 1.668E-05 3.702E-05 3.022E-05 3.366E-01
 
  reduced coordinates :
-    1    -1.84672820513E-01    3.14770000399E-08   -6.04277209632E-08
-    2     1.84672820513E-01   -3.14770000399E-08    6.04277209632E-08
+    1    -1.84672820515E-01    3.14769987005E-08   -6.04277204587E-08
+    2     1.84672820515E-01   -3.14769987005E-08    6.04277204587E-08
  cartesian forces (ha/bohr); non-corrected avg=  1.36E-06 -1.48E-11 -1.79E-10
-    1    -3.70249445710E-05   -9.73413082871E-09    1.87904297171E-08
-    2     3.70249445710E-05    9.73413082871E-09   -1.87904297171E-08
+    1    -3.70249392752E-05   -9.73413018792E-09    1.87904287372E-08
+    2     3.70249392752E-05    9.73413018792E-09   -1.87904287372E-08
  prteigrs : about to open file t50o_TIM4_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03851   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1143,11 +1143,11 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  4  -8.6731754424041     1.259E-09 4.415E-11 2.393E-05 4.333E-06 3.269E-05 1.570E-05 3.366E-01
 
  reduced coordinates :
-    1    -1.84675716538E-01    3.07380495282E-08   -5.90113302309E-08
-    2     1.84675716538E-01   -3.07380495282E-08    5.90113302309E-08
+    1    -1.84675716540E-01    3.07380481022E-08   -5.90113295071E-08
+    2     1.84675716540E-01   -3.07380481022E-08    5.90113295071E-08
  cartesian forces (ha/bohr); non-corrected avg=  1.27E-06 -2.85E-11 -2.58E-10
-    1    -3.26923473032E-05   -9.44668937164E-09    1.82724864163E-08
-    2     3.26923473032E-05    9.44668937164E-09   -1.82724864163E-08
+    1    -3.26923429946E-05   -9.44668916599E-09    1.82724861024E-08
+    2     3.26923429946E-05    9.44668916599E-09   -1.82724861024E-08
  prteigrs : about to open file t50o_TIM4_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03850   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1159,7 +1159,7 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.04776   Average Vxc (eV)=  -6.09156
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75324   -6.05864   -2.65756   -1.04776   -1.04776
+  -9.75324   -6.05865   -2.65756   -1.04776   -1.04776
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78971   -5.25774   -2.21770
@@ -1167,11 +1167,11 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  5  -8.6731754415593     8.448E-10 4.720E-10 2.997E-05 6.811E-06 2.588E-05 1.233E-04 3.366E-01
 
  reduced coordinates :
-    1    -1.84677872140E-01    2.94848347589E-08   -5.65821139587E-08
-    2     1.84677872140E-01   -2.94848347589E-08    5.65821139587E-08
+    1    -1.84677872142E-01    2.94848335436E-08   -5.65821136413E-08
+    2     1.84677872142E-01   -2.94848335436E-08    5.65821136413E-08
  cartesian forces (ha/bohr); non-corrected avg= -1.78E-06  1.58E-10  1.38E-09
-    1    -2.58812495558E-05   -9.39676301446E-09    1.78558649381E-08
-    2     2.58812495558E-05    9.39676301446E-09   -1.78558649381E-08
+    1    -2.58812467185E-05   -9.39676327529E-09    1.78558650346E-08
+    2     2.58812467185E-05    9.39676327529E-09   -1.78558650346E-08
  prteigrs : about to open file t50o_TIM4_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03850   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1193,8 +1193,8 @@ tolerances: {toldff: 1.00E-05, }
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.53784841E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.11146111E-04  sigma(3 1)=  5.96122935E-11
-  sigma(3 3)=  1.11146108E-04  sigma(2 1)= -3.11205323E-11
+  sigma(2 2)=  1.11146111E-04  sigma(3 1)=  5.96122942E-11
+  sigma(3 3)=  1.11146108E-04  sigma(2 1)= -3.11205304E-11
 
 
 --- !ResultsGS
@@ -1212,17 +1212,17 @@ etotal    :  -8.67317544E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.85036425E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.53784841E-04,  -3.11205323E-11,   5.96122935E-11, ]
-- [ -3.11205323E-11,   1.11146111E-04,   0.00000000E+00, ]
-- [  5.96122935E-11,   0.00000000E+00,   1.11146108E-04, ]
+- [  2.53784841E-04,  -3.11205304E-11,   5.96122942E-11, ]
+- [ -3.11205304E-11,   1.11146111E-04,   0.00000000E+00, ]
+- [  5.96122942E-11,   0.00000000E+00,   1.11146108E-04, ]
 pressure_GPa:  -4.6689E+00
 xred      :
 - [ -1.8468E-01,   2.9485E-08,  -5.6582E-08, Si]
 - [  1.8468E-01,  -2.9485E-08,   5.6582E-08, Si]
 cartesian_forces: # hartree/bohr
-- [ -2.58812496E-05,  -9.39676301E-09,   1.78558649E-08, ]
-- [  2.58812496E-05,   9.39676301E-09,  -1.78558649E-08, ]
-force_length_stats: {min:   2.58812574E-05, max:   2.58812574E-05, mean:   2.58812574E-05, }
+- [ -2.58812467E-05,  -9.39676328E-09,   1.78558650E-08, ]
+- [  2.58812467E-05,   9.39676328E-09,  -1.78558650E-08, ]
+force_length_stats: {min:   2.58812546E-05, max:   2.58812546E-05, mean:   2.58812546E-05, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -1240,22 +1240,22 @@ force_length_stats: {min:   2.58812574E-05, max:   2.58812574E-05, mean:   2.588
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.21613446568540E+00  2.35878678070888E-07 -4.52656911669392E-07
-  2.21613446568540E+00 -2.35878678070888E-07  4.52656911669392E-07
+ -2.21613446570262E+00  2.35878668349035E-07 -4.52656909130036E-07
+  2.21613446570262E+00 -2.35878668349035E-07  4.52656909130036E-07
  Reduced coordinates (xred)
- -1.84677872140450E-01  2.94848347588610E-08 -5.65821139586740E-08
-  1.84677872140450E-01 -2.94848347588610E-08  5.65821139586740E-08
- Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.58812E-05 1.49426E-05 (free atoms)
- -2.58812495558082E-05 -9.39676301446459E-09  1.78558649381348E-08
-  2.58812495558082E-05  9.39676301446459E-09 -1.78558649381348E-08
+ -1.84677872141885E-01  2.94848335436294E-08 -5.65821136412545E-08
+  1.84677872141885E-01 -2.94848335436294E-08  5.65821136412545E-08
+ Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.58812E-05 1.49425E-05 (free atoms)
+ -2.58812467185275E-05 -9.39676327529220E-09  1.78558650346034E-08
+  2.58812467185275E-05  9.39676327529220E-09 -1.78558650346034E-08
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  3.10574994669698E-04  7.51741041157167E-08 -1.42846919505079E-07
- -3.10574994669698E-04 -7.51741041157167E-08  1.42846919505079E-07
- Total energy (etotal) [Ha]= -8.67317544155926E+00
+  3.10574960622329E-04  7.51741062023376E-08 -1.42846920276827E-07
+ -3.10574960622329E-04 -7.51741062023376E-08  1.42846920276827E-07
+ Total energy (etotal) [Ha]= -8.67317544155927E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-1.79209E-08
-           Relative     =-2.06624E-09
+           Relative     =-2.06625E-09
 
 --- Iteration: ( 5/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
@@ -1273,8 +1273,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  1  -8.6731752977665    -8.673E+00 8.891E-13 4.169E-04 1.562E-06 2.432E-05 3.368E-01 3.368E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  4.79E-06 -5.27E-12 -4.17E-11
-    1    -2.43189948958E-05   -9.50299207584E-09    1.82368224358E-08
-    2     2.43189948958E-05    9.50299207584E-09   -1.82368224358E-08
+    1    -2.43189925732E-05   -9.50299156530E-09    1.82368223781E-08
+    2     2.43189925732E-05    9.50299156530E-09   -1.82368223781E-08
  prteigrs : about to open file t50o_TIM5_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03850   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1286,7 +1286,7 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.04770   Average Vxc (eV)=  -6.09156
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75326   -6.05862   -2.65768   -1.04770   -1.04770
+  -9.75326   -6.05863   -2.65768   -1.04770   -1.04770
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78981   -5.25769   -2.21784
@@ -1294,8 +1294,8 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  2  -8.6731750571892     2.406E-07 2.637E-12 1.065E-03 5.753E-07 2.489E-05 6.493E-04 3.370E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -7.69E-06  9.11E-13  5.77E-12
-    1    -2.48943354869E-05   -9.52027638656E-09    1.82709993977E-08
-    2     2.48943354869E-05    9.52027638656E-09   -1.82709993977E-08
+    1    -2.48943329608E-05   -9.52027589493E-09    1.82709996364E-08
+    2     2.48943329608E-05    9.52027589493E-09   -1.82709996364E-08
  prteigrs : about to open file t50o_TIM5_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03850   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1312,11 +1312,11 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78980   -5.25769   -2.21783
 
- ETOT  3  -8.6731754525180    -3.953E-07 4.730E-09 8.974E-09 4.582E-07 2.444E-05 3.992E-04 3.366E-01
+ ETOT  3  -8.6731754525179    -3.953E-07 4.730E-09 8.974E-09 4.582E-07 2.444E-05 3.992E-04 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  1.26E-06 -1.15E-11 -8.46E-11
-    1    -2.44361352128E-05   -9.50723650851E-09    1.82351912580E-08
-    2     2.44361352128E-05    9.50723650851E-09   -1.82351912580E-08
+    1    -2.44361328540E-05   -9.50723617104E-09    1.82351908396E-08
+    2     2.44361328540E-05    9.50723617104E-09   -1.82351908396E-08
  prteigrs : about to open file t50o_TIM5_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03850   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1338,8 +1338,8 @@ tolerances: {toldff: 1.00E-05, }
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.53824297E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.11132081E-04  sigma(3 1)=  6.13216756E-11
-  sigma(3 3)=  1.11132081E-04  sigma(2 1)= -3.18210725E-11
+  sigma(2 2)=  1.11132081E-04  sigma(3 1)=  6.13216760E-11
+  sigma(3 3)=  1.11132081E-04  sigma(2 1)= -3.18210712E-11
 
 
 --- !ResultsGS
@@ -1357,17 +1357,17 @@ etotal    :  -8.67317545E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.85021351E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.53824297E-04,  -3.18210725E-11,   6.13216756E-11, ]
-- [ -3.18210725E-11,   1.11132081E-04,   0.00000000E+00, ]
-- [  6.13216756E-11,   0.00000000E+00,   1.11132081E-04, ]
+- [  2.53824297E-04,  -3.18210712E-11,   6.13216760E-11, ]
+- [ -3.18210712E-11,   1.11132081E-04,   0.00000000E+00, ]
+- [  6.13216760E-11,   0.00000000E+00,   1.11132081E-04, ]
 pressure_GPa:  -4.6690E+00
 xred      :
 - [ -1.8468E-01,   2.9485E-08,  -5.6582E-08, Si]
 - [  1.8468E-01,  -2.9485E-08,   5.6582E-08, Si]
 cartesian_forces: # hartree/bohr
-- [ -2.44361352E-05,  -9.50723651E-09,   1.82351913E-08, ]
-- [  2.44361352E-05,   9.50723651E-09,  -1.82351913E-08, ]
-force_length_stats: {min:   2.44361439E-05, max:   2.44361439E-05, mean:   2.44361439E-05, }
+- [ -2.44361329E-05,  -9.50723617E-09,   1.82351908E-08, ]
+- [  2.44361329E-05,   9.50723617E-09,  -1.82351908E-08, ]
+force_length_stats: {min:   2.44361415E-05, max:   2.44361415E-05, mean:   2.44361415E-05, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -1385,22 +1385,22 @@ force_length_stats: {min:   2.44361439E-05, max:   2.44361439E-05, mean:   2.443
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.21613446568540E+00  2.35878678070888E-07 -4.52656911669392E-07
-  2.21613446568540E+00 -2.35878678070888E-07  4.52656911669392E-07
+ -2.21613446570262E+00  2.35878668349035E-07 -4.52656909130036E-07
+  2.21613446570262E+00 -2.35878668349035E-07  4.52656909130036E-07
  Reduced coordinates (xred)
- -1.84677872140450E-01  2.94848347588610E-08 -5.65821139586740E-08
-  1.84677872140450E-01 -2.94848347588610E-08  5.65821139586740E-08
+ -1.84677872141885E-01  2.94848335436294E-08 -5.65821136412545E-08
+  1.84677872141885E-01 -2.94848335436294E-08  5.65821136412545E-08
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.44361E-05 1.41082E-05 (free atoms)
- -2.44361352128241E-05 -9.50723650851260E-09  1.82351912580339E-08
-  2.44361352128241E-05  9.50723650851260E-09 -1.82351912580339E-08
+ -2.44361328540014E-05 -9.50723617103866E-09  1.82351908396064E-08
+  2.44361328540014E-05  9.50723617103866E-09 -1.82351908396064E-08
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  2.93233622553890E-04  7.60578920681008E-08 -1.45881530064271E-07
- -2.93233622553890E-04 -7.60578920681008E-08  1.45881530064271E-07
- Total energy (etotal) [Ha]= -8.67317545251795E+00
+  2.93233594248016E-04  7.60578893683093E-08 -1.45881526716851E-07
+ -2.93233594248016E-04 -7.60578893683093E-08  1.45881526716851E-07
+ Total energy (etotal) [Ha]= -8.67317545251792E+00
 
  Difference of energy with previous step (new-old):
-           Absolute (Ha)=-1.09587E-08
-           Relative     =-1.26352E-09
+           Absolute (Ha)=-1.09586E-08
+           Relative     =-1.26351E-09
 
 --- Iteration: ( 6/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
@@ -1418,11 +1418,11 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  1  -8.6731754526071    -8.673E+00 3.890E-14 2.897E-08 8.278E-07 2.526E-05 3.366E-01 3.366E-01
 
  reduced coordinates :
-    1    -1.84677872140E-01    2.94848347589E-08   -5.65821139587E-08
-    2     1.84677872140E-01   -2.94848347589E-08    5.65821139587E-08
+    1    -1.84677872142E-01    2.94848335436E-08   -5.65821136413E-08
+    2     1.84677872142E-01   -2.94848335436E-08    5.65821136413E-08
  cartesian forces (ha/bohr); non-corrected avg=  5.05E-08  8.07E-13  6.08E-12
-    1    -2.52639831095E-05   -9.53166416759E-09    1.82948919409E-08
-    2     2.52639831095E-05    9.53166416759E-09   -1.82948919409E-08
+    1    -2.52639804765E-05   -9.53166374810E-09    1.82948919306E-08
+    2     2.52639804765E-05    9.53166374810E-09   -1.82948919306E-08
  prteigrs : about to open file t50o_TIM6_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03850   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1434,19 +1434,19 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.04769   Average Vxc (eV)=  -6.09156
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75324   -6.05863   -2.65766   -1.04769   -1.04769
+  -9.75325   -6.05863   -2.65766   -1.04769   -1.04769
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -8.78979   -5.25769   -2.21782
+  -8.78979   -5.25770   -2.21782
 
- ETOT  2  -8.6731754544017    -1.795E-09 9.700E-14 9.576E-08 5.861E-06 1.940E-05 6.169E-06 3.366E-01
+ ETOT  2  -8.6731754544018    -1.795E-09 9.700E-14 9.576E-08 5.861E-06 1.940E-05 6.169E-06 3.366E-01
 
  reduced coordinates :
-    1    -1.84681319120E-01    2.75341058485E-08   -5.28379225988E-08
-    2     1.84681319120E-01   -2.75341058485E-08    5.28379225988E-08
- cartesian forces (ha/bohr); non-corrected avg= -5.34E-08  0.00E+00  2.77E-13
-    1    -1.94028590648E-05   -8.72159389016E-09    1.67379495662E-08
-    2     1.94028590648E-05    8.72159389016E-09   -1.67379495662E-08
+    1    -1.84681319121E-01    2.75341047122E-08   -5.28379222703E-08
+    2     1.84681319121E-01   -2.75341047122E-08    5.28379222703E-08
+ cartesian forces (ha/bohr); non-corrected avg= -5.34E-08  0.00E+00  2.78E-13
+    1    -1.94028569429E-05   -8.72159356339E-09    1.67379489580E-08
+    2     1.94028569429E-05    8.72159356339E-09   -1.67379489580E-08
  prteigrs : about to open file t50o_TIM6_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03850   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1466,11 +1466,11 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  3  -8.6731754562868    -1.885E-09 3.021E-10 1.317E-06 1.338E-05 6.020E-06 1.168E-05 3.366E-01
 
  reduced coordinates :
-    1    -1.84689333183E-01    2.29987549168E-08   -4.41328576961E-08
-    2     1.84689333183E-01   -2.29987549168E-08    4.41328576961E-08
+    1    -1.84689333183E-01    2.29987542226E-08   -4.41328578379E-08
+    2     1.84689333183E-01   -2.29987542226E-08    4.41328578379E-08
  cartesian forces (ha/bohr); non-corrected avg= -4.08E-07 -2.09E-12 -1.91E-11
-    1    -6.02009246807E-06   -6.88073348729E-09    1.31964976864E-08
-    2     6.02009246807E-06    6.88073348729E-09   -1.31964976864E-08
+    1    -6.02009181429E-06   -6.88073305154E-09    1.31964973667E-08
+    2     6.02009181429E-06    6.88073305154E-09   -1.31964973667E-08
  prteigrs : about to open file t50o_TIM6_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1490,11 +1490,11 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  4  -8.6731754561492     1.376E-10 2.807E-11 1.850E-06 2.503E-06 3.517E-06 2.653E-05 3.366E-01
 
  reduced coordinates :
-    1    -1.84690154555E-01    2.15905595059E-08   -4.14320922159E-08
-    2     1.84690154555E-01   -2.15905595059E-08    4.14320922159E-08
+    1    -1.84690154555E-01    2.15905588960E-08   -4.14320924136E-08
+    2     1.84690154555E-01   -2.15905588960E-08    4.14320924136E-08
  cartesian forces (ha/bohr); non-corrected avg=  4.38E-07  2.95E-11  2.51E-10
-    1    -3.51741606147E-06   -6.88030383553E-09    1.32156578079E-08
-    2     3.51741606147E-06    6.88030383553E-09   -1.32156578079E-08
+    1    -3.51741658877E-06   -6.88030372784E-09    1.32156583656E-08
+    2     3.51741658877E-06    6.88030372784E-09   -1.32156583656E-08
  prteigrs : about to open file t50o_TIM6_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1503,7 +1503,7 @@ tolerances: {toldff: 1.00E-05, }
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.32300   -0.19322   -0.08150
- Fermi (or HOMO) energy (eV) =  -1.04737   Average Vxc (eV)=  -6.09159
+ Fermi (or HOMO) energy (eV) =  -1.04737   Average Vxc (eV)=  -6.09160
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.75279   -6.05880   -2.65769   -1.04737   -1.04737
@@ -1514,11 +1514,11 @@ tolerances: {toldff: 1.00E-05, }
  ETOT  5  -8.6731754568031    -6.539E-10 2.833E-11 3.146E-07 2.009E-06 1.509E-06 1.524E-05 3.366E-01
 
  reduced coordinates :
-    1    -1.84691912285E-01    2.10308064479E-08   -4.03567458176E-08
-    2     1.84691912285E-01   -2.10308064479E-08    4.03567458176E-08
+    1    -1.84691912285E-01    2.10308059459E-08   -4.03567461704E-08
+    2     1.84691912285E-01   -2.10308059459E-08    4.03567461704E-08
  cartesian forces (ha/bohr); non-corrected avg= -1.56E-07 -1.18E-11 -1.01E-10
-    1    -1.50871037572E-06   -6.21287996518E-09    1.19109548212E-08
-    2     1.50871037572E-06    6.21287996518E-09   -1.19109548212E-08
+    1    -1.50871142212E-06   -6.21288005896E-09    1.19109549189E-08
+    2     1.50871142212E-06    6.21288005896E-09   -1.19109549189E-08
  prteigrs : about to open file t50o_TIM6_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1540,8 +1540,8 @@ tolerances: {toldff: 1.00E-05, }
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.53969745E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.11150245E-04  sigma(3 1)=  4.27815398E-11
-  sigma(3 3)=  1.11150239E-04  sigma(2 1)= -2.21630281E-11
+  sigma(2 2)=  1.11150245E-04  sigma(3 1)=  4.27815396E-11
+  sigma(3 3)=  1.11150239E-04  sigma(2 1)= -2.21630274E-11
 
 
 --- !ResultsGS
@@ -1559,17 +1559,17 @@ etotal    :  -8.67317546E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.84879980E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.53969745E-04,  -2.21630281E-11,   4.27815398E-11, ]
-- [ -2.21630281E-11,   1.11150245E-04,   0.00000000E+00, ]
-- [  4.27815398E-11,   0.00000000E+00,   1.11150239E-04, ]
+- [  2.53969745E-04,  -2.21630274E-11,   4.27815396E-11, ]
+- [ -2.21630274E-11,   1.11150245E-04,   0.00000000E+00, ]
+- [  4.27815396E-11,   0.00000000E+00,   1.11150239E-04, ]
 pressure_GPa:  -4.6708E+00
 xred      :
 - [ -1.8469E-01,   2.1031E-08,  -4.0357E-08, Si]
 - [  1.8469E-01,  -2.1031E-08,   4.0357E-08, Si]
 cartesian_forces: # hartree/bohr
-- [ -1.50871038E-06,  -6.21287997E-09,   1.19109548E-08, ]
-- [  1.50871038E-06,   6.21287997E-09,  -1.19109548E-08, ]
-force_length_stats: {min:   1.50877018E-06, max:   1.50877018E-06, mean:   1.50877018E-06, }
+- [ -1.50871142E-06,  -6.21288006E-09,   1.19109549E-08, ]
+- [  1.50871142E-06,   6.21288006E-09,  -1.19109549E-08, ]
+force_length_stats: {min:   1.50877123E-06, max:   1.50877123E-06, mean:   1.50877123E-06, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -1587,22 +1587,22 @@ force_length_stats: {min:   1.50877018E-06, max:   1.50877018E-06, mean:   1.508
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.21630294742183E+00  1.68246451583450E-07 -3.22853966541023E-07
-  2.21630294742183E+00 -1.68246451583450E-07  3.22853966541023E-07
+ -2.21630294741452E+00  1.68246447567255E-07 -3.22853969363595E-07
+  2.21630294741452E+00 -1.68246447567255E-07  3.22853969363595E-07
  Reduced coordinates (xred)
- -1.84691912285153E-01  2.10308064479313E-08 -4.03567458176279E-08
-  1.84691912285153E-01 -2.10308064479313E-08  4.03567458176279E-08
+ -1.84691912284543E-01  2.10308059459069E-08 -4.03567461704493E-08
+  1.84691912284543E-01 -2.10308059459069E-08  4.03567461704493E-08
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.50871E-06 8.71089E-07 (free atoms)
- -1.50871037571680E-06 -6.21287996518305E-09  1.19109548212379E-08
-  1.50871037571680E-06  6.21287996518305E-09 -1.19109548212379E-08
+ -1.50871142211512E-06 -6.21288005896363E-09  1.19109549189212E-08
+  1.50871142211512E-06  6.21288005896363E-09 -1.19109549189212E-08
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
-  1.81045245086016E-05  4.97030397214644E-08 -9.52876385699034E-08
- -1.81045245086016E-05 -4.97030397214644E-08  9.52876385699034E-08
- Total energy (etotal) [Ha]= -8.67317545680312E+00
+  1.81045370653815E-05  4.97030404717090E-08 -9.52876393513700E-08
+ -1.81045370653815E-05 -4.97030404717090E-08  9.52876393513700E-08
+ Total energy (etotal) [Ha]= -8.67317545680315E+00
 
  Difference of energy with previous step (new-old):
-           Absolute (Ha)=-4.28517E-09
-           Relative     =-4.94072E-10
+           Absolute (Ha)=-4.28523E-09
+           Relative     =-4.94078E-10
 
 --- Iteration: ( 7/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
@@ -1617,11 +1617,11 @@ tolerances: {toldff: 1.00E-05, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor   difmagsph maxmagsph
 
- ETOT  1  -8.6731754567845    -8.673E+00 5.934E-14 2.860E-07 2.130E-06 6.208E-07 3.366E-01 3.366E-01
+ ETOT  1  -8.6731754567846    -8.673E+00 5.934E-14 2.860E-07 2.130E-06 6.208E-07 3.366E-01 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -1.11E-07 -1.24E-12 -1.07E-11
-    1     6.20828053040E-07   -6.77340263166E-09    1.29989877402E-08
-    2    -6.20828053040E-07    6.77340263166E-09   -1.29989877402E-08
+    1     6.20826972509E-07   -6.77340266418E-09    1.29989875525E-08
+    2    -6.20826972509E-07    6.77340266418E-09   -1.29989875525E-08
  prteigrs : about to open file t50o_TIM7_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1633,16 +1633,16 @@ tolerances: {toldff: 1.00E-05, }
  Fermi (or HOMO) energy (eV) =  -1.04732   Average Vxc (eV)=  -6.09160
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -9.75275   -6.05881   -2.65773   -1.04732   -1.04732
+  -9.75275   -6.05882   -2.65773   -1.04732   -1.04732
  Eigenvalues (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78938   -5.25784   -2.21787
 
- ETOT  2  -8.6731754567093     7.526E-11 8.334E-15 5.209E-07 9.372E-07 3.164E-07 1.442E-05 3.366E-01
+ ETOT  2  -8.6731754567092     7.531E-11 8.334E-15 5.209E-07 9.372E-07 3.164E-07 1.442E-05 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  1.69E-07  4.20E-13  3.66E-12
-    1    -3.16374666020E-07   -6.78586798651E-09    1.30225952896E-08
-    2     3.16374666020E-07    6.78586798651E-09   -1.30225952896E-08
+    1    -3.16375735625E-07   -6.78586792775E-09    1.30225953777E-08
+    2     3.16375735625E-07    6.78586792775E-09   -1.30225953777E-08
  prteigrs : about to open file t50o_TIM7_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1659,11 +1659,11 @@ tolerances: {toldff: 1.00E-05, }
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.78933   -5.25783   -2.21785
 
- ETOT  3  -8.6731754568882    -1.789E-10 2.302E-12 2.075E-08 6.814E-07 3.651E-07 8.084E-06 3.366E-01
+ ETOT  3  -8.6731754568882    -1.790E-10 2.302E-12 2.075E-08 6.814E-07 3.651E-07 8.084E-06 3.366E-01
 
  cartesian forces (ha/bohr); non-corrected avg= -2.78E-08  9.58E-12  8.08E-11
-    1     3.65067423368E-07   -6.77662600698E-09    1.30095169253E-08
-    2    -3.65067423368E-07    6.77662600698E-09   -1.30095169253E-08
+    1     3.65066339994E-07   -6.77662605392E-09    1.30095170700E-08
+    2    -3.65066339994E-07    6.77662605392E-09   -1.30095170700E-08
  prteigrs : about to open file t50o_TIM7_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1685,8 +1685,8 @@ tolerances: {toldff: 1.00E-05, }
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.54001666E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.11132633E-04  sigma(3 1)=  4.33327167E-11
-  sigma(3 3)=  1.11132634E-04  sigma(2 1)= -2.26374337E-11
+  sigma(2 2)=  1.11132633E-04  sigma(3 1)=  4.33327168E-11
+  sigma(3 3)=  1.11132634E-04  sigma(2 1)= -2.26374331E-11
 
 
 --- !ResultsGS
@@ -1699,22 +1699,22 @@ lattice_vectors:
 lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6800000E+02
-convergence: {deltae: -1.789E-10, res2:  2.075E-08, residm:  2.302E-12, diffor:  6.814E-07, }
+convergence: {deltae: -1.790E-10, res2:  2.075E-08, residm:  2.302E-12, diffor:  6.814E-07, }
 etotal    :  -8.67317546E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.84879002E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.54001666E-04,  -2.26374337E-11,   4.33327167E-11, ]
-- [ -2.26374337E-11,   1.11132633E-04,   0.00000000E+00, ]
-- [  4.33327167E-11,   0.00000000E+00,   1.11132634E-04, ]
+- [  2.54001666E-04,  -2.26374331E-11,   4.33327168E-11, ]
+- [ -2.26374331E-11,   1.11132633E-04,   0.00000000E+00, ]
+- [  4.33327168E-11,   0.00000000E+00,   1.11132634E-04, ]
 pressure_GPa:  -4.6708E+00
 xred      :
 - [ -1.8469E-01,   2.1031E-08,  -4.0357E-08, Si]
 - [  1.8469E-01,  -2.1031E-08,   4.0357E-08, Si]
 cartesian_forces: # hartree/bohr
-- [  3.65067423E-07,  -6.77662601E-09,   1.30095169E-08, ]
-- [ -3.65067423E-07,   6.77662601E-09,  -1.30095169E-08, ]
-force_length_stats: {min:   3.65362004E-07, max:   3.65362004E-07, mean:   3.65362004E-07, }
+- [  3.65066340E-07,  -6.77662605E-09,   1.30095171E-08, ]
+- [ -3.65066340E-07,   6.77662605E-09,  -1.30095171E-08, ]
+force_length_stats: {min:   3.65360921E-07, max:   3.65360921E-07, mean:   3.65360921E-07, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -1732,22 +1732,22 @@ force_length_stats: {min:   3.65362004E-07, max:   3.65362004E-07, mean:   3.653
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.21630294742183E+00  1.68246451583450E-07 -3.22853966541023E-07
-  2.21630294742183E+00 -1.68246451583450E-07  3.22853966541023E-07
+ -2.21630294741452E+00  1.68246447567255E-07 -3.22853969363595E-07
+  2.21630294741452E+00 -1.68246447567255E-07  3.22853969363595E-07
  Reduced coordinates (xred)
- -1.84691912285153E-01  2.10308064479313E-08 -4.03567458176279E-08
-  1.84691912285153E-01 -2.10308064479313E-08  4.03567458176279E-08
- Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.65067E-07 2.10942E-07 (free atoms)
-  3.65067423367986E-07 -6.77662600698073E-09  1.30095169252642E-08
- -3.65067423367986E-07  6.77662600698073E-09 -1.30095169252642E-08
+ -1.84691912284543E-01  2.10308059459069E-08 -4.03567461704493E-08
+  1.84691912284543E-01 -2.10308059459069E-08  4.03567461704493E-08
+ Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.65066E-07 2.10941E-07 (free atoms)
+  3.65066339994367E-07 -6.77662605392388E-09  1.30095170699711E-08
+ -3.65066339994367E-07  6.77662605392388E-09 -1.30095170699711E-08
  Gradient of E wrt nuclear positions in reduced coordinates (gred)
- -4.38080908041583E-06  5.42130080558458E-08 -1.04076135402114E-07
-  4.38080908041583E-06 -5.42130080558458E-08  1.04076135402114E-07
- Total energy (etotal) [Ha]= -8.67317545688818E+00
+ -4.38079607993240E-06  5.42130084313911E-08 -1.04076136559769E-07
+  4.38079607993240E-06 -5.42130084313911E-08  1.04076136559769E-07
+ Total energy (etotal) [Ha]= -8.67317545688822E+00
 
  Difference of energy with previous step (new-old):
-           Absolute (Ha)=-8.50573E-11
-           Relative     =-9.80694E-12
+           Absolute (Ha)=-8.50733E-11
+           Relative     =-9.80878E-12
 
  At Broyd/MD step   7, gradients are converged : 
   max grad (force/stress) = 3.6507E-07 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
@@ -1765,24 +1765,24 @@ force_length_stats: {min:   3.65362004E-07, max:   3.65362004E-07, mean:   3.653
       -0.184691912285      0.000000021031     -0.000000040357
        0.184691912285     -0.000000021031      0.000000040357
  rms dE/dt=  2.5375E-06; max dE/dt=  4.7149E-06; dE/dt below (all hartree)
-    1      -0.000004046724      0.000000054136     -0.000000104723
-    2       0.000004714894     -0.000000054290      0.000000103430
+    1      -0.000004046712      0.000000054136     -0.000000104723
+    2       0.000004714880     -0.000000054290      0.000000103430
 
  cartesian coordinates (angstrom) at end:
-    1     -1.17281700710647     0.00000008903219    -0.00000017084696
-    2      1.17281700710647    -0.00000008903219     0.00000017084696
+    1     -1.17281701143326     0.00000008903219    -0.00000017084696
+    2      1.17281701143326    -0.00000008903219     0.00000017084696
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000036506742    -0.00000000677663     0.00000001300952
-    2     -0.00000036506742     0.00000000677663    -0.00000001300952
- frms,max,avg= 2.1094185E-07 3.6506742E-07  -2.784E-08  9.575E-12  8.080E-11 h/b
+    1      0.00000036506634    -0.00000000677663     0.00000001300952
+    2     -0.00000036506634     0.00000000677663    -0.00000001300952
+ frms,max,avg= 2.1094123E-07 3.6506634E-07  -2.784E-08  9.575E-12  8.080E-11 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00001877252011    -0.00000034846809     0.00000066897620
-    2     -0.00001877252011     0.00000034846809    -0.00000066897620
- frms,max,avg= 1.0847065E-05 1.8772520E-05  -1.432E-06  4.924E-10  4.155E-09 e/A
+    1      0.00001877246598    -0.00000034846812     0.00000066897627
+    2     -0.00001877246598     0.00000034846812    -0.00000066897627
+ frms,max,avg= 1.0847034E-05 1.8772466E-05  -1.432E-06  4.924E-10  4.155E-09 e/A
  length scales= 12.000000000000  8.000000000000  8.000000000000 bohr
-              =  6.350126503080  4.233417668720  4.233417668720 angstroms
+              =  6.350126526528  4.233417684352  4.233417684352 angstroms
  prteigrs : about to open file t50o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03849   Average Vxc (hartree)=  -0.22386
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -1831,48 +1831,48 @@ force_length_stats: {min:   3.65362004E-07, max:   3.65362004E-07, mean:   3.653
 --- !EnergyTerms
 iteration_state     : {dtset: 1, itime: 7, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.53915585566816E+00
-hartree             :  1.45926950183091E+00
-xc                  : -3.21818546679241E+00
-Ewald energy        : -5.59015743094939E+00
+kinetic             :  2.53915585567148E+00
+hartree             :  1.45926950183860E+00
+xc                  : -3.21818546679389E+00
+Ewald energy        : -5.59015743093999E+00
 psp_core            :  2.98722879456821E-02
-local_psp           : -5.84092068949938E+00
-non_local_psp       :  1.94779048490826E+00
-total_energy        : -8.67317545688818E+00
-total_energy_eV     : -2.36009106642515E+02
-band_energy         : -1.35343858125359E+00
+local_psp           : -5.84092068951936E+00
+non_local_psp       :  1.94779048490925E+00
+total_energy        : -8.67317545688822E+00
+total_energy_eV     : -2.36009127336548E+02
+band_energy         : -1.35343858125602E+00
 ...
 
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
-    1       7.720563541856     -0.000000319819      0.000000613712
-    2      -7.720563541856      0.000000319819     -0.000000613712
+    1       7.720563541943     -0.000000319819      0.000000613712
+    2      -7.720563541943      0.000000319819     -0.000000613712
  nonlocal contribution to red. grads
-    1       0.436064857035      0.000000027616     -0.000000018501
-    2      -0.436071408388     -0.000000021389      0.000000070824
+    1       0.436064857062      0.000000027616     -0.000000018501
+    2      -0.436071408413     -0.000000021389      0.000000070824
  local psp contribution to red. grads
-    1      -8.070666846262      0.000000342718     -0.000000707301
-    2       8.070682969232     -0.000000351757      0.000000631185
+    1      -8.070666846367      0.000000342718     -0.000000707301
+    2       8.070682969333     -0.000000351757      0.000000631185
  core charge xc contribution to reduced grads
-    1      -0.085986980886      0.000000002012     -0.000000006246
-    2       0.085987472752     -0.000000002444      0.000000002622
+    1      -0.085986980889      0.000000002012     -0.000000006246
+    2       0.085987472754     -0.000000002444      0.000000002622
  residual contribution to red. grads
-    1       0.000021381533      0.000000001609      0.000000013613
-    2      -0.000030776847      0.000000001481      0.000000012511
+    1       0.000021381539      0.000000001609      0.000000013613
+    2      -0.000030776851      0.000000001481      0.000000012511
  rms coord change=  4.5372E-03   atom, delta coord (reduced):
-     1       -0.007858578952      0.000000021031     -0.000000040357
-     2        0.007858578952     -0.000000021031      0.000000040357
+     1       -0.007858578951      0.000000021031     -0.000000040357
+     2        0.007858578951     -0.000000021031      0.000000040357
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.54001666E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.11132633E-04  sigma(3 1)=  4.33327167E-11
-  sigma(3 3)=  1.11132634E-04  sigma(2 1)= -2.26374337E-11
+  sigma(2 2)=  1.11132633E-04  sigma(3 1)=  4.33327168E-11
+  sigma(3 3)=  1.11132634E-04  sigma(2 1)= -2.26374331E-11
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -4.6708E+00 GPa]
-- sigma(1 1)=  7.47298575E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.26963439E+00  sigma(3 1)=  1.27489233E-06
-- sigma(3 3)=  3.26963442E+00  sigma(2 1)= -6.66016183E-07
+- sigma(1 1)=  7.47298701E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.26963494E+00  sigma(3 1)=  1.27489254E-06
+- sigma(3 3)=  3.26963497E+00  sigma(2 1)= -6.66016275E-07
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1886,8 +1886,8 @@ band_energy         : -1.35343858125359E+00
              ecut      7.00000000E+00 Hartree
            enunit           2
            etotal     -8.6731754569E+00
-            fcart      3.6506742337E-07 -6.7766260070E-09  1.3009516925E-08
-                      -3.6506742337E-07  6.7766260070E-09 -1.3009516925E-08
+            fcart      3.6506633999E-07 -6.7766260539E-09  1.3009517070E-08
+                      -3.6506633999E-07  6.7766260539E-09 -1.3009517070E-08
 -          fftalg         512
             intxc           1
            ionmov           4
@@ -1912,17 +1912,17 @@ P           mkmem           1
         optforces           1
            prtvol          10
           spgroup           1
-           strten      2.5400166572E-04  1.1113263289E-04  1.1113263391E-04
-                       0.0000000000E+00  4.3332716709E-11 -2.2637433741E-11
+           strten      2.5400166571E-04  1.1113263289E-04  1.1113263391E-04
+                       0.0000000000E+00  4.3332716821E-11 -2.2637433079E-11
            toldff      1.00000000E-05
            tolmxf      1.00000000E-05
             typat      1  1
-           xangst     -1.1728170071E+00  8.9032187604E-08 -1.7084696080E-07
-                       1.1728170071E+00 -8.9032187604E-08  1.7084696080E-07
-            xcart     -2.2163029474E+00  1.6824645158E-07 -3.2285396654E-07
-                       2.2163029474E+00 -1.6824645158E-07  3.2285396654E-07
-             xred     -1.8469191229E-01  2.1030806448E-08 -4.0356745818E-08
-                       1.8469191229E-01 -2.1030806448E-08  4.0356745818E-08
+           xangst     -1.1728170114E+00  8.9032185808E-08 -1.7084696292E-07
+                       1.1728170114E+00 -8.9032185808E-08  1.7084696292E-07
+            xcart     -2.2163029474E+00  1.6824644757E-07 -3.2285396936E-07
+                       2.2163029474E+00 -1.6824644757E-07  3.2285396936E-07
+             xred     -1.8469191228E-01  2.1030805946E-08 -4.0356746170E-08
+                       1.8469191228E-01 -2.1030805946E-08  4.0356746170E-08
             znucl       14.00000
 
 ================================================================================
@@ -2026,10 +2026,10 @@ P           mkmem           1
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.2
+- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  46 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.1  wall=          3.2
++Overall time at end (sec) : cpu=          3.3  wall=          3.4

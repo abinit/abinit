@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h13 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t80/t80.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h14 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v7_t80/t80.abi
 - output file    -> t80.abo
 - root for input  files -> t80i
 - root for output files -> t80o
@@ -65,6 +65,7 @@ _ WF disk file :      0.016 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          11        mffmem =           1         mkmem =           1
 -   mkqmem =           1        mk1mem =           1           mpw =         169
       nfft =        4096          nkpt =           1
+- my_mband =          11
 ================================================================================
 P This job should need less than                       1.433 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -82,6 +83,7 @@ _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          11        mffmem =           1         mkmem =           1
 -   mkqmem =           1        mk1mem =           1           mpw =         169
       nfft =        4096          nkpt =           1
+- my_mband =          11
 ================================================================================
 P This job should need less than                       1.433 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -99,6 +101,7 @@ _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          11        mffmem =           1         mkmem =           1
 -   mkqmem =           1        mk1mem =           1           mpw =         169
       nfft =        4096          nkpt =           1
+- my_mband =          11
 ================================================================================
 P This job should need less than                       1.433 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -116,6 +119,7 @@ _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          11        mffmem =           1         mkmem =           1
 -   mkqmem =           1        mk1mem =           1           mpw =         169
       nfft =        4096          nkpt =           1
+- my_mband =          11
 ================================================================================
 P This job should need less than                       1.433 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -133,6 +137,7 @@ _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          11        mffmem =           1         mkmem =           1
 -   mkqmem =           1        mk1mem =           1           mpw =         169
       nfft =        4096          nkpt =           1
+- my_mband =          11
 ================================================================================
 P This job should need less than                       1.433 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -166,6 +171,7 @@ _ WF disk file :      0.029 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          11        mffmem =           1         mkmem =           1
 -   mkqmem =           1        mk1mem =           1           mpw =         162
       nfft =        4096          nkpt =           1
+- my_mband =          11
 ================================================================================
 P This job should need less than                       1.424 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -459,7 +465,7 @@ P          mk1mem9          1
               wtk8       1.00000
               wtk9       1.00000
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4144780576E+00  1.4144780576E+00  1.4144780576E+00
+                       1.4144780628E+00  1.4144780628E+00  1.4144780628E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6729761498E+00  2.6729761498E+00  2.6729761498E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -515,8 +521,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10247
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/32ge_lda.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/32ge_lda.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/32ge_lda.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/32ge_lda.fhi
 - Germanium, fhi98PP : Troullier Martins-type, LDA  PW+x, l=1 local
 - 32.00000   4.00000    140700                znucl, zion, pspdat
     6    7    1    1       529   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -609,7 +615,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.41447805755609     1.41447805755609     1.41447805755609
+    2      1.41447806277909     1.41447806277909     1.41447806277909
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -621,7 +627,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.691904599028 10.691904599028 10.691904599028 bohr
-              =  5.657912230224  5.657912230224  5.657912230224 angstroms
+              =  5.657912251116  5.657912251116  5.657912251116 angstroms
  prteigrs : about to open file t80o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.05005   Average Vxc (hartree)=  -0.32082
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -641,7 +647,7 @@ psp_core            :  1.14515911316270E+00
 local_psp           : -2.20308469396243E+00
 non_local_psp       :  4.00317017948068E-02
 total_energy        : -7.96623169747330E+00
-total_energy_eV     : -2.16772188637645E+02
+total_energy_eV     : -2.16772207644923E+02
 band_energy         : -1.17259753227097E+00
 ...
 
@@ -652,9 +658,9 @@ band_energy         : -1.17259753227097E+00
   sigma(3 3)=  1.03283330E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.0387E+00 GPa]
-- sigma(1 1)=  3.03869998E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.03869998E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.03869998E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  3.03870049E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.03870049E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.03870049E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -736,9 +742,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.41447805755609     1.41447805755609     1.41447805755609
+    2      1.41447806277909     1.41447806277909     1.41447806277909
  length scales= 10.691904599028 10.691904599028 10.691904599028 bohr
-              =  5.657912230224  5.657912230224  5.657912230224 angstroms
+              =  5.657912251116  5.657912251116  5.657912251116 angstroms
  prteigrs : about to open file t80o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 11, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -778,8 +784,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10247
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/32ge_lda.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/32ge_lda.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/32ge_lda.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/32ge_lda.fhi
 - Germanium, fhi98PP : Troullier Martins-type, LDA  PW+x, l=1 local
 - 32.00000   4.00000    140700                znucl, zion, pspdat
     6    7    1    1       529   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -793,7 +799,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -861,7 +867,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835274541E+04 eV
+ 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835295132E+04 eV
     (  non-var. 2DEtotal :   -8.6300379190E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -921,7 +927,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835274545E+04 eV
+ 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835295137E+04 eV
     (  non-var. 2DEtotal :   -8.6300379192E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -981,7 +987,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037918E+02 Ha. Also 2DEtotal=   -0.234835274525E+04 eV
+ 2DEtotal=   -0.8630037918E+02 Ha. Also 2DEtotal=   -0.234835295116E+04 eV
     (  non-var. 2DEtotal :   -8.6300379184E+01 Ha)
 
  CALCULATION OF EFFECTIVE MASSES
@@ -1056,7 +1062,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -1124,7 +1130,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835274541E+04 eV
+ 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835295132E+04 eV
     (  non-var. 2DEtotal :   -8.6300379190E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -1184,7 +1190,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835274545E+04 eV
+ 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835295137E+04 eV
     (  non-var. 2DEtotal :   -8.6300379192E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -1244,7 +1250,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037918E+02 Ha. Also 2DEtotal=   -0.234835274525E+04 eV
+ 2DEtotal=   -0.8630037918E+02 Ha. Also 2DEtotal=   -0.234835295116E+04 eV
     (  non-var. 2DEtotal :   -8.6300379184E+01 Ha)
 
  CALCULATION OF EFFECTIVE MASSES
@@ -1317,7 +1323,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -1385,7 +1391,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835274541E+04 eV
+ 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835295132E+04 eV
     (  non-var. 2DEtotal :   -8.6300379190E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -1445,7 +1451,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835274545E+04 eV
+ 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835295137E+04 eV
     (  non-var. 2DEtotal :   -8.6300379192E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -1505,13 +1511,13 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037918E+02 Ha. Also 2DEtotal=   -0.234835274525E+04 eV
+ 2DEtotal=   -0.8630037918E+02 Ha. Also 2DEtotal=   -0.234835295116E+04 eV
     (  non-var. 2DEtotal :   -8.6300379184E+01 Ha)
 
  CALCULATION OF EFFECTIVE MASSES
  NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.
 
- COMMENTS:
+ COMMENTS: 
  - At k-point ( 0.000, 0.000, 0.000), bands     2 through     4
    are DEGENERATE (effective mass tensor is therefore not defined).
    See Section IIIB Eqs. (67)-(70) and Appendix E of PRB 93 205147 (2016).
@@ -1622,7 +1628,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -1690,7 +1696,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835274541E+04 eV
+ 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835295132E+04 eV
     (  non-var. 2DEtotal :   -8.6300379190E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -1750,7 +1756,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835274545E+04 eV
+ 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835295137E+04 eV
     (  non-var. 2DEtotal :   -8.6300379192E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -1810,13 +1816,13 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037918E+02 Ha. Also 2DEtotal=   -0.234835274525E+04 eV
+ 2DEtotal=   -0.8630037918E+02 Ha. Also 2DEtotal=   -0.234835295116E+04 eV
     (  non-var. 2DEtotal :   -8.6300379184E+01 Ha)
 
  CALCULATION OF EFFECTIVE MASSES
  NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.
 
- COMMENTS:
+ COMMENTS: 
  - At k-point ( 0.000, 0.000, 0.000), bands     2 through     4
    are DEGENERATE (effective mass tensor is therefore not defined).
  - Also, 2D requested (perpendicular to Z axis).
@@ -1913,7 +1919,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -1981,7 +1987,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835274541E+04 eV
+ 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835295132E+04 eV
     (  non-var. 2DEtotal :   -8.6300379190E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -2041,7 +2047,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835274545E+04 eV
+ 2DEtotal=   -0.8630037919E+02 Ha. Also 2DEtotal=   -0.234835295137E+04 eV
     (  non-var. 2DEtotal :   -8.6300379192E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -2101,13 +2107,13 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -8.63003792E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.8630037918E+02 Ha. Also 2DEtotal=   -0.234835274525E+04 eV
+ 2DEtotal=   -0.8630037918E+02 Ha. Also 2DEtotal=   -0.234835295116E+04 eV
     (  non-var. 2DEtotal :   -8.6300379184E+01 Ha)
 
  CALCULATION OF EFFECTIVE MASSES
  NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.
 
- COMMENTS:
+ COMMENTS: 
  - At k-point ( 0.000, 0.000, 0.000), bands     2 through     4
    are DEGENERATE.
  - Also, 1D requested (parallel to X axis).
@@ -2184,8 +2190,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10247
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/32ge_lda.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/32ge_lda.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/32ge_lda.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/32ge_lda.fhi
 - Germanium, fhi98PP : Troullier Martins-type, LDA  PW+x, l=1 local
 - 32.00000   4.00000    140700                znucl, zion, pspdat
     6    7    1    1       529   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2247,9 +2253,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.41447805755609     1.41447805755609     1.41447805755609
+    2      1.41447806277909     1.41447806277909     1.41447806277909
  length scales= 10.691904599028 10.691904599028 10.691904599028 bohr
-              =  5.657912230224  5.657912230224  5.657912230224 angstroms
+              =  5.657912251116  5.657912251116  5.657912251116 angstroms
  prteigrs : about to open file t80o_DS8_EIG
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 11, wtk=  1.00000, kpt=  0.2500  0.0000  0.0000 (reduced coord)
@@ -2289,8 +2295,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10247
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/32ge_lda.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/32ge_lda.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/32ge_lda.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/32ge_lda.fhi
 - Germanium, fhi98PP : Troullier Martins-type, LDA  PW+x, l=1 local
 - 32.00000   4.00000    140700                znucl, zion, pspdat
     6    7    1    1       529   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2304,7 +2310,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -2374,7 +2380,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.03291102E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1032911024E+02 Ha. Also 2DEtotal=   -0.281069383786E+03 eV
+ 2DEtotal=   -0.1032911024E+02 Ha. Also 2DEtotal=   -0.281069408431E+03 eV
     (  non-var. 2DEtotal :   -1.0329110244E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -2435,7 +2441,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -4.72475164E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.4724751637E+02 Ha. Also 2DEtotal=   -0.128567030442E+04 eV
+ 2DEtotal=   -0.4724751637E+02 Ha. Also 2DEtotal=   -0.128567041715E+04 eV
     (  non-var. 2DEtotal :   -4.7247516372E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -2497,7 +2503,7 @@ tolerances: {tolwfr: 1.00E-25, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -4.72475164E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.4724751636E+02 Ha. Also 2DEtotal=   -0.128567030400E+04 eV
+ 2DEtotal=   -0.4724751636E+02 Ha. Also 2DEtotal=   -0.128567041673E+04 eV
     (  non-var. 2DEtotal :   -4.7247516356E+01 Ha)
 
  CALCULATION OF EFFECTIVE MASSES
@@ -2541,7 +2547,7 @@ tolerances: {tolwfr: 1.00E-25, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0691904599E+01  1.0691904599E+01  1.0691904599E+01 Bohr
               amu      7.26100000E+01
@@ -2854,7 +2860,7 @@ P          mk1mem9          1
               wtk8       1.00000
               wtk9       1.00000
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4144780576E+00  1.4144780576E+00  1.4144780576E+00
+                       1.4144780628E+00  1.4144780628E+00  1.4144780628E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6729761498E+00  2.6729761498E+00  2.6729761498E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2901,7 +2907,7 @@ P          mk1mem9          1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2917,7 +2923,7 @@ P          mk1mem9          1
 - Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [5] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems,
+- [5] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
 - M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
@@ -2930,12 +2936,12 @@ P          mk1mem9          1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2953,15 +2959,15 @@ P          mk1mem9          1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.6
+- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and  32 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.4  wall=          2.6
++Overall time at end (sec) : cpu=          2.0  wall=          2.1

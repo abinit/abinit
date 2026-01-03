@@ -1,8 +1,8 @@
 
-.Version 10.2.2.3 of ABINIT, released Sep 2024.
-.(sequential version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 22 Oct 2024.
-- ( at 14h03 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/baguetl_optcell-ecutsm/tests/TestBot_MPI1/tutorial_tbase3_2/tbase3_2.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h05 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tbase3_2/tbase3_2.abi
 - output file    -> tbase3_2.abo
 - root for input  files -> tbase3_2i
 - root for output files -> tbase3_2o
