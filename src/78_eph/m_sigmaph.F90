@@ -2550,8 +2550,14 @@ end if
    call pstat_proc%print(_PSTAT_ARGS_)
  end do ! my_ikcalc
 
+ ! --------------------
  ! Print total energies
- ! DBSP
+ ! SP - 01/26 - Note that this way of computing total energies requires computing E4 on a k-point grid that is
+ !              the same as the interpolated q-point grid. This might not always be the best.
+ !              In that case, it is recommended to read E4 from the _SIGEPH.nc file and perform the k-integral
+ !              with a post-processing script.
+ ! --------------------
+ call xmpi_sum_master(sigma%E2, master, comm, ierr)
  call xmpi_sum_master(E4, master, comm, ierr)
  if (my_rank == master .and. dtset%eph_task == 4) then
    ! Spin factor
@@ -2562,13 +2568,18 @@ end if
    endif
    !
    write(ab_out,"(a)")" "
-   write(ab_out,"(a)")" Contributions to total energies (in eV)"
+   write(ab_out,"(a)")" ========================================================= "
+   write(ab_out,"(a)")" Contributions to total energies (in meV)                  "
+   write(ab_out,"(a)")"   See Table II of S. Ponce and X. Gonze, arXiv:2512.04897 "
+   write(ab_out,"(a)")"   for additional information.                             "
+   write(ab_out,"(a)")" ========================================================= "
    write(ab_out,"(a)")" "
    do it = 1, sigma%ntemp
      write(ab_out, "(2(a,f12.6),a)")" Temperature =  ", sigma%kTmesh(it) / kb_HaK, " K"
-     write(ab_out, "(2(a,f12.6),a)")" E^(BO) ",   etot * Ha_eV
+     write(ab_out, "(2(a,f20.6),a)")" E^(BO)   = ",   etot * Ha_eV * 1000
+     write(ab_out, "(2(a,f20.6),a)")" E^(ph)   = ",   sigma%E2(it) * Ha_eV * 1000
      ! We need the spin factor.
-     write(ab_out, "(2(a,f12.6),a)")" E^(elph) ", sfact * E4(it) * Ha_eV
+     write(ab_out, "(2(a,f20.6),a)")" E^(elph) = ", sfact * E4(it) * Ha_eV * 1000
    end do
  end if
 
