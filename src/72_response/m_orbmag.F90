@@ -1473,19 +1473,10 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,e
         if (jband .EQ. iband) cycle
         deltae = eig_k(iband) - eig_k(jband)
         ! deltae test seems to work best compared to deltapert test
-        if (abs(deltae) .LT. dtset%userra) then
-          !write(std_out,'(a,3i4,es16.8)')'JWZ debug adir iband jband deltae',adir,iband,jband,deltae
-          cycle
-        end if
+        if (abs(deltae) .LT. dtset%userra) cycle
         cwavef(1:2,1:npwsp)=cg_k(1:2,(jband-1)*npwsp+1:jband*npwsp)
         dotr = DOT_PRODUCT(cwavef(1,:),gh1c(1,:))+DOT_PRODUCT(cwavef(2,:),gh1c(2,:))
         doti = DOT_PRODUCT(cwavef(1,:),gh1c(2,:))-DOT_PRODUCT(cwavef(2,:),gh1c(1,:))
-        !deltapert = (dotr*dotr + doti*doti)/deltae
-        !if (abs(deltapert) .GT. dtset%userra) then
-        !  write(std_out,'(a,3i4,2es16.8)')'JWZ debug adir iband jband deltae deltapert',& 
-        !    & adir,iband,jband,deltae,deltapert
-        !  cycle
-        !end if
         dcg1(1,:) = dcg1(1,:) + ( dotr*cwavef(1,:) - doti*cwavef(2,:))/deltae
         dcg1(2,:) = dcg1(2,:) + ( dotr*cwavef(2,:) + doti*cwavef(1,:))/deltae
       end do
