@@ -425,18 +425,6 @@ module m_slk
 #endif
 
 
-#ifdef HAVE_GPU
-  interface
-    subroutine my_gpu_memset(gpu_ptr, val, size_in_bytes) bind(c, name="gpu_memset_cpp_")
-      use, intrinsic :: iso_c_binding
-      type(c_ptr),                    intent(in) :: gpu_ptr
-      integer(kind=c_int32_t),        intent(in)    :: val
-      integer(kind=c_size_t),         intent(in)    :: size_in_bytes
-    end subroutine my_gpu_memset
-  end interface
-#endif
-
-
 contains  !==============================================================================
 !!***
 
@@ -1384,23 +1372,23 @@ subroutine basemat_gpu_set_zero(mat)
    if (allocated(mat%buffer_cplx)) then
      gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_cplx))
      ABI_CHECK_CNULL(gpu_ptr, "buffer_cplx not on GPU!")
-     call my_gpu_memset(gpu_ptr, 0, mat%bufsize*dp*2)
+     call gpu_memset(gpu_ptr, 0, mat%bufsize*dp*2)
    end if
    if (allocated(mat%buffer_real)) then
      gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_real))
      ABI_CHECK_CNULL(gpu_ptr, "buffer_real not on GPU!")
-     call my_gpu_memset(gpu_ptr, 0, mat%bufsize*dp)
+     call gpu_memset(gpu_ptr, 0, mat%bufsize*dp)
    end if
  class is (slkmat_sp_t)
    if (allocated(mat%buffer_cplx)) then
      gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_cplx))
      ABI_CHECK_CNULL(gpu_ptr, "buffer_cplx not on GPU!")
-     call my_gpu_memset(gpu_ptr, 0, mat%bufsize*sp*2)
+     call gpu_memset(gpu_ptr, 0, mat%bufsize*sp*2)
    end if
    if (allocated(mat%buffer_real)) then
      gpu_ptr = xomp_get_mapped_ptr(c_loc(mat%buffer_real))
      ABI_CHECK_CNULL(gpu_ptr, "buffer_real not on GPU!")
-     call my_gpu_memset(gpu_ptr, 0, mat%bufsize*sp)
+     call gpu_memset(gpu_ptr, 0, mat%bufsize*sp)
    end if
  end select
 #else

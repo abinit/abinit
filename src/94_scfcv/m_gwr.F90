@@ -2966,7 +2966,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
 
 !Local variables-------------------------------
 !scalars
- integer :: my_ikf, ik_bz, ig2, ipm, npwsp, col_bsize, ndat, gpu_option
+ integer :: my_ikf, ik_bz, ig2, ipm, npwsp, col_bsize, ndat, gpu_option, gpu_mode
  logical :: k_is_gamma
  real(dp) :: kk_bz(3), cpu, wall, gflops, mem_mb
  complex(gwp),allocatable :: ceikr(:)
@@ -3014,12 +3014,13 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
      call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, size_blocs=[-1, col_bsize])
 
      ! Perform FFT G_k(g,g') -> G_k(r,g') and store results in rgp.
+     gpu_mode = 1
      do ig2=1, g_gp%size_local(2), gwr%uc_batch_size
        ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
        if (k_is_gamma) then
-         call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), gpu_mode=1)
+         call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), gpu_mode=gpu_mode)
        else
-         call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), phase_r=ceikr, gpu_mode=1)
+         call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), phase_r=ceikr, gpu_mode=gpu_mode)
        end if
      end do ! ig2
 
@@ -3061,7 +3062,8 @@ end subroutine gwr_get_myk_green_gpr
 !!
 !! SOURCE
 
-subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
+subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, &
+                               g0, ipm_list) ! optional
 
 !Arguments ------------------------------------
  class(gwr_t),intent(in) :: gwr
@@ -3071,14 +3073,14 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
 
 !Local variables-------------------------------
 !scalars
- integer :: ig2, ipm, npwsp, col_bsize, ir1, ndat, ii, num_pm, ipm_list__(2), gpu_option
+ integer :: ig2, ipm, npwsp, col_bsize, ir1, ndat, ii, num_pm, ipm_list__(2), gpu_option, gpu_mode
  logical :: have_g0
  !real(dp) :: cpu, wall, gflops
  type(__slkmat_t) :: rgp, gt_pm(2), gpr
  type(desc_t) :: desc_kbz
  type(uplan_t) :: uplan_k
  complex(gwp),allocatable :: ceig0r(:), conjg_ceig0r(:)
- character(len=500) :: msg
+ character(len=500) :: msg, gpu_action
 ! *************************************************************************
 
  !call cwtime(cpu, wall, gflops, "start")
@@ -3113,22 +3115,26 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
  call uplan_k%init(desc_kbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_kbz%istwfk, &
                    desc_kbz%gvec, gwp, gpu_option)
 
+ gpu_action = "None"; if (gpu_option == ABI_GPU_OPENMP) gpu_action = "alloc"
+
  ! For each tau in imp_list__
  do ii=1,num_pm
    ipm = ipm_list__(ii)
    ! Allocate temporary rgp PBLAS matrix to store G(r,g')
    npwsp = desc_kbz%npw * gwr%nspinor
    ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
-   call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_kbz%istwfk, size_blocs=[-1, col_bsize])
+   call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_kbz%istwfk, &
+                 size_blocs=[-1, col_bsize]) !, gpu_action=gpu_action)
 
    associate (g_gp => gt_pm(ipm))
+   gpu_mode = 1
    do ig2=1, g_gp%size_local(2), gwr%uc_batch_size
      ! G_k(g,g') -> G_k(r,g') and store results in rgp.
      ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
      if (have_g0) then
-       call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), phase_r=ceig0r, gpu_mode=1)
+       call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), phase_r=ceig0r, gpu_mode=gpu_mode)
      else
-       call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), gpu_mode=1)
+       call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), gpu_mode=gpu_mode)
      end if
    end do ! ig2
    end associate
@@ -3136,18 +3142,20 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
    ! MPI transpose: G_k(r,g') -> G_k(g',r) and transform g' index.
    call rgp%ptrans("N", gpr, free=.True.)
 
+   gpu_mode = 1
    do ir1=1, gpr%size_local(2), gwr%uc_batch_size
      ! G_k(g',r) -> G_k(r',r) and store results in rgp.
      ndat = blocked_loop(ir1, gpr%size_local(2), gwr%uc_batch_size)
      if (have_g0) then
        call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), &
-                              isign=-1, iscale=0, phase_r=conjg_ceig0r, gpu_mode=1)
+                              isign=-1, iscale=0, phase_r=conjg_ceig0r, gpu_mode=gpu_mode)
      else
        call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), &
-                               isign=-1, iscale=0, gpu_mode=1)
+                               isign=-1, iscale=0, gpu_mode=gpu_mode)
      end if
    end do ! ir1
    call gpr%free()
+
  end do ! ii
 
  call slk_array_free(gt_pm); call desc_kbz%free(); call uplan_k%free()
@@ -3260,9 +3268,9 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
  class(__slkmat_t),intent(inout) :: rp_r, g_gp
 
 !Local variables-------------------------------
- integer :: ig2, npwsp, nrsp, col_bsize, ir2, ndat, isign
+ integer :: ig2, npwsp, nrsp, col_bsize, ir2, ndat, isign, gpu_option, gpu_mode
  type(__slkmat_t) :: r_gp, gp_r
- character(len=500) :: msg
+ character(len=500) :: msg, gpu_action
  type(uplan_t) :: uplan_k
 ! *************************************************************************
 
@@ -3270,6 +3278,8 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
  npwsp = desc%npw * gwr%nspinor; nrsp = gwr%g_nfft * gwr%nspinor
  ABI_CHECK(block_dist_1d(nrsp, gwr%g_comm%nproc, col_bsize, msg), msg)
 
+ gpu_option = gwr%dtset%gpu_option
+ gpu_action = "None"; if (gpu_option == ABI_GPU_OPENMP) gpu_action = "alloc"
  call gp_r%init(npwsp, nrsp, gwr%g_slkproc, desc%istwfk, size_blocs=[-1, col_bsize])
 
  call uplan_k%init(desc%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc%istwfk, desc%gvec, gwp, &
@@ -3282,9 +3292,11 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
  if (gwr%dtset%gpu_option == ABI_GPU_OPENMP) call rp_r%gpu_map("update_from") ! FIXME
 
  ! F(r',r) --> F(g',r) and store results in gp_r.
+ gpu_mode = 1
  do ir2=1, rp_r%size_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir2, rp_r%size_local(2), gwr%uc_batch_size)
-   call uplan_k%execute_rg(ndat, rp_r%buffer_cplx(:,ir2), gp_r%buffer_cplx(:,ir2), isign=isign, iscale=0, gpu_mode=1)
+   call uplan_k%execute_rg(ndat, rp_r%buffer_cplx(:,ir2), gp_r%buffer_cplx(:,ir2), &
+                           isign=isign, iscale=0, gpu_mode=gpu_mode)
  end do
 
  ! F(g',r) --> F(r,g')
@@ -3293,9 +3305,11 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
  call gp_r%ptrans("C", r_gp, free=.True.)
 
  ! F(r,g') --> F(g,g') and store results in g_gp.
+ gpu_mode = 1
  do ig2=1, g_gp%size_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ig2, g_gp%size_local(2), gwr%uc_batch_size)
-   call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=-isign, iscale=0, gpu_mode=1)
+   call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), &
+                           isign=-isign, iscale=0, gpu_mode=gpu_mode)
  end do
 
  ! Scale output.
@@ -3437,10 +3451,10 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
 
 !Local variables-------------------------------
 !scalars
- integer :: my_iqf, iq_bz, ig2, npwsp, col_bsize, ndat, gpu_option
+ integer :: my_iqf, iq_bz, ig2, npwsp, col_bsize, ndat, gpu_option, gpu_mode
  real(dp) :: cpu, wall, gflops, mem_mb, qq_bz(3)
  logical :: q_is_gamma
- character(len=500) :: msg
+ character(len=500) :: msg, gpu_action
  type(__slkmat_t) :: rgp, wc_qbz
  type(uplan_t) :: uplan_q
  complex(gwp),allocatable :: ceiqr(:)
@@ -3453,6 +3467,8 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(alloc:ceiqr) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
+
+ gpu_action = "None"; if (gpu_option == ABI_GPU_OPENMP) gpu_action = "alloc"
 
  do my_iqf=1,gwr%my_nqbz
    if (.not. select_my_qbz(my_iqf)) continue
@@ -3478,13 +3494,14 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
                      desc_q%gvec, gwp, gpu_option)
 
    ! FFT and store results in rgp
+   gpu_mode = 1
    do ig2=1,wc_qbz%size_local(2), gwr%uc_batch_size
      ndat = blocked_loop(ig2, wc_qbz%size_local(2), gwr%uc_batch_size)
 
      if (q_is_gamma) then
-       call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), gpu_mode=1)
+       call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), gpu_mode=gpu_mode)
      else
-       call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), phase_r=ceiqr, gpu_mode=1)
+       call uplan_q%execute_gr(ndat, wc_qbz%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2), phase_r=ceiqr, gpu_mode=gpu_mode)
      end if
    end do ! ig2
 
@@ -3535,8 +3552,8 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
 
 !Local variables-------------------------------
 !scalars
- integer :: ig2, npwsp, nrsp, col_bsize, ir1, ndat, gpu_option
- character(len=500) :: msg
+ integer :: ig2, npwsp, nrsp, col_bsize, ir1, ndat, gpu_option, gpu_mode
+ character(len=500) :: msg, gpu_action
  type(desc_t) :: desc_qbz
  type(__slkmat_t) :: wc_ggp, rgp, gpr
  type(uplan_t) :: uplan_k
@@ -3544,6 +3561,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
 ! *************************************************************************
 
  gpu_option = gwr%dtset%gpu_option
+ gpu_action = "None"; if (gpu_option == ABI_GPU_OPENMP) gpu_action = "alloc"
 
  ! NB: Non-zero g0, requires the application of the phase.
  if (any(g0_q /= 0)) then
@@ -3570,13 +3588,16 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
                    desc_qbz%gvec, gwp, gpu_option)
 
  ! FFT Wc(g,g') -> Wc(r,g') and store results in rgp
+ gpu_mode = 1
  do ig2=1,wc_ggp%size_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ig2, wc_ggp%size_local(2), gwr%uc_batch_size)
 
    if (any(g0_q /= 0)) then
-     call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), phase_r=ceig0r, gpu_mode=1)
+     call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), &
+                             phase_r=ceig0r, gpu_mode=gpu_mode)
    else
-     call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), gpu_mode=1)
+     call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2), &
+                             gpu_mode=gpu_mode)
    end if
  end do ! ig2
 
@@ -3584,12 +3605,15 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  call rgp%ptrans("N", gpr, free=.True.)
 
  ! Wc_q(g',r) -> Wc_q(r',r) and store results in wc_rgp.
+ gpu_mode = 1
  do ir1=1,gpr%size_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir1, gpr%size_local(2), gwr%uc_batch_size)
    if (any(g0_q /= 0)) then
-     call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), isign=-1, iscale=0, phase_r=conjg_ceig0r, gpu_mode=1)
+     call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), &
+                             isign=-1, iscale=0, phase_r=conjg_ceig0r, gpu_mode=gpu_mode)
    else
-     call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), isign=-1, iscale=0, gpu_mode=1)
+     call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), &
+                             isign=-1, iscale=0, gpu_mode=gpu_mode)
    end if
  end do ! ir1
 
@@ -4458,7 +4482,7 @@ subroutine gwr_build_tchi(gwr)
 !scalars
  integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, nrsp, npwsp, ncol_glob, col_bsize, my_iqi, gt_scbox_win, nspinor, gpu_option
  integer :: idat, ndat, max_ndat, sc_nfft, sc_nfftsp, spin, ik_bz, iq_ibz, ikq_ibz, ikq_bz, ierr, ipm, itau, ig2, ifft !, ii
- integer :: use_umklp ! ik_ibz, isym_k, trev_k, tsign_k, ! g0_k(3),
+ integer :: use_umklp, gpu_mode ! ik_ibz, isym_k, trev_k, tsign_k, ! g0_k(3),
  !integer :: my_ikf_start, my_ikf_stop !, nkf_batch_size, nkf_now, op_type
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu_ir, wall_ir, gflops_ir
@@ -4747,11 +4771,12 @@ subroutine gwr_build_tchi(gwr)
          call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, istwfk1, &
                            desc_q%gvec, gwp, gpu_option)
 
+         gpu_mode = 1
          do ig2=1, chi_rgp%size_local(2), gwr%uc_batch_size
            ndat = blocked_loop(ig2, chi_rgp%size_local(2), gwr%uc_batch_size)
 
            call uplan_q%execute_rg(ndat, chi_rgp%buffer_cplx(:, ig2), &
-                                   gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2), phase_r=cemiqr, gpu_mode=1)
+                                   gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2), phase_r=cemiqr, gpu_mode=gpu_mode)
          end do ! ig2
 
          call uplan_q%free()
@@ -4805,6 +4830,7 @@ subroutine gwr_build_tchi(gwr)
    if (gpu_option == ABI_GPU_OPENMP) then
      gpu_action = "alloc"; call wrtout(std_out, " Allocating Chi_q(r,r', +tau) on the GPU...")
    end if
+
    ABI_MALLOC(chiq_rpr, (gwr%nqibz))
    do iq_ibz=1,gwr%nqibz
      call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize], gpu_action=gpu_action)
