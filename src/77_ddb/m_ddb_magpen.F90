@@ -88,18 +88,17 @@ contains
 !!
 !! SOURCE
 
- subroutine ddb_magpen(ddb,ddb_lw,delta_asrw0,delta_asrw0_fm,dissip,& 
+ subroutine ddb_magpen(ddb,ddb_lw,& 
 & magpen,mpatpol,mpdir,mpert,mpopt,natom, &
 & ntypat,omegaflag,prtvol,rftyp,ucvol,timdisp,xred)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: dissip,mpert,mpopt,natom,ntypat,omegaflag,prtvol,rftyp,timdisp
+ integer,intent(in) :: mpert,mpopt,natom,ntypat,omegaflag,prtvol,rftyp,timdisp
  real(dp),intent(in) :: magpen,ucvol
 !arrays
  type(ddb_type),intent(inout) :: ddb,ddb_lw
  integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp), intent(inout) :: delta_asrw0(3*natom,3), delta_asrw0_fm(3*natom,3)
  real(dp),intent(in) :: xred(3,natom)
 
 !Local variables -------------------------
@@ -122,8 +121,9 @@ contains
  complex(dpc), allocatable :: lm_epsilon(:,:),dum_phongreen(:,:)
 
 ! *********************************************************************
- write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
- ' Linear-response magnetic penalty section ',ch10
+ write(msg, '(2a,(80a),6a)' ) ch10,('=',ii=1,80),ch10,ch10,&
+ ' Constrained DFPT section ',ch10,ch10,&
+ ' (Quantities are in atomic units and along Cartesian directions)'
  call wrtout([std_out, ab_out], msg)
 
  prtopt=1
@@ -286,9 +286,9 @@ contains
    !Print the physical quantities in the new magnetic boundary conditions
    if (prtopt==1) then
      if (mpopt==1) then
-       call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,prtvol,qeq0,qphnrm,qphon,ucvol)
+       call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,qeq0,qphnrm,qphon,ucvol)
      else if (mpopt==2) then
-       call mp_d2etot_print(ddb,ddb%val_rs,kblok,mpert,natom,nblok,2,omega,prtvol,qeq0,qphnrm,qphon,ucvol)
+       call mp_d2etot_print(ddb,ddb%val_rs,kblok,mpert,natom,nblok,2,omega,qeq0,qphnrm,qphon,ucvol)
      end if
    end if
 
@@ -301,9 +301,6 @@ contains
  ! BERRY CURVATURES
  if (timdisp==1) then
 
-!   if (dissip==1) then
-!     ABI_BUG("Berry curvatures calculation is not implemented with dissipation, set dissip=0")
-!   end if
    ABI_MALLOC(ddb_lw%val_fs,(2,ddb_lw%msize,ddb_lw%nblok))
 
    ABI_MALLOC(bc_barmagsus,(ndim,ndim))
@@ -311,7 +308,7 @@ contains
    ABI_MALLOC(bc_sp,(ndim,(natom+5)*3))
 
    write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
-   ' Frequency-derivatives magnetic penalty section ',ch10
+   ' Frequency-derivatives (Berry curvatures) constrained DFPT section ',ch10
    call wrtout([std_out, ab_out], msg)
 
    rffreq(:)=0
@@ -1105,8 +1102,6 @@ contains
 !! barmagsus(ndim,ndim)= Penalized spin-sussceptibility tensor (\bar{\chi})
 !! (equal to barmom^{\dagger} in the nondissipative regime)
 !! ddb= the ddb object
-!! dissip= if 0 a nondissipative regime is assumed
-!!         if 1 a dissipative regime is assumed with a finite \eta introduced at the interpolation in omega regime
 !! iblok= index of the IFCs block
 !! invhmat(ndim,ndim)= (I-\alpha\bar{\chi})^-1 matrix
 !! magsus(ndim,ndim)= Spin-sussceptibility tensor
@@ -1242,7 +1237,6 @@ contains
 !!
 !! FUNCTION
 !! Write on output file the fixed- and relaxed-spin susceptibilities
-!! Only macroscopic quantities are printed if prtvol=1
 !!
 !! INPUTS
 !! blkval= 2nd-order susceptibilities matrix 
@@ -1257,12 +1251,12 @@ contains
 !!
 !! SOURCE
 
- subroutine mp_d2etot_print(ddb,blkval,kblok,mpert,natom,nblok,opt,omega,prtvol,qeq0,qphnrm,qphon,ucvol)
+ subroutine mp_d2etot_print(ddb,blkval,kblok,mpert,natom,nblok,opt,omega,qeq0,qphnrm,qphon,ucvol)
 
 !Arguments -------------------------------
 !scalars
  class(ddb_type),intent(in) :: ddb
- integer,intent(in) :: kblok,mpert,natom,nblok,opt,prtvol
+ integer,intent(in) :: kblok,mpert,natom,nblok,opt
  logical,intent(in) :: qeq0
  real(dp),intent(in) :: ucvol
 !arrays
@@ -1289,32 +1283,30 @@ contains
  rftyp = 1
 
  !IFCs
- if (prtvol >1) then
-   rfphon(1:2)=1
-   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   if (iblok/=0.and.iblok==kblok) then
-     if (opt==1) then
-       call wrtout([ab_out,std_out], ' Frozen-spin interatomic force constants')
-     else if (opt==2) then
-       call wrtout([ab_out,std_out], ' Relaxed-spin interatomic force constants')
-     end if
-     call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
-     do ipert1= 1, natom
-       do idir1= 1, 3
-         irow=( ipert1-1)*3 + idir1
-         do ipert2= 1, natom
-           do idir2= 1, 3
-             icol=( ipert2-1)*3 + idir2
-             val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
-             write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
-           & ipert1, cart(idir1), ipert2, cart(idir2), val(1), val(2)
-             call wrtout([ab_out,std_out], msg)
-           end do
-         end do
-         call wrtout([ab_out,std_out], ' ')
-       end do
-     end do
+ rfphon(1:2)=1
+ call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+ if (iblok/=0.and.iblok==kblok) then
+   if (opt==1) then
+     call wrtout([ab_out,std_out], ' Frozen-spin interatomic force constants')
+   else if (opt==2) then
+     call wrtout([ab_out,std_out], ' Relaxed-spin interatomic force constants')
    end if
+   call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+   do ipert1= 1, natom
+     do idir1= 1, 3
+       irow=( ipert1-1)*3 + idir1
+       do ipert2= 1, natom
+         do idir2= 1, 3
+           icol=( ipert2-1)*3 + idir2
+           val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
+           write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
+         & ipert1, cart(idir1), ipert2, cart(idir2), val(1), val(2)
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], ' ')
+     end do
+   end do
  end if
 
  if (qeq0) then
@@ -1387,6 +1379,18 @@ contains
      call wrtout([ab_out,std_out], ' M-dir E-dir        Real              Imag')
      ipert1= ddb%natom + 5
      ipert2= ddb%natom + 2
+     do idir2= 1, 3
+       do idir1= 1, 3
+         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)/ucvol
+         write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
+       & val(1), val(2)
+         call wrtout([ab_out,std_out], msg)
+       end do
+       call wrtout([ab_out,std_out], ' ')
+     end do
+     call wrtout([ab_out,std_out], ' P-dir H-dir        Real              Imag')
+     ipert1= ddb%natom + 2
+     ipert2= ddb%natom + 5
      do idir2= 1, 3
        do idir1= 1, 3
          val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)/ucvol
