@@ -1308,11 +1308,21 @@ ABI_MSG_END
 
 
 FALLBACKS_SUBDIRS=""
+AC_ARG_ENABLE([create_reconfigure_for_fb],
+    [],                                 dnl <- no help string: keeps it hidden
+    [enable_reconfigure_for_fb="$enableval"],       dnl action if given
+    [enable_reconfigure_for_fb="yes"]                dnl default if not given
+)
+
+
+
 if test "x${mandatory}" = "x#"; then
   AC_MSG_NOTICE(["running cp ${abinit_srcdir}/config/scripts/install_fallbacks.sh ${abinit_builddir}"])	
   cp ${abinit_srcdir}/config/scripts/install_fallbacks.sh .
-  printf '%s/configure %s %s\n' "${abinit_srcdir}"  "$ac_configure_args" "$fb_path" > ${abinit_builddir}/.reconfigure
-  chmod +x ${abinit_builddir}/.reconfigure
+  if test "x$enable_reconfigure_for_fb" = "xyes"; then
+      printf '%s/configure %s %s --disable-create_reconfigure_for_fb \n' "${abinit_srcdir}"  "$ac_configure_args" "$fb_path" > ${abinit_builddir}/.reconfigure
+      chmod +x ${abinit_builddir}/.reconfigure
+  fi
   chmod +x ${abinit_builddir}/install_fallbacks.sh
 #  FALLBACKS_SUBDIRS="fallbacks"
 #else
