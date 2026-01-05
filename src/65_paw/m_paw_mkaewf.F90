@@ -157,7 +157,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  integer :: max_nfgd,nfgd,ln_size,lmn_size,my_comm_atom,option
  integer :: iorder_cprj,comm_cell,me_kpt,ibsp,ibg,isppol,ikpt,nband_k,cplex
  integer :: n1,n2,n3,n4,n5,n6,ikg,npwout,istwf_k,npw_k
- integer :: nfftot,nprocs
+ integer :: nfftot,nprocs,tmp_unt
  integer :: optcut,optgr0,optgr1,optgr2,optrad,start_band,start_kpt,stop_kpt,stop_band
  logical :: my_atmtab_allocated,paral_atom
  real(dp),parameter :: weight1=one
@@ -169,7 +169,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  integer, pointer :: my_atmtab(:)
  integer,allocatable :: gbound(:,:),kg_k(:,:)
  real(dp) :: red(3),shift(3),rfft(3),kpoint(3),cp_fact(2)
- real(dp),allocatable :: r0shift(:,:,:),phk_atm(:,:,:)
+ real(dp),allocatable :: r0shift(:,:,:),phk_atm(:,:,:),paw_compl(:)
  real(dp),allocatable :: buf_tmp(:,:,:),fofgin(:,:),fofgin_down(:,:),fofgout(:,:)
  real(dp),allocatable :: denpot(:,:,:),fofr(:,:,:,:),fofr_down(:,:,:,:),phkr(:,:)
  real(dp),allocatable :: ur_ae(:,:), ur_pw(:,:),ur_ae_onsite(:,:),ur_ps_onsite(:,:)
@@ -284,7 +284,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 
 !=== Initialize ETSF_IO files ===
 ! FIXME: nspinor == 2 is buggy
-
+if(dtset%pawprtwf==1) then
  fname = trim(dtfil%filnam_ds(4))//'_PAWAVES.nc'
  write(msg,'(2a)')' Opening file for AE PAW wave functions: ',trim(fname)
  call wrtout([std_out, ab_out], msg, 'PERS')
@@ -333,17 +333,18 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  end if
 
  call xmpi_barrier(comm_cell)
-
- ! Reopen the file in parallel inside comm_cell
- ! Note that we use individual IO thus there's no need to handle idle processes
- ! if paral_kgb == 0 and nprocs > nkpt * nsppol
- NCF_CHECK(nctk_open_modify(ncid, fname, comm_cell))
- ae_ncid = nctk_idname(ncid, "ur_ae")
- pw_ncid = nctk_idname(ncid, "ur_pw")
- aeons_ncid = nctk_idname(ncid, "ur_ae_onsite")
- psons_ncid = nctk_idname(ncid, "ur_ps_onsite")
-
- NCF_CHECK(nctk_set_datamode(ncid))
+ 
+   ! Reopen the file in parallel inside comm_cell
+   ! Note that we use individual IO thus there's no need to handle idle processes
+   ! if paral_kgb == 0 and nprocs > nkpt * nsppol
+   NCF_CHECK(nctk_open_modify(ncid, fname, comm_cell))
+   ae_ncid = nctk_idname(ncid, "ur_ae")
+   pw_ncid = nctk_idname(ncid, "ur_pw")
+   aeons_ncid = nctk_idname(ncid, "ur_ae_onsite")
+   psons_ncid = nctk_idname(ncid, "ur_ps_onsite")
+  
+   NCF_CHECK(nctk_set_datamode(ncid))
+ endif
 
 !Init structure storing phi_{nlm} and tphi_(nlm} on the dense FFT points located in the PAW spheres.
  ABI_MALLOC(Paw_onsite,(natom))
@@ -356,6 +357,8 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  end if
 
  bdtot_index=0; icg=0; ibg=0; norm_rerr=smallest_real
+ ABI_MALLOC(paw_compl,(maxval(nband)))
+ paw_compl=zero
 
  ! === Loop over spin ===
  do isppol=1,nsppol
@@ -596,6 +599,15 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
        write(std_out,*)"norm (R,AEWF)= ",norm
        call flush_unit(std_out)
 
+       norm=zero
+       do ifft=1, nfftot 
+         norm=norm+(ur_pw(1,ifft)**2+ur_pw(2,ifft)**2)*ur_mask(ifft)
+       enddo
+       do ifft=1, nfftot
+         paw_compl(iband)=paw_compl(iband)+(ur_pw(1,ifft)*ur_ps_onsite(1,ifft)+ur_pw(2,ifft)*ur_ps_onsite(2,ifft))&
+&                         /norm/nsppol*dtset%wtk(ikpt) !/(stop_kpt-start_kpt+1)
+       enddo
+
 !      MS: Various testing and debugging options
        if (.TRUE..and.nprocs==1) then
          if (present(pseudo_norms)) then
@@ -621,21 +633,23 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
          ABI_WARNING(msg)
        end if ! Check if serial run
 
-       ncerr = nf90_put_var(ncid, ae_ncid, ur_ae, &
-          start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
-       NCF_CHECK(ncerr)
+       if(dtset%pawprtwf==1) then
+         ncerr = nf90_put_var(ncid, ae_ncid, ur_ae, &
+            start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
+         NCF_CHECK(ncerr)
 
-       ncerr = nf90_put_var(ncid, pw_ncid, ur_pw, &
-         start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
-       NCF_CHECK(ncerr)
+         ncerr = nf90_put_var(ncid, pw_ncid, ur_pw, &
+           start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
+         NCF_CHECK(ncerr)
 
-       ncerr = nf90_put_var(ncid, aeons_ncid, ur_ae_onsite, &
-         start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
-       NCF_CHECK(ncerr)
+         ncerr = nf90_put_var(ncid, aeons_ncid, ur_ae_onsite, &
+           start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
+         NCF_CHECK(ncerr)
 
-       ncerr = nf90_put_var(ncid, psons_ncid, ur_ps_onsite, &
-         start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
-       NCF_CHECK(ncerr)
+         ncerr = nf90_put_var(ncid, psons_ncid, ur_ps_onsite, &
+           start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
+         NCF_CHECK(ncerr)
+       endif
 
        ABI_FREE(ur_ae)
        ABI_FREE(ur_ae_onsite)
@@ -683,6 +697,14 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
    ABI_COMMENT(msg)
  end if
 
+
+ open(file=trim(dtfil%filnam_ds(4))//'_PAWCOMPL', newunit=tmp_unt,status='unknown',form='formatted')
+ do iband=1,maxval(nband)
+   write(tmp_unt,*) iband,paw_compl(iband)
+ enddo
+ close(tmp_unt)
+
+ ABI_FREE(paw_compl)
  ABI_FREE(r0shift)
  ABI_FREE(phk_atm)
  call pawfgrtab_free(local_pawfgrtab)

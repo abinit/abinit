@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h11 )
-
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h12 )
+  
 
 ================================================================================
 
@@ -64,7 +64,7 @@
 
 ================================================================================
 
- Treat the first list of vectors
+ Treat the first list of vectors 
 
  asrflag is 2
   1  1  1  0.000E+00
@@ -136,25 +136,25 @@
 - -2.013815E+01 -3.846256E+00  3.583830E-01  6.333141E-01  3.315891E+00
 -  4.553684E+00
  Speed of sound for this q and mode:
-   in atomic units:    -0.5523751926E-03
+   in atomic units:    -0.5523751923E-03
    in units km/s:             -1.20843
  Partial Debye temperature for this q and mode:
-   in atomic units:    -0.1038469176E-03
-   in SI units K  :            -32.79222
+   in atomic units:    -0.1038469175E-03
+   in SI units K  :            -32.79226
 
  Speed of sound for this q and mode:
-   in atomic units:     0.5146872538E-04
+   in atomic units:     0.5146872535E-04
    in units km/s:              0.11260
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9676155904E-05
-   in SI units K  :              3.05548
+   in atomic units:     0.9676155899E-05
+   in SI units K  :              3.05549
 
  Speed of sound for this q and mode:
-   in atomic units:     0.9095260092E-04
+   in atomic units:     0.9095260087E-04
    in units km/s:              0.19898
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1709915176E-04
-   in SI units K  :              5.39948
+   in atomic units:     0.1709915175E-04
+   in SI units K  :              5.39949
 
  asrflag is 2
   1  1  1  0.000E+00
@@ -184,25 +184,25 @@
 - -1.732807E+01 -5.049116E+00  1.044279E+00  1.416687E+00  3.583863E+00
 -  8.944610E+00
  Speed of sound for this q and mode:
-   in atomic units:    -0.3625611483E-03
+   in atomic units:    -0.3625611481E-03
    in units km/s:             -0.79317
  Partial Debye temperature for this q and mode:
-   in atomic units:    -0.6816174618E-04
-   in SI units K  :            -21.52375
+   in atomic units:    -0.6816174615E-04
+   in SI units K  :            -21.52378
 
  Speed of sound for this q and mode:
-   in atomic units:     0.7498638615E-04
+   in atomic units:     0.7498638611E-04
    in units km/s:              0.16405
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1409749236E-04
-   in SI units K  :              4.45163
+   in SI units K  :              4.45164
 
  Speed of sound for this q and mode:
    in atomic units:     0.1017278645E-03
    in units km/s:              0.22255
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1912490876E-04
-   in SI units K  :              6.03916
+   in atomic units:     0.1912490875E-04
+   in SI units K  :              6.03917
 
  asrflag is 2
   1  1  1  0.000E+00
@@ -232,25 +232,25 @@
 - -1.062047E+01 -4.418232E+00  6.627975E-01  1.593221E+00  3.095974E+00
 -  1.289566E+01
  Speed of sound for this q and mode:
-   in atomic units:     0.3172894142E-04
+   in atomic units:     0.3172894140E-04
    in units km/s:              0.06941
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.5965062892E-05
+   in atomic units:     0.5965062888E-05
    in SI units K  :              1.88362
 
  Speed of sound for this q and mode:
-   in atomic units:     0.7626948188E-04
+   in atomic units:     0.7626948183E-04
    in units km/s:              0.16685
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.1433871525E-04
-   in SI units K  :              4.52780
+   in atomic units:     0.1433871524E-04
+   in SI units K  :              4.52781
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1482081150E-03
+   in atomic units:     0.1482081149E-03
    in units km/s:              0.32423
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.2786322793E-04
-   in SI units K  :              8.79850
+   in atomic units:     0.2786322792E-04
+   in SI units K  :              8.79851
 
  asrflag is 2
   1  1  1  0.000E+00
@@ -280,25 +280,25 @@
 - -4.720332E+00 -1.883130E+00  4.237815E+00  5.268929E+00  1.062268E+01
 -  1.621610E+01
  Speed of sound for this q and mode:
-   in atomic units:    -0.6761084303E-04
+   in atomic units:    -0.6761084300E-04
    in units km/s:             -0.14791
  Partial Debye temperature for this q and mode:
-   in atomic units:    -0.1271088517E-04
+   in atomic units:    -0.1271088516E-04
    in SI units K  :             -4.01378
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1521521146E-03
+   in atomic units:     0.1521521145E-03
    in units km/s:              0.33286
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.2860470258E-04
-   in SI units K  :              9.03264
+   in atomic units:     0.2860470257E-04
+   in SI units K  :              9.03265
 
  Speed of sound for this q and mode:
-   in atomic units:     0.1891726255E-03
+   in atomic units:     0.1891726254E-03
    in units km/s:              0.41385
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.3556458420E-04
-   in SI units K  :             11.23039
+   in atomic units:     0.3556458418E-04
+   in SI units K  :             11.23041
 
  asrflag is 2
   1  1  1  0.000E+00
@@ -379,7 +379,7 @@
   -4.332324E-05 -2.958698E-05  5.939967E-05  7.979950E-05  9.693145E-05
    1.168478E-04
  Phonon frequencies in cm-1    :
-- -9.508352E+00 -6.493591E+00  1.303672E+01  1.751397E+01  2.127399E+01
+- -9.508352E+00 -6.493590E+00  1.303672E+01  1.751397E+01  2.127399E+01
 -  2.564513E+01
  asrflag is 2
   1  1  1  0.000E+00
@@ -467,6 +467,6 @@
 
 ================================================================================
 
-+Total cpu time      0.046  and wall time      0.046 sec
++Total cpu time      0.049  and wall time      0.049 sec
 
  anaddb : the run completed successfully.

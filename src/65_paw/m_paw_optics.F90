@@ -910,7 +910,7 @@ end if
  integer,parameter :: master=0
  integer :: bdtot_index,cplex,etiq,iatom,ic,ibg,idir
  integer :: ierr,ikpt,ilmn,iln,ount,is,my_jb
- integer :: iorder_cprj,ispinor,isppol,istwf_k,itypat
+ integer :: iorder_cprj,ispinor,isppol,istwf_k,itypat,itypat2
  integer :: jb,jbsp,jlmn,lmn_size,lmncmax,mband_cprj,ncid,varid
  integer :: me,my_nspinor,nband_cprj_k,option_core,pnp_size
  integer :: nband_k,nphicor,ncorespinor,sender,iomode,fformopt,master_spfftband
@@ -925,13 +925,13 @@ end if
  integer :: nc_count(7),nc_start(7),nc_stride(7),tmp_shape(3)
  integer,allocatable :: lcor(:,:),ncor(:,:),kappacor(:,:),nphicor_arr(:)
  real(dp) :: tsec(2)
- real(dp),allocatable :: energy_cor(:,:)
+ real(dp),allocatable :: energy_cor(:,:),occ_cor(:,:)
  real(dp),allocatable :: psinablapsi(:,:,:,:,:),psinablapsi_soc(:,:,:,:,:)
  real(dp),pointer :: soc_ij(:,:,:)
  type(coeff5_type),allocatable,target :: phisocphj(:)
  type(pawcprj_type),pointer :: cprj_k(:,:),cprj_k_loc(:,:)
  type(nctkdim_t) :: ncdims(3)
- type(nctkarr_t) :: nctk_arrays(7)
+ type(nctkarr_t) :: nctk_arrays(8)
  type(atomorb_type), allocatable :: atm(:)
 
 ! ************************************************************************
@@ -999,6 +999,25 @@ end if
    endif
  enddo
 
+ if(dtset%cwfs_wouth==1) then
+   do itypat=1,dtset%ntypat
+     if(atm(itypat)%mult==1) then
+       do itypat2=1,dtset%ntypat
+         if(atm(itypat2)%mult>1.and.atm(itypat2)%znucl==atm(itypat)%znucl.and.&
+&           atm(itypat2)%mesh_size==atm(itypat)%mesh_size.and.&
+&           atm(itypat2)%ln_size==atm(itypat)%ln_size.and.&
+&           atm(itypat2)%nsppol==atm(itypat)%nsppol.and.&
+&           atm(itypat2)%zcore_orig>atm(itypat)%zcore_orig) then
+           write(std_out,*) 'Core wfs of typat ',itypat,' replaced by those of typat ',itypat2
+           atm(itypat)%phi=atm(itypat2)%phi
+           exit
+         endif
+       enddo
+     endif
+   enddo
+ endif
+
+
  nphicor=0
  ncorespinor=0
  do itypat=1,dtset%ntypat
@@ -1041,19 +1060,22 @@ end if
  ABI_MALLOC(ncor,(nphicor,dtset%ntypat))
  ABI_MALLOC(lcor,(nphicor,dtset%ntypat))
  ABI_MALLOC(kappacor,(nphicor,dtset%ntypat))
+ ABI_MALLOC(occ_cor,(nphicor,dtset%ntypat))
  energy_cor=zero
  ncor=0
  lcor=0
  kappacor=0
+ occ_cor=one
  do itypat=1,dtset%ntypat
    do iln=1,atm(itypat)%ln_size
      energy_cor(iln,itypat)=atm(itypat)%eig(iln,1)
      ncor(iln,itypat)=atm(itypat)%indln(2,iln)
      lcor(iln,itypat)=atm(itypat)%indln(1,iln)
+     occ_cor(iln,itypat)=(two/dble(dtset%nsppol*dtset%nspinor))*atm(itypat)%occ(iln,1)/atm(itypat)%max_occ(iln,1)
      if(atm(itypat)%dirac) then
        kappacor(iln,itypat)=atm(itypat)%kappa(iln)
      else
-       kappacor(iln,itypat)=zero
+       kappacor(iln,itypat)=0
      endif
    enddo
  enddo
@@ -1102,6 +1124,9 @@ end if
      nctk_arrays(7)%name="number_of_core_states"
      nctk_arrays(7)%dtype="int"
      nctk_arrays(7)%shape_str="number_of_atom_types"
+     nctk_arrays(8)%name="occupation_core"
+     nctk_arrays(8)%dtype="dp"
+     nctk_arrays(8)%shape_str="max_number_of_core_states,number_of_atom_types"
      NCF_CHECK(nctk_def_arrays(ncid, nctk_arrays))
      NCF_CHECK(nctk_set_atomic_units(ncid, "eigenvalues_core"))
      NCF_CHECK(nctk_set_atomic_units(ncid, "dipole_core_valence"))
@@ -1115,6 +1140,8 @@ end if
      NCF_CHECK(nf90_put_var(ncid,varid,lcor))
      varid=nctk_idname(ncid,"kappa_core")
      NCF_CHECK(nf90_put_var(ncid,varid,kappacor))
+     varid=nctk_idname(ncid,"occupation_core")
+     NCF_CHECK(nf90_put_var(ncid,varid,occ_cor))
      varid=nctk_idname(ncid,"number_of_core_states")
      NCF_CHECK(nf90_put_var(ncid,varid,nphicor_arr))
 !    Write eigenvalues
@@ -1136,7 +1163,7 @@ end if
      do itypat=1,dtset%ntypat
        write(ount) atm(itypat)%ln_size
        do iln=1,nphicor
-         write(ount) ncor(iln,itypat),lcor(iln,itypat),kappacor(iln,itypat),energy_cor(iln,itypat)
+         write(ount) ncor(iln,itypat),lcor(iln,itypat),kappacor(iln,itypat),occ_cor(iln,itypat),energy_cor(iln,itypat)
        end do
      enddo
    else
@@ -1151,6 +1178,7 @@ end if
  ABI_FREE(ncor)
  ABI_FREE(lcor)
  ABI_FREE(kappacor)
+ ABI_FREE(occ_cor)
  ABI_FREE(energy_cor)
 
 !----------------------------------------------------------------------------------

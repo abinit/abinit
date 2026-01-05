@@ -122,7 +122,7 @@ contains
 ! *************************************************************************
 
    if (lotfvar%classic==5 .OR. lotfvar%classic==6) then
-     rcut = 4.0d0 / 0.529177 !--check consistency with glue parameters (mind d and its "limits"!)
+     rcut = 4.0d0 / Bohr_Ang !--check consistency with glue parameters (mind d and its "limits"!)
      rcut_nbl = rcut + rcrust
    end if
 

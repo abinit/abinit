@@ -1127,6 +1127,9 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        if (xmpi_comm_rank(comm_bandfft) == master) then
          ncerr = nf90_put_var(ncid, kg_varid, kg_k, start=[1,1,ikpt], count=[3,npwtot_k,1])
          NCF_CHECK_MSG(ncerr, "putting kg_k")
+       else
+         ncerr = nf90_put_var(ncid, kg_varid, kg_k, start=[1,1,ikpt], count=[0,0,0])
+         NCF_CHECK_MSG(ncerr, "skiping kg_k")
        end if
        ABI_FREE(kg_k)
 
