@@ -38,7 +38,7 @@ module m_slk
 
  use m_fstrings,      only : firstchar, toupper, itoa, sjoin, ltoa, string_in
  use m_time,          only : cwtime, cwtime_report
- use m_numeric_tools, only : blocked_loop !, print_arr
+ !use m_numeric_tools, only : blocked_loop !, print_arr
 
  implicit none
 

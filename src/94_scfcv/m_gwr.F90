@@ -189,7 +189,6 @@ module m_gwr
  private
 !!***
 
-
 !!****t* m_gwr/desc_t
 !! NAME
 !! desc_t
