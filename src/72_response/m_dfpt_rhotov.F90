@@ -293,6 +293,8 @@ contains
      call dotprod_vn(cplex,rhor1,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
      if (ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
        call dotprod_vn(cplex,rhor1,elmag1 ,doti,nfft,nfftot,nspden,1,v1zeeman,ucvol)
+       !A factor of four, present in <0|H^1|1> terms, compensates the missing
+       !half factor
        elmag1=two*elmag1
      end if
    else
@@ -697,9 +699,9 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
                         & + rhomag_eff(1,4)**2+rhomag_eff(2,4)**2 )
    end if
    
-   Bx(:)=-one*magpen*rhomag_eff(:,2)
-   By(:)=-one*magpen*rhomag_eff(:,3)
-   Bz(:)=-one*magpen*rhomag_eff(:,4)
+   Bx(:)=-half*magpen*rhomag_eff(:,2)
+   By(:)=-half*magpen*rhomag_eff(:,3)
+   Bz(:)=-half*magpen*rhomag_eff(:,4)
    if (cplex==1) then
      do ifft=1,nfft
        vmagpen1(ifft,1)=Bz(1)
@@ -747,30 +749,30 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
 
      if (cplex==1) then
        do ifft=1,nfft
-         Blocx(ifft)=Blocx(ifft)+one*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
-         Blocy(ifft)=Blocy(ifft)+one*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
-         Blocz(ifft)=Blocz(ifft)+one*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
+         Blocx(ifft)=Blocx(ifft)+half*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
+         Blocy(ifft)=Blocy(ifft)+half*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
+         Blocz(ifft)=Blocz(ifft)+half*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
        end do
      else if (cplex==2.and.sum(qphon(:)**2) < tol8) then
        do ifft=1,nfft
-         Blocx(2*ifft-1)=Blocx(2*ifft-1)+one*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
-         Blocy(2*ifft-1)=Blocy(2*ifft-1)+one*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
-         Blocz(2*ifft-1)=Blocz(2*ifft-1)+one*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
-         Blocx(2*ifft)=Blocx(2*ifft)+one*magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
-         Blocy(2*ifft)=Blocy(2*ifft)+one*magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
-         Blocz(2*ifft)=Blocz(2*ifft)+one*magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
+         Blocx(2*ifft-1)=Blocx(2*ifft-1)+half*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
+         Blocy(2*ifft-1)=Blocy(2*ifft-1)+half*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
+         Blocz(2*ifft-1)=Blocz(2*ifft-1)+half*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
+         Blocx(2*ifft)=Blocx(2*ifft)+half*magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
+         Blocy(2*ifft)=Blocy(2*ifft)+half*magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
+         Blocz(2*ifft)=Blocz(2*ifft)+half*magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
        end do
      else if (cplex==2.and.sum(qphon(:)**2) > tol8) then
        do ifft=1,nfft
          re=2*ifft-1
          im=2*ifft
   
-         Blocx_re=+one*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
-         Blocy_re=+one*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
-         Blocz_re=+one*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
-         Blocx_im=+one*magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
-         Blocy_im=+one*magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
-         Blocz_im=+one*magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
+         Blocx_re=+half*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
+         Blocy_re=+half*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
+         Blocz_re=+half*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
+         Blocx_im=+half*magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
+         Blocy_im=+half*magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
+         Blocz_im=+half*magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
       
          arg=two_pi*dot_product(qphon,-taumr(ifft,iatom,:))
          phr1d_re=dcos(arg)
