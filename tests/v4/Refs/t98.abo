@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h10 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h12 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t98/t98.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v4_t98/t98.abi
 - output file    -> t98.abo
 - root for input  files -> t98i
 - root for output files -> t98o
@@ -73,9 +73,9 @@ P           mkmem           1
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   1  1  0   0  0  1
            toldfe      1.00000000E-06 Hartree
             typat      1  1  1
-           xangst     -3.7042404601E-02 -3.7042404601E-02  7.4084809203E-02
-                       2.9375236054E-16  2.9375236054E-16 -3.3338164141E+00
-                      -4.2228341245E+00 -5.1859366442E-01 -3.0374771773E+00
+           xangst     -3.7042404738E-02 -3.7042404738E-02  7.4084809476E-02
+                       2.9375236163E-16  2.9375236163E-16 -3.3338164264E+00
+                      -4.2228341401E+00 -5.1859366633E-01 -3.0374771885E+00
             xcart     -7.0000000000E-02 -7.0000000000E-02  1.4000000000E-01
                        5.5511151231E-16  5.5511151231E-16 -6.3000000000E+00
                       -7.9800000000E+00 -9.8000000000E-01 -5.7400000000E+00

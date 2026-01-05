@@ -1,6 +1,6 @@
- 
+  
 .Version    4.0 of ATDEP
-.Copyright (C) 1998-2025 ABINIT group (FB,JB).
+.Copyright (C) 1998-2025 ABINIT group (FB,JB,GA).
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -13,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : 16 Feb 2025.
+.Starting date : 21 Dec 2025.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -1062,10 +1062,10 @@
  
  ========== For an Anisotropic Material =======================================
  Sijkl [in GPa-1]=
- | S11 S12 S13 S14 S15 S16 |      0.415   -0.206   -0.206   -0.000   -0.000   -0.000
- | S21 S22 S23 S24 S25 S26 |     -0.206    0.415   -0.206   -0.000   -0.000   -0.000
- | S31 S32 S33 S34 S35 S36 |     -0.206   -0.206    0.415   -0.000   -0.000   -0.000
- | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.029   -0.000   -0.000
+ | S11 S12 S13 S14 S15 S16 |      0.415   -0.206   -0.206    0.000    0.000   -0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.206    0.415   -0.206    0.000    0.000   -0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.206   -0.206    0.415    0.000    0.000   -0.000
+ | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.029    0.000   -0.000
  | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.029   -0.000
  | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.029
  
@@ -1080,29 +1080,29 @@
  | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.029    0.000    0.000
  | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.029    0.000
  | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.029
- For density rho [in kg.m-3]=19281.220
+ For density rho [in kg.m-3]=19280.771
  
  ========================= Voigt average (constant strain) ===================
  ISOTHERMAL modulus [in GPa]: Bulk Kt=  131.461 and Shear G=   21.239
  Average of Young modulus E [in GPa]=   60.461 Lame modulus Lambda [in GPa]=  117.301 and Poisson ratio Nu=    0.423
- Velocities [in m.s-1]: compressional Vp= 2878.679  shear Vs= 1049.542  and bulk Vphi= 2611.144
- Debye velocity [in m.s-1]= 1191.876  and temperature [in K]=  129.655
+ Velocities [in m.s-1]: compressional Vp= 2878.713  shear Vs= 1049.554  and bulk Vphi= 2611.175
+ Debye velocity [in m.s-1]= 1191.890  and temperature [in K]=  129.657
  
  ========================= Reuss average (constant stress) ===================
  ISOTHERMAL modulus [in GPa]: Bulk Kt=  131.461 and Shear G=    1.945
  Average of Young modulus E [in GPa]=    5.806 Lame modulus Lambda [in GPa]=  130.164 and Poisson ratio Nu=    0.493
- Velocities [in m.s-1]: compressional Vp= 2636.771  shear Vs=  317.593  and bulk Vphi= 2611.144
- Debye velocity [in m.s-1]=  363.447  and temperature [in K]=   39.537
+ Velocities [in m.s-1]: compressional Vp= 2636.802  shear Vs=  317.596  and bulk Vphi= 2611.175
+ Debye velocity [in m.s-1]=  363.451  and temperature [in K]=   39.537
  
  ============================== Hill average =================================
  ISOTHERMAL modulus [in GPa]: Bulk Kt=  131.461 and Shear G=   11.592
  Average of Young modulus E [in GPa]=   33.783 Lame modulus Lambda [in GPa]=  123.733 and Poisson ratio Nu=    0.457
- Velocities [in m.s-1]: compressional Vp= 2760.376  shear Vs=  775.372  and bulk Vphi= 2611.144
- Debye velocity [in m.s-1]=  884.325  and temperature [in K]=   96.199
+ Velocities [in m.s-1]: compressional Vp= 2760.408  shear Vs=  775.381  and bulk Vphi= 2611.175
+ Debye velocity [in m.s-1]=  884.336  and temperature [in K]=   96.200
  
  ========================= Elastic anisotropy =================================
  Elastic anisotropy index : A_U= 5*G_V/G_R + K_V/K_R - 6 =   49.605
- Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =    0.000
+ Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =   -0.000
  Shear anisotropy ratio : A_G= (G_V-G_R)/(G_V+G_R) =    0.832
   
  #############################################################################
@@ -1119,7 +1119,7 @@
   Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 
   Sigma   = (< (F_MD - F_TDEP)^2 >/<F_MD**2>)**0.5 
      <U_MD>            U_0              U_1              U_2            Delta_U          Delta_U2          Delta_F2          Sigma
- -1416.53439      -1416.65002          0.00000          0.11563          0.00000          0.44669          0.00899          0.72034
+ -1416.53452      -1416.65015          0.00000          0.11563          0.00000          0.44669          0.00899          0.72034
  NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=      0.11633
  
  See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files

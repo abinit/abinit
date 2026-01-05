@@ -1,8 +1,8 @@
 
-.Version 10.3.4-d of ABINIT, released Nov 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 15 Dec 2024.
-- ( at 12h23 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Test_suite/libxc_t17/t17.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h01 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/libxc_t17/t17.abi
 - output file    -> t17.abo
 - root for input  files -> t17i
 - root for output files -> t17o
@@ -459,8 +459,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -472,8 +472,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -557,7 +557,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.49287   Average Vxc (hartree)=  -0.17143
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -574,7 +574,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.35537932616907E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.74573919851064E+00
-total_energy_eV     : -7.47153633101217E+01
+total_energy_eV     : -7.47153698614033E+01
 band_energy         : -9.85741860749021E-01
 ...
 
@@ -585,9 +585,9 @@ band_energy         : -9.85741860749021E-01
   sigma(3 3)= -1.64970769E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  4.8536E+00 GPa]
-- sigma(1 1)= -4.85360678E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -4.85360678E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -4.85360678E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -4.85360760E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -4.85360760E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -4.85360760E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -613,8 +613,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -626,8 +626,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -710,7 +710,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.49311   Average Vxc (hartree)=  -0.17146
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -727,7 +727,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.35518963062441E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.74624991683083E+00
-total_energy_eV     : -7.47292606623768E+01
+total_energy_eV     : -7.47292672148770E+01
 band_energy         : -9.86224706882791E-01
 ...
 
@@ -738,9 +738,9 @@ band_energy         : -9.86224706882791E-01
   sigma(3 3)= -1.65687389E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  4.8747E+00 GPa]
-- sigma(1 1)= -4.87469046E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -4.87469046E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -4.87469046E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -4.87469128E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -4.87469128E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -4.87469128E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -766,8 +766,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -779,8 +779,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -863,7 +863,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.49419   Average Vxc (hartree)=  -0.17546
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -880,7 +880,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.35232264722980E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.74965560275558E+00
-total_energy_eV     : -7.48219340893818E+01
+total_energy_eV     : -7.48219406500078E+01
 band_energy         : -9.88385957161569E-01
 ...
 
@@ -891,9 +891,9 @@ band_energy         : -9.88385957161569E-01
   sigma(3 3)= -1.68245134E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  4.9499E+00 GPa]
-- sigma(1 1)= -4.94994191E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -4.94994191E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -4.94994191E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -4.94994275E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -4.94994275E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -4.94994275E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -919,8 +919,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -932,8 +932,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -1016,7 +1016,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.51279   Average Vxc (hartree)=  -0.17405
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -1033,7 +1033,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.38478031291944E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.78936445222718E+00
-total_energy_eV     : -7.59024668349924E+01
+total_energy_eV     : -7.59024734903630E+01
 band_energy         : -1.02557640786093E+00
 ...
 
@@ -1044,9 +1044,9 @@ band_energy         : -1.02557640786093E+00
   sigma(3 3)= -3.22847718E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  9.4985E-01 GPa]
-- sigma(1 1)= -9.49850621E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -9.49850621E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -9.49850621E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -9.49850781E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -9.49850781E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -9.49850781E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1072,8 +1072,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1085,8 +1085,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -1169,7 +1169,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.52225   Average Vxc (hartree)=  -0.20952
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -1186,7 +1186,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.38377759182063E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.80960440536760E+00
-total_energy_eV     : -7.64532239692048E+01
+total_energy_eV     : -7.64532306728675E+01
 band_energy         : -1.04450015796106E+00
 ...
 
@@ -1197,9 +1197,9 @@ band_energy         : -1.04450015796106E+00
   sigma(3 3)=  2.02289166E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.9516E-01 GPa]
-- sigma(1 1)=  5.95155173E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  5.95155173E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.95155173E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  5.95155273E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.95155273E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.95155273E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1225,8 +1225,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1238,8 +1238,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -1322,7 +1322,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.51348   Average Vxc (hartree)=  -0.20414
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -1339,7 +1339,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.36769635021961E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.79074027519316E+00
-total_energy_eV     : -7.59399048818431E+01
+total_energy_eV     : -7.59399115404963E+01
 band_energy         : -1.02696234027932E+00
 ...
 
@@ -1350,9 +1350,9 @@ band_energy         : -1.02696234027932E+00
   sigma(3 3)=  6.55316655E-06  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.9280E-01 GPa]
-- sigma(1 1)=  1.92800784E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.92800784E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.92800784E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.92800816E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.92800816E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.92800816E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  7 ==================================================================
@@ -1378,8 +1378,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1391,8 +1391,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -1475,7 +1475,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.50434   Average Vxc (hartree)=  -0.20385
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -1492,7 +1492,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.34945343824689E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.77159743226756E+00
-total_energy_eV     : -7.54190016348229E+01
+total_energy_eV     : -7.54190082478017E+01
 band_energy         : -1.00868039418126E+00
 ...
 
@@ -1503,9 +1503,9 @@ band_energy         : -1.00868039418126E+00
   sigma(3 3)= -3.12723521E-06  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  9.2006E-02 GPa]
-- sigma(1 1)= -9.20064208E-02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -9.20064208E-02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -9.20064208E-02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -9.20064363E-02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -9.20064363E-02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -9.20064363E-02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  8 ==================================================================
@@ -1531,8 +1531,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1544,8 +1544,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -1628,7 +1628,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.53089   Average Vxc (hartree)=  -0.20277
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -1645,7 +1645,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.40602698584893E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.83232060803684E+00
-total_energy_eV     : -7.70713632798792E+01
+total_energy_eV     : -7.70713700377423E+01
 band_energy         : -1.06177430916567E+00
 ...
 
@@ -1656,9 +1656,9 @@ band_energy         : -1.06177430916567E+00
   sigma(3 3)=  3.05999676E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -9.0028E-01 GPa]
-- sigma(1 1)=  9.00281977E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  9.00281977E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  9.00281977E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  9.00282129E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  9.00282129E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  9.00282129E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  9 ==================================================================
@@ -1684,8 +1684,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1697,8 +1697,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -1781,7 +1781,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.50983   Average Vxc (hartree)=  -0.17953
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -1798,7 +1798,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.44273169046232E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.75713540505443E+00
-total_energy_eV     : -7.50254698609326E+01
+total_energy_eV     : -7.50254764394053E+01
 band_energy         : -1.01966135622029E+00
 ...
 
@@ -1809,9 +1809,9 @@ band_energy         : -1.01966135622029E+00
   sigma(3 3)=  1.71322864E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.0405E+00 GPa]
-- sigma(1 1)=  5.04049182E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  5.04049182E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.04049182E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  5.04049267E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.04049267E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.04049267E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 10 ==================================================================
@@ -1837,8 +1837,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1850,8 +1850,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -1934,7 +1934,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.48529   Average Vxc (hartree)=  -0.15827
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -1951,7 +1951,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.34212218853454E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.72983300236986E+00
-total_energy_eV     : -7.42825337011826E+01
+total_energy_eV     : -7.42825402145122E+01
 band_energy         : -9.70588867143358E-01
 ...
 
@@ -1962,9 +1962,9 @@ band_energy         : -9.70588867143358E-01
   sigma(3 3)= -9.32663510E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  2.7440E+00 GPa]
-- sigma(1 1)= -2.74399032E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -2.74399032E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -2.74399032E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -2.74399078E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -2.74399078E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -2.74399078E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 11 ==================================================================
@@ -1990,8 +1990,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2003,8 +2003,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -2087,7 +2087,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =   2.39504   Average Vxc (hartree)=  -0.14593
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -2104,7 +2104,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.94169467793747E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -3.47869422997251E-01
-total_energy_eV     : -9.46600840233491E+00
+total_energy_eV     : -9.46600923234475E+00
 band_energy         :  4.79008729592704E+00
 ...
 
@@ -2115,9 +2115,9 @@ band_energy         :  4.79008729592704E+00
   sigma(3 3)= -1.43873298E-02  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  4.2329E+02 GPa]
-- sigma(1 1)= -4.23289786E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -4.23289786E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -4.23289786E+02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -4.23289857E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -4.23289857E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -4.23289857E+02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 12 ==================================================================
@@ -2143,8 +2143,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2156,8 +2156,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -2240,7 +2240,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.52734   Average Vxc (hartree)=  -0.21284
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -2257,7 +2257,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.39758825533733E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.81803595429245E+00
-total_energy_eV     : -7.66826580835333E+01
+total_energy_eV     : -7.66826648073135E+01
 band_energy         : -1.05468512490041E+00
 ...
 
@@ -2268,9 +2268,9 @@ band_energy         : -1.05468512490041E+00
   sigma(3 3)=  1.13357094E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.3351E-01 GPa]
-- sigma(1 1)=  3.33508029E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.33508029E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.33508029E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  3.33508085E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.33508085E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.33508085E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 13 ==================================================================
@@ -2296,8 +2296,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2309,8 +2309,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -2393,7 +2393,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.52178   Average Vxc (hartree)=  -0.14112
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -2410,7 +2410,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.41064064809469E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.81991134500375E+00
-total_energy_eV     : -7.67336900600661E+01
+total_energy_eV     : -7.67336967883209E+01
 band_energy         : -1.04355349593218E+00
 ...
 
@@ -2421,9 +2421,9 @@ band_energy         : -1.04355349593218E+00
   sigma(3 3)= -2.67338951E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  7.8654E-01 GPa]
-- sigma(1 1)= -7.86538217E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -7.86538217E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -7.86538217E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -7.86538349E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -7.86538349E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -7.86538349E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 14 ==================================================================
@@ -2449,8 +2449,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2462,8 +2462,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -2546,7 +2546,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.50886   Average Vxc (hartree)=  -0.14182
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -2563,7 +2563,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.32013556281368E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.81216281368527E+00
-total_energy_eV     : -7.65228418000076E+01
+total_energy_eV     : -7.65228485097746E+01
 band_energy         : -1.01772972284445E+00
 ...
 
@@ -2574,9 +2574,9 @@ band_energy         : -1.01772972284445E+00
   sigma(3 3)=  1.57175578E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -4.6243E+00 GPa]
-- sigma(1 1)=  4.62426437E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  4.62426437E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  4.62426437E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  4.62426515E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  4.62426515E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  4.62426515E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 15 ==================================================================
@@ -2602,8 +2602,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2615,8 +2615,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -2699,7 +2699,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.48447   Average Vxc (hartree)=  -0.12984
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -2716,7 +2716,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.39929536281234E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.76241430962230E+00
-total_energy_eV     : -7.51691161594894E+01
+total_energy_eV     : -7.51691227505575E+01
 band_energy         : -9.68942668745372E-01
 ...
 
@@ -2727,9 +2727,9 @@ band_energy         : -9.68942668745372E-01
   sigma(3 3)= -3.97429692E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.1693E+00 GPa]
-- sigma(1 1)= -1.16927833E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -1.16927833E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -1.16927833E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -1.16927852E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -1.16927852E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -1.16927852E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 16 ==================================================================
@@ -2755,8 +2755,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2768,8 +2768,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -2852,7 +2852,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.51505   Average Vxc (hartree)=  -0.13839
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -2869,7 +2869,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.39740604805750E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.80890142045757E+00
-total_energy_eV     : -7.64340947769702E+01
+total_energy_eV     : -7.64341014789556E+01
 band_energy         : -1.03009554430824E+00
 ...
 
@@ -2880,9 +2880,9 @@ band_energy         : -1.03009554430824E+00
   sigma(3 3)= -5.05593862E-06  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4875E-01 GPa]
-- sigma(1 1)= -1.48750825E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -1.48750825E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -1.48750825E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -1.48750850E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -1.48750850E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -1.48750850E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 17 ==================================================================
@@ -2908,8 +2908,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2921,8 +2921,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -3005,7 +3005,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.55226   Average Vxc (hartree)=  -0.16211
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -3022,7 +3022,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.51968683771264E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.84226994181850E+00
-total_energy_eV     : -7.73420984205632E+01
+total_energy_eV     : -7.73421052021652E+01
 band_energy         : -1.10451659116384E+00
 ...
 
@@ -3033,9 +3033,9 @@ band_energy         : -1.10451659116384E+00
   sigma(3 3)=  2.23621088E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.5792E+00 GPa]
-- sigma(1 1)=  6.57915843E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  6.57915843E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  6.57915843E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  6.57915954E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  6.57915954E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  6.57915954E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 18 ==================================================================
@@ -3061,8 +3061,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop_test/tests/Pspdir/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3074,8 +3074,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=    0.00001257
          --- l  ekb(1:nproj) -->
@@ -3158,7 +3158,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  Fermi (or HOMO) energy (hartree) =  -0.52684   Average Vxc (hartree)=  -0.16890
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -3175,7 +3175,7 @@ psp_core            :  2.01061929829747E-07
 local_psp           : -4.40384362472417E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.82720639767506E+00
-total_energy_eV     : -7.69321985385837E+01
+total_energy_eV     : -7.69322052842445E+01
 band_energy         : -1.05368557403002E+00
 ...
 
@@ -3186,13 +3186,13 @@ band_energy         : -1.05368557403002E+00
   sigma(3 3)=  8.23987867E-06  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.4243E-01 GPa]
-- sigma(1 1)=  2.42425560E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  2.42425560E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.42425560E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  2.42425600E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  2.42425600E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.42425600E-01  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      5.0000000000E+00  5.0000000000E+00  5.0000000000E+00 Bohr
               amu      4.00260200E+00
@@ -3377,7 +3377,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -3389,12 +3389,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -3412,7 +3412,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -3427,15 +3427,15 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.5
+- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  53 WARNINGs and  77 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.4  wall=          2.5
++Overall time at end (sec) : cpu=          2.5  wall=          2.6
