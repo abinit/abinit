@@ -2559,7 +2559,7 @@ end if
  ! --------------------
  call xmpi_sum_master(sigma%E2, master, comm, ierr)
  call xmpi_sum_master(E4, master, comm, ierr)
- if (my_rank == master .and. dtset%eph_task == 4) then
+ if (my_rank == master .and. dtset%eph_task == 4 .and. dtset%eph_stern /= 0 .and. .not. sigma%imag_only ) then
    ! Spin factor
    if (dtset%nsppol == 1 .and. dtset%nspinor == 1) then
      sfact = two
