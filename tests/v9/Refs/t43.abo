@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h15 )
-
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h16 )
+  
 
 ================================================================================
 
@@ -58,7 +58,7 @@
 
 ================================================================================
 
- Treat the first list of vectors
+ Treat the first list of vectors 
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -161,6 +161,6 @@
 
 ================================================================================
 
-+Total cpu time      0.046  and wall time      0.046 sec
++Total cpu time      0.047  and wall time      0.047 sec
 
  anaddb : the run completed successfully.

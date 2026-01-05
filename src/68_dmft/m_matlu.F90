@@ -86,6 +86,7 @@ MODULE m_matlu
  public :: symmetrize_matlu
  public :: ylm2jmj_matlu
  public :: magnfield_matlu
+ public :: magmomjmj_matlu
 !!***
 
 !!****t* m_matlu/matlu_type
@@ -3372,7 +3373,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,option,optprt
- complex(dp), allocatable, intent(out) :: mu
+ complex(dp), allocatable, intent(inout) :: mu(:)
 !arrays
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
@@ -3513,11 +3514,10 @@ end subroutine add_matlu
      ! Trace of matrix product
      !=====================================
 
-   mu=czero
    do im1=1,tndim
      do im2=1,tndim
        if(im1==im2) then
-         mu = mu + gathermatlu(iatom)%value(im1,im2)
+         mu(iatom) = mu(iatom) + gathermatlu(iatom)%value(im1,im2)
        end if
      end do
    end do
@@ -3613,7 +3613,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,option,optprt
- complex(dp), allocatable, intent(out) :: mu
+ complex(dp), allocatable, intent(inout) :: mu(:)
 !arrays
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
@@ -3777,11 +3777,10 @@ end subroutine add_matlu
      ! Trace of matrix product
      !=====================================
 
-   mu=czero
    do im1=1,tndim
      do im2=1,tndim
        if(im1==im2) then
-         mu = mu + gathermatlu(iatom)%value(im1,im2)
+         mu(iatom) = mu(iatom) + gathermatlu(iatom)%value(im1,im2)
        end if
      end do
    end do
@@ -3879,7 +3878,7 @@ end subroutine add_matlu
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,option,optprt
- complex(dp), allocatable, intent(out) :: mu
+ complex(dp), allocatable, intent(inout) :: mu(:)
 !arrays
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
@@ -4072,11 +4071,10 @@ end subroutine add_matlu
      ! Trace of matrix product
      !=====================================
 
-   mu=czero
    do im1=1,tndim
      do im2=1,tndim
        if(im1==im2) then
-         mu = mu + gathermatlu(iatom)%value(im1,im2)
+         mu(iatom) = mu(iatom) + gathermatlu(iatom)%value(im1,im2)
        end if
      end do
    end do
@@ -4129,7 +4127,6 @@ end subroutine add_matlu
  end do
  ABI_FREE(gathermatlu)
  ABI_FREE(muzeeman)
-
  end subroutine magmomfzeeman_matlu
 
 !!***
@@ -4745,6 +4742,125 @@ end subroutine add_matlu
 
  end subroutine magnfield_matlu
 !!***
+
+!!****f* m_matlu/magmomjmj_matlu                                                                         
+!! NAME                                                                                                  
+!! magmomjmj_matlu                                                                                       
+!!                                                                                                       
+!! FUNCTION                                                                                              
+!! return the matrix of magnetic moments in the Jmj basis                  
+!!                                                                                                       
+!!                                                                                                       
+!! COPYRIGHT                                                                                             
+!! Copyright (C) 2005-2025 ABINIT group (FGendron)                                                       
+!! This file is distributed under the terms of the                                                       
+!! GNU General Public License, see ~abinit/COPYING                                                       
+!! or http://www.gnu.org/copyleft/gpl.txt .                                                              
+!!                                                                                                       
+!! INPUTS                                                                                                
+!!                                                                                                       
+!! OUTPUT                                                                                                
+!!                                                                                                       
+!! SIDE EFFECTS                                                                                          
+!!                                                                                                       
+!! NOTES                                                                                                  
+!!                                                                                                        
+!! SOURCE                                                                                                 
+ subroutine magmomjmj_matlu(matlu,natom)                                                                  
+ use defs_basis                                                                                           
+ use defs_wvltypes                                                                                        
+ implicit none                                                                                            
+                                                                                                          
+!Arguments ------------------------------------                                                           
+!scalars                                                                                                  
+ integer, intent(in) :: natom                                                                             
+!arrays                                                                                                   
+ type(matlu_type), intent(inout) :: matlu(natom)                                                          
+!Local variables-------------------------------                                                           
+!scalars                                                                                                  
+ integer :: iatom,lpawu,ll,ml1,ms1,jm,jc1,tndim,jj                                                        
+ real(dp) :: xj,xmj                                                                                       
+!arrays                                                                                                   
+ integer, allocatable :: ind_msml(:,:)                                                                    
+ type(coeff2c_type), allocatable :: gathermatlu(:)                                                        
+ complex(dpc),allocatable :: mlms2jmj(:,:)                                                                
+!************************************************************************                                 
+                                                                                                          
+ !=====================================                                                                   
+ ! Allocate Matrices                                                                                      
+ !=====================================                                                                   
+                                                                                                          
+ ABI_MALLOC(gathermatlu,(natom))                                                                          
+                                                                                                          
+ do iatom=1,natom                                                                                         
+   lpawu=matlu(iatom)%lpawu                                                                               
+   if(lpawu.ne.-1) then                                                                                   
+     ll=lpawu                                                                                             
+     tndim=2*(2*ll+1)                                                                                     
+                                                                                                          
+     ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))                                                   
+     gathermatlu(iatom)%value=czero                                                                       
+     ABI_MALLOC(mlms2jmj,(tndim,tndim))                                                                   
+     mlms2jmj=czero                                                                                       
+     ABI_MALLOC(ind_msml,(2,-ll:ll))                                                                      
+     mlms2jmj=czero                                                                                       
+                                                                                                          
+ !=====================================                                                                   
+ ! Build J,M_J matrix                                                                                     
+ !=====================================                                                                   
+                                                                                                          
+    jc1=0                                                                                                 
+    do ms1=1,2                                                                                            
+      do ml1=-ll,ll                                                                                       
+        jc1=jc1+1                                                                                         
+        ind_msml(ms1,ml1)=jc1                                                                             
+      end do                                                                                              
+    end do                                                                                                
+                                                                                                          
+    jc1=0                                                                                                 
+    do jj=ll,ll+1                                                                                         
+      xj=float(jj)-half !  xj is in {ll-0.5, ll+0.5}                                                      
+      do jm=-jj,jj-1                                                                                      
+        xmj=float(jm)+half  ! xmj is in {-xj,xj}                                                          
+        jc1=jc1+1           ! Global index for JMJ                                                        
+        if(nint(xj+0.5)==ll+1) then  ! if xj=ll+0.5                                                       
+          mlms2jmj(jc1,jc1)=xmj   !  J=L+0.5 and m_J=L+0.5                                                
+        else if(nint(xj-0.5)==ll-1) then                                                                  
+          mlms2jmj(jc1,jc1)=xmj   !  J=L+0.5 and m_J=-L-0.5                                               
+        end if                                                                                            
+      end do                                                                                              
+    end do                                                                                                
+                                                                                                          
+    !print to debug                                                                    
+    !write(message,'(3a)') ch10,"JMJ Matrix"                                           
+    !call wrtout(std_out,message,"COLL")                                               
+    !do im=1,2*(ll*2+1)                                                                
+    !  write(message,'(12(1x,18(1x,f5.2,f5.2)))') (mlms2jmj(im,jm),jm=1,2*(ll*2+1))    
+    !  call wrtout(std_out,message,"COLL")                                             
+    !end do                                                                            
+                                                                                        
+  !=====================================                                                
+  ! Put back into matlu format                                                          
+  !=====================================                                                
+                                                                                        
+   gathermatlu(iatom)%value=mlms2jmj                                                  
+                                                                                       
+   call gather_matlu(matlu,gathermatlu(iatom),natom=1,option=-1,prtopt=0)             
+                                                                                        
+  !=====================================                                                
+  ! Deallocate Matrices                                                                 
+  !=====================================                                                
+                                                                                        
+   ABI_FREE(gathermatlu(iatom)%value)                                                
+    end if !lpawu                                                                       
+  end do !natom                                                                         
+
+ABI_FREE(mlms2jmj) 
+ABI_FREE(ind_msml)
+ABI_FREE(gathermatlu)                                                                 
+                                                                                        
+end subroutine magmomjmj_matlu                                                        
+
 
 END MODULE m_matlu
 !!***

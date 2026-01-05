@@ -1,25 +1,25 @@
 # == Convergency and starting
 # DATASET 1: LDA
 # DATASET 2: DMFT
-ndtset 5
-jdtset 1 2 3 4 5
+ndtset 4
+jdtset 2 3 4 5
 prtvol    4
 pawprtvol 3
 getden1 0
 getden  1
 
 ##### CONVERGENCE PARAMETERS
-nstep1   30
+nstep1   50
 nstep     1
 ecut      10
 pawecutdg 40
-tolvrs  1.0d-10
+tolvrs  9.0d-11
 nband     34
 occopt 3 tsmear 700 K
 diemix 0.1
 nline    5
 nnsclo1  0
-nnsclo   10
+nnsclo   15
 fftalg   112
 
 nspinor 2
@@ -51,32 +51,33 @@ usedmft1 0
 usedmft  1
 dmftbandi 9
 dmftbandf 33
-dmft_nwli 2000
+dmft_triqs_n_iw 2000
 dmft_iter 1
 
 # == CTQMC
 dmft_solv 7 # CTQMC
-dmftqmc_l 200
-dmftqmc_n 1.d6
-dmftqmc_therm 5000
-dmftctqmc_basis2 1
-dmftctqmc_basis3 2
-dmftctqmc_basis4 3
-dmftctqmc_basis5 4
-dmftctqmc_meas 10
+dmft_triqs_n_tau 200
+dmft_triqs_n_cycles 125000
+dmft_triqs_n_warmup_cycles_init 5000
+dmft_triqs_n_warmup_cycles_restart 0
+dmft_triqs_basis2 1
+dmft_triqs_basis3 2
+dmft_triqs_basis4 3
+dmft_triqs_basis5 4
+dmft_triqs_length_cycle 10
 
 dmft_mxsf 0.1
 dmft_dc  7
 dmft_nominal 1
 dmft_dc2 8
 dmft_yukawa_param 4
-dmft_epsilon_yukawa 1.2
-dmft_lambda_yukawa 1.62
+dmft_yukawa_lambda 1.62
+dmft_yukawa_epsilon 1.2
 
 dmft_triqs_off_diag 1
-dmft_triqs_wmax 1.0
+dmft_triqs_dlr_wmax 1.0
 dmft_triqs_loc_n_max 2
-dmft_triqs_epsilon 1.d-2
+dmft_triqs_dlr_epsilon 1.d-2
 dmft_triqs_tol_block5 1.0d-15
 
 # == DFT+U
@@ -85,8 +86,9 @@ usepawu     14
 dmatpuopt  1   # choose expression of the density matrix
 lpawu   3   # U on d-orbitals of Ni, no U on oxygen
 upawu1  0.00     # values in Hartree
-upawu  6 eV     # values in Hartree
-jpawu  0.0000  # values in Hartree
+upawu  6 eV      # values in Hartree
+jpawu  0.1000  # values in Hartree
+jpawu1 0.00
 
 pp_dirpath "$ABI_PSPDIR"
 pseudos "58ce.paw"
@@ -96,15 +98,19 @@ pseudos "58ce.paw"
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_TRIQS_v3_2
 #%% [files]
+#%% [shell]
+#%% pre_commands = iw_cp t110_MPI8o_DS1_DEN .;
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test = t110_MPI8.abo, tolnlines = 126, tolabs = 1.0e-4, tolrel = 1.1, fld_options=-easy;
+#%% files_to_test = t110_MPI8o_DS2_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 200, tolabs = 5.e-2, tolrel = 1.0, fld_options=-easy;
+#%%                 t110_MPI8o_DS3_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t110_MPI8o_DS4_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 200, tolabs = 5.e-2, tolrel = 1.0, fld_options=-easy;
 #%%                 t110_MPI8o_DS5_Gtau_offdiag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
-#%%                 t110_MPI8o_DS5_Gtau_offdiag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-easy;
+#%%                 t110_MPI8o_DS5_Gtau_offdiag_iatom0001.dat, tolnlines = 2, tolabs = 5.e-5, tolrel = 1.e-3, fld_options=-easy;
 #%% [extra_info]
-#%% authors = J. Bieder, B. Amadon, E. Castiel
+#%% authors = E. Castiel, J. Bieder, B. Amadon
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for Ce : test TRIQS interface with different basis and spinors
+#%% description = DFT+DMFT for Ce with TRIQS: test all basis with spinors and off-diagonal components
 #%%<END TEST_INFO>

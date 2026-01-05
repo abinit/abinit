@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h01 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/libxc_t19/t19.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h01 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/libxc_t19/t19.abi
 - output file    -> t19.abo
 - root for input  files -> t19i
 - root for output files -> t19o
@@ -232,8 +232,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12417
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/18ar.revpbe
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -330,7 +330,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  9.932300000000  9.932300000000  9.932300000000 bohr
-              =  5.255946788878  5.255946788878  5.255946788878 angstroms
+              =  5.255946808286  5.255946808286  5.255946808286 angstroms
  prteigrs : about to open file t19o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.22165   Average Vxc (hartree)=  -0.27089
  Eigenvalues (hartree) for nkpt=   6  k points:
@@ -356,7 +356,7 @@ psp_core            :  5.45893664125447E-01
 local_psp           : -1.67883052367453E+01
 non_local_psp       :  8.75432867615292E-01
 total_energy        : -2.11621655067584E+01
-total_energy_eV     : -5.75851808913253E+02
+total_energy_eV     : -5.75851859405778E+02
 band_energy         : -2.94483000374586E+00
 ...
 
@@ -367,9 +367,9 @@ band_energy         : -2.94483000374586E+00
   sigma(3 3)=  4.74644356E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.3965E+00 GPa]
-- sigma(1 1)=  1.39645167E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.39645167E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.39645167E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.39645191E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.39645191E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.39645191E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -397,8 +397,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12417
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/18ar.revpbe
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -486,7 +486,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  9.932300000000  9.932300000000  9.932300000000 bohr
-              =  5.255946788878  5.255946788878  5.255946788878 angstroms
+              =  5.255946808286  5.255946808286  5.255946808286 angstroms
  prteigrs : about to open file t19o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.19882   Average Vxc (hartree)=  -0.04300
  Eigenvalues (hartree) for nkpt=   6  k points:
@@ -497,7 +497,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  Fermi (or HOMO) energy (eV) =  -5.41011   Average Vxc (eV)=  -1.17020
  Eigenvalues (   eV  ) for nkpt=   6  k points:
  kpt#   1, nband=  8, wtk=  0.18750, kpt= -0.2500 -0.2500  0.0000 (reduced coord)
- -19.06576   -5.75433   -5.53473   -5.53473   10.86072   13.95616   15.45197   16.82468
+ -19.06576   -5.75433   -5.53473   -5.53473   10.86073   13.95616   15.45198   16.82468
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -512,7 +512,7 @@ psp_core            :  5.45893664125447E-01
 local_psp           : -1.78905950732744E+01
 non_local_psp       :  8.11919600537163E-01
 total_energy        : -1.78104198242368E+01
-total_energy_eV     : -4.84646170545062E+02
+total_energy_eV     : -4.84646213040385E+02
 band_energy         : -2.65562316193624E+00
 ...
 
@@ -600,18 +600,18 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  9.932300000000  9.932300000000  9.932300000000 bohr
-              =  5.255946788878  5.255946788878  5.255946788878 angstroms
+              =  5.255946808286  5.255946808286  5.255946808286 angstroms
  prteigrs : about to open file t19o_DS3_EIG
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.70412   -0.19882   -0.19882   -0.19882    0.34098    0.57570    0.57570    0.57570
  Eigenvalues (   eV  ) for nkpt=   1  k points:
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -19.16014   -5.41009   -5.41009   -5.41009    9.27850   15.66563   15.66563   15.66563
+ -19.16015   -5.41009   -5.41009   -5.41009    9.27850   15.66564   15.66564   15.66564
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      9.9323000000E+00  9.9323000000E+00  9.9323000000E+00 Bohr
               amu      3.99480000E+01
@@ -775,12 +775,12 @@ P           mkmem3          1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [3] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems,
+- [3] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
 - M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
@@ -793,12 +793,12 @@ P           mkmem3          1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -816,15 +816,15 @@ P           mkmem3          1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.2  wall=          5.3
+- Proc.   0 individual time (sec): cpu=          5.0  wall=          5.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.2  wall=          5.3
++Overall time at end (sec) : cpu=          5.0  wall=          5.1

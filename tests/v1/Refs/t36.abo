@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h07 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t36/t36.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h08 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v1_t36/t36.abi
 - output file    -> t36.abo
 - root for input  files -> t36i
 - root for output files -> t36o
@@ -130,8 +130,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/8o.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/8o.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/8o.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/8o.pspnc
 -  Troullier-Martins psp for element  O         Thu Oct 27 17:29:57 EDT 1994
 -  8.00000   6.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -180,10 +180,10 @@ tolerances: {tolwfr: 1.00E-16, }
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.25098   -0.61231   -0.56764   -0.56661
- Fermi (or HOMO) energy (eV) = -15.41813   Average Vxc (eV)=  -4.87188
+ Fermi (or HOMO) energy (eV) = -15.41814   Average Vxc (eV)=  -4.87188
  Eigenvalues (   eV  ) for nkpt=   1  k points:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -34.04092  -16.66178  -15.44638  -15.41813
+ -34.04092  -16.66178  -15.44638  -15.41814
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.88904325E-03  sigma(3 2)=  3.89220754E-04
@@ -236,7 +236,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  5.8812E-02; max dE/dt=  1.1557E-02; dE/dt below (all hartree)
-    1       0.011557394099     -0.043758246561     -0.091258668699
+    1       0.011557394118     -0.043758246558     -0.091258668689
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
@@ -249,16 +249,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00  -9.905E-02  3.750E-01  7.821E-01 e/A
  length scales=  6.000000000000  6.000000000000  6.000000000000 bohr
-              =  3.175063251540  3.175063251540  3.175063251540 angstroms
+              =  3.175063263264  3.175063263264  3.175063263264 angstroms
  prteigrs : about to open file t36o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.56661   Average Vxc (hartree)=  -0.17904
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.25098   -0.61231   -0.56764   -0.56661
- Fermi (or HOMO) energy (eV) = -15.41813   Average Vxc (eV)=  -4.87188
+ Fermi (or HOMO) energy (eV) = -15.41814   Average Vxc (eV)=  -4.87188
  Eigenvalues (   eV  ) for nkpt=   1  k points:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -34.04092  -16.66178  -15.44638  -15.41813
+ -34.04092  -16.66178  -15.44638  -15.41814
  Total charge density [el/Bohr^3]
 )     Maximum=    1.0000E+00  at reduced coord.    0.0000    0.0417    0.0833
 )Next maximum=    9.9189E-01  at reduced coord.    0.0000    0.0833    0.0417
@@ -277,7 +277,7 @@ psp_core            :  4.38200664475724E-02
 local_psp           : -2.52641285802386E+01
 non_local_psp       :  2.91033210542417E+00
 total_energy        : -1.57191688490844E+01
-total_energy_eV     : -4.27740337512589E+02
+total_energy_eV     : -4.27740375018227E+02
 band_energy         : -4.83070759139691E+00
 ...
 
@@ -292,7 +292,7 @@ band_energy         : -4.83070759139691E+00
  core charge xc contribution to reduced grads
     1      -0.010351882371     -0.014483478905     -0.018604848728
  residual contribution to red. grads
-    1       0.427350114772      0.392986712467      0.514866641627
+    1       0.427350114791      0.392986712469      0.514866641637
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.88904325E-03  sigma(3 2)=  3.89220754E-04
@@ -300,13 +300,13 @@ band_energy         : -4.83070759139691E+00
   sigma(3 3)= -2.14592755E-03  sigma(2 1)= -1.37987431E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  7.6236E+01 GPa]
-- sigma(1 1)= -8.49985726E+01  sigma(3 2)=  1.14512680E+01
-- sigma(2 2)= -8.05741447E+01  sigma(3 1)= -7.23943313E+00
-- sigma(3 3)= -6.31353578E+01  sigma(2 1)= -4.05972969E+00
+- sigma(1 1)= -8.49985869E+01  sigma(3 2)=  1.14512699E+01
+- sigma(2 2)= -8.05741582E+01  sigma(3 1)= -7.23943435E+00
+- sigma(3 3)= -6.31353684E+01  sigma(2 1)= -4.05973037E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      6.0000000000E+00  6.0000000000E+00  6.0000000000E+00 Bohr
               amu      1.59994000E+01
@@ -377,7 +377,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -389,12 +389,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -412,7 +412,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -427,7 +427,7 @@ P           mkmem           1
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

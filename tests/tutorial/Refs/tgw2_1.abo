@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h06 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_1.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h06 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_1.abi
 - output file    -> tgw2_1.abo
 - root for input  files -> tgw2_1i
 - root for output files -> tgw2_1o
@@ -182,8 +182,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.04250
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -226,7 +226,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  5  -2.3582294834029    -4.913E-10 3.865E-05 3.194E-09
  ETOT  6  -2.3582294835412    -1.384E-10 7.189E-06 1.003E-11
 
- At SCF step    6, etot is converged :
+ At SCF step    6, etot is converged : 
   for the second time, diff in etot=  1.384E-10 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -302,14 +302,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.652000000000  7.652000000000  7.652000000000 bohr
-              =  4.049264000131  4.049264000131  4.049264000131 angstroms
+              =  4.049264015083  4.049264015083  4.049264015083 angstroms
  prteigrs : about to open file tgw2_1o_DS1_EIG
  Fermi (or HOMO) energy (eV) =   6.76526   Average Vxc (eV)=  -9.88844
  Eigenvalues (   eV  ) for nkpt=   8  k points:
  kpt#   1, nband=  6, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -4.22031   19.66151   19.66151   19.66151   21.09462   21.09462
  kpt#   2, nband=  6, wtk=  0.12500, kpt=  0.2500  0.0000  0.0000 (reduced coord)
-  -2.53290   10.36611   17.88441   17.88441   21.24801   21.77929
+  -2.53290   10.36611   17.88441   17.88441   21.24802   21.77929
  kpt#   3, nband=  6, wtk=  0.06250, kpt=  0.5000  0.0000  0.0000 (reduced coord)
    2.34002    2.51634   18.37472   18.37472   18.44252   18.44252
  kpt#   4, nband=  6, wtk=  0.09375, kpt=  0.2500  0.2500  0.0000 (reduced coord)
@@ -319,7 +319,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  kpt#   6, nband=  6, wtk=  0.18750, kpt= -0.2500  0.2500  0.0000 (reduced coord)
    0.23897    8.17436    9.65470   16.43175   18.36202   24.02323
  kpt#   7, nband=  6, wtk=  0.04688, kpt=  0.5000  0.5000  0.0000 (reduced coord)
-   4.00979    5.29663   12.19892   12.52873   12.52873   15.94022
+   4.00980    5.29663   12.19892   12.52873   12.52873   15.94022
  kpt#   8, nband=  6, wtk=  0.09375, kpt= -0.2500  0.5000  0.2500 (reduced coord)
    6.08986    6.08986    7.10593    7.96091   22.82457   22.82574
  Total charge density [el/Bohr^3]
@@ -342,7 +342,7 @@ non_local_psp       :  3.78412533909463E-01
 internal            : -2.26416955384223E+00
 '-kT*entropy'       : -9.40599296989722E-02
 total_energy        : -2.35822948354120E+00
-total_energy_eV     : -6.41706877066092E+01
+total_energy_eV     : -6.41706933333000E+01
 band_energy         :  3.25193746667723E-01
 ...
 
@@ -353,9 +353,9 @@ band_energy         :  3.25193746667723E-01
   sigma(3 3)= -2.90462601E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  8.5457E+00 GPa]
-- sigma(1 1)= -8.54570333E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -8.54570333E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -8.54570333E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -8.54570477E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -8.54570477E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -8.54570477E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -582,57 +582,57 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  7.652000000000  7.652000000000  7.652000000000 bohr
-              =  4.049264000131  4.049264000131  4.049264000131 angstroms
+              =  4.049264015083  4.049264015083  4.049264015083 angstroms
  prteigrs : about to open file tgw2_1o_DS2_EIG
  Eigenvalues (   eV  ) for nkpt=   8  k points:
  kpt#   1, nband= 35, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -4.22031   19.66151   19.66151   19.66151   21.09462   21.09462   21.09462   23.32009
   26.58125   26.58125   29.08560   31.54425   31.54425   31.54425   40.28768   59.10018
-  59.10018   59.10018   62.30493   62.30493   64.52904   64.52904   64.52904   70.74450
-  70.74450   70.74450   78.62736   83.06646   83.06646   87.08581   87.08581   87.08581
-  90.48308   90.48313   90.48639
+  59.10018   59.10018   62.30494   62.30494   64.52904   64.52904   64.52904   70.74451
+  70.74451   70.74451   78.62736   83.06647   83.06647   87.08582   87.08582   87.08582
+  90.48309   90.48314   90.48640
  kpt#   2, nband= 35, wtk=  0.12500, kpt=  0.2500  0.0000  0.0000 (reduced coord)
   -2.53290   10.36611   17.88441   17.88441   21.24801   21.77929   21.77929   25.66398
-  25.92648   25.92648   31.51326   38.56306   39.14320   39.14320   45.84614   47.82687
-  47.82687   53.48418   61.66899   61.66899   65.74373   66.03174   68.12395   68.12395
-  72.60808   72.60808   75.65835   78.43439   78.43439   78.70550   79.82097   79.82097
+  25.92648   25.92648   31.51327   38.56307   39.14321   39.14321   45.84615   47.82687
+  47.82687   53.48418   61.66900   61.66900   65.74373   66.03174   68.12395   68.12395
+  72.60809   72.60809   75.65836   78.43440   78.43440   78.70551   79.82098   79.82098
   81.19879   86.08167   86.08383
  kpt#   3, nband= 35, wtk=  0.06250, kpt=  0.5000  0.0000  0.0000 (reduced coord)
    2.34002    2.51634   18.37472   18.37472   18.44252   18.44252   21.98700   22.22018
-  32.08901   32.08901   37.81664   37.81664   38.72359   44.56481   50.86498   50.86498
-  50.97209   55.01757   55.01757   56.03744   58.78496   59.23297   63.81911   63.81911
-  68.81662   72.69702   72.69702   74.49593   74.49593   74.94824   75.51728   77.58314
-  77.58314   86.53998   88.21936
+  32.08901   32.08901   37.81664   37.81664   38.72360   44.56482   50.86499   50.86499
+  50.97209   55.01757   55.01757   56.03744   58.78497   59.23297   63.81912   63.81912
+  68.81663   72.69703   72.69703   74.49594   74.49594   74.94824   75.51728   77.58315
+  77.58315   86.53999   88.21936
  kpt#   4, nband= 35, wtk=  0.09375, kpt=  0.2500  0.2500  0.0000 (reduced coord)
-  -1.97448   14.42968   14.46809   14.46809   15.19585   17.90722   28.62250   29.11487
-  29.11487   33.02567   33.47167   34.56685   34.56685   39.97518   47.99702   48.61545
-  48.61545   50.50632   56.71711   60.06145   64.14432   66.28549   66.28549   69.69512
-  70.39899   70.39899   75.44031   77.62136   79.44556   79.44556   80.90121   85.04712
-  85.30796   85.30882   87.14595
+  -1.97448   14.42968   14.46809   14.46809   15.19585   17.90722   28.62250   29.11488
+  29.11488   33.02568   33.47167   34.56685   34.56685   39.97519   47.99702   48.61545
+  48.61545   50.50632   56.71711   60.06146   64.14433   66.28549   66.28549   69.69512
+  70.39899   70.39899   75.44031   77.62136   79.44557   79.44557   80.90122   85.04713
+  85.30797   85.30882   87.14595
  kpt#   5, nband= 35, wtk=  0.37500, kpt=  0.5000  0.2500  0.0000 (reduced coord)
-   1.87168    6.16242   10.57676   13.98803   15.64473   23.09441   25.74554   28.65713
-  31.53995   32.62220   38.92326   39.78354   42.06652   44.52585   46.31700   47.94521
-  50.96722   51.20785   54.39268   57.42170   58.52314   59.50794   61.40171   64.69288
-  65.57799   66.68779   69.36198   73.99502   75.83974   77.23742   79.46376   79.72380
-  81.66128   87.39227   87.91656
+   1.87169    6.16242   10.57676   13.98803   15.64473   23.09441   25.74554   28.65714
+  31.53996   32.62220   38.92326   39.78355   42.06652   44.52585   46.31701   47.94521
+  50.96722   51.20786   54.39268   57.42171   58.52315   59.50794   61.40172   64.69289
+  65.57800   66.68779   69.36199   73.99503   75.83974   77.23742   79.46376   79.72380
+  81.66129   87.39228   87.91656
  kpt#   6, nband= 35, wtk=  0.18750, kpt= -0.2500  0.2500  0.0000 (reduced coord)
-   0.23897    8.17436    9.65470   16.43175   18.36202   24.02278   24.68154   25.74437
-  28.17821   32.43889   34.76545   37.84298   43.17278   44.62090   47.83157   48.27753
-  52.57879   53.78263   54.04498   58.21481   58.54208   59.92546   62.65956   63.05365
-  67.16784   69.76088   72.54382   74.88780   77.62869   78.06568   78.78182   79.42008
-  80.52019   84.27921   84.85336
+   0.23897    8.17436    9.65470   16.43175   18.36202   24.02279   24.68155   25.74438
+  28.17821   32.43889   34.76545   37.84298   43.17279   44.62091   47.83158   48.27754
+  52.57880   53.78264   54.04499   58.21481   58.54208   59.92547   62.65957   63.05366
+  67.16784   69.76088   72.54382   74.88781   77.62870   78.06569   78.78182   79.42008
+  80.52019   84.27922   84.85337
  kpt#   7, nband= 35, wtk=  0.04688, kpt=  0.5000  0.5000  0.0000 (reduced coord)
-   4.00979    5.29663   12.19892   12.52873   12.52873   15.94022   32.77926   34.33025
-  34.33025   39.46603   40.56911   40.56911   40.86803   41.92508   47.32097   47.32097
-  48.02080   48.64089   48.64089   49.32438   51.36094   55.61010   63.18242   71.10213
-  74.41110   74.41110   74.58043   75.42039   76.58299   76.58299   76.74757   79.34417
-  82.23187   85.20221   85.21953
+   4.00980    5.29663   12.19892   12.52873   12.52873   15.94022   32.77926   34.33025
+  34.33025   39.46604   40.56911   40.56911   40.86803   41.92508   47.32098   47.32098
+  48.02080   48.64089   48.64089   49.32438   51.36094   55.61011   63.18243   71.10214
+  74.41111   74.41111   74.58043   75.42040   76.58300   76.58300   76.74757   79.34418
+  82.23187   85.20222   85.21954
  kpt#   8, nband= 35, wtk=  0.09375, kpt= -0.2500  0.5000  0.2500 (reduced coord)
    6.08986    6.08986    7.10593    7.96091   22.82457   22.82457   23.37377   25.42790
-  34.60513   39.10257   41.69497   41.69497   42.29499   42.29499   43.39681   43.88015
-  53.32175   53.32175   57.47273   58.36784   58.98874   59.42585   60.71364   60.71364
-  61.55700   62.79778   62.79778   70.72116   74.02605   78.45188   78.45188   79.85644
-  88.46489   88.46490   93.39332
+  34.60513   39.10257   41.69498   41.69498   42.29500   42.29500   43.39681   43.88015
+  53.32176   53.32176   57.47274   58.36785   58.98874   59.42585   60.71365   60.71365
+  61.55700   62.79779   62.79779   70.72116   74.02605   78.45189   78.45189   79.85645
+  88.46490   88.46490   93.39333
  Total charge density [el/Bohr^3]
 )     Maximum=    3.1318E-02  at reduced coord.    0.7333    0.9333    0.9333
 )Next maximum=    3.1318E-02  at reduced coord.    0.4000    0.9333    0.9333
@@ -642,7 +642,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      7.6520000000E+00  7.6520000000E+00  7.6520000000E+00 Bohr
               amu      2.69815390E+01
@@ -764,7 +764,7 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -781,12 +781,12 @@ P           mkmem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -804,7 +804,7 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -819,15 +819,15 @@ P           mkmem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.9  wall=          1.1
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.9  wall=          1.1
++Overall time at end (sec) : cpu=          1.0  wall=          1.1

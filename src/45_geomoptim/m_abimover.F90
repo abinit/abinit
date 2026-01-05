@@ -102,6 +102,9 @@ integer  :: signperm
 ! Ion movement
 integer  :: ionmov
 
+! Flag: true if we use a PIMD version of the mover routine
+logical :: use_pimd_routine
+
 ! Use by pred_isothermal only
 real(dp) :: bmass
 ! Delta Time for IONs
@@ -476,6 +479,8 @@ type(abimover_specs),intent(out) :: specs
  ab_mover%qmass       =>dtset%qmass
  ab_mover%znucl       =>dtset%znucl
 
+ ab_mover%use_pimd_routine = .false.
+
  ab_mover%amu_curr    =>amu_curr
  ABI_MALLOC(ab_mover%amass,(natom))
  ab_mover%amass(1:natom) = amu_emass * amu_curr(dtset%typat(1:natom))
@@ -699,7 +704,8 @@ type(abimover_specs),intent(out) :: specs
 !  This is the initialization for ionmov==16
 !  ------------------------------------------
  case (16)
-!  TEMPORARLY optcell is not allow
+   ab_mover%use_pimd_routine = .true.
+!  TEMPORARLY optcell is not allowed
    specs%isVused=.TRUE.  ! Velocities are used
    specs%isFconv=.FALSE. ! Convergence is not used for MD
    specs%ncycle=1

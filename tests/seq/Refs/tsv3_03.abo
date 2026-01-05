@@ -1,5 +1,5 @@
 
-.Version 10.4.5.8 of ABINIT, released Sep 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(sequential version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 24 Sep 2025.
-- ( at 17h29 )
+.Starting date : Sun 21 Dec 2025.
+- ( at 14h12 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/srostami_test/tests/TestBot_MPI1/seq_tsv3_03/tsv3_03.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__codata2022/tests/TestBot_MPI1/seq_tsv3_03/tsv3_03.abi
 - output file    -> tsv3_03.abo
 - root for input  files -> tsv3_03i
 - root for output files -> tsv3_03o
@@ -449,7 +449,7 @@ P           mkmem8         16
                          0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
                          0.06250    0.06250    0.06250    0.06250
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4125005569E+00  1.4125005569E+00  1.4125005569E+00
+                       1.4125005621E+00  1.4125005621E+00  1.4125005621E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6692392150E+00  2.6692392150E+00  2.6692392150E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -525,8 +525,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/srostami_test/tests/Pspdir/PseudosHGH_pwteter/31ga.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/srostami_test/tests/Pspdir/PseudosHGH_pwteter/31ga.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/31ga.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/31ga.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ga,  from PRB58, 3641 (1998)
 - 31.00000   3.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -551,8 +551,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    0.945855
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/srostami_test/tests/Pspdir/PseudosHGH_pwteter/33as.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/srostami_test/tests/Pspdir/PseudosHGH_pwteter/33as.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/33as.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_serial/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/33as.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for As,  from PRB58, 3641 (1998)
 - 33.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -657,7 +657,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.41250055685266     1.41250055685266     1.41250055685266
+    2      1.41250056206836     1.41250056206836     1.41250056206836
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -669,7 +669,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.676956860000 10.676956860000 10.676956860000 bohr
-              =  5.650002227411  5.650002227411  5.650002227411 angstroms
+              =  5.650002248273  5.650002248273  5.650002248273 angstroms
  prteigrs : about to open file tsv3_03o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.14622   Average Vxc (hartree)=  -0.32623
  Eigenvalues (hartree) for nkpt=   3  k points:
@@ -689,7 +689,7 @@ psp_core            :  3.78750797374807E-01
 local_psp           : -2.14961653127956E+00
 non_local_psp       :  1.34829740663307E+00
 total_energy        : -7.92532866381628E+00
-total_energy_eV     : -2.15659160487766E+02
+total_energy_eV     : -2.15659179397449E+02
 band_energy         : -1.40550457602026E-01
 ...
 
@@ -700,9 +700,9 @@ band_energy         : -1.40550457602026E-01
   sigma(3 3)=  9.39941791E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.7654E+01 GPa]
-- sigma(1 1)=  2.76540376E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  2.76540376E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.76540376E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  2.76540423E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  2.76540423E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.76540423E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -764,7 +764,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
     Remapping in [-1,1]    -7.586659800E-01
 
            Polarization    -1.536933221E-02 (a.u. of charge)/bohr^2
-           Polarization    -8.793526763E-01 C/m^2
+           Polarization    -8.793527505E-01 C/m^2
 
 
 --- !ResultsGS
@@ -806,9 +806,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.41250055685266     1.41250055685266     1.41250055685266
+    2      1.41250056206836     1.41250056206836     1.41250056206836
  length scales= 10.676956860000 10.676956860000 10.676956860000 bohr
-              =  5.650002227411  5.650002227411  5.650002227411 angstroms
+              =  5.650002248273  5.650002248273  5.650002248273 angstroms
  prteigrs : about to open file tsv3_03o_DS2_EIG
  Eigenvalues (hartree) for nkpt=  16  k points:
  kpt#   1, nband=  4, wtk=  0.06250, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -876,7 +876,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
     Remapping in [-1,1]    -7.586659800E-01
 
            Polarization    -1.536933221E-02 (a.u. of charge)/bohr^2
-           Polarization    -8.793526763E-01 C/m^2
+           Polarization    -8.793527505E-01 C/m^2
 
 
 --- !ResultsGS
@@ -918,9 +918,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.41250055685266     1.41250055685266     1.41250055685266
+    2      1.41250056206836     1.41250056206836     1.41250056206836
  length scales= 10.676956860000 10.676956860000 10.676956860000 bohr
-              =  5.650002227411  5.650002227411  5.650002227411 angstroms
+              =  5.650002248273  5.650002248273  5.650002248273 angstroms
  prteigrs : about to open file tsv3_03o_DS3_EIG
  Eigenvalues (hartree) for nkpt=  16  k points:
  kpt#   1, nband=  4, wtk=  0.06250, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -988,7 +988,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
     Remapping in [-1,1]    -7.586660290E-01
 
            Polarization    -1.536933320E-02 (a.u. of charge)/bohr^2
-           Polarization    -8.793527332E-01 C/m^2
+           Polarization    -8.793528074E-01 C/m^2
 
 
 --- !ResultsGS
@@ -1030,9 +1030,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.41250055685266     1.41250055685266     1.41250055685266
+    2      1.41250056206836     1.41250056206836     1.41250056206836
  length scales= 10.676956860000 10.676956860000 10.676956860000 bohr
-              =  5.650002227411  5.650002227411  5.650002227411 angstroms
+              =  5.650002248273  5.650002248273  5.650002248273 angstroms
  prteigrs : about to open file tsv3_03o_DS4_EIG
  Eigenvalues (hartree) for nkpt=  12  k points:
  kpt#   1, nband=  4, wtk=  0.06250, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1100,7 +1100,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
     Remapping in [-1,1]    -7.586660290E-01
 
            Polarization    -1.536933320E-02 (a.u. of charge)/bohr^2
-           Polarization    -8.793527332E-01 C/m^2
+           Polarization    -8.793528074E-01 C/m^2
 
 
 --- !ResultsGS
@@ -1142,9 +1142,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.41250055685266     1.41250055685266     1.41250055685266
+    2      1.41250056206836     1.41250056206836     1.41250056206836
  length scales= 10.676956860000 10.676956860000 10.676956860000 bohr
-              =  5.650002227411  5.650002227411  5.650002227411 angstroms
+              =  5.650002248273  5.650002248273  5.650002248273 angstroms
  prteigrs : about to open file tsv3_03o_DS5_EIG
  Eigenvalues (hartree) for nkpt=  12  k points:
  kpt#   1, nband=  4, wtk=  0.06250, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1271,7 +1271,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.41250055685266     1.41250055685266     1.41250055685266
+    2      1.41250056206836     1.41250056206836     1.41250056206836
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -1283,7 +1283,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.676956860000 10.676956860000 10.676956860000 bohr
-              =  5.650002227411  5.650002227411  5.650002227411 angstroms
+              =  5.650002248273  5.650002248273  5.650002248273 angstroms
  prteigrs : about to open file tsv3_03o_DS6_EIG
  Fermi (or HOMO) energy (hartree) =   0.14622   Average Vxc (hartree)=  -0.32623
  Eigenvalues (hartree) for nkpt=   3  k points, SPIN UP:
@@ -1308,7 +1308,7 @@ psp_core            :  3.78750797374807E-01
 local_psp           : -2.14961653127956E+00
 non_local_psp       :  1.34829740663307E+00
 total_energy        : -7.92532866381628E+00
-total_energy_eV     : -2.15659160487766E+02
+total_energy_eV     : -2.15659179397449E+02
 band_energy         : -1.40550457602025E-01
 ...
 
@@ -1319,9 +1319,9 @@ band_energy         : -1.40550457602025E-01
   sigma(3 3)=  9.39941791E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.7654E+01 GPa]
-- sigma(1 1)=  2.76540376E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  2.76540376E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.76540376E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  2.76540423E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  2.76540423E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.76540423E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  7 ==================================================================
@@ -1393,7 +1393,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
     Remapping in [-1,1]    -7.586659800E-01
 
            Polarization    -1.536933221E-02 (a.u. of charge)/bohr^2
-           Polarization    -8.793526763E-01 C/m^2
+           Polarization    -8.793527505E-01 C/m^2
 
 
 --- !ResultsGS
@@ -1441,9 +1441,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.41250055685266     1.41250055685266     1.41250055685266
+    2      1.41250056206836     1.41250056206836     1.41250056206836
  length scales= 10.676956860000 10.676956860000 10.676956860000 bohr
-              =  5.650002227411  5.650002227411  5.650002227411 angstroms
+              =  5.650002248273  5.650002248273  5.650002248273 angstroms
  prteigrs : about to open file tsv3_03o_DS7_EIG
  Eigenvalues (hartree) for nkpt=  16  k points, SPIN UP:
  kpt#   1, nband=  4, wtk=  0.06250, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1526,7 +1526,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
     Remapping in [-1,1]    -7.586659800E-01
 
            Polarization    -1.536933221E-02 (a.u. of charge)/bohr^2
-           Polarization    -8.793526763E-01 C/m^2
+           Polarization    -8.793527505E-01 C/m^2
 
 
 --- !ResultsGS
@@ -1574,9 +1574,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.41250055685266     1.41250055685266     1.41250055685266
+    2      1.41250056206836     1.41250056206836     1.41250056206836
  length scales= 10.676956860000 10.676956860000 10.676956860000 bohr
-              =  5.650002227411  5.650002227411  5.650002227411 angstroms
+              =  5.650002248273  5.650002248273  5.650002248273 angstroms
  prteigrs : about to open file tsv3_03o_DS8_EIG
  Eigenvalues (hartree) for nkpt=  16  k points, SPIN UP:
  kpt#   1, nband=  4, wtk=  0.06250, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1891,7 +1891,7 @@ P           mkmem8         16
                          0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
                          0.06250    0.06250    0.06250    0.06250
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4125005569E+00  1.4125005569E+00  1.4125005569E+00
+                       1.4125005621E+00  1.4125005621E+00  1.4125005621E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6692392150E+00  2.6692392150E+00  2.6692392150E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1900,60 +1900,60 @@ P           mkmem8         16
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          1.7        0.03      0.000
-- Total wall clock time (s,m,h):          1.8        0.03      0.001
+- Total cpu        time (s,m,h):          1.6        0.03      0.000
+- Total wall clock time (s,m,h):          1.7        0.03      0.000
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            1.7, wall_time =            1.8
+- cpu_time =            1.6, wall_time =            1.7
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- get_dtsets_pspheads                       0.530  31.2         0.530  29.4              1      -1.00        1.00       1.00
-- fourwf%(pot)                              0.178  10.5         0.295  16.4           9250      -1.00        0.60       0.60
-- timing timab                              0.118   7.0         0.118   6.5             10      -1.00        1.00       1.00
-- abinit(outvars)                           0.103   6.1         0.104   5.8              1      -1.00        0.99       0.99
-- nonlop(apply)                             0.090   5.3         0.080   4.4           9250      -1.00        1.12       1.12
-- abinit(after driver)                      0.080   4.7         0.081   4.5              1      -1.00        0.99       0.99
-- ewald                                     0.080   4.7         0.079   4.4              8      -1.00        1.01       1.01
-- getghc(/=fourXX,nonlop,fock_XX)           0.059   3.5         0.054   3.0             -1      -1.00        1.09       1.09
-- vtowfk(ssdiag)                            0.041   2.4         0.028   1.6             -1      -1.00        1.45       1.45
-- abinit(chkinp,chkvars)                    0.037   2.2         0.037   2.1              1      -1.00        1.00       1.00
-- projbd                                    0.031   1.8         0.031   1.7          13670      -1.00        0.99       0.99
-- stress                                    0.019   1.1         0.018   1.0              2      -1.00        1.06       1.06
-- ewald2 (+vdw_dftd)                        0.019   1.1         0.018   1.0              2      -1.00        1.05       1.05
-- others (197)                              0.043   2.6         0.046   2.6             -1      -1.00        0.94       0.94
+- get_dtsets_pspheads                       0.529  32.8         0.530  31.1              1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.164  10.2         0.247  14.5           9250      -1.00        0.66       0.66
+- timing timab                              0.115   7.1         0.115   6.7             10      -1.00        1.00       1.00
+- abinit(outvars)                           0.099   6.1         0.099   5.8              1      -1.00        1.00       1.00
+- nonlop(apply)                             0.083   5.1         0.072   4.2           9250      -1.00        1.15       1.15
+- abinit(after driver)                      0.078   4.8         0.078   4.6              1      -1.00        1.00       1.00
+- ewald                                     0.074   4.6         0.075   4.4              8      -1.00        0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.054   3.3         0.050   2.9             -1      -1.00        1.08       1.08
+- vtowfk(ssdiag)                            0.037   2.3         0.045   2.6             -1      -1.00        0.83       0.83
+- abinit(chkinp,chkvars)                    0.035   2.2         0.035   2.1              1      -1.00        1.01       1.01
+- projbd                                    0.029   1.8         0.038   2.2          13670      -1.00        0.75       0.75
+- stress                                    0.014   0.9         0.014   0.8              2      -1.00        1.01       1.01
+- ewald2 (+vdw_dftd)                        0.014   0.9         0.014   0.8              2      -1.00        1.00       1.00
+- others (197)                              0.038   2.4         0.044   2.6             -1      -1.00        0.87       0.87
 -<END_TIMER>
 -
-- subtotal                                  1.428  84.1         1.519  84.2                                  0.94       0.94
+- subtotal                                  1.364  84.5         1.456  85.4                                  0.94       0.94
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           1.7, wall_time =           1.8
+- cpu_time =           1.6, wall_time =           1.7
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- get_dtsets_pspheads                       0.530  31.2         0.530  29.4              1      -1.00        1.00       1.00
-- fourwf%(pot)                              0.178  10.5         0.295  16.4           9250      -1.00        0.60       0.60
-- timing timab                              0.118   7.0         0.118   6.5             10      -1.00        1.00       1.00
-- abinit(outvars)                           0.103   6.1         0.104   5.8              1      -1.00        0.99       0.99
-- nonlop(apply)                             0.090   5.3         0.080   4.4           9250      -1.00        1.12       1.12
-- abinit(after driver)                      0.080   4.7         0.081   4.5              1      -1.00        0.99       0.99
-- ewald                                     0.080   4.7         0.079   4.4              8      -1.00        1.01       1.01
-- getghc(/=fourXX,nonlop,fock_XX)           0.059   3.5         0.054   3.0             -1      -1.00        1.09       1.09
-- vtowfk(ssdiag)                            0.041   2.4         0.028   1.6             -1      -1.00        1.45       1.45
-- abinit(chkinp,chkvars)                    0.037   2.2         0.037   2.1              1      -1.00        1.00       1.00
-- projbd                                    0.031   1.8         0.031   1.7          13670      -1.00        0.99       0.99
-- stress                                    0.019   1.1         0.018   1.0              2      -1.00        1.06       1.06
-- ewald2 (+vdw_dftd)                        0.019   1.1         0.018   1.0              2      -1.00        1.05       1.05
-- others (197)                              0.043   2.6         0.046   2.6             -1      -1.00        0.94       0.94
+- get_dtsets_pspheads                       0.529  32.8         0.530  31.1              1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.164  10.2         0.247  14.5           9250      -1.00        0.66       0.66
+- timing timab                              0.115   7.1         0.115   6.7             10      -1.00        1.00       1.00
+- abinit(outvars)                           0.099   6.1         0.099   5.8              1      -1.00        1.00       1.00
+- nonlop(apply)                             0.083   5.1         0.072   4.2           9250      -1.00        1.15       1.15
+- abinit(after driver)                      0.078   4.8         0.078   4.6              1      -1.00        1.00       1.00
+- ewald                                     0.074   4.6         0.075   4.4              8      -1.00        0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.054   3.3         0.050   2.9             -1      -1.00        1.08       1.08
+- vtowfk(ssdiag)                            0.037   2.3         0.045   2.6             -1      -1.00        0.83       0.83
+- abinit(chkinp,chkvars)                    0.035   2.2         0.035   2.1              1      -1.00        1.01       1.01
+- projbd                                    0.029   1.8         0.038   2.2          13670      -1.00        0.75       0.75
+- stress                                    0.014   0.9         0.014   0.8              2      -1.00        1.01       1.01
+- ewald2 (+vdw_dftd)                        0.014   0.9         0.014   0.8              2      -1.00        1.00       1.00
+- others (197)                              0.038   2.4         0.044   2.6             -1      -1.00        0.87       0.87
 -<END_TIMER>
 
-- subtotal                                  1.428  84.1         1.519  84.2                                  0.94       0.94
+- subtotal                                  1.364  84.5         1.456  85.4                                  0.94       0.94
 
 ================================================================================
 
@@ -2037,10 +2037,10 @@ P           mkmem8         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.8
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  39 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.7  wall=          1.8
++Overall time at end (sec) : cpu=          1.6  wall=          1.7

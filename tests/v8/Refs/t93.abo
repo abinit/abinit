@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h15 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t93/t93.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h16 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v8_t93/t93.abi
 - output file    -> t93.abo
 - root for input  files -> t93i
 - root for output files -> t93o
@@ -92,7 +92,7 @@ _ WF disk file :      0.799 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
           ecutwfn3     1.20000000E+01 Hartree
 -          fftalg         512
         freqremax1     0.00000000E+00 Hartree
-        freqremax2     5.51239881E-01 Hartree
+        freqremax2     5.51239833E-01 Hartree
         freqremax3     0.00000000E+00 Hartree
            getscr1          0
            getscr2          0
@@ -210,7 +210,7 @@ P           mkmem           3
             typat      1  1
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -254,8 +254,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.13033
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Si_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Si_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Si_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Si_r.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    160518                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -353,9 +353,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [  0.00000000E+00,  -3.29431979E-30,  -3.29431979E-30, ]
-- [  0.00000000E+00,   3.29431979E-30,   3.29431979E-30, ]
-force_length_stats: {min:   4.65887173E-30, max:   4.65887173E-30, mean:   4.65887173E-30, }
+- [  4.94147968E-30,   1.64715989E-30,  -1.15301193E-29, ]
+- [ -4.94147968E-30,  -1.64715989E-30,   1.15301193E-29, ]
+force_length_stats: {min:   1.26520752E-29, max:   1.26520752E-29, mean:   1.26520752E-29, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -371,25 +371,25 @@ force_length_stats: {min:   4.65887173E-30, max:   4.65887173E-30, mean:   4.658
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  3.7631E-29; max dE/dt=  5.0487E-29; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-    2      -0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  5.6655E-29; max dE/dt=  5.0487E-29; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000     -0.000000000000
+    2      -0.000000000000     -0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
-    2      0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 2.6898008E-30 3.2943198E-30   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 7.3046790E-30 1.1530119E-29   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
-    2      0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 1.3831511E-28 1.6940072E-28   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 3.7562170E-28 5.9290257E-28   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t93o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.17519   Average Vxc (hartree)=  -0.33623
  Eigenvalues (hartree) for nkpt=   3  k points:
@@ -412,7 +412,7 @@ psp_core            :  5.61002511661397E-01
 local_psp           : -2.40541093388900E+00
 non_local_psp       :  1.12943479399788E+00
 total_energy        : -8.36638618052026E+00
-total_energy_eV     : -2.27660945879136E+02
+total_energy_eV     : -2.27660965841175E+02
 band_energy         : -1.88754758767864E-02
 ...
 
@@ -423,9 +423,9 @@ band_energy         : -1.88754758767864E-02
   sigma(3 3)= -3.88625423E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.1434E+01 GPa]
-- sigma(1 1)= -1.14337528E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -1.14337528E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -1.14337528E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -1.14337547E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -1.14337547E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -1.14337547E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -447,7 +447,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices
+ SCREENING: Calculation of the susceptibility and dielectric matrices 
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -463,25 +463,25 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     3
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry
+ Together with 48 symmetry operations and time-reversal symmetry 
  yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     3
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry
+ Together with 48 symmetry operations and time-reversal symmetry 
  yields     8 points in the full Brillouin Zone.
 
 
@@ -493,7 +493,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
 
-- screening: taking advantage of time-reversal symmetry
+- screening: taking advantage of time-reversal symmetry 
 - Maximum band index for partially occupied states nbvw = 8
 - Remaining bands to be divided among processors   nbcw = 24
 - Number of bands treated by each node ~24
@@ -520,11 +520,11 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  13    1.285714E+01    0.000000E+00
  14    1.392857E+01    0.000000E+00
  15    1.500000E+01    0.000000E+00
- 16    0.000000E+00    3.271590E+00
- 17    0.000000E+00    8.464916E+00
+ 16    0.000000E+00    3.271591E+00
+ 17    0.000000E+00    8.464917E+00
  18    0.000000E+00    1.670881E+01
  19    0.000000E+00    2.979517E+01
- 20    0.000000E+00    5.056847E+01
+ 20    0.000000E+00    5.056848E+01
 
 
 --------------------------------------------------------------------------------
@@ -592,7 +592,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
        -0.000   0.000  -0.000  -0.001   0.000   0.001  -0.000  -0.000   0.000
 
     2   0.000 -28.269  12.408   1.991  -4.061   1.989  -4.075   1.997  -4.081
-        0.000 -13.166 -12.328   3.976   2.688   3.963   2.690   3.956   2.682
+        0.000 -13.166 -12.329   3.976   2.688   3.963   2.690   3.956   2.682
 
   chi0(G,G') at the    9 th omega   8.5714   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -623,15 +623,15 @@ meta: {optdriver: 3, gwcalctyp: 2, }
     1   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000 -12.798 -26.230   0.818   4.576   0.815   4.560   0.825   4.552
-       -0.000 -32.178 -15.633   3.987   1.150   3.971   1.152   3.963   1.142
+    2   0.000 -12.798 -26.230   0.818   4.576   0.815   4.560   0.826   4.552
+       -0.000 -32.178 -15.632   3.987   1.150   3.971   1.152   3.963   1.142
 
   chi0(G,G') at the   13 th omega  12.8571   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
        -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
 
-    2   0.000 -18.537  43.192  -3.298  -5.659  -3.300  -5.675  -3.290  -5.684
+    2   0.000 -18.537  43.192  -3.298  -5.659  -3.300  -5.675  -3.289  -5.684
         0.000 -44.619 -10.840   5.752  -3.478   5.735  -3.475   5.727  -3.486
 
   chi0(G,G') at the   14 th omega  13.9286   0.0000 [eV]
@@ -656,7 +656,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   dielectric constant without local fields =  70.4347
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     35.06  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G')
+  Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -897,12 +897,12 @@ meta: {optdriver: 3, gwcalctyp: 2, }
       -10.980  -2.975  15.830   1.295   0.171   1.294   0.171   1.295   0.170
 
     2  -2.975  -1.010   4.998  -1.799  -0.353  -1.799  -0.352  -1.783  -0.352
-        0.050  -3.924   5.633   0.728  -0.338   0.717  -0.337   0.712  -0.344
+        0.050  -3.925   5.633   0.728  -0.338   0.717  -0.337   0.712  -0.344
 
   chi0(G,G') at the    8 th omega   7.5000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -34.549  -4.516  28.722  -1.005  -3.577  -1.004  -3.577  -1.002  -3.575
-      -19.943 -14.665  -2.388  -3.723   2.991  -3.724   2.991  -3.723   2.990
+      -19.942 -14.665  -2.388  -3.723   2.991  -3.724   2.991  -3.723   2.990
 
     2 -14.665 -12.543   7.615  -1.068   0.147  -1.067   0.148  -1.051   0.148
         4.516  -3.282 -11.717  -0.315   0.167  -0.327   0.168  -0.332   0.161
@@ -928,7 +928,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
     1 -10.737  -3.814   9.434   0.746  -7.504   0.747  -7.503   0.749  -7.502
       -14.175  -9.070 -18.342  -1.249  -0.773  -1.250  -0.772  -1.249  -0.773
 
-    2  -9.070 -10.033   3.842   3.090   3.136   3.091   3.135   3.110   3.136
+    2  -9.070 -10.033   3.842   3.090   3.136   3.091   3.136   3.110   3.136
         3.814 -16.129 -16.556  -4.216   6.193  -4.229   6.195  -4.235   6.187
 
   chi0(G,G') at the   12 th omega  11.7857   0.0000 [eV]
@@ -1012,7 +1012,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
   chi0(G,G') at the    6 th omega   5.3571   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1 -18.582   2.902  -5.130   1.562  -9.547   1.562  -9.545   2.897  -5.130
+    1 -18.583   2.902  -5.130   1.562  -9.547   1.562  -9.545   2.897  -5.130
       -47.573  -9.546  -1.562  -5.130  -2.900  -5.130  -2.898  -9.545  -1.562
 
     2  -9.543  -7.300  -0.258  -0.552  -1.090  -0.551  -1.045  -1.014  -0.364
@@ -1036,7 +1036,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
   chi0(G,G') at the    9 th omega   8.5714   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -6.691   7.091  -5.328   1.531  -8.909   1.531  -8.908   7.086  -5.327
+    1  -6.691   7.091  -5.328   1.531  -8.910   1.531  -8.908   7.086  -5.327
       -65.059  -8.909  -1.531  -5.328  -7.089  -5.328  -7.087  -8.908  -1.531
 
     2  -8.906 -14.268   4.445  -0.446   0.963  -0.446   1.007   1.324  -3.947
@@ -1056,11 +1056,11 @@ meta: {optdriver: 3, gwcalctyp: 2, }
        -7.730  -6.644   3.625  -7.066   3.038  -7.066   3.040  -6.643   3.625
 
     2  -6.641  -3.920   1.833  -2.291  -0.415  -2.290  -0.371 -11.064  -2.490
-        3.039  -9.350  10.865  -0.059  -1.508  -0.046  -1.515   2.957  -3.474
+        3.039  -9.350  10.866  -0.059  -1.508  -0.046  -1.515   2.957  -3.474
 
   chi0(G,G') at the   12 th omega  11.7857   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-    1   0.623  14.247   0.850   5.225 -14.231   5.225 -14.230  14.242   0.851
+    1   0.623  14.246   0.850   5.225 -14.232   5.225 -14.230  14.242   0.851
       -42.045 -14.231  -5.225   0.850 -14.245   0.850 -14.243 -14.230  -5.225
 
     2 -14.228  -2.389   2.485   3.507  -3.960   3.507  -3.917   3.161  -4.473
@@ -1115,7 +1115,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
- SIGMA: Calculation of the GW corrections
+ SIGMA: Calculation of the GW corrections 
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1131,25 +1131,25 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     3
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry
+ Together with 48 symmetry operations and time-reversal symmetry 
  yields     8 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     3
- Reduced coordinates and weights :
+ Reduced coordinates and weights : 
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
      2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
      3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
 
- Together with 48 symmetry operations and time-reversal symmetry
+ Together with 48 symmetry operations and time-reversal symmetry 
  yields     8 points in the full Brillouin Zone.
 
 
@@ -1320,7 +1320,7 @@ data: !SigmaeeData |
 ...
 
 
- New Fermi energy :        2.129854E-01 Ha ,    5.795626E+00 eV
+ New Fermi energy :        2.129854E-01 Ha ,    5.795627E+00 eV
  New Exchange energy :    -2.081523E+00 Ha ,   -5.664113E+01 eV
 
  === QP Band Gaps ===
@@ -1331,7 +1331,7 @@ data: !SigmaeeData |
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
               amu      2.80855000E+01
@@ -1345,15 +1345,15 @@ data: !SigmaeeData |
            etotal1    -8.3663861805E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
-            fcart1     0.0000000000E+00 -3.2943197895E-30 -3.2943197895E-30
-                       0.0000000000E+00  3.2943197895E-30  3.2943197895E-30
+            fcart1     4.9414796843E-30  1.6471598948E-30 -1.1530119263E-29
+                      -4.9414796843E-30 -1.6471598948E-30  1.1530119263E-29
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         512
         freqremax1     0.00000000E+00 Hartree
-        freqremax2     5.51239881E-01 Hartree
+        freqremax2     5.51239833E-01 Hartree
         freqremax3     0.00000000E+00 Hartree
            getscr1          0
            getscr2          0
@@ -1477,7 +1477,7 @@ P           mkmem           3
             typat      1  1
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1518,7 +1518,7 @@ P           mkmem           3
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1535,12 +1535,12 @@ P           mkmem           3
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1558,7 +1558,7 @@ P           mkmem           3
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -1573,15 +1573,15 @@ P           mkmem           3
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          7.7  wall=          7.7
+- Proc.   0 individual time (sec): cpu=          7.8  wall=          7.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.7  wall=          7.7
++Overall time at end (sec) : cpu=          7.8  wall=          7.8
