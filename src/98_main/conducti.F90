@@ -48,7 +48,6 @@ program conducti
  character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
-
 ! *********************************************************************************
 
 !Change communicator for I/O (mandatory!)
@@ -86,7 +85,7 @@ program conducti
    write(std_out,'(2a)')' The name of the data file is: ',trim(filnam)
 
 #if defined FC_NVHPC
- if (nproc == -1) write(std_out, *)"NVHPC raises an internal compiler error that is fixed by this print statement."
+   if (nproc == -1) write(std_out, *)"NVHPC raises an internal compiler error that is fixed by this print statement."
 #endif
 
 !  Read type of calculation
@@ -102,36 +101,37 @@ program conducti
    write(std_out,'(a)')' Give the name of the output file ...'
    read(std_in, '(a)') filnam_out
    write(std_out,'(2a)')' The name of the output file is: ',filnam_out
-
  end if
 
 !Broadcast input data
  call xmpi_bcast(incpaw,master,comm,mpierr)
  call xmpi_bcast(filnam,master,comm,mpierr)
  call xmpi_bcast(filnam_out,master,comm,mpierr)
-!Call main routine
- if (incpaw==1) then
+
+ !Call main routine
+ select case (incpaw)
+ case (1)
    if (my_rank==master) then
      call conducti_nc(filnam,filnam_out)
    end if
- elseif (incpaw==2) then
+ case (2)
    call conducti_paw(filnam,filnam_out)
- elseif (incpaw==3) then
+ case (3)
    if (my_rank==master) then
      call linear_optics_paw(filnam,filnam_out)
    end if
- elseif (incpaw==4) then
+ case (4)
    call conducti_paw(filnam,filnam_out)
    call conducti_paw_core(filnam,filnam_out,with_absorption=.true.,with_emissivity=.true.)
- elseif (incpaw==5) then
+ case (5)
    call conducti_paw_core(filnam,filnam_out,with_absorption=.true.)
- elseif (incpaw==6) then
+ case (6)
    call conducti_paw_core(filnam,filnam_out,with_absorption=.true.,with_emissivity=.true.)
- elseif (incpaw==42) then
+ case (42)
    call conducti_paw(filnam,filnam_out,varocc=1)
- else
+ case default
    ABI_ERROR(sjoin("Wrong incpaw:", itoa(incpaw)))
- end if
+ end select
 
 !End, memory cleaning
  call timein(tcpu,twall)
@@ -143,7 +143,6 @@ program conducti
  end if
 
  call abinit_doctor("__conducti")
-
  call xmpi_end()
 
  end program conducti
