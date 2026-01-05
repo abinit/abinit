@@ -65,7 +65,6 @@ module m_anaddb_dataset
   integer:: dieflag
   integer:: dipdip
   integer:: dipquad
-  integer:: dissip
   integer:: dossum
   integer:: dos_maxmode
   integer:: ep_scalprod
@@ -415,16 +414,6 @@ subroutine invars9 (anaddb_dtset, lenstr, natom, string)
    write(message, '(a, i0, 5a)' )&
    'dipquad is ',anaddb_dtset%dipquad, ', but the only allowed values',ch10, &
    'are 0 or 1 .',ch10, 'Action: correct dipquad in your input file.'
-   ABI_ERROR(message)
- end if
-
- anaddb_dtset%dissip = 1
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dissip',tread, 'INT')
- if(tread == 1) anaddb_dtset%dissip = intarr(1)
- if(anaddb_dtset%dissip < 0 .or. anaddb_dtset%dissip > 1)then
-   write(message, '(a, i0, 5a)' )&
-   'dissip is ',anaddb_dtset%dissip, ', but the only allowed values',ch10, &
-   'are 0 or 1 .',ch10, 'Action: correct dissip in your input file.'
    ABI_ERROR(message)
  end if
 
@@ -2257,27 +2246,26 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
    write(nunit, '(10I6)') anaddb_dtset%iatprj_bs
  end if
 
-!magnetic penalty
+!magnetic penalty (constrained DFPT)
  if (abs(anaddb_dtset%magpen) > tol8) then
-   write(nunit, '(a)') ' Second-order quantities calculated with the magnetic penalty will be corrected'
+   write(nunit, '(a)') ' Second-order quantities calculated with constrained DFPT will be transformed'
    write(nunit, '(3x, a9, 7x, 1es16.8)')'   magpen',anaddb_dtset%magpen
    write(nunit, '(3x, a9, 2i3)')        '  mpatpol',anaddb_dtset%mpatpol(1:2)
    write(nunit, '(3x, a9, 3i3)')        '    mpdir',anaddb_dtset%mpdir(1:3)
    write(nunit, '(3x, a9,  i3)')        '    mpopt',anaddb_dtset%mpopt
    if (anaddb_dtset%timdisp == 1) then 
-     write(nunit, '(a)') ' Third-order frequency derivatives calculated with the penalized response functions will be corrected'
+     write(nunit, '(a)') ' Third-order frequency derivatives calculated with constrained DFPT response functions will be transformed'
    write(nunit, '(3x, a9,  i3)') '   timdisp',anaddb_dtset%timdisp
    end if
  end if
  write(nunit, '(a, 80a, a)') ch10, ('=',ii = 1, 80), ch10
 
-!Omega interpolation
+!Frequency interpolation
  if (abs(anaddb_dtset%magpen) > tol8 .and. anaddb_dtset%freqflag/=0) then
-   write(nunit, '(a)') ' Omega interpolation of second-order quantities calculated with the magnetic penalty and the corrected ones'
+   write(nunit, '(a)') ' Frequency interpolation of second-order quantities calculated with constrained DFPT '
    write(nunit, '(3x, a9, i10)')       '   nfreq',anaddb_dtset%nfreq
    write(nunit, '(3x, a9, 7x, es16.8)')' frmin',anaddb_dtset%frmin
    write(nunit, '(3x, a9, 7x, es16.8)')' frmax',anaddb_dtset%frmax
-   write(nunit, '(3x, a9, 3i10)')     '    dissip',anaddb_dtset%dissip
    write(nunit, '(3x, a9, 7x, es16.8)')'      eta',anaddb_dtset%eta
  end if
 
@@ -2461,7 +2449,7 @@ subroutine anaddb_chkvars(string)
 !C
  list_vars = trim(list_vars)//' chneut'
 !D
- list_vars = trim(list_vars)//' dieflag dipdip dipquad dissip dossum dosdeltae dossmear dostol dos_maxmode'
+ list_vars = trim(list_vars)//' dieflag dipdip dipquad dossum dosdeltae dossmear dostol dos_maxmode'
 !E
  list_vars = trim(list_vars)//' ep_scalprod eivec elaflag elphflag enunit'
  list_vars = trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'
