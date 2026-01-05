@@ -74,9 +74,7 @@ program conducti
  my_rank = xmpi_comm_rank(comm)
 
 #if defined FC_NVHPC
- if (nproc == -1) then
-   write(std_out, *)"NVHPC raises an internal compiler error that is fixed by this print statement."
- end if
+ if (nproc == -1) write(std_out, *)"NVHPC raises an internal compiler error that is fixed by this print statement."
 #endif
 
 !Read some input data
@@ -86,6 +84,10 @@ program conducti
    write(std_out,'(a)')' Please, give the name of the data file ...'
    read(std_in, '(a)') filnam
    write(std_out,'(2a)')' The name of the data file is: ',trim(filnam)
+
+#if defined FC_NVHPC
+ if (nproc == -1) write(std_out, *)"NVHPC raises an internal compiler error that is fixed by this print statement."
+#endif
 
 !  Read type of calculation
    if (open_file(filnam,msg,newunit=inunt,form='formatted')==0) then
