@@ -1238,43 +1238,43 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  regterm = dtset%gwr_regterm
  if (regterm > -tol16) then
-     call wrtout(std_out, sjoin("Computing minimax grid with user-provided regterm:", ftoa(regterm)))
-     call gx_minimax_grid(gwr%ntau, gwr%te_min, gwr%te_max, &  ! in
-                          gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
-                          gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
-                          gwr%ft_max_error, gwr%cosft_duality_error, ierr, regterm=regterm)
-     ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
+   call wrtout(std_out, sjoin("Computing minimax grid with user-provided regterm:", ftoa(regterm)))
+   call gx_minimax_grid(gwr%ntau, gwr%te_min, gwr%te_max, &  ! in
+                        gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
+                        gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
+                        gwr%ft_max_error, gwr%cosft_duality_error, ierr, regterm=regterm)
+   ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
  else
-     regterm = zero
-     call wrtout(std_out, sjoin("Computing minimax grid with user-provided regterm:", ftoa(regterm)))
+   regterm = zero
+   call wrtout(std_out, sjoin("Computing minimax grid with user-provided regterm:", ftoa(regterm)))
+   call gx_minimax_grid(gwr%ntau, gwr%te_min, gwr%te_max, &  ! in
+                        gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
+                        gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
+                        gwr%ft_max_error, gwr%cosft_duality_error, ierr, regterm=regterm)
+   ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
+
+   ! If duality error is big, use regterm = 1e-6
+   if (gwr%cosft_duality_error > half) then
+     ABI_SFREE(gwr%tau_mesh)
+     ABI_SFREE(gwr%tau_wgs)
+     ABI_SFREE(gwr%iw_mesh)
+     ABI_SFREE(gwr%iw_wgs)
+     ABI_SFREE(gwr%cosft_wt)
+     ABI_SFREE(gwr%cosft_tw)
+     ABI_SFREE(gwr%sinft_wt)
+     regterm = tol6
+     call wrtout(std_out, sjoin("LARGE duality error -> recomputing minimax grid with regterm:", ftoa(regterm)))
+     prev_dual_error = gwr%cosft_duality_error
      call gx_minimax_grid(gwr%ntau, gwr%te_min, gwr%te_max, &  ! in
                           gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
                           gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
                           gwr%ft_max_error, gwr%cosft_duality_error, ierr, regterm=regterm)
      ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
 
-    ! If duality error is big, use regterm = 1e-6
-    if (gwr%cosft_duality_error > half) then
-       ABI_SFREE(gwr%tau_mesh)
-       ABI_SFREE(gwr%tau_wgs)
-       ABI_SFREE(gwr%iw_mesh)
-       ABI_SFREE(gwr%iw_wgs)
-       ABI_SFREE(gwr%cosft_wt)
-       ABI_SFREE(gwr%cosft_tw)
-       ABI_SFREE(gwr%sinft_wt)
-       regterm = tol6
-       call wrtout(std_out, sjoin("LARGE duality error -> recomputing minimax grid with regterm:", ftoa(regterm)))
-       prev_dual_error = gwr%cosft_duality_error
-       call gx_minimax_grid(gwr%ntau, gwr%te_min, gwr%te_max, &  ! in
-                            gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
-                            gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
-                            gwr%ft_max_error, gwr%cosft_duality_error, ierr, regterm=regterm)
-       ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
-
-       if (gwr%cosft_duality_error > prev_dual_error) then
-         ABI_WARNING("Using regterm didn't decrease the duality error")
-       end if
-    end if
+     if (gwr%cosft_duality_error > prev_dual_error) then
+       ABI_WARNING("Using regterm didn't decrease the duality error")
+     end if
+   end if
  end if
 
  if (gwr%comm%me == 0) then
