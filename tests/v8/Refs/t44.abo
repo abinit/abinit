@@ -1,5 +1,5 @@
 
-.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.Version 10.1.4.4 of ABINIT, released Dec 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h15 )
+.Starting date : Mon  5 Jan 2026.
+- ( at 18h46 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v8_t41-t42-t43-t44/t44.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/TestBot_MPI1/v8_t41-t42-t43-t44/t44.abi
 - output file    -> t44.abo
 - root for input  files -> t44i
 - root for output files -> t44o
@@ -544,8 +544,8 @@ meta: {optdriver: 7, eph_task: 4, }
 - Writing phonon DOS to netcdf file: t44o_DS1_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2393,6 +2393,37 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   16.212
  QP_gap - KS_gap:   -0.896 (OTMS:   -0.214)
  
 ============================================================================================
+ 
+ ========================================================= 
+ Contributions to total energies (in meV)                  
+   See Table II of S. Ponce and X. Gonze, arXiv:2512.04897 
+   for additional information.                             
+ ========================================================= 
+ 
+ Temperature =      5.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           366.303847
+ E^(elph) =             0.632014
+ Temperature =     64.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           366.307614
+ E^(elph) =             0.632031
+ Temperature =    123.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           366.584215
+ E^(elph) =             0.633156
+ Temperature =    182.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           368.050978
+ E^(elph) =             0.638301
+ Temperature =    241.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           371.595851
+ E^(elph) =             0.649144
+ Temperature =    300.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           377.772938
+ E^(elph) =             0.666075
 
 ================================================================================
 == DATASET  7 ==================================================================
@@ -2766,6 +2797,37 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   16.212
  QP_gap - KS_gap:    3.068 (OTMS:    0.045)
  
 ============================================================================================
+ 
+ ========================================================= 
+ Contributions to total energies (in meV)                  
+   See Table II of S. Ponce and X. Gonze, arXiv:2512.04897 
+   for additional information.                             
+ ========================================================= 
+ 
+ Temperature =      5.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           366.303847
+ E^(elph) =             0.632014
+ Temperature =     64.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           366.307614
+ E^(elph) =             0.632031
+ Temperature =    123.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           366.584215
+ E^(elph) =             0.633156
+ Temperature =    182.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           368.050978
+ E^(elph) =             0.638301
+ Temperature =    241.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           371.595851
+ E^(elph) =             0.649144
+ Temperature =    300.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           377.772938
+ E^(elph) =             0.666075
 
 ================================================================================
 == DATASET  8 ==================================================================
@@ -3025,6 +3087,37 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   16.212
    3   9.967   10.106    0.139    0.213   -0.097    0.650   -0.838    1.051   10.714   10.868
    4   9.967   10.106    0.139    0.213   -0.097    0.650   -0.838    1.051    0.000    0.000
 ============================================================================================
+ 
+ ========================================================= 
+ Contributions to total energies (in meV)                  
+   See Table II of S. Ponce and X. Gonze, arXiv:2512.04897 
+   for additional information.                             
+ ========================================================= 
+ 
+ Temperature =      5.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           366.303847
+ E^(elph) =             0.736282
+ Temperature =     64.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           366.307614
+ E^(elph) =             0.736305
+ Temperature =    123.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           366.584215
+ E^(elph) =             0.737788
+ Temperature =    182.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           368.050978
+ E^(elph) =             0.744479
+ Temperature =    241.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           371.595851
+ E^(elph) =             0.758339
+ Temperature =    300.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           377.772938
+ E^(elph) =             0.779654
 
 ================================================================================
 == DATASET  9 ==================================================================
@@ -3099,8 +3192,8 @@ meta: {optdriver: 7, eph_task: 4, }
 - Writing phonon DOS to netcdf file: t44o_DS9_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3417,6 +3510,37 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   16.212
  QP_gap - KS_gap:   -0.896 (OTMS:   -0.214)
  
 ============================================================================================
+ 
+ ========================================================= 
+ Contributions to total energies (in meV)                  
+   See Table II of S. Ponce and X. Gonze, arXiv:2512.04897 
+   for additional information.                             
+ ========================================================= 
+ 
+ Temperature =      5.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           366.303847
+ E^(elph) =             0.632014
+ Temperature =     64.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           366.307614
+ E^(elph) =             0.632031
+ Temperature =    123.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           366.584215
+ E^(elph) =             0.633156
+ Temperature =    182.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           368.050978
+ E^(elph) =             0.638301
+ Temperature =    241.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           371.595851
+ E^(elph) =             0.649144
+ Temperature =    300.000000 K
+ E^(BO)   =       -328087.062976
+ E^(ph)   =           377.772938
+ E^(elph) =             0.666075
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -3823,10 +3947,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        147.6  wall=        147.7
+- Proc.   0 individual time (sec): cpu=        146.0  wall=        146.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        147.6  wall=        147.7
++Overall time at end (sec) : cpu=        146.0  wall=        146.2
