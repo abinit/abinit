@@ -28,7 +28,7 @@ program conducti
  USE_MPI
  use m_xmpi
  use m_errors
- use m_abicore
+ !use m_abicore
  use m_conducti
 
  use m_io_tools,  only : open_file
