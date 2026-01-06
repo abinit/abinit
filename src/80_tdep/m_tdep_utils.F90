@@ -237,6 +237,44 @@ contains
  end subroutine tdep_calc_MoorePenrose
 
 !====================================================================================================
+
+!!****f* ABINIT/m_tdep_utils/tdep_MatchIdeal2Average
+!! NAME
+!!  tdep_MatchIdeal2Average
+!!
+!! FUNCTION
+!! Find the mapping between the atoms in the ideal (equilibrium) supercell,
+!! and the atoms of the input moledular dynamics using their average positions.
+!! Then compute the atom displacements with respect to the equilibrium positions
+!! at each time step of the MD.
+!!
+!! INPUTS
+!!  Invar = Input object containing the input variables, positions, and forces.
+!!  Lattice = Lattice object describing the ideal structure.
+!!  Sym = Symetries object describing all the symmetry operations of the crystal.
+!!  MPIdata = Info on MPI parallelism.
+!!
+!! OUTPUT
+!!  distance = Distance between the ideal positions of the atoms in the supercell,
+!!             (norm, and cartesian components).
+!!  Forces_MD = Cartesian forces on the atoms at each time steps, as a flat array.
+!!  ucart = Cartesian displacements of the atoms with respect to their equilibrium
+!!          positions at each time step.
+!!  Rlatt_cart = Cartesian coordinate of the lattice vectors of the unitcell
+!!               within the supercell, for each atom.
+!!               This array seems to have an extra dimension, for algorithmic simplicity.
+!!  Rlatt4dos = like Rlatt_cart, but scaled by acell_unitcell.
+!!              These are used when reading an IFC file, to compare with the R vectors
+!!              that are stored in the file.
+!!
+!! SIDE EFFECTS
+!! Some of the reduced positions of the atoms Invar%xred are shifted by a supercell
+!! lattice vector in order to re-center the crystal.
+!!
+!! NOTES
+!!
+!! SOURCE
+
  subroutine tdep_MatchIdeal2Average(distance,Forces_MD,Invar,Lattice,MPIdata,&
 &                                   Rlatt_cart,Rlatt4dos,Sym,ucart)
 
@@ -357,9 +395,15 @@ contains
 !==========================================================================================
 !======== 2/ Find the matching between the ideal and average ==============================
 !========   (from the MD simulations) positions. ==========================================
-!======== NOTE: - xred_center is used to find the matching with the ideal positions =======
-!========       - xred_average is used to compute the displacements (from MD trajectories)
 !==========================================================================================
+!  NOTE: - xred_center is used to find the matching with the ideal positions
+!        - xred_average is used to compute the displacements (from MD trajectories)
+!        The difference between those two is that xred_center will be shifted to bring
+!        one of the average positions at the origin, for an easier comparison with
+!        xred_ideal. Some shifts by a supercell lattice vector will be computed
+!        from the difference between xred_center and xred_ideal, and those shifts
+!        will be applied to xred_average and xred at all steps.
+
   write(Invar%stdout,*)' Compute average positions...'
   ABI_MALLOC(xred_average,(3,Invar%natom))             ; xred_average(:,:)=0.d0
   ABI_MALLOC(xred_center,(3,Invar%natom))              ; xred_center(:,:)=0.d0
@@ -376,7 +420,7 @@ contains
 ! in order to find iatom_ref
   write(Invar%stdout,*)' Search the unitcell basis of atoms in the MD trajectory...'
   ok=.false.
-  xred_center(:,:)=xred_average(:,:)
+  xred_center(:,:) = xred_average(:,:)
   iatcell=1
   do iatom=1,Invar%natom
     if (Invar%typat(iatom).ne.Invar%typat_unitcell(iatcell)) cycle
@@ -642,15 +686,6 @@ contains
   ABI_FREE(FromIdeal2Average)
   ABI_FREE(ucart_tmp)
   ABI_FREE(fcart_tmp)
-  ! BEGIN DEBUG
-  !write(Invar%stdout,*) '------------------------------------'
-  !write(Invar%stdout,*) 'istep, iatom, ucart'
-  !istep = 1
-  !do iatom=1,Invar%natom
-  !  write(Invar%stdout,*) istep, iatom, ucart(:,iatom,istep)
-  !end do
-  !write(Invar%stdout,*) '------------------------------------'
-  ! END DEBUG
 
 ! Define Rlatt4dos, fulfilling the definition of mkphdos (ABINIT routine)
   do ii=1,3
@@ -671,7 +706,7 @@ contains
 
 ! BEGIN DEBUG
 !  write(Invar%stdout,*)'------------------------------------------'
-!  write(Invar%stdout,*)'iatom, istep, ucart'
+!  write(Invar%stdout,*)'iatom istep ucart'
 !  do jatom=1,Invar%natom
 !    do istep=1,Invar%my_nstep
 !      write(Invar%stdout,'(2(i5,1x),3(f14.6,1x))') jatom, istep, ucart(:,jatom,istep)
