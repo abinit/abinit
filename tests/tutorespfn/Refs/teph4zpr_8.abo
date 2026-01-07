@@ -1,5 +1,5 @@
 
-.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.Version 10.1.4.4 of ABINIT, released Dec 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h05 )
+.Starting date : Tue  6 Jan 2026.
+- ( at 16h30 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7-teph4zpr_8-teph4zpr_9/teph4zpr_8.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/TestBot_MPI1/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7-teph4zpr_8-teph4zpr_9/teph4zpr_8.abi
 - output file    -> teph4zpr_8.abo
 - root for input  files -> teph4zpr_8i
 - root for output files -> teph4zpr_8o
@@ -393,8 +393,8 @@ meta: {optdriver: 7, eph_task: 4, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/O.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/Pspdir/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/Pspdir/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -408,8 +408,8 @@ meta: {optdriver: 7, eph_task: 4, }
              2   -4.371486
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Mg-sp-gw.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/Pspdir/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/Pspdir/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -838,6 +838,29 @@ For band:9
    8.969    -0.114    -0.001
 
 
+ 
+ ========================================================= 
+ Contributions to total energies (in meV)                  
+   See Table II of S. Ponce and X. Gonze, arXiv:2512.04897 
+   for additional information.                             
+ ========================================================= 
+ 
+ Temperature =      0.000000 K
+ E^(BO)   =      -2069592.946969
+ E^(ph)   =           140.600807
+ E^(elph) =             0.004646
+ Temperature =    100.000000 K
+ E^(BO)   =      -2069592.946969
+ E^(ph)   =           143.022978
+ E^(elph) =             0.004732
+ Temperature =    200.000000 K
+ E^(BO)   =      -2069592.946969
+ E^(ph)   =           163.141596
+ E^(elph) =             0.005356
+ Temperature =    300.000000 K
+ E^(BO)   =      -2069592.946969
+ E^(ph)   =           198.030889
+ E^(elph) =             0.006462
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1026,10 +1049,10 @@ P           mkmem          72
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         14.0  wall=         14.1
+- Proc.   0 individual time (sec): cpu=         14.3  wall=         14.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.0  wall=         14.1
++Overall time at end (sec) : cpu=         14.3  wall=         14.3
