@@ -865,6 +865,22 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
    end do 
  end if
 
+ !For magnetoelectric and magnetic susceptibility apply a 1/ucvol factor
+ ipert1= natom + 2
+ ipert2= natom + 5 
+ do idir1= 1, 3
+   do idir2= 1, 3
+     do ii=1,2
+       d2cart(ii,idir1,ipert1,idir2,ipert2)=&
+&      d2cart(ii,idir1,ipert1,idir2,ipert2)/ucvol
+       d2cart(ii,idir2,ipert2,idir1,ipert1)=&
+&      d2cart(ii,idir2,ipert2,idir1,ipert1)/ucvol
+       d2cart(ii,idir1,ipert2,idir2,ipert2)=&
+&      d2cart(ii,idir1,ipert2,idir2,ipert2)/ucvol
+     end do 
+   end do
+ end do 
+
 end subroutine cart29
 !!***
 

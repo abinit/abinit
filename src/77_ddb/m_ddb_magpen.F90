@@ -1381,7 +1381,7 @@ contains
      ipert2= ddb%natom + 2
      do idir2= 1, 3
        do idir1= 1, 3
-         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)/ucvol
+         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
          write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
        & val(1), val(2)
          call wrtout([ab_out,std_out], msg)
@@ -1393,7 +1393,7 @@ contains
      ipert2= ddb%natom + 5
      do idir2= 1, 3
        do idir1= 1, 3
-         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)/ucvol
+         val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
          write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
        & val(1), val(2)
          call wrtout([ab_out,std_out], msg)
@@ -1423,7 +1423,7 @@ contains
    ipert2= ddb%natom + 5
    do idir2= 1, 3
      do idir1= 1, 3
-       val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)/ucvol
+       val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
        write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
      & val(1), val(2)
        call wrtout([ab_out,std_out], msg)

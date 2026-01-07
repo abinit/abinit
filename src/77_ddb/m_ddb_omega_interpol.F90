@@ -1940,7 +1940,7 @@ end subroutine lm_normal_modes
  ipert2= natom + 2
  do idir1= 1, 3
    do idir2= 1, 3
-     ci_alpha(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)/ucvol
+     ci_alpha(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)
    end do
  end do 
 
@@ -1974,7 +1974,7 @@ end subroutine lm_normal_modes
  ipert2= natom + 5
  do idir1= 1, 3
    do idir2= 1, 3
-     ci_alpha_hc(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)/ucvol
+     ci_alpha_hc(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)
    end do
  end do 
 
@@ -2000,7 +2000,7 @@ end subroutine lm_normal_modes
  
  do idir1= 1, 3
    do idir2= 1, 3
-     ci_mchi(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)/ucvol
+     ci_mchi(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)
    end do
  end do 
 

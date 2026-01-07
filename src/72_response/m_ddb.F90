@@ -940,6 +940,7 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,o
 !scalars
  integer :: iblok,nsize,rftyp
  integer :: idir1,idir2,ipert1,ipert2,mpert
+ real(dp) :: fac
 !arrays
  integer :: rfelfd(4),rfmagn(4),rfphon(4),rfstrs(4)
  real(dp) :: val(2)
@@ -1006,10 +1007,8 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,o
      end do
    end if
 
-   !TODO: the two next susceptibilities should include a volume factor. But since 
-   !this has not been previously included after reading the DDB cannot be applied 
-   !here. I include them when writting in output but not internaly. 
-
+   if (option==0) fac=-ucvol
+   if (option==1) fac=-one/ucvol
    !Magnetoelectric susceptibility
    if (optgb==1) then
      iblok=0
@@ -1026,9 +1025,9 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,o
      do idir2= 1, 3
        do idir1= 1, 3
          val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
-         blkval(:,idir1,ipert1,idir2,ipert2,kblok)=-val(:)
+         blkval(:,idir1,ipert1,idir2,ipert2,kblok)=val(:)*fac
          val(:)=blkval(:,idir2,ipert2,idir1,ipert1,kblok)
-         blkval(:,idir2,ipert2,idir1,ipert1,kblok)=-val(:)
+         blkval(:,idir2,ipert2,idir1,ipert1,kblok)=val(:)*fac
        end do
      end do
    end if
@@ -1049,7 +1048,7 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,o
    do idir2= 1, 3
      do idir1= 1, 3
        val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
-       blkval(:,idir1,ipert1,idir2,ipert2,kblok)=-val(:)
+       blkval(:,idir1,ipert1,idir2,ipert2,kblok)=val(:)*fac
      end do
    end do
  end if
