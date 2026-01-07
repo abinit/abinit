@@ -2339,7 +2339,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol, fermie_to_
    ! Calculate the valence index for each spin channel.
    do spin=1,ebands%nsppol
      valencetop(spin) = smallest_real
-     condbottom(spin) = greatest_real
+     condbottom(spin) = greatest_real / 1000000_dp ! to avoid overflow when multiply by Ha2meV.
      do ikibz=1,ebands%nkpt
        nband_k = ebands%nband(ikibz + (spin-1)*ebands%nkpt)
        do band=1,nband_k
