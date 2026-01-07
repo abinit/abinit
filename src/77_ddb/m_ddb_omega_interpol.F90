@@ -115,25 +115,43 @@ contains
  real(dp), allocatable :: dint_fsddb(:,:),int_fsddb(:,:,:),int_rsddb(:,:,:)
  real(dp), allocatable :: omega(:),omegacalc(:)
  real(dp), allocatable :: w0hessian(:,:),w0berry(:,:)
- real(dp), allocatable :: displ(:),eigvec(:),eigvec_fm(:,:,:,:,:),phfrq(:,:)
- real(dp), allocatable :: mode_phonspec(:,:),phonspec(:)
- real(dp), allocatable :: coeffs(:,:,:)
- complex(dpc), allocatable :: dummysus(:,:)
- complex(dpc), allocatable :: invmagsus(:,:,:), lm_magsus(:,:,:), magsus(:,:,:), invhmat(:,:)
- complex(dpc), allocatable :: dummymom(:,:),dummymom_tr(:,:),mmom(:,:,:), mmom_tr(:,:,:)
- complex(dpc), allocatable :: zfield(:,:,:),zfield_tr(:,:)
+ real(dp), allocatable :: displ(:),eigvec(:)
+ real(dp), allocatable :: mode_phonspec(:),phonspec(:)
+ real(dp), allocatable :: coeffs(:,:,:),pc_in(:),pc_out(:)
+ complex(dpc), allocatable :: dummysus(:,:),  invhmat(:,:)
+ complex(dpc), allocatable :: dummymom(:,:),dummymom_tr(:,:),zfield_tr(:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
- complex(dpc), allocatable :: ci_alpha(:,:,:),lm_alpha(:,:,:),lm_alpha_nm(:,:,:,:)
- complex(dpc), allocatable :: ci_alpha_hc(:,:,:),lm_alpha_hc(:,:,:)
- complex(dpc), allocatable :: ci_localpha(:,:,:),lm_localpha(:,:,:)
- complex(dpc), allocatable :: ci_epsilon(:,:,:),lm_epsilon(:,:,:),lm_epsilon_nm(:,:,:,:)
- complex(dpc), allocatable :: ci_mchi(:,:,:),lm_mchi(:,:,:),lm_mchi_nm(:,:,:,:)
- complex(dpc), allocatable :: modemm(:,:,:),modedisp(:,:,:),modezf(:,:,:)
- complex(dpc), allocatable :: zeff(:,:),zeff_tr(:,:),modemeff(:,:,:),modezeff(:,:,:)
  complex(dpc), allocatable :: fmzeff(:,:),fmzeff_tr(:,:)
  complex(dpc), allocatable :: phongreen(:,:)
  complex(dpc), allocatable :: macmagsus(:,:,:)
  complex(dpc), allocatable :: genzeff_tr(:,:), ri_genelsus(:,:,:)
+
+!Pointer-target arrays
+ real(dp), allocatable, target :: phfrq(:,:)
+ complex(dpc), allocatable, target :: invmagsus(:,:,:), lm_magsus(:,:,:), magsus(:,:,:)
+ complex(dpc), allocatable, target :: mmom(:,:,:), mmom_tr(:,:,:)
+ complex(dpc), allocatable, target :: zfield(:,:,:)
+ complex(dpc), allocatable, target :: ci_alpha(:,:,:),lm_alpha(:,:,:),lm_alpha_nm(:,:,:,:)
+ complex(dpc), allocatable, target :: ci_alpha_hc(:,:,:),lm_alpha_hc(:,:,:)
+ complex(dpc), allocatable, target :: ci_localpha(:,:,:),lm_localpha(:,:,:)
+ complex(dpc), allocatable, target :: ci_locchi(:,:,:),lm_locchi(:,:,:)
+ complex(dpc), allocatable, target :: ci_epsilon(:,:,:),lm_epsilon(:,:,:),lm_epsilon_nm(:,:,:,:)
+ complex(dpc), allocatable, target :: ci_mchi(:,:,:),lm_mchi(:,:,:),lm_mchi_nm(:,:,:,:)
+ complex(dpc), allocatable, target :: modemm(:,:,:),modedisp(:,:,:),modezf(:,:,:)
+ complex(dpc), allocatable, target :: modemeff(:,:,:),modezeff(:,:,:)
+
+ real(dp), pointer, contiguous :: phfrq_iw(:)
+ complex(dpc), pointer, contiguous :: invmagsus_iw(:,:), lm_magsus_iw(:,:), magsus_iw(:,:)
+ complex(dpc), pointer, contiguous :: mmom_iw(:,:), mmom_tr_iw(:,:)
+ complex(dpc), pointer, contiguous :: zfield_iw(:,:)
+ complex(dpc), pointer, contiguous :: ci_alpha_iw(:,:),lm_alpha_iw(:,:),lm_alpha_nm_iw(:,:,:)
+ complex(dpc), pointer, contiguous :: ci_alpha_hc_iw(:,:),lm_alpha_hc_iw(:,:)
+ complex(dpc), pointer, contiguous :: ci_localpha_iw(:,:),lm_localpha_iw(:,:)
+ complex(dpc), pointer, contiguous :: ci_locchi_iw(:,:),lm_locchi_iw(:,:)
+ complex(dpc), pointer, contiguous :: ci_epsilon_iw(:,:),lm_epsilon_iw(:,:),lm_epsilon_nm_iw(:,:,:)
+ complex(dpc), pointer, contiguous :: ci_mchi_iw(:,:),lm_mchi_iw(:,:),lm_mchi_nm_iw(:,:,:)
+ complex(dpc), pointer, contiguous :: modemm_iw(:,:),modedisp_iw(:,:),modezf_iw(:,:)
+ complex(dpc), pointer, contiguous :: modemeff_iw(:,:),modezeff_iw(:,:)
 
 ! *********************************************************************
 
@@ -167,7 +185,7 @@ contains
  ABI_MALLOC(phfrq,(3*natom,nomega))
  ABI_MALLOC(phonspec,(nomega))
  ABI_MALLOC(phongreen,(3*natom,3*natom))
- ABI_MALLOC(mode_phonspec,(3*natom,nomega))
+ ABI_MALLOC(mode_phonspec,(3*natom))
  ABI_MALLOC(displ,(2*3*natom*3*natom))
  ABI_MALLOC(eigvec,(2*3*natom*3*natom))
  ABI_MALLOC(modemm,(ndim,3*natom,nomega))
@@ -180,6 +198,8 @@ contains
  ABI_MALLOC(lm_alpha_nm,(3,3,3*natom,nomega))
  ABI_MALLOC(ci_localpha,(ndim,3,nomega))
  ABI_MALLOC(lm_localpha,(ndim,3,nomega))
+ ABI_MALLOC(ci_locchi,(ndim,3,nomega))
+ ABI_MALLOC(lm_locchi,(ndim,3,nomega))
  ABI_MALLOC(ci_epsilon,(3,3,nomega))
  ABI_MALLOC(lm_epsilon,(3,3,nomega))
  ABI_MALLOC(lm_epsilon_nm,(3,3,3*natom,nomega))
@@ -242,18 +262,55 @@ contains
 !For nwcalc-1 Taylor-expansion interpolation precalculate the coefficients
  if (omegaflag == 3) then
    ABI_MALLOC(coeffs,(2,nwcalc,ddb%msize))
+   ABI_MALLOC(pc_in,(nwcalc))
+   ABI_MALLOC(pc_out,(nwcalc))
    do ii=1,ddb%msize
      if (all(ddb%flg(ii,:)==1)) then
-       call polcoe(omegacalc,ddb%val_fs(1,ii,:),nwcalc,coeffs(1,:,ii))
-       call polcoe(omegacalc,ddb%val_fs(2,ii,:),nwcalc,coeffs(2,:,ii))
+       pc_in(:)= ddb%val_fs(1,ii,:)
+       call polcoe(omegacalc,pc_in,nwcalc,pc_out)
+       coeffs(1,:,ii)= pc_out(:)
+       pc_in(:)= ddb%val_fs(2,ii,:)
+       call polcoe(omegacalc,pc_in,nwcalc,pc_out)
+       coeffs(2,:,ii)= pc_out(:)
      end if
    end do
+   ABI_FREE(pc_in)
+   ABI_FREE(pc_out)
  end if
 
 !Loop over the frequency
  do iw=1,nomega
    omega(iw)=omegamin+omegastp*(iw-1)
    if (nomega==1) omega(iw)=omegamin
+
+   !Pointer target associations for iw case
+   phfrq_iw => phfrq(:,iw)
+   invmagsus_iw => invmagsus(:,:,iw)
+   lm_magsus_iw => lm_magsus(:,:,iw)
+   magsus_iw => magsus(:,:,iw)
+   mmom_iw => mmom(:,:,iw)
+   mmom_tr_iw => mmom_tr(:,:,iw)
+   zfield_iw => zfield(:,:,iw)
+   ci_alpha_iw => ci_alpha(:,:,iw)
+   lm_alpha_iw => lm_alpha(:,:,iw)
+   lm_alpha_nm_iw => lm_alpha_nm(:,:,:,iw)
+   ci_alpha_hc_iw => ci_alpha_hc(:,:,iw)
+   lm_alpha_hc_iw => lm_alpha_hc(:,:,iw)
+   ci_localpha_iw => ci_localpha(:,:,iw)
+   lm_localpha_iw => lm_localpha(:,:,iw)
+   ci_locchi_iw => ci_locchi(:,:,iw)
+   lm_locchi_iw => lm_locchi(:,:,iw)
+   ci_epsilon_iw => ci_epsilon(:,:,iw)
+   lm_epsilon_iw => lm_epsilon(:,:,iw)
+   lm_epsilon_nm_iw => lm_epsilon_nm(:,:,:,iw)
+   ci_mchi_iw => ci_mchi(:,:,iw)
+   lm_mchi_iw => lm_mchi(:,:,iw)
+   lm_mchi_nm_iw => lm_mchi_nm(:,:,:,iw)
+   modemm_iw => modemm(:,:,iw)
+   modedisp_iw => modedisp(:,:,iw)
+   modezf_iw => modezf(:,:,iw)
+   modemeff_iw => modemeff(:,:,iw)
+   modezeff_iw => modezeff(:,:,iw)
 
    !Perform the different interpolations
    !Lineal (with analytic Berry curvature) with dissipation if eta/=0
@@ -300,21 +357,21 @@ contains
    end if
 
    !Calculate the local spin susceptibilities
-   call local_spinsus(dummysus,ddb,1,dummysus,invmagsus(:,:,iw),&
- & dummysus,magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol,&
+   call local_spinsus(dummysus,ddb,1,dummysus,invmagsus_iw,&
+ & dummysus,magpen,magsus_iw,mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol,&
  & fs2rs=fs2rs,blkval_fs=int_fsddb)
 
    !Calculate the 1st-order magnetic moments
    call magmom(dummymom,dummymom_tr,ddb,dummysus,dummysus,1,1,1,magpen,&
- & magsus(:,:,iw),mmom(:,:,iw),mmom_tr(:,:,iw),mpatpol,mpdir,mpert,natom,&
- & 1,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield(:,:,iw),zfield_tr,&
+ & magsus_iw,mmom_iw,mmom_tr_iw,mpatpol,mpdir,mpert,natom,&
+ & 1,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield_iw,zfield_tr,&
  & fs2rs=fs2rs,blkval_fs=int_fsddb)
   
    !Now calculate the non-magnetic second-order quantities
    call ddb%to_d2etot(int_fsddb,1,0,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega(iw))
 
-   call mp_d2etot(dummysus,ddb,1,dummysus,magsus(:,:,iw),&
- & magpen,mpert,mpopt,natom,1,ndim,qphon,xred,zfield(:,:,iw),zfield_tr, &
+   call mp_d2etot(dummysus,ddb,1,dummysus,magsus_iw,&
+ & magpen,mpert,mpopt,natom,1,ndim,qphon,xred,zfield_iw,zfield_tr, &
  & fs2rs=fs2rs,blkval_fs=int_fsddb,blkval_rs=int_rsddb)
 
    call ddb%to_d2etot(int_fsddb,1,1,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega(iw))
@@ -324,29 +381,29 @@ contains
    !and the lattice-mediated contributions to the different susceptibilities.
    if (mpopt==1) then
      call phonon_green(amu,displ,eigvec,eta,int_fsddb,& 
-   & mode_phonspec(:,iw),mpert,natom,ntypat,omega(iw),&
-   & phfrq(:,iw),phongreen,phonspec(iw),typat)
+   & mode_phonspec,mpert,natom,ntypat,omega(iw),&
+   & phfrq_iw,phongreen,phonspec(iw),typat)
 
-     call ri_d2etot(int_fsddb,ci_alpha(:,:,iw),ci_alpha_hc(:,:,iw),ci_epsilon(:,:,iw),ci_localpha(:,:,iw),ci_mchi(:,:,iw),&
-   & lm_alpha(:,:,iw),lm_alpha_hc(:,:,iw),lm_epsilon(:,:,iw),lm_localpha(:,:,iw),lm_magsus(:,:,iw),lm_mchi(:,:,iw),&
-   & magsus(:,:,iw),mpert,mmom(:,:,iw),mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol)
+     call ri_d2etot(int_fsddb,ci_alpha_iw,ci_alpha_hc_iw,ci_epsilon_iw,ci_localpha_iw,ci_locchi_iw,ci_mchi_iw,&
+   & lm_alpha_iw,lm_alpha_hc_iw,lm_epsilon_iw,lm_localpha_iw,lm_locchi_iw,lm_magsus_iw,lm_mchi_iw,&
+   & magsus_iw,mpert,mmom_iw,mmom_tr_iw,natom,ndim,phongreen,ucvol)
 
-     call lm_normal_modes(amu,int_fsddb,displ,eta,lm_alpha_nm(:,:,:,iw),lm_epsilon_nm(:,:,:,iw),lm_mchi_nm(:,:,:,iw), &
-   & mcell,mmom(:,:,iw),modemm(:,:,iw),modedisp(:,:,iw),modemeff(:,:,iw),modezeff(:,:,iw),modezf(:,:,iw),&
-   & mpert,natom,ndim,ntypat,omega(iw),phfrq(:,iw),typat,ucvol,zfield(:,:,iw))
+     call lm_normal_modes(amu,int_fsddb,displ,eta,lm_alpha_nm_iw,lm_epsilon_nm_iw,lm_mchi_nm_iw, &
+   & mcell,mmom_iw,modemm_iw,modedisp_iw,modemeff_iw,modezeff_iw,modezf_iw,&
+   & mpert,natom,ndim,ntypat,omega(iw),phfrq_iw,typat,ucvol,zfield_iw)
 
    else if (mpopt==2) then
      call phonon_green(amu,displ,eigvec,eta,int_rsddb,& 
-   & mode_phonspec(:,iw),mpert,natom,ntypat,omega(iw),&
-   & phfrq(:,iw),phongreen,phonspec(iw),typat)
+   & mode_phonspec,mpert,natom,ntypat,omega(iw),&
+   & phfrq_iw,phongreen,phonspec(iw),typat)
 
-     call ri_d2etot(int_rsddb,ci_alpha(:,:,iw),ci_alpha_hc(:,:,iw),ci_epsilon(:,:,iw),ci_localpha(:,:,iw),ci_mchi(:,:,iw),&
-   & lm_alpha(:,:,iw),lm_alpha_hc(:,:,iw),lm_epsilon(:,:,iw),lm_localpha(:,:,iw),lm_magsus(:,:,iw),lm_mchi(:,:,iw),& 
-   & magsus(:,:,iw),mpert,mmom(:,:,iw),mmom_tr(:,:,iw),natom,ndim,phongreen,ucvol)
+     call ri_d2etot(int_rsddb,ci_alpha_iw,ci_alpha_hc_iw,ci_epsilon_iw,ci_localpha_iw,ci_locchi_iw,ci_mchi_iw,&
+   & lm_alpha_iw,lm_alpha_hc_iw,lm_epsilon_iw,lm_localpha_iw,lm_locchi_iw,lm_magsus_iw,lm_mchi_iw,& 
+   & magsus_iw,mpert,mmom_iw,mmom_tr_iw,natom,ndim,phongreen,ucvol)
 
-     call lm_normal_modes(amu,int_rsddb,displ,eta,lm_alpha_nm(:,:,:,iw),lm_epsilon_nm(:,:,:,iw),lm_mchi_nm(:,:,:,iw), &
-   & mcell,mmom(:,:,iw),modemm(:,:,iw),modedisp(:,:,iw),modemeff(:,:,iw),modezeff(:,:,iw),modezf(:,:,iw),&
-   & mpert,natom,ndim,ntypat,omega(iw),phfrq(:,iw),typat,ucvol,zfield(:,:,iw))
+     call lm_normal_modes(amu,int_rsddb,displ,eta,lm_alpha_nm_iw,lm_epsilon_nm_iw,lm_mchi_nm_iw, &
+   & mcell,mmom_iw,modemm_iw,modedisp_iw,modemeff_iw,modezeff_iw,modezf_iw,&
+   & mpert,natom,ndim,ntypat,omega(iw),phfrq_iw,typat,ucvol,zfield_iw)
 
    end if
 
@@ -539,7 +596,7 @@ contains
 
  write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*3
  write(mmom_unit,*) ' '
- write(mmom_unit,*) '#  Real part of the clamped-ion local magnetoelectric tensor(at. units)'
+ write(mmom_unit,*) '#  Real part of the clamped-ion local magnetic moments induced by an electric field (at. units)'
  write(msg,'(a,a,a)') ch10,&
 &           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
 &           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
@@ -551,7 +608,7 @@ contains
  end do
 
  write(mmom_unit,*) ' '
- write(mmom_unit,*) '#  Imaginary part of the clamped-ion local magnetoelectric tensor(at. units)'
+ write(mmom_unit,*) '#  Imaginary part of the clamped-ion local magnetic moments induced by an electric field (at. units)'
  write(msg,'(a,a,a)') ch10,&
 &           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
 &           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
@@ -563,7 +620,7 @@ contains
  end do
 
  write(mmom_unit,*) ' '
- write(mmom_unit,*) '#  Real part of relaxed-ion local magnetoelectric tensor (at. units)'
+ write(mmom_unit,*) '#  Real part of relaxed-ion local magnetic moments induced by an electric field (at. units)'
  write(msg,'(a,a,a)') ch10,&
 &           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
 &           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
@@ -575,7 +632,7 @@ contains
  end do
 
  write(mmom_unit,*) ' '
- write(mmom_unit,*) '#  Imaginary part of relaxed-ion local magnetoelectric tensor (at. units)'
+ write(mmom_unit,*) '#  Imaginary part of relaxed-ion local magnetic moments induced by an electric field (at. units)'
  write(msg,'(a,a,a)') ch10,&
 &           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
 &           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
@@ -583,6 +640,55 @@ contains
  do iw=1,nomega
     write(msg,pfmt) &
  &  omega(iw), ((aimag(ci_localpha(i,j,iw)+lm_localpha(i,j,iw)),j=1,3),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
+ write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*3
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '#  Real part of the clamped-ion local magnetic moments induced by a Zeeman field (at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m_{mat_1,1}^{Bx}     m_{mat_1,1}^{By}',&
+&           '      ...     m_{mat_1,2}^{Bx}     ...     m_{mat_2,1}^{Bx}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(ci_locchi(i,j,iw)),j=1,3),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '#  Imaginary part of the clamped-ion local magnetic moments induced by a Zeeman field (at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m_{mat_1,1}^{Bx}     m_{mat_1,1}^{By}',&
+&           '      ...     m_{mat_1,2}^{Bx}     ...     m_{mat_2,1}^{Bx}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(ci_locchi(i,j,iw)),j=1,3),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '#  Real part of relaxed-ion local magnetic moments induced by a Zeeman field (at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m_{mat_1,1}^{Bx}     m_{mat_1,1}^{By}',&
+&           '      ...     m_{mat_1,2}^{Bx}     ...     m_{mat_2,1}^{Bx}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(ci_locchi(i,j,iw)+lm_locchi(i,j,iw)),j=1,3),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '#  Imaginary part of relaxed-ion local magnetic moments induced by a Zeeman field (at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m_{mat_1,1}^{Bx}     m_{mat_1,1}^{By}',&
+&           '      ...     m_{mat_1,2}^{Bx}     ...     m_{mat_2,1}^{Bx}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(ci_locchi(i,j,iw)+lm_locchi(i,j,iw)),j=1,3),i=1,ndim)
     call wrtout(mmom_unit,msg,'COLL')
  end do
 
@@ -1176,6 +1282,8 @@ contains
  ABI_FREE(lm_alpha_nm)
  ABI_FREE(ci_localpha)
  ABI_FREE(lm_localpha)
+ ABI_FREE(ci_locchi)
+ ABI_FREE(lm_locchi)
  ABI_FREE(omega)
  ABI_FREE(phfrq)
  ABI_FREE(phongreen)
@@ -1732,8 +1840,8 @@ end subroutine lm_normal_modes
 #include "abi_common.h"
 
 
- subroutine ri_d2etot(blkval,ci_alpha,ci_alpha_hc,ci_epsilon,ci_localpha,ci_mchi,&
-& lm_alpha,lm_alpha_hc,lm_epsilon,lm_localpha,lm_magsus,lm_mchi,magsus,mpert,mcoup, &
+ subroutine ri_d2etot(blkval,ci_alpha,ci_alpha_hc,ci_epsilon,ci_localpha,ci_locchi,ci_mchi,&
+& lm_alpha,lm_alpha_hc,lm_epsilon,lm_localpha,lm_locchi,lm_magsus,lm_mchi,magsus,mpert,mcoup, &
 & mcoup_tr,natom,ndim,phongreen,ucvol)
 
 !Arguments ------------------------------------
@@ -1748,6 +1856,8 @@ end subroutine lm_normal_modes
  complex(dpc), intent(out) :: lm_alpha_hc(3,3)
  complex(dpc), intent(out) :: ci_localpha(ndim,3)
  complex(dpc), intent(out) :: lm_localpha(ndim,3)
+ complex(dpc), intent(out) :: ci_locchi(ndim,3)
+ complex(dpc), intent(out) :: lm_locchi(ndim,3)
  complex(dpc), intent(out) :: ci_epsilon(3,3)
  complex(dpc), intent(out) :: lm_epsilon(3,3)
  complex(dpc), intent(out) :: ci_mchi(3,3)
@@ -1893,6 +2003,10 @@ end subroutine lm_normal_modes
      ci_mchi(idir1,idir2)= c_blkval(idir1,ipert1,idir2,ipert2)/ucvol
    end do
  end do 
+
+ !Local magnetic moments induced by macroscopic Zeeman
+ ci_locchi(:,:)= mcoup(:,(natom+4)*3+1:(natom+5)*3)
+ lm_locchi(:,:)= -matmul(mcoup(:,1:natom*3),matmul(phongreen,coup_tr(:,:))) 
  
  !Local magnetic susceptibility 
  lm_magsus(:,:)= -matmul(mcoup(:,1:natom*3),matmul(phongreen,mcoup_tr(1:natom*3,:)))

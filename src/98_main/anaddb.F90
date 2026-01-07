@@ -247,7 +247,7 @@ program anaddb
  end if
 
  ! MR: Second- and third-order total energy derivatives calculated with the 
- ! magnetic penalty are converted to physically relevant ones here. 
+ ! magnetic penalty (constrained DFPT) are converted to physically relevant ones here. 
  if (abs(inp%magpen) > tol8) then
    call ddb_magpen(ddb, ddb_lw, inp%magpen, inp%mpatpol, & 
  & inp%mpdir, mpert, inp%mpopt, natom, ntypat, inp%freqflag, inp%prtvol, 1, Crystal%ucvol, inp%timdisp, &
