@@ -62,7 +62,7 @@ occopt1? 7
 
 #Computational parameters
  tolvrs 1.0d-8
- nstep  60
+ nstep  40
  ecut 5
  kptopt 0
  nkpt 1
