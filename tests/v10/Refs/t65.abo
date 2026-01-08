@@ -1,6 +1,6 @@
 
 .Version 10.1.4.4 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  3 Jan 2026.
-- ( at 15h02 )
+.Starting date : Wed  7 Jan 2026.
+- ( at 15h35 )
   
-- input  file    -> t65.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/TestBot_MPI1/v10_t61-t62-t63-t64-t65/t65.abi
 - output file    -> t65.abo
 - root for input  files -> t65i
 - root for output files -> t65o
@@ -59,7 +59,7 @@ _ WF disk file :      0.169 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
@@ -84,7 +84,7 @@ _ WF disk file :      0.169 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
         eph_stern2          1
          eph_task1          1
          eph_task2          4
--          fftalg         112
+-          fftalg         512
            getwfk1          0
            getwfk2         -1
              iscf1         -2
@@ -237,8 +237,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.08112
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /scratch/program/abinit/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /scratch/program/abinit/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -368,12 +368,12 @@ meta: {optdriver: 7, eph_task: 4, }
  Dynamical Quadrupoles Tensor (units: e Bohr)
 
   atom   dir       Qxx         Qyy         Qzz         Qyz         Qxz         Qxy
-    1     x      0.000196    0.000000   -0.000986   16.277096   -0.000395   -0.000395
+    1     x      0.000196    0.000000   -0.000986   16.277095   -0.000395   -0.000395
     1     y     -0.000986    0.001182    0.000986    0.000591   16.278081    0.000591
     1     z      0.000986    0.000000    0.000196    0.000591    0.000591   16.278081
-    2     x     -0.000196    0.000000    0.000986  -16.277096    0.000591    0.000591
-    2     y      0.000986    0.001182   -0.000986    0.000591  -16.277096    0.000395
-    2     z     -0.000986    0.000000    0.000196   -0.000395   -0.000591  -16.278081
+    2     x     -0.000196    0.000000    0.000986  -16.277095    0.000591    0.000591
+    2     y      0.000986    0.001182   -0.000986    0.000591  -16.277095    0.000395
+    2     z     -0.000986   -0.000000    0.000196   -0.000395   -0.000591  -16.278081
 - Cannot find dielectric tensor and Born effective charges in DDB file: t63.ddb.out
  Values initialized with zeros.
 - Found quadrupole tensor in DDB file: t63.ddb.out
@@ -524,7 +524,7 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:    0.0 [K], mu_e:   12.788
  
  Temperature =      0.000000 K
  E^(BO)   =       -325151.619138
- E^(ph)   =           337.801154
+ E^(ph)   =           337.801155
  E^(elph) =             6.103468
 
 == END DATASET(S) ==============================================================
@@ -553,7 +553,7 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:    0.0 [K], mu_e:   12.788
            etotal2     0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         512
            getwfk1          0
            getwfk2         -1
              iscf1         -2
@@ -749,10 +749,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.7  wall=         12.8
+- Proc.   0 individual time (sec): cpu=          9.5  wall=          9.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.7  wall=         12.8
+.Delivered   5 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.5  wall=          9.5
