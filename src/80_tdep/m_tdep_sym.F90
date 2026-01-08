@@ -19,6 +19,7 @@ module m_tdep_sym
 
  implicit none
 
+ ! GA: TODO change the spelling --> Symmetries_type
  type,public :: Symetries_type
 
    integer :: msym
