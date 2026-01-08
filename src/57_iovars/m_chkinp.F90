@@ -3124,8 +3124,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
   end if
 
   !  orbmag
-  ! only values of 0,1,2,3,4 are allowed. 0 is the default.
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,5,(/0,1,2,3,4/),iout)
+  ! only values of -3..3 are allowed. 0 is the default.
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,9,(/-4,-3,-2,-1,0,1,2,3,4/),iout)
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
   !  only kptopt 3 or 0 are allowed, because ddk cannot use spatial symmetries and

@@ -183,8 +183,8 @@ module m_orbmag
 
   private :: lamb_core
   private :: make_pcg1
+  private :: gauge_treatment
   private :: para_to_diag
-  private :: para_to_diag_u
   private :: orbmag_mesh_alloc
   private :: orbmag_mesh_free
   private :: sum_orbmag_mesh
@@ -397,7 +397,6 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
    !========  compute nuclear dipole vector potential (may be zero) ==========
    has_nucdip = ANY( ABS(dtset%nucdipmom) .GT. tol8 )
-   nucdip_dirs=0
    if(has_nucdip) then
      nucdip_dirs=3
      ABI_MALLOC(vectornd,(nfftf,dtset%nspden,nucdip_dirs))
@@ -409,6 +408,8 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
           & dtset%nspden, gs_hamk%nvloc, nucdip_dirs, pawfgr, mpi_enreg, vectornd,vectornd_pac)
      ABI_FREE(vectornd)
      call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
+   else
+     nucdip_dirs=0
    end if
 
    !========  compute vxctaulocal if vxctau present =====================
@@ -520,36 +521,30 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      call pawcprj_get(atindx,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
        & mkmem_rbz,dtset%natom,nband_k,nband_k,dtset%nspinor,dtset%nsppol,0)
 
-     ! compute P_c|cg1>
+     ! gauge treatment of cg1_k
      ABI_MALLOC(pcg1_k,(2,mcgk,3))
-     if (dtset%berryopt /= -2) then
-       ! DDK wavefunctions computed in DFPT, must be projected onto conduction space
-       call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,ikpt,isppol,&
-         & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k)
-     else
-       ! we are using berryopt PEAD DDK functions which are already projected by construction
-       pcg1_k(1:2,1:mcgk,1:3) = cg1_k(1:2,1:mcgk,1:3)
-     end if
-
-     ! transform P_c|cg1> to diagonal gauge if requested
-     if (dtset%orbmag .EQ. 3) then
-       ABI_MALLOC(diagcg1_k,(2,mcgk,3))
-       call para_to_diag(atindx,cg_k,pcg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,eig_k,gs_hamk,&
+     call gauge_treatment(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,pcg1_k,gs_hamk,&
          & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
          & nucdip_dirs,occ_k,vectornd_pac)
-       pcg1_k(1:2,1:mcgk,1:3) = diagcg1_k(1:2,1:mcgk,1:3)
-       ABI_FREE(diagcg1_k)
-     end if
+     
+     !if (dtset%berryopt /= -2) then
+     !  ! DDK wavefunctions computed in DFPT, must be projected onto conduction space
+     !  call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,ikpt,isppol,&
+     !    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k)
+     !else
+     !  ! we are using berryopt PEAD DDK functions which are already projected by construction
+     !  pcg1_k(1:2,1:mcgk,1:3) = cg1_k(1:2,1:mcgk,1:3)
+     !end if
 
-     ! transform P_c|cg1> to diagonal gauge if requested
-     if (dtset%orbmag .EQ. 4) then
-       ABI_MALLOC(diagcg1_k,(2,mcgk,3))
-       call para_to_diag_u(atindx,cg_k,pcg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,eig_k,gs_hamk,&
-         & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
-         & nucdip_dirs,occ_k,vectornd_pac)
-       pcg1_k(1:2,1:mcgk,1:3) = diagcg1_k(1:2,1:mcgk,1:3)
-       ABI_FREE(diagcg1_k)
-     end if
+     !! transform P_c|cg1> to diagonal gauge if requested
+     !if (dtset%orbmag .EQ. 3) then
+     !  ABI_MALLOC(diagcg1_k,(2,mcgk,3))
+     !  call para_to_diag(atindx,cg_k,pcg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,eig_k,gs_hamk,&
+     !    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
+     !    & nucdip_dirs,occ_k,vectornd_pac)
+     !  pcg1_k(1:2,1:mcgk,1:3) = diagcg1_k(1:2,1:mcgk,1:3)
+     !  ABI_FREE(diagcg1_k)
+     !end if
 
      ! compute <p|Pc cg1> cprjs
      ABI_MALLOC(cprj1_k,(dtset%natom,mcprjk,3))
@@ -1364,164 +1359,12 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs_hamk,&
 end subroutine orbmag_vv_k
 !!***
 
-!!****f* ABINIT/para_to_diag_u
-!! NAME
-!! para_to_diag_u
-!!
-!! FUNCTION
-!! convert ddk in parallel gauge to diagonal gauge
-!!
-!! INPUTS
-!!  atindx(natom)=index table for atoms (see gstate.f)
-!!  cg_k(2,mcgk)=ground state wavefunctions at this k point
-!!  cg1_k(2,mcgk,3)=DDK wavefunctions at this k point, all 3 directions
-!!  cprj_k(dtset%natom,mcprjk)<type(pawcprj_type)>=cprj for cg_k
-!!  dimlmn(dtset%natom)=cprj lmn dimensions
-!!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  gs_hamk<type(gs_hamiltonian_type)>=ground state Hamiltonian at this k
-!!  ikpt=current k pt
-!!  isppol=current spin polarization
-!!  mcgk=dimension of cg_k
-!!  mcprjk=dimension of cprj_k
-!!  mkmem_rbz=kpts in memory
-!!  mpi_enreg<type(MPI_type)>=information about MPI parallelization
-!!  nband_k=bands at this kpt
-!!  npw_k=number of planewaves at this kpt
-!!  occ_k=band occupations at this kpt
-!!
-!! OUTPUT
-!!  diagcg1_k(2,mcgk,3)=cg1_k converted to diagonal gauge
-!!
-!! NOTES
-!! based on XG Magnetization Gauge notes 16/5/22 Eq. 16
-!!
-!! SOURCE
-
-subroutine para_to_diag_u(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,eig_k,gs_hamk,&
-    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
-    & nucdip_dirs,occ_k,vectornd_pac)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpw,nband_k,ngfft4,ngfft5,ngfft6
-  integer,intent(in) :: npw_k,nucdip_dirs
-  type(dataset_type),intent(in) :: dtset
-  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
-  type(MPI_type), intent(inout) :: mpi_enreg
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3),eig_k(nband_k),dkinpw(mpw,3),occ_k(nband_k)
-  real(dp),intent(in) :: vectornd_pac(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,nucdip_dirs)
-  real(dp),intent(out) :: diagcg1_k(2,mcgk,3)
-  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,mcprjk)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,berryopt,cplex,iband,ipert,jband,ndat,npwsp
-  integer :: optlocal,optnl,opt_gvnlx1,sij_opt,tim_getgh1c,usevnl
-  real(dp) :: deltae,deltapert,doti,dotr
-  type(rf_hamiltonian_type) :: rf_hamk
-  !arrays
-  real(dp) :: lambda(1)
-  real(dp),allocatable :: cwavef(:,:),dcg1(:,:),gh1c(:,:)
-  real(dp),allocatable :: grad_berry(:,:),gs1c(:,:),gvnlx1(:,:)
-  real(dp),allocatable :: vectornd_pac_idir(:,:,:,:)
-  type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
-!--------------------------------------------------------------------
-
-  berryopt=0
-  ndat=1
-  optlocal=0
-  optnl=2
-  opt_gvnlx1=0
-  sij_opt=-1 ! compute H1-lambda S1 in gh1c
-  lambda(1) = zero
-  tim_getgh1c=0
-  usevnl = 0
-
-  ipert=dtset%natom+1 ! DDK
-  cplex=1 ! real space 1-order functions on FFT grid are REAL 
-  call rf_hamk%init(cplex,gs_hamk,ipert)
-
-  npwsp = npw_k*dtset%nspinor
-
-  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
-  call pawcprj_alloc(cwaveprj,3,dimlmn)
-  ABI_MALLOC(cwavef,(2,npwsp))
-  ABI_MALLOC(gh1c,(2,gs_hamk%npw_kp*gs_hamk%nspinor*ndat))
-  ABI_MALLOC(gs1c,(2,gs_hamk%npw_kp*gs_hamk%nspinor*ndat))
-  ABI_MALLOC(gvnlx1,(2,gs_hamk%npw_kp*gs_hamk%nspinor*ndat))
-  ABI_MALLOC(dcg1,(2,npwsp))
-
-  if (nucdip_dirs .EQ. 3) then
-    ABI_MALLOC(vectornd_pac_idir,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc))
-  end if
-
-  diagcg1_k = zero
-
-  do adir = 1, 3
-
-    call rf_hamk%load_k(dkinpw_k=dkinpw(:,adir))
-
-    if (nucdip_dirs .EQ. 3) then
-      vectornd_pac_idir(:,:,:,:)=vectornd_pac(:,:,:,:,adir)
-      call rf_hamk%load_spin(isppol, vectornd=vectornd_pac_idir)
-    end if
-
-    do iband = 1, nband_k
-
-      cwavef(1:2,1:npwsp)=cg_k(1:2,(iband-1)*npwsp+1:iband*npwsp)
-
-      call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,iband,0,ikpt,0,isppol,dtset%mband,&
-        & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
-
-
-      dcg1=zero
-      do jband = 1, nband_k
-        if (jband .EQ. iband) cycle
-        deltae = eig_k(iband) - eig_k(jband)
-        ! deltae test seems to work best compared to deltapert test
-        if (abs(deltae) .LT. dtset%userra) cycle
-
-        lambda(1)=half*(eig_k(iband)+eig_k(jband))
-        call getgh1c(berryopt,cwavef,cwaveprj,gh1c,grad_berry,gs1c,gs_hamk,gvnlx1,adir,ipert,&
-          & lambda,mpi_enreg,ndat,optlocal,optnl,opt_gvnlx1,rf_hamk,sij_opt,&
-          & tim_getgh1c,usevnl)
-
-        cwavef(1:2,1:npwsp)=cg_k(1:2,(jband-1)*npwsp+1:jband*npwsp)
-        dotr = DOT_PRODUCT(cwavef(1,:),gh1c(1,:))+DOT_PRODUCT(cwavef(2,:),gh1c(2,:))
-        doti = DOT_PRODUCT(cwavef(1,:),gh1c(2,:))-DOT_PRODUCT(cwavef(2,:),gh1c(1,:))
-        dcg1(1,:) = dcg1(1,:) + ( dotr*cwavef(1,:) - doti*cwavef(2,:))/deltae
-        dcg1(2,:) = dcg1(2,:) + ( dotr*cwavef(2,:) + doti*cwavef(1,:))/deltae
-      end do
-      diagcg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir) =cg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir)+&
-        &  dcg1(1:2,1:npwsp)
-    end do
-  end do
-
-  call rf_hamk%free()
-  if(allocated(vectornd_pac_idir)) then
-    ABI_FREE(vectornd_pac_idir)
-  end if
-  ABI_FREE(cwavef)
-  call pawcprj_free(cwaveprj)
-  ABI_FREE(cwaveprj)
-  ABI_FREE(gh1c)
-  ABI_FREE(gs1c)
-  ABI_FREE(gvnlx1)
-  ABI_FREE(dcg1)
-
-end subroutine para_to_diag_u
-!!***
-
 !!****f* ABINIT/para_to_diag
 !! NAME
 !! para_to_diag
 !!
 !! FUNCTION
-!! convert ddk in parallel gauge to diagonal gauge
+!! convert cg1_k wavefunction from parallel to diagonal gauge
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
@@ -1542,14 +1385,13 @@ end subroutine para_to_diag_u
 !!  occ_k=band occupations at this kpt
 !!
 !! OUTPUT
-!!  diagcg1_k(2,mcgk,3)=cg1_k converted to diagonal gauge
+!!  gcg1_k(2,mcgk,3)=cg1_k converted to requested gauge and/or projection
 !!
 !! NOTES
-!! based on XG Magnetization Gauge notes 16/5/22 Eq. 16
 !!
 !! SOURCE
 
-subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,eig_k,gs_hamk,&
+subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_k,gs_hamk,&
     & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
     & nucdip_dirs,occ_k,vectornd_pac)
 
@@ -1565,14 +1407,14 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,e
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3),eig_k(nband_k),dkinpw(mpw,3),occ_k(nband_k)
   real(dp),intent(in) :: vectornd_pac(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,nucdip_dirs)
-  real(dp),intent(out) :: diagcg1_k(2,mcgk,3)
+  real(dp),intent(out) :: gcg1_k(2,mcgk,3)
   type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,mcprjk)
 
   !Local variables -------------------------
   !scalars
   integer :: adir,berryopt,cplex,iband,ipert,jband,ndat,npwsp
   integer :: optlocal,optnl,opt_gvnlx1,sij_opt,tim_getgh1c,usevnl
-  real(dp) :: deltae,deltapert,doti,dotr
+  real(dp) :: deltae,deltapert,doti,dotr,hijr,hiji,pertr,perti,pertsize,sijr,siji
   type(rf_hamiltonian_type) :: rf_hamk
   !arrays
   real(dp) :: lambda(1)
@@ -1588,7 +1430,7 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,e
   optlocal=0
   optnl=2
   opt_gvnlx1=0
-  sij_opt=-1
+  sij_opt=1
   tim_getgh1c=0
   usevnl = 0
   lambda(1) = zero
@@ -1611,7 +1453,7 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,e
     ABI_MALLOC(vectornd_pac_idir,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc))
   end if
 
-  diagcg1_k = zero
+  gcg1_k = zero
 
   do adir = 1, 3
 
@@ -1629,7 +1471,6 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,e
       call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,iband,0,ikpt,0,isppol,dtset%mband,&
         & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
 
-      lambda(1)=eig_k(iband)
       call getgh1c(berryopt,cwavef,cwaveprj,gh1c,grad_berry,gs1c,gs_hamk,gvnlx1,adir,ipert,&
         & lambda(1),mpi_enreg,ndat,optlocal,optnl,opt_gvnlx1,rf_hamk,sij_opt,&
         & tim_getgh1c,usevnl)
@@ -1637,17 +1478,34 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,e
       dcg1=zero
       do jband = 1, nband_k
         if (jband .EQ. iband) cycle
-        deltae = eig_k(iband) - eig_k(jband)
+        deltae = eig_k(jband) - eig_k(iband)
         ! deltae test seems to work best compared to deltapert test
-        if (abs(deltae) .LT. dtset%userra) cycle
+        !if (abs(deltae) .LT. dtset%userra) cycle
         cwavef(1:2,1:npwsp)=cg_k(1:2,(jband-1)*npwsp+1:jband*npwsp)
-        dotr = DOT_PRODUCT(cwavef(1,:),gh1c(1,:))+DOT_PRODUCT(cwavef(2,:),gh1c(2,:))
-        doti = DOT_PRODUCT(cwavef(1,:),gh1c(2,:))-DOT_PRODUCT(cwavef(2,:),gh1c(1,:))
-        dcg1(1,:) = dcg1(1,:) + ( dotr*cwavef(1,:) - doti*cwavef(2,:))/deltae
-        dcg1(2,:) = dcg1(2,:) + ( dotr*cwavef(2,:) + doti*cwavef(1,:))/deltae
+        !dotr = DOT_PRODUCT(cwavef(1,:),gh1c(1,:))+DOT_PRODUCT(cwavef(2,:),gh1c(2,:))
+        !doti = DOT_PRODUCT(cwavef(1,:),gh1c(2,:))-DOT_PRODUCT(cwavef(2,:),gh1c(1,:))
+        hijr = DOT_PRODUCT(cwavef(1,:),gh1c(1,:))+DOT_PRODUCT(cwavef(2,:),gh1c(2,:))
+        hiji = DOT_PRODUCT(cwavef(1,:),gh1c(2,:))-DOT_PRODUCT(cwavef(2,:),gh1c(1,:))
+        sijr = DOT_PRODUCT(cwavef(1,:),gs1c(1,:))+DOT_PRODUCT(cwavef(2,:),gs1c(2,:))
+        siji = DOT_PRODUCT(cwavef(1,:),gs1c(2,:))-DOT_PRODUCT(cwavef(2,:),gs1c(1,:))
+        !dcg1(1,:) = dcg1(1,:) + ( dotr*cwavef(1,:) - doti*cwavef(2,:))/deltae
+        !dcg1(2,:) = dcg1(2,:) + ( dotr*cwavef(2,:) + doti*cwavef(1,:))/deltae
+        if (dtset%orbmag .EQ. 3) then
+          lambda(1) = eig_k(iband)
+        else
+          lambda(1) = half*(eig_k(jband)+eig_k(iband))
+        end if
+        pertr = (hijr-lambda(1)*sijr)/deltae
+        perti = (hiji-lambda(1)*siji)/deltae
+        pertsize=sqrt(pertr*pertr+perti*perti)
+        !write(std_out,'(a,3i4,2es16.8)')'JWZ debug adir iband jband pert ',&
+        !  &adir,iband,jband,pertr,perti
+        if (pertsize .GT. dtset%userra) cycle
+        dcg1(1,:) = dcg1(1,:) + pertr*cwavef(1,:) - perti*cwavef(2,:)
+        dcg1(2,:) = dcg1(2,:) + pertr*cwavef(2,:) + perti*cwavef(1,:)
       end do
-      diagcg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir) =cg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir)+&
-        &  dcg1(1:2,1:npwsp)
+      gcg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir) =&
+        &cg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir)-dcg1(1:2,1:npwsp)
     end do
   end do
 
@@ -1666,6 +1524,96 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,diagcg1_k,dimlmn,dkinpw,dtset,e
 end subroutine para_to_diag
 !!***
 
+
+!!****f* ABINIT/gauge_treatment
+!! NAME
+!! gauge_treatment
+!!
+!! FUNCTION
+!! convert cg1_k wavefunction to requested gauge and/or projection
+!!
+!! INPUTS
+!!  atindx(natom)=index table for atoms (see gstate.f)
+!!  cg_k(2,mcgk)=ground state wavefunctions at this k point
+!!  cg1_k(2,mcgk,3)=DDK wavefunctions at this k point, all 3 directions
+!!  cprj_k(dtset%natom,mcprjk)<type(pawcprj_type)>=cprj for cg_k
+!!  dimlmn(dtset%natom)=cprj lmn dimensions
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  gs_hamk<type(gs_hamiltonian_type)>=ground state Hamiltonian at this k
+!!  ikpt=current k pt
+!!  isppol=current spin polarization
+!!  mcgk=dimension of cg_k
+!!  mcprjk=dimension of cprj_k
+!!  mkmem_rbz=kpts in memory
+!!  mpi_enreg<type(MPI_type)>=information about MPI parallelization
+!!  nband_k=bands at this kpt
+!!  npw_k=number of planewaves at this kpt
+!!  occ_k=band occupations at this kpt
+!!
+!! OUTPUT
+!!  gcg1_k(2,mcgk,3)=cg1_k converted to requested gauge and/or projection
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine gauge_treatment(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_k,gs_hamk,&
+    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
+    & nucdip_dirs,occ_k,vectornd_pac)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpw,nband_k,ngfft4,ngfft5,ngfft6
+  integer,intent(in) :: npw_k,nucdip_dirs
+  type(dataset_type),intent(in) :: dtset
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
+  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3),eig_k(nband_k),dkinpw(mpw,3),occ_k(nband_k)
+  real(dp),intent(in) :: vectornd_pac(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,nucdip_dirs)
+  real(dp),intent(out) :: gcg1_k(2,mcgk,3)
+  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,mcprjk)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: adir,berryopt,cplex,iband,ipert,jband,ndat,npwsp
+  integer :: optlocal,optnl,opt_gvnlx1,sij_opt,tim_getgh1c,usevnl
+  real(dp) :: deltae,deltapert,doti,dotr,hijr,hiji,pertr,perti,pertsize,sijr,siji
+  type(rf_hamiltonian_type) :: rf_hamk
+  !arrays
+  real(dp) :: lambda(1)
+  real(dp),allocatable :: cwavef(:,:),dcg1(:,:),gh1c(:,:)
+  real(dp),allocatable :: grad_berry(:,:),gs1c(:,:),gvnlx1(:,:)
+  real(dp),allocatable :: vectornd_pac_idir(:,:,:,:)
+  type(pawcprj_type),allocatable :: cwaveprj(:,:)
+
+!--------------------------------------------------------------------
+
+  ! orbmag > 0: cg1_k contains PAW DDK in parallel gauge, which has a ground state part
+  ! orbmag < 0: cg1_k contains Berry phase DDK, which is projected onto the 
+  !             conduction space by construction
+
+  select case (dtset%orbmag)
+  case ( -2:-1 )
+    ! Berry DDK already projected onto conduction space, stay in parallel transport gauge
+    ! therefore, nothing to do
+    gcg1_k(1:2,1:mcgk,1:3) = cg1_k(1:2,1:mcgk,1:3)
+  case ( 1:2 )
+    ! project cg1_k onto conduction space by removing ground PAW part; 
+    ! stay in parallel transport gauge
+    call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
+      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,gcg1_k)
+  case ( 3:4 ) 
+    ! Convert PAW DDK to diagonal gauge
+    call para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_k,gs_hamk,&
+      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
+      & nucdip_dirs,occ_k,vectornd_pac)
+  end select
+
+end subroutine gauge_treatment
+!!***
 
 !!****f* ABINIT/make_pcg1
 !! NAME
@@ -2378,7 +2326,7 @@ subroutine orbmag_output(chern_terms,chern_trace,dtset,omlamb,orbmag_terms,orbma
  write(message,'(3es16.8)') (berry_total(adir),adir=1,3)
  call wrtout(ab_out,message,'COLL')
 
- if(dtset%orbmag .GE. 2) then
+ if(abs(dtset%orbmag) .GE. 2) then
    write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Orbital magnetic moment, term-by-term breakdown : '
@@ -2407,7 +2355,7 @@ subroutine orbmag_output(chern_terms,chern_trace,dtset,omlamb,orbmag_terms,orbma
    call wrtout(ab_out,message,'COLL')
  end if
 
- if(dtset%orbmag .GE. 2) then
+ if(abs(dtset%orbmag) .GE. 2) then
    write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Term-by-term breakdowns for each band : '
