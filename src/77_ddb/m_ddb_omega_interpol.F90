@@ -277,6 +277,7 @@ contains
    ABI_FREE(pc_in)
    ABI_FREE(pc_out)
  end if
+ if (omegaflag == 2) ABI_MALLOC(pc_in,(nwcalc))
 
 !Loop over the frequency
  do iw=1,nomega
@@ -326,8 +327,10 @@ contains
    else if (omegaflag==2) then
      do ii=1,ddb%msize
        if (all(ddb%flg(ii,:)==1)) then
-         call POLINT(omegacalc,ddb%val_fs(1,ii,:),nwcalc,omega(iw),int_fsddb(1,ii,1),dint_fsddb(1,ii)) 
-         call POLINT(omegacalc,ddb%val_fs(2,ii,:),nwcalc,omega(iw),int_fsddb(2,ii,1),dint_fsddb(2,ii)) 
+         pc_in(:)= ddb%val_fs(1,ii,:)
+         call POLINT(omegacalc,pc_in,nwcalc,omega(iw),int_fsddb(1,ii,1),dint_fsddb(1,ii)) 
+         pc_in(:)= ddb%val_fs(2,ii,:)
+         call POLINT(omegacalc,pc_in,nwcalc,omega(iw),int_fsddb(2,ii,1),dint_fsddb(2,ii)) 
        else if (count(ddb%flg(ii,:)==0)/=nwcalc) then
          write(msg,'(a,a,a)')&
          'ddb_omega_interpol detects differences between the DDB bloks for each frequency.',ch10,&
@@ -358,7 +361,7 @@ contains
 
    !Calculate the local spin susceptibilities
    call local_spinsus(dummysus,ddb,1,dummysus,invmagsus_iw,&
- & dummysus,magpen,magsus_iw,mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol,&
+ & dummysus,magpen,magsus_iw,mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol,qphon,xred,&
  & fs2rs=fs2rs,blkval_fs=int_fsddb)
 
    !Calculate the 1st-order magnetic moments
@@ -1299,6 +1302,7 @@ contains
  ABI_SFREE(w0hessian)
  ABI_SFREE(w0berry)
  ABI_SFREE(coeffs)
+ ABI_SFREE(pc_in)
 
  end subroutine ddb_omega_interpol
 !!***
