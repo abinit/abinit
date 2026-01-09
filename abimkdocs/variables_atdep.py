@@ -494,7 +494,7 @@ Variable(
     vartype="integer",
     topics=['aTDEP_expert'],
     dimensions="scalar",
-    defaultval="1",
+    defaultval="0",
     mnemonics="USE IDEAL POSITIONS",
     added_in_version="before_v9",
     text="""
