@@ -115,6 +115,7 @@ CONTAINS
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
 !!  qphon(3)=wavevector of the phonon
+!!  spinaxis(3)=spin quantization axis
 !!  spnorbscl=scaling factor for spin-orbit coupling
 !!  ucvol=unit cell volume
 !!  vtrial(cplex*nfft,nspden)=GS potential on real space grid
@@ -165,7 +166,7 @@ CONTAINS
 
 subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,ntypat,&
 &          paw_an,paw_ij,pawang,pawfgrtab,pawprtvol,pawrad,pawrhoij,pawspnorb,pawtab,&
-&          pawxcdev,qphon,spnorbscl,ucvol,charge,vtrial,vxc,xred,znuc,&
+&          pawxcdev,qphon,spinaxis,spnorbscl,ucvol,charge,vtrial,vxc,xred,znuc,&
 &          electronpositron_calctype,electronpositron_pawrhoij,electronpositron_lmselect,&
 &          atvshift,fatvshift,natvshift,nucdipmom,eijkl_is_sym,&
 &          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr)
@@ -183,7 +184,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  logical,optional,intent(in) :: electronpositron_lmselect(:,:)
  logical,optional,intent(in) :: eijkl_is_sym(ntypat)
- real(dp),intent(in) :: gprimd(3,3),qphon(3)
+ real(dp),intent(in) :: gprimd(3,3),qphon(3),spinaxis(3)
  real(dp),intent(in) ::  vxc(:,:),xred(3,natom),znuc(ntypat)
  real(dp),intent(in),target :: vtrial(cplex*nfft,nspden)
  real(dp),intent(in),optional :: atvshift(:,:,:)
@@ -219,7 +220,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical :: dijU_available,dijU_need,dijU_prereq
  logical :: has_nucdipmom,my_atmtab_allocated,is_sym
  logical :: need_to_print,paral_atom,v_dijhat_allocated
- real(dp) :: hyb_mixing_,hyb_mixing_sr_
+ real(dp) :: hyb_mixing_,hyb_mixing_sr_,alpha,beta
  character(len=500) :: msg
 !arrays
  integer,pointer :: my_atmtab(:)
@@ -836,7 +837,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 !    ===== Need to compute DijSO
        LIBPAW_ALLOCATE(dijso,(cplex_dij*qphase*lmn2_size,ndij))
        call pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
-&                    pawang,pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,&
+&                    pawang,pawrad(itypat),pawtab(itypat),pawxcdev,spinaxis,spnorbscl,&
 &                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat),paw_ij(iatom)%zora,&
 &                    nucdipmom=nucdipmom(1:3,iatom))
        if (dijso_need) paw_ij(iatom)%dijso(:,:)=dijso(:,:)
@@ -2838,6 +2839,7 @@ end subroutine pawdijaa
 !!  pawrad <type(pawrad_type)>=paw radial mesh and related data, for current atom
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
 !!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
+!!  spinaxis(3)=spin quantization axis
 !!  spnorbscl=scaling factor for spin-orbit coupling
 !!  vh1(qphase*mesh_size,v_size,nspden)=all-electron on-site Hartree potential for current atom
 !!                     only spherical moment is used
@@ -2866,19 +2868,19 @@ end subroutine pawdijaa
 !! SOURCE
 
 subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
-    & pawxcdev,spnorbscl,vh1,vxc1,znuc,zora,&
+    & pawxcdev,spinaxis,spnorbscl,vh1,vxc1,znuc,zora,&
     & nucdipmom)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase,zora
- real(dp), intent(in) :: spnorbscl,znuc
+ real(dp),intent(in) :: spnorbscl,znuc
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad
  type(pawtab_type),target,intent(in) :: pawtab
 !arrays
  real(dp),intent(out) :: dijso(:,:)
- real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
+ real(dp),intent(in) :: spinaxis(3),vh1(:,:,:),vxc1(:,:,:)
  real(dp),optional,intent(in) :: nucdipmom(3)
 !Local variables ---------------------------------------
 !scalars
@@ -2886,13 +2888,14 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
  integer :: klm,klmn,klmn1,kln
  integer :: lm_size,lmn2_size,mdir,mesh_size,ngnt,sdir
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
- real(dp) :: fact,me1,me2,rc,rr,rt,sme
+ real(dp) :: alpha,beta,sx,sy,sz,norm,fact,me1,me2,rc,rr,rt,sme,cb2,sb2
  logical :: has_nucdipmom,use_soc,use_sd,use_fc
  character(len=500) :: msg
 !arrays
  integer,pointer :: indklmn(:,:)
  real(dp),allocatable :: dijnd_rad(:,:),dijso_rad(:),dkdr(:),dv1dr(:),dyadic(:,:,:,:)
  real(dp),allocatable :: v1(:),zk1(:),z_intgd(:),z_kernel(:)
+ complex(dp) :: D(2,2),Drot(2,2),U(2,2),ep,em
 
 ! *************************************************************************
 
@@ -3137,6 +3140,48 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
    end do !loop on klmn
    LIBPAW_DEALLOCATE(dyadic)
    LIBPAW_DEALLOCATE(dijnd_rad)
+ end if
+
+ if (ndij >= 4) then
+   norm = dot_product(spinaxis(:), spinaxis(:))
+   if (norm > tol8*tol8) then
+     sx = spinaxis(1) / sqrt(norm)
+     sy = spinaxis(2) / sqrt(norm)
+     sz = spinaxis(3) / sqrt(norm)
+   else
+     sx = 0._dp; sy = 0._dp; sz = 1._dp
+   end if
+
+   alpha = atan2(sy, sx)
+   beta  = atan2(sqrt(sx*sx + sy*sy), sz)
+
+   if (.not.(abs(alpha) < tol8 .and. abs(beta) < tol8)) then
+   
+     cb2 = cos(half*beta); sb2 = sin(half*beta)
+     em = exp(-j_dpc*0.5_dp*alpha); ep = conjg(em)
+     U(1,1) =  cb2 * em; U(1,2) = -sb2 * em
+     U(2,1) =  sb2 * ep; U(2,2) =  cb2 * ep
+     
+     ! spinaxis rotation assumes qphase=1
+     klmn1 = 1
+     do klmn = 1, lmn2_size
+
+       D(1,1) = cmplx(dijso(klmn1  ,1), dijso(klmn1+1,1), kind=dp)
+       D(2,2) = cmplx(dijso(klmn1  ,2), dijso(klmn1+1,2), kind=dp)
+       D(1,2) = cmplx(dijso(klmn1  ,3), dijso(klmn1+1,3), kind=dp)
+       D(2,1) = cmplx(dijso(klmn1  ,4), dijso(klmn1+1,4), kind=dp)
+       
+       Drot(:,:) = matmul(conjg(transpose(U)), matmul(D(:,:), U))
+
+      ! Write back all 4 blocks (after rotation, old idij=2/4 shortcut relations no longer hold)
+       dijso(klmn1  ,1) = real(Drot(1,1), kind=dp); dijso(klmn1+1,1) = aimag(Drot(1,1))
+       dijso(klmn1  ,2) = real(Drot(2,2), kind=dp); dijso(klmn1+1,2) = aimag(Drot(2,2))
+       dijso(klmn1  ,3) = real(Drot(1,2), kind=dp); dijso(klmn1+1,3) = aimag(Drot(1,2))
+       dijso(klmn1  ,4) = real(Drot(2,1), kind=dp); dijso(klmn1+1,4) = aimag(Drot(2,1))
+
+       klmn1 = klmn1 + cplex_dij
+     end do
+   end if
  end if
 
 end subroutine pawdijso

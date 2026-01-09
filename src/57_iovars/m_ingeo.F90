@@ -2238,8 +2238,8 @@ subroutine checkspvec(name,nitem,spinaxis_in,tread,tread_cart,vec_local,vec_cart
      vec_out(:,:) = vec_local(:,:)
    else
      write(msg,'(a)') 'Spinaxis is defined, but only ' // trim(name) // ' is present.' // ch10 // &
-                 'Action: please use ' // trim(name) // '_cart (Cartesian) instead of ' // trim(name) // &
-                 ' when spinaxis is set.'
+                      'Action: please use ' // trim(name) // '_cart (Cartesian) instead of ' // trim(name) // &
+                      'when spinaxis is set.'
      ABI_ERROR(msg)
    end if
    return
@@ -2259,11 +2259,11 @@ subroutine checkspvec(name,nitem,spinaxis_in,tread,tread_cart,vec_local,vec_cart
        v_cart(:) = vec_cart(:,i)
        call cart2spinaxis(alpha, beta, R, v_cart, v_tmp)
      end if
-     ! shule-CHECK: spinat == spinat_cart or rotate spinat_cart !!!!!
      ! not consistent for local and _cart      
      if (maxval(abs(v_tmp(:) - vec_local(:,i))) > tol8) then
-       write(msg,'(a,a,a,a,a,a,a,3(1x,es16.8),a,a,3(1x,es16.8),a,a)') &
+       write(msg,'(a,a,a,a,a,a,a,3(1x,es16.8),a,a,3(1x,es16.8),a,a,3(1x,es16.8),a,a)') &
         'Both ', trim(name), ' and ', trim(name), '_cart are set but inconsistent.', ch10, &
+        'spinaxis (normalized) =', spinaxis(1), spinaxis(2), spinaxis(3), ch10, &
          trim(name)//' (local) =', vec_local(1,i), vec_local(2,i), vec_local(3,i), ch10, &
          trim(name)//'_cart (cart) =', vec_cart(1,i), vec_cart(2,i), vec_cart(3,i), ch10, &
         'Action: make them consistent or provide only one of them.'

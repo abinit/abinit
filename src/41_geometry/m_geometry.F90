@@ -4166,9 +4166,9 @@ subroutine cart2spinaxis(alpha, beta, R, vin, vout)
  sb = sin(beta); cb = cos(beta)
  sa = sin(alpha); ca = cos(alpha)
 
- R(1,1) = cb*ca;  R(1,2) = -sa;   R(1,3) = sb*ca
- R(2,1) = cb*sa;  R(2,2) =  ca;   R(2,3) = sb*sa
- R(3,1) = -sb;    R(3,2) = 0.0_dp;R(3,3) = cb
+ R(1,1) = cb*ca;  R(2,1) = -sa;   R(3,1) = sb*ca
+ R(1,2) = cb*sa;  R(2,2) =  ca;   R(3,2) = sb*sa
+ R(1,3) = -sb;    R(2,3) = 0.0_dp;R(3,3) = cb
 
  if (present(vin) .and. present(vout)) then
      vout(:) = matmul(R, vin)
