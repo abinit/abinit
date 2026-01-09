@@ -2098,7 +2098,6 @@ end function ebands_nelect_per_spin
 !!  spin. Cannot use F90 array syntax due to the internal storage used in abinit.
 !!
 !! INPUTS
-!!  ebands<ebands_t>=The object describing the band structure.
 !!  arr_name=The name of the array whose min and Max value has to be calculated.
 !!   Possible values: 'occ', 'eig' 'doccde'
 !!
@@ -2121,7 +2120,7 @@ function ebands_get_minmax(ebands, arr_name) result(minmax)
  integer :: band,ikpt,spin,nband_k
  real(dp) :: datum
 !arrays
- real(dp), ABI_CONTIGUOUS pointer :: rdata(:,:,:)
+ real(dp), contiguous, pointer :: rdata(:,:,:)
 ! *************************************************************************
 
  select case (tolower(arr_name))
@@ -2162,9 +2161,6 @@ end function ebands_get_minmax
 !! Returns .TRUE. if metallic occupation scheme is used.
 !! Note that this does not imply that the system is metallic.
 !!
-!! INPUTS
-!! ebands<ebands_t>=The ebands_t datatype
-!!
 !! SOURCE
 
 pure logical function ebands_has_metal_scheme(ebands) result(ans)
@@ -2188,7 +2184,6 @@ end function ebands_has_metal_scheme
 !!  Write 3D energies for Fermi surface visualization (XSF format)
 !!
 !! INPUTS
-!!  ebands<ebands_t>=The object describing the band structure.
 !!  crystal<crystal_t>=Info on unit cell and symmetries.
 !!  fname=File name for output.
 !!

@@ -237,8 +237,8 @@ subroutine ppm_get_qbz(ppm, Gsph, Qmesh, iq_bz, botsq, otq, eig)
 !scalars
  integer :: ii,jj,iq_ibz,itim_q,isym_q,iq_curr,isg1,isg2
 !arrays
- integer, ABI_CONTIGUOUS pointer :: grottb(:)
- complex(gwp),ABI_CONTIGUOUS pointer :: phsgt(:),bigomegatwsq(:,:),omegatw(:,:)
+ integer, contiguous, pointer :: grottb(:)
+ complex(gwp),contiguous, pointer :: phsgt(:),bigomegatwsq(:,:),omegatw(:,:)
 ! *********************************************************************
 
  ! Save the index of the q-point for checking purpose.
