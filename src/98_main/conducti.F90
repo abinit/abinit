@@ -28,7 +28,9 @@ program conducti
  USE_MPI
  use m_xmpi
  use m_errors
- !use m_abicore
+#ifdef HAVE_MEM_PROFILING
+ use m_abicore
+#endif
  use m_conducti
 
  use m_io_tools,  only : open_file
