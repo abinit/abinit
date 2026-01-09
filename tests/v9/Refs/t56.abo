@@ -1,5 +1,5 @@
 
-.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.Version 10.7.0.4 of ABINIT, released Dec 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h17 )
+.Starting date : Fri  9 Jan 2026.
+- ( at 21h54 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t56.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t56.abi
 - output file    -> t56.abo
 - root for input  files -> t56i
 - root for output files -> t56o
@@ -360,8 +360,8 @@ meta: {optdriver: 7, eph_task: -4, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_develop/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1036,9 +1036,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   17.595
    2  12.800   -0.333      1.0   21.589
    3  12.800   -0.333      1.0    0.000
    4  12.800   -0.333      1.0    0.000
-   5  18.426   -0.304      1.1    5.626
-   6  18.426   -0.304      1.1    0.000
-   7  18.426   -0.304      1.1    0.000
+   5  18.426   -0.293      1.1    5.626
+   6  18.426   -0.293      1.1    0.000
+   7  18.426   -0.293      1.1    0.000
    8  26.686   -0.006     52.0    8.260
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
@@ -1897,10 +1897,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.9  wall=          1.0
+- Proc.   0 individual time (sec): cpu=          0.9  wall=          0.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.9  wall=          1.0
++Overall time at end (sec) : cpu=          0.9  wall=          0.9
