@@ -1,0 +1,94 @@
+# Test calculation and printing of the electron-phonon contribution to the total energy
+# Diamond test
+ ndtset 5
+
+ prepalw 2
+ ngkpt 2 2 2
+ nshiftk 1
+ shiftk 0.0 0.0 0.0
+
+ #Set 1 : ground state self-consistency
+ getwfk1   0
+ kptopt1   1
+ tolvrs1   1.0d-6 # Unconverged
+ nqpt1     0
+ rfphon1   0
+
+ #Set 2: Response function calculation of d/dk wave function
+ kptopt2   2
+ iscf2    -3
+ rfelfd2   2
+ tolwfr2   1.0d-6 # Unconverged
+ rfphon2   0
+
+ #Set 3: Response function calculation of d2/dkdk wave function
+ kptopt3   2
+ getddk3   2
+ iscf3    -3
+ rf2_dkdk3 3
+ tolwfr3   1.0d-6 # Unconverged
+ rfphon3   0
+
+ #Set 4 : Response function calculation of Q=0 phonons and electric field
+ #***********************************************************************
+ kptopt4   2
+ getddk4   2
+ rfelfd4   3
+ rfphon4   1
+ tolvrs4   1.0d-6 # Unconverged
+ prepalw4  2
+
+ #Set 5 : Dynamic Quadrupoles calculation
+ #***************************************
+ optdriver5 10
+ kptopt5   2
+ get1wf5   4
+ get1den5  4
+ getddk5   2
+ getdkdk5  3
+ lw_qdrpl5 1
+
+ getwfk   1
+ kptopt   3
+ rfphon   1
+ rfatpol   1 2
+ tolvrs   1.0d-6 # Unconverged
+ useylm  1
+ nqpt   1
+ qpt 0.00000000E+00  0.00000000E+00  0.00000000E+00
+
+ acell 3*6.751
+ rprim 0 .5 .5 .5 0 .5 .5 .5 0
+ nstep 200
+ natom 2
+ typat 1 1
+ xred 3*0.0 3*0.25
+ nband 4
+ ntypat 1
+ znucl 6
+ diemac 4
+ ecut 20
+ enunit 2
+ istwfk *1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain =  t61.abi, t62.abi, t63.abi, t64.abi, t65.abi
+#%% [files]
+#%% files_to_test =
+#%%   t62.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = S. Ponce'
+#%% keywords =
+#%% description =
+#%%   Test to compute the electron-phonon contribution to total energy.
+#%%   This part is the quadrupole part.
+#%%   Consider diamond with low ecut and number of k points.
+#%%<END TEST_INFO>
+
