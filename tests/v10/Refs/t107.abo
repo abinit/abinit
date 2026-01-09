@@ -1,5 +1,5 @@
 
-.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.Version 10.1.4.4 of ABINIT, released Dec 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h15 )
+.Starting date : Mon  5 Jan 2026.
+- ( at 18h46 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v10_t104-t105-t106-t107/t107.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/TestBot_MPI1/v10_t104-t105-t106-t107/t107.abi
 - output file    -> t107.abo
 - root for input  files -> t107i
 - root for output files -> t107o
@@ -502,8 +502,8 @@ meta: {optdriver: 7, eph_task: 4, }
 - Writing phonon DOS to netcdf file: t107o_DS1_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Si-GGA.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Si-GGA.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/Pspdir/Si-GGA.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/Pspdir/Si-GGA.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    150713                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1315,6 +1315,17 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
  QP_gap - KS_gap:   -0.534 (OTMS:   -0.670)
  
 ============================================================================================
+ 
+ ========================================================= 
+ Contributions to total energies (in meV)                  
+   See Table II of S. Ponce and X. Gonze, arXiv:2512.04897 
+   for additional information.                             
+ ========================================================= 
+ 
+ Temperature =   3000.000000 K
+ E^(BO)   =       -230124.057651
+ E^(ph)   =          1542.840420
+ E^(elph) =             0.328472
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1494,6 +1505,17 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T: 3000.0 [K], mu_e:    4.460
    5   4.944    4.851   -0.092   -0.356   -0.124    0.259   -2.622    2.266    0.000    0.000
    6   4.944    4.851   -0.092   -0.356   -0.124    0.259   -2.622    2.266    0.000    0.000
 ============================================================================================
+ 
+ ========================================================= 
+ Contributions to total energies (in meV)                  
+   See Table II of S. Ponce and X. Gonze, arXiv:2512.04897 
+   for additional information.                             
+ ========================================================= 
+ 
+ Temperature =   3000.000000 K
+ E^(BO)   =       -230124.057651
+ E^(ph)   =          1542.840420
+ E^(elph) =             0.947715
 
 ================================================================================
 == DATASET  7 ==================================================================
@@ -2002,10 +2024,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         35.7  wall=         35.8
+- Proc.   0 individual time (sec): cpu=         35.0  wall=         35.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  18 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         35.7  wall=         35.8
++Overall time at end (sec) : cpu=         35.0  wall=         35.3
