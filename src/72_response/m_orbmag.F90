@@ -344,7 +344,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
  ABI_MALLOC(kg_k,(3,mpw))
  ABI_MALLOC(kinpw,(mpw))
- if (dtset%orbmag .GT. 2) then
+ if (abs(dtset%orbmag) .GT. 2) then
    ABI_MALLOC(dkinpw,(mpw,3))
  end if
 
@@ -458,7 +458,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      kinpw(:) = zero
      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,crystal%gmet,&
        & kg_k,kinpw,kpoint,npw_k,0,0)
-     if (dtset%orbmag.GT.2) then
+     if (abs(dtset%orbmag.GT.2)) then
        do adir=1,3
          call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,crystal%gmet,&
            & kg_k,dkinpw(:,adir),kpoint,npw_k,adir,0)
@@ -1395,7 +1395,7 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_
   !scalars
   integer :: adir,berryopt,cplex,iband,ipert,jband,ndat,npwsp
   integer :: optlocal,optnl,opt_gvnlx1,sij_opt,tim_getgh1c,usevnl
-  real(dp) :: deltae,deltapert,doti,dotr,hijr,hiji,pertr,perti,pertsize,sijr,siji
+  real(dp) :: corrfac,deltae,deltapert,doti,dotr,hijr,hiji,pertr,perti,pertsize,sijr,siji
   type(rf_hamiltonian_type) :: rf_hamk
   !arrays
   real(dp) :: lambda(1)
@@ -1467,7 +1467,14 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_
         hiji = DOT_PRODUCT(cwavef(1,:),gh1c(2,:))-DOT_PRODUCT(cwavef(2,:),gh1c(1,:))
         sijr = DOT_PRODUCT(cwavef(1,:),gs1c(1,:))+DOT_PRODUCT(cwavef(2,:),gs1c(2,:))
         siji = DOT_PRODUCT(cwavef(1,:),gs1c(2,:))-DOT_PRODUCT(cwavef(2,:),gs1c(1,:))
-        lambda(1) = half*(eig_k(jband)+eig_k(iband))
+        select case (dtset%orbmag)
+        case ( 3 )
+          lambda(1) = half*(eig_k(jband)+eig_k(iband))
+          corrfac=-one
+        case ( -3 )
+          lambda(1) = eig_k(iband)
+          corrfac=-one
+        end select
         pertr = (hijr-lambda(1)*sijr)/deltae
         perti = (hiji-lambda(1)*siji)/deltae
         pertsize=sqrt(pertr*pertr+perti*perti)
@@ -1480,7 +1487,7 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_
         dcg1(2,:) = dcg1(2,:) + pertr*cwavef(2,:) + perti*cwavef(1,:)
       end do
       gcg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir) =&
-        &cg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir)-dcg1(1:2,1:npwsp)
+        &cg1_k(1:2,(iband-1)*npwsp+1:iband*npwsp,adir)+corrfac*dcg1(1:2,1:npwsp)
     end do
   end do
 
@@ -1552,16 +1559,6 @@ subroutine gauge_treatment(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gc
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,berryopt,cplex,iband,ipert,jband,ndat,npwsp
-  integer :: optlocal,optnl,opt_gvnlx1,sij_opt,tim_getgh1c,usevnl
-  real(dp) :: deltae,deltapert,doti,dotr,hijr,hiji,pertr,perti,pertsize,sijr,siji
-  type(rf_hamiltonian_type) :: rf_hamk
-  !arrays
-  real(dp) :: lambda(1)
-  real(dp),allocatable :: cwavef(:,:),dcg1(:,:),gh1c(:,:)
-  real(dp),allocatable :: grad_berry(:,:),gs1c(:,:),gvnlx1(:,:)
-  real(dp),allocatable :: vectornd_pac_idir(:,:,:,:)
-  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 !--------------------------------------------------------------------
 
@@ -1570,9 +1567,13 @@ subroutine gauge_treatment(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gc
   !             conduction space by construction
 
   select case (dtset%orbmag)
+  case ( -3 )
+    ! Convert Berry DDK to diagonal gauge
+    call para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_k,gs_hamk,&
+      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
+      & nucdip_dirs,occ_k,vectornd_pac)
   case ( -2:-1 )
-    ! Berry DDK already projected onto conduction space, stay in parallel transport gauge
-    ! therefore, nothing to do
+    ! Berry DDK already projected onto conduction space, therefore nothing to do
     gcg1_k(1:2,1:mcgk,1:3) = cg1_k(1:2,1:mcgk,1:3)
   case ( 1:2 )
     ! project cg1_k onto conduction space by removing ground PAW part; 
