@@ -280,7 +280,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
                 & dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,  &
                 & tdks%paw_an,tdks%paw_an,tdks%paw_ij,tdks%pawang,          &
                 & dtset%pawprtvol,tdks%pawrad,tdks%pawrhoij,dtset%pawspnorb,&
-                & tdks%pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel, &
+                & tdks%pawtab,dtset%pawxcdev,dtset%spinaxis,dtset%spnorbscl,dtset%xclevel, &
                 & dtset%xc_denpos,dtset%xc_taupos,tdks%xred,tdks%ucvol,     &
                 & psps%znuclpsp, &
                 & comm_atom=mpi_enreg%comm_atom,                            &
@@ -311,7 +311,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
              & tdks%pawfgr%nfft,nfftotf,dtset%nspden,psps%ntypat,tdks%paw_an,        &
              & tdks%paw_ij,tdks%pawang,tdks%pawfgrtab,dtset%pawprtvol,tdks%pawrad,   &
              & tdks%pawrhoij,dtset%pawspnorb,tdks%pawtab,dtset%pawxcdev,k0,          &
-             & dtset%spnorbscl,tdks%ucvol,dtset%cellcharge(1),tdks%vtrial,           &
+             & dtset%spinaxis,dtset%spnorbscl,tdks%ucvol,dtset%cellcharge(1),tdks%vtrial,           &
              & tdks%vxc,tdks%xred,dtset%znucl,natvshift=dtset%natvshift,             &
              & atvshift=dtset%atvshift, &
              & fatvshift=one,comm_atom=mpi_enreg%comm_atom,                          &

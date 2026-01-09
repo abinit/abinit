@@ -635,7 +635,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 &                     i2pert,dtset%ixc,natom,dtset%natom,nspden,psps%ntypat,dtset%nucdipmom,&
 &                     0,option,paw_an1_i2pert,paw_an0,paw_ij1_i2pert,pawang,&
 &                     dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&                     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,&
+&                     dtset%spinaxis,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,&
 &                     xred,ucvol,psps%znuclpsp, &
 &                     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
                 !    First-order Dij computation
@@ -653,7 +653,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                      call pawdij(cplex,dtset%enunit,gprimd,i2pert,natom,dtset%natom,&
 &                     nfftf,nfftotf,dtset%nspden,psps%ntypat,paw_an1_i2pert,paw_ij1_i2pert,pawang,&
 &                     pawfgrtab,dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,&
-&                     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%cellcharge(1),&
+&                     dtset%pawxcdev,qphon,dtset%spinaxis,dtset%spnorbscl,ucvol,dtset%cellcharge(1),&
 &                     vtrial1_tmp,vxc1_i2pert,xred,dtset%znucl,&
 &                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
                      if (has_dijfr>0) then
