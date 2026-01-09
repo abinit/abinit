@@ -1344,7 +1344,7 @@ function wfd_norm2(Wfd,Cryst,Pawtab,band,ik_ibz,spin) result(norm2)
  character(len=500) :: msg
 !arrays
  real(dp) :: pawovlp(2)
- complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:)
+ complex(gwp),contiguous, pointer :: ug1(:)
  type(pawcprj_type),allocatable :: Cp1(:,:)
 !************************************************************************
 
@@ -1423,7 +1423,7 @@ function wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik_ibz,spin)
  character(len=500) :: msg
 !arrays
  real(dp) :: pawovlp(2)
- complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
+ complex(gwp),contiguous, pointer :: ug1(:),ug2(:)
  type(pawcprj_type),allocatable :: Cp1(:,:),Cp2(:,:)
 !************************************************************************
 
@@ -1703,8 +1703,8 @@ subroutine wfd_get_ur(Wfd, band, ik_ibz, spin, ur)
  character(len=500) :: msg
  type(wave_t),pointer :: wave
 !arrays
- integer,ABI_CONTIGUOUS pointer :: kg_k(:,:),gbound(:,:)
- complex(gwp),ABI_CONTIGUOUS pointer :: ug(:)
+ integer,contiguous, pointer :: kg_k(:,:),gbound(:,:)
+ complex(gwp),contiguous, pointer :: ug(:)
 !************************************************************************
 
  npw_k  = Wfd%npwarr(ik_ibz)
@@ -1908,14 +1908,14 @@ subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sor
  type(wave_t),pointer :: wave
  logical :: want_sorted
 !arrays
- integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
+ integer,contiguous, pointer :: kg_k(:,:)
  integer,allocatable :: dimcprj_srt(:)
  real(dp) :: kpoint(3)
- real(dp),ABI_CONTIGUOUS pointer :: phkxred(:,:)
+ real(dp),contiguous, pointer :: phkxred(:,:)
  real(dp),allocatable :: cwavef(:,:), kpg(:,:)
  !real(dp),allocatable :: ph1d(2,3*(2*mgfft+1)*natom)
- real(dp),ABI_CONTIGUOUS pointer :: ph3d(:,:,:)    ! ph3d(2,npw_k,matblk)
- real(dp),ABI_CONTIGUOUS pointer :: ffnl(:,:,:,:)  ! ffnl(npw_k,dimffnl,lmnmax,ntypat)
+ real(dp),contiguous, pointer :: ph3d(:,:,:)    ! ph3d(2,npw_k,matblk)
+ real(dp),contiguous, pointer :: ffnl(:,:,:,:)  ! ffnl(npw_k,dimffnl,lmnmax,ntypat)
  type(pawcprj_type),allocatable :: Cprj_srt(:,:)
 ! *********************************************************************
 
@@ -3061,7 +3061,7 @@ subroutine wfdgw_rotate(Wfd, Cryst, m_ks_to_qp, bmask)
  type(wave_t),pointer :: wave
 !arrays
  integer :: new_list(Wfd%mband),my_band_list(Wfd%mband)
- complex(dp),ABI_CONTIGUOUS pointer :: umat_sk(:,:)
+ complex(dp),contiguous, pointer :: umat_sk(:,:)
  complex(gwp) :: mcol(Wfd%mband)
  complex(gwp),allocatable :: new_ug(:,:) !, new_ur(:)
 !************************************************************************
@@ -3840,7 +3840,7 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
 !arrays
  integer :: my_bandlist(Wfd%mband)
  real(dp) :: pawovlp(2)
- complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
+ complex(gwp),contiguous, pointer :: ug1(:),ug2(:)
  !complex(gwp) :: ur(Wfd%nfft*Wfd%nspinor)
  character(len=6) :: tag_spin(2)
  type(pawcprj_type),allocatable :: Cp1(:,:),Cp2(:,:)
@@ -5141,7 +5141,7 @@ subroutine wfdgw_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
  integer,allocatable :: l_size_atm(:),my_plot_list(:,:)
  integer :: my_band_list(Wfd%mband)
  real(dp),allocatable :: data_plot(:)
- logical,ABI_CONTIGUOUS pointer :: bmask(:)
+ logical,contiguous, pointer :: bmask(:)
  complex(gwp),allocatable :: ur_ae(:),nc_ur(:)
  type(Pawfgrtab_type),allocatable :: Pawfgrtab(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
@@ -5310,12 +5310,12 @@ subroutine wfdgw_get_nl_me(Wfd, cryst, psps, pawtab, bks_mask, nl_bks)
  type(wave_t),pointer :: wave
 !arrays
  integer :: bks_distrb(Wfd%mband, Wfd%nkibz, Wfd%nsppol)
- integer, ABI_CONTIGUOUS pointer :: kg_k(:,:)
+ integer, contiguous, pointer :: kg_k(:,:)
  real(dp) :: kpoint(3),enlout(1)
  real(dp),allocatable :: kpg_k(:,:),vnl_psi(:,:),vectin(:,:)
  real(dp) :: opaw_psi(1,1)
- real(dp),ABI_CONTIGUOUS pointer :: ffnl_k(:,:,:,:),ph3d_k(:,:,:)
- complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:)
+ real(dp),contiguous, pointer :: ffnl_k(:,:,:,:),ph3d_k(:,:,:)
+ complex(gwp),contiguous, pointer :: ug1(:)
  type(pawcprj_type),allocatable :: cprj(:,:)
 !************************************************************************
 
@@ -5464,14 +5464,14 @@ end subroutine wfdgw_get_nl_me
 !!!   type(gs_hamiltonian_type) :: ham_k
 !!!  !arrays
 !!!   integer :: bks_distrb(wfd%mband, wfd%nkibz, wfd%nsppol)
-!!!   integer, ABI_CONTIGUOUS pointer :: kg_k(:,:)
+!!!   integer, contiguous, pointer :: kg_k(:,:)
 !!!   !real(dp) :: kptns_(3,1),ylmgr_dum(1,1,1),shifts(3)
 !!!   !real(dp),allocatable :: ylm_k(:,:),dum_ylm_gr_k(:,:,:)
 !!!   !real(dp),pointer :: ffnl_k(:,:,:,:)
 !!!   real(dp) :: kpoint(3),dum_enlout(0),dummy_lambda(1),soc(2)
 !!!   real(dp),allocatable :: kpg_k(:,:),vnl_psi(:,:),vectin(:,:) !,s_psi(:,:)
 !!!   real(dp),allocatable :: opaw_psi(:,:) !2, npw_k*wfd%nspinor*wfd%usepaw) ! <G|1+S|Cnk>
-!!!   real(dp),ABI_CONTIGUOUS pointer :: ffnl_k(:,:,:,:),ph3d_k(:,:,:)
+!!!   real(dp),contiguous, pointer :: ffnl_k(:,:,:,:),ph3d_k(:,:,:)
 !!!   type(pawcprj_type),allocatable :: cprj(:,:)
 !!!  !************************************************************************
 !!!
@@ -5672,7 +5672,7 @@ subroutine wfdgw_mkrho(wfd, cryst, psps, ebands, ngfftf, nfftf, rhor, &
  complex(dp),allocatable :: wfr_x(:),wfr_y(:)
  complex(gwp),allocatable :: gradug(:),work(:)
  complex(gwp),allocatable,target :: wfr(:)
- complex(gwp), ABI_CONTIGUOUS pointer :: cwavef1(:),cwavef2(:)
+ complex(gwp), contiguous, pointer :: cwavef1(:),cwavef2(:)
  type(iter2_t) :: Iter_bks
 !*************************************************************************
 
