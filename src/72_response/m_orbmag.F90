@@ -1461,7 +1461,7 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_
         if (jband .EQ. iband) cycle
         deltae = eig_k(jband) - eig_k(iband)
         ! deltae test seems to work best compared to deltapert test
-        !if (abs(deltae) .LT. dtset%userra) cycle
+        !if (abs(deltae) .LT. dtset%ggtrcut) cycle
         cwavef(1:2,1:npwsp)=cg_k(1:2,(jband-1)*npwsp+1:jband*npwsp)
         hijr = DOT_PRODUCT(cwavef(1,:),gh1c(1,:))+DOT_PRODUCT(cwavef(2,:),gh1c(2,:))
         hiji = DOT_PRODUCT(cwavef(1,:),gh1c(2,:))-DOT_PRODUCT(cwavef(2,:),gh1c(1,:))
@@ -1478,7 +1478,7 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_
         pertr = (hijr-lambda(1)*sijr)/deltae
         perti = (hiji-lambda(1)*siji)/deltae
         pertsize=sqrt(pertr*pertr+perti*perti)
-        if (pertsize .GT. dtset%userra) then
+        if (pertsize .GT. dtset%ggtrcut) then
           write(std_out,'(a,3i4,2es16.8)')'JWZ debug adir iband jband pert ',&
             &adir,iband,jband,pertr,perti
           cycle

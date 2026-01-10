@@ -7376,6 +7376,22 @@ allowed, despite the different coordinate system.
 ),
 
 Variable(
+    abivarname="ggtrcut",
+    varset="dfpt",
+    vartype="real",
+    topics=['printing_prngs', 'Output_useful'],
+    dimensions="scalar",
+    defaultval=0.001,
+    mnemonics="GauGe TRansform CUToff",
+    text=r"""
+Cutoff value to use in computing gauge change from parallel transport to diagonal. 
+Expert use only, do not change unless you've studied the source code and know exactly
+what you are doing and expecting.
+""",
+),
+
+
+Variable(
     abivarname="goprecon",
     varset="rlx",
     vartype="integer",
