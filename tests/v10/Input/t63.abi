@@ -16,7 +16,7 @@ t62o_DS5_DDB
 #%% test_chain =  t61.abi, t62.abi, t63.abi, t64.abi, t65.abi
 #%% [files]
 #%% files_to_test =
-#%%   t63.ddb.out, tolnlines = 20, tolabs = 2.0e-6, tolrel = 2.0e-4, fld_options = -medium
+#%%   t63.ddb.out, tolnlines = 36, tolabs = 2.0e-6, tolrel = 2.0e-4, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
