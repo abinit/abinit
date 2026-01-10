@@ -2461,6 +2461,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ga_opt_percent =0.2_dp
    dtsets(idtset)%ga_rules(:) =1
    dtsets(idtset)%geoopt = "none"
+   dtsets(idtset)%ggtrcut=0.001_dp
    dtsets(idtset)%goprecon =0
    dtsets(idtset)%goprecprm(:)=0
    dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)

@@ -909,6 +909,7 @@ type, public :: dataset_type
  real(dp) :: frictionbar
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
+ real(dp) :: ggtrcut = 0.001_dp
  real(dp) :: gw_rcut
  real(dp) :: gwencomp = 2.0_dp
  real(dp) :: gwls_model_parameter         ! Parameter used in dielectric function model
@@ -2370,6 +2371,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%frictionbar        = dtin%frictionbar
  dtout%fxcartfactor       = dtin%fxcartfactor
  dtout%ga_opt_percent     = dtin%ga_opt_percent
+ dtout%ggtrcut            = dtin%ggtrcut
  dtout%gwls_model_parameter = dtin%gwls_model_parameter
  dtout%kptnrm             = dtin%kptnrm
  dtout%kptrlen            = dtin%kptrlen
@@ -3757,7 +3759,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
  list_vars=trim(list_vars)//' getvpq getvpq_filepath'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
- list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
+ list_vars=trim(list_vars)//' get1den get1wf ggtrcut goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib gpu_thread_limit'
  list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option'
  list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
