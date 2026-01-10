@@ -2864,6 +2864,8 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,ggtr
      if (distrb_cycle(jband)) cycle
      jband_me = jband_me + 1
 
+     ! the default value of ggtrcut is 0.001, was formerly a parameter in this routine 
+     ! called etol=0.001_dp
      if ((abs(eig_k(iband)-eig_k(jband)) > ggtrcut).and.(abs(occ_k(jband)) > tol8 )) then
 
        cwave0(:,:) = cg_k(:,1+(jband_me-1)*npw_k*nspinor:jband_me*npw_k*nspinor)
