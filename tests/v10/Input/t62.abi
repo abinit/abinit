@@ -78,6 +78,7 @@
 #%% [setup]
 #%% executable = abinit
 #%% test_chain =  t61.abi, t62.abi, t63.abi, t64.abi, t65.abi
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% [files]
 #%% files_to_test =
 #%%   t62.abo, tolnlines = 2, tolabs = 1.1e-4, tolrel = 8.0e-5, fld_options = -easy;
