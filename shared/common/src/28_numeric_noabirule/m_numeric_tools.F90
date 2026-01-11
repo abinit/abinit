@@ -6679,7 +6679,6 @@ integer pure function blocked_loop(loop_index, loop_stop, batch_size) result(nda
 end function blocked_loop
 !!***
 
-
 !====================================================================
 ! bin_t: average x-value inside the bin
 !====================================================================
@@ -6778,7 +6777,6 @@ subroutine bins_init(self, nn, xvals, dx)
   !end do
 
 end subroutine bins_init
-
 
 !!****t* m_numeric_tools/bins_free
 !! NAME

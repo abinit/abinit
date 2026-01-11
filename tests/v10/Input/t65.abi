@@ -74,7 +74,7 @@
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = S. Ponce'
-#%% keywords =
+#%% keywords = EPH
 #%% description =
 #%%   Test to compute the electron-phonon contribution to total energy.
 #%%   Consider diamond with low ecut and number of k points.
