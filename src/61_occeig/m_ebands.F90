@@ -2672,12 +2672,15 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
 
  ! Check if nband is "large enough" to compute the Fermi level.
  ierr = self%has_enough_bands_for_ef(msg)
- if (ierr > 0) then
-   ABI_ERROR(msg)
- end if
- if (ierr < 0) then
+ if (ierr /= 0) then
    ABI_WARNING(msg)
  end if
+ !if (ierr > 0) then
+ !  ABI_ERROR(msg)
+ !end if
+ !if (ierr < 0) then
+ !  ABI_WARNING(msg)
+ !end if
 
  mu_e = zero
  do it=1,ntemp
