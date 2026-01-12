@@ -143,7 +143,7 @@ contains
        ABI_ERROR(message)
     end if
 
-    efgsi21=efg_si*1.0E-21 ! efg_si is electric field gradient in SI units, defined in 
+    efgsi21=efg_si*1.0E-21 ! efg_si is electric field gradient in SI units, defined in
                            ! defs_basis. Multiply by 10E-21 for nice printing below.
                            ! 1 EFG in au is 9.725E21 volts/m^2
 
@@ -221,11 +221,11 @@ contains
            & '   Cq (MHz) : ',cq,'   eta : ',eta
          call wrtout(ab_out,message,'COLL')
        end if
-      
-       ! for printing and test portability, it's better to simply set very small eigvals to zero 
-       do ii=1,3 
+
+       ! for printing and test portability, it's better to simply set very small eigvals to zero
+       do ii=1,3
          if (abs(eigval(ii))<tol8) eigval(ii)=zero
-       end do 
+       end do
        write(message,'(2a,f13.6,a,f16.8,a,a,3f13.6)')ch10,'      efg eigval (au) : ',eigval(1),' ; (1.0E+21 V/m^2) : ',eigval(1)*efgsi21,ch10,&
             &     '-         eigvec : ',matr(1,1),matr(2,1),matr(3,1)
        call wrtout(ab_out,message,'COLL')
