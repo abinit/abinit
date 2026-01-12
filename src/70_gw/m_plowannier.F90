@@ -1832,7 +1832,7 @@ endif
 &   ' == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis'
    call wrtout(std_out,message,'COLL') ; call wrtout(ab_out,message,'COLL')
    write(message,'(2a,f13.4,a)') ch10,&
-&   '   (The band structure is shifted by fermie =',fermie*27.211,' eV )'
+&   '   (The band structure is shifted by fermie =',fermie*Ha_eV,' eV )'
    call wrtout(std_out,message,'COLL') ; call wrtout(ab_out,message,'COLL')
 
    write(message,'(a,i10)')  ' == Number of atoms                             ',wan%natom_wan
@@ -2122,7 +2122,7 @@ endif
        end do
      end do
    end do
-   write(std_out,*) "energies", energies*27.211
+   write(std_out,*) "energies", energies*Ha_eV
 
    ! Loop over frequency
    !----------------------
@@ -2262,7 +2262,7 @@ endif
      end do
      write(269,*) 27.2107*real(wcurrent),27.2107*real(Ffftable(1,1)),27.2107*aimag(Ffftable(1,1))
      write(2699,*) 27.2107*real(wcurrent),27.2107*real(wcurrent - operwansquarereal(1,1,1) - energies(1,1)),&
-&      27.211*real(energies(1,1)),27.211*real(operwansquarereal(1,1,1))
+&      Ha_eV*real(energies(1,1)),Ha_eV*real(operwansquarereal(1,1,1))
 
      if (dos < 0) then
        xsum=czero

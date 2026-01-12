@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h12 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v7_t13/t13.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h13 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v7_t13/t13.abi
 - output file    -> t13.abo
 - root for input  files -> t13i
 - root for output files -> t13o
@@ -2577,8 +2577,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2671,7 +2671,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000100000000  5.000000000000  4.999900000000 bohr
-              =  2.645938960671  2.645886042950  2.645833125229 angstroms
+              =  2.645938970441  2.645886052720  2.645833134999 angstroms
  prteigrs : about to open file t13o_DS11_EIG
  Fermi (or HOMO) energy (hartree) =   0.24164   Average Vxc (hartree)=  -0.34953
  Eigenvalues (hartree) for nkpt=  98  k points:
@@ -2691,7 +2691,7 @@ psp_core            :  2.96289129692827E-02
 local_psp           : -2.39622750863586E+00
 non_local_psp       :  1.23001455917677E+00
 total_energy        : -5.33595387514405E+00
-total_energy_eV     : -1.45198689155799E+02
+total_energy_eV     : -1.45198701887284E+02
 band_energy         : -5.69616368189415E-01
 ...
 
@@ -2702,9 +2702,9 @@ band_energy         : -5.69616368189415E-01
   sigma(3 3)=  1.73835836E-03  sigma(2 1)= -1.81182528E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.6988E+01 GPa]
-- sigma(1 1)=  6.42889917E+01  sigma(3 2)=  4.19537961E-01
-- sigma(2 2)=  5.55316278E+01  sigma(3 1)=  1.62687589E-01
-- sigma(3 3)=  5.11442601E+01  sigma(2 1)= -5.33057311E-01
+- sigma(1 1)=  6.42890025E+01  sigma(3 2)=  4.19538032E-01
+- sigma(2 2)=  5.55316371E+01  sigma(3 1)=  1.62687617E-01
+- sigma(3 3)=  5.11442687E+01  sigma(2 1)= -5.33057401E-01
 
 ================================================================================
 == DATASET 12 ==================================================================
@@ -2818,7 +2818,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000100000000  5.000000000000  4.999900000000 bohr
-              =  2.645938960671  2.645886042950  2.645833125229 angstroms
+              =  2.645938970441  2.645886052720  2.645833134999 angstroms
  prteigrs : about to open file t13o_DS12_EIG
  Fermi (or HOMO) energy (hartree) =   0.35903   Average Vxc (hartree)=  -0.34962
  Eigenvalues (hartree) for nkpt=  45  k points:
@@ -2838,7 +2838,7 @@ psp_core            :  2.96289129602572E-02
 local_psp           : -2.37823648619802E+00
 non_local_psp       :  1.21652062697593E+00
 total_energy        : -5.33013341568917E+00
-total_energy_eV     : -1.45040306399331E+02
+total_energy_eV     : -1.45040319116928E+02
 band_energy         : -5.64412720093104E-01
 ...
 
@@ -2849,9 +2849,9 @@ band_energy         : -5.64412720093104E-01
   sigma(3 3)=  1.86400197E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.8135E+01 GPa]
-- sigma(1 1)=  5.50111327E+01  sigma(3 2)=  1.69498741E-04
-- sigma(2 2)=  6.45523847E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.48408222E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  5.50111419E+01  sigma(3 2)=  1.69498770E-04
+- sigma(2 2)=  6.45523955E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.48408314E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 13 ==================================================================
@@ -2965,7 +2965,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000100000000  4.999950000000  4.999950000000 bohr
-              =  2.645938960671  2.645859584090  2.645859584090 angstroms
+              =  2.645938970441  2.645859593859  2.645859593859 angstroms
  prteigrs : about to open file t13o_DS13_EIG
  Fermi (or HOMO) energy (hartree) =   0.35896   Average Vxc (hartree)=  -0.34962
  Eigenvalues (hartree) for nkpt=  30  k points:
@@ -2985,7 +2985,7 @@ psp_core            :  2.96289129572943E-02
 local_psp           : -2.37844516794378E+00
 non_local_psp       :  1.21666397468240E+00
 total_energy        : -5.33017889474363E+00
-total_energy_eV     : -1.45041543947339E+02
+total_energy_eV     : -1.45041556665045E+02
 band_energy         : -5.64716760904320E-01
 ...
 
@@ -2996,9 +2996,9 @@ band_energy         : -5.64716760904320E-01
   sigma(3 3)=  2.02656568E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.8117E+01 GPa]
-- sigma(1 1)=  5.51051158E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  5.96236108E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.96236108E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  5.51051250E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.96236208E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.96236208E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 14 ==================================================================
@@ -3112,7 +3112,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
-              =  2.645886042950  2.645886042950  2.645886042950 angstroms
+              =  2.645886052720  2.645886052720  2.645886052720 angstroms
  prteigrs : about to open file t13o_DS14_EIG
  Fermi (or HOMO) energy (hartree) =   0.24120   Average Vxc (hartree)=  -0.34938
  Eigenvalues (hartree) for nkpt=  16  k points:
@@ -3132,7 +3132,7 @@ psp_core            :  2.96289129484057E-02
 local_psp           : -2.41077404370641E+00
 non_local_psp       :  1.23495548779713E+00
 total_energy        : -5.33718650400834E+00
-total_energy_eV     : -1.45232230692982E+02
+total_energy_eV     : -1.45232243427408E+02
 band_energy         : -5.70378608611314E-01
 ...
 
@@ -3143,9 +3143,9 @@ band_energy         : -5.70378608611314E-01
   sigma(3 3)=  1.90002272E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.5901E+01 GPa]
-- sigma(1 1)=  5.59005890E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  5.59005890E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.59005890E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  5.59005984E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.59005984E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.59005984E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 21 ==================================================================
@@ -3259,7 +3259,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000100000000  5.000000000000  4.999900000000 bohr
-              =  2.645938960671  2.645886042950  2.645833125229 angstroms
+              =  2.645938970441  2.645886052720  2.645833134999 angstroms
  prteigrs : about to open file t13o_DS21_EIG
  Fermi (or HOMO) energy (hartree) =   0.04495   Average Vxc (hartree)=  -0.26789
  Eigenvalues (hartree) for nkpt=  63  k points:
@@ -3279,7 +3279,7 @@ psp_core            :  1.48126048467534E-02
 local_psp           : -3.33985036396089E+00
 non_local_psp       :  1.22013222041362E+00
 total_energy        : -5.29798699767818E+00
-total_energy_eV     : -1.44165557879110E+02
+total_energy_eV     : -1.44165570520006E+02
 band_energy         : -1.13318681024610E+00
 ...
 
@@ -3290,9 +3290,9 @@ band_energy         : -1.13318681024610E+00
   sigma(3 3)=  1.29813547E-03  sigma(2 1)=  2.38048153E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.7909E+01 GPa]
-- sigma(1 1)=  3.83677731E+01  sigma(3 2)= -1.23235038E-01
-- sigma(2 2)=  3.71672319E+01  sigma(3 1)= -2.07943860E-02
-- sigma(3 3)=  3.81924577E+01  sigma(2 1)=  7.00361728E-02
+- sigma(1 1)=  3.83677795E+01  sigma(3 2)= -1.23235058E-01
+- sigma(2 2)=  3.71672381E+01  sigma(3 1)= -2.07943895E-02
+- sigma(3 3)=  3.81924641E+01  sigma(2 1)=  7.00361846E-02
 
 ================================================================================
 == DATASET 22 ==================================================================
@@ -3406,7 +3406,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.071394849409  7.071394849409  7.071456710254 bohr
-              =  3.742020987248  3.742020987248  3.742053722597 angstroms
+              =  3.742021001065  3.742021001065  3.742053736415 angstroms
  prteigrs : about to open file t13o_DS22_EIG
  Fermi (or HOMO) energy (hartree) =   0.10046   Average Vxc (hartree)=  -0.26822
  Eigenvalues (hartree) for nkpt=  25  k points:
@@ -3426,7 +3426,7 @@ psp_core            :  1.48126048449018E-02
 local_psp           : -3.34115447561653E+00
 non_local_psp       :  1.22777528509701E+00
 total_energy        : -5.29706554740204E+00
-total_energy_eV     : -1.44140483941938E+02
+total_energy_eV     : -1.44140496580636E+02
 band_energy         : -1.13365444183394E+00
 ...
 
@@ -3437,9 +3437,9 @@ band_energy         : -1.13365444183394E+00
   sigma(3 3)=  1.27897299E-03  sigma(2 1)= -1.53123317E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.7495E+01 GPa]
-- sigma(1 1)=  3.74288126E+01  sigma(3 2)=  2.61108230E-06
-- sigma(2 2)=  3.74288090E+01  sigma(3 1)=  1.06294769E-06
-- sigma(3 3)=  3.76286782E+01  sigma(2 1)= -4.50504277E-02
+- sigma(1 1)=  3.74288189E+01  sigma(3 2)=  2.61108274E-06
+- sigma(2 2)=  3.74288153E+01  sigma(3 1)=  1.06294787E-06
+- sigma(3 3)=  3.76286845E+01  sigma(2 1)= -4.50504353E-02
 
 ================================================================================
 == DATASET 23 ==================================================================
@@ -3493,7 +3493,7 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.29046568E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.28135453E-03  sigma(3 1)= -1.82216336E-15
+  sigma(2 2)=  1.28135453E-03  sigma(3 1)= -1.82212436E-15
   sigma(3 3)=  1.28135453E-03  sigma(2 1)=  3.18868506E-10
 
 
@@ -3517,9 +3517,9 @@ etotal    :  -5.30094686E+00
 entropy   :   0.00000000E+00
 fermie    :   3.06831349E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.29046568E-03,   3.18868506E-10,  -1.82216336E-15, ]
+- [  1.29046568E-03,   3.18868506E-10,  -1.82212436E-15, ]
 - [  3.18868506E-10,   1.28135453E-03,   0.00000000E+00, ]
-- [ -1.82216336E-15,   0.00000000E+00,   1.28135453E-03, ]
+- [ -1.82212436E-15,   0.00000000E+00,   1.28135453E-03, ]
 pressure_GPa:  -3.7788E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
@@ -3553,7 +3553,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.071368332645  7.071359492954  7.071359492954 bohr
-              =  3.742006955181  3.742002277418  3.742002277418 angstroms
+              =  3.742006968998  3.742002291235  3.742002291235 angstroms
  prteigrs : about to open file t13o_DS23_EIG
  Fermi (or HOMO) energy (hartree) =   0.03068   Average Vxc (hartree)=  -0.26792
  Eigenvalues (hartree) for nkpt=  18  k points:
@@ -3573,20 +3573,20 @@ psp_core            :  1.48126048225928E-02
 local_psp           : -3.34602924581917E+00
 non_local_psp       :  1.22486484109900E+00
 total_energy        : -5.30094686300286E+00
-total_energy_eV     : -1.44246099910634E+02
+total_energy_eV     : -1.44246112558592E+02
 band_energy         : -1.13596321599136E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.29046568E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.28135453E-03  sigma(3 1)= -1.82216336E-15
+  sigma(2 2)=  1.28135453E-03  sigma(3 1)= -1.82212436E-15
   sigma(3 3)=  1.28135453E-03  sigma(2 1)=  3.18868506E-10
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.7788E+01 GPa]
-- sigma(1 1)=  3.79668048E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.76987454E+01  sigma(3 1)= -5.36098880E-11
-- sigma(3 3)=  3.76987454E+01  sigma(2 1)=  9.38143377E-06
+- sigma(1 1)=  3.79668112E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.76987518E+01  sigma(3 1)= -5.36087494E-11
+- sigma(3 3)=  3.76987518E+01  sigma(2 1)=  9.38143534E-06
 
 ================================================================================
 == DATASET 24 ==================================================================
@@ -3700,7 +3700,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.071362438807  7.071362438807  7.071362438807 bohr
-              =  3.742003836296  3.742003836296  3.742003836296 angstroms
+              =  3.742003850113  3.742003850113  3.742003850113 angstroms
  prteigrs : about to open file t13o_DS24_EIG
  Fermi (or HOMO) energy (hartree) =   0.00050   Average Vxc (hartree)=  -0.26761
  Eigenvalues (hartree) for nkpt=   6  k points:
@@ -3720,7 +3720,7 @@ psp_core            :  1.48126048270055E-02
 local_psp           : -3.35152618751469E+00
 non_local_psp       :  1.22147401364410E+00
 total_energy        : -5.30388233882765E+00
-total_energy_eV     : -1.44325978270114E+02
+total_energy_eV     : -1.44325990925076E+02
 band_energy         : -1.13803734744256E+00
 ...
 
@@ -3731,9 +3731,9 @@ band_energy         : -1.13803734744256E+00
   sigma(3 3)=  1.29141961E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.7995E+01 GPa]
-- sigma(1 1)=  3.79948703E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.79948703E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.79948703E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  3.79948767E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.79948767E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.79948767E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 31 ==================================================================
@@ -3840,7 +3840,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000100000000  5.000000000000  4.999900000000 bohr
-              =  2.645938960671  2.645886042950  2.645833125229 angstroms
+              =  2.645938970441  2.645886052720  2.645833134999 angstroms
  prteigrs : about to open file t13o_DS31_EIG
  Fermi (or HOMO) energy (hartree) =  -0.06314   Average Vxc (hartree)=  -0.20112
  Eigenvalues (hartree) for nkpt=  28  k points:
@@ -3860,7 +3860,7 @@ psp_core            :  7.40611727211122E-03
 local_psp           : -4.33980601291996E+00
 non_local_psp       :  1.20390113113643E+00
 total_energy        : -5.23715214056250E+00
-total_energy_eV     : -1.42510157230067E+02
+total_energy_eV     : -1.42510169725812E+02
 band_energy         : -1.50218308815824E+00
 ...
 
@@ -3871,9 +3871,9 @@ band_energy         : -1.50218308815824E+00
   sigma(3 3)=  5.64190762E-04  sigma(2 1)=  5.62083621E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.6912E+01 GPa]
-- sigma(1 1)=  1.70662143E+01  sigma(3 2)= -8.10559731E-01
-- sigma(2 2)=  1.70692931E+01  sigma(3 1)= -9.35771002E-02
-- sigma(3 3)=  1.65990625E+01  sigma(2 1)=  1.65370683E-01
+- sigma(1 1)=  1.70662171E+01  sigma(3 2)= -8.10559868E-01
+- sigma(2 2)=  1.70692960E+01  sigma(3 1)= -9.35771159E-02
+- sigma(3 3)=  1.65990653E+01  sigma(2 1)=  1.65370711E-01
 
 ================================================================================
 == DATASET 32 ==================================================================
@@ -3980,7 +3980,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  8.660687048147  8.660687048147  8.660687048147 bohr
-              =  4.583038196610  4.583038196610  4.583038196610 angstroms
+              =  4.583038213533  4.583038213533  4.583038213533 angstroms
  prteigrs : about to open file t13o_DS32_EIG
  Fermi (or HOMO) energy (hartree) =  -0.08745   Average Vxc (hartree)=  -0.20186
  Eigenvalues (hartree) for nkpt=   7  k points:
@@ -4000,7 +4000,7 @@ psp_core            :  7.40611727039905E-03
 local_psp           : -4.30516413505018E+00
 non_local_psp       :  1.19437622844796E+00
 total_energy        : -5.23409215379238E+00
-total_energy_eV     : -1.42426890755459E+02
+total_energy_eV     : -1.42426903243903E+02
 band_energy         : -1.49549165780250E+00
 ...
 
@@ -4011,9 +4011,9 @@ band_energy         : -1.49549165780250E+00
   sigma(3 3)=  6.02015730E-04  sigma(2 1)= -1.36781496E-10
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.7444E+01 GPa]
-- sigma(1 1)=  1.69068963E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.77119113E+01  sigma(3 1)=  4.02416937E-06
-- sigma(3 3)=  1.77119113E+01  sigma(2 1)= -4.02424987E-06
+- sigma(1 1)=  1.69068992E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.77119143E+01  sigma(3 1)=  4.02417005E-06
+- sigma(3 3)=  1.77119143E+01  sigma(2 1)= -4.02425054E-06
 
 ================================================================================
 == DATASET 33 ==================================================================
@@ -4120,7 +4120,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  8.660687048092  8.660687048092  8.660687048092 bohr
-              =  4.583038196581  4.583038196581  4.583038196581 angstroms
+              =  4.583038213504  4.583038213504  4.583038213504 angstroms
  prteigrs : about to open file t13o_DS33_EIG
  Fermi (or HOMO) energy (hartree) =  -0.08750   Average Vxc (hartree)=  -0.20154
  Eigenvalues (hartree) for nkpt=   5  k points:
@@ -4140,7 +4140,7 @@ psp_core            :  7.40611727026017E-03
 local_psp           : -4.31336146214771E+00
 non_local_psp       :  1.19395711826829E+00
 total_energy        : -5.23515362483896E+00
-total_energy_eV     : -1.42455774851563E+02
+total_energy_eV     : -1.42455787342540E+02
 band_energy         : -1.49679742707533E+00
 ...
 
@@ -4151,9 +4151,9 @@ band_energy         : -1.49679742707533E+00
   sigma(3 3)=  5.91016587E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.7388E+01 GPa]
-- sigma(1 1)=  1.73883054E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.73883054E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.73883054E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.73883083E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.73883083E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.73883083E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 34 ==================================================================
@@ -4260,7 +4260,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  8.660687048092  8.660687048092  8.660687048092 bohr
-              =  4.583038196581  4.583038196581  4.583038196581 angstroms
+              =  4.583038213504  4.583038213504  4.583038213504 angstroms
  prteigrs : about to open file t13o_DS34_EIG
  Fermi (or HOMO) energy (hartree) =  -0.08750   Average Vxc (hartree)=  -0.20154
  Eigenvalues (hartree) for nkpt=   5  k points:
@@ -4280,7 +4280,7 @@ psp_core            :  7.40611727026017E-03
 local_psp           : -4.31336146214771E+00
 non_local_psp       :  1.19395711826829E+00
 total_energy        : -5.23515362483896E+00
-total_energy_eV     : -1.42455774851563E+02
+total_energy_eV     : -1.42455787342540E+02
 band_energy         : -1.49679742707533E+00
 ...
 
@@ -4291,9 +4291,9 @@ band_energy         : -1.49679742707533E+00
   sigma(3 3)=  5.91016587E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.7388E+01 GPa]
-- sigma(1 1)=  1.73883054E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.73883054E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.73883054E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.73883083E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.73883083E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.73883083E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 41 ==================================================================
@@ -4407,7 +4407,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  5.000000000000  5.000100000000 bohr
-              =  3.704240460130  2.645886042950  2.645938960671 angstroms
+              =  3.704240473808  2.645886052720  2.645938970441 angstroms
  prteigrs : about to open file t13o_DS41_EIG
  Fermi (or HOMO) energy (hartree) =   0.12211   Average Vxc (hartree)=  -0.31816
  Eigenvalues (hartree) for nkpt= 122  k points:
@@ -4427,7 +4427,7 @@ psp_core            :  2.44372730379715E-02
 local_psp           : -3.11233970602069E+00
 non_local_psp       :  1.20434657394747E+00
 total_energy        : -5.34023820809597E+00
-total_energy_eV     : -1.45315271784338E+02
+total_energy_eV     : -1.45315284526045E+02
 band_energy         : -8.00963236170019E-01
 ...
 
@@ -4438,9 +4438,9 @@ band_energy         : -8.00963236170019E-01
   sigma(3 3)=  2.11087073E-03  sigma(2 1)= -1.32407975E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.3327E+01 GPa]
-- sigma(1 1)=  3.54921572E+01  sigma(3 2)=  1.22060844E-02
-- sigma(2 2)=  6.23844155E+01  sigma(3 1)=  1.30125627E-01
-- sigma(3 3)=  6.21039506E+01  sigma(2 1)= -3.89557645E-02
+- sigma(1 1)=  3.54921632E+01  sigma(3 2)=  1.22060865E-02
+- sigma(2 2)=  6.23844260E+01  sigma(3 1)=  1.30125649E-01
+- sigma(3 3)=  6.21039610E+01  sigma(2 1)= -3.89557711E-02
 
 ================================================================================
 == DATASET 42 ==================================================================
@@ -4554,7 +4554,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  4.999987212432  5.000100000000 bohr
-              =  3.704240460130  2.645879276060  2.645938960671 angstroms
+              =  3.704240473808  2.645879285830  2.645938970441 angstroms
  prteigrs : about to open file t13o_DS42_EIG
  Fermi (or HOMO) energy (hartree) =   0.10914   Average Vxc (hartree)=  -0.31719
  Eigenvalues (hartree) for nkpt=  36  k points:
@@ -4574,7 +4574,7 @@ psp_core            :  2.44372730325827E-02
 local_psp           : -3.14199195141581E+00
 non_local_psp       :  1.20879479020973E+00
 total_energy        : -5.34131544356330E+00
-total_energy_eV     : -1.45344584852147E+02
+total_energy_eV     : -1.45344597596424E+02
 band_energy         : -8.09126314341068E-01
 ...
 
@@ -4585,9 +4585,9 @@ band_energy         : -8.09126314341068E-01
   sigma(3 3)=  2.15356202E-03  sigma(2 1)=  1.00456527E-08
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.2078E+01 GPa]
-- sigma(1 1)=  2.94710887E+01  sigma(3 2)=  3.81002734E-02
-- sigma(2 2)=  6.34039622E+01  sigma(3 1)= -5.11892622E-04
-- sigma(3 3)=  6.33599714E+01  sigma(2 1)=  2.95553256E-04
+- sigma(1 1)=  2.94710937E+01  sigma(3 2)=  3.81002798E-02
+- sigma(2 2)=  6.34039729E+01  sigma(3 1)= -5.11892709E-04
+- sigma(3 3)=  6.33599820E+01  sigma(2 1)=  2.95553305E-04
 
 ================================================================================
 == DATASET 43 ==================================================================
@@ -4701,7 +4701,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  4.999987212432  5.000100000000 bohr
-              =  3.704240460130  2.645879276060  2.645938960671 angstroms
+              =  3.704240473808  2.645879285830  2.645938970441 angstroms
  prteigrs : about to open file t13o_DS43_EIG
  Fermi (or HOMO) energy (hartree) =   0.10914   Average Vxc (hartree)=  -0.31719
  Eigenvalues (hartree) for nkpt=  36  k points:
@@ -4721,7 +4721,7 @@ psp_core            :  2.44372730325827E-02
 local_psp           : -3.14199195141581E+00
 non_local_psp       :  1.20879479020973E+00
 total_energy        : -5.34131544356330E+00
-total_energy_eV     : -1.45344584852147E+02
+total_energy_eV     : -1.45344597596424E+02
 band_energy         : -8.09126314341068E-01
 ...
 
@@ -4732,9 +4732,9 @@ band_energy         : -8.09126314341068E-01
   sigma(3 3)=  2.15356202E-03  sigma(2 1)=  1.00456527E-08
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.2078E+01 GPa]
-- sigma(1 1)=  2.94710887E+01  sigma(3 2)=  3.81002734E-02
-- sigma(2 2)=  6.34039622E+01  sigma(3 1)= -5.11892622E-04
-- sigma(3 3)=  6.33599714E+01  sigma(2 1)=  2.95553256E-04
+- sigma(1 1)=  2.94710937E+01  sigma(3 2)=  3.81002798E-02
+- sigma(2 2)=  6.34039729E+01  sigma(3 1)= -5.11892709E-04
+- sigma(3 3)=  6.33599820E+01  sigma(2 1)=  2.95553305E-04
 
 ================================================================================
 == DATASET 44 ==================================================================
@@ -4815,7 +4815,7 @@ cartesian_stress_tensor: # hartree/bohr^3
 - [  1.06511768E-03,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   2.05643245E-03,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   2.05643245E-03, ]
-pressure_GPa:  -5.0780E+01
+pressure_GPa:  -5.0781E+01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
 cartesian_forces: # hartree/bohr
@@ -4848,7 +4848,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  5.000050000000  5.000050000000 bohr
-              =  3.704240460130  2.645912501810  2.645912501810 angstroms
+              =  3.704240473808  2.645912511581  2.645912511581 angstroms
  prteigrs : about to open file t13o_DS44_EIG
  Fermi (or HOMO) energy (hartree) =   0.11434   Average Vxc (hartree)=  -0.31730
  Eigenvalues (hartree) for nkpt=  21  k points:
@@ -4868,7 +4868,7 @@ psp_core            :  2.44370267806750E-02
 local_psp           : -3.15477449306982E+00
 non_local_psp       :  1.21686910290702E+00
 total_energy        : -5.34060358069944E+00
-total_energy_eV     : -1.45325214078503E+02
+total_energy_eV     : -1.45325226821082E+02
 band_energy         : -8.25898317851428E-01
 ...
 
@@ -4878,10 +4878,10 @@ band_energy         : -8.25898317851428E-01
   sigma(2 2)=  2.05643245E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.05643245E-03  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -5.0780E+01 GPa]
-- sigma(1 1)=  3.13368389E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  6.05023213E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  6.05023213E+01  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -5.0781E+01 GPa]
+- sigma(1 1)=  3.13368442E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  6.05023315E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  6.05023315E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 51 ==================================================================
@@ -4995,7 +4995,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000100000000  5.000000000000  4.999900000000 bohr
-              =  2.645938960671  2.645886042950  2.645833125229 angstroms
+              =  2.645938970441  2.645886052720  2.645833134999 angstroms
  prteigrs : about to open file t13o_DS51_EIG
  Fermi (or HOMO) energy (hartree) =   0.35720   Average Vxc (hartree)=  -0.35539
  Eigenvalues (hartree) for nkpt= 126  k points:
@@ -5015,7 +5015,7 @@ psp_core            :  3.08900891382977E-02
 local_psp           : -2.30689499932176E+00
 non_local_psp       :  1.22859479044488E+00
 total_energy        : -5.33294638605901E+00
-total_energy_eV     : -1.45116851215851E+02
+total_energy_eV     : -1.45116863940160E+02
 band_energy         : -5.14267455830491E-01
 ...
 
@@ -5026,9 +5026,9 @@ band_energy         : -5.14267455830491E-01
   sigma(3 3)=  2.14009327E-03  sigma(2 1)= -6.26265758E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.0859E+01 GPa]
-- sigma(1 1)=  5.89589493E+01  sigma(3 2)= -2.89214310E+00
-- sigma(2 2)=  6.06533036E+01  sigma(3 1)= -1.81804770E+00
-- sigma(3 3)=  6.29637071E+01  sigma(2 1)= -1.84253716E+00
+- sigma(1 1)=  5.89589592E+01  sigma(3 2)= -2.89214358E+00
+- sigma(2 2)=  6.06533138E+01  sigma(3 1)= -1.81804801E+00
+- sigma(3 3)=  6.29637177E+01  sigma(2 1)= -1.84253747E+00
 
 ================================================================================
 == DATASET 52 ==================================================================
@@ -5142,7 +5142,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000050000250  5.000050000250  4.999900000000 bohr
-              =  2.645912501943  2.645912501943  2.645833125229 angstroms
+              =  2.645912511713  2.645912511713  2.645833134999 angstroms
  prteigrs : about to open file t13o_DS52_EIG
  Fermi (or HOMO) energy (hartree) =   0.30546   Average Vxc (hartree)=  -0.35517
  Eigenvalues (hartree) for nkpt=  76  k points:
@@ -5162,7 +5162,7 @@ psp_core            :  3.08900891319225E-02
 local_psp           : -2.32446997949526E+00
 non_local_psp       :  1.23665736979464E+00
 total_energy        : -5.33950451573529E+00
-total_energy_eV     : -1.45295306999876E+02
+total_energy_eV     : -1.45295319739833E+02
 band_energy         : -5.19171048762009E-01
 ...
 
@@ -5173,9 +5173,9 @@ band_energy         : -5.19171048762009E-01
   sigma(3 3)=  2.17708974E-03  sigma(2 1)= -3.45473065E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.0211E+01 GPa]
-- sigma(1 1)=  5.81112488E+01  sigma(3 2)= -9.56894672E-01
-- sigma(2 2)=  5.84697293E+01  sigma(3 1)= -1.14040839E+00
-- sigma(3 3)=  6.40521808E+01  sigma(2 1)= -1.01641668E+00
+- sigma(1 1)=  5.81112586E+01  sigma(3 2)= -9.56894833E-01
+- sigma(2 2)=  5.84697391E+01  sigma(3 1)= -1.14040858E+00
+- sigma(3 3)=  6.40521915E+01  sigma(2 1)= -1.01641685E+00
 
 ================================================================================
 == DATASET 53 ==================================================================
@@ -5289,7 +5289,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000100000000  4.999950000250  4.999950000250 bohr
-              =  2.645938960671  2.645859584222  2.645859584222 angstroms
+              =  2.645938970441  2.645859593992  2.645859593992 angstroms
  prteigrs : about to open file t13o_DS53_EIG
  Fermi (or HOMO) energy (hartree) =   0.29340   Average Vxc (hartree)=  -0.35522
  Eigenvalues (hartree) for nkpt=  72  k points:
@@ -5309,7 +5309,7 @@ psp_core            :  3.08900891319223E-02
 local_psp           : -2.30842800344230E+00
 non_local_psp       :  1.22833864470165E+00
 total_energy        : -5.33849426585141E+00
-total_energy_eV     : -1.45267816702492E+02
+total_energy_eV     : -1.45267829440038E+02
 band_energy         : -5.18985005079966E-01
 ...
 
@@ -5320,9 +5320,9 @@ band_energy         : -5.18985005079966E-01
   sigma(3 3)=  2.06197301E-03  sigma(2 1)=  3.52364851E-06
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.1763E+01 GPa]
-- sigma(1 1)=  6.37225294E+01  sigma(3 2)=  7.84205253E-01
-- sigma(2 2)=  6.08999922E+01  sigma(3 1)=  8.93124608E-02
-- sigma(3 3)=  6.06653303E+01  sigma(2 1)=  1.03669301E-01
+- sigma(1 1)=  6.37225402E+01  sigma(3 2)=  7.84205385E-01
+- sigma(2 2)=  6.09000025E+01  sigma(3 1)=  8.93124758E-02
+- sigma(3 3)=  6.06653405E+01  sigma(2 1)=  1.03669318E-01
 
 ================================================================================
 == DATASET 54 ==================================================================
@@ -5436,7 +5436,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000667  5.000000000667  5.000000000667 bohr
-              =  2.645886043303  2.645886043303  2.645886043303 angstroms
+              =  2.645886053073  2.645886053073  2.645886053073 angstroms
  prteigrs : about to open file t13o_DS54_EIG
  Fermi (or HOMO) energy (hartree) =   0.29905   Average Vxc (hartree)=  -0.35518
  Eigenvalues (hartree) for nkpt=  30  k points:
@@ -5456,7 +5456,7 @@ psp_core            :  3.08900891127965E-02
 local_psp           : -2.31334968382749E+00
 non_local_psp       :  1.22912074091240E+00
 total_energy        : -5.33864879272889E+00
-total_energy_eV     : -1.45272021592671E+02
+total_energy_eV     : -1.45272034330586E+02
 band_energy         : -5.18339974092848E-01
 ...
 
@@ -5467,9 +5467,9 @@ band_energy         : -5.18339974092848E-01
   sigma(3 3)=  2.09397431E-03  sigma(2 1)= -2.75383554E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.1395E+01 GPa]
-- sigma(1 1)=  6.11458311E+01  sigma(3 2)= -5.85683675E-01
-- sigma(2 2)=  6.14315834E+01  sigma(3 1)= -6.98003300E-01
-- sigma(3 3)=  6.16068407E+01  sigma(2 1)= -8.10206252E-01
+- sigma(1 1)=  6.11458414E+01  sigma(3 2)= -5.85683774E-01
+- sigma(2 2)=  6.14315938E+01  sigma(3 1)= -6.98003418E-01
+- sigma(3 3)=  6.16068511E+01  sigma(2 1)= -8.10206388E-01
 
 ================================================================================
 == DATASET 61 ==================================================================
@@ -5576,7 +5576,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.748000000000  7.206000000000  7.206000000000 bohr
-              =  3.041710594975  3.813250965100  3.813250965100 angstroms
+              =  3.041710606207  3.813250979180  3.813250979180 angstroms
  prteigrs : about to open file t13o_DS61_EIG
  Fermi (or HOMO) energy (hartree) =   0.03663   Average Vxc (hartree)=  -0.26524
  Eigenvalues (hartree) for nkpt=  48  k points:
@@ -5596,7 +5596,7 @@ psp_core            :  1.47560810776238E-02
 local_psp           : -3.48671901057017E+00
 non_local_psp       :  1.21406864431417E+00
 total_energy        : -5.32254462982489E+00
-total_energy_eV     : -1.44833805034147E+02
+total_energy_eV     : -1.44833817733637E+02
 band_energy         : -1.15197123343298E+00
 ...
 
@@ -5607,9 +5607,9 @@ band_energy         : -1.15197123343298E+00
   sigma(3 3)=  9.66399754E-04  sigma(2 1)=  3.56356793E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.0411E+01 GPa]
-- sigma(1 1)=  3.43676520E+01  sigma(3 2)= -3.31109249E-01
-- sigma(2 2)=  2.84324588E+01  sigma(3 1)=  1.04843966E+00
-- sigma(3 3)=  2.84324576E+01  sigma(2 1)=  1.04843771E+00
+- sigma(1 1)=  3.43676578E+01  sigma(3 2)= -3.31109305E-01
+- sigma(2 2)=  2.84324636E+01  sigma(3 1)=  1.04843984E+00
+- sigma(3 3)=  2.84324624E+01  sigma(2 1)=  1.04843788E+00
 
 ================================================================================
 == DATASET 62 ==================================================================
@@ -5716,7 +5716,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.748000000000  7.206000000000  7.206000000000 bohr
-              =  3.041710594975  3.813250965100  3.813250965100 angstroms
+              =  3.041710606207  3.813250979180  3.813250979180 angstroms
  prteigrs : about to open file t13o_DS62_EIG
  Fermi (or HOMO) energy (hartree) =   0.03663   Average Vxc (hartree)=  -0.26524
  Eigenvalues (hartree) for nkpt=  48  k points:
@@ -5736,7 +5736,7 @@ psp_core            :  1.47560810776238E-02
 local_psp           : -3.48671901057017E+00
 non_local_psp       :  1.21406864431417E+00
 total_energy        : -5.32254462982489E+00
-total_energy_eV     : -1.44833805034147E+02
+total_energy_eV     : -1.44833817733637E+02
 band_energy         : -1.15197123343298E+00
 ...
 
@@ -5747,9 +5747,9 @@ band_energy         : -1.15197123343298E+00
   sigma(3 3)=  9.66399754E-04  sigma(2 1)=  3.56356793E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.0411E+01 GPa]
-- sigma(1 1)=  3.43676520E+01  sigma(3 2)= -3.31109249E-01
-- sigma(2 2)=  2.84324588E+01  sigma(3 1)=  1.04843966E+00
-- sigma(3 3)=  2.84324576E+01  sigma(2 1)=  1.04843771E+00
+- sigma(1 1)=  3.43676578E+01  sigma(3 2)= -3.31109305E-01
+- sigma(2 2)=  2.84324636E+01  sigma(3 1)=  1.04843984E+00
+- sigma(3 3)=  2.84324624E+01  sigma(2 1)=  1.04843788E+00
 
 ================================================================================
 == DATASET 63 ==================================================================
@@ -5856,7 +5856,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.748000000000  7.205922972859  7.205922972859 bohr
-              =  3.041710594975  3.813210204092  3.813210204092 angstroms
+              =  3.041710606207  3.813210218172  3.813210218172 angstroms
  prteigrs : about to open file t13o_DS63_EIG
  Fermi (or HOMO) energy (hartree) =   0.05589   Average Vxc (hartree)=  -0.26520
  Eigenvalues (hartree) for nkpt=  16  k points:
@@ -5876,7 +5876,7 @@ psp_core            :  1.47560810650063E-02
 local_psp           : -3.48944519743557E+00
 non_local_psp       :  1.21600856249585E+00
 total_energy        : -5.30633151192152E+00
-total_energy_eV     : -1.44392623659311E+02
+total_energy_eV     : -1.44392636320117E+02
 band_energy         : -1.15009900478415E+00
 ...
 
@@ -5887,9 +5887,9 @@ band_energy         : -1.15009900478415E+00
   sigma(3 3)=  1.02570376E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.4598E+01 GPa]
-- sigma(1 1)=  4.34390558E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.01772415E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.01772415E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  4.34390631E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.01772465E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.01772465E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 64 ==================================================================
@@ -5996,7 +5996,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.748000000000  7.205922972859  7.205922972859 bohr
-              =  3.041710594975  3.813210204092  3.813210204092 angstroms
+              =  3.041710606207  3.813210218172  3.813210218172 angstroms
  prteigrs : about to open file t13o_DS64_EIG
  Fermi (or HOMO) energy (hartree) =   0.05589   Average Vxc (hartree)=  -0.26520
  Eigenvalues (hartree) for nkpt=  16  k points:
@@ -6016,7 +6016,7 @@ psp_core            :  1.47560810650063E-02
 local_psp           : -3.48944519743557E+00
 non_local_psp       :  1.21600856249585E+00
 total_energy        : -5.30633151192152E+00
-total_energy_eV     : -1.44392623659311E+02
+total_energy_eV     : -1.44392636320117E+02
 band_energy         : -1.15009900478415E+00
 ...
 
@@ -6027,9 +6027,9 @@ band_energy         : -1.15009900478415E+00
   sigma(3 3)=  1.02570376E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.4598E+01 GPa]
-- sigma(1 1)=  4.34390558E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.01772415E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.01772415E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  4.34390631E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.01772465E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.01772465E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 71 ==================================================================
@@ -6136,7 +6136,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  8.001000000000  5.000000000000  6.000000000000 bohr
-              =  4.233946845929  2.645886042950  3.175063251540 angstroms
+              =  4.233946861563  2.645886052720  3.175063263264 angstroms
  prteigrs : about to open file t13o_DS71_EIG
  Fermi (or HOMO) energy (hartree) =   0.07214   Average Vxc (hartree)=  -0.28216
  Eigenvalues (hartree) for nkpt=  61  k points:
@@ -6156,7 +6156,7 @@ psp_core            :  1.78166151182075E-02
 local_psp           : -3.39432407987813E+00
 non_local_psp       :  1.19821128220878E+00
 total_energy        : -5.33038646754028E+00
-total_energy_eV     : -1.45047192290388E+02
+total_energy_eV     : -1.45047205008589E+02
 band_energy         : -1.03382968712438E+00
 ...
 
@@ -6167,9 +6167,9 @@ band_energy         : -1.03382968712438E+00
   sigma(3 3)=  7.42242190E-04  sigma(2 1)=  2.27117919E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.7798E+01 GPa]
-- sigma(1 1)=  4.22973347E+01  sigma(3 2)=  7.69339319E-02
-- sigma(2 2)=  4.92596515E+01  sigma(3 1)=  3.30757223E-02
-- sigma(3 3)=  2.18375155E+01  sigma(2 1)=  6.68203876E+00
+- sigma(1 1)=  4.22973418E+01  sigma(3 2)=  7.69339448E-02
+- sigma(2 2)=  4.92596598E+01  sigma(3 1)=  3.30757279E-02
+- sigma(3 3)=  2.18375192E+01  sigma(2 1)=  6.68203988E+00
 
 ================================================================================
 == DATASET 72 ==================================================================
@@ -6276,7 +6276,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  8.001000000000  5.000000000000  6.000000000000 bohr
-              =  4.233946845929  2.645886042950  3.175063251540 angstroms
+              =  4.233946861563  2.645886052720  3.175063263264 angstroms
  prteigrs : about to open file t13o_DS72_EIG
  Fermi (or HOMO) energy (hartree) =   0.07214   Average Vxc (hartree)=  -0.28216
  Eigenvalues (hartree) for nkpt=  61  k points:
@@ -6296,7 +6296,7 @@ psp_core            :  1.78166151182075E-02
 local_psp           : -3.39432407987813E+00
 non_local_psp       :  1.19821128220878E+00
 total_energy        : -5.33038646754028E+00
-total_energy_eV     : -1.45047192290388E+02
+total_energy_eV     : -1.45047205008589E+02
 band_energy         : -1.03382968712438E+00
 ...
 
@@ -6307,9 +6307,9 @@ band_energy         : -1.03382968712438E+00
   sigma(3 3)=  7.42242190E-04  sigma(2 1)=  2.27117919E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.7798E+01 GPa]
-- sigma(1 1)=  4.22973347E+01  sigma(3 2)=  7.69339319E-02
-- sigma(2 2)=  4.92596515E+01  sigma(3 1)=  3.30757223E-02
-- sigma(3 3)=  2.18375155E+01  sigma(2 1)=  6.68203876E+00
+- sigma(1 1)=  4.22973418E+01  sigma(3 2)=  7.69339448E-02
+- sigma(2 2)=  4.92596598E+01  sigma(3 1)=  3.30757279E-02
+- sigma(3 3)=  2.18375192E+01  sigma(2 1)=  6.68203988E+00
 
 ================================================================================
 == DATASET 73 ==================================================================
@@ -6416,7 +6416,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  8.001000000000  5.000000000000  6.000000000000 bohr
-              =  4.233946845929  2.645886042950  3.175063251540 angstroms
+              =  4.233946861563  2.645886052720  3.175063263264 angstroms
  prteigrs : about to open file t13o_DS73_EIG
  Fermi (or HOMO) energy (hartree) =   0.07204   Average Vxc (hartree)=  -0.28230
  Eigenvalues (hartree) for nkpt=  40  k points:
@@ -6436,7 +6436,7 @@ psp_core            :  1.78166151073533E-02
 local_psp           : -3.39099707242218E+00
 non_local_psp       :  1.19810954725065E+00
 total_energy        : -5.33035291515111E+00
-total_energy_eV     : -1.45046279283447E+02
+total_energy_eV     : -1.45046292001568E+02
 band_energy         : -1.03294695399644E+00
 ...
 
@@ -6447,9 +6447,9 @@ band_energy         : -1.03294695399644E+00
   sigma(3 3)=  7.37849335E-04  sigma(2 1)=  2.18417714E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.7895E+01 GPa]
-- sigma(1 1)=  4.27645180E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  4.92128831E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.17082733E+01  sigma(2 1)=  6.42606992E+00
+- sigma(1 1)=  4.27645252E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  4.92128914E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.17082769E+01  sigma(2 1)=  6.42607100E+00
 
 ================================================================================
 == DATASET 74 ==================================================================
@@ -6556,7 +6556,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  8.001000000000  5.000000000000  6.000000000000 bohr
-              =  4.233946845929  2.645886042950  3.175063251540 angstroms
+              =  4.233946861563  2.645886052720  3.175063263264 angstroms
  prteigrs : about to open file t13o_DS74_EIG
  Fermi (or HOMO) energy (hartree) =   0.07204   Average Vxc (hartree)=  -0.28230
  Eigenvalues (hartree) for nkpt=  40  k points:
@@ -6576,7 +6576,7 @@ psp_core            :  1.78166151073533E-02
 local_psp           : -3.39099707242218E+00
 non_local_psp       :  1.19810954725065E+00
 total_energy        : -5.33035291515111E+00
-total_energy_eV     : -1.45046279283447E+02
+total_energy_eV     : -1.45046292001568E+02
 band_energy         : -1.03294695399644E+00
 ...
 
@@ -6587,13 +6587,13 @@ band_energy         : -1.03294695399644E+00
   sigma(3 3)=  7.37849335E-04  sigma(2 1)=  2.18417714E-04
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.7895E+01 GPa]
-- sigma(1 1)=  4.27645180E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  4.92128831E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.17082733E+01  sigma(2 1)=  6.42606992E+00
+- sigma(1 1)=  4.27645252E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  4.92128914E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.17082769E+01  sigma(2 1)=  6.42607100E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell11    5.0001000000E+00  5.0000000000E+00  4.9999000000E+00 Bohr
             acell12    5.0001000000E+00  5.0000000000E+00  4.9999000000E+00 Bohr
@@ -8040,13 +8040,13 @@ P           mkmem74        40
            strten22    1.2721796977E-03  1.2721795752E-03  1.2789729917E-03
                        8.8748898417E-11  3.6128863752E-11 -1.5312331729E-06
            strten23    1.2904656818E-03  1.2813545283E-03  1.2813545283E-03
-                       0.0000000000E+00 -1.8221633637E-15  3.1886850623E-10
+                       0.0000000000E+00 -1.8221243580E-15  3.1886850604E-10
            strten24    1.2914196091E-03  1.2914196091E-03  1.2914196091E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten31    5.8006893063E-04  5.8017357902E-04  5.6419076160E-04
                       -2.7550369932E-05 -3.1806215228E-06  5.6208362139E-06
            strten32    5.7465382200E-04  6.0201573012E-04  6.0201573012E-04
-                       0.0000000000E+00  1.3677875994E-10 -1.3678149587E-10
+                       0.0000000000E+00  1.3677876003E-10 -1.3678149581E-10
            strten33    5.9101658750E-04  5.9101658750E-04  5.9101658750E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten34    5.9101658750E-04  5.9101658750E-04  5.9101658750E-04
@@ -8748,7 +8748,7 @@ P           mkmem74        40
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -8760,12 +8760,12 @@ P           mkmem74        40
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -8783,7 +8783,7 @@ P           mkmem74        40
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -8798,15 +8798,15 @@ P           mkmem74        40
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.4  wall=          5.5
+- Proc.   0 individual time (sec): cpu=          5.2  wall=          5.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  59 WARNINGs and  65 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.4  wall=          5.5
++Overall time at end (sec) : cpu=          5.2  wall=          5.4

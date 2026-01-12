@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h15 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t73.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h16 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t73.abi
 - output file    -> t73.abo
 - root for input  files -> t73i
 - root for output files -> t73o
@@ -33,6 +33,7 @@
 -    mband =          42        mffmem =           1         mkmem =           8
 -   mkqmem =           8        mk1mem =           8           mpw =         167
       nfft =        6075          nkpt =           8
+- my_mband =          42
 ================================================================================
 P This job should need less than                       9.562 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -50,7 +51,7 @@ _ WF disk file :      0.858 Mbytes ; DEN or POT disk file :      0.048 Mbytes.
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
-            acell      8.5037675980E+00  8.5037675980E+00  8.5037675980E+00 Bohr
+            acell      8.5037675666E+00  8.5037675666E+00  8.5037675666E+00 Bohr
               amu      5.49380500E+01  1.59994000E+01
           chkprim           0
       chksymbreak           0
@@ -72,7 +73,7 @@ _ WF disk file :      0.858 Mbytes ; DEN or POT disk file :      0.048 Mbytes.
                       -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
            kptopt           3
          kptrlatt        2    0    0      0    2    0      0    0    2
-          kptrlen      1.20261435E+01
+          kptrlen      1.20261434E+01
 P           mkmem           8
 P          mkqmem           8
 P          mk1mem           8
@@ -115,15 +116,15 @@ P          mk1mem           8
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
                          0.12500    0.12500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.2500000000E+00  2.2500000000E+00 -4.4916601543E-33
+                       2.2500000000E+00  2.2500000000E+00 -2.8577314912E-33
                        2.2500000000E+00  2.2500000000E+00  2.2500000000E+00
                        4.5000000000E+00  4.5000000000E+00  2.2500000000E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       4.2518837990E+00  4.2518837990E+00 -8.4880075737E-33
-                       4.2518837990E+00  4.2518837990E+00  4.2518837990E+00
-                       8.5037675980E+00  8.5037675980E+00  4.2518837990E+00
+                       4.2518837833E+00  4.2518837833E+00 -5.4003298598E-33
+                       4.2518837833E+00  4.2518837833E+00  4.2518837833E+00
+                       8.5037675666E+00  8.5037675666E+00  4.2518837833E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -5.0720826009E-17  5.0720826009E-17  5.0000000000E-01
+                       2.5454218466E-17 -2.5454218466E-17  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  2.5000000000E-01
                        5.0000000000E-01  5.0000000000E-01  7.5000000000E-01
             znucl       25.00000    8.00000
@@ -162,8 +163,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.15099
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
 - Mn    ONCVPSP-3.3.0  r_core=   1.41250   1.20960   1.61055
 - 25.00000  15.00000    171221                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -180,8 +181,8 @@ meta: {optdriver: 1, rfelfd: 2, }
   spin-orbit 2    0.007940    0.003946
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
 - O     ONCVPSP-3.3.0  r_core=   1.35509   1.45563   1.35509
 -  8.00000   6.00000    171117                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -201,7 +202,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   5
@@ -228,25 +229,25 @@ tolerances: {tolwfr: 1.00E-16, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -52.052392134312     -5.205E+01 1.525E-02 0.000E+00
- ETOT  2  -52.164970528637     -1.126E-01 3.142E-05 0.000E+00
- ETOT  3  -52.165193386201     -2.229E-04 5.573E-07 0.000E+00
- ETOT  4  -52.165194864599     -1.478E-06 6.804E-09 0.000E+00
- ETOT  5  -52.165194878681     -1.408E-08 9.001E-11 0.000E+00
- ETOT  6  -52.165194879039     -3.584E-10 6.660E-12 0.000E+00
- ETOT  7  -52.165194879052     -1.313E-11 1.441E-13 0.000E+00
- ETOT  8  -52.165194879053     -6.537E-13 1.562E-14 0.000E+00
- ETOT  9  -52.165194879053      6.395E-14 1.455E-15 0.000E+00
- ETOT 10  -52.165194879053     -1.776E-13 9.980E-17 0.000E+00
+-ETOT  1  -52.052392577918     -5.205E+01 1.525E-02 0.000E+00
+ ETOT  2  -52.164970971566     -1.126E-01 3.142E-05 0.000E+00
+ ETOT  3  -52.165193829084     -2.229E-04 5.573E-07 0.000E+00
+ ETOT  4  -52.165195307477     -1.478E-06 6.804E-09 0.000E+00
+ ETOT  5  -52.165195321559     -1.408E-08 9.001E-11 0.000E+00
+ ETOT  6  -52.165195321917     -3.586E-10 6.660E-12 0.000E+00
+ ETOT  7  -52.165195321930     -1.254E-11 1.441E-13 0.000E+00
+ ETOT  8  -52.165195321931     -5.258E-13 1.562E-14 0.000E+00
+ ETOT  9  -52.165195321931     -2.345E-13 1.455E-15 0.000E+00
+ ETOT 10  -52.165195321931      1.208E-13 9.980E-17 0.000E+00
 
  At SCF step   10   max residual=  9.98E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   43.566E-18; max=  99.795E-18
- dfpt_looppert : ek2=    1.3757436346E+02
-          f-sum rule ratio=    7.7836963152E-01
+ Mean square residual over all n,k,spin=   43.565E-18; max=  99.795E-18
+ dfpt_looppert : ek2=    1.3757436448E+02
+          f-sum rule ratio=    7.7836963259E-01
  Expectation of eigenvalue derivatives (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 42, wtk=  0.12500, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -261,16 +262,16 @@ tolerances: {tolwfr: 1.00E-16, }
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   4.11409106E+02 eigvalue=  -1.42758379E+02  local=  -2.04309751E+02
+     kin0=   4.11409111E+02 eigvalue=  -1.42758381E+02  local=  -2.04309753E+02
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -1.07083707E+02  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+     kin1=  -1.07083708E+02  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=  -1.21757814E+01   enl1=   2.75331695E+00
+    edocc=   0.00000000E+00     enl0=  -1.21757817E+01   enl1=   2.75331701E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -5.21651949E+01
+   erelax=  -5.21651953E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.5216519488E+02 Ha. Also 2DEtotal=   -0.141948714199E+04 eV
-    (  non-var. 2DEtotal :   -5.2165194821E+01 Ha)
+ 2DEtotal=   -0.5216519532E+02 Ha. Also 2DEtotal=   -0.141948727850E+04 eV
+    (  non-var. 2DEtotal :   -5.2165195264E+01 Ha)
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
@@ -284,11 +285,11 @@ tolerances: {tolwfr: 1.00E-16, }
      1        2       0.0000000000    0.0000000000
      1        3       0.0000000000    0.0000000000
      2        1       0.0000000000    0.0000000000
-     2        2       0.7210478457    0.0000000000
-     2        3       0.7210478457    0.0000000000
+     2        2       0.7210478432    0.0000000000
+     2        3       0.7210478432    0.0000000000
      3        1       0.0000000000    0.0000000000
-     3        2       0.7210478457    0.0000000000
-     3        3       0.7210478457    0.0000000000
+     3        2       0.7210478432    0.0000000000
+     3        3       0.7210478432    0.0000000000
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
@@ -298,16 +299,16 @@ tolerances: {tolwfr: 1.00E-16, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
-            acell      8.5037675980E+00  8.5037675980E+00  8.5037675980E+00 Bohr
+            acell      8.5037675666E+00  8.5037675666E+00  8.5037675666E+00 Bohr
               amu      5.49380500E+01  1.59994000E+01
           chkprim           0
       chksymbreak           0
            diemac      2.00000000E+01
            diemix      8.00000000E-01
              ecut      5.00000000E+00 Hartree
-           etotal     -5.2165194879E+01
+           etotal     -5.2165195322E+01
 -          fftalg         512
            irdwfk          -1
              iscf          -3
@@ -323,7 +324,7 @@ tolerances: {tolwfr: 1.00E-16, }
                       -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
            kptopt           3
          kptrlatt        2    0    0      0    2    0      0    0    2
-          kptrlen      1.20261435E+01
+          kptrlen      1.20261434E+01
 P           mkmem           8
 P          mkqmem           8
 P          mk1mem           8
@@ -366,15 +367,15 @@ P          mk1mem           8
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
                          0.12500    0.12500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.2500000000E+00  2.2500000000E+00 -4.4916601543E-33
+                       2.2500000000E+00  2.2500000000E+00 -2.8577314912E-33
                        2.2500000000E+00  2.2500000000E+00  2.2500000000E+00
                        4.5000000000E+00  4.5000000000E+00  2.2500000000E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       4.2518837990E+00  4.2518837990E+00 -8.4880075737E-33
-                       4.2518837990E+00  4.2518837990E+00  4.2518837990E+00
-                       8.5037675980E+00  8.5037675980E+00  4.2518837990E+00
+                       4.2518837833E+00  4.2518837833E+00 -5.4003298598E-33
+                       4.2518837833E+00  4.2518837833E+00  4.2518837833E+00
+                       8.5037675666E+00  8.5037675666E+00  4.2518837833E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                      -5.0720826009E-17  5.0720826009E-17  5.0000000000E-01
+                       2.5454218466E-17 -2.5454218466E-17  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  2.5000000000E-01
                        5.0000000000E-01  5.0000000000E-01  7.5000000000E-01
             znucl       25.00000    8.00000
@@ -418,7 +419,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -446,12 +447,12 @@ P          mk1mem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -469,15 +470,15 @@ P          mk1mem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          9.2  wall=          9.2
+- Proc.   0 individual time (sec): cpu=          9.4  wall=          9.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.2  wall=          9.2
++Overall time at end (sec) : cpu=          9.4  wall=          9.5

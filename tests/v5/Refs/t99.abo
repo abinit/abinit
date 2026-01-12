@@ -1,5 +1,5 @@
 
-.Version 10.1.4.3 of ANADDB, released Jul 2025.
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 20 Aug 2025.
-- ( at 05h38 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h12 )
   
 
 ================================================================================
@@ -119,12 +119,12 @@
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  1.15447580E-06 -3.05729725E-03  2.91888580E-06
+-  1  1.15447580E-06 -3.05729725E-03  2.91888579E-06
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.05729848E-03  1.15350955E-06 -1.01256078E-06
+-  1  3.05729847E-03  1.15350955E-06 -1.01256078E-06
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
@@ -250,7 +250,7 @@
  mka2f: lambda <omega^3> =     2.841851E-19
  mka2f: lambda <omega^4> =     2.482242E-21
  mka2f: lambda <omega^5> =     2.216529E-23
- mka2f: omegalog for spin      1 =     8.103082E-03 (Ha)     2.558748E+03 (Kelvin)
+ mka2f: omegalog for spin      1 =     8.103082E-03 (Ha)     2.558751E+03 (Kelvin)
 
  Warning : some of the following quantities should be integrated over spin
 
@@ -262,16 +262,16 @@
  mka2f: lambda <omega^3> =     1.468432E-21
  mka2f: lambda <omega^4> =     1.229973E-23
  mka2f: lambda <omega^5> =     1.049058E-25
- mka2f: omegalog for spin      2 =     7.976317E-03 (Ha)     2.518719E+03 (Kelvin)
+ mka2f: omegalog for spin      2 =     7.976317E-03 (Ha)     2.518722E+03 (Kelvin)
  mka2f: isotropic lambda =     4.896641E-13
- mka2f: omegalog  =     8.102368E-03 (Ha)     2.558522E+03 (Kelvin)
+ mka2f: omegalog  =     8.102368E-03 (Ha)     2.558526E+03 (Kelvin)
  mka2f: input mustar =     1.360000E-01
--mka2f: MacMillan Tc =     1.414185E+01 (Ha)     4.465637E+06 (Kelvin)
+-mka2f: MacMillan Tc =     1.414185E+01 (Ha)     4.465643E+06 (Kelvin)
 -
 - Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.114  and wall time      0.114 sec
++Total cpu time      0.117  and wall time      0.117 sec
 
  anaddb : the run completed successfully.

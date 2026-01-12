@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h00 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h06 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/tutorial_tnuc_3/tnuc_3.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tnuc_3/tnuc_3.abi
 - output file    -> tnuc_3.abo
 - root for input  files -> tnuc_3i
 - root for output files -> tnuc_3o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Sn-sp.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Sn-sp.xml
  Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -144,7 +144,7 @@ P           mkmem          10
               wtk        0.09375    0.09375    0.09375    0.18750    0.09375    0.09375
                          0.09375    0.18750    0.03125    0.03125
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.6222999718E+00  1.6222999718E+00  1.6222999718E+00
+                       1.6222999777E+00  1.6222999777E+00  1.6222999777E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        3.0657026520E+00  3.0657026520E+00  3.0657026520E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -186,9 +186,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.06228
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Sn-sp.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Sn-sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pbe_std/Sn-sp.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Sn-sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Sn-sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Sn-sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  5 (lmn_size= 13), orbitals=   0   0   1   1   2
  Spheres core radius: rc_sph= 2.70161971
@@ -260,7 +260,7 @@ cartesian_stress_tensor: # hartree/bohr^3
 - [ -1.13131730E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,  -1.13131730E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,  -1.13131730E-04, ]
-pressure_GPa:   3.3284E+00
+pressure_GPa:   3.3285E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Sn]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Sn]
@@ -369,7 +369,7 @@ force_length_stats: {min:   1.29904183E-28, max:   1.29904183E-28, mean:   1.299
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.62229997175232     1.62229997175232     1.62229997175232
+    2      1.62229997774270     1.62229997774270     1.62229997774270
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000     0.00000000000000
@@ -379,9 +379,9 @@ force_length_stats: {min:   1.29904183E-28, max:   1.29904183E-28, mean:   1.299
  cartesian forces (eV/Angstrom) at end:
     1     -0.00000000000000    -0.00000000000000     0.00000000000000
     2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 3.8566658E-27 5.6455807E-27   0.000E+00  0.000E+00  0.000E+00 e/A
+ frms,max,avg= 3.8566661E-27 5.6455811E-27   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 12.262810608000 12.262810608000 12.262810608000 bohr
-              =  6.489199887009  6.489199887009  6.489199887009 angstroms
+              =  6.489199910971  6.489199910971  6.489199910971 angstroms
  Fermi (or HOMO) energy (hartree) =   0.03276   Average Vxc (hartree)=  -0.31746
  Eigenvalues (hartree) for nkpt=  10  k points:
  kpt#   1, nband=  5, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
@@ -400,7 +400,7 @@ psp_core            :  9.73148648216591E-01
 local_psp           : -1.79261358951639E+00
 PAW spherical_terms :  6.41511922373900E+00
 total_energy        : -7.19504569326112E+00
-total_energy_eV     : -1.95787150249568E+02
+total_energy_eV     : -1.95787167416811E+02
 ...
 
 
@@ -413,7 +413,7 @@ psp_core            :  9.73148648216591E-01
 xc_dc               : -5.29347329665853E+00
 PAW spherical_terms :  5.21195872495424E+00
 total_energy_dc     : -7.19504524270827E+00
-total_energy_dc_eV  : -1.95787137989402E+02
+total_energy_dc_eV  : -1.95787155156643E+02
 ...
 
 
@@ -422,8 +422,8 @@ iteration_state     : {dtset: 1, }
 comment             : 'Components of total free energy, including PAW core contributions'
 Total energy        : -1.23546838860405E+04
 Total energy DC     : -1.23546838855899E+04
-Total energy (eV)   : -3.36188045692004E+05
-Total energy DC (eV): -3.36188045679744E+05
+Total energy (eV)   : -3.36188075170045E+05
+Total energy DC (eV): -3.36188075157785E+05
 ...
 
 
@@ -432,10 +432,10 @@ Total energy DC (eV): -3.36188045679744E+05
   sigma(2 2)= -1.13131730E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -1.13131730E-04  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure=  3.3284E+00 GPa]
-- sigma(1 1)= -3.32844985E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -3.32844985E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -3.32844985E+00  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure=  3.3285E+00 GPa]
+- sigma(1 1)= -3.32845041E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -3.32845041E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -3.32845041E+00  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -537,7 +537,7 @@ P           mkmem          10
               wtk        0.09375    0.09375    0.09375    0.18750    0.09375    0.09375
                          0.09375    0.18750    0.03125    0.03125
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.6222999718E+00  1.6222999718E+00  1.6222999718E+00
+                       1.6222999777E+00  1.6222999777E+00  1.6222999777E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        3.0657026520E+00  3.0657026520E+00  3.0657026520E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -634,10 +634,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.7  wall=          2.8
+- Proc.   0 individual time (sec): cpu=          2.8  wall=          2.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.7  wall=          2.8
++Overall time at end (sec) : cpu=          2.8  wall=          2.9
