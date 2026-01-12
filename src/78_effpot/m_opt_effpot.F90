@@ -103,7 +103,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
   integer :: ii, info,natom_sc,ntime,unit_anh1,unit_anh2
   integer :: master,nproc,my_rank
   real(dp) :: factor,mse,msef,mses
-  real(dp),parameter :: HaBohr_eVAng = 27.21138386 / 0.529177249
+  real(dp),parameter :: HaBohr_eVAng = Ha_eV /Bohr_Ang
   !arrays
   integer :: sc_size(3)
   integer :: coeff_inds(opt_ncoeff)
@@ -398,7 +398,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   !1406
   real(dp) :: factor,mse_ini,msef_ini,mses_ini,mse,msef,mses
   real(dp) :: coeff_tmp
-  real(dp),parameter :: HaBohr_eVAng = 27.21138386 / 0.529177249
+  real(dp),parameter :: HaBohr_eVAng = Ha_eV /Bohr_Ang
   !arrays
   integer :: sc_size(3),temp_cntr
   integer,allocatable :: terms(:)

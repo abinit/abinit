@@ -925,7 +925,7 @@ subroutine cumulant_compute(self)
          !!self%wrmesh_ce(:,ib,my_ik,spin) = wrmesh_shifted_ce(:) + self%e0vals(ib,my_ik,spin) + 0.5 *wr_step_ce
          !!wrmesh_shifted_ce = wrmesh_shifted
 
-         if (self%debug == 1) self%time_mesh(:,itemp,ib,my_ik,spin) = time_mesh_temp(:)! * 0.24188845385 *10E-4 ! picoseconds ( I think )
+         if (self%debug == 1) self%time_mesh(:,itemp,ib,my_ik,spin) = time_mesh_temp(:)
 
          if (time_mesh_temp(nwr) < time_max) ABI_WARNING(sjoin("KBT",itoa(my_ik),itoa(ib),itoa(itemp)))
          msg = sjoin( &

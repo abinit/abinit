@@ -52,7 +52,7 @@ You should edit it, read it carefully, have a look at the following **new input 
 
 Note also the following: you will work at fixed [[ecut]] (12Ha).
 It is implicit that in *real life*, you should do a convergence test with respect to *ecut*.
-Here, a suitable *ecut* is given to you; it corresponds to the suggested *ecut* for this pseudopotential according to the [PseudoDojo website](http://www.pseudo-dojo.org/) where the silicon pseudopotential was taken.
+Here, a suitable *ecut* is given to you; it corresponds to the suggested *ecut* for this pseudopotential according to the [PseudoDojo website](https://www.pseudo-dojo.org/) where the silicon pseudopotential was taken.
 When we will relax the lattice parameter, it will result in a lattice parameter that is 0.2% off of the experimental value.
 Such convergence study has to be made for each physical property that is the target of your interest. While the
 value of [[ecut]] giving converged properties usually do not depend much on the property, this is not true
@@ -225,7 +225,7 @@ The stress tensor is given in Hartree/Bohr<sup>3</sup>, and the order of the com
                             23  13  12
 
 There is only a 0.13% relative difference between *acell1* and *acell2*.
-So, our converged LDA value for Silicon, with the *Si.psp8* pseudopotential of the [PseudoDojo website](http://www.pseudo-dojo.org/)
+So, our converged LDA value for Silicon, with the *Si.psp8* pseudopotential of the [PseudoDojo website](https://www.pseudo-dojo.org/)
 is 10.195 Bohr, that is 5.395 Angstrom.
 The experimental value is *5.431* Angstrom at 25 degree Celsius,
 see R.W.G. Wyckoff, Crystal structures Ed. Wiley and sons, New-York (1963)

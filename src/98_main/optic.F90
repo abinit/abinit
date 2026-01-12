@@ -633,7 +633,7 @@ program optic
      ! This to be consistent with the value used in m_optic_tools
      ! In principle wmesh should be passed to the children and a lot of code
      ! should be rewritten to be more cache-friendly ...
-     wmesh(ii) = (ii-1)*domega * (13.60569172*2._dp)
+     wmesh(ii) = (ii-1)*domega * Ha_eV
    end do
    NCF_CHECK(nf90_put_var(optic_ncid, nctk_idname(optic_ncid, "wmesh"), wmesh))
    ABI_FREE(wmesh)
