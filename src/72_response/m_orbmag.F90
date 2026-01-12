@@ -458,7 +458,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      kinpw(:) = zero
      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,crystal%gmet,&
        & kg_k,kinpw,kpoint,npw_k,0,0)
-     if (abs(dtset%orbmag.GT.2)) then
+     if (abs(dtset%orbmag).GT.2) then
        do adir=1,3
          call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,crystal%gmet,&
            & kg_k,dkinpw(:,adir),kpoint,npw_k,adir,0)
