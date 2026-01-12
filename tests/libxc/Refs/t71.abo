@@ -1,8 +1,8 @@
 
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,15 +16,15 @@
 
 .Starting date : Sat 20 Dec 2025.
 - ( at 17h02 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/libxc_t71/t71.abi
 - output file    -> t71.abo
 - root for input  files -> t71i
 - root for output files -> t71o
 
-- inpspheads : Reading pseudopotential header in XML form from 
+- inpspheads : Reading pseudopotential header in XML form from
 -   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/C.xml
-- inpspheads : Reading pseudopotential header in XML form from 
+- inpspheads : Reading pseudopotential header in XML form from
 -   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
  DATASET    1 : space group Pm m 2 (# 25); Bravais oP (primitive ortho.)
 ================================================================================
@@ -347,7 +347,7 @@ tolerances: {tolrff: 2.00E-02, }
  ETOT  3  -6.0820439831133    -5.830E-07 2.443E-08 4.599E-06 1.585E-05 2.557E-03
  ETOT  4  -6.0820440042280    -2.111E-08 3.411E-10 1.022E-06 3.574E-06 2.554E-03
 
- At SCF step    4, forces are sufficiently converged : 
+ At SCF step    4, forces are sufficiently converged :
   for the second time, max diff in force=  3.574E-06 is less than < tolrff=  2.000E-02 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -567,7 +567,7 @@ force_length_stats: {min:   3.93476767E-05, max:   3.93476767E-05, mean:   3.934
            Absolute (Ha)=-1.15197E-05
            Relative     =-1.89405E-06
 
- At Broyd/MD step   3, gradients are converged : 
+ At Broyd/MD step   3, gradients are converged :
   max grad (force/stress) = 3.9348E-05 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -776,7 +776,7 @@ tolerances: {toldfe: 1.00E-12, }
  ETOT 22  -6.0634029864184     5.071E-13 5.808E-19 8.779E-15 7.577E-10 5.338E-03
  ETOT 23  -6.0634029864187    -3.322E-13 7.480E-18 5.861E-16 4.200E-10 5.338E-03
 
- At SCF step   23, etot is converged : 
+ At SCF step   23, etot is converged :
   for the second time, diff in etot=  3.322E-13 < toldfe=  1.000E-12
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -946,7 +946,7 @@ Total energy DC (eV): -1.02214857244240E+03
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      9.4486306295E+00  7.5589045036E+00  6.6140414407E+00 Bohr
               amu      1.20110000E+01  1.00794000E+00
@@ -1060,7 +1060,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1072,12 +1072,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1095,7 +1095,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

@@ -1,6 +1,6 @@
 #Conducti output file:
 #Contains all results produced by conducti utility
-#  
+#
 # npts,omin,omax,width     =    1000   0.00000   5.00000   0.07312 Ha
 # rprimd(bohr)      =   7.38796   0.00000   0.00000
 #                       0.00000   7.38796   0.00000
@@ -13,8 +13,8 @@
 # Number of electrons           =        12.00000
 # sumrule           =         1.21951
 # Emax-Efermi       =   0.25925 Ha   7.05444 eV
-# 
-# hbar*omega(eV) cond(ohm.cm)-1 thermal cond(W/m/K)   thermopower(microvolt/K) 
+#
+# hbar*omega(eV) cond(ohm.cm)-1 thermal cond(W/m/K)   thermopower(microvolt/K)
      0.00000    1.103186131369E+04    2.729551448682E-02    8.021624056764E+02
      0.13620    1.102084389095E+04    2.731002124226E-02    8.021623946543E+02
      0.27239    1.098692143877E+04    2.735358169492E-02    8.021623609792E+02

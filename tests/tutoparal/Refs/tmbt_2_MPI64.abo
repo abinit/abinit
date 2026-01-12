@@ -1,8 +1,8 @@
 
 .Version 10.6.0.1 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu10.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Tue  6 Jan 2026.
 - ( at 16h43 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/scope_gnu_10.2_s64/trunk_release-10.6/tests/TestBot_MPI64/tutoparal_tmbt_1_MPI64-tmbt_2_MPI64-tmbt_3_MPI64/tmbt_2.abi
 - output file    -> tmbt_2_MPI64.abo
 - root for input  files -> tmbt_2_MPI64i
@@ -149,7 +149,7 @@ electrons: {nelect:   4.80000000E+01, charge:   0.00000000E+00, occopt:   1.0000
 meta: {optdriver: 3, gwcalctyp: 0, }
 ...
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -198,7 +198,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     9
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.02083
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -210,13 +210,13 @@ meta: {optdriver: 3, gwcalctyp: 0, }
      8)    -2.50000000E-01  0.00000000E+00  3.33333333E-01       0.12500
      9)     2.50000000E-01  2.50000000E-01  3.33333333E-01       0.25000
 
- Together with  6 symmetry operations and time-reversal symmetry 
+ Together with  6 symmetry operations and time-reversal symmetry
  yields    48 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     9
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.02083
      2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
@@ -228,7 +228,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
      8)    -2.50000000E-01  0.00000000E+00  3.33333333E-01       0.12500
      9)     2.50000000E-01  2.50000000E-01  3.33333333E-01       0.25000
 
- Together with  6 symmetry operations and time-reversal symmetry 
+ Together with  6 symmetry operations and time-reversal symmetry
  yields    48 points in the full Brillouin Zone.
 
 
@@ -240,7 +240,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 24
 - Remaining bands to be divided among processors   nbcw = 26
 - Number of bands treated by each node ~0
@@ -280,7 +280,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   dielectric constant without local fields =   2.4415
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     21.24  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -479,7 +479,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      9.2843000456E+00  9.2843000456E+00  1.0213270512E+01 Bohr
               amu      2.80855000E+01  1.59994000E+01
@@ -578,8 +578,8 @@ P           mkmem           1
 
 ================================================================================
 
- Test the timer : 
-  a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
+ Test the timer :
+  a combined call timab(*,1,tsec) + timab(*,2,tsec) is
 - CPU time =    3.6135E-05 sec,    Wall time =    3.6133E-05 sec
 
 - Total cpu        time (s,m,h):       4520.9       75.35      1.256
@@ -614,7 +614,7 @@ P           mkmem           1
 - subtotal                                  2.275   0.1         2.276   0.1                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
 -<BEGIN_TIMER mpi_nprocs = 64, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =        4520.9, wall_time =        4521.4
@@ -643,7 +643,7 @@ P           mkmem           1
 
  Partitioning of abinit
 - abinit                                 4520.869 100.0      4521.387 100.0             64                   1.00       1.00
- 
+
 - get_dtsets_pspheads                       4.962   0.1         4.965   0.1             64                   1.00       1.00
 - abinit(chkinp,chkvars)                    2.456   0.1         2.456   0.1             64                   1.00       1.00
 - driver                                 4504.117  99.6      4504.521  99.6             64                   1.00       1.00
@@ -654,14 +654,14 @@ P           mkmem           1
 
  Partitioning of driver
 - driver                                 4504.117  99.6      4504.521  99.6             64                   1.00       1.00
- 
+
 - screening                              4503.220  99.6      4503.624  99.6             64                   1.00       1.00
 
 - subtotal                               4504.117  99.6      4504.521  99.6                                  1.00       1.00
 
  Partitioning of screening
 - screening                              4503.220  99.6      4503.624  99.6             64                   1.00       1.00
- 
+
 - screening(init1)                         73.117   1.6        73.160   1.6             64                   1.00       1.00
 - screening(wfs)                           32.788   0.7        32.870   0.7             64                   1.00       1.00
 - screening(1)                              1.500   0.0         1.500   0.0             64                   1.00       1.00
@@ -676,12 +676,12 @@ P           mkmem           1
 
  Partitioning of fourdp (upwards partitioning)
 - fourdp                                    1.653   0.0         1.652   0.0            320                   1.00       1.00
- 
+
 - fourdp%(other)                            1.346   0.0         1.345   0.0            256                   1.00       1.00
 
 - subtotal                                  1.653   0.0         1.652   0.0                                  1.00       1.00
 -
--Synchronisation (=leave_test) and MPI calls 
+-Synchronisation (=leave_test) and MPI calls
 - communic.MPI                              0.050   0.0         0.049   0.0             64                   1.01       1.01
 -
 - subtotal                                  0.000   0.0         0.000   0.0                                  0.00       0.00
@@ -692,7 +692,7 @@ P           mkmem           1
 - cchi0                                  3485.972  77.1      3486.152  77.1            512                   1.00       1.00
 
 
- Detailed analysis of some time consuming routines 
+ Detailed analysis of some time consuming routines
                                   tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata
                                  (sec)                (msec)              (microsec)
 - fourwf%(pot)                   0.000         0
@@ -744,7 +744,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -761,12 +761,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -784,7 +784,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

@@ -39,7 +39,7 @@ module m_wfd
  use defs_abitypes,    only : mpi_type
  use m_gwdefs,         only : one_gw
  use m_time,           only : cwtime, cwtime_report, timab
- use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa, yesno, ltoa, ktoa
+ use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa, yesno, ltoa, ktoa, ftoa
  use m_io_tools,       only : get_unit, iomode_from_fname, iomode2str, open_file
  use m_numeric_tools,  only : imin_loc, list2blocks, bool2index
  use m_hide_blas,      only : xcopy, xdotc
@@ -1344,7 +1344,7 @@ function wfd_norm2(Wfd,Cryst,Pawtab,band,ik_ibz,spin) result(norm2)
  character(len=500) :: msg
 !arrays
  real(dp) :: pawovlp(2)
- complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:)
+ complex(gwp),contiguous, pointer :: ug1(:)
  type(pawcprj_type),allocatable :: Cp1(:,:)
 !************************************************************************
 
@@ -1423,7 +1423,7 @@ function wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik_ibz,spin)
  character(len=500) :: msg
 !arrays
  real(dp) :: pawovlp(2)
- complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
+ complex(gwp),contiguous, pointer :: ug1(:),ug2(:)
  type(pawcprj_type),allocatable :: Cp1(:,:),Cp2(:,:)
 !************************************************************************
 
@@ -1504,7 +1504,6 @@ subroutine wfd_get_gvec_gbound(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, nloalg, &
 !Local variables ------------------------------
  integer :: mpw
  integer,allocatable :: gtmp(:,:)
-
 ! *********************************************************************
 
  mpw = size(kg_kq, dim=2)
@@ -1599,7 +1598,6 @@ subroutine wfd_get_many_ur(Wfd, bands, ik_ibz, spin, ur)
  complex(gwp),intent(out) :: ur(Wfd%nfft*Wfd%nspinor*SIZE(bands))
 
 !Local variables ------------------------------
-!scalars
  integer :: dat,ptr,band
 !************************************************************************
 
@@ -1705,8 +1703,8 @@ subroutine wfd_get_ur(Wfd, band, ik_ibz, spin, ur)
  character(len=500) :: msg
  type(wave_t),pointer :: wave
 !arrays
- integer,ABI_CONTIGUOUS pointer :: kg_k(:,:),gbound(:,:)
- complex(gwp),ABI_CONTIGUOUS pointer :: ug(:)
+ integer,contiguous, pointer :: kg_k(:,:),gbound(:,:)
+ complex(gwp),contiguous, pointer :: ug(:)
 !************************************************************************
 
  npw_k  = Wfd%npwarr(ik_ibz)
@@ -1910,16 +1908,15 @@ subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sor
  type(wave_t),pointer :: wave
  logical :: want_sorted
 !arrays
- integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
+ integer,contiguous, pointer :: kg_k(:,:)
  integer,allocatable :: dimcprj_srt(:)
  real(dp) :: kpoint(3)
- real(dp),ABI_CONTIGUOUS pointer :: phkxred(:,:)
+ real(dp),contiguous, pointer :: phkxred(:,:)
  real(dp),allocatable :: cwavef(:,:), kpg(:,:)
  !real(dp),allocatable :: ph1d(2,3*(2*mgfft+1)*natom)
- real(dp),ABI_CONTIGUOUS pointer :: ph3d(:,:,:)    ! ph3d(2,npw_k,matblk)
- real(dp),ABI_CONTIGUOUS pointer :: ffnl(:,:,:,:)  ! ffnl(npw_k,dimffnl,lmnmax,ntypat)
+ real(dp),contiguous, pointer :: ph3d(:,:,:)    ! ph3d(2,npw_k,matblk)
+ real(dp),contiguous, pointer :: ffnl(:,:,:,:)  ! ffnl(npw_k,dimffnl,lmnmax,ntypat)
  type(pawcprj_type),allocatable :: Cprj_srt(:,:)
-
 ! *********************************************************************
 
  ! Different form factors have to be calculated and stored in Kdata.
@@ -2031,7 +2028,6 @@ subroutine wave_init(Wave, usepaw, npw, nfft, nspinor, natom, nlmn_size, cprj_or
  integer,intent(in) :: nlmn_size(:)
 
 !Local variables ------------------------------
-!scalars
  integer,parameter :: ncpgr0=0  ! For the time being, no derivatives
 !************************************************************************
 
@@ -2086,7 +2082,6 @@ subroutine wave_free(Wave, what)
  character(len=*),optional,intent(in) :: what
 
 !Local variables ------------------------------
-!scalars
  character(len=10) :: my_what
 !************************************************************************
 
@@ -2196,7 +2191,6 @@ integer function wfd_get_wave_ptr(wfd, band, ik_ibz, spin, wave_ptr, msg) result
  character(len=*),intent(out) :: msg
 
 !Local variables ------------------------------
-!scalars
  integer :: ib, ik, is
 !************************************************************************
 
@@ -2538,7 +2532,6 @@ subroutine wfd_mybands(Wfd, ik_ibz, spin, how_manyb, my_band_list, how)
  integer,intent(out) :: my_band_list(Wfd%mband)
 
 !Local variables ------------------------------
-!scalars
  integer :: band
  logical :: do_have
 !************************************************************************
@@ -2643,7 +2636,6 @@ subroutine wfdgw_bands_of_rank(Wfd,rank,ik_ibz,spin,how_manyb,rank_band_list)
  integer,intent(out) :: rank_band_list(Wfd%mband)
 
 !Local variables ------------------------------
-!scalars
  integer :: band
  logical :: it_has
 !************************************************************************
@@ -3069,7 +3061,7 @@ subroutine wfdgw_rotate(Wfd, Cryst, m_ks_to_qp, bmask)
  type(wave_t),pointer :: wave
 !arrays
  integer :: new_list(Wfd%mband),my_band_list(Wfd%mband)
- complex(dp),ABI_CONTIGUOUS pointer :: umat_sk(:,:)
+ complex(dp),contiguous, pointer :: umat_sk(:,:)
  complex(gwp) :: mcol(Wfd%mband)
  complex(gwp),allocatable :: new_ug(:,:) !, new_ur(:)
 !************************************************************************
@@ -3848,7 +3840,7 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
 !arrays
  integer :: my_bandlist(Wfd%mband)
  real(dp) :: pawovlp(2)
- complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
+ complex(gwp),contiguous, pointer :: ug1(:),ug2(:)
  !complex(gwp) :: ur(Wfd%nfft*Wfd%nspinor)
  character(len=6) :: tag_spin(2)
  type(pawcprj_type),allocatable :: Cp1(:,:),Cp2(:,:)
@@ -4184,7 +4176,7 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
  integer,intent(in) :: band, ndat, spin, npw_kbz, istwf_kbz
  type(crystal_t),intent(in) :: cryst
 !arrays
- integer :: work_ngfft(18)
+ integer,intent(in) :: work_ngfft(18)
  integer,intent(in) :: indkk(6)
  integer,intent(in) :: gbound_kbz(2*wfd%mgfft+8, 2)
  integer,intent(in) :: kg_kbz(3, npw_kbz)
@@ -4198,6 +4190,7 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
  integer,parameter :: ndat1 = 1
  integer :: ik_ibz, isym_k, trev_k, idat, istwf_kirr, npw_kirr, ib
  logical :: isirr_k
+ !real(dp) :: norm
 !arrays
  integer :: g0_k(3)
  real(dp),allocatable :: cg_kirr(:,:)
@@ -4249,6 +4242,14 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
 #endif
    end if
  end if
+
+ ! Debug section
+ !do idat=1,ndat
+ !  norm = sqrt(cg_dznrm2(npw_kbz*wfd%nspinor, cgs_kbz(:, :, idat)))
+ !  if (abs(norm - one) > tol12) then
+ !    ABI_ERROR(sjoin("norm:", ftoa(norm)))
+ !  end if
+ !end do
 
 end subroutine wfd_rotate_cg
 !!***
@@ -4336,7 +4337,7 @@ subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, in
    !ABI_MALLOC(kg_kbz, (3, npw_kbz))
    !ABI_MALLOC(cgs_kbz, (2, npw_kbz*self%nspinor, nband))
 
-   ABI_CHECK(mpw >= npw_kbz, "mpw < npw_kbz")
+   ABI_CHECK_ILEQ(npw_kbz, mpw, "npw_kbz > mpw!")
    kg_kbz(:,1:npw_kbz) = self%kdata(ik_ibz)%kg_k
    do ib=1,nband
      band = ib + bstart - 1
@@ -4346,7 +4347,7 @@ subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, in
    ! Reconstruct u_k(G) from the IBZ image.
    istwf_kbz = 1
    call get_kg(kk_bz, istwf_kbz, ecut, cryst%gmet, npw_kbz, gtmp)
-   ABI_CHECK(mpw >= npw_kbz, "mpw < npw_kbz")
+   ABI_CHECK_ILEQ(npw_kbz, mpw, "npw_kbz > mpw!")
    kg_kbz(:,1:npw_kbz) = gtmp(:,:npw_kbz)
    ABI_FREE(gtmp)
    !ABI_MALLOC(kg_kbz, (3, npw_kbz))
@@ -5140,7 +5141,7 @@ subroutine wfdgw_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
  integer,allocatable :: l_size_atm(:),my_plot_list(:,:)
  integer :: my_band_list(Wfd%mband)
  real(dp),allocatable :: data_plot(:)
- logical,ABI_CONTIGUOUS pointer :: bmask(:)
+ logical,contiguous, pointer :: bmask(:)
  complex(gwp),allocatable :: ur_ae(:),nc_ur(:)
  type(Pawfgrtab_type),allocatable :: Pawfgrtab(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
@@ -5309,12 +5310,12 @@ subroutine wfdgw_get_nl_me(Wfd, cryst, psps, pawtab, bks_mask, nl_bks)
  type(wave_t),pointer :: wave
 !arrays
  integer :: bks_distrb(Wfd%mband, Wfd%nkibz, Wfd%nsppol)
- integer, ABI_CONTIGUOUS pointer :: kg_k(:,:)
+ integer, contiguous, pointer :: kg_k(:,:)
  real(dp) :: kpoint(3),enlout(1)
  real(dp),allocatable :: kpg_k(:,:),vnl_psi(:,:),vectin(:,:)
  real(dp) :: opaw_psi(1,1)
- real(dp),ABI_CONTIGUOUS pointer :: ffnl_k(:,:,:,:),ph3d_k(:,:,:)
- complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:)
+ real(dp),contiguous, pointer :: ffnl_k(:,:,:,:),ph3d_k(:,:,:)
+ complex(gwp),contiguous, pointer :: ug1(:)
  type(pawcprj_type),allocatable :: cprj(:,:)
 !************************************************************************
 
@@ -5463,14 +5464,14 @@ end subroutine wfdgw_get_nl_me
 !!!   type(gs_hamiltonian_type) :: ham_k
 !!!  !arrays
 !!!   integer :: bks_distrb(wfd%mband, wfd%nkibz, wfd%nsppol)
-!!!   integer, ABI_CONTIGUOUS pointer :: kg_k(:,:)
+!!!   integer, contiguous, pointer :: kg_k(:,:)
 !!!   !real(dp) :: kptns_(3,1),ylmgr_dum(1,1,1),shifts(3)
 !!!   !real(dp),allocatable :: ylm_k(:,:),dum_ylm_gr_k(:,:,:)
 !!!   !real(dp),pointer :: ffnl_k(:,:,:,:)
 !!!   real(dp) :: kpoint(3),dum_enlout(0),dummy_lambda(1),soc(2)
 !!!   real(dp),allocatable :: kpg_k(:,:),vnl_psi(:,:),vectin(:,:) !,s_psi(:,:)
 !!!   real(dp),allocatable :: opaw_psi(:,:) !2, npw_k*wfd%nspinor*wfd%usepaw) ! <G|1+S|Cnk>
-!!!   real(dp),ABI_CONTIGUOUS pointer :: ffnl_k(:,:,:,:),ph3d_k(:,:,:)
+!!!   real(dp),contiguous, pointer :: ffnl_k(:,:,:,:),ph3d_k(:,:,:)
 !!!   type(pawcprj_type),allocatable :: cprj(:,:)
 !!!  !************************************************************************
 !!!
@@ -5671,7 +5672,7 @@ subroutine wfdgw_mkrho(wfd, cryst, psps, ebands, ngfftf, nfftf, rhor, &
  complex(dp),allocatable :: wfr_x(:),wfr_y(:)
  complex(gwp),allocatable :: gradug(:),work(:)
  complex(gwp),allocatable,target :: wfr(:)
- complex(gwp), ABI_CONTIGUOUS pointer :: cwavef1(:),cwavef2(:)
+ complex(gwp), contiguous, pointer :: cwavef1(:),cwavef2(:)
  type(iter2_t) :: Iter_bks
 !*************************************************************************
 

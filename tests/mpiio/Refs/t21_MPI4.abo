@@ -1,8 +1,8 @@
 
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 20 Dec 2025.
 - ( at 17h23 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI4/mpiio_t21_MPI4/t21.abi
 - output file    -> t21_MPI4.abo
 - root for input  files -> t21_MPI4i
@@ -478,7 +478,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  7  -7.2585848333285    -5.838E-12 1.118E-13 5.877E-10
  ETOT  8  -7.2585848333286    -1.110E-13 6.190E-15 3.900E-12
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  1.110E-13 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -639,7 +639,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  7  -7.2585848333285    -5.838E-12 1.118E-13 5.877E-10
  ETOT  8  -7.2585848333286    -1.110E-13 6.190E-15 3.900E-12
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  1.110E-13 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -805,7 +805,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  7  -7.8994190142823    -1.483E-12 8.992E-06 6.009E-11
  ETOT  8  -7.8994190142823    -3.109E-14 1.486E-06 1.067E-12
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  3.109E-14 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -970,7 +970,7 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  7  -7.8994190142823    -1.483E-12 8.992E-06 6.009E-11
  ETOT  8  -7.8994190142823    -3.109E-14 1.486E-06 1.067E-12
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  3.109E-14 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1147,7 +1147,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  6  -7.2585848333226    -1.842E-10 1.239E-12 3.261E-08 5.492E-07 1.083E-01
  ETOT  7  -7.2585848333285    -5.838E-12 1.118E-13 5.877E-10 1.713E-07 1.083E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.713E-07 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1226,7 +1226,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  6  -7.3011190745482    -5.477E-12 5.331E-14 7.943E-10 2.625E-07 2.743E-02
  ETOT  7  -7.3011190745484    -2.220E-13 8.628E-16 2.518E-12 1.139E-08 2.743E-02
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.139E-08 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1308,7 +1308,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  5  -7.3049058280525    -3.202E-11 8.317E-14 9.410E-10 3.367E-07 9.107E-04
  ETOT  6  -7.3049058280527    -1.901E-13 1.027E-14 5.118E-12 7.279E-09 9.107E-04
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  7.279E-09 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1387,7 +1387,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  2  -7.3049104217182    -1.170E-10 2.397E-15 2.499E-08 1.828E-07 1.548E-06
  ETOT  3  -7.3049104217221    -3.890E-12 1.686E-14 1.010E-09 6.025E-08 1.609E-06
 
- At SCF step    3, forces are converged : 
+ At SCF step    3, forces are converged :
   for the second time, max diff in force=  6.025E-08 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1450,7 +1450,7 @@ force_length_stats: {min:   2.78623317E-06, max:   2.78623317E-06, mean:   2.786
            Absolute (Ha)=-4.59367E-06
            Relative     =-6.28847E-07
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 1.6086E-06 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -1582,7 +1582,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  6  -7.2585848333226    -1.842E-10 1.239E-12 3.261E-08 5.492E-07 1.083E-01
  ETOT  7  -7.2585848333285    -5.838E-12 1.118E-13 5.877E-10 1.713E-07 1.083E-01
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.713E-07 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1661,7 +1661,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  6  -7.3011190745482    -5.477E-12 5.331E-14 7.943E-10 2.625E-07 2.743E-02
  ETOT  7  -7.3011190745484    -2.220E-13 8.628E-16 2.518E-12 1.139E-08 2.743E-02
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  1.139E-08 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1743,7 +1743,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  5  -7.3049058280525    -3.202E-11 8.317E-14 9.410E-10 3.367E-07 9.107E-04
  ETOT  6  -7.3049058280527    -1.901E-13 1.027E-14 5.118E-12 7.279E-09 9.107E-04
 
- At SCF step    6, forces are converged : 
+ At SCF step    6, forces are converged :
   for the second time, max diff in force=  7.279E-09 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1822,7 +1822,7 @@ tolerances: {toldff: 1.00E-06, }
  ETOT  2  -7.3049104217182    -1.170E-10 2.397E-15 2.499E-08 1.828E-07 1.548E-06
  ETOT  3  -7.3049104217221    -3.890E-12 1.686E-14 1.010E-09 6.025E-08 1.609E-06
 
- At SCF step    3, forces are converged : 
+ At SCF step    3, forces are converged :
   for the second time, max diff in force=  6.025E-08 < toldff=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1885,7 +1885,7 @@ force_length_stats: {min:   2.78623317E-06, max:   2.78623317E-06, mean:   2.786
            Absolute (Ha)=-4.59367E-06
            Relative     =-6.28847E-07
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 1.6086E-06 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -2024,7 +2024,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  8  -7.8994190142823    -3.109E-14 1.486E-06 1.067E-12 4.819E-09 5.852E-02
  ETOT  9  -7.8994190142823    -1.332E-14 1.310E-06 4.300E-15 4.726E-10 5.852E-02
 
- At SCF step    9, forces are converged : 
+ At SCF step    9, forces are converged :
   for the second time, max diff in force=  4.726E-10 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2104,7 +2104,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  7  -7.9150512566433    -6.573E-14 4.565E-08 9.281E-13 2.714E-08 3.164E-02
  ETOT  8  -7.9150512566433     2.309E-14 2.519E-08 1.263E-14 3.611E-10 3.164E-02
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  3.611E-10 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2187,7 +2187,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  6  -7.9235528304741    -3.671E-12 1.352E-05 5.181E-11 1.569E-08 4.759E-04
  ETOT  7  -7.9235528304742    -4.086E-14 7.500E-06 1.457E-12 7.899E-09 4.759E-04
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  7.899E-09 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2268,7 +2268,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  4  -7.9235555182241    -1.950E-12 3.272E-08 1.232E-10 2.834E-09 1.623E-07
  ETOT  5  -7.9235555182241     7.994E-15 2.291E-08 1.249E-12 3.991E-09 1.583E-07
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  3.991E-09 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2331,7 +2331,7 @@ force_length_stats: {min:   2.74258947E-07, max:   2.74258947E-07, mean:   2.742
            Absolute (Ha)=-2.68775E-06
            Relative     =-3.39210E-07
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 1.5834E-07 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -2469,7 +2469,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  8  -7.8994190142823    -3.109E-14 1.486E-06 1.067E-12 4.819E-09 5.852E-02
  ETOT  9  -7.8994190142823    -1.332E-14 1.310E-06 4.300E-15 4.726E-10 5.852E-02
 
- At SCF step    9, forces are converged : 
+ At SCF step    9, forces are converged :
   for the second time, max diff in force=  4.726E-10 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2549,7 +2549,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  7  -7.9150512566433    -6.573E-14 4.565E-08 9.281E-13 2.714E-08 3.164E-02
  ETOT  8  -7.9150512566433     2.309E-14 2.519E-08 1.263E-14 3.611E-10 3.164E-02
 
- At SCF step    8, forces are converged : 
+ At SCF step    8, forces are converged :
   for the second time, max diff in force=  3.611E-10 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2632,7 +2632,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  6  -7.9235528304741    -3.671E-12 1.352E-05 5.181E-11 1.569E-08 4.759E-04
  ETOT  7  -7.9235528304742    -4.086E-14 7.500E-06 1.457E-12 7.899E-09 4.759E-04
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  7.899E-09 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2713,7 +2713,7 @@ tolerances: {toldff: 1.00E-07, }
  ETOT  4  -7.9235555182241    -1.950E-12 3.272E-08 1.232E-10 2.834E-09 1.623E-07
  ETOT  5  -7.9235555182241     7.994E-15 2.291E-08 1.249E-12 3.991E-09 1.583E-07
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  3.991E-09 < toldff=  1.000E-07
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2776,7 +2776,7 @@ force_length_stats: {min:   2.74258947E-07, max:   2.74258947E-07, mean:   2.742
            Absolute (Ha)=-2.68775E-06
            Relative     =-3.39210E-07
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 1.5834E-07 < tolmxf= 1.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -2858,7 +2858,7 @@ band_energy         :  3.40453014982664E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
 -          iomode           1
             acell      1.0366000000E+01  1.0366000000E+01  1.0366000000E+01 Bohr
@@ -3172,8 +3172,8 @@ P           mkmem8          5
  and a postprocessing based on the final acell, rprim, and xred.
  More details in the log file.
 
- Test the timer : 
-  a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
+ Test the timer :
+  a combined call timab(*,1,tsec) + timab(*,2,tsec) is
 - CPU time =    1.3285E-06 sec,    Wall time =    1.3286E-06 sec
 
 - Total cpu        time (s,m,h):         34.6        0.58      0.010
@@ -3241,7 +3241,7 @@ P           mkmem8          5
 - subtotal                                  7.151  20.7         7.170  20.7                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =          34.6, wall_time =          34.6
@@ -3303,7 +3303,7 @@ P           mkmem8          5
 
  Partitioning of abinit
 - abinit                                   34.596 100.0        34.634 100.0              4                   1.00       1.00
- 
+
 - abinit(init,iofn1,herald)                 0.030   0.1         0.031   0.1              4                   0.99       0.99
 - get_dtsets_pspheads                       2.310   6.7         2.310   6.7              4                   1.00       1.00
 - abinit(outvars)                           0.413   1.2         0.413   1.2              4                   1.00       1.00
@@ -3317,7 +3317,7 @@ P           mkmem8          5
 
  Partitioning of driver
 - driver                                   30.798  89.0        30.834  89.0              4                   1.00       1.00
- 
+
 - driver(bef. select case)                  0.032   0.1         0.032   0.1             32                   1.00       1.00
 - (other)                                  30.763  88.9        30.800  88.9             -1                   1.00       1.00
 
@@ -3325,7 +3325,7 @@ P           mkmem8          5
 
  Partitioning of gstateimg+gstate
 - gstateimg                                30.727  88.8        30.763  88.8             32                   1.00       1.00
- 
+
 - gstate(1)                                 0.042   0.1         0.042   0.1             64                   1.00       1.00
 - gstate(pspini)                            0.462   1.3         0.462   1.3             32                   1.00       1.00
 - gstate(init rhor rhog)                    0.014   0.0         0.014   0.0             32                   1.00       1.00
@@ -3337,7 +3337,7 @@ P           mkmem8          5
 
  Partitioning of scfcv_core
 - scfcv_core                               29.581  85.5        29.617  85.5             80                   1.00       1.00
- 
+
 - scfcv_core(ini moved atm inside)          0.282   0.8         0.282   0.8            544                   1.00       1.00
 - scfcv_core(setvtr)                        0.903   2.6         0.903   2.6            544                   1.00       1.00
 - scfcv_core(vtorho(f))                    26.467  76.5        26.470  76.4            544                   1.00       1.00
@@ -3354,7 +3354,7 @@ P           mkmem8          5
 
  Partitioning of rhotov
 - rhotov                                    0.291   0.8         0.292   0.8            544                   1.00       1.00
- 
+
 - rhotov(rhotoxc)                           0.143   0.4         0.143   0.4            544                   1.00       1.00
 - rhotov(other)                             0.032   0.1         0.032   0.1            544                   1.00       1.00
 - (other)                                   0.112   0.3         0.112   0.3             -1                   1.00       1.00
@@ -3363,7 +3363,7 @@ P           mkmem8          5
 
  Partitioning of vtorho
 - vtorho                                   26.465  76.5        26.468  76.4            544                   1.00       1.00
- 
+
 - vtorho(bef. kpt  loop)                    0.010   0.0         0.010   0.0            544                   1.00       1.00
 - vtorho(bef. vtowfk)                       0.553   1.6         0.554   1.6           1728                   1.00       1.00
 - vtowfk                                   25.186  72.8        25.188  72.7           1728                   1.00       1.00
@@ -3377,7 +3377,7 @@ P           mkmem8          5
 
  Partitioning of vtowfk
 - vtowfk                                   25.186  72.8        25.188  72.7           1728                   1.00       1.00
- 
+
 - vtowfk(2)                                24.719  71.5        24.722  71.4             -4                   1.00       1.00
 - prep_nonlop%vtowfk                        0.256   0.7         0.255   0.7           5376                   1.00       1.00
 - prep_fourwf%vtowfk                        0.139   0.4         0.139   0.4           5184                   1.00       1.00
@@ -3387,7 +3387,7 @@ P           mkmem8          5
 
  Partitioning of getghc
 - getghc                                    9.689  28.0         9.691  28.0          66240                   1.00       1.00
- 
+
 - fourwf%getghc                             7.764  22.4         7.770  22.4          66240                   1.00       1.00
 - nonlop%getghc                             1.479   4.3         1.487   4.3          66240                   0.99       0.99
 - getghc(/=fourXX,nonlop,fock_XX)           0.446   1.3         0.434   1.3             -4                   1.03       1.03
@@ -3396,7 +3396,7 @@ P           mkmem8          5
 
  Partitioning of fourwf (upwards partitioning)
 - fourwf                                    7.995  23.1         8.002  23.1          69696                   1.00       1.00
- 
+
 - fourwf%getghc                             7.764  22.4         7.770  22.4          66240                   1.00       1.00
 - fourwf%prep_four                          0.231   0.7         0.231   0.7           3456                   1.00       1.00
 
@@ -3404,7 +3404,7 @@ P           mkmem8          5
 
  Partitioning of prep_fourwf
 - prep_fourwf                               0.304   0.9         0.304   0.9          10368                   1.00       1.00
- 
+
 - fourwf%prep_four                          0.231   0.7         0.231   0.7           3456                   1.00       1.00
 - alltoall%prep_fo                          0.050   0.1         0.051   0.1          10368                   0.99       0.99
 
@@ -3412,7 +3412,7 @@ P           mkmem8          5
 
  Partitioning of prep_nonlop
 - prep_nonlop                               0.627   1.8         0.628   1.8          19104                   1.00       1.00
- 
+
 - nonlop%prep_nonl%vtowfk                   0.184   0.5         0.184   0.5           5376                   1.00       1.00
 - nonlop%prep_nonl%forstrn                  0.023   0.1         0.023   0.1            480                   1.00       1.00
 - prep_nonlop(alltoall)                     0.086   0.2         0.087   0.3          19104                   0.99       0.99
@@ -3422,26 +3422,26 @@ P           mkmem8          5
 
  Partitioning of mkrho (upwards partitioning)
 - mkrho                                     0.413   1.2         0.413   1.2            272                   1.00       1.00
- 
+
 - mkrho%vtorho                              0.413   1.2         0.413   1.2            272                   1.00       1.00
 
 - subtotal                                  0.413   1.2         0.413   1.2                                  1.00       1.00
 
  Partitioning of inwffil
 - inwffil                                   0.006   0.0         0.006   0.0             32                   1.00       1.00
- 
+
 
 - subtotal                                  0.006   0.0         0.006   0.0                                  1.00       1.00
 
  Partitioning of newkpt
 - newkpt                                    0.006   0.0         0.006   0.0             32                   1.00       1.00
- 
+
 
 - subtotal                                  0.005   0.0         0.005   0.0                                  1.00       1.00
 
  Partitioning of newvtr
 - newvtr                                    0.226   0.7         0.226   0.7            464                   1.00       1.00
- 
+
 - newvtr(call prcref_PMA)                   0.139   0.4         0.139   0.4            464                   1.00       1.00
 - newvtr(aft. prcref_PMA)                   0.067   0.2         0.067   0.2            464                   1.00       1.00
 
@@ -3449,21 +3449,21 @@ P           mkmem8          5
 
  Partitioning of fourdp (upwards partitioning)
 - fourdp                                    0.724   2.1         0.724   2.1           3280                   1.00       1.00
- 
+
 - fourdp%(other)                            0.724   2.1         0.724   2.1           3280                   1.00       1.00
 
 - subtotal                                  0.724   2.1         0.724   2.1                                  1.00       1.00
 
  Partitioning of afterscfloop
 - afterscfloop                              0.729   2.1         0.729   2.1             80                   1.00       1.00
- 
+
 - afterscfloop(forstr)                      0.725   2.1         0.725   2.1             80                   1.00       1.00
 
 - subtotal                                  0.729   2.1         0.729   2.1                                  1.00       1.00
 
  Partitioning of forstr
 - forstr                                    0.724   2.1         0.724   2.1             80                   1.00       1.00
- 
+
 - forstr(forstrnps)                         0.064   0.2         0.064   0.2             80                   1.00       1.00
 - forstr(forces)                            0.008   0.0         0.008   0.0             80                   1.00       1.00
 - forstr(stress)                            0.652   1.9         0.652   1.9             80                   1.00       1.00
@@ -3472,7 +3472,7 @@ P           mkmem8          5
 
  Partitioning of forstrnps
 - forstrnps                                 0.064   0.2         0.064   0.2             80                   1.00       1.00
- 
+
 - forstrnps(bef.loop band)                  0.017   0.0         0.017   0.0            240                   1.00       1.00
 - forstrnps(nonlop+prep_ba                  0.029   0.1         0.029   0.1            480                   1.00       1.00
 - forstrnps(kinetic contr)                  0.015   0.0         0.015   0.0            480                   1.00       1.00
@@ -3481,7 +3481,7 @@ P           mkmem8          5
 
  Partitioning of outscfcv
 - outscfcv                                  0.408   1.2         0.441   1.3             80                   0.93       0.93
- 
+
 - outscfcv([PAW]prtden)                     0.022   0.1         0.022   0.1             80                   1.00       1.00
 - outscfcv(output GSR)                      0.373   1.1         0.405   1.2             80                   0.92       0.92
 
@@ -3489,7 +3489,7 @@ P           mkmem8          5
 
  Partitioning of lobpcgwf2 core engine
 - lobpcgwf2                                24.711  71.4        24.713  71.4           2208                   1.00       1.00
- 
+
 - lobpcg_Bortho(X)                          0.328   0.9         0.328   0.9          13248                   1.00       1.00
 - lobpcg_Bortho(XW)                         0.371   1.1         0.372   1.1          13248                   1.00       1.00
 - lobpcg_Bortho(XWP)                        1.341   3.9         1.342   3.9          39744                   1.00       1.00
@@ -3513,7 +3513,7 @@ P           mkmem8          5
 
  Partitioning of low-level xgTransposer type
 - xgTransposer_transpose@ColsRows           0.511   1.5         0.513   1.5          66240                   1.00       1.00
- 
+
 - xgTransposer_transpose@Linalg             1.831   5.3         1.835   5.3         198720                   1.00       1.00
 - xgTransposer_*@all2all                    1.407   4.1         1.425   4.1         264960                   0.99       0.99
 - xgTransposer_@reorganize                  0.287   0.8         0.285   0.8         264960                   1.01       1.01
@@ -3525,7 +3525,7 @@ P           mkmem8          5
 
  Partitioning of low-level xgBlock type
 - xgBlock_gemm(blas)                        1.445   4.2         1.459   4.2         850080                   0.99       0.99
- 
+
 - xgBlock_trsm                              0.569   1.6         0.573   1.7         205344                   0.99       0.99
 - xgBlock_potrf                             0.076   0.2         0.077   0.2          68448                   0.99       0.99
 - xgBlock_zero                              0.280   0.8         0.275   0.8         368736                   1.02       1.02
@@ -3544,7 +3544,7 @@ P           mkmem8          5
 
 - subtotal                                  6.037  17.4         6.088  17.6                                  0.99       0.99
 -
--Synchronisation (=leave_test) and MPI calls 
+-Synchronisation (=leave_test) and MPI calls
 - communic.MPI                              0.029   0.1         0.029   0.1           4188                   1.02       1.02
 -
 - forstrnps:synchr                          0.000   0.0         0.000   0.0             96                   0.98       0.98
@@ -3602,7 +3602,7 @@ P           mkmem8          5
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -3614,12 +3614,12 @@ P           mkmem8          5
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -3637,7 +3637,7 @@ P           mkmem8          5
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -3652,7 +3652,7 @@ P           mkmem8          5
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

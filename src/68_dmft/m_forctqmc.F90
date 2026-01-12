@@ -687,13 +687,13 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
      if (iatom < 10) then
        write(tag_atom,'("0",I1)') iatom
-     else 
+     else
        write(tag_atom,'(I2)') iatom
      endif
 
      !print Weiss field for correlated atoms
-     lpawu = paw_dmft%lpawu(iatom)             
-     if (lpawu == -1) cycle                    
+     lpawu = paw_dmft%lpawu(iatom)
+     if (lpawu == -1) cycle
 
      if (myproc == mod(nproc+1,nproc)) then
        if (open_file(trim(paw_dmft%filapp)//"_atom_"//tag_atom//"_G0w.dat",message,newunit=unt) /= 0) ABI_ERROR(message)
