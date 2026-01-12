@@ -1,8 +1,8 @@
 
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 20 Dec 2025.
 - ( at 17h02 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/psml_t02/t02.abi
 - output file    -> t02.abo
 - root for input  files -> t02i
@@ -298,7 +298,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  8  -117.47611012269     2.939E-09 2.700E-07 2.502E-11
  ETOT  9  -117.47611012212     5.733E-10 1.273E-06 3.870E-14
 
- At SCF step    9, etot is converged : 
+ At SCF step    9, etot is converged :
   for the second time, diff in etot=  5.733E-10 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -451,7 +451,7 @@ tolerances: {toldfe: 1.00E-05, }
  ETOT 15  -117.48050419304    -9.888E-06 6.858E-07 3.314E-02 1.849E-03 1.218E+00
  ETOT 16  -117.48050757959    -3.387E-06 2.356E-07 2.470E-02 8.366E-04 1.219E+00
 
- At SCF step   16, etot is converged : 
+ At SCF step   16, etot is converged :
   for the second time, diff in etot=  3.387E-06 < toldfe=  1.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -571,7 +571,7 @@ band_energy         : -1.66363719272532E+01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      5.4235139814E+00  5.4235139814E+00  5.4235139814E+00 Bohr
               amu      5.58470000E+01
@@ -785,7 +785,7 @@ P           mkmem          14
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -802,12 +802,12 @@ P           mkmem          14
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -825,7 +825,7 @@ P           mkmem          14
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

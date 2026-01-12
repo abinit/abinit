@@ -1,8 +1,8 @@
 
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 20 Dec 2025.
 - ( at 17h39 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI10/paral_t118_MPI10/t118.abi
 - output file    -> t118_MPI10.abo
 - root for input  files -> t118_MPI10i
@@ -800,7 +800,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000  -0.00032  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00008   0.00000   0.00000   0.00000  -0.00000  -0.00000
    0.00078  -0.00000  -0.00040  -0.00000   0.00000  -0.00000  -0.00000  -0.00010  -0.00000  -0.00002  -0.00000   0.00000   0.00000  -0.00000
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   3
 
@@ -1486,7 +1486,7 @@ force_length_stats: {min: null, max: null, mean: null, }
   -0.00000  -0.00015  -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00004   0.00000   0.00000   0.00000   0.00000   0.00000
   -0.00006   0.00000  -0.00002   0.00000   0.00000  -0.00000   0.00000  -0.00005  -0.00000  -0.00001  -0.00000  -0.00000  -0.00000   0.00000
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   3
 
@@ -1678,7 +1678,7 @@ total_energy_dc_eV  : -1.07409567822254E+03
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
 -          iomode           3
             acell      9.2596580169E+00  9.2596580169E+00  9.2596580169E+00 Bohr
@@ -2015,7 +2015,7 @@ P           mkmem           2
 - Comment: to be cited in case the ETSF_IO file format is used, i.e. iomode=3.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2008
 -
-- [2] A self-consistent DFT + DMFT scheme in the projector augmented wave method: 
+- [2] A self-consistent DFT + DMFT scheme in the projector augmented wave method:
 - applications to cerium, Ce2O3 and Pu2O3 with the Hubbard I solver and comparison to DFT + U,
 - B. Amadon,  J. Phys.: Condens. Matter 24 075604 (2012).
 - Comment : Describes the self-consistent implementation of DFT+DMFT in PAW
@@ -2051,7 +2051,7 @@ P           mkmem           2
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2063,12 +2063,12 @@ P           mkmem           2
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2086,7 +2086,7 @@ P           mkmem           2
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

@@ -52,6 +52,9 @@ module m_screen
 
  private
 
+ public :: em1_symmetrize_ip
+ public :: em1_symmetrize_op
+
  ! Flags defining the content of the %mat buffer in the fgg_t type.
  integer,public,parameter :: MAT_NOTYPE         = 0
  integer,public,parameter :: MAT_CHI0           = 1

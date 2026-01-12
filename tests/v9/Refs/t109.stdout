@@ -1,8 +1,8 @@
 
 .Version 10.5.8.2 of LRUJ, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  LRUJ comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,12 +16,12 @@
 
 .Starting date : Sun 21 Dec 2025.
 - ( at 16h49 )
-  
+
  Number of perturbations detected:  4
  Including unperturbed state, we have  5 data points.
  Hunds J determination, implemented by L. MacEnulty August 2021
  Maximum degree of polynomials analyzed:  3
- NOTE: Unlike the ujdet utility, lruj treats the 
+ NOTE: Unlike the ujdet utility, lruj treats the
  response functions as scalars, not matrices!
  See lruj tutorial for more information.
 
@@ -54,7 +54,7 @@
  Cubic:         -0.6860202    -0.9324877     0.3852829  |    0.0000202    0.0000026    0.0000430
 *************************************************************************************************
 *************************************************************************************************
- 
+
 Linear Response UJ (LRUJ) program complete. Live long and prosper. ~LMac
 
 

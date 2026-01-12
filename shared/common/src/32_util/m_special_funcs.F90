@@ -523,7 +523,6 @@ elemental function gaussian(arg, sigma)
  real(dp) :: gaussian
 
 !Local variables ---------------------------------------
-!scalars
  real(dp) :: xx
 ! *********************************************************************
 
@@ -551,7 +550,6 @@ end function gaussian
 elemental function lorentzian(arg, sigma)
 
 !Arguments ---------------------------------------------
-!scalars
  real(dp),intent(in) :: arg, sigma
  real(dp) :: lorentzian
 ! *********************************************************************

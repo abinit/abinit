@@ -145,7 +145,6 @@ subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:),vkbsign(:,:)
-
 !************************************************************************
 
  !@vkbr_t
@@ -207,9 +206,7 @@ end subroutine vkbr_init
 subroutine vkbr_free_0D(vkbr)
 
 !Arguments ------------------------------------
-!scalars
  type(vkbr_t),intent(inout) :: vkbr
-
 !************************************************************************
 
 !complex
@@ -239,7 +236,6 @@ subroutine vkbr_free_1D(vkbr)
 !Local variables ------------------------------
 !scalars
  integer :: ii
-
 !************************************************************************
 
  do ii=1,SIZE(vkbr)

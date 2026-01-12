@@ -1,8 +1,8 @@
 
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 20 Dec 2025.
 - ( at 17h05 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tbase2_2/tbase2_2.abi
 - output file    -> tbase2_2.abo
 - root for input  files -> tbase2_2i
@@ -1043,7 +1043,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  6  -1.1171843463486    -6.490E-10 1.734E-12 3.695E-07 1.013E-05 2.690E-02
  ETOT  7  -1.1171843463515    -2.882E-12 1.164E-14 2.496E-09 5.222E-07 2.690E-02
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  5.222E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1120,7 +1120,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1181409608961    -1.692E-08 9.303E-11 2.737E-06 3.907E-05 9.213E-03
  ETOT  5  -1.1181409610935    -1.975E-10 1.625E-13 4.362E-08 2.128E-06 9.215E-03
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  2.128E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1201,7 +1201,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1182855312527    -4.258E-09 2.342E-11 7.280E-07 1.912E-05 1.227E-03
  ETOT  5  -1.1182855313061    -5.336E-11 4.435E-14 1.155E-08 1.119E-06 1.228E-03
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  1.119E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1280,7 +1280,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  2  -1.1182883127611    -4.061E-08 8.582E-15 4.242E-06 1.532E-05 5.700E-05
  ETOT  3  -1.1182883136634    -9.022E-10 7.671E-12 7.623E-07 1.190E-05 6.890E-05
 
- At SCF step    3, forces are converged : 
+ At SCF step    3, forces are converged :
   for the second time, max diff in force=  1.190E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1343,7 +1343,7 @@ force_length_stats: {min:   6.88974574E-05, max:   6.88974574E-05, mean:   6.889
            Absolute (Ha)=-2.78236E-06
            Relative     =-2.48805E-06
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 6.8897E-05 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -1450,7 +1450,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4 -0.47393103574282    -2.215E-07 1.198E-09 4.999E-05 4.030E-04 7.060E-01
  ETOT  5 -0.47393103688359    -1.141E-09 1.856E-12 2.009E-07 3.471E-05 7.059E-01
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  1.141E-09 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1620,7 +1620,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  6  -1.1316329579580    -2.066E-10 2.212E-12 3.184E-07 8.833E-06 2.497E-02
  ETOT  7  -1.1316329579895    -3.155E-11 2.187E-13 3.713E-09 2.497E-06 2.497E-02
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  2.497E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1697,7 +1697,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1324326717414    -1.560E-08 1.062E-10 4.123E-06 3.721E-05 7.487E-03
  ETOT  5  -1.1324326719444    -2.030E-10 1.992E-13 6.382E-08 1.970E-06 7.489E-03
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  1.970E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1778,7 +1778,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1325201691774    -2.683E-09 1.838E-11 7.473E-07 1.525E-05 7.602E-04
  ETOT  5  -1.1325201692165    -3.910E-11 3.872E-14 1.155E-08 9.101E-07 7.611E-04
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  9.101E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1857,7 +1857,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  2  -1.1325211208436    -1.359E-08 2.681E-15 2.308E-06 9.900E-06 2.079E-05
  ETOT  3  -1.1325211211479    -3.043E-10 3.186E-12 4.285E-07 7.228E-06 2.802E-05
 
- At SCF step    3, forces are converged : 
+ At SCF step    3, forces are converged :
   for the second time, max diff in force=  7.228E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1920,7 +1920,7 @@ force_length_stats: {min:   2.80176545E-05, max:   2.80176545E-05, mean:   2.801
            Absolute (Ha)=-9.51931E-07
            Relative     =-8.40542E-07
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 2.8018E-05 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -2027,7 +2027,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4 -0.47860857519418    -4.633E-08 3.419E-10 3.307E-05 2.034E-04 7.088E-01
  ETOT  5 -0.47860857538778    -1.936E-10 2.878E-12 2.503E-07 1.420E-05 7.088E-01
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  1.936E-10 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2197,7 +2197,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  6  -1.1368127130629    -4.108E-10 4.389E-12 7.111E-07 1.141E-05 2.136E-02
  ETOT  7  -1.1368127130999    -3.704E-11 2.838E-13 9.136E-09 2.655E-06 2.137E-02
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  2.655E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2274,7 +2274,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1373863349769    -1.210E-08 9.222E-11 6.027E-06 3.261E-05 5.825E-03
  ETOT  5  -1.1373863351488    -1.720E-10 1.846E-13 9.422E-08 1.570E-06 5.827E-03
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  1.570E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2355,7 +2355,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1374367541632    -1.607E-09 1.230E-11 8.290E-07 1.179E-05 5.104E-04
  ETOT  5  -1.1374367541878    -2.464E-11 2.673E-14 1.296E-08 6.209E-07 5.110E-04
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  6.209E-07 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2434,7 +2434,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  2  -1.1374371579483    -5.972E-09 1.842E-15 1.851E-06 1.900E-05 1.002E-05
  ETOT  3  -1.1374371580794    -1.310E-10 1.598E-12 3.521E-07 4.874E-06 1.489E-05
 
- At SCF step    3, forces are converged : 
+ At SCF step    3, forces are converged :
   for the second time, max diff in force=  4.874E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2497,7 +2497,7 @@ force_length_stats: {min:   1.48901717E-05, max:   1.48901717E-05, mean:   1.489
            Absolute (Ha)=-4.03892E-07
            Relative     =-3.55089E-07
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 1.4890E-05 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -2604,7 +2604,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4 -0.48027186419577    -3.866E-08 1.123E-10 4.790E-05 1.895E-04 7.132E-01
  ETOT  5 -0.48027186428857    -9.281E-11 3.626E-12 4.704E-07 9.268E-06 7.132E-01
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  9.281E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2774,7 +2774,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  6  -1.1384532381378    -1.086E-09 9.553E-12 1.144E-06 1.661E-05 1.916E-02
  ETOT  7  -1.1384532381753    -3.754E-11 2.859E-13 1.475E-08 2.576E-06 1.916E-02
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  2.576E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2851,7 +2851,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1389157969807    -1.016E-08 8.042E-11 6.005E-06 2.983E-05 5.267E-03
  ETOT  5  -1.1389157971129    -1.322E-10 1.501E-13 9.240E-08 1.176E-06 5.268E-03
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  1.176E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2931,7 +2931,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  3  -1.1389569540951    -1.232E-08 1.643E-10 3.903E-05 4.850E-05 4.463E-04
  ETOT  4  -1.1389569554867    -1.392E-09 1.099E-11 8.355E-07 1.093E-05 4.353E-04
 
- At SCF step    4, forces are converged : 
+ At SCF step    4, forces are converged :
   for the second time, max diff in force=  1.093E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2994,7 +2994,7 @@ force_length_stats: {min:   4.35338084E-04, max:   4.35338084E-04, mean:   4.353
            Absolute (Ha)=-4.11584E-05
            Relative     =-3.61376E-05
 
- At Broyd/MD step   3, gradients are converged : 
+ At Broyd/MD step   3, gradients are converged :
   max grad (force/stress) = 4.3534E-04 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -3101,7 +3101,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4 -0.48083335129079    -4.865E-08 4.281E-10 7.606E-05 2.087E-04 7.145E-01
  ETOT  5 -0.48083335144062    -1.498E-10 5.124E-12 5.603E-07 1.203E-05 7.145E-01
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  1.498E-10 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3271,7 +3271,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  6  -1.1389515584798    -9.160E-10 8.597E-12 1.222E-06 1.567E-05 1.850E-02
  ETOT  7  -1.1389515585194    -3.968E-11 3.163E-13 1.773E-08 2.726E-06 1.850E-02
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  2.726E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3348,7 +3348,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1393840547123    -9.507E-09 7.752E-11 6.695E-06 2.911E-05 5.146E-03
  ETOT  5  -1.1393840548508    -1.384E-10 1.642E-13 9.886E-08 1.332E-06 5.148E-03
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  1.332E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3428,7 +3428,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  3  -1.1394234868286    -1.229E-08 1.686E-10 4.312E-05 4.884E-05 4.285E-04
  ETOT  4  -1.1394234881709    -1.342E-09 1.099E-11 9.753E-07 1.088E-05 4.177E-04
 
- At SCF step    4, forces are converged : 
+ At SCF step    4, forces are converged :
   for the second time, max diff in force=  1.088E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3491,7 +3491,7 @@ force_length_stats: {min:   4.17665929E-04, max:   4.17665929E-04, mean:   4.176
            Absolute (Ha)=-3.94333E-05
            Relative     =-3.46087E-05
 
- At Broyd/MD step   3, gradients are converged : 
+ At Broyd/MD step   3, gradients are converged :
   max grad (force/stress) = 4.1767E-04 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -3598,7 +3598,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4 -0.48101478040602    -4.128E-08 1.984E-10 6.664E-05 1.978E-04 7.119E-01
  ETOT  5 -0.48101478048448    -7.846E-11 5.386E-12 6.366E-07 7.632E-06 7.119E-01
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  7.846E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3768,7 +3768,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  6  -1.1390836338159    -1.389E-09 1.231E-11 1.712E-06 1.870E-05 1.839E-02
  ETOT  7  -1.1390836338623    -4.640E-11 3.764E-13 3.043E-08 2.940E-06 1.839E-02
 
- At SCF step    7, forces are converged : 
+ At SCF step    7, forces are converged :
   for the second time, max diff in force=  2.940E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3845,7 +3845,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  4  -1.1395116378954    -9.523E-09 7.803E-11 8.591E-06 2.898E-05 5.149E-03
  ETOT  5  -1.1395116380334    -1.379E-10 1.661E-13 1.236E-07 1.228E-06 5.150E-03
 
- At SCF step    5, forces are converged : 
+ At SCF step    5, forces are converged :
   for the second time, max diff in force=  1.228E-06 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3925,7 +3925,7 @@ tolerances: {toldff: 5.00E-05, }
  ETOT  3  -1.1395511928210    -1.260E-08 1.754E-10 5.497E-05 4.984E-05 4.273E-04
  ETOT  4  -1.1395511941898    -1.369E-09 1.125E-11 1.270E-06 1.092E-05 4.164E-04
 
- At SCF step    4, forces are converged : 
+ At SCF step    4, forces are converged :
   for the second time, max diff in force=  1.092E-05 < toldff=  5.000E-05
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3988,7 +3988,7 @@ force_length_stats: {min:   4.16382859E-04, max:   4.16382859E-04, mean:   4.163
            Absolute (Ha)=-3.95562E-05
            Relative     =-3.47127E-05
 
- At Broyd/MD step   3, gradients are converged : 
+ At Broyd/MD step   3, gradients are converged :
   max grad (force/stress) = 4.1638E-04 < tolmxf= 5.0000E-04 ha/bohr (free atoms)
 
 ================================================================================
@@ -4095,7 +4095,7 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  4 -0.48107063405749    -3.928E-08 1.468E-10 7.770E-05 2.028E-04 7.123E-01
  ETOT  5 -0.48107063411576    -5.827E-11 5.864E-12 1.004E-06 4.746E-06 7.123E-01
 
- At SCF step    5, etot is converged : 
+ At SCF step    5, etot is converged :
   for the second time, diff in etot=  5.827E-11 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -4199,7 +4199,7 @@ band_energy         : -2.70027436293980E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00794000E+00
@@ -5019,7 +5019,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -5036,12 +5036,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -5059,7 +5059,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
