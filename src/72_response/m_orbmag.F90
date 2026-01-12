@@ -1478,11 +1478,14 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_
         pertr = (hijr-lambda(1)*sijr)/deltae
         perti = (hiji-lambda(1)*siji)/deltae
         pertsize=sqrt(pertr*pertr+perti*perti)
-        if (pertsize .GT. dtset%ggtrcut) then
-          write(std_out,'(a,3i4,2es16.8)')'JWZ debug adir iband jband pert ',&
-            &adir,iband,jband,pertr,perti
-          cycle
-        end if
+        if (pertsize .GT. dtset%ggtrcut) cycle
+!          write(std_out,'(a,3i4,2es16.8)')'JWZ debug reject adir iband jband pert ',&
+!            &adir,iband,jband,pertr,perti
+!          cycle
+!        else
+!          write(std_out,'(a,3i4,2es16.8)')'JWZ debug accept adir iband jband pert ',&
+!            &adir,iband,jband,pertr,perti
+!        end if
         dcg1(1,:) = dcg1(1,:) + pertr*cwavef(1,:) - perti*cwavef(2,:)
         dcg1(2,:) = dcg1(2,:) + pertr*cwavef(2,:) + perti*cwavef(1,:)
       end do
@@ -1573,7 +1576,7 @@ subroutine gauge_treatment(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gc
       & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
       & nucdip_dirs,occ_k,vectornd_pac)
   case ( -2:-1 )
-    ! Berry DDK already projected onto conduction space, therefore nothing to do
+    ! Berry DDK already projected onto conduction space, leave in berry gauge
     gcg1_k(1:2,1:mcgk,1:3) = cg1_k(1:2,1:mcgk,1:3)
   case ( 1:2 )
     ! project cg1_k onto conduction space by removing ground PAW part; 
