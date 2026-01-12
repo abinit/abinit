@@ -807,7 +807,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
    ! TODO: Avoid packing rhor1 in buffer
 
 !  Compute buffer size
-   buffer_size=11+mbd2kpsp+mbdkpsp
+   buffer_size=11
    ABI_MALLOC(buffer1,(buffer_size))
 
 !  Pack edocc,eeig0,ek0,ek1,eloc0,end0,end1,enl0,enl1,evxctau0,evxctau1,eigen1,resid
@@ -819,17 +819,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
    buffer1(index1+8)=end0;buffer1(index1+9)=end1
    buffer1(index1+10)=evxctau0;buffer1(index1+11)=evxctau1
    index1=index1+11
-   bdtot_index=0;bd2tot_index=0
-   do isppol=1,nsppol
-     do ikpt=1,nkpt_rbz
-       nband_k=nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
-       buffer1(index1+1:index1+2*nband_k**2) = eigen1(bd2tot_index+1:bd2tot_index+2*nband_k**2)
-       buffer1(index1+2*nband_k**2+1:index1+2*nband_k**2+nband_k)= resid(bdtot_index+1:bdtot_index+nband_k)
-       bdtot_index=bdtot_index+nband_k
-       bd2tot_index=bd2tot_index+2*nband_k**2
-       index1=index1+2*nband_k**2+nband_k
-     end do
-   end do
    if(index1<buffer_size)buffer1(index1+1:buffer_size)=zero
 
 !  Build sum of everything
@@ -845,19 +834,18 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
    enl1=buffer1(index1+7)
    end0=buffer1(index1+8);end1=buffer1(index1+9)
    evxctau0=buffer1(index1+10);evxctau1=buffer1(index1+11)
-   index1=index1+11
-   bdtot_index=0;bd2tot_index=0
-   do isppol=1,nsppol
-     do ikpt=1,nkpt_rbz
-       nband_k=nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
-       eigen1(bd2tot_index+1:bd2tot_index+2*nband_k**2) = buffer1(index1+1:index1+2*nband_k**2)
-       resid(bdtot_index+1:bdtot_index+nband_k)= buffer1(index1+2*nband_k**2+1:index1+2*nband_k**2+nband_k)
-       bdtot_index=bdtot_index+nband_k
-       bd2tot_index=bd2tot_index+2*nband_k**2
-       index1=index1+2*nband_k**2+nband_k
-     end do
-   end do
    ABI_FREE(buffer1)
+
+! sync eigen1 and resid as well. No need to pack in buffer1, it duplicates a huge chunk of memory
+   call timab(48,1,tsec)
+   buffer_size=mbd2kpsp
+   call xmpi_sum(eigen1,buffer_size,spaceworld,ierr)
+   call timab(48,2,tsec)
+
+   call timab(48,1,tsec)
+   buffer_size=mbdkpsp
+   call xmpi_sum(resid,buffer_size,spaceworld,ierr)
+   call timab(48,2,tsec)
 
 ! sync rhor1 or rho1wfr as well. No need to pack in buffer1, it duplicates a huge chunk of memory
    if(iscf_mod>0) then
