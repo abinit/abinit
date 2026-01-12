@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2025 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h14 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v8_t41-t42-t43-t44/t41.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h15 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v8_t41-t42-t43-t44/t41.abi
 - output file    -> t41.abo
 - root for input  files -> t41i
 - root for output files -> t41o
@@ -484,7 +484,7 @@ P          mk1mem5         64
                          0.01563    0.01563
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.8683062764E-01  8.8683062764E-01  8.8683062764E-01
+                       8.8683063092E-01  8.8683063092E-01  8.8683063092E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.6758670125E+00  1.6758670125E+00  1.6758670125E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -532,8 +532,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.09587
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -627,7 +627,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.88683062764281     0.88683062764281     0.88683062764281
+    2      0.88683063091746     0.88683063091746     0.88683063091746
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -639,7 +639,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.703468050000  6.703468050000  6.703468050000 bohr
-              =  3.547322510571  3.547322510571  3.547322510571 angstroms
+              =  3.547322523670  3.547322523670  3.547322523670 angstroms
  prteigrs : about to open file t41o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.47040   Average Vxc (hartree)=  -0.50625
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -659,7 +659,7 @@ psp_core            :  1.96719350701201E-01
 local_psp           : -5.69937959416622E+00
 non_local_psp       :  1.30420713604385E+00
 total_energy        : -1.20569771789578E+01
-total_energy_eV     : -3.28087034207880E+02
+total_energy_eV     : -3.28087062975598E+02
 band_energy         :  1.12205993366731E+00
 ...
 
@@ -670,9 +670,9 @@ band_energy         :  1.12205993366731E+00
   sigma(3 3)=  1.02726291E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.0223E+00 GPa]
-- sigma(1 1)=  3.02231131E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.02231131E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.02231131E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  3.02231182E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.02231182E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.02231182E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -768,9 +768,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.88683062764281     0.88683062764281     0.88683062764281
+    2      0.88683063091746     0.88683063091746     0.88683063091746
  length scales=  6.703468050000  6.703468050000  6.703468050000 bohr
-              =  3.547322510571  3.547322510571  3.547322510571 angstroms
+              =  3.547322523670  3.547322523670  3.547322523670 angstroms
  prteigrs : about to open file t41o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 54, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -817,7 +817,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -902,7 +902,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.07902252E+01  frxc 2 =   9.58779568E+00
  Resulting in :
- 2DEtotal=    0.9306845033E+01 Ha. Also 2DEtotal=    0.253252132715E+03 eV
+ 2DEtotal=    0.9306845033E+01 Ha. Also 2DEtotal=    0.253252154921E+03 eV
     (2DErelax=   -2.3836407648E+02 Ha. 2DEnonrelax=    2.4767092151E+02 Ha)
     (  non-var. 2DEtotal :    9.3068449860E+00 Ha)
 
@@ -912,12 +912,12 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1         9.3068449013         0.0000000000
    1    1   2    1         4.6534224506         0.0000000000
    1    1   3    1         4.6534224506         0.0000000000
@@ -926,7 +926,7 @@ tolerances: {tolvrs: 1.00E-10, }
    1    1   3    2        -4.6534210991        -0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
-
+  
    2    1   1    1         4.6534224506         0.0000000000
    2    1   2    1         9.3068449013         0.0000000000
    2    1   3    1         4.6534224506         0.0000000000
@@ -935,7 +935,7 @@ tolerances: {tolvrs: 1.00E-10, }
    2    1   3    2        -4.6534210991        -0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
-
+  
    3    1   1    1         4.6534224506         0.0000000000
    3    1   2    1         4.6534224506         0.0000000000
    3    1   3    1         9.3068449013         0.0000000000
@@ -944,7 +944,7 @@ tolerances: {tolvrs: 1.00E-10, }
    3    1   3    2        -9.3068421982         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
-
+  
    1    2   1    1        -9.3068421982         0.0000000000
    1    2   2    1        -4.6534210991        -0.0000000000
    1    2   3    1        -4.6534210991         0.0000000000
@@ -953,7 +953,7 @@ tolerances: {tolvrs: 1.00E-10, }
    1    2   3    2         4.6534224506         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
-
+  
    2    2   1    1        -4.6534210991        -0.0000000000
    2    2   2    1        -9.3068421982        -0.0000000000
    2    2   3    1        -4.6534210991         0.0000000000
@@ -962,7 +962,7 @@ tolerances: {tolvrs: 1.00E-10, }
    2    2   3    2         4.6534224506         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
-
+  
    3    2   1    1        -4.6534210991         0.0000000000
    3    2   2    1        -4.6534210991         0.0000000000
    3    2   3    1        -9.3068421982        -0.0000000000
@@ -971,63 +971,63 @@ tolerances: {tolvrs: 1.00E-10, }
    3    2   3    2         9.3068449013         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-
+  
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
-
+  
    2    4   1    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
-
+  
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.4142220927        -0.0000000000
    1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
    1    1   1    2        -0.4142220927         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2        -0.0000000000        -0.0000000000
-
+  
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   2    1         0.4142220927         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
    2    1   2    2        -0.4142220927        -0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.4142220927        -0.0000000000
    3    1   1    2        -0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
    3    1   3    2        -0.4142220927         0.0000000000
-
+  
    1    2   1    1        -0.4142220927        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1        -0.0000000000         0.0000000000
    1    2   1    2         0.4142220927         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2         0.0000000000        -0.0000000000
-
+  
    2    2   1    1        -0.0000000000        -0.0000000000
    2    2   2    1        -0.4142220927         0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
    2    2   2    2         0.4142220927        -0.0000000000
    2    2   3    2         0.0000000000        -0.0000000000
-
+  
    3    2   1    1        -0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.4142220927        -0.0000000000
@@ -1075,8 +1075,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.99246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1093,7 +1093,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1176,7 +1176,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.07902252E+01  frxc 2 =   9.58779568E+00
  Resulting in :
- 2DEtotal=    0.1247474855E+02 Ha. Also 2DEtotal=    0.339455171477E+03 eV
+ 2DEtotal=    0.1247474855E+02 Ha. Also 2DEtotal=    0.339455201242E+03 eV
     (2DErelax=   -2.7244942713E+02 Ha. 2DEnonrelax=    2.8492417568E+02 Ha)
     (  non-var. 2DEtotal :    1.2474749046E+01 Ha)
 
@@ -1234,7 +1234,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.07902252E+01  frxc 2 =   9.58779568E+00
  Resulting in :
- 2DEtotal=    0.9453431690E+01 Ha. Also 2DEtotal=    0.257240958502E+03 eV
+ 2DEtotal=    0.9453431690E+01 Ha. Also 2DEtotal=    0.257240981058E+03 eV
     (2DErelax=   -2.4095585955E+02 Ha. 2DEnonrelax=    2.5040929124E+02 Ha)
     (  non-var. 2DEtotal :    9.4534316187E+00 Ha)
 
@@ -1244,95 +1244,95 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1        12.4747489796        -0.0000000018
    1    1   2    1         4.7267158102         0.0000000000
    1    1   3    1         4.7267158102         0.0000000000
    1    1   1    2        -3.6634856295        -0.0000000007
    1    1   2    2        -3.2390869949        -0.0000000007
    1    1   3    2        -3.2390869949        -0.0000000007
-
+  
    2    1   1    1         4.7267158102         0.0000000000
    2    1   2    1         9.4534316204         0.0000000000
    2    1   3    1         4.7267158102         0.0000000000
    2    1   1    2        -3.2390869949        -0.0000000007
    2    1   2    2        -6.4781739899        -0.0000000013
    2    1   3    2        -3.2390869949        -0.0000000007
-
+  
    3    1   1    1         4.7267158102         0.0000000000
    3    1   2    1         4.7267158102         0.0000000000
    3    1   3    1         9.4534316204         0.0000000000
    3    1   1    2        -3.2390869949        -0.0000000007
    3    1   2    2        -3.2390869949        -0.0000000007
    3    1   3    2        -6.4781739899        -0.0000000013
-
+  
    1    2   1    1        -3.6634856295        -0.0000000007
    1    2   2    1        -3.2390869949        -0.0000000007
    1    2   3    1        -3.2390869949        -0.0000000007
    1    2   1    2        12.4747489796        -0.0000000018
    1    2   2    2         4.7267158102         0.0000000000
    1    2   3    2         4.7267158102         0.0000000000
-
+  
    2    2   1    1        -3.2390869949        -0.0000000007
    2    2   2    1        -6.4781739899        -0.0000000013
    2    2   3    1        -3.2390869949        -0.0000000007
    2    2   1    2         4.7267158102         0.0000000000
    2    2   2    2         9.4534316204         0.0000000000
    2    2   3    2         4.7267158102         0.0000000000
-
+  
    3    2   1    1        -3.2390869949        -0.0000000007
    3    2   2    1        -3.2390869949        -0.0000000007
    3    2   3    1        -6.4781739899        -0.0000000013
    3    2   1    2         4.7267158102         0.0000000000
    3    2   2    2         4.7267158102         0.0000000000
    3    2   3    2         9.4534316204         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.4879816732        -0.0000000000
    1    1   2    1        -0.0672352863         0.0000000000
    1    1   3    1        -0.0672352863         0.0000000000
    1    1   1    2        -0.2256887664        -0.0000000000
    1    1   2    2        -0.0626370405        -0.0000000000
    1    1   3    2        -0.0626370405        -0.0000000000
-
+  
    2    1   1    1        -0.0672352863         0.0000000000
    2    1   2    1         0.4879816732        -0.0000000000
    2    1   3    1         0.0672352863        -0.0000000000
    2    1   1    2        -0.0626370405        -0.0000000000
    2    1   2    2        -0.2256887664        -0.0000000000
    2    1   3    2         0.0626370405         0.0000000000
-
+  
    3    1   1    1        -0.0672352863         0.0000000000
    3    1   2    1         0.0672352863        -0.0000000000
    3    1   3    1         0.4879816732        -0.0000000000
    3    1   1    2        -0.0626370405        -0.0000000000
    3    1   2    2         0.0626370405         0.0000000000
    3    1   3    2        -0.2256887664        -0.0000000000
-
+  
    1    2   1    1        -0.2256887664        -0.0000000000
    1    2   2    1        -0.0626370405        -0.0000000000
    1    2   3    1        -0.0626370405        -0.0000000000
    1    2   1    2         0.4879816732        -0.0000000000
    1    2   2    2        -0.0672352863         0.0000000000
    1    2   3    2        -0.0672352863         0.0000000000
-
+  
    2    2   1    1        -0.0626370405        -0.0000000000
    2    2   2    1        -0.2256887664        -0.0000000000
    2    2   3    1         0.0626370405         0.0000000000
    2    2   1    2        -0.0672352863         0.0000000000
    2    2   2    2         0.4879816732        -0.0000000000
    2    2   3    2         0.0672352863        -0.0000000000
-
+  
    3    2   1    1        -0.0626370405        -0.0000000000
    3    2   2    1         0.0626370405         0.0000000000
    3    2   3    1        -0.2256887664        -0.0000000000
@@ -1380,8 +1380,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.99384
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1398,7 +1398,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1483,7 +1483,7 @@ tolerances: {tolvrs: 1.00E-10, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.07902252E+01  frxc 2 =   9.58779568E+00
  Resulting in :
- 2DEtotal=    0.1221547246E+02 Ha. Also 2DEtotal=    0.332399910197E+03 eV
+ 2DEtotal=    0.1221547246E+02 Ha. Also 2DEtotal=    0.332399939343E+03 eV
     (2DErelax=   -2.6062334880E+02 Ha. 2DEnonrelax=    2.7283882127E+02 Ha)
     (  non-var. 2DEtotal :    1.2215472129E+01 Ha)
 
@@ -1493,95 +1493,95 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1        12.2154720646         0.0000000000
    1    1   2    1         7.5450960962         0.0000000000
    1    1   3    1         4.6703759684         0.0000000000
    1    1   1    2        -0.0000000000         0.0000000000
    1    1   2    2        -1.5979740499         0.0000000014
    1    1   3    2        -1.5979740499         0.0000000014
-
+  
    2    1   1    1         7.5450960962         0.0000000000
    2    1   2    1        12.2154720646         0.0000000000
    2    1   3    1         4.6703759684         0.0000000000
    2    1   1    2        -1.5979740499         0.0000000014
    2    1   2    2        -0.0000000000         0.0000000000
    2    1   3    2        -1.5979740499         0.0000000014
-
+  
    3    1   1    1         4.6703759684         0.0000000000
    3    1   2    1         4.6703759684         0.0000000000
    3    1   3    1         9.3407519369         0.0000000000
    3    1   1    2        -1.5979740499         0.0000000014
    3    1   2    2        -1.5979740499         0.0000000014
    3    1   3    2        -3.1959480998         0.0000000028
-
+  
    1    2   1    1        -0.0000000000        -0.0000000000
    1    2   2    1        -1.5979740499         0.0000000014
    1    2   3    1        -1.5979740499         0.0000000014
    1    2   1    2        12.2154720646         0.0000000000
    1    2   2    2         7.5450960962         0.0000000000
    1    2   3    2         4.6703759684         0.0000000000
-
+  
    2    2   1    1        -1.5979740499         0.0000000014
    2    2   2    1        -0.0000000000        -0.0000000000
    2    2   3    1        -1.5979740499         0.0000000014
    2    2   1    2         7.5450960962         0.0000000000
    2    2   2    2        12.2154720646         0.0000000000
    2    2   3    2         4.6703759684         0.0000000000
-
+  
    3    2   1    1        -1.5979740499         0.0000000014
    3    2   2    1        -1.5979740499         0.0000000014
    3    2   3    1        -3.1959480998         0.0000000028
    3    2   1    2         4.6703759684         0.0000000000
    3    2   2    2         4.6703759684         0.0000000000
    3    2   3    2         9.3407519369         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1         0.4157313224         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.0000000000         0.0000000000
    1    1   2    2        -0.1422429092         0.0000000001
    1    1   3    2         0.0000000000        -0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.4157313224         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.1422429092         0.0000000001
    2    1   2    2         0.0000000000         0.0000000000
    2    1   3    2        -0.0000000000         0.0000000000
-
+  
    3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.6716231838         0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000         0.0000000000
    3    1   3    2        -0.0000000000         0.0000000000
-
+  
    1    2   1    1        -0.0000000000        -0.0000000000
    1    2   2    1        -0.1422429092         0.0000000001
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2         0.4157313224         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2        -0.0000000000         0.0000000000
-
+  
    2    2   1    1        -0.1422429092         0.0000000001
    2    2   2    1         0.0000000000        -0.0000000000
    2    2   3    1        -0.0000000000        -0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
    2    2   2    2         0.4157313224         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000        -0.0000000000
    3    2   3    1        -0.0000000000        -0.0000000000
@@ -1599,7 +1599,7 @@ tolerances: {tolvrs: 1.00E-10, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
@@ -1986,7 +1986,7 @@ P          mk1mem5         64
                          0.01563    0.01563
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.8683062764E-01  8.8683062764E-01  8.8683062764E-01
+                       8.8683063092E-01  8.8683063092E-01  8.8683063092E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.6758670125E+00  1.6758670125E+00  1.6758670125E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2027,7 +2027,7 @@ P          mk1mem5         64
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2050,12 +2050,12 @@ P          mk1mem5         64
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2073,15 +2073,15 @@ P          mk1mem5         64
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          9.6  wall=          9.7
+- Proc.   0 individual time (sec): cpu=          9.9  wall=         10.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  15 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.6  wall=          9.7
++Overall time at end (sec) : cpu=          9.9  wall=         10.0

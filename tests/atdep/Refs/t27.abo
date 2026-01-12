@@ -1,6 +1,6 @@
- 
+  
 .Version    4.0 of ATDEP
-.Copyright (C) 1998-2025 ABINIT group (FB,JB).
+.Copyright (C) 1998-2025 ABINIT group (FB,JB,GA).
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -13,7 +13,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : 16 Feb 2025.
+.Starting date : 21 Dec 2025.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -2689,10 +2689,10 @@
  
  ========== For an Anisotropic Material =======================================
  Sijkl [in GPa-1]=
- | S11 S12 S13 S14 S15 S16 |      0.004   -0.001   -0.001   -0.000   -0.000   -0.000
- | S21 S22 S23 S24 S25 S26 |     -0.001    0.004   -0.001   -0.000   -0.000   -0.000
- | S31 S32 S33 S34 S35 S36 |     -0.001   -0.001    0.004   -0.000   -0.000   -0.000
- | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.013   -0.000   -0.000
+ | S11 S12 S13 S14 S15 S16 |      0.004   -0.001   -0.001    0.000    0.000   -0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.001    0.004   -0.001    0.000    0.000   -0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.001   -0.001    0.004    0.000    0.000   -0.000
+ | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.013    0.000   -0.000
  | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.013   -0.000
  | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.013
  
@@ -2707,25 +2707,25 @@
  | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.013    0.000    0.000
  | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.013    0.000
  | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.013
- For density rho [in kg.m-3]=11166.930
+ For density rho [in kg.m-3]=11166.669
  
  ========================= Voigt average (constant strain) ===================
  ISOTHERMAL modulus [in GPa]: Bulk Kt=  256.160 and Shear G=   89.692
  Average of Young modulus E [in GPa]=  240.954 Lame modulus Lambda [in GPa]=  196.366 and Poisson ratio Nu=    0.343
- Velocities [in m.s-1]: compressional Vp= 5800.729  shear Vs= 2834.069  and bulk Vphi= 4789.489
- Debye velocity [in m.s-1]= 3183.487  and temperature [in K]=  399.186
+ Velocities [in m.s-1]: compressional Vp= 5800.797  shear Vs= 2834.102  and bulk Vphi= 4789.545
+ Debye velocity [in m.s-1]= 3183.524  and temperature [in K]=  399.191
  
  ========================= Reuss average (constant stress) ===================
  ISOTHERMAL modulus [in GPa]: Bulk Kt=  256.160 and Shear G=   87.454
  Average of Young modulus E [in GPa]=  235.555 Lame modulus Lambda [in GPa]=  197.858 and Poisson ratio Nu=    0.347
- Velocities [in m.s-1]: compressional Vp= 5777.647  shear Vs= 2798.482  and bulk Vphi= 4789.489
- Debye velocity [in m.s-1]= 3144.993  and temperature [in K]=  394.359
+ Velocities [in m.s-1]: compressional Vp= 5777.714  shear Vs= 2798.515  and bulk Vphi= 4789.545
+ Debye velocity [in m.s-1]= 3145.030  and temperature [in K]=  394.364
  
  ============================== Hill average =================================
  ISOTHERMAL modulus [in GPa]: Bulk Kt=  256.160 and Shear G=   88.573
  Average of Young modulus E [in GPa]=  238.258 Lame modulus Lambda [in GPa]=  197.112 and Poisson ratio Nu=    0.345
- Velocities [in m.s-1]: compressional Vp= 5789.200  shear Vs= 2816.332  and bulk Vphi= 4789.489
- Debye velocity [in m.s-1]= 3164.306  and temperature [in K]=  396.781
+ Velocities [in m.s-1]: compressional Vp= 5789.267  shear Vs= 2816.364  and bulk Vphi= 4789.545
+ Debye velocity [in m.s-1]= 3164.343  and temperature [in K]=  396.786
  
  ========================= Elastic anisotropy =================================
  Elastic anisotropy index : A_U= 5*G_V/G_R + K_V/K_R - 6 =    0.128
@@ -2747,7 +2747,7 @@
   Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 
   Sigma   = (< (F_MD - F_TDEP)^2 >/<F_MD**2>)**0.5 
      <U_MD>            U_0              U_1              U_2              U_3            Delta_U          Delta_U2          Delta_F2          Sigma
-  -768.49875       -768.66870          0.00000          0.18675         -0.01680         -0.00000          0.03433          0.00573          0.24691
+  -768.49881       -768.66877          0.00000          0.18675         -0.01680         -0.00000          0.03433          0.00573          0.24691
  NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=      0.15511
  
  See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files
@@ -2789,8 +2789,8 @@
  Heat capacity at constant P (k_B/f.u.): C_p=           9.012
  Isothermal Bulk Modulus (GPa):          B_T=         256.160
  Isentropic Bulk Modulus (GPa):          B_S=         260.120
- Longitudinal sound velocity (m.s-1):     Vp=        5819.743
- Transverse sound velocity (m.s-1):       Vs=        2816.332
+ Longitudinal sound velocity (m.s-1):     Vp=        5819.811
+ Transverse sound velocity (m.s-1):       Vs=        2816.364
   
  #############################################################################
  ######################### CALCULATION COMPLETED #############################

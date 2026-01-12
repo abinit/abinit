@@ -1,5 +1,5 @@
 
-.Version 10.5.1.5 of ABINIT, released Jul 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  9 Oct 2025.
-- ( at 18h01 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h07 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/TestBot_MPI1/tutorial_trttddft_1-trttddft_2-trttddft_3/trttddft_2.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_trttddft_1-trttddft_2-trttddft_3/trttddft_2.abi
 - output file    -> trttddft_2.abo
 - root for input  files -> trttddft_2i
 - root for output files -> trttddft_2o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/C.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/C.xml
  Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -53,7 +53,7 @@ _ WF disk file :      0.966 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
-            acell      6.6707332491E+00  6.6707332491E+00  6.6707332491E+00 Bohr
+            acell      6.6707332245E+00  6.6707332245E+00  6.6707332245E+00 Bohr
               amu      1.20110000E+01
            bandpp           8
              ecut      1.80000000E+01 Hartree
@@ -88,7 +88,7 @@ _ WF disk file :      0.966 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
                       -2.50000000E-01  0.00000000E+00  0.00000000E+00
                       -4.16666667E-01  0.00000000E+00  0.00000000E+00
          kptrlatt        6   -6    6     -6    6    6     -6   -6    6
-          kptrlen      4.00243995E+01
+          kptrlen      4.00243993E+01
 P           mkmem          28
             natom           2
             nband           8
@@ -171,7 +171,7 @@ P           mkmem          28
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        8.8250000000E-01  8.8250000000E-01  8.8250000000E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.6676833123E+00  1.6676833123E+00  1.6676833123E+00
+                       1.6676833061E+00  1.6676833061E+00  1.6676833061E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl        6.00000
@@ -207,7 +207,7 @@ meta: {optdriver: 9, }
  R(1)=  0.0000000  3.3353666  3.3353666  G(1)= -0.1499086  0.1499086  0.1499086
  R(2)=  3.3353666  0.0000000  3.3353666  G(2)=  0.1499086 -0.1499086  0.1499086
  R(3)=  3.3353666  3.3353666  0.0000000  G(3)=  0.1499086  0.1499086 -0.1499086
- Unit cell volume ucvol=  7.4209710E+01 bohr^3
+ Unit cell volume ucvol=  7.4209709E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
  Coarse grid specifications (used for wave-functions):
@@ -221,9 +221,9 @@ meta: {optdriver: 9, }
          ecut(hartree)=     36.000   => boxcut(ratio)=   2.04381
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/C.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/C.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/torrent_core_energies/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/C.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pw_std/C.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.50736703
@@ -263,7 +263,7 @@ Integrated density (ie. total nb of electrons) =       8.0000035485
   -0.38952    0.27506    0.31786    0.34829    0.59404    0.67310    0.67501    0.90388
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.13    0.13
+- Time - cpu, wall (sec):    0.15    0.15
 
 
 ---------------------------------------------------------------------------
@@ -275,7 +275,7 @@ Integrated density (ie. total nb of electrons) =       8.0000035485
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
-            acell      6.6707332491E+00  6.6707332491E+00  6.6707332491E+00 Bohr
+            acell      6.6707332245E+00  6.6707332245E+00  6.6707332245E+00 Bohr
               amu      1.20110000E+01
            bandpp           8
              ecut      1.80000000E+01 Hartree
@@ -313,7 +313,7 @@ Integrated density (ie. total nb of electrons) =       8.0000035485
                       -2.50000000E-01  0.00000000E+00  0.00000000E+00
                       -4.16666667E-01  0.00000000E+00  0.00000000E+00
          kptrlatt        6   -6    6     -6    6    6     -6   -6    6
-          kptrlen      4.00243995E+01
+          kptrlen      4.00243993E+01
 P           mkmem          28
             natom           2
             nband           8
@@ -398,7 +398,7 @@ P           mkmem          28
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        8.8250000000E-01  8.8250000000E-01  8.8250000000E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.6676833123E+00  1.6676833123E+00  1.6676833123E+00
+                       1.6676833061E+00  1.6676833061E+00  1.6676833061E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl        6.00000
@@ -488,10 +488,10 @@ P           mkmem          28
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.9
+- Proc.   0 individual time (sec): cpu=          0.9  wall=          1.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.8  wall=          0.9
++Overall time at end (sec) : cpu=          0.9  wall=          1.0
