@@ -4063,7 +4063,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    call timab(48,2,tsec)
 
 !  Unpack the final result
-   indx=cplex*dtset%nfft*nspden
+   indx=0
    fe1fixed=buffer1(indx+1) ; fe1norm =buffer1(indx+2)
    ABI_FREE(buffer1)
 
@@ -4074,7 +4074,9 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
    if (psps%usepaw==0) then
      call timab(48,1,tsec)
-     buffer_size = cplex*dtset%nfft
+     buffer_size = cplex*nfftf
+     ! TODO: there should be a primitive for a 2d array here, but the compiler does not seem to find it. 
+     ! would simplify the call to xmpi_sum
      do isppol=1, nspden
        call xmpi_sum(rhorfermi(:,isppol),buffer_size,spaceworld,ierr)
      end do
