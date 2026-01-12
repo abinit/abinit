@@ -808,22 +808,10 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !  Compute buffer size
    buffer_size=11+mbd2kpsp+mbdkpsp
-   if (iscf_mod>0) then
-     buffer_size=buffer_size+cplex*dtset%nfft*nspden
-   end if
    ABI_MALLOC(buffer1,(buffer_size))
 
-!  Pack rhor1,edocc,eeig0,ek0,ek1,eloc0,end0,end1,enl0,enl1,evxctau0,evxctau1,eigen1,resid
-   if (iscf_mod>0) then
-     index1=cplex*dtset%nfft*nspden
-     if (psps%usepaw==0) then
-       buffer1(1:index1)=reshape(rhor1  ,(/index1/))
-     else
-       buffer1(1:index1)=reshape(rho1wfr,(/index1/))
-     end if
-   else
-     index1=0
-   end if
+!  Pack edocc,eeig0,ek0,ek1,eloc0,end0,end1,enl0,enl1,evxctau0,evxctau1,eigen1,resid
+   index1=0
    buffer1(index1+1)=edocc;buffer1(index1+2)=eeig0
    buffer1(index1+3)=ek0  ;buffer1(index1+4)=ek1
    buffer1(index1+5)=eloc0;buffer1(index1+6)=enl0
@@ -850,17 +838,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
    call timab(48,2,tsec)
 
 !  Unpack the final result
-   if(iscf_mod>0) then
-     index1=cplex*dtset%nfft*nspden
-     if (psps%usepaw==0) then
-       rhor1(:,:)  =reshape(buffer1(1:index1),(/cplex*dtset%nfft,nspden/))
-     else
-       rho1wfr(:,:)=reshape(buffer1(1:index1),(/cplex*dtset%nfft,nspden/))
-     end if
-   else
-     index1=0
-   end if
-
+   index1=0
    edocc=buffer1(index1+1);eeig0=buffer1(index1+2)
    ek0=buffer1(index1+3)  ;ek1=buffer1(index1+4)
    eloc0=buffer1(index1+5);enl0=buffer1(index1+6)
@@ -880,6 +858,25 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      end do
    end do
    ABI_FREE(buffer1)
+
+! sync rhor1 or rho1wfr as well. No need to pack in buffer1, it duplicates a huge chunk of memory
+   if(iscf_mod>0) then
+     buffer_size = cplex*dtset%nfft
+     if (psps%usepaw==0) then
+       call timab(48,1,tsec)
+       ! TODO: add a pointer or something to get this into a single call to xmpisum
+       do isppol=1,nspden
+         call xmpi_sum(rhor1(:,isppol),buffer_size,spaceworld,ierr)
+       end do
+       call timab(48,2,tsec)
+     else
+       call timab(48,1,tsec)
+       do isppol=1,nspden
+         call xmpi_sum(rho1wfr(:,isppol),buffer_size,spaceworld,ierr)
+       end do
+       call timab(48,2,tsec)
+     end if
+   end if
 
 !  Accumulate PAW occupancies
    if (psps%usepaw==1.and.iscf_mod>0) then
