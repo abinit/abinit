@@ -150,7 +150,8 @@ module m_xmpi
  ! Count number of windows created
  ! This counter should be zero at the end of the run if all windows have been released.
 
- logical,save, private :: xmpi_use_inplace_operations = .False.
+ !logical,save, private :: xmpi_use_inplace_operations = .False.
+ logical,save, private :: xmpi_use_inplace_operations = .True.
  ! Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum
 
  ! For MPI < v4, collective communication routines accept only a 32bit integer as data count.
