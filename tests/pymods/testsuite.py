@@ -1904,7 +1904,7 @@ pp_dirpath $ABI_PSPDIR
                            medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)
         abimem_level      Run executable with abimem_level.
         useylm            Change Abinit input file to use useylm e.g. useylm 1
-        gpu_option        Change Abinit input file to use gpu_option e.g. useylm 1
+        gpu_option        Change Abinit input file to use gpu_option e.g. gpu_option 2
         ================  ====================================================================
 
         .. warning:
@@ -2670,6 +2670,33 @@ pp_dirpath $ABI_PSPDIR
 # Subclasses needed to handle the different executables
 #############################################################################################################
 
+def match_var_value(text, varname):
+    """
+    Extract the value associated with a variable name from text.
+
+    Supported variable forms:
+      - varname
+      - varname:
+      - varname?
+      - varname+
+      - varname<integer>  (e.g. varname2, varname10)
+
+    Parameters
+    ----------
+    text : str
+        Input text (single or multi-line).
+    varname : str
+        Base variable name.
+
+    Returns
+    -------
+    str or None
+        The associated value if found, otherwise None.
+    """
+    pattern = rf'\b{re.escape(varname)}(?:[:?+]|\d*)\s+(\S+)'
+    m = re.search(pattern, text)
+    return m.group(1) if m else None
+
 
 class AbinitTest(BaseTest):
     """
@@ -2717,12 +2744,13 @@ class AbinitTest(BaseTest):
         if 'output_file = "' not in line:
             app('output_file = "%s"' % (self.id + ".abo"))
 
-        # Add input variables to Abinit input file
+        # Add input variables to Abinit input file if not already present.
+        # TODO: Add mechanism in TEST_INFO to ignore gpu_option
         #print(f"{self.useylm=}")
-        if self.useylm is not None and self.executable == "abinit":
+        if self.useylm is not None and self.executable == "abinit" and match_var_value(line, "useylm") is None:
             app("useylm %d" % self.useylm)
 
-        if self.gpu_option is not None and self.executable == "abinit":
+        if self.gpu_option is not None and self.executable == "abinit" and match_var_value(line, "gpu_option") is None:
             app("gpu_option %d" % self.gpu_option)
 
         # Prefix for input/output/temporary files
