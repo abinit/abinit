@@ -16,7 +16,7 @@ jobs:
       matrix:
         config:
           - os: ubuntu-latest
-            python: "3.9"
+            python: "3.12"
 
     runs-on: ${{ matrix.config.os }}
 

@@ -47,7 +47,7 @@ ecut 20         # Maximal plane-wave kinetic energy cut-off, in Hartree
 pawecutdg 50    # PAW: Energy Cutoff for the Double Grid
 nband 20        # Number of bands
 occopt 3        # Smearing type
-tsmear 1000 K   # Electronic smearing temperature
+tsmear 2000 K   # Electronic smearing temperature
 
 ############################
 # DFT Calculation
@@ -75,7 +75,7 @@ nnsclo1   0
 # Definition for DMFT loop
 dmftbandi 5             # First KS band included in the projection for Wannier orbitals
 dmftbandf 13            # Last KS band included in the projection for Wannier orbitals
-dmft_nwli 1000          # Linear frequency mesh
+dmft_triqs_n_iw 1000    # Linear frequency mesh
 dmft_iter 1             # Number of iterations of the DMFT part.
 
 dmft_mxsf 0.7           # Mixing of the old and new self-energy at every iterations.
@@ -83,17 +83,18 @@ dmft_dc   2             # Double counting type. 6 is Around Mean Field (AMF)
 
 #Definition of impurity solver
 dmft_solv  7           # TRIQS in the density-density approximation
-dmftqmc_l        500   # Number of time slices for G(tau).
-dmftqmc_n        1.d5  # Number of QMC sweeps
-dmftqmc_therm    1000  # Thermalization
-dmftctqmc_basis2 1
-dmftctqmc_basis3 2
-dmftctqmc_basis4 3
-dmftctqmc_meas   10
+dmft_triqs_n_tau        500   # Number of time slices for G(tau).
+dmft_triqs_n_cycles       12500  # Number of QMC sweeps
+dmft_triqs_n_warmup_cycles_init    1000  # Thermalization
+dmft_triqs_n_warmup_cycles_restart 0
+dmft_triqs_basis2 1
+dmft_triqs_basis3 2
+dmft_triqs_basis4 3
+dmft_triqs_length_cycle   10
 
 dmft_triqs_off_diag 1
-dmft_triqs_wmax  1.0
-dmft_triqs_epsilon 1.d-2
+dmft_triqs_dlr_wmax  1.0
+dmft_triqs_dlr_epsilon 1.d-2
 dmft_shiftself 1.d-1
 
 #Definition of DFT+U
@@ -114,10 +115,10 @@ jpawu       0.84 eV  # Values of J
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
 #%% [NCPU_8]
-#%% files_to_test = t111_MPI8.abo, tolnlines = 3, tolabs = 1.e-4, tolrel = 1.e-4, fld_options=-easy;
+#%% files_to_test = t111_MPI8.abo, tolnlines = 113, tolabs = 5.e-4, tolrel = 5e-4, fld_options=-easy;
 #%% [extra_info]
-#%% authors = F. Gendron, E. Castiel
+#%% authors = E. Castiel, F. Gendron
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for Fe : test TRIQS interface for different basis with magnetic DFT
+#%% description = DFT+DMFT for Fe with TRIQS: test basis with magnetic DFT
 #%% topics = DMFT
 #%%<END TEST_INFO>

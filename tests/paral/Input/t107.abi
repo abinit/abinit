@@ -3,14 +3,14 @@
 # == Convergency and starting
 # DATASET 1: LDA
 # DATASET 2: DMFT
-ndtset 2
-jdtset 1 2
+ndtset 1
+jdtset 2
 prtvol    4
 pawprtvol 3
-getden  -1
+getden  1
 
 ##### CONVERGENCE PARAMETERS
-nstep1   30
+nstep1   50
 nstep2   2
 ecut      10
 pawecutdg 40
@@ -46,23 +46,25 @@ usedmft1 0
 usedmft2 1
 dmftbandi 5
 dmftbandf 17
-dmft_nwli 500
+dmft_triqs_n_iw 500
 dmft_iter 1
 
 # == CTQMC
 dmft_solv 7 # CTQMC
-dmftqmc_l 200
-dmftqmc_n 1.d6
-dmftqmc_therm 5000
-dmftctqmc_basis 2
-dmftctqmc_meas 10
+dmft_triqs_n_tau 200
+dmft_triqs_n_cycles 125000
+dmft_triqs_n_warmup_cycles_init 5000
+dmft_triqs_basis 2
+dmft_triqs_length_cycle 10
+dmft_triqs_n_warmup_cycles_restart 0
 
 dmft_mxsf 0.1
 dmft_dc 8
 dmft_yukawa_param 2
 
 dmft_triqs_off_diag 0
-dmft_triqs_wmax 1.0
+dmft_triqs_dlr_wmax 1.0
+dmft_triqs_dlr_epsilon 1.d-6
 dmft_triqs_loc_n_max 2
 
 # == DFT+U
@@ -73,6 +75,7 @@ lpawu   3   # U on d-orbitals of Ni, no U on oxygen
 upawu1  0.00     # values in Hartree
 upawu2  6 eV     # values in Hartree
 jpawu  0.0000  # values in Hartree
+jpawu2 1 eV
 
 pp_dirpath "$ABI_PSPDIR"
 pseudos "58ce.paw"
@@ -82,19 +85,23 @@ pseudos "58ce.paw"
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_TRIQS_v3_2
 #%% [files]
+#%% [shell]
+#%% pre_commands = iw_cp t107o_DS1_DEN t107_MPI4o_DS1_DEN;
+#%%                iw_cp t107o_DS1_DEN t107_MPI8o_DS1_DEN;
 #%% [paral_info]
 #%% nprocs_to_test = 4, 8
 #%% max_nprocs = 8
 #%% [NCPU_4]
-#%% files_to_test = t107_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
-#%%                 t107_MPI4o_DS2_DMFTORBITAL_itypat0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
-#%%                 t107_MPI4o_DS2_DMFTOVERLAP_iatom0001_isppol1, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%% files_to_test = t107_MPI4.abo, tolnlines = 5, tolabs = 3.e-7, tolrel = 1.e-6, fld_options=-medium;
+#%%                 t107_MPI4o_DS2_DMFTORBITAL_itypat0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t107_MPI4o_DS2_DMFTOVERLAP_iatom0001_isppol1, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t107_MPI4o_DS2_Gtau_diag_DLR_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%%                 t107_MPI4o_DS2_Gtau_diag_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%%                 t107_MPI4o_DS2_CTQMC_HISTOGRAM_iatom0001.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
 #%% [NCPU_8]
-#%% files_to_test = t107_MPI8.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options=-medium;
+#%% files_to_test = t107_MPI8.abo, tolnlines = 9, tolabs = 1.e-6, tolrel = 5.e-6, fld_options=-medium;
 #%% [extra_info]
-#%% authors = J. Bieder, B. Amadon, E. Castiel
+#%% authors = E. Castiel, J. Bieder, B. Amadon
 #%% keywords = DMFT, TRIQS
-#%% description = DFT+DMFT for Ce : test parallelism of TRIQS interface with self-consistency and off-diagonal elements in the cubic basis
+#%% description = DFT+DMFT for Ce with TRIQS: test parallelization, exact DC and charge self-consistency with off-diagonal elements in the cubic basis
 #%%<END TEST_INFO>

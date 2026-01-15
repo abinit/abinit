@@ -5,20 +5,20 @@
  ndtset 6
 
 #First dataset : SCF run
- prtden1  1     
-  nband1  4     
+ prtden1  1
+  nband1  4
  kptopt1  1
 
 #Second dataset : NSCF run with kptopt 1 (more bands)
-   iscf2 -2  
- getwfk2  1   
+   iscf2 -2
+ getwfk2  1
  getden2  1
   nband2  20
  kptopt2  1
 
 #Third dataset : NSCF run with kptopt 3
-   iscf3 -2  
- getwfk3  2   
+   iscf3 -2
+ getwfk3  2
  getden3  1
   nband3  20
  kptopt3  3
@@ -67,7 +67,7 @@
  acell   3*10.60
  diemac 10.0
  ecut 4.00   # too small !
- natom  2 
+ natom  2
  nbdbuf 0
  nstep 100
  ntypat  2
@@ -84,14 +84,14 @@
 #%% executable = abinit
 #%% test_chain = t47.abi, t48.abi, t49.abi
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t47.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Y. Gillet
-#%% keywords = NC, DFPT 
-#%% description = 
+#%% keywords = NC, DFPT
+#%% description =
 #%%   GaAs, zinc-blende structure. Generate the data for optic (linear and non-linear coefficients).
 #%%   to be analysed in the test 48 (Fortran files) and test 49 (netcdf files with h1 matrix elements).
 #%% topics = Optic

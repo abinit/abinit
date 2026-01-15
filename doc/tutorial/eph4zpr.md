@@ -15,7 +15,7 @@ Additional examples are provided in this
 that explains how to use Abipy to automate the calculations and post-process the results for Diamond.
 
 It is assumed the user has already completed the two tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
-and that he/she is familiar with the calculation of ground state (GS) and response properties
+and that they are familiar with the calculation of ground state (GS) and response properties
 in particular phonons, Born effective charges and the high-frequency dielectric tensor.
 The user should have read the [introduction tutorial for the EPH code](/tutorial/eph_intro)
 before running these examples.
@@ -638,6 +638,9 @@ The same trick is highly recommended when computing WFK files for $GW$ calculati
     as the $\qq$-space integration must be performed in the full $\text{IBZ}_\kk$.
     On the other hand, ZPR calculations can take advange of the Sternheimer method to reduce the number
     of empty bands required to converge.
+
+
+[HDIAGO_README]
 
 ## Our first ZPR calculation
 
@@ -1322,27 +1325,27 @@ The Fan-Migdal self-energy can be rewritten in terms of the spectral representat
 
 \begin{equation}
 \Sigma^\FM_{n\kk}(\ww) =
-\int \dd\ee\dd\ww  \left [
+\int \dd\ee\dd\ww'  \left [
 \frac{n(\ww') + f(\ee)}{\ww - \ee  + \ww' + i \eta} +
 \frac{n(\ww') + 1 - f(\ee)}{\omega - \ee  - \ww' + i \eta}
 \right ]
-\alpha^2 F_\nk(\ee,\ww')
+\alpha^2 F^\FM_\nk(\ee,\ww')
 \end{equation}
 
 where we have introduced the real, positive and T-independent Eliashberg function
 
 \begin{equation}
-\alpha^2 F_\nk(\ee,\ww') =
+\alpha^2 F^\FM_\nk(\ee,\ww') =
 \sum_{m,\nu} \int_\BZ \frac{d\qq}{\Omega_\BZ} |\gkq|^2
-\delta(\ee - \ee_{m\kq})\delta(\ww - \wqnu).
+\delta(\ee - \ee_{m\kq})\delta(\ww' - \wqnu).
 \end{equation}
 
-The computation of $\alpha^2 F_\nk$ is activated by setting [[prteliash]] to 3.
+The computation of $\alpha^2 F^\FM_\nk$ is activated by setting [[prteliash]] to 3.
 The frequency mesh for phonons is defined by [[ph_wstep]], [[ph_smear]]
 The frequency mesh for electrons is defined by [[dosdeltae]], [[tsmear]]
 
-In the adiabatic approximation the phonon frequencies in the denominator of the Fan-Migdal term are neglected and
-the FM term simplifies to:
+In the adiabatic approximation the phonon frequencies in the denominator of the Fan-Migdal term
+are neglected and the FM term simplifies to:
 
 \begin{equation}
 \Sigma^{a-\FM}_{n\kk}(\ee_\nk) =
@@ -1351,6 +1354,8 @@ the FM term simplifies to:
 \label{eq:adiabatic_fan_selfen}
 \end{equation}
 
+
+<!--
 The adiabatic ZPR can also be expressed as:
 
 $$
@@ -1364,6 +1369,4 @@ F_2^\nk(\ww) =
 \sum_{m\nu} \int_\BZ \frac{d\qq}{\Omega_\BZ} (|\gkq|^2 - g_{mn\nu}^{2,\DW}(\kk,\qq))
 \dfrac{\delta(\ww - \wqnu)}{\ee_\nk - \ee_{m\kq}}
 $$
-
-<!--
 -->

@@ -1,5 +1,5 @@
 
-.Version 10.2.4.2 of ABINIT, released Nov 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 19 Nov 2024.
-- ( at 19h56 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h18 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/TestBot_MPI1/v9_t57-t58-t59-t60-t61/t60.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v9_t57-t58-t59-t60-t61/t60.abi
 - output file    -> t60.abo
 - root for input  files -> t60i
 - root for output files -> t60o
@@ -252,8 +252,8 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
       eph_extrael8     0.00000000E+00
       eph_extrael9     0.00000000E+00
       eph_extrael10    0.00000000E+00
-      eph_extrael11   -1.69326306E-03
-      eph_extrael12   -1.69326306E-03
+      eph_extrael11   -1.69326308E-03
+      eph_extrael12   -1.69326308E-03
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -281,7 +281,7 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
     eph_phrange_w1     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w2     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w3     0.00000000E+00  0.00000000E+00 Hartree
-    eph_phrange_w4     0.00000000E+00  3.67493254E-03 Hartree
+    eph_phrange_w4     0.00000000E+00  3.67493222E-03 Hartree
     eph_phrange_w5     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w6     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w7     0.00000000E+00  0.00000000E+00 Hartree
@@ -328,8 +328,8 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
   eph_tols_idelta11    1.00000000E-12  1.00000000E-12
   eph_tols_idelta12    1.00000000E-12  1.00000000E-12
 -          fftalg         512
-        freqspmax      7.34986508E-02 Hartree
-        freqspmin     -7.34986508E-02 Hartree
+        freqspmax      7.34986444E-02 Hartree
+        freqspmin     -7.34986444E-02 Hartree
           getdvdb1          0
           getdvdb2          0
           getdvdb3          2
@@ -551,13 +551,13 @@ P           mkmem           8
      sigma_erange3     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange4     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange5     0.00000000E+00  0.00000000E+00 Hartree
-     sigma_erange6     1.83746627E-02  1.83746627E-02 Hartree
-     sigma_erange7     1.83746627E-02  1.83746627E-02 Hartree
+     sigma_erange6     1.83746611E-02  1.83746611E-02 Hartree
+     sigma_erange7     1.83746611E-02  1.83746611E-02 Hartree
      sigma_erange8     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange9     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange10    0.00000000E+00  0.00000000E+00 Hartree
-     sigma_erange11    3.67493254E-02  3.67493254E-02 Hartree
-     sigma_erange12    3.67493254E-02  3.67493254E-02 Hartree
+     sigma_erange11    3.67493222E-02  3.67493222E-02 Hartree
+     sigma_erange12    3.67493222E-02  3.67493222E-02 Hartree
       sigma_ngkpt1       2    2    2
       sigma_ngkpt2       0    0    0
       sigma_ngkpt3       2    2    2
@@ -625,7 +625,7 @@ P           mkmem           8
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.0381281131E+00  2.0381281131E+00  2.0381281131E+00
+                       2.0381281206E+00  2.0381281206E+00  2.0381281206E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        3.8515039575E+00  3.8515039575E+00  3.8515039575E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -751,8 +751,8 @@ meta: {optdriver: 7, eph_task: 4, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/03-Li.psp
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/03-Li.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -766,8 +766,8 @@ meta: {optdriver: 7, eph_task: 4, }
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_EOF-10.2/tests/Pspdir/09-F.psp
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/09-F.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -936,7 +936,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
    3  -1.171   -1.439   -0.268   -0.278   -0.034    0.965   -0.895    0.618    1.978    1.721
    4  -1.171   -1.439   -0.268   -0.278   -0.034    0.965   -0.895    0.618    0.000    0.000
    5  13.987   14.071    0.084    0.100   -0.019    0.843   -1.054    1.155   15.158   15.511
-   6  15.747   12.126   -3.620   -0.835   -0.804    4.337   -0.624   -0.211    1.760   -1.945
+   6  15.747   12.127   -3.620   -0.835   -0.804    4.337   -0.624   -0.211    1.760   -1.945
    7  16.382   16.306   -0.076   -0.144   -0.093    0.530    0.049   -0.193    0.635    4.179
    8  19.258   19.564    0.306    0.365   -0.025    0.839   -0.377    0.742    2.876    3.258
    9  19.258   19.564    0.306    0.365   -0.025    0.839   -0.377    0.742    0.000    0.000
@@ -1512,7 +1512,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
 ============================================================================================
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   1 -19.234    1.883      0.2    0.000
+   1 -19.234    1.882      0.2    0.000
    2  -2.697    0.097      3.4   16.537
    3  -0.415    0.187      1.8    2.282
    4  -0.415    0.187      1.8    0.000
@@ -1530,7 +1530,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    2  -3.149    0.000   4359.5   15.833
    3  -1.171    0.117      2.8    1.978
    4  -1.171    0.117      2.8    0.000
-   5  13.987    0.005     67.8   15.158
+   5  13.987    0.005     67.6   15.158
    6  15.747    0.190      1.7    1.760
    7  16.382    0.102      3.2    0.635
    8  19.258    0.183      1.8    2.876
@@ -1545,7 +1545,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
    2  -3.149    0.000   4130.8   15.833
    3  -1.171    0.147      2.2    1.978
    4  -1.171    0.147      2.2    0.000
-   5  13.987    0.007     47.4   15.158
+   5  13.987    0.007     47.3   15.158
    6  15.747    0.273      1.2    1.760
    7  16.382    0.146      2.3    0.635
    8  19.258    0.280      1.2    2.876
@@ -1901,7 +1901,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
  Temperature (K)              xx              yy              zz
             1.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
-          300.00    0.186840E-85    0.186840E-85    0.186840E-85
+          300.00    0.186803E-85    0.186803E-85    0.186803E-85
 
 
  Peltier [Volts] using SERTA approximation
@@ -1940,7 +1940,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
  Temperature (K)              xx              yy              zz
             1.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
-          300.00    0.186840E-85    0.186840E-85    0.186840E-85
+          300.00    0.186803E-85    0.186803E-85    0.186803E-85
 
 
  Peltier [Volts] using MRTA approximation
@@ -2197,7 +2197,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
  Temperature (K)              xx              yy              zz
             1.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
-          300.00    0.207854E-85    0.207854E-85    0.207854E-85
+          300.00    0.207815E-85    0.207815E-85    0.207815E-85
 
 
  Peltier [Volts] using SERTA approximation
@@ -2236,7 +2236,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
  Temperature (K)              xx              yy              zz
             1.00    0.000000E+00    0.000000E+00    0.000000E+00
  Temperature (K)              xx              yy              zz
-          300.00    0.207854E-85    0.207854E-85    0.207854E-85
+          300.00    0.207815E-85    0.207815E-85    0.207815E-85
 
 
  Peltier [Volts] using MRTA approximation
@@ -3046,26 +3046,26 @@ meta: {optdriver: 7, eph_task: 9, }
  Print first 10 frequencies in gw_vals array (re-im) for testing purposes:
  spin: 1, ikcalc: 1
  gw_vals for itemp:1ib: 1
- -2.31377E+00 -2.03942E+00 -1.76068E+00 -1.47812E+00 -1.19231E+00 -9.03825E-01 -6.13243E-01 -3.21156E-01 -2.81548E-02  2.65162E-01
- -4.87609E+01 -4.88618E+01 -4.89501E+01 -4.90257E+01 -4.90884E+01 -4.91380E+01 -4.91744E+01 -4.91976E+01 -4.92074E+01 -4.92039E+01
+ -2.31376E+00 -2.03940E+00 -1.76066E+00 -1.47810E+00 -1.19229E+00 -9.03805E-01 -6.13222E-01 -3.21134E-01 -2.81322E-02  2.65186E-01
+ -4.87609E+01 -4.88618E+01 -4.89502E+01 -4.90258E+01 -4.90884E+01 -4.91380E+01 -4.91745E+01 -4.91976E+01 -4.92075E+01 -4.92039E+01
  gw_vals for itemp:1ib: 2
- -2.31377E+00 -2.03942E+00 -1.76068E+00 -1.47812E+00 -1.19231E+00 -9.03825E-01 -6.13243E-01 -3.21156E-01 -2.81548E-02  2.65162E-01
- -4.87609E+01 -4.88618E+01 -4.89501E+01 -4.90257E+01 -4.90884E+01 -4.91380E+01 -4.91744E+01 -4.91976E+01 -4.92074E+01 -4.92039E+01
+ -2.31376E+00 -2.03940E+00 -1.76066E+00 -1.47810E+00 -1.19229E+00 -9.03805E-01 -6.13222E-01 -3.21134E-01 -2.81322E-02  2.65186E-01
+ -4.87609E+01 -4.88618E+01 -4.89502E+01 -4.90258E+01 -4.90884E+01 -4.91380E+01 -4.91745E+01 -4.91976E+01 -4.92075E+01 -4.92039E+01
  gw_vals for itemp:1ib: 3
- -2.31377E+00 -2.03942E+00 -1.76068E+00 -1.47812E+00 -1.19231E+00 -9.03825E-01 -6.13243E-01 -3.21156E-01 -2.81548E-02  2.65162E-01
- -4.87609E+01 -4.88618E+01 -4.89501E+01 -4.90257E+01 -4.90884E+01 -4.91380E+01 -4.91744E+01 -4.91976E+01 -4.92074E+01 -4.92039E+01
+ -2.31376E+00 -2.03940E+00 -1.76066E+00 -1.47810E+00 -1.19229E+00 -9.03805E-01 -6.13222E-01 -3.21134E-01 -2.81322E-02  2.65186E-01
+ -4.87609E+01 -4.88618E+01 -4.89502E+01 -4.90258E+01 -4.90884E+01 -4.91380E+01 -4.91745E+01 -4.91976E+01 -4.92075E+01 -4.92039E+01
  gw_vals for itemp:1ib: 4
-  3.91037E+01  3.73402E+01  3.56474E+01  3.40197E+01  3.24523E+01  3.09408E+01  2.94813E+01  2.80703E+01  2.67046E+01  2.53815E+01
- -8.16532E+00 -7.92758E+00 -7.71467E+00 -7.52457E+00 -7.35564E+00 -7.20639E+00 -7.07559E+00 -6.96222E+00 -6.86535E+00 -6.78428E+00
+  3.91040E+01  3.73405E+01  3.56476E+01  3.40199E+01  3.24525E+01  3.09410E+01  2.94815E+01  2.80705E+01  2.67048E+01  2.53817E+01
+ -8.16533E+00 -7.92760E+00 -7.71467E+00 -7.52459E+00 -7.35564E+00 -7.20637E+00 -7.07558E+00 -6.96219E+00 -6.86534E+00 -6.78427E+00
 
  Print first 5 temperatures of diagonal mobility_mu  > 1e-6 (with ieh as electrons or holes) for testing purposes:
  spin: 1
  mobility_mu for itemp:1 ieh: 2 xyz: 1
-  1.97681E-01
+  1.97682E-01
  mobility_mu for itemp:1 ieh: 2 xyz: 2
-  1.97681E-01
+  1.97682E-01
  mobility_mu for itemp:1 ieh: 2 xyz: 3
-  1.97681E-01
+  1.97682E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -3098,8 +3098,8 @@ meta: {optdriver: 7, eph_task: 9, }
       eph_extrael8     0.00000000E+00
       eph_extrael9     0.00000000E+00
       eph_extrael10    0.00000000E+00
-      eph_extrael11   -1.69326306E-03
-      eph_extrael12   -1.69326306E-03
+      eph_extrael11   -1.69326308E-03
+      eph_extrael12   -1.69326308E-03
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -3127,7 +3127,7 @@ meta: {optdriver: 7, eph_task: 9, }
     eph_phrange_w1     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w2     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w3     0.00000000E+00  0.00000000E+00 Hartree
-    eph_phrange_w4     0.00000000E+00  3.67493254E-03 Hartree
+    eph_phrange_w4     0.00000000E+00  3.67493222E-03 Hartree
     eph_phrange_w5     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w6     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w7     0.00000000E+00  0.00000000E+00 Hartree
@@ -3210,8 +3210,8 @@ meta: {optdriver: 7, eph_task: 9, }
             fcart12    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         512
-        freqspmax      7.34986508E-02 Hartree
-        freqspmin     -7.34986508E-02 Hartree
+        freqspmax      7.34986444E-02 Hartree
+        freqspmin     -7.34986444E-02 Hartree
           getdvdb1          0
           getdvdb2          0
           getdvdb3          2
@@ -3424,13 +3424,13 @@ P           mkmem           8
      sigma_erange3     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange4     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange5     0.00000000E+00  0.00000000E+00 Hartree
-     sigma_erange6     1.83746627E-02  1.83746627E-02 Hartree
-     sigma_erange7     1.83746627E-02  1.83746627E-02 Hartree
+     sigma_erange6     1.83746611E-02  1.83746611E-02 Hartree
+     sigma_erange7     1.83746611E-02  1.83746611E-02 Hartree
      sigma_erange8     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange9     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange10    0.00000000E+00  0.00000000E+00 Hartree
-     sigma_erange11    3.67493254E-02  3.67493254E-02 Hartree
-     sigma_erange12    3.67493254E-02  3.67493254E-02 Hartree
+     sigma_erange11    3.67493222E-02  3.67493222E-02 Hartree
+     sigma_erange12    3.67493222E-02  3.67493222E-02 Hartree
       sigma_ngkpt1       2    2    2
       sigma_ngkpt2       0    0    0
       sigma_ngkpt3       2    2    2
@@ -3520,7 +3520,7 @@ P           mkmem           8
             tmesh12    3.00000000E+03  1.00000000E+00  1.00000000E+00
             typat      1  2
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.0381281131E+00  2.0381281131E+00  2.0381281131E+00
+                       2.0381281206E+00  2.0381281206E+00  2.0381281206E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        3.8515039575E+00  3.8515039575E+00  3.8515039575E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3616,10 +3616,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          7.9  wall=          8.0
+- Proc.   0 individual time (sec): cpu=          7.5  wall=          7.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and  24 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.9  wall=          8.0
++Overall time at end (sec) : cpu=          7.5  wall=          7.6

@@ -112,8 +112,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !Local variables-------------------------------
 !scalars
  integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm
- integer :: tread_pseudos,cnt,tread_geo,tread_gpu_option,treads
- integer :: idev,gpu_option
+ integer :: tread_pseudos,cnt,tread_geo,tread_gpu_option,treads, idev,gpu_option
  real(dp) :: cpus
  character(len=500) :: msg
  character(len=fnlen) :: pp_dirpath,gpu_option_string
@@ -1193,7 +1192,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  character(len=500) :: msg
  type(atomdata_t) :: atom
 !arrays
- integer :: cond_values(4),vacuum(3)
+ integer :: cond_values(4),vacuum(3), units(2)
  integer,allocatable :: iatfix(:,:),iatnd(:),intarr(:),istwfk(:),nband(:),typat(:)
  real(dp) :: acell(3),rprim(3,3)
  real(dp),allocatable :: amu(:),atndlist(:,:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:)
@@ -1208,6 +1207,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  !write(std_out,'(a)')' m_invars1%invars1 : enter '; call flush(std_out)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ units = [std_out, ab_out]
 
  ! This counter is incremented when we find a non-critical error.
  ! The code outputs a warning and stops at end.
@@ -2141,16 +2141,25 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%constraint_kind(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
 !Some special cases are not compatible with GPU implementation
- if (dtset%optdriver/=RUNL_GSTATE .and. dtset%optdriver/=RUNL_RESPFN) then
-   dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS and RESPFN
+!Warn user if value is changed at runtime.
+!We don't stop the code because we may want to run the test suite in GPU mode.
+ if (all(dtset%optdriver /= [RUNL_GSTATE, RUNL_RESPFN, RUNL_GWR])) then
+   if (dtset%gpu_option /= ABI_GPU_DISABLED) then
+     call wrtout(units, "- WARNING: GPU only compatible with GS, RESPFN and GWR. gpu_option has been set to 0!")
+   end if
+   dtset%gpu_option=ABI_GPU_DISABLED
  end if
  if (dtset%optdriver==RUNL_RESPFN .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
-   dtset%gpu_option=ABI_GPU_DISABLED  ! RESPFN on GPU only implemented with OpenMP
+   if (dtset%gpu_option /= ABI_GPU_DISABLED) then
+     call wrtout(units, "- WARNING: RESPFN on GPU only implemented with OpenMP. gpu_option has been set to 0!")
+   end if
+   dtset%gpu_option=ABI_GPU_DISABLED
  end if
- if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU impl
+ if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU implementation
  if (dtset%nspinor/=1) then
    if (dtset%gpu_option/=ABI_GPU_DISABLED .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
-     dtset%gpu_option=ABI_GPU_DISABLED  ! nspinor=2 not supported outside of CPU and OpenMP GPU
+     dtset%gpu_option=ABI_GPU_DISABLED
+     call wrtout(units, "- WARNING: nspinor=2 not supported outside of CPU and OpenMP GPU. gpu_option has been set to 0!")
    end if
  end if
 
@@ -2323,12 +2332,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_charge_prec=tol6
    dtsets(idtset)%dmft_dc=1
    dtsets(idtset)%dmft_entropy=0
-   dtsets(idtset)%dmft_epsilon_yukawa=-1.0_dp
    dtsets(idtset)%dmft_fermi_step=0.02_dp
    dtsets(idtset)%dmft_hybri_limit=0
    dtsets(idtset)%dmft_iter=10
    dtsets(idtset)%dmft_kspectralfunc=0
-   dtsets(idtset)%dmft_lambda_yukawa=-1.0_dp
    dtsets(idtset)%dmft_magnfield=0
    if (dtsets(idtset)%dmft_magnfield .gt. 0) dtsets(idtset)%dmft_magnfield_b=0.0_dp
    dtsets(idtset)%dmft_mxsf=0.6_dp
@@ -2337,10 +2344,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_nwli=0
    dtsets(idtset)%dmft_nwlo=0
    dtsets(idtset)%dmft_occnd_imag=1
-   dtsets(idtset)%dmft_optim=0
    dtsets(idtset)%dmft_orbital(:)=1
    dtsets(idtset)%dmft_prt_maxent=1
-   dtsets(idtset)%dmft_prtself=1
+   dtsets(idtset)%dmft_prtself=0
    dtsets(idtset)%dmft_prtwan=0
    dtsets(idtset)%dmft_read_occnd=0
    dtsets(idtset)%dmft_rslf=1
@@ -2350,42 +2356,50 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_t2g=0
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
+   dtsets(idtset)%dmft_triqs_basis=-1
    dtsets(idtset)%dmft_triqs_compute_integral=1
    dtsets(idtset)%dmft_triqs_det_init_size=100
    dtsets(idtset)%dmft_triqs_det_n_operations_before_check=10000
    dtsets(idtset)%dmft_triqs_det_precision_error=1.0d-5
    dtsets(idtset)%dmft_triqs_det_precision_warning=1.0d-8
    dtsets(idtset)%dmft_triqs_det_singular_threshold=-1.0_dp
+   dtsets(idtset)%dmft_triqs_dlr_epsilon=-1.0_dp
+   dtsets(idtset)%dmft_triqs_dlr_wmax=-1.0_dp
    dtsets(idtset)%dmft_triqs_entropy=0
-   dtsets(idtset)%dmft_triqs_epsilon=1.0d-6
-   dtsets(idtset)%dmft_triqs_gaussorder=0
+   dtsets(idtset)%dmft_triqs_gaussorder=-1
    dtsets(idtset)%dmft_triqs_imag_threshold=1.0d-13
-   dtsets(idtset)%dmft_triqs_leg_measure=0
+   dtsets(idtset)%dmft_triqs_length_cycle=0
    dtsets(idtset)%dmft_triqs_loc_n_min=0
    dtsets(idtset)%dmft_triqs_loc_n_max=huge(0)
    dtsets(idtset)%dmft_triqs_measure_density_matrix=1
+   dtsets(idtset)%dmft_triqs_measure_g_l=0
    dtsets(idtset)%dmft_triqs_move_double=0
    dtsets(idtset)%dmft_triqs_move_shift=1
-   dtsets(idtset)%dmft_triqs_nleg=0
-   dtsets(idtset)%dmft_triqs_nsubdivisions=1
+   dtsets(idtset)%dmft_triqs_n_cycles=0
+   dtsets(idtset)%dmft_triqs_n_iw=0
+   dtsets(idtset)%dmft_triqs_n_l=0
+   dtsets(idtset)%dmft_triqs_n_tau=0
+   dtsets(idtset)%dmft_triqs_n_warmup_cycles_init=-1
+   dtsets(idtset)%dmft_triqs_n_warmup_cycles_restart=-1
+   dtsets(idtset)%dmft_triqs_nsubdivisions=0
    dtsets(idtset)%dmft_triqs_off_diag=-1
    dtsets(idtset)%dmft_triqs_pauli_prob=0.8
+   dtsets(idtset)%dmft_triqs_prt_entropy=0
+   dtsets(idtset)%dmft_triqs_random_seed_a=34788
+   dtsets(idtset)%dmft_triqs_random_seed_b=928374
    dtsets(idtset)%dmft_triqs_read_ctqmcdata=1
-   dtsets(idtset)%dmft_triqs_seed_a=34788
-   dtsets(idtset)%dmft_triqs_seed_b=928374
-   dtsets(idtset)%dmft_triqs_therm_restart=0
+   dtsets(idtset)%dmft_triqs_shift_mu=0.0_dp
    dtsets(idtset)%dmft_triqs_time_invariance=1
    dtsets(idtset)%dmft_triqs_tol_block=tol12
    dtsets(idtset)%dmft_triqs_use_norm_as_weight=1
-   dtsets(idtset)%dmft_triqs_wmax=-1.0_dp
-   dtsets(idtset)%dmft_use_all_bands=0
-   dtsets(idtset)%dmft_use_full_chipsi=0
    dtsets(idtset)%dmft_wanorthnorm=3
    dtsets(idtset)%dmft_wanrad=-1.0_dp
    dtsets(idtset)%dmft_x2my2d=0
+   dtsets(idtset)%dmft_yukawa_epsilon=-1.0_dp
+   dtsets(idtset)%dmft_yukawa_lambda=-1.0_dp
    dtsets(idtset)%dmft_yukawa_param=1
-   dtsets(idtset)%dmftbandi=0
    dtsets(idtset)%dmftbandf=0
+   dtsets(idtset)%dmftbandi=0
    dtsets(idtset)%dmftcheck=0
    dtsets(idtset)%dmftctqmc_basis=1
    dtsets(idtset)%dmftctqmc_check=0
@@ -2394,8 +2408,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_grnns=0
    dtsets(idtset)%dmftctqmc_localprop=0
    dtsets(idtset)%dmftctqmc_meas=1
-   dtsets(idtset)%dmftctqmc_mrka=0
    dtsets(idtset)%dmftctqmc_mov=0
+   dtsets(idtset)%dmftctqmc_mrka=0
+   dtsets(idtset)%dmftctqmc_chains=xomp_get_max_threads()
    dtsets(idtset)%dmftctqmc_order=0
    dtsets(idtset)%dmftqmc_l=0
    dtsets(idtset)%dmftqmc_n=0.0_dp
@@ -2422,7 +2437,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ecuteps=zero
    dtsets(idtset)%ecutsigx=zero ! If ecutsigx is not defined explicitly, npwsigx will be initialized from ecutwfn.
    dtsets(idtset)%ecutsm=zero
-   dtsets(idtset)%ecutwfn=zero ! The true default value is ecut . This is defined in invars2.F90
+   dtsets(idtset)%ecutwfn=zero ! The true default value is ecut. This is defined in invars2.F90
    dtsets(idtset)%effmass_free=one
    dtsets(idtset)%efmas=0
    dtsets(idtset)%efmas_bands=0 ! The true default is nband. This is defined in invars2.F90
@@ -2762,7 +2777,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%recptrott=0
    dtsets(idtset)%rectesteg=0
    dtsets(idtset)%rectolden=zero
-   dtsets(idtset)%rcpaw_sc(:)=tol1
+   dtsets(idtset)%rcpaw_sc(:)=two
    dtsets(idtset)%rcpaw_rctypat(:)=1
    dtsets(idtset)%rcut=zero
    dtsets(idtset)%restartxf=0

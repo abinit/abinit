@@ -363,7 +363,7 @@ subroutine tdep_calc_thermo(Invar,Lattice,MPIdata,PHdos,U0)
   end do
   mass_amu=mass_amu*amu_emass/real(Invar%natom_unitcell)
 
-!FB  k_B=8.617343d-5 !in eV/K
+! k_B is Boltzmann constant in eV/K
   k_B=kb_HaK*Ha_eV
   domega=(Invar%dosdeltae*Ha_meV)
   wovert=1.d0/(2*Invar%temperature*k_B)
@@ -475,7 +475,7 @@ subroutine tdep_calc_elastic(Phi2,distance,Invar,Lattice)
   write(Invar%stdout,'(a)') ' ################ Bulk and Shear modulus--Sound velocities ###################'
   write(Invar%stdout,'(a)') ' #############################################################################'
 
-  bohr=0.5291772108e-10
+  bohr=Bohr_Ang*1.0e-10
 ! Define atomic mass average
   mass_amu=zero
   do iatom=1,Invar%natom_unitcell
@@ -484,7 +484,7 @@ subroutine tdep_calc_elastic(Phi2,distance,Invar,Lattice)
   end do
   mass_amu=mass_amu/real(Invar%natom_unitcell)
 
-  rho=(mass_amu/1e3)*Invar%natom_unitcell/Lattice%ucvol/bohr**3/6.022e23
+  rho=(mass_amu/1e3)*Invar%natom_unitcell/Lattice%ucvol/bohr**3/Avogadro
 
 !==========================================================================================
 !===================== Elastic constants ==================================================
