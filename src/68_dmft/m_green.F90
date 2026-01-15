@@ -1916,7 +1916,7 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 !Local variables-------------------------------
  integer :: band_index,i,iatom,ib,ib1,icomp_chloc,ifreq,ikpt,isppol
  integer :: lpawu,mbandc,myproc,natom,nband_k,nkpt,nmoments,nspinor
- integer :: nsppol,optaftsolv,optdiff,optfilloccnd,option,optksloc,optself
+ integer :: nsppol,optaftsolv,optdiff,optfilloccnd,option,optksloc,optself,optiondiff
  real(dp) :: correction,diff_chloc,fac,temp
  character(len=12) :: tag
  character(len=500) :: message
@@ -2328,9 +2328,15 @@ subroutine integrate_green(green,paw_dmft,prtopt,opt_ksloc,opt_after_solver,opt_
 !    obtained directly from local green function or, through kohn sham
 !    occupations are the same.
  if ((abs(optksloc) == 3) .and. (paw_dmft%lchipsiortho == 1)) then ! optksloc= 3
+   
+   if(nspinor == 2) then
+     optiondiff = 2
+   else
+      optiondiff = 1
+   endif     
    call diff_matlu("Local projection of Kohn-Sham occupations ",&
         & "Integration of local Green's function ",&
-        & green%occup%matlu(:),matlu_temp(:),natom,1,tol4)
+        & green%occup%matlu(:),matlu_temp(:),natom,optiondiff,tol4)
    write(message,'(2a)') ch10,&
        & "  ***** => Calculations of Green's function in Kohn-Sham and local spaces are coherent ****"
    call wrtout(std_out,message,'COLL')
