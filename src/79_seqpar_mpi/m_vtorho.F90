@@ -966,7 +966,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
        call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
-       !kinpw = zero
 
        ! Compute (k+G) vectors (only if useylm=1)
        if (dtset%cprj_in_memory/=1) then
@@ -1001,14 +1000,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
           psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
           npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
           psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw)
-          !ffnl = zero
        end if
 
        if (dtset%use_gbt /= 0) then
          ! Compute (1/2) (2 Pi)**2 (k+q/2+G)**2:
          ABI_MALLOC(kinpw_kphq, (npw_k))
          call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw_kphq,kphq,npw_k,0,0)
-         !kinpw_kphq = zero
 
          ! Compute nonlocal form factors ffnl at all (k+q/2+G):
          ! TODO: useylm = 1 requires ylm_kphq, ylmgr_kphq
@@ -1019,7 +1016,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
           psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
           npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
           psps%usepaw,psps%useylm,ylm_k,ylmgr,kinpw=kinpw_kphq)
-          !ffnl_kphq = zero
        end if
 
        ! Load k-dependent part in the Hamiltonian datastructure
@@ -1847,7 +1843,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            locc_test = abs(occ(bdtot_index))>tol8
 !          dmft
            if(paw_dmft%use_dmft>=1.and.dtset%nbandkss==0) then
-             if(paw_dmft%band_in(iband).or.paw_dmft%dmft_use_all_bands) then
+             if(paw_dmft%band_in(iband).or.(paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)) then
                if( paw_dmft%use_dmft == 1 .and. dmft_dftocc == 1 ) then ! test of the code
                  paw_dmft%occnd(1,iband,iband,ikpt,isppol) = occ(bdtot_index)
                end if
@@ -1860,7 +1856,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !            dmft
              if((paw_dmft%use_dmft==1.or.paw_dmft%use_dmft==10).and.dtset%nbandkss==0) then
                ebandldatot=ebandldatot+dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
-               if(paw_dmft%band_in(iband).or.paw_dmft%dmft_use_all_bands) then
+               if(paw_dmft%band_in(iband).or.(paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)) then
                  ebandlda=ebandlda+dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
                  ekinlda=ekinlda+dtset%wtk(ikpt)*occ(bdtot_index)*eknk(bdtot_index)
                  occ(bdtot_index)=paw_dmft%occnd(1,iband,iband,ikpt,isppol)
@@ -1887,7 +1883,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            if((paw_dmft%use_dmft==1.or.paw_dmft%use_dmft==10).and.dtset%nbandkss==0) then
              do iband1=1,nband_k
                if((paw_dmft%band_in(iband).and.paw_dmft%band_in(iband1)).or. &
-                & (paw_dmft%dmft_use_all_bands.and.iband==iband1)) then
+                & ((paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7).and.iband==iband1)) then
                  ! write(std_out,*) "II+", isppol,ikpt,iband,iband1
                  ekindmft2=ekindmft2  +  dtset%wtk(ikpt)*paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*&
                    eknk_nd(1,iband,iband1,ikpt,isppol)

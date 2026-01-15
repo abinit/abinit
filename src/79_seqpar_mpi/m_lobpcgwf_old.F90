@@ -85,6 +85,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use defs_basis
  use m_abicore
  use m_lobpcg
+ use m_gputk
  use m_abi_linalg
  use m_wfutils
  use m_xmpi

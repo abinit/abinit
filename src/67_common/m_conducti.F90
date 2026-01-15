@@ -35,7 +35,7 @@ module m_conducti
  use defs_abitypes,  only : MPI_type
  use m_io_tools,     only : open_file, close_unit, get_unit
  use m_fstrings,     only : sjoin
- use m_matrix,        only : matr3inv
+ use m_matrix,       only : matr3inv
  use m_hide_lapack,  only : jacobi
  use m_occ,          only : getnel
  use m_geometry,     only : metric
@@ -125,8 +125,8 @@ contains
 
 !Arguments -----------------------------------
 !scalars
- character(len=fnlen) :: filnam,filnam_out
- integer, optional :: varocc
+ character(len=fnlen),intent(in) :: filnam,filnam_out
+ integer, optional, intent(in) :: varocc
 
 !Local variables-------------------------------
 !scalars
@@ -962,7 +962,7 @@ end subroutine conducti_paw
 
 !Arguments -----------------------------------
 !scalars
- character(len=fnlen) :: filnam,filnam_out
+ character(len=fnlen),intent(in) :: filnam,filnam_out
  logical,intent(in),optional :: with_absorption,with_emissivity
 !Local variables-------------------------------
 !scalars
@@ -1446,7 +1446,7 @@ end subroutine conducti_paw
                end do
                do iom=1,mom
                  do icor=1,nphicor
-                   diff_occ = occ_cor(icor,itypat_atnbr)-occ_k(iband) 
+                   diff_occ = occ_cor(icor,itypat_atnbr)-occ_k(iband)
                    diff_eig=eig0_k(iband)-energy_cor(icor,itypat_atnbr)
                    oml=oml_edge(icor,iom)
                    if(need_absorption) then
@@ -1726,12 +1726,12 @@ end subroutine conducti_paw
        do iom=1,mom
          if(nsppol==1) then
            write(absx_unt,'(100(1x,e15.8))') &
-&          (oml_edge(icor,iom),sigx1_av(icor,iom,1)/(Sp_Lt_SI*eps0),&
-&          sigx1(icor,iom,atnbr,1)/(Sp_Lt_SI*eps0),icor=1,nphicor)
+&          (oml_edge(icor,iom),sigx1_av(icor,iom,1)/(Speed_Light_SI*eps0),&
+&          sigx1(icor,iom,atnbr,1)/(Speed_Light_SI*eps0),icor=1,nphicor)
          else
            write(absx_unt,'(100(1x,e15.8))') &
-&          (oml_edge(icor,iom),sum_spin_sigx1_av(icor,iom)/(Sp_Lt_SI*eps0),&
-&          sum_spin_sigx1(icor,iom,atnbr)/(Sp_Lt_SI*eps0),icor=1,nphicor)
+&          (oml_edge(icor,iom),sum_spin_sigx1_av(icor,iom)/(Speed_Light_SI*eps0),&
+&          sum_spin_sigx1(icor,iom,atnbr)/(Speed_Light_SI*eps0),icor=1,nphicor)
          endif
        end do
        close(absx_unt)
@@ -1907,7 +1907,8 @@ subroutine conducti_nc(filnam,filnam_out)
 
 !Arguments -----------------------------------
 !scalars
- character(len=fnlen) :: filnam,filnam_out
+ character(len=fnlen),intent(in) :: filnam,filnam_out
+
 !Local variables-------------------------------
 !scalars
  integer,parameter :: formeig0=0,formeig1=1
@@ -2508,6 +2509,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
  real(dp),intent(in) :: fcti(npti),xi(npti)
  character(len=fnlen),intent(in) :: filnam_out_sig
  real(dp),intent(in) :: phi
+
 !Local variables-------------------------------
 !scalars
  integer :: ii,ip,eps_unt,abs_unt
@@ -2582,15 +2584,15 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
    if(eps2**2 > eps1**2 * tol12)then
      nomega=sqrt(half*(eps1 + sqrt(eps1**2 + eps2**2)))
      komega=sqrt(half*(-eps1 + sqrt(eps1**2 + eps2**2)))
-     abso=four_pi*fcti(ip)/(nomega*Sp_Lt)
+     abso=four_pi*fcti(ip)/(nomega*Speed_Light)
    else if(eps1>zero)then
      nomega=sqrt(half*(eps1 + sqrt(eps1**2 + eps2**2)))
      komega=half*abs(eps2/sqrt(eps1))
-     abso=four_pi*fcti(ip)/(nomega*Sp_Lt)
+     abso=four_pi*fcti(ip)/(nomega*Speed_Light)
    else if(eps1<zero)then
      nomega=half*abs(eps2/sqrt(-eps1))
      komega=sqrt(half*(-eps1 + sqrt(eps1**2 + eps2**2)))
-     abso=two*sqrt(-eps1)*pole/(Sp_Lt)
+     abso=two*sqrt(-eps1)*pole/(Speed_Light)
    end if
 
    epsc=cmplx(eps1,eps2,kind=dp)
@@ -2608,7 +2610,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
      pole=pole*Ha_eV
      sigma1=sigma1*Ohmcm
      sigma2=sigma2*Ohmcm
-     abso=abso*Ohmcm*Sp_Lt/(Sp_Lt_SI*four_pi*eps0)
+     abso=abso*Ohmcm*Speed_Light/(Speed_Light_SI*four_pi*eps0)
    endif
    write(eps_unt,'(5e18.10)') pole,sigma1,sigma2,eps1,eps2
    write(abs_unt,'(6e18.10)') pole,nomega,komega,refl_s,refl_p,abso

@@ -1,8 +1,8 @@
 
-.Version 10.4.5.9 of ABINIT, released Sep 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  1 Oct 2025.
-- ( at 11h04 )
-  
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t68.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h16 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t68.abi
 - output file    -> t68.abo
 - root for input  files -> t68i
 - root for output files -> t68o
@@ -161,8 +161,8 @@ meta: {optdriver: 1, rfmagn: 1, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   1.98828
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -183,7 +183,7 @@ meta: {optdriver: 1, rfmagn: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 3    ipert=   6
@@ -231,7 +231,7 @@ tolerances: {toldfe: 1.00E-03, }
  ETOT 16   9.9304910439588     -1.579E-04 6.709E-04 9.922E-05 1.500E-03 1.796E+01
  ETOT 17   9.9299254707128     -5.656E-04 1.422E+01 4.195E-05 1.404E-03 1.796E+01
 
- At SCF step   17, etot is converged : 
+ At SCF step   17, etot is converged :
   for the second time, diff in etot=  5.656E-04 < toldfe=  1.000E-03
 
  ---------------------------------------------------------------------------
@@ -281,16 +281,16 @@ tolerances: {toldfe: 1.00E-03, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
@@ -411,7 +411,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -423,12 +423,12 @@ P          mk1mem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -446,7 +446,7 @@ P          mk1mem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -461,15 +461,15 @@ P          mk1mem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         25.6  wall=         25.7
+- Proc.   0 individual time (sec): cpu=         25.4  wall=         25.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.6  wall=         25.7
++Overall time at end (sec) : cpu=         25.4  wall=         25.4

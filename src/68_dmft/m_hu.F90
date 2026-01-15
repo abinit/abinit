@@ -208,9 +208,9 @@ subroutine init_hu(hu,paw_dmft,pawtab)
  type(pawtab_type), intent(in) :: pawtab(paw_dmft%ntypat)
  type(hu_type), intent(inout) :: hu(paw_dmft%ntypat)
 !Local variables ------------------------------------
- integer  :: dmft_optim,i,ij,ij1,ij2,itypat,lpawu,m
+ integer  :: i,ij,ij1,ij2,itypat,lpawu,m
  integer  :: m1,ms,ms1,ndim,ntypat,tndim
- logical  :: t2g,x2my2d
+ logical  :: dmft_optim,t2g,x2my2d
  real(dp) :: jpawu,upawu,xtemp
  integer, parameter   :: mt2g(3) = (/1,2,4/)
  integer, allocatable :: xij(:,:)
@@ -222,7 +222,7 @@ subroutine init_hu(hu,paw_dmft,pawtab)
  t2g    = (paw_dmft%dmft_t2g == 1)
  x2my2d = (paw_dmft%dmft_x2my2d == 1)
 
- dmft_optim = paw_dmft%dmft_optim
+ dmft_optim = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
 
  write(message,'(2a)') ch10,"  == Compute Interactions for DMFT"
  call wrtout(std_out,message,'COLL')
@@ -323,7 +323,7 @@ subroutine init_hu(hu,paw_dmft,pawtab)
      end do ! ms1
    end do ! ms
 
-   if (t2g .and. dmft_optim == 1) then
+   if (t2g .and. dmft_optim) then
      upawu = zero
      jpawu = zero
      do ms1=1,ndim
@@ -652,7 +652,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
  type(matlu_type), intent(inout) :: udens_atoms(paw_dmft%natom)
  type(vee_type), target, intent(inout) :: vee_rotated(paw_dmft%natom)
 !Local variables-------------------------------
- integer  :: dmft_optim,iatom,itypat,lpawu,m,m1,m2,mi,ms,ms1,nat_correl
+ integer  :: iatom,itypat,lpawu,m,m1,m2,mi,ms,ms1,nat_correl
  integer  :: natom,ndim,nflavor,nspinor,nsppol,nsppol_,prtonly,tndim,prtopt
  logical  :: triqs
  real(dp) :: f2,jpawu,xsum,xsum2,xsum2new,xsumnew
@@ -671,8 +671,6 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 
  triqs = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7 .or. paw_dmft%dmft_solv == 10)
 
- dmft_optim = paw_dmft%dmft_optim
- 
  if(paw_dmft%dmft_solv .eq. 10) then
    prtopt = 4
  else
@@ -770,18 +768,19 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
          ABI_MALLOC(veeylm2,(tndim,tndim,tndim,tndim))
        end if
 !      Change basis from slm to ylm basis
-       !if (dmft_optim == 1) then
-       veeslm => hu(itypat)%vee(:,:,:,:)
+       !if (triqs) then
+         veeslm => hu(itypat)%vee(:,:,:,:)
        !else
        !  ABI_MALLOC(veeslm,(ndim,ndim,ndim,ndim))
-       !  veeslm(:,:,:,:) = cmplx(real(hu(itypat)%vee(:,:,:,:)),zero,kind=dp)
+       !  veeslm(:,:,:,:) = cmplx(real(hu(itypat)%vee(:,:,:,:)),zero,kind=sp)
        !end if
 
        call vee_slm2ylm_hu(lpawu,veeslm(:,:,:,:),veeylm(:,:,:,:),paw_dmft,1,2)
 
-       !if (dmft_optim == 0) then
+       !if (.not. triqs) then
        !  ABI_FREE(veeslm)
        !end if
+
        veeslm => null()
 
        ! The line below is not really useful
