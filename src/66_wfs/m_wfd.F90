@@ -4849,6 +4849,11 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ! TODO: Here I should treat the case in which istwfk in wfd differs from the one on disk.
       ABI_MALLOC(gf2wfd, (npw_disk))
       if (any(my_readmask(:,ik_ibz,spin))) then
+#if defined FC_NVHPC
+      !write(std_out, *)"NVHPC with netcdf gives crazy values for kg_k"
+      !write(std_out,*)  "wfd%kdata(ik_ibz)%kg_k(:,1)", wfd%kdata(ik_ibz)%kg_k(:,1)
+      !write(std_out,*)  "kg_k(:,1):", kg_k(:,1)
+#endif
         call kg_map(wfd%npwarr(ik_ibz), wfd%kdata(ik_ibz)%kg_k, npw_disk, kg_k, gf2wfd, nmiss)
       end if
       !if (nmiss/=0) then
