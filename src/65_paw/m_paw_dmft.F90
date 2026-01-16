@@ -1003,7 +1003,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  else if(use_dmft == 10) then
    write(message, '(a,a)') ch10,' DMFT uses the python invocation and orbitals constructed using Wannier90 '
  endif
-! call wrtout([std_out,ab_out],message,'COLL')
+ call wrtout([std_out,ab_out],message,'COLL')
 
  ! OG: What is all that? Something as moved? START
  if (use_dmft /= 10) then

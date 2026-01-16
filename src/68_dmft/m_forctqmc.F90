@@ -252,11 +252,13 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  if (useylm == 0) then
    write(std_out,*) " Slm (real spherical harmonics) basis is used (before a possible rotation)"
    rot_type_vee = 1 ! for rotatevee_hu
- else if (useylm == 1) then
-   !write(std_out,*) " Ylm (complex spherical harmonics) basis is used (before rotation)"
-   write(message,'(3a)') ch10,"   == Only Density-Density Terms Included"
-   call wrtout(std_out,message,'COLL') 
+! else if (useylm == 1) then
+!   !write(std_out,*) " Ylm (complex spherical harmonics) basis is used (before rotation)"
+!   write(message,'(3a)') ch10,"   == Only Density-Density Terms Included"
+!   call wrtout(std_out,message,'COLL') 
  else if (useylm == 1 .and. usejmj == 0) then
+   write(message,'(3a)') ch10,"   == Only Density-Density Terms Included"
+   call wrtout(std_out,message,'COLL')
    write(std_out,*) " Ylm (complex spherical harmonics) basis is used (before rotation)"
    rot_type_vee = 4 ! for rotatevee_hu
  else if (useylm == 1 .and. usejmj == 1) then
