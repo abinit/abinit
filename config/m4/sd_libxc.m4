@@ -78,7 +78,7 @@ AC_SUBST([abi_fb_libxc_version])
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_libxc_enable_fc}" && sd_libxc_enable_fc="yes"
+  test -z "${sd_libxc_enable_fc}" && sd_libxc_enable_fc="no"
   if test "${sd_libxc_enable_fc}" = "yes"; then
     test -z "${sd_libxc_libs_def}" && sd_libxc_libs_def="-lxcf90 -lxc"
   else
