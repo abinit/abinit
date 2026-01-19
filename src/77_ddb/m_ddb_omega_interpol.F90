@@ -258,6 +258,7 @@ contains
      ABI_ERROR(msg)
    end if
 
+   !Index shift for Berry curvatures
    ipert3= natom + 9
    idir3= 1
    iishift= 3*(mpert*(3*(mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
