@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h12 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h13 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t19/t19.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v67mbpt_t19/t19.abi
 - output file    -> t19.abo
 - root for input  files -> t19i
 - root for output files -> t19o
@@ -130,6 +130,11 @@ _ WF disk file :      0.417 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
            getwfk3          1
            getwfk4          1
            getwfk5          1
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     0.00000000E+00 Bohr
+          gw_rcut4     0.00000000E+00 Bohr
+          gw_rcut5     1.00000000E+00 Bohr
         gwcalctyp1          0
         gwcalctyp2          1
         gwcalctyp3          1
@@ -231,11 +236,6 @@ P           mkmem           3
         optdriver3          3
         optdriver4          3
         optdriver5          3
-             rcut1     0.00000000E+00 Bohr
-             rcut2     0.00000000E+00 Bohr
-             rcut3     0.00000000E+00 Bohr
-             rcut4     0.00000000E+00 Bohr
-             rcut5     1.00000000E+00 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -293,7 +293,7 @@ P           mkmem           3
             typat      1  1
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -341,8 +341,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -435,7 +435,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -447,7 +447,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t19o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.22844   Average Vxc (hartree)=  -0.35062
  Eigenvalues (hartree) for nkpt=   3  k points:
@@ -471,7 +471,7 @@ psp_core            :  8.60437873155177E-02
 local_psp           : -2.54700041519356E+00
 non_local_psp       :  1.83258979949224E+00
 total_energy        : -8.77512526040355E+00
-total_energy_eV     : -2.38783301880423E+02
+total_energy_eV     : -2.38783322817705E+02
 band_energy         :  3.98859226013338E-01
 ...
 
@@ -482,9 +482,9 @@ band_energy         :  3.98859226013338E-01
   sigma(3 3)= -2.34301835E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  6.8934E+00 GPa]
-- sigma(1 1)= -6.89339681E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -6.89339681E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -6.89339681E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -6.89339797E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -6.89339797E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -6.89339797E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -567,10 +567,10 @@ meta: {optdriver: 3, gwcalctyp: 1, }
   1    0.000000E+00    0.000000E+00
   2    0.000000E+00    7.786879E+02
   3    0.000000E+00    1.334270E+02
-  4    0.000000E+00    4.426765E+01
+  4    0.000000E+00    4.426766E+01
   5    0.000000E+00    1.672687E+01
-  6    0.000000E+00    5.549548E+00
-  7    0.000000E+00    9.509066E-01
+  6    0.000000E+00    5.549549E+00
+  7    0.000000E+00    9.509067E-01
 
 
 --------------------------------------------------------------------------------
@@ -910,10 +910,10 @@ meta: {optdriver: 3, gwcalctyp: 1, }
   1    0.000000E+00    0.000000E+00
   2    0.000000E+00    7.786879E+02
   3    0.000000E+00    1.334270E+02
-  4    0.000000E+00    4.426765E+01
+  4    0.000000E+00    4.426766E+01
   5    0.000000E+00    1.672687E+01
-  6    0.000000E+00    5.549548E+00
-  7    0.000000E+00    9.509066E-01
+  6    0.000000E+00    5.549549E+00
+  7    0.000000E+00    9.509067E-01
 
 
 --------------------------------------------------------------------------------
@@ -1261,10 +1261,10 @@ meta: {optdriver: 3, gwcalctyp: 1, }
   1    0.000000E+00    0.000000E+00
   2    0.000000E+00    7.786879E+02
   3    0.000000E+00    1.334270E+02
-  4    0.000000E+00    4.426765E+01
+  4    0.000000E+00    4.426766E+01
   5    0.000000E+00    1.672687E+01
-  6    0.000000E+00    5.549548E+00
-  7    0.000000E+00    9.509066E-01
+  6    0.000000E+00    5.549549E+00
+  7    0.000000E+00    9.509067E-01
 
 
 --------------------------------------------------------------------------------
@@ -1607,10 +1607,10 @@ meta: {optdriver: 3, gwcalctyp: 1, }
   1    0.000000E+00    0.000000E+00
   2    0.000000E+00    7.786879E+02
   3    0.000000E+00    1.334270E+02
-  4    0.000000E+00    4.426765E+01
+  4    0.000000E+00    4.426766E+01
   5    0.000000E+00    1.672687E+01
-  6    0.000000E+00    5.549548E+00
-  7    0.000000E+00    9.509066E-01
+  6    0.000000E+00    5.549549E+00
+  7    0.000000E+00    9.509067E-01
 
 
 --------------------------------------------------------------------------------
@@ -1905,6 +1905,11 @@ meta: {optdriver: 3, gwcalctyp: 1, }
            getwfk3          1
            getwfk4          1
            getwfk5          1
+          gw_rcut1     0.00000000E+00 Bohr
+          gw_rcut2     0.00000000E+00 Bohr
+          gw_rcut3     0.00000000E+00 Bohr
+          gw_rcut4     0.00000000E+00 Bohr
+          gw_rcut5     1.00000000E+00 Bohr
         gwcalctyp1          0
         gwcalctyp2          1
         gwcalctyp3          1
@@ -2006,11 +2011,6 @@ P           mkmem           3
         optdriver3          3
         optdriver4          3
         optdriver5          3
-             rcut1     0.00000000E+00 Bohr
-             rcut2     0.00000000E+00 Bohr
-             rcut3     0.00000000E+00 Bohr
-             rcut4     0.00000000E+00 Bohr
-             rcut5     1.00000000E+00 Bohr
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -2078,7 +2078,7 @@ P           mkmem           3
             typat      1  1
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2179,10 +2179,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.8  wall=          6.2
+- Proc.   0 individual time (sec): cpu=          4.8  wall=          4.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.8  wall=          6.2
++Overall time at end (sec) : cpu=          4.8  wall=          4.8

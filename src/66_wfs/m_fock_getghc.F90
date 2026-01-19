@@ -19,6 +19,7 @@
 
 module m_fock_getghc
 
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
  use defs_basis
  use m_abicore
  use m_errors
@@ -26,7 +27,6 @@ module m_fock_getghc
  use m_fock
  use m_pawcprj
  !use m_cgtools
- use, intrinsic :: iso_c_binding, only: c_size_t
 
  use defs_abitypes, only : mpi_type
  use defs_datatypes, only : pseudopotential_type
@@ -47,9 +47,8 @@ module m_fock_getghc
  use m_paw_ij,           only : paw_ij_type
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
+ use m_gputk
  use m_abi_linalg
-
- use, intrinsic :: iso_c_binding, only: c_loc
 
 #if defined(HAVE_GPU)
  use m_gpu_toolbox
@@ -243,7 +242,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  logical :: need_ghc,qeq0
  real(dp),parameter :: weight1=one
  real(dp) :: doti,eigen,imcwf,imcwocc,imvloc,invucvol,recwf,recwocc,revloc,wtk
- complex(dpc) :: cinvucvol,cucvol
+ complex(dp) :: cinvucvol,cucvol
  type(fock_common_type),pointer :: fockcommon
  type(fock_BZ_type),pointer :: fockbz
 ! Arrays
@@ -540,8 +539,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !     qvec(:)=kpoint_i(:)-kpoint_j(:)
    qvec_j(:)=gs_ham%kpt_k(:)-fockbz%kptns_bz(:,jkpt)
    qeq0=(qvec_j(1)**2+qvec_j(2)**2+qvec_j(3)**2<1.d-15)
-   call bare_vqg(qvec_j,fockcommon%gsqcut,gs_ham%gmet,fockcommon%usepaw,fockcommon%hyb_mixing,&
-&   fockcommon%hyb_mixing_sr,fockcommon%hyb_range_fock,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
+
+   ! Get the Coulomb interaction in reciprocal space
+   call bare_vqg(qvec_j,fockcommon,gs_ham%gmet,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET UPDATE TO(vqg) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
@@ -694,16 +694,16 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 
 
      call timab(1515,2,tsec) ; call timab(1513,-1,tsec) ; call timab(1544,-2,tsec)
-       ! Perform an FFT using fourwf to get rhog_munu = FFT^-1(rhor_munu)
-       call fourdp(cplex_fock,rhog_munu,rhor_munu,-1,mpi_enreg,nfftf,ndat*ndat_occ,&
+     ! Perform an FFT using fourwf to get rhog_munu = FFT^-1(rhor_munu)
+     call fourdp(cplex_fock,rhog_munu,rhor_munu,-1,mpi_enreg,nfftf,ndat*ndat_occ,&
 &         ngfftf,tim_fourdp_fock_getghc,gpu_option=gpu_option)
      call timab(1513,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1544,-1,tsec)
 
      if(fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
        ABI_MALLOC(vfockstr, (6,ndat_occ,ndat))
-       call strfock(gs_ham%gprimd,fockcommon%gsqcut,vfockstr,fockcommon%hyb_mixing,fockcommon%hyb_mixing_sr,&
-&          fockcommon%hyb_range_fock,mpi_enreg,nfftf,ngfftf,fockbz%nkpt_bz,ndat*ndat_occ,rhog_munu,gs_ham%ucvol,&
-&          qvec_j,gpu_option=gpu_option)
+       call strfock(fockcommon,gs_ham%gprimd,vfockstr,&
+&                   mpi_enreg,nfftf,ngfftf,fockbz%nkpt_bz,ndat*ndat_occ,rhog_munu,gs_ham%ucvol,&
+&                   qvec_j,gpu_option=gpu_option)
        do idat=1,ndat
        do idat_occ=1,ndat_occ
          fockcommon%stress_ikpt(:,fockcommon%ieigen+idat-1)=fockcommon%stress_ikpt(:,fockcommon%ieigen+idat-1)+vfockstr(:,idat_occ,idat)*occ(idat_occ)*wtk
@@ -1871,7 +1871,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
 
 !Local variables-------------------------------
 ! Scalars
- complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
+ complex(dp), parameter :: cminusone  = (-1._dp,0._dp)
  integer :: iband,ikpt,ipw,my_nspinor,nband_k,npw,idat,gpu_option_
  real(dp) :: eigen
  type(fock_common_type),pointer :: fockcommon

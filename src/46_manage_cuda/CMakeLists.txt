@@ -19,7 +19,6 @@ add_library(46_manage_cuda STATIC
   gpu_mkkpg.cu
   gpu_nonlop.cu
   gpu_sphere.cu
-  gpu_fftbox.cu
   prt_utils_rec.cu
   rec_dens_calc.cu
   rec_kernels.cu

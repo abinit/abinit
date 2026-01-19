@@ -677,6 +677,9 @@ subroutine polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,polunit,&
 !arrays
  real(dp) :: pel_mks(3),pelev_mks(3),pion_mks(3),ptot(3),ptot_mks(3)
 
+! GA: - The input/ouput description above is wrong.
+!     - Why do we care whether we used PAW?
+
 ! ***********************************************************************
 !!REC Note ptot has already been folded and kept onto same branch
 !unless ptot=0d0, in which case ptot has not been computed yet

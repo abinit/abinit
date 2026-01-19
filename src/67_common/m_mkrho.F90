@@ -30,6 +30,7 @@ module m_mkrho
  use m_errors
  use m_dtset
  use m_extfpmd
+ use m_gputk
  use m_abi_linalg
 
  use defs_abitypes,  only : MPI_type
@@ -103,6 +104,7 @@ contains
 !!   | symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !!   | symrel(3,3,nsym)=symmetry matrices in real space (integers)
 !!   | wtk(nkpt)=k point weights (they sum to 1.0)
+!!  extfpmd <type(extfpmd_type)>=--optional--extended first-principles molecular dynamics type
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
@@ -147,17 +149,15 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  type(paw_dmft_type), intent(in)  :: paw_dmft
  type(wvl_wf_type),intent(inout) :: wvl_wfs
  type(wvl_denspot_type), intent(inout) :: wvl_den
-!no_abirules
 !nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise
- integer, intent(in) :: irrzon(dtset%nfft**(1-1/dtset%nsym),2,  &
-   &               (dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
+ integer, intent(in) :: irrzon(dtset%nfft**(1-1/dtset%nsym),2, (dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  integer, intent(in) :: kg(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
  real(dp), intent(in) :: gprimd(3,3)
  real(dp), intent(in), target :: cg(2,mcg)
  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
 !nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise
  real(dp), intent(in) :: phnons(2,(dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3))**(1-1/dtset%nsym),  &
-&                                 (dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
+                                  (dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp), intent(in) :: rprimd(3,3)
  real(dp), intent(out) :: rhor(dtset%nfft,dtset%nspden),rhog(2,dtset%nfft)
 
@@ -195,7 +195,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  real(dp), ABI_CONTIGUOUS pointer :: rhoaug_my(:,:,:)   => null()
  real(dp), ABI_CONTIGUOUS pointer :: wfraug(:,:,:,:)    => null()
  real(dp), ABI_CONTIGUOUS pointer :: cg_k(:,:) => null()
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -825,10 +824,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                do ib=1,blocksize
                  cwavef_rot(:, :, ib, :) = cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :)
                end do
-
                call rot_cg(paw_dmft%occnd(:,:,:,ikpt,isppol), cwavef_rot, npw_k, nband_k, blocksize,&
 &                          dtset%nspinor, paw_dmft%include_bands(1), paw_dmft%mbandc, occ_diag,&
-&                          paw_dmft%dmft_optim)
+&                          (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7))
                do ib=1,blocksize
                  cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :) = cwavef_rot(:, :, ib, :)
                end do
@@ -1089,24 +1087,21 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
  nfftot=dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
 
-!Add extfpmd free electrons contribution to density
+!Add extfpmd electrons contributions to density on coarse grid.
+!When using a fine grid, space-dependant contributions to the
+!density are added in the pawmkrho subroutine.
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
-     if(extfpmd%version==10) then
-       do ispden=1,dtset%nspden
-         do ifft=1,dtset%nfft
-           rhor(ifft,ispden)=rhor(ifft,ispden)+extfpmd%nelectarr(ifft,ispden)/ucvol/dtset%nspden
-         end do
-       end do
+     if(extfpmd%version==10.and.allocated(extfpmd%nelectarr)) then
+       rhor(:,:)=rhor(:,:)+extfpmd%nelectarr(:,:)/ucvol/dtset%nspden
      else
        rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
      end if
-     rhog(1,1)=rhog(1,1)+extfpmd%nelect/ucvol/dtset%nspden
    end if
  end if
 
  select case (ioption)
- case(0, 1)
+ case (0, 1)
    call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
                phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel,dtset%tnons)
    if(ioption==1)then
@@ -1118,7 +1113,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
        rhog(:,ifft)=1.0d0/2.0d0*rhog(:,ifft)
      end do
    end if
- case(2)
+ case (2)
    ABI_BUG('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
    !call symtaug(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
    !dtset%paral_kgb,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
@@ -2409,10 +2404,8 @@ end subroutine read_atomden
 !! atomrgrid(natomgrmax,ntypat)
 !! density(natomgrmax,ntypat)
 !!
-!! OUTPUT
-!! rho(ngrid) : input/output density array
-!!
 !! SIDE EFFECTS
+!! rho(ngrid): input/output density array
 !!
 !! NOTES
 !! There are two ways to compile the proto density in real space
@@ -2431,11 +2424,10 @@ end subroutine read_atomden
 !! average, since there is no preferred direction without any
 !! external field (and it's simpler)
 !!
-!!
 !! SOURCE
 
 subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_pos, &
-&                  natomgr,natomgrmax,atomrgrid,density,prtvol,calctype)
+                   natomgr,natomgrmax,atomrgrid,density,prtvol,calctype)
 
 !Arguments ------------------------------------
 !scalars
@@ -2468,8 +2460,6 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
  real(dp),allocatable :: equiv_atom_dist(:,:),equiv_atom_pos(:,:,:),rho_temp(:,:)
  real(dp),allocatable :: dp_1d_dummy(:),dp_2d_dummy(:,:),ypp(:)
  real(dp),allocatable :: x_fit(:),y_fit(:)
-
-
 ! ************************************************************************
 
 !initialise and check parallel execution
@@ -2768,7 +2758,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
  ABI_SFREE(equiv_atom_pos)
  ABI_SFREE(equiv_atom_dist)
 
- end subroutine atomden
+end subroutine atomden
 !!***
 
 end module m_mkrho

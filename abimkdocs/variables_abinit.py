@@ -278,13 +278,13 @@ Variable(
     varset="gstate",
     vartype="real",
     topics=['NMR_basic','MagField_expert'],
-    dimensions=['[[3*natnd]]'],
+    dimensions=['3*[[natnd]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="ATom Nuclear Dipole moment LIST",
     requires="[[natnd]] > 0 and [[iatnd]]",
     added_in_version="v10.5",
     text=r"""
-Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit 
+Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit
 nuclear dipole moments. The number of atoms in the cell with explicit
 nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
 of the dipole moment vector on each atom is given in [[atndlist]]. There are 3*[[natnd]]
@@ -1516,7 +1516,7 @@ electrons from occupation numbers). It is then required that: nelect_occ = [[nel
 To treat a neutral system, which is desired in nearly all cases, one must use
 [[cellcharge]] = 0. To treat a system missing one electron per unit cell, set [[cellcharge]] = +1.
 
-[[cellcharge]] superceeds the old [[charge]] input variable, whose name was rather unspecific.
+[[cellcharge]] superdeeds the old [[charge]] input variable, whose name was rather unspecific.
 
 When there are several images, [[cellcharge]] might depend on the image number, but ONLY
 when [[imgmov]]=6 and [[occopt]]=0 or 2. In the checking routine, [[nelect]] is considered
@@ -1696,7 +1696,7 @@ Variable(
     topics=['parallelism_useful'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="CHecK whether the PARALelism is adequate",
+    mnemonics="CHecK whether the PARALlelism is adequate",
     added_in_version="before_v9",
     text=r"""
 Not all parallelism types or level are allowed or simply relevant for the different [[optdriver]] values in ABINIT.
@@ -2011,7 +2011,7 @@ For now, [[cprj_in_memory]] = 1 is implemented only in the following context:
 
 * [[optdriver]] = 0: ground-state computation. If optdriver/=0, [[cprj_in_memory]] is set to 0 automatically.
 
-* [[wfoptalg]] = 10,114 or 111: using Congugate Gradient algorithm (PAW only), LOBPCG (PAW or NC) or Chebyshev filtering (PAW or NC)
+* [[wfoptalg]] = 10,114 or 111: using Conjugate Gradient algorithm (PAW only), LOBPCG (PAW or NC) or Chebyshev filtering (PAW or NC)
 
 * [[rmm_diis]] = 0: without the use of rmm_diis algorithm
 
@@ -2979,14 +2979,17 @@ Variable(
     abivarname="dmft_charge_prec",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=1e-06,
-    mnemonics="Dynamical Mean Field Theory: charge density precision",
+    mnemonics="Dynamical Mean Field Theory: CHARGE density PRECision",
+    requires="[[usedmft]] == 1",
     added_in_version="before_v9",
     text=r"""
-Precision to achieve in determining the charge density in the computation of the fermi level.
-Should be decreased to increase precision. However, for a large system, it can increase importantly computer time.
+This variable sets the numerical tolerance used to determine the Fermi level. The root-finding algorithm stops once the calculated electron count matches the target value within this tolerance.
+A smaller value improves the accuracy of the Fermi level but increases the number of root-finding iterations, which may significantly impact performance for large systems. If you are using noisy solvers (e.g., CT-QMC), it is unnecessary to set a tolerance smaller than the intrinsic noise level of your solver.
+
+See [[dmft_fermi_step]] for further tuning of the root-finding algorithm.
 """,
 ),
 
@@ -2994,20 +2997,33 @@ Variable(
     abivarname="dmft_dc",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_useful'],
+    topics=['DMFT_basic', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
-    defaultval=1,
+    defaultval=r"None if [[dmft_solv]] $\in$ [6,7], 1 otherwise",
     mnemonics="Dynamical Mean Field Theory: Double Counting",
-    characteristics=['[[DEVELOP]]'],
+    requires="[[usedmft]] == 1",
     added_in_version="before_v9",
     text=r"""
 
-Value of double counting used for DMFT (so, only relevant for [[usedmft]]=1)..
+Selects the double counting (DC) correction formula used in DFT+DMFT calculations.
 
-   * 1: corresponds to the "Full Localized Limit" double counting (to be used with [[usepawu]]=10).
-   * 2: corresponds to the "Around Mean Field" double counting (this is not yet in production).
-   * 5: the calculation is done without magnetism in the J term (cf [[cite:Park2015]] and [[cite:Chen2016a]]), to be used with [[usepawu]]=14.
-   * 6: this option is in development.
+   * 1 or 5 - Full Localized Limit (FLL): magnetic (1) and non-magnetic (5) versions.
+   * 2 or 6 - Around Mean Field (AMF): magnetic (2) and non-magnetic (6) versions.
+   * 7 - Nominal double counting: non-magnetic version only. Uses the nominal occupancy set by [[dmft_nominal]].
+   * 8 - Exact formula (cf [[cite:Haule2015a]]): non-magnetic version only, and only compatible
+         with LDA and PBE ([[ixc]] $\in$ [7,-1012,11,-101130]).
+         This is the formula you should always use. The implementation makes the assumption
+         that the screened potential has the form of a Yukawa potential (cf [[dmft_yukawa_param]]),
+         which is rigorously valid only in the case [[dmft_solv]]=7, with the full Slater Hamiltonian.
+         Besides, we assume that the projection of the correlated orbital [[dmft_orbital]]
+         on the energy window [ [[dmftbandi]],[[dmftbandf]] ] is equal to [[dmft_orbital]] itself
+         (i.e. the closure relation is assumed). Please look at section 7 of the
+         [[tutorial:dmft_triqs|tutorial on DFT+DMFT with TRIQS/CT-HYB]] for detailed informations on how to use it.
+
+Magnetic formulas ([[dmft_dc]] < 5 ) need to be used with magnetic DFT ([[usepawu]]=10).
+Non-magnetic formulas ([[dmft_dc]] >= 5 ) need to be used with non-magnetic DFT ([[usepawu]]=14).
+See [[cite:Park2015]] and [[cite:Chen2016a]] for more details on the non-magnetic treatment.
+
 """,
 ),
 
@@ -3030,39 +3046,64 @@ Quantum Monte Carlo). See also the input variable [[dmft_nlambda]].
 ),
 
 Variable(
-    abivarname="dmft_kspectral_func",
+    abivarname="dmft_fermi_step",
     varset="dmft",
-    vartype="integer",
-    topics=['DMFT_useful'],
+    vartype="real",
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
-    defaultval=0,
-    mnemonics="Dynamical Mean Field Theory: compute K-resolved SPECTRAL FUNCtion",
-    characteristics=['[[DEVELOP]]'],
-    added_in_version="9.0.0",
+    defaultval=0.02,
+    mnemonics="Dynamical Mean Field Theory: FERMI search maximal STEP",
+    requires="[[usedmft]] == 1",
+    characteristics=['[[ENERGY]]'],
+    added_in_version="before_v10.5.6",
     text=r"""
+During the Fermi level search, the step increment for the Fermi level is capped to [[dmft_fermi_step]].
+If this value is too low, the root-finding algorithm will be significantly slowed down.
+If it is too high, the step increment might become too high and the algorithm might encounter instabilities
+and fail to converge.
 
-When activated, in conjunction with [[iscf]] = -2 or -3, a calculation
-of k-resolved spectral function (or density of state) is possible.
-However, the calculation requires as input the self-energy computed in the real
-axis using an external analytical continuation code.
-The section 7 of the [[tutorial:dmft|tutorial on DFT+DMFT]]  details how to obtain this data
-and related informations.
+Can be specified in the unit of your choice (Ha, Ry, eV, K) since it has the [[ENERGY]] characteristics.
+
+See [[dmft_charge_prec]] for further tuning of the root-finding algorithm.
 """,
 ),
-
 
 Variable(
     abivarname="dmft_iter",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_compulsory'],
+    topics=['DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
-    defaultval=0,
-    mnemonics="Dynamical Mean Field Theory: number of ITERation",
-    characteristics=['[[DEVELOP]]'],
+    defaultval=r"None if [[dmft_solv]] $\in$ [6,7], 10 otherwise",
+    mnemonics="Dynamical Mean Field Theory: number of DMFT ITERations",
+    requires="[[usedmft]] == 1",
     added_in_version="before_v9",
     text=r"""
-Number of iterations for the DMFT inner loop.
+Number of iterations in the DMFT inner loop, at fixed density. The number of DFT+DMFT cycles (i.e. density updates)
+is set via [[nstep]], for a total number of [[nstep]] $\times$ [[dmft_iter]] calls to the impurity solver.
+""",
+),
+
+Variable(
+    abivarname="dmft_kspectralfunc",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_useful', 'DmftTriqsCthyb_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: compute K-resolved SPECTRAL FUNCtion",
+    requires="[[usedmft]] == 1, [[iscf]] in [-3,-2]",
+    added_in_version="9.0.0",
+    text=r"""
+
+When activated, in conjunction with [[iscf]] = -2 or -3, a calculation
+of $k$-resolved spectral function (or density of states) is performed.
+However, the calculation requires as input the self-energy computed in the real
+axis using an external analytical continuation code.
+The section 7 of the [[tutorial:dmft|tutorial on DFT+DMFT]] details how to obtain this data
+and related information with the ABINIT's internal implementation. In order to use it with
+the TRIQS/CT-HYB interface, please have a look at section 6 in the
+[[tutorial:dmft_triqs|TRIQS/CT-HYB tutorial]].
 """,
 ),
 
@@ -3074,6 +3115,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: Magnetic Field",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\ne$ [6,7]",
     characteristics=['[[DEVELOP]]'],
     added_in_version="10.4.0",
     text=r"""
@@ -3097,6 +3139,7 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="Dynamical Mean Field Theory: Magnetic Field Value of Bz",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\ne$ [6,7]",
     characteristics=['[[DEVELOP]]'],
     added_in_version="10.4.0",
     text=r"""
@@ -3108,14 +3151,14 @@ Variable(
     abivarname="dmft_mxsf",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_useful'],
+    topics=['DMFT_useful', 'DmftTriqsCthyb_useful'],
     dimensions="scalar",
-    defaultval=0.3,
+    defaultval=0.6,
     mnemonics="Dynamical Mean Field Theory: MiXing parameter for the SelF energy",
-    characteristics=['[[DEVELOP]]'],
+    requires="[[usedmft]] == 1",
     added_in_version="before_v9",
     text=r"""
-Mixing parameter for the simple mixing of the self-energy (0.3 is safe, but it can be increased most of the time to 0.6).
+Linear mixing parameter of the self-energy. Most of the time, it can be increased to 0.6-0.8, but you can decrease it if you're having convergence issues. Always try to set it as high as possible to speed up convergence.
 """,
 ),
 
@@ -3138,17 +3181,31 @@ Its value must be greater or equal to 3.
 ),
 
 Variable(
+    abivarname="dmft_nominal",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_useful', 'DmftTriqsCthyb_useful'],
+    dimensions=['[[natom]]'],
+    mnemonics="Dynamical Mean Field Theory: NOMINAL occupancies",
+    requires="[[usedmft]] == 1, [[dmft_dc]] == 7",
+    added_in_version="before_v10.5.6",
+    text=r"""
+[[dmft_nominal]] gives the nominal occupancies for each atom, used for the nominal double
+counting ([[dmft_dc]]=7). For uncorrelated atoms, just set any arbitrary value.
+""",
+),
+
+Variable(
     abivarname="dmft_nwli",
     varset="dmft",
     vartype="integer",
     topics=['DMFT_compulsory'],
     dimensions="scalar",
-    defaultval=0,
     mnemonics="Dynamical Mean Field Theory: Number of frequency omega (W) in the LInear mesh",
-    characteristics=['[[DEVELOP]]'],
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\ne$ [6,7]",
     added_in_version="before_v9",
     text=r"""
-Number of Matsubara frequencies (linear mesh)
+Number of Matsubara frequencies (linear mesh), only for the internal solvers of Abinit.
 """,
 ),
 
@@ -3160,10 +3217,11 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: Number of frequency omega (W) in the LOg mesh",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\ne$ [6,7]",
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-Number of frequencies in the log mesh.
+Number of frequencies in the log mesh, only for the internal solvers of Abinit.
 """,
 ),
 
@@ -3175,10 +3233,124 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: Occupation non-diagonal imaginary part",
+    requires="[[usedmft]] == 1",
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
 When 0 force non-diagonal occupations imaginary parts to be null. Do not use this, it is only for compatibility with old tests.
+""",
+),
+
+Variable(
+    abivarname="dmft_orbital",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_useful', 'DmftTriqsCthyb_useful'],
+    dimensions=['[[ntypat]]'],
+    defaultval=1,
+    mnemonics="Dynamical Mean Field Theory: correlated ORBITAL",
+    requires="[[usedmft]] == 1",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set the reduced radial wavefunction $u_l(r)$ of the correlated orbitals $\frac{u_l(r)}{r} Y_{lm}(\hat{r})$
+for each atom type, where $Y_{lm}(\hat{r})$ are the real spherical harmonics.
+For uncorrelated atom types, simply put any arbitrary value.
+The same radial wavefunction is used for all angular momentum channels $m$ of a given atom type.
+
+  * If set to $i >$ 0, use the $i$-th radial orbital of the corresponding PAW dataset.
+    They all correspond to atomic orbitals at different energies, with $i$=1 having the lowest energy
+    and being the most bound (default choice).
+  * If set to $i \le$ 0, read an arbitrary radial part from the file specified by [[dmft_orbital_filepath]].
+""",
+),
+
+Variable(
+    abivarname="dmft_orbital_filepath",
+    varset="dmft",
+    vartype="string",
+    topics=['DMFT_useful', 'DmftTriqsCthyb_useful'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: correlated ORBITAL FILEPATH",
+    requires=r"[[usedmft]] == 1, [[dmft_orbital]] $\le$ 0",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set the root of the filepath for the correlated orbital in the case of a user-provided
+reduced radial wavefunction $u_l(r)$ ([[dmft_orbital]] $\le$ 0).
+
+The filepath for each atom type must be "[[dmft_orbital_filepath]]_xxxx" with "xxxx"
+the atom type number, written with 4 digits.
+
+The first line must be the number of radial points. Afterwards, you must provide the value
+of $u_l(r)$ for each point, with one value per line. Simply provide the value, and nothing else.
+The file must be one column.
+
+The values of the radii are implicitly set in the code by assuming the radial mesh obeys the same
+formula as the one used for the radial mesh of the PAW dataset. The first value is the lowest radius
+(usually 0).
+
+Thus, inside the PAW sphere, the radial mesh of your orbital must be identical to that of the
+PAW dataset, but your orbital can stop at any arbitrary radius (earlier or even later as long as
+you extend the mesh in a consistent way). If you do not know how to extrapolate the PAW mesh, this
+can be done very simply by printing the Wannier functions ([[dmft_prtwan]]=1).
+
+If you only know the values of your orbital $u_l(r)$ on a specific set of radii, simply use a cubic
+spline interpolation to extrapolate the values on the extended PAW mesh.
+""",
+),
+
+Variable(
+    abivarname="dmft_prt_maxent",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Dynamical Mean Field Theory: PRinT files for MAXENT",
+    requires="[[usedmft]] == 1",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set to 1 to write useful files for the analytical continuation of the self-energy.
+This prints the self-energy in the basis that diagonalizes the local electronic levels.
+The off-diagonal elements are thus minimized, since they are not handled by most analytical
+continuation codes. The rotation matrix is also printed, as well as the matrix overlap of the
+Wannier functions.
+""",
+),
+
+Variable(
+    abivarname="dmft_prtself",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: PRinT SELF-energy",
+    requires="[[usedmft]] == 1",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set to 1 to write the self-energy at each iteration in order to see its evolution
+along the SCF cycle. Otherwise, the self-energy file is overwritten at each iteration
+to keep the last value only.
+""",
+),
+
+Variable(
+    abivarname="dmft_prtwan",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: PRinT WANnier functions",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Compute and write on file the reduced radial part $u_l(r)$ of the Wannier functions
+(i.e. the orthonormalized projection of [[dmft_orbital]] on [ [[dmftbandi]],[[dmftbandf]] ]).
+This is computed on the same radial mesh as the PAW one, extended up to the radius [[dmft_wanrad]].
+It corresponds to the local orbital that is used in practice in the code, and is different from
+[[dmft_orbital]] in the general case (unless your energy window is large enough to have a closure
+relation). This is only available in the case [[dmft_solv]] $\in$ [6,7].
 """,
 ),
 
@@ -3190,6 +3362,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: READ OCCupations (Non Diagonal)",
+    requires="[[usedmft]] == 1",
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
@@ -3214,28 +3387,63 @@ Variable(
     abivarname="dmft_rslf",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_basic'],
+    topics=['DMFT_expert'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval=1,
     mnemonics="Dynamical Mean Field Theory: Read SeLF energy",
+    requires="[[usedmft]] == 1",
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-Flag to read/write Self-Energy. If put to one, self-energy is written and read at each DFT iteration.
-If self-energy file is missing, the self-energy is initialized to the double counting at the first iteration.
-Importantly, in order to the calculation to restart easily, the self-energy is read and write in the same file.
+Flag to initialize the self-energy at the beginning of each new DMFT loop.
+
+If set to 1, the self-energy is read either from the file of the dataset specified by [[getself]]
+if this is the first DFT+DMFT iteration, or from the previous iteration otherwise.
+In other words, this allows a charge self-consistent calculation. If no such file can be found,
+the self-energy is set to the DFT double-counting value.
+
+If set to 0, the self-energy is always initialized to the double counting value at the beginning
+of each new DFT+DMFT iteration.
+
+If set to -1, it is initialized to 0.
+
+These last two options are only here for debugging and historical purposes, and should
+not be used. Note that inside a DMFT loop, the calculation is always self-consistent,
+regardless of the value of [[dmft_rslf]].
+""",
+),
+
+Variable(
+    abivarname="dmft_shiftself",
+    varset="dmft",
+    vartype="real",
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
+    dimensions=['[[natom]]'],
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: spin SHIFT for the SELF-energy",
+    requires="[[usedmft]] == 1, [[nsppol]] == 2, [[usepawu]] == 14",
+    characteristics=['[[ENERGY]]'],
+    added_in_version="before_v10.5.6",
+    text=r"""
+When you are performing a magnetic calculation with a non-magnetic DFT, the magnetization
+can take quite some time to arise (especially if it's very low) since you start from a
+paramagnetic configuration. In this case, it is useful to start directly from a ferromagnetic
+self-energy to speed up convergence. Thus, at the first iteration, an initial static shift
+[[dmft_shiftself]] is applied between the two spin channels of the DMFT self-energy.
+
+Can be specified in the unit of your choice (Ha, Ry, eV, K) since it has the [[ENERGY]] characteristics.
 """,
 ),
 
 Variable(
     abivarname="dmft_solv",
     varset="dmft",
-    vartype="real",
-    topics=['DMFT_basic'],
+    vartype="integer",
+    topics=['DMFT_basic', 'DmftTriqsCthyb_basic'],
     dimensions="scalar",
     defaultval=5,
     mnemonics="Dynamical Mean Field Theory: choice of SOLVer",
-    characteristics=['[[DEVELOP]]'],
+    requires="[[usedmft]] == 1",
     added_in_version="before_v9",
     text=r"""
 Choice of solver for the Impurity model.
@@ -3243,25 +3451,22 @@ Choice of solver for the Impurity model.
   * 0 --> No solver and U=0, J=0 (see [[upawu]] and [[jpawu]]).
   * 1 --> DFT+U self-energy is used (for testing purpose)
   * 2 --> Hubbard one solver in the density density approximation of the Coulomb interaction. The Hubbard one solver is an approximation which gives a rough description of correlated Mott insulators. It should not be used for metals.
-  * 5 --> Use the Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of ABINIT in the density density approximation of the Coulomb interaction. The calculation is fully parallelised over MPI processes.
-  * 6 --> Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of TRIQS in the density density representation.
-  * 7 --> Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of TRIQS with the rotationally invariant formulation.
-  * 8 --> Same as 5, but off-diagonal elements of the hybridization function are taken into account (useful for low symetry systems or with spin orbit coupling).
+  * 5 --> Use the Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of ABINIT in the density density approximation of the Coulomb interaction. The calculation is fully parallelized over MPI processes.
+  * 6 --> TRIQS/CTHYB with the density-density Hamiltonian.
+  * 7 --> TRIQS/CTHYB with the full rotationally invariant Slater Hamiltonian.
+  * 8 --> Same as 5, but off-diagonal elements of the hybridization function are taken into account (useful for low symmetry systems or with spin orbit coupling).
   * 9 --> Python invocation. Give a symbolic link to your python interpreter as an input like 'input-tag'_TRIQS_python_lib and the python script as an input like 'input-tag'_TRIQS_script.py. The inputs for the script will be written in dft_for_triqs.nc and the output as triqs_for_dft.nc.
 
 The CT Hyb algorithm is described in [[cite:Werner2006]]. For a
 discussion of density-density approximation with respect with the
-rotationnally invariant formulation, see e.g. [[cite:Antipov2012]].
+rotationally invariant formulation, see e.g. [[cite:Antipov2012]].
 The ABINIT/CT Hyb implementation is discussed in [[cite:Gonze2016]].
 The TRIQS/CT Hyb implementation is described in [[cite:Seth2016]].
-Before using it, it has to be installed following instructions available [here](https://triqs.github.io/triqs/2.1.x).
-Until release 8.10 included, the
-interface was valid only for TRIQS 1.4 and TRIQS/CTHYB 1.4. It has then been upgraded to TRIQS 2.1 afterwards.
-An example of a config.ac file to compile ABINIT with TRIQS can be found in [[ac:higgs_gnu_7.3_triqs2.ac]].
-See the useful variables for CT-QMC solver: [[dmftctqmc_basis]],
+
+See the useful variables for ABINIT/CT-QMC solver: [[dmftctqmc_basis]],
 [[dmftctqmc_check]], [[dmftctqmc_correl]], [[dmftctqmc_gmove]],
 [[dmftctqmc_grnns]], [[dmftctqmc_meas]], [[dmftctqmc_mrka]],
-[[dmftctqmc_mov]], [[dmftctqmc_order]], [[dmftctqmc_triqs_nleg]],
+[[dmftctqmc_mov]], [[dmftctqmc_order]],
 [[dmftqmc_l]], [[dmftqmc_n]], [[dmftqmc_seed]], [[dmftqmc_therm]]
 """,
 ),
@@ -3270,16 +3475,16 @@ Variable(
     abivarname="dmft_t2g",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: t2g orbitals",
-    characteristics=['[[DEVELOP]]'],
+    requires="[[usedmft]] == 1",
     added_in_version="before_v9",
     text=r"""
 
-Can be set to 1 only if in cubic symmetry. It enables one to carry a DFT+DMFT
-calculations only on _t<sub>2g</sub>_ orbitals.
+This should be set to 1 only if in cubic symmetry. It enables one to carry a DFT+DMFT
+calculations on $\text{t}_{2\text{g}}$ orbitals only.
 """,
 ),
 
@@ -3287,20 +3492,19 @@ Variable(
     abivarname="dmft_tolfreq",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_expert'],
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=0.0001,
     mnemonics="Dynamical Mean Field Theory: TOLerance on DFT correlated electron occupation matrix for the definition of the FREQuency grid",
-    characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
 
-The DFT occupation matrix for correlated electrons can be computed directly.
-It can be compared to the calculation of the same quantity using DFT Green's
-function, a sum over Matsubara frequencies and a projection over correlated
-orbitals. Because the Matsubara grid is finite, the two quantities differ. If
-this difference is larger than dmft_tolfreq, then the code stops and an error
-message is given.
+The DFT occupation matrix for correlated electrons can be computed by direct integration of the DFT
+Green's function. It can be compared to the calculation of the same quantity by downfolding Fermi-Dirac
+occupations. Because the Matsubara grid is finite, the two quantities numerically
+differ. This check allows to see if your value of [[dmft_nwli]]/[[dmft_triqs_n_iw]] (depending on your solver)
+is large enough.
+If the difference is larger than [[dmft_tolfreq]], then the code stops and an error message is thrown.
 """,
 ),
 
@@ -3308,47 +3512,843 @@ Variable(
     abivarname="dmft_tollc",
     varset="dmft",
     vartype="real",
-    topics=['DMFT_useful'],
+    topics=['DMFT_useful', 'DmftTriqsCthyb_useful'],
     dimensions="scalar",
     defaultval=1e-05,
     mnemonics="Dynamical Mean Field Theory: TOLerance on Local Charge for convergence of the DMFT loop",
-    characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-Tolerance for the variation of Local Charge for convergence of the DMFT Loop.
-Most of the time however, DFT+DMFT calculations can converge fastly using [[dmft_iter]]=1, so
-that this variable is not required.
+Tolerance criterion on the variation of Local Charge for the convergence of the DMFT Loop.
+However, most of the time, charge self-consistent DFT+DMFT calculations
+can converge faster using [[dmft_iter]]=1, so that this variable is not required.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_basis",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, Continuous Time Quantum Monte Carlo BASIS",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v9",
+    text=r"""
+Choose the basis in which to perform CTQMC calculation. This basis should be carefully
+selected as it determines the magnitude of the off-diagonal elements as well as the
+conserved quantum numbers in the atomic Hamiltonian, and can therefore greatly
+impact the computation time.
+
+Note that if you choose the density-density solver ([[dmft_solv]]=6),
+the off-diagonal components of the electronic levels will be neglected by
+definition. As they carry most of the physics, it is important to choose a
+basis in which these off-diagonal components are weak.
+
+  * 0 --> Stay in the real spherical harmonics (cubic) basis. Useful for systems with cubic
+    symmetry whose off-diagonal elements vanish by symmetry in this basis. Provides a lot of
+    conserved quantum numbers.
+  * 1 --> Basis that diagonalizes the local electronic levels. Useful to reduce
+    the magnitude of the off-diagonal components, but do not usually provide a lot of conserved
+    quantum numbers.
+  * 2 --> Basis that diagonalizes the local occupation matrix. Useful to reduce
+    the magnitude of the off-diagonal components, but do not usually provide a lot of conserved
+    quantum numbers.
+  * 3 --> Spherical harmonics basis. Provides the most conserved quantum numbers.
+  * 4 (only when [[nspinor]]=2) --> JmJ basis. Useful for systems with spin-orbit coupling.
+    Provides a lot of conserved quantum numbers.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_compute_integral",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, COMPUTE thermodynamic INTEGRAL",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_entropy]] == 1, [[dmft_triqs_measure_density_matrix]] == 1",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Specify whether to compute the contribution from the impurity entropy when computing the DFT+DMFT entropy (cf [[dmft_triqs_entropy]]).
+
+  * 0 --> Neglect it. As this is the main bottleneck of a free energy calculation, it can be useful
+          to disable it and only compute the remaining contribution. In this case, only the internal energy is printed under `ETOT`,
+          as neglecting the impurity entropy is not a good approximation.
+  * 1 --> Compute it using the coupling constant method over both interaction and chemical potential strength.
+          See the [[tutorial:dmft_triqs|TRIQS/CT-HYB tutorial]] for more details. This requires the evaluation of the integral of
+          the interaction energy and the electron number over the strength of the coupling constant $\lambda \in [0,1]$, which is
+          done numerically by solving the impurity problem for several values of $\lambda$ (cf [[dmft_triqs_gaussorder]] and
+          [[dmft_triqs_nsubdivisions]] to set the integration points). At $\lambda$=0, the interaction Hamiltonian is 0 (as the
+          non-interacting limit is known analytically), and the chemical potential is shifted by [[dmft_triqs_shift_mu]].
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_det_init_size",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=100,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant INITial SIZE",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+For the computation of the determinant of the hybridization matrix during the TRIQS/CTHYB run,
+some memory is initially reserved for a maximal size of [[dmft_triqs_det_init_size]].
+This is automatically resized (x2) when the perturbation order becomes larger, but
+this can take some time if this happens too often.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_det_n_operations_before_check",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=10000,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant Number of OPERATIONS BEFORE CHECK",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+At each move, the determinant in TRIQS/CTHYB is updated using the Sherman-Morrison formula.
+However, this formula can be unstable sometimes, and the determinant is thus recomputed from scratch
+every [[dmft_triqs_det_n_operations_before_check]] operations where the deviation from the Sherman-
+Morrison formula is checked. This is really computationally expensive, so you should increase this
+value if you notice this takes too much time. If you see that Sherman-Morrison formula is too unstable
+and you repeatedly get some error messages during this check, you should decrease this value.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_det_precision_error",
+    varset="dmft",
+    vartype="real",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=1e-5,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant PRECISION ERROR",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+After [[dmft_triqs_det_n_operations_before_check]], the determinant is recomputed from scratch
+and compared to its current value computed with Sherman-Morrison formula. If the deviation is
+higher than [[dmft_triqs_det_precision_error]], an error message is thrown. If this happens too
+often, simply lower the value of [[dmft_triqs_det_n_operations_before_check]].
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_det_precision_warning",
+    varset="dmft",
+    vartype="real",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=1e-8,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant PRECISION WARNING",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+After [[dmft_triqs_det_n_operations_before_check]], the determinant is recomputed from scratch
+and compared to its current value computed with Sherman-Morrison formula. If the deviation is
+higher than [[dmft_triqs_det_precision_warning]], a warning is printed. If this happens too
+often, simply lower the value of [[dmft_triqs_det_n_operations_before_check]].
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_det_singular_threshold",
+    varset="dmft",
+    vartype="real",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=-1.0,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant SINGULAR matrix THRESHOLD",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Tolerance to check if the hybridization matrix is singular. An error is thrown if that is the
+case. If [[dmft_triqs_det_singular_threshold]] < 0, this is checked using the std::isnormal
+function on the absolute value of the determinant. Otherwise, this is checked by looking
+if the absolute value of the determinant is below [[dmft_triqs_det_singular_threshold]].
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_dlr_epsilon",
+    varset="dmft",
+    vartype="real",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, accuracy (EPSILON) for DLR representation",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_g_l]] == 0",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Specify the accuracy parameter $\varepsilon$ for the DLR (Discrete Lehmann representation)
+frequencies used as a compact representation of the noisy imaginary-time Green's function
+from the CT-QMC ([[dmft_triqs_measure_g_l]]=0).
+
+The DLR frequencies are then computed to ensure that they can represent any arbitrary
+Green's function with accuracy [[dmft_triqs_dlr_epsilon]] (cf [[cite:Kaye2022]]).
+
+This parameter should always be higher than the statistical noise of your Green's function, as
+you want to filter this noise rather than represent it.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_dlr_wmax",
+    varset="dmft",
+    vartype="real",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, frequency (W) MAXimal",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_g_l]] == 0",
+    characteristics=['[[ENERGY]]'],
+    added_in_version="before_v10.5.6",
+    text=r"""
+Specify the maximal real frequency parameter $\omega_{\mathrm{max}}$ for the DLR
+(Discrete Lehmann representation) frequencies used as a compact representation of
+the noisy imaginary-time Green's function from the CT-QMC ([[dmft_triqs_measure_g_l]]=0).
+
+The DLR frequencies are then computed to ensure that they can represent any arbitrary
+Green's function whose spectral function have a support
+in [ -[[dmft_triqs_dlr_wmax]], [[dmft_triqs_dlr_wmax]] ] (cf [[cite:Kaye2022]]).
+
+Can be specified in the unit of your choice (Ha, Ry, eV, K) since it has the [[ENERGY]] characteristics.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_entropy",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, compute ENTROPY ",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Computes the DFT+DMFT entropy from the evaluation of the Baym-Kadanoff functional.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_gaussorder",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_useful'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, GAUSS-Legendre ORDER",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_compute_integral]] == 1",
+    added_in_version="before_v9",
+    text=r"""
+When evaluating the coupling constant integral for the computation of the impurity entropy (cf [[dmft_triqs_compute_integral]]),
+the integration interval [0,1] is split in [[dmft_triqs_nsubdivisions]] regular subdivisions. Then, each one of these
+subdivisions is evaluated numerically by Gauss-Legendre quadrature of order [[dmft_triqs_gaussorder]], for a total of
+[[dmft_triqs_gaussorder]] $\times$ [[dmft_triqs_nsubdivisions]] integration points.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_imag_threshold",
+    varset="dmft",
+    vartype="real",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=1e-13,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, IMAGinary part THRESHOLD",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+In the real version of TRIQS/CTHYB, only the hybridization components
+having a maximal imaginary part below [[dmft_triqs_imag_threshold]] are kept.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_length_cycle",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, LENGTH of CYCLE",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Sets the number of sweeps in one cycle of TRIQS/CT-HYB. Measurements are
+only performed at the end of each cycle.
+
+This variable allows to fully decorrelate a configuration before taking a new
+measurement, as only independent measurements matter for statistics.
+
+If this variable is lower than the autocorrelation time of the Markov chain, there
+will be no drawback on the statistics, but you are wasting time measuring correlated
+samples. Keep in mind that measurements can be very computationally heavy.
+
+If this variable is higher than the autocorrelation time, you will lose statistics.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_loc_n_max",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=2147483647,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, LOCal Hilbert space Number MAXimal",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+This allows to truncate the local Hilbert space in TRIQS/CTHYB by keeping only the states
+with a number of electrons comprised between [ [[dmft_triqs_loc_n_min]],[[dmft_triqs_loc_n_max]] ].
+This greatly speed-up the calculation, but can generate ergodicity issues if you filter states
+with non-negligible contributions.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_loc_n_min",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, LOCal Hilbert space Number MINimal",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+This allows to truncate the local Hilbert space in TRIQS/CTHYB by keeping only the states
+with a number of electrons comprised between [ [[dmft_triqs_loc_n_min]],[[dmft_triqs_loc_n_max]] ].
+This greatly speed-up the calculation, but can generate ergodicity issues if you filter states
+with non-negligible contributions.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_measure_density_matrix",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval="1 if [[dmft_triqs_off_diag]]=0, 0 otherwise",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, MEASUREment of the DENSITY MATRIX",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_use_norm_as_weight]] == 1, [[dmft_triqs_off_diag]] == 0",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set to 1 to active the measurement of the impurity density matrix in TRIQS/CTHYB. This greatly
+improves the accuracy of static observables such as the number of electrons, energy...
+Currently, TRIQS/CTHYB does not support this feature with off-diagonal components.
+
+The sampling efficiency of the density matrix can be improved by activating [[dmft_triqs_time_invariance]].
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_measure_g_l",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, MEASUREment of the G_l coefficients for Legendre representation",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set to 1 if you want to sample the Green's function directly in the Legendre basis
+(cf [[cite:Boehnke2011]]). Otherwise, if set to 0, the Green's function is sampled on the imaginary
+time axis, and a constrained fit is then performed to obtain the coefficients of the
+Discrete Lehmann representation (DLR, cf [[cite:Kaye2022]]). We strongly advise to use
+the DLR, as it significantly outperforms the Legendre representation for noise reduction.
+
+See [[dmft_triqs_n_l]] to set the parameters of the Legendre representation, and [[dmft_triqs_dlr_epsilon]] and
+[[dmft_triqs_dlr_wmax]] for the DLR parameters.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_move_double",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval="[[dmft_triqs_off_diag]]",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, MOVEs DOUBLE",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set to 1 to activate the double moves in TRIQS/CTHYB. Go to their website for more information on this move.
+It can be required for ergodicity in the off-diagonal case.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_move_shift",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, MOVE SHIFT",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set to 1 to activate the shift move in TRIQS/CTHYB. Go to their website for more information on this move.
+It is never required for ergodicity, but is quite efficient in lowering the auto-correlation time, and has
+very high acceptance rates.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_n_cycles",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, Number of measurement CYCLES",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Number of measurement cycles on each CPU for TRIQS/CT-HYB. This parameter controls
+the level of statistical noise on your output quantities.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_n_iw",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, Number of Imaginary frequencies (W)",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Number of linear Matsubara frequencies for the representation of the Green's function
+(only in the case [[dmft_solv]] $\in$ [6,7]). The high-frequency behavior is taken into account
+via a moment expansion of the Green's function up to order 5, where the moments are computed
+analytically in a self-consistent fashion.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_n_l",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_useful'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, Number of LEGendre polynomials",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_g_l]] == 1",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Specify the number of Legendre polynomials used for the calculation of Green's
+function in TRIQS/CTHYB (cf [[cite:Boehnke2011]]).
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_n_tau",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, Number of TAU points",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Specify the number of imaginary time points for the binned representation of the
+Green's function and hybridization function on the segment [0, $\beta$] in TRIQS/CT-HYB.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_n_warmup_cycles_init",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, Number of WARMUP CYCLES at INITialization",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Specify the number of warmup cycles for each CPU when starting from an empty configuration in
+TRIQS/CT-HYB. This typically needs to be quite high, especially at low temperatures.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_n_warmup_cycles_restart",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, Number of WARMUP CYCLES at RESTART",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Specify the number of warmup cycles for each CPU when restarting the TRIQS/CT-HYB simulation from
+a previous configuration. This typically does not need to be very high, and can even be set
+to 0 most of the time.
+
+At the initial DFT+DMFT iteration, a configuration file from a previous output can be specified
+via [[getctqmcdata]]. Afterwards, by default, the run automatically restarts from the last
+configuration of the previous run of the SCF cycle (this behavior is controlled by
+[[dmft_triqs_read_ctqmcdata]].
+
+The restart feature is only available with our internal version of TRIQS/CT-HYB.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_nsubdivisions",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, Number of SUBDIVISIONS",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_compute_integral]] == 1",
+    added_in_version="before_v10.5.6",
+    text=r"""
+When evaluating the coupling constant integral for the computation of the impurity entropy (cf [[dmft_triqs_compute_integral]]),
+the integration interval [0,1] is split in [[dmft_triqs_nsubdivisions]] regular subdivisions. Then, each one of these
+subdivisions is evaluated numerically by Gauss-Legendre quadrature of order [[dmft_triqs_gaussorder]], for a total of
+[[dmft_triqs_gaussorder]] $\times$ [[dmft_triqs_nsubdivisions]] integration points.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_off_diag",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_compulsory'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, OFF-DIAGonal components",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set to 1 to keep all off-diagonal components of the hybridization and electronic levels for the
+TRIQS/CT-HYB run. If set to 0, the off-diagonal elements are set to 0 before the Monte-Carlo run (in the
+basis specified by [[dmft_triqs_basis]]). This allows to use the feature [[dmft_triqs_measure_density_matrix]]
+for more accurate results, but the calculation is no longer numerically exact.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_pauli_prob",
+    varset="dmft",
+    vartype="real",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval="0.8 if [[dmft_solv]]=7, 1 if [[dmft_solv]]=6",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, PAULI PROBability",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+For the insert/remove moves, a proportion [[dmft_triqs_pauli_prob]] of the moves will be
+proposed according to Pauli principle. This means that the two operators will be inserted/removed
+such that two operators of the same type do not follow each other. The remaining proportion
+1 - [[dmft_triqs_pauli_prob]] of the moves will be proposed uniformly.
+
+Pauli moves increase the acceptance rate and reduce the autocorrelation time in a lot of systems,
+though non Pauli moves are still required for ergodicity in the [[dmft_solv]]=7 case ; so be careful
+not to set [[dmft_triqs_pauli_prob]] too close to 1.
+
+This feature is only available with our internal version of TRIQS/CT-HYB.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_prt_entropy",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, PRinT additional info for ENTROPY",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Print additional information when performing the thermodynamic integration (cf [[dmft_triqs_compute_integral]]),
+in order to help you tune your parameters.
+For each value of the coupling constant $\lambda$, print the occupation numbers, the Green's function, etc.
+This might increase the measurement time.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_random_seed_a",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=34788,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, RANDOM SEED A",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Controls the seed of TRIQS/CTHYB, which is [[dmft_triqs_random_seed_a]] + rank $\times$
+[[dmft_triqs_random_seed_b]].
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_random_seed_b",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=928374,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, RANDOM SEED B",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Controls the seed of TRIQS/CTHYB, which is [[dmft_triqs_random_seed_a]] + rank $\times$
+[[dmft_triqs_random_seed_b]].
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_read_ctqmcdata",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, READ CT-QMC DATA",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+At each CT-HYB run, the initial configuration of the Monte-Carlo is read from file
+(either the last configuration of the previous iteration or the one specified by
+[[getctqmcdata]] if this is the first iteration). This greatly speeds up warmup.
+At very low temperatures, this can sometimes cause some issues since the weights
+become very low, and the weight of a configuration can become 0 at the next iteration
+if you're not converged yet. In this case, disable this.
+
+The restart feature is only available with our internal version of TRIQS/CT-HYB.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_shift_mu",
+    varset="dmft",
+    vartype="real",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, SHIFT of the chemical potential (MU)",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+During the thermodynamic integration for the entropy calculation, the coupling constant
+$\lambda$ can also be set in front of the chemical potential in order to make the CT-HYB
+run easier. It is set such that the true chemical potential of the system $\mu$ is recovered at $\lambda$=1,
+and it is shifted by [[dmft_triqs_shift_mu]] at $\lambda$=0.
+
+The CT-HYB run is easier if the system is either filled or empty, so you want the target
+chemical potential $\mu$ + [[dmft_triqs_shift_mu]] to be set in order to reach the configuration
+that is closer to the current configuration of your system. For instance, if your system is nearer
+from filled than empty, set the shift to a negative value in order to make the system more filled
+as $\lambda$ decreases. Be careful however, as setting a high value of [[dmft_triqs_shift_mu]] will
+require a higher number of integration points.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_time_invariance",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval="[[dmft_triqs_measure_density_matrix]]",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, TIME INVARIANCE",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set to 1 to activate an improved estimator for the density matrix in TRIQS/CTHYB, based on the time
+translation invariance of the Hamiltonian.
+This greatly reduces the statistical noise, but can increase the computation time
+if you measure too often.
+
+This feature is only available with our internal version of TRIQS/CT-HYB.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_tol_block",
+    varset="dmft",
+    vartype="real",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=1e-12,
+    mnemonics="Dynamical Mean Field Theory: TRIQS, TOLerance for the BLOCK detection algorithm",
+    requires=r"[[usedmft]] = 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Before any CT-HYB run, the code rotates in the basis specified by [[dmft_triqs_basis]]. Then,
+all the off-diagonal elements below the threshold [[dmft_triqs_tol_block]] are set to 0 in
+order to try and reveal a compact block structure to reduce the computation time.
+This block structure is automatically detected. Try not to set this value above numerical noise.
+""",
+),
+
+Variable(
+    abivarname="dmft_triqs_use_norm_as_weight",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval="[[dmft_triqs_measure_density_matrix]]",
+    mnemonics="Dynamical Mean Field Theory: TRIQS, USE NORM of the matrix AS atomic WEIGHT",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set to 1 to use the Frobenius norm of the matrix instead of its trace as atomic weight in
+TRIQS/CTHYB. This is required when sampling the density matrix in order to have full
+ergodicity.
 """,
 ),
 
 Variable(
     abivarname="dmft_wanorthnorm",
     varset="dmft",
-    vartype="real",
-    topics=['DMFT_expert'],
+    vartype="integer",
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
     dimensions="scalar",
     defaultval=3,
     mnemonics="Dynamical Mean Field Theory: WANnier OrthoNormalization",
-    characteristics=['[[DEVELOP]]'],
+    requires="[[usedmft]] == 1",
     added_in_version="9.4.0",
     text=r"""
-Definition of Wannier orthormalization in DMFT.
-Default value is 3 (Normalization of the overlap of Wannier functions summed
-over k-point) if [[natom]]=1, or 2 (Normalization of the overlap for each k-point) if
-[[natom]]>1.
+Definition of the orthonormalization scheme for the Wannier functions. As we project
+the orbitals on a finite energy window [ [[dmftbandi]],[[dmftbandf]] ], they might no
+longer be orthonormal, so it is necessary to orthonormalize them in order to build true
+Wannier functions.
+
+This is done by multiplication with the inverse square root of their overlaps.
+
+  * If set to 2, the overlap is computed at each individual $k$-point for all atoms at
+    the same time. This numerically guarantees the identity Downfold(Upfold) = Id, regardless
+    of the size of the energy window. However, this makes the Wannier functions system-dependent
+    as the orthonormalization scheme depends on the position of the atoms and the reciprocal lattice.
+    This is the default choice when [[natom]] > 1 and [[dmft_solv]] $\ne$ [6,7].
+  * If set to 3, the overlap is summed over all $k$-point and is computed separately for each
+    atom. With this choice, the fundamental identity Downfold(Upfold) = Id is only
+    guaranteed for localized Wannier functions (i.e. large enough energy window),
+    with no overlap to the neighboring atoms. This is the default choice when [[natom]]=1
+    or [[dmft_solv]] $\in$ [6,7] as this is the only rigorous choice to compare energies between
+    different systems.
 """,
 ),
 
+Variable(
+    abivarname="dmft_wanrad",
+    varset="dmft",
+    vartype="real",
+    topics=['DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: WANnier functions radius",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_prtwan]] == 1",
+    characteristics=['[[LENGTH]]'],
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set the maximal radius up to which the Wannier functions are computed when [[dmft_prtwan]]=1.
+The PAW grid is extended if needed.
+
+Can be specified in the unit of your choice (Bohr, Angstrom) as it has the [[LENGTH]] characteristics.
+""",
+),
+
+Variable(
+    abivarname="dmft_x2my2d",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: x2my2d orbital",
+    requires="[[usedmft]] == 1",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set to 1 to apply DMFT to the $d_{x^2-y^2}$ orbital only.
+""",
+),
+
+Variable(
+    abivarname="dmft_yukawa_epsilon",
+    varset="dmft",
+    vartype="real",
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: dielectric constant (EPSILON) for YUKAWA potential",
+    requires="[[usedmft]] == 1, [[dmft_yukawa_param]] == 4",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set the value of the dielectric constant $\varepsilon$ for the Yukawa screened potential (cf
+[[dmft_yukawa_param]]).
+""",
+),
+
+Variable(
+    abivarname="dmft_yukawa_lambda",
+    varset="dmft",
+    vartype="real",
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    mnemonics="Dynamical Mean Field Theory: inverse screening length (LAMBDA) for YUKAWA potential",
+    requires="[[usedmft]] == 1, [[dmft_yukawa_param]] == 4",
+    added_in_version="before_v10.5.6",
+    text=r"""
+Set the value of the inverse screening length $\lambda$ (in atomic units) for the Yukawa screened potential (cf
+[[dmft_yukawa_param]]).
+""",
+),
+
+Variable(
+    abivarname="dmft_yukawa_param",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_expert', 'DmftTriqsCthyb_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Dynamical Mean Field Theory: YUKAWA potential PARAMetrization",
+    requires="[[usedmft]] == 1, [[dmft_dc]] == 8",
+    added_in_version="before_v10.5.6",
+    text=r"""
+When activating [[dmft_dc]]=8, the screened potential is assumed to have the form
+of a Yukawa potential with a dielectric constant: $V_{\text{scr}}(r) =
+ \frac{e^{-\lambda r}}{\varepsilon r}$. The variable [[dmft_yukawa_param]] controls how
+the parameters $\lambda$ and $\varepsilon$ are set:
+
+  * If set to 1: $\lambda$ and $\varepsilon$ are chosen to yield $U$ and $J$ as
+close as possible to the input [[upawu]] and [[jpawu]].
+  * If set to 2: $\varepsilon$ = 1, and $\lambda$ is chosen to yield $U$ = [[upawu]].
+  * If set to 3: $\lambda$ = 0, and $\varepsilon$ is chosen to yield $U$ = [[upawu]].
+  * If set to 4: $\lambda$ and $\varepsilon$ are set to the values specified by
+[[dmft_yukawa_lambda]] and [[dmft_yukawa_epsilon]].
+
+""",
+),
 
 Variable(
     abivarname="dmftbandf",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_compulsory'],
+    topics=['DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
-    defaultval=0,
     mnemonics="Dynamical Mean Field Theory: BAND: Final",
-    characteristics=['[[DEVELOP]]'],
+    requires="[[usedmft]] == 1",
     added_in_version="before_v9",
     text=r"""
 [[dmftbandf]] is the last band taken into account in the Projected Local
@@ -3361,11 +4361,10 @@ Variable(
     abivarname="dmftbandi",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_compulsory'],
+    topics=['DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
-    defaultval=0,
     mnemonics="Dynamical Mean Field Theory: BAND: Initial",
-    characteristics=['[[DEVELOP]]'],
+    requires="[[usedmft]] == 1",
     added_in_version="before_v9",
     text=r"""
 [[dmftbandi]] is the first band taken into account in the Projected Local
@@ -3378,10 +4377,11 @@ Variable(
     abivarname="dmftcheck",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_useful'],
+    topics=['DMFT_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: CHECKs",
+    requires="[[usedmft]] == 1",
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
@@ -3391,17 +4391,16 @@ Only for developer purposes.
 
 Variable(
     abivarname="dmftctqmc_basis",
-    varset="dev",
+    varset="dmft",
     vartype="integer",
-    topics=['DMFT_expert'],
+    topics=['DMFT_basic'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: Continuous Time Quantum Monte Carlo BASIS",
-    characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]] == 5",
+    requires="[[usedmft]] == 1, [[dmft_solv]] == 5",
     added_in_version="before_v9",
     text=r"""
-Choose the basis to perform CTQMC calculation.
+Choose the basis to perform ABINIT/CTQMC calculation.
 
   * 0 --> Use the local basis in the spherical harmonics basis.
   Can be useful if the Hamiltonian has weak off diagonal terms and for this reason,
@@ -3417,7 +4416,7 @@ Variable(
     abivarname="dmftctqmc_check",
     varset="dmft",
     vartype="integer",
-    topics=['DMFT_useful'],
+    topics=['DMFT_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: Continuous Time Quantum Monte Carlo CHECK",
@@ -3452,32 +4451,6 @@ simulation. Slow down the simulation.
 
   * 0 --> Nothing done
   * 1 --> Calculations performed and written in "Correlation.dat" file
-""",
-),
-
-Variable(
-    abivarname="dmftctqmc_localprop",
-    varset="dmft",
-    vartype="integer",
-    topics=['DMFT_expert'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="Dynamical Mean Field Theory: CTQMC: calculation of local properties",
-    characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]] in [5, 8]",
-    added_in_version="9.5.0",
-    text=r"""
-Compute properties of the local impurity during the CTQMC calculations.
-
-  * 0 --> Nothing done
-
-  * 1 --> Add the calculation of weight of configurations. For example, for a calculation on $d$ orbitals, the calculations
-gives the weight of the 0,1,2,3,4,5,6,7,8,9 and 10 electrons configurations.
-
-  * 2 --> Add the calculation of local magnetic susceptibility. For [[nspinor]] == 1, the operator corresponds to $g_e\hat{S}_z$,
-whereas for [[nspinor]] == 2 the operator corresponds to $\hat{L}_z+g_e\hat{S}_z$.
-
-  * 3 --> Add the calculation of local charge susceptibility.
 """,
 ),
 
@@ -3519,15 +4492,40 @@ is a good approximation only if there is enough Monte Carlo sweeps per cpu.
 ),
 
 Variable(
-    abivarname="dmftctqmc_meas",
+    abivarname="dmftctqmc_localprop",
     varset="dmft",
     vartype="integer",
     topics=['DMFT_expert'],
     dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: CTQMC: calculation of local properties",
+    characteristics=['[[DEVELOP]]'],
+    requires="[[dmft_solv]] in [5, 8]",
+    added_in_version="9.5.0",
+    text=r"""
+Compute properties of the local impurity during the CTQMC calculations.
+
+  * 0 --> Nothing done
+
+  * 1 --> Add the calculation of weight of configurations. For example, for a calculation on $d$ orbitals, the calculations
+gives the weight of the 0,1,2,3,4,5,6,7,8,9 and 10 electrons configurations.
+
+  * 2 --> Add the calculation of local magnetic susceptibility. For [[nspinor]] == 1, the operator corresponds to $g_e\hat{S}_z$,
+whereas for [[nspinor]] == 2 the operator corresponds to $\hat{L}_z+g_e\hat{S}_z$.
+
+  * 3 --> Add the calculation of local charge susceptibility.
+""",
+),
+
+Variable(
+    abivarname="dmftctqmc_meas",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_basic'],
+    dimensions="scalar",
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: Continuous Time Quantum Monte Carlo MEASurements",
-    characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]] == 5",
+    requires="[[usedmft]] == 1, [[dmft_solv]] == 5",
     added_in_version="before_v9",
     text=r"""
 The modulo used to measure the interaction energy and the number of electrons.
@@ -3577,6 +4575,26 @@ perform a fourier transform. The result can be plotted using the "Markov_id.dat"
 ),
 
 Variable(
+    abivarname="dmftctqmc_chains",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_useful'],
+    dimensions="scalar",
+    defaultval="number of [[OPENMP]] threads",
+    mnemonics="Dynamical Mean Field Theory: Continuous Time Quantum Monte Carlo Number of per-MPI tasks Chains",
+    characteristics=['[[DEVELOP]]'],
+    requires="[[dmft_solv]] == 5",
+    added_in_version="10.7",
+    text=r"""
+Number of chains each MPI task will run. Those chains will be parallelised using OpenMP threads.
+Default behaviour is that each MPI task run as many chains as OpenMP threads are defined.
+Therefore, user is expected to manage this parallelisation level through `OMP_NUM_THREADS` environment variable,
+while this variable is here for tuning or troubleshooting purposes.
+Implemented only for dmft_solv == 5.
+""",
+),
+
+Variable(
     abivarname="dmftctqmc_order",
     varset="dmft",
     vartype="integer",
@@ -3596,38 +4614,18 @@ result is written in the "Perturbation.dat" file.
 ),
 
 Variable(
-    abivarname="dmftctqmc_triqs_nleg",
-    varset="dmft",
-    vartype="integer",
-    topics=['DMFT_expert'],
-    dimensions="scalar",
-    defaultval=30,
-    mnemonics="Dynamical Mean Field Theory: Continuous Time Quantum Monte Carlo perturbation of TRIQS, Number of LEGendre polynomials",
-    characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]] in [6, 7]",
-    added_in_version="before_v9",
-    text=r"""
-Specify the number of Legendre polynomials used for the calculation of Green's
-function in CTQMC code from the library TRIQS. Default is 30. The value of
-coefficients are given in file whose name ending is
-"Legendre_coefficient.dat" (see also [[cite:Boehnke2011]]).
-""",
-),
-
-Variable(
     abivarname="dmftqmc_l",
     varset="dmft",
     vartype="integer",
     topics=['DMFT_compulsory'],
     dimensions="scalar",
-    defaultval=0,
     mnemonics="Dynamical Mean Field Theory: Quantum Monte Carlo time sLices",
-    characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]] >= 5",
+    requires=r"[[dmft_solv]] >= 5, [[dmft_solv]] $\ne$ [6,7]",
     added_in_version="before_v9",
     text=r"""
 Number of time slices used to represent the time green function. This value
 should be carefully chosen according to Niquist frequency and the [[tsmear]] value.
+This is only used for ABINIT internal solvers.
 """,
 ),
 
@@ -3637,13 +4635,12 @@ Variable(
     vartype="real",
     topics=['DMFT_compulsory'],
     dimensions="scalar",
-    defaultval=0.0,
     mnemonics="Dynamical Mean Field Theory: Quantum Monte Carlo Number of sweeps",
-    characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]] >= 5",
+    requires=r"[[dmft_solv]] >= 5, [[dmft_solv]] $\ne$ [6,7]",
     added_in_version="before_v9",
     text=r"""
-Number of Monte Carlo sweeps. Should be at least 10<sup>6<\sup>.
+Number of Monte Carlo sweeps. Should be at least 10<sup>6</sup>. This is only used for
+ABINIT internal solvers.
 """,
 ),
 
@@ -3656,7 +4653,7 @@ Variable(
     defaultval="[[jdtset]]",
     mnemonics="Dynamical Mean Field Theory: Quantum Monte Carlo SEED",
     characteristics=['[[DEVELOP]]'],
-    requires="[[dmft_solv]] >= 5",
+    requires=r"[[dmft_solv]] >= 5, [[dmft_solv]] $\ne$ [6,7]",
     added_in_version="before_v9",
     text=r"""
 Seed to initialize the random number generator.
@@ -3673,13 +4670,12 @@ Variable(
     vartype="integer",
     topics=['DMFT_compulsory'],
     dimensions="scalar",
-    defaultval=1000,
     mnemonics="Dynamical Mean Field Theory: Quantum Monte Carlo THERMalization",
-    characteristics=['[[DEVELOP]]'],
     requires="[[dmft_solv]] == 5",
     added_in_version="before_v9",
     text=r"""
-Number of Monte Carlo sweeps for the thermalization
+Number of Monte Carlo sweeps for the thermalization. This is only used for
+ABINIT internal solvers.
 """,
 ),
 
@@ -3697,7 +4693,7 @@ Variable(
 Defines the linear grid resolution (energy increment) to be used for the
 computation of the Density-Of-States, when [[prtdos]] is non-zero.
 If [[dosdeltae]] is set to zero (the default value), the actual increment is
-0.001 Ha if [[prtdos]] = 1 or 4 (smearing technique), and the much smaller value 0.00005 Ha if
+0.001 Ha if [[prtdos]] = 1 or 4 (smearing technique), and the much smaller value 0.0005 Ha if
 [[prtdos]] = 2, 3 or 5 (tetrahedron technique). This different default value arises because the
 smearing technique gives a quite smooth DOS, while the DOS
 from the tetrahedron method is rapidly varying.
@@ -4235,10 +5231,11 @@ Variable(
 
 The variable [[elph2_imagden]] determines the imaginary shift of the
 denominator of the sum-over-states in the perturbation,
-$(e_{nk}-e_{n'k'}+i$[[elph2_imagden]]). One should use a width comparable with
-the Debye frequency or the maximum phonon frequency.
-Can be specified in Ha (the default), Ry, eV or Kelvin, since [[ecut]] has the
+$(e_{nk}-e_{n'k'}+i$[[elph2_imagden]]).
+One should use a width comparable with the Debye frequency or the maximum phonon frequency.
+Can be specified in Ha (the default), Ry, eV or Kelvin, since [[elph2_imagden]] has the
 [[ENERGY]] characteristics (1 Ha = 27.2113845 eV).
+
 """,
 ),
 
@@ -4314,8 +5311,7 @@ Variable(
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v9",
     text=r"""
-This variable can be used to change artificially the value of the Fermi level when
-performing e-ph calculations.
+This variable can be used to change artificially the value of the Fermi level when performing e-ph calculations.
 The variable has effect only if set to a non-zero value.
 This option is mutually exclusive with [[eph_extrael]] and [[eph_doping]].
 When [[eph_fermie]] is used the number of temperatures specified by [[tmesh]] cannot be greater than one.
@@ -4332,7 +5328,7 @@ Variable(
     mnemonics="Electron-PHonon: FROHLICH Model",
     added_in_version="before_v9",
     text=r"""
-Only relevant for [[optdriver]]=7 and [[eph_task]]=6, 10.
+Only relevant for [[optdriver]]=7 and [[eph_task]] = 6 or 10.
 If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
 the effective masses (must give a _EFMAS file as input, see [[prtefmas]] and [[getefmas]] or [[irdefmas]]),
 as the parameters of a Frohlich Hamiltonian.
@@ -4410,7 +5406,7 @@ Variable(
     text=r"""
 This variable defines the technique for the integration over the Brillouin zone in the EPH code.
 
-* 1 --> Gaussian technique with broadening factor
+* 1 --> Gaussian technique with broadening factor.
 * 2 --> Tetrahedron method.
 
 Note that the default value depends on the value of [[eph_task]] i.e. on the physical properties
@@ -4495,7 +5491,7 @@ Variable(
 Select the electron-phonon task to be performed when [[optdriver]] == 7.
 The choice is among:
 
-* 0 --> No computation. Mainly used to access the post-processing tools.
+* 0 --> No computation. Mainly used to access the post-processing tools available in EPH (phonon band and dos).
 * 1 --> Compute phonon linewidths in metals and superconducting properties (isotropic formalism).
 * 2 --> Compute e-ph matrix elements. Save results in GKK.nc file.
 * -2 --> Compute e-ph matrix elements. Save results in GKQ.nc file that can be post-processed with AbiPy.
@@ -4507,9 +5503,9 @@ The choice is among:
          the user has to provide the full list of q-points in the input, [[ph_ndivsm]] is not used to generate the q-path.
 * 6 --> Estimate correction to the ZPR in polar materials using the generalized Frohlich model. Requires EFMAS.nc file. See [[cite:Miglio2020]].
 * 7 --> Compute phonon limited transport in semiconductors using lifetimes taken from SIGEPH.nc file. See [[cite:Brunin2020b]].
-* 8 --> Compute phonon limited transport by solving the (linearized) IBTE using collision terms taken from SIGEPH.nc file.
+* 8 --> Compute phonon limited transport by solving the linearized IBTE using collision terms taken from SIGEPH.nc file.
         Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task]] == -4.
-* 9 --> Compute cumulant from SIGEPH.nc file specifcy via [[getsigeph_filepath]].
+* 9 --> Compute cumulant from SIGEPH.nc file specified via [[getsigeph_filepath]].
 * 10 --> Compute polaron effective mass, using the generalized Frohlich model, in the triply-degenerate VB or CB cubic case.
          Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111).
          Same requirements as for [[eph_task]] = 6. Reference: [[cite:Guster2021]]
@@ -4518,8 +5514,8 @@ The choice is among:
          The k-mesh must be equal to the one associated to the input WFK file, the q-mesh is specified
          by [[eph_ngqpt_fine]] (NB: the q-mesh must be a sub-mesh of the k-mesh or equal).
 * 12 --> Migdal-Eliashberg equations (isotropic case).
-* -12 --> Migdal-Eliashberg equations (anisotropic case). IN DEVELOPMENT.
-* 13 --> Variational polaron equations
+* -12 --> Migdal-Eliashberg equations (anisotropic case). UNDER DEVELOPMENT.
+* 13 --> Variational polaron equations. Requires GSTORE file specified via [[getgstore_filepath]]
 * -13 --> Compute polaron wavefunctions and atomic displacements in the supercell and write results to files
 * 14 --> Compute the molecular Berry curvature from GSTORE.nc. No support for metals or non-collinear magnetism yet. Reference: [[cite:Saparov2022]], [[cite:Coh2023]].
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
@@ -4529,14 +5525,18 @@ The choice is among:
               An array D(R) with the decay of the W(R,r) as a function of R is computed and saved to file
               In the second case (-15) the q-points are taken directly from the DVDB file.
 * 16, -16 --> test_phrotation TO BE DOCUMENTED.
-* 17 --> Compute e-ph matrix elements with the GWPT formalism  IN DEVELOPMENT.
-* 18 --> Compute e-ph matrix g(k,q) along high-symmetry path. See [[eph_fix_wavevec]] and other related variables.
+* 17 --> Compute e-ph matrix elements with the GWPT formalism  Produce GSTORE file.
+         Requires netcdf library with MPI-IO support.
+* 18 --> Compute e-ph matrix g(k,q) along a high-symmetry path. See [[eph_fix_wavevec]] and other related variables.
+* 19 --> Compute matrix elements of the screened interaction W between two Cooper pairs.
+* 24 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections, also possibly the spectral function.
+         Similar to [[eph_task]] 4 but requires GSTORE file specified via [[getgstore_filepath]]
 
 !!! important
 
     At the time of writing ( |today| ), PAW is not supported by the EPH code.
     Also, calculations with [[nspinor]] = 2 require [[nspden]] 1 in all the EPH tasks
-    in which the interpolation of the DFPT potentials is needed.
+    in which the interpolation of the DFPT scattering potentials is needed.
 """,
 ),
 
@@ -5040,18 +6040,18 @@ Possible values of [[fock_icutcoul]] are from 0 to 5, but currently are availabl
 options 0 and 5. Option 5 is hard coded as the method to be applied to HSE functionals.
 
 Like for [[icutcoul]], for 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
-This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
+This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[fock_rcut]].
 
-  * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
-  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
-  * 2 --> (W.I.P) Surface. See [[vcutgeo]] and [[rcut]].
+  * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[fock_rcut]].
+  * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[fock_rcut]].
+  * 2 --> (W.I.P) Surface. See [[vcutgeo]] and [[fock_rcut]].
   * 3 --> (W.I.P) 3D crystal (Coulomb interaction without cut-off).
   * 4 --> (W.I.P.)ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
 
 Note that Spencer and Alavi showed that the
 spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]].
-In the latter case, use a negative value for the cutoff radius of the sphere ([[rcut]]<0),
+In the latter case, use a negative value for the cutoff radius of the sphere ([[fock_rcut]]<0),
 which is automatically calculated so that the volume enclosed in the sphere is
 equal to the volume of the solid.
 """,
@@ -5349,7 +6349,7 @@ choose between any of them. The chosen number of rules have been defined in [[ga
 Implemented rules are
 1) crossover. Two parents are randomly chosen and two springs are mixed from
 the two by (a) choosing randomly (through Fitness function) two parents and
-then randomly rotating and shifting the coordinates withing that particular
+then randomly rotating and shifting the coordinates within that particular
 cell. (b) Slice every one of the unit cell of the parents along a random
 direction and creating the spring offs from the pieces of the two parents.
 2) Vector flip mutation. From the coordinates from a given parent, a piece of
@@ -5623,6 +6623,36 @@ is equivalent to 0, since no dataset has been computed in the same run.
   * If [[getcell]]=another negative number, it indicates the number of datasets to go backward
 to find the needed data (once again, going back beyond the first dataset is
 equivalent to using a zero get variable).
+""",
+),
+
+Variable(
+    abivarname="getctqmcdata",
+    varset="dmft",
+    vartype="integer",
+    topics=['DmftTriqsCthyb_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GET CTQMC DATA from...",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    added_in_version="before v10.5.6",
+    text=r"""
+Eventually used when [[ndtset]] > 0 (multi-dataset mode) to indicate
+that the starting CT-HYB configuration is to be taken from the output of a previous
+dataset. It is used to chain the calculations and greatly speed-up warmup, since it describes from which
+dataset the OUTPUT configuration is to be taken, as INPUT configuration of the present dataset.
+
+  * If [[getctqmcdata]] == 0, no such use of previously computed output configuration file is done.
+
+  * If [[getctqmcdata]] is positive, its value gives the index of the dataset from which
+the output configuration is to be used as input. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+
+  * If [[getctqmcdata]] is -1, the output configuration of the previous dataset must be taken,
+which is a frequently occurring case.
+
+  * If [[getctqmcdata]] is a negative number, it indicates the number of datasets to go
+backward to find the needed file. Going back beyond the first dataset is equivalent to using zero for the get variable.
 """,
 ),
 
@@ -6060,6 +7090,36 @@ backward to find the needed data. Going back beyond the first dataset is equival
 ),
 
 Variable(
+    abivarname="getself",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_useful','DmftTriqsCthyb_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GET SELF-energy from...",
+    requires="[[usedmft]]=1",
+    added_in_version="before v10.5.6",
+    text=r"""
+Eventually used when [[ndtset]] > 0 (multi-dataset mode) to indicate
+that the starting DMFT self-energy is to be taken from the output of a previous
+dataset. It is used to chain the calculations, since it describes from which
+dataset the OUTPUT self-energy is to be taken, as INPUT self-energy of the present dataset.
+
+  * If [[getself]] == 0, no such use of previously computed output self-energy file is done.
+
+  * If [[getself]] is positive, its value gives the index of the dataset from which
+the output self-energy is to be used as input. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+
+  * If [[getself]] is -1, the output self-energy of the previous dataset must be taken,
+which is a frequently occurring case.
+
+  * If [[getself]] is a negative number, it indicates the number of datasets to go
+backward to find the needed file. Going back beyond the first dataset is equivalent to using zero for the get variable.
+""",
+),
+
+Variable(
     abivarname="getsuscep",
     varset="files",
     vartype="integer",
@@ -6449,7 +7509,7 @@ Variable(
 When using GPU acceleration, the wave-function projections ($<\tilde{p}_i|\Psi_{nk}> (used
 in the non-local operator) are all stored on all GPU devices.
 [[gpu_nl_distrib]] enable the distribution of these projections in slices on several GPU devices.
-This uses less memory per GPU but requires communications beween GPU devices. These communications
+This uses less memory per GPU but requires communications between GPU devices. These communications
 may penalize the execution time, especially if splitting size is higher than the amount of GPU per node
 or if GPU-aware MPI wasn't enabled at compile time.
 By default, the projections splitting size is automatically set by ABINIT after assessing GPU memory
@@ -6468,7 +7528,7 @@ Variable(
     topics=['parallelism_expert'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="GPU: Non-Local operator SPLITing SIZE",
+    mnemonics="GPU: Non-Local operator SPLITting SIZE",
     requires="[[gpu_option]] == 2 ([[OPENMP_OFFLOAD]])",
     added_in_version="9.12",
     text=r"""
@@ -6527,7 +7587,7 @@ GPU programming models available in ABINIT:
   [Kokkos](https://github.com/kokkos/kokkos) and [YAKL](https://github.com/mrnorman/YAKL)
   performance libraries. It also uses NVidia FFT/linear algebra libraries
   ([cuFFT](https://docs.nvidia.com/cuda/cufft), [cuBLAS](https://docs.nvidia.com/cuda/cublas)).
-  The [[KOKKOS]] GPU implementation can be used in conjuction with openMP threads
+  The [[KOKKOS]] GPU implementation can be used in conjunction with openMP threads
   on CPU (see [[gpu_kokkos_nthrd]]).
 
 For an expert use of ABINIT on [[GPU]], some additional keywords can be used. See [[gpu_nl_distrib]], [[gpu_nl_splitsize]].
@@ -6657,7 +7717,7 @@ Variable(
     topics=['FrequencyMeshMBPT_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="GW Contour Deformation FReQencies on REal axis - Use Tangent Grid",
+    mnemonics="GW Contour Deformation FReQuencies on REal axis - Use Tangent Grid",
     requires="[[optdriver]] in [3,4] and [[gwcalctyp]] in [2,9,12,19,22,29]",
     added_in_version="before_v9",
     text=r"""
@@ -7779,8 +8839,8 @@ Variable(
     requires="[[natnd]] > 0",
     added_in_version="v10.5",
     text=r"""
-Together with [[natnd]], provides a simplified, alternative input to [[nucdipmom]] for 
-the atoms carrying explicit nuclear dipole moments. The number of atoms in the cell with 
+Together with [[natnd]], provides a simplified, alternative input to [[nucdipmom]] for
+the atoms carrying explicit nuclear dipole moments. The number of atoms in the cell with
 explicit nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
 of the dipole moment vector on each atom is given in [[atndlist]]. This simplified
 list is converted internally to the full [[nucdipmom]] list; either input format
@@ -7914,7 +8974,7 @@ correction to the electronic eigenvalues.
 
   * If [[ieig2rf]] is set to 3, the second-order electronic eigenvalues will be
     calculated from the DFPT method (sum over states) but using a different part
-    of the code. This is equivalent to [[ieig2rf]] = 1 [debuging].
+    of the code. This is equivalent to [[ieig2rf]] = 1 (debugging).
 
   * If [[ieig2rf]] is set to 4, the second-order electronic eigenvalues will be
     calculated from the dynamical DFPT method (Sternheimer). The code will
@@ -8017,7 +9077,7 @@ variables, as well as with the parallelism (see input variable [[npimage]]).
     QTB-MD is an efficient but approximate method when dealing with strongly anharmonic systems,
     while path integral molecular dynamics (PIMD) gives exact results but in a huge amount of computation time.
     The QTB and PIMD methods have been combined in order to improve the PIMD convergence
-    or correct the failures of the QTB-MD technique. Warning: this option need a previoulsy generated file
+    or correct the failures of the QTB-MD technique. Warning: this option need a previously generated file
     containing Gaussian random forces for each time step. Very experimental !!!
 
 No meaning for RF calculations.
@@ -8103,7 +9163,7 @@ Prior to ABINITv2.3, the choice [[intxc]] = 1 was favoured (it was the default),
 but the continuation of the development of the code lead to prefer the default
 [[intxc]] = 0. Indeed, the benefit of [[intxc]] = 1 is rather small, while making
 it available for all cases is a non-negligible development effort.
-Other targets are prioritary. You will notice that many automatic tests use
+Other targets are priority. You will notice that many automatic tests use
 [[intxc]] = 1. Please, do not follow this historical choice for your production runs.
 """,
 ),
@@ -9005,8 +10065,8 @@ possibility to mix density/potential on the fine or coarse FFT grid (see [[pawmi
 is equivalent to an Anderson mixing with **iscf** = 3 or 13 (resp. 4 or 14).
 - Note 2: when a mixing of the density is activated ([[iscf]]>=10) the density residual
 correction added to forces (see [[densfor_pred]]) needs the second derivative of the
-exchange-correlation functionnal (namely Kxc). When the latter is not provided, [[iscf]]
-is automatically switched to select the coresponding mixing of the potential ([[iscf]]<10).
+exchange-correlation functional (namely Kxc). When the latter is not provided, [[iscf]]
+is automatically switched to select the corresponding mixing of the potential ([[iscf]]<10).
 - Also note that:
 * when mixing is done on potential (iscf < 10), total energy is computed by "direct" decomposition.
 * when mixing is done on density (iscf >= 10), total energy is computed by "double counting" decomposition.
@@ -9648,7 +10708,7 @@ implementation approaches, the round-off errors can lead to slight differences
 intermediate and final results obtained using methods 1,2 and 3. The choice of
 the method can also affect the convergence. For more details, see [[cite:Ricci2019]] or [[cite:Gonze2020]].
 WARNING: in [[cite:Ricci2019]], the meaning of [[ixcrot]]=2 or 3 is inverted with respect to the implementation. On the contrary,
-the implemention and [[cite:Gonze2020]] agree. More explicitly, the method refered to as method 1' in [[cite:Ricci2019]]
+the implementation and [[cite:Gonze2020]] agree. More explicitly, the method referred to as method 1' in [[cite:Ricci2019]]
 is [[ixcrot]]=2, and method refereed to as method 2 in [[cite:Ricci2019]] is [[ixcrot]]=3.
 
 !!! note
@@ -9740,12 +10800,12 @@ Variable(
     abivarname="jpawu",
     varset="paw",
     vartype="real",
-    topics=['DFT+U_compulsory'],
+    topics=['DFT+U_compulsory', 'DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="value of J for PAW+U",
     characteristics=['[[ENERGY]]'],
-    requires="[[usepaw]] == 1 and [[usepawu]] == 1",
+    requires="[[usepaw]] == 1 and [[usepawu]] > 0",
     added_in_version="before_v9",
     text=r"""
 Gives the value of the screened exchange interaction between correlated
@@ -9836,7 +10896,7 @@ It is used to generate the circuit to be followed by the band structure, when
 [[kptopt]] is negative (it is not read if [[kptopt]] is zero or positive).
 
 There are abs([[kptopt]]) segments to be defined, each of which starting from
-the end point of the preceeding one. Thus, the number of points to be input is
+the end point of the preceding one. Thus, the number of points to be input is
 abs([[kptopt]])+1. They form a circuit starting at
 [[kptbounds]](1:3,1)/[[kptnrm]] and ending at
 [[kptbounds]](1:3,abs([[kptopt]])+1)/[[kptnrm]]. The number of divisions of
@@ -10093,7 +11153,7 @@ Variable(
     characteristics=['[[INTERNAL_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-If [[nqpt]] = 0, or if one is doing a reponse calculation, this internal
+If [[nqpt]] = 0, or if one is doing a response calculation, this internal
 variable is derived from [[kpt]] and [[kptnrm]]: [[kptns]](1:3,:)=
 [[kpt]](1:3,:)/ [[kptnrm]], so that it is [[kpt]] renormalized by [[kptnrm]].
 
@@ -10416,7 +11476,7 @@ Variable(
     abivarname="lpawu",
     varset="paw",
     vartype="integer",
-    topics=['DFT+U_compulsory'],
+    topics=['DFT+U_compulsory', 'DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=-1),
     mnemonics="value of angular momentum L for PAW+U",
@@ -10424,10 +11484,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Give for each species the value of the angular momentum
- on which to apply the DFT+U correction.
+ on which to apply the DFT+U/DFT+DMFT correction.
 
-  * If equal to 1 (p-orbitals), 2 (d-orbitals)  or 3 (f-orbitals), values of [[upawu]] and  [[jpawu]] are used in the calculation.
-  * If equal to -1: do not apply DFT+U correction on the species.
+  * If equal to 0 (s-orbitals), 1 (p-orbitals), 2 (d-orbitals)  or 3 (f-orbitals), values of [[upawu]] and  [[jpawu]] are used in the calculation.
+  * If equal to -1: do not apply DFT+U/DFT+DMFT correction on the species.
 """,
 ),
 
@@ -10451,7 +11511,7 @@ see [[flexoflag@anaddb]]).
 This **requires** the precalculation of the ground-state wave-functions and
 density, as well as response functions and densities to a set of perturbations as specified below.
 The number of linear-response calculations to be explicitly precomputed can be reduced via symmetry arguments
-selecting the appropiate value of the [[prepalw]] variable.
+selecting the appropriate value of the [[prepalw]] variable.
 
   * 0 --> No flexoelectric spatial dispersion tensors are calculated.
   * 1 --> Four tensors required to build all the contributions to the bulk flexoelectric tensor
@@ -10524,7 +11584,7 @@ This **requires** the precalculation of the ground-state wave functions and
 density as well as response functions and densities to the following perturbations:
 ddk, d2_dkdk, atomic displacements and electric fields. The number of linear-response calculations
 to be explicitly precomputed can be reduced via symmetry arguments
-selecting the appropiate value of the [[prepalw]] variable.
+selecting the appropriate value of the [[prepalw]] variable.
 """,
 ),
 
@@ -11237,7 +12297,7 @@ Variable(
     mnemonics="Number of AToms with Nuclear Dipole moment",
     added_in_version="v10.5",
     text=r"""
-Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit 
+Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit
 nuclear dipole moments. The number of atoms in the cell with explicit
 nuclear dipoles is [[natnd]]; the list of the atoms is [[iatnd]]; and the components
 of the dipole moment vector on each atom is given in [[atndlist]]. This simplified
@@ -11668,7 +12728,7 @@ Variable(
     topics=['MolecularDynamics_useful'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="NetCdf TIME between output of molecular dynamics informations",
+    mnemonics="NetCdf TIME between output of molecular dynamics information",
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
@@ -12296,7 +13356,7 @@ Variable(
     text=r"""
 This variable is used to define the number of high-symmetry k-points in the
 [[kptbounds]] array when [[kptopt]] > 0. Historically, [[kptbounds]] is used
-in conjuction with a negative value of [[kptopt]] when performing a NSCF band
+in conjunction with a negative value of [[kptopt]] when performing a NSCF band
 structure calculation. In this case, the number of k-points in kptbounds is
 given by abs(kptopt) + 1. There are, however, other cases in which one has to
 specify a k-path in the input file in order to activate some kind of post-
@@ -12794,13 +13854,13 @@ different contributions of 3rd derivatives of the energy are written in the
 output file (non time consuming).
 
 Higher values activate some internal tests for
-checking the implementation correctness (time consuming, not useable in parallel).
+checking the implementation correctness (time consuming, not usable in parallel).
 If [[nonlinear_info]] == 2, same effect than 1 and tests are done in non-linear
 ([[optdriver]]==5 and [[usepead]] == 0).
 If [[nonlinear_info]] == 3, same effect than 1 and tests are done in rf2_init
 ([[rf2_dkdk]]/=0 or [[rf2_dkde]]/=0).
 If [[nonlinear_info]] == 4, same effect than 1 and tests are done in both non-linear and rf2_init.
-A line containining "NOT PASSED" (and other information) is added to the output file
+A line containing "NOT PASSED" (and other information) is added to the output file
 for each test that does not pass, otherwise nothing is printed. However, more information concerning
 the tests is always printed in the **standard** output file.
 """,
@@ -12986,7 +14046,7 @@ Variable(
     requires="[[paral_kgb]] == 1",
     added_in_version="before_v9",
     text=r"""
-This input variable has been superceded by [[np_spkpt]].
+This input variable has been superseded by [[np_spkpt]].
 For the time being, for backward compatibility with AbiPy,
 [[npkpt]] is still recognized, with the same meaning than [[np_spkpt]],
 despite the incorrect lack of mention of the spin parallelism in the name [[npkpt]].
@@ -13374,9 +14434,10 @@ allowed x, y and z magnetization (useful only with [[nspinor]] = 2 and
 [[nsppol]] = 1, either because there is spin-orbit without time-reversal
 symmetry - and thus spontaneous magnetization, or with spin-orbit, if one
 allows for spontaneous non-collinear magnetism). Available for
-response functions [[cite:Ricci2019]]. Not yet available for mGGA. Also note that, with [[nspden]] = 4, time-reversal symmetry
-is not taken into account (at present; this has to be checked) and thus
-[[kptopt]] has to be different from 1 or 2.
+response functions [[cite:Ricci2019]]. Not yet available for mGGA.
+Also note that, with [[nspden]] = 4, time-reversal symmetry
+is not taken into account (at present; this has to be checked) and thus [[kptopt]]
+has to be different from 1 or 2 (the default value is 4).
 
 The default ([[nspden]] = [[nsppol]]) does not suit the case of vector magnetization.
 Note that the choice of [[nspden]] has an influence on the treatment of symmetries. See [[symafm]].
@@ -14397,7 +15458,7 @@ preferred way to use [[orbmag]] is at the end of a DFPT DDK calculation. Alterna
 can be called in a ground state calculation if [[berryopt]] -2 has also been called,
 to generate discretized DDK wavefunctions. This latter method works only on a mesh of
 kpoints, while the DFPT version works for both a mesh and for a single k point (as
-encountered in studying an atom or molecule in a box, or a pariticularly large unit cell).
+encountered in studying an atom or molecule in a box, or a particularly large unit cell).
 Note that convergence with kpt mesh is
 *much* faster using the DFPT approach, and the [[berryopt]] approach is not recommended
 unless a very specific ground state feature is also needed.
@@ -14465,7 +15526,7 @@ Variable(
     topics=['parallelism_basic'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="activate PARALelization over (paw) ATOMic sites",
+    mnemonics="activate PARALlelization over (paw) ATOMic sites",
     added_in_version="before_v9",
     text=r"""
 Relevant only for PAW calculations.
@@ -14485,7 +15546,7 @@ Variable(
     topics=['parallelism_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="activate PARALelization over K-point, G-vectors and Bands",
+    mnemonics="activate PARALlelization over K-point, G-vectors and Bands",
     added_in_version="before_v9",
     text=r"""
 
@@ -14496,7 +15557,7 @@ Variable(
     not automatically set by [[autoparal]]. For example, consult the [[tutorial:paral_mbt|tutorial on parallelism for Many-Body Perturbation Theory]] to learn how
     to run beyond-GS calculations with MPI. Other tutorials on parallelism are also available.
 
-**If paral_kgb is not explicitely put in the input file**, ABINIT
+**If paral_kgb is not explicitly set in the input file**, ABINIT
 automatically detects if the job has been sent in sequential or in parallel.
 In this last case, it detects the number of processors on which the job has
 been sent and calculates values of [[np_spkpt]], [[npfft]], [[npband]],
@@ -14535,7 +15596,7 @@ be optimal. To optimize the repartition use:
 **If paral_kgb = 1** and **max_ncpus = n $\ne$ 0** ABINIT will test automatically
 if all the processor numbers between 2 and n are convenient for a parallel
 calculation and print the possible values in the log file. A weight is
-attributed to each possible processors repartition. It is adviced to select a
+attributed to each possible processors repartition. It is advised to select a
 processor repartition for which the weight is high (as closed to the number of
 processors as possible). The code will then stop after the printing. This test
 can be done as well with a sequential as with a parallel version of the code.
@@ -14567,6 +15628,23 @@ If **paral_rf** is set to -1, the code reports the list of irreducible
 perturbations for the specified q-point in the log file (YAML format) and then stops.
 
 **paral_rf** can be specified separately for each dataset.
+""",
+),
+
+Variable(
+    abivarname="paw_add_core",
+    varset="paw",
+    vartype="integer",
+    topics=['PAW_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PAW - ADD CORE contribution to total energy",
+    requires="[[usepaw]] == 1",
+    added_in_version="v10",
+    text=r"""
+If [[paw_add_core]] is activated (set to 1), then the core-electron contributions are added to the total energy displayed during the iterations and at the end of the calculation. These include the kinetic, electrostatic, and exchange-correlation contributions.
+By default, this variable is not activated, and the core contributions are only listed at the end of the calculation, without being added to the total energy.
+This feature is available only when the PAW atomic data are in [PAW-XML](https://esl.cecam.org/en/data/paw-xml/) format.
 """,
 ),
 
@@ -14675,7 +15753,7 @@ function of the index of the k-point. The output can be readily plotted with
 the software [xmgrace](http://plasma-gate.weizmann.ac.il/Grace/) (e.g
 xmgrace FATBANDS_at0001_Ni_is2_l2_m-1). Relevant values are:
 
-  * 0: desactivated.
+  * 0: deactivated.
   * 1: The fatbands are only resolved in L.
   * 2: The fatbands are resolved in L and M.
 """,
@@ -15088,7 +16166,7 @@ zero-order regular approximation to relativistic effects (ZORA)
 can be added without the
 use of specific PAW datasets (pseudopotentials).  If in addition, a
 nuclear magnetic dipole moment (see [[nucdipmom]]) is present, onsite ZORA terms due
-to the electron-nuclear spin interactions are added as well. See also the [[zora]] 
+to the electron-nuclear spin interactions are added as well. See also the [[zora]]
 input keyword.
 
 If [[pawspnorb]] = 1, spin-orbit (and nuclear-electron spin) interactions will be added.
@@ -16014,14 +17092,17 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Plasmon Pole MODEL",
-    requires="[[optdriver]] in [3,4]",
+    requires="[[optdriver]] in [4, 7]",
     added_in_version="before_v9",
     text=r"""
-  * **ppmodel** = 1: PP model of Godby and Needs [[cite:Godby1989]].
-  * **ppmodel** = 2: PP model of Hybertsen and Louie [[cite:Hybertsen1986]].
-  * **ppmodel** = 3: PP model of W. von der Linden and P. Horsh [[cite:VonDerLinden1988]].
-  * **ppmodel** = 4: PP model of Farid and Engel [[cite:Engel1993]].
-  * **ppmodel** = 0: no PP model, numerical integration (contour deformation method [[cite:Lebegue2003]]).
+This variable defines the plasmon-pole model used to compute the convolution between G and W
+either in the SIGMA code ([[optdriver]] 4) or in the EPH code ([[optdriver]] 7) when GWPT is used (see [[eph_task]]).
+
+* **ppmodel** = 1: PP model of Godby and Needs [[cite:Godby1989]].
+* **ppmodel** = 2: PP model of Hybertsen and Louie [[cite:Hybertsen1986]].
+* **ppmodel** = 3: PP model of W. von der Linden and P. Horsh [[cite:VonDerLinden1988]].
+* **ppmodel** = 4: PP model of Farid and Engel [[cite:Engel1993]].
+* **ppmodel** = 0: no PP model, numerical integration (contour deformation method [[cite:Lebegue2003]]).
 
 Please note the difference between **ppmodel** 1 and **ppmodel** 2,3,4. In the
 first case (**ppmodel** = 1), the plasmon-pole parameters are determined in
@@ -16238,7 +17319,7 @@ Variable(
     requires="[[optdriver]] == 4",
     added_in_version="9.4.0",
     text=r"""
-[[prtchkprdm]]==1 triggers the priting of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
+[[prtchkprdm]]==1 triggers the printing of binary checkpoint files when updating the density matrix for the the linearized GW approximation.
 It is only meaningful when [[gw1rdm]]>0. The files that are printed use the usual ABINIT output files naming convention with extension _CHKP_RDM_1.
 """,
 ),
@@ -16613,8 +17694,7 @@ ELF is computed from an alternative approach which should better take into
 account the existence of spin dependent densities (see the documentation in
 /doc/theory/ELF of your ABINIT repository)
 
-Please note that ELF is **not** yet implemented in the case of PAW
-([[usepaw]] = 1) calculations.
+Please note that ELF is **not** yet implemented in the case of PAW ([[usepaw]] = 1) calculations.
 """,
 ),
 
@@ -16629,7 +17709,7 @@ Variable(
     added_in_version="9.11.0",
     text=r"""
 If set to 1, ABINIT will produce a netCDF EVK file, containing the elements of the velocity operator (ddk) between two wavefunctions at wavevector k.
-Not compatible with parallelization over perturbations ([[paral_rf]]=1) when netCDF library doesnt support MPI-IO.
+Not compatible with parallelization over perturbations ([[paral_rf]]=1) when netCDF library does not support MPI-IO.
 """,
 ),
 
@@ -16995,7 +18075,7 @@ The file structure of this unformatted output file is described in [[help:abinit
 No output is provided by a negative value of this variable.
 
 NB: In DFPT calculations, prtpot is automatically set to 1 as the POT files might be used to perform EPH calculations
-unless the user explictly sets prtpot to 0 in the input file.
+unless the user explicitly sets prtpot to 0 in the input file.
 """,
 ),
 
@@ -17596,7 +18676,7 @@ This internal variable characterizes a Shubnikov type III magnetic space group
 (anti-ferromagnetic space group). The user is advised to consult [[cite:Bradley1972]].
 In a Shubnikov type III magnetic space group, the primitive cell is the same if one takes
 into account the spin-flipping operations or if one does not take into account such
-spin-flipping operations. Explicitely, there is no pure translation with a spin-flip.
+spin-flipping operations. Explicitly, there is no pure translation with a spin-flip.
 
 A Shubnikov type III magnetic space group might be defined by its Fedorov
 space group (set of all spatial symmetries, irrespective of their magnetic
@@ -17989,31 +19069,67 @@ Variable(
     abivarname="rcut",
     varset="gstate",
     vartype="real",
+    topics=['Coulomb_useful'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Radius of the CUT-off for coulomb interaction for Hartree, ion-electron, and ion-ion interactions",
+    added_in_version="before_v9",
+    text=r"""
+Truncation of the Coulomb interaction in real space. The meaning of [[rcut]]
+is governed by the cutoff shape options [[icutcoul]].
+
+If [[rcut]] is zero or negative, the cutoff is automatically calculated so to enclose
+the same volume inside the cutoff as the volume of the solid, i.e primitive cell times the number of k-points.
+""",
+),
+
+Variable(
+    abivarname="gw_rcut",
+    varset="gstate",
+    vartype="real",
     topics=['Coulomb_useful','GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="Radius of the CUT-off for coulomb interaction",
     added_in_version="before_v9",
     text=r"""
-Truncation of the Coulomb interaction in real space. The meaning of [[rcut]]
-is governed by the cutoff shape options [[icutcoul]], [[gw_icutcoul]] and/or [[fock_icutcoul]].
+Truncation of the Coulomb interaction in real space. The meaning of [[gw_rcut]]
+is governed by the cutoff shape options [[gw_icutcoul]].
 See complementary information in [[vcutgeo]].
 
 In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]] for one-dimensional systems, the cutoff region is given by the
 Wigner-Seitz cell centered on the axis of the cylinder. The cutoff region is
 thus automatically defined by the unit cell and there is no need to specify
-the value of [[rcut]]. For two-dimensional systems, Ismail-Beigi [[cite:Ismail-Beigi2006]] also fixes the cutoff region,
+the value of [[gw_rcut]]. For two-dimensional systems, Ismail-Beigi [[cite:Ismail-Beigi2006]] also fixes the cutoff region,
 at half the replication length perpendicular to the (truly) periodic plane.
 
-Thus, when the Beigi methods in 1D or 2D are expected, [[rcut]] must be 0.0.
-Using another value of [[rcut]] will prevent the Beigi method to be used.
+Thus, when the Beigi methods in 1D or 2D are expected, [[gw_rcut]] must be 0.0.
+Using another value of [[gw_rcut]] will prevent the Beigi method to be used.
 See complementary information in [[vcutgeo]].
 
 On the other hand, when the Rozzi methods in 1D or 2D are expected, which is the case when one component of [[vcutgeo]] is negative,
-[[rcut]] mut be defined.
+[[gw_rcut]] mut be defined.
 
-If [[rcut]] is negative, the cutoff is automatically calculated so to enclose
-the same volume inside the cutoff as the volume of the primitive cell.
+If [[gw_rcut]] is negative, the cutoff is automatically calculated so to enclose
+the same volume inside the cutoff as the volume of the solid, i.e primitive cell times the number of k-points.
+""",
+),
+
+Variable(
+    abivarname="fock_rcut",
+    varset="gstate",
+    vartype="real",
+    topics=['Coulomb_useful'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Radius of the CUT-off for coulomb interaction for FOCK operator",
+    added_in_version="before_v9",
+    text=r"""
+Truncation of the Coulomb interaction in real space. The meaning of [[fock_rcut]]
+is governed by the cutoff shape options [[fock_icutcoul]].
+
+If [[fock_rcut]] is zero or negative, the cutoff is automatically calculated so to enclose
+the same volume inside the cutoff as the volume of the solid, i.e primitive cell times the number of k-points.
 """,
 ),
 
@@ -18568,37 +19684,6 @@ energies are no longer recomputed by the longwave driver but read from the preca
 
 Strain first-order energies calculated with [[rfstrs_ref]] = 1 are useful, for instance,
 in the calculation of absolute deformation potentials [[cite:Stengel2015]].
-""",
-),
-
-Variable(
-    abivarname="rfuser",
-    varset="dfpt",
-    vartype="integer",
-    topics=['DFPT_expert'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="Response Function, USER-defined",
-    added_in_version="before_v9",
-    text=r"""
-Available to the developers, to activate the use of ipert=natom+6 and
-ipert=natom+7, two sets of perturbations that the developers can define.
-
-  * 0 --> no computations for ipert=natom+6 or ipert=natom+7
-  * 1 --> response with respect to perturbation natom+6 will be computed
-  * 2 --> response with respect to perturbation natom+7 will be computed
-  * 3 --> responses with respect to perturbations natom+6 and natom+7 will be computed
-
-!!! important
-
-    In order to define and use correctly the new perturbations, the developer
-    might have to include code lines or additional routines at the level of the
-    following routines: dfpt_cgwf.F90, dfpt_dyout.F90, dfpt_symph.F90,
-    dfpt_dyout.F90, dfpt_etot.F90, littlegroup_pert.F90, dfpt_looppert.F90,
-    dfpt_mkcor.F90, dfpt_nstdy.F90, dfpt_nstwf.F90, respfn.F90, dfpt_scfcv.F90,
-    irreducible_set_pert.F90, dfpt_vloca.F90, dfpt_vtorho.F90, dfpt_vtowfk.F90. In
-    these routines, the developer should pay a particular attention to the rfpert
-    array, defined in the routine respfn (in m_respfn_driver.F90), as well as to the ipert local variable.
 """,
 ),
 
@@ -19297,18 +20382,15 @@ Variable(
     mnemonics="SPIN for AToms",
     added_in_version="before_v9",
     text=r"""
-Gives the initial electronic spin-magnetization for each atom, in unit of $\hbar/2$,
-as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]), the target value of the magnetization.
+Gives the **initial** electronic spin-magnetization for each atom in Cartesian coordinates, in unit of $\hbar/2$,
+as well as, in case of fixed magnetization calculations (see [[constraint_kind]] and [[magconon]]),
+the **target value** of the magnetization.
 
-Note that if [[nspden]] = 2, the z-component must be given for each atom, in
-triplets (0 0 z-component).
-For example, the electron of an hydrogen atom can be spin up (0 0 1.0) or spin
-down (0 0 -1.0).
+Note that if [[nspden]] = 2, the z-component must be given for each atom, in triplets (0 0 z-component).
+For example, the electron of an hydrogen atom can be spin up (0 0 1.0) or spin down (0 0 -1.0).
 
-This value is only used to create the first exchange and correlation
-potential.
-It is not checked against the initial occupation numbers [[occ]] for each spin
-channel.
+This value is only used to create the first exchange and correlation potential.
+It is not checked against the initial occupation numbers [[occ]] for each spin channel.
 It is meant to give an easy way to break the spin symmetry, and to allow to
 find stable local spin fluctuations, for example: antiferromagnetism, or the
 spontaneous spatial spin separation of elongated H$_2$ molecule.
@@ -19370,7 +20452,7 @@ and does not change during the SCF procedure.
 [[spinmagntarget]] is not used.
 
 For the time being, in response-function calculations, only [[spinmagntarget]]=0.0 or the default
-value are allowed. Moreover, the occupation numbers for the ground-state and for the reponse-function
+value are allowed. Moreover, the occupation numbers for the ground-state and for the response-function
 calculations must be identical. Thus, ferromagnetic insulators must rely on
 [[occopt]]=0 or 2, with explicit definition of the occupation numbers.
 
@@ -19846,7 +20928,7 @@ the default Pulay mixing is used).
 
 Since the convergence of the self-consistent cycle is determined directly by
 the convergence of the density: [[toldfe]], [[toldff]], [[tolrff]],
-[[tolvrs]], [[tolwfr]] are not used, and are replaced by [[rectolden]]; the
+[[tolvrs]], [[tolwfr]] , [[toldmag]]are not used, and are replaced by [[rectolden]]; the
 energetic values, except for the fermi energy, are only computed during the
 latest SFC cycle: the output file will show a jump of the total energy at the
 end, but it is not because of a bad convergence behavior. Computational speed
@@ -19973,7 +21055,7 @@ boundary conditions can be smoothed using an exponential decay. This means a
 correction on the energy at the end on each wavefunction optimisation run. If
 this parameter is set to zero, no tail computation is done. On the contrary,
 put it to a positive value makes the tail correction available. The value
-correspond to a length in atomic units being the spacial expansion with the
+correspond to a length in atomic units being the spatial expansion with the
 exponential decay around the grid.
 """,
 ),
@@ -20016,19 +21098,24 @@ Variable(
     defaultval=0.0,
     mnemonics="TOLerance on the DiFference of total Energy",
     characteristics=['[[ENERGY]]'],
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] can differ from zero.",
-    excludes="[[toldff]] or [[tolrff]] or [[tolvrs]]",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]], [[toldmag]] or [[tolvrs]] can differ from zero.",
+    excludes="[[toldff]] or [[tolrff]] or [[tolvrs]] or [[toldmag]]",
     added_in_version="before_v9",
     text=r"""
 Sets a tolerance for absolute differences of total energy that, reached TWICE
 successively, will cause one SCF cycle to stop (and ions to be moved).
-Can be specified in Ha (the default), Ry, eV or Kelvin, since [[toldfe]] has
+Can be specified in Ha (the default), Ry, eV, meV or Kelvin, since [[toldfe]] has
 the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV).
 If set to zero, this stopping condition is ignored.
 Effective only when SCF cycles are done ([[iscf]]>0).
 Because of machine precision, it is not worth to try to obtain differences in
-energy that are smaller than about 1.0d-12 of the total energy. To get
-accurate stresses may be quite demanding.
+energy that are smaller than about 1.0d-12 of the total energy.
+To get accurate stresses may be quite demanding.
+
+!!! tip
+
+    In version 10.5.1 and above, it is possible to use a negative value to
+    specify the tolerance in energy per atom e.g. toldfe = -0.1 meV.
 
 When the geometry is optimized (relaxation of atomic positions or primitive
 vectors), the use of [[toldfe]] is to be avoided. The use of [[tolrff]]
@@ -20037,7 +21124,7 @@ characteristics. When all forces vanish by symmetry (e.g. optimization of the
 lattice parameters of a high-symmetry crystal), then place [[toldfe]] to
 1.0d-12, or use (better) [[tolvrs]].
 
-Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
+Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
@@ -20088,6 +21175,41 @@ See [[tolwfr]] for more details about coupling two criteria.
 """,
 ),
 
+Variable(
+    abivarname="toldmag",
+    varset="basic",
+    vartype="real",
+    topics=['SCFControl_basic', 'ForcesStresses_basic'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="TOLerance on the DiFference of MAGnetizations",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]], [[toldmag]] or [[tolvrs]] can differ from zero.",
+    excludes="[[toldfe]] or [[tolrff]] or [[tolvrs]]",
+    added_in_version="v10.5",
+    text=r"""
+Sets a tolerance for differences of magnetization (in atomic unit ) that, reached
+TWICE successively, will cause one SCF cycle to stop (and ions to be moved).
+If set to zero, this stopping condition is ignored.
+Effective only when SCF cycles are done ([[iscf]]>0). This tolerance applies
+to any particular cartesian component of any atom.
+
+This stopping criterion is not allowed for RF calculations.
+Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
+at the same goal (causing the SCF cycle to stop), they are seen as a unique
+input variable at reading. Hence, it is forbidden that two of these input
+variables have non-zero values for the same dataset, or generically (for all
+datasets). However, a non-zero value for one such variable for one dataset
+will have precedence on the non-zero value for another input variable defined generically.
+
+**toldmag** can be coupled with [[tolwfr]]. In that case, SCF cycle is stopped when both criteria are satisfied.
+To do so one has to specify both criteria for the same dataset.
+Note that a tolerance defined generically does not couple with a criterion defined for one particular dataset.
+See [[tolwfr]] for more details about coupling two criteria.
+
+When the maximum magnetization among all atoms and directions is smaller than 10e^-8, both the maximum of magnetization
+and its difference are reset to zero. In this case, the toldmag convergence criterion cannot be used.
+""",
+),
 Variable(
     abivarname="tolimg",
     varset="rlx",
@@ -20245,8 +21367,8 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="TOLerance on the potential V(r) ReSidual",
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] can differ from zero.",
-    excludes="[[toldfe]] or [[toldff]] or [[tolrff]]'",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] or [[toldmag]] can differ from zero.",
+    excludes="[[toldfe]] or [[toldff]] or [[tolrff]] or [[toldmag]]'",
     added_in_version="before_v9",
     text=r"""
 Sets a tolerance for potential residual that, when reached, will cause one SCF
@@ -20267,7 +21389,7 @@ tolerance on the potential residual is imposed by first subtracting the mean
 of the residual of the potential (or the trace of the potential matrix, if the
 system is spin-polarized), then summing the square of this function over all
 FFT grid points. The result should be lower than [[tolvrs]].
-Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
+Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
@@ -20319,7 +21441,7 @@ Note that **tolwfr** is often used in the test cases, but this is
 purely for historical reasons: except when [[iscf]] < 0, **other criteria should be used**.
 Indeed, the squared residual can be small even with non self-consistent density and potential.
 
-**tolwfr** alone should not be used as SCF criterion, but it can be coupled with [[toldfe]], [[toldff]], [[tolrff]] or [[tolvrs]].
+**tolwfr** alone should not be used as SCF criterion, but it can be coupled with [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] or [[tolvrs]].
 In that case, SCF cycle is stopped when both criteria are satisfied.
 That way one can insure that physical properties are converged (=SCF converged) while insuring that wavefunctions are converged.
 For example, a ground state computations done before DFPT can use stringent values of **tolwfr** in addition to a desired criterion on self-consistency.
@@ -20556,12 +21678,12 @@ Variable(
     abivarname="upawu",
     varset="paw",
     vartype="real",
-    topics=['DFT+U_compulsory'],
+    topics=['DFT+U_compulsory', 'DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="value of U for PAW+U",
     characteristics=['[[ENERGY]]'],
-    requires="[[usepaw]] == 1 and [[usepawu]] == 1",
+    requires="[[usepaw]] == 1 and [[usepawu]] > 0",
     added_in_version="before_v9",
     text=r"""
 Gives the value of the screened coulomb interaction between correlated
@@ -20706,13 +21828,12 @@ The sign of [[usedmatpu]] has influence only when [[geoopt]] or [[moldyn]] are n
 
 Variable(
     abivarname="usedmft",
-    varset="dev",
+    varset="dmft",
     vartype="integer",
-    topics=['DMFT_compulsory'],
+    topics=['DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="USE Dynamical Mean Field Theory",
-    characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
 If set to 1, enable the use of DFT+DMFT, see in particular the important
@@ -20732,27 +21853,26 @@ The current implementation uses Wannier functions obtained from
 [[ cite:Amadon2008 | projected local orbitals ]] as
 correlated orbitals (see [[dmftbandi]] and [[dmftbandf]] input variables to define them).
 
-The Green functions are computed on a mesh of linear Matsubara frequencies.
+The Green's functions are computed on a mesh of linear Matsubara frequencies.
 However, most of the code uses logarithmic Matsubara grid to lower the
 computational cost. Both [[dmft_nwli]] and [[dmft_nwlo]] are thus convergence parameters.
+In the case where you are using the internal interface with TRIQS/CT-HYB ([[dmft_solv]] $\in$ [6,7]),
+we use a linear mesh with [[dmft_triqs_n_iw]] Matsubara frequencies, where the high-frequency
+behavior is described by a moment expansion up to order 5.
 
-DMFT is currently available for collinear ([[nspinor]] = 1) polarized or
+DFT+DMFT is currently available for collinear ([[nspinor]] = 1) polarized or
 unpolarized calculations ([[nspden]] = [[nsppol]] = 2 or [[nspden]] = [[nsppol]] = 1)
-and for non collinear calculations ([[nspinor]] = 2,[[nspden]] = 4,[[nsppol]] = 1).
+and for non collinear calculations ([[nspinor]] = 2, [[nspden]] = 4, [[nsppol]] = 1).
 However it is not yet available for collinear antiferromagnetic calculations
-([[nspden]] = 2,[[nsppol]] = 1) and non collinear non magnetic calculations
-([[nspden]] = 1, [[nsppol]] = 1,[[nspinor]] = 2). CTQMC calculations
+([[nspden]] = 2, [[nsppol]] = 1) and non collinear non magnetic calculations
+([[nspden]] = 1, [[nsppol]] = 1, [[nspinor]] = 2). CTQMC calculations
 ([[dmft_solv]] = 5) are not yet possible if [[nspinor]] = 2.
 
 Only static calculations without relaxation or dynamics are possible (forces
 and stress are not computed in the scheme: so the computed values should NOT
 be trusted).
 
-When correlated density matrices are diagonal, all values of [[upawu]] and
-[[jpawu]] are possible. If the correlated density matrices are non diagonal,
-only [[jpawu]] = 0 is implemented.
-
-Relevant direct output quantities from converged DMFT calculations are total
+Relevant direct output quantities from converged DFT+DMFT calculations are total
 energy and occupation of correlated orbitals. For Hubbard I calculation
 ([[dmft_solv]] = 2), total and partial spectral functions can be obtained with
 prtdos=1 and can be found in files OUTSpFunc* (where OUT is the root for
@@ -20853,7 +21973,7 @@ Variable(
     abivarname="usepawu",
     varset="paw",
     vartype="integer",
-    topics=['DFT+U_compulsory', 'PAW_useful', 'GW_useful', 'SelfEnergy_useful'],
+    topics=['DFT+U_compulsory', 'PAW_useful', 'GW_useful', 'SelfEnergy_useful', 'DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="USE PAW+U (spherical part)",
@@ -20861,7 +21981,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Must be non-zero if a DFT+U calculation is done, or if a GW calculation
-following a DFT+U calculation is done (important!), or if a DMFT calculation is done..
+following a DFT+U calculation is done (important!), or if a DFT+DMFT calculation is done.
 
   * If set to 0, the DFT+U method is not used.
 
@@ -20869,15 +21989,18 @@ following a DFT+U calculation is done (important!), or if a DMFT calculation is 
 The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy.
 Three choices are allowed concerning the double counting term:
 
-    * If abs([[usepawu]]) = 1 or 10, the Full Localized Limit (FLL) (or Atomic limit) double counting is used (cf Eq. (4) of [[cite:Liechtenstein1995]] or Eq. (8) of [[cite:Czyzyk1994]]).
+    * If abs([[usepawu]]) = 1, the Full Localized Limit (FLL) (or Atomic limit) double counting is used (cf Eq. (4) of [[cite:Liechtenstein1995]] or Eq. (8) of [[cite:Czyzyk1994]]).
 
     * If abs([[usepawu]]) = 2, the Around Mean Field (AMF) double counting is used (cf Eq. (7) of [[cite:Czyzyk1994]]). Not valid if nspinor=2.
 
-    * If abs([[usepawu]]) = 4 or 14, the FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without
+    * If abs([[usepawu]]) = 4, the FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without
     polarization in the exchange correlation functional (cf [[cite:Park2015]] and [[cite:Chen2016a]]). In this case, one must use [[iscf]]<10.
 
-For DMFT calculations [[usedmft]]=1, only [[usepawu]]=10 or 14 is permitted. For other types of calculations, abs([[usepawu]])=10 or 14 cannot be used.
-Positive and negative values of [[usedmft]], only differ by their internal implementation. At some stage, only positive values will be used again.
+ * For DFT+DMFT calculations ([[usedmft]]=1), only [[usepawu]]=10 or 14 is permitted. For other types of calculations, abs([[usepawu]])=10 or 14 cannot be used.
+
+    * If [[usepawu]] = 10, the calculation is done with polarized exchange correlation functional.
+
+    * If [[usepawu]] = 14, the calculation is done without spin polarization in the exchange correlation functional, and magnetism solely arises from DMFT.
 
 If [[nspden]] = 4 (non-collinear calculations) with GGA, one needs to use [[pawxcdev]] = 1,
 and either abs([[usepawu]])=0, 1, 4, 10 or 14.
@@ -21980,7 +23103,7 @@ This variable defines the cutoff for the radial mesh used to compute `epsatm`
 for the local part in the case of NC pseudos given in UPF2 format.
 
 This parameter can be used to cut off the numerical noise arising from the large-r tail when integrating V_loc(r) - Z_v/r.
-In QE, vloc_rcut is harcoded to 10 Bohr but numerical experiments showed that such value leads to oscillations
+In QE, vloc_rcut is hardcoded to 10 Bohr but numerical experiments showed that such value leads to oscillations
 in the second order derivatives of the vloc form factors.
 For this reason, the default value in Abinit is set to 6.0.
 """,
@@ -22222,11 +23345,11 @@ It can be used as a simple string flagging the desired outputs as follows:
  * "gden"      --> Activates the printing of the gradient of the electronic density file. Refer to [[prtgden]] for further documentation.
  * "geo"       --> Activates the printing of the geometry analysis. Refer to [[prtgeo]] for further documentation.
  * "gkk"       --> Activates the printing of the GKK matrix file. Refer to [[prtgkk]] for further documentation.
- * "gsr"       --> Activates the printing of the GSR file. Refer to [[prtgsr]] for further documention.
+ * "gsr"       --> Activates the printing of the GSR file. Refer to [[prtgsr]] for further documentation.
  * "hist"      --> Activates the printing of the HIST file. Refer to [[prthist]] for further documentation.
  * "kbff"      --> Activates the printing of the Kleynman-Bylander form factors. Refer to [[prtkbff]] for further documentation.
  * "kden"      --> Activates the printing of the kinetic energy density file. Refer to [[prtkden]] for further documentation.
- * "lden"      --> Activates the printing of the Laplacian of the eletronic density. Refer to [[prtlden]] for further documentation.
+ * "lden"      --> Activates the printing of the Laplacian of the electronic density. Refer to [[prtlden]] for further documentation.
  * "ncout"     --> Activates the printing of the OUT file in netCDF format. Refer to [[ncout]] for further documentation.
  * "pot"       --> Activates the printing of the total potential. Refer to [[prtpot]] for further documentation.
  * "psps_1"    --> Activates the printing of the pseudopotential tables in netCDF format. Refer to [[prtpsps]] for further documentation.
@@ -22727,7 +23850,7 @@ Variable(
     added_in_version="v10.5",
     text=r"""
 ZORA is an effective approximation to the full Dirac equation, which
-delivers reasonable values for relativistic effects at modest 
+delivers reasonable values for relativistic effects at modest
 cost [[cite:Autschbach2013]].
 The ZORA Hamiltonian includes kinetic energy couplings that are
 independent of electron spin, and additional terms depending explicitly
@@ -22739,8 +23862,8 @@ due to nuclear magnetic dipoles (see [[nucdipmom]]).
 [[zora]] 3 activates both kinetic energy and electron spin terms.
 
 Negative values of [[zora]] are present only for debugging purposes. [[zora]] -1 permits only
-spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits only 
-the electon spin-nuclear dipole through space interaciton, and [[zora]] -3 permits only the
+spin-orbit coupling, regardless of the presence of nuclear dipoles. [[zora]] -2 permits only
+the electron spin-nuclear dipole through space interaction, and [[zora]] -3 permits only the
 electron spin-nuclear dipole Fermi-contact-like interaction.
 """,
 ),
@@ -22958,7 +24081,7 @@ Variable(
     mnemonics="Time-Dependent Electric Field INDUCED VECtor POTential",
     added_in_version="10",
     text=r"""
-This variable controls wether we include the induced vector potential in the
+This variable controls whether we include the induced vector potential in the
 Hamiltonian so that the total vector potential applied is the sum of the vector
 potential associated with the external electric field and the vector potential
 induced by the current density.
@@ -23032,7 +24155,7 @@ Variable(
     mnemonics="Time-Dependent calculation RESTART",
     added_in_version="10",
     text=r"""
-This variable controls wether we are restarting a RTTDDFT run.
+This variable controls whether we are restarting a RTTDDFT run.
 If [[td_restart]] is 0 the calculation starts from scratch, if it is
 set to 1 than ABINIT will read the file called TD_RESTART that contains
 some information in order to continue the previous RTTDDFT calculation.
@@ -23252,7 +24375,7 @@ use eph_phrange -4 -6 to include **ALL** phonon indices except 4, 5, 6.
     The indices do not necessary correspond to phonon modes if there are crossings
     in the phonon band structure.
     At each q-point, indeed, phonons are ordered according to their energy.
-    and this order does not necessarly reflect the connection of the energy branch in q-space.
+    and this order does not necessarily reflect the connection of the energy branch in q-space.
 """,
 ),
 
@@ -23485,7 +24608,7 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 This variable defines the path of the external KERANGE.nc file with the list of k-points in the
-electron/hole pockets for semiconductors or the k-points withing an energy window around the Fermi level
+electron/hole pockets for semiconductors or the k-points within an energy window around the Fermi level
 as specified by [[sigma_erange]].
 
 The tables stored in the netcdf file are used for the calculation of the imaginary part of
@@ -24295,7 +25418,7 @@ Variable(
     text=r"""
 This variable defines the effective energy window for the $\kq$ KS states
 in the computation of electron lifetimes ([[eph_task]] -4) and is used to predict
-the list of $\qq$-points in the BZ that will be needeed during the calculation.
+the list of $\qq$-points in the BZ that will be needed during the calculation.
 
 The code uses e.g. the input [[sigma_erange]] to select the $\nk$ states in $\tau_\nk$ but then this
 initial energy window must be increased a bit to accommodate for phonon absorption/emission (from $\kk$ to $\kq$).
@@ -24603,29 +25726,6 @@ See line 743 in src/95_drive/screening.F90 .
 ),
 
 Variable(
-    abivarname="gstore_cplex",
-    varset="eph",
-    vartype="integer",
-    topics=['ElPhonInt_basic'],
-    dimensions="scalar",
-    defaultval=2,
-    mnemonics=r"GSTORE ComPLEX dimension",
-    requires="[[optdriver]] == 7",
-    added_in_version="9.6.2",
-    text=r"""
-This input variable specifies whether the EPH code should store $|g|^2$ or $g$
-when computing the e-ph matrix elements ([[eph_task]] == 11)
-Possible values are:
-
-    1 --> compute and store $|g|^2$ in GSTORE.nc.
-          Use this option to reduce the size of the file but keep in mind
-          that the GSTORE can only be used to compute expression in which
-          only $|g|^2$ is needed.
-    2 --> compute and store complex $g$ in GSTORE.nc (default)
-""",
-),
-
-Variable(
     abivarname="gstore_with_vk",
     varset="eph",
     vartype="integer",
@@ -24640,10 +25740,64 @@ This input variable specifies whether the EPH code should compute and store
 the matrix elements of the velocity operator when computing the e-ph matrix elements ([[eph_task]] == 11)
 Possible values are:
 
-    0 --> Do not compute velocity matrix elements
-    1 --> compute and store the diagonal matrix elements (default)
-    2 --> compute and store diagonal + off-diagonal terms.
+0 --> Do not compute velocity matrix elements
+1 --> compute and store the diagonal matrix elements (default)
+2 --> compute and store diagonal + off-diagonal terms.
 """,
+),
+
+Variable(
+    abivarname="gstore_use_lgk",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics=r"GSTORE USE Little Group of K",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.5.6",
+    text=r"""
+When generating a GSTORE file, setting [[gstore_use_lgk]] to 1,
+instructs Abinit to restrict the computation of the g(k,q) to the
+$\qq$-points in the IBZ_k where IBZ_k is the irreducibile zone
+defined by the little group of the $\kk$-point.
+This allows one to reduce the number of e-ph matrix elements, but keep in mind that
+the generated GSTORE can only be used to compute electronic properties such
+as the electron self-energy $\Sigma_\kk$.
+By default, little group symmetries are not used.
+
+!!! important
+
+    [[gstore_use_lgk]] = 1 is only compatible with [[gstore_qzone]] == "bz".
+""",
+),
+
+Variable(
+    abivarname="gstore_use_lgq",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics=r"GSTORE USE Little Group of Q",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.5.6",
+    text=r"""
+When generating a GSTORE file, setting [[gstore_use_lgq]] to 1,
+instructs Abinit to restrict the computation of the g(k,q) to the
+$\kk$-points in the IBZ_q where IBZ_q is the irreducibile zone
+defined by the little group of the $\qq$-point.
+This allows one to reduce the number of e-ph matrix elements, but keep in mind that
+the generated GSTORE can only be used to compute phonon properties such
+as the phonon self-energy $\Pi_\kk$.
+By default, little group symmetries are not used.
+
+!!! important
+
+    [[gstore_use_lgq]] = 1 is only compatible with [[gstore_kzone]] == "bz".
+""",
+
+
 ),
 
 Variable(
@@ -24658,13 +25812,14 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This input variable specifies whether the EPH code should compute the $g(\kk, \qq)$
-matrix elements for $\kk$ in the IBZ or in the BZ.
+matrix elements with $\kk$ in the IBZ or in the BZ.
 
 !!! important
 
     The combination [[gstore_kzone]] = "ibz" with [[gstore_qzone]] = "ibz" is not allowed.
     One usually restricts one wavevector to the IBZ while the other wavevector covers the full BZ.
-    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes.
+    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes,
+    and it is not recommended for production runs (much slower).
 """,
 ),
 
@@ -24686,7 +25841,8 @@ e-ph matrix elements for $\qq$ in the IBZ or in the BZ.
 
     The combination [[gstore_kzone]] = "ibz" with [[gstore_qzone]] = "ibz" is not allowed.
     One usually restricts one wavevector to the IBZ while the other wavevector covers the full BZ.
-    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes.
+    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes,
+    and it is not recommended for production runs (much slower).
 """,
 ),
 
@@ -24705,8 +25861,11 @@ This input variable can be used to introduce a filter in the electronic wavevect
 when computing the e-ph matrix elements with [[eph_task]] == 11.
 Possible values are:
 
-    "none" --> No filter is applied.
-    "fs_tetra" --> Use tetrahedron method to filter k/k+q states on the Fermi surface.
+- "none" --> No filter is applied (default)
+- "qprange" --> Use [[gw_qprange]] to select k-points. If [[gw_qprange]] is not given in input,
+   the code automatically selects the k-points associated to the direct and the fundamental KS gap
+   as computed from the WFK file. This option is usually used for ZPR computations in semiconductors.
+- "fs_tetra" --> Use tetrahedron method to filter k/k+q states on the Fermi surface.
 
 Note that it is possible to use another filter based on the position of the energy states wrt to either
 the CBM/VBM or the position wrt to the Fermi level via [[gstore_erange]].
@@ -24714,22 +25873,41 @@ the CBM/VBM or the position wrt to the Fermi level via [[gstore_erange]].
 ),
 
 Variable(
-    abivarname="gstore_gmode",
+    abivarname="gstore_vname",
     varset="eph",
     vartype="string",
-    topics=['ElPhonInt_basic'],
+    topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval="phonon",
-    mnemonics=r"GSTORE GMODE",
+    defaultval="gvals",
+    mnemonics=r"GSTORE Variable NAME",
     requires="[[optdriver]] == 7",
-    added_in_version="10.1.2",
+    added_in_version="10.5.6",
     text=r"""
-This input variable specifies the representation used to store the e-ph matrix elements in the GSTORE.nc file
+This input variable specifies the name of the netcdf variable from which the e-ph matrix elements
+will be **read** from the GSTORE.nc file.
+Possible values are: "gvals" (default) or "gvals_ks"
+This variable has an effect only where reading a GSTORE file produced by
+the GWPT subdriver ([[eph_task]] 17) for post-processing purposes.
+In this case, indeed, the "gvals" netcdf variables stores the GWPT electron-matrix elements
+while "gvals_ks" contains the KS e-ph matrix elements.
+Use "gvals_ks" if you want to compute physical properties using KS matrix elements instead of the GWPT ones
+for comparison purposes.
 
-Possible values are:
+This input variable specifies the name of the NetCDF variable from which
+the electron–phonon matrix elements will be read in the GSTORE.nc file.
 
-    "phonon" --> Store e-ph matrix elements in the phonon representation (collective displacement)
-    "atom" -->  Store e-ph matrix elements in the atom representation (displacement of a single atom along one of the reduced directions)
+Valid options are:
+
+- "gvals" (default)
+- "gvals_ks"
+
+This variable is only relevant when reading a GSTORE.nc file produced by
+the GWPT subdriver ([[eph_task]] = 17) for post-processing.
+In such cases: "gvals" stores the GWPT-renormalized electron–phonon matrix elements while
+"gvals_ks" contains the Kohn–Sham (KS) electron–phonon matrix elements.
+
+Select "gvals_ks" if you wish to compute physical properties using the KS matrix elements
+instead of the GWPT ones, for comparison purposes.
 """,
 ),
 
@@ -24747,11 +25925,10 @@ Variable(
 This input variable can be used to specify the band range
 when computing the GSTORE.nc file with [[eph_task]] == 11.
 The first entry gives the first band to be included while the second index specifies the last band.
-
 Note that the array depends on the value of [[nsppol]] thus one has to provide four integers for the
 two different spin channels when [[nsppol]] == 2.
 
-If not specified in input, ABINIT will use all the bands from 1 up to the maximum number of bands
+If not specified in input, ABINIT will use all the bands from 1 up to [[nband]]
 unless additional filters are activated, see [[gstore_kfilter]] and [[gstore_erange]].
 """,
 ),
@@ -24846,7 +26023,7 @@ Variable(
     dimensions=[2, "[[nsppol]]"],
     characteristics=['[[ENERGY]]'],
     requires="[[optdriver]] == 7",
-    mnemonics="GSTORE Energy  RANGE",
+    mnemonics="GSTORE Energy RANGE",
     added_in_version="9.6.2",
     text=r"""
 This variable is used when [[eph_task]] = 11 to define the k/q points that should be considered when
@@ -24856,7 +26033,6 @@ on the basis of their KS energy $\ee_\nk$.
 
 If both entries in [[gstore_erange]] are negative, the code assumes a metal and only states within the energy
 window [efermi - abs(gstore_erange(1)), efermi + abs(gstore_erange(2)] are included in the calculation.
-
 Positive (or zero) values are used in semiconductors to define an energy range with respect to the band edges.
 In this case, the first entry given the position of the holes with respect to the CBM while the second entry
 gives the position of electrons with respect to the VBM (energy differences are **always positive**, even for holes).
@@ -24917,7 +26093,7 @@ Variable(
     text=r"""
 This variable defines the maximum number of FFTs performed in the unit cell/supercell.
 If not specified in the input, the code will automatically define these values in order
-to find a good compromise betweeen memory and performance.
+to find a good compromise between memory and performance.
 """,
 ),
 
@@ -24952,11 +26128,11 @@ The choice is among:
 
     At the time of writing, the following features are **not yet supported** in GWR:
 
+    * PAW method.
     * Calculations with [[nspinor]] == 2.
     * Metallic systems as the our minimax meshes assume systems with an energy gap.
     * Temperature effects at the electronic level are not taken into account as we work with the T = 0 formalism.
     * Only $\Gamma$-centered $\kk$-meshes are supported in GWR.
-    * PAW method.
 """,
 ),
 
@@ -25054,8 +26230,7 @@ If encountering out-of-memory issues with the supercell method, it is advisable 
 To optimize performance, utilize all available cores, prioritizing g-parallelism followed by k-parallelism.
 
 The two algorithms are equivalent in the case of $\Gamma$-only sampling.
-
-See also [[gwr_chi_algo]]
+See also [[gwr_chi_algo]].
 """,
 ),
 
@@ -25104,25 +26279,6 @@ See also [[inclvkb]] for the inclusion of the contribution given by the non-loca
 ),
 
 
-#Variable(
-#    abivarname="gwr_regterm",
-#    varset="gwr",
-#    vartype="real",
-#    topics=['GWR_expert'],
-#    dimensions=[1],
-#    defaultval=-1.0,
-#    mnemonics="GWR REGularization TERM",
-#    requires="[[optdriver]] == 6",
-#    added_in_version="9.8.0",
-#    text=r"""
-#TODO: To be described.
-#Negative value means automatic regularization.
-#Zero to deactivate it.
-#Positive to use specific value.
-#""",
-#),
-
-
 Variable(
     abivarname="optdcmagpawu",
     varset="paw",
@@ -25134,7 +26290,7 @@ Variable(
     requires="[[usepaw]] == 1, [[usepawu]] == 1 or 4, and [[nspden]] == 4",
     added_in_version="9.8.2",
     text=r"""
-This option is usefull only for tests and code comparisons. For magnetic computations ([[nspden]]==4),
+This option is useful only for tests and code comparisons. For magnetic computations ([[nspden]]==4),
 it defines how the magnetism is treated in the double counting term in the PAW+U formalism.
 Abinit versions before 9.8 correspond to [[optdcmagpawu]]=1, without magnetism in the DC term,
 while [[optdcmagpawu]]=3 takes into account magnetism in the DC term, that is currently the default.
@@ -25696,48 +26852,48 @@ The other piece of information is given by [[eph_fix_korq]] that specifies wheth
 To compute e-ph matrix as a function of the $\qq$-point, start from this template:
 
 ```
-   optdriver 7
-   eph_task 18
+optdriver 7    # EPH driver
+eph_task 18    # Compute g(k,q) along a path.
 
-   nstep 100      # NSCF cycle for electronic wavefunctions.
-   tolwfr 1e-18
-   nbdbuf 4
-   getpot_filepath  "gs_POT"   # Need to read the GS potential from file produced in a previous run.
+nstep 100      # NSCF cycle for electronic wavefunctions.
+tolwfr 1e-20   # Stopping criterion for NSCF
+nband 10       # Adjust nband and nbdbuf according to your system.
+nbdbuf 4       # Ignore last nbdbuf states when computing residuals for tolwfr
+
+getpot_filepath  "gs_POT"   # Read the GS potential produced with prtpot 1
+
+# OTHER VARIABLES required by the EPH code such as getdvdb_filepath ...
+
+eph_fix_korq "k"          # k is fixed in g(k,q)
+eph_fix_wavevec 0.0 0 0   # k-point
+
+eph_path_brange 1 4       # Compute g(k,q) with m and n ranging from 4 up to 10
 
 
-   # OTHER VARIABLES required by the EPH code such as getdvdb_filepath ...
-
-   eph_fix_korq "k"          # k is fixed in g(k,q)
-   eph_fix_wavevec 0.0 0 0   # k-point
-
-   eph_path_brange 1 4              # Compute g(k,q) with m and n ranging from 4 up to 10
-   nband 40
-
-   ph_ndivsm 10              # the q-path in g(k,q)
-   ph_nqpath 3
-   ph_qpath
-      0.0    0.0    0.0
-      0.5    0.0    0.5
-      0.5    0.25   0.75
+ph_ndivsm 10              # the q-path in g(k,q)
+ph_nqpath 3
+ph_qpath
+   0.0    0.0    0.0
+   0.5    0.0    0.5
+   0.5    0.25   0.75
 ```
 
 To compute e-ph matrix as a function of the $\kk$-point, start from this template:
 
 ```
-   optdriver 7
-   eph_task 18
+optdriver 7
+eph_task 18
 
-   eph_fix_korq "q"
-   eph_fix_wavevec 0.5 0 0
-   nband 10
-   eph_path_brange 4
+eph_fix_korq "q"
+eph_fix_wavevec 0.5 0 0
+eph_path_brange 1 4
 
-   ndivsm 10
-   nkpath 3
-   kptbounds
-      0.0    0.0    0.0
-      0.5    0.0    0.5
-      0.5    0.25   0.75
+ndivsm 10
+nkpath 3
+kptbounds
+   0.0    0.0    0.0
+   0.5    0.0    0.5
+   0.5    0.25   0.75
 ```
 """,
 ),
@@ -25817,5 +26973,92 @@ with the first point being the static limit.
 As a consequence, the full set of frequencies spans the [1, 1 + nfreqim] range.
 """,
 ),
-]
 
+Variable(
+    abivarname="use_gbt",
+    varset="gstate",
+    vartype="integer",
+    topics=['spinpolarisation_basic', 'MagMom_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="USE Generalized Bloch Theorem",
+    added_in_version="10.5.1",
+    text=r"""
+If set to 1, the Generalized Bloch Theorem (GBT) is used to compute a spin-spiral with wavevector [[qgbt]].
+The GBT requires [[nspinor]] = 2 and [[nspden]] 4, but is not compatible with spin-orbit coupling hence
+[[so_psp]] must be set to zero.
+Also, one has to disable spatial symmetries completely by setting [[nsym]] to 1, and
+time-reversal symmetry as well with [[kptopt]] = 4.
+
+Note that, for the time being, [[use_gbt]] /= 0 requires:
+
+- NC pseudos (no PAW)
+- [[useylm]] = 0
+- [[paral_kgb]] = 0
+- [[wfoptalg]] = 0 (CG eigensolver)
+
+Both LDA and GGA are supported, although GGA tends to be more difficult to converge in the non-collinear case.
+In order to reduce the number of SCF iterations and the computational cost,
+we recommend using [[toldfe]] as stopping criterion.
+Also, the convergence of the SCF cycle may be significantly improved by increasing [[nline]] to e.g. 12.
+
+!!! important
+
+    The atomic magnetic moment rotates in the x-y plane (Cartesian coords.) while the z-component
+    remains lattice-periodict. For this reason, one should set [[spinat]] so to have non-zero
+    components in the x-y plane.
+
+Note that [[spinat]] gives the **initial** electronic spin-magnetization for each atom and the final
+atomic magnetization may differ from [[spinat]], unless one uses GBT in conjunction with constrained DFT
+to specify a **target value** of the magnetization (see [[constraint_kind]] and [[magconon]]).
+
+!!! important
+
+    The NC pseudopotentials provided by PseudoDojo are designed as a compromise between accuracy and efficiency,
+    and may not always be sufficient to capture the finer details of magnon dispersion or atomic magnetization
+    (even the stringent version).
+    In such cases, NC pseudopotentials with smaller core radii close to the maximum of the all-electron wavefunctions
+    are usually required for the d or f channels, though this comes at the cost of a higher [[ecut]] value.
+
+    For this reason, we recommend comparing NC results with other ab initio codes that implement the GBT using
+    either all-electron or PAW methods, and, when necessary, generating customized pseudopotentials for the magnetic species,
+    starting from the input files available on the PseudoDojo website.
+""",
+),
+
+Variable(
+    abivarname="qgbt",
+    varset="gstate",
+    vartype="real",
+    topics=['spinpolarisation_basic', 'MagMom_useful'],
+    dimensions=[3],
+    defaultval=[0, 0, 0],
+    mnemonics="Q-point for Generalized Bloch Theorem in REDuced coordinates.",
+    added_in_version="10.5.1",
+    text=r"""
+Reduced coordinates of the wave-vector $\qq$ of the spin spiral when [[use_gbt]] /= 0.
+If you prefer to work only with cartesian coordinates, you may work entirely
+with "[[qgbt_cart]]" and ignore [[qgbt]], in which case [[qgbt]]
+must be absent from the input file.
+One and only one of [[qgbt]] or [[qgbt_cart]] must be provided.
+""",
+),
+
+Variable(
+    abivarname="qgbt_cart",
+    varset="gstate",
+    vartype="real",
+    topics=['spinpolarisation_basic', 'MagMom_useful'],
+    dimensions=[3],
+    defaultval=[0, 0, 0],
+    mnemonics="Q-point for Generalized Bloch Theorem in CARTesian coordinates.",
+    added_in_version="10.5.1",
+    text=r"""
+Cartesian coordinates of the wave-vector $\qq$ of the spin spiral when [[use_gbt]] /= 0.
+If [[qgbt]] is ABSENT from the input file and [[qgbt_cart]] is
+provided, then the values of [[qgbt]] will be computed from the provided
+[[qgbt_cart]]
+One and only one of [[qgbt]] or [[qgbt_cart]] must be provided.
+""",
+),
+]

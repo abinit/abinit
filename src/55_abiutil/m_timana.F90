@@ -604,7 +604,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(660)='bse(exc_diago_driver)           '; basic(660)=1
  names(661)='bse(exc_haydock_driver)         '; basic(661)=1
 
-
  names(670)='exc_build_ham                   '
  names(671)='exc_build_ham(q=0)              '
  names(672)='exc_build_ham(block-res)        '
@@ -627,6 +626,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(696)='exc_haydock_driver(inter        '
  names(697)='exc_haydock_driver(matmul)      '
 !Slots up to 699 are reserved for bethe_salpeter code.
+
+ names(701)='qmc_prep_ctqmc                  '
+ names(702)='qmc_prep_ctqmc%(bef. loop)      '
+ names(703)='qmc_prep_ctqmc%(loop)           '
+ names(704)='qmc_prep_ctqmc%(loop%solve)     '
+ names(705)='qmc_prep_ctqmc%(aft. loop)      '
 
  names(710)='inwffil                         '
  names(711)='inwffil(read header)            '
@@ -958,7 +963,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1547)='fock_getghc(post-k wo fourXX+MPI'; !related to 1507
  names(1548)='fock_getghc(post-k xmpi_sum)    '; !related to 1507
 
-
  names(1560)='fock2ACE                        '
  names(1561)='fock2ACE(init)                  '; basic(1561)=1
  names(1562)='fock2ACE(main/=fock_getghc)     '; basic(1562)=1
@@ -1021,30 +1025,30 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1664) = 'xgTransposer_*@all2all         '
  names(1665) = 'xgTransposer_*@gatherv         '
  names(1666) = 'xgTransposer_@reorganize       '
- names(1667) = 'xgTransposer_init              '
- names(1668) = 'xgTransposer_free              '
- names(1669) = 'xgTransposer_transpose         '
+ names(1667) = 'xgTransposer_init              ';basic(1667)=1
+ names(1668) = 'xgTransposer_free              ';basic(1668)=1
+ names(1669) = 'xgTransposer_transpose         ';basic(1669)=1
 
- names(1670) = 'xgBlock_gemm(blas)             '
- names(1671) = 'xgBlock_trsm                   '
- names(1672) = 'xgBlock_potrf                  '
- names(1673) = 'xgBlock_zero                   '
- names(1674) = 'xgBlock_zero_im_g0             '
- names(1675) = 'xgBlock_heev                   '
- names(1676) = 'xgBlock_heevd                  '
- names(1677) = 'xgBlock_hpev                   '
- names(1678) = 'xgBlock_hpevd                  '
- names(1679) = 'xgBlock_hegv                   '
- names(1680) = 'xgBlock_hegvx                  '
- names(1681) = 'xgBlock_hegvd                  '
- names(1682) = 'xgBlock_hpgv                   '
- names(1683) = 'xgBlock_hpgvx                  '
- names(1684) = 'xgBlock_hpgvd                  '
- names(1685) = 'xgBlock_copy                   '
- names(1686) = 'xgBlock_cshift                 '
- names(1687) = 'xgBlock_pack                   '
- names(1688) = 'xgBlock_gemm(mpi)              '
- names(1689) = 'xgBlock_apply_diag             '
+ names(1670) = 'xgBlock_gemm(blas)             ';basic(1670)=1
+ names(1671) = 'xgBlock_trsm                   ';basic(1671)=1
+ names(1672) = 'xgBlock_potrf                  ';basic(1672)=1
+ names(1673) = 'xgBlock_zero                   ';basic(1673)=1
+ names(1674) = 'xgBlock_zero_im_g0             ';basic(1674)=1
+ names(1675) = 'xgBlock_heev                   ';basic(1675)=1
+ names(1676) = 'xgBlock_heevd                  ';basic(1676)=1
+ names(1677) = 'xgBlock_hpev                   ';basic(1677)=1
+ names(1678) = 'xgBlock_hpevd                  ';basic(1678)=1
+ names(1679) = 'xgBlock_hegv                   ';basic(1679)=1
+ names(1680) = 'xgBlock_hegvx                  ';basic(1680)=1
+ names(1681) = 'xgBlock_hegvd                  ';basic(1681)=1
+ names(1682) = 'xgBlock_hpgv                   ';basic(1682)=1
+ names(1683) = 'xgBlock_hpgvx                  ';basic(1683)=1
+ names(1684) = 'xgBlock_hpgvd                  ';basic(1684)=1
+ names(1685) = 'xgBlock_copy                   ';basic(1685)=1
+ names(1686) = 'xgBlock_cshift                 ';basic(1686)=1
+ names(1687) = 'xgBlock_pack                   ';basic(1687)=1
+ names(1688) = 'xgBlock_gemm(mpi)              ';basic(1688)=1
+ names(1689) = 'xgBlock_apply_diag             ';basic(1689)=1
 
  names(1690) = 'xgScalapack_init               '
  names(1691) = 'xgScalapack_free               '
@@ -1184,23 +1188,31 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  !names(1930)='gwr_wcq_to_scbox               '; basic(1930) = 1
  !names(1931)='gsph2box                       '; basic(1931) = 1
 
+ ! GWPT code
+ names(1940)='ik_preamble                     '; basic(1940) = 1
+ names(1941)='ip_preamble                     '; basic(1941) = 1
+ names(1942)='ibsum_preamble1                 '; basic(1942) = 1
+ names(1943)='ibsum_preamble2                 '; basic(1943) = 1
+ names(1944)='pert_loop1                      '; basic(1944) = 1
+ names(1945)='pert_loop2                      '; basic(1945) = 1
+
  ! xg_t (2nd part)
- names(2000)='xgBlock_scale                   '
- names(2001)='xgBlock_colwiseDotProduct       '
- names(2002)='xgBlock_colwiseMul              '
- names(2003)='xgBlock_colwiseCymax            '
- names(2004)='xgBlock_colwiseDivision         '
- names(2005)='xgBlock_colwiseNorm2            '
- names(2006)='xgBlock_saxpy                   '
- names(2007)='xgBlock_minmax                  '
- names(2008)='xgBlock_partialcopy             '
- names(2009)='xgBlock_gemmcyclic              '
- names(2010)='xgBlock_yxmax                   '
- names(2011)='xgBlock_ymax                    '
- names(2012)='xgBlock_add                     '
- names(2013)='xgBlock_add_diag                '
- names(2014)='xgBlock_invert                  '
- names(2015)='xgBlock_invert_sy               '
+ names(2000)='xgBlock_scale                   '; basic(2000) = 1
+ names(2001)='xgBlock_colwiseDotProduct       '; basic(2001) = 1
+ names(2002)='xgBlock_colwiseMul              '; basic(2002) = 1
+ names(2003)='xgBlock_colwiseCymax            '; basic(2003) = 1
+ names(2004)='xgBlock_colwiseDivision         '; basic(2004) = 1
+ names(2005)='xgBlock_colwiseNorm2            '; basic(2005) = 1
+ names(2006)='xgBlock_saxpy                   '; basic(2006) = 1
+ names(2007)='xgBlock_minmax                  '; basic(2007) = 1
+ names(2008)='xgBlock_partialcopy             '; basic(2008) = 1
+ names(2009)='xgBlock_gemmcyclic              '! not basic, contain partialcopy
+ names(2010)='xgBlock_yxmax                   '; basic(2010) = 1
+ names(2011)='xgBlock_ymax                    '; basic(2011) = 1
+ names(2012)='xgBlock_add                     '; basic(2012) = 1
+ names(2013)='xgBlock_add_diag                '; basic(2013) = 1
+ names(2014)='xgBlock_invert                  '; basic(2014) = 1
+ names(2015)='xgBlock_invert_sy               '; basic(2015) = 1
 
  ! lobpcg2_cprj
  names(2030) = 'lobpcgwf2_cprj                 ';
@@ -1253,14 +1265,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2100)='xg_nonlop                       '
  names(2101)='xg_nonlop%getcprj               '
  names(2102)='xg_nonlop%apply_prj             '
- names(2103)='xg_nonlop%apply_Aij             '
+ names(2103)='xg_nonlop%apply_Aij             '; basic(2103)=1
  names(2104)='xg_nonlop%mult_cprj             '
  names(2105)='xg_nonlop%make_k                '
- names(2106)='xg_nonlop%make_Dij              '
+ names(2106)='xg_nonlop%make_Dij              '; basic(2106)=1
  names(2107)='xg_nonlop%make_Sij              '
- names(2108)='xg_nonlop%make_ekb              '
- names(2109)='xg_nonlop%apply_diag            '
- names(2110)='xg_nonlop%init                  '
+ names(2108)='xg_nonlop%make_ekb              '; basic(2108)=1
+ names(2109)='xg_nonlop%apply_diag            '; basic(2109)=1
+ names(2110)='xg_nonlop%init                  '; basic(2110)=1
 
  names(2120)='xg_nonlop%getXSX                '
  names(2121)='xg_nonlop%getXHX                '
@@ -1269,20 +1281,20 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  names(2130)='xg_nl%getcprj(gemm)             '
  names(2131)='xg_nl%getcprj(copy)             '
- names(2132)='xg_nl%getcprj(mpi)              '
- names(2133)='xg_nl%getcprj(proj-otf)         '
- names(2134)='xg_nl%getcprj(other)            '
+ names(2132)='xg_nl%getcprj(mpi)              '; basic(2132)=1
+ names(2133)='xg_nl%getcprj(proj-otf)         '; basic(2133)=1
+ names(2134)='xg_nl%getcprj(other)            '; basic(2134)=1
 
  names(2135)='xg_nl%apply_prj(gemm)           '
  names(2136)='xg_nl%apply_prj(copy)           '
- names(2137)='xg_nl%apply_prj(mpi)            '
- names(2138)='xg_nl%apply_prj(proj-otf)       '
- names(2139)='xg_nl%apply_prj(other)          '
+ names(2137)='xg_nl%apply_prj(mpi)            '; basic(2137)=1
+ names(2138)='xg_nl%apply_prj(proj-otf)       '; basic(2138)=1
+ names(2139)='xg_nl%apply_prj(other)          '; basic(2139)=1
 
  names(2140)='xg_nl%multcprj(gemm)            '
  names(2141)='xg_nl%multcprj(copy)            '
- names(2142)='xg_nl%multcprj(mpi)             '
- names(2143)='xg_nl%multcprj(other)           '
+ names(2142)='xg_nl%multcprj(mpi)             '; basic(2142)=1
+ names(2143)='xg_nl%multcprj(other)           '; basic(2143)=1
 
  names(2150)='xg_nonlop_forces_stress         '
  names(2151)='xg_nl_fst%start                 '
@@ -1488,8 +1500,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:7)=(/-140, 122,-352,-212,-227,-228,-844/)
    case(21)
 !      Estimate different complements in vtowfk
-!      vtowfk(ssdiag) (= vtowfk(loop)  -cgwf-lobpcgwf_old-cgwf_cprj-lobpcgwf2-chebfi - getcprj(vtowfk) - getcsc(subovl))
-     tslots(:9)=(/-588, 39,-22,-530,-1300,-1600,-1640,-1295,-1364/)
+!      vtowfk(ssdiag) (= vtowfk(loop)  -cgwf -lobpcgwf_old -cgwf_cprj -lobpcgwf2 -chebfi
+!         -getcprj(vtowfk) -getcsc(subovl)) -chebfiwf2 -lobpcgwf2_cprj -chebfiwf2_cprj
+     tslots(:12)=(/-588, 39,-22,-530,-1300,-1600,-1640,-1295,-1364,-1750,-2030,-2060/)
    case(22)
 !      vtowfk(contrib) (= vtowfk (afterloop) - nonlop%vtowfk - fourwf%vtowfk )
      tslots(:4)=(/589, 30,-222,-842/)
@@ -1970,6 +1983,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:9)=(/ (ii,ii=620,628,1) /)                            ; msg='dmft '
        case(47)
          list(:9)=(/ (ii,ii=1001,1009,1) /)                          ; msg='initberry '
+       case(48)
+         list(:5)=(/ (ii,ii=701,705,1) /)                            ; msg='dmft%impurity_solve: qmc_prep_ctqmc'
        case(50)
          list(:5)=(/1560,1561,1562,1563,1565/)                       ; msg='fock2ACE '
        case(51)

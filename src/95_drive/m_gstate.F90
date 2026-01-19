@@ -46,6 +46,7 @@ module m_gstate
  use m_ebands
  use m_dtfil
  use m_extfpmd
+ use m_rcpaw
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -65,7 +66,7 @@ module m_gstate
  use m_pawcprj,          only : pawcprj_type,pawcprj_free,pawcprj_alloc, pawcprj_getdim
  use m_pawfgr,           only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_abi2big,          only : wvl_occ_abi2big, wvl_setngfft, wvl_setBoxGeometry
- use m_energies,         only : energies_type, energies_init
+ use m_energies,         only : energies_type
  use m_args_gs,          only : args_gs_type
  use m_results_gs,       only : results_gs_type
  use m_pawrhoij,         only : pawrhoij_type, pawrhoij_copy, pawrhoij_free
@@ -294,6 +295,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr, hdr_den, hdr_bz
  type(extfpmd_type),pointer :: extfpmd => null()
+ type(rcpaw_type), pointer :: rcpaw => null()
  type(macro_uj_type) :: dtpawuj(1)
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
@@ -395,13 +397,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !when using BigDFT to ensure success on inca_gcc44_sdebug
  if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).or.dtset%usewvl==1) then
    results_gs%ngrvdw=dtset%natom
-   if (allocated(results_gs%grvdw)) then
-     ABI_FREE(results_gs%grvdw)
-   end if
+   ABI_SFREE(results_gs%grvdw)
    ABI_MALLOC(results_gs%grvdw,(3,dtset%natom))
    results_gs%grvdw(:,:)=zero
  end if
- call energies_init(results_gs%energies)
+ call results_gs%energies%init()
 
 !Set up for iterations
  call setup1(acell,bantot,dtset,&
@@ -877,8 +877,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if(extfpmd_chkinp(dtset)) then
      ABI_MALLOC(extfpmd,)
      call extfpmd%init(dtset%mband,hdr%extfpmd_eshift,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
-&     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,dtset%occopt,rprimd,dtset%tphysel,&
-&     dtset%tsmear,dtset%useextfpmd,mpi_enreg,dtset%extfpmd_nband)
+&     nfftf,dtset%nspden,dtset%nsppol,dtset%nkpt,dtset%occopt,rprimd,dtset%tphysel,&
+&     dtset%tsmear,dtset%useextfpmd,mpi_enreg,dtset%extfpmd_nband,dtset%extfpmd_pawsph==1)
    end if
  end if
 
@@ -905,7 +905,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%spinmagntarget,dtset%mband,dtset%nband,&
 &   dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
 &   dtset%occopt,dtset%prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,&
-&   extfpmd=extfpmd)
+&   extfpmd=extfpmd,rcpaw=rcpaw)
    if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(args_gs%upawu(:))>=tol8.or.  &
 &   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy_ks=zero
 
@@ -1019,7 +1019,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,dtset%optdcmagpawu,pawang,dtset%pawprtvol,&
 &     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa,dmft_orbital=dtset%dmft_orbital(:),&
 &     dmft_dc=dtset%dmft_dc,dmft_orbital_filepath=dtset%dmft_orbital_filepath,dmft_yukawa_param=dtset%dmft_yukawa_param,&
-&     dmft_lambda_yukawa=dtset%dmft_lambda_yukawa,dmft_epsilon_yukawa=dtset%dmft_epsilon_yukawa)
+&     dmft_yukawa_lambda=dtset%dmft_yukawa_lambda,dmft_yukawa_epsilon=dtset%dmft_yukawa_epsilon)
 
    ! DEBUG:
    !if (me == master) call pawtab_print(Pawtab)
@@ -1035,6 +1035,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call xmpi_bcast(paw_dmft%occnd(:,:,:,:,:),0,paw_dmft%spacecomm,ierr)
    end if
    call print_sc_dmft(paw_dmft,dtset%pawprtvol)
+ end if
+
+ ! Initialize (eventually) rcpaw object
+ if (dtset%use_rcpaw==1) then
+   ABI_WARNING("Untested Mode RCPAW")
+   ABI_MALLOC(rcpaw,)
+   call rcpaw_init(rcpaw,dtset,psps%filpsp,pawrad,pawtab,psps%ntypat,1,my_natom,mpi_enreg%comm_atom,mpi_enreg%my_atmtab)
  end if
 
 !###########################################################
@@ -1374,14 +1381,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call timab(1225,3,tsec)
 
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cprj,cpus,&
-&   args_gs%dmatpawu,dtefield,dtfil,dtpawuj,dtset,ecore,eigen,hdr,extfpmd,&
+&   args_gs%dmatpawu,dtefield,dtfil,dtpawuj,dtset,ecore,eigen,hdr,extfpmd,rcpaw,&
 &   indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &   nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &   pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
 &   resid,results_gs,scf_history,fatvshift,&
 &   symrec,taug,taur,wvl,ylm,ylmgr,paw_dmft,wffnew,wffnow,xg_nonlop)
 
-   call dtfil_init_time(dtfil,0)
+   call dtfil%init_time(0)
 
    write(msg,'(a,80a)')ch10,('=',mu=1,80)
    call wrtout([std_out, ab_out], msg)
@@ -1707,6 +1714,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_FREE(extfpmd)
  end if
 
+!Destroy rcpaw datastructure
+ if(associated(rcpaw)) then
+   call rcpaw_destroy(rcpaw)
+   ABI_FREE(rcpaw)
+ endif
+
 !Destroy electronpositron datastructure
  if (dtset%positron/=0) then
    call destroy_electronpositron(electronpositron)
@@ -1746,15 +1759,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        ABI_FREE(mpi_enreg%kpt_loc2ibz_sp)
      end if
    end if
-   if (allocated(mpi_enreg%kpt_loc2ibz_sp))  then
-     ABI_FREE(mpi_enreg%kpt_loc2ibz_sp)
-   end if
-   if (allocated(mpi_enreg%kpt_loc2fbz_sp)) then
-     ABI_FREE(mpi_enreg%kpt_loc2fbz_sp)
-   end if
-   if (allocated(mpi_enreg%mkmem)) then
-     ABI_FREE(mpi_enreg%mkmem)
-   end if
+   ABI_SFREE(mpi_enreg%kpt_loc2ibz_sp)
+   ABI_SFREE(mpi_enreg%kpt_loc2fbz_sp)
+   ABI_SFREE(mpi_enreg%mkmem)
  end if
  ! deallocate cprj
  if(usecprj==1) then
@@ -1764,12 +1771,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ABI_FREE(cprj)
 
  ! deallocate efield
- call destroy_efield(dtefield)
+ call dtefield%free()
 
-!deallocate Recursion
- if (dtset%userec == 1) then
-   call CleanRec(rec_set)
- end if
+ if (dtset%userec == 1) call CleanRec(rec_set)
 
  call hdr%free()
  call ebands%free()

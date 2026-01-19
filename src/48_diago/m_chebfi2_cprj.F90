@@ -76,7 +76,6 @@ module m_chebfi2_cprj
    integer :: space_cprj
    integer :: spacedim                      ! Space dimension for one vector
    integer :: cprjdim                       ! cprj dimension
-   integer :: blockdim_cprj                 !
    integer :: total_spacedim                ! Maybe not needed
    integer :: neigenpairs                   ! Number of eigen values/vectors we want
    integer :: ndeg_filter                   ! Degree of the polynomial filter
@@ -199,7 +198,6 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,cprjdim,tolerance,ecut,bandpp
  chebfi%neigenpairs   = neigenpairs
  chebfi%spacedim      = spacedim
  chebfi%cprjdim       = cprjdim
- chebfi%blockdim_cprj = bandpp*xg_nonlop%nspinor
  if (tolerance > 0.0) then
    chebfi%tolerance = tolerance
  else
@@ -275,8 +273,8 @@ subroutine chebfi_allocateAll(chebfi)
  call xg_setBlock(chebfi%X_NP,chebfi%X_prev,total_spacedim,chebfi%bandpp,fcol=chebfi%bandpp+1)
 
  call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0)
- call xg_init(chebfi%cprj_work ,space_cprj,chebfi%cprjdim,chebfi%blockdim_cprj,chebfi%spacecom)
- call xg_init(chebfi%cprj_work2,space_cprj,chebfi%cprjdim,chebfi%blockdim_cprj,chebfi%spacecom)
+ call xg_init(chebfi%cprj_work ,space_cprj,chebfi%cprjdim,chebfi%bandpp*nspinor,chebfi%spacecom)
+ call xg_init(chebfi%cprj_work2,space_cprj,chebfi%cprjdim,chebfi%bandpp*nspinor,chebfi%spacecom)
 
  call xg_init(chebfi%proj_work,space,chebfi%xg_nonlop%max_npw_k,chebfi%xg_nonlop%cprjdim,chebfi%spacecom,me_g0=chebfi%me_g0)
 
@@ -480,7 +478,6 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  real(dp) :: tsec(2)
  !Pointers similar to old Chebfi
  integer,allocatable :: ndeg_filter_bands(:) !Oracle variable
- real(dp), pointer :: resid_val(:) => null()
  type(xg_nonlop_t) :: xg_nonlop
 
 ! *********************************************************************
@@ -542,12 +539,6 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  call xmpi_min(mineig,mineig_global,chebfi%spacecom,ierr)
  call timab(tim_RR_q, 2, tsec)
 
- ! ITEST
- write(900,*) 'rayleigh quotients='
- call xgBlock_print(DivResults%self, 900)
- flush(900)
- ! ITEST
-
  lambda_minus = maxeig_global
 
  call timab(tim_oracle,1,tsec)
@@ -568,11 +559,6 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
 
  one_over_r = 1/radius
  two_over_r = 2/radius
-
- ! ITEST
- write(900,*) 'chebfi%xXColsRows (before filter)=', xgBlock_getid(chebfi%xXColsRows) 
- flush(900)
- ! ITEST
 
  do ideg = 0, ndeg_filter - 1
 
@@ -605,11 +591,6 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  call xmpi_barrier(chebfi%spacecom)
  call timab(tim_barrier,2,tsec)
 
- ! ITEST
- write(900,*) 'chebfi%xXColsRows (after filter)=', xgBlock_getid(chebfi%xXColsRows) 
- flush(900)
- ! ITEST
-
  call timab(tim_amp_f,1,tsec)
  call chebfi_ampfactor(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
  ! this results in higher condition number so avoid
@@ -631,21 +612,11 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  end if
  call timab(tim_transpose,2,tsec)
 
- ! ITEST
- write(900,*) 'chebfi%X(before RR)=', xgBlock_getid(chebfi%X) 
- flush(900)
-
- ! ITEST
  call timab(tim_cprj,1,tsec)
  call xg_nonlop_getcprj(xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%cprj_work%self)
  call timab(tim_cprj,2,tsec)
- call xg_RayleighRitz_cprj(chebfi%xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,&
-     chebfi%blockdim_cprj,ierr,15015015,tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
-
- ! ITEST
- write(900,*) 'chebfi%X(after RR)=', xgBlock_getid(chebfi%X) 
- flush(900)
- ! ITEST
+ call xg_RayleighRitz_cprj(chebfi%xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,ierr,0,&
+   tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
 
  if (chebfi%paw) then
    call timab(tim_AX_nl,1,tsec)
@@ -662,15 +633,6 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
 
  call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
  call timab(tim_residu, 2, tsec)
-
- call xgBlock_reverseMap_1d(residu, resid_val)
-
- ! ITEST
- write(900,*) 'colwiseNorm2 residu='
- call xgBlock_print(residu, 900)
- write(900,*) 'Frobenius norm=', sqrt(sum(resid_val(1:chebfi%nbdbuf)))
- flush(900)
- ! ITEST
 
  call timab(tim_copy, 1, tsec)
  call xgBlock_copy(chebfi%X,X0)

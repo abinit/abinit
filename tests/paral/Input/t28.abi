@@ -58,9 +58,9 @@ prtden 0  prteig 0  prtwf 0
 #%% [NCPU_4]
 #%% files_to_test = t28_MPI4.abo, tolnlines= 25, tolabs=  5.0e-3, tolrel= 1.001, fld_options = -easy
 #%% [extra_info]
-#%% keywords = PAW 
+#%% keywords = PAW
 #%% authors = M. Torrent
-#%% description = 
+#%% description =
 #%%    Test the parallelization over spinorial components of WF
 #%%    Bi A7 structure (2 atoms, treated as semi-conductor),
 #%%    using PAW, within LDA and spin-orbit coupling.

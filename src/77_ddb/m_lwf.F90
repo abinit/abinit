@@ -51,23 +51,16 @@ module m_lwf
  use m_dtset
  use m_krank
 
- use m_fstrings,        only : itoa, ftoa, sjoin, ltoa, ktoa, strcat, basename, replace
- use m_matrix,          only : matr3inv
- use m_time,            only : cwtime, cwtime_report
+ use m_fstrings,        only : ltoa
  use m_io_tools,        only : open_file
  use m_geometry,        only : mkrdim, symredcart, normv, phdispl_cart2red
  use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph, pheigvec_normalize, massmult_and_breaksym, phdispl_from_eigvec
- use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new
+ use m_bz_mesh,         only : make_path
  use m_ifc,             only : ifc_type
  use m_anaddb_dataset,  only : anaddb_dataset_type
-! use m_kpts,            only : get_kpt_full_bz,
- use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid
-
- use m_special_funcs,   only : bose_einstein
- use m_sort,            only : sort_dp
- use m_symfind,         only : symanal
+ use m_kpts,            only : kpts_ibz_from_kptrlatt
  use m_scdm_math,       only : build_Rgrid
- use m_wannier_builder,            only : WannierBuilder_witheigen_t
+ use m_wannier_builder, only : WannierBuilder_witheigen_t
  use m_wann_netcdf,     only : IOWannNC
 
 
@@ -350,7 +343,7 @@ contains
     !print *, "xred:", crystal%xred
     do iq_ibz = 1, self%nqibz
        call ifc%fourq(crystal, self%qibz(:,iq_ibz), phfrq, displ, out_eigvec = eigvec)
-       ! freqency to eigenvalues
+       ! frequency to eigenvalues
        self%eigenvalues(:, iq_ibz) = freq_to_eigenval(phfrq)
        ! remove phases from eigenvector
        do iatom = 1, natom
@@ -463,7 +456,7 @@ contains
     !scalars
     integer :: nphmodes, iq, iunit
     !real(dp) :: dummy
-    character(len=300) :: formt
+    character(len=300) :: fmt
     character(len=500) :: msg
 
     ! *************************************************************************
@@ -479,9 +472,9 @@ contains
     write (iunit, '(a,i0)')  '# number_of_qpoints ', nqpts
     write (iunit, '(a,i0)')  '# number_of_phonon_modes ', nphmodes
     write (iunit, '(a)')  '# '
-    write (formt,'(a,i0,a)') "(I5, ", nphmodes, "E20.10)"
+    write (fmt,'(a,i0,a)') "(I5, ", nphmodes, "E20.10)"
     do iq= 1, nqpts
-      write (iunit, formt)  iq, phfreq(:,iq)
+      write (iunit, fmt)  iq, phfreq(:,iq)
     end do
     close(iunit)
 

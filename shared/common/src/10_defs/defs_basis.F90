@@ -46,33 +46,23 @@ module defs_basis
 !nb of bytes related to default simple-precision real/complex subtypes
 !(= 4 for many machine architectures, = 8 for e.g. Cray)
  integer, parameter :: sp=kind(1.0)          ! Single precision should not be used
- integer, parameter :: spc=kind((1.0,1.0))
 
 !nb of bytes related to default double-precision real/complex subtypes
 !(= 8 for many machine architectures)
  integer, parameter :: dp=kind(1.0d0)
- integer, parameter :: dpc=kind((1.0_dp,1.0_dp))  ! Complex should not be used presently
-                                                  ! except for use of libraries
+
+! Please DO NOT USE use complex(dpc) as complex(dp) is completely equivalent.
+! dpc is still needed because nvfortran with ELPA (eos_nvhpc_23.9_elpa), for unknown reasons,
+! raises an internal compiler error when compiling m_slk if dpc is not declared here.
+ integer, parameter :: dpc=kind((1.0_dp,1.0_dp))
 
 !nb of bytes related to GW arrays, that can be tuned from sp to dp independently
 !of other variables in ABINIT. Presently single-precision is the default (see config/specs/options.conf)..
 #if defined HAVE_GW_DPC
  integer, parameter :: gwp=kind(1.0d0)
- integer, parameter :: gwpc=kind((1.0_dp,1.0_dp))
-
 #else
  integer, parameter :: gwp=kind(1.0)
- integer, parameter :: gwpc=kind((1.0,1.0))
 #endif
-
-!Example:
-! integer, parameter :: urp=selected_real_kind((p=)12,(r=)50)
-! real((kind=)urp) :: d
-! d=5.04876_urp   ! for a real d with 12 significative digits
-! and such as 10^-50 < |d| < 10^50
-
-!To modify sp/spc and / or dp/dpc, insert instructions such as 'dp='
-! but do not modify the other declarations in this module
 
 !The default lengths
 ! TODO: We should increase fnlen to be able to handle multiple pseudos paths in the input file
@@ -86,7 +76,7 @@ module defs_basis
  ! It will be added to the netcdf files in ntck_open_create
  character(len=:), allocatable, save :: INPUT_STRING
 
- integer, parameter :: md5_slen = 32 ! lenght of strings storing the pseudos' md5 checksum.
+ integer, parameter :: md5_slen = 32 ! length of strings storing the pseudos' md5 checksum.
  character(len=md5_slen),parameter :: md5_none = "None"
 
  integer, parameter :: abi_slen=80 ! maximum length of string variables
@@ -123,7 +113,7 @@ module defs_basis
  integer,public,parameter :: ABI_RECL=524288  ! 2**19
 
  integer,public,parameter :: MAX_NSHIFTK = 210
- ! Maximun number of shifts in input k-mesh.
+ ! Maximum number of shifts in input k-mesh.
 
 !Real dp constants
  real(dp), parameter :: zero=0._dp
@@ -222,64 +212,161 @@ module defs_basis
  ! The default value (2Gb) can be changed at runtime via the command line interface.
  real(dp), save, protected :: mem_per_cpu_mb = two * 1024_dp
 
-!Real physical constants
-!Revised fundamental constants from http://physics.nist.gov/cuu/Constants/index.html
-!(from 2006 least squares adjustment)
- real(dp), parameter :: Bohr_Ang=0.52917720859_dp    ! 1 Bohr, in Angstrom
- real(dp), parameter :: Ang_Bohr = one / Bohr_Ang  ! 1 Angstrom in Bohr
- real(dp), parameter :: Bohr_meter=Bohr_Ang * 1.d-10 ! 1 Bohr in meter
- real(dp), parameter :: Bohr_cm=Bohr_meter * 100_dp ! 1 Bohr in cm
- real(dp), parameter :: Ha_cmm1=219474.6313705_dp  ! 1 Hartree in cm^-1
- real(dp), parameter :: Ha_eV=27.21138386_dp ! 1 Hartree in eV
- real(dp), parameter :: eV_Ha=one/Ha_eV      ! 1 eV in Hartree
- real(dp), parameter :: Ha_meV=Ha_eV*1000_dp ! 1 Hartree in meV
- real(dp), parameter :: Ha_K=315774.65_dp ! 1Hartree in Kelvin
- real(dp), parameter :: Ha_THz=6579.683920722_dp ! 1 Hartree in THz
- real(dp), parameter :: Ha_s=Ha_THz*1e12*two_pi ! 1 Hartree in s
- real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree in J
- real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge in Coulomb
- real(dp), parameter :: kb_HaK=8.617343d-5/Ha_eV ! Boltzmann constant in Ha/K
- real(dp), parameter :: kb_SI=1.380649d-23  ! Boltzmann constant in Joule/K (CODATA 2017 value.)
- real(dp), parameter :: kb_THzK=kb_HaK*Ha_THz ! Boltzmann constant in THz/K
- real(dp), parameter :: amu_emass=1.660538782d-27/9.10938215d-31 ! 1 atomic mass unit in electronic mass
- real(dp), parameter :: HaBohr3_GPa=Ha_eV/Bohr_Ang**3*e_Cb*1.0d+21 ! 1 Ha/Bohr^3 in GPa
- real(dp), parameter :: Avogadro=6.02214179d23 ! per mole
- real(dp), parameter :: Ohmcm=two*pi*Ha_THz*ninth*ten ! 1 Ohm.cm in atomic units
-!real(dp), parameter :: eps0=8.854187817d-12 ! permittivity of free space in F/m
- real(dp), parameter :: eps0=one/(four_pi*0.0000001_dp*299792458.0_dp**2)
- real(dp), parameter :: AmuBohr2_Cm2=e_Cb*1.0d20/(Bohr_Ang*Bohr_Ang)
- real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
- real(dp), parameter :: FineStructureConstant=0.0072973525664_dp ! 2014 CODATA value
- real(dp), parameter :: FineStructureConstant2=0.000053251354478_dp ! Square of fine structure constant
- real(dp), parameter :: Sp_Lt_SI=2.99792458d8 ! speed of light in SI
- real(dp), parameter :: Sp_Lt=Sp_lt_SI/2.1876912633d6 ! speed of light in atomic units
- real(dp), parameter :: Time_Sec=2.418884326505D-17 !  Atomic unit of time in seconds
- real(dp), parameter :: BField_Tesla=4.254383d-6 ! Tesla in a.u.
- real(dp), parameter :: dipole_moment_debye=0.393430307_dp ! Debye unit in a.u.
- real(dp), parameter :: siemens_SI=e_Cb**2 / Ha_J / Time_Sec ! Siemens in SI: A/V = C^2 / (J * s)
- real(dp), parameter :: volt_SI=Ha_J/e_Cb ! Volt in SI: J/C
-!EB suppress *0.5_dp  ! Atomic unit of induction field (in Tesla) * mu_B (in atomic units).
- real(dp), parameter :: mu_B_SI=9.274009994D-24   ! Bohr magneton in SI
- real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units
+!=========================================================
+!First part of physical constant definitions
+
+! Previous values from NIST 2006 from http://physics.nist.gov/cuu/Constants/index.html
+
+!real(dp), parameter :: Bohr_Ang=0.52917720859_dp    ! 1 Bohr, in Angstrom
+!real(dp), parameter :: Ang_Bohr = one / Bohr_Ang  ! 1 Angstrom in Bohr
+!real(dp), parameter :: Bohr_meter=Bohr_Ang * 1.d-10 ! 1 Bohr in meter
+!real(dp), parameter :: Bohr_cm=Bohr_meter * 100_dp ! 1 Bohr in cm
+!real(dp), parameter :: Ha_cmm1=219474.6313705_dp  ! 1 Hartree in cm^-1
+!real(dp), parameter :: Ha_eV=27.21138386_dp ! 1 Hartree in eV
+!real(dp), parameter :: eV_Ha=one/Ha_eV      ! 1 eV in Hartree
+!real(dp), parameter :: Ha_meV=Ha_eV*1000_dp ! 1 Hartree in meV
+!real(dp), parameter :: Ha_K=315774.65_dp ! 1Hartree in Kelvin
+!real(dp), parameter :: Ha_THz=6579.683920722_dp ! 1 Hartree in THz
+!real(dp), parameter :: Ha_s=Ha_THz*1e12*two_pi ! 1 Hartree in s
+!real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree in J
+
+!real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge in Coulomb
+!real(dp), parameter :: kb_SI=1.380649d-23  ! Boltzmann constant in Joule/K (CODATA 2017 value.)
+!real(dp), parameter :: Avogadro=6.02214179d23 ! per mole
+!real(dp), parameter :: Speed_Light_SI=2.99792458d8 ! speed of light in SI
+
+! 09/2025 [SP] update with 2022 NIST values from the same website.
+!         See also P. J. Mohr et al., Review Mod. Phys. 97, 025002 (2025)
+!
+ real(dp), parameter :: Bohr_Ang     = 0.529177210544_dp      ! 1 Bohr, in Angstrom
+ real(dp), parameter :: Ang_Bohr     = one / Bohr_Ang         ! 1 Angstrom in Bohr
+ real(dp), parameter :: Bohr_meter   = Bohr_Ang * 1.d-10      ! 1 Bohr in meter
+ real(dp), parameter :: Bohr_cm      = Bohr_meter * 100_dp    ! 1 Bohr in cm
+ real(dp), parameter :: Ha_eV        = 27.211386245981_dp     ! 1 Hartree in eV
+ real(dp), parameter :: Ha_cmm1      = 219474.63136314_dp     ! 1 Hartree in cm^-1
+ real(dp), parameter :: eV_Ha        = one / Ha_eV            ! 1 eV in Hartree
+ real(dp), parameter :: Ha_meV       = Ha_eV * 1000_dp        ! 1 Hartree in meV
+ real(dp), parameter :: Ha_K         = 315775.02480398_dp     ! 1 Hartree in Kelvin
+ real(dp), parameter :: Ha_THz       = 6579.6839204999_dp     ! 1 Hartree in THz
+ real(dp), parameter :: Ha_s         = Ha_THz * 1e12 * two_pi ! 1 Hartree in s
+ real(dp), parameter :: Ha_J         = 4.3597447222060d-18    ! 1 Hartree in J
+
+ ! Since 2019, the following constants have been defined and are now exact [SP].
+ real(dp), parameter :: e_Cb         = 1.602176634d-19        ! minus the electron charge in Coulomb
+ real(dp), parameter :: kb_SI        = 1.380649d-23           ! Boltzmann constant in Joule/K
+ real(dp), parameter :: Avogadro     = 6.02214076d23          ! per mole
+ real(dp), parameter :: Speed_Light_SI     = 299792458_dp           ! Speed of light in vacuum (m/s)
+ ! Note: In SI, c is fixed and the fine structure constant (alpha) is measured.
+ !       In a.u., alpha is fixed and c is measured. Be carefull when using them.
+ !       Here we define c.
+
+!=========================================================
+!Second part of physical constant definitions
+
+! Previous values from NIST 2006 from http://physics.nist.gov/cuu/Constants/index.html
+
+!real(dp), parameter :: kb_HaK=8.617343d-5/Ha_eV ! Boltzmann constant in Ha/K
+!real(dp), parameter :: kb_THzK=kb_HaK*Ha_THz ! Boltzmann constant in THz/K
+!real(dp), parameter :: amu_emass=1.660538782d-27/9.10938215d-31 ! 1 atomic mass unit in electronic mass
+!real(dp), parameter :: HaBohr3_GPa=Ha_eV/Bohr_Ang**3*e_Cb*1.0d+21 ! 1 Ha/Bohr^3 in GPa
+!real(dp), parameter :: Ohmcm=two*pi*Ha_THz*ninth*ten ! 1 Ohm.cm in atomic units
+!!real(dp), parameter :: eps0=8.854187817d-12 ! permittivity of free space in F/m
+!real(dp), parameter :: eps0=one/(four_pi*0.0000001_dp*299792458.0_dp**2)
+!real(dp), parameter :: AmuBohr2_Cm2=e_Cb*1.0d20/(Bohr_Ang*Bohr_Ang)
+
+! 09/2025 [SP] update with 2022 NIST values from the same website.
+!         See also P. J. Mohr et al., Review Mod. Phys. 97, 025002 (2025)
+
+ real(dp), parameter :: kb_HaK       = kb_SI / Ha_J           ! Boltzmann constant in Ha/K
+ real(dp), parameter :: kb_THzK      = kb_HaK * Ha_THz        ! Boltzmann constant in THz/K
+ real(dp), parameter :: amu_emass    = 1.66053906892d-27 / 9.1093837139d-31         ! 1 atomic mass unit in electronic mass
+ real(dp), parameter :: HaBohr3_GPa  = Ha_eV / Bohr_Ang**3 * e_Cb * 1.0d+21         ! 1 Ha/Bohr^3 in GPa
+ real(dp), parameter :: Ohmcm        = two * pi * Ha_THz * ninth * ten              ! 1 Ohm.cm in atomic units
+ real(dp), parameter :: eps0         = one / (four_pi * 0.0000001_dp * Speed_Light_SI**2) ! permittivity of free space in F/m
+ real(dp), parameter :: AmuBohr2_Cm2 = e_Cb * 1.0d20 / (Bohr_Ang * Bohr_Ang)
+
+!=========================================================
+!Third part of physical constant definitions
+
+! Real physical constants
+! Previous values from NIST 2006 from http://physics.nist.gov/cuu/Constants/index.html
+
+!real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
+!real(dp), parameter :: FineStructureConstant=0.0072973525664_dp ! 2014 CODATA value
+!real(dp), parameter :: FineStructureConstant2=0.000053251354478_dp ! Square of fine structure constant
+!real(dp), parameter :: Speed_Light=Speed_light_SI/2.1876912633d6 ! speed of light in atomic units
+!real(dp), parameter :: Time_Sec=2.418884326505D-17 !  Atomic unit of time in seconds
+
+! 09/2025 [SP] update with 2022 NIST values from the same website.
+!         See also P. J. Mohr et al., Review Mod. Phys. 97, 025002 (2025)
+!
+! Note: In SI, c is fixed and the fine structure constant (alpha) is measured.
+!       In a.u., alpha is fixed and c is measured. Be carefull when used them.
+!       Here we defined c.
+
+ real(dp), parameter :: InvFineStruct= 137.035999177_dp                   ! Inverse of fine structure constant
+ real(dp), parameter :: FineStructureConstant  = 0.0072973525643_dp       ! Fine structure constant
+ real(dp), parameter :: FineStructureConstant2 = FineStructureConstant**2 ! Square of fine structure constant
+
+!Works until now
+
+!The compiler nvhpc has a problem with this line ?!?
+ real(dp), parameter :: Speed_Light        = InvFineStruct                      ! Speed of light in atomic units
+!So, replace with this line with straight value of Speed_Light
+!real(dp), parameter :: Speed_Light= 137.035999177_dp
+
+!
+ real(dp), parameter :: Time_Sec     = 2.4188843265864D-17                ! Atomic unit of time in seconds
+
+!=========================================================
+!Fourth part of physical constant definitions
+
+! Real physical constants
+! Previous values from NIST 2006 from http://physics.nist.gov/cuu/Constants/index.html
+
+! real(dp), parameter :: BField_Tesla=4.254383d-6 ! Tesla in a.u.
+! real(dp), parameter :: dipole_moment_debye=0.393430307_dp ! Debye unit in a.u.
+! real(dp), parameter :: siemens_SI=e_Cb**2 / Ha_J / Time_Sec ! Siemens in SI: A/V = C^2 / (J * s)
+! real(dp), parameter :: volt_SI=Ha_J/e_Cb ! Volt in SI: J/C
+!!EB suppress *0.5_dp  ! Atomic unit of induction field (in Tesla) * mu_B (in atomic units).
+! real(dp), parameter :: mu_B_SI=9.274009994D-24   ! Bohr magneton in SI
+! real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units
+
+! 09/2025 [SP] update with 2022 NIST values from the same website.
+!         See also P. J. Mohr et al., Review Mod. Phys. 97, 025002 (2025)
+!
+! Note: In SI, c is fixed and the fine structure constant (alpha) is measured.
+!       In a.u., alpha is fixed and c is measured. Be carefull when used them. Here we defined c.
+
+ real(dp), parameter :: mu_B_SI      = 9.2740100657D-24                   ! Bohr magneton in SI
+ real(dp), parameter :: mu_B         = 0.5_dp                             ! Bohr magneton in atomic units
+ real(dp), parameter :: BField_Tesla = mu_B_SI / (Ha_J * mu_B)            ! Tesla in a.u.
+ real(dp), parameter :: dipole_moment_debye = 0.393430307_dp              ! Debye unit in a.u.
+ real(dp), parameter :: siemens_SI   = e_Cb**2 / Ha_J / Time_Sec          ! Siemens in SI: A/V = C^2 / (J * s)
+ real(dp), parameter :: volt_SI      = Ha_J / e_Cb                        ! Volt in SI: J/C
+ real(dp), parameter :: EFG_SI       = volt_SI / Bohr_meter**2            ! E-field gradient in SI : Volt/m^2
+
+!End of physical constants
+!=========================================================
 
 !Complex constants
  !double precision
- complex(dpc), parameter :: czero = (0._dp,0._dp)
- complex(dpc), parameter :: cone  = (1._dp,0._dp)
- complex(dpc), parameter :: ctwo  = (2._dp,0._dp)
- complex(dpc), parameter :: j_dpc = (0._dp,1.0_dp)
+ complex(dp), parameter :: czero = (0._dp,0._dp)
+ complex(dp), parameter :: cone  = (1._dp,0._dp)
+ complex(dp), parameter :: ctwo  = (2._dp,0._dp)
+ complex(dp), parameter :: j_dpc = (0._dp,1.0_dp)
 
  ! single-precision
- complex(spc), parameter :: czero_sp = (0._sp,0._sp)
- complex(spc), parameter :: cone_sp  = (1._sp,0._sp)
- complex(spc), parameter :: ctwo_sp  = (2._sp,0._sp)
- complex(spc), parameter :: j_sp     = (0._sp,1.0_sp)
+ complex(sp), parameter :: czero_sp = (0._sp,0._sp)
+ complex(sp), parameter :: cone_sp  = (1._sp,0._sp)
+ complex(sp), parameter :: ctwo_sp  = (2._sp,0._sp)
+ complex(sp), parameter :: j_sp     = (0._sp,1.0_sp)
 
 !Pauli matrix
- complex(dpc), parameter :: pauli_mat(2,2,0:3) = reshape([cone,czero,czero,cone, &
-                                                          czero,cone,cone,czero,&
-                                                          czero,j_dpc,-j_dpc,czero,&
-                                                          cone,czero,czero,-cone], [2,2,4])
+ complex(dp), parameter :: pauli_mat(2,2,0:3) = reshape([cone,czero,czero,cone, &
+                                                         czero,cone,cone,czero,&
+                                                         czero,j_dpc,-j_dpc,czero,&
+                                                         cone,czero,czero,-cone], [2,2,4])
 
 !Character constants
  character(len=1), parameter :: ch10 = char(10)
@@ -287,7 +374,7 @@ module defs_basis
 
  ! File used to dump the error message in m_error.
  ! Extremely useful when we run on many CPUs since logging, in this case, is automatically disabled
- ! As a consequence, we get error messages in the main log only if the problem is encoutered by the master node!
+ ! As a consequence, we get error messages in the main log only if the problem is encountered by the master node!
  ! Note that the file is removed in xmpi_init (if present).
  character(len=fnlen),parameter :: ABI_MPIABORTFILE="__ABI_MPIABORTFILE__"
 
@@ -351,8 +438,7 @@ module defs_basis
   integer,parameter,public :: NLO_MINCAT = 10
 
 ! This is used to compute the maximum index of the perturbation as natom + MPERT_MAX
-! GA: But this is not actually the maximum perturbation,
-!     see m_dfpt_loopert
+! GA: But this is not actually the maximum perturbation, see m_dfpt_loopert
   integer,parameter,public :: MPERT_MAX = 8
 
 ! Parameters for the GPU implementation(s)
@@ -360,7 +446,7 @@ module defs_basis
  integer,parameter,public :: ABI_GPU_UNKNOWN  =-1
  ! Not using any GPU implementation, implies running on CPU
  integer,parameter,public :: ABI_GPU_DISABLED = 0
- ! Legacy GPU implementation relying on NVIDIA CUDA kernels, not prefered
+ ! Legacy GPU implementation relying on NVIDIA CUDA kernels, not preferred
  integer,parameter,public :: ABI_GPU_LEGACY   = 1
  ! GPU implementation relying on OpenMP v5 "TARGET" construct
  integer,parameter,public :: ABI_GPU_OPENMP   = 2
@@ -412,7 +498,7 @@ module defs_basis
  end type coeff2_type
 !A small datatype for ragged complex 2D-arrays
  type coeff2c_type
-  complex(dpc), allocatable :: value(:,:)
+  complex(dp), allocatable :: value(:,:)
  end type coeff2c_type
 !A small datatype for ragged real 3D-arrays
  type coeff3_type
@@ -582,9 +668,9 @@ integer pure function str2wfktask(str) result(wfk_task)
    wfk_task = WFK_TASK_OPTICS_FULLBZ
  case ("check_symtab")
    wfk_task = WFK_TASK_CHECK_SYMTAB
-case ("wannier")
+ case ("wannier")
    wfk_task = WFK_TASK_WANNIER
-case ("pseudobands")
+ case ("pseudobands")
    wfk_task = WFK_TASK_PSEUDOBANDS
  case default
    wfk_task = WFK_TASK_NONE

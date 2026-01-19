@@ -77,13 +77,6 @@ contains
 !! Might combine the psps to generate pseudoatoms, thanks to alchemy.
 !! Also compute ecore=[Sum(i) zion(i)] * [Sum(i) epsatm(i)] by calling pspcor.
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | iscf=parameter controlling scf or non-scf calculations
@@ -148,7 +141,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  integer :: comm_mpi_,ierr,ii,ilang,ilmn,ilmn0,iln,iproj,ipsp,ipspalch
  integer :: ispin,itypalch,itypat,mtypalch,npsp,npspalch,ntypalch
  integer :: ntypat,ntyppure,paw_size
- logical :: has_coretau,has_kij,has_tproj,has_tvale,has_nabla,has_shapefncg,has_vminushalf,has_wvl
+ logical :: has_coretau,has_kij,has_tproj,has_tvale,has_nabla
+ logical :: has_shapefncg,has_vminushalf,has_wvl,paw_add_core
  real(dp),save :: ecore_old=zero,gsqcut_old=zero,gsqcutdg_old=zero, spnorbscl_old=-one,hyb_mixing_old=-999.0_dp
  real(dp) :: dq,epsatm_psp,qmax,rmax,xcccrc
  character(len=500) :: msg
@@ -157,8 +151,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  type(nctab_t) :: nctab_dum
  type(nctab_t),pointer :: nctab_ptr
 !arrays
- integer :: paw_options(10)
- integer,save :: paw_options_old(10)=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
+ integer :: paw_options(11)
+ integer,save :: paw_options_old(11)=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
  integer,save :: pspso_old(npspmax),pspso_zero(npspmax)
  integer,allocatable :: indlmn_alch(:,:,:),new_pspso(:)
  integer,pointer :: indlmn(:,:)
@@ -171,7 +165,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  real(dp),allocatable :: xccc1d_alch(:,:,:),xcccrc_alch(:)
  real(dp),allocatable :: xcctau1d_alch(:,:,:)
  type(nctab_t),target,allocatable :: nctab_alch(:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -227,6 +220,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    has_tproj=(dtset%usewvl==1.or.dtset%use_rcpaw==1) ! projectors will be free at the end of the psp reading
    has_vminushalf=(maxval(dtset%ldaminushalf)==1)
    has_coretau=(dtset%usekden>=1)
+   paw_add_core=(dtset%paw_add_core==1)
    if (has_kij)       paw_options(1)=1
    if (has_tvale)     paw_options(2)=1
    if (has_nabla)     paw_options(5)=1
@@ -235,6 +229,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    if (has_tproj)     paw_options(8)=1
    if (has_vminushalf)paw_options(9)=1
    if (has_coretau)   paw_options(10)=1
+   if (paw_add_core)  paw_options(11)=1
    !if (dtset%prtvclmb /= 0) then
    paw_options(3) = 1
    paw_options(4) = 1
@@ -286,13 +281,11 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 & .or. sum(new_pspso(:))/=0                &
 & .or. mtypalch>0                          &
 & .or. (dtset%usewvl==1.and.psps%usepaw==1)&
-& .or. (use_rcpaw_old==1)&
+& .or. (use_rcpaw_old==1)                  &
 & ) gencond=1
 
  if (present(comm_mpi).and.psps%usepaw==1) then
-   if(xmpi_comm_size(comm_mpi)>1)then
-     call xmpi_sum(gencond,comm_mpi,ierr)
-   end if
+   if(xmpi_comm_size(comm_mpi)>1) call xmpi_sum(gencond,comm_mpi,ierr)
    if (gencond/=0) gencond=1
  end if
  ABI_FREE(new_pspso)
@@ -324,7 +317,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 &     has_vhnzc=paw_options(3),has_vhtnzc=paw_options(4),&
 &     has_nabla=paw_options(5),has_shapefncg=paw_options(6),&
 &     has_wvl=paw_options(7),has_tproj=paw_options(8),&
-&     has_vminushalf=paw_options(9),has_coretau=paw_options(10))
+&     has_vminushalf=paw_options(9),has_coretau=paw_options(10),&
+&     add_core_energy=paw_options(11))
    end if
 
 !  Read atomic pseudopotential data and get transforms
@@ -591,7 +585,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    ABI_FREE(xccc1d)
    ABI_FREE(xcctau1d)
    ABI_FREE(dvlspl)
-
  end if !  End condition of new computation needed
 
 !-------------------------------------------------------------
@@ -651,7 +644,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  end do
  psps%mproj = maxval(psps%indlmn(3,:,:))
 
- if (gencond == 1) call psps_print(psps,std_out,dtset%prtvol)
+ if (gencond == 1) call psps_print(psps,[std_out], prtvol=dtset%prtvol)
 
  ! Write the PSPS.nc file and exit here if requested by the user.
  if (abs(dtset%prtpsps) == 1) then
@@ -699,10 +692,8 @@ subroutine pspcor(ecore,epsatm,natom,ntypat,typat,zion)
  real(dp),intent(in) :: epsatm(ntypat),zion(ntypat)
 
 !Local variables-------------------------------
-!scalars
  integer :: ia
  real(dp) :: charge,esum
-
 ! *************************************************************************
 
  charge = 0.d0
@@ -865,7 +856,6 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  character(len=30) :: creator
  type(pspheader_type) :: psphead
 #endif
-
 ! ******************************************************************************
 
 !paral_mode defines how we access to the psp file
@@ -1424,7 +1414,6 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
  integer, parameter :: dump = 64
  integer :: ierr, i, j ,k
  character(len=500) :: msg
-
  ! *********************************************************************
 
  open(unit=dump, file=trim(pfx)//"_psp_info.yaml", status='REPLACE', err=10, iostat=ierr)
@@ -1565,8 +1554,8 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
  return
  10 continue
 
- if ( ierr /= 0 ) then
-   write(msg,'(a,a,a,i8)') "Error writing pseudopotential information", ch10, "IOSTAT=", ierr
+ if (ierr /= 0) then
+   write(msg,'(3a,i0)') "Error writing pseudopotential information", ch10, "IOSTAT=", ierr
    ABI_WARNING(msg)
  end if
 

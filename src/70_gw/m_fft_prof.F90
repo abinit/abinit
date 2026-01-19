@@ -16,7 +16,7 @@
 
 #include "abi_common.h"
 
-MODULE m_FFT_prof
+module m_FFT_prof
 
  use defs_basis
  use m_xomp
@@ -134,7 +134,7 @@ MODULE m_FFT_prof
    real(dp) :: wall_time
    real(dp) :: gflops
    character(len=TNAME_LEN) :: test_name
-   complex(dpc),allocatable :: results(:)
+   complex(dp),allocatable :: results(:)
 
  contains
    procedure :: init => fftprof_init
@@ -196,7 +196,6 @@ subroutine fft_test_init(Ftest, fft_setup, kpoint, ecut, boxcutmin, rprimd, nsym
  real(dp),parameter :: k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: tnons(:,:)
-
 ! *************************************************************************
 
  call nullify_mpi_enreg(Ftest%MPI_enreg)
@@ -234,11 +233,11 @@ subroutine fft_test_init(Ftest, fft_setup, kpoint, ecut, boxcutmin, rprimd, nsym
  ABI_CALLOC(tnons,(3,nsym))
 
  call getng(boxcutmin,0,ecut,gmet,k0,Ftest%MPI_enreg%me_fft,Ftest%mgfft,Ftest%nfft,Ftest%ngfft,Ftest%MPI_enreg%nproc_fft,nsym,&
-&  Ftest%MPI_enreg%paral_kgb,symrel,tnons, unit=dev_null, gpu_option=ftest%gpu_option)
+   Ftest%MPI_enreg%paral_kgb,symrel,tnons, unit=dev_null, gpu_option=ftest%gpu_option)
 
  ABI_FREE(tnons)
 
- call init_distribfft(Ftest%MPI_enreg%distribfft,'c',Ftest%MPI_enreg%nproc_fft,Ftest%ngfft(2),Ftest%ngfft(3))
+ call Ftest%MPI_enreg%distribfft%init('c',Ftest%MPI_enreg%nproc_fft,Ftest%ngfft(2),Ftest%ngfft(3))
 
  ! Compute the index of each plane wave in the FFT grid.
  ABI_MALLOC(Ftest%indpw_k,(Ftest%npw_k))
@@ -270,7 +269,6 @@ subroutine fft_test_free_0D(Ftest)
 
 !Arguments -----------------------------------
  class(FFT_test_t),intent(inout) :: Ftest
-
 ! *********************************************************************
 
  ABI_SFREE(Ftest%indpw_k)
@@ -304,7 +302,6 @@ subroutine fft_test_free_1D(Ftest)
 
 !Local variables-------------------------------
  integer :: ii
-
 ! *********************************************************************
 
  do ii=LBOUND(Ftest,DIM=1),UBOUND(Ftest,DIM=1)
@@ -382,7 +379,6 @@ character(len=TNAME_LEN) function get_name(Ftest)
 
 !Local variables-------------------------------
  character(len=TNAME_LEN) :: library_name,cplex_mode,padding_mode
-
 ! *********************************************************************
 
  if (ftest%gpu_option == 0) then
@@ -421,8 +417,7 @@ subroutine fftprof_init(Ftprof, test_name, nthreads, ncalls, ndat, gpu_option, c
  real(dp),intent(in) :: cpu_time,wall_time,gflops
  character(len=*),intent(in) :: test_name
 !arrays
- complex(dpc),optional,intent(in) :: results(:)
-
+ complex(dp),optional,intent(in) :: results(:)
 ! *************************************************************************
 
  Ftprof%ncalls         = ncalls
@@ -457,7 +452,6 @@ subroutine fftprof_free_0D(Ftprof)
 
 !Arguments -----------------------------------
  class(FFT_prof_t),intent(inout) :: Ftprof
-
 ! *********************************************************************
 
  ABI_SFREE(Ftprof%results)
@@ -525,7 +519,6 @@ subroutine fftprofs_print(Fprof, header, unit, mode_paral, prtvol)
  real(dp) :: mabs_err,mean_err,check_mabs_err,check_mean_err, ref_wtime,para_eff
  character(len=4) :: my_mode
  character(len=500) :: ofmt,hfmt,nafmt,msg
-
 ! *********************************************************************
 
  my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
@@ -565,7 +558,7 @@ subroutine fftprofs_print(Fprof, header, unit, mode_paral, prtvol)
  check_mabs_err=zero; check_mean_err=zero
  do ii=1,SIZE(Fprof)
    ncalls = Fprof(ii)%ncalls
-   if (ncalls>0) then
+   if (ncalls > 0) then
      mabs_err = zero; mean_err=zero
      if (ref_lib>0) then
        mabs_err = MAXVAL( ABS(Fprof(ii)%results - Fprof(ref_lib)%results) )
@@ -588,7 +581,7 @@ subroutine fftprofs_print(Fprof, header, unit, mode_paral, prtvol)
    end if
  end do
 
- if (ref_lib>0) then
+ if (ref_lib > 0) then
    write(std_out,'(/,2(a,es9.2),2a)')&
     " Consistency check: MAX(Max_|Err|) = ",check_mabs_err,&
     ", Max(<|Err|>) = ",check_mean_err,", reference_lib: ",TRIM(Fprof(ref_lib)%test_name)
@@ -632,8 +625,7 @@ subroutine time_fourdp(Ftest, isign, cplex, header, Ftprof)
  integer,parameter :: g0(3)=(/1,2,-1/)
  integer :: gg(3)
  real(dp),allocatable :: fofg(:,:),fofr(:)
- complex(dpc),allocatable :: results(:),ctmp(:)
-
+ complex(dp),allocatable :: results(:),ctmp(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()
@@ -641,7 +633,7 @@ subroutine time_fourdp(Ftest, isign, cplex, header, Ftprof)
 
  write(header,'(2(a,i2),a)')" fourdp with cplex ",cplex,", isign ",isign,", ndat 1"
 
- if (Ftest%available==0) then
+ if (Ftest%available == 0) then
    call Ftprof%init(test_name,0,0,0,0,zero,zero,zero)
    RETURN
  end if
@@ -752,7 +744,7 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
 !arrays
  integer,parameter :: g0(3) = [1,-2,1]
  integer :: gg(3)
- complex(dpc),allocatable :: ffc(:),ggc(:),results(:)
+ complex(dp),allocatable :: ffc(:),ggc(:),results(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()
@@ -770,8 +762,8 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
  nfft = Ftest%nfft; ndat = Ftest%ndat
  write(header,'(3(a,i2))')" fftbox with isign ",isign,", in-place ",inplace,", ndat ",ndat
 
- ABI_CALLOC(ffc,(nfft*ndat))
- ABI_CALLOC(ggc,(nfft*ndat))
+ ABI_CALLOC(ffc, (nfft*ndat))
+ ABI_CALLOC(ggc, (nfft*ndat))
  ABI_CALLOC(results, (nfft*ndat))
 
  if (isign==-1) then
@@ -807,20 +799,36 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
  ! No augmentation here.
  call plan%init(ndat, Ftest%ngfft(1:3), Ftest%ngfft(1:3), Ftest%ngfft(7), fftcache0, ftest%gpu_option)
 
+ if (plan%gpu_option == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:ffc, ggc)
+#endif
+ end if
+
  select case (inplace)
  case (0)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call plan%execute(ffc, ggc, isign)
+     call plan%execute(ffc, ggc, isign, ndat, iscale=0)
      ! Store results at the first call.
-     if (icall == 1) results = ggc
+     if (icall == 1) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$omp target update from(ggc)
+#endif
+       results = ggc
+     end if
    end do
  case (1)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call plan%execute(ffc, isign)
+     call plan%execute(ffc, isign, ndat, iscale=0)
      ! Store results at the first call.
-     if (icall == 1) results = ffc
+     if (icall == 1) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$omp target update from(ffc)
+#endif
+       results = ffc
+     end if
    end do
  case default
    ABI_ERROR(sjoin("Wrong value for inplace:", itoa(inplace)))
@@ -831,6 +839,12 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
                   cpu_time,wall_time,gflops,results=results)
 
  call plan%free()
+
+ if (plan%gpu_option == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:ffc, ggc)
+#endif
+ end if
  ABI_FREE(ffc)
  ABI_FREE(ggc)
  ABI_FREE(results)
@@ -876,8 +890,7 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
  integer :: gg(3)
  integer,allocatable :: gbound_in(:,:),gbound_out(:,:)
  real(dp),allocatable :: denpot(:,:,:),fofg_in(:,:), fofr_4(:,:,:,:),fofg_out(:,:)
- complex(dpc),allocatable :: results(:)
-
+ complex(dp),allocatable :: results(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()
@@ -955,8 +968,8 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
          do i2=0,n2-1
            do i1=0,n1-1
              g0dotr= two_pi*( g0(1)*(i1/DBLE(n1)) &
-&                            +g0(2)*(i2/DBLE(n2)) &
-&                            +g0(3)*(i3/DBLE(n3)) )
+                             +g0(2)*(i2/DBLE(n2)) &
+                             +g0(3)*(i3/DBLE(n3)) )
              denpot(i1+1,i2+1,i3+1)=COS(g0dotr)
            end do
          end do
@@ -967,8 +980,8 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
            idx=1
            do i1=0,n1-1
              g0dotr= two_pi*( g0(1)*(i1/DBLE(n1)) &
-&                            +g0(2)*(i2/DBLE(n2)) &
-&                            +g0(3)*(i3/DBLE(n3)) )
+                             +g0(2)*(i2/DBLE(n2)) &
+                             +g0(3)*(i3/DBLE(n3)) )
 
              denpot(idx,  i2+1,i3+1)= COS(g0dotr)
              denpot(idx+1,i2+1,i3+1)= SIN(g0dotr)
@@ -1166,7 +1179,7 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
  integer,parameter :: nspinor1=1,dim_rtwg1=1,istwfk1=1
  integer :: icall,ifft,itim1,itim2,nfft,dat,sprc,ptr,ndat, n1,n2,n3,n4,n5,n6
  real(dp) :: cpu_time,wall_time,gflops
- complex(dpc) :: ktabp1 = cone, ktabp2 = cone
+ complex(dp) :: ktabp1 = cone, ktabp2 = cone
  character(len=TNAME_LEN) :: test_name
  logical :: not_implemented
  type(MPI_type) :: MPI_enreg_seq
@@ -1176,9 +1189,8 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
  integer,allocatable :: gbound(:,:), ktabr1(:), ktabr2(:), igfftg0(:)
  real(dp),parameter :: spinrot1(4)=(/one,zero,zero,one/),spinrot2(4)=(/one,zero,zero,one/)
  logical,allocatable :: mask(:)
- complex(dpc),allocatable :: results(:)
- complex(gwpc),allocatable :: rhotwg(:), wfn1(:), wfn2(:)
-
+ complex(dp),allocatable :: results(:)
+ complex(gwp),allocatable :: rhotwg(:), wfn1(:), wfn2(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()
@@ -1202,7 +1214,7 @@ subroutine time_rhotwg(Ftest, map2sphere, use_padfft, osc_npw, osc_gvec, header,
  if (Ftest%ngfft(7)/100 == FFT_FFTW3) call fftw3_set_nthreads(Ftest%nthreads)
 
  call initmpi_seq(MPI_enreg_seq)
- call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',n2,n3,'all')
+ call MPI_enreg_seq%distribfft%init_seq('c',n2,n3,'all')
 
  itim1=1; itim2=1
  ABI_MALLOC(ktabr1,(nfft))
@@ -1304,7 +1316,7 @@ subroutine time_fftu(Ftest, isign, header, Ftprof)
  integer,parameter :: g0(3) = [1,-2,1]
  integer :: gg(3)
  integer,allocatable :: kg_k(:,:),gbound(:,:)
- complex(dpc),allocatable :: ug(:),results(:),ur(:)
+ complex(dp),allocatable :: ug(:),results(:),ur(:)
 ! *********************************************************************
 
  test_name = Ftest%get_name()
@@ -1364,8 +1376,8 @@ subroutine time_fftu(Ftest, isign, header, Ftprof)
      do i2=0,n2-1
        do i1=0,n1-1
          g0dotr= two_pi*( g0(1)*(i1/DBLE(n1)) &
-&                        +g0(2)*(i2/DBLE(n2)) &
-&                        +g0(3)*(i3/DBLE(n3)) )
+                         +g0(2)*(i2/DBLE(n2)) &
+                         +g0(3)*(i3/DBLE(n3)) )
          ifft = 1 + i1 + i2*n1 + i3*n2*n3
          ur(ifft)=DCMPLX(DCOS(g0dotr),DSIN(g0dotr))
        end do
@@ -1458,7 +1470,6 @@ subroutine prof_fourdp(fft_setups, isign, cplex, necut, ecut_arth, boxcutmin, rp
  real(dp),parameter :: k_gamma(3)=zero
  real(dp) :: ecut_list(necut)
  real(dp),allocatable :: prof_res(:,:,:)
-
 ! *********************************************************************
 
  nsetups = size(fft_setups, dim=2)
@@ -1553,7 +1564,6 @@ subroutine prof_fourwf(fft_setups, cplex, option, kpoint, necut, ecut_arth, &
  integer :: ngfft_ecut(18,necut)
  real(dp) :: ecut_list(necut)
  real(dp),allocatable :: prof_res(:,:,:)
-
 ! *********************************************************************
 
  nsetups = size(fft_setups, dim=2)
@@ -1650,7 +1660,6 @@ subroutine prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut
  real(dp),parameter :: k_gamma(3)=zero
  real(dp) :: ecut_list(necut)
  real(dp),allocatable :: prof_res(:,:,:)
-
 ! *********************************************************************
 
  nsetups = size(fft_setups, dim=2)
@@ -1736,7 +1745,6 @@ integer function empty_cache(kbsize) result(fake)
 !Local variables-------------------------------
  integer :: sz
  real(dp),allocatable :: chunk(:)
-
 ! *********************************************************************
 
  fake = 0
@@ -1754,5 +1762,5 @@ end function empty_cache
 
 !----------------------------------------------------------------------
 
-END MODULE m_FFT_prof
+end module m_FFT_prof
 !!***

@@ -70,7 +70,7 @@ MODULE m_hu
 
  type, public :: vee_type ! for each atom
 
-   complex(dpc), allocatable :: mat(:,:,:,:)
+   complex(dp), allocatable :: mat(:,:,:,:)
 
  end type vee_type
 !!***
@@ -102,13 +102,13 @@ MODULE m_hu
 
   real(dp), allocatable :: fk(:)
 
-  complex(dpc), allocatable :: udens(:,:)
+  complex(dp), allocatable :: udens(:,:)
 
-  complex(dpc), allocatable :: uqmc(:)
+  complex(dp), allocatable :: uqmc(:)
 
-  complex(dpc), allocatable :: vee(:,:,:,:)
+  complex(dp), allocatable :: vee(:,:,:,:)
 
-  complex(dpc), allocatable :: veeslm2(:,:,:,:)
+  complex(dp), allocatable :: veeslm2(:,:,:,:)
 
  end type hu_type
 
@@ -208,9 +208,9 @@ subroutine init_hu(hu,paw_dmft,pawtab)
  type(pawtab_type), intent(in) :: pawtab(paw_dmft%ntypat)
  type(hu_type), intent(inout) :: hu(paw_dmft%ntypat)
 !Local variables ------------------------------------
- integer  :: dmft_optim,i,ij,ij1,ij2,itypat,lpawu,m
+ integer  :: i,ij,ij1,ij2,itypat,lpawu,m
  integer  :: m1,ms,ms1,ndim,ntypat,tndim
- logical  :: t2g,x2my2d
+ logical  :: dmft_optim,t2g,x2my2d
  real(dp) :: jpawu,upawu,xtemp
  integer, parameter   :: mt2g(3) = (/1,2,4/)
  integer, allocatable :: xij(:,:)
@@ -222,7 +222,7 @@ subroutine init_hu(hu,paw_dmft,pawtab)
  t2g    = (paw_dmft%dmft_t2g == 1)
  x2my2d = (paw_dmft%dmft_x2my2d == 1)
 
- dmft_optim = paw_dmft%dmft_optim
+ dmft_optim = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
 
  write(message,'(2a)') ch10,"  == Compute Interactions for DMFT"
  call wrtout(std_out,message,'COLL')
@@ -323,7 +323,7 @@ subroutine init_hu(hu,paw_dmft,pawtab)
      end do ! ms1
    end do ! ms
 
-   if (t2g .and. dmft_optim == 1) then
+   if (t2g .and. dmft_optim) then
      upawu = zero
      jpawu = zero
      do ms1=1,ndim
@@ -634,17 +634,17 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
  type(matlu_type), intent(inout) :: udens_atoms(paw_dmft%natom)
  type(vee_type), target, intent(inout) :: vee_rotated(paw_dmft%natom)
 !Local variables-------------------------------
- integer  :: dmft_optim,iatom,itypat,lpawu,m,m1,m2,mi,ms,ms1,nat_correl
+ integer  :: iatom,itypat,lpawu,m,m1,m2,mi,ms,ms1,nat_correl
  integer  :: natom,ndim,nflavor,nspinor,nsppol,nsppol_,prtonly,tndim
  logical  :: triqs
  real(dp) :: f2,jpawu,xsum,xsum2,xsum2new,xsumnew
  character(len=4) :: tag_at
  character(len=30) :: basis_vee
  character(len=500) :: message
- complex(dpc), target, allocatable :: veeylm(:,:,:,:)
- complex(dpc), pointer :: veeslm(:,:,:,:) => null(),veetemp(:,:,:,:) => null()
- complex(dpc), pointer :: veetemp2(:,:,:,:) => null(),veetemp3(:,:,:,:) => null()
- complex(dpc), pointer :: veeylm2(:,:,:,:) => null()
+ complex(dp), target, allocatable :: veeylm(:,:,:,:)
+ complex(dp), pointer :: veeslm(:,:,:,:) => null(),veetemp(:,:,:,:) => null()
+ complex(dp), pointer :: veetemp2(:,:,:,:) => null(),veetemp3(:,:,:,:) => null()
+ complex(dp), pointer :: veeylm2(:,:,:,:) => null()
 ! *********************************************************************
 
  natom   = paw_dmft%natom
@@ -652,8 +652,6 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
  nsppol  = paw_dmft%nsppol
 
  triqs = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
-
- dmft_optim = paw_dmft%dmft_optim
 
  write(message,'(a,3x,a)') ch10,"== Rotate interaction to the CTQMC basis"
  call wrtout(std_out,message,"COLL")
@@ -744,7 +742,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
          ABI_MALLOC(veeylm2,(tndim,tndim,tndim,tndim))
        end if
 !      Change basis from slm to ylm basis
-       if (dmft_optim == 1) then
+       if (triqs) then
          veeslm => hu(itypat)%vee(:,:,:,:)
        else
          ABI_MALLOC(veeslm,(ndim,ndim,ndim,ndim))
@@ -753,7 +751,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 
        call vee_slm2ylm_hu(lpawu,veeslm(:,:,:,:),veeylm(:,:,:,:),paw_dmft,1,2)
 
-       if (dmft_optim == 0) then
+       if (.not. triqs) then
          ABI_FREE(veeslm)
        end if
        veeslm => null()
@@ -1143,12 +1141,12 @@ subroutine rotate_hu(rot_mat,nsppol,tndim,vee,vee_rotated)
 
 !Arguments ------------------------------------
  integer, intent(in) :: nsppol,tndim
- complex(dpc), intent(in) :: rot_mat(tndim,tndim,nsppol)
- complex(dpc), intent(in) :: vee(tndim*nsppol,tndim*nsppol,tndim*nsppol,tndim*nsppol)
- complex(dpc), intent(inout) :: vee_rotated(tndim*nsppol,tndim*nsppol,tndim*nsppol,tndim*nsppol)
+ complex(dp), intent(in) :: rot_mat(tndim,tndim,nsppol)
+ complex(dp), intent(in) :: vee(tndim*nsppol,tndim*nsppol,tndim*nsppol,tndim*nsppol)
+ complex(dp), intent(inout) :: vee_rotated(tndim*nsppol,tndim*nsppol,tndim*nsppol,tndim*nsppol)
 !Local variables-------------------------------
  integer :: is1,is2,loop,m1,m2,ms1,ms2
- complex(dpc), allocatable :: mat_tmp(:,:),vee_tmp(:,:)
+ complex(dp), allocatable :: mat_tmp(:,:),vee_tmp(:,:)
 ! *********************************************************************
 
  ABI_MALLOC(mat_tmp,(tndim,tndim))
@@ -1211,7 +1209,7 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
 !Arguments ------------------------------------
 !type
  integer, intent(in) :: ndim,prtopt
- complex(dpc), intent(in) :: vee(ndim,ndim,ndim,ndim)
+ complex(dp), intent(in) :: vee(ndim,ndim,ndim,ndim)
  real(dp), optional, intent(in) :: f2,upawu
  character(len=*), intent(in) :: basis
 !Local variables-------------------------------
@@ -1559,9 +1557,9 @@ subroutine vee2udensatom_hu(ndim,udens_atoms,veetemp,basis,prtonly)
 
 !Arguments ------------------------------------
  integer, intent(in) :: ndim
- complex(dpc), intent(inout) :: udens_atoms(2*ndim,2*ndim)
+ complex(dp), intent(inout) :: udens_atoms(2*ndim,2*ndim)
  !real(dp), intent(in) :: veetemp(nspinor*ndim,nspinor*ndim,nspinor*ndim,nspinor*ndim)
- complex(dpc), intent(in) :: veetemp(ndim,ndim,ndim,ndim)
+ complex(dp), intent(in) :: veetemp(ndim,ndim,ndim,ndim)
  character(len=*), intent(in) :: basis
  integer, intent(in), optional :: prtonly
 !Local variables-------------------------------
@@ -1680,12 +1678,12 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,paw_dmft,option,prtvol)
 
 !Arguments ---------------------------------------------
  integer,intent(in) :: lcor,option,prtvol
- complex(dpc), intent(in) :: mat_inp_c(2*lcor+1,2*lcor+1,2*lcor+1,2*lcor+1)
- complex(dpc), intent(out) :: mat_out_c(2*lcor+1,2*lcor+1,2*lcor+1,2*lcor+1)
+ complex(dp), intent(in) :: mat_inp_c(2*lcor+1,2*lcor+1,2*lcor+1,2*lcor+1)
+ complex(dp), intent(out) :: mat_out_c(2*lcor+1,2*lcor+1,2*lcor+1,2*lcor+1)
  type(paw_dmft_type) , target, intent(in) :: paw_dmft
 !Local variables ---------------------------------------
  integer :: ndim
- complex(dpc), allocatable :: slm2ylm(:,:)
+ complex(dp), allocatable :: slm2ylm(:,:)
  character(len=500) :: message
 ! *********************************************************************
 
@@ -1895,8 +1893,8 @@ subroutine vee_ndim2tndim_hu(lcor,mat_inp_c,mat_out_c)
 !scalars
  integer, intent(in) :: lcor
 !arrays
- complex(dpc), intent(in) :: mat_inp_c(2*lcor+1,2*lcor+1,2*lcor+1,2*lcor+1)
- complex(dpc), intent(inout) :: mat_out_c(2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1))
+ complex(dp), intent(in) :: mat_inp_c(2*lcor+1,2*lcor+1,2*lcor+1,2*lcor+1)
+ complex(dp), intent(inout) :: mat_out_c(2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1))
 !Local variables ---------------------------------------
 !scalars
  integer :: is1,is2,m1,m2,m3,m4,ndim,s1,s2
@@ -1958,12 +1956,12 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option,paw_dmft)
 
 !Arguments ---------------------------------------------
  integer, intent(in) :: lcor,option
- complex(dpc), intent(in) :: mat_inp_c(2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1))
- complex(dpc), intent(inout) :: mat_out_c(2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1))
+ complex(dp), intent(in) :: mat_inp_c(2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1))
+ complex(dp), intent(inout) :: mat_out_c(2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1),2*(2*lcor+1))
  type(paw_dmft_type), intent(in) :: paw_dmft
 !Local variables ---------------------------------------
  integer :: im,jm,tndim
- complex(dpc), allocatable :: jmj2ylm(:,:)
+ complex(dp), allocatable :: jmj2ylm(:,:)
  character(len=500) :: message
 !*********************************************************************
 

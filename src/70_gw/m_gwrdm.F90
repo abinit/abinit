@@ -151,7 +151,7 @@ function calc_Ec_GM_k(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,ebands) result(Ec_GM_k)
  type(sigma_t),intent(in) :: Sr
 !arrays
  real(dp),intent(in) :: weights(:)
- complex(dpc),intent(in) :: sigcme_k(:,:,:,:)
+ complex(dp),intent(in) :: sigcme_k(:,:,:,:)
 !Local variables ------------------------------
 !scalars
  integer :: ibdm!,unitt
@@ -213,8 +213,8 @@ subroutine calc_rdmx(ib1,ib2,ik_ibz,pot,rdm_k,ebands)
  integer,intent(in) :: ib1,ib2,ik_ibz
  type(ebands_t),target,intent(in) :: ebands
 !arrays
- complex(dpc),intent(in) :: pot(:,:)
- complex(dpc),intent(inout) :: rdm_k(:,:)
+ complex(dp),intent(in) :: pot(:,:)
+ complex(dp),intent(inout) :: rdm_k(:,:)
 
 !Local variables ------------------------------
 !scalars
@@ -275,11 +275,11 @@ subroutine calc_rdmc(ib1,ib2,ik_ibz,omega_i,weights,sigcme_k,ebands,rdm_k)
 !scalars
  integer,intent(in) :: ib1,ib2,ik_ibz
  type(ebands_t),target,intent(in) :: ebands
- complex(dpc),intent(in) :: omega_i(:)
+ complex(dp),intent(in) :: omega_i(:)
 !arrays
  real(dp),intent(in) :: weights(:)
- complex(dpc),intent(inout) :: rdm_k(:,:)
- complex(dpc),intent(in) :: sigcme_k(:,:,:,:)
+ complex(dp),intent(inout) :: rdm_k(:,:)
+ complex(dp),intent(in) :: sigcme_k(:,:,:,:)
 
 !Local variables ------------------------------
 !scalars
@@ -347,7 +347,7 @@ subroutine natoccs(ib1,ib2,rdm_k,nateigv,occs,ebands,ik_ibz,iinfo,checksij)
  type(ebands_t),target,intent(in) :: ebands
 !arrays
  real(dp),intent(inout) :: occs(:,:)
- complex(dpc),intent(inout) :: rdm_k(:,:),nateigv(:,:,:,:)
+ complex(dp),intent(inout) :: rdm_k(:,:),nateigv(:,:,:,:)
 !Local variables ------------------------------
 !scalars
  integer:: ndim,ib1dm,ib2dm,ib3dm,lwork,info
@@ -358,7 +358,7 @@ subroutine natoccs(ib1,ib2,rdm_k,nateigv,occs,ebands,ik_ibz,iinfo,checksij)
 !arrays
  integer :: units(2)
  real(dp),allocatable :: occs_tmp(:),occs_tmp2(:),rwork(:)
- complex(dpc),allocatable :: work(:),tmp_mat(:,:),eigenvect(:,:)
+ complex(dp),allocatable :: work(:),tmp_mat(:,:),eigenvect(:,:)
 !************************************************************************
 
  check_Sijmat=.false.; if (present(checksij)) check_Sijmat=.true.
@@ -627,7 +627,7 @@ subroutine get_chkprdm(Wfd,Kmesh,Sigp,ebands,occs,nateigv,sigmak_todo,my_rank,gw
 !arrays
  integer,intent(inout) :: sigmak_todo(:)
  real(dp),intent(inout) :: occs(:,:)
- complex(dpc),intent(inout) :: nateigv(:,:,:,:)
+ complex(dp),intent(inout) :: nateigv(:,:,:,:)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,iunit=666314
@@ -765,7 +765,7 @@ subroutine print_chkprdm(Wfd,occs,nateigv,ik_ibz,my_rank,gw1rdm_fname_out)
  character(len=fnlen),intent(in) :: gw1rdm_fname_out
 !arrays
  real(dp),intent(in) :: occs(:,:)
- complex(dpc),intent(in) :: nateigv(:,:,:,:)
+ complex(dp),intent(in) :: nateigv(:,:,:,:)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,iunit=666314
@@ -844,12 +844,12 @@ subroutine change_matrix(Sigp,Sr,Mels,Kmesh,nateigv)
  type(sigma_t),intent(inout) :: Sr
  type(melements_t),intent(inout) :: Mels
 !arrays
- complex(dpc),intent(in) :: nateigv(:,:,:,:)
+ complex(dp),intent(in) :: nateigv(:,:,:,:)
 !Local variables-------------------------------
 !scalars
  integer :: ikcalc,ik_ibz,ib1,ib2,ib1dm,ib2dm
 !arrays
- complex(dpc),allocatable :: mat2rot(:,:),Umat(:,:)
+ complex(dp),allocatable :: mat2rot(:,:),Umat(:,:)
 ! *************************************************************************
 
   do ikcalc=1,Sigp%nkptgw
@@ -1009,12 +1009,12 @@ subroutine print_band_energies(b1gw,b2gw,Sr,Sigp,Mels,Kmesh,ebands,new_hartr,old
  type(melements_t),intent(in) :: Mels
  integer,intent(in) :: b1gw,b2gw
 !arrays
- complex(dpc),intent(in) :: old_purex(:,:),new_hartr(:,:)
+ complex(dp),intent(in) :: old_purex(:,:),new_hartr(:,:)
 !Local variables-------------------------------
 !scalars
  integer :: ib,ikcalc,ik_ibz, units(2)
  real(dp) :: eik_new
- complex(dpc) :: delta_band_ibik
+ complex(dp) :: delta_band_ibik
  character(len=500) :: msg
 !************************************************************************
 
@@ -1087,8 +1087,8 @@ subroutine rotate_ks_no(ib1,ib2,Mat,Umat,option)
 !scalars
  integer,intent(in) :: ib1,ib2,option
 !arrays
- complex(dpc),intent(in) :: Umat(:,:)
- complex(dpc),intent(inout) :: Mat(:,:)
+ complex(dp),intent(in) :: Umat(:,:)
+ complex(dp),intent(inout) :: Mat(:,:)
 !Local variables ------------------------------
 !scalars
  integer:: ndim
@@ -1127,12 +1127,12 @@ subroutine ks2no(ndim,mat,rot)
 !scalars
  integer,intent(in) :: ndim
 !arrays
- complex(dpc),dimension(:,:),intent(in) :: rot
- complex(dpc),dimension(:,:),intent(inout) :: mat
+ complex(dp),dimension(:,:),intent(in) :: rot
+ complex(dp),dimension(:,:),intent(inout) :: mat
 !Local variables ------------------------------
 !scalars
 !arrays
- complex(dpc),allocatable :: res(:,:)
+ complex(dp),allocatable :: res(:,:)
 !************************************************************************
 
  ABI_MALLOC(res,(ndim,ndim))
@@ -1169,12 +1169,10 @@ subroutine no2ks(ndim,mat,rot)
 !scalars
  integer,intent(in) :: ndim
 !arrays
- complex(dpc),dimension(:,:),intent(in) :: rot
- complex(dpc),dimension(:,:),intent(inout) :: mat
+ complex(dp),dimension(:,:),intent(in) :: rot
+ complex(dp),dimension(:,:),intent(inout) :: mat
 !Local variables ------------------------------
-!scalars
-!arrays
- complex(dpc),allocatable :: res(:,:)
+ complex(dp),allocatable :: res(:,:)
 !************************************************************************
 
  ABI_MALLOC(res,(ndim,ndim))
@@ -1210,7 +1208,7 @@ subroutine printrdm_k(ib1,ib2,rdm_k) ! Only used for debug on this file, do not 
 !scalars
  integer,intent(in) :: ib1,ib2
 !arrays
- complex(dpc),intent(in) :: rdm_k(:,:)
+ complex(dp),intent(in) :: rdm_k(:,:)
 !Local variables ------------------------------
 !scalars
  integer::ib1dm

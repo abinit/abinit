@@ -72,7 +72,6 @@ subroutine echo_xc_name (ixc)
 !Local variables -------------------------
  integer :: l_citation
  character(len=500) :: message, citation
-
 ! *********************************************************************
 
  message =''
@@ -242,7 +241,6 @@ logical function xc_need_kden(ixc,xc_funcs)
 !Arguments ------------------------------------
  integer,intent(in) :: ixc
  type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
-
 ! *************************************************************************
 
  xc_need_kden=.false.
@@ -277,9 +275,6 @@ logical function has_kxc(ixc,xc_funcs)
 !Arguments -------------------------------
  integer, intent(in) :: ixc
  type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
-
-!Local variables -------------------------
-
 ! *********************************************************************
 
  has_kxc=.false.
@@ -320,9 +315,6 @@ logical function has_k3xc(ixc,xc_funcs)
 !Arguments -------------------------------
  integer, intent(in) :: ixc
  type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
-
-!Local variables -------------------------
-
 ! *********************************************************************
 
  has_k3xc=.false.
@@ -368,7 +360,6 @@ subroutine check_kxc(ixc,optdriver,check_k3xc)
 !Local variables -------------------------
  logical :: check_k3xc_,kxc_available,k3xc_available
  character(len=500) :: msg
-
 ! *********************************************************************
 
  check_k3xc_=.false. ; if (present(check_k3xc)) check_k3xc_=check_k3xc
@@ -478,7 +469,6 @@ subroutine size_dvxc(ixc,order,nspden,&
 !Local variables----------------
  logical :: libxc_has_kxc,libxc_has_k3xc,libxc_isgga,libxc_ismgga,libxc_ishybrid,my_add_tfw
  logical :: need_gradient,need_laplacian,need_kden
-
 ! *************************************************************************
 
 !Several flags
@@ -650,7 +640,6 @@ subroutine xcmult (depsxc,nfft,ngrad,nspden,nspgrad,rhonow)
 !scalars
  integer :: idir,ifft
  real(dp) :: rho_tot,rho_up
-
 ! *************************************************************************
 
  do idir=1,3
@@ -739,7 +728,6 @@ subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
  character(len=600) :: message
 !arrays
  real(dp) :: rho(2)
-
 ! *************************************************************************
 
  numneg=0
@@ -977,7 +965,6 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
  real(dp),allocatable :: d2vxc_c(:,:),d2vxc_x(:,:),dvxc_c(:,:),dvxc_x(:,:)
  real(dp),allocatable :: vxcgrho_x(:,:)
  type(libxc_functional_type) :: xc_funcs_vwn3(2),xc_funcs_lyp(2)
-
 ! *************************************************************************
 
 !optional arguments

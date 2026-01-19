@@ -4,7 +4,6 @@
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2025 ABINIT group (AM)
 !!  This file is distributed under the terms of the
@@ -37,10 +36,11 @@ module m_mover_effpot
  use m_psps
  use m_args_gs
  use m_ifc
+ use m_symfind
 
  use defs_datatypes,          only : pseudopotential_type
  use defs_abitypes,           only : MPI_type
- use m_build_info,   only : abinit_version
+ use m_build_info,            only : abinit_version
  use m_geometry,              only : xcart2xred, xred2xcart
  use m_multibinit_dataset,    only : multibinit_dtset_type
  use m_effective_potential,   only : effective_potential_type
@@ -58,10 +58,9 @@ module m_mover_effpot
  use m_copy            , only : alloc_copy
  use m_electronpositron, only : electronpositron_type
  use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
- use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
+ use m_results_gs,       only : results_gs_type
  use m_mover,            only : mover
  use m_io_tools,         only : get_unit, open_file
- use m_symfind
  use m_matrix,           only: matr3inv,mati3inv
  use m_symtk,            only: symatm
 
@@ -488,7 +487,7 @@ ABI_FREE(xcart)
    psps%useylm = dtset%useylm
 
 !  initialisation of results_gs
-   call init_results_gs(dtset%natom,1,1,results_gs)
+   call results_gs%init(dtset%natom,1,1)
 
 !  Set the pointers of scfcv_args
    zero_integer = 0
@@ -1022,14 +1021,13 @@ ABI_FREE(xcart)
    !   ABI_FREE(npwtot)
    ! end if
    call dtset%free()
-   call destroy_results_gs(results_gs)
+   call results_gs%free()
    call scfcv_destroy(scfcv_args)
    call destroy_mpi_enreg(mpi_enreg)
 
  end if
 
- write(message, '(a,(80a),a,a)' ) ch10,&
-& ('=',ii=1,80),ch10
+ write(message, '(a,(80a),a,a)' ) ch10,('=',ii=1,80),ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
@@ -1051,18 +1049,11 @@ end subroutine mover_effpot
 !! msym : maximum symmetries defines sizes of symrel and tnons
 !! natom
 !!
-!!
 !! OUTPUT
 !! ptgroupma
 !! spgroup: index of spacegroup
 !! symrel(3,3,msym): symmetry relations
 !! tnons(3,msym): translations
-!!
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
 !!
 !! SOURCE
 
@@ -1110,7 +1101,6 @@ use_inversion = 0
 !write(std_out,*) 'nsym', nsym
 symrel_out = symrel
 tnons_out  = tnons
-
 
 end subroutine checksymmetrygroup
 !!***

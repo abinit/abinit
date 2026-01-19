@@ -1,5 +1,5 @@
-#Test the triple parallelisation. 
-#We cannot check the distribution npband*npfft*np_spkpt=2*2*2=8 processors, 
+#Test the triple parallelisation.
+#We cannot check the distribution npband*npfft*np_spkpt=2*2*2=8 processors,
 #this number being not allowed in the test procedure.
 #Here, we only test the parallelisation over FFT and kpoints:
 #npband*npfft*np_spkpt=1*2*2=4 processors.
@@ -15,7 +15,7 @@
  kptrlatt 4 0 0 0 4 0 0 0 4
  nshiftk 4 shiftk 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
  ionmov 3 ntime 3 toldff 1.2d-7 tolmxf 1.0d-5
- optcell 1 ecutsm 0.5 dilatmx 1.1 
+ optcell 1 ecutsm 0.5 dilatmx 1.1
  ixc 1
 
  ecut 15. pawecutdg 50
@@ -50,8 +50,8 @@
 #%% files_to_test = t24_MPI4.abo, tolnlines=  236,   tolabs=  3.0e-4, tolrel= 7.0e-1
 #%% [extra_info]
 #%% keywords = PAW
-#%% authors = Unknown 
-#%% description = 
+#%% authors = Unknown
+#%% description =
 #%%   C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
 #%%   Test the triple parallelisation.
 #%%   We cannot check the distribution npband*npfft*np_spkpt=2*2*2=8 processors,
