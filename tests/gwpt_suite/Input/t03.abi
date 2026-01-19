@@ -5,7 +5,7 @@
  ecut 45.0
  nstep 150
  iscf -2          # NSCF run
- tolwfr 1e-14     # 1e-20 is the recommended value
+ tolwfr 1e-20     # 1e-20 is the recommended value
  nband  70        # occ + empty states .
  nbdbuf -10       # A negative value means 10% of nband as buffer.
 
@@ -29,8 +29,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain =  t01.abi, t02.abi, t03.abi, t04.abi, t05.abi
-#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
+#%% test_chain = t01.abi, t02.abi, t03.abi, t04.abi, t05.abi, t06.abi
 #%% [files]
 #%% use_git_submodule = diamond_eph_gwpt
 #%% files_to_test =

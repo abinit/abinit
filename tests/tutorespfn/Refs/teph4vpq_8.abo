@@ -1,5 +1,5 @@
 
-.Version 10.5.6.1 of ABINIT, released Sep 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 23 Feb 2025.
-- ( at 16h09 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h07 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_8.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_8.abi
 - output file    -> teph4vpq_8.abo
 - root for input  files -> teph4vpq_8i
 - root for output files -> teph4vpq_8o
@@ -166,7 +166,7 @@ P           mkmem          84
                          0.00546    0.01092
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.0307175380E+00  2.0307175380E+00  2.0307175380E+00
+                       2.0307175455E+00  2.0307175455E+00  2.0307175455E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        3.8375000000E+00  3.8375000000E+00  3.8375000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -289,25 +289,25 @@ meta: {optdriver: 7, eph_task: 11, }
  27)  -3.33333333E-01 -3.33333333E-01 -3.33333333E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.2234217387E-02 (at units)
+ Average speed of sound partial sums:     0.2234217386E-02 (at units)
 -                                   =           4.8878 [km/s]
 
- Debye frequency from partial sums:     0.1801153402E-02 (Ha)
--                                 =     0.1185102008E+02 (THz)
--Debye temperature from partial sums:     0.5687585851E+03 (K)
+ Debye frequency from partial sums:     0.1801153401E-02 (Ha)
+-                                 =     0.1185102007E+02 (THz)
+-Debye temperature from partial sums:     0.5687592599E+03 (K)
 
- Average speed of sound partial sums:     0.2234217387E-02 (at units)
+ Average speed of sound partial sums:     0.2234217386E-02 (at units)
 -                                   =           4.8878 [km/s]
 
- Debye frequency from partial sums:     0.1801153402E-02 (Ha)
--                                 =     0.1185102008E+02 (THz)
--Debye temperature from partial sums:     0.5687585851E+03 (K)
+ Debye frequency from partial sums:     0.1801153401E-02 (Ha)
+-                                 =     0.1185102007E+02 (THz)
+-Debye temperature from partial sums:     0.5687592599E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4vpq_8o_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/Li.psp8
 - Li    ONCVPSP-3.2.3.1  r_core=   1.40824   1.10935
 -  3.00000   3.00000    170503                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -320,8 +320,8 @@ meta: {optdriver: 7, eph_task: 11, }
              1   -2.250662   -0.474685
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/vvasilchenko_varpeq_nosym/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_05_pbe_std_psp8/F.psp8
 - F     ONCVPSP-3.2.3.1  r_core=   1.30942   1.45782   1.60379
 -  9.00000   7.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -393,47 +393,39 @@ P Number of CPUs for parallelism over k-points: 1
 
  gstore_completed: 1
  gstore_done_qbz_spin: 597
- gqk%nb_kq: 1
- gqk%nb_k: 1
- gqk%glob_nq: 597
- gqk%glob_nk: 89
-
- Group velocities |v_nk| in atomic units:
- For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     5.654169E-17
- For k-point: [ 7.6923E-02,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     1.151920E-01
- For k-point: [-3.0769E-01,  4.6154E-01,  1.5385E-01] , spin 1
- ib_k: 1     0.000000E+00
- For k-point: [-3.0769E-01,  4.6154E-01,  2.3077E-01] , spin 1
- ib_k: 1     0.000000E+00
-
+ nb_k: 1
+ bstart_k: 6
+ nb_kq: 1
+ bstart_kq: 6
+ glob_nq: 597
+ glob_nk: 89
  E-PH matrix elements in the atom representation: pcase = (idir, iatom)
-    iq    ik pcase im_kq  in_k        |g| in Ha
+ NB: Values are averaged over e_mk+q, and e_nk degenerate states.
+    iq    ik pcase  m_kq   n_k        |g| in Ha
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
-     1     1     4     1     1     2.369238E-08
+    iq    ik pcase  m_kq   n_k              |g|
+-    1     1     4     6     6     9.129338E-09
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 6
-    iq    ik pcase im_kq  in_k              |g|
-     1     1     6     1     1     2.307791E-08
- |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
-     1    89     4     1     1     2.433022E-08
- |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 6
-    iq    ik pcase im_kq  in_k              |g|
-     1    89     6     1     1     2.528762E-08
+    iq    ik pcase  m_kq   n_k              |g|
+-    1     1     6     6     6     4.058752E-08
  |g(k,q)| in Ha for iq: 597 ik: 1 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
-   597     1     4     1     1     7.813351E-01
+    iq    ik pcase  m_kq   n_k              |g|
+-  597     1     4     6     6     7.813350E-01
  |g(k,q)| in Ha for iq: 597 ik: 1 pcase: 6
-    iq    ik pcase im_kq  in_k              |g|
-   597     1     6     1     1     4.982705E-01
+    iq    ik pcase  m_kq   n_k              |g|
+-  597     1     6     6     6     4.982705E-01
+ |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 4
+    iq    ik pcase  m_kq   n_k              |g|
+-    1    89     4     6     6     8.988575E-09
+ |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 6
+    iq    ik pcase  m_kq   n_k              |g|
+-    1    89     6     6     6     4.171257E-08
  |g(k,q)| in Ha for iq: 597 ik: 89 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
-   597    89     4     1     1     8.165923E-01
+    iq    ik pcase  m_kq   n_k              |g|
+-  597    89     4     6     6     8.165923E-01
  |g(k,q)| in Ha for iq: 597 ik: 89 pcase: 6
-    iq    ik pcase im_kq  in_k              |g|
-   597    89     6     1     1     5.482770E-01
+    iq    ik pcase  m_kq   n_k              |g|
+-  597    89     6     6     6     5.482770E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -494,7 +486,7 @@ P           mkmem          84
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
             typat      1  2
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.0307175380E+00  2.0307175380E+00  2.0307175380E+00
+                       2.0307175455E+00  2.0307175455E+00  2.0307175455E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        3.8375000000E+00  3.8375000000E+00  3.8375000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -595,10 +587,10 @@ P           mkmem          84
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         93.3  wall=         93.3
+- Proc.   0 individual time (sec): cpu=         97.1  wall=         97.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         93.3  wall=         93.3
++Overall time at end (sec) : cpu=         97.1  wall=         97.2

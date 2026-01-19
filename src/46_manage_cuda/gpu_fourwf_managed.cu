@@ -216,14 +216,24 @@ extern "C" void gpu_fourwf_managed_(int *cplex,
 
   int deviceId;
   CHECK_CUDA_ERROR( cudaGetDevice(&deviceId) );
+#if CUDA_VERSION >= 13000
+  cudaMemLocation location = {.type = cudaMemLocationTypeDevice, .id = deviceId};
+#endif
   if(*option!=3) {
     //printf("[debug prefetch] &fofgin=%p fofgin=%f npwin=%d ndat=%d, deviceId=%d\n",fofgin, *fofgin,  *npwin, *ndat, deviceId);
+#if CUDA_VERSION >= 13000
+    CHECK_CUDA_ERROR( cudaMemPrefetchAsync ( fofgin, 2*(*npwin)*(*ndat)*sizeof(double), location, 0) );
+#else
     CHECK_CUDA_ERROR( cudaMemPrefetchAsync ( fofgin, 2*(*npwin)*(*ndat)*sizeof(double), deviceId) );
+#endif
   }
 
   if(*option==2 || *option==3)
+#if CUDA_VERSION >= 13000
+    CHECK_CUDA_ERROR( cudaMemPrefetchAsync ( fofgout, 2*(*npwout)*(*ndat)*sizeof(double), location, 0) );
+#else
     CHECK_CUDA_ERROR( cudaMemPrefetchAsync ( fofgout, 2*(*npwout)*(*ndat)*sizeof(double), deviceId) );
-
+#endif
   //memcpy cpu => buffer
   if(*option==1){
     memcpy(buff_weightr,weight_r,(*ndat)*sizeof(double));

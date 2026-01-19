@@ -89,6 +89,7 @@ contains
 !!  efield = cartesian coordinates of the electric field in atomic units
 !!  ehart=Hartree energy (hartree)
 !!  eii=pseudoion core correction energy part of Etot (hartree)
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  gsqcut=cutoff value on G**2 for (large) sphere inside FFT box.
 !!                       gsqcut=(boxcut**2)*ecut/(2._dp*(Pi**2)

@@ -1,12 +1,11 @@
 Your environment does not provide __mandatory libraries__,
-but we can build them for you.
+but we can build them for you. 
+__Check__ the list above, all the ones marked as __fb__,for fallbacks,
+will be installed locally.
+ 
+To proceed, you can run: 
+__make__
 
-Please issue:
+Or you can install/load those libraries and rerun 
+__configure__
 
-__cd fallbacks__
-__./build-abinit-fallbacks.sh__
-
-At the end of the process, the options needed to link
-the external libraries will be proposed.
-
-__copy/paste__ the options in your ac9 file and rerun configure.

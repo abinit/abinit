@@ -171,7 +171,7 @@ if ( os.path.exists("config.h.cmake") ):
 # Write Makefile.am
 mf = open("Makefile.am", "wt")
 mf.write(makefile_header(my_name,now))
-mf.write("SUBDIRS = %s\n\n" % (" ".join(abinit_top_dirs + xsubs)))
+mf.write("SUBDIRS = @FALLBACKS_SUBDIRS@ %(subdirs)s\n\n" %{'subdirs': " ".join(abinit_top_dirs + xsubs)})
 mf.write(clean)
 mf.write(ext)
 add = "config/makefiles/top.am"

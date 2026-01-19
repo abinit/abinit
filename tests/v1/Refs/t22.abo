@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h07 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h08 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t21-t22-t23-t24/t22.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v1_t21-t22-t23-t24/t22.abi
 - output file    -> t22.abo
 - root for input  files -> t21o
 - root for output files -> t22o
@@ -131,8 +131,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     70.000   => boxcut(ratio)=   2.04824
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/01h.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/01h.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/01h.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/01h.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -167,9 +167,9 @@ solver: {iscf: 7, nstep: 2, nline: 2, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
 
- ETOT  1 -0.47919829594354    -4.792E-01 5.232E-09 1.913E-05
+ ETOT  1 -0.47919829594354    -4.792E-01 5.232E-09 1.913E-05 7.218E-01 7.218E-01
 
  prteigrs : about to open file t22o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.25194   Average Vxc (hartree)=  -0.11545
@@ -180,7 +180,7 @@ tolerances: {tolwfr: 1.00E-14, }
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.07989
 
- ETOT  2 -0.47919829602008    -7.653E-11 1.598E-12 4.215E-06
+ ETOT  2 -0.47919829602008    -7.653E-11 1.598E-12 4.215E-06 5.480E-06 7.218E-01
 
  prteigrs : about to open file t22o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.25192   Average Vxc (hartree)=  -0.11545
@@ -229,14 +229,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.721774     0.000000      0.721774     0.721774
- ---------------------------------------------------------------------
-  Sum:              0.721774     0.000000      0.721774     0.721774
- Total magnetization (from the atomic spheres):             0.721774
- Total magnetization (exact up - dn):                       1.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  H   2.00000     0.721774     0.000000      0.721774     0.721774
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.721774     0.000000      0.721774     0.721774
+ Total magnetization (from the atomic spheres):                0.721774
+ Total magnetization (exact up - dn):                          1.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -262,7 +263,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  7.000000000000  7.000000000000 bohr
-              =  3.704240460130  3.704240460130  3.704240460130 angstroms
+              =  3.704240473808  3.704240473808  3.704240473808 angstroms
  prteigrs : about to open file t22o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.25192   Average Vxc (hartree)=  -0.11545
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -312,7 +313,7 @@ psp_core            :  4.57958112768191E-07
 local_psp           : -5.68084825609072E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -4.79198296020078E-01
-total_energy_eV     : -1.30396487780603E+01
+total_energy_eV     : -1.30396499214183E+01
 band_energy         : -2.51924739879475E-01
 ...
 
@@ -333,9 +334,9 @@ band_energy         : -2.51924739879475E-01
   sigma(3 3)=  1.21376439E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -3.5710E-01 GPa]
-- sigma(1 1)=  3.57101737E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.57101726E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.57101752E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  3.57101797E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.57101786E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.57101812E-01  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -472,10 +473,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.5  wall=          1.6
+- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.5  wall=          1.6
++Overall time at end (sec) : cpu=          0.6  wall=          0.7

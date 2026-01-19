@@ -40,11 +40,17 @@ inp_files = [
     "t28.abi" ,  # test stress for GBT using Finite difference
     "t29.abi" ,  # test force for GBT using Finite difference
     "t30.abi" ,  # test axial vector symmetry with hspinfield along x,y and z directions.
+    "t39.abi" ,  # test overlapping of PAW sphere with itself (possible if small unit cell)
     "t40.abi" ,  # test orbmag calculation when using spatial symmetries for GS nuclear dipole
     "t41.abi" ,  # test orbmag calculation using R2SCAN mGGA
     "t42.abi" ,  # test orbmag calculation using R2SCAN mGGA, nspinor 2, zora
     "t43.abi" ,  # test quadrupoles calculation with xcnlcc
     "t44.abi" ,  # test all zora input values on orbmag calculation
+    "t61.abi" ,  # test total energy due to electron-phonon interaction: step 1 DFT+DFPT
+    "t62.abi" ,  # test total energy due to electron-phonon interaction: step 2 quadrupole
+    "t63.abi" ,  # test total energy due to electron-phonon interaction: step 3 merge DDB
+    "t64.abi" ,  # test total energy due to electron-phonon interaction: step 4 merge DVDB
+    "t65.abi" ,  # test total energy due to electron-phonon interaction: step 5 dense nscf + AHC + Sternheimer
     "t81.abi" ,  # Short MD to test restart on next test
     "t82.abi" ,  # Test restart of MD from the HIST of previous test using restartxf -1
     "t83.abi" ,  # Test variable cell nudged elastic band method
@@ -54,5 +60,7 @@ inp_files = [
     "t106.abi" , # Test Si spectral function and mobilities :step 3 merge DVDB
     "t107.abi" , # Test Si spectral function and mobilities :step 4 mobilities cumulant and DM with positive doping correction
     "t108.abi",  # Test for rcpaw
+    "t109.abi",  # Test paw_add_core variable
+    "t110.abi",  # Test for toldmag
     "t121.abi",  # Test for hybrid function using fock_icutcoul, fock_rcut
 ]

@@ -1,4 +1,4 @@
-/* gpu_fft.cu */
+/* gpu_fft_hip.cu */
 
 /*
  * Copyright (C) 2008-2025 ABINIT Group
@@ -7,7 +7,7 @@
  * or http://www.gnu.org/copyleft/gpl.txt .
  * for the initials of contributors, see ~abinit/doc/developers/contributors.txt.
  *
- * The main goal of this file is to contain cublas and magma encapsulation routines,
+ * The main goal of this file is to contain hipblas and hipfft encapsulation routines,
  * that will be callable from fortran routines
  *
  */
@@ -18,7 +18,7 @@
 hipfftHandle plan_fft[2];
 static hipStream_t stream_compute[2];
 
-//! utility function to select eigen type
+//! utility function to select FFT type
 static hipfftType select_hipfft_type(const int fftType_int)
 {
   switch(fftType_int){
@@ -39,7 +39,7 @@ static hipfftType select_hipfft_type(const int fftType_int)
 
 /*=========================================================================*/
 /* NAME
- *  gpu_fft_plan_many
+ *  gpu_fft_plan_many_cpp
  *
  * FUNCTION
  *  Initialize a FFT plan with custom dimension, strided and batch size.
@@ -71,8 +71,8 @@ static hipfftType select_hipfft_type(const int fftType_int)
 
 extern "C"
 void gpu_fft_plan_many_cpp(int *fft_plan_id, int *rank, int **n, int **inembed,
-                       int *istride, int *idist, int **onembed, int *ostride,
-                       int *odist, int *fft_type, int *batch){
+                           int *istride, int *idist, int **onembed, int *ostride,
+                           int *odist, int *fft_type, int *batch){
 
   assert(HIPFFT_Z2Z==0x69 && "hipFFT_Type enum value mismatch !(HIP update?)");
   assert(HIPFFT_FORWARD==-1 && "hipFFT direction enum value mismatch (HIP update?)");
@@ -98,14 +98,15 @@ void gpu_fft_plan_many_cpp(int *fft_plan_id, int *rank, int **n, int **inembed,
 
 /*=========================================================================*/
 /* NAME
- *  gpu_fft_stream_synchronize
+ *  gpu_fft_stream_synchronize_cpp
  *
  * FUNCTION
  *  Wait for any FFT operations still running on stream
  */
 /*=========================================================================*/
 
-extern "C" void gpu_fft_stream_synchronize_cpp(int *fft_plan_id)
+extern "C"
+void gpu_fft_stream_synchronize_cpp(int *fft_plan_id)
 {
   HIP_API_CHECK( hipStreamSynchronize(stream_compute[*fft_plan_id]) );
 }
@@ -113,7 +114,7 @@ extern "C" void gpu_fft_stream_synchronize_cpp(int *fft_plan_id)
 
 /*=========================================================================*/
 // NAME
-//  gpu_fft_plan_destroy
+//  gpu_fft_plan_destroy_cpp
 //
 // FUNCTION
 //  Destroy FFT plan
@@ -129,10 +130,10 @@ void gpu_fft_plan_destroy_cpp(int *fft_plan_id){
 
 /*=========================================================================*/
 /* NAME
- *  gpu_fft_exec_z2z
+ *  gpu_fft_exec_z2z_cpp
  *
  * FUNCTION
- *  Run a Fast Fourrier Transform on double-complex input and output
+ *  Run a Fast Fourier Transform on double-complex input and output
  *
  * INPUTS
  *   idata       Pointer to the complex input data (in GPU memory) to transform
@@ -154,10 +155,10 @@ void gpu_fft_exec_z2z_cpp(int *fft_plan_id, void **idata, void **odata, int *dir
 
 /*=========================================================================*/
 /* NAME
- *  gpu_fft_exec_c2c
+ *  gpu_fft_exec_c2c_cpp
  *
  * FUNCTION
- *  Run a Fast Fourrier Transform on float complex input and output
+ *  Run a Fast Fourier Transform on float complex input and output
  *
  * INPUTS
  *   idata       Pointer to the complex input data (in GPU memory) to transform

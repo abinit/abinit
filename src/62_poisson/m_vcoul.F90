@@ -159,7 +159,7 @@ end type vcoul_t
 !!
 !! FUNCTION
 !! Mimicking the BerkeleyGW technique
-!! A Monte-Carlo sampling of each miniBZ surrounding each (q+G) point
+!! A Monte-Carlo sampling of each miniBZ surrounding each (q+G) point.
 !! However:
 !!    - extended to multiple shifts
 !!    - with an adaptative number of MonteCarlo sampling points
@@ -299,9 +299,6 @@ end subroutine gw_icutcoul_to_mode
 !!  qlwl(3,nqlwl)= The nqlwl "small" q-points
 !!  comm=MPI communicator.
 !!
-!! OUTPUT
-!!  vcp=Datatype gathering information on the Coulomb interaction.
-!!
 !! SOURCE
 
 subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo, vc_ecut, ng, nqlwl, qlwl, comm)
@@ -332,6 +329,7 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  real(dp),contiguous, pointer :: qibz(:,:), qbz(:,:)
 ! *************************************************************************
 
+ !call wrtout(std_out, "in vcoul_init")
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  units = [std_out, ab_out]
 
@@ -570,6 +568,7 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  ABI_FREE(vcoul_lwl)
 
  call vcp%print(units)
+ !call wrtout(std_out, " exiting vcoul_init")
 
 end subroutine vcoul_init
 !!***

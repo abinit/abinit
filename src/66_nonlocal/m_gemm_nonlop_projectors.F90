@@ -39,6 +39,7 @@ module m_gemm_nonlop_projectors
  use m_xomp
  use m_xmpi
  use m_fstrings,    only : itoa, ftoa, sjoin
+ use m_gputk
  use m_abi_linalg
 
  use defs_abitypes, only : MPI_type
@@ -53,9 +54,7 @@ module m_gemm_nonlop_projectors
  use m_alloc_hamilt_gpu, only : gemm_nonlop_gpu_data
 #endif
 
-#ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc, c_ptr
-#endif
 
  implicit none
 
