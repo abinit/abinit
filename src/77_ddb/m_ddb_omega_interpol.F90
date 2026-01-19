@@ -98,8 +98,8 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: alpha_unit,alpha_hc_unit,diel_unit,fs2rs,i,iblok,idir1,idir2,ifound
- integer :: ii,imode,index,ipert1,ipert2,iw,j,jblok,jw,kblok,lblok
+ integer :: alpha_unit,alpha_hc_unit,diel_unit,fs2rs,i,iblok,idir1,idir2,idir3,ifound
+ integer :: ii,iishift,imode,index,ipert1,ipert2,ipert3,iw,j,jblok,jw,kblok,lblok
  integer :: mmag_unit,mmom_unit,mmspec_unit,nblok,ndim 
  integer :: nmat,nmdir,nwcalc,optgb,phon_unit,prtopt
  integer :: locmagsus_unit,zeff_unit,zeffspec_unit,zfield_unit
@@ -257,6 +257,11 @@ contains
    & ' found in the DDB file. This is necessary if omegaflag=1 ',ch10
      ABI_ERROR(msg)
    end if
+
+   !Index shift for Berry curvatures
+   ipert3= natom + 9
+   idir3= 1
+   iishift= 3*(mpert*(3*(mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
  end if
 
 !For nwcalc-1 Taylor-expansion interpolation precalculate the coefficients
@@ -318,8 +323,8 @@ contains
    if (omegaflag==1) then
      do ii=1,ddb%msize
        if (all(ddb%flg(ii,:)==1)) then
-         int_fsddb(1,ii,1)= w0hessian(1,ii) + omega(iw)*w0berry(1,ii) - eta*w0berry(2,ii)
-         int_fsddb(2,ii,1)= w0hessian(2,ii) + omega(iw)*w0berry(2,ii) + eta*w0berry(1,ii)
+         int_fsddb(1,ii,1)= w0hessian(1,ii) + omega(iw)*w0berry(1,ii+iishift) - eta*w0berry(2,ii+iishift)
+         int_fsddb(2,ii,1)= w0hessian(2,ii) + omega(iw)*w0berry(2,ii+iishift) + eta*w0berry(1,ii+iishift)
        end if
      end do
 
