@@ -1174,7 +1174,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! Apply Rayleigh Ritz on slice (refinement)
     ! prtvol = 15015015 to print condition number of overlap matrix
     call xg_RayleighRitz_cprj(xg_nonlop,slice%X,slice%cprjX,slice%AX,eigenvalues_slice,&
-        slice%blockdim_cprj,ierr,15015015,tim_slice_rr,ABI_GPU_DISABLED,solve_ax_bx=.true.)
+        ierr,0,tim_slice_rr,ABI_GPU_DISABLED,solve_ax_bx=.true.)
     
     if ( ierr /= 0 ) then
         ABI_BUG("RayleighRitz did not work")
@@ -1182,7 +1182,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     ! restart!
 !    call xg_RayleighRitz_cprj(xg_nonlop,slice%X,slice%cprjX,slice%AX,eigenvalues_slice,&
-!        slice%blockdim_cprj,ierr,15015015,tim_slice_rr,ABI_GPU_DISABLED,solve_ax_bx=.true.)
+!        ierr,0,tim_slice_rr,ABI_GPU_DISABLED,solve_ax_bx=.true.)
 
 !    if ( ierr /= 0 ) then
 !        ABI_BUG("RayleighRitz did not work")
@@ -1467,7 +1467,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  ! restart!
 ! call xg_RayleighRitz_cprj(xg_nonlop,slice%AllX,slice%AllcprjX,slice%AllAX%self,eigen,&
-!     slice%all_blockdim_cprj,ierr,15015015,tim_slice_rr,ABI_GPU_DISABLED,solve_ax_bx=.true.)
+!     ierr,0,tim_slice_rr,ABI_GPU_DISABLED,solve_ax_bx=.true.)
 
 ! if ( ierr /= 0 ) then
 !     ABI_BUG("RayleighRitz did not work")
@@ -1571,7 +1571,7 @@ subroutine slice_orthoXwrtBlocks(slice,X0,cprjX0,var,cprjvar,islice,cprj_work)
 
     ! Add the nonlocal part if paw
     if (slice%xg_nonlop%paw) then
-      call xg_nonlop_getXSX(slice%xg_nonlop,cprjX0,cprjvar,cprj_work,buffer%self,slice%blockdim_cprj)
+      call xg_nonlop_getSX(slice%xg_nonlop,cprjX0,cprjvar,cprj_work,buffer%self)
     end if
 
     ! sum all process contribution
