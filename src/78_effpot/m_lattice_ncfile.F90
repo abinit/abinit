@@ -5,10 +5,8 @@
 !! FUNCTION
 !! This module contains the subroutines for output netcdf file
 !!
-!!
 !! Datatypes:
 !! lattice_ncfile_t: store data to calculate lattice_ncfile
-!!
 !!
 !! COPYRIGHT
 !! Copyright (C) 2001-2025 ABINIT group (hexu)
@@ -26,7 +24,6 @@
 
 #include "abi_common.h"
 
-#define HAVE_NETCDF 1
 
 module m_lattice_ncfile
 
@@ -39,9 +36,8 @@ module m_lattice_ncfile
   use m_lattice_harmonic_potential , only: lattice_harmonic_potential_t
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
-#if defined HAVE_NETCDF
   use netcdf
-#endif
+
   implicit none
 
   private
@@ -81,7 +77,6 @@ contains
     self%itime=0
     self%write_traj=write_traj
     self%filename=trim(filename)
-#if defined HAVE_NETCDF
     write(std_out,*) "Write iteration in lattice history file "//trim(self%filename)//"."
     !  Create netCDF file
     ncerr = nf90_create(path=trim(filename), cmode=NF90_CLOBBER, ncid=self%ncid)
@@ -89,19 +84,16 @@ contains
     self%isopen=.True.
     ncerr =nf90_enddef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when ending def mode in lattice netcdf history file")
-#endif
   end subroutine initialize
 
   subroutine finalize(self)
     class(lattice_ncfile_t), intent(inout) :: self
-#if defined HAVE_NETCDF
     integer :: ncerr
     if (self%isopen) then
        write(std_out, *) "Closing lattice history file "//trim(self%filename)//"."
        ncerr=nf90_close(self%ncid)
        NCF_CHECK_MSG(ncerr, "close netcdf lattice history file"//trim(self%filename)//".")
     end if
-#endif
 
   end subroutine finalize
 
@@ -109,7 +101,7 @@ contains
     class(lattice_ncfile_t), intent(inout) :: self
     type(mbsupercell_t), intent(in) :: supercell
     integer :: ncerr
-#if defined HAVE_NETCDF
+
     ncerr = nf90_redef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when starting defining trajectory variables in lattice history file.")
     ! define dimensions
@@ -126,7 +118,7 @@ contains
          &         self%ilatt_prim_id, NF90_INT, "ilatt_prim", &
          & "index of lattice in primitive cell", "dimensionless")
 
-    
+
     call ab_define_var(self%ncid, [self%three,self%three], &
          &         self%ref_cell_id, NF90_DOUBLE, "ref_cell", &
          & "REFerence CELL", "bohr")
@@ -172,8 +164,6 @@ contains
           &      start=[1,1], count=[3,3])
      NCF_CHECK_MSG(ncerr, "Error when writting ref_cell in lattice history file.")
 
-#endif
-
   end subroutine write_cell
 
   subroutine def_lattice_var(self)
@@ -181,7 +171,6 @@ contains
     !type(lattice_hist_t),intent(in) :: hist
     integer :: ncerr
 
-#if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when starting defining trajectory variables in lattice history file.")
     ! define dimensions
@@ -216,8 +205,6 @@ contains
 
     ncerr=nf90_enddef(self%ncid)
     NCF_CHECK_MSG(ncerr, "Error when finishing defining variables in lattice history file.")
-#endif
-
 
   end subroutine def_lattice_var
 
@@ -232,7 +219,6 @@ contains
     self%itime=self%itime+1
     itime = self%itime
 
-#if defined HAVE_NETCDF
     !if(self%write_traj ==1) then
     ncerr=nf90_put_var(self%ncid, self%xcart_id, xcart, &
             &      start=[1,1, itime], count=[3,natom, 1])
@@ -254,8 +240,6 @@ contains
     ncerr=nf90_put_var(self%ncid, self%itime_id, [self%itime], &
          &      start=[itime], count=[1])
     NCF_CHECK_MSG(ncerr, "Error when writting itime in lattice history file.")
-
-#endif
 
   end subroutine write_one_step
 

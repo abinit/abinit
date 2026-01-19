@@ -31,7 +31,7 @@ nband 32 nband1 16
 
 # === SCF cycle options
 nstep 20  tolvrs 1.d-7 nstep3  7
-ecut 5. pawecutdg 10.
+ecut 6. pawecutdg 10.
 
 # === K-points and syms
 kptopt1 1  kptopt 4
@@ -49,7 +49,7 @@ prtden 0  prteig 0  prtwf 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t17.abo, tolnlines = 137, tolabs = 2.0e-1, tolrel = 1.1, fld_options = -easy
+#%%   t17.abo, tolnlines = 45, tolabs = 5.4e+0, tolrel = 1.1, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

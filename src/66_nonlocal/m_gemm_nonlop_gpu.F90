@@ -15,7 +15,6 @@
 !!
 !! SOURCE
 
-
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -30,6 +29,7 @@ module m_gemm_nonlop_gpu
  use m_xmpi
  use m_fstrings,    only : itoa, ftoa, sjoin
 
+ use m_gputk
  use m_abi_linalg  ! copy_on_gpu, copy_from_gpu, alloc_on_gpu, dealloc_on_gpu, gpu_memset, gpu_allocated
  use defs_abitypes, only : MPI_type
  use m_opernlc_ylm_allwf, only : opernlc_ylm_allwf
@@ -46,9 +46,7 @@ module m_gemm_nonlop_gpu
  use m_manage_kokkos, only : opernlc_ylm_allwf_kokkos
 #endif
 
-#ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_ptr, c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
-#endif
 
  implicit none
 
@@ -130,13 +128,8 @@ module m_gemm_nonlop_gpu
 !! INPUTS
 !! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
-!! PARENTS
-!!      m_nonlop
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,dgemm,opernlc_ylm,xmpi_sum
-!!
 !! SOURCE
+
  subroutine gemm_nonlop_gpu(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
 &                 enl,ffnlin,ffnlout,indlmn,istwf_k,&
 &                 lambda,lmnmax,matblk,&

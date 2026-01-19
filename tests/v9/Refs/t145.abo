@@ -1,5 +1,5 @@
 
-.Version 10.3.6.3 of ABINIT, released Feb 2025.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  3 Apr 2025.
-- ( at 16h53 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h18 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/TestBot_MPI1/v9_t145/t145.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v9_t145/t145.abi
 - output file    -> t145.abo
 - root for input  files -> t145i
 - root for output files -> t145o
@@ -49,6 +49,7 @@ _ WF disk file :      0.021 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =         158
       nfft =        4096          nkpt =          16
+- my_mband =           4
 ================================================================================
 P This job should need less than                       2.295 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -66,6 +67,7 @@ _ WF disk file :      0.156 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =         158
       nfft =        4096          nkpt =          16
+- my_mband =           4
 ================================================================================
 P This job should need less than                       2.295 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -83,6 +85,7 @@ _ WF disk file :      0.156 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          16
 -   mkqmem =          16        mk1mem =          16           mpw =         158
       nfft =        4096          nkpt =          16
+- my_mband =           4
 ================================================================================
 P This job should need less than                       2.548 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -339,7 +342,7 @@ P          mk1mem5         16
                          0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
                          0.06250    0.06250    0.06250    0.06250
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4036425458E+00  1.4036425458E+00  1.4036425458E+00
+                       1.4036425510E+00  1.4036425510E+00  1.4036425510E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6525000000E+00  2.6525000000E+00  2.6525000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -387,8 +390,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.11870
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/Pspdir/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/Pspdir/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -400,8 +403,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/Pspdir/As.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/mroyo_nonlinearxccc/tests/Pspdir/As.fhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/As.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/As.fhi
 - As, fhi98PP : H, LDA CA PerdewWang, l=2 local
 - 33.00000   5.00000    170607                znucl, zion, pspdat
     6    7    2    2       531   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -487,7 +490,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.40364254578497     1.40364254578497     1.40364254578497
+    2      1.40364255096796     1.40364255096796     1.40364255096796
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -499,7 +502,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.610000000000 10.610000000000 10.610000000000 bohr
-              =  5.614570183140  5.614570183140  5.614570183140 angstroms
+              =  5.614570203872  5.614570203872  5.614570203872 angstroms
  prteigrs : about to open file t145o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.05320   Average Vxc (hartree)=  -0.32102
  Eigenvalues (hartree) for nkpt=   2  k points:
@@ -519,7 +522,7 @@ psp_core            :  8.72499977335082E-01
 local_psp           : -2.26936734802062E+00
 non_local_psp       : -2.12656363676506E-02
 total_energy        : -8.49861996995251E+00
-total_energy_eV     : -2.31259210282639E+02
+total_energy_eV     : -2.31259230560185E+02
 band_energy         : -8.20277780883411E-01
 ...
 
@@ -530,9 +533,9 @@ band_energy         : -8.20277780883411E-01
   sigma(3 3)=  1.44057831E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -4.2383E+00 GPa]
-- sigma(1 1)=  4.23832701E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  4.23832701E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  4.23832701E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  4.23832772E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  4.23832772E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  4.23832772E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -624,7 +627,7 @@ tolerances: {tolwfr: 1.00E-04, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.00324125E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1003241245E+02 Ha. Also 2DEtotal=   -0.272995826256E+03 eV
+ 2DEtotal=   -0.1003241245E+02 Ha. Also 2DEtotal=   -0.272995850193E+03 eV
     (  non-var. 2DEtotal :   -1.0028890956E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -676,7 +679,7 @@ tolerances: {tolwfr: 1.00E-04, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.00324125E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1003241245E+02 Ha. Also 2DEtotal=   -0.272995826253E+03 eV
+ 2DEtotal=   -0.1003241245E+02 Ha. Also 2DEtotal=   -0.272995850190E+03 eV
     (  non-var. 2DEtotal :   -1.0028890956E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -728,7 +731,7 @@ tolerances: {tolwfr: 1.00E-04, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.00324125E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1003241245E+02 Ha. Also 2DEtotal=   -0.272995826250E+03 eV
+ 2DEtotal=   -0.1003241245E+02 Ha. Also 2DEtotal=   -0.272995850187E+03 eV
     (  non-var. 2DEtotal :   -1.0028890956E+01 Ha)
 ================================================================================
 
@@ -1279,7 +1282,7 @@ tolerances: {tolvrs: 1.00E-03, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.5295824985E+01 Ha. Also 2DEtotal=    0.144106726519E+03 eV
+ 2DEtotal=    0.5295824985E+01 Ha. Also 2DEtotal=    0.144106739154E+03 eV
     (2DErelax=   -2.0174792949E+01 Ha. 2DEnonrelax=    2.5470617934E+01 Ha)
     (  non-var. 2DEtotal :    5.2955057657E+00 Ha)
 
@@ -1335,7 +1338,7 @@ tolerances: {tolvrs: 1.00E-03, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.5285106965E+01 Ha. Also 2DEtotal=    0.143815074353E+03 eV
+ 2DEtotal=    0.5285106965E+01 Ha. Also 2DEtotal=    0.143815086963E+03 eV
     (2DErelax=   -9.0464728198E+01 Ha. 2DEnonrelax=    9.5749835162E+01 Ha)
     (  non-var. 2DEtotal :    5.2841074162E+00 Ha)
 
@@ -1387,7 +1390,7 @@ tolerances: {tolvrs: 1.00E-03, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -3.56387068E+02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.3563870676E+03 Ha. Also 2DEtotal=   -0.969778529923E+04 eV
+ 2DEtotal=   -0.3563870676E+03 Ha. Also 2DEtotal=   -0.969778614956E+04 eV
     (  non-var. 2DEtotal :   -3.5638767180E+02 Ha)
 
 --------------------------------------------------------------------------------
@@ -1437,7 +1440,7 @@ tolerances: {tolvrs: 1.00E-03, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -3.56387068E+02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.3563870676E+03 Ha. Also 2DEtotal=   -0.969778529930E+04 eV
+ 2DEtotal=   -0.3563870676E+03 Ha. Also 2DEtotal=   -0.969778614963E+04 eV
     (  non-var. 2DEtotal :   -3.5638767179E+02 Ha)
 ================================================================================
 
@@ -1692,37 +1695,37 @@ tolerances: {tolvrs: 1.00E-03, }
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -1.403639E-08 -1.397106E-08 -1.377331E-08  1.612540E-03  1.612540E-03
+  -1.403635E-08 -1.397106E-08 -1.377336E-08  1.612540E-03  1.612540E-03
    1.612540E-03
  Phonon frequencies in cm-1    :
-- -3.080632E-03 -3.066293E-03 -3.022891E-03  3.539116E+02  3.539116E+02
+- -3.080623E-03 -3.066294E-03 -3.022902E-03  3.539116E+02  3.539116E+02
 -  3.539116E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -1.403635E-08 -1.397101E-08 -1.247080E-08  1.612540E-03  1.612540E-03
+  -1.403638E-08 -1.397105E-08 -1.247084E-08  1.612540E-03  1.612540E-03
    1.770357E-03
  Phonon frequencies in cm-1    :
-- -3.080622E-03 -3.066283E-03 -2.737025E-03  3.539116E+02  3.539116E+02
+- -3.080629E-03 -3.066291E-03 -2.737032E-03  3.539116E+02  3.539116E+02
 -  3.885486E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  1.00000  0.00000
  Phonon energies in Hartree :
-  -1.403635E-08 -1.377333E-08 -1.268889E-08  1.612540E-03  1.612540E-03
+  -1.403635E-08 -1.377330E-08 -1.268884E-08  1.612540E-03  1.612540E-03
    1.770357E-03
  Phonon frequencies in cm-1    :
-- -3.080622E-03 -3.022896E-03 -2.784890E-03  3.539116E+02  3.539116E+02
+- -3.080623E-03 -3.022890E-03 -2.784878E-03  3.539116E+02  3.539116E+02
 -  3.885486E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
-  -1.397104E-08 -1.377333E-08 -1.276071E-08  1.612540E-03  1.612540E-03
+  -1.397107E-08 -1.377331E-08 -1.276068E-08  1.612540E-03  1.612540E-03
    1.770357E-03
  Phonon frequencies in cm-1    :
-- -3.066288E-03 -3.022896E-03 -2.800652E-03  3.539116E+02  3.539116E+02
+- -3.066295E-03 -3.022893E-03 -2.800646E-03  3.539116E+02  3.539116E+02
 -  3.885486E+02
 
 ================================================================================
@@ -2236,7 +2239,7 @@ P          mk1mem5         16
                          0.06250    0.06250    0.06250    0.06250    0.06250    0.06250
                          0.06250    0.06250    0.06250    0.06250
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4036425458E+00  1.4036425458E+00  1.4036425458E+00
+                       1.4036425510E+00  1.4036425510E+00  1.4036425510E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6525000000E+00  2.6525000000E+00  2.6525000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00

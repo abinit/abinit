@@ -27,7 +27,7 @@ module m_dtset
  use m_errors
  use m_xmpi
 
- use m_fstrings,      only : inupper
+ use m_fstrings,      only : inupper, sjoin, itoa, ftoa
  use m_numeric_tools, only : arth
  use m_matrix,        only : mati3inv
  use m_symtk,         only : littlegroup_q, symatm
@@ -67,7 +67,7 @@ module m_dtset
 !! creation/destruction/copy routines, declared in another part of ABINIT,
 !! that might need to take into account your modification.
 !!
-!! Variables should be declared on separated lines in order to reduce the occurence of git conflicts.
+!! Variables should be declared on separated lines in order to reduce the occurrence of git conflicts.
 !! The name of the variable can exceed 16 characters
 !!
 !! Since all these input variables are described in the abinit_help.html and
@@ -121,6 +121,7 @@ type, public :: dataset_type
  integer :: cineb_start
  integer :: cprj_in_memory
  integer :: cprj_update_lvl
+ integer :: cwfs_wouth = 0
 
 !D
  integer :: delayperm
@@ -135,46 +136,49 @@ type, public :: dataset_type
  integer :: dmft_iter
  integer :: dmft_kspectralfunc
  integer :: dmft_magnfield
- real(dp) :: dmft_magnfield_b
  integer :: dmft_nlambda
  integer :: dmft_nwli
  integer :: dmft_nwlo
  integer :: dmft_occnd_imag
- integer :: dmft_optim
  integer :: dmft_prt_maxent
  integer :: dmft_prtself
  integer :: dmft_prtwan
- integer :: dmft_rslf
  integer :: dmft_read_occnd
+ integer :: dmft_rslf
  integer :: dmft_solv
  integer :: dmft_t2g
+ integer :: dmft_triqs_basis
  integer :: dmft_triqs_compute_integral
  integer :: dmft_triqs_det_init_size
  integer :: dmft_triqs_det_n_operations_before_check
  integer :: dmft_triqs_entropy
  integer :: dmft_triqs_gaussorder
- integer :: dmft_triqs_leg_measure
- integer :: dmft_triqs_loc_n_min
+ integer :: dmft_triqs_length_cycle
  integer :: dmft_triqs_loc_n_max
+ integer :: dmft_triqs_loc_n_min
  integer :: dmft_triqs_measure_density_matrix
+ integer :: dmft_triqs_measure_g_l
  integer :: dmft_triqs_move_double
  integer :: dmft_triqs_move_shift
- integer :: dmft_triqs_nleg
+ integer :: dmft_triqs_n_cycles
+ integer :: dmft_triqs_n_iw
+ integer :: dmft_triqs_n_l
+ integer :: dmft_triqs_n_tau
+ integer :: dmft_triqs_n_warmup_cycles_init
+ integer :: dmft_triqs_n_warmup_cycles_restart
  integer :: dmft_triqs_nsubdivisions
  integer :: dmft_triqs_off_diag
+ integer :: dmft_triqs_prt_entropy
+ integer :: dmft_triqs_random_seed_a
+ integer :: dmft_triqs_random_seed_b
  integer :: dmft_triqs_read_ctqmcdata
- integer :: dmft_triqs_seed_a
- integer :: dmft_triqs_seed_b
- integer :: dmft_triqs_therm_restart
  integer :: dmft_triqs_time_invariance
  integer :: dmft_triqs_use_norm_as_weight
- integer :: dmft_use_all_bands
- integer :: dmft_use_full_chipsi
  integer :: dmft_wanorthnorm
  integer :: dmft_x2my2d
  integer :: dmft_yukawa_param
- integer :: dmftbandi
  integer :: dmftbandf
+ integer :: dmftbandi
  integer :: dmftcheck
  integer :: dmftctqmc_basis
  integer :: dmftctqmc_check
@@ -222,6 +226,8 @@ type, public :: dataset_type
  integer :: extfpmd_nbcut = 25
  integer :: extfpmd_nbdbuf = 0
  integer :: extfpmd_nband = 0
+ integer :: extfpmd_pawsph = 0
+ integer :: extfpmd_prterr = 0
  integer :: extrapwf
  integer :: expert_user
 !F
@@ -278,12 +284,13 @@ type, public :: dataset_type
  integer :: gpu_option
  integer :: gpu_thread_limit
 
- integer :: gstore_cplex = 2
  integer :: gstore_with_vk = 1
+ integer :: gstore_use_lgk = 0
+ integer :: gstore_use_lgq = 0
  character(len=abi_slen) :: gstore_kzone = "ibz"
  character(len=abi_slen) :: gstore_qzone = "bz"
  character(len=abi_slen) :: gstore_kfilter = "none"
- character(len=abi_slen) :: gstore_gmode = "phonon"
+ character(len=abi_slen) :: gstore_gname = "gvals"
  integer :: gstore_brange(2, 2) = 0
  real(dp) :: gstore_erange(2, 2) = zero
 
@@ -324,7 +331,7 @@ type, public :: dataset_type
  integer :: gw_icutcoul
  integer :: gw_invalid_freq
  integer :: gw_nqlwl
- integer :: gw_qprange
+ integer :: gw_qprange = 0
  integer :: gw_sigxcore = 0
 
  integer :: gwr_nstep = 50
@@ -362,6 +369,9 @@ type, public :: dataset_type
  integer :: irandom
  integer :: irdchkprdm = 0
  integer :: irdddb = 0
+ integer :: irddkdk = 0
+ integer :: irddkde = 0
+ integer :: irddelfd = 0
  integer :: irddvdb = 0
  integer :: irddrhodb = 0
  integer :: irdddk = 0
@@ -523,6 +533,7 @@ type, public :: dataset_type
  integer :: paral_kgb
  integer :: paral_rf
  integer :: paral_slice
+ integer :: paw_add_Core
  integer :: pawcpxocc
  integer :: pawcross
  integer :: pawfatbnd
@@ -643,14 +654,15 @@ type, public :: dataset_type
  integer :: rfphon
  integer :: rfstrs
  integer :: rfstrs_ref
- integer :: rfuser
  integer :: rf2_dkdk
  integer :: rf2_dkde
  integer :: rmm_diis = 0
  integer :: rmm_diis_savemem = 0
  integer :: rcpaw_frocc = 0
- integer :: rcpaw_nfrpaw = 2
- integer :: rcpaw_nfrtnc = 2
+ integer :: rcpaw_updatetnc
+ integer :: rcpaw_elin = 1
+ integer :: rcpaw_tpaw = 1
+ integer :: rcpaw_vhtnzc = 1
 !S
  integer :: sigma_nshiftk = 1      ! Number of shifts in k-mesh for Sigma_{nk}.
  integer :: signperm
@@ -704,6 +716,7 @@ type, public :: dataset_type
  integer :: usexcnhat_orig
  integer :: useylm
  integer :: useextfpmd = 0
+ integer :: use_gbt = 0
  integer :: use_yaml = 0
  integer :: use_slk
  integer :: use_oldchi = 1
@@ -780,6 +793,7 @@ type, public :: dataset_type
  integer :: ngkpt(3)   ! Number of division for MP sampling.
  integer :: ph_ngqpt(3) = 20
  integer :: qprtrb(3)
+ integer :: rcpaw_updatepaw(2)= 0
  integer :: rfatpol(2)
  integer :: rfdir(3)
  integer :: rf2_pert1_dir(3)
@@ -817,7 +831,7 @@ type, public :: dataset_type
  integer, allocatable ::  plowan_nbl(:)      ! plowan_nbl(plowan_natom)
  integer, allocatable ::  plowan_projcalc(:) ! plowan_projcalc(\sum_iatom plowan_nbl)
  integer, allocatable ::  prtatlist(:)       ! prtatlist(natom)
- integer, allocatable ::  rcpaw_frtypat(:)   ! rcpaw_frtypat(ntypat)
+ integer, allocatable ::  rcpaw_rctypat(:)   ! rcpaw_rctypat(ntypat)
  integer, allocatable ::  so_psp(:)          ! so_psp(npsp)
  integer, allocatable ::  symafm(:)          ! symafm(nsym)
  integer, allocatable ::  symrel(:,:,:)      ! symrel(3,3,nsym)
@@ -844,22 +858,25 @@ type, public :: dataset_type
  real(dp) :: diemixmag
  real(dp) :: dilatmx
  real(dp) :: dmft_charge_prec
- real(dp) :: dmft_epsilon_yukawa
  real(dp) :: dmft_fermi_step
- real(dp) :: dmft_lambda_yukawa
+ real(dp) :: dmft_magnfield_b
  real(dp) :: dmft_mxsf
  real(dp) :: dmft_tolfreq
  real(dp) :: dmft_tollc
  real(dp) :: dmft_triqs_det_precision_error
  real(dp) :: dmft_triqs_det_precision_warning
  real(dp) :: dmft_triqs_det_singular_threshold
- real(dp) :: dmft_triqs_epsilon
+ real(dp) :: dmft_triqs_dlr_epsilon
+ real(dp) :: dmft_triqs_dlr_wmax
  real(dp) :: dmft_triqs_imag_threshold
  real(dp) :: dmft_triqs_pauli_prob
+ real(dp) :: dmft_triqs_shift_mu
  real(dp) :: dmft_triqs_tol_block
- real(dp) :: dmft_triqs_wmax
  real(dp) :: dmft_wanrad
+ real(dp) :: dmft_yukawa_epsilon
+ real(dp) :: dmft_yukawa_lambda
  real(dp) :: dmftqmc_n
+ real(dp) :: dmftctqmc_chains
  real(dp) :: dosdeltae
  real(dp) :: dtion
  real(dp) :: dtele
@@ -871,7 +888,7 @@ type, public :: dataset_type
  real(dp) :: ecutwfn
  real(dp) :: effmass_free
  real(dp) :: efmas_deg_tol
- real(dp) :: elph2_imagden
+ real(dp) :: elph2_imagden = 0.1_dp * eV_Ha
  real(dp) :: eph_ecutosc = zero
  real(dp) :: eph_extrael = zero
  real(dp) :: eph_fermie = zero
@@ -885,6 +902,7 @@ type, public :: dataset_type
  real(dp) :: exchmix
  real(dp) :: fband
  real(dp) :: fermie_nest = zero
+ real(dp) :: fock_rcut
  real(dp) :: focktoldfe
  real(dp) :: freqim_alpha
  real(dp) :: freqremin = zero
@@ -895,6 +913,7 @@ type, public :: dataset_type
  real(dp) :: frictionbar
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
+ real(dp) :: gw_rcut
  real(dp) :: gwencomp = 2.0_dp
  real(dp) :: gwls_model_parameter         ! Parameter used in dielectric function model
  real(dp) :: gwr_tolqpe = 0.01 * eV_Ha
@@ -932,7 +951,7 @@ type, public :: dataset_type
  real(dp) :: pw_unbal_thresh
  real(dp) :: ratsm
  real(dp) :: ratsph_extra
- real(dp) :: rcpaw_tolnc = 0.000001_dp
+ real(dp) :: rcpaw_tolnc = tol5
  real(dp) :: recrcut
  real(dp) :: recefermi
  real(dp) :: rectolden
@@ -961,6 +980,7 @@ type, public :: dataset_type
  real(dp) :: tolfilter = 1.1_dp
  real(dp) :: tolmxde
  real(dp) :: toldff
+ real(dp) :: toldmag
  real(dp) :: tolimg
  real(dp) :: tolmxf
  real(dp) :: tolrde
@@ -1010,7 +1030,7 @@ type, public :: dataset_type
 !Real arrays
  real(dp) :: boxcenter(3)
  real(dp) :: bfield(3)
-!  Take big absolute value numbers, but not the biggest ones, otherwise overflow can happen
+! Take big absolute value numbers, but not the biggest ones, otherwise overflow can happen.
  real(dp) :: bs_eh_cutoff(2) = [smallest_real*tol6, greatest_real*tol6]
  real(dp) :: bs_freq_mesh(3) = [zero,zero, 0.01_dp/Ha_eV]
  real(dp) :: bs_haydock_tol(2) = [0.02_dp, zero]
@@ -1029,6 +1049,8 @@ type, public :: dataset_type
  real(dp) :: pol(3)
  real(dp) :: polcen(3)
  real(dp) :: pvelmax(3)
+ real(dp) :: qgbt(3)=zero
+ real(dp) :: qgbt_cart(3)=zero
  real(dp) :: qptn(3)
  real(dp) :: red_efield(3)
  real(dp) :: red_dfield(3)
@@ -1083,7 +1105,7 @@ type, public :: dataset_type
  real(dp), allocatable :: qptdm(:,:)          ! qptdm(3,nqptdm)
  real(dp), allocatable :: quadmom(:)          ! quadmom(ntypat)
  real(dp), allocatable :: ratsph(:)           ! ratsph(ntypat)
- real(dp), allocatable :: rcpaw_scenergy(:)   ! rcpaw_scenergy(ntypat)
+ real(dp), allocatable :: rcpaw_sc(:)         ! rcpaw_sc(ntypat)
  real(dp), allocatable :: rprim_orig(:,:,:)   ! rprim_orig(3,3,nimage)
  real(dp), allocatable :: rprimd_orig(:,:,:)  ! rprimd_orig(3,3,nimage)
  real(dp), allocatable :: sigma_shiftk(:,:)   ! sigma_shiftk(3, sigma_nshiftk)    ! shifts in k-mesh for Sigma_{nk}.
@@ -1140,16 +1162,22 @@ type, public :: dataset_type
    ! Free arrays that depend on input nkpt (used in EPH code)
 
  procedure :: get_npert_rbz => dtset_get_npert_rbz
-   ! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
+   ! Get the number of effective perturbation done in looper3, nkpt_rbz, nband_rbz
 
  procedure :: testsusmat => dtset_testsusmat
-   ! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
+   ! Test whether a new susceptibility matrix and/or a new dielectric matrix must be computed
 
  procedure :: get_crystal => dtset_get_crystal
    ! Build crystal_t object from dtset and image index.
 
  procedure :: get_ktmesh => dtset_get_ktmesh
    ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
+
+ procedure :: get_wrmesh_for_sigeph => dtset_get_wrmesh_for_sigeph
+  ! Frequency mesh for sigma(w) and spectral functions (EPH self-energy)
+
+ procedure :: get_edos_params => dtset_get_edos_params
+  ! Return parameters for the computation of the electronic DOS.
 
  end type dataset_type
 !!***
@@ -1551,27 +1579,25 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%cineb_start        = dtin%cineb_start
  dtout%cprj_in_memory     = dtin%cprj_in_memory
  dtout%cprj_update_lvl    = dtin%cprj_update_lvl
+ dtout%cwfs_wouth         = dtin%cwfs_wouth
  dtout%delayperm          = dtin%delayperm
  dtout%diismemory         = dtin%diismemory
  dtout%dipquad            = dtin%dipquad
  dtout%dmatpuopt          = dtin%dmatpuopt
  dtout%dmatudiag          = dtin%dmatudiag
+ dtout%dmft_charge_prec   = dtin%dmft_charge_prec
  dtout%dmft_dc            = dtin%dmft_dc
  dtout%dmft_entropy       = dtin%dmft_entropy
- dtout%dmft_charge_prec   = dtin%dmft_charge_prec
- dtout%dmft_epsilon_yukawa = dtin%dmft_epsilon_yukawa
  dtout%dmft_fermi_step    = dtin%dmft_fermi_step
  dtout%dmft_iter          = dtin%dmft_iter
  dtout%dmft_kspectralfunc = dtin%dmft_kspectralfunc
- dtout%dmft_lambda_yukawa = dtin%dmft_lambda_yukawa
  dtout%dmft_magnfield     = dtin%dmft_magnfield
  dtout%dmft_magnfield_b   = dtin%dmft_magnfield_b
- dtout%dmft_nlambda       = dtin%dmft_nlambda
  dtout%dmft_mxsf          = dtin%dmft_mxsf
- dtout%dmft_nwlo          = dtin%dmft_nwlo
+ dtout%dmft_nlambda       = dtin%dmft_nlambda
  dtout%dmft_nwli          = dtin%dmft_nwli
+ dtout%dmft_nwlo          = dtin%dmft_nwlo
  dtout%dmft_occnd_imag    = dtin%dmft_occnd_imag
- dtout%dmft_optim         = dtin%dmft_optim
  dtout%dmft_orbital_filepath = dtin%dmft_orbital_filepath
  dtout%dmft_prt_maxent    = dtin%dmft_prt_maxent
  dtout%dmft_prtself       = dtin%dmft_prtself
@@ -1580,44 +1606,52 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_rslf          = dtin%dmft_rslf
  dtout%dmft_solv          = dtin%dmft_solv
  dtout%dmft_t2g           = dtin%dmft_t2g
- dtout%dmft_use_all_bands = dtin%dmft_use_all_bands
- dtout%dmft_use_full_chipsi = dtin%dmft_use_full_chipsi
- dtout%dmft_wanrad        = dtin%dmft_wanrad
- dtout%dmft_x2my2d        = dtin%dmft_x2my2d
- dtout%dmft_yukawa_param  = dtin%dmft_yukawa_param
  dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
+ dtout%dmft_triqs_basis   = dtin%dmft_triqs_basis
  dtout%dmft_triqs_compute_integral = dtin%dmft_triqs_compute_integral
  dtout%dmft_triqs_det_init_size = dtin%dmft_triqs_det_init_size
  dtout%dmft_triqs_det_n_operations_before_check = dtin%dmft_triqs_det_n_operations_before_check
  dtout%dmft_triqs_det_precision_error = dtin%dmft_triqs_det_precision_error
  dtout%dmft_triqs_det_precision_warning = dtin%dmft_triqs_det_precision_warning
  dtout%dmft_triqs_det_singular_threshold = dtin%dmft_triqs_det_singular_threshold
+ dtout%dmft_triqs_dlr_epsilon = dtin%dmft_triqs_dlr_epsilon
+ dtout%dmft_triqs_dlr_wmax = dtin%dmft_triqs_dlr_wmax
  dtout%dmft_triqs_entropy = dtin%dmft_triqs_entropy
- dtout%dmft_triqs_epsilon = dtin%dmft_triqs_epsilon
  dtout%dmft_triqs_gaussorder = dtin%dmft_triqs_gaussorder
  dtout%dmft_triqs_imag_threshold = dtin%dmft_triqs_imag_threshold
- dtout%dmft_triqs_leg_measure = dtin%dmft_triqs_leg_measure
- dtout%dmft_triqs_loc_n_min = dtin%dmft_triqs_loc_n_min
+ dtout%dmft_triqs_length_cycle = dtin%dmft_triqs_length_cycle
  dtout%dmft_triqs_loc_n_max = dtin%dmft_triqs_loc_n_max
+ dtout%dmft_triqs_loc_n_min = dtin%dmft_triqs_loc_n_min
  dtout%dmft_triqs_measure_density_matrix = dtin%dmft_triqs_measure_density_matrix
+ dtout%dmft_triqs_measure_g_l = dtin%dmft_triqs_measure_g_l
  dtout%dmft_triqs_move_double = dtin%dmft_triqs_move_double
  dtout%dmft_triqs_move_shift = dtin%dmft_triqs_move_shift
- dtout%dmft_triqs_pauli_prob = dtin%dmft_triqs_pauli_prob
- dtout%dmft_triqs_nleg = dtin%dmft_triqs_nleg
+ dtout%dmft_triqs_n_cycles = dtin%dmft_triqs_n_cycles
+ dtout%dmft_triqs_n_iw = dtin%dmft_triqs_n_iw
+ dtout%dmft_triqs_n_l = dtin%dmft_triqs_n_l
+ dtout%dmft_triqs_n_tau = dtin%dmft_triqs_n_tau
+ dtout%dmft_triqs_n_warmup_cycles_init = dtin%dmft_triqs_n_warmup_cycles_init
+ dtout%dmft_triqs_n_warmup_cycles_restart = dtin%dmft_triqs_n_warmup_cycles_restart
  dtout%dmft_triqs_nsubdivisions = dtin%dmft_triqs_nsubdivisions
  dtout%dmft_triqs_off_diag = dtin%dmft_triqs_off_diag
+ dtout%dmft_triqs_pauli_prob = dtin%dmft_triqs_pauli_prob
+ dtout%dmft_triqs_prt_entropy = dtin%dmft_triqs_prt_entropy
+ dtout%dmft_triqs_random_seed_a = dtin%dmft_triqs_random_seed_a
+ dtout%dmft_triqs_random_seed_b = dtin%dmft_triqs_random_seed_b
  dtout%dmft_triqs_read_ctqmcdata = dtin%dmft_triqs_read_ctqmcdata
- dtout%dmft_triqs_seed_a = dtin%dmft_triqs_seed_a
- dtout%dmft_triqs_seed_b = dtin%dmft_triqs_seed_b
- dtout%dmft_triqs_therm_restart = dtin%dmft_triqs_therm_restart
+ dtout%dmft_triqs_shift_mu = dtin%dmft_triqs_shift_mu
  dtout%dmft_triqs_time_invariance = dtin%dmft_triqs_time_invariance
  dtout%dmft_triqs_tol_block = dtin%dmft_triqs_tol_block
  dtout%dmft_triqs_use_norm_as_weight = dtin%dmft_triqs_use_norm_as_weight
- dtout%dmft_triqs_wmax    = dtin%dmft_triqs_wmax
  dtout%dmft_wanorthnorm   = dtin%dmft_wanorthnorm
- dtout%dmftbandi          = dtin%dmftbandi
+ dtout%dmft_wanrad        = dtin%dmft_wanrad
+ dtout%dmft_x2my2d        = dtin%dmft_x2my2d
+ dtout%dmft_yukawa_epsilon = dtin%dmft_yukawa_epsilon
+ dtout%dmft_yukawa_lambda = dtin%dmft_yukawa_lambda
+ dtout%dmft_yukawa_param  = dtin%dmft_yukawa_param
  dtout%dmftbandf          = dtin%dmftbandf
+ dtout%dmftbandi          = dtin%dmftbandi
  dtout%dmftcheck          = dtin%dmftcheck
  dtout%dmftctqmc_basis    = dtin%dmftctqmc_basis
  dtout%dmftctqmc_check    = dtin%dmftctqmc_check
@@ -1626,11 +1660,12 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmftctqmc_grnns    = dtin%dmftctqmc_grnns
  dtout%dmftctqmc_localprop = dtin%dmftctqmc_localprop
  dtout%dmftctqmc_meas     = dtin%dmftctqmc_meas
- dtout%dmftctqmc_mrka     = dtin%dmftctqmc_mrka
  dtout%dmftctqmc_mov      = dtin%dmftctqmc_mov
+ dtout%dmftctqmc_mrka     = dtin%dmftctqmc_mrka
+ dtout%dmftctqmc_chains = dtin%dmftctqmc_chains
  dtout%dmftctqmc_order    = dtin%dmftctqmc_order
- dtout%dmftqmc_n          = dtin%dmftqmc_n
  dtout%dmftqmc_l          = dtin%dmftqmc_l
+ dtout%dmftqmc_n          = dtin%dmftqmc_n
  dtout%dmftqmc_seed       = dtin%dmftqmc_seed
  dtout%dmftqmc_therm      = dtin%dmftqmc_therm
  dtout%d3e_pert1_elfd     = dtin%d3e_pert1_elfd
@@ -1713,6 +1748,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%extfpmd_nbcut      = dtin%extfpmd_nbcut
  dtout%extfpmd_nbdbuf     = dtin%extfpmd_nbdbuf
  dtout%extfpmd_nband      = dtin%extfpmd_nband
+ dtout%extfpmd_pawsph     = dtin%extfpmd_pawsph
+ dtout%extfpmd_prterr     = dtin%extfpmd_prterr
  dtout%extrapwf           = dtin%extrapwf
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
@@ -1724,6 +1761,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwr_ucsc_batch     = dtin%gwr_ucsc_batch
  dtout%fockoptmix         = dtin%fockoptmix
  dtout%fock_icutcoul      = dtin%fock_icutcoul
+ dtout%fock_rcut          = dtin%fock_rcut
  dtout%freqim_alpha       = dtin%freqim_alpha
  dtout%freqremin          = dtin%freqremin
  dtout%freqremax          = dtin%freqremax
@@ -1791,12 +1829,13 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gpu_option         = dtin%gpu_option
  dtout%gpu_thread_limit   = dtin%gpu_thread_limit
 
- dtout%gstore_cplex       = dtin%gstore_cplex
  dtout%gstore_with_vk     = dtin%gstore_with_vk
+ dtout%gstore_use_lgk     = dtin%gstore_use_lgk
+ dtout%gstore_use_lgq     = dtin%gstore_use_lgq
  dtout%gstore_kzone       = dtin%gstore_kzone
  dtout%gstore_qzone       = dtin%gstore_qzone
  dtout%gstore_kfilter     = dtin%gstore_kfilter
- dtout%gstore_gmode       = dtin%gstore_gmode
+ dtout%gstore_gname       = dtin%gstore_gname
  dtout%gstore_brange      = dtin%gstore_brange
  dtout%gstore_erange      = dtin%gstore_erange
 
@@ -1817,6 +1856,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gw_frqre_inzgrid   = dtin%gw_frqre_inzgrid
  dtout%gw_frqre_tangrid   = dtin%gw_frqre_tangrid
  dtout%gw_invalid_freq    = dtin%gw_invalid_freq
+ dtout%gw_rcut            = dtin%gw_rcut
  dtout%gw_qprange         = dtin%gw_qprange
  dtout%gw_sigxcore        = dtin%gw_sigxcore
 
@@ -1881,6 +1921,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%irddrhodb          = dtin%irddrhodb
  dtout%irdddk             = dtin%irdddk
  dtout%irdden             = dtin%irdden
+ dtout%irddkdk            = dtin%irddkdk
+ dtout%irddkde            = dtin%irddkde
+ dtout%irddelfd           = dtin%irddelfd
  dtout%irdefmas           = dtin%irdefmas
  dtout%irdhaydock         = dtin%irdhaydock
  dtout%irdkden            = dtin%irdkden
@@ -2031,6 +2074,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%paral_slice        = dtin%paral_slice
  dtout%prt_lorbmag        = dtin%prt_lorbmag
  dtout%pawcpxocc          = dtin%pawcpxocc
+ dtout%paw_add_core       = dtin%paw_add_core
  dtout%pawcross           = dtin%pawcross
  dtout%pawlcutd           = dtin%pawlcutd
  dtout%pawlmix            = dtin%pawlmix
@@ -2129,9 +2173,11 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%qptopt             = dtin%qptopt
  dtout%quadquad           = dtin%quadquad
  dtout%random_atpos       = dtin%random_atpos
- dtout%rcpaw_frocc       = dtin%rcpaw_frocc
- dtout%rcpaw_nfrpaw       = dtin%rcpaw_nfrpaw
- dtout%rcpaw_nfrtnc       = dtin%rcpaw_nfrtnc
+ dtout%rcpaw_frocc        = dtin%rcpaw_frocc
+ dtout%rcpaw_updatetnc    = dtin%rcpaw_updatetnc
+ dtout%rcpaw_elin         = dtin%rcpaw_elin
+ dtout%rcpaw_tpaw         = dtin%rcpaw_tpaw
+ dtout%rcpaw_vhtnzc       = dtin%rcpaw_vhtnzc
  dtout%recgratio          = dtin%recgratio
  dtout%recnpath           = dtin%recnpath
  dtout%recnrec            = dtin%recnrec
@@ -2146,7 +2192,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rfphon             = dtin%rfphon
  dtout%rfstrs             = dtin%rfstrs
  dtout%rfstrs_ref         = dtin%rfstrs_ref
- dtout%rfuser             = dtin%rfuser
  dtout%rf2_dkdk           = dtin%rf2_dkdk
  dtout%rf2_dkde           = dtin%rf2_dkde
  dtout%rmm_diis           = dtin%rmm_diis
@@ -2187,6 +2232,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%useextfpmd         = dtin%useextfpmd
+ dtout%use_gbt            = dtin%use_gbt
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
                                             ! It will be removed when Yaml output enters production.
  dtout%use_slk            = dtin%use_slk
@@ -2381,6 +2427,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%tolfilter          = dtin%tolfilter
  dtout%tolmxde            = dtin%tolmxde
  dtout%toldff             = dtin%toldff
+ dtout%toldmag            = dtin%toldmag
  dtout%tolimg             = dtin%tolimg
  dtout%tolmxf             = dtin%tolmxf
  dtout%tolrde             = dtin%tolrde
@@ -2425,14 +2472,17 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%mdtemp(:)          = dtin%mdtemp(:)
  dtout%neb_spring(:)      = dtin%neb_spring(:)
  dtout%polcen(:)          = dtin%polcen(:)
- dtout%qptn(:)            = dtin%qptn(:)
  dtout%pvelmax(:)         = dtin%pvelmax(:)
+ dtout%qgbt(:)            = dtin%qgbt(:)
+ dtout%qgbt_cart(:)       = dtin%qgbt_cart(:)
+ dtout%qptn(:)            = dtin%qptn(:)
  dtout%red_efield(:)      = dtin%red_efield(:)
  dtout%red_dfield(:)      = dtin%red_dfield(:)
  dtout%red_efieldbar(:)   = dtin%red_efieldbar(:)
  dtout%shiftk_orig        = dtin%shiftk_orig
  dtout%strtarget(:)       = dtin%strtarget(:)
  dtout%ucrpa_window(:)    = dtin%ucrpa_window(:)
+ dtout%rcpaw_updatepaw(:) = dtin%rcpaw_updatepaw(:)
  dtout%vcutgeo(:)         = dtin%vcutgeo(:)
  dtout%vprtrb(:)          = dtin%vprtrb(:)
 
@@ -2462,7 +2512,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%plowan_lcalc, dtout%plowan_lcalc)
  call alloc_copy(dtin%plowan_projcalc, dtout%plowan_projcalc)
  call alloc_copy(dtin%prtatlist, dtout%prtatlist)
- call alloc_copy(dtin%rcpaw_frtypat,dtout%rcpaw_frtypat)
+ call alloc_copy(dtin%rcpaw_rctypat,dtout%rcpaw_rctypat)
  call alloc_copy(dtin%so_psp, dtout%so_psp)
  call alloc_copy(dtin%symafm, dtout%symafm)
  call alloc_copy(dtin%symrel, dtout%symrel)
@@ -2503,7 +2553,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%qptdm, dtout%qptdm)
  call alloc_copy(dtin%quadmom, dtout%quadmom)
  call alloc_copy(dtin%ratsph, dtout%ratsph)
- call alloc_copy(dtin%rcpaw_scenergy,dtout%rcpaw_scenergy)
+ call alloc_copy(dtin%rcpaw_sc,dtout%rcpaw_sc)
  call alloc_copy(dtin%rprim_orig, dtout%rprim_orig)
  call alloc_copy(dtin%rprimd_orig, dtout%rprimd_orig)
  call alloc_copy(dtin%shiftk, dtout%shiftk)
@@ -2580,7 +2630,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%plowan_nbl)
  ABI_SFREE(dtset%plowan_projcalc)
  ABI_SFREE(dtset%prtatlist)
- ABI_SFREE(dtset%rcpaw_frtypat)
+ ABI_SFREE(dtset%rcpaw_rctypat)
  ABI_SFREE(dtset%so_psp)
  ABI_SFREE(dtset%symafm)
  ABI_SFREE(dtset%symrel)
@@ -2622,7 +2672,7 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%qptdm)
  ABI_SFREE(dtset%quadmom)
  ABI_SFREE(dtset%ratsph)
- ABI_SFREE(dtset%rcpaw_scenergy)
+ ABI_SFREE(dtset%rcpaw_sc)
  ABI_SFREE(dtset%rprim_orig)
  ABI_SFREE(dtset%rprimd_orig)
  ABI_SFREE(dtset%shiftk)
@@ -2761,13 +2811,13 @@ end subroutine find_getdtset
 !! dtset_get_npert_rbz
 !!
 !! FUNCTION
-!! Get the number of effective pertubation done in looper3, nkpt_rbz, nband_rbz
+!! Get the number of effective perturbation done in looper3, nkpt_rbz, nband_rbz
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!
 !! OUTPUT
-!!  npert=number of effective pertubation done in looper3
+!!  npert=number of effective perturbation done in looper3
 !!  nkpt_rbz= nkpt in the reduced brillouin zone
 !!  nband_rbz= nband in the reduced brillouin zone
 !!
@@ -2826,7 +2876,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  if(dtset%rfphon==1)rfpert(dtset%rfatpol(1):dtset%rfatpol(2))=1
 
  if(dtset%rfddk==1)rfpert(dtset%natom+1)=1
- if(dtset%rfddk==2)rfpert(dtset%natom+6)=1
 
  if(dtset%rf2_dkdk/=0) rfpert(dtset%natom+10)=1
  if(dtset%rf2_dkde/=0) rfpert(dtset%natom+11)=1
@@ -2836,9 +2885,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
  if(dtset%rfstrs==1.or.dtset%rfstrs==3)rfpert(dtset%natom+3)=1
  if(dtset%rfstrs==2.or.dtset%rfstrs==3)rfpert(dtset%natom+4)=1
-
- if(dtset%rfuser==1.or.dtset%rfuser==3)rfpert(dtset%natom+6)=1
- if(dtset%rfuser==2.or.dtset%rfuser==3)rfpert(dtset%natom+7)=1
 
  if(dtset%rfmagn==1) rfpert(dtset%natom+5)=1
 
@@ -3096,7 +3142,7 @@ end subroutine dtset_get_npert_rbz
 !! dtset_testsusmat
 !!
 !! FUNCTION
-!! Test wether a new susceptibility matrix and/or a new dielectric matrix must be computed
+!! Test whether a new susceptibility matrix and/or a new dielectric matrix must be computed
 !! and return the logical result
 !!
 !! INPUTS
@@ -3210,6 +3256,63 @@ subroutine dtset_get_ktmesh(dtset, ntemp, ktmesh)
 end subroutine dtset_get_ktmesh
 !!***
 
+!!****f* m_dtset/dtset_get_wrmesh_for_sigeph
+!! NAME
+!! dtset_get_wrmesh_for_sigeph
+!!
+!! FUNCTION
+!!  Frequency mesh for sigma(w) and spectral functions (EPH self-energy)
+!!
+!! SOURCE
+
+subroutine dtset_get_wrmesh_for_sigeph(dtset, nwr, wr_step)
+
+!Arguments-------------------------------
+!scalars
+ class(dataset_type),intent(in) :: dtset
+ integer,intent(out) :: nwr
+ real(dp),intent(out) :: wr_step
+! *********************************************************************
+
+ ! Use GW variables but change default values
+ nwr = dtset%nfreqsp; wr_step = zero
+ if (nwr > 0) then
+   if (mod(nwr, 2) == 0) nwr = nwr + 1
+   wr_step = two * eV_Ha / (nwr - 1)
+   if (dtset%freqspmax /= zero) wr_step = dtset%freqspmax / (nwr - 1)
+   call wrtout([std_out, ab_out], &
+     sjoin(" Will compute Sigma(omega) using", itoa(nwr), "points and step:", ftoa(wr_step * Ha_eV), "(eV)"))
+ end if
+
+end subroutine dtset_get_wrmesh_for_sigeph
+!!***
+
+!!****f* m_dtset/dtset_get_edos_params
+!! NAME
+!! dtset_get_edos_params
+!!
+!! FUNCTION
+!!   Return parameters for the computation of the electronic DOS.
+!!   to be passed to ebands%get_edos
+!!
+!! SOURCE
+
+subroutine dtset_get_edos_params(dtset, edos_intmeth, edos_step, edos_broad)
+
+!Arguments-------------------------------
+!scalars
+ class(dataset_type),intent(in) :: dtset
+ integer,intent(out) :: edos_intmeth
+ real(dp),intent(out) :: edos_step, edos_broad
+! *********************************************************************
+
+ edos_intmeth = 2; if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
+ edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+ edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
+
+end subroutine dtset_get_edos_params
+!!***
+
 !!****f* m_dtset/macroin
 !! NAME
 !! macroin
@@ -3224,7 +3327,7 @@ end subroutine dtset_get_ktmesh
 !! Documentation of such input variables is very important, including the
 !! proper echo, in the output file, of what such input variables have done.
 !!
-!! Important information : all the "macro" input variables should be properly
+!! Important information: all the "macro" input variables should be properly
 !! identifiable to be so, and it is proposed to make them start with the string "macro".
 !!
 !! INPUTS
@@ -3246,7 +3349,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
  character(len=*),intent(inout) :: string
 !arrays
  real(dp),intent(in) :: ecut_tmp(3,2,10)
- type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc) !vz_i ziontypat
+ type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
 
 !Local variables -------------------------------
 !scalars
@@ -3260,18 +3363,19 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
 
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset
+
    if (dtsets(idtset)%macro_uj>0) then
      dtsets(idtset)%irdwfk   = 1        ! preconverged wave function compulsory
-!    dtsets(idtset)%nline    = maxval((/ int(dtsets(idtset)%natom/2) , 6 /))   ! using default value: \DeltaU< 1%
-!    dtsets(idtset)%nnsclo   = 4        ! using default value: \DeltaU< 1%
+     !dtsets(idtset)%nline    = maxval((/ int(dtsets(idtset)%natom/2) , 6 /))   ! using default value: \DeltaU< 1%
+     !dtsets(idtset)%nnsclo   = 4        ! using default value: \DeltaU< 1%
      dtsets(idtset)%tolvrs   = 10d-8    ! convergence on the potential; 10d-8^= 10d-5 on occupation
      dtsets(idtset)%diemix   = 0.45_dp  ! fastest convergence: dn= E^(-istep * 0.229 )
      dtsets(idtset)%dmatpuopt= 3        ! normalization of the occupation operator
-!    dtsets(idtset)%nstep    = 255      ! expected convergence after 10 \pm 3, 30 as in default normally suficient
-!    dtsets(idtset)%iscf     = 17       ! mixing on potential, 17: default for PAW
+     !dtsets(idtset)%nstep    = 255      ! expected convergence after 10 \pm 3, 30 as in default normally sufficient
+     !dtsets(idtset)%iscf     = 17       ! mixing on potential, 17: default for PAW
    end if ! macro_uj
 
-  !Read parameters
+   ! Read parameters
    marr=dtsets(idtset)%npsp;if (dtsets(idtset)%npsp<3) marr=3
    marr=max(marr,dtsets(idtset)%nimage)
    ABI_MALLOC(intarr,(marr))
@@ -3305,6 +3409,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol3
        dtsets(idtset)%tolmxf=1.0d-3
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=1
        dtsets(idtset)%timopt=0
        dtsets(idtset)%npulayit=4
@@ -3328,6 +3433,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol5
        dtsets(idtset)%tolmxf=5.0d-4
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=1
        dtsets(idtset)%timopt=0
        dtsets(idtset)%npulayit=7
@@ -3351,6 +3457,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol7
        dtsets(idtset)%tolmxf=1.0d-4
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=2
        dtsets(idtset)%timopt=1
        if(xmpi_paral==1) dtsets(idtset)%timopt = 0
@@ -3375,6 +3482,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol9
        dtsets(idtset)%tolmxf=5.0d-5
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=2
        dtsets(idtset)%timopt=1
        if(xmpi_paral==1) dtsets(idtset)%timopt = 0
@@ -3399,6 +3507,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol10
        dtsets(idtset)%tolmxf=1.0d-6
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=2
        dtsets(idtset)%timopt=1
        if(xmpi_paral==1) dtsets(idtset)%timopt = 0
@@ -3423,6 +3532,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%tolvrs=tol12
        dtsets(idtset)%tolmxf=1.0d-6
        dtsets(idtset)%toldff=zero
+       dtsets(idtset)%toldmag=zero
        dtsets(idtset)%optforces=2
        dtsets(idtset)%timopt=1
        if(xmpi_paral==1) dtsets(idtset)%timopt = 0
@@ -3431,9 +3541,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
        dtsets(idtset)%prteig=1
        dtsets(idtset)%prtden=1
      elseif(dtsets(idtset)%accuracy>6)then
-       write(msg, '(a,a,a)' )&
-         'accuracy >6 is forbidden !',ch10,&
-         'Action: check your input data file.'
+       write(msg, '(3a)' )'accuracy >6 is forbidden !',ch10,'Action: check your input data file.'
        ABI_ERROR(msg)
      end if
    else
@@ -3442,7 +3550,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
 
    ABI_FREE(intarr)
    ABI_FREE(dprarr)
- end do
+ end do ! idtset
 
 end subroutine macroin
 !!***
@@ -3575,7 +3683,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chebfi_oracle'
  list_vars=trim(list_vars)//' chkdilatmx chkexit chkparal chkprim'
  list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind'
- list_vars=trim(list_vars)//' cprj_in_memory cprj_update_lvl cpus cpum cpuh'
+ list_vars=trim(list_vars)//' cprj_in_memory cprj_update_lvl cpus cpum cpuh cwfs_wouth'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
@@ -3583,27 +3691,29 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' diemix diemixmag diismemory'
  list_vars=trim(list_vars)//' dilatmx dipdip dipquad dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
- list_vars=trim(list_vars)//' dmftbandi dmftbandf dmftctqmc_basis'
- list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
- list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_localprop dmftctqmc_meas dmftctqmc_mrka'
- list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmft_triqs_compute_integral dmft_triqs_det_init_size'
- list_vars=trim(list_vars)//' dmft_triqs_det_n_operations_before_check dmft_triqs_det_precision_error'
- list_vars=trim(list_vars)//' dmft_triqs_det_precision_warning dmft_triqs_det_singular_threshold'
- list_vars=trim(list_vars)//' dmft_triqs_entropy dmft_triqs_epsilon dmft_triqs_gaussorder dmft_triqs_imag_threshold'
- list_vars=trim(list_vars)//' dmft_triqs_leg_measure dmft_triqs_loc_n_min dmft_triqs_loc_n_max'
- list_vars=trim(list_vars)//' dmft_triqs_measure_density_matrix dmft_triqs_move_double'
- list_vars=trim(list_vars)//' dmft_triqs_move_shift'
- list_vars=trim(list_vars)//' dmft_triqs_nleg dmft_triqs_nsubdivisions dmft_triqs_off_diag dmft_triqs_pauli_prob dmft_triqs_read_ctqmcdata'
- list_vars=trim(list_vars)//' dmft_triqs_seed_a dmft_triqs_seed_b dmft_triqs_therm_restart'
- list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight dmft_triqs_wmax dmftcheck'
- list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dmft_charge_prec dmft_dc'
- list_vars=trim(list_vars)//' dmft_entropy dmft_epsilon_yukawa dmft_fermi_step'
- list_vars=trim(list_vars)//' dmft_iter dmft_kspectralfunc dmft_lambda_yukawa dmft_magnfield dmft_magnfield_b dmft_mxsf '
+
+ list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_entropy dmft_fermi_step dmft_iter'
+ list_vars=trim(list_vars)//' dmft_kspectralfunc dmft_magnfield dmft_magnfield_b dmft_mxsf'
  list_vars=trim(list_vars)//' dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
- list_vars=trim(list_vars)//' dmft_occnd_imag dmft_optim dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
- list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_tolfreq dmft_tollc'
- list_vars=trim(list_vars)//' dmft_t2g dmft_test dmft_use_all_bands dmft_use_full_chipsi dmft_wanorthnorm'
- list_vars=trim(list_vars)//' dmft_wanrad dmft_x2my2d dmft_yukawa_param dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
+ list_vars=trim(list_vars)//' dmft_occnd_imag dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
+ list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_t2g dmft_tolfreq dmft_tollc'
+ list_vars=trim(list_vars)//' dmft_triqs_basis dmft_triqs_compute_integral dmft_triqs_det_init_size'
+ list_vars=trim(list_vars)//' dmft_triqs_det_n_operations_before_check dmft_triqs_det_precision_error'
+ list_vars=trim(list_vars)//' dmft_triqs_det_precision_warning dmft_triqs_det_singular_threshold dmft_triqs_dlr_epsilon dmft_triqs_dlr_wmax'
+ list_vars=trim(list_vars)//' dmft_triqs_entropy dmft_triqs_gaussorder dmft_triqs_imag_threshold'
+ list_vars=trim(list_vars)//' dmft_triqs_length_cycle dmft_triqs_loc_n_max dmft_triqs_loc_n_min'
+ list_vars=trim(list_vars)//' dmft_triqs_measure_density_matrix dmft_triqs_measure_g_l dmft_triqs_move_double'
+ list_vars=trim(list_vars)//' dmft_triqs_move_shift dmft_triqs_n_cycles dmft_triqs_n_iw dmft_triqs_n_l dmft_triqs_n_tau dmft_triqs_n_warmup_cycles_init'
+ list_vars=trim(list_vars)//' dmft_triqs_n_warmup_cycles_restart dmft_triqs_nsubdivisions dmft_triqs_off_diag dmft_triqs_pauli_prob'
+ list_vars=trim(list_vars)//' dmft_triqs_prt_entropy dmft_triqs_random_seed_a dmft_triqs_random_seed_b dmft_triqs_read_ctqmcdata dmft_triqs_shift_mu'
+ list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight'
+ list_vars=trim(list_vars)//' dmft_wanorthnorm dmft_wanrad dmft_x2my2d dmft_yukawa_epsilon dmft_yukawa_lambda dmft_yukawa_param'
+ list_vars=trim(list_vars)//' dmftbandf dmftbandi dmftcheck dmftctqmc_basis'
+ list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
+ list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_localprop dmftctqmc_meas dmftctqmc_mov'
+ list_vars=trim(list_vars)//' dmftctqmc_mrka dmftctqmc_chains dmftctqmc_order'
+ list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm'
+ list_vars=trim(list_vars)//' dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
@@ -3627,7 +3737,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_phwinfact eph_fix_korq'
  list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_tols_idelta eph_fix_wavevec eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user'
- list_vars=trim(list_vars)//' extfpmd_nbcut extfpmd_nbdbuf extfpmd_nband extrapwf'
+ list_vars=trim(list_vars)//' extfpmd_nbcut extfpmd_nbdbuf extfpmd_nband extfpmd_pawsph extfpmd_prterr extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest ffnl_lw'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw fft_count'
@@ -3641,7 +3751,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_nfixcoeff fit_nimposecoeff fit_rangePower fit_SPCoupling fit_SPC_maxS'
  list_vars=trim(list_vars)//' fit_tolGF fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS fit_max_nbody'
  list_vars=trim(list_vars)//' fit_weight_T'
- list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
+ list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul fock_rcut'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin friction frictionbar frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
@@ -3661,12 +3771,12 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib gpu_thread_limit'
  list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option'
  list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
- list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter gstore_gmode'
- list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk'
+ list_vars=trim(list_vars)//' gstore_brange gstore_erange gstore_kfilter gstore_gname'
+ list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk gstore_use_lgk gstore_use_lgq'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_icutcoul gw_invalid_freq'
- list_vars=trim(list_vars)//' gw_nqlwl gw_qlwl gw_qprange gw_sigxcore'
+ list_vars=trim(list_vars)//' gw_nqlwl gw_qlwl gw_qprange gw_rcut gw_sigxcore'
  list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'
  list_vars=trim(list_vars)//' gwls_kmax_analytic gwls_kmax_numeric'
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
@@ -3682,10 +3792,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invovl_blksliced iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
- list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddvdb irddrhodb irdefmas'
- list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
- list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
- list_vars=trim(list_vars)//' irdwfkfine'
+ list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddkdk irddkde irddelfd'
+ list_vars=trim(list_vars)//' irddvdb irddrhodb irdefmas'
+ list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps irdscr irdsuscep irdwfk irdwfq ird1den irdwfkfine'
  list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'
  list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron ixcrot irdvdw ivalence'
 !J
@@ -3765,7 +3874,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' pseudos ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
- list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
+ list_vars=trim(list_vars)//' q1shft qgbt qgbt_cart qmass qprtrb qpt qptdm qptnrm qph1l'
  list_vars=trim(list_vars)//' qptopt quadquad qptrlatt quadmom'
 !R
  list_vars=trim(list_vars)//' random_atpos randomseed ratsm ratsph ratsph_extra rcut'
@@ -3773,9 +3882,10 @@ subroutine chkvars(string)
 !list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
- list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
+ list_vars=trim(list_vars)//' rfstrs rfstrs_ref rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  list_vars=trim(list_vars)//' rmm_diis rmm_diis_savemem'
- list_vars=trim(list_vars)//' rcpaw_scenergy rcpaw_nfrpaw rcpaw_frocc rcpaw_tolnc rcpaw_nfrtnc rcpaw_frtypat'
+ list_vars=trim(list_vars)//' rcpaw_frocc rcpaw_elin rcpaw_tpaw rcpaw_vhtnzc rcpaw_rctypat'
+ list_vars=trim(list_vars)//' rcpaw_sc rcpaw_tolnc rcpaw_updatepaw rcpaw_updatetnc'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' sel_EFS'
@@ -3819,7 +3929,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' tolvrs tolwfr tolwfr_diago tphysel ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
- list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
+ list_vars=trim(list_vars)//' usedmft useexexch usekden use_gbt use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
  list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop'

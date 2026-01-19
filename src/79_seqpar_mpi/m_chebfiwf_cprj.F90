@@ -16,11 +16,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!      vtowfk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -31,6 +26,7 @@
 
 module m_chebfiwf_cprj
 
+ use, intrinsic :: iso_c_binding
  use defs_abitypes
  use defs_basis
  use m_abicore
@@ -130,7 +126,7 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
 
  logical :: paw
 
- integer :: space, space_cprj, blockdim, cprjdim, nband_cprj
+ integer :: space, space_cprj, cprjdim, nband_cprj
  integer :: me_g0,me_g0_fft
 
  integer, parameter :: tim_chebfiwf2 = 2060
@@ -150,9 +146,6 @@ subroutine chebfiwf2_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  l_gs_hamk => gs_hamk
 
  cprjdim = xg_nonlop%cprjdim
-
-!Variables
- blockdim=mpi_enreg%nproc_band*mpi_enreg%bandpp
  nband_cprj=nband/mpi_enreg%nproc_band
 
 !Depends on istwfk
@@ -246,17 +239,9 @@ end subroutine chebfiwf2_cprj
 !!  X  <type(xgBlock_t)>= memory block containing |C>
 !!  AX <type(xgBlock_t)>= memory block containing H|C>
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xgBlock_getSize,xgBlock_reverseMap,xgBlock_scale,xgBlock_copy
-!!      multithreaded_getghc
-!!
 !! SOURCE
 !
 subroutine xg_getghc(X,AX)
-
- use iso_c_binding
 
 !Arguments ------------------------------------
  type(xgBlock_t), intent(inout) :: X

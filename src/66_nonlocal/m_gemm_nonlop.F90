@@ -38,6 +38,7 @@ module m_gemm_nonlop
  use m_abicore
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
  use m_gemm_nonlop_projectors
 

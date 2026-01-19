@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h17 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h18 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/wannier90_t11/t11.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/wannier90_t11/t11.abi
 - output file    -> t11.abo
 - root for input  files -> t11i
 - root for output files -> t11o
@@ -189,8 +189,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.07656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/18ar.revpbe
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -285,7 +285,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 12.500000000000 12.500000000000 12.500000000000 bohr
-              =  6.614715107375  6.614715107375  6.614715107375 angstroms
+              =  6.614715131800  6.614715131800  6.614715131800 angstroms
  prteigrs : about to open file t11o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.26716   Average Vxc (hartree)=  -0.14810
  Eigenvalues (hartree) for nkpt=   3  k points:
@@ -305,7 +305,7 @@ psp_core            :  2.73859304494880E-01
 local_psp           : -2.18055134768127E+01
 non_local_psp       :  8.64518486559594E-01
 total_energy        : -2.09580710265014E+01
-total_energy_eV     : -5.70298115667273E+02
+total_energy_eV     : -5.70298165672832E+02
 band_energy         : -3.16457065839168E+00
 ...
 
@@ -316,9 +316,9 @@ band_energy         : -3.16457065839168E+00
   sigma(3 3)= -4.22231126E-06  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.2422E-01 GPa]
-- sigma(1 1)= -1.24224665E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -1.24224665E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -1.24224665E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -1.24224686E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -1.24224686E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -1.24224686E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -443,7 +443,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales= 12.500000000000 12.500000000000 12.500000000000 bohr
-              =  6.614715107375  6.614715107375  6.614715107375 angstroms
+              =  6.614715131800  6.614715131800  6.614715131800 angstroms
  prteigrs : about to open file t11o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  4, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)

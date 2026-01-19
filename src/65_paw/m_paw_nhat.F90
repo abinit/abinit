@@ -27,6 +27,7 @@ MODULE m_paw_nhat
  use m_errors
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
  use, intrinsic :: iso_c_binding, only: c_size_t,c_loc
 
@@ -39,7 +40,7 @@ MODULE m_paw_nhat
  use m_pawcprj,      only : pawcprj_type
  use m_paw_finegrid, only : pawgylm,pawrfgd_fft,pawrfgd_wvl,pawexpiqr
  use m_paral_atom,   only : get_my_atmtab, free_my_atmtab
- use m_distribfft,   only : distribfft_type,init_distribfft_seq,destroy_distribfft
+ use m_distribfft,   only : distribfft_type
  use m_geometry,     only : xred2xcart
  use m_cgtools,      only : mean_fftr
  use m_mpinfo,       only : set_mpi_enreg_fft,unset_mpi_enreg_fft,initmpi_seq
@@ -479,15 +480,18 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
      end if
 
 !    Add the contribution of the atom to the compensation charge
+!    LB-2025-12-11 : if the PAW sphere overlaps with itself (true if it is larger than the unit cell, rare case but possible...),
+!    then several values of ic can give the same kc in the following loops, so the iterations are not independent,
+!    and cannot be parallelized (for example with OpenMP directives)
      if (compute_nhat) then
        if (cplex==1) then
-         !$OMP PARALLEL DO PRIVATE(kc)
+         ! Not possible to parallelize here (see comment above)
          do ic=1,nfgd
            kc=pawfgrtab(iatom)%ifftsph(ic)
            pawnhat(kc,ispden)=pawnhat(kc,ispden)+pawnhat_atm(ic)
          end do
        else
-         !$OMP PARALLEL DO PRIVATE(jc)
+         ! Not possible to parallelize here (see comment above)
          do ic=1,nfgd
            jc=2*ic-1;kc=2*pawfgrtab(iatom)%ifftsph(ic)-1
            pawnhat(kc:kc+1,ispden)=pawnhat(kc:kc+1,ispden)+pawnhat_atm(jc:jc+1)
@@ -496,13 +500,13 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
      end if
      if (compute_grad) then
        if (cplex==1) then
-         !$OMP PARALLEL DO PRIVATE(kc)
+         ! Not possible to parallelize here (see comment above)
          do ic=1,nfgd
            kc=pawfgrtab(iatom)%ifftsph(ic)
            pawgrnhat(kc,ispden,1:3)=pawgrnhat(kc,ispden,1:3)+pawgrnhat_atm(ic,1:3)
          end do
        else
-         !$OMP PARALLEL DO PRIVATE(jc,ii)
+         ! Not possible to parallelize here (see comment above)
          do ic=1,nfgd
            jc=2*ic-1;kc=2*pawfgrtab(iatom)%ifftsph(ic)-1
            do ii=1,3
@@ -579,7 +583,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
+     call my_distribfft%init_seq('f',ngfft(2),ngfft(3),'fourdp')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -601,7 +605,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -695,7 +699,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 
 !Local variables ---------------------------------------
 !scalars
- complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
+ complex(dp), parameter :: cminusone  = (-1._dp,0._dp)
  integer :: iatm,iatom,iatom_tot,ic,ierr,ils,ilslm,isp1,isp2,isploop,itypat,jc,klm,klmn,idat1,idat2,ia,nfgd_max
  integer :: lmax,lmin,lm_size,mm,my_comm_atom,my_comm_fft,optgr0,optgr1,paral_kgb_fft
  integer :: cplex,ilmn,jlmn,lmn_size,lmn2_size,gpu_option_,nprojs,shift,nlmn,nfgd
@@ -1365,7 +1369,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
+     call my_distribfft%init_seq('f',ngfft(2),ngfft(3),'fourdp')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -1392,7 +1396,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -1753,7 +1757,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
+     call my_distribfft%init_seq('f',ngfft(2),ngfft(3),'fourdp')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -1780,7 +1784,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -2193,7 +2197,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
  integer :: lm0,lm_size,lmax,lmin,lmn2_size,mm,nfgd,nsploop,optgr0,gpu_option_
  logical :: has_qphase,qne0
  real(dp) :: vi,vr
- complex(dpc) :: scal
+ complex(dp) :: scal
  character(len=500) :: msg
 !arrays
  real(dp) :: rdum1(1),rdum2(2), sum_r, sum_i
@@ -2897,7 +2901,7 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
      my_distribfft => distribfft
    else
      ABI_MALLOC(my_distribfft,)
-     call init_distribfft_seq(my_distribfft,'c',ngfftdiel(2),ngfftdiel(3),'fourwf')
+     call my_distribfft%init_seq('c',ngfftdiel(2),ngfftdiel(3),'fourwf')
    end if
    call initmpi_seq(mpi_enreg_fft)
    ABI_FREE(mpi_enreg_fft%distribfft)
@@ -2919,7 +2923,7 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
    ABI_FREE(wfraug_paw)
    call unset_mpi_enreg_fft(mpi_enreg_fft)
    if (.not.present(distribfft)) then
-     call destroy_distribfft(my_distribfft)
+     call my_distribfft%free()
      ABI_FREE(my_distribfft)
    end if
  end if
@@ -3364,4 +3368,3 @@ end subroutine wvl_nhatgrid
 
 END MODULE m_paw_nhat
 !!***
-

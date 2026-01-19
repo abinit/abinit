@@ -207,7 +207,7 @@ subroutine outvars_scup(scup_dtset,nunit)
  integer :: int_inorb=0,int_mgn=0,int_tddft=0,int_pband=0
  integer :: int_peigv=0,int_peltic=0,int_pgeom=0,int_porbocc=0
  integer :: int_freezden=0
-!Character for defining fromat string
+!Character for defining format string
 !*********************************************************************
 
    !Check if logicals are true, if yes set integers to one for printing
@@ -409,9 +409,9 @@ tmp_int=0
  if(tread==1) scup_dtset%scup_ndivsm=intarr(1)
  if(scup_dtset%scup_ndivsm<0 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_ndivsm is',scup_dtset%scup_ndivsm,', but the only allowed values',ch10,&
-&   'are positiv.',ch10,&
-&   'Action: correct scup_ndivsm in your input file.'
+   'scup_ndivsm is',scup_dtset%scup_ndivsm,', but the only allowed values',ch10,&
+   'are positive.',ch10,&
+   'Action: correct scup_ndivsm in your input file.'
    ABI_ERROR(message)
  end if
 
@@ -420,9 +420,9 @@ tmp_int=0
  if(tread==1) scup_dtset%scup_nspeck=intarr(1)
  if(scup_dtset%scup_nspeck<0 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_nspeck is',scup_dtset%scup_nspeck,', but the only allowed values',ch10,&
-&   'are positiv.',ch10,&
-&   'Action: correct scup_nspeck in your input file.'
+   'scup_nspeck is',scup_dtset%scup_nspeck,', but the only allowed values',ch10,&
+   'are positive.',ch10,&
+   'Action: correct scup_nspeck in your input file.'
    ABI_ERROR(message)
  end if
 
@@ -468,9 +468,9 @@ tmp_int=0
  if(tread==1) tmp_int=intarr(1)
  if(tmp_int<0 .or. tmp_int>1 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_printgeom is',tmp_int,', but the only allowed values',ch10,&
-&   'are 0 and 1.',ch10,&
-&   'Action: correct scup_printgeom in your input file.'
+   'scup_printgeom is',tmp_int,', but the only allowed values',ch10,&
+   'are 0 and 1.',ch10,&
+   'Action: correct scup_printgeom in your input file.'
    ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printgeom = .TRUE.
@@ -480,9 +480,9 @@ tmp_int=0
  if(tread==1) scup_dtset%scup_printniter=intarr(1)
  if(scup_dtset%scup_printniter<0 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_printniter is',scup_dtset%scup_printniter,', but the only allowed values',ch10,&
-&   'are positiv',ch10,&
-&   'Action: correct scup_printniter in your input file.'
+   'scup_printniter is',scup_dtset%scup_printniter,', but the only allowed values',ch10,&
+   'are positive',ch10,&
+   'Action: correct scup_printniter in your input file.'
    ABI_ERROR(message)
  end if
 
@@ -490,9 +490,9 @@ tmp_int=0
  if(tread==1) tmp_int=intarr(1)
  if(tmp_int<0 .or. tmp_int>1 )then
    write(message, '(a,I3,a,a,a,a,a)' )&
-&   'scup_printorbocc is',tmp_int,', but the only allowed values',ch10,&
-&   'are 0 and 1.',ch10,&
-&   'Action: correct scup_printorbocc in your input file.'
+   'scup_printorbocc is',tmp_int,', but the only allowed values',ch10,&
+   'are 0 and 1.',ch10,&
+   'Action: correct scup_printorbocc in your input file.'
    ABI_ERROR(message)
  end if
  if(tmp_int == 1) scup_dtset%scup_printorbocc = .TRUE.
@@ -630,11 +630,9 @@ end subroutine invars10scup
 !! along kpath
 !!
 !! INPUTS
-!!
 !! speck = array with special k-points along the path
-!! gprimd = reciprocal latice vectors of cell
+!! gprimd = reciprocal lattice vectors of cell
 !! ndivsm = number of divisions for smallest segment
-!!
 !!
 !! OUTPUT
 !! scup_kpath <type(kpath_t)> = kpath_t with all information about kpath
@@ -671,7 +669,7 @@ subroutine scup_kpath_new(speck,rprimd,ndivsm,scup_kpath)
 call matr3inv(rprimd,gprimd)
 
 !Create Kpath
-scup_kpath = kpath_new(speck,gprimd,ndivsm)
+call scup_kpath%init(speck,gprimd,ndivsm)
 
 !Change size of scup_kpath%ndivs(:) variable
 !from nspeck-1 to nspeck and put 1 to first entry
@@ -703,8 +701,7 @@ end subroutine scup_kpath_new
 !! Print info of kpath provide to SCALE UP
 !!
 !! INPUTS
-!!
-!! scup_kpath<tpye(kpath_t) = kpath_t with all information about kpath
+!! scup_kpath<type(kpath_t) = kpath_t with all information about kpath
 !!
 !! OUTPUT
 !! Only Printing
@@ -728,7 +725,7 @@ subroutine scup_kpath_print(scup_kpath)
  write(unt,'(4a)') ' scup_printbands = 1. Printing of electronic bands active',ch10,&
                    ' Kpath information below:',ch10
 
-call scup_kpath%print([std_out])
+ call scup_kpath%print([std_out])
 
 end subroutine scup_kpath_print
 !!***

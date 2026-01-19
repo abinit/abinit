@@ -42,9 +42,9 @@ subroutine abi_ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
  character(len=1), intent(in) :: transa
  character(len=1), intent(in) :: diag
  integer, intent(in) :: m,n,ldb,lda
- complex(dpc), intent(in) :: alpha
- complex(dpc),target,intent(in) :: a(lda,*)
- complex(dpc),target,intent(inout) :: b(ldb,*)
+ complex(dp), intent(in) :: alpha
+ complex(dp),target,intent(in) :: a(lda,*)
+ complex(dp),target,intent(inout) :: b(ldb,*)
 
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_PLASMA
@@ -113,7 +113,7 @@ end subroutine abi_ztrsm
 #ifdef HAVE_LINALG_PLASMA
    if(cplx_ == 2) then
       info = PLASMA_ztrsm_c(side_plasma(side),uplo_plasma(uplo),trans_plasma(TRANSA),diag_plasma(diag),&
-&       m,n,cmplx(alpha,0.d0,dpc),c_loc(a),lda,c_loc(b),ldb)
+&       m,n,cmplx(alpha,0.d0,dp),c_loc(a),lda,c_loc(b),ldb)
    else
       info = PLASMA_dtrsm_c(side_plasma(side),uplo_plasma(uplo),trans_plasma(TRANSA),diag_plasma(diag),&
 &       m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
@@ -121,7 +121,7 @@ end subroutine abi_ztrsm
 #endif
  else
    if(cplx_ == 2) then
-      call ztrsm(side,uplo,transa,diag,m,n,cmplx(alpha,0.d0,dpc),a,lda,b,ldb)
+      call ztrsm(side,uplo,transa,diag,m,n,cmplx(alpha,0.d0,dp),a,lda,b,ldb)
    else
       call dtrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
    end if
@@ -152,7 +152,7 @@ end subroutine abi_dtrsm
 !Arguments-------------------------------------
  character(len=1), intent(in) :: side,uplo,transa,diag
  integer, intent(in) :: m,n,lda,ldb
- complex(dpc), intent(in) :: alpha
+ complex(dp), intent(in) :: alpha
  real(dp),target, intent(in) :: a(lda,*)           ! FIXME should be lda * x_cplx
  real(dp),target, intent(inout) :: b(ldb,*)
  !Only for lobpcgwf
@@ -214,7 +214,7 @@ end subroutine abi_d2ztrsm
 !Arguments-------------------------------------
  character(len=1), intent(in) :: side,uplo,transa,diag
  integer, intent(in) :: m,n,lda,ldb
- complex(dpc), intent(in) :: alpha
+ complex(dp), intent(in) :: alpha
  real(dp), target,intent(in) :: a(2,lda,*)
  real(dp), target,intent(inout) :: b(2,ldb,*)
 

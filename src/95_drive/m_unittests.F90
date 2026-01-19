@@ -61,7 +61,7 @@ contains
 !!
 !! FUNCTION
 !!  Generate rprimd compatible with the point group
-!!  This is only for testing porposes
+!!  This is only for testing purposes
 !!
 
 function rprimd_from_ptgroup(ptgroup) result(rprim)
@@ -71,7 +71,6 @@ function rprimd_from_ptgroup(ptgroup) result(rprim)
 !Local variables -------------------------
  real(dp) :: a,b,c, tmp1, tmp2, alpha,beta, gamma, tx,ty,tz
  real(dp) :: rprim(3,3)
-
 ! *********************************************************************
 
  a = one * 5
@@ -145,13 +144,14 @@ type(crystal_t) function crystal_from_ptgroup(ptgroup, use_symmetries) result(cr
 
 !Local variables -------------------------
  type(irrep_t),allocatable :: irr(:)
- logical,parameter :: use_antiferro_true=.true.,remove_inv_false=.false.
+
  integer,parameter :: npsp1 = 1, space_group0 = 0, timrev2 = 2
  integer :: natom,nclass,ntypat,nsym
  integer :: typat(1)
  real(dp) :: rprimd(3,3)
  real(dp) :: amu(1),xred(3,1),znucl(1),zion(1)
  real(dp),allocatable :: tnons(:,:)
+ logical,parameter :: use_antiferro_true=.true.,remove_inv_false=.false.
  character(len=5),allocatable :: class_names(:)
  integer,allocatable :: symrel(:,:,:),symafm(:),class_ids(:,:)
 
@@ -210,7 +210,7 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
 !Local variables -------------------------
 !scalars
  integer,parameter :: qptopt1 = 1, nqshft1 = 1, bcorr0 = 0, bcorr1 = 1, master = 0
- integer :: nqibz,iq_ibz,nqbz,ierr,nw, my_rank, return_code
+ integer :: nqibz,iq_ibz,nqbz,ierr,nw, my_rank, return_code, ncid, ncerr
  real(dp),parameter :: max_occ1 = one
  real(dp) :: cpu, wall, gflops, dosdeltae, emin, emax, qnorm, int_dos, broad, min_eig, max_eig, mstar
  character(len=80) :: errstr
@@ -218,7 +218,6 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
  type(crystal_t) :: cryst
  type(t_tetrahedron) :: tetraq
  type(htetra_t) :: htetraq
- integer :: ncid, ncerr
 !arrays
  integer :: in_qptrlatt(3,3), new_qptrlatt(3,3)
  integer,allocatable :: bz2ibz(:,:)
@@ -227,7 +226,6 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
  real(dp),allocatable :: qbz(:,:), qibz(:,:), wtq_ibz(:), wdt(:,:)
  real(dp),allocatable :: wmesh(:), eig(:),mat(:), dos(:), idos(:), cauchy_ppart(:)
  complex(dp),allocatable :: zmesh(:), cweight(:,:)
-
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -259,7 +257,7 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
  end if
 
  ! Initialize new tetrahedra
- call htetra_init(htetraq, bz2ibz(1,:), cryst%gprimd, qlatt, qbz, nqbz, qibz, nqibz, ierr, errstr, comm)
+ call htetraq%init(bz2ibz(1,:), cryst%gprimd, qlatt, qbz, nqbz, qibz, nqibz, ierr, errstr, comm)
  if (prtvol > 0) then
    call htetraq%print(std_out)
    call cwtime_report(" init_htetra", cpu, wall, gflops)
@@ -621,8 +619,7 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
 !scalars
  integer,parameter :: qptopt1 = 1, nqshft1 = 1, master = 0
  integer :: nqibz, iq_ibz, nqbz, ierr, nw, my_rank
- integer :: num_broad, num_meshes, iq_mesh, ibroad
- integer :: ncid, ncerr
+ integer :: num_broad, num_meshes, iq_mesh, ibroad, ncid, ncerr
  real(dp),parameter :: max_occ1 = one
  real(dp) :: cpu, wall, gflops, dosdeltae, emin, emax, qnorm, int_dos, broad, min_eig, max_eig
  character(len=80) :: errstr
@@ -635,7 +632,6 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
  real(dp),allocatable :: qbz(:,:), qibz(:,:), wtq_ibz(:), broad_list(:)
  real(dp),allocatable :: wmesh(:), eig(:), mat(:), dos(:), idos(:), cauchy_ppart(:)
  complex(dp),allocatable :: zmesh(:), cweight(:,:)
-
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -673,7 +669,7 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
    rlatt = new_qptrlatt; call matr3inv(rlatt, qlatt)
 
    ! Initialize new tetrahedra
-   call htetra_init(htetraq, bz2ibz(1,:), cryst%gprimd, qlatt, qbz, nqbz, qibz, nqibz, ierr, errstr, comm)
+   call htetraq%init(bz2ibz(1,:), cryst%gprimd, qlatt, qbz, nqbz, qibz, nqibz, ierr, errstr, comm)
    call htetraq%print(std_out)
    call cwtime_report(" init_htetra", cpu, wall, gflops)
 
@@ -742,7 +738,6 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
 
    do ibroad=1,num_broad
      broad = broad_list(ibroad)
-
      call cwtime_report(" init", cpu, wall, gflops)
 
      dos = zero; cauchy_ppart = zero
@@ -848,7 +843,7 @@ end subroutine tetra_zinv_convergence
 !!
 !! FUNCTION
 !!  Test the krank routines
-!!
+
 subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
 
 !Arguments -------------------------------
@@ -871,7 +866,6 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
  integer,allocatable :: bz2ibz(:,:), bz2ibz_symkpt(:,:), bz2ibz_symkpt_new(:,:), kmap(:,:)
  integer,allocatable :: bz2ibz_listkk(:,:), ibz2bz(:), ibz2bz_new(:)
  real(dp),allocatable :: wtq_fullbz(:), wtq_folded(:), wtq_ibz(:), qbz(:,:),qibz(:,:)
-
 ! *********************************************************************
 
  call wrtout(std_out, sjoin(" kptrank_unittests with ptgroup:", ptgroup, ", and ngqpt:", ltoa(ngqpt)))
@@ -896,8 +890,8 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
  call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
  ! Test krank object.
- !krank = krank_new(nqibz, qibz)
- krank = krank_from_kptrlatt(nqibz, qibz, new_qptrlatt)
+ !call krank%init(nqibz, qibz)
+ call krank%from_kptrlatt(nqibz, qibz, new_qptrlatt)
 
  do iq_ibz=1,nqibz
    iqibz_rank = krank%get_index(qibz(:, iq_ibz))
@@ -998,8 +992,7 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
  ABI_SFREE(bz2ibz)
  ABI_SFREE(wtq_ibz)
 
- call cryst%free()
- call krank%free()
+ call cryst%free(); call krank%free()
 
 end subroutine kptrank_unittests
 !!***

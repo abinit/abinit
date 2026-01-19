@@ -85,6 +85,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use defs_basis
  use m_abicore
  use m_lobpcg
+ use m_gputk
  use m_abi_linalg
  use m_wfutils
  use m_xmpi
@@ -122,7 +123,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  logical :: gen_eigenpb
  integer :: cplx
  real(dp) :: condestgramb,deltae,deold,dum
- complex(dpc) :: cminusone
+ complex(dp) :: cminusone
  real(dp) :: zvar(2)
  logical :: havetoprecon
  real(dp) :: tsec(2)

@@ -23,7 +23,7 @@ MODULE m_fstrings
 
  use, intrinsic :: iso_c_binding
 
- use defs_basis, only : dp, std_out, ch10
+ use defs_basis, only : sp, dp, std_out, ch10
 
  implicit none
 
@@ -79,6 +79,11 @@ MODULE m_fstrings
    module procedure itoa_1b
    module procedure itoa_4b
  end interface itoa
+
+ interface ftoa
+   module procedure ftoa_dp
+   module procedure ftoa_sp
+ end interface ftoa
 
  interface write_num
    module procedure write_rdp_0D
@@ -1167,29 +1172,54 @@ end function itoa_4b
 
 !----------------------------------------------------------------------
 
-!!****f* m_fstrings/ftoa
+!!****f* m_fstrings/ftoa_dp
 !! NAME
-!! ftoa
+!! ftoa_dp
 !!
 !! FUNCTION
-!!  Convert an float into a string using format fmt  (es16.6 if fmt is not given).
-!!
+!!  Convert an float into a string using format fmt (es16.6 if fmt is not given).
 
-pure function ftoa(value, fmt)
+pure function ftoa_dp(value, fmt)
 
  real(dp),intent(in) :: value
  character(len=*),optional,intent(in) :: fmt
- character(len=MAX_SLEN) :: ftoa
+ character(len=MAX_SLEN) :: ftoa_dp
 ! *********************************************************************
 
  if (present(fmt)) then
-   write(ftoa,round_brackets(fmt))value
+   write(ftoa_dp,round_brackets(fmt))value
  else
-   write(ftoa,"(es16.6)")value
+   write(ftoa_dp,"(es16.6)")value
  end if
- ftoa = ADJUSTL(ftoa)
+ ftoa_dp = ADJUSTL(ftoa_dp)
 
-end function ftoa
+end function ftoa_dp
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/ftoa_sp
+!! NAME
+!! ftoa_sp
+!!
+!! FUNCTION
+!!  Convert an float into a string using format fmt (es16.6 if fmt is not given).
+
+pure function ftoa_sp(value, fmt)
+
+ real(sp),intent(in) :: value
+ character(len=*),optional,intent(in) :: fmt
+ character(len=MAX_SLEN) :: ftoa_sp
+! *********************************************************************
+
+ if (present(fmt)) then
+   write(ftoa_sp,round_brackets(fmt))value
+ else
+   write(ftoa_sp,"(es16.6)")value
+ end if
+ ftoa_sp = ADJUSTL(ftoa_sp)
+
+end function ftoa_sp
 !!***
 
 !----------------------------------------------------------------------
@@ -1565,10 +1595,6 @@ end function endswith
 !!
 !! INPUTS
 !!   istr=Input string
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

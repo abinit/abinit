@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -28,13 +24,11 @@ module m_ompgpu_fourwf
 
  use defs_basis
  use m_abicore
+ use m_gputk
  use m_abi_linalg
  use m_errors
  use m_xomp
-
-#ifdef HAVE_FC_ISO_C_BINDING
  use iso_c_binding
-#endif
 
 #ifdef HAVE_GPU
  use m_gpu_toolbox
@@ -101,10 +95,9 @@ subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 !Local variables-------------------------------
 !scalars
  integer      :: n1,n2,n3,nfft_tot
- complex(dpc) :: norm
+ complex(dp) :: norm
  logical      :: transfer_fofr, transfer_fofg
  character(len=500) :: msg
-
 ! *************************************************************************
 
  n1=ngfft(1);
@@ -128,7 +121,7 @@ subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 
  ! If fft size has changed, we realloc our buffers
  if((nfft_tot/=fft_size_fourdp) .or. (ndat/=ndat_fourdp)) then
-   call free_ompgpu_fourdp
+   call free_ompgpu_fourdp()
    call alloc_ompgpu_fourdp(ngfft,ndat)
  end if !end if "fft size changed"
 
@@ -245,7 +238,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
  ! If fft size has changed, we realloc our buffers
  if((nfft_tot/=fft_size_fourwf) .or. (ndat/=ndat_fourwf)) then
-   call free_ompgpu_fourwf
+   call free_ompgpu_fourwf()
    call alloc_ompgpu_fourwf(ngfft,ndat)
  end if !end if "fft size changed"
 
@@ -381,7 +374,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
      end do
    end if
 
-   ! call backward fourrier transform on gpu work_gpu => fofr_gpu
+   ! call backward fourier transform on gpu work_gpu => fofr_gpu
 #if defined HAVE_GPU_HIP && defined FC_LLVM
    !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr_amdref)
    call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr_amdref), FFT_INVERSE)

@@ -5,7 +5,6 @@
 !! FUNCTION
 !!  Small module to define data used to profile and trace abinit with nvtx library (Nvidia nsys).
 !!
-!!
 !! COPYRIGHT
 !!  Copyright (C) 2000-2025 ABINIT group (MT)
 !!  This file is distributed under the terms of the

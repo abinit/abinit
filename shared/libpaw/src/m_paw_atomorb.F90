@@ -118,6 +118,9 @@ MODULE m_paw_atomorb
   real(dp) :: ekinc
   ! Core kinetic energy
 
+  real(dp) :: eigshift
+  ! Eigenenergy shift due to truncation of local potentiel to the sphere in rcpaw
+
   real(dp) :: min_eigv
   ! Minimal eigenvalue of the  valence orbitals
 
@@ -249,8 +252,8 @@ MODULE m_paw_atomorb
 
 !----------------------------------------------------------------------
 
- integer,public,parameter :: ORB_FROZEN       =1
- integer,public,parameter :: ORB_RELAXED_CORE =0
+ integer,public,parameter :: ORB_FROZEN       =0
+ integer,public,parameter :: ORB_RELAXED_CORE =1
  integer,public,parameter :: ORB_VALENCE      =2
 
 

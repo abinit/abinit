@@ -44,7 +44,7 @@ pseudos = "H.LDA-PW-paw.abinit"
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = A. Blanchet
-#%% keywords = finite, temperature, exchange, correlation, functional, ftxc, plasma, WDM
+#%% keywords = ftxc, WDM
 #%% description =
 #%%   Test finite-temperature exchange-correlation functionals (corrKSDT and KDT16)
 #%%   and calculation of entropy and internal energy, on the hydrogen atom: PAW case

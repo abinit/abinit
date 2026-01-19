@@ -44,6 +44,11 @@ module m_rcpaw
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_paw_finegrid,     only : pawrfgd_fft
 
+#ifdef HAVE_MPI2
+ use mpi
+#endif
+
+
  implicit none
 
  private
@@ -79,9 +84,9 @@ module m_rcpaw
  type,public :: rcpaw_type
    integer :: ntypat
    integer :: istep
-   integer :: nfrpaw
-   integer :: nfrocc
-   integer :: nfrtnc
+   integer :: updatepaw(2)
+   integer :: updateocc
+   integer :: updatetnc
    logical :: frocc
    logical :: all_atoms_relaxed
    real(dp) :: nelect_core
@@ -103,6 +108,7 @@ module m_rcpaw
 
  public :: rcpaw_destroy       ! Destroy RCPAW
  public :: rcpaw_init          ! Initialize RCPAW
+ public :: rcpaw_reinit        ! Re-Initialize RCPAW
  public :: rcpaw_core_eig      ! Compute core eigenenergies
  public :: rcpaw_core_energies ! Compute total energy contributions from the core
 !!***
@@ -194,6 +200,46 @@ end subroutine destroy_valdens
 !!***
 
 
+!----------------------------------------------------------------------
+
+!!****f* m_rcpaw/rcpaw_reinit
+!! NAME
+!! rcpaw_reinit
+!!
+!! FUNCTION
+!! Reinitialize rcpaw object
+!!
+!! INPUTS
+!!
+!!
+!! OUTPUT
+!!
+!!
+!! SOURCE
+
+subroutine rcpaw_reinit(rcpaw)
+!Arguments ------------------------------------
+!scalars
+ integer :: itypat
+ type(rcpaw_type), pointer,intent(inout) :: rcpaw
+
+!******************************************************************************************
+
+ rcpaw%all_atoms_relaxed=.true.
+ do itypat=1,size(rcpaw%atm)
+   rcpaw%atm(itypat)%nresid_c=one
+   rcpaw%atm(itypat)%nc_conv=.false.
+   if(rcpaw%atm(itypat)%mode(1,1)==orb_relaxed_core) then
+     rcpaw%all_atoms_relaxed=.false.
+   else
+     rcpaw%atm(itypat)%nc_conv=.true.
+   endif
+ enddo
+
+end subroutine rcpaw_reinit
+!!***
+
+
 
 !----------------------------------------------------------------------
 
@@ -212,10 +258,10 @@ end subroutine destroy_valdens
 !!
 !! SOURCE
 
-subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,comm_atom,mpi_atmtab)
+subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,cplex,my_natom,comm_atom,mpi_atmtab)
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: ntypat,my_natom
+ integer, intent(in) :: ntypat,my_natom,cplex
  integer,optional,intent(in) :: comm_atom
  type(rcpaw_type), pointer, intent(inout) :: rcpaw
  type(dataset_type), intent(in) :: dtset
@@ -224,11 +270,10 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
  character(len=fnlen), intent(in) :: filpsp(ntypat)
  type(pawrad_type), intent(in) :: pawrad(ntypat)
  type(pawtab_type), intent(inout) :: pawtab(ntypat)
- type(paw_an_type), intent(in) :: paw_an(my_natom)
 
 !Local variables-------------------------------
 !scalars
- integer :: itypat,iatom,lm_size,mesh_size,cplex,my_comm_atom,iat
+ integer :: itypat,iatom,lm_size,mesh_size,my_comm_atom,iat
  logical :: my_atmtab_allocated,paral_atom
 !arrays
  integer :: mult(ntypat)
@@ -272,30 +317,33 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
  do itypat=1,ntypat
    call pawpsp_init_core(rcpaw%atm(itypat),psp_filename=filpsp(itypat))
    ABI_MALLOC(rcpaw%atm(itypat)%vhtnzc_orig,(size(pawtab(itypat)%vhtnzc)))
-   rcpaw%atm(itypat)%mode=dtset%rcpaw_frtypat(itypat)
+   rcpaw%atm(itypat)%mode=dtset%rcpaw_rctypat(itypat)
    rcpaw%atm(itypat)%vhtnzc_orig=pawtab(itypat)%vhtnzc
    rcpaw%atm(itypat)%mult=mult(itypat)
    rcpaw%atm(itypat)%nspden=dtset%nspden
-   if(rcpaw%atm(itypat)%mode(1,1)==orb_relaxed_core) rcpaw%all_atoms_relaxed=.false.
+   rcpaw%atm(itypat)%eigshift=zero
+   if(rcpaw%atm(itypat)%mode(1,1)==orb_relaxed_core) then
+     rcpaw%all_atoms_relaxed=.false.
+   else
+     rcpaw%atm(itypat)%nc_conv=.true.
+   endif
  enddo
 
  ! Init atp
  do itypat=1,ntypat
-   if(rcpaw%atm(itypat)%zcore_orig>zero) then
      rcpaw%atp(itypat)%ixc=dtset%ixc
      rcpaw%atp(itypat)%xclevel=dtset%xclevel
      rcpaw%atp(itypat)%electrons=dtset%nelect
      call atompaw_init(pawtab(itypat),pawrad(itypat),rcpaw%atp(itypat),&
-&    int(rcpaw%atm(itypat)%znucl),rcpaw%atm(itypat),dtset%rcpaw_scenergy(itypat))
-   endif
+&    int(rcpaw%atm(itypat)%znucl),rcpaw%atm(itypat),dtset%rcpaw_sc(itypat),&
+&    dtset%rcpaw_elin,dtset%rcpaw_vhtnzc,dtset%rcpaw_tpaw)
  enddo
 
  ! Init val
  do iat=1,my_natom
   iatom=iat;if (paral_atom) iatom=my_atmtab(iat)
-  cplex=paw_an(iat)%cplex
-  lm_size=paw_an(iat)%lm_size
   itypat=dtset%typat(iatom)
+  lm_size=Pawtab(itypat)%lcut_size**2
   mesh_size=pawtab(itypat)%mesh_size
   ABI_MALLOC(rcpaw%val(iat)%nhat1,(mesh_size*cplex,lm_size,dtset%nspden))
   ABI_MALLOC(rcpaw%val(iat)%rho1,(mesh_size*cplex,lm_size,dtset%nspden))
@@ -313,6 +361,7 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
  rcpaw%eeigc=zero
  rcpaw%ehnzc=zero
  rcpaw%ekinc=zero
+ rcpaw%entropy=zero
  rcpaw%tolnc=dtset%rcpaw_tolnc
  rcpaw%ntypat=ntypat
  rcpaw%nelect_core=zero
@@ -320,22 +369,22 @@ subroutine rcpaw_init(rcpaw,dtset,filpsp,pawrad,pawtab,ntypat,paw_an,my_natom,co
    rcpaw%nelect_core=rcpaw%nelect_core+rcpaw%atm(itypat)%zcore*rcpaw%atm(itypat)%mult
  enddo
  rcpaw%nelect_core_orig=rcpaw%nelect_core
+
  if(dtset%rcpaw_frocc==1) then
    rcpaw%frocc=.true.
  else
    rcpaw%frocc=.false.
  endif
- rcpaw%nfrpaw=dtset%rcpaw_nfrpaw
- if(rcpaw%frocc) then
-   rcpaw%nfrocc=rcpaw%nfrpaw
+ rcpaw%updatepaw=dtset%rcpaw_updatepaw
+ if(rcpaw%frocc.and.rcpaw%updatepaw(2)>0) then
+   rcpaw%updateocc=rcpaw%updatepaw(2)
  else
-   rcpaw%nfrocc=dtset%nstep
+   rcpaw%updateocc=dtset%nstep
  endif
- rcpaw%nfrtnc=dtset%rcpaw_nfrtnc
+ rcpaw%updatetnc=dtset%rcpaw_updatetnc
 
  ! Init core energies
  call rcpaw_core_energies(rcpaw,ntypat)
-
 end subroutine rcpaw_init
 !!***
 
@@ -358,7 +407,7 @@ end subroutine rcpaw_init
 !! SOURCE
 
 subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
-& nfft,vtrial,cplex,ucvol,paw_an,&
+& nfft,vtrial,cplex,ucvol,&
 &                      gmet,rprimd,xred,ngfft,my_natom,&
 &                      distribfft,comm_fft,mpi_atmtab,comm_atom)
 !Arguments ------------------------------------
@@ -377,28 +426,28 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
  real(dp),intent(in) :: gmet(3,3)
  real(dp), intent(in) :: rprimd(3,3)
  real(dp), intent(in) :: xred(3,dtset%natom)
- real(dp),intent(in),target :: vtrial(cplex*nfft,dtset%nspden)
+ real(dp),intent(in),target :: vtrial(cplex*nfft)
  type(pawtab_type), target,intent(inout) :: pawtab(ntypat)
  type(pawrad_type), intent(in) :: pawrad(ntypat)
- type(paw_an_type),intent(inout) :: paw_an(my_natom)
 
 !Local variables-------------------------------
 !scalars
  integer :: me_fft,iatom
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- integer :: ii,itypat
- integer :: mesh_size
+ integer :: ii,itypat,ifft_old
+ integer :: mesh_size,ind1,ind2
  integer :: il,nfgd,ifft,iln
  integer :: n1,n2,n3,i3,ispden
  integer :: my_comm_atom,iat,ierr
  logical :: my_atmtab_allocated,paral_atom,grid_found
- real(dp) :: eigshift,r2_tmp
+ real(dp) :: eigshift,r1,r2,est_err,vh1,vh2
 !arrays
  integer,pointer :: my_atmtab(:)
  integer,allocatable :: ifftsph(:)
  real(dp), allocatable :: nt1hat0(:)
  real(dp),allocatable :: rfgd(:,:)
  real(dp),allocatable :: vh_sph(:)
+ integer :: local_arr(2),global_arr(2)
 
 !******************************************************************************************
 
@@ -446,6 +495,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
  do itypat=1,dtset%ntypat
    if(.not.rcpaw%atm(itypat)%nc_conv) then
      eigshift=zero
+     est_err=zero
      do iat=1,my_natom
        iatom=iat;if (paral_atom) iatom=my_atmtab(iat)
        if(dtset%typat(iatom)==itypat) then ! Average on atoms of same type
@@ -468,17 +518,49 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
          ABI_FREE(nt1hat0)
          call pawrfgd_fft(ifftsph,gmet,n1,n2,n3,nfgd,0.5_dp,rfgd,rprimd,ucvol,xred(:,iatom),&
 &                        fftn3_distrib,ffti3_local,me_fft)
-         ifft=ifftsph(1)
-         r2_tmp=norm2(rfgd(:,1))
-         do ii=2,nfgd
-           if(norm2(rfgd(:,ii))<r2_tmp) then
+         r1=0.6_dp
+         r2=r1
+         ifft=1
+         ifft_old=1
+         do ii=1,nfgd
+           if(norm2(rfgd(:,ii))<r1) then
+             ifft_old=ifft
              ifft=ifftsph(ii)
-             r2_tmp=norm2(rfgd(:,ii))
+             r2=r1
+             r1=norm2(rfgd(:,ii))
            endif
          enddo
          ABI_FREE(ifftsph)
          ABI_FREE(rfgd)
-         eigshift=eigshift+vtrial(ifft,1)-vh_sph(1)-pawtab(itypat)%vhtnzc(1)-paw_an(iat)%vxct1(1,1,1)/sqrt(four_pi)
+         global_arr(1)=r1
+         global_arr(2)=0
+         if(present(comm_fft)) then
+           local_arr(1)=r1
+           local_arr(2)=me_fft
+           ! Check which processor is closest to minimum
+#if defined HAVE_MPI
+           call MPI_ALLREDUCE(local_arr,global_arr,1,MPI_2INT,MPI_MINLOC,comm_fft,ierr)
+#endif
+         endif
+         if(me_fft==global_arr(2)) then
+           ind1=pawrad_ifromr(pawrad(itypat),r1)
+           ind2=pawrad_ifromr(pawrad(itypat),r2)
+           vh1=vh_sph(ind1)+pawtab(itypat)%vhtnzc(ind1)+(r1-pawrad(itypat)%rad(ind1))*&
+&              (pawtab(itypat)%vhtnzc(ind1+1)+vh_sph(ind1+1)-vh_sph(ind1)-pawtab(itypat)%vhtnzc(ind1))/&
+&              (pawrad(itypat)%rad(ind1+1)-pawrad(itypat)%rad(ind1))
+           vh2=vh_sph(ind2)+pawtab(itypat)%vhtnzc(ind2)+(r2-pawrad(itypat)%rad(ind2))*&
+&              (pawtab(itypat)%vhtnzc(ind2+1)+vh_sph(ind2+1)-vh_sph(ind2)-pawtab(itypat)%vhtnzc(ind2))/&
+&              (pawrad(itypat)%rad(ind2+1)-pawrad(itypat)%rad(ind2))
+           eigshift=eigshift+vtrial(ifft)-vh1
+           if(r1>zero) then
+              est_err=est_err+abs((vtrial(ifft)-vh1)-&
+&                                  (vtrial(ifft_old)-vh2))
+            endif
+         endif
+         if(present(comm_fft)) then
+           call xmpi_bcast(eigshift,global_arr(2),comm_fft,ierr)
+           call xmpi_bcast(est_err,global_arr(2),comm_fft,ierr)
+         endif
          ABI_FREE(vh_sph)
        endif
      enddo
@@ -486,9 +568,15 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
      if(paral_atom) then
        call xmpi_sum(eigshift,my_comm_atom,ierr)
        call xmpi_bcast(eigshift,0,my_comm_atom,ierr)
+       call xmpi_sum(est_err,my_comm_atom,ierr)
+       call xmpi_bcast(est_err,0,my_comm_atom,ierr)
      endif
-     rcpaw%atm(itypat)%eig=rcpaw%atm(itypat)%eig+eigshift/rcpaw%atm(itypat)%mult ! Average on atoms of same type
-     if(rcpaw%atm(itypat)%nresid_c<rcpaw%tolnc)rcpaw%atm(itypat)%nc_conv=.true.
+     rcpaw%atm(itypat)%eigshift=eigshift/rcpaw%atm(itypat)%mult
+     write(std_out,*) 'ESTIMATED ERROR ON CORE EIGS OF TYPAT',itypat,' = ',est_err*Ha_eV, ' eV'
+     if(allocated(rcpaw%atm(itypat)%eig)) rcpaw%atm(itypat)%eig=rcpaw%atm(itypat)%eig+eigshift/rcpaw%atm(itypat)%mult ! Average on atoms of same type
+     if(rcpaw%atm(itypat)%nresid_c<rcpaw%tolnc.and.rcpaw%istep>rcpaw%updatepaw(2).and.rcpaw%updatepaw(2)/=0)then
+        rcpaw%atm(itypat)%nc_conv=.true.
+     endif
    endif
  enddo
 

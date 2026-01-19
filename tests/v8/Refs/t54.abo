@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ANADDB, released Sep 2024.
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h14 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h15 )
 
 
 ================================================================================
@@ -28,8 +28,8 @@
          asr         2
  Interatomic Force Constants Inputs :
       dipdip         1
-      dipqua         1
-      quadqu         1
+     dipquad         0
+    quadquad         0
       ifcana         0
       ifcout         0
  Description of grid 1 :
@@ -113,7 +113,6 @@
 
  Calculation of the interatomic forces
 
--begin at tcpu      0.033  and twall      0.033 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      144
  greater than 80, so only write 20 of them
@@ -144,19 +143,19 @@
 
  Calculation of phonon density of states
 
- Average speed of sound partial sums:     0.2373329001E-02 (at units)
+ Average speed of sound partial sums:     0.2373328999E-02 (at units)
 -                                   =           5.1921 [km/s]
 
  Debye frequency from partial sums:     0.1193444711E-02 (Ha)
--                                 =     0.7852488976E+01 (THz)
--Debye temperature from partial sums:     0.3768595860E+03 (K)
+-                                 =     0.7852488972E+01 (THz)
+-Debye temperature from partial sums:     0.3768600331E+03 (K)
 
- Average speed of sound:     0.1857634414E-03 (at units)
+ Average speed of sound:     0.1857634413E-03 (at units)
 -                      =           0.4064 [km/s]
 
- Debye frequency from DOS:     0.9341241629E-04 (Ha)
--                        =     0.6146241735E+00 (THz)
--Debye temperature from DOS:     0.2949727306E+02 (K)
+ Debye frequency from DOS:     0.9341241626E-04 (Ha)
+-                        =     0.6146241732E+00 (THz)
+-Debye temperature from DOS:     0.2949730806E+02 (K)
 
 
 ================================================================================
@@ -177,13 +176,13 @@
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -1.0 -2.0  1.0  0.0 -1.0  1.0  1.0  0.0 -1.0 -2.0  1.0
+  3.0 -1.0 -2.0  1.0 -0.0 -1.0  1.0  1.0 -0.0 -1.0 -2.0  1.0
  Symmetry characters of vibration mode #   4
         degenerate with vibration mode #   5
-  2.0  0.0  1.0  0.0 -1.0  0.0 -2.0  0.0 -1.0 -0.0  1.0 -0.0
+  2.0  0.0  1.0 -0.0 -1.0 -0.0 -2.0 -0.0 -1.0  0.0  1.0  0.0
  Symmetry characters of vibration mode #   6
         degenerate with vibration mode #   7
-  2.0 -0.0 -1.0 -0.0 -1.0  0.0  2.0  0.0 -1.0 -0.0 -1.0  0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #   8
   1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #   9
@@ -195,7 +194,7 @@
    2.225818E-03  2.413234E-03  2.941463E-03  3.034007E-03
  Phonon frequencies in cm-1    :
 -  1.051253E+02  1.595529E+02  2.706267E+02  4.451978E+02  4.814125E+02
--  4.885106E+02  5.296437E+02  6.455766E+02  6.658875E+02
+-  4.885106E+02  5.296436E+02  6.455766E+02  6.658875E+02
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -237,10 +236,10 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00  4.559219E+02  4.559219E+02
 -  5.048500E+02  5.048500E+02  6.952030E+02  7.146489E+02
 -
-- Proc.   0 individual time (sec): cpu=         22.5  wall=         22.5
+- Proc.   0 individual time (sec): cpu=         22.6  wall=         22.6
 
 ================================================================================
 
-+Total cpu time     22.514  and wall time     22.520 sec
++Total cpu time     22.614  and wall time     22.619 sec
 
  anaddb : the run completed successfully.
