@@ -2453,6 +2453,9 @@ subroutine pawdijnd(dijnd,cplex_dij,gprimd,iatom,natom,ndij,nspden,nucdipmom,&
  lmn2_size=pawtab%lmn2_size
  usezora=((zora.EQ.1).OR.(zora.EQ.3))
 
+ !write(std_out,'(a,I4,L4)')'JWZ debug pawdijnd zora use_zora ', &
+ !  & zora,usezora
+
 !Check data consistency
  if (cplex_dij/=2) then
    msg='cplex_dij must be 2 for nuclear dipole moments !'
@@ -2647,8 +2650,8 @@ subroutine pawdijaa(dijnd,gprimd,iatom,jatom,mesh_size,natom,nucdipmom,&
  d2ij(1,1,1)=c3/three;  d2ij(1,1,7)=-c2/three; d2ij(1,1,9)=c1 ! xx/r^2 = c3/3 S_00-c2/3 S_20 + c1 S-{2,2}
  d2ij(2,2,1)=c3/three;  d2ij(2,2,7)=-c2/three; d2ij(2,2,9)=-c1 ! xx/r^2 = c3/3 S_00-c2/3 S_20 - c1 S-{2,2}
 
- ! need set of Gaunt integrals one larger than usual
- my_lmax=pawang%l_max+1
+ ! need set of Gaunt integrals two larger than usual
+ my_lmax=pawang%l_max+2
  my_lsizemax=2*my_lmax-1
  LIBPAW_ALLOCATE(my_gntselect,((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2))
  LIBPAW_ALLOCATE(my_realgnt,((2*my_lmax-1)**2*my_lmax**4))
@@ -2905,6 +2908,8 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
  indklmn => pawtab%indklmn
 
  select case(zora)
+   case(-4)
+     use_soc=.FALSE.; use_sd=.TRUE.; use_fc=.TRUE.
    case(-3)
      use_soc=.FALSE.; use_sd=.FALSE.; use_fc=.TRUE.
    case(-2)
@@ -2929,6 +2934,9 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
    case default
      use_soc=.TRUE.; use_sd=.FALSE.; use_fc=.FALSE.
  end select
+
+ !write(std_out,'(a,3L4)')'JWZ debug pawdijso use_soc use_sd use_fc : ',&
+ !  & use_soc,use_sd,use_fc
 
 !Check data consistency
  if (qphase/=1) then
@@ -4217,6 +4225,9 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
                  else ! no phase
                    do ilslm=1,lm_size
                      do ic=1,nfgd
+#if defined FC_NVHPC
+                       if (my_natom == -1) write(std_out, *)"NVHPC raises an internal compiler error that is fixed by this print statement."
+#endif
                        contrib(1:qphase)=vloc(1:qphase,ic)*pawfgrtab(iatom)%gylm(ic,ilslm)
                        intvloc(1:qphase,ilslm)=intvloc(1:qphase,ilslm)+contrib(1:qphase)
                      end do

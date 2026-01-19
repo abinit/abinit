@@ -1,5 +1,5 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2025 ABINIT group .
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h05 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h05 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_trf2_1-trf2_2-trf2_3-trf2_4-trf2_5-trf2_6-trf2_7/trf2_2.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_trf2_1-trf2_2-trf2_3-trf2_4-trf2_5-trf2_6-trf2_7/trf2_2.abi
 - output file    -> trf2_2.abo
 - root for input  files -> trf2_2i
 - root for output files -> trf2_2o
@@ -33,6 +33,7 @@
 -    mband =           4        mffmem =           1         mkmem =         128
 -   mkqmem =         128        mk1mem =         128           mpw =          77
       nfft =        1728          nkpt =         128
+- my_mband =           4
 ================================================================================
 P This job should need less than                       3.363 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -50,6 +51,7 @@ _ WF disk file :      0.604 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =          77
       nfft =        1728          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                       5.558 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -67,6 +69,7 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =          77
       nfft =        1728          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                       5.558 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -84,6 +87,7 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =          77
       nfft =        1728          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                       5.558 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -101,6 +105,7 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =          77
       nfft =        1728          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                       5.558 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -118,6 +123,7 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =          77
       nfft =        1728          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                       5.558 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -135,6 +141,7 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =          77
       nfft =        1728          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                       5.558 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -152,6 +159,7 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         256
 -   mkqmem =         256        mk1mem =         256           mpw =          77
       nfft =        1728          nkpt =         256
+- my_mband =           4
 ================================================================================
 P This job should need less than                       5.558 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
@@ -765,7 +773,7 @@ P          mk1mem8        256
                          0.00391    0.00391
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4036425458E+00  1.4036425458E+00  1.4036425458E+00
+                       1.4036425510E+00  1.4036425510E+00  1.4036425510E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6525000000E+00  2.6525000000E+00  2.6525000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -824,8 +832,8 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05142
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -837,8 +845,8 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -949,7 +957,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.5007904420E+01 Ha. Also 2DEtotal=    0.136272009510E+03 eV
+ 2DEtotal=    0.5007904420E+01 Ha. Also 2DEtotal=    0.136272021459E+03 eV
     (2DErelax=   -1.6150035857E+01 Ha. 2DEnonrelax=    2.1157940277E+01 Ha)
     (  non-var. 2DEtotal :    5.0079062068E+00 Ha)
 
@@ -1009,7 +1017,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87269502E+01  frxc 2 =   2.15252646E+01
  Resulting in :
- 2DEtotal=    0.5007832720E+01 Ha. Also 2DEtotal=    0.136270058449E+03 eV
+ 2DEtotal=    0.5007832720E+01 Ha. Also 2DEtotal=    0.136270070397E+03 eV
     (2DErelax=   -7.8834005571E+01 Ha. 2DEnonrelax=    8.3841838291E+01 Ha)
     (  non-var. 2DEtotal :    5.0078223758E+00 Ha)
 
@@ -1064,7 +1072,7 @@ tolerances: {tolvrs: 1.00E-08, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -2.18746797E+02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.2187467967E+03 Ha. Also 2DEtotal=   -0.595240305252E+04 eV
+ 2DEtotal=   -0.2187467967E+03 Ha. Also 2DEtotal=   -0.595240357445E+04 eV
     (  non-var. 2DEtotal :   -2.1874679555E+02 Ha)
 ================================================================================
 
@@ -1384,8 +1392,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.96688
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1397,8 +1405,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1489,7 +1497,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.6020406794E+01 Ha. Also 2DEtotal=    0.163823600275E+03 eV
+ 2DEtotal=    0.6020406794E+01 Ha. Also 2DEtotal=    0.163823614640E+03 eV
     (2DErelax=   -2.8860899685E+01 Ha. 2DEnonrelax=    3.4881306479E+01 Ha)
     (  non-var. 2DEtotal :    6.0204023577E+00 Ha)
 
@@ -1545,7 +1553,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.4825950633E+01 Ha. Also 2DEtotal=    0.131320795168E+03 eV
+ 2DEtotal=    0.4825950633E+01 Ha. Also 2DEtotal=    0.131320806682E+03 eV
     (2DErelax=   -1.6821295202E+01 Ha. 2DEnonrelax=    2.1647245835E+01 Ha)
     (  non-var. 2DEtotal :    4.8259512501E+00 Ha)
 
@@ -1605,7 +1613,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87269574E+01  frxc 2 =   2.15252646E+01
  Resulting in :
- 2DEtotal=    0.5996994043E+01 Ha. Also 2DEtotal=    0.163186506921E+03 eV
+ 2DEtotal=    0.5996994043E+01 Ha. Also 2DEtotal=    0.163186521230E+03 eV
     (2DErelax=   -1.1596529878E+02 Ha. 2DEnonrelax=    1.2196229283E+02 Ha)
     (  non-var. 2DEtotal :    5.9969983322E+00 Ha)
 
@@ -1661,7 +1669,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87269521E+01  frxc 2 =   2.15252646E+01
  Resulting in :
- 2DEtotal=    0.5063732630E+01 Ha. Also 2DEtotal=    0.137791172365E+03 eV
+ 2DEtotal=    0.5063732630E+01 Ha. Also 2DEtotal=    0.137791184447E+03 eV
     (2DErelax=   -8.0137285864E+01 Ha. 2DEnonrelax=    8.5201018494E+01 Ha)
     (  non-var. 2DEtotal :    5.0637292465E+00 Ha)
 
@@ -1807,8 +1815,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.88435
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1820,8 +1828,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1912,7 +1920,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.6313859159E+01 Ha. Also 2DEtotal=    0.171808845225E+03 eV
+ 2DEtotal=    0.6313859159E+01 Ha. Also 2DEtotal=    0.171808860290E+03 eV
     (2DErelax=   -2.8083560337E+01 Ha. 2DEnonrelax=    3.4397419496E+01 Ha)
     (  non-var. 2DEtotal :    6.3138604304E+00 Ha)
 
@@ -1968,7 +1976,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.4811437448E+01 Ha. Also 2DEtotal=    0.130925871323E+03 eV
+ 2DEtotal=    0.4811437448E+01 Ha. Also 2DEtotal=    0.130925882803E+03 eV
     (2DErelax=   -1.7319695370E+01 Ha. 2DEnonrelax=    2.2131132818E+01 Ha)
     (  non-var. 2DEtotal :    4.8114375444E+00 Ha)
 
@@ -2027,7 +2035,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87269645E+01  frxc 2 =   2.15252646E+01
  Resulting in :
- 2DEtotal=    0.6171180570E+01 Ha. Also 2DEtotal=    0.167926363357E+03 eV
+ 2DEtotal=    0.6171180570E+01 Ha. Also 2DEtotal=    0.167926378081E+03 eV
     (2DErelax=   -1.1444697461E+02 Ha. 2DEnonrelax=    1.2061815518E+02 Ha)
     (  non-var. 2DEtotal :    6.1711790379E+00 Ha)
 
@@ -2083,7 +2091,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87269540E+01  frxc 2 =   2.15252646E+01
  Resulting in :
- 2DEtotal=    0.5053907022E+01 Ha. Also 2DEtotal=    0.137523803971E+03 eV
+ 2DEtotal=    0.5053907022E+01 Ha. Also 2DEtotal=    0.137523816029E+03 eV
     (2DErelax=   -8.1491240078E+01 Ha. 2DEnonrelax=    8.6545147100E+01 Ha)
     (  non-var. 2DEtotal :    5.0539094695E+00 Ha)
 
@@ -2229,8 +2237,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.96780
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2242,8 +2250,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2340,7 +2348,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.5757997253E+01 Ha. Also 2DEtotal=    0.156683073524E+03 eV
+ 2DEtotal=    0.5757997253E+01 Ha. Also 2DEtotal=    0.156683087262E+03 eV
     (2DErelax=   -2.5229071003E+01 Ha. 2DEnonrelax=    3.0987068257E+01 Ha)
     (  non-var. 2DEtotal :    5.7579959249E+00 Ha)
 
@@ -2398,7 +2406,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87269571E+01  frxc 2 =   2.15252646E+01
  Resulting in :
- 2DEtotal=    0.5848612430E+01 Ha. Also 2DEtotal=    0.159148837882E+03 eV
+ 2DEtotal=    0.5848612430E+01 Ha. Also 2DEtotal=    0.159148851837E+03 eV
     (2DErelax=   -1.0529635224E+02 Ha. 2DEnonrelax=    1.1114496467E+02 Ha)
     (  non-var. 2DEtotal :    5.8486120829E+00 Ha)
 
@@ -2544,8 +2552,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.88338
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2557,8 +2565,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2640,7 +2648,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.5762005403E+01 Ha. Also 2DEtotal=    0.156792140824E+03 eV
+ 2DEtotal=    0.5762005403E+01 Ha. Also 2DEtotal=    0.156792154572E+03 eV
     (2DErelax=   -2.6737474772E+01 Ha. 2DEnonrelax=    3.2499480175E+01 Ha)
     (  non-var. 2DEtotal :    5.7620038561E+00 Ha)
 
@@ -2697,7 +2705,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.5303944832E+01 Ha. Also 2DEtotal=    0.144327678804E+03 eV
+ 2DEtotal=    0.5303944832E+01 Ha. Also 2DEtotal=    0.144327691459E+03 eV
     (2DErelax=   -2.0897854670E+01 Ha. 2DEnonrelax=    2.6201799502E+01 Ha)
     (  non-var. 2DEtotal :    5.3039450318E+00 Ha)
 
@@ -2753,7 +2761,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.4432995763E+01 Ha. Also 2DEtotal=    0.120627949365E+03 eV
+ 2DEtotal=    0.4432995763E+01 Ha. Also 2DEtotal=    0.120627959942E+03 eV
     (2DErelax=   -1.8911331010E+01 Ha. 2DEnonrelax=    2.3344326774E+01 Ha)
     (  non-var. 2DEtotal :    4.4329964581E+00 Ha)
 
@@ -2811,7 +2819,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87269643E+01  frxc 2 =   2.15252646E+01
  Resulting in :
- 2DEtotal=    0.6141535021E+01 Ha. Also 2DEtotal=    0.167119666944E+03 eV
+ 2DEtotal=    0.6141535021E+01 Ha. Also 2DEtotal=    0.167119681597E+03 eV
     (2DErelax=   -1.0920456673E+02 Ha. 2DEnonrelax=    1.1534610175E+02 Ha)
     (  non-var. 2DEtotal :    6.1415359184E+00 Ha)
 
@@ -2869,7 +2877,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87269590E+01  frxc 2 =   2.15252646E+01
  Resulting in :
- 2DEtotal=    0.5732429585E+01 Ha. Also 2DEtotal=    0.155987341877E+03 eV
+ 2DEtotal=    0.5732429585E+01 Ha. Also 2DEtotal=    0.155987355554E+03 eV
     (2DErelax=   -9.2120119978E+01 Ha. 2DEnonrelax=    9.7852549563E+01 Ha)
     (  non-var. 2DEtotal :    5.7324298005E+00 Ha)
 
@@ -2925,7 +2933,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87269564E+01  frxc 2 =   2.15252646E+01
  Resulting in :
- 2DEtotal=    0.5209226013E+01 Ha. Also 2DEtotal=    0.141750248648E+03 eV
+ 2DEtotal=    0.5209226013E+01 Ha. Also 2DEtotal=    0.141750261077E+03 eV
     (2DErelax=   -8.4705901913E+01 Ha. 2DEnonrelax=    8.9915127926E+01 Ha)
     (  non-var. 2DEtotal :    5.2092357773E+00 Ha)
 
@@ -3071,8 +3079,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.97151
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3084,8 +3092,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3174,7 +3182,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.5232684970E+01 Ha. Also 2DEtotal=    0.142388599343E+03 eV
+ 2DEtotal=    0.5232684970E+01 Ha. Also 2DEtotal=    0.142388611828E+03 eV
     (2DErelax=   -2.2463940429E+01 Ha. 2DEnonrelax=    2.7696625399E+01 Ha)
     (  non-var. 2DEtotal :    5.2326854565E+00 Ha)
 
@@ -3229,7 +3237,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.4651960044E+01 Ha. Also 2DEtotal=    0.126586270449E+03 eV
+ 2DEtotal=    0.4651960044E+01 Ha. Also 2DEtotal=    0.126586281549E+03 eV
     (2DErelax=   -1.7512085348E+01 Ha. 2DEnonrelax=    2.2164045392E+01 Ha)
     (  non-var. 2DEtotal :    4.6519592104E+00 Ha)
 
@@ -3287,7 +3295,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87269593E+01  frxc 2 =   2.15252646E+01
  Resulting in :
- 2DEtotal=    0.5803934086E+01 Ha. Also 2DEtotal=    0.157933078326E+03 eV
+ 2DEtotal=    0.5803934086E+01 Ha. Also 2DEtotal=    0.157933092174E+03 eV
     (2DErelax=   -9.6200909394E+01 Ha. 2DEnonrelax=    1.0200484348E+02 Ha)
     (  non-var. 2DEtotal :    5.8039342661E+00 Ha)
 
@@ -3343,7 +3351,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87269540E+01  frxc 2 =   2.15252646E+01
  Resulting in :
- 2DEtotal=    0.5092013672E+01 Ha. Also 2DEtotal=    0.138560738636E+03 eV
+ 2DEtotal=    0.5092013672E+01 Ha. Also 2DEtotal=    0.138560750785E+03 eV
     (2DErelax=   -8.1544557244E+01 Ha. 2DEnonrelax=    8.6636570916E+01 Ha)
     (  non-var. 2DEtotal :    5.0920156345E+00 Ha)
 
@@ -3489,8 +3497,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.88823
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3502,8 +3510,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3599,7 +3607,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.6183397636E+01 Ha. Also 2DEtotal=    0.168258806642E+03 eV
+ 2DEtotal=    0.6183397636E+01 Ha. Also 2DEtotal=    0.168258821395E+03 eV
     (2DErelax=   -2.3918993084E+01 Ha. 2DEnonrelax=    3.0102390720E+01 Ha)
     (  non-var. 2DEtotal :    6.1833952276E+00 Ha)
 
@@ -3656,7 +3664,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87269640E+01  frxc 2 =   2.15252646E+01
  Resulting in :
- 2DEtotal=    0.5988020005E+01 Ha. Also 2DEtotal=    0.162942310912E+03 eV
+ 2DEtotal=    0.5988020005E+01 Ha. Also 2DEtotal=    0.162942325199E+03 eV
     (2DErelax=   -1.0269950017E+02 Ha. 2DEnonrelax=    1.0868752018E+02 Ha)
     (  non-var. 2DEtotal :    5.9880231899E+00 Ha)
 
@@ -3802,8 +3810,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.89209
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3815,8 +3823,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3905,7 +3913,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.4849157256E+01 Ha. Also 2DEtotal=    0.131952279497E+03 eV
+ 2DEtotal=    0.4849157256E+01 Ha. Also 2DEtotal=    0.131952291067E+03 eV
     (2DErelax=   -2.2746685598E+01 Ha. 2DEnonrelax=    2.7595842855E+01 Ha)
     (  non-var. 2DEtotal :    4.8491557704E+00 Ha)
 
@@ -3962,7 +3970,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.5467032512E+01 Ha. Also 2DEtotal=    0.148765520255E+03 eV
+ 2DEtotal=    0.5467032512E+01 Ha. Also 2DEtotal=    0.148765533299E+03 eV
     (2DErelax=   -2.4134110250E+01 Ha. 2DEnonrelax=    2.9601142762E+01 Ha)
     (  non-var. 2DEtotal :    5.4670328930E+00 Ha)
 
@@ -4019,7 +4027,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87269614E+01  frxc 2 =   2.15252646E+01
  Resulting in :
- 2DEtotal=    0.5846999380E+01 Ha. Also 2DEtotal=    0.159104944545E+03 eV
+ 2DEtotal=    0.5846999380E+01 Ha. Also 2DEtotal=    0.159104958496E+03 eV
     (2DErelax=   -9.5877890445E+01 Ha. 2DEnonrelax=    1.0172488982E+02 Ha)
     (  non-var. 2DEtotal :    5.8470019275E+00 Ha)
 
@@ -4076,7 +4084,7 @@ tolerances: {tolvrs: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87269640E+01  frxc 2 =   2.15252646E+01
  Resulting in :
- 2DEtotal=    0.6102219680E+01 Ha. Also 2DEtotal=    0.166049842107E+03 eV
+ 2DEtotal=    0.6102219680E+01 Ha. Also 2DEtotal=    0.166049856666E+03 eV
     (2DErelax=   -1.0119294506E+02 Ha. 2DEnonrelax=    1.0729516474E+02 Ha)
     (  non-var. 2DEtotal :    6.1022278053E+00 Ha)
 
@@ -4830,7 +4838,7 @@ P          mk1mem8        256
                          0.00391    0.00391
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.4036425458E+00  1.4036425458E+00  1.4036425458E+00
+                       1.4036425510E+00  1.4036425510E+00  1.4036425510E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.6525000000E+00  2.6525000000E+00  2.6525000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -4928,10 +4936,10 @@ P          mk1mem8        256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         52.8  wall=         53.3
+- Proc.   0 individual time (sec): cpu=         56.7  wall=         56.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  22 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         52.8  wall=         53.3
++Overall time at end (sec) : cpu=         56.7  wall=         56.8

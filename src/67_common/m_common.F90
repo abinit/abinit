@@ -44,7 +44,8 @@ module m_common
  use m_yaml
  use m_invars2
  use m_dtset
-
+ 
+ use m_rcpaw,             only : rcpaw_type
  use m_fstrings,          only : indent, endswith, sjoin, itoa
  use m_electronpositron,  only : electronpositron_type
  use m_energies,          only : energies_type
@@ -109,6 +110,7 @@ contains
 !!  cpus=cpu time limit in seconds
 !!  deltae=change in energy between the previous and present SCF cycle
 !!  diffor=maximum absolute change in component of fcart between present and previous SCF cycle.
+!!  difmagsph=maximum absolute change in magnetization between present and previous SCF cycle.
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | chkexit= if non-zero, check whether the user wishes to exit
 !!   | enunit=parameter determining units of output energies
@@ -150,6 +152,7 @@ contains
 !!  istep_mix=number of inner SCF iteration in the double loop approach
 !!  kpt(3,nkpt)=reduced coordinates of k points.
 !!  maxfor=maximum absolute value of fcart
+!!  maxmagsph=maximum absolute value of magnetization among all atoms.
 !!  moved_atm_inside: if==1, the atoms are allowed to move.
 !!  mpi_enreg=information about MPI parallelization
 !!  nband(nkpt*nsppol)=number of bands at each k point, for each polarization
@@ -168,7 +171,7 @@ contains
 !!  tollist(12)=tolerance list. Presently, the following are defined :
 !!    tollist(1)=tolmxf ; tollist(2)=tolwfr ; tollist(3)=toldff
 !!    tollist(4)=toldfe ; tollist(5)=toleig ; tollist(6)=tolvrs
-!!    tollist(7)=tolrff
+!!    tollist(7)=tolrff ; tollist(9)=toldmag
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  vxcavg=mean of the vxc potential
 !!  wtk(nkpt)=weight assigned to each k point.
@@ -180,13 +183,13 @@ contains
 !!
 !! SOURCE
 
-subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
+subroutine scprqt(choice,cpus,deltae,diffor,maxmagsph,difmagsph,dtset,&
 &  eigen,etotal,favg,fcart,fermie,fermih,fname_eig,filnam1,initGS,&
 &  iscf,istep,istep_fock_outer,istep_mix,kpt,maxfor,moved_atm_inside,mpi_enreg,&
 &  nband,nkpt,nstep,occ,optres,&
 &  prtfor,prtxml,quit,res2,resid,residm,response,tollist,usepaw,&
 &  vxcavg,wtk,xred,conv_retcode,&
-&  electronpositron, fock) ! optional arguments)
+&  electronpositron, fock,rcpaw) ! optional arguments)
 
 !Arguments ------------------------------------
 !scalars
@@ -194,13 +197,14 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  integer,intent(in) :: moved_atm_inside,nkpt,nstep
  integer,intent(in) :: optres,prtfor,prtxml,response,usepaw
  integer,intent(out) :: quit,conv_retcode
- real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,fermih,maxfor,res2,residm
+ real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,fermih,maxfor,res2,residm,maxmagsph,difmagsph
  real(dp),intent(in) :: vxcavg
  character(len=fnlen),intent(in) :: fname_eig,filnam1
  type(electronpositron_type),pointer,optional :: electronpositron
  type(fock_type),pointer,optional :: fock
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
+ type(rcpaw_type),intent(inout),optional,pointer :: rcpaw
 !arrays
  integer,intent(in) :: nband(nkpt*dtset%nsppol)
  real(dp),intent(in) :: eigen(dtset%mband*nkpt*dtset%nsppol),favg(3)
@@ -212,19 +216,21 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
+ !integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
+ integer,save :: toldfe_ok,toldff_ok,tolrff_ok,toldmag_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr,ttoldmag
  integer :: iatom,iband,iexit,ikpt,ii,ishift,isppol,my_rank
  integer :: nband_index,nband_k,nnsclohf
  integer :: openexit,option,tmagnet,usefock
 #if defined DEV_YP_VDWXC
  integer :: ivdw
 #endif
- real(dp),save :: toldfe,toldff,tolrff,tolvrs,tolwfr,vdw_df_threshold
+ !real(dp),save :: toldfe,toldff,tolrff,tolvrs,tolwfr,vdw_df_threshold
+ real(dp),save :: toldfe,toldff,tolrff,tolvrs,tolwfr,vdw_df_threshold, toldmag
  real(dp) :: diff_e,diff_f,magnet,rhodn,rhoup
  logical :: noquit,use_dpfft
  character(len=500) :: message, message2, message3
  character(len=2) :: format_istep
- character(len=5) :: format_magnet
+ !character(len=5) :: format_magnet
  character(len=8) :: colname
  character(len=1) :: firstchar
  type(yamldoc_t) :: ydoc
@@ -243,7 +249,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  use_dpfft = .False.
 
  tmagnet=0
- if(response==0.and.(iscf>0.or.iscf==-3).and.dtset%nsppol==2.and.dtset%occopt>2)tmagnet=1
+ if(response==0.and.(iscf>0.or.iscf==-3).and.dtset%nsppol==2.and.dtset%occopt>2) tmagnet=1
+ if((iscf>0.or.iscf==-3).and.(dtset%nsppol==2.or.dtset%nspden>1)) tmagnet=2
 
  ishift=0
  residm_band = zero
@@ -268,12 +275,14 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    tolvrs=tollist(6)
    tolrff=tollist(7)
    vdw_df_threshold=tollist(8)
-   ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0;
+   toldmag=tollist(9)
+   ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0; ttoldmag=0 ;
    if(abs(tolwfr)>tiny(zero))ttolwfr=1
    if(abs(toldff)>tiny(zero))ttoldff=1
    if(abs(tolrff)>tiny(zero))ttolrff=1
    if(abs(toldfe)>tiny(zero))ttoldfe=1
    if(abs(tolvrs)>tiny(zero))ttolvrs=1
+   if(abs(toldmag)>tiny(zero))ttoldmag=1
    !  If non-scf calculations, tolwfr must be defined
    if(ttolwfr /= 1 .and. (iscf<0 .and. iscf/=-3) )then
      write(message,'(a,a,a,es14.6,a,a)')&
@@ -288,13 +297,16 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ABI_ERROR('toldff only allowed when prtfor=1!')
    end if
    ! If SCF calculations, one and only one of these can differ from zero
-   if( (iscf>0 .or. iscf==-3) .and.(ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff>1) &
-    .and. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff/=1) ) then
+   !if( (iscf>0 .or. iscf==-3) .and.(ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff>1) &
+   if( (iscf>0 .or. iscf==-3) .and.(ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag>1) &
+    .and. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff+ttoldmag/=1) ) then
+    !.and. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff/=1) ) then
      write(message,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,a,a)' )&
 &     'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
-&     'toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
+&     'toldff, tolrff, toldfe, toldmag or tolvrs ','must differ from zero, while they are',ch10,&
 &     'toldff=',toldff,', tolrff=',tolrff,', toldfe=',toldfe,ch10,&
-&     'and tolvrs=',tolvrs,' .',ch10,&
+!&     'and tolvrs=',tolvrs,' .',ch10,&
+&     'toldmag=',toldmag,' and tolvrs=',tolvrs,' .',ch10,&
 &     'Action: change your input file and resubmit the job.'
      ABI_ERROR(message)
    end if
@@ -305,22 +317,22 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      write(colname, "(A)") "residm  "
    end if
    if (nstep>0 .and. (iscf>=0 .or.iscf==-3) .and. dtset%prtstm==0) then
-     if(tmagnet==1)then
+     if(tmagnet==2 .and. response==0)then
        if (prtfor==0) then
          if (optres==0) then
            write(message, '(4a)' ) ch10,&
-            '     iter   Etot(hartree)     deltaE(h) ',colname,'  vres2    magn'
+            '     iter   Etot(hartree)      deltaE(h)  ',colname,  '   vres2   difmagsph maxmagsph'
          else
            write(message, '(4a)' ) ch10,&
-            '     iter   Etot(hartree)     deltaE(h) ',colname,'  nres2    magn'
+            '     iter   Etot(hartree)      deltaE(h)  ',colname,  '   nres2   difmagsph maxmagsph'
          end if
        else
          if (optres==0) then
            write(message, '(4a)' ) ch10,&
-            '     iter   Etot(hartree)     deltaE(h) ',colname,'  vres2   diffor   maxfor   magn'
+            '     iter   Etot(hartree)      deltaE(h)  ',colname,  '   vres2    diffor    maxfor   difmagsph maxmagsph'
          else
            write(message, '(4a)' ) ch10,&
-            '     iter   Etot(hartree)     deltaE(h) ',colname,'  nres2   diffor   maxfor   magn'
+            '     iter   Etot(hartree)      deltaE(h)  ',colname,  '   nres2    diffor    maxfor   difmagsph maxmagsph'
          end if
        end if
      else
@@ -343,12 +355,22 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            end if
          end if
        else
-         if (optres==0) then
-           write(message, '(4a)' ) ch10,&
-            '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2'
+         if(tmagnet==2 .and. iscf>0 )then
+           if (optres==0) then
+             write(message, '(4a)' ) ch10,&
+              '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2    difmagsph maxmagsph'
+           else
+             write(message, '(4a)' ) ch10,&
+              '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2    difmagsph maxmagsph'
+           end if
          else
-           write(message, '(4a)' ) ch10,&
-            '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2'
+           if (optres==0) then
+             write(message, '(4a)' ) ch10,&
+              '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2 '
+           else
+             write(message, '(4a)' ) ch10,&
+              '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2 '
+           end if
          end if
        end if
      end if
@@ -357,8 +379,10 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !    If wfoptalg=1 or 111, we should write mdeg_filter
      call ydoc%add_ints("iscf, nstep, nline, wfoptalg", &
                         [dtset%iscf, dtset%nstep, dtset%nline, dtset%wfoptalg], dict_key="solver")
-     call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff", & ! , vdw_df_threshold", &
-                        [tolwfr, toldff, toldfe, tolvrs, tolrff], & !, vdw_df_threshold], &
+     call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff, toldmag", & ! , vdw_df_threshold", &
+                        [tolwfr, toldff, toldfe, tolvrs, tolrff, toldmag], & !, vdw_df_threshold], &
+     !call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff", & ! , vdw_df_threshold", &
+     !                   [tolwfr, toldff, toldfe, tolvrs, tolrff], & !, vdw_df_threshold], &
                         real_fmt="(es8.2)", dict_key="tolerances", ignore=zero)
 
      call ydoc%write_and_free(ab_out, newline=.False.)
@@ -374,18 +398,21 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    tolvrs=tollist(6)
    tolrff=tollist(7)
    vdw_df_threshold=tollist(8)
-   ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0;
+   toldmag=tollist(9)
+   ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0; ttoldmag=0;
+   !ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0;
    if(abs(tolwfr)>tiny(0.0_dp))ttolwfr=1
    if(abs(toldff)>tiny(0.0_dp))ttoldff=1
    if(abs(tolrff)>tiny(0.0_dp))ttolrff=1
    if(abs(toldfe)>tiny(0.0_dp))ttoldfe=1
    if(abs(tolvrs)>tiny(0.0_dp))ttolvrs=1
+   if(abs(toldmag)>tiny(0.0_dp))ttoldmag=1
 
    ! Conduct printing. If extra output follows, then put a blank line into the output here
    if (dtset%prtvol>=10) call wrtout([std_out, ab_out], ' ')
 
    ! Calculate up and down charge and magnetization
-   if(tmagnet==1) then
+   if(tmagnet==1 ) then
      rhoup = zero
      rhodn = zero
      nband_index = 1
@@ -434,20 +461,23 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      format_istep='i3'
      if(istep>99)format_istep='i5'
      if(istep>9999)format_istep='i7'
-     if(tmagnet==1)then
-       if(magnet<10)then
-         format_magnet='f6.3)'
-       else if(magnet<100)then
-         format_magnet='f6.2)'
-       else
-         format_magnet='f6.1)'
-       end if
+     !if(tmagnet==1)then
+     if(tmagnet==2 .and. response==0)then
+     !  if(magnet<10)then
+     !    format_magnet='f6.3)'
+     !  else if(magnet<100)then
+     !    format_magnet='f6.2)'
+     !  else
+     !    format_magnet='f6.1)'
+     !  end if
        if (prtfor==0) then
-         write(message, '(a,'//format_istep//',1p,g22.14,3es9.2,0p,'//format_magnet ) &
-          ' ETOT',istep,etotal,deltae,residm,res2,magnet
+         !write(message, '(a,'//format_istep//',1p,g22.14,3es9.2,0p,'//format_magnet ) &
+         write(message, '(a,'//format_istep//',1p,g22.14,5es10.3)' ) &
+          !' ETOT',istep,etotal,deltae,residm,res2,magnet
+          ' ETOT',istep,etotal,deltae,residm,res2,difmagsph,maxmagsph
        else
-         write(message, '(a,'//format_istep//',1p,g22.14,3es9.2,es8.1,es9.2,0p,'//format_magnet ) &
-          ' ETOT',istep,etotal,deltae,residm,res2,diffor,maxfor,magnet
+         write(message, '(a,'//format_istep//',1p,g22.14,7es10.3)' ) &
+          ' ETOT',istep,etotal,deltae,residm,res2,diffor,maxfor,difmagsph,maxmagsph
        end if
      else
        firstchar=' '
@@ -461,8 +491,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
             firstchar,'ETOT',istep,etotal,deltae,residm,res2,diffor,maxfor
          end if
        else
-         write(message, '(2a,'//format_istep//',1p,g22.14,1x,3es10.3)' ) &
-          firstchar,'ETOT',istep,etotal,deltae,residm,res2
+         if(tmagnet==2 .and. iscf>0 )then
+           write(message, '(2a,'//format_istep//',1p,g22.14,1x,5es10.3)' ) &
+            firstchar,'ETOT',istep,etotal,deltae,residm,res2,difmagsph,maxmagsph
+         else
+           write(message, '(2a,'//format_istep//',1p,g22.14,1x,3es10.3)' ) &
+            firstchar,'ETOT',istep,etotal,deltae,residm,res2
+         end if
        end if
      end if
      !if (etot_yaml_doc%stream%length /= 0) call etot_yaml_doc%add_tabular_line('  '//message(6:))
@@ -544,7 +579,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    if (present(electronpositron)) then
      if (associated(electronpositron)) then
        if (electronpositron%istep_scf==1) then
-         toldff_ok=0;tolrff_ok=0;toldfe_ok=0
+         toldff_ok=0;tolrff_ok=0;toldfe_ok=0; toldmag_ok=0;
        end if
      end if
    end if
@@ -562,7 +597,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 #endif
      ! Here treat the tolwfr criterion: if maximum residual is less than
      ! input tolwfr, stop steps (exit loop here)
-     if (ttolwfr == 1 .and. (ttolvrs+ttoldfe+ttoldff+ttolrff==0) .and. .not. noquit) then
+     if (ttolwfr == 1 .and. (ttolvrs+ttoldfe+ttoldff+ttolrff+ttoldmag==0) .and. .not. noquit) then
+     !if (ttolwfr == 1 .and. (ttolvrs+ttoldfe+ttoldff+ttolrff==0) .and. .not. noquit) then
        if (residm < tolwfr) then
          if (dtset%usewvl == 0) then
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
@@ -576,6 +612,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        else
          use_dpfft = residm < tol7
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.residm < (tolwfr)**third) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep 
+           endif
+         endif
+       endif
      end if
 
      ! Here treat the toldff criterion: if maximum change of fcart is less than
@@ -597,6 +640,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          toldff_ok=0
          use_dpfft = diffor < tol6
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.diffor < (toldff)**third) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep
+           endif
+         endif
+       endif
 
        if(toldff_ok>=2 .and..not.noquit)then
          if (ttolwfr==0) then
@@ -609,6 +659,43 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3)' ) ch10, &
             ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND forces are converged : ',ch10,&
             '  for the second time, max diff in force=',diffor,' < toldff=',toldff
+           call wrtout([std_out, ab_out], message)
+           quit=1
+        end if
+       end if
+     end if
+
+     ! HEREEEE
+     if (ttoldmag==1) then
+       if (istep==1) then
+         toldmag_ok=0
+       else if (difmagsph < toldmag) then
+         toldmag_ok=toldmag_ok+1
+         ! add warning for magnetizations which are 0 . Check below that the wave
+         ! functions are relatively converged as well
+         if (maxmagsph < tol8) then
+           write (message,'(3a)') ' toldmag criterion is satisfied, but your magnetizations are suspiciously low.', ch10,&
+            ' Check if the magnetizations are 0 : in that case you can not use the toldmag convergence criterion!'
+           ABI_WARNING(message)
+     ! HEREE  ??
+         end if
+         if (res2 > tol9) toldmag_ok=0
+       else
+         toldmag_ok=0
+         use_dpfft = difmagsph < tol6
+       end if
+
+       if(toldmag_ok>=2 .and..not.noquit)then
+         if (ttolwfr==0) then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
+            ' At SCF step',istep,', magnetizations are converged : ',ch10,&
+            '  for the second time, max diff in magnetization=',difmagsph,' < toldmag=',toldmag
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else if (ttolwfr==1 .and. residm < tolwfr )then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3)' ) ch10, &
+            ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND magnetizations are converged : ',ch10,&
+            '  for the second time, max diff in magnetization=',difmagsph,' < toldmag=',toldmag
            call wrtout([std_out, ab_out], message)
            quit=1
         end if
@@ -630,6 +717,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          tolrff_ok=0
          use_dpfft = diffor < tolrff * maxfor * five
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.(diffor < ( tolrff*maxfor)**third.or.(maxfor < tol6 .and. diffor < tol6))) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep
+           endif
+         endif
+       endif
        if(tolrff_ok>=2 .and. (.not.noquit))then
          if (ttolwfr==0) then
            write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
@@ -660,6 +754,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          toldfe_ok=0
          use_dpfft = abs(deltae) < tol8
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.abs(deltae) < (toldfe)**third) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep
+           endif
+         endif
+       endif
        ! Fock : tolwfr not taken into account
        if(usefock/=0.and.nnsclohf>=2) then
          if (toldfe_ok==2 .and. (.not.noquit))then
@@ -760,6 +861,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            use_dpfft = res2 < tol5
          end if
        end if
+       if(present(rcpaw)) then
+         if (associated(rcpaw).and.res2 < (tolvrs)**third) then
+           if(rcpaw%updatepaw(1)==0.and.rcpaw%updatepaw(2)==0) then
+             rcpaw%updatepaw(:)=istep
+           endif
+         endif
+       endif
      end if
 
      if (quit==1.and.noquit) then
@@ -776,8 +884,18 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ii = fftcore_set_mixprec(0)
    end if
 
+   ! Additional stuff for rcpaw
+   if(present(rcpaw)) then
+     if(associated(rcpaw)) then
+       if(rcpaw%updatepaw(2)>0.and.rcpaw%frocc) rcpaw%updateocc=rcpaw%updatepaw(2) 
+       if(rcpaw%updatetnc==0)rcpaw%updatetnc=rcpaw%updatepaw(2)
+       if(quit==1.and.(rcpaw%istep<rcpaw%updatepaw(2).or.rcpaw%updatepaw(2)==0))quit=0
+     endif
+   endif
+
  case (3)
    ! If wavefunction convergence was not reached (for nstep>0) print a warning and return conv_retcode
+   
    conv_retcode = 0
    if(nstep>0) then
      if (.not. converged()) then
@@ -832,6 +950,10 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          write(message, '(a,es11.3,a,es11.3,a)' ) &
          '  maximum force difference=',diffor,' exceeds toldff=',toldff,ch10
 
+       else if (ttoldmag==1) then
+         write(message, '(a,es11.3,a,es11.3,a)' ) &
+         '  maximum magnetization difference=',difmagsph,' exceeds toldmag=',toldmag,ch10
+
        else if (ttolrff==1) then
          write(message, '(a,es11.3,a,es11.3,a)' ) &
          '  maximum force difference=',diffor,' exceeds tolrff*maxfor=',tolrff*maxfor,ch10
@@ -874,6 +996,12 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
            write(ab_xml_out, "(A)") ' stop-criterion="toldff" />'
          else
            write(ab_xml_out, "(A)") ' stop-criterion="toldff+tolwfr" />'
+         end if
+       else if (ttoldmag == 1) then
+         if (ttolwfr==0) then
+           write(ab_xml_out, "(A)") ' stop-criterion="toldmag" />'
+         else
+           write(ab_xml_out, "(A)") ' stop-criterion="toldmag+tolwfr" />'
          end if
        else if (ttolrff == 1) then
          if (ttolwfr==0) then
@@ -994,6 +1122,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    end if
    if (ttoldff==1) then
      if (diffor > toldff) loc_conv=.false.
+   end if
+   if (ttoldmag==1) then
+     if (difmagsph > toldmag) loc_conv=.false.
    end if
    if (ttolrff==1) then
      if (diffor > tolrff*maxfor .and. maxfor > tol16) loc_conv=.false.
@@ -1485,12 +1616,12 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !Local variables-------------------------------
 !scalars
  integer :: ipositron,optdc
- logical :: directE_avail,testdmft,write_entropy=.false.,write_totalxc=.false.
+ logical :: directE_avail,testdmft,write_entropy=.false.,write_totalxc=.false.,write_epaw_core=.false.
  real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal,el_temp
  ! Do not modify the length of these strings
  character(len=14) :: eneName
  character(len=500) :: info,msg
- type(yamldoc_t) :: edoc,dc_edoc,sdoc,ftxcdoc
+ type(yamldoc_t) :: edoc,dc_edoc,pawcore_edoc,sdoc,ftxcdoc
 !arrays
  !character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
@@ -1560,7 +1691,15 @@ subroutine prtene(dtset,energies,iout,usepaw)
          call edoc%add_real('non_local_psp+x', energies%e_nlpsp_vfock-energies%e_fock0)
        endif
      else
-       call edoc%add_real('spherical_terms', energies%e_paw)
+       if (dtset%use_rcpaw/=0) then
+         call edoc%add_real('PAW spherical_terms', energies%paw%epaw)
+         call edoc%add_real('PAW core', energies%paw%epaw_core)
+       else if (dtset%paw_add_core==1) then
+         call edoc%add_real('PAW spherical_terms', energies%paw%epaw-energies%paw%epaw_core)
+         call edoc%add_real('PAW core', energies%paw%epaw_core)
+       else
+         call edoc%add_real('PAW spherical_terms', energies%paw%epaw)
+       end if
        !!!XG20181025 Does not work (yet)...
        !!!if(abs(energies%e_nlpsp_vfock)>tol8)then
        !!!  write(msg, '(a,es21.14)' )'    Fock-type term  = ',energies%e_nlpsp_vfock
@@ -1568,9 +1707,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
        !!!  write(msg, '(a,es21.14)' ) '    -frozen Fock en.= ',-energies%e_fock0
        !!!  call wrtout(iout,msg)
        !!!endif
-       if(abs(energies%e_cpaw)>tiny(0.0_dp)) then
-         call edoc%add_real('cpaw', energies%e_cpaw)
-       endif
      end if
      if (ANY(ABS(dtset%nucdipmom)>tol8)) then
        call edoc%add_real('nucl. magn. dipoles',energies%e_nucdip)
@@ -1656,10 +1792,15 @@ subroutine prtene(dtset,energies,iout,usepaw)
      call dc_edoc%add_real('electric_field', energies%e_elecfield)
    end if
    if (usepaw==1) then
-     call dc_edoc%add_real('spherical_terms', energies%e_pawdc)
-     if(abs(energies%e_cpawdc)>tiny(0.0_dp)) then
-       call dc_edoc%add_real('cpaw_dc', energies%e_cpawdc)
-     endif
+     if (dtset%use_rcpaw/=0) then
+       call dc_edoc%add_real('PAW spherical_terms', energies%paw%epaw_dc)
+       call dc_edoc%add_real('PAW core dc', energies%paw%epaw_core_dc)
+     else if (dtset%paw_add_core==1) then
+       call dc_edoc%add_real('PAW spherical_terms', energies%paw%epaw_dc-energies%paw%epaw_core)
+       call dc_edoc%add_real('PAW core', energies%paw%epaw_core)
+     else
+       call dc_edoc%add_real('PAW spherical_terms', energies%paw%epaw_dc)
+     end if
    end if
    if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
      call dc_edoc%add_real('VdWaals_dft_d', energies%e_vdw_dftd)
@@ -1710,7 +1851,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call dc_edoc%add_real('total_energy_dc', etotaldc)
  end if
 
-!======= Additional printing for compatibility  ==========
+!======= Additional printing ==========
 
  if (usepaw==0.and.optdc==0) then
    call edoc%add_real('total_energy_eV', etotal*Ha_eV)
@@ -1745,6 +1886,22 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call edoc%add_real('monopole_correction_eV', energies%e_monopole*Ha_eV)
  end if
 
+!Print total energy including PAW core contribution
+ if (usepaw==1) then
+   if (dtset%paw_add_core==0.and.dtset%use_rcpaw==0) then
+     if (abs(energies%paw%epaw_core)>tiny(zero).or.abs(energies%paw%epaw_core_dc)>tiny(zero)) then
+       write_epaw_core=.true.
+       info = 'Components of total free energy, including PAW core contributions'
+       pawcore_edoc = yamldoc_open('EnergyTermsWithPAWCore', info=trim(adjustl(info)), &
+                                   width=20, real_fmt='(es21.14)')
+       call pawcore_edoc%add_real('Total energy', etotal+energies%paw%epaw_core)
+       if(optdc>=1) call pawcore_edoc%add_real('Total energy DC', etotaldc+energies%paw%epaw_core)
+       call pawcore_edoc%add_real('Total energy (eV)', (etotal+energies%paw%epaw_core)*Ha_eV)
+       if(optdc>=1) call pawcore_edoc%add_real('Total energy DC (eV)', (etotaldc+energies%paw%epaw_core)*Ha_eV)
+     end if
+   end if
+ end if
+
 !======== In case other sources of entropies than the non-interacting entropy =========
 !============= of the Kohn-Sham states come into play, print the details ==============
  if(dtset%occopt>=3.and.dtset%occopt<=8) then
@@ -1754,7 +1911,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      & width=20, real_fmt="(es21.14)") ! in kB units
      call sdoc%add_real('noninteracting',energies%entropy_ks) ! Noninteracting entropy = Entropy of the Kohn-Sham states
      if(abs(energies%entropy_xc)>tiny(zero)) call sdoc%add_real('xc',energies%entropy_xc)
-     if(usepaw==1.and.abs(energies%entropy_paw)>tiny(zero)) call sdoc%add_real('spherical_terms',energies%entropy_paw)
+     if(usepaw==1.and.abs(energies%paw%entropy_paw)>tiny(zero)) call sdoc%add_real('spherical_terms',energies%paw%entropy_paw)
      if(abs(energies%entropy_extfpmd)>tiny(zero)) call sdoc%add_real('extfpmd',energies%entropy_extfpmd)
      if(abs(energies%entropy_imp)>tiny(zero)) call sdoc%add_real('impurity',energies%entropy_imp)
      call sdoc%add_real('total_entropy',energies%entropy) ! Total entropy energy
@@ -1774,10 +1931,10 @@ subroutine prtene(dtset,energies,iout,usepaw)
        ! For now, only finite-temperature xc functionals contribute to entropy_paw.
        ! We may introduce 'energies%entropy_pawxc' in the future.
        call ftxcdoc%add_real('xc',energies%e_xc)
-       call ftxcdoc%add_real('spherical_terms_xc',energies%e_pawxc)
-       call ftxcdoc%add_real('internal_xc',energies%e_xc+energies%e_pawxc)
-       call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*(energies%entropy_xc+energies%entropy_paw))
-       call ftxcdoc%add_real('free_xc',energies%e_xc+energies%e_pawxc-el_temp*(energies%entropy_xc+energies%entropy_paw))
+       call ftxcdoc%add_real('spherical_terms_xc',energies%paw%epaw_xc)
+       call ftxcdoc%add_real('internal_xc',energies%e_xc+energies%paw%epaw_xc)
+       call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*(energies%entropy_xc+energies%paw%entropy_paw))
+       call ftxcdoc%add_real('free_xc',energies%e_xc+energies%paw%epaw_xc-el_temp*(energies%entropy_xc+energies%paw%entropy_paw))
      else
        call ftxcdoc%add_real('internal_xc',energies%e_xc)
        call ftxcdoc%add_real('-kT*entropy_xc',-el_temp*energies%entropy_xc)
@@ -1789,6 +1946,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
  ! Write components of total energies in Yaml format.
  call edoc%write_and_free(iout)
  if(optdc >= 1) call dc_edoc%write_and_free(iout)
+ if (write_epaw_core) call pawcore_edoc%write_and_free(iout)
  if(write_entropy) call sdoc%write_and_free(iout)
  if(write_totalxc) call ftxcdoc%write_and_free(iout)
 

@@ -82,80 +82,71 @@ contains !===========================================================
 
   !--Function phi_r
 ! *************************************************************************
-  dphi =  (0.2878207442141723d+01 + ddphi) / 0.529177d0
-  rcphi = (0.3700000000000000d+01 + ddphi) / 0.529177d0
+  dphi =  (0.2878207442141723d+01 + ddphi) / Bohr_Ang
+  rcphi = (0.3700000000000000d+01 + ddphi) / Bohr_Ang
 
-  a0I = -0.8000000000000000d-01 / (13.6057d0 * 2.d0) *&
-    scalefactor_phi
-  a1I =  0.0000000000000000d+00 / (13.6057d0 * 2.d0) * (0.529177d0) *&
-    scalefactor_phi
-  a2I =  0.7619231375231362d+00 / (13.6057d0 * 2.d0) * (0.529177d0)**2 *&
-    scalefactor_phi
-  a3I = -0.8333333333333333d+00 / (13.6057d0 * 2.d0) * (0.529177d0)**3 *&
-    scalefactor_phi
-  a4I = -0.1211483464993159d+00 / (13.6057d0 * 2.d0) * (0.529177d0)**4 *&
-    scalefactor_phi
+  a0I = -0.8000000000000000d-01 / Ha_eV * scalefactor_phi
+  a1I =  0.0000000000000000d+00 / Ha_eV * Bohr_Ang * scalefactor_phi
+  a2I =  0.7619231375231362d+00 / Ha_eV * Bohr_Ang**2 * scalefactor_phi
+  a3I = -0.8333333333333333d+00 / Ha_eV * Bohr_Ang**3 * scalefactor_phi
+  a4I = -0.1211483464993159d+00 / Ha_eV * Bohr_Ang**4 * scalefactor_phi
 
-  !        a0II = -0.8000000000000000d-01 / (13.6057d0 * 2.d0)
+  !        a0II = -0.8000000000000000d-01 / Ha_eV
   a0II = a0I
-  !        a1II =  0.0000000000000000d+00 / (13.6057d0 * 2.d0) * (0.529177d0)
+  !        a1II =  0.0000000000000000d+00 / Ha_eV * Bohr_Ang
   a1II = a1I
-  !        a2II =  0.7619231375231362d+00 / (13.6057d0 * 2.d0) * (0.529177d0)**2
+  !        a2II =  0.7619231375231362d+00 / Ha_eV * Bohr_Ang**2
   a2II = a2I
-  a3II = -0.8333333333333333d+00 / (13.6057d0 * 2.d0) * (0.529177d0)**3 *&
-    scalefactor_phi
-  a4II = -0.1096009851140349d+01 / (13.6057d0 * 2.d0) * (0.529177d0)**4 *&
-    scalefactor_phi
-  a5II =  0.2158417178555998d+01 / (13.6057d0 * 2.d0) * (0.529177d0)**5 *&
-    scalefactor_phi
-  a6II = -0.9128915709636862d+00 / (13.6057d0 * 2.d0) * (0.529177d0)**6 *&
-    scalefactor_phi
+  a3II = -0.8333333333333333d+00 / Ha_eV * Bohr_Ang**3 * scalefactor_phi
+  a4II = -0.1096009851140349d+01 / Ha_eV * Bohr_Ang**4 * scalefactor_phi
+  a5II =  0.2158417178555998d+01 / Ha_eV * Bohr_Ang**5 * scalefactor_phi
+  a6II = -0.9128915709636862d+00 / Ha_eV * Bohr_Ang**6 * scalefactor_phi
 
   !--Function rho_r
-  rbrho = 0.3500000000000000d+01 / 0.529177d0
-  rmrho = (0.3900000000000000d+01 + ddphi) / 0.529177d0
+  rbrho = 0.3500000000000000d+01 / Bohr_Ang
+  rmrho = (0.3900000000000000d+01 + ddphi) / Bohr_Ang
 
   b0I =  0.1000000000000000d+01
-  b1I = -0.6800000000000000d+00 * (0.529177d0)
-  b2I =  0.7500000000000000d+00 * (0.529177d0)**2
-  b3I = -0.1333333333333333d+01 * (0.529177d0)**3
+  b1I = -0.6800000000000000d+00 * Bohr_Ang
+  b2I =  0.7500000000000000d+00 * Bohr_Ang**2
+  b3I = -0.1333333333333333d+01 * Bohr_Ang**3
 
   !        b0II =  0.1000000000000000d+01
   b0II = b0I
-  !        b1II = -0.6800000000000000d+00 * (0.529177d0)
+  !        b1II = -0.6800000000000000d+00 * Bohr_Ang
   b1II = b1I
-  !        b2II =  0.7500000000000000d+00 * (0.529177d0)**2
+  !        b2II =  0.7500000000000000d+00 * Bohr_Ang**2
   b2II = b2I
-  b3II = -0.1527241171296038d+01 * (0.529177d0)**3
+  b3II = -0.1527241171296038d+01 * Bohr_Ang**3
 
   b0III =  0.0000000000000000d+00
-  b1III =  0.0000000000000000d+00 * (0.529177d0)
-  b2III =  0.5578188675490974d+01 * (0.529177d0)**2
-  b3III =  0.6132971688727435d+01 * (0.529177d0)**3
+  b1III =  0.0000000000000000d+00 * Bohr_Ang
+  b2III =  0.5578188675490974d+01 * Bohr_Ang**2
+  b3III =  0.6132971688727435d+01 * Bohr_Ang**3
 
   !--Function U_n
   n0U =  0.1200000000000000d+02
   nsU =  0.9358157767784574d+01
 
-  c0I = -0.2793388616771698d+01 / (13.6057d0 * 2.d0) * scalefactor_phi
-  c1I = -0.3419999999999999d+00 / (13.6057d0 * 2.d0) * scalefactor_phi
-  c2I =  0.3902327808424106d-01 / (13.6057d0 * 2.d0) * scalefactor_phi
-  c3I =  0.7558829951858879d-02 / (13.6057d0 * 2.d0) * scalefactor_phi
-  c4I =  0.3090472511796849d-03 / (13.6057d0 * 2.d0) * scalefactor_phi
+  c0I = -0.2793388616771698d+01 / Ha_eV * scalefactor_phi
+  c1I = -0.3419999999999999d+00 / Ha_eV * scalefactor_phi
+  c2I =  0.3902327808424106d-01 / Ha_eV * scalefactor_phi
+  c3I =  0.7558829951858879d-02 / Ha_eV * scalefactor_phi
+  c4I =  0.3090472511796849d-03 / Ha_eV * scalefactor_phi
 
-  c0II = -0.3300000000000000d+01 / (13.6057d0 * 2.d0) * scalefactor_phi
-  c1II =  0.0000000000000000d+00 / (13.6057d0 * 2.d0) * scalefactor_phi
-  c2II =  0.8618226772941980d-01 / (13.6057d0 * 2.d0) * scalefactor_phi
-  c3II =  0.4341701445034724d-02 / (13.6057d0 * 2.d0) * scalefactor_phi
-  c4II = -0.3044398779375916d-03 / (13.6057d0 * 2.d0) * scalefactor_phi
+  c0II = -0.3300000000000000d+01 / Ha_eV * scalefactor_phi
+  c1II =  0.0000000000000000d+00 / Ha_eV * scalefactor_phi
+  c2II =  0.8618226772941980d-01 / Ha_eV * scalefactor_phi
+  c3II =  0.4341701445034724d-02 / Ha_eV * scalefactor_phi
+  c4II = -0.3044398779375916d-03 / Ha_eV * scalefactor_phi
 
-  !        c0III = -0.3300000000000000d+01 / (13.6057d0 * 2.d0)
+  !        c0III = -0.3300000000000000d+01 / Ha_eV
   c0III = c0II
-  !        c1III =  0.0000000000000000d+00 / (13.6057d0 * 2.d0)
+  !        c1III =  0.0000000000000000d+00 / Ha_eV
   c1III = c1II
-  !        c2III =  0.8618226772941980d-01 / (13.6057d0 * 2.d0)
+  !        c2III =  0.8618226772941980d-01 / Ha_eV
   c2III = c2II
-  c3III =  0.4325981467602070d-02 / (13.6057d0 * 2.d0) * scalefactor_phi
+  c3III =  0.4325981467602070d-02 / Ha_eV * scalefactor_phi
 
  end subroutine glue_init
  !!***

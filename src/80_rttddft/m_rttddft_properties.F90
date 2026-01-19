@@ -244,7 +244,7 @@ subroutine rttddft_calc_etot(dtset, energies, etotal, occ)
       & + energies%e_ewald       &
       & + energies%e_vdw_dftd    &
       & + energies%e_nlpsp_vfock &
-      & + energies%e_paw
+      & + energies%paw%epaw
 !     & + energies%e_entropy
 !FB: @MT Should one add the last e_paw contribution or not?
 !FB: Seeems like all the other contributions are not relevant here @MT?
