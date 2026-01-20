@@ -118,8 +118,6 @@ with $\Theta$ the Heaviside step-function, and
 \qquad (\tau < 0).
 \end{equation}
 
-
-
 In Fourier space, one obtains:
 
 \begin{equation}
@@ -209,7 +207,6 @@ similarly to what is done in the conventional code:
  -\dfrac{4\pi}{V} \sum_{\nu}^{\text{occ}} \sum_\qq^\BZ \sum_{\GG}
   \dfrac{|M_\GG^{b_1b_1}(\kk,\qq)|^2}{|\qpG|^2}.
 \end{equation}
-
 
 
 The number of $\bg$-vectors in the sum is defined by [[ecutsigx]].

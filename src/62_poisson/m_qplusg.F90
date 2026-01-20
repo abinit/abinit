@@ -69,7 +69,6 @@ subroutine cmod_qpg(nq, iq, q, npwvec, gvec, gprimd, qplusg)
  integer :: ig
 !arrays
  real(dp) :: gmet(3,3),gpq(3)
-
 !************************************************************************
 
  ! Compute reciprocal space metrics

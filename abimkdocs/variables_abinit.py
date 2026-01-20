@@ -2999,7 +2999,7 @@ Variable(
     vartype="integer",
     topics=['DMFT_basic', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
-    defaultval="None if [[dmft_solv]] $\in$ [6,7], 1 otherwise",
+    defaultval=r"None if [[dmft_solv]] $\in$ [6,7], 1 otherwise",
     mnemonics="Dynamical Mean Field Theory: Double Counting",
     requires="[[usedmft]] == 1",
     added_in_version="before_v9",
@@ -3074,7 +3074,7 @@ Variable(
     vartype="integer",
     topics=['DMFT_compulsory', 'DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
-    defaultval="None if [[dmft_solv]] $\in$ [6,7], 10 otherwise",
+    defaultval=r"None if [[dmft_solv]] $\in$ [6,7], 10 otherwise",
     mnemonics="Dynamical Mean Field Theory: number of DMFT ITERations",
     requires="[[usedmft]] == 1",
     added_in_version="before_v9",
@@ -3271,7 +3271,7 @@ Variable(
     topics=['DMFT_useful', 'DmftTriqsCthyb_useful'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: correlated ORBITAL FILEPATH",
-    requires="[[usedmft]] == 1, [[dmft_orbital]] $\le$ 0",
+    requires=r"[[usedmft]] == 1, [[dmft_orbital]] $\le$ 0",
     added_in_version="before_v10.5.6",
     text=r"""
 Set the root of the filepath for the correlated orbital in the case of a user-provided
@@ -3342,7 +3342,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: PRinT WANnier functions",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Compute and write on file the reduced radial part $u_l(r)$ of the Wannier functions
@@ -3532,7 +3532,7 @@ Variable(
     dimensions="scalar",
     defaultval="None",
     mnemonics="Dynamical Mean Field Theory: TRIQS, Continuous Time Quantum Monte Carlo BASIS",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v9",
     text=r"""
 Choose the basis in which to perform CTQMC calculation. This basis should be carefully
@@ -3568,7 +3568,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: TRIQS, COMPUTE thermodynamic INTEGRAL",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_entropy]] == 1, [[dmft_triqs_measure_density_matrix]] == 1",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_entropy]] == 1, [[dmft_triqs_measure_density_matrix]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
 Specify whether to compute the contribution from the impurity entropy when computing the DFT+DMFT entropy (cf [[dmft_triqs_entropy]]).
@@ -3593,7 +3593,7 @@ Variable(
     dimensions="scalar",
     defaultval=100,
     mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant INITial SIZE",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 For the computation of the determinant of the hybridization matrix during the TRIQS/CTHYB run,
@@ -3611,7 +3611,7 @@ Variable(
     dimensions="scalar",
     defaultval=10000,
     mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant Number of OPERATIONS BEFORE CHECK",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 At each move, the determinant in TRIQS/CTHYB is updated using the Sherman-Morrison formula.
@@ -3631,7 +3631,7 @@ Variable(
     dimensions="scalar",
     defaultval=1e-5,
     mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant PRECISION ERROR",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 After [[dmft_triqs_det_n_operations_before_check]], the determinant is recomputed from scratch
@@ -3649,7 +3649,7 @@ Variable(
     dimensions="scalar",
     defaultval=1e-8,
     mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant PRECISION WARNING",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 After [[dmft_triqs_det_n_operations_before_check]], the determinant is recomputed from scratch
@@ -3667,7 +3667,7 @@ Variable(
     dimensions="scalar",
     defaultval=-1.0,
     mnemonics="Dynamical Mean Field Theory: TRIQS, DETerminant SINGULAR matrix THRESHOLD",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Tolerance to check if the hybridization matrix is singular. An error is thrown if that is the
@@ -3685,7 +3685,7 @@ Variable(
     dimensions="scalar",
     defaultval="None",
     mnemonics="Dynamical Mean Field Theory: TRIQS, accuracy (EPSILON) for DLR representation",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_g_l]] == 0",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_g_l]] == 0",
     added_in_version="before_v10.5.6",
     text=r"""
 Specify the accuracy parameter $\varepsilon$ for the DLR (Discrete Lehmann representation)
@@ -3707,7 +3707,7 @@ Variable(
     topics=['DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: TRIQS, frequency (W) MAXimal",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_g_l]] == 0",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_g_l]] == 0",
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v10.5.6",
     text=r"""
@@ -3731,7 +3731,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: TRIQS, compute ENTROPY ",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Computes the DFT+DMFT entropy from the evaluation of the Baym-Kadanoff functional.
@@ -3746,7 +3746,7 @@ Variable(
     dimensions="scalar",
     defaultval="None",
     mnemonics="Dynamical Mean Field Theory: TRIQS, GAUSS-Legendre ORDER",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_compute_integral]] == 1",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_compute_integral]] == 1",
     added_in_version="before_v9",
     text=r"""
 When evaluating the coupling constant integral for the computation of the impurity entropy (cf [[dmft_triqs_compute_integral]]),
@@ -3764,7 +3764,7 @@ Variable(
     dimensions="scalar",
     defaultval=1e-13,
     mnemonics="Dynamical Mean Field Theory: TRIQS, IMAGinary part THRESHOLD",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 In the real version of TRIQS/CTHYB, only the hybridization components
@@ -3780,7 +3780,7 @@ Variable(
     dimensions="scalar",
     defaultval="None",
     mnemonics="Dynamical Mean Field Theory: TRIQS, LENGTH of CYCLE",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Sets the number of sweeps in one cycle of TRIQS/CT-HYB. Measurements are
@@ -3805,7 +3805,7 @@ Variable(
     dimensions="scalar",
     defaultval=2147483647,
     mnemonics="Dynamical Mean Field Theory: TRIQS, LOCal Hilbert space Number MAXimal",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 This allows to truncate the local Hilbert space in TRIQS/CTHYB by keeping only the states
@@ -3823,7 +3823,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: TRIQS, LOCal Hilbert space Number MINimal",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 This allows to truncate the local Hilbert space in TRIQS/CTHYB by keeping only the states
@@ -3841,7 +3841,7 @@ Variable(
     dimensions="scalar",
     defaultval="1 if [[dmft_triqs_off_diag]]=0, 0 otherwise",
     mnemonics="Dynamical Mean Field Theory: TRIQS, MEASUREment of the DENSITY MATRIX",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_use_norm_as_weight]] == 1, [[dmft_triqs_off_diag]] == 0",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_use_norm_as_weight]] == 1, [[dmft_triqs_off_diag]] == 0",
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 to active the measurement of the impurity density matrix in TRIQS/CTHYB. This greatly
@@ -3860,7 +3860,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: TRIQS, MEASUREment of the G_l coefficients for Legendre representation",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 if you want to sample the Green's function directly in the Legendre basis
@@ -3882,7 +3882,7 @@ Variable(
     dimensions="scalar",
     defaultval="[[dmft_triqs_off_diag]]",
     mnemonics="Dynamical Mean Field Theory: TRIQS, MOVEs DOUBLE",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 to activate the double moves in TRIQS/CTHYB. Go to their website for more information on this move.
@@ -3898,7 +3898,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: TRIQS, MOVE SHIFT",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 to activate the shift move in TRIQS/CTHYB. Go to their website for more information on this move.
@@ -3915,7 +3915,7 @@ Variable(
     dimensions="scalar",
     defaultval="None",
     mnemonics="Dynamical Mean Field Theory: TRIQS, Number of measurement CYCLES",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Number of measurement cycles on each CPU for TRIQS/CT-HYB. This parameter controls
@@ -3931,7 +3931,7 @@ Variable(
     dimensions="scalar",
     defaultval="None",
     mnemonics="Dynamical Mean Field Theory: TRIQS, Number of Imaginary frequencies (W)",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Number of linear Matsubara frequencies for the representation of the Green's function
@@ -3948,7 +3948,7 @@ Variable(
     topics=['DmftTriqsCthyb_useful'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: TRIQS, Number of LEGendre polynomials",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_g_l]] == 1",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_g_l]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
 Specify the number of Legendre polynomials used for the calculation of Green's
@@ -3963,7 +3963,7 @@ Variable(
     topics=['DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: TRIQS, Number of TAU points",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Specify the number of imaginary time points for the binned representation of the
@@ -3978,7 +3978,7 @@ Variable(
     topics=['DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: TRIQS, Number of WARMUP CYCLES at INITialization",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Specify the number of warmup cycles for each CPU when starting from an empty configuration in
@@ -3993,7 +3993,7 @@ Variable(
     topics=['DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: TRIQS, Number of WARMUP CYCLES at RESTART",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Specify the number of warmup cycles for each CPU when restarting the TRIQS/CT-HYB simulation from
@@ -4017,7 +4017,7 @@ Variable(
     dimensions="scalar",
     defaultval="None",
     mnemonics="Dynamical Mean Field Theory: TRIQS, Number of SUBDIVISIONS",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_compute_integral]] == 1",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_compute_integral]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
 When evaluating the coupling constant integral for the computation of the impurity entropy (cf [[dmft_triqs_compute_integral]]),
@@ -4034,7 +4034,7 @@ Variable(
     topics=['DmftTriqsCthyb_compulsory'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: TRIQS, OFF-DIAGonal components",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 to keep all off-diagonal components of the hybridization and electronic levels for the
@@ -4052,7 +4052,7 @@ Variable(
     dimensions="scalar",
     defaultval="0.8 if [[dmft_solv]]=7, 1 if [[dmft_solv]]=6",
     mnemonics="Dynamical Mean Field Theory: TRIQS, PAULI PROBability",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 For the insert/remove moves, a proportion [[dmft_triqs_pauli_prob]] of the moves will be
@@ -4076,7 +4076,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Dynamical Mean Field Theory: TRIQS, PRinT additional info for ENTROPY",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Print additional information when performing the thermodynamic integration (cf [[dmft_triqs_compute_integral]]),
@@ -4094,7 +4094,7 @@ Variable(
     dimensions="scalar",
     defaultval=34788,
     mnemonics="Dynamical Mean Field Theory: TRIQS, RANDOM SEED A",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Controls the seed of TRIQS/CTHYB, which is [[dmft_triqs_random_seed_a]] + rank $\times$
@@ -4110,7 +4110,7 @@ Variable(
     dimensions="scalar",
     defaultval=928374,
     mnemonics="Dynamical Mean Field Theory: TRIQS, RANDOM SEED B",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Controls the seed of TRIQS/CTHYB, which is [[dmft_triqs_random_seed_a]] + rank $\times$
@@ -4126,7 +4126,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Dynamical Mean Field Theory: TRIQS, READ CT-QMC DATA",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 At each CT-HYB run, the initial configuration of the Monte-Carlo is read from file
@@ -4148,7 +4148,7 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="Dynamical Mean Field Theory: TRIQS, SHIFT of the chemical potential (MU)",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 During the thermodynamic integration for the entropy calculation, the coupling constant
@@ -4173,7 +4173,7 @@ Variable(
     dimensions="scalar",
     defaultval="[[dmft_triqs_measure_density_matrix]]",
     mnemonics="Dynamical Mean Field Theory: TRIQS, TIME INVARIANCE",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_triqs_measure_density_matrix]] == 1",
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 to activate an improved estimator for the density matrix in TRIQS/CTHYB, based on the time
@@ -4193,7 +4193,7 @@ Variable(
     dimensions="scalar",
     defaultval=1e-12,
     mnemonics="Dynamical Mean Field Theory: TRIQS, TOLerance for the BLOCK detection algorithm",
-    requires="[[usedmft]] = 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] = 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Before any CT-HYB run, the code rotates in the basis specified by [[dmft_triqs_basis]]. Then,
@@ -4211,7 +4211,7 @@ Variable(
     dimensions="scalar",
     defaultval="[[dmft_triqs_measure_density_matrix]]",
     mnemonics="Dynamical Mean Field Theory: TRIQS, USE NORM of the matrix AS atomic WEIGHT",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before_v10.5.6",
     text=r"""
 Set to 1 to use the Frobenius norm of the matrix instead of its trace as atomic weight in
@@ -4259,7 +4259,7 @@ Variable(
     topics=['DmftTriqsCthyb_expert'],
     dimensions="scalar",
     mnemonics="Dynamical Mean Field Theory: WANnier functions radius",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_prtwan]] == 1",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7], [[dmft_prtwan]] == 1",
     characteristics=['[[LENGTH]]'],
     added_in_version="before_v10.5.6",
     text=r"""
@@ -5231,10 +5231,11 @@ Variable(
 
 The variable [[elph2_imagden]] determines the imaginary shift of the
 denominator of the sum-over-states in the perturbation,
-$(e_{nk}-e_{n'k'}+i$[[elph2_imagden]]). One should use a width comparable with
-the Debye frequency or the maximum phonon frequency.
-Can be specified in Ha (the default), Ry, eV or Kelvin, since [[ecut]] has the
+$(e_{nk}-e_{n'k'}+i$[[elph2_imagden]]).
+One should use a width comparable with the Debye frequency or the maximum phonon frequency.
+Can be specified in Ha (the default), Ry, eV or Kelvin, since [[elph2_imagden]] has the
 [[ENERGY]] characteristics (1 Ha = 27.2113845 eV).
+
 """,
 ),
 
@@ -5490,7 +5491,7 @@ Variable(
 Select the electron-phonon task to be performed when [[optdriver]] == 7.
 The choice is among:
 
-* 0 --> No computation. Mainly used to access the post-processing tools.
+* 0 --> No computation. Mainly used to access the post-processing tools available in EPH (phonon band and dos).
 * 1 --> Compute phonon linewidths in metals and superconducting properties (isotropic formalism).
 * 2 --> Compute e-ph matrix elements. Save results in GKK.nc file.
 * -2 --> Compute e-ph matrix elements. Save results in GKQ.nc file that can be post-processed with AbiPy.
@@ -5514,7 +5515,7 @@ The choice is among:
          by [[eph_ngqpt_fine]] (NB: the q-mesh must be a sub-mesh of the k-mesh or equal).
 * 12 --> Migdal-Eliashberg equations (isotropic case).
 * -12 --> Migdal-Eliashberg equations (anisotropic case). UNDER DEVELOPMENT.
-* 13 --> Variational polaron equations
+* 13 --> Variational polaron equations. Requires GSTORE file specified via [[getgstore_filepath]]
 * -13 --> Compute polaron wavefunctions and atomic displacements in the supercell and write results to files
 * 14 --> Compute the molecular Berry curvature from GSTORE.nc. No support for metals or non-collinear magnetism yet. Reference: [[cite:Saparov2022]], [[cite:Coh2023]].
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
@@ -5524,15 +5525,18 @@ The choice is among:
               An array D(R) with the decay of the W(R,r) as a function of R is computed and saved to file
               In the second case (-15) the q-points are taken directly from the DVDB file.
 * 16, -16 --> test_phrotation TO BE DOCUMENTED.
-* 17 --> Compute e-ph matrix elements with the GWPT formalism  UNDER DEVELOPMENT.
+* 17 --> Compute e-ph matrix elements with the GWPT formalism  Produce GSTORE file.
+         Requires netcdf library with MPI-IO support.
 * 18 --> Compute e-ph matrix g(k,q) along a high-symmetry path. See [[eph_fix_wavevec]] and other related variables.
 * 19 --> Compute matrix elements of the screened interaction W between two Cooper pairs.
+* 24 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections, also possibly the spectral function.
+         Similar to [[eph_task]] 4 but requires GSTORE file specified via [[getgstore_filepath]]
 
 !!! important
 
     At the time of writing ( |today| ), PAW is not supported by the EPH code.
     Also, calculations with [[nspinor]] = 2 require [[nspden]] 1 in all the EPH tasks
-    in which the interpolation of the DFPT potentials is needed.
+    in which the interpolation of the DFPT scattering potentials is needed.
 """,
 ),
 
@@ -6630,7 +6634,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="GET CTQMC DATA from...",
-    requires="[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
+    requires=r"[[usedmft]] == 1, [[dmft_solv]] $\in$ [6,7]",
     added_in_version="before v10.5.6",
     text=r"""
 Eventually used when [[ndtset]] > 0 (multi-dataset mode) to indicate
@@ -17690,8 +17694,7 @@ ELF is computed from an alternative approach which should better take into
 account the existence of spin dependent densities (see the documentation in
 /doc/theory/ELF of your ABINIT repository)
 
-Please note that ELF is **not** yet implemented in the case of PAW
-([[usepaw]] = 1) calculations.
+Please note that ELF is **not** yet implemented in the case of PAW ([[usepaw]] = 1) calculations.
 """,
 ),
 
@@ -17706,7 +17709,7 @@ Variable(
     added_in_version="9.11.0",
     text=r"""
 If set to 1, ABINIT will produce a netCDF EVK file, containing the elements of the velocity operator (ddk) between two wavefunctions at wavevector k.
-Not compatible with parallelization over perturbations ([[paral_rf]]=1) when netCDF library doesn't support MPI-IO.
+Not compatible with parallelization over perturbations ([[paral_rf]]=1) when netCDF library does not support MPI-IO.
 """,
 ),
 
@@ -25809,13 +25812,14 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This input variable specifies whether the EPH code should compute the $g(\kk, \qq)$
-matrix elements for $\kk$ in the IBZ or in the BZ.
+matrix elements with $\kk$ in the IBZ or in the BZ.
 
 !!! important
 
     The combination [[gstore_kzone]] = "ibz" with [[gstore_qzone]] = "ibz" is not allowed.
     One usually restricts one wavevector to the IBZ while the other wavevector covers the full BZ.
-    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes.
+    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes,
+    and it is not recommended for production runs (much slower).
 """,
 ),
 
@@ -25837,7 +25841,8 @@ e-ph matrix elements for $\qq$ in the IBZ or in the BZ.
 
     The combination [[gstore_kzone]] = "ibz" with [[gstore_qzone]] = "ibz" is not allowed.
     One usually restricts one wavevector to the IBZ while the other wavevector covers the full BZ.
-    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes.
+    Using the BZ for both $\kk$ and $\qq$ is usually used for testing purposes,
+    and it is not recommended for production runs (much slower).
 """,
 ),
 
@@ -25857,10 +25862,10 @@ when computing the e-ph matrix elements with [[eph_task]] == 11.
 Possible values are:
 
 - "none" --> No filter is applied (default)
-- "fs_tetra" --> Use tetrahedron method to filter k/k+q states on the Fermi surface.
-- "qprange" --> Use [[gw_qprange]] to select k-points. If [[gw_qprange]] is not given in input
+- "qprange" --> Use [[gw_qprange]] to select k-points. If [[gw_qprange]] is not given in input,
    the code automatically selects the k-points associated to the direct and the fundamental KS gap
-   as computed from the WFK file.
+   as computed from the WFK file. This option is usually used for ZPR computations in semiconductors.
+- "fs_tetra" --> Use tetrahedron method to filter k/k+q states on the Fermi surface.
 
 Note that it is possible to use another filter based on the position of the energy states wrt to either
 the CBM/VBM or the position wrt to the Fermi level via [[gstore_erange]].
@@ -25923,7 +25928,7 @@ The first entry gives the first band to be included while the second index speci
 Note that the array depends on the value of [[nsppol]] thus one has to provide four integers for the
 two different spin channels when [[nsppol]] == 2.
 
-If not specified in input, ABINIT will use all the bands from 1 up to the maximum number of bands [[nband]]
+If not specified in input, ABINIT will use all the bands from 1 up to [[nband]]
 unless additional filters are activated, see [[gstore_kfilter]] and [[gstore_erange]].
 """,
 ),

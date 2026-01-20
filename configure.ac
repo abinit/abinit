@@ -1121,7 +1121,7 @@ fi
 # Help to produce libraires
 if test "${mandatory}" = "#"; then
       ABI_MSG_NOTICE_L([help-fb],[We can __help__ you !])
-else 
+else
    if test "${mandatory}" = "fail"; then
    	ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
    fi
@@ -1362,6 +1362,6 @@ fi
 
 
 if test "x${mandatory}" = "x#"; then
-  ABI_TRIGGERS_SUMMARY	
+  ABI_TRIGGERS_SUMMARY
   ABI_MSG_NOTICE_L([help-fb], [Missing Mandatory library!])
-fi 
+fi

@@ -22,14 +22,16 @@
 
 module m_abi_linalg
 
+ use, intrinsic :: iso_c_binding
  USE_MPI
  use defs_basis
  use m_errors
  use m_abicore
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_slk
- use, intrinsic :: iso_c_binding
+
 !#ifdef HAVE_LINALG_ELPA
 ! use m_elpa
 !#endif
@@ -139,11 +141,6 @@ module m_abi_linalg
  public :: abi_linalg_finalize      ! CleanuUp routine
  public :: abi_linalg_work_allocate ! Allocate work arrays
  !----------------------------------------------------------------------
-
- public :: gpu_set_to_zero
- public :: gpu_set_to_zero_complex
- public :: gpu_copy
- public :: gpu_copy_complex
 
 !BLAS INTERFACE
  !public :: abi_zgemm
@@ -330,77 +327,8 @@ module m_abi_linalg
  public :: ortho_reim
  !----------------------------------------------------------------------
 
-#ifdef HAVE_GPU
-
-  interface
-
-    subroutine check_gpu_mem(str) bind(c, name="check_gpu_mem_")
-      use, intrinsic :: iso_c_binding
-      implicit none
-      character (KIND=c_char), intent(in)  :: str(*)
-    end subroutine check_gpu_mem
-
-    subroutine alloc_on_gpu(gpu_ptr,size_in_bytes) bind(c, name="alloc_on_gpu_")
-      use, intrinsic :: iso_c_binding
-      implicit none
-      type(c_ptr),                    intent(inout)  :: gpu_ptr
-      integer(kind=c_size_t),         intent(in)     :: size_in_bytes
-    end subroutine alloc_on_gpu
-
-    subroutine dealloc_on_gpu(gpu_ptr) bind(c, name="dealloc_on_gpu_")
-      use, intrinsic :: iso_c_binding
-      implicit none
-      type(c_ptr),                    intent(inout)  :: gpu_ptr
-    end subroutine dealloc_on_gpu
-
-    subroutine copy_gpu_to_gpu(dest_gpu_ptr, src_gpu_ptr, size_in_bytes) bind(c, name="copy_gpu_to_gpu_cpp_")
-      use, intrinsic :: iso_c_binding
-      implicit none
-      type(c_ptr)                                   :: dest_gpu_ptr
-      type(c_ptr)                                   :: src_gpu_ptr
-      integer(kind=c_size_t),        intent(in)    :: size_in_bytes
-    end subroutine copy_gpu_to_gpu
-
-    subroutine gpu_memset(gpu_ptr, val, size_in_bytes) bind(c, name="gpu_memset_cpp_")
-      use, intrinsic :: iso_c_binding
-      implicit none
-      type(c_ptr),                    intent(in) :: gpu_ptr
-      integer(kind=c_int32_t),        intent(in)    :: val
-      integer(kind=c_size_t),         intent(in)    :: size_in_bytes
-    end subroutine gpu_memset
-
-    ! logical(kind=c_bool) function gpu_allocated(gpu_ptr) bind(c, name="gpu_allocated_")
-    !   use, intrinsic :: iso_c_binding
-    !   implicit none
-    !   type(c_ptr),                    intent(in) :: gpu_ptr
-    ! end function gpu_allocated
-
-    subroutine gpu_allocated_impl(gpu_ptr, is_allocated) bind(c, name="gpu_allocated_impl_")
-      use, intrinsic :: iso_c_binding
-      implicit none
-      type(c_ptr),                    intent(in)  :: gpu_ptr
-      logical(kind=c_bool),           intent(out) :: is_allocated
-    end subroutine gpu_allocated_impl
-
-    subroutine gpu_managed_ptr_status(gpu_ptr, str) bind(c, name="gpu_managed_ptr_status_")
-      use, intrinsic :: iso_c_binding
-      implicit none
-      type(c_ptr),                    intent(in)  :: gpu_ptr
-      character (KIND=c_char),        intent(in)  :: str(*)
-    end subroutine gpu_managed_ptr_status
-
-  end interface
-
-#else
+#ifndef HAVE_GPU
  !dummy routines replace gpu helper routines
- public :: gpu_device_synchronize
- public :: check_gpu_mem
- public :: alloc_on_gpu
- public :: copy_from_gpu
- public :: copy_on_gpu
- public :: dealloc_on_gpu
- public :: gpu_allocated_impl
- public :: gpu_managed_ptr_status
  public :: gpu_linalg_init
  public :: gpu_linalg_shutdown
  public :: gpu_xgemm
@@ -411,10 +339,6 @@ module m_abi_linalg
  public :: gpu_xsygvd
  public :: gpu_xsygvd_bufferSize
 #endif
-
- public :: copy_gpu_to_gpu
- public :: gpu_memset
- public :: gpu_allocated
 
  public :: gpu_xorthonormalize
 
@@ -513,7 +437,6 @@ CONTAINS  !===========================================================
  integer :: num_cores=0,num_cores_node=0
  integer,allocatable :: affinity(:)
 #endif
-
 !******************************************************************
 
 !Use only abi_linalg in case of GS calculations
@@ -588,8 +511,8 @@ CONTAINS  !===========================================================
 #ifdef HAVE_LINALG_PLASMA
 !Plasma Initialization
 !Because use of hybrid use of mpi+openmp+plasma,
-!  we need to set manually the thread bindings policy
-!  to avoid conflicts between mpi process due to plasma
+!we need to set manually the thread bindings policy
+!to avoid conflicts between mpi process due to plasma
  if (XPLASMA_ISON) then
    num_cores=xomp_get_max_threads()
    num_cores_node=xomp_get_num_cores_node()
@@ -644,13 +567,8 @@ CONTAINS  !===========================================================
 
 !Local variables ------------------------------
 #ifdef HAVE_LINALG_MAGMA
- integer :: nb
- integer :: magmaf_get_ssytrd_nb
- integer :: magmaf_get_dsytrd_nb
- integer :: magmaf_get_chetrd_nb
- integer :: magmaf_get_zhetrd_nb
+ integer :: nb, magmaf_get_ssytrd_nb, magmaf_get_dsytrd_nb, magmaf_get_chetrd_nb, magmaf_get_zhetrd_nb
 #endif
-
 !******************************************************************
 
 !Single precision WORK
@@ -843,7 +761,6 @@ CONTAINS  !===========================================================
 #ifdef HAVE_LINALG_PLASMA
  integer :: info
 #endif
-
 !******************************************************************
 
  if (.not.abi_linalg_in_use) return
@@ -930,9 +847,7 @@ CONTAINS  !===========================================================
 subroutine linalg_allow_gemm3m(bool, write_msg)
 
 !Arguments ------------------------------------
-!scalars
  logical,intent(in) :: bool, write_msg
-
 ! *************************************************************************
 
  XGEMM3M_ISON = bool
@@ -982,9 +897,7 @@ end subroutine linalg_allow_gemm3m
 pure logical function use_zgemm3m(m, n, k)
 
 !Arguments ------------------------------------
-!scalars
  integer,intent(in) :: m,n,k
-
 ! *************************************************************************
 
  use_zgemm3m = .False.
@@ -1015,9 +928,7 @@ end function use_zgemm3m
 pure logical function use_cgemm3m(m, n, k)
 
 !Arguments ------------------------------------
-!scalars
  integer,intent(in) :: m,n,k
-
 ! *************************************************************************
 
  use_cgemm3m = .False.
@@ -1043,9 +954,7 @@ end function use_cgemm3m
 subroutine linalg_allow_plasma(bool)
 
 !Arguments ------------------------------------
-!scalars
  logical,intent(in) :: bool
-
 ! *************************************************************************
 
  XPLASMA_ISON = bool
@@ -1072,9 +981,7 @@ end subroutine linalg_allow_plasma
 integer function uplo_plasma(uplo)
 
 !Arguments ------------------------------------
-!scalars
  character(len=1),intent(in) :: uplo
-
 ! *************************************************************************
 
  if (LSAME(uplo,'U')) then
@@ -1099,9 +1006,7 @@ end function uplo_plasma
 integer function trans_plasma(trans)
 
 !Arguments ------------------------------------
-!scalars
  character(len=1),intent(in) :: trans
-
 ! *************************************************************************
 
  if (LSAME(trans,'C')) then
@@ -1128,9 +1033,7 @@ end function trans_plasma
 integer function side_plasma(side)
 
 !Arguments ------------------------------------
-!scalars
  character(len=1),intent(in) :: side
-
 ! *************************************************************************
 
  if(LSAME(side,'L')) then
@@ -1155,9 +1058,7 @@ end function side_plasma
 integer function diag_plasma(diag)
 
 !Arguments ------------------------------------
-!scalars
  character(len=1),intent(in) :: diag
-
 ! *************************************************************************
 
  if (LSAME(diag,'U')) then
@@ -1182,9 +1083,7 @@ end function diag_plasma
 integer function jobz_plasma(jobz)
 
 !Arguments ------------------------------------
-!scalars
  character(len=1),intent(in) :: jobz
-
 ! *************************************************************************
 
  if (LSAME(jobz,'N')) then
@@ -1197,23 +1096,6 @@ end function jobz_plasma
 !!***
 
 #endif
-
-!!
-!! this is just a wrapper arround gpu_allocated_cuda, because (strangely)
-!! I can't manage to bind a function (not a subroutine) through iso_c_binding
-!!
-function gpu_allocated(gpu_ptr) result(is_allocated)
-
-  use, intrinsic :: iso_c_binding
-  implicit none
-
-  !Arguments ------------------------------------
-  type(c_ptr),                    intent(in) :: gpu_ptr
-  logical(kind=c_bool)                       :: is_allocated
-
-  call gpu_allocated_impl(gpu_ptr, is_allocated)
-
-end function gpu_allocated
 
 ! Include files providing wrappers for some of the most commonly used BLAS & LAPACK routines
 

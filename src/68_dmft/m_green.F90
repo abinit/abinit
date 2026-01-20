@@ -24,6 +24,7 @@
 
  MODULE m_green
 
+ use, intrinsic :: iso_c_binding, only: c_size_t
  use defs_basis
  use m_abicore
  use m_errors
@@ -43,8 +44,9 @@
  use m_splines
  use m_time, only : timab
  use m_xmpi, only : xmpi_barrier,xmpi_sum
+ use m_gputk
  use m_abi_linalg
- use, intrinsic :: iso_c_binding, only: c_size_t
+
 
 #ifdef HAVE_GPU_MARKERS
  use m_nvtx_data

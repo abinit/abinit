@@ -30,6 +30,7 @@ module m_mkrho
  use m_errors
  use m_dtset
  use m_extfpmd
+ use m_gputk
  use m_abi_linalg
 
  use defs_abitypes,  only : MPI_type

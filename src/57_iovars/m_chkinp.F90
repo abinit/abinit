@@ -1596,7 +1596,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_sigxcore',dt%gw_sigxcore,2,[0,1],iout)
 
    ! gwcomp
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'gwcomp',dt%gwcomp,2,[0,1],iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gwcomp',dt%gwcomp,3,[0,1,2],iout)
+
    if (dt%gwcomp/=0) then
      if (optdriver==RUNL_SCREENING .and. (dt%awtr /=1 .or. dt%spmeth /=0)) then
        write(msg,'(3a)' )&
@@ -2776,13 +2777,13 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
 
-     ! nucdipmom is not currently compatible with spinat (this is necessary because both are used in symfind)
-     if( any(abs(dt%spinat) > tol8) ) then
-       write(msg, '(3a)' )&
-        ' Nuclear dipole moments (variable nucdipmom or atndlist) input as nonzero but spinat is also nonzero => stop',ch10,&
-        'Action: re-run with spinat zero '
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
+     !! nucdipmom is not currently compatible with spinat (this is necessary because both are used in symfind)
+     !if( any(abs(dt%spinat) > tol8) ) then
+     !  write(msg, '(3a)' )&
+     !   ' Nuclear dipole moments (variable nucdipmom or atndlist) input as nonzero but spinat is also nonzero => stop',ch10,&
+     !   'Action: re-run with spinat zero '
+     !  ABI_ERROR_NOSTOP(msg, ierr)
+     !end if
 
    end if
 
