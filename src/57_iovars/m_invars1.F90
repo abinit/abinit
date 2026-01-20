@@ -39,7 +39,7 @@ module m_invars1
 #endif
 
  use m_fstrings, only : inupper, itoa, endswith, strcat, sjoin, startswith
- use m_geometry, only : mkrdim, geteuler, cart2spinaxis
+ use m_geometry, only : mkrdim, cart2spinaxis
  use m_parser,   only : intagm, intagm_img, chkint_ge, ab_dimensions, geo_t, geo_from_abivar_string
  use m_inkpts,   only : inkpts, inqpt
  use m_ingeo,    only : ingeo, invacuum, checkspvec
@@ -1199,7 +1199,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !arrays
  integer :: cond_values(4),vacuum(3)
  integer,allocatable :: iatfix(:,:),iatnd(:),intarr(:),istwfk(:),nband(:),typat(:)
- real(dp) :: acell(3),rprim(3,3),field_loc(3),field_cart(3),hloc(3,1),hcart(3,1),hout(3,1) 
+ real(dp) :: acell(3),rprim(3,3),field_loc(3),field_cart(3),hloc(3,1),hcart(3,1) 
  real(dp),allocatable :: amu(:),atndlist(:,:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:)
  real(dp),allocatable :: nucdipmom(:,:),ratsph(:),reaalloc(:),spinat(:,:),spinat_cart(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
@@ -1533,8 +1533,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  end if
 
  hloc(:,1)  = field_loc(:); hcart(:,1) = field_cart(:)
- call checkspvec('hspinfield',1,dtset%spinaxis,tread,tread_cart,hloc,hcart,hout)
- dtset%hspinfield(1:3) = hout(:,1) 
+ call checkspvec('hspinfield',1,dtset%spinaxis,tread,tread_cart,hloc,hcart)
+ dtset%hspinfield(1:3) = hloc(:,1)
+ if (tread == 0 .and. tread_cart == 1) dtset%hspinfield_in(1:3) = hloc(:,1)
+ if (tread == 1 .and. tread_cart == 0) dtset%hspinfield_cart(1:3) = hcart(:,1)
 
  if(tread==1 .or. tread_cart==1) then
    if(dtset%nspden == 2)then

@@ -2087,7 +2087,7 @@ subroutine metric_so(amet,soc_weight,gprimd,pauli,alpha,beta)
    S(:,:,:) = cmplx(pauli(1,:,:,:), pauli(2,:,:,:), kind=dp)
 
    cb2 = cos(half*beta); sb2 = sin(half*beta)
-   em = exp(-j_dpc*0.5_dp*alpha); ep = conjg(em)
+   em = exp(-j_dpc*half*alpha); ep = conjg(em)
 
    U(1,1) =  cb2 * em; U(1,2) = -sb2 * em
    U(2,1) =  sb2 * ep; U(2,2) =  cb2 * ep
@@ -2097,7 +2097,7 @@ subroutine metric_so(amet,soc_weight,gprimd,pauli,alpha,beta)
      S(:,:,n)  = Srot(:,:)
    end do
     
-   pauli(:,:,:,:) = 0.0_dp
+   pauli(:,:,:,:) = zero
    pauli(1,:,:,:) = real(S(:,:,:), kind=dp)
    pauli(2,:,:,:) = aimag(S(:,:,:))
  end if

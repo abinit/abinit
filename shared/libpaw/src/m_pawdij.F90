@@ -43,6 +43,7 @@ MODULE m_pawdij
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_finegrid, only : pawgylm, pawexpiqr
  use m_paw_sphharm,  only : initylmr,slxyzs,make_dyadic,realgaunt
+ use m_euler,        only : geteuler
 
  implicit none
 
@@ -2888,7 +2889,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
  integer :: klm,klmn,klmn1,kln
  integer :: lm_size,lmn2_size,mdir,mesh_size,ngnt,sdir
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
- real(dp) :: alpha,beta,sx,sy,sz,norm,fact,me1,me2,rc,rr,rt,sme,cb2,sb2
+ real(dp) :: alpha,beta,fact,me1,me2,rc,rr,rt,sme,cb2,sb2
  logical :: has_nucdipmom,use_soc,use_sd,use_fc
  character(len=500) :: msg
 !arrays
@@ -3143,22 +3144,13 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
  end if
 
  if (ndij >= 4) then
-   norm = dot_product(spinaxis(:), spinaxis(:))
-   if (norm > tol8*tol8) then
-     sx = spinaxis(1) / sqrt(norm)
-     sy = spinaxis(2) / sqrt(norm)
-     sz = spinaxis(3) / sqrt(norm)
-   else
-     sx = 0._dp; sy = 0._dp; sz = 1._dp
-   end if
 
-   alpha = atan2(sy, sx)
-   beta  = atan2(sqrt(sx*sx + sy*sy), sz)
+   call geteuler(spinaxis,alpha,beta)
 
    if (.not.(abs(alpha) < tol8 .and. abs(beta) < tol8)) then
    
      cb2 = cos(half*beta); sb2 = sin(half*beta)
-     em = exp(-j_dpc*0.5_dp*alpha); ep = conjg(em)
+     em = exp(-j_dpc*half*alpha); ep = conjg(em)
      U(1,1) =  cb2 * em; U(1,2) = -sb2 * em
      U(2,1) =  sb2 * ep; U(2,2) =  cb2 * ep
      
@@ -3166,18 +3158,17 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
      klmn1 = 1
      do klmn = 1, lmn2_size
 
-       D(1,1) = cmplx(dijso(klmn1  ,1), dijso(klmn1+1,1), kind=dp)
-       D(2,2) = cmplx(dijso(klmn1  ,2), dijso(klmn1+1,2), kind=dp)
-       D(1,2) = cmplx(dijso(klmn1  ,3), dijso(klmn1+1,3), kind=dp)
-       D(2,1) = cmplx(dijso(klmn1  ,4), dijso(klmn1+1,4), kind=dp)
+       D(1,1) = cmplx(dijso(klmn1,1), dijso(klmn1+1,1), kind=dp)
+       D(2,2) = cmplx(dijso(klmn1,2), dijso(klmn1+1,2), kind=dp)
+       D(1,2) = cmplx(dijso(klmn1,3), dijso(klmn1+1,3), kind=dp)
+       D(2,1) = cmplx(dijso(klmn1,4), dijso(klmn1+1,4), kind=dp)
        
        Drot(:,:) = matmul(conjg(transpose(U)), matmul(D(:,:), U))
 
-      ! Write back all 4 blocks (after rotation, old idij=2/4 shortcut relations no longer hold)
-       dijso(klmn1  ,1) = real(Drot(1,1), kind=dp); dijso(klmn1+1,1) = aimag(Drot(1,1))
-       dijso(klmn1  ,2) = real(Drot(2,2), kind=dp); dijso(klmn1+1,2) = aimag(Drot(2,2))
-       dijso(klmn1  ,3) = real(Drot(1,2), kind=dp); dijso(klmn1+1,3) = aimag(Drot(1,2))
-       dijso(klmn1  ,4) = real(Drot(2,1), kind=dp); dijso(klmn1+1,4) = aimag(Drot(2,1))
+       dijso(klmn1,1) = real(Drot(1,1), kind=dp); dijso(klmn1+1,1) = aimag(Drot(1,1))
+       dijso(klmn1,2) = real(Drot(2,2), kind=dp); dijso(klmn1+1,2) = aimag(Drot(2,2))
+       dijso(klmn1,3) = real(Drot(1,2), kind=dp); dijso(klmn1+1,3) = aimag(Drot(1,2))
+       dijso(klmn1,4) = real(Drot(2,1), kind=dp); dijso(klmn1+1,4) = aimag(Drot(2,1))
 
        klmn1 = klmn1 + cplex_dij
      end do
