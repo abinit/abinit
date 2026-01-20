@@ -6,13 +6,13 @@ ndtset 4
 natnd 2
 iatnd 1 2
 
-atndlist1 
+atndlist1
 0  1 0
 0  1 0
 atndlist2
 0  1 0
 0 -1 0
-atndlist3 
+atndlist3
 0 0  1
 0 0  1
 atndlist4

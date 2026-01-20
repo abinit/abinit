@@ -101,7 +101,6 @@ subroutine psp1cc(fchrg,n1xccc,xccc1d)
  character(len=500) :: message
 !arrays
  real(dp),allocatable :: ff(:),ff2(:),work(:),yy(:)
-
 ! *************************************************************************
 
  ABI_MALLOC(ff,(n1xccc))
@@ -224,7 +223,6 @@ subroutine gg1cc(gg1cc_xx,xx)
  real(dp) :: c24=-4160.d0/243.d0+160.d0*pi**2/81.d0,c31=1.d0/36.d0
  real(dp) :: c32=-25.d0/108.d0,c33=485.d0/432.d0-pi**2/27.d0
  real(dp) :: c34=-4055.d0/972.d0+25.d0*pi**2/81.d0
-
 ! *************************************************************************
 
 !Cut off beyond 3/gcut=xcccrc
@@ -291,7 +289,6 @@ subroutine gp1cc(gp1cc_xx,xx)
  real(dp),parameter :: c35=-2933875.d0/15552.d0+20275.d0*pi**2/729.d0-200.d0*pi**4/243.d0
  real(dp),parameter :: two_pim1=1.0d0/two_pi
  real(dp) :: denom,phi,phip
-
 ! *************************************************************************
 
 !Cut off beyond r=3*xcccrc is already done at the calling level
@@ -333,7 +330,6 @@ end subroutine gp1cc
 !! OUTPUT
 !!  gpp1cc_xx=second derivative of gg wrt xx.
 !!
-!!
 !! SOURCE
 
 subroutine gpp1cc(gpp1cc_xx,xx)
@@ -358,7 +354,6 @@ subroutine gpp1cc(gpp1cc_xx,xx)
  real(dp) :: t157,t16,t160,t17,t174,t175,t18,t19,t2,t20,t21,t23,t24,t3,t31,t33
  real(dp) :: t34,t4,t41,t42,t44,t45,t46,t5,t54,t55,t56,t57,t6,t62,t64,t65,t7
  real(dp) :: t72,t78,t79,t8,t85,t9,t93
-
 ! *************************************************************************
 
  if (xx>3.0d0) then
@@ -496,7 +491,6 @@ subroutine psp5lo(al,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
  real(dp) :: arg,result,rmtoin,test,ztor1
 !arrays
  real(dp),allocatable :: work(:)
-
 ! *************************************************************************
 
  ABI_MALLOC(work,(mmax))
@@ -523,10 +517,7 @@ subroutine psp5lo(al,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
      work(ir)=(rad(ir)*rad(ir))*(rad(ir)*vloc(ir)+zion)
    end if
  end do
-!DEBUG
-!write(std_out,*)' psp5lo : stop '
-!stop
-!ENDDEBUG
+!write(std_out,*)' psp5lo : stop '; stop
 
 !Do integral from r(1) to r(max)
  call ctrap(mmax,work,al,result)
@@ -668,7 +659,6 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
 !arrays
  real(dp) :: ckb(dpsang),dvms(dpsang),eta(dpsang),renorm(dpsang)
  real(dp),allocatable :: work1(:),work2(:),work3(:),work4(:)
-
 !*************************************************************************
 
 !l=0,1,2 and 3 spherical Bessel functions
@@ -1159,7 +1149,6 @@ subroutine psp8lo(amesh, epsatm, mmax, mqgrid, qgrid, q2vq, rad, vloc, yp1, ypn,
  real(dp) :: amesh_new,arg,fp1,fpn,qmesh,result,ztor1
 !arrays
  real(dp),allocatable :: rad_new(:),rvlpz(:),rvlpz_new(:),sprvlpz(:,:),work(:)
-
 ! *************************************************************************
 
  ABI_MALLOC(work,(mmax))
@@ -1328,7 +1317,6 @@ subroutine psp8nl(amesh, ffspl, indlmn, lmax, lmnmax, lnmax, mmax, mqgrid, qgrid
 !arrays
  real(dp) :: sb_out(4)
  real(dp),allocatable :: rad_new(:),vpspll_new(:,:),work(:,:),work2(:)
-
 ! *************************************************************************
 
  ! Find r mesh spacing necessary for accurate integration at qmax
@@ -1520,7 +1508,6 @@ subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
 !arrays
  real(dp),allocatable :: ff3(:),ff4(:),gg(:),gg1(:),gg2(:)
  real(dp),allocatable :: gg3(:),gg4(:),work(:),xx(:)
-
 ! *************************************************************************
 
  !write(std_out,*) 'cc_derivatives : enter'

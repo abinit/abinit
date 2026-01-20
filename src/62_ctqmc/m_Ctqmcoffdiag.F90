@@ -3049,7 +3049,7 @@ include 'mpif.h'
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: buffer2,buffer2s
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: fullempty
-  DOUBLE PRECISION                              :: xsum  
+  DOUBLE PRECISION                              :: xsum
   TYPE(FFTHyb) :: FFTmrka
 
 #if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
@@ -3122,14 +3122,14 @@ include 'mpif.h'
       op%measPerturbation(:   ,iflavor) = op%measPerturbation(:,iflavor) &
                                     / SUM(op%measPerturbation(:,iflavor))
 
-    IF ( op%opt_order .GT. 0 ) then 
-      xsum = SUM(op%meas_fullemptylines(:,iflavor))      
-      IF (xsum /= 0.0 ) then      
+    IF ( op%opt_order .GT. 0 ) then
+      xsum = SUM(op%meas_fullemptylines(:,iflavor))
+      IF (xsum /= 0.0 ) then
         op%meas_fullemptylines(:   ,iflavor) = op%meas_fullemptylines(:,iflavor) &
                                       / SUM(op%meas_fullemptylines(:,iflavor))
       else
        op%meas_fullemptylines(:   ,iflavor) = zero
-      ENDIF 
+      ENDIF
       !write(6,*) "sum fullempty",iflavor,op%meas_fullemptylines(:,iflavor)
     ENDIF
 

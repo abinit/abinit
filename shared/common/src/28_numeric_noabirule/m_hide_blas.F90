@@ -341,18 +341,18 @@ interface xgemv
   !
   subroutine cgemv ( trans, m, n, alpha, a, lda, x, incx, beta, y, incy )
     use defs_basis
-    complex(sp),intent(in) :: alpha, beta
-    integer,intent(in) :: incx, incy, lda, m, n
     character(len=1),intent(in) :: trans
+    integer,intent(in) :: incx, incy, lda, m, n
+    complex(sp),intent(in) :: alpha, beta
     complex(sp),intent(in) :: a( lda, * ), x( * )
     complex(sp),intent(inout) :: y( * )
   end subroutine cgemv
   !
   subroutine zgemv ( trans, m, n, alpha, a, lda, x, incx, beta, y, incy )
     use defs_basis
-    complex(dp),intent(in) :: alpha, beta
-    integer,intent(in) :: incx, incy, lda, m, n
     character(len=1),intent(in) :: trans
+    integer,intent(in) :: incx, incy, lda, m, n
+    complex(dp),intent(in) :: alpha, beta
     complex(dp),intent(in) :: a( lda, * ), x( * )
     complex(dp),intent(inout) :: y( * )
   end subroutine zgemv
@@ -566,7 +566,6 @@ subroutine blas_cholesky_ortho_spc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
  integer :: ierr
  logical :: my_usegemm
  character(len=500) :: msg
-
 ! *************************************************************************
 
  ! 1) Calculate overlap_ij =  <phi_i|phi_j>
@@ -678,7 +677,6 @@ subroutine sqmat_itranspose_sp(n,mat,alpha)
  real(sp),optional,intent(in) :: alpha
 !arrays
  real(sp),intent(inout) :: mat(n,n)
-
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_MKL_IMATCOPY
@@ -725,7 +723,6 @@ subroutine sqmat_itranspose_dp(n,mat,alpha)
  real(dp),optional,intent(in) :: alpha
 !arrays
  real(dp),intent(inout) :: mat(n,n)
-
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_MKL_IMATCOPY
@@ -866,7 +863,6 @@ subroutine sqmat_otranspose_sp(n,imat,omat,alpha)
 !arrays
  real(sp),intent(in) :: imat(n,n)
  real(sp),intent(out) :: omat(n,n)
-
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_MKL_OMATCOPY
@@ -915,7 +911,6 @@ subroutine sqmat_otranspose_dp(n,imat,omat,alpha)
 !arrays
  real(dp),intent(in) :: imat(n,n)
  real(dp),intent(out) :: omat(n,n)
-
 ! *************************************************************************
 
 #ifdef HAVE_LINALG_MKL_OMATCOPY

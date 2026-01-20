@@ -133,6 +133,10 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
               do gama=1,3
                 do zeta=1,3
                   do delta=1,3
+#if defined FC_NVHPC
+                    if (itrans == -1) write(std_out, *)"NVHPC freezes here that is fixed by this print statement."
+#endif
+
                     counter=delta+(gama-1)*3+(beta-1)*9+(alpha-1)*27
                     temp=Sym%S_ref(mu,alpha,isym,1)*Sym%S_ref(nu  ,beta ,isym,1)*&
 &                        Sym%S_ref(xi,gama ,isym,1)*Sym%S_ref(zeta,delta,isym,1)
@@ -188,7 +192,9 @@ subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
         ncoeff_prev=Shell4at%ncoeff_prev(ishell)+CoeffMoore%ncoeff3rd+CoeffMoore%ncoeff2nd+CoeffMoore%ncoeff1st
         ncoeff_prev_l=ncoeff_prev+1
         ncoeff_prev_h=ncoeff_prev+ncoeff
-
+#if defined FC_NVHPC
+        if (itrans == -1) write(std_out, *)"NVHPC freezes here that is fixed by this print statement."
+#endif
         ABI_MALLOC(SSSS_proj,(3,3,3,3,ncoeff)) ; SSSS_proj(:,:,:,:,:)=zero
         do mu=1,3
           do nu=1,3
@@ -319,6 +325,10 @@ subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
         write(Invar%stdout,'(a,i4,a,i4)') '  For latom  =',latom ,' ,with type=',mod(latom -1,Invar%natom_unitcell)+1
         do ii=1,3
           do jj=1,3
+#if defined FC_NVHPC
+            if (itrans == -1) write(std_out, *)"NVHPC freezes here that is fixed by this print statement."
+#endif
+
             write(Invar%stdout,'(a,i2,i2,a)') '  Phi4^{',ii,jj,'kl}='
             do kk=1,3
               if (abs(Phi4_3333(ii,jj,1,kk)).lt.5.d-7) then
@@ -375,6 +385,9 @@ subroutine tdep_build_phi4_3333(isym,Phi4_ref,Phi4_3333,Sym,itrans)
             do gama=1,3
               do zeta=1,3
                 do delta=1,3
+#if defined FC_NVHPC
+                 if (itrans == -1) write(std_out, *)"NVHPC freezes here that is fixed by this print statement."
+#endif
                   Phi4_3333(mu,nu,xi,zeta)=Phi4_3333(mu,nu,xi,zeta)+&
 &                 Sym%S_ref(mu,alpha,isym,1)*Sym%S_ref(nu  ,beta ,isym,1)*&
 &                 Sym%S_ref(xi,gama ,isym,1)*Sym%S_ref(zeta,delta,isym,1)*Phi4_ref(alpha,beta,gama,delta)
@@ -396,6 +409,10 @@ subroutine tdep_build_phi4_3333(isym,Phi4_ref,Phi4_3333,Sym,itrans)
     do jj=1,3
       do kk=1,3
         do ll=1,3
+#if defined FC_NVHPC
+          if (itrans == -1) write(std_out, *)"NVHPC freezes here that is fixed by this print statement."
+#endif
+
           if (itrans==1) then ; ee=ii ; ff=jj ; gg=kk ; hh=ll ; endif !\Phi4_ijkl
           if (itrans==2) then ; ee=ii ; ff=kk ; gg=jj ; hh=ll ; endif !\Phi4_ikjl
           if (itrans==3) then ; ee=jj ; ff=ii ; gg=kk ; hh=ll ; endif !\Phi4_jikl
