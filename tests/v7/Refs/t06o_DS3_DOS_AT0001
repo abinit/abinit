@@ -1,5 +1,5 @@
 #
-# ABINIT package : DOS file  
+# ABINIT package : DOS file
 #
 # nsppol = 2, nkpt =    8, nband(1)=   6
 # Tetrahedron method
@@ -9,7 +9,7 @@
 #
 # The local DOS (in electrons/Hartree for one atomic sphere)
 # and integrated local DOS (in electrons for one atomic sphere) are computed.
-# at  1601 energies (in Hartree) covering the interval 
+# at  1601 energies (in Hartree) covering the interval
 # between   -0.6000 and    0.2000 Hartree by steps of  0.00050 Hartree.
 #
 #                Spin-up DOS

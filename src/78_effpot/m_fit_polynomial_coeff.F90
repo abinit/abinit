@@ -163,7 +163,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer :: rank_to_send,unit_anh,fit_iatom_in,unit_GF_val,nfix_and_impose,nfixcoeff_corr,atom_start,atom_end
  integer :: ncopy_terms
  real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS,tolGF,check_value
- real(dp),parameter :: HaBohr_eVAng = Ha_eV /Bohr_Ang 
+ real(dp),parameter :: HaBohr_eVAng = Ha_eV /Bohr_Ang
  type(effective_potential_type) :: eff_pot_fixed
  logical :: iam_master,need_verbose,need_positive,converge,file_opened
  logical :: need_anharmstr,need_spcoupling,ditributed_coefficients,need_prt_anh
@@ -748,7 +748,7 @@ contains
 
     if(present(coeff_file_rw)) then
         ! TODO hexu: This functionality needs more test and is now temporarily disabled
-        ! If test ok, remove setting it to 0. 
+        ! If test ok, remove setting it to 0.
 
       if (coeff_file_rw==1 .and. generateterm_in == 1 ) then
         write (filename, "(A9,I2,I2,A4)") "TEST_TERMS", my_rank+1,fit_iatom_in,".xml"

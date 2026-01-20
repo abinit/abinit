@@ -1,8 +1,8 @@
 
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu14.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu14.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Mon 22 Dec 2025.
 - ( at 23h39 )
-  
+
 - input  file    -> /opt/ABINIT/atlas_gnu_14.2_triqs/trunk__codata2022/tests/TestBot_MPI8_OMP1/paral_t111_MPI8/t111.abi
 - output file    -> t111_MPI8.abo
 - root for input  files -> t111_MPI8i
@@ -1203,7 +1203,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   -0.00000   0.00000   0.00000   0.03030   0.00000   0.00000   0.00000   0.00000   0.00235   0.00000
    0.00000   0.00000  -0.00000   0.00000   0.02718   0.00000   0.00000  -0.00000   0.00000   0.00276
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -3220,7 +3220,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00054  -0.00001   0.00005   0.01930   0.00008   0.00002  -0.00000   0.00002   0.00269   0.00003
   -0.00001  -0.00005   0.00033   0.00031   0.02392  -0.00000  -0.00000  -0.00000   0.00003   0.00349
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -5233,7 +5233,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00005   0.00001   0.00001   0.02714  -0.00000  -0.00001   0.00000  -0.00000   0.00444   0.00000
    0.00000   0.00001   0.00189  -0.00001   0.02483  -0.00000  -0.00000  -0.00005   0.00000   0.00475
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -7246,7 +7246,7 @@ force_length_stats: {min: null, max: null, mean: null, }
   -0.00000   0.00000   0.00001   0.03052   0.00000  -0.00000   0.00000  -0.00000   0.00449  -0.00000
    0.00000   0.00001  -0.00036  -0.00000   0.02447   0.00000   0.00000  -0.00009  -0.00000   0.00507
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -8907,7 +8907,7 @@ total_energy_dc_eV  : -3.37912046114972E+03
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      5.4476100000E+00  5.4476100000E+00  5.4476100000E+00 Bohr
               amu      5.58470000E+01
@@ -11213,7 +11213,7 @@ P           mkmem          16
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] A self-consistent DFT + DMFT scheme in the projector augmented wave method: 
+- [1] A self-consistent DFT + DMFT scheme in the projector augmented wave method:
 - applications to cerium, Ce2O3 and Pu2O3 with the Hubbard I solver and comparison to DFT + U,
 - B. Amadon,  J. Phys.: Condens. Matter 24 075604 (2012).
 - Comment : Describes the self-consistent implementation of DFT+DMFT in PAW
@@ -11249,7 +11249,7 @@ P           mkmem          16
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -11261,12 +11261,12 @@ P           mkmem          16
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -11284,7 +11284,7 @@ P           mkmem          16
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

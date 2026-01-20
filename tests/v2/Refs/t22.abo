@@ -1,8 +1,8 @@
 
 .Version 10.5.8.2 of ANADDB, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 20 Dec 2025.
 - ( at 17h10 )
-  
+
 
 ================================================================================
 
@@ -87,11 +87,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -107,7 +107,7 @@
        3               2       -0.000000        0.000000
        3               3        0.030961        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -124,7 +124,7 @@
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces
 
        Homogeneous q point set in the B.Z.
  Grid q points  :        4
@@ -137,7 +137,7 @@
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -328,9 +328,9 @@
 
 ================================================================================
 
-  
- Mode effective charges 
- Mode number.    x            y            z            length 
+
+ Mode effective charges
+ Mode number.    x            y            z            length
 -     1         -0.000000    -0.000000    -0.000014     0.000014
 -     2         -0.000000    -0.000014     0.000000     0.000014
 -     3         -0.000014     0.000000     0.000000     0.000014
@@ -340,7 +340,7 @@
 -     7         -0.000000     0.000000     0.000000     0.000000
 -     8         -0.000000    -0.000000     0.000000     0.000000
 -     9          0.000000    -0.000000     0.000000     0.000000
-  
+
  Oscillator strengths (in a.u. ; 1 a.u.=253.2638413 m3/s2). Set to zero if abs()<tol14.
  Mode number.       xx          yy          zz          xy          xz          yz          trace
 -   1     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
@@ -380,11 +380,11 @@
      35.51667060      0.00000000     -0.00000000
       0.00000000     35.51667060      0.00000000
      -0.00000000      0.00000000     35.51667060
- 
+
 
 ================================================================================
 
- Treat the second list of vectors 
+ Treat the second list of vectors
 
 
   Phonon at Gamma, with non-analyticity in the

@@ -42,46 +42,46 @@
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
  ==== FFT setup for fftalg 110 ====
-  FFT mesh divisions ........................   100  100  100
-  Augmented FFT divisions ...................   101  101  100
-  FFT algorithm .............................   110
-  FFT cache size ............................    16
+-  FFT mesh divisions ........................   100  100  100
+-  Augmented FFT divisions ...................   101  101  100
+-  FFT algorithm .............................   110
+-  FFT cache size ............................    16
 
  ==== FFT setup for fftalg 111 ====
-  FFT mesh divisions ........................   100  100  100
-  Augmented FFT divisions ...................   101  101  100
-  FFT algorithm .............................   111
-  FFT cache size ............................    16
+-  FFT mesh divisions ........................   100  100  100
+-  Augmented FFT divisions ...................   101  101  100
+-  FFT algorithm .............................   111
+-  FFT cache size ............................    16
 
  ==== FFT setup for fftalg 112 ====
-  FFT mesh divisions ........................   100  100  100
-  Augmented FFT divisions ...................   101  101  100
-  FFT algorithm .............................   112
-  FFT cache size ............................    16
+-  FFT mesh divisions ........................   100  100  100
+-  Augmented FFT divisions ...................   101  101  100
+-  FFT algorithm .............................   112
+-  FFT cache size ............................    16
 
  ==== FFT setup for fftalg 411 ====
-  FFT mesh divisions ........................   100  100  100
-  Augmented FFT divisions ...................   101  101  100
-  FFT algorithm .............................   411
-  FFT cache size ............................    16
+-  FFT mesh divisions ........................   100  100  100
+-  Augmented FFT divisions ...................   101  101  100
+-  FFT algorithm .............................   411
+-  FFT cache size ............................    16
 
  ==== FFT setup for fftalg 412 ====
-  FFT mesh divisions ........................   100  100  100
-  Augmented FFT divisions ...................   101  101  100
-  FFT algorithm .............................   412
-  FFT cache size ............................    16
+-  FFT mesh divisions ........................   100  100  100
+-  Augmented FFT divisions ...................   101  101  100
+-  FFT algorithm .............................   412
+-  FFT cache size ............................    16
 
  ==== FFT setup for fftalg 312 ====
-  FFT mesh divisions ........................   100  100  100
-  Augmented FFT divisions ...................   101  101  100
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
+-  FFT mesh divisions ........................   100  100  100
+-  Augmented FFT divisions ...................   101  101  100
+-  FFT algorithm .............................   312
+-  FFT cache size ............................    16
 
  ==== FFT setup for fftalg 512 ====
-  FFT mesh divisions ........................   100  100  100
-  Augmented FFT divisions ...................   101  101  100
-  FFT algorithm .............................   512
-  FFT cache size ............................    16
+-  FFT mesh divisions ........................   100  100  100
+-  Augmented FFT divisions ...................   101  101  100
+-  FFT algorithm .............................   512
+-  FFT cache size ............................    16
 
 ==============================================================
 ==== fourwf with option  0, cplex  0, ndat  4, istwf_k  1 ====

@@ -1,8 +1,8 @@
 
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 20 Dec 2025.
 - ( at 17h12 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v5_t15/t15.abi
 - output file    -> t15.abo
 - root for input  files -> t15i
@@ -458,7 +458,7 @@ force_length_stats: {min:   7.78736789E-03, max:   7.78736789E-03, mean:   7.787
    0.00003   0.00002   0.00002   0.81566  -0.00002
   -0.00000  -0.00002   0.00003  -0.00002   0.87646
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -667,7 +667,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  9  -340.63382772371     1.607E-09 2.214E-10 1.184E-05 3.313E-07 8.442E-07
  ETOT 10  -340.63382771839     5.321E-09 7.411E-10 1.905E-07 7.196E-07 1.564E-06
 
- At SCF step   10, etot is converged : 
+ At SCF step   10, etot is converged :
   for the second time, diff in etot=  5.321E-09 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -867,7 +867,7 @@ force_length_stats: {min:   7.80818724E-03, max:   7.80818724E-03, mean:   7.808
   -0.00000   0.00000   0.00000   0.81881   0.00000
    0.00000   0.00000  -0.00000   0.00000   0.87677
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1074,7 +1074,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  7  -340.63087027936     3.472E-09 4.224E-10 5.297E-06 2.353E-05 5.994E-05
  ETOT  8  -340.63087027702     2.333E-09 4.994E-11 4.125E-06 2.443E-05 8.432E-05
 
- At SCF step    8, etot is converged : 
+ At SCF step    8, etot is converged :
   for the second time, diff in etot=  2.333E-09 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1274,7 +1274,7 @@ force_length_stats: {min:   7.73017243E-03, max:   7.73017243E-03, mean:   7.730
   -0.00000   0.00000   0.00000   0.80960   0.00000
    0.00000   0.00000   0.00000   0.00000   0.87902
 
- ---------- DFT+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1419,7 +1419,7 @@ total_energy_dc_eV  : -9.26903817841277E+03
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.1000000000E+01  1.1000000000E+01  1.1000000000E+01 Bohr
               amu      5.86900000E+01
@@ -1563,7 +1563,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1575,12 +1575,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1598,7 +1598,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

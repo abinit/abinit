@@ -3571,7 +3571,7 @@ end subroutine dfpt_nstdy
 !!
 !! NOTES
 !!  This routine will NOT work with nspden==4:
-!!    at least the use of fftpac should be modified.
+!!  at least the use of fftpac should be modified.
 !!
 !! SOURCE
 

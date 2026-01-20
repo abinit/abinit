@@ -1,6 +1,6 @@
  Conducti output file:
  Contains all results produced by conducti utility
- 
+
  # omega(ua)       cond(ua)             thermal cond(ua)       thermopower(ua)
      0.00735    2.622636973394E-03    5.687220912083E-10   -1.038137361678E-04
      0.01470    2.919033298439E-01    4.239180613728E-09   -1.038136439536E-04
@@ -274,7 +274,7 @@
      1.98450    0.000000000000E+00    0.000000000000E+00    0.000000000000E+00
      1.99185    0.000000000000E+00    0.000000000000E+00    0.000000000000E+00
      1.99920    0.000000000000E+00    0.000000000000E+00    0.000000000000E+00
- 
+
  full conductivity tensor, for the desired set of energies
  then, the three principal values, for the desired set of energies:
  energy (in eV) =    2.000064E-01, conductivity tensor (in Ohm.cm-1) follows :
@@ -1365,10 +1365,10 @@
         0.000000000000000        0.000000000000000        0.000000000000000
         0.000000000000000        0.000000000000000        0.000000000000000
         0.000000000000000        0.000000000000000        0.000000000000000
- 
+
 
  Now, print principal values of the conductivity tensor.
- 
+
  #omega(ua)   cond_1(ua)     cond_2(ua) cond_3(ua)  cond_tot(ua)
      0.00735    3.721542301733E-04    1.878325608038E-03    3.721571351821E-04    2.622636973394E-03
      0.01470    4.050200157326E-02    2.108989819807E-01    4.050234628998E-02    2.919033298439E-01

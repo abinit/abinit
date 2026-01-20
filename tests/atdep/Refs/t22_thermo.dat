@@ -13,7 +13,7 @@
       The average mass / proton-electron mass ratio (in a.u.) =   208.980
       The Lindemann constant : sqrt(<u^2>)/d_at =     0.057
       The integral of vDOS =     1.000
- 
+
 ============= Harmonic Approximation (HA) ==================
    Note that the following results come from an EXTRAPOLATION:
      1/ F_vib^HA(T) is computed for each T using vDOS(T=  300)
