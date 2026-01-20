@@ -814,7 +814,7 @@ subroutine cart29(blkflg,blkval,carflg,d2cart,&
    end do
  end do
 
-!MRoyo: For magnetic Zeeman perturbations, apply a negative sign to get induced magnetic moments
+!MRoyo: For magnetic Zeeman perturbations, apply a negative sign to get induced magnetic moments.
 !Macroscopic Zeeman
  mflg= 0
  ipert1=natom+5 
