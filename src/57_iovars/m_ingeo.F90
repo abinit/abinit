@@ -33,7 +33,8 @@ module m_ingeo
 &                         symmetrize_rprimd, symmetrize_tnons,symmetrize_xred
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
  use m_symfind,    only : symfind, symfind_expert, symanal, symlatt
- use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric, reduce2primitive, geteuler, cart2spinaxis
+ use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric, reduce2primitive, cart2spinaxis
+ use m_euler,      only : geteuler
  use m_parser,     only : intagm, intagm_img, geo_t, geo_from_abivar_string, get_acell_rprim
 
  implicit none
@@ -574,7 +575,8 @@ end do
    call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'spinat_cart',tread_cart,'DPR')
    if(tread_cart==1) spinat_cart(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
    
-   call checkspvec('spinat',natom,dtset%spinaxis,tread,tread_cart,spinat,spinat_cart,spinat) 
+   call checkspvec('spinat',natom,dtset%spinaxis,tread,tread_cart,spinat,spinat_cart)
+   if (tread == 0 .and. tread_cart == 1) dtset%spinat_in(1:3,1:natom) = spinat(1:3,1:natom) 
 
    ! nucdipmom is read for each irreducible atom, from 1 to natom
    nucdipmom=zero
@@ -629,7 +631,8 @@ end do
 
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'spinat_cart',tread_cart,'DPR')
    if(tread_cart==1) spinat_cart(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natom])
-   call checkspvec('spinat',natrd,dtset%spinaxis,tread,tread_cart,spinat,spinat_cart,spinat) 
+   call checkspvec('spinat',natrd,dtset%spinaxis,tread,tread_cart,spinat,spinat_cart) 
+   if (tread == 0 .and. tread_cart == 1) dtset%spinat_in(1:3,1:natrd) = spinat(1:3,1:natrd) 
     
    ! nucdipmom is read for each irreducible atom, from 1 to natrd
    nucdipmom=zero
@@ -2178,30 +2181,31 @@ end subroutine invacuum
 !!       (spinat or hspinfield) is provided in the input
 !! tread_cart=integer flag (0 or 1), set to 1 if the Cartesian quantity
 !!            (spinat_cart or hspinfield_cart) is provided in the input 
-!! vec_local(nvec,natom)=spin vectors defined in the local spin reference frame
+!! vec_local(nvec,natom)=spin vectors defined in the local spin reference coordinates
 !! vec_cart(nvec,natom)=spin vectors defined in Cartesian coordinates
 !!
 !! OUTPUT
-!! vec_out=spin vectors in the local spin reference frame
+!! vec_local=updated consistent spin vectors in local spin reference coordinate
+!! vec_cart=updated consistent spin vectors in cartesian coordinate
 !!
 !! SOURCE
 
-subroutine checkspvec(name,nitem,spinaxis_in,tread,tread_cart,vec_local,vec_cart,vec_out)
+subroutine checkspvec(name,nitem,spinaxis_in,tread,tread_cart,vec_local,vec_cart)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nitem, tread, tread_cart
  character(len=*),intent(in) :: name
 !arrays
- real(dp),intent(in) :: spinaxis_in(3), vec_local(3,nitem), vec_cart(3,nitem)
- real(dp),intent(out) :: vec_out(3,nitem)
+ real(dp),intent(in) :: spinaxis_in(3)
+ real(dp),intent(inout) :: vec_local(3,nitem), vec_cart(3,nitem) 
 
 !Local variables-------------------------------
 !scalars
  integer :: i
  real(dp) :: alpha, beta, norm
 !arrays
- real(dp) :: spinaxis(3), R(3,3), v_cart(3), v_tmp(3)
+ real(dp) :: spinaxis(3), R(3,3), v_cart(3), v_local(3)
  logical  :: trivial_axis
  character(len=1000) :: msg
 
@@ -2214,53 +2218,57 @@ subroutine checkspvec(name,nitem,spinaxis_in,tread,tread_cart,vec_local,vec_cart
 
 ! case 0: nothing provided 
  if (tread == 0 .and. tread_cart == 0) return
+ 
+ if (.not. trivial_axis) then
+   call geteuler(spinaxis, alpha, beta)
+   call cart2spinaxis(alpha, beta, R)
+ end if
 
 ! case 1: only _cart provided
  if (tread == 0 .and. tread_cart == 1) then
-
-   if (trivial_axis) then
-     vec_out(:,:) = vec_cart(:,:)
-   else
-     call geteuler(spinaxis, alpha, beta)
-     do i = 1, nitem
+   do i = 1, nitem
+     if (trivial_axis) then
+       vec_local(:,i) = vec_cart(:,i)
+       vec_cart(:,i) = vec_local(:,i)
+     else
        v_cart(:) = vec_cart(:, i)
-       call cart2spinaxis(alpha, beta, R, v_cart, v_tmp)
-       vec_out(:, i) = v_tmp(:)
-     end do
-   end if
+       vec_local(:,i) = matmul(R, v_cart)
+       vec_cart(:,i) = matmul(transpose(R),vec_local(:,i))
+     end if
+   end do
    return
  end if
  
 ! case 2: only local provided
- if (tread == 1 .and. tread_cart == 0) then  
-   
-   if (trivial_axis) then
-     vec_out(:,:) = vec_local(:,:)
+ if (tread == 1 .and. tread_cart == 0) then 
+   do i = 1, nitem    
+     if (trivial_axis) then
+       vec_cart(:,i) = vec_local(:,i)
+       vec_local(:,i) = vec_cart(:,i)
    else
      write(msg,'(a)') 'Spinaxis is defined, but only ' // trim(name) // ' is present.' // ch10 // &
                       'Action: please use ' // trim(name) // '_cart (Cartesian) instead of ' // trim(name) // &
                       'when spinaxis is set.'
      ABI_ERROR(msg)
    end if
+   end do
    return
  end if
     
 ! case 3: both provided and check consistency
  if (tread == 1 .and. tread_cart == 1) then
    
-   if (.not. trivial_axis) then
-     call geteuler(spinaxis, alpha, beta)
-   end if 
-
    do i = 1, nitem
      if (trivial_axis) then
-       v_tmp(:) = vec_cart(:,i)
+       vec_cart(:,i) = vec_local(:,i)
+       vec_local(:,i) = vec_cart(:,i)
      else
-       v_cart(:) = vec_cart(:,i)
-       call cart2spinaxis(alpha, beta, R, v_cart, v_tmp)
+       v_cart(:) = matmul(transpose(R), vec_local(:,i))
+       v_local(:) = matmul(R, vec_cart(:,i))
      end if
      ! not consistent for local and _cart      
-     if (maxval(abs(v_tmp(:) - vec_local(:,i))) > tol8) then
+     if (maxval(abs(v_local(:) - vec_local(:, i))) > tol8 .or. &
+         maxval(abs(v_cart(:) - vec_cart(:, i))) > tol8) then
        write(msg,'(a,a,a,a,a,a,a,3(1x,es16.8),a,a,3(1x,es16.8),a,a,3(1x,es16.8),a,a)') &
         'Both ', trim(name), ' and ', trim(name), '_cart are set but inconsistent.', ch10, &
         'spinaxis (normalized) =', spinaxis(1), spinaxis(2), spinaxis(3), ch10, &
@@ -2269,7 +2277,8 @@ subroutine checkspvec(name,nitem,spinaxis_in,tread,tread_cart,vec_local,vec_cart
         'Action: make them consistent or provide only one of them.'
        ABI_ERROR(msg)
      end if
-     vec_out(:,i) = v_tmp(:)
+     vec_local(:,i) = v_local(:)
+     vec_cart(:,i) = v_cart(:) 
    end do
    return
  end if

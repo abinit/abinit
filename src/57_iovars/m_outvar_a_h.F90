@@ -117,6 +117,7 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  integer :: natnd,natom,nimfrqs,nimage
  integer :: ntypalch,ntypat,print_constraint,size1,size2,test_write,tmpimg0
  logical :: compute_static_images
+ logical :: nontrivial_spinaxis
  real(dp) :: cpus
  character(len=1) :: firstchar_fftalg,firstchar_gpu
  character(len=14) :: str_hyb
@@ -1555,10 +1556,20 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'hspinfield','BFI',0)
 
 !hspinfield_cart
- dprarr(1,:) = dtsets(:)%hspinfield_cart(1)
- dprarr(2,:) = dtsets(:)%hspinfield_cart(2)
- dprarr(3,:) = dtsets(:)%hspinfield_cart(3)
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'hspinfield_cart','BFI',0)
+ nontrivial_spinaxis=.false.
+ do idtset=1,ndtset_alloc
+   if (any(abs(dtsets(idtset)%spinaxis(1:2)) > tol8) .or. &
+       abs(dtsets(idtset)%spinaxis(3) - 1.0_dp) > tol8) then
+     nontrivial_spinaxis=.true.
+     exit
+   end if
+ end do
+ if (nontrivial_spinaxis) then
+   dprarr(1,:) = dtsets(:)%hspinfield_cart(1)
+   dprarr(2,:) = dtsets(:)%hspinfield_cart(2)
+   dprarr(3,:) = dtsets(:)%hspinfield_cart(3)
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'hspinfield_cart','BFI',0)
+ end if
 
  intarr(1,:)=dtsets(:)%extfpmd_nbcut
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'extfpmd_nbcut','INT',0)

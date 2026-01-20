@@ -52,7 +52,6 @@ MODULE m_paw_denpot
 
  use m_crystal,          only : crystal_t
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
- use m_geometry,         only : geteuler
 
 #ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_f_pointer

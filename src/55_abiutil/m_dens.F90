@@ -33,8 +33,9 @@ MODULE m_dens
  use m_time,          only : timab
  use m_numeric_tools, only : wrap2_zero_one
  use m_io_tools,      only : open_file
- use m_geometry,      only : dist2, xcart2xred, metric, geteuler, cart2spinaxis
+ use m_geometry,      only : dist2, xcart2xred, metric, cart2spinaxis
  use m_mpinfo,        only : ptabs_fourdp
+ use m_euler,         only : geteuler
 
  implicit none
 
@@ -2039,10 +2040,10 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
    mag_tot_cart=zero
    mag_tot_cart_im=zero
    if (nspden==4) then
-     mag_spin = (/mag_x,mag_y,mag_z/)
+     mag_spin = [mag_x,mag_y,mag_z]
      mag_tot_cart = matmul(Rspin_t,mag_spin)
      if (cplex==2) then
-       mag_spin = (/mag_x_im,mag_y_im,mag_z_im/)
+       mag_spin = [mag_x_im,mag_y_im,mag_z_im]
        mag_tot_cart_im = matmul(Rspin_t,mag_spin)
      end if
    end if

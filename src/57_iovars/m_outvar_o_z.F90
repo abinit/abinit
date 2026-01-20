@@ -126,6 +126,7 @@ contains
  integer :: nimage,nnos,nsym
  integer :: ntypalch,ntypat,size1,size2,test_write,tnkpt,timopt_default,tmpimg0
  logical :: compute_static_images
+ logical :: nontrivial_spinaxis
  character(len=1) :: firstchar_gpu
 !arrays
  integer,allocatable :: narrm(:)
@@ -995,16 +996,26 @@ contains
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'spinat','DPR',multivals%natom)
 
 !spinat_cart
- dprarr(:,0)=0.0_dp
- narr=3*natom ! default size for all datasets
- do idtset=1,ndtset_alloc       ! specific size for each dataset
-   narrm(idtset)=3*dtsets(idtset)%natom
-   if (narrm(idtset)>0) then
-     dprarr(1:narrm(idtset),idtset)=reshape(dtsets(idtset)%spinat_cart(1:3,1:dtsets(idtset)%natom), (/narrm(idtset)/))
+  nontrivial_spinaxis=.false.
+ do idtset=1,ndtset_alloc
+   if (any(abs(dtsets(idtset)%spinaxis(1:2)) > tol8) .or. &
+       abs(dtsets(idtset)%spinaxis(3) - 1.0_dp) > tol8) then
+     nontrivial_spinaxis=.true.
+     exit
    end if
-   if(sum(abs( dtsets(idtset)%spinat_cart(1:3,1:dtsets(idtset)%natom))) < tol12 ) narrm(idtset)=0
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'spinat_cart','DPR',multivals%natom)
+ if (nontrivial_spinaxis) then
+   dprarr(:,0)=0.0_dp
+   narr=3*natom ! default size for all datasets
+   do idtset=1,ndtset_alloc       ! specific size for each dataset
+     narrm(idtset)=3*dtsets(idtset)%natom
+     if (narrm(idtset)>0) then
+       dprarr(1:narrm(idtset),idtset)=reshape(dtsets(idtset)%spinat_cart(1:3,1:dtsets(idtset)%natom), (/narrm(idtset)/))
+     end if
+     if(sum(abs( dtsets(idtset)%spinat_cart(1:3,1:dtsets(idtset)%natom))) < tol12 ) narrm(idtset)=0
+   end do
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'spinat_cart','DPR',multivals%natom)
+ end if
 
 ! spinaxis
  dprarr(1,:)=dtsets(:)%spinaxis(1)

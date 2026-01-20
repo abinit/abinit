@@ -78,7 +78,6 @@ MODULE m_geometry
  public :: wedge_product      ! compute wedge product given wedge basis
  public :: d3lwsym
  public :: sylwtens             ! Determines the set of irreductible elements of the spatial-dispersion tensors
- public :: geteuler             ! Compute the Euler angles corresponding to the spin quantization axis
  public :: cart2spinaxis        ! Compute the rotation matrix from cartesian to spinaxis coordinate     
 
  interface normv
@@ -4082,53 +4081,6 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 end subroutine sylwtens
 !!***
 
-!!****f* m_geometry/geteuler
-!! NAME
-!! geteuler
-!!
-!! FUNCTION
-!! Compute the Euler angles (alpha, beta) corresponding to the spin quantization axis given in Cartesian coordinates.
-!!
-!! INPUTS
-!! spinaxis(3)=spin quantization axis
-!!
-!! OUTPUT
-!! alpha=Euler angle for rotation around z-axis
-!! beta =Euler angle for rotation around y-axis
-!!
-!! SOURCE
-
-subroutine geteuler(spinaxis, alpha, beta)
-
-!Arguments -------------------------------
-!scalars
- real(dp),intent(out) :: alpha, beta
-!arrays
- real(dp),intent(in) :: spinaxis(3)
-
-!Local variables -------------------------
-!scalars
- real(dp) :: sx, sy, sz, norm, rxy
-!***********************************************************************
- norm = DOT_PRODUCT(spinaxis(:), spinaxis(:))
- if (norm < tol8*tol8) then
-   alpha = 0._dp; beta = 0._dp
-   return
- end if
-
- sx = spinaxis(1); sy = spinaxis(2); sz = spinaxis(3)
- rxy = sqrt(sx*sx + sy*sy)
- if (rxy < tol8) then
-   alpha = 0._dp
- else
-   alpha = atan2(sy, sx)
- end if
-
- beta  = atan2(rxy, sz)
-
-end subroutine geteuler
-!!***
-
 !!****f* m_geometry/cart2spinaxis
 !! NAME
 !! cart2spinaxis
@@ -4168,7 +4120,7 @@ subroutine cart2spinaxis(alpha, beta, R, vin, vout)
 
  R(1,1) = cb*ca;  R(2,1) = -sa;   R(3,1) = sb*ca
  R(1,2) = cb*sa;  R(2,2) =  ca;   R(3,2) = sb*sa
- R(1,3) = -sb;    R(2,3) = 0.0_dp;R(3,3) = cb
+ R(1,3) = -sb;    R(2,3) = zero;  R(3,3) = cb
 
  if (present(vin) .and. present(vout)) then
      vout(:) = matmul(R, vin)
