@@ -1011,7 +1011,7 @@ type, public :: dataset_type
  real(dp) :: vdw_df_tolerance
  real(dp) :: vdw_df_zab
  real(dp) :: vis
- real(dp) :: vloc_rcut = 6.0_dp
+ real(dp) :: vloc_rcut = 6.0_dp !  10 Bohr in QE
  real(dp) :: wfmix
  real(dp) :: wtq
  real(dp) :: wvl_hgrid

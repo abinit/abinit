@@ -3154,7 +3154,6 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, &
      end if
    end do ! ir1
    call gpr%free()
-
  end do ! ii
 
  call slk_array_free(gt_pm); call desc_kbz%free(); call uplan_k%free()
@@ -3167,7 +3166,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, &
    ABI_FREE(conjg_ceig0r)
  end if
 
- ! Transfer data from CPU to GPU.
+ ! FIXME: Transfer data from CPU to GPU.
  if (gpu_option == ABI_GPU_OPENMP) then
    do ii=1,num_pm
      ipm = ipm_list__(ii)
@@ -4903,7 +4902,7 @@ subroutine gwr_build_tchi(gwr)
 
        ! Accumulate contribution to chi_q(r',r) with q in the IBZ.
        do iq_ibz=1,gwr%nqibz
-         if (gwr%dtset%symchi /= 0 .and. ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0) cycle ! FIXME: iq_bz or ikq?
+         if (gwr%dtset%symchi /= 0 .and. ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0) cycle
          qq_ibz = gwr%qibz(:,iq_ibz); kpq_bz = kk_bz + qq_ibz
 
          call findqg0(ikq_bz, g0_kq, kpq_bz, gwr%nkbz, gwr%kbz, gwr%mG0)
@@ -4929,9 +4928,7 @@ subroutine gwr_build_tchi(gwr)
          !  !wtqp * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
 
          call cplx_mat_plus_bc(chiq_rpr(iq_ibz)%bufsize, chiq_rpr(iq_ibz)%buffer_cplx(:,1), &
-                               wtqp, "C", gkq_rpr_pm(2)%buffer_cplx(:,1), gk_rpr_pm(1)%buffer_cplx(:,1), &
-                               !0)
-                               gpu_option) ! TODO
+                               wtqp, "C", gkq_rpr_pm(2)%buffer_cplx(:,1), gk_rpr_pm(1)%buffer_cplx(:,1), gpu_option)
        end do ! iq_ibz
 
        if (print_time) then

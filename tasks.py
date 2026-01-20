@@ -498,7 +498,6 @@ def omp_check(ctx, omp_threads="1, 2", np=1, abinit_input_file="run.abi", mpi_ru
     if run_make: make(ctx)
 
     differ = which_differ()
-
     omp_threads = list_from_string(omp_threads)
 
     cprint("Will run {abinit_input_file=} with OMP threads={omp_threads=} and MPI nprocs={np}", color="yellow")
@@ -516,6 +515,7 @@ def omp_check(ctx, omp_threads="1, 2", np=1, abinit_input_file="run.abi", mpi_ru
         cmd = f"{differ} run_omp{omp_ref}.log run_omp{nth}_mpi{np}.log"
         cprint(f"About to execute {cmd=}", color="yellow" )
         ctx.run(cmd, pty=True)
+
 
 @task
 def pyenv_clean(ctx):

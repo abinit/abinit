@@ -198,7 +198,6 @@ contains  !=====================================================
 !! userie =  0 : Use all pp of the given p-grid
 !! userie = -1 : Use only pp = Gamma
 !!
-!!
 !! SOURCE
 
 subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, drhodb, ifc, wfk_hdr, &
@@ -324,6 +323,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
  ABI_CHECK_IEQ(dtset%nspinor, 1, "GWPT with nspinor 2 not coded")
  ABI_CHECK_IEQ(dtset%nsppol, 1, "GWPT with nsppol 2 not tested")
+
+ !dtset%useric = 1 ! exclude the correlation part of Sigma
+ !dtset%userid = 1 ! exclude the exchange part of Sigma
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
