@@ -228,10 +228,9 @@ subroutine slice_init(slice,neigenpairs,spacedim,cprjdim,tolerance,ecut,bandpp, 
  slice%bandpp        = bandpp
  slice%spacecom      = spacecom
  slice%cprjdim       = cprjdim
+ slice%tolerance     = 1.0e-20
  if (tolerance > 0.0) then
    slice%tolerance = tolerance
- else
-   slice%tolerance = 1.0e-20
  end if
  slice%ecut          = ecut
  slice%ndeg_filter   = ndeg_filter
@@ -540,6 +539,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: tim_slice_rr
  integer :: tim_slice_pr
  integer :: my_rank
+ integer :: trace_degree, trace_rank
  logical :: is_close_to_V
  real(dp) :: tol_step
  real(dp) :: tol_probe
@@ -563,6 +563,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: amp_ideg
  real(dp) :: ein_ideg, eout_ideg
  real(dp) :: trace_est
+ real(dp) :: low_bound, upp_bound, min_low_bound, max_upp_bound
  real(dp) :: tol12 = 1.0e-12
  type(xg_t) :: Xsum
  type(xg_t) :: DivResults
@@ -727,13 +728,13 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! ITEST
 
  ! Compute |X|^2 colwise L2-norm (before any filter)
- call xgBlock_colwiseNorm2(slice%AllX,dist1%self,comm_loc=xmpi_comm_null)
- call xgBlock_reverseMap_1d(dist1%self,X0_norm2)
+ !call xgBlock_colwiseNorm2(slice%AllX,dist1%self,comm_loc=xmpi_comm_null)
+ !call xgBlock_reverseMap_1d(dist1%self,X0_norm2)
 
  ! ITEST
- write(901,*) 'norm2(squared) ||X||='
- call xgBlock_print(dist1%self,901)
- flush(901)
+ !write(901,*) 'norm2(squared) ||X||='
+ !call xgBlock_print(dist1%self,901)
+ !flush(901)
  ! ITEST
 
  ! ------------------------------------------------------------
@@ -748,27 +749,16 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  min_low_bound = rayleigh_quotients(1) ! normally this would come after slice1
  ! and we will use the lowest Rayleigh quotient from trace estimation
  max_upp_bound = slice%ecut
- call computeTraceEstimation(n, m, trace_est, getAX, my_rank)
+ trace_degree = 10
+ trace_rank = 100
+ call computeTraceEstimation(slice, trace_rank, trace_degree, low_bound, upp_bound,&
+     min_low_bound, max_upp_bound, trace_est, getAX, kin, my_rank)
  write(901,*) 'trace estimation=', trace_est
  flush(901)
 
  ! TODO put as many vectors as ceil(trace_est) in slice 2 ..
  ! remaining vectors are in slice 1. Also apply trace estimation 
  ! on first slice using Chebyshev low-pass polynomial.
-
- ! Permute columns 1,..,neigenpairs according to order
- !call xgBlock_permuteCols(slice%AllX, slice%spacedim, neigenpairs, permute_cols)
- !call xgBlock_permuteCols(slice%AllAX%self, slice%spacedim, neigenpairs, permute_cols)
- ! ITEST
- !write(901,*) 'slice%AllX after perm=', xgBlock_getid(slice%AllX) 
- !write(901,*) 'slice%AllAX after perm=', xgBlock_getid(slice%AllAX%self) 
- !flush(901)
- ! ITEST 
-
- ! Compare this probe to rayleigh quotients. Actually count the number of
- ! rayleigh quotients in the slice interval. We expect to see that it is 
- ! not the same as the final converged number
-
 
  !! ------------------------------------------------------------
  !! 
@@ -2182,15 +2172,16 @@ end function bandpassIndicator_sca
 !! generateRademacherMatrix
 !!
 !! SOURCE
-subroutine generateRademacherMatrix(V, rank)
+subroutine generateRademacherMatrix(V, n, m, rank)
   
     implicit none
     
     ! input/output
-    real(dp), intent(out) :: V(:,:)
-    integer, intent(in) :: rank
+    real(dp), intent(out) :: V(2,n*m)
+    integer, intent(in) :: n, m, rank
     ! local arguments
     integer :: nseed, i
+    integer :: base_seed
     real(dp) :: U(size(V,1), size(V,2))
     integer, allocatable :: seed(:)
     
@@ -2199,9 +2190,15 @@ subroutine generateRademacherMatrix(V, rank)
     ! MPI-safe seed: deterministic way to generate a unique seed per MPI rank
     call random_seed(size=nseed)
     ABI_MALLOC(seed, (nseed))
-    seed = mod(base_seed + rank*73856093 + [(i*19349663, i=1,nseed)], 2147483647) 
+    base_seed = 123456789
+    seed = mod( base_seed + rank*73856093 + [(i*19349663, i=1,nseed)], 2147483647 )
     call random_seed(put=seed)
     ABI_FREE(seed)
+
+    ! Z(1,:) = ±1, Z(2,:) = 0
+    call random_number(V(1,1:n*m))
+    V(1,1:n*m) = merge(1.0_dp, -1.0_dp, V(1,1:n*m) > 0.5_dp)
+    V(2,1:n*m) = 0.0_dp
 
     ! Generate uniform random numbers
     call random_number(U)
@@ -2221,14 +2218,15 @@ end subroutine generateRademacherMatrix
 !! applyBandpassFilter
 !!
 !! SOURCE
-subroutine applyBandpassFilter(slice, X0, cprjX0, getAX, low_bound, upp_bound, min_low_bound, &
-        max_upp_bound, ndeg_filter, gpu_option)
+subroutine applyBandpassFilter(slice, X0, cprjX0, getAX, kin, low_bound, upp_bound, &
+        min_low_bound, max_upp_bound, ndeg_filter, gpu_option)
 
     implicit none
 
     type(slice_t), intent(inout) :: slice
     type(xgBlock_t), intent(inout) :: X0
     type(xgBlock_t), intent(inout) :: cprjX0
+    type(xgBlock_t), intent(in) :: kin
     integer, intent(in) :: ndeg_filter
     real(dp), intent(in) :: low_bound, upp_bound
     real(dp), intent(in) :: min_low_bound, max_upp_bound
@@ -2242,11 +2240,15 @@ subroutine applyBandpassFilter(slice, X0, cprjX0, getAX, low_bound, upp_bound, m
     end interface
 
     integer :: neigenpairs
-    integer :: cdeg
+    integer :: ideg
+    integer :: nspinor
     integer :: l_gpu_option
+    real(dp) :: cdeg
     real(dp) :: center, radius
     real(dp) :: ls, us
     real(dp) :: mu, damp
+    real(dp) :: one_over_r
+    real(dp) :: two_over_r
     real(dp) :: tsec(2)
     type(xg_t) :: Xsum
     type(xg_nonlop_t) :: xg_nonlop
@@ -2254,9 +2256,13 @@ subroutine applyBandpassFilter(slice, X0, cprjX0, getAX, low_bound, upp_bound, m
     ! *********************************************************************
 
     ! Initialize values
-    neigenpairs = slice%neigenpairs
+    neigenpairs = cols(X0)
     xg_nonlop = slice%xg_nonlop
+    nspinor = slice%xg_nonlop%nspinor
     l_gpu_option = ABI_GPU_DISABLED
+    
+    slice%cprjX = cprjX0
+    slice%X = X0
     
     ! Process input arguments
     if (present(gpu_option)) then
@@ -2339,14 +2345,20 @@ end subroutine applyBandpassFilter
 !! computeTraceEstimation
 !!
 !! SOURCE
-subroutine computeTraceEstimation(n, m, trace_est, getAX, my_rank, gpu_option)
+subroutine computeTraceEstimation(slice, m, trace_degree, low_bound, upp_bound, &
+        min_low_bound, max_upp_bound, trace_est, getAX, kin, my_rank, gpu_option)
   
     implicit none
 
+    type(slice_t), intent(in) :: slice
+    type(xgBlock_t), intent(in) :: kin
     integer, intent(in) :: my_rank
-    integer, intent(in) :: n, m
-    integer, optional, intent(in) :: gpu_option
+    integer, intent(in) :: trace_degree
+    integer, intent(in) :: m
     real(dp), intent(out) :: trace_est
+    real(dp), intent(in) :: low_bound, upp_bound
+    real(dp), intent(in) :: min_low_bound, max_upp_bound
+    integer, optional, intent(in) :: gpu_option
 
     interface
         subroutine getAX(X,AX)
@@ -2356,17 +2368,28 @@ subroutine computeTraceEstimation(n, m, trace_est, getAX, my_rank, gpu_option)
         end subroutine getAX
     end interface
 
-    type(slice_t) :: slice
-    real(dp), allocatable :: Z(:,:), Y(:,:)
-    integer :: i, j
-    integer :: rank
+    type(slice_t) :: slice_trace
+    type(xg_t) :: cprj_trace
+    type(xgBlock_t) :: xgZ, xgY
+    type(xg_nonlop_t) :: xg_nonlop
+    integer :: cprjdim
+    integer :: n, i, j, k
+    integer :: blockdim_cprj
+    integer :: nspinor
     integer :: l_gpu_option
-    real(dp) :: tmp
+    real(dp) :: tolerance
+    real(dp) :: trace_tmp
     real(dp) :: accum
+    real(dp), allocatable :: Z(:,:), Y(:,:)
     real(dp) :: tsec(2)
 
     ! *********************************************************************
 
+    n = slice%total_spacedim
+    tolerance = slice%tolerance
+    cprjdim = slice%cprjdim
+    nspinor = slice%xg_nonlop%nspinor
+    blockdim_cprj = m*nspinor
     l_gpu_option = ABI_GPU_DISABLED
     
     ! Process input arguments
@@ -2374,75 +2397,66 @@ subroutine computeTraceEstimation(n, m, trace_est, getAX, my_rank, gpu_option)
       l_gpu_option = gpu_option
     end if
 
-    ABI_MALLOC(Z, (n,m))
-    ABI_MALLOC(Y, (n,m))
+    ! Allocate memory for random matrices
+    ABI_MALLOC(Z, (2,n*m))
+    ABI_MALLOC(Y, (2,n*m))
+  
+    ! Allocate temporary xgtools workspaces
+    call xg_init(cprj_trace,slice%space_cprj,cprjdim,blockdim_cprj,comm=slice%spacecom)
+    call slice_init(slice_trace,m,slice%spacedim,cprjdim,tolerance,slice%ecut, &
+&                 slice%bandpp,trace_degree,slice%nbdbuf,slice%space,slice%space_cprj,1, &
+&                 slice%spacecom,slice%me_g0,slice%paw,slice%nslice,slice%tolfilter,&
+&                 slice%paral_slice,slice%spectral_cut,slice%xg_nonlop,slice%me_g0_fft)
+
+    ! Map xgtools to memory
+    call xgBlock_map(xgY, Y, slice%space, n, m, slice%spacecom, me_g0=slice%me_g0)
+    call xgBlock_map(xgZ, Z, slice%space, n, m, slice%spacecom, me_g0=slice%me_g0)
 
     ! Rademacher probes (best for Hutchinson)
-    call generateRademacherMatrix(Z, my_rank)
-  
-    ! Allocate temporary workspaces for random vectors
-    call xg_init(cprj_xgx0,space_cprj,xg_nonlop%cprjdim,nband_cprj*nspinor,&
-        comm=l_mpi_enreg%comm_band)
-    call slice_init(slice_tmp,trace_rank,npw*nspinor,cprjdim,dtset%tolwfr_diago,dtset%ecut, &
-&                 mpi_enreg%bandpp, dtset%nline, dtset%nbdbuf, space,space_cprj,1, &
-&                 l_mpi_enreg%comm_band,me_g0,paw,&
-&                 dtset%nslice,dtset%tolfilter,dtset%paral_slice,dtset%spectral_cut,&
-&                 xg_nonlop,me_g0_fft)
+    call generateRademacherMatrix(Z, n, m, my_rank)
 
-    ! Store input and output solution
-    slice%AllX = X0
-    slice%AllcprjX = cprjX0
+    ! Link random matrices and xgtools
+    slice_trace%X = xgZ
+    slice_trace%cprjX = cprj_trace%self
+    slice_trace%cprj_work = slice_trace%Allcprj_work%self
   
-    ! Compute cprjX for all X (in colsrows)
+    ! Compute cprjX (in colsrows)
     call timab(tim_cprj,1,tsec)
-    call xg_nonlop_getcprj(xg_nonlop,slice%AllX,slice%AllcprjX,slice%proj_work%self)
+    xg_nonlop = slice_trace%xg_nonlop
+    call xg_nonlop_getcprj(xg_nonlop,slice_trace%X,slice_trace%cprjX,slice_trace%proj_work%self)
     call timab(tim_cprj,2,tsec)
-
-
-    ! ITEST
-    write(901,*) 'slice%X0 before filter=', xgBlock_getid(X0)
-    write(901,*) 'slice%AllX before filter=', xgBlock_getid(slice%AllX) 
-    flush(901)
-    ! ITEST
 
     !Compute A * Psi
     call timab(tim_AX_v,1,tsec)
-    call getAX(slice%AllX,slice%AllAX%self)
+    call getAX(slice_trace%X,slice_trace%AX)
     call timab(tim_AX_v,2,tsec)
     call timab(tim_AX_k,1,tsec)
-    call xgBlock_add_diag(slice%AllX,kin,nspinor,slice%AllAX%self)
+    call xgBlock_add_diag(slice_trace%X,kin,nspinor,slice_trace%AX)
     call timab(tim_AX_k,2,tsec)
     call timab(tim_AX_nl,1,tsec)
-    call xg_nonlop_getHX(xg_nonlop,slice%AllAX%self,slice%AllcprjX,slice%Allcprj_work%self,slice%proj_work%self)
+    call xg_nonlop_getHX(xg_nonlop,slice_trace%AX,slice_trace%cprjX,&
+        slice_trace%cprj_work2%self,slice_trace%proj_work%self)
     call timab(tim_AX_nl,2,tsec)
   
     ! Apply f(A) to ALL columns
     ! input is Z output is Y=f(Z)
-    call applyBandpassFilter(slice, X0, cprjX0, getAX, low_bound, upp_bound, min_low_bound, &
-        max_upp_bound, ndeg_filter, gpu_option)
+    write(901,*) 'slice_trace%cprjX=', rows(slice_trace%cprjX), cols(slice_trace%cprjX)
+    write(901,*) 'slice_trace%cprj_work=', rows(slice_trace%cprj_work), cols(slice_trace%cprj_work)
+    flush(901)
+    call applyBandpassFilter(slice_trace, xgY, slice_trace%cprjX, getAX, kin, low_bound, &
+        upp_bound, min_low_bound, max_upp_bound, trace_degree, l_gpu_option)
 
-    ! Version 1: thread parallelism + SIMD vectorization over rows (i)
-    !    accum = 0.0_dp
-    !    !$omp parallel reduction(+:accum)
-    !    do j = 1,m
-    !        tmp = 0.0_dp
-    !        !$omp simd reduction(+:tmp)
-    !        do i = 1,n
-    !            tmp = tmp + Z(i,j) * Y(i,j)
-    !        end do
-    !    accum = accum + tmp
-    !    end do
-    !    !$omp end parallel
-
-
-    ! Version 2: flatten both loops as one big iteration
+    ! thread parallelism over columns (j) + SIMD vectorization over rows (i)
     accum = 0.0_dp
     !$omp parallel reduction(+:accum)
-    !$omp do collapse(2)
-    do j = 1,m
-        do i = 1,n
-            accum = accum + Z(i,j)*Y(i,j)
+    do j = 1, m
+        trace_tmp = 0.0_dp
+        !$omp simd reduction(+:trace_tmp)
+        do i = 1, n
+            k = i + (j-1)*n
+            trace_tmp = trace_tmp + Z(1,k) * Y(1,k)
         end do
+        accum = accum + trace_tmp
     end do
     !$omp end parallel
 
@@ -2451,8 +2465,8 @@ subroutine computeTraceEstimation(n, m, trace_est, getAX, my_rank, gpu_option)
     ! Free memory
     ABI_FREE(Z)
     ABI_FREE(Y)
-    call xg_free(cprj_xgx0)
-    call slice_free(slice)
+    call xg_free(cprj_trace)
+    call slice_free(slice_trace)
 
 end subroutine computeTraceEstimation
 !!***
