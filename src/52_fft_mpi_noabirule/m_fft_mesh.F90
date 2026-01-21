@@ -1168,7 +1168,7 @@ subroutine calc_ceigr_spc(gg, nfft, nspinor, ngfft, ceigr)
  complex(sp),intent(out) :: ceigr(nfft*nspinor)
 
 !Local variables-------------------------------
- integer :: ix,iy,iz,fft_idx,base,isp
+ integer :: ix,iy,iz,ifft,base,isp
  real(dp) :: gdotr
 ! *************************************************************************
 
@@ -1177,15 +1177,15 @@ subroutine calc_ceigr_spc(gg, nfft, nspinor, ngfft, ceigr)
    RETURN
  end if
 
- fft_idx=0
+ ifft=0
  do iz=0,ngfft(3)-1
    do iy=0,ngfft(2)-1
      do ix=0,ngfft(1)-1
        gdotr= two_pi*( gg(1)*(ix/DBLE(ngfft(1))) &
                       +gg(2)*(iy/DBLE(ngfft(2))) &
                       +gg(3)*(iz/DBLE(ngfft(3))) )
-       fft_idx = fft_idx+1
-       ceigr(fft_idx)=CMPLX(DCOS(gdotr),DSIN(gdotr), KIND=sp)
+       ifft = ifft+1
+       ceigr(ifft)=CMPLX(DCOS(gdotr),DSIN(gdotr), KIND=sp)
      end do
    end do
  end do
@@ -1231,7 +1231,7 @@ subroutine calc_ceigr_dpc(gg, nfft, nspinor, ngfft, ceigr)
  complex(dp),intent(out) :: ceigr(nfft*nspinor)
 
 !Local variables-------------------------------
- integer :: ix,iy,iz,fft_idx,base,isp
+ integer :: ix,iy,iz,ifft,base,isp
  real(dp) :: gdotr
 ! *************************************************************************
 
@@ -1239,15 +1239,15 @@ subroutine calc_ceigr_dpc(gg, nfft, nspinor, ngfft, ceigr)
    ceigr=cone; RETURN
  end if
 
- fft_idx=0
+ ifft=0
  do iz=0,ngfft(3)-1
    do iy=0,ngfft(2)-1
      do ix=0,ngfft(1)-1
        gdotr= two_pi*( gg(1)*(ix/DBLE(ngfft(1))) &
                       +gg(2)*(iy/DBLE(ngfft(2))) &
                       +gg(3)*(iz/DBLE(ngfft(3))) )
-       fft_idx = fft_idx+1
-       ceigr(fft_idx)=DCMPLX(DCOS(gdotr),DSIN(gdotr))
+       ifft = ifft+1
+       ceigr(ifft)=DCMPLX(DCOS(gdotr),DSIN(gdotr))
      end do
    end do
  end do
@@ -1292,7 +1292,7 @@ pure subroutine calc_eigr(gg, nfft, ngfft, eigr)
  real(dp),intent(out) :: eigr(2*nfft)
 
 !Local variables-------------------------------
- integer :: ix,iy,iz,fft_idx
+ integer :: ix,iy,iz,ifft
  real(dp) :: gdotr
 ! *************************************************************************
 
@@ -1302,16 +1302,16 @@ pure subroutine calc_eigr(gg, nfft, ngfft, eigr)
    RETURN
  end if
 
- fft_idx=1
+ ifft=1
  do iz=0,ngfft(3)-1
    do iy=0,ngfft(2)-1
      do ix=0,ngfft(1)-1
        gdotr= two_pi*( gg(1)*(ix/DBLE(ngfft(1))) &
                       +gg(2)*(iy/DBLE(ngfft(2))) &
                       +gg(3)*(iz/DBLE(ngfft(3))) )
-       eigr(fft_idx  )=DCOS(gdotr)
-       eigr(fft_idx+1)=DSIN(gdotr)
-       fft_idx = fft_idx + 2
+       eigr(ifft  )=DCOS(gdotr)
+       eigr(ifft+1)=DSIN(gdotr)
+       ifft = ifft + 2
      end do
    end do
  end do
@@ -1350,7 +1350,7 @@ pure subroutine calc_ceikr_dpc(kk, ngfft, nfft, nspinor, ceikr)
  complex(dp),intent(out) :: ceikr(nfft*nspinor)
 
 !local variables-------------------------------
- integer :: ix, iy, iz, fft_idx
+ integer :: ix, iy, iz, ifft
  real(dp) :: kdotr
 ! *************************************************************************
 
@@ -1358,16 +1358,16 @@ pure subroutine calc_ceikr_dpc(kk, ngfft, nfft, nspinor, ceikr)
    ceikr = cone; return
  end if
 
- fft_idx = 0
+ ifft = 0
  do iz=0,ngfft(3)-1
    do iy=0,ngfft(2)-1
      do ix=0,ngfft(1)-1
        kdotr = two_pi*( kk(1) * (ix / dble(ngfft(1))) &
                        +kk(2) * (iy / dble(ngfft(2))) &
                        +kk(3) * (iz / dble(ngfft(3))) )
-       !fft_idx = ix + ngfft(1) * (iy + ngfft(2) * iz) + 1
-       fft_idx = fft_idx + 1
-       ceikr(fft_idx) = dcmplx(cos(kdotr), sin(kdotr))
+       !ifft = ix + ngfft(1) * (iy + ngfft(2) * iz) + 1
+       ifft = ifft + 1
+       ceikr(ifft) = dcmplx(cos(kdotr), sin(kdotr))
      end do
    end do
  end do
@@ -1408,7 +1408,7 @@ pure subroutine calc_ceikr_spc(kk, ngfft, nfft, nspinor, ceikr)
  complex(sp),intent(out) :: ceikr(nfft*nspinor)
 
 !local variables-------------------------------
- integer :: ix, iy, iz, fft_idx
+ integer :: ix, iy, iz, ifft
  real(dp) :: kdotr
 ! *************************************************************************
 
@@ -1416,16 +1416,16 @@ pure subroutine calc_ceikr_spc(kk, ngfft, nfft, nspinor, ceikr)
    ceikr = cone; return
  end if
 
- fft_idx = 0
+ ifft = 0
  do iz=0,ngfft(3)-1
    do iy=0,ngfft(2)-1
      do ix=0,ngfft(1)-1
        kdotr = two_pi*( kk(1) * (ix / dble(ngfft(1))) &
                        +kk(2) * (iy / dble(ngfft(2))) &
                        +kk(3) * (iz / dble(ngfft(3))) )
-       !fft_idx = ix + ngfft(1) * (iy + ngfft(2) * iz) + 1
-       fft_idx = fft_idx + 1
-       ceikr(fft_idx) = cmplx(cos(kdotr), sin(kdotr), kind=sp)
+       !ifft = ix + ngfft(1) * (iy + ngfft(2) * iz) + 1
+       ifft = ifft + 1
+       ceikr(ifft) = cmplx(cos(kdotr), sin(kdotr), kind=sp)
      end do
    end do
  end do
