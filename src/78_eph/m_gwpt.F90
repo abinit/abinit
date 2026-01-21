@@ -1853,36 +1853,36 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                  !end if
 
                  ! qq == pp = gamma
-                 if (qq_is_gamma .and. pp_is_gamma) then
-                   !print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'im_kq', 'in_k', 'ipp_bz', 'ib_sum', 'ipc'
-                   !print '(I7, I7, I7, I7, I7, I7)', my_is,  im_kq,  in_k,  ipp_bz,  ib_sum,  ipc
-                   !print *, "gsig_atm(:, im_kq, in_k, ipc):", gsig_atm(:, im_kq, in_k, ipc)
-                   !print *, "gks_atm(:, im_kq, in_k, ipc):", gks_atm(:, im_kq, in_k, ipc)
-                   !print *, "gks_atm2(:, im_kq, in_k, ipc):", gks_atm2(:, im_kq, in_k, ipc)
-                   !print *, ' '
+                 !! if (qq_is_gamma .and. pp_is_gamma) then
+                 !!   !print '(A7, A7, A7, A7, A7, A7)', 'my_is', 'im_kq', 'in_k', 'ipp_bz', 'ib_sum', 'ipc'
+                 !!   !print '(I7, I7, I7, I7, I7, I7)', my_is,  im_kq,  in_k,  ipp_bz,  ib_sum,  ipc
+                 !!   !print *, "gsig_atm(:, im_kq, in_k, ipc):", gsig_atm(:, im_kq, in_k, ipc)
+                 !!   !print *, "gks_atm(:, im_kq, in_k, ipc):", gks_atm(:, im_kq, in_k, ipc)
+                 !!   !print *, "gks_atm2(:, im_kq, in_k, ipc):", gks_atm2(:, im_kq, in_k, ipc)
+                 !!   !print *, ' '
 
-                   rtmp = sum(abs(stern_kqmp%cgq - stern_kmp%cgq)) / size(stern_kqmp%cgq)
-                   if (rtmp > tol14) then
-                     print *, "Sternheimer cgq diff",  rtmp; stop
-                   end if
+                 !!   rtmp = sum(abs(stern_kqmp%cgq - stern_kmp%cgq)) ! / size(stern_kqmp%cgq)
+                 !!   if (rtmp > tol14) then
+                 !!     print *, "Sternheimer cgq diff",  rtmp; stop
+                 !!   end if
 
-                   ii = npw_kqmp * nspinor
-                   rtmp = sum(abs(cg_kmp(:,1:ii) - cg_kqmp(:,1:ii))) / (two * ii)
-                   if (rtmp > tol14) then
-                     print *, "Sternheimer cg_kmp diff", rtmp; stop
-                   end if
+                 !!   ii = npw_kqmp * nspinor
+                 !!   rtmp = sum(abs(cg_kmp(:,1:ii) - cg_kqmp(:,1:ii))) ! / (two * ii)
+                 !!   if (rtmp > tol14) then
+                 !!     print *, "Sternheimer cg_kmp diff", rtmp; stop
+                 !!   end if
 
-                   ii = npw_kqmp * nspinor
-                   rtmp = sum(abs(full_cg1_kmp(:,1:ii) - full_cg1_kqmp(:,1:ii))) / (two * ii)
-                   if (rtmp > tol14) then
-                     print *, rtmp; stop
-                   end if
+                 !!   ii = npw_kqmp * nspinor
+                 !!   rtmp = sum(abs(full_cg1_kmp(:,1:ii) - full_cg1_kqmp(:,1:ii))) ! / (two * ii)
+                 !!   if (rtmp > tol14) then
+                 !!     print *, rtmp; stop
+                 !!   end if
 
-                   rtmp = sum(abs(full_ur1_star_kmp - full_ur1_kqmp)) / (nfft * nspinor)
-                   if (rtmp > tol14) then
-                     print *, "full_ur1_kmpq diff", rtmp; stop
-                   end if
-                 end if ! qq == pp = gamma
+                 !!   rtmp = sum(abs(full_ur1_star_kmp - full_ur1_kqmp)) ! / (nfft * nspinor)
+                 !!   if (rtmp > tol14) then
+                 !!     print *, "full_ur1_kmpq diff", rtmp; stop
+                 !!   end if
+                 !! end if ! qq == pp = gamma
 
                end do ! m_kq
              end do ! n_k
