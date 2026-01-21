@@ -12,6 +12,7 @@ gpu_option 2
 useylm 1
 useylm3 0
 istwfk *1
+iomode  1  # Use Fortran-IO to avoid SIGSEV on eos_nvhpc_23.9_elpa
 
 ####################
 # Dataset 1: SCF run
