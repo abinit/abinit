@@ -89,8 +89,8 @@ xred     -9.8060630002E-22  3.3877150941E-20  0.0000000000E+00
 
 
 #Definition of the planewave basis set
-ecut   4.0         # Maximal kinetic energy cut-off, in Hartree
-nband  58
+ecut   3.0         # Maximal kinetic energy cut-off, in Hartree
+nband  42
 
 #Definition of the k-point grid
 kptopt 3          # Option for the automatic generation of k points, taking
@@ -117,7 +117,7 @@ nspinor  2
 
 #Pseudos
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Mn_LDA_FR.psp8, F_LDA_FR.psp8"
+pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #

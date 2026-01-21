@@ -7,10 +7,6 @@
    tolvrs1  1.0d-10   
    spinat1  0.0 0.0  5.0     #Magnetism
             0.0 0.0 -5.0
-            0.0 0.0  5.0
-            0.0 0.0 -5.0
-            0.0 0.0  0.0
-            0.0 0.0  0.0
             0.0 0.0  0.0
             0.0 0.0  0.0
             0.0 0.0  0.0
@@ -51,8 +47,8 @@ xred     -9.8060630002E-22  3.3877150941E-20  0.0000000000E+00
           8.0421109347E-01  1.9578890653E-01  5.0000000000E-01
 
 #Definition of the planewave basis set
-ecut   4.0         
-nband  58
+ecut   3.0         
+nband  42
 
 #Definition of the k-point grid
 kptopt 3          
@@ -82,7 +78,7 @@ autoparal 1
 
 #Pseudos
 pp_dirpath "$ABI_PSPDIR"
-pseudos "Mn_LDA_FR.psp8, F_LDA_FR.psp8"
+pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
