@@ -749,7 +749,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  min_low_bound = rayleigh_quotients(1) ! normally this would come after slice1
  ! and we will use the lowest Rayleigh quotient from trace estimation
  max_upp_bound = slice%ecut
- trace_degree = 15
+ trace_degree = 1
  trace_rank = 40 ! FIXME for the moment changing this produces a bug
 
  ! FIXME hand-tuned for now
@@ -2386,10 +2386,12 @@ subroutine computeTraceEstimation(slice, m, trace_degree, low_bound, upp_bound, 
     integer :: blockdim_cprj
     integer :: nspinor
     integer :: l_gpu_option
+    integer :: idx_i, idx_j
     real(dp) :: tolerance
     real(dp) :: trace_tmp
     real(dp) :: accum
     real(dp), allocatable :: X(:,:), fX(:,:)
+    real(dp), allocatable :: XXt(:,:), fXfXt(:,:)
     real(dp) :: tsec(2)
 
     ! *********************************************************************
@@ -2411,8 +2413,14 @@ subroutine computeTraceEstimation(slice, m, trace_degree, low_bound, upp_bound, 
     ABI_MALLOC(X, (2,n*m)) ! X
     ABI_MALLOC(fX, (2,n*m)) ! Y=f(A)X
 
+    write(901,*) 'INIT rand L2-norm=', sqrt(dot_product(fX(1,:), fX(1,:)))
+    flush(901)
+    
     ! Compute values of Rademacher probes (best for Hutchinson)
     call generateRademacherMatrix(X, n, m, my_rank)
+
+    write(901,*) 'INIT Xrand L2-norm=', sqrt(dot_product(X(1,:), X(1,:)))
+    flush(901)
 
     ! Map xgtools pointers to memory
     call xgBlock_map(xgX, X, slice%space, n, m, slice%spacecom, me_g0=slice%me_g0)
@@ -2423,6 +2431,9 @@ subroutine computeTraceEstimation(slice, m, trace_degree, low_bound, upp_bound, 
     ! Work with slice memory. Reset points to dimensions of trace estimation
     call xg_setBlock(slice%X_SLICE,slice%X,n,m)
     call xg_setBlock(slice%X_SLICE,slice%AX,n,m,fcol=m+1)
+
+    write(901,*) 'COPY rand L2-norm=', sqrt(dot_product(fX(1,:), fX(1,:)))
+    flush(901)
 
     ! Set pointers of X and cprjX
     slice%X = xgfX ! Values count
@@ -2447,9 +2458,15 @@ subroutine computeTraceEstimation(slice, m, trace_degree, low_bound, upp_bound, 
     call xg_nonlop_getHX(xg_nonlop,slice%AX,slice%cprjX,slice%cprj_work,slice%proj_work%self)
     call timab(tim_AX_nl,2,tsec)
 
+    write(901,*) 'BEFORE rand L2-norm=', sqrt(dot_product(fX(1,:), fX(1,:)))
+    flush(901)
+
     ! Compute f(A) * X
     call applyBandpassFilter(slice, getAX, kin, low_bound, upp_bound, &
         min_low_bound, max_upp_bound, trace_degree, l_gpu_option)
+
+    write(901,*) 'AFTER rand L2-norm=', sqrt(dot_product(fX(1,:), fX(1,:)))
+    flush(901)
 
     ! SIMD vectorization over rows (i)
     accum = 0.0_dp
@@ -2463,7 +2480,25 @@ subroutine computeTraceEstimation(slice, m, trace_degree, low_bound, upp_bound, 
         accum = accum + trace_tmp
     end do
 
+    ! Test Gram matrix.. Normally it should be B-orthogonality that is important ..
+    ! TODO deactivate paw
+    ABI_MALLOC(XXt, (m,m))
+    XXt = 0.0d0
+    do j = 1, m
+        do i = 1, m
+            do k = 1, n
+                idx_i = k + (i-1)*n
+                idx_j = k + (j-1)*n
+                XXt(i,j) = XXt(i,j) + X(1,idx_i) * X(1,idx_j)
+            end do
+        end do
+    end do
+    write(901,*) XXt
+    flush(901)
+    ABI_FREE(XXt)
+
     trace_est = accum / real(m,kind=dp)
+
 
     ! Free memory
     ABI_FREE(X)
