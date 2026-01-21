@@ -1,6 +1,6 @@
 
 .Version 10.7.0.3 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
+.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -25,7 +25,7 @@
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =      18
      lnmax =       6     mgfft =      15  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
@@ -81,6 +81,7 @@ _ WF disk file :      0.157 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
+-          iomode           1
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
              bdgw3          4       5       4       5
@@ -425,7 +426,7 @@ meta: {optdriver: 6, }
 
 .Using double precision arithmetic; gwpc =  8
  
-- Reading GS density from: t14o_DS1_DEN.nc
+- Reading GS density from: t14o_DS1_DEN
  
  
  
@@ -469,7 +470,7 @@ meta: {optdriver: 6, }
 
 .Using double precision arithmetic; gwpc =  8
  
-- Reading GS density from: t14o_DS1_DEN.nc
+- Reading GS density from: t14o_DS1_DEN
  
  
  
@@ -496,7 +497,7 @@ meta: {optdriver: 6, }
 )     Maximum=    9.7811E-02  at reduced coord.    0.1333    0.1333    0.6000
 )     Minimum=    1.9174E-03  at reduced coord.    0.7333    0.7333    0.7333
    Integrated=    8.0000E+00
-- Reading GS states from WFK file: t14o_DS2_WFK.nc
+- Reading GS states from WFK file: t14o_DS2_WFK
   Mapping kBZ --> kIBZ
  Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
         BZ                                       IBZ                                       ibz  isym  itim  g0
@@ -577,13 +578,13 @@ gwr_boxcutmin:   1.00000000E+00
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, 1, 1, ]
 P np_qibz: [1, 1, 1, ]
-min_transition_energy_eV:   9.02529999E-01
-max_transition_energy_eV:   5.15924157E+01
-eratio:   5.71642114E+01
-ft_max_err_t2w_cos:   1.69754129E-02
-ft_max_err_w2t_cos:   5.30899611E-04
-ft_max_err_t2w_sin:   3.37573151E-01
-cosft_duality_error:   7.86624364E-04
+min_transition_energy_eV:   9.02530149E-01
+max_transition_energy_eV:   5.15924165E+01
+eratio:   5.71642028E+01
+ft_max_err_t2w_cos:   1.69754098E-02
+ft_max_err_w2t_cos:   5.30899614E-04
+ft_max_err_t2w_sin:   3.37573093E-01
+cosft_duality_error:   7.86624507E-04
 Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, weight(omega)
     1 2.14325E-01   5.65693E-01   1.17768E-02   2.46619E-02
     2 1.28479E+00   1.69883E+00   4.26019E-02   4.02802E-02
@@ -620,24 +621,24 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      1.17768303E-02    1.00000000E+00    0.00000000E+00
-      4.26019184E-02    1.00000000E+00    0.00000000E+00
-      1.02353357E-01    1.00000000E+00    0.00000000E+00
-      2.42819629E-01    1.00000000E+00    0.00000000E+00
-      6.17145550E-01    1.00000000E+00    0.00000000E+00
-      1.86464996E+00    1.00000000E+00    0.00000000E+00
+      1.17768323E-02    1.00000000E+00   -0.00000000E+00
+      4.26019255E-02    1.00000000E+00   -0.00000000E+00
+      1.02353374E-01    1.00000000E+00   -0.00000000E+00
+      2.42819669E-01    1.00000000E+00   -0.00000000E+00
+      6.17145652E-01    1.00000000E+00   -0.00000000E+00
+      1.86465027E+00    1.00000000E+00   -0.00000000E+00
 ...
 
 
 --- !EMACRO_WITH_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      1.17768303E-02    1.00000000E+00    0.00000000E+00
-      4.26019184E-02    1.00000000E+00    0.00000000E+00
-      1.02353357E-01    1.00000000E+00    0.00000000E+00
-      2.42819629E-01    1.00000000E+00    0.00000000E+00
-      6.17145550E-01    1.00000000E+00    0.00000000E+00
-      1.86464996E+00    1.00000000E+00    0.00000000E+00
+      1.17768323E-02    1.00000000E+00    0.00000000E+00
+      4.26019255E-02    1.00000000E+00    0.00000000E+00
+      1.02353374E-01    1.00000000E+00    0.00000000E+00
+      2.42819669E-01    1.00000000E+00    0.00000000E+00
+      6.17145652E-01    1.00000000E+00    0.00000000E+00
+      1.86465027E+00    1.00000000E+00    0.00000000E+00
 ...
 
 
@@ -673,13 +674,13 @@ gwr_task   : G0W0
 QP_VBM_band: 4
 QP_CBM_band: 5
 KS_gap     :    2.454
-QP_gap     :    7.673
-Delta_QP_KS:    5.219
+QP_gap     :    7.672
+Delta_QP_KS:    5.218
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        2   -0.451  -11.382  -13.885   -0.278    0.862   -2.398   -2.398   -2.850    2.000
-        3   -0.451  -11.382  -13.885   -0.278    0.862   -2.398   -2.398   -2.850    2.000
-        4   -0.451  -11.382  -13.885   -0.278    0.862   -2.398   -2.398   -2.850    2.000
+        2   -0.451  -11.382  -13.884   -0.278    0.862   -2.397   -2.397   -2.849    2.000
+        3   -0.451  -11.382  -13.884   -0.278    0.862   -2.397   -2.397   -2.849    2.000
+        4   -0.451  -11.382  -13.884   -0.278    0.862   -2.397   -2.397   -2.849    2.000
         5    2.003   -9.974   -5.148   -1.562    0.864    2.820    2.820    4.823    0.000
         6    2.003   -9.974   -5.148   -1.562    0.864    2.820    2.820    4.823    0.000
         7    2.003   -9.974   -5.148   -1.562    0.864    2.820    2.820    4.823    0.000
@@ -695,13 +696,13 @@ gwr_task   : G0W0
 QP_VBM_band: 4
 QP_CBM_band: 5
 KS_gap     :    3.497
-QP_gap     :    8.551
-Delta_QP_KS:    5.054
+QP_gap     :    8.550
+Delta_QP_KS:    5.053
 data: !Tabular |
      Band       E0 <VxcDFT>     SigX SigC(E0)        Z     E-E0  E-Eprev        E   Occ(E)
-        3   -1.736  -11.091  -13.756   -0.099    0.836   -2.310   -2.310   -4.047    2.000
-        4   -1.736  -11.091  -13.756   -0.099    0.836   -2.310   -2.310   -4.047    2.000
-        5    1.761   -9.965   -5.157   -1.645    0.867    2.744    2.744    4.505    0.000
+        3   -1.736  -11.091  -13.754   -0.098    0.836   -2.309   -2.309   -4.045    2.000
+        4   -1.736  -11.091  -13.754   -0.098    0.836   -2.309   -2.309   -4.045    2.000
+        5    1.761   -9.965   -5.156   -1.645    0.867    2.744    2.744    4.505    0.000
 ...
 
 
@@ -715,16 +716,18 @@ data: !Tabular |
 
  === QP gaps and band edges taking into account Sigma_nk corrections for 2 k-points ===
  Indirect band gap semiconductor
- Fundamental gap:     3.301 (eV)
-   VBM:    -2.850 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     3.300 (eV)
+   VBM:    -2.849 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     0.451 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         3.887 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-
-
+ 
+- Cannot deallocate gwr datatype if FC_NVHPC, DO NOT USE DATASETS!
+ 
 == END DATASET(S) ==============================================================
 ================================================================================
 
  -outvars: echo values of variables after computation  --------
+-          iomode           1
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
               amu      2.80855000E+01
              bdgw3          4       5       4       5
@@ -742,13 +745,13 @@ data: !Tabular |
            etotal1    -8.3092786940E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
-            fcart1    -2.0995284391E-28  2.0995284391E-28 -2.0995284391E-28
-                       2.0995284391E-28 -2.0995284391E-28  2.0995284391E-28
+            fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
         freqspmax1     0.00000000E+00 Hartree
         freqspmax2     0.00000000E+00 Hartree
         freqspmax3     1.83746611E-01 Hartree
@@ -761,6 +764,8 @@ data: !Tabular |
            getwfk1          0
            getwfk2          0
            getwfk3          2
+-      gpu_option           2
+-gpu_thread_limit           1
    gwr_max_hwtene      6.00000000E-01 Hartree
          gwr_ntau1         12
          gwr_ntau2         12
@@ -774,7 +779,7 @@ data: !Tabular |
       gw_icutcoul1          6
       gw_icutcoul2          6
       gw_icutcoul3         16
-           istwfk        2    3    7
+           istwfk        1    1    1
               ixc          11
            jdtset        1    2    3
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -815,7 +820,7 @@ P           mkmem           3
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         227
-           strten1     3.5076488370E-05  3.5076488370E-05  3.5076488370E-05
+           strten1     3.5076520428E-05  3.5076520428E-05  3.5076520428E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -873,6 +878,9 @@ P           mkmem           3
            tolvrs2     0.00000000E+00
            tolvrs3     0.00000000E+00
             typat      1  1
+-          useylm1          1
+-          useylm2          1
+-          useylm3          0
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.3573395450E+00  1.3573395450E+00  1.3573395450E+00
