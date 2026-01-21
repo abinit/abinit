@@ -1,6 +1,6 @@
 
 .Version 10.7.0.3 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
+.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -25,7 +25,7 @@
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =      18
      lnmax =       6     mgfft =      15  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
@@ -33,7 +33,7 @@
 -    mband =           6        mffmem =           1         mkmem =           3
        mpw =         113          nfft =        3375          nkpt =           3
 ================================================================================
-P This job should need less than                       1.839 Mbytes of memory.
+P This job should need less than                       1.866 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.033 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -41,7 +41,7 @@ _ WF disk file :      0.033 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =      18
      lnmax =       6     mgfft =      15  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
@@ -49,7 +49,7 @@ _ WF disk file :      0.033 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          40        mffmem =           1         mkmem =           3
        mpw =         113          nfft =        3375          nkpt =           3
 ================================================================================
-P This job should need less than                       2.047 Mbytes of memory.
+P This job should need less than                       2.099 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.209 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -91,10 +91,10 @@ _ WF disk file :      0.157 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  3 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    0
+-  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
 -          iomode           1
@@ -132,6 +132,8 @@ _ WF disk file :      0.157 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            getwfk2          0
            getwfk3          2
            getwfk4          2
+-      gpu_option           2
+-gpu_thread_limit           1
     gwr_boxcutmin1     1.00000000E+00
     gwr_boxcutmin2     1.00000000E+00
     gwr_boxcutmin3     1.10000000E+00
@@ -254,6 +256,10 @@ P           mkmem           3
            tolvrs3     0.00000000E+00
            tolvrs4     0.00000000E+00
             typat      1  1
+-          useylm1          1
+-          useylm2          1
+-          useylm3          0
+-          useylm4          0
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.3573395450E+00  1.3573395450E+00  1.3573395450E+00
@@ -331,11 +337,11 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.3065585710600    -8.307E+00 2.835E-03 1.253E+00
+ ETOT  1  -8.3065585710601    -8.307E+00 2.835E-03 1.253E+00
  ETOT  2  -8.3092522919542    -2.694E-03 1.276E-05 1.900E-02
  ETOT  3  -8.3092786346611    -2.634E-05 5.586E-07 3.639E-04
  ETOT  4  -8.3092786882415    -5.358E-08 3.990E-08 1.071E-05
- ETOT  5  -8.3092786937511    -5.510E-09 7.251E-10 3.403E-07
+ ETOT  5  -8.3092786937512    -5.510E-09 7.251E-10 3.403E-07
  ETOT  6  -8.3092786939796    -2.284E-10 8.366E-11 5.822E-09
 
  At SCF step    6       vres2   =  5.82E-09 < tolvrs=  1.00E-08 =>converged.
@@ -417,16 +423,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.21092742544710E+00
-hartree             :  6.01379470305272E-01
-xc                  : -3.11931598794468E+00
+kinetic             :  3.21092742544697E+00
+hartree             :  6.01379470305715E-01
+xc                  : -3.11931598794459E+00
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  5.53648753925927E-01
-local_psp           : -2.29956447427849E+00
-non_local_psp       :  1.14411090475141E+00
-total_energy        : -8.30927869397955E+00
-total_energy_eV     : -2.26106991967378E+02
-band_energy         : -1.03027581576133E-02
+local_psp           : -2.29956447427146E+00
+non_local_psp       :  1.14411090474394E+00
+total_energy        : -8.30927869397959E+00
+total_energy_eV     : -2.26106991967379E+02
+band_energy         : -1.03027581517398E-02
 ...
 
 
@@ -442,8 +448,8 @@ band_energy         : -1.03027581576133E-02
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -472,9 +478,6 @@ meta: {optdriver: 6, }
 )     Maximum=    9.7811E-02  at reduced coord.    0.1333    0.1333    0.6000
 )     Minimum=    1.9174E-03  at reduced coord.    0.7333    0.7333    0.7333
    Integrated=    8.0000E+00
-- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
-- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
-- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
 
  === KS gaps after direct diagonalization ===
  Indirect band gap semiconductor
@@ -482,12 +485,13 @@ meta: {optdriver: 6, }
    VBM:     4.649 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     5.552 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         2.454 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
-
+ 
+- Cannot deallocate gwr datatype if FC_NVHPC, DO NOT USE DATASETS!
+ 
 ================================================================================
 == DATASET  3 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
@@ -509,9 +513,26 @@ meta: {optdriver: 6, }
 .Using double precision arithmetic; gwpc =  8
 
 - Reading GS density from: t13o_DS1_DEN
-
-
-
+ 
+ 
+ 
+ 
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/gmatteo_gwr/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/gmatteo_gwr/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- Si    ONCVPSP-3.2.3.1  r_core=   1.60303   1.72197   1.91712
+- 14.00000   4.00000    170510                znucl, zion, pspdat
+    8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    5.99000000000000    4.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
+     nproj     2     2     2
+     extension_switch     1
+  pspatm : epsatm=    9.34321699
+         --- l  ekb(1:nproj) -->
+             0    5.168965    0.829883
+             1    2.571282    0.578307
+             2   -2.427311   -0.488097
+ pspatm: atomic psp has been read  and splines computed
+ 
 --------------------------------------------------------------------------------
 
  Total charge density [el/Bohr^3]
@@ -574,8 +595,8 @@ P kpt_comm can use shmem: yes
 P g_comm can use shmem: yes
 P tau_comm can use shmem: yes
 P spin_comm can use shmem yes
-- FFT uc_batch_size: 1
-- FFT sc_batch_size: 1
+- FFT uc_batch_size: 4
+- FFT sc_batch_size: 4
  ==== Info on the gwr_t object ====
 
 --- !GWR_params
@@ -647,24 +668,24 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 
        1       2       3       4       5       6
     1 -22.312 -11.817  -4.709  -1.809  -0.487  -0.036
-       -0.000  -0.000  -0.000  -0.000  -0.000   0.000
-
+        0.000   0.000   0.000   0.000   0.000   0.000
+ 
     2 -22.377 -11.594  -3.921  -1.284  -0.320  -0.024
-        0.000  -0.000   0.000  -0.000  -0.000   0.000
-
+        0.000   0.000   0.000   0.000   0.000   0.000
+ 
     3 -22.370 -11.524  -3.810  -1.778  -1.306  -0.736
-       -0.000   0.000  -0.000   0.000  -0.000   0.000
-
+        0.000   0.000   0.000   0.000   0.000   0.000
+ 
  Trace of: gt_kibz for ipm: 2 , spin: 1 for testing purposes:
  (ik_ibz, itau) table
 
        1       2       3       4       5       6
     1   3.899   3.502   2.971   2.524   1.958   1.105
-        0.000   0.000  -0.000   0.000  -0.000   0.000
-
+        0.000   0.000   0.000   0.000   0.000   0.000
+ 
     2   3.842   3.180   2.114   1.093   0.389   0.043
-        0.000   0.000   0.000  -0.000   0.000  -0.000
-
+        0.000   0.000   0.000   0.000   0.000   0.000
+ 
     3   3.825   3.073   1.810   0.611   0.079   0.001
         0.000   0.000   0.000   0.000   0.000   0.000
 
@@ -688,8 +709,8 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
  (iq_ibz, iomega) table
        1       2       3       4       5       6
     1  -2.698  -2.621  -2.377  -1.912  -1.173  -0.328
-       -0.000   0.000  -0.000   0.000   0.000   0.000
-
+        0.000  -0.000  -0.000   0.000  -0.000   0.000
+ 
     2  -2.781  -2.678  -2.402  -1.934  -1.174  -0.327
         0.000   0.000   0.000   0.000   0.000   0.000
 
@@ -707,12 +728,12 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
 'epsilon_{iw, q -> Gamma}(0,0)': !Tabular |
-      1.17768323E-02    4.22084056E+01    1.66831624E-17
-      4.26019255E-02    3.77709364E+01   -1.34891326E-17
-      1.02353374E-01    2.53376508E+01    6.05151972E-18
-      2.42819669E-01    9.95689467E+00   -4.98991033E-18
-      6.17145652E-01    2.79395737E+00   -7.77595973E-21
-      1.86465027E+00    1.21026086E+00   -2.35390901E-20
+      1.17768323E-02    4.22084056E+01   -9.80599904E-20
+      4.26019255E-02    3.77709364E+01    2.88757659E-19
+      1.02353374E-01    2.53376508E+01    1.36483209E-19
+      2.42819669E-01    9.95689467E+00   -1.06034734E-19
+      6.17145652E-01    2.79395737E+00    1.72727559E-20
+      1.86465027E+00    1.21026086E+00   -4.11035857E-21
 ...
 
 
@@ -817,12 +838,13 @@ data: !Tabular |
    VBM:    -0.377 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     0.451 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         3.274 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
-
+ 
+- Cannot deallocate gwr datatype if FC_NVHPC, DO NOT USE DATASETS!
+ 
 ================================================================================
 == DATASET  4 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
@@ -909,8 +931,8 @@ P kpt_comm can use shmem: yes
 P g_comm can use shmem: yes
 P tau_comm can use shmem: yes
 P spin_comm can use shmem yes
-- FFT uc_batch_size: 1
-- FFT sc_batch_size: 1
+- FFT uc_batch_size: 4
+- FFT sc_batch_size: 4
  ==== Info on the gwr_t object ====
 
 --- !GWR_params
@@ -965,7 +987,8 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
   3.80000000E+00  1.34997152E-01 -8.43450020E+00 -3.09962165E-01
   4.00000000E+00  1.25000000E-01 -8.45489936E+00 -3.10711821E-01
               oo               0 -8.61213554E+00 -3.16490144E-01
-
+- Cannot deallocate gwr datatype if FC_NVHPC, DO NOT USE DATASETS!
+ 
 == END DATASET(S) ==============================================================
 ================================================================================
 
@@ -1000,7 +1023,7 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
         freqspmax1     0.00000000E+00 Hartree
         freqspmax2     0.00000000E+00 Hartree
         freqspmax3     1.83746611E-01 Hartree
@@ -1017,6 +1040,8 @@ Minimax imaginary tau/omega mesh in a.u.: !Tabular | # tau, weight(tau), omega, 
            getwfk2          0
            getwfk3          2
            getwfk4          2
+-      gpu_option           2
+-gpu_thread_limit           1
     gwr_boxcutmin1     1.00000000E+00
     gwr_boxcutmin2     1.00000000E+00
     gwr_boxcutmin3     1.10000000E+00
@@ -1085,7 +1110,7 @@ P           mkmem           3
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         227
-           strten1     3.5076520395E-05  3.5076520395E-05  3.5076520395E-05
+           strten1     3.5076520428E-05  3.5076520428E-05  3.5076520428E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1147,6 +1172,10 @@ P           mkmem           3
            tolvrs3     0.00000000E+00
            tolvrs4     0.00000000E+00
             typat      1  1
+-          useylm1          1
+-          useylm2          1
+-          useylm3          0
+-          useylm4          0
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.3573395450E+00  1.3573395450E+00  1.3573395450E+00
@@ -1158,62 +1187,62 @@ P           mkmem           3
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          2.3        0.04      0.001
-- Total wall clock time (s,m,h):          2.3        0.04      0.001
+- Total cpu        time (s,m,h):          7.2        0.12      0.002
+- Total wall clock time (s,m,h):          7.2        0.12      0.002
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            2.3, wall_time =            2.3
+- cpu_time =            7.2, wall_time =            7.2
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- gwr_build_tchi                            0.757  33.6         0.757  32.3              2      -1.00        1.00       1.00
-- gwr_build_sigmac                          0.600  26.6         0.604  25.8              1      -1.00        0.99       0.99
-- gwr_init                                  0.220   9.7         0.222   9.5              3      -1.00        0.99       0.99
-- get_dtsets_pspheads                       0.135   6.0         0.135   5.8              1      -1.00        1.00       1.00
-- timing timab                              0.110   4.9         0.110   4.7             14      -1.00        1.00       1.00
-- pspini                                    0.107   4.8         0.107   4.6              4      -1.00        1.00       1.00
-- gwr_rpa_energy                            0.072   3.2         0.072   3.1              1      -1.00        0.99       0.99
-- gwr_build_head_wings                      0.047   2.1         0.047   2.0              2      -1.00        1.00       1.00
-- fourwf%(pot)                              0.027   1.2         0.027   1.2            712      -1.00        1.00       1.00
-- abinit(after driver)                      0.025   1.1         0.031   1.3              1      -1.00        0.80       0.80
-- ewald                                     0.024   1.1         0.024   1.0              4      -1.00        1.00       1.00
-- abinit(outvars)                           0.024   1.0         0.031   1.3              1      -1.00        0.75       0.75
-- ugb_from_diago                            0.019   0.9         0.019   0.8              3      -1.00        1.00       1.00
-- gwr_build_wc                              0.013   0.6         0.013   0.5              1      -1.00        1.00       1.00
-- others (202)                              0.057   2.5         0.073   3.1             -1      -1.00        0.78       0.78
+- gwr_build_tchi                            2.019  28.0         2.019  28.0              2      -1.00        1.00       1.00
+- fourwf%(den)                              1.508  20.9         1.508  20.9            108      -1.00        1.00       1.00
+- gwr_build_sigmac                          1.327  18.4         1.327  18.4              1      -1.00        1.00       1.00
+- gwr_init                                  0.425   5.9         0.425   5.9              3      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.375   5.2         0.375   5.2              1      -1.00        1.00       1.00
+- pspini                                    0.308   4.3         0.308   4.3              4      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.217   3.0         0.217   3.0              1      -1.00        1.00       1.00
+- gwr_rpa_energy                            0.156   2.2         0.156   2.2              1      -1.00        1.00       1.00
+- timing timab                              0.108   1.5         0.108   1.5             17      -1.00        1.00       1.00
+- gwr_build_head_wings                      0.076   1.1         0.076   1.1              2      -1.00        1.00       1.00
+- gwr_build_wc                              0.063   0.9         0.063   0.9              1      -1.00        1.00       1.00
+- abinit(outvars)                           0.062   0.9         0.062   0.9              1      -1.00        1.00       1.00
+- abinit(after driver)                      0.060   0.8         0.060   0.8              1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.045   0.6         0.045   0.6            681      -1.00        1.00       1.00
+- others (202)                              0.227   3.1         0.227   3.1             -1      -1.00        1.00       1.00
 -<END_TIMER>
 -
-- subtotal                                  2.237  99.3         2.274  96.9                                  0.98       0.98
+- subtotal                                  6.975  96.7         6.975  96.7                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           2.3, wall_time =           2.3
+- cpu_time =           7.2, wall_time =           7.2
 -
 - routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
 -                                                                                (-1=no count)
-- gwr_build_tchi                            0.757  33.6         0.757  32.3              2      -1.00        1.00       1.00
-- gwr_build_sigmac                          0.600  26.6         0.604  25.8              1      -1.00        0.99       0.99
-- gwr_init                                  0.220   9.7         0.222   9.5              3      -1.00        0.99       0.99
-- get_dtsets_pspheads                       0.135   6.0         0.135   5.8              1      -1.00        1.00       1.00
-- timing timab                              0.110   4.9         0.110   4.7             14      -1.00        1.00       1.00
-- pspini                                    0.107   4.8         0.107   4.6              4      -1.00        1.00       1.00
-- gwr_rpa_energy                            0.072   3.2         0.072   3.1              1      -1.00        0.99       0.99
-- gwr_build_head_wings                      0.047   2.1         0.047   2.0              2      -1.00        1.00       1.00
-- fourwf%(pot)                              0.027   1.2         0.027   1.2            712      -1.00        1.00       1.00
-- abinit(after driver)                      0.025   1.1         0.031   1.3              1      -1.00        0.80       0.80
-- ewald                                     0.024   1.1         0.024   1.0              4      -1.00        1.00       1.00
-- abinit(outvars)                           0.024   1.0         0.031   1.3              1      -1.00        0.75       0.75
-- ugb_from_diago                            0.019   0.9         0.019   0.8              3      -1.00        1.00       1.00
-- gwr_build_wc                              0.013   0.6         0.013   0.5              1      -1.00        1.00       1.00
-- others (202)                              0.057   2.5         0.073   3.1             -1      -1.00        0.78       0.78
+- gwr_build_tchi                            2.019  28.0         2.019  28.0              2      -1.00        1.00       1.00
+- fourwf%(den)                              1.508  20.9         1.508  20.9            108      -1.00        1.00       1.00
+- gwr_build_sigmac                          1.327  18.4         1.327  18.4              1      -1.00        1.00       1.00
+- gwr_init                                  0.425   5.9         0.425   5.9              3      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.375   5.2         0.375   5.2              1      -1.00        1.00       1.00
+- pspini                                    0.308   4.3         0.308   4.3              4      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.217   3.0         0.217   3.0              1      -1.00        1.00       1.00
+- gwr_rpa_energy                            0.156   2.2         0.156   2.2              1      -1.00        1.00       1.00
+- timing timab                              0.108   1.5         0.108   1.5             17      -1.00        1.00       1.00
+- gwr_build_head_wings                      0.076   1.1         0.076   1.1              2      -1.00        1.00       1.00
+- gwr_build_wc                              0.063   0.9         0.063   0.9              1      -1.00        1.00       1.00
+- abinit(outvars)                           0.062   0.9         0.062   0.9              1      -1.00        1.00       1.00
+- abinit(after driver)                      0.060   0.8         0.060   0.8              1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.045   0.6         0.045   0.6            681      -1.00        1.00       1.00
+- others (202)                              0.227   3.1         0.227   3.1             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                                  2.237  99.3         2.274  96.9                                  0.98       0.98
+- subtotal                                  6.975  96.7         6.975  96.7                                  1.00       1.00
 
 ================================================================================
 

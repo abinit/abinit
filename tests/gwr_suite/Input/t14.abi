@@ -9,6 +9,10 @@ ndtset 3
 
 gpu_option 2
 
+useylm 1
+useylm3 0
+istwfk *1
+
 ####################
 # Dataset 1: SCF run
 ####################
@@ -101,7 +105,7 @@ pseudos "Psdj_nc_sr_04_pbe_std_psp8/Si.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi
+#%% exclude_builders = haicgu_*
 #%% need_cpp_vars = HAVE_GPU, HAVE_OPENMP_OFFLOAD
 #%% [files]
 #%% files_to_test =

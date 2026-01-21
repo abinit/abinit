@@ -31,27 +31,27 @@
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       2
 -    mband =           6        mffmem =           1         mkmem =           3
-       mpw =          57          nfft =        3375          nkpt =           3
+       mpw =         113          nfft =        3375          nkpt =           3
 ================================================================================
-P This job should need less than                       1.822 Mbytes of memory.
+P This job should need less than                       1.866 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.018 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
+_ WF disk file :      0.033 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
-     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =      18
      lnmax =       6     mgfft =      15  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       2
 -    mband =           5        mffmem =           1         mkmem =           3
-       mpw =          57          nfft =        3375          nkpt =           3
+       mpw =         113          nfft =        3375          nkpt =           3
 ================================================================================
-P This job should need less than                       1.819 Mbytes of memory.
+P This job should need less than                       1.860 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
+_ WF disk file :      0.028 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -63,11 +63,11 @@ _ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       2
 -    mband =          30        mffmem =           1         mkmem =           3
-       mpw =          57          nfft =        3375          nkpt =           3
+       mpw =         113          nfft =        3375          nkpt =           3
 ================================================================================
-P This job should need less than                       1.886 Mbytes of memory.
+P This job should need less than                       1.973 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
+_ WF disk file :      0.157 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -75,10 +75,10 @@ _ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  3 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    0
+-  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0260000000E+01  1.0260000000E+01  1.0260000000E+01 Bohr
@@ -95,7 +95,7 @@ _ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
           ecutwfn1     0.00000000E+00 Hartree
           ecutwfn2     4.00000000E+00 Hartree
           ecutwfn3     4.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
         freqspmax1     0.00000000E+00 Hartree
         freqspmax2     0.00000000E+00 Hartree
         freqspmax3     1.83746611E-01 Hartree
@@ -108,6 +108,8 @@ _ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            getwfk1          0
            getwfk2          0
            getwfk3          2
+-      gpu_option           2
+-gpu_thread_limit           1
    gwr_max_hwtene      6.00000000E-01 Hartree
          gwr_ntau1         12
          gwr_ntau2         12
@@ -121,7 +123,7 @@ _ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
       gw_icutcoul1          6
       gw_icutcoul2          6
       gw_icutcoul3         16
-           istwfk        2    3    7
+           istwfk        1    1    1
               ixc          11
            jdtset        1    2    3
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -214,6 +216,9 @@ P           mkmem           3
            tolvrs2     0.00000000E+00
            tolvrs3     0.00000000E+00
             typat      1  1
+-          useylm1          1
+-          useylm2          1
+-          useylm3          0
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.3573395450E+00  1.3573395450E+00  1.3573395450E+00
@@ -238,7 +243,7 @@ P           mkmem           3
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 3, mband: 6, nsppol: 1, nspinor: 1, nspden: 1, mpw: 57, }
+dimensions: {natom: 2, nkpt: 3, mband: 6, nsppol: 1, nspinor: 1, nspden: 1, mpw: 113, }
 cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
@@ -289,20 +294,20 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.3064574219189    -8.306E+00 4.397E-03 1.239E+00
- ETOT  2  -8.3092497842633    -2.792E-03 2.292E-05 2.057E-02
- ETOT  3  -8.3092786331161    -2.885E-05 8.961E-07 3.792E-04
- ETOT  4  -8.3092786884816    -5.537E-08 5.889E-08 1.096E-05
- ETOT  5  -8.3092786937371    -5.255E-09 2.027E-09 3.429E-07
- ETOT  6  -8.3092786939790    -2.419E-10 1.556E-10 6.450E-09
-
- At SCF step    6       vres2   =  6.45E-09 < tolvrs=  1.00E-08 =>converged.
-
+ ETOT  1  -8.3065585710601    -8.307E+00 2.835E-03 1.253E+00
+ ETOT  2  -8.3092522919542    -2.694E-03 1.276E-05 1.900E-02
+ ETOT  3  -8.3092786346611    -2.634E-05 5.586E-07 3.639E-04
+ ETOT  4  -8.3092786882415    -5.358E-08 3.990E-08 1.071E-05
+ ETOT  5  -8.3092786937512    -5.510E-09 7.251E-10 3.403E-07
+ ETOT  6  -8.3092786939796    -2.284E-10 8.366E-11 5.822E-09
+ 
+ At SCF step    6       vres2   =  5.82E-09 < tolvrs=  1.00E-08 =>converged.
+ 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.50764884E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.50764884E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.50764884E-05  sigma(2 1)=  0.00000000E+00
-
+  sigma(1 1)=  3.50765204E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.50765204E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.50765204E-05  sigma(2 1)=  0.00000000E+00
+ 
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -314,54 +319,54 @@ lattice_vectors:
 lattice_lengths: [   7.25492,    7.25492,    7.25492, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7001139E+02
-convergence: {deltae: -2.419E-10, res2:  6.450E-09, residm:  1.556E-10, diffor: null, }
+convergence: {deltae: -2.284E-10, res2:  5.822E-09, residm:  8.366E-11, diffor: null, }
 etotal    :  -8.30927869E+00
 entropy   :   0.00000000E+00
-fermie    :   1.70857178E-01
+fermie    :   1.70857184E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  3.50764884E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   3.50764884E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   3.50764884E-05, ]
+- [  3.50765204E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.50765204E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.50765204E-05, ]
 pressure_GPa:  -1.0320E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -2.09952844E-28,   2.09952844E-28,  -2.09952844E-28, ]
-- [  2.09952844E-28,  -2.09952844E-28,   2.09952844E-28, ]
-force_length_stats: {min:   3.63648993E-28, max:   3.63648993E-28, mean:   3.63648993E-28, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          1.78506392
-    2        2.00000          1.72909566
+    1        2.00000          1.78506391
+    2        2.00000          1.72909565
 ================================================================================
 
  ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   10.342E-12; max=  15.559E-11
+ 
+ Mean square residual over all n,k,spin=   79.049E-13; max=  83.664E-12
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  1.7588E-27; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000     -0.000000000000      0.000000000000
-
+    2       0.000000000000      0.000000000000      0.000000000000
+ 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.35733954504536     1.35733954504536     1.35733954504536
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 2.0995284E-28 2.0995284E-28   0.000E+00  0.000E+00  0.000E+00 h/b
-
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+ 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000     0.00000000000000
- frms,max,avg= 1.0796209E-26 1.0796209E-26   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.260000000000 10.260000000000 10.260000000000 bohr
               =  5.429358180181  5.429358180181  5.429358180181 angstroms
  prteigrs : about to open file t14o_DS1_EIG
@@ -375,37 +380,37 @@ force_length_stats: {min:   3.63648993E-28, max:   3.63648993E-28, mean:   3.636
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.21092742715608E+00
-hartree             :  6.01379463475242E-01
-xc                  : -3.11931598178544E+00
+kinetic             :  3.21092742544697E+00
+hartree             :  6.01379470305715E-01
+xc                  : -3.11931598794459E+00
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  5.53648753925927E-01
-local_psp           : -2.29956448113624E+00
-non_local_psp       :  1.14411091057150E+00
-total_energy        : -8.30927869397903E+00
-total_energy_eV     : -2.26106991967364E+02
-band_energy         : -1.03027791286891E-02
+local_psp           : -2.29956447427146E+00
+non_local_psp       :  1.14411090474394E+00
+total_energy        : -8.30927869397959E+00
+total_energy_eV     : -2.26106991967379E+02
+band_energy         : -1.03027581517398E-02
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.50764884E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.50764884E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.50764884E-05  sigma(2 1)=  0.00000000E+00
-
+  sigma(1 1)=  3.50765204E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.50765204E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.50765204E-05  sigma(2 1)=  0.00000000E+00
+ 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.0320E+00 GPa]
-- sigma(1 1)=  1.03198592E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.03198592E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.03198592E+00  sigma(2 1)=  0.00000000E+00
-
+- sigma(1 1)=  1.03198686E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.03198686E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.03198686E+00  sigma(2 1)=  0.00000000E+00
+ 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
-dimensions: {natom: 2, nkpt: 3, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 57, }
+dimensions: {natom: 2, nkpt: 3, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 113, }
 cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 6, }
@@ -419,37 +424,35 @@ meta: {optdriver: 6, }
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
 .Using double precision arithmetic; gwpc =  8
-
-- Reading GS density from: t14o_DS1_DEN
-
-
-
+ 
+- Reading GS density from: t14o_DS1_DEN.nc
+ 
+ 
+ 
 --------------------------------------------------------------------------------
 
  Total charge density [el/Bohr^3]
 )     Maximum=    9.7811E-02  at reduced coord.    0.1333    0.1333    0.6000
 )     Minimum=    1.9174E-03  at reduced coord.    0.7333    0.7333    0.7333
    Integrated=    8.0000E+00
-- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
-- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
-- WARNING: Using ScaLAPACK for diagonalization, but ELPA library is highly recommended for both efficiency and memory reasons.
-
+ 
  === KS gaps after direct diagonalization ===
  Indirect band gap semiconductor
  Fundamental gap:     0.903 (eV)
    VBM:     4.649 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     5.552 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         2.454 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
-
+ 
+- Cannot deallocate gwr datatype if FC_NVHPC, DO NOT USE DATASETS!
+ 
 ================================================================================
 == DATASET  3 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
-dimensions: {natom: 2, nkpt: 3, mband: 30, nsppol: 1, nspinor: 1, nspden: 1, mpw: 57, }
+dimensions: {natom: 2, nkpt: 3, mband: 30, nsppol: 1, nspinor: 1, nspden: 1, mpw: 113, }
 cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 6, }
@@ -465,18 +468,35 @@ meta: {optdriver: 6, }
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
 .Using double precision arithmetic; gwpc =  8
-
-- Reading GS density from: t14o_DS1_DEN
-
-
-
+ 
+- Reading GS density from: t14o_DS1_DEN.nc
+ 
+ 
+ 
+ 
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/gmatteo_gwr/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/gmatteo_gwr/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Si.psp8
+- Si    ONCVPSP-3.2.3.1  r_core=   1.60303   1.72197   1.91712
+- 14.00000   4.00000    170510                znucl, zion, pspdat
+    8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    5.99000000000000    4.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
+     nproj     2     2     2
+     extension_switch     1
+  pspatm : epsatm=    9.34321699
+         --- l  ekb(1:nproj) -->
+             0    5.168965    0.829883
+             1    2.571282    0.578307
+             2   -2.427311   -0.488097
+ pspatm: atomic psp has been read  and splines computed
+ 
 --------------------------------------------------------------------------------
 
  Total charge density [el/Bohr^3]
 )     Maximum=    9.7811E-02  at reduced coord.    0.1333    0.1333    0.6000
 )     Minimum=    1.9174E-03  at reduced coord.    0.7333    0.7333    0.7333
    Integrated=    8.0000E+00
-- Reading GS states from WFK file: t14o_DS2_WFK
+- Reading GS states from WFK file: t14o_DS2_WFK.nc
   Mapping kBZ --> kIBZ
  Legend: bz = TS(ibz) + g0 where isym is the index of the symrec operation S and itim is 1 if TR is used.
         BZ                                       IBZ                                       ibz  isym  itim  g0
@@ -532,8 +552,8 @@ P kpt_comm can use shmem: yes
 P g_comm can use shmem: yes
 P tau_comm can use shmem: yes
 P spin_comm can use shmem yes
-- FFT uc_batch_size: 1
-- FFT sc_batch_size: 1
+- FFT uc_batch_size: 4
+- FFT sc_batch_size: 4
  ==== Info on the gwr_t object ====
 
 --- !GWR_params
