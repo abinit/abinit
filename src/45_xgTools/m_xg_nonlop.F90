@@ -2225,10 +2225,6 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
    call xg_init(err,SPACE_R,ncols,1,xmpi_comm_self)
 
    call xgBlock_colwiseNorm2(cprj_in,err%self,max_val=norm)
-   ! ITEST
-   write(901,*) 'cprj_in norm2=', norm
-   flush(901)
-   ! ITEST
 
    ! Y_0 = PX (with P block diagonal and "close" to A^-1)
    call xgBlock_zero(cprj_out)
