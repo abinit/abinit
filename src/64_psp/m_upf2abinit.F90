@@ -7,7 +7,7 @@
 !!  the internal ABINIT representation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2025 ABINIT group (MJV, MG, DRH)
+!!  Copyright (C) 2009-2026 ABINIT group (MJV, MG, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

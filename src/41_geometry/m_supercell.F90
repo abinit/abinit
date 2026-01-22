@@ -7,7 +7,7 @@
 !! Container type is defined, and destruction, print subroutines as well as the central supercell_init
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2025 ABINIT group (MJV, DJA)
+!! Copyright (C) 2010-2026 ABINIT group (MJV, DJA)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

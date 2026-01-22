@@ -563,7 +563,7 @@ contains
     write(Invar%stdout,'(a,a,a)') '.Version ', version_string,' of ATDEP'
   end if
 
-  write(Invar%stdout,'(a)') '.Copyright (C) 1998-2025 ABINIT group (FB,JB,GA).'
+  write(Invar%stdout,'(a)') '.Copyright (C) 1998-2026 ABINIT group (FB,JB,GA).'
   write(Invar%stdout,'(a)') ' ABINIT comes with ABSOLUTELY NO WARRANTY.'
   write(Invar%stdout,'(a)') ' It is free software, and you are welcome to redistribute it'
   write(Invar%stdout,'(a)') ' under certain conditions (GNU General Public License,'

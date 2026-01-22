@@ -12,7 +12,7 @@
 !!  (well, here performance is critical). Client code should make sure they always point contiguous targets.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2025 ABINIT group (MG, MT)
+!! Copyright (C) 2009-2026 ABINIT group (MG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

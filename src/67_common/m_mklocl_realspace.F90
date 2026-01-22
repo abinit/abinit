@@ -7,7 +7,7 @@
 !!   Computation is done in real space (useful for isolated systems).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (TRangel, MT, DC)
+!!  Copyright (C) 2013-2026 ABINIT group (TRangel, MT, DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

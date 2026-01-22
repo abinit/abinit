@@ -6,7 +6,7 @@
 !!  This module contains the declaration of data types and methods used to handle electric fields
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2025 ABINIT group (MJV)
+!! Copyright (C) 2011-2026 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

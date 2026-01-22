@@ -8,7 +8,7 @@
 !! This should really help to do the transposition operataion
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2025 ABINIT group (J. Bieder, L. Baguet)
+!!  Copyright (C) 2017-2026 ABINIT group (J. Bieder, L. Baguet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

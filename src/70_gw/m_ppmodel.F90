@@ -6,7 +6,7 @@
 !!  Module containing the definition of the ppmodel_t used to deal with the plasmonpole technique.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG, GMR, VO, LR, RWG, RS)
+!!  Copyright (C) 2008-2026 ABINIT group (MG, GMR, VO, LR, RWG, RS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

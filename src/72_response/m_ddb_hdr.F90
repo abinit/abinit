@@ -7,7 +7,7 @@
 !!  to handle the header of the DDB files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2025 ABINIT group (GA, MJV, XG, MT, MM, MVeithen, MG, PB, JCC, MMignolet)
+!! Copyright (C) 2011-2026 ABINIT group (GA, MJV, XG, MT, MM, MVeithen, MG, PB, JCC, MMignolet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

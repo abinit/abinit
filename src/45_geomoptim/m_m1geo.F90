@@ -7,7 +7,7 @@
 !! and its related init and destroy routines
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group (XG)
+!! Copyright (C) 2018-2026 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

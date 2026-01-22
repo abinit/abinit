@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2022-2025 ABINIT group (MR)
+!!  Copyright (C) 2022-2026 ABINIT group (MR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -795,7 +795,7 @@ end subroutine dfptlw_loop
 !!  the d3etot mixed (reduced/cartessian) coordinates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2022-2025 ABINIT group (MR)
+!!  Copyright (C) 2022-2026 ABINIT group (MR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -970,7 +970,7 @@ end subroutine dfptlw_typeIproc
 !!  Data is read by the master and broadcasted.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2022-2025 ABINIT group (MR)
+!!  Copyright (C) 2022-2026 ABINIT group (MR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -6,7 +6,7 @@
 !!  This module contains several routines related to the exact formula for the double counting.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2025-2025 ABINIT group
+!! Copyright (C) 2025-2026 ABINIT group
 !! These routines were inspired by K. Haule routines in embedded DMFT.
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING

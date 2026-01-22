@@ -6,7 +6,7 @@
 !!  Driver for GWR calculations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2025 ABINIT group (MG)
+!!  Copyright (C) 2021-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  APACHE license version 2.0, see ~abinit/COPYING
 !!  or https://www.apache.org/licenses/LICENSE-2.0 .

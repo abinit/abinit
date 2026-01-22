@@ -16,7 +16,7 @@
 !! only these types to perfom calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2016-2025 ABINIT group (J. Bieder, MS, L. Baguet)
+!!  Copyright (C) 2016-2026 ABINIT group (J. Bieder, MS, L. Baguet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

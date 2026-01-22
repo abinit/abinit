@@ -6,7 +6,7 @@
 !!  This module provides method to allocate/free/initialize the pseudopotential_type object.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2025 ABINIT group (XG,DC,MG)
+!!  Copyright (C) 2014-2026 ABINIT group (XG,DC,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
