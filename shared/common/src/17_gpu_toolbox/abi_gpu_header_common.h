@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2025 ABINIT Group
+ * Copyright (C) 2008-2026 ABINIT Group
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
