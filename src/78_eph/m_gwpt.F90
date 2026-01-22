@@ -86,6 +86,7 @@ module m_gwpt
  use m_screen,         only : em1_symmetrize_op
  use m_ppmodel,        only : ppmodel_t
  use m_lgroup,         only : lgroup_t
+ use m_initylmg,       only : initylmg_k
 
  implicit none
 
@@ -227,7 +228,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 !scalars
  integer,parameter :: LOG_MODQ = 1, LOG_MODK = 4, LOG_MODP = 4, ENOUGH_STERN = 5
  integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, istwfk1 = 1, cplex1 = 1, pawread0 = 0
- integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, with_cplex0 = 0, n3xccc0 = 0
+ integer,parameter :: master = 0, ndat1 = 1, with_cplex0 = 0, n3xccc0 = 0, optder0 = 0  !useylmgr = 0, useylmgr1 = 0,
  integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
  integer :: nb_k, nb_kq, bstart_k, bstop_k, bstart_kq, bstop_kq, matblk, method, enforce_sym
  integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nproc !, gsum_master
@@ -295,9 +296,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: gxc_atm(:,:,:,:), gks_atm(:,:,:,:), gks_atm2(:,:,:,:), gsig_atm(:,:,:,:)
  real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:), ph1d(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:), vlocal1_qq(:,:,:,:,:), v1scf_qq(:,:,:,:), vlocal1_mqq(:,:,:,:,:), v1scf_mq(:,:,:,:)
- real(dp),allocatable :: ylm_k(:,:), ylm_kq(:,:), ylm_kmp(:,:), ylm_kqmp(:,:)
- real(dp),allocatable :: ylmgr_kq(:,:,:), ylmgr_kmp(:,:,:), ylmgr_kqmp(:,:,:)
- real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), rhor(:,:), vxc(:,:), kxc(:,:)
+ real(dp),allocatable :: ylm_kmp(:,:), ylm_kqmp(:,:), vtrial(:,:), work(:,:,:,:), rhor(:,:), vxc(:,:), kxc(:,:)
  real(dp),allocatable :: omegame0i_nk(:), omegame0i_mkq(:), omegas_nk(:), omegas_mkq(:)
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), my_gbuf_ks(:,:,:,:,:,:)
  real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:), cg1_kmp(:,:), full_cg1_kqmp(:,:), full_cg1_kmp(:,:), vxc_nk(:,:)
@@ -320,7 +319,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
  end if
 
- ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
  ABI_CHECK_IEQ(dtset%nspinor, 1, "GWPT with nspinor 2 not coded")
  ABI_CHECK_IEQ(dtset%nsppol, 1, "GWPT with nsppol 2 not tested")
 
@@ -801,16 +799,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(kg_kmp, (3, mpw))
  ABI_MALLOC(kg_kqmp, (3, mpw))
 
- ! Spherical Harmonics for useylm == 1.
- ! FIXME: These arrays should be allocated with npw_k, npw_kq inside the loops.
- ! but should recheck the API used to symmetrized wavefunctions.
- ABI_MALLOC(ylm_k, (mpw, psps%mpsang**2 * psps%useylm))
- ABI_MALLOC(ylm_kq, (mpw, psps%mpsang**2 * psps%useylm))
- ABI_MALLOC(ylm_kmp, (mpw, psps%mpsang**2 * psps%useylm))
- ABI_MALLOC(ylm_kqmp, (mpw, psps%mpsang**2 * psps%useylm))
- ABI_MALLOC(ylmgr_kq, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
- ABI_MALLOC(ylmgr_kmp, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
- ABI_MALLOC(ylmgr_kqmp, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
  ! GS wavefunctions
  ABI_MALLOC(ur_star_kmp, (nfft*nspinor))
  ABI_MALLOC(ur_star_kqmp, (nfft*nspinor))
@@ -1188,6 +1176,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Compute nonlocal form factors ffnl_kmp at (k-p+G).
          ABI_MALLOC(ffnl_kmp, (npw_kmp, 1, psps%lmnmax, psps%ntypat))
 
+         ABI_MALLOC(ylm_kmp, (npw_kmp, psps%mpsang**2 * psps%useylm))
+         if (psps%useylm == 1) then
+           call initylmg_k(npw_kmp, psps%mpsang, optder0, cryst%rprimd, cryst%gprimd, kmp, kg_kmp, ylm_kmp, ylmgr_dum)
+         end if
+
          call mkffnl_objs(cryst, psps, 1, ffnl_kmp, ider0, idir0, kg_kmp, kpg_kmp, kmp, nkpg_kmp, &
                           npw_kmp, ylm_kmp, ylmgr_dum) !, comm=gqk%pert_comm%value, request=ffnl_kmp_request)
 
@@ -1215,6 +1208,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          ! Compute nonlocal form factors ffnl_kqmp at (k+q-p+G).
          ABI_MALLOC(ffnl_kqmp, (npw_kqmp, 1, psps%lmnmax, psps%ntypat))
+
+         ABI_MALLOC(ylm_kqmp, (npw_kqmp, psps%mpsang**2 * psps%useylm))
+         if (psps%useylm == 1) then
+           call initylmg_k(npw_kqmp, psps%mpsang, optder0, cryst%rprimd, cryst%gprimd, kqmp, kg_kqmp, ylm_kqmp, ylmgr_dum)
+         end if
+
          call mkffnl_objs(cryst, psps, 1, ffnl_kqmp, ider0, idir0, kg_kqmp, kpg_kqmp, kqmp, nkpg_kqmp, &
                           npw_kqmp, ylm_kqmp, ylmgr_dum) ! , comm=gqk%pert_comm%value, request=ffnl_kqmp_request)
 
@@ -1914,6 +1913,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ABI_FREE(ph3d_kmp)
          ABI_FREE(ph3d_kqmp)
 
+         ABI_SFREE(ylm_kmp)
+         ABI_SFREE(ylm_kqmp)
+
          ABI_SFREE(botsq_pbz)
          ABI_SFREE(otq_pbz)
          ABI_SFREE(dmeig_pbz)
@@ -2060,13 +2062,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(kg_kq)
  ABI_FREE(kg_kmp)
  ABI_FREE(kg_kqmp)
- ABI_FREE(ylm_k)
- ABI_FREE(ylm_kq)
- ABI_FREE(ylm_kmp)
- ABI_FREE(ylm_kqmp)
- ABI_FREE(ylmgr_kq)
- ABI_FREE(ylmgr_kmp)
- ABI_FREE(ylmgr_kqmp)
  ABI_FREE(cg_work)
  ABI_FREE(ur_star_kmp)
  ABI_FREE(ur_star_kqmp)
