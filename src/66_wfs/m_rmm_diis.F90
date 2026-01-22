@@ -1109,20 +1109,29 @@ subroutine rmm_diis_update_block(diis, iter, npwsp, ndat, cg_bk, residv_bk, comm
  !if (nprocs > 1) call xmpi_sum(wvec, comm, ierr)
 
  ! Take linear combination of chain_phi and chain_resv.
- !!$OMP PARALLEL DO
+!$omp parallel private(idat, alphas)
+  if (cplex /= 2) then
+    ABI_MALLOC(alphas, (1, 0:iter))
+  end if
+
+ !$omp do
  do idat=1,ndat
    if (cplex == 2) then
      call cg_zgemv("N", npwsp, iter, diis%chain_phi(:,:,:,idat), wvec(:,:,idat), cg_bk(:,:,idat))
      call cg_zgemv("N", npwsp, iter, diis%chain_resv(:,:,:,idat), wvec(:,:,idat), residv_bk(:,:,idat))
    else
      ! coefficients are real --> use DGEMV.
-     ABI_MALLOC(alphas, (1, 0:iter))
      alphas(1,:) = wvec(1,:,idat)
      call dgemv("N", 2*npwsp, iter, one, diis%chain_phi(:,:,:,idat), 2*npwsp, alphas, 1, zero, cg_bk(:,:,idat), 1)
      call dgemv("N", 2*npwsp, iter, one, diis%chain_resv(:,:,:,idat), 2*npwsp, alphas, 1, zero, residv_bk(:,:,idat), 1)
-     ABI_FREE(alphas)
    end if
  end do ! idat
+ !$omp end do
+
+ if (cplex /= 2) then
+   ABI_FREE(alphas)
+ end if
+!$omp end parallel
 
  ABI_FREE(wvec)
  !if (timeit) call cwtime_report(" update_block", cpu, wall, gflops)
