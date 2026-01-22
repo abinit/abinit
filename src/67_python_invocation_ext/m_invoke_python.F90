@@ -6,7 +6,7 @@
 !! Write function
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2025 ABINIT group (OGingras)
+!! Copyright (C) 2006-2026 ABINIT group (OGingras)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
