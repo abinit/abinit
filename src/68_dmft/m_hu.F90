@@ -677,7 +677,6 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
    prtopt = 1
  endif
 
- write(*,*)"Hello Fred rot_type=",rot_type
  write(message,'(a,3x,a)') ch10,"== Rotate interaction to the CTQMC basis"
  call wrtout(std_out,message,"COLL")
 
