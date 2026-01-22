@@ -6,7 +6,7 @@
 !! Treat XC functionals closely linked with the Perdew-Wang 92 LSD and the PBE GGA.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (XG,MF,LG,CE,AB)
+!!  Copyright (C) 1998-2026 ABINIT group (XG,MF,LG,CE,AB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

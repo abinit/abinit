@@ -7,7 +7,7 @@
 !! physical constants, as well as associated datatypes and methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2025 ABINIT group (HM, XG,XW, EB)
+!! Copyright (C) 2000-2026 ABINIT group (HM, XG,XW, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

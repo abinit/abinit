@@ -7,7 +7,7 @@
 !! of the XC kernel (the third derivative of the XC energy)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2025 ABINIT group (MT, MJV, CE, TD, XG, AB)
+!!  Copyright (C) 2012-2026 ABINIT group (MT, MJV, CE, TD, XG, AB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
