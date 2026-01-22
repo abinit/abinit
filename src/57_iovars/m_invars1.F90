@@ -2143,9 +2143,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !Some special cases are not compatible with GPU implementation
 !Warn user if value is changed at runtime.
 !We don't stop the code because we may want to run the test suite in GPU mode.
- if (all(dtset%optdriver /= [RUNL_GSTATE, RUNL_RESPFN, RUNL_GWR])) then
+ if (all(dtset%optdriver /= [RUNL_GSTATE, RUNL_RESPFN, RUNL_GWR, RUNL_EPH])) then
    if (dtset%gpu_option /= ABI_GPU_DISABLED) then
-     call wrtout(units, "- WARNING: GPU only compatible with GS, RESPFN and GWR. gpu_option has been set to 0!")
+     call wrtout(units, "- WARNING: GPU only compatible with GS, RESPFN, GWR, EPH. gpu_option has been set to 0!")
    end if
    dtset%gpu_option=ABI_GPU_DISABLED
  end if

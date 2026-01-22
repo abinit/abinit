@@ -778,6 +778,8 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_op
  end if
  ldb = kk; ldc = mm
 
+ ! ZGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
+
  if(my_gpu_option==ABI_GPU_DISABLED) then
    call ZGEMM(trans, "N", mm, nn, kk, my_alpha, cgmat, lda, vec, ldb, my_beta, matvec, ldc)
  else if(my_gpu_option==ABI_GPU_OPENMP) then
@@ -785,9 +787,6 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_op
    my_cbeta  = DCMPLX(my_beta(1), my_beta(2))
    call abi_gpu_xgemm(2, trans, "N", mm, nn, kk, my_calpha, cgmat, lda, vec, ldb, my_cbeta, matvec, ldc)
  end if
- ! ZGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
-
- !call ZGEMV(trans,mm,nn,my_alpha,cgmat,lda,vec,1,my_beta,matvec,1)
 
 end subroutine cg_zgemv
 !!***

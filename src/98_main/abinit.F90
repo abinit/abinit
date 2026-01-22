@@ -248,8 +248,7 @@ program abinit
     '- root for output files -> ',trim(filnam(4)),ch10
    call wrtout([std_out, ab_out], msg)
  end if
-
- call wrtout(std_out, ' abinit : after writing the name of files ','PERS')
+ !call wrtout(std_out, ' abinit : after writing the name of files ','PERS')
 
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
