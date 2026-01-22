@@ -1281,7 +1281,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
   INTEGER                                         :: iflavor
   INTEGER                                         :: iflavor2
   INTEGER                                         :: iomega
-  INTEGER                                         :: itau
+  INTEGER                                         :: itau,ioerr
   DOUBLE PRECISION                                :: pi_invBeta
   COMPLEX(KIND=8)                                 :: K
   !DOUBLE PRECISION                                :: re
@@ -1293,6 +1293,9 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
   TYPE(GreenHyboffdiagComplex)                     :: F_tmp
   CHARACTER(LEN=100) :: message
   character(len=2) :: atomnb
+  DOUBLE PRECISION, allocatable :: x_r(:,:,:), x_i(:,:,:)
+  CHARACTER(LEN=256) :: dummy
+  DOUBLE PRECISION    :: tautemp
   !character(len=30) :: tmpfil
   !INTEGER :: unitnb
 
@@ -1491,6 +1494,47 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
     END DO
   END DO
 
+  !debug
+  if (3 .eq. 4) then
+    !== Read Hybridization function from file ==
+    !reset previous hybridization
+    write(*,*) "Warning: About to read Hybridization from file!"
+    DO iflavor = 1, flavors             
+      DO iflavor2 = 1, flavors          
+        DO itau=1,samples+1             
+          F(itau,iflavor,iflavor2) = czero
+        END DO
+      END DO
+    END DO  
+
+   if (op%rank .eq. 0 ) then
+     ABI_MALLOC(x_r,(op%samples+1,flavors,flavors))
+     ABI_MALLOC(x_i,(op%samples+1,flavors,flavors))     
+     open(unit=735,file='Hybridization.dat',status='old',form='formatted',action='read',iostat=ioerr)
+
+     read(735, '(a)') dummy
+
+     do itau=1, op%samples+1
+        read(735, '(2x,393(e25.17e3,2x))') tautemp, &
+                & ((x_r(itau,iflavor,iflavor2), x_i(itau,iflavor,iflavor2), iflavor=1, flavors), iflavor2=1, flavors)
+     end do
+     
+     close(735)
+
+     ! Now assign to F array (reverse the sign flip and time ordering)
+     do itau=1, op%samples+1
+        do iflavor=1, flavors
+           do iflavor2=1, flavors
+              F(op%samples+2-itau, iflavor, iflavor2) = &
+                      CMPLX(-x_r(itau,iflavor,iflavor2), -x_i(itau,iflavor,iflavor2), kind=8)
+           enddo
+        enddo
+     enddo
+   ABI_FREE(x_r)
+   ABI_FREE(x_i)  
+   endif  
+  end if ! end reading F from file
+
   !== Write Hybridization function in file ==
   If (Iatom .lt. 10) then
      write(atomnb,'("0",i1)') Iatom
@@ -1507,6 +1551,8 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
     enddo
     close(735)
   ENDIF
+
+
   !   call xmpi_barrier(op%MY_COMM)
   !write(6,*) "QQQQ3"
   FREE(Gomega_tmp)
@@ -3714,19 +3760,19 @@ SUBROUTINE CtqmcoffdiagComplex_getGreen(op, Gtau, Gw)
      !!write(6,*) "size gw",SIZE(Gw,DIM=2) ,flavors+1 
     IF ( SIZE(Gw,DIM=3) .EQ. flavors+1 ) THEN
      ! CALL GreenHyboffdiag_forFourier(op%Greens, Gomega=Gw, omega=Gw(:,op%flavors,op%flavors+1))
-      CALL GreenHyboffdiagComplex_forFourier(op%Greens, Gomega=Gw, omega=Gw(:,op%flavors,op%flavors+1))
+      CALL GreenHyboffdiagComplex_forFourierComplex(op%Greens, Gomega=Gw, omega=Gw(:,op%flavors,op%flavors+1))
       !write(6,*) "1"
       !IF ( op%rank .EQ. 0 ) write(20,*) Gw(:,iflavor1)
     ELSE IF ( SIZE(Gw,DIM=3) .EQ. flavors ) THEN  
-      CALL GreenHyboffdiagComplex_forFourier(op%Greens,Gomega=Gw)
+      CALL GreenHyboffdiagComplex_forFourierComplex(op%Greens,Gomega=Gw)
       !write(6,*) "2"
     ELSE
       CALL WARNALL("CtqmcoffdiagComplex_getGreen : Gw is not valid                    ")
-      CALL GreenHyboffdiagComplex_forFourier(op%Greens,Wmax=op%Wmax)
+      CALL GreenHyboffdiagComplex_forFourierComplex(op%Greens,Wmax=op%Wmax)
       !write(6,*) "3"
     END IF
   ELSE
-    CALL GreenHyboffdiagComplex_forFourier(op%Greens,Wmax=op%Wmax)
+    CALL GreenHyboffdiagComplex_forFourierComplex(op%Greens,Wmax=op%Wmax)
   END IF
 !  ============== write Gomega_nd.dat
 !================================================
