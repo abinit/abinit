@@ -527,7 +527,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! Initialize the object used to read DeltaVscf
  if (use_dvdb) then
-   call dvdb%init(dvdb_filepath, comm)
+   call dvdb%init(dvdb_filepath, dtset%gpu_option, comm)
    ABI_CHECK(dvdb%has_fields("pot1", msg), sjoin(dvdb_filepath, msg))
 
    ! DVDB cryst comes from DPPT --> no time-reversal if q /= 0
@@ -590,7 +590,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  if (use_drhodb) then
    ! Store DRHODB as a DVDB object
-   call drhodb%init(drhodb_filepath, comm)
+   call drhodb%init(drhodb_filepath, dtset%gpu_option, comm)
    ABI_CHECK(drhodb%has_fields("den1", msg), sjoin(drhodb_filepath, msg))
 
    ! DVDB cryst comes from DPPT --> no time-reversal if q /= 0
