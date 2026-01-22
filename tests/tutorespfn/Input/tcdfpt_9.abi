@@ -1,0 +1,27 @@
+tcdfpt_9.ddb.out
+MnF2 
+4
+tcdfpt_7o_DS2_DDB
+tcdfpt_7o_DS3_DDB
+tcdfpt_7o_DS4_DDB
+tcdfpt_7o_DS5_DDB
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain =  tcdfpt_7.abi, tcdfpt_8.abi, tcdfpt_9.abi, tcdfpt_10.abi
+#%% [files]
+#%% files_to_test =
+#%%   tcdfpt_9.ddb.out, tolnlines=  0, tolabs=  1.143e-09, tolrel=  3.000e-09, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = DFPT
+#%% description =  Input file for mrgddb of 2nd and 3rd (Berry Curvs.) derivatives of ETOT 
+#%% topics = DFPT
+#%%<END TEST_INFO>
+

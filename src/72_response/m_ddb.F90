@@ -1035,6 +1035,8 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,o
  end if
 
  !Magnetic susceptibility
+ if (option==0) fac=-ucvol
+ if (option==1) fac=-one/ucvol
  if (optgb==1) then
    iblok=0
    rfphon(:)=0

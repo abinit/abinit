@@ -527,25 +527,27 @@ contains
  end do
 
  write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' )  ndim*3
- write(zfield_unit,*) ' '
- write(zfield_unit,*) '#  Real part of clamped-ion local Zeeman fields induced by electric field (at. units)'
- write(msg,'(a,a)') ch10,&
-&           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
- call wrtout(zfield_unit,msg,'COLL')
- do iw=1,nomega
-   write(msg,pfmt) omega(iw), ((real(zfield(i,(natom+1)*3+j,iw)),j=1,3),i=1,ndim)
+ if (qeq0) then
+   write(zfield_unit,*) ' '
+   write(zfield_unit,*) '#  Real part of clamped-ion local Zeeman fields induced by electric field (at. units)'
+   write(msg,'(a,a)') ch10,&
+  &           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
    call wrtout(zfield_unit,msg,'COLL')
- end do
-
- write(zfield_unit,*) ' '
- write(zfield_unit,*) '#  Imag part of clamped-ion local Zeeman fields induced by electric field (at. units)'
- write(msg,'(a,a)') ch10,&
-&           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
- call wrtout(zfield_unit,msg,'COLL')
- do iw=1,nomega
-   write(msg,pfmt) omega(iw), ((aimag(zfield(i,(natom+1)*3+j,iw)),j=1,3),i=1,ndim)
+   do iw=1,nomega
+     write(msg,pfmt) omega(iw), ((real(zfield(i,(natom+1)*3+j,iw)),j=1,3),i=1,ndim)
+     call wrtout(zfield_unit,msg,'COLL')
+   end do
+  
+   write(zfield_unit,*) ' '
+   write(zfield_unit,*) '#  Imag part of clamped-ion local Zeeman fields induced by electric field (at. units)'
+   write(msg,'(a,a)') ch10,&
+  &           ' # At  hw     Z_11     Z_12      Z_13    ...     Z_21     Z_22     ...'
    call wrtout(zfield_unit,msg,'COLL')
- end do
+   do iw=1,nomega
+     write(msg,pfmt) omega(iw), ((aimag(zfield(i,(natom+1)*3+j,iw)),j=1,3),i=1,ndim)
+     call wrtout(zfield_unit,msg,'COLL')
+   end do
+ end if
 
  write(zfield_unit,*) ' '
  write(zfield_unit,*) '#  Real part of clamped-ion local Zeeman fields induced by macroscopic Zeeman field (at. units)'
@@ -603,53 +605,55 @@ contains
  end do
 
  write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*3
- write(mmom_unit,*) ' '
- write(mmom_unit,*) '#  Real part of the clamped-ion local magnetic moments induced by an electric field (at. units)'
- write(msg,'(a,a,a)') ch10,&
-&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
-&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
- call wrtout(mmom_unit,msg,'COLL')
- do iw=1,nomega
-    write(msg,pfmt) &
- &  omega(iw), ((real(ci_localpha(i,j,iw)),j=1,3),i=1,ndim)
-    call wrtout(mmom_unit,msg,'COLL')
- end do
+ if (qeq0) then
+   write(mmom_unit,*) ' '
+   write(mmom_unit,*) '#  Real part of the clamped-ion local magnetic moments induced by an electric field (at. units)'
+   write(msg,'(a,a,a)') ch10,&
+  &           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+  &           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
+   call wrtout(mmom_unit,msg,'COLL')
+   do iw=1,nomega
+      write(msg,pfmt) &
+   &  omega(iw), ((real(ci_localpha(i,j,iw)),j=1,3),i=1,ndim)
+      call wrtout(mmom_unit,msg,'COLL')
+   end do
+  
+   write(mmom_unit,*) ' '
+   write(mmom_unit,*) '#  Imaginary part of the clamped-ion local magnetic moments induced by an electric field (at. units)'
+   write(msg,'(a,a,a)') ch10,&
+  &           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+  &           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
+   call wrtout(mmom_unit,msg,'COLL')
+   do iw=1,nomega
+      write(msg,pfmt) &
+   &  omega(iw), ((aimag(ci_localpha(i,j,iw)),j=1,3),i=1,ndim)
+      call wrtout(mmom_unit,msg,'COLL')
+   end do
 
- write(mmom_unit,*) ' '
- write(mmom_unit,*) '#  Imaginary part of the clamped-ion local magnetic moments induced by an electric field (at. units)'
- write(msg,'(a,a,a)') ch10,&
-&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
-&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
- call wrtout(mmom_unit,msg,'COLL')
- do iw=1,nomega
-    write(msg,pfmt) &
- &  omega(iw), ((aimag(ci_localpha(i,j,iw)),j=1,3),i=1,ndim)
-    call wrtout(mmom_unit,msg,'COLL')
- end do
+   write(mmom_unit,*) ' '
+   write(mmom_unit,*) '#  Real part of relaxed-ion local magnetic moments induced by an electric field (at. units)'
+   write(msg,'(a,a,a)') ch10,&
+&             ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+&             '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
+   call wrtout(mmom_unit,msg,'COLL')
+   do iw=1,nomega
+      write(msg,pfmt) &
+   &  omega(iw), ((real(ci_localpha(i,j,iw)+lm_localpha(i,j,iw)),j=1,3),i=1,ndim)
+      call wrtout(mmom_unit,msg,'COLL')
+   end do
 
- write(mmom_unit,*) ' '
- write(mmom_unit,*) '#  Real part of relaxed-ion local magnetic moments induced by an electric field (at. units)'
- write(msg,'(a,a,a)') ch10,&
-&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
-&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
- call wrtout(mmom_unit,msg,'COLL')
- do iw=1,nomega
-    write(msg,pfmt) &
- &  omega(iw), ((real(ci_localpha(i,j,iw)+lm_localpha(i,j,iw)),j=1,3),i=1,ndim)
-    call wrtout(mmom_unit,msg,'COLL')
- end do
-
- write(mmom_unit,*) ' '
- write(mmom_unit,*) '#  Imaginary part of relaxed-ion local magnetic moments induced by an electric field (at. units)'
- write(msg,'(a,a,a)') ch10,&
-&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
-&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
- call wrtout(mmom_unit,msg,'COLL')
- do iw=1,nomega
-    write(msg,pfmt) &
- &  omega(iw), ((aimag(ci_localpha(i,j,iw)+lm_localpha(i,j,iw)),j=1,3),i=1,ndim)
-    call wrtout(mmom_unit,msg,'COLL')
- end do
+   write(mmom_unit,*) ' '
+   write(mmom_unit,*) '#  Imaginary part of relaxed-ion local magnetic moments induced by an electric field (at. units)'
+   write(msg,'(a,a,a)') ch10,&
+&             ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+&             '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
+   call wrtout(mmom_unit,msg,'COLL')
+   do iw=1,nomega
+      write(msg,pfmt) &
+   &  omega(iw), ((aimag(ci_localpha(i,j,iw)+lm_localpha(i,j,iw)),j=1,3),i=1,ndim)
+      call wrtout(mmom_unit,msg,'COLL')
+   end do
+ end if
 
  write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*3
  write(mmom_unit,*) ' '
@@ -703,304 +707,310 @@ contains
  close(mmom_unit)
 
 !Dielectric susceptibility
- diel_filename=trim(outfilename_radix)//"_DIELTENS"
- if (open_file(diel_filename, msg, newunit=diel_unit) /= 0) then
-   ABI_ERROR(msg)
- end if
-
- if (mpopt==1) then
-   call wrtout([ab_out,std_out,diel_unit], '#  Fixed-spin dielectric tensor calculated and interpolated by ANADDB')
- else if (mpopt==2) then
-   call wrtout([ab_out,std_out,diel_unit], '#  Relaxed-spin dielectric tensor calculated and interpolated by ANADDB')
- else
-   write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
-   ABI_ERROR(msg)
- end if
- 
- call wrtout([ab_out,std_out,diel_unit], ' ')
- write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
-
- call wrtout([ab_out,std_out,diel_unit], '#  Real part of clamped-ion dielectric tensor')
- write(msg,'(a,a)') ch10,&
-&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
- call wrtout([ab_out,std_out,diel_unit],msg,'COLL')
- do iw=1,min(nomega,3) 
-   write(msg,pfmt) &
- & omega(iw), ((real(ci_epsilon(i,j,iw)),j=1,3),i=1,3)
-   call wrtout([ab_out,std_out],msg,'COLL')
- end do
- call wrtout([ab_out,std_out],'...')
- do iw=1,nomega
-   write(msg,pfmt) &
- & omega(iw), ((real(ci_epsilon(i,j,iw)),j=1,3),i=1,3)
-   call wrtout(diel_unit,msg,'COLL')
- end do
-
- call wrtout([ab_out,std_out,diel_unit], ' ')
- call wrtout([ab_out,std_out,diel_unit], '#  Imaginary part of clamped-ion dielectric tensor')
- write(msg,'(a,a)') ch10,&
-&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
- call wrtout([ab_out,std_out,diel_unit],msg,'COLL')
- do iw=1,min(nomega,3) 
-   write(msg,pfmt) &
- & omega(iw), ((aimag(ci_epsilon(i,j,iw)),j=1,3),i=1,3)
-   call wrtout([ab_out,std_out],msg,'COLL')
- end do
- call wrtout([ab_out,std_out],'...')
- do iw=1,nomega
-    write(msg,pfmt) &
- &  omega(iw), ((aimag(ci_epsilon(i,j,iw)),j=1,3),i=1,3)
-    call wrtout(diel_unit,msg,'COLL')
- end do
-
- call wrtout([ab_out,std_out,diel_unit], ' ')
- call wrtout([ab_out,std_out,diel_unit], '#  Real part of relaxed-ion dielectric tensor ')
- write(msg,'(a,a)') ch10,&
-&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
- call wrtout([ab_out,std_out,diel_unit],msg,'COLL')
- do iw=1,min(nomega,3) 
-   write(msg,pfmt) &
- & omega(iw), ((real(lm_epsilon(i,j,iw)+ci_epsilon(i,j,iw)),j=1,3),i=1,3)
-   call wrtout([ab_out,std_out],msg,'COLL')
- end do
- call wrtout([ab_out,std_out],'...')
- do iw=1,nomega
-   write(msg,pfmt) &
- & omega(iw), ((real(lm_epsilon(i,j,iw)+ci_epsilon(i,j,iw)),j=1,3),i=1,3)
-   call wrtout(diel_unit,msg,'COLL')
- end do
-
- call wrtout([ab_out,std_out,diel_unit], ' ')
- call wrtout([ab_out,std_out,diel_unit], '#  Imaginary part of relaxed-ion dielectric tensor')
- write(msg,'(a,a)') ch10,&
-&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
- call wrtout([ab_out,std_out,diel_unit],msg,'COLL')
- do iw=1,min(nomega,3) 
-   write(msg,pfmt) &
- & omega(iw), ((aimag(lm_epsilon(i,j,iw)+ci_epsilon(i,j,iw)),j=1,3),i=1,3)
-   call wrtout([ab_out,std_out],msg,'COLL')
- end do
- call wrtout([ab_out,std_out],'...')
- do iw=1,nomega
-    write(msg,pfmt) &
- &  omega(iw), ((aimag(lm_epsilon(i,j,iw)+ci_epsilon(i,j,iw)),j=1,3),i=1,3)
-    call wrtout(diel_unit,msg,'COLL')
- end do
- write(diel_unit,*) ' '
-
- write(diel_unit,*) '#'
- write(diel_unit,*) '# Phonon modes contribution to dielectric tensor' 
- write(diel_unit,*) '#'
-
- do imode= 1, 3*natom
-   write(diel_unit,*) ' '
-   write(diel_unit,*) '#  Real part of dielectric tensor due to phonon mode:', imode
+ if (qeq0) then
+   diel_filename=trim(outfilename_radix)//"_DIELTENS"
+   if (open_file(diel_filename, msg, newunit=diel_unit) /= 0) then
+     ABI_ERROR(msg)
+   end if
+  
+   if (mpopt==1) then
+     call wrtout([ab_out,std_out,diel_unit], '#  Fixed-spin dielectric tensor calculated and interpolated by ANADDB')
+   else if (mpopt==2) then
+     call wrtout([ab_out,std_out,diel_unit], '#  Relaxed-spin dielectric tensor calculated and interpolated by ANADDB')
+   else
+     write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
+     ABI_ERROR(msg)
+   end if
+   
+   call wrtout([ab_out,std_out,diel_unit], ' ')
+   write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
+  
+   call wrtout([ab_out,std_out,diel_unit], '#  Real part of clamped-ion dielectric tensor')
    write(msg,'(a,a)') ch10,&
- &           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
-   call wrtout(diel_unit,msg,'COLL')
+  &           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
+   call wrtout([ab_out,std_out,diel_unit],msg,'COLL')
+   do iw=1,min(nomega,3) 
+     write(msg,pfmt) &
+   & omega(iw), ((real(ci_epsilon(i,j,iw)),j=1,3),i=1,3)
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do
+   call wrtout([ab_out,std_out],'...')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), ((real(ci_epsilon(i,j,iw)),j=1,3),i=1,3)
+     call wrtout(diel_unit,msg,'COLL')
+   end do
+  
+   call wrtout([ab_out,std_out,diel_unit], ' ')
+   call wrtout([ab_out,std_out,diel_unit], '#  Imaginary part of clamped-ion dielectric tensor')
+   write(msg,'(a,a)') ch10,&
+  &           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
+   call wrtout([ab_out,std_out,diel_unit],msg,'COLL')
+   do iw=1,min(nomega,3) 
+     write(msg,pfmt) &
+   & omega(iw), ((aimag(ci_epsilon(i,j,iw)),j=1,3),i=1,3)
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do
+   call wrtout([ab_out,std_out],'...')
    do iw=1,nomega
       write(msg,pfmt) &
-   &  omega(iw), ((real(lm_epsilon_nm(i,j,imode,iw)),j=1,3),i=1,3)
+   &  omega(iw), ((aimag(ci_epsilon(i,j,iw)),j=1,3),i=1,3)
+      call wrtout(diel_unit,msg,'COLL')
+   end do
+  
+   call wrtout([ab_out,std_out,diel_unit], ' ')
+   call wrtout([ab_out,std_out,diel_unit], '#  Real part of relaxed-ion dielectric tensor ')
+   write(msg,'(a,a)') ch10,&
+  &           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
+   call wrtout([ab_out,std_out,diel_unit],msg,'COLL')
+   do iw=1,min(nomega,3) 
+     write(msg,pfmt) &
+   & omega(iw), ((real(lm_epsilon(i,j,iw)+ci_epsilon(i,j,iw)),j=1,3),i=1,3)
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do
+   call wrtout([ab_out,std_out],'...')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), ((real(lm_epsilon(i,j,iw)+ci_epsilon(i,j,iw)),j=1,3),i=1,3)
+     call wrtout(diel_unit,msg,'COLL')
+   end do
+  
+   call wrtout([ab_out,std_out,diel_unit], ' ')
+   call wrtout([ab_out,std_out,diel_unit], '#  Imaginary part of relaxed-ion dielectric tensor')
+   write(msg,'(a,a)') ch10,&
+  &           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
+   call wrtout([ab_out,std_out,diel_unit],msg,'COLL')
+   do iw=1,min(nomega,3) 
+     write(msg,pfmt) &
+   & omega(iw), ((aimag(lm_epsilon(i,j,iw)+ci_epsilon(i,j,iw)),j=1,3),i=1,3)
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do
+   call wrtout([ab_out,std_out],'...')
+   do iw=1,nomega
+      write(msg,pfmt) &
+   &  omega(iw), ((aimag(lm_epsilon(i,j,iw)+ci_epsilon(i,j,iw)),j=1,3),i=1,3)
       call wrtout(diel_unit,msg,'COLL')
    end do
    write(diel_unit,*) ' '
-   write(diel_unit,*) '#  Imaginary part of dielectric tensor due to phonon mode:', imode
-   write(msg,'(a,a)') ch10,&
- &           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
-   call wrtout(diel_unit,msg,'COLL')
-   do iw=1,nomega
-      write(msg,pfmt) &
-   &  omega(iw), ((aimag(lm_epsilon_nm(i,j,imode,iw)),j=1,3),i=1,3)
-      call wrtout(diel_unit,msg,'COLL')
-   end do
- end do 
+  
+   write(diel_unit,*) '#'
+   write(diel_unit,*) '# Phonon modes contribution to dielectric tensor' 
+   write(diel_unit,*) '#'
+  
+   do imode= 1, 3*natom
+     write(diel_unit,*) ' '
+     write(diel_unit,*) '#  Real part of dielectric tensor due to phonon mode:', imode
+     write(msg,'(a,a)') ch10,&
+   &           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
+     call wrtout(diel_unit,msg,'COLL')
+     do iw=1,nomega
+        write(msg,pfmt) &
+     &  omega(iw), ((real(lm_epsilon_nm(i,j,imode,iw)),j=1,3),i=1,3)
+        call wrtout(diel_unit,msg,'COLL')
+     end do
+     write(diel_unit,*) ' '
+     write(diel_unit,*) '#  Imaginary part of dielectric tensor due to phonon mode:', imode
+     write(msg,'(a,a)') ch10,&
+   &           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
+     call wrtout(diel_unit,msg,'COLL')
+     do iw=1,nomega
+        write(msg,pfmt) &
+     &  omega(iw), ((aimag(lm_epsilon_nm(i,j,imode,iw)),j=1,3),i=1,3)
+        call wrtout(diel_unit,msg,'COLL')
+     end do
+   end do 
 
- close(diel_unit)
+   close(diel_unit)
+ end if
 
 !Magnetoelectric tensor mu_0 dM/dE
- alpha_filename=trim(outfilename_radix)//"_MAGNETOELTENS_dMdE"
- if (open_file(alpha_filename, msg, newunit=alpha_unit) /= 0) then
-   ABI_ERROR(msg)
- end if
-
- call wrtout([ab_out,std_out], ' ')
- if (mpopt==1) then
-   call wrtout([ab_out,std_out,alpha_unit], '#  Fixed-spin magnetoelectric tensor calculated and interpolated by ANADDB')
- else if (mpopt==2) then
-   call wrtout([ab_out,std_out,alpha_unit],'#  Relaxed-spin magnetoelectric tensor calculated and interpolated by ANADDB')
- else
-   write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
-   ABI_ERROR(msg)
- end if
- call wrtout([ab_out,std_out,alpha_unit],'#  (Magnetization induced by electric field: mu_0 dM_a/dE_b)')
- 
- call wrtout([ab_out,std_out,alpha_unit],' ')
- write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
-
- convfac= mu_0_SI *  e_Cb * BField_Tesla / Bohr_meter**2 * 1.d12
-
-  call wrtout([ab_out,std_out,alpha_unit],'#  Real part of clamped-ion magnetoelectric tensor (ps/m)')
- write(msg,'(a,a)') ch10,&
-&           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
- call wrtout([ab_out,std_out,alpha_unit],msg,'COLL')
- do iw=1,min(nomega,3) 
-   write(msg,pfmt) &
- & omega(iw), ((real(ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
-   call wrtout([ab_out,std_out],msg,'COLL')
- end do 
- call wrtout([ab_out,std_out],'...')
- do iw=1,nomega
-   write(msg,pfmt) &
- & omega(iw), ((real(ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
-   call wrtout(alpha_unit,msg,'COLL')
- end do
-
- call wrtout([ab_out,std_out,alpha_unit], ' ')
- call wrtout([ab_out,std_out,alpha_unit], '#  Imaginary part of clamped-ion magnetoelectric tensor (ps/m)')
- write(msg,'(a,a)') ch10,&
-&           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
- call wrtout([ab_out,std_out,alpha_unit],msg,'COLL')
- do iw=1,min(nomega,3) 
-   write(msg,pfmt) &
- & omega(iw), ((aimag(ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
-   call wrtout([ab_out,std_out],msg,'COLL')
- end do 
- call wrtout([ab_out,std_out],'...')
- do iw=1,nomega
-    write(msg,pfmt) &
- &  omega(iw), ((aimag(ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
-    call wrtout(alpha_unit,msg,'COLL')
- end do
-
- call wrtout([ab_out,std_out,alpha_unit],' ')
- call wrtout([ab_out,std_out,alpha_unit],'#  Real part of relaxed-ion magnetoelectric tensor (ps/m)')
- write(msg,'(a,a)') ch10,&
-&           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
- call wrtout([ab_out,std_out,alpha_unit],msg,'COLL')
- do iw=1,min(nomega,3) 
-   write(msg,pfmt) &
- & omega(iw), ((real(lm_alpha(i,j,iw)+ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
-   call wrtout([ab_out,std_out],msg,'COLL')
- end do 
- call wrtout([ab_out,std_out],'...')
- do iw=1,nomega
-    write(msg,pfmt) &
- &  omega(iw), ((real(lm_alpha(i,j,iw)+ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
-    call wrtout(alpha_unit,msg,'COLL')
- end do
-
- call wrtout([ab_out,std_out,alpha_unit],' ')
- call wrtout([ab_out,std_out,alpha_unit],'#  Imaginary part of relaxed-ion magnetoelectric tensor (ps/m)')
- write(msg,'(a,a)') ch10,&
-&           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
- call wrtout([ab_out,std_out,alpha_unit],msg,'COLL')
- do iw=1,min(nomega,3) 
-   write(msg,pfmt) &
- & omega(iw), ((aimag(lm_alpha(i,j,iw)+ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
-   call wrtout([ab_out,std_out],msg,'COLL')
- end do 
- call wrtout([ab_out,std_out],'...')
- do iw=1,nomega
-    write(msg,pfmt) &
- &  omega(iw), ((aimag(lm_alpha(i,j,iw)+ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
-    call wrtout(alpha_unit,msg,'COLL')
- end do
- write(alpha_unit,*) ''
-
- write(alpha_unit,*) '#'
- write(alpha_unit,*) '# Phonon modes contribution to magnetoelectric tensor' 
- write(alpha_unit,*) '#'
-
- do imode= 1, 3*natom
-   write(alpha_unit,*) ' '
-   write(alpha_unit,*) '#  Real part of magnetoelectric tensor (ps/m) due to phonon mode:', imode
+ if (qeq0) then
+   alpha_filename=trim(outfilename_radix)//"_MAGNETOELTENS_dMdE"
+   if (open_file(alpha_filename, msg, newunit=alpha_unit) /= 0) then
+     ABI_ERROR(msg)
+   end if
+  
+   call wrtout([ab_out,std_out], ' ')
+   if (mpopt==1) then
+     call wrtout([ab_out,std_out,alpha_unit], '#  Fixed-spin magnetoelectric tensor calculated and interpolated by ANADDB')
+   else if (mpopt==2) then
+     call wrtout([ab_out,std_out,alpha_unit],'#  Relaxed-spin magnetoelectric tensor calculated and interpolated by ANADDB')
+   else
+     write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
+     ABI_ERROR(msg)
+   end if
+   call wrtout([ab_out,std_out,alpha_unit],'#  (Magnetization induced by electric field: mu_0 dM_a/dE_b)')
+   
+   call wrtout([ab_out,std_out,alpha_unit],' ')
+   write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
+  
+   convfac= mu_0_SI *  e_Cb * BField_Tesla / Bohr_meter**2 * 1.d12
+  
+    call wrtout([ab_out,std_out,alpha_unit],'#  Real part of clamped-ion magnetoelectric tensor (ps/m)')
    write(msg,'(a,a)') ch10,&
- &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
-   call wrtout(alpha_unit,msg,'COLL')
+  &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
+   call wrtout([ab_out,std_out,alpha_unit],msg,'COLL')
+   do iw=1,min(nomega,3) 
+     write(msg,pfmt) &
+   & omega(iw), ((real(ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do 
+   call wrtout([ab_out,std_out],'...')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), ((real(ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
+     call wrtout(alpha_unit,msg,'COLL')
+   end do
+  
+   call wrtout([ab_out,std_out,alpha_unit], ' ')
+   call wrtout([ab_out,std_out,alpha_unit], '#  Imaginary part of clamped-ion magnetoelectric tensor (ps/m)')
+   write(msg,'(a,a)') ch10,&
+  &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
+   call wrtout([ab_out,std_out,alpha_unit],msg,'COLL')
+   do iw=1,min(nomega,3) 
+     write(msg,pfmt) &
+   & omega(iw), ((aimag(ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do 
+   call wrtout([ab_out,std_out],'...')
    do iw=1,nomega
       write(msg,pfmt) &
-   &  omega(iw), ((real(lm_alpha_nm(i,j,imode,iw))*convfac,j=1,3),i=1,3)
+   &  omega(iw), ((aimag(ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
       call wrtout(alpha_unit,msg,'COLL')
    end do
-   write(alpha_unit,*) ' '
-   write(alpha_unit,*) '#  Imaginary part of magnetoelectric tensor (ps/m) due to phonon mode:', imode
+  
+   call wrtout([ab_out,std_out,alpha_unit],' ')
+   call wrtout([ab_out,std_out,alpha_unit],'#  Real part of relaxed-ion magnetoelectric tensor (ps/m)')
    write(msg,'(a,a)') ch10,&
- &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
-   call wrtout(alpha_unit,msg,'COLL')
+  &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
+   call wrtout([ab_out,std_out,alpha_unit],msg,'COLL')
+   do iw=1,min(nomega,3) 
+     write(msg,pfmt) &
+   & omega(iw), ((real(lm_alpha(i,j,iw)+ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do 
+   call wrtout([ab_out,std_out],'...')
    do iw=1,nomega
       write(msg,pfmt) &
-   &  omega(iw), ((aimag(lm_alpha_nm(i,j,imode,iw))*convfac,j=1,3),i=1,3)
+   &  omega(iw), ((real(lm_alpha(i,j,iw)+ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
       call wrtout(alpha_unit,msg,'COLL')
    end do
- end do 
-
- close(alpha_unit)
+  
+   call wrtout([ab_out,std_out,alpha_unit],' ')
+   call wrtout([ab_out,std_out,alpha_unit],'#  Imaginary part of relaxed-ion magnetoelectric tensor (ps/m)')
+   write(msg,'(a,a)') ch10,&
+  &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
+   call wrtout([ab_out,std_out,alpha_unit],msg,'COLL')
+   do iw=1,min(nomega,3) 
+     write(msg,pfmt) &
+   & omega(iw), ((aimag(lm_alpha(i,j,iw)+ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
+     call wrtout([ab_out,std_out],msg,'COLL')
+   end do 
+   call wrtout([ab_out,std_out],'...')
+   do iw=1,nomega
+      write(msg,pfmt) &
+   &  omega(iw), ((aimag(lm_alpha(i,j,iw)+ci_alpha(i,j,iw))*convfac,j=1,3),i=1,3)
+      call wrtout(alpha_unit,msg,'COLL')
+   end do
+   write(alpha_unit,*) ''
+  
+   write(alpha_unit,*) '#'
+   write(alpha_unit,*) '# Phonon modes contribution to magnetoelectric tensor' 
+   write(alpha_unit,*) '#'
+  
+   do imode= 1, 3*natom
+     write(alpha_unit,*) ' '
+     write(alpha_unit,*) '#  Real part of magnetoelectric tensor (ps/m) due to phonon mode:', imode
+     write(msg,'(a,a)') ch10,&
+   &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
+     call wrtout(alpha_unit,msg,'COLL')
+     do iw=1,nomega
+        write(msg,pfmt) &
+     &  omega(iw), ((real(lm_alpha_nm(i,j,imode,iw))*convfac,j=1,3),i=1,3)
+        call wrtout(alpha_unit,msg,'COLL')
+     end do
+     write(alpha_unit,*) ' '
+     write(alpha_unit,*) '#  Imaginary part of magnetoelectric tensor (ps/m) due to phonon mode:', imode
+     write(msg,'(a,a)') ch10,&
+   &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
+     call wrtout(alpha_unit,msg,'COLL')
+     do iw=1,nomega
+        write(msg,pfmt) &
+     &  omega(iw), ((aimag(lm_alpha_nm(i,j,imode,iw))*convfac,j=1,3),i=1,3)
+        call wrtout(alpha_unit,msg,'COLL')
+     end do
+   end do 
+  
+   close(alpha_unit)
+ end if
 
 !Magnetoelectric tensor dP/dH
- alpha_hc_filename=trim(outfilename_radix)//"_MAGNETOELTENS_dPdH"
- if (open_file(alpha_hc_filename, msg, newunit=alpha_hc_unit) /= 0) then
-   ABI_ERROR(msg)
+ if (qeq0) then
+   alpha_hc_filename=trim(outfilename_radix)//"_MAGNETOELTENS_dPdH"
+   if (open_file(alpha_hc_filename, msg, newunit=alpha_hc_unit) /= 0) then
+     ABI_ERROR(msg)
+   end if
+  
+   if (mpopt==1) then
+     write(alpha_hc_unit,*) '#  Fixed-spin magnetoelectric tensor calculated and interpolated by ANADDB'
+   else if (mpopt==2) then
+     write(alpha_hc_unit,*) '#  Relaxed-spin magnetoelectric tensor calculated and interpolated by ANADDB'
+   else
+     write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
+     ABI_ERROR(msg)
+   end if
+   write(alpha_hc_unit,*) '#  (Polarization induced by Zeeman field strength: dP_a/dH_b)'
+   
+   write(alpha_hc_unit,*) '#'
+   write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
+  
+   convfac= mu_0_SI *  e_Cb * BField_Tesla / Bohr_meter**2 * 1.d12
+  
+   write(alpha_hc_unit,*) '#  Real part of clamped-ion magnetoelectric tensor (ps/m)'
+   write(msg,'(a,a)') ch10,&
+  &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
+   call wrtout(alpha_hc_unit,msg,'COLL')
+   do iw=1,nomega
+      write(msg,pfmt) &
+   &  omega(iw), ((real(ci_alpha_hc(i,j,iw))*convfac,j=1,3),i=1,3)
+      call wrtout(diel_unit,msg,'COLL')
+   end do
+  
+   write(alpha_hc_unit,*) ' '
+   write(alpha_hc_unit,*) '#  Imaginary part of clamped-ion magnetoelectric tensor (ps/m)'
+   write(msg,'(a,a)') ch10,&
+  &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
+   call wrtout(alpha_hc_unit,msg,'COLL')
+   do iw=1,nomega
+      write(msg,pfmt) &
+   &  omega(iw), ((aimag(ci_alpha_hc(i,j,iw))*convfac,j=1,3),i=1,3)
+      call wrtout(alpha_hc_unit,msg,'COLL')
+   end do
+  
+   write(alpha_hc_unit,*) ' '
+   write(alpha_hc_unit,*) '#  Real part of relaxed-ion magnetoelectric tensor (ps/m)'
+   write(msg,'(a,a)') ch10,&
+  &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
+   call wrtout(alpha_hc_unit,msg,'COLL')
+   do iw=1,nomega
+      write(msg,pfmt) &
+   &  omega(iw), ((real(lm_alpha_hc(i,j,iw)+ci_alpha_hc(i,j,iw))*convfac,j=1,3),i=1,3)
+      call wrtout(alpha_hc_unit,msg,'COLL')
+   end do
+  
+   write(alpha_hc_unit,*) ' '
+   write(alpha_hc_unit,*) '#  Imaginary part of relaxed-ion magnetoelectric tensor (ps/m)'
+   write(msg,'(a,a)') ch10,&
+  &           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
+   call wrtout(alpha_hc_unit,msg,'COLL')
+   do iw=1,nomega
+      write(msg,pfmt) &
+   &  omega(iw), ((aimag(lm_alpha_hc(i,j,iw)+ci_alpha_hc(i,j,iw))*convfac,j=1,3),i=1,3)
+      call wrtout(alpha_hc_unit,msg,'COLL')
+   end do
+  
+   close(alpha_hc_unit)
  end if
-
- if (mpopt==1) then
-   write(alpha_hc_unit,*) '#  Fixed-spin magnetoelectric tensor calculated and interpolated by ANADDB'
- else if (mpopt==2) then
-   write(alpha_hc_unit,*) '#  Relaxed-spin magnetoelectric tensor calculated and interpolated by ANADDB'
- else
-   write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
-   ABI_ERROR(msg)
- end if
- write(alpha_hc_unit,*) '#  (Polarization induced by Zeeman field strength: dP_a/dH_b)'
- 
- write(alpha_hc_unit,*) '#'
- write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
-
- convfac= mu_0_SI *  e_Cb * BField_Tesla / Bohr_meter**2 * 1.d12
-
- write(alpha_hc_unit,*) '#  Real part of clamped-ion magnetoelectric tensor (ps/m)'
- write(msg,'(a,a)') ch10,&
-&           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
- call wrtout(alpha_hc_unit,msg,'COLL')
- do iw=1,nomega
-    write(msg,pfmt) &
- &  omega(iw), ((real(ci_alpha_hc(i,j,iw))*convfac,j=1,3),i=1,3)
-    call wrtout(diel_unit,msg,'COLL')
- end do
-
- write(alpha_hc_unit,*) ' '
- write(alpha_hc_unit,*) '#  Imaginary part of clamped-ion magnetoelectric tensor (ps/m)'
- write(msg,'(a,a)') ch10,&
-&           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
- call wrtout(alpha_hc_unit,msg,'COLL')
- do iw=1,nomega
-    write(msg,pfmt) &
- &  omega(iw), ((aimag(ci_alpha_hc(i,j,iw))*convfac,j=1,3),i=1,3)
-    call wrtout(alpha_hc_unit,msg,'COLL')
- end do
-
- write(alpha_hc_unit,*) ' '
- write(alpha_hc_unit,*) '#  Real part of relaxed-ion magnetoelectric tensor (ps/m)'
- write(msg,'(a,a)') ch10,&
-&           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
- call wrtout(alpha_hc_unit,msg,'COLL')
- do iw=1,nomega
-    write(msg,pfmt) &
- &  omega(iw), ((real(lm_alpha_hc(i,j,iw)+ci_alpha_hc(i,j,iw))*convfac,j=1,3),i=1,3)
-    call wrtout(alpha_hc_unit,msg,'COLL')
- end do
-
- write(alpha_hc_unit,*) ' '
- write(alpha_hc_unit,*) '#  Imaginary part of relaxed-ion magnetoelectric tensor (ps/m)'
- write(msg,'(a,a)') ch10,&
-&           ' # At  hw     alpha_11     alpha_12     ...     alpha_21     alpha_22     ...'
- call wrtout(alpha_hc_unit,msg,'COLL')
- do iw=1,nomega
-    write(msg,pfmt) &
- &  omega(iw), ((aimag(lm_alpha_hc(i,j,iw)+ci_alpha_hc(i,j,iw))*convfac,j=1,3),i=1,3)
-    call wrtout(alpha_hc_unit,msg,'COLL')
- end do
-
- close(alpha_hc_unit)
 
 !Magnetic susceptibility
  mmag_filename=trim(outfilename_radix)//"_MAGSUS"
@@ -1147,7 +1157,7 @@ contains
  close(phon_unit)
 
 !Phonon frequencies
- phon_filename=trim(outfilename_radix)//"_PHFRQ"
+ phon_filename=trim(outfilename_radix)//"_PHFRW"
  if (open_file(phon_filename, msg, newunit=phon_unit) /= 0) then
    ABI_ERROR(msg)
  end if
@@ -1214,33 +1224,35 @@ contains
    ABI_ERROR(msg)
  end if
 
- write(zeff_unit,*) '#'
- write(zeff_unit,*) '#  Electric Born effective charges calculated and interpolated by ANADDB'
- write(zeff_unit,*) '#'
-
- write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' ) 3 
- do imode= 1, 3*natom
-   write(zeff_unit,*) ' '
-   write(zeff_unit,'(a,i3)') '#  Real part of electric Born charge (at. units) induced by phonon mode:', imode
-   write(msg,'(a,a)') ch10,&
- &           ' # At  hw     Z^x_{n}     Z^y_{n}     Z^z_{n}'
-   call wrtout(zeff_unit,msg,'COLL')
-   do iw=1,nomega
-     write(msg,pfmt) &
-   & omega(iw), (real(modezeff(i,imode,iw)),i=1,3)
+ if (qeq0) then
+   write(zeff_unit,*) '#'
+   write(zeff_unit,*) '#  Electric and magnetic Born effective charges calculated and interpolated by ANADDB'
+   write(zeff_unit,*) '#'
+  
+   write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' ) 3 
+   do imode= 1, 3*natom
+     write(zeff_unit,*) ' '
+     write(zeff_unit,'(a,i3)') '#  Real part of electric Born charge (at. units) induced by phonon mode:', imode
+     write(msg,'(a,a)') ch10,&
+   &           ' # At  hw     Z^x_{n}     Z^y_{n}     Z^z_{n}'
      call wrtout(zeff_unit,msg,'COLL')
-   end do
-   write(zeff_unit,*) ' '
-   write(zeff_unit,'(a,i3)') '#  Imaginary part of electric Born charge (at. units) induced by phonon mode:', imode
-   write(msg,'(a,a)') ch10,&
- &           ' # At  hw     Z^x_{n}     Z^y_{n}     Z^z_{n}'
-   call wrtout(zeff_unit,msg,'COLL')
-   do iw=1,nomega
-     write(msg,pfmt) &
-   & omega(iw), (aimag(modezeff(i,imode,iw)),i=1,3)
+     do iw=1,nomega
+       write(msg,pfmt) &
+     & omega(iw), (real(modezeff(i,imode,iw)),i=1,3)
+       call wrtout(zeff_unit,msg,'COLL')
+     end do
+     write(zeff_unit,*) ' '
+     write(zeff_unit,'(a,i3)') '#  Imaginary part of electric Born charge (at. units) induced by phonon mode:', imode
+     write(msg,'(a,a)') ch10,&
+   &           ' # At  hw     Z^x_{n}     Z^y_{n}     Z^z_{n}'
      call wrtout(zeff_unit,msg,'COLL')
+     do iw=1,nomega
+       write(msg,pfmt) &
+     & omega(iw), (aimag(modezeff(i,imode,iw)),i=1,3)
+       call wrtout(zeff_unit,msg,'COLL')
+     end do
    end do
- end do
+ end if
 
  do imode= 1, 3*natom
    write(zeff_unit,*) ' '
