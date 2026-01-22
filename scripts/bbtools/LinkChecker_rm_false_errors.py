@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Copyright (C) 2010-2025 ABINIT Group (Jean-Michel Beuken)
+# Copyright (C) 2010-2026 ABINIT Group (Jean-Michel Beuken)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
