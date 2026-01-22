@@ -56,7 +56,7 @@ module m_gwpt
  use m_fftcore,        only : ngfft_seq, sphereboundary, print_ngfft
  use m_fft_mesh,       only : setmesh
  use m_cgtk,           only : cgtk_rotate, cgtk_change_gsphere
- use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm, fxphas_and_cmp
+ !use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm, fxphas_and_cmp
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_kg,             only : getph, mkkin
