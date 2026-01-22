@@ -34,7 +34,7 @@
 # developers/maintainers/change_year.sh developers/maintainers/suppress.sh scripts/*/*.sh scripts/*/*/*.sh shared/*/*.sh developers/maintainers/update_refs.sh 
 # developers/maintainers/change_year.sh abichecks/scripts/run-basic-tests.sh 
 # developers/maintainers/change_year.sh developers/various/*.sh developers/various/fixed_to_free doc/config/scripts/make* INSTALL 
-# developers/maintainers/change_year.sh tests/config/scripts/make-makefiles-tests tests/cpu/Refs/changeref scripts/configure/upgrade-build-config packages/debian/copyright 
+# developers/maintainers/change_year.sh tests/config/scripts/make-makefiles-tests tests/cpu/Refs/changeref packages/debian/copyright 
 # developers/maintainers/change_year.sh doc/tutorial/paw2_assets/tpaw2_*.abo*
 # 
 # Moreover, one should complement the present script with a search 
