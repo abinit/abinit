@@ -46,6 +46,7 @@ inp_files = [
     "t42.abi" ,  # test orbmag calculation using R2SCAN mGGA, nspinor 2, zora
     "t43.abi" ,  # test quadrupoles calculation with xcnlcc
     "t44.abi" ,  # test all zora input values on orbmag calculation
+    "t45.abi" ,  # test prtbbb together with ggtrcut variable
     "t61.abi" ,  # test total energy due to electron-phonon interaction: step 1 DFT+DFPT
     "t62.abi" ,  # test total energy due to electron-phonon interaction: step 2 quadrupole
     "t63.abi" ,  # test total energy due to electron-phonon interaction: step 3 merge DDB

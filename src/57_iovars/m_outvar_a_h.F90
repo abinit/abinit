@@ -1350,6 +1350,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%get1wf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'get1wf','INT',0)
+ 
+ dprarr(1,:)=dtsets(:)%ggtrcut
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ggtrcut','DPR',0)
 
  intarr(1,:)=dtsets(:)%goprecon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'goprecon','INT',0)
