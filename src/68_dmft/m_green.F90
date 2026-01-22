@@ -4417,7 +4417,7 @@ end subroutine local_ks_green
 !! Compute the high-frequency moments of the Green's function in KS space
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2025 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4609,7 +4609,7 @@ end subroutine compute_moments_ks
 !! Fermi level search)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2025 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
