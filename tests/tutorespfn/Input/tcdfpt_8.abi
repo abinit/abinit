@@ -1,27 +1,52 @@
-# Ground-state and ddk response funcion calculation for antiferromagnetic MnF2
-# (M. Royo, 12.12.2025)
+# Berry curvatures calculation in antiferromagnetic MnF2 (omega=0 and finite q).
+# (M. Royo, 22.01.2026)
 
    ndtset 2
+   jdtset 4 5 
 
-### 1) GROUND STATE
-   tolvrs1  1.0d-10   
-   spinat1  0.0 0.0  5.0     #Magnetism
-            0.0 0.0 -5.0
-            0.0 0.0  0.0
-            0.0 0.0  0.0
-            0.0 0.0  0.0
-            0.0 0.0  0.0
+outdata_prefix = "tcdfpt_7o"
 
-### 2) DDK
-  tolwfr2   1.0d-10 
-  rfelfd2   2       
-   rfdir2   1 1 1         
-    nqpt2   1
-     qpt2   0.0 0.0 0.0   
-  getwfk2   1            
-    iscf2  -3   
-                
-### GENERAL PARAMETERS
+## GENERAL PARAMETERS
+    nqpt   1
+     qpt   5.00000000E-01  5.00000000E-01  0.00000000E+00
+  getwfk   1            
+  get1wf   2
+
+optdriver  10
+  timdisp  1
+  tim1rev  0
+
+### 4) ADIABATIC DYNAMICS WITH MACROSCOPIC ZEEMAN
+  
+  d3e_pert1_magn4  1
+d3e_pert1_magdir4  1 1 1
+   d3e_pert1_dir4  1 1 1
+  d3e_pert1_phon4  1
+ d3e_pert1_atpol4  1 6
+
+  d3e_pert2_magn4  1
+d3e_pert2_magdir4  1 1 1
+   d3e_pert2_dir4  1 1 1
+  d3e_pert2_phon4  1
+ d3e_pert2_atpol4  1 6
+
+### 5) ADIABATIC DYNAMICS WITH LOCAL ZEEMAN
+  
+  d3e_pert1_magn5  2
+ d3e_pert1_magat5  1 2
+d3e_pert1_magdir5  1 1 0
+   d3e_pert1_dir5  1 1 1
+  d3e_pert1_phon5  1
+ d3e_pert1_atpol5  1 6
+
+  d3e_pert2_magn5  2
+ d3e_pert2_magat5  1 2
+d3e_pert2_magdir5  1 1 0
+   d3e_pert2_dir5  1 1 1
+  d3e_pert2_phon5  1
+ d3e_pert2_atpol5  1 6
+
+### MORE GENERAL PARAMETERS
 
 #Definition of the atom types
 ntypat 2          
@@ -41,37 +66,25 @@ xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
           6.9627618231E-01  6.9627618231E-01  0.0000000000E+00
           1.9627618231E-01  8.0372381769E-01  5.0000000000E-01
           3.0372381769E-01  3.0372381769E-01  0.0000000000E+00
-          8.0372381769E-01  1.9627618231E-01  5.0000000000E-01  
+          8.0372381769E-01  1.9627618231E-01  5.0000000000E-01
 
 #Definition of the planewave basis set
-ecut   3.0         
+ecut   3.0         # Maximal kinetic energy cut-off, in Hartree
 nband  42
 
 #Definition of the k-point grid
-kptopt 3          
-                  
+kptopt 3          # Option for the automatic generation of k points, taking
+                  # into account the symmetry
 ngkpt 2 2 3      
 
 nshiftk 1         
-shiftk 0.5 0.5 0.5
+shiftk 0.0 0.0 0.0
 
 #Symmetries deactivated for magnetic systems
 nsym 1
 
-#Definition of the SCF procedure
-nstep 50        
-diemac  8.0    
-
-nline 12
-diemix1    0.6
-diemixmag1 0.4
-nnsclo -4
-
 nspden   4   
 nspinor  2   
-
-# Parallelization 
-autoparal 1
 
 #Pseudos
 pp_dirpath "$ABI_PSPDIR"
@@ -84,18 +97,17 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain =  tcdfpt_1.abi, tcdfpt_2.abi, tcdfpt_3.abi, tcdfpt_4.abi, tcdfpt_5.abi, tcdfpt_6.abi
+#%% test_chain =  tcdfpt_7.abi, tcdfpt_8.abi, tcdfpt_9.abi, tcdfpt_10.abi
 #%% [files]
 #%% files_to_test =
-#%%   tcdfpt_1.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-medium
+#%%   tcdfpt_8.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-medium
 #%% [shell]  
-#%% post_commands= ww_mv tcdfpt_1o_DS1_WFK tcdfpt_2o_DS1_WFK; ww_mv tcdfpt_1o_DS2_1WF19 tcdfpt_2o_DS2_1WF19; ww_mv tcdfpt_1o_DS2_1WF20 tcdfpt_2o_DS2_1WF20; ww_mv tcdfpt_1o_DS2_1WF21 tcdfpt_2o_DS2_1WF21
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]
 #%% authors = M. Royo
 #%% keywords = DFPT
-#%% description = Noncolinear ground state and ddk response functions for MnF2
+#%% description = Berry curvatures calculation for adiabatic dynamics of MnF2
 #%% topics = DFPT
 #%%<END TEST_INFO>
 

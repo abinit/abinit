@@ -247,20 +247,18 @@ contains
    ! Then macroscopic Zeeman field
    ! Look for the induced magnetic moments block in the DDB
    lblok=0
-   if (qeq0) then
-     rfphon(:)=0
-     rfelfd(:)=0
-     rfstrs(1:2)=0
-     rfmagn(2)=1
-     if (magpen<zero) then
-       rfmagn(1)= 1
-     else if (magpen>zero) then
-       rfmagn(1)= 2
-     end if
-
-     call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
-   & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn)
+   rfphon(:)=0
+   rfelfd(:)=0
+   rfstrs(1:2)=0
+   rfmagn(2)=1
+   if (magpen<zero) then
+     rfmagn(1)= 1
+   else if (magpen>zero) then
+     rfmagn(1)= 2
    end if
+
+   call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
+ & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn)
 
    if (iblok /= 0 .or. jblok /=0 .or. lblok/=0) then
      call magmom(barmmom,barmmom_tr,ddb,invbarmagsus,invhmat,iblok,jblok,lblok,magpen,magsus,mmom,mmom_tr,&
