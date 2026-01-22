@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Copyright (C) 1998-2025 ABINIT group (XG)
+# Copyright (C) 1998-2026 ABINIT group (XG)
 # 
 # The purpose of this script is to change the copyright year
 # in nearly all files in the ABINIT package. 
 # First you should reapply the present script without changing it, because it has been seen that some people bring
 # routines with erroneous date during a few months after the beginning of a new one ... !
 #
-# Then one should update the present script to put the current year (at present, valid for upgrading from 2024 to 2025 !) !
+# Then one should update the present script to put the current year (at present, valid for upgrading from 2025 to 2026 !) !
 #
 # Then should be called from the top directory  (here a list of generic filenames, ordered on the basis of the alphanumeric string)
 # developers/maintainers/change_year.sh *.ac */*.ac */*/*.ac */*/*.am */*/*/*/*.am */*/*.c */*/*/*.c */*/*.cnf */*/*.conf */*/*.cu */*/*.csh 
@@ -20,7 +20,7 @@
 
 # Please do not change the permission of py files. Not all py modules must be executable! 
 # Simply issue the in-place command  
-# sed -iTMP 's!2024 ABINIT!2025 ABINIT!' */*.py */*/*.py */*/*/*.py
+# sed -iTMP 's!2025 ABINIT!2026 ABINIT!' */*.py */*/*.py */*/*/*.py
 # followed by
 # rm */*pyTMP */*/*pyTMP */*/*/*pyTMP
 #
@@ -38,11 +38,11 @@
 # developers/maintainers/change_year.sh doc/tutorial/paw2_assets/tpaw2_*.abo*
 # 
 # Moreover, one should complement the present script with a search 
-# grep '2024 ABINIT' * */* */*/* */*/*/* */*/*/*/*
+# grep '2025 ABINIT' * */* */*/* */*/*/* */*/*/*/*
 # and treat by hand the remaining files ...
 #
-#XG 2010_01_18 Still other problems with copyrights might be detected by using the following command (replace 2025 by the present year !):
-# grep -i opyright * */* */*/* */*/*/* */*/*/*/* | grep -v 2025 | grep -v '!! COPYRIGHT' | grep -v 'Oldenburg' | grep -v 'Stefan Goedecker' | grep -v 'doc/rel' | grep -v 'Remove' | grep -v 'tests/' | grep -v 'EXC group' | grep -v 'PWSCF group' | grep -v 'Makefile' | grep -v 'abinit.d' | grep -v 'fallbacks' | grep -v 'doc/features/features' | grep -v 'doc/install_notes/install' | grep -v 'COPYING' | grep -v 'gui' | grep -v 'default' | grep -v js_files | grep -v pickle | grep -v Foundation | grep -v 'COPYRIGHT H' | grep -v 'Peslyak' | grep -v 'no copyright'
+#XG 2010_01_18 Still other problems with copyrights might be detected by using the following command (replace 2026 by the present year !):
+# grep -i opyright * */* */*/* */*/*/* */*/*/*/* | grep -v 2026 | grep -v '!! COPYRIGHT' | grep -v 'Oldenburg' | grep -v 'Stefan Goedecker' | grep -v 'doc/rel' | grep -v 'Remove' | grep -v 'tests/' | grep -v 'EXC group' | grep -v 'PWSCF group' | grep -v 'Makefile' | grep -v 'abinit.d' | grep -v 'fallbacks' | grep -v 'doc/features/features' | grep -v 'doc/install_notes/install' | grep -v 'COPYING' | grep -v 'gui' | grep -v 'default' | grep -v js_files | grep -v pickle | grep -v Foundation | grep -v 'COPYRIGHT H' | grep -v 'Peslyak' | grep -v 'no copyright'
 
 for file in "$@"
 do
@@ -53,11 +53,11 @@ do
 #for different values replacing 2019 
 #The following command is more powerfull. It uses a regexp. This change the two last digits of the year.
 #sed -e 's&\(([cC]) ....-20\)20\( ABINIT\)&\121\2&' $file > $file.tmp
- sed -e 's&\(([cC]) ....-20\)24\( ABINIT\)&\125\2&' $file > $file.tmp
+ sed -e 's&\(([cC]) ....-20\)25\( ABINIT\)&\126\2&' $file > $file.tmp
  rm $file
 #The next line is also needed, as some developers decide to use this syntax, and some the other ...
 #sed -e 's&\(([cC]) 20\)20\( ABINIT\)&\120-2021\2&' $file.tmp > $file
- sed -e 's&\(([cC]) 20\)24\( ABINIT\)&\124-2025\2&' $file.tmp > $file
+ sed -e 's&\(([cC]) 20\)25\( ABINIT\)&\125-2026\2&' $file.tmp > $file
  rm $file.tmp
  echo "file $file treated "
 done
