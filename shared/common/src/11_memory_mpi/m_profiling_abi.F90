@@ -324,7 +324,6 @@ subroutine abimem_report(tag, unt, with_mallinfo)
  real(dp) :: diff_mb
  real(dp), parameter :: byte2Mb = b2Mb / 8.0_dp
  logical :: with_minfo
-
 ! *************************************************************************
 
  with_minfo = .True.
@@ -415,7 +414,10 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
    end if
  end if
 
- ! Increase total counter
+ ! Increase total counters.
+ ! If OpenMP threads are on, at most one thread at a time may execute the enclosed code.
+ ! This will increase contention but remember that we are in "debug" mode.
+!$omp critical(mem_counter_region)
  minfo%memory = minfo%memory + isize
  new_peak = .False.
  if (isize > minfo%peak) then
@@ -441,6 +443,7 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
    !  _ABORT("Wrong action: "//trim(act))
    !end if
  end if
+!$omp end critical(mem_counter_region)
 
  ! Selective memory tracing
  do_log = .True.
@@ -462,7 +465,6 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
    select case (minfo%level)
    case (0)
      ! No action required
-
    case (1)
      ! Write only if we have a new peak
      if (new_peak) then
@@ -490,7 +492,6 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
 
 end subroutine abimem_record
 !!***
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Private routine providing services already implemented in other higher level modules.
@@ -626,14 +627,13 @@ function abimem_wtime() result(wall)
 !arrays
  integer :: values(8)
 #endif
-
 ! *************************************************************************
 
 #ifndef HAVE_MPI
 
-!The following section of code is standard F90, but it is useful only if the intrinsics
-!date_and_time is accurate at the 0.01 sec level, which is not the case for a P6 with the pghpf compiler ...
-!Year and month initialisation
+ !The following section of code is standard F90, but it is useful only if the intrinsics
+ !date_and_time is accurate at the 0.01 sec level, which is not the case for a P6 with the pghpf compiler ...
+ !Year and month initialisation
  if(start==1)then
    start=0
    call date_and_time(date,time,zone,values)
@@ -663,12 +663,12 @@ function abimem_wtime() result(wall)
    end do
  end if
 
-!Now take into account bissextile years (I think 2000 is bissextile, but I am not sure ...)
+ ! Now take into account bissextile years (I think 2000 is bissextile, but I am not sure ...)
  if(mod(year_init,4)==0 .and. month_init<=2 .and. month_now>2)   wall=wall+3600.0d0
  if(mod(values(1),4)==0 .and. month_init<=14 .and. month_now>14) wall=wall+3600.0d0
 
 #else
-!Use the timer provided by MPI1.
+ ! Use the timer provided by MPI1.
  wall = MPI_WTIME()
 #endif
 
