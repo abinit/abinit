@@ -7,7 +7,7 @@
 !!  approach  
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2019-2019 ABINIT group (NBrouwer,MT, JBoust)
+!!  Copyright (C) 2019-2026 ABINIT group (NBrouwer,MT, JBoust)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

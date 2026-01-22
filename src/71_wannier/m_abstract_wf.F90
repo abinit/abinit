@@ -9,7 +9,7 @@
 !!  And it provide the common interface for both format.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2022 ABINIT group (BAmadon, CEspejo, FJollet, TRangel, DRH)
+!!  Copyright (C) 2005-2026 ABINIT group (BAmadon, CEspejo, FJollet, TRangel, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
