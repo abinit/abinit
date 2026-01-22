@@ -4335,7 +4335,7 @@ end subroutine add_matlu
 !! suboptimal if this is the case.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2024 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4543,7 +4543,7 @@ end subroutine add_matlu
 !! Transform mat from Ylm to JmJ basis or vice versa
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2024 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
