@@ -1285,6 +1285,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
      trev_k = self%kcalc2ibz(ikcalc, 6)
 
      wtk = self%ebands%wtk(ik_ibz)
+     ! TODO: this S is not used below - remove
      S = transpose(cryst%symrel_cart(:,:,isym_k))
 
      nbands = self%nbcalc_ks(ikcalc, spin)
@@ -1316,32 +1317,32 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 &              - self%vals_wr(:, itemp, ib_eph, my_ik, my_spin))
 
          Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
-           do iw=1, self%nwr
-!             if (mod(iw, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over freqs
+         do iw=1, self%nwr
+!           if (mod(iw, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over freqs
 
-                !  Preparing all elements needed for conductivity
-                omega = self%wrmesh_b(iw,ib_eph,my_ik,my_spin)
+              !  Preparing all elements needed for conductivity
+              omega = self%wrmesh_b(iw,ib_eph,my_ik,my_spin)
 
 ! this retrieves the Cumulant spectral function
 ! TODO: add the Dyson Migdal as well, to compare properly the transport with the same KG equation
-                sp_func = -aimag (self%gw_vals(iw, itemp, ib_eph, my_ik, my_spin) ) / pi
-                sp_func_dm = -aimag (gdm_vals(iw)) / pi
+              sp_func = -aimag (self%gw_vals(iw, itemp, ib_eph, my_ik, my_spin) ) / pi
+              sp_func_dm = -aimag (gdm_vals(iw)) / pi
 
 
-                self%spfunc_dm_wr(iw, itemp, ib_eph, my_ik, my_spin) = sp_func_dm
+              self%spfunc_dm_wr(iw, itemp, ib_eph, my_ik, my_spin) = sp_func_dm
 
-                self%spfunc_wr(iw, itemp, ib_eph, my_ik, my_spin) = sp_func
-!                test_Aw(itemp) = test_Aw(itemp) + sp_func
-                dfdw = occ_dfde(omega, self%kTmesh(itemp), self%mu_e(itemp))
-                self%print_dfdw(iw,itemp) = dfdw
-!                test_dfdw(itemp) = test_dfdw(itemp) + dfdw
-                kernel(iw) = - dfdw * sp_func**2
-                kernel_dm(iw) = - dfdw * sp_func_dm**2
-                Aw(iw) = sp_func**2
-                Aw_dm(iw) = sp_func_dm**2
-                dfdw_acc(iw) = dfdw
+              self%spfunc_wr(iw, itemp, ib_eph, my_ik, my_spin) = sp_func
+!              test_Aw(itemp) = test_Aw(itemp) + sp_func
+              dfdw = occ_dfde(omega, self%kTmesh(itemp), self%mu_e(itemp))
+              self%print_dfdw(iw,itemp) = dfdw
+!              test_dfdw(itemp) = test_dfdw(itemp) + dfdw
+              kernel(iw) = - dfdw * sp_func**2
+              kernel_dm(iw) = - dfdw * sp_func_dm**2
+              Aw(iw) = sp_func**2
+              Aw_dm(iw) = sp_func_dm**2
+              dfdw_acc(iw) = dfdw
 
-           end do !iw
+         end do !iw
          mu_e = self%transport_mu_e(itemp)
          ieh = 2; if (eig_nk >= mu_e) ieh = 1
          integration = simpson( wr_step, kernel)
@@ -1354,41 +1355,62 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 &          + integration*vv_tens(:,:)*wtk
          self%l0_dm( :, :, ieh, spin, itemp ) = self%l0_dm( :, :, ieh, spin, itemp ) &
 &          + integration_dm*vv_tens(:,:)*wtk
+
+! TODO: document this bit, why only use the xx component of vv_tens?? Aw_l0 is never used or output
          Aw_l0(itemp) = Aw_l0(itemp) + int_Aw*wtk*vv_tens(1,1)
          Aw_l0_dm(itemp) = Aw_l0_dm(itemp) + int_Aw_dm*wtk*vv_tens(1,1)
          dfdw_l0(itemp) = dfdw_l0(itemp) + int_dfdw*wtk*vv_tens(1,1)
+! END TODO
 
-         self%l1( :, :, ieh, spin, itemp ) = self%l0( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp))
-         self%l2( :, :, ieh, spin, itemp ) = self%l1( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp))
-         self%l1_dm( :, :, ieh, spin, itemp ) = self%l0_dm( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp))
-         self%l2_dm( :, :, ieh, spin, itemp ) = self%l1_dm( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp))
+! TODO : check these equations for l1 l2, they should not depend on the band indices, as we are inside the ib loop!!
+         self%l1( :, :, ieh, spin, itemp ) = self%l1( :, :, ieh, spin, itemp ) &
+             & + integration*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))
+         self%l2( :, :, ieh, spin, itemp ) = self%l2( :, :, ieh, spin, itemp ) &
+             & + integration*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))**2
+         self%l1_dm( :, :, ieh, spin, itemp ) = self%l1_dm( :, :, ieh, spin, itemp ) &
+             & + integration_dm*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))
+         self%l2_dm( :, :, ieh, spin, itemp ) = self%l2_dm( :, :, ieh, spin, itemp ) &
+             & + integration_dm*vv_tens(:,:)*wtk*(eig_nk - self%mu_e(itemp))**2
 
-         call inv33(self%l0(:, :, ieh, spin, itemp), work_33)
-         l0inv_33nw(:,:,ieh) = work_33
-         self%seebeck(:,:,ieh,spin,itemp) = matmul(work_33, self%l1(:,:,ieh,spin,itemp)) / Tkelv
-
-         call inv33(self%l0_dm(:, :, ieh, spin, itemp), work_33)
-         l0inv_33nw_dm(:,:,ieh) = work_33
-         self%seebeck_dm(:,:,ieh,spin,itemp) = matmul(work_33, self%l1_dm(:,:,ieh,spin,itemp)) / Tkelv
-
-         work_33 = self%l1(:, :, ieh, spin, itemp)
-         work_33 = self%l2(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw(:, :, ieh), work_33))
-         self%kappa(:,:,ieh,spin,itemp) = work_33 / Tkelv
-
-
-         work_33 = self%l1_dm(:, :, ieh, spin, itemp)
-         work_33 = self%l2_dm(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw_dm(:, :, ieh), work_33))
-         self%kappa_dm(:,:,ieh,spin,itemp) = work_33 / Tkelv
-         !self%conductivity_mu( :, :, ieh, spin, itemp ) = self%conductivity_mu( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
-!         call xmpi_sum(self%conductivity_mu(:, :, ieh, spin, itemp) , self%wt_comm%value, ierr)
-         end do ! itemp
+       end do ! itemp
 
      end do !ib
 
    end do ! my_ik
-   ! Collect data if k-points parallelism.
-   !call xmpi_sum(self%conductivity_mu , self%kcalc_comm%value, ierr)
+
  end do !my_spin
+
+ ! Collect data if k-points parallelism. TODO: if this is reactivated, mpi_sum the l0 l1 l2 arrays instead
+ !call xmpi_sum(self%l0, self%kcalc_comm%value, ierr)
+ !call xmpi_sum(self%l1, self%kcalc_comm%value, ierr)
+ !call xmpi_sum(self%l2, self%kcalc_comm%value, ierr)
+
+ do itemp = 1, self%ntemp
+   Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
+   do my_spin=1,self%my_nspins
+     spin = self%my_spins(my_spin)
+     do ieh = 1, 2
+       ! calculate the transport coefficients from the l0 l1 l2
+       call inv33(self%l0(:, :, ieh, spin, itemp), l0inv_33nw(:,:,ieh))
+       self%seebeck(:,:,ieh,spin,itemp) = matmul(l0inv_33nw(:,:,ieh), self%l1(:,:,ieh,spin,itemp)) / Tkelv
+      
+       call inv33(self%l0_dm(:, :, ieh, spin, itemp), l0inv_33nw_dm(:,:,ieh))
+       self%seebeck_dm(:,:,ieh,spin,itemp) = matmul(l0inv_33nw_dm(:,:,ieh), self%l1_dm(:,:,ieh,spin,itemp)) / Tkelv
+      
+       work_33 = self%l1(:, :, ieh, spin, itemp)
+       ! TODO: check if one of the work_33 below is incorrect or needs a transpose 
+       work_33 = self%l2(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw(:, :, ieh), work_33))
+       self%kappa(:,:,ieh,spin,itemp) = work_33 / Tkelv
+      
+       work_33 = self%l1_dm(:, :, ieh, spin, itemp)
+       work_33 = self%l2_dm(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw_dm(:, :, ieh), work_33))
+       self%kappa_dm(:,:,ieh,spin,itemp) = work_33 / Tkelv
+
+       !TODO: leftover below - can this be removed?
+       !self%conductivity_mu( :, :, ieh, spin, itemp ) = self%conductivity_mu( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
+     end do ! ieh
+   end do !my_spin
+ end do ! itemp
 
  max_occ = two / (self%nspinor * self%nsppol)
  fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
@@ -1399,10 +1421,6 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  self%conductivity_mu_dm = fact0 * self%l0_dm  ! siemens cm^-1
  self%seebeck_dm = - volt_SI  * max_occ * self%seebeck_dm
  self%kappa_dm = + volt_SI**2 * fact0 * self%kappa_dm
-
- do itemp=1, self%ntemp
-   Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
- end do
 
  ! Scale by the carrier concentration
  fact = 100**3 / e_Cb
