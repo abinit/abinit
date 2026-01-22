@@ -397,7 +397,6 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
  character(len=*), intent(in) :: vname,act,file
 
 !Local variables-------------------------------
- !integer :: ierr
  !real(dp) :: now
  logical :: do_log, new_peak
  character(len=500) :: msg
