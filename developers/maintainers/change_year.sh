@@ -16,7 +16,7 @@
 # developers/maintainers/change_year.sh */*.sh */*/*.src */*/*/*.src */*/*/*/*.src */*/*/*.stdout */*/*.tex */*/*/*.tex */*/*.txt */*/*/*.txt */*/*_ */*/*/*_ */*/*_ext
 # developers/maintainers/change_year.sh */*/*/*/*_ */*/*/*/*.src */*/*/*/*.c */*/*/*/*.finc */*/*/*/*.h */*/*/*/*.f90 */*/*/*/*.F90 */*/*/*/*.in */*/*/*/*.cu
 # developers/maintainers/change_year.sh *.md */*.md */*/*.md */*/*-fc */*/*/*abo */*/*/*/*abo
-# developers/maintainers/change_year.sh */*/*/*.out */*/*/*.output */*/*.cpp
+# developers/maintainers/change_year.sh */*/*/*.out */*/*/*.output */*/*.cpp */*/*/*/*.cpp
 
 # Please do not change the permission of py files. Not all py modules must be executable! 
 # Simply issue the in-place command  
