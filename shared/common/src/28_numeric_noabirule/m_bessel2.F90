@@ -7,7 +7,7 @@
 !! These routines were taken from https://www.netlib.org/slatec/.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2024-2024 ABINIT group
+!!  Copyright (C) 2024-2025 ABINIT group
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
