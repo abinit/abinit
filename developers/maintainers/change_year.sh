@@ -11,8 +11,8 @@
 # Then should be called from the top directory  (here a list of generic filenames, ordered on the basis of the alphanumeric string)
 # developers/maintainers/change_year.sh *.ac */*.ac */*/*.ac */*/*.am */*/*/*/*.am */*/*.c */*/*/*.c */*/*.cnf */*/*.conf */*/*.cu */*/*.csh 
 # developers/maintainers/change_year.sh */*env */*/*env */*/*.finc */*/*/*/*.finc */*/*.f90 */*/*.F90 */*/*/*.f90 */*/*/*.F90 *.in */*.in */*/*.in 
-# developers/maintainers/change_year.sh *.h */*/*.h */*/*/*.h */*/*/*.help */*/*.html */*/*/*.m */*/make* */*/*/*bindings*
-# developers/maintainers/change_year.sh */*/*.m4 */*/*/*.m4 */*/*/*/*.m4 */*/Makefile */*/*.pl */*/*/*.pl bindings/README fallbacks/README tests/README */*/README 
+# developers/maintainers/change_year.sh */*/*.h */*/*/*.h */*/*/*.help */*/*.html */*/*/*.m */*/make* */*/*/*bindings*
+# developers/maintainers/change_year.sh */*/*.m4 */*/*/*.m4 */*/*/*/*.m4 */*/Makefile */*/*.pl */*/*/*.pl bindings/README tests/README */*/README 
 # developers/maintainers/change_year.sh */*.sh */*/*.src */*/*/*.src */*/*/*/*.src */*/*/*.stdout */*/*.tex */*/*/*.tex */*/*.txt */*/*/*.txt */*/*_ */*/*/*_ */*/*_ext
 # developers/maintainers/change_year.sh */*/*/*/*_ */*/*/*/*.src */*/*/*/*.c */*/*/*/*.finc */*/*/*/*.h */*/*/*/*.f90 */*/*/*/*.F90 */*/*/*/*.in */*/*/*/*.cu
 # developers/maintainers/change_year.sh *.md */*.md */*/*.md */*/*-fc */*/*/*abo */*/*/*/*abo
@@ -30,7 +30,7 @@
 #
 # So, also issue, one after the other (cut and paste the following):
 # developers/maintainers/change_year.sh config/scripts/a* config/scripts/clean* config/scripts/u* config/m4*/
-# developers/maintainers/change_year.sh developers/maintainers/change2.sh developers/maintainers/change.sh developers/various/fixed_to_free tests/cpu/Refs/changeref 
+# developers/maintainers/change_year.sh developers/maintainers/change.sh developers/various/fixed_to_free tests/cpu/Refs/changeref 
 # developers/maintainers/change_year.sh developers/maintainers/suppress.sh scripts/*/*.sh scripts/*/*/*.sh shared/*/*.sh developers/maintainers/update_refs.sh 
 # developers/maintainers/change_year.sh abichecks/scripts/run-basic-tests.sh 
 # developers/maintainers/change_year.sh developers/various/*.sh developers/various/fixed_to_free doc/config/scripts/make* INSTALL 
