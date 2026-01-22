@@ -86,14 +86,14 @@ diemac 3.0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t86.abo, tolnlines = 3, tolabs = 1.1e-05, tolrel = 2.0e-03, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = T. Hasegawa
 #%% keywords = NC, DFPT
-#%% description = 
+#%% description =
 #%%   Si diamond
 #%%   Spin-polarized calculation (nspden=2)
 #%%   RF phonon with q=0.5 0 0

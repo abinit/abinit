@@ -131,9 +131,7 @@ Features available in ANADDB that are not yet supported by EPH
 At the time of writing ( |today|), the following features are **not yet supported** by EPH:
 
 * PAW calculations
-* Spin-orbit coupling
 * Non-collinear magnetism ([[nspinor]] = 2 and [[nspden]] = 4)
-* Non-local part of the pseudopotential applied with [[useylm]] = 1
 
 In this introduction, we focus on the parts that are common to the different sub-drivers i.e.:
 
@@ -144,6 +142,7 @@ The use of the different sub-drivers is discussed in more detail in the speciali
 
 * [Phonon-limited mobilities](/tutorial/eph4mob)
 * [ZPR and T-dependent band structures](/tutorial/eph4zpr)
+* [Self-trapped polarons & Variational Polaron Equations ](/tutorial/eph4vpq)
 
 <!--
 * [Isotropic superconductivity in metals](tutorial/eph4isotc)
@@ -272,7 +271,7 @@ $(\kappa\alpha, \qq)$ perturbation [[cite:Gonze1997]] [[cite:Baroni2001]].
 The DVDB file stores $\partial_{\kappa\alpha,\qq} v^\KS(\rr)$
 for all the $\qq$-points in the IBZ and all the irreducible atomic perturbations.
 More rigorously, we should say that the DVDB file stores the local part of the DFPT potential
-(variation of the Hartree + XC + local part of the pseudo)
+(self-consistent variation of the Hartree + XC + local part of the pseudo)
 but this is a rather technical point discussed in more detail in [[cite:Brunin2020b]] that is not relevant
 for the present discussion so we do not elaborate more on this.
 
@@ -381,13 +380,12 @@ The expression for the LR model including both dipole and quadrupole terms reads
 \end{equation}
 
 !!! important
-	The computation of the dynamical quadrupoles tensor within the DFPT framework will be made available in a future release,
-	together with a specific tutorial. Once it is computed and stored in the DDB,
+
+	The computation of the dynamical quadrupoles tensor within the DFPT framework
+	is documented in [this tutorial](/tutorial/lw_quad].
+    Once it is computed and stored in the DDB,
 	the EPH code reads it automatically and uses it for the LR model.
 
-<!--
-TODO: Discuss more the integration with the DFPT part.
--->
 
 In the implementation, each Fourier component is multiplied by the
 Gaussian filter $e^{-\frac{|\qG|^2}{4\alpha}}$
@@ -635,9 +633,4 @@ the [mobility tutorial](/tutorial/eph4mob#how-to-compute-only-the-k-points-close
 TODO: Recheck the code, perhaps I can use the ab-initio band edge if its greater/smaller than the SKW one.
 The most important thing is that SKW reproduces the position of the band edges as these values are then used
 that the position of the SKW band edge is consistent
--->
-
-
-<!--
-## GSTORE.nc file
 -->

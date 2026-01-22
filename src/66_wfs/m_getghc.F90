@@ -30,6 +30,7 @@ module m_getghc
  use m_abicore
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
 
  use defs_abitypes, only : mpi_type

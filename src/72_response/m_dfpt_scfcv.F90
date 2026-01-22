@@ -3571,7 +3571,7 @@ end subroutine dfpt_nstdy
 !!
 !! NOTES
 !!  This routine will NOT work with nspden==4:
-!!    at least the use of fftpac should be modified.
+!!  at least the use of fftpac should be modified.
 !!
 !! SOURCE
 
@@ -4047,26 +4047,14 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    call timab(129,1,tsec)
 
 !  Identify MPI buffer size
-   buffer_size=cplex*dtset%nfft*nspden+2+mbd2kpsp
+   buffer_size=2
    ABI_MALLOC(buffer1,(buffer_size))
 
-!  Pack rhorfermi, fe1fixed, fe1norm
-   indx=cplex*dtset%nfft*nspden
-   if (psps%usepaw==0) then
-     buffer1(1:indx)=reshape(rhorfermi,(/indx/))
-   else
-     buffer1(1:indx)=reshape(rhowfr,(/indx/))
-   end if
-   buffer1(indx+1)=fe1fixed ; buffer1(indx+2)=fe1norm
-   indx=indx+2 ; bd2tot_index=0
-   do isppol=1,nsppol
-     do ikpt=1,nkpt_rbz
-       nband_k=nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
-       buffer1(indx+1:indx+2*nband_k**2)=eigen1(bd2tot_index+1:bd2tot_index+2*nband_k**2)
-       bd2tot_index=bd2tot_index+2*nband_k**2
-       indx=indx+2*nband_k**2
-     end do
-   end do
+!  Pack fe1fixed, fe1norm
+   indx = 0
+   buffer1(indx+1)=fe1fixed 
+   buffer1(indx+2)=fe1norm
+   indx=indx+2 
    if(indx<buffer_size)buffer1(indx+1:buffer_size)=zero
 
 !  Build sum of everything
@@ -4075,23 +4063,32 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    call timab(48,2,tsec)
 
 !  Unpack the final result
-   indx=cplex*dtset%nfft*nspden
-   if (psps%usepaw==0) then
-     rhorfermi(:,:)=reshape(buffer1(1:indx),(/cplex*dtset%nfft,nspden/))
-   else
-     rhowfr(:,:)=reshape(buffer1(1:indx),(/cplex*dtset%nfft,nspden/))
-   end if
+   indx=0
    fe1fixed=buffer1(indx+1) ; fe1norm =buffer1(indx+2)
-   indx=indx+2 ; bd2tot_index=0
-   do isppol=1,nsppol
-     do ikpt=1,nkpt_rbz
-       nband_k=nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
-       eigen1(bd2tot_index+1:bd2tot_index+2*nband_k**2)=buffer1(indx+1:indx+2*nband_k**2)
-       bd2tot_index=bd2tot_index+2*nband_k**2
-       indx=indx+2*nband_k**2
-     end do
-   end do
    ABI_FREE(buffer1)
+
+   call timab(48,1,tsec)
+   buffer_size=mbd2kpsp
+   call xmpi_sum(eigen1,buffer_size,spaceworld,ierr)
+   call timab(48,2,tsec)
+
+   if (psps%usepaw==0) then
+     call timab(48,1,tsec)
+     buffer_size = cplex*nfftf
+     ! TODO: there should be a primitive for a 2d array here, but the compiler does not seem to find it. 
+     ! would simplify the call to xmpi_sum
+     do isppol=1, nspden
+       call xmpi_sum(rhorfermi(:,isppol),buffer_size,spaceworld,ierr)
+     end do
+     call timab(48,2,tsec)
+   else
+     call timab(48,1,tsec)
+     buffer_size = cplex*dtset%nfft
+     do isppol=1, nspden
+       call xmpi_sum(rhowfr(:,isppol),buffer_size,spaceworld,ierr)
+     end do
+     call timab(48,2,tsec)
+   end if
 
 !  Accumulate PAW occupancies
    if (psps%usepaw==1) then

@@ -1,8 +1,8 @@
 
 .Version 10.5.8.2 of LRUJ, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  LRUJ comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,12 +16,12 @@
 
 .Starting date : Sun 21 Dec 2025.
 - ( at 16h42 )
-  
+
  Number of perturbations detected:  5
  Including unperturbed state, we have  6 data points.
  Standard determination of the Hubbard U parameter.
  Maximum degree of polynomials analyzed:  3
- NOTE: Unlike the ujdet utility, lruj treats the 
+ NOTE: Unlike the ujdet utility, lruj treats the
  response functions as scalars, not matrices!
  See lruj tutorial for more information.
 
@@ -36,7 +36,7 @@
  Mixing constant factored out of Chi0:   0.450
  Percentage of AE orbital within the PAW sphere of perturbed subspace:     90.46723%
 
-  Perturbations           Occupations 
+  Perturbations           Occupations
  --------------- -----------------------------
     alpha [eV]     Unscreened      Screened
  --------------- -----------------------------
@@ -55,7 +55,7 @@
  Cubic:         -0.8007861    -0.0952726     9.2474264  |    0.0001546    0.0000015    0.0002901
 *************************************************************************************************
 *************************************************************************************************
- 
+
 Linear Response UJ (LRUJ) program complete. Live long and prosper. ~LMac
 
 

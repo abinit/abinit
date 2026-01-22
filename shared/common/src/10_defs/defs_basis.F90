@@ -257,7 +257,7 @@ module defs_basis
  real(dp), parameter :: Avogadro     = 6.02214076d23          ! per mole
  real(dp), parameter :: Speed_Light_SI     = 299792458_dp           ! Speed of light in vacuum (m/s)
  ! Note: In SI, c is fixed and the fine structure constant (alpha) is measured.
- !       In a.u., alpha is fixed and c is measured. Be carefull when using them. 
+ !       In a.u., alpha is fixed and c is measured. Be carefull when using them.
  !       Here we define c.
 
 !=========================================================
@@ -301,14 +301,14 @@ module defs_basis
 !         See also P. J. Mohr et al., Review Mod. Phys. 97, 025002 (2025)
 !
 ! Note: In SI, c is fixed and the fine structure constant (alpha) is measured.
-!       In a.u., alpha is fixed and c is measured. Be carefull when used them. 
+!       In a.u., alpha is fixed and c is measured. Be carefull when used them.
 !       Here we defined c.
 
  real(dp), parameter :: InvFineStruct= 137.035999177_dp                   ! Inverse of fine structure constant
  real(dp), parameter :: FineStructureConstant  = 0.0072973525643_dp       ! Fine structure constant
  real(dp), parameter :: FineStructureConstant2 = FineStructureConstant**2 ! Square of fine structure constant
 
-!Works until now 
+!Works until now
 
 !The compiler nvhpc has a problem with this line ?!?
  real(dp), parameter :: Speed_Light        = InvFineStruct                      ! Speed of light in atomic units
@@ -344,7 +344,7 @@ module defs_basis
  real(dp), parameter :: dipole_moment_debye = 0.393430307_dp              ! Debye unit in a.u.
  real(dp), parameter :: siemens_SI   = e_Cb**2 / Ha_J / Time_Sec          ! Siemens in SI: A/V = C^2 / (J * s)
  real(dp), parameter :: volt_SI      = Ha_J / e_Cb                        ! Volt in SI: J/C
- real(dp), parameter :: EFG_SI       = volt_SI / Bohr_meter**2            ! E-field gradient in SI : Volt/m^2 
+ real(dp), parameter :: EFG_SI       = volt_SI / Bohr_meter**2            ! E-field gradient in SI : Volt/m^2
 
 !End of physical constants
 !=========================================================

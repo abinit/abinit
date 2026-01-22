@@ -3,7 +3,7 @@
  #scissors shift:    0.000000E+00
  #energy window:    1.707220E+02eV    6.273919E+00Ha
 
- # Energy(eV)         Im(eps(w))         Spin up       Spin down 
+ # Energy(eV)         Im(eps(w))         Spin up       Spin down
     5.442277E-02    0.000000E+00    0.000000E+00    0.000000E+00
     1.088455E-01    0.000000E+00    0.000000E+00    0.000000E+00
     1.632683E-01    0.000000E+00    0.000000E+00    0.000000E+00
@@ -155,7 +155,7 @@
     8.108993E+00    0.000000E+00    0.000000E+00    0.000000E+00
 
 
- # Energy(eV)         Re(eps(w))         Spin up       Spin down    +delta(diag) 
+ # Energy(eV)         Re(eps(w))         Spin up       Spin down    +delta(diag)
     5.442277E-02    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
     1.088455E-01    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
     1.632683E-01    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
