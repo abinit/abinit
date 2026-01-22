@@ -48,6 +48,7 @@ program mrgdv
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: gpu_option0 = 0
  integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, rspace_cell, symv1scf, npert_miss, abimem_level
  real(dp) :: dvdb_qdamp, abimem_limit_mb
  character(len=24) :: codename
@@ -151,7 +152,7 @@ program mrgdv
      ABI_CHECK(nargs > 1, "Additional arguments are missing")
      call get_command_argument(2, dvdb_filepath)
 
-     call dvdb%init(dvdb_filepath, comm)
+     call dvdb%init(dvdb_filepath, gpu_option0, comm)
      if (prtvol > 0) call dvdb%print([std_out], "", prtvol=prtvol)
      call dvdb%list_perts([-1, -1, -1], npert_miss)
      call dvdb%free()
@@ -190,7 +191,7 @@ program mrgdv
      write(std_out,"(a)")sjoin("                         qptopt:", itoa(qptopt))
      write(std_out,"(a)")trim(dvdb_filepath), " --> ", trim(dump_file)
 
-     call dvdb%init(dvdb_filepath, xmpi_comm_self)
+     call dvdb%init(dvdb_filepath, gpu_option0, xmpi_comm_self)
      call ngfft_seq(ngfftf, dvdb%ngfft3_v1(:, 1))
      call dvdb%open_read(ngfftf, xmpi_comm_self)
      if (prtvol > 0) call dvdb%print([std_out], "", prtvol)
