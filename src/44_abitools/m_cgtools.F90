@@ -3672,7 +3672,7 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
    do ig=1+igs,npw+igs
      if(kinpw(ig-igs)<huge(zero)*1.d-11)then
        xx=kinpw(ig-igs)*ek0_inv
-!      Teter polynomial ratio
+       ! Teter polynomial ratio
        poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
        fac=poly/(poly+16._dp*xx**4)
        if (optekin==1) fac=two*fac
@@ -5934,7 +5934,7 @@ subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
  integer :: idat, ierr
 ! *************************************************************************
 
-!$OMP PARALLEL DO IF (ndat > 1)
+ !$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call sqnorm_g(norms(idat), istwf_k, npwsp, cg(:,idat), me_g0, xmpi_comm_self)
  end do
@@ -6020,6 +6020,8 @@ subroutine cg_precon_many(istwf_k, npw, nspinor, ndat, cg, optekin, kinpw, vect,
 
  ! TODO: Optimized version for MPI with ndat > 1
  ABI_MALLOC(pcon, (npw))
+
+ !$OMP PARALLEL DO
  do idat=1,ndat
    call cg_precon(cg(:,idat), zero, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pcon, vect(:,idat), comm)
  end do
