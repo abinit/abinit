@@ -379,7 +379,7 @@ contains
    call ddb%to_d2etot(int_fsddb,1,0,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega(iw))
 
    call mp_d2etot(dummysus,ddb,1,dummysus,magsus_iw,&
- & magpen,mpert,mpopt,natom,1,ndim,qphon,xred,zfield_iw,zfield_tr, &
+ & magpen,mpert,mpopt,natom,1,ndim,qphon,zfield_iw,zfield_tr, &
  & fs2rs=fs2rs,blkval_fs=int_fsddb,blkval_rs=int_rsddb)
 
    call ddb%to_d2etot(int_fsddb,1,1,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega(iw))

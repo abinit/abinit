@@ -275,7 +275,7 @@ contains
 
    !Convert second-order derivatives to diferent magnetic boundary conditions
    call mp_d2etot(barmagsus,ddb,kblok,invhmat,magsus,magpen,mpert,mpopt,natom, &
- & nblok,ndim,qpt,xred,zfield,zfield_tr)
+ & nblok,ndim,qpt,zfield,zfield_tr)
 
    !Convert second-order energies to the physical quantities of ddb%val
    call ddb%to_d2etot(ddb%val,kblok,1,qeq0,qphon,qphnrm,ucvol,optgb,omega=omega)
@@ -459,7 +459,7 @@ contains
 !! SOURCE
 
  subroutine local_spinsus(barmagsus,ddb,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus, &
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol,xred,qphon, &
+& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol,qphon,xred, &
 & fs2rs,blkval_fs) !optional
 
 !Arguments -------------------------------
@@ -546,7 +546,6 @@ contains
      end do
    end do
  end do
-
 
 !Use magsus to store the intermediate array
  magsus=idty-magpen*barmagsus
@@ -1108,7 +1107,7 @@ contains
 
  subroutine mp_d2etot(barmagsus,ddb,&
 & iblok,invhmat,magsus,magpen,mpert,mpopt,&
-& natom,nblok,ndim,qphon,xred,zfield,zfield_tr,&
+& natom,nblok,ndim,qphon,zfield,zfield_tr,&
 & fs2rs,blkval_fs,blkval_rs) !optional
 
 !Arguments -------------------------------
@@ -1118,7 +1117,7 @@ contains
  real(dp),intent(in) :: magpen
 !arrays
  type(ddb_type),intent(inout) :: ddb
- real(dp),intent(in) :: qphon(3),xred(3,natom)
+ real(dp),intent(in) :: qphon(3)
  real(dp),intent(in),optional :: blkval_fs(2,3,mpert,3,mpert,1)
  real(dp),intent(out),optional :: blkval_rs(2,3,mpert,3,mpert,1)
  complex(dpc),intent(in) :: barmagsus(ndim,ndim)
