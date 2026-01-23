@@ -196,7 +196,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  real(dp),allocatable :: lambda_bk(:), kres_bk(:,:), dots_bk(:,:), residv_bk(:,:)
  real(dp),allocatable :: umat(:,:,:), gwork(:,:), dots(:, :)
  real(dp),target,allocatable :: ghc(:,:), gvnlxc(:,:)
- real(dp), contiguous, pointer :: gsc_bk(:,:), cg_bk(:,:), ghc_bk(:,:), gvnlxc_bk(:,:)
+ real(dp),contiguous, pointer :: gsc_bk(:,:), cg_bk(:,:), ghc_bk(:,:), gvnlxc_bk(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
 ! *************************************************************************
 
@@ -236,7 +236,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
 
  ! Note:
  !
- ! * Accuracy_level is not allowed to increase during the SCF cycle
+ ! * Accuracy_level is not allowed to increase during the SCF cycle.
  !
  ! * Since we operate on blocks of bands, all the states in the block will receive the same treatment.
  !   This means that one can observe different convergence behaviour depending on bsize.
@@ -600,7 +600,6 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
    end if
 
  else
-   !if (prtvol == -level)
    if (after_ortho == 1) call wrtout(std_out, " SLOW: Recomputing enlx gvnlx by calling nonlop.")
    if (after_ortho == 2) call wrtout(std_out, " VERY-SLOW: Recomputing eigens and residues by calling getghc.")
 
@@ -1274,8 +1273,8 @@ end subroutine my_pack_matrix
 subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor, savemem, enlx, eig, cg, gsc, ghc, gvnlxc)
 
 !Arguments ------------------------------------
- integer,intent(in) :: prtvol, nband, npw, my_nspinor, savemem
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+ integer,intent(in) :: prtvol, nband, npw, my_nspinor, savemem
  type(mpi_type),intent(in) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*my_nspinor*nband)
  real(dp),target,intent(inout) :: gsc(2,npw*my_nspinor*nband*gs_hamk%usepaw)
@@ -1292,10 +1291,9 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
  real(dp) :: cpu, wall, gflops
 !arrays
  real(dp),target :: fake_gsc_bk(0,0)
- real(dp) :: subovl(use_subovl0)
+ real(dp) :: subovl(use_subovl0), dots(2, nband)
  real(dp),allocatable :: subham(:), h_ij(:,:,:), evec(:,:,:), evec_re(:,:), gwork(:,:)
  real(dp),contiguous, pointer :: ghc_bk(:,:), gvnlxc_bk(:,:), gsc_bk(:,:)
- real(dp) :: dots(2, nband)
  type(pawcprj_type) :: cprj_dum(1,1)
 ! *************************************************************************
 

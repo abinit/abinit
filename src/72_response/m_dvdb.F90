@@ -3175,7 +3175,7 @@ subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, drho_cplex, nfft, ngfft, n
  ! Get rho1(cplex, nfftf, nspden, my_npert))
  call db%get_ftqbz(qbz, drho_cplex, nfft, ngfft, rho1, comm)
 
- option = 2 ! if 2, treat only density change
+ option = 2  ! if 2, treat only density change
  !option = 1 ! if 1, treat both density change and XC core correction
  ABI_MALLOC(vxc1, (drho_cplex, nfft, dtset%nspden, db%my_npert))
 
@@ -3460,14 +3460,6 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
          !call cwtime(cpu, wall, gflops, "start")
          call v1phq_rotate(cryst, qibz(:,iq_ibz), isym, itimrev, g0q, &
                            ngfft, cplex_qibz, nfft, db%nspden, db%mpi_enreg, v1r_qibz, v1r_qbz, xmpi_comm_self)
-         !call cwtime_report(" rotate", cpu, wall, gflops)
-         !v1r_qbz = zero; v1r_qbz = v1r_qibz
-
-         !call times_eigr(-tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
-         !call times_eigr(+tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
-         !if (itimrev == 2) v1r_qbz(2,:,:,:) = -v1r_qbz(2,:,:,:)
-         !call times_eigr(-tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
-         !call times_eigr(+tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
        end if
 
        ! Multiply by e^{iqpt_bz.r}
@@ -3483,9 +3475,9 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 
        ! Compute FT phases for this qpt_bz.
        call calc_eiqr(-qpt_bz, db%my_nrpt, db%my_rpt, emiqr)
-       !call cwtime_report(" phases", cpu, wall, gflops)
 
        ! SLOW FT.
+       !call cwtime_report(" phases", cpu, wall, gflops)
        cnt = 0
        do ispden=1,db%nspden
          do ifft=1,nfft
@@ -3858,7 +3850,7 @@ subroutine dvdb_need_ftinterp(db, nqpt, qpts, qptopt,  qmap_symrec, need_ftinter
  ABI_MALLOC(qmap_symrec, (6, nqpt))
 
  if (kpts_map("symrec", qtimrev, db%cryst, qrank, nqpt, qpts, qmap_symrec) /= 0) then
-   ! There's at least on-qpoint in qpts that is not the IBZ imanged of db%qpts
+   ! There's at least on-qpoint in qpts that is not the IBZ image of db%qpts.
    need_ftinterp = .True.; call qrank%free()
    return
  end if
@@ -4028,7 +4020,7 @@ end subroutine dvdb_seek
 !!
 !! FUNCTION
 !!   Rewind the file and move to the first header. Needed only if dvdb%iomode==IO_MODE_FORTRAN
-!!   Return exit code and error message in msg if ierr != 0
+!!   Return exit code and error message in msg if ierr != 0.
 !!
 !! SOURCE
 

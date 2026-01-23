@@ -149,7 +149,6 @@ contains
    procedure :: plot => vcoul_plot    ! Plot vc in real and reciprocal space.
    procedure :: print => vcoul_print  ! Print info on the object.
    procedure :: free => vcoul_free    ! Free memory
-
 end type vcoul_t
 !!***
 
@@ -1186,8 +1185,7 @@ subroutine mc_init(mc, rprimd, ucvol, gprimd, gmet, kptrlatt)
  integer, allocatable :: seed(:)
 ! *************************************************************************
 
- mc%gmet = gmet
- mc%ucvol = ucvol
+ mc%gmet = gmet; mc%ucvol = ucvol
 
  ! Supercell defined by the k-mesh
  rprimd_sc(:,:) = MATMUL(rprimd, kptrlatt)
@@ -1563,6 +1561,7 @@ subroutine beigi_surface_limit(opt_slab, cryst, nqibz, nkbz, rcut, alpha, boxcen
  yy(:)=vcfit(1,:)
  !yy(:)=one
  ABI_FREE(vcfit)
+
  dx=(xx(2)-xx(1))
  ! integ = \int dr r f(r)
  integ=xx(2)*yy(2)*dx*3.0/2.0

@@ -52,6 +52,7 @@ module m_abi_linalg
 #endif
 
  use m_time,  only : timab
+ use m_fstrings, only : sjoin, itoa
 
  implicit none
 
