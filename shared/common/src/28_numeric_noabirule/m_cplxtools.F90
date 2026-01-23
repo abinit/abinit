@@ -1184,6 +1184,7 @@ subroutine cplx_mat_plus_bc_dpc(bufsize, aa, real_fact, bmode, bb, cc, gpu_optio
 ! *************************************************************************
 
  if (gpu_option == ABI_GPU_DISABLED) then
+   ! CPU version
    select case (bmode)
    case ("N")
      !$OMP PARALLEL DO
@@ -1200,7 +1201,7 @@ subroutine cplx_mat_plus_bc_dpc(bufsize, aa, real_fact, bmode, bb, cc, gpu_optio
   end select
 
  else
-
+   ! GPU version
 #ifdef HAVE_OPENMP_OFFLOAD
    select case (bmode)
    case ("N")

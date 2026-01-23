@@ -11,7 +11,7 @@ paral_kgb 1
 # Dataset 1
 rmm_diis1 1       # Two CG steps followed by RMM-DIIS.
 nspinor1 1
-istwfk1 *1        
+istwfk1 *1
 
 ##################
 # COMMON VARIABLES
@@ -52,7 +52,7 @@ xred
 #%% files_to_test =
 #%%   t53.abo, tolnlines = 40, tolabs = 3e-04, tolrel = 1.5;
 #%% [paral_info]
-#%% max_nprocs = 8
+#%% nprocs_to_test = 1
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, RMM-DIIS
