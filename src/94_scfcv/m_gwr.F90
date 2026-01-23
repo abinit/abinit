@@ -1886,10 +1886,12 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
  integer :: my_is, my_it, ipm, npwsp, col_bsize, itau, spin, ik_ibz, iq_ibz
  !integer :: ii, num_pm, ipm_list__(2)
  type(__slkmat_t), pointer :: mat
- character(len=500) :: msg
+ character(len=500) :: msg !, gpu_action
 ! *************************************************************************
 
  ABI_CHECK(string_in(action, "malloc, free"), sjoin("Invalid action:", action))
+
+ !gpu_action = "None"; if (gwr%dtset%gpu_option == ABI_GPU_OPENMP) gpu_action = "alloc"
 
  !num_pm = 2; ipm_list__ = [1, 2]
  !if (present(ipm_list)) then
@@ -1917,7 +1919,7 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
          ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
          associate (gt => gwr%gt_kibz(:, ik_ibz, itau, spin))
          do ipm=1,2
-           if (action == "malloc") call gt(ipm)%init(npwsp, npwsp, gwr%g_slkproc, istwfk1, size_blocs=[-1, col_bsize])
+           if (action == "malloc") call gt(ipm)%init(npwsp, npwsp, gwr%g_slkproc, istwfk1, size_blocs=[-1, col_bsize]) !, gpu_action=gpu_action)
            if (action == "free") call gt(ipm)%free()
          end do
          end associate
@@ -1935,7 +1937,7 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
          ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
          if (what == "tchi") mat => gwr%tchi_qibz(iq_ibz, itau, spin)
          if (what == "wc") mat => gwr%wc_qibz(iq_ibz, itau, spin)
-         if (action == "malloc") call mat%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+         if (action == "malloc") call mat%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize]) !, gpu_action=gpu_action)
          if (action == "free") call mat%free()
        end do
 
@@ -1950,7 +1952,7 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
          ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
          associate (sigc => gwr%sigc_kibz(:, ik_ibz, itau, spin))
          do ipm=1,2
-           if (action == "malloc") call sigc(ipm)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+           if (action == "malloc") call sigc(ipm)%init(npwsp, npwsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize]) !, gpu_action=gpu_action)
            if (action == "free") call sigc(ipm)%free()
          end do
          end associate

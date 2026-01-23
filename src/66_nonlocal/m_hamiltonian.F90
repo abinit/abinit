@@ -893,8 +893,8 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 ! ==== Non-local factors ====
 ! ===========================
 
-
- if (ham%usepaw==0) then ! Norm-conserving: use constant Kleimann-Bylander energies.
+ if (ham%usepaw==0) then
+   ! Norm-conserving: use constant Kleimann-Bylander energies.
    ham%dimekb1=psps%dimekb
    ham%dimekb2=psps%ntypat
    ham%dimekbq=1
@@ -920,7 +920,8 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    end if
 #endif
 
- else ! PAW: store overlap coefficients (spin non dependent) and Dij coefficients (spin dependent)
+ else
+   ! PAW: store overlap coefficients (spin non dependent) and Dij coefficients (spin dependent)
    cplex_dij=1
    if (present(paw_ij)) then
      if (size(paw_ij)>0) cplex_dij=paw_ij(1)%cplex_dij
@@ -946,7 +947,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
        ham%sij(cplex_dij*pawtab(itypat)%lmn2_size+1:ham%dimekb1,itypat)=zero
      end if
    end do
-   !We preload here PAW non-local factors in order to avoid a communication over atoms
+   ! We preload here PAW non-local factors in order to avoid a communication over atoms
    ! inside the loop over spins.
    ABI_MALLOC(ham%ekb_spin,(ham%dimekb1,ham%dimekb2,nspinor**2,ham%dimekbq,my_nsppol))
    ham%ekb_spin=zero
@@ -1767,9 +1768,9 @@ subroutine rfham_init(rf_ham, cplex, gs_Ham, ipert,&
    rf_Ham%dime1kb1=cplex_dij1*(gs_Ham%lmnmax*(gs_Ham%lmnmax+1))/2
  end if
 
-  ! Allocate the arrays of the 1st-order Hamiltonian
-  ! We preload here 1st-order non-local factors in order to avoid
-  ! a communication over atoms inside the loop over spins.
+ ! Allocate the arrays of the 1st-order Hamiltonian
+ ! We preload here 1st-order non-local factors in order to avoid
+ ! a communication over atoms inside the loop over spins.
  if (gs_Ham%usepaw==1.and.rf_Ham%dime1kb1>0) then
    if ((ipert>=1.and.ipert<=gs_Ham%natom).or.ipert==gs_Ham%natom+2.or.&
         ipert==gs_Ham%natom+3.or.ipert==gs_Ham%natom+4.or.ipert==gs_Ham%natom+11) then
@@ -1787,7 +1788,7 @@ subroutine rfham_init(rf_ham, cplex, gs_Ham, ipert,&
          ABI_MALLOC(e1kb_tmp,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,cplex))
        end if
 
-!      === Frozen term
+       ! === Frozen term
        jsp=0
        do isp=1,rf_Ham%nsppol
          if (my_spintab(isp)==1) then
@@ -1802,7 +1803,7 @@ subroutine rfham_init(rf_ham, cplex, gs_Ham, ipert,&
          end if
        end do
 
-!      === Self-consistent term
+       ! === Self-consistent term
        if (has_e1kbsc_) then
          jsp=0
          do isp=1,rf_Ham%nsppol
@@ -2039,10 +2040,10 @@ subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
    end if
  end if
 
-!Communication in case of distribution over atomic sites
+ ! Communication in case of distribution over atomic sites
  if (paral_atom) call xmpi_sum(ekb,comm_atom,ierr)
 
-!Destroy atom table used for parallelism
+ ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  DBG_EXIT("COLL")
@@ -2095,12 +2096,12 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
    e1kbsc=zero ; natom=size(e1kbsc,2)
  end if
 
-!Set up parallelism over atoms
+ ! Set up parallelism over atoms
  my_natom=size(paw_ij1) ; paral_atom=(xmpi_comm_size(comm_atom)>1)
  nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
  call get_my_atmtab(comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
-!Retrieve 1st-order PAW Dij coefficients for this spin component (frozen)
+ ! Retrieve 1st-order PAW Dij coefficients for this spin component (frozen)
  if (my_natom>0.and.present(e1kbfr)) then
    if (allocated(paw_ij1(1)%dijfr)) then
      dime1kb1=size(e1kbfr,1) ; dime1kb3=size(e1kbfr,3) ; dime1kb4=size(e1kbfr,4)
@@ -2119,7 +2120,7 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
    end if
  end if
 
-!Retrieve 1st-order PAW Dij coefficients for this spin component (self-consistent)
+ ! Retrieve 1st-order PAW Dij coefficients for this spin component (self-consistent)
  if (my_natom>0.and.present(e1kbsc)) then
    if (allocated(paw_ij1(1)%dijfr).and.allocated(paw_ij1(1)%dij)) then
      dime1kb1=size(e1kbsc,1) ; dime1kb3=size(e1kbsc,3) ; dime1kb4=size(e1kbsc,4)
@@ -2146,7 +2147,7 @@ subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
    if (present(e1kbsc)) call xmpi_sum(e1kbsc,comm_atom,ierr)
  end if
 
-!Destroy atom table used for parallelism
+ ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  DBG_EXIT("COLL")

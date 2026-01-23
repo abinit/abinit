@@ -56,7 +56,6 @@ module m_gwpt
  use m_fftcore,        only : ngfft_seq, sphereboundary, print_ngfft
  use m_fft_mesh,       only : setmesh
  use m_cgtk,           only : cgtk_rotate, cgtk_change_gsphere
- !use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm, fxphas_and_cmp
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_kg,             only : getph, mkkin
@@ -74,7 +73,6 @@ module m_gwpt
  use m_pawrhoij,       only : pawrhoij_type
  use m_pawfgr,         only : pawfgr_type
  use m_dfpt_cgwf,      only : stern_t
- use m_phonons,        only : pheigvec_rotate
  use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph, read_screening
  use m_vcoul,          only : vcoul_t
  use m_gstore,         only : gstore_t, gqk_t, gstore_check_restart
@@ -1915,7 +1913,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          ABI_SFREE(ylm_kmp)
          ABI_SFREE(ylm_kqmp)
-
          ABI_SFREE(botsq_pbz)
          ABI_SFREE(otq_pbz)
          ABI_SFREE(dmeig_pbz)
