@@ -267,7 +267,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    rot_type_vee = 3 !  
  end if ! useylm
 
- write(*,*)"Hello Fred rot_type in forctqmc=",rot_type_vee
  ! if(useylm==1.and.opt_diag/=1) ABI_ERROR("useylm==1 and opt_diag/=0 is not possible")
  if (hu(1)%jpawu_zero .and. nsppol == 2) nsppol_imp = 2 ! J=0 and nsppol=2
  if (.not. hu(1)%jpawu_zero .or. nsppol /= 2) nsppol_imp = 1  ! J/=0 ou nsppol=1
