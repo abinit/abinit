@@ -151,6 +151,7 @@ inp_files = [
     "t145.abi",  # test quadrupole calculation with all negative KB energies As PSP
     "t146.abi",  # test antisymmetric vector potential response and quadrupoles of HF molecule
     "t147.abi",  # test total vector potential response and quadrupoles of HF molecule
-    "t148.abi",  # test total linear-response calculation with 2D Coulomb cutoff in BN monolayer
-    "t149.abi"   # test total linear-response calculation with 2D short-range Coulomb kernel in BN monolayer
+    "t148.abi",  # test linear-response calculation with 2D Coulomb cutoff in BN monolayer
+    "t149.abi",  # test linear-response calculation with 2D short-range Coulomb kernel in BN monolayer
+    "t150.abi"   # test finite-q scalar potential linear-response calculation with PCM short-circuit conditions
 ]
