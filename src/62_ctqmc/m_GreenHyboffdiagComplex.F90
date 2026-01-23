@@ -902,10 +902,10 @@ SUBROUTINE GreenHyboffdiagComplex_setN(op,N)
     !op%oper(1,iflavor,iflavor2) = -tmpoper
     !op%oper(op%samples,iflavor,iflavor2) = 2*op%oper(op%samples,iflavor,iflavor2)
     !op%oper(1,iflavor,iflavor2) = 2*op%oper(1,iflavor,iflavor2)
-        !op%oper(op%samples,iflavor,iflavor2) = 2*op%oper(op%samples,iflavor,iflavor2)
-        !op%oper(1,iflavor,iflavor2) = 2*op%oper(1,iflavor,iflavor2)
-        op%oper(op%samples,iflavor,iflavor2) = op%oper(op%samples,iflavor,iflavor2)+op%oper(op%samples,iflavor2,iflavor)                      
-        op%oper(1,iflavor,iflavor2) = op%oper(1,iflavor,iflavor2)+op%oper(1,iflavor2,iflavor)                                        
+        op%oper(op%samples,iflavor,iflavor2) = 2*op%oper(op%samples,iflavor,iflavor2)
+        op%oper(1,iflavor,iflavor2) = 2*op%oper(1,iflavor,iflavor2)
+        !op%oper(op%samples,iflavor,iflavor2) = op%oper(op%samples,iflavor,iflavor2)+op%oper(op%samples,iflavor2,iflavor)                      
+        !op%oper(1,iflavor,iflavor2) = op%oper(1,iflavor,iflavor2)+op%oper(1,iflavor2,iflavor)                                        
       endif
     ENDDO
   ENDDO
