@@ -17648,7 +17648,7 @@ This variable enables response-function calculations with respect to external Ze
 
   * 0 --> no magnetic-field perturbation
   * 1 --> uniform magnetic-field perturbation (possibly at finite q) applied along the Cartesian directions specified by [[rfdir]]
-  * 2 --> local magnetic-field perturbations (possibly at finite q) applied to the atomis specified by [[rfatpol]] and along the 
+  * 2 --> local magnetic-field perturbations (possibly at finite q) applied to the atoms specified by [[rfatpol]] and along the 
           Cartesian directions specified by [[rfdir]]. The size and boundary shape of the atomic spheres wherein the field is applied 
           are specified by [[ratsph]] and [[ratsm]].
 
