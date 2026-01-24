@@ -32,7 +32,7 @@ Xavier
 
 **A.1** Remark: ABINIT paper
 
-The ABINIT project developments since 2020 have been the subject of a recently published paper, see [[cite:Verstraete2025]]. Updated abiref.bib by M. Giatomassi (MR1235).
+The ABINIT project developments since 2020 have been the subject of a recently published paper, see [[cite:Verstraete2025]]. 
 TODO : mention in acknowledgments.
 
 **A.2** Update of ABINIT to CODATA2022 version of the fundamental constants
@@ -73,7 +73,7 @@ There have been many improvements in the DMFT part of ABINIT, already started wi
 * ABINIT has been interfaced with TRIQS [[https://triqs.github.io/triqs/latest/]]. About thirty new input variables have been defined, with the prefix dmft_triqs_XXXX . 
 * A new tutorial [[tutorial:dmft_triqs]], has been introduced. 
 * Massive optimization of the code, as well as cleaning.
-* It is possible to use the JMj local basis in DMFT with the CTQMC of abinit using the tag [[dmftctmqc_basis]] = 4. It adds also the local susceptibility in this local basis and a test in paral repo 
+* It is possible to use the JMj local basis in DMFT with the CTQMC of abinit using [[dmftctqmc_basis]] = 4. It adds also the local susceptibility in this local basis and a test in paral repo 
 * Add a new variable called [[dmft_magnfield]] that allows one to apply a small magnetic field for the DMFT calculations. 
   The contribution of the field is added using the Zeeman Hamiltonian either on the local impurity Hamiltonian or on the Kohn-Sham eigenvalues used to build the green's function.
 * When activating [[dmft_dc]]=8, the screened potential is assumed to have the form of a Yukawa potential. Controlling the parameters of this Yukawa potential is possible, see [[dmft_dc]]=8.
@@ -93,14 +93,14 @@ Currently, the only parts of the code that are not tested are the interface with
 See numerous new tests, [[test:paral_102]] to [[test:paral_118]], [[test:paral_121]], as well as the new [[tutorial:dmft_triqs]].
 
 New input variables : 
-*about thirty variables with the prefix dmft_triqs_XXX. 
-(TODO : document dmft_triqs_dlr_wmax, dmft_triqs_measure_g_l, dmft_triqs_pauli_prob, dmft_triqs_shift_mu, dmft_triqs_random_seed_a, dmft_triqs_random_seed_b,
+
+* about thirty variables with the prefix dmft_triqs_XXX.  (TODO : document dmft_triqs_dlr_wmax, dmft_triqs_measure_g_l, dmft_triqs_pauli_prob, dmft_triqs_shift_mu, dmft_triqs_random_seed_a, dmft_triqs_random_seed_b,
 dmft_triqs_n_iw, dmft_triqs_random_n_l, dmft_triqs_n_tau, dmft_triqs_prt_entropy, dmft_triqs_read_ctqmcdata).
 * Yukawa : [[dmft_yukawa_epsilon]], [[dmft_yukawa_lambda]],  [[dmft_yukawa_param]]
 * Magnetic field : [[dmft_magnfield]], [[dmft_magnfield_b]] 
 * Continuous Time QMC : [[dmftctqmc_chains]], [[dmftctqmc_localprop]] (replacing dmftctqmc_config), [[dmftctqmc_mov]], [[dmftctqmc_order]]
 * Init from previous datasets : [[getctqmcdata]], [[getself]]
-* Other miscellaneous new input variables : [[dmft_orbital_filepath]], [[dmft_prtself]], [[dmft_wanothnorm]],[[dmft_fermi_step]], [[dmft_nominal]], [[dmft_orbital]], 
+* Other miscellaneous new input variables : [[dmft_orbital_filepath]], [[dmft_prtself]], [[dmft_wanorthnorm]],[[dmft_fermi_step]], [[dmft_nominal]], [[dmft_orbital]], 
 [[dmft_prt_maxent]], [[dmft_prtwan]], [[dmft_shiftself]], [[dmft_wanrad]], [[dmft_x2my2d]].
 * TODO test [[dmft_prt_maxent]]
 
@@ -151,7 +151,7 @@ By J. Boust, M. Torrent (MR1173, 1242, 1256, 1271)
 
 Calculation of the Born contribution ("electron-phonon") to the total energy.
 More information: [[https://arxiv.org/abs/2512.04897]].
-New tests :  [[tests:v10_61]] to [[tests:v10_65]].
+New tests :  [[test:v10_61]] to [[test:v10_65]].
 This energy contribution is printed with [[optdriver]]=7, [[eph_task]]=4 . TODO : check with Samuel.
 
 By S. Ponce with help by X. Gonze for the theory (MR1270)
@@ -187,8 +187,9 @@ There has been a reorganization and beautification of Anaddb.
 * ASR is no longer deactivated just to preserve old behaviour.
 
 Moreover, internally, 
+
 * the new anaddb_driver_type contains most of the subroutines that are executed by anaddb
-* the variable [[atifc]] is no longer overwritten internally.
+* the variable [[atifc@anaddb]] is no longer overwritten internally.
 * ddb_hdr_type uses logical variables to check for available block types (instead of mblktyp)
 
 By G. Antonius (MR1228)
@@ -340,7 +341,7 @@ For [[gw_rcut]], see [[test:gwr_suite_10]], [[test:gwr_suite_11]], [[test:paral_
 
 By F. Bruneval (commit 54d0c199f18 among others)
 
-**D.5 **
+**D.5**
 Significantly improved the error message output to ABI_MPIABORTFILE. Use POSIX API to create a file lock.
 
 By M. Giantomassi (MR1201)
@@ -404,10 +405,10 @@ By J. Zwanziger (MR1230)
 However, these tests are not activated ?! TODO : activate them or suppress them.
 
 **D.16**
-New input variables, not tested, not documented : [[nb_protected]], [[nb_per_slice]]. Introduced by Matteo 20250415. TODO : document and test.
+New input variables, not tested, not documented : `nb_protected`, `nb_per_slice`. Introduced by Matteo 20250415. TODO : document and test.
 
 **D.17**
-New input variables, not tested, not documented : [[extfpmd_prterr]] 20251031, [[extfpmd_pawsph]] 20251031 , [[cwfs_wouth]] 20251215. Introduced by James Boust. TODO : document and test.
+New input variables, not tested, not documented : `extfpmd_prterr` 20251031, `extfpmd_pawsph` 20251031 , `cwfs_wouth` 20251215. Introduced by James Boust. TODO : document and test.
 
 
 * * *
