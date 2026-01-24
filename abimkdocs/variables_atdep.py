@@ -438,7 +438,7 @@ Variable(
     mnemonics="TOLerance for MATCHing atom positions.",
     added_in_version="10.5",
     text="""
-Defines the tolerance criterion for mathing the average values of xred to the ideal ones.
+Defines the tolerance criterion for matching the average values of xred to the ideal ones.
 """,
 ),
 
