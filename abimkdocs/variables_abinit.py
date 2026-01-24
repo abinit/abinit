@@ -8617,6 +8617,28 @@ Number of strain teps per MC trial trajectory, for the Hybrid Monte Carlo algori
 """,
 ),
 
+Variable(        
+    abivarname="hspinfield",
+    varset="ffield",
+    vartype="real",
+    topics=['MagField_basic'], 
+    dimensions=[3],
+    defaultval=0,
+    mnemonics="H-magnetic SPIN FIELD",
+    characteristics=['[[MAGNETIC_FIELD]]'], 
+    added_in_version="10.6.0",
+    text=r"""    
+
+Give the value of the magnetic field, $H$, acting on the spin/spinorial wavefunctions (so, not on the orbital part).
+As usual, the default is atomic units.    
+
+Note that Tesla are admitted, despite the fact that this is not the proper unit for a $H$ field.
+Actually, if you specify "Tesla", ABINIT will set $\mu_0H$ in Tesla, so that H will be in Amperes/metre.
+
+REPLACES the obsolete zeemanfield input variable. 
+""",
+),
+
 Variable(
     abivarname="hyb_mixing",
     varset="gstate",
@@ -9784,6 +9806,56 @@ A non-zero value of [[irdkden]] is treated in the same way as other "ird" variab
 For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
+
+Variable(        
+    abivarname="irddelfd",    
+    varset="files",
+    vartype="integer",       
+    topics=['multidtset_useful'],
+    dimensions="scalar",     
+    defaultval=0,
+    mnemonics="Integer that governs the ReaDing of the the 1st derivative of wavefunctions with respect to ELectric FielD, from _1WF file",
+    added_in_version="10.5",
+    text=r"""    
+Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate starting wavefunctions for the 1st derivative of wavefunctions with respect to ELectric FielD, from _1WF file.
+As alternative, one can use the input variable [[getdelfd]], they are mutually exclusive.
+See [[getdelfd]] as well as the similar [[irdddk]] for more information
+""",
+),
+
+
+Variable(
+    abivarname="irddkde",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer that governs the ReaDing of the mixed 2nd derivative of wavefunctions with respect to K and electric field, from _1WF file",
+    added_in_version="10.5",
+    text=r"""
+Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate starting DKDE wavefunctions.
+As alternative, one can use the input variable [[getdkde]], they are mutually exclusive. 
+See [[getdkde]] as well as the similar [[irdddk]] for more information
+""",
+),
+
+
+Variable(
+    abivarname="irddkdk",
+    varset="files",
+    vartype="integer", 
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer that governs the ReaDing of the 2nd derivative of wavefunctions with respect to K, from _1WF file",
+    added_in_version="10.5",
+    text=r"""
+Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate starting DKDK wavefunctions.
+As alternative, one can use the input variable [[getdkdk]], they are mutually exclusive. 
+See [[getdkdk]] as well as the similar [[irdddk]] for more information
+""",
+),  
 
 Variable(
     abivarname="irddvdb",
@@ -21204,7 +21276,7 @@ Note that a tolerance defined generically does not couple with a criterion defin
 See [[tolwfr]] for more details about coupling two criteria.
 
 When the maximum magnetization among all atoms and directions is smaller than 10e^-8, both the maximum of magnetization
-and its difference are reset to zero. In this case, the toldmag convergence criterion cannot be used.
+and its difference are reset to zero. In this case, the **toldmag** convergence criterion cannot be used.
 """,
 ),
 Variable(
@@ -23811,7 +23883,10 @@ Variable(
     characteristics=['[[MAGNETIC_FIELD]]'],
     added_in_version="before_v9",
     text=r"""
-Give the value of the Zeeman field, $H$, acting on the spin/spinorial wavefunctions (so, not on the orbital part).
+
+OBSOLETE, superceded by [[hspinfield]].
+
+Give the value of the magnetic field, $H$, acting on the spin/spinorial wavefunctions (so, not on the orbital part).
 As usual, the default is atomic units.
 
 Note that Tesla are admitted, despite the fact that this is not the proper unit for a $H$ field.
@@ -25756,7 +25831,7 @@ Variable(
     text=r"""
 When generating a GSTORE file, setting [[gstore_use_lgk]] to 1,
 instructs Abinit to restrict the computation of the g(k,q) to the
-$\qq$-points in the IBZ_k where IBZ_k is the irreducibile zone
+$\qq$-points in the IBZ_k where IBZ_k is the irreducible zone
 defined by the little group of the $\kk$-point.
 This allows one to reduce the number of e-ph matrix elements, but keep in mind that
 the generated GSTORE can only be used to compute electronic properties such
@@ -25782,7 +25857,7 @@ Variable(
     text=r"""
 When generating a GSTORE file, setting [[gstore_use_lgq]] to 1,
 instructs Abinit to restrict the computation of the g(k,q) to the
-$\kk$-points in the IBZ_q where IBZ_q is the irreducibile zone
+$\kk$-points in the IBZ_q where IBZ_q is the irreducible zone
 defined by the little group of the $\qq$-point.
 This allows one to reduce the number of e-ph matrix elements, but keep in mind that
 the generated GSTORE can only be used to compute phonon properties such
@@ -25868,13 +25943,13 @@ the CBM/VBM or the position wrt to the Fermi level via [[gstore_erange]].
 ),
 
 Variable(
-    abivarname="gstore_vname",
+    abivarname="gstore_gname",
     varset="eph",
     vartype="string",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
     defaultval="gvals",
-    mnemonics=r"GSTORE Variable NAME",
+    mnemonics=r"GSTORE G-value NAME",
     requires="[[optdriver]] == 7",
     added_in_version="10.5.6",
     text=r"""
@@ -26980,7 +27055,7 @@ Variable(
     added_in_version="10.5.1",
     text=r"""
 If set to 1, the Generalized Bloch Theorem (GBT) is used to compute a spin-spiral with wavevector [[qgbt]].
-The GBT requires [[nspinor]] = 2 and [[nspden]] 4, but is not compatible with spin-orbit coupling hence
+The GBT requires [[nspinor]] = 2 and [[nspden]]=4, but is not compatible with spin-orbit coupling hence
 [[so_psp]] must be set to zero.
 Also, one has to disable spatial symmetries completely by setting [[nsym]] to 1, and
 time-reversal symmetry as well with [[kptopt]] = 4.
@@ -27000,7 +27075,7 @@ Also, the convergence of the SCF cycle may be significantly improved by increasi
 !!! important
 
     The atomic magnetic moment rotates in the x-y plane (Cartesian coords.) while the z-component
-    remains lattice-periodict. For this reason, one should set [[spinat]] so to have non-zero
+    remains lattice-periodic. For this reason, one should set [[spinat]] so to have non-zero
     components in the x-y plane.
 
 Note that [[spinat]] gives the **initial** electronic spin-magnetization for each atom and the final
