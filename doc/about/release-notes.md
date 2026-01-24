@@ -309,7 +309,7 @@ will be **read** from the GSTORE.nc file.
 
 TODO : New input variable gstore_cplex, not documented, not tested
 
-See [[test:gwpt_suite_4]] and [[test:gwpt_suite_5]]
+See `test:gwpt_suite_04` and `test:gwpt_suite_05`
 
 By M. Giantomassi (MR1235 and 1238)
 
@@ -400,7 +400,8 @@ By J. Zwanziger (MR1230)
 
 **D.14** Replace complex(dpc) with complex(dp).  Remove gwpc and spc; use gwp and sp instead. By M. Giantomassi (MR1235)
 
-**D.15** Copy tests from long wave tutorial to [[test:v10_31]] to [[test:v10_38]] in order to use NetCDF instead of text DDB in the tutorial. M. Giantomassi (e2d87c42135). Initial tests from M. Royo and A. Zabalo.
+**D.15** Copy tests from long wave tutorial to `test:v10_31` to `test:v10_38` in order to use NetCDF instead of text DDB in the tutorial. M. Giantomassi (e2d87c42135). Initial tests from M. Royo and A. Zabalo.
+However, these tests are not activated ?! TODO : activate them or suppress them.
 
 **D.16**
 New input variables, not tested, not documented : [[nb_protected]], [[nb_per_slice]]. Introduced by Matteo 20250415. TODO : document and test.
