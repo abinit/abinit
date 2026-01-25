@@ -59,7 +59,7 @@ See [[test:v10_30]], [[test:v6_17]].
 By Le Shu (MR1211)
 
 
-**A.4** Suppress rfuser (free natom+6 and natom+7). Not used anymore. Also suppress [[rfddk]]=2 (free natom+6). By X.Gonze (MR1229)
+**A.4** Suppress `rfuser` (free natom+6 and natom+7). Not used anymore. Also suppress [[rfddk]]=2 (free natom+6). By X.Gonze (MR1229)
 
 * * *
 
@@ -326,7 +326,7 @@ This setting enables a more accurate evaluation of the self-energy for a given S
 * New file format for the header of the SCR file with info on frequency meshes.
 * Breaking change in GW: stop the code if [[nbandi]] is greater than the number of states found in the WFK file.
 Previously, we were just printing a WARNING in the log file.
-* Fix memory leak in gwr with [[chi_algo]] 2
+* Fix memory leak in gwr with [[gwr_chi_algo]] 2
 
 See [[test:v67mbpt_54]] to [[test:v67mbpt_60]], also [[test:gwr_suite_12]]..
 
@@ -913,11 +913,10 @@ There have been many improvements in the DMFT part of ABINIT, not yet though to 
 * New functionalities have been added (new double counting, possibility to work with an arbitrary orbital read from file...). List to be provided ...
 * One can run dmft susceptibility with correlated and non correlated atoms.
 * A new option to run DFT+DMFT has been added: one can use Wannier90 to construct localized orbitals and call the impurity solver using the python invocation scheme (still to be done: going back to DFT from the impurity solver).
-* Several routines have been added in preparation for a (working) interface with TRIQS. About thirty new input variables have been defined, with the prefix dmft_triqs_XXXX (to be tested and documented).
+* Several routines have been added in preparation for a (working) interface with TRIQS. About thirty new input variables have been defined, with the prefix dmft_triqs_XXXX .
 * Two extra components for the energy are printed.
 * New input variables (to be tested and documented): dmft_fermi_step, dmft_nominal, dmft_orbital, dmft_prt_maxent, dmft_prtwan, dmft_shiftself, dmft_test, dmft_use_all_bands, dmft_use_full_chipsi, dmft_wanrad, dmft_x2my2d.
 
-Input variables [[dmftctqmc_mov]], [[dmftctqmc_order]] and [[dmft_triqs_n_l]] are documented, but not tested.
 There has also been miscellaneous DMFT fixes and improvements
 
 By F. Castiel, F. Gendron, O. Gingras, B. Amadon (MR1063, 1077, 1084, 1107, 1148 give more details)
