@@ -29,6 +29,7 @@ module m_dfpt_cgwf
  use defs_basis
  use m_abicore
  use m_errors
+ use m_xomp
  use m_xmpi
  use m_cgtools
  use m_rf2
@@ -1902,8 +1903,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  cgq_ptr => stern%cgq
 
  if (gpu_option == ABI_GPU_OPENMP) then
-   map_cgq  =  .not. ( xomp_target_is_present(c_loc(cgq_ptr)))
-   print *, "mapping cgq"
+   map_cgq  =  .not. (xomp_target_is_present(c_loc(cgq_ptr)))
 #ifdef HAVE_OPENMP_OFFLOAD
  ! Upload cgq array to GPU
  !$OMP TARGET ENTER DATA MAP(to:cgq_ptr) IF (map_cgq)
