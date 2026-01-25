@@ -344,7 +344,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
  ABI_MALLOC(kg_k,(3,mpw))
  ABI_MALLOC(kinpw,(mpw))
- if (abs(dtset%orbmag) .GT. 2) then
+ if (abs(dtset%orbmag) .EQ. 3) then
    ABI_MALLOC(dkinpw,(mpw,3))
  end if
 
@@ -458,7 +458,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      kinpw(:) = zero
      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,crystal%gmet,&
        & kg_k,kinpw,kpoint,npw_k,0,0)
-     if (abs(dtset%orbmag).GT.2) then
+     if (abs(dtset%orbmag).EQ.3) then
        do adir=1,3
          call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,crystal%gmet,&
            & kg_k,dkinpw(:,adir),kpoint,npw_k,adir,0)
@@ -1578,16 +1578,16 @@ subroutine gauge_treatment(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gc
   case ( -2:-1 )
     ! Berry DDK already projected onto conduction space, leave in berry gauge
     gcg1_k(1:2,1:mcgk,1:3) = cg1_k(1:2,1:mcgk,1:3)
-  case ( 1:2 )
-    ! project cg1_k onto conduction space by removing ground PAW part; 
-    ! stay in parallel transport gauge
-    call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
-      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,gcg1_k)
   case ( 3 ) 
     ! Convert PAW DDK to diagonal gauge
     call para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_k,gs_hamk,&
       & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,mpw,nband_k,ngfft4,ngfft5,ngfft6,npw_k,&
       & nucdip_dirs,occ_k,vectornd_pac)
+  case default
+    ! project cg1_k onto conduction space by removing ground PAW part; 
+    ! stay in parallel transport gauge
+    call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
+      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,gcg1_k)
   end select
 
 end subroutine gauge_treatment
