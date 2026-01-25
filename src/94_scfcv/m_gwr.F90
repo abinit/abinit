@@ -3386,7 +3386,7 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
 
  if (isirr_q) then
    ! Copy the PBLAS matrix in wc_qbz and we are done.
-   call gwr%wc_qibz(iq_ibz, itau, spin)%copy(wc_qbz); return
+   call gwr%wc_qibz(iq_ibz, itau, spin)%copy(wc_qbz); goto 10
  end if
 
  !ABI_WARNING_IF(trev_q == 0, "trev_q should be tested")
@@ -3430,6 +3430,7 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  end associate
  end associate
 
+10 continue
  ABI_NVTX_END_RANGE()
 
 end subroutine gwr_rotate_wc
@@ -3603,7 +3604,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  nrsp = gwr%g_nfft * gwr%nspinor
  npwsp = desc_qbz%npw * gwr%nspinor
  ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
- call rgp%init(nrsp, npwsp, gwr%g_slkproc, desc_qbz%istwfk, size_blocs=[-1, col_bsize])
+ call rgp%init(nrsp, npwsp, gwr%g_slkproc, desc_qbz%istwfk, size_blocs=[-1, col_bsize]) ! , gpu_action=gpu_action)
 
  call uplan_k%init(desc_qbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_qbz%istwfk, &
                    desc_qbz%gvec, gwp, gpu_option)
