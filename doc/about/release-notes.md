@@ -206,7 +206,7 @@ input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
 datasets).
 
-New [[test:v10_110], and the output of many tests has been updated, due to the above-mentioned writings.
+New [[test:v10_110]], and the output of many tests has been updated, due to the above-mentioned writings.
 
 By S. Rostami (MR1243)
 
@@ -324,7 +324,7 @@ This setting enables a more accurate evaluation of the self-energy for a given S
 * Use MPI shared window in SIGMA so that memory for epsm1 does not increase with the number of MPI procs per node
 * Add possibility of using minimax meshes in SCREENING and SIGMA with AC.
 * New file format for the header of the SCR file with info on frequency meshes.
-* Breaking change in GW: stop the code if [[nbandi]] is greater than the number of states found in the WFK file.
+* Breaking change in GW: stop the code if [[nband]] is greater than the number of states found in the WFK file.
 Previously, we were just printing a WARNING in the log file.
 * Fix memory leak in gwr with [[gwr_chi_algo]] 2
 
@@ -433,14 +433,14 @@ Also fixes the evaluation of the hybrid Kohn-Sham + Thomas-Fermi contribution to
 
 By A. Blanchet (MR1252).
 
-**E.3** Re-enable SOC/spinor treatment with wannier90, which was broken some time ago
-Catch PAW + W90 which is not functional for the moment (afaik)
-Start changes to enable PAW as well
+**E.3** Re-enable SOC/spinor treatment with wannier90, which was broken some time ago.
+Catch PAW + W90 which is not functional for the moment (afaik).
+Start changes to enable PAW as well.
 
 By M. Verstraete (MR1215)
 
-**E.4** Bugfix: the born effective charge was not printed in output when there was electric/displacement term at Gamma, but no displacement/displacement term.
-No autotest needed to be added as tutorespfn/telast_3 is in this case. The refrence has been updated.
+**E.4** Bugfix: the Born effective charge was not printed in output when there was electric/displacement term at Gamma, but no displacement/displacement term.
+No autotest needed to be added as tutorespfn/telast_3 is in this case. The reference has been updated.
 
 By He Xu (MR1241)
 
