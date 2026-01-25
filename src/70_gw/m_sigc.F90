@@ -574,7 +574,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    do spin=1,Wfd%nsppol
      do ib=ib1,ib2
        do jb=ib1,ib2
-        if (abs(qp_ene(ib,jk_ibz,spin)-qp_ene(jb,jk_ibz,spin)) < 0.001/Ha_ev) degtab(ib,jb,spin)=1
+        if (abs(qp_ene(ib,jk_ibz,spin)-qp_ene(jb,jk_ibz,spin)) < dtset%symsigma_de) degtab(ib,jb,spin)=1
        end do
      end do
    end do

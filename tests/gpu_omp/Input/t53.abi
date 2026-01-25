@@ -52,7 +52,7 @@ xred
 #%% files_to_test =
 #%%   t53.abo, tolnlines = 40, tolabs = 3e-04, tolrel = 1.5;
 #%% [paral_info]
-#%% nprocs_to_test = 1
+#%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, RMM-DIIS

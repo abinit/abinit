@@ -2859,7 +2859,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      cnt = 0
      do spin=1,new%nsppol
        bstop = new%bstart_ks(ikcalc, spin) + new%nbcalc_ks(ikcalc, spin) - 1
-       call ebands%enclose_degbands(ik_ibz, spin, new%bstart_ks(ikcalc, spin), bstop, changed, TOL_EDIFF, &
+       call ebands%enclose_degbands(ik_ibz, spin, new%bstart_ks(ikcalc, spin), bstop, changed, dtset%symsigma_de, &
                                     degblock=degblock)
        if (changed) then
          new%nbcalc_ks(ikcalc, spin) = bstop - new%bstart_ks(ikcalc, spin) + 1

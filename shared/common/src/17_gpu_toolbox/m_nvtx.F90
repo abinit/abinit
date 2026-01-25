@@ -106,8 +106,6 @@ contains
 
   subroutine nvtxStartRange(name,id)
 
-    implicit none
-
     character(kind=c_char,len=*) :: name
     integer, optional:: id
     type(nvtxEventAttributes):: event

@@ -2403,7 +2403,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
        if (any(mod10 == [SIG_SEX, SIG_COHSEX])) then
          ! Calculate static COHSEX or SEX using the coarse gwc_ngfft mesh.
-         call cohsex_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Cryst,qp_ebands,Sigp,Sr,epsm1,Gsph_c,Vcp,Kmesh,Qmesh,&
+         call cohsex_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,dtset, Cryst,qp_ebands,Sigp,Sr,epsm1,Gsph_c,Vcp,Kmesh,Qmesh,&
                         Ltg_k(ikcalc),Pawtab,Pawang,Paw_pwff,Psps,Wfd,QP_sym,&
                         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_k)
        else
@@ -2952,7 +2952,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  integer :: mod10,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng, nsppol
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev,usefock_ixc
  integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc
- real(dp),parameter :: OMEGASIMIN=0.01d0, tol_enediff=0.001_dp*eV_Ha
+ real(dp),parameter :: OMEGASIMIN=0.01d0
  real(dp) :: domegas,domegasi,ucvol,rcut, drude_plasmon_freq, wmax
  logical :: ltest,remove_inv,changed,found
  character(len=500) :: msg, iw_mesh_type
@@ -3357,7 +3357,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
        if (kmesh%has_IBZ_item(Sigp%kptgw(:,ikcalc), ikibz, G0)) then
          call ks_ebands%enclose_degbands(ikibz,isppol, &
-               Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
+               Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,dtset%symsigma_de)
 
          if (changed) then
            write(msg,'(2(a,i0),2a,2(1x,i0))')&

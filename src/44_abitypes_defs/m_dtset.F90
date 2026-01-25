@@ -954,6 +954,7 @@ type, public :: dataset_type
  real(dp) :: rhoqpmix
  real(dp) :: rifcsph = zero
  real(dp) :: rcut
+ real(dp) :: symsigma_de = one / Ha_meV
  real(dp) :: slabwsrad
  real(dp) :: slabzbeg
  real(dp) :: slabzend
@@ -2403,6 +2404,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rectolden          = dtin%rectolden
  dtout%dfpt_sciss         = dtin%dfpt_sciss
  dtout%mbpt_sciss         = dtin%mbpt_sciss
+ dtout%symsigma_de        = dtin%symsigma_de
  dtout%spinmagntarget     = dtin%spinmagntarget
  dtout%spbroad            = dtin%spbroad
  dtout%spnorbscl          = dtin%spnorbscl
@@ -3908,7 +3910,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' spin_var_temperature spin_write_traj'
  list_vars=trim(list_vars)//' spinat spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
- list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'
+ list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symsigma_de symv1scf'
  list_vars=trim(list_vars)//' structure '
 !T
  list_vars=trim(list_vars)//' td_exp_order td_maxene td_mexcit td_scnmax td_prtstr td_restart td_propagator td_scthr'

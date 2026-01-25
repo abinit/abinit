@@ -4776,7 +4776,6 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
  integer :: bstart_k, bstop_k, bstart_kq, bstop_kq, max_nk, max_nq
  integer :: ik_bz, ik_ibz, ib_min_k, ib_max_k, iq_bz, ikq_ibz, ib_min_kq, ib_max_kq, nn
  logical :: with_ks__, changed_k, changed_kq, all_gs
- real(dp),parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
  real(dp) :: gg, gg_ks, g_ratio, min_g_ratio, max_g_ratio, mean_g_ratio, stdev_g_ratio !, vnk
  character(len=abi_slen) :: gstore_gmode
  character(len=500) :: msg
@@ -4902,7 +4901,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
      kk = ebands%kptns(:,ik_ibz)
      ib_min_k = bstart_k; ib_max_k = bstop_k
 
-     call ebands%enclose_degbands(ik_ibz, spin, ib_min_k, ib_max_k, changed_k, TOL_EDIFF, &
+     call ebands%enclose_degbands(ik_ibz, spin, ib_min_k, ib_max_k, changed_k, dtset%symsigma_de, &
                                   degblock=degblock_k)
      if (changed_k) then
        !write(ab_out, "(a)")" Non all the degenerate bands at k were included. This should not happen!"
@@ -4927,7 +4926,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
        ikq_ibz = mapl_kq(1)
        ib_min_kq = bstart_kq; ib_max_kq = bstop_kq
 
-       call ebands%enclose_degbands(ikq_ibz, spin, ib_min_kq, ib_max_kq, changed_kq, TOL_EDIFF, &
+       call ebands%enclose_degbands(ikq_ibz, spin, ib_min_kq, ib_max_kq, changed_kq, dtset%symsigma_de, &
                                     degblock=degblock_kq)
 
        if (changed_kq) then
