@@ -20812,7 +20812,6 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="SYMmetrization of SIGMA matrix elements",
-    requires="[[optdriver]] in [4, 7]",
     commentdefault="The default value changed in Abinitv9 from 0 to 1",
     added_in_version="before_v9",
     text=r"""
@@ -20823,15 +20822,34 @@ by the point group of the wave-vector k specified in the [[kptgw]] list.
 
 The symmetrized expression leads to a considerable speedup of the run, especially
 for high-symmetry k points e.g. $\Gamma$.
-Unfortunately, this option is not yet compatible with self-consistent GW
-calculations (see [[gwcalctyp]]).
+Unfortunately, this option is not yet compatible with self-consistent GW calculations (see [[gwcalctyp]]).
 
 The code constructs a symmetric invariant
 for the diagonal matrix elements of the self-energy by averaging the self-energy matrix
 elements within the degenerate subspace. Therefore, particular care has to be
 taken in the presence of accidental degeneracies. Since calculations
 performed with [[symsigma]] = 1 will not be able to remove the initial
-accidental degeneracy. This is the reason why this option is not activated by default.
+accidental degeneracy.
+States are considered degenerate if their energies differ by less than [[symsigma_de]].
+""",
+),
+
+Variable(
+    abivarname="symsigma_de",
+    varset="gw",
+    vartype="real",
+    topics=['SelfEnergy_expert'],
+    dimensions="scalar",
+    defaultval="1 meV",
+    mnemonics="SYMmetrization of SIGMA matrix elements, Delta Energy",
+    characteristics=['[[ENERGY]]'],
+    added_in_version="10.7.0",
+    text=r"""
+
+This variable is used in conjunction with [[symsigma]] 1.
+States are considered degenerate if their energies differ by less than [[symsigma_de]].
+The cutoff can be specified in Ha units (the default), Ry, eV, meV or Kelvin, since **symsigma_de** has the
+[[ENERGY]] characteristics.
 """,
 ),
 

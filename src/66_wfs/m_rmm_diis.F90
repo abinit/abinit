@@ -1241,7 +1241,7 @@ end subroutine my_pack_matrix
 !!
 !! FUNCTION
 !!  This routine computes the <i|H|j> matrix elements and then performs the subspace rotation
-!!  of the orbitals (rayleigh-ritz procedure)
+!!  of the orbitals (Rayleigh-Ritz procedure)
 !!  The main difference with respect to other similar routines is that this implementation does not require
 !!  the <i|H|j> matrix elements as input so it can be used before starting the wavefunction optimation
 !!  as required e.g. by the RMM-DIIS method.

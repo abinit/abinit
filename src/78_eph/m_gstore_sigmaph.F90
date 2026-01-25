@@ -1259,7 +1259,7 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
    if (dtset%symsigma == +1) then
      ! Average self-energy matrix elements in the degenerate subspace.
      bstart_k = gqk%bstart_k; bstop_k = gqk%bstop_k
-     call ebands%enclose_degbands(ik_ibz, spin, bstart_k, bstop_k, changed_k, TOL_EDIFF, degblock=degblock)
+     call ebands%enclose_degbands(ik_ibz, spin, bstart_k, bstop_k, changed_k, dtset%symsigma_de, degblock=degblock)
      bstart_k = gqk%bstart_k; bstop_k = gqk%bstop_k
      !if (changed_k) then
      !  ABI_WARNING("Changed")

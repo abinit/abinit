@@ -183,6 +183,9 @@ module m_gwr
  use m_dyson_solver,  only : sigma_pade_t
  use minimax_grids,   only : gx_minimax_grid
  use m_occ,           only : get_fact_spin_tol_empty
+#if defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -823,8 +826,6 @@ module m_gwr
 
  integer,private,parameter :: CHI_FIT = 1, SIGMA_FIT = 2
 
- real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
-
 contains
 !!***
 
@@ -1164,7 +1165,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      cnt = 0
      do spin=1,gwr%nsppol
        bstop = gwr%bstart_ks(ikcalc, spin) + gwr%nbcalc_ks(ikcalc, spin) - 1
-       call ks_ebands%enclose_degbands(ik_ibz, spin, gwr%bstart_ks(ikcalc, spin), bstop, changed, TOL_EDIFF, &
+       call ks_ebands%enclose_degbands(ik_ibz, spin, gwr%bstart_ks(ikcalc, spin), bstop, changed, gwr%dtset%symsigma_de, &
                                        degblock=degblock)
        if (changed) then
          gwr%nbcalc_ks(ikcalc, spin) = bstop - gwr%bstart_ks(ikcalc, spin) + 1
@@ -3085,6 +3086,8 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, &
 ! *************************************************************************
 
  !call cwtime(cpu, wall, gflops, "start")
+ !ABI_NVTX_START_RANGE(NVTX_GWR_)
+
  gpu_option = gwr%dtset%gpu_option
 
  num_pm = 2; ipm_list__ = [1, 2]
@@ -3176,6 +3179,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, &
    end do
  end if
 
+ !ABI_NVTX_END_RANGE()
  !call cwtime_report(" gwr_get_gkbz_rpr_pm:", cpu, wall, gflops)
 
 end subroutine gwr_get_gkbz_rpr_pm
@@ -3274,6 +3278,8 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
  type(uplan_t) :: uplan_k
 ! *************************************************************************
 
+ !ABI_NVTX_START_RANGE(NVTX_GWR_)
+
  ! Allocate intermediate gp_r PBLAS matrix to store F(g',r)
  npwsp = desc%npw * gwr%nspinor; nrsp = gwr%g_nfft * gwr%nspinor
  ABI_CHECK(block_dist_1d(nrsp, gwr%g_comm%nproc, col_bsize, msg), msg)
@@ -3318,6 +3324,7 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
  if (gwr%dtset%gpu_option == ABI_GPU_OPENMP) call g_gp%gpu_map("update_to") ! FIXME
 
  call uplan_k%free(); call r_gp%free()
+ !ABI_NVTX_END_RANGE()
 
 end subroutine gwr_rpr_to_ggp
 !!***
@@ -3355,6 +3362,7 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  complex(dp) :: ph2, ph1
 ! *************************************************************************
 
+ !ABI_NVTX_START_RANGE(NVTX_GWR_)
  ABI_CHECK(gwr%wc_space == "itau", sjoin("wc_space:", gwr%wc_space, " != itau"))
 
  qq_bz = gwr%qbz(:, iq_bz)
@@ -3417,6 +3425,8 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  end associate
  end associate
 
+ !ABI_NVTX_END_RANGE()
+
 end subroutine gwr_rotate_wc
 !!***
 
@@ -3461,6 +3471,8 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
+ !ABI_NVTX_START_RANGE(NVTX_GWR_)
+
  gpu_option = gwr%dtset%gpu_option
 
  ABI_MALLOC(ceiqr, (gwr%g_nfft * gwr%nspinor))
@@ -3524,6 +3536,8 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
  call wrtout(std_out, sjoin(" Local memory for Wc(g',r):", ftoa(mem_mb, fmt="f8.1"), "[Mb] <<< MEM"))
  call cwtime_report(" gwr_get_myq_wc_gpr:", cpu, wall, gflops)
 
+ !ABI_NVTX_END_RANGE()
+
 end subroutine gwr_get_myq_wc_gpr
 !!***
 
@@ -3559,6 +3573,8 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  type(uplan_t) :: uplan_k
  complex(gwp),allocatable :: ceig0r(:), conjg_ceig0r(:)
 ! *************************************************************************
+
+ !ABI_NVTX_START_RANGE(NVTX_GWR_)
 
  gpu_option = gwr%dtset%gpu_option
  gpu_action = "None"; if (gpu_option == ABI_GPU_OPENMP) gpu_action = "alloc"
@@ -3628,6 +3644,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  end if
 
  if (gpu_option == ABI_GPU_OPENMP) call wc_rpr%gpu_map("update_to")
+ !ABI_NVTX_END_RANGE()
 
 end subroutine gwr_get_wc_rpr_qbz
 !!***
@@ -5420,6 +5437,7 @@ subroutine gwr_build_wc(gwr)
  complex(dp) :: em1_wq(gwr%ntau, gwr%nqibz), eps_wq(gwr%ntau, gwr%nqibz)
 ! *************************************************************************
 
+ !ABI_NVTX_START_RANGE(NVTX_GWR_)
  units = [std_out, ab_out]
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -5599,6 +5617,7 @@ subroutine gwr_build_wc(gwr)
 
  call cwtime_report(" gwr_build_wc:", cpu_all, wall_all, gflops_all)
  call timab(1924, 2, tsec)
+ !ABI_NVTX_END_RANGE()
 
 end subroutine gwr_build_wc
 !!***
@@ -6139,16 +6158,14 @@ else
            bufsize = sigc_rpr(1,ipm,ikcalc)%bufsize
            call cplx_mat_plus_bc(bufsize, sigc_rpr(1,ipm,ikcalc)%buffer_cplx(:,1), &
                                  wtqp, "N", gk_rpr_pm(ipm)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
-                                 !0)
-                                 gpu_option) ! TODO
+                                 gpu_option)
 
            if (abs(wtqm) > tol12) then
              ABI_ERROR(sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
 
              call cplx_mat_plus_bc(bufsize, sigc_rpr(2,ipm,ikcalc)%buffer_cplx(:,1), &
                                    wtqm, "C", gk_rpr_pm(ipm)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
-                                   !0)
-                                   gpu_option) ! TODO
+                                   gpu_option)
 
              !sigc_rpr(1, ipm, ikcalc)%buffer_cplx = sigc_rpr(1, ipm, ikcalc)%buffer_cplx + &
              !    (wtqp + wtqm) * real(gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx, kind=gwp) &
@@ -6696,6 +6713,8 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, loc_cwork, sigm_pm)
  !complex(gwp),allocatable :: loc_cwork(:)
 ! *************************************************************************
 
+ !ABI_NVTX_START_RANGE(NVTX_GWR_)
+
  ! (r',r) with r' local and r-index PBLAS-distributed.
  sigm_pm = czero_gw
  do ipm=1,2
@@ -6716,6 +6735,8 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, loc_cwork, sigm_pm)
    !ABI_FREE(loc_cwork)
    end associate
  end do
+
+ !ABI_NVTX_END_RANGE()
 
 end subroutine sig_braket_ur
 !!***
@@ -8450,9 +8471,9 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
    ! TODO it does not work if nspinor == 2.
 
    if (gwr%dtset%symsigma == 1) then
-     call sigx_symmetrize(ikcalc_ibz, spin, bmin, bmax, nsppol, nspinor, gwr%nsig_ab, ks_eig, sigx, sigxme_tmp)
+     call sigx_symmetrize(ikcalc_ibz, spin, bmin, bmax, nsppol, nspinor, gwr%nsig_ab, gwr%dtset%symsigma_de, ks_eig, sigx, sigxme_tmp)
      !do ii=bmin, bmax; print *, "qp_eig:", ii, qp_eig(ii, ikcalc_ibz, spin) * Ha_eV; end do
-     !call sigx_symmetrize(ikcalc_ibz, spin, bmin, bmax, nsppol, nspinor, gwr%nsig_ab, qp_eig, sigx, sigxme_tmp)
+     !call sigx_symmetrize(ikcalc_ibz, spin, bmin, bmax, nsppol, nspinor, gwr%nsig_ab, gwr%dtset%symsigma_de, qp_eig, sigx, sigxme_tmp)
    end if
 
    ! Reconstruct the full sigma_x matrix from the upper triangle.
