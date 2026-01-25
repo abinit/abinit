@@ -124,6 +124,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_gwr
 
  use, intrinsic :: iso_c_binding
@@ -2895,6 +2898,7 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
  !       2) Make sure that the FFT box is large enough to accommodate umklapps
 
  desc_kbz%ig0 = -1
+ !$OMP PARALLEL DO
  do ig1=1,desc_kbz%npw
    desc_kbz%gvec(:,ig1) = tsign_k * matmul(gwr%cryst%symrec(:,:,isym_k), desc_kibz%gvec(:,ig1)) - g0_k
    if (all(desc_kbz%gvec(:,ig1) == 0)) desc_kbz%ig0 = ig1
@@ -2972,13 +2976,14 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
  logical :: k_is_gamma
  real(dp) :: kk_bz(3), cpu, wall, gflops, mem_mb
  complex(gwp),allocatable :: ceikr(:)
- character(len=500) :: msg
+ character(len=500) :: msg, gpu_action
  type(__slkmat_t) :: rgp, gt_pm(2)
  type(uplan_t) :: uplan_k
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
  gpu_option = gwr%dtset%gpu_option
+ gpu_action = "None"; if (gpu_option == ABI_GPU_OPENMP) gpu_action = "alloc"
 
  mem_mb = two * gwr%my_nkbz * two * gwp * gwr%g_nfft * gwr%green_mpw * b2Mb /  gwr%g_slkproc%grid%nprocs
  call wrtout(std_out, sjoin(" Estimated local memory for Green's functions: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
@@ -3013,7 +3018,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, select_my_kbz, desc_mykbz, gt_
      associate (g_gp => gt_pm(ipm))
      npwsp = desc_k%npw * gwr%nspinor
      ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
-     call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, size_blocs=[-1, col_bsize])
+     call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_k%istwfk, size_blocs=[-1, col_bsize]) !, gpu_action=gpu_action)
 
      ! Perform FFT G_k(g,g') -> G_k(r,g') and store results in rgp.
      gpu_mode = 1
@@ -3086,7 +3091,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, &
 ! *************************************************************************
 
  !call cwtime(cpu, wall, gflops, "start")
- !ABI_NVTX_START_RANGE(NVTX_GWR_)
+ ABI_NVTX_START_RANGE(NVTX_GWR_GKBZ_RPR_PM)
 
  gpu_option = gwr%dtset%gpu_option
 
@@ -3179,7 +3184,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, &
    end do
  end if
 
- !ABI_NVTX_END_RANGE()
+ ABI_NVTX_END_RANGE()
  !call cwtime_report(" gwr_get_gkbz_rpr_pm:", cpu, wall, gflops)
 
 end subroutine gwr_get_gkbz_rpr_pm
@@ -3278,7 +3283,7 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
  type(uplan_t) :: uplan_k
 ! *************************************************************************
 
- !ABI_NVTX_START_RANGE(NVTX_GWR_)
+ ABI_NVTX_START_RANGE(NVTX_GWR_RPR_TO_GGP)
 
  ! Allocate intermediate gp_r PBLAS matrix to store F(g',r)
  npwsp = desc%npw * gwr%nspinor; nrsp = gwr%g_nfft * gwr%nspinor
@@ -3324,7 +3329,7 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, rfact, g_gp)
  if (gwr%dtset%gpu_option == ABI_GPU_OPENMP) call g_gp%gpu_map("update_to") ! FIXME
 
  call uplan_k%free(); call r_gp%free()
- !ABI_NVTX_END_RANGE()
+ ABI_NVTX_END_RANGE()
 
 end subroutine gwr_rpr_to_ggp
 !!***
@@ -3362,7 +3367,7 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  complex(dp) :: ph2, ph1
 ! *************************************************************************
 
- !ABI_NVTX_START_RANGE(NVTX_GWR_)
+ ABI_NVTX_START_RANGE(NVTX_GWR_ROTATE_WC)
  ABI_CHECK(gwr%wc_space == "itau", sjoin("wc_space:", gwr%wc_space, " != itau"))
 
  qq_bz = gwr%qbz(:, iq_bz)
@@ -3425,7 +3430,7 @@ subroutine gwr_rotate_wc(gwr, iq_bz, itau, spin, desc_qbz, wc_qbz)
  end associate
  end associate
 
- !ABI_NVTX_END_RANGE()
+ ABI_NVTX_END_RANGE()
 
 end subroutine gwr_rotate_wc
 !!***
@@ -3471,7 +3476,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
- !ABI_NVTX_START_RANGE(NVTX_GWR_)
+ ABI_NVTX_START_RANGE(NVTX_GWR_MYQ_WW_GPR)
 
  gpu_option = gwr%dtset%gpu_option
 
@@ -3536,7 +3541,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, select_my_qbz, desc_myqbz, wc_gpr
  call wrtout(std_out, sjoin(" Local memory for Wc(g',r):", ftoa(mem_mb, fmt="f8.1"), "[Mb] <<< MEM"))
  call cwtime_report(" gwr_get_myq_wc_gpr:", cpu, wall, gflops)
 
- !ABI_NVTX_END_RANGE()
+ ABI_NVTX_END_RANGE()
 
 end subroutine gwr_get_myq_wc_gpr
 !!***
@@ -3574,7 +3579,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  complex(gwp),allocatable :: ceig0r(:), conjg_ceig0r(:)
 ! *************************************************************************
 
- !ABI_NVTX_START_RANGE(NVTX_GWR_)
+ ABI_NVTX_START_RANGE(NVTX_GWR_WC_RPR_QBZ)
 
  gpu_option = gwr%dtset%gpu_option
  gpu_action = "None"; if (gpu_option == ABI_GPU_OPENMP) gpu_action = "alloc"
@@ -3644,7 +3649,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  end if
 
  if (gpu_option == ABI_GPU_OPENMP) call wc_rpr%gpu_map("update_to")
- !ABI_NVTX_END_RANGE()
+ ABI_NVTX_END_RANGE()
 
 end subroutine gwr_get_wc_rpr_qbz
 !!***
@@ -3691,7 +3696,9 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
  units = [std_out, ab_out]
 
+ ABI_NVTX_START_RANGE(NVTX_GWR_COS_TRANSFORM)
  call cwtime(cpu, wall, gflops, "start")
+
  sum_spins_ = .False.; if (present(sum_spins)) sum_spins_ = sum_spins
 
  call wrtout(std_out, sjoin(" Performing cosine transform. what:", what, ", mode:", mode))
@@ -3925,6 +3932,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    end do ! my_iqi
  end if
 
+ ABI_NVTX_END_RANGE()
  call cwtime_report(" gwr_cos_transform:", cpu, wall, gflops)
 
 end subroutine gwr_cos_transform
@@ -5437,7 +5445,7 @@ subroutine gwr_build_wc(gwr)
  complex(dp) :: em1_wq(gwr%ntau, gwr%nqibz), eps_wq(gwr%ntau, gwr%nqibz)
 ! *************************************************************************
 
- !ABI_NVTX_START_RANGE(NVTX_GWR_)
+ ABI_NVTX_START_RANGE(NVTX_GWR_BUILD_WC)
  units = [std_out, ab_out]
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -5617,7 +5625,7 @@ subroutine gwr_build_wc(gwr)
 
  call cwtime_report(" gwr_build_wc:", cpu_all, wall_all, gflops_all)
  call timab(1924, 2, tsec)
- !ABI_NVTX_END_RANGE()
+ ABI_NVTX_END_RANGE()
 
 end subroutine gwr_build_wc
 !!***
@@ -6713,7 +6721,7 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, loc_cwork, sigm_pm)
  !complex(gwp),allocatable :: loc_cwork(:)
 ! *************************************************************************
 
- !ABI_NVTX_START_RANGE(NVTX_GWR_)
+ ABI_NVTX_START_RANGE(NVTX_GWR_BRAKET_UR)
 
  ! (r',r) with r' local and r-index PBLAS-distributed.
  sigm_pm = czero_gw
@@ -6736,7 +6744,7 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, loc_cwork, sigm_pm)
    end associate
  end do
 
- !ABI_NVTX_END_RANGE()
+ ABI_NVTX_END_RANGE()
 
 end subroutine sig_braket_ur
 !!***
