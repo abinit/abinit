@@ -134,7 +134,7 @@ contains
   end subroutine nvtxStartRange
 
   subroutine nvtxEndRange
-    call nvtxRangePop
+    call nvtxRangePop()
   end subroutine nvtxEndRange
 
 #endif
