@@ -1831,6 +1831,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, ibgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcount0 = 0
  integer :: opt_gvnlx1, grad_berry_size_mpw1, iband, gpu_option
  real(dp) :: out_resid, fermie1, eig0nk !, dotr
+ logical :: map_cgq
  character(len=500) :: init_mode__
  type(rf2_t) :: rf2
 !arrays
@@ -1867,7 +1868,6 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  !if (psps%usepaw==1) mcprjq = stern%nspinor*mband_mem*mkqmem*nsppol*usecprj
 
  gpu_option = stern%dtset%gpu_option
-
  init_mode__ = "None"; if (present(init_mode)) init_mode__ = init_mode
 
  select case (init_mode__)
@@ -1901,10 +1901,14 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
  cgq_ptr => stern%cgq
 
+ if (gpu_option == ABI_GPU_OPENMP) then
+   map_cgq  =  .not. ( xomp_target_is_present(c_loc(cgq_ptr)))
+   print *, "mapping cgq"
 #ifdef HAVE_OPENMP_OFFLOAD
  ! Upload cgq array to GPU
- !$OMP TARGET ENTER DATA MAP(to:cgq_ptr) IF (gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:cgq_ptr) IF (map_cgq)
 #endif
+ end if
 
  !print *, "before dfpt_cgwf
  call dfpt_cgwf(u1_band, band_me, stern%rank_band, stern%bands_treated_now, berryopt0, &
@@ -1921,10 +1925,10 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
  ABI_FREE(grad_berry)
 
-!Deallocate arrays
-#ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete:cgq_ptr) IF (gpu_option==ABI_GPU_OPENMP)
-#endif
+!!Deallocate arrays
+!#ifdef HAVE_OPENMP_OFFLOAD
+! !$OMP TARGET EXIT DATA MAP(delete:cgq_ptr) IF (gpu_option==ABI_GPU_OPENMP)
+!#endif
 
  if (stern%use_cache) then
    ! Store |Psi_1> to init Sternheimer solver for the next q-point.
@@ -2024,7 +2028,11 @@ end subroutine stern_solve
 subroutine stern_free(stern)
 
 !Arguments ------------------------------------
- class(stern_t),intent(inout) :: stern
+ class(stern_t),target,intent(inout) :: stern
+
+!Local variables ------------------------------
+ integer :: gpu_option
+ real(dp), contiguous, pointer :: cgq_ptr(:,:,:) !, work_ptr(:,:,:,:), gscq_ptr(:,:,:)
 !************************************************************************
 
  ! integer
@@ -2039,7 +2047,7 @@ subroutine stern_free(stern)
  ABI_SFREE(stern%ghc)
  ABI_SFREE(stern%gsc)
  ABI_SFREE(stern%gvnlxc)
- ABI_SFREE(stern%cgq)
+
  ABI_SFREE(stern%gscq)
  ABI_SFREE(stern%gvnlx1)
  ABI_SFREE(stern%work)
@@ -2054,6 +2062,14 @@ subroutine stern_free(stern)
  !end if
  ABI_SFREE(stern%cprjq)
  ABI_SFREE(stern%cwaveprj1)
+
+ gpu_option = stern%dtset%gpu_option
+ cgq_ptr => stern%cgq
+#ifdef HAVE_OPENMP_OFFLOAD
+ ! Upload cgq array to GPU
+ !$OMP TARGET EXIT DATA MAP(delete:cgq_ptr) IF (gpu_option==ABI_GPU_OPENMP)
+#endif
+ ABI_SFREE(stern%cgq)
 
 end subroutine stern_free
 !!***
