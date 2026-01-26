@@ -1085,7 +1085,6 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      end if
    end do
 
-
    !DEBUG Keep this debugging feature !
    !call sqnorm_g(dotr,istwf_k,npw1*nspinor,direc,me_g0,comm_fft)
    !write(std_out,*)' dfpt_cgwf: after projbd, direc**2=',dotr
@@ -1903,10 +1902,10 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  cgq_ptr => stern%cgq
 
  if (gpu_option == ABI_GPU_OPENMP) then
+   ! Upload cgq array to GPU
    map_cgq  =  .not. (xomp_target_is_present(c_loc(cgq_ptr)))
 #ifdef HAVE_OPENMP_OFFLOAD
- ! Upload cgq array to GPU
- !$OMP TARGET ENTER DATA MAP(to:cgq_ptr) IF (map_cgq)
+   !$OMP TARGET ENTER DATA MAP(to:cgq_ptr) IF (map_cgq)
 #endif
  end if
 
@@ -1924,11 +1923,6 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  !print *, "after dfpt_cgwf
 
  ABI_FREE(grad_berry)
-
-!!Deallocate arrays
-!#ifdef HAVE_OPENMP_OFFLOAD
-! !$OMP TARGET EXIT DATA MAP(delete:cgq_ptr) IF (gpu_option==ABI_GPU_OPENMP)
-!#endif
 
  if (stern%use_cache) then
    ! Store |Psi_1> to init Sternheimer solver for the next q-point.

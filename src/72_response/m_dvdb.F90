@@ -2998,7 +2998,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
                   zero_sp, ov1r_sp(2,1), 2)
      !case (ABI_GPU_OPENMP)
      case default
-       ABI_ERROR(sjoin("Unsupported gpu_option:", itoa(db%gpu_option)))
+       ABI_ERROR(sjoin("ftinterp_qpt: unsupported gpu_option:", itoa(db%gpu_option)))
      end select
 
      ov1r(:, :, ispden, imyp) = ov1r_sp(:, :)
