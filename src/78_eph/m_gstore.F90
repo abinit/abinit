@@ -3899,7 +3899,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
          ! Calculate dvscf * psi_k, results stored in h1_kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
-#if 1
+#if 0
          ! TODO: In order to use getgh1c with ndat > 1, wfd_sym_ug_kg should receive wavefunctions as
          !real(dp),intent(out) :: cgs_kbz(2, npw_kq*self%nspinor, nband)
          ABI_MALLOC(lambda, (nb_k))
