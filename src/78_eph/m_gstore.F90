@@ -3487,7 +3487,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:)
  !integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
  real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3) !, v_nk(3)
- real(dp),allocatable :: displ_cart_qibz(:,:,:,:) !, lambda(:)
+ real(dp),allocatable :: displ_cart_qibz(:,:,:,:), lambda(:)
  real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), kpg_kq(:,:), kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:)
@@ -3731,9 +3731,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
    ! Allocate workspace for wavefunctions using mpw and nb
    ! FIXME: Should be allocated with npw_k and npw_kw but one has to change wfd_sym_ug_kg to get rid of mpw
-   ABI_MALLOC(kets_k, (2, mpw*nspinor, nb_k))
-   ABI_MALLOC(bras_kq, (2, mpw*nspinor, nb_kq))
-   ABI_MALLOC(h1_kets_kq, (2, mpw*nspinor, nb_kq))
+   !ABI_MALLOC(kets_k, (2, mpw*nspinor, nb_k))
+   !ABI_MALLOC(bras_kq, (2, mpw*nspinor, nb_kq))
+   !ABI_MALLOC(h1_kets_kq, (2, mpw*nspinor, nb_kq))
 
    ABI_MALLOC(iq_buf, (2, qbuf_size))
    ABI_MALLOC(gkq_atm, (2, nb_kq, nb_k, natom3))
@@ -3867,17 +3867,17 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
        !ABI_MALLOC(kets_k, (2, npw_k*nspinor, nb_k))
        !ABI_MALLOC(bras_kq, (2, npw_kq*nspinor, nb_kq))
-       !ABI_MALLOC(h1_kets_kq, (2, npw_kq*nspinor, nb_kq))
+
 
        ! Get npw_k, kg_k and symmetrize wavefunctions from IBZ (if needed).
        ! TODO: these routines now should allocate wavefunctions as
        !real(dp),intent(out) :: cgs_kbz(2, npw_k*self%nspinor, nband)
-       call wfd%sym_ug_kg(ecut, kk_bz, kk_ibz, gqk%bstart_k, nb_k, spin, mpw, gqk%my_k2ibz(:, my_ik), cryst, &
-                          work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
+       call wfd%sym_ug_kg_npw(ecut, kk_bz, kk_ibz, gqk%bstart_k, nb_k, spin, gqk%my_k2ibz(:, my_ik), cryst, &
+                              work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
 
        ! Get npw_kq, kg_kq and symmetrize wavefunctions from IBZ (if needed).
-       call wfd%sym_ug_kg(ecut, kq_bz, kq_ibz, gqk%bstart_kq, nb_kq, spin, mpw, indkk_kq(:,1), cryst, &
-                          work_ngfft, work, istwf_kq, npw_kq, kg_kq, bras_kq)
+       call wfd%sym_ug_kg_npw(ecut, kq_bz, kq_ibz, gqk%bstart_kq, nb_kq, spin, indkk_kq(:,1), cryst, &
+                              work_ngfft, work, istwf_kq, npw_kq, kg_kq, bras_kq)
 
        call gs_ham_kq%eph_setup_k("k" , kk_bz, istwf_k, npw_k, kg_k, dtset, cryst, psps, &
                                   nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, gqk%pert_comm%value)
@@ -3885,6 +3885,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        call gs_ham_kq%eph_setup_k("kq", kq_bz, istwf_k, npw_kq, kg_kq, dtset, cryst, psps, &
                                   nkpg_kq, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, gqk%pert_comm%value)
 
+       ABI_MALLOC(h1_kets_kq, (2, npw_kq*nspinor, nb_k))
        ABI_MALLOC(gs1c_kq, (2, npw_kq*nspinor*nb_k*((sij_opt+1)/2)))
 
        ! Loop over my atomic perturbations and compute gkq_atm.
@@ -3898,7 +3899,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
          ! Calculate dvscf * psi_k, results stored in h1_kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
-#if 0
+#if 1
          ! TODO: In order to use getgh1c with ndat > 1, wfd_sym_ug_kg should receive wavefunctions as
          !real(dp),intent(out) :: cgs_kbz(2, npw_kq*self%nspinor, nband)
          ABI_MALLOC(lambda, (nb_k))
@@ -3948,10 +3949,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ABI_FREE(ph3d_kq)
        ABI_FREE(kinpw_k)
        ABI_FREE(kinpw_kq)
-
-       !ABI_FREE(kets_k)
-       !ABI_FREE(bras_kq)
-       !ABI_FREE(h1_kets_kq)
+       ABI_FREE(kets_k)
+       ABI_FREE(bras_kq)
+       ABI_FREE(h1_kets_kq)
 
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
        if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, gqk%pert_comm%value, ierr)
@@ -3978,9 +3978,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
    ABI_FREE(iq_buf)
    ABI_FREE(my_gbuf)
-   ABI_FREE(bras_kq)
-   ABI_FREE(kets_k)
-   ABI_FREE(h1_kets_kq)
+   !ABI_FREE(bras_kq)
+   !ABI_FREE(kets_k)
+   !ABI_FREE(h1_kets_kq)
    ABI_FREE(gkq_atm)
 
    if (dtset%gstore_use_lgk /= 0) then
