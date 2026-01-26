@@ -1,6 +1,6 @@
 ## v10.6
 
-Version 10.6, released on Feb 1, 2026.
+Version 10.6, released on Feb 10, 2026.
 <!-- Release notes updated on Jan 24, 2026. -->
 
 These release notes
