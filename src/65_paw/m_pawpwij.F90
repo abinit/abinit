@@ -1164,7 +1164,7 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
    CASE (0)
      ! Need results on the full FFT box thus cannot use zero-padded FFT.
      call plan%init(ndat1, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, gpu_option_0)
-     call plan%execute(rho, -1)
+     call plan%execute(rho, -1, ndat1)
      call plan%free()
 
      rhotwg=rhotwg + rho
@@ -1177,7 +1177,7 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
        call fftpad(rho,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat1,mgfft,-1,gbound)
      else
        call plan%init(ndat1, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, gpu_option_0)
-       call plan%execute(rho, -1)
+       call plan%execute(rho, -1, ndat1)
        call plan%free()
      end if
 

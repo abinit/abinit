@@ -1,4 +1,4 @@
-# GW Macroscopic dielectric function without local field effects 
+# GW Macroscopic dielectric function without local field effects
 # Scissor operator energy =  0.8000 [eV]
 # Tolerance = -0.0010 0.0000
 # npweps  = 51
@@ -9,12 +9,12 @@
 # nkbz    = 8
 # Lorentzian broadening =  0.1000 [eV]
 # List of q-points for the optical limit:
-# q =  0.938821, 0.000000, 0.000000, [Reduced coords] 
-# q =  0.000000, 0.938821, 0.000000, [Reduced coords] 
-# q =  0.000000, 0.000000, 0.938821, [Reduced coords] 
-# q =  0.000000, 0.813043, 0.813043, [Reduced coords] 
-# q =  0.813043, 0.000000, 0.813043, [Reduced coords] 
-# q =  0.813043, 0.813043, 0.000000, [Reduced coords] 
+# q =  0.938821, 0.000000, 0.000000, [Reduced coords]
+# q =  0.000000, 0.938821, 0.000000, [Reduced coords]
+# q =  0.000000, 0.000000, 0.938821, [Reduced coords]
+# q =  0.000000, 0.813043, 0.813043, [Reduced coords]
+# q =  0.813043, 0.000000, 0.813043, [Reduced coords]
+# q =  0.813043, 0.813043, 0.000000, [Reduced coords]
 # omega [eV]    RE(eps(q=1)) IM(eps(q=1) RE(eps(q=2) ) ... DOS   IDOS
   0.000   38.0494    0.0000   37.2269    0.0000   35.8190    0.0000   31.7755    0.0000   32.8564    0.0000   33.4225    0.0000    0.0000    0.0000
   0.100   38.0738    0.0491   37.2508    0.0478   35.8417    0.0456   31.7949    0.0390   32.8767    0.0407   33.4432    0.0415    0.0000    0.0000

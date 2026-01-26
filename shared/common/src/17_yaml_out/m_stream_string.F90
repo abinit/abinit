@@ -117,7 +117,6 @@ subroutine stream_flush_units(stream, units, newline)
  character(len=stream%length) :: s
 !arrays
  integer :: my_units(size(units))
-
 !******************************************************************
 
  ! Remove duplicated units (if any)
@@ -132,7 +131,11 @@ subroutine stream_flush_units(stream, units, newline)
 
  do ii=1,cnt
    if (units(ii) == dev_null) cycle
+#if defined FC_NVHPC || defined FC_LLVM
+   write(units(ii), "(a)")s
+#else
    write(units(ii), "(a)")trim(s)
+#endif
    if (present(newline)) then
      if (newline) write(units(ii), "(a)")""
    end if

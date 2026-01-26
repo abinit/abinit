@@ -4,8 +4,8 @@
  #scissors shift:    0.000000E+00Ha
  #energy window:    6.580444E+01eV    2.418268E+00Ha
  # Energy      Tot-Im Chi(-2w,w,w)  Tot-Im Chi(-2w,w,w)
- # eV          *10^-7 esu        *10^-12 m/V SI units 
- # 
+ # eV          *10^-7 esu        *10^-12 m/V SI units
+ #
        0.272114   6.850331E-01   2.869460E+01
        0.544228   8.790113E-01   3.681994E+01
        0.816342   1.269548E+00   5.317868E+01

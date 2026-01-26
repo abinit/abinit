@@ -22,14 +22,15 @@
 
 #include "abi_common.h"
 
-MODULE m_cplxtools
+module m_cplxtools
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_errors
  use m_xmpi
 
- use m_fstrings,  only : toupper
+ use m_fstrings,  only : toupper, sjoin
 
  implicit none
 
@@ -56,6 +57,7 @@ MODULE m_cplxtools
  public :: cplx_setaug_zero_dpc
  public :: cplx_setaug_zero_spc
  public :: cplx_addtorho
+ public :: cplx_mat_plus_bc
 !***
 
  ! Interfaces
@@ -77,6 +79,11 @@ MODULE m_cplxtools
  interface cplx_addtorho
    module procedure cplx_addtorho_dpc
  end interface cplx_addtorho
+
+ interface cplx_mat_plus_bc
+   module procedure cplx_mat_plus_bc_spc
+   module procedure cplx_mat_plus_bc_dpc
+ end interface cplx_mat_plus_bc
 
  !integer,parameter,private :: MIN_SIZE = 5000
 
@@ -144,9 +151,6 @@ end subroutine cplx_fromreal
 !! INPUTS
 !!  n=Specifies the number of elements in vectors x and y.
 !!  mask(n)=Logical array.
-!!
-!! SIDE EFFECTS
-!!  x(n)=See description.
 !!
 !! SOURCE
 
@@ -1091,5 +1095,132 @@ end subroutine cplx_addtorho_dpc
 
 !----------------------------------------------------------------------
 
-END MODULE m_cplxtools
+!!****f* m_cplxtools/cplx_mat_plus_bc_spc
+!! NAME
+!!  cplx_mat_plus_bc_spc
+!!
+!! FUNCTION
+!!  Compute a = a + fact * b * c
+!!
+!! SOURCE
+
+subroutine cplx_mat_plus_bc_spc(bufsize, aa, real_fact, bmode, bb, cc, gpu_option)
+
+!Arguments ------------------------------------
+!scalars
+ integer(c_size_t),intent(in) :: bufsize
+ integer,intent(in) :: gpu_option
+ real(sp),intent(in) :: real_fact
+ character(len=1),intent(in) :: bmode
+!arrays
+ complex(sp),intent(inout) :: aa(bufsize)
+ complex(sp),intent(in) :: bb(bufsize), cc(bufsize)
+
+!Local variables-------------------------------
+ integer(c_size_t) :: ii
+! *************************************************************************
+
+ if (gpu_option == ABI_GPU_DISABLED) then
+   select case (bmode)
+   case ("N")
+     !$OMP PARALLEL DO
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * bb(ii) * cc(ii)
+     end do
+  case ("C")
+     !$OMP PARALLEL DO
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * conjg(bb(ii)) * cc(ii)
+     end do
+  case default
+    ABI_ERROR(sjoin("Invalid bmode:", bmode))
+  end select
+
+ else
+#ifdef HAVE_OPENMP_OFFLOAD
+   select case (bmode)
+   case ("N")
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:aa, bb, cc)
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * bb(ii) * cc(ii)
+     end do
+   case ("C")
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:aa, bb, cc)
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * conjg(bb(ii)) * cc(ii)
+     end do
+  case default
+    ABI_ERROR(sjoin("Invalid bmode:", bmode))
+  end select
+#endif
+ end if
+
+end subroutine cplx_mat_plus_bc_spc
+!!***
+
+!!****f* m_cplxtools/cplx_mat_plus_bc_dpc
+!! NAME
+!!  cplx_mat_plus_bc_dpc
+!!
+!! FUNCTION
+!!  Compute a = a + fact * b * c
+!!
+!! SOURCE
+
+subroutine cplx_mat_plus_bc_dpc(bufsize, aa, real_fact, bmode, bb, cc, gpu_option)
+
+!Arguments ------------------------------------
+!scalars
+ integer(c_size_t),intent(in) :: bufsize
+ integer,intent(in) :: gpu_option
+ real(dp),intent(in) :: real_fact
+ character(len=1),intent(in) :: bmode
+!arrays
+ complex(dp),intent(inout) :: aa(bufsize)
+ complex(dp),intent(in) :: bb(bufsize), cc(bufsize)
+
+!Local variables-------------------------------
+ integer(c_size_t) :: ii
+! *************************************************************************
+
+ if (gpu_option == ABI_GPU_DISABLED) then
+   select case (bmode)
+   case ("N")
+     !$OMP PARALLEL DO
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * bb(ii) * cc(ii)
+     end do
+  case ("C")
+     !$OMP PARALLEL DO
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * conjg(bb(ii)) * cc(ii)
+     end do
+  case default
+    ABI_ERROR(sjoin("Invalid bmode:", bmode))
+  end select
+
+ else
+
+#ifdef HAVE_OPENMP_OFFLOAD
+   select case (bmode)
+   case ("N")
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:aa, bb, cc)
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * bb(ii) * cc(ii)
+     end do
+   case ("C")
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:aa, bb, cc)
+     do ii=1,bufsize
+       aa(ii) = aa(ii) + real_fact * conjg(bb(ii)) * cc(ii)
+     end do
+  case default
+    ABI_ERROR(sjoin("Invalid bmode:", bmode))
+  end select
+#endif
+ end if
+
+end subroutine cplx_mat_plus_bc_dpc
+!!***
+
+end module m_cplxtools
 !!***

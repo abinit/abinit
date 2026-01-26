@@ -48,9 +48,9 @@
 #%% [extra_info]
 #%% keywords = NC
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   Test the option ionmov=4. Si2 molecule, spin-polarized.
-#%%   Same test as number 16 of fast, except for the change 
+#%%   Same test as number 16 of fast, except for the change
 #%%   of ionmov, no reading of wavefunctions, iscf to 2, and different
 #%%   tolerance criteria.
 #%%
@@ -59,7 +59,7 @@
 #%%         message: |
 #%%         the number of bands in the spin up case must be equal to
 #%%         the number of bands in the spin down case.
-#%%         This is not the case for the k point number : 1 
+#%%         This is not the case for the k point number : 1
 #%%         The number of bands spin up and down are : 5 3 Action : change nband, or use the sequential
 #%%         version of ABINIT.
 #%%         src_file: chkinp.F90

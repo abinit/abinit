@@ -1,8 +1,8 @@
 
 .Version 10.5.8.2 of MRGSCR, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2025 ABINIT group .
  MRGSCR comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,11 +16,11 @@
 
 .Starting date : Sun 21 Dec 2025.
 - ( at 08h16 )
-  
-->>  Enter the number of files to merge: 
-->>  Enter the prefix for the final output file: 
-->>  Enter the name for the partial screening file no.   1 
-->>  Enter the name for the partial screening file no.   2 
+
+->>  Enter the number of files to merge:
+->>  Enter the prefix for the final output file:
+->>  Enter the name for the partial screening file no.   1
+->>  Enter the name for the partial screening file no.   2
  SCR file: epsilon^-1 , calculated using inclvkb = 0
  TESTPARTICLE RPA
  Identifier                       4
@@ -197,14 +197,14 @@
  19   0.00  29.80
  20   0.00  50.57
 
- ==== Files have been merged successfully === 
+ ==== Files have been merged successfully ===
 
 
- Checking if the list of q-points is complete. 
+ Checking if the list of q-points is complete.
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -213,13 +213,13 @@
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -228,12 +228,12 @@
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
 
 
 
-.File t58o_SCR contains a complete list of q-points 
+.File t58o_SCR contains a complete list of q-points
 
 -
 - Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
