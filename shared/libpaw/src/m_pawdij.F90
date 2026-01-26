@@ -43,7 +43,7 @@ MODULE m_pawdij
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_finegrid, only : pawgylm, pawexpiqr
  use m_paw_sphharm,  only : initylmr,slxyzs,make_dyadic,realgaunt
- use m_euler,        only : geteuler
+ use m_numeric_tools,only : geteuler
 
  implicit none
 
@@ -226,6 +226,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 !arrays
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect(:)
+ real(dp) :: spinaxis_in(3)
  real(dp),allocatable :: dij0(:),dijhartree(:)
  real(dp),allocatable :: dijhat(:,:),dijexxc(:,:),dijfock_cv(:,:),dijfock_vv(:,:),dijpawu(:,:)
  real(dp),allocatable :: dijnd(:,:),dijso(:,:)
@@ -837,17 +838,11 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== Need to compute DijSO
        LIBPAW_ALLOCATE(dijso,(cplex_dij*qphase*lmn2_size,ndij))
-       if (present(spinaxis)) then
-         call pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
+       spinaxis_in = [zero, zero, one]; if (present(spinaxis)) spinaxis_in = spinaxis
+       call pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 &                    pawang,pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,&
 &                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat),paw_ij(iatom)%zora,&
 &                    nucdipmom=nucdipmom(1:3,iatom),spinaxis=spinaxis)
-       else
-         call pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
-&                    pawang,pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,&
-&                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat),paw_ij(iatom)%zora,&
-&                    nucdipmom=nucdipmom(1:3,iatom))
-       end if
        if (dijso_need) paw_ij(iatom)%dijso(:,:)=dijso(:,:)
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijso(:,:)
        LIBPAW_DEALLOCATE(dijso)

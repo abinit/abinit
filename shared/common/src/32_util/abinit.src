@@ -26,7 +26,6 @@ sources = [
  "m_special_funcs.F90",
  "m_symtk.F90",
  "m_pstat.F90",
- "m_euler.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

@@ -28,14 +28,15 @@ module m_ingeo
  use m_sort
  use m_dtset
 
- use m_matrix,     only : mati3inv, mati3det
- use m_symtk,      only : chkorthsy, symrelrot, chkprimit, symatm, &
-&                         symmetrize_rprimd, symmetrize_tnons,symmetrize_xred
- use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
- use m_symfind,    only : symfind, symfind_expert, symanal, symlatt
- use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric, reduce2primitive, cart2spinaxis
- use m_euler,      only : geteuler
- use m_parser,     only : intagm, intagm_img, geo_t, geo_from_abivar_string, get_acell_rprim
+ use m_matrix,        only : mati3inv, mati3det
+ use m_symtk,         only : chkorthsy, symrelrot, chkprimit, symatm, &
+&                          symmetrize_rprimd, symmetrize_tnons,symmetrize_xred
+ use m_spgbuilder,    only : gensymspgr, gensymshub, gensymshub4
+ use m_symfind,       only : symfind, symfind_expert, symanal, symlatt
+ use m_geometry,      only : mkradim, mkrdim, xcart2xred, xred2xcart, &
+&                          randomcellpos, metric, reduce2primitive, cart2spinaxis
+ use m_parser,        only : intagm, intagm_img, geo_t, geo_from_abivar_string, get_acell_rprim
+ use m_numeric_tools, only : geteuler
 
  implicit none
 
