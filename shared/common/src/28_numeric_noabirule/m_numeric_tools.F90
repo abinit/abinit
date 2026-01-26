@@ -101,6 +101,7 @@ MODULE m_numeric_tools
  public :: bool2index            ! Allocate and return array with the indices in the input boolean array that evaluates to .True.
  public :: polynomial_regression ! Perform a polynomial regression on incoming data points
  public :: blocked_loop          ! Helper function to implement blocked algorithms inside do loops.
+ public :: geteuler            ! Compute the Euler angles corresponding to the spin quantization axis
 
  !MG FIXME: deprecated: just to avoid updating refs while refactoring.
  public :: dotproduct
@@ -6640,6 +6641,53 @@ integer pure function blocked_loop(loop_index, loop_stop, batch_size) result(nda
  ndat = merge(batch_size, loop_stop - loop_index + 1, loop_index + batch_size - 1 <= loop_stop)
 
 end function blocked_loop
+!!***
+
+!!****f* m_euler/geteuler
+!! NAME
+!! geteuler
+!!
+!! FUNCTION
+!! Compute the Euler angles (alpha, beta) corresponding to the spin quantization axis given in Cartesian coordinates.
+!!
+!! INPUTS
+!! spinaxis(3)=spin quantization axis
+!!
+!! OUTPUT
+!! alpha=Euler angle for rotation around z-axis
+!! beta =Euler angle for rotation around y-axis
+!!
+!! SOURCE
+
+subroutine geteuler(spinaxis, alpha, beta)
+
+!Arguments -------------------------------
+!scalars
+ real(dp),intent(out) :: alpha, beta
+!arrays
+ real(dp),intent(in) :: spinaxis(3)
+
+!Local variables -------------------------
+!scalars
+ real(dp) :: sx, sy, sz, norm, rxy
+!***********************************************************************
+ norm = DOT_PRODUCT(spinaxis(:), spinaxis(:))
+ if (norm < tol8*tol8) then
+   alpha = zero; beta = zero
+   return
+ end if
+
+ sx = spinaxis(1); sy = spinaxis(2); sz = spinaxis(3)
+ rxy = sqrt(sx*sx + sy*sy)
+ if (rxy < tol8) then
+   alpha = zero
+ else
+   alpha = atan2(sy, sx)
+ end if
+
+ beta  = atan2(rxy, sz)
+ 
+end subroutine geteuler
 !!***
 
 END MODULE m_numeric_tools

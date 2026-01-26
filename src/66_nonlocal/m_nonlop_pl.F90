@@ -37,10 +37,10 @@ module m_nonlop_pl
 
  use defs_abitypes, only : MPI_type
  use m_geometry,   only : strconv
- use m_euler,      only : geteuler
  use m_kg,         only : ph1d3d
  use m_contract,   only : cont22cso, cont22so, cont24, cont33cso, cont33so, cont35, cont22, cont3, cont13, &
                           metcon, metcon_so, metric_so
+ use m_numeric_tools, only : geteuler
  implicit none
 
  private

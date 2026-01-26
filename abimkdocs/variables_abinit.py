@@ -26004,9 +26004,11 @@ Variable(
     added_in_version="10.7.0",
     text=r"""
 Cartesian coordinates of the global spin-quantization axis.
-The default spin-quantization axis is along z cartesian axis, [[spinaxis]] defined the relative orientation of spinor space spanned by the Pauli matrices $\{\sigma_1,\sigma_2,\sigma_3\}$ with respect to the Cartesian basis, i.e. it sets the $\sigma_3$ axis along the [[spinaxis]] direction.
-When [[spinaxis]] is not the default, it is recommended to provide magnetic vectors
-in Cartesian coordinates using [[spinat_cart]] and [[hspinfield_cart]] instead of [[spinat]] and [[hspinfield]]. 
+By default, the spin-quantization axis is aligned with the Cartesian z axis. 
+The variable [[spinaxis]] defined the orientation of spinor space spanned by the Pauli matrices \{\sigma_1,\sigma_2,\sigma_3\} 
+with respect to the Cartesian reference frame; in particular, it sets the \sigma_3 axis along the direction specified by [[spinaxis]].
+When [[spinaxis]] differs from its default value, it is recommended to specify magnetic vectors in Cartesian coordinates 
+using [[spinat_cart]] and [[hspinfield_cart]] rather than [[spinat]] and [[hspinfield]].
 """,
 ),
 ]

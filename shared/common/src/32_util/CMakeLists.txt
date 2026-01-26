@@ -10,7 +10,6 @@ add_library(32_util STATIC
   m_special_funcs.F90
   m_symtk.F90
   m_pstat.F90
-  m_euler.F90
   )
 
 set_target_properties(32_util
