@@ -4301,7 +4301,7 @@ subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, in
  integer,intent(in) :: indkk(6)
  integer,intent(out) :: kg_kbz(3, mpw)
  real(dp),intent(in) :: kk_bz(3), kk_ibz(3)
- ! TODO: these routines now should allocate wavefunctions as
+ ! TODO: In order to use getgh1c with ndat > 1, this routines now should receive wavefunctions as
  !real(dp),intent(out) :: cgs_kbz(2, npw_kq*self%nspinor, nband)
  real(dp),intent(out) :: cgs_kbz(2, mpw*self%nspinor, nband)
  real(dp),intent(out) :: work(2, work_ngfft(4), work_ngfft(5), work_ngfft(6))

@@ -3484,7 +3484,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:)
  !integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
  real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3) !, v_nk(3)
- real(dp),allocatable :: displ_cart_qibz(:,:,:,:)
+ real(dp),allocatable :: displ_cart_qibz(:,:,:,:) !, lambda(:)
  real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), kpg_kq(:,:), kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:)
@@ -3877,7 +3877,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        call gs_ham_kq%eph_setup_k("kq", kq_bz, istwf_k, npw_kq, kg_kq, dtset, cryst, psps, &
                                   nkpg_kq, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, gqk%pert_comm%value)
 
-       ABI_MALLOC(gs1c_kq, (2, npw_kq*nspinor*((sij_opt+1)/2)))
+       ABI_MALLOC(gs1c_kq, (2, npw_kq*nspinor*nb_k*((sij_opt+1)/2)))
 
        ! Loop over my atomic perturbations and compute gkq_atm.
        gkq_atm = zero
@@ -3890,6 +3890,24 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
          ! Calculate dvscf * psi_k, results stored in h1_kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
+#if 0
+         ! TODO: In order to use getgh1c with ndat > 1, wfd_sym_ug_kg should receive wavefunctions as
+         !real(dp),intent(out) :: cgs_kbz(2, npw_kq*self%nspinor, nband)
+         ABI_MALLOC(lambda, (nb_k))
+         do in_k=1,nb_k
+           band_k = in_k + gqk%bstart_k - 1
+           eig0nk = ebands%eig(band_k, ik_ibz, spin)
+           ! Use scissor shift on 0-order eigenvalue
+           eshift = eig0nk - dtset%dfpt_sciss
+           lambda(in_k) = eshift
+         end do
+
+         call getgh1c(berryopt0, kets_k, cwaveprj0, h1_kets_kq, &
+                      grad_berry, gs1c_kq, gs_ham_kq, gvnlx1, idir, ipert, lambda, mpi_enreg, nb_k, optlocal, &
+                      optnl, opt_gvnlx1, rf_ham_kq, sij_opt, tim_getgh1c, usevnl)
+
+         ABI_FREE(lambda)
+#else
          do in_k=1,nb_k
            band_k = in_k + gqk%bstart_k - 1
            eig0nk = ebands%eig(band_k, ik_ibz, spin)
@@ -3900,6 +3918,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
                         grad_berry, gs1c_kq, gs_ham_kq, gvnlx1, idir, ipert, [eshift], mpi_enreg, ndat1, optlocal, &
                         optnl, opt_gvnlx1, rf_ham_kq, sij_opt, tim_getgh1c, usevnl)
          end do ! in_k
+#endif
 
          call rf_ham_kq%free()
 
