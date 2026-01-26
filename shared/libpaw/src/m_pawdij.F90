@@ -116,7 +116,6 @@ CONTAINS
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
 !!  qphon(3)=wavevector of the phonon
-!!  spinaxis(3)=spin quantization axis
 !!  spnorbscl=scaling factor for spin-orbit coupling
 !!  ucvol=unit cell volume
 !!  vtrial(cplex*nfft,nspden)=GS potential on real space grid
@@ -167,10 +166,10 @@ CONTAINS
 
 subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,ntypat,&
 &          paw_an,paw_ij,pawang,pawfgrtab,pawprtvol,pawrad,pawrhoij,pawspnorb,pawtab,&
-&          pawxcdev,qphon,spinaxis,spnorbscl,ucvol,charge,vtrial,vxc,xred,znuc,&
+&          pawxcdev,qphon,spnorbscl,ucvol,charge,vtrial,vxc,xred,znuc,&
 &          electronpositron_calctype,electronpositron_pawrhoij,electronpositron_lmselect,&
 &          atvshift,fatvshift,natvshift,nucdipmom,eijkl_is_sym,&
-&          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr)
+&          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr,spinaxis)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -185,11 +184,12 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  logical,optional,intent(in) :: electronpositron_lmselect(:,:)
  logical,optional,intent(in) :: eijkl_is_sym(ntypat)
- real(dp),intent(in) :: gprimd(3,3),qphon(3),spinaxis(3)
+ real(dp),intent(in) :: gprimd(3,3),qphon(3)
  real(dp),intent(in) ::  vxc(:,:),xred(3,natom),znuc(ntypat)
  real(dp),intent(in),target :: vtrial(cplex*nfft,nspden)
  real(dp),intent(in),optional :: atvshift(:,:,:)
  real(dp),intent(in),optional :: nucdipmom(3,natom)
+ real(dp),intent(in),optional :: spinaxis(3)
  type(paw_an_type),intent(in) :: paw_an(my_natom)
  type(paw_ij_type),target,intent(inout) :: paw_ij(my_natom)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom)
@@ -837,10 +837,17 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== Need to compute DijSO
        LIBPAW_ALLOCATE(dijso,(cplex_dij*qphase*lmn2_size,ndij))
-       call pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
-&                    pawang,pawrad(itypat),pawtab(itypat),pawxcdev,spinaxis,spnorbscl,&
+       if (present(spinaxis)) then
+         call pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
+&                    pawang,pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,&
+&                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat),paw_ij(iatom)%zora,&
+&                    nucdipmom=nucdipmom(1:3,iatom),spinaxis=spinaxis)
+       else
+         call pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
+&                    pawang,pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,&
 &                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1,znuc(itypat),paw_ij(iatom)%zora,&
 &                    nucdipmom=nucdipmom(1:3,iatom))
+       end if
        if (dijso_need) paw_ij(iatom)%dijso(:,:)=dijso(:,:)
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijso(:,:)
        LIBPAW_DEALLOCATE(dijso)
@@ -2840,7 +2847,6 @@ end subroutine pawdijaa
 !!  pawrad <type(pawrad_type)>=paw radial mesh and related data, for current atom
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
 !!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
-!!  spinaxis(3)=spin quantization axis
 !!  spnorbscl=scaling factor for spin-orbit coupling
 !!  vh1(qphase*mesh_size,v_size,nspden)=all-electron on-site Hartree potential for current atom
 !!                     only spherical moment is used
@@ -2869,8 +2875,8 @@ end subroutine pawdijaa
 !! SOURCE
 
 subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
-    & pawxcdev,spinaxis,spnorbscl,vh1,vxc1,znuc,zora,&
-    & nucdipmom)
+    & pawxcdev,spnorbscl,vh1,vxc1,znuc,zora,&
+    & nucdipmom,spinaxis)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -2881,8 +2887,9 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
  type(pawtab_type),target,intent(in) :: pawtab
 !arrays
  real(dp),intent(out) :: dijso(:,:)
- real(dp),intent(in) :: spinaxis(3),vh1(:,:,:),vxc1(:,:,:)
+ real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
  real(dp),optional,intent(in) :: nucdipmom(3)
+ real(dp),optional,intent(in) :: spinaxis(3)
 !Local variables ---------------------------------------
 !scalars
  integer :: angl_size,gs1,gs2,idij,ii,ij_size,ilm,jlm,ispden
@@ -2894,6 +2901,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
  character(len=500) :: msg
 !arrays
  integer,pointer :: indklmn(:,:)
+ real(dp) :: spinaxis_in(3)
  real(dp),allocatable :: dijnd_rad(:,:),dijso_rad(:),dkdr(:),dv1dr(:),dyadic(:,:,:,:)
  real(dp),allocatable :: v1(:),zk1(:),z_intgd(:),z_kernel(:)
  complex(dp) :: D(2,2),Drot(2,2),U(2,2),ep,em
@@ -3143,9 +3151,11 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,pawang,pawrad,pawtab,&
    LIBPAW_DEALLOCATE(dijnd_rad)
  end if
 
+ spinaxis_in = [zero, zero, one]; if (present(spinaxis)) spinaxis_in = spinaxis
+
  if (ndij >= 4) then
 
-   call geteuler(spinaxis,alpha,beta)
+   call geteuler(spinaxis_in,alpha,beta)
 
    if (.not.(abs(alpha) < tol8 .and. abs(beta) < tol8)) then
    

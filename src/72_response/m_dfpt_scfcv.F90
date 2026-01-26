@@ -900,8 +900,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call pawdij(cplex,dtset%enunit,gprimd,ipert,my_natom,dtset%natom,&
 &     nfftf,nfftotf,dtset%nspden,psps%ntypat,paw_an1,paw_ij1,pawang,&
 &     pawfgrtab,dtset%pawprtvol,pawrad,pawrhoij1,dtset%pawspnorb,pawtab,&
-&     dtset%pawxcdev,qphon,dtset%spinaxis,dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial1_tmp,vxc1,xred,dtset%znucl,&
-&     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+&     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial1_tmp,vxc1,xred,dtset%znucl,&
+&     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,spinaxis=dtset%spinaxis)
      if (has_dijfr>0) then
        ABI_FREE(vtrial1_tmp)
      end if

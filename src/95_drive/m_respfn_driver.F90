@@ -997,9 +997,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call pawdij(cplex,dtset%enunit,gprimd,ipert,my_natom,natom,nfftf,nfftotf,&
 &   dtset%nspden,ntypat,paw_an,paw_ij,pawang,pawfgrtab,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,k0,&
-&   dtset%spinaxis,dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial,vxc,xred,dtset%znucl,&
+&   dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial,vxc,xred,dtset%znucl,&
 &   nucdipmom=dtset%nucdipmom,&
-&   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+&   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,&
+&   spinaxis=dtset%spinaxis)
    call symdij(gprimd,indsym,ipert,my_natom,natom,dtset%nsym,ntypat,0,&
 &   paw_ij,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)

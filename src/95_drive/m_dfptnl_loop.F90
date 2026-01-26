@@ -653,9 +653,10 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                      call pawdij(cplex,dtset%enunit,gprimd,i2pert,natom,dtset%natom,&
 &                     nfftf,nfftotf,dtset%nspden,psps%ntypat,paw_an1_i2pert,paw_ij1_i2pert,pawang,&
 &                     pawfgrtab,dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,&
-&                     dtset%pawxcdev,qphon,dtset%spinaxis,dtset%spnorbscl,ucvol,dtset%cellcharge(1),&
+&                     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%cellcharge(1),&
 &                     vtrial1_tmp,vxc1_i2pert,xred,dtset%znucl,&
-&                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+&                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,&
+&                     spinaxis=dtset%spinaxis)
                      if (has_dijfr>0) then
                        ABI_FREE(vtrial1_tmp)
                      end if

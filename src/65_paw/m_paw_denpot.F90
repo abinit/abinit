@@ -946,9 +946,9 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,gprimd,ipert,ixc,&
 !    Compute spin-orbit contribution to Dij
      if (option/=2.or.cplex_rhoij==2) then
        call pawdijso(paw_ij(iatom)%dijso,cplex_dij,cplex,ndij,nspden,pawang,&
-         & pawrad(itypat),pawtab(itypat),pawxcdev,spinaxis,spnorbscl,paw_an(iatom)%vh1,&
+         & pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,paw_an(iatom)%vh1,&
          & paw_an(iatom)%vxc1,znucl(itypat),paw_ij(iatom)%zora,&
-         & nucdipmom=nucdipmom(1:3,iatom))
+         & nucdipmom=nucdipmom(1:3,iatom),spinaxis=spinaxis)
        paw_ij(iatom)%has_dijso=2
      end if
 
