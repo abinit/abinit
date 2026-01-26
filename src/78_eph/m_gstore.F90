@@ -632,6 +632,9 @@ contains
   procedure :: compute_and_write_vk => gstore_compute_and_write_vk
   ! Compute electronic group velocities in the IBZ. Write results to disk
 
+  !procedure :: compute_and_write_commutator => gstore_compute_and_write_commutator
+  ! Compute matrix elements of the commutator. Write results to disk
+
 end type gstore_t
 !!***
 
@@ -3724,13 +3727,14 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    NCF_CHECK(nctk_prepare_mpiio(spin_ncid, "gvals"))
    NCF_CHECK(nctk_prepare_mpiio(root_ncid, "gstore_done_qbz_spin"))
 
-   ! Allocate workspace for wavefunctions using mpw and nb
-   ! FIXME: Should be allocated with npw_k and npw_kw but one has to change wfd_sym_ug_kg to get rid of mpw
    nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
 
+   ! Allocate workspace for wavefunctions using mpw and nb
+   ! FIXME: Should be allocated with npw_k and npw_kw but one has to change wfd_sym_ug_kg to get rid of mpw
    ABI_MALLOC(kets_k, (2, mpw*nspinor, nb_k))
    ABI_MALLOC(bras_kq, (2, mpw*nspinor, nb_kq))
    ABI_MALLOC(h1_kets_kq, (2, mpw*nspinor, nb_kq))
+
    ABI_MALLOC(iq_buf, (2, qbuf_size))
    ABI_MALLOC(gkq_atm, (2, nb_kq, nb_k, natom3))
 
@@ -3861,6 +3865,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          end if
        end if
 
+       !ABI_MALLOC(kets_k, (2, npw_k*nspinor, nb_k))
+       !ABI_MALLOC(bras_kq, (2, npw_kq*nspinor, nb_kq))
+       !ABI_MALLOC(h1_kets_kq, (2, npw_kq*nspinor, nb_kq))
+
        ! Get npw_k, kg_k and symmetrize wavefunctions from IBZ (if needed).
        ! TODO: these routines now should allocate wavefunctions as
        !real(dp),intent(out) :: cgs_kbz(2, npw_k*self%nspinor, nband)
@@ -3940,6 +3948,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ABI_FREE(ph3d_kq)
        ABI_FREE(kinpw_k)
        ABI_FREE(kinpw_kq)
+
+       !ABI_FREE(kets_k)
+       !ABI_FREE(bras_kq)
+       !ABI_FREE(h1_kets_kq)
 
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
        if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, gqk%pert_comm%value, ierr)
