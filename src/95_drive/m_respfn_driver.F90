@@ -534,7 +534,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
 
 !Deactivate time-reversal symmetry for finite-omega calculations
- if (abs(dtset%rfomega)>tol10) timrev=0
+ if (abs(dtset%rfomega)>tol10.or.dtset%tim1rev==0) timrev=0
 
 !Generate an index table of atoms, in order for them to be used
 !type after type.
@@ -922,7 +922,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  dyfr_nondiag=0;if (psps%usepaw==1.and.rfphon==1) dyfr_nondiag=1
  dyfr_cplex=1;if (psps%usepaw==1.and.rfphon==1.and.(.not.qeq0)) dyfr_cplex=2
- if (abs(dtset%rfomega)>tol10) dyfr_cplex=2
+ if (abs(dtset%rfomega)>tol10.or.dtset%tim1rev==0) dyfr_cplex=2
  ABI_MALLOC(dyew,(2,3,natom,3,natom))
  ABI_MALLOC(dyewq0,(3,3,natom))
  ABI_MALLOC(dyfrlo,(3,3,natom))
