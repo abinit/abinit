@@ -2025,7 +2025,6 @@ subroutine stern_free(stern)
  class(stern_t),target,intent(inout) :: stern
 
 !Local variables ------------------------------
- integer :: gpu_option
  real(dp), contiguous, pointer :: cgq_ptr(:,:,:) !, work_ptr(:,:,:,:), gscq_ptr(:,:,:)
 !************************************************************************
 
@@ -2057,11 +2056,12 @@ subroutine stern_free(stern)
  ABI_SFREE(stern%cprjq)
  ABI_SFREE(stern%cwaveprj1)
 
- gpu_option = stern%dtset%gpu_option
  cgq_ptr => stern%cgq
 #ifdef HAVE_OPENMP_OFFLOAD
- ! Upload cgq array to GPU
- !$OMP TARGET EXIT DATA MAP(delete:cgq_ptr) IF (gpu_option==ABI_GPU_OPENMP)
+ if (xomp_target_is_present(c_loc(cgq_ptr))) then
+   ! Free array on the GPU
+   !$OMP TARGET EXIT DATA MAP(delete:cgq_ptr)
+ end if
 #endif
  ABI_SFREE(stern%cgq)
 
