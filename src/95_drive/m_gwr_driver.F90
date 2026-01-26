@@ -628,9 +628,9 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
                Cryst%natom,Cryst%natom,nfftf,ngfftf(1)*ngfftf(2)*ngfftf(3),&
                Dtset%nspden,Cryst%ntypat,KS_paw_an,KS_paw_ij,Pawang,Pawfgrtab,&
                Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-               k0,Dtset%spinaxis,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,&
+               k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,&
                ks_vxc,Cryst%xred,Dtset%znucl,&
-               nucdipmom=Dtset%nucdipmom)
+               nucdipmom=Dtset%nucdipmom,spinaxis=Dtset%spinaxis)
 
    ! Symmetrize KS Dij
    call symdij_all(Cryst%gprimd,Cryst%indsym,ipert0,&

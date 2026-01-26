@@ -311,12 +311,12 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
              & tdks%pawfgr%nfft,nfftotf,dtset%nspden,psps%ntypat,tdks%paw_an,        &
              & tdks%paw_ij,tdks%pawang,tdks%pawfgrtab,dtset%pawprtvol,tdks%pawrad,   &
              & tdks%pawrhoij,dtset%pawspnorb,tdks%pawtab,dtset%pawxcdev,k0,          &
-             & dtset%spinaxis,dtset%spnorbscl,tdks%ucvol,dtset%cellcharge(1),tdks%vtrial,           &
+             & dtset%spnorbscl,tdks%ucvol,dtset%cellcharge(1),tdks%vtrial,           &
              & tdks%vxc,tdks%xred,dtset%znucl,natvshift=dtset%natvshift,             &
              & atvshift=dtset%atvshift, &
              & fatvshift=one,comm_atom=mpi_enreg%comm_atom,                          &
              & mpi_atmtab=mpi_enreg%my_atmtab,mpi_comm_grid=mpi_enreg%comm_fft,      &
-             & nucdipmom=dtset%nucdipmom)
+             & nucdipmom=dtset%nucdipmom,spinaxis=dtset%spinaxis)
 
    !Symetrize Dij
    call symdij(tdks%gprimd,tdks%indsym,ipert,my_natom,dtset%natom,dtset%nsym, &

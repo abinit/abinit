@@ -1545,7 +1545,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
      call pawdij(cplex,dtset%enunit,gprimd,ipert,my_natom,dtset%natom,nfftf,nfftotf,&
 &     dtset%nspden,psps%ntypat,paw_an,paw_ij,pawang,pawfgrtab,dtset%pawprtvol,&
-&     pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,k0,dtset%spinaxis,dtset%spnorbscl,&
+&     pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,k0,dtset%spnorbscl,&
 &     ucvol_local,dtset%cellcharge(1),vtrial,vxc,xred,dtset%znucl,&
 &     natvshift=dtset%natvshift,atvshift=dtset%atvshift,fatvshift=fatvshift,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
@@ -1554,7 +1554,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     electronpositron_calctype=ipositron,&
 &     electronpositron_pawrhoij=pawrhoij_ep,&
 &     electronpositron_lmselect=lmselect_ep,&
-&     nucdipmom=dtset%nucdipmom,eijkl_is_sym=eijkl_is_sym)
+&     nucdipmom=dtset%nucdipmom,eijkl_is_sym=eijkl_is_sym,spinaxis=dtset%spinaxis)
 
 !    Symetrize Dij
      call symdij(gprimd,indsym,ipert,my_natom,dtset%natom,dtset%nsym,&

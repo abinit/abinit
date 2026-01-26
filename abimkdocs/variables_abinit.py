@@ -25992,4 +25992,21 @@ provided, then the values of [[qgbt]] will be computed from the provided
 One and only one of [[qgbt]] or [[qgbt_cart]] must be provided.
 """,
 ),
+
+Variable(
+    abivarname="spinaxis",
+    varset="gstate",
+    vartype="real",
+    topics=['spinpolarisation_basic', 'MagMom_useful'],
+    dimensions=[3],
+    defaultval=[0, 0, 1],
+    mnemonics="Spin-quantization AXIS in CARTesian coordinates.",
+    added_in_version="10.7.0",
+    text=r"""
+Cartesian coordinates of the global spin-quantization axis.
+The default spin-quantization axis is along z cartesian axis, [[spinaxis]] defined the relative orientation of spinor space spanned by the Pauli matrices $\{\sigma_1,\sigma_2,\sigma_3\}$ with respect to the Cartesian basis, i.e. it sets the $\sigma_3$ axis along the [[spinaxis]] direction.
+When [[spinaxis]] is not the default, it is recommended to provide magnetic vectors
+in Cartesian coordinates using [[spinat_cart]] and [[hspinfield_cart]] instead of [[spinat]] and [[hspinfield]]. 
+""",
+),
 ]
