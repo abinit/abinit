@@ -2983,5 +2983,162 @@ subroutine estimateFirstEigenvalue(slice, m, power_deg, eigen_est, getAX, kin, &
 end subroutine estimateFirstEigenvalue
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_slice_cprj/computeBorthoLanczos
+!! NAME
+!! computeBorthoLanczos
+!!
+!! SOURCE
+subroutine computeBorthoLanczos(slice, n, k, min_low_est, getAX, kin, my_rank, gpu_option)
+  
+    implicit none
+
+    ! arguments
+    integer, intent(inout) :: slice
+    integer, intent(in) :: n ! number of rows
+    integer, intent(in) :: k ! maxiter
+    integer, intent(out) :: min_low_est ! result
+    integer, intent(in) :: my_rank ! mpi_rank
+    type(xgBlock_t), intent(in) :: kin
+    integer, optional, intent(in) :: gpu_option
+    interface
+        subroutine getAX(X,AX)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: AX
+        end subroutine getAX
+    end interface
+
+    !! local variables
+    ! scalars
+    type(xgBlock_t) :: cprjX0
+    integer :: j
+    integer :: il, iu
+    integer :: M, INFO
+    real(dp) :: beta_prev
+    ! arrays
+    real(dp) :: q(2,n)
+    real(dp) :: q_prev(2,n)
+    real(dp) :: Bq(2,n)
+    real(dp) :: alpha(k) ! diagonal
+    real(dp) :: beta(k-1) ! off-diagonal
+    real(dp) :: w(k)
+    real(dp) :: z(1, k)
+    real(dp) :: work(lwork)
+    integer :: iwork(liwork)
+
+    ! *********************************************************************
+
+    call generateRademacherMatrix(q, n, 1, my_rank)
+    
+    ! X = S|q>
+    ! use slice%X as a workspace
+    if (slice%paw) then
+      call xg_nonlop_getSX(slice%xg_nonlop,slice%X,slice%cprjX,slice%cprj_work%self,&
+          slice%proj_work%self)
+    else
+      write(901,*) 'not implemented!'
+      flush(901)
+    end if
+
+    ! Map xgtools pointers to memory
+    call xgBlock_map(xgX, X, slice%space, n, m, slice%spacecom, me_g0=slice%me_g0)
+    call xgBlock_map(xgfX, fX, slice%space, n, m, slice%spacecom, me_g0=slice%me_g0)
+
+    q /= sqrt(dot_product((q, Bq)))
+
+    call xgBlock_colwiseDotProduct(q, Bq, qTBq,comm_loc=xmpi_comm_null)
+    
+    call xgBlock_scale(q, 1/center, 1) !scale q by 1/center
+    
+    q_prev = 0.0d0
+    beta_prev = 0.0d0
+    alpha = 0.0d0
+    beta = 0.0d0
+
+    do j in 1:k
+
+        !A * Psi
+        call timab(tim_AX_v,1,tsec)
+        call getAX(slice%xXColsRows,slice%xAXColsRows)
+        call timab(tim_AX_v,2,tsec)
+        call timab(tim_AX_k,1,tsec)
+        call xgBlock_add_diag(slice%xXColsRows,kin,nspinor,slice%xAXColsRows)
+        call timab(tim_AX_k,2,tsec)
+        call timab(tim_cprj,1,tsec)
+        call xg_nonlop_getcprj(xg_nonlop,slice%xXColsRows,slice%cprjX,slice%proj_work%self)
+        call timab(tim_cprj,2,tsec)
+        call timab(tim_AX_nl,1,tsec)
+        call xg_nonlop_getHX(xg_nonlop,slice%xAXcolsRows,slice%cprjX,slice%cprj_work%self,slice%proj_work%self)
+        call timab(tim_AX_nl,2,tsec)
+
+        alpha[j] = dot_product(q, Aq)
+
+        ! v = S^{-1} * Aq
+        call xg_nonlop_getSm1X(slice%xg_nonlop,slice%X_next,slice%cprjX,&
+            slice%cprj_work%self,slice%cprj_work2%self,slice%proj_work%self)
+
+        ! v = v + a * q
+        call xgBlock_saxpy(v, -alpha[j], q)
+        if j > 1 then
+            call xgBlock_saxpy(v, -beta_prev, q_prev)
+        end if
+
+        if j < k then
+            ! Bv = S|Psi>
+            ! use Bv as a workspace
+            call xg_nonlop_getSX(chebfi%xg_nonlop,Bv,chebfi%cprjX,chebfi%cprj_work%self,chebfi%proj_work%self)
+
+            ! TODO find equivalent in xgtools
+            ! otherwise simply use ddot of LAPACK
+            beta[j] = sqrt(dot_product(v, Bv))
+
+            ! option: essaie de mettre 1
+            ! FIXME à mon avis c'est pas optimal car normallement il y a ddot pour ça
+            ! essaie de le faire sur CPU d'abord sans xgtools puis demander à Lucas
+            call xg_init(vTBv, space_res, chebfi%bandpp, 1)
+            call xgBlock_colwiseDotProduct(v,Bv,vTBv%self,comm_loc=xmpi_comm_null)
+            call xg_free(vTBv)
+
+            q_prev = q
+            q = v / beta[j]
+            beta_prev = beta[j]
+        end if
+    end do
+        
+    ! Compute only one eigenvalue, the lowest (no eigenvectors)
+    ! ---------------------------------------------------------
+    ! LAPACK dstevr routine
+    ! ------------------------------------------------------------
+    ! D diagonal elements, length N (alpha)
+    ! E subdiagonal elements, length N-1 (beta)
+    ! 'N' for eigenvalues only 
+    ! 'I' for indices [IL, IU]
+    ! m output number of eigenvalues found
+    ! w output array of eigenvalues (length N)
+    ! z output eigenvectors
+    ! work, iwork workspace arrays
+    il = 1
+    iu = 3
+
+    ! workspace query
+    lwork = -1
+    liwork = -1
+    call dstevr('N', 'I', k, alpha, beta, 0.0d0, 0.0d0, il, iu, DBL_EPSILON, &
+        m, w, z, ldz, work, lwork, iwork, ilwork, info)
+
+    ! actual compute the 3 lowest eigenvalues
+    call dstevr('N', 'I', k, alpha, beta, 0.0d0, 0.0d0, il, iu, DBL_EPSILON, &
+        m, w, z, ldz, work, lwork, liwork, info)
+
+    ! m number of eigenvalues found
+    ! w(1:m) lowest eigenvalues
+
+    ! ---------------------------------------------------------
+
+end subroutine computeBorthoLanczos
+!!***
+
 end module m_slice_cprj
 !!***
