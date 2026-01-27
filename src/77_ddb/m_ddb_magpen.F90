@@ -1790,7 +1790,7 @@ contains
  end if
 
 !Store the FM flavor in the DDB object
- do ipert2=1,natom+2
+ do ipert2=1,natom+5
    do idir2=1,3
      icol=idir2+(ipert2-1)*3
      indexat2(icol)=ipert2
