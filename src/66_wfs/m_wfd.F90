@@ -457,6 +457,7 @@ module m_wfd
    procedure :: sym_ug_kg => wfd_sym_ug_kg
    ! Symmetrize a wave function in G-space
    ! Used in phgamma only, use wfd_rotate_cg for a more efficient version (see m_sigmaph for usage)
+   !  This routine is deprecated and should be replaced by sym_ug_kg_npw in order to call getgh1c with ndat > 1, i
 
    procedure :: sym_ug_kg_npw => wfd_sym_ug_kg_npw
    ! Symmetrize a wave function in G-space
@@ -3989,7 +3990,7 @@ end subroutine wfd_test_ortho
 !!                 is taken into account when constructing u_kbz.
 !!
 !! NOTES
-!!  This method is deprecated. See wfd_sym_ug_kg for symmetrization in G-space
+!!  This method is deprecated. See wfd_sym_ug_kg and wfd_sym_ug_kg_npw for symmetrization in G-space
 !!
 !! OUTPUT
 !!  ur_kbz(Wfd%nfft*Wfd%nspinor)=The symmetrized wavefunction in real space.
@@ -4287,6 +4288,11 @@ end subroutine wfd_rotate_cg
 !!  kg_kbz: G-vectors in reduced coordinates.
 !!  cgs_kbz: Periodic part of wavefunctions at kk_bz.
 !!
+!! NOTES
+!!  This routine is deprecated and should be replaced by sym_ug_kg_npw.
+!!  In order to call getgh1c with ndat > 1, indeed, one should return an array dimensioned
+!!  as (2, npw_kbz*wfd%nspinor, nband) instead of (2, mpw*wfd%nspinor, nband)
+!!
 !! SOURCE
 
 subroutine wfd_sym_ug_kg(wfd, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, indkk, cryst, &
@@ -4305,9 +4311,6 @@ subroutine wfd_sym_ug_kg(wfd, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, ind
  integer,intent(in) :: indkk(6)
  integer,intent(out) :: kg_kbz(3, mpw)
  real(dp),intent(in) :: kk_bz(3), kk_ibz(3)
- ! TODO: In order to use getgh1c with ndat > 1, this routines now should receive wavefunctions as
- !integer,intent(out) :: kg_kbz(3, npw_kbz)
- !real(dp),allocatable,intent(out) :: cgs_kbz(:,:,:) ! (2, npw_kbz*wfd%nspinor, nband)
  real(dp),intent(out) :: cgs_kbz(2, mpw*wfd%nspinor, nband)
  real(dp),intent(out) :: work(2, work_ngfft(4), work_ngfft(5), work_ngfft(6))
  logical ,optional, intent(in) :: force_rotate
@@ -4337,11 +4340,9 @@ subroutine wfd_sym_ug_kg(wfd, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, ind
  if (.not. rotate) then
    ! Copy u_k(G)
    istwf_kbz = wfd%istwfk(ik_ibz); npw_kbz = wfd%npwarr(ik_ibz)
-   !ABI_MALLOC(kg_kbz, (3, npw_kbz))
-   !ABI_MALLOC(cgs_kbz, (2, npw_kbz*wfd%nspinor, nband))
-
    ABI_CHECK_ILEQ(npw_kbz, mpw, "npw_kbz > mpw!")
    kg_kbz(:,1:npw_kbz) = wfd%kdata(ik_ibz)%kg_k
+
    do ib=1,nband
      band = ib + bstart - 1
      call wfd%copy_cg(band, ik_ibz, spin, cgs_kbz(1,1,ib))
@@ -4354,8 +4355,6 @@ subroutine wfd_sym_ug_kg(wfd, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, ind
    ABI_CHECK_ILEQ(npw_kbz, mpw, "npw_kbz > mpw!")
    kg_kbz(:,1:npw_kbz) = gtmp(:,:npw_kbz)
    ABI_FREE(gtmp)
-   !ABI_MALLOC(kg_kbz, (3, npw_kbz))
-   !ABI_MALLOC(cgs_kbz, (2, npw_kbz*wfd%nspinor, nband))
 
    ! Use cg_kirr as workspace array, results stored in cgs_kbz.
    istwf_kirr = wfd%istwfk(ik_ibz); npw_kirr = wfd%npwarr(ik_ibz)
@@ -4423,9 +4422,7 @@ subroutine wfd_sym_ug_kg_npw(wfd, ecut, kk_bz, kk_ibz, bstart, nband, spin, indk
  integer,intent(in) :: indkk(6)
  integer,intent(out) :: kg_kbz(:,:) ! (3, mpw)
  real(dp),intent(in) :: kk_bz(3), kk_ibz(3)
- ! TODO: In order to use getgh1c with ndat > 1, this routines now should receive wavefunctions as
  real(dp),allocatable,intent(out) :: cgs_kbz(:,:,:) ! (2, npw_kbz*wfd%nspinor, nband)
- !real(dp),intent(out) :: cgs_kbz(2, mpw*wfd%nspinor, nband)
  real(dp),intent(out) :: work(2, work_ngfft(4), work_ngfft(5), work_ngfft(6))
  logical ,optional, intent(in) :: force_rotate
 

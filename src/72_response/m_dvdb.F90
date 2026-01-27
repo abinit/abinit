@@ -1339,10 +1339,10 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, qbz2db, cplex, nfft, ngfft, v1scf, c
 
 !Arguments ------------------------------------
 !scalars
+ class(dvdb_t),intent(inout) :: db
  integer,intent(in) :: nfft,comm
  integer,intent(out) :: cplex
  type(crystal_t),intent(in) :: cryst
- class(dvdb_t),intent(inout) :: db
 !arrays
  real(dp),intent(in) :: qbz(3)
  integer,intent(in) :: ngfft(18), qbz2db(6)

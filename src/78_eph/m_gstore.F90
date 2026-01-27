@@ -3473,7 +3473,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer :: nfft,nfftf,mgfft,mgfftf, nkpg_k, nkpg_kq, qbuf_size, iqbuf_cnt, root_ncid, spin_ncid, ncerr
  integer :: ii, iq_ibz, isym_q, trev_q
  real(dp) :: cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all ! cpu, wall, gflops,
- real(dp) :: ecut, eshift, eig0nk, weight_q, weight_k
+ real(dp) :: ecut, eshift, weight_q, weight_k
  logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q, print_time, need_ftinterp, qq_is_gamma
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kq
@@ -3729,14 +3729,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
    nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
 
-   ! Allocate workspace for wavefunctions using mpw and nb
-   ! FIXME: Should be allocated with npw_k and npw_kw but one has to change wfd_sym_ug_kg to get rid of mpw
-   !ABI_MALLOC(kets_k, (2, mpw*nspinor, nb_k))
-   !ABI_MALLOC(bras_kq, (2, mpw*nspinor, nb_kq))
-   !ABI_MALLOC(h1_kets_kq, (2, mpw*nspinor, nb_kq))
-
    ABI_MALLOC(iq_buf, (2, qbuf_size))
    ABI_MALLOC(gkq_atm, (2, nb_kq, nb_k, natom3))
+   ABI_MALLOC(lambda, (nb_k))
 
    ! Inside the loops we compute gkq_atm(2, nb_kq, nb_k, natom3)
    ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb_kq, nb_k, natom3, gqk%my_nk, qbuf_size), ierr)
@@ -3865,17 +3860,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          end if
        end if
 
-       !ABI_MALLOC(kets_k, (2, npw_k*nspinor, nb_k))
-       !ABI_MALLOC(bras_kq, (2, npw_kq*nspinor, nb_kq))
-
-
-       ! Get npw_k, kg_k and symmetrize wavefunctions from IBZ (if needed).
-       ! TODO: these routines now should allocate wavefunctions as
-       !real(dp),intent(out) :: cgs_kbz(2, npw_k*self%nspinor, nband)
+       ! Get npw_k, kg_k and symmetrize wavefunctions from the IBZ (if needed).
        call wfd%sym_ug_kg_npw(ecut, kk_bz, kk_ibz, gqk%bstart_k, nb_k, spin, gqk%my_k2ibz(:, my_ik), cryst, &
                               work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
 
-       ! Get npw_kq, kg_kq and symmetrize wavefunctions from IBZ (if needed).
+       ! Get npw_kq, kg_kq and symmetrize wavefunctions from the IBZ (if needed).
        call wfd%sym_ug_kg_npw(ecut, kq_bz, kq_ibz, gqk%bstart_kq, nb_kq, spin, indkk_kq(:,1), cryst, &
                               work_ngfft, work, istwf_kq, npw_kq, kg_kq, bras_kq)
 
@@ -3899,29 +3888,22 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
          ! Calculate dvscf * psi_k, results stored in h1_kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
-#if 0
-         ! TODO: In order to use getgh1c with ndat > 1, wfd_sym_ug_kg should receive wavefunctions as
-         !real(dp),intent(out) :: cgs_kbz(2, npw_kq*self%nspinor, nband)
-         ABI_MALLOC(lambda, (nb_k))
+#if 1
          do in_k=1,nb_k
-           band_k = in_k + gqk%bstart_k - 1
-           eig0nk = ebands%eig(band_k, ik_ibz, spin)
            ! Use scissor shift on 0-order eigenvalue
-           eshift = eig0nk - dtset%dfpt_sciss
-           lambda(in_k) = eshift
+           band_k = in_k + gqk%bstart_k - 1
+           lambda(in_k) = ebands%eig(band_k, ik_ibz, spin) - dtset%dfpt_sciss
          end do
 
          call getgh1c(berryopt0, kets_k, cwaveprj0, h1_kets_kq, &
                       grad_berry, gs1c_kq, gs_ham_kq, gvnlx1, idir, ipert, lambda, mpi_enreg, nb_k, optlocal, &
                       optnl, opt_gvnlx1, rf_ham_kq, sij_opt, tim_getgh1c, usevnl)
 
-         ABI_FREE(lambda)
 #else
          do in_k=1,nb_k
-           band_k = in_k + gqk%bstart_k - 1
-           eig0nk = ebands%eig(band_k, ik_ibz, spin)
            ! Use scissor shift on 0-order eigenvalue
-           eshift = eig0nk - dtset%dfpt_sciss
+           band_k = in_k + gqk%bstart_k - 1
+           eshift = ebands%eig(band_k, ik_ibz, spin) - dtset%dfpt_sciss
 
            call getgh1c(berryopt0, kets_k(:,:,in_k), cwaveprj0, h1_kets_kq(:,:,in_k), &
                         grad_berry, gs1c_kq, gs_ham_kq, gvnlx1, idir, ipert, [eshift], mpi_enreg, ndat1, optlocal, &
@@ -3940,6 +3922,12 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          end do
        end do ! my_ip
 
+       ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
+       if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, gqk%pert_comm%value, ierr)
+
+       ! Save e-ph matrix elements in the buffer.
+       my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_atm
+
        ABI_FREE(gs1c_kq)
        ABI_FREE(ffnl_k)
        ABI_FREE(ffnl_kq)
@@ -3952,12 +3940,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ABI_FREE(kets_k)
        ABI_FREE(bras_kq)
        ABI_FREE(h1_kets_kq)
-
-       ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
-       if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, gqk%pert_comm%value, ierr)
-
-       ! Save e-ph matrix elements in the buffer.
-       my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_atm
      end do ! my_ik
 
      ABI_FREE(v1scf)
@@ -3978,9 +3960,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
    ABI_FREE(iq_buf)
    ABI_FREE(my_gbuf)
-   !ABI_FREE(bras_kq)
-   !ABI_FREE(kets_k)
-   !ABI_FREE(h1_kets_kq)
+   ABI_FREE(lambda)
    ABI_FREE(gkq_atm)
 
    if (dtset%gstore_use_lgk /= 0) then
@@ -5735,7 +5715,8 @@ end subroutine gstore_compute_and_write_ph
 !!  gstore_compute_and_write_vk
 !!
 !! FUNCTION
-!!  Compute electronic group velocities in the IBZ. Write results to disk
+!!  Compute electronic group velocities in the IBZ.
+!!  Write results to disk
 !!
 !! SOURCE
 
@@ -5859,8 +5840,166 @@ integer function spin_vid(var_name)
   spin_vid = nctk_idname(spin_ncid, var_name)
 end function spin_vid
 
-
 end subroutine gstore_compute_and_write_vk
+!!***
+
+!!****f* m_gstore/gstore_compute_and_write_commutator
+!! NAME
+!!  gstore_compute_and_write_commutator
+!!
+!! FUNCTION
+!!  Compute electronic group velocities in the IBZ.
+!!  Write results to disk
+!!
+!! SOURCE
+
+subroutine gstore_compute_and_write_commutator(gstore, mpw, ngfftf, gmax, dtset, cryst, wfd, kg_k, ebands, dvdb, root_ncid)
+
+!Arguments ------------------------------------
+ class(gstore_t), intent(in) :: gstore
+ integer,intent(in) :: ngfftf(18), gmax(3), mpw
+ type(dvdb_t),intent(inout) :: dvdb
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ type(wfd_t),intent(in) :: wfd
+ type(ebands_t),intent(in) :: ebands
+ integer,intent(in) :: root_ncid
+!arrays
+ integer,intent(inout) :: kg_k(3,mpw)
+
+!Local variables-------------------------------
+!scalars
+ integer :: my_is, spin, nb_k, nb_kq, spin_ncid, band, in_k, my_ik, ierr, ii, ik_ibz, isym_k, trev_k, npw_k, istwf_k
+ integer :: cplex, nfftf, db_iqpt, idir, ipert, ipc, my_ip, natom, natom3
+ real(dp) :: cpu_kk, wall_kk, gflops_kk, eig0nk
+ !logical :: isirr_k
+!arrays
+ integer :: g0_k(3), work_ngfft(18) !, units(2)
+ integer,allocatable :: gbound_k(:,:), count_bk(:,:)
+ real(dp) :: kk_ibz(3), kk_bz(3), qq_ibz(3)
+ !real(dp),allocatable :: cg_work(:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:), work(:,:,:,:), kets_k(:,:,:), p_kets_k(:,:,:,:)
+ complex(dp),allocatable :: vp_comm_mn(:,:,:)
+!----------------------------------------------------------------------
+
+ call wrtout(std_out, " Computing and writing commutator matrix elements.")
+ call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
+
+ ! Copy important dimensions
+ natom = cryst%natom; natom3 = 3 * natom !; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
+ !nkibz = ebands%nkpt; mband = ebands%mband
+
+ nfftf = product(ngfftf(1:3)) !; mgfftf = maxval(ngfftf(1:3))
+
+ call ngfft_seq(work_ngfft, gmax)
+ !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
+ ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
+
+ ! Read the dvscf potentials at qq=Gamma for all 3*natom perturbations.
+ ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom)
+ qq_ibz(:) = zero; db_iqpt = dvdb%findq(qq_ibz)
+ call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, gstore%comm)
+
+ !ABI_MALLOC(cg_work, (2, mpw*wfd%nspinor))
+
+ do my_is=1,gstore%my_nspins
+   associate (gqk => gstore%gqk(my_is))
+   spin = gstore%my_spins(my_is); nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
+
+   ! Be careful as wavefunctions might be replicated.
+   ! Use count_bk to count how many states have been computed
+   ! in parallel in order to rescale the results.
+   !ABI_ICALLOC(count_bk, (nb_k, gstore%nkibz))
+   NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+   !NCF_CHECK(nctk_prepare_mpiio(spin_ncid, "vk_cart_ibz"))
+
+   ABI_CALLOC(vp_comm_mn, (nb_kq, nb_k, natom3))
+
+   do my_ik=1,gqk%my_nk
+     ! The k-point and the symmetries relating the BZ k-point to the IBZ.
+     kk_bz = gqk%my_kpts(:, my_ik)
+     ik_ibz = gqk%my_k2ibz(1, my_ik)!; isym_k = gqk%my_k2ibz(2, my_ik)
+     !trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5,my_ik)
+     !isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+
+     kk_ibz = ebands%kptns(:,ik_ibz)
+
+     ! parallelize inside (q, pert) so that only one proc in the 3D grid
+     ! computes v_nk for this kpt in the BZ and we can use xmpi_sum_master.
+     !cnt = cnt + 1
+     !if (gqk%qpt_pert_comm%skip(cnt)) cycle
+
+     ! Get npw_k, kg_k and symmetrize wavefunctions from the IBZ (if needed).
+     call wfd%sym_ug_kg_npw(dtset%ecut, kk_bz, kk_ibz, gqk%bstart_k, nb_k, spin, gqk%my_k2ibz(:, my_ik), cryst, &
+                            work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
+
+     !ABI_MALLOC(gbound_k, (2*mgfft+8, 2))
+     !call sphereboundary(gbound_k, istwf_k, kg_k, mgfft, npw_k)
+     !ABI_FREE(gbound_k)
+
+     !call fft_ug(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug, ur)
+
+     !do n_k=gqk%bstart_k, gqk%bstop_k
+     !  in_k = n_k - gqk%bstart_k + 1
+     !  count_bk(in_k, ik_ibz) = count_bk(in_k, ik_ibz) + 1
+     !end do ! n_k
+
+     !do m_kq=gqk%bstart_kq, gqk%bstop_kq
+     !  im_kq = m_kq - gqk%bstart_kq + 1
+     !end do ! m_kq
+
+     ! Compute <g|-i\Nabla |psi_nk>.
+     ABI_MALLOC(p_kets_k, (2, npw_k*wfd%nspinor, 3, nb_k))
+     call cg_p_psi(npw_k, wfd%nspinor, nb_k, kk_bz, kg_k, kets_k, p_kets_k)
+
+     do my_ip=1,gqk%my_npert
+       idir = dvdb%my_pinfo(1, my_ip); ipert = dvdb%my_pinfo(2, my_ip); ipc = dvdb%my_pinfo(3, my_ip)
+       !v1scf(:,:,ispden, ipc)
+       !vp_comm_mn(im_kq, in_k, ipc) = ???
+     end do
+
+     ABI_FREE(kets_k)
+     ABI_FREE(p_kets_k)
+
+     !call xmpi_sum(vp_comm_mn, .., ierr)
+   end do ! my_ik
+
+   !call xmpi_sum(count_bk, gqk%comm%value, ierr)
+
+   !do ik_ibz=1, gstore%nkibz
+   !  do band=gqk%bstart_k, gqk%bstop_k
+   !    in_k = band - gqk%bstart_k + 1
+   !    if (count_bk(in_k, ik_ibz) == 0) cycle
+   !    do ii=1,3
+   !      vnk_cart_ibz(ii,in_k,ik_ibz) = vnk_cart_ibz(ii,in_k,ik_ibz) / count_bk(in_k, ik_ibz)
+   !    end do
+   !  end do
+   !end do
+
+   ! Write v_nk to disk.
+   !!if (gqk%comm%me == master) then
+     !NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vnk_cart_ibz))
+   !!end if
+
+   ABI_FREE(vp_comm_mn)
+   !ABI_FREE(count_bk)
+   end associate
+ end do ! my_is
+
+ !ABI_FREE(cg_work)
+ ABI_FREE(v1scf)
+ ABI_FREE(work)
+
+ call cwtime_report(" Computation of commutator:", cpu_kk, wall_kk, gflops_kk)
+
+contains
+
+integer function spin_vid(var_name)
+  character(len=*),intent(in) :: var_name
+  spin_vid = nctk_idname(spin_ncid, var_name)
+end function spin_vid
+
+end subroutine gstore_compute_and_write_commutator
 !!***
 
 end module m_gstore

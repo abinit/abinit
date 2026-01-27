@@ -1831,12 +1831,12 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, ibgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcount0 = 0
  integer :: opt_gvnlx1, grad_berry_size_mpw1, iband, gpu_option
  real(dp) :: out_resid, fermie1, eig0nk !, dotr
- logical :: map_cgq
+ logical :: map_cgq, map_vlocal
  character(len=500) :: init_mode__
  type(rf2_t) :: rf2
 !arrays
  real(dp),allocatable :: grad_berry(:,:)
- real(dp), contiguous, pointer :: cgq_ptr(:,:,:) !, work_ptr(:,:,:,:), gscq_ptr(:,:,:)
+ real(dp), contiguous, pointer :: cgq_ptr(:,:,:), vlocal_ptr(:,:,:,:) !, work_ptr(:,:,:,:), gscq_ptr(:,:,:)
  complex(gwp),allocatable :: cwork_sp(:)
  logical :: cycle_bands(stern%nband)
 #ifdef HAVE_GW_DPC
@@ -1900,12 +1900,15 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  end select
 
  cgq_ptr => stern%cgq
+ vlocal_ptr => gs_hamkq%vlocal
 
  if (gpu_option == ABI_GPU_OPENMP) then
    ! Upload cgq array to GPU
    map_cgq  =  .not. (xomp_target_is_present(c_loc(cgq_ptr)))
+   map_vlocal = .not. (xomp_target_is_present(c_loc(vlocal_ptr)))
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(to:cgq_ptr) IF (map_cgq)
+   !$OMP TARGET ENTER DATA MAP(to:vlocal_ptr) IF (map_vlocal)
 #endif
  end if
 
@@ -1923,6 +1926,14 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  !print *, "after dfpt_cgwf
 
  ABI_FREE(grad_berry)
+
+ if (gpu_option == ABI_GPU_OPENMP) then
+   if (map_vlocal) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:vlocal_ptr)
+#endif
+   end if
+ end if
 
  if (stern%use_cache) then
    ! Store |Psi_1> to init Sternheimer solver for the next q-point.
@@ -2058,8 +2069,8 @@ subroutine stern_free(stern)
 
  cgq_ptr => stern%cgq
 #ifdef HAVE_OPENMP_OFFLOAD
+ ! Free array on the GPU
  if (xomp_target_is_present(c_loc(cgq_ptr))) then
-   ! Free array on the GPU
    !$OMP TARGET EXIT DATA MAP(delete:cgq_ptr)
  end if
 #endif
