@@ -115,6 +115,9 @@ module m_orbmag
     ! number of orbmag terms to store on the kpt mesh
     ! CC, VV1, VV2, NL, L_R, B.M
 
+    integer :: n4,n5,n6
+    ! real space grid dimenions for odens
+
     real(dp),allocatable :: lambsig(:)
     ! lambsig(ntypat)
 
@@ -128,6 +131,10 @@ module m_orbmag
     real(dp),allocatable :: omesh(:,:,:,:,:)
     ! 3 for the 3 directions
     ! omesh(mband,nkpt,nsppol,3,orbmag_terms)
+    
+    real(dp),allocatable :: odens(:,:,:,:,:)
+    ! 3 for the 3 directions
+    ! odens(2,n4,n5,n6,3)
 
   end type orbmag_mesh_type
 
@@ -2494,6 +2501,9 @@ subroutine orbmag_mesh_alloc(dtset,orbmag_mesh)
   orbmag_mesh%nsppol = dtset%nsppol
   orbmag_mesh%natom = dtset%natom
   orbmag_mesh%ntypat = dtset%ntypat
+  orbmag_mesh%n4=dtset%ngfft(4)
+  orbmag_mesh%n5=dtset%ngfft(5)
+  orbmag_mesh%n6=dtset%ngfft(6)
   orbmag_mesh%chern_nterms = chern_nterms
   orbmag_mesh%orbmag_nterms = orbmag_nterms
 
@@ -2502,6 +2512,8 @@ subroutine orbmag_mesh_alloc(dtset,orbmag_mesh)
   ABI_REMALLOC(orbmag_mesh%cmesh,(orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,chern_nterms))
   orbmag_mesh%cmesh=zero
   ABI_REMALLOC(orbmag_mesh%omesh,(orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,orbmag_nterms))
+  orbmag_mesh%omesh=zero
+  ABI_REMALLOC(orbmag_mesh%odens,(2,orbmag_mesh%n4,orbmag_mesh%n5,orbmag_mesh%n6,3))
   orbmag_mesh%omesh=zero
 
 end subroutine orbmag_mesh_alloc
@@ -2530,6 +2542,7 @@ subroutine orbmag_mesh_free(orbmag_mesh)
     ABI_SFREE(orbmag_mesh%nucdipmom)
     ABI_SFREE(orbmag_mesh%cmesh)
     ABI_SFREE(orbmag_mesh%omesh)
+    ABI_SFREE(orbmag_mesh%odens)
 
 end subroutine orbmag_mesh_free
 !!***
