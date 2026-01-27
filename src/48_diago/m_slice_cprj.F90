@@ -746,14 +746,15 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  my_rank = xmpi_comm_rank(slice%spacecom)
  low_bound = rayleigh_quotients(neigenpairs) 
  upp_bound = slice%ecut
- trace_degree = 8
+ trace_degree = 28
  trace_rank = 40 ! FIXME for the moment changing this produces a bug
 
- call computeTraceEstimationCheby(slice, trace_rank, trace_degree, low_bound, upp_bound, &
-        trace_est, getAX, DivResults%self, kin, my_rank, gpu_option)
+ ! FIXME attention slice%X est modifié n'est plus X0..
+ !call computeTraceEstimationCheby(slice, trace_rank, trace_degree, low_bound, upp_bound, &
+ !       trace_est, getAX, DivResults%self, kin, my_rank, gpu_option)
 
- write(901,*) 'trace estimation=', trace_est
- flush(901)
+ !write(901,*) 'trace estimation=', trace_est
+ !flush(901)
  
  
  write(901,*) 'computing trace estimation for slice 2 ..'
@@ -766,13 +767,13 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  min_low_bound = rayleigh_quotients(1) ! normally this would come after slice1
  ! and we will use the lowest Rayleigh quotient from trace estimation
  max_upp_bound = slice%ecut
- trace_degree = 20
+ trace_degree = 120
  trace_rank = 40 ! FIXME for the moment changing this produces a bug
 
  ! FIXME hand-tuned for now
- !low_bound = 0.6d0
- !upp_bound = 1.4d0
- !min_low_bound = -1.0d0
+ low_bound = 0.7d0
+ upp_bound = 1.43d0
+ min_low_bound = -0.5d0
 
  write(901,*) 'low_bound    , upp_bound    =', low_bound, upp_bound
  write(901,*) 'min_low_bound, max_upp_bound=', min_low_bound, max_upp_bound
@@ -781,6 +782,16 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call computeTraceEstimation(slice, trace_rank, trace_degree, low_bound, upp_bound,&
      min_low_bound, max_upp_bound, trace_est, getAX, kin, my_rank, gpu_option=gpu_option)
  write(901,*) 'trace estimation=', trace_est
+ flush(901)
+            
+ ! correction
+ center = (max_upp_bound + min_low_bound)*0.5
+ radius = (max_upp_bound - min_low_bound)*0.5 
+ ls = (low_bound - center) / radius
+ us = (upp_bound - center) / radius
+ f_l  = bandpassIndicator_sca(ls,ls,us,trace_degree)
+ f_u  = bandpassIndicator_sca(us,ls,us,trace_degree)
+ write(901,*) 'trace estimation / tau^2=', trace_est/min(f_l,f_u), ' tau ', max(f_l,f_u)
  flush(901)
 
  ! TODO put as many vectors as ceil(trace_est) in slice 2 ..
@@ -1200,11 +1211,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! Number of vectors on which we apply rr
     count_rr = count_mask
 
-    ! Restrict eigenvalue array for size consistancy (essentially keep nonzero entries)
-    call xgBlock_reshape(slice%eigenvalues, 1, neigenpairs) 
-    call xgBlock_setBlock(slice%eigenvalues, eigenvalues_slice, rows=1, cols=count_rr)
-    call xgBlock_reshape(eigenvalues_slice, count_rr, 1)
-    call xgBlock_reshape(slice%eigenvalues, neigenpairs, 1)
+    ! restrict eigenvalue array for size consistancy (essentially keep nonzero entries)
+    call xgblock_reshape(slice%eigenvalues, 1, neigenpairs) 
+    call xgblock_setblock(slice%eigenvalues, eigenvalues_slice, rows=1, cols=count_rr)
+    call xgblock_reshape(eigenvalues_slice, count_rr, 1)
+    call xgblock_reshape(slice%eigenvalues, neigenpairs, 1)
 
     ! Orthonormalize
     !call xg_Borthonormalize_cprj(xg_nonlop,slice%blockdim_cprj,slice%X,slice%cprjX,&
@@ -2209,37 +2220,83 @@ subroutine generateRademacherMatrix(V, n, m, rank)
     ! local arguments
     integer :: nseed, i
     integer :: base_seed
-    real(dp) :: U(2, n*m)
     integer, allocatable :: seed(:)
     
     ! *********************************************************************
 
     ! MPI-safe seed: deterministic way to generate a unique seed per MPI rank
-    call random_seed(size=nseed)
+    call random_seed(size=nseed) ! runtime value of nseed
+    
     ABI_MALLOC(seed, (nseed))
     base_seed = 123456789
     seed = mod( base_seed + rank*73856093 + [(i*19349663, i=1,nseed)], 2147483647 )
     call random_seed(put=seed)
-    ABI_FREE(seed)
 
     ! Z(1,:) = ±1, Z(2,:) = 0
     call random_number(V(1,1:n*m))
     V(1,1:n*m) = merge(1.0_dp, -1.0_dp, V(1,1:n*m) > 0.5_dp)
     V(2,1:n*m) = 0.0_dp
-
-    ! Generate uniform random numbers
-    call random_number(U)
-
-    write(901,*) 'rand L2-norm=', sqrt(dot_product(U(1,:), U(1,:)))
-    flush(901)
-
-    where (U < 0.5d0)
-        V = -1.0d0
-    elsewhere
-        V = 1.0d0
-    end where
+    
+    ABI_FREE(seed)
 
 end subroutine generateRademacherMatrix
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice_cprj/generateGaussianMatrix
+!! NAME
+!! generateGaussianMatrix
+!!
+!! SOURCE
+subroutine generateGaussianMatrix(V, n, m, rank)
+
+    implicit none
+
+    ! input/output
+    real(dp), intent(out) :: V(2, n*m)
+    integer, intent(in)  :: n, m, rank
+
+    ! local arguments
+    integer :: nseed, i, j, nm
+    integer :: base_seed
+    integer, allocatable :: seed(:)
+    real(dp) :: u1, u2
+
+    ! *********************************************************************
+
+    nm = n * m
+
+    ! MPI-safe seed: deterministic way to generate a unique seed per MPI rank
+    call random_seed(size = nseed)
+
+    ABI_MALLOC(seed, (nseed))
+    base_seed = 123456789
+    seed = mod( base_seed + rank*73856093 + [(i*19349663, i=1,nseed)], 2147483647 )
+    call random_seed(put = seed)
+
+    ! Generate i.i.d. N(0,1) entries (real-valued)
+    i = 1
+    do while (i <= nm)
+        call random_number(u1)
+        call random_number(u2)
+
+        ! Box–Muller transform
+        V(1, i) = sqrt(-2.0_dp * log(u1)) * cos(2.0_dp * Pi * u2)
+
+        if (i + 1 <= nm) then
+            V(1, i+1) = sqrt(-2.0_dp * log(u1)) * sin(2.0_dp * Pi * u2)
+        end if
+
+        i = i + 2
+    end do
+
+    ! Imaginary part = 0 (consistent with your Rademacher routine)
+    V(2, 1:nm) = 0.0_dp
+
+    ABI_FREE(seed)
+
+end subroutine generateGaussianMatrix
 !!***
 
 !----------------------------------------------------------------------
@@ -2508,9 +2565,8 @@ subroutine computeTraceEstimation(slice, m, trace_degree, low_bound, upp_bound, 
     integer :: idx_i, idx_j
     real(dp) :: tolerance
     real(dp) :: trace_tmp
-    real(dp) :: accum
+    real(dp) :: accum, normX
     real(dp), allocatable :: X(:,:), fX(:,:)
-    real(dp), allocatable :: XXt(:,:), fXfXt(:,:)
     real(dp) :: tsec(2)
 
     ! *********************************************************************
@@ -2536,7 +2592,8 @@ subroutine computeTraceEstimation(slice, m, trace_degree, low_bound, upp_bound, 
     flush(901)
     
     ! Compute values of Rademacher probes (best for Hutchinson)
-    call generateRademacherMatrix(X, n, m, my_rank)
+    !call generateRademacherMatrix(X, n, m, my_rank)
+    call generateGaussianMatrix(X, n, m, my_rank)
 
     write(901,*) 'INIT Xrand L2-norm=', sqrt(dot_product(X(1,:), X(1,:)))
     flush(901)
@@ -2577,14 +2634,14 @@ subroutine computeTraceEstimation(slice, m, trace_degree, low_bound, upp_bound, 
     call xg_nonlop_getHX(xg_nonlop,slice%AX,slice%cprjX,slice%cprj_work,slice%proj_work%self)
     call timab(tim_AX_nl,2,tsec)
 
-    write(901,*) 'BEFORE rand L2-norm=', sqrt(dot_product(fX(1,:), fX(1,:)))
+    write(901,*) 'BEFORE rand L2-norm=', dot_product(X(1,:), fX(1,:))
     flush(901)
 
     ! Compute f(A) * X
     call applyBandpassFilter(slice, getAX, kin, low_bound, upp_bound, &
         min_low_bound, max_upp_bound, trace_degree, l_gpu_option)
 
-    write(901,*) 'AFTER rand L2-norm=', sqrt(dot_product(fX(1,:), fX(1,:)))
+    write(901,*) 'AFTER rand L2-norm=', dot_product(X(1,:), fX(1,:))
     flush(901)
 
     ! SIMD vectorization for flatten array
@@ -2594,23 +2651,9 @@ subroutine computeTraceEstimation(slice, m, trace_degree, low_bound, upp_bound, 
         accum = accum + X(1,k) * fX(1,k)
     end do
 
-    ! Test Gram matrix.. Normally it should be B-orthogonality that is important ..
-    ! TODO deactivate paw
-    ABI_MALLOC(XXt, (m,m))
-    XXt = 0.0d0
-    do j = 1, m
-        do i = 1, m
-            do k = 1, n
-                idx_i = k + (i-1)*n
-                idx_j = k + (j-1)*n
-                XXt(i,j) = XXt(i,j) + X(1,idx_i) * X(1,idx_j)
-            end do
-        end do
-    end do
-    !write(901,*) XXt
-    !flush(901)
-    ABI_FREE(XXt)
-
+    !normX = sqrt(dot_product(X(1,:), X(1,:)))
+    !trace_est = accum / (m * normX)
+    
     trace_est = accum / m
 
 
