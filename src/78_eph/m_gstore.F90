@@ -150,8 +150,8 @@ module m_gstore
  use m_special_funcs,  only : gaussian
  use m_geometry,       only : phdispl_cart2red_nmodes
  use m_copy,           only : alloc_copy
- use m_fftcore,        only : ngfft_seq, get_kg
- use m_cgtools,        only : cg_zdotc
+ use m_fftcore,        only : ngfft_seq, get_kg, sphereboundary
+ use m_cgtools,        only : cg_zdotc, cg_p_psi
  use m_kg,             only : getph
  use m_crystal,        only : crystal_t
  use m_hdr,            only : hdr_type, fform_from_ext
@@ -5853,7 +5853,7 @@ end subroutine gstore_compute_and_write_vk
 !!
 !! SOURCE
 
-subroutine gstore_compute_and_write_commutator(gstore, mpw, ngfftf, gmax, dtset, cryst, wfd, kg_k, ebands, dvdb, root_ncid)
+subroutine gstore_compute_and_write_commutator(gstore, mpw, ngfftf, gmax, dtset, cryst, wfd, mpi_enreg, kg_k, ebands, dvdb, root_ncid)
 
 !Arguments ------------------------------------
  class(gstore_t), intent(in) :: gstore
@@ -5862,6 +5862,7 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, ngfftf, gmax, dtset,
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(wfd_t),intent(in) :: wfd
+ type(mpi_type),intent(in) :: mpi_enreg
  type(ebands_t),intent(in) :: ebands
  integer,intent(in) :: root_ncid
 !arrays
@@ -5869,8 +5870,10 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, ngfftf, gmax, dtset,
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: option2 = 2, tim_fourwf = 0
  integer :: my_is, spin, nb_k, nb_kq, spin_ncid, band, in_k, my_ik, ierr, ii, ik_ibz, isym_k, trev_k, npw_k, istwf_k
- integer :: cplex, nfftf, db_iqpt, idir, ipert, ipc, my_ip, natom, natom3
+ integer :: cplex, nfftf, mgfftf, db_iqpt, idir, ipert, ipc, my_ip, natom, natom3
+ integer :: n1, n2, n3, n4, n5, n6
  real(dp) :: cpu_kk, wall_kk, gflops_kk, eig0nk
  !logical :: isirr_k
 !arrays
@@ -5878,7 +5881,7 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, ngfftf, gmax, dtset,
  integer,allocatable :: gbound_k(:,:), count_bk(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), qq_ibz(3)
  !real(dp),allocatable :: cg_work(:,:)
- real(dp),allocatable :: v1scf(:,:,:,:), work(:,:,:,:), kets_k(:,:,:), p_kets_k(:,:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:), work(:,:,:,:), kets_k(:,:,:), gv1psi(:,:,:), p_kets_k(:,:,:,:), fofr(:,:,:,:)
  complex(dp),allocatable :: vp_comm_mn(:,:,:)
 !----------------------------------------------------------------------
 
@@ -5889,7 +5892,10 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, ngfftf, gmax, dtset,
  natom = cryst%natom; natom3 = 3 * natom !; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
  !nkibz = ebands%nkpt; mband = ebands%mband
 
- nfftf = product(ngfftf(1:3)) !; mgfftf = maxval(ngfftf(1:3))
+ nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
+
+ n1 = ngfftf(1); n2 = ngfftf(2); n3 = ngfftf(3) !; n4 = ngfftf(4); n5 = ngfftf(5); n6 = ngfftf(6)
+ n4 = n1; n5 = n2; n6 = n3
 
  call ngfft_seq(work_ngfft, gmax)
  !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
@@ -5901,6 +5907,7 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, ngfftf, gmax, dtset,
  call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, gstore%comm)
 
  !ABI_MALLOC(cg_work, (2, mpw*wfd%nspinor))
+ ABI_MALLOC(gbound_k, (2*mgfftf+8, 2))
 
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is))
@@ -5933,9 +5940,7 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, ngfftf, gmax, dtset,
      call wfd%sym_ug_kg_npw(dtset%ecut, kk_bz, kk_ibz, gqk%bstart_k, nb_k, spin, gqk%my_k2ibz(:, my_ik), cryst, &
                             work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
 
-     !ABI_MALLOC(gbound_k, (2*mgfft+8, 2))
-     !call sphereboundary(gbound_k, istwf_k, kg_k, mgfft, npw_k)
-     !ABI_FREE(gbound_k)
+     call sphereboundary(gbound_k, istwf_k, kg_k, mgfftf, npw_k)
 
      !call fft_ug(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug, ur)
 
@@ -5952,14 +5957,28 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, ngfftf, gmax, dtset,
      ABI_MALLOC(p_kets_k, (2, npw_k*wfd%nspinor, 3, nb_k))
      call cg_p_psi(npw_k, wfd%nspinor, nb_k, kk_bz, kg_k, kets_k, p_kets_k)
 
+     ABI_MALLOC(gv1psi, (2, npw_k*wfd%nspinor, nb_k))
+
      do my_ip=1,gqk%my_npert
        idir = dvdb%my_pinfo(1, my_ip); ipert = dvdb%my_pinfo(2, my_ip); ipc = dvdb%my_pinfo(3, my_ip)
        !v1scf(:,:,ispden, ipc)
        !vp_comm_mn(im_kq, in_k, ipc) = ???
      end do
 
+     ABI_MALLOC(fofr, (2,n4,n5,n6*nb_k))
+
+     !if (wfd%nspinor == 1) then
+     !  call fourwf(cplex, v1scf(:,:, spin, ipc), fofgin, fofgout, fofr, gbound_k, gbound_k, istwf_k, &
+     !              kg_k, kg_k, mgfft, mpi_enreg, nb_k, ngfft, npw_k, npw_k, n4, n5, n6, option2, &
+     !              tim_fourwf, one, one, gpu_option=gpu_option)
+     !else
+     !  ABI_ERROR("nspinor 2 not coded")
+     !end if
+
      ABI_FREE(kets_k)
      ABI_FREE(p_kets_k)
+     ABI_FREE(gv1psi)
+     ABI_FREE(fofr)
 
      !call xmpi_sum(vp_comm_mn, .., ierr)
    end do ! my_ik
@@ -5989,6 +6008,7 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, ngfftf, gmax, dtset,
  !ABI_FREE(cg_work)
  ABI_FREE(v1scf)
  ABI_FREE(work)
+ ABI_FREE(gbound_k)
 
  call cwtime_report(" Computation of commutator:", cpu_kk, wall_kk, gflops_kk)
 

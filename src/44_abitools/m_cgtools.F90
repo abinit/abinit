@@ -135,7 +135,7 @@ module m_cgtools
  public :: cg_randomize             ! Initialize cg_k with random numbers.
  public :: cg_copy_spin
  public :: cg_put_spin
- public :: cg_p_psi                ! Compute <g|-i\Nabla|psi_nk>.
+ public :: cg_p_psi                 ! Compute <g|-i\Nabla|psi_nk>.
 !***
 
 CONTAINS  !========================================================================================
