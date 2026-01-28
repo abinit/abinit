@@ -3473,7 +3473,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer :: nfft,nfftf,mgfft,mgfftf, nkpg_k, nkpg_kq, qbuf_size, iqbuf_cnt, root_ncid, spin_ncid, ncerr
  integer :: ii, iq_ibz, isym_q, trev_q
  real(dp) :: cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all ! cpu, wall, gflops,
- real(dp) :: ecut, eshift, weight_q, weight_k
+ real(dp) :: ecut, weight_q, weight_k ! eshift,
  logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q, print_time, need_ftinterp, qq_is_gamma
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kq
@@ -3699,8 +3699,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    call gstore%compute_and_write_vk(mpw, wfd, ebands, psps, pawtab, root_ncid)
  end if
 
- !call gstore%compute_and_write_commutator(mpw, gmax, ngfft, ngfftf, dtset, cryst, &
- !                                         pawfgr, pawtab, psps, &
+ !call gstore%compute_and_write_commutator(mpw, gmax, ngfft, ngfftf, dtset, cryst, pawfgr, psps, &
  !                                         wfd, mpi_enreg, kg_k, ebands, dvdb, gs_ham_kq, root_ncid)
 
  call wrtout(std_out, " Begin computation of e-ph matrix elements...", pre_newlines=1)
@@ -3923,6 +3922,16 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
              gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,im_kq), h1_kets_kq(1,1,in_k))
            end do
          end do
+
+         !call zgemm('C', 'N', &                    ! B^H * H
+         !           nb_kq, nb_k, &                 ! M, N
+         !           npw_kq*nspinor, &              ! K
+         !           cone, &                        ! alpha
+         !           bras_kq, npw_kq*nspinor, &     ! A, lda
+         !           h1_kets_kq, npw_kq*nspinor, &  ! B, ldb
+         !           czero, &                       ! beta
+         !           gkq_atm(:,:,:,ipc), nb_kq)     ! C, ldc
+
        end do ! my_ip
 
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
@@ -5855,7 +5864,7 @@ end subroutine gstore_compute_and_write_vk
 !! SOURCE
 
 subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf, dtset, cryst, &
-                                               pawfgr, pawtab, psps, &
+                                               pawfgr, psps, &
                                                wfd, mpi_enreg, kg_k, ebands, dvdb, gs_ham_kq, root_ncid)
 
 !Arguments ------------------------------------
@@ -5871,7 +5880,6 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
  type(ebands_t),intent(in) :: ebands
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
- type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  integer,intent(in) :: root_ncid
 !arrays
  integer,intent(inout) :: kg_k(3,mpw)
@@ -5879,23 +5887,23 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0
- integer :: my_is, spin, nb_k, nb_kq, spin_ncid, in_k, im_k, m_k, n_k, my_ik, ierr, ii, ik_ibz, isym_k, trev_k, npw_k, npwsp_k, istwf_k
+ integer :: my_is, spin, nb_k, nb_kq, spin_ncid, in_k, my_ik, ii, ik_ibz, npw_k, npwsp_k, istwf_k ! isym_k, trev_k,
  integer :: cplex, db_iqpt, idir, ipert, ipc, my_ip, natom, natom3, n1, n2, n3, n4, n5, n6, nsppol, nspinor, nspden
- integer :: nfft, nfftf, mgfft, mgfftf, nkpg, my_npert, nkpg_k, nkpg_kq, band_k
+ integer :: nfft, nfftf, mgfft, mgfftf, my_npert, nkpg_k, band_k
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1, ncerr, ik_glob
  real(dp) :: cpu_kk, wall_kk, gflops_kk
  !logical :: isirr_k
  logical :: gen_eigenpb
  type(rf_hamiltonian_type) :: rf_ham_kq
 !arrays
- integer :: units(2), g0_k(3), work_ngfft(18)
+ integer :: units(2), work_ngfft(18) ! g0_k(3),
  !integer,allocatable :: count_bk(:,:)
- real(dp) :: kk_ibz(3), kk_bz(3), gamma_point(3), rdot1(2), rdot2(2)
+ real(dp) :: kk_ibz(3), kk_bz(3), gamma_point(3)
  real(dp),allocatable :: v1scf(:,:,:,:), work(:,:,:,:), p_kets_k(:,:,:,:), gs1c_kq(:,:), ahc_dw(:,:,:,:)
- real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1_kets_kq(:,:,:), iv1p_comm(:,:,:,:,:)
- real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
- real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), kpg_kq(:,:), kpg_k(:,:)
- real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
+ real(dp),allocatable :: kets_k(:,:,:), h1_kets_kq(:,:,:), iv1p_comm(:,:,:,:,:)
+ real(dp),allocatable :: ffnl_k(:,:,:,:), ph3d_k(:,:,:)
+ real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kpg_k(:,:)
+ real(dp),allocatable :: vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), lambda(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:)
 !----------------------------------------------------------------------
