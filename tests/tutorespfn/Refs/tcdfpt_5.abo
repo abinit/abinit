@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 22 Jan 2026.
-- ( at 14h50 )
+.Starting date : Wed 28 Jan 2026.
+- ( at 12h50 )
   
 - The starting date is more than 2 years after the initial release
 - of this version of ABINIT, namely Mar 2023.
@@ -2268,8 +2268,6 @@
  
 ================================================================================
  
-================================================================================
- 
  Dielectric Tensor and Effective Charges 
  
  
@@ -2314,10 +2312,10 @@
          6         3    6.199447E-08   -1.041469E-07   -5.470016E-01
  Now, the imaginary part of the dynamical matrix is zeroed
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.8
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          4.1
  
 ================================================================================
  
-+Total cpu time      0.164  and wall time      0.844 sec
++Total cpu time      0.129  and wall time      4.127 sec
  
  anaddb : the run completed succesfully.
