@@ -588,6 +588,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: tsec(2)
  integer, allocatable :: permute_cols(:)
  integer, allocatable :: sorted_idx(:) ! same as permute_cols but used elsewhere
+ integer, allocatable :: probe_idx(:)
+ real(dp), allocatable :: probe_kept(:)
  real(dp), allocatable :: rayleigh_quotients(:)
  real(dp), pointer :: probe(:) => null()
  real(dp), pointer :: X0_norm2(:) => null()
@@ -639,6 +641,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call xg_init(DivResults, space_res, neigenpairs, 1)
  ABI_MALLOC(ndeg_filter_slice,(nslice))
  ABI_MALLOC(permute_cols, (neigenpairs))
+ ABI_MALLOC(probe_idx, (neigenpairs))
  ABI_MALLOC(rayleigh_quotients, (neigenpairs))
 
  ! Memory used to store results of slice merging. 
@@ -727,8 +730,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! ITEST
 
  ! Compute |X|^2 colwise L2-norm (before any filter)
- !call xgBlock_colwiseNorm2(slice%AllX,dist1%self,comm_loc=xmpi_comm_null)
- !call xgBlock_reverseMap_1d(dist1%self,X0_norm2)
+ call xgBlock_colwiseNorm2(slice%AllX,dist1%self,comm_loc=xmpi_comm_null)
+ call xgBlock_reverseMap_1d(dist1%self,X0_norm2)
 
  ! ITEST
  !write(901,*) 'norm2(squared) ||X||='
@@ -785,8 +788,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! FIXME hand-tuned for now
  low_bound = rayleigh_quotients(5)
  upp_bound = maxval(rayleigh_quotients)
- min_low_bound = min_low_est
- !min_low_bound = -0.2d0
+ !min_low_bound = min_low_est
+ min_low_bound = -0.2d0
 
  write(901,*) 'low_bound    , upp_bound    =', low_bound, upp_bound
  write(901,*) 'min_low_bound, max_upp_bound=', min_low_bound, max_upp_bound
@@ -865,6 +868,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     !! -                Scalar polynomial tuning                  -
     !! 
     !! ------------------------------------------------------------
+
+    ! ongoing, hardcoded depends on previous code
+    slice1_mineig = -0.2d0
+    slice1_maxeig = 0.3d0
+    !slice2_mineig = 0.3d0
+    !slice2_maxeig = 3.0d0
 
     if (islice==1) then
 
@@ -1050,8 +1059,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     !! have the greatest energy norm for the slice. No tolerance.
     !! We start from all vectors then we keep only nvec of them.
     !! For every column vector x with npw rows,
-    !! * f(x) = x^T f(M) x (option 1)
-    !! * f(x) = ||f(M)x|| (option 2)
+    !! * f(x) = ||f(M)x|| (option 1)
+    !! * f(x) = x^T f(M) x (option 2)
     !! 
     !! ------------------------------------------------------------
 
@@ -1063,150 +1072,91 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     call timab(tim_slice_pr,1,tsec)
 
+    !    Step 1
+    ! =============
     ! Compute probe
-    ! dist2 = |X_PROBE|^2 colwise L2-norm
+    ! =============
+
     call xgBlock_copy(slice%X, slice%X_PROBE%self)
-    call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist2%self, max_dist2, comm_loc=xmpi_comm_null)
-    
+
     if (slice%spectral_cut == 1) then
-
-        ! TODO rename variables
-        call xgBlock_reverseMap_1d(dist2%self,probe)
-        !call xgBlock_reverseMap_1d(dist3%self, dist3_array)
-
-        ! Normalize by norm of initial X
-        probe(:) = probe(:) / sqrt(X0_norm2(:))
-
-        ! Scale probe to get a pivot between 0 and 1
-        ! useful for absolute probe
-        probe(:) = probe(:) / maxval(probe)
-
-        ! ITEST
-        write(901,*) 
-        write(901,*) 'indicator for components in wanted eigenspace=', probe(:)
-        !write(901,*) 'indicator for components in orthogonal complement=', dist3_array(:)
-        !write(901,*) 'eout_ideg=', eout_ideg
-        !write(901,*) 'ein_ideg=', ein_ideg
-        !write(901,*) 'estimator=', eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2
-        flush(901)
-        ! ITEST
-
+        ! option 1 the norm
+        ! dist2 = |X_PROBE|^2 colwise L2-norm
+        call xgBlock_colwiseNorm2(slice%X_PROBE%self, dist2%self, max_dist2, comm_loc=xmpi_comm_null)
+    else if (slice%spectral_cut == 2) then
+        ! option 2 the scalar product
+        ! FIXME find xgroutine that does inner products..
+        call xgBlock_colwiseMul(slice%X_PROBE%self, probe)
     end if
 
-    ! Criterion is deactivated by default
-    count_mask = neigenpairs
-   
-    ! Old criterion kept for reference
-    !count_mask = count(probe > dist3_array .or. ( probe > 1 ))
+    ! TODO rename variables
+    call xgBlock_reverseMap_1d(dist2%self,probe)
+    !call xgBlock_reverseMap_1d(dist3%self, dist3_array)
 
-    !tol_probe = 0.3
-    ! Initialize with quantity that is very small
-    tol_probe = sum(probe)/neigenpairs ! initialize with average value (a little less)
-    tol_step = tol_probe * 0.05 ! step is 10%
-    write(901,*) 'initial tolerance (average)=', tol_probe
-    write(901,*) 'starting refinement with step=', tol_step
-    flush(901)
-
-    ! Adaptive refinement
-    if (slice%spectral_cut == 1) then
-        
-        !if (islice==1) then
-        !    
-        !    !count_mask = count( probe > eout_ideg**2 + (ein_ideg*0.1d0)**2 )
-        !
-        !else
-        !
-        !    ! Criterion to take into account error of f
-        !    ! FIXME norm of X? Tolerance? slice=1?
-        !    !count_mask = count( probe > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2 )
-        !    count_mask = count( probe > tol_probe) 
-        !
-        !end if
-        count_mask = count( probe > tol_probe ) 
-
-    end if
+    ! TODO check if norm of X should be included in order to have a normalized
+    ! quantity to compare
     
+    ! Normalize by norm of initial X
+    probe(:) = probe(:) / sqrt(X0_norm2(:))
+
     write(901,*) 
-    write(901,*) 'initial count_mask=', count_mask
+    write(901,*) 'indicator for components in wanted eigenspace=', probe(:)
     flush(901)
 
+    !    Step 2
+    ! =============
+    ! Probe pruning
+    ! =============
+
+    ! ongoing implementation should be obtained from trace estimation now hardcoded
     if (islice==1) then
+        count_mask = 7
+    else if (islice==2) then
+        count_mask = neigenpairs! 82 ! TODO rename to nvec_kept..
+    end if
 
-        ! Discard vectors: Increase tolerance for probe if too many vectors in slice
-!        icount = 1
-!        do while(count_mask > 1.4*neigenpairs/nslice) ! maximum columns in block
-!            tol_probe = tol_probe + tol_step
-!            count_mask = count( probe > tol_probe)
-!            write(901,*) '#icount, tol_probe=, count_mask=', icount, tol_probe, count_mask
-!            icount = icount + 1
-!        end do
-        !tol_probe = sum(probe)/neigenpairs*0.3
-        tol_probe = -1
-        !count_mask = count( probe > tol_probe )
-        count_mask = neigenpairs - 3*slice%nbdbuf
-        ! TODO perform Alternating method where we adjust sizes upper and lower by alternating
-        ! between the two
-        write(901,*) 'fixed tolerance using nbdbuf=', 3*slice%nbdbuf
-        flush(901)
- 
-    else
+    ABI_MALLOC(probe_kept, (count_mask))
+
+    probe_idx(1:neigenpairs) = (/ (iband, iband=1,neigenpairs) /)
+    call sort_dp(neigenpairs, probe, probe_idx, tol12)
+    probe_kept = probe(probe_idx(1:count_mask))
+
+    write(901,*) 'kept probes', probe_kept
+    write(901,*) 'at indices', probe_idx(1:count_mask)
+
+    ABI_FREE(probe_kept)
+
+    ! TODO 
+    ! deal with extra vectors: if great probes are found outside the kept ones maybe include them
         
-        ! Add vectors: Decrease tolerance for probe if not enough vectors after merge
-        icount = 1
-        do while (count_mask < 1.3*neigenpairs/nslice .or. count_mask + count_merge < neigenpairs)
-            tol_probe = tol_probe - tol_step
-            count_mask = count( probe > tol_probe)
-            write(901,*) '#icount, tol_probe=, count_mask=', icount, tol_probe, count_mask
-            icount = icount + 1
-        end do
-        write(901,*) 'refined tolerance, #iterations=', tol_probe, icount
-        flush(901)
+    !    Step 3
+    ! ==============================================
+    ! Store kept vectors in contiguous memory layout
+    ! ==============================================
 
-    end if
-
-    ! ITEST
-    write(901,*) 'Keep count_mask= out of neigenpairs=', count_mask, neigenpairs
-    write(901,*) 
-    flush(901)
-    ! ITEST
-
-    if (slice%spectral_cut == 1) then
-
-        ! Allocate slice subspace memory, this is contiguous !!  
-        call xg_init(X_kept,slice%space,slice%total_spacedim,count_mask,xmpi_comm_self,me_g0=slice%me_g0_fft)
-        call xg_init(AX_kept,slice%space,slice%total_spacedim,count_mask,xmpi_comm_self,me_g0=slice%me_g0_fft)
+    ! Allocate slice subspace memory, this is contiguous !!  
+    call xg_init(X_kept,slice%space,slice%total_spacedim,count_mask,xmpi_comm_self,me_g0=slice%me_g0_fft)
+    call xg_init(AX_kept,slice%space,slice%total_spacedim,count_mask,xmpi_comm_self,me_g0=slice%me_g0_fft)
    
-        ! Copy data
-        icount = 1
-        do iband=1,neigenpairs
-            is_close_to_V = .true.
-            if (islice==1) then
-            !    !is_close_to_V = probe(iband) > eout_ideg**2 + (ein_ideg*0.1d0)**2
-                 is_close_to_V = iband < neigenpairs - 3*slice%nbdbuf + 1
-            else
-            !    !is_close_to_V = probe(iband) > eout_ideg**2 + ((1+ein_ideg)*0.1d0)**2
-                 is_close_to_V = probe(iband) > tol_probe
-            end if
-            if (is_close_to_V) then
-                call xgBlock_setBlock(X_kept%self, X_kept_col, slice%total_spacedim, 1, fcol=icount)
-                call xgBlock_setBlock(AX_kept%self, AX_kept_col, slice%total_spacedim, 1, fcol=icount)
-                call xgBlock_setBlock(slice%X, X_col, slice%total_spacedim, 1, fcol=iband)
-                call xgBlock_setBlock(slice%AX, AX_col, slice%total_spacedim, 1, fcol=iband)
+    do icount=1,count_mask
+
+        iband = probe_idx(icount)
+            
+        call xgBlock_setBlock(X_kept%self, X_kept_col, slice%total_spacedim, 1, fcol=icount)
+        call xgBlock_setBlock(AX_kept%self, AX_kept_col, slice%total_spacedim, 1, fcol=icount)
+        call xgBlock_setBlock(slice%X, X_col, slice%total_spacedim, 1, fcol=iband)
+        call xgBlock_setBlock(slice%AX, AX_col, slice%total_spacedim, 1, fcol=iband)
     
-                call timab(tim_copy, 1, tsec)
-                call xgBlock_copy(X_col, X_kept_col)
-                call xgBlock_copy(AX_col, AX_kept_col)
-                call timab(tim_copy, 2, tsec)
+        call timab(tim_copy, 1, tsec)
+        call xgBlock_copy(X_col, X_kept_col)
+        call xgBlock_copy(AX_col, AX_kept_col)
+        call timab(tim_copy, 2, tsec)
 
-                icount = icount + 1
-            end if
-        end do
-
-        ! reset pointers to temporary (kept)
-        slice%X = X_kept%self
-        slice%AX = AX_kept%self
-
-    end if
+    end do
+    
+    ! reset pointers to temporary (kept)
+    slice%X = X_kept%self
+    slice%AX = AX_kept%self
  
     ! content is not important, but dimensions 
     call xgBlock_setBlock(slice%AllcprjX, slice%cprjX, slice%cprjdim, count_mask*nspinor)
@@ -1585,6 +1535,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call xg_free(dist3)
  ABI_FREE(permute_cols)
  ABI_FREE(rayleigh_quotients)
+ ABI_FREE(probe_idx)
 
 end subroutine slice_run_cprj
 !!***
