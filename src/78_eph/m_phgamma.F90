@@ -3800,11 +3800,11 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
        ABI_MALLOC(gs1c_kq, (2, npw_kq*nspinor*((sij_opt+1)/2)))
 
-       call gs_hamkq%eph_setup_k("k" , kk, istwf_k, npw_k, kg_k,  dtset, cryst, psps, &
-                                 nkpg, kpg_k, ffnl_k, kinpw_k, ph3d_k, pert_comm%value)
+       call gs_hamkq%eph_setup_k("k" , kk, istwf_k, npw_k, kg_k,  dtset, cryst, psps, &      ! in
+                                 nkpg, kpg_k, ffnl_k, kinpw_k, ph3d_k, pert_comm%value)      ! out
 
-       call gs_hamkq%eph_setup_k("kq", kq, istwf_k, npw_kq, kg_kq, dtset, cryst, psps, &
-                                 nkpg, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, pert_comm%value)
+       call gs_hamkq%eph_setup_k("kq", kq, istwf_k, npw_kq, kg_kq, dtset, cryst, psps, &     ! in
+                                 nkpg, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, pert_comm%value)  ! out
 
        ! Loop over all my atomic perturbations and compute gkk_atm.
        gkk_atm = zero
