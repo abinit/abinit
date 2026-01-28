@@ -1,8 +1,8 @@
 # Berry curvatures calculation in antiferromagnetic MnF2 (omega=0 and q=0).
 # (M. Royo, 12.12.2025)
 
-   ndtset 2
-   jdtset 7 8 
+   ndtset 4
+   jdtset 7 8 9 10
 
 outdata_prefix = "tcdfpt_2o"
 
@@ -15,7 +15,7 @@ outdata_prefix = "tcdfpt_2o"
 optdriver  10
   timdisp  1
   tim1rev  1
-### 7) ADIABATIC DYNAMICS WITH MACROSCOPIC ZEEMAN
+### 7) BERRY CURVATURES WITH MACROSCOPIC ZEEMAN
   
   d3e_pert1_magn7  1
 d3e_pert1_magdir7  1 1 1
@@ -31,7 +31,7 @@ d3e_pert2_magdir7  1 1 1
   d3e_pert2_phon7  1
  d3e_pert2_atpol7  1 6
 
-### 8) ADIABATIC DYNAMICS WITH LOCAL ZEEMAN
+### 8) BERRY CURVATURES WITH LOCAL ZEEMAN
   
   d3e_pert1_magn8  2
  d3e_pert1_magat8  1 2
@@ -48,6 +48,33 @@ d3e_pert2_magdir8  1 1 0
    d3e_pert2_dir8  1 1 1
   d3e_pert2_phon8  1
  d3e_pert2_atpol8  1 6
+
+### 9) BERRY CURVATURES BETWEEN MACRO AND LOCAL ZEEMAN
+  
+  d3e_pert1_magn9  1
+  d3e_pert1_elfd9  0
+   d3e_pert1_dir9  1 1 1
+  d3e_pert1_phon9  0
+
+  d3e_pert2_magn9  2
+ d3e_pert2_magat9  1 2
+d3e_pert2_magdir9  1 1 0
+  d3e_pert2_elfd9  0
+  d3e_pert2_phon9  0
+
+### 10) BERRY CURVATURES BETWEEN LOCAL AND MACRO ZEEMAN
+  
+  d3e_pert1_magn10  2
+ d3e_pert1_magat10  1 2
+d3e_pert1_magdir10  1 1 0
+  d3e_pert1_elfd10  0
+  d3e_pert1_phon10  0
+
+  d3e_pert2_magn10  1
+  d3e_pert2_elfd10  0
+   d3e_pert2_dir10  1 1 1
+  d3e_pert2_phon10  0
+
 
 ### MORE GENERAL PARAMETERS
 
@@ -100,7 +127,7 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain =  tcdfpt_1.abi, tcdfpt_2.abi, tcdfpt_3.abi, tcdfpt_4.abi, tcdfpt_5.abi, tcdfpt_6.abi
+#%% test_chain =  tcdfpt_1.abi, tcdfpt_2.abi, tcdfpt_3.abi, tcdfpt_4.abi, tcdfpt_5.abi, tcdfpt_6.abi, tcdfpt_7.abi
 #%% [files]
 #%% files_to_test =
 #%%   tcdfpt_3.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-medium

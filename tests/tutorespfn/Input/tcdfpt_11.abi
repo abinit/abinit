@@ -1,6 +1,7 @@
 ! Postprocessing to switch between constrained/unconstrained magnetic functionals
-! and numerical frequency interpolation for antiferromagnetic MnF2
-! (M. Royo, 12.12.2025)
+! and frequency interpolation with analytical Berry curvatures for antiferromagnetic MnF2
+! Finite q case.
+! (M. Royo, 22.01.2026)
 
    prtvol 11
 !Magnetic penalty
@@ -8,10 +9,10 @@
    mpatpol 1 2
    mpdir 1 1 0
    mpopt 2  !(1 Frozen-spin, 2 Relaxed-spin)
-   timdisp 0 
+   timdisp 1 
 
 !Frequency interpolation
-   freqflag 3
+   freqflag 1
    nfreq  10
    frmin  0.000
    frmax  0.01
@@ -23,11 +24,11 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% input_ddb = tcdfpt_4.ddb.out
-#%% test_chain =  tcdfpt_1.abi, tcdfpt_2.abi, tcdfpt_3.abi, tcdfpt_4.abi, tcdfpt_5.abi, tcdfpt_6.abi, tcdfpt_7.abi
+#%% input_ddb = tcdfpt_10.ddb.out
+#%% test_chain =  tcdfpt_8.abi, tcdfpt_9.abi, tcdfpt_10.abi, tcdfpt_11.abi
 #%% [files]
 #%% files_to_test =
-#%%   tcdfpt_5.abo, tolnlines=  0, tolabs=  0.000e0, tolrel=  0.000e-0, fld_options = -easy
+#%%   tcdfpt_11.abo, tolnlines=  0, tolabs=  0.000e0, tolrel=  0.000e-0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
