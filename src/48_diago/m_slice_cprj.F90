@@ -910,6 +910,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         ! FIXME only works for slice=1
         ABI_WARNING('present code only works for nslice=2')
 
+        ! ongoing hardcoded
+        alpha_minus = 0.7
+        alpha_plus = 2.0
+
         overlap_width = (alpha_plus - alpha_minus)/8.0
         lambda_minus = alpha_minus-overlap_width 
         lambda_plus = alpha_plus+overlap_width
@@ -1112,7 +1116,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     if (islice==1) then
         count_mask = 7
     else if (islice==2) then
-        count_mask = neigenpairs! 82 ! TODO rename to nvec_kept..
+        count_mask = 80 ! TODO rename to nvec_kept..
     end if
 
     ABI_MALLOC(probe_kept, (count_mask))
@@ -1128,6 +1132,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     ! TODO 
     ! deal with extra vectors: if great probes are found outside the kept ones maybe include them
+    ! appending vectors should be within a loop here
         
     !    Step 3
     ! ==============================================
@@ -1259,6 +1264,15 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     write(901,*) 'Frobenius norm=', sqrt(sum(resid))
     flush(901)
     ! ITEST
+
+    !! ------------------------------------------------------------
+    !! 
+    !! -              Diagnostic for full slices                  -
+    !! 
+    !! ------------------------------------------------------------
+
+    ! 
+
     
     !! ------------------------------------------------------------
     !! 
@@ -1271,6 +1285,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     fcol_in = 1
     lcol_in = count_rr
     if (islice==1) then
+
+        ! TODO count how many eigenpairs have converged outside the slice with 
+        ! their confidence interval based on residual outside the slice
 
         lcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < lambda_minus))
 
