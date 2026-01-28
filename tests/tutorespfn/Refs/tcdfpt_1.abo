@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 22 Jan 2026.
-- ( at 14h45 )
+.Starting date : Wed 28 Jan 2026.
+- ( at 12h44 )
   
 - The starting date is more than 2 years after the initial release
 - of this version of ABINIT, namely Mar 2023.
 - Note that the use beyond 3 years after the release will not be supported.
 - Action: please, switch to a more recent version of ABINIT.
  
-- input  file    -> /mnt/lustre/scratch/nlsas/home/csic/eem/mrv/Programs/abinit/tmp-build-constrained-DFPT/Test_suite/tutorespfn_tcdfpt_1-tcdfpt_2-tcdfpt_3-tcdfpt_4-tcdfpt_5-tcdfpt_6/tcdfpt_1.abi
+- input  file    -> /mnt/lustre/scratch/nlsas/home/csic/eem/mrv/Programs/abinit/tmp-build-constrained-DFPT/Test_suite/tutorespfn_tcdfpt_1-tcdfpt_2-tcdfpt_3-tcdfpt_4-tcdfpt_5-tcdfpt_6-tcdfpt_7/tcdfpt_1.abi
 - output file    -> tcdfpt_1.abo
 - root for input  files -> tcdfpt_1i
 - root for output files -> tcdfpt_1o
@@ -865,10 +865,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         11.5  wall=         55.7
+- Proc.   0 individual time (sec): cpu=          7.5  wall=         34.5
  
 ================================================================================
  
  Calculation completed.
 .Delivered   1 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        215.3  wall=        680.4
++Overall time at end (sec) : cpu=        102.3  wall=        412.0
