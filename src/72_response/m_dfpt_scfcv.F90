@@ -3197,7 +3197,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  real(dp),intent(inout) :: d2lo(2,3,mpert,3,mpert),d2nl(2,3,mpert,3,mpert) !vz_i
 ! optional
  real(dp),optional,intent(in) :: rhor(nfft,nspden)
- real(dp),optional,intent(in) :: vxc(cplex*nfft,nspden)
+ real(dp),optional,intent(in) :: vxc(nfft,nspden)
 
 !Local variables-------------------------------
 !scalars
@@ -3561,7 +3561,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
              optnc=1
              call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,rhodummy,0,&
 &             nkxc,nmxc,nspden,n3xccc,optnc,option,qphon,rhor,rhor1,&
-&             rprimd,0,vxc,vxc1,xccc3d1)
+&             rprimd,0,vxc,vxc1,xccc3d1,ixcrot=ixcrot)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,&
 &             nkxc,nmxc,nspden,n3xccc,option,qphon,rhodummy,&
