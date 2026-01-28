@@ -1283,14 +1283,13 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
      end do
    end if
    if (db%debug) write(std_out,*)"All perts available. Returning"
+   call timab(1805, 2, tsec)
    return
  end if
 
  ! Perturbation are missing and we have to reconstruct them by symmetry.
  ! This is the common case when DFPT calculations are done for independent perturbations only.
- if (db%debug) then
-   write(std_out,*)sjoin("Will use symmetries to recostruct:", itoa(3*db%natom - npc), "perturbations")
- end if
+ if (db%debug) write(std_out,*)sjoin("Will use symmetries to recostruct:", itoa(3*db%natom - npc), "perturbations")
 
  ! 0 if pert is not available.
  ! 1 if pert is on file.
