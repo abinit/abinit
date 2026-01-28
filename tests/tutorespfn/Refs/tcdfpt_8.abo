@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 22 Jan 2026.
-- ( at 15h05 )
+.Starting date : Wed 28 Jan 2026.
+- ( at 12h23 )
   
 - The starting date is more than 2 years after the initial release
 - of this version of ABINIT, namely Mar 2023.
 - Note that the use beyond 3 years after the release will not be supported.
 - Action: please, switch to a more recent version of ABINIT.
  
-- input  file    -> /mnt/lustre/scratch/nlsas/home/csic/eem/mrv/Programs/abinit/tmp-build-constrained-DFPT/Test_suite/tutorespfn_tcdfpt_7-tcdfpt_8-tcdfpt_9-tcdfpt_10/tcdfpt_7.abi
-- output file    -> tcdfpt_7.abo
-- root for input  files -> tcdfpt_7i
-- root for output files -> tcdfpt_7o
+- input  file    -> /mnt/lustre/scratch/nlsas/home/csic/eem/mrv/Programs/abinit/tmp-build-constrained-DFPT/Test_suite/tutorespfn_tcdfpt_8-tcdfpt_9-tcdfpt_10-tcdfpt_11/tcdfpt_8.abi
+- output file    -> tcdfpt_8.abo
+- root for input  files -> tcdfpt_8i
+- root for output files -> tcdfpt_8o
  
  
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
@@ -443,7 +443,7 @@ force_length_stats: {min:   2.25652786E-09, max:   1.08931317E+00, mean:   7.262
  frms,max,avg= 2.6405592E+01 3.9608429E+01   2.830E-09 -4.365E-09  9.368E-10 e/A
  length scales=  9.210000000000  9.210000000000  6.256000000000 bohr
               =  4.873722091114  4.873722091114  3.310532616939 angstroms
- prteigrs : about to open file tcdfpt_7o_DS1_EIG
+ prteigrs : about to open file tcdfpt_8o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.50576   Average Vxc (hartree)=  -0.48165
  Eigenvalues (hartree) for nkpt=  12  k points:
  kpt#   1, nband= 42, wtk=  0.08333, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -536,8 +536,6 @@ meta: {optdriver: 1, rfmagn: 1, rfphon: 1, }
    21)    idir= 3    ipert=  11
  
 ================================================================================
-   WARNING: RF routines are not adapted to fft parallelization
-   when tim1rev=0. The result of this calculation will most surely be wrong if npfft/=1.
 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.500000  0.500000  0.000000
@@ -3749,8 +3747,6 @@ meta: {optdriver: 1, rfmagn: 2, }
     4)    idir= 2    ipert=  19
  
 ================================================================================
-   WARNING: RF routines are not adapted to fft parallelization
-   when tim1rev=0. The result of this calculation will most surely be wrong if npfft/=1.
 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.500000  0.500000  0.000000
@@ -4777,10 +4773,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         71.8  wall=        227.1
+- Proc.   0 individual time (sec): cpu=         75.6  wall=        540.2
  
 ================================================================================
  
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        890.0  wall=       2722.9
++Overall time at end (sec) : cpu=       1091.5  wall=       6362.5
