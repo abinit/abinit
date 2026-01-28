@@ -36,6 +36,7 @@ inp_files = [
 "tcdfpt_8.abi",
 "tcdfpt_9.abi",
 "tcdfpt_10.abi",
+"tcdfpt_11.abi",
 #
 "teph_tdep_legacy_1.abi",
 "teph_tdep_legacy_2.abi",
