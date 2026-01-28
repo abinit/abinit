@@ -1938,20 +1938,22 @@ contains
    end do
  end if
 
+!MR: Not sure why this is different from the electrical charges,
+!but is needed to reproduce freqflag=3 numbers
 !Magnetic charges induced by atomic displacement
- ipert1= natom + 5
- do ipert2= 1, natom
-   do idir2= 1, 3
-     icol=( ipert2-1)*3 + idir2
-     do idir1= 1, 3
-       irow=( ipert1-1)*3 + idir1
-       cval=bc_pp(irow,icol)
-       bc_pp(irow,icol)=-cval
-       cval=bc_pp(icol,irow)
-       bc_pp(icol,irow)=-cval
-     end do
-   end do
- end do
+! ipert1= natom + 5
+! do ipert2= 1, natom
+!   do idir2= 1, 3
+!     icol=( ipert2-1)*3 + idir2
+!     do idir1= 1, 3
+!       irow=( ipert1-1)*3 + idir1
+!       cval=bc_pp(irow,icol)
+!       bc_pp(irow,icol)=-cval
+!       cval=bc_pp(icol,irow)
+!       bc_pp(icol,irow)=-cval
+!     end do
+!   end do
+! end do
 
 !Dielectric tensor
  if (qeq0) then
