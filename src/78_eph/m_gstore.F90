@@ -3699,9 +3699,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    call gstore%compute_and_write_vk(mpw, wfd, ebands, psps, pawtab, root_ncid)
  end if
 
- call gstore%compute_and_write_commutator(mpw, gmax, ngfft, ngfftf, dtset, cryst, &
-                                          pawfgr, pawtab, psps, &
-                                          wfd, mpi_enreg, kg_k, ebands, dvdb, gs_ham_kq, root_ncid)
+ !call gstore%compute_and_write_commutator(mpw, gmax, ngfft, ngfftf, dtset, cryst, &
+ !                                         pawfgr, pawtab, psps, &
+ !                                         wfd, mpi_enreg, kg_k, ebands, dvdb, gs_ham_kq, root_ncid)
 
  call wrtout(std_out, " Begin computation of e-ph matrix elements...", pre_newlines=1)
 
