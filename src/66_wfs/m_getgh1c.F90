@@ -292,6 +292,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        gpu_option=gs_hamkq%gpu_option)
 
      if(gs_hamkq%nspinor==2)then
+       ABI_CHECK_IEQ(ndat, 1, "ndat > 1 with nspinor 2 and nspden 1 is buggy")
+       ! MG TODO: This section is superflous: Calling fourwf above with ndat * nspinor instead of ndat should be enough.
        ABI_MALLOC(cwave_sp,(2,npw))
        ABI_MALLOC(gh1c_sp,(2,npw1))
 !$OMP PARALLEL DO
