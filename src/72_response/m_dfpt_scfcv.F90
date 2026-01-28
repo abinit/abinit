@@ -1446,7 +1446,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon,rhor1,rmet,rprimd,symrc1,ucvol,&
-&         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
+&         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc,ixcrot=dtset%ixcrot)
        else
          call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
@@ -1460,7 +1460,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon,rhor1_pq,rmet,rprimd,symrc1,ucvol,&
-&         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
+&         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc,ixcrot=dtset%ixcrot)
        else
          call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb_pq,d2lo_pq,d2nl_pq,eigen0,eigen1,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
@@ -1473,7 +1473,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1_mq,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1_mq,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1_mq,nspden,&
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon_mq,rhor1_mq,rmet,rprimd,symrc1,ucvol,&
-&         wtk_rbz,xred,ylm,ylm1_mq,rhor=rhor,vxc=vxc)
+&         wtk_rbz,xred,ylm,ylm1_mq,rhor=rhor,vxc=vxc,ixcrot=dtset%ixcrot)
        else
          call dfpt_nstdy(atindx,blkflg,cg,cg1_mq,cplex,dtfil,dtset,d2bbb_mq,d2lo_mq,d2nl_mq,eigen0,eigen1_mq,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1_mq,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
@@ -3165,7 +3165,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 &          gmet,gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,&
 &          mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,nfft,ngfft,nkpt,nkpt_rbz,nkxc,&
 &          npwarr,npwar1,nspden,nsppol,nsym1,occ_rbz,ph1d,psps,qphon,rhor1,rmet,rprimd,&
-&          symrc1,ucvol,wtk_rbz,xred,ylm,ylm1,rhor,vxc)
+&          symrc1,ucvol,wtk_rbz,xred,ylm,ylm1,rhor,vxc,ixcrot)
 
 !Arguments -------------------------------
 !scalars
@@ -3176,6 +3176,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
+!optional
+ integer,optional,intent(in) :: ixcrot
 !arrays
  integer,intent(in) :: atindx(dtset%natom),indkpt1(nkpt_rbz),indsy1(4,nsym1,dtset%natom)
  integer,intent(in) :: istwfk_rbz(nkpt_rbz),kg(3,mpw*mkmem),kg1(3,mpw1*mk1mem)
@@ -3557,7 +3559,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
          if(psps%n1xccc/=0)then
            option=0
 !FR SPr EB non-collinear magnetism
-           if (nspden==4.and.present(rhor).and.present(vxc)) then
+           if (nspden==4.and.present(rhor).and.present(vxc).and.present(ixcrot)) then
              optnc=1
              call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,rhodummy,0,&
 &             nkxc,nmxc,nspden,n3xccc,optnc,option,qphon,rhor,rhor1,&
