@@ -587,6 +587,9 @@ contains
   procedure, private :: filter_fs_tetra__ => gstore_filter_fs_tetra__
   ! Select k-points on the FS using the tetrahedron method
 
+  procedure, private :: filter_kptgw__ => gstore_filter_kptgw__
+  ! Select k-points using kptgw input variable. Useful for ZPR for user-specified k-points.
+
   procedure, private :: filter_erange__ => gstore_filter_erange__
   ! Select k-points inside an energy window.
 
@@ -768,6 +771,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    ! Compute nkcalc, kcalc, bstart_ks, nbcalc_ks
    if (dtset%gw_qprange /= 0) then
      call sigtk_kcalc_from_qprange(dtset, gstore%cryst, ebands, dtset%gw_qprange, nkcalc, kcalc, bstart_ks, nbcalc_ks)
+
    else
      ! gw_qprange is not specified in the input.
      ! Include direct and fundamental KS gap or include states depending on the position wrt band edges.
@@ -787,6 +791,33 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    ABI_FREE(bstart_ks)
    ABI_FREE(nbcalc_ks)
    call gaps%free()
+ end if
+
+ if (dtset%nkptgw /= 0) then
+  ! Allow user to specify k-points with kptgw and bdgw.
+
+  if (gstore%kfilter /= "none") then
+    ABI_ERROR("gstore%kfilter and nkptgw != 0 cannot be used together!")
+  end if
+
+  ! Assume ZPR calculations requiring virtual k+q transitions from 1 up to nband.
+  gstore_brange_kq(:,1) = [1, dtset%mband]
+  gstore_brange_kq(:,2) = [1, dtset%mband]
+
+   call sigtk_kcalc_from_nkptgw(dtset, dtset%mband, nkcalc, kcalc, bstart_ks, nbcalc_ks)
+
+   ! Convert to stop values
+   nbcalc_ks = bstart_ks + nbcalc_ks - 1
+
+   ! FIXME: Handle degeneracies
+   do spin=1,nsppol
+     gstore_brange_k(1, spin) = minval(bstart_ks(1:nkcalc, spin))
+     gstore_brange_k(2, spin) = maxval(nbcalc_ks(1:nkcalc, spin))
+   end do
+
+   ABI_FREE(kcalc)
+   ABI_FREE(bstart_ks)
+   ABI_FREE(nbcalc_ks)
  end if
 
  call gstore%distribute_spins__(dtset%mband, gstore_brange_kq, gstore_brange_k, nproc_spin, comm_spin, comm)
@@ -916,7 +947,10 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! Here we filter the electronic wavevectors k and recompute select_qbz_spin and select_kbz_spin according to kfilter.
  select case (gstore%kfilter)
  case ("none")
-   continue
+   if (dtset%nkptgw /= 0) then
+     ! Use kptgw input variable. Useful for ZPR for user-specified k-points.
+     call gstore%filter_kptgw__(dtset, qbz2ibz, qibz2bz, kibz2bz, select_qbz_spin, select_kbz_spin)
+   end if
 
  case ("erange")
    ! Use energy range: transport in semiconductors/metals or superconducting propertiea.
@@ -1425,6 +1459,7 @@ subroutine gstore_set_mpi_grid__(gstore, dtfil, nproc_spin, comm_spin)
    bstop_kq = gstore%brange_kq_spin(2, spin)
    nb_kq = gstore%brange_kq_spin(2, spin) - gstore%brange_kq_spin(1, spin) + 1
 
+   ! Here we set nb_k and nb_kq
    gqk%nb_k = nb_k; gqk%bstart_k = bstart_k; gqk%bstop_k = bstop_k
    gqk%nb_kq = nb_kq; gqk%bstart_kq = bstart_kq; gqk%bstop_kq = bstop_kq
 
@@ -2066,6 +2101,85 @@ subroutine gstore_filter_fs_tetra__(gstore, qbz2ibz, qibz2bz, kibz2bz, select_qb
  end associate
 
 end subroutine gstore_filter_fs_tetra__
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gstore_filter_kptgw__
+!! NAME
+!! gstore_gw_filter_kptgw__
+!!
+!! FUNCTION
+!! Filter k-points according to the input variable kptgw. Useful for ZPR for user-specified k-points.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine gstore_filter_kptgw__(gstore, dtset, qbz2ibz, qibz2bz, kibz2bz, select_qbz_spin, select_kbz_spin)
+
+!Arguments ------------------------------------
+!scalars
+ class(gstore_t),intent(inout) :: gstore
+ type(dataset_type),intent(in) :: dtset
+ integer,intent(in) :: qbz2ibz(6,gstore%nqbz), qibz2bz(gstore%nqibz)
+ integer,intent(in) :: kibz2bz(gstore%nkibz)
+ integer,intent(out) :: select_qbz_spin(gstore%nqbz, gstore%nsppol)
+ integer,intent(out) :: select_kbz_spin(gstore%nkbz, gstore%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: spin, ik_bz, ik_ibz, gap_err, ik_calc, nkcalc, mapl_kk(6), my_rank
+!arrays
+ integer,allocatable :: bstart_ks(:,:), nbcalc_ks(:,:)
+ real(dp),allocatable :: kcalc(:,:)
+!----------------------------------------------------------------------
+
+ ABI_UNUSED(qbz2ibz)
+ ABI_UNUSED(qibz2bz)
+
+ associate (cryst => gstore%cryst, ebands => gstore%ebands)
+
+ my_rank = xmpi_comm_rank(gstore%comm)
+
+ call wrtout(std_out, sjoin(" Filtering k-points using nkptgw:", itoa(dtset%nkptgw)))
+ if (gstore%qzone /= "bz") then
+   ABI_ERROR(sjoin('gw_qprange filtering requires gstore_qzone = "bz" while it is: ', gstore%qzone))
+ end if
+
+ ! Compute nkcalc, kcalc, bstart_ks, nbcalc_ks
+ call sigtk_kcalc_from_nkptgw(dtset, dtset%mband, nkcalc, kcalc, bstart_ks, nbcalc_ks)
+
+ ! TODO: kcalc should be spin-dependent to handle magnetic semiconductors.
+ select_kbz_spin = 0
+ do spin=1,gstore%nsppol
+   do ik_calc=1,nkcalc
+     if (kpts_map("symrel", ebands%kptopt, gstore%cryst, gstore%krank_ibz, 1, kcalc(:,ik_calc), mapl_kk) /= 0) then
+       ABI_ERROR(sjoin("Cannot map kcalc to IBZ with kcalc:", ktoa(kcalc(:,ik_calc))))
+     end if
+     ! Change select_kbz_spin
+     ik_ibz = mapl_kk(1)
+     ik_bz = kibz2bz(ik_ibz); select_kbz_spin(ik_bz, spin) = 1
+   end do
+   ! Set brange_k_spin from bstart_ks and nbcalc_ks. Arrays have shape (nkcalc, nsppol)
+   ! FIXME: This requires a more careful treatment of (gqk%nb_k, gqk%nb) matrix that should become (nb1, nb2)
+   ! Note also that brange_k and brange_kq have been already initialized in gstore_distribute_spins
+   !gstore%brange_k_spin(:, spin) = [minval(bstart_ks(:,spin)), maxval(bstart_ks(:,spin) + nbcalc_ks(:,spin) - 1)]
+   !gstore%brange_kq_spin(:, spin) = [minval(bstart_ks(:,spin)), maxval(bstart_ks(:,spin) + nbcalc_ks(:,spin) - 1)]
+   !gstore%brange_kq_spin(:, spin) = [1, dtset%mband]
+ end do ! spin
+
+ !call recompute_select_qbz_spin(gstore, gstore%qbz, qbz2ibz, qibz2bz, gstore%kbz, gstore%kibz, gstore%kbz2ibz, gstore%kibz2bz, &
+ !                               select_kbz_spin, select_qbz_spin)
+
+ ABI_FREE(kcalc)
+ ABI_FREE(bstart_ks)
+ ABI_FREE(nbcalc_ks)
+ end associate
+
+end subroutine gstore_filter_kptgw__
 !!***
 
 !----------------------------------------------------------------------
