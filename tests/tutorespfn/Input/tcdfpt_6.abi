@@ -3,10 +3,10 @@ MnF2
 6
 tcdfpt_2o_DS3_DDB
 tcdfpt_2o_DS4_DDB
-tcdfpt_3o_DS7_DDB
-tcdfpt_3o_DS8_DDB
-tcdfpt_3o_DS9_DDB
-tcdfpt_3o_DS10_DDB
+tcdfpt_2o_DS7_DDB
+tcdfpt_2o_DS8_DDB
+tcdfpt_2o_DS9_DDB
+tcdfpt_2o_DS10_DDB
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
