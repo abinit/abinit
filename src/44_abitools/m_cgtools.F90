@@ -6261,20 +6261,20 @@ subroutine cg_p_psi(npw_k, nspinor, ndat, kk, kg_k, cg_k, p_cg_k)
  real(dp),intent(in) :: kk(3)
  integer,intent(in) :: kg_k(3,npw_k)
  real(dp),intent(in) :: cg_k(2,npw_k*nspinor,ndat)
- real(dp),intent(out) :: p_cg_k(2,npw_k*nspinor,3,ndat)
+ real(dp),intent(out) :: p_cg_k(2,npw_k*nspinor,ndat,3)
 
 !Local variables ------------------------------
  integer :: idir, ig, ispinor, idat, spad, ipwsp
 ! *************************************************************************
 
- !$OMP PARALLEL DO PRIVATE(spad, ipwsp) COLLAPSE(2)
- do idat=1,ndat
-   do idir=1,3
+ !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(spad, ipwsp)
+ do idir=1,3
+   do idat=1,ndat
      do ispinor=1,nspinor
        spad = (ispinor - 1) * npw_k
        do ig=1,npw_k
          ipwsp = ig + spad
-         p_cg_k(:, ipwsp, idir, idat) = cg_k(:, ipwsp, idat) * (kg_k(idir, ig) + kk(idir))
+         p_cg_k(:, ipwsp, idat, idir) = cg_k(:, ipwsp, idat) * (kg_k(idir, ig) + kk(idir))
        end do ! ig
      end do ! ispinor
    end do ! idir
