@@ -579,6 +579,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    call gstore%compute_and_write_vk(mpw, wfd, ebands, psps, pawtab, root_ncid)
  end if ! ndone /= 0
 
+ !if (dtset%gstore_iv1pn =/ 0) then
+ !  !call gstore%compute_and_write_commutator(mpw, gmax, ngfft, ngfftf, dtset, cryst, pawfgr, psps, &
+ !  !                                         wfd, mpi_enreg, kg_k, ebands, dvdb, gs_ham_kq, root_ncid)
+ !end if
+
  ! Radius of sphere with volume equivalent to the micro zone.
  !q0rad = two_pi * (three / (four_pi * cryst%ucvol * gstore%nqbz)) ** third
  !bz_vol = two_pi**3 / cryst%ucvol
