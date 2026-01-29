@@ -4,7 +4,7 @@ __Check__ the list above, all the ones marked as __fb__,for fallbacks,
 will be installed locally.
  
 To proceed, you can run: 
-__make__
+__./install_fallbacks.sh__
 
 Or you can install/load those libraries and rerun 
 __configure__
