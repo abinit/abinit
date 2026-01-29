@@ -640,8 +640,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    call wrtout(std_out,message,'COLL')
    call print_matlu(matlu1(:),natom,1,compl=1)
    if (paw_dmft%dmft_solv .eq. 10) then
-     write(message,'(a,2x,a)') ch10," The off diagonal occupation matrix elements are complex.& 
-      & This is taken into account in the CT-QMC with dmft_solv = 10."
+     write(message,'(a,2x,a)') ch10,"   The potential complex off diagonal occupation matrix elements are & 
+      &taken into account in the CT-QMC with dmft_solv = 10."
      call wrtout(std_out,message,'COLL')
    else                        
      call checkreal_matlu(matlu1(:),natom,tol10)

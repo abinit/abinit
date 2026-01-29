@@ -1281,7 +1281,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
   INTEGER                                         :: iflavor
   INTEGER                                         :: iflavor2
   INTEGER                                         :: iomega
-  INTEGER                                         :: itau,ioerr
+  INTEGER                                         :: itau,ioerr,debug
   DOUBLE PRECISION                                :: pi_invBeta
   COMPLEX(KIND=8)                                 :: K
   !DOUBLE PRECISION                                :: re
@@ -1291,7 +1291,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
   COMPLEX(KIND=8), DIMENSION(:,:), ALLOCATABLE   :: F_omega_inv
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: Gomega_tmp
   TYPE(GreenHyboffdiagComplex)                     :: F_tmp
-  CHARACTER(LEN=100) :: message
+  CHARACTER(LEN=200) :: message
   character(len=2) :: atomnb
   DOUBLE PRECISION, allocatable :: x_r(:,:,:), x_i(:,:,:)
   CHARACTER(LEN=256) :: dummy
@@ -1306,6 +1306,8 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
   samples    = op%samples
   pi_invBeta = ACOS(-1.d0) / op%beta
   op%Wmax=SIZE(Gomega,1)
+
+  debug = 0 !set to one to build G0
 
   !=================================
   ! --- Initialize F_tmp 
@@ -1323,103 +1325,97 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
   MALLOC(F_omega,(1:op%Wmax,1:flavors,1:flavors))
   MALLOC(F_omega_inv,(1:flavors,1:flavors))
   MALLOC(Gomega_tmp,(1:op%Wmax,1:flavors,1:flavors))
-  !op%hybri_limit(2,2)=op%hybri_limit(1,1)
-  !op%mu(1)=op%mu(1)/10
-  !op%mu(2)=op%mu(1)
-  !DO iomega=1,op%Wmax
-  !  do iflavor=1,flavors
-  !    do iflavor2=1,flavors
-  !     ! Gomega_tmp(iomega,iflavor,iflavor2)=op%hybri_limit(iflavor,iflavor2)/(cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta))/3.d0
-  !    enddo
-  !  enddo
-  !END DO
   Gomega_tmp=Gomega
 
-  !=============================================================================================
-  ! --- Compute Bath Green's function from Hybridization function in imaginary time
-  !=============================================================================================
-  ! In the following we want to get G_0(iw_n) from F(iw_n).
-  ! Be careful : G_0 is called F and F is called G_0 (Why ????)
-  !-----------------------------------------------------------
-  
-  ! G_0(iw_n)^-1 = iw_n + mu - F(iw_n)
-  !-----------------------------------
-  do iomega=1,op%Wmax
-    do iflavor=1,flavors
-      do iflavor2=1,flavors
-        if (iflavor==iflavor2) then
-          F_omega_inv(iflavor,iflavor2)= (cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta,kind=8) &
-&          + op%mu(iflavor)- Gomega_tmp(iomega,iflavor,iflavor2))
-        else
-          F_omega_inv(iflavor,iflavor2)= (- Gomega_tmp(iomega,iflavor,iflavor2))
-        endif
-      enddo
-    enddo
 
-    !Inverse of G_0(iw_n)^-1 to get G_0(iw_n)
-    !--------------------
-    call xginv(F_omega_inv,flavors)
-
-    do iflavor=1,flavors
-      do iflavor2=1,flavors
-        F_omega(iomega,iflavor,iflavor2) = F_omega_inv(iflavor,iflavor2)
-      enddo
-    enddo
-  enddo !iomega
-
-  CALL GreenHyboffdiagComplex_setOperW(F_tmp,F_omega)
-     
-  CALL GreenHyboffdiagComplex_backFourier(F_tmp,func="green")
-
-  !Put the result in F(tau) aka G_0(tau).
-  !--------------------------------------
-  DO iflavor = 1, flavors                                                                                                        
-    DO iflavor2 = 1, flavors                                                                                                     
-      DO itau=1,samples+1                                                                                                        
-!     This symetrization is general and valid even with SOC                                                                     
-!     Without SOC, it is useless ?                                                                                              
-      F(itau,iflavor,iflavor2) = (        F_tmp%oper(itau,iflavor,iflavor2)   +         &                                        
- &                                  dconjg(F_tmp%oper(itau,iflavor2,iflavor))   )/2.d0                                           
-      END DO                                                                                                                     
-    END DO                                                                                                                       
-  END DO                                                                                                                         
-
-  !Print G_0(tau) in file
-  !------------------------
-  !Real part
-  open (unit=4367,file='G0tau_fromF_Re',status='unknown',form='formatted')
-  rewind(4367)
-  IF ( op%rank .EQ. 0 ) THEN
-    DO iflavor = 1, flavors
-      DO iflavor2 = 1, flavors
-        write(4367,*) "#",iflavor,iflavor2
-        do  itau=1,op%samples+1
-          write(4367,*) (itau-1)*op%beta/(op%samples),real(F(itau,iflavor,iflavor2))
+  !This section of the code is not used / Only building G0 so just skip it
+  if(debug == 1) then
+    !=============================================================================================
+    ! --- Compute Bath Green's function from Hybridization function in imaginary time
+    !=============================================================================================
+    ! In the following we want to get G_0(iw_n) from F(iw_n).
+    ! Be careful : G_0 is called F and F is called G_0 (Why ????)
+    !-----------------------------------------------------------
+    ! G_0(iw_n)^-1 = iw_n + mu - F(iw_n)
+    !-----------------------------------
+    do iomega=1,op%Wmax
+      do iflavor=1,flavors
+        do iflavor2=1,flavors
+          if (iflavor==iflavor2) then
+            F_omega_inv(iflavor,iflavor2)= (cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta,kind=8) &
+  &          + op%mu(iflavor)- Gomega_tmp(iomega,iflavor,iflavor2))
+          else
+            F_omega_inv(iflavor,iflavor2)= (- Gomega_tmp(iomega,iflavor,iflavor2))
+          endif
         enddo
-        write(4367,*) 
-      END DO
-    END DO
-  ENDIF
-  !call flush(4367) nag compiler problrem
-  close(4367)
+      enddo
 
-  !Imag part
-  open (unit=4367,file='G0tau_fromF_Im',status='unknown',form='formatted')                               
-  rewind(4367)                                                                                           
-  IF ( op%rank .EQ. 0 ) THEN                                                                             
-    DO iflavor = 1, flavors                                                                              
-      DO iflavor2 = 1, flavors                                                                           
-        write(4367,*) "#",iflavor,iflavor2                                                             
-        do  itau=1,op%samples+1                                                                          
-          write(4367,*) (itau-1)*op%beta/(op%samples),aimag(F(itau,iflavor,iflavor2))                     
-        enddo                                                                                            
-        write(4367,*)                                                                                  
-      END DO                                                                                             
-    END DO                                                                                               
-  ENDIF   
-  !call flush(4367) !nag compiler problem                                                                                              
-  close(4367)                                                                                            
+      !Inverse of G_0(iw_n)^-1 to get G_0(iw_n)
+      !--------------------
+      call xginv(F_omega_inv,flavors)
+
+      do iflavor=1,flavors
+        do iflavor2=1,flavors
+          F_omega(iomega,iflavor,iflavor2) = F_omega_inv(iflavor,iflavor2)
+        enddo
+      enddo
+    enddo !iomega
+
+    CALL GreenHyboffdiagComplex_setOperW(F_tmp,F_omega)
      
+    CALL GreenHyboffdiagComplex_backFourier(F_tmp,func="green")
+
+    !Put the result in F(tau) aka G_0(tau).
+    !--------------------------------------
+    DO iflavor = 1, flavors                                                                                                        
+      DO iflavor2 = 1, flavors                                                                                                     
+        DO itau=1,samples+1                                                                                                        
+  !     This symetrization is general and valid even with SOC                                                                     
+  !     Without SOC, it is useless ?                                                                                              
+        F(itau,iflavor,iflavor2) = (        F_tmp%oper(itau,iflavor,iflavor2)   +         &                                        
+   &                                  dconjg(F_tmp%oper(itau,iflavor2,iflavor))   )/2.d0                                           
+        END DO                                                                                                                     
+      END DO                                                                                                                       
+    END DO                                                                                                                         
+ 
+    !Print G_0(tau) in file
+    !------------------------
+    !Real part
+    open (unit=4367,file='G0tau_fromF_Re',status='unknown',form='formatted')
+    rewind(4367)
+    IF ( op%rank .EQ. 0 ) THEN
+      DO iflavor = 1, flavors
+        DO iflavor2 = 1, flavors
+          write(4367,*) "#",iflavor,iflavor2
+          do  itau=1,op%samples+1
+            write(4367,*) (itau-1)*op%beta/(op%samples),real(F(itau,iflavor,iflavor2))
+          enddo
+          write(4367,*) 
+        END DO
+      END DO
+    ENDIF
+    !call flush(4367) nag compiler problrem
+    close(4367)
+
+    !Imag part
+    open (unit=4367,file='G0tau_fromF_Im',status='unknown',form='formatted')                               
+    rewind(4367)                                                                                           
+    IF ( op%rank .EQ. 0 ) THEN                                                                             
+      DO iflavor = 1, flavors                                                                              
+        DO iflavor2 = 1, flavors                                                                           
+          write(4367,*) "#",iflavor,iflavor2                                                             
+          do  itau=1,op%samples+1                                                                          
+            write(4367,*) (itau-1)*op%beta/(op%samples),aimag(F(itau,iflavor,iflavor2))                     
+          enddo                                                                                            
+          write(4367,*)                                                                                  
+        END DO                                                                                             
+      END DO                                                                                               
+    ENDIF   
+    !call flush(4367) !nag compiler problem                                                                                              
+    close(4367)                                                                                            
+  
+  endif  ! end of building G0
+
   call xmpi_barrier(op%MY_COMM)
 
   !=============================================================================================
@@ -1442,8 +1438,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
         IF ( op%opt_levels .EQ. 1 ) THEN
           K = op%mu(iflavor)
         ELSE
-           K = -(F_omega(op%Wmax,iflavor,iflavor)) 
-!        op%mu = K
+          K = -(F_omega(op%Wmax,iflavor,iflavor)) 
           op%mu(iflavor) = K 
         END IF
       ELSE
@@ -1464,12 +1459,12 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
   ! For all iflavor and iflavor2, do the Fourier transformation to have F(tau)
   ! ---------------------------------------------
   if (op%opt_hybri_limit .eq. 0) then
-    write(message,'(5a)') "   == WARNING: Not using the asymptotic limit of hybridization to enforce F(iw_n) -> -C_ij/iw_n"
+    write(message,'(a,a)') "   == Not using the asymptotic limit of hybridization to enforce F(iw_n) -> -C_ij/iw_n (dmft_hybri_limit = 0)", ch10
   else
   ! Take into account asymptotic limit of hybridization function such that F(iw_n) -> -C_ij/iw_n
   ! with C_ij calculated in m_forctqmc.f90
   ! --------------------------------------
-    write(message,'(5a)') "   == Use asymptotic limit of hybridization function such that F(iw_n) -> -C_ij/iw_n" 
+    write(message,'(a,a)') "   == Use asymptotic limit of hybridization function such that F(iw_n) -> -C_ij/iw_n (dmft_hybri_limit = 1)", ch10 
   endif
   CALL wrtout(std_out,message,'COLL')
   CALL GreenHyboffdiagComplex_backFourierComplex(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=op%opt_hybri_limit)
@@ -1672,6 +1667,7 @@ include 'mpif.h'
   CHARACTER(LEN=4)                   :: Cchar
 !#endif
   DOUBLE PRECISION                   :: estimatedTime
+  CHARACTER(LEN=100) :: message
 
   IF ( .NOT. op%set  ) &
     CALL ERROR("CtqmcoffdiagComplex_run : QMC not set up                          ")
@@ -1708,7 +1704,8 @@ include 'mpif.h'
       op%modGlobalMove(1) = max(op%sweeps,op%thermalization)+1 ! No Global Move
       !write(std_out,*) "op%sweeps",op%sweeps, op%modGlobalMove(1)
       !CALL WARNALL("CtqmcoffdiagComplex_run : global moves option is <= 0 or > sweeps/cpu -> No global Moves")
-      write(std_out,*) ch10,"   == No global moves are used in CT-QMC. Make sure it is correct"
+      write(message,'(a,a)') "   == No global moves are used in CT-QMC. Make sure it is correct", ch10
+      CALL wrtout(std_out,message,'COLL') 
     ELSE 
       op%modGlobalMove(1) = opt_gMove 
     END IF
@@ -1737,7 +1734,7 @@ include 'mpif.h'
 !#endif
 
   IF ( op%rank .EQ. 0 ) THEN
-    WRITE(op%ostream,'(A29)') "Starting QMC (Thermalization)"
+    WRITE(op%ostream,'(A25)') "== Starting QMC Solver"
   END IF
   
   !=================================
@@ -4021,7 +4018,7 @@ SUBROUTINE CtqmcoffdiagComplex_printAll(op)
 !  CALL CtqmcoffdiagComplex_printE(op)
 
 !#ifdef CTCtqmcoffdiagComplex_ANALYSIS
-  CALL CtqmcoffdiagComplex_printPerturbation(op)
+!  CALL CtqmcoffdiagComplex_printPerturbation(op)
 
   CALL CtqmcoffdiagComplex_printCorrelation(op)
 !#endif
@@ -4074,7 +4071,7 @@ SUBROUTINE CtqmcoffdiagComplex_printQMC(op)
   sweeps    = DBLE(op%sweeps)
   invSweeps = 1.d0/sweeps
 
-  WRITE(ostream,'(1x,F13.0,A11,F10.2,A12,I5,A5)') sweeps*DBLE(op%size), " sweeps in ", op%runTime, &
+  WRITE(ostream,'(a,F13.0,A11,F10.2,A12,I5,A5)') "The QMC Solver did ",sweeps*DBLE(op%size), " sweeps in ", op%runTime, &
                  " seconds on ", op%size, " CPUs"
   WRITE(ostream,'(A28,F6.2)') "Segments added        [%] : ", op%stats(4)*invSweeps*100.d0
   WRITE(ostream,'(A28,F6.2)') "Segments removed      [%] : ", op%stats(5)*invSweeps*100.d0

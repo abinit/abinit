@@ -2047,7 +2047,7 @@ end subroutine add_matlu
 !             call wrtout(std_out,message,'COLL')
 !           end do
            !call dsyev('v','u',tndim,valuer,tndim,eig,work,lworkr,info)
-       if (blockdiag) then
+       if (blockdiag .or. blockdiagc) then
          call blockdiago_fordsyev(valuer(:,:),tndim,eig(:))
        else
          ABI_MALLOC(work,(lworkr))
@@ -2109,23 +2109,26 @@ end subroutine add_matlu
 !             call wrtout(std_out,message,'COLL')
 !           end do
      else
-       if (optreal == 1 .and. maxval(abs(aimag(matlu(iatom)%mat(:,:,isppol)))) > tol8 ) then
-         write(message,'(a)') " Local hamiltonian in correlated basis is complex"
-         ABI_COMMENT(message)
-       end if
 
        if (blockdiagc) then
-        write(message,'(a,2x,a)') ch10, " == The local Hamiltonian in Ylm basis is complex. &
+        write(message,'(a,a,a)') ch10, "   == The local Hamiltonian in Ylm basis is complex.&
           & The complex matrix is used for the diagonalisation. Printing real and imaginary part of rotation matrix:  "                                                    
         call wrtout(std_out,message,'COLL')
 
         eigvectmatlu(iatom)%mat(:,:,isppol) = matlu(iatom)%mat(:,:,isppol)                 
-        ABI_MALLOC(zwork,(lwork))                                                                                             
-        ABI_MALLOC(rwork,(3*tndim-2))                                                                                         
-        call zheev('v','u',tndim,eigvectmatlu(iatom)%mat(:,:,isppol),tndim,eig(:),zwork(:),lwork,rwork(:),info)               
-        ABI_FREE(zwork)                                                                                                       
-        ABI_FREE(rwork)   
-       else                                                                   
+        
+        call blockdiago_forzheev(eigvectmatlu(iatom)%mat(:,:,isppol),tndim,eig(:))
+
+        !ABI_MALLOC(zwork,(lwork))                                                                                             
+        !ABI_MALLOC(rwork,(3*tndim-2))                                                                                         
+        !call zheev('v','u',tndim,eigvectmatlu(iatom)%mat(:,:,isppol),tndim,eig(:),zwork(:),lwork,rwork(:),info)               
+        !ABI_FREE(zwork)                                                                                                       
+        !ABI_FREE(rwork)   
+       else
+          if (optreal == 1 .and. maxval(abs(aimag(matlu(iatom)%mat(:,:,isppol)))) > tol8 ) then
+            write(message,'(a)') " Local hamiltonian in correlated basis is complex"
+            ABI_COMMENT(message)
+          end if               
          !eigvectmatlu(iatom)%mat(:,:,isppol) = matlu(iatom)%mat(:,:,isppol)
          ABI_MALLOC(zwork,(lwork))
          ABI_MALLOC(rwork,(3*tndim-2))
