@@ -900,10 +900,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         overlap_width = (alpha_plus - alpha_minus)/8.0
         if (islice==2) then
             lambda_minus = alpha_minus-overlap_width
+            lambda_plus = alpha_plus
         else
             lambda_minus = alpha_minus
+            lambda_plus = alpha_plus+overlap_width
         end if
-        lambda_plus = alpha_plus+overlap_width
 
         ! ITEST
         write(901,*) 'wanted part of the spectrum=', alpha_minus, alpha_plus
@@ -935,6 +936,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
                 f_u  = bandpassIndicator_sca(us_in,ls,us,ndeg)
                 f_uw = bandpassIndicator_sca(us   ,ls,us,ndeg)
             end do
+            ndeg = 50
         else
             ndeg = 50
         end if
@@ -1091,9 +1093,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     ! ongoing implementation should be obtained from trace estimation now hardcoded
     if (islice==1) then
-        count_mask = 40
+        count_mask = 90
     else if (islice==2) then
-        count_mask = 80  ! TODO rename to nvec_kept..
+        count_mask = 90  ! TODO rename to nvec_kept..
     end if
     ! ongoing: merge strategy should work (no missing eigenvalues) if I put count_mask=neigenpairs
 
@@ -1259,6 +1261,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     end if
     flush(901)
 
+    !! TODO étape suivante: une fois qu'on a diagnostiquer une mauvaise convergence
+    !! dans une slice on pourrait faire une procédure de restart pour corriger
+    !! l'erreur soit en ajoutant plus de vecteurs soit jsp à réflechir
+
     
     !! ------------------------------------------------------------
     !! 
@@ -1326,12 +1332,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     count_slice = lcol_in - fcol_in + 1
 
     ! ITEST
-    if (islice==3) then
-        write(901,*) 'inside indices [a,b)=', fcol_in, lcol_in, lambda_minus
-    else
-        write(901,*) 'inside indices [a,b)=', fcol_in, lcol_in, alpha_minus, alpha_plus
-    end if
-    write(901,*) 'Frobenius norm (inside only)=', sqrt(sum(resid(fcol_in:lcol_in)))
+    !if (islice==3) then
+    !    write(901,*) 'inside indices [a,b)=', fcol_in, lcol_in, lambda_minus
+    !else
+    !    write(901,*) 'inside indices [a,b)=', fcol_in, lcol_in, alpha_minus, alpha_plus
+    !end if
+    write(901,*) 'Frobenius norm (inside slice', islice, 'only)=', sqrt(sum(resid(fcol_in:lcol_in)))
     flush(901)
     ! ITEST
 
@@ -1443,7 +1449,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  ! ITEST
  call xgBlock_reverseMap_1d(residu, resid)
- write(901,*) 'Frobenius norm (merged slices)=', sqrt(sum(resid(1:slice%nbdbuf)))
+ write(901,*) 'Frobenius norm (merged slices)=', sqrt(sum(resid))
  write(901,*) 'resid (merged slices)='
  call xgBlock_print(residu, 901)
  write(901,*) 'eigen (merged slices)='
