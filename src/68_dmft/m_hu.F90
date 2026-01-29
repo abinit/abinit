@@ -754,7 +754,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
         ! enddo
 
        call rotate_hu(rot_mat(iatom)%mat(:,:,:),1,tndim,hu(itypat)%veeslm2(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
-       basis_vee = 'CTQMC basis from cubic'
+       basis_vee = "CTQMC basis from cubic"
 
 !    In the Ylm basis
 !    ================================================================================
@@ -784,7 +784,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        veeslm => null()
 
        ! The line below is not really useful
-       if (.not. triqs) veeylm(:,:,:,:) = cmplx(dble(veeylm(:,:,:,:)),zero,kind=dp)
+       !if (.not. triqs) veeylm(:,:,:,:) = cmplx(dble(veeylm(:,:,:,:)),zero,kind=dp)
 
        basis_vee = 'Ylm'
        if (.not. paw_dmft%dmft_solv .eq. 10) then
@@ -822,7 +822,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 
 !        new dimension
 
-         basis_vee = 'JmJ'
+         basis_vee = "JmJ"
 
        else if (rot_type == 4) then
 
@@ -1592,16 +1592,16 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
    write(message,'(a)') ch10                                                                   
    call wrtout(std_out,message,'COLL')                                                         
                                                                                                
-   write(message,'(2x,a,3x,14f10.4)') "Imag part of Um1m2=Vee(m1,m2,m1,m2)"                      
-   call wrtout(std_out,message,'COLL')                                                         
-   write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)                                           
-   call wrtout(std_out,message,'COLL')                                                         
-   do m1=1,ndim                                                                                
-     write(message,'(2x,i4,3x,14f10.6)') m1,(aimag(vee(m1,m2,m1,m2)),m2=1,ndim)                
-     call wrtout(std_out,message,'COLL')                                                       
-   end do ! m1                                                                                 
-   write(message,'(a)') ch10                                                                   
-   call wrtout(std_out,message,'COLL')                                                         
+   !write(message,'(2x,a,3x,14f10.4)') "Imag part of Um1m2=Vee(m1,m2,m1,m2)"                      
+   !call wrtout(std_out,message,'COLL')                                                         
+   !write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)                                           
+   !call wrtout(std_out,message,'COLL')                                                         
+   !do m1=1,ndim                                                                                
+   !  write(message,'(2x,i4,3x,14f10.6)') m1,(aimag(vee(m1,m2,m1,m2)),m2=1,ndim)                
+   !  call wrtout(std_out,message,'COLL')                                                       
+   !end do ! m1                                                                                 
+   !write(message,'(a)') ch10                                                                   
+   !call wrtout(std_out,message,'COLL')                                                         
                                                                                                
    write(message,'(2x,a,3x,14f10.4)') "Real part of Jm1m2=Vee(m1,m2,m2,m1)"                                 
    call wrtout(std_out,message,'COLL')                                                         
@@ -1614,16 +1614,16 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
    write(message,'(a)') ch10                                                                   
    call wrtout(std_out,message,'COLL')                                                         
                                                                                                
-   write(message,'(2x,a,3x,14f10.4)') "Imag part of Jm1m2=Vee(m1,m2,m2,m1)"                       
-   call wrtout(std_out,message,'COLL')                                                         
-   write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)                                           
-   call wrtout(std_out,message,'COLL')                                                         
-   do m1=1,ndim                                                                                
-     write(message,'(2x,i4,3x,14f10.6)') m1,(aimag(vee(m1,m2,m2,m1)),m2=1,ndim)                
-     call wrtout(std_out,message,'COLL')                                                       
-   end do ! m1                                                                                 
-   write(message,'(a)') ch10                                                                   
-   call wrtout(std_out,message,'COLL')                                                         
+   !write(message,'(2x,a,3x,14f10.4)') "Imag part of Jm1m2=Vee(m1,m2,m2,m1)"                       
+   !call wrtout(std_out,message,'COLL')                                                         
+   !write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)                                           
+   !call wrtout(std_out,message,'COLL')                                                         
+   !do m1=1,ndim                                                                                
+   !  write(message,'(2x,i4,3x,14f10.6)') m1,(aimag(vee(m1,m2,m2,m1)),m2=1,ndim)                
+   !  call wrtout(std_out,message,'COLL')                                                       
+   !end do ! m1                                                                                 
+   !write(message,'(a)') ch10                                                                   
+   !call wrtout(std_out,message,'COLL')                                                         
 
  endif !prtopt == 4
 end subroutine printvee_hu
@@ -1700,10 +1700,10 @@ subroutine vee2udensatom_hu(ndim,udens_atoms,veetemp,basis,prtonly)
  write(message,'(4a)') ch10,"   -------- Interactions in the ",trim(basis)," basis "
  call wrtout(std_out,message,'COLL')
  if (prtonly .eq. 2) then
-   write(message,'(1x,14(8x,i5))') (m,m=1,tndim) 
+   write(message,'(14(i14))') (m,m=1,tndim) 
    call wrtout(std_out,message,'COLL')
    do ms=1,tndim
-     write(message,'(i3,28(2x,14f7.3))') ms,((udens_atoms(ms,ms1)),ms1=1,tndim)
+     write(message,'(i3,14(2x,28f7.3))') ms,((udens_atoms(ms,ms1)),ms1=1,tndim)
      call wrtout(std_out,message,'COLL')
    enddo
  else

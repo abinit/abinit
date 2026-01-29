@@ -558,7 +558,7 @@ SUBROUTINE GreenHyboffdiagComplex_measHybrid(op, Mmatrix, ListCdagC_1, updated,s
            ! write(6,*) "measHybrid ic iflavor1 iflavor2 op%map(iflav1,iflav2) oper",ic,iflavor,iflavorbis,op%map(iflavor,iflavorbis)%listDBLE(iC),op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold * argument
             op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) =                &
                            op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) &
-                         + op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold * op%phasevalueold * argument
+                         + op%map(iflavor,iflavorbis)%listDBLE(iC) *  op%phasevalueold * argument
            !if(op%map(iflavor,iflavorbis)%listINT(iC)==1.and.iflavor==iflavorbis) then
           !  if(iflavor==iflavorbis) then
           !   !sui!write(6,*) "G(0)", op%map(iflavor,iflavorbis)%listINT(iC),op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold,op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis),iflavor
@@ -580,7 +580,7 @@ SUBROUTINE GreenHyboffdiagComplex_measHybrid(op, Mmatrix, ListCdagC_1, updated,s
       END DO
       op%signvaluemeas = op%signvaluemeas + op%signvalueold * argument
       op%measurements = op%measurements + op%factor
-      op%phasevaluemeas = op%phasevaluemeas + op%phasevalueold * op%signvalueold * argument      
+      op%phasevaluemeas = op%phasevaluemeas + op%phasevalueold * argument      
 
     !sui!write(6,*) "   measurements", op%measurements
          !sui! write(6,*) "                  signvaluemeas",op%signvaluemeas,op%signvalueold*argument
@@ -954,7 +954,7 @@ SUBROUTINE GreenHyboffdiagComplex_setMuD1(op,iflavor,iflavor2,mu,d1)
   DOUBLE PRECISION                :: mu2
 !*********************************************************************
 
-  ABI_UNUSED((/d1/))
+!  ABI_UNUSED((/d1/))
   
   mu2=0
   if(iflavor==iflavor2) mu2=mu
@@ -1175,8 +1175,10 @@ include 'mpif.h'
       C=cmplx(-A,0.d0,kind=8)
       if(present(hybri_limit)) then
         if(present(opt_hybri_limit)) then
-          if(opt_hybri_limit==1) C= (hybri_limit(iflavor1,iflavor2))
-        !sui!write(6,*) "C=                         ",C
+          if(opt_hybri_limit==1) then
+            C = (hybri_limit(iflavor1,iflavor2))
+            !write(6,*) "Hello C=                         ",C
+          endif
         endif
       endif 
 
@@ -1418,7 +1420,7 @@ include 'mpif.h'
   MALLOC(Domega,(1:omegaSamples))
   MALLOC(A_omega,(1:omegaSamples))
   MALLOC(C_omega,(1:omegaSamples))
-  IF ( op%rank .EQ. 0 ) THEN
+  !IF ( op%rank .EQ. 0 ) THEN
     !DO iflavor1 = 1, op%nflavors
     !  DO iflavor2 = 1, op%nflavors
     !    write(22236,*) "#",iflavor1,iflavor2
@@ -1428,7 +1430,7 @@ include 'mpif.h'
     !    write(22236,*) 
     !  ENDDO
     !ENDDO
-  ENDIF
+  !ENDIF
 
   op%oper = 0.d0
 
@@ -1455,11 +1457,15 @@ include 'mpif.h'
         A = 0.d0
       endif ! funct
       
-      C=cmplx(-A,0.d0,kind=8)
+      !C=cmplx(-A,0.d0,kind=8)
+      C=B
+      !write(*,*) "Hello C before hybri_limit", C
       if(present(hybri_limit)) then
         if(present(opt_hybri_limit)) then
-          if(opt_hybri_limit==1) C= (hybri_limit(iflavor1,iflavor2))
-        !sui!write(6,*) "C=                         ",C
+          if(opt_hybri_limit==1) then
+            C= (hybri_limit(iflavor1,iflavor2))
+            !write(6,*) "C=                         ",C
+          endif
         endif
       endif 
 
