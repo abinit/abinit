@@ -552,7 +552,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: radius
  real(dp) :: ls, us, cdeg, mu, damp
  real(dp) :: min_low_est
- real(dp) :: slice1_mineig, slice1_maxeig
  real(dp) :: amp_ideg
  real(dp) :: ein_ideg, eout_ideg
  real(dp) :: trace_est, trace_est_tau
@@ -871,14 +870,19 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     !! ------------------------------------------------------------
 
     ! ongoing, hardcoded depends on previous code
-    slice1_mineig = -0.2d0
-    slice1_maxeig = 0.3d0
-    !slice2_mineig = 0.3d0
-    !slice2_maxeig = 3.0d0
+    min_low_est = -0.2d0
+    lambda_minus = 1.17d0
+    alpha_minus = 1.17d0
 
     if (islice==1) then
+        alpha_minus = -0.18d0
+        alpha_plus = lambda_minus
+    else
+        alpha_plus = maxval(rayleigh_quotients)
+    end if
 
-        lambda_minus = 1.0d0
+    if (islice==3) then
+
         lambda_plus = slice%ecut
         center = (lambda_plus + lambda_minus)*0.5
         radius = (lambda_plus - lambda_minus)*0.5
@@ -892,28 +896,13 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     else
 
-        ! Assumes sequential, =smallest converged value from first slice
-        call xgBlock_minmax(eigen_out%self, slice1_mineig, slice1_maxeig)
-
-        ! ITEST
-        write(901,*) 'detected previous slice, mineig=', slice1_mineig
-        write(901,*) '                         maxeig=', slice1_maxeig
-        flush(901)
-        ! ITEST
-
-        !alpha_minus = 0.51404 ! assumes sequential, =largest previously converged value
-        alpha_minus = slice1_maxeig
-        alpha_plus = maxval(rayleigh_quotients) ! can be in parallel, only depends on Rayleigh value
-        ! FIXME only works for slice=1
-        ABI_WARNING('present code only works for nslice=2')
-
-        ! ongoing hardcoded
-        alpha_minus = 0.7
-        alpha_plus = 3.0
-
         ! overlapping between slices
         overlap_width = (alpha_plus - alpha_minus)/8.0
-        lambda_minus = alpha_minus-overlap_width 
+        if (islice==2) then
+            lambda_minus = alpha_minus-overlap_width
+        else
+            lambda_minus = alpha_minus
+        end if
         lambda_plus = alpha_plus+overlap_width
 
         ! ITEST
@@ -923,8 +912,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         ! ITEST
  
         ! TODO add overlap width to filter in [a-w,b+w) for wanted [a,b) for convergence reasons
-        center = (slice%ecut + slice1_mineig)*0.5
-        radius = (slice%ecut - slice1_mineig)*0.5 
+        center = (slice%ecut + min_low_est)*0.5
+        radius = (slice%ecut - min_low_est)*0.5 
         ls = (lambda_minus - center) / radius
         us = (lambda_plus - center) / radius
 
@@ -937,14 +926,18 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         ndeg = 8
         f_lw = 1.d0; f_uw = 1.d0; f_l = 1.d0; f_u = 1.d0
 
-        ! Amplification is f(l-w)/f(l) and f(u+w)/f(u) (between 0 and 1)
-        do while ( (f_lw/f_l > ramp .or. f_uw/f_u > ramp) .and. ndeg < ndeg_max )
-            ndeg = ndeg + 1
-            f_l  = bandpassIndicator_sca(ls_in,ls,us,ndeg)
-            f_lw = bandpassIndicator_sca(ls   ,ls,us,ndeg)
-            f_u  = bandpassIndicator_sca(us_in,ls,us,ndeg)
-            f_uw = bandpassIndicator_sca(us   ,ls,us,ndeg)
-        end do
+        if (islice==2) then
+            ! Amplification is f(l-w)/f(l) and f(u+w)/f(u) (between 0 and 1)
+            do while ( (f_lw/f_l > ramp .or. f_uw/f_u > ramp) .and. ndeg < ndeg_max )
+                ndeg = ndeg + 1
+                f_l  = bandpassIndicator_sca(ls_in,ls,us,ndeg)
+                f_lw = bandpassIndicator_sca(ls   ,ls,us,ndeg)
+                f_u  = bandpassIndicator_sca(us_in,ls,us,ndeg)
+                f_uw = bandpassIndicator_sca(us   ,ls,us,ndeg)
+            end do
+        else
+            ndeg = 50
+        end if
 
         ndeg_filter = ndeg
        
@@ -973,7 +966,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     call timab(tim_slice_fi,1,tsec)
     
-    if (islice>1) then
+    if (islice>0) then
     
         ! Initialize Chebyshev expansion of indicator function of order ndeg_filter
         call xg_init(Xsum,slice%space,slice%total_spacedim,neigenpairs,slice%spacecom,gpu_option=gpu_option)
@@ -1001,7 +994,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         call slice_swapInnerBuffers(slice, slice%total_spacedim, neigenpairs)
         call timab(tim_swap,2,tsec)
 
-        if (islice>1) then
+        if (islice>0) then
 
             ! Accumulate X with weight in Xsum for bandpass filters
             mu = 2/Pi * (SIN((ideg+1)*ACOS(ls)) - SIN((ideg+1)*ACOS(us)))/(ideg+1)
@@ -1011,7 +1004,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
         end if
 
-        if (islice>1 .and. ideg==ndeg_filter - 1) then 
+        if (islice>0 .and. ideg==ndeg_filter - 1) then 
         
             ! store final expansion Xsum to X
             call xgBlock_copy(Xsum%self, slice%X)
@@ -1034,7 +1027,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     end do ! End polynomial degree loop
 
-    if (islice==1) then
+    if (islice==3) then
 
         ! Amplify to finalize filter application
         call timab(tim_amp_f,1,tsec)
@@ -1084,7 +1077,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         ! dot_XfX = <X,fX> colwise L2-dot product
         call xgBlock_colwiseDotProduct(X0, slice%X, dot_XfX%self, comm_loc=xmpi_comm_null)
         call xgBlock_reverseMap(dot_XfX%self, probe_XfX, rows=1, cols=neigenpairs)
-        probe(:) = probe_XfX(1,:)
+        probe => probe_XfX(1,1:neigenpairs)
     end if
     
     !write(901,*) 
@@ -1100,7 +1093,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     if (islice==1) then
         count_mask = 40
     else if (islice==2) then
-        count_mask = 100  ! TODO rename to nvec_kept..
+        count_mask = 80  ! TODO rename to nvec_kept..
     end if
     ! ongoing: merge strategy should work (no missing eigenvalues) if I put count_mask=neigenpairs
 
@@ -1169,7 +1162,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! Number of vectors on which we apply rr
     count_rr = count_mask
 
-    ! restrict eigenvalue array for size consistancy (essentially keep nonzero entries)
+    ! restrict eigenvalue array for size consistency (essentially keep nonzero entries)
     call xgblock_reshape(slice%eigenvalues, 1, neigenpairs) 
     call xgblock_setblock(slice%eigenvalues, eigenvalues_slice, rows=1, cols=count_rr)
     call xgblock_reshape(eigenvalues_slice, count_rr, 1)
@@ -1266,12 +1259,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     end if
     flush(901)
 
-    ! ITEST
-    write(901,*) 'Slice confidence intervals left=', confi_interval_left(1:count_rr) 
-    write(901,*) 'Slice confidence intervals right=', confi_interval_right(1:count_rr)
-    flush(901)
-    ! ITEST
-
     
     !! ------------------------------------------------------------
     !! 
@@ -1283,7 +1270,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     
     fcol_in = 1
     lcol_in = count_rr
-    if (islice==1) then
+    if (islice==3) then
 
         ! TODO count how many eigenpairs have converged outside the slice with 
         ! their confidence interval based on residual outside the slice
@@ -1339,7 +1326,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     count_slice = lcol_in - fcol_in + 1
 
     ! ITEST
-    if (islice==1) then
+    if (islice==3) then
         write(901,*) 'inside indices [a,b)=', fcol_in, lcol_in, lambda_minus
     else
         write(901,*) 'inside indices [a,b)=', fcol_in, lcol_in, alpha_minus, alpha_plus
@@ -1350,14 +1337,13 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     ! ITEST
     write(901,*) 
-    write(901,*) '======================================'
-    write(901,*) 'count_merged=', count_merge
+    write(901,*) '====================================== Slice', islice
+    write(901,*) 'interval bounds', lambda_minus, alpha_minus, alpha_plus
+    !write(901,*) 'count_merged=', count_merge 
     write(901,*) 'count_slice =', count_slice
     write(901,*) 'count_rr    =', count_rr
-    write(901,*) 'fcol_in     =', fcol_in
-    write(901,*) 'lcol_in     =', lcol_in
-    write(901,*) 'lambda_fcol =', lambda_apost_slice(fcol_in)
-    write(901,*) 'lambda_lcol =', lambda_apost_slice(lcol_in)
+    write(901,*) 'fcol_in,val =', fcol_in, lambda_apost_slice(fcol_in)
+    write(901,*) 'lcol_in,val =', lcol_in, lambda_apost_slice(lcol_in)
     write(901,*) '======================================'
     write(901,*)
     flush(901)
@@ -1393,7 +1379,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     fcol_global = count_merge + 1
 
     !! Free slice memory whose size depends on count_mask, different for every slice
-    if (islice>1) then
+    if (islice>3) then
         
         call xg_free(Xsum)
 
