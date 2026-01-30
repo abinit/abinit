@@ -8,7 +8,7 @@
 !!  pawtab_type variables define TABulated data for PAW (from pseudopotential)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2025 ABINIT group (MT)
+!! Copyright (C) 2013-2026 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -334,7 +334,7 @@ MODULE m_pawtab
 
   real(dp) :: ehnzc
    ! Hartree energy of core electrons + nucleus
-  
+
   real(dp) :: eps
   ! Epsilon parameter for Yukawa potential (only used for the exact double counting)
 

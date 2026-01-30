@@ -1,4 +1,4 @@
-## Copyright (C) 2020-2024 Yann Pouillon
+## Copyright (C) 2020-2026 Yann Pouillon
 
 #
 # NetCDF I/O library - C++ interface
@@ -66,7 +66,7 @@ AC_DEFUN([SD_NETCDF_CXX_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([netcdf-cxx],
     [AS_HELP_STRING([--with-netcdf-cxx],
       [Install prefix of the NetCDF C++ interface library (e.g. /usr/local).])],

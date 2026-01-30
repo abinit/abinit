@@ -8,7 +8,7 @@
 !! pure plane waves.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group (A. Blanchet)
+!! Copyright (C) 2018-2026 ABINIT group (A. Blanchet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -932,7 +932,7 @@ contains
         band_index=band_index+nband_k
       end do
     end do
-   open(file=fname,newunit=tmp_unt,status='unknown',form='formatted') 
+   open(file=fname,newunit=tmp_unt,status='unknown',form='formatted')
     do ii=1,minval(nband)-this%nbdbuf
       write(tmp_unt,*) ii,abs(err(ii))
     enddo

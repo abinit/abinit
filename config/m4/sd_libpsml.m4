@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2026 ABINIT group (Yann Pouillon)
 
 #
 # PSeudopotential Markup Language I/O library (LibPSML)
@@ -67,7 +67,7 @@ AC_DEFUN([SD_LIBPSML_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([libpsml],
     [AS_HELP_STRING([--with-libpsml],
       [Install prefix of the PSML I/O library (e.g. /usr/local).])],

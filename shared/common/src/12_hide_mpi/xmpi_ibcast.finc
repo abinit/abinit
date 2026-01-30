@@ -5,12 +5,12 @@
 !!
 !! FUNCTION
 !!  This module contains functions that calls MPI routine MPI_IBCAST,
-!!  to broadcast data from one processor to other procs inside a communicator, 
+!!  to broadcast data from one processor to other procs inside a communicator,
 !!  if we compile the code using the MPI CPP flags.
 !!  xmpi_ibcast is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2025 ABINIT group (MG)
+!!  Copyright (C) 2001-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

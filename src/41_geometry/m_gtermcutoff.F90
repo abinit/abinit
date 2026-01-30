@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group ()
+!! Copyright (C) 1999-2026 ABINIT group ()
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -501,7 +501,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      periodic_dir(:)=0
      do ii=1,3
        check=vcutgeo(ii)
-       if (ABS(check)>zero) then 
+       if (ABS(check)>zero) then
          periodic_dir(ii)=1
          !For Rozzi"s method
          if (check<zero) alpha(ii)=normv(check*rprimd(:,ii),rmet,'R')

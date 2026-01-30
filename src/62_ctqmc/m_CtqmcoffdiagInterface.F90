@@ -5,13 +5,13 @@
 !!****m* ABINIT/m_CtqmcoffdiagInterface
 !! NAME
 !!  m_CtqmcoffdiagInterface
-!! 
-!! FUNCTION 
-!!  Manage a ctqmc simulation. 
+!!
+!! FUNCTION
+!!  Manage a ctqmc simulation.
 !!  friendly interface for the user
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder, B. Amadon, J. Denier)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder, B. Amadon, J. Denier)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,7 +37,7 @@ IMPLICIT NONE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,7 +69,7 @@ CONTAINS
 !!  Initialize with permanent parameters
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -159,7 +159,7 @@ END SUBROUTINE CtqmcoffdiagInterface_init
 !!  Set and save options for many runs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -188,7 +188,7 @@ END SUBROUTINE CtqmcoffdiagInterface_init
 !! SOURCE
 
 SUBROUTINE CtqmcoffdiagInterface_setOpts(op,opt_Fk,opt_order,opt_histo,opt_movie,&
-& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
+& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove)
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
@@ -232,7 +232,7 @@ END SUBROUTINE CtqmcoffdiagInterface_setOpts
 !!  run a ctqmc simu and get results
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -258,7 +258,7 @@ END SUBROUTINE CtqmcoffdiagInterface_setOpts
 !! SOURCE
 
 SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit,Magmom_orb,&
-&Magmom_spin,Magmom_tot,Iatom,fname,jmjbasis) 
+&Magmom_spin,Magmom_tot,Iatom,fname,jmjbasis)
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
@@ -297,7 +297,7 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
 !  OPEN(UNIT=ifstream, FILE="Gw.dat")
 !  CALL Ctqmcoffdiag_setG0w(Hybrid, ifstream)
 !  CLOSE(ifstream)
-!  
+!
 
   IF ( PRESENT(opt_levels)) &
     CALL Ctqmcoffdiag_setMu(op%Hybrid, opt_levels)
@@ -375,7 +375,7 @@ END SUBROUTINE CtqmcoffdiagInterface_run
 !!  change sweeps on the fly
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -410,7 +410,7 @@ END SUBROUTINE CtqmcoffdiagInterface_setSweeps
 !!  Destroy simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

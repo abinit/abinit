@@ -3,7 +3,7 @@
 !! m_spmat_base
 !!
 !! FUNCTION
-!! This module contains the base type for sparse matrix. 
+!! This module contains the base type for sparse matrix.
 !!
 !! Datatypes:
 !!  base_mat_t: base sparse matrix.
@@ -13,7 +13,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

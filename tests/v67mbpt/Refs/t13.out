@@ -1,8 +1,8 @@
 
-.Version 8.0.5 of CUT3D 
-.(MPI version, prepared for a x86_64_darwin15.4.0_gnu5.3 computer) 
+.Version 8.0.5 of CUT3D
+.(MPI version, prepared for a x86_64_darwin15.4.0_gnu5.3 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  CUT3D comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat  7 May 2016.
 - ( at 22h46 )
-  
+
 
   What is the name of the 3D function (density, potential or wavef) file ?
   => Your 3D function file is: t12o_DS1_WFK
@@ -24,11 +24,11 @@
 - Your file contains unformatted binary header + 3D data
 
  ===============================================================================
- ECHO of the ABINIT file header 
- 
+ ECHO of the ABINIT file header
+
  First record :
 .codvsn,headform,fform = 8.0.5    80    2
- 
+
  Second record :
  bantot,intxc,ixc,natom  =    16     0     7     1
  ngfft(1:3),nkpt         =    16    16    16     2
@@ -116,12 +116,12 @@
  title=  Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
   znuclpsp= 18.00, zionpsp=  8.00, pspso=  0, pspdat=******, pspcod=  6, pspxc=  7
   lmnmax  =  2
- 
+
  Last record :
  residm,etot,fermie=    5.702789E-17   -2.113379599952E+01   -4.441666E-02
  xred =
             0.000000E+00    0.000000E+00    0.000000E+00
- End the ECHO of the ABINIT file header 
+ End the ECHO of the ABINIT file header
  ===============================================================================
 
  ===========================================================
@@ -139,7 +139,7 @@
    #    Atomic positions (cartesian coordinates - Bohr)
    1    0.000000E+00    0.000000E+00    0.000000E+00
 
-  This file is a WF file. 
+  This file is a WF file.
 
  For which k-points? (1 to    2)
   => Your k-point is :            1
@@ -154,17 +154,17 @@
  => Your choice is :           1
 
  What is the name of the QPS file?
- Do you want the atomic analysis for this state : 
- (kpt,band)= (    1    5)? 
- If yes, enter the radius of the atomic spheres, in bohr 
- If no, enter 0 
- You entered ratsph=      6.00000000 Bohr 
+ Do you want the atomic analysis for this state :
+ (kpt,band)= (    1    5)?
+ If yes, enter the radius of the atomic spheres, in bohr
+ If no, enter 0
+ You entered ratsph=      6.00000000 Bohr
 
- Atomic sphere analysis 
+ Atomic sphere analysis
 
  wffile : kpgmax, bessargmax, nradint =     2.828427E+00    1.067000E+02  1067
- Angular analysis 
- 
+ Angular analysis
+
  Atom #   1 is  Ar, in-sphere charge =  4.942836
  l=0, charge= 0.321014, m=-l,l splitting: 0.321
  l=1, charge= 0.331354, m=-l,l splitting: 0.057 0.217 0.057
@@ -172,7 +172,7 @@
  l=3, charge= 1.427842, m=-l,l splitting: 0.157 0.036 0.356 0.330 0.356 0.036 0.157
  l=4, charge= 0.805489, m=-l,l splitting: 0.191 0.072 0.033 0.106 0.004 0.106 0.033 0.072 0.191
 
- Sum of angular contributions for all atomic spheres 
+ Sum of angular contributions for all atomic spheres
  l=0, charge = 0.321014 proportion = 0.064945
  l=1, charge = 0.331354 proportion = 0.067037
  l=2, charge = 2.057137 proportion = 0.416185
@@ -180,8 +180,8 @@
  l=4, charge = 0.805489 proportion = 0.162961
 
  Total over all atoms and l=0 to 4 :  4.942836
- 
- Charge in the sphere around each atom 
+
+ Charge in the sphere around each atom
  Atom number    1 :  charge =    7.09134295
 
   3D wave function was read. Ready for further treatment.
@@ -202,11 +202,11 @@
         (bare 3D data, preceeded by 3D index)
    6 => 3D indexed imaginary data
         (bare 3D data, preceeded by 3D index)
-   7 => 3D Data Explorer formatted data 
+   7 => 3D Data Explorer formatted data
         (Real file and Imaginary file)
-   8 => 3D Data Explorer formatted data 
+   8 => 3D Data Explorer formatted data
         (Only the Real file)
-   9 => 3D Data Explorer formatted data 
+   9 => 3D Data Explorer formatted data
         (Only the Imaginary file)
   10 => 3D Data Explorer formatted data and position files
   11 => XCrysden formatted data (norm of wf) and position files
@@ -216,7 +216,7 @@
 
  Your choice is 14
 
- 
+
   Enter the root of an output file:
    The root of your file is : t13
    The corresponding filename is : t13_k1_b5

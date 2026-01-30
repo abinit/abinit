@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (DC)
+!!  Copyright (C) 2008-2026 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -522,7 +522,7 @@ contains
     token%data%withField = .true.
     token%data%field = field
     token%data%field_axial = field_axial
-    
+
     ! We unset all the computed symmetries
     token%data%nBravSym = -1
     if (token%data%auto) then

@@ -1,4 +1,4 @@
-## Copyright (C) 2020-2024 Yann Pouillon
+## Copyright (C) 2020-2026 Yann Pouillon
 
 #
 #  Atompaw
@@ -25,6 +25,6 @@ AC_DEFUN([ABI_CHECK_ATOMPAW_BINS],[
   if test "${ATOMPAW_BIN}" != "" -a "${GRAPHATOM_BIN}" != ""; then
       AC_DEFINE([HAVE_ATOMPAW],1,[Define to 1 if you have the AtomPAW library.])
   fi
-  
+
 
 ]) # ABI_CHECK_ATOMPAW_BINS

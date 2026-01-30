@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of AIM, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  AIM comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 14 Sep 2024.
 - ( at 06h44 )
-  
+
  ECHO of the INPUT
  ************************
  ATOM                 1
@@ -35,11 +35,11 @@
  LSTEP2     1.0000000000E-04
  DPCLIM     5.0000000000E-02
  ===============================================================================
- ECHO of the ABINIT file header 
- 
+ ECHO of the ABINIT file header
+
  First record :
 .codvsn,headform,fform = 10.1.4.5   80   52
- 
+
  Second record :
  bantot,intxc,ixc,natom  =     5     0     1     2
  ngfft(1:3),nkpt         =    40    40    60     1
@@ -87,15 +87,15 @@
  title= Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
   znuclpsp= 12.00, zionpsp=  2.00, pspso=  0, pspdat=940714, pspcod=  1, pspxc=  1
   lmnmax  =  2
- 
+
  Last record :
  residm,etot,fermie=    2.437663E-09   -1.753316932837E+01   -1.328240E-01
  xred =
             0.000000E+00    0.000000E+00    0.000000E+00
             0.000000E+00    0.000000E+00    3.290909E-01
- End the ECHO of the ABINIT file header 
+ End the ECHO of the ABINIT file header
  ===============================================================================
- INVERSE OF RPRIMD: 
+ INVERSE OF RPRIMD:
       0.12500000      0.00000000      0.00000000
       0.00000000      0.12500000      0.00000000
       0.00000000      0.00000000      0.09090909
@@ -131,7 +131,7 @@
  BONDING CRITICAL POINTS (BCP)
  =============================
 
- Bonded atom (BAT) (indxatm,indxcell,position): 
+ Bonded atom (BAT) (indxatm,indxcell,position):
      2   172      0.00000000      0.00000000      3.62000000
 %Bonding CP:      -0.00041640     -0.00041640      2.00715073
 %Eigenval. of Hessian:       0.57971475     -0.10223291     -0.10360153
@@ -141,10 +141,10 @@
 -      0.99897307     -0.00000000     -0.04530800
 
 %Density and laplacian in CP:       0.06719310      0.37388031
-%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT): 
+%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT):
       2.00715082      1.61284937      3.62000000      0.55446155
  ********************************************************************
- Bonded atom (BAT) (indxatm,indxcell,position): 
+ Bonded atom (BAT) (indxatm,indxcell,position):
      2   171      0.00000000      0.00000000     -7.38000000
 %Bonding CP:       0.00402087      0.00402087     -3.56567397
 %Eigenval. of Hessian:       0.00677158     -0.00070665     -0.00072306
@@ -154,7 +154,7 @@
 -      0.99983576     -0.00000000     -0.01812340
 
 %Density and laplacian in CP:       0.00248861      0.00534187
-%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT): 
+%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT):
       3.56567851      3.81433027      7.38000000      0.48315427
  ********************************************************************
  Number of BCP found:    2
@@ -491,11 +491,11 @@ BCP-RCP-CCP       2       8       8
 
  CHARGE INTEGRATION
  ==================
- Core density contribution: 
+ Core density contribution:
 
           2.00000397
 
- Different density contributions: Core (only spherical part) and the rest 
+ Different density contributions: Core (only spherical part) and the rest
 
             2.00000397      6.64089494
 

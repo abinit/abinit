@@ -5,12 +5,12 @@
 !!****m* ABINIT/m_Stat
 !! NAME
 !!  m_Stat
-!! 
-!! FUNCTION 
-!!  FIXME: add description. 
+!!
+!! FUNCTION
+!!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,7 +23,7 @@
 MODULE m_Stat
 USE m_global
 IMPLICIT NONE
-  
+
 PRIVATE
 
 PUBLIC :: Stat_average
@@ -55,7 +55,7 @@ DOUBLE PRECISION FUNCTION Stat_variance(tab)
   INTEGER                                    :: i
   DOUBLE PRECISION                           :: average
   DOUBLE PRECISION                           :: tab2
-  
+
   sizet = SIZE(tab)
   Stat_variance = 0.d0
 
@@ -122,7 +122,7 @@ END FUNCTION Stat_deviation
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -156,7 +156,7 @@ SUBROUTINE Stat_linearReg(tabX, tabY, a, b, R)
   R = ABS(a * SQRT(var) / Stat_deviation(tabY))
 END SUBROUTINE Stat_linearReg
 !!***
-  
+
 !!****f* ABINIT/m_Stat/Stat_powerReg
 !! NAME
 !!  Stat_powerReg
@@ -165,7 +165,7 @@ END SUBROUTINE Stat_linearReg
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -205,7 +205,7 @@ SUBROUTINE Stat_powerReg(tabX, tabY, a, b, R)
 
 
 !  IF ( ISNAN(a) .OR. ISNAN(b) ) THEN
-    DO i = 1, size1 
+    DO i = 1, size1
       tab1(i) = LOG(tabX(i))
       IF ( tabY(i) .NE. 0.d0 ) THEN
         tab2(i) = LOG(tabY(i))
@@ -232,7 +232,7 @@ DOUBLE PRECISION FUNCTION Stat_simpson(func, a, b, N)
   INTEGER :: i
   INTEGER :: x0
   INTEGER :: x1
-  INTEGER :: x2 
+  INTEGER :: x2
   DOUBLE PRECISION :: dtau
   DOUBLE PRECISION :: J
 
@@ -242,8 +242,8 @@ DOUBLE PRECISION FUNCTION Stat_simpson(func, a, b, N)
   x1 = 0
   DO i = 1, N-2, 2
     x0 = x2
-    x1 = x1 + 2    
-    x2 = x0 + 2   
+    x1 = x1 + 2
+    x2 = x0 + 2
     J = J + func(x0) + 4.d0*func(x1) + func(x2)
   END DO
   J = J * dtau / 3.d0

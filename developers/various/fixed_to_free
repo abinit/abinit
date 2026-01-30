@@ -1,17 +1,17 @@
 #!/bin/csh
 #
-# Copyright (C) 1998-2025 ABINIT group (XG,LSi)
+# Copyright (C) 1998-2026 ABINIT group (XG,LSi)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .
 # For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-# 
+#
 # The purpose of this script is to translate fortran files
 # that are written in fixed format to free format
 # and move them in the directory  ..
 # Usage :
 # fixed_to_free file1 file2 ...
-# Note : it uses the perl script FT77to90, that must be in the same 
+# Note : it uses the perl script FT77to90, that must be in the same
 # directory as fixed_to_free
 
 # Count the number of files

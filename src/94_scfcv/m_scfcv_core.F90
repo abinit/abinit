@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
+!!  Copyright (C) 1998-2026 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -390,7 +390,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  real(dp) :: efield_old_cart(3), ptot_cart(3)
  real(dp) :: red_efield2(3),red_efield2_old(3)
  real(dp) :: vpotzero(2)
- real(dp) :: maxmag , difmag  
+ real(dp) :: maxmag , difmag
  real(dp) :: dmatdum(0,0,0,0)
  real(dp) :: orb_mom_atom(10,3,dtset%natom)
 ! red_efield1(3),red_efield2(3) is reduced electric field, defined by Eq.(25) of Nat. Phys. suppl. (2009) [[cite:Stengel2009]]
@@ -1956,7 +1956,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,extfpmd=extfpmd)
        if(istep>=rcpaw%updatepaw(1).and.istep<=rcpaw%updatepaw(2).and.dtset%cprj_in_memory==1)then
          call xg_nonlop_destroy_Sij(xg_nonlop)
-         call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111) 
+         call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111)
        endif
        if(.not.rcpaw%all_atoms_relaxed.and.any(rcpaw%atm(:)%zcore_orig>0)) then
          optn=n3xccc/nfftf

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2025 ABINIT group (XG, DRH, MB, XW, MT, SPr, XW, MV, MM, AR)
+!!  Copyright (C) 1999-2026 ABINIT group (XG, DRH, MB, XW, MT, SPr, XW, MV, MM, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4052,9 +4052,9 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
 !  Pack fe1fixed, fe1norm
    indx = 0
-   buffer1(indx+1)=fe1fixed 
+   buffer1(indx+1)=fe1fixed
    buffer1(indx+2)=fe1norm
-   indx=indx+2 
+   indx=indx+2
    if(indx<buffer_size)buffer1(indx+1:buffer_size)=zero
 
 !  Build sum of everything
@@ -4075,7 +4075,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    if (psps%usepaw==0) then
      call timab(48,1,tsec)
      buffer_size = cplex*nfftf
-     ! TODO: there should be a primitive for a 2d array here, but the compiler does not seem to find it. 
+     ! TODO: there should be a primitive for a 2d array here, but the compiler does not seem to find it.
      ! would simplify the call to xmpi_sum
      do isppol=1, nspden
        call xmpi_sum(rhorfermi(:,isppol),buffer_size,spaceworld,ierr)

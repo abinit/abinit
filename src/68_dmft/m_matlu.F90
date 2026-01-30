@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -711,7 +711,7 @@ end subroutine print_matlu
 !! Symmetrize local quantity.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1238,7 +1238,7 @@ end subroutine print_matlu
 !! Inverse local quantity.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1464,7 +1464,7 @@ end subroutine add_matlu
 !! Change representation of density matrix (useful for nspinor=2)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1734,7 +1734,7 @@ end subroutine add_matlu
 !! Create new array from matlu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1846,7 +1846,7 @@ end subroutine add_matlu
 !! Diagonalize hermitian matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2282,7 +2282,7 @@ end subroutine add_matlu
 !! Rotate matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2513,7 +2513,7 @@ end subroutine add_matlu
 !! Add/subtract a scalar to the diagonal part
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2574,7 +2574,7 @@ end subroutine add_matlu
 !! Check that matlu is real and diagonal with given precision
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2666,7 +2666,7 @@ end subroutine add_matlu
 !! Check that matlu is diagonal in the orbital index with given precision
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2744,7 +2744,7 @@ end subroutine add_matlu
 !! Matrix product of two matlus
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2821,7 +2821,7 @@ end subroutine add_matlu
 !! conjugate of input matlu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2878,7 +2878,7 @@ end subroutine add_matlu
 !! Compute the logarithm of matlu (only if diagonal for the moment)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2938,7 +2938,7 @@ end subroutine add_matlu
 !! Transform mat from Slm to Ylm basis or vice versa
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3167,7 +3167,7 @@ end subroutine add_matlu
 !! Multiply matlu by a scalar
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3214,7 +3214,7 @@ end subroutine add_matlu
 !! Write matlu for a given frequency
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3293,7 +3293,7 @@ end subroutine add_matlu
 !!  Set the diagonal elements to 1 (the off-diagonal are not set to 0)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3347,7 +3347,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3587,7 +3587,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3852,7 +3852,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4145,7 +4145,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4336,7 +4336,7 @@ end subroutine add_matlu
 !! suboptimal if this is the case.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2024 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4544,7 +4544,7 @@ end subroutine add_matlu
 !! Transform mat from Ylm to JmJ basis or vice versa
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2024 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4615,7 +4615,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4744,6 +4744,7 @@ end subroutine add_matlu
  end subroutine magnfield_matlu
 !!***
 
+
 !!****f* m_matlu/magmomjmj_matlu
 !! NAME
 !! magmomjmj_matlu
@@ -4753,7 +4754,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

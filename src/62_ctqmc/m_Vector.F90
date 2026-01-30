@@ -5,12 +5,12 @@
 !!****m* ABINIT/m_Vector
 !! NAME
 !!  m_Vector
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  Manage a double precision vector
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,7 +46,7 @@ PRIVATE
 TYPE, PUBLIC :: Vector
   INTEGER         :: size
   INTEGER         :: tail
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)         :: vec 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)         :: vec
 END TYPE Vector
 !!***
 
@@ -69,7 +69,7 @@ CONTAINS
 !!  initialize
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -99,7 +99,7 @@ SUBROUTINE Vector_init(this, size)
   this%size = size_val
   FREEIF(this%vec)
   MALLOC(this%vec,(1:size_val))
-  this%tail     = 0 
+  this%tail     = 0
   this%vec = 0.d0
 END SUBROUTINE Vector_init
 !!***
@@ -112,7 +112,7 @@ END SUBROUTINE Vector_init
 !!  impose size
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -146,7 +146,7 @@ SUBROUTINE Vector_setSize(this,new_tail)
     END IF
   END IF
   this%tail = new_tail
-END SUBROUTINE Vector_setSize  
+END SUBROUTINE Vector_setSize
 !!***
 
 !!****f* ABINIT/m_Vector/Vector_enlarge
@@ -157,7 +157,7 @@ END SUBROUTINE Vector_setSize
 !!  enlarge memory size
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -182,14 +182,14 @@ SUBROUTINE Vector_enlarge(this, size)
 !Local variables ------------------------------
   INTEGER                                 :: width
   INTEGER                                 :: tail
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: thistemp 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: thistemp
   INTEGER                                 :: size_val
 
   IF ( ALLOCATED(this%vec) ) THEN
     FREEIF(thistemp)
     width = this%size
     tail  = this%tail
-    size_val = size 
+    size_val = size
     MALLOC(thistemp,(1:tail))
     thistemp(1:tail) = this%vec(1:tail)
     FREE(this%vec)
@@ -211,7 +211,7 @@ END SUBROUTINE Vector_enlarge
 !!  push an element at the end
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -257,7 +257,7 @@ END SUBROUTINE Vector_pushBack
 !!  Clear vector
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -277,7 +277,7 @@ SUBROUTINE Vector_clear(this)
 
 !Arguments ------------------------------------
   TYPE(Vector), INTENT(INOUT) :: this
-  this%tail = 0 
+  this%tail = 0
 END SUBROUTINE Vector_clear
 !!***
 
@@ -289,7 +289,7 @@ END SUBROUTINE Vector_clear
 !!  print vector
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -334,10 +334,10 @@ END SUBROUTINE Vector_print
 !!  Vector_destroy
 !!
 !! FUNCTION
-!!  Destroy vector 
+!!  Destroy vector
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

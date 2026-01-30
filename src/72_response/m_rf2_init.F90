@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2025 ABINIT group (LB,MT)
+!!  Copyright (C) 2015-2026 ABINIT group (LB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -151,7 +151,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
 ! *********************************************************************
 
- 
+
  DBG_ENTER("COLL")
 
  call timab(514,1,tsec)

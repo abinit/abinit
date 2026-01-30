@@ -5,7 +5,7 @@
 <body>
 
 <hr>
-<h5>Copyright (C) 2010-2025 ABINIT group (XG)
+<h5>Copyright (C) 2010-2026 ABINIT group (XG)
 <br> This file is distributed under the terms of the GNU General Public License, see
 ~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
 http://www.gnu.org/copyleft/gpl.txt </a>.
@@ -18,8 +18,8 @@ January 2017 and May 2017. These release notes
 are relative to modifications/improvements of ABINITv8.4 with respect to v8.2.
 
 The list of contributors includes :
-F. Altvater, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, 
-W. Chen, G. Geneste, M. Giantomassi, Y. Gillet, X. Gonze, F. Jollet, A. Martin, 
+F. Altvater, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet,
+W. Chen, G. Geneste, M. Giantomassi, Y. Gillet, X. Gonze, F. Jollet, A. Martin,
 F. Naccarato, G. Petretto, S. Prokhorenko, F. Ricci, M. Torrent , M. Verstraete, J. Zwanziger
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
@@ -34,7 +34,7 @@ Version 8.4, released on June 2, 2017.
 
 Changes with respect to version 8.2 :
 
-A. Warnings and important remarks 
+A. Warnings and important remarks
 B. Most noticeable achievements (for users)
 C. Changes in the package, for developers
 D. Other changes (or on-going developments, not finalized)
@@ -47,8 +47,8 @@ A.1 The Github ABINIT Web page, at https://github.com/abinit, allows one to
     access the mirror of the repository of ABINIT, as well as some other projects
     related to ABINIT, like AbiPy or the pseudo-dojo.
 
-A.2 The content of the ABINIT Web portal, specifically for the pages related to the presentation of 
-    ABINIT (https://www.abinit.org/about/what-is-abinit), has been upgraded.  
+A.2 The content of the ABINIT Web portal, specifically for the pages related to the presentation of
+    ABINIT (https://www.abinit.org/about/what-is-abinit), has been upgraded.
 
 __________________________________________________________________
 
@@ -88,7 +88,7 @@ B.6 Computation of Gruneisen parameters by finite differences, within ANADDB.
 
 B.7 New LOBPCG implementation wfoptalg=114.
     This is the default when paral_kgb=1.
-    Performances are equivalent in standard use (MPI alone) and much better with openmp+multithreaded linalg. 
+    Performances are equivalent in standard use (MPI alone) and much better with openmp+multithreaded linalg.
     It also allows to have only one block for large system and to reduce memory copies.
     This version has been developed keeping in mind the next generation of HPC.
     Work by J. Bieder
@@ -96,7 +96,7 @@ B.7 New LOBPCG implementation wfoptalg=114.
 B.8 New algorithms for the displacement of nuclei (ionmov) :
     - Hybrid Monte Carlo (HMC) predictor (ionmov=25)
     - Velocity Verlet (VV) NVE molecular dynamics predictor (ionmov=24)
-    See Tv8#12 for ionmov=24. 
+    See Tv8#12 for ionmov=24.
     Work by S. Prokhorenko
 
 B.9 Refactoring of ANADDB for the production of DOS and other thermodynamic quantities,
@@ -109,7 +109,7 @@ __________________________________________________________________
 
 C. Changes for the developers (also compilers)
 
-C.1 Management of the test farm : the new bot ubu_intel_17_openmpi 
+C.1 Management of the test farm : the new bot ubu_intel_17_openmpi
     has been activated, so that Intel 17 is now supported.
     Also, replacement of shiva_gnu_6.3_py3k by inca_gnu_6.3_py3k,
     update of graphene (MacPorts) to gcc6.3 + scalapack.
@@ -139,12 +139,12 @@ D.4 Added new value for nlflag=3 that computes only the non-linear susceptibilit
 D.5 Computation of forces is now possible in the Wavelets + PAW case.
     By M. Torrent.
 
-D.6 Ongoing work concerning the new "driver" optdrive=7 specifically dealing with electron-phonon 
-    related computations (including zero-point renormalisation). 
+D.6 Ongoing work concerning the new "driver" optdrive=7 specifically dealing with electron-phonon
+    related computations (including zero-point renormalisation).
     See new tests v8#41 to 44.
     Work by M. Giantomassi.
 
-D.7 Ongoing work : Raman intensities, in the PAW case, using DFPT. 
+D.7 Ongoing work : Raman intensities, in the PAW case, using DFPT.
     By L. Baguet and M. Torrent
 
 D.8 Ongoing work related to non-collinear DFPT.
@@ -164,10 +164,10 @@ D.10 New test paral#62, to make sure paralkgb=0 works when there are some idle p
      By M. Giantomassi
 
 D.11 Ongoing work on forces and stresses for hybrid functionals.
-     By F. Jollet 
+     By F. Jollet
 
 D.12 Ongoing work on the electron-phonon postprocessor ElectronPhononCoupling.
-     Fix bug affecting MPI runs. 
+     Fix bug affecting MPI runs.
      By G. Antonius.
 
 D.13 Improvement of zheevd using MAGMA (from a msg on the forum)
@@ -178,7 +178,7 @@ D.14 Implemented KSS.nc output with netcdf primitives
 
 D.15 Concerning  the Fourier interpolation of the phonon band structure,
      inside ANADDB, work by G Petretto :
-     - Updates in the calculation of sound velocity, 
+     - Updates in the calculation of sound velocity,
      - Small modifications for nlflag==3 and added some quantities to the anaddb netcdf file,
      - Fix a bug in the implementation of the new weights
 
@@ -195,8 +195,8 @@ D.18 The energy width for the bands in the Boltztrap intrans file is now automat
      By M Verstraete
 
 D.19 Numerous miscellaneous additional bug fixes and improvements of documentation by :
-     F. Altvater, G. Antonius, J. Bieder, M. Giantomassi, F. Jollet, 
-     G. Petretto, M. Verstraete, M. Torrent, J. Zwanziger. 
+     F. Altvater, G. Antonius, J. Bieder, M. Giantomassi, F. Jollet,
+     G. Petretto, M. Verstraete, M. Torrent, J. Zwanziger.
 
 </pre>
 

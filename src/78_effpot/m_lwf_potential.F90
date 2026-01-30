@@ -3,7 +3,7 @@
 !! m_lwf_potential
 !!
 !! FUNCTION
-!! This module contains an LWF potential. 
+!! This module contains an LWF potential.
 !!
 !! Datatypes:
 !!
@@ -12,7 +12,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -184,7 +184,7 @@ contains
   subroutine convert_coeff_to_csr(self)
     class(lwf_potential_t), intent(inout) :: self
     if (.not. self%csr_mat_ready) then
-       !call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+       !call init_mpi_info(master, iam_master, my_rank, comm, nproc)
        !if(iam_master) then
        call spmat_convert(self%coeff_coo, self%coeff)
        call self%coeff_coo%diag(self%coeff_diag)
@@ -303,11 +303,11 @@ contains
   !----------------------------------------------------------------------
   !> @brief get_delta_E_lwf: calculate the energy difference when a given lwf
   !> is changed. This is to be used for spin Monte Carlo. Currently the
-  !> only supported is the spin model. 
+  !> only supported is the spin model.
   !>
   !> @param[in]  lwf: lwf of full structure. array of (nlwf)
   !> @param[in]  ilwf: the index of spin changed. integer
-  !> @param[in]  lwf_new: the new value of the changed spin. 
+  !> @param[in]  lwf_new: the new value of the changed spin.
   !> @param[out] deltaE: the energy difference
   !----------------------------------------------------------------------
   subroutine get_delta_E_lwf(self, lwf, ilwf, lwf_new, deltaE)
@@ -364,7 +364,7 @@ contains
   end subroutine get_delta_E_lwf
 
   !subroutine add_self_bound_term(self, order, coeff)
-  !  class(lwf_potential_t), intent(inout) :: self 
+  !  class(lwf_potential_t), intent(inout) :: self
   !  integer, intent(in) :: order
   !  real(dp), intent(in) :: coeff
   !  if (order /= 0) then
