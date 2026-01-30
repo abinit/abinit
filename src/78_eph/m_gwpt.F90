@@ -2142,6 +2142,8 @@ subroutine dump_my_gbuf()
  ! i.e. the procs treating different k-points for this q are involved in IO
  ! as all the local buffers store results for all natom3 perturbations.
 
+ ! NOTE: A similar routine is used in m_gstore. The two implementations should be kept in synch.
+
  integer :: ii, iq_bz, iq_glob, my_iq
  !integer,allocatable :: itab_k(:)
 
@@ -2174,20 +2176,21 @@ subroutine dump_my_gbuf()
                       count=[2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
  NCF_CHECK(ncerr)
 
+ !ABI_ICALLOC(itab_k, (gqk%my_nk))
+ ! nctkarr_t("gstore_state_kqs", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
+
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
  !if (all(gqk%coords_qkpb_sumbp(2:3) == [0, 0]))  then
    do ii=1,iqbuf_cnt
      iq_bz = iq_buf(2, ii)
      NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
-
-     !ABI_ICALLOC(itab_k, (gqk%my_nk))
      !itab_k = 1
-     !ncerr = nf90_put_var(root_ncid, root_vid("gstore_kq_tab"), itab_k, &
-     !                     start=[gqk%my_kstart, iq_bz, spin], &
-     !                     count=[gqk%my_nk, 1, 1])
+     !ncerr = nf90_put_var(root_ncid, root_vid("gstore_state_kqb"), itab_k, &
+     !                     start=[gqk%my_kstart, iq_glob, spin], &
+     !                     count=[gqk%my_nk, iqbuf_cnt, 1])
      !NCF_CHECK(ncerr)
-     !ABI_FREE(itab_k)
    end do
+   !ABI_FREE(itab_k)
  !end if
 
  ! Zero the counter before returning
