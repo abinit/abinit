@@ -317,6 +317,7 @@ type, public :: gqk_t
   complex(dp), allocatable :: my_iv1p_comm(:,:,:,:,:)
    ! (nb_k, nb_k, 3, my_npert, my_nk))
    ! Stores i <psi_mk[V1_q0ka, p]|psi_nk> in the full BZ in reduced coordinates.
+   ! Can be used to compute non-diagonal DW self-energy in the RIA. See [[cite:Lihm2020]], PhysRevB.101.121102
    ! Note that in the present implementation both m and n indices run from bstart_k to bstop_k.
 
   integer :: coords_qkpb_sumbp(ndims) = 0
@@ -1089,7 +1090,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      nctkarr_t("gstore_qbz2ibz", "i", "six, gstore_nqbz"), &
      nctkarr_t("gstore_qglob2bz", "i", "gstore_max_nq, number_of_spins"), &
      nctkarr_t("gstore_kglob2bz", "i", "gstore_max_nk, number_of_spins"), &
-     !nctkarr_t("gstore_kq_tab", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
+     !nctkarr_t("gstore_state_kqs", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
+     !
      ! These quantities are needed to interface GSTORE.nc with external codes.
      ! For the meaning of the different variables and conventions see m_ifc module.
      nctkarr_t("ifc_zeff", "dp", "three, three, number_of_atoms"), &
@@ -1118,7 +1120,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    !  0 --> (k, q, spin) has not been computed.
    !  1 --> (k, q, spin) has been computed.
    !  2 --> (k, q, spin) has been reconstructed by symmetry.
-   !NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_kq_tab"), NF90_FILL, 0))
+   !NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_state_kqs"), NF90_FILL, 0))
 
    ! Optional arrays
    if (allocated(gstore%delta_ef_kibz_spin)) then
@@ -4023,6 +4025,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
            band_k = in_k + gqk%bstart_k - 1
            lambda(in_k) = ebands%eig(band_k, ik_ibz, spin) - dtset%dfpt_sciss
          end do
+         !call ebands%get_dfpt_eshifted(gqk%bstart_k, nb_k, ik_ibz, spin, dtset%dfpt_sciss, lambda)
 
          call getgh1c(berryopt0, kets_k, cwaveprj0, h1_kets_kq, &
                       grad_berry, gs1c_kq, gs_ham_kq, gvnlx1, idir, ipert, lambda, mpi_enreg, nb_k, optlocal, &
@@ -4043,21 +4046,15 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          call rf_ham_kq%free()
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
-         !$OMP PARALLEL DO COLLAPSE(2)
-         do in_k=1,nb_k
-           do im_kq=1,nb_kq
-             gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,im_kq), h1_kets_kq(1,1,in_k))
-           end do
-         end do
+         !!$OMP PARALLEL DO COLLAPSE(2)
+         !do in_k=1,nb_k
+         !  do im_kq=1,nb_kq
+         !    gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,im_kq), h1_kets_kq(1,1,in_k))
+         !  end do
+         !end do
 
-         !call zgemm('C', 'N', &                    ! B^H * H
-         !           nb_kq, nb_k, &                 ! M, N
-         !           npw_kq*nspinor, &              ! K
-         !           cone, &                        ! alpha
-         !           bras_kq, npw_kq*nspinor, &     ! A, lda
-         !           h1_kets_kq, npw_kq*nspinor, &  ! B, ldb
-         !           czero, &                       ! beta
-         !           gkq_atm(:,:,:,ipc), nb_kq)     ! C, ldc
+         call zgemm('C', 'N', nb_kq, nb_k, npw_kq*nspinor, cone, bras_kq, npw_kq*nspinor, &
+                    h1_kets_kq, npw_kq*nspinor, czero, gkq_atm(:,:,:,ipc), nb_kq)
 
        end do ! my_ip
 
@@ -4161,6 +4158,8 @@ subroutine dump_my_gbuf()
  ! i.e. the procs treating different k-points for this q are involved in IO
  ! as all the local buffers store results for all natom3 perturbations.
 
+ ! NOTE: A similar routine is used in m_gstore. The two implementations should be kept in synch.
+
  integer :: ii, iq_bz, iq_glob, my_iq
  !integer,allocatable :: itab_k(:)
 
@@ -4181,20 +4180,22 @@ subroutine dump_my_gbuf()
                       count=[2, gqk%nb_kq, gqk%nb_k, gqk%natom3, gqk%my_nk, iqbuf_cnt])
  NCF_CHECK(ncerr)
 
+ !ABI_ICALLOC(itab_k, (gqk%my_nk))
+ !nctkarr_t("gstore_state_kqs", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
+
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
  !if (all(gqk%coords_qkpb_sumbp(2:3) == [0, 0]))  then
    do ii=1,iqbuf_cnt
      iq_bz = iq_buf(2, ii)
      NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
 
-     !ABI_ICALLOC(itab_k, (gqk%my_nk))
      !itab_k = 1
-     !ncerr = nf90_put_var(root_ncid, root_vid("gstore_kq_tab"), itab_k, &
-     !                     start=[gqk%my_kstart, iq_bz, spin], &
-     !                     count=[gqk%my_nk, 1, 1])
+     !ncerr = nf90_put_var(root_ncid, root_vid("gstore_state_kqs"), itab_k, &
+     !                     start=[gqk%my_kstart, iq_glob, spin], &
+     !                     count=[gqk%my_nk, iqbuf_cnt, 1])
      !NCF_CHECK(ncerr)
-     !ABI_FREE(itab_k)
    end do
+   !ABI_FREE(itab_k)
  !end if
 
  ! Zero the counter before returning
@@ -4580,8 +4581,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
  call pstat_proc%print(_PSTAT_ARGS_)
 
  from_atm_to_nu = .False.
- ! Compare with_gmode with the one on disk.
- ! The only conversion I can think of is: atom --> phonon.
+ ! Compare with_gmode with the one on disk. The only conversion I can think of is: atom --> phonon.
  if (gstore%gmode /= with_gmode) then
    if (gstore%gmode == GSTORE_GMODE_ATOM .and. with_gmode == GSTORE_GMODE_PHONON) then
      from_atm_to_nu = .True.; gstore%gmode = GSTORE_GMODE_PHONON ! Change gstore%gmode here
@@ -6225,7 +6225,7 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
          band_k = in_k + gqk%bstart_k - 1
          lambda(in_k) = ebands%eig(band_k, ik_ibz, spin) - dtset%dfpt_sciss
        end do
-       !call ebands%get_eshift(gqk%bstart_k, nb_k, ik_ibz, spin, dtset%dfpt_sciss, lambda)
+       !call ebands%get_dfpt_eshifted(gqk%bstart_k, nb_k, ik_ibz, spin, dtset%dfpt_sciss, lambda)
 
        ! Calculate dvscf * psi_k, results stored in h1_kets_kq on the k+q sphere.
        ! Compute H(1) applied to GS wavefunction Psi(0).
