@@ -56,7 +56,7 @@ public :: irrzg             ! Find the irreducible zone in reciprocal space (use
 public :: setsym            ! Set up irreducible zone in  G space by direct calculation.
 public :: hartredq          ! Compute the q-gradient of the Hartree potential (=FFT of -rho(G)*G_qdir/pi**2/|G|**4 )
 
-! MG FIXME This routine is deprecated. Now the symmetrization of the **potentials** is done in the m_dvdb
+! MG FIXME This routine is deprecated. Now the symmetrization of the DFPT **potentials** is done in the m_dvdb
 public :: rotate_rho
 !!***
 
@@ -2607,12 +2607,6 @@ end subroutine setsym
 !!  (=FFT of -rho(G)*G_qdir/pi**2/|G|**4 ) -> Cartesian coordinates
 !!  The calculation is performed in reduced reciprocal space coordinates.
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2021-2026 ABINIT group (FIXME: add author)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  cplex= if 1, vqgradhartr is REAL, if 2, vqgradhartr is COMPLEX
 !!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
@@ -2627,10 +2621,6 @@ end subroutine setsym
 !!
 !! OUTPUT
 !!  vqgradhart(cplex*nfft)=q-gradient of the Hartree potential at q=0in real space, either REAL or COMPLEX
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! SOURCE
 
