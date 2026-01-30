@@ -7,7 +7,7 @@
 !!  and, optionally, transport properties within the Kubo formalism.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (JCA, MG)
+!!  Copyright (C) 2008-2026 ABINIT group (JCA, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1393,15 +1393,15 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
        ! calculate the transport coefficients from the l0 l1 l2
        call inv33(self%l0(:, :, ieh, spin, itemp), l0inv_33nw(:,:,ieh))
        self%seebeck(:,:,ieh,spin,itemp) = matmul(l0inv_33nw(:,:,ieh), self%l1(:,:,ieh,spin,itemp)) / Tkelv
-      
+
        call inv33(self%l0_dm(:, :, ieh, spin, itemp), l0inv_33nw_dm(:,:,ieh))
        self%seebeck_dm(:,:,ieh,spin,itemp) = matmul(l0inv_33nw_dm(:,:,ieh), self%l1_dm(:,:,ieh,spin,itemp)) / Tkelv
-      
+
        work_33 = self%l1(:, :, ieh, spin, itemp)
-       ! TODO: check if one of the work_33 below is incorrect or needs a transpose 
+       ! TODO: check if one of the work_33 below is incorrect or needs a transpose
        work_33 = self%l2(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw(:, :, ieh), work_33))
        self%kappa(:,:,ieh,spin,itemp) = work_33 / Tkelv
-      
+
        work_33 = self%l1_dm(:, :, ieh, spin, itemp)
        work_33 = self%l2_dm(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw_dm(:, :, ieh), work_33))
        self%kappa_dm(:,:,ieh,spin,itemp) = work_33 / Tkelv

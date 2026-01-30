@@ -1,8 +1,8 @@
 
-.Version 9.0.0 of CUT3D 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.0.0 of CUT3D
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  CUT3D comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Mon 24 Feb 2020.
 - ( at 16h15 )
-  
+
 
   What is the name of the 3D function (density, potential or wavef) file ?
   => Your 3D function file is: t58o_WFK
@@ -24,11 +24,11 @@
 - Your file contains unformatted binary header + 3D data
 
  ===============================================================================
- ECHO of the ABINIT file header 
- 
+ ECHO of the ABINIT file header
+
  First record :
 .codvsn,headform,fform = 9.0.0      80    2
- 
+
  Second record :
  bantot,intxc,ixc,natom  =    32     0     1     2
  ngfft(1:3),nkpt         =    10    16    24     4
@@ -73,13 +73,13 @@
  title= Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
   znuclpsp= 14.00, zionpsp=  4.00, pspso=  0, pspdat=940714, pspcod=  1, pspxc=  1
   lmnmax  =  2
- 
+
  Last record :
  residm,etot,fermie=    1.479863E-08   -8.572289729154E+00    2.819199E-01
  xred =
             0.000000E+00    0.000000E+00    0.000000E+00
             2.500000E-01    2.500000E-01    2.500000E-01
- End the ECHO of the ABINIT file header 
+ End the ECHO of the ABINIT file header
  ===============================================================================
 
  ===========================================================
@@ -98,7 +98,7 @@
    1    0.000000E+00    0.000000E+00    0.000000E+00
    2    3.000000E+00    2.500000E+00    2.000000E+00
 
-  This file is a WF file. 
+  This file is a WF file.
 
  For which k-points? (1 to    4)
   => Your k-point is :            2
@@ -114,13 +114,13 @@
  Do you want to analyze a GW wavefunction? (1=yes,0=no)
  => Your choice is :           0
 
- Do you want the atomic analysis for this state : 
- (kpt,band)= (    2    3)? 
- If yes, enter the radius of the atomic spheres, in bohr 
- If no, enter 0 
- You entered ratsph=      1.00000000 Bohr 
+ Do you want the atomic analysis for this state :
+ (kpt,band)= (    2    3)?
+ If yes, enter the radius of the atomic spheres, in bohr
+ If no, enter 0
+ You entered ratsph=      1.00000000 Bohr
 
- Atomic sphere analysis 
+ Atomic sphere analysis
 
  wffile : kpgmax, bessargmax, nradint =     2.408319E+00    1.520000E+01   152
  Angular analysis (real spherical harmonics)
@@ -148,7 +148,7 @@
 
  Total over all atoms and l=0 to 4 :  0.029743
 
- Charge in the sphere around each atom 
+ Charge in the sphere around each atom
  Atom number    1 :  charge =    0.01384597
  Atom number    2 :  charge =    0.01384597
 
@@ -170,11 +170,11 @@
         (bare 3D data, preceeded by 3D index)
    6 => 3D indexed imaginary data
         (bare 3D data, preceeded by 3D index)
-   7 => 3D Data Explorer formatted data 
+   7 => 3D Data Explorer formatted data
         (Real file and Imaginary file)
-   8 => 3D Data Explorer formatted data 
+   8 => 3D Data Explorer formatted data
         (Only the Real file)
-   9 => 3D Data Explorer formatted data 
+   9 => 3D Data Explorer formatted data
         (Only the Imaginary file)
   10 => 3D Data Explorer formatted data and position files
   11 => XCrysden formatted data (norm of wf) and position files
@@ -184,7 +184,7 @@
 
  Your choice is  2
 
- 
+
   Enter the root of an output file:
    The root of your file is : t59
    The corresponding filename is : t59_k2_b3_sppol2

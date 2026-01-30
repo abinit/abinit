@@ -1,8 +1,8 @@
 
-.Version 7.7.1 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu4.7 computer) 
+.Version 7.7.1 of ANADDB
+.(MPI version, prepared for a x86_64_linux_gnu4.7 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Mon 24 Feb 2014.
 - ( at 00h54 )
-  
+
 
 ================================================================================
 
@@ -70,8 +70,8 @@ Elphon: extra electrons per unit cell =     0.100000E+00
                      5.00000000E-01  0.00000000E+00  0.00000000E+00    1.000E+00
 Phonon displacements will be output, frozen into supercells
  Chosen amplitude of frozen displacements =     0.1000000000E+02
-Phonon band structure files, with atomic projections, will be output 
- Chosen atoms for projection = 
+Phonon band structure files, with atomic projections, will be output
+ Chosen atoms for projection =
      1     2
 
 ================================================================================
@@ -90,7 +90,7 @@ Phonon band structure files, with atomic projections, will be output
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces
 
 -begin at tcpu      0.038  and twall      0.038 sec
        Homogeneous q point set in the B.Z.
@@ -108,7 +108,7 @@ Phonon band structure files, with atomic projections, will be output
 
 ================================================================================
 
- Properties based on electron-phonon coupling 
+ Properties based on electron-phonon coupling
 
  Found     2 symmetries that leave the perturbation invariant.
  Found     2 symmetries that leave the perturbation invariant.
@@ -259,10 +259,10 @@ Phonon band structure files, with atomic projections, will be output
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 -begin at tcpu    579.277  and twall    579.352 sec
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00  1.049696E-03  1.049696E-03
@@ -271,7 +271,7 @@ Phonon band structure files, with atomic projections, will be output
 -  0.000000E+00  0.000000E+00  0.000000E+00  2.303815E+02  2.303816E+02
 -  6.098173E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector)
@@ -326,7 +326,7 @@ Phonon band structure files, with atomic projections, will be output
  Symmetry characters of vibration mode #   6
   1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
   1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
    9.956626E-04  1.330052E-03  1.660483E-03  2.079686E-03  2.147570E-03
@@ -335,7 +335,7 @@ Phonon band structure files, with atomic projections, will be output
 -  2.185227E+02  2.919126E+02  3.644339E+02  4.564382E+02  4.713370E+02
 -  5.168649E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector)

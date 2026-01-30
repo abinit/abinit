@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 "check build configuration"
 #
-# Copyright (C) 2010-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2010-2026 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -172,7 +172,7 @@ def main():
   dopt_removed = [opt for opt in opt_removed if opt in opt_template]
 
   # Report any mismatch
-  nerr = ( len(denv_config) + len(denv_template) + len(dopt_config) + 
+  nerr = ( len(denv_config) + len(denv_template) + len(dopt_config) +
          + len(dopt_values) + len(dopt_template) + len(dopt_removed) )
 
   if nerr > 0:

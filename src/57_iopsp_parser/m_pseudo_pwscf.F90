@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MVer)
+!!  Copyright (C) 2008-2026 ABINIT group (MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,12 +26,12 @@ module pseudo_pwscf
   integer ,parameter :: npsx = 6
   ! npsx  : maximum number of different pseudopotentials
   integer, parameter :: lmaxx  = 3, nchix  = 6, ndm = 2000
-  ! lmaxx : maximum non local angular momentum in PP      
+  ! lmaxx : maximum non local angular momentum in PP
   ! nchix : maximum number of atomic wavefunctions per PP
   ! ndm   : maximum number of points in the radial mesh
   integer, parameter :: nbrx = 8, lqmax = 5, nqfx = 8
-  ! nbrx  : maximum number of beta functions         
-  ! lqmax : maximum number of angular momentum of Q  
+  ! nbrx  : maximum number of beta functions
+  ! lqmax : maximum number of angular momentum of Q
   ! nqfx  : maximum number of coefficients in Q smoothing
   !
   ! pp_header
@@ -56,7 +56,7 @@ module pseudo_pwscf
   ! pp_nonlocal
   ! pp_beta
   real(8) :: betar(ndm, nbrx, npsx)
-  integer :: lll(nbrx,npsx), ikk2(nbrx,npsx)  
+  integer :: lll(nbrx,npsx), ikk2(nbrx,npsx)
   ! pp_dij
   real(8) :: dion(nbrx,nbrx,npsx)
   ! pp_qij

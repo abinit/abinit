@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Copyright (C) 2019-2025 ABINIT group (XG)
-# 
+# Copyright (C) 2019-2026 ABINIT group (XG)
+#
 # The purpose of this script is to update all reference files, by brute force.
 
 #Issue this script on the main reference machine, in the directory tests.
@@ -52,24 +52,24 @@ cp TestBot_MPI*/unitary_t*/*out        unitary/Refs
 # Now, suppress the corresponding fldiff files, to see whether some relevant files have not been copied
 # Normal directories
 rm TestBot_MPI1/v1_t*/*out.fldiff
-rm TestBot_MPI1/v2_t*/*out.fldiff  
+rm TestBot_MPI1/v2_t*/*out.fldiff
 rm TestBot_MPI1/v3_t*/*out.fldiff TestBot_MPI1/v3_t*/*DOS*.fldiff
 rm TestBot_MPI1/v3_t*/*_k*_b*.fldiff TestBot_MPI1/v3_t*/t79_*.fldiff
-rm TestBot_MPI1/v4_t*/*out*.fldiff TestBot_MPI1/v4_t*/*DOS*.fldiff TestBot_MPI1/v4_t*/*AV.fldiff 
-rm TestBot_MPI1/v5_t*/*out.fldiff TestBot_MPI1/v5_t*/*DOS*.fldiff TestBot_MPI1/v5_t*/*xml.fldiff                   
-rm TestBot_MPI1/v5_t*/t10_*.fldiff  TestBot_MPI1/v5_t*/*FATBANDS*.fldiff   
-rm TestBot_MPI1/v6_t*/*out.fldiff TestBot_MPI1/v6_t*/*B*TR*P*.fldiff 
+rm TestBot_MPI1/v4_t*/*out*.fldiff TestBot_MPI1/v4_t*/*DOS*.fldiff TestBot_MPI1/v4_t*/*AV.fldiff
+rm TestBot_MPI1/v5_t*/*out.fldiff TestBot_MPI1/v5_t*/*DOS*.fldiff TestBot_MPI1/v5_t*/*xml.fldiff
+rm TestBot_MPI1/v5_t*/t10_*.fldiff  TestBot_MPI1/v5_t*/*FATBANDS*.fldiff
+rm TestBot_MPI1/v6_t*/*out.fldiff TestBot_MPI1/v6_t*/*B*TR*P*.fldiff
 rm TestBot_MPI1/v7_t*/*out.fldiff TestBot_MPI1/v7_t*/*DOS*.fldiff
 rm TestBot_MPI1/v7_t*/*DMFT.fldiff TestBot_MPI1/v7_t*/*SBK.fldiff  TestBot_MPI1/v7_t*/t88*.fldiff
 rm TestBot_MPI1/v8_t*/*out*.fldiff TestBot_MPI1/v8_t*/*dat*.fldiff TestBot_MPI1/v8_t*/*xml.fldiff TestBot_MPI1/v8_t*/t58*.fldiff TestBot_MPI1/v8_t*/*DDB.fldiff
-rm TestBot_MPI1/v9_t*/*out*.fldiff TestBot_MPI1/v9_t*/*KERANGE.fldiff  
+rm TestBot_MPI1/v9_t*/*out*.fldiff TestBot_MPI1/v9_t*/*KERANGE.fldiff
 rm TestBot_MPI1/v67mbpt_t*/*out.fldiff  TestBot_MPI1/v67mbpt_t*/*MDF.fldiff TestBot_MPI1/v67mbpt_t*/*_k*_b*.fldiff
-rm TestBot_MPI1/atompaw_t*/*out.fldiff  
+rm TestBot_MPI1/atompaw_t*/*out.fldiff
 rm TestBot_MPI1/bigdft_t*/*out.fldiff
 rm TestBot_MPI1/etsf_io_t*/*out.fldiff
 rm TestBot_MPI1/fast_t*/*out.fldiff  TestBot_MPI1/fast_t*/*GEO.fldiff
 rm TestBot_MPI1/libxc_t*/*out.fldiff TestBot_MPI1/libxc_t*/*data.fldiff
-rm TestBot_MPI1/psml_t*/*out.fldiff   
+rm TestBot_MPI1/psml_t*/*out.fldiff
 rm TestBot_MPI1/tutomultibinit_t*/*out.fldiff TestBot_MPI1/tutomultibinit_t*/*xml.fldiff
 rm TestBot_MPI1/tutoplugs_t*/*out.fldiff
 rm TestBot_MPI1/tutorespfn_t*/*out.fldiff TestBot_MPI1/tutorespfn_t*/*MRTA*.fldiff TestBot_MPI1/tutorespfn_t*/*SERTA*.fldiff
@@ -81,13 +81,13 @@ rm TestBot_MPI1/wannier90_t*/*out.fldiff
 # Directories for parallel tests
 rm TestBot_MPI*/bigdft_paral_t*/*out.fldiff
 rm TestBot_MPI*/mpiio_t*/*out.fldiff TestBot_MPI*/mpiio_t*/*DOS*.fldiff
-rm TestBot_MPI*/paral_t*/*out.fldiff TestBot_MPI*/paral_t*/*MDF.fldiff   TestBot_MPI*/paral_t*/*xml.fldiff    TestBot_MPI*/paral_t*/*dat.fldiff  TestBot_MPI*/paral_t*/*DDB.fldiff 
-rm TestBot_MPI*/tutoparal_t*/*out.fldiff  
+rm TestBot_MPI*/paral_t*/*out.fldiff TestBot_MPI*/paral_t*/*MDF.fldiff   TestBot_MPI*/paral_t*/*xml.fldiff    TestBot_MPI*/paral_t*/*dat.fldiff  TestBot_MPI*/paral_t*/*DDB.fldiff
+rm TestBot_MPI*/tutoparal_t*/*out.fldiff
 rm TestBot_MPI*/unitary_t*/*out.fldiff
 
 # For the serial reference machine
 #rm TestBot_MPI1/seq_t*/*out.fldiff
 
 # For the gpu reference machine
-#rm TestBot_MPI*/gpu_t*/*out.fldiff      
+#rm TestBot_MPI*/gpu_t*/*out.fldiff
 

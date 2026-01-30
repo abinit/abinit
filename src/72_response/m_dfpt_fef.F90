@@ -6,7 +6,7 @@
 !!  Response calculations in finite electric field.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2004-2025 ABINIT group (XW).
+!!  Copyright (C) 2004-2026 ABINIT group (XW).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -225,7 +225,7 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem_rbz,mpi_enreg
  call wrtout(std_out,message,'COLL')
 
 !find the related k points to every k point in full BZ-----------------
-!TODO: import hash tables for k-points, to make lookup fast and check for missing 
+!TODO: import hash tables for k-points, to make lookup fast and check for missing
 ! matches
 
 !loop over three reciprocal directions
@@ -693,7 +693,7 @@ end subroutine dfptff_initberry
 !! Calculation of the gradient of Berry-phase term in finite electric field.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2025 ABINIT group (XW).
+!! Copyright (C) 2004-2026 ABINIT group (XW).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -797,7 +797,7 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,&
 !TODO: this algorithm is very inefficient: the looping is in the wrong order.
 !  should be possible to store a temp vector and make it into a BLAS call...
 !  basically boils down to an internal sum over iband
-!     grad_berry(ipw,jband) = fac * wf(ipw,:) * qmat(:,jband) 
+!     grad_berry(ipw,jband) = fac * wf(ipw,:) * qmat(:,jband)
    do ipw = 1, npw_k1
      jpw = pwind_tmp(ipw)
 
@@ -2692,7 +2692,7 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mband_mem,
 &          cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
        end if
        call xmpi_bcast(vect2,band_procs(jband), mpi_enreg%comm_band,ierr)
-       
+
 ! now everyone has vect2 for present jband
        if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
 
@@ -2747,7 +2747,7 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mband_mem,
          if (npw_k1 < mpw_tmp) vect1(:,npw_k1+1:mpw_tmp) = zero
          call overlap_g(doti,dotr,mpw_tmp,npw_k1,npw_k2,nspinor,pwind_tmp,&
 &          vect1,vect2)
-         
+
          s1mat(1,iband,jband) = s1mat(1,iband,jband) + dotr
          s1mat(2,iband,jband) = s1mat(2,iband,jband) + doti
        end do    ! iband

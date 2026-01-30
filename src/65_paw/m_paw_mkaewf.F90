@@ -6,7 +6,7 @@
 !! Construct complete AE wave functions on the fine FFT grid adding onsite PAW corrections.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -333,7 +333,7 @@ if(dtset%pawprtwf==1) then
  end if
 
  call xmpi_barrier(comm_cell)
- 
+
    ! Reopen the file in parallel inside comm_cell
    ! Note that we use individual IO thus there's no need to handle idle processes
    ! if paral_kgb == 0 and nprocs > nkpt * nsppol
@@ -342,7 +342,7 @@ if(dtset%pawprtwf==1) then
    pw_ncid = nctk_idname(ncid, "ur_pw")
    aeons_ncid = nctk_idname(ncid, "ur_ae_onsite")
    psons_ncid = nctk_idname(ncid, "ur_ps_onsite")
-  
+
    NCF_CHECK(nctk_set_datamode(ncid))
  endif
 
@@ -600,7 +600,7 @@ if(dtset%pawprtwf==1) then
        call flush_unit(std_out)
 
        norm=zero
-       do ifft=1, nfftot 
+       do ifft=1, nfftot
          norm=norm+(ur_pw(1,ifft)**2+ur_pw(2,ifft)**2)*ur_mask(ifft)
        enddo
        do ifft=1, nfftot

@@ -5,12 +5,12 @@
 !!****m* ABINIT/m_MapHyb
 !! NAME
 !!  m_MapHyb
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  map template integer/double
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +36,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,7 +80,7 @@ CONTAINS
 !!  initialize
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -124,7 +124,7 @@ END SUBROUTINE MapHyb_init
 !!  impose size of the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -157,7 +157,7 @@ SUBROUTINE MapHyb_setSize(this,new_tail)
     CALL MapHyb_enlarge(this, MAX(new_tail-size,Global_SIZE))
   END IF
   this%tail = new_tail
-END SUBROUTINE MapHyb_setSize  
+END SUBROUTINE MapHyb_setSize
 !!***
 
 !!****f* ABINIT/m_MapHyb/MapHyb_enlarge
@@ -168,7 +168,7 @@ END SUBROUTINE MapHyb_setSize
 !!  enlarge memory space
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -194,15 +194,15 @@ SUBROUTINE MapHyb_enlarge(this, size)
   INTEGER                                :: width
   INTEGER                                :: tail
   INTEGER                                :: size_val
-  INTEGER         , ALLOCATABLE, DIMENSION(:) :: listINT_temp 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: listDBLE_temp 
+  INTEGER         , ALLOCATABLE, DIMENSION(:) :: listINT_temp
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: listDBLE_temp
 
   IF ( ALLOCATED(this%listINT) ) THEN
     FREEIF(listINT_temp)
     width = this%size
     tail  = this%tail
     size_val = width
-    IF ( PRESENT(size) ) size_val = size 
+    IF ( PRESENT(size) ) size_val = size
     ! listINT enlarge
     MALLOC(listINT_temp,(1:tail))
     listINT_temp(1:tail) = this%listINT(1:tail)
@@ -232,7 +232,7 @@ END SUBROUTINE MapHyb_enlarge
 !!  assign this=map
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -273,7 +273,7 @@ END SUBROUTINE MapHyb_assign
 !!  sort the this with respect to the integer array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -293,7 +293,7 @@ SUBROUTINE MapHyb_sort(this)
 
 !Arguments ------------------------------------
   TYPE(MapHyb), INTENT(INOUT) :: this
- 
+
   IF ( this%tail .EQ. 1 ) RETURN
   CALL MapHyb_quickSort(this, 1, this%tail)
 END SUBROUTINE MapHyb_sort
@@ -308,7 +308,7 @@ END SUBROUTINE MapHyb_sort
 !!  with the quickSort algo
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -370,7 +370,7 @@ RECURSIVE SUBROUTINE MapHyb_quickSort(this, begin, end)
 
 END SUBROUTINE MapHyb_quickSort
 !!***
- 
+
 !!****f* ABINIT/m_MapHyb/MapHyb_print
 !! NAME
 !!  MapHyb_print
@@ -379,7 +379,7 @@ END SUBROUTINE MapHyb_quickSort
 !!  print the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -409,7 +409,7 @@ SUBROUTINE MapHyb_print(this,ostream)
   IF ( PRESENT(ostream) ) ostream_val = ostream
   WRITE(ostream_val,'(A,2x,A5,2x,A5)') "#","Index", "Value"
   DO it = 1, this%tail
-    WRITE(ostream_val,'(3x,I5,2x,ES22.14)') this%listINT(it), this%listDBLE(it) 
+    WRITE(ostream_val,'(3x,I5,2x,ES22.14)') this%listINT(it), this%listDBLE(it)
   END DO
 END SUBROUTINE MapHyb_print
 !!***
@@ -422,7 +422,7 @@ END SUBROUTINE MapHyb_print
 !!  Clear the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -442,7 +442,7 @@ SUBROUTINE MapHyb_clear(this)
 
 !Arguments ------------------------------------
   TYPE(MapHyb), INTENT(INOUT) :: this
-  this%tail = 0 
+  this%tail = 0
 END SUBROUTINE MapHyb_clear
 !!***
 
@@ -454,7 +454,7 @@ END SUBROUTINE MapHyb_clear
 !!  destroy and deallocate the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

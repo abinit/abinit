@@ -7,7 +7,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (AM, hexu)
+!! Copyright (C) 1999-2026 ABINIT group (AM, hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -209,7 +209,7 @@ contains
 
     !  Read the model (from DDB or XML)
     call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
-      ! TODO: coeff_file_rw is currently set to 0 as this functionality needs more testing. 
+      ! TODO: coeff_file_rw is currently set to 0 as this functionality needs more testing.
        if (inp%coeff_file_rw==2) then
           read_effective_potential=reference_effective_potential
           !call effective_potential_file_read(filnam(3),read_effective_potential,inp,comm)

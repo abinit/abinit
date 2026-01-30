@@ -1,6 +1,6 @@
 # This file will run one abinit built-in test in a separate process
 
-# Copyright (C) 1999-2025 ABINIT group (LSi)
+# Copyright (C) 1999-2026 ABINIT group (LSi)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~ABINIT/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,7 +76,7 @@ sub transpath {
 #	$path = path to be translated
 # output: this subroutine acts as a function and return the path
 # according to host conventions
-	
+
 	$path =~ tr/\057/\\/ if ($SLASH eq '\\');
 	return $path;
 	}

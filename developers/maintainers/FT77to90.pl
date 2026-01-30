@@ -4,7 +4,7 @@
 #	-dp will replace the double precision statements using kind
 # 	-lf will replace labelled format statements by character strings
 #
-# Copyright (C) 1998-2025 ABINIT group (LSi)
+# Copyright (C) 1998-2026 ABINIT group (LSi)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@
 #  NB: Fortran 90 allows line length to be extended from 80 to 132 characters
 # 3) old style relational operators (even if found in comments but not on cpp stmt)
 #    .EQ. .GE. .GT. .LE. .LT. .NE.   are replaced as follows:
-#     ==   >=   >    <=   <    /=  
+#     ==   >=   >    <=   <    /=
 #  RESTRICTION: relational operators that span two lines won't be changed
 # 4) records continuation with non blank in column 6 is replaced by ampersands
 # (esperluette in french) at end and beginning of segments;
@@ -283,7 +283,7 @@ while ( $_ = <FILEIN>) {	# read next line
         }
       if ($seqnum eq '' && $col1 ne $f90comnt && $col1 ne $cppdir) {
 # start suppressing numbers if numbering was off and line is neither a comment
-# nor a cpp statement: 
+# nor a cpp statement:
         $line = substr($line,0,72)."\n";
         $len -= 8;		# reduce line length by 8
         $seqnum = $_;		# set numbering on
@@ -299,7 +299,7 @@ while ( $_ = <FILEIN>) {	# read next line
 #	suppress numbering if same format and increasing sequence:
           $line = substr($line,0,72)."\n";
           $len -= 8;		# reduce line length by 8
-          $incr = $seqnum2 - $seqnum;	# sequence increment 
+          $incr = $seqnum2 - $seqnum;	# sequence increment
           $seqnum = $seqnum2;	# update sequence number
           }
         else {			# broken sequence
@@ -310,7 +310,7 @@ while ( $_ = <FILEIN>) {	# read next line
         }
       if ($seqnum eq '' && $col1 ne $f90comnt && $col1 ne $cppdir) {
 # start suppressing numbers if numbering was off and line is neither a comment
-# nor a cpp statement: 
+# nor a cpp statement:
         $line = substr($line,0,72)."\n";
         $len -= 8;		# reduce line length by 8
         $seqnum = $seqnum2;	# set numbering on
@@ -352,7 +352,7 @@ if ($suplabfmt == 1) {
       $pntr += index($isn,'(') + 1;     # point to remainder
 # split control information list into specifiers:
       ($spec1,$spec2,$spec3,$spec4,$spec5,$spec6,$spec7) = split(',',$remain1);
-      $ix = index($spec2,')'); 
+      $ix = index($spec2,')');
       $spec2 = substr($spec2,0,$ix) if ($ix > 0);       # drop possible )
       $len2 = length($spec2);
       $spec2 =~ tr/ //d;           # strip off blanks

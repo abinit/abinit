@@ -15,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,12 +56,12 @@ module m_abstract_mover
   type ,public :: abstract_mover_t
      ! This is the abstract class of mover
      ! It do the following things:
-     ! calculate d(var)/dt and integrate new var. 
+     ! calculate d(var)/dt and integrate new var.
      ! call functions to calculate observables.
      ! interact with hist file.
 
      ! a pointer to the supercell structure
-     type(mbsupercell_t), pointer:: supercell=>null() 
+     type(mbsupercell_t), pointer:: supercell=>null()
      type(hash_table_t), pointer :: etable=>null()
      ! a label for each mover. For printing out information
      character (len=200) :: label="Abstract Mover"
@@ -98,7 +98,7 @@ contains
   !-------------------------------------------------------------------!
   ! set_rng:
   ! set the random number generator. The rng is already initialize
-  ! outside. 
+  ! outside.
   !-------------------------------------------------------------------!
   subroutine set_rng(self, rng)
     class(abstract_mover_t), intent(inout) :: self

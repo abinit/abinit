@@ -6,7 +6,7 @@
 !! Compute RF charge density rho1(r) and rho1(G) in electrons/bohr**3
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -661,7 +661,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  n1=gs_hamkq%ngfft(1);n2=gs_hamkq%ngfft(2);n3=gs_hamkq%ngfft(3)
  if (option==2.or.option==3) eloc0_k=zero
  if (option==2.or.option==3) then
-!  XG20241028 This coding confuses the gnu 8.5 compiler, wrt the CONTIGUOUS character of the pointer. 
+!  XG20241028 This coding confuses the gnu 8.5 compiler, wrt the CONTIGUOUS character of the pointer.
 !  So, make a simple copy. This is not optimal, though...
 !  Original ---
 !  vlocal => gs_hamkq%vlocal

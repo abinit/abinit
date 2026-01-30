@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MT)
+!!  Copyright (C) 2008-2026 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,8 +84,8 @@ contains
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2)
 !!                        - k point direction in the case (choice=5,signs=2)
 !!                        - strain component (1:6) in the case (choice=3,signs=2) or (choice=6,signs=1)
-!!                        - strain component (1:9) in the case (choice=33,signs=2) 
-!!                        - (1:9) components to specify the atom to be moved and the second q-gradient 
+!!                        - strain component (1:9) in the case (choice=33,signs=2)
+!!                        - (1:9) components to specify the atom to be moved and the second q-gradient
 !!                          direction in the case (choice=25,signs=2)
 !!  indlmn(6,nlmn)= array giving l,m,n,lm,ln,s for i=lmn
 !!  istwf_k=option parameter that describes the storage of wfs
@@ -103,7 +103,7 @@ contains
 !!  npw=number of plane waves in reciprocal space
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  ph3d(2,npw,matblk)=three-dimensional phase factors
-!!  [qdir]= optional, direction of the q-gradient (only for choice=22 choice=25 and choice=33) 
+!!  [qdir]= optional, direction of the q-gradient (only for choice=22 choice=25 and choice=33)
 !!  signs=chooses possible output:
 !!   signs=1: compute derivatives in all directions
 !!   signs=2: compute derivative in direction IDIR only
@@ -435,7 +435,7 @@ end if
 
 !      --------------------------------------------------------------------
 !      CHOICE= 22 and 25  --  SIGNS= 2
-!      Accumulate dGxdt --- derivative wrt atm pos. and one or two q-vectors--- 
+!      Accumulate dGxdt --- derivative wrt atm pos. and one or two q-vectors---
 !      for directions fixed by IDIR and qdir
 !      --------------------------------------------------------------------
        if (signs==2.and.(choice_==22.or.choice_==25)) then
@@ -636,7 +636,7 @@ end if
 
 !      --------------------------------------------------------------------
 !      CHOICE= 33  --  SIGNS= 2
-!      Accumulate dGxdt and d2Gxdt --- mixed derivative wrt strain and q-vector --- 
+!      Accumulate dGxdt and d2Gxdt --- mixed derivative wrt strain and q-vector ---
 !      for directions fixed by idir and qdir
 !      --------------------------------------------------------------------
        if ((signs==2).and.(choice_==33)) then
@@ -699,11 +699,11 @@ end if
              end if
            else
              if (parity) then
-               buffer_r1 = zero 
-               buffer_r2 = zero 
-               buffer_r3 = zero 
-               buffer_r4 = zero 
-               buffer_r5 = zero 
+               buffer_r1 = zero
+               buffer_r2 = zero
+               buffer_r3 = zero
+               buffer_r4 = zero
+               buffer_r5 = zero
                do ipw=1,npw
                  aux_r = scalr(ipw)*ffnl(ipw,1+igamma,ilmn)
                  buffer_r1 = buffer_r1 + aux_r
@@ -721,11 +721,11 @@ end if
                  d2gxdt(1,2,ilmn,ia,ispinor) = scale*buffer_r4
                  d2gxdt(1,3,ilmn,ia,ispinor) = scale*buffer_r5
              else
-               buffer_i1 = zero 
-               buffer_i2 = zero 
-               buffer_i3 = zero 
-               buffer_i4 = zero 
-               buffer_i5 = zero 
+               buffer_i1 = zero
+               buffer_i2 = zero
+               buffer_i3 = zero
+               buffer_i4 = zero
+               buffer_i5 = zero
                do ipw=1,npw
                  aux_i = scali(ipw)*ffnl(ipw,1+igamma,ilmn)
                  buffer_i1 = buffer_i1 + aux_i
@@ -1752,7 +1752,7 @@ end if
 
 !      --------------------------------------------------------------------
 !      CHOICE= 22 and 25  --  SIGNS= 2
-!      Accumulate dGxdt --- derivative wrt atm pos. and one or two q-vectors--- 
+!      Accumulate dGxdt --- derivative wrt atm pos. and one or two q-vectors---
 !      for directions fixed by IDIR and qdir
 !      --------------------------------------------------------------------
        if (signs==2.and.(choice_==22.or.choice_==25)) then
@@ -2017,7 +2017,7 @@ end if
 
 !      --------------------------------------------------------------------
 !      CHOICE= 33  --  SIGNS= 2
-!      Accumulate dGxdt and d2Gxdt --- mixed derivative wrt strain and q-vector --- 
+!      Accumulate dGxdt and d2Gxdt --- mixed derivative wrt strain and q-vector ---
 !      for directions fixed by idir and qdir
 !      --------------------------------------------------------------------
        if ((signs==2).and.(choice_==33)) then

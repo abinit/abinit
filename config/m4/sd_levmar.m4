@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2026 ABINIT group (Yann Pouillon)
 
 #
 # Exchange-Correlation functionals library (Levmar)
@@ -67,7 +67,7 @@ AC_DEFUN([SD_LEVMAR_INIT], [
   esac
 
   # Declare configure option
-  # TODO: make it switchable for the implicit case 
+  # TODO: make it switchable for the implicit case
   AC_ARG_WITH([levmar],
     [AS_HELP_STRING([--with-levmar],
       [Install prefix of the Levmar library (e.g. /usr/local).])],

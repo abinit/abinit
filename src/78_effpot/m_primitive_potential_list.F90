@@ -4,18 +4,18 @@
 !!
 !! FUNCTION
 !! This module define the primitive potential list type, which is a list of primitive potentials
-!! 
+!!
 !! Datatypes:
 !!  primitive_potential_list_t
 !!
 !! Subroutines:
-!! 
+!!
 !!  * fill_supercell: use translation symmetry to fill the supercell.
 !!  * load_from_file: load potential from file.
 !!  * save_to_file: save to file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,7 +62,7 @@ module m_primitive_potential_list
   type, public, extends(primitive_potential_t):: primitive_potential_list_t
      type(primitive_potential_pointer_t), allocatable :: data(:) ! list of pointer type
      integer :: size=0   ! number of components.
-     integer :: capacity=0  ! number of slots allocated for saving the pointers. 
+     integer :: capacity=0  ! number of slots allocated for saving the pointers.
    contains
      procedure :: initialize
      procedure :: append
@@ -74,7 +74,7 @@ module m_primitive_potential_list
 contains
 
   !-------------------------------------------------------------------!
-  ! fill supercell: 
+  ! fill supercell:
   !-------------------------------------------------------------------!
   subroutine fill_supercell(self, scmaker, params, scpot, supercell)
     class(primitive_potential_list_t), intent(inout) :: self
@@ -143,7 +143,7 @@ contains
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     call xmpi_bcast(self%size, master, comm, ierr)
     do i=1, self%size
@@ -177,7 +177,7 @@ contains
     type(primitive_potential_pointer_t), allocatable :: temp(:)
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     self%size=self%size + 1
     if(self%size==1) then
@@ -205,7 +205,7 @@ contains
 
   end subroutine append
 
-  
+
   !----------------------------------------------------------------------
   !> @brief build supercell potential for every component in the list
   !> Here sc_pot is an pointer.

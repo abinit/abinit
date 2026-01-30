@@ -12,7 +12,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -177,7 +177,7 @@ contains
     type(polynomial_t) :: p
     real(dp) :: e
     call p1%initialize(2, 0.1_dp, [1, 2,4], [2,1] )
-    e=p1%evaluate(vals) 
+    e=p1%evaluate(vals)
     !print *, "e: ", e
     d1=0.0
     call p1%add_to_first_derivative(vals, d1)

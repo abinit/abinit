@@ -6,7 +6,7 @@
 !! Echo acknowledgments for the ABINIT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (XG)
+!!  Copyright (C) 2008-2026 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -493,7 +493,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#MacEnulty2024'
  priority(46)=20
 
- 
+
  !---------------------------------------------------------------------------------------------
 !Determine the papers to be cited
 

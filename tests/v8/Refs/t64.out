@@ -1,8 +1,8 @@
 
-.Version 8.5.3 of ANADDB 
-.(MPI version, prepared for a x86_64_darwin16.7.0_gnu7.1 computer) 
+.Version 8.5.3 of ANADDB
+.(MPI version, prepared for a x86_64_darwin16.7.0_gnu7.1 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Mon 28 Aug 2017.
 - ( at 10h28 )
-  
+
 
 ================================================================================
 
@@ -63,7 +63,7 @@
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces
 
 -begin at tcpu      0.017  and twall      0.017 sec
        Homogeneous q point set in the B.Z.
@@ -81,7 +81,7 @@
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -164,7 +164,7 @@
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 -
 - Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0

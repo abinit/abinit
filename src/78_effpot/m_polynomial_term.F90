@@ -7,7 +7,7 @@
 !! Module with the datatype polynomial terms
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2025 ABINIT group (AM)
+!! Copyright (C) 2010-2026 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -370,7 +370,7 @@ subroutine polynomial_term_free(polynomial_term)
  ABI_SFREE(polynomial_term%power_strain)
  ABI_SFREE(polynomial_term%strain)
  ABI_SFREE(polynomial_term%index_coeff)
- 
+
 end subroutine polynomial_term_free
 !!***
 

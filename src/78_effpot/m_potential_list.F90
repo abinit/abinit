@@ -17,7 +17,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -83,17 +83,17 @@ module m_potential_list
      procedure :: finalize
      procedure :: append  ! add a potential to the list
      procedure :: calculate ! each potential in list do calculate and then sum.
-     procedure :: get_delta_E ! currently only used in spin potential, 
+     procedure :: get_delta_E ! currently only used in spin potential,
                               ! to calculate energy difference when one spin changes.
 
-     procedure :: get_delta_E_lwf ! currently only used in lwf potential, 
+     procedure :: get_delta_E_lwf ! currently only used in lwf potential,
   end type potential_list_t
   !!***
 
 contains
 
   !----------------------------------------------------------------------
-  !> @brief initialize 
+  !> @brief initialize
   !>
   !----------------------------------------------------------------------
   subroutine initialize(self)
@@ -141,8 +141,8 @@ contains
        ! Intel compiler complains
        if(associated(self%list(i)%ptr)) then
           ABI_FREE(self%list(i)%ptr)
-       endif 
-       
+       endif
+
        nullify(self%list(i)%ptr)
     end do
     if (allocated(self%list)) then
@@ -252,11 +252,11 @@ contains
     !----------------------------------------------------------------------
     !> @brief get_delta_E_lwf: calculate the energy difference when a given lwf
     !> is changed. This is to be used for spin Monte Carlo. Currently the
-    !> only supported is the spin model. 
+    !> only supported is the spin model.
     !>
     !> @param[in]  lwf: lwf of full structure. array of (nlwf)
     !> @param[in]  ilwf: the index of spin changed. integer
-    !> @param[in]  lwf_new: the new value of the changed spin. 
+    !> @param[in]  lwf_new: the new value of the changed spin.
     !> @param[out] deltaE: the energy difference
     !----------------------------------------------------------------------
     subroutine get_delta_E_lwf(self, lwf, ilwf, lwf_new, deltaE)

@@ -4,7 +4,7 @@
 </head>
 <body>
 
-<h5>Copyright (C) 2010-2025 ABINIT group (XG)
+<h5>Copyright (C) 2010-2026 ABINIT group (XG)
 <br> This file is distributed under the terms of the GNU General Public License, see
 ~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
 http://www.gnu.org/copyleft/gpl.txt </a>.
@@ -20,8 +20,8 @@ The list of contributors includes :
 D. Adams, S. Albrecht, B. Amadon, P.M. Anglade, A. Berger, J.-M. Beuken, S. Blackburn,
 F. Bottin, P. Boulanger, D. Caliste, M. Cazzaniga, V. Chevrier,
 M. Cote, M. Cotelo, F. Da Pieve, M. Delaveau, T. Deutsch, L. Diaz, G.A. Franco, M. Gatti, M. Giantomassi,
-X. Gonze, Chuping Hu, A. Jacques, F. Jollet, G. Jomard, S. Leroux, A. Lherbier, M. Mancini, 
-N. Manini, V. Olevano, M. Oliveira, G. Onida, Y. Pouillon, T. Rangel, V. Recoules, L. Reining, 
+X. Gonze, Chuping Hu, A. Jacques, F. Jollet, G. Jomard, S. Leroux, A. Lherbier, M. Mancini,
+N. Manini, V. Olevano, M. Oliveira, G. Onida, Y. Pouillon, T. Rangel, V. Recoules, L. Reining,
 G.-M. Rignanese, F. Sottile, M. Stankovski, M. Torrent, M. Verstraete, D. Waroquiers, J. Zwanziger
 
 It is worth to read carefully
@@ -49,29 +49,29 @@ __________________________________________________________________
 0. Foreword
 
    Internal changes are quite large between ABINITv5 and ABINITv6.
-   Many developers have concentrated to clean and simplify 
+   Many developers have concentrated to clean and simplify
    the package, as well as to make it more robust (many more automatic tests, see D.14).
    Some of these modifications are visible to the
    users, many are not. In particular, the automatic testing
-   has been considerably improved thanks to the setup of a farm of 
+   has been considerably improved thanks to the setup of a farm of
    machines, on which all the automatic tests are done nightly.
 
-   The consequences of the many modifications will be felt in 
+   The consequences of the many modifications will be felt in
    the forthcoming months, with likely an increased development rate.
-   
-   Concerning the user's point of view, although already some 
-   noticeable achievements are listed in section B, several of the 
-   projects started during last year are not yet finalized 
+
+   Concerning the user's point of view, although already some
+   noticeable achievements are listed in section B, several of the
+   projects started during last year are not yet finalized
    (described in section D).
-   In order to have a reasonable time gap between v5.8 and v6.0 
+   In order to have a reasonable time gap between v5.8 and v6.0
    it was however important not to wait more than a half year.
    So, keep posted, ABINITv6.x is rather exciting !
-   
+
 __________________________________________________________________
 
 A.  WARNINGS AND IMPORTANT REMARKS
 
-A.1 The build system has been strongly modified, and actually simplified : it builds 
+A.1 The build system has been strongly modified, and actually simplified : it builds
     one executable "abinit", and not separately a "abinis" or a "abinip".
     "abinit" will be a sequential executable or a parallel executable, depending
     on whether MPI libraries have been enabled during the build.
@@ -89,7 +89,7 @@ A.1 The build system has been strongly modified, and actually simplified : it bu
     (Work done by Yann Pouillon)
 
 A.2 The license of Abinit is now GNU GPL v3+.
-    
+
 __________________________________________________________________
 
 B.  Most noticeable achievements
@@ -97,7 +97,7 @@ B.  Most noticeable achievements
 
 B.1 The computation of the derivative with respect to the wavevector (d/dk - DDK perturbation)
     has been implemented, in the PAW case. This gives access to the first derivative of the eigenvalues
-    with respect to wavevector, and prepares the electric field response. See also D.2. 
+    with respect to wavevector, and prepares the electric field response. See also D.2.
     Automatic test Tv5#05, #30.
     Work done by J. Zwanziger + M Torrent.
 
@@ -106,7 +106,7 @@ B.2 The computation of Raman scattering intensities (for norm-conserving psps)
     (1) It is now possible in the spin-polarized LDA case (work by F. Da Pieve)
         See the test case Tv6#62
     (2) It is now possible with a grid of k points that has only one k-point per direction (work by S. Leroux)
-        See the test case Tv6#65    
+        See the test case Tv6#65
     (3) It is parallelized over k points and tested (work by S. Leroux)
         See the test case Tparal#E
 
@@ -120,11 +120,11 @@ B.4 The computation of the second derivative of the eigenvalues with respect to 
     Input variables for ABINIT : eig2rf, bdeigrf
     Automatic test : Tv5#26, 27, 28 and Tv6#61
     Work by P. Boulanger with M. Coté and X. Gonze.
-    
+
 B.5 LDA+U + spin-orbit has been implemented. Presently only the FLL version of double counting is valid (usepawu=1)
     Automatic test : Tv5#16 and 17
     Work done by B. Amadon and M. Torrent
-  
+
 B.6 The computation of the positron lifetime and annihilation rate has been implemented within the PAW,
     using the self-consistent two-component DFT. Actually, this part (already working for Norm-conserving PP),
     has been rewritten from scratch, with added functionalities : full self-consistency,
@@ -132,7 +132,7 @@ B.6 The computation of the positron lifetime and annihilation rate has been impl
     Input variables : ixcpositron, positron, posnstep, posocc, postoldfe .
     Automatic test Tv5#07
     Work by M. Torrent and G. Jomard.
-    
+
 B.7 GW calculation using different treatments of the exchange for the core electrons
     has been implemented : either the core contribution is approximated with vxc
     or the core term is approximated with the Fock operator inside the PAW spheres.
@@ -141,7 +141,7 @@ B.7 GW calculation using different treatments of the exchange for the core elect
     Automatic test Tv6#66
     Work by M. Giantomassi.
 
-B.8 GW calculation with the extrapolar methodology has been implemented for PAW. 
+B.8 GW calculation with the extrapolar methodology has been implemented for PAW.
     No automatic test yet.
     Work done by M. Giantomassi.
 
@@ -151,12 +151,12 @@ B.9 Different files can now be generated :
         as the _AW_WFK file is written using the NETCDF file format following the ETSF-IO specification for
         wavefunctions in real space. Only available for sequential runs.)
       Automatic test Tetsf_io#09
-    - the gradient and laplacian of the density (for norm-conserving pseudopotentials), 
+    - the gradient and laplacian of the density (for norm-conserving pseudopotentials),
        using the input variables prtgden and prtlden (by A. Lherbier)
        Automatic test Tv1#21
     - the spin-polarized ELF (Electron Localisation Function) (by A. Lherbier)
 
-B.10 Implementation of the molecular dynamics stepper proposed by Blanes and Moanes, 
+B.10 Implementation of the molecular dynamics stepper proposed by Blanes and Moanes,
      a symplectic algorithm, see the input variable ionmov=14 .
      Test Tv5#03
      Work by P.-M. Anglade
@@ -170,7 +170,7 @@ C.1 A script to examine the output of the compilation with numerous debugging op
 
 C.2 Systematic use of the python INI format for environment variables, and other configuration files (Y. Pouillon)
 
-C.3 Change in the build system and the package : 
+C.3 Change in the build system and the package :
     - Interfaces are now in a numbered directory (Y. Pouillon)
     - Capabilities to test MPI_IO (Y. Pouillon, X. Gonze)
     - Improvement for future Scalapack testing (Y. Pouillon)
@@ -194,7 +194,7 @@ D.1. The capability to perform Dynamical Mean Field calculations is in progress,
      Related input variables (not operational) usedmft, dmftbandi, dmftbandf
      Fake test, not documented : Tv6#07
 
-D.2 The use of Density Functional Perturbation Theory with PAW 
+D.2 The use of Density Functional Perturbation Theory with PAW
     (phonons and electric field) is in progress,
      by M. Torrent, F. Jollet and J. Zwanziger.
 
@@ -207,7 +207,7 @@ D.3. The capability to define "images", to perform (not yet implemented) Nudged 
 
 D.4 A new optdriver level has been addded for performing self-consistent GW calculations.
     Related input variables (not operational) gw_nstep, gw_sctype, gw_sctype_name, gw_toldfeig.
-    Work by M. Giantomassi 
+    Work by M. Giantomassi
 
 D.5 The Bethe-Salpeter equation (BSE) can be used to compute the optical spectra
     of materials. The BSE explicitly treats the effect of excitons.
@@ -221,13 +221,13 @@ D.5 The Bethe-Salpeter equation (BSE) can be used to compute the optical spectra
     while the norm-conserving one is closer to production (not quite so, though,
     more testing is needed). In any case, it is much too early for beginners to use the BSE,
     at least a tutorial should be written by ABINIT developers.
-    
+
     The BSE routines now present in ABINIT originate from the EXC code,
     by F. Sottile, V. Olevano, L. Reining, M. Gatti, G. Onida, S. Albrecht, with
-    the porting realized by M. Giantomassi. 
+    the porting realized by M. Giantomassi.
 
 D.6 Implementation of the GW_OPTIMAL algorithm, by A. Berger, is in progress,
-    with help for the porting by M. Giantomassi. 
+    with help for the porting by M. Giantomassi.
     Related input variables (not operational yet) gw_optimal_level, gw_nband_optimal.
 
 D.7 It is now possible to specify the tolerance for the identification of space group, given
@@ -238,7 +238,7 @@ D.7 It is now possible to specify the tolerance for the identification of space 
 D.8 Finite electric field calculations with PAW are in progress (J. Zwanziger)
 
 D.9 Important limitations of the space group finder have been removed.
-    This is for cases where the information from the cell geometry only 
+    This is for cases where the information from the cell geometry only
     was leading to a holohedry that was different from the real holohedry, obtained
     by taking into account the cell geometry and atomic positions. (XG)
 
@@ -254,7 +254,7 @@ D.11 The capability to compute the U or J values, within the LDA+U (or GGA+U) ap
 D.12 Work on meta-GGA going on, by M. Oliveira and A. Lherbier .
 
 D.13 Work on the recursion approach to high-temperature DFT calculations, implementation of
-     GPU capabilities, by M. Mancini. 
+     GPU capabilities, by M. Mancini.
 
 D.14 New tests have been introduced to demonstrate the use of input variables or capabilities
      introduced earlier, but not documented/tested. Some tests were modified for the same goal.
@@ -270,8 +270,8 @@ D.14 New tests have been introduced to demonstrate the use of input variables or
      - Tv3#22 to test genafm (XG)
      - Tv4#13 to test nbandsus, suskxcrs  (XG)
      - Tv4#17 to test bxctmindg, iboxcut, mqgriddg (MTorrent)
-     - Tv5#2 : to test ionmov=5 (GAFranco) 
-     - Tv5#4 : to test getvel (GAFranco) 
+     - Tv5#2 : to test ionmov=5 (GAFranco)
+     - Tv5#4 : to test getvel (GAFranco)
      - Tv5#6 : pawnzlm, pawstgylm, pawusecp, pawlmix, pawlcutd, pawnhatxc, pawntheta, pawnphi (MTorrent)
      - Tv5#11 : pawprtden (MTorrent)
      - Tv5#17 : pawcpxocci, spnorbscl (MTorrent)
@@ -286,8 +286,8 @@ D.14 New tests have been introduced to demonstrate the use of input variables or
      - Tv5#79 : prtxml (DCaliste)
      - Tv5#80 : tphysela (MVerstra)
      - Tv5#82 : irdddk (JZwanziger)
-     - Tv5#90, 92, 93, 94 : for ANADDB, in the electron-phonon case, 
-         symgkq, telphint, ep_b_min, ep_b_max, mustar, elph_fermie, ep_nqpt, 
+     - Tv5#90, 92, 93, 94 : for ANADDB, in the electron-phonon case,
+         symgkq, telphint, ep_b_min, ep_b_max, mustar, elph_fermie, ep_nqpt,
          ep_qptlist, qgrid_type (MVerstraete)
      - Tv5#91 : a2fsmear, dossmear (MVerstraete)
      - Tv5#99 : rifcsph (MVerstraete)
@@ -298,7 +298,7 @@ D.14 New tests have been introduced to demonstrate the use of input variables or
      - Tv6#82 : nomegasi, omegasimaxi, spbroad (MGiantomassi)
      - Tv6#83 : gw_nqlwl, gw_qlwl, vcutgeo (MGiantomassi)
      - Tv6#85 : gwgamma, irdsuscep, irdqps, irdkss, irdscr (MGiantomassi)
-  
+
 D.15 Use of FFTW3 library is under development (by M. Giantomassi).
 
 D.16 The different input files for the tutorial LDA+U (tests/tutorial/Input/tldau*.in) are now automatically tested.
@@ -318,9 +318,9 @@ D.21 New "commodity" or development input variables : prtangst, prtxcart, prtxre
 
 D.22 Numerous miscellaneous bug fixes (to the sources, as well as to the build system, including the plug-ins),
      and improvements of documentation by D. Adams, B. Amadon, P.M. Anglade, J.-M. Beuken, S. Blackburn,
-     F. Bottin, P. Boulanger, D. Caliste, M. Cazzaniga, V. Chevrier, 
-     M. Cote, M. Cotelo, M. Delaveau, T. Deutsch, L. Diaz, G.A. Franco, M. Giantomassi, 
-     X. Gonze, Chuping Hu, A. Jacques, F. Jollet, G. Jomard, M. Mancini, N. Manini, G. Onida, 
+     F. Bottin, P. Boulanger, D. Caliste, M. Cazzaniga, V. Chevrier,
+     M. Cote, M. Cotelo, M. Delaveau, T. Deutsch, L. Diaz, G.A. Franco, M. Giantomassi,
+     X. Gonze, Chuping Hu, A. Jacques, F. Jollet, G. Jomard, M. Mancini, N. Manini, G. Onida,
      Y. Pouillon, T. Rangel, V. Recoules, G.-M. Rignanese, M. Stankovski, M. Verstraete, M. Torrent, D. Waroquiers, J. Zwanziger
 
 D.23 The distribution of processors in the FFT/Band/k point parallelism can be found automatically. Work by F. Jollet.

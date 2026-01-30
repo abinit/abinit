@@ -7,7 +7,7 @@
 !!  i.e. quantities expressed with <Phi_i|...|Phi_j> and/or <tild_Phi_i|...|tild_Phi_j>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2025 ABINIT group (MT,FJ)
+!! Copyright (C) 2013-2026 ABINIT group (MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,14 +94,14 @@ subroutine pawnabla_init(mpsang,ntypat,pawrad,pawtab)
 !Local variables-------------------------------
 !scalars
  integer :: ii,nln,il,ilm,ilmn,iln,itypat
- integer :: jl,jlm,jlmn,jln,lmn_size,mesh_size 
+ integer :: jl,jlm,jlmn,jln,lmn_size,mesh_size
  real(dp) :: avg,intg
  character(len=500) :: msg
 !arrays
  integer, LIBPAW_CONTIGUOUS pointer :: indlmn(:,:)
  real(dp) :: ang_phipphj(mpsang**2,mpsang**2,8)
  real(dp),allocatable :: dphi(:),dtphi(:),ff(:),int1(:,:),int2(:,:),rad(:)
- 
+
 ! *************************************************************************
 
  if (mpsang>4)then
@@ -111,7 +111,7 @@ subroutine pawnabla_init(mpsang,ntypat,pawrad,pawtab)
    LIBPAW_BUG(msg)
  end if
 
-!Integration of the angular part: all angular integrals have been computed 
+!Integration of the angular part: all angular integrals have been computed
 !outside Abinit and tabulated for each (l,m) value up to l=3
  call setnabla_ylm(ang_phipphj,mpsang)
 
@@ -203,7 +203,7 @@ subroutine pawnabla_init(mpsang,ntypat,pawrad,pawtab)
            avg=half*(pawtab(itypat)%nabla_ij(ii,ilmn,jlmn)-pawtab(itypat)%nabla_ij(ii,jlmn,ilmn))
            pawtab(itypat)%nabla_ij(ii,ilmn,jlmn)= avg
            pawtab(itypat)%nabla_ij(ii,jlmn,ilmn)=-avg
-         end do           
+         end do
        end do
      end do
    end if
@@ -417,7 +417,7 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,atm)
 
 !        jl was set as a flag for invalid combinations
 !          i.e. m=-(l+1) or m=(l+1)
-!        In these cases, cgc=0 ; so nabla_ij=0 
+!        In these cases, cgc=0 ; so nabla_ij=0
          if(jl==-1) then
            pawtab(itypat)%nabla_ij(1:3,ilmn,jlmn)= zero
            pawtab(itypat)%nabla_im_ij(1:3,ilmn,jlmn) = zero

@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2026 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -368,7 +368,7 @@ AC_DEFUN([_ABI_CC_CHECK_HEADERS],[
 AC_DEFUN([_ABI_CC_CHECK_FUNCTIONS],[
   # Init AC_MSG_CHECKING([for library functions])
 
-  dnl AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime]) 
+  dnl AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime])
   AC_CHECK_FUNCS([abort])
   AC_CHECK_FUNCS([mallinfo])
 

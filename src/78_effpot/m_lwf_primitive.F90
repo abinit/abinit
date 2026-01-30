@@ -13,7 +13,7 @@
 !! Subroutines:
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -420,7 +420,7 @@ contains
     ! Step 1: allocate the scpot as a corresponding supercell potential
     ABI_MALLOC_TYPE_SCALAR(lwf_potential_t, scpot)
     ! Fortran does not know the functions specific to the derived class pointer.
-    ! Only the ones inheritated from abstract class, 
+    ! Only the ones inheritated from abstract class,
     ! unless select type is used:
     select type(scpot)
     type is (lwf_potential_t)
@@ -443,7 +443,7 @@ contains
              i = self%coeff%ind%data(2, inz)
              j = self%coeff%ind%data(3, inz)
              val = self%coeff%val%data(inz)
-             ! translate i to i in supercell. 
+             ! translate i to i in supercell.
              ! No need to allocate, it is done by trans_i . but remember to deallocate!
              ! nbasis is the number in one primitive cell.
              ! e.g. there are 3*natom possible i (3: x, y, z) in each primitive cell.
@@ -543,7 +543,7 @@ contains
   end subroutine get_eigen
 
   !subroutine add_self_bound_term(self, order, coeff)
-  !  class(lwf_primitive_potential_t), intent(inout):: self 
+  !  class(lwf_primitive_potential_t), intent(inout):: self
   !  integer, intent(in):: order
   !  real(dp), intent(in):: coeff
   !  if (order /= 0) then
