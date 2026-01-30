@@ -534,7 +534,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: tim_slice_pr
  integer :: my_rank
  integer :: trace_degree, trace_rank
- logical :: is_close_to_V
+ integer :: nstep_spectrum
+ integer :: istep_spectrum
+ integer :: trace_sum
+ logical :: found_gap
  real(dp) :: conf_tol
  real(dp) :: tol_step
  real(dp) :: tol_probe
@@ -556,8 +559,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: min_low_est
  real(dp) :: amp_ideg
  real(dp) :: ein_ideg, eout_ideg
+ real(dp) :: trace_est
  real(dp) :: trace_est_slice1, trace_est_slice2
- real(dp) :: low_bound, upp_bound, min_low_bound, max_upp_bound
+ real(dp) :: low_bound, upp_bound, min_low_bound
+ real(dp) :: min_upp_bound, max_upp_bound
+ real(dp) :: delta_step_spectrum
  real(dp) :: tol12 = 1.0e-12
  type(xg_t) :: Xsum
  type(xg_t) :: DivResults
@@ -747,10 +753,39 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  !! Phase 1:
  !! lambda_minus = estimation of (upper bound of) lowest eigenvalue
- !! 
+ !!
 
+ ! Split working spectrum into N intervals (N=nstep_spectrum)
+ nstep_spectrum = 50
+ min_low_bound = -0.18d0 ! FIXME hardcoded minlowest but some more ...
+ min_upp_bound = maxval(rayleigh_quotients)
+ delta_step_spectrum = (min_upp_bound - min_low_bound) / nstep_spectrum
  my_rank = xmpi_comm_rank(slice%spacecom)
- trace_degree = 15
+ max_upp_bound = slice%ecut
+ min_low_est = -0.3d0 ! hardcoded TODO define from previous step
+ trace_rank = neigenpairs ! FIXME for the moment changing this produces a bug
+ trace_degree = 30
+
+ trace_sum = 0
+ do istep_spectrum=1, nstep_spectrum
+
+    low_bound = min(min_upp_bound, min_low_bound + (istep_spectrum - 1) * delta_step_spectrum)
+    upp_bound = min(min_upp_bound, min_low_bound + istep_spectrum * delta_step_spectrum)
+    write(901,*) 'scanning interval [ai,bi) i= bi=', istep_spectrum, upp_bound
+
+    ! TODO reuse Chebyshev recursion to avoid repeated calculations... (but memory bound)
+    call computeTraceEstimation(slice, trace_rank, trace_degree, low_bound, upp_bound,&
+        min_low_est, max_upp_bound, trace_est, getAX, kin, my_rank, gpu_option=gpu_option)
+
+    found_gap = ( istep_spectrum>1 .and. trace_est < 1.0 )
+    write(901,*) 'trace est, with gap=', ceiling(trace_est), found_gap
+
+    trace_sum = trace_sum + ceiling(trace_est)
+
+ end do
+ write(901,*) 'total trace_est=', trace_sum
+ flush(901) ! <<- should be more than neigenpairs
+
  trace_rank = neigenpairs
  upp_bound = slice%ecut
  !! subroutine computeBorthoLanczos(slice, n, k, min_low_est, getAX, kin, my_rank, gpu_option)
@@ -767,10 +802,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  my_rank = xmpi_comm_rank(slice%spacecom)
  low_bound = -0.18d0  ! [a,b)
  upp_bound = 1.17d0
- min_low_est = -0.3d0 ! hardcoded TODO define from previous step
- max_upp_bound = slice%ecut
  trace_degree = 50
- trace_rank = neigenpairs ! FIXME for the moment changing this produces a bug
 
  call computeTraceEstimation(slice, trace_rank, trace_degree, low_bound, upp_bound,&
      min_low_est, max_upp_bound, trace_est_slice1, getAX, kin, my_rank, gpu_option=gpu_option)
@@ -2240,7 +2272,6 @@ subroutine applyBandpassFilter(slice, getAX, kin, low_bound, upp_bound, &
 
     ! Initialize values
     neigenpairs = cols(slice%X)
-    write(901,*) 'neigenpairs=',neigenpairs; flush(901) 
     xg_nonlop = slice%xg_nonlop
     nspinor = slice%xg_nonlop%nspinor
     l_gpu_option = ABI_GPU_DISABLED
