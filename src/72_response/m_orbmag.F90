@@ -2513,8 +2513,10 @@ subroutine orbmag_mesh_alloc(dtset,orbmag_mesh)
   orbmag_mesh%cmesh=zero
   ABI_REMALLOC(orbmag_mesh%omesh,(orbmag_mesh%mband,orbmag_mesh%nkpt,orbmag_mesh%nsppol,3,orbmag_nterms))
   orbmag_mesh%omesh=zero
-  ABI_REMALLOC(orbmag_mesh%odens,(2,orbmag_mesh%n4,orbmag_mesh%n5,orbmag_mesh%n6,3))
-  orbmag_mesh%omesh=zero
+  if (dtset%orbmag .EQ. 4) then
+    ABI_REMALLOC(orbmag_mesh%odens,(2,orbmag_mesh%n4,orbmag_mesh%n5,orbmag_mesh%n6,3))
+    orbmag_mesh%omesh=zero
+  end if
 
 end subroutine orbmag_mesh_alloc
 !!***
@@ -2826,6 +2828,16 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
    nctkdim_t("natom",dtset%natom)],defmode=.True.)
  NCF_CHECK(ncerr)
 
+ !! add odens_cplex,n4,n5,n6 only if odens will be output
+ if (dtset%orbmag .EQ. 4) then
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("n4", orbmag_mesh%n4),&
+     nctkdim_t("n5", orbmag_mesh%n5),&
+     nctkdim_t("n6", orbmag_mesh%n6),&
+     nctkdim_t("odens_cplex", 2)],defmode=.True.)
+   NCF_CHECK(ncerr)
+ endif
+
  ncerr = nctk_def_arrays(ncid, [&
    nctkarr_t("chern_mesh", "dp", "mband, nkpt, nsppol, ndir, chern_nterms"),&
    nctkarr_t("orbmag_mesh", "dp", "mband, nkpt, nsppol, ndir, orbmag_nterms"),&
@@ -2833,12 +2845,23 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
    nctkarr_t("nucdipmom", "dp", "ndir, natom")])
  NCF_CHECK(ncerr)
 
+ !! odens dimensions, only if output
+ if ( dtset%orbmag .EQ. 4) then
+   ncerr = nctk_def_arrays(ncid, [&
+     nctkarr_t("odens_mesh", "dp", "odens_cplex,n4,n5,n6,ndir")])
+   NCF_CHECK(ncerr)
+ endif
+
+
  NCF_CHECK(nctk_set_datamode(ncid))
 
  NCF_CHECK(nf90_put_var(ncid, vid("chern_mesh"), orbmag_mesh%cmesh))
  NCF_CHECK(nf90_put_var(ncid, vid("orbmag_mesh"), orbmag_mesh%omesh))
  NCF_CHECK(nf90_put_var(ncid, vid("nucdipmom"), orbmag_mesh%nucdipmom))
  NCF_CHECK(nf90_put_var(ncid, vid("lambsig"), orbmag_mesh%lambsig))
+ if ( dtset%orbmag .EQ. 4 ) then
+   NCF_CHECK(nf90_put_var(ncid, vid("odens_mesh"), orbmag_mesh%odens))
+ end if
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2),a)')" orbmag_ncwrite: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
