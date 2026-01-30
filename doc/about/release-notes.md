@@ -94,15 +94,13 @@ See numerous new tests, [[test:paral_102]] to [[test:paral_118]], [[test:paral_1
 
 New input variables : 
 
-* about thirty variables with the prefix dmft_triqs_XXX.  (TODO : document dmft_triqs_dlr_wmax, dmft_triqs_measure_g_l, dmft_triqs_pauli_prob, dmft_triqs_shift_mu, dmft_triqs_random_seed_a, dmft_triqs_random_seed_b,
-dmft_triqs_n_iw, dmft_triqs_random_n_l, dmft_triqs_n_tau, dmft_triqs_prt_entropy, dmft_triqs_read_ctqmcdata).
+* about thirty variables with the prefix dmft_triqs_XXX. 
 * Yukawa : [[dmft_yukawa_epsilon]], [[dmft_yukawa_lambda]],  [[dmft_yukawa_param]]
 * Magnetic field : [[dmft_magnfield]], [[dmft_magnfield_b]] 
 * Continuous Time QMC : [[dmftctqmc_chains]], [[dmftctqmc_localprop]] (replacing dmftctqmc_config), [[dmftctqmc_mov]], [[dmftctqmc_order]]
 * Init from previous datasets : [[getctqmcdata]], [[getself]]
 * Other miscellaneous new input variables : [[dmft_orbital_filepath]], [[dmft_prtself]], [[dmft_wanorthnorm]],[[dmft_fermi_step]], [[dmft_nominal]], [[dmft_orbital]], 
 [[dmft_prt_maxent]], [[dmft_prtwan]], [[dmft_shiftself]], [[dmft_wanrad]], [[dmft_x2my2d]].
-* TODO test [[dmft_prt_maxent]]
 
 See numerous tests, [[test:paral_102]] to [[test:paral_118]], [[test:paral_121]], as well as the new [[tutorial:dmft_triqs]].
 
