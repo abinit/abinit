@@ -556,7 +556,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: min_low_est
  real(dp) :: amp_ideg
  real(dp) :: ein_ideg, eout_ideg
- real(dp) :: trace_est, trace_est_tau
+ real(dp) :: trace_est_slice1, trace_est_slice2
  real(dp) :: low_bound, upp_bound, min_low_bound, max_upp_bound
  real(dp) :: tol12 = 1.0e-12
  type(xg_t) :: Xsum
@@ -773,8 +773,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  trace_rank = neigenpairs ! FIXME for the moment changing this produces a bug
 
  call computeTraceEstimation(slice, trace_rank, trace_degree, low_bound, upp_bound,&
-     min_low_est, max_upp_bound, trace_est, getAX, kin, my_rank, gpu_option=gpu_option)
- write(901,*) 'trace estimation for slice1, deg, m_vecs=', trace_est, trace_degree, trace_rank
+     min_low_est, max_upp_bound, trace_est_slice1, getAX, kin, my_rank, gpu_option=gpu_option)
+ write(901,*) 'trace estimation for slice1, deg=', trace_est_slice1, trace_degree
  flush(901)
 
  ! Slice 2: 
@@ -789,8 +789,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  trace_rank = neigenpairs ! FIXME for the moment changing this produces a bug
 
  call computeTraceEstimation(slice, trace_rank, trace_degree, low_bound, upp_bound,&
-     min_low_est, max_upp_bound, trace_est, getAX, kin, my_rank, gpu_option=gpu_option)
- write(901,*) 'trace estimation for slice2, deg, m_vecs=', trace_est, trace_degree, trace_rank
+     min_low_est, max_upp_bound, trace_est_slice2, getAX, kin, my_rank, gpu_option=gpu_option)
+ write(901,*) 'trace estimation for slice2, deg=', trace_est_slice2, trace_degree
  flush(901)
  
  ! attention slice%X est modifié n'est plus X0..
@@ -1046,13 +1046,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! Probe pruning
     ! =============
 
-    ! ongoing implementation should be obtained from trace estimation now hardcoded
     if (islice==1) then
-        count_mask = 40
+        count_mask = ceiling(trace_est_slice1)
     else if (islice==2) then
-        count_mask = 80  ! TODO rename to nvec_kept..
+        count_mask = ceiling(trace_est_slice2)
     end if
-    ! ongoing: merge strategy should work (no missing eigenvalues) if I put count_mask=neigenpairs
 
     probe = -probe
     probe_idx(1:neigenpairs) = (/ (iband, iband=1,neigenpairs) /)
