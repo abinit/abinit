@@ -2306,6 +2306,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_with_vk', tread, 'INT')
  if (tread == 1) dtset%gstore_with_vk = intarr(1)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_iv1p_comm', tread, 'INT')
+ if (tread == 1) dtset%gstore_iv1p_comm = intarr(1)
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_use_lgk', tread, 'INT')
  if (tread == 1) dtset%gstore_use_lgk = intarr(1)
 

@@ -25765,6 +25765,25 @@ Possible values are:
 ),
 
 Variable(
+    abivarname="gstore_iv1p_comm",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics=r"GSTORE write matrix elements of i[V1_ka, p] commutator",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.7.0",
+    text=r"""
+If set to 1, the EPH code computes and stores on file the matrix elements
+
+i <psi_mk[V1_q0ka, p]|psi_nk> in the full BZ in reduced coordinates.
+
+when computing the GSTORE.nc. See [[cite:Lihm2020]].
+""",
+),
+
+Variable(
     abivarname="gstore_use_lgk",
     varset="eph",
     vartype="integer",

@@ -577,12 +577,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  if (gstore%with_vk /= 0 .and. ndone == 0) then
    call gstore%compute_and_write_vk(mpw, wfd, ebands, psps, pawtab, root_ncid)
- end if ! ndone /= 0
+ end if
 
- !if (dtset%gstore_iv1pn =/ 0) then
- !  !call gstore%compute_and_write_commutator(mpw, gmax, ngfft, ngfftf, dtset, cryst, pawfgr, psps, &
- !  !                                         wfd, mpi_enreg, kg_k, ebands, dvdb, gs_ham_kq, root_ncid)
- !end if
+
+
+
+
 
  ! Radius of sphere with volume equivalent to the micro zone.
  !q0rad = two_pi * (three / (four_pi * cryst%ucvol * gstore%nqbz)) ** third
@@ -817,6 +817,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  if (my_rank == master) call gstore%print([std_out])
  call pstat_proc%print(_PSTAT_ARGS_)
+
+ ! TODO
+ !if (dtset%gstore_iv1p_comm /= 0) then
+ !  call gstore%compute_and_write_commutator(mpw, gmax, ngfft, ngfftf, dtset, cryst, pawfgr, psps, &
+ !                                           wfd, mpi_enreg, kg_k, ebands, dvdb, gs_ham_kq, root_ncid)
+ !end if
 
  ! This parameter defines the size of the q-buffer used to store the g(k, q) e-ph matrix elements
  ! for all the k-point treated by this MPI rank.
