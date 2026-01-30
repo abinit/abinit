@@ -316,7 +316,7 @@ type, public :: gqk_t
 
   complex(dp), allocatable :: my_iv1p_comm(:,:,:,:,:)
    ! (nb_k, nb_k, 3, my_npert, my_nk))
-   ! Stores i <psi_mk[V1_q0ka, p]|psi_nk> in the full BZ in reduced coordinates.
+   ! Stores i <psi_mk[V1_q0ka, p]|psi_nk> in reduced coordinates.
    ! Can be used to compute non-diagonal DW self-energy in the RIA. See [[cite:Lihm2020]], PhysRevB.101.121102
    ! Note that in the present implementation both m and n indices run from bstart_k to bstop_k.
 
@@ -2143,7 +2143,7 @@ subroutine gstore_filter_kptgw__(gstore, dtset, qbz2ibz, qibz2bz, kibz2bz, selec
 
 !Local variables-------------------------------
 !scalars
- integer :: spin, ik_bz, ik_ibz, gap_err, ik_calc, nkcalc, mapl_kk(6), my_rank
+ integer :: spin, ik_bz, ik_ibz, ik_calc, nkcalc, mapl_kk(6), my_rank
 !arrays
  integer,allocatable :: bstart_ks(:,:), nbcalc_ks(:,:)
  real(dp),allocatable :: kcalc(:,:)
@@ -3593,7 +3593,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, LOG_MODQ = 5, master = 0, ndat1 = 1
  integer :: my_rank,nproc,nproc_lim,mband,nsppol,nkibz,idir,ipert, iq_bz
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq, timrev_k, timrev_q
- integer :: band_k, in_k, im_kq, ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, nb_k, nb_kq
+ integer :: band_k, in_k, ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, nb_k, nb_kq ! im_kq,
  integer :: my_ik, my_is, comm_rpt, my_npert, my_ip, my_iq, spin,istwf_k,istwf_kq,npw_k,npw_kq
  integer :: mpw, ierr, n1,n2,n3,n4,n5,n6,nspden,ndone, db_iqpt
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
@@ -4941,7 +4941,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, ncerr, natom3, varid
+ integer :: root_ncid, spin_ncid, gstore_completed, spin, ik_glob, iq_glob, ipc, ncerr, natom3
  integer :: glob_nq, glob_nk, im_kq, in_k, m_kq, n_k, nb_k, nb_kq, ii ! ib_k,
  integer :: bstart_k, bstop_k, bstart_kq, bstop_kq, max_nk, max_nq, idir
  integer :: ik_bz, ik_ibz, ib_min_k, ib_max_k, iq_bz, ikq_ibz, ib_min_kq, ib_max_kq, nn
@@ -6054,7 +6054,7 @@ end subroutine gstore_compute_and_write_vk
 !!  gstore_compute_and_write_commutator
 !!
 !! FUNCTION
-!!  Compute matrix elements i <psi_mk[V1_q0ka, p]|psi_nk> in the full BZ in reduced coordinates.
+!!  Compute matrix elements i <psi_mk|[V1_q0ka, p]|psi_nk> in the full BZ in reduced coordinates.
 !!  Write results to disk.
 !!  See [[cite:Lihm2020]], PhysRevB.101.121102
 !!
@@ -6084,9 +6084,9 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, master = 0
- integer :: my_is, spin, nb_k, nb_kq, spin_ncid, in_k, my_ik, ii, ik_bz, ik_ibz, npw_k, npwsp_k, istwf_k
+ integer :: my_is, spin, nb_k, nb_kq, spin_ncid, in_k, my_ik, ii, ik_ibz, npw_k, npwsp_k, istwf_k ! ik_bz,
  integer :: cplex, db_iqpt, idir, ipert, ipc, my_ip, natom, natom3, n1, n2, n3, n4, n5, n6, nsppol, nspinor, nspden
- integer :: nfft, nfftf, mgfft, mgfftf, my_npert, nkpg_k, band_k, glob_nk
+ integer :: nfft, nfftf, mgfftf, my_npert, nkpg_k, band_k !, glob_nk mgfft,
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1, ncerr, ik_glob, ierr
  real(dp) :: cpu_kk, wall_kk, gflops_kk
  logical :: gen_eigenpb
@@ -6208,7 +6208,7 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
      ABI_MALLOC(h1_kets_kq, (2, npwsp_k, nb_k))
      ABI_MALLOC(gs1c_kq, (2, npwsp_k*nb_k*((sij_opt+1)/2)))
 
-     ! Compute <g|-i\Nabla |u_nk>.
+     ! Compute <g|-i\Nabla |psi_nk>.
      ABI_MALLOC(p_kets_k, (2, npwsp_k, nb_k, 3))
      call cg_p_psi(npw_k, nspinor, nb_k, kk_bz, kg_k, kets_k, p_kets_k)
 

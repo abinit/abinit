@@ -3037,7 +3037,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg
  integer :: jene, iene, comm_rpt, nesting, my_npert, my_ip, my_iq, ncerr, edos_intmeth
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
- real(dp) :: edos_step, edos_broad, sigma, ecut, eshift, eig0nk
+ real(dp) :: edos_step, edos_broad, sigma, ecut, eig0nk ! eshift,
  logical :: gen_eigenpb, need_velocities, isirr_k, isirr_kq, print_time_k, need_ftinterp
  type(wfd_t) :: wfd
  type(fstab_t),pointer :: fs
