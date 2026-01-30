@@ -1538,7 +1538,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  ! ================
  ! Stochastic bands
  ! ================
- if (dtset%nb_protected /= 0) then
+ !if (dtset%nb_protected /= 0) then
+ if (.False.) then
    call wrtout(std_out, " Generating stochastic bands...")
    ! Initial setup.
    call psb%init(dtset, h_size, eig_ene, gs_fermie) !, nband_k)
@@ -2251,8 +2252,9 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie)
  ABI_MALLOC(tmp_eig_k, (eig_size))
  tmp_eig_k = eig_k - gs_fermie
 
- psb%nb_protected = dtset%nb_protected
- psb%maxsto_per_slice = dtset%nb_per_slice
+ psb%nb_protected = huge(1)
+ !psb%nb_protected = dtset%nb_protected
+ !psb%maxsto_per_slice = dtset%nb_per_slice
  ! TODO
  psb%efrac = 0.02_dp   ! dtset%efrac
 
@@ -2278,7 +2280,7 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie)
      ! Won't use pseudo bands in this case.
      psb%subspace(3, psb%nslices) = 1
    else
-     psb%subspace(3, psb%nslices) = min(dtset%nb_per_slice, nb)
+     !psb%subspace(3, psb%nslices) = min(dtset%nb_per_slice, nb)
    end if
    first_band = last_band + 1
    !write(std_out,'(a,i0,a,*(1x,i0))')" islice: ", psb%nslices, " subspace:", psb%subspace(:, psb%nslices)
@@ -2306,7 +2308,7 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie)
  units = [std_out, ab_out]
  call wrtout(units, ' Stochastic pseudobands setup:', pre_newlines=1)
  call wrtout(units, sjoin('     Number of stochastic subspaces: ', itoa(psb%nslices)))
- call wrtout(units, sjoin('     Number of stochastic pseudobands per subspace: ', itoa(dtset%nb_per_slice)))
+ !call wrtout(units, sjoin('     Number of stochastic pseudobands per subspace: ', itoa(dtset%nb_per_slice)))
  call wrtout(units, sjoin('     Original number of bands: ', itoa(eig_size)))
  call wrtout(units, sjoin('     Number of bands in the protection window: ', itoa(psb%nb_protected)))
  call wrtout(units, sjoin('     Final number of bands: ', itoa(psb%nb_tot)), newlines=1)
