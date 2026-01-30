@@ -307,10 +307,17 @@ type, public :: gqk_t
   ! (nb_kq, nb_k, my_npert, my_nq, my_nk)
 
   real(dp), allocatable :: my_g2(:,:,:,:,:)
+  ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
+  ! e-ph matrix elements g^2 (local buffer).
 
   real(dp), allocatable :: my_gdw2(:,:,:,:,:)
   ! (my_npert, nb_kq, my_nq, nb_k, my_nk)
-  ! gDW^2 (local buffer).
+  ! gDW^2 (local buffer) (only for diagonal DW self-energy in the RIA)
+
+  complex(dp), allocatable :: my_iv1p_comm(:,:,:,:,:)
+   ! (nb_k, nb_k, 3, my_npert, my_nk))
+   ! Stores i <psi_mk[V1_q0ka, p]|psi_nk> in the full BZ in reduced coordinates.
+   ! Note that in the present implementation both m and n indices run from bstart_k to bstop_k.
 
   integer :: coords_qkpb_sumbp(ndims) = 0
   ! Coordinates of this processor in the (q, k, pert, band, band_sum, pp_sum) Cartesian grid.
@@ -1786,6 +1793,9 @@ subroutine gstore_print(gstore, units, header, prtvol)
    if (allocated(gqk%vnk_mat_cart_ibz)) then
      write(msg,'(a,f8.1,a)')'- Local memory allocated for vnk_mat_cart_ibz: ',ABI_MEM_MB(gqk%vnk_mat_cart_ibz),' [Mb] <<< MEM'
      call wrtout(units, msg)
+   end if
+   if (allocated(gqk%my_iv1p_comm)) then
+     write(msg,'(a,f8.1,a)')'- Local memory allocated for <mk|i[V1,p]|nk> array: ',ABI_MEM_MB(gqk%my_iv1p_comm),' [mb] <<< mem'
    end if
    end associate
  end do
@@ -3424,6 +3434,7 @@ subroutine gqk_free(gqk)
  ABI_SFREE(gqk%my_g)
  ABI_SFREE(gqk%my_g2)
  ABI_SFREE(gqk%my_gdw2)
+ ABI_SFREE(gqk%my_iv1p_comm)
  ABI_SFREE(gqk%my_pertcases)
  ABI_SFREE(gqk%vnk_cart_ibz)
  ABI_SFREE(gqk%vnk_mat_cart_ibz)
@@ -3813,10 +3824,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    call gstore%compute_and_write_vk(mpw, wfd, ebands, psps, pawtab, root_ncid)
  end if
 
- !if (dtset%gstore_iv1pn =/ 0) then
+ if (dtset%gstore_iv1p_comm /= 0) then
    call gstore%compute_and_write_commutator(mpw, gmax, ngfft, ngfftf, dtset, cryst, pawfgr, psps, &
                                             wfd, mpi_enreg, kg_k, ebands, dvdb, gs_ham_kq, root_ncid)
- !end if
+ end if
 
  call wrtout(std_out, " Begin computation of e-ph matrix elements...", pre_newlines=1)
 
@@ -4303,7 +4314,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
  integer :: my_ip, ipert, iq_ibz, iq_bz, isym_q, trev_q, tsign_q, ii, im_kq, in_k
  real(dp) :: cpu, wall, gflops, wqnu, gdw2
  complex(dp) :: cfact
- logical :: isirr_q, from_atm_to_nu
+ logical :: isirr_q, from_atm_to_nu, has_iv1p_comm
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: gstore_cryst
  type(gqk_t),pointer :: gqk
@@ -4313,7 +4324,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
  integer,allocatable :: qglob2bz(:,:), qbz2ibz(:,:)
  real(dp) :: qq_ibz(3)
  real(dp) :: displ_nu_red(2, 3, cryst%natom)
- real(dp),allocatable :: gwork_q(:,:,:,:,:), slice_bb(:,:,:)
+ real(dp),allocatable :: gwork_q(:,:,:,:,:), slice_bb(:,:,:), iv1p_comm(:,:,:,:,:)
  real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:), pheigvec_cart_qbz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), gmn_nu(:,:,:,:)
  complex(dp),allocatable :: tpp_red(:,:), my_gq0nm_atm(:,:,:,:)
@@ -4553,6 +4564,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
  ABI_MALLOC(displ_red_qbz, (2, 3, cryst%natom, natom3))
 
  NCF_CHECK(nctk_open_read(ncid, gstore%path, gstore%comm))
+ has_iv1p_comm = gstore_nc_has_iv1p_comm(gstore, ncid)
 
  if (nproc > 1) then
    NCF_CHECK(nctk_set_collective(ncid, vid("phfreqs_ibz")))
@@ -4638,6 +4650,25 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
          end do
        end do
      end if ! with_g2dw
+
+     if (has_iv1p_comm) then
+      ABI_MALLOC(gqk%my_iv1p_comm, (nb_k, nb_k, 3, gqk%my_npert, gqk%my_nk))
+      ABI_MALLOC(iv1p_comm, (2, nb_k, nb_k, 3, natom3))
+      ! nctkarr_t("iv1p_comm", "dp", "two, nb_k, nb_k, three, natom3, glob_nk")
+
+      do my_ik=1,gqk%my_nk
+        ik_glob = my_ik + gqk%my_kstart - 1
+        ncerr = nf90_get_var(spin_ncid, spin_vid("iv1p_comm"), iv1p_comm, start=[1,1,1,1,1, ik_glob])
+        NCF_CHECK(ncerr)
+
+        ! Save my perturbations for this k-point.
+        do my_ip=1,gqk%my_npert
+          ipert = gqk%my_pertcases(my_ip)
+          gqk%my_iv1p_comm(:,:,:,my_ip, my_ik) = r2c(iv1p_comm(:,:,:,:,ipert))
+        end do
+      end do
+      ABI_FREE(iv1p_comm)
+     end if
 
      if (from_atm_to_nu) then
        ABI_MALLOC(gmn_nu, (2, nb_kq, nb_k, 3*natom))
@@ -5151,14 +5182,7 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
  ABI_FREE(qglob2bz)
 
  ! Here we read the matrix elements of i[V1, p] if present on disk.
- has_iv1p_comm = .True.
- do spin=1,gstore%nsppol
-   NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
-   ncerr = nf90_inq_varid(spin_ncid, "iv1p_comm", varid)
-   if (ncerr /= nf90_noerr) then
-     has_iv1p_comm = .False.; exit
-   end if
- end do
+ has_iv1p_comm = gstore_nc_has_iv1p_comm(gstore, root_ncid)
 
  if (has_iv1p_comm) then
    do spin=1,gstore%nsppol
@@ -5175,8 +5199,8 @@ subroutine gstore_print_for_abitests(gstore, dtset, ebands, do_avg, with_ks)
        ! Write the first and the last k-point.
        if ((ik_glob /= 1 .and. ik_glob /= glob_nk) .and. .not. all_gs) cycle
 
-       ik_bz = gstore%kglob2bz(ik_glob, spin)
-       ik_ibz = gstore%kbz2ibz(1, ik_bz)
+       !ik_bz = gstore%kglob2bz(ik_glob, spin)
+       !ik_ibz = gstore%kbz2ibz(1, ik_bz)
        !kk_ibz = ebands%kptns(:,ik_ibz)
 
        ! nctkarr_t("iv1p_comm", "dp", "two, nb_k, nb_k, three, natom3, glob_nk")
@@ -6030,8 +6054,9 @@ end subroutine gstore_compute_and_write_vk
 !!  gstore_compute_and_write_commutator
 !!
 !! FUNCTION
-!!  Compute matrix elements i <psi_mk[V1_q0ka, p]|psi_nk in the full BZ.
+!!  Compute matrix elements i <psi_mk[V1_q0ka, p]|psi_nk> in the full BZ in reduced coordinates.
 !!  Write results to disk.
+!!  See [[cite:Lihm2020]], PhysRevB.101.121102
 !!
 !! SOURCE
 
@@ -6078,7 +6103,7 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
 !----------------------------------------------------------------------
 
  units = [std_out, ab_out]
- call wrtout(units, " Computing and writing matrix elements of commutator i [V1, p]...")
+ call wrtout(units, " Computing and writing i <psi_mk| [V1, p]| psi_nk> ...")
  call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
 
  ! Copy important dimensions
@@ -6114,7 +6139,7 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
 
  ! Since v1(q=0) and p are Hermitian operators, we have:
  !
- !  i <u_mk| [v1, p] |u_nk> = i <v1 u_mk | p u_nk> -i <p u_mk | v1 u_nk>
+ !  i <psi_mk| [v1, p] |psi_nk> = i <v1 psi_mk | p psi_nk> -i <p psi_mk | v1 psi_nk>
  !
  ! Note that in the present implementation both m and n indices run from bstart_k to bstop_k.
 
@@ -6163,6 +6188,9 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
    call gs_ham_kq%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
 
    do my_ik=1,gqk%my_nk
+     ! Parallelism inside q-point communicator.
+     if (gqk%qpt_comm%skip(my_ik)) cycle
+
      ! The k-point and the symmetries relating the BZ k-point to the IBZ.
      kk_bz = gqk%my_kpts(:, my_ik)
      ik_ibz = gqk%my_k2ibz(1, my_ik)
@@ -6183,7 +6211,6 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
      ! Compute <g|-i\Nabla |u_nk>.
      ABI_MALLOC(p_kets_k, (2, npwsp_k, nb_k, 3))
      call cg_p_psi(npw_k, nspinor, nb_k, kk_bz, kg_k, kets_k, p_kets_k)
-     !call cg_p_psi(npw_k, nspinor, nb_k, gamma_point, kg_k, kets_k, p_kets_k)
 
      iv1p_comm = zero
      do my_ip=1,my_npert
@@ -6253,14 +6280,9 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
    !    end do
    !  end do
    !end do
-
-   ! Write v_nk to disk.
-   !!if (gqk%comm%me == master) then
-     !NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("iv1p_comm"), iv1p_comm))
-   !!end if
+   !ABI_FREE(count_bk)
 
    ABI_FREE(iv1p_comm)
-   !ABI_FREE(count_bk)
    end associate
  end do ! my_is
 
@@ -6274,7 +6296,7 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
 
-! call xmpi_barrier(gstore%comm)
+ call xmpi_barrier(gstore%comm)
  call cwtime_report(" Computation of commutator:", cpu_kk, wall_kk, gflops_kk)
 
 contains
@@ -6287,4 +6309,38 @@ end function spin_vid
 end subroutine gstore_compute_and_write_commutator
 !!***
 
+!!****f* m_gstore/gstore_nc_has_iv1p_comm
+!! NAME
+!! gstore_nc_has_iv1p_comm
+!!
+!! FUNCTION
+!! Return True if GSTORE.nc contains commutator matrix elements.
+!!
+!! SOURCE
+
+logical function gstore_nc_has_iv1p_comm(gstore, root_ncid) result (has_iv1p_comm)
+
+!Arguments ------------------------------------
+ class(gstore_t),target, intent(in) :: gstore
+ integer,intent(in) :: root_ncid
+
+!Local variables-------------------------------
+ integer :: spin, ncerr, spin_ncid, varid
+! *************************************************************************
+
+ has_iv1p_comm = .True.
+ do spin=1,gstore%nsppol
+   NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+   ncerr = nf90_inq_varid(spin_ncid, "iv1p_comm", varid)
+   if (ncerr /= nf90_noerr) then
+     has_iv1p_comm = .False.; exit
+   end if
+ end do
+
+end function gstore_nc_has_iv1p_comm
+!!***
+
 end module m_gstore
+
+!----------------------------------------------------------------------
+

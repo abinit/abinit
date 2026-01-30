@@ -1389,6 +1389,9 @@ subroutine outvar_a_h(choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)  =dtsets(:)%gstore_with_vk
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gstore_with_vk','INT',0)
 
+ intarr(1,:)  =dtsets(:)%gstore_iv1p_comm
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gstore_iv1p_comm','INT',0)
+
  intarr(1,:)  =dtsets(:)%gstore_use_lgk
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gstore_use_lgk','INT',0)
 

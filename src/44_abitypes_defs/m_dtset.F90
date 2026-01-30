@@ -285,6 +285,7 @@ type, public :: dataset_type
  integer :: gpu_thread_limit
 
  integer :: gstore_with_vk = 1
+ integer :: gstore_iv1p_comm = 0
  integer :: gstore_use_lgk = 0
  integer :: gstore_use_lgq = 0
  character(len=abi_slen) :: gstore_kzone = "ibz"
@@ -1826,6 +1827,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gpu_thread_limit   = dtin%gpu_thread_limit
 
  dtout%gstore_with_vk     = dtin%gstore_with_vk
+ dtout%gstore_iv1p_comm   = dtin%gstore_iv1p_comm
  dtout%gstore_use_lgk     = dtin%gstore_use_lgk
  dtout%gstore_use_lgq     = dtin%gstore_use_lgq
  dtout%gstore_kzone       = dtin%gstore_kzone
@@ -3764,7 +3766,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option'
  list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gstore_brange gstore_erange gstore_kfilter gstore_gname'
- list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk gstore_use_lgk gstore_use_lgq'
+ list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk gstore_iv1p_comm gstore_use_lgk gstore_use_lgq'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_icutcoul gw_invalid_freq'
