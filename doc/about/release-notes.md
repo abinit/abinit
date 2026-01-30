@@ -359,7 +359,7 @@ By L. Baguet (MR1216)
 **D.8** No more [[bandpp]] in testsuite.
 
 Remove [[bandpp]] in input files of the testsuite, except in paral[33] and v9[205], and replace it by [[nblock_lobpcg]].
-For now the [[tutorial:paral_bandpw]] is not changed, but it should be reworked (almost completely...). This will done later. TODO
+For now the [[tutorial:paral_bandpw]] is not changed, but has to be reworked.
 
 By L. Baguet (MR1217)
 
