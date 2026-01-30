@@ -222,9 +222,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !arrays
  integer,  contiguous, pointer :: gbound_k1(:,:), gbound_k2(:,:)
  integer,  contiguous, pointer :: kg_k1(:,:), kg_k2(:,:)
- integer,  ABI_CONTIGUOUS pointer :: indices_pw_fft(:), kg_k_fft(:,:)
- integer,  ABI_CONTIGUOUS pointer :: recvcount_fft(:), recvdisp_fft(:)
- integer,  ABI_CONTIGUOUS pointer :: sendcount_fft(:), senddisp_fft(:)
+ integer,  contiguous, pointer :: indices_pw_fft(:), kg_k_fft(:,:)
+ integer,  contiguous, pointer :: recvcount_fft(:), recvdisp_fft(:)
+ integer,  contiguous, pointer :: sendcount_fft(:), senddisp_fft(:)
  integer,  allocatable:: dimcprj(:)
  real(dp)                         :: enlout(ndat), lambda_ndat(ndat), tsec(2)
  real(dp), target                 :: nonlop_dum(1,1)
@@ -243,8 +243,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp), allocatable            :: cwavef_spin(:,:), gvnlxc_spin(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: gvnlc(:,:)
- real(c_double), ABI_CONTIGUOUS pointer :: gvnlxc_(:,:)
+ real(c_double), contiguous, pointer :: gvnlc(:,:)
+ real(c_double), contiguous, pointer :: gvnlxc_(:,:)
 #else
  real(dp), allocatable            :: gvnlc(:,:)
  real(dp), contiguous, pointer                :: gvnlxc_(:,:)
@@ -2205,7 +2205,7 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
  !character(len=500) :: msg
 !arrays
  real(dp) :: enlout_dum(ndat),tsec(2)
- real(dp), ABI_CONTIGUOUS pointer :: cwavef(:,:),scwavef(:,:)
+ real(dp), contiguous, pointer :: cwavef(:,:),scwavef(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 ! *********************************************************************
 
