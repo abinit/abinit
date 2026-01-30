@@ -8,7 +8,7 @@
 !!  paw_energies_type variables define several contributions to PAW on-site ENERGIES
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2025 ABINIT group (MT)
+!! Copyright (C) 2013-2026 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
