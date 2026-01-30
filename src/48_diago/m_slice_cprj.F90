@@ -526,6 +526,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: icount
  integer :: blockdim_cprj
  integer :: fcol_in, lcol_in
+ integer :: fcol_dummy, lcol_dummy, ncount_out
  integer :: fcol_global
  integer :: ndeg, ndeg_max
  integer :: tim_slice_fi
@@ -534,6 +535,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: my_rank
  integer :: trace_degree, trace_rank
  logical :: is_close_to_V
+ real(dp) :: conf_tol
  real(dp) :: tol_step
  real(dp) :: tol_probe
  real(dp) :: tolerance
@@ -878,7 +880,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         alpha_minus = -0.18d0
         alpha_plus = lambda_minus
     else
-        alpha_plus = maxval(rayleigh_quotients)
+        alpha_plus = maxval(rayleigh_quotients)-0.1d0
     end if
 
     ! overlapping between slices
@@ -887,6 +889,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     lambda_minus = alpha_minus-overlap_width
     if (islice==1) then
         lambda_minus = alpha_minus ! otherwise it is outside the center
+    else if (islice==nslice) then
+        lambda_plus = alpha_plus ! there is nothing righwise of max anyway..
     end if
 
     ! ITEST
@@ -947,9 +951,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     end if
 
     call timab(tim_slice_fi,1,tsec)
-    
-    ! dunno:
-    ! <- slice%X qui n'est pas bien initialisé
     
     ! Initialize Chebyshev expansion of indicator function of order ndeg_filter
     call xg_init(Xsum,slice%space,slice%total_spacedim,neigenpairs,slice%spacecom,gpu_option=gpu_option)
@@ -1252,18 +1253,36 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     
     lcol_in = count_rr
     fcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < alpha_minus)) + 1
-
+   
+    conf_tol = maxval(sqrt(resid))
+    fcol_dummy = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice+conf_tol < alpha_minus)) + 1
+    write(901,*) 'mergeD: fcol slice    ', islice, '        ', fcol_in
+    write(901,*) 'mergeD: fcol slice    ', islice, 'interval', fcol_dummy
+    ncount_out = count(lambda_apost_slice+conf_tol < alpha_minus)
+    write(901,*) 'mergeD: count out left', islice, '        ', ncount_out, 'out of', count_rr
+    ncount_out = count(lambda_apost_slice-conf_tol > alpha_plus)
+    write(901,*) 'mergeD: count outright', islice, '        ', ncount_out, 'out of', count_rr
+    write(901,*) 'mergeD-----------------------'
+    flush(901)
+    
     if (islice<nslice) then
 
         lcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < alpha_plus))
+        write(901,*) 'merge: interval on slice   ', islice, ':', lcol_in; flush(901)
 
     else
-
-        write(901,*) 'pass', lcol_in
+        
+        write(901,*) 'merge: maximized on slice  ', islice, ':', lcol_in
+        lcol_dummy = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < alpha_plus))
+        write(901,*) 'merge: interval on slice***', islice, ':', lcol_in
+        write(901,*) 'merge: resid***************', islice, ':', sqrt(sum(resid(fcol_in:lcol_dummy)))
         flush(901)
+
         if (count_merge + lcol_in-fcol_in+1 > neigenpairs) then
+            write(901,*) 'merge: pass on slice       ', islice, ':', lcol_in; flush(901)
             lcol_in = fcol_in + neigenpairs - count_merge - 1
-            write(901,*) 'pass bis', lcol_in, fcol_in, neigenpairs, count_merge
+            write(901,*) 'merge: pass after on slice ', islice, ':', lcol_in, fcol_in, neigenpairs, count_merge
+            write(901,*) 'merge: residBBBBBBBBBBBBBBB', islice, ':', sqrt(sum(resid(fcol_in:lcol_in)))
             flush(901)
         end if
 
