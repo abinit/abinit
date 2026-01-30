@@ -756,7 +756,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  !!
 
  ! Split working spectrum into N intervals (N=nstep_spectrum)
- nstep_spectrum = 50
+ nstep_spectrum =50
  min_low_bound = -0.18d0 ! FIXME hardcoded minlowest but some more ...
  min_upp_bound = maxval(rayleigh_quotients)
  delta_step_spectrum = (min_upp_bound - min_low_bound) / nstep_spectrum
