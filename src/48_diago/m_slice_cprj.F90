@@ -561,6 +561,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  type(xg_t) :: DivResults
  type(xg_t) :: norm2_X
  type(xg_t) :: dot_XfX, norm2_fX
+ type(xg_t) :: res_temp
  type(xg_t) :: X0_out, eigen_out
  type(xgBlock_t) :: X0_out_part, eigen_out_part
  type(xgBlock_t) :: X_in, eigen_in
@@ -593,8 +594,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp), pointer :: theta_(:,:) => null()
  real(dp), pointer :: resid(:) => null()
  !Pointers similar to old Chebfi
- integer,allocatable :: ndeg_filter_slice(:) !Slice variable
- integer,allocatable :: ndeg_filter_bands(:) !Oracle variable
  type(xg_nonlop_t) :: xg_nonlop
 
 ! *********************************************************************
@@ -632,7 +631,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! Allocations
  ! DivResults stores Rayleigh quotients
  call xg_init(DivResults, space_res, neigenpairs, 1)
- ABI_MALLOC(ndeg_filter_slice,(nslice))
  ABI_MALLOC(permute_cols, (neigenpairs))
  ABI_MALLOC(probe_idx, (neigenpairs))
  ABI_MALLOC(rayleigh_quotients, (neigenpairs))
@@ -753,10 +751,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  trace_degree = 15
  trace_rank = neigenpairs
  upp_bound = slice%ecut
- !call estimateFirstEigenvalue(slice, trace_rank, trace_degree, min_low_est, getAX, kin, &
- !        my_rank, gpu_option)
- call computeTraceEstimationCheby(slice, trace_rank, trace_degree, low_bound, upp_bound, &
-        min_low_est, getAX, kin, my_rank, gpu_option)
+ call estimateFirstEigenvalue(slice, trace_rank, trace_degree, min_low_est, getAX, kin, &
+         my_rank, gpu_option)
+ !call computeTraceEstimationCheby(slice, trace_rank, trace_degree, low_bound, upp_bound, &
+ !       min_low_est, getAX, kin, my_rank, gpu_option)
  write(901,*) 'min_low_est=', min_low_est
  flush(901)
 
@@ -830,7 +828,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  count_merge = 0
  fcol_global = 1
 
- do islice=1, nslice
+ do islice=2, nslice
 
     write(901,*)
     write(901,*) '====================Slice=================', islice
@@ -843,13 +841,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     !! 
     !! ------------------------------------------------------------
 
-    if (islice>1) then
-        
-        ! Reset pointers to dimensions of nband (assumes sequential slices)
-        call xg_setBlock(slice%X_SLICE,slice%X,slice%total_spacedim,neigenpairs)
-        call xg_setBlock(slice%X_SLICE,slice%AX,slice%total_spacedim,neigenpairs,fcol=neigenpairs+1)
-
-    end if
+    ! Reset pointers to dimensions of nband (assumes sequential slices)
+    call xg_setBlock(slice%X_SLICE,slice%X,slice%total_spacedim,neigenpairs)
+    call xg_setBlock(slice%X_SLICE,slice%AX,slice%total_spacedim,neigenpairs,fcol=neigenpairs+1)
 
     ! Initial slice workspaces are independent entire arrays
     call xgBlock_copy(slice%AllX, slice%X)
@@ -858,6 +852,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! the two following ones will be recomputed so whatever
     slice%cprjX = slice%AllcprjX
     slice%cprj_work = slice%Allcprj_work%self
+
+    write(901,*) 'dunno init', xgBlock_getid(slice%AX), xgBlock_getid(slice%X), &
+        xgBlock_getid(slice%cprjX), xgBlock_getid(slice%cprj_work)
+    flush(901)
 
     !! ------------------------------------------------------------
     !! 
@@ -870,7 +868,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     !! ------------------------------------------------------------
 
     ! ongoing, hardcoded depends on previous code
-    min_low_est = -0.2d0
+    min_low_est = -0.3d0
     lambda_minus = 1.17d0
     alpha_minus = 1.17d0
 
@@ -881,78 +879,58 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         alpha_plus = maxval(rayleigh_quotients)
     end if
 
-    if (islice==3) then
-
-        lambda_plus = slice%ecut
-        center = (lambda_plus + lambda_minus)*0.5
-        radius = (lambda_plus - lambda_minus)*0.5
-
-        ndeg_filter = slice%ndeg_filter
-
-        ! ITEST
-        write(901,*) 'unwanted part of the spectrum=', lambda_minus, lambda_plus
-        flush(901)
-        ! ITEST
-
-    else
-
-        ! overlapping between slices
-        overlap_width = (alpha_plus - alpha_minus)/8.0
-        if (islice==2) then
-            lambda_minus = alpha_minus-overlap_width
-            lambda_plus = alpha_plus
-        else
-            lambda_minus = alpha_minus
-            lambda_plus = alpha_plus+overlap_width
-        end if
-
-        ! ITEST
-        write(901,*) 'wanted part of the spectrum=', alpha_minus, alpha_plus
-        write(901,*) '               with overlap=', lambda_minus, lambda_plus
-        flush(901)
-        ! ITEST
- 
-        ! TODO add overlap width to filter in [a-w,b+w) for wanted [a,b) for convergence reasons
-        center = (slice%ecut + min_low_est)*0.5
-        radius = (slice%ecut - min_low_est)*0.5 
-        ls = (lambda_minus - center) / radius
-        us = (lambda_plus - center) / radius
-
-        ! Optimize polynomial degree with given tolerance
-        ramp = slice%tolfilter
-        ndeg_max = 200
-
-        ls_in = (alpha_minus - center) / radius ! scaled point inside slice
-        us_in = (alpha_plus - center) / radius ! scaled point inside slice
-        ndeg = 8
-        f_lw = 1.d0; f_uw = 1.d0; f_l = 1.d0; f_u = 1.d0
-
-        if (islice==2) then
-            ! Amplification is f(l-w)/f(l) and f(u+w)/f(u) (between 0 and 1)
-            do while ( (f_lw/f_l > ramp .or. f_uw/f_u > ramp) .and. ndeg < ndeg_max )
-                ndeg = ndeg + 1
-                f_l  = bandpassIndicator_sca(ls_in,ls,us,ndeg)
-                f_lw = bandpassIndicator_sca(ls   ,ls,us,ndeg)
-                f_u  = bandpassIndicator_sca(us_in,ls,us,ndeg)
-                f_uw = bandpassIndicator_sca(us   ,ls,us,ndeg)
-            end do
-            ndeg = 50
-        else
-            ndeg = 50
-        end if
-
-        ndeg_filter = ndeg
-       
-        ! ITEST
-        write(901,*) 'left/right amplif factor f(out)/f(in)=', f_lw/f_l, f_uw/f_u
-        write(901,*) 'minimal polynomial degree=', ndeg_filter
-        flush(901)
-        ! ITEST
-
+    ! overlapping between slices
+    overlap_width = (alpha_plus - alpha_minus)/8.0
+    lambda_plus = alpha_plus+overlap_width
+    lambda_minus = alpha_minus-overlap_width
+    if (islice==1) then
+        lambda_minus = alpha_minus ! otherwise it is outside the center
     end if
 
-    one_over_r = 1.0/radius
-    two_over_r = 2.0/radius
+    ! ITEST
+    write(901,*) 'global spectrum=', min_low_est, slice%ecut
+    write(901,*) 'wanted slice=', alpha_minus, alpha_plus
+    write(901,*) 'with overlap=', lambda_minus, lambda_plus
+    flush(901)
+    ! ITEST
+ 
+    center = (slice%ecut + min_low_est)*0.5
+    radius = (slice%ecut - min_low_est)*0.5 
+    ls = (lambda_minus - center) / radius
+    us = (lambda_plus - center) / radius
+
+    ! Optimize polynomial degree with given tolerance
+    ramp = slice%tolfilter
+    ndeg_max = 200
+    ls_in = (alpha_minus - center) / radius ! scaled point inside slice
+    us_in = (alpha_plus - center) / radius ! scaled point inside slice
+    ndeg = 8
+    f_lw = 1.d0; f_uw = 1.d0; f_l = 1.d0; f_u = 1.d0
+
+    ! Amplification is f(l-w)/f(l) and f(u+w)/f(u) (between 0 and 1)
+    if (islice==1) then
+        do while ( f_uw/f_u > ramp .and. ndeg < ndeg_max )
+            ndeg = ndeg + 1
+            f_u  = bandpassIndicator_sca(us_in,ls,us,ndeg)
+            f_uw = bandpassIndicator_sca(us   ,ls,us,ndeg)
+        end do
+    else
+        do while ( (f_lw/f_l > ramp .or. f_uw/f_u > ramp) .and. ndeg < ndeg_max )
+            ndeg = ndeg + 1
+            f_l  = bandpassIndicator_sca(ls_in,ls,us,ndeg)
+            f_lw = bandpassIndicator_sca(ls   ,ls,us,ndeg)
+            f_u  = bandpassIndicator_sca(us_in,ls,us,ndeg)
+            f_uw = bandpassIndicator_sca(us   ,ls,us,ndeg)
+        end do
+    end if
+
+    ndeg_filter = ndeg
+       
+    ! ITEST
+    write(901,*) 'left/right amplif factor f(out)/f(in)=', f_lw/f_l, f_uw/f_u
+    write(901,*) 'minimal polynomial degree=', ndeg_filter
+    flush(901)
+    ! ITEST
 
     !! ------------------------------------------------------------
     !! 
@@ -968,21 +946,19 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     call timab(tim_slice_fi,1,tsec)
     
-    if (islice>0) then
+    ! Initialize Chebyshev expansion of indicator function of order ndeg_filter
+    call xg_init(Xsum,slice%space,slice%total_spacedim,neigenpairs,slice%spacecom,gpu_option=gpu_option)
+    cdeg = Pi/(ndeg_filter+2)
+    mu = 1.d0/Pi*(ACOS(ls)-ACOS(us))
+    damp = 1.d0 ! Jackson damping
+    one_over_r = 1.d0/radius
+    two_over_r = 2.d0/radius
+    call xgBlock_saxpy(Xsum%self, mu*damp, slice%X)
     
-        ! Initialize Chebyshev expansion of indicator function of order ndeg_filter
-        call xg_init(Xsum,slice%space,slice%total_spacedim,neigenpairs,slice%spacecom,gpu_option=gpu_option)
-        cdeg = Pi/(ndeg_filter+2)
-        mu = 1.d0/Pi*(ACOS(ls)-ACOS(us))
-        damp = 1.d0 ! Jackson damping
-        call xgBlock_saxpy(Xsum%self, mu*damp, slice%X)
-
-    end if
-        
     do ideg = 0, ndeg_filter - 1
         
         ! ITEST
-        write(901,*) 'polynomial degree=', ideg
+        write(901,*) 'polynomial degree=', ideg, xgBlock_getid(slice%cprjX)
         flush(901)
         ! ITEST
 
@@ -996,17 +972,13 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         call slice_swapInnerBuffers(slice, slice%total_spacedim, neigenpairs)
         call timab(tim_swap,2,tsec)
 
-        if (islice>0) then
+        ! Accumulate X with weight in Xsum for bandpass filters
+        mu = 2/Pi * (SIN((ideg+1)*ACOS(ls)) - SIN((ideg+1)*ACOS(us)))/(ideg+1)
+        damp = ((1 - (ideg+1)/(ndeg_filter+2))*SIN(cdeg)*COS((ideg+1)*cdeg) + &
+                1/(ndeg_filter+2)*COS(cdeg)*SIN((ideg+1)*cdeg))/SIN(cdeg)
+        call xgBlock_saxpy(Xsum%self, mu*damp, slice%X)
 
-            ! Accumulate X with weight in Xsum for bandpass filters
-            mu = 2/Pi * (SIN((ideg+1)*ACOS(ls)) - SIN((ideg+1)*ACOS(us)))/(ideg+1)
-            damp = ((1 - (ideg+1)/(ndeg_filter+2))*SIN(cdeg)*COS((ideg+1)*cdeg) + &
-                     1/(ndeg_filter+2)*COS(cdeg)*SIN((ideg+1)*cdeg))/SIN(cdeg)
-            call xgBlock_saxpy(Xsum%self, mu*damp, slice%X)
-
-        end if
-
-        if (islice>0 .and. ideg==ndeg_filter - 1) then 
+        if (ideg==ndeg_filter - 1) then 
         
             ! store final expansion Xsum to X
             call xgBlock_copy(Xsum%self, slice%X)
@@ -1016,31 +988,22 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         !A * Psi
         call timab(tim_AX_v,1,tsec)
         call getAX(slice%X,slice%AX)
+        write(901,*) 'dunno=', xgBlock_getid(slice%X), xgBlock_getid(slice%cprjX); flush(901)
         call timab(tim_AX_v,2,tsec)
         call timab(tim_AX_k,1,tsec)
         call xgBlock_add_diag(slice%X,kin,nspinor,slice%AX)
+        write(901,*) 'dunno=', xgBlock_getid(slice%X), xgBlock_getid(slice%cprjX); flush(901)
         call timab(tim_AX_k,2,tsec)
         call timab(tim_cprj,1,tsec)
         call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
+        write(901,*) 'dunno=', xgBlock_getid(slice%X), xgBlock_getid(slice%cprjX); flush(901)
         call timab(tim_cprj,2,tsec)
         call timab(tim_AX_nl,1,tsec)
         call xg_nonlop_getHX(xg_nonlop,slice%AX,slice%cprjX,slice%cprj_work,slice%proj_work%self)
+        write(901,*) 'dunno=', xgBlock_getid(slice%X), xgBlock_getid(slice%cprjX); flush(901)
         call timab(tim_AX_nl,2,tsec)
 
     end do ! End polynomial degree loop
-
-    if (islice==3) then
-
-        ! Amplify to finalize filter application
-        call timab(tim_amp_f,1,tsec)
-        ABI_MALLOC(ndeg_filter_bands,(neigenpairs))
-        ndeg_filter_bands(:) = ndeg_filter
-        !call slice_ampfactorMax(slice, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
-        call slice_ampfactor(slice, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
-        ABI_FREE(ndeg_filter_bands)
-        call timab(tim_amp_f,2,tsec)
-        
-    end if
     
     call timab(tim_slice_fi,2,tsec)
 
@@ -1071,6 +1034,19 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! Note: option 1 gives betten results than option 2 so far
     ! =============
 
+    !! testing 1d colwiseDotProduct (working) TODO integrate this into trace estimators for easy GPU porting
+    !call xg_init(res_temp, SPACE_R, 1, 1)
+    !write(901,*) 'colwisenorm2=', xgBlock_getid(slice%X)
+    !call xgBlock_print(res_temp%self, 901)
+    !call xgBlock_colwiseNorm2(slice%X, norm2_fX%self, comm_loc=xmpi_comm_null)
+    !write(901,*) 'dunno'
+    !call xgBlock_colwiseDotProduct(norm2_fX%self, norm2_fX%self, res_temp%self, comm_loc=xmpi_comm_null)
+    !write(901,*) 'colwisenorm2='
+    !call xgBlock_print(res_temp%self, 901)
+    !flush(901)
+    !call xg_free(res_temp)
+
+
     if (slice%spectral_cut == 1) then
         ! norm2_fX = <fX,fX> colwise L2-norm
         call xgBlock_colwiseNorm2(slice%X, norm2_fX%self, comm_loc=xmpi_comm_null)
@@ -1093,9 +1069,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     ! ongoing implementation should be obtained from trace estimation now hardcoded
     if (islice==1) then
-        count_mask = 90
+        count_mask = 40
     else if (islice==2) then
-        count_mask = 90  ! TODO rename to nvec_kept..
+        count_mask = 75  ! TODO rename to nvec_kept..
     end if
     ! ongoing: merge strategy should work (no missing eigenvalues) if I put count_mask=neigenpairs
 
@@ -1122,7 +1098,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     do icount=1,count_mask
 
         iband = probe_idx(icount)
-            
         call xgBlock_setBlock(X_kept%self, X_kept_col, slice%total_spacedim, 1, fcol=icount)
         call xgBlock_setBlock(AX_kept%self, AX_kept_col, slice%total_spacedim, 1, fcol=icount)
         call xgBlock_setBlock(slice%X, X_col, slice%total_spacedim, 1, fcol=iband)
@@ -1274,57 +1249,21 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     !! 
     !! ------------------------------------------------------------
     
-    fcol_in = 1
     lcol_in = count_rr
-    if (islice==3) then
+    fcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < alpha_minus)) + 1
 
-        ! TODO count how many eigenpairs have converged outside the slice with 
-        ! their confidence interval based on residual outside the slice
+    if (islice<nslice) then
 
-        lcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < lambda_minus))
-
-        !! If too many columns and not enough for second slice, then reduce
-        !! can happen if guess is too bad
-        !if (lcol_in - fcol_in + 1 > neigenpairs / nslice + 20) then
-        !    lcol_in = neigenpairs / nslice
-        !end if
-
-        if (lcol_in < count_rr) then
-        
-            ! if multiple eigenvalue is at endpoint, backwards !remove! its multiplicities
-            write(901,*) 'last      =', lambda_apost_slice(lcol_in), lcol_in
-            write(901,*) 'after last=', lambda_apost_slice(lcol_in+1)
-            flush(901)
-            do while (lambda_apost_slice(lcol_in+1) - lambda_apost_slice(lcol_in) < 1.0e-3)
-                lcol_in = lcol_in - 1
-                write(901,*) 'is multiple eigenvalue, force to include it', lcol_in
-                flush(901)
-            end do
-            lcol_in = lcol_in - 2 
-            ! plus some extra space
-            write(901,*) 'safety:', lcol_in
-            flush(901)
-
-        end if
+        lcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < alpha_plus))
 
     else
 
-        fcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < alpha_minus)) + 1
-
-        if (islice<nslice) then
-
-            lcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < alpha_plus))
-
-        else
-
-            write(901,*) 'pass', lcol_in
+        write(901,*) 'pass', lcol_in
+        flush(901)
+        if (count_merge + lcol_in-fcol_in+1 > neigenpairs) then
+            lcol_in = fcol_in + neigenpairs - count_merge - 1
+            write(901,*) 'pass bis', lcol_in, fcol_in, neigenpairs, count_merge
             flush(901)
-            if (count_merge + lcol_in-fcol_in+1 > neigenpairs) then
-                lcol_in = fcol_in + neigenpairs - count_merge - 1
-                write(901,*) 'pass', lcol_in, fcol_in, neigenpairs, count_merge
-                flush(901)
-            end if
-
         end if
 
     end if
@@ -1332,11 +1271,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     count_slice = lcol_in - fcol_in + 1
 
     ! ITEST
-    !if (islice==3) then
-    !    write(901,*) 'inside indices [a,b)=', fcol_in, lcol_in, lambda_minus
-    !else
-    !    write(901,*) 'inside indices [a,b)=', fcol_in, lcol_in, alpha_minus, alpha_plus
-    !end if
     write(901,*) 'Frobenius norm (inside slice', islice, 'only)=', sqrt(sum(resid(fcol_in:lcol_in)))
     flush(901)
     ! ITEST
@@ -1385,18 +1319,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     fcol_global = count_merge + 1
 
     !! Free slice memory whose size depends on count_mask, different for every slice
-    if (islice>3) then
-        
-        call xg_free(Xsum)
-
-    end if
-
-    if (slice%spectral_cut==1) then
-
-        call xg_free(X_kept)
-        call xg_free(AX_kept)
-
-    end if
+    call xg_free(Xsum)
+    call xg_free(X_kept)
+    call xg_free(AX_kept)
 
  end do ! End loop on slices
 
@@ -2974,8 +2899,9 @@ subroutine computeBorthoLanczos(slice, n, k, min_low_est, getAX, kin, my_rank, g
             ! option: essaie de mettre 1
             ! FIXME à mon avis c'est pas optimal car normallement il y a ddot pour ça
             ! essaie de le faire sur CPU d'abord sans xgtools puis demander à Lucas
-            call xg_init(vTBv, space_res, slice%bandpp, 1)
+            call xg_init(vTBv, space_res, 1, 1)
             !call xgBlock_colwiseDotProduct(v,Bv,vTBv%self,comm_loc=xmpi_comm_null)
+            ! TODO objects v, Bv should be xgtools
             call xg_free(vTBv)
 
             q_prev = q
