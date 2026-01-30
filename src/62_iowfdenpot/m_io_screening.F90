@@ -408,7 +408,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
  character(len=nctk_slen) :: varname !,head_shape,wing_shape
 !arrays
  real(dp),allocatable :: real_omega(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: r2vals(:,:) !,rvals3(:,:,:)
+ real(dp), contiguous, pointer :: r2vals(:,:) !,rvals3(:,:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1362,9 +1362,9 @@ subroutine write_screening(varname, unt, iomode, npwe, nomega, iq_ibz, epsm1)
  complex(dp),allocatable :: epsm1d(:,:)
  integer :: varid,ncerr
 #ifdef HAVE_GW_DPC
- real(dp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
+ real(dp), contiguous, pointer :: real_epsm1(:,:,:,:,:,:,:)
 #else
- real(sp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
+ real(sp), contiguous, pointer :: real_epsm1(:,:,:,:,:,:,:)
 #endif
 ! *************************************************************************
 
@@ -1476,9 +1476,9 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
  complex(dp),allocatable :: bufdc2d(:,:),bufdc3d(:,:,:)
  ! pointers passed to netcdf4 routines (complex datatypes are not supported).
 #ifdef HAVE_GW_DPC
- real(dp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
+ real(dp), contiguous, pointer :: real_epsm1(:,:,:,:,:,:,:)
 #else
- real(sp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
+ real(sp), contiguous, pointer :: real_epsm1(:,:,:,:,:,:,:)
 #endif
  integer :: spins(2),s1,s2
 ! *************************************************************************

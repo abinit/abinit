@@ -166,8 +166,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  real(dp),allocatable :: gh1c_sp(:,:),gh1c1(:,:),gh1c2(:,:),gh1c3(:,:),gh1c4(:,:)
  real(dp),allocatable :: gh1c_mGGA(:,:),gh1ndc(:,:),gvnl2(:,:)
  real(dp),allocatable :: nonlop_out(:,:),vlocal1_tmp(:,:,:),work(:,:,:,:)
- real(dp),ABI_CONTIGUOUS pointer :: gvnlx1_(:,:)
- real(dp),pointer :: dkinpw(:),kinpw1(:)
+ real(dp),contiguous, pointer :: gvnlx1_(:,:), dkinpw(:),kinpw1(:)
  type(pawcprj_type),allocatable,target :: cwaveprj_tmp(:,:)
  type(pawcprj_type),pointer :: cwaveprj_ptr(:,:)
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -1102,7 +1101,7 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
  integer :: n1,n2,n3,n4,n5,n6,paral_kgb,ispden
 !arrays
  real(dp) :: rhodum(1) !, tsec(2)
- real(dp), ABI_CONTIGUOUS pointer :: vtrial_ptr(:,:),vtrial1_ptr(:,:)
+ real(dp), contiguous, pointer :: vtrial_ptr(:,:),vtrial1_ptr(:,:)
  real(dp),allocatable :: cgrvtrial(:,:),cgrvtrial1(:,:),vlocal_tmp(:,:,:),vlocal1_tmp(:,:,:)
 ! *************************************************************************
 
@@ -1709,7 +1708,7 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
  real(dp),intent(out) :: gh1dqc(2,gs_hamkq%npw_kp*gs_hamkq%nspinor)
  real(dp),intent(out) :: gvloc1dqc(2,gs_hamkq%npw_kp*gs_hamkq%nspinor)
  real(dp),intent(out) :: gvnl1dqc(2,gs_hamkq%npw_kp*gs_hamkq%nspinor)
- real(dp),pointer :: dqdqkinpw(:),kinpw1(:)
+ real(dp),contiguous, pointer :: dqdqkinpw(:),kinpw1(:)
  type(pawcprj_type),intent(inout),target :: cwaveprj(:,:)
 
 !Local variables-------------------------------
@@ -1723,7 +1722,7 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
 !arrays
  integer,parameter :: ngamma(3,3)=reshape((/1,6,5,9,2,4,8,7,3/),(/3,3/))
  real(dp) :: enlout(1),svectout_dum(1,1)
- real(dp),ABI_CONTIGUOUS pointer :: gvnl1dqc_(:,:)
+ real(dp),contiguous, pointer :: gvnl1dqc_(:,:)
  real(dp), allocatable :: work(:,:,:,:)
 ! *************************************************************************
 

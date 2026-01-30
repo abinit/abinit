@@ -1455,7 +1455,7 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
 !Local variables-------------------------------
  integer :: ncerr
  integer :: max_nreh, sum_nreh
- real(dp), ABI_CONTIGUOUS pointer :: r2vals(:,:),r3vals(:,:,:)
+ real(dp), contiguous, pointer :: r2vals(:,:),r3vals(:,:,:)
 ! *************************************************************************
 
  ! ==============================================
