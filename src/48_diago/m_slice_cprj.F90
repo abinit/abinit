@@ -828,7 +828,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  count_merge = 0
  fcol_global = 1
 
- do islice=2, nslice
+ do islice=1, nslice
 
     write(901,*)
     write(901,*) '====================Slice=================', islice
@@ -848,14 +848,16 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! Initial slice workspaces are independent entire arrays
     call xgBlock_copy(slice%AllX, slice%X)
     call xgBlock_copy(slice%AllAX%self, slice%AX)
- 
+    
     ! the two following ones will be recomputed so whatever
     slice%cprjX = slice%AllcprjX
     slice%cprj_work = slice%Allcprj_work%self
 
-    write(901,*) 'dunno init', xgBlock_getid(slice%AX), xgBlock_getid(slice%X), &
-        xgBlock_getid(slice%cprjX), xgBlock_getid(slice%cprj_work)
-    flush(901)
+    ! reinitiaze pointers to workspaces ...
+    if (islice>1) then
+        call xg_setBlock(slice%X_NP,slice%X_next,slice%total_spacedim,slice%neigenpairs)
+        call xg_setBlock(slice%X_NP,slice%X_prev,slice%total_spacedim,slice%neigenpairs,fcol=slice%neigenpairs+1)
+    end if
 
     !! ------------------------------------------------------------
     !! 
@@ -946,6 +948,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     call timab(tim_slice_fi,1,tsec)
     
+    ! dunno:
+    ! <- slice%X qui n'est pas bien initialisé
+    
     ! Initialize Chebyshev expansion of indicator function of order ndeg_filter
     call xg_init(Xsum,slice%space,slice%total_spacedim,neigenpairs,slice%spacecom,gpu_option=gpu_option)
     cdeg = Pi/(ndeg_filter+2)
@@ -958,7 +963,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     do ideg = 0, ndeg_filter - 1
         
         ! ITEST
-        write(901,*) 'polynomial degree=', ideg, xgBlock_getid(slice%cprjX)
+        write(901,*) 'polynomial degree=', ideg
         flush(901)
         ! ITEST
 
@@ -988,21 +993,17 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         !A * Psi
         call timab(tim_AX_v,1,tsec)
         call getAX(slice%X,slice%AX)
-        write(901,*) 'dunno=', xgBlock_getid(slice%X), xgBlock_getid(slice%cprjX); flush(901)
         call timab(tim_AX_v,2,tsec)
         call timab(tim_AX_k,1,tsec)
         call xgBlock_add_diag(slice%X,kin,nspinor,slice%AX)
-        write(901,*) 'dunno=', xgBlock_getid(slice%X), xgBlock_getid(slice%cprjX); flush(901)
         call timab(tim_AX_k,2,tsec)
         call timab(tim_cprj,1,tsec)
         call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
-        write(901,*) 'dunno=', xgBlock_getid(slice%X), xgBlock_getid(slice%cprjX); flush(901)
         call timab(tim_cprj,2,tsec)
         call timab(tim_AX_nl,1,tsec)
         call xg_nonlop_getHX(xg_nonlop,slice%AX,slice%cprjX,slice%cprj_work,slice%proj_work%self)
-        write(901,*) 'dunno=', xgBlock_getid(slice%X), xgBlock_getid(slice%cprjX); flush(901)
         call timab(tim_AX_nl,2,tsec)
-
+        
     end do ! End polynomial degree loop
     
     call timab(tim_slice_fi,2,tsec)
@@ -1071,7 +1072,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     if (islice==1) then
         count_mask = 40
     else if (islice==2) then
-        count_mask = 75  ! TODO rename to nvec_kept..
+        count_mask = 100  ! TODO rename to nvec_kept..
     end if
     ! ongoing: merge strategy should work (no missing eigenvalues) if I put count_mask=neigenpairs
 
@@ -1109,11 +1110,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         call timab(tim_copy, 2, tsec)
 
     end do
-    
+ 
     ! reset pointers to temporary (kept)
     slice%X = X_kept%self
     slice%AX = AX_kept%self
- 
+    
     ! content is not important, but dimensions 
     call xgBlock_setBlock(slice%AllcprjX, slice%cprjX, slice%cprjdim, count_mask*nspinor)
 
@@ -1672,13 +1673,13 @@ subroutine slice_computeNextOrderChebfiPolynom(slice,ideg,center,one_over_r,two_
    call xgBlock_copy(slice%AX,slice%X_next)
    call timab(tim_copy, 2, tsec)
  end if
-
+ 
  call timab(tim_postinvovl, 1, tsec)
  call xgBlock_scale(slice%X, center, 1) !scale by center
 
  !(B-1 * A * Psi^i-1 - c * Psi^i-1)
  call xgBlock_saxpy(slice%X_next, dble(-1.0), slice%X)
-
+ 
  !Psi^i-1  = 1/c * Psi^i-1
  call xgBlock_scale(slice%X, 1/center, 1) !counter scale by 1/center
 
@@ -1689,9 +1690,9 @@ subroutine slice_computeNextOrderChebfiPolynom(slice,ideg,center,one_over_r,two_
 
    call xgBlock_saxpy(slice%X_next, dble(-1.0), slice%X_prev)
  end if
-
+ 
  call timab(tim_postinvovl, 2, tsec)
-
+ 
 end subroutine slice_computeNextOrderChebfiPolynom
 !!***
 
