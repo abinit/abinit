@@ -401,13 +401,13 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%irdddk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdddk','INT',0)
- 
+
  intarr(1,:)=dtsets(:)%irddelfd
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irddelfd','INT',0)
 
  intarr(1,:)=dtsets(:)%irddkdk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irddkdk','INT',0)
- 
+
  intarr(1,:)=dtsets(:)%irddkde
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irddkde','INT',0)
 
@@ -949,11 +949,11 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nberry
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nberry','INT',0)
 
- intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nb_protected
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nb_protected','INT',0)
+ !:intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nb_protected
+ !:call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nb_protected','INT',0)
 
- intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nb_per_slice
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nb_per_slice','INT',0)
+ !intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%nb_per_slice
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nb_per_slice','INT',0)
 
  intarr(1,:)=dtsets(:)%nc_xccc_gspace
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nc_xccc_gspace','INT',0)
