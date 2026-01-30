@@ -7,7 +7,7 @@
 !!  and, optionally, transport properties within the Kubo formalism.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (JCA, MG)
+!!  Copyright (C) 2008-2026 ABINIT group (JCA, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

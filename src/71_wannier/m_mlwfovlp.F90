@@ -6,7 +6,7 @@
 !!  Interface with Wannier90
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2025 ABINIT group (BAmadon, CEspejo, FJollet, TRangel, DRH, hexu)
+!!  Copyright (C) 2005-2026 ABINIT group (BAmadon, CEspejo, FJollet, TRangel, DRH, hexu)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

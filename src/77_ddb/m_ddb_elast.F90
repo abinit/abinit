@@ -6,7 +6,7 @@
 !!  Elastic properties (clamped-ions and relaxed-ions).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2025 ABINIT group (XW, DW)
+!!  Copyright (C) 1999-2026 ABINIT group (XW, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
