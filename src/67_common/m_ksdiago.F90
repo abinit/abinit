@@ -1542,7 +1542,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  if (.False.) then
    call wrtout(std_out, " Generating stochastic bands...")
    ! Initial setup.
-   call psb%init(dtset, h_size, eig_ene, gs_fermie) !, nband_k)
+!  call psb%init(dtset, h_size, eig_ene, gs_fermie) !, nband_k)
+   call psb%init(h_size, eig_ene, gs_fermie) !, nband_k)
    my_npwsp = eigvec%size_local(1)
    nb_glob = eigvec%size_global(2)
    ABI_CALLOC(ps_ug, (my_npwsp, psb%maxsto_per_slice, psb%nslices))
@@ -2231,11 +2232,12 @@ end subroutine hyb_free
 !!
 !! SOURCE
 
-subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie)
+!subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie)
+subroutine psbands_init(psb, eig_size, eig_k, gs_fermie)
 
 !Arguments ------------------------------------
  class(psbands_t),intent(out) :: psb
- class(dataset_type),target,intent(in) :: dtset
+!class(dataset_type),target,intent(in) :: dtset
  integer,intent(in) :: eig_size
  real(dp),intent(in) :: gs_fermie
 !arrays
