@@ -1132,6 +1132,10 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
        call getghc(cpopt,ket,cwaveprj1,ghc,gsc,gs_hamk,gvnlxc,lams,mpi_enreg,&
          & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
 
+       ! [H+E*S - 2\mu*S]|ket> is needed for orbmag
+       ! -2*S|ket> needed below for Chern
+       ghc(1:2,1:npwsp) = ghc(1:2,1:npwsp) + gsc(1:2,1:npwsp)*(eig_k(nn) - two*fermie)
+
        do bdir = 1, 3
          epsabg = eijk(adir,bdir,gdir)
          if (ABS(epsabg) .LT. half) cycle
@@ -1146,14 +1150,15 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
          dotr = DOT_PRODUCT(bra(1,:),gsc(1,:))+DOT_PRODUCT(bra(2,:),gsc(2,:))
          doti = DOT_PRODUCT(bra(1,:),gsc(2,:))-DOT_PRODUCT(bra(2,:),gsc(1,:))
          b1 = b1 -two*prefac_b*CMPLX(dotr,doti)
-         m1 = m1 + prefac_m*CMPLX(dotr,doti)*eig_k(nn)
-         m1_mu = m1_mu - two*prefac_m*CMPLX(dotr,doti)*fermie
+         !m1 = m1 + prefac_m*CMPLX(dotr,doti)*eig_k(nn)
+         !m1_mu = m1_mu - two*prefac_m*CMPLX(dotr,doti)*fermie
 
        end do !bdir
  
      end do !gdir
 
-     orbmag_mesh%omesh(nn,ikpt,isppol,adir,incc) = real(m1 + m1_mu)
+     !orbmag_mesh%omesh(nn,ikpt,isppol,adir,incc) = real(m1 + m1_mu)
+     orbmag_mesh%omesh(nn,ikpt,isppol,adir,incc) = real(m1)
      orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibcc) = real(b1)
 
    end do !nn
