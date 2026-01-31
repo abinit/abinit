@@ -306,7 +306,7 @@ the computation to the little group (of k or q).
 Introduced new variable [[gstore_gname]]. This input variable specifies the name of the netcdf variable from which the e-ph matrix elements
 will be **read** from the GSTORE.nc file.
 
-See [[test:gwpt_suite_04]] and [[test:gwpt_suite_05]].
+See `test:gwpt_suite_04` and `test:gwpt_suite_05`to be activated later.
 
 By M. Giantomassi (MR1235 and 1238)
 
