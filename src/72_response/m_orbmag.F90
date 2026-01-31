@@ -1090,10 +1090,11 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
   !Local variables -------------------------
   !scalars
   integer :: adir,bdir,cpopt,gdir,ndat,nn,npwsp,sij_opt,tim_getghc,type_calc
-  real(dp) :: doti,dotr,epsabg,lams
-  complex(dp) :: b1,m1,prefac_b,prefac_m
+  real(dp) :: bdoti,bdotr,epsabg,lams,mdoti,mdotr
+  complex(dp) :: prefac_b,prefac_m
   !arrays
   real(dp),allocatable :: bra(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:),ket(:,:)
+  complex(dpc) :: m1(3),b1(3)
   type(pawcprj_type),allocatable :: cwaveprj1(:,:)
 !--------------------------------------------------------------------
 
@@ -1113,51 +1114,54 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
  sij_opt = 1
  type_calc = 0
 
- do adir = 1, 3
-   do nn = 1, nband_k
 
-     m1 = czero
-     b1 = czero
+ do nn = 1, nband_k
 
-     do gdir = 1, 3
+   m1 = czero
+   b1 = czero
+     
+   do gdir = 1, 3
 
-       cpopt = 2
-       ket(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
+     cpopt = 2
+     ket(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
 
-       call pawcprj_get(atindx,cwaveprj1,cprj1_k(:,:,gdir),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
-         & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
+     call pawcprj_get(atindx,cwaveprj1,cprj1_k(:,:,gdir),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
+       & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
 
-       ! compute H|Pc du> and S|Pc du>
-       ! [H+E*S - 2\mu*S]|ket> is needed for orbmag
-       ! -2*S|ket> needed for Chern
-       call getghc(cpopt,ket,cwaveprj1,ghc,gsc,gs_hamk,gvnlxc,lams,mpi_enreg,&
-         & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
+     ! compute H|Pc d_\gamma u> and S|Pc d_\gamma u>
+     ! [H+E*S - 2\mu*S]|ket> is needed for orbmag
+     ! -2*S|ket> needed for Chern
+     call getghc(cpopt,ket,cwaveprj1,ghc,gsc,gs_hamk,gvnlxc,lams,mpi_enreg,&
+       & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
 
-       ghc(1:2,1:npwsp) = ghc(1:2,1:npwsp) + gsc(1:2,1:npwsp)*(eig_k(nn) - two*fermie)
+     ghc(1:2,1:npwsp) = ghc(1:2,1:npwsp) + gsc(1:2,1:npwsp)*(eig_k(nn) - two*fermie)
 
-       do bdir = 1, 3
+     do bdir = 1, 3
+       bra(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
+
+       mdotr = DOT_PRODUCT(bra(1,:),ghc(1,:))+DOT_PRODUCT(bra(2,:),ghc(2,:))
+       mdoti = DOT_PRODUCT(bra(1,:),ghc(2,:))-DOT_PRODUCT(bra(2,:),ghc(1,:))
+
+       bdotr = DOT_PRODUCT(bra(1,:),gsc(1,:))+DOT_PRODUCT(bra(2,:),gsc(2,:))
+       bdoti = DOT_PRODUCT(bra(1,:),gsc(2,:))-DOT_PRODUCT(bra(2,:),gsc(1,:))
+
+       ! assemble contributions alpha_dir \propto \beta_dir x \gamma_dir
+       do adir = 1, 3
          epsabg = eijk(adir,bdir,gdir)
          if (ABS(epsabg) .LT. half) cycle
          prefac_b = cbc*c2*epsabg
          prefac_m = com*c2*epsabg
-         bra(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
+         m1(adir) = m1(adir) + prefac_m*CMPLX(mdotr,mdoti)
+         b1(adir) = b1(adir) - two* prefac_b*CMPLX(bdotr,bdoti)
+       end do ! adir
+   
+     end do !bdir
+   end do !gdir
 
-         dotr = DOT_PRODUCT(bra(1,:),ghc(1,:))+DOT_PRODUCT(bra(2,:),ghc(2,:))
-         doti = DOT_PRODUCT(bra(1,:),ghc(2,:))-DOT_PRODUCT(bra(2,:),ghc(1,:))
-         m1 = m1 + prefac_m*CMPLX(dotr,doti)
+   orbmag_mesh%omesh(nn,ikpt,isppol,1:3,incc) = real(m1(1:3))
+   orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibcc) = real(b1(1:3))
 
-         dotr = DOT_PRODUCT(bra(1,:),gsc(1,:))+DOT_PRODUCT(bra(2,:),gsc(2,:))
-         doti = DOT_PRODUCT(bra(1,:),gsc(2,:))-DOT_PRODUCT(bra(2,:),gsc(1,:))
-         b1 = b1 - two*prefac_b*CMPLX(dotr,doti)
-       end do !bdir
- 
-     end do !gdir
-
-     orbmag_mesh%omesh(nn,ikpt,isppol,adir,incc) = real(m1)
-     orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibcc) = real(b1)
-
-   end do !nn
- end do !adir
+ end do !nn
 
  ABI_FREE(bra)
  ABI_FREE(ket)
