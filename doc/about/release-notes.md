@@ -306,6 +306,8 @@ the computation to the little group (of k or q).
 Introduced new variable [[gstore_gname]]. This input variable specifies the name of the netcdf variable from which the e-ph matrix elements
 will be **read** from the GSTORE.nc file.
 
+See [[test:gwpt_suite_04]] and [[test:gwpt_suite_05]].
+
 By M. Giantomassi (MR1235 and 1238)
 
 
@@ -322,7 +324,7 @@ This setting enables a more accurate evaluation of the self-energy for a given S
 Previously, we were just printing a WARNING in the log file.
 * Fix memory leak in gwr with [[gwr_chi_algo]] 2
 
-See [[test:v67mbpt_54]] to [[test:v67mbpt_60]], also [[test:gwr_suite_12]]..
+See [[test:v67mbpt_54]] to [[test:v67mbpt_60]], also [[test:gwr_suite_12]].
 
 By M. Giantomassi and Hsiao-Yi Tsai (MR1187, 1201)
 
@@ -348,7 +350,7 @@ By F. Brieuc (MR1207)
 
 As discussed in the coredev meeting, now [[dilatmx]] > 1 is allowed only for ground state.
 Some tests were using dilatmx > 1 for DFPT, so they are changed.
-Also, a warning is printed if dilatmx>1 and [[optcell]]==0.
+Also, a warning is printed if dilatmx > 1 and [[optcell]]==0.
 
 By L. Baguet (MR1216)
 
