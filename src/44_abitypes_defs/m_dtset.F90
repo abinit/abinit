@@ -450,8 +450,8 @@ type, public :: dataset_type
  integer :: nbdblock
  integer :: nbdbuf
  integer :: nberry
- integer :: nb_protected = 0
- integer :: nb_per_slice = 2
+ !integer :: nb_protected = 0
+ !integer :: nb_per_slice = 2
  integer :: nc_xccc_gspace = 0
  integer :: nconeq
  integer :: ncout = 1
@@ -1987,8 +1987,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nbdbuf             = dtin%nbdbuf
  dtout%nbandhf            = dtin%nbandhf
  dtout%nberry             = dtin%nberry
- dtout%nb_protected       = dtin%nb_protected
- dtout%nb_per_slice       = dtin%nb_per_slice
+ !dtout%nb_protected       = dtin%nb_protected
+ !dtout%nb_per_slice       = dtin%nb_per_slice
  dtout%nc_xccc_gspace     = dtin%nc_xccc_gspace
  dtout%nbandkss           = dtin%nbandkss
  dtout%nconeq             = dtin%nconeq
@@ -3820,7 +3820,7 @@ subroutine chkvars(string)
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz natnd'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'
- list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nb_protected nb_per_slice nconeq ncout'
+ list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nconeq ncout'  ! nb_protected nb_per_slice
  list_vars=trim(list_vars)//' nc_xccc_gspace nctime ndivk ndivsm ndtset neb_algo neb_cell_algo neb_spring nefield'
  list_vars=trim(list_vars)//' nfreqim nfreqim_conv nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
