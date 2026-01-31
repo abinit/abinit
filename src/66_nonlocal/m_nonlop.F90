@@ -345,14 +345,14 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  type(gs_hamiltonian_type),intent(in),target :: hamk
 !arrays
  real(dp),intent(in) :: lambda(ndat)
- real(dp),ABI_CONTIGUOUS intent(in),target,optional :: enl(:,:,:,:),enl_ndat(:,:,:,:,:)
+ real(dp),contiguous, intent(in),target,optional :: enl(:,:,:,:),enl_ndat(:,:,:,:,:)
  real(dp),intent(inout),target :: vectin(:,:)
  real(dp),intent(out),target :: enlout(:),svectout(:,:)
  real(dp),intent(out),optional :: enlout_im(:)
  real(dp),intent(inout),target :: vectout(:,:)
  type(pawcprj_type),intent(inout),target :: cprjin(:,:)
  type(pawcprj_type),intent(inout),target,optional :: cprjin_left(:,:)
- real(dp),intent(inout), ABI_CONTIGUOUS optional :: vectproj(:,:,:)
+ real(dp),intent(inout), contiguous, optional :: vectproj(:,:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -365,16 +365,16 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !arrays
  integer :: nlmn_atm(1),nloalg_(3)
  integer,pointer :: kgin(:,:),kgout(:,:)
- integer, ABI_CONTIGUOUS pointer :: atindx1_(:),indlmn_(:,:,:),nattyp_(:)
+ integer, contiguous, pointer :: atindx1_(:),indlmn_(:,:,:),nattyp_(:)
  real(dp) :: tsec(2)
- real(dp), ABI_CONTIGUOUS pointer :: enl_ptr(:,:,:,:),enl_ndat_ptr(:,:,:,:,:)
+ real(dp), contiguous, pointer :: enl_ptr(:,:,:,:),enl_ndat_ptr(:,:,:,:,:)
  real(dp),pointer :: ffnlin(:,:,:,:),ffnlin_(:,:,:,:),ffnlout(:,:,:,:),ffnlout_(:,:,:,:)
  real(dp),pointer :: kpgin(:,:),kpgout(:,:)
  real(dp) :: kptin(3),kptout(3)
  real(dp),pointer :: ph3din(:,:,:),ph3din_(:,:,:),ph3dout(:,:,:),ph3dout_(:,:,:)
  real(dp),pointer :: phkxredin(:,:),phkxredin_(:,:),phkxredout(:,:),phkxredout_(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: ph1d_(:,:),sij_(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: enl__(:,:,:,:),enl_ndat_(:,:,:,:,:)
+ real(dp), contiguous, pointer :: ph1d_(:,:),sij_(:,:)
+ real(dp), contiguous, pointer :: enl__(:,:,:,:),enl_ndat_(:,:,:,:,:)
  type(pawcprj_type),pointer :: cprjin_(:,:)
  integer :: b0,b1,b2,b3,b4,e0,e1,e2,e3,e4
  integer :: proj_shift,ia,nlmn

@@ -304,7 +304,6 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cwaveprj_gat(:,:)
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1010,9 +1009,8 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable,target :: cwavef(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: cwavef_ptr(:,:),ghc_ptr(:,:),gsc_ptr(:,:)
+ real(dp), contiguous, pointer :: cwavef_ptr(:,:),ghc_ptr(:,:),gsc_ptr(:,:)
  type(pawcprj_type) :: cwaveprj(1,1)
-
 ! *************************************************************************
 
 !Keep track of total time spent in mkresi
@@ -1150,7 +1148,6 @@ subroutine entropy(dtset,energies)
 !scalars
  type(dataset_type),intent(in) :: dtset
  type(energies_type),intent(inout) :: energies
-
 ! *************************************************************************
 
 !In case we have other sources of entropy than kohn-sham states occupation,

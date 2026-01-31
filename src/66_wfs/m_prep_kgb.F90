@@ -132,21 +132,21 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 !arrays
  integer,allocatable :: index_wavef_band(:),index_wavef_send(:),index_wavef_spband(:)
  integer,allocatable :: rdisplsloc(:),recvcountsloc(:),sdisplsloc(:),sendcountsloc(:)
- integer,ABI_CONTIGUOUS pointer :: kg_k_gather_sym(:,:)
- integer,ABI_CONTIGUOUS pointer :: rdispls(:),rdispls_sym(:)
- integer,ABI_CONTIGUOUS pointer :: recvcounts(:),recvcounts_sym(:),recvcounts_sym_tot(:)
- integer,ABI_CONTIGUOUS pointer :: sdispls(:),sdispls_sym(:)
- integer,ABI_CONTIGUOUS pointer :: sendcounts(:),sendcounts_sym(:),sendcounts_sym_all(:)
- integer,ABI_CONTIGUOUS pointer :: tab_proc(:)
+ integer,contiguous, pointer :: kg_k_gather_sym(:,:)
+ integer,contiguous, pointer :: rdispls(:),rdispls_sym(:)
+ integer,contiguous, pointer :: recvcounts(:),recvcounts_sym(:),recvcounts_sym_tot(:)
+ integer,contiguous, pointer :: sdispls(:),sdispls_sym(:)
+ integer,contiguous, pointer :: sendcounts(:),sendcounts_sym(:),sendcounts_sym_all(:)
+ integer,contiguous, pointer :: tab_proc(:)
  real(dp) :: tsec(2)
  real(dp),allocatable,target :: cwavef_alltoall1(:,:), gvnlxc_alltoall1(:,:)
  real(dp),allocatable,target :: gwavef_alltoall1(:,:), swavef_alltoall1(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: cwavef_alltoall2(:,:) => null()
- real(c_double), ABI_CONTIGUOUS pointer :: gvnlxc_alltoall2(:,:) => null()
- real(c_double), ABI_CONTIGUOUS pointer :: gwavef_alltoall2(:,:) => null()
- real(c_double), ABI_CONTIGUOUS pointer :: swavef_alltoall2(:,:) => null()
+ real(c_double), contiguous, pointer :: cwavef_alltoall2(:,:) => null()
+ real(c_double), contiguous, pointer :: gvnlxc_alltoall2(:,:) => null()
+ real(c_double), contiguous, pointer :: gwavef_alltoall2(:,:) => null()
+ real(c_double), contiguous, pointer :: swavef_alltoall2(:,:) => null()
 #else
  real(dp),allocatable,target :: cwavef_alltoall2(:,:)
  real(dp),allocatable,target :: gvnlxc_alltoall2(:,:)
@@ -647,7 +647,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  real(dp),        intent(in)            :: lambdablock(blocksize)
  real(dp),        intent(out)  , target :: enlout_block(nnlout*blocksize),gvnlc(:,:),gsc(:,:)
  real(dp),        intent(inout), target :: cwavef(:,:)
- real(dp),ABI_CONTIGUOUS optional,intent(inout)        :: vectproj(:,:,:)
+ real(dp),contiguous, optional,intent(inout)        :: vectproj(:,:,:)
  type(gs_hamiltonian_type),intent(in)   :: hamk
  type(mpi_type),intent(in)              :: mpi_enreg
  type(pawcprj_type),intent(inout)       :: cwaveprj(:,:)
@@ -665,14 +665,14 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 !arrays
  integer,  allocatable :: index_wavef_band(:)
  integer,  allocatable :: rdisplsloc(:),recvcountsloc(:),sdisplsloc(:),sendcountsloc(:)
- integer,ABI_CONTIGUOUS  pointer :: rdispls(:),recvcounts(:),sdispls(:),sendcounts(:)
+ integer,contiguous,  pointer :: rdispls(:),recvcounts(:),sdispls(:),sendcounts(:)
  real(dp) :: lambda_nonlop(mpi_enreg%bandpp)
  real(dp) :: tsec(2)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: cwavef_alltoall2(:,:) => null()
- real(c_double), ABI_CONTIGUOUS pointer :: gvnlc_alltoall2(:,:)  => null()
- real(c_double), ABI_CONTIGUOUS pointer :: gsc_alltoall2(:,:)    => null()
+ real(c_double), contiguous, pointer :: cwavef_alltoall2(:,:) => null()
+ real(c_double), contiguous, pointer :: gvnlc_alltoall2(:,:)  => null()
+ real(c_double), contiguous, pointer :: gsc_alltoall2(:,:)    => null()
  integer(kind=C_SIZE_T) :: cwavef_alltoall2_size
  integer(kind=C_SIZE_T) :: gvnlc_alltoall2_size
  integer(kind=C_SIZE_T) :: gsc_alltoall2_size
@@ -1122,12 +1122,12 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  real(dp) :: weight,weight1,weight2
  type(bandfft_kpt_type),pointer :: bandfft_kpt_ptr
 !arrays
- integer,ABI_CONTIGUOUS pointer :: indices_pw_fft(:),kg_k_fft(:,:),kg_k_gather(:,:),kg_k_gather_sym(:,:)
- integer,ABI_CONTIGUOUS pointer :: rdispls(:),rdispls_sym(:)
- integer,ABI_CONTIGUOUS pointer :: recvcounts(:),recvcount_fft(:),recvcounts_sym(:),recvcounts_sym_tot(:)
- integer,ABI_CONTIGUOUS pointer :: recvdisp_fft(:),sdispls(:),sdispls_sym(:)
- integer,ABI_CONTIGUOUS pointer :: sendcounts(:),sendcount_fft(:),sendcounts_sym(:),sendcounts_sym_all(:)
- integer,ABI_CONTIGUOUS pointer :: senddisp_fft(:),tab_proc(:)
+ integer,contiguous, pointer :: indices_pw_fft(:),kg_k_fft(:,:),kg_k_gather(:,:),kg_k_gather_sym(:,:)
+ integer,contiguous, pointer :: rdispls(:),rdispls_sym(:)
+ integer,contiguous, pointer :: recvcounts(:),recvcount_fft(:),recvcounts_sym(:),recvcounts_sym_tot(:)
+ integer,contiguous, pointer :: recvdisp_fft(:),sdispls(:),sdispls_sym(:)
+ integer,contiguous, pointer :: sendcounts(:),sendcount_fft(:),sendcounts_sym(:),sendcounts_sym_all(:)
+ integer,contiguous, pointer :: senddisp_fft(:),tab_proc(:)
  integer,allocatable :: rdisplsloc(:)
  integer,allocatable :: recvcountsloc(:),sdisplsloc(:)
  integer,allocatable :: sendcountsloc(:)
@@ -1137,7 +1137,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  real(dp),allocatable :: buff_wf(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: cwavef_alltoall1(:,:) => null()
+ real(c_double), contiguous, pointer :: cwavef_alltoall1(:,:) => null()
 #else
  real(dp),allocatable :: cwavef_alltoall1(:,:)
 #endif
