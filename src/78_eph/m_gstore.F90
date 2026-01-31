@@ -3620,7 +3620,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:)
  real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1_kets_kq(:,:,:) !, cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
- real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
+ real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:,:), work(:,:,:,:)
  real(dp),allocatable :: gs1c_kq(:,:) !, vnk_cart_ibz(:,:,:) !, vkq_cart_ibz(:,:,:)  !, vnk_mat_cart_ibz(:,:,:,:)
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
@@ -3757,7 +3757,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  optlocal = 1    ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
  optnl = 2       ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
  opt_gvnlx1 = 0  ! gvnlx1 is output
- ABI_MALLOC(gvnlx1, (2, usevnl))
  ABI_MALLOC(grad_berry, (2, nspinor*(berryopt0/4)))
 
  ! This part is taken from dfpt_vtorho
@@ -4007,6 +4006,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
        ABI_MALLOC(h1_kets_kq, (2, npw_kq*nspinor, nb_k))
        ABI_MALLOC(gs1c_kq, (2, npw_kq*nspinor*nb_k*((sij_opt+1)/2)))
+       ABI_MALLOC(gvnlx1, (2, npw_kq*nspinor,nb_k))
 
        ! Loop over my atomic perturbations and compute gkq_atm.
        gkq_atm = zero
@@ -4046,14 +4046,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          call rf_ham_kq%free()
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
-         !!$OMP PARALLEL DO COLLAPSE(2)
-         !do in_k=1,nb_k
-         !  do im_kq=1,nb_kq
-         !    gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,im_kq), h1_kets_kq(1,1,in_k))
-         !  end do
-         !end do
-
-         call zgemm('C', 'N', nb_kq, nb_k, npw_kq*nspinor, cone, bras_kq, npw_kq*nspinor, &
+         call ZGEMM('C', 'N', nb_kq, nb_k, npw_kq*nspinor, cone, bras_kq, npw_kq*nspinor, &
                     h1_kets_kq, npw_kq*nspinor, czero, gkq_atm(:,:,:,ipc), nb_kq)
 
        end do ! my_ip
@@ -4076,6 +4069,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ABI_FREE(kets_k)
        ABI_FREE(bras_kq)
        ABI_FREE(h1_kets_kq)
+       ABI_FREE(gvnlx1)
      end do ! my_ik
 
      ABI_FREE(v1scf)
@@ -4122,7 +4116,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  call gstore%print_for_abitests(dtset, ebands, .True.)
 
  ! Free memory
- ABI_FREE(gvnlx1)
+
  ABI_FREE(grad_berry)
  ABI_FREE(dummy_vtrial)
  ABI_FREE(work)
@@ -6098,7 +6092,7 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
  real(dp),allocatable :: v1scf(:,:,:,:), work(:,:,:,:), p_kets_k(:,:,:,:), gs1c_kq(:,:), dmat(:,:,:,:)
  real(dp),allocatable :: kets_k(:,:,:), h1_kets_kq(:,:,:), iv1p_comm(:,:,:,:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ph3d_k(:,:,:), grad_berry(:,:), kinpw_k(:), kpg_k(:,:)
- real(dp),allocatable :: vlocal(:,:,:,:), vlocal1(:,:,:,:,:), dummy_vtrial(:,:), gvnlx1(:,:), lambda(:)
+ real(dp),allocatable :: vlocal(:,:,:,:), vlocal1(:,:,:,:,:), dummy_vtrial(:,:), gvnlx1(:,:,:), lambda(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:)
 !----------------------------------------------------------------------
 
@@ -6134,7 +6128,7 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
  optlocal = 1    ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
  optnl = 2       ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
  opt_gvnlx1 = 0  ! gvnlx1 is output
- ABI_MALLOC(gvnlx1, (2, usevnl))
+
  ABI_MALLOC(grad_berry, (2, nspinor*(berryopt0/4)))
 
  ! Since v1(q=0) and p are Hermitian operators, we have:
@@ -6207,6 +6201,7 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
      npwsp_k = npw_k * nspinor
      ABI_MALLOC(h1_kets_kq, (2, npwsp_k, nb_k))
      ABI_MALLOC(gs1c_kq, (2, npwsp_k*nb_k*((sij_opt+1)/2)))
+     ABI_MALLOC(gvnlx1, (2, npwsp_k,nb_k))
 
      ! Compute <g|-i\Nabla |psi_nk>.
      ABI_MALLOC(p_kets_k, (2, npwsp_k, nb_k, 3))
@@ -6263,6 +6258,7 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
      ABI_FREE(p_kets_k)
      ABI_FREE(gs1c_kq)
      ABI_FREE(h1_kets_kq)
+     ABI_FREE(gvnlx1)
    end do ! my_ik
 
    ABI_FREE(vlocal1)
@@ -6290,7 +6286,6 @@ subroutine gstore_compute_and_write_commutator(gstore, mpw, gmax, ngfft, ngfftf,
  ABI_FREE(dummy_vtrial)
  ABI_FREE(v1scf)
  ABI_FREE(work)
- ABI_FREE(gvnlx1)
  ABI_FREE(grad_berry)
 
  call pawcprj_free(cwaveprj0)

@@ -122,7 +122,7 @@ contains
 !! gh1c(2,npw1*nspinor)= <G|H^(1)|C> or  <G|H^(1)-lambda.S^(1)|C> on the k+q sphere
 !!                     (only kinetic+non-local parts if optlocal=0)
 !! if (usevnl==1)
-!!  gvnlx1(2,npw1*nspinor)=  part of <G|K^(1)+Vnl^(1)|C> not depending on VHxc^(1)              (sij_opt/=-1)
+!!  gvnlx1(2,npw1*nspinor*ndat)=  part of <G|K^(1)+Vnl^(1)|C> not depending on VHxc^(1)              (sij_opt/=-1)
 !!                       or part of <G|K^(1)+Vnl^(1)-lambda.S^(1)|C> not depending on VHxc^(1) (sij_opt==-1)
 !! if (sij_opt=1)
 !!  gs1c(2,npw1*nspinor)=<G|S^(1)|C> (S=overlap) on the k+q sphere.
@@ -710,7 +710,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          berryopt==14 .or. berryopt==16 .or. berryopt==17 ) .and.(optnl>0.or.sij_opt/=0))then
 
    if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) then
-     ABI_BUG("Not implemented for OpenMP GPU (gs_hamkq%gpu_optioncuda==2)")
+     ABI_BUG("Not implemented for OpenMP GPU (gs_hamkq%gpu_option==2)")
    end if
    if (optnl>=1) then
      do ipw=1,npw1*my_nspinor*ndat
@@ -792,7 +792,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_FREE(cwaveprj_tmp)
      end if
      nullify(cwaveprj_ptr)
-
 
    else
      ! Norm-conserving psps:
