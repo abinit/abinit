@@ -153,7 +153,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=16
- integer :: choice,cplex1,cpopt,ipw,ipws,ispinor,istr,i1,i2,i3,idat
+ integer :: choice,cplex1,cpopt,ipw,ipws,ispinor,istr,i1,i2,i3,idat, ndat__
  integer :: my_nspinor,natom,ncpgr,nnlout=1,npw,npw1,paw_opt,signs
  integer :: tim_fourwf,tim_nonlop,usecprj
  logical :: compute_conjugate,has_kin,has_mGGA1,has_nd1,usevnl2
@@ -276,16 +276,23 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !-------------------------------------------
  if (ipert<=natom+5.and.ipert/=natom+1.and.optlocal>0) then
 
-   ABI_MALLOC(work,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+   ! Important: work (aka fofr) must be allocated with "ndat", but fourwf with option 2 never accesses it, so this allocation wastes memory.
+   ! but it is neeeded to run on GPUs.
+   ! Note that we use ndat__, since when nspinor 2 with nvloc 1, we can compute <g|vlocal1|u> for all ndat bands and the two spinor components
+   ! with a single call to fourwf.
+   ndat__ = ndat
+   !if (gs_hamkq%nvloc==1) ndat__ = ndat * gs_hamkq%nspinor ! TODO: Activate after testing
+
+   ABI_MALLOC(work,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6*ndat__))
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(work,2*gs_hamkq%n4*gs_hamkq%n5*gs_hamkq%n6)
+   if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(work,2*gs_hamkq%n4*gs_hamkq%n5*gs_hamkq%n6*ndat__)
 #endif
 
    if (gs_hamkq%nvloc==1) then
 
      weight=one; tim_fourwf=4
      call fourwf(rf_hamkq%cplex,rf_hamkq%vlocal1,cwave,gh1c,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
-       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%ngfft,&
+       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,ndat__,gs_hamkq%ngfft,&
        npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight, gpu_option=gs_hamkq%gpu_option)
 
      if(gs_hamkq%nspinor==2)then
@@ -412,7 +419,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    end if ! nvloc
 
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(work,2*gs_hamkq%n4*gs_hamkq%n5*gs_hamkq%n6)
+   if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(work,2*gs_hamkq%n4*gs_hamkq%n5*gs_hamkq%n6*ndat__)
 #endif
    ABI_FREE(work)
 
