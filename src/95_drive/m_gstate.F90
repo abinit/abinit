@@ -317,14 +317,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
- real(dp),ABI_CONTIGUOUS pointer :: cg(:,:) => null()
+ real(dp),contiguous, pointer :: cg(:,:) => null()
  real(dp),pointer :: eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
  real(dp),pointer :: taug(:,:),taur(:,:),xred_old(:,:)
  type(pawrhoij_type),pointer :: pawrhoij(:)
  type(coulomb_operator) :: kernel_dummy
  type(pawcprj_type),allocatable :: cprj(:,:)
  type(xg_nonlop_t) :: xg_nonlop
-
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -1855,7 +1854,6 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
  integer :: ikpt,npw
  real(dp) :: arith,geom,wtknrm
  character(len=500) :: msg
-
 ! *************************************************************************
 
    if (dtset%iscf>=0) then
@@ -2319,7 +2317,6 @@ subroutine clnup2(n1xccc,gred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
  real(dp) :: devsqr,grchempot2
  character(len=500) :: msg
  integer :: units(2)
-
 ! *************************************************************************
 
 !write(std_out,*)' clnup2 : enter '

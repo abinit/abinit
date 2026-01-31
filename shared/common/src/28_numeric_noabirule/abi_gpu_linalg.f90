@@ -1358,7 +1358,6 @@ subroutine abi_gpu_xscal_d(cplx, size, alpha, x, incrx)
  complex(dp), intent(in)    :: alpha
  real(dp),     intent(inout), target :: x(*)
  integer,      intent(in)    :: incrx
-
 ! *************************************************************************
 
  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -2043,7 +2042,7 @@ end subroutine abi_gpu_xtrsm_2z
 subroutine abi_gpu_work_resizeI(array,array_managed,current_dim,asked_dim)
 
   integer, allocatable, intent(inout) :: array(:)
-  integer(kind=c_int32_t), ABI_CONTIGUOUS pointer, intent(inout) :: array_managed(:)
+  integer(kind=c_int32_t), contiguous, pointer, intent(inout) :: array_managed(:)
   integer, intent(inout)  :: current_dim
   integer, intent(in   )  :: asked_dim
 ! *************************************************************************
@@ -2096,7 +2095,7 @@ end subroutine abi_gpu_work_resizeI
 subroutine abi_gpu_work_resizeR(array,array_managed,current_dim,asked_dim)
 
   double precision, allocatable, intent(inout) :: array(:)
-  real(kind=c_double), ABI_CONTIGUOUS pointer, intent(inout) :: array_managed(:)
+  real(kind=c_double), contiguous, pointer, intent(inout) :: array_managed(:)
   integer, intent(inout) :: current_dim
   integer, intent(in   ) :: asked_dim
 
@@ -2151,10 +2150,9 @@ end subroutine abi_gpu_work_resizeR
 subroutine abi_gpu_work_resizeC(array,array_managed,current_dim,asked_dim)
 
   complex(kind=8), allocatable, intent(inout) :: array(:)
-  complex(kind=c_double_complex), ABI_CONTIGUOUS pointer, intent(inout) :: array_managed(:)
+  complex(kind=c_double_complex), contiguous, pointer, intent(inout) :: array_managed(:)
   integer, intent(inout)  :: current_dim
   integer, intent(in   )  :: asked_dim
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -2207,7 +2205,6 @@ subroutine abi_gpu_work_resizeCptr(array,current_dim,asked_dim)
   type(c_ptr), intent(inout) :: array
   integer(c_size_t), intent(inout)  :: current_dim
   integer(c_size_t), intent(in   )  :: asked_dim
-
 ! *************************************************************************
 
   if ( current_dim < asked_dim  ) then
@@ -2417,7 +2414,6 @@ subroutine abi_gpu_xhegvd_d(cplx, itype, jobz, uplo, A_nrows, &
   integer,         intent(in   ) :: ldb
   real(dp),        intent(inout),target :: W(*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -2506,7 +2502,6 @@ subroutine abi_gpu_xhegvd_2d(cplx, itype, jobz, uplo, A_nrows, &
   real(dp),        intent(in   ),target :: B(ldb,*)
   real(dp),        intent(inout),target :: W(A_nrows,*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -2701,7 +2696,6 @@ subroutine abi_gpu_xheevd_d(cplx, jobz, uplo, A_nrows, &
   integer,         intent(in   ) :: lda
   real(dp),        intent(inout),target :: W(*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -2779,7 +2773,6 @@ subroutine abi_gpu_xheevd_2d(cplx, jobz, uplo, A_nrows, &
   real(dp),        intent(in   ),target :: A(lda,*)
   real(dp),        intent(inout),target :: W(A_nrows,*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -2882,7 +2875,6 @@ subroutine abi_gpu_xpotrf_cptr(cplx, uplo, A_nrows, &
   ! Local variables ------------------------------
   integer     :: bufferSize
   type(c_ptr) :: gpu_ptr
-
 ! *************************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -3024,7 +3016,6 @@ subroutine abi_gpu_xpotrf_2d(cplx, uplo, A_nrows, &
   integer,         intent(in   ) :: A_nrows,lda
   real(dp),        intent(in   ),target :: A(lda,*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then

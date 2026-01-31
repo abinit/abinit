@@ -1508,7 +1508,6 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
  real(dp), allocatable :: dummy(:,:),scprod(:,:,:)
  real(dp), allocatable :: dcwavef_tmp(:,:)
  type(pawcprj_type),allocatable :: dcwaveprj_tmp(:,:)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1848,14 +1847,12 @@ ABI_MALLOC(gvnl1dqc_,(2,npw1*my_nspinor))
  if (associated(gs_hamkq%kinpw_kp)) then
    kinpw1 => gs_hamkq%kinpw_kp
  else if (has_kin) then
-   msg='need kinpw1 allocated!'
-   ABI_BUG(msg)
+   ABI_BUG('need kinpw1 allocated!')
  end if
  if (associated(rf_hamkq%dkinpw_k)) then
    dqdqkinpw => rf_hamkq%dkinpw_k
  else if (has_kin) then
-   msg='need dqdqkinpw allocated!'
-   ABI_BUG(msg)
+   ABI_BUG('need dqdqkinpw allocated!')
  end if
 
  if (has_kin) then
@@ -2113,8 +2110,6 @@ end subroutine getgh1dqc_setup
 !! OUTPUT
 !!  gh1ndc(2,npw_k*my_nspinor*ndat)=1st order A.p contribution to <G|H|C> for array of nuclear dipoles
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !! This codes only the DDK response for A.p, so effectively A_ipert|C>. The nuclear dipole Hamiltonian
 !! (to first order in the nuclear dipole strength) is A.p where in atomic units
@@ -2150,7 +2145,6 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
  real(dp),allocatable :: cwavein1(:,:),cwavein2(:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:)
  real(dp),allocatable :: vectornd_dir(:,:,:,:),work(:,:,:,:),zk(:,:,:)
-
 ! *********************************************************************
 
  gh1ndc(:,:)=zero
