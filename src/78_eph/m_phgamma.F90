@@ -3066,7 +3066,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp),allocatable :: v1scf(:,:,:,:), tgam(:,:,:), gkq_atm(:,:,:,:), lambda(:)
  real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1_kets_kq(:,:,:), cg_work(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
- real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
+ real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:,:), work(:,:,:,:)
  real(dp),allocatable :: gs1c_kq(:,:), v1_work(:,:,:,:), vcart_ibz(:,:,:,:)
  real(dp),allocatable :: wt_ek(:,:), wt_ekq(:,:), dbldelta_wts(:,:)
  real(dp),allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:), tgamvv_out(:,:,:,:), vv_kkq(:,:,:), tmp_vals_ee(:,:,:,:,:), emesh(:)
@@ -3514,7 +3514,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  optlocal = 1    ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
  optnl = 2       ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
  opt_gvnlx1 = 0  ! gvnlx1 is output
- ABI_MALLOC(gvnlx1, (2, usevnl))
+
  ABI_MALLOC(grad_berry, (2, nspinor*(berryopt0/4)))
 
  ! This part is taken from dfpt_vtorho
@@ -3802,6 +3802,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
        ABI_MALLOC(gkq_atm, (2, nb_kq, nb_k, natom3))
        ABI_MALLOC(h1_kets_kq, (2, npw_kq*nspinor, nb_k))
+       ABI_MALLOC(gvnlx1, (2, npw_kq*nspinor, nb_k))
        ABI_MALLOC(lambda, (nb_k))
 
        ! Loop over all my atomic perturbations and compute gkq_atm.
@@ -3862,6 +3863,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ABI_FREE(kets_k)
        ABI_FREE(bras_kq)
        ABI_FREE(h1_kets_kq)
+       ABI_FREE(gvnlx1)
 
        ! Compute group velocities if we are in transport mode or adaptive gaussian or
        ! tetrahedron with libtetrabz returning nesting condition.
@@ -4062,7 +4064,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call cwtime_report(" phonon linewidths q-loop", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ! Free memory
- ABI_FREE(gvnlx1)
  ABI_FREE(grad_berry)
  ABI_FREE(dummy_vtrial)
  ABI_FREE(work)
