@@ -2989,16 +2989,17 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      ! unfortunately the API does not support transa so one has to transport db%wsr.
      ! Alternatively, compute all my_npert with ZGEMM (more memory but it should be more efficient).
 
-     select case (db%gpu_option)
-     case (ABI_GPU_DISABLED)
+     !select case (db%gpu_option)
+     !case (ABI_GPU_DISABLED)
        call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,1), 1, &
                   zero_sp, ov1r_sp(1,1), 2)
        call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,2), 1, &
                   zero_sp, ov1r_sp(2,1), 2)
      !case (ABI_GPU_OPENMP)
-     case default
-       ABI_ERROR(sjoin("ftinterp_qpt: unsupported gpu_option:", itoa(db%gpu_option)))
-     end select
+       ! TODO
+     !case default
+     !  ABI_ERROR(sjoin("ftinterp_qpt: unsupported gpu_option:", itoa(db%gpu_option)))
+     !end select
 
      ov1r(:, :, ispden, imyp) = ov1r_sp(:, :)
 
