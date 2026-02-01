@@ -45,6 +45,7 @@ module m_orbmag
   use m_cgtools,          only : projbd
   use m_dtfil
   use m_ebands
+  use m_fft,              only : fourwf
   use m_getghc,           only : getghc
   use m_getgh1c
   use m_hamiltonian
@@ -1094,15 +1095,20 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,cpopt,gdir,ndat,nn,npwsp,sij_opt,tim_getghc,type_calc
-  real(dp) :: bdoti,bdotr,epsabg,lams,mdoti,mdotr
+  integer :: adir,bdir,cpopt,fourwf_cplex,fourwf_option,gdir,ndat
+  integer :: nn,npwsp,sij_opt,tim_fourwf,tim_getghc,type_calc
+  real(dp) :: bdoti,bdotr,epsabg,lams,mdoti,mdotr,weight_i,weight_r
   complex(dp) :: prefac_b,prefac_m
   !arrays
-  real(dp),allocatable :: bra(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:),ket(:,:)
+  real(dp),allocatable :: bra(:,:),denpot(:,:,:),fofgout(:,:),fofr(:,:,:,:)
+  real(dp),allocatable :: ghc(:,:),gsc(:,:),gvnlxc(:,:),ket(:,:)
   complex(dpc) :: m1(3),b1(3)
   type(pawcprj_type),allocatable :: cwaveprj1(:,:)
 !--------------------------------------------------------------------
 
+ fourwf_cplex = 1
+ fourwf_option = 0
+ tim_fourwf = 1
  npwsp = npw_k*dtset%nspinor
 
  ABI_MALLOC(bra,(2,npwsp))
@@ -1118,6 +1124,10 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
  ndat = 1
  sij_opt = 1
  type_calc = 0
+ 
+ if (dtset%orbmag .EQ. 4) then
+   ABI_MALLOC(fofr,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
+ end if
 
 
  do nn = 1, nband_k
@@ -1140,6 +1150,14 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
        & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
 
      ghc(1:2,1:npwsp) = ghc(1:2,1:npwsp) + gsc(1:2,1:npwsp)*(eig_k(nn) - two*fermie)
+     
+     if (dtset%orbmag .EQ. 4) then
+       call fourwf(fourwf_cplex,denpot,ghc,fofgout,fofr,gs_hamk%gbound_k,&
+         & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
+         & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
+         & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,fourwf_option,&
+         & tim_fourwf,weight_r,weight_i)
+     end if
 
      do bdir = 1, 3
        bra(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
@@ -1175,6 +1193,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
  ABI_FREE(gvnlxc)
  call pawcprj_free(cwaveprj1)
  ABI_FREE(cwaveprj1)
+ ABI_SFREE(fofr)
 
 end subroutine orbmag_cc_k
 !!***
