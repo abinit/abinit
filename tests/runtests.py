@@ -251,8 +251,11 @@ def main():
     parser.add_option("-b", "--build-tree", dest="build_dir_path", default="",
                       help="Path to the top level directory of the build tree.")
 
+    parser.add_option("--builder", dest="builder", type="str", default="",
+                      help="Set buildbot builder name to skip test if name is in the exclude_builders TEST_INFO_SECTION.")
+
     parser.add_option("-d", "--dry-run", default=False, action="store_true",
-                      help="Print list of tests and exit")
+                      help="Print list of tests and exit.")
 
     parser.add_option("--gdb", action="store_true",
                       help=("Run the test(s) under the control of the GNU gdb debugger. "
@@ -420,6 +423,10 @@ def main():
         build_dir_path = os.path.abspath(options.build_dir_path)
 
     build_env = BuildEnvironment(build_dir_path)
+
+    # Set buildbot builder name to skip tests.
+    if options.builder:
+        build_env.set_buildbot_builder(options.builder)
 
     timeout_time = options.timeout_time
 
