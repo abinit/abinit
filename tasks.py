@@ -1059,3 +1059,48 @@ def config_log(ctx, log_path="config.log"):
         print(f"--- Error block #{idx} ---")
         print(block)
         print("-" * 40)
+
+
+@task
+def nvidia_prof(ctx, sh_path="nv_prof.sh"):
+    """Generate a shell script to run an Abinit input file with GPU and profile it with nsys."""
+    sh_template = r"""\
+#!/bin/bash
+set -x
+set -e
+
+invoke make -b abinit
+
+export OMP_TARGET_OFFLOAD=MANDATORY
+#export LIBOMPTARGET_INFO=4     # LLVM
+#export NVCOMPILER_OMP_DEBUG=1  # NVHPC
+
+# Set OpenMP environment
+export nt=1
+echo "Running ABINIT with OMP_NUM_THREADS=${nt}"
+export OMP_NUM_THREADS=${nt}
+#export OMP_PLACES=cores
+#export OMP_PROC_BIND=close
+
+# GPU version
+rm profile_*
+nsys profile \
+  --trace=cuda,openmp,nvtx \
+  --cuda-memory-usage=true \
+  -o profile_run \
+  mpirun -n 1 abinit run_gpu.abi | tee run_gpu.log
+
+nsys stats profile_run.nsys-rep | tee prof.out
+#nsys-ui profile_run.nsys-rep
+
+#ncu \
+#  --set roofline \
+#  --kernel-name your_kernel_name \
+#  mpirun -n 1 abinit run_gpu.abi | tee run_gpu.log
+
+#vimdiff run_gpu.abo ref_cpu.abo
+#vimdiff run_gpu.abo ref_cpu.log
+"""
+
+    with open(sh_path, "wt") as fh:
+        fh.write(sh_template)
