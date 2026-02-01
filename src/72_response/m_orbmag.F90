@@ -1099,6 +1099,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
   integer :: nn,npwsp,sij_opt,tim_fourwf,tim_getghc,type_calc
   real(dp) :: bdoti,bdotr,epsabg,lams,mdoti,mdotr,weight_i,weight_r
   complex(dp) :: prefac_b,prefac_m
+  logical :: need_odensity
   !arrays
   real(dp),allocatable :: bra(:,:),denpot(:,:,:),fofgout(:,:),fofr(:,:,:,:)
   real(dp),allocatable :: ghc(:,:),gsc(:,:),gvnlxc(:,:),ket(:,:)
@@ -1110,6 +1111,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
  fourwf_option = 0
  tim_fourwf = 1
  npwsp = npw_k*dtset%nspinor
+ need_odensity = (dtset%orbmag .EQ. 4)
 
  ABI_MALLOC(bra,(2,npwsp))
  ABI_MALLOC(ket,(2,npwsp))
@@ -1125,7 +1127,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
  sij_opt = 1
  type_calc = 0
  
- if (dtset%orbmag .EQ. 4) then
+ if (need_odensity) then
    ABI_MALLOC(fofr,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
  end if
 
@@ -1151,7 +1153,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
 
      ghc(1:2,1:npwsp) = ghc(1:2,1:npwsp) + gsc(1:2,1:npwsp)*(eig_k(nn) - two*fermie)
      
-     if (dtset%orbmag .EQ. 4) then
+     if (need_odensity) then
        call fourwf(fourwf_cplex,denpot,ghc,fofgout,fofr,gs_hamk%gbound_k,&
          & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
          & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
@@ -1176,6 +1178,12 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
          prefac_m = com*c2*epsabg
          m1(adir) = m1(adir) + prefac_m*CMPLX(mdotr,mdoti)
          b1(adir) = b1(adir) - two* prefac_b*CMPLX(bdotr,bdoti)
+         
+         if (need_odensity) then
+           orbmag_mesh%odens(1,:,:,:,adir) = orbmag_mesh%odens(1,:,:,:,adir) + half*c2*fofr(2,:,:,:)
+           orbmag_mesh%odens(2,:,:,:,adir) = orbmag_mesh%odens(2,:,:,:,adir) - half*c2*fofr(1,:,:,:)
+         end if
+       
        end do ! adir
    
      end do !bdir
@@ -1186,13 +1194,13 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
 
  end do !nn
 
- ABI_FREE(bra)
- ABI_FREE(ket)
- ABI_FREE(ghc)
- ABI_FREE(gsc)
- ABI_FREE(gvnlxc)
+ ABI_SFREE(bra)
+ ABI_SFREE(ket)
+ ABI_SFREE(ghc)
+ ABI_SFREE(gsc)
+ ABI_SFREE(gvnlxc)
  call pawcprj_free(cwaveprj1)
- ABI_FREE(cwaveprj1)
+ ABI_SFREE(cwaveprj1)
  ABI_SFREE(fofr)
 
 end subroutine orbmag_cc_k
