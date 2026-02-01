@@ -127,10 +127,26 @@ module m_orbmag
     real(dp),allocatable :: cmesh(:,:,:,:,:)
     ! 3 for the 3 directions
     ! cmesh(mband,nkpt,nsppol,3,chern_terms)
+    
+    real(dp),allocatable :: chern_terms(:,:,:,:)
+    ! 3 for the 3 directions
+    ! chern_terms(dtset%mband,dtset%nsppol,3,chern_nterms)
+
+    real(dp),allocatable :: chern_trace(:,:)
+    ! 3 for the 3 directions
+    ! chern_trace(3,chern_nterms)
 
     real(dp),allocatable :: omesh(:,:,:,:,:)
     ! 3 for the 3 directions
     ! omesh(mband,nkpt,nsppol,3,orbmag_terms)
+    
+    real(dp),allocatable :: orbmag_terms(:,:,:,:)
+    ! 3 for the 3 directions
+    ! orbmag_terms(dtset%mband,dtset%nsppol,3,orbmag_nterms)
+    
+    real(dp),allocatable :: orbmag_trace(:,:)
+    ! 3 for the 3 directions
+    ! orbmag_trace(3,orbmag_nterms)
     
     real(dp),allocatable :: odens(:,:,:,:,:)
     ! 3 for the 3 directions
@@ -141,6 +157,7 @@ module m_orbmag
       procedure :: init => orbmag_init
       procedure :: free => orbmag_free
       procedure :: mpisum => orbmag_mpisum
+      procedure :: term_scale => orbmag_term_scale
 
 
   end type orbmag_mesh_type
@@ -202,7 +219,7 @@ module m_orbmag
   private :: orbmag_init
   private :: orbmag_free
   private :: orbmag_mpisum
-  private :: sum_orbmag_mesh
+  private :: orbmag_term_scale
   private :: orbmag_output
   private :: orbmag_ncwrite   ! Write orbmag_mesh contributions to netcdf file.
   private :: dterm_alloc
@@ -301,7 +318,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  integer :: me,mcgk,mcprjk,my_lmax,my_nspinor,nband_k,nband_me,ncid,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,nucdip_dirs,spaceComm
  integer,parameter :: master=0
- real(dp) :: arg,ecut_eff,fermie
+ real(dp) :: arg,ecut_eff,fermie,trnrm
  logical :: has_nucdip
  type(dterm_type) :: dterm
  type(gs_hamiltonian_type) :: gs_hamk
@@ -310,9 +327,8 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  !arrays
  integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),gntselect(:,:),kg_k(:,:),nattyp(:)
  real(dp) :: kpoint(3),omlamb(3)
- real(dp),allocatable :: chern_terms(:,:,:,:),chern_trace(:,:),cg_k(:,:),cg1_k(:,:,:),cwavef(:,:)
- real(dp),allocatable :: dkinpw(:,:),eig_k(:),ffnl_k(:,:,:,:),gcg1_k(:,:,:)
- real(dp),allocatable :: kinpw(:),kpg_k(:,:),occ_k(:),orbmag_terms(:,:,:,:),orbmag_trace(:,:)
+ real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cwavef(:,:),dkinpw(:,:),eig_k(:)
+ real(dp),allocatable :: ffnl_k(:,:,:,:),gcg1_k(:,:,:),kinpw(:),kpg_k(:,:),occ_k(:)
  real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:)
  real(dp),allocatable :: vectornd(:,:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:)
@@ -587,6 +603,16 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,mcprjk,mkmem_rbz,&
        & nband_k,nl1_option,orbmag_mesh,pawtab)
 
+     ! accumulate terms
+     do nn = 1, nband_k
+       trnrm = ebands_k%occ(nn,ikpt,isppol)*dtset%wtk(ikpt)/crystal%ucvol
+       if(abs(trnrm).LT.tol8) cycle
+       orbmag_mesh%chern_terms(nn,isppol,1:3,ibcc:ibvv2) = orbmag_mesh%chern_terms(nn,isppol,1:3,ibcc:ibvv2) + &
+           & trnrm*orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibcc:ibvv2)
+       orbmag_mesh%orbmag_terms(nn,isppol,1:3,incc:inbm) = orbmag_mesh%orbmag_terms(nn,isppol,1:3,incc:inbm) + &
+           & trnrm*orbmag_mesh%omesh(nn,ikpt,isppol,1:3,incc:inbm)
+     end do ! loop on bands
+
      icg = icg + mcgk
      icprj = icprj + mcprjk
      ikg = ikg + npw_k
@@ -622,26 +648,11 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
  end do ! end loop over isppol
 
- ! prepare orbmag_terms for output to abo file
- ABI_MALLOC(orbmag_terms,(dtset%mband,dtset%nsppol,3,orbmag_nterms))
- ABI_MALLOC(chern_terms,(dtset%mband,dtset%nsppol,3,chern_nterms))
- call sum_orbmag_mesh(chern_terms,crystal,dtset,ebands_k,mpi_enreg,orbmag_mesh,orbmag_terms)
-
+ ! accumulate data over processors
  call orbmag_mesh%mpisum(nproc,spaceComm)
-
- ! compute trace over filled states of each term
- ABI_MALLOC(orbmag_trace,(3,orbmag_nterms))
- ABI_MALLOC(chern_trace,(3,chern_nterms))
- orbmag_trace = zero
- chern_trace = zero
- do isppol = 1, dtset%nsppol
-   do nn = 1, nband_k
-     orbmag_trace(1:3,1:orbmag_nterms) = orbmag_trace(1:3,1:orbmag_nterms) + &
-       & orbmag_terms(nn,isppol,1:3,1:orbmag_nterms)
-     chern_trace(1:3,1:chern_nterms) = chern_trace(1:3,1:chern_nterms) + &
-       & chern_terms(nn,isppol,1:3,1:chern_nterms)
-   end do ! nn
- end do ! isppol
+ 
+ ! prepare terms for output to abo file
+ call orbmag_mesh%term_scale(crystal,dtset)
 
  ! get the Lamb term
  call lamb_core(atindx,dtset,omlamb,pawtab)
@@ -655,7 +666,8 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  end if
 
  ! output summary to abo file
- call orbmag_output(chern_terms,chern_trace,dtset,omlamb,orbmag_terms,orbmag_trace)
+ call orbmag_output(orbmag_mesh%chern_terms,orbmag_mesh%chern_trace,&
+   & dtset,omlamb,orbmag_mesh%orbmag_terms,orbmag_mesh%orbmag_trace)
 
 !---------------------------------------------------
 ! deallocate memory
@@ -683,11 +695,6 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
  call dterm_free(dterm)
  call orbmag_mesh%free()
-
- ABI_FREE(orbmag_terms)
- ABI_FREE(chern_terms)
- ABI_FREE(orbmag_trace)
- ABI_FREE(chern_trace)
 
 end subroutine orbmag
 !!***
@@ -728,6 +735,19 @@ subroutine orbmag_mpisum(omag,nproc,spaceComm)
       ABI_FREE(buffer1)
       ABI_FREE(buffer2)
     end if
+    if (allocated(omag%chern_terms)) then
+      buff_size=size(omag%chern_terms)
+      ABI_MALLOC(buffer1,(buff_size))
+      ABI_MALLOC(buffer2,(buff_size))
+      buffer1=zero;buffer2=zero
+      buffer1(1:buff_size) = &
+        & reshape(omag%chern_terms,(/omag%mband*omag%nsppol*3*chern_nterms/))
+      call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
+      omag%chern_terms(1:omag%mband,1:omag%nsppol,1:3,1:chern_nterms)=&
+        & reshape(buffer2,(/omag%mband,omag%nsppol,3,chern_nterms/))
+      ABI_FREE(buffer1)
+      ABI_FREE(buffer2)
+    end if
     if (allocated(omag%omesh)) then
       buff_size=size(omag%omesh)
       ABI_MALLOC(buffer1,(buff_size))
@@ -741,121 +761,65 @@ subroutine orbmag_mpisum(omag,nproc,spaceComm)
       ABI_FREE(buffer1)
       ABI_FREE(buffer2)
     end if
+    if (allocated(omag%orbmag_terms)) then
+      buff_size=size(omag%orbmag_terms)
+      ABI_MALLOC(buffer1,(buff_size))
+      ABI_MALLOC(buffer2,(buff_size))
+      buffer1=zero;buffer2=zero
+      buffer1(1:buff_size) = &
+        & reshape(omag%orbmag_terms,(/omag%mband*omag%nsppol*3*orbmag_nterms/))
+      call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
+      omag%orbmag_terms(1:omag%mband,1:omag%nsppol,1:3,1:orbmag_nterms)=&
+        & reshape(buffer2,(/omag%mband,omag%nsppol,3,orbmag_nterms/))
+      ABI_FREE(buffer1)
+      ABI_FREE(buffer2)
+    end if
+ 
   end if
 
 end subroutine orbmag_mpisum
 !!***
   
 
-!!****f*m_orbmag/sum_orbmag_mesh
+!!****f*m_orbmag/orbmag_term_scale
 !! NAME
-!! sum_orbmag_mesh
+!! orbmag_term_scale
 !!
 !! FUNCTION
-!! sum terms in orbmag_mesh
+!! change frames and scale terms as needed
 !!
 !! INPUTS
 !!
 !! OUTPUT
-!!   orbmag_terms(mband,nsppol,3,nterms)
 !!
 !! SOURCE
 
-subroutine sum_orbmag_mesh(chern_terms,crystal,dtset,ebands_k,mpi_enreg,orbmag_mesh,orbmag_terms)
+subroutine orbmag_term_scale(omag,crystal,dtset)
 
   !Arguments ------------------------------------
   !scalars
+  class(orbmag_mesh_type),intent(inout),target :: omag
   type(crystal_t),intent(in) :: crystal
   type(dataset_type),intent(in) :: dtset
-  type(ebands_t),intent(in) :: ebands_k
-  type(MPI_type), intent(inout) :: mpi_enreg
-  type(orbmag_mesh_type),intent(in) :: orbmag_mesh
 
   !arrays
-  real(dp),intent(out) :: chern_terms(dtset%mband,dtset%nsppol,3,chern_nterms)
-  real(dp),intent(out) :: orbmag_terms(dtset%mband,dtset%nsppol,3,orbmag_nterms)
 
   !Local variables -------------------------
   !scalars
-  integer :: buff_size,ierr,ikpt,isppol,iterm,nband_k
-  integer :: me,nn,nproc,spaceComm
-  real(dp) :: trnrm
-  real(dp),allocatable :: buffer1(:),buffer2(:)
+  integer :: isppol,iterm,nn
   !arrays
 
 !--------------------------------------------------------------------
 
-  spaceComm=mpi_enreg%comm_cell
-  nproc=xmpi_comm_size(spaceComm)
-  me = mpi_enreg%me_kpt
-
-  chern_terms = zero
-  orbmag_terms = zero
-  do isppol = 1, dtset%nsppol
-    do ikpt = 1, dtset%nkpt
-      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-      ! if the current kpt is not on the current processor, cycle
-      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) cycle
-
-      do nn = 1, nband_k
-        trnrm = ebands_k%occ(nn,ikpt,isppol)*dtset%wtk(ikpt)/crystal%ucvol
-        if(abs(trnrm).LT.tol8) cycle
-
-        chern_terms(nn,isppol,1:3,ibcc:ibvv2) = chern_terms(nn,isppol,1:3,ibcc:ibvv2) + &
-            & trnrm*orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibcc:ibvv2)
-
-        orbmag_terms(nn,isppol,1:3,incc:inbm) = orbmag_terms(nn,isppol,1:3,incc:inbm) + &
-            & trnrm*orbmag_mesh%omesh(nn,ikpt,isppol,1:3,incc:inbm)
-
-      end do ! loop on bands
-    end do ! loop on kpts
-  end do ! loop on nsppol
-
-  !! collect orbmag_terms if distributed over different processes
-  if (nproc > 1) then
-    buff_size=size(orbmag_terms)
-    ABI_MALLOC(buffer1,(buff_size))
-    ABI_MALLOC(buffer2,(buff_size))
-    buffer1=zero;buffer2=zero
-    buffer1(1:buff_size) = reshape(orbmag_terms,(/nband_k*dtset%nsppol*3*orbmag_nterms/))
-    call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-    orbmag_terms(1:nband_k,1:dtset%nsppol,1:3,1:orbmag_nterms)=reshape(buffer2,(/nband_k,dtset%nsppol,3,orbmag_nterms/))
-    ABI_FREE(buffer1)
-    ABI_FREE(buffer2)
-  end if
-
-  !! collect chern_terms if distributed over different processes
-  if (nproc > 1) then
-    buff_size=size(chern_terms)
-    ABI_MALLOC(buffer1,(buff_size))
-    ABI_MALLOC(buffer2,(buff_size))
-    buffer1=zero;buffer2=zero
-    buffer1(1:buff_size) = reshape(chern_terms,(/nband_k*dtset%nsppol*3*chern_nterms/))
-    call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-    chern_terms(1:nband_k,1:dtset%nsppol,1:3,1:chern_nterms)=reshape(buffer2,(/nband_k,dtset%nsppol,3,chern_nterms/))
-    ABI_FREE(buffer1)
-    ABI_FREE(buffer2)
-  end if
-
-
-  !! convert to cartesian frame from reduced triclinic
- ! general results: [rprimd]*r_red = r_cart
- !                  [gprimd]*k_red = k_cart
- !                  [gprimd]*grad_(r_red) = grad_(r_cart)
- !                  [rprimd]*grad_(k_red) = grad_(k_cart)
- ! most terms in orbital magnetism look like
- ! \grad_(k_cart) x \grad_(k_cart) but are calculated in reduced k
- ! so [rprimd]*grad_(k_red) x [rprimd]*grad_(k_red) = det[rprimd]*[rprimd]^{-1,T} grad_(k_red) x grad_(k_red)
- !
  do iterm = 1, orbmag_nterms
    do isppol = 1, dtset%nsppol
-     do nn = 1, nband_k
+     do nn = 1, omag%mband
        if((iterm.EQ.inlr).OR.(iterm.EQ.inbm)) then
-         orbmag_terms(nn,isppol,1:3,iterm) = &
-           & MATMUL(crystal%rprimd,orbmag_terms(nn,isppol,1:3,iterm))
+         omag%orbmag_terms(nn,isppol,1:3,iterm) = &
+           & MATMUL(crystal%rprimd,omag%orbmag_terms(nn,isppol,1:3,iterm))
        else
-         orbmag_terms(nn,isppol,1:3,iterm) = &
-           & crystal%ucvol*MATMUL(crystal%gprimd,orbmag_terms(nn,isppol,1:3,iterm))
+         omag%orbmag_terms(nn,isppol,1:3,iterm) = &
+           & crystal%ucvol*MATMUL(crystal%gprimd,omag%orbmag_terms(nn,isppol,1:3,iterm))
        end if
      end do ! nn
    end do !isppol
@@ -863,20 +827,29 @@ subroutine sum_orbmag_mesh(chern_terms,crystal,dtset,ebands_k,mpi_enreg,orbmag_m
 
  do iterm = 1, chern_nterms
    do isppol = 1, dtset%nsppol
-     do nn = 1, nband_k
-       chern_terms(nn,isppol,1:3,iterm) = &
-         & crystal%ucvol*MATMUL(crystal%gprimd,chern_terms(nn,isppol,1:3,iterm))
+     do nn = 1, omag%mband
+       omag%chern_terms(nn,isppol,1:3,iterm) = &
+         & crystal%ucvol*MATMUL(crystal%gprimd,omag%chern_terms(nn,isppol,1:3,iterm))
      end do ! nn
    end do !isppol
  end do
 
  !! convert orbmag magnetization to orbital moment
  !! Berry curvature terms are ignored
- orbmag_terms(:,:,:,incc:inbm)=crystal%ucvol*orbmag_terms(:,:,:,incc:inbm)
+ omag%orbmag_terms(:,:,:,incc:inbm)=crystal%ucvol*omag%orbmag_terms(:,:,:,incc:inbm)
 
-end subroutine sum_orbmag_mesh
+ !! accumulate trace of terms 
+ do isppol = 1, dtset%nsppol
+   do nn = 1, omag%mband
+     omag%orbmag_trace(1:3,1:orbmag_nterms) = omag%orbmag_trace(1:3,1:orbmag_nterms) + &
+       & omag%orbmag_terms(nn,isppol,1:3,1:orbmag_nterms)
+     omag%chern_trace(1:3,1:chern_nterms) = omag%chern_trace(1:3,1:chern_nterms) + &
+       & omag%chern_terms(nn,isppol,1:3,1:chern_nterms)
+   end do ! nn
+ end do ! isppol
+
+end subroutine orbmag_term_scale
 !!***
-
 
 !!****f* ABINIT/orbmag_nl1_k
 !! NAME
@@ -2546,8 +2519,16 @@ subroutine orbmag_init(omag,dtset)
   ABI_REMALLOC(omag%nucdipmom,(3,omag%natom))
   ABI_REMALLOC(omag%cmesh,(omag%mband,omag%nkpt,omag%nsppol,3,chern_nterms))
   omag%cmesh=zero
+  ABI_REMALLOC(omag%chern_terms,(dtset%mband,dtset%nsppol,3,chern_nterms))
+  omag%chern_terms=zero
+  ABI_REMALLOC(omag%chern_trace,(3,chern_nterms))
+  omag%chern_trace=zero
   ABI_REMALLOC(omag%omesh,(omag%mband,omag%nkpt,omag%nsppol,3,orbmag_nterms))
   omag%omesh=zero
+  ABI_REMALLOC(omag%orbmag_terms,(dtset%mband,dtset%nsppol,3,orbmag_nterms))
+  omag%orbmag_terms=zero
+  ABI_REMALLOC(omag%orbmag_trace,(3,orbmag_nterms))
+  omag%orbmag_trace=zero
   if (dtset%orbmag .EQ. 4) then
     ABI_REMALLOC(omag%odens,(2,omag%n4,omag%n5,omag%n6,3))
     omag%omesh=zero
@@ -2578,7 +2559,11 @@ subroutine orbmag_free(omag)
     ABI_SFREE(omag%lambsig)
     ABI_SFREE(omag%nucdipmom)
     ABI_SFREE(omag%cmesh)
+    ABI_SFREE(omag%chern_terms)
+    ABI_SFREE(omag%chern_trace)
     ABI_SFREE(omag%omesh)
+    ABI_SFREE(omag%orbmag_terms)
+    ABI_SFREE(omag%orbmag_trace)
     ABI_SFREE(omag%odens)
 
 end subroutine orbmag_free
