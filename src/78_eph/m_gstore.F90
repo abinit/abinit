@@ -137,6 +137,7 @@ module m_gstore
  use m_ephtk
  use m_mkffnl
  use m_sigtk
+ use m_abi_linalg,     only : abi_gpu_xgemm_d
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : pseudopotential_type
@@ -3617,7 +3618,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:), lambda(:)
  real(dp),allocatable :: grad_berry(:,:), kinpw_k(:), kinpw_kq(:), kpg_kq(:,:), kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:), gkq_atm_ipc(:,:,:)
  real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1_kets_kq(:,:,:) !, cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:,:), work(:,:,:,:)
@@ -3860,8 +3861,12 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    nb_k = gqk%nb_k; nb_kq = gqk%nb_kq
 
    ABI_MALLOC(iq_buf, (2, qbuf_size))
-   ABI_MALLOC(gkq_atm, (2, nb_kq, nb_k, natom3))
    ABI_MALLOC(lambda, (nb_k))
+   ABI_MALLOC(gkq_atm, (2, nb_kq, nb_k, natom3))
+   ABI_MALLOC(gkq_atm_ipc, (2, nb_kq, nb_k))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:gkq_atm_ipc) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
 
    ! Inside the loops we compute gkq_atm(2, nb_kq, nb_k, natom3)
    ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb_kq, nb_k, natom3, gqk%my_nk, qbuf_size), ierr)
@@ -4008,11 +4013,12 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ABI_MALLOC(gs1c_kq, (2, npw_kq*nspinor*nb_k*((sij_opt+1)/2)))
        ABI_MALLOC(gvnlx1, (2, npw_kq*nspinor,nb_k))
 #ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(to:kets_k, bras_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP)
        !$OMP TARGET ENTER DATA MAP(alloc:h1_kets_kq, gvnlx1, kets_k, bras_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP)
        !$OMP TARGET ENTER DATA MAP(alloc:gs1c_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP .and. sij_opt /= 0)
 #endif
 
-       ! Loop over my atomic perturbations and compute gkq_atm.
+       ! Loop over my atomic perturbations and compute gkq_atm_ipc.
        gkq_atm = zero
        do my_ip=1,my_npert
          idir = dvdb%my_pinfo(1, my_ip); ipert = dvdb%my_pinfo(2, my_ip); ipc = dvdb%my_pinfo(3, my_ip)
@@ -4050,12 +4056,20 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          call rf_ham_kq%free()
 
          ! Calculate <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation. No need to handle istwf_kq because it's always 1.
-         call ZGEMM('C', 'N', nb_kq, nb_k, npw_kq*nspinor, cone, bras_kq, npw_kq*nspinor, &
-                    h1_kets_kq, npw_kq*nspinor, czero, gkq_atm(:,:,:,ipc), nb_kq)
+         if (dtset%gpu_option == ABI_GPU_OPENMP) then
+           call abi_gpu_xgemm_d(2, 'C', 'N', nb_kq, nb_k, npw_kq*nspinor, cone, bras_kq, npw_kq*nspinor, &
+                                h1_kets_kq, npw_kq*nspinor, czero, gkq_atm_ipc, nb_kq)
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET UPDATE FROM(gkq_atm_ipc)
+#endif
 
-         !call ab_gpu_xgemm_z(2, 'C', 'N', nb_kq, nb_k, npw_kq*nspinor, cone, bras_kq, npw_kq*nspinor, &
-         !           h1_kets_kq, npw_kq*nspinor, czero, gkq_atm(:,:,:,ipc), nb_kq)
+         else
+           call ZGEMM('C', 'N', nb_kq, nb_k, npw_kq*nspinor, cone, bras_kq, npw_kq*nspinor, &
+                      h1_kets_kq, npw_kq*nspinor, czero, gkq_atm_ipc, nb_kq)
+         end if
 
+         ! Transfer data
+         gkq_atm(:,:,:,ipc) = gkq_atm_ipc
        end do ! my_ip
 
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
@@ -4104,6 +4118,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_FREE(my_gbuf)
    ABI_FREE(lambda)
    ABI_FREE(gkq_atm)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:gkq_atm_ipc) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
+
+   ABI_FREE(gkq_atm_ipc)
 
    if (dtset%gstore_use_lgk /= 0) then
      do my_ik=1,gqk%my_nk
