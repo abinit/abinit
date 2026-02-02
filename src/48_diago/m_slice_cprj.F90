@@ -2499,6 +2499,7 @@ subroutine computeBorthoLanczos(slice, n, k, min_low_est, getAX, kin, my_rank, g
     integer :: il, iu
     integer :: M, info, ldz
     real(dp) :: beta_prev
+    real(dp) :: lambda1
     ! arrays
     real(dp) :: q(2,n), Aq(2, n)
     real(dp) :: v(2,n), Bv(2, n)
@@ -2508,6 +2509,7 @@ subroutine computeBorthoLanczos(slice, n, k, min_low_est, getAX, kin, my_rank, g
     real(dp) :: beta(k-1) ! off-diagonal
     real(dp) :: w(k)
     real(dp) :: z(1, k)
+    real(dp) :: v1(k)
     real(dp) :: tsec(2)
     !real(dp), allocatable :: work(lwork)
     !integer, allocatable :: iwork(liwork)
@@ -2602,35 +2604,8 @@ subroutine computeBorthoLanczos(slice, n, k, min_low_est, getAX, kin, my_rank, g
         end if
     end do
         
-    ! Compute only one eigenvalue, the lowest (no eigenvectors)
-    ! ---------------------------------------------------------
-    ! LAPACK dstevr routine
-    ! ------------------------------------------------------------
-    ! D diagonal elements, length N (alpha)
-    ! E subdiagonal elements, length N-1 (beta)
-    ! 'N' for eigenvalues only 
-    ! 'I' for indices [IL, IU]
-    ! m output number of eigenvalues found
-    ! w output array of eigenvalues (length N)
-    ! z output eigenvectors
-    ! work, iwork workspace arrays
-    il = 1
-    iu = 3
-
-    ! workspace query
-    lwork = -1
-    liwork = -1
-    !call dstevr('N', 'I', k, alpha, beta, 0.0d0, 0.0d0, il, iu, DBL_EPSILON, &
-    !    m, w, z, ldz, work, lwork, iwork, liwork, info)
-
-    ! actual compute the 3 lowest eigenvalues
-    !call dstevr('N', 'I', k, alpha, beta, 0.0d0, 0.0d0, il, iu, DBL_EPSILON, &
-    !    m, w, z, ldz, work, lwork, liwork, info)
-
-    ! m number of eigenvalues found
-    ! w(1:m) lowest eigenvalues
-
-    ! ---------------------------------------------------------
+    call smallestTridiagEigenpair(k, alpha, beta, lambda1, v1)
+    
 
     ! TODO Add residual error computation trick for Lanczos
     ! using 1 eigenvector also
@@ -2737,6 +2712,55 @@ subroutine splitSpectrumToSlices( &
     !trace_estim_slice = ..
     
 end subroutine splitSpectrumToSlices
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice_cprj/smallestTridiagEigenpair
+!! NAME
+!! smallestTridiagEigenpair
+!!
+!! SOURCE
+
+  subroutine smallestTridiagEigenpair(n, d, e, lambda, v)
+    implicit none
+    integer, intent(in) :: n
+    real(dp), intent(in)  :: d(n), e(n-1)
+    real(dp), intent(out) :: lambda
+    real(dp), intent(out) :: v(n)
+
+    ! Local copies (DSTEVX overwrites input)
+    real(dp) :: dloc(n), eloc(n-1)
+    real(dp), allocatable :: z(:,:), work(:)
+    integer, allocatable :: iwork(:), ifail(:)
+    integer :: info, m
+    
+    ! *********************************************************************
+
+    dloc = d
+    eloc = e
+
+    ABI_MALLOC(z, (n,1))
+    ABI_MALLOC(work, (5*n))
+    ABI_MALLOC(iwork, (5*n))
+    ABI_MALLOC(ifail, (n))
+
+    ! DSTEVX computes selected eigenpairs (here smallest: index 1)
+    call dstevx('V', 'I', n, dloc, eloc, 0.0d0, 0.0d0, 1, 1, 1.0d-12, m, dloc, z, n, work, iwork, ifail, info)
+
+    if (info /= 0) then
+       ABI_ERROR('DSTEVX failed')
+    end if
+
+    lambda = dloc(1)
+    v      = z(:,1)
+
+    ABI_FREE(z)
+    ABI_FREE(work)
+    ABI_FREE(iwork)
+    ABI_FREE(ifail)
+
+  end subroutine smallestTridiagEigenpair
 !!***
 
 end module m_slice_cprj
