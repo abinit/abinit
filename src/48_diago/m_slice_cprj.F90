@@ -148,6 +148,7 @@ module m_slice_cprj
  public :: slice_free
  public :: slice_memInfo
  public :: slice_run_cprj
+ public :: smallestTridiagEigenpair
 
  CONTAINS  !========================================================================================
 !!***
