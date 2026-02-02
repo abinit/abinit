@@ -93,6 +93,7 @@ abi_build_exe(mrggkk)
 abi_build_exe(mrgscr)
 abi_build_exe(multibinit)
 abi_build_exe(optic)
+abi_build_exe(testdiago)
 abi_build_exe(testtransposer)
 abi_build_exe(vdw_kernelgen)
 
