@@ -645,6 +645,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ABI_MALLOC(rayleigh_quotients, (neigenpairs))
  ABI_MALLOC(confi_interval_left, (neigenpairs))
  ABI_MALLOC(confi_interval_right, (neigenpairs))
+ ABI_MALLOC(nb_vec_slices, (nslice))
+ ABI_MALLOC(upper_bound_slices, (nslice)) 
 
  ! Memory used to store results of slice merging. 
  call xg_init(X0_out, slice%space, spacedim, neigenpairs, slice%spacecom, me_g0=slice%me_g0)
@@ -764,45 +766,28 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  if (res_norm > 0.1d0) then
      ABI_WARNING("Lanczos has residual > 0.1 may need greater kmax to guarantee lower bound")
  end if
-
- ABI_MALLOC(nb_vec_slices, (nslice))
- ABI_MALLOC(upper_bound_slices, (nslice)) 
  
- nstep_spectrum =50
+ nstep_spectrum = 30
  min_upp_bound = maxval(rayleigh_quotients)
  my_rank = xmpi_comm_rank(slice%spacecom)
  max_upp_bound = slice%ecut
- min_low_est = min_low_bound - 5*res_norm ! experimental
+ min_low_est = min_low_bound - min(5*res_norm,0.1d0) ! experimental
  trace_rank = neigenpairs ! FIXME for the moment changing this produces a bug
- trace_degree = 30
+ trace_degree = 10
 
- call splitSpectrumToSlices(slice, nslice, trace_rank, trace_degree, nstep_spectrum, &
-     min_low_bound, min_upp_bound, min_low_est, max_upp_bound, my_rank, getAX, kin, &
-     nb_vec_slices, upper_bound_slices, & ! output
-     gpu_option=gpu_option)
-
- ABI_FREE(nb_vec_slices)
- ABI_FREE(upper_bound_slices)
-
-
-
- trace_rank = neigenpairs
- upp_bound = slice%ecut
- !! subroutine computeBorthoLanczos(slice, n, k, min_low_est, getAX, kin, my_rank, gpu_option)
- write(901,*) 'min_low_est=', min_low_est
+ write(901,*) 'splitting spectrum to slices within global', min_low_est, max_upp_bound
+ write(901,*) '                                    wanted', min_low_bound, min_upp_bound
  flush(901)
-
-
- !! Phase 2:
- !! Loop on slices on [lambda_minus, lambda_plus)
- !! essaie de faire une loupe où on scanne le spectre de façon itérative
- !! et on réutilise les récursions de Chebyshev
- !! 
+! call splitSpectrumToSlices(slice, nslice, trace_rank, trace_degree, nstep_spectrum, &
+!     min_low_bound, min_upp_bound, min_low_est, max_upp_bound, my_rank, getAX, kin, &
+!     nb_vec_slices, upper_bound_slices, & ! output
+!     gpu_option=gpu_option)
+ upper_bound_slices(1) = 0.11d0 ! TODO hardcoded!
 
  ! Slice 1: 
  my_rank = xmpi_comm_rank(slice%spacecom)
- low_bound = -0.18d0  ! [a,b)
- upp_bound = 1.17d0
+ low_bound = min_low_bound  ! [a,b)
+ upp_bound = upper_bound_slices(1)
  trace_degree = 50
 
  call computeTraceEstimation(slice, trace_rank, trace_degree, low_bound, upp_bound,&
@@ -812,11 +797,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  ! Slice 2: 
  my_rank = xmpi_comm_rank(slice%spacecom)
- low_bound = 1.17d0 ! [a,b)
+ low_bound = upper_bound_slices(1) ! [a,b)
  upp_bound = maxval(rayleigh_quotients)
  overlap_width = (upp_bound - low_bound)/10.0
  low_bound = low_bound - overlap_width
- min_low_est = -0.3d0 ! hardcoded TODO define from previous step
+ min_low_est = min_low_est
  max_upp_bound = slice%ecut
  trace_degree = 50
  trace_rank = neigenpairs ! FIXME for the moment changing this produces a bug
@@ -878,12 +863,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     !! ------------------------------------------------------------
 
     ! ongoing, hardcoded depends on previous code
-    min_low_est = -0.3d0
-    lambda_minus = 1.17d0
-    alpha_minus = 1.17d0
+    lambda_minus = upper_bound_slices(1)
+    alpha_minus = upper_bound_slices(1)
 
     if (islice==1) then
-        alpha_minus = -0.18d0
+        alpha_minus = min_low_bound
         alpha_plus = lambda_minus
     else
         alpha_plus = maxval(rayleigh_quotients)
@@ -1046,19 +1030,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! Note: option 1 gives betten results than option 2 so far
     ! =============
 
-    !! testing 1d colwiseDotProduct (working) TODO integrate this into trace estimators for easy GPU porting
-    !call xg_init(res_temp, SPACE_R, 1, 1)
-    !write(901,*) 'colwisenorm2=', xgBlock_getid(slice%X)
-    !call xgBlock_print(res_temp%self, 901)
-    !call xgBlock_colwiseNorm2(slice%X, norm2_fX%self, comm_loc=xmpi_comm_null)
-    !write(901,*) 'dunno'
-    !call xgBlock_colwiseDotProduct(norm2_fX%self, norm2_fX%self, res_temp%self, comm_loc=xmpi_comm_null)
-    !write(901,*) 'colwisenorm2='
-    !call xgBlock_print(res_temp%self, 901)
-    !flush(901)
-    !call xg_free(res_temp)
-
-
     if (slice%spectral_cut == 1) then
         ! norm2_fX = <fX,fX> colwise L2-norm
         call xgBlock_colwiseNorm2(slice%X, norm2_fX%self, comm_loc=xmpi_comm_null)
@@ -1080,9 +1051,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! =============
 
     if (islice==1) then
-        count_mask = ceiling(trace_est_slice1)
+        count_mask = min(ceiling(trace_est_slice1), neigenpairs)
     else if (islice==2) then
-        count_mask = ceiling(trace_est_slice2)
+        count_mask = ceiling(neigenpairs - trace_est_slice1*0.8)
     end if
 
     probe = -probe
@@ -1429,6 +1400,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ABI_FREE(probe_idx)
  ABI_FREE(confi_interval_left)
  ABI_FREE(confi_interval_right)
+ ABI_FREE(nb_vec_slices)
+ ABI_FREE(upper_bound_slices)
 
 end subroutine slice_run_cprj
 !!***
@@ -2449,7 +2422,7 @@ subroutine computeTraceEstimation(slice, m_vecs, trace_degree, low_bound, upp_bo
     call timab(tim_AX_nl,1,tsec)
     call xg_nonlop_getHX(xg_nonlop,slice%AX,slice%cprjX,slice%cprj_work,slice%proj_work%self)
     call timab(tim_AX_nl,2,tsec)
-    
+
     ! Compute f(A) * X
     call applyBandpassFilter(slice, getAX, kin, low_bound, upp_bound, &
         min_low_bound, max_upp_bound, trace_degree, l_gpu_option)
@@ -2656,10 +2629,13 @@ subroutine splitSpectrumToSlices( &
     end interface
 
     ! Local variables
+    integer, parameter :: trace_crit = 2
     integer :: l_gpu_option
     integer :: trace_sum
+    integer :: neigenpairs
     integer :: ipart
-    logical :: found_gap
+    integer :: mid, idx, k, n
+    logical :: found_gap(nstep_spectrum)
     real(dp) :: width
     real(dp) :: trace_est
     real(dp) :: lower_i
@@ -2669,6 +2645,7 @@ subroutine splitSpectrumToSlices( &
     
     ! *********************************************************************
 
+    neigenpairs = slice%neigenpairs
     l_gpu_option = ABI_GPU_DISABLED
     if (present(gpu_option)) then
       l_gpu_option = gpu_option
@@ -2689,7 +2666,6 @@ subroutine splitSpectrumToSlices( &
 
          lower_i = min(max_bound, low_bound_wanted + (ipart - 1) * width)
          upper_i = min(max_bound, low_bound_wanted + ipart * width)
-         write(901,*) 'scanning interval [ai,bi) i= bi=', ipart, upper_i
 
         call computeTraceEstimation(slice, trace_rank, trace_degree, lower_i, upper_i,&
             min_bound, max_bound, trace_est, getAX, kin, my_rank, gpu_option=l_gpu_option)
@@ -2697,8 +2673,10 @@ subroutine splitSpectrumToSlices( &
         ! TODO keep this version and add second version that reuses Chebyshev 
         !      recursion to avoid repeated calculations... 
 
-        found_gap = ( ipart>1 .and. trace_est < 1.0 )
-        write(901,*) 'trace est, with gap=', ceiling(trace_est), found_gap
+        found_gap(ipart) = ( ipart>1 .and. trace_est < trace_crit )
+
+        write(901,*) 'spectrum part : nbvecs', ipart, lower_i, upper_i, ceiling(trace_est)
+        flush(901)
         
         upper_bound_spectrum(ipart) = upper_i
         trace_estim_spectrum(ipart) = ceiling(trace_est)
@@ -2706,16 +2684,56 @@ subroutine splitSpectrumToSlices( &
         trace_sum = trace_sum + ceiling(trace_est)
 
     end do
-    write(901,*) 'total trace_est=', trace_sum
-    flush(901) ! 
 
     if (trace_sum < slice%neigenpairs) then
         ABI_WARNING("trace estimation missed eigenvalues")
     end if
 
-    ! Detect spectral gap
-    !trace_estim_slice = ..
+    ! Chose the spectral gap with the index closer to the middle
+    ! same for interval bound closer to the midpoint
+    write(901,*) "found_gap=", found_gap
+    write(901,*) "upper_bound=", upper_bound_spectrum
+    flush(901)
+
+    found_gap = ( trace_estim_spectrum == minval(trace_estim_spectrum) )
     
+    write(901,*) "found_gap(mod)=", found_gap
+
+    n = nstep_spectrum
+    mid = (n + 1) / 2
+    idx = 0   ! 0 = not found
+
+    if (found_gap(mid)) then
+        idx = mid
+    else
+        do k = 1, max(mid-1, n-mid)
+            if (mid-k >= 1) then
+                if (found_gap(mid-k)) then
+                    idx = mid-k
+                    exit
+                end if
+            end if
+            if (mid+k <= n) then
+                if (found_gap(mid+k)) then
+                    idx = mid+k
+                    exit
+                end if
+            end if
+        end do
+    end if
+
+    nb_vec_slices(1) = min(ceiling(sum(trace_estim_spectrum(1:idx+1))), neigenpairs)
+    nb_vec_slices(2) = min(ceiling(sum(trace_estim_spectrum(idx+2:nstep_spectrum))), neigenpairs)
+    write(901,*) 'gap idx    =', idx
+    write(901,*) 'gap value  =', upper_bound_spectrum(idx)
+    write(901,*) 'trace left =', nb_vec_slices(1)
+    write(901,*) 'trace right=', nb_vec_slices(2)
+    flush(901)
+
+    ! output the gap
+    upp_bound_slices(1) = upper_bound_spectrum(idx)
+
+
 end subroutine splitSpectrumToSlices
 !!***
 
