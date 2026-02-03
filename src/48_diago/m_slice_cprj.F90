@@ -2720,6 +2720,9 @@ end subroutine splitSpectrumToSlices
 !!****f* m_slice_cprj/smallestTridiagEigenpair
 !! NAME
 !! smallestTridiagEigenpair
+!! 
+!! FUNCTION
+!! Smallest eigenvalue of symmetric tridiagonal
 !!
 !! SOURCE
 
