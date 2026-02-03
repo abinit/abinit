@@ -1651,7 +1651,9 @@ subroutine gsham_alloc_fofr_work(gs_ham, ndat)
  end if
 
  ! Realloc and remap if the buffer is not large enough.
- if (gs_ham%n6*ndat > size(gs_ham%fofr_work, dim=4)) then
+ !if (gs_ham%n6*ndat > size(gs_ham%fofr_work, dim=4)) then
+ ! Realloc and remap if buffer size changed.
+ if (gs_ham%n6*ndat /= size(gs_ham%fofr_work, dim=4)) then
    fofr_work_ptr => gs_ham%fofr_work
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET EXIT DATA MAP(delete:fofr_work_ptr) IF (gs_ham%gpu_option==ABI_GPU_OPENMP)
