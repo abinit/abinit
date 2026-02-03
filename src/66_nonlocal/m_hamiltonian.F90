@@ -427,6 +427,12 @@ module m_hamiltonian
    ! xred(3,natom)
    ! reduced coordinates of atoms (dimensionless)
 
+  real(dp), allocatable :: fofr_work(:,:,:,:)
+  !  (2,n4,n5,n6,ndat)
+  ! Buffer used in getgh1c when calling fourwf to compute <r|vlocal1|u_nk> for n =1, ndat.
+  ! It is automatically allocated/reallocated by alloc_fofr according on the input ndat.
+  ! In the case of gpu_option = 2, this is the buffer that is mapped to the GPU but only when ndat changes.
+
 ! ===== Structured datatype pointers
 
   type(fock_common_type), pointer :: fockcommon => null()
@@ -463,6 +469,9 @@ module m_hamiltonian
 
    procedure :: print => gsham_print
     ! Print the object
+
+   procedure :: alloc_fofr_work => gsham_alloc_fofr_work
+    ! Allocate work space array before calling fourwf for ndat bands and map it to GPU
 
  end type gs_hamiltonian_type
 !!***
@@ -606,7 +615,10 @@ contains  !===========================================================
 subroutine gsham_free(Ham)
 
 !Arguments ------------------------------------
- class(gs_hamiltonian_type),intent(inout),target :: Ham
+ class(gs_hamiltonian_type),target,intent(inout) :: Ham
+
+!Local variables-------------------------------
+ real(dp), contiguous, pointer :: fofr_work_ptr(:,:,:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -638,7 +650,6 @@ subroutine gsham_free(Ham)
  end if
  ABI_SFREE(Ham%gbound_k)
  ABI_SFREE(Ham%pspso)
-
  ABI_SFREE(Ham%dimcprj)
 
 ! Real Pointers
@@ -686,6 +697,14 @@ subroutine gsham_free(Ham)
    call gpu_finalize_ham_data()
  end if
 #endif
+
+ if (Ham%gpu_option==ABI_GPU_OPENMP) then
+   fofr_work_ptr => Ham%fofr_work
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:fofr_work_ptr) IF (Ham%gpu_option==ABI_GPU_OPENMP)
+#endif
+ end if
+ ABI_SFREE(Ham%fofr_work)
 
  DBG_EXIT("COLL")
 
@@ -1600,6 +1619,51 @@ subroutine gsham_load_spin(Ham,isppol,vectornd,vlocal,vxctaulocal,with_nonlocal)
  DBG_EXIT("COLL")
 
 end subroutine gsham_load_spin
+!!***
+
+!!****f* m_hamiltonian/gsham_alloc_fofr_work
+!! NAME
+!!  gsham_alloc_fofr_work
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine gsham_alloc_fofr_work(gs_ham, ndat)
+
+!Arguments ------------------------------------
+ class(gs_hamiltonian_type),target,intent(inout) :: gs_ham
+ integer,intent(in) :: ndat
+
+!Local variables-------------------------------
+ real(dp), contiguous, pointer :: fofr_work_ptr(:,:,:,:)
+! *************************************************************************
+
+ if (.not. allocated(gs_ham%fofr_work)) then
+   ! First allocation on CPU and GPU.
+   ABI_MALLOC(gs_ham%fofr_work, (2, gs_ham%n4, gs_ham%n5, gs_ham%n6*ndat))
+   fofr_work_ptr => gs_ham%fofr_work
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:fofr_work_ptr) IF (gs_ham%gpu_option==ABI_GPU_OPENMP)
+#endif
+ end if
+
+ ! Realloc and remap if the buffer is not large enough.
+ if (gs_ham%n6*ndat > size(gs_ham%fofr_work, dim=4)) then
+   fofr_work_ptr => gs_ham%fofr_work
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:fofr_work_ptr) IF (gs_ham%gpu_option==ABI_GPU_OPENMP)
+#endif
+   ABI_REMALLOC(gs_ham%fofr_work, (2, gs_ham%n4, gs_ham%n5, gs_ham%n6*ndat))
+   fofr_work_ptr => gs_ham%fofr_work
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:fofr_work_ptr) IF (gs_ham%gpu_option==ABI_GPU_OPENMP)
+#endif
+ end if ! realloc condition.
+
+end subroutine gsham_alloc_fofr_work
 !!***
 
 !!****f* m_hamiltonian/gsham_print
