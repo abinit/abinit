@@ -536,6 +536,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: my_rank
  integer :: trace_degree, trace_rank
  integer :: nstep_spectrum
+ integer :: kmax
  real(dp) :: conf_tol
  real(dp) :: tol_step
  real(dp) :: tol_probe
@@ -561,6 +562,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: trace_est_slice1, trace_est_slice2
  real(dp) :: low_bound, upp_bound, min_low_bound
  real(dp) :: min_upp_bound, max_upp_bound
+ real(dp) :: lambda_min, res_norm ! lanczos
  real(dp) :: tol12 = 1.0e-12
  type(xg_t) :: Xsum
  type(xg_t) :: DivResults
@@ -750,25 +752,27 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! ------------------------------------------------------------
  !
 
- ! lambda_plus = upper bound of greatest eigenvalue
- low_bound = maxval(rayleigh_quotients)
- 
- write(901,*) 'estimate ..'
+ kmax = 20
+ call computeBLanczos(slice, getAX, kin, spacedim, kmax, lambda_min, res_norm, gpu_option)
+ min_low_bound = lambda_min - res_norm
+
+ write(901,*) 'Lanczos lambda_min=', lambda_min
+ write(901,*) 'Lanczos res_norm  =', res_norm
+ write(901,*) 'Lanczos guarantee =', min_low_bound
  flush(901)
 
- !! Phase 1:
- !! lambda_minus = estimation of (upper bound of) lowest eigenvalue
- !!
+ if (res_norm > 0.1d0) then
+     ABI_WARNING("Lanczos has residual > 0.1 may need greater kmax to guarantee lower bound")
+ end if
 
  ABI_MALLOC(nb_vec_slices, (nslice))
  ABI_MALLOC(upper_bound_slices, (nslice)) 
  
  nstep_spectrum =50
- min_low_bound = -0.18d0 ! FIXME hardcoded minlowest but some more ...
  min_upp_bound = maxval(rayleigh_quotients)
  my_rank = xmpi_comm_rank(slice%spacecom)
  max_upp_bound = slice%ecut
- min_low_est = -0.3d0 ! hardcoded TODO define from previous step
+ min_low_est = min_low_bound - 5*res_norm ! experimental
  trace_rank = neigenpairs ! FIXME for the moment changing this produces a bug
  trace_degree = 30
 
@@ -2766,6 +2770,368 @@ end subroutine splitSpectrumToSlices
     ABI_FREE(ifail)
 
   end subroutine smallestTridiagEigenpair
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice_cprj/computeBLanczos
+!! NAME
+!! computeBLanczos
+!! 
+!! FUNCTION
+!! B-Lanczos three-term recurrence (using B-inner product)
+!!
+!! SOURCE
+  
+  subroutine computeBLanczos(slice, getAX, kin, n, k, lambda_min, res_norm, gpu_option)
+
+    implicit none
+
+    type(slice_t), intent(inout) :: slice
+    type(xgBlock_t), intent(in) :: kin
+    integer, intent(in) :: n, k
+    real(dp), intent(out) :: lambda_min, res_norm
+    integer, optional, intent(in) :: gpu_option
+    interface
+        subroutine getAX(X,AX)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: AX
+        end subroutine getAX
+    end interface
+    
+    type(xg_nonlop_t) :: xg_nonlop
+    type(xg_t) :: xg_Bv
+    real(dp) :: Bv(n), Bv2(2,n)
+    real(dp) :: q(n), q2(2,n), v(n), v2(2,n)
+    real(dp) :: Bm1v2(2,n)
+    real(dp) :: alpha(k), beta(k-1)
+    real(dp) :: q_prev(n)
+    real(dp) :: v_min(n)
+    real(dp) :: beta_prev
+    real(dp) :: normB
+
+    integer :: i, j
+    integer :: space
+    integer :: spacedim
+    integer :: l_gpu_option
+
+    ! *********************************************************************
+
+    xg_nonlop = slice%xg_nonlop
+    space = slice%space
+    spacedim = slice%spacedim
+
+    l_gpu_option = ABI_GPU_DISABLED
+    if (present(gpu_option)) then
+      l_gpu_option = gpu_option
+    end if
+
+    ! ONGOING
+    ! unit tests per elementary operation
+    
+    call random_number(q)
+    do i = 1, n
+        q2(1, i) = q(i)
+        q2(2, i) = 0.0d0
+    end do
+    v2(:,:) = 0.0d0; v(:) = 0.0d0
+    Bv2(:,:) = 0.0d0; Bv(:) = 0.0d0
+    Bm1v2(:,:) = 0.0d0
+    
+    ! Bv = B * q
+    call matmul_op_B(slice, n, q2, Bv2, l_gpu_option)
+    do i = 1, n
+        Bv(i) = Bv2(1, i) ! avoids temporary
+    end do
+
+    normB = sqrt(dot_product(q, Bv))
+    q = q / normB
+
+    q_prev = 0.0_dp
+    beta_prev = 0.0_dp
+
+    do j = 1, k
+        ! v = A * q    
+        do i = 1, n
+            q2(1, i) = q(i)
+        end do
+        call matmul_op_A(slice, getAX, kin, n, q2, v2, l_gpu_option)
+        do i = 1, n
+            v(i) = v2(1, i)
+        end do
+
+        ! alpha_j = q^T * Aq
+        alpha(j) = dot_product(q, v)
+
+        ! v = B^{-1} * A * q
+        call matmul_op_Binv(slice, n, v2, Bm1v2, l_gpu_option) 
+        do i = 1, n
+            v(i) = Bm1v2(1, i)
+        end do
+
+        ! v = B^{-1} A q - alpha q - beta_prev q_prev
+        v = v - alpha(j)*q
+        if (j > 1) v = v - beta_prev*q_prev
+
+        ! Compute beta_j if j<k
+        if (j < k) then
+            ! Bv = B * v        
+            do i = 1, n
+                v2(1, i) = v(i)
+            end do
+            call matmul_op_B(slice, n, v2, Bv2, l_gpu_option)
+            do i = 1, n
+                Bv(i) = Bv2(1, i)
+            end do
+
+            beta(j) = sqrt(dot_product(v, Bv))
+
+            ! Update q_prev, q, beta_prev
+            q_prev = q
+            q = v / beta(j)
+            beta_prev = beta(j)
+        end if
+    end do
+
+    ! Diagonalize T
+    call smallestTridiagEigenpair(k, alpha, beta, lambda_min, v_min)
+
+    ! residual norm using Lanczos shortcut
+    res_norm = abs(beta(k-1)*v_min(k))
+
+  end subroutine computeBLanczos
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice_cprj/matmul_op_A
+!! NAME
+!! matmul_op_A
+!! 
+!! FUNCTION
+!! Apply A to Fortran 1D array q2 and store result to Fortran 1D array Aq2
+!! All in complex.
+!! 
+!! SOURCE
+
+subroutine matmul_op_A(slice, getAX, kin, n, q2, Aq2, gpu_option)
+    
+    implicit none
+
+    type(slice_t), intent(inout) :: slice
+    type(xgBlock_t), intent(in) :: kin
+    integer, intent(in) :: n
+    real(dp), intent(in) :: q2(2,n) ! 1d complex array (in)
+    real(dp), intent(out) :: Aq2(2,n) ! 1d complex array (out)
+    integer, optional, intent(in) :: gpu_option
+
+    interface
+        subroutine getAX(X,AX)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: AX
+        end subroutine getAX
+    end interface
+
+    type(xg_t) :: cprjW, cprj_work
+    type(xgBlock_t) :: W, AW, proj_work
+    type(xg_nonlop_t) :: xg_nonlop
+    integer :: l_gpu_option, space, spacecom, space_cprj, cprjdim, nspinor
+    integer :: blockdim_cprj
+    real(dp) :: tsec(2)
+    
+    ! *********************************************************************
+
+    space = slice%space
+    spacecom = slice%spacecom
+    space_cprj = slice%space_cprj
+    cprjdim = slice%cprjdim
+    nspinor = slice%xg_nonlop%nspinor
+    xg_nonlop = slice%xg_nonlop
+    proj_work = slice%proj_work%self
+
+    l_gpu_option = ABI_GPU_DISABLED
+    if (present(gpu_option)) then
+      l_gpu_option = gpu_option
+    end if
+    
+    ! TODO make this optional
+    blockdim_cprj = nspinor ! = number_columns * nspinor
+    call xg_init(cprjW, space_cprj, cprjdim, blockdim_cprj, spacecom)
+    call xg_init(cprj_work, space_cprj, cprjdim, blockdim_cprj, spacecom)
+   
+    ! TODO make this optional otherwise W=slice%X and AW=slice%AX
+    call xgBlock_map(W, q2, space, n, 1, spacecom, gpu_option=gpu_option)
+    call xgBlock_map(AW, Aq2, space, n, 1, spacecom, gpu_option=gpu_option)
+
+    call timab(tim_cprj,1,tsec)
+    call xg_nonlop_getcprj(xg_nonlop, W, cprjW%self, proj_work)
+    call timab(tim_cprj,2,tsec)
+        
+    call timab(tim_ax_v,1,tsec)
+    call getAX(W,AW)
+    call timab(tim_ax_v,2,tsec)
+
+    call timab(tim_ax_k,1,tsec)
+    call xgBlock_add_diag(W,kin,nspinor,AW)
+    call timab(tim_ax_k,2,tsec)
+
+    call timab(tim_AX_nl,1,tsec)
+    call xg_nonlop_getHX(xg_nonlop, AW, cprjW%self, cprj_work%self, proj_work)
+    call timab(tim_AX_nl,2,tsec)
+
+    call xg_free(cprjW)
+    call xg_free(cprj_work)
+
+end subroutine matmul_op_A
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice_cprj/matmul_op_B
+!! NAME
+!! matmul_op_B
+!! 
+!! FUNCTION
+!! Apply B to Fortran 1D array q2 and store result to Fortran 1D array Bq2
+!! All in complex.
+!! 
+!! SOURCE
+
+subroutine matmul_op_B(slice, n, q2, Bq2, gpu_option)
+    
+    implicit none
+
+    type(slice_t), intent(inout) :: slice
+    integer, intent(in) :: n
+    real(dp), intent(in) :: q2(2,n) ! 1d complex array (in)
+    real(dp), intent(out) :: Bq2(2,n) ! 1d complex array (out)
+    integer, optional, intent(in) :: gpu_option
+
+    type(xg_t) :: cprjW, cprj_work
+    type(xgBlock_t) :: W, BW, proj_work
+    type(xg_nonlop_t) :: xg_nonlop
+    integer :: l_gpu_option, space, spacecom, space_cprj, cprjdim, nspinor
+    integer :: blockdim_cprj
+    real(dp) :: tsec(2)
+    
+    ! *********************************************************************
+
+    space = slice%space
+    spacecom = slice%spacecom
+    space_cprj = slice%space_cprj
+    cprjdim = slice%cprjdim
+    nspinor = slice%xg_nonlop%nspinor
+    xg_nonlop = slice%xg_nonlop
+    proj_work = slice%proj_work%self
+
+    l_gpu_option = ABI_GPU_DISABLED
+    if (present(gpu_option)) then
+      l_gpu_option = gpu_option
+    end if 
+   
+    ! TODO make this optional
+    blockdim_cprj = nspinor ! = number_columns * nspinor
+    call xg_init(cprjW, space_cprj, cprjdim, blockdim_cprj, spacecom)
+    call xg_init(cprj_work, space_cprj, cprjdim, blockdim_cprj, spacecom)
+    
+    ! TODO make this optional otherwise W=slice%X and AW=slice%AX
+    call xgBlock_map(W, q2, space, n, 1, spacecom, gpu_option=gpu_option)
+    call xgBlock_map(BW, Bq2, space, n, 1, spacecom, gpu_option=gpu_option)
+
+    call timab(tim_cprj,1,tsec)
+    call xg_nonlop_getcprj(xg_nonlop, W, cprjW%self, proj_work)
+    call timab(tim_cprj,2,tsec)
+
+    ! BW = S|Psi>
+    call timab(tim_copy, 1, tsec)
+    call xgBlock_copy(W,BW)
+    call timab(tim_copy, 2, tsec)
+
+    if (slice%paw) then
+        call xg_nonlop_getSX(xg_nonlop, BW, cprjW%self, cprj_work%self, proj_work)
+    end if
+
+    call xg_free(cprjW)
+    call xg_free(cprj_work)
+
+end subroutine matmul_op_B
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice_cprj/matmul_op_Binv
+!! NAME
+!! matmul_op_Binv
+!! 
+!! FUNCTION
+!! Apply Binv to Fortran 1D array q2 and store result to Fortran 1D array Binvq2
+!! All in complex.
+!! 
+!! SOURCE
+
+subroutine matmul_op_Binv(slice, n, q2, Binvq2, gpu_option)
+    
+    implicit none
+
+    type(slice_t), intent(inout) :: slice
+    integer, intent(in) :: n
+    real(dp), intent(in) :: q2(2,n) ! 1d complex array (in)
+    real(dp), intent(out) :: Binvq2(2,n) ! 1d complex array (out)
+    integer, optional, intent(in) :: gpu_option
+
+    type(xg_t) :: cprjW, cprj_work, cprj_work2
+    type(xgBlock_t) :: W, BinvW, proj_work
+    type(xg_nonlop_t) :: xg_nonlop
+    integer :: l_gpu_option, space, spacecom, space_cprj, cprjdim, nspinor
+    integer :: blockdim_cprj
+    real(dp) :: tsec(2)
+    
+    ! *********************************************************************
+
+    space = slice%space
+    spacecom = slice%spacecom
+    space_cprj = slice%space_cprj
+    cprjdim = slice%cprjdim
+    nspinor = slice%xg_nonlop%nspinor
+    xg_nonlop = slice%xg_nonlop
+    proj_work = slice%proj_work%self
+
+    l_gpu_option = ABI_GPU_DISABLED
+    if (present(gpu_option)) then
+      l_gpu_option = gpu_option
+    end if
+    
+    blockdim_cprj = nspinor ! = number_columns * nspinor
+    call xg_init(cprjW, space_cprj, cprjdim, blockdim_cprj, spacecom)
+    call xg_init(cprj_work, space_cprj, cprjdim, blockdim_cprj, spacecom)
+    call xg_init(cprj_work2, space_cprj, cprjdim, blockdim_cprj, spacecom)
+    
+    call xgBlock_map(W, q2, space, n, 1, spacecom, gpu_option=gpu_option)
+    call xgBlock_map(BinvW, Binvq2, space, n, 1, spacecom, gpu_option=gpu_option)
+
+    call timab(tim_cprj,1,tsec)
+    call xg_nonlop_getcprj(xg_nonlop, W, cprjW%self, proj_work)
+    call timab(tim_cprj,2,tsec)
+
+    ! BinvW = S^{-1}|Psi>
+    call timab(tim_copy, 1, tsec)
+    call xgBlock_copy(W,BinvW)
+    call timab(tim_copy, 2, tsec)
+
+    if (slice%paw) then
+        call timab(tim_invovl, 1, tsec)
+        call xg_nonlop_getSm1X(xg_nonlop, BinvW, cprjW%self, cprj_work%self, &
+            cprj_work2%self,proj_work)
+        call timab(tim_invovl, 2, tsec)
+    end if
+
+    call xg_free(cprjW)
+    call xg_free(cprj_work)
+    call xg_free(cprj_work2)
+
+end subroutine matmul_op_Binv
 !!***
 
 end module m_slice_cprj
