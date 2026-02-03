@@ -137,7 +137,7 @@ module m_gstore
  use m_ephtk
  use m_mkffnl
  use m_sigtk
- use m_abi_linalg,     only : abi_gpu_xgemm_d
+
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : pseudopotential_type
@@ -174,6 +174,7 @@ module m_gstore
  use m_pstat,          only : pstat_proc
  use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph
  use m_gsphere,        only : gsphere_t
+ use m_abi_linalg,     only : abi_gpu_xgemm_d
 
  implicit none
 
@@ -4062,7 +4063,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 #ifdef HAVE_OPENMP_OFFLOAD
            !$OMP TARGET UPDATE FROM(gkq_atm_ipc)
 #endif
-
          else
            call ZGEMM('C', 'N', nb_kq, nb_k, npw_kq*nspinor, cone, bras_kq, npw_kq*nspinor, &
                       h1_kets_kq, npw_kq*nspinor, czero, gkq_atm_ipc, nb_kq)
@@ -4121,7 +4121,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET EXIT DATA MAP(delete:gkq_atm_ipc) IF (dtset%gpu_option == ABI_GPU_OPENMP)
 #endif
-
    ABI_FREE(gkq_atm_ipc)
 
    if (dtset%gstore_use_lgk /= 0) then

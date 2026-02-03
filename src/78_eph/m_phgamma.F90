@@ -85,6 +85,7 @@ module m_phgamma
  use m_wfd,            only : wfd_t
  use m_pstat,          only : pstat_proc
  use m_lgroup,         only : lgroup_t
+ use m_abi_linalg,     only : abi_gpu_xgemm_d
 
  implicit none
 
@@ -3063,7 +3064,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp),allocatable :: kinpw_k(:), kinpw_kq(:), displ_cart(:,:,:,:), displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:), kpg_kq(:,:), kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:), tgam(:,:,:), gkq_atm(:,:,:,:), lambda(:)
+ real(dp),allocatable :: v1scf(:,:,:,:), tgam(:,:,:), gkq_atm(:,:,:,:), gkq_atm_ipc(:,:,:), lambda(:)
  real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1_kets_kq(:,:,:), cg_work(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:,:), work(:,:,:,:)
@@ -3790,20 +3791,27 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        call wfd%sym_ug_kg_npw(ecut, kq, kq_ibz, bstart_kq, nb_kq, spin, indkk_kq(:,1), cryst, &
                               work_ngfft, work, istwf_kq, npw_kq, kg_kq, bras_kq)
 
-       ! if PAW, one has to solve a generalized eigenproblem
-       gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
-       ABI_MALLOC(gs1c_kq, (2, npw_kq*nspinor*((sij_opt+1)/2)))
-
        call gs_hamkq%eph_setup_k("k" , kk, istwf_k, npw_k, kg_k, dtset, cryst, psps, &       ! in
                                  nkpg, kpg_k, ffnl_k, kinpw_k, ph3d_k, pert_comm%value)      ! out
 
        call gs_hamkq%eph_setup_k("kq", kq, istwf_k, npw_kq, kg_kq, dtset, cryst, psps, &     ! in
                                  nkpg, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, pert_comm%value)  ! out
 
+       ! If PAW, one has to solve a generalized eigenproblem
+       gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
+
+       ABI_MALLOC(lambda, (nb_k))
        ABI_MALLOC(gkq_atm, (2, nb_kq, nb_k, natom3))
        ABI_MALLOC(h1_kets_kq, (2, npw_kq*nspinor, nb_k))
        ABI_MALLOC(gvnlx1, (2, npw_kq*nspinor, nb_k))
-       ABI_MALLOC(lambda, (nb_k))
+       ABI_MALLOC(gs1c_kq, (2, npw_kq*nspinor*nb_k*((sij_opt+1)/2)))
+       ABI_MALLOC(gkq_atm_ipc, (2, nb_kq, nb_k))
+#ifdef HAVE_OPENMP_OFFLOAD
+      !$OMP TARGET ENTER DATA MAP(alloc:gkq_atm_ipc) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+      !$OMP TARGET ENTER DATA MAP(to:kets_k, bras_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+      !$OMP TARGET ENTER DATA MAP(alloc:h1_kets_kq, gvnlx1, kets_k, bras_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+      !$OMP TARGET ENTER DATA MAP(alloc:gs1c_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP .and. sij_opt /= 0)
+#endif
 
        ! Loop over all my atomic perturbations and compute gkq_atm.
        do my_ip=1,my_npert
@@ -3843,15 +3851,25 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
          ! Calculate <psi_{k+q,m}|dvscf_q|psi_{k,n}> for this perturbation.
          ! No need to handle istwf_kq because it's always 1.
-         call ZGEMM('C', 'N', nb_kq, nb_k, npw_kq*nspinor, cone, bras_kq, npw_kq*nspinor, &
-                    h1_kets_kq, npw_kq*nspinor, czero, gkq_atm(:,:,:,ipc), nb_kq)
+         if (dtset%gpu_option == ABI_GPU_OPENMP) then
+           call abi_gpu_xgemm_d(2, 'C', 'N', nb_kq, nb_k, npw_kq*nspinor, cone, bras_kq, npw_kq*nspinor, &
+                               h1_kets_kq, npw_kq*nspinor, czero, gkq_atm_ipc, nb_kq)
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET UPDATE FROM(gkq_atm_ipc)
+#endif
 
+         else
+           call ZGEMM('C', 'N', nb_kq, nb_k, npw_kq*nspinor, cone, bras_kq, npw_kq*nspinor, &
+                      h1_kets_kq, npw_kq*nspinor, czero, gkq_atm_ipc, nb_kq)
+         end if
+
+         ! Transfer data
+         gkq_atm(:,:,:,ipc) = gkq_atm_ipc
        end do ! my_ip (loop over my_npert atomic perturbations)
 
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
        if (pert_comm%nproc > 1) call xmpi_sum(gkq_atm, pert_comm%value, ierr)
 
-       ABI_FREE(gs1c_kq)
        ABI_FREE(ffnl_k)
        ABI_FREE(ffnl_kq)
        ABI_FREE(kpg_kq)
@@ -3860,9 +3878,15 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ABI_FREE(kinpw_kq)
        ABI_FREE(ph3d_k)
        ABI_FREE(ph3d_kq)
+
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:h1_kets_kq, gvnlx1, kets_k, bras_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+       !$OMP TARGET EXIT DATA MAP(delete:gs1c_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP .and. sij_opt /= 0)
+#endif
        ABI_FREE(kets_k)
        ABI_FREE(bras_kq)
        ABI_FREE(h1_kets_kq)
+       ABI_FREE(gs1c_kq)
        ABI_FREE(gvnlx1)
 
        ! Compute group velocities if we are in transport mode or adaptive gaussian or
@@ -4014,8 +4038,12 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          end do
        end if ! prteliash == 3
 
-       ABI_FREE(gkq_atm)
        ABI_FREE(lambda)
+       ABI_FREE(gkq_atm)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:gkq_atm_ipc) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
+       ABI_FREE(gkq_atm_ipc)
 
        if (print_time_k) then
          write(msg,'(5x,2(a,i0),a)')"k-point [", my_ik, "/", gams%my_nfsk_q, "]"

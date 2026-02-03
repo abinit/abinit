@@ -161,6 +161,8 @@ module m_abi_linalg
     module procedure abi_gpu_xgemm_2z
  end interface abi_gpu_xgemm
 
+ public :: abi_gpu_xgemm_d
+
  interface abi_gpu_xgemm_strided
     module procedure abi_gpu_xgemm_strided_cptr
     module procedure abi_gpu_xgemm_strided_d
