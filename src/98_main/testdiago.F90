@@ -39,8 +39,8 @@ program testdiago
 
     implicit none
 
-  integer, parameter :: n = 100
-  integer, parameter :: kmax = 100
+  integer, parameter :: n = 500
+  integer, parameter :: kmax = 20
 
   real(dp) :: A(n,n), B(n,n)
   real(dp) :: evals(n)
@@ -53,11 +53,26 @@ program testdiago
   real(dp) :: eig_lanczos
   real(dp) :: shift
   real(dp) :: res_norm
+  real(dp) :: low_bound
   real(dp), allocatable :: workB(:)
+  integer, allocatable :: seed(:)
 
   integer :: i, info, lwork
+  integer :: nseed
+  logical :: success
 
-  call random_seed()
+  call random_seed(size=nseed)
+  allocate(seed(nseed))
+  ! Case n=500 with kmax=10 F and kmax=20 T
+  !seed = (/ 1239937284, -897626825, 1137443096, -1034675534, &
+  !          124992374, 488443746, -644767705, -1072627500 /)
+  ! Case n=500 with kmax=10 F and kmax=20 T
+  seed = (/ 1555480729, 1032432162, 113869316, 1593505229, &
+            461320453, 1082979611, -238973894, -1158470550 /)
+  call random_seed(put=seed)
+  !call random_seed(get=seed)
+  print *, "Seed=", seed
+  deallocate(seed)
 
   ! -------------------------------------------------
   ! 1. Random symmetric matrix A
@@ -97,11 +112,23 @@ program testdiago
   call random_number(v0)
   call b_lanczos(A, B, n, kmax, eig_lanczos, res_norm)
 
-  print *, "B-Lanczos lowest eigenvalue approximation:"
+  print *, "B-Lanczos lowest eigenvalue approximation (upper bound):"
   print *, eig_lanczos
 
   print *, "residual error norm"
   print *, res_norm
+
+  low_bound = eig_lanczos - res_norm
+  print *, "Final estimation (guaranteed lower bound)"
+  print *, low_bound
+
+  success = evals(1) > low_bound
+  print *, "Status"
+  print *, success
+
+  if (.not. success) then
+      print *, "must increase kmax"
+  end if
 
 contains
 

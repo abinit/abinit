@@ -2750,7 +2750,8 @@ end subroutine splitSpectrumToSlices
     ABI_MALLOC(ifail, (n))
 
     ! DSTEVX computes selected eigenpairs (here smallest: index 1)
-    call dstevx('V', 'I', n, dloc, eloc, 0.0d0, 0.0d0, 1, 1, 1.0d-12, m, dloc, z, n, work, iwork, ifail, info)
+    call dstevx('V', 'I', n, dloc, eloc, 0.0d0, 0.0d0, 1, 1, 1.0d-12, m, dloc, z, &
+        n, work, iwork, ifail, info)
 
     if (info /= 0) then
        ABI_ERROR('DSTEVX failed')
