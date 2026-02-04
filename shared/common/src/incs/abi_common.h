@@ -428,5 +428,15 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #  define __slkmat_t slkmat_sp_t
 #endif
 
+
+/* Macros used to hide OpenMp target statements */
+
+#ifdef HAVE_OPENMP_OFFLOAD
+#  define _OMP_TARGET !$OMP TARGET
+#else
+#  define _OMP_TARGET ! no_openmp_target
+#endif
+
+
 #endif
 /* _ABINIT_COMMON_H */
