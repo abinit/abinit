@@ -567,7 +567,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: min_upp_bound, max_upp_bound
  real(dp) :: lambda_min, res_norm ! lanczos
  real(dp) :: lower_i, upper_i, width
- real(dp) :: energy_i, signed_val, energy_magn_j
+ real(dp) :: signed_val, energy_magn_j
+ real(dp) :: re_energy, im_energy, energy_ifilter
  real(dp) :: tol12 = 1.0e-12
  type(xg_t) :: Xsum
  type(xg_t) :: DivResults
@@ -603,8 +604,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp), allocatable :: lower_bounds(:)
  real(dp), allocatable :: upper_bounds(:)
  real(dp), allocatable :: cja(:)
- real(dp), allocatable :: re_energy(:)
- real(dp), allocatable :: im_energy(:)
  real(dp), allocatable :: energy_sign(:)
  real(dp), allocatable :: confi_interval_left(:), confi_interval_right(:)
  real(dp), pointer :: probe(:) => null()
@@ -683,12 +682,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call xg_nonlop_getcprj(xg_nonlop,slice%AllX,slice%AllcprjX,slice%proj_work%self)
  call timab(tim_cprj,2,tsec)
 
- ! ITEST
- write(901,*) 'slice%X0 before filter=', xgBlock_getid(X0)
- write(901,*) 'slice%AllX before filter=', xgBlock_getid(slice%AllX) 
- flush(901)
- ! ITEST
-
  !Compute A * Psi
  call timab(tim_AX_v,1,tsec)
  call getAX(slice%AllX,slice%AllAX%self)
@@ -699,32 +692,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call timab(tim_AX_nl,1,tsec)
  call xg_nonlop_getHX(xg_nonlop,slice%AllAX%self,slice%AllcprjX,slice%Allcprj_work%self,slice%proj_work%self)
  call timab(tim_AX_nl,2,tsec)
-
- ! ITEST
- write(901,*) 'slice%AllX init guess=', xgBlock_getid(slice%AllX) 
- write(901,*) 'slice%AllAX init guess=', xgBlock_getid(slice%AllAX%self) 
- flush(901)
- ! ITEST
-
- ! B-orthonormalize X and AX for all bands(assuming linalg)
- !call xg_Borthonormalize_cprj(xg_nonlop,slice%all_blockdim_cprj,slice%AllX,slice%AllcprjX,ierr,tim_ortho,&
- !   gpu_option,AX=slice%AllAX%self)
-
- ! ITEST
- !write(901,*) 'slice%AllX after Bortho no1=', xgBlock_getid(slice%AllX) 
- !write(901,*) 'slice%AllAX after Bortho no1=', xgBlock_getid(slice%AllAX%self) 
- !flush(901)
- ! ITEST
-
- ! B-orthonormalize X and AX for all bands(assuming linalg)
- !call xg_Borthonormalize_cprj(xg_nonlop,slice%all_blockdim_cprj,slice%AllX,slice%AllcprjX,ierr,tim_ortho,&
- !    gpu_option,AX=slice%AllAX%self)
-
- ! ITEST
- !write(901,*) 'slice%AllX after Bortho no2=', xgBlock_getid(slice%AllX) 
- !write(901,*) 'slice%AllAX after Bortho no2=', xgBlock_getid(slice%AllAX%self) 
- !flush(901)
- ! ITEST
 
  !
  ! ------------------------------------------------------------
@@ -741,10 +708,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! Recover column indices of sorted Rayleigh quotients in increasing order
  call xgBlock_reverseMap(DivResults%self, theta_, rows=1, cols=neigenpairs)
  rayleigh_quotients(1:neigenpairs) = theta_(1,1:neigenpairs)
- !permute_cols(1:neigenpairs) = (/ (iband, iband=1,neigenpairs) /)
- !call sort_dp(neigenpairs, rayleigh_quotients, permute_cols, tol12)
- ! store order into theta_
- !theta_(1,1:neigenpairs) = rayleigh_quotients(1:neigenpairs)
 
  ! ITEST
  write(901,*) 'rayleigh quotients='
@@ -903,24 +866,22 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         upper_bounds(islice) = lambda_plus
   end do
 
-  nfilters = 10 ! bottom-up merging > nslice
+  nfilters = 4 ! bottom-up merging > nslice
 
   ABI_MALLOC(energy_filters, (neigenpairs, nfilters))
   ABI_MALLOC(cja, (ndeg_filter_max+1))
-  ABI_MALLOC(re_energy, (neigenpairs))
-  ABI_MALLOC(im_energy, (neigenpairs))
   ABI_MALLOC(energy_sign, (neigenpairs))
 
   upper_bounds(2) = 0.5d0
   center = (max_upp_bound + min_low_est)*0.5
   radius = (max_upp_bound - min_low_est)*0.5
-  width = (upper_bounds(2) - upper_bounds(1)) / nfilters
+  width = (upper_bounds(2) - lower_bounds(1)) / nfilters
 
   do ifilter=1,nfilters
       
       ! Compute energy for every band
       lower_i = lower_bounds(1) + (ifilter - 1) * width
-      upper_i = upper_bounds(1) + ifilter * width
+      upper_i = min(upper_bounds(2), lower_bounds(1) + ifilter * width)
       deg_i = ndeg_filter_max
 
       write(901,*) '========================================'
@@ -930,20 +891,20 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
       call buildChebyshevJacksonCoeffs(lower_i, upper_i, deg_i, center, radius, cja)
   
-      !! init=0 a bit obscure think more FIXME
-      re_energy = 0.0d0
-      im_energy = 0.0d0
-      do ideg = 1, ndeg_filter_max+1
-        energy_i = 0.0d0
-        do j = 1, neigenpairs
-            re_energy(j) = re_energy(j) + cja(ideg) * cheby_moments(2*j-1, ideg)
-            im_energy(j) = im_energy(j) + cja(ideg) * cheby_moments(2*j,   ideg)
-            energy_magn_j = sqrt( re_energy(j)**2 + im_energy(j)**2 )
-            energy_i = energy_i + energy_magn_j
-            energy_filters(j, ifilter) = energy_magn_j
+      ! for every eigenpair, score is the sum of degrees
+      energy_ifilter = 0.d0
+      do j = 1, neigenpairs
+        re_energy = 0.0d0
+        im_energy = 0.0d0
+        do ideg = 1, ndeg_filter_max+1
+            re_energy = re_energy + cja(ideg) * cheby_moments(2*j-1, ideg)
+            im_energy = im_energy + cja(ideg) * cheby_moments(2*j,   ideg)
         end do
+        energy_magn_j = sqrt( re_energy**2 + im_energy**2 )
+        energy_filters(j, ifilter) = energy_magn_j
+        energy_ifilter = energy_ifilter + energy_magn_j 
       end do
-      nvec_approx = ceiling(energy_i)
+      nvec_approx = ceiling(energy_ifilter)
       write(901,*) 'nvec estimate from X0 probe=', nvec_approx
       flush(901)
 
@@ -964,10 +925,21 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
   ! negative: slice i+1 dominates
   ! magnitude: fraction of vectors agreeing
 
+  ! for every band print its nfilter scores
+  write(901,*)
+  write(901,*) 'j=    ', nfilters, 'scores'
+  do j = 1, neigenpairs
+    write(901,*) 'eigenvalue', j
+    do ifilter = 1, nfilters
+        signed_val = energy_filters(j,ifilter)
+        write(901,*) signed_val
+        flush(901)
+    end do
+  end do
+  write(901,*)
+
   ABI_FREE(energy_filters)
   ABI_FREE(cja)
-  ABI_FREE(re_energy)
-  ABI_FREE(im_energy)
   ABI_FREE(energy_sign)
 
   !! TODO do the tree traversal
