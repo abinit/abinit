@@ -25,7 +25,7 @@ module m_nvtx_data
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 125
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 130
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -155,6 +155,13 @@ module m_nvtx_data
   integer, parameter :: NVTX_GWR_COS_TRANSFORM = 123
   integer, parameter :: NVTX_GWR_BUILD_WC = 124
   integer, parameter :: NVTX_GWR_BRAKET_UR = 125
+
+  ! GETGH1C SECTIONS
+  integer, parameter :: NVTX_GETGH1_LOCPOT = 126
+  integer, parameter :: NVTX_GETGH1_NLOCPOT = 127
+  integer, parameter :: NVTX_GETGH1_DDK = 128
+  integer, parameter :: NVTX_GETGH1_DDE = 129
+  integer, parameter :: NVTX_GETGH1_STRAIN = 130
 
 contains
 
@@ -288,7 +295,13 @@ contains
          & "GWR_WC_RPR_QBZ", &
          & "GWR_COS_TRANSFORM", &
          & "GWR_BUILD_WC", &
-         & "GWR_BRAKET_UR" &
+         & "GWR_BRAKET_UR", &
+         ! GETGH1C SECTIONS
+         & "NVTX_GETGH1_LOCPOT", &
+         & "NVTX_GETGH1_NLOCPOT", &
+         & "NVTX_GETGH1_DDK", &
+         & "NVTX_GETGH1_DDE", &
+         & "NVTX_GETGH1_STRAIN" &
          & ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -418,6 +431,13 @@ contains
     nvtx_ids(123) = NVTX_GWR_COS_TRANSFORM
     nvtx_ids(124) = NVTX_GWR_BUILD_WC
     nvtx_ids(125) = NVTX_GWR_BRAKET_UR
+
+    ! GETGH1C SECTIONS
+    nvtx_ids(126) = NVTX_GETGH1_LOCPOT
+    nvtx_ids(127) = NVTX_GETGH1_NLOCPOT
+    nvtx_ids(128) = NVTX_GETGH1_DDK
+    nvtx_ids(129) = NVTX_GETGH1_DDE
+    nvtx_ids(130) = NVTX_GETGH1_STRAIN
 
   end subroutine nvtx_init
 
