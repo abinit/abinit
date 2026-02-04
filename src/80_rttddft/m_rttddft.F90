@@ -280,9 +280,9 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
                 & dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,  &
                 & tdks%paw_an,tdks%paw_an,tdks%paw_ij,tdks%pawang,          &
                 & dtset%pawprtvol,tdks%pawrad,tdks%pawrhoij,dtset%pawspnorb,&
-                & tdks%pawtab,dtset%pawxcdev,dtset%spinaxis,dtset%spnorbscl,dtset%xclevel, &
+                & tdks%pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel, &
                 & dtset%xc_denpos,dtset%xc_taupos,tdks%xred,tdks%ucvol,     &
-                & psps%znuclpsp, &
+                & psps%znuclpsp,dtset%spinaxis,&
                 & comm_atom=mpi_enreg%comm_atom,                            &
                 & mpi_atmtab=mpi_enreg%my_atmtab,vpotzero=vpotzero,         &
                 & epaw_xc=energies%e_pawxc)

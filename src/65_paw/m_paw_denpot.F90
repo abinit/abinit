@@ -159,8 +159,8 @@ CONTAINS  !=====================================================================
 
 subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,gprimd,ipert,ixc,&
 & my_natom,natom,nspden,ntypat,nucdipmom,nzlmopt,option,paw_an,paw_an0,&
-& paw_ij,pawang,pawprtvol,pawrad,pawrhoij,pawspnorb,pawtab,pawxcdev,spinaxis,spnorbscl,&
-& xclevel,xc_denpos,xc_taupos,xred,ucvol,znucl,&
+& paw_ij,pawang,pawprtvol,pawrad,pawrhoij,pawspnorb,pawtab,pawxcdev,spnorbscl,&
+& xclevel,xc_denpos,xc_taupos,xred,ucvol,znucl,spinaxis,&
 & electronpositron,mpi_atmtab,comm_atom,vpotzero,hyb_mixing,hyb_mixing_sr,epaw_xc,&
 & rcpaw,extfpmd) ! optional arguments
 
@@ -179,7 +179,7 @@ subroutine pawdenpot(compch_sph,el_temp,epaw,epawdc,spaw,gprimd,ipert,ixc,&
  type(extfpmd_type),pointer, intent(in), optional :: extfpmd
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
- real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom),spinaxis(3),xred(3,natom),znucl(ntypat)
+ real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom),xred(3,natom),znucl(ntypat),spinaxis(3)
  real(dp),intent(out),optional :: vpotzero(2)
  type(paw_an_type),intent(inout) :: paw_an(my_natom)
  type(paw_an_type), intent(in) :: paw_an0(my_natom)
