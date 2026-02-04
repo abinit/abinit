@@ -281,7 +281,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !-------------------------------------------
 
  if (ipert<=natom+5.and.ipert/=natom+1.and.optlocal>0) then
-   !ABI_NVTX_START_RANGE(NVTX_GETGHC_LOCPOT)
+   ABI_NVTX_START_RANGE(NVTX_GETGHC1_LOCPOT)
 
    ! Important: work (aka fofr) must be allocated with "ndat", but fourwf with option 2 never accesses it, so this allocation wastes memory.
    ! but it is neeeded to run on GPUs.
@@ -441,7 +441,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #endif
    ABI_FREE(work)
 #endif
-  !ABI_NVTX_END_RANGE()
+  ABI_NVTX_END_RANGE()
 
 !  k-point perturbation (or no local part, i.e. optlocal=0)
 !  -------------------------------------------
@@ -483,7 +483,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !-------------------------------------------
  if (ipert<=natom.and.(optnl>0.or.sij_opt/=0)) then
 
-   !ABI_NVTX_START_RANGE(NVTX_GETGHC_NLOCPOT)
+   ABI_NVTX_START_RANGE(NVTX_GETGH1_NLOCPOT)
 
 !  PAW:
    if (gs_hamkq%usepaw==1) then
@@ -566,11 +566,13 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end if
      end if
    end if
-   !ABI_NVTX_END_RANGE()
+   ABI_NVTX_END_RANGE()
 
 !  k-point perturbation
 !  -------------------------------------------
  else if (ipert==natom+1.and.(optnl>0.or.sij_opt/=0)) then
+
+   ABI_NVTX_START_RANGE(NVTX_GETGHC1_DDK)
 
    tim_nonlop=8 ; signs=2 ; choice=5
    if (gs_hamkq%usepaw==1) then
@@ -598,9 +600,13 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,lambda,mpi_enreg,ndat,nnlout,&
                   paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnlx1_)
    end if
+
+   ABI_NVTX_END_RANGE()
+
 !DEBUG
 !  gvnlx1_=zero
 !ENDDEBUG
+
 
 !  Electric field perturbation without Berry phase
 !  -------------------------------------------
@@ -608,6 +614,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
           (berryopt/=4 .and. berryopt/=6 .and. berryopt/=7 .and. &
           berryopt/=14 .and. berryopt/=16 .and. berryopt/=17) .and.(optnl>0.or.sij_opt/=0))then
    !  gvnlx1 was already initialized in the calling routine, by reading a ddk file. It contains |i du^(0)/dk_band>
+
+   ABI_NVTX_START_RANGE(NVTX_GETGH1_DDE)
 
    if (gs_hamkq%usepaw==1) then
      if (usecprj==1) then
@@ -733,6 +741,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      nullify(cwaveprj_ptr)
    end if  ! PAW
 
+   ABI_NVTX_END_RANGE()
+
 !  Electric field perturbation with Berry phase
 !  -------------------------------------------
  else if (ipert==natom+2 .and. &
@@ -759,6 +769,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !  Strain perturbation
 !  -------------------------------------------
  else if ((ipert==natom+3.or.ipert==natom+4).and.(optnl>0.or.sij_opt/=0)) then
+
+   ABI_NVTX_START_RANGE(NVTX_GETGH1_STRAIN)
 
    istr=idir;if(ipert==natom+4) istr=istr+3
 
@@ -840,6 +852,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end if
      end if
    end if
+
+   ABI_NVTX_END_RANGE()
 
 !  No non-local part
 !  -------------------------------------------
