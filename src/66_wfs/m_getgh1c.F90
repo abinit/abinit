@@ -281,7 +281,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !-------------------------------------------
 
  if (ipert<=natom+5.and.ipert/=natom+1.and.optlocal>0) then
-   ABI_NVTX_START_RANGE(NVTX_GETGHC1_LOCPOT)
+   ABI_NVTX_START_RANGE(NVTX_GETGH1_LOCPOT)
 
    ! Important: work (aka fofr) must be allocated with "ndat", but fourwf with option 2 never accesses it, so this allocation wastes memory.
    ! but it is neeeded to run on GPUs.
@@ -572,7 +572,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !  -------------------------------------------
  else if (ipert==natom+1.and.(optnl>0.or.sij_opt/=0)) then
 
-   ABI_NVTX_START_RANGE(NVTX_GETGHC1_DDK)
+   ABI_NVTX_START_RANGE(NVTX_GETGH1_DDK)
 
    tim_nonlop=8 ; signs=2 ; choice=5
    if (gs_hamkq%usepaw==1) then
