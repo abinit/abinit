@@ -1642,6 +1642,7 @@ subroutine gsham_alloc_fofr_work(gs_ham, ndat)
 ! *************************************************************************
 
  if (.not. allocated(gs_ham%fofr_work)) then
+   !print *, "first allocation"
    ! First allocation on CPU and GPU.
    ABI_MALLOC(gs_ham%fofr_work, (2, gs_ham%n4, gs_ham%n5, gs_ham%n6*ndat))
    fofr_work_ptr => gs_ham%fofr_work
@@ -1654,6 +1655,7 @@ subroutine gsham_alloc_fofr_work(gs_ham, ndat)
  !if (gs_ham%n6*ndat > size(gs_ham%fofr_work, dim=4)) then
  ! Realloc and remap if buffer size changed.
  if (gs_ham%n6*ndat /= size(gs_ham%fofr_work, dim=4)) then
+   !print *, "reallocating:", gs_ham%n6*ndat, size(gs_ham%fofr_work, dim=4)
    fofr_work_ptr => gs_ham%fofr_work
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET EXIT DATA MAP(delete:fofr_work_ptr) IF (gs_ham%gpu_option==ABI_GPU_OPENMP)

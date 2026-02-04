@@ -263,6 +263,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    map_gh1c  =  .not. ( xomp_target_is_present(c_loc(gh1c)))
    map_gs1c  =  .not. ( xomp_target_is_present(c_loc(gs1c))) .and. sij_opt==1
    map_cwave =  .not. ( xomp_target_is_present(c_loc(cwave)))
+   !print *, "getgh1c: map_gh1c=", map_gh1c, ", map_gs1c=", map_gs1c, ", map_cwave=", map_cwave
 
    !$OMP TARGET ENTER DATA MAP(alloc:gh1c) IF(map_gh1c)
    !$OMP TARGET ENTER DATA MAP(alloc:gs1c) IF(map_gs1c)
@@ -278,7 +279,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 ! Electric field perturbation or
 ! Strain perturbation
 !-------------------------------------------
+
  if (ipert<=natom+5.and.ipert/=natom+1.and.optlocal>0) then
+   !ABI_NVTX_START_RANGE(NVTX_GETGHC_LOCPOT)
 
    ! Important: work (aka fofr) must be allocated with "ndat", but fourwf with option 2 never accesses it, so this allocation wastes memory.
    ! but it is neeeded to run on GPUs.
@@ -438,6 +441,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #endif
    ABI_FREE(work)
 #endif
+  !ABI_NVTX_END_RANGE()
 
 !  k-point perturbation (or no local part, i.e. optlocal=0)
 !  -------------------------------------------
@@ -478,6 +482,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !Phonon perturbation
 !-------------------------------------------
  if (ipert<=natom.and.(optnl>0.or.sij_opt/=0)) then
+
+   !ABI_NVTX_START_RANGE(NVTX_GETGHC_NLOCPOT)
 
 !  PAW:
    if (gs_hamkq%usepaw==1) then
@@ -560,6 +566,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end if
      end if
    end if
+   !ABI_NVTX_END_RANGE()
 
 !  k-point perturbation
 !  -------------------------------------------

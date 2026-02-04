@@ -3939,7 +3939,11 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      do my_ip=1,my_npert
        call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, gs_ham_kq%nvloc,&
                                   pawfgr, mpi_enreg, dummy_vtrial, v1scf(:,:,:,my_ip), vlocal, vlocal1(:,:,:,:,my_ip))
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(to:vlocal1(:,:,:,:,my_ip)) IF (dtset%gpu_option == ABI_GPU_OPENMP) NOWAIT
+#endif
      end do
+     !$OMP TASKWAIT
 
      ! Continue to initialize the GS Hamiltonian
      call gs_ham_kq%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
@@ -4000,24 +4004,41 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        call wfd%sym_ug_kg_npw(ecut, kk_bz, kk_ibz, gqk%bstart_k, nb_k, spin, gqk%my_k2ibz(:, my_ik), cryst, &
                               work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
 
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(to:kets_k) IF (dtset%gpu_option == ABI_GPU_OPENMP) NOWAIT
+#endif
+
        ! Get npw_kq, kg_kq and symmetrize wavefunctions from the IBZ (if needed).
        call wfd%sym_ug_kg_npw(ecut, kq_bz, kq_ibz, gqk%bstart_kq, nb_kq, spin, indkk_kq(:,1), cryst, &
                               work_ngfft, work, istwf_kq, npw_kq, kg_kq, bras_kq)
 
-       call gs_ham_kq%eph_setup_k("k" , kk_bz, istwf_k, npw_k, kg_k, dtset, cryst, psps, &
-                                  nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, gqk%pert_comm%value)
-
-       call gs_ham_kq%eph_setup_k("kq", kq_bz, istwf_k, npw_kq, kg_kq, dtset, cryst, psps, &
-                                  nkpg_kq, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, gqk%pert_comm%value)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(to:bras_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP) NOWAIT
+#endif
 
        ABI_MALLOC(h1_kets_kq, (2, npw_kq*nspinor, nb_k))
        ABI_MALLOC(gs1c_kq, (2, npw_kq*nspinor*nb_k*((sij_opt+1)/2)))
        ABI_MALLOC(gvnlx1, (2, npw_kq*nspinor,nb_k))
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(to:kets_k, bras_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP)
-       !$OMP TARGET ENTER DATA MAP(alloc:h1_kets_kq, gvnlx1, kets_k, bras_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP)
-       !$OMP TARGET ENTER DATA MAP(alloc:gs1c_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP .and. sij_opt /= 0)
+       !$OMP TARGET ENTER DATA MAP(alloc:h1_kets_kq, gvnlx1, kets_k, bras_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP) NOWAIT
+       !$OMP TARGET ENTER DATA MAP(alloc:gs1c_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP .and. sij_opt /= 0) NOWAIT
 #endif
+
+       call gs_ham_kq%eph_setup_k("k" , kk_bz, istwf_k, npw_k, kg_k, dtset, cryst, psps, &
+                                  nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, gqk%pert_comm%value)
+
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(to:kpg_k, ffnl_k, kinpw_k, ph3d_k) IF (dtset%gpu_option == ABI_GPU_OPENMP) NOWAIT
+#endif
+
+       call gs_ham_kq%eph_setup_k("kq", kq_bz, istwf_k, npw_kq, kg_kq, dtset, cryst, psps, &
+                                  nkpg_kq, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, gqk%pert_comm%value)
+
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(to:kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP) NOWAIT
+#endif
+
+       !$OMP TASKWAIT
 
        ! Loop over my atomic perturbations and compute gkq_atm_ipc.
        gkq_atm = zero
@@ -4078,6 +4099,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ! Save e-ph matrix elements in the buffer.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_atm
 
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:kpg_k, ffnl_k, kinpw_k, ph3d_k) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+       !$OMP TARGET EXIT DATA MAP(delete:kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
        ABI_FREE(ffnl_k)
        ABI_FREE(ffnl_kq)
        ABI_FREE(kpg_k)
@@ -4099,6 +4124,12 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      end do ! my_ik
 
      ABI_FREE(v1scf)
+
+#ifdef HAVE_OPENMP_OFFLOAD
+     do my_ip=1,my_npert
+       !$OMP TARGET EXIT DATA MAP(delete:vlocal1(:,:,:,:,my_ip)) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+     end do
+#endif
      ABI_FREE(vlocal1)
 
      ! Dump buffer
@@ -4146,7 +4177,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  call gstore%print_for_abitests(dtset, ebands, .True.)
 
  ! Free memory
-
  ABI_FREE(grad_berry)
  ABI_FREE(dummy_vtrial)
  ABI_FREE(work)
