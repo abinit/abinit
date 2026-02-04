@@ -514,7 +514,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: spectral_cut
  integer :: paral_slice
  integer :: ndeg_filter,ndeg_filter_max
- integer :: ideg, ierr
+ integer :: deg_i
+ integer :: ideg, ierr, j
  integer :: iband, islice
  integer :: slicedim
  integer :: shift_x,shift_cprj
@@ -537,6 +538,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: trace_degree, trace_rank
  integer :: nstep_spectrum
  integer :: kmax
+ integer :: nfilters, ifilter
+ integer :: nvec_approx
  real(dp) :: conf_tol
  real(dp) :: tol_step
  real(dp) :: tol_probe
@@ -563,6 +566,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: low_bound, upp_bound, min_low_bound
  real(dp) :: min_upp_bound, max_upp_bound
  real(dp) :: lambda_min, res_norm ! lanczos
+ real(dp) :: lower_i, upper_i, width
+ real(dp) :: energy_i, signed_val, energy_magn_j
  real(dp) :: tol12 = 1.0e-12
  type(xg_t) :: Xsum
  type(xg_t) :: DivResults
@@ -594,6 +599,13 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer, allocatable :: nb_vec_slices(:)
  real(dp), allocatable :: upper_bound_slices(:)
  real(dp), allocatable :: rayleigh_quotients(:)
+ real(dp), allocatable :: energy_filters(:,:)
+ real(dp), allocatable :: lower_bounds(:)
+ real(dp), allocatable :: upper_bounds(:)
+ real(dp), allocatable :: cja(:)
+ real(dp), allocatable :: re_energy(:)
+ real(dp), allocatable :: im_energy(:)
+ real(dp), allocatable :: energy_sign(:)
  real(dp), allocatable :: confi_interval_left(:), confi_interval_right(:)
  real(dp), pointer :: probe(:) => null()
  real(dp), pointer :: probe_XfX(:,:) => null()
@@ -601,6 +613,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp), pointer :: lambda_apost(:) => null()
  real(dp), pointer :: lambda_apost_slice(:) => null()
  real(dp), pointer :: theta_(:,:) => null()
+ real(dp), pointer :: cheby_moments(:,:) => null()
  real(dp), pointer :: resid(:) => null()
  !Pointers similar to old Chebfi
  type(xg_nonlop_t) :: xg_nonlop
@@ -646,7 +659,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ABI_MALLOC(confi_interval_left, (neigenpairs))
  ABI_MALLOC(confi_interval_right, (neigenpairs))
  ABI_MALLOC(nb_vec_slices, (nslice))
- ABI_MALLOC(upper_bound_slices, (nslice)) 
+ ABI_MALLOC(upper_bound_slices, (nslice))
+ ABI_MALLOC(lower_bounds, (nslice))
+ ABI_MALLOC(upper_bounds, (nslice))
 
  ! Memory used to store results of slice merging. 
  call xg_init(X0_out, slice%space, spacedim, neigenpairs, slice%spacecom, me_g0=slice%me_g0)
@@ -750,11 +765,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  !
  ! ------------------------------------------------------------
- !        Split spectrum to slices based on spectral gaps
+ !              Approximate lowest eigenvalue
  ! ------------------------------------------------------------
  !
 
- kmax = 20
+ kmax = 50
  call computeBLanczos(slice, getAX, kin, spacedim, kmax, lambda_min, res_norm, gpu_option)
  min_low_bound = lambda_min - res_norm
 
@@ -766,6 +781,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  if (res_norm > 0.1d0) then
      ABI_WARNING("Lanczos has residual > 0.1 may need greater kmax to guarantee lower bound")
  end if
+
+ !
+ ! ------------------------------------------------------------
+ !        Split spectrum to slices based on spectral gaps
+ ! ------------------------------------------------------------
+ !
  
  nstep_spectrum = 30
  min_upp_bound = maxval(rayleigh_quotients)
@@ -782,7 +803,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 !     min_low_bound, min_upp_bound, min_low_est, max_upp_bound, my_rank, getAX, kin, &
 !     nb_vec_slices, upper_bound_slices, & ! output
 !     gpu_option=gpu_option)
- upper_bound_slices(1) = 0.11d0 ! TODO hardcoded!
+ 
+ ! Au31 system
+ upper_bound_slices(1) = 0.10d0 ! TODO hardcoded!
+ ! Alu system
+ !upper_bound_slices(1) = 1.37d0 ! hardcoded
 
  ! Slice 1: 
  my_rank = xmpi_comm_rank(slice%spacecom)
@@ -790,10 +815,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  upp_bound = upper_bound_slices(1)
  trace_degree = 50
 
- call computeTraceEstimation(slice, trace_rank, trace_degree, low_bound, upp_bound,&
-     min_low_est, max_upp_bound, trace_est_slice1, getAX, kin, my_rank, gpu_option=gpu_option)
- write(901,*) 'trace estimation for slice1, deg=', trace_est_slice1, trace_degree
- flush(901)
+ !call computeTraceEstimation(slice, trace_rank, trace_degree, low_bound, upp_bound,&
+ !    min_low_est, max_upp_bound, trace_est_slice1, getAX, kin, my_rank, gpu_option=gpu_option)
+ !write(901,*) 'trace estimation for slice1, deg=', trace_est_slice1, trace_degree
+ !flush(901)
 
  ! Slice 2: 
  my_rank = xmpi_comm_rank(slice%spacecom)
@@ -806,17 +831,159 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  trace_degree = 50
  trace_rank = neigenpairs ! FIXME for the moment changing this produces a bug
 
- call computeTraceEstimation(slice, trace_rank, trace_degree, low_bound, upp_bound,&
-     min_low_est, max_upp_bound, trace_est_slice2, getAX, kin, my_rank, gpu_option=gpu_option)
- write(901,*) 'trace estimation for slice2, deg=', trace_est_slice2, trace_degree
- flush(901)
+ !call computeTraceEstimation(slice, trace_rank, trace_degree, low_bound, upp_bound,&
+ !    min_low_est, max_upp_bound, trace_est_slice2, getAX, kin, my_rank, gpu_option=gpu_option)
+ !write(901,*) 'trace estimation for slice2, deg=', trace_est_slice2, trace_degree
+ !flush(901)
  
  ! attention slice%X est modifié n'est plus X0..
  !! normalement il faut remettre slice%X à valeurs de AllX --->
-            
+
+
+  !! ------------------------------------------------------------
+  !! 
+  !! -                    Spectral trees                        -
+  !!
+  !! Probe nband with low degree just to prune and reduce to n. 
+  !! Then actually filter in parallel using high optimal degree. 
+  !! Spirit of two-step multiresolution.
+  !! 
+  !! Spectral multigrid method. Tree traversal method.
+  !! Try to detect number of vectors with spectral trees (hierarchy).
+  !! Pay high filter degrees only where spectrum mass lies.
+  !! 
+  !! ------------------------------------------------------------
+
+  ! Reset pointers to dimensions of nband (assumes sequential slices)
+  call xg_setBlock(slice%X_SLICE,slice%X,slice%total_spacedim,neigenpairs)
+  call xg_setBlock(slice%X_SLICE,slice%AX,slice%total_spacedim,neigenpairs,fcol=neigenpairs+1)
+
+  ! Initial slice workspaces are independent entire arrays
+  call xgBlock_copy(slice%AllX, slice%X)
+  call xgBlock_copy(slice%AllAX%self, slice%AX)
+    
+  ! the two following ones will be recomputed so whatever
+  slice%cprjX = slice%AllcprjX
+  slice%cprj_work = slice%Allcprj_work%self
+
+  ! reinitialize pointers to workspaces ...
+  call xg_setBlock(slice%X_NP,slice%X_next,slice%total_spacedim,slice%neigenpairs)
+  call xg_setBlock(slice%X_NP,slice%X_prev,slice%total_spacedim,slice%neigenpairs,fcol=slice%neigenpairs+1)
+
+  ndeg_filter_max = 20 ! low degree
+
+  write(901,*) 'Spectral trees %%%%%%%%%'
+  write(901,*) 'ndeg_filter_max=', ndeg_filter_max
+  write(901,*) 'min_low_est=', min_low_est
+  write(901,*) 'max_upp_bound=', max_upp_bound
+  write(901,*) ' ********************** '
+  flush(901)
+
+  call computeChebyshevMoments(slice, getAX, kin, min_low_est, max_upp_bound, &
+      ndeg_filter_max, cheby_moments, gpu_option)
+
+  ! Ugly loop to set slice intervals
+  do islice=1, nslice
+    lambda_minus = upper_bound_slices(1)
+    alpha_minus = upper_bound_slices(1)
+        if (islice==1) then
+            alpha_minus = min_low_bound
+            alpha_plus = lambda_minus
+        else
+            alpha_plus = maxval(rayleigh_quotients)
+        end if
+        overlap_width = (alpha_plus - alpha_minus)/10.0
+        lambda_plus = alpha_plus+overlap_width
+        lambda_minus = alpha_minus-overlap_width
+        if (islice==1) then
+            lambda_minus = alpha_minus ! otherwise it is outside the center
+            lambda_plus = alpha_plus
+        end if
+        lower_bounds(islice) = lambda_minus
+        upper_bounds(islice) = lambda_plus
+  end do
+
+  nfilters = 10 ! bottom-up merging > nslice
+
+  ABI_MALLOC(energy_filters, (neigenpairs, nfilters))
+  ABI_MALLOC(cja, (ndeg_filter_max+1))
+  ABI_MALLOC(re_energy, (neigenpairs))
+  ABI_MALLOC(im_energy, (neigenpairs))
+  ABI_MALLOC(energy_sign, (neigenpairs))
+
+  upper_bounds(2) = 0.5d0
+  center = (max_upp_bound + min_low_est)*0.5
+  radius = (max_upp_bound - min_low_est)*0.5
+  width = (upper_bounds(2) - upper_bounds(1)) / nfilters
+
+  do ifilter=1,nfilters
+      
+      ! Compute energy for every band
+      lower_i = lower_bounds(1) + (ifilter - 1) * width
+      upper_i = upper_bounds(1) + ifilter * width
+      deg_i = ndeg_filter_max
+
+      write(901,*) '========================================'
+      write(901,*) 'ifilter=', ifilter
+      write(901,*) 'lower_i=', lower_i
+      write(901,*) 'upper_i=', upper_i
+
+      call buildChebyshevJacksonCoeffs(lower_i, upper_i, deg_i, center, radius, cja)
+  
+      !! init=0 a bit obscure think more FIXME
+      re_energy = 0.0d0
+      im_energy = 0.0d0
+      do ideg = 1, ndeg_filter_max+1
+        energy_i = 0.0d0
+        do j = 1, neigenpairs
+            re_energy(j) = re_energy(j) + cja(ideg) * cheby_moments(2*j-1, ideg)
+            im_energy(j) = im_energy(j) + cja(ideg) * cheby_moments(2*j,   ideg)
+            energy_magn_j = sqrt( re_energy(j)**2 + im_energy(j)**2 )
+            energy_i = energy_i + energy_magn_j
+            energy_filters(j, ifilter) = energy_magn_j
+        end do
+      end do
+      nvec_approx = ceiling(energy_i)
+      write(901,*) 'nvec estimate from X0 probe=', nvec_approx
+      flush(901)
+
+  end do
+
+  write(901,*)
+  do ifilter = 1, nfilters-1
+    do j = 1, neigenpairs
+        signed_val = (energy_filters(j,ifilter) - energy_filters(j,ifilter+1)) / &
+            (energy_filters(j,ifilter) + energy_filters(j,ifilter+1) + 0.2d0)
+        energy_sign(j) = sign(1.0d0, signed_val)
+    end do
+    write(901,*) 'pairwise response "i VS i+1" i=', sum(energy_sign), ifilter
+    flush(901)
+  end do
+  ! interpretation: 
+  ! positive: slice i dominates
+  ! negative: slice i+1 dominates
+  ! magnitude: fraction of vectors agreeing
+
+  ABI_FREE(energy_filters)
+  ABI_FREE(cja)
+  ABI_FREE(re_energy)
+  ABI_FREE(im_energy)
+  ABI_FREE(energy_sign)
+
+  !! TODO do the tree traversal
+  !! like subdivide [A,B) and compute energy is each step
+
  !! ------------------------------------------------------------
  !! 
  !! -                      Main slice loop                     -
+ !! 
+ !! How to optimize degree using energies:
+ !! Increase degree until the band becomes “energetically isolated” 
+ !! and further degree increase changes nothing important.
+ !! 
+ !! TODO compute Chebyshev recursion for all filters at the same
+ !! time with ONE recursion and MULTIPLE Xsum per slice. Then
+ !! proceed to Rayleigh-Ritz if slice degree reached. Local operation.
  !! 
  !! ------------------------------------------------------------
 
@@ -891,6 +1058,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     write(901,*) 'with overlap=', lambda_minus, lambda_plus
     flush(901)
     ! ITEST
+
+    lower_bounds(islice) = lambda_minus
+    upper_bounds(islice) = lambda_plus
  
     center = (slice%ecut + min_low_est)*0.5
     radius = (slice%ecut - min_low_est)*0.5 
@@ -935,7 +1105,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     !! ------------------------------------------------------------
     !! 
     !! -                Polynomial degree loop                    -
-    !! 
+    !!
     !! ------------------------------------------------------------
  
     if (islice==1) then
@@ -1051,9 +1221,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ! =============
 
     if (islice==1) then
-        count_mask = min(ceiling(trace_est_slice1), neigenpairs)
+        !count_mask = min(ceiling(trace_est_slice1), neigenpairs)
+        !count_mask = ceiling(trace_est_slice1) + 20
+        count_mask = 150
     else if (islice==2) then
-        count_mask = ceiling(neigenpairs - trace_est_slice1*0.8)
+        !count_mask = ceiling(neigenpairs - trace_est_slice1*0.8)
+        count_mask = 150
     end if
 
     probe = -probe
@@ -1402,6 +1575,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ABI_FREE(confi_interval_right)
  ABI_FREE(nb_vec_slices)
  ABI_FREE(upper_bound_slices)
+ ABI_FREE(lower_bounds)
+ ABI_FREE(upper_bounds)
 
 end subroutine slice_run_cprj
 !!***
@@ -2323,6 +2498,169 @@ end subroutine applyBandpassFilter
 
 !----------------------------------------------------------------------
 
+!!****f* m_slice_cprj/computeChebyshevMoments
+!! NAME
+!! computeChebyshevMoments
+!! 
+!! FUNCTION
+!! Compute Chebyshev moments up to maximal degree all centered in [A,B)
+!!
+!! OUTPUT
+!! M_n = <X, f_n(B^{-1}AX) X> for n=1,..,ndeg_filter_max
+!! 
+!! SOURCE
+subroutine computeChebyshevMoments(slice, getAX, kin, min_low_bound, max_upp_bound, &
+        ndeg_filter_max, cheby_moments, gpu_option)
+
+    implicit none
+
+    type(slice_t), intent(inout) :: slice
+    type(xgBlock_t), intent(in) :: kin
+    integer, intent(in) :: ndeg_filter_max
+    real(dp), intent(in) :: min_low_bound, max_upp_bound
+    real(dp), pointer, intent(inout) :: cheby_moments(:,:)
+    integer, optional, intent(in) :: gpu_option
+    interface
+        subroutine getAX(X,AX)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: AX
+        end subroutine getAX
+    end interface
+
+    integer :: neigenpairs
+    integer :: ideg
+    integer :: nspinor
+    integer :: nrows
+    integer :: l_gpu_option
+    real(dp) :: center, radius
+    real(dp) :: one_over_r
+    real(dp) :: two_over_r
+    real(dp) :: tsec(2)
+    type(xg_t) :: Moments, X0
+    type(xgBlock_t) :: moment_ideg
+    type(xg_nonlop_t) :: xg_nonlop
+
+    ! *********************************************************************
+
+    ! Initialize values
+    neigenpairs = cols(slice%X)
+    nrows = slice%total_spacedim
+    xg_nonlop = slice%xg_nonlop
+    nspinor = slice%xg_nonlop%nspinor
+    l_gpu_option = ABI_GPU_DISABLED
+    
+    if (present(gpu_option)) then
+      l_gpu_option = gpu_option
+    end if
+
+    ! Allocate space
+    call xg_init(Moments, slice%space, neigenpairs, ndeg_filter_max+1)        ! M_n=<X0,f_n(A)X0>
+    call xg_init(X0, slice%space, nrows, neigenpairs, slice%spacecom, me_g0=slice%me_g0)  ! X0
+
+    call xgBlock_copy(slice%X, X0%self)
+
+    ! Spectral interval to be amplified scaled to [-1,1)
+    center = (max_upp_bound + min_low_bound)*0.5
+    radius = (max_upp_bound - min_low_bound)*0.5 
+    one_over_r = 1.0/radius
+    two_over_r = 2.0/radius
+
+    ! Initialize
+    call xgBlock_setBlock(Moments%self, moment_ideg, neigenpairs, 1) 
+    call xgBlock_colwiseDotProduct(slice%X, slice%X, moment_ideg, comm_loc=xmpi_comm_null)
+   
+    ! Loop on degree 
+    do ideg = 0, ndeg_filter_max - 1
+        
+        call timab(tim_cprj,1,tsec)
+        call xg_nonlop_getcprj(xg_nonlop,slice%AX,slice%cprjX,slice%proj_work%self)
+        call timab(tim_cprj,2,tsec)
+
+        call slice_computeNextOrderChebfiPolynom(slice, ideg, center, one_over_r, two_over_r)
+
+        ! slice%X = f_ideg X0
+        call timab(tim_swap,1,tsec)
+        call slice_swapInnerBuffers(slice, slice%total_spacedim, neigenpairs)
+        call timab(tim_swap,2,tsec)
+
+        ! M_ideg = < X0, f_ideg X0 > in R^nband for every ideg
+        call xgBlock_setBlock(Moments%self, moment_ideg, neigenpairs, 1, fcol=ideg+2) 
+        call xgBlock_colwiseDotProduct(X0%self, slice%X, moment_ideg, comm_loc=xmpi_comm_null)
+
+        !A * Psi
+        call timab(tim_AX_v,1,tsec)
+        call getAX(slice%X,slice%AX)
+        call timab(tim_AX_v,2,tsec)
+        call timab(tim_AX_k,1,tsec)
+        call xgBlock_add_diag(slice%X,kin,nspinor,slice%AX)
+        call timab(tim_AX_k,2,tsec)
+        call timab(tim_cprj,1,tsec)
+        call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
+        call timab(tim_cprj,2,tsec)
+        call timab(tim_AX_nl,1,tsec)
+        call xg_nonlop_getHX(xg_nonlop,slice%AX,slice%cprjX,slice%cprj_work,slice%proj_work%self)
+        call timab(tim_AX_nl,2,tsec)
+
+    end do ! End polynomial degree loop
+
+    call xgBlock_reverseMap(Moments%self, cheby_moments, neigenpairs, ndeg_filter_max+1)
+  
+    ! Free memory
+    call xg_free(X0)
+    call xg_free(Moments)
+    
+end subroutine computeChebyshevMoments
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice_cprj/buildChebyshevJacksonCoeffs
+!! NAME
+!! buildChebyshevJacksonCoeffs
+!!
+!! SOURCE
+subroutine buildChebyshevJacksonCoeffs(low_bound, upp_bound, ndeg_filter, &
+        center, radius, cja)
+
+    implicit none
+
+    integer, intent(in) :: ndeg_filter
+    real(dp), intent(in) :: low_bound, upp_bound
+    real(dp), intent(in) :: center, radius
+    real(dp), intent(inout) :: cja(ndeg_filter+1)
+
+    integer :: ideg
+    real(dp) :: cdeg
+    real(dp) :: ls, us
+    real(dp) :: mu, damp
+    
+    ! *********************************************************************
+
+    ls = (low_bound - center) / radius
+    us = (upp_bound - center) / radius
+    cdeg = Pi/(ndeg_filter+2)
+    mu = 1.d0/Pi*(ACOS(ls)-ACOS(us))
+    damp = 1.d0 ! Jackson damping
+
+    cja(1) = mu*damp
+
+    do ideg = 0, ndeg_filter - 1
+
+        ! Accumulate X with weight in Xsum for bandpass filters
+        mu = 2/Pi * (SIN((ideg+1)*ACOS(ls)) - SIN((ideg+1)*ACOS(us)))/(ideg+1)
+        damp = ((1 - (ideg+1)/(ndeg_filter+2))*SIN(cdeg)*COS((ideg+1)*cdeg) + &
+                1/(ndeg_filter+2)*COS(cdeg)*SIN((ideg+1)*cdeg))/SIN(cdeg)
+
+        cja(ideg+2) = mu*damp
+
+    end do
+
+end subroutine buildChebyshevJacksonCoeffs
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_slice_cprj/computeTraceEstimation
 !! NAME
 !! computeTraceEstimation
@@ -2437,158 +2775,6 @@ subroutine computeTraceEstimation(slice, m_vecs, trace_degree, low_bound, upp_bo
     call xg_free(xgX)
 
 end subroutine computeTraceEstimation
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice_cprj/computeBorthoLanczos
-!! NAME
-!! computeBorthoLanczos
-!!
-!! SOURCE
-subroutine computeBorthoLanczos(slice, n, k, min_low_est, getAX, kin, my_rank, gpu_option)
-  
-    implicit none
-
-    ! arguments
-    type(slice_t), intent(inout) :: slice
-    integer, intent(in) :: n ! number of rows
-    integer, intent(in) :: k ! maxiter
-    integer, intent(out) :: min_low_est ! result
-    integer, intent(in) :: my_rank ! mpi_rank
-    type(xgBlock_t), intent(in) :: kin
-    integer, optional, intent(in) :: gpu_option
-    interface
-        subroutine getAX(X,AX)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: AX
-        end subroutine getAX
-    end interface
-
-    !! local variables
-    ! scalars
-    type(xg_t) :: vTBv
-    type(xg_nonlop_t) :: xg_nonlop
-    type(xgBlock_t) :: cprjX0
-    integer :: space_res, nspinor
-    integer :: j
-    integer :: lwork, liwork
-    integer :: il, iu
-    integer :: M, info, ldz
-    real(dp) :: beta_prev
-    real(dp) :: lambda1
-    ! arrays
-    real(dp) :: q(2,n), Aq(2, n)
-    real(dp) :: v(2,n), Bv(2, n)
-    real(dp) :: q_prev(2,n)
-    real(dp) :: Bq(2,n)
-    real(dp) :: alpha(k) ! diagonal
-    real(dp) :: beta(k-1) ! off-diagonal
-    real(dp) :: w(k)
-    real(dp) :: z(1, k)
-    real(dp) :: v1(k)
-    real(dp) :: tsec(2)
-    !real(dp), allocatable :: work(lwork)
-    !integer, allocatable :: iwork(liwork)
-
-    ! *********************************************************************
-
-    nspinor = slice%xg_nonlop%nspinor
-    xg_nonlop = slice%xg_nonlop
-    if (space(slice%AllX)==SPACE_C) then
-        space_res = SPACE_C
-    else if (space(slice%AllX)==SPACE_CR) then
-        space_res = SPACE_R
-    else
-        ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
-    end if
-
-    call generateRademacherMatrix(q, n, 1, my_rank)
-    
-    ! X = S|q>
-    ! use slice%X as a workspace
-    if (slice%paw) then
-      call xg_nonlop_getSX(slice%xg_nonlop,slice%X,slice%cprjX,slice%cprj_work,&
-          slice%proj_work%self)
-    else
-      write(901,*) 'not implemented!'
-      flush(901)
-    end if
-
-    ! Map xgtools pointers to memory
-    !call xgBlock_map(xgX, X, slice%space, n, m, slice%spacecom, me_g0=slice%me_g0)
-    !call xgBlock_map(xgfX, fX, slice%space, n, m, slice%spacecom, me_g0=slice%me_g0)
-
-    q = q / sqrt(dot_product(q(1,:), Bq(1,:)))
-
-    ! Alternatives :
-    !call xgBlock_colwiseDotProduct(q, Bq, qTBq,comm_loc=xmpi_comm_null)
-    !call xgBlock_scale(q, 1/center, 1) !scale q by 1/center
-    
-    q_prev = 0.0d0
-    beta_prev = 0.0d0
-    alpha = 0.0d0
-    beta = 0.0d0
-
-    do j = 1,k
-
-        !A * Psi
-        call timab(tim_AX_v,1,tsec)
-        call getAX(slice%X,slice%AX)
-        call timab(tim_AX_v,2,tsec)
-        call timab(tim_AX_k,1,tsec)
-        call xgBlock_add_diag(slice%X,kin,nspinor,slice%AX)
-        call timab(tim_AX_k,2,tsec)
-        call timab(tim_cprj,1,tsec)
-        call xg_nonlop_getcprj(xg_nonlop,slice%X,slice%cprjX,slice%proj_work%self)
-        call timab(tim_cprj,2,tsec)
-        call timab(tim_AX_nl,1,tsec)
-        call xg_nonlop_getHX(xg_nonlop,slice%AX,slice%cprjX,slice%cprj_work,slice%proj_work%self)
-        call timab(tim_AX_nl,2,tsec)
-
-        alpha(j) = dot_product(q(1,:), Aq(1,:))
-
-        ! v = S^{-1} * Aq
-        call xg_nonlop_getSm1X(slice%xg_nonlop,slice%X_next,slice%cprjX,&
-            slice%cprj_work,slice%cprj_work2%self,slice%proj_work%self)
-
-        ! v = v + a * q
-        !call xgBlock_saxpy(v, -alpha(j), q)
-        if (j > 1) then
-            !call xgBlock_saxpy(v, -beta_prev, q_prev)
-        end if
-
-        if (j < k) then
-            ! Bv = S|Psi>
-            ! use Bv as a workspace
-            !call xg_nonlop_getSX(slice%xg_nonlop,Bv,slice%cprjX,slice%cprj_work,slice%proj_work%self)
-
-            ! TODO find equivalent in xgtools
-            ! otherwise simply use ddot of LAPACK
-            beta(j) = sqrt(dot_product(v(1,:), Bv(1,:)))
-
-            ! option: essaie de mettre 1
-            ! FIXME à mon avis c'est pas optimal car normallement il y a ddot pour ça
-            ! essaie de le faire sur CPU d'abord sans xgtools puis demander à Lucas
-            call xg_init(vTBv, space_res, 1, 1)
-            !call xgBlock_colwiseDotProduct(v,Bv,vTBv%self,comm_loc=xmpi_comm_null)
-            ! TODO objects v, Bv should be xgtools
-            call xg_free(vTBv)
-
-            q_prev = q
-            q = v / beta(j)
-            beta_prev = beta(j)
-        end if
-    end do
-        
-    call smallestTridiagEigenpair(k, alpha, beta, lambda1, v1)
-    
-
-    ! TODO Add residual error computation trick for Lanczos
-    ! using 1 eigenvector also
-
-end subroutine computeBorthoLanczos
 !!***
 
 !----------------------------------------------------------------------
