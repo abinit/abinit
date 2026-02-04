@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-from __future__ import print_function, division, absolute_import  #, unicode_literals
+from __future__ import annotations
 
 import sys
+import dataclasses
 import os
 # Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
 os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
@@ -9,10 +10,13 @@ import platform
 import shutil
 import tempfile
 import json
+import ruamel.yaml as yaml
 
 from os.path import join as pj, abspath as absp, basename
 from socket import gethostname
 from warnings import warn
+from dataclasses import dataclass, field
+from typing import List, Optional
 
 import logging
 logger = logging.getLogger(__name__)
@@ -64,7 +68,114 @@ def _str2list(string):
     return [s.strip() for s in string.split(",") if s]
 
 
-class TestBot(object):
+@dataclass(kw_only=True)
+class TestBotConfig:
+    """
+    Configuration for a Buildbot/TestBot worker.
+    """
+
+    slavename: str
+    """Name of buildbot worker"""
+
+    type: str = ""
+    """'ref' if this worker is the reference worker where all tests should pass"""
+
+    ncpus: Optional[int] = None
+    """Max number of CPUs that can be used by TestBot"""
+
+    max_gpus: Optional[int] = 0
+    """Max number of GPUs that can be used by TestBot"""
+
+    mpi_prefix: str = ""
+    """MPI runner"""
+
+    mpirun_np: str = ""
+    """String used to execute `mpirun -n#NUM`"""
+
+    omp_num_threads: int = 0
+    """Number of OpenMP threads. 0 if OpenMP should not be used"""
+
+    enable_mpi: Optional[bool] = None
+    """True if MPI is activated"""
+
+    enable_openmp: Optional[bool] = None
+    """True if OpenMP is activated"""
+
+    poe: str = ""
+    """Deprecated"""
+
+    poe_args: str = ""
+    """Deprecated"""
+
+    with_tdirs: list[str] = field(default_factory=list)
+    """List of subsuites to include"""
+
+    without_tdirs: list[str] = field(default_factory=list)
+    """List of subsuites to exclude"""
+
+    timeout_time: float = 900.0
+    """Timeout time in seconds"""
+
+    cygwin_dir: str = ""
+    """Deprecated"""
+
+    runmode: str = "static"
+    """'static': run all tests with 1 MPI proc; use np > 1 only for multiparallel tests"""
+
+    keywords: list[str] = field(default_factory=list)
+    """Keywords to select/ignore tests"""
+
+    etsf_check: bool = False
+    """Activate validation of NetCDF files produced by Abinit"""
+
+    verbose: int = 0
+    """Verbosity level"""
+
+    tmp_basedir: str = ""
+    """Temporary folder where tests are executed and copied back"""
+
+    mpi_args: str = ""
+    """Arguments passed to the MPI command"""
+
+    force_mpi: bool = False
+    """Force usage of mpirun_np prefix"""
+
+    def __post_init__(self):
+        """
+        Enforce required fields and basic consistency.
+        """
+        missing = []
+
+        if not self.slavename:
+            missing.append("slavename")
+
+        if self.ncpus is None:
+            missing.append("ncpus")
+
+        #if self.enable_mpi is None:
+        #    missing.append("enable_mpi")
+
+        #if self.enable_openmp is None:
+        #    missing.append("enable_openmp")
+
+        if missing:
+            raise ValueError("Missing required configuration field(s): " + ", ".join(missing))
+
+        # Optional sanity checks
+        if self.ncpus is not None and self.ncpus <= 0:
+            raise ValueError("ncpus must be a positive integer")
+
+        if self.max_gpus < 0:
+            raise ValueError("max_gpus cannot be negative")
+
+        if self.omp_num_threads < 0:
+            raise ValueError("omp_num_threads cannot be negative")
+
+        if self.timeout_time <= 0:
+            raise ValueError("timeout_time must be positive")
+
+
+class TestBot:
     """
     This object drives the execution of the abinit automatic tests:
 
@@ -117,14 +228,6 @@ class TestBot(object):
 
     def __init__(self, testbot_cfg=None):
 
-        # Read the options specified in the testbot configuration file.
-        if testbot_cfg is None:
-            basedir, _ = os.path.split(absp(__file__))
-            testbot_cfg = pj(basedir, "testbot.cfg")
-
-        parser = SafeConfigParser()
-        parser.read(testbot_cfg)
-
         attrs2read = [
             "slavename",
             "type",
@@ -147,22 +250,77 @@ class TestBot(object):
             "force_mpi",
         ]
 
-        for attr in attrs2read:
-            default, parse, info = TestBot._attrbs[attr]
-            try:
-                value = parser.get("testbot", attr)
-            except NoOptionError:
-                value = default
+        # Read the options specified in the testbot configuration file.
+        read_cfg = True
 
-            if value is None:
-                # Write out the cfg file and raise
-                for section in parser.sections():
-                    print("[" + section + "]")
-                    for opt in parser.options(section):
-                        print(opt + " = " + parser.get(section, opt))
-                raise ValueError("Mandatory option %s is not declared" % attr)
+        if testbot_cfg is None:
+            basedir, _ = os.path.split(absp(__file__))
+            testbot_cfg = pj(basedir, "testbot.cfg")
+            read_cfg = os.path.exists(testbot_cfg)
 
-            self.__dict__[attr] = parse(value)
+        read_cfg = testbot_cfg.endswith(".cfg")
+        print(f"{read_cfg=}")
+
+        # Here we init the attributes either from the cfg file or the yaml file.
+        if read_cfg:
+          parser = SafeConfigParser()
+          parser.read(testbot_cfg)
+
+          for attr in attrs2read:
+              default, parse, info = TestBot._attrbs[attr]
+              try:
+                  value = parser.get("testbot", attr)
+              except NoOptionError:
+                  value = default
+
+              if value is None:
+                  # Write out the cfg file and raise
+                  for section in parser.sections():
+                      print("[" + section + "]")
+                      for opt in parser.options(section):
+                          print(opt + " = " + parser.get(section, opt))
+                  raise ValueError("Mandatory option %s is not declared" % attr)
+
+              self.__dict__[attr] = parse(value)
+
+        else:
+            # Try yaml file.
+            basedir, _ = os.path.split(absp(__file__))
+            builders_yaml = pj(basedir, "builders.yaml")
+            if not os.path.exists(testbot_cfg):
+                raise RuntimeError(f"Cannot find file: {builders_yaml}")
+
+            with open(builders_yaml, "rt") as f:
+              string = f.read()
+              all_docs = yaml.YAML(typ='safe', pure=True).load(string)
+
+            name = "scope_gnu_10.2_paral"
+            for doc in all_docs:
+                if doc["name"] == name: break
+            else:
+                raise ValueError(f"Cannot find {name=} in file {builders_yaml}")
+
+            print(doc)
+            kwargs = {k: doc[k] for k in [field.name for field in dataclasses.fields(TestBotConfig)] if k in doc}
+            ctx = TestBotConfig(**kwargs)
+            print(ctx)
+
+            for attr in attrs2read:
+                default, parse, info = TestBot._attrbs[attr]
+                value = doc.get(attr, default)
+
+                if value is None and default is None:
+                    # Write out the cfg file and raise
+                    print(doc)
+                    raise ValueError("Mandatory option %s is not declared" % attr)
+
+                if value is not None:
+                  value = parse(value)
+
+                self.__dict__[attr] = value
+
+            # Final fix.
+            self.slavename = doc["name"]
 
         if self.with_tdirs and self.without_tdirs:
             raise ValueError("with_tdirs and without_tdirs attribute are mutually exclusive")
@@ -191,6 +349,7 @@ class TestBot(object):
         parser.read(build_examples)
 
         if self.slavename not in parser.sections():
+            print(f"workers:", parser.sections())
             raise ValueError("%s is not a valid buildbot worker." % self.slavename)
 
         # TODO
@@ -493,7 +652,7 @@ class TestBot(object):
             sys.exit(99)
 
 
-class TestBotSummary(object):
+class TestBotSummary:
     """Stores the final results of the tests performed by TestBot."""
 
     _possible_status = ["failed", "passed", "succeeded", "skipped"]
