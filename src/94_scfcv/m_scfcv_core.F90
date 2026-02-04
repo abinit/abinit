@@ -1490,8 +1490,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,energies%entropy_paw,&
 &     gprimd,ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,&
 &     option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
-&     pawtab,dtset%pawxcdev,dtset%spinaxis,dtset%spnorbscl,dtset%xclevel,&
-&     dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,&
+&     pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,&
+&     dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,dtset%spinaxis,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &     hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
 &     electronpositron=electronpositron,vpotzero=vpotzero,epaw_xc=energies%e_pawxc,rcpaw=rcpaw,extfpmd=extfpmd)
@@ -1987,8 +1987,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &       energies%entropy_paw,gprimd,ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,&
 &       paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
-&       pawtab,dtset%pawxcdev,dtset%spinaxis,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,&
-&       xred,ucvol,psps%znuclpsp,&
+&       pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,&
+&       xred,ucvol,psps%znuclpsp,dtset%spinaxis,&
 &       hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &       electronpositron=electronpositron,epaw_xc=energies%e_pawxc)
        ABI_NVTX_END_RANGE()

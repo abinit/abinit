@@ -635,8 +635,8 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 &                     i2pert,dtset%ixc,natom,dtset%natom,nspden,psps%ntypat,dtset%nucdipmom,&
 &                     0,option,paw_an1_i2pert,paw_an0,paw_ij1_i2pert,pawang,&
 &                     dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&                     dtset%spinaxis,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,&
-&                     xred,ucvol,psps%znuclpsp, &
+&                     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,&
+&                     xred,ucvol,psps%znuclpsp,dtset%spinaxis, &
 &                     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
                 !    First-order Dij computation
 !                     call timab(561,1,tsec)

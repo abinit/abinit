@@ -2177,13 +2177,13 @@ end subroutine invacuum
 !! INPUTS
 !! name=character string identifying the spin-related quantity: 'spinat' or 'hspinfield'
 !! nitem=number of spin vectors to be treated: natom for spinat, 1 for hspinfield
-!! spinaxis(3)=spin quantization axis
+!! spinaxis_in(3)=spin quantization axis
 !! tread=integer flag (0 or 1), set to 1 if the local-frame quantity
 !!       (spinat or hspinfield) is provided in the input
 !! tread_cart=integer flag (0 or 1), set to 1 if the Cartesian quantity
 !!            (spinat_cart or hspinfield_cart) is provided in the input 
-!! vec_local(nvec,natom)=spin vectors defined in the local spin reference coordinates
-!! vec_cart(nvec,natom)=spin vectors defined in Cartesian coordinates
+!! vec_local(nvec,nitem)=spin vectors defined in the local spin reference coordinates
+!! vec_cart(nvec,nitem)=spin vectors defined in Cartesian coordinates
 !!
 !! OUTPUT
 !! vec_local=updated consistent spin vectors in local spin reference coordinate
@@ -2203,86 +2203,79 @@ subroutine checkspvec(name,nitem,spinaxis_in,tread,tread_cart,vec_local,vec_cart
 
 !Local variables-------------------------------
 !scalars
- integer :: i
+ integer :: i, icase
  real(dp) :: alpha, beta, norm
 !arrays
- real(dp) :: spinaxis(3), R(3,3), v_cart(3), v_local(3)
+ real(dp) :: spinaxis(3), R(3,3), RT(3,3), v_cart(3), v_local(3)
  logical  :: trivial_axis
  character(len=1000) :: msg
 
 ! *************************************************************************
 
+! case 0: nothing provided
+ if (tread == 0 .and. tread_cart == 0) return
+
  spinaxis(:) = spinaxis_in(:)
  norm = sqrt(dot_product(spinaxis, spinaxis))
- if (norm > tol8) spinaxis(:) = spinaxis(:) / norm
- trivial_axis = all(abs(spinaxis(:) - (/0.0_dp, 0.0_dp, 1.0_dp/)) < tol8)
+ if (norm <= tol8) then
+   spinaxis(:) = [zero, zero, one]
+   trivial_axis = .true.
+ else
+   spinaxis(:) = spinaxis(:) / norm
+   trivial_axis = all(abs(spinaxis(:) - [zero, zero, one]) < tol8)
+ end if
 
-! case 0: nothing provided 
- if (tread == 0 .and. tread_cart == 0) return
- 
+ R(:,:) = zero
+ R(1,1) = one; R(2,2) = one; R(3,3) = one
+
  if (.not. trivial_axis) then
    call geteuler(spinaxis, alpha, beta)
    call cart2spinaxis(alpha, beta, R)
  end if
+ RT(:,:) = transpose(R)
 
-! case 1: only _cart provided
- if (tread == 0 .and. tread_cart == 1) then
-   do i = 1, nitem
-     if (trivial_axis) then
-       vec_local(:,i) = vec_cart(:,i)
-       vec_cart(:,i) = vec_local(:,i)
-     else
-       v_cart(:) = vec_cart(:, i)
-       vec_local(:,i) = matmul(R, v_cart)
-       vec_cart(:,i) = matmul(transpose(R),vec_local(:,i))
-     end if
-   end do
-   return
- end if
+ ! 3 cases: (tread, tread_cart)
+ icase = 2*tread + tread_cart
  
-! case 2: only local provided
- if (tread == 1 .and. tread_cart == 0) then 
-   do i = 1, nitem    
-     if (trivial_axis) then
-       vec_cart(:,i) = vec_local(:,i)
-       vec_local(:,i) = vec_cart(:,i)
-   else
+ select case (icase)
+ 
+ case (1) ! case 1: only _cart provided (tread = 0, tread_cart = 1)
+   do i = 1, nitem
+     vec_local(:,i) = matmul(R, vec_cart(:,i))
+     end do
+   return
+
+ case (2) ! case 2: only local provided (tread = 1, tread_cart = 0)
+   if (.not. trivial_axis) then
      write(msg,'(a)') 'Spinaxis is defined, but only ' // trim(name) // ' is present.' // ch10 // &
                       'Action: please use ' // trim(name) // '_cart (Cartesian) instead of ' // trim(name) // &
                       'when spinaxis is set.'
      ABI_ERROR(msg)
    end if
+   do i = 1, nitem    
+     vec_cart(:,i) = vec_local(:,i)
    end do
    return
- end if
-    
-! case 3: both provided and check consistency
- if (tread == 1 .and. tread_cart == 1) then
-   
+
+ case (3) ! case 3: both provided and check consistency: (tread = tread_cart = 1) 
    do i = 1, nitem
-     if (trivial_axis) then
-       vec_cart(:,i) = vec_local(:,i)
-       vec_local(:,i) = vec_cart(:,i)
-     else
-       v_cart(:) = matmul(transpose(R), vec_local(:,i))
-       v_local(:) = matmul(R, vec_cart(:,i))
-     end if
-     ! not consistent for local and _cart      
+     v_cart(:) = matmul(RT, vec_local(:,i))
+     v_local(:) = matmul(R, vec_cart(:,i))
+
      if (maxval(abs(v_local(:) - vec_local(:, i))) > tol8 .or. &
          maxval(abs(v_cart(:) - vec_cart(:, i))) > tol8) then
        write(msg,'(a,a,a,a,a,a,a,3(1x,es16.8),a,a,3(1x,es16.8),a,a,3(1x,es16.8),a,a)') &
         'Both ', trim(name), ' and ', trim(name), '_cart are set but inconsistent.', ch10, &
-        'spinaxis (normalized) =', spinaxis(1), spinaxis(2), spinaxis(3), ch10, &
+        'spinaxis =', spinaxis_in(1), spinaxis_in(2), spinaxis_in(3), ch10, &
          trim(name)//' (local) =', vec_local(1,i), vec_local(2,i), vec_local(3,i), ch10, &
          trim(name)//'_cart (cart) =', vec_cart(1,i), vec_cart(2,i), vec_cart(3,i), ch10, &
         'Action: make them consistent or provide only one of them.'
        ABI_ERROR(msg)
      end if
-     vec_local(:,i) = v_local(:)
-     vec_cart(:,i) = v_cart(:) 
    end do
    return
- end if
+
+ end select
 
 end subroutine checkspvec
 !!***

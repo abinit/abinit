@@ -3884,14 +3884,15 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
   norm_spinaxis = sqrt(dot_product(dt%spinaxis, dt%spinaxis))
   ABI_CHECK_NOSTOP(norm_spinaxis > tol8, 'Spinaxis must be a non-zero vector', ierr)
   if (dt%nspden == 2) then
-    do iatom = 1, dt%natom 
-      norm_spinat = sqrt(dot_product(dt%spinat(:,iatom),dt%spinat(:,iatom)))
+    do iatom = 1, dt%natom
+      ! use Cartesian spinat for consistency with spinaxis
+      norm_spinat = sqrt(dot_product(dt%spinat_cart(:,iatom),dt%spinat_cart(:,iatom)))
       if (norm_spinat < tol8) cycle
-      dotval = dot_product(dt%spinat(:,iatom), dt%spinaxis)
+      dotval = dot_product(dt%spinat_cart(:,iatom), dt%spinaxis)
       if (abs(abs(dotval) - norm_spinat*norm_spinaxis) > tol8*norm_spinat*norm_spinaxis) then
         write(msg, '(3a)')&
-         'In collinear (nspden=2) calculation, spinat must be parallel to spin quantization axis',ch10,&
-         'Action: modify spinat or spinaxis in your input file '
+         'In collinear (nspden=2) calculation, spinat (Cartesian) must be parallel to spin quantization axis',ch10,&
+         'Action: modify spinat(_cart) or spinaxis in your input file '
         ABI_ERROR_NOSTOP(msg,ierr)
       end if
     end do

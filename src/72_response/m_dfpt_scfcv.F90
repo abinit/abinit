@@ -882,7 +882,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call pawdenpot(dum,el_temp,epaw1,epawdc1_dum,spaw1_dum,gprimd,ipert,dtset%ixc,my_natom,dtset%natom,&
 &     dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an1,paw_an,paw_ij1,pawang,&
 &     dtset%pawprtvol,pawrad,pawrhoij1,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&     dtset%spinaxis,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp, &
+&     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,dtset%spinaxis,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
 !    First-order Dij computation
@@ -1088,8 +1088,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        call pawdenpot(dum,el_temp,epaw1,epawdc1_dum,spaw1_dum,gprimd,ipert,dtset%ixc,&
          & my_natom,dtset%natom,dtset%nspden,&
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an1,paw_an,paw_ij1,pawang,dtset%pawprtvol,&
-&       pawrad,pawrhoij1,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spinaxis,dtset%spnorbscl,&
-&       dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,&
+&       pawrad,pawrhoij1,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
+&       dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,dtset%spinaxis,&
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
      end if
 

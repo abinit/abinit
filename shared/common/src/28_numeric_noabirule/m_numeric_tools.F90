@@ -6671,22 +6671,17 @@ subroutine geteuler(spinaxis, alpha, beta)
 !scalars
  real(dp) :: sx, sy, sz, norm, rxy
 !***********************************************************************
- norm = DOT_PRODUCT(spinaxis(:), spinaxis(:))
- if (norm < tol8*tol8) then
-   alpha = zero; beta = zero
-   return
- end if
+  
+ alpha = zero; beta = zero
+ norm = DOT_PRODUCT(spinaxis, spinaxis)
+  
+ if (norm <= tol8*tol8) return
 
  sx = spinaxis(1); sy = spinaxis(2); sz = spinaxis(3)
  rxy = sqrt(sx*sx + sy*sy)
- if (rxy < tol8) then
-   alpha = zero
- else
-   alpha = atan2(sy, sx)
- end if
-
+ if (rxy > tol8) alpha = atan2(sy, sx)
  beta  = atan2(rxy, sz)
- 
+
 end subroutine geteuler
 !!***
 
