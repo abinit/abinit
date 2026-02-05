@@ -51,8 +51,8 @@ from pymods.tools import pprint_table
 
 ROOT, _ = os.path.split(absp(__file__))
 
-BUILDERS_YAML = pj(ROOT, "builders.yaml")
-BUILDERS_JSON = pj(ROOT, "builders.json")
+TESTBOT_YAML = pj(ROOT, "testbot.yaml")
+TESTBOT_JSON = pj(ROOT, "testbot.json")
 
 
 def lazy__str__(func):
@@ -196,14 +196,29 @@ class TestBotContext:
             raise ValueError(f"timeout_time is negative: {self.timeout_time}")
 
 
+def get_mpi_prefix_from_env() -> str | None:
+    # This is what JMB does in buildbot_worker/testbot.py
+    # The problem is that this has precedence over mpi_prefix. Should ask why!!
+    try:
+       return os.environ['MPI_HOME']
+    except:
+       pass
+    try:
+       return os.environ['MPIHOME']
+    except:
+        pass
+
+    return None
+
+
 def read_builders(fmt: str) -> list[dict]:
     """Read builders from file."""
     if fmt == "yaml":
       import ruamel.yaml as yaml
-      with open(BUILDERS_YAML, "rt") as f:
+      with open(TESTBOT_YAML, "rt") as f:
         all_builders = yaml.YAML(typ='safe', pure=True).load(f.read())
     elif fmt == "json":
-      with open(BUILDERS_JSON, "rt") as f:
+      with open(TESTBOT_JSON, "rt") as f:
         all_builders = json.load(f)
     else:
         raise ValueError(f"Invalid {fmt=}")
@@ -252,7 +267,6 @@ def validate() -> int:
 
     #print(ctx.type)
     #for builder_name in parser.sections():
-
     #convert()
 
     if retcode == 0:
@@ -263,13 +277,13 @@ def validate() -> int:
     return retcode
 
 
-def convert() -> int:
+def convert():
     """
     Convert yaml file to json.
     """
     all_builders = read_builders("yaml")
 
-    with open(BUILDERS_JSON, "w", encoding="utf-8") as f:
+    with open(TESTBOT_JSON, "w", encoding="utf-8") as f:
       json.dump(all_builders, f, indent=2, sort_keys=True)
 
     return 0
@@ -277,7 +291,7 @@ def convert() -> int:
 
 class TestBot:
     """
-    This object drives the execution of the abinit automatic tests:
+    This object drives the execution of the ABINIT automatic tests:
 
       1) Read setup options from the file testbot.cfg uploaded by the master on the builder.
       2) Initialize the job_runner and other objects used to run the tests.
@@ -379,16 +393,15 @@ class TestBot:
                 self.__dict__[attr] = parse(value)
 
         else:
-            # Use yaml file.
-            fmt = "yaml"
-            #fmt = "json"
+            #fmt = "yaml" # Use yaml file.
+            fmt = "json"
             all_builders = read_builders(fmt)
 
             for builder in all_builders:
                 if builder["name"] == builder_name: break
             else:
                 all_names = [b["name"] for b in all_builders]
-                raise ValueError(f"Cannot find {builder_name=} in file {BUILDERS_YAML}\nChoose among: {all_names}")
+                raise ValueError(f"Cannot find {builder_name=} in file {TESTBOT_YAML}\nChoose among: {all_names}")
 
             print(builder)
             ctx = TestBotContext.from_builders(all_builders, builder_name)
@@ -410,6 +423,15 @@ class TestBot:
 
             # Final fix.
             self.slavename = builder["name"]
+
+            # This is what JMB does in buildbot_worker/testbot.py
+            mpi_prefix_from_env = get_mpi_prefix_from_env()
+            if mpi_prefix_from_env is not None:
+                if self.mpi_prefix:
+                    print("WARNING: About to overwrite mpi_prefix from yaml file with the one from $MPI_HOME")
+                    print(f"From Yaml     : {self.mpi_prefix}")
+                    print(f"From $MPI_HOME: {mpi_prefix_from_env}")
+                    self.mpi_prefix= mpi_prefix_from_env
 
         if self.with_tdirs and self.without_tdirs:
             raise ValueError("with_tdirs and without_tdirs attribute are mutually exclusive")
@@ -592,6 +614,13 @@ class TestBot:
         Run all the automatic tests depending on the environment and the options specified in the testbot.cfg configuration file.
         Return the number of failing tests (+ no. passed tests if this is the reference builder).
         """
+        # TODO
+        #import multiprocessing
+        #multiprocessing.set_start_method("fork")  # Ensure compatibility on macOS/Linux
+
+        # Disable colors
+        termcolor.enable(False)
+
         # If with_tdirs and without_tdirs are not given => execute all tests.
         # else create a list of strings with the suites that should be executed|excluded.
         suite_args = None
@@ -858,8 +887,9 @@ def get_epilog() -> str:
 ======================================================================================================
 Usage example:
 
-    testbot.py run BUILDER_NAME  => Run tests for the given builder
-    testbot.py validate          => Validate yaml file and convert to json
+    testbot.py run BUILDER_NAME  => Run tests for the given builder.
+    testbot.py print             => Print info on options.
+    testbot.py validate          => Validate yaml file and convert to json.
 
 ======================================================================================================
 """
@@ -867,32 +897,35 @@ Usage example:
 
 
 def get_parser(with_epilog=False):
-     parser = argparse.ArgumentParser(epilog=get_epilog() if with_epilog else "",
-                                      formatter_class=argparse.RawDescriptionHelpFormatter)
+    """Build and return the command-line parser"""
+    parser = argparse.ArgumentParser(epilog=get_epilog() if with_epilog else "",
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
 
-     parser.add_argument('--loglevel', default="ERROR", type=str,
-         help="Set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG")
-     parser.add_argument('-V', '--version', action='version', version=__version__)
+    parser.add_argument('--loglevel', default="ERROR", type=str,
+        help="Set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG")
+    parser.add_argument('-V', '--version', action='version', version=__version__)
 
-     parser.add_argument('-v', '--verbose', default=0, action='count', # -vv --> verbose=2
-         help='verbose, can be supplied multiple times to increase verbosity')
+    parser.add_argument('-v', '--verbose', default=0, action='count', # -vv --> verbose=2
+        help='verbose, can be supplied multiple times to increase verbosity')
 
-     # Create the parsers for the sub-commands
-     subparsers = parser.add_subparsers(dest='command', help='sub-command help',
-        description="Valid subcommands, use command --help for help")
+    # Create the parsers for the sub-commands
+    subparsers = parser.add_subparsers(dest='command', help='sub-command help',
+       description="Valid subcommands, use command --help for help")
 
-     # Subparser for run
-     p_run = subparsers.add_parser('run', # parents=[copts_parser],
-         help="Run tests.")
-     p_run.add_argument("builder_name", type=str, help="Name of the builder")
+    # Subparser for run
+    p_run = subparsers.add_parser('run', # parents=[copts_parser],
+        help="Run tests.")
+    p_run.add_argument("builder_name", type=str, help="Name of the builder")
 
-     p_run.add_argument('-d', '--dry-run', default=True, action="store_true", help='Dry-run mode.')
+    p_run.add_argument('-d', '--dry-run', default=True, action="store_true", help='Dry-run mode.')
 
-     # Subparser for validate
-     p_validate = subparsers.add_parser('validate', # parents=[copts_parser],
-         help="Validate yaml file and convert to JSON.")
+    p_print = subparsers.add_parser('print', help="Print info on options.")
 
-     return parser
+    # Subparser for validate
+    p_validate = subparsers.add_parser('validate', # parents=[copts_parser],
+        help="Validate yaml file and convert to JSON.")
+
+    return parser
 
 
 def new_main():
@@ -903,18 +936,16 @@ def new_main():
     if options.command == "validate":
         return validate()
 
-    if options.command == "run":
-        # Disable colors
-        termcolor.enable(False)
+    if options.command == "print":
+        TestBot.print_options()
+        return 0
 
+    if options.command == "run":
         testbot = TestBot(None, builder_name=options.builder_name)
         if options.dry_run:
             print("Running in dry-run mode, will return immediately.")
             print(testbot)
             return 0
-
-        #import multiprocessing
-        #multiprocessing.set_start_method("fork")  # Ensure compatibility on macOS/Linux
 
         return testbot.run()
 
@@ -930,9 +961,6 @@ def main():
 
     if len(sys.argv) > 1 and sys.argv[1] == "validate":
         return validate()
-
-    if len(sys.argv) > 1 and sys.argv[1] == "convert":
-        return convert()
 
     # Configuration file (hardcoded or from command line)
     testbot_cfg = None
@@ -953,6 +981,6 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(new_main())
+    #sys.exit(new_main())
     sys.exit(main())
 
