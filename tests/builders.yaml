@@ -1,22 +1,12 @@
-- _id: ObjectId("5efd84d13b83985b1ffd0487")
-  name: scope_gnu_10.2_paral
+- name: scope_gnu_10.2_paral
   slavename: scope
   shortname: SCO
-  active: true
   type:
   - slow
   - night
   - merge
   - scope
-  tags:
-  - mpich
-  - gnu
-  - openblas
-  - slow
-  - night
   runmode: dynamic
-  mpi_flavor: mpich
-  mpi_version: 3.3.2
   mpi_prefix: /usr/local/mpich-3.3.2_gnu10.2
   mpirun_np: /bin/mpiexec -np
   with_tdirs: null
@@ -25,28 +15,15 @@
   omp_num_threads: 0
   timeout_time: 1200
   keywords: FAILS_IFMPI-
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.6/gnu/10.2/paral
   etsf_check: 'no'
-  infos: -ffpe-trap=invalid,zero,overflow -fbacktrace -pedantic -fcheck=all
-  builderid: 13
-- _id: ObjectId("5ff5fc350c0f897d71e33e1a")
-  name: scope_gnu_10.2_s64
+- name: scope_gnu_10.2_s64
   slavename: scope
   shortname: S64
-  active: true
   type:
   - odonly
-  tags:
-  - mpich
-  - gnu
-  - openblas
-  - odonly
   runmode: dynamic
-  mpi_flavor: mpich
-  mpi_version: 3.3.2
   mpi_prefix: /usr/local/mpich-3.3.2_gnu10.2
   mpirun_np: /bin/mpiexec -np
   with_tdirs: tutoparal
@@ -55,30 +32,16 @@
   omp_num_threads: 0
   timeout_time: 1200
   keywords: FAILS_IFMPI-
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_9.8/gnu/10.2/paral
   etsf_check: 'no'
-  infos: -ffpe-trap=invalid,zero,overflow -fbacktrace -pedantic -fcheck=all
-  builderid: 11
-- _id: ObjectId("636d0dfcc7464beaa2fb1f72")
-  name: scope_gnu_12.2_mpich
+- name: scope_gnu_12.2_mpich
   slavename: scope
   shortname: SCP
-  active: true
   type:
   - night
   - scope
-  tags:
-  - mpich
-  - gnu
-  - night
-  - openblas
-  - scope
   runmode: static
-  mpi_flavor: mpich
-  mpi_version: 4.0.3
   mpi_prefix: /usr/local/mpich-4.0.3_gnu12.2
   mpirun_np: /bin/mpiexec -n
   with_tdirs: null
@@ -87,42 +50,17 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.6/gnu/12.2/mpich
   etsf_check: 'no'
-  infos: profiling
-  fallback_options:
-    CC: mpicc
-    CXX: mpicxx
-    FC: mpif90
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: ''
-    FCFLAGS_EXTRA: ''
-    LINALG: -L/usr/local/OpenBLAS-0.3.21_gcc12.2
-  builderid: 19
-- _id: ObjectId("650086329126717113b8dccf")
-  name: scope_gnu_12.2_abipy
+- name: scope_gnu_12.2_abipy
   slavename: scope
   shortname: SCY
-  active: true
   type:
   - fast
   - night
   - scope
-  tags:
-  - mpich
-  - gnu
-  - night
-  - openblas
-  - scope
-  - fast
   runmode: static
-  mpi_flavor: mpich
-  mpi_version: 4.0.3
   mpi_prefix: /usr/local/mpich-4.0.3_gnu12.2
   mpirun_np: /bin/mpiexec -n
   with_tdirs: fast
@@ -131,41 +69,16 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.6/gnu/12.2/mpich
   etsf_check: 'no'
-  infos: profiling
-  fallback_options:
-    CC: mpicc
-    CXX: mpicxx
-    FC: mpif90
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: ''
-    FCFLAGS_EXTRA: ''
-    LINALG: -L/usr/local/OpenBLAS-0.3.21_gcc12.2
-  builderid: 29
-- _id: ObjectId("654521ebf378cc8a0aeb02a7")
-  name: eos_nvhpc_23.9_elpa
+- name: eos_nvhpc_23.9_elpa
   slavename: eos
   shortname: EOE
-  active: true
   type:
   - night
   - eos
-  tags:
-  - openmpi
-  - nvhpc
-  - night
-  - elpa
-  - cuda12.2
-  - gpu
   runmode: static
-  mpi_flavor: openmpi
-  mpi_version: 4.1.6
   mpi_prefix: /usr/local/openmpi-4.1.6_nvhpc-23.9_cuda_12.2
   mpirun_np: /bin/mpiexec -n
   with_tdirs: null
@@ -174,41 +87,17 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_9.8/nvhpc/23.1/elpa
   etsf_check: 'no'
-  infos: profiling
-  fallback_options:
-    CC: mpicc
-    CXX: mpicxx
-    FC: mpif90
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: ''
-    FCFLAGS_EXTRA: ''
-    LINALG: ''
-  builderid: 30
-- _id: ObjectId("65a18426cd4c102483813f57")
-  name: scope_gnu_13.2_dep
+- name: scope_gnu_13.2_dep
   slavename: scope
   shortname: SCD
-  active: true
   type:
   - fast
   - night
   - scope
-  tags:
-  - mpich
-  - gnu
-  - night
-  - openblas
-  - fast
   runmode: static
-  mpi_flavor: mpich
-  mpi_version: 4.1.2
   mpi_prefix: /usr/local/mpich-4.1.2_gnu13.2
   mpirun_np: /bin/mpiexec -np
   with_tdirs: null
@@ -217,33 +106,19 @@
   omp_num_threads: 0
   timeout_time: 1200
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: null
   etsf_check: 'no'
-  infos: ''
-  builderid: 34
-- _id: ObjectId("66d9a7e8e2a2c470c999e4ca")
-  name: eos_gnu_13.2_mpich
+- name: eos_gnu_13.2_mpich
   slavename: eos
   shortname: EOF
-  active: true
   type:
   - fast
   - night
   - ref
   - merge
   - eos
-  tags:
-  - mpich
-  - gnu
-  - scalapack
-  - ref
-  - night
   runmode: static
-  mpi_flavor: mpich
-  mpi_version: 4.2.2
   mpi_prefix: /usr/local/mpich-4.2.2-gcc13.2
   mpirun_np: /bin/mpiexec -n
   with_tdirs: null
@@ -252,43 +127,19 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.6/gnu/13.2/mpich
   etsf_check: 'no'
-  infos: profiling
-  fallback_options:
-    CC: mpicc
-    CXX: mpicxx
-    FC: mpif90
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: ''
-    FCFLAGS_EXTRA: ''
-    LINALG: ''
-  builderid: 38
-- _id: ObjectId("66df0b80e2a2c470c999e4cb")
-  name: eos_gnu_13.2_serial
+- name: eos_gnu_13.2_serial
   slavename: eos
   shortname: EOZ
-  active: true
   type:
   - fast
   - ref
   - night
   - merge
   - eos
-  tags:
-  - gnu
-  - serial
-  - fast
-  - ref
-  - night
   runmode: static
-  mpi_flavor: null
-  mpi_version: null
   mpi_prefix: null
   mpirun_np: null
   with_tdirs: null
@@ -297,39 +148,16 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.6/gnu/13.2/serial
   etsf_check: 'no'
-  infos: profiling
-  fallback_options:
-    CC: mpicc
-    CXX: mpicxx
-    FC: mpif90
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: ''
-    FCFLAGS_EXTRA: ''
-    LINALG: ''
-  builderid: 39
-- _id: ObjectId("66e1a007e2a2c470c999e4cc")
-  name: alps_gnu_9.5_sdebug
+- name: alps_gnu_9.5_sdebug
   slavename: alps
   shortname: LRS
-  active: true
   type:
   - night
   - fast
-  tags:
-  - gnu
-  - openblas
-  - night
-  - fast
   runmode: static
-  mpi_flavor: mpich
-  mpi_version: 4.2.3
   mpi_prefix: /usr/local/mpich-4.2.3_gnu9.5
   mpirun_np: /bin/mpiexec
   with_tdirs: fast
@@ -338,39 +166,16 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.0/gnu/9.5/sdebug
   etsf_check: 'no'
-  infos: -ffpe-trap=invalid,zero,overflow -fbacktrace -pedantic -fcheck=all
-  fallback_options:
-    CC: gcc
-    CXX: g++
-    FC: gfortran
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: ''
-    FCFLAGS_EXTRA: -Wno-missing-include-dirs
-    LINALG: -L/usr/local/OpenBLAS-0.3.15_gcc93/lib -lopenblas -lpthread
-  builderid: 42
-- _id: ObjectId("66e85abae2a2c470c999e4cd")
-  name: alps_nag_7.2_openmpi
+- name: alps_nag_7.2_openmpi
   slavename: alps
   shortname: NAG
-  active: true
   type:
   - newbot
   - slow
-  tags:
-  - openmpi
-  - nag
-  - newbot
-  - slow
   runmode: static
-  mpi_flavor: openmpi
-  mpi_version: 4.1.6
   mpi_prefix: /usr/local/openmpi-4.1.6_nag72
   mpirun_np: /bin/mpirun -np
   with_tdirs: null
@@ -381,45 +186,16 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.0/nag/7.2/openmpi
   etsf_check: 'no'
-  infos: null
-  fallback_options:
-    CC: mpicc
-    CXX: mpicxx
-    FC: mpif90
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: -P -traditional-cpp
-    FCFLAGS_EXTRA: -g -L/usr/local/nag/lib
-    LINALG: -L/usr/local/lapack-3.10_nag7.2 -llapack -lrefblas -lpthread -lm
-    NETCDF_INCS: -I/usr/local/netcdf-4.4.1.1_nag70/include
-    NETCDF_LIBS: -L/usr/local/netcdf-4.4.1.1_nag70/lib -lnetcdff -lnetcdf -L/usr/local/hdf5-1.8.20_openmpi/lib -lhdf5_hl -lhdf5
-      -lz -lcurl -ldl
-  builderid: 41
-- _id: ObjectId("6720b75c138f74218f953806")
-  name: eos_nvhpc_24.9_openmpi
+- name: eos_nvhpc_24.9_openmpi
   slavename: eos
   shortname: EOI
-  active: true
   type:
   - night
   - eos
-  tags:
-  - openmpi
-  - nvhpc
-  - fast
-  - night
-  - elpa
-  - gpu
-  - cuda12.3
   runmode: static
-  mpi_flavor: openmpi
-  mpi_version: 4.1.6
   mpi_prefix: /usr/local/openmpi-4.1.6_nvhpc-24.9_cuda_12.3
   mpirun_np: /bin/mpiexec -n
   with_tdirs: null
@@ -428,39 +204,16 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.6/nvhpc/24.9/openmpi
   etsf_check: 'no'
-  infos: profiling
-  fallback_options:
-    CC: mpicc
-    CXX: mpicxx
-    FC: mpif90
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: ''
-    FCFLAGS_EXTRA: ''
-    LINALG: ''
-  builderid: 44
-- _id: ObjectId("672ccea0138f74218f953807")
-  name: alps_nag_7.2_serial
+- name: alps_nag_7.2_serial
   slavename: alps
   shortname: NGS
-  active: true
   type:
   - night
   - slow
-  tags:
-  - serial
-  - nag
-  - night
-  - slow
   runmode: static
-  mpi_flavor: null
-  mpi_version: null
   mpi_prefix: null
   mpirun_np: null
   with_tdirs: null
@@ -469,43 +222,17 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.6/nag/7.2/serial
   etsf_check: 'no'
-  infos: null
-  fallback_options:
-    CC: gcc
-    CXX: gxx
-    FC: nagfor
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: -P -traditional-cpp
-    FCFLAGS_EXTRA: -g -L/usr/local/nag/lib
-    LINALG: -L/usr/local/lapack-3.10_nag7.2 -llapack -lrefblas -lpthread -lm
-    NETCDF_INCS: -I/usr/local/netcdf-4.4.1.1_nag70/include
-    NETCDF_LIBS: -L/usr/local/netcdf-4.4.1.1_nag70/lib -lnetcdff -lnetcdf -L/usr/local/hdf5-1.8.20_openmpi/lib -lhdf5_hl -lhdf5
-      -lz -lcurl -ldl
-  builderid: 45
-- _id: ObjectId("6781434a5c43084e439092cd")
-  name: eos_intel_2023_cmake
+- name: eos_intel_2023_cmake
   slavename: eos
   shortname: EIC
-  active: true
   type:
   - night
   - eos
   - fast
-  tags:
-  - intel
-  - night
-  - cmake
-  - fast
   runmode: static
-  mpi_flavor: intel
-  mpi_version: '2030'
   mpi_prefix: ${I_MPI_ROOT}
   mpirun_np: /bin/mpiexec -n
   with_tdirs: null
@@ -514,39 +241,15 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.6/intel/2023/cmake
   etsf_check: 'no'
-  infos: profiling
-  fallback_options:
-    CC: mpiicx -cc=icx
-    CXX: mpiicpx
-    FC: mpiifort
-    CPP: icpx -E
-    FC_LIBS: -lstdc++ -ldl
-    FCFLAGS_EXTRA: -traceback
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: ''
-    LINALG: ''
-  builderid: 48
-- _id: ObjectId("678772a15c43084e439092ce")
-  name: eos_gnu_13.2_nan
+- name: eos_gnu_13.2_nan
   slavename: eos
   shortname: ENA
-  active: true
   type:
   - newbot
-  tags:
-  - mpich
-  - gnu
-  - newbot
   runmode: static
-  mpi_flavor: mpich
-  mpi_version: 4.2.2
   mpi_prefix: /usr/local/mpich-4.2.2-gcc13.2
   mpirun_np: /bin/mpiexec -n
   with_tdirs: null
@@ -555,39 +258,16 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.0/gnu/13.2/mpich
   etsf_check: 'no'
-  infos: profiling
-  fallback_options:
-    CC: mpicc
-    CXX: mpicxx
-    FC: mpif90
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: ''
-    FCFLAGS_EXTRA: ''
-    LINALG: ''
-  builderid: 49
-- _id: ObjectId("678f7cae5c43084e439092d0")
-  name: alps_gnu_14.2_cov
+- name: alps_gnu_14.2_cov
   slavename: alps
   shortname: ACO
-  active: true
   type:
   - night
   - fast
-  tags:
-  - mkl
-  - gnu
-  - night
-  - fast
   runmode: static
-  mpi_flavor: mpich
-  mpi_version: 4.2.3
   mpi_prefix: /usr/local/mpich-4.2.3_gnu14.2
   mpirun_np: /bin/mpiexec -n
   with_tdirs: null
@@ -596,40 +276,16 @@
   omp_num_threads: 0
   timeout_time: 2000
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.6/gnu/14.2/cov
   etsf_check: 'no'
-  infos: coverage
-  fallback_options:
-    CC: mpicc
-    CXX: mpicxx
-    FC: mpif90
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: ''
-    FCFLAGS_EXTRA: ''
-    LINALG: -L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group
-  builderid: 51
-- _id: ObjectId("67a0bce2a9b26fbec8852ad8")
-  name: alps_intel_2025_elpa
+- name: alps_intel_2025_elpa
   slavename: alps
   shortname: AOE
-  active: true
   type:
   - night
   - fast
-  tags:
-  - mpich
-  - intel
-  - mkl
-  - night
-  - fast
   runmode: static
-  mpi_flavor: intel
-  mpi_version: '2025'
   mpi_prefix: ${I_MPI_ROOT}
   mpirun_np: /bin/mpirun -n
   with_tdirs: null
@@ -638,39 +294,15 @@
   omp_num_threads: 0
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.6/intel/2025/elpa
   etsf_check: 'no'
-  infos: NEX
-  fallback_options:
-    CC: $(which mpiicc) -cc=$(which icx)
-    CXX: $(which mpiicpx) -cc=$(which icpx)
-    FC: $(which mpiifort) -fc=$(which ifx)
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: ''
-    FCFLAGS_EXTRA: ''
-    LINALG_LIBS: -L${MKLROOT}/lib -lmkl_scalapack_lp64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lmkl_blacs_intelmpi_lp64
-      -lpthread -lm -ldl
-  builderid: 52
-- _id: ObjectId("67a0eb68a9b26fbec8852ad9")
-  name: atlas_gnu_14.2_openmp
+- name: atlas_gnu_14.2_openmp
   slavename: atlas
   shortname: aIO
-  active: true
   type:
   - newbot
-  tags:
-  - serial
-  - gnu
-  - newbot
-  - atlas
   runmode: static
-  mpi_flavor: null
-  mpi_version: null
   mpi_prefix: null
   mpirun_np: null
   with_tdirs: null
@@ -679,29 +311,16 @@
   omp_num_threads: 2
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.2/gnu/14.2/openmp
   etsf_check: 'no'
-  infos: NE, openmp, atlas
-  builderid: 53
-- _id: ObjectId("67bf3f7d9fb595c33bb1bb2f")
-  name: bob_gnu_13.2_openmp
+- name: bob_gnu_13.2_openmp
   slavename: bob
   shortname: BO7
-  active: true
   type:
   - night
   - slow
-  tags:
-  - serial
-  - gnu
-  - night
-  - atlas
   runmode: static
-  mpi_flavor: null
-  mpi_version: null
   mpi_prefix: null
   mpirun_np: null
   with_tdirs: null
@@ -710,29 +329,16 @@
   omp_num_threads: 2
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_9.8/gnu/13.2/openmp
   etsf_check: 'no'
-  infos: NE, openmp, atlas
-  builderid: 35
-- _id: ObjectId("680f44cccdbe2f7bbb33272f")
-  name: haicgu_gnu_14.1_hpc
+- name: haicgu_gnu_14.1_hpc
   slavename: haicgu
   shortname: hG14
-  active: true
   type:
   - hpc
   - night
-  tags:
-  - gnu
-  - arm
-  - blas
-  - hpc
   runmode: static
-  mpi_flavor: opennmpi
-  mpi_version: 5.0.3
   mpi_prefix: ''
   mpirun_np: srun -n
   with_tdirs: null
@@ -741,62 +347,18 @@
   omp_num_threads: 0
   timeout_time: 1800
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /home/buildbot_admin/CI/fallbacks/gnu_14.1
   etsf_check: 'no'
-  infos: null
-  fallback_options:
-    CC: mpicc
-    CXX: mpicxx
-    FC: mpif90
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: ''
-    FCFLAGS_EXTRA: ''
-    LINALG_LIBS: -L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
-    LINALG_INCS: -I${MKLROOT}/include
-    NETCDF_INCS: -I${FALLBACKS_PATH}/netcdf4/default/include -I${FALLBACKS_PATH}/netcdf4_fortran/default/include
-    NETCDF_LIBS: -L${FALLBACKS_PATH}/netcdf4_fortran/default/lib -lnetcdff -L${FALLBACKS_PATH}/netcdf4/default/lib -lnetcdf
-      -lm -ldl
-  builderid: 54
-  properties:
-    remote_data:
-      host: guoehi-dev
-    queue_type: slurm
-    base_dir: /home/buildbot_admin/CI/run
-    resources:
-      partition: cn-eth,cn-ib
-      nodes: 1
-      ntasks: 64
-      mem: 110GB
-      time: '8:00:00'
-      job_name: abinit_CI
-      exclusive: user
-    script_pre_run: eval "$(conda shell.bash hook)"; conda activate abipy
-    modules: gompi/2024.14 OpenBLAS/0.3.27 HDF5/1.14.4-2 netCDF-C++4/4.3.1 netCDF-Fortran/4.6.1 FFTW.MPI/3.3.10 ScaLAPACK/2.2.1-fb
-      libxc/6.2.2
   mpi_args: --exclusive
   tmp_basedir: /tmp
   force_mpi: 'yes'
-- _id: ObjectId("681d9d13cdbe2f7bbb332734")
-  name: atlas_gnu_14.2_triqs
+- name: atlas_gnu_14.2_triqs
   slavename: atlas
   shortname: aTQ
-  active: true
   type:
   - night
-  tags:
-  - gnu
-  - night
-  - mkl
-  - triqs
-  - openmpi
   runmode: static
-  mpi_flavor: openmpi
-  mpi_version: 5.0.5
   mpi_prefix: /usr/lib64/openmpi
   mpirun_np: /bin/mpiexec -n
   with_tdirs: null
@@ -805,30 +367,16 @@
   omp_num_threads: 1
   timeout_time: 900
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /usr/local/fallbacks_10.6/gnu/14.2/triqs
   etsf_check: 'no'
-  infos: NE, triqs, mkl2025
-  builderid: 56
-- _id: ObjectId("68234fe7cdbe2f7bbb332735")
-  name: manneback_gnu_14.2_hpc
+- name: manneback_gnu_14.2_hpc
   slavename: manneback
   shortname: MANN
-  active: true
   type:
   - night
   - hpc
-  tags:
-  - gnu
-  - intel
-  - blas
-  - hpc
-  - night
   runmode: static
-  mpi_flavor: opennmpi
-  mpi_version: 5.0.3
   mpi_prefix: ''
   mpirun_np: srun -n
   with_tdirs: null
@@ -837,43 +385,9 @@
   omp_num_threads: 1
   timeout_time: 1800
   keywords: null
-  special: false
   poe: null
   poe_args: null
-  fallbacks_prefix: /home/ucl/modl/jmbeuken/HPC/fallbacks/gnu_14.2
   etsf_check: 'no'
-  infos: null
-  fallback_options:
-    CC: mpicc
-    CXX: mpicxx
-    FC: mpif90
-    FCFLAGS: ''
-    FFLAGS: ''
-    CPPFLAGS: ''
-    FPPFLAGS: ''
-    FCFLAGS_EXTRA: ''
-    LINALG_LIBS: -L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
-    LINALG_INCS: -I${MKLROOT}/include
-    NETCDF_INCS: -I${FALLBACKS_PATH}/netcdf4/default/include -I${FALLBACKS_PATH}/netcdf4_fortran/default/include
-    NETCDF_LIBS: -L${FALLBACKS_PATH}/netcdf4_fortran/default/lib -lnetcdff -L${FALLBACKS_PATH}/netcdf4/default/lib -lnetcdf
-      -lm -ldl
-  builderid: 57
-  properties:
-    remote_data:
-      host: manneback
-    queue_type: slurm
-    base_dir: /home/ucl/modl/jmbeuken/HPC/run
-    resources:
-      partition: keira
-      mem_per_cpu: 2G
-      qos: keira
-      nodes: 1
-      ntasks: 64
-      time: '8:00:00'
-      job_name: abinit_CI
-    script_pre_run: eval "$(/home/ucl/modl/jmbeuken/miniconda3/bin/conda shell.bash hook)"; conda activate abipy
-    modules: gompi/2024a Autotools/20231222-GCCcore-13.3.0 ScaLAPACK/2.2.0-gompi-2024a-fb OpenBLAS/0.3.27-GCC-13.3.0 FFTW.MPI/3.3.10-gompi-2024a
-      HDF5/1.14.5-gompi-2024a netCDF/4.9.2-gompi-2024a netCDF-Fortran/4.6.1-gompi-2024a libxc/6.2.2-GCC-13.3.0
   mpi_args: --exclusive
   tmp_basedir: /tmp
   force_mpi: 'yes'
