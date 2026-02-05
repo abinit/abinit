@@ -8,7 +8,7 @@
 !!  wrt k, and the corresponding wave functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2025 ABINIT group (MG, HM, MJV)
+!! Copyright (C) 2016-2026 ABINIT group (MG, HM, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,7 +22,7 @@
 
 #include "abi_common.h"
 
-MODULE m_ddk
+module m_ddk
 
  use defs_basis
  use m_abicore
@@ -687,7 +687,6 @@ end subroutine ddk_red2car
 !!
 !! SOURCE
 
-
 subroutine ddkop_init(new, dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft)
 
 !Arguments ------------------------------------
@@ -788,7 +787,7 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
  real(dp),allocatable :: ylm_k(:,:),ylmgr1_k(:,:,:)
 !************************************************************************
 
- ABI_CHECK(npw_k <= self%mpw, "npw_k > mpw!")
+ ABI_CHECK_ILEQ(npw_k, self%mpw, "npw_k > mpw!")
  self%kpoint = kpoint
 
  ! Set up the spherical harmonics (Ylm) at k+q if useylm = 1

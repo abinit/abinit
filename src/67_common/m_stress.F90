@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, FJ, MT)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,6 +89,7 @@ contains
 !!  efield = cartesian coordinates of the electric field in atomic units
 !!  ehart=Hartree energy (hartree)
 !!  eii=pseudoion core correction energy part of Etot (hartree)
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  gsqcut=cutoff value on G**2 for (large) sphere inside FFT box.
 !!                       gsqcut=(boxcut**2)*ecut/(2._dp*(Pi**2)

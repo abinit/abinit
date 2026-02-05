@@ -6,7 +6,7 @@
 !! Module containing the definition of the crystal_t data type and methods used to handle it.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG, YP, MJV, GA)
+!!  Copyright (C) 2008-2026 ABINIT group (MG, YP, MJV, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -955,6 +955,7 @@ integer function crystal_compare(self, other, header) result(ierr)
  ! Atoms
  if (any(self%typat /= other%typat)) then
    ABI_WARNING("Found critical diffs in typat.")
+   !print *, self%typat; print *, other%typat
    ierr = ierr + 1
  end if
  if (any(abs(self%zion - other%zion) > tol3)) then

@@ -10,7 +10,7 @@
 !!  to compute the matrix elements: <k+q| dvscf_{idir, ipert, qpt} |k>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2025 ABINIT group (MG, GA)
+!! Copyright (C) 2009-2026 ABINIT group (MG, GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1411,7 +1411,7 @@ end subroutine dvdb_readsym_qbz
 !!  dvdb_read_vxc1_qbz
 !!
 !! FUNCTION
-!! Compute the first-order change of exchange-correlation potential
+!! Compute the first-order change of the exchange-correlation potential
 !! for a q-point in the BZ starting from its symmetrical image in the IBZ.
 !!
 !! INPUTS
@@ -2313,8 +2313,8 @@ end subroutine rotate_fqg
 !!  dvdb_ftinterp_setup
 !!
 !! FUNCTION
-!!  Precompute the wsr array with with the DFPT potential in the supercell
-!!  required for the Fourier interpolation
+!!  Precompute the wsr array with the DFPT potential in the supercell
+!!  required for the Fourier interpolation.
 !!  This is a collective routine that should be called by all procs inside db%comm.
 !!
 !! \begin{equation}
@@ -2377,13 +2377,13 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, 
  call wrtout(std_out, sjoin(ch10, "Building W(R,r) using q-mesh ngqpt: ", ltoa(ngqpt), &
    ", with nprocs_rpt:", itoa(db%nprocs_rpt)), do_flush=.True.)
  call wrtout(std_out, sjoin(" Using Gaussian filter with qdamp: ", ftoa(db%qdamp, fmt="(f6.1)")))
+ call wrtout(std_out, "")
+ call wrtout(std_out, " Note: this part may take some time depending on the number of MPI procs, ngqpt and nfft points.")
+ call wrtout(std_out, " Use boxcutmin < 2.0 (> 1.1) to decrease nfft, reduce memory requirements and speedup the calculation.")
  !call wrtout(std_out, " Q-mesh shifts:")
  !do ii=1,nqshift
  !  call wrtout(std_out, ltoa(qshift(:, ii)))
  !end do
- call wrtout(std_out, "")
- call wrtout(std_out, " Note: this part may take some time depending on the number of MPI procs, ngqpt and nfft points.")
- call wrtout(std_out, " Use boxcutmin < 2.0 (> 1.1) to decrease nfft, reduce memory requirements and speedup the calculation.")
 
  call prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
                        qibz, qbz, indqq, iperm, nqsts, iqs_dvdb, all_rpt, all_wghatm, db%comm)
@@ -2444,7 +2444,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, 
    !
    ! Here all procs get all potentials for this IBZ q-point on the real-space FFT mesh.
    ! This call allocates v1r_qibz(cplex_qibz, nfft, nspden, 3*natom)
-   ! Note that here we need all 3*natom perturbations because of v1phq_rotate
+   ! Note that here we need all 3*natom perturbations because of v1phq_rotate.
    call db%readsym_allv1(iqs_dvdb(iq_ibz), cplex_qibz, nfft, ngfft, v1r_qibz, db%comm)
 
    ! Reconstruct by symmetry the potentials for the star of this q-point,
@@ -3071,9 +3071,9 @@ subroutine dvdb_get_ftqbz(db, qbz, cplex, nfft, ngfft, v1scf, comm)
 
 !Arguments ------------------------------------
 !scalars
+ class(dvdb_t),intent(inout) :: db
  integer,intent(in) :: nfft, comm
  integer,intent(out) :: cplex
- class(dvdb_t),intent(inout) :: db
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: qbz(3)
@@ -3154,9 +3154,10 @@ subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, drho_cplex, nfft, ngfft, n
 ! *************************************************************************
 
  ! Get rho1(cplex, nfftf, nspden, my_npert))
- call db%get_ftqbz(qbz, drho_cplex, nfft, ngfft, vxc1, comm)
+ call db%get_ftqbz(qbz, drho_cplex, nfft, ngfft, rho1, comm)
 
  option = 2 ! if 2, treat only density change
+ !option = 1 ! if 1, treat both density change and XC core correction
  ABI_MALLOC(vxc1, (drho_cplex, nfft, dtset%nspden, db%my_npert))
 
  do imyp=1,db%my_npert

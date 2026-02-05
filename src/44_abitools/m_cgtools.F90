@@ -7,7 +7,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2025 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
+!! Copyright (C) 1992-2026 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,6 +42,7 @@ module m_cgtools
  use m_errors
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
 
  use m_fstrings,      only : toupper, itoa, sjoin
@@ -762,8 +763,7 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_op
 
 !Local variables-------------------------------
 !scalars
- integer :: mm, nn, kk, lda, ldb, ldc
- integer :: my_gpu_option
+ integer :: mm, nn, kk, lda, ldb, ldc, my_gpu_option
  real(dp) :: my_alpha(2), my_beta(2)
  complex(dp) :: my_calpha, my_cbeta
 ! *************************************************************************
@@ -1956,7 +1956,7 @@ subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid,gpu_thre
  invnfftot=one/(dble(nfftot))
 
  if(l_gpu_thread_limit /= 0) then
-   nthreads_bak=xomp_get_num_threads(open_parallel=.True.)
+   nthreads_bak=xomp_get_max_threads()
    call xomp_set_num_threads(min(l_gpu_thread_limit,nthreads_bak))
  end if
 
@@ -3293,8 +3293,7 @@ subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
 
 !Local variables-------------------------------
 !scalars
- integer :: nbandm,npw_sp,ierr
- integer :: my_gpu_option
+ integer :: nbandm,npw_sp,ierr, my_gpu_option
 !arrays
  real(dp) :: tsec(2),bkp_scprod(2),bkp_dirg0(2)
 ! *************************************************************************
@@ -4366,7 +4365,7 @@ end subroutine fxphas_seq
 
 !!****f* m_cgtools/fxphas_and_cmp
 !! NAME
-!! fxphas_and_com
+!! fxphas_and_cmp
 !!
 !! FUNCTION
 !! Fix phase and compare two set of wavefunctions
@@ -4386,10 +4385,9 @@ logical function fxphas_and_cmp(npw_k, nspinor, nband_k, istwfk, cg1, cg2, eig_k
 
 !Local variables-------------------------------
  integer, parameter :: useoverlap0 = 0, mgsc = 0
- integer :: ipw, ipwsp, isp, mcg, band
+ integer :: ipw, mcg, band, ipwsp, isp
  real(dp) :: phi1, rho1, phi2, rho2, max_rho_adiff, atol_rho__, phi_diff_ref, max_dphi_adiff, atol_dphi__, gsc(0,0)
  character(len=500) :: btype
-
 ! ***********************************************************************
 
  atol_rho__ = tol6; if (present(atol_rho)) atol_rho__ = atol_rho
@@ -4403,20 +4401,20 @@ logical function fxphas_and_cmp(npw_k, nspinor, nband_k, istwfk, cg1, cg2, eig_k
  do band=1,nband_k
    call band_type(band, btype)
    if (btype == "degenerate") cycle
-   write(234, *)"band: ", band, "istwfk: ", istwfk, trim(btype)
-   write(235, *)"band: ", band, "istwfk:", istwfk, trim(btype)
-   write(234, *)"cg1:"; write(235, *)"cg2:"
+   !write(234, *)"band: ", band, "istwfk: ", istwfk, trim(btype)
+   !write(235, *)"band: ", band, "istwfk:", istwfk, trim(btype)
+   !write(234, *)"cg1:"; write(235, *)"cg2:"
    !write(234, *)"cg1 rho:"; write(235, *)"cg2 rho phi:"
    do isp=1,nspinor
      do ipw=1,npw_k
        ipwsp = ipw + (isp - 1) * npw_k
-       if (npw_k > 15 .and. ipw > 15 .and. ipw < npw_k - 15) cycle
+       !if (npw_k > 15 .and. ipw > 15 .and. ipw < npw_k - 15) cycle
        !write(234, *)ipwsp, cg1(1, ipwsp, band); write(234, *)ipwsp, cg1(2, ipwsp, band)
        !write(235, *)ipwsp, cg2(1, ipwsp, band); write(235, *)ipwsp, cg2(2, ipwsp, band)
        call rhophi(cg1(:, ipwsp, band), phi1, rho1)
        call rhophi(cg2(:, ipwsp, band), phi2, rho2)
-       write(234, *)ipwsp, rho1!; write(234, *)ipwsp, phi1
-       write(235, *)ipwsp, rho2!; write(235, *)ipwsp, phi2
+       !write(234, *)ipwsp, rho1!; write(234, *)ipwsp, phi1
+       !write(235, *)ipwsp, rho2!; write(235, *)ipwsp, phi2
      end do
    end do
  end do

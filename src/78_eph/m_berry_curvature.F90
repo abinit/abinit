@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG, MMignolet)
+!!  Copyright (C) 2008-2026 ABINIT group (MG, MMignolet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -209,7 +209,7 @@ subroutine berry_curvature(gstore, dtset, dtfil)
 
            dene = e_b1_k - e_b2_kq
            if (abs(dene) > tol12) then
-           ! the tolerance here might need some tweaking
+             ! the tolerance here might need some tweaking
              fact(1) = fact(1) / dene**2
            else
              ! TODO: add finite delta or do Taylor series expansion of numerator + denominator?

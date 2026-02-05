@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h09 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h11 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v3_t51/t51.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v3_t51/t51.abi
 - output file    -> t51.abo
 - root for input  files -> t51i
 - root for output files -> t51o
@@ -167,8 +167,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.00660
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -198,18 +198,18 @@ solver: {iscf: 7, nstep: 15, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-08, }
 ...
 
-     iter   Etot(hartree)     deltaE(h) residm    vres2    magn
- ETOT  1  -23.647944662046    -2.36E+01 6.22E-01 2.19E+03 0.500
- ETOT  2  -24.820348297113    -1.17E+00 9.52E-03 2.37E+01 0.500
- ETOT  3  -24.825312780450    -4.96E-03 5.20E-04 6.31E+00 0.500
- ETOT  4  -24.826005416134    -6.93E-04 1.38E-04 7.75E-01 0.500
- ETOT  5  -24.826267486772    -2.62E-04 2.58E-05 2.68E-02 0.500
- ETOT  6  -24.826321663146    -5.42E-05 9.80E-06 2.96E-03 0.500
- ETOT  7  -24.826323249370    -1.59E-06 2.52E-06 1.53E-03 0.500
- ETOT  8  -24.826324915837    -1.67E-06 7.26E-07 4.86E-05 0.500
- ETOT  9  -24.826324963347    -4.75E-08 1.57E-07 2.42E-06 0.500
- ETOT 10  -24.826324966049    -2.70E-09 5.87E-08 6.02E-08 0.500
- ETOT 11  -24.826324966149    -1.01E-10 1.34E-08 1.11E-09 0.500
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
+ ETOT  1  -23.647944662046    -2.365E+01 6.217E-01 2.191E+03 4.575E-01 4.575E-01
+ ETOT  2  -24.820348297113    -1.172E+00 9.518E-03 2.370E+01 2.596E-03 4.549E-01
+ ETOT  3  -24.825312780450    -4.964E-03 5.201E-04 6.310E+00 2.089E-02 4.758E-01
+ ETOT  4  -24.826005416134    -6.926E-04 1.377E-04 7.750E-01 3.728E-02 5.131E-01
+ ETOT  5  -24.826267486772    -2.621E-04 2.575E-05 2.681E-02 1.464E-03 5.117E-01
+ ETOT  6  -24.826321663146    -5.418E-05 9.796E-06 2.960E-03 1.144E-02 5.231E-01
+ ETOT  7  -24.826323249370    -1.586E-06 2.524E-06 1.531E-03 4.668E-05 5.230E-01
+ ETOT  8  -24.826324915837    -1.666E-06 7.258E-07 4.860E-05 1.141E-03 5.242E-01
+ ETOT  9  -24.826324963347    -4.751E-08 1.570E-07 2.418E-06 2.845E-04 5.239E-01
+ ETOT 10  -24.826324966049    -2.702E-09 5.874E-08 6.015E-08 2.250E-05 5.239E-01
+ ETOT 11  -24.826324966149    -1.006E-10 1.343E-08 1.106E-09 2.211E-06 5.239E-01
 
  At SCF step   11, etot is converged :
   for the second time, diff in etot=  1.006E-10 < toldfe=  1.000E-08
@@ -247,14 +247,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     3.296526     2.772596      6.069122     0.523930
- ---------------------------------------------------------------------
-  Sum:              3.296526     2.772596      6.069122     0.523930
- Total magnetization (from the atomic spheres):             0.523930
- Total magnetization (exact up - dn):                       0.500000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1 Fe   2.00000     3.296526     2.772596      6.069122     0.523930
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 3.296526     2.772596      6.069122     0.523930
+ Total magnetization (from the atomic spheres):                0.523930
+ Total magnetization (exact up - dn):                          0.500000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -276,7 +277,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.423500000000  5.423500000000  5.423500000000 bohr
-              =  2.869992590788  2.869992590788  2.869992590788 angstroms
+              =  2.869992601385  2.869992601385  2.869992601385 angstroms
  prteigrs : about to open file t51o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.25222   Average Vxc (hartree)=  -0.50057
  Magnetization (Bohr magneton)=  5.00000000E-01
@@ -309,7 +310,7 @@ non_local_psp       : -2.84343044005868E+01
 internal            : -2.48145205671978E+01
 '-kT*entropy'       : -1.18043989515314E-02
 total_energy        : -2.48263249661493E+01
-total_energy_eV     : -6.75558658486991E+02
+total_energy_eV     : -6.75558717722130E+02
 band_energy         : -2.74809054385505E+00
 ...
 
@@ -320,9 +321,9 @@ band_energy         : -2.74809054385505E+00
   sigma(3 3)=  1.78330675E-02  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.2467E+02 GPa]
-- sigma(1 1)=  5.24666872E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  5.24666872E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.24666872E+02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  5.24666960E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.24666960E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.24666960E+02  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -506,10 +507,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  21 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.3  wall=          1.3
+.Delivered  11 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.4  wall=          1.4

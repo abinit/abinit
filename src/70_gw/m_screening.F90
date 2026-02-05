@@ -7,7 +7,7 @@
 !!  with the inverse dielectric matrix as well as related methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (MG)
+!! Copyright (C) 2008-2026 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -813,19 +813,19 @@ subroutine epsm1_from_file(epsm1, fname, mqmem, npwe_asked, comm)
  ! Get G-vectors.
  epsm1%npwe = epsm1%Hscr%npwe
  if (npwe_asked>0) then
-   if (npwe_asked>epsm1%Hscr%npwe) then
+   if (npwe_asked > epsm1%Hscr%npwe) then
      write(msg,'(a,i8,2a,i8)')&
       'Number of G-vectors saved on file is less than the value required = ',npwe_asked,ch10,&
       'Calculation will proceed with Max available npwe = ',epsm1%Hscr%npwe
      ABI_WARNING(msg)
    else
      ! Redefine the no. of G"s for W.
-     epsm1%npwe=npwe_asked
+     epsm1%npwe = npwe_asked
    end if
  end if
 
  ! pointer to epsm1%Hscr%gvec ?
- ABI_MALLOC(epsm1%gvec,(3,epsm1%npwe))
+ ABI_MALLOC(epsm1%gvec, (3,epsm1%npwe))
  epsm1%gvec=epsm1%Hscr%gvec(:,1:epsm1%npwe)
 
 end subroutine epsm1_from_file
@@ -890,8 +890,8 @@ subroutine epsm1_mkdump(epsm1, Vcp, npwe, gvec, nkxc, kxcg, id_required, approx_
  complex(dp),allocatable :: dummy_lwing(:,:,:),dummy_uwing(:,:,:),dummy_head(:,:,:)
 ! *********************************************************************
 
- ABI_CHECK(id_required==4, 'Value of id_required not coded')
- ABI_CHECK(npwe == epsm1%npwe, "mismatch in npwe")
+ ABI_CHECK_IEQ(id_required, 4, 'Value of id_required not coded')
+ ABI_CHECK_IEQ(npwe, epsm1%npwe, "mismatch in npwe")
 
  units = [std_out, ab_out]
 
