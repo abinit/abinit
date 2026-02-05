@@ -6,7 +6,7 @@
 !!  Module containing the definition of the ppmodel_t used to deal with the plasmonpole technique.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG, GMR, VO, LR, RWG, RS)
+!!  Copyright (C) 2008-2026 ABINIT group (MG, GMR, VO, LR, RWG, RS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -192,7 +192,7 @@ contains
 !!  ppm_get_qbz
 !!
 !! FUNCTION
-!!  Compute plasmonpole matrix elements for q in the BZ from the symmetrical image in the IBZ
+!!  Compute plasmon-pole matrix elements for q in the BZ from the symmetrical image in the IBZ
 !!
 !! INPUTS
 !!  Gsph<gsphere_t>=data related to the G-sphere
@@ -237,8 +237,8 @@ subroutine ppm_get_qbz(ppm, Gsph, Qmesh, iq_bz, botsq, otq, eig)
 !scalars
  integer :: ii,jj,iq_ibz,itim_q,isym_q,iq_curr,isg1,isg2
 !arrays
- integer, ABI_CONTIGUOUS pointer :: grottb(:)
- complex(gwp),ABI_CONTIGUOUS pointer :: phsgt(:),bigomegatwsq(:,:),omegatw(:,:)
+ integer, contiguous, pointer :: grottb(:)
+ complex(gwp),contiguous, pointer :: phsgt(:),bigomegatwsq(:,:),omegatw(:,:)
 ! *********************************************************************
 
  ! Save the index of the q-point for checking purpose.
@@ -250,6 +250,8 @@ subroutine ppm_get_qbz(ppm, Gsph, Qmesh, iq_bz, botsq, otq, eig)
 
  ! Here there is a problem with the small q, still cannot use BZ methods
  iq_ibz = Qmesh%tab(iq_bz); isym_q = Qmesh%tabo(iq_bz); itim_q = (3-Qmesh%tabi(iq_bz))/2
+
+ ABI_CHECK(all(abs(qmesh%umklp(:, iq_bz)) < tol6), "umklapp in get_qbz are not supported!")
 
  !call Qmesh%get_bz_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
  iq_curr = iq_ibz; if (ppm%mqmem == 0) iq_curr = 1
@@ -545,8 +547,6 @@ end subroutine ppm_init
 !! INPUTS
 !!  Cryst<crystal_t>=Info on the unit cell and crystal symmetries.
 !!  Qmesh<kmesh_t>=the q-mesh used for the inverse dielectric matrix
-!!    %nibz=number of irreducible q-points
-!!    %ibz(3,%nibz)=the irred q-point
 !!  npwe=number of G vectors for the correlation part
 !!  nomega=number of frequencies in $\epsilon^{-1}$
 !!  omega=frequencies in epsm1
@@ -1893,31 +1893,32 @@ end subroutine cqratio
 !!  using a plasmon-pole model.
 !!
 !! INPUTS
-!!  nspinor=Number of spinorial components.
-!!  npwc=Number of G vectors in the plasmon pole.
+!!  nspinor=Number of spinor components.
+!!  npwc=Number of G vectors in the plasmon pole (correlation part)
 !!  nomega=Number of frequencies.
 !!  rhotwgp(npwx)=oscillator matrix elements divided by |q+G| i.e. $\frac{\langle b1 k-q s | e^{-i(q+G)r | b2 k s \rangle}{|q+G|}$.
 !!  botsq(npwc,dm2_botsq)=Plasmon pole parameters for this q-point.
 !!  otq(npwc,dm2_otq)=Plasmon pole parameters for this q-point.
-!!  omegame0i(nomega)=Frequencies used to evaluate \Sigma_c ($\omega$ - $\epsilon_i)$
+!!  omegame0i(nomega)=($\omega$ - $\epsilon_i)$
 !!  zcut=Small imaginary part to avoid the divergence. (see related input variable)
 !!  theta_mu_minus_e0i= $\theta(\mu-\epsilon_{k-q,b1,s}), defines if the state is occupied or not.
 !!  eig(dm_eig,dm_eig)=The eigvectors of the symmetrized inverse dielectric matrix for this q point
 !!    (first index for G, second index for bands).
-!!  npwx=number of G vectors in rhotwgp
+!!  npwx=number of G vectors in rhotwgp.
 !!
 !! OUTPUT
 !!  ket(npwc,nomega):
-!!
-!!  i/two_pi * convolution between G and W ...
 !!
 !!  === model==1,2 ====
 !!
 !!    ket(G,omega) += Sum_G2                 Omega(G,G2) * rhotw(G2)
 !!                            ---------------------------------------------------
-!!                             2 omegatw(G,G2) (omega-E_i + omegatw(G,G2)(2f-1))
+!!                             2 omegatw(G,G2) (omega - E_i + omegatw(G,G2)(2f-1))
 !!
 !!  sigcme(nomega) (to be described), only relevant if ppm3 or ppm4
+!!
+!! NOTES
+!!  The i/two_pi factor in the convolution between G and W is included in this routine.
 !!
 !! TODO:
 !!  Use BLAS for better efficiency
@@ -1934,75 +1935,89 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
  real(dp),intent(in) :: theta_mu_minus_e0i, zcut
 !arrays
  real(dp),intent(in) :: omegame0i(nomega)
- complex(gwp),intent(in) :: botsq(npwc,ppm%dm2_botsq), eig(ppm%dm_eig,ppm%dm_eig), otq(npwc,ppm%dm2_otq)
- complex(gwp),intent(in) :: rhotwgp(npwx*nspinor)
- complex(gwp),intent(inout) :: ket(npwc*nspinor, nomega)
+ complex(gwp),intent(in) :: botsq(npwc, ppm%dm2_botsq), eig(ppm%dm_eig, ppm%dm_eig), otq(npwc, ppm%dm2_otq)
+ complex(gwp),intent(in) :: rhotwgp(npwx, nspinor)
+ complex(gwp),intent(inout) :: ket(npwc, nspinor, nomega)
  complex(gwp),intent(out) :: sigcme(nomega)
 
 !Local variables-------------------------------
 !scalars
- integer :: ig,igp,ii,ios,ispinor,spadc,spadx
- real(dp) :: den,ff,inv_den,omegame0i_io,otw,twofm1,twofm1_zcut
+ integer :: ig,igp,ii,iw,ispinor
+ real(dp),parameter :: tol_occ = tol3, tol_omega = tol6
+ real(dp) :: den, den2, ff, inv_den, omegame0i_io, otw, twofm1, twofm1_zcut, twofm1_zcut2, zcut2
  complex(gwp) :: ct, num, numf, rhotwgdp_igp
- logical :: fully_occupied,totally_empty
+ logical :: fully_occupied, totally_empty
  !character(len=500) :: msg
 !arrays
  complex(gwp),allocatable :: rhotwgdpcc(:)
 !*************************************************************************
 
+ zcut2 = zcut ** 2
+
  select case (ppm%model)
 
  case (PPM_GODBY_NEEDS, PPM_HYBERTSEN_LOUIE)
-   fully_occupied = (abs(theta_mu_minus_e0i-one) < 0.001)
-   totally_empty  = (abs(theta_mu_minus_e0i    ) < 0.001)
+   fully_occupied = (abs(theta_mu_minus_e0i-one) < tol_occ)
+   totally_empty  = (abs(theta_mu_minus_e0i    ) < tol_occ)
 
    do ispinor=1,nspinor
-     spadx = (ispinor-1)*npwx; spadc = (ispinor-1)*npwc
 
      if (.not. totally_empty) then
        ! \Bomega^2_{G1G2}/\omegat_{G1G2} M_{G1,G2}. \theta(\mu-e_s) / (\omega+\omegat_{G1G2}-e_s-i\delta)
        twofm1_zcut = zcut
-!$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den)
-       do ios=1,nomega
-         omegame0i_io = omegame0i(ios)
+       twofm1_zcut2 = zcut2
+!$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den, den2)
+       do iw=1,nomega
+         omegame0i_io = omegame0i(iw)
+         !if (iw > 1 .and. abs(omegame0i(iw) - omegame0i(iw-1)) < tol_omega) then
+         !  ket(:,:,iw) = ket(:,:,iw-1); cycle
+         !end if
+
          do igp=1,npwc
-           rhotwgdp_igp = rhotwgp(spadx+igp)
+           rhotwgdp_igp = rhotwgp(igp, ispinor)
            do ig=1,npwc
              otw = DBLE(otq(ig,igp)) !in principle otw -> otw - ieta
              num = botsq(ig,igp) * rhotwgdp_igp
              den = omegame0i_io + otw
-             if (den**2 > zcut**2) then
-               ket(spadc+ig,ios) = ket(spadc+ig,ios) + num/(den*otw) * theta_mu_minus_e0i
+             den2 = den ** 2
+             if (den2 > zcut2) then
+               ket(ig,ispinor, iw) = ket(ig,ispinor,iw) + num/(den*otw) * theta_mu_minus_e0i
              else
-               ket(spadc+ig,ios) = ket(spadc+ig,ios) + &
-                 num * CMPLX(den,twofm1_zcut) / ((den**2+twofm1_zcut**2)*otw) * theta_mu_minus_e0i
+               ket(ig,ispinor,iw) = ket(ig,ispinor,iw) + &
+                 num * CMPLX(den,twofm1_zcut) / ((den2 + twofm1_zcut2) * otw) * theta_mu_minus_e0i
              end if
            end do ! ig
          end do ! igp
-       end do ! ios
+       end do ! iw
      end if ! not totally empty
 
      if (.not. fully_occupied) then
        ! \Bomega^2_{G1G2}/\omegat_{G1G2} M_{G1,G2}. \theta(e_s-\mu) / (\omega-\omegat_{G1G2}-e_s+i\delta)
        twofm1_zcut = -zcut
-!$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den)
-       do ios=1,nomega
-         omegame0i_io = omegame0i(ios)
+       twofm1_zcut2 = twofm1_zcut**2
+!$omp parallel do private(omegame0i_io, rhotwgdp_igp, otw, num, den, den2)
+       do iw=1,nomega
+         omegame0i_io = omegame0i(iw)
+         !if (iw > 1 .and. abs(omegame0i(iw) - omegame0i(iw-1)) < tol_omega) then
+         !  ket(:,:,iw) = ket(:,:,iw-1); cycle
+         !end if
+
          do igp=1,npwc
-           rhotwgdp_igp = rhotwgp(spadx+igp)
+           rhotwgdp_igp = rhotwgp(igp, ispinor)
            do ig=1,npwc
-             otw = DBLE(otq(ig,igp)) !in principle otw -> otw - ieta
+             otw = DBLE(otq(ig,igp)) !in principle otw -> otw + ieta
              num = botsq(ig,igp) * rhotwgdp_igp
-             den = omegame0i_io-otw
-             if (den**2 > zcut**2) then
-               ket(spadc+ig,ios) = ket(spadc+ig,ios) + num / (den*otw)*(one-theta_mu_minus_e0i)
+             den = omegame0i_io - otw
+             den2 = den ** 2
+             if (den2 > zcut2) then
+               ket(ig,ispinor,iw) = ket(ig,ispinor, iw) + num / (den*otw) * (one-theta_mu_minus_e0i)
              else
-               ket(spadc+ig,ios) = ket(spadc+ig,ios) + &
-                 num * CMPLX(den,twofm1_zcut) / ((den**2+twofm1_zcut**2)*otw)*(one-theta_mu_minus_e0i)
+               ket(ig,ispinor, iw) = ket(ig,ispinor,iw) + &
+                 num * CMPLX(den,twofm1_zcut) / ((den2 + twofm1_zcut2) * otw) * (one-theta_mu_minus_e0i)
              end if
            end do ! ig
          end do ! igp
-       end do ! ios
+       end do ! iw
      end if ! not fully occupied
 
    end do ! ispinor
@@ -2018,10 +2033,10 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
    ff = theta_mu_minus_e0i      ! occupation number f (include poles if ...)
    twofm1 = two*ff-one          ! 2f-1
    twofm1_zcut = twofm1*zcut
-   rhotwgdpcc(:) = CONJG(rhotwgp(:))
+   rhotwgdpcc(:) = CONJG(rhotwgp(:, 1))
 
-   do ios=1,nomega
-     omegame0i_io = omegame0i(ios)
+   do iw=1,nomega
+     omegame0i_io = omegame0i(iw)
      ct = czero_gw
      do ii=1,npwc ! Loop over the DM bands
        num = czero_gw
@@ -2057,15 +2072,15 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
        end if
 
      end do ! ii DM bands
-     sigcme(ios) = ct*half
+     sigcme(iw) = ct*half
 
      !if (ppm%model == PPM_ENGEL_FARID) then
-     !ct = dot_product(ket(:, ios), ket(:, ios))
-     !if (abs(sigcme(ios) - ct) > tol12) then
+     !ct = dot_product(ket(:, iw), ket(:, iw))
+     !if (abs(sigcme(iw) - ct) > tol12) then
      !  ABI_ERROR("foo bar")
      !end if
      !end if
-   end do ! ios
+   end do ! iw
 
    ABI_FREE(rhotwgdpcc)
 

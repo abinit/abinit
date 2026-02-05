@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt.
@@ -173,7 +173,7 @@ subroutine out_resultsgs_XML(dtset, level, results_gs, usepaw)
    write(value, "(es20.8)") results_gs%energies%e_nlpsp_vfock
    write(ab_xml_out, "(A,A,A)", advance = "NO") ' non-local="', trim(value) ,'"'
    if (usepaw == 1) then
-     write(value, "(es20.8)") results_gs%energies%e_paw
+     write(value, "(es20.8)") results_gs%energies%paw%epaw
      write(ab_xml_out, "(A,A,A)", advance = "NO") ' paw="', trim(value) ,'"'
    end if
  else
@@ -183,7 +183,7 @@ subroutine out_resultsgs_XML(dtset, level, results_gs, usepaw)
    write(value, "(es20.8)") results_gs%energies%e_xcdc
    write(ab_xml_out, "(A,A,A)", advance = "NO") ' xcdc="', trim(value) ,'"'
    if (usepaw == 1) then
-     write(value, "(es20.8)") results_gs%energies%e_pawdc
+     write(value, "(es20.8)") results_gs%energies%paw%epaw_dc
      write(ab_xml_out, "(A,A,A)", advance = "NO") ' pawdc="', trim(value) ,'"'
    end if
  end if

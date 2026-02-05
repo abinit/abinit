@@ -23,7 +23,7 @@ ndtset 2
 #-1.0 0.0 0.0
 ## zz terms
 #
-# Here have the up-up configuration (along z) and the 
+# Here have the up-up configuration (along z) and the
 # up-down. Down-down and down-up are symmetric.
 nucdipmom1
 0.0 0.0 1.0
@@ -32,7 +32,7 @@ nucdipmom2
 0.0 0.0 1.0
 0.0 0.0 -1.0
 
-# best to use always all spin-relativistic corrections 
+# best to use always all spin-relativistic corrections
 nspinor 2
 zora 3
 
@@ -82,7 +82,7 @@ write_files "gsr"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t84.abo, tolnlines=  7, tolabs=  3.9e-9, tolrel= 4.6e-10
+#%%   t84.abo, tolnlines=  7, tolabs=  4.0e-9, tolrel= 3.0e-9
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

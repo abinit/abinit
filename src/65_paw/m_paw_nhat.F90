@@ -7,7 +7,7 @@
 !!    charge density (i.e. n^hat(r)).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group (FJ, MT, MG, TRangel)
+!! Copyright (C) 2018-2026 ABINIT group (FJ, MT, MG, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,6 +27,7 @@ MODULE m_paw_nhat
  use m_errors
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
  use, intrinsic :: iso_c_binding, only: c_size_t,c_loc
 
@@ -479,15 +480,18 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
      end if
 
 !    Add the contribution of the atom to the compensation charge
+!    LB-2025-12-11 : if the PAW sphere overlaps with itself (true if it is larger than the unit cell, rare case but possible...),
+!    then several values of ic can give the same kc in the following loops, so the iterations are not independent,
+!    and cannot be parallelized (for example with OpenMP directives)
      if (compute_nhat) then
        if (cplex==1) then
-         !$OMP PARALLEL DO PRIVATE(kc)
+         ! Not possible to parallelize here (see comment above)
          do ic=1,nfgd
            kc=pawfgrtab(iatom)%ifftsph(ic)
            pawnhat(kc,ispden)=pawnhat(kc,ispden)+pawnhat_atm(ic)
          end do
        else
-         !$OMP PARALLEL DO PRIVATE(jc)
+         ! Not possible to parallelize here (see comment above)
          do ic=1,nfgd
            jc=2*ic-1;kc=2*pawfgrtab(iatom)%ifftsph(ic)-1
            pawnhat(kc:kc+1,ispden)=pawnhat(kc:kc+1,ispden)+pawnhat_atm(jc:jc+1)
@@ -496,13 +500,13 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
      end if
      if (compute_grad) then
        if (cplex==1) then
-         !$OMP PARALLEL DO PRIVATE(kc)
+         ! Not possible to parallelize here (see comment above)
          do ic=1,nfgd
            kc=pawfgrtab(iatom)%ifftsph(ic)
            pawgrnhat(kc,ispden,1:3)=pawgrnhat(kc,ispden,1:3)+pawgrnhat_atm(ic,1:3)
          end do
        else
-         !$OMP PARALLEL DO PRIVATE(jc,ii)
+         ! Not possible to parallelize here (see comment above)
          do ic=1,nfgd
            jc=2*ic-1;kc=2*pawfgrtab(iatom)%ifftsph(ic)-1
            do ii=1,3

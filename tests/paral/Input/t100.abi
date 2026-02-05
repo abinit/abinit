@@ -96,6 +96,8 @@ dmftqmc_therm    10000  # Thermalization
 dmftctqmc_gmove  0      # Global move occurence in QMC
 dmftctqmc_order  50     # Perturbation order
 dmftctqmc_localprop 2      # Activate Histogram and spin susceptibility
+dmftctqmc_chains  1     # force 1 chain per MPI task for testing purposes
+                        # auto-setting match OpenMP threads and alter convergence
 
 #Definition of DFT+U
 usepawu1    4           #

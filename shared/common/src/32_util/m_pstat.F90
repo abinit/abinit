@@ -6,7 +6,7 @@
 !! Interface to the /proc/{pid}/status file available on Linux.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2025 ABINIT group (MG)
+!!  Copyright (C) 2017-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

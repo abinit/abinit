@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +33,7 @@ MODULE m_oper
  use m_abicore
  use m_errors
  use m_xomp
+ use m_gputk
  use m_abi_linalg
 
  !use m_abi_linalg, only : abi_xgemm

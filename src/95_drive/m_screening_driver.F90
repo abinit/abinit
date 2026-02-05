@@ -6,7 +6,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
+!!  Copyright (C) 2008-2026 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -816,12 +816,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
     cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
 
    nzlmopt=-1; option=0; compch_sph=greatest_real
-   call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,KS_energies%entropy_paw,&
-    Cryst%gprimd,ipert,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,Cryst%ntypat,Dtset%nucdipmom,&
-    nzlmopt,option,&
-    Paw_an,Paw_an,Paw_ij,Pawang,Dtset%pawprtvol,Pawrad,Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-    Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-    Cryst%xred,Cryst%ucvol,Psps%znuclpsp,Dtset%spinaxis,epaw_xc=KS_energies%e_pawxc)
+   call pawdenpot(compch_sph,el_temp,Cryst%gprimd,ipert,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+&   Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,Paw_an,Paw_an,KS_energies%paw,Paw_ij,Pawang,&
+&   Dtset%pawprtvol,Pawrad,Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,&
+&   Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%xred,Cryst%ucvol,Psps%znuclpsp,Dtset%spinaxis)
    call timab(320,2,tsec) ! screening(paw
  else
    ABI_MALLOC(Paw_ij,(0))

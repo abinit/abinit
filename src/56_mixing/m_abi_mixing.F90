@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (XG, DC, GMR)
+!!  Copyright (C) 2008-2026 ABINIT group (XG, DC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -817,7 +817,8 @@ end subroutine abi_mixing_eval_deallocate
     end if
     if (dbl_nnsclo == 1) errid = AB7_ERROR_MIXING_INC_NNSLOOP
  end if
-
+ 
+ if(present(nelect_extfpmd)) nelect_extfpmd=nelect_extfpmd_
  if (present(resnrm)) resnrm = resnrm_
  nullify(rcpawarr_)
 

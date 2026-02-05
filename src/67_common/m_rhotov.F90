@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (XG, GMR, MT, EB)
+!!  Copyright (C) 1998-2026 ABINIT group (XG, GMR, MT, EB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -507,7 +507,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
      !If constrained_dft, must take into account the constraints, and recompute the residual and the new potential
      if( any(dtset%constraint_kind(:)/=0))then
        call constrained_residual(constrained_dft,energies%e_constrained_dft,&
-&        grcondft,intgres,mpi_enreg,rhor,dtset%spinaxis,strscondft,vresidnew,xred,dtset%qgbt,dtset%use_gbt)
+&        grcondft,intgres,mpi_enreg,rhor,strscondft,vresidnew,xred,dtset%qgbt,dtset%use_gbt)
        vnew(:,1:dtset%nspden)=vtrial(:,1:dtset%nspden)+vresidnew(:,1:dtset%nspden)
      endif
 

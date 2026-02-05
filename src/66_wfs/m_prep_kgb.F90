@@ -7,7 +7,7 @@
 !!  or to perform the FFT of the wavefunctions when the orbitals are distributed in linalg mode (paral_kgb = 1).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (FBottin,MT,GZ,MD,FDahm)
+!!  Copyright (C) 1998-2026 ABINIT group (FBottin,MT,GZ,MD,FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,6 +27,7 @@ module m_prep_kgb
  use m_errors
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
 
  use, intrinsic :: iso_c_binding, only: c_loc, c_size_t
@@ -1083,7 +1084,7 @@ end subroutine prep_nonlop
 !!  [bandfft_kpt_tab]= (optional) if present, contains tabs used to implement
 !!                     the "band-fft" parallelism
 !!                      if not present, the bandfft_kpt global variable is used
-!!  [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
+!!  [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
 !! OUTPUT
 !!  gwavef=(2,npw*ndat)=matrix elements <G|H|C>.

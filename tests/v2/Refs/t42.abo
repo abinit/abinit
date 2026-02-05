@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h08 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h10 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v2_t42/t42.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v2_t42/t42.abi
 - output file    -> t42.abo
 - root for input  files -> t42i
 - root for output files -> t42o
@@ -170,7 +170,7 @@ P           mkmem           1
            tolwfr4     1.00000000E-09
             typat      1  2
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       6.1104124027E-01  6.1104124027E-01  6.1104124027E-01
+                       6.1104124252E-01  6.1104124252E-01  6.1104124252E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.1547006000E+00  1.1547006000E+00  1.1547006000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -221,8 +221,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/2he.2.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/2he.2.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/2he.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/2he.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for He,  from PRB58, 3641 (1998)
 -  2.00000   2.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -240,8 +240,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/1h.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/1h.1.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/1h.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/1h.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
 -  1.00000   1.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -345,7 +345,7 @@ force_length_stats: {min:   3.89588468E-02, max:   3.89588468E-02, mean:   3.895
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.61104124026520     0.61104124026520     0.61104124026520
+    2      0.61104124252148     0.61104124252148     0.61104124252148
 
  cartesian forces (hartree/bohr) at end:
     1      0.02249290067232     0.02249290067232     0.02249290067232
@@ -353,11 +353,11 @@ force_length_stats: {min:   3.89588468E-02, max:   3.89588468E-02, mean:   3.895
  frms,max,avg= 2.2492901E-02 2.2492901E-02   2.127E-12  2.127E-12  2.127E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      1.15663135974858     1.15663135974858     1.15663135974858
-    2     -1.15663135974858    -1.15663135974858    -1.15663135974858
- frms,max,avg= 1.1566314E+00 1.1566314E+00   1.094E-10  1.094E-10  1.094E-10 e/A
+    1      1.15663145689482     1.15663145689482     1.15663145689482
+    2     -1.15663145689482    -1.15663145689482    -1.15663145689482
+ frms,max,avg= 1.1566315E+00 1.1566315E+00   1.094E-10  1.094E-10  1.094E-10 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file t42o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.80680   Average Vxc (hartree)=  -0.00000
  Eigenvalues (hartree) for nkpt=   1  k points:
@@ -385,10 +385,10 @@ psp_core            : -1.42868342966491E-05
 local_psp           : -4.70362879058126E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.46237999684489E+00
-total_energy_eV     : -6.70047673033318E+01
+total_energy_eV     : -6.70047731785237E+01
 band_energy         : -1.61360734724849E+00
 monopole_correction :  1.41864873974033E-01
-monopole_correction_eV:  3.86033954195793E+00
+monopole_correction_eV:  3.86033988044482E+00
 ...
 
 
@@ -398,9 +398,9 @@ monopole_correction_eV:  3.86033954195793E+00
   sigma(3 3)=  5.91164438E-04  sigma(2 1)=  1.62686814E-05
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.7393E+01 GPa]
-- sigma(1 1)=  1.73926553E+01  sigma(3 2)=  4.78641052E-01
-- sigma(2 2)=  1.73926553E+01  sigma(3 1)=  4.78641052E-01
-- sigma(3 3)=  1.73926553E+01  sigma(2 1)=  4.78641052E-01
+- sigma(1 1)=  1.73926582E+01  sigma(3 2)=  4.78641132E-01
+- sigma(2 2)=  1.73926582E+01  sigma(3 1)=  4.78641132E-01
+- sigma(3 3)=  1.73926582E+01  sigma(2 1)=  4.78641132E-01
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -623,9 +623,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.61104124026520     0.61104124026520     0.61104124026520
+    2      0.61104124252148     0.61104124252148     0.61104124252148
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file t42o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 20, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -677,8 +677,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/2he.2.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/2he.2.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/2he.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/2he.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for He,  from PRB58, 3641 (1998)
 -  2.00000   2.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -696,8 +696,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/1h.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/1h.1.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/1h.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/1h.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
 -  1.00000   1.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -778,9 +778,9 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
   10    1.16492E+00   3.16992E+01   -1.297456E+00    0.78(  1-> 12)  0.16(  1-> 11)
   11    1.16492E+00   3.16992E+01   -1.297455E+00    0.78(  1-> 11)  0.16(  1-> 12)
   12    1.17744E+00   3.20398E+01   -1.284938E+00    0.94(  1-> 14)  0.05(  1-> 11)
-  13    1.17744E+00   3.20398E+01   -1.284937E+00    0.94(  1-> 13)  0.05(  1-> 12)
-  14    1.23212E+00   3.35277E+01   -1.230258E+00    0.85(  1-> 15)  0.15(  1-> 16)
-  15    1.23212E+00   3.35277E+01   -1.230258E+00    0.85(  1-> 16)  0.15(  1-> 15)
+  13    1.17744E+00   3.20399E+01   -1.284937E+00    0.94(  1-> 13)  0.05(  1-> 12)
+  14    1.23212E+00   3.35278E+01   -1.230258E+00    0.85(  1-> 15)  0.15(  1-> 16)
+  15    1.23212E+00   3.35278E+01   -1.230258E+00    0.85(  1-> 16)  0.15(  1-> 15)
   16    1.23936E+00   3.37246E+01   -1.223023E+00    0.79(  1-> 18)  0.21(  1-> 17)
   17    1.23936E+00   3.37246E+01   -1.223023E+00    0.79(  1-> 17)  0.21(  1-> 18)
   18    1.24162E+00   3.37862E+01   -1.220760E+00    1.00(  1-> 19)  0.00(  1-> 17)
@@ -832,7 +832,7 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
   16    1.24364E+00   3.38410E+01   -1.218745E+00    0.81(  1-> 17)  0.19(  1-> 18)
   17    1.24364E+00   3.38410E+01   -1.218745E+00    0.81(  1-> 18)  0.19(  1-> 17)
   18    1.24790E+00   3.39571E+01   -1.214481E+00    1.00(  1-> 19)  0.00(  1-> 16)
-  19    1.29044E+00   3.51147E+01   -1.171937E+00    1.00(  1-> 20)  0.00(  1->  8)
+  19    1.29044E+00   3.51148E+01   -1.171937E+00    1.00(  1-> 20)  0.00(  1->  8)
 
   Oscillator strengths :  (elements smaller than 1.e-6 are set to zero)
   Excit#   (Ha)   Average    XX        YY        ZZ         XY        XZ        YZ
@@ -900,9 +900,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.61104124026520     0.61104124026520     0.61104124026520
+    2      0.61104124252148     0.61104124252148     0.61104124252148
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file t42o_DS3_EIG
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 20, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -954,8 +954,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/2he.2.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/2he.2.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/2he.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/2he.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for He,  from PRB58, 3641 (1998)
 -  2.00000   2.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -973,8 +973,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -1, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/1h.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/1h.1.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/1h.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/1h.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
 -  1.00000   1.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1052,7 +1052,7 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
    7    1.08487E+00   2.95207E+01   -1.377515E+00    0.98(  1->  8)  0.01(  1-> 20)
    8    1.12903E+00   3.07225E+01   -1.333350E+00    0.93(  1->  9)  0.06(  1-> 10)
    9    1.15060E+00   3.13094E+01   -1.311780E+00    0.94(  1-> 10)  0.06(  1->  9)
-  10    1.16809E+00   3.17854E+01   -1.294286E+00    0.77(  1-> 12)  0.21(  1-> 11)
+  10    1.16809E+00   3.17855E+01   -1.294286E+00    0.77(  1-> 12)  0.21(  1-> 11)
   11    1.16809E+00   3.17855E+01   -1.294285E+00    0.77(  1-> 11)  0.21(  1-> 12)
   12    1.18723E+00   3.23063E+01   -1.275146E+00    0.98(  1-> 14)  0.01(  1-> 11)
   13    1.18723E+00   3.23063E+01   -1.275145E+00    0.98(  1-> 13)  0.01(  1-> 12)
@@ -1177,9 +1177,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.61104124026520     0.61104124026520     0.61104124026520
+    2      0.61104124252148     0.61104124252148     0.61104124252148
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
-              =  5.291772085900  5.291772085900  5.291772085900 angstroms
+              =  5.291772105440  5.291772105440  5.291772105440 angstroms
  prteigrs : about to open file t42o_DS4_EIG
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 20, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -1269,7 +1269,7 @@ P           mkmem           1
            tolwfr4     1.00000000E-09
             typat      1  2
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       6.1104124027E-01  6.1104124027E-01  6.1104124027E-01
+                       6.1104124252E-01  6.1104124252E-01  6.1104124252E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.1547006000E+00  1.1547006000E+00  1.1547006000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1365,10 +1365,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.1
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  30 WARNINGs and  35 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.1  wall=          1.1
++Overall time at end (sec) : cpu=          1.0  wall=          1.1

@@ -1,0 +1,91 @@
+# Multi_dataset parameters
+ ndtset 2       # Two datasets
+ jdtset 1 2     # one followed by two
+ getden -1      # Second one takes the density of first
+
+ pawprtvol 3  # Printing additional information
+ prtvol 4     #
+
+############################
+# Structural Parameters
+############################
+#Definition of unit cell
+ acell 3*5.44761       # lattice parameter
+ rprim -0.5  0.5  0.5  # Primitive cell
+        0.5 -0.5  0.5
+        0.5  0.5 -0.5
+
+#Definition atom
+ ntypat 1   # number of different types of atoms
+ znucl 26   # z number of atom
+
+#Definition of the atoms
+ natom 1           # number of atom
+ typat 1           # type of atom
+ xred 0.0 0.0 0.0  # reduced coordinates for primitive cell
+
+#Definition pseudopotentials
+ pp_dirpath "$ABI_PSPDIR"            # repository with pseudopotentials
+ pseudos "26fe.lda2.paw"
+
+#Definition of the k-point grid
+ kptopt 1
+ ngkpt 4 4 4              # Reciprocal space vectors are built from
+                          # the rprim parameters. This is the size of the
+                          # reciprocal k-points.
+ nshiftk 2                # Convergence of the density with regular shifts.
+ shiftk 0.25  0.25  0.25
+       -0.25 -0.25 -0.25
+
+ istwfk *1
+
+############################
+# Energy Parameters
+############################
+
+ ecut 20         # Maximal plane-wave kinetic energy cut-off, in Hartree
+ pawecutdg 40    # PAW: Energy Cutoff for the Double Grid
+ nband 20        # Number of bands
+ occopt 3        # Smearing type
+ tsmear 300 K    # Electronic smearing temperature
+
+
+############################
+# DFT Calculation
+############################
+
+ nstep1 30       # Number of iterations for the DFT convergence
+ tolwfr 1.0d-10  # Tolerance of the density for DFT convergence
+
+#Definition of the spin properties
+ nsppol 1     # No spin-polarization
+ nspden 1     # No Scalar magnetism
+ nspinor 1    # No Spin-orbit
+
+ prtdos1  3
+ prtdosm1 1
+
+############################
+# Fatbands Calculation
+############################
+
+ nbandkss2 2
+ kssform2  3
+ pawfatbnd2 1  # Fatbands, resolved for each angular momentum
+ iscf2 -2
+ kptopt2  -5  # Band structure: 5 segments
+ ndivk2   18 12 21 25 18  # Length of each segment
+ kptbounds2       # The 5 segments are connecting 6 points of the
+                  # Brillouin zone, given here.
+              0.0 0.0 0.0  # Gamma
+              0.0 1/2 0.0  # N
+              1/4 1/4 1/4  # P
+              0.0 0.0 0.0  # Gamma
+             -1/2 1/2 1/2  # H
+              0.0 1/2 0.0  # N
+
+
+
+
+
+
