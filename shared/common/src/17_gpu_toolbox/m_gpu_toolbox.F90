@@ -4,10 +4,10 @@
 !!
 !! FUNCTION
 !!  Fake module to dupe the build system and allow it to include cuda files
-!!   in the chain of dependencies.
+!!  in the chain of dependencies.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2025 ABINIT group (MT)
+!!  Copyright (C) 2000-2026 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,26 +22,14 @@
 
 module m_gpu_toolbox
 
-  use m_initcuda
-  use m_gpu_detect
+ use m_initcuda
+ use m_gpu_detect
 
-! MG: I had to comment this import to avoid the following error on buda2_gnu_8.5_cuda
-!
-!    type(c_ptr),intent(inout) :: blockvectorbx_gpu, blockvectorx_gpu,sqgram_gpu
-!            1
-!    Error: Type name 'c_ptr' at (1) is ambiguous
-!    abi_gpu_linalg.f90:374:47:
-!
-! I believe this is due to a misconfiguration issue in the Fortran compilers used by the bot.
+ use, intrinsic :: iso_c_binding
 
-#ifdef HAVE_FC_ISO_C_BINDING
- use, intrinsic :: iso_c_binding, only : C_INT32_T,C_SIZE_T
-#endif
-
-  implicit none
+ implicit none
 
   !Interfaces for C bindings --- To be completed
-#ifdef HAVE_FC_ISO_C_BINDING
 #if defined HAVE_GPU
 
   ! mirroring cuda enum cudaMemoryAdvise usually defined in
@@ -98,11 +86,6 @@ module m_gpu_toolbox
 
   interface
 
-    !  integer(C_INT) function cuda_func() bind(C)
-    !    use iso_c_binding, only : C_INT,C_PTR
-    !    type(C_PTR) :: ptr
-    !  end function cuda_func
-
     subroutine gpu_device_synchronize() bind(c, name='gpu_device_synchronize_cpp')
       use, intrinsic :: iso_c_binding
     end subroutine gpu_device_synchronize
@@ -137,7 +120,7 @@ module m_gpu_toolbox
       integer(kind=C_INT32_T),           value :: deviceId
     end subroutine gpu_memory_advise_f
 
-    !!! FFT related routines
+    ! FFT related routines
     subroutine gpu_fft_plan_destroy(fft_plan_id) bind(c, name='gpu_fft_plan_destroy_cpp')
       use, intrinsic :: iso_c_binding
       integer    , intent(in)  :: fft_plan_id
@@ -164,8 +147,8 @@ module m_gpu_toolbox
     subroutine gpu_fft_exec_z2z(fft_plan_id, idata, odata, direction) bind(c, name='gpu_fft_exec_z2z_cpp')
       use, intrinsic :: iso_c_binding
       integer    , intent(in)  :: fft_plan_id
-      type(c_ptr), intent(in)    :: idata, odata
-      integer    , intent(in)    :: direction
+      type(c_ptr), intent(in)  :: idata, odata
+      integer    , intent(in)  :: direction
     end subroutine gpu_fft_exec_z2z
 
   end interface
@@ -176,12 +159,10 @@ module m_gpu_toolbox
   integer(C_INT32_T), public, parameter :: CPU_DEVICE_ID = -1
 
 #endif
-#endif
 
 contains
   !!***
 
-#ifdef HAVE_FC_ISO_C_BINDING
 #if defined HAVE_GPU
 
   ! prefetch data (memory managed pointer) to device
@@ -198,21 +179,15 @@ contains
     ! if a device id is provided, use it
     ! if not, just probe driver to get current device id
     if (present(deviceId)) then
-
       if ( deviceId >= CPU_DEVICE_ID ) then
         call gpu_data_prefetch_async_f(dev_ptr, count, deviceId)
       end if
-
     else
-
       call gpu_get_device(currentDevId)
       call gpu_data_prefetch_async_f(dev_ptr, count, currentDevId)
-
     end if
 
   end subroutine gpu_data_prefetch_async
-
-#endif
 #endif
 
 end module m_gpu_toolbox

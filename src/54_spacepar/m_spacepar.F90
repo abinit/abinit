@@ -7,7 +7,7 @@
 !!  Unlike the procedures in m_cgtools, the routines declared in this module can use mpi_type.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
+!!  Copyright (C) 2008-2026 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -811,7 +811,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
  l_gpu_thread_limit=0; if(present(gpu_thread_limit)) l_gpu_thread_limit=gpu_thread_limit
 
  if(l_gpu_thread_limit /= 0) then
-   nthreads_bak=xomp_get_num_threads(open_parallel=.True.)
+   nthreads_bak=xomp_get_max_threads()
    call xomp_set_num_threads(min(l_gpu_thread_limit,nthreads_bak))
  end if
 
@@ -2614,7 +2614,7 @@ end subroutine setsym
 !!  The calculation is performed in reduced reciprocal space coordinates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2025 ABINIT group (FIXME: add author)
+!!  Copyright (C) 2021-2026 ABINIT group (FIXME: add author)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

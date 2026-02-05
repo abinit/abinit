@@ -6,7 +6,7 @@
 !!  Contains various subroutines used in RT-TDDFT
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2025 ABINIT group (FB)
+!!  Copyright (C) 2021-2026 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -274,18 +274,16 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
    !FB: @MT Changed self_consistent to false here. Is this right?
    call paw_ij_reset_flags(tdks%paw_ij,self_consistent=.false.)
    option=0; compch_sph=-1.d5; nzlmopt=0
-   call pawdenpot(compch_sph,el_temp,energies%e_paw,energies%e_pawdc,       &
-                & energies%entropy_paw,tdks%gprimd,ipert,dtset%ixc,my_natom,&
-                & dtset%natom,&
+   call pawdenpot(compch_sph,el_temp,tdks%gprimd,ipert,dtset%ixc,my_natom,dtset%natom, &
                 & dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,  &
-                & tdks%paw_an,tdks%paw_an,tdks%paw_ij,tdks%pawang,          &
-                & dtset%pawprtvol,tdks%pawrad,tdks%pawrhoij,dtset%pawspnorb,&
-                & tdks%pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel, &
-                & dtset%xc_denpos,dtset%xc_taupos,tdks%xred,tdks%ucvol,     &
-                & psps%znuclpsp,dtset%spinaxis,&
+                & tdks%paw_an,tdks%paw_an,energies%paw,tdks%paw_ij,         &
+                & tdks%pawang,dtset%pawprtvol,tdks%pawrad,tdks%pawrhoij,    &
+                & dtset%pawspnorb,tdks%pawtab,dtset%pawxcdev,               &
+                & dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,            &
+                & dtset%xc_taupos,tdks%xred,tdks%ucvol,                     &
+                & psps%znuclpsp,dtset%spinaxis,                             &
                 & comm_atom=mpi_enreg%comm_atom,                            &
-                & mpi_atmtab=mpi_enreg%my_atmtab,vpotzero=vpotzero,         &
-                & epaw_xc=energies%e_pawxc)
+                & mpi_atmtab=mpi_enreg%my_atmtab,vpotzero=vpotzero)
    !Correct the average potential with the calculated constant vpotzero
    !Correct the total energies accordingly
    !vpotzero(1) = -beta/ucvol
@@ -297,10 +295,10 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
    tdks%vtrial(:,:)=tdks%vtrial(:,:)+SUM(vpotzero(:))
    if(option/=1)then
       !Fix the direct total energy (non-zero only for charged systems)
-      energies%e_paw=energies%e_paw-SUM(vpotzero(:))*dtset%cellcharge(1)
+      energies%paw%epaw=energies%paw%epaw-SUM(vpotzero(:))*dtset%cellcharge(1)
       !Fix the double counting total energy accordingly (for both charged AND
       !neutral systems)
-      energies%e_pawdc=energies%e_pawdc-SUM(vpotzero(:))*tdks%zion+ &
+      energies%paw%epaw_dc=energies%paw%epaw_dc-SUM(vpotzero(:))*tdks%zion+ &
                           & vpotzero(2)*dtset%cellcharge(1)
    end if
 

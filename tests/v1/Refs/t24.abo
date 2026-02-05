@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h07 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h08 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v1_t21-t22-t23-t24/t24.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v1_t21-t22-t23-t24/t24.abi
 - output file    -> t24.abo
 - root for input  files -> t23o
 - root for output files -> t24o
@@ -132,8 +132,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     70.000   => boxcut(ratio)=   2.04824
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/01h.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/01h.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/01h.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/01h.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -168,9 +168,9 @@ solver: {iscf: 7, nstep: 2, nline: 2, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-14, }
 ...
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
+     iter   Etot(hartree)      deltaE(h)  residm     vres2   difmagsph maxmagsph
 
- ETOT  1 -0.49958827022616    -4.996E-01 4.088E-08 6.465E-01
+ ETOT  1 -0.49958827022616    -4.996E-01 4.088E-08 6.465E-01 7.447E-01 7.447E-01
 
  prteigrs : about to open file t24o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.25954   Average Vxc (hartree)=   0.02626
@@ -181,7 +181,7 @@ tolerances: {tolwfr: 1.00E-14, }
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
    0.20318
 
- ETOT  2 -0.49958835231072    -8.208E-08 1.740E-10 1.354E-01
+ ETOT  2 -0.49958835231072    -8.208E-08 1.740E-10 1.354E-01 1.699E-04 7.449E-01
 
  prteigrs : about to open file t24o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.25981   Average Vxc (hartree)=   0.02612
@@ -221,7 +221,7 @@ cartesian_stress_tensor: # hartree/bohr^3
 - [  5.64409547E-06,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   5.64409544E-06,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   5.64409549E-06, ]
-pressure_GPa:  -1.6605E-01
+pressure_GPa:  -1.6606E-01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  H]
 cartesian_forces: # hartree/bohr
@@ -230,14 +230,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
- ---------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.744898     0.000000      0.744898     0.744898
- ---------------------------------------------------------------------
-  Sum:              0.744898     0.000000      0.744898     0.744898
- Total magnetization (from the atomic spheres):             0.744898
- Total magnetization (exact up - dn):                       1.000000
+    Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+    1  H   2.00000     0.744898     0.000000      0.744898     0.744898
+ ------------------------------------------------------------------------------------------------------------
+  Sum:                 0.744898     0.000000      0.744898     0.744898
+ Total magnetization (from the atomic spheres):                0.744898
+ Total magnetization (exact up - dn):                          1.000000
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -263,7 +264,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  7.000000000000  7.000000000000 bohr
-              =  3.704240460130  3.704240460130  3.704240460130 angstroms
+              =  3.704240473808  3.704240473808  3.704240473808 angstroms
  prteigrs : about to open file t24o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.25981   Average Vxc (hartree)=   0.02612
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
@@ -313,7 +314,7 @@ psp_core            :  4.57958112768191E-07
 local_psp           : -6.01353804051975E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -4.99588352310724E-01
-total_energy_eV     : -1.35944904267120E+01
+total_energy_eV     : -1.35944916187204E+01
 band_energy         : -2.59805885347256E-01
 ...
 
@@ -333,10 +334,10 @@ band_energy         : -2.59805885347256E-01
   sigma(2 2)=  5.64409544E-06  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.64409549E-06  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -1.6605E-01 GPa]
-- sigma(1 1)=  1.66054994E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.66054993E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.66054994E-01  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.6606E-01 GPa]
+- sigma(1 1)=  1.66055022E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.66055021E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.66055022E-01  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -474,10 +475,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.9
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.8  wall=          0.9
++Overall time at end (sec) : cpu=          1.0  wall=          1.1

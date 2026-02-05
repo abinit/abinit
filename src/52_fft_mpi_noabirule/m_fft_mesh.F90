@@ -8,7 +8,7 @@
 !!  operations of the space group etc.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
+!! Copyright (C) 2008-2026 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1365,6 +1365,7 @@ pure subroutine calc_ceikr_dpc(kk, ngfft, nfft, nspinor, ceikr)
        kdotr = two_pi*( kk(1) * (ix / dble(ngfft(1))) &
                        +kk(2) * (iy / dble(ngfft(2))) &
                        +kk(3) * (iz / dble(ngfft(3))) )
+       !fft_idx = ix + ngfft(1) * (iy + ngfft(2) * iz) + 1
        fft_idx = fft_idx + 1
        ceikr(fft_idx) = dcmplx(cos(kdotr), sin(kdotr))
      end do
@@ -1422,6 +1423,7 @@ pure subroutine calc_ceikr_spc(kk, ngfft, nfft, nspinor, ceikr)
        kdotr = two_pi*( kk(1) * (ix / dble(ngfft(1))) &
                        +kk(2) * (iy / dble(ngfft(2))) &
                        +kk(3) * (iz / dble(ngfft(3))) )
+       !fft_idx = ix + ngfft(1) * (iy + ngfft(2) * iz) + 1
        fft_idx = fft_idx + 1
        ceikr(fft_idx) = cmplx(cos(kdotr), sin(kdotr), kind=sp)
      end do

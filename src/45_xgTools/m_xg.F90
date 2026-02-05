@@ -16,7 +16,7 @@
 !! only these types to perfom calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2016-2025 ABINIT group (J. Bieder, MS, L. Baguet)
+!!  Copyright (C) 2016-2026 ABINIT group (J. Bieder, MS, L. Baguet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,13 +35,14 @@ module m_xg
 
   use, intrinsic :: iso_c_binding, only: c_loc, c_double, c_double_complex, c_int32_t, c_size_t, c_ptr
 
+  USE_MPI
   use m_errors
   use m_abicore
   use defs_basis
   use m_time, only : timab
-  USE_MPI
   use m_xmpi
   use m_xomp
+  use m_gputk
   use m_abi_linalg
 
 #if defined(HAVE_GPU)

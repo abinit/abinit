@@ -8,7 +8,7 @@
 !! This should really help to do the transposition operataion
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2025 ABINIT group (J. Bieder, L. Baguet)
+!!  Copyright (C) 2017-2026 ABINIT group (J. Bieder, L. Baguet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1025,7 +1025,7 @@ module m_xgTransposer
 #endif
 
     if (xgTransposer%gpu_option /= ABI_GPU_DISABLED .and. xgTransposer%gpu_thread_limit /= 0) then
-      nthreads_bak=xomp_get_num_threads(open_parallel=.True.)
+      nthreads_bak=xomp_get_max_threads()
       call xomp_set_num_threads(min(xgTransposer%gpu_thread_limit,nthreads_bak))
     end if
 

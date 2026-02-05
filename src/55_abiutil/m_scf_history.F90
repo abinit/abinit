@@ -8,7 +8,7 @@
 !!  as needed by the specific SCF algorithm.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2025 ABINIT group (MT)
+!! Copyright (C) 2011-2026 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -137,6 +137,9 @@ MODULE m_scf_history
    real(dp),allocatable :: atmrho_last(:)
     ! atmrho_last(nfft)
     ! Sum of atomic densities at the end of the LAST SCF cycle
+
+   real(dp),allocatable :: nextfpmd(:)
+    ! extfpmd density
 
    real(dp),allocatable :: rhor_last(:,:)
     ! rhor_last(nfft,nspden)
@@ -292,6 +295,9 @@ subroutine scf_history_init(dtset, mpi_enreg, usecg, scf_history)
            call pawrhoij_nullify(scf_history%pawrhoij(:,jj))
          end do
        endif
+       if(dtset%useextfpmd>0) then
+         ABI_MALLOC(scf_history%nextfpmd,(scf_history%history_size))
+       endif
      end if
 
      if (scf_history%usecg>0) then
@@ -361,6 +367,7 @@ subroutine scf_history_free(scf_history)
  ABI_SFREE(scf_history%cg)
  ABI_SFREE(scf_history%eigen)
  ABI_SFREE(scf_history%dotprod_sumdiag_cgcprj_ij)
+ ABI_SFREE(scf_history%nextfpmd)
 
  scf_history%history_size=-1
  scf_history%usecg=0

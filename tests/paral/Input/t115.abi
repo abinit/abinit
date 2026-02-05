@@ -1,0 +1,111 @@
+# _== Convergency and starting
+# DATASET 1: LDA
+# DATASET 2: LDA+DMFT
+ndtset 3
+jdtset 1 2 3
+
+getden1 0
+getden  1
+
+nnsclo1 0
+nline1  5
+nnsclo 10
+nline 10
+
+prtvol    4
+pawprtvol 3
+
+##### CONVERGENCE PARAMETERS
+nstep1   50
+nstep    1
+ecut     12 # low cutoff !
+pawecutdg 20
+
+tolvrs 1.0d-10
+tolwfr_diago 1d-30
+nband     66
+nbdbuf    4
+occopt 3 tsmear 1500 K
+
+##### PHYSICAL PARAMETERS
+natom 5 ntypat 3 typat 1 2 3 3 3
+znucl  23.0 38.0 8.0
+# V Sr O*3
+xred 0.00 0.00 0.00
+     0.50 0.50 0.50
+     0.50 0.00 0.00
+     0.00 0.50 0.00
+     0.00 0.00 0.50
+acell   3*7.2605
+rprim 1.0 0.0 0.0    #Real space PRIMitive translations
+      0.0 1.0 0.0
+      0.0 0.0 1.0
+
+nsppol 1
+nspinor 2
+nspden 4
+
+# == Points k and symetries
+ngkpt   4 4 4    #K - PoinTs grid : Real space LATTice
+nshiftk 2
+shiftk 1/2 1/2 1/2
+       0.0 0.0 0.0
+istwfk *1
+
+# == LDA+DMFT
+usedmft1 0
+usedmft  1
+dmftbandi 23
+dmftbandf 61 # include V t2g bands
+dmft_triqs_n_iw 500
+dmft_iter 1
+dmft_mxsf 0.7
+dmft_dc2 8
+dmft_dc3 6
+
+dmft_triqs_dlr_wmax 3.0
+dmft_triqs_dlr_epsilon 1.d-2
+
+dmft_prt_maxent 0
+dmft_solv 6 # Density-density TRIQS
+
+# == DFT+U
+usepawu1    4
+usepawu     14
+dmatpuopt  1   # The density matrix: the simplest expression.
+lpawu  2 -1  1
+upawu1 0. 0. 0.
+jpawu1 0. 0. 0.
+upawu  10.0  0.0  1.0  eV
+jpawu  1.0  0.0  0.5  eV
+
+dmft_triqs_length_cycle 100
+dmft_triqs_basis2 3
+dmft_triqs_basis3 4
+dmft_triqs_n_warmup_cycles_init 500
+dmft_triqs_n_tau 100
+dmft_triqs_off_diag 0
+dmft_triqs_n_cycles 5000
+dmft_triqs_n_warmup_cycles_restart 0
+
+prtwf 0
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "23v.paw, 38sr.paw, 8o.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_TRIQS_v3_2
+#%% [paral_info]
+#%% nprocs_to_test = 8
+#%% max_nprocs = 8
+#%% [NCPU_8]
+#%% files_to_test = t115_MPI8o_DS2_Gtau_diag_DLR_iatom0001.dat, tolnlines = 1, tolabs = 3.e-8, tolrel = 3.e-8, fld_options=-medium;
+#%%                 t115_MPI8o_DS3_Gtau_diag_iatom0003.dat, tolnlines = 34, tolabs = 5.e-6, tolrel = 5.e-6, fld_options=-medium;
+#%% [extra_info]
+#%% authors = B. Amadon, E. Castiel
+#%% keywords = DMFT, TRIQS
+#%% description = DFT+DMFT for SrVO3 with TRIQS: test different correlated types with spinors
+#%% topics = DMFT, parallelism
+#%%<END TEST_INFO>

@@ -9,7 +9,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2025 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP, GA, MMignolet)
+!! Copyright (C) 2011-2026 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP, GA, MMignolet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3529,8 +3529,11 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
  ! Look for the Gamma Block in the DDB
  qphon(:,1)=zero
  qphnrm(1)=zero
- rfphon(1:2)=1
- rfelfd(1:2)=2
+ !rfphon(1:2)=1
+ !rfelfd(1:2)=2
+ ! For effective charges: perturbation 1 = phonons, perturbation 2 = electric field
+ rfphon(1)=1; rfphon(2)=0
+ rfelfd(1)=0; rfelfd(2)=2
  rfstrs(1:2)=0
 
  !write(std_out,*)"ddb%mpert",ddb%mpert

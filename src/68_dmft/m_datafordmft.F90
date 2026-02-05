@@ -6,7 +6,7 @@
 !! This module produces inputs for the DMFT calculation
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -202,7 +202,7 @@ subroutine datafordmft(cg,cprj,cryst_struc,dft_occup,dimcprj,dtset,eigen,mband_c
  nbandf = paw_dmft%dmftbandf
  t2g    = (paw_dmft%dmft_t2g == 1)
  x2my2d = (paw_dmft%dmft_x2my2d == 1)
- use_full_chipsi = (paw_dmft%dmft_use_full_chipsi == 1)
+ use_full_chipsi = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
 
  if (use_full_chipsi .and. mpi_enreg%nproc_fft > 1) then
    message = "datafordmft not working when nproc_fft > 1 and use_full_chipsi=1"

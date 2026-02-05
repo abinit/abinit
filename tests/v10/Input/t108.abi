@@ -3,6 +3,8 @@
 # -                                      -
 # -         Alu fcc                      -
 # ----------------------------------------
+# 0 dtsets
+  ndtset 2
 
 # 1- RCPAW
   use_rcpaw 1
@@ -17,14 +19,17 @@
 # ---------------------------------------
   ecut 10.
   pawecutdg 50.
-  nband 24
+  nband 38
   nstep 5
   toldfe 1.d-5
 
 # 4-Options for the choice of calculation:
 # ----------------------------------------
   occopt 3
-  tsmear 0.0036749
+  tsmear1 0.0036749
+  tsmear2 30000000.0 K
+  useextfpmd2 1
+  extfpmd_pawsph2 1
   ionmov 0
   optcell 0
 
@@ -76,5 +81,4 @@
 #%%   It tests the following parts of the code:
 #%%     rcpaw_relax, atompaw_solve
 #%%   Note that, in addition to the psp file, the core wave functions file is needed
-#%%   as well as the atomapw input file.
 #%%<END TEST_INFO>

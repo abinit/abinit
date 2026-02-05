@@ -8,7 +8,7 @@
 !!  which leads to excellent CPU efficiency and OpenMP scalability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2025 ABINIT group (AL,MS)
+!! Copyright (C) 2014-2026 ABINIT group (AL,MS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,6 +38,7 @@ module m_gemm_nonlop
  use m_abicore
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
  use m_gemm_nonlop_projectors
 

@@ -811,8 +811,6 @@ subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_re
   ABI_FREE(p_thermo2)
   ABI_FREE(u_vib)
 
-!FB  0.473294364993209*(2.38255605878933*1.38065e-23)/1.20512e11/3.0/((30.6135754000*0.529177e-10)**3/216)
-
 end subroutine tdep_calc_alpha_gamma
 
 !=====================================================================================================

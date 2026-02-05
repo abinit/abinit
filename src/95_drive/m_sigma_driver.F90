@@ -6,7 +6,7 @@
 !! Calculate the matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2025 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!!  Copyright (C) 1999-2026 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -837,12 +837,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real
-   call pawdenpot(compch_sph,el_temp,KS_energies%e_paw,KS_energies%e_pawdc,&
-     KS_energies%entropy_paw,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
-     Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_paw_ij,&
-     Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
-     Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-     Cryst%xred,Cryst%ucvol,Psps%znuclpsp,Dtset%spinaxis,epaw_xc=KS_energies%e_pawxc)
+   call pawdenpot(compch_sph,el_temp,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+     Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_energies%paw,KS_paw_ij,&
+     Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
+     Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%xred,Cryst%ucvol,Psps%znuclpsp,Dtset%spinaxis)
 
  else
    ABI_MALLOC(ks_nhatgr, (0, 0, 0))
@@ -1820,7 +1818,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_MALLOC(kxcg, (nfftf_tot,dim_kxcg))
 
    case (-11)
-     !LR+ALDA kernel
+     ! LR+ALDA kernel
      ABI_CHECK(epsm1%ID==0,"epsm1%ID should be 0")
 
      if (Dtset%usepaw==1) then
@@ -2413,7 +2411,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
           if (x1rdm/=1 .and. sigmak_todo(ik_ibz)==1) then
             ! Do not compute correlation MELS if the k-point was read from the checkpoint file
             ! this IF only affects GW density matrix update
-            call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,qp_ebands, &
+            call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,dtfil, Cryst,qp_ebands, &
                               Sigp,Sr,epsm1,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
                               Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
                               gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
@@ -3032,11 +3030,17 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  Sigp%npwx   = Dtset%npwsigx
 
  ! Read parameters of the WFK, verifify them and retrieve all G-vectors.
- call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
+ if (dtset%userie == 456) then
+   call wfk_read_eigenvalues("SC_WFK",energies_p,Hdr_wfk,comm)
+ else
+   call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
+ end if
  mband = MAXVAL(Hdr_wfk%nband)
 
  remove_inv = .FALSE.
+ if (dtset%userie /= 456) then
  call hdr_wfk%vs_dtset(dtset)
+ end if
 
  test_npwkss = 0
  call make_gvec_kss(Dtset%nkpt,Dtset%kptns,Hdr_wfk%ecut_eff,Dtset%symmorphi,Dtset%nsym,Dtset%symrel,Dtset%tnons,&
@@ -3644,12 +3648,15 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  end do
 
-#if 0
+#if 1
  ! Using the random q for the optical limit is one of the reasons
  ! why sigma breaks the initial energy degeneracies.
- Vcp%i_sz=zero
- Vcp%vc_sqrt(1,1)=czero
- Vcp%vcqlwl_sqrt(1,1)=czero
+ if (dtset%userra > 100) then
+   call wrtout(units, "I am setting Vcp%i_sz=zero, Vcp%vc_sqrt(1,1)=czero, Vcp%vcqlwl_sqrt(1,1)=czero")
+   Vcp%i_sz=zero
+   Vcp%vc_sqrt(1,1)=czero
+   Vcp%vcqlwl_sqrt(1,1)=czero
+ end if
 #endif
 
  ABI_FREE(qlwl)
@@ -4265,12 +4272,10 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
  ! Get electronic temperature from dtset
  el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
 
- call pawdenpot(qp_compch_sph,el_temp,QP_energies%e_paw,QP_energies%e_pawdc,&
-   QP_energies%entropy_paw,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
-   Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,QP_paw_an,QP_paw_an,&
-   QP_paw_ij,Pawang,Dtset%pawprtvol,Pawrad,QP_pawrhoij,Dtset%pawspnorb,&
-   Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-   Cryst%xred,Cryst%ucvol,Psps%znuclpsp,Dtset%spinaxis)
+ call pawdenpot(qp_compch_sph,el_temp,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
+   Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,QP_paw_an,QP_paw_an,QP_energies%paw,&
+   QP_paw_ij,Pawang,Dtset%pawprtvol,Pawrad,QP_pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
+   Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%xred,Cryst%ucvol,Psps%znuclpsp,Dtset%spinaxis)
 
 end subroutine paw_qpscgw
 !!***

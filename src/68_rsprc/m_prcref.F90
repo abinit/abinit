@@ -6,7 +6,7 @@
 !!  Routines to precondition residual potential (or density) and forces.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, MT, PMA)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, MT, PMA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -119,6 +119,7 @@ contains
 !!   | prtvol=control print volume and debugging
 !!   | typat(natom)=integer type for each atom in cell
 !!  etotal=total ennergy
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fcart(3,natom)=cartesian forces (hartree/bohr)
 !!  ffttomix(nfft*(1-nfftprc/nfft))=Index of the points of the FFT (fine) grid on the grid used for mixing (coarse)
 !!  gmet(3,3)=metric tensor in G space in Bohr**-2.
@@ -2978,7 +2979,7 @@ end subroutine cgpr
 !! first bracket the minimum then perform the minimization
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2026 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
