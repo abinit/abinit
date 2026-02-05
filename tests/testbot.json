@@ -13,12 +13,6 @@
     "shortname": "SCO",
     "slavename": "scope",
     "timeout_time": 1200,
-    "type": [
-      "slow",
-      "night",
-      "merge",
-      "scope"
-    ],
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -36,9 +30,6 @@
     "shortname": "S64",
     "slavename": "scope",
     "timeout_time": 1200,
-    "type": [
-      "odonly"
-    ],
     "with_tdirs": "tutoparal",
     "without_tdirs": null
   },
@@ -56,10 +47,6 @@
     "shortname": "SCP",
     "slavename": "scope",
     "timeout_time": 900,
-    "type": [
-      "night",
-      "scope"
-    ],
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -77,11 +64,6 @@
     "shortname": "SCY",
     "slavename": "scope",
     "timeout_time": 900,
-    "type": [
-      "fast",
-      "night",
-      "scope"
-    ],
     "with_tdirs": "fast",
     "without_tdirs": null
   },
@@ -99,10 +81,6 @@
     "shortname": "EOE",
     "slavename": "eos",
     "timeout_time": 900,
-    "type": [
-      "night",
-      "eos"
-    ],
     "with_tdirs": null,
     "without_tdirs": "hpc_gpu_omp"
   },
@@ -120,11 +98,6 @@
     "shortname": "SCD",
     "slavename": "scope",
     "timeout_time": 1200,
-    "type": [
-      "fast",
-      "night",
-      "scope"
-    ],
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -142,13 +115,7 @@
     "shortname": "EOF",
     "slavename": "eos",
     "timeout_time": 900,
-    "type": [
-      "fast",
-      "night",
-      "ref",
-      "merge",
-      "eos"
-    ],
+    "type": "ref",
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -166,13 +133,7 @@
     "shortname": "EOZ",
     "slavename": "eos",
     "timeout_time": 900,
-    "type": [
-      "fast",
-      "ref",
-      "night",
-      "merge",
-      "eos"
-    ],
+    "type": "ref",
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -190,10 +151,6 @@
     "shortname": "LRS",
     "slavename": "alps",
     "timeout_time": 900,
-    "type": [
-      "night",
-      "fast"
-    ],
     "with_tdirs": "fast",
     "without_tdirs": null
   },
@@ -211,10 +168,6 @@
     "shortname": "NAG",
     "slavename": "alps",
     "timeout_time": 900,
-    "type": [
-      "newbot",
-      "slow"
-    ],
     "with_tdirs": null,
     "without_tdirs": [
       "paral",
@@ -235,10 +188,6 @@
     "shortname": "EOI",
     "slavename": "eos",
     "timeout_time": 900,
-    "type": [
-      "night",
-      "eos"
-    ],
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -256,10 +205,6 @@
     "shortname": "NGS",
     "slavename": "alps",
     "timeout_time": 900,
-    "type": [
-      "night",
-      "slow"
-    ],
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -277,11 +222,6 @@
     "shortname": "EIC",
     "slavename": "eos",
     "timeout_time": 900,
-    "type": [
-      "night",
-      "eos",
-      "fast"
-    ],
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -299,9 +239,6 @@
     "shortname": "ENA",
     "slavename": "eos",
     "timeout_time": 900,
-    "type": [
-      "newbot"
-    ],
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -319,10 +256,6 @@
     "shortname": "ACO",
     "slavename": "alps",
     "timeout_time": 2000,
-    "type": [
-      "night",
-      "fast"
-    ],
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -340,10 +273,6 @@
     "shortname": "AOE",
     "slavename": "alps",
     "timeout_time": 900,
-    "type": [
-      "night",
-      "fast"
-    ],
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -361,9 +290,6 @@
     "shortname": "aIO",
     "slavename": "atlas",
     "timeout_time": 900,
-    "type": [
-      "newbot"
-    ],
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -381,10 +307,6 @@
     "shortname": "BO7",
     "slavename": "bob",
     "timeout_time": 900,
-    "type": [
-      "night",
-      "slow"
-    ],
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -405,10 +327,6 @@
     "slavename": "haicgu",
     "timeout_time": 1800,
     "tmp_basedir": "/tmp",
-    "type": [
-      "hpc",
-      "night"
-    ],
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -426,9 +344,6 @@
     "shortname": "aTQ",
     "slavename": "atlas",
     "timeout_time": 900,
-    "type": [
-      "night"
-    ],
     "with_tdirs": null,
     "without_tdirs": null
   },
@@ -449,10 +364,6 @@
     "slavename": "manneback",
     "timeout_time": 1800,
     "tmp_basedir": "/tmp",
-    "type": [
-      "night",
-      "hpc"
-    ],
     "with_tdirs": null,
     "without_tdirs": null
   }

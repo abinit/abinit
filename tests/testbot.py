@@ -73,7 +73,14 @@ def _yesno2bool(string):
 
 
 def _str2list(string):
+    if isinstance(string, (list, tuple)):
+        return string
+
+    #try:
     return [s.strip() for s in string.split(",") if s]
+    #except Exception as exc:
+    #    print(f"{type(string)=}, {string=}")
+    #    raise
 
 
 #from pydantic.dataclasses import dataclass as pydantic_dataclass
@@ -269,6 +276,11 @@ def validate() -> int:
     #for builder_name in parser.sections():
     #convert()
 
+    for builder_name in builder_names:
+        testbot = TestBot(None, builder_name=builder_name)
+        #print("Running in dry-run mode, will return immediately.")
+        print(testbot)
+
     if retcode == 0:
         convert()
     else:
@@ -435,6 +447,9 @@ class TestBot:
 
         if self.with_tdirs and self.without_tdirs:
             raise ValueError("with_tdirs and without_tdirs attribute are mutually exclusive")
+
+        if self.type not in ["", "ref"]:
+            raise ValueError(f"type should be either 'ref' or empty string while it's: {self.type}")
 
         # TODO: ncpus should be replaced by max_cpus for clarity reasons
         self.max_cpus = self.ncpus
@@ -695,62 +710,65 @@ class TestBot:
         else:
             return nfailed
 
-    def finalize(self):
-        """
-        This piece of code has been extracted from analysis9
-        """
-        fname = "testbot_summary.json"
-        with open(fname, "rt") as data_file:
-           d = json.load(data_file)
 
-        # FIXME What is this?
-        d['tag'] = sys.argv[1]
+def analyze(fname):
+    """
+    This piece of code has been extracted from analysis9
+    """
+    #fname = "testbot_summary.json"
+    with open(fname, "rt") as data_file:
+       d = json.load(data_file)
 
-        with open(fname, 'wt') as data_file:
-           json.dump(d, data_file)
+    # FIXME What is this?
+    #d['tag'] = sys.argv[1]
 
-        try:
-            tests_status = dict(zip(d["summary_table"][0],d["summary_table"][1]))
+    with open(fname, 'wt') as data_file:
+       json.dump(d, data_file)
 
-            dashline = "=========================================================================="
-            print( dashline )
-            print(     "          Serie   #failed   #passed  #succes  #skip  |   #CPU      #WALL")
+    try:
+        tests_status = dict(zip(d["summary_table"][0],d["summary_table"][1]))
+
+        dashline = "=========================================================================="
+        print( dashline )
+        print(     "          Serie   #failed   #passed  #succes  #skip  |   #CPU      #WALL")
+        print(dashline)
+        rtime = 0.0
+        ttime = 0.0
+        paral = ''
+        mpiio = ''
+        for t, s in sorted(tests_status.items()):
+            kt = False
+            for i in d[t].keys():
+               if  d[t][i]['status'] != "skipped":
+                  kt = True
+                  rtime += d[t][i]['run_etime']
+                  ttime += d[t][i]['tot_etime']
+            if kt:
+                 temp = ''.join(['%5s   |' % l for l in  s.split('/') ])
+                 temp = '%15s | %10s %7.1f  | %7.1f' % (t,temp,rtime,ttime)
+                 if t == 'mpiio':
+                    mpiio = temp
+                 elif t == 'paral':
+                    paral = temp
+                 else:
+                    print(temp)
+            rtime = ttime = 0.0
+
+        print(dashline)
+        putline = 0
+        if paral != '':
+            print(paral)
+            putline=1
+        if mpiio != '':
+            print(mpiio)
+            putline=1
+        if putline == 1:
             print(dashline)
-            rtime = 0.0
-            ttime = 0.0
-            paral = ''
-            mpiio = ''
-            for t, s in sorted(tests_status.items()):
-                kt = False
-                for i in d[t].keys():
-                   if  d[t][i]['status'] != "skipped":
-                      kt = True
-                      rtime += d[t][i]['run_etime']
-                      ttime += d[t][i]['tot_etime']
-                if kt:
-                     temp = ''.join(['%5s   |' % l for l in  s.split('/') ])
-                     temp = '%15s | %10s %7.1f  | %7.1f' % (t,temp,rtime,ttime)
-                     if t == 'mpiio':
-                        mpiio = temp
-                     elif t == 'paral':
-                        paral = temp
-                     else:
-                        print(temp)
-                rtime = ttime = 0.0
-
-            print(dashline)
-            putline = 0
-            if paral != '':
-                print(paral)
-                putline=1
-            if mpiio != '':
-                print(mpiio)
-                putline=1
-            if putline == 1:
-                print(dashline)
-        except:
-            print("no results")
-            sys.exit(99)
+    except:
+        print("no results")
+        with open("ANALYSIS_SUMMARY_FAILED", "wt") as f:
+            f.write("")
+        sys.exit(99)
 
 
 class TestBotSummary:
@@ -916,10 +934,9 @@ def get_parser(with_epilog=False):
     p_run = subparsers.add_parser('run', # parents=[copts_parser],
         help="Run tests.")
     p_run.add_argument("builder_name", type=str, help="Name of the builder")
-
     p_run.add_argument('-d', '--dry-run', default=True, action="store_true", help='Dry-run mode.')
 
-    p_print = subparsers.add_parser('print', help="Print info on options.")
+    p_info = subparsers.add_parser('info', help="Print info on options.")
 
     # Subparser for validate
     p_validate = subparsers.add_parser('validate', # parents=[copts_parser],
@@ -936,9 +953,12 @@ def new_main():
     if options.command == "validate":
         return validate()
 
-    if options.command == "print":
+    if options.command == "info":
         TestBot.print_options()
         return 0
+
+    if options.command == "analyze":
+        return analyze(fname="testbot_summary.json")
 
     if options.command == "run":
         testbot = TestBot(None, builder_name=options.builder_name)
@@ -952,7 +972,7 @@ def new_main():
     raise ValueError(f"Invalid command: {options.command}")
 
 
-def main():
+def old_main():
 
     if "--help" in sys.argv or "-h" in sys.argv:
         # Print help and exit.
@@ -981,6 +1001,6 @@ def main():
 
 
 if __name__ == "__main__":
-    #sys.exit(new_main())
-    sys.exit(main())
+    sys.exit(new_main())
+    #sys.exit(old_main())
 
