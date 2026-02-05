@@ -17,11 +17,6 @@
 - name: scope_gnu_10.2_paral
   slavename: scope
   shortname: SCO
-  type:
-  - slow
-  - night
-  - merge
-  - scope
   runmode: dynamic
   mpi_prefix: /usr/local/mpich-3.3.2_gnu10.2
   mpirun_np: /bin/mpiexec -np
@@ -37,8 +32,6 @@
 - name: scope_gnu_10.2_s64
   slavename: scope
   shortname: S64
-  type:
-  - odonly
   runmode: dynamic
   mpi_prefix: /usr/local/mpich-3.3.2_gnu10.2
   mpirun_np: /bin/mpiexec -np
@@ -54,9 +47,6 @@
 - name: scope_gnu_12.2_mpich
   slavename: scope
   shortname: SCP
-  type:
-  - night
-  - scope
   runmode: static
   mpi_prefix: /usr/local/mpich-4.0.3_gnu12.2
   mpirun_np: /bin/mpiexec -n
@@ -72,10 +62,6 @@
 - name: scope_gnu_12.2_abipy
   slavename: scope
   shortname: SCY
-  type:
-  - fast
-  - night
-  - scope
   runmode: static
   mpi_prefix: /usr/local/mpich-4.0.3_gnu12.2
   mpirun_np: /bin/mpiexec -n
@@ -91,9 +77,6 @@
 - name: eos_nvhpc_23.9_elpa
   slavename: eos
   shortname: EOE
-  type:
-  - night
-  - eos
   runmode: static
   mpi_prefix: /usr/local/openmpi-4.1.6_nvhpc-23.9_cuda_12.2
   mpirun_np: /bin/mpiexec -n
@@ -109,10 +92,6 @@
 - name: scope_gnu_13.2_dep
   slavename: scope
   shortname: SCD
-  type:
-  - fast
-  - night
-  - scope
   runmode: static
   mpi_prefix: /usr/local/mpich-4.1.2_gnu13.2
   mpirun_np: /bin/mpiexec -np
@@ -128,12 +107,7 @@
 - name: eos_gnu_13.2_mpich
   slavename: eos
   shortname: EOF
-  type:
-  - fast
-  - night
-  - ref
-  - merge
-  - eos
+  type: "ref"
   runmode: static
   mpi_prefix: /usr/local/mpich-4.2.2-gcc13.2
   mpirun_np: /bin/mpiexec -n
@@ -149,12 +123,7 @@
 - name: eos_gnu_13.2_serial
   slavename: eos
   shortname: EOZ
-  type:
-  - fast
-  - ref
-  - night
-  - merge
-  - eos
+  type: "ref"
   runmode: static
   mpi_prefix: null
   mpirun_np: null
@@ -170,9 +139,6 @@
 - name: alps_gnu_9.5_sdebug
   slavename: alps
   shortname: LRS
-  type:
-  - night
-  - fast
   runmode: static
   mpi_prefix: /usr/local/mpich-4.2.3_gnu9.5
   mpirun_np: /bin/mpiexec
@@ -188,9 +154,6 @@
 - name: alps_nag_7.2_openmpi
   slavename: alps
   shortname: NAG
-  type:
-  - newbot
-  - slow
   runmode: static
   mpi_prefix: /usr/local/openmpi-4.1.6_nag72
   mpirun_np: /bin/mpirun -np
@@ -208,9 +171,6 @@
 - name: eos_nvhpc_24.9_openmpi
   slavename: eos
   shortname: EOI
-  type:
-  - night
-  - eos
   runmode: static
   mpi_prefix: /usr/local/openmpi-4.1.6_nvhpc-24.9_cuda_12.3
   mpirun_np: /bin/mpiexec -n
@@ -226,9 +186,6 @@
 - name: alps_nag_7.2_serial
   slavename: alps
   shortname: NGS
-  type:
-  - night
-  - slow
   runmode: static
   mpi_prefix: null
   mpirun_np: null
@@ -244,10 +201,6 @@
 - name: eos_intel_2023_cmake
   slavename: eos
   shortname: EIC
-  type:
-  - night
-  - eos
-  - fast
   runmode: static
   mpi_prefix: ${I_MPI_ROOT}
   mpirun_np: /bin/mpiexec -n
@@ -263,8 +216,6 @@
 - name: eos_gnu_13.2_nan
   slavename: eos
   shortname: ENA
-  type:
-  - newbot
   runmode: static
   mpi_prefix: /usr/local/mpich-4.2.2-gcc13.2
   mpirun_np: /bin/mpiexec -n
@@ -280,9 +231,6 @@
 - name: alps_gnu_14.2_cov
   slavename: alps
   shortname: ACO
-  type:
-  - night
-  - fast
   runmode: static
   mpi_prefix: /usr/local/mpich-4.2.3_gnu14.2
   mpirun_np: /bin/mpiexec -n
@@ -298,9 +246,6 @@
 - name: alps_intel_2025_elpa
   slavename: alps
   shortname: AOE
-  type:
-  - night
-  - fast
   runmode: static
   mpi_prefix: ${I_MPI_ROOT}
   mpirun_np: /bin/mpirun -n
@@ -316,8 +261,6 @@
 - name: atlas_gnu_14.2_openmp
   slavename: atlas
   shortname: aIO
-  type:
-  - newbot
   runmode: static
   mpi_prefix: null
   mpirun_np: null
@@ -333,9 +276,6 @@
 - name: bob_gnu_13.2_openmp
   slavename: bob
   shortname: BO7
-  type:
-  - night
-  - slow
   runmode: static
   mpi_prefix: null
   mpirun_np: null
@@ -351,9 +291,6 @@
 - name: haicgu_gnu_14.1_hpc
   slavename: haicgu
   shortname: hG14
-  type:
-  - hpc
-  - night
   runmode: static
   mpi_prefix: ''
   mpirun_np: srun -n
@@ -372,8 +309,6 @@
 - name: atlas_gnu_14.2_triqs
   slavename: atlas
   shortname: aTQ
-  type:
-  - night
   runmode: static
   mpi_prefix: /usr/lib64/openmpi
   mpirun_np: /bin/mpiexec -n
@@ -389,9 +324,6 @@
 - name: manneback_gnu_14.2_hpc
   slavename: manneback
   shortname: MANN
-  type:
-  - night
-  - hpc
   runmode: static
   mpi_prefix: ''
   mpirun_np: srun -n
