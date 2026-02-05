@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-__version__ = "0.3"
+__version__ = "1.0"
 __author__ = "Matteo Giantomassi"
 
 import sys
@@ -222,11 +222,25 @@ def validate() -> int:
 
     all_builders = read_builders("yaml")
     builder_names = [b["name"] for b in all_builders]
+
     retcode = 0
 
     if len(set(builder_names)) != len(builder_names):
         retcode += 1
         print("Builder names are not unique!")
+
+    allowed = set(TestBot._attrbs.keys())
+
+    for builder in all_builders:
+        b_keys = set(builder.keys())
+        #missing = allowed - b_keys
+        extra   = b_keys - allowed
+
+        if extra:
+            print("Unexpected:", extra)
+
+        #if missing:
+        #    print("Missing:", missing)
 
     for builder_name in builder_names:
         try:
@@ -238,6 +252,11 @@ def validate() -> int:
 
     #print(ctx.type)
     #for builder_name in parser.sections():
+
+    if retcode == 0:
+        convert()
+    else:
+        print("Validation failed. JSON file won't be produced.")
 
     return retcode
 
@@ -304,7 +323,7 @@ class TestBot:
 
         print("# NB If default is None, the option must be specified.")
 
-    def __init__(self, testbot_cfg=None):
+    def __init__(self, testbot_cfg=None, builder_name=None):
 
         attrs2read = [
             "slavename",
@@ -328,50 +347,48 @@ class TestBot:
             "force_mpi",
         ]
 
-        # Read the options specified in the testbot configuration file.
-        read_cfg = True
+        if builder_name is None:
+            # Legacy mode based on INI file. Will be removed.
+            # Read the options specified in the testbot configuration file.
 
-        if testbot_cfg is None:
-            basedir, _ = os.path.split(absp(__file__))
-            testbot_cfg = pj(basedir, "testbot.cfg")
-            read_cfg = os.path.exists(testbot_cfg)
+            if testbot_cfg is None:
+                basedir, _ = os.path.split(absp(__file__))
+                testbot_cfg = pj(basedir, "testbot.cfg")
 
-        read_cfg = testbot_cfg.endswith(".cfg")
-        print(f"{read_cfg=}")
+            # Here we init the attributes either from the cfg file
+            parser = SafeConfigParser()
+            parser.read(testbot_cfg)
 
-        # Here we init the attributes either from the cfg file or the yaml file.
-        if read_cfg:
-          parser = SafeConfigParser()
-          parser.read(testbot_cfg)
+            for attr in attrs2read:
+                default, parse, info = TestBot._attrbs[attr]
+                try:
+                    value = parser.get("testbot", attr)
+                except NoOptionError:
+                    value = default
 
-          for attr in attrs2read:
-              default, parse, info = TestBot._attrbs[attr]
-              try:
-                  value = parser.get("testbot", attr)
-              except NoOptionError:
-                  value = default
+                if value is None:
+                    # Write out the cfg file and raise
+                    for section in parser.sections():
+                        print("[" + section + "]")
+                        for opt in parser.options(section):
+                            print(opt + " = " + parser.get(section, opt))
+                    raise ValueError("Mandatory option %s is not declared" % attr)
 
-              if value is None:
-                  # Write out the cfg file and raise
-                  for section in parser.sections():
-                      print("[" + section + "]")
-                      for opt in parser.options(section):
-                          print(opt + " = " + parser.get(section, opt))
-                  raise ValueError("Mandatory option %s is not declared" % attr)
-
-              self.__dict__[attr] = parse(value)
+                self.__dict__[attr] = parse(value)
 
         else:
-            # Try yaml file.
-            all_builders = read_builders("yaml")
+            # Use yaml file.
+            fmt = "yaml"
+            #fmt = "json"
+            all_builders = read_builders(fmt)
 
-            builder_name = "scope_gnu_10.2_paral"
             for builder in all_builders:
                 if builder["name"] == builder_name: break
             else:
-                raise ValueError(f"Cannot find {builder_name=} in file {BUILDERS_YAML}")
-            print(builder)
+                all_names = [b["name"] for b in all_builders]
+                raise ValueError(f"Cannot find {builder_name=} in file {BUILDERS_YAML}\nChoose among: {all_names}")
 
+            print(builder)
             ctx = TestBotContext.from_builders(all_builders, builder_name)
             print(ctx)
 
@@ -839,7 +856,8 @@ def get_epilog() -> str:
 ======================================================================================================
 Usage example:
 
-    testbot.py FILE          => Open file in ipython shell.
+    testbot.py run BUILDER_NAME  => Run tests for the given builder
+    testbot.py validate          => Validate yaml file and convert to json
 
 ======================================================================================================
 """
@@ -852,36 +870,56 @@ def get_parser(with_epilog=False):
 
      parser.add_argument('--loglevel', default="ERROR", type=str,
          help="Set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG")
-     parser.add_argument('-V', '--version', action='version', version=abilab.__version__)
+     parser.add_argument('-V', '--version', action='version', version=__version__)
 
      parser.add_argument('-v', '--verbose', default=0, action='count', # -vv --> verbose=2
          help='verbose, can be supplied multiple times to increase verbosity')
 
-     # Subparser for irefine
-     #p_irefine = subparsers.add_parser('irefine', parents=[copts_parser, path_selector, spgopt_parser],
-     #    help="Refine structure with abi_sanitize iteratively, stop if target space group is obtained.")
-     #p_irefine.add_argument("--target-spgnum", required=True, type=int, help="Target space group number.")
+     # Create the parsers for the sub-commands
+     subparsers = parser.add_subparsers(dest='command', help='sub-command help',
+        description="Valid subcommands, use command --help for help")
+
+     # Subparser for run
+     p_run = subparsers.add_parser('run', # parents=[copts_parser],
+         help="Run tests.")
+     p_run.add_argument("builder_name", type=str, help="Name of the builder")
+
+     p_run.add_argument('-d', '--dry-run', default=True, action="store_true", help='Dry-run mode.')
+
+     # Subparser for validate
+     p_validate = subparsers.add_parser('validate', # parents=[copts_parser],
+         help="Validate yaml file and convert to JSON.")
 
      return parser
 
 
+def new_main():
+    # Parse command line.
+    parser = get_parser(with_epilog=True)
+    options = parser.parse_args()
+
+    if options.command == "validate":
+        return validate()
+
+    if options.command == "run":
+        # Disable colors
+        termcolor.enable(False)
+
+        testbot = TestBot(None, builder_name=options.builder_name)
+        if options.dry_run:
+            print("Running in dry-run mode, will return immediately.")
+            print(testbot)
+            return 0
+
+        #import multiprocessing
+        #multiprocessing.set_start_method("fork")  # Ensure compatibility on macOS/Linux
+
+        return testbot.run()
+
+    raise ValueError(f"Invalid command: {options.command}")
+
+
 def main():
-
-    #parser = get_parser(with_epilog=True)
-
-    ## Parse command line.
-    #try:
-    #    options = parser.parse_args()
-    #except Exception as exc:
-    #    show_examples_and_exit(error_code=1)
-
-    #if not options.command:
-    #    show_examples_and_exit(error_code=1)
-
-    #if options.command == "spglib":
-
-    #import multiprocessing
-    #multiprocessing.set_start_method("fork")  # Ensure compatibility on macOS/Linux
 
     if "--help" in sys.argv or "-h" in sys.argv:
         # Print help and exit.
@@ -913,4 +951,6 @@ def main():
 
 
 if __name__ == "__main__":
+    sys.exit(new_main())
     sys.exit(main())
+
