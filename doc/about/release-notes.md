@@ -111,14 +111,19 @@ By F. Castiel, F. Gendron, O. Gingras, B. Amadon, M. Sarraute
 
 **B.2** Generalized Bloch theorem to study spin spirals
 
-The generalized Bloch theorem (GBT) can be used to study spin spirals. See ref (TODO : provide references).
-The atomic magnetic moment rotates in the x-y plane (Cartesian coords.) while the z-component
+The generalized Bloch theorem (GBT) can be used to study spin spirals, still keeping the usual small primitive cell instead of using a supercell.
+Full spin-orbit coupling (SOC) is not compatible with GBT. However, the periodic part of SOC (along the spin rotation axis) can be treated,
+See the following references, among others :
+[[cite:Sandratskii1986]], [[cite:Kurz2004]], [[cite:Heide2009]], and [[cite:Sandratskii2017]].
+
+In the present ABINIT implementation,
+the atomic magnetic moment rotates in the x-y plane (Cartesian coords.) while the z-component
     remains lattice-periodic. For this reason, one should set [[spinat]] so to have non-zero
     components in the x-y plane. Soon, this restriction should be waived, by defining an arbitrary spin projection axis.
 Forces, stresses and electric polarization are compatible with the GBT. Tests for forces and stresses are provided.
-Full spin-orbit coupling (SOC) is not compatible with GBT, although its periodic part (along the z direction) can be activated (TODO give reference and update the doc).
-For the time being, only NC pseudos with useylm = 0 are supported.
-Also, [[paral_kgb]] must be set to 0 and GPUs cannot be used [[gpu_option]] 0.
+The treatment of the periodic part of SOC (along the z direction) has been implemented as well.
+For the time being, only NC pseudos with [[useylm]] = 0 are supported.
+Also, [[paral_kgb]] must be set to 0 and GPUs cannot be used ([[gpu_option]]=0).
 
 New input variables: [[use_gbt]], [[qgbt]], [[qgbt_cart]].
 
