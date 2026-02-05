@@ -33,7 +33,6 @@ Xavier
 **A.1** Remark: ABINIT paper
 
 The ABINIT project developments since 2020 have been the subject of a recently published paper, see [[cite:Verstraete2025]].
-TODO : mention in acknowledgments.
 
 **A.2** Update of ABINIT to CODATA2022 version of the fundamental constants
 
@@ -254,7 +253,7 @@ By O. Mattelaer, with some help from M. Giantomassi and S. Ponce' (MR1194, 1227,
 **C.3** Improvement of configure
 
 Configure now displays Python version and is OK with python version > 3.12
-There is a new version of the fallbacks (10.6).   TODO : Check whether it is advertised properly on the ABINIT Web site.
+There is a new version of the fallbacks (10.6).   
 EOI and EOE builders have been fixed for new fallbacks
 
 By J.-M. Beuken (MR1213, 1267)
@@ -402,11 +401,7 @@ By J. Zwanziger (MR1230)
 
 **D.14** Replace complex(dpc) with complex(dp).  Remove gwpc and spc; use gwp and sp instead. By M. Giantomassi (MR1235)
 
-**D.15** Copy tests from long wave tutorial to `test:v10_31` to `test:v10_38` in order to use NetCDF instead of text DDB in the tutorial.
-Initial tests from M. Royo and A. Zabalo.
-However, these tests are not activated ?! TODO : activate them or suppress them.
-
-**D.16**
+**D.15**
 New input variables, not tested, not documented : `extfpmd_prterr` 20251031, `extfpmd_pawsph` 20251031 , `cwfs_wouth` 20251215. Introduced by James Boust. TODO : document and test.
 
 
