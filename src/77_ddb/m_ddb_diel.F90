@@ -689,7 +689,7 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat, &
        if(abs(modez(ii,idir2,imode))>modezabs(imode))modezabs(imode)=abs(modez(ii,idir2,imode))
      end do
    end do
-   write(std_out,'(i4,3f16.6)')imode,modez(1,:,imode)
+   if (silent_/=1) write(std_out,'(i4,3f16.6)')imode,modez(1,:,imode)
  end do
 
 !Find degenerate modes with non-zero mode effective charge
@@ -736,12 +736,21 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat, &
        vec(:,2) = displ(1,:,imode+1)
        displ(1,:,imode) = cos(theta)*vec(:,1) - sin(theta)*vec(:,2)
        displ(1,:,imode+1) = sin(theta)*vec(:,1) + cos(theta)*vec(:,2)
+
+!      MR: Rotate also the imaginary part
+       vec(:,1) = displ(2,:,imode)
+       vec(:,2) = displ(2,:,imode+1)
+       displ(2,:,imode) = cos(theta)*vec(:,1) - sin(theta)*vec(:,2)
+       displ(2,:,imode+1) = sin(theta)*vec(:,1) + cos(theta)*vec(:,2)
+
      end if
 
    else if (deg(imode) == 3) then
 
-     write(std_out,'(a,3es16.6)') ' Mode effective charge of next mode =',modez(1,:,imode+1)
-     write(std_out,'(a,3es16.6)') ' Mode effective charge of next-next mode =',modez(1,:,imode+2)
+     if (silent_/=1) then
+       write(std_out,'(a,3es16.6)') ' Mode effective charge of next mode =',modez(1,:,imode+1)
+       write(std_out,'(a,3es16.6)') ' Mode effective charge of next-next mode =',modez(1,:,imode+2)
+     end if
 
 !    Before mixing them, select the mode-effective charge vectors as being predominently "x", "y" or "z" type.
      if(abs(modez(1,1,imode))>abs(modez(1,2,imode))-tol12 .and. &
@@ -875,7 +884,9 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat, &
 
  end do
 
- write(std_out,'(a,a)')ch10,' alignph : after modifying the eigenvectors, mode number and mode effective charges :'
+ if (silent_/=1) then
+   write(std_out,'(a,a)')ch10,' alignph : after modifying the eigenvectors, mode number and mode effective charges :'
+ end if
  do imode=1,3*natom
    do ii=1,2
      do idir2=1,3
@@ -891,7 +902,7 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat, &
        end do
      end do
    end do
-   write(std_out,'(i4,3f16.6)')imode,modez(1,:,imode)
+   if (silent_/=1)  write(std_out,'(i4,3f16.6)')imode,modez(1,:,imode)
  end do
 
  ABI_FREE(deg)

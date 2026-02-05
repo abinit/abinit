@@ -90,16 +90,16 @@ contains
 
  subroutine ddb_magpen(ddb,ddb_lw,& 
 & magpen,mpatpol,mpdir,mpert,mpopt,natom, &
-& prtvol,rftyp,ucvol,timdisp)
+& prtvol,rftyp,ucvol,timdisp,xred)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mpert,mpopt,natom,prtvol,rftyp,timdisp
-! integer,intent(in) :: dissip
  real(dp),intent(in) :: magpen,ucvol
 !arrays
  type(ddb_type),intent(inout) :: ddb,ddb_lw
  integer,intent(in) :: mpatpol(2),mpdir(3)
+ real(dp),intent(in) :: xred(3,natom)
 
 !Local variables -------------------------
 !scalars
@@ -109,7 +109,7 @@ contains
  logical :: qeq0
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4),rfmagn(4),rffreq(4)
- real(dp) :: omega(3),qphnrm(3),qphon(3,3)
+ real(dp) :: omega(3),qphnrm(3),qphon(3,3),qpt(3)
  complex(dpc), allocatable :: barmagsus(:,:),invbarmagsus(:,:)
  complex(dpc), allocatable :: invmagsus(:,:), magsus(:,:), invhmat(:,:)
  complex(dpc), allocatable :: barmmom(:,:),barmmom_tr(:,:),mmom(:,:),mmom_tr(:,:)
@@ -120,8 +120,9 @@ contains
  complex(dpc), allocatable :: lm_epsilon(:,:),dum_phongreen(:,:)
 
 ! *********************************************************************
- write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
- ' Linear-response magnetic penalty section ',ch10
+ write(msg, '(2a,(80a),6a)' ) ch10,('=',ii=1,80),ch10,ch10,&
+ ' Constrained DFPT section ',ch10,ch10,&
+ ' (Quantities are in atomic units and along Cartesian directions)'
  call wrtout([std_out, ab_out], msg)
 
  prtopt=1
@@ -165,6 +166,7 @@ contains
    omega=zero
    qphon=zero
    qphon(:,1)=ddb%qpt(1:3,kblok)
+   qpt=qphon(:,1)
    qeq0=(sqrt(sum(qphon(:,1)**2))<tol8)
    qphnrm(:)=ddb%nrm(1,kblok)
    omega(1)=ddb%omega(1,kblok)
@@ -198,7 +200,7 @@ contains
      end if
 
      call local_spinsus(barmagsus,ddb,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
-   & mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol)
+   & mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol,qpt,xred)
 
    end if
 
@@ -244,24 +246,22 @@ contains
    ! Then macroscopic Zeeman field
    ! Look for the induced magnetic moments block in the DDB
    lblok=0
-   if (qeq0) then
-     rfphon(:)=0
-     rfelfd(:)=0
-     rfstrs(1:2)=0
-     rfmagn(2)=1
-     if (magpen<zero) then
-       rfmagn(1)= 1
-     else if (magpen>zero) then
-       rfmagn(1)= 2
-     end if
-
-     call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
-   & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn)
+   rfphon(:)=0
+   rfelfd(:)=0
+   rfstrs(1:2)=0
+   rfmagn(2)=1
+   if (magpen<zero) then
+     rfmagn(1)= 1
+   else if (magpen>zero) then
+     rfmagn(1)= 2
    end if
+
+   call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
+ & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn)
 
    if (iblok /= 0 .or. jblok /=0 .or. lblok/=0) then
      call magmom(barmmom,barmmom_tr,ddb,invbarmagsus,invhmat,iblok,jblok,lblok,magpen,magsus,mmom,mmom_tr,&
-   & mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol,zfield,zfield_tr)
+   & mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol,qpt,xred,zfield,zfield_tr)
    end if
 
    !Now calculate the non-magnetic second-order quantities
@@ -284,9 +284,9 @@ contains
    !Print the physical quantities in the new magnetic boundary conditions
    if (prtopt==1) then
      if (mpopt==1) then
-       call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,prtvol,qeq0,qphnrm,qphon,ucvol,ddb%msize)
+       call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,qeq0,qphnrm,qphon,ucvol,ddb%msize)
      else if (mpopt==2) then
-       call mp_d2etot_print(ddb,ddb%val_rs,kblok,mpert,natom,nblok,2,omega,prtvol,qeq0,qphnrm,qphon,ucvol,ddb%msize)
+       call mp_d2etot_print(ddb,ddb%val_rs,kblok,mpert,natom,nblok,2,omega,qeq0,qphnrm,qphon,ucvol,ddb%msize)
      end if
    end if
 
@@ -299,9 +299,6 @@ contains
  ! BERRY CURVATURES
  if (timdisp==1) then
 
-!   if (dissip==1) then
-!     ABI_BUG("Berry curvatures calculation is not implemented with dissipation, set dissip=0")
-!   end if
    ABI_MALLOC(ddb_lw%val_fs,(2,ddb_lw%msize,ddb_lw%nblok))
 
    ABI_MALLOC(bc_barmagsus,(ndim,ndim))
@@ -309,7 +306,7 @@ contains
    ABI_MALLOC(bc_sp,(ndim,(natom+5)*3))
 
    write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
-   ' Frequency-derivatives magnetic penalty section ',ch10
+   ' Frequency-derivatives (Berry curvatures) constrained DFPT section ',ch10
    call wrtout([std_out, ab_out], msg)
 
    rffreq(:)=0
@@ -321,6 +318,7 @@ contains
      !Berry curvature of the penalized spin-susceptibility
      qphon=zero
      qphon(:,1)=ddb_lw%qpt(1:3,kblok)
+     qpt= qphon(:,1) 
      qphnrm(:)=ddb_lw%nrm(1,kblok)
      omega(:)=ddb_lw%omega(:,kblok)
      rfphon(1:3)=0
@@ -348,7 +346,7 @@ contains
 
      if (iblok /= 0) then
        call berrycurv_ss(bc_barmagsus,bc_ss,ddb_lw,iblok,invbarmagsus,mpatpol,mpdir,mpert,&
-     & natom,ndim,nmdir,prtvol)
+     & natom,ndim,nmdir,prtvol,qpt,xred)
      end if
 
      !Berry curvature of the induced Zeeman fields
@@ -388,7 +386,7 @@ contains
 
      if (iblok /= 0 .or. jblok /=0 .or. lblok /= 0) then
        call berrycurv_sp(barmmom,bc_sp,bc_ss,ddb_lw,iblok,invbarmagsus,jblok,lblok, &
-     & mpatpol,mpdir,mpert,natom,ndim,nmdir,prtvol)
+     & mpatpol,mpdir,mpert,natom,ndim,nmdir,prtvol,qpt,xred)
      end if
 
      !Berry curvature of other second-order quantites
@@ -451,6 +449,7 @@ contains
 !! prtvol= control the volume of information written on output
 !! fs2rs= (optional) if 1, the routine starts from a precalculated blkval_fs 
 !! blkval_fs(2,3,mpert,3,mpert)= fixed-spin 2nd-order derivatives
+!! xred(3,natom)= reduced atomic coordinates
 !!
 !! OUTPUT
 !! barmagsus(ndim,ndim)= Penalized spin-sussceptibility tensor
@@ -461,7 +460,7 @@ contains
 !! SOURCE
 
  subroutine local_spinsus(barmagsus,ddb,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus, &
-& mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol, &
+& mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol,qphon,xred, &
 & fs2rs,blkval_fs) !optional
 
 !Arguments -------------------------------
@@ -474,6 +473,7 @@ contains
  type(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in),optional :: blkval_fs(2,3,mpert,3,mpert,1)
+ real(dp),intent(in) :: qphon(3),xred(3,natom)
  complex(dpc),intent(out) :: barmagsus(ndim,ndim)
  complex(dpc),intent(out) :: invbarmagsus(ndim,ndim)
  complex(dpc),intent(out) :: invhmat(ndim,ndim)
@@ -531,9 +531,12 @@ contains
          irow=idir1_red+(ipert1_red-1)*nmdir
          index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
 
+         !Apply a phase factor to adopt the same Gonze&Lee convention as for atomic
+         !displacements at finite q (See M. Stengel PRB 2013). 
          if (fs2rs_==0) then
            barmagsus(irow,icol)= &
-         & cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),kind=dpc)
+         & cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),kind=dpc) &
+         & * exp(two_pi*(0.d0,1.d0)*dot_product(qphon,xred(:,iat1)-xred(:,iat2)))
          else if (fs2rs_==1) then
            invmagsus(irow,icol)= &
          & cmplx(blkval_fs(1,idir1,ipert1,idir2,ipert2,iblok), &
@@ -600,24 +603,7 @@ contains
  ABI_FREE(work1)
  ABI_FREE(work2)
 
-!!TMP shift of invmagsus
-! do irow= 1, ndim
-!   invmagsus(irow,irow)= invmagsus(irow,irow) - 2.072d-4 
-! end do 
-! invmagsus(1,3)= invmagsus(1,3) + 1.924d-4
-! invmagsus(2,4)= invmagsus(2,4) + 1.924d-4
-! invmagsus(3,1)= invmagsus(3,1) + 1.924d-4
-! invmagsus(4,2)= invmagsus(4,2) + 1.924d-4
-
  if (prtopt==1.and.prtvol>1) then
-!TODO: remove
-!  ! fac=2.714943600699**2*27.2114/four
-!   fac=27.2114/four
-!   open(10,file='k_ss.txt')
-!     do irow=1, ndim
-!       write(10,*) invmagsus(irow,1:ndim)*fac
-!     end do 
-!   close(10)
   
    !Write results in output
    if (magpen > zero) then
@@ -632,7 +618,6 @@ contains
        end do
      end do
      call wrtout([ab_out,std_out], '   ')
-  
   
      call wrtout([ab_out,std_out], ' Inverse of local spin susceptibility ')
      call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
@@ -759,7 +744,7 @@ contains
 !! SOURCE
 
  subroutine magmom(barmmom,barmmom_tr,ddb,invbarmagsus,invhmat,iblok,jblok,lblok,magpen,magsus,mmom,mmom_tr,&
-& mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol,zfield,zfield_tr, &
+& mpatpol,mpdir,mpert,natom,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield,zfield_tr, &
 & fs2rs,blkval_fs) !optional
 
 !Arguments -------------------------------
@@ -769,7 +754,7 @@ contains
  real(dp),intent(in) :: magpen
 !arrays
  type(ddb_type),intent(inout) :: ddb
-! real(dp),intent(in) :: qphon(3),xred(3,natom)
+ real(dp),intent(in) :: qphon(3),xred(3,natom)
  integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in),optional :: blkval_fs(2,3,mpert,3,mpert,1)
  complex(dpc),intent(out) :: barmmom(ndim,(natom+5)*3)
@@ -786,6 +771,7 @@ contains
  integer :: fs2rs_
  integer :: iat1,icol,idir1,idir2,index,ipert1,ipert2,irow
  integer :: ipert1_red,idir1_red,jndex,zblok
+ complex(dpc) :: qfac, qfac_tr
  character(len=1000) :: msg
 !arrays
  integer :: indexat1(ndim),indexdir1(ndim)
@@ -819,6 +805,11 @@ contains
        ipert1= natom + 11 + iat1
        ipert1_red= ipert1_red + 1
        idir1_red= 0
+
+       !Apply a phase factor to adopt the same Gonze&Lee convention as for atomic
+       !displacements at finite q (See M. Stengel PRB 2013). 
+       qfac= exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1)))
+       qfac_tr= exp(-two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1)))
        do idir1= 1, 3
          if (mpdir(idir1)==0) cycle
          idir1_red= idir1_red + 1
@@ -830,14 +821,14 @@ contains
 
          if (fs2rs_==0) then
            if (iblok /=0 .and. ipert2 <= natom) then
-             barmmom(irow,icol)= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),kind=dpc)
-             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,iblok),ddb%val(2,jndex,iblok),kind=dpc)
+             barmmom(irow,icol)= cmplx(ddb%val(1,index,iblok),ddb%val(2,index,iblok),kind=dpc) * qfac 
+             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,iblok),ddb%val(2,jndex,iblok),kind=dpc) * qfac_tr 
            else if (jblok /=0 .and. ipert2 == natom+2) then
              barmmom(irow,icol)= cmplx(ddb%val(1,index,jblok),ddb%val(2,index,jblok),kind=dpc)
              barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,jblok),ddb%val(2,jndex,jblok),kind=dpc)
            else if (lblok /=0 .and. ipert2 == natom+5) then
-             barmmom(irow,icol)= cmplx(ddb%val(1,index,lblok),ddb%val(2,index,lblok),kind=dpc)
-             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,lblok),ddb%val(2,jndex,lblok),kind=dpc)
+             barmmom(irow,icol)= cmplx(ddb%val(1,index,lblok),ddb%val(2,index,lblok),kind=dpc) * qfac
+             barmmom_tr(icol,irow)= cmplx(ddb%val(1,jndex,lblok),ddb%val(2,jndex,lblok),kind=dpc) * qfac_tr
            end if
          else if (fs2rs_==1) then
            zfield(irow,icol)= &
@@ -871,21 +862,6 @@ contains
  end if
 
  if (prtopt==1.and.prtvol>1) then
-    !TODO: the change of phase should rather be done on the magnetic variables, for them
-    !to follow the same criterion as the atomic displacement ones. 
-!  ! fac=2.714943600699/two*27.2114/0.529177
-!   fac=27.2114/0.529177/two
-!  
-!   open(10,file='k_ps.txt')
-!   do iat1= 1, natom
-!     do idir1= 1, 3
-!       icol= (iat1-1)*3 + idir1
-!       !MR: caution, this conjg might be incorrect in presence of dissipation
-!       write(10,*) conjg(zfield(1:ndim,icol)*fac* &
-!     & exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1))))
-!     end do
-!   end do 
-!   close(10)
   
   !Write the results
    if (magpen > zero) then
@@ -1104,8 +1080,6 @@ contains
 !! barmagsus(ndim,ndim)= Penalized spin-sussceptibility tensor (\bar{\chi})
 !! (equal to barmom^{\dagger} in the nondissipative regime)
 !! ddb= the ddb object
-!! dissip= if 0 a nondissipative regime is assumed
-!!         if 1 a dissipative regime is assumed with a finite \eta introduced at the interpolation in omega regime
 !! iblok= index of the IFCs block
 !! invhmat(ndim,ndim)= (I-\alpha\bar{\chi})^-1 matrix
 !! magsus(ndim,ndim)= Spin-sussceptibility tensor
@@ -1143,7 +1117,6 @@ contains
 ! real(dp),intent(in) :: magpen
 !arrays
  type(ddb_type),intent(inout) :: ddb
-! real(dp),intent(in) :: qphon(3),xred(3,natom)
  real(dp),intent(in),optional :: blkval_fs(2,3,mpert,3,mpert,1)
  real(dp),intent(out),optional :: blkval_rs(2,3,mpert,3,mpert,1)
  complex(dpc),intent(in) :: barmagsus(ndim,ndim)
@@ -1217,21 +1190,6 @@ contains
    end do
  end do 
 
-!TODO:This should be applied to the magnetic variables instead
-! !Adopt the same phase convention as for the local Zeeman perturbation
-! do ipert2= 1, natom
-!   do idir2= 1, 3
-!     icol=( ipert2-1)*3 + idir2
-!     do ipert1= 1, natom
-!       do idir1= 1, 3
-!         irow=( ipert1-1)*3 + idir1
-!         fmifc_sf(irow,icol)=fmifc(irow,icol)* &
-!       & exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,ipert2)-xred(:,ipert1)))
-!       end do
-!     end do
-!   end do
-! end do 
-
  end subroutine mp_d2etot
 !!***
 
@@ -1241,7 +1199,6 @@ contains
 !!
 !! FUNCTION
 !! Write on output file the fixed- and relaxed-spin susceptibilities
-!! Only macroscopic quantities are printed if prtvol=1
 !!
 !! INPUTS
 !! blkval= 2nd-order susceptibilities matrix 
@@ -1256,12 +1213,12 @@ contains
 !!
 !! SOURCE
 
- subroutine mp_d2etot_print(ddb,blkval,kblok,mpert,natom,nblok,opt,omega,prtvol,qeq0,qphnrm,qphon,ucvol,msize)
+ subroutine mp_d2etot_print(ddb,blkval,kblok,mpert,natom,nblok,opt,omega,qeq0,qphnrm,qphon,ucvol,msize)
 
 !Arguments -------------------------------
 !scalars
  class(ddb_type),intent(in) :: ddb
- integer,intent(in) :: kblok,mpert,natom,nblok,opt,prtvol,msize
+ integer,intent(in) :: kblok,mpert,natom,nblok,opt,msize
  logical,intent(in) :: qeq0
  real(dp),intent(in) :: ucvol
 !arrays
@@ -1288,33 +1245,31 @@ contains
  rftyp = 1
 
  !IFCs
- if (prtvol >1) then
-   rfphon(1:2)=1
-   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
-   if (iblok/=0.and.iblok==kblok) then
-     if (opt==1) then
-       call wrtout([ab_out,std_out], ' Frozen-spin interatomic force constants')
-     else if (opt==2) then
-       call wrtout([ab_out,std_out], ' Relaxed-spin interatomic force constants')
-     end if
-     call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
-     do ipert1= 1, natom
-       do idir1= 1, 3
-         irow=( ipert1-1)*3 + idir1
-         do ipert2= 1, natom
-           do idir2= 1, 3
-             icol=( ipert2-1)*3 + idir2
-             index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
-             val(:)=blkval(:,index,kblok)
-             write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
-           & ipert1, cart(idir1), ipert2, cart(idir2), val(1), val(2)
-             call wrtout([ab_out,std_out], msg)
-           end do
-         end do
-         call wrtout([ab_out,std_out], ' ')
-       end do
-     end do
+ rfphon(1:2)=1
+ call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+ if (iblok/=0.and.iblok==kblok) then
+   if (opt==1) then
+     call wrtout([ab_out,std_out], ' Frozen-spin interatomic force constants')
+   else if (opt==2) then
+     call wrtout([ab_out,std_out], ' Relaxed-spin interatomic force constants')
    end if
+   call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+   do ipert1= 1, natom
+     do idir1= 1, 3
+       irow=( ipert1-1)*3 + idir1
+       do ipert2= 1, natom
+         do idir2= 1, 3
+           icol=( ipert2-1)*3 + idir2
+           index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
+           val(:)=blkval(:,index,kblok)
+           write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
+         & ipert1, cart(idir1), ipert2, cart(idir2), val(1), val(2)
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], ' ')
+     end do
+   end do
  end if
 
  if (qeq0) then
@@ -1392,7 +1347,20 @@ contains
      do idir2= 1, 3
        do idir1= 1, 3
          index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
-         val(:)=blkval(:,index,kblok)/ucvol
+         val(:)=blkval(:,index,kblok)
+         write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
+       & val(1), val(2)
+         call wrtout([ab_out,std_out], msg)
+       end do
+       call wrtout([ab_out,std_out], ' ')
+     end do
+     call wrtout([ab_out,std_out], ' P-dir H-dir        Real              Imag')
+     ipert1= ddb%natom + 2
+     ipert2= ddb%natom + 5
+     do idir2= 1, 3
+       do idir1= 1, 3
+         index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
+         val(:)=blkval(:,index,kblok)
          write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
        & val(1), val(2)
          call wrtout([ab_out,std_out], msg)
@@ -1423,7 +1391,7 @@ contains
    do idir2= 1, 3
      do idir1= 1, 3
        index= idir1 + 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
-       val(:)=blkval(:,index,kblok)/ucvol
+       val(:)=blkval(:,index,kblok)
        write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
      & val(1), val(2)
        call wrtout([ab_out,std_out], msg)
@@ -1558,7 +1526,7 @@ contains
 !! SOURCE
 
  subroutine berrycurv_ss(bc_barmagsus,bc_ss,ddb_lw,iblok,invbarmagsus,&
-& mpatpol,mpdir,mpert,natom,ndim,nmdir,prtvol)
+& mpatpol,mpdir,mpert,natom,ndim,nmdir,prtvol,qphon,xred)
 
 !Arguments -------------------------------
 !scalars
@@ -1566,6 +1534,7 @@ contains
 !arrays
  type(ddb_type),intent(inout) :: ddb_lw
  integer,intent(in) :: mpatpol(2),mpdir(3)
+ real(dp),intent(in) :: qphon(3),xred(3,natom)
  complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
  complex(dpc),intent(out) :: bc_ss(ndim,ndim)
  complex(dpc),intent(out) :: bc_barmagsus(ndim,ndim)
@@ -1612,8 +1581,11 @@ contains
        & 3*((ipert1 - 1) + mpert*((idir2 - 1) + &
        & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
 
-         bc_barmagsus(irow,icol)= -one* &
-       & cmplx(ddb_lw%val(1,index,iblok),ddb_lw%val(2,index,iblok),kind=dpc)
+         !Apply a phase factor to adopt the same Gonze&Lee convention as for atomic
+         !displacements at finite q (See M. Stengel PRB 2013). 
+         bc_barmagsus(irow,icol)= -one* & !To convert from d3etot to local susc.
+       & cmplx(ddb_lw%val(1,index,iblok),ddb_lw%val(2,index,iblok),kind=dpc) &
+       & * exp(two_pi*(0.d0,1.d0)*dot_product(qphon,xred(:,iat1)-xred(:,iat2)))
 
        end do
      end do
@@ -1622,16 +1594,6 @@ contains
 
 !Calculate the Berry-curvature of the inverse magnetic susceptibility
  bc_ss=-matmul(invbarmagsus,matmul(bc_barmagsus,invbarmagsus)) 
-
-!TODO: Adapt the phase of this quantity
-! fac=2.714943600699**2/four !TMP
-! fac=one/four !TMP
-! open(10,file='g_ss.txt')
-!   do irow=1, ndim
-!     write(10,*) -ione*bc_ss(irow,1:ndim)*fac
-!   end do 
-! close(10)
-
 
  if (prtvol>1) then
    call wrtout([ab_out,std_out], ' Fixed-spin Berry curvature of the inverse spin susceptibility ')
@@ -1647,7 +1609,7 @@ contains
    call wrtout([ab_out,std_out], '   ')
  end if
 
-!Store the FM flavor in the DDB file
+!Store the FM flavor in the DDB object 
  ipert2_red= 0
  do iat2= mpatpol(1), mpatpol(2)
    ipert2= natom + 11 + iat2
@@ -1708,7 +1670,7 @@ contains
 !! SOURCE
 
  subroutine berrycurv_sp(barmmom,bc_sp,bc_ss,ddb_lw,iblok,invbarmagsus,&
-& jblok,lblok,mpatpol,mpdir,mpert,natom,ndim,nmdir,prtvol)!,qphon,xred)
+& jblok,lblok,mpatpol,mpdir,mpert,natom,ndim,nmdir,prtvol,qphon,xred)
 
 !Arguments -------------------------------
 !scalars
@@ -1716,7 +1678,7 @@ contains
 !arrays
  type(ddb_type),intent(inout) :: ddb_lw
  integer,intent(in) :: mpatpol(2),mpdir(3)
-! real(dp),intent(in) :: qphon(3),xred(3,natom)
+ real(dp),intent(in) :: qphon(3),xred(3,natom)
  complex(dpc),intent(in) :: barmmom(ndim,(natom+5)*3)
  complex(dpc),intent(in) :: bc_ss(ndim,ndim)
  complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
@@ -1726,6 +1688,7 @@ contains
  integer :: iat1,icol,idir1,idir2,idir3,index,ipert1,ipert2,ipert3,irow
  integer :: ipert1_red,idir1_red,jndex
  complex(dpc), parameter :: ione=(0.d0,1.d0)
+ complex(dpc) :: qfac
  character(len=1000) :: msg
 !arrays
  integer :: indexat1(ndim),indexdir1(ndim)
@@ -1751,6 +1714,10 @@ contains
        ipert1= natom + 11 + iat1
        ipert1_red= ipert1_red + 1
        idir1_red= 0
+
+       !Apply a phase factor to adopt the same Gonze&Lee convention as for atomic
+       !displacements at finite q (See M. Stengel PRB 2013). 
+       qfac= exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1)))
        do idir1= 1, 3
          if (mpdir(idir1)==0) cycle
          idir1_red= idir1_red + 1
@@ -1762,14 +1729,14 @@ contains
        & 3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
          
          if (iblok /=0 .and. ipert2 <= natom) then
-           bc_barsp(irow,icol)= -one* &
-         & cmplx(ddb_lw%val(1,index,iblok),ddb_lw%val(2,index,iblok),kind=dpc)
+           bc_barsp(irow,icol)= -one* &  !To go from d3etot to induced local field
+         & cmplx(ddb_lw%val(1,index,iblok),ddb_lw%val(2,index,iblok),kind=dpc) * qfac
          else if (jblok /=0 .and. ipert2 == natom+2) then
            bc_barsp(irow,icol)= -one* &
          & cmplx(ddb_lw%val(1,index,jblok),ddb_lw%val(2,index,jblok),kind=dpc)
          else if (lblok /=0 .and. ipert2 == natom+5) then
            bc_barsp(irow,icol)= -one* &
-         & cmplx(ddb_lw%val(1,index,lblok),ddb_lw%val(2,index,lblok),kind=dpc)
+         & cmplx(ddb_lw%val(1,index,lblok),ddb_lw%val(2,index,lblok),kind=dpc) * qfac
          end if
 
        end do
@@ -1779,25 +1746,6 @@ contains
 
  !Calculate the Berry curvature of the induced Zeeman fields
  bc_sp= -matmul(bc_ss,barmmom) - matmul(invbarmagsus,bc_barsp)
-
-!TO DO: apply the q-depenent phase on the magnetic variables
-! do irow=1,ndim
-!   do iat1= 1, natom
-!     do idir1= 1, 3
-!       icol= (iat1-1)*3 + idir1
-!       !MR: Caution, this conjg might be wrong in presence of dissipation
-!       bc_ps(icol,irow)=conjg(bc_sp(irow,icol)*exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1))))
-!     end do
-!   end do
-! end do 
-!
-!! fac=2.714943600699/two/0.52917 !TMP
-! fac=one/two/0.52917 !TMP
-! open(10,file='g_ps.txt')
-! do irow=1,natom*3
-!   write(10,*) (0.d0,-1.d0)*bc_ps(irow,1:ndim)*fac
-! end do 
-! close(10)
 
  if (prtvol > 1) then
    if (iblok /= 0) then
@@ -1841,8 +1789,8 @@ contains
    end if
  end if
 
-!Store the FM flavor in the DDB file
- do ipert2=1,natom+2
+!Store the FM flavor in the DDB object
+ do ipert2=1,natom+5
    do idir2=1,3
      icol=idir2+(ipert2-1)*3
      indexat2(icol)=ipert2
@@ -1985,20 +1933,22 @@ contains
    end do
  end if
 
+!MR: Not sure why this is different from the electrical charges,                 |  --------------------------------------------------------------------------------
+!but is needed to reproduce freqflag=3 numbers
 !Magnetic charges induced by atomic displacement
- ipert1= natom + 5
- do ipert2= 1, natom
-   do idir2= 1, 3
-     icol=( ipert2-1)*3 + idir2
-     do idir1= 1, 3
-       irow=( ipert1-1)*3 + idir1
-       cval=bc_pp(irow,icol)
-       bc_pp(irow,icol)=-cval
-       cval=bc_pp(icol,irow)
-       bc_pp(icol,irow)=-cval
-     end do
-   end do
- end do
+! ipert1= natom + 5
+! do ipert2= 1, natom
+!   do idir2= 1, 3
+!     icol=( ipert2-1)*3 + idir2
+!     do idir1= 1, 3
+!       irow=( ipert1-1)*3 + idir1
+!       cval=bc_pp(irow,icol)
+!       bc_pp(irow,icol)=-cval
+!       cval=bc_pp(icol,irow)
+!       bc_pp(icol,irow)=-cval
+!     end do
+!   end do
+! end do
 
 !Dielectric tensor
  if (qeq0) then
@@ -2014,9 +1964,6 @@ contains
    end do
  end if
 
-!TODO: the next two susceptibilities miss a 1/ucvol factor that needs to be first
-!incorporated in the 2nd-order susceptibilities of ABINIT.
-
 !Magnetoelectric susceptibility
  if (qeq0) then
    ipert1= natom + 5
@@ -2026,9 +1973,9 @@ contains
      do idir1= 1, 3
        irow=( ipert1-1)*3 + idir1
        cval=bc_pp(irow,icol)
-       bc_pp(irow,icol)=-cval
+       bc_pp(irow,icol)=-cval/ucvol
        cval=bc_pp(icol,irow)
-       bc_pp(icol,irow)=-cval
+       bc_pp(icol,irow)=-cval/ucvol
      end do
    end do
  end if
@@ -2041,11 +1988,11 @@ contains
     do idir1= 1, 3
       irow=( ipert1-1)*3 + idir1
       cval=bc_pp(irow,icol)
-      bc_pp(irow,icol)=-cval
+      bc_pp(irow,icol)=-cval/ucvol
     end do
   end do
 
-!Store the FM flavor in the DDB file
+!Store the FM flavor in the DDB object
  do ipert2= 1, natom+5
    do idir2= 1, 3
      icol=( ipert2-1)*3 + idir2
@@ -2128,11 +2075,11 @@ contains
    call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega, &
   & rffreq=rffreq)
    if (iblok/=0.and.iblok==kblok) then
-     if (opt==1) then
+!     if (opt==1) then
        call wrtout([ab_out,std_out], ' Frozen-spin Berry curvature of interatomic force constants')
-     else if (opt==2) then
-       call wrtout([ab_out,std_out], ' Relaxed-spin Berry curvature of interatomic force constants')
-     end if
+!     else if (opt==2) then
+!       call wrtout([ab_out,std_out], ' Relaxed-spin Berry curvature of interatomic force constants')
+!     end if
      call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
      do ipert1= 1, natom
        do idir1= 1, 3
@@ -2163,11 +2110,11 @@ contains
    call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega, &
  & rffreq=rffreq)
    if (iblok/=0.and.iblok==kblok) then
-     if (opt==1) then
+!     if (opt==1) then
        call wrtout([ab_out,std_out], ' Frozen-spin Berry curvature of Born effective charges')
-     else if (opt==2) then
-       call wrtout([ab_out,std_out], ' Relaxed-spin Berry curvature of Born effective charges')
-     end if
+!     else if (opt==2) then
+!       call wrtout([ab_out,std_out], ' Relaxed-spin Berry curvature of Born effective charges')
+!     end if
      call wrtout([ab_out,std_out], ' E-dir      atom   dir        Real              Imag')
      ipert1= natom + 2
      do idir1= 1, 3
@@ -2193,11 +2140,11 @@ contains
    call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega, &
  & rffreq=rffreq)
    if (iblok/=0.and.iblok==kblok) then
-     if (opt==1) then
+!     if (opt==1) then
        call wrtout([ab_out,std_out], ' Frozen-spin Berry curvature of clamped-ion dielectric tensor')
-     else if (opt==2) then
-       call wrtout([ab_out,std_out], ' Relaxed-spin Berry curvature of clamped-ion dielectric tensor')
-     end if
+!     else if (opt==2) then
+!       call wrtout([ab_out,std_out], ' Relaxed-spin Berry curvature of clamped-ion dielectric tensor')
+!     end if
      call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
      ipert1= ddb_lw%natom + 2
      ipert2= ddb_lw%natom + 2
@@ -2225,11 +2172,11 @@ contains
    call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega, &
  & rfmagn=rfmagn,rffreq=rffreq)
    if (iblok/=0.and.iblok==kblok) then
-     if (opt==1) then
+!     if (opt==1) then
        call wrtout([ab_out,std_out], ' Frozen-spin Berry curvature of clamped-ion magnetoelectric susceptibility')
-     else if (opt==2) then
-       call wrtout([ab_out,std_out], ' Relaxed-spin Berry curvature of clamped-ion magnetoelectric susceptibility')
-     end if
+!     else if (opt==2) then
+!       call wrtout([ab_out,std_out], ' Relaxed-spin Berry curvature of clamped-ion magnetoelectric susceptibility')
+!     end if
      call wrtout([ab_out,std_out], ' M-dir E-dir        Real              Imag')
      ipert1= ddb_lw%natom + 5
      ipert2= ddb_lw%natom + 2
@@ -2258,11 +2205,11 @@ contains
  call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega, &
 & rfmagn=rfmagn,rffreq=rffreq)
  if (iblok/=0.and.iblok==kblok) then
-   if (opt==1) then
+!   if (opt==1) then
      call wrtout([ab_out,std_out], ' Frozen-spin Berry curvature of clamped-ion magnetic susceptibility')
-   else if (opt==2) then
-     call wrtout([ab_out,std_out], ' Relaxed-spin Berry curvature of clamped-ion magnetic susceptibility')
-   end if
+!   else if (opt==2) then
+!     call wrtout([ab_out,std_out], ' Relaxed-spin Berry curvature of clamped-ion magnetic susceptibility')
+!   end if
    call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
    ipert1= ddb_lw%natom + 5
    ipert2= ddb_lw%natom + 5
@@ -2289,11 +2236,11 @@ contains
  call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega, &
 & rfmagn=rfmagn,rffreq=rffreq)
  if (iblok/=0.and.iblok==kblok) then
-   if (opt==1) then
+!   if (opt==1) then
      call wrtout([ab_out,std_out], ' Frozen-spin Berry curvature of magnetic Born effective charges')
-   else if (opt==2) then
-     call wrtout([ab_out,std_out], ' Relaxed-spin Berry curvature of magnetic Born effective charges')
-   end if
+!   else if (opt==2) then
+!     call wrtout([ab_out,std_out], ' Relaxed-spin Berry curvature of magnetic Born effective charges')
+!   end if
    call wrtout([ab_out,std_out], ' atom   dir     B-dir        Real              Imag')
 
    ipert2= ddb_lw%natom + 5

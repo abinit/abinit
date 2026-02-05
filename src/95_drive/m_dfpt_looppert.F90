@@ -363,10 +363,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  kramers_deg=.true.
  if (dtset%tim1rev==0) kramers_deg=.false.
  
- if (.not.kramers_deg.and.(dtset%npfft/=1.or.dtset%autoparal/=0)) then
-   write(msg,'(a,a)')'   WARNING: RF routines are not adapted to fft parallelization'//char(10)//&
-& '   when tim1rev=0. The result of this calculation will most surely be wrong if npfft/=1.'
-   ABI_WARNING(msg)
+ if (.not.kramers_deg.and.dtset%npfft/=1) then
+   write(msg,'(a,a)')'   RF routines are not adapted to fft parallelization'//char(10)//&
+& '   when tim1rev=0. However, npfft is different from 1 in the present run.'
+   ABI_BUG(msg)
    call wrtout(ab_out,msg,'COLL')
  end if
 
@@ -3005,9 +3005,9 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    else if(ipert==natom+3.or.ipert==natom+4)then
      erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1
    else if(ipert==natom+5.or.ipert==natom+6)then
-     erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1!+elmag1
+     erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1+elmag1
    else if(ipert>natom+11.and.ipert<=2*natom+11)then
-     erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1!+elmag1
+     erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1+elmag1
    end if
    if (emagpen1>tol8) erelax=erelax+emagpen1
    enl1_effective=enl1
