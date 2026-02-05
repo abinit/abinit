@@ -210,7 +210,6 @@ contains
    if (ipert==natom+6) idir_eff= 4
    ABI_MALLOC(v1hspinfield,(cplex*nfft,nspden))
    call dfpt_v1hspinfield(nspden,nfft,cplex,idir_eff,v1hspinfield)
-   if (ipert==natom+6) v1hspinfield=2.0d0*v1hspinfield
  end if
 
 !Preconditioned DFPT
@@ -238,7 +237,6 @@ contains
  if (abs(magpen) > tol6) then
    call dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,&
 & mpdir,natom,nfft,nspden,qphon,rhomag,taumr,vmagpen1)
-!  emagpen1=two*emagpen1
  end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
@@ -295,6 +293,8 @@ contains
      call dotprod_vn(cplex,rhor1,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
      if (ipert==natom+5.or.ipert==natom+6.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
        call dotprod_vn(cplex,rhor1,elmag1 ,doti,nfft,nfftot,nspden,1,v1hspinfield,ucvol)
+       !A factor of four, present in <0|H^1|1> terms, compensates the missing
+       !half factor
        elmag1=two*elmag1
      end if
    else
@@ -521,8 +521,8 @@ subroutine dfpt_v1hspinfield(nspden,nfft,cplex,idir,v1hspinfield)
        v1hspinfield(:,3)=-0.5d0
        v1hspinfield(:,4)= 0.0d0
      else if(idir==4)then  ! Scalar potential
-       v1hspinfield(:,1)=-0.5d0
-       v1hspinfield(:,2)=-0.5d0
+       v1hspinfield(:,1)=-1.0d0
+       v1hspinfield(:,2)=-1.0d0
        v1hspinfield(:,3)= 0.0d0
        v1hspinfield(:,4)= 0.0d0
      end if
@@ -682,7 +682,8 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
 !Compute magnetic penalty from cell-integrated magnetic moments
  if (magpen < zero) then
 
-   rhomag_eff=rhomag
+   rhomag_eff(:,1)=rhomag(:,1)
+   rhomag_eff(:,2:4)=half*rhomag(:,2:4) !Convert from mu_B to a.u. 
    do i=1,3 
      if (mpdir(i)==0) rhomag_eff(:,1+i) = zero
    end do
@@ -695,9 +696,9 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
                         & + rhomag_eff(1,4)**2+rhomag_eff(2,4)**2 )
    end if
    
-   Bx(:)=-one*magpen*rhomag_eff(:,2)
-   By(:)=-one*magpen*rhomag_eff(:,3)
-   Bz(:)=-one*magpen*rhomag_eff(:,4)
+   Bx(:)=-half*magpen*rhomag_eff(:,2)
+   By(:)=-half*magpen*rhomag_eff(:,3)
+   Bz(:)=-half*magpen*rhomag_eff(:,4)
    if (cplex==1) then
      do ifft=1,nfft
        vmagpen1(ifft,1)=Bz(1)
@@ -725,7 +726,8 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
    Blocy=zero
    Blocz=zero
 
-   intgden_eff=intgden
+   intgden_eff(:,1,:)=intgden(:,1,:)
+   intgden_eff(:,2:4,:)=half*intgden(:,2:4,:) !Convert from mu_B to a.u.
    do iatom=mpatpol(1),mpatpol(2)
 
      do i=1,3 
@@ -744,30 +746,30 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
 
      if (cplex==1) then
        do ifft=1,nfft
-         Blocx(ifft)=Blocx(ifft)+one*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
-         Blocy(ifft)=Blocy(ifft)+one*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
-         Blocz(ifft)=Blocz(ifft)+one*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
+         Blocx(ifft)=Blocx(ifft)+half*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
+         Blocy(ifft)=Blocy(ifft)+half*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
+         Blocz(ifft)=Blocz(ifft)+half*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
        end do
      else if (cplex==2.and.sum(qphon(:)**2) < tol8) then
        do ifft=1,nfft
-         Blocx(2*ifft-1)=Blocx(2*ifft-1)+one*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
-         Blocy(2*ifft-1)=Blocy(2*ifft-1)+one*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
-         Blocz(2*ifft-1)=Blocz(2*ifft-1)+one*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
-         Blocx(2*ifft)=Blocx(2*ifft)+one*magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
-         Blocy(2*ifft)=Blocy(2*ifft)+one*magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
-         Blocz(2*ifft)=Blocz(2*ifft)+one*magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
+         Blocx(2*ifft-1)=Blocx(2*ifft-1)+half*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
+         Blocy(2*ifft-1)=Blocy(2*ifft-1)+half*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
+         Blocz(2*ifft-1)=Blocz(2*ifft-1)+half*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
+         Blocx(2*ifft)=Blocx(2*ifft)+half*magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
+         Blocy(2*ifft)=Blocy(2*ifft)+half*magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
+         Blocz(2*ifft)=Blocz(2*ifft)+half*magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
        end do
      else if (cplex==2.and.sum(qphon(:)**2) > tol8) then
        do ifft=1,nfft
          re=2*ifft-1
          im=2*ifft
   
-         Blocx_re=+one*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
-         Blocy_re=+one*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
-         Blocz_re=+one*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
-         Blocx_im=+one*magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
-         Blocy_im=+one*magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
-         Blocz_im=+one*magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
+         Blocx_re=+half*magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
+         Blocy_re=+half*magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
+         Blocz_re=+half*magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
+         Blocx_im=+half*magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
+         Blocy_im=+half*magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
+         Blocz_im=+half*magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
       
          arg=two_pi*dot_product(qphon,-taumr(ifft,iatom,:))
          phr1d_re=dcos(arg)
@@ -881,17 +883,17 @@ subroutine dfpt_v1hspinfield_atsph(cplex,fatsph,idir,ipert,natom,nfft,nspden,&
  !Define the local magnetic field
  if (cplex==1) then
    do ifft=1,nfft
-     Bloc(ifft)=-one*fatsph(ifft,iatom)
+     Bloc(ifft)=-half*fatsph(ifft,iatom)
    end do
  else if (cplex==2) then
    do ifft=1,nfft
      re=2*ifft-1
      im=2*ifft
      if (sum(qphon(:)**2)<tol8) then 
-       Bloc(re)=-one*fatsph(ifft,iatom)
+       Bloc(re)=-half*fatsph(ifft,iatom)
        Bloc(im)=zero
      else 
-       Bloc_re=-one*fatsph(ifft,iatom)
+       Bloc_re=-half*fatsph(ifft,iatom)
        Bloc_im=zero
        arg=two_pi*dot_product(qphon,-taumr(ifft,iatom,:))
        phr1d_re=dcos(arg)

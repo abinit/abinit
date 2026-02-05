@@ -72,11 +72,10 @@ program anaddb
 !Local variables-------------------------------
  integer, parameter:: master = 0
  integer:: comm, ii, ierr
- integer:: nproc, my_rank, ana_ncid
+ integer:: nproc, my_rank, ana_ncid,mtyp
  logical:: iam_master
  real(dp):: tcpu, tcpui, twall, twalli !,cpu, wall, gflops
  real(dp)::  tsec(2)
- real(dp), allocatable:: delta_asrw0(:,:), delta_asrw0_fm(:,:)
  integer:: units(2)
  character(len=10):: procstr
  character(len=24):: codename, start_datetime
@@ -190,23 +189,32 @@ program anaddb
 
 ! Change the bravais lattice if needed
  call ddb%set_brav(dtset%brav)
+ ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with automatic reshapes
+ ! that ddb%val and ddb%flg experience when passed as arguments of some routines
+ ! Copy the long-wave ddb
+ if (ddb_hdr%has_d3E_lw) then
+   call ddb_lw_copy(ddb, ddb_lw, ddb_hdr)
+ end if
 
  ! MR: Second- and third-order total energy derivatives calculated with the 
- ! magnetic penalty are converted to physically relevant ones here. 
+ ! magnetic penalty (constrained DFPT) are converted to physically relevant ones here. 
  if (abs(dtset%magpen) > tol8) then
-   ABI_MALLOC(delta_asrw0,(3* Crystal%natom,3))
-   ABI_MALLOC(delta_asrw0_fm,(3* Crystal%natom,3))
    call ddb_magpen(ddb, ddb_lw, dtset%magpen, dtset%mpatpol, & 
- & dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, dtset%prtvol, 1, Crystal%ucvol, dtset%timdisp)
+ & dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, dtset%prtvol, 1, Crystal%ucvol, dtset%timdisp, &
+ & Crystal%xred)
 
    if (dtset%freqflag/=0) then
      call ddb_omega_interpol(Crystal%amu, ddb, ddb_lw, dtset%eta, filnam(8), &
    & dtset%magpen, dtset%mpatpol, dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, dtset%nfreq, Crystal%ntypat, & 
-   & dtset%freqflag, dtset%frmax, dtset%frmin, dtset%prtvol, Crystal%typat, Crystal%ucvol)
+   & dtset%freqflag, dtset%frmax, dtset%frmin, dtset%prtvol, Crystal%typat, Crystal%ucvol, Crystal%xred)
    end if
 
-   ABI_FREE(delta_asrw0)
-   ABI_FREE(delta_asrw0_fm)
+   !Proceed with a normal anaddb run with relaxed- or fixed-spin quantities
+   if (dtset%mpopt==1) then
+     ddb%val= ddb%val_fs
+   else if (dtset%mpopt==2) then
+     ddb%val= ddb%val_rs
+   end if
  end if
 
 
@@ -219,10 +227,6 @@ program anaddb
 !     asrq0%singular = zero; asrq0%uinvers = zero; asrq0%vtinvers = zero
 !   end if
 ! end if
-! Copy the long-wave ddb
- if (ddb_hdr%has_d3E_lw) then
-   call ddb_lw_copy(ddb, ddb_lw, ddb_hdr)
- end if
 
 ! Acoustic Sum Rule
 ! In case the interatomic forces are not calculated, the
