@@ -102,17 +102,17 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 ref(1)=' Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.'//ch10//&
    ' J. Chem. Phys. 163, 164126 (2025).'//ch10//&
    ' M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,'//ch10//&
-   ' M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Béjaud, J.-M. Beuken,'//ch10//& 
+   ' M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,'//ch10//& 
    ' J. Bieder, A. Blanchet, F. Bottin, J. Bouchet, J. Bouquiaux, E. Bousquet,'//ch10//&
    ' J. Boust, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval,'//ch10
 ref(1)=trim(ref(1))//&
-   ' A. Castellano, E. Castiel, J.-B. Charraud, J. Clérouin, M. Côté, C. Duval,'//ch10//&
+   ' A. Castellano, E. Castiel, J.-B. Charraud, J. Clerouin, M. Cote, C. Duval,'//ch10//&
    ' A. Gallo, F. Gendron, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras,'//ch10//&
-   ' F. Gómez-Ortiz, X. Gonze, F. Goudreault, A. Grüneis, R. Gupta, B. Guster,'//ch10//&
+   ' F. Gomez-Ortiz, X. Gonze, F. Goudreault, A. Gruneis, R. Gupta, B. Guster,'//ch10//&
    ' D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,'//ch10//&
    ' I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Marazzi, M. Mignolet,'//ch10
 ref(1)=trim(ref(1))//&
-   " D.D. O'Regan, R. Outerovitch, Ch. Paillard, G. Petretto, S. Poncé,"//ch10//&
+   " D.D. O'Regan, R. Outerovitch, Ch. Paillard, G. Petretto, S. Ponce,"//ch10//&
    ' F. Ricci, G.-M. Rignanese, M. Rodriguez-Mayorga, A.H. Romero, S. Rostami,'//ch10//& 
    ' M. Royo, M. Sarraute, A. Sasani, F. Soubiran, M. Stengel, Ch. Tantardini,'//ch10//&
    ' M. Torrent, V. Trinquet, V. Vasilchencko, D. Waroquiers, A. Zabalo,'//ch10//&
