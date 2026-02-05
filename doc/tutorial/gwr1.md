@@ -774,7 +774,7 @@ You should get the following figure:
 
 Clearly six minimax points are not enough to convergence.
 Also the convergence with [[gwr_ntau]] is not variational, and there are meshes that perform better than others.
-This study shows that we should use 16-20 minimax points to reach an accuracy of 0.005 eV (`abs_conv`).
+This study shows that we should use 16-20 minimax points to reach a precision of 0.005 eV (`abs_conv`).
 Unfortunately, this would render the calculations more expensive, especially for a tutorial,
 therefore we opt to continue with **12 minimax points** for the next calculations.
 Again, let's save the results in a different directory by executing:
@@ -914,7 +914,7 @@ mv tgwr_4o_* log conv_kmesh
 In this last part of the tutorial, we discuss how to interpolate the QP corrections
 along an arbitrary $\kk$-path using the star-function method discussed in
 [this section](/tutorial/eph_intro/#star-function-interpolation-of-the-ks-eigenvalues) of the EPH introduction.
-This method is less accurate than e.g. the Wannier interpolation, and might be problematic in the presence
+This method is less precise than e.g. the Wannier interpolation, and might be problematic in the presence
 of band-crossings, but it has the big advantage of being much easier to use and with minimal user intervention.
 
 First of all, we need to compute the QP corrections for **all** the $\kk$-points in the IBZ.
@@ -926,7 +926,7 @@ This is done in the following input:
 Note the usage of [[gw_qprange]] = `-NUM` and [[gwr_sigma_algo]] 1 to activate
 the supercell algorithm for $\Sigma_\nk$, the most efficient algorithm when all the $\kk$-points in $\Sigma_\nk$ are wanted.
 To keep the wall-time at a reasonable level, we use a WFK file with 2x2x2 $\kk$-mesh,
-but it is clear that a more accurate intepolation would require denser $\kk$-meshes.
+but it is clear that a more precise interpolation would require denser $\kk$-meshes.
 
 Run the job with:
 

@@ -66,7 +66,7 @@ new features here, and you should look at the following new input variables whic
 
 There are two datasets specified in *telast_1.abi*. First, let us examine the
 common input data. We specify a starting guess for [[acell]], and give an
-accurate decimal specification for [[rprim]]. The definition of the atom
+precise decimal specification for [[rprim]]. The definition of the atom
 types and atoms follows [tutorial DFPT1](/tutorial/rf1). The reduced atomic
 positions [[xred]] are a starting approximation, and will be replaced by our
 converged results in the remaining input files, as will [[acell]].
@@ -332,7 +332,7 @@ has errors which are linearly proportional to convergence errors in the GS and
 first-order wave functions. Since errors in the variational 2DEtotal are
 second-order in wave-function convergence errors, comparing this to the non-variational
 result for the diagonal second derivative will give an idea of the
-accuracy of the latter and perhaps indicate the need for tighter convergence
+precision of the latter and perhaps indicate the need for tighter convergence
 tolerances for both the GS and RF wave functions.
 This is discussed in X. Gonze and C. Lee, Phys. Rev. B 55, 10355 (1997) [[cite:Gonze1997a]], Sec. II.
 For an atomic-displacement perturbation, the corresponding breakdown of the 2DTE is headed
@@ -637,7 +637,7 @@ in section 3. (Recall that our strains and stresses were both 3,3 or z,z or Voig
 compared to 34.8658 GPa, the 3,1 elastic-tensor element computed above.
 
 The good agreement we found from this simple numerical differentiation
-required that we had accurately relaxed the lattice so that the stress of the
+required that we had precisely relaxed the lattice so that the stress of the
 unstrained structure was very small. Similar numerical-derivative comparisons
 for systems with finite stress are more complicated, as discussed in
 [notes by A. R. Oganov](/theory/documents/elasticity-oganov.pdf).
@@ -656,7 +656,7 @@ focusing on the C/m^2 results,
            Polarization    -3.246052331E-01 C/m^2
 
 While not labeled as such, these are the Cartesian x, y, and z components,
-respectively, and the x and y components are zero within numerical accuracy as
+respectively, and the x and y components are zero within numerical precision as
 they must be from symmetry. Numerical differentiation of the z component
 yields -0.699337 C/m$^2$. This is to be compared with the z,3 element of our
 rigid-ion piezoelectric tensor from section 3, -0.696149 C/m$^2$, and the two

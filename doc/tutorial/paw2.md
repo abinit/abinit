@@ -23,7 +23,7 @@ atomic **partial-waves** $\phi_i$, of **pseudized partial-waves** $\tphi_i$, and
 (dual to $\tphi_i$) have to be defined. This set of _partial-waves_ and _projectors_
 functions (and some additional atomic data) are stored in a so-called **PAW dataset**.
 A PAW dataset has to be generated for each atomic species in order
-to reproduce atomic behavior as accurate as possible while requiring minimal
+to reproduce atomic behavior as accurately as possible while requiring minimal
 CPU and memory resources in executing ABINIT for the crystal simulations.
 These two constraints are obviously conflicting.
 
@@ -370,7 +370,7 @@ Open it. It should look like:
 			  One-center xc            -123.07769380742522
 
 The generated PAW dataset (contained in <span style="color:green">Ni.GGA-PBE.xml</span> file) is a first draft.
-Several parameters have to be adjusted, in order to get accurate results and efficient DFT calculations.
+Several parameters have to be adjusted, in order to get precise results and efficient DFT calculations.
 
 !!! Note
     The <span style="color:green">Ni.GGA-PBE.xml</span> file is directly usable by ABINIT.
@@ -403,7 +403,7 @@ We can keep the **700 points** grid.
 !!! Note
 	We could try to decrease the size of the grid.
 	Small grids give PAW dataset with small size (in kB) and run faster in ABINIT,
-	but accuracy can be affected.
+	but precision can be affected.
 
 !!! Note
     The final $r_{PAW}$ value (`rc = ...` in `Ni` file) changes with the
@@ -584,7 +584,7 @@ You get a file <span style="color:green">Ni.GGA-PBE-paw.xml</span> containing th
 
 To test the efficiency of the generated PAW dataset, we finally will use `ABINIT`!
 You are about to run a DFT computation and determine the size of the **plane
-wave basis** needed to reach a given accuracy. If the **cut-off energy** defining the
+wave basis** needed to reach a given precision. If the **cut-off energy** defining the
 plane waves basis is too high (higher than `20 Hartree`), some changes have to be made in the input file.
 
 Copy <span style="color:green">\$ABI_TESTS/tutorial/Input/tpaw2_1.abi</span> in your working directory.

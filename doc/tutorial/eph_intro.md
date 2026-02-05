@@ -167,7 +167,7 @@ More specifically, in EPH the name of the DDB file is specified by
     In particular, the acoustic sum rule and the charge neutrality of the Born effecive charges
     are enforced by default.
     It is responsability of the user to check whether the breaking of these sum rules (always
-    present due to numerical inaccuracies) is reasonable.
+    present due to non-vanishing numerical precision) is reasonable.
     By the same token, make sure that no vibrational instabilty is present before
     embarking on big EPH calculations.
     If the spectrum presents instabilities around $\Gamma$ due to a Fourier interpolation
@@ -177,7 +177,7 @@ More specifically, in EPH the name of the DDB file is specified by
 
 By default, the EPH code computes the phonon DOS and the atom-projected PHDOS by interpolating
 the IFCs on the *dense* $\qq$-mesh specified by [[ph_ngqpt]].
-The default $\qq$-grid is 20×20×20. You may want to increase this value for more accurate results.
+The default $\qq$-grid is 20×20×20. You may want to increase this value for more precise results.
 The step of the (linear) frequency mesh is governed by [[ph_wstep]].
 The linear tetrahedron method by [[cite:Bloechl1994]] is used by default.
 The Gaussian method can be activated via [[ph_intmeth]] with [[ph_smear]] defining
@@ -316,7 +316,7 @@ where the sum is over the lattice vectors inside the Born-von Karman supercell.
 The algorithm used to define the $\RR$ points of the supercell with the
 corresponding weights is specified by [[dvdb_rspace_cell]].
 
-The accuracy of the interpolation depends on the localization of $W_{\kappa\alpha}$ in $\RR$-space.
+The preciseion of the interpolation depends on the localization of $W_{\kappa\alpha}$ in $\RR$-space.
 This means that the Born-von Karman supercell corresponding to the [[ddb_ngqpt]] grid should be large
 enough to capture the spatial decay of $W_{\kappa\alpha}(\rr,\RR)$ as a function of $\RR$.
 As a consequence, [[ddb_ngqpt]] should be subject to convergence studies.
@@ -503,7 +503,7 @@ conservation is nededed**.
 
 At this point a question naturally arises: can we avoid the NSCF computation of $\kk$-points that
 are supposed to give negligible contribution to the final physical results?
-The answer is yes provided we are able to predict in some easy way and with reasonable accuracy the
+The answer is yes provided we are able to predict in some easy way and with reasonable precision the
 KS eigenvalues $\ee_\nk$ **without actually solving the KS equations**.
 
 The aproach used in the EPH code is based on the star-function interpolation by Shankland-Koelling-Wood (SKW)

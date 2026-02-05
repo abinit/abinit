@@ -75,10 +75,10 @@ The number of steps, [[nstep]], in this example file has been set to 25. You sho
 
 You will work at fixed [[ecut]] (3Ha) and k-point grid, defined by [[kptrlatt]] (the 8x8x8 Monkhorst-Pack grid).
 In *real life* you should do a convergence test with respect to both parameters.
-We postpone the discussion of the accuracy of these choices and
+We postpone the discussion of the precision obtained with these choices and
 the choice of pseudopotential to the end of the
 [fifth section of this tutorial](#5-dfpt-calculation-of-the-effect-of-an-homogeneous-electric-field).
-They give acceptable but not very accurate results such that the running time is reasonable for a tutorial.
+They give acceptable but not very precise results such that the running time is reasonable for a tutorial.
 
 You should make the run (a few seconds):
 
@@ -94,7 +94,7 @@ Note that one obtains the following value for the energy, in the final echo sect
      etotal   -9.7626837450E+00
      etotal   -9.7658722915E+00
 
-However, we will rely later, for the purpose of doing finite differences, on a more accurate (more digits) value of this
+However, we will rely later, for the purpose of doing finite differences, on a more precise (more digits) value of this
 total energy, that can be found about a dozen of lines before this final echo:
 
     total_energy        : -9.76587229147669E+00
@@ -294,7 +294,7 @@ Then, you should also open the *trf1_3o_DDB* file, and read the
 corresponding [[help:respfn#ddb|section 6.5]] of the respfn help file.
 
 Finally, the excellent agreement between the finite-difference formula and the
-DFPT approach calls for some accuracy considerations. These can be found in
+DFPT approach calls for some precision considerations. These can be found in
 [[help:respfn#numerical-quality|section 7]] of the respfn help file.
 
 !!! tip

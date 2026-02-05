@@ -120,7 +120,7 @@ have an additional dependence on the physical temperature $T$.
     As a consequence, **accidental degeneracies won't be removed** when [[symsigma]] is set to 1.
 
 Note that both the FM and the DW term converge slowly with the $\qq$-sampling.
-Moreover, accurate computation of the real part require the inclusion of a large number of empty states.
+Moreover, precise computation of the real part require the inclusion of a large number of empty states.
 
 In order to accelerate the convergence with [[nband]], the EPH code can replace the contributions
 given by the high-energy states above a certain band index $M$ with the solution
@@ -240,7 +240,7 @@ A typical workflow for ZPR calculations involves the following steps
    In the simplest case, one uses a $\qq$-mesh that is equal to the GS $\kk$-mesh (sub-meshes are also fine)
    and the DFPT calculations can directly start from the WFK produced in step #1.
    Remember to compute $\bm{\epsilon}^{\infty}$, $\bm{Z}^*$ (polar materials) and the dynamical quadrupoles
-   $\bm{Q}^*$ as these quantities are needed for an accurate interpolation of phonon frequencies and DFPT potentials.
+   $\bm{Q}^*$ as these quantities are needed for a precise interpolation of phonon frequencies and DFPT potentials.
 
 3. **NSCF computation** of a WFK file on a much denser $\kk$-mesh containing the wavevectors
    where phonon-induced QP corrections are wanted. The NSCF run uses the DEN file produced in step #1.
@@ -303,7 +303,7 @@ mv MgO_eph_zpr-master MgO_eph_zpr
 
 The |AbiPy| script used to executed the DFPT part is available
 [here](https://github.com/abinit/MgO_eph_zpr/blob/master/run_zpr_mgo.py).
-Note that several parameters have been tuned to reach a reasonable **compromise between accuracy
+Note that several parameters have been tuned to reach a reasonable **compromise between precision
 and computational cost** so do not expect the results obtained at the end of the lesson to be fully converged.
 More specifically, we use norm-conserving pseudopotentials with a cutoff energy [[ecut]]
 of 30 Ha (too low, it should be ~50 Ha).
@@ -999,8 +999,8 @@ in order to monitor the convergence of the QP corrections.
     Please, avoid using the Sternheimer method with only occupied bands because EPH needs
     to compute the chemical potential as a function of temperature.
     It is recommended to include enough conduction bands (including degenerate states at the VBM)
-    to obtain a decent description of the electronic DOS around the VBM and prevent
-    inaccuracies in the calculation of $\mu(T)$.
+    to obtain a decent description of the electronic DOS around the VBM and to allow
+    precise calculation of $\mu(T)$.
 
 
 To analyze the convergence behavior, we can extract the results from the main output file
