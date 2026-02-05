@@ -149,6 +149,9 @@ inp_files = [
     "t146.abi",  # test antisymmetric vector potential response and quadrupoles of HF molecule
     "t147.abi",  # test total vector potential response and quadrupoles of HF molecule
     "t148.abi",  # test flexoelectric tensor calculation with ffnl_lw=1
+    "t218.abi",  # test linear-response calculation with 2D Coulomb cutoff in BN monolayer
+    "t219.abi",  # test linear-response calculation with 2D short-range Coulomb kernel in BN monolayer
+    "t220.abi",  # test finite-q scalar potential linear-response calculation with PCM short-circuit conditions
 
     # write_files behaviour
     "t150.abi",  # test the behaviour of supravariable write_files

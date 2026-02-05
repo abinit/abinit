@@ -1179,7 +1179,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,evxctau0,evxctau1,exc1,ipert,dtset%natom,optene)
 !&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
 !    !debug: compute the d2E/d-qd+q energy, should be equal to the one from previous line
-!<<<<<<< HEAD
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
 &        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,elmag1,eloc0_mq,elpsp1,emagpen1,&
@@ -1190,14 +1189,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        evar=half*(evar+evar_mq)
        deltae=half*(deltae+deltae_mq)
      end if
-!=======
-!!    if(.not.kramers_deg) then
-!!      call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
-!!&       efrloc,efrnl,efrx1,efrx2,ehart1_mq,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
-!!&       enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1_mq,elmag1_mq,ipert,dtset%natom,optene)
-!!     end if
-!&     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,evxctau0,evxctau1,exc1,ipert,dtset%natom,optene)
-!>>>>>>> trunk/develop
 
      call timab(152,1,tsec)
      choice=2
@@ -1456,7 +1447,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon,rhor1,rmet,rprimd,symrc1,ucvol,&
-&         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
+&         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc,ixcrot=dtset%ixcrot)
        else
          call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
@@ -1470,7 +1461,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon,rhor1_pq,rmet,rprimd,symrc1,ucvol,&
-&         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
+&         wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc,ixcrot=dtset%ixcrot)
        else
          call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb_pq,d2lo_pq,d2nl_pq,eigen0,eigen1,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
@@ -1483,7 +1474,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1_mq,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &         mpw,mpw1_mq,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1_mq,nspden,&
 &         dtset%nsppol,nsym1,occ_rbz,ph1d,psps,qphon_mq,rhor1_mq,rmet,rprimd,symrc1,ucvol,&
-&         wtk_rbz,xred,ylm,ylm1_mq,rhor=rhor,vxc=vxc)
+&         wtk_rbz,xred,ylm,ylm1_mq,rhor=rhor,vxc=vxc,ixcrot=dtset%ixcrot)
        else
          call dfpt_nstdy(atindx,blkflg,cg,cg1_mq,cplex,dtfil,dtset,d2bbb_mq,d2lo_mq,d2nl_mq,eigen0,eigen1_mq,gmet,&
 &         gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1_mq,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
@@ -1553,20 +1544,20 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !- core charge is excluded from the charge density;
 !- the potential is the INPUT vtrial.
 
- if (ipert/=dtset%natom+1.and.dtset%prt1mag/=0) then
+! if (ipert/=dtset%natom+1.and.dtset%prt1mag/=0) then
    prtopt=1
-   if(ipert==dtset%natom+5 .or. ipert>dtset%natom+11 ) then
-     prtopt=idir+1;
+   !   if(ipert==dtset%natom+5 .or. ipert==dtset%natom+6 .or. ipert>dtset%natom+11 ) then
+   !  prtopt=idir+1;
      call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
 &     prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag,&
 &     qphon=qphon)
-     call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],prtopt,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
+   !  call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],prtopt,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
 
      call magmom_to_d2(blkflg,cplex,d2lo,idir,intgden,ipert,mpert,&
  &    dtset%natom,nspden,rhomag)
-   end if
- end if
+  ! end if
+! end if
  !if((dtset%iscf>0).and.(dtset%nsppol==2.or.dtset%nspden>1).and.(ipert/=dtset%natom+5)) then
  if((iscf_mod>0).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
    call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],1,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
@@ -3160,7 +3151,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 &          gmet,gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,&
 &          mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,nfft,ngfft,nkpt,nkpt_rbz,nkxc,&
 &          npwarr,npwar1,nspden,nsppol,nsym1,occ_rbz,ph1d,psps,qphon,rhor1,rmet,rprimd,&
-&          symrc1,ucvol,wtk_rbz,xred,ylm,ylm1,rhor,vxc)
+&          symrc1,ucvol,wtk_rbz,xred,ylm,ylm1,rhor,vxc,ixcrot)
 
 !Arguments -------------------------------
 !scalars
@@ -3171,6 +3162,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
+!optional
+ integer,optional,intent(in) :: ixcrot
 !arrays
  integer,intent(in) :: atindx(dtset%natom),indkpt1(nkpt_rbz),indsy1(4,nsym1,dtset%natom)
  integer,intent(in) :: istwfk_rbz(nkpt_rbz),kg(3,mpw*mkmem),kg1(3,mpw1*mk1mem)
@@ -3192,7 +3185,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  real(dp),intent(inout) :: d2lo(2,3,mpert,3,mpert),d2nl(2,3,mpert,3,mpert) !vz_i
 ! optional
  real(dp),optional,intent(in) :: rhor(nfft,nspden)
- real(dp),optional,intent(in) :: vxc(cplex*nfft,nspden)
+ real(dp),optional,intent(in) :: vxc(nfft,nspden)
 
 !Local variables-------------------------------
 !scalars
@@ -3547,11 +3540,11 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
          if(psps%n1xccc/=0)then
            option=0
 !FR SPr EB non-collinear magnetism
-           if (nspden==4.and.present(rhor).and.present(vxc)) then
+           if (nspden==4.and.present(rhor).and.present(vxc).and.present(ixcrot)) then
              optnc=1
              call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,rhodummy,0,&
 &             nkxc,nmxc,nspden,n3xccc,optnc,option,qphon,rhor,rhor1,&
-&             rprimd,0,vxc,vxc1,xccc3d1)
+&             rprimd,0,vxc,vxc1,xccc3d1,ixcrot=ixcrot)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,rhodummy,0,rhodummy,0,&
 &             nkxc,nmxc,nspden,n3xccc,option,qphon,rhodummy,&

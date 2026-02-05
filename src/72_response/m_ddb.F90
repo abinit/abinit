@@ -564,7 +564,7 @@ subroutine ddb_free(ddb)
  ABI_SFREE(ddb%qpt)
  ABI_SFREE(ddb%omega)
  ABI_SFREE(ddb%nrm)
-! ABI_SFREE(ddb%val_fs)
+ ABI_SFREE(ddb%val_fs)
 ! ABI_SFREE(ddb%val_rs)
  ABI_SFREE(ddb%kpt)
  ABI_SFREE(ddb%val)
@@ -1262,6 +1262,7 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,o
 !scalars
  integer :: iblok,rftyp
  integer :: idir1,idir2,ipert1,ipert2
+ real(dp) :: fac
 !arrays
  integer :: rfelfd(4),rfmagn(4),rfphon(4),rfstrs(4)
  real(dp) :: val(2)
@@ -1328,10 +1329,8 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,o
      end do
    end if
 
-   !TODO: the two next susceptibilities should include a volume factor. But since 
-   !this has not been previously included after reading the DDB cannot be applied 
-   !here. I include them when writting in output but not internaly. 
-
+   if (option==0) fac=-ucvol
+   if (option==1) fac=-one/ucvol
    !Magnetoelectric susceptibility
    if (optgb==1) then
      iblok=0
@@ -1348,9 +1347,9 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,o
      do idir2= 1, 3
        do idir1= 1, 3
          val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
-         blkval(:,idir1,ipert1,idir2,ipert2,kblok)=-val(:)
+         blkval(:,idir1,ipert1,idir2,ipert2,kblok)=val(:)*fac
          val(:)=blkval(:,idir2,ipert2,idir1,ipert1,kblok)
-         blkval(:,idir2,ipert2,idir1,ipert1,kblok)=-val(:)
+         blkval(:,idir2,ipert2,idir1,ipert1,kblok)=val(:)*fac
        end do
      end do
    end if
@@ -1358,6 +1357,8 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,o
  end if
 
  !Magnetic susceptibility
+ if (option==0) fac=-ucvol
+ if (option==1) fac=-one/ucvol
  if (optgb==1) then
    iblok=0
    rfphon(:)=0
@@ -1371,7 +1372,7 @@ subroutine ddb_to_d2etot(ddb,blkval,kblok,option,qeq0,qphon,qphnrm,ucvol,optgb,o
    do idir2= 1, 3
      do idir1= 1, 3
        val(:)=blkval(:,idir1,ipert1,idir2,ipert2,kblok)
-       blkval(:,idir1,ipert1,idir2,ipert2,kblok)=-val(:)
+       blkval(:,idir1,ipert1,idir2,ipert2,kblok)=val(:)*fac
      end do
    end do
  end if
@@ -1494,7 +1495,7 @@ subroutine ddb_bcast(ddb, comm)
  call xmpi_bcast(ddb%omega, master, comm, ierr)
  call xmpi_bcast(ddb%qpt, master, comm, ierr)
  call xmpi_bcast(ddb%val, master, comm, ierr)
-! call xmpi_bcast(ddb%val_fs, master, comm, ierr)
+ call xmpi_bcast(ddb%val_fs, master, comm, ierr)
 ! call xmpi_bcast(ddb%val_rs, master, comm, ierr)
 
  DBG_EXIT("COLL")
@@ -2404,136 +2405,11 @@ subroutine rdddb9(ddb,ddb_hdr,unddb,&
 
  ! Read the blocks from the input database, and close it.
  do iblok=1,ddb%nblok
-!<<<<<<< HEAD
-!   call ddb%read_block_txt(iblok,mband,mpert,msize,nkpt,unddb,&
-! & ddb_version=ddb_version)
-!
-!   if (raw_ == 1) cycle
-!
-!   !  Here complete the matrix by symmetrisation of the existing elements
-!   if(ddb%typ(iblok)==1 .or. ddb%typ(iblok)==2) then
-!
-!     qpt(1)=ddb%qpt(1,iblok)/ddb%nrm(1,iblok)
-!     qpt(2)=ddb%qpt(2,iblok)/ddb%nrm(1,iblok)
-!     qpt(3)=ddb%qpt(3,iblok)/ddb%nrm(1,iblok)
-!
-!     ! Examine the symmetries of the q wavevector
-!     call littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol=0)
-!
-!     ! Deactuvate TRS for finite-omega calculations
-!     if (any(abs(ddb%omega(:,iblok)) > tol8)) then
-!       timrev=0
-!     end if
-!
-!     nsize=3*mpert*3*mpert
-!     ABI_MALLOC(tmpflg,(3,mpert,3,mpert,1,1))
-!     ABI_MALLOC(tmpval,(2,3,mpert,3,mpert,1,1))
-!
-!     tmpflg(:,:,:,:,1,1) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,mpert,3,mpert/))
-!     tmpval(1,:,:,:,:,1,1) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,mpert,3,mpert/))
-!     tmpval(2,:,:,:,:,1,1) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert/))
-!
-!     ! Then apply symmetry operations
-!     call d2sym3(tmpflg,tmpval,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,1)
-!
-!     ! Transform the dynamical matrix in cartesian coordinates
-!     ABI_MALLOC(carflg,(3,mpert,3,mpert))
-!     ABI_MALLOC(d2cart,(2,3,mpert,3,mpert))
-!
-!     call cart29(tmpflg,tmpval,carflg,d2cart,gprimd,1,mpert,natom,1,ntypat,rprimd,typat,ucvol,zion)
-!
-!     ddb%flg(1:nsize,iblok) = reshape(carflg,shape = (/3*mpert*3*mpert/))
-!     ddb%val(1,1:nsize,iblok) = reshape(d2cart(1,:,:,:,:), shape = (/3*mpert*3*mpert/))
-!     ddb%val(2,1:nsize,iblok) = reshape(d2cart(2,:,:,:,:), shape = (/3*mpert*3*mpert/))
-!
-!     ABI_FREE(carflg)
-!     ABI_FREE(d2cart)
-!     ABI_FREE(tmpflg)
-!     ABI_FREE(tmpval)
-!
-!   else if (ddb%typ(iblok) == 3) then
-!
-!     nsize=3*mpert*3*mpert*3*mpert
-!     ABI_MALLOC(tmpflg,(3,mpert,3,mpert,3,mpert))
-!     ABI_MALLOC(tmpval,(2,3,mpert,3,mpert,3,mpert))
-!     ABI_MALLOC(rfpert,(3,mpert,3,mpert,3,mpert))
-!
-!     tmpflg(:,:,:,:,:,:) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
-!     tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
-!     tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
-!
-!     ! Set the elements that are zero by symmetry for raman and
-!     ! non-linear optical susceptibility tensors
-!     rfpert = 0
-!     rfpert(:,natom+2,:,natom+2,:,natom+2) = 1
-!     rfpert(:,1:natom,:,natom+2,:,natom+2) = 1
-!     rfpert(:,natom+2,:,1:natom,:,natom+2) = 1
-!     rfpert(:,natom+2,:,natom+2,:,1:natom) = 1
-!     call sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
-!     do i1pert = 1,mpert
-!       do i2pert = 1,mpert
-!         do i3pert = 1,mpert
-!           do i1dir=1,3
-!             do i2dir=1,3
-!               do i3dir=1,3
-!                 if ((rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) .and. &
-!                     (tmpflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/=1)) then
-!                   tmpval(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = zero
-!                   tmpflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=1
-!                 end if
-!               end do
-!             end do
-!           end do
-!         end do
-!       end do
-!     end do
-!
-!     call d3sym(tmpflg,tmpval,indsym,mpert,natom,nsym,symrec,symrel)
-!
-!     ABI_MALLOC(d3cart,(2,3,mpert,3,mpert,3,mpert))
-!     ABI_MALLOC(car3flg,(3,mpert,3,mpert,3,mpert))
-!
-!     call nlopt(tmpflg,car3flg,tmpval,d3cart,gprimd,mpert,natom,rprimd,ucvol)
-!
-!     ddb%flg(1:nsize,iblok) = reshape(car3flg, shape = (/3*mpert*3*mpert*3*mpert/))
-!     ddb%val(1,1:nsize,iblok) = reshape(d3cart(1,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
-!     ddb%val(2,1:nsize,iblok) = reshape(d3cart(2,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
-!!=======
-!>>>>>>> trunk/develop
 
    call ddb%read_block_txt(iblok,mband,mpert,msize,nkpt,unddb, ddb_version=ddb_version)
 
-!<<<<<<< HEAD
-!   else if (ddb%typ(iblok) == 33) then
-!
-!     nsize=3*mpert*3*mpert*3*mpert
-!     ABI_MALLOC(tmpflg,(3,mpert,3,mpert,3,mpert))
-!     ABI_MALLOC(tmpval,(2,3,mpert,3,mpert,3,mpert))
-!
-!     tmpflg(:,:,:,:,:,:) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
-!     tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
-!     tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
-!
-!     !Apply symmetry operations
-!     call d3lwsym(tmpflg,tmpval,indsym,mpert,natom,nsym,symrec,symrel)
-!
-!     ABI_MALLOC(d3cart,(2,3,mpert,3,mpert,3,mpert))
-!     ABI_MALLOC(car3flg,(3,mpert,3,mpert,3,mpert))
-!
-!     call lwcart(tmpflg,car3flg,tmpval,d3cart,gprimd,mpert,natom,rprimd)
-!
-!     ddb%flg(1:nsize,iblok) = reshape(car3flg, shape = (/3*mpert*3*mpert*3*mpert/))
-!     ddb%val(1,1:nsize,iblok) = reshape(d3cart(1,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
-!     ddb%val(2,1:nsize,iblok) = reshape(d3cart(2,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
-!
-!     ABI_FREE(d3cart)
-!     ABI_FREE(car3flg)
-!     ABI_FREE(tmpflg)
-!     ABI_FREE(tmpval)
-!=======
    if (raw_ == 0) then
      call ddb%symmetrize_and_transform(ddb_hdr%crystal,iblok)
-!>>>>>>> trunk/develop
    end if
 
  end do ! iblok
@@ -2897,15 +2773,8 @@ subroutine ddb_read_txt(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
  dimekb = ddb_hdr%psps%dimekb
  lmnmax = ddb_hdr%psps%lmnmax
  occopt = ddb_hdr%occopt
-!<<<<<<< HEAD
-
-! mpert = 2*natom+MPERT_MAX
-! msize=3*mpert*3*mpert; if (mtyp==3.or.mtyp==33) msize=msize*3*mpert
-
-!=======
  mpert = ddb_hdr%mpert
  msize = ddb_hdr%msize
-!>>>>>>> trunk/develop
 
  ! Master reads and then broadcasts data.
  if (xmpi_comm_rank(comm) == master) then

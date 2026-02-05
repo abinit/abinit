@@ -550,7 +550,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
 
 !Deactivate time-reversal symmetry for finite-omega calculations
- if (abs(dtset%rfomega)>tol10) timrev=0
+ if (abs(dtset%rfomega)>tol10.or.dtset%tim1rev==0) timrev=0
 
 !Generate an index table of atoms, in order for them to be used
 !type after type.
@@ -1024,7 +1024,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  dyfr_nondiag=0;if (psps%usepaw==1.and.rfphon==1) dyfr_nondiag=1
  dyfr_cplex=1;if (psps%usepaw==1.and.rfphon==1.and.(.not.qeq0)) dyfr_cplex=2
- if (abs(dtset%rfomega)>tol10) dyfr_cplex=2
+ if (abs(dtset%rfomega)>tol10.or.dtset%tim1rev==0) dyfr_cplex=2
  ABI_MALLOC(dyew,(2,3,natom,3,natom))
  ABI_MALLOC(dyewq0,(3,3,natom))
  ABI_MALLOC(dyfrlo,(3,3,natom))
@@ -3443,6 +3443,52 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
      end do
    end do
  end if
+
+ if (rfmagn==1.and.rfpert(natom+2)==1) then
+   write(iout,*)' '
+   write(iout,*)' Magnetoelectric tensor, in cartesian coordinates'
+   write(iout,*)' (from magnetization induced by electric field)'
+   write(iout,*)'    j1       j2             matrix element'
+   write(iout,*)' dir pert dir pert     real part    imaginary part'
+   ipert1=natom+5
+   ipert2=natom+2
+   nline=1
+   do idir1=1,3
+     if (nline/=0) write(iout,*)' '
+     nline=0
+     do idir2=1,3
+       if (carflg(idir1,ipert1,idir2,ipert2)==1) then
+         nline=nline+1
+         write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
+ &       d2cart(1,idir1,ipert1,idir2,ipert2),&
+ &       d2cart(2,idir1,ipert1,idir2,ipert2)
+       end if
+     end do
+   end do
+
+   write(iout,*)' '
+   write(iout,*)' Magnetoelectric tensor, in cartesian coordinates'
+   write(iout,*)' (from polarization induced by Zeeman field)'
+   write(iout,*)'    j1       j2             matrix element'
+   write(iout,*)' dir pert dir pert     real part    imaginary part'
+   ipert1=natom+2
+   ipert2=natom+5
+   nline=1
+   do idir1=1,3
+     if (nline/=0) write(iout,*)' '
+     nline=0
+     do idir2=1,3
+       if (carflg(idir1,ipert1,idir2,ipert2)==1) then
+         nline=nline+1
+         write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
+ &       d2cart(1,idir1,ipert1,idir2,ipert2),&
+ &       d2cart(2,idir1,ipert1,idir2,ipert2)
+       end if
+     end do
+   end do
+
+ end if
+
 
 end subroutine dfpt_dyout
 !!***
