@@ -265,6 +265,7 @@ nav:
     - Bibliography: theory/bibliography.md
     - Acronyms: theory/acronyms.md
 - Developers:
+    - Overview: developers/overview_development.md
     - Git and Gitlab: developers/git_and_gitlab.md
     - HowTo for developers: developers/developers_howto.md
     - Abimkdocs: developers/abimkdocs.md
