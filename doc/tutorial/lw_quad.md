@@ -11,7 +11,7 @@ It is assumed the user has already completed the two tutorials [RF1](/tutorial/r
 and is comfortable with the concepts of ground-state and response properties,
 including phonons, Born effective charges and dielectric tensor.
 
-The first-order terms in the long-wavelength expansion of a material's charge response to atomic displacements
+The first-order terms in the long-wavelength expansion of a material charge response to atomic displacements
 are the Born effective charges (dynamical dipoles). The second-order terms in this expansion are known as
 dynamical quadrupoles. Accordingly, the quadrupoles can be considered as the spatial-dispersion of the Born charges.
 
