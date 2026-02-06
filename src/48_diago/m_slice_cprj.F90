@@ -538,8 +538,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: trace_degree, trace_rank
  integer :: nstep_spectrum
  integer :: kmax
- integer :: nfilters, ifilter
+ integer :: nfilters, ifilter, nstep_bisect, ishift
  integer :: nvec_approx
+ integer :: ideg_shift
+ real(dp) :: balance_prev, balance_this
  real(dp) :: conf_tol
  real(dp) :: tol_step
  real(dp) :: tol_probe
@@ -566,9 +568,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: low_bound, upp_bound, min_low_bound
  real(dp) :: min_upp_bound, max_upp_bound
  real(dp) :: lambda_min, res_norm ! lanczos
- real(dp) :: lower_i, upper_i, width
- real(dp) :: signed_val, energy_magn_j
- real(dp) :: re_energy, im_energy, energy_ifilter
+ real(dp) :: lower_i, upper_i, mid_i, width
  real(dp) :: tol12 = 1.0e-12
  type(xg_t) :: Xsum
  type(xg_t) :: DivResults
@@ -600,11 +600,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer, allocatable :: nb_vec_slices(:)
  real(dp), allocatable :: upper_bound_slices(:)
  real(dp), allocatable :: rayleigh_quotients(:)
- real(dp), allocatable :: energy_filters(:,:)
+ real(dp), allocatable :: energy_filters_left(:,:)
+ real(dp), allocatable :: energy_filters_right(:,:)
  real(dp), allocatable :: lower_bounds(:)
  real(dp), allocatable :: upper_bounds(:)
- real(dp), allocatable :: cja(:)
- real(dp), allocatable :: energy_sign(:)
+ real(dp), allocatable, target :: cja(:)
+ real(dp), allocatable, target :: energy_interval(:)
  real(dp), allocatable :: confi_interval_left(:), confi_interval_right(:)
  real(dp), pointer :: probe(:) => null()
  real(dp), pointer :: probe_XfX(:,:) => null()
@@ -732,7 +733,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  ! ------------------------------------------------------------
  !
 
- kmax = 50
+ kmax = 100
  call computeBLanczos(slice, getAX, kin, spacedim, kmax, lambda_min, res_norm, gpu_option)
  min_low_bound = lambda_min - res_norm
 
@@ -834,6 +835,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
   call xg_setBlock(slice%X_NP,slice%X_prev,slice%total_spacedim,slice%neigenpairs,fcol=slice%neigenpairs+1)
 
   ndeg_filter_max = 20 ! low degree
+  ! if energy oscillates instead of being monotonous this means we have to increase
+  ! degree 
 
   write(901,*) 'Spectral trees %%%%%%%%%'
   write(901,*) 'ndeg_filter_max=', ndeg_filter_max
@@ -866,81 +869,95 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         upper_bounds(islice) = lambda_plus
   end do
 
-  nfilters = 4 ! bottom-up merging > nslice
+  nfilters = nslice
+  nstep_bisect = 8 ! number of bisection steps
 
-  ABI_MALLOC(energy_filters, (neigenpairs, nfilters))
+  ABI_MALLOC(energy_filters_left, (neigenpairs, nstep_bisect))
+  ABI_MALLOC(energy_filters_right, (neigenpairs, nstep_bisect))
+  ABI_MALLOC(energy_interval, (neigenpairs))
   ABI_MALLOC(cja, (ndeg_filter_max+1))
-  ABI_MALLOC(energy_sign, (neigenpairs))
 
-  upper_bounds(2) = 0.5d0
+  upper_bounds(2) = 0.5d0 ! hardcoded FIXME auto
   center = (max_upp_bound + min_low_est)*0.5
   radius = (max_upp_bound - min_low_est)*0.5
-  width = (upper_bounds(2) - lower_bounds(1)) / nfilters
-
-  do ifilter=1,nfilters
-      
-      ! Compute energy for every band
-      lower_i = lower_bounds(1) + (ifilter - 1) * width
-      upper_i = min(upper_bounds(2), lower_bounds(1) + ifilter * width)
-      deg_i = ndeg_filter_max
-
-      write(901,*) '========================================'
-      write(901,*) 'ifilter=', ifilter
-      write(901,*) 'lower_i=', lower_i
-      write(901,*) 'upper_i=', upper_i
-
-      call buildChebyshevJacksonCoeffs(lower_i, upper_i, deg_i, center, radius, cja)
-  
-      ! for every eigenpair, score is the sum of degrees
-      energy_ifilter = 0.d0
-      do j = 1, neigenpairs
-        re_energy = 0.0d0
-        im_energy = 0.0d0
-        do ideg = 1, ndeg_filter_max+1
-            re_energy = re_energy + cja(ideg) * cheby_moments(2*j-1, ideg)
-            im_energy = im_energy + cja(ideg) * cheby_moments(2*j,   ideg)
-        end do
-        energy_magn_j = sqrt( re_energy**2 + im_energy**2 )
-        energy_filters(j, ifilter) = energy_magn_j
-        energy_ifilter = energy_ifilter + energy_magn_j 
-      end do
-      nvec_approx = ceiling(energy_ifilter)
-      write(901,*) 'nvec estimate from X0 probe=', nvec_approx
-      flush(901)
-
-  end do
+  lower_i = lower_bounds(1)
+  upper_i = upper_bounds(2)
+  width = (upper_i - lower_i) / (nstep_bisect + 1)
 
   write(901,*)
-  do ifilter = 1, nfilters-1
-    do j = 1, neigenpairs
-        signed_val = (energy_filters(j,ifilter) - energy_filters(j,ifilter+1)) / &
-            (energy_filters(j,ifilter) + energy_filters(j,ifilter+1) + 0.2d0)
-        energy_sign(j) = sign(1.0d0, signed_val)
-    end do
-    write(901,*) 'pairwise response "i VS i+1" i=', sum(energy_sign), ifilter
+  write(901,*) 'lower_i=', lower_i
+  write(901,*) 'upper_i=', upper_i
+
+  ! shifted bisection
+  do ishift = 1, nstep_bisect
+
+    mid_i = lower_i + ishift * width
+    deg_i = ndeg_filter_max
+     
+    write(901,*) '========================================'
+    write(901,*) 'ishift=', ishift
+    write(901,*) 'mid_i  =', mid_i
+
+    ! Slice Left [a,b)
+    call buildChebyshevJacksonCoeffs(lower_i, mid_i, deg_i, center, radius, cja)
+    call computeFilterEnergy(neigenpairs, deg_i, cja, cheby_moments, &
+          energy_interval, nvec_approx)
+
+    energy_filters_left(:,ishift) = energy_interval(:)
+
+    write(901,*) 'nvec estimate left from X0 probe=', nvec_approx
     flush(901)
-  end do
-  ! interpretation: 
-  ! positive: slice i dominates
-  ! negative: slice i+1 dominates
-  ! magnitude: fraction of vectors agreeing
+
+    ! Slice Right [b,c)
+    call buildChebyshevJacksonCoeffs(mid_i, upper_i, deg_i, center, radius, cja)
+    call computeFilterEnergy(neigenpairs, deg_i, cja, cheby_moments, &
+          energy_interval, nvec_approx)
+
+    energy_filters_right(:,ishift) = energy_interval(:)
+
+    write(901,*) 'nvec estimate right from X0 probe=', nvec_approx
+    flush(901)
+
+    !! Uniform mass bisection
+    !! si le degré est assez elevé alors la masse totale est
+    !! - constante
+    !! - égale à nband
+    !!
+    !! Actuellement la masse totale est 88<192. Ça veut dire qu'on pert de la masse. 
+    !! Pour ça il faut augmenter l'overlap à droite et à gauche à mon avis.
+    !! todo nvec_approx sign flip means that we found important spectral
+    !! mass. Do not split there. also follow how the sign flip moves with degree
+    !! if it tends to go left or right. Take convergence into account by taking the limit.
+
+  end do 
 
   ! for every band print its nfilter scores
   write(901,*)
-  write(901,*) 'j=    ', nfilters, 'scores'
+  write(901,*) 'j=    ', nstep_bisect, 'scores'
   do j = 1, neigenpairs
     write(901,*) 'eigenvalue', j
-    do ifilter = 1, nfilters
-        signed_val = energy_filters(j,ifilter)
-        write(901,*) signed_val
-        flush(901)
+    do ishift = 1, nstep_bisect
+        balance_this = energy_filters_left(j,ishift) - energy_filters_right(j,ishift)
+        if (ishift > 1) then
+            if (balance_prev * balance_this < 0) then
+                write(901,*) 'sign flip! significant mass between=', ishift-1, ishift
+            end if
+        end if
+        write(901,*) energy_filters_left(j,ishift), energy_filters_right(j,ishift)
+        balance_prev = balance_this
     end do
   end do
   write(901,*)
+  flush(901)
 
-  ABI_FREE(energy_filters)
+  ! sign flip indicates presence of importance spectral mass
+  ! we should NOT cut in the (bi,bi+1) that contains the largest spectral mass
+  !! adding more nstep_bisect refines the interval (bi,bi+1) containing the large 
+  !! spectral mass
+
+  ABI_FREE(energy_filters_left)
+  ABI_FREE(energy_filters_right)
   ABI_FREE(cja)
-  ABI_FREE(energy_sign)
 
   !! TODO do the tree traversal
   !! like subdivide [A,B) and compute energy is each step
@@ -2556,7 +2573,7 @@ subroutine computeChebyshevMoments(slice, getAX, kin, min_low_bound, max_upp_bou
         call slice_swapInnerBuffers(slice, slice%total_spacedim, neigenpairs)
         call timab(tim_swap,2,tsec)
 
-        ! M_ideg = < X0, f_ideg X0 > in R^nband for every ideg
+        ! M_ideg = < X0, f_ideg X0 > in C^nband for every ideg
         call xgBlock_setBlock(Moments%self, moment_ideg, neigenpairs, 1, fcol=ideg+2) 
         call xgBlock_colwiseDotProduct(X0%self, slice%X, moment_ideg, comm_loc=xmpi_comm_null)
 
@@ -3308,6 +3325,54 @@ subroutine matmul_op_Binv(slice, n, q2, Binvq2, gpu_option)
     call xg_free(cprj_work2)
 
 end subroutine matmul_op_Binv
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice_cprj/computeFilterEnergy
+!! NAME
+!! computeFilterEnergy
+!! 
+!! SOURCE
+
+subroutine computeFilterEnergy(neigenpairs, ndeg_filter, cja, cheby_moments, &
+        energy_interval, nvec_approx)
+
+      implicit none
+
+      integer, intent(in) :: ndeg_filter
+      integer, intent(in) :: neigenpairs
+      integer, intent(out) :: nvec_approx
+      real(dp), pointer, intent(in) :: cja(:)
+      real(dp), pointer, intent(in) :: cheby_moments(:,:)
+      real(dp), pointer, intent(in) :: energy_interval(:)
+ 
+      real(dp) :: E_re(neigenpairs)
+      real(dp) :: E_im(neigenpairs)
+      real(dp) :: E_tot
+      real(dp) :: energy_magn_j
+      integer :: ideg
+      integer :: j
+
+      ! *********************************************************************
+
+      E_re = 0.0d0
+      E_im = 0.0d0
+      E_tot = 0.d0
+      do ideg = 1, ndeg_filter+1
+          do j = 1, neigenpairs
+              E_re(j) = E_re(j) + cja(ideg) * cheby_moments(2*j-1, ideg)
+              E_im(j) = E_im(j) + cja(ideg) * cheby_moments(2*j,   ideg)
+          end do
+      end do
+      do j = 1, neigenpairs
+          energy_magn_j = hypot(E_re(j), E_im(j))
+          energy_interval(j) = energy_magn_j
+          E_tot = E_tot + energy_magn_j 
+      end do
+      nvec_approx = ceiling(E_tot)
+
+end subroutine computeFilterEnergy
 !!***
 
 end module m_slice_cprj
