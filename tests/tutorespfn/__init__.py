@@ -125,5 +125,4 @@ inp_files = [
 "trf2_4.abi",
 "trf2_5.abi",
 "trf2_6.abi",
-"trf2_7.abi",
 ]
