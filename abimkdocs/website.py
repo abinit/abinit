@@ -464,8 +464,8 @@ Change the input yaml files or the python code
 # Autoconf examples
 
 This page gathers the autoconf files used by the buildbot testfarm. The different
-bots are described in the Wiki: [slave matrix](https://wiki.abinit.org/doku.php?id=bb:slaves)
-and [builder matrix](https://wiki.abinit.org/doku.php?id=bb:builder).
+bots are described in Abinit web site [server matrix](https://github.com/abinit/abinit_web/blob/main/docs/servers.md)
+and [builder matrix](https://github.com/abinit/abinit_web/blob/main/docs/builder.md).
 
 """)
         for f in os.listdir(dirpath):
