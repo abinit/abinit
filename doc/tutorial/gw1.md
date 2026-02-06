@@ -871,7 +871,7 @@ the previous convergence studies. Indeed, [[nband]] has been decreased from
 100 to 50. The CPU time of this part is linear with
 respect to this parameter (or more exactly, with the number of conduction
 bands). Thus, the CPU time has been decreased by a factor of 2. Referring to
-our previous convergence study, we see that the absolute accuracy on the GW
+our previous convergence study, we see that the absolute precision on the GW
 energies is now on the order of 0.2 eV only. This would be annoying for the absolute positioning of the band energy
 as required for band-offset or ionization potential of finite systems.
 However, as long as we are only interested in the gap energy that is fine enough.
@@ -930,7 +930,7 @@ of course on the pseudopotential used. However, a GW result is hardly
 more accurate than 0.1 eV, in the present state of the art. But this goes also
 with the other source of inaccuracy, the choice of the pseudopotential, that
 can arrive up to even 0.2 eV. This can also be taken into account when
-choosing the level of accuracy for the convergence parameters in the GW calculation.
+choosing the level of precision for the convergence parameters in the GW calculation.
 As a reasonable target, the numerical sources of errors, due to insufficient [[ecuteps]], [[nband]], k point grid,
 should be kept lower than 0.02 or 0.03 eV.
 
@@ -947,7 +947,7 @@ is followed by the use of Wannier90.
 
 {% dialog tests/wannier90/Input/t03.abi %}
 
-The wannier interpolation is a very accurate method, can handle band crossings
+The wannier interpolation is a very precise method, can handle band crossings
 but it may require additional work to obtain well localized wannier functions.
 Another practical way follows from the
 fact that the QP energies, similarly to the KS eigenvalues,
@@ -1044,7 +1044,7 @@ A correct self-consistent calculation should consist of the following runs:
   * 5) Sigma calculation (with the WFK, QPS and the new SCR files): outputs a new QPS file
   * 6) Screening calculation (with the WFK, the new QPS file): outputs a newer SCR file
   * 7) Sigma calculation (with the WFK, the newer QPS and SCR files): outputs a newer QPS
-  * ............ and so on, until the desired accuracy is reached
+  * ............ and so on, until the desired precision is reached
 
 Note that for Hartree-Fock calculations a dummy screening is required for
 initialization reasons. Therefore, a correct HF calculations should look like
@@ -1054,7 +1054,7 @@ initialization reasons. Therefore, a correct HF calculations should look like
   * 3) Sigma calculation (with KS inputs): outputs a QPS file
   * 4) Sigma calculation (with the WFK and QPS files): outputs a new QPS file
   * 5) Sigma calculation (with the WFK and the new QPS file): outputs a newer QPS file
-  * ............ and so on, until the desired accuracy is reached
+  * ............ and so on, until the desired precision is reached
 
 In the case of a self-consistent calculation, the output is slightly more complex:
 **For instance, at iteration 2**

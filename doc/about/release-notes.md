@@ -93,7 +93,7 @@ See numerous new tests, [[test:paral_102]] to [[test:paral_118]], [[test:paral_1
 
 New input variables :
 
-* about thirty variables with the prefix dmft_triqs_XXX. 
+* about thirty variables with the prefix dmft_triqs_XXX, see above. 
 * Yukawa : [[dmft_yukawa_epsilon]], [[dmft_yukawa_lambda]],  [[dmft_yukawa_param]]
 * Magnetic field : [[dmft_magnfield]], [[dmft_magnfield_b]]
 * Continuous Time QMC : [[dmftctqmc_chains]], [[dmftctqmc_localprop]] (replacing dmftctqmc_config), [[dmftctqmc_mov]], [[dmftctqmc_order]]
@@ -131,22 +131,20 @@ New tests : [[test:v10_27]], [[test:v10_28]], [[test:v10_29]]
 By Le Shu, M. Giantomassi and X. Gonze (MR1223, 1226, 1237, 1239)
 
 
-**B.3** Relaxed-core PAW  [PERHAPS TOO EARLY FOR MOST NOTICEABLE DEVELOPMENT]
+**B.3** New convergence criterion, suited for non-collinear magnetism studies
 
-Implemented the relaxed-core PAW method, see [[test:v10_108]].
+A new tolerance parameter [[toldmag]] has been added to monitor and control the magnetization convergence in SCF cycles.
+The output file now reports the maximum value of the magnetization in the atomic spheres and the difference between the values between two SCF steps.
 
-New input variables : use_rcpaw, rcpaw_frocc, rcpaw_elin, rcpaw_tpaw, rcpaw_vhtnzc, rcpaw_rctypat, rcpaw_sc, rcpaw_tolnc, rcpaw_updaepw, rcpaw_updatetnc
-There is no documentation of these input variables
+Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
+at the same goal (causing the SCF cycle to stop), they are seen as a unique
+input variable at reading. Hence, it is forbidden that two of these input
+variables have non-zero values for the same dataset, or generically (for all
+datasets).
 
-Print now core contribution when running PAW; with this contribution the total energy can be compared when using different pseudopotentials, even when they have different cores.
-Also, the total energy of the isolated atom is now identical to the one out put by atompaw.
+New [[test:v10_110]], and the output of many tests has been updated, due to the above-mentioned writings.
 
-New [[paw_add_core]] (not activated by default) to include the core contribution in the total energy printed during iterations. By default, this is the behavior when running relaxed-core paw.
-See [[test:v10_109]]
-
-Related tests : [[test:v10_108]], [[test:v10_109]].
-
-By J. Boust, M. Torrent (MR1173, 1242, 1256, 1271)
+By S. Rostami (MR1243)
 
 
 **B.4** Born contribution ("electron-phonon") to the total energy (beyond the usual Born-Oppenheimer energy)
@@ -195,22 +193,6 @@ Moreover, internally,
 * ddb_hdr_type uses logical variables to check for available block types (instead of mblktyp)
 
 By G. Antonius (MR1228)
-
-
-**B.7** New convergence criterion, suited for non-collinear magnetism studies
-
-A new tolerance parameter [[toldmag]] has been added to monitor and control the magnetization convergence in SCF cycles.
-The output file now reports the maximum value of the magnetization in the atomic spheres and the difference between the values between two SCF steps.
-
-Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
-at the same goal (causing the SCF cycle to stop), they are seen as a unique
-input variable at reading. Hence, it is forbidden that two of these input
-variables have non-zero values for the same dataset, or generically (for all
-datasets).
-
-New [[test:v10_110]], and the output of many tests has been updated, due to the above-mentioned writings.
-
-By S. Rostami (MR1243)
 
 
 * * *
@@ -341,10 +323,20 @@ For [[gw_rcut]], see [[test:gwr_suite_10]], [[test:gwr_suite_11]], [[test:paral_
 
 By F. Bruneval (commit 54d0c199f18 among others)
 
-**D.5**
-Significantly improved the error message output to ABI_MPIABORTFILE. Use POSIX API to create a file lock.
+**D.5** Relaxed-core PAW (Still in development, alsi extended FMPD.)
 
-By M. Giantomassi (MR1201)
+Implemented the relaxed-core PAW method, see [[test:v10_108]].
+
+New input variables : use_rcpaw, rcpaw_frocc, rcpaw_elin, rcpaw_tpaw, rcpaw_vhtnzc, rcpaw_rctypat, rcpaw_sc, rcpaw_tolnc, rcpaw_updaepw, rcpaw_updatetnc
+To be documented.
+
+Print now core contribution when running PAW; with this contribution the total energy can be compared when using different pseudopotentials, even when they have different cores.
+Also, the total energy of the isolated atom is now identical to the one out put by atompaw.
+
+New [[paw_add_core]] (not activated by default) to include the core contribution in the total energy printed during iterations. By default, this is the behavior when running relaxed-core paw.
+See [[test:v10_109]]
+
+Other new input variables, to be tested, to be documented : `extfpmd_prterr`, `extfpmd_pawsph`, `cwfs_wouth`. 
 
 **D.6** Remove the output in the log of PAW related quantities (Dij and Rhoij) at each SCF cycle when pawprtvol is 0
 
@@ -402,7 +394,8 @@ By J. Zwanziger (MR1230)
 **D.14** Replace complex(dpc) with complex(dp).  Remove gwpc and spc; use gwp and sp instead. By M. Giantomassi (MR1235)
 
 **D.15**
-New input variables, not tested, not documented : `extfpmd_prterr` 20251031, `extfpmd_pawsph` 20251031 , `cwfs_wouth` 20251215. Introduced by James Boust. TODO : document and test.
+Significantly improved the error message output to ABI_MPIABORTFILE. Use POSIX API to create a file lock.
+
 
 
 * * *

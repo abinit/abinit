@@ -121,12 +121,12 @@ Then, the file at which the problem occurred is mentioned, as well as the number
 
 As the computation of [[nkpt]] for specific grids of k-points is not an easy task,
 while the even more important selection of specific economical grids
-(the best ratio between the accuracy of the integration in the Brillouin zone and the number of k-points)
+(the best ratio between the precision of the integration in the Brillouin zone and the number of k-points)
 is more difficult, some help to the user is provided by ABINIT.
 
 The code is able to examine automatically different k-point grids, and to propose the best grids for integration.
 This is described in the [[help:abinit]], see the input variable [[prtkpt]], and the associated characterisation
-of the integral accuracy, described in [[kptrlen]].
+of the integral precision, described in [[kptrlen]].
 
 !!! tip
 
@@ -138,7 +138,7 @@ When one begins the study of a new material, it is strongly advised to examine f
 and select (at least) three efficient ones, for the k-point convergence study.
 
 Do not forget that the CPU time will be linearly proportional to the number of k-points to be treated:
-using 10 k-points will take five times more than using 2 k-points. Even for a similar accuracy of the
+using 10 k-points will take five times more than using 2 k-points. Even for a similar precision of the
 Brillouin zone integration (that is to say for about the same value of [[kptrlen]]), there might be a grid that will reduce to 10 k-points in the irreducible Brillouin zone and another that will reduce to 2 k-points
 in the irreducible Brillouin zone.
 The latter is clearly to be preferred from a computational perspective!
@@ -171,7 +171,7 @@ From the output file, here is the evolution of total energy for the different k-
     etotal4    -8.5251270559E+00
 
 The difference between dataset 3 and dataset 4 is rather small.
-Even the dataset 2 gives an accuracy of about 0.0001 Ha. So, our converged value for the total energy,
+Even the dataset 2 gives a precision of about 0.0001 Ha. So, our converged value for the total energy,
 at fixed [[acell]], fixed [[ecut]], is -8.8251 Ha.
 
 !!! note
