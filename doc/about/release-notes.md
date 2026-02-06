@@ -118,11 +118,11 @@ The atomic magnetic moment rotates in the x-y plane (Cartesian coords.) while th
     remains lattice-periodic. For this reason, one should set [[spinat]] so to have non-zero
     components in the x-y plane. Soon, this restriction should be waived, by defining an arbitrary spin projection axis.
 Forces, stresses and electric polarization are compatible with the GBT. Tests for forces and stresses are provided.
-Full spin-orbit coupling SOC) is not compatible with GBT, although its periodic part (along the z direction) can be activated (TODO give reference and update the doc).
+Full spin-orbit coupling (SOC) is not compatible with GBT, although its periodic part (along the z direction) can be activated (TODO give reference and update the doc).
 For the time being, only NC pseudos with useylm = 0 are supported.
-Also, paral_kgb must be set to 0.
+Also, [[paral_kgb]] must be set to 0 and GPUs cannot be used [[gpu_option]] 0.
 
-New input variables : [[use_gbt]], [[qgbt]], [[qgbt_cart]].
+New input variables: [[use_gbt]], [[qgbt]], [[qgbt_cart]].
 
 New tests : [[test:v10_27]], [[test:v10_28]], [[test:v10_29]]
 
@@ -151,8 +151,8 @@ By J. Boust, M. Torrent (MR1173, 1242, 1256, 1271)
 
 Calculation of the Born contribution ("electron-phonon") to the total energy.
 More information: [[https://arxiv.org/abs/2512.04897]].
-New tests :  [[test:v10_61]] to [[test:v10_65]].
-This energy contribution is printed with [[optdriver]]=7, [[eph_task]]=4 . TODO : check with Samuel.
+New tests:  [[test:v10_61]] to [[test:v10_65]].
+This energy contribution is printed with [[optdriver]]=7, [[eph_task]]=4.
 
 By S. Ponce with help by X. Gonze for the theory (MR1270)
 
@@ -162,16 +162,16 @@ By S. Ponce with help by X. Gonze for the theory (MR1270)
 * Nuclear spin dipole coupling has been added, enabling electron-mediated spin-dipole coupling.
 * The tutorial on nucleus properties has been expanded to include indirect J coupling.
 * Provides a simplified, alternative input to [[nucdipmom]] for the atoms carrying explicit
-nuclear dipole moments : [[atndlist]], [[iatnd]], [[natnd]]
+nuclear dipole moments: [[atndlist]], [[iatnd]], [[natnd]]
 * Added printing in 10^-21 SI units for point charge model output of EFG
 * Introduction of the [[zora]] input variable (zero-order relativistic approximation),
 to be able to include gradually corrections to the non-relativistic Hamiltonian, in the PAW case. [[zora]]=2 is equivalent to [[pawspnorb]]=1.
 * Also, update to CODATA2022, see A.2.
 * Corrected a bug in dfpt_nstpaw, whereby vlocal was not being allocated in the case of nonzero nuclear dipole vector potentials
 
-New input variables : [[atndlist]], [[iatnd]], [[natnd]], [[zora]].
+New input variables: [[atndlist]], [[iatnd]], [[natnd]], [[zora]].
 
-New tests : [[test:v10_44]], [[test:v10_84]], [[test:v9_141]] and tutorial [[test:nuc_5]]. Enlarged: [[test:v10_42]].
+New tests: [[test:v10_44]], [[test:v10_84]], [[test:v9_141]] and tutorial [[test:nuc_5]]. Enlarged: [[test:v10_42]].
 
 By J. Zwanziger (MR1212, 1222, 1253, 1259, 1275)
 
@@ -226,12 +226,12 @@ These developments further enhance ABINIT’s portability and efficiency on mode
 By G. Petretto (MR1240)
 
 
-**C.2** Improvements of the ABINIT build system : pkg_config and simplified usage of fallbacks.
+**C.2** Improvements of the ABINIT build system: pkg_config and simplified usage of fallbacks.
 
 
 It is now possible to better discover how to configure FFTW3, libxc, netcdf, ELPA and hdf5 using pkg_config (if present).
 This follows the same strategy as for netcdf_fortran.
-One change of behavior is that ./configure will try to detect/configure FFTW3 (and fallback to Goedecker if FFTW3 is not installed/working).
+One change of behavior is that ./configure will try to detect/configure FFTW3 (and fallback to Goedecker's version if FFTW3 is not installed/working).
 Therefore, some buildbot might be running now with FFTW3 instead of Goedecker.
 If that's problematic, one can add --without-fftw3 to forbid such detection.
 This is for example the case for alps_nag_7.2_serial which is now using FFTW3.
@@ -243,9 +243,9 @@ Note that currently the fallback always compile hdf5, a PR on the fallback repo 
 
 Fix detection of intel on manneback.
 
-Fix a typo in a config file : a copy-paste issue when hdf5 installation path was wrongly having reference to libxc.
+Fix a typo in a config file: a copy-paste issue when hdf5 installation path was wrongly having reference to libxc.
 
-By O. Mattelaer, with some help from M. Giantomassi (MR1194, 1227, 1246, 1255, 1262)
+By O. Mattelaer, with some help from M. Giantomassi and S. Ponce' (MR1194, 1227, 1246, 1255, 1262)
 
 
 **C.3** Improvement of configure
@@ -279,9 +279,9 @@ By M. Sarraute (MR1196, 1204, 1234, 1244, 1248, 1254, 1264)
 
 **D.1** Miscellaneous optimizations or testing for GPU
 
-Add GPU optimizations for use cases with multiple K-points.
+Add GPU optimization for use cases with multiple K-points.
 
-This brings GPU acceleration to sections that bottlenecks GPU performance when using multiple K-points :
+This brings GPU acceleration to sections that bottlenecks GPU performance when using multiple K-points:
 
 * array initialization in mkrho (paral_kgb==1)
 * array initialization in vtowfk post diago
@@ -299,18 +299,14 @@ By M. Sarraute (MR1196, 1210)
 
 The GSTORE.nc file now always stores complex electron–phonon matrix elements in the atomic representation.
 The format also supports different numbers of bands for incoming and outgoing electrons.
-Backward compatibility with older GSTORE files is not preserved (too difficult to maintain),
-but this is not a major issue since GSTORE is currently only used in varpeq, and V. Vasilchenko has agreed to adopt the new format.
+Backward compatibility with older GSTORE files is not preserved (too difficult to maintain).
+This is not a major issue since GSTORE is currently only used in varpeq, and V. Vasilchenko has agreed to adopt the new format.
 
 Introduced new variables [[gstore_use_lgk]], [[gstore_use_lgq]] to use symmetries by restricting
 the computation to the little group (of k or q).
 
 Introduced new variable [[gstore_gname]]. This input variable specifies the name of the netcdf variable from which the e-ph matrix elements
 will be **read** from the GSTORE.nc file.
-
-TODO : New input variable gstore_cplex, not documented, not tested
-
-See `test:gwpt_suite_04` and `test:gwpt_suite_05`
 
 By M. Giantomassi (MR1235 and 1238)
 
@@ -350,11 +346,11 @@ By M. Giantomassi (MR1201)
 
 By F. Brieuc (MR1207)
 
-**D.7** Allow dilatmx>1 only for ground state .
+**D.7** Allow dilatmx > 1 only for ground state.
 
-As discussed in coredev meeting, now dilatmx>1 is allowed only for ground state.
-Some tests were using dilatmx>1 for DFPT, so they are changed.
-Also, a warning is printed if dilatmx>1 and optcell==0.
+As discussed in the coredev meeting, now [[dilatmx]] > 1 is allowed only for ground state.
+Some tests were using dilatmx > 1 for DFPT, so they are changed.
+Also, a warning is printed if dilatmx>1 and [[optcell]]==0.
 
 By L. Baguet (MR1216)
 
@@ -401,13 +397,11 @@ By J. Zwanziger (MR1230)
 
 **D.14** Replace complex(dpc) with complex(dp).  Remove gwpc and spc; use gwp and sp instead. By M. Giantomassi (MR1235)
 
-**D.15** Copy tests from long wave tutorial to `test:v10_31` to `test:v10_38` in order to use NetCDF instead of text DDB in the tutorial. M. Giantomassi (e2d87c42135). Initial tests from M. Royo and A. Zabalo.
+**D.15** Copy tests from long wave tutorial to `test:v10_31` to `test:v10_38` in order to use NetCDF instead of text DDB in the tutorial.
+Initial tests from M. Royo and A. Zabalo.
 However, these tests are not activated ?! TODO : activate them or suppress them.
 
 **D.16**
-New input variables, not tested, not documented : `nb_protected`, `nb_per_slice`. Introduced by Matteo 20250415. TODO : document and test.
-
-**D.17**
 New input variables, not tested, not documented : `extfpmd_prterr` 20251031, `extfpmd_pawsph` 20251031 , `cwfs_wouth` 20251215. Introduced by James Boust. TODO : document and test.
 
 
@@ -418,7 +412,7 @@ New input variables, not tested, not documented : `extfpmd_prterr` 20251031, `ex
 **E.1** Axial vectors and symmetries
 
 An input axial vector, like [[hspinfield]] was wrongly treated as a normal vector for the determination of symmetries.
-For example, a non-zero [[hspinfield]] was wrongly preventing the inversion symmetry to occur. Same think for [[spinat]].
+For example, a non-zero [[hspinfield]] was wrongly preventing the inversion symmetry to occur. Same thing for [[spinat]].
 The recognition of symmetry groups was also incorrect. This has been fixed.
 
 See [[test:v10_30]].
