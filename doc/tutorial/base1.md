@@ -530,7 +530,7 @@ It is also worth to change the stopping criterion for the SCF cycle, in order
 to be sure that the forces generated for each trial interatomic distance are
 sufficiently converged. Indeed, the value used for [[toldfe]], namely 1.0d-6,
 might be sufficient for total energy calculations, but definitely not for the
-accurate computation of other properties. So, change [[toldfe]] in [[tolrff]],
+precise computation of other properties. So, change [[toldfe]] in [[tolrff]],
 and set the latter input variable to 0.02.
 The input file *tbase1_3.abi* is an example of file that will do the job
 
