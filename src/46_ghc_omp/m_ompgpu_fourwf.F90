@@ -200,7 +200,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
  real(dp) :: xnorm,one,tmp
 
- integer :: n1,n2,n3,nfft_tot,npwmin
+ integer :: n1,n2,n3,nfft_tot,npwmin,izd
  integer :: cfft_size
  integer :: shift_inv1,shift_inv2,shift_inv3
  integer :: i1,i2,i3,ipw,idat;
@@ -473,14 +473,16 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    ! call gpu routine to  Apply local potential
    if(cplex==1) then
      ! !$OMP TARGET TEAMS DISTRIBUTE MAP(to:denpot,fofr)
-     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) MAP(to:denpot,fofr)
+     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) PRIVATE(izd, tmp) MAP(to:denpot,fofr)
      do idat = 1, ndat
-       ! !$OMP PARALLEL DO COLLAPSE(3)
+       ! !$OMP PARALLEL DO PRIVATE(izd, tmp) COLLAPSE(3)
        do i3=1, n3
          do i2=1, n2
            do i1=1, n1
-             fofr(1, i1, i2, i3+(idat-1)*n3) = fofr(1, i1, i2, i3+(idat-1)*n3) * denpot(i1,i2,i3)
-             fofr(2, i1, i2, i3+(idat-1)*n3) = fofr(2, i1, i2, i3+(idat-1)*n3) * denpot(i1,i2,i3)
+             izd = i3+(idat-1)*n3
+             tmp = denpot(i1,i2,i3)
+             fofr(1, i1, i2, izd) = fofr(1, i1, i2, izd) * tmp
+             fofr(2, i1, i2, izd) = fofr(2, i1, i2, izd) * tmp
            end do
          end do
        end do
