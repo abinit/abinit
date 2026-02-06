@@ -1,16 +1,16 @@
 ## v10.6
 
-Version 10.6, released on Feb 10, 2026.
-<!-- Release notes updated on Jan 24, 2026. -->
+Version 10.6, released on Feb 7, 2026.
+<!-- Release notes updated on Feb 6, 2026. -->
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.6 with respect to v10.4.
 <!-- Initially, beta-release v10.6.1, the included MRs are
 MR1160, 1165, 1168, 1170, 1172, 1173, 1183, 1187, 1191, 1194, 1106,
 then 1200 to 1275, except those that had been closed, and also
-EXCEPT MR1219, 1225, that had already been included in v10.4,
-and EXCEPT MR1276, 1277, 1278, 1280 that will be included in v10.8 .
-For release v10.6.3, ...
+EXCEPT MR1219, 1225, that had already been included in v10.4.
+MR1276, 1277, 1278, 1280 will be included in v10.8 .
+For release v10.6.3, also includes MR 1279 and 1281.
 -->
 
 Many thanks to the contributors to the ABINIT project between April 2025 and February 2026 !
