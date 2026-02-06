@@ -857,10 +857,12 @@ end do
 
      end if
 
-     if(natom/=natrd.and.multiplicity == 1)then
-       ! Generate the full set of atoms from its knowledge in the irreducible part.
-       call fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
-     end if
+    if(natom/=natrd.and.multiplicity == 1)then
+      ! Generate the full set of atoms from its knowledge in the irreducible part.
+       call fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,spinat_cart,symafm,symrel,tnons,tolsym,typat,xred)
+      ! Keep spinat_in consistent with symmetry-expanded spinat for output/printing.
+      dtset%spinat_in(1:3,1:natom) = spinat(1:3,1:natom)
+    end if
 
      ! Check whether the symmetry operations are consistent with the lattice vectors
      iexit=0
@@ -1927,18 +1929,20 @@ end subroutine ingeobld
 !!  At input, for the asymmetric unit cell
 !!  nucdipmom(3,1:natrd)=nuclear magnetic dipole moments of the atoms
 !!  spinat(3,1:natrd)=spin-magnetization of the atoms
+!!  spinat_cart(3,1:natrd)=spin-magnetization of the atoms (Cartesian)
 !!  typat(1:natrd)=type integer for each atom in cell
 !!  xred(3,1:natrd)=reduced dimensionless atomic coordinates
 !!
 !!  At output, for the complete unit cell
 !!  nucdipmom(3,1:natom)=nuclear magnetic dipole moments of the atoms
 !!  spinat(3,1:natom)=spin-magnetization of the atoms
+!!  spinat_cart(3,1:natom)=spin-magnetization of the atoms (Cartesian)
 !!  typat(1:natom)=type integer for each atom in cell
 !!  xred(3,1:natom)=reduced dimensionless atomic coordinates
 !!
 !! SOURCE
 
-subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
+subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,spinat_cart,symafm,symrel,tnons,tolsym,typat,xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -1948,7 +1952,7 @@ subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons
  integer,intent(inout) :: typat(natom)
  real(dp),intent(in) :: tolsym
  real(dp),intent(in) :: tnons(3,nsym)
- real(dp),intent(inout) :: chrgat(natom),nucdipmom(3,natom),spinat(3,natom),xred(3,natom)
+ real(dp),intent(inout) :: chrgat(natom),nucdipmom(3,natom),spinat(3,natom),spinat_cart(3,natom),xred(3,natom)
 
 !Local variables ------------------------------
 !scalars
@@ -1957,7 +1961,7 @@ subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons
 !arrays
  integer :: bcktypat(nsym*natrd)
  real(dp) :: bckat(3),bcknucdipmom(3,nsym*natrd)
- real(dp) :: bckchrgat(nsym*natrd),bckspinat(3,nsym*natrd),bckxred(3,nsym*natrd)
+ real(dp) :: bckchrgat(nsym*natrd),bckspinat(3,nsym*natrd),bckspinat_cart(3,nsym*natrd),bckxred(3,nsym*natrd)
 
 ! *************************************************************************
 
@@ -2012,6 +2016,7 @@ subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons
        bckchrgat(curat)=chrgat(jj)
        bcknucdipmom(:,curat)=nucdipmom(:,jj)
        bckspinat(:,curat)=spinat(:,jj)*symafm(ii)
+       bckspinat_cart(:,curat)=spinat_cart(:,jj)*symafm(ii)
      end if
 
    end do
@@ -2048,6 +2053,7 @@ subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons
  chrgat(1:natom)=bckchrgat(1:natom)
  nucdipmom(1:3,1:natom)=bcknucdipmom(1:3,1:natom)
  spinat(1:3,1:natom)=bckspinat(1:3,1:natom)
+ spinat_cart(1:3,1:natom)=bckspinat_cart(1:3,1:natom)
 
 !DEBUG
 !write(std_out,*)' fillcell : exit with natom=',natom

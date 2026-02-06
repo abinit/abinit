@@ -229,7 +229,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  integer,save :: mlang5=((mlang+3)*(mlang+4)*(mlang+5))/6-10
  integer,save :: mlang6=((mlang+4)*(mlang+5)*(mlang+6))/6-20
  integer :: compact,ia,ia1,ia2,ia3,ia4,ia5,ierr,iest,ig,ii,ilang,ilang2,ilmn
- integer :: iln,iln0,indx,iproj,ipsang,ishift,isp,ispin,ispinor,ispinor_index,ispinp
+ integer :: iln,iln0,indx,iproj,ipsang,ishift,isp,ispin,ispinor,ispinor_index,ispinp,ispinor_ekb
  integer :: istr,istr1,istr2,iterm,itypat,jj,jjk,jjs,jjs1,jjs2,jjs3,jjs4,jjstr,jspin
  integer :: mincat,mproj,mu,mumax,n1,n2,n3,ndgxdt,ndgxdtfac,nincat,nlang
  integer :: nproj,nspinso,rank
@@ -477,7 +477,9 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
            iproj=indlmn(3,ilmn,itypat)
 !          This shift is not needed anymore
 !          if (ispinor==2) ipsang=indlmn(1,ilmn,itypat)-mpsang+2
-           ekb_s(ipsang,iproj)=ekb(iln,itypat,ispinor)
+!           ekb_s(ipsang,iproj)=ekb(iln,itypat,ispinor)
+           ispinor_ekb=min(ispinor,ubound(ekb,3))
+           ekb_s(ipsang,iproj)=ekb(iln,itypat,ispinor_ekb)
            wt(ipsang,iproj)=4.d0*pi/ucvol*dble(2*ipsang-1)*ekb_s(ipsang,iproj)
 !
 !          mjv 27 6 2008: if only_SO == 2 remove the factor of l in the operator
