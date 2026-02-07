@@ -148,6 +148,8 @@ The 20 highest energy states are simply not considered when checking the converg
     computing many empty states. As a rule of thumb, use 10% of [[nband]] or even more
     in complicated systems. This can really make a **huge difference** at the level of the wall time.
 
+[HDIAGO_README]
+
 ### 1.c Generating the screening: the SCR file.
 
 In dataset 3, the calculation of the screening (KS susceptibility $\chi^0$ and then inverse dielectric
@@ -331,7 +333,7 @@ evaluate the Wigner radius $r_s$, then compute the Drude plasma frequency, repor
 ```
 
 
-This omega_plasma is the value used when the default for [[ppmfrq]], namely 0.0, is specified. 
+This omega_plasma is the value used when the default for [[ppmfrq]], namely 0.0, is specified.
 It is in fact the second frequency
 where the code calculates the dielectric matrix to adjust the plasmon-pole
 model parameters.

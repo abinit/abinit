@@ -1,6 +1,6 @@
 
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 20 Dec 2025.
 - ( at 17h12 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v5_t26-t27-t28/t26.abi
 - output file    -> t26.abo
 - root for input  files -> t26i
@@ -480,7 +480,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -832,95 +832,95 @@ tolerances: {tolvrs: 1.00E-04, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         7.3085488112         0.0000000000
    1    1   2    1         3.6542758019         0.0000000000
    1    1   3    1         3.6542754834         0.0000000000
    1    1   1    2        -7.3083800241        -0.0000000000
    1    1   2    2        -3.6541889144         0.0000000000
    1    1   3    2        -3.6541910007         0.0000000000
-  
+
    2    1   1    1         3.6542766332         0.0000000000
    2    1   2    1         7.3085453495         0.0000000000
    2    1   3    1         3.6542760963         0.0000000000
    2    1   1    2        -3.6541885299         0.0000000000
    2    1   2    2        -7.3083786122         0.0000000000
    2    1   3    2        -3.6541890551         0.0000000000
-  
+
    3    1   1    1         3.6542755108         0.0000000000
    3    1   2    1         3.6542761603         0.0000000000
    3    1   3    1         7.3085479466         0.0000000000
    3    1   1    2        -3.6541914649         0.0000000000
    3    1   2    2        -3.6541889878         0.0000000000
    3    1   3    2        -7.3083795540         0.0000000000
-  
+
    1    2   1    1        -7.3083800160         0.0000000000
    1    2   2    1        -3.6541889626        -0.0000000000
    1    2   3    1        -3.6541909581        -0.0000000000
    1    2   1    2         7.3087248559         0.0000000000
    1    2   2    2         3.6543622154         0.0000000000
    1    2   3    2         3.6543614657         0.0000000000
-  
+
    2    2   1    1        -3.6541885084        -0.0000000000
    2    2   2    1        -7.3083786230        -0.0000000000
    2    2   3    1        -3.6541889600        -0.0000000000
    2    2   1    2         3.6543630445         0.0000000000
    2    2   2    2         7.3087296020         0.0000000000
    2    2   3    2         3.6543619786         0.0000000000
-  
+
    3    2   1    1        -3.6541914960        -0.0000000000
    3    2   2    1        -3.6541890566        -0.0000000000
    3    2   3    1        -7.3083795526        -0.0000000000
    3    2   1    2         3.6543614856         0.0000000000
    3    2   2    2         3.6543620289         0.0000000000
    3    2   3    2         7.3087264172         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.1404787603         0.0000000000
    1    1   2    1         0.0000000594         0.0000000000
    1    1   3    1         0.0000000046         0.0000000000
    1    1   1    2        -0.1404755445        -0.0000000000
    1    1   2    2         0.0000000106         0.0000000000
    1    1   3    2        -0.0000000101         0.0000000000
-  
+
    2    1   1    1         0.0000000601         0.0000000000
    2    1   2    1         0.1404787360         0.0000000000
    2    1   3    1         0.0000000670         0.0000000000
    2    1   1    2         0.0000000208         0.0000000000
    2    1   2    2        -0.1404756295        -0.0000000000
    2    1   3    2        -0.0000000072        -0.0000000000
-  
+
    3    1   1    1        -0.0000000126         0.0000000000
    3    1   2    1         0.0000000824         0.0000000000
    3    1   3    1         0.1404787637         0.0000000000
    3    1   1    2        -0.0000000188         0.0000000000
    3    1   2    2         0.0000000091        -0.0000000000
    3    1   3    2        -0.1404755330        -0.0000000000
-  
+
    1    2   1    1        -0.1404755441         0.0000000000
    1    2   2    1         0.0000000113        -0.0000000000
    1    2   3    1        -0.0000000111        -0.0000000000
    1    2   1    2         0.1404822752         0.0000000000
    1    2   2    2        -0.0000000270         0.0000000000
    1    2   3    2         0.0000000208         0.0000000000
-  
+
    2    2   1    1         0.0000000198        -0.0000000000
    2    2   2    1        -0.1404756294         0.0000000000
    2    2   3    1        -0.0000000082         0.0000000000
    2    2   1    2        -0.0000000264         0.0000000000
    2    2   2    2         0.1404822549         0.0000000000
    2    2   3    2        -0.0000000765         0.0000000000
-  
+
    3    2   1    1        -0.0000000179        -0.0000000000
    3    2   2    1         0.0000000109         0.0000000000
    3    2   3    1        -0.1404755336         0.0000000000
@@ -937,9 +937,9 @@ tolerances: {tolvrs: 1.00E-04, }
 -  5.141413E+02
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
  Phonons at gamma, also compute the Diagonal Debye-Waller shift of eigenvalues.
 
@@ -1006,7 +1006,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1362,95 +1362,95 @@ tolerances: {tolvrs: 1.00E-04, }
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    1         8.1265303603         0.0000000000
    1    1   2    1         3.4981926216         0.0000000000
    1    1   3    1         3.4983358936        -0.0000000000
    1    1   1    2        -1.6393569392         0.0000000000
    1    1   2    2        -3.1922117865        -0.0000000000
    1    1   3    2        -3.1920997051        -0.0000000000
-  
+
    2    1   1    1         3.4982071727        -0.0000000000
    2    1   2    1         6.9964409352         0.0000000000
    2    1   3    1         3.4982486391         0.0000000000
    2    1   1    2        -3.1921274908        -0.0000000000
    2    1   2    2        -6.3843519399        -0.0000000000
    2    1   3    2        -3.1922050030        -0.0000000000
-  
+
    3    1   1    1         3.4982101168         0.0000000000
    3    1   2    1         3.4982299514         0.0000000000
    3    1   3    1         6.9964675996         0.0000000000
    3    1   1    2        -3.1921303521        -0.0000000000
    3    1   2    2        -3.1921810327        -0.0000000000
    3    1   3    2        -6.3843847150        -0.0000000000
-  
+
    1    2   1    1        -1.6393569413        -0.0000000000
    1    2   2    1        -3.1922117866         0.0000000000
    1    2   3    1        -3.1920991630         0.0000000000
    1    2   1    2         8.1267075971         0.0000000000
    1    2   2    2         3.4982804088        -0.0000000000
    1    2   3    2         3.4984226560        -0.0000000000
-  
+
    2    2   1    1        -3.1921269757         0.0000000000
    2    2   2    1        -6.3843520186         0.0000000000
    2    2   3    1        -3.1922049714         0.0000000000
    2    2   1    2         3.4982955401         0.0000000000
    2    2   2    2         6.9966304337         0.0000000000
    2    2   3    2         3.4983358133         0.0000000000
-  
+
    3    2   1    1        -3.1921299971         0.0000000000
    3    2   2    1        -3.1921810971         0.0000000000
    3    2   3    1        -6.3843847269         0.0000000000
    3    2   1    2         3.4982977800         0.0000000000
    3    2   2    2         3.4983171372        -0.0000000000
    3    2   3    2         6.9966501119         0.0000000000
-  
-  
+
+
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    1         0.1453405690         0.0000000000
    1    1   2    1        -0.0108619861         0.0000000000
    1    1   3    1        -0.0108601040        -0.0000000000
    1    1   1    2        -0.0771144529         0.0000000000
    1    1   2    2        -0.0456028847        -0.0000000000
    1    1   3    2        -0.0455996397        -0.0000000000
-  
+
    2    1   1    1        -0.0108599277        -0.0000000000
    2    1   2    1         0.1453418649        -0.0000000000
    2    1   3    1         0.0108595748         0.0000000000
    2    1   1    2        -0.0456018349        -0.0000000000
    2    1   2    2        -0.0771114548         0.0000000000
    2    1   3    2         0.0456010492         0.0000000000
-  
+
    3    1   1    1        -0.0108600245         0.0000000000
    3    1   2    1         0.0108622721        -0.0000000000
    3    1   3    1         0.1453390544        -0.0000000000
    3    1   1    2        -0.0456017207        -0.0000000000
    3    1   2    2         0.0456032585         0.0000000000
    3    1   3    2        -0.0771135542         0.0000000000
-  
+
    1    2   1    1        -0.0771144677         0.0000000000
    1    2   2    1        -0.0456028800        -0.0000000000
    1    2   3    1        -0.0455996277         0.0000000000
    1    2   1    2         0.1453441540         0.0000000000
    1    2   2    2        -0.0108620551         0.0000000000
    1    2   3    2        -0.0108600582        -0.0000000000
-  
+
    2    2   1    1        -0.0456018285         0.0000000000
    2    2   2    1        -0.0771114517         0.0000000000
    2    2   3    1         0.0456010430        -0.0000000000
    2    2   1    2        -0.0108600138        -0.0000000000
    2    2   2    2         0.1453454512        -0.0000000000
    2    2   3    2         0.0108593817         0.0000000000
-  
+
    3    2   1    1        -0.0456017167         0.0000000000
    3    2   2    1         0.0456032658        -0.0000000000
    3    2   3    1        -0.0771135584        -0.0000000000
@@ -1467,9 +1467,9 @@ tolerances: {tolvrs: 1.00E-04, }
 -  4.919222E+02
 ================================================================================
 
- ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
- Warning : the total shift must be computed through anaddb,                  
- here, only the contribution of one q point is printed.                      
+ ---- T=0 shift of eigenenergies due to electron-phonon interation at q ----
+ Warning : the total shift must be computed through anaddb,
+ here, only the contribution of one q point is printed.
  Print first the electronic eigenvalues, then the q-dependent Fan shift of eigenvalues.
 
  Eigenvalues (hartree) for nkpt=  32  k points:
@@ -1488,7 +1488,7 @@ tolerances: {tolvrs: 1.00E-04, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0200586463E+01  1.0200586463E+01  1.0200586463E+01 Bohr
               amu      2.80855000E+01
@@ -1709,7 +1709,7 @@ P          mk1mem3         32
 - Strong suggestion to cite this paper in your publications.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#ponce2014
 -
-- [2] Temperature dependence of the electronic structure of semiconductors and insulators 
+- [2] Temperature dependence of the electronic structure of semiconductors and insulators
 - S. Ponce, Y. Gillet, J. Laflamme Janssen, A. Marini, M. Verstraete and X. Gonze. J. Chem. Phys. 143, 102813 (2015)
 - Comment: the temperature-dependence of the electronic structure is computed (or the zero-point renormalisation).
 - Strong suggestion to cite this paper in your publications.
@@ -1727,7 +1727,7 @@ P          mk1mem3         32
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -1750,12 +1750,12 @@ P          mk1mem3         32
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -1773,7 +1773,7 @@ P          mk1mem3         32
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

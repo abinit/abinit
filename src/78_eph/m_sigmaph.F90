@@ -32,16 +32,15 @@ module m_sigmaph
  use m_copy
  use m_ifc
  use m_ebands
- use m_wfk
- use m_ddb
  use m_ddk
- use m_dvdb
+ use m_dvdb,           only : dvdb_t
  use m_fft
- use m_hamiltonian
- use m_pawcprj
- use m_wfd
+ use m_hamiltonian,    only : gs_hamiltonian_type, rf_hamiltonian_type
+ use m_pawcprj,        only : pawcprj_type, pawcprj_free
+ use m_wfd,            only : wfd_t, u1_cache_t
+ use m_wfk
  use m_skw
- use m_krank
+ use m_krank,           only : krank_t
  use m_lgroup
  use m_ephwg
  use m_sort
@@ -70,7 +69,7 @@ module m_sigmaph
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_occ,            only : occ_fd, occ_be
- use m_kg,             only : getph, mkkpg, mkkin
+ use m_kg,             only : getph, mkkpg
  use m_bz_mesh,        only : isamek
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_ioarr,          only : read_rhor
@@ -490,8 +489,8 @@ module m_sigmaph
    ! d Re Sigma_frohl(omega, kT, band, kcalc, spin) / d omega (omega=eKS)
 
   real(dp),allocatable :: dw_vals(:,:)
-   !  dw_vals(ntemp, max_nbcalc) for given (ikcalc, spin)
-   !  Debye-Waller term (static).
+   ! dw_vals(ntemp, max_nbcalc) for given (ikcalc, spin)
+   ! Debye-Waller term (static).
 
   real(dp),allocatable :: dw_stern_vals(:,:)
    !  dw_stern_vals(ntemp, max_nbcalc) for given (ikcalc, spin)
@@ -654,7 +653,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: mpw,ierr,it,imyq,band, ignore_kq, ignore_ibsum_kq
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu, iang
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg_kq,nq,cnt,imyp, q_start, q_stop, restart, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom, sendcount
  integer :: comm_rpt, osc_npw, stern_comm
  integer :: nelem, cgq_request ! ffnl_k_request, ffnl_kq_request,
@@ -695,15 +694,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gkq0_atm(:,:,:,:), gaussw_qnu(:)
  real(dp),allocatable :: cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
  real(dp),allocatable :: stern_ppb(:,:,:,:), stern_dw(:,:,:,:)
+ logical,allocatable :: ihave_ikibz_spin(:,:), bks_mask(:,:,:),keep_ur(:,:,:), osc_mask(:)
  real(dp),allocatable :: E4stern_nk(:,:,:,:)
- logical,allocatable :: ihave_ikibz_spin(:,:), bks_mask(:,:,:),keep_ur(:,:,:)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:),nqnu_tlist(:),dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:),alpha_mrta(:)
  real(dp),allocatable :: delta_e_minus_emkq(:), gkq_allgather(:,:,:),f_tlist_b(:,:)
  !real(dp),allocatable :: phfreqs_qibz(:,:), pheigvec_qibz(:,:,:,:), eigvec_qpt(:,:,:)
- logical,allocatable :: osc_mask(:)
  real(dp),allocatable :: gkq2_lr(:,:,:), E4(:)
  complex(dp) :: cp3(3)
  complex(dp),allocatable :: osc_ks(:,:), fmw_frohl_sphcorr(:,:,:,:), cfact_wr(:), tpp_red(:,:)
@@ -1095,7 +1093,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! DBSP
  etot = zero
  if (dtset%eph_stern /= 0) then
-   ! Read the GS potential (vtrial) from input POT file
+   ! Read the GS potential (vtrial) from input POT file.
    ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
    call wrtout(units, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
    call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pot_pawrhoij, comm, &
@@ -1113,7 +1111,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end if
  ABI_MALLOC(nqnu_tlist, (sigma%ntemp))
 
- ! Allocate workspace arrays for Eliashberg calculation.
+ ! Allocate workspace arrays for Eliashberg functions
  if (dtset%prteliash /= 0) then
    ABI_MALLOC(dtw_weights, (sigma%phmesh_size, 2))
    ABI_MALLOC(dwargs, (sigma%phmesh_size))
@@ -1270,12 +1268,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(alpha_mrta, (nbcalc_ks))
      end if
 
-     ! Prepare computation of Sigma_{nk}(w) and spectral function.
      if (sigma%nwr > 0) then
+       ! Prepare computation of Sigma_{nk}(w) and spectral function.
+       ! Build linear mesh **centered** around the KS energy.
        sigma%vals_wr = zero
        do ib_k=1,nbcalc_ks
          band_ks = ib_k + bstart_ks - 1
-         ! Build linear mesh **centered** around the KS energy.
          eig0nk = ebands%eig(band_ks, ik_ibz, spin) - sigma%wr_step * (sigma%nwr / 2)
          sigma%wrmesh_b(:,ib_k) = arth(eig0nk, sigma%wr_step, sigma%nwr)
        end do
@@ -1515,7 +1513,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Get istwf_kq, npw_kq, kg_kq for k+q.
        call wfd%get_gvec_gbound(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, & ! in
-                                istwf_kq, npw_kq, kg_kq, nkpg1, kpg_kq, gbound_kq)       ! out
+                                istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)     ! out
 
        !call timab(1901, 2, tsec)
        !call timab(1902, 1, tsec)
@@ -1556,11 +1554,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! NB: bsum_range is not compatible with Sternheimer.
          ! There's a check at the level of the parser in chkinp.
 
+         ! The static correction to FM_nk is:
+         !    \sum_{qnu} (2n_qnu + 1) <H^1_{qnu} psi_nk| psi^1_{nk; qnu}>
+
          call timab(1908, 1, tsec)
          ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
 
-         ! NOTE that in the present version we need to gather all nbsum bands
-         ! on each core before calling dfpt_cgwf.
+         ! NOTE: in the present version, we need to gather all nbsum bands on each core before calling dfpt_cgwf.
          ! In principle one can call dfpt_cgwf in band-para mode but then
          ! we are obliged to call the sternheimer solver with one psi1 and all procs in bsum_comm
          ! just to to be able to apply the projector operator.
@@ -1628,7 +1628,7 @@ if (.not. stern%has_band_para) then
          end if
 end if
          call timab(1908, 2, tsec)
-       end if  ! eph_stern
+       end if ! eph_stern
 
        ! Loop over all 3*natom perturbations (Each core prepares its own potentials)
        ! In the inner loop, we calculate H1 * psi_k, stored in h1kets_kq on the k+q sphere.
@@ -1715,7 +1715,8 @@ end if
 
              call timab(1909, 2, tsec)
 
-             call stern%solve(u1_band, band_me, idir, ipert, qpt, gs_ham_kq, rf_ham_kq, ebands%eig(:,ik_ibz,spin), ebands%eig(:,ikq_ibz,spin), &
+             call stern%solve(u1_band, band_me, idir, ipert, qpt, gs_ham_kq, rf_ham_kq, &
+                              ebands%eig(:,ik_ibz,spin), ebands%eig(:,ikq_ibz,spin), &
                               kets_k(:,:,ib_k), cwaveprj0, cg1s_kq(:,:,ipc,ib_k), cwaveprj, msg, ierr)
              ABI_CHECK(ierr == 0, msg)
              if (stern%has_band_para) call xmpi_bcast(cg1s_kq(:,:,ipc,ib_k), u1_master, sigma%bsum_comm%value, ierr)
@@ -1810,7 +1811,6 @@ end if
                sigma%fan_stern_vals(it, ib_k) = sigma%fan_stern_vals(it, ib_k) + rtmp
                ! Add static term from Sternheimer to Sigma(w) as well.
                if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + rtmp
-               !if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkq2 * cfact_wr(:)
              end do
 
              ! Calculation of the 4th-order contribution to total energy due to electron-phonon interaction
@@ -3362,7 +3362,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call cwtime_report(" sigmaph_new: after doublegrid", cpu, wall, gflops)
 
  ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
- ! TODO: One should check that nband is > nbocc to avoid inaccuracies in mu_e
  ABI_MALLOC(new%mu_e, (new%ntemp))
  new%mu_e(:) = ebands%fermie
 
@@ -3480,7 +3479,6 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    ! Master creates the netcdf file used to store the results of the calculation.
    NCF_CHECK(nctk_open_create(self%ncid, path, xmpi_comm_self))
    ncid = self%ncid
-
    NCF_CHECK(wfk_hdr%ncwrite(ncid, fform_from_ext("SIGEPH.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands%ncwrite(ncid))
@@ -3488,7 +3486,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
      NCF_CHECK(edos%ncwrite(ncid))
    end if
 
-   ! Add sigma_eph dimensions.
+   ! Add dimensions.
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("nkcalc", self%nkcalc), nctkdim_t("max_nbcalc", self%max_nbcalc), &
      nctkdim_t("nsppol", self%nsppol), nctkdim_t("ntemp", self%ntemp), nctkdim_t("natom3", 3 * cryst%natom), &
@@ -3526,7 +3524,6 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
      nctkarr_t("sigma_erange", "dp", "two"), &
      !nctkarr_t("frohl_params", "dp", "four"), &
      nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
-     !nctkarr_t("bstop_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("kcalc", "dp", "three, nkcalc"), &
      nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
@@ -3885,8 +3882,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, kcalc2eb
 !scalars
  integer,parameter :: master = 0
  integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt, band_ks, bstart_ks, nbcalc_ks, mband
- integer :: bmin, bmax, my_rank, ierr
- integer :: ncerr
+ integer :: bmin, bmax, my_rank, ierr, ncerr
  type(krank_t) :: krank
  character(len=5000) :: msg
 !arrays
@@ -4120,14 +4116,9 @@ subroutine sigmaph_free(self)
  call self%eph_doublegrid%free()
 
  ! Deallocate MPI communicators
- call self%pert_comm%free()
- call self%qpt_comm%free()
- call self%bsum_comm%free()
- call self%qb_comm%free()
- call self%kcalc_comm%free()
- call self%spin_comm%free()
- call self%pqb_comm%free()
- call self%ncwrite_comm%free()
+ call self%pert_comm%free(); call self%qpt_comm%free(); call self%bsum_comm%free()
+ call self%qb_comm%free(); call self%kcalc_comm%free(); call self%spin_comm%free()
+ call self%pqb_comm%free(); call self%ncwrite_comm%free()
 
  ! Close netcdf file.
  if (self%ncid /= nctk_noid) then
@@ -4599,7 +4590,6 @@ end subroutine sigmaph_setup_qloop
 !!  ebands<ebands_t>=KS band energies.
 !!  ikcalc=Index of the computed k-point
 !!  spin=Spin index.
-!!  prtvol= Verbosity level
 !!  comm=MPI communicator.
 !!
 !! SOURCE
@@ -4650,9 +4640,9 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
  if (self%mrta > 0) call xmpi_sum_master(self%linewidth_mrta, master, comm, ierr)
  if (dtset%eph_prtscratew == 1) then
-    ! Collect spectral decomposition of scattering rates, multiply by two since so far we have stored Imag(Sigma) (ph_w)
-    call xmpi_sum_master(self%scratew, master, comm, ierr)
-    self%scratew = two * self%scratew
+   ! Collect spectral decomposition of scattering rates, multiply by two since so far we have stored Imag(Sigma) (ph_w)
+   call xmpi_sum_master(self%scratew, master, comm, ierr)
+   self%scratew = two * self%scratew
  end if
 
  if (dtset%ibte_prep > 0) then
@@ -4953,10 +4943,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
 
  call flush_unit(ab_out)
 
- ! Write self-energy matrix elements for this (kpt, spin)
- ! NB: Only master writes
- ! (use, intrinsic :: iso_c_binding to associate a real pointer to complex data because netcdf does not support complex types).
- ! Well, cannot use c_loc with gcc <= 4.8 due to internal compiler error so use c2r and stack memory.
+ ! Write self-energy matrix elements for this (kpt, spin). NB: Only master writes
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), c2r(self%vals_e0ks), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "fan_vals"), c2r(self%fan_vals), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "E4_vals"), c2r(self%E4_vals), start=[1,1,1,ikcalc,spin]))
@@ -4965,7 +4952,6 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dvals_de0ks"), c2r(self%dvals_de0ks), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dw_vals"), self%dw_vals, start=[1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dw_stern_vals"), self%dw_stern_vals, start=[1,1,ikcalc,spin]))
-
  ! Dump QP energies and gaps for this (kpt, spin)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpoms_enes"), c2r(qpoms_enes), start=[1,1,1,ikcalc,spin]))
 
@@ -4996,8 +4982,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "wrmesh_b"), self%wrmesh_b, start=[1,1,ikcalc,spin]))
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_wr"), c2r(self%vals_wr), start=[1,1,1,1,ikcalc,spin]))
 
-   ! Compute spectral function.
-   ! A = -1/pi [Im Sigma(ww)] / ([ww - ee - Re Sigma(ww)] ** 2 + Im Sigma(ww) ** 2])
+   ! Compute spectral function. A = -1/pi [Im Sigma(ww)] / ([ww - ee - Re Sigma(ww)] ** 2 + Im Sigma(ww) ** 2])
    ABI_MALLOC(aw, (self%nwr, self%ntemp, self%max_nbcalc))
    do ib=1,self%nbcalc_ks(ikcalc, spin)
      band_ks = self%bstart_ks(ikcalc, spin) + ib - 1

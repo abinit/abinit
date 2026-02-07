@@ -33,6 +33,7 @@ MODULE m_oper
  use m_abicore
  use m_errors
  use m_xomp
+ use m_gputk
  use m_abi_linalg
 
  !use m_abi_linalg, only : abi_xgemm

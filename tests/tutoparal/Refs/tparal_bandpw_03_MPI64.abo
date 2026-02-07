@@ -1,6 +1,6 @@
 
 .Version 10.6.0.1 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu10.2 computer)
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -16,13 +16,13 @@
 
 .Starting date : Tue  6 Jan 2026.
 - ( at 16h36 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/scope_gnu_10.2_s64/trunk_release-10.6/tests/TestBot_MPI64/tutoparal_tparal_bandpw_03_MPI64/tparal_bandpw_03.abi
 - output file    -> tparal_bandpw_03_MPI64.abo
 - root for input  files -> tparal_bandpw_03_MPI64i
 - root for output files -> tparal_bandpw_03_MPI64o
 
-- inpspheads : Reading pseudopotential header in XML form from 
+- inpspheads : Reading pseudopotential header in XML form from
 -   /home/buildbot/ABINIT3/scope_gnu_10.2_s64/trunk_release-10.6/tests/Pspdir/Psdj_paw_pw_std/Au.xml
  Symmetries : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -1824,7 +1824,7 @@ Total energy DC (eV): -5.53247128131871E+07
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      2.3010000000E+01  2.3010000000E+01  2.3010000000E+01 Bohr
               amu      1.96966540E+02
@@ -2431,8 +2431,8 @@ P           mkmem           1
 
 ================================================================================
 
- Test the timer : 
-  a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
+ Test the timer :
+  a combined call timab(*,1,tsec) + timab(*,2,tsec) is
 - CPU time =    3.1652E-05 sec,    Wall time =    3.1664E-05 sec
 
 - Total cpu        time (s,m,h):       8176.7      136.28      2.271
@@ -2497,7 +2497,7 @@ P           mkmem           1
 - subtotal                                124.634   1.5       124.505   1.5                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
 -<BEGIN_TIMER mpi_nprocs = 64, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =        8176.7, wall_time =        8190.3
@@ -2565,7 +2565,7 @@ P           mkmem           1
 
  Partitioning of abinit
 - abinit                                 8176.657 100.0      8190.338 100.0             64                   1.00       1.00
- 
+
 - get_dtsets_pspheads                      36.172   0.4        36.174   0.4             64                   1.00       1.00
 - abinit(outvars)                          12.777   0.2        12.778   0.2             64                   1.00       1.00
 - abinit(chkinp,chkvars)                    3.281   0.0         3.281   0.0             64                   1.00       1.00
@@ -2577,14 +2577,14 @@ P           mkmem           1
 
  Partitioning of driver
 - driver                                 8113.816  99.2      8127.457  99.2             64                   1.00       1.00
- 
+
 - (other)                                8113.342  99.2      8126.981  99.2             -1                   1.00       1.00
 
 - subtotal                               8113.816  99.2      8127.457  99.2                                  1.00       1.00
 
  Partitioning of gstateimg+gstate
 - gstateimg                              8108.522  99.2      8122.159  99.2             64                   1.00       1.00
- 
+
 - gstate(1)                                 2.128   0.0         2.186   0.0            128                   0.97       0.97
 - gstate(pspini)                           51.711   0.6        51.713   0.6             64                   1.00       1.00
 - gstate(2)                                 5.980   0.1         5.980   0.1             64                   1.00       1.00
@@ -2597,7 +2597,7 @@ P           mkmem           1
 
  Partitioning of scfcv_core
 - scfcv_core                             7989.764  97.7      7990.248  97.6             64                   1.00       1.00
- 
+
 - scfcv_core(setvtr)                      306.256   3.7       306.268   3.7            640                   1.00       1.00
 - scfcv_core(loop, PAW)                    33.609   0.4        33.611   0.4            640                   1.00       1.00
 - scfcv_core(vtorho(f))                  7330.066  89.6      7330.381  89.5            640                   1.00       1.00
@@ -2610,7 +2610,7 @@ P           mkmem           1
 
  Partitioning of rhotov
 - rhotov                                   14.484   0.2        14.482   0.2            576                   1.00       1.00
- 
+
 - rhotov(rhotoxc)                           9.575   0.1         9.577   0.1            576                   1.00       1.00
 - (other)                                   4.590   0.1         4.593   0.1             -1                   1.00       1.00
 
@@ -2618,7 +2618,7 @@ P           mkmem           1
 
  Partitioning of vtorho
 - vtorho                                 7330.037  89.6      7330.354  89.5            640                   1.00       1.00
- 
+
 - vtorho(bef. spin loop)                    3.301   0.0         3.302   0.0            640                   1.00       1.00
 - vtorho(bef. vtowfk)                       2.109   0.0         2.107   0.0            640                   1.00       1.00
 - vtowfk                                 7255.488  88.7      7255.804  88.6            640                   1.00       1.00
@@ -2630,7 +2630,7 @@ P           mkmem           1
 
  Partitioning of vtowfk
 - vtowfk                                 7255.488  88.7      7255.804  88.6            640                   1.00       1.00
- 
+
 - vtowfk(2)                              6393.577  78.2      6393.854  78.1            -64                   1.00       1.00
 - prep_nonlop%vtowfk                      174.681   2.1       174.658   2.1          12800                   1.00       1.00
 - vtowfk(3)                               687.185   8.4       687.238   8.4            -64                   1.00       1.00
@@ -2639,7 +2639,7 @@ P           mkmem           1
 
  Partitioning of getghc
 - getghc                                 3556.485  43.5      3556.447  43.4          76800                   1.00       1.00
- 
+
 - fourwf%getghc                           242.079   3.0       241.922   3.0          76800                   1.00       1.00
 - nonlop%getghc                          3303.467  40.4      3303.193  40.3          76800                   1.00       1.00
 - getghc(/=fourXX,nonlop,fock_XX)          10.939   0.1        11.332   0.1            -64                   0.97       0.97
@@ -2648,7 +2648,7 @@ P           mkmem           1
 
  Partitioning of fourwf (upwards partitioning)
 - fourwf                                  264.041   3.2       263.863   3.2         100756                   1.00       1.00
- 
+
 - fourwf%getghc                           242.079   3.0       241.922   3.0          76800                   1.00       1.00
 - fourwf%prep_four                         21.962   0.3        21.941   0.3          23956                   1.00       1.00
 
@@ -2656,7 +2656,7 @@ P           mkmem           1
 
  Partitioning of prep_fourwf
 - prep_fourwf                              29.931   0.4        29.985   0.4          12800                   1.00       1.00
- 
+
 - fourwf%prep_four                         21.962   0.3        21.941   0.3          23956                   1.00       1.00
 - alltoall%prep_fo                          7.025   0.1         6.989   0.1          12800                   1.01       1.01
 
@@ -2664,7 +2664,7 @@ P           mkmem           1
 
  Partitioning of prep_nonlop
 - prep_nonlop                             298.952   3.7       298.940   3.6          14016                   1.00       1.00
- 
+
 - nonlop%prep_nonl%vtowfk                 169.799   2.1       169.831   2.1          12800                   1.00       1.00
 - nonlop%prep_nonl%forstrn                114.692   1.4       114.696   1.4           1216                   1.00       1.00
 - prep_nonlop(alltoall)                     3.716   0.0         3.686   0.0          14016                   1.01       1.01
@@ -2674,32 +2674,32 @@ P           mkmem           1
 
  Partitioning of mkrho (upwards partitioning)
 - mkrho                                    46.480   0.6        46.485   0.6            640                   1.00       1.00
- 
+
 - mkrho%vtorho                             46.480   0.6        46.485   0.6            640                   1.00       1.00
 
 - subtotal                                 46.480   0.6        46.485   0.6                                  1.00       1.00
 
  Partitioning of inwffil
 - inwffil                                   0.448   0.0         0.448   0.0             64                   1.00       1.00
- 
+
 
 - subtotal                                  0.443   0.0         0.443   0.0                                  1.00       1.00
 
  Partitioning of newkpt
 - newkpt                                    0.437   0.0         0.437   0.0             64                   1.00       1.00
- 
+
 
 - subtotal                                  0.430   0.0         0.430   0.0                                  1.00       1.00
 
  Partitioning of newrho
 - newrho                                    8.611   0.1         8.612   0.1            576                   1.00       1.00
- 
+
 
 - subtotal                                  0.000   0.0         0.000   0.0                                  0.00       0.00
 
  Partitioning of fourdp (upwards partitioning)
 - fourdp                                   37.519   0.5        37.526   0.5           4800                   1.00       1.00
- 
+
 - fourdp%(other)                           35.553   0.4        35.560   0.4           4224                   1.00       1.00
 - fourdp%newrho                             1.966   0.0         1.967   0.0            576                   1.00       1.00
 
@@ -2707,7 +2707,7 @@ P           mkmem           1
 
  Partitioning of afterscfloop
 - afterscfloop                            288.919   3.5       288.926   3.5             64                   1.00       1.00
- 
+
 - afterscfloop(forstr)                    277.882   3.4       277.888   3.4             64                   1.00       1.00
 - afterscfloop(final)                      10.716   0.1        10.716   0.1             64                   1.00       1.00
 
@@ -2715,7 +2715,7 @@ P           mkmem           1
 
  Partitioning of forstr
 - forstr                                  277.802   3.4       277.808   3.4             64                   1.00       1.00
- 
+
 - forstr(forstrnps)                       130.741   1.6       130.747   1.6             64                   1.00       1.00
 - forstr(forces)                            3.263   0.0         3.263   0.0             64                   1.00       1.00
 - forstr(stress)                          143.543   1.8       143.543   1.8             64                   1.00       1.00
@@ -2724,7 +2724,7 @@ P           mkmem           1
 
  Partitioning of forstrnps
 - forstrnps                               130.739   1.6       130.744   1.6             64                   1.00       1.00
- 
+
 - forstrnps(bef.loop band)                  2.776   0.0         2.776   0.0             64                   1.00       1.00
 - forstrnps(nonlop+prep_ba                124.849   1.5       124.856   1.5           1216                   1.00       1.00
 - forstrnps(kinetic contr)                  2.399   0.0         2.391   0.0           1216                   1.00       1.00
@@ -2733,13 +2733,13 @@ P           mkmem           1
 
  Partitioning of outscfcv
 - outscfcv                                  2.143   0.0         2.240   0.0             64                   0.96       0.96
- 
+
 
 - subtotal                                  2.126   0.0         2.222   0.0                                  0.96       0.96
 
  Partitioning of lobpcgwf2 core engine
 - lobpcgwf2                              6393.459  78.2      6393.739  78.1            768                   1.00       1.00
- 
+
 - lobpcg_Bortho(X)                         15.198   0.2        15.137   0.2          15360                   1.00       1.00
 - lobpcg_Bortho(XW)                        30.222   0.4        30.152   0.4          15360                   1.00       1.00
 - lobpcg_Bortho(XWP)                      163.620   2.0       163.459   2.0          46080                   1.00       1.00
@@ -2762,7 +2762,7 @@ P           mkmem           1
 
  Partitioning of low-level xgTransposer type
 - xgTransposer_transpose@ColsRows          49.974   0.6        49.642   0.6          76800                   1.01       1.01
- 
+
 - xgTransposer_transpose@Linalg           345.688   4.2       345.313   4.2         230400                   1.00       1.00
 - xgTransposer_*@all2all                  372.054   4.6       371.048   4.5         307200                   1.00       1.00
 - xgTransposer_@reorganize                  9.823   0.1         8.391   0.1         307200                   1.17       1.17
@@ -2773,7 +2773,7 @@ P           mkmem           1
 
  Partitioning of low-level xgBlock type
 - xgBlock_gemm(blas)                      291.087   3.6       286.636   3.5         994560                   1.02       1.02
- 
+
 - xgBlock_trsm                             81.364   1.0        80.688   1.0         232704                   1.01       1.01
 - xgBlock_potrf                            27.503   0.3        27.107   0.3          77568                   1.01       1.01
 - xgBlock_zero                             28.982   0.4        27.645   0.3         418560                   1.05       1.05
@@ -2788,7 +2788,7 @@ P           mkmem           1
 
 - subtotal                               1882.896  23.0      1877.803  22.9                                  1.00       1.00
 -
--Synchronisation (=leave_test) and MPI calls 
+-Synchronisation (=leave_test) and MPI calls
 - communic.MPI                            618.412   7.6       619.107   7.6        2005056                   1.00       1.00
 -
 - forstrnps:synchr                          0.003   0.0         0.003   0.0            128                   0.95       0.95
@@ -2823,7 +2823,7 @@ P           mkmem           1
 - RayleighRitz@gemm_2                     104.272   1.3       104.270   1.3          77568                   1.00       1.00
 
 
- Detailed analysis of some time consuming routines 
+ Detailed analysis of some time consuming routines
                                   tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata
                                  (sec)                (msec)              (microsec)
 - fourwf%(pot)                 242.079     76800       3.152     55296       0.057
@@ -2887,7 +2887,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2899,12 +2899,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2922,7 +2922,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

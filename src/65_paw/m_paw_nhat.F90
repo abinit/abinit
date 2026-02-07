@@ -27,6 +27,7 @@ MODULE m_paw_nhat
  use m_errors
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
  use, intrinsic :: iso_c_binding, only: c_size_t,c_loc
 

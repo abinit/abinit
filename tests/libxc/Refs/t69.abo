@@ -1,6 +1,6 @@
 
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -16,15 +16,15 @@
 
 .Starting date : Sat 20 Dec 2025.
 - ( at 17h02 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/libxc_t69/t69.abi
 - output file    -> t69.abo
 - root for input  files -> t69i
 - root for output files -> t69o
 
-- inpspheads : Reading pseudopotential header in XML form from 
+- inpspheads : Reading pseudopotential header in XML form from
 -   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/C.xml
-- inpspheads : Reading pseudopotential header in XML form from 
+- inpspheads : Reading pseudopotential header in XML form from
 -   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/H4.GGA_X_PBE+GGA_C_PBE-paw.xml
  DATASET    1 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -271,7 +271,7 @@ tolerances: {tolrff: 5.00E-03, }
  ETOT  9  -6.0806417451369     1.430E-08 4.730E-10 2.901E-07 2.023E-06 3.379E-03 4.055E-05 5.376E-01
  ETOT 10  -6.0806417387915     6.345E-09 6.208E-11 1.072E-08 1.504E-06 3.378E-03 7.407E-06 5.376E-01
 
- At SCF step   10, forces are sufficiently converged : 
+ At SCF step   10, forces are sufficiently converged :
   for the second time, max diff in force=  1.504E-06 is less than < tolrff=  5.000E-03 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -417,7 +417,7 @@ tolerances: {tolrff: 5.00E-03, }
  ETOT  4  -6.0806577831041     1.370E-08 1.410E-10 3.436E-07 2.390E-06 1.430E-03 3.322E-06 5.378E-01
  ETOT  5  -6.0806577795073     3.597E-09 1.837E-11 7.316E-08 1.459E-06 1.431E-03 1.086E-06 5.378E-01
 
- At SCF step    5, forces are sufficiently converged : 
+ At SCF step    5, forces are sufficiently converged :
   for the second time, max diff in force=  1.459E-06 is less than < tolrff=  5.000E-03 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -571,7 +571,7 @@ tolerances: {tolrff: 5.00E-03, }
  ETOT  8  -6.0806612688481     9.419E-11 1.256E-14 1.273E-10 2.719E-08 2.978E-05 1.749E-07 5.379E-01
  ETOT  9  -6.0806612688172     3.090E-11 4.764E-16 3.153E-11 2.860E-08 2.981E-05 4.624E-08 5.379E-01
 
- At SCF step    9, forces are sufficiently converged : 
+ At SCF step    9, forces are sufficiently converged :
   for the second time, max diff in force=  2.860E-08 is less than < tolrff=  5.000E-03 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -703,7 +703,7 @@ force_length_stats: {min:   2.98085461E-05, max:   2.98085461E-05, mean:   2.980
            Absolute (Ha)=-3.48931E-06
            Relative     =-5.73837E-07
 
- At Broyd/MD step   3, gradients are converged : 
+ At Broyd/MD step   3, gradients are converged :
   max grad (force/stress) = 2.9809E-05 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -899,7 +899,7 @@ tolerances: {tolrff: 5.00E-03, }
  ETOT  4  -6.0887144999918    -2.349E-07 2.593E-08 1.145E-04 2.547E-05 5.172E-03 1.984E-04 5.456E-01
  ETOT  5  -6.0887142555864     2.444E-07 1.252E-09 2.076E-05 1.760E-05 5.155E-03 2.592E-04 5.458E-01
 
- At SCF step    5, forces are sufficiently converged : 
+ At SCF step    5, forces are sufficiently converged :
   for the second time, max diff in force=  1.760E-05 is less than < tolrff=  5.000E-03 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1046,7 +1046,7 @@ tolerances: {tolrff: 5.00E-03, }
  ETOT  5  -6.0887527906406    -1.678E-08 2.384E-10 5.309E-07 5.376E-06 2.248E-03 2.432E-05 5.459E-01
  ETOT  6  -6.0887527989337    -8.293E-09 6.451E-11 2.123E-07 7.617E-06 2.240E-03 8.524E-06 5.459E-01
 
- At SCF step    6, forces are sufficiently converged : 
+ At SCF step    6, forces are sufficiently converged :
   for the second time, max diff in force=  7.617E-06 is less than < tolrff=  5.000E-03 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1198,7 +1198,7 @@ tolerances: {tolrff: 5.00E-03, }
  ETOT  6  -6.0887615530474    -5.870E-09 3.104E-12 6.674E-08 3.101E-07 8.991E-05 4.871E-06 5.458E-01
  ETOT  7  -6.0887615546039    -1.557E-09 2.858E-11 2.215E-08 2.701E-08 8.993E-05 2.912E-06 5.458E-01
 
- At SCF step    7, forces are sufficiently converged : 
+ At SCF step    7, forces are sufficiently converged :
   for the second time, max diff in force=  2.701E-08 is less than < tolrff=  5.000E-03 times max force
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1482,7 +1482,7 @@ force_length_stats: {min:   4.12040771E-06, max:   4.12040771E-06, mean:   4.120
            Absolute (Ha)=-6.47772E-09
            Relative     =-1.06388E-09
 
- At Broyd/MD step   4, gradients are converged : 
+ At Broyd/MD step   4, gradients are converged :
   max grad (force/stress) = 4.1204E-06 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -2139,7 +2139,7 @@ force_length_stats: {min:   3.26852260E-07, max:   3.26852260E-07, mean:   3.268
            Absolute (Ha)=-5.08935E-08
            Relative     =-8.13760E-09
 
- At Broyd/MD step   3, gradients are converged : 
+ At Broyd/MD step   3, gradients are converged :
   max grad (force/stress) = 3.2685E-07 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
 
 ================================================================================
@@ -2231,7 +2231,7 @@ Total energy DC (eV): -1.02829563275649E+03
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      9.4486306295E+00  7.5589045036E+00  7.5589045036E+00 Bohr
               amu      1.20110000E+01  1.00794000E+00
@@ -2373,7 +2373,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2385,12 +2385,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2408,7 +2408,7 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

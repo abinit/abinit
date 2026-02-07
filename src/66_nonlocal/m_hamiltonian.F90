@@ -1290,7 +1290,7 @@ end subroutine gsham_load_kprime
 !! SOURCE
 
 subroutine gsham_eph_setup_k(gs_ham, which_k, kk, istwf_k, npw_k, kg_k, dtset, cryst, psps, &  ! in
-                             nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, comm)                  ! out
+                             nkpg_k, kpg_k, ffnl_k, kinpw_k, ph3d_k, comm)                     ! out
 
 !Arguments ------------------------------------
 !scalars

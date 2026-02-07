@@ -69,7 +69,6 @@ program mrgddb
  real(dp) :: tsec(2)
  character(len=fnlen),allocatable :: filnam(:),copy_filnam(:)
  character(len=500) :: msg,arg
-
 !******************************************************************
 
  ! Change communicator for I/O (mandatory!)

@@ -604,7 +604,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(660)='bse(exc_diago_driver)           '; basic(660)=1
  names(661)='bse(exc_haydock_driver)         '; basic(661)=1
 
-
  names(670)='exc_build_ham                   '
  names(671)='exc_build_ham(q=0)              '
  names(672)='exc_build_ham(block-res)        '
@@ -964,7 +963,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1547)='fock_getghc(post-k wo fourXX+MPI'; !related to 1507
  names(1548)='fock_getghc(post-k xmpi_sum)    '; !related to 1507
 
-
  names(1560)='fock2ACE                        '
  names(1561)='fock2ACE(init)                  '; basic(1561)=1
  names(1562)='fock2ACE(main/=fock_getghc)     '; basic(1562)=1
@@ -1189,6 +1187,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  !names(1929)='gwr_gk_to_scbox                '; basic(1929) = 1
  !names(1930)='gwr_wcq_to_scbox               '; basic(1930) = 1
  !names(1931)='gsph2box                       '; basic(1931) = 1
+
+ ! GWPT code
+ names(1940)='ik_preamble                     '; basic(1940) = 1
+ names(1941)='ip_preamble                     '; basic(1941) = 1
+ names(1942)='ibsum_preamble1                 '; basic(1942) = 1
+ names(1943)='ibsum_preamble2                 '; basic(1943) = 1
+ names(1944)='pert_loop1                      '; basic(1944) = 1
+ names(1945)='pert_loop2                      '; basic(1945) = 1
 
  ! xg_t (2nd part)
  names(2000)='xgBlock_scale                   '; basic(2000) = 1

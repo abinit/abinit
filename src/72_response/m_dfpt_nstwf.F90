@@ -33,6 +33,7 @@ module m_dfpt_nstwf
  use m_nctk
  use m_dtset
  use m_dtfil
+ use m_gputk
  use m_abi_linalg
 
  use defs_datatypes, only : pseudopotential_type

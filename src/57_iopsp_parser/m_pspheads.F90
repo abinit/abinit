@@ -1210,7 +1210,7 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
    ixc = -106131
  case ("WC")
    ixc = -118130
- case ('SLA  PW   NOGX NOGC')  ! string produced by oncvpsp3
+ case ('SLA  PW   NOGX NOGC', "SLA+PW")  ! string produced by oncvpsp3
    ixc = -1012
  case ('R2SCAN01')
    ixc = -645642
