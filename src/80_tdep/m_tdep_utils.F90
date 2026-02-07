@@ -167,11 +167,13 @@ contains
   ABI_MALLOC(WORK, (5 * nconcoef)); WORK(:) = 0.d0
   ABI_MALLOC(IPIV, (nconcoef)); IPIV(:) = 0
   A_inv(:,:) = A_tot(:,:)
-  !DEBUG write(Invar%stdout,*) ' '
-  !DEBUG write(Invar%stdout,*) ' The matrix A_inv is (before DGETRF):'
-  !DEBUG do icoeff=1,nconcoef
-  !DEBUG   write(Invar%stdout,*) (A_inv(icoeff,iconst), iconst=1, nconcoef)
-  !DEBUG end do
+  !BEGIN DEBUG
+  !write(Invar%stdout,*) ' '
+  !write(Invar%stdout,*) ' The matrix A_inv is (before DGETRF):'
+  !do icoeff=1,nconcoef
+  !  write(Invar%stdout,*) (A_inv(icoeff,iconst), iconst=1, nconcoef)
+  !end do
+  !END DEBUG
 
   ! Check for small pivot elements
   do icoeff=1,nconcoef
@@ -204,11 +206,13 @@ contains
     write(Invar%stdout,*) 'ERROR: Matrix inversion failed in DGETRI. INFO=', INFO
     stop
   end if
-  !DEBUG write(Invar%stdout,*) ' '
-  !DEBUG write(Invar%stdout,*) ' The inverse matrix is (after DGETRI):'
-  !DEBUG do icoeff=1,nconcoef
-  !DEBUG   write(Invar%stdout,*) (A_inv(icoeff,iconst), iconst=1, nconcoef)
-  !DEBUG end do
+  ! BEGIN DEBUG
+  !write(Invar%stdout,*) ' '
+  !write(Invar%stdout,*) ' The inverse matrix is (after DGETRI):'
+  !do icoeff=1,nconcoef
+  !  write(Invar%stdout,*) (A_inv(icoeff,iconst), iconst=1, nconcoef)
+  !end do
+  ! END DEBUG
 
   ABI_FREE(WORK)
   ABI_FREE(IPIV)
@@ -216,11 +220,13 @@ contains
   call DGEMV('N',nconcoef,nconcoef,1.d0,A_inv,nconcoef,b_tot,1,0.d0,x_tot,1)
   write(Invar%stdout,*) ' The problem is solved'
   write(Invar%stdout,*) ' '
-  !DEBUG write(Invar%stdout,*) ' The solutions are:'
-  !DEBUG do icoeff=1,nconcoef
-  !DEBUG   write(Invar%stdout,'(1x,i4,1x,f15.10)') icoeff,x_tot(icoeff)
-  !DEBUG end do
-  !DEBUG write(Invar%stdout,'(a,1x,f15.10)')'  condition number=',maxval(x_tot(:))/minval(x_tot(:))
+  !BEGIN DEBUG
+  !write(Invar%stdout,*) ' The solutions are:'
+  !do icoeff=1,nconcoef
+  !  write(Invar%stdout,'(1x,i4,1x,f15.10)') icoeff,x_tot(icoeff)
+  !end do
+  !write(Invar%stdout,'(a,1x,f15.10)')'  condition number=',maxval(x_tot(:))/minval(x_tot(:))
+  !END DEBUG
 
   IFC_coeff(ncoeff_prev+1:ncoeff_prev+ntotcoeff,1)=x_tot(1:ntotcoeff)
   ABI_FREE(A_tot)
@@ -231,6 +237,44 @@ contains
  end subroutine tdep_calc_MoorePenrose
 
 !====================================================================================================
+
+!!****f* ABINIT/m_tdep_utils/tdep_MatchIdeal2Average
+!! NAME
+!!  tdep_MatchIdeal2Average
+!!
+!! FUNCTION
+!! Find the mapping between the atoms in the ideal (equilibrium) supercell,
+!! and the atoms of the input moledular dynamics using their average positions.
+!! Then compute the atom displacements with respect to the equilibrium positions
+!! at each time step of the MD.
+!!
+!! INPUTS
+!!  Invar = Input object containing the input variables, positions, and forces.
+!!  Lattice = Lattice object describing the ideal structure.
+!!  Sym = Symetries object describing all the symmetry operations of the crystal.
+!!  MPIdata = Info on MPI parallelism.
+!!
+!! OUTPUT
+!!  distance = Distance between the ideal positions of the atoms in the supercell,
+!!             (norm, and cartesian components).
+!!  Forces_MD = Cartesian forces on the atoms at each time steps, as a flat array.
+!!  ucart = Cartesian displacements of the atoms with respect to their equilibrium
+!!          positions at each time step.
+!!  Rlatt_cart = Cartesian coordinate of the lattice vectors of the unitcell
+!!               within the supercell, for each atom.
+!!               This array seems to have an extra dimension, for algorithmic simplicity.
+!!  Rlatt4dos = like Rlatt_cart, but scaled by acell_unitcell.
+!!              These are used when reading an IFC file, to compare with the R vectors
+!!              that are stored in the file.
+!!
+!! SIDE EFFECTS
+!! Some of the reduced positions of the atoms Invar%xred are shifted by a supercell
+!! lattice vector in order to re-center the crystal.
+!!
+!! NOTES
+!!
+!! SOURCE
+
  subroutine tdep_MatchIdeal2Average(distance,Forces_MD,Invar,Lattice,MPIdata,&
 &                                   Rlatt_cart,Rlatt4dos,Sym,ucart)
 
@@ -260,8 +304,6 @@ contains
   double precision, allocatable  :: xcart_ideal(:,:)
   logical :: ok,must_shift,discard_R
   character(len=500) :: msg
-
-  ierr = 0;
 
   write(Invar%stdout,*)' '
   write(Invar%stdout,*) '#############################################################################'
@@ -295,10 +337,10 @@ contains
           call DGEMV('T',3,3,1.d0,Lattice%multiplicitym1(:,:),3,tmp(:),1,0.d0,xred_tmp(:),1)
 
 !         If the first atom of the pattern is in the [0;1[ range then keep all the
-!         atoms of the pattern (even if the others are outside the box). Elsewhere,
+!         atoms of the pattern (even if the others are outside the box). Else,
 !         none are taken.
           if (iatcell==1) then
-            if (minval(xred_tmp(:)).lt.0.d0.or.maxval(xred_tmp(:)).ge.(1.d0-1.d-12)) then
+            if (minval(xred_tmp(:)).lt.0.d0.or.maxval(xred_tmp(:)).ge.(1.d0-tol12)) then
               discard_R = .true.
               cycle
             end if
@@ -353,9 +395,15 @@ contains
 !==========================================================================================
 !======== 2/ Find the matching between the ideal and average ==============================
 !========   (from the MD simulations) positions. ==========================================
-!======== NOTE: - xred_center is used to find the matching with the ideal positions =======
-!========       - xred_average is used to compute the displacements (from MD trajectories)
 !==========================================================================================
+!  NOTE: - xred_center is used to find the matching with the ideal positions
+!        - xred_average is used to compute the displacements (from MD trajectories)
+!        The difference between those two is that xred_center will be shifted to bring
+!        one of the average positions at the origin, for an easier comparison with
+!        xred_ideal. Some shifts by a supercell lattice vector will be computed
+!        from the difference between xred_center and xred_ideal, and those shifts
+!        will be applied to xred_average and xred at all steps.
+
   write(Invar%stdout,*)' Compute average positions...'
   ABI_MALLOC(xred_average,(3,Invar%natom))             ; xred_average(:,:)=0.d0
   ABI_MALLOC(xred_center,(3,Invar%natom))              ; xred_center(:,:)=0.d0
@@ -370,10 +418,9 @@ contains
 
 ! Search the basis of atoms in the supercell
 ! in order to find iatom_ref
-
   write(Invar%stdout,*)' Search the unitcell basis of atoms in the MD trajectory...'
   ok=.false.
-  xred_center(:,:)=xred_average(:,:)
+  xred_center(:,:) = xred_average(:,:)
   iatcell=1
   do iatom=1,Invar%natom
     if (Invar%typat(iatom).ne.Invar%typat_unitcell(iatcell)) cycle
@@ -416,41 +463,38 @@ contains
   end if
   ABI_FREE(dist_unitcell)
 
-! Modification of xred and Rlatt tabs
-! For averaged quantities --> kk=1: xred_center, xred_average et xred
-! For ideal quantities    --> kk=2: Rlatt_red et xred_ideal
   write(Invar%stdout,*)' Compare ideal and average positions using PBC...'
-  do kk=1,2
-!   1/ The "iatom_ref" (kk=1) or iatom=1 (kk=2) atom is put in (0.0;0.0;0.0)
-    if (kk==1) then
-      tmp(:)=xred_center(:,iatom_ref)
-    else if (kk==2) then
-      tmp1(:)=xred_ideal(:,1)
-      tmp2(:)=Rlatt_red(:,1,1)
-    end if
-    do jatom=1,Invar%natom
-      if (kk==1) xred_center(:,jatom)=xred_center(:,jatom)-tmp(:)
-      if (kk==2) then
-        xred_ideal(:,jatom)=  xred_ideal(:,jatom)  -tmp1(:)
-        Rlatt_red (:,1,jatom)=Rlatt_red (:,1,jatom)-tmp2(:)
-      end if
+! Modification of xred and Rlatt tabs
+! for averaged quantities: xred_center, xred_average, xred
+! 1/ The "iatom_ref" atom is put in (0.0;0.0;0.0)
+  tmp(:) = xred_center(:,iatom_ref)
+  do jatom=1,Invar%natom
+    xred_center(:,jatom) = xred_center(:,jatom) - tmp(:)
+  end do
+! 2/ All the atoms are put in the range [-0.5;0.5[ (use of PBC)
+  do jatom=1,Invar%natom
+    tmp(:)=xred_center(:,jatom)
+    call tdep_make_inbox(tmp,1,Invar%tolinbox,xred_center(:,jatom))
+    call tdep_make_inbox(tmp,1,Invar%tolinbox,xred_average(:,jatom))
+    do istep=1,Invar%my_nstep
+      call tdep_make_inbox(tmp,1,Invar%tolinbox,Invar%xred(:,jatom,istep))
     end do
-!   2/ All the atoms are put in the range [-0.5;0.5[ (use of PBC)
-    do jatom=1,Invar%natom
-      if (kk==1) then
-        tmp(:)=xred_center(:,jatom)
-        call tdep_make_inbox(tmp,1,Invar%tolinbox,xred_center (:,jatom))
-        call tdep_make_inbox(tmp,1,Invar%tolinbox,xred_average(:,jatom))
-        do istep=1,Invar%my_nstep
-          call tdep_make_inbox(tmp,1,Invar%tolinbox,Invar%xred(:,jatom,istep))
-        end do
-      else if (kk==2) then
-        tmp(:)=xred_ideal(:,jatom)
-        call tdep_make_inbox(tmp,1,tol8,xred_ideal(:,jatom))
-        call tdep_make_inbox(tmp,1,tol8,Rlatt_red(:,1,jatom))
-!FB        call tdep_make_inbox(Rlatt_red(:,1,jatom),1,tol8)
-      end if
-    end do
+  end do
+! Modification of xred and Rlatt tabs
+! for ideal quantities: Rlatt_red et xred_ideal
+!   1/ The atom 1 is put in (0.0;0.0;0.0)
+  tmp1(:)=xred_ideal(:,1)
+  tmp2(:)=Rlatt_red(:,1,1)
+  do jatom=1,Invar%natom
+    xred_ideal(:,jatom)=  xred_ideal(:,jatom)  -tmp1(:)
+    Rlatt_red (:,1,jatom)=Rlatt_red (:,1,jatom)-tmp2(:)
+  end do
+! 2/ All the atoms are put in the range [-0.5;0.5[ (use of PBC)
+  do jatom=1,Invar%natom
+    tmp(:)=xred_ideal(:,jatom)
+    call tdep_make_inbox(tmp,1,tol8,xred_ideal(:,jatom))
+    call tdep_make_inbox(tmp,1,tol8,Rlatt_red(:,1,jatom))
+!FB      call tdep_make_inbox(Rlatt_red(:,1,jatom),1,tol8)
   end do
 
 ! When the multiplicity equals 1 along one direction, there is some trouble
@@ -511,14 +555,16 @@ contains
         do ii=1,3
           if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)-1.d0).le.Invar%tolmatch) then
             xred_center(ii,iatom)=xred_center(ii,iatom)-1d0
+            xred_average(ii,iatom)=xred_average(ii,iatom)-1d0
             do istep=1,Invar%my_nstep
-              Invar%xred(:,iatom,istep)=Invar%xred(:,iatom,istep)-1d0
+              Invar%xred(ii,iatom,istep)=Invar%xred(ii,iatom,istep)-1d0
             end do
             FromIdeal2Average(jatom)=iatom
           else if (abs(xred_center(ii,iatom)-xred_ideal(ii,jatom)+1.d0).le.Invar%tolmatch) then
             xred_center(ii,iatom)=xred_center(ii,iatom)+1d0
+            xred_average(ii,iatom)=xred_average(ii,iatom)+1d0
             do istep=1,Invar%my_nstep
-              Invar%xred(:,iatom,istep)=Invar%xred(:,iatom,istep)+1d0
+              Invar%xred(ii,iatom,istep)=Invar%xred(ii,iatom,istep)+1d0
             end do
             FromIdeal2Average(jatom)=iatom
           end if
@@ -607,12 +653,13 @@ contains
   end do
   do istep=1,Invar%my_nstep
     do iatom=1,Invar%natom
-      call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,Invar%xred(:,FromIdeal2Average(iatom),istep),&
-&       1,0.d0,xcart(:,FromIdeal2Average(iatom),istep),1)
+      jatom = FromIdeal2Average(iatom)
+      call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,Invar%xred(:,jatom,istep),&
+&                1,0.d0,xcart(:,jatom,istep),1)
       if (Invar%use_ideal_positions.eq.0) then
-        ucart_tmp(:,iatom,istep)=xcart(:,FromIdeal2Average(iatom),istep)-xcart_average(:,FromIdeal2Average(iatom))
+        ucart_tmp(:,iatom,istep) = xcart(:,jatom,istep) - xcart_average(:,jatom)
       else
-        ucart_tmp(:,iatom,istep)=xcart(:,FromIdeal2Average(iatom),istep)-xcart_ideal  (:,iatom)
+        ucart_tmp(:,iatom,istep) = xcart(:,jatom,istep) - xcart_ideal(:,iatom)
       end if
     end do
   end do
@@ -656,6 +703,18 @@ contains
   Invar%xred_ideal(:,:)=xred_ideal(:,:)
   ABI_FREE(xred_ideal)
   ABI_FREE(Rlatt_red)
+
+! BEGIN DEBUG
+!  write(Invar%stdout,*)'------------------------------------------'
+!  write(Invar%stdout,*)'iatom istep ucart'
+!  do jatom=1,Invar%natom
+!    do istep=1,Invar%my_nstep
+!      write(Invar%stdout,'(2(i5,1x),3(f14.6,1x))') jatom, istep, ucart(:,jatom,istep)
+!    end do
+!  end do
+!  write(Invar%stdout,*)'------------------------------------------'
+! END DEBUG
+
 
  end subroutine tdep_MatchIdeal2Average
 
@@ -745,8 +804,6 @@ contains
   double precision, allocatable :: tmp(:),Phi_tot(:)
   double precision, allocatable :: U_MD(:),U_TDEP(:),weights_tot(:)
   integer :: ierr
-
-  ierr = 0
 
   write(Invar%stdout,*)' '
   write(Invar%stdout,*) '#############################################################################'

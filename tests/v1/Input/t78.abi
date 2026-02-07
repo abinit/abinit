@@ -84,14 +84,14 @@
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%  t78.abo, tolnlines = 3, tolabs = 1.1e-7, tolrel = 2.0e-5
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% keywords = NC
 #%% authors = Unknown
-#%% description = 
+#%% description =
 #%%   2 special k point Si in 2-atom diamond unit cell.
 #%%   Optimization of unit cell volume (optcell=1).
 #%%   Use 2 datasets, and the variable getcell.

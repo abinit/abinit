@@ -30,10 +30,11 @@
 
 MODULE m_matlu
 
+ use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
  use defs_basis
  use m_errors
  use m_abicore
- use, intrinsic :: iso_c_binding, only: c_size_t, c_loc
+ use m_gputk
  use m_abi_linalg
 
 #ifdef HAVE_GPU
@@ -4743,6 +4744,7 @@ end subroutine add_matlu
  end subroutine magnfield_matlu
 !!***
 
+
 !!****f* m_matlu/magmomjmj_matlu                                                                         
 !! NAME                                                                                                  
 !! magmomjmj_matlu                                                                                       
@@ -4855,11 +4857,11 @@ end subroutine add_matlu
     end if !lpawu                                                                       
   end do !natom                                                                         
 
-ABI_FREE(mlms2jmj) 
+ABI_FREE(mlms2jmj)
 ABI_FREE(ind_msml)
-ABI_FREE(gathermatlu)                                                                 
-                                                                                        
-end subroutine magmomjmj_matlu                                                        
+ABI_FREE(gathermatlu)
+
+end subroutine magmomjmj_matlu
 
 
 END MODULE m_matlu

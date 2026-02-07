@@ -631,8 +631,8 @@ pure logical function sigma_needs_ppm(Sigp)
 !************************************************************************
 
  mod10=MOD(Sigp%gwcalctyp,10)
- sigma_needs_ppm = (ANY(mod10 == (/SIG_GW_PPM, SIG_QPGW_PPM/)) .or.  &
-                    Sigp%gwcomp==1                                   &
+ sigma_needs_ppm = (ANY(mod10 == [SIG_GW_PPM, SIG_QPGW_PPM]) .or.  &
+                    Sigp%gwcomp==1                                 &
                    )
 
 end function sigma_needs_ppm

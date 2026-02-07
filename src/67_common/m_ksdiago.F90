@@ -1103,10 +1103,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  ! Initialize the Hamiltonian on the coarse FFT mesh.
  if (present(electronpositron)) then
    call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
-    mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0, electronpositron=electronpositron)
+    mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0, gpu_option=dtset%gpu_option, electronpositron=electronpositron)
  else
    call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
-    mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0)
+    mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0, gpu_option=dtset%gpu_option)
  end if
 
  ! Check on the number of stored bands.
@@ -1205,6 +1205,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  batch_size = 8 * omp_nt
  if (istwf_k == 2) batch_size = 1  ! FIXME
  !batch_size = 1
+ if (gs_hamk%gpu_option == ABI_GPU_OPENMP) then
+   batch_size = 32
+ end if
+
  call wrtout(std_out, sjoin(" Building H^KS with batch_size:", itoa(batch_size)))
 
  ABI_MALLOC(bras, (2, npwsp * batch_size))
@@ -1277,7 +1281,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
      end do
      if (psps%usepaw == 1) then
        NOT_IMPLEMENTED_ERROR()
-       !gsg_mat%buffer_real(...)
        !gsg_mat%buffer_real(...)
      end if
    end if ! istwf_k

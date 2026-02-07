@@ -651,7 +651,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm,file
  integer :: max1,max2,max3,my_rank,natom_uc
  integer :: nproc,second_coordinate,size_tmp,sumg0
  integer :: my_nrpt,nrpt_alone
- real(dp) :: ucvol
+ real(dp) :: ucvol, eta
  character(len=500) :: msg
  logical :: iam_master , has_totFC
 !array
@@ -915,7 +915,7 @@ end if
        call ewald9(acell,eff_pot%harmonics_terms%epsilon_inf,dyewq0,&
 &                  gmet,gprimd,natom_uc,real((/0,0,0/),dp),rmet,&
 &                  supercell%rprimd,sumg0,ucvol,xred_tmp(:,1:natom_uc),&
-&                  eff_pot%harmonics_terms%zeff,qdrp_cart)
+&                  eff_pot%harmonics_terms%zeff,qdrp_cart,eta)
        buff_ewald(:,:,:,:,:,irpt) = dyewq0
      else
        first_coordinate  = ((my_irpt(irpt)-1)*natom_uc) + 1
@@ -925,7 +925,7 @@ end if
        call ewald9(acell,eff_pot%harmonics_terms%epsilon_inf,dyew,gmet,gprimd,&
 &                  int(2*natom_uc),real((/0,0,0/),dp),&
 &                  rmet,supercell%rprimd,&
-&                  sumg0,ucvol,xred_tmp,zeff_tmp,qdrp_cart)
+&                  sumg0,ucvol,xred_tmp,zeff_tmp,qdrp_cart,eta)
        buff_ewald(:,:,:,:,:,irpt) = &
 &           dyew(:,:,1:natom_uc,:,natom_uc+1:2*natom_uc)
      end if

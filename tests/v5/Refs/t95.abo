@@ -1,6 +1,6 @@
 
 .Version 10.5.8.2 of ANADDB, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 20 Dec 2025.
 - ( at 17h13 )
-  
+
 
 ================================================================================
 
@@ -97,7 +97,7 @@
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces
 
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -114,7 +114,7 @@
 
 ================================================================================
 
- Calculation of phonon density of states 
+ Calculation of phonon density of states
 
  Average speed of sound partial sums:    -0.6590764217E-03 (at units)
 -                                   =          -1.4419 [km/s]
@@ -123,17 +123,17 @@
 -                                 =    -0.3577529328E+01 (THz)
 -Debye temperature from partial sums:    -0.1716943285E+03 (K)
 
- Average speed of sound:     0.3008293431E-04 (at units) 
+ Average speed of sound:     0.3008293431E-04 (at units)
 -                      =           0.0658 [km/s]
 
- Debye frequency from DOS:     0.2481776066E-04 (Ha) 
+ Debye frequency from DOS:     0.2481776066E-04 (Ha)
 -                        =     0.1632930207E+00 (THz)
 -Debye temperature from DOS:     0.7836828986E+01 (K)
 
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -142,7 +142,7 @@
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -177,7 +177,7 @@
  Phonon frequencies in cm-1    :
 - -2.479366E+02 -2.479366E+02  2.701868E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -201,7 +201,7 @@
  Phonon frequencies in cm-1    :
 - -2.479366E+02 -2.479366E+02  2.701868E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -225,7 +225,7 @@
  Phonon frequencies in cm-1    :
 - -2.085317E+02 -2.085317E+02  4.017677E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -249,7 +249,7 @@
  Phonon frequencies in cm-1    :
 - -2.479366E+02 -2.479366E+02  2.701868E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -273,7 +273,7 @@
  Phonon frequencies in cm-1    :
 - -2.085317E+02 -2.085317E+02  4.017677E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -297,7 +297,7 @@
  Phonon frequencies in cm-1    :
 - -2.085317E+02 -2.085317E+02  4.017677E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -321,7 +321,7 @@
  Phonon frequencies in cm-1    :
 - -2.479366E+02 -2.479366E+02  2.701868E+02
 
- Eigendisplacements 
+ Eigendisplacements
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -341,7 +341,7 @@
 
 ================================================================================
 
- Properties based on electron-phonon coupling 
+ Properties based on electron-phonon coupling
 
  Found     4 symmetries that leave the perturbation invariant.
  Found     4 symmetries that leave the perturbation invariant.

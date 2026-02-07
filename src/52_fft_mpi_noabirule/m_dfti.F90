@@ -873,7 +873,7 @@ subroutine dfti_fftug_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nda
  integer,parameter :: dist=2
  integer :: iscale__, isign__
  real(dp) :: fofgout(2,0)
- real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
+ real(dp),contiguous, pointer :: real_ug(:,:),real_ur(:,:)
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -952,7 +952,7 @@ subroutine dfti_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
  integer,parameter :: dist=1
  integer :: iscale__, isign__
  real(sp) :: fofgout(2,0)
- real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
+ real(sp),contiguous, pointer :: real_ug(:,:),real_ur(:,:)
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -1032,7 +1032,7 @@ subroutine dfti_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
  integer :: iscale__, isign__
 !arrays
  real(dp) :: fofgout(2,0)
- real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
+ real(dp),contiguous, pointer :: real_ug(:,:),real_ur(:,:)
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -1114,7 +1114,7 @@ subroutine dfti_fftur_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nda
  integer :: iscale__, isign__
 !arrays
  real(dp) :: dum_ugin(2,0)
- real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
+ real(dp),contiguous, pointer :: real_ug(:,:),real_ur(:,:)
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -1198,7 +1198,7 @@ subroutine dfti_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
  integer :: iscale__, isign__
 !arrays
  real(sp) :: dum_ugin(2,0)
- real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
+ real(sp),contiguous, pointer :: real_ug(:,:),real_ur(:,:)
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -1281,7 +1281,7 @@ subroutine dfti_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
  integer :: iscale__, isign__
 !arrays
  real(dp) :: dum_ugin(2,0)
- real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
+ real(dp),contiguous, pointer :: real_ug(:,:),real_ur(:,:)
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -1516,7 +1516,7 @@ subroutine dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout)
  type(C_ptr) :: fin_cptr, fout_cptr
 
 !arrays
- complex(dp),ABI_CONTIGUOUS pointer :: fin_fptr(:),fout_fptr(:)
+ complex(dp),contiguous, pointer :: fin_fptr(:),fout_fptr(:)
 ! *************************************************************************
 
  ! Associate complex pointers with real inputs via the C pointers
@@ -1577,7 +1577,7 @@ subroutine dfti_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout)
  integer,parameter :: iscale1 = 1
  type(C_ptr) :: finout_cptr
 !arrays
- complex(dp),ABI_CONTIGUOUS pointer :: finout_fptr(:)
+ complex(dp),contiguous, pointer :: finout_fptr(:)
 ! *************************************************************************
 
  ! Associate complex finout_fptr with real ffinout via the C pointer
@@ -1639,7 +1639,7 @@ subroutine dfti_fftpad_dp(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbo
  type(C_ptr) :: cptr
  integer :: iscale__
 !arrays
- complex(dp),ABI_CONTIGUOUS pointer :: fptr(:)
+ complex(dp),contiguous, pointer :: fptr(:)
 ! *************************************************************************
 
  iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
@@ -1811,7 +1811,7 @@ subroutine dfti_r2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
  type(C_PTR) :: cptr
 !arrays
  integer,allocatable :: i1inver(:),i2inver(:),i3inver(:)
- complex(dp),ABI_CONTIGUOUS pointer :: gg_hp(:)
+ complex(dp),contiguous, pointer :: gg_hp(:)
 ! *************************************************************************
 
  padx = (nx/2+1)
@@ -1940,7 +1940,7 @@ subroutine dfti_r2c_op_dp(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
 !scalars
  type(C_ptr) :: gg_cptr
 !arrays
- complex(dp),ABI_CONTIGUOUS pointer :: gg_fptr(:)
+ complex(dp),contiguous, pointer :: gg_fptr(:)
 ! *************************************************************************
 
  gg_cptr = C_loc(gg)
@@ -1994,7 +1994,7 @@ subroutine dfti_c2r_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
  type(DFTI_DESCRIPTOR),pointer :: Desc
  type(C_PTR) :: cptr
 !arrays
- complex(dp),ABI_CONTIGUOUS pointer :: ff_hp(:)
+ complex(dp),contiguous, pointer :: ff_hp(:)
 ! *************************************************************************
 
  !stride  = 1
@@ -2099,7 +2099,7 @@ subroutine dfti_c2r_op_dp(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
 !scalars
  type(C_ptr) :: ff_cptr
 !arrays
- complex(dp),ABI_CONTIGUOUS pointer :: ff_fptr(:)
+ complex(dp),contiguous, pointer :: ff_fptr(:)
 ! *************************************************************************
 
  ff_cptr = C_loc(ff)
@@ -2255,7 +2255,7 @@ subroutine dfti_alloc_real_dp(size, cptr, fptr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
- real(dp),ABI_CONTIGUOUS pointer :: fptr(:)
+ real(dp),contiguous, pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
 ! *************************************************************************
 
@@ -2292,7 +2292,7 @@ subroutine dfti_alloc_complex_spc(size, cptr, fptr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
- complex(sp),ABI_CONTIGUOUS pointer :: fptr(:)
+ complex(sp),contiguous, pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
 ! *************************************************************************
 
@@ -2329,7 +2329,7 @@ subroutine dfti_alloc_complex_dpc(size, cptr, fptr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
- complex(dp),ABI_CONTIGUOUS pointer :: fptr(:)
+ complex(dp),contiguous, pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
 ! *************************************************************************
 

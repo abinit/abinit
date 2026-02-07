@@ -42,7 +42,6 @@ module m_gpu_detect
 CONTAINS  !===========================================================
 !!***
 
-
 !!****f* m_gpu_detect/find_set_gpu
 !! NAME
 !! find_set_gpu
@@ -106,12 +105,12 @@ CONTAINS  !===========================================================
 
   !--Printing Nodes name
   write(msg,'(3a)')&
-    & ' -Node names---------------',ch10,&
-    & '   me                name  '
-  call wrtout(std_out,msg,'COLL')
+     ' -Node names---------------',ch10,&
+     '   me                name  '
+  call wrtout(std_out,msg)
   do icpu=0,nproc-1
     write(msg,'(i5,a22)') icpu,trim(nodes(icpu))
-    call wrtout(std_out,msg,'COLL')
+    call wrtout(std_out,msg)
   end do
 
   !--research of the cpu on the same node of this cpu
@@ -131,7 +130,7 @@ CONTAINS  !===========================================================
   !--All cpu know the cpu with associated gpu (and which gpu on the node)
   !--Now gpu_map contains the number of the device which is associated
   !  with any cpu (-1 if not)
-  call  xmpi_allgather(cpu_map_me,gpu_map,commcart,ierr)
+  call xmpi_allgather(cpu_map_me,gpu_map,commcart,ierr)
 
   !--Count the total number of gpu
   ngpu = count(gpu_map>-1)
@@ -185,7 +184,6 @@ end subroutine find_set_gpu
 
 end subroutine get_topo
 !!***
-
 
 end module m_gpu_detect
 !!***

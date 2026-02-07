@@ -2532,7 +2532,6 @@ subroutine cginv(a, n, comm)
  !type(slkmat_dp_t)    :: Slk_mat
  !type(slk_processor_t) :: Slk_processor
 #endif
-
 ! *************************************************************************
 
  use_scalapack=.FALSE.
@@ -2712,7 +2711,6 @@ subroutine zginv(a, n, comm)
  type(slkmat_dp_t)    :: Slk_mat
  type(slk_processor_t) :: Slk_processor
 #endif
-
 ! *************************************************************************
 
  use_scalapack=.FALSE.
@@ -2968,7 +2966,6 @@ subroutine matrginv(a,lda,n)
  real(dp) :: det(2)
 #endif
  real(dp),allocatable :: work(:)
-
 ! *************************************************************************
 
 #if defined HAVE_LINALG_ESSL
@@ -3073,7 +3070,6 @@ subroutine matr3eigval(eigval,matr)
  integer :: ier
 !arrays
  real(dp) :: eigvec(2,3,3),matrx(2,6),zhpev1(2,2*3-1),zhpev2(3*3-2)
-
 ! *************************************************************************
 
  matrx(1,1)=matr(1,1)

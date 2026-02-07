@@ -1,6 +1,6 @@
 
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 20 Dec 2025.
 - ( at 17h13 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v67mbpt_t60/t60.abi
 - output file    -> t60.abo
 - root for input  files -> t60i
@@ -619,7 +619,7 @@ meta: {optdriver: 3, gwcalctyp: 1, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- SCREENING: Calculation of the susceptibility and dielectric matrices 
+ SCREENING: Calculation of the susceptibility and dielectric matrices
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -635,7 +635,7 @@ meta: {optdriver: 3, gwcalctyp: 1, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -644,13 +644,13 @@ meta: {optdriver: 3, gwcalctyp: 1, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for the screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -659,7 +659,7 @@ meta: {optdriver: 3, gwcalctyp: 1, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
 
 
@@ -671,7 +671,7 @@ meta: {optdriver: 3, gwcalctyp: 1, }
  q-points for optical limit:   1
      1)      0.000010    0.000020    0.000030
 
-- screening: taking advantage of time-reversal symmetry 
+- screening: taking advantage of time-reversal symmetry
 - Maximum band index for partially occupied states nbvw = 4
 - Remaining bands to be divided among processors   nbcw = 21
 - Number of bands treated by each node ~21
@@ -835,7 +835,7 @@ meta: {optdriver: 3, gwcalctyp: 1, }
   dielectric constant without local fields =  28.5077
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     56.27  [%]
-  Heads and wings of the symmetrical epsilon^-1(G,G') 
+  Heads and wings of the symmetrical epsilon^-1(G,G')
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1684,7 +1684,7 @@ meta: {optdriver: 4, gwcalctyp: 1, }
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
- SIGMA: Calculation of the GW corrections 
+ SIGMA: Calculation of the GW corrections
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
@@ -1700,7 +1700,7 @@ meta: {optdriver: 4, gwcalctyp: 1, }
 
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)    -2.50000000E-01 -2.50000000E-01  0.00000000E+00       0.18750
      2)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.37500
@@ -1709,13 +1709,13 @@ meta: {optdriver: 4, gwcalctyp: 1, }
      5)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.12500
      6)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
 
 
  ==== Q-mesh for screening function ====
  Number of points in the irreducible wedge :     6
- Reduced coordinates and weights : 
+ Reduced coordinates and weights :
 
      1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.03125
      2)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.09375
@@ -1724,7 +1724,7 @@ meta: {optdriver: 4, gwcalctyp: 1, }
      5)     5.00000000E-01 -2.50000000E-01  2.50000000E-01       0.18750
      6)     0.00000000E+00 -2.50000000E-01 -2.50000000E-01       0.18750
 
- Together with 48 symmetry operations and time-reversal symmetry 
+ Together with 48 symmetry operations and time-reversal symmetry
  yields    32 points in the full Brillouin Zone.
 
 
@@ -1736,14 +1736,14 @@ meta: {optdriver: 4, gwcalctyp: 1, }
           total number of points  =         8000
 
 
- Parameters for the analytic continuation of Sigma_c(i omega): 
+ Parameters for the analytic continuation of Sigma_c(i omega):
   Mesh type:                      = minimax
   Number of imaginary frequencies =  20
   Min frequency on imag axis (eV) =    0.064
   Max frequency on imag axis (eV) =  113.164
 
 
- setup_sigma: calculating Sigma(iw) at imaginary frequencies (eV) (Fermi Level set to 0) 
+ setup_sigma: calculating Sigma(iw) at imaginary frequencies (eV) (Fermi Level set to 0)
 
      0.000       0.064
      0.000       0.198
@@ -1842,7 +1842,7 @@ data: !SigmaeeData |
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      2.80855000E+01
@@ -2067,8 +2067,8 @@ P           mkmem4          6
 
 ================================================================================
 
- Test the timer : 
-  a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
+ Test the timer :
+  a combined call timab(*,1,tsec) + timab(*,2,tsec) is
 - CPU time =    1.3304E-06 sec,    Wall time =    1.3305E-06 sec
 
 - Total cpu        time (s,m,h):          8.4        0.14      0.002
@@ -2120,7 +2120,7 @@ P           mkmem4          6
 - subtotal                                  3.288  39.0         3.368  39.5                                  0.98       0.98
 
 - For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- as well as % of the total time and number of calls
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =           8.4, wall_time =           8.5
@@ -2166,7 +2166,7 @@ P           mkmem4          6
 
  Partitioning of abinit
 - abinit                                    8.433 100.0         8.517 100.0              1                   0.99       0.99
- 
+
 - abinit(init,iofn1,herald)                 0.014   0.2         0.015   0.2              1                   0.96       0.96
 - get_dtsets_pspheads                       0.169   2.0         0.169   2.0              1                   1.00       1.00
 - abinit(outvars)                           0.068   0.8         0.068   0.8              1                   1.00       1.00
@@ -2180,7 +2180,7 @@ P           mkmem4          6
 
  Partitioning of driver
 - driver                                    7.976  94.6         8.060  94.6              1                   0.99       0.99
- 
+
 - screening                                 5.034  59.7         5.035  59.1              1                   1.00       1.00
 - sigma                                     1.809  21.5         1.811  21.3              1                   1.00       1.00
 - (other)                                   1.132  13.4         1.212  14.2             -1                   0.93       0.93
@@ -2189,7 +2189,7 @@ P           mkmem4          6
 
  Partitioning of gstateimg+gstate
 - gstateimg                                 1.131  13.4         1.211  14.2              2                   0.93       0.93
- 
+
 - gstate(1)                                 0.010   0.1         0.010   0.1              4                   1.00       1.00
 - gstate(pspini)                            0.194   2.3         0.194   2.3              2                   1.00       1.00
 - gstate(init rhor rhog)                    0.015   0.2         0.090   1.1              2                   0.16       0.16
@@ -2201,7 +2201,7 @@ P           mkmem4          6
 
  Partitioning of scfcv_core
 - scfcv_core                                0.907  10.8         0.911  10.7              2                   0.99       0.99
- 
+
 - scfcv_core(setvtr)                        0.021   0.2         0.021   0.2              6                   1.00       1.00
 - scfcv_core(vtorho(f))                     0.826   9.8         0.828   9.7              6                   1.00       1.00
 - scfcv_core(rhotov)                        0.002   0.0         0.002   0.0              5                   1.00       1.00
@@ -2212,13 +2212,13 @@ P           mkmem4          6
 
  Partitioning of rhotov
 - rhotov                                    0.002   0.0         0.002   0.0              5                   1.00       1.00
- 
+
 
 - subtotal                                  0.002   0.0         0.002   0.0                                  1.00       1.00
 
  Partitioning of vtorho
 - vtorho                                    0.826   9.8         0.828   9.7              6                   1.00       1.00
- 
+
 - vtowfk                                    0.823   9.8         0.825   9.7             16                   1.00       1.00
 - vtorho(mkrho 2)                           0.002   0.0         0.002   0.0             11                   1.00       1.00
 
@@ -2226,7 +2226,7 @@ P           mkmem4          6
 
  Partitioning of vtowfk
 - vtowfk                                    0.823   9.8         0.825   9.7             16                   1.00       1.00
- 
+
 - cgwf                                      0.724   8.6         0.726   8.5             78                   1.00       1.00
 - vtowfk(subdiago)                          0.017   0.2         0.017   0.2             78                   0.99       0.99
 - vtowfk(pw_orthon)                         0.078   0.9         0.078   0.9             78                   1.00       1.00
@@ -2236,7 +2236,7 @@ P           mkmem4          6
 
  Partitioning of cgwf
 - cgwf                                      0.724   8.6         0.726   8.5             78                   1.00       1.00
- 
+
 - getghc%cgwf                               0.561   6.7         0.562   6.6           5972                   1.00       1.00
 - cgwf-O(npw)                               0.076   0.9         0.076   0.9             -1                   1.00       1.00
 - projbd%cgwf                               0.087   1.0         0.088   1.0           7352                   0.99       0.99
@@ -2245,7 +2245,7 @@ P           mkmem4          6
 
  Partitioning of getghc
 - getghc                                    0.561   6.7         0.562   6.6           5972                   1.00       1.00
- 
+
 - fourwf%getghc                             0.445   5.3         0.448   5.3           5972                   0.99       0.99
 - nonlop%getghc                             0.075   0.9         0.076   0.9           5972                   0.99       0.99
 - getghc(/=fourXX,nonlop,fock_XX)           0.041   0.5         0.039   0.5             -1                   1.05       1.05
@@ -2254,14 +2254,14 @@ P           mkmem4          6
 
  Partitioning of fourwf (upwards partitioning)
 - fourwf                                    0.447   5.3         0.449   5.3           6012                   0.99       0.99
- 
+
 - fourwf%getghc                             0.445   5.3         0.448   5.3           5972                   0.99       0.99
 
 - subtotal                                  0.447   5.3         0.449   5.3                                  0.99       0.99
 
  Partitioning of screening
 - screening                                 5.034  59.7         5.035  59.1              1                   1.00       1.00
- 
+
 - screening(init1)                          0.164   1.9         0.164   1.9              1                   1.00       1.00
 - screening(wfs)                            0.013   0.2         0.013   0.2              1                   1.00       1.00
 - screening(1)                              0.011   0.1         0.011   0.1              1                   1.00       1.00
@@ -2276,7 +2276,7 @@ P           mkmem4          6
 
  Partitioning of sigma
 - sigma                                     1.809  21.5         1.811  21.3              1                   1.00       1.00
- 
+
 - sigma(Init1)                              0.010   0.1         0.010   0.1              2                   1.00       1.00
 - setup_sigma                               0.251   3.0         0.251   2.9              1                   1.00       1.00
 - sigma(make_vhxc)                          0.023   0.3         0.023   0.3              1                   1.00       1.00
@@ -2288,7 +2288,7 @@ P           mkmem4          6
 
  Partitioning of calc_sigc_me
 - calc_sigc_me                              1.375  16.3         1.375  16.1              1                   1.00       1.00
- 
+
 - calc_sigc_me(Init)                        0.015   0.2         0.015   0.2              1                   1.00       1.00
 - calc_sigc_me(Init q)                      0.973  11.5         0.973  11.4              6                   1.00       1.00
 - calc_sigc_me(loop)                        0.387   4.6         0.387   4.5              6                   1.00       1.00
@@ -2297,59 +2297,59 @@ P           mkmem4          6
 
  Partitioning of inwffil
 - inwffil                                   0.008   0.1         0.008   0.1              2                   1.00       1.00
- 
+
 - inwffil(call newkpt)                      0.008   0.1         0.008   0.1              2                   1.00       1.00
 
 - subtotal                                  0.008   0.1         0.008   0.1                                  1.00       1.00
 
  Partitioning of newkpt
 - newkpt                                    0.008   0.1         0.008   0.1              2                   1.00       1.00
- 
+
 - newkpt(call wfconv)                       0.008   0.1         0.008   0.1              8                   1.00       1.00
 
 - subtotal                                  0.008   0.1         0.008   0.1                                  1.00       1.00
 
  Partitioning of newvtr
 - newvtr                                    0.001   0.0         0.001   0.0              4                   1.00       1.00
- 
+
 
 - subtotal                                  0.001   0.0         0.001   0.0                                  1.00       1.00
 
  Partitioning of fourdp (upwards partitioning)
 - fourdp                                    0.016   0.2         0.092   1.1             39                   0.18       0.18
- 
+
 - fourdp%(other)                            0.016   0.2         0.092   1.1             37                   0.18       0.18
 
 - subtotal                                  0.016   0.2         0.092   1.1                                  0.18       0.18
 
  Partitioning of afterscfloop
 - afterscfloop                              0.009   0.1         0.009   0.1              2                   1.00       1.00
- 
+
 - afterscfloop(forstr)                      0.009   0.1         0.009   0.1              2                   1.00       1.00
 
 - subtotal                                  0.009   0.1         0.009   0.1                                  1.00       1.00
 
  Partitioning of forstr
 - forstr                                    0.009   0.1         0.009   0.1              1                   1.00       1.00
- 
+
 - forstr(stress)                            0.008   0.1         0.008   0.1              1                   1.00       1.00
 
 - subtotal                                  0.009   0.1         0.009   0.1                                  1.00       1.00
 
  Partitioning of forstrnps
 - forstrnps                                 0.000   0.0         0.000   0.0              1                   1.00       1.00
- 
+
 
 - subtotal                                  0.000   0.0         0.000   0.0                                  1.00       1.00
 
  Partitioning of outscfcv
 - outscfcv                                  0.046   0.5         0.048   0.6              2                   0.95       0.95
- 
+
 - outscfcv(output GSR)                      0.044   0.5         0.047   0.6              2                   0.94       0.94
 
 - subtotal                                  0.046   0.5         0.048   0.6                                  0.95       0.95
 -
--Synchronisation (=leave_test) and MPI calls 
+-Synchronisation (=leave_test) and MPI calls
 - communic.MPI                              0.033   0.4         0.033   0.4          47939                   1.01       1.01
 -
 - forstrnps:synchr                          0.000   0.0         0.000   0.0              2                   1.26       1.26
@@ -2400,7 +2400,7 @@ P           mkmem4          6
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -2412,12 +2412,12 @@ P           mkmem4          6
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -2435,7 +2435,7 @@ P           mkmem4          6
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -2450,7 +2450,7 @@ P           mkmem4          6
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009

@@ -35,7 +35,7 @@ module m_conducti
  use defs_abitypes,  only : MPI_type
  use m_io_tools,     only : open_file, close_unit, get_unit
  use m_fstrings,     only : sjoin
- use m_matrix,        only : matr3inv
+ use m_matrix,       only : matr3inv
  use m_hide_lapack,  only : jacobi
  use m_occ,          only : getnel
  use m_geometry,     only : metric
@@ -125,8 +125,8 @@ contains
 
 !Arguments -----------------------------------
 !scalars
- character(len=fnlen) :: filnam,filnam_out
- integer, optional :: varocc
+ character(len=fnlen),intent(in) :: filnam,filnam_out
+ integer, optional, intent(in) :: varocc
 
 !Local variables-------------------------------
 !scalars
@@ -962,7 +962,7 @@ end subroutine conducti_paw
 
 !Arguments -----------------------------------
 !scalars
- character(len=fnlen) :: filnam,filnam_out
+ character(len=fnlen),intent(in) :: filnam,filnam_out
  logical,intent(in),optional :: with_absorption,with_emissivity
 !Local variables-------------------------------
 !scalars
@@ -1446,7 +1446,7 @@ end subroutine conducti_paw
                end do
                do iom=1,mom
                  do icor=1,nphicor
-                   diff_occ = occ_cor(icor,itypat_atnbr)-occ_k(iband) 
+                   diff_occ = occ_cor(icor,itypat_atnbr)-occ_k(iband)
                    diff_eig=eig0_k(iband)-energy_cor(icor,itypat_atnbr)
                    oml=oml_edge(icor,iom)
                    if(need_absorption) then
@@ -1907,7 +1907,8 @@ subroutine conducti_nc(filnam,filnam_out)
 
 !Arguments -----------------------------------
 !scalars
- character(len=fnlen) :: filnam,filnam_out
+ character(len=fnlen),intent(in) :: filnam,filnam_out
+
 !Local variables-------------------------------
 !scalars
  integer,parameter :: formeig0=0,formeig1=1
@@ -2508,6 +2509,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig,phi,au_units)
  real(dp),intent(in) :: fcti(npti),xi(npti)
  character(len=fnlen),intent(in) :: filnam_out_sig
  real(dp),intent(in) :: phi
+
 !Local variables-------------------------------
 !scalars
  integer :: ii,ip,eps_unt,abs_unt

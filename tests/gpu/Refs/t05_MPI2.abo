@@ -1,6 +1,6 @@
 
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_nvhpc24.9-0 computer) 
+.(MPI version, prepared for a x86_64_linux_nvhpc24.9-0 computer)
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -16,12 +16,12 @@
 
 .Starting date : Mon 22 Dec 2025.
 - ( at 10h21 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/TestBot_MPI2/gpu_t05_MPI2/t05.abi
 - output file    -> t05_MPI2.abo
 - root for input  files -> t05_MPI2i
 - root for output files -> t05_MPI2o
- 
+
  Magnetic group, Shubnikov type IV
  Fedorov space group R-3 m (#166)
  Magnetic Bravais lattice hR_I (rhombohedral, centered magnetic, #31)
@@ -42,7 +42,7 @@ P This job should need less than                       8.990 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.181 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -216,15 +216,15 @@ P           mkmem           5
                        5.0000000000E-01  5.0000000000E-01  2.5000000000E-01
                        5.0000000000E-01  5.0000000000E-01  7.5000000000E-01
             znucl       28.00000    8.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 2, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -238,31 +238,31 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.9600000  3.9600000  G(1)= -0.1262626  0.1262626  0.1262626
  R(2)=  3.9600000  0.0000000  3.9600000  G(2)=  0.1262626 -0.1262626  0.1262626
  R(3)=  7.9200000  7.9200000  0.0000000  G(3)=  0.0631313  0.0631313 -0.0631313
  Unit cell volume ucvol=  2.4839654E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  32
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.24388
- 
+
  getcut : COMMENT -
   Note that boxcut > 2.2 ; recall that boxcut=Gcut(box)/Gcut(sphere) = 2
   is sufficient for exact treatment of convolution.
   Such a large boxcut is a waste : you could raise ecut
   e.g. ecut=   10.069997 Hartrees makes boxcut=2
- 
- 
+
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  32
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00699
- 
+
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/28ni.paw
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/28ni.paw
@@ -284,7 +284,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Radial grid used for Vloc is grid 3
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
+
 - pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/8o.2.paw
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/8o.2.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Oxygen
@@ -306,17 +306,17 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Radial grid used for Vloc is grid 4
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
+
    5.32753584E+03                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
+
 _setup2: Arith. and geom. avg. npw (full set) are     268.741     268.707
- 
- 
+
+
  ******************************************
  DFT+U Method used: FLL
  ******************************************
- 
+
 ================================================================================
 
 --- !BeginCycle
@@ -324,7 +324,7 @@ iteration_state: {dtset: 1, }
 solver: {iscf: 17, nstep: 15, nline: 4, wfoptalg: 14, }
 tolerances: {tolvrs: 1.00E-07, }
 ...
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
  ETOT  1  -373.48416390081    -3.735E+02 2.631E-06 1.621E+01 1.740E+00 1.740E+00
  ETOT  2  -371.61566820467     1.868E+00 4.577E-11 6.375E+00 1.703E-01 1.570E+00
@@ -339,14 +339,14 @@ tolerances: {tolvrs: 1.00E-07, }
  ETOT 11  -370.46633258786     1.628E-07 6.671E-15 1.649E-06 4.678E-04 1.343E+00
  ETOT 12  -370.46633260153    -1.367E-08 2.320E-15 2.272E-07 4.983E-05 1.343E+00
  ETOT 13  -370.46633261390    -1.237E-08 2.234E-15 4.088E-09 4.520E-05 1.343E+00
- 
+
  At SCF step   13       nres2   =  4.09E-09 < tolvrs=  1.00E-07 =>converged.
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.69573333E-02  sigma(3 2)= -8.82269280E-05
   sigma(2 2)=  2.69573333E-02  sigma(3 1)= -8.82269280E-05
   sigma(3 3)=  2.69573333E-02  sigma(2 1)=  8.82269280E-05
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -392,16 +392,16 @@ force_length_stats: {min:   2.87530970E-32, max:   8.62592909E-32, mean:   4.312
   Sum:                20.564849    20.564849     41.129698    -0.000000
  Total magnetization (from the atomic spheres):               -0.000000
  Total magnetization (exact up - dn):                         -0.000000
- 
- 
+
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =     21.861329542582737
  Compensation charge over fft grid         =     21.862843623398977
- 
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1 - Spin component 1
   -2.96308  -0.99059   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00009  -0.00009   0.00000  -0.00009 ...
@@ -459,8 +459,8 @@ force_length_stats: {min:   2.87530970E-32, max:   8.62592909E-32, mean:   4.312
    0.00000   0.00000  -0.00004  -0.00009  -0.00004  -0.00006  -0.00013  -0.00006  -0.00001  -0.00000  -0.01815  -0.00000 ...
    0.00001   0.00002   0.00000   0.00012  -0.00012   0.00000   0.00018  -0.00018  -0.00000   0.00000  -0.00000  -0.01803 ...
    ...  only 12  components have been written...
- 
- 
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1 - Spin component 1
    1.00556  -0.03771   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00016  -0.00016   0.00000  -0.00016 ...
@@ -518,7 +518,7 @@ force_length_stats: {min:   2.87530970E-32, max:   8.62592909E-32, mean:   4.312
    0.00000   0.00000   0.04415   0.08830   0.04415  -0.00800  -0.01600  -0.00800  -0.00561  -0.00281   0.34216  -0.00281 ...
   -0.00779   0.00281   0.00560   0.00155  -0.00155  -0.00140  -0.00080   0.00080  -0.00594   0.00594  -0.00281   0.18467 ...
    ...  only 12  components have been written...
- 
+
  "PAW+U" part of augmentation waves occupancies Rhoij:
  Atom #  1 - L=2 ONLY - Spin component 1
    0.95285   0.00023   0.00011   0.00023   0.00000
@@ -544,62 +544,62 @@ force_length_stats: {min:   2.87530970E-32, max:   8.62592909E-32, mean:   4.312
    0.00011   0.00005   0.96973   0.00005   0.00000
    0.00023  -0.00023   0.00005   0.95285   0.00009
    0.00000  -0.00009   0.00000   0.00009   0.96973
- 
- ---------- DFT+U DATA --------------------------------------------------- 
- 
+
+ ---------- DFT+U DATA ---------------------------------------------------
+
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
- 
+
  Atom   1. Occ. for lpawu and for spin  1 =   4.60952
  Atom   1. Occ. for lpawu and for spin  2 =   3.22711
  => On atom   1,  local Mag. for lpawu is       -1.382412
- 
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for spin  1
      0.91542    0.00022    0.00010    0.00022    0.00000
      0.00022    0.91542    0.00005   -0.00022   -0.00009
      0.00010    0.00005    0.93163    0.00005    0.00000
      0.00022   -0.00022    0.00005    0.91542    0.00009
      0.00000   -0.00009    0.00000    0.00009    0.93163
- 
- 
+
+
  Occupation matrix for spin  2
      0.91263    0.00022   -0.00120    0.00022    0.00000
      0.00022    0.91263   -0.00060   -0.00022    0.00104
     -0.00120   -0.00060    0.24461   -0.00060    0.00000
      0.00022   -0.00022   -0.00060    0.91263   -0.00104
      0.00000    0.00104    0.00000   -0.00104    0.24461
- 
- 
+
+
  ====== For Atom     2, occupations for correlated orbitals. lpawu =   2
- 
+
  Atom   2. Occ. for lpawu and for spin  1 =   3.22711
  Atom   2. Occ. for lpawu and for spin  2 =   4.60952
  => On atom   2,  local Mag. for lpawu is        1.382412
- 
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for spin  1
      0.91263    0.00022   -0.00120    0.00022    0.00000
      0.00022    0.91263   -0.00060   -0.00022    0.00104
     -0.00120   -0.00060    0.24461   -0.00060    0.00000
      0.00022   -0.00022   -0.00060    0.91263   -0.00104
      0.00000    0.00104    0.00000   -0.00104    0.24461
- 
- 
+
+
  Occupation matrix for spin  2
      0.91542    0.00022    0.00010    0.00022    0.00000
      0.00022    0.91542    0.00005   -0.00022   -0.00009
      0.00010    0.00005    0.93163    0.00005    0.00000
      0.00022   -0.00022    0.00005    0.91542    0.00009
      0.00000   -0.00009    0.00000    0.00009    0.93163
- 
- 
- 
+
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   28.466E-18; max=  22.340E-16
  reduced coordinates (array xred) for    4 atoms
        0.000000000000      0.000000000000      0.000000000000
@@ -611,20 +611,20 @@ force_length_stats: {min:   2.87530970E-32, max:   8.62592909E-32, mean:   4.312
     2       0.000000000000      0.000000000000      0.000000000000
     3       0.000000000000      0.000000000000      0.000000000000
     4       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      2.09554175375424     2.09554175375424    -0.00000000000000
     3      2.09554175375424     2.09554175375424     2.09554175375424
     4      4.19108350750848     4.19108350750848     2.09554175375424
- 
+
  cartesian forces (hartree/bohr) at end:
     1      0.00000000000000     0.00000000000000    -0.00000000000000
     2     -0.00000000000000    -0.00000000000000     0.00000000000000
     3     -0.00000000000000    -0.00000000000000     0.00000000000000
     4     -0.00000000000000    -0.00000000000000     0.00000000000000
  frms,max,avg= 2.8753097E-32 4.9801825E-32   0.000E+00  0.000E+00  0.000E+00 h/b
- 
+
  cartesian forces (eV/Angstrom) at end:
     1      0.00000000000000     0.00000000000000    -0.00000000000000
     2     -0.00000000000000    -0.00000000000000     0.00000000000000
@@ -646,7 +646,7 @@ force_length_stats: {min:   2.87530970E-32, max:   8.62592909E-32, mean:   4.312
    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000
    0.00000    0.00000    0.00000    0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
+
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
@@ -679,20 +679,20 @@ total_energy_dc     : -3.70466332613901E+02
 total_energy_dc_eV  : -1.00809024678889E+04
 ...
 
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.69573333E-02  sigma(3 2)= -8.82269280E-05
   sigma(2 2)=  2.69573333E-02  sigma(3 1)= -8.82269280E-05
   sigma(3 3)=  2.69573333E-02  sigma(2 1)=  8.82269280E-05
- 
+
 -Cartesian components of stress tensor (GPa)         [Pressure= -7.9311E+02 GPa]
 - sigma(1 1)=  7.93112126E+02  sigma(3 2)= -2.59572584E+00
 - sigma(2 2)=  7.93112126E+02  sigma(3 1)= -2.59572584E+00
 - sigma(3 3)=  7.93112126E+02  sigma(2 1)=  2.59572584E+00
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.9200000000E+00  7.9200000000E+00  7.9200000000E+00 Bohr
               amu      5.86900000E+01  1.59994000E+01
@@ -863,7 +863,7 @@ P           mkmem           5
                        5.0000000000E-01  5.0000000000E-01  2.5000000000E-01
                        5.0000000000E-01  5.0000000000E-01  7.5000000000E-01
             znucl       28.00000    8.00000
- 
+
 ================================================================================
 
 
@@ -914,7 +914,7 @@ P           mkmem           5
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -926,12 +926,12 @@ P           mkmem           5
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -949,15 +949,15 @@ P           mkmem           5
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - Proc.   0 individual time (sec): cpu=          6.5  wall=          6.5
- 
+
 ================================================================================
- 
+
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
 +Overall time at end (sec) : cpu=         13.0  wall=         13.0

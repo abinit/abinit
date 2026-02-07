@@ -1,6 +1,6 @@
 
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 20 Dec 2025.
 - ( at 17h07 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_teph4vpq_1-teph4vpq_2-teph4vpq_3-teph4vpq_4-teph4vpq_5-teph4vpq_6-teph4vpq_7-teph4vpq_8-teph4vpq_9-teph4vpq_10/teph4vpq_8.abi
 - output file    -> teph4vpq_8.abo
 - root for input  files -> teph4vpq_8i
@@ -224,11 +224,11 @@ meta: {optdriver: 7, eph_task: 11, }
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -244,7 +244,7 @@ meta: {optdriver: 7, eph_task: 11, }
        3               2       -0.000000        0.000000
        3               3       -0.065315        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -390,54 +390,46 @@ P Number of CPUs for parallelism over k-points: 1
  Max 10  k-points will be written. Use prtvol > 0 to print all of them.
  Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.
  Little group operations won't be used
- 
+
  gstore_completed: 1
  gstore_done_qbz_spin: 597
- gqk%nb_kq: 1
- gqk%nb_k: 1
- gqk%glob_nq: 597
- gqk%glob_nk: 89
-
- Group velocities |v_nk| in atomic units:
- For k-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     5.654169E-17
- For k-point: [ 7.6923E-02,  0.0000E+00,  0.0000E+00] , spin 1
- ib_k: 1     1.151920E-01
- For k-point: [-3.0769E-01,  4.6154E-01,  1.5385E-01] , spin 1
- ib_k: 1     0.000000E+00
- For k-point: [-3.0769E-01,  4.6154E-01,  2.3077E-01] , spin 1
- ib_k: 1     0.000000E+00
- 
+ nb_k: 1
+ bstart_k: 6
+ nb_kq: 1
+ bstart_kq: 6
+ glob_nq: 597
+ glob_nk: 89
  E-PH matrix elements in the atom representation: pcase = (idir, iatom)
-    iq    ik pcase im_kq  in_k        |g| in Ha
+ NB: Values are averaged over e_mk+q, and e_nk degenerate states.
+    iq    ik pcase  m_kq   n_k        |g| in Ha
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
-     1     1     4     1     1     2.369238E-08
+    iq    ik pcase  m_kq   n_k              |g|
+-    1     1     4     6     6     9.129338E-09
  |g(k,q)| in Ha for iq: 1 ik: 1 pcase: 6
-    iq    ik pcase im_kq  in_k              |g|
-     1     1     6     1     1     2.307791E-08
- |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
-     1    89     4     1     1     2.433022E-08
- |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 6
-    iq    ik pcase im_kq  in_k              |g|
-     1    89     6     1     1     2.528762E-08
+    iq    ik pcase  m_kq   n_k              |g|
+-    1     1     6     6     6     4.058752E-08
  |g(k,q)| in Ha for iq: 597 ik: 1 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
-   597     1     4     1     1     7.813351E-01
+    iq    ik pcase  m_kq   n_k              |g|
+-  597     1     4     6     6     7.813350E-01
  |g(k,q)| in Ha for iq: 597 ik: 1 pcase: 6
-    iq    ik pcase im_kq  in_k              |g|
-   597     1     6     1     1     4.982705E-01
+    iq    ik pcase  m_kq   n_k              |g|
+-  597     1     6     6     6     4.982705E-01
+ |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 4
+    iq    ik pcase  m_kq   n_k              |g|
+-    1    89     4     6     6     8.988575E-09
+ |g(k,q)| in Ha for iq: 1 ik: 89 pcase: 6
+    iq    ik pcase  m_kq   n_k              |g|
+-    1    89     6     6     6     4.171257E-08
  |g(k,q)| in Ha for iq: 597 ik: 89 pcase: 4
-    iq    ik pcase im_kq  in_k              |g|
-   597    89     4     1     1     8.165923E-01
+    iq    ik pcase  m_kq   n_k              |g|
+-  597    89     4     6     6     8.165923E-01
  |g(k,q)| in Ha for iq: 597 ik: 89 pcase: 6
-    iq    ik pcase im_kq  in_k              |g|
-   597    89     6     1     1     5.482770E-01
+    iq    ik pcase  m_kq   n_k              |g|
+-  597    89     6     6     6     5.482770E-01
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.6750000000E+00  7.6750000000E+00  7.6750000000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
@@ -535,7 +527,7 @@ P           mkmem          84
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -552,12 +544,12 @@ P           mkmem          84
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -575,7 +567,7 @@ P           mkmem          84
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -590,7 +582,7 @@ P           mkmem          84
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
