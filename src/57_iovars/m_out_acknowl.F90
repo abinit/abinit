@@ -210,7 +210,7 @@ ref(1)=trim(ref(1))//&
  comment(6)=' Comment: the second generic paper describing the ABINIT project. Note that this paper'//ch10//&
    ' should be cited especially if you are using the GW part of ABINIT, as several authors'//ch10//&
    ' of this part are not in the list of authors of the first or third paper.'//ch10//&
-   ' The .pdf of the latter paper is available at',//ch10//&
+   ' The .pdf of the latter paper is available at'//ch10//&
    ' https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/zfk_0505-06_558-562.pdf.'//ch10//&
    ' Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,'//ch10//&
    ' the licence allows the authors to put it on the Web).'//ch10//&
