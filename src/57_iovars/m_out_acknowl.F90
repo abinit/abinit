@@ -119,7 +119,7 @@ ref(1)=trim(ref(1))//&
    ' A. Zadoks, Huazhang Zhang, J.W. Zwanziger.'
  comment(1)=' Comment: the sixth generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for J. Chem. Phys. '//ch10//&
-   ' is available at',//ch10//&
+   ' is available at'//ch10//&
    ' https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025'
@@ -139,7 +139,7 @@ ref(1)=trim(ref(1))//&
    ' M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanziger.'
  comment(2)=' Comment: the fifth generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
-   ' is available at',//ch10//&
+   ' is available at'//ch10//&
    ' https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020'
@@ -159,7 +159,7 @@ ref(1)=trim(ref(1))//&
    ' M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.'
  comment(3)=' Comment: a global overview of ABINIT, with focus on selected capabilities .'//ch10//&
    ' Note that a version of this paper, that is not formatted for J. Chem. Phys. '//ch10//&
-   ' is available at',//ch10//&
+   ' is available at'//ch10//&
    '  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020'
@@ -181,7 +181,7 @@ ref(1)=trim(ref(1))//&
    ' B.Xu, A.Zhou, J.W.Zwanziger.'
  comment(4)=' Comment: the fourth generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
-   ' is available at',//ch10//&
+   ' is available at'//ch10//&
    ' https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT16.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016'
