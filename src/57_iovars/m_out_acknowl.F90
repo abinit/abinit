@@ -73,8 +73,8 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  integer :: idtset,iprior,iref,ncited,nrefs,ipsp,print_optional
  integer, allocatable :: cite(:),priority(:)
  character(len=750), allocatable :: ref(:)
- character(len=600), allocatable :: comment(:)
- character(len=600+750) :: string
+ character(len=650), allocatable :: comment(:)
+ character(len=650+750) :: string
 
 ! *************************************************************************
 
