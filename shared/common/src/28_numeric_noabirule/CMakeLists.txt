@@ -11,6 +11,7 @@ add_library(28_numeric_noabirule STATIC
   m_cplxtools.F90
   m_elpa.F90
   m_gaussian_quadrature.F90
+  m_gputk.F90
   m_hide_blas.F90
   m_hide_lapack.F90
   m_hybrd.F90

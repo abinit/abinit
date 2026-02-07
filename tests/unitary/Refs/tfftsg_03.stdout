@@ -42,10 +42,10 @@
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
  ==== FFT setup for fftalg 112 ====
-  FFT mesh divisions ........................   100  100  100
-  Augmented FFT divisions ...................   101  101  100
-  FFT algorithm .............................   112
-  FFT cache size ............................    16
+-  FFT mesh divisions ........................   100  100  100
+-  Augmented FFT divisions ...................   101  101  100
+-  FFT algorithm .............................   112
+-  FFT cache size ............................    16
 === FFT Unit Tests ===
 fftbox_utests with fftalg = 112, ndat = 1, nthreads = 1
 Goedecker c2c_ip_spc :  OK

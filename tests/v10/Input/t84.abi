@@ -23,7 +23,7 @@ ndtset 2
 #-1.0 0.0 0.0
 ## zz terms
 #
-# Here have the up-up configuration (along z) and the 
+# Here have the up-up configuration (along z) and the
 # up-down. Down-down and down-up are symmetric.
 nucdipmom1
 0.0 0.0 1.0
@@ -32,7 +32,7 @@ nucdipmom2
 0.0 0.0 1.0
 0.0 0.0 -1.0
 
-# best to use always all spin-relativistic corrections 
+# best to use always all spin-relativistic corrections
 nspinor 2
 zora 3
 

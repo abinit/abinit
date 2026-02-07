@@ -1257,8 +1257,6 @@ end subroutine bigdft_lib_error
 
 subroutine xlf_set_sighandler()
 
-! *************************************************************************
-
 #ifdef FC_IBM
  call SIGNAL(SIGTRAP, xl__trcedump)
  call SIGNAL(SIGFPE, xl__trcedump)

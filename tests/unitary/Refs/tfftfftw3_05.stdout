@@ -1,6 +1,6 @@
 
-.Version 8.11.12 of FFTPROF 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 8.11.12 of FFTPROF
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer)
 
 .Copyright (C) 1998-2026 ABINIT group . 
  FFTPROF comes with ABSOLUTELY NO WARRANTY.
@@ -16,50 +16,50 @@
 
 .Starting date : Mon 25 Nov 2019.
 - ( at 08h24 )
-  
+
  Tool for profiling and testing the FFT libraries used in ABINIT.
- Allowed options are: 
+ Allowed options are:
    fourdp --> Test FFT transforms of density and potentials on the full box.
    fourwf --> Test FFT transforms of wavefunctions using the zero-pad algorithm.
    gw_fft --> Test the FFT transforms used in the GW code.
    all    --> Test all FFT routines.
- 
+
 === MPI FFT Unit Tests ===
 MPI fftu_utests with fftalg = 311, paral_kgb = 1 ndat = 1, nthreads = 0
 
  ==== ngfft for MPI-fourwf ====
-  FFT mesh divisions ........................   120  120  120
-  Augmented FFT divisions ...................   121  121  120
-  FFT algorithm .............................   311
-  FFT cache size ............................    16
+-  FFT mesh divisions ........................   120  120  120
+-  Augmented FFT divisions ...................   121  121  120
+-  FFT algorithm .............................   311
+-  FFT cache size ............................    16
 FFTW3 fftu_mpi, istwfk1 :  OK
 FFTW3 accrho_mpi, istwfk1 :  OK
 FFTW3 <G|vloc|u>, istwfk1 :  OK
 
  ==== ngfft for MPI-fourwf ====
-  FFT mesh divisions ........................   120  120  120
-  Augmented FFT divisions ...................   121  121  120
-  FFT algorithm .............................   311
-  FFT cache size ............................    16
+-  FFT mesh divisions ........................   120  120  120
+-  Augmented FFT divisions ...................   121  121  120
+-  FFT algorithm .............................   311
+-  FFT cache size ............................    16
 FFTW3 fftu_mpi, istwfk2 :  OK
 FFTW3 accrho_mpi, istwfk2 :  OK
 FFTW3 <G|vloc|u>, istwfk2 :  OK
 MPI fftu_utests with fftalg = 312, paral_kgb = 1 ndat = 1, nthreads = 0
 
  ==== ngfft for MPI-fourwf ====
-  FFT mesh divisions ........................   120  120  120
-  Augmented FFT divisions ...................   121  121  120
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
+-  FFT mesh divisions ........................   120  120  120
+-  Augmented FFT divisions ...................   121  121  120
+-  FFT algorithm .............................   312
+-  FFT cache size ............................    16
 FFTW3 fftu_mpi, istwfk1 :  OK
 FFTW3 accrho_mpi, istwfk1 :  OK
 FFTW3 <G|vloc|u>, istwfk1 :  OK
 
  ==== ngfft for MPI-fourwf ====
-  FFT mesh divisions ........................   120  120  120
-  Augmented FFT divisions ...................   121  121  120
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
+-  FFT mesh divisions ........................   120  120  120
+-  Augmented FFT divisions ...................   121  121  120
+-  FFT algorithm .............................   312
+-  FFT cache size ............................    16
 FFTW3 fftu_mpi, istwfk2 :  OK
 FFTW3 accrho_mpi, istwfk2 :  OK
 FFTW3 <G|vloc|u>, istwfk2 :  OK

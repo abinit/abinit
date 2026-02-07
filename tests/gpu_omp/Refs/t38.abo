@@ -1,6 +1,6 @@
 
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_nvhpc24.9-0 computer) 
+.(MPI version, prepared for a x86_64_linux_nvhpc24.9-0 computer)
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -16,27 +16,27 @@
 
 .Starting date : Mon 22 Dec 2025.
 - ( at 07h40 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/TestBot_MPI1/gpu_omp_t38/t38.abi
 - output file    -> t38.abo
 - root for input  files -> t38i
 - root for output files -> t38o
- 
-- inpspheads : Reading pseudopotential header in XML form from 
+
+- inpspheads : Reading pseudopotential header in XML form from
 -   /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
- 
+
  invars1: COMMENT -
   With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.
- 
+
  invars1: COMMENT -
   With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.
- 
+
  invars1: COMMENT -
   With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.
- 
+
  invars1: COMMENT -
   With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.
- 
+
  invars1: COMMENT -
   With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.
  DATASET    1 : magnetic group, Shubnikov type III
@@ -58,7 +58,7 @@ P This job should need less than                      14.663 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.076 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
- 
+
  DATASET    2 : magnetic group, Shubnikov type III
  Fedorov space group R3 2 (#155); Bravais hR (rhombohedral)
  Magnetic point group 32' (# 30)
@@ -78,7 +78,7 @@ P This job should need less than                      14.663 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.076 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
- 
+
  DATASET    3 : magnetic group, Shubnikov type III
  Fedorov space group R3 2 (#155); Bravais hR (rhombohedral)
  Magnetic point group 32' (# 30)
@@ -98,7 +98,7 @@ P This job should need less than                      14.663 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.076 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
- 
+
  DATASET    4 : magnetic group, Shubnikov type III
  Fedorov space group R3 2 (#155); Bravais hR (rhombohedral)
  Magnetic point group 32' (# 30)
@@ -118,7 +118,7 @@ P This job should need less than                      14.663 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.076 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
- 
+
  DATASET    5 : magnetic group, Shubnikov type III
  Fedorov space group R3 2 (#155); Bravais hR (rhombohedral)
  Magnetic point group 32' (# 30)
@@ -138,7 +138,7 @@ P This job should need less than                      14.663 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.076 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -219,23 +219,23 @@ P           mkmem           1
           usepawu5          1
 -          useylm           1
             znucl       26.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   1.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   2.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   3.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   4.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   5.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -251,17 +251,17 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  R(3)=  2.7100000  2.7100000 -2.7100000  G(3)=  0.1845018  0.1845018  0.0000000
  Unit cell volume ucvol=  7.9610044E+01 bohr^3
  Angles (23,13,12)=  1.09471221E+02  1.09471221E+02  1.09471221E+02 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
          ecut(hartree)=     14.000   => boxcut(ratio)=   2.03166
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  24
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.07375
- 
+
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
@@ -282,19 +282,19 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Mesh size for Vloc has been set to 1332 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
+
    4.97277064E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
+
 P newkpt: treating     24 bands with npw=     201 for ikpt=   1 by node    0
 _setup2: Arith. and geom. avg. npw (full set) are     201.000     201.000
- 
- 
+
+
  ******************************************
  DFT+U Method used: FLL with no spin polarization in the xc functional
  Magnetic DC : option_interaction = 3
  ******************************************
- 
+
 ================================================================================
 
 --- !BeginCycle
@@ -302,7 +302,7 @@ iteration_state: {dtset: 1, }
 solver: {iscf: 17, nstep: 31, nline: 12, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-15, }
 ...
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
  ETOT  1  -122.41538452635    -1.224E+02 1.696E+01 5.384E+00 2.278E+00 2.278E+00
  ETOT  2  -124.62022770332    -2.205E+00 8.552E-04 1.112E+01 1.156E+00 3.434E+00
@@ -335,17 +335,17 @@ tolerances: {tolvrs: 1.00E-15, }
  ETOT 29  -124.67435584221    -8.527E-14 3.281E-13 6.377E-13 5.834E-08 3.781E+00
  ETOT 30  -124.67435584221    -1.279E-13 1.071E-12 2.069E-13 3.665E-07 3.781E+00
  ETOT 31  -124.67435584221    -9.948E-14 6.231E-14 9.232E-14 1.955E-08 3.781E+00
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.99014411E-04  sigma(3 2)= -8.84139475E-04
   sigma(2 2)= -4.99014411E-04  sigma(3 1)= -8.84139475E-04
   sigma(3 3)= -4.99014411E-04  sigma(2 1)= -8.84139475E-04
- 
- 
+
+
  scprqt:  WARNING -
   nstep=   31 was not enough SCF cycles to converge;
   density residual=  9.232E-14 exceeds tolvrs=  1.000E-15
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -385,15 +385,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (exact)
  (cart.coord.)                                      2.297966    2.297966    2.297966
  (sph.coord.)                           3.980194                                       54.735610   45.000000
- 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =      8.579912343962576
  Compensation charge over fine fft grid    =      8.579851138148710
- 
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1 - Component up-up
    === REAL PART:
@@ -559,8 +559,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00077   0.00569  -0.00077   0.01701  -0.00040  -0.00038  -0.01645   0.00222  -0.04922   0.00117
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00136   0.00285  -0.00007  -0.00089   0.02193  -0.00395  -0.00639   0.00019   0.00258  -0.06344
    max. value=  2.37E-02, min. value= -8.22E-02
- 
- 
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1 - Component dens (n)
    === REAL PART:
@@ -726,7 +726,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   -0.00000   0.00001   0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00227  -0.00342  -0.00011   0.00034   0.00018   0.00003  -0.00005   0.00001   0.00000  -0.00001
    0.00001   0.00005   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00637   0.00019   0.00027   0.00019  -0.00000   0.00007   0.00001  -0.00002   0.00001   0.00000
    max. value=  1.80E-01, min. value= -1.80E-01
- 
+
  "PAW+U" part of augmentation waves occupancies Rhoij:
  Atom #  1 - L=2 ONLY - Component dens (n)
    === REAL PART:
@@ -820,83 +820,83 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00027  -0.00000  -0.00027  -0.00022   0.00000   0.00001  -0.00000  -0.00001   0.00002
    0.00227  -0.00342  -0.00011   0.00034   0.00018   0.00003  -0.00005   0.00001   0.00000  -0.00001
   -0.00637   0.00019   0.00027   0.00019  -0.00000   0.00007   0.00001  -0.00002   0.00001   0.00000
- 
- ---------- DFT+U DATA --------------------------------------------------- 
- 
+
+ ---------- DFT+U DATA ---------------------------------------------------
+
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
- 
+
  => On atom   1, for  lpawu, local Mag. x is     0.21874399E+01
                              local Mag. y is     0.21874399E+01
                              local Mag. z is     0.21874399E+01
                              norm of Mag. is     0.37887571E+01
          (along mag axis)    occ. for majority spin is =      4.71533
          (along mag axis)    occ. for minority spin is =      0.92658
- 
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for component up-up
   (  0.80767,  0.00000) ( -0.03012, -0.05247) ( -0.01006, -0.00000) ( -0.03012,  0.05247) (  0.00000, -0.01461) (
   ( -0.03012,  0.05247) (  0.79574, -0.00000) ( -0.00924, -0.01881) ( -0.03262, -0.06045) ( -0.01526, -0.01044) (
   ( -0.01006,  0.00000) ( -0.00924,  0.01881) (  0.75452, -0.00000) ( -0.00924, -0.01881) ( -0.00000, -0.00131) (
   ( -0.03012, -0.05247) ( -0.03262,  0.06045) ( -0.00924,  0.01881) (  0.79574,  0.00000) (  0.01526, -0.01044) (
   (  0.00000,  0.01461) ( -0.01526,  0.01044) ( -0.00000,  0.00131) (  0.01526,  0.01044) (  0.76102,  0.00000) (
- 
- 
+
+
  Occupation matrix for component dwn-dwn
   (  0.42946,  0.00000) ( -0.11890, -0.20791) ( -0.03262, -0.00000) ( -0.11890,  0.20791) ( -0.00000,  0.05743) (
   ( -0.11890,  0.20791) (  0.44139,  0.00000) (  0.03058, -0.01827) ( -0.11640, -0.19992) ( -0.02170, -0.01096) (
   ( -0.03262,  0.00000) (  0.03058,  0.01827) (  0.21075, -0.00000) (  0.03058, -0.01827) (  0.00000, -0.00466) (
   ( -0.11890, -0.20791) ( -0.11640,  0.19992) (  0.03058,  0.01827) (  0.44139, -0.00000) (  0.02170, -0.01096) (
   ( -0.00000, -0.05743) ( -0.02170,  0.01096) (  0.00000,  0.00466) (  0.02170,  0.01096) (  0.20425, -0.00000) (
- 
- 
+
+
  Occupation matrix for component up-dwn
   (  0.17717, -0.17717) (  0.11412,  0.03583) (  0.01310, -0.01310) ( -0.03583, -0.11412) ( -0.01554, -0.01554) (
   ( -0.02534, -0.11961) (  0.18911, -0.17717) ( -0.00555,  0.02402) (  0.12211,  0.03333) (  0.00941, -0.00085) (
   (  0.01238, -0.01238) ( -0.00573, -0.03836) (  0.27676, -0.27676) (  0.03836,  0.00573) (  0.00449,  0.00449) (
   (  0.11961,  0.02534) ( -0.03333, -0.12211) ( -0.02402,  0.00555) (  0.17717, -0.18911) ( -0.00085,  0.00941) (
   ( -0.01574, -0.01574) (  0.01013, -0.03686) (  0.00114,  0.00114) ( -0.03686,  0.01013) (  0.27351, -0.27351) (
- 
- 
+
+
  Occupation matrix for component dwn-up
   (  0.17717,  0.17717) ( -0.02534,  0.11961) (  0.01238,  0.01238) (  0.11961, -0.02534) ( -0.01574,  0.01574) (
   (  0.11412, -0.03583) (  0.18911,  0.17717) ( -0.00573,  0.03836) ( -0.03333,  0.12211) (  0.01013,  0.03686) (
   (  0.01310,  0.01310) ( -0.00555, -0.02402) (  0.27676,  0.27676) ( -0.02402, -0.00555) (  0.00114, -0.00114) (
   ( -0.03583,  0.11412) (  0.12211, -0.03333) (  0.03836, -0.00573) (  0.17717,  0.18911) ( -0.03686, -0.01013) (
   ( -0.01554,  0.01554) (  0.00941,  0.00085) (  0.00449, -0.00449) ( -0.00085, -0.00941) (  0.27351,  0.27351) (
- 
- 
- 
+
+
+
 == Occupation matrix in the complex harmonics basis for component up-up
   (  0.79895,  0.00000) ( -0.02844, -0.02844) (  0.00000, -0.00618) (  0.00876, -0.00876) ( -0.02332,  0.00000) (
   ( -0.02844,  0.02844) (  0.85619, -0.00000) (  0.00676,  0.00676) (  0.00000,  0.03262) (  0.05415, -0.05415) (
   (  0.00000,  0.00618) (  0.00676, -0.00676) (  0.75452, -0.00000) (  0.01984,  0.01984) ( -0.00000, -0.00804) (
   (  0.00876,  0.00876) (  0.00000, -0.03262) (  0.01984, -0.01984) (  0.73528, -0.00000) ( -0.01358, -0.01358) (
   ( -0.02332, -0.00000) (  0.05415,  0.05415) ( -0.00000,  0.00804) ( -0.01358,  0.01358) (  0.76973,  0.00000) (
- 
+
 == Occupation matrix in the complex harmonics basis for component dwn-dwn
   (  0.25943, -0.00000) ( -0.14707, -0.14707) (  0.00000, -0.01977) (  0.03914, -0.03914) ( -0.11260, -0.00000) (
   ( -0.14707,  0.14707) (  0.64131, -0.00000) (  0.03454,  0.03454) (  0.00000,  0.11640) (  0.17973, -0.17973) (
   (  0.00000,  0.01977) (  0.03454, -0.03454) (  0.21075, -0.00000) ( -0.00870, -0.00870) ( -0.00000, -0.02636) (
   (  0.03914,  0.03914) ( -0.00000, -0.11640) ( -0.00870,  0.00870) (  0.24147, -0.00000) ( -0.04987, -0.04987) (
   ( -0.11260,  0.00000) (  0.17973,  0.17973) ( -0.00000,  0.02636) ( -0.04987,  0.04987) (  0.37428, -0.00000) (
- 
+
 == Occupation matrix in the complex harmonics basis for component up-dwn
   (  0.22524, -0.22524) (  0.07726,  0.00000) (  0.01007,  0.01007) (  0.00000,  0.02570) (  0.06380, -0.06380) (
   (  0.00000, -0.11020) (  0.10542, -0.10542) ( -0.03397,  0.00000) ( -0.03842, -0.03842) (  0.00000,  0.12902) (
   ( -0.00558, -0.00558) (  0.00000,  0.00811) (  0.27676, -0.27676) ( -0.05425,  0.00000) (  0.01193,  0.01193) (
   ( -0.02450,  0.00000) (  0.05035,  0.05035) (  0.00000, -0.00785) (  0.26086, -0.26086) (  0.02619, -0.00000) (
   (  0.03253, -0.03253) ( -0.15099,  0.00000) ( -0.00846, -0.00846) (  0.00000, -0.04596) (  0.22544, -0.22544) (
- 
+
 == Occupation matrix in the complex harmonics basis for component dwn-up
   (  0.22524,  0.22524) (  0.00000,  0.11020) ( -0.00558,  0.00558) ( -0.02450,  0.00000) (  0.03253,  0.03253) (
   (  0.07726,  0.00000) (  0.10542,  0.10542) (  0.00000, -0.00811) (  0.05035, -0.05035) ( -0.15099,  0.00000) (
   (  0.01007, -0.01007) ( -0.03397,  0.00000) (  0.27676,  0.27676) (  0.00000,  0.00785) ( -0.00846,  0.00846) (
   ( -0.00000, -0.02570) ( -0.03842,  0.03842) ( -0.05425,  0.00000) (  0.26086,  0.26086) ( -0.00000,  0.04596) (
   (  0.06380,  0.06380) (  0.00000, -0.12902) (  0.01193, -0.01193) (  0.02619,  0.00000) (  0.22544,  0.22544) (
- 
- 
- 
+
+
+
 == Occupation matrix in the J (= L-1/2, L+1/2) and M_J basis
   (  0.706, -0.000) ( -0.052, -0.052) (  0.000,  0.021) (  0.014, -0.014) ( -0.267,  0.267) ( -0.109, -0.000) (  0.051,  0.051) ( -0.000,  0.020) (  0.024, -0.024) ( -0.047,  0.000) (
   ( -0.052,  0.052) (  0.631, -0.000) ( -0.089, -0.089) ( -0.000, -0.095) (  0.000,  0.098) ( -0.041,  0.041) ( -0.309,  0.000) (  0.147,  0.147) ( -0.000, -0.070) ( -0.047,  0.047) (
@@ -908,13 +908,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   ( -0.000, -0.020) (  0.147, -0.147) ( -0.262, -0.000) ( -0.101, -0.101) (  0.020,  0.020) ( -0.000, -0.065) (  0.150, -0.150) (  0.496, -0.000) (  0.151,  0.151) ( -0.000,  0.023) (
   (  0.024,  0.024) ( -0.000,  0.070) (  0.149, -0.149) ( -0.129, -0.000) ( -0.072,  0.000) (  0.128,  0.128) ( -0.000, -0.051) (  0.151, -0.151) (  0.684, -0.000) (  0.089,  0.089) (
   ( -0.047,  0.000) ( -0.047, -0.047) (  0.000, -0.041) (  0.208, -0.208) (  0.033, -0.033) ( -0.145, -0.000) (  0.028,  0.028) ( -0.000, -0.023) (  0.089, -0.089) (  0.770,  0.000) (
- 
- 
- 
+
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   57.578E-16; max=  62.311E-15
    0.0000  0.0000  0.0000    1  6.23111E-14 kpt; spin; max resid(k); each band:
   4.64E-17 3.70E-17 2.72E-17 2.72E-17 2.82E-17 2.82E-17 4.20E-20 4.21E-20
@@ -924,14 +924,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- 
+
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
- 
+
  cartesian forces (eV/Angstrom) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
@@ -1025,21 +1025,21 @@ Total energy (eV)   : -3.46405684408199E+04
 Total energy DC (eV): -3.46405684403425E+04
 ...
 
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.99014411E-04  sigma(3 2)= -8.84139475E-04
   sigma(2 2)= -4.99014411E-04  sigma(3 1)= -8.84139475E-04
   sigma(3 3)= -4.99014411E-04  sigma(2 1)= -8.84139475E-04
- 
+
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4682E+01 GPa]
 - sigma(1 1)= -1.46815109E+01  sigma(3 2)= -2.60122814E+01
 - sigma(2 2)= -1.46815109E+01  sigma(3 1)= -2.60122814E+01
 - sigma(3 3)= -1.46815109E+01  sigma(2 1)= -2.60122814E+01
- 
+
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -1055,17 +1055,17 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  R(3)=  2.7100000  2.7100000 -2.7100000  G(3)=  0.1845018  0.1845018  0.0000000
  Unit cell volume ucvol=  7.9610044E+01 bohr^3
  Angles (23,13,12)=  1.09471221E+02  1.09471221E+02  1.09471221E+02 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
          ecut(hartree)=     14.000   => boxcut(ratio)=   2.03166
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  24
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.07375
- 
+
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
@@ -1086,18 +1086,18 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Mesh size for Vloc has been set to 1332 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
+
 --------------------------------------------------------------------------------
- 
+
 P newkpt: treating     24 bands with npw=     201 for ikpt=   1 by node    0
 _setup2: Arith. and geom. avg. npw (full set) are     201.000     201.000
- 
- 
+
+
  ******************************************
  DFT+U Method used: FLL with no spin polarization in the xc functional
  Magnetic DC : option_interaction = 3
  ******************************************
- 
+
 ================================================================================
 
 --- !BeginCycle
@@ -1105,7 +1105,7 @@ iteration_state: {dtset: 2, }
 solver: {iscf: 17, nstep: 30, nline: 12, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-15, }
 ...
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
  ETOT  1  -122.41538452635    -1.224E+02 1.696E+01 5.384E+00 2.278E+00 2.278E+00
  ETOT  2  -124.61989617732    -2.205E+00 8.554E-04 1.117E+01 1.160E+00 3.438E+00
@@ -1137,17 +1137,17 @@ tolerances: {tolvrs: 1.00E-15, }
  ETOT 28  -124.67377798002    -3.268E-12 1.871E-13 3.544E-13 2.443E-07 3.782E+00
  ETOT 29  -124.67377798002     5.684E-14 1.374E-13 1.763E-13 2.281E-07 3.782E+00
  ETOT 30  -124.67377798002     2.416E-13 2.243E-14 1.037E-13 5.526E-08 3.782E+00
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.98410160E-04  sigma(3 2)= -8.87593490E-04
   sigma(2 2)= -4.98410160E-04  sigma(3 1)= -8.87593490E-04
   sigma(3 3)= -4.98410160E-04  sigma(2 1)= -8.87593490E-04
- 
- 
+
+
  scprqt:  WARNING -
   nstep=   30 was not enough SCF cycles to converge;
   density residual=  1.037E-13 exceeds tolvrs=  1.000E-15
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 2, }
@@ -1187,15 +1187,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (exact)
  (cart.coord.)                                      2.298424    2.298424    2.298424
  (sph.coord.)                           3.980987                                       54.735610   45.000000
- 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =      8.579703212859245
  Compensation charge over fine fft grid    =      8.579641991270574
- 
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1 - Component up-up
    === REAL PART:
@@ -1361,8 +1361,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00078   0.00571  -0.00076   0.01702  -0.00036  -0.00041  -0.01651   0.00220  -0.04923   0.00103
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00135   0.00280  -0.00006  -0.00084   0.02195  -0.00390  -0.00626   0.00017   0.00242  -0.06350
    max. value=  2.37E-02, min. value= -8.22E-02
- 
- 
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1 - Component dens (n)
    === REAL PART:
@@ -1528,7 +1528,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   -0.00000   0.00001   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00241  -0.00352  -0.00010   0.00035   0.00020   0.00003  -0.00006   0.00001   0.00000  -0.00002
    0.00001   0.00005   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00622   0.00011   0.00024   0.00011  -0.00000   0.00007   0.00002  -0.00001   0.00002   0.00000
    max. value=  1.81E-01, min. value= -1.81E-01
- 
+
  "PAW+U" part of augmentation waves occupancies Rhoij:
  Atom #  1 - L=2 ONLY - Component dens (n)
    === REAL PART:
@@ -1622,83 +1622,83 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   -0.00000   0.00022   0.00000  -0.00022  -0.00018   0.00000   0.00001  -0.00000  -0.00001   0.00001
    0.00241  -0.00352  -0.00010   0.00035   0.00020   0.00003  -0.00006   0.00001   0.00000  -0.00002
   -0.00622   0.00011   0.00024   0.00011  -0.00000   0.00007   0.00002  -0.00001   0.00002   0.00000
- 
- ---------- DFT+U DATA --------------------------------------------------- 
- 
+
+ ---------- DFT+U DATA ---------------------------------------------------
+
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
- 
+
  => On atom   1, for  lpawu, local Mag. x is     0.21879858E+01
                              local Mag. y is     0.21879858E+01
                              local Mag. z is     0.21879858E+01
                              norm of Mag. is     0.37897026E+01
          (along mag axis)    occ. for majority spin is =      4.71570
          (along mag axis)    occ. for minority spin is =      0.92600
- 
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for component up-up
   (  0.80771,  0.00000) ( -0.02991, -0.05244) ( -0.01023, -0.00000) ( -0.02991,  0.05244) (  0.00000, -0.01453) (
   ( -0.02991,  0.05244) (  0.79569,  0.00000) ( -0.00914, -0.01813) ( -0.03285, -0.06075) ( -0.01436, -0.01047) (
   ( -0.01023,  0.00000) ( -0.00914,  0.01813) (  0.75493, -0.00000) ( -0.00914, -0.01813) (  0.00000, -0.00138) (
   ( -0.02991, -0.05244) ( -0.03285,  0.06075) ( -0.00914,  0.01813) (  0.79569, -0.00000) (  0.01436, -0.01047) (
   (  0.00000,  0.01453) ( -0.01436,  0.01047) (  0.00000,  0.00138) (  0.01436,  0.01047) (  0.76084, -0.00000) (
- 
- 
+
+
  Occupation matrix for component dwn-dwn
   (  0.42949,  0.00000) ( -0.11906, -0.20828) ( -0.03062, -0.00000) ( -0.11906,  0.20828) (  0.00000,  0.05566) (
   ( -0.11906,  0.20828) (  0.44150, -0.00000) (  0.02956, -0.01749) ( -0.11612, -0.19997) ( -0.02102, -0.01009) (
   ( -0.03062,  0.00000) (  0.02956,  0.01749) (  0.21014,  0.00000) (  0.02956, -0.01749) ( -0.00000, -0.00433) (
   ( -0.11906, -0.20828) ( -0.11612,  0.19997) (  0.02956,  0.01749) (  0.44150,  0.00000) (  0.02102, -0.01009) (
   (  0.00000, -0.05566) ( -0.02102,  0.01009) ( -0.00000,  0.00433) (  0.02102,  0.01009) (  0.20423, -0.00000) (
- 
- 
+
+
  Occupation matrix for component up-dwn
   (  0.17709, -0.17709) (  0.11419,  0.03629) (  0.01256, -0.01256) ( -0.03629, -0.11419) ( -0.01472, -0.01472) (
   ( -0.02503, -0.11955) (  0.18911, -0.17709) ( -0.00542,  0.02361) (  0.12250,  0.03334) (  0.00865, -0.00087) (
   (  0.01256, -0.01256) ( -0.00477, -0.03718) (  0.27683, -0.27683) (  0.03718,  0.00477) (  0.00403,  0.00403) (
   (  0.11955,  0.02503) ( -0.03334, -0.12250) ( -0.02361,  0.00542) (  0.17709, -0.18911) ( -0.00087,  0.00865) (
   ( -0.01546, -0.01546) (  0.00901, -0.03597) (  0.00108,  0.00108) ( -0.03597,  0.00901) (  0.27387, -0.27387) (
- 
- 
+
+
  Occupation matrix for component dwn-up
   (  0.17709,  0.17709) ( -0.02503,  0.11955) (  0.01256,  0.01256) (  0.11955, -0.02503) ( -0.01546,  0.01546) (
   (  0.11419, -0.03629) (  0.18911,  0.17709) ( -0.00477,  0.03718) ( -0.03334,  0.12250) (  0.00901,  0.03597) (
   (  0.01256,  0.01256) ( -0.00542, -0.02361) (  0.27683,  0.27683) ( -0.02361, -0.00542) (  0.00108, -0.00108) (
   ( -0.03629,  0.11419) (  0.12250, -0.03334) (  0.03718, -0.00477) (  0.17709,  0.18911) ( -0.03597, -0.00901) (
   ( -0.01472,  0.01472) (  0.00865,  0.00087) (  0.00403, -0.00403) ( -0.00087, -0.00865) (  0.27387,  0.27387) (
- 
- 
- 
+
+
+
 == Occupation matrix in the complex harmonics basis for component up-up
   (  0.79881, -0.00000) ( -0.02876, -0.02876) (  0.00000, -0.00626) (  0.00932, -0.00932) ( -0.02344,  0.00000) (
   ( -0.02876,  0.02876) (  0.85643, -0.00000) (  0.00636,  0.00636) (  0.00000,  0.03285) (  0.05359, -0.05359) (
   (  0.00000,  0.00626) (  0.00636, -0.00636) (  0.75493, -0.00000) (  0.01928,  0.01928) (  0.00000, -0.00821) (
   (  0.00932,  0.00932) (  0.00000, -0.03285) (  0.01928, -0.01928) (  0.73494, -0.00000) ( -0.01321, -0.01321) (
   ( -0.02344, -0.00000) (  0.05359,  0.05359) (  0.00000,  0.00821) ( -0.01321,  0.01321) (  0.76974, -0.00000) (
- 
+
 == Occupation matrix in the complex harmonics basis for component dwn-dwn
   (  0.26120, -0.00000) ( -0.14811, -0.14811) ( -0.00000, -0.01859) (  0.03914, -0.03914) ( -0.11263,  0.00000) (
   ( -0.14811,  0.14811) (  0.64147,  0.00000) (  0.03327,  0.03327) (  0.00000,  0.11612) (  0.17923, -0.17923) (
   ( -0.00000,  0.01859) (  0.03327, -0.03327) (  0.21014,  0.00000) ( -0.00854, -0.00854) ( -0.00000, -0.02471) (
   (  0.03914,  0.03914) (  0.00000, -0.11612) ( -0.00854,  0.00854) (  0.24154,  0.00000) ( -0.05007, -0.05007) (
   ( -0.11263, -0.00000) (  0.17923,  0.17923) ( -0.00000,  0.02471) ( -0.05007,  0.05007) (  0.37252, -0.00000) (
- 
+
 == Occupation matrix in the complex harmonics basis for component up-dwn
   (  0.22511, -0.22511) (  0.07822,  0.00000) (  0.00964,  0.00964) (  0.00000,  0.02728) (  0.06348, -0.06348) (
   (  0.00000, -0.11091) (  0.10518, -0.10518) ( -0.03338,  0.00000) ( -0.03857, -0.03857) (  0.00000,  0.12820) (
   ( -0.00603, -0.00603) (  0.00000,  0.00675) (  0.27683, -0.27683) ( -0.05259,  0.00000) (  0.01174,  0.01174) (
   ( -0.02416,  0.00000) (  0.05059,  0.05059) (  0.00000, -0.00766) (  0.26102, -0.26102) (  0.02591,  0.00000) (
   (  0.03330, -0.03330) ( -0.15016,  0.00000) ( -0.00811, -0.00811) (  0.00000, -0.04530) (  0.22585, -0.22585) (
- 
+
 == Occupation matrix in the complex harmonics basis for component dwn-up
   (  0.22511,  0.22511) (  0.00000,  0.11091) ( -0.00603,  0.00603) ( -0.02416,  0.00000) (  0.03330,  0.03330) (
   (  0.07822,  0.00000) (  0.10518,  0.10518) (  0.00000, -0.00675) (  0.05059, -0.05059) ( -0.15016,  0.00000) (
   (  0.00964, -0.00964) ( -0.03338,  0.00000) (  0.27683,  0.27683) (  0.00000,  0.00766) ( -0.00811,  0.00811) (
   (  0.00000, -0.02728) ( -0.03857,  0.03857) ( -0.05259,  0.00000) (  0.26102,  0.26102) (  0.00000,  0.04530) (
   (  0.06348,  0.06348) (  0.00000, -0.12820) (  0.01174, -0.01174) (  0.02591,  0.00000) (  0.22585,  0.22585) (
- 
- 
- 
+
+
+
 == Occupation matrix in the J (= L-1/2, L+1/2) and M_J basis
   (  0.705, -0.000) ( -0.052, -0.052) (  0.000,  0.020) (  0.015, -0.015) ( -0.268,  0.268) ( -0.110,  0.000) (  0.051,  0.051) ( -0.000,  0.019) (  0.023, -0.023) ( -0.046,  0.000) (
   ( -0.052,  0.052) (  0.631, -0.000) ( -0.089, -0.089) ( -0.000, -0.094) ( -0.000,  0.098) ( -0.041,  0.041) ( -0.310,  0.000) (  0.147,  0.147) ( -0.000, -0.070) ( -0.047,  0.047) (
@@ -1710,13 +1710,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   ( -0.000, -0.019) (  0.147, -0.147) ( -0.262,  0.000) ( -0.101, -0.101) (  0.020,  0.020) (  0.000, -0.067) (  0.150, -0.150) (  0.498,  0.000) (  0.151,  0.151) (  0.000,  0.022) (
   (  0.023,  0.023) ( -0.000,  0.070) (  0.149, -0.149) ( -0.129,  0.000) ( -0.072,  0.000) (  0.129,  0.129) ( -0.000, -0.052) (  0.151, -0.151) (  0.683,  0.000) (  0.089,  0.089) (
   ( -0.046,  0.000) ( -0.047, -0.047) ( -0.000, -0.040) (  0.208, -0.208) (  0.033, -0.033) ( -0.145, -0.000) (  0.028,  0.028) (  0.000, -0.022) (  0.089, -0.089) (  0.770, -0.000) (
- 
- 
- 
+
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   21.724E-16; max=  22.427E-15
    0.0000  0.0000  0.0000    1  2.24269E-14 kpt; spin; max resid(k); each band:
   2.34E-17 1.82E-17 5.83E-18 5.84E-18 6.64E-18 6.59E-18 2.37E-20 2.39E-20
@@ -1726,14 +1726,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  1.1405E-29; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1      -0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- 
+
  cartesian forces (hartree/bohr) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
- 
+
  cartesian forces (eV/Angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
@@ -1827,21 +1827,21 @@ Total energy (eV)   : -3.46405527150098E+04
 Total energy DC (eV): -3.46405527159110E+04
 ...
 
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.98410160E-04  sigma(3 2)= -8.87593490E-04
   sigma(2 2)= -4.98410160E-04  sigma(3 1)= -8.87593490E-04
   sigma(3 3)= -4.98410160E-04  sigma(2 1)= -8.87593490E-04
- 
+
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4664E+01 GPa]
 - sigma(1 1)= -1.46637332E+01  sigma(3 2)= -2.61139020E+01
 - sigma(2 2)= -1.46637332E+01  sigma(3 1)= -2.61139020E+01
 - sigma(3 3)= -1.46637332E+01  sigma(2 1)= -2.61139020E+01
- 
+
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
@@ -1857,17 +1857,17 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  R(3)=  2.7100000  2.7100000 -2.7100000  G(3)=  0.1845018  0.1845018  0.0000000
  Unit cell volume ucvol=  7.9610044E+01 bohr^3
  Angles (23,13,12)=  1.09471221E+02  1.09471221E+02  1.09471221E+02 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
          ecut(hartree)=     14.000   => boxcut(ratio)=   2.03166
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  24
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.07375
- 
+
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
@@ -1888,18 +1888,18 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Mesh size for Vloc has been set to 1332 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
+
 --------------------------------------------------------------------------------
- 
+
 P newkpt: treating     24 bands with npw=     201 for ikpt=   1 by node    0
 _setup2: Arith. and geom. avg. npw (full set) are     201.000     201.000
- 
- 
+
+
  ******************************************
  DFT+U Method used: FLL with no spin polarization in the xc functional
  Magnetic DC : option_interaction = 3
  ******************************************
- 
+
 ================================================================================
 
 --- !BeginCycle
@@ -1907,7 +1907,7 @@ iteration_state: {dtset: 3, }
 solver: {iscf: 17, nstep: 32, nline: 12, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-15, }
 ...
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
  ETOT  1  -122.41538452635    -1.224E+02 1.696E+01 5.384E+00 2.278E+00 2.278E+00
  ETOT  2  -124.61989660731    -2.205E+00 8.554E-04 1.117E+01 1.160E+00 3.438E+00
@@ -1941,17 +1941,17 @@ tolerances: {tolvrs: 1.00E-15, }
  ETOT 30  -124.67377190543    -1.464E-12 4.376E-14 4.861E-14 9.907E-08 3.782E+00
  ETOT 31  -124.67377190543     1.563E-13 7.040E-15 2.468E-14 4.518E-08 3.782E+00
  ETOT 32  -124.67377190543    -1.279E-13 9.718E-15 8.099E-15 1.528E-08 3.782E+00
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.98366073E-04  sigma(3 2)= -8.87469320E-04
   sigma(2 2)= -4.98366073E-04  sigma(3 1)= -8.87469320E-04
   sigma(3 3)= -4.98366073E-04  sigma(2 1)= -8.87469320E-04
- 
- 
+
+
  scprqt:  WARNING -
   nstep=   32 was not enough SCF cycles to converge;
   density residual=  8.099E-15 exceeds tolvrs=  1.000E-15
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 3, }
@@ -1991,15 +1991,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (exact)
  (cart.coord.)                                      2.298442    2.298442    2.298442
  (sph.coord.)                           3.981018                                       54.735610   45.000000
- 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =      8.579697262968669
  Compensation charge over fine fft grid    =      8.579636083941940
- 
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1 - Component up-up
    === REAL PART:
@@ -2165,8 +2165,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00078   0.00571  -0.00076   0.01702  -0.00036  -0.00041  -0.01651   0.00220  -0.04923   0.00103
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00135   0.00280  -0.00006  -0.00083   0.02195  -0.00390  -0.00625   0.00017   0.00241  -0.06350
    max. value=  2.37E-02, min. value= -8.22E-02
- 
- 
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1 - Component dens (n)
    === REAL PART:
@@ -2332,7 +2332,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   -0.00000   0.00001   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00241  -0.00352  -0.00010   0.00035   0.00020   0.00003  -0.00006   0.00001  -0.00000  -0.00002
    0.00001   0.00005   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00622   0.00010   0.00024   0.00010  -0.00000   0.00007   0.00002  -0.00001   0.00002  -0.00000
    max. value=  1.81E-01, min. value= -1.81E-01
- 
+
  "PAW+U" part of augmentation waves occupancies Rhoij:
  Atom #  1 - L=2 ONLY - Component dens (n)
    === REAL PART:
@@ -2426,83 +2426,83 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   -0.00000   0.00022   0.00000  -0.00022  -0.00018   0.00000   0.00001  -0.00000  -0.00001   0.00001
    0.00241  -0.00352  -0.00010   0.00035   0.00020   0.00003  -0.00006   0.00001  -0.00000  -0.00002
   -0.00622   0.00010   0.00024   0.00010  -0.00000   0.00007   0.00002  -0.00001   0.00002  -0.00000
- 
- ---------- DFT+U DATA --------------------------------------------------- 
- 
+
+ ---------- DFT+U DATA ---------------------------------------------------
+
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
- 
+
  => On atom   1, for  lpawu, local Mag. x is     0.21880050E+01
                              local Mag. y is     0.21880050E+01
                              local Mag. z is     0.21880050E+01
                              norm of Mag. is     0.37897358E+01
          (along mag axis)    occ. for majority spin is =      4.71572
          (along mag axis)    occ. for minority spin is =      0.92598
- 
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for component up-up
   (  0.80771, -0.00000) ( -0.02991, -0.05244) ( -0.01022, -0.00000) ( -0.02991,  0.05244) (  0.00000, -0.01453) (
   ( -0.02991,  0.05244) (  0.79569, -0.00000) ( -0.00913, -0.01810) ( -0.03286, -0.06075) ( -0.01433, -0.01046) (
   ( -0.01022,  0.00000) ( -0.00913,  0.01810) (  0.75494, -0.00000) ( -0.00913, -0.01810) (  0.00000, -0.00137) (
   ( -0.02991, -0.05244) ( -0.03286,  0.06075) ( -0.00913,  0.01810) (  0.79569,  0.00000) (  0.01433, -0.01046) (
   (  0.00000,  0.01453) ( -0.01433,  0.01046) (  0.00000,  0.00137) (  0.01433,  0.01046) (  0.76083,  0.00000) (
- 
- 
+
+
  Occupation matrix for component dwn-dwn
   (  0.42949, -0.00000) ( -0.11907, -0.20829) ( -0.03055, -0.00000) ( -0.11907,  0.20829) ( -0.00000,  0.05559) (
   ( -0.11907,  0.20829) (  0.44151,  0.00000) (  0.02952, -0.01745) ( -0.11612, -0.19997) ( -0.02098, -0.01006) (
   ( -0.03055,  0.00000) (  0.02952,  0.01745) (  0.21011,  0.00000) (  0.02952, -0.01745) (  0.00000, -0.00431) (
   ( -0.11907, -0.20829) ( -0.11612,  0.19997) (  0.02952,  0.01745) (  0.44151, -0.00000) (  0.02098, -0.01006) (
   ( -0.00000, -0.05559) ( -0.02098,  0.01006) (  0.00000,  0.00431) (  0.02098,  0.01006) (  0.20422, -0.00000) (
- 
- 
+
+
  Occupation matrix for component up-dwn
   (  0.17709, -0.17709) (  0.11419,  0.03630) (  0.01253, -0.01253) ( -0.03630, -0.11419) ( -0.01469, -0.01469) (
   ( -0.02503, -0.11956) (  0.18911, -0.17709) ( -0.00542,  0.02358) (  0.12251,  0.03334) (  0.00862, -0.00087) (
   (  0.01255, -0.01255) ( -0.00475, -0.03714) (  0.27683, -0.27683) (  0.03714,  0.00475) (  0.00402,  0.00402) (
   (  0.11956,  0.02503) ( -0.03334, -0.12251) ( -0.02358,  0.00542) (  0.17709, -0.18911) ( -0.00087,  0.00862) (
   ( -0.01545, -0.01545) (  0.00899, -0.03593) (  0.00108,  0.00108) ( -0.03593,  0.00899) (  0.27388, -0.27388) (
- 
- 
+
+
  Occupation matrix for component dwn-up
   (  0.17709,  0.17709) ( -0.02503,  0.11956) (  0.01255,  0.01255) (  0.11956, -0.02503) ( -0.01545,  0.01545) (
   (  0.11419, -0.03630) (  0.18911,  0.17709) ( -0.00475,  0.03714) ( -0.03334,  0.12251) (  0.00899,  0.03593) (
   (  0.01253,  0.01253) ( -0.00542, -0.02358) (  0.27683,  0.27683) ( -0.02358, -0.00542) (  0.00108, -0.00108) (
   ( -0.03630,  0.11419) (  0.12251, -0.03334) (  0.03714, -0.00475) (  0.17709,  0.18911) ( -0.03593, -0.00899) (
   ( -0.01469,  0.01469) (  0.00862,  0.00087) (  0.00402, -0.00402) ( -0.00087, -0.00862) (  0.27388,  0.27388) (
- 
- 
- 
+
+
+
 == Occupation matrix in the complex harmonics basis for component up-up
   (  0.79880,  0.00000) ( -0.02878, -0.02878) (  0.00000, -0.00626) (  0.00933, -0.00933) ( -0.02344,  0.00000) (
   ( -0.02878,  0.02878) (  0.85644,  0.00000) (  0.00634,  0.00634) (  0.00000,  0.03286) (  0.05357, -0.05357) (
   (  0.00000,  0.00626) (  0.00634, -0.00634) (  0.75494, -0.00000) (  0.01926,  0.01926) ( -0.00000, -0.00820) (
   (  0.00933,  0.00933) (  0.00000, -0.03286) (  0.01926, -0.01926) (  0.73493,  0.00000) ( -0.01320, -0.01320) (
   ( -0.02344, -0.00000) (  0.05357,  0.05357) ( -0.00000,  0.00820) ( -0.01320,  0.01320) (  0.76973,  0.00000) (
- 
+
 == Occupation matrix in the complex harmonics basis for component dwn-dwn
   (  0.26127, -0.00000) ( -0.14816, -0.14816) (  0.00000, -0.01856) (  0.03915, -0.03915) ( -0.11264, -0.00000) (
   ( -0.14816,  0.14816) (  0.64148, -0.00000) (  0.03321,  0.03321) (  0.00000,  0.11612) (  0.17920, -0.17920) (
   (  0.00000,  0.01856) (  0.03321, -0.03321) (  0.21011,  0.00000) ( -0.00853, -0.00853) ( -0.00000, -0.02465) (
   (  0.03915,  0.03915) (  0.00000, -0.11612) ( -0.00853,  0.00853) (  0.24153, -0.00000) ( -0.05007, -0.05007) (
   ( -0.11264,  0.00000) (  0.17920,  0.17920) ( -0.00000,  0.02465) ( -0.05007,  0.05007) (  0.37244, -0.00000) (
- 
+
 == Occupation matrix in the complex harmonics basis for component up-dwn
   (  0.22510, -0.22510) (  0.07827,  0.00000) (  0.00963,  0.00963) (  0.00000,  0.02731) (  0.06347, -0.06347) (
   (  0.00000, -0.11094) (  0.10517, -0.10517) ( -0.03335,  0.00000) ( -0.03857, -0.03857) (  0.00000,  0.12818) (
   ( -0.00603, -0.00603) (  0.00000,  0.00671) (  0.27683, -0.27683) ( -0.05253,  0.00000) (  0.01172,  0.01172) (
   ( -0.02416,  0.00000) (  0.05059,  0.05059) (  0.00000, -0.00766) (  0.26102, -0.26102) (  0.02590, -0.00000) (
   (  0.03333, -0.03333) ( -0.15012,  0.00000) ( -0.00810, -0.00810) (  0.00000, -0.04528) (  0.22587, -0.22587) (
- 
+
 == Occupation matrix in the complex harmonics basis for component dwn-up
   (  0.22510,  0.22510) (  0.00000,  0.11094) ( -0.00603,  0.00603) ( -0.02416,  0.00000) (  0.03333,  0.03333) (
   (  0.07827,  0.00000) (  0.10517,  0.10517) (  0.00000, -0.00671) (  0.05059, -0.05059) ( -0.15012,  0.00000) (
   (  0.00963, -0.00963) ( -0.03335,  0.00000) (  0.27683,  0.27683) (  0.00000,  0.00766) ( -0.00810,  0.00810) (
   (  0.00000, -0.02731) ( -0.03857,  0.03857) ( -0.05253,  0.00000) (  0.26102,  0.26102) (  0.00000,  0.04528) (
   (  0.06347,  0.06347) (  0.00000, -0.12818) (  0.01172, -0.01172) (  0.02590,  0.00000) (  0.22587,  0.22587) (
- 
- 
- 
+
+
+
 == Occupation matrix in the J (= L-1/2, L+1/2) and M_J basis
   (  0.705, -0.000) ( -0.052, -0.052) (  0.000,  0.020) (  0.015, -0.015) ( -0.268,  0.268) ( -0.110, -0.000) (  0.051,  0.051) ( -0.000,  0.019) (  0.023, -0.023) ( -0.046,  0.000) (
   ( -0.052,  0.052) (  0.631,  0.000) ( -0.089, -0.089) ( -0.000, -0.094) (  0.000,  0.098) ( -0.041,  0.041) ( -0.310, -0.000) (  0.147,  0.147) ( -0.000, -0.070) ( -0.047,  0.047) (
@@ -2514,13 +2514,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   ( -0.000, -0.019) (  0.147, -0.147) ( -0.262, -0.000) ( -0.101, -0.101) (  0.020,  0.020) (  0.000, -0.067) (  0.150, -0.150) (  0.498, -0.000) (  0.151,  0.151) (  0.000,  0.022) (
   (  0.023,  0.023) ( -0.000,  0.070) (  0.149, -0.149) ( -0.129, -0.000) ( -0.072,  0.000) (  0.129,  0.129) ( -0.000, -0.052) (  0.151, -0.151) (  0.683, -0.000) (  0.089,  0.089) (
   ( -0.046,  0.000) ( -0.047, -0.047) (  0.000, -0.040) (  0.208, -0.208) (  0.033, -0.033) ( -0.145, -0.000) (  0.028,  0.028) ( -0.000, -0.022) (  0.089, -0.089) (  0.770,  0.000) (
- 
- 
- 
+
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   99.904E-17; max=  97.183E-16
    0.0000  0.0000  0.0000    1  9.71826E-15 kpt; spin; max resid(k); each band:
   2.20E-18 2.34E-18 6.18E-20 6.23E-20 9.20E-20 9.20E-20 6.64E-21 6.62E-21
@@ -2530,14 +2530,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  4.7600E-29; max dE/dt=  6.7316E-29; dE/dt below (all hartree)
     1       0.000000000000     -0.000000000000     -0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- 
+
  cartesian forces (hartree/bohr) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
- 
+
  cartesian forces (eV/Angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
@@ -2631,21 +2631,21 @@ Total energy (eV)   : -3.46405525510701E+04
 Total energy DC (eV): -3.46405525506130E+04
 ...
 
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.98366073E-04  sigma(3 2)= -8.87469320E-04
   sigma(2 2)= -4.98366073E-04  sigma(3 1)= -8.87469320E-04
   sigma(3 3)= -4.98366073E-04  sigma(2 1)= -8.87469320E-04
- 
+
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.4662E+01 GPa]
 - sigma(1 1)= -1.46624361E+01  sigma(3 2)= -2.61102489E+01
 - sigma(2 2)= -1.46624361E+01  sigma(3 1)= -2.61102489E+01
 - sigma(3 3)= -1.46624361E+01  sigma(2 1)= -2.61102489E+01
- 
+
 ================================================================================
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
@@ -2661,17 +2661,17 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  R(3)=  2.7100000  2.7100000 -2.7100000  G(3)=  0.1845018  0.1845018  0.0000000
  Unit cell volume ucvol=  7.9610044E+01 bohr^3
  Angles (23,13,12)=  1.09471221E+02  1.09471221E+02  1.09471221E+02 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
          ecut(hartree)=     14.000   => boxcut(ratio)=   2.03166
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  24
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.07375
- 
+
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
@@ -2692,18 +2692,18 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Mesh size for Vloc has been set to 1332 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
+
 --------------------------------------------------------------------------------
- 
+
 P newkpt: treating     24 bands with npw=     201 for ikpt=   1 by node    0
 _setup2: Arith. and geom. avg. npw (full set) are     201.000     201.000
- 
- 
+
+
  ******************************************
  DFT+U Method used: FLL
  Magnetic DC : option_interaction = 3
  ******************************************
- 
+
 ================================================================================
 
 --- !BeginCycle
@@ -2711,7 +2711,7 @@ iteration_state: {dtset: 4, }
 solver: {iscf: 17, nstep: 33, nline: 12, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-15, }
 ...
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
  ETOT  1  -122.61760590476    -1.226E+02 1.732E+01 4.747E+00 1.889E+00 1.889E+00
  ETOT  2  -124.59529703559    -1.978E+00 2.652E-03 1.385E+01 1.504E+00 3.393E+00
@@ -2746,17 +2746,17 @@ tolerances: {tolvrs: 1.00E-15, }
  ETOT 31  -124.68715967126    -9.535E-12 2.000E-10 1.364E-12 5.181E-07 3.810E+00
  ETOT 32  -124.68715967126     5.670E-12 5.216E-10 3.218E-13 2.618E-07 3.810E+00
  ETOT 33  -124.68715967125     8.896E-12 2.016E-10 1.146E-13 2.442E-07 3.810E+00
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.36824340E-04  sigma(3 2)= -9.21908752E-04
   sigma(2 2)= -6.36824340E-04  sigma(3 1)= -9.21908752E-04
   sigma(3 3)= -6.36824340E-04  sigma(2 1)= -9.21908752E-04
- 
- 
+
+
  scprqt:  WARNING -
   nstep=   33 was not enough SCF cycles to converge;
   density residual=  1.146E-13 exceeds tolvrs=  1.000E-15
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 4, }
@@ -2796,15 +2796,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (exact)
  (cart.coord.)                                      2.300948    2.300948    2.300948
  (sph.coord.)                           3.985358                                       54.735610   45.000000
- 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =      8.594242489438724
  Compensation charge over fine fft grid    =      8.594181349663353
- 
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1 - Component up-up
    === REAL PART:
@@ -2970,8 +2970,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00078  -0.00010   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00203   0.00697  -0.00092   0.02865  -0.00081  -0.00129  -0.01743   0.00226  -0.03841   0.00167
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00114   0.00290  -0.00005  -0.00134   0.03676  -0.00330  -0.00586   0.00015   0.00321  -0.05518
    max. value=  4.07E-02, min. value= -7.81E-02
- 
- 
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1 - Component dens (n)
    === REAL PART:
@@ -3137,7 +3137,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00001   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00610  -0.00733  -0.00031   0.00006   0.00046   0.00020  -0.00024  -0.00000   0.00000  -0.00002
    0.00001   0.00002   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00576   0.00003   0.00036   0.00003   0.00000   0.00005   0.00002  -0.00001   0.00002  -0.00000
    max. value=  1.82E-01, min. value= -1.82E-01
- 
+
  "PAW+U" part of augmentation waves occupancies Rhoij:
  Atom #  1 - L=2 ONLY - Component dens (n)
    === REAL PART:
@@ -3231,83 +3231,83 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   -0.00000  -0.00060  -0.00000   0.00060  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00001
    0.00610  -0.00733  -0.00031   0.00006   0.00046   0.00020  -0.00024  -0.00000   0.00000  -0.00002
   -0.00576   0.00003   0.00036   0.00003   0.00000   0.00005   0.00002  -0.00001   0.00002  -0.00000
- 
- ---------- DFT+U DATA --------------------------------------------------- 
- 
+
+ ---------- DFT+U DATA ---------------------------------------------------
+
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
- 
+
  => On atom   1, for  lpawu, local Mag. x is     0.21823783E+01
                              local Mag. y is     0.21823783E+01
                              local Mag. z is     0.21823783E+01
                              norm of Mag. is     0.37799901E+01
          (along mag axis)    occ. for majority spin is =      4.70432
          (along mag axis)    occ. for minority spin is =      0.92433
- 
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for component up-up
   (  0.80603,  0.00000) ( -0.03050, -0.05249) ( -0.00701,  0.00000) ( -0.03050,  0.05249) (  0.00000, -0.01117) (
   ( -0.03050,  0.05249) (  0.79292,  0.00000) ( -0.00645, -0.01763) ( -0.03218, -0.06071) ( -0.01498, -0.00772) (
   ( -0.00701, -0.00000) ( -0.00645,  0.01763) (  0.75376, -0.00000) ( -0.00645, -0.01763) (  0.00000, -0.00055) (
   ( -0.03050, -0.05249) ( -0.03218,  0.06071) ( -0.00645,  0.01763) (  0.79292, -0.00000) (  0.01498, -0.00772) (
   (  0.00000,  0.01117) ( -0.01498,  0.00772) (  0.00000,  0.00055) (  0.01498,  0.00772) (  0.75987,  0.00000) (
- 
- 
+
+
  Occupation matrix for component dwn-dwn
   (  0.42770, -0.00000) ( -0.11924, -0.20830) ( -0.03418, -0.00000) ( -0.11924,  0.20830) (  0.00000,  0.05229) (
   ( -0.11924,  0.20830) (  0.44082, -0.00000) (  0.02704, -0.01797) ( -0.11755, -0.20008) ( -0.02069, -0.01284) (
   ( -0.03418,  0.00000) (  0.02704,  0.01797) (  0.20995, -0.00000) (  0.02704, -0.01797) ( -0.00000, -0.00415) (
   ( -0.11924, -0.20830) ( -0.11755,  0.20008) (  0.02704,  0.01797) (  0.44082,  0.00000) (  0.02069, -0.01284) (
   (  0.00000, -0.05229) ( -0.02069,  0.01284) ( -0.00000,  0.00415) (  0.02069,  0.01284) (  0.20384,  0.00000) (
- 
- 
+
+
  Occupation matrix for component up-dwn
   (  0.17605, -0.17605) (  0.11406,  0.03522) (  0.01298, -0.01298) ( -0.03522, -0.11406) ( -0.01450, -0.01450) (
   ( -0.02532, -0.12059) (  0.18916, -0.17605) ( -0.00449,  0.02158) (  0.12228,  0.03353) (  0.01063, -0.00007) (
   (  0.00872, -0.00872) ( -0.00909, -0.03337) (  0.27649, -0.27649) (  0.03337,  0.00909) (  0.00445,  0.00445) (
   (  0.12059,  0.02532) ( -0.03353, -0.12228) ( -0.02158,  0.00449) (  0.17605, -0.18916) ( -0.00007,  0.01063) (
   ( -0.01165, -0.01165) (  0.01290, -0.03179) (  0.00085,  0.00085) ( -0.03179,  0.01290) (  0.27343, -0.27343) (
- 
- 
+
+
  Occupation matrix for component dwn-up
   (  0.17605,  0.17605) ( -0.02532,  0.12059) (  0.00872,  0.00872) (  0.12059, -0.02532) ( -0.01165,  0.01165) (
   (  0.11406, -0.03522) (  0.18916,  0.17605) ( -0.00909,  0.03337) ( -0.03353,  0.12228) (  0.01290,  0.03179) (
   (  0.01298,  0.01298) ( -0.00449, -0.02158) (  0.27649,  0.27649) ( -0.02158, -0.00449) (  0.00085, -0.00085) (
   ( -0.03522,  0.11406) (  0.12228, -0.03353) (  0.03337, -0.00909) (  0.17605,  0.18916) ( -0.03179, -0.01290) (
   ( -0.01450,  0.01450) (  0.01063,  0.00007) (  0.00445, -0.00445) ( -0.00007, -0.01063) (  0.27343,  0.27343) (
- 
- 
- 
+
+
+
 == Occupation matrix in the complex harmonics basis for component up-up
   (  0.79412,  0.00000) ( -0.03014, -0.03014) (  0.00000, -0.00456) (  0.00737, -0.00737) ( -0.02308,  0.00000) (
   ( -0.03014,  0.03014) (  0.85363, -0.00000) (  0.00791,  0.00791) (  0.00000,  0.03218) (  0.05284, -0.05284) (
   (  0.00000,  0.00456) (  0.00791, -0.00791) (  0.75376, -0.00000) (  0.01703,  0.01703) (  0.00000, -0.00535) (
   (  0.00737,  0.00737) (  0.00000, -0.03218) (  0.01703, -0.01703) (  0.73221, -0.00000) ( -0.01463, -0.01463) (
   ( -0.02308, -0.00000) (  0.05284,  0.05284) (  0.00000,  0.00535) ( -0.01463,  0.01463) (  0.77178,  0.00000) (
- 
+
 == Occupation matrix in the complex harmonics basis for component dwn-dwn
   (  0.26349,  0.00000) ( -0.14700, -0.14700) ( -0.00000, -0.02123) (  0.04060, -0.04060) ( -0.11193,  0.00000) (
   ( -0.14700,  0.14700) (  0.64090,  0.00000) (  0.03183,  0.03183) (  0.00000,  0.11755) (  0.18053, -0.18053) (
   ( -0.00000,  0.02123) (  0.03183, -0.03183) (  0.20995, -0.00000) ( -0.00641, -0.00641) ( -0.00000, -0.02711) (
   (  0.04060,  0.04060) ( -0.00000, -0.11755) ( -0.00641,  0.00641) (  0.24073,  0.00000) ( -0.04846, -0.04846) (
   ( -0.11193, -0.00000) (  0.18053,  0.18053) ( -0.00000,  0.02711) ( -0.04846,  0.04846) (  0.36806,  0.00000) (
- 
+
 == Occupation matrix in the complex harmonics basis for component up-dwn
   (  0.22617, -0.22617) (  0.08226,  0.00000) (  0.00978,  0.00978) (  0.00000,  0.02232) (  0.06176, -0.06176) (
   (  0.00000, -0.10995) (  0.10470, -0.10470) ( -0.03052,  0.00000) ( -0.03781, -0.03781) (  0.00000,  0.13122) (
   ( -0.00302, -0.00302) (  0.00000,  0.01286) (  0.27649, -0.27649) ( -0.04720,  0.00000) (  0.00931,  0.00931) (
   ( -0.02525,  0.00000) (  0.05093,  0.05093) (  0.00000, -0.00635) (  0.26051, -0.26051) (  0.02538,  0.00000) (
   (  0.03562, -0.03562) ( -0.14585,  0.00000) ( -0.00858, -0.00858) (  0.00000, -0.04812) (  0.22332, -0.22332) (
- 
+
 == Occupation matrix in the complex harmonics basis for component dwn-up
   (  0.22617,  0.22617) (  0.00000,  0.10995) ( -0.00302,  0.00302) ( -0.02525,  0.00000) (  0.03562,  0.03562) (
   (  0.08226,  0.00000) (  0.10470,  0.10470) (  0.00000, -0.01286) (  0.05093, -0.05093) ( -0.14585,  0.00000) (
   (  0.00978, -0.00978) ( -0.03052,  0.00000) (  0.27649,  0.27649) (  0.00000,  0.00635) ( -0.00858,  0.00858) (
   ( -0.00000, -0.02232) ( -0.03781,  0.03781) ( -0.04720,  0.00000) (  0.26051,  0.26051) ( -0.00000,  0.04812) (
   (  0.06176,  0.06176) (  0.00000, -0.13122) (  0.00931, -0.00931) (  0.02538,  0.00000) (  0.22332,  0.22332) (
- 
- 
- 
+
+
+
 == Occupation matrix in the J (= L-1/2, L+1/2) and M_J basis
   (  0.698, -0.000) ( -0.054, -0.054) (  0.000,  0.026) (  0.016, -0.016) ( -0.268,  0.268) ( -0.111,  0.000) (  0.051,  0.051) ( -0.000,  0.019) (  0.026, -0.026) ( -0.045,  0.000) (
   ( -0.054,  0.054) (  0.626, -0.000) ( -0.087, -0.087) ( -0.000, -0.097) ( -0.000,  0.099) ( -0.041,  0.041) ( -0.309,  0.000) (  0.147,  0.147) ( -0.000, -0.072) ( -0.046,  0.046) (
@@ -3319,13 +3319,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   ( -0.000, -0.019) (  0.147, -0.147) ( -0.261,  0.000) ( -0.101, -0.101) (  0.023,  0.023) ( -0.000, -0.062) (  0.152, -0.152) (  0.502,  0.000) (  0.149,  0.149) ( -0.000,  0.026) (
   (  0.026,  0.026) ( -0.000,  0.072) (  0.151, -0.151) ( -0.130,  0.000) ( -0.073,  0.000) (  0.128,  0.128) ( -0.000, -0.050) (  0.149, -0.149) (  0.680, -0.000) (  0.087,  0.087) (
   ( -0.045,  0.000) ( -0.046, -0.046) ( -0.000, -0.041) (  0.206, -0.206) (  0.036, -0.036) ( -0.141, -0.000) (  0.027,  0.027) (  0.000, -0.026) (  0.087, -0.087) (  0.772,  0.000) (
- 
- 
- 
+
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   84.264E-13; max=  20.164E-11
    0.0000  0.0000  0.0000    1  2.01644E-10 kpt; spin; max resid(k); each band:
   2.55E-17 1.94E-17 4.20E-18 2.48E-17 1.13E-17 1.12E-17 2.48E-17 9.06E-18
@@ -3335,14 +3335,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  7.2872E-30; max dE/dt=  1.2622E-29; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- 
+
  cartesian forces (hartree/bohr) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
- 
+
  cartesian forces (eV/Angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
@@ -3436,21 +3436,21 @@ Total energy (eV)   : -3.46409168507340E+04
 Total energy DC (eV): -3.46409168502798E+04
 ...
 
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.36824340E-04  sigma(3 2)= -9.21908752E-04
   sigma(2 2)= -6.36824340E-04  sigma(3 1)= -9.21908752E-04
   sigma(3 3)= -6.36824340E-04  sigma(2 1)= -9.21908752E-04
- 
+
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.8736E+01 GPa]
 - sigma(1 1)= -1.87360189E+01  sigma(3 2)= -2.71234919E+01
 - sigma(2 2)= -1.87360189E+01  sigma(3 1)= -2.71234919E+01
 - sigma(3 3)= -1.87360189E+01  sigma(2 1)= -2.71234919E+01
- 
+
 ================================================================================
 == DATASET  5 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 5, }
@@ -3466,17 +3466,17 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  R(3)=  2.7100000  2.7100000 -2.7100000  G(3)=  0.1845018  0.1845018  0.0000000
  Unit cell volume ucvol=  7.9610044E+01 bohr^3
  Angles (23,13,12)=  1.09471221E+02  1.09471221E+02  1.09471221E+02 degrees
- 
+
  Coarse grid specifications (used for wave-functions):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
          ecut(hartree)=     14.000   => boxcut(ratio)=   2.03166
- 
+
  Fine grid specifications (used for densities):
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  24
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.07375
- 
+
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/trunk__codata2022/tests/Pspdir/Psdj_paw_pbe_std/Fe.xml
@@ -3497,18 +3497,18 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Mesh size for Vloc has been set to 1332 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
- 
+
 --------------------------------------------------------------------------------
- 
+
 P newkpt: treating     24 bands with npw=     201 for ikpt=   1 by node    0
 _setup2: Arith. and geom. avg. npw (full set) are     201.000     201.000
- 
- 
+
+
  ******************************************
  DFT+U Method used: FLL
  Magnetic DC : option_interaction = 3
  ******************************************
- 
+
 ================================================================================
 
 --- !BeginCycle
@@ -3516,7 +3516,7 @@ iteration_state: {dtset: 5, }
 solver: {iscf: 17, nstep: 34, nline: 12, wfoptalg: 10, }
 tolerances: {tolvrs: 1.00E-15, }
 ...
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2   difmagsph maxmagsph
  ETOT  1  -122.61760590476    -1.226E+02 1.732E+01 4.747E+00 1.889E+00 1.889E+00
  ETOT  2  -124.59528694666    -1.978E+00 2.652E-03 1.385E+01 1.504E+00 3.393E+00
@@ -3552,17 +3552,17 @@ tolerances: {tolvrs: 1.00E-15, }
  ETOT 32  -124.68711591943    -1.023E-11 4.210E-09 3.045E-13 2.020E-07 3.810E+00
  ETOT 33  -124.68711591943    -7.816E-13 3.191E-10 2.067E-13 1.458E-07 3.810E+00
  ETOT 34  -124.68711591943     4.405E-13 2.443E-09 8.367E-14 1.428E-08 3.810E+00
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.36671484E-04  sigma(3 2)= -9.20584377E-04
   sigma(2 2)= -6.36671484E-04  sigma(3 1)= -9.20584377E-04
   sigma(3 3)= -6.36671484E-04  sigma(2 1)= -9.20584377E-04
- 
- 
+
+
  scprqt:  WARNING -
   nstep=   34 was not enough SCF cycles to converge;
   density residual=  8.367E-14 exceeds tolvrs=  1.000E-15
- 
+
 
 --- !ResultsGS
 iteration_state: {dtset: 5, }
@@ -3602,15 +3602,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Total magnetization (exact)
  (cart.coord.)                                      2.300979    2.300979    2.300979
  (sph.coord.)                           3.985412                                       54.735610   45.000000
- 
+
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =      8.594213389235026
  Compensation charge over fine fft grid    =      8.594152230584870
- 
+
  ==== Results concerning PAW augmentation regions ====
- 
+
  Total pseudopotential strength Dij (hartree):
  Atom #  1 - Component up-up
    === REAL PART:
@@ -3776,8 +3776,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00079  -0.00010   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00202   0.00696  -0.00091   0.02866  -0.00079  -0.00128  -0.01743   0.00226  -0.03842   0.00164
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00114   0.00287  -0.00005  -0.00132   0.03675  -0.00331  -0.00583   0.00015   0.00318  -0.05518
    max. value=  4.07E-02, min. value= -7.80E-02
- 
- 
+
+
  Augmentation waves occupancies Rhoij:
  Atom #  1 - Component dens (n)
    === REAL PART:
@@ -3943,7 +3943,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00001   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00612  -0.00734  -0.00030   0.00006   0.00046   0.00020  -0.00024  -0.00000   0.00000  -0.00002
    0.00001   0.00002   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00574   0.00002   0.00035   0.00002   0.00000   0.00005   0.00002  -0.00001   0.00002  -0.00000
    max. value=  1.82E-01, min. value= -1.82E-01
- 
+
  "PAW+U" part of augmentation waves occupancies Rhoij:
  Atom #  1 - L=2 ONLY - Component dens (n)
    === REAL PART:
@@ -4037,83 +4037,83 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   -0.00000  -0.00061  -0.00000   0.00061   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00001
    0.00612  -0.00734  -0.00030   0.00006   0.00046   0.00020  -0.00024  -0.00000   0.00000  -0.00002
   -0.00574   0.00002   0.00035   0.00002   0.00000   0.00005   0.00002  -0.00001   0.00002  -0.00000
- 
- ---------- DFT+U DATA --------------------------------------------------- 
- 
+
+ ---------- DFT+U DATA ---------------------------------------------------
+
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
- 
+
  => On atom   1, for  lpawu, local Mag. x is     0.21824284E+01
                              local Mag. y is     0.21824284E+01
                              local Mag. z is     0.21824284E+01
                              norm of Mag. is     0.37800769E+01
          (along mag axis)    occ. for majority spin is =      4.70435
          (along mag axis)    occ. for minority spin is =      0.92428
- 
+
  == Occupation matrix for correlated orbitals:
- 
+
  Occupation matrix for component up-up
   (  0.80605,  0.00000) ( -0.03050, -0.05250) ( -0.00698,  0.00000) ( -0.03050,  0.05250) (  0.00000, -0.01123) (
   ( -0.03050,  0.05250) (  0.79293, -0.00000) ( -0.00647, -0.01754) ( -0.03218, -0.06072) ( -0.01487, -0.00770) (
   ( -0.00698, -0.00000) ( -0.00647,  0.01754) (  0.75378,  0.00000) ( -0.00647, -0.01754) ( -0.00000, -0.00054) (
   ( -0.03050, -0.05250) ( -0.03218,  0.06072) ( -0.00647,  0.01754) (  0.79293,  0.00000) (  0.01487, -0.00770) (
   (  0.00000,  0.01123) ( -0.01487,  0.00770) ( -0.00000,  0.00054) (  0.01487,  0.00770) (  0.75984,  0.00000) (
- 
- 
+
+
  Occupation matrix for component dwn-dwn
   (  0.42774, -0.00000) ( -0.11925, -0.20835) ( -0.03383, -0.00000) ( -0.11925,  0.20835) (  0.00000,  0.05196) (
   ( -0.11925,  0.20835) (  0.44086,  0.00000) (  0.02687, -0.01774) ( -0.11757, -0.20013) ( -0.02047, -0.01267) (
   ( -0.03383,  0.00000) (  0.02687,  0.01774) (  0.20984, -0.00000) (  0.02687, -0.01774) (  0.00000, -0.00407) (
   ( -0.11925, -0.20835) ( -0.11757,  0.20013) (  0.02687,  0.01774) (  0.44086, -0.00000) (  0.02047, -0.01267) (
   (  0.00000, -0.05196) ( -0.02047,  0.01267) (  0.00000,  0.00407) (  0.02047,  0.01267) (  0.20379, -0.00000) (
- 
- 
+
+
  Occupation matrix for component up-dwn
   (  0.17603, -0.17603) (  0.11408,  0.03523) (  0.01286, -0.01286) ( -0.03523, -0.11408) ( -0.01436, -0.01436) (
   ( -0.02533, -0.12062) (  0.18916, -0.17603) ( -0.00451,  0.02145) (  0.12230,  0.03355) (  0.01047, -0.00004) (
   (  0.00866, -0.00866) ( -0.00891, -0.03327) (  0.27651, -0.27651) (  0.03327,  0.00891) (  0.00439,  0.00439) (
   (  0.12062,  0.02533) ( -0.03355, -0.12230) ( -0.02145,  0.00451) (  0.17603, -0.18916) ( -0.00004,  0.01047) (
   ( -0.01171, -0.01171) (  0.01278, -0.03163) (  0.00086,  0.00086) ( -0.03163,  0.01278) (  0.27348, -0.27348) (
- 
- 
+
+
  Occupation matrix for component dwn-up
   (  0.17603,  0.17603) ( -0.02533,  0.12062) (  0.00866,  0.00866) (  0.12062, -0.02533) ( -0.01171,  0.01171) (
   (  0.11408, -0.03523) (  0.18916,  0.17603) ( -0.00891,  0.03327) ( -0.03355,  0.12230) (  0.01278,  0.03163) (
   (  0.01286,  0.01286) ( -0.00451, -0.02145) (  0.27651,  0.27651) ( -0.02145, -0.00451) (  0.00086, -0.00086) (
   ( -0.03523,  0.11408) (  0.12230, -0.03355) (  0.03327, -0.00891) (  0.17603,  0.18916) ( -0.03163, -0.01278) (
   ( -0.01436,  0.01436) (  0.01047,  0.00004) (  0.00439, -0.00439) ( -0.00004, -0.01047) (  0.27348,  0.27348) (
- 
- 
- 
+
+
+
 == Occupation matrix in the complex harmonics basis for component up-up
   (  0.79417,  0.00000) ( -0.03022, -0.03022) ( -0.00000, -0.00455) (  0.00741, -0.00741) ( -0.02311,  0.00000) (
   ( -0.03022,  0.03022) (  0.85365,  0.00000) (  0.00783,  0.00783) (  0.00000,  0.03218) (  0.05279, -0.05279) (
   ( -0.00000,  0.00455) (  0.00783, -0.00783) (  0.75378,  0.00000) (  0.01697,  0.01697) ( -0.00000, -0.00532) (
   (  0.00741,  0.00741) (  0.00000, -0.03218) (  0.01697, -0.01697) (  0.73220,  0.00000) ( -0.01458, -0.01458) (
   ( -0.02311, -0.00000) (  0.05279,  0.05279) ( -0.00000,  0.00532) ( -0.01458,  0.01458) (  0.77172,  0.00000) (
- 
+
 == Occupation matrix in the complex harmonics basis for component dwn-dwn
   (  0.26380, -0.00000) ( -0.14723, -0.14723) (  0.00000, -0.02104) (  0.04065, -0.04065) ( -0.11197,  0.00000) (
   ( -0.14723,  0.14723) (  0.64099, -0.00000) (  0.03154,  0.03154) (  0.00000,  0.11757) (  0.18037, -0.18037) (
   (  0.00000,  0.02104) (  0.03154, -0.03154) (  0.20984, -0.00000) ( -0.00646, -0.00646) (  0.00000, -0.02680) (
   (  0.04065,  0.04065) (  0.00000, -0.11757) ( -0.00646,  0.00646) (  0.24074, -0.00000) ( -0.04845, -0.04845) (
   ( -0.11197, -0.00000) (  0.18037,  0.18037) (  0.00000,  0.02680) ( -0.04845,  0.04845) (  0.36772, -0.00000) (
- 
+
 == Occupation matrix in the complex harmonics basis for component up-dwn
   (  0.22609, -0.22609) (  0.08245,  0.00000) (  0.00970,  0.00970) (  0.00000,  0.02245) (  0.06176, -0.06176) (
   (  0.00000, -0.11015) (  0.10467, -0.10467) ( -0.03034,  0.00000) ( -0.03781, -0.03781) (  0.00000,  0.13109) (
   ( -0.00302, -0.00302) (  0.00000,  0.01261) (  0.27651, -0.27651) ( -0.04705,  0.00000) (  0.00922,  0.00922) (
   ( -0.02529,  0.00000) (  0.05094,  0.05094) (  0.00000, -0.00638) (  0.26052, -0.26052) (  0.02536,  0.00000) (
   (  0.03569, -0.03569) ( -0.14571,  0.00000) ( -0.00849, -0.00849) (  0.00000, -0.04801) (  0.22343, -0.22343) (
- 
+
 == Occupation matrix in the complex harmonics basis for component dwn-up
   (  0.22609,  0.22609) (  0.00000,  0.11015) ( -0.00302,  0.00302) ( -0.02529,  0.00000) (  0.03569,  0.03569) (
   (  0.08245,  0.00000) (  0.10467,  0.10467) (  0.00000, -0.01261) (  0.05094, -0.05094) ( -0.14571,  0.00000) (
   (  0.00970, -0.00970) ( -0.03034,  0.00000) (  0.27651,  0.27651) (  0.00000,  0.00638) ( -0.00849,  0.00849) (
   ( -0.00000, -0.02245) ( -0.03781,  0.03781) ( -0.04705,  0.00000) (  0.26052,  0.26052) ( -0.00000,  0.04801) (
   (  0.06176,  0.06176) (  0.00000, -0.13109) (  0.00922, -0.00922) (  0.02536,  0.00000) (  0.22343,  0.22343) (
- 
- 
- 
+
+
+
 == Occupation matrix in the J (= L-1/2, L+1/2) and M_J basis
   (  0.698, -0.000) ( -0.054, -0.054) ( -0.000,  0.026) (  0.016, -0.016) ( -0.268,  0.268) ( -0.111, -0.000) (  0.051,  0.051) (  0.000,  0.019) (  0.026, -0.026) ( -0.044,  0.000) (
   ( -0.054,  0.054) (  0.626,  0.000) ( -0.087, -0.087) (  0.000, -0.097) (  0.000,  0.099) ( -0.041,  0.041) ( -0.309, -0.000) (  0.147,  0.147) (  0.000, -0.072) ( -0.046,  0.046) (
@@ -4125,13 +4125,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   (  0.000, -0.019) (  0.147, -0.147) ( -0.261, -0.000) ( -0.101, -0.101) (  0.023,  0.023) ( -0.000, -0.063) (  0.151, -0.151) (  0.502, -0.000) (  0.149,  0.149) ( -0.000,  0.026) (
   (  0.026,  0.026) (  0.000,  0.072) (  0.151, -0.151) ( -0.131,  0.000) ( -0.073,  0.000) (  0.128,  0.128) (  0.000, -0.050) (  0.149, -0.149) (  0.680,  0.000) (  0.087,  0.087) (
   ( -0.044,  0.000) ( -0.046, -0.046) (  0.000, -0.041) (  0.206, -0.206) (  0.036, -0.036) ( -0.141, -0.000) (  0.027,  0.027) ( -0.000, -0.026) (  0.087, -0.087) (  0.772,  0.000) (
- 
- 
- 
+
+
+
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   10.179E-11; max=  24.429E-10
    0.0000  0.0000  0.0000    1  2.44292E-09 kpt; spin; max resid(k); each band:
   9.62E-18 1.97E-17 2.49E-18 2.85E-19 4.36E-18 4.14E-18 1.04E-18 5.51E-18
@@ -4141,14 +4141,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
- 
+
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
- 
+
  cartesian forces (eV/Angstrom) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
@@ -4242,20 +4242,20 @@ Total energy (eV)   : -3.46409156603359E+04
 Total energy DC (eV): -3.46409156597321E+04
 ...
 
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -6.36671484E-04  sigma(3 2)= -9.20584377E-04
   sigma(2 2)= -6.36671484E-04  sigma(3 1)= -9.20584377E-04
   sigma(3 3)= -6.36671484E-04  sigma(2 1)= -9.20584377E-04
- 
+
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.8732E+01 GPa]
 - sigma(1 1)= -1.87315218E+01  sigma(3 2)= -2.70845275E+01
 - sigma(2 2)= -1.87315218E+01  sigma(3 1)= -2.70845275E+01
 - sigma(3 3)= -1.87315218E+01  sigma(2 1)= -2.70845275E+01
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
@@ -4346,7 +4346,7 @@ P           mkmem           1
           usepawu5          1
 -          useylm           1
             znucl       26.00000
- 
+
 ================================================================================
 
 
@@ -4403,7 +4403,7 @@ P           mkmem           1
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -4415,12 +4415,12 @@ P           mkmem           1
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -4438,15 +4438,15 @@ P           mkmem           1
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - Proc.   0 individual time (sec): cpu=         35.4  wall=         35.4
- 
+
 ================================================================================
- 
+
  Calculation completed.
 .Delivered  10 WARNINGs and  37 COMMENTs to log file.
 +Overall time at end (sec) : cpu=         35.4  wall=         35.4

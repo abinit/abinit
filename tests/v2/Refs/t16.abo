@@ -1,6 +1,6 @@
 
 .Version 10.5.8.2 of ANADDB, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 20 Dec 2025.
 - ( at 17h10 )
-  
+
 
 ================================================================================
 
@@ -82,11 +82,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -102,7 +102,7 @@
        3               2        0.000000        0.000000
        3               3        8.000000        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -116,7 +116,7 @@
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces
 
        Homogeneous q point set in the B.Z.
  Grid q points  :      256
@@ -144,19 +144,19 @@
 
  The interatomic forces have been obtained
 
- Analysis of interatomic force constants 
+ Analysis of interatomic force constants
 
  column 1 is related to the displacement
-        of the generic atom along x,    
+        of the generic atom along x,
  column 2 is related to the displacement
-        of the generic atom along y,    
+        of the generic atom along y,
  column 3 is related to the displacement
-        of the generic atom along z,    
+        of the generic atom along z,
 
  generic atom number   1
  with cartesian coordinates  0.00000000E+00  0.00000000E+00  0.00000000E+00
 
- Third atom defining local coordinates : 
+ Third atom defining local coordinates :
      ib =    2   irpt =  124
 
    1 interaction with atom     1 cell     207
@@ -166,7 +166,7 @@
    0.00000  0.13904  0.00000
    0.00000  0.00000  0.13904
   Trace           0.41713
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        0.707107       -0.707107
  Second local vector :       -1.000000        0.000000       -0.000000
  Third  local vector :        0.000000        0.707107        0.707107
@@ -181,7 +181,7 @@
   -0.02348 -0.03385  0.02348
    0.02348  0.02348 -0.03385
   Trace          -0.10154
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.577350       -0.577350        0.577350
  Second local vector :        0.816497       -0.408248        0.408248
  Third  local vector :        0.000000        0.707107        0.707107
@@ -196,7 +196,7 @@
    0.02348 -0.03385  0.02348
   -0.02348  0.02348 -0.03385
   Trace          -0.10154
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.577350        0.577350       -0.577350
  Second local vector :        0.816497        0.408248       -0.408248
  Third  local vector :        0.000000       -0.707107       -0.707107
@@ -211,7 +211,7 @@
    0.02348 -0.03385 -0.02348
    0.02348 -0.02348 -0.03385
   Trace          -0.10154
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.577350       -0.577350       -0.577350
  Second local vector :        0.816497        0.408248        0.408248
  Third  local vector :        0.000000       -0.707107        0.707107
@@ -226,7 +226,7 @@
   -0.02348 -0.03385 -0.02348
   -0.02348 -0.02348 -0.03385
   Trace          -0.10154
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.577350        0.577350        0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
  Third  local vector :        0.000000        0.707107       -0.707107
@@ -241,7 +241,7 @@
   -0.00178 -0.00182 -0.00111
    0.00111  0.00111  0.00433
   Trace           0.00069
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.707107       -0.707107        0.000000
  Second local vector :       -0.000000        0.000000        1.000000
  Third  local vector :       -0.707107        0.707107       -0.000000
@@ -256,7 +256,7 @@
    0.00111  0.00433  0.00111
   -0.00178 -0.00111 -0.00182
   Trace           0.00069
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.707107        0.000000       -0.707107
  Second local vector :        0.000000        1.000000       -0.000000
  Third  local vector :        0.707107       -0.000000       -0.707107
@@ -271,7 +271,7 @@
   -0.00111  0.00433  0.00111
    0.00178 -0.00111 -0.00182
   Trace           0.00069
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.707107        0.000000        0.707107
  Second local vector :        0.000000       -1.000000        0.000000
  Third  local vector :        0.707107        0.000000        0.707107
@@ -286,7 +286,7 @@
    0.00178 -0.00182 -0.00111
   -0.00111  0.00111  0.00433
   Trace           0.00069
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.707107        0.707107        0.000000
  Second local vector :       -0.000000       -0.000000       -1.000000
  Third  local vector :       -0.707107       -0.707107        0.000000
@@ -301,7 +301,7 @@
   -0.00111 -0.00182 -0.00178
   -0.00111 -0.00178 -0.00182
   Trace           0.00069
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000       -0.707107       -0.707107
  Second local vector :        1.000000       -0.000000        0.000000
  Third  local vector :       -0.000000       -0.707107        0.707107
@@ -316,7 +316,7 @@
    0.00111 -0.00182  0.00178
   -0.00111  0.00178 -0.00182
   Trace           0.00069
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000       -0.707107        0.707107
  Second local vector :       -1.000000       -0.000000       -0.000000
  Third  local vector :        0.000000       -0.707107       -0.707107
@@ -331,7 +331,7 @@
    0.00178 -0.00182  0.00111
    0.00111 -0.00111  0.00433
   Trace           0.00069
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.707107       -0.707107        0.000000
  Second local vector :        0.000000        0.000000       -1.000000
  Third  local vector :        0.707107        0.707107        0.000000
@@ -346,7 +346,7 @@
   -0.00111 -0.00182  0.00178
    0.00111  0.00178 -0.00182
   Trace           0.00069
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        0.707107       -0.707107
  Second local vector :       -1.000000        0.000000        0.000000
  Third  local vector :        0.000000        0.707107        0.707107
@@ -361,7 +361,7 @@
    0.00111  0.00433 -0.00111
    0.00178  0.00111 -0.00182
   Trace           0.00069
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.707107        0.000000       -0.707107
  Second local vector :       -0.000000       -1.000000       -0.000000
  Third  local vector :       -0.707107        0.000000       -0.707107
@@ -376,7 +376,7 @@
    0.00111 -0.00182 -0.00178
    0.00111 -0.00178 -0.00182
   Trace           0.00069
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.000000        0.707107        0.707107
  Second local vector :        1.000000        0.000000       -0.000000
  Third  local vector :       -0.000000        0.707107       -0.707107
@@ -391,7 +391,7 @@
   -0.00111  0.00433 -0.00111
   -0.00178  0.00111 -0.00182
   Trace           0.00069
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.707107        0.000000        0.707107
  Second local vector :       -0.000000        1.000000        0.000000
  Third  local vector :       -0.707107       -0.000000        0.707107
@@ -406,7 +406,7 @@
   -0.00178 -0.00182  0.00111
   -0.00111 -0.00111  0.00433
   Trace           0.00069
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :        0.707107        0.707107        0.000000
  Second local vector :        0.000000       -0.000000        1.000000
  Third  local vector :        0.707107       -0.707107       -0.000000
@@ -421,7 +421,7 @@
    0.00029  0.00032 -0.00035
    0.00029 -0.00035  0.00032
   Trace           0.00071
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.904534       -0.301511       -0.301511
  Second local vector :        0.426401       -0.639602       -0.639602
  Third  local vector :       -0.000000       -0.707107        0.707107
@@ -436,7 +436,7 @@
    0.00029  0.00006  0.00029
   -0.00035  0.00029  0.00032
   Trace           0.00071
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.301511       -0.904534       -0.301511
  Second local vector :       -0.639602        0.426401       -0.639602
  Third  local vector :        0.707107        0.000000       -0.707107
@@ -451,7 +451,7 @@
   -0.00035  0.00032  0.00029
    0.00029  0.00029  0.00006
   Trace           0.00071
- Transformation to local coordinates 
+ Transformation to local coordinates
  First  local vector :       -0.301511       -0.301511       -0.904534
  Second local vector :       -0.639602       -0.639602        0.426401
  Third  local vector :       -0.707107        0.707107        0.000000
@@ -461,8 +461,8 @@
 
 ================================================================================
 
- Calculation of phonon density of states, 
-    thermodynamical properties, 
+ Calculation of phonon density of states,
+    thermodynamical properties,
     and Debye-Waller factors.
 
        Homogeneous q point set in the B.Z.
@@ -1038,7 +1038,7 @@ iatom,iwchan,igqpt2(i),gij error=   3  1     4     4     4   0.00000
 
 ================================================================================
 
- Treat the first list of vectors 
+ Treat the first list of vectors
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000

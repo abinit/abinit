@@ -458,21 +458,21 @@ subroutine print_ngfft(units, ngfft, header, prtvol)
  call wrtout(units, msg)
 
  write(msg,'(2(a,3i5,a),a,i5,2a,i5)')&
-  '  FFT mesh divisions ........................ ',ngfft(1),ngfft(2),ngfft(3),ch10,&
-  '  Augmented FFT divisions ................... ',ngfft(4),ngfft(5),ngfft(6),ch10,&
-  '  FFT algorithm ............................. ',ngfft(7),ch10,&
-  '  FFT cache size ............................ ',ngfft(8)
+  '-  FFT mesh divisions ........................ ',ngfft(1),ngfft(2),ngfft(3),ch10,&
+  '-  Augmented FFT divisions ................... ',ngfft(4),ngfft(5),ngfft(6),ch10,&
+  '-  FFT algorithm ............................. ',ngfft(7),ch10,&
+  '-  FFT cache size ............................ ',ngfft(8)
  call wrtout(units, msg)
 
  if (my_prtvol > 0) then
    write(msg,'(6(a,i5,a),a,4i5)')&
-    '  FFT parallelization level ................. ',ngfft(9),ch10,&
-    '  Number of processors in my FFT group ...... ',ngfft(10),ch10,&
-    '  Index of me in my FFT group ............... ',ngfft(11),ch10,&
-    '  No of xy planes in R space treated by me .. ',ngfft(12),ch10,&
-    '  No of xy planes in G space treated by me .. ',ngfft(13),ch10,&
-    '  MPI communicator for FFT .................. ',ngfft(14),ch10,&
-    '  Value of ngfft(15:18) ..................... ',ngfft(15:18)
+    '-  FFT parallelization level ................. ',ngfft(9),ch10,&
+    '-  Number of processors in my FFT group ...... ',ngfft(10),ch10,&
+    '-  Index of me in my FFT group ............... ',ngfft(11),ch10,&
+    '-  No of xy planes in R space treated by me .. ',ngfft(12),ch10,&
+    '-  No of xy planes in G space treated by me .. ',ngfft(13),ch10,&
+    '-  MPI communicator for FFT .................. ',ngfft(14),ch10,&
+    '-  Value of ngfft(15:18) ..................... ',ngfft(15:18)
    call wrtout(units, msg)
  end if
 

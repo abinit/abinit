@@ -1,6 +1,6 @@
 
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 20 Dec 2025.
 - ( at 17h04 )
-  
+
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_tnlo_5/tnlo_5.abi
 - output file    -> tnlo_5.abo
 - root for input  files -> tnlo_5i
@@ -1751,7 +1751,7 @@ meta: {optdriver: 1, rfddk: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -2002,7 +2002,7 @@ meta: {optdriver: 1, rfelfd: 3, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   4
@@ -2094,7 +2094,7 @@ tolerances: {tolvrs: 1.00E-12, }
        3               2       -0.000000        0.000000
        3               3       -0.001266        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -2105,36 +2105,36 @@ tolerances: {tolvrs: 1.00E-12, }
          2         2   -4.126750E-16    2.208477E+00    3.007190E-16
          2         3    4.126750E-16    6.624752E-16    2.208477E+00
  Now, the imaginary part of the dynamical matrix is zeroed
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    4       -45.2961724560         0.0000000000
    1    1   2    4        -0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
-  
+
    2    1   1    4        -0.0000000000         0.0000000000
    2    1   2    4       -45.2961724560         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
-  
+
    3    1   1    4        -0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
    3    1   3    4       -45.2961724560         0.0000000000
-  
+
    1    2   1    4        -4.9772647601         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4        -0.0000000000         0.0000000000
-  
+
    2    2   1    4         0.0000000000         0.0000000000
    2    2   2    4        -4.9772647601         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
-  
+
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4        -0.0000000000         0.0000000000
    3    2   3    4        -4.9772647601         0.0000000000
-  
+
    1    4   1    1       -45.2961724560         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1        -0.0000000000         0.0000000000
@@ -2144,7 +2144,7 @@ tolerances: {tolvrs: 1.00E-12, }
    1    4   1    4      -121.8496044057         0.0000000000
    1    4   2    4        40.6165348019         0.0000000000
    1    4   3    4        40.6165348019         0.0000000000
-  
+
    2    4   1    1        -0.0000000000         0.0000000000
    2    4   2    1       -45.2961724560         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
@@ -2154,7 +2154,7 @@ tolerances: {tolvrs: 1.00E-12, }
    2    4   1    4        40.6165348019         0.0000000000
    2    4   2    4      -121.8496044057         0.0000000000
    2    4   3    4        40.6165348019         0.0000000000
-  
+
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
    3    4   3    1       -45.2961724560         0.0000000000
@@ -2164,44 +2164,44 @@ tolerances: {tolvrs: 1.00E-12, }
    3    4   1    4        40.6165348019         0.0000000000
    3    4   2    4        40.6165348019         0.0000000000
    3    4   3    4      -121.8496044057         0.0000000000
-  
-  
+
+
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         6.1221671833        -0.0000000000
    1    4   2    4        -0.0000000000        -0.0000000000
    1    4   3    4        -0.0000000000        -0.0000000000
-  
+
    2    4   1    4        -0.0000000000        -0.0000000000
    2    4   2    4         6.1221671833        -0.0000000000
    2    4   3    4         0.0000000000        -0.0000000000
-  
+
    3    4   1    4        -0.0000000000        -0.0000000000
    3    4   2    4        -0.0000000000        -0.0000000000
    3    4   3    4         6.1221671833        -0.0000000000
-  
+
   Effective charges, in cartesian coordinates,
-  (from electric field response) 
+  (from electric field response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    4        -2.2084767299         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
    3    1   1    4        -0.0000000000         0.0000000000
    1    2   1    4         2.2084767299         0.0000000000
    2    2   1    4        -0.0000000000         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
-  
+
    1    1   2    4         0.0000000000         0.0000000000
    2    1   2    4        -2.2084767299         0.0000000000
    3    1   2    4        -0.0000000000         0.0000000000
    1    2   2    4        -0.0000000000         0.0000000000
    2    2   2    4         2.2084767299         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-  
+
    1    1   3    4         0.0000000000         0.0000000000
    2    1   3    4        -0.0000000000         0.0000000000
    3    1   3    4        -2.2084767299         0.0000000000
@@ -2489,7 +2489,7 @@ meta: {optdriver: 1, rfddk: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -2740,7 +2740,7 @@ meta: {optdriver: 1, rfelfd: 3, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   4
@@ -2884,7 +2884,7 @@ tolerances: {tolvrs: 1.00E-12, }
        3               2        0.000004        0.000000
        3               3       -0.001266        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -2895,36 +2895,36 @@ tolerances: {tolvrs: 1.00E-12, }
          2         2    4.254067E-16    2.208513E+00   -9.180281E-05
          2         3   -4.254067E-16   -9.180281E-05    2.208513E+00
  Now, the imaginary part of the dynamical matrix is zeroed
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    4       -45.2958086507         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
-  
+
    2    1   1    4         0.0003991420         0.0000000000
    2    1   2    4       -45.2967984251         0.0000000000
    2    1   3    4         0.0001914904         0.0000000000
-  
+
    3    1   1    4         0.0003991420         0.0000000000
    3    1   2    4         0.0001914904         0.0000000000
    3    1   3    4       -45.2967984251         0.0000000000
-  
+
    1    2   1    4        -4.9776002696         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
-  
+
    2    2   1    4        -0.0003848952         0.0000000000
    2    2   2    4        -4.9766523786         0.0000000000
    2    2   3    4        -0.0001781005         0.0000000000
-  
+
    3    2   1    4        -0.0003848952         0.0000000000
    3    2   2    4        -0.0001781005         0.0000000000
    3    2   3    4        -4.9766523786         0.0000000000
-  
+
    1    4   1    1       -45.2958086507         0.0000000000
    1    4   2    1         0.0003991420         0.0000000000
    1    4   3    1         0.0003991420         0.0000000000
@@ -2934,7 +2934,7 @@ tolerances: {tolvrs: 1.00E-12, }
    1    4   1    4      -121.7644939188         0.0000000000
    1    4   2    4        40.6178346158         0.0000000000
    1    4   3    4        40.6178346158         0.0000000000
-  
+
    2    4   1    1         0.0000000000         0.0000000000
    2    4   2    1       -45.2967984251         0.0000000000
    2    4   3    1         0.0001914904         0.0000000000
@@ -2944,7 +2944,7 @@ tolerances: {tolvrs: 1.00E-12, }
    2    4   1    4        40.6178346158         0.0000000000
    2    4   2    4      -121.9391463938         0.0000000000
    2    4   3    4        40.7034771621         0.0000000000
-  
+
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0001914904         0.0000000000
    3    4   3    1       -45.2967984251         0.0000000000
@@ -2954,44 +2954,44 @@ tolerances: {tolvrs: 1.00E-12, }
    3    4   1    4        40.6178346158         0.0000000000
    3    4   2    4        40.7034771621         0.0000000000
    3    4   3    4      -121.9391463938         0.0000000000
-  
-  
+
+
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         6.1223311033        -0.0000000000
    1    4   2    4        -0.0000000000        -0.0000000000
    1    4   3    4        -0.0000000000        -0.0000000000
-  
+
    2    4   1    4        -0.0000000000        -0.0000000000
    2    4   2    4         6.1222249378        -0.0000000000
    2    4   3    4        -0.0055063731        -0.0000000000
-  
+
    3    4   1    4        -0.0000000000        -0.0000000000
    3    4   2    4        -0.0055063731        -0.0000000000
    3    4   3    4         6.1222249378        -0.0000000000
-  
+
   Effective charges, in cartesian coordinates,
-  (from electric field response) 
+  (from electric field response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    4        -2.2085458636         0.0000000000
    2    1   1    4        -0.0000000000         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    1    2   1    4         2.2085458636         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
    3    2   1    4        -0.0000000000         0.0000000000
-  
+
    1    1   2    4        -0.0000000000         0.0000000000
    2    1   2    4        -2.2085128830         0.0000000000
    3    1   2    4         0.0000918028         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    2    2   2    4         2.2085128830         0.0000000000
    3    2   2    4        -0.0000918028         0.0000000000
-  
+
    1    1   3    4         0.0000000000         0.0000000000
    2    1   3    4         0.0000918028         0.0000000000
    3    1   3    4        -2.2085128830         0.0000000000
@@ -3279,7 +3279,7 @@ meta: {optdriver: 1, rfddk: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -3530,7 +3530,7 @@ meta: {optdriver: 1, rfelfd: 3, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   4
@@ -3674,7 +3674,7 @@ tolerances: {tolvrs: 1.00E-12, }
        3               2       -0.000004        0.000000
        3               3       -0.001266        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -3685,36 +3685,36 @@ tolerances: {tolvrs: 1.00E-12, }
          2         2    7.573900E-17    2.208513E+00    9.180659E-05
          2         3   -7.573900E-17    9.180659E-05    2.208513E+00
  Now, the imaginary part of the dynamical matrix is zeroed
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   1    4       -45.2969899214         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
-  
+
    2    1   1    4        -0.0001913846         0.0000000000
    2    1   2    4       -45.2962078500         0.0000000000
    2    1   3    4        -0.0003993022         0.0000000000
-  
+
    3    1   1    4        -0.0001913846         0.0000000000
    3    1   2    4        -0.0003993022         0.0000000000
    3    1   3    4       -45.2962078500         0.0000000000
-  
+
    1    2   1    4        -4.9764742741         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
-  
+
    2    2   1    4         0.0001780188         0.0000000000
    2    2   2    4        -4.9772152817         0.0000000000
    2    2   3    4         0.0003849699         0.0000000000
-  
+
    3    2   1    4         0.0001780188         0.0000000000
    3    2   2    4         0.0003849699         0.0000000000
    3    2   3    4        -4.9772152817         0.0000000000
-  
+
    1    4   1    1       -45.2969899214         0.0000000000
    1    4   2    1        -0.0001913846         0.0000000000
    1    4   3    1        -0.0001913846         0.0000000000
@@ -3724,7 +3724,7 @@ tolerances: {tolvrs: 1.00E-12, }
    1    4   1    4      -121.9391464388         0.0000000000
    1    4   2    4        40.6178345288         0.0000000000
    1    4   3    4        40.6178345288         0.0000000000
-  
+
    2    4   1    1         0.0000000000         0.0000000000
    2    4   2    1       -45.2962078500         0.0000000000
    2    4   3    1        -0.0003993022         0.0000000000
@@ -3734,7 +3734,7 @@ tolerances: {tolvrs: 1.00E-12, }
    2    4   1    4        40.6178345288         0.0000000000
    2    4   2    4      -121.7644933092         0.0000000000
    2    4   3    4        40.5288242515         0.0000000000
-  
+
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1        -0.0003993022         0.0000000000
    3    4   3    1       -45.2962078500         0.0000000000
@@ -3744,44 +3744,44 @@ tolerances: {tolvrs: 1.00E-12, }
    3    4   1    4        40.6178345288         0.0000000000
    3    4   2    4        40.5288242515         0.0000000000
    3    4   3    4      -121.7644933092         0.0000000000
-  
-  
+
+
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    4   1    4         6.1223310923        -0.0000000000
    1    4   2    4        -0.0000000000        -0.0000000000
    1    4   3    4        -0.0000000000        -0.0000000000
-  
+
    2    4   1    4        -0.0000000000        -0.0000000000
    2    4   2    4         6.1222249255        -0.0000000000
    2    4   3    4         0.0055063937        -0.0000000000
-  
+
    3    4   1    4        -0.0000000000        -0.0000000000
    3    4   2    4         0.0055063937        -0.0000000000
    3    4   3    4         6.1222249255        -0.0000000000
-  
+
   Effective charges, in cartesian coordinates,
-  (from electric field response) 
+  (from electric field response)
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-  
+
    1    1   1    4        -2.2085458943         0.0000000000
    2    1   1    4        -0.0000000000         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    1    2   1    4         2.2085458943         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
    3    2   1    4        -0.0000000000         0.0000000000
-  
+
    1    1   2    4         0.0000000000         0.0000000000
    2    1   2    4        -2.2085128801         0.0000000000
    3    1   2    4        -0.0000918066         0.0000000000
    1    2   2    4        -0.0000000000         0.0000000000
    2    2   2    4         2.2085128801         0.0000000000
    3    2   2    4         0.0000918066         0.0000000000
-  
+
    1    1   3    4        -0.0000000000         0.0000000000
    2    1   3    4        -0.0000918066         0.0000000000
    3    1   3    4        -2.2085128801         0.0000000000
@@ -3791,7 +3791,7 @@ tolerances: {tolvrs: 1.00E-12, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      7.1391127387E+00  7.1391127387E+00  7.1391127387E+00 Bohr
               amu      3.09737620E+01  2.69815390E+01
@@ -5053,7 +5053,7 @@ P          mk1mem34       432
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -5081,12 +5081,12 @@ P          mk1mem34       432
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -5104,7 +5104,7 @@ P          mk1mem34       432
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016

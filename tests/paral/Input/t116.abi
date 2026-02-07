@@ -1,4 +1,4 @@
-#Testing DMFT Correlated and non-correlated atoms (not realistic)  
+#Testing DMFT Correlated and non-correlated atoms (not realistic)
 
 #Multi_dataset parameters
 ndtset 2      # Two datasets
@@ -7,9 +7,9 @@ getden -1     # Second one takes the density of first
 
  pawprtvol 3  # Printing additional information
 # prtvol 4     #
- prtden -1    #  
+ prtden -1    #
 # prtwf  0     #
- 
+
 # fftalg 512   # For tests
 # wfoptalg 10
 ############################
@@ -17,11 +17,11 @@ getden -1     # Second one takes the density of first
 ############################
 
 #Definition of unit cell
- acell 3*6.5           # lattice parameter Bohr  
+ acell 3*6.5           # lattice parameter Bohr
 
  rprim 0.0 0.5 0.5     # Primitive FCC cell
        0.5 0.0 0.5
-       0.5 0.5 0.0    
+       0.5 0.5 0.0
 
 
 #Definition atom
@@ -37,8 +37,8 @@ getden -1     # Second one takes the density of first
 
 
 #Definition pseudopotentials
-pp_dirpath "$ABI_PSPDIR"  # This is the path to the directory where  
-pseudos "26fe.paw,1h.paw"   # pseudopotentials for tests are stored    
+pp_dirpath "$ABI_PSPDIR"  # This is the path to the directory where
+pseudos "26fe.paw,1h.paw"   # pseudopotentials for tests are stored
 ixc 7
 
 #Definition of the k-point grid
@@ -46,7 +46,7 @@ ixc 7
  ngkpt 4 4 4              # Reciprocal space vectors are built from
                           # the rprim parameters. This is the size of the
                           # reciprocal k-points.
- nshiftk 4                # Convergence of the density with regular shifts. 
+ nshiftk 4                # Convergence of the density with regular shifts.
  shiftk 0.5 0.5 0.5
         0.5 0.0 0.0
         0.0 0.5 0.0

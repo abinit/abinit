@@ -390,7 +390,6 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, dtset,
    ! ==============================
    ! ==== Sum over k in the BZ ====
    ! ==============================
-
    do ik_bz=1,Kmesh%nbz
 
      ! Parallelization over k-points and spin.

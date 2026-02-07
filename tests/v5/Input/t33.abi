@@ -61,7 +61,7 @@ occopt 4
 nstep 50               # Maximal number of SCF cycles
 
 # these atomic data sets are simple but fast. A MUCH BETTER
-# choice would be to use the thoroughly tested ones from 
+# choice would be to use the thoroughly tested ones from
 # www.pseudo-dojo.org
 pp_dirpath "$ABI_PSPDIR"
 pseudos "cu_ps.736.lda, o_ps.736.lda"
@@ -70,14 +70,14 @@ pseudos "cu_ps.736.lda, o_ps.736.lda"
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t33.abo, tolnlines = 25, tolabs = 1.1e-04, tolrel = 2.0e-02, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = J. Zwanziger
 #%% keywords = PAW, DFTU
-#%% description = 
+#%% description =
 #%%   Crystalline Cu2O
 #%%   Computation of the total energy and EFG tensors in DFT+U formalism
 #%%   Note: Cu2O is a nonmagnetic insulator. However, DFT+U

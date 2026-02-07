@@ -43,7 +43,7 @@ MODULE m_paw_correlations
  use m_paral_atom,  only : get_my_atmtab,free_my_atmtab
  use m_copy,        only : alloc_copy
  use m_geometry,    only : vcart2ylm
- use m_atomdata 
+ use m_atomdata
 
  implicit none
 
