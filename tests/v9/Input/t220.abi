@@ -106,7 +106,7 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t220.abo, tolnlines=  50, tolabs=  1.000e-07, tolrel=  4.000e-6, fld_options=-medium
+#%%   t220.abo, tolnlines=  5, tolabs=  1.000e-07, tolrel=  4.000e-6, fld_options=-medium
 #%% [shell]  
 #%% max_nprocs = 12
 #%% [extra_info]

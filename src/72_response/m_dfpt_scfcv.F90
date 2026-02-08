@@ -1544,9 +1544,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !- core charge is excluded from the charge density;
 !- the potential is the INPUT vtrial.
 
-! if (ipert/=dtset%natom+1.and.dtset%prt1mag/=0) then
+if (ipert/=dtset%natom+1.and.dtset%prt1mag/=0) then
+! if (ipert/=dtset%natom+1) then
    prtopt=1
-   !   if(ipert==dtset%natom+5 .or. ipert==dtset%natom+6 .or. ipert>dtset%natom+11 ) then
+!     if(ipert==dtset%natom+5 .or. ipert==dtset%natom+6 .or. ipert>dtset%natom+11 ) then
    !  prtopt=idir+1;
      call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
@@ -1556,7 +1557,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
      call magmom_to_d2(blkflg,cplex,d2lo,idir,intgden,ipert,mpert,&
  &    dtset%natom,nspden,rhomag)
-  ! end if
+    end if
 ! end if
  !if((dtset%iscf>0).and.(dtset%nsppol==2.or.dtset%nspden>1).and.(ipert/=dtset%natom+5)) then
  if((iscf_mod>0).and.(dtset%nsppol==2.or.dtset%nspden>1)) then

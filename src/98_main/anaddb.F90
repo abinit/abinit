@@ -204,7 +204,7 @@ program anaddb
  & Crystal%xred)
 
    if (dtset%freqflag/=0) then
-     call ddb_omega_interpol(Crystal%amu, ddb, ddb_lw, dtset%eta, filnam(8), &
+     call ddb_omega_interpol(Crystal%amu, ddb, ddb_lw, dtset%eta, dtset%prefix_outdata, &
    & dtset%magpen, dtset%mpatpol, dtset%mpdir, dtset%mpert, dtset%mpopt,  Crystal%natom, dtset%nfreq, Crystal%ntypat, & 
    & dtset%freqflag, dtset%frmax, dtset%frmin, dtset%prtvol, Crystal%typat, Crystal%ucvol, Crystal%xred)
    end if
