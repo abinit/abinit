@@ -102,6 +102,7 @@ nspinor  2
 
 # Parallelization 
 #autoparal 1
+asr 0
 
 #Pseudos
 pp_dirpath "$ABI_PSPDIR"

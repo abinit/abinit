@@ -85,6 +85,7 @@ nsym 1
 
 nspden   4   
 nspinor  2   
+asr 0
 
 #Pseudos
 pp_dirpath "$ABI_PSPDIR"

@@ -1666,7 +1666,7 @@ subroutine lm_normal_modes(amu,blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mch
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- tmp=ntypat
+
 !Rotate doubly degenerated modes 
  call alignph(amu,displ,blkval,mpert,natom,ntypat,phfrq,typat,silent=1)
 
