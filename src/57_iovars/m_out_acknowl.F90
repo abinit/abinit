@@ -73,8 +73,8 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  integer :: idtset,iprior,iref,ncited,nrefs,ipsp,print_optional
  integer, allocatable :: cite(:),priority(:)
  character(len=750), allocatable :: ref(:)
- character(len=600), allocatable :: comment(:)
- character(len=600+750) :: string
+ character(len=650), allocatable :: comment(:)
+ character(len=650+750) :: string
 
 ! *************************************************************************
 
@@ -119,7 +119,8 @@ ref(1)=trim(ref(1))//&
    ' A. Zadoks, Huazhang Zhang, J.W. Zwanziger.'
  comment(1)=' Comment: the sixth generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for J. Chem. Phys. '//ch10//&
-   ' is available at https://www.abinit.org/sites/default/files/ABINIT25.pdf .'//ch10//&
+   ' is available at'//ch10//&
+   ' https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025'
  priority(1)=3
@@ -138,7 +139,8 @@ ref(1)=trim(ref(1))//&
    ' M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanziger.'
  comment(2)=' Comment: the fifth generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
-   ' is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .'//ch10//&
+   ' is available at'//ch10//&
+   ' https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020'
  priority(2)=2
@@ -157,7 +159,8 @@ ref(1)=trim(ref(1))//&
    ' M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.'
  comment(3)=' Comment: a global overview of ABINIT, with focus on selected capabilities .'//ch10//&
    ' Note that a version of this paper, that is not formatted for J. Chem. Phys. '//ch10//&
-   ' is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .'//ch10//&
+   ' is available at'//ch10//&
+   '  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020'
  priority(3)=2
@@ -178,7 +181,8 @@ ref(1)=trim(ref(1))//&
    ' B.Xu, A.Zhou, J.W.Zwanziger.'
  comment(4)=' Comment: the fourth generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
-   ' is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .'//ch10//&
+   ' is available at'//ch10//&
+   ' https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT16.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016'
  priority(4)=1
@@ -192,7 +196,8 @@ ref(1)=trim(ref(1))//&
    ' M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger'
  comment(5)=' Comment: the third generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
-   ' is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .'//ch10//&
+   ' is available at'//ch10//& 
+   ' https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT_CPC_v10.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009'
  priority(5)=0
@@ -205,7 +210,8 @@ ref(1)=trim(ref(1))//&
  comment(6)=' Comment: the second generic paper describing the ABINIT project. Note that this paper'//ch10//&
    ' should be cited especially if you are using the GW part of ABINIT, as several authors'//ch10//&
    ' of this part are not in the list of authors of the first or third paper.'//ch10//&
-   ' The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.'//ch10//&
+   ' The .pdf of the latter paper is available at'//ch10//&
+   ' https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/zfk_0505-06_558-562.pdf.'//ch10//&
    ' Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,'//ch10//&
    ' the licence allows the authors to put it on the Web).'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005'
