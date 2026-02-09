@@ -52,7 +52,7 @@ By S. Ponce' and X. Gonze (MR1233).
 The Zeeman effect is the global response of a system to a magnetic field, acting on both the spin and orbital magnetic moment.
 So, the previously defined input variable zeemanfield, where only the spin was considered, was wrongly named.
 
-New input variable : [[hspinfield]]
+New input variable : [[hspinfield]].
 See [[test:v10_30]], [[test:v6_17]].
 
 By Le Shu (MR1211)
@@ -111,7 +111,7 @@ By F. Castiel, F. Gendron, O. Gingras, B. Amadon, M. Sarraute
 **B.2** Generalized Bloch theorem to study spin spirals
 
 The generalized Bloch theorem (GBT) can be used to study spin spirals, still keeping the usual small primitive cell instead of using a supercell.
-Full spin-orbit coupling (SOC) is not compatible with GBT. However, the periodic part of SOC (along the spin rotation axis) can be treated,
+Full spin-orbit coupling (SOC) is not compatible with GBT. However, the periodic part of SOC (along the spin rotation axis) can be treated.
 See the following references, among others :
 [[cite:Sandratskii1986]], [[cite:Kurz2004]], [[cite:Heide2009]], and [[cite:Sandratskii2017]].
 
