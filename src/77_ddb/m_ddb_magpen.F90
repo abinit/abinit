@@ -284,9 +284,9 @@ contains
    !Print the physical quantities in the new magnetic boundary conditions
    if (prtopt==1) then
      if (mpopt==1) then
-       call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,qeq0,qphnrm,qphon,ucvol,ddb%msize)
+       call mp_d2etot_print(ddb,ddb%val_fs,kblok,mpert,natom,nblok,1,omega,qeq0,qphnrm,qphon,ddb%msize)
      else if (mpopt==2) then
-       call mp_d2etot_print(ddb,ddb%val_rs,kblok,mpert,natom,nblok,2,omega,qeq0,qphnrm,qphon,ucvol,ddb%msize)
+       call mp_d2etot_print(ddb,ddb%val_rs,kblok,mpert,natom,nblok,2,omega,qeq0,qphnrm,qphon,ddb%msize)
      end if
    end if
 
@@ -1211,14 +1211,13 @@ contains
 !!
 !! SOURCE
 
- subroutine mp_d2etot_print(ddb,blkval,kblok,mpert,natom,nblok,opt,omega,qeq0,qphnrm,qphon,ucvol,msize)
+ subroutine mp_d2etot_print(ddb,blkval,kblok,mpert,natom,nblok,opt,omega,qeq0,qphnrm,qphon,msize)
 
 !Arguments -------------------------------
 !scalars
  class(ddb_type),intent(in) :: ddb
  integer,intent(in) :: kblok,mpert,natom,nblok,opt,msize
  logical,intent(in) :: qeq0
- real(dp),intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: omega(3)
  real(dp),intent(in) :: blkval(2,msize,nblok)
@@ -2047,7 +2046,7 @@ contains
 !Local variables -------------------------
 !scalars
  integer :: iblok,idir1,idir2,idir3,ipert1,ipert2,ipert3,irow,icol
- integer :: rftyp,index
+ integer :: rftyp,index,tmp
  character(len=1000) :: msg
 !arrays
  integer :: rfelfd(4),rfmagn(4),rfphon(4),rfstrs(4),rffreq(4)
@@ -2066,7 +2065,7 @@ contains
 
  ipert3= natom + 9
  idir3= 1
-
+ tmp=opt ! 
  !IFCs
  if (prtvol>1) then
    rfphon(1:2)=1

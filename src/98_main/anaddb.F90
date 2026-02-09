@@ -72,7 +72,7 @@ program anaddb
 !Local variables-------------------------------
  integer, parameter:: master = 0
  integer:: comm, ii, ierr
- integer:: nproc, my_rank, ana_ncid,mtyp
+ integer:: nproc, my_rank, ana_ncid
  logical:: iam_master
  real(dp):: tcpu, tcpui, twall, twalli !,cpu, wall, gflops
  real(dp)::  tsec(2)
@@ -81,7 +81,6 @@ program anaddb
  character(len=24):: codename, start_datetime
 ! character(len = strlen):: string, raw_string
  character(len = fnlen):: worker_logfile
- character(len = fnlen):: filnam(8)
  character(len=500):: msg
  type(args_t):: args
  type(anaddb_dataset_type):: dtset
