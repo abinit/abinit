@@ -2518,7 +2518,7 @@ end subroutine print_scalar_filter
     write(901,*) "Bv(before ) (CPU): ", dot_product(Bv,Bv); flush(901)
 
     ! Bv = B * q
-    call matmul_op_A_B(slice, getAX_BX, n, q2, v2, Bv2)
+    call matmul_op_A_B(slice, getAX_BX, n, q2, v2, Bv2, l_gpu_option)
     !$omp target teams distribute parallel do
     do i = 1, n
         Bv(i) = Bv2(1, i) ! avoids temporary due to strided mem
@@ -2553,7 +2553,7 @@ end subroutine print_scalar_filter
         do i = 1, n
             q2(1, i) = q(i)
         end do
-        call matmul_op_A_B(slice, getAX_BX, n, q2, v2, Bv2)
+        call matmul_op_A_B(slice, getAX_BX, n, q2, v2, Bv2, l_gpu_option)
         !$omp target teams distribute parallel do
         do i = 1, n
             v(i) = v2(1, i)
@@ -2597,7 +2597,7 @@ end subroutine print_scalar_filter
             do i = 1, n
                 v2(1, i) = v(i)
             end do
-            call matmul_op_A_B(slice, getAX_BX, n, v2, Bm1v2, Bv2) ! Bm1v2 temporary
+            call matmul_op_A_B(slice, getAX_BX, n, v2, Bm1v2, Bv2, l_gpu_option) ! Bm1v2 temporary
             !$omp target teams distribute parallel do
             do i = 1, n
                 Bv(i) = Bv2(1, i)
@@ -2677,12 +2677,9 @@ subroutine matmul_op_A_B(slice, getAX_BX, n, q2, Aq2, Bq2)
     !$omp target update from(q2)
     write(901,*) "q2(inside  ) (CPU): ", dot_product(q2(1,:),q2(1,:)); flush(901)
 
-    call xgBlock_map(W, q2, slice%space, n, 1, xmpi_comm_null, me_g0=slice%me_g0_fft, &
-        gpu_option=slice%gpu_option)
-    call xgBlock_map(AW, Aq2, slice%space, n, 1, xmpi_comm_null, me_g0=slice%me_g0_fft, &
-        gpu_option=slice%gpu_option)
-    call xgBlock_map(BW, Bq2, slice%space, n, 1, xmpi_comm_null, me_g0=slice%me_g0_fft, &
-        gpu_option=slice%gpu_option)
+    call xgBlock_map(W, q2, slice%space, n, 1, xmpi_comm_null, me_g0=slice%me_g0_fft, gpu_option=slice%gpu_option)
+    call xgBlock_map(AW, Aq2, slice%space, n, 1, xmpi_comm_null, me_g0=slice%me_g0_fft, gpu_option=slice%gpu_option)
+    call xgBlock_map(BW, Bq2, slice%space, n, 1, xmpi_comm_null, me_g0=slice%me_g0_fft, gpu_option=slice%gpu_option)
     
     write(901,*) 'W id at map', xgBlock_getid(W); flush(901)
     write(901,*) 'AW id at map', xgBlock_getid(AW); flush(901)
@@ -2692,8 +2689,8 @@ subroutine matmul_op_A_B(slice, getAX_BX, n, q2, Aq2, Bq2)
     ! will copy X to BX if paw
     ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
     call getAX_BX(W, AW, BW)
-    call xgBlock_zero_im_g0(AW)
-    call xgBlock_zero_im_g0(BW)
+    !call xgBlock_zero_im_g0(AW)
+    !call xgBlock_zero_im_g0(BW)
     ABI_NVTX_END_RANGE()
     
     write(901,*) 'W id at exit', xgBlock_getid(W); flush(901)

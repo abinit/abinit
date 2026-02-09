@@ -245,7 +245,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
         dtset%spectral_cut,l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
         gpu_thread_limit=dtset%gpu_thread_limit)
  
- call slice_allschedule(slice, xgx0, getghc_gsc1, xgeigen, nspinor)
+ call slice_allschedule(slice, xgx0, getghc_gsc1, getBm1X, xgeigen, nspinor)
  
  if (dtset%nslice>1) then
     ! Release collective cg_temp memory from GPU, will only use active task memory
@@ -383,6 +383,10 @@ subroutine getghc_gsc1(X,AX,BX)
  call xgBlock_check(X,AX)
  call xgBlock_check(X,BX)
 
+ write(901,*) 'debug A"', spacedim, blockdim
+ write(901,*) 'debug A"', xgBlock_getid(AX)
+ flush(901)
+
  call xgBlock_reverseMap(X,cg,rows=1,cols=spacedim*blockdim)
  call xgBlock_reverseMap(AX,ghc,rows=1,cols=spacedim*blockdim)
  call xgBlock_reverseMap(BX,gsc,rows=1,cols=spacedim*blockdim)
@@ -395,6 +399,10 @@ subroutine getghc_gsc1(X,AX,BX)
 #endif
 
  if ( .not. l_paw ) call xgBlock_copy(X,BX)
+
+ write(901,*) 'debug A', spacedim, blockdim
+ write(901,*) 'debug A', xgBlock_getid(AX)
+ flush(901)
 
  ABI_NVTX_END_RANGE()
 
