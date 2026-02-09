@@ -1,5 +1,5 @@
 
-.Version 10.4.5.1 of ABINIT, released Sep 2025.
+.Version 10.5.8.5 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  1 Oct 2025.
-- ( at 15h47 )
+.Starting date : Sun  8 Feb 2026.
+- ( at 21h04 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t79.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t79.abi
 - output file    -> t79.abo
 - root for input  files -> t79i
 - root for output files -> t79o
@@ -162,8 +162,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.15099
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Mn-sp-r_LDA_1012_dojov0.4.psp8
 - Mn    ONCVPSP-3.3.0  r_core=   1.41250   1.20960   1.61055
 - 25.00000  15.00000    171221                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -180,8 +180,8 @@ meta: {optdriver: 1, rfphon: 1, }
   spin-orbit 2    0.007940    0.003946
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/O-r_LDA_1012_dojov0.4.psp8
 - O     ONCVPSP-3.3.0  r_core=   1.35509   1.45563   1.35509
 -  8.00000   6.00000    171117                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -298,40 +298,40 @@ tolerances: {tolvrs: 1.00E-08, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        20.8831096752         0.0000000000
-   1    1   2    1        13.2361866118         0.0000000000
-   1    1   3    1        19.7907633013         0.0000000000
-   1    1   1    2        -4.1191786171         0.0000000000
-   1    1   2    2        -2.5574429662         0.0000000000
-   1    1   3    2        -2.9572019570         0.0000000000
-   1    1   1    3        -7.8923077418         0.0000000000
-   1    1   2    3        -5.2089735314         0.0000000000
-   1    1   3    3        -7.9876305637        -0.0000000000
-   1    1   1    4        -7.8923108366        -0.0000000000
-   1    1   2    4        -5.2089761019         0.0000000000
-   1    1   3    4        -7.9884909161        -0.0000000000
+   1    1   1    1        20.8830982334         0.0000000000
+   1    1   2    1        13.2361751699         0.0000000000
+   1    1   3    1        19.7907518594         0.0000000000
+   1    1   1    2        -4.1191900590         0.0000000000
+   1    1   2    2        -2.5574544081         0.0000000000
+   1    1   3    2        -2.9572133989         0.0000000000
+   1    1   1    3        -7.8923191837         0.0000000000
+   1    1   2    3        -5.2089849733         0.0000000000
+   1    1   3    3        -7.9876420056        -0.0000000000
+   1    1   1    4        -7.8923222784        -0.0000000000
+   1    1   2    4        -5.2089875438         0.0000000000
+   1    1   3    4        -7.9885023579        -0.0000000000
   
-   2    1   1    1        13.2361866118         0.0000000000
+   2    1   1    1        13.2361751699         0.0000000000
   
-   3    1   1    1        19.7907633013         0.0000000000
+   3    1   1    1        19.7907518594         0.0000000000
   
-   1    2   1    1        -4.1191786171         0.0000000000
+   1    2   1    1        -4.1191900590         0.0000000000
   
-   2    2   1    1        -2.5574429662         0.0000000000
+   2    2   1    1        -2.5574544081         0.0000000000
   
-   3    2   1    1        -2.9572019570         0.0000000000
+   3    2   1    1        -2.9572133989         0.0000000000
   
-   1    3   1    1        -7.8923077418        -0.0000000000
+   1    3   1    1        -7.8923191837        -0.0000000000
   
-   2    3   1    1        -5.2089735314        -0.0000000000
+   2    3   1    1        -5.2089849733        -0.0000000000
   
-   3    3   1    1        -7.9876305637         0.0000000000
+   3    3   1    1        -7.9876420056         0.0000000000
   
-   1    4   1    1        -7.8923108366         0.0000000000
+   1    4   1    1        -7.8923222784         0.0000000000
   
-   2    4   1    1        -5.2089761019        -0.0000000000
+   2    4   1    1        -5.2089875438        -0.0000000000
   
-   3    4   1    1        -7.9884909161         0.0000000000
+   3    4   1    1        -7.9885023579         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -535,10 +535,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         14.0  wall=         14.1
+- Proc.   0 individual time (sec): cpu=         13.9  wall=         14.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.0  wall=         14.1
++Overall time at end (sec) : cpu=         13.9  wall=         14.0

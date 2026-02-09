@@ -17,7 +17,7 @@
 
 ## PARALELIZATION OPTIONS
 paral_rf   1
-  nppert   2
+#  nppert   2
 
 ## GENERAL LINEAR RESPONSE PARAMETERS
   tolvrs   1.0d-2
