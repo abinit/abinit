@@ -1,5 +1,5 @@
 
-.Version 10.5.8.4 of ABINIT, released Oct 2025.
+.Version 10.5.8.5 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2025 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  8 Dec 2025.
-- ( at 16h32 )
+.Starting date : Sun  8 Feb 2026.
+- ( at 21h02 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v8_t67-t68-t69-t70/t69.abi
 - output file    -> t69.abo
@@ -266,7 +266,7 @@ tolerances: {toldfe: 1.00E-02, }
  7,8,9: eventually, occupation + non-local contributions
     edocc=   5.32965272E+02     enl0=  -2.01637753E+01   enl1=   0.00000000E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=   6.91982326E+01
+   erelax=  -6.91963966E+01
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
@@ -474,10 +474,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         15.5  wall=         15.5
+- Proc.   0 individual time (sec): cpu=         15.3  wall=         15.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.5  wall=         15.5
++Overall time at end (sec) : cpu=         15.3  wall=         15.3
