@@ -267,6 +267,7 @@ nav:
     - Bibliography: theory/bibliography.md
     - Acronyms: theory/acronyms.md
 - Developers:
+    - Overview: developers/overview_development.md
     - Git and Gitlab: developers/git_and_gitlab.md
     - HowTo for developers: developers/developers_howto.md
     - Abimkdocs: developers/abimkdocs.md
@@ -370,7 +371,7 @@ extra_javascript:
     #- extra_javascript/mathjax.js
     #- https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
-copyright: Copyright &copy; 2020-2025 The Abinit Group
+copyright: Copyright &copy; 2020-2026 The Abinit Group
 
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
