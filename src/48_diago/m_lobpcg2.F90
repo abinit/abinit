@@ -7,7 +7,7 @@
 !! LOBPCG method (second version introduced by J. Bieder), using the xg_tools.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2025 ABINIT group (J. Bieder, L. Baguet)
+!! Copyright (C) 2015-2026 ABINIT group (J. Bieder, L. Baguet)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
