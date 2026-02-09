@@ -118,14 +118,10 @@ contains
  real(dp), allocatable :: displ(:),eigvec(:)
  real(dp), allocatable :: mode_phonspec(:),phonspec(:)
  real(dp), allocatable :: coeffs(:,:,:),pc_in(:),pc_out(:)
- complex(dpc), allocatable :: dummysus(:,:),  invhmat(:,:)
+ complex(dpc), allocatable :: dummysus(:,:)
  complex(dpc), allocatable :: dummysus1(:,:), dummysus2(:,:)
  complex(dpc), allocatable :: dummymom(:,:),dummymom_tr(:,:),zfield_tr(:,:)
- complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
- complex(dpc), allocatable :: zeff(:,:),fmzeff(:,:),fmzeff_tr(:,:)
  complex(dpc), allocatable :: phongreen(:,:)
- complex(dpc), allocatable :: macmagsus(:,:,:)
- complex(dpc), allocatable :: genzeff_tr(:,:), ri_genelsus(:,:,:)
 
 !Pointer-target arrays
  real(dp), allocatable, target :: phfrq(:,:)
@@ -397,7 +393,7 @@ contains
 
      call ri_d2etot(int_fsddb,ci_alpha_iw,ci_alpha_hc_iw,ci_epsilon_iw,ci_localpha_iw,ci_locchi_iw,ci_mchi_iw,&
    & lm_alpha_iw,lm_alpha_hc_iw,lm_epsilon_iw,lm_localpha_iw,lm_locchi_iw,lm_magsus_iw,lm_mchi_iw,&
-   & magsus_iw,mpert,mmom_iw,mmom_tr_iw,natom,ndim,phongreen,ucvol)
+   & mpert,mmom_iw,mmom_tr_iw,natom,ndim,phongreen,ucvol)
 
      call lm_normal_modes(amu,int_fsddb,displ,eta,lm_alpha_nm_iw,lm_epsilon_nm_iw,lm_mchi_nm_iw, &
    & mcell,mmom_iw,modemm_iw,modedisp_iw,modemeff_iw,modezeff_iw,modezf_iw,&
@@ -410,7 +406,7 @@ contains
 
      call ri_d2etot(int_rsddb,ci_alpha_iw,ci_alpha_hc_iw,ci_epsilon_iw,ci_localpha_iw,ci_locchi_iw,ci_mchi_iw,&
    & lm_alpha_iw,lm_alpha_hc_iw,lm_epsilon_iw,lm_localpha_iw,lm_locchi_iw,lm_magsus_iw,lm_mchi_iw,& 
-   & magsus_iw,mpert,mmom_iw,mmom_tr_iw,natom,ndim,phongreen,ucvol)
+   & mpert,mmom_iw,mmom_tr_iw,natom,ndim,phongreen,ucvol)
 
      call lm_normal_modes(amu,int_rsddb,displ,eta,lm_alpha_nm_iw,lm_epsilon_nm_iw,lm_mchi_nm_iw, &
    & mcell,mmom_iw,modemm_iw,modedisp_iw,modemeff_iw,modezeff_iw,modezf_iw,&
@@ -1648,11 +1644,11 @@ subroutine lm_normal_modes(amu,blkval,displ,eta,lm_alpha_nm,lm_epsilon_nm,lm_mch
 !Local variables-------------------------------
 !scalars
  integer :: i1,iat1,iat2,idir1,idir2,im,imode,index,ipert,ipert1,irow,jpert
- integer :: pdim, tmp
+ integer :: pdim
  real(dp) :: fac
  complex(dpc) :: cplx_eta,cplx_w2
 !arrays
- complex(dpc),allocatable :: c_blkval(:,:,:,:),norm(:)
+ complex(dpc),allocatable :: c_blkval(:,:,:,:) !,norm(:)
  complex(dpc),allocatable :: zeff(:,:), zeff_tr(:,:), modezeff_tr(:,:)
  complex(dpc),allocatable :: meff(:,:), meff_tr(:,:), modemeff_tr(:,:)
 !character(len=500) :: msg                   
@@ -1866,7 +1862,7 @@ end subroutine lm_normal_modes
 
 
  subroutine ri_d2etot(blkval,ci_alpha,ci_alpha_hc,ci_epsilon,ci_localpha,ci_locchi,ci_mchi,&
-& lm_alpha,lm_alpha_hc,lm_epsilon,lm_localpha,lm_locchi,lm_magsus,lm_mchi,magsus,mpert,mcoup, &
+& lm_alpha,lm_alpha_hc,lm_epsilon,lm_localpha,lm_locchi,lm_magsus,lm_mchi,mpert,mcoup, &
 & mcoup_tr,natom,ndim,phongreen,ucvol)
 
 !Arguments ------------------------------------
@@ -1887,7 +1883,6 @@ end subroutine lm_normal_modes
  complex(dpc), intent(out) :: lm_epsilon(3,3)
  complex(dpc), intent(out) :: ci_mchi(3,3)
  complex(dpc), intent(out) :: lm_mchi(3,3)
- complex(dpc), intent(inout) :: magsus(ndim,ndim)
  complex(dpc), intent(out) :: lm_magsus(ndim,ndim)
  complex(dpc), intent(in) :: mcoup(ndim,(natom+5)*3)
  complex(dpc), intent(in) :: mcoup_tr((natom+5)*3,ndim)
