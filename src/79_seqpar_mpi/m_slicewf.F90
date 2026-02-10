@@ -383,10 +383,6 @@ subroutine getghc_gsc1(X,AX,BX)
  call xgBlock_check(X,AX)
  call xgBlock_check(X,BX)
 
- write(901,*) 'debug A"', spacedim, blockdim
- write(901,*) 'debug A"', xgBlock_getid(AX)
- flush(901)
-
  call xgBlock_reverseMap(X,cg,rows=1,cols=spacedim*blockdim)
  call xgBlock_reverseMap(AX,ghc,rows=1,cols=spacedim*blockdim)
  call xgBlock_reverseMap(BX,gsc,rows=1,cols=spacedim*blockdim)
@@ -399,10 +395,6 @@ subroutine getghc_gsc1(X,AX,BX)
 #endif
 
  if ( .not. l_paw ) call xgBlock_copy(X,BX)
-
- write(901,*) 'debug A', spacedim, blockdim
- write(901,*) 'debug A', xgBlock_getid(AX)
- flush(901)
 
  ABI_NVTX_END_RANGE()
 

@@ -275,12 +275,14 @@ module m_xg
   public :: xgBlock_invert
   public :: xgBlock_invert_sy
   public :: xgBlock_invert_tri
+  public :: xgBlock_invert_tri_lowest
   public :: xgBlock_yxpa
 
   public :: xgBlock_zero
   public :: xgBlock_zerotri
   public :: xgBlock_zero_im_g0
   public :: xgBlock_one
+  public :: xgBlock_colwiseRandom
   public :: xgBlock_diagonal
   public :: xgBlock_diagonalOnly
 
@@ -6345,6 +6347,57 @@ contains
   end subroutine xgBlock_invert_tri
   !!***
 
+  !!****f* m_xg/xgBlock_invert_tri_lowest
+  !! TODO ongoing Ioanna
+  !!
+  !! NAME
+  !! xgBlock_invert_tri_lowest
+
+  subroutine xgBlock_invert_tri_lowest(uplo,diag,xgBlock)
+    ! TODO with xgblocks and move to cpu
+    ! at the beginnin if not computed
+  !subroutine smallestTridiagEigenpair(n, d, e, lambda, v)
+    implicit none
+    integer, intent(in) :: n
+    real(dp), intent(in)  :: d(n), e(n-1)
+    real(dp), intent(out) :: lambda
+    real(dp), intent(out) :: v(n)
+
+    ! Local copies (DSTEVX overwrites input)
+    real(dp) :: dloc(n), eloc(n-1)
+    real(dp), allocatable :: z(:,:), work(:)
+    integer, allocatable :: iwork(:), ifail(:)
+    integer :: info, m
+    
+    ! *********************************************************************
+
+    dloc = d
+    eloc = e
+
+    ABI_MALLOC(z, (n,1))
+    ABI_MALLOC(work, (5*n))
+    ABI_MALLOC(iwork, (5*n))
+    ABI_MALLOC(ifail, (n))
+
+    ! DSTEVX computes selected eigenpairs (here smallest: index 1)
+    call dstevx('V', 'I', n, dloc, eloc, 0.0d0, 0.0d0, 1, 1, 1.0d-12, m, dloc, z, &
+        n, work, iwork, ifail, info)
+
+    if (info /= 0) then
+       ABI_ERROR('DSTEVX failed')
+    end if
+
+    lambda = dloc(1)
+    v      = z(:,1)
+
+    ABI_FREE(z)
+    ABI_FREE(work)
+    ABI_FREE(iwork)
+    ABI_FREE(ifail)
+
+  end subroutine xgBlock_invert_tri_lowest
+  !!***
+
   !!****f* m_xg/xgBlock_yxpa
   !!
   !! NAME
@@ -6406,6 +6459,73 @@ contains
     end select
 
   end subroutine xgBlock_one
+  !!***
+
+  !!****f* m_xg/xgBlock_colwiseRandom
+  !! 
+  !! TODO testing phase
+  !!
+  !! NAME
+  !! xgBlock_colwiseRandom
+
+  subroutine xgBlock_colwiseRandom(xgBlock, my_rank, jcol)
+    
+    type(xgBlock_t), intent(inout) :: xgBlock
+    integer, intent(in) :: my_rank ! mpi-parallel safe seed
+    integer, intent(in) :: jcol
+    integer :: tid, rank, seed_size, i, n
+    integer, allocatable :: seed(:)
+
+    if (xgBlock%gpu_option/=ABI_GPU_DISABLED) then
+        ABI_ERROR('Not implemented for GPU')
+    end if
+    if (jcol > xgBlock%cols) then
+        ABI_ERROR('given column is out of block')
+    end if
+    
+    tid = 0
+    n = xgBlock%rows
+
+    select case(xgBlock%space)
+    case (SPACE_R)
+        call random_seed(size=seed_size)
+        !$omp parallel private(tid, seed)
+            tid = xomp_get_thread_num()
+            ABI_MALLOC(seed, (seed_size))
+            seed = 123456 + 1000*my_rank + 10*tid + (/ (i, i=1,seed_size) /)
+            call random_seed(put=seed)
+            ! execute each iteration i by exactly one thread
+            !$omp do
+            do i=1,n
+                call random_number(r1)
+            end do
+            !$omp end do
+            ABI_FREE(seed)
+        !$omp end parallel
+    case (SPACE_C)
+        !rank = xmpi_comm_rank(xgBlock%spacedim_comm)
+        call random_seed(size=seed_size)
+        !$omp parallel private(tid, seed)
+            tid = xomp_get_thread_num()
+            ABI_MALLOC(seed, (seed_size))
+            seed = 123456 + 1000*my_rank + 10*tid + (/ (i, i=1,seed_size) /)
+            call random_seed(put=seed)
+            !$omp do
+            do i=1,n
+                call random_number(r1)
+                call random_number(r2)
+                xgBlock%vecC(i,jcol) = dcmplx(r1 - 0.5_dp, r2 - 0.5_dp)
+            end do
+            !$omp end do
+            ABI_FREE(seed)
+        !$omp end parallel
+        norm2 = sum(conjg(x0)*x0) ! TODO ok contiguous
+        x0 = x0 / sqrt(real(norm2, dp)) ! TODO
+    case (SPACE_CR)
+        ABI_ERROR('Not implemented for SPACE_CR')
+    end select
+
+  end subroutine xgBlock_random
   !!***
 
   !!****f* m_xg/xgBlock_diagonal

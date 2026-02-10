@@ -1171,8 +1171,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
 
     write(901,*) 'Here I write the Lanczos yeyyy'
     kmax = 20
-    call computeBLanczos(slice, getAX_BX, getBm1X, slice%total_spacedim, kmax, &
-        lambda_min, res_norm, gpu_option=slice%gpu_option)
+    call computeBLanczos(slice, getAX_BX, getBm1X, kmax, lambda_min, res_norm)
 
     write(901,*) 'Lanczos lambda_min=', lambda_min
     write(901,*) 'Lanczos res_norm  =', res_norm
@@ -2408,18 +2407,18 @@ end subroutine print_scalar_filter
 !! computeBLanczos
 !! 
 !! FUNCTION
-!! B-Lanczos three-term recurrence (using B-inner product)
+!! B-Lanczos three-term recurrence (using B-inner product).
+!! Performs k Lanczos iterations on a column vector.
 !!
 !! SOURCE
   
-  subroutine computeBLanczos(slice, getAX_BX, getBm1X, n, k, lambda_min, res_norm, gpu_option)
+  subroutine computeBLanczos(slice, getAX_BX, getBm1X, k, lambda_min, res_norm)
 
     implicit none
 
     type(slice_t), intent(inout) :: slice
-    integer, intent(in) :: n, k
+    integer, intent(in) :: k
     real(dp), intent(out) :: lambda_min, res_norm
-    integer, optional, intent(in) :: gpu_option
     interface
         subroutine getAX_BX(X,AX,BX)
             use m_xg, only : xgBlock_t
@@ -2436,198 +2435,125 @@ end subroutine print_scalar_filter
         end subroutine getBm1X
     end interface
     
-    type(xg_t) :: xg_Bv
-    real(dp) :: Bv(n), Bv2(2,n)
-    real(dp) :: q(n), q2(2,n), v(n), v2(2,n)
-    real(dp) :: Bm1v2(2,n)
+    type(xg_t) :: W_vcol
+    type(xg_t) :: W_dot
+    type(xgBlock_t) :: q, v, Bv, Bm1v, qprev
+    type(xgBlock_t) :: dot_qTBv, dot_qTv, dot_vTBv
     real(dp) :: alpha(k), beta(k-1)
-    real(dp) :: q_prev(n)
-    real(dp) :: v_min(n)
     real(dp) :: beta_prev
-    real(dp) :: normB
-    real(dp) :: qTBv, qTv, vTBv
-    real(dp) :: dot_test
+    real(dp) :: norml_q
+    real(dp) :: dot_qTBv_layout(1,1), dot_qTv_layout(1,1), dot_vTBv_layout(1,1)
+    real(dp), allocatable :: v_min(:)
 
-    integer :: i, j, l
+    integer :: i, j
+    integer :: rank
     integer :: space
     integer :: spacedim
-    integer :: tid, rank, seed_size
-    integer :: l_gpu_option
-    integer, allocatable :: seed(:)
+    integer :: me_g0
+    integer :: gpu_option
+    integer, parameter :: tim_invovl = 1755
+    integer, parameter :: tim_copy = 1765
+    real(dp) :: tsec(2)
 
     ! *********************************************************************
 
     space = slice%space
-    spacedim = slice%spacedim
-
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
-
-    ! Parallel-safe, multithread-safe
-    tid = 0
+    spacedim = slice%total_spacedim
+    gpu_option = slice%gpu_option
+    me_g0 = slice%me_g0_fft
     rank = xmpi_comm_rank(slice%spacecom)
-    call random_seed(size=seed_size)
-!$omp parallel private(tid, seed)
-    tid = xomp_get_thread_num()
-    ABI_MALLOC(seed, (seed_size))
-    seed = 123456 + 1000*rank + 10*tid + (/ (i, i=1,seed_size) /)
-    call random_seed(put=seed)
-    !$omp do
-    do i=1,n
-        call random_number(q(i))
-    end do
-    !$omp end do
-    ABI_FREE(seed)
-!$omp end parallel
-
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-    !$omp target enter data map(to:Bv,Bv2,q,q2,v,v2,Bm1v2,alpha,beta,q_prev)
-#endif
-
-    ! Offload to GPU
-    dot_test = 0.0d0
-    !$omp target teams distribute parallel do reduction(+:dot_test)
-    do i = 1, n
-        dot_test = dot_test + q(i)*q(i)
-    end do
-    ! Check result on CPU
-    write(901,*) "Dot product (GPU): ", dot_test
-    write(901,*) "Dot product (CPU): ", dot_product(q,q)
-    flush(901)
-
-    !$omp target teams distribute parallel do
-    do i = 1, n
-        q2(1, i) = q(i)
-        q2(2, i) = 0.0d0
-        v2(1, i) = 0.0d0
-        v2(2, i) = 0.0d0
-        Bv2(1, i) = 0.0d0
-        Bv2(2, i) = 0.0d0
-        Bm1v2(1, i) = 0.0d0
-        Bm1v2(2, i) = 0.0d0
-        v(i) = 0.0d0
-        Bv(i) = 0.0d0
-        q_prev(i) = 0.0d0
-    end do
-
-    !$omp target update from(Bv2,Bv,q2)
-    write(901,*) "Bv2(before) (CPU): ", dot_product(Bv2(1,:),Bv2(1,:)); flush(901)
-    write(901,*) "q2(before ) (CPU): ", dot_product(q2(1,:),q2(1,:)); flush(901)
-    write(901,*) "Bv(before ) (CPU): ", dot_product(Bv,Bv); flush(901)
-
-    ! Bv = B * q
-    call matmul_op_A_B(slice, getAX_BX, n, q2, v2, Bv2)
-    !$omp target teams distribute parallel do
-    do i = 1, n
-        Bv(i) = Bv2(1, i) ! avoids temporary due to strided mem
-    end do 
-
-    !$omp target update from(Bv2,Bv,q2)
-    write(901,*) "Bv2(after ) (CPU): ", dot_product(Bv2(1,:),Bv2(1,:)); flush(901)
-    write(901,*) "q2(after  ) (CPU): ", dot_product(q2(1,:),q2(1,:)); flush(901)
-    write(901,*) "Bv(after  ) (CPU): ", dot_product(Bv,Bv); flush(901)
-
-    qTBv = 0.0d0
-    !$omp target teams distribute parallel do reduction(+:qTBv)
-    do i = 1, n
-        qTBv = qTBv + q(i)*Bv(i)
-    end do
-    !$omp target update from(q,Bv)
-    write(901,*) "qTBv: Dot product (GPU): ", qTBv; flush(901)
-    write(901,*) "qTBv: Dot product (CPU): ", dot_product(q,Bv); flush(901)
-
-    normB = sqrt(qTBv)
-    !$omp target teams distribute parallel do
-    do i = 1, n
-        q(i) = q(i) / normB
-    end do
-
     beta_prev = 0.0_dp
+
+    ABI_MALLOC(v_min, (spacedim))
+
+    call xg_init(W_vcol, space, spacedim, 5, xmpi_comm_null, me_g0=me_g0, gpu_option=gpu_option)
+    call xgBlock_setBlock(W_vcol%self,     q, spacedim, 1)         ! q
+    call xgBlock_setBlock(W_vcol%self,     v, spacedim, 1, fcol=2) ! Aq
+    call xgBlock_setBlock(W_vcol%self,    Bv, spacedim, 1, fcol=3) ! Bq
+    call xgBlock_setBlock(W_vcol%self,  Bm1v, spacedim, 1, fcol=4) ! Bm1 v
+    call xgBlock_setBlock(W_vcol%self, qprev, spacedim, 1, fcol=5) ! q_prev
+
+    call xg_init(W_dot, SPACE_R, 1, 3, xmpi_comm_null, me_g0=me_g0, gpu_option=gpu_option)
+    call xgBlock_setBlock(W_dot%self, dot_qTBv, 1, 1)
+    call xgBlock_setBlock(W_dot%self,  dot_qTv, 1, 1, fcol=2)
+    call xgBlock_setBlock(W_dot%self, dot_vTBv, 1, 1, fcol=3)
+
+    ! q = random column vector
+    call xgBlock_colwiseRandom(q, rank, 1)
+    if (gpu_option==ABI_GPU_OPENMP) then
+        call xgBlock_copy_to_gpu(q)
+    end if
+    
+    ! Bv = B * q / norml_q
+    ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
+    call getAX_BX(q, v, Bv)
+    call xgBlock_zero_im_g0(v) ! v stores Aq
+    call xgBlock_zero_im_g0(Bv) ! Bv stores Bq
+    ABI_NVTX_END_RANGE()
+    
+    call xgBlock_colwiseDotProduct(q, Bv, dot_qTBv)
+    call xgBlock_reverseMap(dot_qTBv,dot_qTBv_layout,rows=1,cols=1)
+    
+    norml_q = 1.d0 / sqrt(dot_qTBv_layout(1,1))
+    call xgBlock_scale(q, norml_q, 1)
+    call xgBlock_scale(v, norml_q, 1)
+    call xgBlock_scale(Bv, norml_q, 1)
 
     do j = 1, k
 
-        ! v = A * q
-        !$omp target teams distribute parallel do
-        do i = 1, n
-            q2(1, i) = q(i)
-        end do
-        call matmul_op_A_B(slice, getAX_BX, n, q2, v2, Bv2)
-        !$omp target teams distribute parallel do
-        do i = 1, n
-            v(i) = v2(1, i)
-        end do
+        if (j>1) then ! rewrite v
+            ! v = A * q
+            ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
+            call getAX_BX(q, v, Bv)
+            call xgBlock_zero_im_g0(v) ! v stores Aq
+            call xgBlock_zero_im_g0(Bv) ! Bv stores Bq
+            ABI_NVTX_END_RANGE()
+        end if
 
         ! alpha_j = q^T * Aq
-        qTv = 0.0d0
-        !$omp target teams distribute parallel do reduction(+:qTv)
-        do l = 1, n
-            qTv = qTv + q(l)*v(l)
-        end do
-        alpha(j) = qTv
-        !$omp target update from(q,v)
-        write(901,*) "qTv: Dot product (GPU): ", qTv
-        write(901,*) "qTv: Dot product (CPU): ", dot_product(q,v)
-        flush(901)
+        call xgBlock_colwiseDotProduct(q, v, dot_qTv)
+        call xgBlock_reverseMap(dot_qTv,dot_qTv_layout,rows=1,cols=1)
+        alpha(j) = dot_qTv_layout(1,1)
 
         ! v = B^{-1} * A * q
-        call matmul_op_Binv(slice, getBm1X, n, v2, Bm1v2, l_gpu_option) 
-        !$omp target teams distribute parallel do
-        do i = 1, n
-            v(i) = Bm1v2(1, i)
-        end do
-
+        if (slice%paw) then
+            call timab(tim_invovl, 1, tsec)
+            ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_BM1X)
+            call getBm1X(v, Bm1v)
+            ABI_NVTX_END_RANGE()
+            call timab(tim_invovl, 2, tsec)
+            call timab(tim_copy, 1, tsec)
+            call xgBlock_copy(Bm1v, v)
+            call timab(tim_copy, 2, tsec)
+        end if
+        
         ! v = B^{-1} A q - alpha q - beta_prev q_prev
-        !$omp target teams distribute parallel do
-        do l = 1, n
-            v(l) = v(l) - alpha(j)*q(l)
-        end do
+        call xgBlock_saxpy(v, -1.d0 * alpha(j), q)
         if (j > 1) then
-            !$omp target teams distribute parallel do
-            do l = 1, n
-                v(l) = v(l) - beta_prev*q_prev(l)
-            end do
+            call xgBlock_saxpy(v, -beta_prev, q_prev)
         end if
 
         ! Compute beta_j if j<k
         if (j < k) then
-            ! Bv = B * v        
-            !$omp target teams distribute parallel do
-            do i = 1, n
-                v2(1, i) = v(i)
-            end do
-            call matmul_op_A_B(slice, getAX_BX, n, v2, Bm1v2, Bv2) ! Bm1v2 temporary
-            !$omp target teams distribute parallel do
-            do i = 1, n
-                Bv(i) = Bv2(1, i)
-            end do
+            
+            ! Bv = B * v
+            ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
+            call getAX_BX(v, Bm1v, Bv)
+            call xgBlock_zero_im_g0(Bm1v) ! Bm1v dummy workspace
+            call xgBlock_zero_im_g0(Bv) ! Bv 
+            ABI_NVTX_END_RANGE()
+ 
+            call xgBlock_colwiseDotProduct(v, Bv, dot_vTBv)
+            call xgBlock_reverseMap(dot_vTBv,dot_vTBv_layout,rows=1,cols=1)
+            beta(j) = sqrt(dot_vTBv_layout(1,1))
 
-            vTBv = 0.d0
-            !$omp target teams distribute parallel do reduction(+:vTBv)
-            do l = 1, n
-                vTBv = vTBv + v(l)*Bv(l)
-            end do
-            beta(j) = sqrt(vTBv)
-            !$omp target update from(v,Bv)
-            write(901,*) "vTBv: Dot product (GPU): ", vTBv
-            write(901,*) "vTBv: Dot product (CPU): ", dot_product(v,Bv)
-            flush(901)
-
-            ! Update q_prev, q, beta_prev
-            !$omp target teams distribute parallel do
-            do l = 1, n
-                q_prev(l) = q(l)
-                q(l) = v(l) / beta(j)
-            end do
+            ! Update q_prev, q=v/beta_j, beta_prev
+            call xgBlock_copy(q, q_prev)
+            call xgBlock_scale(v, 1.d0/beta(j), 1)
+            call xgBlock_copy(v, q)
             beta_prev = beta(j)
         end if
     end do
-
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-    !$omp target update from(alpha,beta)
-    !$omp target exit data map(delete:Bv,Bv2,q,q2,v,v2,Bm1v2,alpha,beta,q_prev)
-#endif
 
     ! Diagonalize T (always on CPU)
     call smallestTridiagEigenpair(k, alpha, beta, lambda_min, v_min)
@@ -2635,133 +2561,11 @@ end subroutine print_scalar_filter
     ! residual norm using Lanczos shortcut
     res_norm = abs(beta(k-1)*v_min(k))
 
+    call xg_free(W_vcol)
+    call xg_free(W_dot)
+    ABI_FREE(v_min)
+
   end subroutine computeBLanczos
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/matmul_op_A_B
-!! NAME
-!! matmul_op_A_B
-!! 
-!! FUNCTION
-!! Apply A and B to Fortran 1D array q2 and store result to Fortran 1D array 
-!! Aq2 and Bq2 all in complex.
-!! 
-!! SOURCE
-
-subroutine matmul_op_A_B(slice, getAX_BX, n, q2, Aq2, Bq2)
-    
-    implicit none
-
-    type(slice_t), intent(inout) :: slice
-    integer, intent(in) :: n
-    real(dp), intent(in) :: q2(2,n) ! 1d complex array (in)
-    real(dp), intent(out) :: Aq2(2,n) ! 1d complex array (out)
-    real(dp), intent(out) :: Bq2(2,n) ! 1d complex array (out)
-
-    interface
-        subroutine getAX_BX(X,AX,BX)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: AX
-            type(xgBlock_t), intent(inout) :: BX
-        end subroutine getAX_BX
-    end interface
-
-    type(xgBlock_t) :: W, AW, BW
-    real(dp) :: tsec(2)
-    
-    ! *********************************************************************
-
-    !$omp target update from(q2)
-    write(901,*) "q2(inside  ) (CPU): ", dot_product(q2(1,:),q2(1,:)); flush(901)
-
-    call xgBlock_map(W, q2, slice%space, n, 1, xmpi_comm_null, me_g0=slice%me_g0_fft, &
-        gpu_option=slice%gpu_option)
-    call xgBlock_map(AW, Aq2, slice%space, n, 1, xmpi_comm_null, me_g0=slice%me_g0_fft, &
-        gpu_option=slice%gpu_option)
-    call xgBlock_map(BW, Bq2, slice%space, n, 1, xmpi_comm_null, me_g0=slice%me_g0_fft, &
-        gpu_option=slice%gpu_option)
-    
-    write(901,*) 'W id at map', xgBlock_getid(W); flush(901)
-    write(901,*) 'AW id at map', xgBlock_getid(AW); flush(901)
-    write(901,*) 'BW id at map', xgBlock_getid(BW); flush(901)
-
-    ! Apply A and B to X (requires colsrows representation) to create AX and BX in colsrows
-    ! will copy X to BX if paw
-    ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
-    call getAX_BX(W, AW, BW)
-    call xgBlock_zero_im_g0(AW)
-    call xgBlock_zero_im_g0(BW)
-    ABI_NVTX_END_RANGE()
-    
-    write(901,*) 'W id at exit', xgBlock_getid(W); flush(901)
-    write(901,*) 'AW id at exit', xgBlock_getid(AW); flush(901)
-    write(901,*) 'BW id at exit', xgBlock_getid(BW); flush(901)
-
-end subroutine matmul_op_A_B
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/matmul_op_Binv
-!! NAME
-!! matmul_op_Binv
-!! 
-!! FUNCTION
-!! Apply inverse of B to Fortran 1D array q2 and store result to Fortran 1D array 
-!! Binvq2 all in complex.
-!! 
-!! SOURCE
-
-subroutine matmul_op_Binv(slice, getBm1X, n, q2, Binvq2, gpu_option)
-    
-    implicit none
-
-    type(slice_t), intent(inout) :: slice
-    integer, intent(in) :: n
-    real(dp), intent(in) :: q2(2,n) ! 1d complex array (in)
-    real(dp), intent(out) :: Binvq2(2,n) ! 1d complex array (out)
-    integer, optional, intent(in) :: gpu_option
-
-    interface
-        subroutine getBm1X(X,Bm1X)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: Bm1X
-        end subroutine getBm1X
-    end interface
-
-    type(xgBlock_t) :: W, BinvW
-    integer, parameter :: tim_invovl = 1755
-    integer, parameter :: tim_copy = 1765
-    integer :: l_gpu_option
-    real(dp) :: tsec(2)
-    
-    ! *********************************************************************
-
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
-
-    call xgBlock_map(W, q2, slice%space, n, 1, xmpi_comm_null, gpu_option=l_gpu_option)
-    call xgBlock_map(BinvW, Binvq2, slice%space, n, 1, xmpi_comm_null, gpu_option=l_gpu_option)
-
-    if (slice%paw) then
-        call timab(tim_invovl, 1, tsec)
-        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_BM1X)
-        call getBm1X(W, BinvW)
-        ABI_NVTX_END_RANGE()
-        call timab(tim_invovl, 2, tsec)
-    else
-        call timab(tim_copy, 1, tsec)
-        call xgBlock_copy(W,BinvW)
-        call timab(tim_copy, 2, tsec)
-    end if
-
-end subroutine matmul_op_Binv
 !!***
 
 end module m_slice
