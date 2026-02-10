@@ -21,9 +21,9 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 This tutorial should take about 1 hour.
 
 WARNING : This tutorial has been updated by removing the use of the ANADDB input variable [[brav]] in 
-trf2_4.abi, trf2_5.abi, and trf2_7.abi, with the accompanying modifications in the text of the tutorial.
+trf2_4.abi, trf2_5.abi, and trf2_6.abi, with the accompanying modifications in the text of the tutorial.
 Also, due to the change of default values for [[rfdir]] and [[rfatpol]] in ABINITv9.8 with respect to the prior versions of ABINIT, 
-the example input files from this tutorial will not work with such prior versions of ABINIT. 
+the example input files from this tutorial will not work with such version of ABINIT or even older ones). 
 Please, use ABINITv9.8 or more recent versions of ABINIT, or adjust the values of [[rfdir]] and [[rfatpol]]. 
 See point A.3 of the [v9.8 release notes](/about/release-notes/#98). 
 
@@ -360,53 +360,6 @@ needed for the Fourier interpolation), but not printed.
 
 {% dialog tests/tutorespfn/Refs/trf2_5.abo %}
 
-Please, open also the other output file, named *trf2_5o_B2EPS.freq*.
-It contains the frequencies, in a format suitable for graphical output, using the program
-*band2eps* (the latter should be more documented, and will not be described in the present tutorial).
-
-You can copy the files *trf2_6.abi*, *trf2_6.files* and *trf2_6.in_freq* to the *Work_rf2* directory. Note that band2eps uses the old format using the files file. Then, issue
-
-    band2eps < trf2_6.files > trf2_6.log
-
-{% dialog tests/tutorespfn/Input/trf2_6.files tests/tutorespfn/Input/trf2_6.abi %}
-
-The file *trf2_6.abo.eps* has been produced. It is an .eps file (eps stand for
-Encapsulated PostScript). You can use the program ghostview to visualize it.
-The command to issue will depend on the way you have configured your machine,
-but the following might perhaps do the work:
-
-    gv trf2_6.abo.eps
-
-You should see a nice phonon band structure for AlAs. Well, not so nice, after
-all, because there are two strange dips for the highest phonon band, at the Gamma point.
-This is due to the lack of LO-TO splitting for the ANADDB treatment of the first list of vector.
-The correct phonon band structure is:
-
-![](rf2_assets/trf2_6.abo.png)
-
-You can correct the LO-TO splitting by the following little hack.
-
-Open the file *trf2_5o_B2EPS.freq*, and note that the value of the frequency, in
-the sixth column, has a discontinuity exactly for the Gamma point (the three
-first columns give the k point coordinates), that is, at lines 1 and 31:
-
-     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00  0.1568561346E-02  0.1568561346E-02  0.1568561346E-02
-
-Replace these values (sixth column, line 1 and 31) by the correct value,
-including the LO-TO splitting, that you can find in the file *trf2_5.abo*, at
-the end, second list of vector. That is, the lines 1 and 31 should now read:
-
-     0.000000E+00  0.000000E+00  0.000000E+00  1.568561E-03  1.568561E-03  1.730570E-03
-
-Now, run *band2eps* again. Your phonon band structure should be perfect!
-
-It can be compared with the AlAs phonon band structure published in [[cite:Giannozzi1991]].
-
-Of course, one should make a convergence study, on the k and q point grids
-(separately!), as well as on the energy cut-off, and also test LDA and GGA...
-But this is left to the user! You can have a look at the paper [[cite:Petretto2018]]
-for a careful analysis of phonon dispersion convergence with Abinit.
-
 ### Plotting phonon bands with AbiPy
 
 If |AbiPy| is installed on your machine, you can use the |abiopen| script
@@ -497,10 +450,10 @@ farthest from a clean, stable, usage. By exploring the input variables, the
 user should be able to produce figures and data like the ones for SiO2 quartz
 and stishovite, published in [[cite:Lee1995]].
 
-You can copy the file *trf2_7.abi* from *\$ABI_TESTS/tutorespfn/Input* to *Work_rf2*.
+You can copy the file *trf2_6.abi* from *\$ABI_TESTS/tutorespfn/Input* to *Work_rf2*.
 The same DDB as for trf2_4 and trf2_5 is used, namely *trf2_3.ddb.abo*.
 
-{% dialog tests/tutorespfn/Input/trf2_7.abi %}
+{% dialog tests/tutorespfn/Input/trf2_6.abi %}
 
 The following additional input variables are present:
 

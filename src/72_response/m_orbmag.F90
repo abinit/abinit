@@ -7,7 +7,7 @@
 !!  used to handle orbital magnetization
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2025 ABINIT group (JWZ)
+!! Copyright (C) 2011-2026 ABINIT group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -217,6 +217,7 @@ module m_orbmag
   private :: make_pcg1
   private :: gauge_treatment
   private :: para_to_diag
+  private :: odens_real
   private :: orbmag_init
   private :: orbmag_free
   private :: orbmag_mpisum
@@ -1103,8 +1104,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: eig_k(nband_k),gcg1_k(2,mcgk,3)
-  real(dp),intent(in) :: ph3d(2,npw_k,dtset%natom)
+  real(dp),intent(in) :: eig_k(nband_k),gcg1_k(2,mcgk,3),ph3d(2,npw_k,dtset%natom)
   type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,mcprjk,3)
 
   !Local variables -------------------------
@@ -1199,18 +1199,9 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
          m1(adir) = m1(adir) + prefac_m*CMPLX(mdotr,mdoti)
          b1(adir) = b1(adir) - two* prefac_b*CMPLX(bdotr,bdoti)
          
-         if (need_odensity) then
-           do ipw = 1, npw_k
-             gdotr=CMPLX(ph3d(1,ipw,t_atom),ph3d(2,ipw,t_atom))
-             bracg=CMPLX(bra(1,ipw),bra(2,ipw))
-             odensfac=CONJG(gdotr)*CONJG(bracg)*prefac_m
-
-             orbmag_mesh%odens(1,:,:,:,adir) = orbmag_mesh%odens(1,:,:,:,adir) + &
-               & REAL(odensfac)*fofr(1,:,:,:) - AIMAG(odensfac)*fofr(2,:,:,:)
-             orbmag_mesh%odens(2,:,:,:,adir) = orbmag_mesh%odens(2,:,:,:,adir) + &
-               & AIMAG(odensfac)*fofr(1,:,:,:) + REAL(odensfac)*fofr(2,:,:,:)
-           end do
-         end if
+         if (need_odensity) call odens_real(adir,bra,dtset,fofr,&
+           & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
+           & npw_k,orbmag_mesh,ph3d,prefac_m)
        
        end do ! adir
    
@@ -2758,6 +2749,68 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
 end subroutine make_d
 !!***
 
+!!****f* ABINIT/odens_real
+!! NAME
+!! odens_real
+!!
+!! FUNCTION
+!! FT over R site for odens in real space
+!!
+!! INPUTS
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!! orbmag_mesh%odens updated
+!! 
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine odens_real(adir,bra,dtset,fofr,n4,n5,n6,npw_k,orbmag_mesh,ph3d,prefac_m)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: adir,n4,n5,n6,npw_k
+  complex(dpc) :: prefac_m
+  type(dataset_type),intent(in) :: dtset
+  type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
+
+  !arrays
+  real(dp),intent(in) :: bra(2,npw_k),fofr(2,n4,n5,n6)
+  real(dp),intent(in) :: ph3d(2,npw_k,dtset%natom)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: iatom,ipw,t_atom
+  complex(dpc) :: brac,ffac,gr
+
+  !arrays
+
+!--------------------------------------------------------------------
+
+  do iatom = 1, dtset%natom
+    if ( ANY(ABS(dtset%nucdipmom(1:3,iatom)).GT.tol8) ) then
+      t_atom = iatom
+      exit
+    end if
+  end do
+
+  do ipw = 1, npw_k
+    gr = CMPLX(ph3d(1,ipw,t_atom),ph3d(2,ipw,t_atom))
+    brac = CMPLX(bra(1,ipw),bra(2,ipw))
+    ffac = CONJG(gr)*CONJG(brac)*prefac_m
+    orbmag_mesh%odens(1,:,:,:,adir) = orbmag_mesh%odens(1,:,:,:,adir) +&
+      & REAL(ffac)*fofr(1,:,:,:) - AIMAG(ffac)*fofr(2,:,:,:)
+    orbmag_mesh%odens(2,:,:,:,adir) = orbmag_mesh%odens(2,:,:,:,adir) +&
+      & REAL(ffac)*fofr(2,:,:,:) + AIMAG(ffac)*fofr(1,:,:,:)
+  end do
+
+end subroutine odens_real
+!!***
+
+
 !!****f* ABINIT/local_fermie
 !! NAME
 !! local_fermie
@@ -2874,11 +2927,14 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
 !scalars
  integer :: ncerr,fform
  real(dp) :: cpu,wall,gflops
+ logical :: has_odens
  character(len=500) :: msg
 !arrays
 !*************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
+
+ has_odens = (dtset%orbmag .EQ. 4)
 
  fform = fform_from_ext("ORBMAG.nc")
  ABI_CHECK(fform /= 0, "Cannot find fform associated to ORBMAG.nc")
@@ -2901,7 +2957,7 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
  NCF_CHECK(ncerr)
 
  !! add odens_cplex,n4,n5,n6 only if odens will be output
- if (dtset%orbmag .EQ. 4) then
+ if (has_odens) then
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("n4", orbmag_mesh%n4),&
      nctkdim_t("n5", orbmag_mesh%n5),&
@@ -2918,7 +2974,7 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
  NCF_CHECK(ncerr)
 
  !! odens dimensions, only if output
- if ( dtset%orbmag .EQ. 4) then
+ if (has_odens) then
    ncerr = nctk_def_arrays(ncid, [&
      nctkarr_t("odens_mesh", "dp", "odens_cplex,n4,n5,n6,ndir")])
    NCF_CHECK(ncerr)
@@ -2931,7 +2987,7 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
  NCF_CHECK(nf90_put_var(ncid, vid("orbmag_mesh"), orbmag_mesh%omesh))
  NCF_CHECK(nf90_put_var(ncid, vid("nucdipmom"), orbmag_mesh%nucdipmom))
  NCF_CHECK(nf90_put_var(ncid, vid("lambsig"), orbmag_mesh%lambsig))
- if ( dtset%orbmag .EQ. 4 ) then
+ if ( has_odens ) then
    NCF_CHECK(nf90_put_var(ncid, vid("odens_mesh"), orbmag_mesh%odens))
  end if
 
