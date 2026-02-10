@@ -284,7 +284,7 @@ Converging transport properties requires careful convergence tests both for $\kk
 A dense $\qq$-mesh is needed to obtain **high-quality lifetimes**, whereas a dense $\kk$-sampling
 is needed to have a **good sampling of the electron (hole) pockets**.
 All these studies are explained later and left as an additional excercise.
-In this tutorial, indeed, we need to find some compromise between accuracy and computational cost
+In this tutorial, indeed, we need to find some compromise between precision and computational cost
 hence a single $\kk$-mesh is used in all our examples.
 
 The computation of the dense WFK file is similar to a NSCF band structure computation.
@@ -407,8 +407,8 @@ In this case, using the same sampling for electrons and phonons may be enough to
   since these transitions are not compatible with energy and crystalline-momentum conservation.
   The use of the tetrahedron method is **automatically activated** when [[eph_task]] is set to -4.
   It is possible to change this behaviour by using [[eph_intmeth]] albeit not recommended
-  as the calculation will become significantly slower. If using the Gaussian method, one must 
-  converge the self-energy with respect to [[zcut]] (or [[eph_fsmear]] if [[eph_task]] is set to 1), 
+  as the calculation will become significantly slower. If using the Gaussian method, one must
+  converge the self-energy with respect to [[zcut]] (or [[eph_fsmear]] if [[eph_task]] is set to 1),
   By default, [[zcut]] is set to a very large value.
 
 * The [[sigma_erange]] variable defines the energy window, below the VBM and above the
@@ -429,8 +429,8 @@ We now examine the log file in detail.
 After the standard output of the input variables, the code reports the different parameters
 used for the treatment of the long-range part of the DFPT potentials:
 the **Born effective charges, the high-frequency dielectric constant and the dynamical quadrupole tensor**.
-Make sure to have all of them in order to obtain an
-accurate interpolation of the scattering potentials, see discussion in [[cite:Brunin2020]].
+Make sure to have all of them in order to obtain a
+precise interpolation of the scattering potentials, see discussion in [[cite:Brunin2020]].
 
 !!! important
 
@@ -634,7 +634,7 @@ to reach convergence within 5%.
 !!! tip
 
     As a rule of thumb, a $\qq$-mesh twice as dense in each direction as the $\kk$-mesh,
-    is needed to obtain accurate values for the linewidth and achieve fast convergence
+    is needed to obtain precise values for the linewidth and achieve fast convergence
     of the integrals in $\kk$-space [[cite:Brunin2020b]].
     Possible exceptions are systems with very small effective masses (e.g. GaAs) in which
     a very dense $\kk$-sampling is needed to sample the electron (hole) pockets.

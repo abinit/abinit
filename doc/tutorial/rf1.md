@@ -50,7 +50,7 @@ cp ../trf1_1.abi .
 Note that two pseudopotentials are mentioned in the input file: one
 for the Aluminum atom, and one for the Arsenic atom.
 The first listed in *trf1_1.abi* (for Al) will define the first type of atom of the input file
-(see input variables [[typat]] and [[ntypat]]) and the second (for As) will define the second type of atom. 
+(see input variables [[typat]] and [[ntypat]]) and the second (for As) will define the second type of atom.
 It might be the first time that you encounter this situation (more than one type of atoms) in the
 tutorials, at variance with the first four basic tutorials.
 !!! warning
@@ -75,10 +75,10 @@ The number of steps, [[nstep]], in this example file has been set to 25. You sho
 
 You will work at fixed [[ecut]] (3Ha) and k-point grid, defined by [[kptrlatt]] (the 8x8x8 Monkhorst-Pack grid).
 In *real life* you should do a convergence test with respect to both parameters.
-We postpone the discussion of the accuracy of these choices and
+We postpone the discussion of the precision obtained with these choices and
 the choice of pseudopotential to the end of the
 [fifth section of this tutorial](#5-dfpt-calculation-of-the-effect-of-an-homogeneous-electric-field).
-They give acceptable but not very accurate results such that the running time is reasonable for a tutorial.
+They give acceptable but not very precise results such that the running time is reasonable for a tutorial.
 
 You should make the run (a few seconds):
 
@@ -94,7 +94,7 @@ Note that one obtains the following value for the energy, in the final echo sect
      etotal   -9.7626837450E+00
      etotal   -9.7658722915E+00
 
-However, we will rely later, for the purpose of doing finite differences, on a more accurate (more digits) value of this
+However, we will rely later, for the purpose of doing finite differences, on a more precise (more digits) value of this
 total energy, that can be found about a dozen of lines before this final echo:
 
     total_energy        : -9.76587229147669E+00
@@ -122,7 +122,7 @@ atom along the first axis of the reduced coordinates.
 You can copy the file *\$ABI_TESTS/tutorespfn/Input/trf1_2.abi* in *Work_rf1*.
 This is your input file. You should open it and briefly look at the two
 changes with respect to *trf1_1.abi*:
-the change of [[xred]], and the reading of the wavefunction file, using the [[irdwfk]] input variable. 
+the change of [[xred]], and the reading of the wavefunction file, using the [[irdwfk]] input variable.
 !!! warning
     You need to copy trf1_1o_WFK to trf1_2i_WFK so Abinit can find the wavefunction during the calculation.
 
@@ -294,7 +294,7 @@ Then, you should also open the *trf1_3o_DDB* file, and read the
 corresponding [[help:respfn#ddb|section 6.5]] of the respfn help file.
 
 Finally, the excellent agreement between the finite-difference formula and the
-DFPT approach calls for some accuracy considerations. These can be found in
+DFPT approach calls for some precision considerations. These can be found in
 [[help:respfn#numerical-quality|section 7]] of the respfn help file.
 
 !!! tip
@@ -475,11 +475,11 @@ Much later, the dielectric tensor is given:
        1    4   1    4         9.7501435881        -0.0000000000
        1    4   2    4         0.0000000000        -0.0000000000
        1    4   3    4         0.0000000000        -0.0000000000
-    
+
        2    4   1    4         0.0000000000        -0.0000000000
        2    4   2    4         9.7501435881        -0.0000000000
        2    4   3    4         0.0000000000        -0.0000000000
-    
+
        3    4   1    4         0.0000000000        -0.0000000000
        3    4   2    4         0.0000000000        -0.0000000000
        3    4   3    4         9.7501435881        -0.0000000000
@@ -517,7 +517,7 @@ Finally, the phonon frequencies are computed:
      Phonon frequencies in cm-1    :
     -  5.617914E-01  5.617914E-01  5.617917E-01  3.442606E+02  3.442606E+02
     -  3.442606E+02
-    
+
       Phonon at Gamma, with non-analyticity in the
       direction (cartesian coordinates)  1.00000  0.00000  0.00000
      Phonon energies in Hartree :
@@ -526,7 +526,7 @@ Finally, the phonon frequencies are computed:
      Phonon frequencies in cm-1    :
     -  5.617914E-01  5.617914E-01  8.875575E-01  3.442606E+02  3.442606E+02
     -  3.796470E+02
-    
+
       Phonon at Gamma, with non-analyticity in the
       direction (cartesian coordinates)  0.00000  1.00000  0.00000
      Phonon energies in Hartree :
@@ -535,7 +535,7 @@ Finally, the phonon frequencies are computed:
      Phonon frequencies in cm-1    :
     -  5.617914E-01  5.617917E-01  8.875573E-01  3.442606E+02  3.442606E+02
     -  3.796470E+02
-    
+
       Phonon at Gamma, with non-analyticity in the
       direction (cartesian coordinates)  0.00000  0.00000  1.00000
      Phonon energies in Hartree :
@@ -574,9 +574,9 @@ Still, the agreement of our calculation with the theoretical result is not very 
 better k point sampling (8x8x8), with [[ecut]] = 6 Hartree, reduces the value to 9.89.
 Changing pseudopotentials finally improves the agreement: with the
 much harder *al.psp8* and *as.psp8* pseudopotentials with adequate
-[[ecut]] = 20 Hartree and 8x8x8 Monkhorst-Pack sampling, we reach a value of 9.30. 
+[[ecut]] = 20 Hartree and 8x8x8 Monkhorst-Pack sampling, we reach a value of 9.30.
 Note that we need to change [[ixc]]=-1012 and consider [[nband]]=9, since there is 3 electrons for Al and 15 electrons for As moving in these pseudopotential.
-This information can be found by searching zion in the .abo of any file using the pseudopotentials. 
+This information can be found by searching zion in the .abo of any file using the pseudopotentials.
 This illustrates that the dielectric tensor is a much more sensitive quantity than the others.
 
 ## 6 DFPT calculation of phonon frequencies at non-zero q
