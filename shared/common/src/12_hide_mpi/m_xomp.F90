@@ -6,7 +6,7 @@
 !!  Thin wrappers and tools for OpenMP parallelization.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +47,6 @@ MODULE m_xomp
  public :: xomp_target_is_present
  ! OpenMP 5.1 GPU device routine
  public :: xomp_get_mapped_ptr
-
 
 !----------------------------------------------------------------------
 
@@ -554,7 +553,6 @@ function xomp_get_mapped_ptr(ptr) result(gpu_ptr)
  type(c_ptr),intent(in) :: ptr
  integer :: device_id, rc
  type(c_ptr) :: gpu_ptr
-
 ! *************************************************************************
 
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -570,9 +568,6 @@ function xomp_get_mapped_ptr(ptr) result(gpu_ptr)
  end if
 #else
  gpu_ptr = c_null_ptr
- ! this macro is called before m_errors is compiled
-! ABI_UNUSED(device_id)
-! ABI_UNUSED(rc)
  if (.FALSE.) write(std_out,*)device_id
  if (.FALSE.) write(std_out,*)rc
  ABI_UNUSED_A(ptr)

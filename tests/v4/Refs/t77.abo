@@ -1,8 +1,8 @@
 
-.Version 10.5.8.4 of ANADDB, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.5.8.2 of ANADDB, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  4 Dec 2025.
-- ( at 16h17 )
-  
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h11 )
+
 
 ================================================================================
 
@@ -53,11 +53,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges 
+ Dielectric Tensor and Effective Charges
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges 
+   and impose the ASR on the effective charges
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -73,7 +73,7 @@
        3               2        0.000000        0.000000
        3               3       -0.000004        0.000000
 
- Effective charge tensors after 
+ Effective charge tensors after
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -88,14 +88,14 @@
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.545381697E-03   0.545381697E-03   0.545381697E-03
-     Ionic:                        -0.266168099E-01  -0.266168099E-01  -0.266168099E-01  
+     Ionic:                        -0.266168099E-01  -0.266168099E-01  -0.266168099E-01
      Total:                        -0.260714282E-01  -0.260714282E-01  -0.260714282E-01
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
-     Electronic berry phase:        0.312038837E-01   0.312038837E-01   0.312038837E-01
-     Ionic:                        -0.152287443E+01  -0.152287443E+01  -0.152287443E+01  
-     Total:                        -0.149167055E+01  -0.149167055E+01  -0.149167055E+01
+     Electronic berry phase:        0.312038864E-01   0.312038864E-01   0.312038864E-01
+     Ionic:                        -0.152287456E+01  -0.152287456E+01  -0.152287456E+01
+     Total:                        -0.149167067E+01  -0.149167067E+01  -0.149167067E+01
 
 
 ================================================================================
@@ -103,61 +103,61 @@
 
  Relaxation of the geometry at fixed polarization:
 
- Lambda =        2.810409001       2.810406952       2.810405130
- Value of the energy functional E_1 = -0.987453847E+01
+ Lambda =        2.688757240       2.688757240       2.688757240
+ Value of the energy functional E_1 = -0.988405322E+01
 
  Difference between actual value of the Polarization (C/m^2)
  and the target value:
-       -0.091670545       -0.091670545       -0.091670545
+       -0.091670671       -0.091670671       -0.091670671
 
  Difference between the Hellmann-Feynman forces
  and the forces induced by the electric field
  (cartesian coordinates, hartree/bohr)
-    2.112298361E-02    2.112296821E-02    2.112295452E-02
-   -2.112298361E-02   -2.112296821E-02   -2.112295452E-02
- fmax =     2.112298361E-02
+    2.020865116E-02    2.020865116E-02    2.020865116E-02
+   -2.020865116E-02   -2.020865116E-02   -2.020865116E-02
+ fmax =     2.020865116E-02
 
  Change of cartesian coordinates (delta_xcart):
-       1     151.030140000     151.027520000     151.025190000
-       2     150.815040000     150.812420000     150.810090000
+       1       0.131608360       0.131608140       0.131607970
+       2      -0.086257580      -0.086257797      -0.086257971
 
  New cartesian coordinates (xcart_new):
    xcart
-     0.15103014000000D+03     0.15102752000000D+03     0.15102519000000D+03
-     0.15346917271250D+03     0.15346655271250D+03     0.15346422271250D+03
+     0.13160836000000D+00     0.13160814000000D+00     0.13160797000000D+00
+     0.25678751325000D+01     0.25678749155000D+01     0.25678747415000D+01
 
  New reduced coordinates (xred_new):
    xred
-     0.14225227820065D+02     0.14225721389959D+02     0.14226160328070D+02
-     0.14454966964326D+02     0.14455460534220D+02     0.14455899472331D+02
+     0.12396492965496D-01     0.12396534410297D-01     0.12396566435824D-01
+     0.24187510598154D+00     0.24187514686118D+00     0.24187517964025D+00
 
  Difference between the Hellmann-Feynman stresses
  and the stresses induced by the electric field
  (cartesian coordinates, hartree/bohr^3)
-  diffsig(1) =      0.000250331     diffsig(4) =      0.000109065
-  diffsig(2) =      0.000250331     diffsig(5) =      0.000109065
-  diffsig(3) =      0.000250331     diffsig(6) =      0.000109065
+  diffsig(1) =      0.000250331     diffsig(4) =      0.000104344
+  diffsig(2) =      0.000250331     diffsig(5) =      0.000104344
+  diffsig(3) =      0.000250331     diffsig(6) =      0.000104344
  sigmax =     2.503312060E-04
 
  Induced strain (delta_eta):
-  delta_eta(1) =     -0.027412547     delta_eta(4) =      0.001247188
-  delta_eta(2) =     -0.027412548     delta_eta(5) =      0.001247167
-  delta_eta(3) =     -0.027412548     delta_eta(6) =      0.001247147
+  delta_eta(1) =     -0.027412548     delta_eta(4) =      0.003036901
+  delta_eta(2) =     -0.027412548     delta_eta(5) =      0.003036901
+  delta_eta(3) =     -0.027412548     delta_eta(6) =      0.003036901
 
  New lattice constants (acell_new):
    acell
-    0.73059187214016D+01    0.73059186404658D+01    0.73059185683883D+01
+    0.73126511966612D+01    0.73126511965414D+01    0.73126511965955D+01
 
  New primitive vectors (rprim_new):
    rprim
-    0.90614762109630D-03    0.70710649090614D+00    0.70710649085897D+00
-    0.70710649093811D+00    0.90615550660524D-03    0.70710649081690D+00
-    0.70710649091003D+00    0.70710649083599D+00    0.90616251968003D-03
+    0.22044914554210D-02    0.70710506298357D+00    0.70710506300014D+00
+    0.70710506298626D+00    0.22044914697756D-02    0.70710506299740D+00
+    0.70710506299457D+00    0.70710506298913D+00    0.22044914562233D-02
 -
 - Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
 
 ================================================================================
 
-+Total cpu time      0.027  and wall time      0.027 sec
++Total cpu time      0.043  and wall time      0.043 sec
 
  anaddb : the run completed successfully.

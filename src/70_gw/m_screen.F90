@@ -6,7 +6,7 @@
 !!  Screening object used in the BSE/GWPT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2025 ABINIT group (MG)
+!!  Copyright (C) 2014-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,6 +51,9 @@ module m_screen
  implicit none
 
  private
+
+ public :: em1_symmetrize_ip
+ public :: em1_symmetrize_op
 
  ! Flags defining the content of the %mat buffer in the fgg_t type.
  integer,public,parameter :: MAT_NOTYPE         = 0

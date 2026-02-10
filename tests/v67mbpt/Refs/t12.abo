@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h11 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h13 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t12-t13/t12.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v67mbpt_t12-t13/t12.abi
 - output file    -> t12.abo
 - root for input  files -> t12i
 - root for output files -> t12o
@@ -138,7 +138,7 @@ P           mkmem           2
         optdriver2          3
         optdriver3          4
            ppmfrq1     0.00000000E+00 Hartree
-           ppmfrq2     6.06363869E-01 Hartree
+           ppmfrq2     6.06363816E-01 Hartree
            ppmfrq3     0.00000000E+00 Hartree
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
@@ -219,8 +219,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/18ar.revpbe
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -314,7 +314,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  8.000000000000  8.000000000000  8.000000000000 bohr
-              =  4.233417668720  4.233417668720  4.233417668720 angstroms
+              =  4.233417684352  4.233417684352  4.233417684352 angstroms
  prteigrs : about to open file t12o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04442   Average Vxc (hartree)=  -0.38078
  Eigenvalues (hartree) for nkpt=   2  k points:
@@ -334,7 +334,7 @@ psp_core            :  1.04469034002258E+00
 local_psp           : -1.17174881592611E+01
 non_local_psp       :  8.87458329901809E-01
 total_energy        : -2.11337959995240E+01
-total_energy_eV     : -5.75079835361981E+02
+total_energy_eV     : -5.75079885786816E+02
 band_energy         : -1.88607422924117E+00
 ...
 
@@ -345,9 +345,9 @@ band_energy         : -1.88607422924117E+00
   sigma(3 3)=  1.98364445E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.8361E+00 GPa]
-- sigma(1 1)=  5.83608249E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  5.83608249E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.83608249E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  5.83608347E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.83608347E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.83608347E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -455,7 +455,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
         0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
 
     2   0.000  -1.778   0.324  -0.216  -0.506  -0.216  -0.506  -0.216  -0.506
-       -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000   0.000   0.000
+       -0.000   0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =   2.3934
@@ -545,7 +545,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
         0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000
 
     2   0.077  -1.967   0.098   0.175  -0.511  -0.273  -0.434  -0.273  -0.434
-        0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000  -0.000   0.000
+        0.000   0.000  -0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    4 :     46.33  [%]
 
@@ -567,7 +567,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
         0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
     2  -0.131  -2.042  -0.125  -0.205  -0.438   0.177  -0.463  -0.200   0.286
-        0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000
+        0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000   0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    5 :     24.93  [%]
 
@@ -589,7 +589,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
         0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
     2  -0.345  -2.064  -0.144  -0.254  -0.408   0.388  -0.446  -0.254  -0.408
-        0.000   0.000  -0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000
+        0.000   0.000  -0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     25.51  [%]
 
@@ -778,7 +778,7 @@ data: !SigmaeeData |
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
 .  kptgw no:  1; Maximum DeltaE = (   4.269  -0.000) for band index:  7
-.  kptgw no:  2; Maximum DeltaE = (   4.003   0.000) for band index:  6
+.  kptgw no:  2; Maximum DeltaE = (   4.003  -0.000) for band index:  6
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -847,7 +847,7 @@ P           mkmem           2
         optdriver2          3
         optdriver3          4
            ppmfrq1     0.00000000E+00 Hartree
-           ppmfrq2     6.06363869E-01 Hartree
+           ppmfrq2     6.06363816E-01 Hartree
            ppmfrq3     0.00000000E+00 Hartree
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
@@ -975,10 +975,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.6
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.0  wall=          1.6
++Overall time at end (sec) : cpu=          1.1  wall=          1.2

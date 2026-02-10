@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2025 ABINIT group (XG, MG, FJ, DCA, MT)
+!! Copyright (C) 1992-2026 ABINIT group (XG, MG, FJ, DCA, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -121,6 +121,7 @@ type, public :: dataset_type
  integer :: cineb_start
  integer :: cprj_in_memory
  integer :: cprj_update_lvl
+ integer :: cwfs_wouth = 0
 
 !D
  integer :: delayperm
@@ -453,8 +454,8 @@ type, public :: dataset_type
  integer :: nbdblock
  integer :: nbdbuf
  integer :: nberry
- integer :: nb_protected = 0
- integer :: nb_per_slice = 2
+ !integer :: nb_protected = 0
+ !integer :: nb_per_slice = 2
  integer :: nc_xccc_gspace = 0
  integer :: nconeq
  integer :: ncout = 1
@@ -662,8 +663,9 @@ type, public :: dataset_type
  integer :: rmm_diis_savemem = 0
  integer :: rcpaw_frocc = 0
  integer :: rcpaw_updatetnc
- integer :: rcpaw_orbshift = 0
- integer :: rcpaw_potshift = 0
+ integer :: rcpaw_elin = 1
+ integer :: rcpaw_tpaw = 1
+ integer :: rcpaw_vhtnzc = 1
 !S
  integer :: sigma_nshiftk = 1      ! Number of shifts in k-mesh for Sigma_{nk}.
  integer :: signperm
@@ -883,6 +885,7 @@ type, public :: dataset_type
  real(dp) :: dmft_yukawa_epsilon
  real(dp) :: dmft_yukawa_lambda
  real(dp) :: dmftqmc_n
+ real(dp) :: dmftctqmc_chains
  real(dp) :: dosdeltae
  real(dp) :: dtion
  real(dp) :: dtele
@@ -894,7 +897,7 @@ type, public :: dataset_type
  real(dp) :: ecutwfn
  real(dp) :: effmass_free
  real(dp) :: efmas_deg_tol
- real(dp) :: elph2_imagden
+ real(dp) :: elph2_imagden = 0.1_dp * eV_Ha
  real(dp) :: eph_ecutosc = zero
  real(dp) :: eph_extrael = zero
  real(dp) :: eph_fermie = zero
@@ -1588,6 +1591,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%cineb_start        = dtin%cineb_start
  dtout%cprj_in_memory     = dtin%cprj_in_memory
  dtout%cprj_update_lvl    = dtin%cprj_update_lvl
+ dtout%cwfs_wouth         = dtin%cwfs_wouth
  dtout%delayperm          = dtin%delayperm
  dtout%diismemory         = dtin%diismemory
  dtout%dipquad            = dtin%dipquad
@@ -1670,6 +1674,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmftctqmc_meas     = dtin%dmftctqmc_meas
  dtout%dmftctqmc_mov      = dtin%dmftctqmc_mov
  dtout%dmftctqmc_mrka     = dtin%dmftctqmc_mrka
+ dtout%dmftctqmc_chains = dtin%dmftctqmc_chains
  dtout%dmftctqmc_order    = dtin%dmftctqmc_order
  dtout%dmftqmc_l          = dtin%dmftqmc_l
  dtout%dmftqmc_n          = dtin%dmftqmc_n
@@ -2004,8 +2009,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nbdbuf             = dtin%nbdbuf
  dtout%nbandhf            = dtin%nbandhf
  dtout%nberry             = dtin%nberry
- dtout%nb_protected       = dtin%nb_protected
- dtout%nb_per_slice       = dtin%nb_per_slice
+ !dtout%nb_protected       = dtin%nb_protected
+ !dtout%nb_per_slice       = dtin%nb_per_slice
  dtout%nc_xccc_gspace     = dtin%nc_xccc_gspace
  dtout%nbandkss           = dtin%nbandkss
  dtout%nconeq             = dtin%nconeq
@@ -2188,8 +2193,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 ! dtout%rcpaw_nfrpaw       = dtin%rcpaw_nfrpaw
 ! dtout%rcpaw_nfrtnc       = dtin%rcpaw_nfrtnc
  dtout%rcpaw_updatetnc    = dtin%rcpaw_updatetnc
- dtout%rcpaw_orbshift     = dtin%rcpaw_orbshift
- dtout%rcpaw_potshift     = dtin%rcpaw_potshift
+ dtout%rcpaw_elin         = dtin%rcpaw_elin
+ dtout%rcpaw_tpaw         = dtin%rcpaw_tpaw
+ dtout%rcpaw_vhtnzc       = dtin%rcpaw_vhtnzc
  dtout%recgratio          = dtin%recgratio
  dtout%recnpath           = dtin%recnpath
  dtout%recnrec            = dtin%recnrec
@@ -3706,7 +3712,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chebfi_oracle'
  list_vars=trim(list_vars)//' chkdilatmx chkexit chkparal chkprim'
  list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind'
- list_vars=trim(list_vars)//' cprj_in_memory cprj_update_lvl cpus cpum cpuh'
+ list_vars=trim(list_vars)//' cprj_in_memory cprj_update_lvl cpus cpum cpuh cwfs_wouth'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
@@ -3734,7 +3740,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmftbandf dmftbandi dmftcheck dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
  list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_localprop dmftctqmc_meas dmftctqmc_mov'
- list_vars=trim(list_vars)//' dmftctqmc_mrka dmftctqmc_order'
+ list_vars=trim(list_vars)//' dmftctqmc_mrka dmftctqmc_chains dmftctqmc_order'
  list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm'
  list_vars=trim(list_vars)//' dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qdamp dvdb_rspace_cell'
@@ -3855,7 +3861,7 @@ subroutine chkvars(string)
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz natnd'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'
- list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nb_protected nb_per_slice nconeq ncout'
+ list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nconeq ncout'  ! nb_protected nb_per_slice
  list_vars=trim(list_vars)//' nc_xccc_gspace nctime ndivk ndivsm ndtset neb_algo neb_cell_algo neb_spring nefield'
  list_vars=trim(list_vars)//' nfreqim nfreqim_conv nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
@@ -3913,7 +3919,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' rf2atpol rf2dir rf2elfd rf2phon rf2strs rf2magat'
  list_vars=trim(list_vars)//' rf3atpol rf3dir rf3elfd rf3phon'
  list_vars=trim(list_vars)//' rmm_diis rmm_diis_savemem'
- list_vars=trim(list_vars)//' rcpaw_frocc rcpaw_orbshift rcpaw_potshift rcpaw_rctypat rcpaw_sc rcpaw_tolnc rcpaw_updatepaw rcpaw_updatetnc'
+ list_vars=trim(list_vars)//' rcpaw_frocc rcpaw_elin rcpaw_tpaw rcpaw_vhtnzc rcpaw_rctypat'
+ list_vars=trim(list_vars)//' rcpaw_sc rcpaw_tolnc rcpaw_updatepaw rcpaw_updatetnc'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' sel_EFS'

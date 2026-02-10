@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2025 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
+!!  Copyright (C) 1999-2026 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -251,7 +251,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  real(dp),allocatable :: gsc(:,:),gscq(:,:),gvnlx1(:,:),gvnlxc(:,:)
  real(dp),pointer :: kinpw1(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:),cwaveprj0(:,:),cwaveprj1(:,:)
-
 ! *********************************************************************
 
  DBG_ENTER('COLL')
@@ -598,7 +597,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        enl0_k(iband)=energy_factor*scprod
 
        if(ipert/=natom+10.and.ipert/=natom+11) then
-          !        <G|Vnl1|Cnk> is contained in gvnlx1 (with cwave1)
+          ! <G|Vnl1|Cnk> is contained in gvnlx1 (with cwave1)
           ! gvnlx1 contains at this stage first order kinetic energy, first order nuclear dipole,
           ! first order vxctau1
          call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwave1,gvnlx1,mpi_enreg%me_g0,&
@@ -830,7 +829,6 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,e
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwcorr(:,:)
  type(pawcprj_type) :: cwaveprj1_corr(natom,nspinor*usepaw)
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
