@@ -584,7 +584,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
      call orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph3d)
 
      ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
      call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,&
@@ -771,6 +771,19 @@ subroutine orbmag_mpisum(omag,nproc,spaceComm)
       call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
       omag%orbmag_terms(1:omag%mband,1:omag%nsppol,1:3,1:orbmag_nterms)=&
         & reshape(buffer2,(/omag%mband,omag%nsppol,3,orbmag_nterms/))
+      ABI_FREE(buffer1)
+      ABI_FREE(buffer2)
+    end if
+    if (allocated(omag%odens)) then
+      buff_size=size(omag%odens)
+      ABI_MALLOC(buffer1,(buff_size))
+      ABI_MALLOC(buffer2,(buff_size))
+      buffer1=zero;buffer2=zero
+      buffer1(1:buff_size) = &
+        & reshape(omag%odens,(/2*omag%n4*omag%n5*omag%n6*3/))
+      call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
+      omag%odens(1:2,1:omag%n4,1:omag%n5,1:omag%n6,1:3)=&
+        & reshape(buffer2,(/2,omag%n4,omag%n5,omag%n6,3/))
       ABI_FREE(buffer1)
       ABI_FREE(buffer2)
     end if
@@ -1077,7 +1090,7 @@ end subroutine orbmag_nl_k
 !! SOURCE
 
 subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh)
+    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph3d)
 
   !Arguments ------------------------------------
   !scalars
@@ -1091,14 +1104,15 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: eig_k(nband_k),gcg1_k(2,mcgk,3)
+  real(dp),intent(in) :: ph3d(2,npw_k,dtset%natom)
   type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,mcprjk,3)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,cpopt,fourwf_cplex,fourwf_option,gdir,ndat
-  integer :: nn,npwsp,sij_opt,tim_fourwf,tim_getghc,type_calc
+  integer :: adir,bdir,cpopt,fourwf_cplex,fourwf_option,gdir,iatom,ipw,ndat
+  integer :: nn,npwsp,sij_opt,t_atom,tim_fourwf,tim_getghc,type_calc
   real(dp) :: bdoti,bdotr,epsabg,lams,mdoti,mdotr,weight_i,weight_r
-  complex(dp) :: prefac_b,prefac_m
+  complex(dp) :: bracg,gdotr,odensfac,prefac_b,prefac_m
   logical :: need_odensity
   !arrays
   real(dp),allocatable :: bra(:,:),denpot(:,:,:),fofgout(:,:),fofr(:,:,:,:)
@@ -1129,8 +1143,14 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
  
  if (need_odensity) then
    ABI_MALLOC(fofr,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
+   ! need atom index with dipole for ph3d use below
+   do iatom = 1, dtset%natom
+     if ( ANY(ABS(dtset%nucdipmom(1:3,iatom))>tol8) ) then
+       t_atom = iatom
+       exit
+     end if
+   end do
  end if
-
 
  do nn = 1, nband_k
 
@@ -1180,8 +1200,16 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
          b1(adir) = b1(adir) - two* prefac_b*CMPLX(bdotr,bdoti)
          
          if (need_odensity) then
-           orbmag_mesh%odens(1,:,:,:,adir) = orbmag_mesh%odens(1,:,:,:,adir) + half*c2*fofr(2,:,:,:)
-           orbmag_mesh%odens(2,:,:,:,adir) = orbmag_mesh%odens(2,:,:,:,adir) - half*c2*fofr(1,:,:,:)
+           do ipw = 1, npw_k
+             gdotr=CMPLX(ph3d(1,ipw,t_atom),ph3d(2,ipw,t_atom))
+             bracg=CMPLX(bra(1,ipw),bra(2,ipw))
+             odensfac=CONJG(gdotr)*CONJG(bracg)*prefac_m
+
+             orbmag_mesh%odens(1,:,:,:,adir) = orbmag_mesh%odens(1,:,:,:,adir) + &
+               & REAL(odensfac)*fofr(1,:,:,:) - AIMAG(odensfac)*fofr(2,:,:,:)
+             orbmag_mesh%odens(2,:,:,:,adir) = orbmag_mesh%odens(2,:,:,:,adir) + &
+               & AIMAG(odensfac)*fofr(1,:,:,:) + REAL(odensfac)*fofr(2,:,:,:)
+           end do
          end if
        
        end do ! adir
