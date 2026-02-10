@@ -7,7 +7,7 @@
 !!  spherical harmonics Ylm (resp. Slm) (and gradients).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2025 ABINIT group (MT, FJ, NH, TRangel)
+!! Copyright (C) 2013-2026 ABINIT group (MT, FJ, NH, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

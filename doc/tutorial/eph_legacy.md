@@ -114,12 +114,12 @@ The value of [[acell]] is fixed to a rounded value from experiment.
 It, too, should be converged to get physical results (see [Tutorial 3](/tutorial/base3)).
 
 Note that the value of 1.0E-14 for [[tolwfr]] is tight, and should be even
-lower (down to 1.0E-20 or even 1.0E-22) for accurate results. This is because the wavefunctions
+lower (down to 1.0E-20 or even 1.0E-22) for precise results. This is because the wavefunctions
 will be used later explicitly in the matrix elements for ANADDB, as opposed to
 only energy values or densities, which are averages of the wavefunctions and
 eigenenergies over k-points and bands. Electron-phonon quantities are delicate
 sums of a few of these small matrix elements (those near the Fermi surface),
-so each matrix element must be accurate. You can however set [[prtwf]] to 0 in
+so each matrix element must be precise. You can however set [[prtwf]] to 0 in
 the phonon calculations, and avoid saving huge perturbed wavefunction files to
 disk (you only need to keep the ground state wave functions, with prtwf1 1).
 

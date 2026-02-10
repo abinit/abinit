@@ -7,7 +7,7 @@
 !! the irreducible representations associated to electronic eigenstates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -285,7 +285,6 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  !complex(dp),allocatable :: her_test(:) !,mat_test(:,:)
  complex(dp),allocatable :: phase_mkt(:)
  type(point_group_t) :: Ptg
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -938,11 +937,9 @@ end subroutine esymm_print
 subroutine esymm_free_0D(esymm)
 
 !Arguments ------------------------------------
-!scalars
  type(esymm_t),intent(inout) :: esymm
 
 !Local variables ------------------------------
-!scalars
  integer :: ii
 ! *************************************************************************
 
@@ -985,7 +982,6 @@ end subroutine esymm_free_0D
 subroutine esymm_free_2D(esymm)
 
 !Arguments ------------------------------------
-!scalars
  type(esymm_t),intent(inout) :: esymm(:,:)
 
 !Local variables ------------------------------
@@ -1052,9 +1048,9 @@ subroutine esymm_finalize(esymm,prtvol)
  if (.not.esymm%has_chtabs) then
 
    write(msg,'(5a)')&
-&    "Reference character table not available. ",ch10,&
-&    "Symmetry analysis not available. Using heuristic method to classify the states.",ch10,&
-&    "It might not work, especially if accidental degeneracies are present."
+    "Reference character table not available. ",ch10,&
+    "Symmetry analysis not available. Using heuristic method to classify the states.",ch10,&
+    "It might not work, especially if accidental degeneracies are present."
    ABI_WARNING(msg)
    !
    ! The simplest thing we can do here is using the calculated matrices to get the

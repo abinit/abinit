@@ -6,7 +6,7 @@
 !!  This module contains procedures to calculate the oscillator matrix elements used in the GW code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (MG)
+!! Copyright (C) 2008-2026 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -149,7 +149,7 @@ subroutine rho_tw_g(nspinor, npwvec, nr, ndat, ngfft, map2sphere, use_padfft, ig
      CASE (0)
        ! Need results on the full FFT box thus cannot use zero-padded FFT.
        call plan%init(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, gpu_option_0)
-       call plan%execute(u12prod, -1)
+       call plan%execute(u12prod, -1, ndat)
        call plan%free()
        if (dim_rtwg == 1) then
          rhotwg(1:npwvec) = rhotwg(1:npwvec) + u12prod
@@ -165,7 +165,7 @@ subroutine rho_tw_g(nspinor, npwvec, nr, ndat, ngfft, map2sphere, use_padfft, ig
          call fftpad(u12prod, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, -1, gbound)
        else
          call plan%init(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, gpu_option_0)
-         call plan%execute(u12prod, -1)
+         call plan%execute(u12prod, -1, ndat)
          call plan%free()
        end if
 
@@ -272,7 +272,7 @@ subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0,
  CASE (0)
    ! Need results on the full FFT box thus cannot use zero-padded FFT.
    call plan%init(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, gpu_option_0)
-   call plan%execute(u12prod, -1)
+   call plan%execute(u12prod, -1, ndat)
    call plan%free()
    call xcopy(nr*ndat,u12prod,1,usug,1)
 
@@ -284,7 +284,7 @@ subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0,
      call fftpad(u12prod,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
    else
      call plan%init(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, gpu_option_0)
-     call plan%execute(u12prod, -1)
+     call plan%execute(u12prod, -1, ndat)
      call plan%free()
    end if
 
@@ -597,7 +597,7 @@ subroutine calc_wfwfg(ktabr_k, ktabi_k, spinrot, nr, nspinor, ngfft_gw, wfr_jb, 
 
  ! Transform to Fourier space (result in wfg2_jk)
  call plan%init(nspinor, ngfft_gw(1:3), ngfft_gw(1:3), ngfft_gw(7), fftcache0, gpu_option_0)
- call plan%execute(wfr2_dpcplx, wfg2_jk, -1)
+ call plan%execute(wfr2_dpcplx, wfg2_jk, -1, nspinor)
  call plan%free()
  ABI_FREE(wfr2_dpcplx)
 

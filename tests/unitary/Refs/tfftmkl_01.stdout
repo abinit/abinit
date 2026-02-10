@@ -1,8 +1,8 @@
 
-.Version 8.0.4 of FFTPROF 
-.(MPI version, prepared for a x86_64_linux_intel15.0 computer) 
+.Version 10.5.8.5 of FFTPROF, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_intel2025.0 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group . 
  FFTPROF comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -34,10 +34,10 @@
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
  
  ==== FFT setup for fftalg 512 ====
-  FFT mesh divisions ........................   100  100  100
-  Augmented FFT divisions ...................   101  101  100
-  FFT algorithm .............................   512
-  FFT cache size ............................    16
+-  FFT mesh divisions ........................   100  100  100
+-  Augmented FFT divisions ...................   101  101  100
+-  FFT algorithm .............................   512
+-  FFT cache size ............................    16
 === FFT Unit Tests ===
 fftbox_utests with fftalg = 512, ndat = 1, nthreads = 1
 DFTI c2c_ip_spc :  OK

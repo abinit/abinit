@@ -530,7 +530,7 @@ It is also worth to change the stopping criterion for the SCF cycle, in order
 to be sure that the forces generated for each trial interatomic distance are
 sufficiently converged. Indeed, the value used for [[toldfe]], namely 1.0d-6,
 might be sufficient for total energy calculations, but definitely not for the
-accurate computation of other properties. So, change [[toldfe]] in [[tolrff]],
+precise computation of other properties. So, change [[toldfe]] in [[tolrff]],
 and set the latter input variable to 0.02.
 The input file *tbase1_3.abi* is an example of file that will do the job
 
@@ -753,7 +753,7 @@ These are:
 
 We used 10 Ha as cut-off energy, a 10x10x10 Bohr^3 supercell,
 the LDA (=local-density approximation, as well as the local-spin-density approximation in the spin-polarized case) in the
-Perdew-Wang parametrization ([[ixc]]=-1012), and a LDA pseudopotential from the pseudodojo <http://www.pseudo-dojo.org/>,
+Perdew-Wang parametrization ([[ixc]]=-1012), and a LDA pseudopotential from the pseudodojo <https://www.pseudo-dojo.org/>,
 copied in the ABINIT directory $ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8 . You might have a look at
 the file $ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8/README.md to learn more about pseudopotentials.
 

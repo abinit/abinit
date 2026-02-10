@@ -1,0 +1,80 @@
+# ZPR computation from GSTORE file. Should reproduce the results of teph4zpr_7.abi
+# in which a different routine that compute the e-ph matrix elements on-the-fly is used.
+
+ ndtset 2
+ #ndtset 1 jdtset 2
+ nband 20
+
+ ngkpt 4 4 4    eph_ngqpt_fine 4 4 4    getwfk_filepath "teph4zpr_3o_DS1_WFK"
+ #ngkpt 8 8 8    eph_ngqpt_fine 8 8 8    getwfk_filepath "teph4zpr_3o_DS2_WFK"
+ #ngkpt 12 12 12 eph_ngqpt_fine 12 12 12 getwfk_filepath "teph4zpr_3o_DS3_WFK"
+
+ getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
+
+ getddb_filepath "teph4zpr_1_DDB"
+ ddb_ngqpt 4 4 4
+ getdvdb_filepath "teph4zpr_2_DVDB"
+
+ ecut 35.0
+
+ nshiftk 1
+ shiftk 0 0 0
+
+ mixprec 1 boxcutmin 1.1   # Important to speedup the calculation and reduce memory.
+
+## DATASET 1 (GSTORE computation)
+ optdriver1 7               # Enter EPH code.
+ eph_task1 11               # GSTORE computation
+ gstore_kfilter1 "qprange"  # Compute g(k,q) only for |nk> at the band edges
+ gstore_use_lgk1 1          # Only q-points in the IBZ_k
+ #gstore_use_lgk1 0
+
+## DATASET 2 (ZPR computation from GSTORE).
+ optdriver2 7              # Enter EPH code.
+ eph_task2 24              # SIGMAPH from GSTORE
+ getgstore_filepath2  "teph4zpr_10o_DS1_GSTORE.nc"
+
+ # Activate Sterhneimer
+ eph_stern2 1
+ #eph_stern2 0
+ tolwfr2 1e-16
+ nline2  200
+
+ nfreqsp2 201
+ freqspmax2 2 eV
+ prtvol2 1  # This is for the automatic tests. Do not use in production!
+
+ #eph_frohl_ntheta 0       # Disable spherical integration of FM integrand in the microzone around Gamma.
+ #                         # to preserve previous behaviour.
+ tmesh2 0 100 4            # [start, step, num_T] in K
+
+ prtphdos 0       # Disable computation of PHDOS to save some time
+
+ zcut 0.01 eV
+
+ pp_dirpath = "$ABI_PSPDIR"
+ pseudos = "O.psp8, Mg-sp-gw.psp8"
+
+ structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain =  teph4zpr_1.abi, teph4zpr_2.abi, teph4zpr_3.abi, teph4zpr_4.abi,
+#%%               teph4zpr_5.abi, teph4zpr_6.abi, teph4zpr_7.abi, teph4zpr_8.abi, teph4zpr_9.abi, teph4zpr_10.abi
+#%% [files]
+#%% use_git_submodule = MgO_eph_zpr
+#%% files_to_test =
+#%%   teph4zpr_10.abo, tolnlines= 180, tolabs= 0.09, tolrel= 0.1
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH, GSTORE
+#%% description =
+#%%   ZPR computation from GSTORE file. Should reproduce the results of teph4zpr_7.abi
+#%%   in which a different routine that computes the e-ph matrix elements on-the-fly is used.
+#%%<END TEST_INFO>

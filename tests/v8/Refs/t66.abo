@@ -1,8 +1,8 @@
 
-.Version 10.5.8.5 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  8 Feb 2026.
-- ( at 21h01 )
-  
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v8_t66/t66.abi
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h15 )
+
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v8_t66/t66.abi
 - output file    -> t66.abo
 - root for input  files -> t66i
 - root for output files -> t66o
@@ -249,8 +249,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12179
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -377,7 +377,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.420000000000  5.420000000000  5.420000000000 bohr
-              =  2.868140470558  2.868140470558  2.868140470558 angstroms
+              =  2.868140481148  2.868140481148  2.868140481148 angstroms
  prteigrs : about to open file t66o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.26091   Average Vxc (hartree)=  -0.51312
  Magnetization (Bohr magneton)=  3.32518413E+00
@@ -418,7 +418,7 @@ non_local_psp       : -2.87947870449299E+01
 internal            : -2.47841035509746E+01
 '-kT*entropy'       : -1.28641841106932E-02
 total_energy        : -2.47969677350853E+01
-total_energy_eV     : -6.74759807603441E+02
+total_energy_eV     : -6.74759866768535E+02
 band_energy         : -2.87194765927993E+00
 ...
 
@@ -429,9 +429,9 @@ band_energy         : -2.87194765927993E+00
   sigma(3 3)=  8.98033673E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.6421E+02 GPa]
-- sigma(1 1)=  2.64210584E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  2.64210584E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.64210584E+02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  2.64210629E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  2.64210629E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.64210629E+02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -465,7 +465,7 @@ meta: {optdriver: 1, rfmagn: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <== 
+ ==>  initialize data related to q vector <==
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 3    ipert=   6
@@ -474,7 +474,6 @@ meta: {optdriver: 1, rfmagn: 1, }
 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
- Perturbation : homogeneous spin magnetic field along direction   3
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
 
@@ -494,97 +493,89 @@ tolerances: {toldfe: 1.00E-06, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1  -7.4245618182031     -7.425E+00 4.898E-32 7.265E+03 1.392E+01 1.392E+01
- ETOT  2 -0.95580457764710      6.469E+00 1.358E-03 1.388E+04 1.237E+00 1.515E+01
- ETOT  3  -13.720055743855     -1.276E+01 1.303E-03 1.174E+03 4.540E+00 1.969E+01
- ETOT  4  -15.031180105540     -1.311E+00 1.161E-04 6.635E+00 2.816E+00 2.251E+01
- ETOT  5  -15.088117928201     -5.694E-02 2.222E-05 8.231E-02 1.371E+00 2.388E+01
- ETOT  6  -15.088601788862     -4.839E-04 5.407E-07 9.984E-05 1.292E-01 2.401E+01
- ETOT  7  -15.088602265592     -4.767E-07 5.031E-08 6.622E-07 4.029E-03 2.401E+01
- ETOT  8  -15.088602266543     -9.509E-10 1.861E-09 7.020E-10 1.332E-04 2.401E+01
+-ETOT  1   12.142549007517      1.214E+01 4.898E-32 7.265E+03 1.392E+01 1.392E+01
+ ETOT  2   17.562182618981      5.420E+00 1.358E-03 1.388E+04 1.237E+00 1.515E+01
+ ETOT  3   12.291330265475     -5.271E+00 1.303E-03 1.174E+03 4.540E+00 1.969E+01
+ ETOT  4   13.719978999541      1.429E+00 1.161E-04 6.635E+00 2.816E+00 2.251E+01
+ ETOT  5   14.967390527237      1.247E+00 2.222E-05 8.231E-02 1.371E+00 2.388E+01
+ ETOT  6   15.084638356200      1.172E-01 5.407E-07 9.984E-05 1.292E-01 2.401E+01
+ ETOT  7   15.088474508055      3.836E-03 5.031E-08 6.622E-07 4.029E-03 2.401E+01
+ ETOT  8   15.088595886936      1.214E-04 1.861E-09 7.020E-10 1.332E-04 2.401E+01
+ ETOT  9   15.088601729750      5.843E-06 3.014E-09 1.571E-12 6.292E-06 2.401E+01
+ ETOT 10   15.088602269874      5.401E-07 4.547E-10 1.314E-14 5.703E-07 2.401E+01
+ ETOT 11   15.088602270839      9.651E-10 7.403E-10 2.017E-15 2.175E-09 2.401E+01
 
- At SCF step    8, etot is converged : 
-  for the second time, diff in etot=  9.509E-10 < toldfe=  1.000E-06
+ At SCF step   11, etot is converged :
+  for the second time, diff in etot=  9.651E-10 < toldfe=  1.000E-06
+
+ ---------------------------------------------------------------------------
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1 Fe   2.00000    12.849995   -11.164981      1.685014    24.014977
+    1 Fe   2.00000    12.849999   -11.164985      1.685014    24.014983
  ------------------------------------------------------------------------------------------------------------
-  Sum:                12.849995   -11.164981      1.685014    24.014977
- Total magnetization (from the atomic spheres):               24.014977
- Total magnetization (exact up - dn):                         30.177198
+  Sum:                12.849999   -11.164985      1.685014    24.014983
+ Total magnetization (from the atomic spheres):               24.014983
+ Total magnetization (exact up - dn):                         30.177205
 
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
  dfpt_looppert: DFPT cycle converged with prtwf=-1. Will skip output of the 1st-order WFK file.
- Mean square residual over all n,k,spin=   11.785E-12; max=  18.608E-10
+ Mean square residual over all n,k,spin=   23.508E-13; max=  74.026E-11
 
- Seven components of 2nd-order total energy (hartree) are
+ Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   1.28559398E-01 eigvalue=   7.57408880E-03  local=  -6.76904108E-03
+     kin0=   1.28559452E-01 eigvalue=   7.57409118E-03  local=  -6.76904161E-03
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-    Hspinfield=  -3.01771982E+01  Hartree=   1.99038703E+00     xc=  -1.52507919E+01
+ loc psp =   0.00000000E+00  Hartree=   1.99038581E+00     xc=  -1.52507994E+01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   2.82485703E+01     enl0=  -2.89340537E-02   enl1=   0.00000000E+00
+    edocc=   2.82485854E+01     enl0=  -2.89340622E-02   enl1=   0.00000000E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -1.50886023E+01
+   erelax=   1.50886023E+01
 ================================================================================
 
  ---- first-order wavefunction calculations are completed ----
 
 
  ==> Compute Derivative Database <==
-  
+
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-  
+
    1    1   2    3         0.0000000000         0.0000000000
    1    1   3    3         0.0000000000         0.0000000000
-   1    1   3    6        -0.0000001169         0.0000000000
-  
+
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
-   2    1   3    6         0.0000001470         0.0000000000
-  
+
    3    1   1    3         0.0000000000         0.0000000000
    3    1   2    3         0.0000000000         0.0000000000
-   3    1   3    6         0.0000001222         0.0000000000
-  
+
    1    3   2    1         0.0000000000         0.0000000000
    1    3   3    1         0.0000000000         0.0000000000
-  
+
    2    3   1    1         0.0000000000         0.0000000000
    2    3   3    1         0.0000000000         0.0000000000
-  
+
    3    3   1    1         0.0000000000         0.0000000000
    3    3   2    1         0.0000000000         0.0000000000
-  
-   3    6   1    1        -0.0000001169         0.0000000000
-   3    6   2    1         0.0000001470         0.0000000000
-   3    6   3    1         0.0000001222         0.0000000000
-  
-  
-  Magnetic susceptibility, in cartesian coordinates
-  (from uniform spin field response)
-     j1       j2             matrix element
-  dir pert dir pert     real part    imaginary part
-  
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
-  
+
  -outvars: echo values of variables after computation  --------
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
               amu      5.58470000E+01
              ecut      2.00000000E+01 Hartree
            etotal1    -2.4796967735E+01
-           etotal2    -1.5088602267E+01
+           etotal2     1.5088602271E+01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         512
@@ -769,7 +760,7 @@ P          mk1mem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -781,12 +772,12 @@ P          mk1mem           8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
+- A.Martin,
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- Note that a version of this paper, that is not formatted for J. Chem. Phys
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -804,7 +795,7 @@ P          mk1mem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
@@ -819,15 +810,15 @@ P          mk1mem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
 - is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          6.3  wall=          6.4
+- Proc.   0 individual time (sec): cpu=          7.1  wall=          7.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.3  wall=          6.4
++Overall time at end (sec) : cpu=          7.1  wall=          7.2

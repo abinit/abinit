@@ -1,8 +1,8 @@
 
-.Version 10.5.6.9 of ABINIT, released Sep 2025.
-.(MPI version, prepared for a aarch64_darwin23.6.0_gnu14.2 computer)
+.Version 10.7.0.2 of ABINIT, released Dec 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -30,7 +30,7 @@
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       2
--    mband =           9        mffmem =           1         mkmem =           3
+-    mband =          12        mffmem =           1         mkmem =           3
        mpw =         553          nfft =       27000          nkpt =           3
 ================================================================================
 P This job should need less than                       9.561 Mbytes of memory.
@@ -43,7 +43,7 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
@@ -53,9 +53,9 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
               amu      1.20110000E+01
         ddb_ngqpt        2    2    2
              ecut      4.50000000E+01 Hartree
+        eph_stern           1
          eph_task          24
 -          fftalg         312
-   gstore_use_lgk        1
            istwfk        2    3    7
               ixc          11
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -65,13 +65,14 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
           kptrlen      9.54735576E+00
 P           mkmem           3
             natom           2
-            nband           9
+            nband          12
             ngfft          30      30      30
              nkpt           3
+            nline         100
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver           7
        prtphbands           0
          prtphdos           0
@@ -132,12 +133,12 @@ P           mkmem           3
             typat      1  1
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.9311883380E-01  8.9311883380E-01  8.9311883380E-01
+                       8.9311883710E-01  8.9311883710E-01  8.9311883710E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.6877500000E+00  1.6877500000E+00  1.6877500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
-             zcut      3.67493254E-04 Hartree
+             zcut      3.67493222E-04 Hartree
             znucl        6.00000
 
 ================================================================================
@@ -151,7 +152,7 @@ P           mkmem           3
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 3, mband: 9, nsppol: 1, nspinor: 1, nspden: 1, mpw: 553, }
+dimensions: {natom: 2, nkpt: 3, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 553, }
 cutoff_energies: {ecut:  45.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 7, eph_task: 24, }
@@ -229,7 +230,12 @@ meta: {optdriver: 7, eph_task: 24, }
    6.90155232E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+
 - Reading e-ph matrix elements from: t04o_GSTORE.nc
+ Asking for with_cplex: 1
+ Asking for with_gmode: phonon
+ Asking for gvals_name: gvals
+ Asking for g2dw: yes
  Initializing gstore object from: t04o_GSTORE.nc
 
  Reading KS e-ph matrix elements
@@ -250,17 +256,17 @@ P pp_sum_comm can use shmem: yes
  glob_nq_spin: [8]
  kptopt: 1
  qptopt: 1
- has_used_lgk: 0
+ has_used_lgk: 1
  has_used_lgq: 0
  with_vk: 1
 
- gqk_cplex: 1
- gqk_bstart_k: 1
+ gqk_cplex: 2
+ gqk_bstart_k: 2
  gqk_bstart_kq: 1
- gqk_bstop_k: 9
- gqk_bstop_kq: 9
- gqk_nb_k: 9
- gqk_nb_kq: 9
+ gqk_bstop_k: 7
+ gqk_bstop_kq: 12
+ gqk_nb_k: 6
+ gqk_nb_kq: 12
  gqk_my_npert: 6
 P gqk_my_nk: -1
 P gqk_my_nq: -1
@@ -273,6 +279,7 @@ P Number of CPUs for parallelism over k-points: 1
  k-points included in gstore:
 1 : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 2 : [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Little group operations of the k-point will be used to symmetry reduce the integral in q-space.
 
  === Gaps, band edges and relative position wrt Fermi level ===
  Indirect band gap semiconductor
@@ -288,6 +295,7 @@ P Number of CPUs for parallelism over k-points: 1
  300.0     0.026    13.558     3.336     1.478
 
 
+ Reading GS KS potential for Sternheimer from: diamond_eph_gwpt/gso_POT.nc
 ================================================================================
  Final results in eV.
  Notations:
@@ -307,36 +315,30 @@ P Number of CPUs for parallelism over k-points: 1
 
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   13.558
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -11.203  -11.333   -0.130   -0.133   -0.000    0.981   -0.154    0.021    0.000    0.000
-   2  10.221   10.340    0.119    0.699   -0.049    0.171    0.860   -0.162   21.424   21.674
-   3  10.221   10.340    0.119    0.699   -0.049    0.171    0.860   -0.162    0.000    0.000
-   4  10.221   10.340    0.119    0.699   -0.049    0.171    0.860   -0.162    0.000    0.000
-   5  15.832   15.786   -0.045   -0.267   -0.049    0.170   -0.204   -0.063    5.611    5.446
-   6  15.832   15.786   -0.045   -0.267   -0.049    0.170   -0.204   -0.063    0.000    0.000
-   7  15.832   15.786   -0.045   -0.267   -0.049    0.170   -0.204   -0.063    0.000    0.000
-   8  23.441   22.530   -0.911   -1.409   -0.005    0.646   -1.355   -0.054    7.609    6.744
-   9  29.456   29.897    0.442    0.567   -0.003    0.779    0.605   -0.038    6.015    7.367
+   2  10.221   10.390    0.169    1.213   -0.062    0.139   -0.522    1.734    0.000    0.000
+   3  10.221   10.390    0.169    1.213   -0.062    0.139   -0.522    1.734    0.000    0.000
+   4  10.221   10.390    0.169    1.213   -0.062    0.139   -0.522    1.734    0.000    0.000
+   5  15.832   15.777   -0.055   -0.371   -0.058    0.148   -1.866    1.495    5.611    5.387
+   6  15.832   15.777   -0.055   -0.371   -0.058    0.148   -1.866    1.495    0.000    0.000
+   7  15.832   15.777   -0.055   -0.371   -0.058    0.148   -1.866    1.495    0.000    0.000
 
  KS gap:    5.611 (assuming bval:4 ==> bcond:5)
- QP gap:    5.446 (OTMS:    4.645)
- QP_gap - KS_gap:   -0.165 (OTMS:   -0.965)
+ QP gap:    5.387 (OTMS:    4.027)
+ QP_gap - KS_gap:   -0.223 (OTMS:   -1.583)
 
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:   13.558
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1  -2.521   -2.187    0.335    1.346   -0.030    0.249    1.090    0.256    0.000    0.000
-   2  -2.521   -2.187    0.335    1.346   -0.030    0.249    1.090    0.256    0.000    0.000
-   3   3.934    3.854   -0.080   -0.276   -0.025    0.291    0.185   -0.462    6.455    6.040
-   4   3.934    3.854   -0.080   -0.276   -0.025    0.291    0.185   -0.462    0.000    0.000
-   5  15.036   14.896   -0.140   -1.953   -0.132    0.071   -1.915   -0.038   11.102   11.042
-   6  15.036   14.896   -0.140   -1.953   -0.132    0.071   -1.915   -0.038    0.000    0.000
-   7  26.960   26.869   -0.091   -1.091   -0.111    0.083   -1.081   -0.010   11.924   11.973
-   8  26.960   26.869   -0.091   -1.091   -0.111    0.083   -1.081   -0.010    0.000    0.000
-   9  33.358   33.366    0.008    0.025   -0.022    0.318    0.050   -0.025    6.399    6.498
+   2  -2.521   -2.385    0.136    1.102   -0.072    0.124    0.658    0.444    0.000    0.000
+   3   3.934    4.005    0.070    0.182   -0.016    0.388   -1.037    1.219    6.455    6.389
+   4   3.934    4.005    0.070    0.182   -0.016    0.388   -1.037    1.219    0.000    0.000
+   5  15.036   14.859   -0.176   -1.042   -0.050    0.169   -1.297    0.255   11.102   10.855
+   6  15.036   14.859   -0.176   -1.042   -0.050    0.169   -1.297    0.255    0.000    0.000
+   7  26.960   26.855   -0.104   -1.155   -0.102    0.090   -4.286    3.131   11.924   11.996
 
  KS gap:   11.102 (assuming bval:4 ==> bcond:5)
- QP gap:   11.042 (OTMS:    9.425)
- QP_gap - KS_gap:   -0.059 (OTMS:   -1.677)
+ QP gap:   10.855 (OTMS:    9.878)
+ QP_gap - KS_gap:   -0.247 (OTMS:   -1.224)
 
 ============================================================================================
 
@@ -348,24 +350,25 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:   13.558
               amu      1.20110000E+01
         ddb_ngqpt        2    2    2
              ecut      4.50000000E+01 Hartree
+        eph_stern           1
          eph_task          24
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
-   gstore_use_lgk        1
               ixc          11
          kptrlatt        2    0    0      0    2    0      0    0    2
           kptrlen      9.54735576E+00
 P           mkmem           3
             natom           2
-            nband           9
+            nband          12
             ngfft          30      30      30
              nkpt           3
+            nline         100
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver           7
        prtphbands           0
          prtphdos           0
@@ -427,12 +430,12 @@ P           mkmem           3
             tmesh      3.00000000E+02  1.00000000E+02  1.00000000E+00
             typat      1  1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.9311883380E-01  8.9311883380E-01  8.9311883380E-01
+                       8.9311883710E-01  8.9311883710E-01  8.9311883710E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.6877500000E+00  1.6877500000E+00  1.6877500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
-             zcut      3.67493254E-04 Hartree
+             zcut      3.67493222E-04 Hartree
             znucl        6.00000
 
 ================================================================================

@@ -6,7 +6,7 @@
 !!  DFPT calculation of spatial and time dispersion properties
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2019-2025 ABINIT group (MR, MS)
+!!  Copyright (C) 2019-2026 ABINIT group (MR, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -858,7 +858,7 @@ end subroutine longwave
 !!  Write the relevant spatial-dispersion quantities in Cartesian coordinates
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2022-2025 ABINIT group (MR)
+!!  Copyright (C) 2022-2026 ABINIT group (MR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

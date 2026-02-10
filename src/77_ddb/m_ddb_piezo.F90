@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2025 ABINIT group (XW)
+!!  Copyright (C) 1999-2026 ABINIT group (XW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -586,7 +586,7 @@ subroutine ddb_piezo(inp,blkval,dielt_rlx,elast,iblok,instrain,iout,mpert,natom,
    do ivarA=1,3
      do ivarB=1,3
        dielt_stress(ivarA,ivarB)=dielt_rlx(ivarA,ivarB)+&
-&       dielt_stress(ivarA,ivarB)/(8.854187817)
+&       dielt_stress(ivarA,ivarB)/(eps0*1.0e12)
      end do
    end do
 
@@ -617,7 +617,7 @@ subroutine ddb_piezo(inp,blkval,dielt_rlx,elast,iblok,instrain,iout,mpert,natom,
 !  then restore the unit to be m^2/C
    do ivarA=1,3
      do ivarB=1,6
-       g_tensor(ivarA,ivarB)=g_tensor(ivarA,ivarB)/(8.854187817)
+       g_tensor(ivarA,ivarB)=g_tensor(ivarA,ivarB)/(eps0*1.0e12)
      end do
    end do
  end if
@@ -670,7 +670,7 @@ subroutine ddb_piezo(inp,blkval,dielt_rlx,elast,iblok,instrain,iout,mpert,natom,
 !  then restore the unit to be N/c
    do ivarA=1,3
      do ivarB=1,6
-       h_tensor(ivarA,ivarB)=1000.0*(h_tensor(ivarA,ivarB)/(8.854187817))
+       h_tensor(ivarA,ivarB)=1000.0*(h_tensor(ivarA,ivarB)/(eps0*1.0e12))
      end do
    end do
  end if

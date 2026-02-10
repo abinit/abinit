@@ -6,7 +6,7 @@
 !!   Driver for EPH calculations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2025 ABINIT group (MG, MVer, GA)
+!!  Copyright (C) 2009-2026 ABINIT group (MG, MVer, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -66,7 +66,7 @@ module m_eph_driver
  use m_ephtk,           only : ephtk_update_ebands
  use m_gstore,          only : gstore_t
  use m_migdal_eliashberg, only : migdal_eliashberg_iso !, migdal_eliashberg_aniso
- use m_gstore_sigeph,   only : gstore_sigeph
+ use m_gstore_sigmaph,   only : gstore_sigmaph
  use m_berry_curvature, only : berry_curvature
  use m_cumulant,        only : cumulant_driver
  use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
@@ -695,8 +695,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
  case (24)
-   ! Compute e-ph self-energy from GSTORE.nc file
-   call gstore_sigeph(ngfftc, ngfftf, dtset, dtfil, cryst, ebands, ifc, mpi_enreg, comm)
+   ! Compute e-ph self-energy from GSTORE.nc file.
+   call gstore_sigmaph(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, ebands, dvdb, ifc, &
+                       pawfgr, pawtab, psps, mpi_enreg, comm)
 
  case (5, -5)
    ! Interpolate the DFPT potential.
@@ -728,14 +729,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (dtfil%filgstorein /= ABI_NOFILE) then
      ! Init gstore from pre-existent file. gstore_gname and read_dw are not relevant here.
      call wrtout(units, sjoin(" Restarting GSTORE computation from:", dtfil%filgstorein))
-     call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, &
+     call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, dtfil, cryst, ebands, ifc, &
                              "atom", dtset%gstore_gname, .False., comm)
    else
      gstore_path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
      call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
    end if
 
-   call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
+   call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, &
                        pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
    gstore_path = gstore%path
@@ -743,8 +744,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
    ! Wannierize the e-ph matrix elements if the ABIWAN.nc file is provided.
    if (dtfil%filabiwanin /= ABI_NOFILE) then
-      ! Init gstore from pre-existent file. gstore_gname and read_dw are not relevant here.
-     call gstore%from_ncpath(gstore_path, with_cplex2, dtset, cryst, ebands, ifc, &
+     ! Init gstore from pre-existent file. gstore_gname and read_dw are not relevant here.
+     call gstore%from_ncpath(gstore_path, with_cplex2, dtset, dtfil, cryst, ebands, ifc, &
                             "atom", dtset%gstore_gname, .False., comm)
      call gstore%wannierize_and_write_gwan(dvdb, dtfil)
      call gstore%free()
@@ -766,7 +767,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !            - Read GWAN.nc file to build gstore%gqk(spin)%wan
  !            - Pass gstore object to the eph_task routines (what about ebands)?
 
- !  call gstore%from_ncpath(gstore_path, with_cplex2, dtset, cryst, ebands, ifc, comm)
+ !  call gstore%from_ncpath(gstore_path, with_cplex2, dtset, dtfil, cryst, ebands, ifc, comm)
  !  call gstore%wannierize(dvdb, dtfil)
  !  call gstore%free()
  !  call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
@@ -775,7 +776,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (12, -12)
    ! Migdal-Eliashberg equations (isotropic or anisotropic case).
    ! Need|g(k,q)|^2 in the phonon representation but
-   call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, &
+   call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, dtfil, cryst, ebands, ifc, &
                            "phonon", dtset%gstore_gname, .False., comm)
 
    if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
@@ -785,7 +786,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (13)
    ! Variational polaron equations.
    call wrtout(units, sjoin(" Computing variational polaron equations from pre-existent GSTORE file:", gstore_filepath))
-   call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, cryst, ebands, ifc, &
+   call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, dtfil, cryst, ebands, ifc, &
                            "phonon", dtset%gstore_gname, .False., comm)
    call varpeq_run(gstore, dtset, dtfil)
    call gstore%free()
@@ -796,10 +797,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (14)
    ! Molecular Berry Curvature.
-   ! ! Customize input vars for this eph_task.
-   ! dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_with_vk = 1
    call wrtout(units, sjoin(" Computing Berry curvature from pre-existent GSTORE file:", dtfil%filgstorein))
-   call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, &
+   call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, dtfil, cryst, ebands, ifc, &
                            "atom", dtset%gstore_gname, .False., comm)
 
    call berry_curvature(gstore, dtset, dtfil)
