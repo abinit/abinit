@@ -1,16 +1,16 @@
 ## v10.6
 
-Version 10.6, released on Feb 10, 2026.
-<!-- Release notes updated on Jan 24, 2026. -->
+Version 10.6, released on Feb 7, 2026.
+<!-- Release notes updated on Feb 6, 2026. -->
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.6 with respect to v10.4.
 <!-- Initially, beta-release v10.6.1, the included MRs are
 MR1160, 1165, 1168, 1170, 1172, 1173, 1183, 1187, 1191, 1194, 1106,
 then 1200 to 1275, except those that had been closed, and also
-EXCEPT MR1219, 1225, that had already been included in v10.4,
-and EXCEPT MR1276, 1277, 1278, 1280 that will be included in v10.8 .
-For release v10.6.3, ...
+EXCEPT MR1219, 1225, that had already been included in v10.4.
+MR1276, 1277, 1278, 1280 will be included in v10.8 .
+For release v10.6.3, also includes MR 1279 and 1281.
 -->
 
 Many thanks to the contributors to the ABINIT project between April 2025 and February 2026 !
@@ -33,7 +33,6 @@ Xavier
 **A.1** Remark: ABINIT paper
 
 The ABINIT project developments since 2020 have been the subject of a recently published paper, see [[cite:Verstraete2025]].
-TODO : mention in acknowledgments.
 
 **A.2** Update of ABINIT to CODATA2022 version of the fundamental constants
 
@@ -94,15 +93,13 @@ See numerous new tests, [[test:paral_102]] to [[test:paral_118]], [[test:paral_1
 
 New input variables :
 
-* about thirty variables with the prefix dmft_triqs_XXX.  (TODO : document dmft_triqs_dlr_wmax, dmft_triqs_measure_g_l, dmft_triqs_pauli_prob, dmft_triqs_shift_mu, dmft_triqs_random_seed_a, dmft_triqs_random_seed_b,
-dmft_triqs_n_iw, dmft_triqs_random_n_l, dmft_triqs_n_tau, dmft_triqs_prt_entropy, dmft_triqs_read_ctqmcdata).
+* about thirty variables with the prefix dmft_triqs_XXX, see above.
 * Yukawa : [[dmft_yukawa_epsilon]], [[dmft_yukawa_lambda]],  [[dmft_yukawa_param]]
 * Magnetic field : [[dmft_magnfield]], [[dmft_magnfield_b]]
 * Continuous Time QMC : [[dmftctqmc_chains]], [[dmftctqmc_localprop]] (replacing dmftctqmc_config), [[dmftctqmc_mov]], [[dmftctqmc_order]]
 * Init from previous datasets : [[getctqmcdata]], [[getself]]
 * Other miscellaneous new input variables : [[dmft_orbital_filepath]], [[dmft_prtself]], [[dmft_wanorthnorm]],[[dmft_fermi_step]], [[dmft_nominal]], [[dmft_orbital]],
 [[dmft_prt_maxent]], [[dmft_prtwan]], [[dmft_shiftself]], [[dmft_wanrad]], [[dmft_x2my2d]].
-* TODO test [[dmft_prt_maxent]]
 
 See numerous tests, [[test:paral_102]] to [[test:paral_118]], [[test:paral_121]], as well as the new [[tutorial:dmft_triqs]].
 
@@ -113,14 +110,19 @@ By F. Castiel, F. Gendron, O. Gingras, B. Amadon, M. Sarraute
 
 **B.2** Generalized Bloch theorem to study spin spirals
 
-The generalized Bloch theorem (GBT) can be used to study spin spirals. See ref (TODO : provide references).
-The atomic magnetic moment rotates in the x-y plane (Cartesian coords.) while the z-component
+The generalized Bloch theorem (GBT) can be used to study spin spirals, still keeping the usual small primitive cell instead of using a supercell.
+Full spin-orbit coupling (SOC) is not compatible with GBT. However, the periodic part of SOC (along the spin rotation axis) can be treated,
+See the following references, among others :
+[[cite:Sandratskii1986]], [[cite:Kurz2004]], [[cite:Heide2009]], and [[cite:Sandratskii2017]].
+
+In the present ABINIT implementation,
+the atomic magnetic moment rotates in the x-y plane (Cartesian coords.) while the z-component
     remains lattice-periodic. For this reason, one should set [[spinat]] so to have non-zero
     components in the x-y plane. Soon, this restriction should be waived, by defining an arbitrary spin projection axis.
 Forces, stresses and electric polarization are compatible with the GBT. Tests for forces and stresses are provided.
-Full spin-orbit coupling (SOC) is not compatible with GBT, although its periodic part (along the z direction) can be activated (TODO give reference and update the doc).
-For the time being, only NC pseudos with useylm = 0 are supported.
-Also, [[paral_kgb]] must be set to 0 and GPUs cannot be used [[gpu_option]] 0.
+The treatment of the periodic part of SOC (along the z direction) has been implemented as well.
+For the time being, only NC pseudos with [[useylm]] = 0 are supported.
+Also, [[paral_kgb]] must be set to 0 and GPUs cannot be used ([[gpu_option]]=0).
 
 New input variables: [[use_gbt]], [[qgbt]], [[qgbt_cart]].
 
@@ -129,22 +131,20 @@ New tests : [[test:v10_27]], [[test:v10_28]], [[test:v10_29]]
 By Le Shu, M. Giantomassi and X. Gonze (MR1223, 1226, 1237, 1239)
 
 
-**B.3** Relaxed-core PAW  [PERHAPS TOO EARLY FOR MOST NOTICEABLE DEVELOPMENT]
+**B.3** New convergence criterion, suited for non-collinear magnetism studies
 
-Implemented the relaxed-core PAW method, see [[test:v10_108]].
+A new tolerance parameter [[toldmag]] has been added to monitor and control the magnetization convergence in SCF cycles.
+The output file now reports the maximum value of the magnetization in the atomic spheres and the difference between the values between two SCF steps.
 
-New input variables : use_rcpaw, rcpaw_frocc, rcpaw_elin, rcpaw_tpaw, rcpaw_vhtnzc, rcpaw_rctypat, rcpaw_sc, rcpaw_tolnc, rcpaw_updaepw, rcpaw_updatetnc
-There is no documentation of these input variables
+Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
+at the same goal (causing the SCF cycle to stop), they are seen as a unique
+input variable at reading. Hence, it is forbidden that two of these input
+variables have non-zero values for the same dataset, or generically (for all
+datasets).
 
-Print now core contribution when running PAW; with this contribution the total energy can be compared when using different pseudopotentials, even when they have different cores.
-Also, the total energy of the isolated atom is now identical to the one out put by atompaw.
+New [[test:v10_110]], and the output of many tests has been updated, due to the above-mentioned writings.
 
-New [[paw_add_core]] (not activated by default) to include the core contribution in the total energy printed during iterations. By default, this is the behavior when running relaxed-core paw.
-See [[test:v10_109]]
-
-Related tests : [[test:v10_108]], [[test:v10_109]].
-
-By J. Boust, M. Torrent (MR1173, 1242, 1256, 1271)
+By S. Rostami (MR1243)
 
 
 **B.4** Born contribution ("electron-phonon") to the total energy (beyond the usual Born-Oppenheimer energy)
@@ -195,22 +195,6 @@ Moreover, internally,
 By G. Antonius (MR1228)
 
 
-**B.7** New convergence criterion, suited for non-collinear magnetism studies
-
-A new tolerance parameter [[toldmag]] has been added to monitor and control the magnetization convergence in SCF cycles.
-The output file now reports the maximum value of the magnetization in the atomic spheres and the difference between the values between two SCF steps.
-
-Since [[toldfe]], [[toldff]], [[tolrff]], [[toldmag]] and [[tolvrs]] are aimed
-at the same goal (causing the SCF cycle to stop), they are seen as a unique
-input variable at reading. Hence, it is forbidden that two of these input
-variables have non-zero values for the same dataset, or generically (for all
-datasets).
-
-New [[test:v10_110]], and the output of many tests has been updated, due to the above-mentioned writings.
-
-By S. Rostami (MR1243)
-
-
 * * *
 
 
@@ -251,7 +235,7 @@ By O. Mattelaer, with some help from M. Giantomassi and S. Ponce' (MR1194, 1227,
 **C.3** Improvement of configure
 
 Configure now displays Python version and is OK with python version > 3.12
-There is a new version of the fallbacks (10.6).   TODO : Check whether it is advertised properly on the ABINIT Web site.
+There is a new version of the fallbacks (10.6).
 EOI and EOE builders have been fixed for new fallbacks
 
 By J.-M. Beuken (MR1213, 1267)
@@ -308,6 +292,8 @@ the computation to the little group (of k or q).
 Introduced new variable [[gstore_gname]]. This input variable specifies the name of the netcdf variable from which the e-ph matrix elements
 will be **read** from the GSTORE.nc file.
 
+See `test:gwpt_suite_04` and `test:gwpt_suite_05`to be activated later.
+
 By M. Giantomassi (MR1235 and 1238)
 
 
@@ -324,7 +310,7 @@ This setting enables a more accurate evaluation of the self-energy for a given S
 Previously, we were just printing a WARNING in the log file.
 * Fix memory leak in gwr with [[gwr_chi_algo]] 2
 
-See [[test:v67mbpt_54]] to [[test:v67mbpt_60]], also [[test:gwr_suite_12]]..
+See [[test:v67mbpt_54]] to [[test:v67mbpt_60]], also [[test:gwr_suite_12]].
 
 By M. Giantomassi and Hsiao-Yi Tsai (MR1187, 1201)
 
@@ -337,10 +323,20 @@ For [[gw_rcut]], see [[test:gwr_suite_10]], [[test:gwr_suite_11]], [[test:paral_
 
 By F. Bruneval (commit 54d0c199f18 among others)
 
-**D.5**
-Significantly improved the error message output to ABI_MPIABORTFILE. Use POSIX API to create a file lock.
+**D.5** Relaxed-core PAW (Still in development, alsi extended FMPD.)
 
-By M. Giantomassi (MR1201)
+Implemented the relaxed-core PAW method, see [[test:v10_108]].
+
+New input variables : use_rcpaw, rcpaw_frocc, rcpaw_elin, rcpaw_tpaw, rcpaw_vhtnzc, rcpaw_rctypat, rcpaw_sc, rcpaw_tolnc, rcpaw_updaepw, rcpaw_updatetnc
+To be documented.
+
+Print now core contribution when running PAW; with this contribution the total energy can be compared when using different pseudopotentials, even when they have different cores.
+Also, the total energy of the isolated atom is now identical to the one out put by atompaw.
+
+New [[paw_add_core]] (not activated by default) to include the core contribution in the total energy printed during iterations. By default, this is the behavior when running relaxed-core paw.
+See [[test:v10_109]]
+
+Other new input variables, to be tested, to be documented : `extfpmd_prterr`, `extfpmd_pawsph`, `cwfs_wouth`.
 
 **D.6** Remove the output in the log of PAW related quantities (Dij and Rhoij) at each SCF cycle when pawprtvol is 0
 
@@ -350,14 +346,14 @@ By F. Brieuc (MR1207)
 
 As discussed in the coredev meeting, now [[dilatmx]] > 1 is allowed only for ground state.
 Some tests were using dilatmx > 1 for DFPT, so they are changed.
-Also, a warning is printed if dilatmx>1 and [[optcell]]==0.
+Also, a warning is printed if dilatmx > 1 and [[optcell]]==0.
 
 By L. Baguet (MR1216)
 
 **D.8** No more [[bandpp]] in testsuite.
 
 Remove [[bandpp]] in input files of the testsuite, except in paral[33] and v9[205], and replace it by [[nblock_lobpcg]].
-For now the [[tutorial:paral_bandpw]] is not changed, but it should be reworked (almost completely...). This will done later. TODO
+For now the [[tutorial:paral_bandpw]] is not changed, but has to be reworked.
 
 By L. Baguet (MR1217)
 
@@ -397,12 +393,9 @@ By J. Zwanziger (MR1230)
 
 **D.14** Replace complex(dpc) with complex(dp).  Remove gwpc and spc; use gwp and sp instead. By M. Giantomassi (MR1235)
 
-**D.15** Copy tests from long wave tutorial to `test:v10_31` to `test:v10_38` in order to use NetCDF instead of text DDB in the tutorial.
-Initial tests from M. Royo and A. Zabalo.
-However, these tests are not activated ?! TODO : activate them or suppress them.
+**D.15**
+Significantly improved the error message output to ABI_MPIABORTFILE. Use POSIX API to create a file lock.
 
-**D.16**
-New input variables, not tested, not documented : `extfpmd_prterr` 20251031, `extfpmd_pawsph` 20251031 , `cwfs_wouth` 20251215. Introduced by James Boust. TODO : document and test.
 
 
 * * *

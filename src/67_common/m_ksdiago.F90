@@ -2251,6 +2251,8 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie)
  real(dp),allocatable :: tmp_eig_k(:)
 ! *********************************************************************
 
+ ABI_UNUSED(dtset%natom)
+
  ! Shift energies wrt the input Fermi level.
  ABI_MALLOC(tmp_eig_k, (eig_size))
  tmp_eig_k = eig_k - gs_fermie
