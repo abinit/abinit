@@ -914,6 +914,10 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
  if (ham%usepaw==0) then
    ! Norm-conserving: use constant Kleimann-Bylander energies.
+   ! nspinor ** 2 is a fake dimension here in the sense that
+   ! the KB energies for the scalar part and the SOC part are packed in the firs dimension (dimekb).
+   ! In nonlop_pl, ekb are accessed using ekb(iln,itypat,ispinor) where iln runs over all projects (scalar + SOC)
+   ! The ispinor index is irrelevant as ekb(:,:,1) = ekb(:,:,2). See nonlop_pl
    ham%dimekb1=psps%dimekb
    ham%dimekb2=psps%ntypat
    ham%dimekbq=1
