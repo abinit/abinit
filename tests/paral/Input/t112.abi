@@ -67,7 +67,7 @@ nnsclo2   10             # Number of non-self consistent loops
 usedmft2  1              # Active DMFT
 dmftbandi 9              # First band included in the projection. Initial
 dmftbandf 25             # and final bands.
-dmft_triqs_n_iw 1000     # Linear freqeuncy mesh
+dmft_triqs_n_iw 200      # Linear freqeuncy mesh
 dmft_iter 1              # Number of iterations of the DMFT part.
                          # We often use single-shot, since anyway the charge density
                          # changes through the DFT+DMFT anyway.
