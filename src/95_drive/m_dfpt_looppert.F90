@@ -1260,7 +1260,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ABI_MALLOC(ylm1_mq,(mpw1_mq*mk1mem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
      ABI_MALLOC(ylmgr1_mq,(mpw1_mq*mk1mem_rbz,nylmgr1,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
      if (psps%useylm==1) then
-       if (sum(dtset%qptn(1:3)**2) < 1.d-14) then
+       if (abs(sum(dtset%qptn(1:3)**2)) < 1.d-14) then
          ylm1_mq(:,:)=ylm1(:,:)
          ylmgr1_mq(:,:,:)=ylmgr1(:,:,:)
        else
@@ -1349,7 +1349,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    if (.not.kramers_deg) then
      if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then
-       call wrtout(std_out, " qpt is Gamma, psi_k+q initialized from psi_k in memory")
+       call wrtout(std_out, " qpt is Gamma, psi_k-q initialized from psi_k in memory")
        cg_mq = cg
        eigen_mq = eigen0
      else
@@ -1843,18 +1843,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
   
          call dfpt_init_mag1(ipert,idir,rhor1,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
   
-         if(.not.kramers_deg) then
-           rhor1_pq=rhor1
-           call dfpt_init_mag1(ipert,idir,rhor1_mq,rhor,cplex,nfftf,nspden,vxc,kxc,nkxc)
-         end if
        end if
 
        call fourdp(cplex,rhog1,rhor1,-1,mpi_enreg,nfftf,1,ngfftf,0)
-       if (.not.kramers_deg) then
-         !call fourdp(cplex,rhog1_pq,rhor1_pq,-1,mpi_enreg,nfftf,1,ngfftf,0)
-         rhog1_pq=rhog1
-         call fourdp(cplex,rhog1_mq,rhor1_mq,-1,mpi_enreg,nfftf,1,ngfftf,0)
-       end if
      end if
 
    else
@@ -1886,25 +1877,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
              dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1_mq,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
              occ_rbz,phnons1,rhog1_mq,rhor1_mq,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
 
-           !reconstruct the +q and -q densities, this might bug if fft parallelization is used, todo...
-!           do ifft=1,nfftf
-!             rhor1(2*ifft-1,1) = half*(rhor1_pq(2*ifft-1,1)+rhor1_mq(2*ifft-1,1))
-!             rhor1(2*ifft  ,1) = half*(rhor1_pq(2*ifft  ,1)-rhor1_mq(2*ifft  ,1))
-!           end do
-!           if (nspden >= 2) then
-!             do ifft=1,nfftf
-!               rhor1(2*ifft-1,2) = half*(rhor1_pq(2*ifft-1,2)+rhor1_mq(2*ifft-1,2))
-!               rhor1(2*ifft  ,2) = half*(rhor1_pq(2*ifft  ,2)-rhor1_mq(2*ifft  ,2))
-!             end do
-!           end if
-!           if (nspden > 2) then
-!             do ifft=1,nfftf
-!               rhor1(2*ifft-1,3) = half*(rhor1_pq(2*ifft-1,3)+rhor1_mq(2*ifft  ,4))
-!               rhor1(2*ifft  ,3) = half*(rhor1_pq(2*ifft  ,3)-rhor1_mq(2*ifft-1,4))
-!               rhor1(2*ifft  ,4) = half*(rhor1_pq(2*ifft  ,4)+rhor1_mq(2*ifft-1,3))
-!               rhor1(2*ifft-1,4) = half*(rhor1_pq(2*ifft-1,4)-rhor1_mq(2*ifft  ,3))
-!             end do
-!           end if
            do ifft=1,nfftf
              rhor1(2*ifft-1,:) = half*(rhor1_pq(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
              rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
