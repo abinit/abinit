@@ -6426,7 +6426,8 @@ contains
     real(dp) :: norm2_vec
     integer :: tid, rank, seed_size, i, n
     integer, allocatable :: seed(:)
-    complex(kind=c_double_complex) , ABI_CONTIGUOUS pointer :: vecC(:) => null()
+    complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC(:) => null()
+    real(kind=c_double), ABI_CONTIGUOUS pointer:: vecR(:) => null()
 
     if (jcol > xgBlock%cols) then
         ABI_ERROR('given column is out of block')
@@ -6437,50 +6438,56 @@ contains
     
     if (xgBlock%gpu_option/=ABI_GPU_DISABLED) then
         call xgBlock_copy_from_gpu(xgBlock)
-    end if
-    
-    call random_seed(size=seed_size)
-    ABI_MALLOC(seed, (seed_size))
+    end if 
 
     ! Each thread each MPI process maintains its own seed
     select case(xgBlock%space)
     case (SPACE_R)
-        !$omp parallel private(tid, seed, re, i)
+        vecR => xgBlock%vecR(:,jcol) ! contiguous in memory
+        !$omp parallel default(none) &
+        !$omp private(tid, seed, re, i, seed_size) &
+        !$omp shared(vecR, my_rank, n)
+            call random_seed(size=seed_size)
+            ABI_MALLOC(seed, (seed_size))
             tid = xomp_get_thread_num()
-            seed = 123456 + 17*my_rank + 10*tid + (/ (i, i=1,seed_size) /)
+            seed = 123456 + 1000*my_rank + 97*tid + (/ (i, i=1,seed_size) /)
             call random_seed(put=seed)
+            ! Avoid multiple threads modify the same RNG state race condition
             ! execute each iteration i by exactly one thread
             !$omp do
             do i=1,n
                 call random_number(re)
-                xgBlock%vecR(i,jcol) = re
+                vecR(i) = re
             end do
             !$omp end do
+            ABI_FREE(seed)
         !$omp end parallel
     case (SPACE_C)
-        !$omp parallel private(tid, seed, reim, i)
+        vecC => xgBlock%vecC(:,jcol) ! contiguous in memory
+        !$omp parallel default(none) &
+        !$omp private(tid, seed, reim, i, seed_size) &
+        !$omp shared(vecC, my_rank, n)
+            call random_seed(size=seed_size)
+            ABI_MALLOC(seed, (seed_size))
             tid = xomp_get_thread_num()
-            seed = 123456 + 1000*my_rank + 10*tid + (/ (i, i=1,seed_size) /)
+            seed = 123456 + 1000*my_rank + 97*tid + (/ (i, i=1,seed_size) /)
             call random_seed(put=seed)
             !$omp do
             do i=1,n
                 call random_number(reim)
-                xgBlock%vecC(i,jcol) = dcmplx(reim(1)-0.5_dp, reim(2)-0.5_dp)
+                vecC(i) = dcmplx(reim(1)-0.5_dp, reim(2)-0.5_dp) ! zero mean
             end do
             !$omp end do
+            ABI_FREE(seed)
         !$omp end parallel
-        vecC => xgBlock%vecC(:,jcol) ! contiguous in memory
         norm2_vec = sum(conjg(vecC)*vecC)
         vecC = vecC / sqrt(real(norm2_vec, dp))
         write(901,*) 'norm2_vec=', norm2_vec
         flush(901)
     case (SPACE_CR)
-        ABI_FREE(seed)
         ABI_ERROR('Not implemented for SPACE_CR')
     end select
     
-    ABI_FREE(seed)
-
     if (xgBlock%gpu_option/=ABI_GPU_DISABLED) then
         call xgBlock_copy_to_gpu(xgBlock)
     end if

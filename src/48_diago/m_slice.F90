@@ -1083,7 +1083,9 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     ! Local variables
     ! Scalars
     integer :: my_rank, shift, bandpp, space_res
+    integer :: ierr
     real(dp) :: mineig, maxeig
+    real(dp) :: lanczos_lowb, lanczos_lowb_global
     ! Derived types
     type(xg_t) :: Results1, Results2
     type(xg_t) :: eigen_mpi, resid_mpi
@@ -1165,14 +1167,26 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
 
     write(901,*) 'Here I write the Lanczos yeyyy'
     flush(901)
-    kmax = 20
+    kmax = 50
     call computeBLanczos(slice, getAX_BX, getBm1X, kmax, lambda_min, res_norm)
 
-    write(901,*) 'Lanczos lambda_min=', lambda_min
-    write(901,*) 'Lanczos res_norm  =', res_norm
-    write(901,*) 'Lanczos guarantee =', lambda_min - res_norm
-    flush(901)
+    my_rank = xmpi_comm_rank(slice%spacecom)
+    lanczos_lowb = lambda_min - res_norm
+    write(901+my_rank,*) 'my_rank           =', my_rank
+    write(901+my_rank,*) 'Lanczos lambda_min=', lambda_min
+    write(901+my_rank,*) 'Lanczos res_norm  =', res_norm
+    write(901+my_rank,*) 'Lanczos guarantee =', lanczos_lowb
+    flush(901+my_rank)
     
+    if (slice%paral_kgb == 1) then
+        call xmpi_min(lanczos_lowb,lanczos_lowb_global,slice%spacecom,ierr)
+    else
+        lanczos_lowb_global = lanczos_lowb
+    end if
+
+    write(901+my_rank,*) 'Lanczos guarantee(global) =', lanczos_lowb_global
+    flush(901+my_rank)
+
     ! Compute Rayleigh quotients
     ! <Psi|H|Psi>
     call xgBlock_colwiseDotProduct(xXColsRows, xAXColsRows, Results1%self, comm_loc=xmpi_comm_null)
@@ -2470,32 +2484,23 @@ end subroutine print_scalar_filter
     call xgBlock_setBlock(W_vcol%self,  Bm1v, spacedim, 1, fcol=4) ! Bm1 v
     call xgBlock_setBlock(W_vcol%self, qprev, spacedim, 1, fcol=5) ! q_prev
 
-    write(901,*) 'allocated W_vcol'
-    flush(901)
-
-    call xg_init(W_dot, SPACE_R, 1, 3, xmpi_comm_null, me_g0=me_g0, gpu_option=gpu_option)
+    call xg_init(W_dot, space, 1, 3, xmpi_comm_null, me_g0=me_g0, gpu_option=gpu_option)
     call xgBlock_setBlock(W_dot%self, dot_qTBv, 1, 1)
     call xgBlock_setBlock(W_dot%self,  dot_qTv, 1, 1, fcol=2)
     call xgBlock_setBlock(W_dot%self, dot_vTBv, 1, 1, fcol=3)
 
-    write(901,*) 'allocated W_dot'
-    flush(901)
-
     ! q = random column vector
     call xgBlock_colwiseRandom(q, rank, 1)
 
-    write(901,*) 'entries on random vector OK'
-    flush(901)
-    
     ! Bv = B * q / norml_q
     ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
     call getAX_BX(q, v, Bv)
     call xgBlock_zero_im_g0(v) ! v stores Aq
     call xgBlock_zero_im_g0(Bv) ! Bv stores Bq
     ABI_NVTX_END_RANGE()
-    
+   
     call xgBlock_colwiseDotProduct(q, Bv, dot_qTBv)
-    call xgBlock_reverseMap(dot_qTBv,dot_qTBv_layout,rows=1,cols=1)
+    call xgBlock_reverseMap(dot_qTBv,dot_qTBv_layout,rows=1,cols=1)    
     
     norml_q = 1.d0 / sqrt(dot_qTBv_layout(1,1))
     call xgBlock_scale(q, norml_q, 1)
