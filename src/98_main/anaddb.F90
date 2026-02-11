@@ -791,8 +791,6 @@ end if  ! condition on nlflag
      qphon(:,1)=inp%qph2l(:,iphl2)
      qphnrm(1)=inp%qnrml2(iphl2)
 
-     !TODO: Quadrupole interactions need to be incorporated here (MR)
-
      ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
      ! for the second list of wv (can include non-analyticities if q /= 0)
      call dfpt_phfrq(ddb%amu, displ, d2cart, eigval, eigvec, Crystal%indsym, &
