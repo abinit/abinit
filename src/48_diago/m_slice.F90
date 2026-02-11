@@ -194,7 +194,7 @@ module m_slice
 
         ! Memory buffers
         type(xg_t) :: X_ext                                 ! eigenvector memory used by all slices
-        type(xgTransposer_t) :: xgTransposerXext            ! transposer datastructure
+        type(xgTransposer_t) :: xgTransposerXext            ! transposer datastructure 
         
         ! Pointers
         type(xgBlock_t) :: me_Xext_active                   ! eigenvector memory in use by active slice
@@ -1083,6 +1083,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     ! Local variables
     ! Scalars
     integer :: my_rank, shift, bandpp, space_res
+    integer :: ndeg_filter_max, nband
     integer :: ierr
     real(dp) :: mineig, maxeig
     real(dp) :: lanczos_lowb, lanczos_lowb_global
@@ -1101,6 +1102,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     real(dp), allocatable, target :: theta_mpi_reshaped(:)
     real(dp), pointer :: theta_mpi_reshaped_ptr(:) => null()
     real(dp), pointer :: theta_mpi(:,:) => null()
+    complex(dp), allocatable :: cheby_moments(:,:)
     integer :: kmax
     real(dp) :: lambda_min, res_norm
     integer :: maxeig_pos(2)
@@ -1157,14 +1159,6 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     slice%use_linalg = .false.
     slice%use_colsrows = .true.
 
-    ! Now apply A and B to X (requires colsrows representation) to create AX and BX in colsrows
-    ! Remember that this function will copy X to BX if paw
-    ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
-    call getAX_BX(xXColsRows, xAXColsRows, xBXColsRows)
-    call xgBlock_zero_im_g0(xAXColsRows)
-    call xgBlock_zero_im_g0(xBXColsRows)
-    ABI_NVTX_END_RANGE()
-
     write(901,*) 'Here I write the Lanczos yeyyy'
     flush(901)
     kmax = 50
@@ -1186,6 +1180,35 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
 
     write(901+my_rank,*) 'Lanczos guarantee(global) =', lanczos_lowb_global
     flush(901+my_rank)
+
+    write(901,*) 'Here I compute Chebyshev moments yuhu'
+    flush(901)
+ 
+    ndeg_filter_max = 5
+    nband = slice%neigenpairs
+    if (slice%paral_kgb==1) then
+        nband = slice%bandpp
+    end if
+    ABI_MALLOC(cheby_moments, (nband, ndeg_filter_max+1) )
+
+    call computeChebyshevMoments(slice, xXColsRows, getAX_BX, getBm1X, &
+        lanczos_lowb_global, slice%ecut, ndeg_filter_max, cheby_moments)
+    write(901,*) 'cheby_moments=', cheby_moments(1,:)
+    flush(901)
+
+    ABI_FREE(cheby_moments)
+
+    ! Use the moments in parallel for every filter
+    ! at the end of every filter we must sum contributions across procs
+
+
+    ! Now apply A and B to X (requires colsrows representation) to create AX and BX in colsrows
+    ! Remember that this function will copy X to BX if paw
+    ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
+    call getAX_BX(xXColsRows, xAXColsRows, xBXColsRows)
+    call xgBlock_zero_im_g0(xAXColsRows)
+    call xgBlock_zero_im_g0(xBXColsRows)
+    ABI_NVTX_END_RANGE()
 
     ! Compute Rayleigh quotients
     ! <Psi|H|Psi>
@@ -2477,6 +2500,7 @@ end subroutine print_scalar_filter
 
     ABI_MALLOC(v_min, (spacedim))
 
+    ! workspace size (npw,5)
     call xg_init(W_vcol, space, spacedim, 5, xmpi_comm_null, me_g0=me_g0, gpu_option=gpu_option)
     call xgBlock_setBlock(W_vcol%self,     q, spacedim, 1)         ! q
     call xgBlock_setBlock(W_vcol%self,     v, spacedim, 1, fcol=2) ! Aq
@@ -2574,6 +2598,144 @@ end subroutine print_scalar_filter
     ABI_FREE(v_min)
 
   end subroutine computeBLanczos
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/computeChebyshevMoments
+!! NAME
+!! computeChebyshevMoments
+!! 
+!! FUNCTION
+!! Compute Chebyshev moments up to maximal degree all centered in [A,B)
+!!
+!! OUTPUT
+!! M_n = <X, f_n(B^{-1}AX) X> for n=1,..,ndeg_filter_max
+!! 
+!! SOURCE
+
+subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
+        min_low_bound, max_upp_bound, ndeg_filter_max, cheby_moments)
+
+    implicit none
+
+    type(slice_t), intent(inout) :: slice
+    type(xgBlock_t), intent(in) :: X0
+    integer, intent(in) :: ndeg_filter_max
+    real(dp), intent(in) :: min_low_bound, max_upp_bound
+    complex(dp), intent(out) :: cheby_moments(:,:)
+    interface
+        subroutine getAX_BX(X,AX,BX)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: AX
+            type(xgBlock_t), intent(inout) :: BX
+        end subroutine getAX_BX
+    end interface
+    interface
+        subroutine getBm1X(X,Bm1X)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: Bm1X
+        end subroutine getBm1X
+    end interface
+
+    integer, parameter :: tim_swap = 1761
+    integer :: neigenpairs, nband
+    integer :: ideg
+    integer :: tot_spacedim
+    integer :: space, spacecom, me_g0, gpu_option
+    real(dp) :: center, radius
+    real(dp) :: one_over_r
+    real(dp) :: two_over_r
+    real(dp) :: tsec(2)
+    type(xg_t) :: Moments
+    type(xgBlock_t) :: moment_ideg
+    type(chebfi_t) :: chebfi
+    complex(dp), pointer :: momvals(:,:) => null()
+
+    ! *********************************************************************
+
+    space = slice%space
+    spacecom = slice%spacecom
+    neigenpairs = slice%neigenpairs
+    tot_spacedim = slice%total_spacedim
+    me_g0 = slice%me_g0
+    gpu_option = slice%gpu_option
+
+    nband = slice%neigenpairs
+    if (slice%paral_kgb==1) then
+        nband = slice%bandpp
+    end if
+    
+    ! Moment workspace size (nband, ndeg+1)
+    call xg_init(Moments, space, nband, ndeg_filter_max+1, gpu_option=gpu_option) ! M_n=<X0,f_n(A)X0>
+
+    ! Initialize chebfi object in MPI Colsrows distribution
+    call chebfi_init(chebfi,neigenpairs,tot_spacedim,slice%tolerance,slice%ecut,slice%paral_kgb,&
+        slice%bandpp,ndeg_filter_max,0,space,1,spacecom,me_g0,slice%me_g0_fft,slice%paw,&
+        slice%comm_rows,slice%comm_cols,0,1.d0,0.d0,gpu_option,gpu_kokkos_nthrd=slice%gpu_kokkos_nthrd,&
+        gpu_thread_limit=slice%gpu_thread_limit,from_linalg=.false.)
+
+    ! Compute moment 0= <X0,X0>
+    call xgBlock_setBlock(Moments%self, moment_ideg, nband, 1) 
+    call xgBlock_colwiseDotProduct(X0, X0, moment_ideg, comm_loc=xmpi_comm_null)
+   
+    ! Spectral interval to be amplified scaled to [-1,1)
+    center = (max_upp_bound + min_low_bound)*0.5
+    radius = (max_upp_bound - min_low_bound)*0.5 
+    one_over_r = 1.0/radius
+    two_over_r = 2.0/radius
+
+    ! Initialize Chebyshev recursion
+    chebfi%xXColsRows = X0
+    ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
+    call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
+    call xgBlock_zero_im_g0(chebfi%xAXColsRows)
+    call xgBlock_zero_im_g0(chebfi%xBXColsRows)
+    ABI_NVTX_END_RANGE()
+
+    do ideg = 0, ndeg_filter_max - 1
+       
+        write(901,*) 'ideg=', ideg
+        flush(901)
+
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
+        call chebfi_computeNextOrderChebfiPolynom(chebfi, ideg, center, one_over_r, two_over_r, getBm1X)
+        ABI_NVTX_END_RANGE()
+
+        ! chebfi%xXColsRows = f_ideg X0
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
+        call timab(tim_swap,1,tsec)
+        call chebfi_swapInnerBuffers(chebfi, tot_spacedim, nband)
+        call timab(tim_swap,2,tsec)
+        ABI_NVTX_END_RANGE()
+
+        ! M_ideg = < X0, f_ideg X0 > in C^nband for every ideg
+        call xgBlock_setBlock(Moments%self, moment_ideg, nband, 1, fcol=ideg+2) 
+        call xgBlock_colwiseDotProduct(X0, chebfi%xXColsRows, moment_ideg, comm_loc=xmpi_comm_null)
+
+        !A * Psi    
+        ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
+        call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
+        call xgBlock_zero_im_g0(chebfi%xAXColsRows)
+        call xgBlock_zero_im_g0(chebfi%xBXColsRows)
+        ABI_NVTX_END_RANGE()
+
+    end do 
+
+    if (gpu_option==ABI_GPU_OPENMP) then
+      call xgBlock_copy_from_gpu(Moments%self)
+    end if
+
+    call xgBlock_reverseMap(Moments%self, momvals, nband, ndeg_filter_max+1)
+    cheby_moments = momvals
+
+    ! Free memory
+    call xg_free(Moments)
+    call chebfi_free(chebfi)
+    
+end subroutine computeChebyshevMoments
 !!***
 
 end module m_slice
