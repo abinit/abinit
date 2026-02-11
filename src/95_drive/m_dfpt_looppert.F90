@@ -363,9 +363,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  end if
  
  if (.not.kramers_deg.and.dtset%npfft/=1) then
-   write(msg,'(a,a)')'   WARNING: RF routines are not adapted to fft parallelization'//char(10)//&
-& '   when tim1rev=0. The result of this calculation will most surely be wrong if npfft/=1.'
-   ABI_WARNING(msg)
+   write(msg,'(a,a)')'   RF routines are not adapted to fft parallelization'//char(10)//&
+& '   when tim1rev=0. However, npfft is different from 1 in the present run.'
+   ABI_BUG(msg)
    call wrtout(ab_out,msg,'COLL')
  end if
 
