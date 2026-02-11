@@ -106,7 +106,7 @@ module m_slice
     use m_xgTransposer
     use m_xg_ortho_RR
     use m_chebfi2
-    use m_slice_cprj, only: smallestTridiagEigenpair
+    use m_slice_cprj, only: smallestTridiagEigenpair, buildChebyshevJacksonCoeffs
 
     use m_xmpi
     use m_xomp
@@ -1085,6 +1085,8 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     integer :: my_rank, shift, bandpp, space_res
     integer :: ndeg_filter_max, nband
     integer :: ierr
+    integer :: nstep_bisect
+    real(dp) :: center, radius
     real(dp) :: mineig, maxeig
     real(dp) :: lanczos_lowb, lanczos_lowb_global
     ! Derived types
@@ -1185,7 +1187,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     write(901+my_rank,*) 'Here I compute Chebyshev moments yuhu'
     flush(901+my_rank)
  
-    ndeg_filter_max = 3
+    ndeg_filter_max = 5
     nband = slice%neigenpairs
     if (slice%paral_kgb==1) then
         nband = slice%bandpp
@@ -1196,13 +1198,27 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     call computeChebyshevMoments(slice, xXColsRows, getAX_BX, getBm1X, &
         lanczos_lowb_global, slice%ecut, ndeg_filter_max, cheby_moments)
     write(901+my_rank,*) 'Moments rows=', size(cheby_moments,1), 'cols=', size(cheby_moments,2)
-    write(901+my_rank,*) 'cheby_moments row1 =', real(cheby_moments(1,:))
+    !write(901+my_rank,*) 'cheby_moments row1 =', real(cheby_moments(1,:))
     flush(901+my_rank)
-
-    ABI_FREE(cheby_moments)
 
     ! Use the moments in parallel for every filter
     ! at the end of every filter we must sum contributions across procs
+
+    write(901+my_rank,*) 'I finally split spectrum..'
+    flush(901+my_rank)
+
+    nstep_bisect = 10
+    center = (slice%ecut + (lanczos_lowb_global - 0.1)) / 2.d0
+    radius = (slice%ecut - (lanczos_lowb_global - 0.1)) / 2.d0
+    
+    ! [a,b) working spectrum hardcoded, ongoing...
+    call splitSpectrum(nstep_bisect, center, radius, lanczos_lowb_global, 0.5_dp, cheby_moments)
+
+    ABI_FREE(cheby_moments)
+
+    ! TODO do this in MPI like bandpp bisect must be summed using communicator...
+    ! normally the sum should be the same with 1 MPI and 4 MPI otherwise a problem.
+    ! serious debug here 
 
 
     ! Now apply A and B to X (requires colsrows representation) to create AX and BX in colsrows
@@ -1228,7 +1244,8 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     call xgBlock_ymax(X_next, eigen_mpi%self, 0, 1)                    ! X_next = - eig * S|Psi>
     call xgBlock_add(X_next, xAXColsRows)                              ! X_next = H|Psi> - eig * S|Psi>
     call xgBlock_colwiseNorm2(X_next, resid_mpi%self, comm_loc=xmpi_comm_null)  ! resid = |X_next|^2
-   
+  
+    ! TODO I don't need all thetas. I only need theta max. And I don't need residual neither. 
     ! MPI communication for gathering all thetas (using summation strategy on columns)
     my_rank = xmpi_comm_rank(slice%spacecom)
     shift = my_rank * bandpp
@@ -2753,6 +2770,113 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     call chebfi_free(chebfi)
     
 end subroutine computeChebyshevMoments
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/splitSpectrum
+!! NAME
+!! splitSpectrum
+!! 
+!! FUNCTION
+!! Split working spectrum [a,b) mapped to [-1,1) with center and radius
+!! 
+!! SOURCE
+
+subroutine splitSpectrum(nstep_bisect, center, radius, a, b, cheby_moments)
+
+        implicit none
+
+        real(dp), intent(in) :: a, b
+        real(dp), intent(in) :: center, radius
+        integer, intent(in) :: nstep_bisect
+        complex(dp), intent(in) :: cheby_moments(:,:)
+
+        integer :: neigenpairs
+        integer :: ndeg_filter
+        integer :: ishift
+        real(dp) :: c, width
+        real(dp), allocatable :: energy_interval(:)
+        real(dp), allocatable :: cja(:)
+
+        ! *********************************************************************
+
+        neigenpairs = size(cheby_moments, 1)
+        ndeg_filter = size(cheby_moments, 2)-1
+
+        ABI_MALLOC(energy_interval, (neigenpairs))
+        ABI_MALLOC(cja, (ndeg_filter + 1))
+
+        width = (b - a) / (nstep_bisect + 1)
+  
+        do ishift = 1, nstep_bisect
+    
+            c = a + ishift * width
+
+            ! Slice Left [a,c)
+            call buildChebyshevJacksonCoeffs(a, c+0.1, ndeg_filter, center, radius, cja)
+            call computeFilterEnergy(cja, cheby_moments, energy_interval)
+
+            write(901,*) 'ishift=', ishift, 'c=', c
+            write(901,*) 'Nvec left=', sum(energy_interval)
+            flush(901)
+
+            ! Slice Right [c,b)
+            call buildChebyshevJacksonCoeffs(c-0.1, b, ndeg_filter, center, radius, cja)
+            call computeFilterEnergy(cja, cheby_moments, energy_interval)
+
+            write(901,*) 'Nvec right=', sum(energy_interval)
+            flush(901)
+
+        end do
+
+        ABI_FREE(energy_interval)
+        ABI_FREE(cja)
+
+end subroutine splitSpectrum
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/computeFilterEnergy
+!! NAME
+!! computeFilterEnergy
+!! 
+!! SOURCE
+
+subroutine computeFilterEnergy(cja, cheby_moments, energy_interval)
+
+      implicit none
+
+      real(dp), intent(in) :: cja(:)
+      complex(dp), intent(in) :: cheby_moments(:,:)
+      real(dp), intent(out) :: energy_interval(:)
+ 
+      complex(dp), allocatable :: energy(:)
+      integer :: neigenpairs, ndeg_filter
+      integer :: ideg, j
+
+      ! *********************************************************************
+
+      neigenpairs = size(cheby_moments,1)
+      ndeg_filter = size(cheby_moments,2)-1
+      ABI_MALLOC(energy, (neigenpairs))
+      energy = dcmplx(0.0d0,0.0d0)
+      !$omp parallel do private(ideg)
+      do j = 1, neigenpairs
+        do ideg = 1, ndeg_filter+1
+            energy(j) = energy(j) + cja(ideg) * cheby_moments(j, ideg)
+        end do
+      end do
+      !$omp end parallel do
+      !$omp parallel do
+      do j = 1, neigenpairs
+          energy_interval(j) = abs(energy(j))
+      end do
+      !$omp end parallel do
+      ABI_FREE(energy)
+
+end subroutine computeFilterEnergy
 !!***
 
 end module m_slice
