@@ -4102,6 +4102,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET EXIT DATA MAP(delete:kpg_k, ffnl_k, kinpw_k, ph3d_k) IF (dtset%gpu_option == ABI_GPU_OPENMP)
        !$OMP TARGET EXIT DATA MAP(delete:kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+       !$OMP TARGET EXIT DATA MAP(delete:h1_kets_kq, gvnlx1, kets_k, bras_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+       !$OMP TARGET EXIT DATA MAP(delete:gs1c_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP .and. sij_opt /= 0)
 #endif
        ABI_FREE(ffnl_k)
        ABI_FREE(ffnl_kq)
@@ -4111,11 +4113,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ABI_FREE(ph3d_kq)
        ABI_FREE(kinpw_k)
        ABI_FREE(kinpw_kq)
-
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET EXIT DATA MAP(delete:h1_kets_kq, gvnlx1, kets_k, bras_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP)
-       !$OMP TARGET EXIT DATA MAP(delete:gs1c_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP .and. sij_opt /= 0)
-#endif
        ABI_FREE(kets_k)
        ABI_FREE(bras_kq)
        ABI_FREE(h1_kets_kq)
