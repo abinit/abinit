@@ -2442,7 +2442,9 @@ end subroutine print_scalar_filter
     real(dp) :: alpha(k), beta(k-1)
     real(dp) :: beta_prev
     real(dp) :: norml_q
-    real(dp) :: dot_qTBv_layout(1,1), dot_qTv_layout(1,1), dot_vTBv_layout(1,1)
+    real(dp), pointer :: dot_qTBv_layout(:,:) => null()
+    real(dp), pointer :: dot_qTv_layout(:,:) => null()
+    real(dp), pointer :: dot_vTBv_layout(:,:) => null()
     real(dp), allocatable :: v_min(:)
 
     integer :: i, j
@@ -2480,9 +2482,6 @@ end subroutine print_scalar_filter
 
     ! q = random column vector
     call xgBlock_colwiseRandom(q, rank, 1)
-    if (gpu_option==ABI_GPU_OPENMP) then
-        call xgBlock_copy_to_gpu(q)
-    end if
     
     ! Bv = B * q / norml_q
     ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
@@ -2530,7 +2529,7 @@ end subroutine print_scalar_filter
         ! v = B^{-1} A q - alpha q - beta_prev q_prev
         call xgBlock_saxpy(v, -1.d0 * alpha(j), q)
         if (j > 1) then
-            call xgBlock_saxpy(v, -beta_prev, q_prev)
+            call xgBlock_saxpy(v, -beta_prev, qprev)
         end if
 
         ! Compute beta_j if j<k
@@ -2548,7 +2547,7 @@ end subroutine print_scalar_filter
             beta(j) = sqrt(dot_vTBv_layout(1,1))
 
             ! Update q_prev, q=v/beta_j, beta_prev
-            call xgBlock_copy(q, q_prev)
+            call xgBlock_copy(q, qprev)
             call xgBlock_scale(v, 1.d0/beta(j), 1)
             call xgBlock_copy(v, q)
             beta_prev = beta(j)
