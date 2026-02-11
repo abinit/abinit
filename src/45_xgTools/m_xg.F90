@@ -6422,7 +6422,7 @@ contains
     integer, intent(in) :: my_rank ! mpi-parallel safe seed
     integer, intent(in) :: jcol
 
-    real(dp) :: r1, r2
+    real(dp) :: re, reim(2)
     real(dp) :: norm2_vec
     integer :: tid, rank, seed_size, i, n
     integer, allocatable :: seed(:)
@@ -6442,36 +6442,38 @@ contains
     call random_seed(size=seed_size)
     ABI_MALLOC(seed, (seed_size))
 
+    ! Each thread each MPI process maintains its own seed
     select case(xgBlock%space)
     case (SPACE_R)
-        !$omp parallel private(tid, seed)
+        !$omp parallel private(tid, seed, re, i)
             tid = xomp_get_thread_num()
-            seed = 123456 + 1000*my_rank + 10*tid + (/ (i, i=1,seed_size) /)
+            seed = 123456 + 17*my_rank + 10*tid + (/ (i, i=1,seed_size) /)
             call random_seed(put=seed)
             ! execute each iteration i by exactly one thread
             !$omp do
             do i=1,n
-                call random_number(r1)
-                xgBlock%vecR(i,jcol) = r1
+                call random_number(re)
+                xgBlock%vecR(i,jcol) = re
             end do
             !$omp end do
         !$omp end parallel
     case (SPACE_C)
-        !$omp parallel private(tid, seed)
+        !$omp parallel private(tid, seed, reim, i)
             tid = xomp_get_thread_num()
             seed = 123456 + 1000*my_rank + 10*tid + (/ (i, i=1,seed_size) /)
             call random_seed(put=seed)
             !$omp do
             do i=1,n
-                call random_number(r1)
-                call random_number(r2)
-                xgBlock%vecC(i,jcol) = dcmplx(r1 - 0.5_dp, r2 - 0.5_dp)
+                call random_number(reim)
+                xgBlock%vecC(i,jcol) = dcmplx(reim(1)-0.5_dp, reim(2)-0.5_dp)
             end do
             !$omp end do
         !$omp end parallel
         vecC => xgBlock%vecC(:,jcol) ! contiguous in memory
         norm2_vec = sum(conjg(vecC)*vecC)
         vecC = vecC / sqrt(real(norm2_vec, dp))
+        write(901,*) 'norm2_vec=', norm2_vec
+        flush(901)
     case (SPACE_CR)
         ABI_FREE(seed)
         ABI_ERROR('Not implemented for SPACE_CR')

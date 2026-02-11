@@ -1155,9 +1155,6 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     slice%use_linalg = .false.
     slice%use_colsrows = .true.
 
-    write(901,*) ' X id before', xgBlock_getid(xXColsRows); flush(901)
-    write(901,*) 'AX id before', xgBlock_getid(xAXColsRows); flush(901)
-    write(901,*) 'BX id before', xgBlock_getid(xBXColsRows); flush(901)
     ! Now apply A and B to X (requires colsrows representation) to create AX and BX in colsrows
     ! Remember that this function will copy X to BX if paw
     ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
@@ -1165,11 +1162,9 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     call xgBlock_zero_im_g0(xAXColsRows)
     call xgBlock_zero_im_g0(xBXColsRows)
     ABI_NVTX_END_RANGE()
-    write(901,*) ' X id after ', xgBlock_getid(xXColsRows); flush(901)
-    write(901,*) 'AX id after ', xgBlock_getid(xAXColsRows); flush(901)
-    write(901,*) 'BX id after ', xgBlock_getid(xBXColsRows); flush(901)
 
     write(901,*) 'Here I write the Lanczos yeyyy'
+    flush(901)
     kmax = 20
     call computeBLanczos(slice, getAX_BX, getBm1X, kmax, lambda_min, res_norm)
 
@@ -2475,13 +2470,22 @@ end subroutine print_scalar_filter
     call xgBlock_setBlock(W_vcol%self,  Bm1v, spacedim, 1, fcol=4) ! Bm1 v
     call xgBlock_setBlock(W_vcol%self, qprev, spacedim, 1, fcol=5) ! q_prev
 
+    write(901,*) 'allocated W_vcol'
+    flush(901)
+
     call xg_init(W_dot, SPACE_R, 1, 3, xmpi_comm_null, me_g0=me_g0, gpu_option=gpu_option)
     call xgBlock_setBlock(W_dot%self, dot_qTBv, 1, 1)
     call xgBlock_setBlock(W_dot%self,  dot_qTv, 1, 1, fcol=2)
     call xgBlock_setBlock(W_dot%self, dot_vTBv, 1, 1, fcol=3)
 
+    write(901,*) 'allocated W_dot'
+    flush(901)
+
     ! q = random column vector
     call xgBlock_colwiseRandom(q, rank, 1)
+
+    write(901,*) 'entries on random vector OK'
+    flush(901)
     
     ! Bv = B * q / norml_q
     ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
