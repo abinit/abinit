@@ -1155,7 +1155,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
     call xgTransposer_transpose(xgTransposerX, STATE_COLSROWS)
     ABI_NVTX_END_RANGE()
-    
+
     slice%use_linalg = .false.
     slice%use_colsrows = .true.
 
@@ -1164,8 +1164,9 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     kmax = 50
     call computeBLanczos(slice, getAX_BX, getBm1X, kmax, lambda_min, res_norm)
 
-    my_rank = xmpi_comm_rank(slice%spacecom)
     lanczos_lowb = lambda_min - res_norm
+    
+    my_rank = xmpi_comm_rank(slice%spacecom)
     write(901+my_rank,*) 'my_rank           =', my_rank
     write(901+my_rank,*) 'Lanczos lambda_min=', lambda_min
     write(901+my_rank,*) 'Lanczos res_norm  =', res_norm
@@ -1181,20 +1182,22 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     write(901+my_rank,*) 'Lanczos guarantee(global) =', lanczos_lowb_global
     flush(901+my_rank)
 
-    write(901,*) 'Here I compute Chebyshev moments yuhu'
-    flush(901)
+    write(901+my_rank,*) 'Here I compute Chebyshev moments yuhu'
+    flush(901+my_rank)
  
-    ndeg_filter_max = 5
+    ndeg_filter_max = 3
     nband = slice%neigenpairs
     if (slice%paral_kgb==1) then
         nband = slice%bandpp
     end if
     ABI_MALLOC(cheby_moments, (nband, ndeg_filter_max+1) )
 
+    write(901+my_rank,*) 'rows=', rows(xXColsRows), 'cols=', cols(xXColsRows)
     call computeChebyshevMoments(slice, xXColsRows, getAX_BX, getBm1X, &
         lanczos_lowb_global, slice%ecut, ndeg_filter_max, cheby_moments)
-    write(901,*) 'cheby_moments=', cheby_moments(1,:)
-    flush(901)
+    write(901+my_rank,*) 'Moments rows=', size(cheby_moments,1), 'cols=', size(cheby_moments,2)
+    write(901+my_rank,*) 'cheby_moments row1 =', real(cheby_moments(1,:))
+    flush(901+my_rank)
 
     ABI_FREE(cheby_moments)
 
@@ -2620,7 +2623,7 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     implicit none
 
     type(slice_t), intent(inout) :: slice
-    type(xgBlock_t), intent(in) :: X0
+    type(xgBlock_t), intent(inout) :: X0
     integer, intent(in) :: ndeg_filter_max
     real(dp), intent(in) :: min_low_bound, max_upp_bound
     complex(dp), intent(out) :: cheby_moments(:,:)
@@ -2643,6 +2646,7 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     integer, parameter :: tim_swap = 1761
     integer :: neigenpairs, nband
     integer :: ideg
+    integer :: iband
     integer :: tot_spacedim
     integer :: space, spacecom, me_g0, gpu_option
     real(dp) :: center, radius
@@ -2650,7 +2654,9 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     real(dp) :: two_over_r
     real(dp) :: tsec(2)
     type(xg_t) :: Moments
-    type(xgBlock_t) :: moment_ideg
+    type(xg_t) :: norm2_X
+    type(xgBlock_t) :: Moment_ideg
+    type(xgBlock_t) :: X0_part
     type(chebfi_t) :: chebfi
     complex(dp), pointer :: momvals(:,:) => null()
 
@@ -2678,8 +2684,8 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         gpu_thread_limit=slice%gpu_thread_limit,from_linalg=.false.)
 
     ! Compute moment 0= <X0,X0>
-    call xgBlock_setBlock(Moments%self, moment_ideg, nband, 1) 
-    call xgBlock_colwiseDotProduct(X0, X0, moment_ideg, comm_loc=xmpi_comm_null)
+    call xgBlock_setBlock(Moments%self, Moment_ideg, nband, 1) 
+    call xgBlock_colwiseDotProduct(X0, X0, Moment_ideg, comm_loc=xmpi_comm_null)
    
     ! Spectral interval to be amplified scaled to [-1,1)
     center = (max_upp_bound + min_low_bound)*0.5
@@ -2689,6 +2695,17 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
 
     ! Initialize Chebyshev recursion
     chebfi%xXColsRows = X0
+    if (slice%paral_kgb==1) then
+        ! Normalize X
+        call xgBlock_reverseMap(Moment_ideg, momvals, nband, 1)
+        do iband=1, nband
+            call xgBlock_setBlock(chebfi%xXColsRows, X0_part, tot_spacedim, 1, fcol=iband)
+            call xgBlock_scale(X0_part, 1._dp/real(momvals(iband,1)), 1)
+        end do
+        call xgBlock_ones(Moment_ideg)
+        call xgBlock_copy(chebfi%xXColsRows, X0)
+    end if
+
     ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
     call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
     call xgBlock_zero_im_g0(chebfi%xAXColsRows)
@@ -2697,8 +2714,8 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
 
     do ideg = 0, ndeg_filter_max - 1
        
-        write(901,*) 'ideg=', ideg
-        flush(901)
+        write(901+xmpi_comm_rank(spacecom),*) 'ideg=', ideg
+        flush(901+xmpi_comm_rank(spacecom))
 
         ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
         call chebfi_computeNextOrderChebfiPolynom(chebfi, ideg, center, one_over_r, two_over_r, getBm1X)
@@ -2712,8 +2729,8 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         ABI_NVTX_END_RANGE()
 
         ! M_ideg = < X0, f_ideg X0 > in C^nband for every ideg
-        call xgBlock_setBlock(Moments%self, moment_ideg, nband, 1, fcol=ideg+2) 
-        call xgBlock_colwiseDotProduct(X0, chebfi%xXColsRows, moment_ideg, comm_loc=xmpi_comm_null)
+        call xgBlock_setBlock(Moments%self, Moment_ideg, nband, 1, fcol=ideg+2) 
+        call xgBlock_colwiseDotProduct(X0, chebfi%xXColsRows, Moment_ideg, comm_loc=xmpi_comm_null)
 
         !A * Psi    
         ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)

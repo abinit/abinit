@@ -281,6 +281,7 @@ module m_xg
   public :: xgBlock_zerotri
   public :: xgBlock_zero_im_g0
   public :: xgBlock_one
+  public :: xgBlock_ones
   public :: xgBlock_colwiseRandom
   public :: xgBlock_diagonal
   public :: xgBlock_diagonalOnly
@@ -5989,6 +5990,88 @@ contains
     call timab(tim_zero,2,tsec)
 
   end subroutine xgBlock_zero
+  !!***
+
+  !!****f* m_xg/xgBlock_ones
+  !!
+  !! NAME
+  !! xgBlock_ones
+
+  subroutine xgBlock_ones(xgBlock)
+
+    type(xgBlock_t), intent(inout) :: xgBlock
+
+    integer :: i,fact
+#if defined HAVE_GPU
+    integer(C_SIZE_T) :: byte_count
+#endif
+
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
+    integer :: rows,cols,iblock,jblock
+#endif
+    double precision :: tsec(2)
+
+    fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
+
+    if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
+
+#if defined HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        byte_count = int(fact, c_size_t) * xgBlock%ldim * xgBlock%cols * dp
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock%vecR)
+        call gpu_memset(c_loc(xgBlock%vecR), 1, byte_count)
+        !$OMP END TARGET DATA
+      case (SPACE_C)
+        byte_count = int(xgBlock%ldim, c_size_t) * xgBlock%cols * 2 * dp ! Note the factor 2, needed here!
+        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock%vecC)
+        call gpu_memset(c_loc(xgBlock%vecC), 1, byte_count)
+        !$OMP END TARGET DATA
+      end select
+#else
+!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
+      rows = xgBlock%rows; cols = xgBlock%cols
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        xgBlock__vecR => xgBlock%vecR
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecR)
+        do iblock = 1, cols
+          do jblock = 1, fact * rows
+            xgBlock__vecR(jblock,iblock) = 1.d0
+          end do
+        end do
+      case (SPACE_C)
+        xgBlock__vecC => xgBlock%vecC
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecC)
+        do iblock = 1, cols
+          do jblock = 1, fact * rows
+            xgBlock__vecC(jblock,iblock) = dcmplx(1.d0,0)
+          end do
+        end do
+      end select
+#endif
+#endif
+
+    else
+
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        !$omp parallel do
+        do i = 1, xgBlock%cols
+          xgBlock%vecR(:,i) = 1.d0
+        end do
+      case (SPACE_C)
+        !$omp parallel do
+        do i = 1, xgBlock%cols
+          xgBlock%vecC(:,i) = dcmplx(1.d0)
+        end do
+      end select
+    end if
+
+  end subroutine xgBlock_ones
   !!***
 
   !!****f* m_xg/xgBlock_zerotri
