@@ -448,7 +448,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),allocatable :: vhartr1_tmp(:,:)
  real(dp),allocatable,target :: vtrial1(:,:),vtrial2(:,:)
  real(dp),allocatable :: vtrial1_mq(:,:),rhorfermi_mq(:,:)
- real(dp),allocatable :: nvresid1_mq(:,:),vxc1_mq(:,:),vhartr1_mq(:)
+ real(dp),allocatable :: nvresid1_mq(:,:)
  real(dp),pointer :: vtrial1_tmp(:,:)
  type(pawcprj_type),allocatable :: cprj1(:,:)
  type(paw_an_type),allocatable :: paw_an1(:)
@@ -610,11 +610,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 ! TODO: for non collinear case this should always be nspden, in NCPP case as well!!!
  ABI_MALLOC(vxc1,(cplex*nfftf,nspden*(1-usexcnhat))) ! Not always needed
  vtrial1_tmp => vtrial1   ! this is to avoid errors when vtrial1_tmp is unused
-
- if (.not.kramers_deg) then
-   ABI_MALLOC(vhartr1_mq,(cplex*nfftf))
-   ABI_MALLOC(vxc1_mq,(cplex*nfftf,nspden*(1-usexcnhat)))
- end if
 
 !Several parameters and arrays for the SCF mixing:
 !These arrays are needed only in the self-consistent case
@@ -839,16 +834,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     rhog,rhog1,rhor,rhor1,rprimd,dtset%typat,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,&
 &     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot,xred,dtset%qgbt,dtset%use_gbt)
 
-!     write(101,*) vtrial1(:,1)
-!     write(102,*) vtrial1(:,2)
-!     write(103,*) vtrial1(:,3)
-!     write(104,*) vtrial1(:,4)
-
      !Compute vtrial1 at (+q,+omega) and (-q,-omega) with specific local part if q/=0
      if (.not.kramers_deg) then
        call dfpt_vtrial1_mq(cplex,nfftf,dtset%nspden,nvresid1,nvresid1_mq,vtrial1,vtrial1_mq)
-!       nvresid1_mq=nvresid1
-!       vtrial1_mq=vtrial1
      end if
 
 !    For Q=0 and metallic occupation, initialize quantities needed to
@@ -957,8 +945,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  Update vtrial1_mq
    if (nstep>1.and..not.kramers_deg) then
      call dfpt_vtrial1_mq(cplex,nfftf,dtset%nspden,nvresid1,nvresid1_mq,vtrial1,vtrial1_mq)
-!      nvresid1_mq=nvresid1
-!      vtrial1_mq=vtrial1
    end if
 
 !  For Q=0 and metallic occupation, calculate the first-order Fermi energy
@@ -973,7 +959,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        call newfermie1(cplex,fermie1_mq,fe1fixed_mq,ipert,istep,dtset%ixc,my_natom,dtset%natom,&
 &       nfftf,nfftotf,nhatfermi,nspden,dtset%ntypat,dtset%occopt,paw_an,paw_an1,paw_ij1,pawang,&
 &       dtset%pawnzlm,pawrad,pawrhoij1,pawrhoijfermi,pawtab,dtset%pawxcdev,&
-&       dtset%prtvol,rhorfermi_mq,ucvol,psps%usepaw,usexcnhat,vtrial1_mq,vxc1_mq,dtset%xclevel,&
+&       dtset%prtvol,rhorfermi_mq,ucvol,psps%usepaw,usexcnhat,vtrial1_mq,vxc1,dtset%xclevel,&
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
      end if
    end if
@@ -1669,8 +1655,6 @@ if (ipert/=dtset%natom+1.and.dtset%prt1mag/=0) then
  ABI_FREE(fcart)
  ABI_FREE(vtrial1)
  if (.not.kramers_deg) then
-   ABI_FREE(vhartr1_mq)
-   ABI_FREE(vxc1_mq)
    ABI_FREE(vtrial1_mq)
    ABI_FREE(d2bbb_mq)
    ABI_FREE(d2lo_mq)

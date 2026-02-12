@@ -87,7 +87,7 @@ nband 4
 ixc   7           # Perdew-Wang 92
 
 #Definition of the planewave basis set
-ecut   4.5       # Maximal kinetic energy cut-off, in Hartree
+ecut   5.0       # Maximal kinetic energy cut-off, in Hartree
 
 #Definition of the k-point grid
 ngkpt 6 6 1

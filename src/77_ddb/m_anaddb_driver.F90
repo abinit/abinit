@@ -1086,8 +1086,6 @@ subroutine anaddb_driver_dielectric_nonana(driver, dtset, crystal, ddb, ana_ncid
    qphon(:,1)=dtset%qph2l(:,iphl2)
    qphnrm(1)=dtset%qnrml2(iphl2)
 
-   !TODO: Quadrupole interactions need to be incorporated here (MR)
-
    ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
    ! for the second list of wv (can include non-analyticities if q /= 0)
    call dfpt_phfrq(ddb%amu, driver%displ, driver%d2cart, eigval, eigvec, crystal%indsym, &
