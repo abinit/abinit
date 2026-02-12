@@ -1284,11 +1284,12 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
   integer :: adir,bdir,choice,cpopt,gdir,ndat,nn,nnlout,np,npwsp
   integer :: paw_opt,signs,tim_getghc
   real(dp) :: epsabg
-  complex(dp) :: b1,bdotc,bpdotc,bv2b,gdotc,gpdotc,m1,m1_mu,mb,mg,mv2b,mv2b_mu
+  complex(dp) :: bdotc,bpdotc,gdotc,gpdotc
   complex(dp) :: prefac_b,prefac_m
   !arrays
   real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1)
   real(dp),allocatable :: bra(:,:),ket(:,:),svectoutb(:,:),svectoutg(:,:),vectout(:,:)
+  complex(dp) :: b1(3),bv2b(3),m1(3),mv2b(3),m1_mu(3),mv2b_mu(3)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 !--------------------------------------------------------------------
 
@@ -1311,81 +1312,78 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
  signs = 2
  nnlout = 1
 
- !do adir = 1, 3
-   do nn = 1, nband_k
+ do nn = 1, nband_k
      
-     m1 = czero; mv2b = czero
-     m1_mu = czero; mv2b_mu = czero
-     b1 = czero; bv2b = czero
+   m1 = czero; mv2b = czero
+   m1_mu = czero; mv2b_mu = czero
+   b1 = czero; bv2b = czero
 
-     ! extract |u_nk>
-     ket(1:2,1:npwsp) = cg_k(1:2,(nn-1)*npwsp+1:nn*npwsp)
+   ! extract |u_nk>
+   ket(1:2,1:npwsp) = cg_k(1:2,(nn-1)*npwsp+1:nn*npwsp)
+   call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
+     & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
 
-     do bdir = 1, 3
-       do gdir = 1, 3
+   do bdir = 1, 3
+     ! compute dS/dk_b|u_nk>
+     call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
+       & paw_opt,signs,svectoutb,tim_getghc,ket,vectout)
+
+     do gdir = 1, 3
+       ! compute dS/dk_g |u_nk>
+       call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,gdir,lamv,mpi_enreg,ndat,nnlout,&
+         & paw_opt,signs,svectoutg,tim_getghc,ket,vectout)
+       ! extract |Pc du/dk_b>
+       bra(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
+       gdot=cg_zdotc(npwsp,bra,svectoutg); gdotc=CMPLX(gdot(1),gdot(2))
+       ! extract |Pc du/dk_g>
+       bra(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
+       bdot=cg_zdotc(npwsp,bra,svectoutb); bdotc=CMPLX(bdot(1),bdot(2))
+        
+       do adir=1,3 
          epsabg = eijk(adir,bdir,gdir)
          if (ABS(epsabg) .LT. half) cycle
          prefac_b = cbc*c2*epsabg
          prefac_m = com*c2*epsabg
-
-         call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
-           & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
-
-         ! compute dS/dk_g |u_nk>
-         call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,gdir,lamv,mpi_enreg,ndat,nnlout,&
-           & paw_opt,signs,svectoutg,tim_getghc,ket,vectout)
-         ! compute dS/dk_b|u_nk>
-         call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
-           & paw_opt,signs,svectoutb,tim_getghc,ket,vectout)
-
-         ! extract |Pc du/dk_b>
-         bra(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
-         gdot=cg_zdotc(npwsp,bra,svectoutg); gdotc=CMPLX(gdot(1),gdot(2))
          
          ! add <Pc du/dk_b|dS/dk_g|u_nk>*E_nk
-         b1 = b1 - prefac_b*gdotc
-         m1 = m1 + prefac_m*gdotc*eig_k(nn)
-         m1_mu = m1_mu - prefac_m*gdotc*fermie
-
-         ! extract |Pc du/dk_g>
-         bra(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
-         !overlap
-         bdot=cg_zdotc(npwsp,bra,svectoutb); bdotc=CMPLX(bdot(1),bdot(2))
+         b1(adir) = b1(adir) - prefac_b*gdotc
+         m1(adir) = m1(adir) + prefac_m*gdotc*eig_k(nn)
+         m1_mu(adir) = m1_mu(adir) - prefac_m*gdotc*fermie
 
          ! add CONJG(<Pc du/dk_b|dS/dk_g|u_nk>)*E_nk
-         b1 = b1 - prefac_b*CONJG(bdotc)
-         m1 = m1 + prefac_m*CONJG(bdotc)*eig_k(nn)
-         m1_mu = m1_mu - prefac_m*CONJG(bdotc)*fermie
+         b1(adir) = b1(adir) - prefac_b*CONJG(bdotc)
+         m1(adir) = m1(adir) + prefac_m*CONJG(bdotc)*eig_k(nn)
+         m1_mu(adir) = m1_mu(adir) - prefac_m*CONJG(bdotc)*fermie
+       end do
 
-         do np = 1, nband_k
+       do np = 1, nband_k
+         if (occ_k(np).LT.tol8) cycle
+         bra(1:2,1:npwsp) = cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
+         gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
+         bpdot = cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
 
-           if (occ_k(np).LT.tol8) cycle
-
-           bra(1:2,1:npwsp) = cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
-
-           gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
-           mg = CMPLX(gpdot(1),gpdot(2))
-
-           bpdot = cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
-           mb = CMPLX(bpdot(1),bpdot(2))
-
+         do adir=1,3 
+           epsabg = eijk(adir,bdir,gdir)
+           if (ABS(epsabg) .LT. half) cycle
+           prefac_b = cbc*c2*epsabg
+           prefac_m = com*c2*epsabg
            ! terms in <u|dS|u'><u'|dS|u>
-           bv2b = bv2b + prefac_b*CONJG(bpdotc)*gpdotc
-           mv2b = mv2b - prefac_m*CONJG(bpdotc)*gpdotc*eig_k(nn)
-           mv2b_mu = mv2b_mu + prefac_m*CONJG(bpdotc)*gpdotc*fermie
-         end do ! np
+           bv2b(adir) = bv2b(adir) + prefac_b*CONJG(bpdotc)*gpdotc
+           mv2b(adir) = mv2b(adir) - prefac_m*CONJG(bpdotc)*gpdotc*eig_k(nn)
+           mv2b_mu(adir) = mv2b_mu(adir) + prefac_m*CONJG(bpdotc)*gpdotc*fermie
+         end do
+       end do ! np
 
-       end do !gdir
-     end do !bdir
+     end do !gdir
+   end do !bdir
 
-     orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibvv1) = real(b1)
-     orbmag_mesh%cmesh(nn,ikpt,isppol,adir,ibvv2) = real(bv2b)
+   orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibvv1) = real(b1(1:3))
+   orbmag_mesh%cmesh(nn,ikpt,isppol,1:3,ibvv2) = real(bv2b(1:3))
 
-     orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv1) = real(m1+m1_mu)
-     orbmag_mesh%omesh(nn,ikpt,isppol,adir,invv2) = real(mv2b+mv2b_mu)
+   orbmag_mesh%omesh(nn,ikpt,isppol,1:3,invv1) = real(m1(1:3)+m1_mu(1:3))
+   orbmag_mesh%omesh(nn,ikpt,isppol,1:3,invv2) = real(mv2b(1:3)+mv2b_mu(1:3))
 
-   end do !nn
- end do !adir
+ end do !nn
 
  ABI_FREE(bra)
  ABI_FREE(ket)
