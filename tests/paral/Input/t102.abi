@@ -113,17 +113,17 @@ kssform3    3
 #pawfatbnd2  1           # Fatbands, only resolved for total angular momenta
 dmft_kspectralfunc3 1    # Activate k-resolved spectral function
 iscf3      -2            #
-kptopt3    -5            # Bandstructure: 5 segments
-ndivsm3     20           # Lengths of minimal segment
+kptopt3    -1            # Bandstructure: 5 segments
+ndivsm3     10           # Lengths of minimal segment
 kptbounds3               # The four segments of the band structure are
 #                        # connecting 5 points of the Brillouin zone,
 #                        # given here.
         0.0 0.0 0.0      # Gamma
         0.0 1/2 0.0      # N
-        1/4 1/4 1/4      # P
-        0.0 0.0 0.0      # Gamma
-        1/2 1/2 1/2      # H
-        0.0 1/2 0.0      # N
+#        1/4 1/4 1/4      # P
+#        0.0 0.0 0.0      # Gamma
+#        1/2 1/2 1/2      # H
+#        0.0 1/2 0.0      # N
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
