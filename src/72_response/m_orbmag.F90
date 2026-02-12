@@ -1449,10 +1449,10 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_
   !scalars
   integer :: adir,berryopt,cplex,iband,ipert,jband,ndat,npwsp
   integer :: optlocal,optnl,opt_gvnlx1,sij_opt,tim_getgh1c,usevnl
-  real(dp) :: corrfac,deltae,deltapert,doti,dotr,hijr,hiji,pertr,perti,pertsize,sijr,siji
+  real(dp) :: corrfac,deltae,deltapert,doti,dotr,pertr,perti,pertsize
   type(rf_hamiltonian_type) :: rf_hamk
   !arrays
-  real(dp) :: lambda(1)
+  real(dp) :: hij(2),lambda(1),sij(2)
   real(dp),allocatable :: cwavef(:,:),dcg1(:,:),gh1c(:,:)
   real(dp),allocatable :: grad_berry(:,:),gs1c(:,:),gvnlx1(:,:)
   real(dp),allocatable :: vectornd_pac_idir(:,:,:,:)
@@ -1517,10 +1517,8 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_
         ! deltae test seems to work best compared to deltapert test
         !if (abs(deltae) .LT. dtset%ggtrcut) cycle
         cwavef(1:2,1:npwsp)=cg_k(1:2,(jband-1)*npwsp+1:jband*npwsp)
-        hijr = DOT_PRODUCT(cwavef(1,:),gh1c(1,:))+DOT_PRODUCT(cwavef(2,:),gh1c(2,:))
-        hiji = DOT_PRODUCT(cwavef(1,:),gh1c(2,:))-DOT_PRODUCT(cwavef(2,:),gh1c(1,:))
-        sijr = DOT_PRODUCT(cwavef(1,:),gs1c(1,:))+DOT_PRODUCT(cwavef(2,:),gs1c(2,:))
-        siji = DOT_PRODUCT(cwavef(1,:),gs1c(2,:))-DOT_PRODUCT(cwavef(2,:),gs1c(1,:))
+        hij=cg_zdotc(npwsp,cwavef,gh1c)
+        sij=cg_zdotc(npwsp,cwavef,gs1c)
         select case (dtset%orbmag)
         case ( 3 )
           lambda(1) = half*(eig_k(jband)+eig_k(iband))
@@ -1529,8 +1527,8 @@ subroutine para_to_diag(atindx,cg_k,cg1_k,cprj_k,dimlmn,dkinpw,dtset,eig_k,gcg1_
           lambda(1) = eig_k(iband)
           corrfac=-one
         end select
-        pertr = (hijr-lambda(1)*sijr)/deltae
-        perti = (hiji-lambda(1)*siji)/deltae
+        pertr = (hij(1)-lambda(1)*sij(1))/deltae
+        perti = (hij(2)-lambda(1)*sij(2))/deltae
         pertsize=sqrt(pertr*pertr+perti*perti)
         if (pertsize .GT. dtset%ggtrcut) cycle
 !          write(std_out,'(a,3i4,2es16.8)')'JWZ debug reject adir iband jband pert ',&
