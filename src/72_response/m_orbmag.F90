@@ -83,8 +83,6 @@ module m_orbmag
 
 
   ! these parameters name the various output terms
-
-  ! these parameters name the various output terms
   integer,parameter :: chern_nterms=3
   integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3
   integer,parameter :: orbmag_nterms=6
@@ -1360,7 +1358,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
          if (occ_k(np).LT.tol8) cycle
          bra(1:2,1:npwsp) = cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
          gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
-         bpdot = cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
+         bpdot=cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
 
          do adir=1,3 
            epsabg = eijk(adir,bdir,gdir)
@@ -1702,9 +1700,8 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
   !scalars
   integer :: adir,choice,cpopt,iband,jband
   integer :: ndat,nnlout,npwsp,paw_opt,signs,tim_nonlop
-  real(dp) :: doti,dotr
   !arrays
-  real(dp) :: lambda(1)
+  real(dp) :: dotp(2),lambda(1)
   real(dp),allocatable :: cwavef(:,:),enlout(:),svectout(:,:)
   real(dp),allocatable :: vcg1(:,:),vectout(:,:)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -1750,10 +1747,9 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
       do jband = 1, nband_k
         if(abs(occ_k(jband)).LT.tol8) cycle
         cwavef(1:2,1:npwsp)=cg_k(1:2,(jband-1)*npwsp+1:jband*npwsp)
-        dotr = DOT_PRODUCT(cwavef(1,:),svectout(1,:))+DOT_PRODUCT(cwavef(2,:),svectout(2,:))
-        doti = DOT_PRODUCT(cwavef(1,:),svectout(2,:))-DOT_PRODUCT(cwavef(2,:),svectout(1,:))
-        vcg1(1,:) = vcg1(1,:) - half*( dotr*cwavef(1,:) - doti*cwavef(2,:))
-        vcg1(2,:) = vcg1(2,:) - half*( dotr*cwavef(2,:) + doti*cwavef(1,:))
+        dotp=cg_zdotc(npwsp,cwavef,svectout)
+        vcg1(1,:) = vcg1(1,:) - half*( dotp(1)*cwavef(1,:) - dotp(2)*cwavef(2,:))
+        vcg1(2,:) = vcg1(2,:) - half*( dotp(1)*cwavef(2,:) + dotp(2)*cwavef(1,:))
       end do
 
       ! subtract vcg1 from cg1_k to obtain pcg1, the conduction band part of cg1
