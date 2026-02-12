@@ -10,8 +10,8 @@ This approach has the advantage that ABINIT can automatically handle several key
 to reduce the number of $\kk$ and $\qq$ points to the appropriate irreducible Brillouin zone,
 or automatically filtering the bands in transport calculations.
 
-However, this strategy also has important drawbacks.
-The e-ph matrix elements must be recomputed from scratch every time a new physical quantity is evaluated.
+However, this strategy also has important drawbacks since
+the e-ph matrix elements must be recomputed from scratch every time a new physical quantity is evaluated.
 More critically, there exist algorithms in which the same set of e-ph matrix elements is required multiple times.
 A notable example is the VarPEq algorithm: here an external SCF loop is present, and at each iteration
 the code must evaluate terms that depend on a fixed set of e-ph matrix elements.
@@ -25,11 +25,13 @@ matrix elements using a dedicated EPH sub-driver that is activated using:
 It is important to understand, however, that the user is now responsible for specifying
 how the $\kk$-mesh and $\qq$-mesh should be sampled and how symmetries should be applied to reduce the number of matrix elements.
 All variables controlling the GSTORE computation start with the `gstore_` prefix.
-Default values are provided that are generally well suited for standard electronic-structure workflows,
+
+Default values are provided that are generally well suited for the computation of electronic properties,
 but in many situations you may need to customize or override the default behavior depending on your specific use case.
 This guide aims to help you understand how to select the appropriate options.
 
-The first step is to specify whether the $\kk$-points or the $\qq$-points should be restricted to the IBZ.
+The first step is to specify whether the $\kk$-points or the $\qq$-points should be restricted to the
+irreducible zone (IBZ) or the full Brillouin zone (BZ).
 This is controlled by the variables [[gstore_kzone]] and [[gstore_qzone]].
 The default behavior is:
 
@@ -55,10 +57,13 @@ For the phonon self-energy, on the other hand, on should override the default be
 
 An additional reduction of the number of wavevectors can be achieved with the two
 mutually exclusive variables [[gstore_use_lgq]] and [[gstore_use_lgk]].
-In some cases, the integration over the BZ can indeed be restricted by symmetry to the irreducible wedge defined by the "external" wavevector.
+In some cases, the integration over the BZ in the post-processing step can indeed be restricted
+by symmetry to the irreducible wedge defined by the little group of the "external" wavevector ($\kk$ or $\qq$
+We use the notation IBZ_k to denote the the irreducible wedge defined by the little group of $\kk$
+and IBZ_q for the irrecudible wedge defined by the little group of $\qq$.
 The following examples will help clarify this point.
 
-The electron self-energy Sigma_\nk is defined by an integration over $\qq$-points in the full BZ,
+The electron self-energy $Sigma_\nk$ is defined by an integration over $\qq$-points in the full BZ,
 but one can use the symmetries of the little group of $\kk$ to restrict the integration to a smaller zone.
 
 $$
@@ -87,6 +92,7 @@ For phonon properties, one should use
 Now we turn to the problem of selecting the bands that enter the e-ph matrix elements.
 Several options are available, each tailored to simplify a different type of calculation.
 Let us begin with the default behavior.
+
 If no specific option is provided in the input file, ABINIT computes **all** matrix elements with $m$ and $n$ ranging from 1 up to [[nband]].
 Clearly, this is rarely what you actually want: not all these transitions are needed to compute the final physical properties.
 However, ABINIT cannot (yet) read your mind, so you must **explicitly** specify the band ranges in the input file.
@@ -117,6 +123,33 @@ For computing the ZPR of the fundamental/direct band gap:
 [[gstore_kfilter]] "qprange"  # Compute g(k,q) only for |nk> at the band edges
 [[gstore_use_lgk]] 1          # Only q-points in the IBZ_k
 [[nband]]                     # Bands for the m index (from 1 up to nband)
+
+!!! important
+
+    Here, by band edges we refer to the $\kk$-points in the WFK file at which the
+    conduction band minimum (CBM) and valence band maximum (VBM) are found.
+
+    These $\kk$-points do not necessarily coincide with the true band extrema,
+    as the latter may not lie on the chosen $\kk$-mesh. A typical example is
+    silicon, where the CBM is located along the Γ–X direction at $k \approx 0.85\, \frac{2\pi}{a}$.
+
+    If a more accurate description of the true band edges is required,
+    generate a WFK file using a shifted $\kk$-mesh via [[shiftk]].
+
+If you want to have full control on the list $\kk$-points and bands that should be considered for the $|n\kk\rangle$ states,
+use [[nkptgw]], [[kptgw]] and [[bdgw]] as in the example below:
+
+[[gstore_use_lgk]] 1          # Only q-points in the IBZ_k
+[[nkptgw]]
+2
+[[kptgw]]
+0   0 0
+0.8 0 0
+[[bdgw]]
+1 5
+1 5
+[[nband]]                     # Bands for the m index (from 1 up to nband)
+
 
 ## MPI parallelism in gstore computation
 

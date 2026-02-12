@@ -226,10 +226,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 !scalars
  integer,parameter :: LOG_MODQ = 1, LOG_MODK = 4, LOG_MODP = 4, ENOUGH_STERN = 5
  integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, istwfk1 = 1, cplex1 = 1, pawread0 = 0
- integer,parameter :: master = 0, ndat1 = 1, with_cplex0 = 0, n3xccc0 = 0, optder0 = 0  !useylmgr = 0, useylmgr1 = 0,
+ integer,parameter :: master = 0, ndat1 = 1, with_cplex0 = 0, n3xccc0 = 0, optder0 = 0
  integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
  integer :: nb_k, nb_kq, bstart_k, bstop_k, bstart_kq, bstop_kq, matblk, method, enforce_sym
- integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nproc !, gsum_master
+ integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nproc
  integer :: ib_sum, ii, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, ig, max_npw_xc, min_npw_xc, npw_x, npw_c, nw_nk, nw_mkq
  integer :: isym_q, trev_q, ip_ibz
@@ -367,6 +367,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call gstore%get_missing_qbz_spin(done_qbz_spin, ndone, nmiss)
  !call wrtout(units, sjoin("- Number of q-points/spin completed:", itoa(count(done_qbz_spin == 1)), "/", itoa(sigma%nkcalc)))
 
+ ! TODO: Check restart capabilities. It seems they don't work properly.
  ! NB: Write phonon data here as we are not guaranteed to have all the IBZ q-points
  ! inside the loop over my_iq if filtering has been used.
  ! Make sure internal table with gstore_done_qbz_spin is properly filled.
@@ -578,11 +579,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  if (gstore%with_vk /= 0 .and. ndone == 0) then
    call gstore%compute_and_write_vk(mpw, wfd, ebands, psps, pawtab, root_ncid)
  end if
-
-
-
-
-
 
  ! Radius of sphere with volume equivalent to the micro zone.
  !q0rad = two_pi * (three / (four_pi * cryst%ucvol * gstore%nqbz)) ** third
