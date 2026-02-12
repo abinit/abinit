@@ -42,7 +42,7 @@ module m_orbmag
   use defs_abitypes,      only : MPI_type
   use m_crystal,          only : crystal_t
   use m_cgprj,            only : getcprj
-  use m_cgtools,          only : projbd
+  use m_cgtools,          only : cg_zdotc,projbd
   use m_dtfil
   use m_ebands
   use m_fft,              only : fourwf
@@ -1111,13 +1111,14 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
   !scalars
   integer :: adir,bdir,cpopt,fourwf_cplex,fourwf_option,gdir,iatom,ipw,ndat
   integer :: nn,npwsp,sij_opt,t_atom,tim_fourwf,tim_getghc,type_calc
-  real(dp) :: bdoti,bdotr,epsabg,lams,mdoti,mdotr,weight_i,weight_r
-  complex(dp) :: bracg,gdotr,odensfac,prefac_b,prefac_m
+  real(dp) :: epsabg,lams,weight_i,weight_r
+  complex(dp) :: odensfac,prefac_b,prefac_m
   logical :: need_odensity
   !arrays
+  real(dp) bdot(2),mdot(2)
   real(dp),allocatable :: bra(:,:),denpot(:,:,:),fofgout(:,:),fofr(:,:,:,:)
   real(dp),allocatable :: ghc(:,:),gsc(:,:),gvnlxc(:,:),ket(:,:)
-  complex(dpc) :: m1(3),b1(3)
+  complex(dp) :: m1(3),b1(3)
   type(pawcprj_type),allocatable :: cwaveprj1(:,:)
 !--------------------------------------------------------------------
 
@@ -1184,11 +1185,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
      do bdir = 1, 3
        bra(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
 
-       mdotr = DOT_PRODUCT(bra(1,:),ghc(1,:))+DOT_PRODUCT(bra(2,:),ghc(2,:))
-       mdoti = DOT_PRODUCT(bra(1,:),ghc(2,:))-DOT_PRODUCT(bra(2,:),ghc(1,:))
-
-       bdotr = DOT_PRODUCT(bra(1,:),gsc(1,:))+DOT_PRODUCT(bra(2,:),gsc(2,:))
-       bdoti = DOT_PRODUCT(bra(1,:),gsc(2,:))-DOT_PRODUCT(bra(2,:),gsc(1,:))
+       mdot = cg_zdotc(npwsp,bra,ghc); bdot = cg_zdotc(npwsp,bra,gsc)
 
        ! assemble contributions alpha_dir \propto \beta_dir x \gamma_dir
        do adir = 1, 3
@@ -1196,8 +1193,8 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
          if (ABS(epsabg) .LT. half) cycle
          prefac_b = cbc*c2*epsabg
          prefac_m = com*c2*epsabg
-         m1(adir) = m1(adir) + prefac_m*CMPLX(mdotr,mdoti)
-         b1(adir) = b1(adir) - two* prefac_b*CMPLX(bdotr,bdoti)
+         m1(adir) = m1(adir) + prefac_m*CMPLX(mdot(1),mdot(2))
+         b1(adir) = b1(adir) - two*prefac_b*CMPLX(bdot(1),bdot(2))
          
          if (need_odensity) call odens_real(adir,bra,dtset,fofr,&
            & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
@@ -1286,10 +1283,11 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
   !scalars
   integer :: adir,bdir,choice,cpopt,gdir,ndat,nn,nnlout,np,npwsp
   integer :: paw_opt,signs,tim_getghc
-  real(dp) :: doti,dotr,epsabg
-  complex(dp) :: b1,bv2b,m1,m1_mu,mb,mg,mv2b,mv2b_mu,prefac_b,prefac_m
+  real(dp) :: epsabg
+  complex(dp) :: b1,bdotc,bpdotc,bv2b,gdotc,gpdotc,m1,m1_mu,mb,mg,mv2b,mv2b_mu
+  complex(dp) :: prefac_b,prefac_m
   !arrays
-  real(dp) :: enlout(1),lamv(1)
+  real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1)
   real(dp),allocatable :: bra(:,:),ket(:,:),svectoutb(:,:),svectoutg(:,:),vectout(:,:)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 !--------------------------------------------------------------------
@@ -1313,12 +1311,15 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
  signs = 2
  nnlout = 1
 
- do adir = 1, 3
+ !do adir = 1, 3
    do nn = 1, nband_k
-
+     
      m1 = czero; mv2b = czero
      m1_mu = czero; mv2b_mu = czero
      b1 = czero; bv2b = czero
+
+     ! extract |u_nk>
+     ket(1:2,1:npwsp) = cg_k(1:2,(nn-1)*npwsp+1:nn*npwsp)
 
      do bdir = 1, 3
        do gdir = 1, 3
@@ -1327,8 +1328,6 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
          prefac_b = cbc*c2*epsabg
          prefac_m = com*c2*epsabg
 
-         ! extract |u_nk>
-         ket(1:2,1:npwsp) = cg_k(1:2,(nn-1)*npwsp+1:nn*npwsp)
          call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
            & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
 
@@ -1341,24 +1340,22 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
 
          ! extract |Pc du/dk_b>
          bra(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
-         !overlap
-         dotr = DOT_PRODUCT(bra(1,:),svectoutg(1,:))+DOT_PRODUCT(bra(2,:),svectoutg(2,:))
-         doti = DOT_PRODUCT(bra(1,:),svectoutg(2,:))-DOT_PRODUCT(bra(2,:),svectoutg(1,:))
+         gdot=cg_zdotc(npwsp,bra,svectoutg); gdotc=CMPLX(gdot(1),gdot(2))
+         
          ! add <Pc du/dk_b|dS/dk_g|u_nk>*E_nk
-         b1 = b1 - prefac_b*CMPLX(dotr,doti)
-         m1 = m1 + prefac_m*CMPLX(dotr,doti)*eig_k(nn)
-         m1_mu = m1_mu - prefac_m*CMPLX(dotr,doti)*fermie
+         b1 = b1 - prefac_b*gdotc
+         m1 = m1 + prefac_m*gdotc*eig_k(nn)
+         m1_mu = m1_mu - prefac_m*gdotc*fermie
 
          ! extract |Pc du/dk_g>
          bra(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
          !overlap
-         dotr = DOT_PRODUCT(bra(1,:),svectoutb(1,:))+DOT_PRODUCT(bra(2,:),svectoutb(2,:))
-         doti = DOT_PRODUCT(bra(1,:),svectoutb(2,:))-DOT_PRODUCT(bra(2,:),svectoutb(1,:))
+         bdot=cg_zdotc(npwsp,bra,svectoutb); bdotc=CMPLX(bdot(1),bdot(2))
 
          ! add CONJG(<Pc du/dk_b|dS/dk_g|u_nk>)*E_nk
-         b1 = b1 - prefac_b*CMPLX(dotr,-doti)
-         m1 = m1 + prefac_m*CMPLX(dotr,-doti)*eig_k(nn)
-         m1_mu = m1_mu - prefac_m*CMPLX(dotr,-doti)*fermie
+         b1 = b1 - prefac_b*CONJG(bdotc)
+         m1 = m1 + prefac_m*CONJG(bdotc)*eig_k(nn)
+         m1_mu = m1_mu - prefac_m*CONJG(bdotc)*fermie
 
          do np = 1, nband_k
 
@@ -1366,18 +1363,16 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
 
            bra(1:2,1:npwsp) = cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
 
-           dotr = DOT_PRODUCT(bra(1,:),svectoutg(1,:))+DOT_PRODUCT(bra(2,:),svectoutg(2,:))
-           doti = DOT_PRODUCT(bra(1,:),svectoutg(2,:))-DOT_PRODUCT(bra(2,:),svectoutg(1,:))
-           mg = CMPLX(dotr,doti)
+           gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
+           mg = CMPLX(gpdot(1),gpdot(2))
 
-           dotr = DOT_PRODUCT(bra(1,:),svectoutb(1,:))+DOT_PRODUCT(bra(2,:),svectoutb(2,:))
-           doti = DOT_PRODUCT(bra(1,:),svectoutb(2,:))-DOT_PRODUCT(bra(2,:),svectoutb(1,:))
-           mb = CMPLX(dotr,doti)
+           bpdot = cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
+           mb = CMPLX(bpdot(1),bpdot(2))
 
            ! terms in <u|dS|u'><u'|dS|u>
-           bv2b = bv2b + prefac_b*CONJG(mb)*mg
-           mv2b = mv2b - prefac_m*CONJG(mb)*mg*eig_k(nn)
-           mv2b_mu = mv2b_mu + prefac_m*CONJG(mb)*mg*fermie
+           bv2b = bv2b + prefac_b*CONJG(bpdotc)*gpdotc
+           mv2b = mv2b - prefac_m*CONJG(bpdotc)*gpdotc*eig_k(nn)
+           mv2b_mu = mv2b_mu + prefac_m*CONJG(bpdotc)*gpdotc*fermie
          end do ! np
 
        end do !gdir
@@ -2773,7 +2768,7 @@ subroutine odens_real(adir,bra,dtset,fofr,n4,n5,n6,npw_k,orbmag_mesh,ph3d,prefac
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: adir,n4,n5,n6,npw_k
-  complex(dpc) :: prefac_m
+  complex(dp) :: prefac_m
   type(dataset_type),intent(in) :: dtset
   type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 
@@ -2784,7 +2779,7 @@ subroutine odens_real(adir,bra,dtset,fofr,n4,n5,n6,npw_k,orbmag_mesh,ph3d,prefac
   !Local variables -------------------------
   !scalars
   integer :: iatom,ipw,t_atom
-  complex(dpc) :: brac,ffac,gr
+  complex(dp) :: brac,ffac,gr
 
   !arrays
 
