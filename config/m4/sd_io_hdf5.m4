@@ -308,13 +308,13 @@ AC_DEFUN([SD_HDF5_DETECT], [
         sd_hdf5_ok="yes"
         sd_hdf5_enable="no"
         sd_hdf5_cppflags=""
-        sd_hdf5_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_hdf5_version}}/include"
+        sd_hdf5_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}}/include"
         sd_hdf5_cxxflags=""
         sd_hdf5_fcflags=""
         sd_hdf5_ldflags=""
         sd_hdf5_libs="-L${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/lib ${sd_hdf5_libs_def}"
 	test "${sd_hdf5_enable_fc}" = "yes" && \
-          sd_hdf5_fcflags="${sd_hdf5_fcflags_def} -I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_hdf5_version}}/include"
+          sd_hdf5_fcflags="${sd_hdf5_fcflags_def} -I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}}/include"
       if test "${sd_hdf5_status}" = "optional" -a \
               "${sd_hdf5_init}" = "def"; then
 	sd_hdf5_init='fb'
