@@ -687,15 +687,18 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
      end if
 
      ! Sum over my q-points.
+     ABI_CHECK(gqk%my_nq /= 0, "gqm%my_nq cannot be zero here!")
+
      do my_iq=1,gqk%my_nq
        call gqk%myqpt(my_iq, gstore, weight_q, qpt); q_is_gamma = sum(qpt**2) < tol14
 
        ! weight_q is computed here. It depends whether we are summing over the full BZ or IBZ_k.
        ! IMPORTANT: We cannot cycle is my_iq == 1 as this is the iteration in which we broadcast stern_dw if eph_stern /= 0.
-       ! Also weight_q should be set to zero if q is not in IBZ_k when my_iq == 1.
+       ! Also weight_q should be set to zero if q is not in the IBZ_k when my_iq == 1.
        weight_q = one / gstore%nqbz
        if (use_lgk /= 0) then
          ii = lg_myk%findq_ibzk(qpt); if (ii == -1 .and. my_iq /= 1) cycle
+         weight_q = zero
          if (ii /= -1) weight_q = lg_myk%weights(ii)
        end if
 
