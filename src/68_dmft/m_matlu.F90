@@ -1512,7 +1512,7 @@ end subroutine add_matlu
      glocspsp_mat => glocspsp(iatom)%mat
 
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(isppol) MAP(to:glocnm,glocspsp) &
+     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(isppol) MAP(to:glocnm_mat,glocspsp_mat) &
      !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      do isppol=1,nsppol
@@ -1555,7 +1555,7 @@ end subroutine add_matlu
      glocspsp_mat => glocspsp(iatom)%mat
 
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(isppol) MAP(to:glocnm,glocspsp) &
+     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(isppol) MAP(to:glocnm_mat,glocspsp_mat) &
      !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      do isppol=1,nsppol
