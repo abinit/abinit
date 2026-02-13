@@ -770,9 +770,11 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  gstore_brange_kq = dtset%gstore_brange
 
  if (gstore%kfilter == "qprange") then
-   ! Assume ZPR calculations requiring virtual k+q transitions from 1 up to nband.
-   gstore_brange_kq(:,1) = [1, dtset%mband]
-   gstore_brange_kq(:,2) = [1, dtset%mband]
+   ! Assume ZPR calculations requiring virtual k+q transitions from 1 up to nband unless gstore_brange is given.
+   if (all(gstore_brange_kq == 0)) then
+     gstore_brange_kq(:,1) = [1, dtset%mband]
+     gstore_brange_kq(:,2) = [1, dtset%mband]
+   end if
 
    ! The same set of calls is found in gstore_filter_gw_qprange__
    ! The main difference is that here we set the bands while gstore_filter_gw_qprange__ sets the the k-points.
@@ -791,6 +793,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    ! Convert to stop values
    nbcalc_ks = bstart_ks + nbcalc_ks - 1
 
+   ! Set brange_k
    ! FIXME: Handle degeneracies
    do spin=1,nsppol
      gstore_brange_k(1, spin) = minval(bstart_ks(1:nkcalc, spin))
@@ -810,15 +813,19 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
     ABI_ERROR("gstore%kfilter and nkptgw != 0 cannot be used together!")
   end if
 
-  ! Assume ZPR calculations requiring virtual k+q transitions from 1 up to nband.
-  gstore_brange_kq(:,1) = [1, dtset%mband]
-  gstore_brange_kq(:,2) = [1, dtset%mband]
+  ! Assume ZPR calculations requiring virtual k+q transitions from 1 up to nband unless gstore_brange is given.
+  gstore_brange_kq = dtset%gstore_brange
+  if (all(gstore_brange_kq == 0)) then
+    gstore_brange_kq(:,1) = [1, dtset%mband]
+    gstore_brange_kq(:,2) = [1, dtset%mband]
+   end if
 
    call sigtk_kcalc_from_nkptgw(dtset, dtset%mband, nkcalc, kcalc, bstart_ks, nbcalc_ks)
 
    ! Convert to stop values
    nbcalc_ks = bstart_ks + nbcalc_ks - 1
 
+   ! Set brange_k
    ! FIXME: Handle degeneracies
    do spin=1,nsppol
      gstore_brange_k(1, spin) = minval(bstart_ks(1:nkcalc, spin))
@@ -1346,6 +1353,40 @@ end function gstore_same_nbands
 !!
 !! OUTPUT
 !!
+!! NOTES
+!!  What works:
+!!
+!!  - Setting gstore_kfilter = "qprange" works.
+!!    With this, bands (nb_k) and k-points are automatically filtered, including only the VBM and CBM.
+!!    This is useful for calculating the ZPR of the fundamental gap.
+!!    Manual specification of bands (nb_k) and k-points also works by setting gstore_kfilter = "none" (default)
+!!    and providing the values via kptgw and bdgw.
+!!
+!!  What doesn’t work:
+!!
+!!  - There is currently no effective way to control nb_kq directly.
+!!    The only workaround is using gstore_brange. For example, gstore_brange = '1, 8' sets nb_k = nb_kq = 8.
+!!    However, gstore_brange has the lowest priority: if gstore_kfilter
+!!    is set or kptgw/bdgw are provided, gstore_brange is ignored and nb_kq defaults to nband.
+!!
+!!  Notes on use cases:
+!!      For ZPR calculations, the current schemes are sufficient.
+!!      For tasks comparing g between GWPT and FD, the current schemes are not very convenient.
+!!      For instance, to compare g at k=q=Γ for the first 8 bands of diamond,
+!!      ideally we would restrict the calculation to nb_k = nb_kq = {1..8} and k=q=Γ. But currently
+!!
+!!  Using gstore_brange triggers unnecessary k-point calculations (ngkpt is usually a dense k-grid).
+!!
+!!  Using kptgw and bdgw triggers unnecessary band calculations (nb_kq = nband is usually a big number).
+!!
+!!  Potential improvement (?):
+!!      Maybe we could give gstore_brange higher priority to control nb_kq(?). To avoid conflicts:
+!!      If gstore_brange is provided and gstore_kfilter = "none", we do
+!!      bstart_k = bdgw[1], nb_k = min(nband, bdgw[2] - bdgw[1])
+!!      bstart_kq = gstore_brange[1], nb_kq = min(nband, gstore_brange[2] - gstore_brange[1])
+!!      If gstore_brange is NOT provided and gstore_kfilter = "none", we do
+!!      bstart_kq = bstart_k = bdgw[1], nb_kq = nb_k = max(nband, bdgw[2] - bdgw[1])
+!!
 !! SOURCE
 
 subroutine gstore_distribute_spins(gstore, mband, brange_kq, brange_k, nproc_spin, comm_spin, comm)
@@ -1388,13 +1429,13 @@ subroutine gstore_distribute_spins(gstore, mband, brange_kq, brange_k, nproc_spi
 
    nproc_spin(spin) = xmpi_comm_size(comm_spin(spin))
 
-   ! Default values for brange at k, k+q
+   ! Default values for brange at k, k+q from mband
    gstore%brange_k_spin(:, spin) = [1, mband]
    gstore%brange_kq_spin(:, spin) = [1, mband]
 
-   ! Optionally take them from input brange_k, brange_kq
-   if (all(brange_kq /= 0)) gstore%brange_kq_spin(:, spin) = brange_kq(:, spin)
+   ! Optionally take values from input brange_k, brange_kq
    if (all(brange_k  /= 0)) gstore%brange_k_spin(:, spin) = brange_k(:, spin)
+   if (all(brange_kq /= 0)) gstore%brange_kq_spin(:, spin) = brange_kq(:, spin)
 
    ! Validate against input mband.
    ABI_CHECK_IRANGE(gstore%brange_k_spin(1, spin), 1, mband, "brange_k(1, spin)")
@@ -2177,12 +2218,6 @@ subroutine gstore_filter_kptgw__(gstore, dtset, qbz2ibz, qibz2bz, kibz2bz, selec
      ik_ibz = mapl_kk(1)
      ik_bz = kibz2bz(ik_ibz); select_kbz_spin(ik_bz, spin) = 1
    end do
-   ! Set brange_k_spin from bstart_ks and nbcalc_ks. Arrays have shape (nkcalc, nsppol)
-   ! FIXME: This requires a more careful treatment of (gqk%nb_k, gqk%nb) matrix that should become (nb1, nb2)
-   ! Note also that brange_k and brange_kq have been already initialized in gstore_distribute_spins
-   !gstore%brange_k_spin(:, spin) = [minval(bstart_ks(:,spin)), maxval(bstart_ks(:,spin) + nbcalc_ks(:,spin) - 1)]
-   !gstore%brange_kq_spin(:, spin) = [minval(bstart_ks(:,spin)), maxval(bstart_ks(:,spin) + nbcalc_ks(:,spin) - 1)]
-   !gstore%brange_kq_spin(:, spin) = [1, dtset%mband]
  end do ! spin
 
  !call recompute_select_qbz_spin(gstore, gstore%qbz, qbz2ibz, qibz2bz, gstore%kbz, gstore%kibz, gstore%kbz2ibz, gstore%kibz2bz, &
@@ -2416,12 +2451,6 @@ subroutine gstore_filter_gw_qprange__(gstore, dtset, qbz2ibz, qibz2bz, kibz2bz, 
      ik_ibz = mapl_kk(1)
      ik_bz = kibz2bz(ik_ibz); select_kbz_spin(ik_bz, spin) = 1
    end do
-   ! Set brange_k_spin from bstart_ks and nbcalc_ks. Arrays have shape (nkcalc, nsppol)
-   ! FIXME: This requires a more careful treatment of (gqk%nb_k, gqk%nb) matrix that should become (nb1, nb2)
-   ! Note also that brange_k and brange_kq have been already initialized in gstore_distribute_spins
-   !gstore%brange_k_spin(:, spin) = [minval(bstart_ks(:,spin)), maxval(bstart_ks(:,spin) + nbcalc_ks(:,spin) - 1)]
-   !gstore%brange_kq_spin(:, spin) = [minval(bstart_ks(:,spin)), maxval(bstart_ks(:,spin) + nbcalc_ks(:,spin) - 1)]
-   !gstore%brange_kq_spin(:, spin) = [1, dtset%mband]
  end do ! spin
 
  !call recompute_select_qbz_spin(gstore, gstore%qbz, qbz2ibz, qibz2bz, gstore%kbz, gstore%kibz, gstore%kbz2ibz, gstore%kibz2bz, &
