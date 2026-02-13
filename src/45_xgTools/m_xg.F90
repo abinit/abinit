@@ -6565,8 +6565,6 @@ contains
         !$omp end parallel
         norm2_vec = sum(conjg(vecC)*vecC)
         vecC = vecC / sqrt(real(norm2_vec, dp))
-        write(901,*) 'norm2_vec=', norm2_vec
-        flush(901)
     case (SPACE_CR)
         ABI_ERROR('Not implemented for SPACE_CR')
     end select

@@ -994,7 +994,11 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
  
     !write(std_out,*) 'eigen_active='
     !call xgBlock_print(eigen_active, std_out)
-    
+   
+    ! TODO 
+    ! 1) include restart
+    ! 2) make for 1 MPI
+
     call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
         slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg_ptr)
 
@@ -1088,7 +1092,9 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     integer :: nstep_bisect
     real(dp) :: center, radius
     real(dp) :: mineig, maxeig
+    real(dp) :: mineig_global, maxeig_global
     real(dp) :: lanczos_lowb, lanczos_lowb_global
+    real(dp) :: c_split
     ! Derived types
     type(xg_t) :: Results1, Results2
     type(xg_t) :: eigen_mpi, resid_mpi
@@ -1187,7 +1193,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     write(901+my_rank,*) 'Here I compute Chebyshev moments yuhu'
     flush(901+my_rank)
  
-    ndeg_filter_max = 5
+    ndeg_filter_max = 10 ! Parameter affects accuracy of uniformMass
     nband = slice%neigenpairs
     if (slice%paral_kgb==1) then
         nband = slice%bandpp
@@ -1200,25 +1206,6 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     write(901+my_rank,*) 'Moments rows=', size(cheby_moments,1), 'cols=', size(cheby_moments,2)
     !write(901+my_rank,*) 'cheby_moments row1 =', real(cheby_moments(1,:))
     flush(901+my_rank)
-
-    ! Use the moments in parallel for every filter
-    ! at the end of every filter we must sum contributions across procs
-
-    write(901+my_rank,*) 'I finally split spectrum..'
-    flush(901+my_rank)
-
-    nstep_bisect = 10
-    center = (slice%ecut + (lanczos_lowb_global - 0.1)) / 2.d0
-    radius = (slice%ecut - (lanczos_lowb_global - 0.1)) / 2.d0
-    
-    ! [a,b) working spectrum hardcoded, ongoing...
-    call splitSpectrum(nstep_bisect, center, radius, lanczos_lowb_global, 0.5_dp, cheby_moments)
-
-    ABI_FREE(cheby_moments)
-
-    ! TODO do this in MPI like bandpp bisect must be summed using communicator...
-    ! normally the sum should be the same with 1 MPI and 4 MPI otherwise a problem.
-    ! serious debug here 
 
 
     ! Now apply A and B to X (requires colsrows representation) to create AX and BX in colsrows
@@ -1237,6 +1224,38 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     ! eigen = <Psi|H|Psi> / <Psi|S|Psi>
     call xgBlock_colwiseDivision(Results1%self, Results2%self, eigen_mpi%self, &
         maxeig, maxeig_pos, mineig, mineig_pos)
+
+    if (slice%paral_kgb == 1) then
+        call xmpi_max(maxeig,maxeig_global,slice%spacecom,ierr)
+        call xmpi_min(mineig,mineig_global,slice%spacecom,ierr)
+    else
+        maxeig_global = maxeig
+        mineig_global = mineig
+    end if
+
+    ! Use the moments in parallel for every filter
+    ! at the end of every filter we must sum contributions across procs
+
+    write(901+my_rank,*) 'I finally split spectrum..', lanczos_lowb_global, maxeig_global
+    flush(901+my_rank)
+
+    nstep_bisect = 10 ! Parameter affects accuracy of splitSpectrum
+    center = (slice%ecut + lanczos_lowb_global) / 2.d0
+    radius = (slice%ecut - lanczos_lowb_global) / 2.d0
+    
+    ! [a,b) working spectrum hardcoded, ongoing...
+    call splitSpectrum(nstep_bisect, center, radius, lanczos_lowb_global, &
+        maxeig_global, c_split, cheby_moments)
+
+    write(901+my_rank,*) 'split spectrum at=', c_split
+    flush(901+my_rank)
+
+    ABI_FREE(cheby_moments)
+
+    ! TODO do this in MPI like bandpp bisect must be summed using communicator...
+    ! normally the sum should be the same with 1 MPI and 4 MPI otherwise a problem.
+    ! serious debug here 
+
 
     ! In order to avoid transposing AX,BX, we compute residuals in colsrows representation
     ! TODO IL 20/01/2025 ymax has not been tested on GPU
@@ -2535,14 +2554,16 @@ end subroutine print_scalar_filter
 
     ! q = random column vector
     call xgBlock_colwiseRandom(q, rank, 1)
+    write(901+rank,*) 'Random id=', xgBlock_getid(q) 
+    flush(901+rank)
 
     ! Bv = B * q / norml_q
     ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
     call getAX_BX(q, v, Bv)
     call xgBlock_zero_im_g0(v) ! v stores Aq
     call xgBlock_zero_im_g0(Bv) ! Bv stores Bq
-    ABI_NVTX_END_RANGE()
-   
+    ABI_NVTX_END_RANGE() 
+
     call xgBlock_colwiseDotProduct(q, Bv, dot_qTBv)
     call xgBlock_reverseMap(dot_qTBv,dot_qTBv_layout,rows=1,cols=1)    
     
@@ -2569,10 +2590,13 @@ end subroutine print_scalar_filter
 
         ! v = B^{-1} * A * q
         if (slice%paw) then
+            write(901+rank,*) 'K start bug'; flush(901+rank)
+            call xgBlock_print(v, 901+xmpi_comm_rank(slice%spacecom))
             call timab(tim_invovl, 1, tsec)
             ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_BM1X)
             call getBm1X(v, Bm1v)
             ABI_NVTX_END_RANGE()
+            write(901+rank,*) 'K start end'; flush(901+rank)
             call timab(tim_invovl, 2, tsec)
             call timab(tim_copy, 1, tsec)
             call xgBlock_copy(Bm1v, v)
@@ -2783,24 +2807,34 @@ end subroutine computeChebyshevMoments
 !! 
 !! SOURCE
 
-subroutine splitSpectrum(nstep_bisect, center, radius, a, b, cheby_moments)
+subroutine splitSpectrum(nstep_bisect, center, radius, a, b, c_split, cheby_moments, comm)
 
         implicit none
 
         real(dp), intent(in) :: a, b
+        real(dp), intent(out) :: c_split
         real(dp), intent(in) :: center, radius
         integer, intent(in) :: nstep_bisect
         complex(dp), intent(in) :: cheby_moments(:,:)
+        integer, intent(in), optional :: comm
 
         integer :: neigenpairs
         integer :: ndeg_filter
         integer :: ishift
+        integer :: comm_, ierr
+        real(dp) :: mass_diff, mass_diff_prev
         real(dp) :: c, width
+        real(dp) :: spectral_mass_left
+        real(dp) :: spectral_mass_right
         real(dp), allocatable :: energy_interval(:)
         real(dp), allocatable :: cja(:)
 
         ! *********************************************************************
 
+        comm_ = xmpi_comm_null
+        if (present(comm)) then
+            comm_ = comm
+        end if
         neigenpairs = size(cheby_moments, 1)
         ndeg_filter = size(cheby_moments, 2)-1
 
@@ -2808,25 +2842,42 @@ subroutine splitSpectrum(nstep_bisect, center, radius, a, b, cheby_moments)
         ABI_MALLOC(cja, (ndeg_filter + 1))
 
         width = (b - a) / (nstep_bisect + 1)
-  
+        mass_diff_prev = 0.d0
+        c_split = a
+
         do ishift = 1, nstep_bisect
     
             c = a + ishift * width
 
             ! Slice Left [a,c)
-            call buildChebyshevJacksonCoeffs(a, c+0.1, ndeg_filter, center, radius, cja)
+            call buildChebyshevJacksonCoeffs(a, c, ndeg_filter, center, radius, cja)
             call computeFilterEnergy(cja, cheby_moments, energy_interval)
+            if ( xmpi_comm_size(comm_) > 1) then
+                call xmpi_sum(energy_interval, comm_, ierr)
+            end if
+            spectral_mass_left = sum(energy_interval)
 
             write(901,*) 'ishift=', ishift, 'c=', c
-            write(901,*) 'Nvec left=', sum(energy_interval)
+            write(901,*) 'Nvec left=', spectral_mass_left
             flush(901)
 
             ! Slice Right [c,b)
-            call buildChebyshevJacksonCoeffs(c-0.1, b, ndeg_filter, center, radius, cja)
-            call computeFilterEnergy(cja, cheby_moments, energy_interval)
+            call buildChebyshevJacksonCoeffs(c, b, ndeg_filter, center, radius, cja)
+            call computeFilterEnergy(cja, cheby_moments, energy_interval)            
+            if ( xmpi_comm_size(comm_) > 1) then
+                call xmpi_sum(energy_interval, comm_, ierr)
+            end if
+            spectral_mass_right = sum(energy_interval)
 
-            write(901,*) 'Nvec right=', sum(energy_interval)
+            write(901,*) 'Nvec right=', spectral_mass_right
             flush(901)
+
+            ! Detect spectral mass flip
+            mass_diff = spectral_mass_left - spectral_mass_right
+            if (ishift > 1 .and. mass_diff * mass_diff_prev < 0) then
+                c_split = (2 * a + (2*ishift - 1) * width) / 2.d0
+            end if
+            mass_diff_prev = mass_diff
 
         end do
 
