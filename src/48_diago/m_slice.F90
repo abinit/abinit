@@ -646,7 +646,8 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     ! Process: 
     ! 
     ! - after debugging computeSpectrum: delete all this unwanted part if not used
-    ! must debug very carefuly
+    ! must debug very carefuly. 
+    ! **Prefer to debug with _LOG files instead of 901+rank**
     ! 
 
     if (slice%paral_slice==12) then
@@ -1693,6 +1694,9 @@ subroutine slice_markActiveTask(slice)
     slice%me_nproc_slice = slice%nproc_per_slice(slice%me_id_slice)
     slice%me_ndeg_slice = slice%poly_degrees(slice%me_id_slice)
 
+    ! TODO resolve normally it should not be very complicated like simple deactivate
+    ! all communicators set to null and then use distributions like none.
+    ! Make sure transposer routines are never called
     if(slice%me_nproc_slice==1) then
         ABI_ERROR("Slicing with a single MPI process not implemented.")
     end if
