@@ -650,6 +650,8 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
    ABI_CALLOC(stern_ppb, (2, natom3, natom3, nb_k))
 
    ! Loop over my k-points in |n,k>.
+   ABI_CHECK(gqk%my_nq /= 0, "gqm%my_nk cannot be zero here!")
+
    do my_ik=1,gqk%my_nk
      kk = gqk%my_kpts(:, my_ik)
      print_time_kk = my_rank == 0 .and. (my_ik <= LOG_MODK .or. mod(my_ik, LOG_MODK) == 0)
@@ -1138,7 +1140,7 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
 
  spin = gqk%spin
 
- ! Sum partial terms inside qgk%comm.
+ !call wrtout(std_out, "Summing partial sigma terms inside qgk%comm.", do_flush=.True.)
  call xmpi_sum(sigma%vals_e0ks, gqk%comm%value, ierr)
  call xmpi_sum(sigma%dvals_de0ks, gqk%comm%value, ierr)
  call xmpi_sum(sigma%fan_vals, gqk%comm%value, ierr)
@@ -1146,6 +1148,7 @@ subroutine sep_gather_and_write_results(sigma, root_ncid, gstore, gqk, dtset, eb
  call xmpi_sum(sigma%dw_vals, gqk%comm%value, ierr)
  call xmpi_sum(sigma%dw_stern_vals, gqk%comm%value, ierr)
  if (sigma%nwr > 0) call xmpi_sum(sigma%vals_wr, gqk%comm%value, ierr)
+ !call wrtout(std_out, "Sum completed.", do_flush=.True.)
 
  ! Only procs inside ncwrite_comm perform IO (ab_out and ncid)
  iwrite = gqk%comm%me == 0; if (.not. iwrite) return
