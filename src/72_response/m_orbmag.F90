@@ -42,7 +42,7 @@ module m_orbmag
   use defs_abitypes,      only : MPI_type
   use m_crystal,          only : crystal_t
   use m_cgprj,            only : getcprj
-  use m_cgtools,          only : cg_zdotc,projbd
+  use m_cgtools,          only : cg_zdotc,cg_zdotu,projbd
   use m_dtfil
   use m_ebands
   use m_fft,              only : fourwf
@@ -2770,10 +2770,10 @@ subroutine odens_real(adir,bra,dtset,fofr,n4,n5,n6,npw_k,orbmag_mesh,ph3d,prefac
 
   !Local variables -------------------------
   !scalars
-  integer :: iatom,ipw,t_atom
-  complex(dp) :: brac,ffac,gr
+  integer :: iatom,t_atom
 
   !arrays
+  real(dp) :: ffac(2),slowfft(2)
 
 !--------------------------------------------------------------------
 
@@ -2784,15 +2784,17 @@ subroutine odens_real(adir,bra,dtset,fofr,n4,n5,n6,npw_k,orbmag_mesh,ph3d,prefac
     end if
   end do
 
-  do ipw = 1, npw_k
-    gr = CMPLX(ph3d(1,ipw,t_atom),ph3d(2,ipw,t_atom))
-    brac = CMPLX(bra(1,ipw),bra(2,ipw))
-    ffac = CONJG(gr)*CONJG(brac)*prefac_m
-    orbmag_mesh%odens(1,:,:,:,adir) = orbmag_mesh%odens(1,:,:,:,adir) +&
-      & REAL(ffac)*fofr(1,:,:,:) - AIMAG(ffac)*fofr(2,:,:,:)
-    orbmag_mesh%odens(2,:,:,:,adir) = orbmag_mesh%odens(2,:,:,:,adir) +&
-      & REAL(ffac)*fofr(2,:,:,:) + AIMAG(ffac)*fofr(1,:,:,:)
-  end do
+  ! computes ph3d*bra (not an inner product, no complex conjugation on first argument)
+  slowfft=cg_zdotu(npw_k,ph3d(1:2,1:npw_k,t_atom),bra(1:2,1:npw_k))
+
+  ! really needed conjg(phd)*conjg(bra) so take conjg of slowfft here
+  ffac(1)=slowfft(1)*REAL(prefac_m)+slowfft(2)*AIMAG(prefac_m)
+  ffac(2)=slowfft(1)*AIMAG(prefac_m)-slowfft(2)*REAL(prefac_m)
+
+  orbmag_mesh%odens(1,:,:,:,adir) = orbmag_mesh%odens(1,:,:,:,adir) +&
+    & ffac(1)*fofr(1,:,:,:) - ffac(2)*fofr(2,:,:,:)
+  orbmag_mesh%odens(2,:,:,:,adir) = orbmag_mesh%odens(2,:,:,:,adir) +&
+    & ffac(1)*fofr(2,:,:,:) + ffac(2)*fofr(1,:,:,:)
 
 end subroutine odens_real
 !!***
