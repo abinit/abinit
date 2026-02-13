@@ -66,7 +66,7 @@ xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
           8.0372381769E-01  1.9627618231E-01  5.0000000000E-01  
 
 #Definition of the planewave basis set
-ecut   3.0         
+ecut   3.5         
 nband  42
 
 #Definition of the k-point grid
@@ -84,7 +84,7 @@ nsym 1
 nstep 50        
 diemac  8.0    
 
-nline 12
+nline 8
 diemix1    0.6
 diemixmag1 0.4
 nnsclo -4
