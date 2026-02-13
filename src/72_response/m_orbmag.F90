@@ -1196,7 +1196,8 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
          
          if (need_odensity) call odens_real(adir,bra,fofr,&
            & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,dtset%natom,&
-           & npw_k,orbmag_mesh,ph3d,prefac_m,t_atom)
+           & npw_k,orbmag_mesh,ph3d,prefac_m,t_atom,&
+           & mult_fact=one,conjg_flag=.FALSE.)
        
        end do ! adir
    
@@ -1397,9 +1398,11 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
 
          if (need_odensity) then
            call odens_real(adir,brab,fofrg,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,dtset%natom,&
-             & npw_k,orbmag_mesh,ph3d,prefac_m,t_atom) 
+             & npw_k,orbmag_mesh,ph3d,prefac_m,t_atom,&
+             & mult_fact=(eig_k(nn)-fermie),conjg_flag=.FALSE.)
            call odens_real(adir,brag,fofrb,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,dtset%natom,&
-             & npw_k,orbmag_mesh,ph3d,prefac_m,t_atom)
+             & npw_k,orbmag_mesh,ph3d,prefac_m,t_atom,&
+             & mult_fact=(eig_k(nn)-fermie),conjg_flag=.TRUE.)
          endif
 
        end do
@@ -2809,12 +2812,15 @@ end subroutine make_d
 !!
 !! SOURCE
 
-subroutine odens_real(adir,bra,fofr,n4,n5,n6,natom,npw_k,orbmag_mesh,ph3d,prefac_m,t_atom)
+subroutine odens_real(adir,bra,fofr,n4,n5,n6,natom,npw_k,orbmag_mesh,ph3d,prefac_m,t_atom,&
+    & mult_fact,conjg_flag) ! optional arguments
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: adir,n4,n5,n6,natom,npw_k,t_atom
+  real(dp),intent(in),optional :: mult_fact
   complex(dp) :: prefac_m
+  logical,intent(in),optional :: conjg_flag
   type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 
   !arrays
@@ -2823,11 +2829,25 @@ subroutine odens_real(adir,bra,fofr,n4,n5,n6,natom,npw_k,orbmag_mesh,ph3d,prefac
 
   !Local variables -------------------------
   !scalars
+  real(dp) :: the_mult_fact
+  logical :: the_conjg_flag
 
   !arrays
   real(dp) :: ffac(2),slowfft(2)
 
 !--------------------------------------------------------------------
+
+  if(present(mult_fact)) then
+    the_mult_fact=mult_fact
+  else
+    the_mult_fact=one
+  end if
+
+  if(present(conjg_flag)) then
+    the_conjg_flag=conjg_flag
+  else
+    the_conjg_flag=.FALSE.
+  end if
 
   ! computes ph3d*bra (not an inner product, no complex conjugation on first argument)
   slowfft=cg_zdotu(npw_k,ph3d(1:2,1:npw_k,t_atom),bra(1:2,1:npw_k))
@@ -2836,10 +2856,19 @@ subroutine odens_real(adir,bra,fofr,n4,n5,n6,natom,npw_k,orbmag_mesh,ph3d,prefac
   ffac(1)=slowfft(1)*REAL(prefac_m)+slowfft(2)*AIMAG(prefac_m)
   ffac(2)=slowfft(1)*AIMAG(prefac_m)-slowfft(2)*REAL(prefac_m)
 
-  orbmag_mesh%odens(1,:,:,:,adir) = orbmag_mesh%odens(1,:,:,:,adir) +&
-    & ffac(1)*fofr(1,:,:,:) - ffac(2)*fofr(2,:,:,:)
-  orbmag_mesh%odens(2,:,:,:,adir) = orbmag_mesh%odens(2,:,:,:,adir) +&
-    & ffac(1)*fofr(2,:,:,:) + ffac(2)*fofr(1,:,:,:)
+  ffac(1:2) = the_mult_fact*ffac(1:2)
+
+  if (the_conjg_flag) then
+    orbmag_mesh%odens(1,:,:,:,adir) = orbmag_mesh%odens(1,:,:,:,adir) +&
+      & (ffac(1)*fofr(1,:,:,:) - ffac(2)*fofr(2,:,:,:))
+    orbmag_mesh%odens(2,:,:,:,adir) = orbmag_mesh%odens(2,:,:,:,adir) -&
+      & (ffac(1)*fofr(2,:,:,:) + ffac(2)*fofr(1,:,:,:))
+  else
+    orbmag_mesh%odens(1,:,:,:,adir) = orbmag_mesh%odens(1,:,:,:,adir) +&
+      & ffac(1)*fofr(1,:,:,:) - ffac(2)*fofr(2,:,:,:)
+    orbmag_mesh%odens(2,:,:,:,adir) = orbmag_mesh%odens(2,:,:,:,adir) +&
+      & ffac(1)*fofr(2,:,:,:) + ffac(2)*fofr(1,:,:,:)
+  end if
 
 end subroutine odens_real
 !!***
