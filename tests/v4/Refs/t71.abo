@@ -1,6 +1,6 @@
 
-.Version 10.5.8.2 of ANADDB, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.1 of ANADDB, released Dec 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,9 +14,9 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h11 )
-
+.Starting date : Thu 12 Feb 2026.
+- ( at 12h40 )
+  
 
 ================================================================================
 
@@ -67,11 +67,11 @@
 
 ================================================================================
 
- Dielectric Tensor and Effective Charges
+ Dielectric Tensor and Effective Charges 
 
 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
-   and impose the ASR on the effective charges
+   and impose the ASR on the effective charges 
 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
@@ -87,7 +87,7 @@
        3               2        0.000000        0.000000
        3               3        0.000202        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -111,13 +111,13 @@
  Polarization in cartesian coordinates (a.u.):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.565116787E-17   0.440558626E-17   0.145568431E-01
-     Ionic:                         0.000000000E+00   0.000000000E+00  -0.673442545E-02
+     Ionic:                         0.000000000E+00   0.000000000E+00  -0.673442545E-02  
      Total:                         0.565116787E-17   0.440558626E-17   0.782241767E-02
 
  Polarization in cartesian coordinates (C/m^2):
  (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
      Electronic berry phase:        0.323330249E-15   0.252064588E-15   0.832866377E+00
-     Ionic:                         0.000000000E+00   0.000000000E+00  -0.385308578E+00
+     Ionic:                         0.000000000E+00   0.000000000E+00  -0.385308578E+00  
      Total:                         0.323330249E-15   0.252064588E-15   0.447557799E+00
 
 
@@ -169,10 +169,10 @@
  Difference between the Hellmann-Feynman stresses
  and the stresses induced by the electric field
  (cartesian coordinates, hartree/bohr^3)
-  diffsig(1) =     -0.000100794     diffsig(4) =      0.000000000
-  diffsig(2) =     -0.000100794     diffsig(5) =      0.000000000
+  diffsig(1) =     -0.000098789     diffsig(4) =      0.000000000
+  diffsig(2) =     -0.000098788     diffsig(5) =      0.000000000
   diffsig(3) =     -0.000017809     diffsig(6) =     -0.000000000
- sigmax =     1.007940793E-04
+ sigmax =     9.878850620E-05
 
  Induced strain (delta_eta):
   delta_eta(1) =      0.000000000     delta_eta(4) =      0.000000000
@@ -191,7 +191,7 @@
 
 ================================================================================
 
- Treat the first list of vectors
+ Treat the first list of vectors 
 
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -204,7 +204,7 @@
 -  7.750253E+01  1.781426E+02  1.781426E+02  2.360219E+02  2.435548E+02
 -  2.475600E+02  2.475600E+02  5.525273E+02  5.525273E+02  5.584840E+02
 
- Eigendisplacements
+ Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -422,7 +422,7 @@
 
 ================================================================================
 
- Treat the second list of vectors
+ Treat the second list of vectors 
 
 
   Phonon at Gamma, with non-analyticity in the
@@ -436,7 +436,7 @@
 -  1.231526E+02  1.781426E+02  2.360219E+02  2.435548E+02  2.455681E+02
 -  2.475600E+02  4.259477E+02  5.525273E+02  5.584840E+02  7.532393E+02
 
- Eigendisplacements
+ Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -625,7 +625,7 @@
 -  1.231526E+02  1.781426E+02  2.360219E+02  2.435548E+02  2.455681E+02
 -  2.475600E+02  4.259477E+02  5.525273E+02  5.584840E+02  7.532393E+02
 
- Eigendisplacements
+ Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -814,7 +814,7 @@
 -  1.498337E+02  1.781426E+02  1.781426E+02  2.435548E+02  2.475600E+02
 -  2.475600E+02  4.299408E+02  5.525273E+02  5.525273E+02  7.383726E+02
 
- Eigendisplacements
+ Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
    then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
@@ -998,6 +998,6 @@
 
 ================================================================================
 
-+Total cpu time      0.088  and wall time      0.088 sec
++Total cpu time      0.063  and wall time      0.063 sec
 
  anaddb : the run completed successfully.
