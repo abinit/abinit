@@ -2849,21 +2849,30 @@ subroutine odens_real(adir,bra,fofr,n4,n5,n6,natom,npw_k,orbmag_mesh,ph3d,prefac
     the_conjg_flag=.FALSE.
   end if
 
-  ! computes ph3d*bra (not an inner product, no complex conjugation on first argument)
+  ! compute ph3d*bra (not an inner product, no complex conjugation on first argument)
   slowfft=cg_zdotu(npw_k,ph3d(1:2,1:npw_k,t_atom),bra(1:2,1:npw_k))
 
-  ! really needed conjg(phd)*conjg(bra) so take conjg of slowfft here
-  ffac(1)=slowfft(1)*REAL(prefac_m)+slowfft(2)*AIMAG(prefac_m)
-  ffac(2)=slowfft(1)*AIMAG(prefac_m)-slowfft(2)*REAL(prefac_m)
+  ! normal case (conjg_flag false): conjg(ph3d*bra) * fofr
+  if ( .NOT. the_conjg_flag ) slowfft(2) = -slowfft(2)
 
+  ! conjg case (conjg_flag true): ph3d*bra * conjg(fofr),
+  ! so no need to change slowfft
+ 
+  !multiply prefac_m * slowfft with normal complex multiplication 
+  ffac(1)=slowfft(1)*REAL(prefac_m)-slowfft(2)*AIMAG(prefac_m)
+  ffac(2)=slowfft(1)*AIMAG(prefac_m)+slowfft(2)*REAL(prefac_m)
+
+  !scale by the_mult_fact (default value is 1.0)
   ffac(1:2) = the_mult_fact*ffac(1:2)
 
   if (the_conjg_flag) then
+    ! add ffac * conjg(fofr)
     orbmag_mesh%odens(1,:,:,:,adir) = orbmag_mesh%odens(1,:,:,:,adir) +&
-      & (ffac(1)*fofr(1,:,:,:) - ffac(2)*fofr(2,:,:,:))
+      & ffac(1)*fofr(1,:,:,:) + ffac(2)*fofr(2,:,:,:)
     orbmag_mesh%odens(2,:,:,:,adir) = orbmag_mesh%odens(2,:,:,:,adir) -&
-      & (ffac(1)*fofr(2,:,:,:) + ffac(2)*fofr(1,:,:,:))
+      & ffac(1)*fofr(2,:,:,:) + ffac(2)*fofr(1,:,:,:)
   else
+    ! add ffac * fofr
     orbmag_mesh%odens(1,:,:,:,adir) = orbmag_mesh%odens(1,:,:,:,adir) +&
       & ffac(1)*fofr(1,:,:,:) - ffac(2)*fofr(2,:,:,:)
     orbmag_mesh%odens(2,:,:,:,adir) = orbmag_mesh%odens(2,:,:,:,adir) +&
