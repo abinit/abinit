@@ -357,8 +357,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                            "atom", dtset%gstore_gname, .False., comm)
  end if
 
+ ! FIXME: Fix problem with IO (some q-points are not written)
  ! Open GSTORE.nc file and go to data mode.
- ! TODO: Fix problem with IO (some q-points are not written)
  !NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, comm))
  ! use xmpi_comm_self otherwise there will be a deadlock on lemaitre4
  NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, xmpi_comm_self))
