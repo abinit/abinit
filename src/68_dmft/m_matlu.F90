@@ -736,8 +736,8 @@ end subroutine print_matlu
 !Local variables-------------------------------
  integer :: at_indx,iatom,irot,isppol,lpawu,m1,m2,mu,natom
  integer :: ndim,ndim_max,nspinor,nsppol,nsym,nu,gpu_option
- complex(dp), allocatable :: gloc_tmp(:,:,:),gloc_tmp2(:,:,:)
- complex(dp), allocatable :: gloc_tmp3(:,:,:,:),gloc_tmp4(:,:,:,:)
+ complex(dp), target, allocatable :: gloc_tmp(:,:,:),gloc_tmp2(:,:,:)
+ complex(dp), target, allocatable :: gloc_tmp3(:,:,:,:),gloc_tmp4(:,:,:,:)
  type(matlu_type), allocatable, target :: gloc_nmrep(:),glocsym(:)
  complex(dp), ABI_CONTIGUOUS pointer :: zarot(:,:,:,:),gloc_mat(:,:,:),glocsym_mat(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: symrec_cart(:,:,:)

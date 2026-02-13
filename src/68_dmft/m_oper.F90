@@ -849,7 +849,7 @@ subroutine downfold_oper(oper,paw_dmft,procb,iproc,option,op_ks_diag,gpu_option)
  complex(dp), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),mat(:,:,:),chipsi(:,:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: wtk(:)
  character(len=500) :: message
- complex(dp), allocatable :: mat_temp(:,:,:),mat_temp2(:,:,:),mat_temp3(:,:)
+ complex(dp), target, allocatable :: mat_temp(:,:,:),mat_temp2(:,:,:),mat_temp3(:,:)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1112,7 +1112,7 @@ subroutine upfold_oper(oper,paw_dmft,procb,iproc,gpu_option)
  integer :: iatom,ik,ikpt,isppol,idat,lpawu,mbandc,l_gpu_option
  integer :: ndim,ndim_max,ndat,nspinor,paral,shift
  complex(dp), ABI_CONTIGUOUS pointer :: ks(:,:,:,:),mat(:,:,:),chipsi(:,:,:,:,:)
- complex(dp), allocatable :: mat_temp(:,:),mat_temp2(:,:)
+ complex(dp), target, allocatable :: mat_temp(:,:),mat_temp2(:,:)
 ! *********************************************************************
 
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
