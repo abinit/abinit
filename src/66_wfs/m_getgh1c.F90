@@ -1758,7 +1758,7 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
  integer :: choice,cpopt,iidir,ipw,ipws,ispinor,my_nspinor,natom,nnlout
  integer :: npw,npw1,paw_opt,signs,tim_fourwf,tim_nonlop
  logical :: has_kin
- character(len=500) :: msg
+ !character(len=500) :: msg
  real(dp) :: lambda,weight
 
 !arrays

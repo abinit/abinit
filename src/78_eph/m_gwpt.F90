@@ -357,6 +357,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                            "atom", dtset%gstore_gname, .False., comm)
  end if
 
+ if (nqbz /= 0) then
+   ABI_CHECK_IEQ(nqbz, gstore%nqbz, "nqbz from file differs from gstore%nqbz")
+ else
+   nqbz = gstore%nqbz
+ end if
+
  ! FIXME: Fix problem with IO (some q-points are not written)
  ! Open GSTORE.nc file and go to data mode.
  !NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, comm))
