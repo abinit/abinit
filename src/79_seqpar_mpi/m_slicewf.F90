@@ -451,7 +451,7 @@ subroutine getBm1X(X,Bm1X)
      ABI_MALLOC(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim))
      call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj)
    end if
-
+    
    ABI_NVTX_START_RANGE(NVTX_INVOVL)
    call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), &
        spacedim/l_nspinor, blockdim, l_mpi_enreg, l_nspinor, l_block_sliced)

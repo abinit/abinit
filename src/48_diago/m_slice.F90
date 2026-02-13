@@ -1112,6 +1112,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     real(dp), pointer :: theta_mpi(:,:) => null()
     complex(dp), allocatable :: cheby_moments(:,:)
     integer :: kmax
+    integer :: me_g0
     real(dp) :: lambda_min, res_norm
     integer :: maxeig_pos(2)
     integer :: mineig_pos(2)
@@ -1129,10 +1130,14 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
         space_res = SPACE_R
     end if
     bandpp = slice%bandpp
+    me_g0 = slice%me_g0
+    if (slice%paral_kgb==1) then
+        me_g0 = slice%me_g0_fft
+    end if
 
     ! Allocate temporary memory (distributed in colsrows representation)
     call xg_init(X_NAB, slice%space, slice%total_spacedim, 3*bandpp, slice%spacecom, &
-        me_g0=slice%me_g0_fft, gpu_option=slice%gpu_option)
+        me_g0=me_g0, gpu_option=slice%gpu_option)
 
     call xg_setBlock(X_NAB, X_next, slice%total_spacedim, bandpp)                           ! X_next
     call xg_setBlock(X_NAB, xAXColsRows, slice%total_spacedim, bandpp, fcol=bandpp + 1)     ! xAXColsRows
@@ -1142,45 +1147,90 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     ! using space_res
     call xg_init(Results1, space_res, rows=bandpp, cols=1, gpu_option=slice%gpu_option)
     call xg_init(Results2, space_res, rows=bandpp, cols=1, gpu_option=slice%gpu_option)
-    call xg_init(eigen_mpi, space_res, rows=bandpp, cols=1, comm=slice%spacecom, gpu_option=slice%gpu_option)
+    call xg_init(eigen_mpi, space_res, rows=bandpp, cols=1, gpu_option=slice%gpu_option)
     ! using SPACE_R
     call xg_init(resid_mpi, SPACE_R, rows=bandpp, cols=1, comm=slice%spacecom, gpu_option=slice%gpu_option)
 
-    ! Allocate memory for X in colsrows representation
-    call xgTransposer_constructor(xgTransposerX, X, xXColsRows, nspinor, STATE_LINALG,&
-        TRANS_ALL2ALL, slice%comm_rows, slice%comm_cols, 0, 0, slice%me_g0_fft,&
-        gpu_option=slice%gpu_option, gpu_thread_limit=slice%gpu_thread_limit)
-         
-    xgTransposerX%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
-        
-    ! Sanity check
-    if ((.not. slice%use_linalg) .or. slice%use_colsrows) then
-        ABI_ERROR("not in linalg")
-    end if
-    
-    ! ============== Transpose ==============
-    call xmpi_barrier(slice%spacecom)
-    ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
-    call xgTransposer_transpose(xgTransposerX, STATE_COLSROWS)
-    ABI_NVTX_END_RANGE()
+    if (slice%paral_kgb==1) then
 
-    slice%use_linalg = .false.
-    slice%use_colsrows = .true.
+        ! Allocate memory for X in colsrows representation
+        call xgTransposer_constructor(xgTransposerX, X, xXColsRows, nspinor, STATE_LINALG,&
+            TRANS_ALL2ALL, slice%comm_rows, slice%comm_cols, 0, 0, slice%me_g0_fft,&
+            gpu_option=slice%gpu_option, gpu_thread_limit=slice%gpu_thread_limit)
+         
+        xgTransposerX%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
+        
+        ! Sanity check
+        if ((.not. slice%use_linalg) .or. slice%use_colsrows) then
+            ABI_ERROR("not in linalg")
+        end if
+    
+        ! ============== Transpose ==============
+        call xmpi_barrier(slice%spacecom)
+        ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
+        call xgTransposer_transpose(xgTransposerX, STATE_COLSROWS)
+        ABI_NVTX_END_RANGE()
+
+        slice%use_linalg = .false.
+        slice%use_colsrows = .true.
+
+    else
+
+        ! Use colsrows notion
+        xXColsRows = X
+
+    end if
+     
+    ! Compute Rayleigh quotients
+    ! <Psi|H|Psi>
+    ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
+    call getAX_BX(xXColsRows, xAXColsRows, xBXColsRows)
+    call xgBlock_zero_im_g0(xAXColsRows)
+    call xgBlock_zero_im_g0(xBXColsRows)
+    ABI_NVTX_END_RANGE()
+    call xgBlock_colwiseDotProduct(xXColsRows, xAXColsRows, Results1%self, comm_loc=xmpi_comm_null)
+    ! <Psi|S|Psi>
+    call xgBlock_colwiseDotProduct(xXColsRows, xBXColsRows, Results2%self, comm_loc=xmpi_comm_null)
+    ! eigen = <Psi|H|Psi> / <Psi|S|Psi>
+    call xgBlock_colwiseDivision(Results1%self, Results2%self, eigen_mpi%self, &
+        maxeig, maxeig_pos, mineig, mineig_pos)
+
+    maxeig_global = maxeig
+    if (slice%paral_kgb == 1) then
+        call xmpi_barrier(slice%spacecom)
+        call xmpi_max(maxeig,maxeig_global,slice%spacecom,ierr)
+    end if
+
+    call xmpi_barrier(slice%spacecom)
+    my_rank = xmpi_comm_rank(slice%spacecom)
+    if (my_rank==1) then
+        write(902,*) 'eigen='
+        call xgBlock_print(eigen_mpi%self, 902)
+        flush(902)
+    end if
+    write(901+my_rank,*) 'maxeig=', maxeig, 'maxeig_global=', maxeig_global
+    write(901+my_rank,*) 'bandpp=', bandpp
+    flush(901+my_rank)
 
     write(901,*) 'Here I write the Lanczos yeyyy'
     flush(901)
     kmax = 50
+
+    my_rank = xmpi_comm_rank(slice%spacecom)
+    write(901+my_rank,*) 'What 1', slice%spacecom, xmpi_comm_size(slice%spacecom), my_rank
+    write(901+my_rank,*) 'my_rank           =', my_rank; flush(901+my_rank)
     call computeBLanczos(slice, getAX_BX, getBm1X, kmax, lambda_min, res_norm)
 
     lanczos_lowb = lambda_min - res_norm
     
     my_rank = xmpi_comm_rank(slice%spacecom)
-    write(901+my_rank,*) 'my_rank           =', my_rank
+    write(901,*) 'What 2', slice%spacecom, xmpi_comm_size(slice%spacecom), my_rank
+    write(901+my_rank,*) 'my_rank           =', my_rank; flush(901+my_rank)
     write(901+my_rank,*) 'Lanczos lambda_min=', lambda_min
     write(901+my_rank,*) 'Lanczos res_norm  =', res_norm
     write(901+my_rank,*) 'Lanczos guarantee =', lanczos_lowb
     flush(901+my_rank)
-    
+   
     if (slice%paral_kgb == 1) then
         call xmpi_min(lanczos_lowb,lanczos_lowb_global,slice%spacecom,ierr)
     else
@@ -1200,38 +1250,13 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     end if
     ABI_MALLOC(cheby_moments, (nband, ndeg_filter_max+1) )
 
+    mineig_global = lanczos_lowb_global - 0.1
     write(901+my_rank,*) 'rows=', rows(xXColsRows), 'cols=', cols(xXColsRows)
     call computeChebyshevMoments(slice, xXColsRows, getAX_BX, getBm1X, &
-        lanczos_lowb_global, slice%ecut, ndeg_filter_max, cheby_moments)
+        mineig_global, slice%ecut, ndeg_filter_max, cheby_moments)
     write(901+my_rank,*) 'Moments rows=', size(cheby_moments,1), 'cols=', size(cheby_moments,2)
     !write(901+my_rank,*) 'cheby_moments row1 =', real(cheby_moments(1,:))
     flush(901+my_rank)
-
-
-    ! Now apply A and B to X (requires colsrows representation) to create AX and BX in colsrows
-    ! Remember that this function will copy X to BX if paw
-    ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
-    call getAX_BX(xXColsRows, xAXColsRows, xBXColsRows)
-    call xgBlock_zero_im_g0(xAXColsRows)
-    call xgBlock_zero_im_g0(xBXColsRows)
-    ABI_NVTX_END_RANGE()
-
-    ! Compute Rayleigh quotients
-    ! <Psi|H|Psi>
-    call xgBlock_colwiseDotProduct(xXColsRows, xAXColsRows, Results1%self, comm_loc=xmpi_comm_null)
-    ! <Psi|S|Psi>
-    call xgBlock_colwiseDotProduct(xXColsRows, xBXColsRows, Results2%self, comm_loc=xmpi_comm_null)
-    ! eigen = <Psi|H|Psi> / <Psi|S|Psi>
-    call xgBlock_colwiseDivision(Results1%self, Results2%self, eigen_mpi%self, &
-        maxeig, maxeig_pos, mineig, mineig_pos)
-
-    if (slice%paral_kgb == 1) then
-        call xmpi_max(maxeig,maxeig_global,slice%spacecom,ierr)
-        call xmpi_min(mineig,mineig_global,slice%spacecom,ierr)
-    else
-        maxeig_global = maxeig
-        mineig_global = mineig
-    end if
 
     ! Use the moments in parallel for every filter
     ! at the end of every filter we must sum contributions across procs
@@ -1240,13 +1265,16 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     flush(901+my_rank)
 
     nstep_bisect = 10 ! Parameter affects accuracy of splitSpectrum
-    center = (slice%ecut + lanczos_lowb_global) / 2.d0
-    radius = (slice%ecut - lanczos_lowb_global) / 2.d0
+    center = (slice%ecut + mineig_global) / 2.d0
+    radius = (slice%ecut - mineig_global) / 2.d0
     
     ! [a,b) working spectrum hardcoded, ongoing...
     call splitSpectrum(nstep_bisect, center, radius, lanczos_lowb_global, &
-        maxeig_global, c_split, cheby_moments)
+        maxeig_global, c_split, cheby_moments, comm=slice%spacecom)
 
+    if (slice%paral_kgb==1) then
+        call xmpi_min(c_split, slice%spacecom, ierr)
+    end if
     write(901+my_rank,*) 'split spectrum at=', c_split
     flush(901+my_rank)
 
@@ -2533,11 +2561,13 @@ end subroutine print_scalar_filter
     space = slice%space
     spacedim = slice%total_spacedim
     gpu_option = slice%gpu_option
-    me_g0 = slice%me_g0_fft
+    me_g0 = slice%me_g0
     rank = xmpi_comm_rank(slice%spacecom)
     beta_prev = 0.0_dp
 
     ABI_MALLOC(v_min, (spacedim))
+    
+    write(901+rank,*) 'Lanczos in rank=', rank; flush(901+rank)
 
     ! workspace size (npw,5)
     call xg_init(W_vcol, space, spacedim, 5, xmpi_comm_null, me_g0=me_g0, gpu_option=gpu_option)
@@ -2590,13 +2620,10 @@ end subroutine print_scalar_filter
 
         ! v = B^{-1} * A * q
         if (slice%paw) then
-            write(901+rank,*) 'K start bug'; flush(901+rank)
-            call xgBlock_print(v, 901+xmpi_comm_rank(slice%spacecom))
             call timab(tim_invovl, 1, tsec)
             ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_BM1X)
             call getBm1X(v, Bm1v)
             ABI_NVTX_END_RANGE()
-            write(901+rank,*) 'K start end'; flush(901+rank)
             call timab(tim_invovl, 2, tsec)
             call timab(tim_copy, 1, tsec)
             call xgBlock_copy(Bm1v, v)
@@ -2824,9 +2851,9 @@ subroutine splitSpectrum(nstep_bisect, center, radius, a, b, c_split, cheby_mome
         integer :: comm_, ierr
         real(dp) :: mass_diff, mass_diff_prev
         real(dp) :: c, width
-        real(dp) :: spectral_mass_left
-        real(dp) :: spectral_mass_right
-        real(dp), allocatable :: energy_interval(:)
+        real(dp), allocatable :: spectral_mass_left(:)
+        real(dp), allocatable :: spectral_mass_right(:)
+        real(dp), allocatable :: energy_per_band(:)
         real(dp), allocatable :: cja(:)
 
         ! *********************************************************************
@@ -2838,8 +2865,12 @@ subroutine splitSpectrum(nstep_bisect, center, radius, a, b, c_split, cheby_mome
         neigenpairs = size(cheby_moments, 1)
         ndeg_filter = size(cheby_moments, 2)-1
 
-        ABI_MALLOC(energy_interval, (neigenpairs))
+        write(901+xmpi_comm_rank(comm_), *) 'neigenpairs=', neigenpairs
+        flush(901+xmpi_comm_rank(comm_))
+        ABI_MALLOC(energy_per_band, (neigenpairs))
         ABI_MALLOC(cja, (ndeg_filter + 1))
+        ABI_MALLOC(spectral_mass_left, (nstep_bisect))
+        ABI_MALLOC(spectral_mass_right, (nstep_bisect))
 
         width = (b - a) / (nstep_bisect + 1)
         mass_diff_prev = 0.d0
@@ -2848,32 +2879,39 @@ subroutine splitSpectrum(nstep_bisect, center, radius, a, b, c_split, cheby_mome
         do ishift = 1, nstep_bisect
     
             c = a + ishift * width
+            
+            write(901+xmpi_comm_rank(comm_),*) 'ishift=', ishift, 'c=', c
 
             ! Slice Left [a,c)
             call buildChebyshevJacksonCoeffs(a, c, ndeg_filter, center, radius, cja)
-            call computeFilterEnergy(cja, cheby_moments, energy_interval)
+            call computeFilterEnergy(cja, cheby_moments, energy_per_band)
+            spectral_mass_left(ishift) = sum(energy_per_band)
+            write(901+xmpi_comm_rank(comm_),*) 'Nvec left=', spectral_mass_left(ishift)
             if ( xmpi_comm_size(comm_) > 1) then
-                call xmpi_sum(energy_interval, comm_, ierr)
+                call xmpi_barrier(comm_)
+                call xmpi_sum(spectral_mass_left(ishift), comm_, ierr)
             end if
-            spectral_mass_left = sum(energy_interval)
 
-            write(901,*) 'ishift=', ishift, 'c=', c
-            write(901,*) 'Nvec left=', spectral_mass_left
-            flush(901)
+            write(901+xmpi_comm_rank(comm_),*) 'Nvec left=', spectral_mass_left(ishift)
+            flush(901+xmpi_comm_rank(comm_))
 
             ! Slice Right [c,b)
             call buildChebyshevJacksonCoeffs(c, b, ndeg_filter, center, radius, cja)
-            call computeFilterEnergy(cja, cheby_moments, energy_interval)            
+            call computeFilterEnergy(cja, cheby_moments, energy_per_band)            
+            spectral_mass_right(ishift) = sum(energy_per_band)
+            
+            write(901+xmpi_comm_rank(comm_),*) 'Nvec right=', spectral_mass_right(ishift)
+            
             if ( xmpi_comm_size(comm_) > 1) then
-                call xmpi_sum(energy_interval, comm_, ierr)
+                call xmpi_barrier(comm_)
+                call xmpi_sum(spectral_mass_right(ishift), comm_, ierr)
             end if
-            spectral_mass_right = sum(energy_interval)
 
-            write(901,*) 'Nvec right=', spectral_mass_right
-            flush(901)
+            write(901+xmpi_comm_rank(comm_),*) 'Nvec right=', spectral_mass_right(ishift)
+            flush(901+xmpi_comm_rank(comm_))
 
             ! Detect spectral mass flip
-            mass_diff = spectral_mass_left - spectral_mass_right
+            mass_diff = spectral_mass_left(ishift) - spectral_mass_right(ishift)
             if (ishift > 1 .and. mass_diff * mass_diff_prev < 0) then
                 c_split = (2 * a + (2*ishift - 1) * width) / 2.d0
             end if
@@ -2881,7 +2919,9 @@ subroutine splitSpectrum(nstep_bisect, center, radius, a, b, c_split, cheby_mome
 
         end do
 
-        ABI_FREE(energy_interval)
+        ABI_FREE(energy_per_band)
+        ABI_FREE(spectral_mass_left)
+        ABI_FREE(spectral_mass_right)
         ABI_FREE(cja)
 
 end subroutine splitSpectrum
@@ -2895,13 +2935,13 @@ end subroutine splitSpectrum
 !! 
 !! SOURCE
 
-subroutine computeFilterEnergy(cja, cheby_moments, energy_interval)
+subroutine computeFilterEnergy(cja, cheby_moments, energy_per_band)
 
       implicit none
 
       real(dp), intent(in) :: cja(:)
       complex(dp), intent(in) :: cheby_moments(:,:)
-      real(dp), intent(out) :: energy_interval(:)
+      real(dp), intent(out) :: energy_per_band(:)
  
       complex(dp), allocatable :: energy(:)
       integer :: neigenpairs, ndeg_filter
@@ -2922,7 +2962,7 @@ subroutine computeFilterEnergy(cja, cheby_moments, energy_interval)
       !$omp end parallel do
       !$omp parallel do
       do j = 1, neigenpairs
-          energy_interval(j) = abs(energy(j))
+          energy_per_band(j) = abs(energy(j))
       end do
       !$omp end parallel do
       ABI_FREE(energy)
