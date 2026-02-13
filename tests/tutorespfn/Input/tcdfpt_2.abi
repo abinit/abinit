@@ -86,7 +86,7 @@ xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 
 
 #Definition of the planewave basis set
-ecut   3.0         # Maximal kinetic energy cut-off, in Hartree
+ecut   2.5         # Maximal kinetic energy cut-off, in Hartree
 nband  42
 
 #Definition of the k-point grid

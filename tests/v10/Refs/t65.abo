@@ -1,6 +1,6 @@
 
-.Version 10.1.4.4 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.1 of ABINIT, released Dec 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  7 Jan 2026.
-- ( at 15h35 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/TestBot_MPI1/v10_t61-t62-t63-t64-t65/t65.abi
+.Starting date : Thu 12 Feb 2026.
+- ( at 12h38 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v10_t61-t62-t63-t64-t65/t65.abi
 - output file    -> t65.abo
 - root for input  files -> t65i
 - root for output files -> t65o
@@ -237,8 +237,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.08112
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/sponce_tot_energy/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -368,12 +368,12 @@ meta: {optdriver: 7, eph_task: 4, }
  Dynamical Quadrupoles Tensor (units: e Bohr)
 
   atom   dir       Qxx         Qyy         Qzz         Qyz         Qxz         Qxy
-    1     x      0.000196    0.000000   -0.000986   16.277095   -0.000395   -0.000395
-    1     y     -0.000986    0.001182    0.000986    0.000591   16.278081    0.000591
-    1     z      0.000986    0.000000    0.000196    0.000591    0.000591   16.278081
-    2     x     -0.000196    0.000000    0.000986  -16.277095    0.000591    0.000591
-    2     y      0.000986    0.001182   -0.000986    0.000591  -16.277095    0.000395
-    2     z     -0.000986   -0.000000    0.000196   -0.000395   -0.000591  -16.278081
+    1     x      0.000184   -0.000000   -0.000981   15.909584   -0.000399   -0.000399
+    1     y     -0.000981    0.001165    0.000981    0.000583   15.910565    0.000583
+    1     z      0.000981    0.000000    0.000184    0.000583    0.000583   15.910565
+    2     x     -0.000184    0.000000    0.000981  -15.909584    0.000583    0.000583
+    2     y      0.000981    0.001165   -0.000981    0.000583  -15.909584    0.000399
+    2     z     -0.000981    0.000000    0.000184   -0.000399   -0.000583  -15.910565
 - Cannot find dielectric tensor and Born effective charges in DDB file: t63.ddb.out
  Values initialized with zeros.
 - Found quadrupole tensor in DDB file: t63.ddb.out
@@ -457,79 +457,79 @@ P Number of k-point in Sigma_nk treated by this proc: 8 of 8
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
-
-
+ 
+ 
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   12.788
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1  -8.691   -8.733   -0.042   -0.043   -0.000    0.993   -0.095    0.052    0.000    0.000
-   2  12.788   12.851    0.063    0.086   -2.547    0.739   -0.855    0.941   21.479   21.585
-   3  12.788   12.851    0.063    0.086   -2.547    0.739   -0.855    0.941    0.000    0.000
-   4  12.788   12.851    0.063    0.086   -2.547    0.739   -0.855    0.941    0.000    0.000
+   1  -8.691   -8.733   -0.042   -0.042   -0.000    0.993   -0.094    0.051    0.000    0.000
+   2  12.788   12.850    0.062    0.084   -2.547    0.739   -0.842    0.926   21.479   21.583
+   3  12.788   12.850    0.062    0.084   -2.547    0.739   -0.842    0.926    0.000    0.000
+   4  12.788   12.850    0.062    0.084   -2.547    0.739   -0.842    0.926    0.000    0.000
 ============================================================================================
 K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   12.788
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1  -6.962   -6.977   -0.015   -0.055   -2.778    0.274   -0.140    0.085    0.000    0.000
-   2   6.185    6.287    0.101    0.128   -3.432    0.791   -0.393    0.521   13.148   13.264
-   3  11.044   11.056    0.012    0.080  -10.568    0.151   -0.782    0.863    4.858    4.769
-   4  11.044   11.056    0.012    0.080  -10.568    0.151   -0.782    0.863    0.000    0.000
+   1  -6.962   -6.978   -0.016   -0.055   -2.737    0.284   -0.138    0.084    0.000    0.000
+   2   6.185    6.214    0.028    0.128   -3.147    0.221   -0.385    0.513   13.148   13.192
+   3  11.044   11.058    0.015    0.079  -10.172    0.185   -0.770    0.849    4.858    4.845
+   4  11.044   11.058    0.015    0.079  -10.172    0.185   -0.770    0.849    0.000    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   12.788
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1  -2.789   -2.778    0.011   -0.229   -0.754   -0.047   -0.349    0.120    0.000    0.000
-   2  -0.704   -0.731   -0.026   -0.030   -0.584    0.865   -0.365    0.335    2.085    2.048
-   3   9.976   10.060    0.084    0.181   -3.374    0.465   -0.662    0.843   10.680   10.791
-   4   9.976   10.060    0.084    0.181   -3.374    0.465   -0.662    0.843    0.000    0.000
+   1  -2.789   -2.777    0.012   -0.224   -0.754   -0.055   -0.343    0.119    0.000    0.000
+   2  -0.704   -0.730   -0.026   -0.030   -0.584    0.865   -0.359    0.330    2.085    2.047
+   3   9.976   10.057    0.081    0.172   -3.373    0.473   -0.658    0.830   10.680   10.787
+   4   9.976   10.057    0.081    0.172   -3.373    0.473   -0.658    0.830    0.000    0.000
 ============================================================================================
 K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00], T:    0.0 [K], mu_e:   12.788
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1  -6.388   -6.399   -0.011   -0.038   -2.322    0.294   -0.135    0.097    0.000    0.000
-   2   8.383    8.384    0.001    0.007   -1.447    0.223   -0.569    0.576   14.771   14.783
-   3   8.637    8.668    0.031    0.063   -2.565    0.481   -0.683    0.747    0.254    0.284
-   4   8.637    8.668    0.031    0.063   -2.565    0.481   -0.683    0.747    0.000    0.000
+   1  -6.388   -6.400   -0.012   -0.038   -2.271    0.310   -0.133    0.095    0.000    0.000
+   2   8.383    8.384    0.001    0.005   -1.470    0.224   -0.562    0.567   14.771   14.783
+   3   8.637    8.668    0.031    0.063   -2.575    0.486   -0.672    0.735    0.254    0.284
+   4   8.637    8.668    0.031    0.063   -2.575    0.486   -0.672    0.735    0.000    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00], T:    0.0 [K], mu_e:   12.788
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1  -2.603   -2.601    0.001    0.007   -7.962    0.165   -0.162    0.169    0.000    0.000
-   2   2.002    1.998   -0.004   -0.015   -5.953    0.229   -0.380    0.365    4.605    4.600
-   3   6.013    6.009   -0.005   -0.081   -6.366    0.058   -0.624    0.543    4.012    4.010
-   4   7.868    7.862   -0.005   -0.029   -6.402    0.190   -0.768    0.740    1.854    1.853
+   1  -2.603   -2.601    0.001    0.007   -7.838    0.178   -0.160    0.167    0.000    0.000
+   2   2.002    1.998   -0.004   -0.015   -5.808    0.254   -0.374    0.359    4.605    4.600
+   3   6.013    6.009   -0.005   -0.081   -6.181    0.059   -0.615    0.534    4.012    4.011
+   4   7.868    7.862   -0.006   -0.028   -6.225    0.212   -0.757    0.728    1.854    1.853
 ============================================================================================
 K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00], T:    0.0 [K], mu_e:   12.788
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1  -4.180   -4.190   -0.010   -0.056   -5.294    0.184   -0.195    0.139    0.000    0.000
-   2   4.132    4.125   -0.007   -0.121   -3.773    0.057   -0.545    0.424    8.312    8.315
-   3   5.097    5.084   -0.013   -0.028   -2.237    0.456   -0.548    0.520    0.965    0.959
-   4   9.755    9.751   -0.004   -0.061   -3.988    0.063   -0.881    0.820    4.659    4.667
+   1  -4.180   -4.191   -0.011   -0.055   -5.222    0.193   -0.192    0.137    0.000    0.000
+   2   4.132    4.125   -0.007   -0.119   -3.745    0.057   -0.537    0.418    8.312    8.316
+   3   5.097    5.084   -0.013   -0.028   -2.232    0.467   -0.540    0.512    0.965    0.959
+   4   9.755    9.751   -0.004   -0.056   -3.986    0.074   -0.864    0.807    4.659    4.667
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:   12.788
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1   0.083    0.058   -0.025   -0.036   -1.505    0.690   -0.288    0.252    0.000    0.000
-   2   0.083    0.058   -0.025   -0.036   -1.505    0.690   -0.288    0.252    0.000    0.000
-   3   6.421    6.493    0.071    0.094   -0.504    0.759   -0.601    0.694    6.338    6.434
-   4   6.421    6.493    0.071    0.094   -0.504    0.759   -0.601    0.694    0.000    0.000
+   1   0.083    0.058   -0.025   -0.036   -1.505    0.690   -0.284    0.248    0.000    0.000
+   2   0.083    0.058   -0.025   -0.036   -1.505    0.690   -0.284    0.248    0.000    0.000
+   3   6.421    6.492    0.070    0.092   -0.504    0.762   -0.591    0.684    6.338    6.434
+   4   6.421    6.492    0.070    0.092   -0.504    0.762   -0.591    0.684    0.000    0.000
 ============================================================================================
 K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:    0.0 [K], mu_e:   12.788
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1   0.944    0.935   -0.010   -0.034   -3.625    0.286   -0.289    0.254    0.000    0.000
-   2   0.944    0.935   -0.010   -0.034   -3.625    0.286   -0.289    0.254    0.000    0.000
-   3   4.316    4.324    0.009    0.027   -2.197    0.328   -0.508    0.535    3.371    3.390
-   4   4.316    4.324    0.009    0.027   -2.197    0.328   -0.508    0.535    0.000    0.000
+   1   0.944    0.934   -0.010   -0.034   -3.594    0.298   -0.284    0.250    0.000    0.000
+   2   0.944    0.934   -0.010   -0.034   -3.594    0.298   -0.284    0.250    0.000    0.000
+   3   4.316    4.325    0.009    0.027   -2.167    0.341   -0.500    0.527    3.371    3.391
+   4   4.316    4.325    0.009    0.027   -2.167    0.341   -0.500    0.527    0.000    0.000
 ============================================================================================
-
- =========================================================
- Contributions to total energies (in meV)
-   See Table II of S. Ponce and X. Gonze, arXiv:2512.04897
-   for additional information.
- =========================================================
-
+ 
+ ========================================================= 
+ Contributions to total energies (in meV)                  
+   See Table II of S. Ponce and X. Gonze, arXiv:2512.04897 
+   for additional information.                             
+ ========================================================= 
+ 
  Temperature =      0.000000 K
  E^(BO)   =       -325151.619138
- E^(ph)   =           337.801155
- E^(elph) =             6.103468
+ E^(ph)   =           337.279161
+ E^(elph) =             6.103120
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      6.7510000000E+00  6.7510000000E+00  6.7510000000E+00 Bohr
               amu      1.20110000E+01
@@ -682,7 +682,25 @@ P           mkmem           8
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] The Abinit project: Impact, environment and recent developments.
+- [1] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
+- J. Chem. Phys. 163, 164126 (2025).
+- M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,
+- M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,
+- J. Bieder, A. Blanchet, F. Bottin, J. Bouchet, J. Bouquiaux, E. Bousquet,
+- J. Boust, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval,
+- A. Castellano, E. Castiel, J.-B. Charraud, J. Clerouin, M. Cote, C. Duval,
+- A. Gallo, F. Gendron, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras,
+- F. Gomez-Ortiz, X. Gonze, F. Goudreault, A. Gruneis, R. Gupta, B. Guster,
+- D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
+- I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
+- Comment: the sixth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025
+-
+- [2] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -694,29 +712,31 @@ P           mkmem           8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] ABINIT: Overview, and focus on selected capabilities
-- J. Chem. Phys. 152, 124102 (2020).
-- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
-- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
-- G.Brunin, D.Caliste, M.Cote,
-- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
-- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
-- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
-- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
-- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- [3] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
-- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- is available at
+-  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [3] Recent developments in the ABINIT software package.
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -729,14 +749,15 @@ P           mkmem           8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - And optionally:
 -
-- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -744,15 +765,16 @@ P           mkmem           8
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.5  wall=          9.5
+- Proc.   0 individual time (sec): cpu=          9.4  wall=          9.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.5  wall=          9.5
+.Delivered   6 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.4  wall=          9.5

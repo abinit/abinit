@@ -1,6 +1,6 @@
 
-.Version 10.1.4.4 of MRGDV, released Dec 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.3 computer)
+.Version 10.5.8.1 of MRGDV, released Dec 2025.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
  MRGDV comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  3 Jan 2026.
-- ( at 15h15 )
-
-->> Enter name of output file:
-->> Enter total number of DFPT POT files:
-->> Enter name of POT file 1 :
-->> Enter name of POT file 2 :
-->> Enter name of POT file 3 :
-->> Enter name of POT file 4 :
+.Starting date : Thu 12 Feb 2026.
+- ( at 12h38 )
+  
+->> Enter name of output file: 
+->> Enter total number of DFPT POT files: 
+->> Enter name of POT file 1 : 
+->> Enter name of POT file 2 : 
+->> Enter name of POT file 3 : 
+->> Enter name of POT file 4 : 
 - Reading header of file [1]: t61o_DS13_POT1
 - Merging file [1]: t61o_DS13_POT1
 - Reading header of file [2]: t61o_DS23_POT1
