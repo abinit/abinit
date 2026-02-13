@@ -565,7 +565,7 @@ AC_DEFUN([_SD_LIBXC_CHECK_CONFIG], [
   fi
 
   # When using environment variables, triggers must be set to yes
-  if test -n "${tmp_libxc_vars}" -a "${sd_libxc_init}" = "pkg" -a "${sd_libxc_init}" = "dir" ; then
+  if test -n "${tmp_libxc_vars}" -a "${sd_libxc_init}" != "pkg" -a "${sd_libxc_init}" != "dir" ; then
     sd_libxc_enable="yes"
     sd_libxc_init="env"
     if test "${tmp_libxc_invalid}" = "yes"; then
