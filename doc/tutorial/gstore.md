@@ -97,18 +97,30 @@ If no specific option is provided in the input file, ABINIT computes **all** mat
 Clearly, this is rarely what you actually want: not all these transitions are needed to compute the final physical properties.
 However, ABINIT cannot (yet) read your mind, so you must **explicitly** specify the band ranges in the input file.
 
-The most basic variable is [[gstore_brange]], which defines the range of the $m$ and $n$ indices
-(for each spin channel when [[nsppol]] = 2).
-[[gstore_brange]] gives you full control over the bands to include, but it is not always
-the most convenient option — especially when the relevant contributions to the physical properties come
+The most basic variable is [[gstore_brange]], which defines the range of **both** the $m$ and $n$ indices
+for each spin [[nsppol]] channel.
+
+[[gstore_brange]] gives you full control over the bands to include and should be included when you need
+all the e-ph matrix elements connecting **all** $\kk$ and $\kq$ states inside a band range as, for instance,
+in polaron calculations.
+
+In the case of metals or transport properties in semiconductors, the relevant contributions to the physical properties come
 from transitions located within an energy window around the Fermi level (as in metals)
 or from windows starting at the band edges in semiconductors.
-In this case, it is much easier to filter bands using an energy range defined by [[gstore_erange]].
+In this case, it is much easier to filter bands automaticall using an input energy range defined by [[gstore_erange]].
 
 !!! important
 
     [[gstore_erange]] is not compatible with [[gstore_brange]].
 
+
+There are however other applications in which we want to filter $\kk$-points and have a different range of bands
+for the $\psi_\nk$ and $\psi_\mkq$ states entering the e-ph matrix elements.
+
+In ZPR calculations of the (fundamental) band gap, for instance, the $\kk$-points and the $n$ index can be restricted
+to the band edges that are automatically detected from the KS energies of the WFK file.
+The $m$ index, on the contrary, should cover a much large band range to account for empty states in the summation
+while the $\qq$-points should cover the full BZ or an appropriate irreducible wedge as discussed below.
 
 Finally, the [[gstore_kfilter]] variable allows you to apply an additional level of filtering directly on the electronic states.
 As before, the most appropriate choice for this option depends strongly on the specific physical property you intend to compute.
@@ -118,11 +130,12 @@ We conclude this guide by providing examples of recommended settings for differe
 Note that not all gstore_ variables are explicitly included in these examples,
 as we rely on the default behavior whenever appropriate.
 
-For computing the ZPR of the fundamental/direct band gap:
+For computing the ZPR of the fundamental/direct band gap, use:
 
 [[gstore_kfilter]] "qprange"  # Compute g(k,q) only for |nk> at the band edges
 [[gstore_use_lgk]] 1          # Only q-points in the IBZ_k
-[[nband]]                     # Bands for the m index (from 1 up to nband)
+[[gstore_brange]] 1 12        # Range for the m index (last index cannot be greated than nband)
+[[nband]]         12
 
 !!! important
 
@@ -136,19 +149,20 @@ For computing the ZPR of the fundamental/direct band gap:
     If a more accurate description of the true band edges is required,
     generate a WFK file using a shifted $\kk$-mesh via [[shiftk]].
 
-If you want to have full control on the list $\kk$-points and bands that should be considered for the $|n\kk\rangle$ states,
-use [[nkptgw]], [[kptgw]] and [[bdgw]] as in the example below:
+If you want to have full control on the list $\kk$-points and bands that should be considered
+for the $|n\kk\rangle$ states, **remove** the "kfilter" option,
+and use [[nkptgw]], [[kptgw]] and [[bdgw]] as in the example below:
 
 [[gstore_use_lgk]] 1          # Only q-points in the IBZ_k
-[[nkptgw]]
-2
+[[nkptgw]] 2
 [[kptgw]]
 0   0 0
 0.8 0 0
 [[bdgw]]
+1 5                           # Range for n index.
 1 5
-1 5
-[[nband]]                     # Bands for the m index (from 1 up to nband)
+[[gstore_brange]] 1 12        # Range for the m index (last index cannot be greated than nband)
+[[nband]]         12
 
 
 ## MPI parallelism in gstore computation

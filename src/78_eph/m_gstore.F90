@@ -807,17 +807,17 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  end if
 
  if (dtset%nkptgw /= 0) then
-  ! Allow user to specify k-points with kptgw and bdgw.
+   ! Allow user to specify k-points with kptgw and bdgw.
 
-  if (gstore%kfilter /= "none") then
-    ABI_ERROR("gstore%kfilter and nkptgw != 0 cannot be used together!")
-  end if
+   if (gstore%kfilter /= "none") then
+     ABI_ERROR("gstore_kfilter and nkptgw != 0 cannot be used together!")
+   end if
 
-  ! Assume ZPR calculations requiring virtual k+q transitions from 1 up to nband unless gstore_brange is given.
-  gstore_brange_kq = dtset%gstore_brange
-  if (all(gstore_brange_kq == 0)) then
-    gstore_brange_kq(:,1) = [1, dtset%mband]
-    gstore_brange_kq(:,2) = [1, dtset%mband]
+   ! Assume ZPR calculations requiring virtual k+q transitions from 1 up to nband unless gstore_brange is given.
+   gstore_brange_kq = dtset%gstore_brange
+   if (all(gstore_brange_kq == 0)) then
+     gstore_brange_kq(:,1) = [1, dtset%mband]
+     gstore_brange_kq(:,2) = [1, dtset%mband]
    end if
 
    call sigtk_kcalc_from_nkptgw(dtset, dtset%mband, nkcalc, kcalc, bstart_ks, nbcalc_ks)
@@ -2658,8 +2658,8 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
    bstart_kq = gqk%bstart_kq; bstop_kq = gqk%bstop_kq
 
    ! Stop if dtset%nband < gstore%nband before sigfaulting.
-   ABI_CHECK_ILEQ(bstop_k, mband, "bstop_k should be smaller that mband. Action increase nband in input")
-   ABI_CHECK_ILEQ(bstop_kq, mband, "bstop_kq should be smaller that mband. Action increase nband in input")
+   ABI_CHECK_ILEQ(bstop_k, mband, "bstop_k should be smaller that mband present in WFK")
+   ABI_CHECK_ILEQ(bstop_kq, mband, "bstop_kq should be smaller that mband present in WFK")
 
    ! We need the image of this k-point in the IBZ.
    do my_ik=1,gqk%my_nk
@@ -2744,8 +2744,14 @@ subroutine gstore_fill_bks_mask_pp_mesh(gstore, ecut, mband, nkibz, nsppol, my_p
 
  do my_is=1,gstore%my_nspins
    gqk => gstore%gqk(my_is); spin = gstore%my_spins(my_is)
+
    ! These are the first and last band indices used in the sum over states (possibly MPI-distributed)
    b1 = my_bsum_start(spin); b2 = my_bsum_stop(spin)
+
+   ! Stop if dtset%nband < gstore%nband before sigfaulting.
+   ABI_CHECK_ILEQ(gqk%bstop_k, mband, "bstop_k should be smaller that mband present in WFK")
+   ABI_CHECK_ILEQ(gqk%bstop_kq, mband, "bstop_kq should be smaller that mband present in WFK")
+   ABI_CHECK_ILEQ(b2, mband, "max band index in sum should be smaller that mband present in WFK")
 
    ABI_MALLOC(map_kq, (6, gqk%my_nk))
 
@@ -4978,6 +4984,7 @@ subroutine gstore_check_restart(filepath, dtset, nqbz, done_qbz_spin, restart, c
 
  call xmpi_bcast(restart, master, comm, ierr)
  call xmpi_bcast(nqbz, master, comm, ierr)
+
  if (my_rank /= master) then
    ABI_MALLOC(done_qbz_spin, (nqbz, dtset%nsppol))
  end if

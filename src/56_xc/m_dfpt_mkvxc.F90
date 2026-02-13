@@ -970,7 +970,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !scalars
  integer :: ii,ir,ishift,ngrad,nspgrad
  real(dp) :: gradrho_gradrho1
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp) :: qphon(3)
  real(dp) :: r0(3),r1(3)
