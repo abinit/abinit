@@ -1,8 +1,8 @@
 
-.Version 10.5.8.5 of ABINIT, released Oct 2025.
+.Version 10.5.8.1 of ABINIT, released Dec 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  8 Feb 2026.
-- ( at 21h04 )
+.Starting date : Fri 13 Feb 2026.
+- ( at 13h16 )
   
 - input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v9_t218/t218.abi
 - output file    -> t218.abo
@@ -404,7 +404,7 @@ P          mk1mem5         36
                          0.02778    0.02778    0.02778    0.02778    0.02778    0.02778
                          0.02778    0.02778    0.02778    0.02778    0.02778    0.02778
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.2407882598E+00  7.1636943582E-01  0.0000000000E+00
+                       1.2407882644E+00  7.1636943847E-01  0.0000000000E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.3447500000E+00  1.3537420437E+00  0.0000000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -551,9 +551,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  B]
 - [  3.3333E-01,   3.3333E-01,   0.0000E+00,  N]
 cartesian_forces: # hartree/bohr
-- [ -1.14837199E-28,   1.67970816E-28,  -0.00000000E+00, ]
-- [  1.14837199E-28,  -1.67970816E-28,  -0.00000000E+00, ]
-force_length_stats: {min:   2.03474267E-28, max:   2.03474267E-28, mean:   2.03474267E-28, }
+- [  2.29674398E-28,  -3.65264089E-28,  -0.00000000E+00, ]
+- [ -2.29674398E-28,   3.65264089E-28,  -0.00000000E+00, ]
+force_length_stats: {min:   4.31472112E-28, max:   4.31472112E-28, mean:   4.31472112E-28, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -569,25 +569,25 @@ force_length_stats: {min:   2.03474267E-28, max:   2.03474267E-28, mean:   2.034
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.333333333333      0.333333333333      0.000000000000
- rms dE/dt=  1.2484E-27; max dE/dt=  1.6799E-27; dE/dt below (all hartree)
-    1      -0.000000000000      0.000000000000      0.000000000000
-    2      -0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  1.1572E-27; max dE/dt=  2.1541E-27; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000     -0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.24078825984140     0.71636943582309     0.00000000000000
+    2      1.24078826442304     0.71636943846830     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 1.1747592E-28 1.6797082E-28   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 2.4911054E-28 3.6526409E-28   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.00000000000000    -0.00000000000000
-    2      0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 6.0408543E-27 8.6374059E-27   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 1.2809779E-26 1.8782635E-26   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  4.689500000000  4.689500000000 40.000000000000 bohr
-              =  2.481576519683  2.481576519683 21.167088343600 angstroms
+              =  2.481576528846  2.481576528846 21.167088421760 angstroms
  prteigrs : about to open file t218o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.19486   Average Vxc (hartree)=  -0.09772
  Eigenvalues (hartree) for nkpt=   7  k points:
@@ -607,7 +607,7 @@ psp_core            :  0.00000000000000E+00
 local_psp           : -1.94249572306477E+02
 non_local_psp       :  7.81803349669993E-01
 total_energy        : -1.20625119298584E+01
-total_energy_eV     : -3.28237642439208E+02
+total_energy_eV     : -3.28237671220132E+02
 band_energy         : -4.47315246866728E+00
 ...
 
@@ -618,9 +618,9 @@ band_energy         : -4.47315246866728E+00
   sigma(3 3)=  4.71339803E-02  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.3700E+03 GPa]
-- sigma(1 1)=  1.36158308E+03  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.36158308E+03  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.38672934E+03  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.36158331E+03  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.36158331E+03  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.38672958E+03  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -727,7 +727,7 @@ tolerances: {tolwfr: 1.00E-18, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.82458918E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1824589182E+02 Ha. Also 2DEtotal=   -0.496495966268E+03 eV
+ 2DEtotal=   -0.1824589182E+02 Ha. Also 2DEtotal=   -0.496496009802E+03 eV
     (  non-var. 2DEtotal :   -1.8245891819E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -791,7 +791,7 @@ tolerances: {tolwfr: 1.00E-18, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.82458918E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1824589182E+02 Ha. Also 2DEtotal=   -0.496495966236E+03 eV
+ 2DEtotal=   -0.1824589182E+02 Ha. Also 2DEtotal=   -0.496496009770E+03 eV
     (  non-var. 2DEtotal :   -1.8245891818E+01 Ha)
 
 --------------------------------------------------------------------------------
@@ -850,7 +850,7 @@ tolerances: {tolwfr: 1.00E-18, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.79886695E-01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1798866950E+00 Ha. Also 2DEtotal=   -0.489496590985E+01 eV
+ 2DEtotal=   -0.1798866950E+00 Ha. Also 2DEtotal=   -0.489496633905E+01 eV
     (  non-var. 2DEtotal :   -1.7988669473E-01 Ha)
 ================================================================================
 
@@ -989,7 +989,7 @@ tolerances: {tolwfr: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.77263629E+00  frxc 2 =   4.70349344E-01
  Resulting in :
- 2DEtotal=    0.2129292345E+02 Ha. Also 2DEtotal=    0.579409913579E+03 eV
+ 2DEtotal=    0.2129292345E+02 Ha. Also 2DEtotal=    0.579409964383E+03 eV
     (2DErelax=   -4.6157595633E+01 Ha. 2DEnonrelax=    6.7450519086E+01 Ha)
     (  non-var. 2DEtotal :    2.1293040351E+01 Ha)
 
@@ -1052,7 +1052,7 @@ tolerances: {tolwfr: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.44177741E+02  frxc 2 =   1.49599371E+02
  Resulting in :
- 2DEtotal=   -0.3533116252E+02 Ha. Also 2DEtotal=   -0.961409825436E+03 eV
+ 2DEtotal=   -0.3533116252E+02 Ha. Also 2DEtotal=   -0.961409909735E+03 eV
     (2DErelax=   -4.3242636307E+03 Ha. 2DEnonrelax=    4.2889324682E+03 Ha)
     (  non-var. 2DEtotal :   -3.5310186367E+01 Ha)
 
@@ -1109,7 +1109,7 @@ tolerances: {tolwfr: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -2.77860685E+01  frxc 2 =   2.35879471E+01
  Resulting in :
- 2DEtotal=    0.1804568049E+02 Ha. Also 2DEtotal=    0.491047938841E+03 eV
+ 2DEtotal=    0.1804568049E+02 Ha. Also 2DEtotal=    0.491047981897E+03 eV
     (2DErelax=   -1.1107982331E+02 Ha. 2DEnonrelax=    1.2912550380E+02 Ha)
     (  non-var. 2DEtotal :    1.8047377015E+01 Ha)
 
@@ -1174,7 +1174,7 @@ tolerances: {tolwfr: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -9.29055393E+02  frxc 2 =   4.57863794E+03
  Resulting in :
- 2DEtotal=    0.3571654811E+04 Ha. Also 2DEtotal=    0.971896700733E+05 eV
+ 2DEtotal=    0.3571654811E+04 Ha. Also 2DEtotal=    0.971896785952E+05 eV
     (2DErelax=   -1.3379947294E+04 Ha. 2DEnonrelax=    1.6951602105E+04 Ha)
     (  non-var. 2DEtotal :    3.5715944339E+03 Ha)
 
@@ -1228,7 +1228,7 @@ tolerances: {tolwfr: 1.00E-08, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.66649066E+02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1666490658E+03 Ha. Also 2DEtotal=   -0.453475169919E+04 eV
+ 2DEtotal=   -0.1666490658E+03 Ha. Also 2DEtotal=   -0.453475209681E+04 eV
     (  non-var. 2DEtotal :   -1.6664842409E+02 Ha)
 
 --------------------------------------------------------------------------------
@@ -1281,7 +1281,7 @@ tolerances: {tolwfr: 1.00E-08, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.59906561E-01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1599065612E+00 Ha. Also 2DEtotal=   -0.435127881850E+01 eV
+ 2DEtotal=   -0.1599065612E+00 Ha. Also 2DEtotal=   -0.435127920004E+01 eV
     (  non-var. 2DEtotal :   -1.6011064041E-01 Ha)
 ================================================================================
 
@@ -1627,9 +1627,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.24078825984140     0.71636943582309     0.00000000000000
+    2      1.24078826442304     0.71636943846830     0.00000000000000
  length scales=  4.689500000000  4.689500000000 40.000000000000 bohr
-              =  2.481576519683  2.481576519683 21.167088343600 angstroms
+              =  2.481576528846  2.481576528846 21.167088421760 angstroms
  prteigrs : about to open file t218o_DS4_EIG
  Eigenvalues (hartree) for nkpt=  36  k points:
  kpt#   1, nband=  4, wtk=  0.02778, kpt=  0.0100  0.0000  0.5000 (reduced coord)
@@ -1740,7 +1740,7 @@ tolerances: {tolwfr: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.77263629E+00  frxc 2 =   4.70349344E-01
  Resulting in :
- 2DEtotal=    0.2180507440E+02 Ha. Also 2DEtotal=    0.593346249701E+03 eV
+ 2DEtotal=    0.2180507440E+02 Ha. Also 2DEtotal=    0.593346301728E+03 eV
     (2DErelax=   -4.6393796557E+01 Ha. 2DEnonrelax=    6.8198870961E+01 Ha)
     (  non-var. 2DEtotal :    2.1805001169E+01 Ha)
 
@@ -1794,7 +1794,7 @@ tolerances: {tolwfr: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.77263629E+00  frxc 2 =   4.70349344E-01
  Resulting in :
- 2DEtotal=    0.2140326423E+02 Ha. Also 2DEtotal=    0.582412438875E+03 eV
+ 2DEtotal=    0.2140326423E+02 Ha. Also 2DEtotal=    0.582412489942E+03 eV
     (2DErelax=   -4.6049914304E+01 Ha. 2DEnonrelax=    6.7453178536E+01 Ha)
     (  non-var. 2DEtotal :    2.1403370602E+01 Ha)
 
@@ -1854,7 +1854,7 @@ tolerances: {tolwfr: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.44177741E+02  frxc 2 =   1.49599371E+02
  Resulting in :
- 2DEtotal=   -0.2791400077E+02 Ha. Also 2DEtotal=   -0.759578590137E+03 eV
+ 2DEtotal=   -0.2791400077E+02 Ha. Also 2DEtotal=   -0.759578656739E+03 eV
     (2DErelax=   -4.2441217176E+03 Ha. 2DEnonrelax=    4.2162077168E+03 Ha)
     (  non-var. 2DEtotal :   -2.7895192580E+01 Ha)
 
@@ -1914,7 +1914,7 @@ tolerances: {tolwfr: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -2.77860685E+01  frxc 2 =   2.35879471E+01
  Resulting in :
- 2DEtotal=    0.1888922287E+02 Ha. Also 2DEtotal=    0.514001894313E+03 eV
+ 2DEtotal=    0.1888922287E+02 Ha. Also 2DEtotal=    0.514001939382E+03 eV
     (2DErelax=   -1.1231503614E+02 Ha. 2DEnonrelax=    1.3120425901E+02 Ha)
     (  non-var. 2DEtotal :    1.8888976445E+01 Ha)
 
@@ -1968,7 +1968,7 @@ tolerances: {tolwfr: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -2.77860685E+01  frxc 2 =   2.35879471E+01
  Resulting in :
- 2DEtotal=    0.1836100591E+02 Ha. Also 2DEtotal=    0.499628379943E+03 eV
+ 2DEtotal=    0.1836100591E+02 Ha. Also 2DEtotal=    0.499628423752E+03 eV
     (2DErelax=   -1.1077188525E+02 Ha. 2DEnonrelax=    1.2913289117E+02 Ha)
     (  non-var. 2DEtotal :    1.8362566571E+01 Ha)
 
@@ -2029,7 +2029,7 @@ tolerances: {tolwfr: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -9.29055393E+02  frxc 2 =   4.57863794E+03
  Resulting in :
- 2DEtotal=    0.3595401689E+04 Ha. Also 2DEtotal=    0.978358554872E+05 eV
+ 2DEtotal=    0.3595401689E+04 Ha. Also 2DEtotal=    0.978358640658E+05 eV
     (2DErelax=   -1.3154187218E+04 Ha. 2DEnonrelax=    1.6749588907E+04 Ha)
     (  non-var. 2DEtotal :    3.5950258030E+03 Ha)
 
@@ -2156,8 +2156,8 @@ tolerances: {tolwfr: 1.00E-08, }
            etotal2    -1.7988669503E-01
            etotal3    -1.5990656120E-01
            etotal5     3.5954016889E+03
-            fcart1    -1.1483719898E-28  1.6797081615E-28 -0.0000000000E+00
-                       1.1483719898E-28 -1.6797081615E-28 -0.0000000000E+00
+            fcart1     2.2967439797E-28 -3.6526408902E-28 -0.0000000000E+00
+                      -2.2967439797E-28  3.6526408902E-28 -0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2448,7 +2448,7 @@ P          mk1mem5         36
                          0.02778    0.02778    0.02778    0.02778    0.02778    0.02778
                          0.02778    0.02778    0.02778    0.02778    0.02778    0.02778
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.2407882598E+00  7.1636943582E-01  0.0000000000E+00
+                       1.2407882644E+00  7.1636943847E-01  0.0000000000E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.3447500000E+00  1.3537420437E+00  0.0000000000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2477,7 +2477,41 @@ P          mk1mem5         36
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] The Abinit project: Impact, environment and recent developments.
+- [1] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
+- J. Chem. Phys. 163, 164126 (2025).
+- M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,
+- M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,
+- J. Bieder, A. Blanchet, F. Bottin, J. Bouchet, J. Bouquiaux, E. Bousquet,
+- J. Boust, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval,
+- A. Castellano, E. Castiel, J.-B. Charraud, J. Clerouin, M. Cote, C. Duval,
+- A. Gallo, F. Gendron, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras,
+- F. Gomez-Ortiz, X. Gonze, F. Goudreault, A. Gruneis, R. Gupta, B. Guster,
+- D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
+- I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
+- Comment: the sixth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025
+-
+- [2] Optimized norm-conserving Vanderbilt pseudopotentials.
+- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
+- Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
+-
+- [3] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
+-
+- [4] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- interatomic force constants from density-functional perturbation theory,
+- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
+-
+- [5] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -2490,65 +2524,33 @@ P          mk1mem5         36
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
-- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
--
-- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
-- interatomic force constants from density-functional perturbation theory,
-- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
--
-- [4] Optimized norm-conserving Vanderbilt pseudopotentials.
-- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
-- Comment: Some pseudopotential generated using the ONCVPSP code were used.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
--
-- [5] ABINIT: Overview, and focus on selected capabilities
-- J. Chem. Phys. 152, 124102 (2020).
-- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
-- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
-- G.Brunin, D.Caliste, M.Cote,
-- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
-- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
-- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
-- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
-- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- [6] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
-- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- is available at
+-  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [6] Recent developments in the ABINIT software package.
-- Computer Phys. Comm. 205, 106 (2016).
-- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
-- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
-- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
-- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
-- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
-- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
-- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
-- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
-- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
-- The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
--
-- Proc.   0 individual time (sec): cpu=         15.5  wall=         15.5
+- Proc.   0 individual time (sec): cpu=         15.7  wall=         15.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  36 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.5  wall=         15.5
++Overall time at end (sec) : cpu=         15.7  wall=         15.7
