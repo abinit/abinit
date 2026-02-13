@@ -257,10 +257,13 @@ subroutine init_oper_ndat(paw_dmft,oper,ndat,nkpt,wtk,shiftk,opt_ksloc,gpu_optio
  integer, optional, intent(in) :: nkpt,opt_ksloc,shiftk,gpu_option
  integer, intent(in) :: ndat
  type(paw_dmft_type), intent(in) :: paw_dmft
- type(oper_type), intent(inout) :: oper
+ type(oper_type), target, intent(inout) :: oper
  real(dp), target, optional :: wtk(paw_dmft%nkpt)
 !Local variables ------------------------------------
  integer :: optksloc,ndat_,l_gpu_option
+#ifdef HAVE_OPENMP_OFFLOAD
+ complex(dp), ABI_CONTIGUOUS pointer :: ks(:,:,:,:)
+#endif
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -311,7 +314,8 @@ subroutine init_oper_ndat(paw_dmft,oper,ndat,nkpt,wtk,shiftk,opt_ksloc,gpu_optio
    ABI_MALLOC(oper%ks,(oper%mbandc,oper%mbandc*ndat_,oper%nkpt,oper%nsppol))
    oper%has_operks  = 1
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(alloc:oper%ks) IF(l_gpu_option==ABI_GPU_OPENMP)
+   ks => oper%ks ! List items in OMP TARGET clauses not supported in GCC
+   !$OMP TARGET ENTER DATA MAP(alloc:ks) IF(l_gpu_option==ABI_GPU_OPENMP)
 #endif
    if(gpu_option==ABI_GPU_OPENMP) then
      call gpu_set_to_zero_complex(oper%ks, int(oper%nsppol,c_size_t)*ndat_*oper%mbandc*oper%mbandc*oper%nkpt)
@@ -352,8 +356,11 @@ end subroutine init_oper_ndat
 subroutine destroy_oper(oper)
 
 !Arguments ------------------------------------
- type(oper_type), intent(inout) :: oper
+ type(oper_type), target, intent(inout) :: oper
 !Local variables-------------------------------
+#ifdef HAVE_OPENMP_OFFLOAD
+ complex(dp), ABI_CONTIGUOUS pointer :: ks(:,:,:,:)
+#endif
 !! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -372,7 +379,8 @@ subroutine destroy_oper(oper)
 
  if (allocated(oper%ks)) then
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:oper%ks) IF(oper%gpu_option==ABI_GPU_OPENMP)
+   ks => oper%ks ! List items in OMP TARGET clauses not supported in GCC
+   !$OMP TARGET EXIT DATA MAP(delete:ks) IF(oper%gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(oper%ks)
    oper%has_operks = 0
