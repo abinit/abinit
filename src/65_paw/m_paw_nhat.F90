@@ -690,8 +690,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),optional, intent(in) ::gprimd(3,3),qphon(3),xred(3,natom)
  real(dp),intent(out) :: grnhat12(2,nfft,nspinor**2,3*nhat12_grdim,ndat2,ndat1)
- real(dp),optional,intent(out) :: grnhat_12(2,nfft,nspinor**2,3,natom*(ider/3),ndat2,ndat1)
- real(dp),intent(out) :: nhat12(2,nfft,nspinor**2,ndat2,ndat1)
+ real(dp),optional,target,intent(out) :: grnhat_12(2,nfft,nspinor**2,3,natom*(ider/3),ndat2,ndat1)
+ real(dp),target,intent(out) :: nhat12(2,nfft,nspinor**2,ndat2,ndat1)
  type(pawfgrtab_type),intent(inout),target :: pawfgrtab(my_natom)
  type(pawtab_type),intent(in),target :: pawtab(ntypat)
  type(pawcprj_type),intent(in) :: cprj1(natom,nspinor*ndat1),cprj2(natom,nspinor*ndat2)
@@ -713,7 +713,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  integer,pointer :: my_atmtab(:)
  real(dp) :: rdum(1),tsec(2),ro(2),ro_ql(2)
- real(dp),allocatable :: work(:,:), qijl(:,:), nhat12_atm(:,:,:,:,:,:),projs1(:,:,:),projs2(:,:,:),cpf(:,:,:,:,:),gnt_scal(:,:)
+ real(dp),allocatable :: work(:,:), qijl(:,:),projs1(:,:,:),projs2(:,:,:),cpf(:,:,:,:,:),gnt_scal(:,:)
+ real(dp),allocatable,target :: nhat12_atm(:,:,:,:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: atom_expiqr(:,:,:),atom_gylm(:,:,:),atom_dltij(:),atom_gylmgr(:,:,:,:)
  integer,  ABI_CONTIGUOUS pointer :: atom_nfgd(:),atom_ifftsph(:,:),ang_gntselect(:,:),atom_indklmn(:,:)
 
@@ -2200,7 +2201,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
  character(len=500) :: msg
 !arrays
  real(dp) :: rdum1(1),rdum2(2), sum_r, sum_i
- real(dp),allocatable :: dijhat_idij(:,:,:),prod(:,:,:),gnt_scal(:,:)
+ real(dp),allocatable,target :: dijhat_idij(:,:,:),prod(:,:,:),gnt_scal(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: atom_expiqr(:,:,:),atom_gylm(:,:,:),atom_qijl(:,:)
  integer,  ABI_CONTIGUOUS pointer :: atom_ifftsph(:,:),atom_indklmn(:,:),atom_nfgd(:)
 
