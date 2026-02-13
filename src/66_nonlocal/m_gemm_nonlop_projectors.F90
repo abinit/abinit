@@ -1387,7 +1387,7 @@ contains
         if(istwf_k <= 1) then
 #ifdef HAVE_OPENMP_OFFLOAD
           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-          !$OMP& PRIVATE(ilmn,ipw,idir,idir1,idir2) MAP(to:atom_dprojs,dprojs,kpg,ipw,idir,idir1,idir2) &
+          !$OMP& PRIVATE(ilmn,ipw,idir,idir1,idir2) MAP(to:atom_dprojs,dprojs,kpg) &
           !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
           do ilmn=lmn_beg,nlmn
