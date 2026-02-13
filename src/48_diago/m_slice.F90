@@ -559,11 +559,27 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
   
     ! ===================== Compute Rayleigh quotients and residuals ===================================
     
+    ! TODO change naming
+
     ABI_NVTX_START_RANGE(NVTX_SLICE_RRQ)
     call slice_computeSpectrum(slice, X0, getAX_BX, getBm1X, eigen, resid0%self, nspinor)
     ABI_NVTX_END_RANGE()
-    
+   
+    if (slice%nslice /= 2) then
+        ABI_ERROR("current implementation only supports 2 slices")
+    end if
+
+    ! Output:
+    ! - c_split                 : between [a,b)
+    ! - nvec_left, nvec_right   : trial vectors per slice
+    ! - index_left, index_right : column indices per slice
+    !                             TODO the criterion should be nvec maximum probes
+    ! 
+
     ! ===================== Compute guaranteed spectral bounds ======================================== 
+
+    ! TODO
+    ! this part is not necessary anymore with the new splitting strategy
 
     ! Copy is done on CPU so update the CPU data
     if (slice%gpu_option==ABI_GPU_OPENMP) then
@@ -603,7 +619,13 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     slice%maxeig_global = slice%ecut
 
     ! ===================== Split interval [lambda_minus,lambda_plus) into slices ======================
-    
+   
+    ! TODO this is taken care of the new part
+    ! what is missing is the assignement of the number of vectors
+    ! I propose to cut it in half like assume that uniform mass splitting has worked
+    ! then take nslice = nband/2 + nbuf where nbuf is the number of extra vectors
+    ! taken in order to assure overlap and vectors converging outside the slice.
+
     if (slice%nslice==1) then
         slice%neigenpairs_per_slice = slice%neigenpairs
         slice%fcol_in_X = 1
@@ -618,6 +640,14 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     end if
 
     ! ===================== Resource management system ================================================= 
+
+    ! TODO half of the processes are assigned per slice
+    ! under the uniform mass splitting that simplifies things and we no longer need fair allocation
+    ! Process: 
+    ! 
+    ! - after debugging computeSpectrum: delete all this unwanted part if not used
+    ! must debug very carefuly
+    ! 
 
     if (slice%paral_slice==12) then
 
@@ -1134,6 +1164,8 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
     if (slice%paral_kgb==1) then
         me_g0 = slice%me_g0_fft
     end if
+
+    ! TODO test that everything works in 1 MPI and in multiple MPI
 
     ! Allocate temporary memory (distributed in colsrows representation)
     call xg_init(X_NAB, slice%space, slice%total_spacedim, 3*bandpp, slice%spacecom, &
