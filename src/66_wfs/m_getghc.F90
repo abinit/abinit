@@ -1194,7 +1194,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          ! OpenMP GPU
 #ifdef HAVE_OPENMP_OFFLOAD
          if (k1_eq_k2) then
-           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef) MAP(tofrom:kinpw_k2)
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef)
            do idat=1,ndat
              do ispinor=1,my_nspinor
                !$OMP PARALLEL DO PRIVATE(igspinor)
@@ -1210,7 +1210,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
              end do ! ispinor
            end do ! idat
          else
-           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,gvnlxc_,gsc) MAP(tofrom:kinpw_k2)
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,gvnlxc_,gsc,kinpw_k2)
            do idat=1,ndat
              do ispinor=1,my_nspinor
                !$OMP PARALLEL DO PRIVATE(igspinor)
