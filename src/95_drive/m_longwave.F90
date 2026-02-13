@@ -837,9 +837,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_SFREE(ylmgr)
  ABI_SFREE(blkflg_car)
  ABI_SFREE(d3etot_car)
- if (allocated(ncorespl)) then
-   ABI_FREE(ncorespl)
- endif
+ ABI_SFREE(ncorespl)
  call pawfgr_destroy(pawfgr)
 
  ! Clean the header
