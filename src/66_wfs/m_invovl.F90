@@ -725,7 +725,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
      &                   projs(:, :, shift+1), (3-cplx)*ham%npw_k, czero, gramwork(:,:,1), invovl%nprojs,x_cplx=cplx)
      shift = shift + slice_size
      ! reduce on proc i
-     call xmpi_sum_master(gramwork, iproc-1, mpi_enreg%comm_fft, ierr)
+     if (mpi_enreg%nproc_fft>1) then
+       call xmpi_sum_master(gramwork, iproc-1, mpi_enreg%comm_fft, ierr)
+     end if
      if(iproc == mpi_enreg%me_fft+1) then
        invovl%gram_projs = gramwork
      end if
@@ -1077,7 +1079,9 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
 
  nprojs = invovl%nprojs
  normprojs = SUM(SUM(proj**2, 1),1)
- call xmpi_sum(normprojs, mpi_enreg%comm_fft, ierr)
+ if (mpi_enreg%nproc_fft>1) then
+   call xmpi_sum(normprojs, mpi_enreg%comm_fft, ierr)
+ end if
 
  ! Compute work distribution : split nprojs evenly between the fft processors
  if(mpi_enreg%paral_kgb == 1) then
@@ -1113,11 +1117,15 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
      & temp_proj(:,:,1), nlmntot_this_proc, czero, &
      & PtPsm1proj(:,:,1), nprojs, &
      & x_cplx=cplx)
-   call xmpi_sum(PtPsm1proj, mpi_enreg%comm_fft, ierr)
+   if (mpi_enreg%nproc_fft>1) then
+     call xmpi_sum(PtPsm1proj, mpi_enreg%comm_fft, ierr)
+   end if
    resid = proj - resid - Ptpsm1proj
    ! exit check
    errs = SUM(SUM(resid**2, 1),1)
-   call xmpi_sum(errs, mpi_enreg%comm_fft, ierr)
+   if (mpi_enreg%nproc_fft>1) then
+     call xmpi_sum(errs, mpi_enreg%comm_fft, ierr)
+   end if
 
    maxerr = sqrt(MAXVAL(errs/normprojs))
    if(maxerr < precision .or. additional_steps_to_take == 1) then
