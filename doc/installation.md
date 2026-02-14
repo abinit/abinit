@@ -224,7 +224,9 @@ When the hostname.ac9 file is ready, you can come back to the configure/make seq
 
 ## How to build ABINIT with CMake ?
 
-As an alternative to the autotools, you can use [CMake](https://cmake.org/) to build ABINIT. You just need to follow step 1 and 2 from the [overview](#overview) above. No need to write an _ac9 file__, `CMake` should be able to figure out where all required software dependencies are installed on your build host.
+As an alternative to the autotools, you can use [CMake](https://cmake.org/) to build ABINIT. 
+You just need to follow step 1 and 2 from the [overview](#overview) above. 
+No need to write an _ac9 file__, `CMake` should be able to figure out where all required software dependencies are installed on your build host.
 
 Here are the steps for building abinit, where all options take default values:
 
@@ -551,7 +553,7 @@ More explicitly, you need minimally (version numbers can be upgraded)
  * [GNU M4 1.4](ftp://ftp.gnu.org/gnu/m4/m4-1.4.4.tar.gz)
 
 If you do not have these tools, please consult your local computer guru, and/or the page 
-[an overview of ABINIT development](./overview_development).
+[an overview of ABINIT development](../developers/overview_development).
 
 If you want to develop on a regular basis, please have a Git(lab) access
 created for you by contacting Jean-Michel Beuken, as described in these pages.

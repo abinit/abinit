@@ -2,9 +2,9 @@
 authors: DCA, XG, RC
 ---
 
-<! -- This file must be kept in sync with the doc/guide/new_user.md file. 
+<!-- This file must be kept in sync with the doc/guide/new_user.md file. 
 Since they are not placed in the same directory, their hyperlinks might differ. 
-This problem problem should be solved, when time permits. -- >
+This problem problem should be solved, when time permits. -->
 
 # New user help file
 
@@ -104,7 +104,7 @@ There are official recommended pseudopotentials tables
 (the PAW JTH table, and the norm-conserving table from ONCVPSP), and also some older sets of pseudopotentials.
 Information on pseudopotential files can be found in the [[help:abinit#5|ABINIT help file]],
 the [[theory:pseudopotentials|Pseudopotential theory document]], 
-the [[developer:pseudos_nc_header|Description of the format for the norm-conserving pseudopotential header]],
+the [[developers:pseudos_nc_header|Description of the format for the norm-conserving pseudopotential header]],
 and in the [[topic:PseudosPAW|PseudosPAW]] topics.
 
 !!! warning
