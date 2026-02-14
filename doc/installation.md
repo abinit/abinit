@@ -50,10 +50,8 @@ in the |abiconfig| package on github
 (specifically the [directory for ABINITv9](https://github.com/abinit/abiconfig/tree/master/abiconfig/clusters)),
 while the configuration files
 used for our buildbot testfarm are available in the [autoconf_examples section](/developers/autoconf_examples/).
-The [ABINIT Wiki](https://wiki.abinit.org) also has a **build abinit** section, that might be useful.
-In particular, the current documentation for the fallback procedure is available
-[here](https://wiki.abinit.org/doku.php?id=build:fallbacks) while configuration options are documented
-[in this page](https://wiki.abinit.org/doku.php?id=build:configure).
+The current documentation for the fallback procedure is available
+[here](https://github.com/abinit/abinit-fallbacks).
 
 If you succeed to build the executables, and would like to check whether
 the executables work properly, please consult the two sections on [Internal tests](#how-to-run-the-internal-tests)
@@ -535,7 +533,7 @@ fldiff.report and report files are produced automatically.
 ## For developers
 
 Note the documentation available in the pages labelled [Developers](/developers/git_and_gitlab/),
-as well as the [developer's corner of the Wiki](https://wiki.abinit.org).
+as well as the [developer's corner of the ABINIT web site](https://www.abinit.org/corner.html).
 The following sections are complements for the installation from gitlab, and the generation of the
 ABINIT distribution.
 
@@ -552,11 +550,8 @@ More explicitly, you need minimally (version numbers can be upgraded)
  * [GNU Libtool 2.2.4](ftp://ftp.gnu.org/gnu/libtool/libtool-2.2.4.tar.gz)
  * [GNU M4 1.4](ftp://ftp.gnu.org/gnu/m4/m4-1.4.4.tar.gz)
 
-If you do not have these tools, please consult your local computer guru, and/or the following pages:
-
-  * [An overview of ABINIT development](https://wiki.abinit.org/doku.php?id=developers:overview)
-  * [10 steps to hike ABINIT](https://wiki.abinit.org/doku.php?id=developers:hike)
-  * [Buildbot and the test farm](https://wiki.abinit.org/doku.php?id=bb:overview)
+If you do not have these tools, please consult your local computer guru, and/or the page 
+[an overview of ABINIT development](./overview_development).
 
 If you want to develop on a regular basis, please have a Git(lab) access
 created for you by contacting Jean-Michel Beuken, as described in these pages.
@@ -567,8 +562,7 @@ to receive the latest information concerning new developments.
 
 After having installed git, and obtained a gitlab branch on the ABINIT internal server,
 create an autonomous copy of the source code, on top of which you have to make your development.
-This is explained in the ABINIT wiki
-[gitlab: ABINIT specificities](https://wiki.abinit.org/doku.php?id=developers:git:specificities_git_abinit)
+This is explained in the page about [git(lab) ABINIT specificities](https://www.abinit.org/gitlab.html).
 
 For your gitlab branches on the internal server, you will have the
 permission not only to clone/fetch/pull, but also to commit/push your

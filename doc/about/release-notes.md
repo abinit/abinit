@@ -5104,9 +5104,7 @@ B.10 Implementation of the LDA-1/2 methodology.
 
 C.1 There are large changes of the procedure to document ABINIT, for most of the documentation files.
     The HTML files are now produced from YAML files, under the control of the script ~abinit/doc/generate_doc.py .
-    The documentation that describes this procedure is available on the ABINIT wiki, at https://wiki.abinit.org/doku.php?id=developers:generate_doc .
     This is directly linked to the modifications in the doc presented in B1-B4.
-    In particular, the Dokuwiki syntax is used for the hyperlinks.
     By F. Jollet and X. Gonze.
 
 * * *

@@ -7,8 +7,7 @@ authors: XG
 
 !!! Warning
     This file is obsolete, and should be reexamined/rewritten.
-    By contrast, the documentation for developers on the [ABINIT Wiki](https://wiki.abinit.org/doku.php?id=developers:overview) 
-    is up-to-date.
+    By contrast, the documentation available on the ABINIT web site [developer's corner](https://www.abinit.org/corner.html) is up to date.
 
 This page provides a description of the procedures followed for development of
 the ABINIT package through collaboration of different groups of persons, based

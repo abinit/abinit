@@ -8,7 +8,7 @@ This page collects FAQs related to
 
 ## I'm new to configure. Can you explain how to use it?
 
-Please consult <https://wiki.abinit.org/doku.php?id=build:configure>
+Please consult <https://docs.abinit.org/installation/>
 
 To obtain the full list of available options and their documentation, use
 
