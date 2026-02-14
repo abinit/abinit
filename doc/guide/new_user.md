@@ -2,10 +2,14 @@
 authors: DCA, XG, RC
 ---
 
+<! -- This file must be kept in sync with the doc/index.md file. 
+Since they are not placed in the same directory, their hyperlinks might differ. 
+This problem problem should be solved, when time permits. -- >
+
 # New user help file
 
 This page gives a beginner's introduction to the ABINIT resources,
-the package, and the main ABINIT applications. Hello world.
+the package, and the main ABINIT applications. 
 
 ## Foreword
 
@@ -35,7 +39,7 @@ density and electronic structure of systems made of electrons and nuclei
 pseudopotentials and a planewave basis, or augmented plane waves, or even wavelets.
 
 Some possibilities of ABINIT go beyond Density Functional Theory,
-i.e. the many-body perturbation theory (GW approximation the Bethe-Salpether
+i.e. the many-body perturbation theory (GW approximation the Bethe-Salpeter
 equation), Time-Dependent Density Functional Theory, Dynamical Mean-Field
 Theory, the Allen-Heine-Cardona theory to find temperature-dependent electronic structure.
 
@@ -90,8 +94,8 @@ The detailed description of input variables is given in many "Variable Set" file
 A set of examples aimed at guiding the beginner is available in the [[tutorial:index|tutorials]].
 
 Other test cases (more than 1000 input files) can be found in the ~abinit/test
-subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v67mbpt, v7, .., v9, v10,
-"libxc", "paral", the "tutoX" series ...).
+subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v67mbpt, v7, .., v9, v10),
+"libxc", "paral", the "tutoX" series ...
 
 Many different sorts of pseudopotentials can be used with ABINIT.
 Most of them can be found on the [atomic data files](https://www.abinit.org/downloads/atomic-data-files)
@@ -100,6 +104,7 @@ There are official recommended pseudopotentials tables
 (the PAW JTH table, and the norm-conserving table from ONCVPSP), and also some older sets of pseudopotentials.
 Information on pseudopotential files can be found in the [[help:abinit#5|ABINIT help file]],
 the [[theory:pseudopotentials|Pseudopotential theory document]], 
+the [[developer:pseudos_nc_header|Description of the format for the norm-conserving pseudopotential header]],
 and in the [[topic:PseudosPAW|PseudosPAW]] topics.
 
 !!! warning
@@ -121,6 +126,12 @@ mrgddb and anaddb
     thermodynamical functions, piezoelectric properties, superconducting
     properties, to name a few. `mrgddb` is for "Merge of Derivative DataBases",
     while `anaddb` is for "Analysis of Derivative DataBases".
+
+abitk
+:   This simple tool is used to parse and supply descriptive output concerning a
+    completed run, and is designed primarily to examine output files in `netcdf`
+    format. The name stands for "Abinit Tool Kit". Running `abitk -h` gives
+    the various options.
 
 cut3d
 :   It can be used to post-process the three-dimensional density (or
@@ -203,7 +214,7 @@ input file, are listed below:
 
 [[typat]]([[natom]]):
 :   sequence of integers, specifying the type of each atom.
-    NOTE: the atomic coordinates ([[xcart]] or [[xred]])
+:   NOTE: the atomic coordinates ([[xcart]] or [[xred]])
     must be specified in the same order
 
 [[rprim]](3,3)
@@ -211,12 +222,12 @@ input file, are listed below:
     each COLUMN of this array is one primitive translation
 
 [[xcart]](3,[[natom]])
-:   cartesian coordinates (Bohr) of atoms in unit cell
-    NOTE: only used when [[xred]] is absent
+:   cartesian coordinates (Bohr) of atoms in unit cell;
+:   NOTE: only used when [[xred]] is absent
 
 [[xred]](3,[[natom]])
 :   fractional coordinates for atomic locations;
-    NOTE: leave out if [[xcart]] is used
+:   NOTE: leave out if [[xcart]] is used
 
 [[znucl]]([[ntypat]])
 :   Nuclear charge of each type of element; must agree with
@@ -228,7 +239,7 @@ input file, are listed below:
 :       planewave kinetic energy cutoff in Hartree
 
 [[kptopt]]
-:       option for specifying the k-point grid
+:       option for specifying the k-point grid;
         if [[kptopt]]=1, automatic generation, using ngkpt and shiftk.
 
 [[ngkpt]](3)
@@ -236,18 +247,18 @@ input file, are listed below:
 
 [[occopt]]
 :       set the occupation of electronic levels:
-        =1 for semiconductors
+        =1 for semiconductors;
         =3 ... 7  for metals
 
 **Specification of the type of calculation to be done:**
 
 [[moldyn]]
-:       when [[moldyn]] is "none": the ions and cell shape are fixed
-                        is "nve_verlet": molecular dynamics (NVE)
+:       when [[moldyn]] is "none": the ions and cell shape are fixed ;
+        when [[moldyn]] is "nve_verlet": molecular dynamics (NVE)
 
 [[geoopt]]
-:       when [[geoopt]] is "none": the ions and cell shape are fixed
-                        is "bfgs": search for the equilibrium geometry
+:       when [[geoopt]] is "none": the ions and cell shape are fixed ;
+        when [[moldyn]] is "bfgs": search for the equilibrium geometry
 
 [[iscf]]
 :       either a positive number for defining self-consistent
@@ -262,7 +273,7 @@ input file, are listed below:
 [[rfphon]]
 :       when = 1: will do response calculation to atomic displacements
 
-**Specification of the numerical convergency of the calculation:**
+**Specification of the numerical convergence of the calculation:**
 
 [[nstep]]
 :    maximal number of self-consistent cycles (on the order of 20)
@@ -352,5 +363,5 @@ capabilities, but the one with the largest last digit is more debugged than
 the other: version 10.6.5 is more debugged than 10.6.3, but no new features has
 been added (so likely, no additional bug!).
 
-In order to start using ABINIT, and to learn how to compile ABINIT from source,
-please follow [[tutorial:index|these tutorials.]]
+In order to start using ABINIT, please follow [[tutorial:index|the tutorials.]]
+The tutorials also include information about how to compile the code from source.
