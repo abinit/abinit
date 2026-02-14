@@ -99,7 +99,7 @@ page of the ABINIT web site.
 There are official recommended pseudopotentials tables
 (the PAW JTH table, and the norm-conserving table from ONCVPSP), and also some older sets of pseudopotentials.
 Information on pseudopotential files can be found in the [[help:abinit#5|ABINIT help file]],
-the [[theory:pseudopotentials|Pseudopotential theory document]], on the [ABINIT wiki](https://wiki.abinit.org/doku.php?id=developers:pseudos),
+the [[theory:pseudopotentials|Pseudopotential theory document]], 
 and in the [[topic:PseudosPAW|PseudosPAW]] topics.
 
 !!! warning
