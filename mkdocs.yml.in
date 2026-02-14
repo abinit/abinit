@@ -277,10 +277,11 @@ nav:
         - YAML-based test suite Python tools and API: developers/yaml_tools_api.md
     - XgType: developers/XgType.md
     - Pseudos:
+        - psp_header: developers/pseudos_nc_header.md
         - psp1: developers/psp1_info.md
         - psp3: developers/psp3_info.md
         - psp45: developers/psp45_info.md
-        - psp5: developers/psp5spinorbit_info.md
+        - psp5spinorbit: developers/psp5spinorbit_info.md
         - psp6: developers/psp6_info.md
         - psp8: developers/psp8_info.md
     - Code stats: developers/codestats.md
