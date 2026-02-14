@@ -56,7 +56,7 @@ see the [installation notes](/installation).
 
     We will use the name "~abinit" to refer to the directory that contains the
     ABINIT package after download. In practice, a version number is appended to
-    this name, to give for example: abinit-8.8.0. The ABINIT package versioning
+    this name, to give for example: abinit-10.6.3. The ABINIT package versioning
     scheme is explained later in this file.
 
 ~abinit contains different subdirectories. For example, the present file, as
@@ -90,8 +90,8 @@ The detailed description of input variables is given in many "Variable Set" file
 A set of examples aimed at guiding the beginner is available in the [[tutorial:index|tutorials]].
 
 Other test cases (more than 1000 input files) can be found in the ~abinit/test
-subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v67mbpt, v7, v8),
-"libxc", "paral", the "tutoX" series ...
+subdirectories, e.g. "fast", the "vX" series (v1, v2, ... v67mbpt, v7, .., v9, v10,
+"libxc", "paral", the "tutoX" series ...).
 
 Many different sorts of pseudopotentials can be used with ABINIT.
 Most of them can be found on the [atomic data files](https://www.abinit.org/downloads/atomic-data-files)
@@ -328,7 +328,7 @@ structure can be constructed.
 
 We finish this "help for new user" with a brief explanation of the logic of ABINIT version releases.
 
-The full name of a version has three digits (for example, 9.10.5). The first
+The full name of a version has three digits (for example, 10.6.3). The first
 digit is the slowly varying one (in average, it is changed after two or three
 years). It indicates the major efforts and trends in that version. At the
 level of 1.x.y ABINIT (before 2000 !), the major effort was placed on the
@@ -347,9 +347,9 @@ with additional features. A [release notes document](/about/release-notes) is is
 additional capabilities, and other information with respect to modifications
 with the previous release. The odd second digits are used for internal
 management only, so-called "development versions" of ABINIT (for example
-9.11.4). Two versions differing by the last (third) digit have the same
+10.7.0). Two versions differing by the last (third) digit have the same
 capabilities, but the one with the largest last digit is more debugged than
-the other: version 9.10.5 is more debugged than 9.10.3, but no new features has
+the other: version 10.6.5 is more debugged than 10.6.3, but no new features has
 been added (so likely, no additional bug!).
 
 In order to start using ABINIT, and to learn how to compile ABINIT from source,
