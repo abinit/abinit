@@ -327,8 +327,9 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  !arrays
  integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),gntselect(:,:),kg_k(:,:),nattyp(:)
  real(dp) :: kpoint(3),omlamb(3)
- real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cwavef(:,:),dkinpw(:,:),eig_k(:)
- real(dp),allocatable :: ffnl_k(:,:,:,:),gcg1_k(:,:,:),kinpw(:),kpg_k(:,:),occ_k(:)
+ real(dp),allocatable :: cg1_k(:,:,:),cwavef(:,:),dkinpw(:,:),eig_k(:)
+ real(dp),allocatable :: ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:),occ_k(:)
+ real(dp),allocatable,target :: cg_k(:,:),gcg1_k(:,:,:)
  real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:)
  real(dp),allocatable :: vectornd(:,:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:)
@@ -1102,7 +1103,8 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: eig_k(nband_k),gcg1_k(2,mcgk,3)
+  real(dp),intent(in) :: eig_k(nband_k)
+  real(dp),intent(in),target :: gcg1_k(2,mcgk,3)
   type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,mcprjk,3)
 
   !Local variables -------------------------
@@ -1114,8 +1116,10 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
   logical :: need_odensity
   !arrays
   real(dp) bdot(2),mdot(2)
-  real(dp),allocatable :: bra(:,:),denpot(:,:,:),fofgout(:,:),fofr(:,:,:,:)
-  real(dp),allocatable :: ghc(:,:),gsc(:,:),gvnlxc(:,:),ket(:,:)
+  real(dp),allocatable :: denpot(:,:,:),fofgout(:,:)
+  real(dp),allocatable,target :: fofr(:,:,:,:)
+  real(dp),allocatable :: ghc(:,:),gsc(:,:),gvnlxc(:,:)
+  real(dp),pointer :: bra(:,:),ket(:,:)
   complex(dp) :: m1(3),b1(3)
   type(pawcprj_type),allocatable :: cwaveprj1(:,:)
 !--------------------------------------------------------------------
@@ -1159,7 +1163,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
    do gdir = 1, 3
 
      cpopt = 2
-     ket(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
+     ket => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
 
      call pawcprj_get(atindx,cwaveprj1,cprj1_k(:,:,gdir),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
        & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
@@ -1181,7 +1185,8 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
      end if
 
      do bdir = 1, 3
-       bra(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
+       !bra(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
+       bra => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
 
        mdot = cg_zdotc(npwsp,bra,ghc); bdot = cg_zdotc(npwsp,bra,gsc)
 
@@ -1209,8 +1214,9 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
 
  end do !nn
 
- ABI_SFREE(bra)
- ABI_SFREE(ket)
+ if(associated(ket)) NULLIFY(ket)
+ if(associated(bra)) NULLIFY(bra)
+
  ABI_SFREE(ghc)
  ABI_SFREE(gsc)
  ABI_SFREE(gvnlxc)
@@ -1275,7 +1281,8 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: cg_k(2,mcgk),eig_k(nband_k),gcg1_k(2,mcgk,3),occ_k(nband_k)
+  real(dp),intent(in) :: eig_k(nband_k),occ_k(nband_k)
+  real(dp),intent(in),target :: cg_k(2,mcgk),gcg1_k(2,mcgk,3)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
 
   !Local variables -------------------------
@@ -1288,9 +1295,10 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
   logical :: need_odensity
   !arrays
   real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1)
-  real(dp),allocatable :: bra(:,:),brab(:,:),brag(:,:),denpot(:,:,:)
-  real(dp),allocatable :: fofgout(:,:),fofrb(:,:,:,:),fofrg(:,:,:,:),ket(:,:)
-  real(dp),allocatable :: svectoutb(:,:),svectoutg(:,:),vectout(:,:)
+  real(dp),allocatable :: denpot(:,:,:)
+  real(dp),allocatable :: fofgout(:,:),svectoutb(:,:),svectoutg(:,:),vectout(:,:)
+  real(dp),allocatable,target :: fofrb(:,:,:,:),fofrg(:,:,:,:)
+  real(dp),pointer :: bra(:,:),brab(:,:),brag(:,:),ket(:,:)
   complex(dp) :: b1(3),bv2b(3),m1(3),mv2b(3),m1_mu(3),mv2b_mu(3)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 !--------------------------------------------------------------------
@@ -1301,13 +1309,8 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
  npwsp = npw_k*dtset%nspinor
  need_odensity = (dtset%orbmag .EQ. 4)
 
- ABI_MALLOC(bra,(2,npwsp))
- ABI_MALLOC(brab,(2,npwsp))
- ABI_MALLOC(brag,(2,npwsp))
- ABI_MALLOC(ket,(2,npwsp))
  ABI_MALLOC(svectoutb,(2,npwsp))
  ABI_MALLOC(svectoutg,(2,npwsp))
- ABI_MALLOC(vectout,(2,npwsp))
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
 
@@ -1339,7 +1342,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
    b1 = czero; bv2b = czero
 
    ! extract |u_nk>
-   ket(1:2,1:npwsp) = cg_k(1:2,(nn-1)*npwsp+1:nn*npwsp)
+   ket => cg_k(1:2,(nn-1)*npwsp+1:nn*npwsp)
    call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
      & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
 
@@ -1372,11 +1375,11 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
        end if
    
        ! extract |Pc du/dk_b>
-       brab(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
+       brab => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
        gdot=cg_zdotc(npwsp,brab,svectoutg); gdotc=CMPLX(gdot(1),gdot(2))
 
        ! extract |Pc du/dk_g>
-       brag(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
+       brag => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
        bdot=cg_zdotc(npwsp,brag,svectoutb); bdotc=CMPLX(bdot(1),bdot(2))
         
        do adir=1,3 
@@ -1408,7 +1411,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
 
        do np = 1, nband_k
          if (occ_k(np).LT.tol8) cycle
-         bra(1:2,1:npwsp) = cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
+         bra => cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
          gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
          bpdot=cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
 
@@ -1435,13 +1438,13 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
 
  end do !nn
 
- ABI_FREE(bra)
- ABI_FREE(brab)
- ABI_FREE(brag)
- ABI_FREE(ket)
+ IF(ASSOCIATED(brab)) NULLIFY(brab)
+ IF(ASSOCIATED(brag)) NULLIFY(brag)
+ IF(ASSOCIATED(ket)) NULLIFY(ket)
+ IF(ASSOCIATED(bra)) NULLIFY(bra)
+ 
  ABI_FREE(svectoutb)
  ABI_FREE(svectoutg)
- ABI_FREE(vectout)
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
  ABI_SFREE(fofrb)
@@ -2823,7 +2826,7 @@ subroutine odens_real(adir,bra,fofr,n4,n5,n6,natom,npw_k,orbmag_mesh,ph3d,prefac
   type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 
   !arrays
-  real(dp),intent(in) :: bra(2,npw_k),fofr(2,n4,n5,n6)
+  real(dp),intent(in),pointer :: bra(:,:),fofr(:,:,:,:)
   real(dp),intent(in) :: ph3d(2,npw_k,natom)
 
   !Local variables -------------------------
