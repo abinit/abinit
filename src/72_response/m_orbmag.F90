@@ -583,11 +583,11 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
      call orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph3d)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh)
 
      ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
      call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,&
-      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,ph3d)
+      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh)
 
      ! ZTG23 Eq. 36 term 1
      call orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
@@ -1089,7 +1089,7 @@ end subroutine orbmag_nl_k
 !! SOURCE
 
 subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph3d)
+    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh)
 
   !Arguments ------------------------------------
   !scalars
@@ -1102,7 +1102,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: eig_k(nband_k),gcg1_k(2,mcgk,3),ph3d(2,npw_k,dtset%natom)
+  real(dp),intent(in) :: eig_k(nband_k),gcg1_k(2,mcgk,3)
   type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,mcprjk,3)
 
   !Local variables -------------------------
@@ -1196,7 +1196,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
          
          if (need_odensity) call odens_real(adir,bra,fofr,&
            & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,dtset%natom,&
-           & npw_k,orbmag_mesh,ph3d,prefac_m,t_atom,&
+           & npw_k,orbmag_mesh,gs_hamk%ph3d_k,prefac_m,t_atom,&
            & mult_fact=one,conjg_flag=.FALSE.)
        
        end do ! adir
@@ -1262,7 +1262,7 @@ end subroutine orbmag_cc_k
 !! SOURCE
 
 subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,&
-    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,ph3d)
+    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh)
 
   !Arguments ------------------------------------
   !scalars
@@ -1276,7 +1276,6 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: cg_k(2,mcgk),eig_k(nband_k),gcg1_k(2,mcgk,3),occ_k(nband_k)
-  real(dp),intent(in) :: ph3d(2,npw_k,dtset%natom)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
 
   !Local variables -------------------------
@@ -1398,10 +1397,10 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
 
          if (need_odensity) then
            call odens_real(adir,brab,fofrg,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,dtset%natom,&
-             & npw_k,orbmag_mesh,ph3d,prefac_m,t_atom,&
+             & npw_k,orbmag_mesh,gs_hamk%ph3d_k,prefac_m,t_atom,&
              & mult_fact=(eig_k(nn)-fermie),conjg_flag=.FALSE.)
            call odens_real(adir,brag,fofrb,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,dtset%natom,&
-             & npw_k,orbmag_mesh,ph3d,prefac_m,t_atom,&
+             & npw_k,orbmag_mesh,gs_hamk%ph3d_k,prefac_m,t_atom,&
              & mult_fact=(eig_k(nn)-fermie),conjg_flag=.TRUE.)
          endif
 
