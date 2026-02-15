@@ -115,7 +115,7 @@ module m_orbmag
     ! CC, VV1, VV2, NL, L_R, B.M
 
     integer :: n4,n5,n6
-    ! real space grid dimenions for odens
+    ! real space grid dimenions for rmesh
 
     real(dp),allocatable :: lambsig(:)
     ! lambsig(ntypat)
@@ -147,14 +147,16 @@ module m_orbmag
     ! 3 for the 3 directions
     ! orbmag_trace(3,orbmag_nterms)
     
-    real(dp),allocatable :: odens(:,:,:,:,:)
+    real(dp),allocatable :: rmesh(:,:,:,:,:)
+    ! total orbmag on real mesh
     ! 3 for the 3 directions
-    ! odens(2,n4,n5,n6,3)
+    ! rmesh(2,n4,n5,n6,3)
 
     contains
 
       procedure :: init => orbmag_init
       procedure :: free => orbmag_free
+      procedure :: accum_rmesh => orbmag_rmesh
       procedure :: mpisum => orbmag_mpisum
       procedure :: term_scale => orbmag_term_scale
       procedure :: output => orbmag_output
@@ -192,6 +194,11 @@ module m_orbmag
     ! BM(natom,lmn2max,ndij,3)
     complex(dp),allocatable :: BM(:,:,:,:)
 
+    contains
+
+      procedure :: init => dterm_init
+      procedure :: free => dterm_free
+
   end type dterm_type
 
   ! Bound methods:
@@ -215,14 +222,14 @@ module m_orbmag
   private :: make_pcg1
   private :: gauge_treatment
   private :: para_to_diag
-  private :: odens_real
   private :: orbmag_init
   private :: orbmag_free
   private :: orbmag_mpisum
+  private :: orbmag_rmesh
   private :: orbmag_term_scale
   private :: orbmag_output
   private :: orbmag_ncwrite   ! Write orbmag_mesh contributions to netcdf file.
-  private :: dterm_alloc
+  private :: dterm_init
   private :: dterm_free
 
 CONTAINS  !========================================================================================
@@ -392,7 +399,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
  lmn2max = psps%lmnmax*(psps%lmnmax+1)/2
  ! note: in make_d, terms will be filled as iatom using atindx
- call dterm_alloc(dterm,psps%lmnmax,lmn2max,dtset%natom,paw_ij(1)%ndij)
+ call dterm%init(psps%lmnmax,lmn2max,dtset%natom,paw_ij(1)%ndij)
  call make_d(atindx,dterm,dtset,crystal%gprimd,paw_ij,pawrad,pawtab,psps)
 
  ! initialize orbmag_mesh datatype
@@ -693,7 +700,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
 
- call dterm_free(dterm)
+ call dterm%free()
  call orbmag_mesh%free()
 
 end subroutine orbmag
@@ -774,15 +781,15 @@ subroutine orbmag_mpisum(omag,nproc,spaceComm)
       ABI_FREE(buffer1)
       ABI_FREE(buffer2)
     end if
-    if (allocated(omag%odens)) then
-      buff_size=size(omag%odens)
+    if (allocated(omag%rmesh)) then
+      buff_size=size(omag%rmesh)
       ABI_MALLOC(buffer1,(buff_size))
       ABI_MALLOC(buffer2,(buff_size))
       buffer1=zero;buffer2=zero
       buffer1(1:buff_size) = &
-        & reshape(omag%odens,(/2*omag%n4*omag%n5*omag%n6*3/))
+        & reshape(omag%rmesh,(/2*omag%n4*omag%n5*omag%n6*3/))
       call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-      omag%odens(1:2,1:omag%n4,1:omag%n5,1:omag%n6,1:3)=&
+      omag%rmesh(1:2,1:omag%n4,1:omag%n5,1:omag%n6,1:3)=&
         & reshape(buffer2,(/2,omag%n4,omag%n5,omag%n6,3/))
       ABI_FREE(buffer1)
       ABI_FREE(buffer2)
@@ -1199,10 +1206,11 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
          m1(adir) = m1(adir) + prefac_m*CMPLX(mdot(1),mdot(2))
          b1(adir) = b1(adir) - two*prefac_b*CMPLX(bdot(1),bdot(2))
          
-         if (need_odensity) call odens_real(adir,bra,fofr,&
-           & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,dtset%natom,&
-           & npw_k,orbmag_mesh,gs_hamk%ph3d_k,prefac_m,t_atom,&
-           & mult_fact=one,conjg_flag=.FALSE.)
+         if (need_odensity) then
+           call orbmag_mesh%accum_rmesh(adir,bra,fofr,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
+             & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,&
+             & mult_fact=one,conjg_flag=.FALSE.)
+         end if
        
        end do ! adir
    
@@ -1399,11 +1407,11 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
          m1_mu(adir) = m1_mu(adir) - prefac_m*CONJG(bdotc)*fermie
 
          if (need_odensity) then
-           call odens_real(adir,brab,fofrg,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,dtset%natom,&
-             & npw_k,orbmag_mesh,gs_hamk%ph3d_k,prefac_m,t_atom,&
+           call orbmag_mesh%accum_rmesh(adir,brab,fofrg,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
+             & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,&
              & mult_fact=(eig_k(nn)-fermie),conjg_flag=.FALSE.)
-           call odens_real(adir,brag,fofrb,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,dtset%natom,&
-             & npw_k,orbmag_mesh,gs_hamk%ph3d_k,prefac_m,t_atom,&
+           call orbmag_mesh%accum_rmesh(adir,brag,fofrb,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
+             & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,&
              & mult_fact=(eig_k(nn)-fermie),conjg_flag=.TRUE.)
          endif
 
@@ -2502,7 +2510,7 @@ subroutine dterm_free(dterm)
 
   !Arguments ------------------------------------
   !scalars
-  class(dterm_type),intent(inout) :: dterm
+  class(dterm_type),intent(inout),target :: dterm
 !--------------------------------------------------------------------
 
   ABI_SFREE(dterm%aij)
@@ -2520,9 +2528,9 @@ subroutine dterm_free(dterm)
 end subroutine dterm_free
 !!***
 
-!!****f* ABINIT/dterm_alloc
+!!****f* ABINIT/dterm_init
 !! NAME
-!! dterm_alloc
+!! dterm_init
 !!
 !! FUNCTION
 !! allocate space in dterm_type
@@ -2540,12 +2548,12 @@ end subroutine dterm_free
 !!
 !! SOURCE
 
-subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij)
+subroutine dterm_init(dterm,lmnmax,lmn2max,natom,ndij)
 
   !Arguments ------------------------------------
   !scalars
+  class(dterm_type),intent(inout),target :: dterm
   integer,intent(in) :: lmnmax,lmn2max,natom,ndij
-  class(dterm_type),intent(inout) :: dterm
 !--------------------------------------------------------------------
 
   dterm%lmnmax = lmnmax
@@ -2565,7 +2573,7 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij)
   ABI_REMALLOC(dterm%BM,(natom,lmn2max,ndij,3))
   dterm%has_BM=1
 
-end subroutine dterm_alloc
+end subroutine dterm_init
 !!***
 
 !!****f* ABINIT/orbmag_init
@@ -2619,7 +2627,7 @@ subroutine orbmag_init(omag,dtset)
   ABI_REMALLOC(omag%orbmag_trace,(3,orbmag_nterms))
   omag%orbmag_trace=zero
   if (dtset%orbmag .EQ. 4) then
-    ABI_REMALLOC(omag%odens,(2,omag%n4,omag%n5,omag%n6,3))
+    ABI_REMALLOC(omag%rmesh,(2,omag%n4,omag%n5,omag%n6,3))
     omag%omesh=zero
   end if
 
@@ -2653,7 +2661,7 @@ subroutine orbmag_free(omag)
     ABI_SFREE(omag%omesh)
     ABI_SFREE(omag%orbmag_terms)
     ABI_SFREE(omag%orbmag_trace)
-    ABI_SFREE(omag%odens)
+    ABI_SFREE(omag%rmesh)
 
 end subroutine orbmag_free
 !!***
@@ -2795,9 +2803,9 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
 end subroutine make_d
 !!***
 
-!!****f* ABINIT/odens_real
+!!****f* ABINIT/orbmag_rmesh
 !! NAME
-!! odens_real
+!! orbmag_rmesh
 !!
 !! FUNCTION
 !! FT over R site for odens in real space
@@ -2808,22 +2816,22 @@ end subroutine make_d
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! orbmag_mesh%odens updated
+!! orbmag_mesh%rmesh updated
 !! 
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine odens_real(adir,bra,fofr,n4,n5,n6,natom,npw_k,orbmag_mesh,ph3d,prefac_m,t_atom,&
-    & mult_fact,conjg_flag) ! optional arguments
+subroutine orbmag_rmesh(omag,adir,bra,fofr,n4,n5,n6,natom,npw_k,ph3d,prefac_m,t_atom,&
+    & mult_fact,conjg_flag) 
 
   !Arguments ------------------------------------
   !scalars
+  class(orbmag_mesh_type),intent(inout),target :: omag
   integer,intent(in) :: adir,n4,n5,n6,natom,npw_k,t_atom
   real(dp),intent(in),optional :: mult_fact
   complex(dp) :: prefac_m
   logical,intent(in),optional :: conjg_flag
-  type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 
   !arrays
   real(dp),intent(in),pointer :: bra(:,:),fofr(:,:,:,:)
@@ -2839,13 +2847,13 @@ subroutine odens_real(adir,bra,fofr,n4,n5,n6,natom,npw_k,orbmag_mesh,ph3d,prefac
 
 !--------------------------------------------------------------------
 
-  if(present(mult_fact)) then
+  if (present(mult_fact)) then
     the_mult_fact=mult_fact
   else
     the_mult_fact=one
   end if
 
-  if(present(conjg_flag)) then
+  if (present(conjg_flag)) then
     the_conjg_flag=conjg_flag
   else
     the_conjg_flag=.FALSE.
@@ -2869,21 +2877,20 @@ subroutine odens_real(adir,bra,fofr,n4,n5,n6,natom,npw_k,orbmag_mesh,ph3d,prefac
 
   if (the_conjg_flag) then
     ! add ffac * conjg(fofr)
-    orbmag_mesh%odens(1,:,:,:,adir) = orbmag_mesh%odens(1,:,:,:,adir) +&
+    omag%rmesh(1,:,:,:,adir) = omag%rmesh(1,:,:,:,adir) +&
       & ffac(1)*fofr(1,:,:,:) + ffac(2)*fofr(2,:,:,:)
-    orbmag_mesh%odens(2,:,:,:,adir) = orbmag_mesh%odens(2,:,:,:,adir) -&
+    omag%rmesh(2,:,:,:,adir) = omag%rmesh(2,:,:,:,adir) -&
       & ffac(1)*fofr(2,:,:,:) + ffac(2)*fofr(1,:,:,:)
   else
     ! add ffac * fofr
-    orbmag_mesh%odens(1,:,:,:,adir) = orbmag_mesh%odens(1,:,:,:,adir) +&
+    omag%rmesh(1,:,:,:,adir) = omag%rmesh(1,:,:,:,adir) +&
       & ffac(1)*fofr(1,:,:,:) - ffac(2)*fofr(2,:,:,:)
-    orbmag_mesh%odens(2,:,:,:,adir) = orbmag_mesh%odens(2,:,:,:,adir) +&
+    omag%rmesh(2,:,:,:,adir) = omag%rmesh(2,:,:,:,adir) +&
       & ffac(1)*fofr(2,:,:,:) + ffac(2)*fofr(1,:,:,:)
   end if
 
-end subroutine odens_real
+end subroutine orbmag_rmesh
 !!***
-
 
 !!****f* ABINIT/local_fermie
 !! NAME
@@ -3062,7 +3069,7 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
  NCF_CHECK(nf90_put_var(ncid, vid("nucdipmom"), orbmag_mesh%nucdipmom))
  NCF_CHECK(nf90_put_var(ncid, vid("lambsig"), orbmag_mesh%lambsig))
  if ( has_odens ) then
-   NCF_CHECK(nf90_put_var(ncid, vid("odens_mesh"), orbmag_mesh%odens))
+   NCF_CHECK(nf90_put_var(ncid, vid("odens_mesh"), orbmag_mesh%rmesh))
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
