@@ -289,9 +289,8 @@ nav:
     - Test Page for linkcheck: developers/testlink.md
     #- External Resources: developers/external_resources.md
 - About:
-    - Release Notes: about/release-notes.md
-    - Contributing: about/contributing.md
     - History: about/history.md
+    - Release Notes: about/release-notes.md
     - License: about/license.md
 
 # The section below activates markdown/theme extensions and other parameters related to
