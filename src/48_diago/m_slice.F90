@@ -1247,7 +1247,7 @@ subroutine slice_computeSpectrum(slice, X, getAX_BX, getBm1X, eigen, resid, nspi
 
     write(901,*) 'Here I write the Lanczos yeyyy'
     flush(901)
-    kmax = 50
+    kmax = 100
 
     my_rank = xmpi_comm_rank(slice%spacecom)
     write(901+my_rank,*) 'What 1', slice%spacecom, xmpi_comm_size(slice%spacecom), my_rank
