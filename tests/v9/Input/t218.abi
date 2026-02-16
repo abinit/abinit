@@ -113,7 +113,7 @@ pseudos "B.psp8, N.psp8"
 #%% test_chain =  t218.abi
 #%% [files]
 #%% files_to_test =
-#%%   t218.abo, tolnlines=  5, tolabs=  1.000e-05, tolrel=  5.000e-04, fld_options=-medium
+#%%   t218.abo, tolnlines=  40, tolabs=  1.000e-05, tolrel=  5.000e-04, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

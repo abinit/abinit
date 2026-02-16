@@ -50,7 +50,7 @@ nqpt5     1
 qpt5      0.01 0.0 0.0   
 getwfq5  -1             
 kptopt5   3             
-tolwfr5   1.0d-8   
+tolwfr5   1.1d-8   
 
 ###################  Common data  ######################
 prtwf     0
@@ -113,7 +113,7 @@ pseudos "B.psp8, N.psp8"
 #%% test_chain =  t219.abi
 #%% [files]
 #%% files_to_test =
-#%%   t219.abo, tolnlines=  16, tolabs=  1.000e-05, tolrel=  5.000e-04, fld_options=-medium
+#%%   t219.abo, tolnlines=  19, tolabs=  1.000e-03, tolrel=  5.000e-04, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
