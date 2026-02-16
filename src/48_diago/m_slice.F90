@@ -2695,11 +2695,17 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     call xgBlock_setBlock(Moments%self, Moment_ideg, nband, 1) 
     call xgBlock_colwiseDotProduct(X0, X0, Moment_ideg, comm_loc=xmpi_comm_null) 
 
+    ! Initialize Chebyshev recursion with orthonormalized X0
     chebfi%xXColsRows = X0
-    write(std_out,*) 'x X=', rows(chebfi%xXColsRows), cols(chebfi%xXColsRows), xgBlock_getid(chebfi%xXColsRows)
-    write(std_out,*) 'xAX=', rows(chebfi%xAXColsRows), cols(chebfi%xAXColsRows), xgBlock_getid(chebfi%xAXColsRows)
-    write(std_out,*) 'xBX=', rows(chebfi%xBXColsRows), cols(chebfi%xBXColsRows), xgBlock_getid(chebfi%xBXColsRows)
-    flush(std_out)
+    if (slice%paral_kgb==1) then
+        ! Normalize X
+        call xgBlock_reverseMap(Moment_ideg, momvals, nband, 1)
+        do iband=1, nband
+            call xgBlock_setBlock(chebfi%xXColsRows, X0_part, tot_spacedim, 1, fcol=iband)
+            call xgBlock_scale(X0_part, 1._dp/real(momvals(iband,1)), 1)
+        end do
+        call xgBlock_ones(Moment_ideg)
+    end if
 
     ! Compute A*Psi
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
@@ -2708,21 +2714,14 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     call xgBlock_zero_im_g0(chebfi%xBXColsRows)
     ABI_NVTX_END_RANGE()
 
-    write(std_out,*) 'x X=', rows(chebfi%xXColsRows), cols(chebfi%xXColsRows), xgBlock_getid(chebfi%xXColsRows)
-    write(std_out,*) 'xAX=', rows(chebfi%xAXColsRows), cols(chebfi%xAXColsRows), xgBlock_getid(chebfi%xAXColsRows)
-    write(std_out,*) 'xBX=', rows(chebfi%xBXColsRows), cols(chebfi%xBXColsRows), xgBlock_getid(chebfi%xBXColsRows)
-    flush(std_out)
-
     ! Compute upper bound of interval as Rayleigh quotient
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RRQ)
     call timab(tim_RR_q, 1, tsec)
     call chebfi_rayleighRitzQuotients(chebfi, maxeig, mineig, DivResults%self)
-    maxeig_global = maxeig
-    if (slice%paral_kgb == 1) then
-        call xmpi_max(maxeig, maxeig_global, spacecom, ierr)
-    end if
     call timab(tim_RR_q, 2, tsec)
     ABI_NVTX_END_RANGE()
+    
+    call xmpi_max(maxeig, maxeig_global, spacecom, ierr)
     write(std_out,*) 'DivResults maxeig_global=', maxeig_global
     call xgBlock_print(DivResults%self, std_out)
     flush(std_out)
@@ -2732,27 +2731,6 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     radius = (max_upp_bound - min_low_bound)*0.5 
     one_over_r = 1.0/radius
     two_over_r = 2.0/radius
-
-    ! Initialize Chebyshev recursion with orthonormalized X0
-    !chebfi%xXColsRows = X0
-    call xgBlock_setBlock(X0, chebfi%xXColsRows, tot_spacedim, nband)
-    if (slice%paral_kgb==1) then
-        ! Normalize X
-        call xgBlock_reverseMap(Moment_ideg, momvals, nband, 1)
-        do iband=1, nband
-            call xgBlock_setBlock(chebfi%xXColsRows, X0_part, tot_spacedim, 1, fcol=iband)
-            call xgBlock_scale(X0_part, 1._dp/real(momvals(iband,1)), 1)
-        end do
-        call xgBlock_ones(Moment_ideg)
-        call xgBlock_copy(chebfi%xXColsRows, X0)
-    end if
-
-    ! (Re)compute A*Psi FIXME avoid this computation
-    ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
-    call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
-    call xgBlock_zero_im_g0(chebfi%xAXColsRows)
-    call xgBlock_zero_im_g0(chebfi%xBXColsRows)
-    ABI_NVTX_END_RANGE()
 
     do ideg = 0, ndeg_filter_max - 1
        
