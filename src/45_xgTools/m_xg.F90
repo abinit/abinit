@@ -6519,7 +6519,7 @@ contains
     tid = 0
     n = xgBlock%rows
     
-    if (xgBlock%gpu_option/=ABI_GPU_DISABLED) then
+    if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
         call xgBlock_copy_from_gpu(xgBlock)
     end if 
 
@@ -6569,7 +6569,7 @@ contains
         ABI_ERROR('Not implemented for SPACE_CR')
     end select
     
-    if (xgBlock%gpu_option/=ABI_GPU_DISABLED) then
+    if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
         call xgBlock_copy_to_gpu(xgBlock)
     end if
 
