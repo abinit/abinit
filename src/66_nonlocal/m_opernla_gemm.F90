@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MT)
+!!  Copyright (C) 2008-2026 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,15 +25,14 @@ module m_opernla_gemm
  use m_errors
  USE_MPI
  use m_xmpi
+ use m_gputk
  use m_abi_linalg
  use m_gemm_nonlop_projectors
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
 
-#ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_size_t
-#endif
 
  implicit none
 

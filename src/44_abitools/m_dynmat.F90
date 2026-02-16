@@ -6,7 +6,7 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2025 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
+!!  Copyright (C) 2014-2026 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3515,7 +3515,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,comm)
        do nu=1,3
          do ia=1,natom
            do mu=1,3
-             ! Real and imaginary part of the interatomic forces
+             ! Real part of the interatomic forces
              atmfrc(mu,ia,nu,ib,irpt)=atmfrc(mu,ia,nu,ib,irpt) &
               +re*dynmat(1,mu,ia,nu,ib,iqpt)&
               +im*dynmat(2,mu,ia,nu,ib,iqpt)
@@ -4833,7 +4833,7 @@ subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
  else
    write(msg,'(3a,i0,a)' )&
     'The argument "plus" must be equal to 0 or 1.',ch10,&
-    'The value ',plus,' is not available.'
+    'The value: ',plus,' is not available.'
    ABI_BUG(msg)
  end if
 
@@ -4880,11 +4880,12 @@ end subroutine nanal9
 !!
 !! OUTPUT
 !! d2cart(2,3,mpert,3,mpert)=dynamical matrix obtained for the wavevector qpt (normalized using qphnrm)
+!! eta: parameter used to split R and G-space summation
 !!
 !! SOURCE
 
 subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
-                  nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,qdrp_cart,ewald_option,comm,&
+                  nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,qdrp_cart,ewald_option,eta,comm,&
                   dipquad,quadquad)  ! optional
 
 !Arguments -------------------------------
@@ -4900,7 +4901,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
  real(dp),intent(in) :: qdrp_cart(3,3,3,natom)
  real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(in) :: dyewq0(3,3,natom)
- real(dp),intent(out) :: d2cart(2,3,mpert,3,mpert)
+ real(dp),intent(out) :: d2cart(2,3,mpert,3,mpert), eta
 
 !Local variables -------------------------
 !scalars
@@ -4942,7 +4943,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
 
    call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,&
-      qdrp_cart,option=ewald_option,dipquad=dipquad_,quadquad=quadquad_)
+      qdrp_cart,eta,option=ewald_option,dipquad=dipquad_,quadquad=quadquad_)
 
    call q0dy3_apply(natom,dyewq0,dyew)
    call nanal9(dyew,dq,iqpt1,natom,nqpt1,plus1)

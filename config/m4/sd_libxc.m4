@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2026 ABINIT group (Yann Pouillon)
 
 #
 # Exchange-Correlation functionals library (LibXC)
@@ -78,7 +78,7 @@ AC_SUBST([abi_fb_libxc_version])
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_libxc_enable_fc}" && sd_libxc_enable_fc="yes"
+  test -z "${sd_libxc_enable_fc}" && sd_libxc_enable_fc="no"
   if test "${sd_libxc_enable_fc}" = "yes"; then
     test -z "${sd_libxc_libs_def}" && sd_libxc_libs_def="-lxcf90 -lxc"
   else
@@ -292,7 +292,7 @@ AC_DEFUN([SD_LIBXC_DETECT], [
     else
         sd_libxc_ok="yes"
         sd_libxc_cppflags=""
-        sd_libxc_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version}}/include"
+        sd_libxc_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version}/include"
         sd_libxc_fcflags=""
         sd_libxc_ldflags=""
         sd_libxc_kxc_ok="no"

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2025 ABINIT group (GA)
+!!  Copyright (C) 2014-2026 ABINIT group (GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -188,7 +188,6 @@ subroutine anaddb_driver_init(driver, dtset)
 !Arguments -------------------------------
  class(anaddb_driver_type), intent(inout):: driver
  type(anaddb_dataset_type), intent(in):: dtset
-
 ! ************************************************************************
 
  ! Set control flags
@@ -275,7 +274,6 @@ subroutine anaddb_driver_free(driver)
 
 !Arguments -------------------------------
  class(anaddb_driver_type), intent(inout):: driver
-
 ! ************************************************************************
 
  ABI_SFREE(driver%zeff)
@@ -317,7 +315,6 @@ subroutine anaddb_driver_open_write_nc(driver, ana_ncid, dtset, crystal, comm)
  integer:: natom,lenstr
  integer:: ncerr
  integer:: my_rank
-
 ! ************************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -396,7 +393,6 @@ subroutine anaddb_driver_electric_tensors(driver, dtset, crystal, ddb, ddb_lw, d
  integer:: lwsym
  character(len = 500):: msg
  integer:: units(2)
-
 ! ************************************************************************
 
  units = [std_out, ab_out]
@@ -485,7 +481,6 @@ subroutine anaddb_driver_structural_response(driver, dtset, crystal, ddb)
  real(dp):: qphnrm(3), qphon(3, 3)
  integer, allocatable:: d2flg(:)
  real(dp), allocatable:: gred(:,:)
-
 ! ************************************************************************
 
  msize = dtset%msize
@@ -583,7 +578,6 @@ subroutine anaddb_driver_susceptibilities(driver, dtset, ddb, ana_ncid, comm)
  integer, parameter:: master = 0
  integer:: my_rank
  integer:: ncerr
-
 ! ************************************************************************
 
  if (ddb%get_dchidet(dtset%ramansr, dtset%nlflag, driver%dchide, driver%dchidt) == 0) then
@@ -644,12 +638,9 @@ subroutine anaddb_driver_interatomic_force_constants(driver, ifc, dtset, crystal
  character(len = 500):: msg
  integer:: ngqpt_coarse(3)
  integer:: units(2)
-
 ! ************************************************************************
 
  units = [std_out, ab_out]
-
-! ************************************************************************
 
   write(msg, '(a, a, (80a), a, a, a, a)' ) ch10, ('=',ii = 1, 80), ch10, ch10, &
     ' Calculation of the interatomic forces ',ch10
@@ -731,11 +722,9 @@ subroutine anaddb_driver_phdos(driver, dtset, crystal, ifc, comm)
  character(len = fnlen):: phibz_prefix
  character(len = 500):: msg
  type(phdos_t):: Phdos
-
  integer:: units(2)
  integer:: count_wminmax(2)
  real(dp):: wminmax(2)
-
 ! ************************************************************************
 
  ABI_UNUSED(driver%natom)
@@ -839,7 +828,6 @@ subroutine anaddb_driver_harmonic_thermo(driver, dtset, crystal, ifc, ddb, comm)
  integer:: ii
  character(len = 500):: msg
  integer:: units(2)
-
 ! ************************************************************************
 
  ABI_UNUSED(driver%natom)
@@ -893,12 +881,12 @@ subroutine anaddb_driver_dielectric_q0(driver, dtset, crystal, ifc, ddb, asrq0, 
  integer:: ii, iblok
  integer:: rfelfd(4), rfphon(4), rfstrs(4)
  integer:: units(2)
+ real(dp) :: eta
  character(len = 500):: msg
  real(dp):: qphnrm(3), qphon(3, 3)
  real(dp), allocatable:: eigval(:,:)
  real(dp), allocatable:: eigvec(:,:,:,:,:)
  real(dp), allocatable:: lst(:)
-
 ! ************************************************************************
 
  units = [std_out, ab_out]
@@ -920,7 +908,7 @@ subroutine anaddb_driver_dielectric_q0(driver, dtset, crystal, ifc, ddb, asrq0, 
      Ifc%dyewq0, driver%d2cart, crystal%gmet, ddb%gprim, dtset%mpert, crystal%natom, &
      Ifc%nrpt, qphnrm(1), qphon, crystal%rmet, ddb%rprim, Ifc%rpt, &
      Ifc%trans, crystal%ucvol, Ifc%wghatm, crystal%xred, driver%zeff, driver%qdrp_cart, &
-     Ifc%ewald_option, xmpi_comm_self, &
+     Ifc%ewald_option, eta, xmpi_comm_self, &
      dipquad=Ifc%dipquad, quadquad=Ifc%quadquad)
 
  else if (dtset%ifcflag == 0) then
@@ -1001,7 +989,6 @@ subroutine anaddb_driver_nonlinear_response(driver, dtset, crystal, ana_ncid, co
  integer:: my_rank
  real(dp):: qphnrm(3), qphon(3, 3)
  real(dp), allocatable:: rsus(:,:,:)
-
 ! ************************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -1060,7 +1047,6 @@ subroutine anaddb_driver_dielectric_nonana(driver, dtset, crystal, ddb, ana_ncid
  real(dp), allocatable:: eigvec(:,:,:,:,:)
  real(dp), allocatable:: rsus(:,:,:)
  real(dp), allocatable:: lst(:)
-
 ! ************************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -1177,7 +1163,6 @@ subroutine anaddb_driver_internal_strain(driver, dtset, ddb, asrq0)
  integer:: rfelfd(4), rfphon(4), rfstrs(4)
  character(len = 500):: msg
  real(dp):: qphnrm(3), qphon(3, 3)
-
 ! ************************************************************************
 
  units = [std_out, ab_out]
@@ -1237,7 +1222,6 @@ subroutine anaddb_driver_elastic_tensor(driver, dtset, crystal, ddb, asrq0, ana_
  real(dp):: qphnrm(3), qphon(3, 3)
  real(dp):: compl(6, 6), compl_clamped(6, 6), compl_stress(6, 6)
  real(dp):: elast_clamped(6, 6), elast_stress(6, 6)
-
 ! ************************************************************************
 
  units = [std_out, ab_out]
@@ -1302,7 +1286,6 @@ subroutine anaddb_driver_piezoelectric_tensor(driver, dtset, crystal, ddb, ana_n
  integer:: rfelfd(4), rfphon(4), rfstrs(4)
  real(dp):: qphnrm(3), qphon(3, 3)
  real(dp):: piezo(6, 3)
-
 ! ************************************************************************
 
  units = [std_out, ab_out]
@@ -1359,7 +1342,6 @@ subroutine anaddb_driver_flexoelectric_tensor(driver, dtset, crystal, ddb, ddb_l
  integer:: ii
  integer:: units(2)
  character(len = 500):: msg
-
 ! ************************************************************************
 
  units = [std_out, ab_out]
@@ -1405,7 +1387,6 @@ subroutine anaddb_driver_lattice_wannier(driver, dtset, crystal, ifc, comm)
  integer:: ii
  character(len = 500):: msg
  integer:: units(2)
-
 ! ************************************************************************
 
  units = [std_out, ab_out]

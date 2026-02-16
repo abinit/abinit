@@ -10,7 +10,7 @@
 !!  Manage error and warnings for the ctqmc
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +29,7 @@ USE defs_basis
 USE m_profiling_abi
 USE m_errors
 USE m_xmpi
+USE m_xomp
 #endif
 
 USE_MPI
@@ -52,7 +53,7 @@ CONTAINS
 !!  error dectected => leave
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -101,7 +102,7 @@ END SUBROUTINE ERROR
 !!  on cpu wants to tell something
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -130,7 +131,7 @@ include 'mpif.h'
   INTEGER                      :: ierr
   INTEGER                      :: rank
   CALL MPI_Comm_rank(MY_WORLD, rank, ierr)
-  WRITE(messend,'(A,I6,A)') "WARNING in QMC rank ", rank, " : ", TRIM(message)
+  WRITE(messend,'(A,I6,A,A)') "WARNING in QMC rank ", rank, " : ", TRIM(message)
 #else
   WRITE(messend,'(A,A)') "WARNING in QMC : ", TRIM(message)
 #endif
@@ -148,7 +149,7 @@ END SUBROUTINE WARN
 !!  collective warning function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

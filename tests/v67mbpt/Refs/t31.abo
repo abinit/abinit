@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h12 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h13 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t31-t32-t33-t34-t35/t31.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v67mbpt_t31-t32-t33-t34-t35/t31.abi
 - output file    -> t31.abo
 - root for input  files -> t31i
 - root for output files -> t31o
@@ -120,11 +120,11 @@ _ WF disk file :      1.510 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
   bs_coulomb_term3         21
   bs_coulomb_term4         11
   bs_coulomb_term5         21
-     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh3     0.00000000E+00  2.20495952E-01  3.67493254E-03 Hartree
-     bs_freq_mesh4     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh5     0.00000000E+00  2.20495952E-01  3.67493254E-03 Hartree
+     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh3     0.00000000E+00  2.20495933E-01  3.67493222E-03 Hartree
+     bs_freq_mesh4     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh5     0.00000000E+00  2.20495933E-01  3.67493222E-03 Hartree
  bs_haydock_niter1        100
  bs_haydock_niter2        100
  bs_haydock_niter3        200
@@ -309,9 +309,9 @@ _ WF disk file :      1.510 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
           kptrlen5     2.88980399E+01
        mbpt_sciss1     0.00000000E+00 Hartree
        mbpt_sciss2     0.00000000E+00 Hartree
-       mbpt_sciss3     2.93994603E-02 Hartree
+       mbpt_sciss3     2.93994577E-02 Hartree
        mbpt_sciss4     0.00000000E+00 Hartree
-       mbpt_sciss5     2.93994603E-02 Hartree
+       mbpt_sciss5     2.93994577E-02 Hartree
        mdf_epsinf1     0.00000000E+00
        mdf_epsinf2     0.00000000E+00
        mdf_epsinf3     1.20000000E+01
@@ -457,7 +457,7 @@ P           mkmem5         64
                          0.01563    0.01563
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -505,8 +505,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00850
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -600,7 +600,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -612,7 +612,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t31o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.22452   Average Vxc (hartree)=  -0.35174
  Eigenvalues (hartree) for nkpt=   8  k points:
@@ -632,7 +632,7 @@ psp_core            :  8.60437873155177E-02
 local_psp           : -2.54194380616736E+00
 non_local_psp       :  1.90003800348738E+00
 total_energy        : -8.78626947939614E+00
-total_energy_eV     : -2.39086551501251E+02
+total_energy_eV     : -2.39086572465123E+02
 band_energy         :  3.67853467948843E-01
 ...
 
@@ -643,9 +643,9 @@ band_energy         :  3.67853467948843E-01
   sigma(3 3)= -1.52074048E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  4.4742E+00 GPa]
-- sigma(1 1)= -4.47417222E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -4.47417222E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -4.47417222E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -4.47417297E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -4.47417297E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -4.47417297E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -736,9 +736,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t31o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband= 35, wtk=  0.12500, kpt=  0.0550  0.0600  0.0650 (reduced coord)
@@ -972,9 +972,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t31o_DS4_EIG
  Eigenvalues (hartree) for nkpt=  64  k points:
  kpt#   1, nband= 35, wtk=  0.01563, kpt=  0.0550  0.0600  0.0650 (reduced coord)
@@ -1162,8 +1162,8 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 180 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 189 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 180 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 182 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 187 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
  Writing EXC Macroscopic dielectric function to file: t31o_DS5_EXC_MDF
 
  Macroscopic dielectric function:
@@ -1191,11 +1191,11 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
   bs_coulomb_term3         21
   bs_coulomb_term4         11
   bs_coulomb_term5         21
-     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh3     0.00000000E+00  2.20495952E-01  3.67493254E-03 Hartree
-     bs_freq_mesh4     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh5     0.00000000E+00  2.20495952E-01  3.67493254E-03 Hartree
+     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh3     0.00000000E+00  2.20495933E-01  3.67493222E-03 Hartree
+     bs_freq_mesh4     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh5     0.00000000E+00  2.20495933E-01  3.67493222E-03 Hartree
  bs_haydock_niter1        100
  bs_haydock_niter2        100
  bs_haydock_niter3        200
@@ -1389,9 +1389,9 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
           kptrlen5     2.88980399E+01
        mbpt_sciss1     0.00000000E+00 Hartree
        mbpt_sciss2     0.00000000E+00 Hartree
-       mbpt_sciss3     2.93994603E-02 Hartree
+       mbpt_sciss3     2.93994577E-02 Hartree
        mbpt_sciss4     0.00000000E+00 Hartree
-       mbpt_sciss5     2.93994603E-02 Hartree
+       mbpt_sciss5     2.93994577E-02 Hartree
        mdf_epsinf1     0.00000000E+00
        mdf_epsinf2     0.00000000E+00
        mdf_epsinf3     1.20000000E+01
@@ -1543,7 +1543,7 @@ P           mkmem5         64
                          0.01563    0.01563
                        outvars : Printing only first  50 k-points.
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1639,10 +1639,10 @@ P           mkmem5         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         22.3  wall=         22.3
+- Proc.   0 individual time (sec): cpu=         24.0  wall=         24.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.3  wall=         22.3
++Overall time at end (sec) : cpu=         24.0  wall=         24.1

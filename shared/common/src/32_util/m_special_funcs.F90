@@ -7,7 +7,7 @@
 !! evaluate special functions frequently needed in Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (MG, MT, FB, XG, MVer, FJ, NH, GZ, DRH)
+!! Copyright (C) 2008-2026 ABINIT group (MG, MT, FB, XG, MVer, FJ, NH, GZ, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -523,7 +523,6 @@ elemental function gaussian(arg, sigma)
  real(dp) :: gaussian
 
 !Local variables ---------------------------------------
-!scalars
  real(dp) :: xx
 ! *********************************************************************
 
@@ -551,7 +550,6 @@ end function gaussian
 elemental function lorentzian(arg, sigma)
 
 !Arguments ---------------------------------------------
-!scalars
  real(dp),intent(in) :: arg, sigma
  real(dp) :: lorentzian
 ! *********************************************************************
