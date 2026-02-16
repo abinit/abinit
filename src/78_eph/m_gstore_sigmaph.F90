@@ -616,6 +616,10 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
 
  call wrtout(std_out, " Begin computation of the self-energy matrix elements.")
 
+ if (dtset%userib /= 0 .and. (any(abs(qpt - dtset%qptn) > tol14))) then
+   call wrtout(units, sjoin(" userib /= 0 => Include only one q-point in the integration. qpt", ktoa(dtset%qptn)))
+ end if
+
  ! Loop over collinear spins.
  do my_is=1,gstore%my_nspins
    associate (gqk => gstore%gqk(my_is), cryst => gstore%cryst)
@@ -703,6 +707,17 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
          weight_q = zero
          if (ii /= -1) weight_q = lg_myk%weights(ii)
        end if
+
+       ! Select contribution from a certaing q-point
+       ! Don't cycle as this will interfere with parallelism over q-points and DW
+       if (dtset%userib /= 0) then
+          if (any(abs(qpt - dtset%qptn) > tol14)) then
+            weight_q = zero
+          else
+            write(msg, *) "weight for qpt is", weight_q, " with multiplicity:", weight_q * gstore%nqbz
+            call wrtout(std_out, msg)
+          end if
+        end if
 
        !iq_bz = gqk%my_q2bz(my_iq); qq_is_gamma = sum(qq_bz**2) < tol14
        qq_bz_string = ktoa(qpt)
