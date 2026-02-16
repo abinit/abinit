@@ -7,7 +7,7 @@
 !!  and a set of generic interfaces wrapping the most commonly used MPI primitives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2025 ABINIT group (MG, MB, XG, YP, MT)
+!! Copyright (C) 2009-2026 ABINIT group (MG, MB, XG, YP, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -150,7 +150,7 @@ module m_xmpi
  ! Count number of windows created
  ! This counter should be zero at the end of the run if all windows have been released.
 
- logical,save, private :: xmpi_use_inplace_operations = .False.
+ logical,save, private :: xmpi_use_inplace_operations = .True.
  ! Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum
 
  ! For MPI < v4, collective communication routines accept only a 32bit integer as data count.
@@ -547,12 +547,14 @@ interface xmpi_max
   module procedure xmpi_max_int
   module procedure xmpi_max_dpv
   module procedure xmpi_max_dp0d_ip
+  module procedure xmpi_max_dp1d_ip
 end interface xmpi_max
 
 interface xmpi_max_ip
   module procedure xmpi_max_int0d_ip
-  module procedure xmpi_max_dp0d_ip
   module procedure xmpi_max_int1d_ip
+  module procedure xmpi_max_dp0d_ip
+  module procedure xmpi_max_dp1d_ip
 end interface xmpi_max_ip
 
 !----------------------------------------------------------------------
@@ -4978,7 +4980,7 @@ end subroutine xmpio_create_coldistr_from_fp3blocks
 !! FUNCTION
 !!  Try to optimally distribute nprocs in a 2d grid of shape (n1, n2) given a problem of dimension (size1, size2).
 !!  Use order string to define priorities:
-!!      "12" or "21" if both dimensions should be optimized (if not possibile the first one gets optimized)
+!!      "12" or "21" if both dimensions should be optimized (if not possibile the first one gets optimized).
 !!      "1" or "2" to optimize only one dimension.
 !!  Return: exit status in ierr.
 !!
@@ -5067,7 +5069,6 @@ end subroutine balance_2
 end subroutine xmpi_distrib_2d
 !!***
 
-
 !----------------------------------------------------------------------
 
 !!****f* m_xmpi/xmpi_split_nsppol
@@ -5075,8 +5076,7 @@ end subroutine xmpi_distrib_2d
 !! xmpi_split_nsppol
 !!
 !! FUNCTION
-!!  Distribute spins.
-!!  Also create and return indirect mapping to spin index and init %brange_spin
+!!  Distribute collinear spins. Also create and return indirect mapping to spin index and init %brange_spin
 !!
 !! INPUTS
 !!  in_comm=Input communicator

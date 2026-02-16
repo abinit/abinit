@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
+!! Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -112,8 +112,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !Local variables-------------------------------
 !scalars
  integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm
- integer :: tread_pseudos,cnt,tread_geo,tread_gpu_option,treads
- integer :: idev,gpu_option
+ integer :: tread_pseudos,cnt,tread_geo,tread_gpu_option,treads, idev,gpu_option
  real(dp) :: cpus
  character(len=500) :: msg
  character(len=fnlen) :: pp_dirpath,gpu_option_string
@@ -1193,7 +1192,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  character(len=500) :: msg
  type(atomdata_t) :: atom
 !arrays
- integer :: cond_values(4),vacuum(3)
+ integer :: cond_values(4),vacuum(3), units(2)
  integer,allocatable :: iatfix(:,:),iatnd(:),intarr(:),istwfk(:),nband(:),typat(:)
  real(dp) :: acell(3),rprim(3,3)
  real(dp),allocatable :: amu(:),atndlist(:,:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:)
@@ -1208,6 +1207,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  !write(std_out,'(a)')' m_invars1%invars1 : enter '; call flush(std_out)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ units = [std_out, ab_out]
 
  ! This counter is incremented when we find a non-critical error.
  ! The code outputs a warning and stops at end.
@@ -2141,16 +2141,25 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%constraint_kind(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
 !Some special cases are not compatible with GPU implementation
- if (dtset%optdriver/=RUNL_GSTATE .and. dtset%optdriver/=RUNL_RESPFN) then
-   dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS and RESPFN
+!Warn user if value is changed at runtime.
+!We don't stop the code because we may want to run the test suite in GPU mode.
+ if (all(dtset%optdriver /= [RUNL_GSTATE, RUNL_RESPFN, RUNL_GWR])) then
+   if (dtset%gpu_option /= ABI_GPU_DISABLED) then
+     call wrtout(units, "- WARNING: GPU only compatible with GS, RESPFN and GWR. gpu_option has been set to 0!")
+   end if
+   dtset%gpu_option=ABI_GPU_DISABLED
  end if
  if (dtset%optdriver==RUNL_RESPFN .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
-   dtset%gpu_option=ABI_GPU_DISABLED  ! RESPFN on GPU only implemented with OpenMP
+   if (dtset%gpu_option /= ABI_GPU_DISABLED) then
+     call wrtout(units, "- WARNING: RESPFN on GPU only implemented with OpenMP. gpu_option has been set to 0!")
+   end if
+   dtset%gpu_option=ABI_GPU_DISABLED
  end if
- if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU impl
+ if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU implementation
  if (dtset%nspinor/=1) then
    if (dtset%gpu_option/=ABI_GPU_DISABLED .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
-     dtset%gpu_option=ABI_GPU_DISABLED  ! nspinor=2 not supported outside of CPU and OpenMP GPU
+     dtset%gpu_option=ABI_GPU_DISABLED
+     call wrtout(units, "- WARNING: nspinor=2 not supported outside of CPU and OpenMP GPU. gpu_option has been set to 0!")
    end if
  end if
 
@@ -2400,6 +2409,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_meas=1
    dtsets(idtset)%dmftctqmc_mov=0
    dtsets(idtset)%dmftctqmc_mrka=0
+   dtsets(idtset)%dmftctqmc_chains=xomp_get_max_threads()
    dtsets(idtset)%dmftctqmc_order=0
    dtsets(idtset)%dmftqmc_l=0
    dtsets(idtset)%dmftqmc_n=0.0_dp
@@ -2426,7 +2436,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ecuteps=zero
    dtsets(idtset)%ecutsigx=zero ! If ecutsigx is not defined explicitly, npwsigx will be initialized from ecutwfn.
    dtsets(idtset)%ecutsm=zero
-   dtsets(idtset)%ecutwfn=zero ! The true default value is ecut . This is defined in invars2.F90
+   dtsets(idtset)%ecutwfn=zero ! The true default value is ecut. This is defined in invars2.F90
    dtsets(idtset)%effmass_free=one
    dtsets(idtset)%efmas=0
    dtsets(idtset)%efmas_bands=0 ! The true default is nband. This is defined in invars2.F90
@@ -2766,7 +2776,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%recptrott=0
    dtsets(idtset)%rectesteg=0
    dtsets(idtset)%rectolden=zero
-   dtsets(idtset)%rcpaw_sc(:)=tol1
+   dtsets(idtset)%rcpaw_sc(:)=two
    dtsets(idtset)%rcpaw_rctypat(:)=1
    dtsets(idtset)%rcut=zero
    dtsets(idtset)%restartxf=0

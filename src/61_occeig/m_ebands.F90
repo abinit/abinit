@@ -6,7 +6,7 @@
 !!  This module contains utilities to analyze and retrieve information from the ebands_t.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (MG, MJV, BXu)
+!! Copyright (C) 2008-2026 ABINIT group (MG, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -139,6 +139,7 @@ contains
  procedure :: write_xmgrace         => ebands_write_xmgrace
  procedure :: write_gnuplot         => ebands_write_gnuplot
  procedure :: sort                  => ebands_sort
+ procedure :: has_enough_bands_for_ef => ebands_has_enough_bands_for_ef  !  Check if nband is "large enough" to compute the Fermi level Ef(T).
 
 end type ebands_t
 !!***
@@ -470,7 +471,6 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
  real(dp) :: tsmear
  type(ebands_t)  :: tmp_ebands
  !character(len=500) :: msg
-
 ! *********************************************************************
 
  call get_gaps_(ebands, gaps, ierr)
@@ -2098,7 +2098,6 @@ end function ebands_nelect_per_spin
 !!  spin. Cannot use F90 array syntax due to the internal storage used in abinit.
 !!
 !! INPUTS
-!!  ebands<ebands_t>=The object describing the band structure.
 !!  arr_name=The name of the array whose min and Max value has to be calculated.
 !!   Possible values: 'occ', 'eig' 'doccde'
 !!
@@ -2121,7 +2120,7 @@ function ebands_get_minmax(ebands, arr_name) result(minmax)
  integer :: band,ikpt,spin,nband_k
  real(dp) :: datum
 !arrays
- real(dp), ABI_CONTIGUOUS pointer :: rdata(:,:,:)
+ real(dp), contiguous, pointer :: rdata(:,:,:)
 ! *************************************************************************
 
  select case (tolower(arr_name))
@@ -2162,9 +2161,6 @@ end function ebands_get_minmax
 !! Returns .TRUE. if metallic occupation scheme is used.
 !! Note that this does not imply that the system is metallic.
 !!
-!! INPUTS
-!! ebands<ebands_t>=The ebands_t datatype
-!!
 !! SOURCE
 
 pure logical function ebands_has_metal_scheme(ebands) result(ans)
@@ -2188,7 +2184,6 @@ end function ebands_has_metal_scheme
 !!  Write 3D energies for Fermi surface visualization (XSF format)
 !!
 !! INPUTS
-!!  ebands<ebands_t>=The object describing the band structure.
 !!  crystal<crystal_t>=Info on unit cell and symmetries.
 !!  fname=File name for output.
 !!
@@ -2339,7 +2334,7 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol, fermie_to_
    ! Calculate the valence index for each spin channel.
    do spin=1,ebands%nsppol
      valencetop(spin) = smallest_real
-     condbottom(spin) = greatest_real
+     condbottom(spin) = greatest_real / 1000000_dp ! to avoid overflow when multiply by Ha2meV.
      do ikibz=1,ebands%nkpt
        nband_k = ebands%nband(ikibz + (spin-1)*ebands%nkpt)
        do band=1,nband_k
@@ -2675,8 +2670,19 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
 
  call self%copy(tmp_ebands)
 
- mu_e = zero
+ ! Check if nband is "large enough" to compute the Fermi level.
+ ierr = self%has_enough_bands_for_ef(msg)
+ if (ierr /= 0) then
+   ABI_WARNING(msg)
+ end if
+ !if (ierr > 0) then
+ !  ABI_ERROR(msg)
+ !end if
+ !if (ierr < 0) then
+ !  ABI_WARNING(msg)
+ !end if
 
+ mu_e = zero
  do it=1,ntemp
    if (mod(it, nprocs) /= my_rank) cycle ! MPI parallelism inside comm.
 
@@ -4117,15 +4123,11 @@ end function ebands_chop
 !!  Mainly used when interpolating band energies as the interpolator may not produce ordered eigenvalues
 !!  and there are routines whose implementation assumes eig(b) <= eig(b+1)
 !!
-!! SIDE EFFECTS
-!!  ebands<ebands_t> = Object with input energies sorted in output.
-!!
 !! SOURCE
 
 subroutine ebands_sort(self)
 
 !Arguments ------------------------------------
-!scalars
  class(ebands_t),intent(inout) :: self
 
 !Local variables-------------------------------
@@ -4151,6 +4153,60 @@ subroutine ebands_sort(self)
  end do
 
 end subroutine ebands_sort
+!!***
+
+!!****f* m_ebands/ebands_has_enough_bands_for_ef
+!! NAME
+!! ebands_has_enough_bands_for_ef
+!!
+!! FUNCTION
+!!  Check if nband is "large enough" to compute the Fermi level Ef(T).
+!!
+!! OUTPUT
+!!  msg: error/warning message.
+!!  ierr:
+!!    > 0: if critical error that should trigger abortion.
+!!    < 0: if non-critical error that should trigger warning
+!!    = 0: everything seems ok.
+!!
+!! NOTES
+!!  The logic here is far from perfect since what really matter is not the number of bands but the
+!!  electronic DOS in the conduction region. Systems with a large DOS require more bands
+!!  for an accurate evaluation of Ef(T). For simplicity, we just use a simple scaling factor `fact`
+!!  that mutiplies the number of electrons.
+!!
+!! SOURCE
+
+integer function ebands_has_enough_bands_for_ef(ebands, msg) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ class(ebands_t),intent(in) :: ebands
+ character(len=*),intent(out) :: msg
+
+!Local variables-------------------------------
+ real(dp), parameter :: fact = 1.2_dp
+ integer :: nbv
+! *********************************************************************
+
+ ierr = 0; msg = ""
+
+ ! We do the math assuming a semiconductor (spin unpolarized if nsppol == 2)
+ nbv = ebands%nelect / 2; if (ebands%nspinor == 2) nbv = ebands%nelect
+
+ if (ebands%mband <= nbv) then
+   ! Catch the worst-case-scenario in which only occupied states in a semiconductor are provided.
+   ierr = 1
+   msg = sjoin("In order to compute Ef(T) you should use nband > ", itoa(ceiling(ebands%nelect)))
+   return
+ end if
+
+ if (ebands%mband <= ceiling(fact * nbv)) then
+   ierr = -1
+   msg = "nband might be too small to compute Ef(T). Try to increase nband."
+ end if
+
+end function ebands_has_enough_bands_for_ef
 !!***
 
 !----------------------------------------------------------------------
@@ -4216,7 +4272,6 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
  real(dp),allocatable :: new_shiftk(:,:),new_kibz(:,:),new_kbz(:,:),new_wtk(:)
  real(dp),allocatable :: new_doccde(:),new_eig(:),new_occ(:)
-
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -4537,7 +4592,6 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 !arrays
  real(dp) :: eminmax_spin(2,ebands%nsppol), vsum(3), tsum(3,3)
  real(dp),allocatable :: wme0(:),tmp_eigen(:), weights(:,:)
-
 ! *********************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
@@ -5890,7 +5944,6 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
  integer,allocatable :: bz2ibz(:,:)
  real(dp) :: kpt(3)
  real(dp),allocatable :: kfull(:,:)
-
 ! *********************************************************************
 
  ! Check input parameters
@@ -5991,9 +6044,7 @@ end function klinterp_new
 subroutine klinterp_free(self)
 
 !Arguments ------------------------------------
-!scalars
  class(klinterp_t),intent(inout) :: self
-
 ! *********************************************************************
 
  ABI_SFREE(self%data_uk_bsd)
@@ -6028,7 +6079,6 @@ subroutine klinterp_eval_bsd(self, kpt, vals_bsd)
  !integer :: ir1, ir2, ir3, pr1, pr2, pr3
  real(dp) :: val !, vv(8)
  real(dp) :: kwrap(3), shift(3)
-
 ! *********************************************************************
 
  call wrap2_zero_one(kpt, kwrap, shift)

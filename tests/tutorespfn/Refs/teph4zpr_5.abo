@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h04 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h04 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7-teph4zpr_8/teph4zpr_5.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7-teph4zpr_8-teph4zpr_9/teph4zpr_5.abi
 - output file    -> teph4zpr_5.abo
 - root for input  files -> teph4zpr_5i
 - root for output files -> teph4zpr_5o
@@ -168,12 +168,12 @@ P           mkmem           8
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.1263589907E+00  2.1263589907E+00  2.1263589907E+00
+                       2.1263589985E+00  2.1263589985E+00  2.1263589985E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        4.0182361526E+00  4.0182361526E+00  4.0182361526E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
-             zcut      3.67493254E-04 Hartree
+             zcut      3.67493222E-04 Hartree
             znucl        8.00000   12.00000
 
 ================================================================================
@@ -333,18 +333,18 @@ meta: {optdriver: 7, eph_task: 4, }
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.3115170319E-02 (at units)
+ Average speed of sound partial sums:     0.3115170317E-02 (at units)
 -                                   =           6.8150 [km/s]
 
- Debye frequency from partial sums:     0.2398391094E-02 (Ha)
--                                 =     0.1578065532E+02 (THz)
--Debye temperature from partial sums:     0.7573511083E+03 (K)
+ Debye frequency from partial sums:     0.2398391093E-02 (Ha)
+-                                 =     0.1578065531E+02 (THz)
+-Debye temperature from partial sums:     0.7573520068E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4zpr_5o_DS1_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/O.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -358,8 +358,8 @@ meta: {optdriver: 7, eph_task: 4, }
              2   -4.371486
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Mg-sp-gw.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -636,12 +636,12 @@ meta: {optdriver: 7, eph_task: 4, }
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.3115170319E-02 (at units)
+ Average speed of sound partial sums:     0.3115170317E-02 (at units)
 -                                   =           6.8150 [km/s]
 
- Debye frequency from partial sums:     0.2398391094E-02 (Ha)
--                                 =     0.1578065532E+02 (THz)
--Debye temperature from partial sums:     0.7573511083E+03 (K)
+ Debye frequency from partial sums:     0.2398391093E-02 (Ha)
+-                                 =     0.1578065531E+02 (THz)
+-Debye temperature from partial sums:     0.7573520068E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4zpr_5o_DS2_PHDOS.nc
 --------------------------------------------------------------------------------
@@ -907,12 +907,12 @@ meta: {optdriver: 7, eph_task: 4, }
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.3115170319E-02 (at units)
+ Average speed of sound partial sums:     0.3115170317E-02 (at units)
 -                                   =           6.8150 [km/s]
 
- Debye frequency from partial sums:     0.2398391094E-02 (Ha)
--                                 =     0.1578065532E+02 (THz)
--Debye temperature from partial sums:     0.7573511083E+03 (K)
+ Debye frequency from partial sums:     0.2398391093E-02 (Ha)
+-                                 =     0.1578065531E+02 (THz)
+-Debye temperature from partial sums:     0.7573520068E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4zpr_5o_DS3_PHDOS.nc
 --------------------------------------------------------------------------------
@@ -1124,12 +1124,12 @@ P           mkmem           8
             tmesh      0.00000000E+00  1.00000000E+02  4.00000000E+00
             typat      2  1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       2.1263589907E+00  2.1263589907E+00  2.1263589907E+00
+                       2.1263589985E+00  2.1263589985E+00  2.1263589985E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        4.0182361526E+00  4.0182361526E+00  4.0182361526E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
-             zcut      3.67493254E-04 Hartree
+             zcut      3.67493222E-04 Hartree
             znucl        8.00000   12.00000
 
 ================================================================================
@@ -1226,10 +1226,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         17.7  wall=         19.9
+- Proc.   0 individual time (sec): cpu=         18.0  wall=         18.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.7  wall=         19.9
++Overall time at end (sec) : cpu=         18.0  wall=         18.1

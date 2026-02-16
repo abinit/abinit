@@ -6,7 +6,7 @@
 !!  Low-level tools related to symmetries
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (RC, XG, GMR, MG, JWZ)
+!!  Copyright (C) 1998-2026 ABINIT group (RC, XG, GMR, MG, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -88,7 +88,6 @@ subroutine symdet(determinant, nsym, sym)
 !scalars
  integer :: det,isym
  character(len=500) :: msg
-
 ! *************************************************************************
 
  do isym=1,nsym
@@ -142,7 +141,6 @@ subroutine chkgrp(nsym, symafm, symrel, ierr)
  character(len=500) :: msg
 !arrays
  integer :: chk(3,3)
-
 ! *************************************************************************
 
 !DEBUG
@@ -280,7 +278,6 @@ end subroutine chkgrp
  integer,allocatable :: ptsymm(:),list_symrel(:,:)
  real(dp) :: prd_tnons(3)
  real(dp),allocatable :: tnons_(:,:)
-
 ! *************************************************************************
 
 !DEBUG
@@ -602,7 +599,6 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
  character(len=500) :: msg
 !arrays
  real(dp) :: prods(3,3),rmet_sym(3,3),rprimd_sym(3,3)
-
 ! *************************************************************************
 
 !DEBUG
@@ -766,7 +762,6 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel, is_translation)
 !scalars
  integer :: isym
  character(len=500) :: msg
-
 !**************************************************************************
 
  if(present(is_translation))then
@@ -859,7 +854,6 @@ subroutine symrelrot(nsym, rprimd, rprimd_new, symrel, tolsym, ierr)
 !arrays
  integer :: symrel_tmp(3,3,nsym)
  real(dp) :: coord(3,3),coordinvt(3,3),matr1(3,3),matr2(3,3),rprimd_invt(3,3)
-
 !**************************************************************************
 
  ierr_=0
@@ -984,7 +978,6 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
  character(len=500) :: msg
 !arrays
  real(dp) :: difq(3),qsym(3),shift(3)
-
 ! *********************************************************************
 
  my_prtvol=0; if (PRESENT(prtvol)) my_prtvol=prtvol
@@ -1032,8 +1025,8 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
      ! If the operation succeded, change shift from real(dp) to integer, then exit loop
      if(symq(4,itirev,isym)/=0)then
        if (my_prtvol>0) then
-         if(itirev==1)write(msg,'(a,i4,a)')' littlegroup_q : found symmetry',isym,' preserves q '
-         if(itirev==2)write(msg,'(a,i4,a)')' littlegroup_q : found symmetry ',isym,' + TimeReversal preserves q '
+         if(itirev==1)write(msg,'(a,i4,a)')' littlegroup_q: found symmetry',isym,' preserves q '
+         if(itirev==2)write(msg,'(a,i4,a)')' littlegroup_q: found symmetry ',isym,' + TimeReversal preserves q '
          call wrtout(std_out,msg)
        end if
        ! Uses the mathematical function NINT = nearest integer
@@ -1109,7 +1102,6 @@ subroutine matpointsym(iatom,mat3,natom,nsym,rprimd,symrel,tnons,xred)
  integer :: symrel_it(3,3)
  real(dp) :: mat3_tri(3,3),mat3_tri_sym(3,3),rprimd_inv(3,3),tmp_mat(3,3)
  real(dp) :: xredp(3)
-
 !**************************************************************************
 
 !copy rprimd input and construct inverse
@@ -1231,12 +1223,10 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
  integer :: ang90(3),equal(3)
  real(dp) :: length(3),metric(3,3),norm(3),rbasis(3,3),rconv(3,3),rconv_new(3,3)
  real(dp) :: rnormalized(3,3),symmetrized_length(3)
-
 !**************************************************************************
 
  if(abs(iholohedry)<1 .or. abs(iholohedry)>7)then
-   write(msg, '(a,i0)' )&
-&    'Abs(iholohedry) should be between 1 and 7, while iholohedry=',iholohedry
+   write(msg, '(a,i0)' )'Abs(iholohedry) should be between 1 and 7, while iholohedry=',iholohedry
    ABI_BUG(msg)
  end if
 
@@ -1419,7 +1409,6 @@ subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
 !character(len=500) :: msg
 !arrays
  real(dp):: aa(3,3),ait(3,3),cell_base(3,3),gprimd(3,3),rmet(3,3),rprimd_new(3,3)
-
 ! *************************************************************************
 
 !DEBUG
@@ -1520,7 +1509,6 @@ subroutine symmetrize_tnons(nsym,symrel,tnons,tolsym)
  integer :: symrel_mult(3,3)
  integer :: unitmat(3,3)
  real(dp):: tnons_mult(3)
-
 ! *************************************************************************
 
 !DEBUG
@@ -1649,7 +1637,6 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
  real(dp) :: sgval(3),tsum(3),tt(3),work(15),xredshift(3,1)
  real(dp),allocatable :: xredsym(:,:)
  real(dp) :: transl(3) ! translation vector
-
 ! *************************************************************************
 !
 !Check whether group contains more than identity;
@@ -1887,7 +1874,6 @@ subroutine symchk(difmin,eatom,natom,tratom,transl,trtypat,typat,xred)
 !scalars
  integer :: iatom,jatom,trans1,trans2,trans3
  real(dp) :: test,test1,test2,test3,testmn
-
 ! *************************************************************************
 
 !DEBUG
@@ -1990,7 +1976,7 @@ end subroutine symchk
 !! Equivalent to $S*t(b)+tnons-x(a)=another$ $integer$ for $x(b)=x(inv(S))$.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2040,7 +2026,6 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
 !arrays
  integer :: transl(3)
  real(dp) :: difmin(3),tratom(3)
-
 ! *************************************************************************
 
 !DEBUG
@@ -2204,7 +2189,6 @@ subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons
  !arrays
  integer :: identity(3,3),matrix(3,3),trial(3,3)
  real(dp) :: reduced(3),trialt(3)
-
  !**************************************************************************
 
  identity(:,:)=0
@@ -2450,7 +2434,6 @@ subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order
  character(len=500) :: msg
  integer :: direction,directiontype
  real(dp),parameter :: nzero=1.0d-6
-
 !**************************************************************************
 
 !write(std_out,*)' symaxes : enter, isym=',isym
@@ -2700,7 +2683,6 @@ subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_ax
  integer :: mirrorzx(3,3)
  real(dp) :: trialt(3)
 ! real(dp) :: itnonsconv2(3),trialt2(3)
-
 !**************************************************************************
 
 !write(std_out,*)' symplanes : enter'
@@ -2997,7 +2979,6 @@ subroutine smallprim(metmin,minim,rprimd)
 !arrays
  integer :: nvecta(3),nvectb(3)
  real(dp) :: rmet(3,3),scprod(3),tmpvect(3)
-
 !**************************************************************************
 
  !call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)

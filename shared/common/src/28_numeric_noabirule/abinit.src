@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2026 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -28,6 +28,7 @@ sources = [
  "m_bspline.F90",
  "m_elpa.F90",
  "m_gaussian_quadrature.F90",
+ "m_gputk.F90",
  "m_hide_blas.F90",
  "m_hide_lapack.F90",
  "m_hybrd.F90",

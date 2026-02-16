@@ -6,7 +6,7 @@
 !!  Driver for GWR calculations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2025 ABINIT group (MG)
+!!  Copyright (C) 2021-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  APACHE license version 2.0, see ~abinit/COPYING
 !!  or https://www.apache.org/licenses/LICENSE-2.0 .
@@ -998,7 +998,12 @@ end if
  ABI_SFREE(pawfgrtab)
  ABI_SFREE(ks_paw_an)
 
- call cryst%free(); call wfk_hdr%free(); call ks_ebands%free(); call destroy_mpi_enreg(mpi_enreg_seq); call gwr%free()
+ call cryst%free(); call wfk_hdr%free(); call ks_ebands%free(); call destroy_mpi_enreg(mpi_enreg_seq)
+#if defined FC_NVHPC
+ call wrtout(units, "- Cannot deallocate gwr datatype if FC_NVHPC, DO NOT USE DATASETS!")
+#else
+ call gwr%free()
+#endif
 
  call pstat_proc%print(_PSTAT_ARGS_)
 

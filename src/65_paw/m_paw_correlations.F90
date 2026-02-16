@@ -7,7 +7,7 @@
 !!    correlations in the PAW approach (DFT+U, exact-exchange, ...).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group (BA,FJ,MT)
+!! Copyright (C) 2018-2026 ABINIT group (BA,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,7 @@ MODULE m_paw_correlations
  use m_paral_atom,  only : get_my_atmtab,free_my_atmtab
  use m_copy,        only : alloc_copy
  use m_geometry,    only : vcart2ylm
- use m_atomdata 
+ use m_atomdata
 
  implicit none
 

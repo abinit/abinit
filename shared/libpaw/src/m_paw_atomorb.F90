@@ -7,7 +7,7 @@
 !!  to store atomic orbitals on a radial mesh as well
 !!  as methods to operate on it.
 !!
-!! Copyright (C) 2008-2025 ABINIT group (MG)
+!! Copyright (C) 2008-2026 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -117,6 +117,9 @@ MODULE m_paw_atomorb
 
   real(dp) :: ekinc
   ! Core kinetic energy
+
+  real(dp) :: eigshift
+  ! Eigenenergy shift due to truncation of local potentiel to the sphere in rcpaw
 
   real(dp) :: min_eigv
   ! Minimal eigenvalue of the  valence orbitals
