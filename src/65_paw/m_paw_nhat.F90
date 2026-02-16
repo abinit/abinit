@@ -2355,7 +2355,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
 #ifdef HAVE_OPENMP_OFFLOAD
              !$OMP TARGET TEAMS DISTRIBUTE &
              !$OMP& PRIVATE(ia) &
-             !$OMP& MAP(to:prod) MAP(to:Pot,atom_ifftsph,atom_expiqr,atom_gylm)
+             !$OMP& MAP(to:prod,Pot,atom_ifftsph,atom_gylm)
              do ia=1,nattyp
                !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat,sum_r,sum_i,ilslm,ic,jc)
                do idat=1,ndat
