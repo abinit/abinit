@@ -616,11 +616,11 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
 
  call wrtout(std_out, " Begin computation of the self-energy matrix elements.")
 
- if (dtset%userib /= 0 .and. (any(abs(qpt - dtset%qptn) > tol14))) then
+ if (dtset%userib /= 0) then
    call wrtout(units, sjoin(" userib /= 0 => Include only one q-point in the integration. qpt", ktoa(dtset%qptn)))
    ! Notes:
    ! 1) Each q-point contribution is weighted by (multiplicity / nqbz), not by 1 / nqbz.
-   ! 2) When lgb_k is enabled, there is no guarantee that the q-point
+   ! 2) When use_lgk is enabled, there is no guarantee that the q-point
    !    specified in dtset%qptn belongs to the zone (IBZ_k). One shouls check the log file for messages
  end if
 
