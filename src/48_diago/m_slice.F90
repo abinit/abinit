@@ -514,7 +514,9 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     integer :: neigenpairs, iband, min_loc, islice
     integer :: fcol, fcol_ext, ncols, itest, iparal
     integer :: npband_test
+    integer :: wanted_mass
     logical :: on_host, on_device
+    real(dp) :: lowb, uppb, c_split
     real(dp) :: lambda_minus, lambda_plus
     real(dp) :: tol12 = 1.0e-12
     ! Derived types
@@ -528,14 +530,14 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     integer, allocatable :: weights(:)
     integer, allocatable :: npband_per_slice(:)
     integer, allocatable :: nband_per_slice(:)
-    integer, allocatable, target :: permute_cols(:)
-    real(dp), allocatable, target :: theta_reshaped(:)
-    real(dp), pointer :: theta_reshaped_ptr(:) => null()
-    integer, pointer :: permute_cols_ptr(:) => null()
-    real(dp), pointer :: theta_(:,:) => null()
-    real(dp), pointer :: resid_(:,:) => null()
+    integer, allocatable :: bands_left(:)
+    integer, allocatable :: bands_right(:)
     
     ! *********************************************************************
+
+    if (slice%nslice /= 2) then
+        ABI_ERROR("current implementation only supports 2 slices")
+    end if
 
     call timab(tim_slice_sched,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_SLICE_SCHEDULE)
@@ -550,100 +552,65 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     !end if
 
     neigenpairs = slice%neigenpairs
-    
-    ! Space for computed residuals (not distributed)
-    call xg_init(resid0, SPACE_R, rows=1, cols=neigenpairs, gpu_option=slice%gpu_option)
-
-    ABI_MALLOC_IFNOT(theta_reshaped, (neigenpairs))
-    ABI_MALLOC_IFNOT(permute_cols, (neigenpairs))
-    theta_reshaped_ptr => theta_reshaped
-
-    call xgBlock_reshape(eigen, 1, neigenpairs)
-    write(std_out,*) 'db xgBlock_zero call'
-    call xgBlock_zero(eigen)
-    call xgBlock_zero(resid0%self)
   
     ! ===================== Compute Rayleigh quotients and residuals ===================================
     
-    ! TODO change naming
+    wanted_mass = ceiling(neigenpairs * 0.6d0) ! plus 10% extra vectors
+    
+    ABI_MALLOC(bands_left, (wanted_mass))
+    ABI_MALLOC(bands_right, (wanted_mass)) 
 
     ABI_NVTX_START_RANGE(NVTX_SLICE_RRQ)
-    call slice_prepareSpectrum(slice, X0, getAX_BX, getBm1X, nspinor)
+    call slice_prepareSpectrum(slice, X0, lowb, uppb, c_split, bands_left, bands_right, &
+        getAX_BX, getBm1X, nspinor)
     ABI_NVTX_END_RANGE()
-   
-    if (slice%nslice /= 2) then
-        ABI_ERROR("current implementation only supports 2 slices")
-    end if
+    
+    write(std_out,*) 'wanted mass=', wanted_mass
+    write(std_out,*) 'bands_left=', bands_left(:)
+    write(std_out,*) 'bands_right=', bands_right(:)
+    flush(std_out)
 
+    ABI_FREE(bands_left)
+    ABI_FREE(bands_right)
+
+    !! TODO actually some bands are never assigned to a slice..
+   
     ! Output:
     ! - c_split                 : between [a,b)
     ! - nvec_left, nvec_right   : trial vectors per slice
     ! - index_left, index_right : column indices per slice
-    !                             TODO the criterion should be nvec maximum probes
     ! 
 
     ! ===================== Compute guaranteed spectral bounds ======================================== 
 
-    ! TODO
-    ! this part is not necessary anymore with the new splitting strategy
-
-    ! Copy is done on CPU so update the CPU data
-    if (slice%gpu_option==ABI_GPU_OPENMP) then
-        call xgBlock_copy_from_gpu(eigen)
-        call xgBlock_copy_from_gpu(resid0%self)
-    end if
-    
-    ! Results could be complex, so neigenpairs has to be in cols, not rows
-    call xgBlock_reverseMap(eigen, theta_, rows=1, cols=neigenpairs)
-    call xgBlock_reverseMap(resid0%self, resid_, rows=1, cols=neigenpairs) 
-
-    ! Sort thetas in increasing order
-    theta_reshaped(1:neigenpairs) = theta_(1,1:neigenpairs)
-    permute_cols_ptr => permute_cols
-    permute_cols(1:neigenpairs) = (/ (iband, iband=1,neigenpairs) /)
-    call sort_dp(neigenpairs, theta_reshaped_ptr, permute_cols_ptr, tol12)
-    theta_(1,1:neigenpairs) = theta_reshaped(1:neigenpairs)
-
-    ! update eigen on GPU with sorted values
-#ifdef HAVE_OPENMP_OFFLOAD
-    !$OMP TARGET ENTER DATA MAP(to:theta_) IF(slice%gpu_option==ABI_GPU_OPENMP)
-    !$OMP TARGET UPDATE TO(theta_) IF(slice%gpu_option==ABI_GPU_OPENMP)
-#endif
-    call xgBlock_map(eigen_sorted, theta_, SPACE_R, rows=1, cols=neigenpairs, gpu_option=slice%gpu_option)
-    call xgBlock_copy(eigen_sorted, eigen)
-!#ifdef HAVE_OPENMP_OFFLOAD
-!    !$OMP TARGET EXIT DATA MAP(delete:theta_) IF(slice%gpu_option==ABI_GPU_OPENMP)
-!#endif
-    
-    ! Minimum and maximum quotients
-    lambda_minus = theta_reshaped(1)
-    lambda_plus = theta_reshaped(neigenpairs)
-
-    ! Guaranteed spectral bounds
-    min_loc = permute_cols(1)
-    slice%mineig_global = lambda_minus - sqrt(resid_(1, min_loc))
+    slice%mineig_global = lowb
     slice%maxeig_global = slice%ecut
 
     ! ===================== Split interval [lambda_minus,lambda_plus) into slices ======================
    
-    ! TODO this is taken care of the new part
-    ! what is missing is the assignement of the number of vectors
-    ! I propose to cut it in half like assume that uniform mass splitting has worked
-    ! then take nslice = nband/2 + nbuf where nbuf is the number of extra vectors
-    ! taken in order to assure overlap and vectors converging outside the slice.
+    ! todo simplify fix polynomial degree and give it here
 
-    if (slice%nslice==1) then
-        slice%neigenpairs_per_slice = slice%neigenpairs
-        slice%fcol_in_X = 1
-        slice%fcol_in_Xext = 1
-        slice%poly_degrees = slice%ndeg_filter
-        slice%part_low_bounds = slice%mineig_global
-        slice%part_upp_bounds = slice%maxeig_global
-        slice%poly_low_bounds = lambda_minus
-        slice%poly_upp_bounds = lambda_plus
-    else
-        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
-    end if
+    ! Slice left
+    slice%neigenpairs_per_slice(1) = wanted_mass
+    slice%fcol_in_X(1) = 1
+    slice%fcol_in_Xext(1) = 1
+    slice%poly_degrees(1) = slice%ndeg_filter
+    slice%part_low_bounds(1) = slice%mineig_global ! todo
+    slice%part_upp_bounds(1) = slice%maxeig_global ! todo
+    slice%poly_low_bounds(1) = lambda_minus        ! todo
+    slice%poly_upp_bounds(1) = lambda_plus         ! todo
+
+    ! Slice right
+    slice%neigenpairs_per_slice(2) = wanted_mass
+    slice%fcol_in_X(2) = 1
+    slice%fcol_in_Xext(2) = 1
+    slice%poly_degrees(2) = slice%ndeg_filter
+    slice%part_low_bounds(2) = slice%mineig_global ! todo
+    slice%part_upp_bounds(2) = slice%maxeig_global ! todo
+    slice%poly_low_bounds(2) = lambda_minus        ! todo
+    slice%poly_upp_bounds(2) = lambda_plus         ! todo
+
+
 
     ! ===================== Resource management system ================================================= 
 
@@ -655,153 +622,14 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     ! must debug very carefuly. 
     ! **Prefer to debug with _LOG files instead of 901+rank**
     ! 
-
-    if (slice%paral_slice==12) then
-
-        ! === IML temporary Memory Estimation
-
-        write(std_out,*) 'Memory check for slicing (for test cases ti-255, ga2o3-1280 ONLY)'
-        npband_list = (/ 32, 64, 128, 192 /)
-
-        do itest=1, 4 ! loop on number of MPI processes to distribute
-            slice%nproc=npband_list(itest)
-            do iparal=1, 2 ! loop on paral_slice strategy (1 or 2)
-                slice%paral_slice = iparal
-                if (neigenpairs==6144) then
-                    do islice=2, 4 
-                        slice%nslice=islice
-                        call slice_allocateAll(slice)
-                        write(std_out,*) ' '
-                        write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
-&                                   ' nproc=', slice%nproc
-                        write(std_out,*) ' '
-                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
-                        call slice_allocateResources(slice)
-                        if (ANY( slice%nproc_per_slice==0 )) then
-                            write(std_out,'(a)') 'Invalid allocation: found slice without any procs'
-                        else
-                            write(std_out,'(a)') 'Memory estimate:' 
-                            write(std_out,'(a,i6,a,i6)') 'max bandpp=', &
-&                                   maxval(slice%neigenpairs_per_slice/slice%nproc_per_slice), &
-&                                   ' max spacedim=', maxval(slice%total_spacedim/slice%nproc_per_slice)
-                        end if
-                        write(std_out,*) ' '
-                    end do
-                else if (neigenpairs==12288) then
-                    do islice=2, 8 
-                        slice%nslice=islice
-                        call slice_allocateAll(slice)
-                        write(std_out,*) ' '
-                        write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
-&                                   ' nproc=', slice%nproc
-                        write(std_out,*) ' '
-                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
-                        call slice_allocateResources(slice)
-                        if (ANY( slice%nproc_per_slice==0 )) then
-                            write(std_out,'(a)') 'Invalid allocation: found slice without any procs'
-                        else
-                            write(std_out,'(a)') 'Memory estimate:' 
-                            write(std_out,'(a,i6,a,i6)') 'max bandpp=', &
-&                                   maxval(slice%neigenpairs_per_slice/slice%nproc_per_slice), &
-&                                   ' max spacedim=', maxval(slice%total_spacedim/slice%nproc_per_slice)
-                        end if
-                        write(std_out,*) ' '
-                    end do
-                else if (neigenpairs==18432) then
-                    do islice=2, 12
-                        slice%nslice=islice
-                        call slice_allocateAll(slice)
-                        write(std_out,*) ' '
-                        write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
-&                                   ' nproc=', slice%nproc
-                        write(std_out,*) ' '
-                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
-                        call slice_allocateResources(slice)
-                        if (ANY( slice%nproc_per_slice==0 )) then
-                            write(std_out,'(a)') 'Invalid allocation: found slice without any procs'
-                        else
-                            write(std_out,'(a)') 'Memory estimate:' 
-                            write(std_out,'(a,i6,a,i6)') 'max bandpp=', &
-&                                   maxval(slice%neigenpairs_per_slice/slice%nproc_per_slice), &
-&                                   ' max spacedim=', maxval(slice%total_spacedim/slice%nproc_per_slice)
-                        end if
-                        write(std_out,*) ' '
-                    end do
-                else if (neigenpairs==2048) then
-                    do islice=2, 4
-                        slice%nslice=islice
-                        call slice_allocateAll(slice)
-                        write(std_out,*) ' '
-                        write(std_out,'(a,i3,a,i3,a,i3)') 'Try nslice=', islice, ' paral_slice=', iparal, &
-&                                   ' nproc=', slice%nproc
-                        write(std_out,*) ' '
-                        call slice_cutSpectrum(slice, lambda_minus, lambda_plus, theta_reshaped_ptr, plot_filter=.false.)
-                        call slice_allocateResources(slice)
-                        if (ANY( slice%nproc_per_slice==0 )) then
-                            write(std_out,'(a)') 'Invalid allocation: found slice without any procs'
-                        else
-                            write(std_out,'(a)') 'Memory estimate:' 
-                            write(std_out,'(a,i6,a,i6)') 'max bandpp=', &
-&                                   maxval(slice%neigenpairs_per_slice/slice%nproc_per_slice), &
-&                                   ' max spacedim=', maxval(slice%total_spacedim/slice%nproc_per_slice)
-                        end if
-                        write(std_out,*) ' '
-                    end do
-                end if
-            end do
-        end do
-        ABI_ERROR("temporary marker to stop calculation")
-
-    else
-
-        ! Divide resources into slice tasks
-        if (slice%nslice==1) then
-            slice%nproc_per_slice = xmpi_comm_size(slice%spacecom)
-            write(std_out,*) 'slice%nproc_per_slice=', slice%nproc_per_slice
-            write(std_out,*) 'slice%spacecom size=', xmpi_comm_size(slice%spacecom)
-            slice%lookup_proc = 0
-        else
-            call slice_allocateResources(slice)
-        end if
-
-    end if
-
-!    ! Degree-load balance estimation: print info for application observability
-!    npband_list = (/ 4, 8, 16, 32 /)
-!    ABI_MALLOC_IFNOT(weights, (slice%nslice))
-!    ABI_MALLOC_IFNOT(nband_per_slice, (slice%nslice))
-!    ABI_MALLOC_IFNOT(npband_per_slice, (slice%nslice))
-!    write(std_out,'(a)') '=============== Load balance observer ==================='
-!    do itest=1, 4 ! loop on number of MPI processes to distribute
-!        npband_test = npband_list(itest)
-!        write(std_out,'(a,i4)') 'npband=', npband_test
-!        weights(:) = slice%poly_degrees(:)
-!        nband_per_slice(:) = slice%neigenpairs_per_slice(:)
-!        ! Fair allocation
-!        npband_per_slice = ceiling(real(npband_test) / real(slice%nslice))
-!        if (modulo(npband_test,slice%nslice)/=0) then
-!            npband_per_slice(1) = 0
-!            npband_per_slice(1) = npband_test - sum(npband_per_slice)
-!        end if        
-!        if (ANY( npband_per_slice==0 )) then
-!            write(std_out,'(a)') 'FA  Invalid allocation: found slice without any procs'
-!        else
-!            write(std_out,'(a,i7,a,i7)') 'FA  chunk size max bandpp=', maxval(nband_per_slice/npband_per_slice), &
-!&               ' max spacedim=', maxval(slice%total_spacedim/npband_per_slice)
-!        end if
-!        ! Weighted fair allocation
-!        call fair_allocation(slice%nslice, nband_per_slice, weights, npband_test, npband_per_slice)
-!        if (ANY( npband_per_slice==0 )) then
-!            write(std_out,'(a)') 'WFA Invalid allocation: found slice without any procs'
-!        else
-!            write(std_out,'(a,i7,a,i7)') 'WFA chunk size max bandpp=', maxval(nband_per_slice/npband_per_slice), &
-!&               ' max spacedim=', maxval(slice%total_spacedim/npband_per_slice)
-!        end if
-!    end do 
-!    ABI_SFREE(weights)
-!    ABI_SFREE(nband_per_slice)
-!    ABI_SFREE(npband_per_slice)
-!    write(std_out,'(a)') '========================================================='
+    
+    ! Divide resources into slice tasks
+    slice%nproc_per_slice = xmpi_comm_size(slice%spacecom)
+    write(std_out,*) 'slice%nproc_per_slice=', slice%nproc_per_slice
+    write(std_out,*) 'slice%spacecom size=', xmpi_comm_size(slice%spacecom)
+    !slice%lookup_proc = 0
+     
+    call slice_allocateResources(slice)
 
     ! Run on all ranks of spacecom: Mark my slice task and resources as actively in use
     call slice_markActiveTask(slice)
@@ -813,11 +641,9 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
         ABI_ERROR("not in linalg representation")
     end if
 
-    ! Permute column vectors in Rayleigh quotient increasing order
-    call xgBlock_permuteCols(X0, slice%spacedim, neigenpairs, permute_cols_ptr)
-
     slice%neigenpairs_ext = sum(slice%neigenpairs_per_slice)
 
+    ! todo adapt to np=1
     if (slice%nslice==1) then
         slice%XextLinalg = X0
     else 
@@ -827,6 +653,8 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
         
         slice%XextLinalg = slice%X_ext%self
 
+
+        ! TODO adapt we did not permute
         ! Copy X to XextLinalg by column blocks
         do islice=1,slice%nslice
             ncols = slice%neigenpairs_per_slice(islice)
@@ -844,14 +672,6 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
         ABI_ERROR('wrong linalg representation')
     end if
     write(std_out,'(a,i6,i6)') '# proc has # cols of Xext_linalg ', xmpi_comm_rank(slice%spacecom), cols(slice%XextLinalg)
-
-    ! Recover dimensions
-    call xgBlock_reshape(eigen, neigenpairs, 1)
-
-    ! Free temporary memory
-    call xg_free(resid0) 
-    ABI_SFREE(permute_cols)
-    ABI_SFREE(theta_reshaped)
 
     ABI_NVTX_END_RANGE()
     call timab(tim_slice_sched,2,tsec)
@@ -1091,13 +911,17 @@ end subroutine slice_run
 !! 
 !! SOURCE
 
-subroutine slice_prepareSpectrum(slice, X, getAX_BX, getBm1X, nspinor)
+subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, bands_right, &
+        getAX_BX, getBm1X, nspinor)
 
     implicit none
 
     ! Arguments
     type(slice_t), intent(inout) :: slice
     type(xgBlock_t), intent(inout) :: X
+    real(dp), intent(out) :: lowb, uppb, c_split
+    integer, intent(out) :: bands_left(:)
+    integer, intent(out) :: bands_right(:)
     integer, intent(in) :: nspinor
     interface
         subroutine getAX_BX(X,AX,BX)
@@ -1118,7 +942,6 @@ subroutine slice_prepareSpectrum(slice, X, getAX_BX, getBm1X, nspinor)
     ! Local variables
     ! Scalars
     integer :: spacedim, tot_spacedim
-    integer :: my_rank
     integer :: ndeg_filter_max, neigenpairs
     integer :: ierr
     integer :: nstep_bisect
@@ -1128,7 +951,6 @@ subroutine slice_prepareSpectrum(slice, X, getAX_BX, getBm1X, nspinor)
     real(dp) :: mineig, maxeig
     real(dp) :: mineig_global, maxeig_global
     real(dp) :: lanczos_lowb, lanczos_lowb_global
-    real(dp) :: c_split
     ! Derived types
     type(xgBlock_t) :: xXColsRows
     type(xgTransposer_t) :: xgTransposerX
@@ -1171,7 +993,6 @@ subroutine slice_prepareSpectrum(slice, X, getAX_BX, getBm1X, nspinor)
 
     end if
 
-    write(std_out,*) 'xX=', rows(xXColsRows), cols(xXColsRows), xgBlock_getid(xXColsRows)
     write(std_out,*) 'Here I write the Lanczos yeyyy'
     flush(std_out)
 
@@ -1179,66 +1000,59 @@ subroutine slice_prepareSpectrum(slice, X, getAX_BX, getBm1X, nspinor)
     call computeBLanczos(slice, getAX_BX, getBm1X, kmax, lambda_min, res_norm)
 
     lanczos_lowb = lambda_min - res_norm
+    call xmpi_min(lanczos_lowb,lanczos_lowb_global,slice%spacecom,ierr)
     
-    my_rank = xmpi_comm_rank(slice%spacecom)
-    write(std_out,*) 'What 2', slice%spacecom, xmpi_comm_size(slice%spacecom), my_rank
-    write(std_out,*)     'my_rank           =', my_rank
     write(std_out,*) 'Lanczos lambda_min=', lambda_min
     write(std_out,*) 'Lanczos res_norm  =', res_norm
     write(std_out,*) 'Lanczos guarantee =', lanczos_lowb
+    write(std_out,*) 'Lanczos guarantee(global) =', lanczos_lowb_global
     flush(std_out)
-   
-    if (slice%paral_kgb == 1) then
-        call xmpi_min(lanczos_lowb,lanczos_lowb_global,slice%spacecom,ierr)
-    else
-        lanczos_lowb_global = lanczos_lowb
-    end if
 
-    write(901+my_rank,*) 'Lanczos guarantee(global) =', lanczos_lowb_global
-    flush(901+my_rank)
-
-    write(901+my_rank,*) 'Here I compute Chebyshev moments yuhu'
-    flush(901+my_rank)
+    write(std_out,*) 'Here I compute Chebyshev moments yuhu'
+    flush(std_out)
  
     ndeg_filter_max = 10 ! Parameter affects accuracy of uniformMass
+    mineig_global = lanczos_lowb_global - 0.1
     ABI_MALLOC(cheby_moments, (slice%bandpp, ndeg_filter_max+1) )
 
-    mineig_global = lanczos_lowb_global - 0.1
-    write(901+my_rank,*) 'rows=', rows(xXColsRows), 'cols=', cols(xXColsRows)
     call computeChebyshevMoments(slice, xXColsRows, getAX_BX, getBm1X, &
         mineig_global, slice%ecut, maxeig_global, ndeg_filter_max, cheby_moments)
-    write(901+my_rank,*) 'Moments rows=', size(cheby_moments,1), 'cols=', size(cheby_moments,2)
-    !write(901+my_rank,*) 'cheby_moments row1 =', real(cheby_moments(1,:))
-    flush(901+my_rank)
 
-    ! Use the moments in parallel for every filter
-    ! at the end of every filter we must sum contributions across procs
+    write(std_out,*) 'Moments rows=', size(cheby_moments,1), 'cols=', size(cheby_moments,2)
+    write(std_out,*) 'a priori approximation of maxeig_global=', maxeig_global
+    flush(std_out)
 
-    write(901+my_rank,*) 'I finally split spectrum..', lanczos_lowb_global, maxeig_global
-    flush(901+my_rank)
+    write(std_out,*) 'I finally split spectrum..', lanczos_lowb_global, maxeig_global
+    flush(std_out)
 
     nstep_bisect = 10 ! Parameter affects accuracy of splitSpectrum
     center = (slice%ecut + mineig_global) / 2.d0
     radius = (slice%ecut - mineig_global) / 2.d0
     
-    ! [a,b) working spectrum hardcoded, ongoing...
-    call splitSpectrum(nstep_bisect, center, radius, lanczos_lowb_global, &
+    ! Use the moments in parallel for every filter
+    call splitSpectrum(neigenpairs, nstep_bisect, center, radius, lanczos_lowb_global, &
         maxeig_global, c_split, cheby_moments, comm=slice%spacecom)
 
-    if (slice%paral_kgb==1) then
-        call xmpi_min(c_split, slice%spacecom, ierr)
-    end if
-    write(901+my_rank,*) 'split spectrum at=', c_split
-    flush(901+my_rank)
+    ! Prepare output [a,c) and [c,b)
+    call xmpi_min(c_split, slice%spacecom, ierr)
+    lowb = lanczos_lowb_global
+    uppb = maxeig_global
+    
+    write(std_out,*) 'split spectrum at=', c_split
+    flush(std_out)
 
-    ! TODO output c_split from this routine
+    write(std_out,*) 'pruning starts now'
+    flush(std_out)
+       
+    ! Pruning performs communication
 
-    ABI_FREE(cheby_moments)
-
-    ! TODO do this in MPI like bandpp bisect must be summed using communicator...
-    ! normally the sum should be the same with 1 MPI and 4 MPI otherwise a problem.
-    ! serious debug here 
-
+    ! right slice
+    call spectralPruning(lowb, c_split, center, radius, cheby_moments, neigenpairs, &
+        bands_left, comm=slice%spacecom)
+    
+    ! Left slice
+    call spectralPruning(c_split, uppb, center, radius, cheby_moments, neigenpairs, &
+        bands_right, comm=slice%spacecom)
 
     ! ============== Transpose ==============
     if (slice%paral_kgb == 1) then
@@ -1258,7 +1072,7 @@ subroutine slice_prepareSpectrum(slice, X, getAX_BX, getBm1X, nspinor)
     slice%use_linalg = .true.
     slice%use_colsrows = .false.
 
-    ! Free temporary memory
+    ABI_FREE(cheby_moments)
     if (slice%paral_kgb == 1) then
         call xgTransposer_free(xgTransposerX)
     end if
@@ -1530,7 +1344,8 @@ subroutine slice_allocateResources(slice)
     end if
    
     call xmpi_barrier(slice%spacecom)
-    
+   
+    ! todo fix for MPI=1 this should work
     if (maxval(slice%lookup_proc)+1 .ne. slice%nslice) then
         ABI_ERROR("Resource error: not enough procs to divide into slices. Please increase npband")
     end if
@@ -2722,9 +2537,6 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     ABI_NVTX_END_RANGE()
     
     call xmpi_max(maxeig, maxeig_global, spacecom, ierr)
-    write(std_out,*) 'DivResults maxeig_global=', maxeig_global
-    call xgBlock_print(DivResults%self, std_out)
-    flush(std_out)
 
     ! Spectral interval to be amplified scaled to [-1,1)
     center = (max_upp_bound + min_low_bound)*0.5
@@ -2783,11 +2595,18 @@ end subroutine computeChebyshevMoments
 !! splitSpectrum
 !! 
 !! FUNCTION
-!! Split working spectrum [a,b) mapped to [-1,1) with center and radius
+!! Split working spectrum [a,b) mapped to [-1,1) with center and radius.
+!! 
+!! NOTES
+!! Working spectrum is initialized as [a,b) and assumes that b may have an error
+!! so adapts it. A way to incorporate case of large error on b is to increase b 
+!! by a step until all the mass equal to nband is included. 
+!! While missing mass then extend
 !! 
 !! SOURCE
 
-subroutine splitSpectrum(nstep_bisect, center, radius, a, b, c_split, cheby_moments, comm)
+subroutine splitSpectrum(nband_tot, nstep_bisect, center, radius, a, b, c_split, &
+        cheby_moments, comm)
 
         implicit none
 
@@ -2795,15 +2614,17 @@ subroutine splitSpectrum(nstep_bisect, center, radius, a, b, c_split, cheby_mome
         real(dp), intent(out) :: c_split
         real(dp), intent(in) :: center, radius
         integer, intent(in) :: nstep_bisect
+        integer, intent(in) :: nband_tot
         complex(dp), intent(in) :: cheby_moments(:,:)
         integer, intent(in), optional :: comm
 
         integer :: neigenpairs
         integer :: ndeg_filter
         integer :: ishift
+        integer :: tot_mass
         integer :: comm_, ierr
         real(dp) :: mass_diff, mass_diff_prev
-        real(dp) :: c, width
+        real(dp) :: b_ext, c, width, width_ext
         real(dp), allocatable :: spectral_mass_left(:)
         real(dp), allocatable :: spectral_mass_right(:)
         real(dp), allocatable :: energy_per_band(:)
@@ -2818,8 +2639,6 @@ subroutine splitSpectrum(nstep_bisect, center, radius, a, b, c_split, cheby_mome
         neigenpairs = size(cheby_moments, 1)
         ndeg_filter = size(cheby_moments, 2)-1
 
-        write(901+xmpi_comm_rank(comm_), *) 'neigenpairs=', neigenpairs
-        flush(901+xmpi_comm_rank(comm_))
         ABI_MALLOC(energy_per_band, (neigenpairs))
         ABI_MALLOC(cja, (ndeg_filter + 1))
         ABI_MALLOC(spectral_mass_left, (nstep_bisect))
@@ -2828,41 +2647,48 @@ subroutine splitSpectrum(nstep_bisect, center, radius, a, b, c_split, cheby_mome
         width = (b - a) / (nstep_bisect + 1)
         mass_diff_prev = 0.d0
         c_split = a
+        b_ext = b
+        width_ext = (b - a)/8.d0
+        ! TODO verify that it converges towards a limit that is upper bound of b_true
 
         do ishift = 1, nstep_bisect
     
             c = a + ishift * width
             
-            write(901+xmpi_comm_rank(comm_),*) 'ishift=', ishift, 'c=', c
+            write(std_out,*) 'ishift=', ishift, 'c=', c
+            flush(std_out)
 
             ! Slice Left [a,c)
             call buildChebyshevJacksonCoeffs(a, c, ndeg_filter, center, radius, cja)
             call computeFilterEnergy(cja, cheby_moments, energy_per_band)
             spectral_mass_left(ishift) = sum(energy_per_band)
-            write(901+xmpi_comm_rank(comm_),*) 'Nvec left=', spectral_mass_left(ishift)
-            if ( xmpi_comm_size(comm_) > 1) then
-                call xmpi_barrier(comm_)
-                call xmpi_sum(spectral_mass_left(ishift), comm_, ierr)
-            end if
+            call xmpi_sum(spectral_mass_left(ishift), comm_, ierr)
 
-            write(901+xmpi_comm_rank(comm_),*) 'Nvec left=', spectral_mass_left(ishift)
-            flush(901+xmpi_comm_rank(comm_))
+            write(std_out,*) '                      Nvec left=', spectral_mass_left(ishift)
+            flush(std_out)
 
             ! Slice Right [c,b)
             call buildChebyshevJacksonCoeffs(c, b, ndeg_filter, center, radius, cja)
             call computeFilterEnergy(cja, cheby_moments, energy_per_band)            
             spectral_mass_right(ishift) = sum(energy_per_band)
-            
-            write(901+xmpi_comm_rank(comm_),*) 'Nvec right=', spectral_mass_right(ishift)
-            
-            if ( xmpi_comm_size(comm_) > 1) then
-                call xmpi_barrier(comm_)
-                call xmpi_sum(spectral_mass_right(ishift), comm_, ierr)
+            call xmpi_sum(spectral_mass_right(ishift), comm_, ierr)
+           
+            write(std_out,*) 'b=', b
+            write(std_out,*) '                      Nvec right=', spectral_mass_right(ishift)
+            flush(std_out)
+
+            tot_mass = spectral_mass_left(ishift) + spectral_mass_right(ishift)
+            if (tot_mass < nband_tot) then
+                ! extend interval and recalculate
+                b_ext = b + width_ext
+                call buildChebyshevJacksonCoeffs(c, b_ext, ndeg_filter, center, radius, cja)
+                call computeFilterEnergy(cja, cheby_moments, energy_per_band)            
+                tot_mass = spectral_mass_left(ishift) + sum(energy_per_band)
+                write(std_out,*) 'extended interval to=', b_ext
+                write(std_out,*) '                  ==== Nvec right=', sum(energy_per_band)
+                flush(std_out)
             end if
-
-            write(901+xmpi_comm_rank(comm_),*) 'Nvec right=', spectral_mass_right(ishift)
-            flush(901+xmpi_comm_rank(comm_))
-
+            
             ! Detect spectral mass flip
             mass_diff = spectral_mass_left(ishift) - spectral_mass_right(ishift)
             if (ishift > 1 .and. mass_diff * mass_diff_prev < 0) then
@@ -2878,6 +2704,82 @@ subroutine splitSpectrum(nstep_bisect, center, radius, a, b, c_split, cheby_mome
         ABI_FREE(cja)
 
 end subroutine splitSpectrum
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/spectralPruning
+!! NAME
+!! spectralPruning
+!! 
+!! FUNCTION
+!! Selects max probes in [a,b) mapped to [-1,1) with center and radius.
+!! Returns indices out of tot_nband to keep of size wanted_mass.
+!! 
+!! SOURCE
+
+subroutine spectralPruning(a, b, center, radius, cheby_moments, tot_nband, idx, comm)
+
+        implicit none
+
+        real(dp), intent(in) :: a, b
+        real(dp), intent(in) :: center, radius
+        integer, intent(in) :: tot_nband
+        integer, intent(out) :: idx(:)
+        complex(dp), intent(in) :: cheby_moments(:,:)
+        integer, intent(in), optional :: comm
+
+        integer :: neigenpairs
+        integer :: ndeg_filter
+        integer :: ishift
+        integer :: wanted_mass
+        integer :: comm_, my_rank, ierr
+        integer :: iband
+        real(dp) :: tol12 = 1.0e-12
+        integer, allocatable :: jperm(:)
+        real(dp), allocatable :: energy_per_band(:)
+        real(dp), allocatable :: energy_per_band_global(:)
+        real(dp), allocatable :: cja(:)
+
+        ! *********************************************************************
+
+        comm_ = xmpi_comm_null
+        if (present(comm)) then
+            comm_ = comm
+        end if
+        neigenpairs = size(cheby_moments, 1)
+        ndeg_filter = size(cheby_moments, 2)-1
+        wanted_mass = size(idx)
+
+        ABI_MALLOC(jperm, (tot_nband))
+        ABI_MALLOC(energy_per_band, (neigenpairs))
+        ABI_MALLOC(energy_per_band_global, (tot_nband))
+        ABI_MALLOC(cja, (ndeg_filter + 1))
+
+        call buildChebyshevJacksonCoeffs(a, b, ndeg_filter, center, radius, cja)
+        call computeFilterEnergy(cja, cheby_moments, energy_per_band)
+      
+        energy_per_band_global = 0.d0
+        if (xmpi_comm_size(comm_) > 1) then
+            ! sum contributions across procs
+            my_rank = xmpi_comm_rank(comm_)
+            ishift = my_rank * neigenpairs
+            energy_per_band_global(ishift+1:ishift+neigenpairs) = energy_per_band(:)
+            call xmpi_sum(energy_per_band_global, comm_, ierr)
+        else
+            energy_per_band_global(:) = energy_per_band(:)
+        end if
+    
+        jperm = (/ (iband, iband=1, tot_nband) /)
+        call sort_dp(tot_nband, energy_per_band_global, jperm, tol12)
+        idx(1:wanted_mass) = jperm(tot_nband - wanted_mass + 1:tot_nband) 
+
+        ABI_FREE(jperm)
+        ABI_FREE(energy_per_band)
+        ABI_FREE(energy_per_band_global)
+        ABI_FREE(cja)
+
+end subroutine spectralPruning
 !!***
 
 !----------------------------------------------------------------------
