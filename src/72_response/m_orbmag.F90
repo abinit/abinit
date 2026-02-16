@@ -1119,8 +1119,8 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
   integer :: adir,bdir,cpopt,fourwf_cplex,fourwf_option,gdir,iatom,ipw,ndat
   integer :: nn,npwsp,sij_opt,t_atom,tim_fourwf,tim_getghc,type_calc
   real(dp) :: epsabg,lams,weight_i,weight_r
-  complex(dp) :: odensfac,prefac_b,prefac_m
-  logical :: need_odensity
+  complex(dp) :: ormeshfac,prefac_b,prefac_m
+  logical :: need_ormesh
   !arrays
   real(dp) bdot(2),mdot(2)
   real(dp),allocatable :: denpot(:,:,:),fofgout(:,:)
@@ -1135,7 +1135,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
  fourwf_option = 0
  tim_fourwf = 1
  npwsp = npw_k*dtset%nspinor
- need_odensity = (dtset%orbmag .EQ. 4)
+ need_ormesh = (dtset%orbmag .EQ. 4)
 
  ABI_MALLOC(bra,(2,npwsp))
  ABI_MALLOC(ket,(2,npwsp))
@@ -1151,7 +1151,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
  sij_opt = 1
  type_calc = 0
  
- if (need_odensity) then
+ if (need_ormesh) then
    ABI_MALLOC(fofr,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
    ! need atom index with dipole for ph3d use below
    do iatom = 1, dtset%natom
@@ -1183,7 +1183,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
 
      ghc(1:2,1:npwsp) = ghc(1:2,1:npwsp) + gsc(1:2,1:npwsp)*(eig_k(nn) - two*fermie)
      
-     if (need_odensity) then
+     if (need_ormesh) then
        call fourwf(fourwf_cplex,denpot,ghc,fofgout,fofr,gs_hamk%gbound_k,&
          & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
          & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
@@ -1206,7 +1206,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
          m1(adir) = m1(adir) + prefac_m*CMPLX(mdot(1),mdot(2))
          b1(adir) = b1(adir) - two*prefac_b*CMPLX(bdot(1),bdot(2))
          
-         if (need_odensity) then
+         if (need_ormesh) then
            call orbmag_mesh%accum_rmesh(adir,bra,fofr,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
              & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,&
              & mult_fact=one,conjg_flag=.FALSE.)
@@ -1300,7 +1300,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
   real(dp) :: epsabg,weight_i,weight_r
   complex(dp) :: bdotc,bpdotc,gdotc,gpdotc
   complex(dp) :: prefac_b,prefac_m
-  logical :: need_odensity
+  logical :: need_ormesh
   !arrays
   real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1)
   real(dp),allocatable :: denpot(:,:,:)
@@ -1315,7 +1315,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
  fourwf_option = 0
  tim_fourwf = 1
  npwsp = npw_k*dtset%nspinor
- need_odensity = (dtset%orbmag .EQ. 4)
+ need_ormesh = (dtset%orbmag .EQ. 4)
 
  ABI_MALLOC(svectoutb,(2,npwsp))
  ABI_MALLOC(svectoutg,(2,npwsp))
@@ -1331,7 +1331,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
  signs = 2
  nnlout = 1
 
- if (need_odensity) then
+ if (need_ormesh) then
    ABI_MALLOC(fofrb,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
    ABI_MALLOC(fofrg,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
    ! need atom index with dipole for ph3d use below
@@ -1360,7 +1360,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
        & paw_opt,signs,svectoutb,tim_getghc,ket,vectout)
 
-     if (need_odensity) then
+     if (need_ormesh) then
        call fourwf(fourwf_cplex,denpot,svectoutb,fofgout,fofrb,gs_hamk%gbound_k,&
          & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
          & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
@@ -1374,7 +1374,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
        call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,gdir,lamv,mpi_enreg,ndat,nnlout,&
          & paw_opt,signs,svectoutg,tim_getghc,ket,vectout)
 
-       if (need_odensity) then
+       if (need_ormesh) then
          call fourwf(fourwf_cplex,denpot,svectoutg,fofgout,fofrg,gs_hamk%gbound_k,&
            & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
            & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
@@ -1406,7 +1406,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
          m1(adir) = m1(adir) + prefac_m*CONJG(bdotc)*eig_k(nn)
          m1_mu(adir) = m1_mu(adir) - prefac_m*CONJG(bdotc)*fermie
 
-         if (need_odensity) then
+         if (need_ormesh) then
            call orbmag_mesh%accum_rmesh(adir,brab,fofrg,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
              & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,&
              & mult_fact=(eig_k(nn)-fermie),conjg_flag=.FALSE.)
@@ -2808,7 +2808,7 @@ end subroutine make_d
 !! orbmag_rmesh
 !!
 !! FUNCTION
-!! FT over R site for odens in real space
+!! FT over R site for orbmag_rmesh in real space
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -3008,14 +3008,14 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
 !scalars
  integer :: ncerr,fform
  real(dp) :: cpu,wall,gflops
- logical :: has_odens
+ logical :: has_ormesh
  character(len=500) :: msg
 !arrays
 !*************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
 
- has_odens = (dtset%orbmag .EQ. 4)
+ has_ormesh = (dtset%orbmag .EQ. 4)
 
  fform = fform_from_ext("ORBMAG.nc")
  ABI_CHECK(fform /= 0, "Cannot find fform associated to ORBMAG.nc")
@@ -3037,13 +3037,13 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
    nctkdim_t("natom",dtset%natom)],defmode=.True.)
  NCF_CHECK(ncerr)
 
- !! add odens_cplex,n4,n5,n6 only if odens will be output
- if (has_odens) then
+ !! add orbmag_rmesh_cplex,n4,n5,n6 only if orbmag_rmesh will be output
+ if (has_ormesh) then
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("n4", orbmag_mesh%n4),&
      nctkdim_t("n5", orbmag_mesh%n5),&
      nctkdim_t("n6", orbmag_mesh%n6),&
-     nctkdim_t("odens_cplex", 2)],defmode=.True.)
+     nctkdim_t("ormesh_cplex", 2)],defmode=.True.)
    NCF_CHECK(ncerr)
  endif
 
@@ -3054,10 +3054,10 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
    nctkarr_t("nucdipmom", "dp", "ndir, natom")])
  NCF_CHECK(ncerr)
 
- !! odens dimensions, only if output
- if (has_odens) then
+ !! orbmag_rmesh dimensions, only if output
+ if (has_ormesh) then
    ncerr = nctk_def_arrays(ncid, [&
-     nctkarr_t("odens_mesh", "dp", "odens_cplex,n4,n5,n6,ndir")])
+     nctkarr_t("orbmag_rmesh", "dp", "ormesh_cplex,n4,n5,n6,ndir")])
    NCF_CHECK(ncerr)
  endif
 
@@ -3068,8 +3068,8 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
  NCF_CHECK(nf90_put_var(ncid, vid("orbmag_mesh"), orbmag_mesh%omesh))
  NCF_CHECK(nf90_put_var(ncid, vid("nucdipmom"), orbmag_mesh%nucdipmom))
  NCF_CHECK(nf90_put_var(ncid, vid("lambsig"), orbmag_mesh%lambsig))
- if ( has_odens ) then
-   NCF_CHECK(nf90_put_var(ncid, vid("odens_mesh"), orbmag_mesh%rmesh))
+ if ( has_ormesh ) then
+   NCF_CHECK(nf90_put_var(ncid, vid("orbmag_rmesh"), orbmag_mesh%rmesh))
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
