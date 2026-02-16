@@ -322,7 +322,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  integer :: adir,bdtot_index,buff_size,choice,cpopt,dimffnl,exchn2n3d
  integer :: iat,iatom,icg,icprj,ider,idir,ierr
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,itypat,lmn2max
- integer :: me,mcgk,mcprjk,my_lmax,my_nspinor,nband_k,nband_me,ncid,ngfft1,ngfft2,ngfft3,ngfft4
+ integer :: me,mcgk,mcprjk,my_nspinor,nband_k,nband_me,ncid,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,nucdip_dirs,spaceComm
  integer,parameter :: master=0
  real(dp) :: arg,ecut_eff,fermie,trnrm
@@ -332,12 +332,12 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
  type(orbmag_mesh_type) :: orbmag_mesh
 
  !arrays
- integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),gntselect(:,:),kg_k(:,:),nattyp(:)
+ integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),kg_k(:,:),nattyp(:)
  real(dp) :: kpoint(3),omlamb(3)
  real(dp),allocatable :: cg1_k(:,:,:),cwavef(:,:),dkinpw(:,:),eig_k(:)
  real(dp),allocatable :: ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:),occ_k(:)
  real(dp),allocatable,target :: cg_k(:,:),gcg1_k(:,:,:)
- real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:)
+ real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:)
  real(dp),allocatable :: vectornd(:,:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
@@ -391,11 +391,6 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
  call pawcprj_alloc(cwaveprj,0,dimlmn)
-
- my_lmax = psps%mpsang + 1
- ABI_MALLOC(realgnt,((2*my_lmax-1)**2*(my_lmax)**4))
- ABI_MALLOC(gntselect,((2*my_lmax-1)**2,my_lmax**2*(my_lmax**2+1)/2))
- call realgaunt(my_lmax,ngnt,gntselect,realgnt)
 
  lmn2max = psps%lmnmax*(psps%lmnmax+1)/2
  ! note: in make_d, terms will be filled as iatom using atindx
@@ -537,6 +532,9 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
        & kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl_k,ph3d_k=ph3d,&
        & compute_gbound=.TRUE.)
 
+     ABI_SFREE(ylm_k)
+     ABI_SFREE(ylmgr_k)
+     
      ! retrieve ground state wavefunctions at this k point and isppol
      mcgk = npw_k*nband_k*dtset%nspinor
      ABI_MALLOC(cg_k,(2,mcgk))
@@ -576,14 +574,18 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      do nn = 1, nband_k
        do adir = 1, 3
          cwavef(1:2,1:npwsp) = gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,adir)
-         call getcprj(choice,cpopt,cwavef,cwaveprj,ffnl_k,idir,psps%indlmn,istwf_k,&
-           & kg_k,kpg_k,kpoint,psps%lmnmax,dtset%mgfft,mpi_enreg,1,dtset%natom,nattyp,dtset%ngfft,&
-           & dtset%nloalg,npw_k,dtset%nspinor,dtset%ntypat,phkxred,ph1d,ph3d,crystal%ucvol,psps%useylm)
-         call pawcprj_put(atindx,cwaveprj,cprj1_k(:,:,adir),dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
-           & mkmem_rbz,dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0)
+         call getcprj(choice,cpopt,cwavef,cwaveprj,gs_hamk%ffnl_k,idir,&
+           & psps%indlmn,istwf_k,kg_k,gs_hamk%kpg_k,kpoint,psps%lmnmax,dtset%mgfft,&
+           & mpi_enreg,1,dtset%natom,nattyp,dtset%ngfft,dtset%nloalg,npw_k,&
+           & dtset%nspinor,dtset%ntypat,phkxred,ph1d,gs_hamk%ph3d_k,&
+           & crystal%ucvol,psps%useylm)
+         call pawcprj_put(atindx,cwaveprj,cprj1_k(:,:,adir),dtset%natom,&
+           & nn,0,ikpt,0,isppol,dtset%mband,mkmem_rbz,dtset%natom,1,nband_k,&
+           & dimlmn,dtset%nspinor,dtset%nsppol,0)
        end do
      end do
-     ABI_FREE(cwavef)
+     ABI_SFREE(cwavef)
+     ABI_SFREE(phkxred)
 
      !--------------------------------------------------------------------------------
      ! Finally ready to compute contributions to orbital magnetism and Berry curvature
@@ -626,33 +628,26 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      ikg = ikg + npw_k
      bdtot_index=bdtot_index+nband_k
 
-     ABI_FREE(cg_k)
-     ABI_FREE(cg1_k)
-     ABI_FREE(gcg1_k)
-     ABI_FREE(eig_k)
-     ABI_FREE(occ_k)
-     ABI_FREE(ylm_k)
-     ABI_FREE(ylmgr_k)
-     ABI_FREE(kpg_k)
-     ABI_FREE(ffnl_k)
-     ABI_FREE(ph3d)
-     ABI_FREE(phkxred)
+     ABI_SFREE(ffnl_k)
+     ABI_SFREE(ph3d)
+     ABI_SFREE(kpg_k)
+     ABI_SFREE(cg_k)
+     ABI_SFREE(cg1_k)
+     ABI_SFREE(gcg1_k)
+     ABI_SFREE(eig_k)
+     ABI_SFREE(occ_k)
      call pawcprj_free(cprj_k)
-     ABI_FREE(cprj_k)
+     ABI_SFREE(cprj_k)
      do adir = 1, 3
        call pawcprj_free(cprj1_k(:,:,adir))
      end do
-     ABI_FREE(cprj1_k)
+     ABI_SFREE(cprj1_k)
 
    end do ! end loop over kpts
 
-   ABI_FREE(vlocal)
-   if(allocated(vectornd_pac)) then
-     ABI_FREE(vectornd_pac)
-   end if
-   if(allocated(vxctaulocal)) then
-      ABI_FREE(vxctaulocal)
-   end if
+   ABI_SFREE(vlocal)
+   ABI_SFREE(vectornd_pac)
+   ABI_SFREE(vxctaulocal)
 
  end do ! end loop over isppol
 
@@ -682,19 +677,14 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
  call gs_hamk%free()
 
- ABI_FREE(kg_k)
- ABI_FREE(kinpw)
- if(allocated(dkinpw)) then
-   ABI_FREE(dkinpw)
- end if
- ABI_FREE(ph1d)
+ ABI_SFREE(kg_k)
+ ABI_SFREE(kinpw)
+ ABI_SFREE(dkinpw)
+ ABI_SFREE(ph1d)
 
- ABI_FREE(realgnt)
- ABI_FREE(gntselect)
-
- ABI_FREE(atindx)
- ABI_FREE(atindx1)
- ABI_FREE(nattyp)
+ ABI_SFREE(atindx)
+ ABI_SFREE(atindx1)
+ ABI_SFREE(nattyp)
 
  ABI_FREE(dimlmn)
  call pawcprj_free(cwaveprj)
