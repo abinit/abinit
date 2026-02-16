@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2025 ABINIT group (XG)
+!!  Copyright (C) 2005-2026 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -852,7 +852,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !   where E is energy of electron, E0 rest mass, lambda the relativistic wavelength
 !   values of CE at 200 300 and 1000 kV:  7.29e6  6.53e6   5.39e6 rad / V / m
 !   vertical integral of vclmb * c / ngfft(3) / cross sectional area factor (= sin(gamma))
-!      * 0.5291772083e-10*27.2113834 to get to SI
+!      * Bohr_Ang * 1.0e-10* Ha_eV to get to SI
 !      * CE factor above
 !   should be done for each plane perpendicular to the axes...
      ABI_FREE(vwork)
@@ -866,7 +866,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        vwork(:,ispden)=vhartr(:)+vxc(:,ispden)
      end do
 
-     call fftdatar_write("vhxc",dtfil%fnameabo_app_vhxc,dtset%iomode,hdr,crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
+     call fftdatar_write("vhxc",dtfil%fnameabo_app_vhxc,dtset%iomode,hdr,&
+                          crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
      ABI_FREE(vwork)
    end if
 

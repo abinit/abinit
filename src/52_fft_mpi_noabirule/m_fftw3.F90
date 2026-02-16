@@ -6,7 +6,7 @@
 !!  This module provides wrappers for the FFTW3 routines: in-place and out-of-place version.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2025 ABINIT group (MG, FD)
+!! Copyright (C) 2009-2026 ABINIT group (MG, FD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1044,7 +1044,7 @@ subroutine fftw3_fftug_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
  integer,parameter :: dist=2
  integer :: iscale__, isign__
  real(dp) :: fofgout(2,0)
- real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
+ real(dp),contiguous, pointer :: real_ug(:,:),real_ur(:,:)
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -1109,7 +1109,7 @@ subroutine fftw3_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
  integer :: iscale__, isign__
 !arrays
  real(sp) :: fofgout(2,0)
- real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
+ real(sp),contiguous, pointer :: real_ug(:,:),real_ur(:,:)
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -1174,7 +1174,7 @@ subroutine fftw3_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
  integer :: iscale__, isign__
 !arrays
  real(dp) :: fofgout(2,0)
- real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
+ real(dp),contiguous, pointer :: real_ug(:,:),real_ur(:,:)
 ! *************************************************************************
 
  iscale__ = 0; if (present(iscale)) iscale__ = iscale
@@ -1256,7 +1256,7 @@ subroutine fftw3_fftur_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
  integer :: iscale__, isign__
 !arrays
  real(dp) :: dum_ugin(2,0)
- real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
+ real(dp),contiguous, pointer :: real_ug(:,:),real_ur(:,:)
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -1322,7 +1322,7 @@ subroutine fftw3_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
  integer :: iscale__, isign__
 !arrays
  real(sp) :: dum_ugin(2,0)
- real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
+ real(sp),contiguous, pointer :: real_ug(:,:),real_ur(:,:)
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -1388,7 +1388,7 @@ subroutine fftw3_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, n
  integer :: iscale__, isign__
 !arrays
  real(dp) :: dum_ugin(2,0)
- real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
+ real(dp),contiguous, pointer :: real_ug(:,:),real_ur(:,:)
 ! *************************************************************************
 
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -2902,7 +2902,7 @@ subroutine fftw3_alloc_real1d_dp(size,cptr,fptr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
- real(dp),ABI_CONTIGUOUS pointer :: fptr(:)
+ real(dp),contiguous, pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
 ! *************************************************************************
 
@@ -2933,7 +2933,7 @@ subroutine fftw3_alloc_real2d_dp(shape,cptr,fptr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: shape(2)
- real(dp),ABI_CONTIGUOUS pointer :: fptr(:,:)
+ real(dp),contiguous, pointer :: fptr(:,:)
  type(C_PTR),intent(out) :: cptr
 ! *************************************************************************
 
@@ -2964,7 +2964,7 @@ subroutine fftw3_alloc_complex1d_spc(size,cptr,fptr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
- complex(sp),ABI_CONTIGUOUS pointer :: fptr(:)
+ complex(sp),contiguous, pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
 ! *************************************************************************
 
@@ -2995,7 +2995,7 @@ subroutine fftw3_alloc_complex1d_dpc(size,cptr,fptr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
- complex(dp),ABI_CONTIGUOUS pointer :: fptr(:)
+ complex(dp),contiguous, pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
 ! *************************************************************************
 
@@ -3212,7 +3212,7 @@ subroutine fftw3mpi_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,comm_ff
  real(dp):: factor_fft
 !arrays
  type(C_PTR) :: plan, cdata
- complex(C_DOUBLE_COMPLEX), ABI_CONTIGUOUS pointer :: data(:,:,:)
+ complex(C_DOUBLE_COMPLEX), contiguous, pointer :: data(:,:,:)
  integer(C_INTPTR_T) :: i, j, k, alloc_local, local_n0, local_0_start,fft_sizes(4)
 !*************************************************************************
 
@@ -3311,8 +3311,8 @@ subroutine fftw3mpi_many_dft_tr(nx,ny,nz,ndat,isign,fin,fout,comm_fft,fftw_flags
  integer,intent(in) :: nx,ny,nz,ndat,isign,comm_fft
  integer,optional,intent(in) :: fftw_flags
 !arrays
- complex(C_DOUBLE_COMPLEX),ABI_CONTIGUOUS pointer  :: fin(:,:,:)
- complex(C_DOUBLE_COMPLEX),ABI_CONTIGUOUS pointer :: fout(:,:,:)
+ complex(C_DOUBLE_COMPLEX),contiguous, pointer  :: fin(:,:,:)
+ complex(C_DOUBLE_COMPLEX),contiguous, pointer :: fout(:,:,:)
 
 !Local variables-------------------------------
 #ifdef HAVE_FFTW3_MPI
@@ -3402,8 +3402,8 @@ subroutine fftw3_mpifourdp_c2r(nfft,ngfft,ndat,&
  integer(C_INTPTR_T) :: i,j,jdat,k,alloc_local,fft_sizes(4),demi_nx,base,idat,kdat
  integer(C_INTPTR_T) :: local_n0, local_0_start, local_n1, local_1_start
 !arrays
- complex(C_DOUBLE_COMPLEX), ABI_CONTIGUOUS pointer :: data_cplx(:,:,:)
- real(C_DOUBLE), ABI_CONTIGUOUS pointer :: data_real(:,:,:)
+ complex(C_DOUBLE_COMPLEX), contiguous, pointer :: data_cplx(:,:,:)
+ real(C_DOUBLE), contiguous, pointer :: data_real(:,:,:)
 ! *************************************************************************
 
  !ABI_CHECK(ndat==1, "ndat > 1 not implemented yet")
@@ -3544,7 +3544,7 @@ subroutine fftw3_mpifourdp_r2c(nfft,ngfft,ndat,&
  real(dp) :: factor_fft
  type(C_PTR) :: plan_fw,cdata_cplx,cdata_real
 !arrays
- complex(C_DOUBLE_COMPLEX), ABI_CONTIGUOUS pointer :: data_cplx(:,:,:),data_real(:,:,:)
+ complex(C_DOUBLE_COMPLEX), contiguous, pointer :: data_cplx(:,:,:),data_real(:,:,:)
  integer(C_INTPTR_T) :: fft_sizes(4)
 ! *************************************************************************
 
@@ -3794,7 +3794,7 @@ subroutine fftw3_mpifourdp_c2c(cplex,nfft,ngfft,ndat,isign,&
  type(C_PTR) :: plan,cptr_cdata
 !arrays
  integer(C_INTPTR_T) :: fft_sizes(4)
- complex(C_DOUBLE_COMPLEX), ABI_CONTIGUOUS pointer :: f03_cdata(:)
+ complex(C_DOUBLE_COMPLEX), contiguous, pointer :: f03_cdata(:)
 !*************************************************************************
 
  my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
@@ -3970,7 +3970,7 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 !arrays
  real(dp),allocatable :: zmpi1(:,:,:,:),zmpi2(:,:,:,:)  ! work arrays for MPI
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
- !real(dp),ABI_CONTIGUOUS pointer :: zw(:,:),zt(:,:,:)
+ !real(dp),contiguous, pointer :: zw(:,:),zt(:,:,:)
 ! FFT work arrays
  real(dp) :: tsec(2)
 ! *************************************************************************
@@ -6068,7 +6068,7 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  integer :: requests(ndat)
  real(dp) ABI_ASYNC, allocatable :: zmpi1(:,:,:,:,:),zmpi2(:,:,:,:,:)  ! work arrays for MPI
  real(dp),allocatable :: zw(:,:),zt(:,:,:) ! cache work array and array for transpositions
- !real(dp),ABI_CONTIGUOUS pointer :: zw(:,:),zt(:,:,:)
+ !real(dp),contiguous, pointer :: zw(:,:),zt(:,:,:)
 ! FFT work arrays
  real(dp) :: tsec(2)
 ! *************************************************************************

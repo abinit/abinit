@@ -8,7 +8,7 @@
 !!         VNL = Sum_ij [ Dij |pi><pj| ],  with pi, pj= projectors
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2025 ABINIT group (MT, FJ, BA, JWZ)
+!! Copyright (C) 2013-2026 ABINIT group (MT, FJ, BA, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4225,6 +4225,9 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
                  else ! no phase
                    do ilslm=1,lm_size
                      do ic=1,nfgd
+#if defined FC_NVHPC
+                       if (my_natom == -1) write(std_out, *)"NVHPC raises an internal compiler error that is fixed by this print statement."
+#endif
                        contrib(1:qphase)=vloc(1:qphase,ic)*pawfgrtab(iatom)%gylm(ic,ilslm)
                        intvloc(1:qphase,ilslm)=intvloc(1:qphase,ilslm)+contrib(1:qphase)
                      end do

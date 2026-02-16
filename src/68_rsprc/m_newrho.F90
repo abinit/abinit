@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2025 ABINIT group (MT).
+!!  Copyright (C) 2005-2026 ABINIT group (MT).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -612,13 +612,17 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
  if(associated(rcpaw)) then
    indx=0
+   rcpaw%nelect_core=zero
    do itypat=1,size(rcpaw%atm)
+     rcpaw%atm(itypat)%zcore=zero
      do isppol=1,rcpaw%atm(itypat)%nsppol
        do iln=1,rcpaw%atm(itypat)%ln_size
          indx=indx+1
          rcpaw%atm(itypat)%occ(iln,isppol)=rcpaw_arr_(indx)
+         rcpaw%atm(itypat)%zcore=rcpaw%atm(itypat)%zcore+rcpaw%atm(itypat)%occ(iln,isppol)
        enddo
      enddo
+     rcpaw%nelect_core=rcpaw%nelect_core+rcpaw%atm(itypat)%zcore*rcpaw%atm(itypat)%mult
    enddo
    ABI_FREE(rcpaw_arr)
  endif

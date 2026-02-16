@@ -6,7 +6,7 @@
 !!  Tools for the management of a set of Fermi surface k-points.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG, MVer)
+!!  Copyright (C) 2008-2026 ABINIT group (MG, MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,8 +50,8 @@ module m_fstab
 !! FUNCTION
 !!  Tables with the correspondence between k-points on the Fermi surface (FS) and k-points
 !!  in the IBZ (i.e. the k-points found in ebands_t).
-!!  We use `nsppol` fstab_t objects to account for spin polarization and possibly different number of
-!!  bands crossing the Fermi level.
+!!  We use `nsppol` fstab_t objects to account for spin polarization and possibly different
+!!  number of bands crossing the Fermi level.
 !!
 !! SOURCE
 
@@ -80,7 +80,7 @@ module m_fstab
 
    integer :: eph_intmeth = 1
    ! Integration method.
-   ! 1 for gaussian (including adaptive broadening)
+   ! 1 for gaussian (including adaptive broadening if eph_fsmear is negative.
    ! |2| for tetrahedra.
    !     2 for the optimized tetrahedron method.
    !    -2 for the linear tetrahedron method.
@@ -185,10 +185,6 @@ contains  !============================================================
 !!
 !! FUNCTION
 !!  Free memory
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -322,8 +318,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
  call krank%free()
  call cwtime_report(" fstab_init%krank", cpu, wall, gflops)
 
- ABI_MALLOC(full2ebands, (6, nkbz))
- full2ebands = 0
+ ABI_ICALLOC(full2ebands, (6, nkbz))
 
  do ik_bz=1,nkbz
    full2ebands(1, ik_bz) = indkk(1, ik_bz)      ! ik_ibz
@@ -334,7 +329,7 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
  ABI_FREE(indkk)
 
  ! Select only the k-points in the BZ that are sufficiently close to the FS.
- ! FIXME: Do not know why but lambda depends on eph_fsewin if gaussian
+ ! FIXME: Do not know why but lambda depends on eph_fsewin if gaussian.
  ABI_CHECK(dtset%eph_fsewin > tol12, "dtset%eph_fsewin < tol12")
  elow = ebands%fermie - dtset%eph_fsewin
  ehigh = ebands%fermie + dtset%eph_fsewin
@@ -717,7 +712,7 @@ subroutine fstab_print(fstab, units, header, prtvol)
    write(msg,"(2(a,i0))")"    min band: ", minval(fs%bstart_cnt_ibz(1,:), mask=fs%bstart_cnt_ibz(1,:) /= -1)
    call wrtout(units, msg)
    write(msg,"(2(a,i0))")"    Max band: ", maxval(fs%bstart_cnt_ibz(1,:) + fs%bstart_cnt_ibz(2,:) - 1, &
-                                                     mask=fs%bstart_cnt_ibz(1,:) /= -1)
+                                                  mask=fs%bstart_cnt_ibz(1,:) /= -1)
    call wrtout(units, msg)
    end associate
  end do

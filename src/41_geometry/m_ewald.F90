@@ -6,7 +6,7 @@
 !!  This module gathers routines to compute the Ewald energy and its derivatives
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2025 ABINIT group (DCA, XG, JJC, GMR)
+!!  Copyright (C) 2014-2026 ABINIT group (DCA, XG, JJC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,7 +69,8 @@ contains
 !!
 !! SOURCE
 
-subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rmet,rprimd,typat,ucvol,vcutgeo,xred,zion)
+subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,&
+                 rmet,rprimd,typat,ucvol,vcutgeo,xred,zion)
 
 !Arguments ------------------------------------
 !scalars
@@ -651,6 +652,7 @@ end subroutine ewald2
 !! dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
 !!  second energy derivative wrt xred(3,natom) in Hartrees
 !! Set to zero if all(zeff == zero)
+!! eta: parameter used to split R and G-space summation
 !!
 !! NOTES
 !! 1. The q=0 part should be subtracted, by another call to
@@ -667,7 +669,7 @@ end subroutine ewald2
 !!
 !! SOURCE
 
-subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff, qdrp_cart, &
+subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff, qdrp_cart, eta, &
                   option, dipquad, quadquad)  ! optional
 
 !Arguments -------------------------------
@@ -679,7 +681,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp),intent(in) :: acell(3),dielt(3,3),gmet(3,3),gprim(3,3),qphon(3)
  real(dp),intent(in) :: rmet(3,3),rprim(3,3),xred(3,natom),zeff(3,3,natom)
  real(dp),intent(in) :: qdrp_cart(3,3,3,natom)
- real(dp),intent(out) :: dyew(2,3,natom,3,natom)
+ real(dp),intent(out) :: dyew(2,3,natom,3,natom), eta
 
 !Local variables -------------------------
 !scalars
@@ -695,7 +697,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp),parameter :: y2max=64.0_dp, y2min=1.0d-24
  real(dp) :: cddi,cddr,cqdi,cqdr,cqqi,cqqr,g3,g4
  real(dp) :: arg1,arg2,arg3,arga,c123r,c123i,c23i,c23r,detdlt,inv_detdlt
- real(dp) :: direct,eta,fact1,fact3,gsq,recip,reta,reta3,inv4eta
+ real(dp) :: direct,fact1,fact3,gsq,recip,reta,reta3,inv4eta
  real(dp) :: minexparg,sigma_max
  real(dp) :: term1,term2,term3,term4,term5,y2,yy,invy,invy2,derfc_yy
  character(len=700) :: msg
@@ -772,7 +774,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
    wdielt(:,:)=dielt(:,:)
 
-   !Diagonalize dielectric matrix
+   ! Diagonalize dielectric matrix
    lwork=-1
    ABI_MALLOC(work,(10))
    call dsyev('N','U',3, wdielt, 3, eig_dielt, work, lwork,info)
@@ -783,10 +785,10 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    call dsyev('V','U',3, wdielt, 3, eig_dielt, work, lwork,info)
    ABI_FREE(work)
 
-   !This is a tentative maximum value for the gaussian width in real space
+   ! This is a tentative maximum value for the gaussian width in real space
    sigma_max=three
 
-   !Set eta taking into account that the eps_inf is used as a metric in reciprocal space
+   ! Set eta taking into account that the eps_inf is used as a metric in reciprocal space
    eta=sqrt(maxval(eig_dielt))/sigma_max
 
    if (firstcall) then
