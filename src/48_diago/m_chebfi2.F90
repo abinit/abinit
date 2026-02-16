@@ -149,6 +149,7 @@ module m_chebfi2
  public :: chebfi_memInfo
  public :: chebfi_run
  public :: chebfi_runSlice
+ public :: chebfi_rayleighRitzQuotients
  public :: chebfi_computeNextOrderChebfiPolynom
  public :: chebfi_swapInnerBuffers
  public :: bandpassIndicator_sca    ! polynomial bandpass filter at point x
