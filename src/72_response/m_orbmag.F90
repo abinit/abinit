@@ -1130,8 +1130,6 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
  npwsp = npw_k*dtset%nspinor
  need_ormesh = (dtset%orbmag .EQ. 4)
 
- ABI_MALLOC(bra,(2,npwsp))
- ABI_MALLOC(ket,(2,npwsp))
  ABI_MALLOC(ghc,(2,npwsp))
  ABI_MALLOC(gsc,(2,npwsp))
  ABI_MALLOC(gvnlxc,(2,npwsp))
@@ -1215,8 +1213,8 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
 
  end do !nn
 
- if(associated(ket)) NULLIFY(ket)
- if(associated(bra)) NULLIFY(bra)
+ if(ASSOCIATED(ket)) NULLIFY(ket)
+ if(ASSOCIATED(bra)) NULLIFY(bra)
 
  ABI_SFREE(ghc)
  ABI_SFREE(gsc)
