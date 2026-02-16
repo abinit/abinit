@@ -544,7 +544,7 @@ subroutine phgamma_init(gams, cryst, ifc, ebands, fstab, dtset, eph_scalprod, ng
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
  type(ebands_t),intent(in) :: ebands
- type(fstab_t), intent(in) :: fstab
+ class(fstab_t), intent(in) :: fstab
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: ngqpt(3)
@@ -3031,7 +3031,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, band_kq, ib_k, ib_kq !ib1,ib2,
  integer :: ik_ibz,ik_bz,ikq_bz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,timrev_q
- integer :: ik_fs, my_ik, my_is, spin, istwf_k, istwf_kq, npw_k, npw_kq
+ integer :: ik_fs, my_ik, my_is, istwf_k, istwf_kq, npw_k, npw_kq
+ integer :: spin
  integer :: ii,jj,ipw,mpw,my_mpw,mnb,ierr,cnt,ncid
  integer :: n1, n2, n3, n4, n5, n6, nspden, ltetra
  integer :: sij_opt, usecprj, usevnl, optlocal, optnl, opt_gvnlx1
@@ -3041,7 +3042,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp) :: edos_step, edos_broad, sigma, ecut, eshift, eig0nk
  logical :: gen_eigenpb, need_velocities, isirr_k, isirr_kq, print_time_k, need_ftinterp
  type(wfd_t) :: wfd
- type(fstab_t),pointer :: fs
+ class(fstab_t),pointer :: fs
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
  type(edos_t) :: edos
@@ -3072,7 +3073,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp),allocatable :: wt_ek(:,:), wt_ekq(:,:), dbldelta_wts(:,:)
  real(dp),allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:), tgamvv_out(:,:,:,:), vv_kkq(:,:,:), tmp_vals_ee(:,:,:,:,:), emesh(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
- type(fstab_t),target,allocatable :: fstab(:)
+ !class(fstab_t),target :: fstab(nsppol)
+ class(fstab_t),target,allocatable :: fstab(:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
 #ifdef HAVE_MPI
  integer :: ndims, comm_cart, me_cart, coords(5)
@@ -3119,7 +3121,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  ! Find Fermi surface k-points
  ! TODO: support kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface!
- ABI_MALLOC(fstab, (nsppol))
+ allocate(fstab(nsppol))
+ !ABI_MALLOC(fstab, (nsppol))
  call fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
  call tetra%free()
 
@@ -4081,9 +4084,11 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ABI_SFREE(tgamvv_out)
  call ddkop%free(); call gs_hamkq%free(); call wfd%free()
  do spin=1,ebands%nsppol
-   call fstab(spin)%free()
+   fs => fstab(spin)
+   call fs%free()
  end do
- ABI_FREE(fstab)
+ !ABI_FREE(fstab)
+ deallocate(fstab)
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
 
@@ -4187,7 +4192,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 
 !Arguments ------------------------------------
  class(phgamma_t),intent(inout) :: gams
- type(fstab_t),intent(inout) :: fs
+ class(fstab_t),intent(inout), pointer :: fs
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
  integer,intent(in) :: spin, ltetra, comm
@@ -4208,7 +4213,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 !arrays
  integer :: nge(3), ngw(3), g0bz_kq(3)
  integer,allocatable :: select_ikfs(:), indkpt(:), kbz2fs(:) !, symrecfm(:,:,:)
- real(dp) :: kk(3), kq(3)
+ real(dp),target :: kk(3), kq(3)
  real(dp),allocatable :: eig_k(:,:), eig_kq(:,:), wght_bz(:,:,:), kbz(:,:)
  real(dp),allocatable :: work_k(:), work_kq(:), dtweightde(:,:,:), tweight(:,:,:)
 ! *************************************************************************
@@ -4231,7 +4236,8 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
    nkfs_q = 0
    do ik_fs=1,fs%nkfs
      kq = fs%kpts(:, ik_fs) + qpt
-     ikq_fs = fs%findkg0(kq, g0bz_kq); if (ikq_fs == -1) cycle
+     ikq_fs = fs%findkg0(kq, g0bz_kq)
+     if (ikq_fs == -1) cycle
      nkfs_q = nkfs_q + 1
      select_ikfs(nkfs_q) = ik_fs
    end do
