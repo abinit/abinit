@@ -922,25 +922,24 @@ subroutine orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,mcprjk,&
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
 
- do adir = 1, 3
-   do nn = 1, nband_k
-
-     call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
-       & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
+ do nn = 1, nband_k
+   call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
+     & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
+   do adir = 1, 3
 
      select case (nl1_option)
      case(1)
-       call tt_me(dterm%LR(:,:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,dterm%ndij,pawtab,tt)
+       call tt_me(dterm%LR(:,:,:,adir),atindx,dtset,dterm%lmn2max,dterm%ndij,pawtab,tt,cwaveprj)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inlr) = real(tt)
      case(2)
-       call tt_me(dterm%BM(:,:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,dterm%ndij,pawtab,tt)
+       call tt_me(dterm%BM(:,:,:,adir),atindx,dtset,dterm%lmn2max,dterm%ndij,pawtab,tt,cwaveprj)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inbm) = real(tt)
      case default
        tt = czero
      end select
 
-   end do !nn
- end do !adir
+   end do !adir
+ end do !nn
 
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
@@ -1997,7 +1996,7 @@ end subroutine txt_me
 !!
 !! SOURCE
 
-subroutine tt_me(aij,atindx,bcp,dtset,kcp,lmn2max,ndij,pawtab,tt)
+subroutine tt_me(aij,atindx,dtset,lmn2max,ndij,pawtab,tt,ucprj)
 
   !Arguments ------------------------------------
   !scalars
@@ -2008,7 +2007,7 @@ subroutine tt_me(aij,atindx,bcp,dtset,kcp,lmn2max,ndij,pawtab,tt)
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   complex(dp),intent(in) :: aij(dtset%natom,lmn2max,ndij)
-  type(pawcprj_type),intent(in) :: bcp(dtset%natom,dtset%nspinor),kcp(dtset%natom,dtset%nspinor)
+  type(pawcprj_type),intent(in) :: ucprj(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
@@ -2027,8 +2026,8 @@ subroutine tt_me(aij,atindx,bcp,dtset,kcp,lmn2max,ndij,pawtab,tt)
           klmn=MATPACK(ilmn,jlmn)
           ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
           dij = aij(iatom,klmn,isp)
-          cpi =  CMPLX(bcp(iatom,isp)%cp(1,ilmn),bcp(iatom,isp)%cp(2,ilmn))
-          cpj =  CMPLX(kcp(iatom,isp)%cp(1,jlmn),kcp(iatom,isp)%cp(2,jlmn))
+          cpi =  CMPLX(ucprj(iatom,isp)%cp(1,ilmn),ucprj(iatom,isp)%cp(2,ilmn))
+          cpj =  CMPLX(ucprj(iatom,isp)%cp(1,jlmn),ucprj(iatom,isp)%cp(2,jlmn))
           ! see note at top of file near definition of MATPACK macro
           if (ilmn .GT. jlmn) dij = CONJG(dij)
           ! note use of CONJG(cpi), because cpi is from the bra side cprj
@@ -2038,14 +2037,14 @@ subroutine tt_me(aij,atindx,bcp,dtset,kcp,lmn2max,ndij,pawtab,tt)
               dij = aij(iatom,klmn,3) ! up-down
               ! D^ss'_ij=D^s's_ji^*
               if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,4))
-              cpi = CMPLX(bcp(iatom,1)%cp(1,ilmn),bcp(iatom,1)%cp(2,ilmn))
-              cpj = CMPLX(kcp(iatom,2)%cp(1,jlmn),kcp(iatom,2)%cp(2,jlmn))
+              cpi = CMPLX(ucprj(iatom,1)%cp(1,ilmn),ucprj(iatom,1)%cp(2,ilmn))
+              cpj = CMPLX(ucprj(iatom,2)%cp(1,jlmn),ucprj(iatom,2)%cp(2,jlmn))
             else
               dij = aij(iatom,klmn,4) ! down-up
               ! D^ss'_ij=D^s's_ji^*
               if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,3))
-              cpi = CMPLX(bcp(iatom,2)%cp(1,ilmn),bcp(iatom,2)%cp(2,ilmn))
-              cpj = CMPLX(kcp(iatom,1)%cp(1,jlmn),kcp(iatom,1)%cp(2,jlmn))
+              cpi = CMPLX(ucprj(iatom,2)%cp(1,ilmn),ucprj(iatom,2)%cp(2,ilmn))
+              cpj = CMPLX(ucprj(iatom,1)%cp(1,jlmn),ucprj(iatom,1)%cp(2,jlmn))
             end if
             tt = tt + CONJG(cpi)*cpj*dij
           end if
