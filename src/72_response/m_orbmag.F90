@@ -1002,8 +1002,9 @@ subroutine orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
   !scalars
   integer :: adir,bdir,gdir,nn
   real(dp) :: epsabg
-  complex(dp) :: m1,prefac_m,txt_d,txt_q
+  complex(dp) :: prefac_m,txt_d,txt_q
   !arrays
+  complex(dp) :: m1(3)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 !--------------------------------------------------------------------
@@ -1011,34 +1012,37 @@ subroutine orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
 
- do adir = 1, 3
-   do nn = 1, nband_k
-     call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
-       & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
+ do nn = 1, nband_k
 
-     m1 = czero
-     do bdir = 1, 3
-       do gdir = 1, 3
+   call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
+     & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
+
+   m1(1:3) = czero
+   do bdir = 1, 3
+     do gdir = 1, 3
+
+       call txt_me(dterm%aij,atindx,bdir,dtset,gdir,dterm%lmn2max,dterm%ndij,&
+         & pawtab,txt_d,cwaveprj)
+
+       call txt_me(dterm%qij,atindx,bdir,dtset,gdir,dterm%lmn2max,dterm%ndij,&
+         & pawtab,txt_q,cwaveprj)
+
+       do adir = 1, 3
+
          epsabg = eijk(adir,bdir,gdir)
          if (ABS(epsabg) .LT. half) cycle
          prefac_m = com*c2*epsabg
-
-         call txt_me(dterm%aij,atindx,cwaveprj,bdir,dtset,gdir,cwaveprj,&
-           & dterm%lmn2max,dterm%ndij,pawtab,txt_d)
-
-         call txt_me(dterm%qij,atindx,cwaveprj,bdir,dtset,gdir,cwaveprj,&
-           & dterm%lmn2max,dterm%ndij,pawtab,txt_q)
-
          ! note rho^0 H^1 term has opposite sign of rho^1 H^0
-         m1 = m1 - prefac_m*(txt_d - eig_k(nn)*txt_q)
+         m1(adir) = m1(adir) - prefac_m*(txt_d - eig_k(nn)*txt_q)
 
-       end do !gdir
-     end do !bdir
+       end do ! adir
 
-     orbmag_mesh%omesh(nn,ikpt,isppol,adir,innl) = real(m1)
+     end do !gdir
+   end do !bdir
 
-   end do !nn
- end do !adir
+   orbmag_mesh%omesh(nn,ikpt,isppol,1:3,innl) = real(m1(1:3))
+
+ end do !nn
 
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
@@ -1891,7 +1895,6 @@ end subroutine lamb_core
 !! INPUTS
 !!  aij(dtset%natom,lmn2max,ndij)=(complex)scalar ij couplings
 !!  atindx(natom)=index table for atoms (see gstate.f)
-!!  bcp(dtset%natom,dtset%nspinor)<type(pawcprj_type)>=bra side cprj <p|bra>
 !!  bdir=direction of bcp derivative to use
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gdir=direction of kcp derivative to use
@@ -1899,6 +1902,7 @@ end subroutine lamb_core
 !!  lmn2max=max value of lmn2 over all psps
 !!  pawtab(dtset%ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  ndij=spin channels in dij
+!!  ucprj(dtset%natom,dtset%nspinor)<type(pawcprj_type)> input cprj
 !!
 !! OUTPUT
 !! txt=(complex) computed matrix element
@@ -1910,7 +1914,7 @@ end subroutine lamb_core
 !!
 !! SOURCE
 
-subroutine txt_me(aij,atindx,bcp,bdir,dtset,gdir,kcp,lmn2max,ndij,pawtab,txt)
+subroutine txt_me(aij,atindx,bdir,dtset,gdir,lmn2max,ndij,pawtab,txt,ucprj)
 
   !Arguments ------------------------------------
   !scalars
@@ -1921,8 +1925,7 @@ subroutine txt_me(aij,atindx,bcp,bdir,dtset,gdir,kcp,lmn2max,ndij,pawtab,txt)
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   complex(dp),intent(in) :: aij(dtset%natom,lmn2max,ndij)
-  type(pawcprj_type),intent(in) :: bcp(dtset%natom,dtset%nspinor)
-  type(pawcprj_type),intent(in) :: kcp(dtset%natom,dtset%nspinor)
+  type(pawcprj_type),intent(in) :: ucprj(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
@@ -1943,22 +1946,22 @@ subroutine txt_me(aij,atindx,bcp,bdir,dtset,gdir,kcp,lmn2max,ndij,pawtab,txt)
           dij = aij(iatom,klmn,isp)
           ! see note at top of file near definition of MATPACK macro
           if (ilmn .GT. jlmn) dij = CONJG(dij)
-          dcpi = CMPLX(bcp(iatom,isp)%dcp(1,bdir,ilmn),bcp(iatom,isp)%dcp(2,bdir,ilmn))
-          dcpj = CMPLX(kcp(iatom,isp)%dcp(1,gdir,jlmn),kcp(iatom,isp)%dcp(2,gdir,jlmn))
+          dcpi = CMPLX(ucprj(iatom,isp)%dcp(1,bdir,ilmn),ucprj(iatom,isp)%dcp(2,bdir,ilmn))
+          dcpj = CMPLX(ucprj(iatom,isp)%dcp(1,gdir,jlmn),ucprj(iatom,isp)%dcp(2,gdir,jlmn))
           txt = txt + CONJG(dcpi)*dcpj*dij
           if (ndij == 4) then
             if (isp == 1) then
               dij = aij(iatom,klmn,3) ! up-down
               ! D^ss'_ij=D^s's_ji^*
               if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,4))
-              dcpi = CMPLX(bcp(iatom,1)%dcp(1,bdir,ilmn),bcp(iatom,1)%dcp(2,bdir,ilmn))
-              dcpj = CMPLX(kcp(iatom,2)%dcp(1,gdir,jlmn),kcp(iatom,2)%dcp(2,gdir,jlmn))
+              dcpi = CMPLX(ucprj(iatom,1)%dcp(1,bdir,ilmn),ucprj(iatom,1)%dcp(2,bdir,ilmn))
+              dcpj = CMPLX(ucprj(iatom,2)%dcp(1,gdir,jlmn),ucprj(iatom,2)%dcp(2,gdir,jlmn))
             else
               dij = aij(iatom,klmn,4) ! down-up
               ! D^ss'_ij=D^s's_ji^*
               if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,3))
-              dcpi = CMPLX(bcp(iatom,2)%dcp(1,bdir,ilmn),bcp(iatom,2)%dcp(2,bdir,ilmn))
-              dcpj = CMPLX(kcp(iatom,1)%dcp(1,gdir,jlmn),kcp(iatom,1)%dcp(2,gdir,jlmn))
+              dcpi = CMPLX(ucprj(iatom,2)%dcp(1,bdir,ilmn),ucprj(iatom,2)%dcp(2,bdir,ilmn))
+              dcpj = CMPLX(ucprj(iatom,1)%dcp(1,gdir,jlmn),ucprj(iatom,1)%dcp(2,gdir,jlmn))
             end if
             txt = txt + CONJG(dcpi)*dcpj*dij
           end if
@@ -1981,12 +1984,11 @@ end subroutine txt_me
 !! INPUTS
 !!  aij(dtset%natom,lmn2max,ndij)=(complex)scalar ij couplings
 !!  atindx(natom)=index table for atoms (see gstate.f)
-!!  bcp(dtset%natom,dtset%nspinor)<type(pawcprj_type)>=bra side cprj <p|bra>
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  kcp(dtset%natom,dtset%nspinor)<type(pawcprj_type)>=ket side cprj <p|ket>
 !!  lmn2max=max value of lmn2 over all psps
 !!  pawtab(dtset%ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  ndij=spin channels in dij
+!!  ucprj(dtset%natom,dtset%nspinor)<type(pawcprj_type)> input cprj
 !!
 !! OUTPUT
 !! tt=(complex) computed matrix element
