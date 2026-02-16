@@ -618,6 +618,10 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
 
  if (dtset%userib /= 0 .and. (any(abs(qpt - dtset%qptn) > tol14))) then
    call wrtout(units, sjoin(" userib /= 0 => Include only one q-point in the integration. qpt", ktoa(dtset%qptn)))
+   ! Notes:
+   ! 1) Each q-point contribution is weighted by (multiplicity / nqbz), not by 1 / nqbz.
+   ! 2) When lgb_k is enabled, there is no guarantee that the q-point
+   !    specified in dtset%qptn belongs to the zone (IBZ_k). One shouls check the log file for messages
  end if
 
  ! Loop over collinear spins.
