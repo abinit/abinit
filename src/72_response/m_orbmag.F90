@@ -606,12 +606,12 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      ! ZTG23 text after Eq. 42
      nl1_option = 1 ! LR
      call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab)
 
      ! ZTG23 Eq. 43
      nl1_option = 2 ! BM
      call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab)
 
      ! accumulate terms
      do nn = 1, nband_k
@@ -881,6 +881,7 @@ end subroutine orbmag_term_scale
 !!  mcgk=2nd dimension of cg_k
 !!  mcprjk=dimension of cprj_k
 !!  mkmem_rbz=kpts in memory
+!!  mpi_enreg<type(MPI_type)>=information about MPI parallelization
 !!  nband_k=bands at this kpt
 !!  nl1_option=chooses which onsite term to apply
 !!  npw_k=planewaves at this k point
@@ -901,7 +902,7 @@ end subroutine orbmag_term_scale
 !! SOURCE
 
 subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppol,&
-    & mcgk,mcprjk,mkmem_rbz,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab)
+    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab)
 
   !Arguments ------------------------------------
   !scalars
@@ -909,6 +910,7 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppo
   type(dterm_type),intent(in) :: dterm
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
   type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 
   !arrays
@@ -928,6 +930,7 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppo
 
  npwsp = npw_k*dtset%nspinor
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
+ ABI_MALLOC(cwavef,(2,npwsp))
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
 
  do nn = 1, nband_k
@@ -939,10 +942,12 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppo
 
      select case (nl1_option)
      case(1)
-       call tt_me(dterm%LR(:,:,:,adir),atindx,cwavef,dtset,gs_hamk,dterm%lmn2max,dterm%ndij,pawtab,tt,cwaveprj)
+       call tt_me(dterm%LR(:,:,:,adir),atindx,cwavef,dtset,gs_hamk,dterm%lmn2max,mpi_enreg,&
+         & dterm%ndij,npw_k,pawtab,tt,cwaveprj)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inlr) = real(tt)
      case(2)
-       call tt_me(dterm%BM(:,:,:,adir),atindx,cwavef,dtset,gs_hamk,dterm%lmn2max,dterm%ndij,pawtab,tt,cwaveprj)
+       call tt_me(dterm%BM(:,:,:,adir),atindx,cwavef,dtset,gs_hamk,dterm%lmn2max,mpi_enreg,&
+         & dterm%ndij,npw_k,pawtab,tt,cwaveprj)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inbm) = real(tt)
      case default
        tt = czero
@@ -954,7 +959,7 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppo
 
  call pawcprj_free(cwaveprj)
  ABI_SFREE(cwaveprj)
- if (ASSOCIATED(cwavef)) NULLIFY(cwavef)
+ IF(ASSOCIATED(cwavef)) NULLIFY(cwavef)
 
 end subroutine orbmag_nl1_k
 !!***
@@ -1998,6 +2003,7 @@ end subroutine txt_me
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gs_hamk<type(gs_hamiltonian_type)>=ground state Hamiltonian at this k
 !!  lmn2max=max value of lmn2 over all psps
+!!  mpi_enreg<type(MPI_type)>=information about MPI parallelization
 !!  pawtab(dtset%ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  ndij=spin channels in dij
 !!  ucprj(dtset%natom,dtset%nspinor)<type(pawcprj_type)> input cprj
@@ -2010,14 +2016,15 @@ end subroutine txt_me
 !!
 !! SOURCE
 
-subroutine tt_me(aij,atindx,cwavef,dtset,gs_hamk,lmn2max,ndij,pawtab,tt,ucprj)
+subroutine tt_me(aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,ndij,npw_k,pawtab,tt,ucprj)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: lmn2max,ndij
+  integer,intent(in) :: lmn2max,ndij,npw_k
   complex(dp),intent(out) :: tt
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
@@ -2028,17 +2035,52 @@ subroutine tt_me(aij,atindx,cwavef,dtset,gs_hamk,lmn2max,ndij,pawtab,tt,ucprj)
 
   !Local variables -------------------------
   !scalars
-  integer :: iat,iatom,isp,itypat,ilmn,jlmn,klmn
+  integer :: fourwf_cplex,fourwf_option,iat,iatom,isp,itypat
+  integer :: ilmn,ipw,jlmn,klmn,ndat,npwsp,t_atom,tim_fourwf
+  logical :: need_ormesh
+  real(dp) :: weight_i,weight_r
   complex(dp) :: cpi,cpj,dij
+  !arrays
+  real(dp),allocatable,target :: fofr(:,:,:,:)
+  real(dp),allocatable :: denpot(:,:),fofgin(:,:),fofgout(:,:)
 !--------------------------------------------------------------------
+
+  fourwf_cplex = 1
+  fourwf_option = 0
+  tim_fourwf = 1
+  ndat = 1
+  npwsp = npw_k*dtset%nspinor
+  need_ormesh = (dtset%orbmag .EQ. 4)
+
+  if (need_ormesh) then
+    do iat = 1, dtset%natom
+      if ( ANY(ABS(dtset%nucdipmom(1:3,iatom))>tol8) ) then
+        t_atom = iat
+        exit
+      end if
+    end do
+    ABI_MALLOC(fofr,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
+    ABI_CHECK(dtset%nspinor.EQ.1,"tt_me: orbmag_rmesh not coded for spinors yet")
+  end if
 
   tt = czero
   do iat = 1, dtset%natom
     iatom = atindx(iat)
     itypat=dtset%typat(iat)
     do isp = 1, dtset%nspinor
-      do ilmn = 1, pawtab(itypat)%lmn_size
-        do jlmn = 1, pawtab(itypat)%lmn_size
+      do jlmn = 1, pawtab(itypat)%lmn_size
+        if (need_ormesh .AND. iat.EQ.t_atom) then
+          ABI_MALLOC(fofgin,(2,npwsp))
+          fofgin(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*cwavef(1,1:npwsp)
+          fofgin(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*cwavef(2,1:npwsp)
+          call fourwf(fourwf_cplex,denpot,fofgin,fofgout,fofr,gs_hamk%gbound_k,&
+            & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
+            & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
+            & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,fourwf_option,&
+            & tim_fourwf,weight_r,weight_i)
+          ABI_FREE(fofgin)
+        end if
+        do ilmn = 1, pawtab(itypat)%lmn_size
           klmn=MATPACK(ilmn,jlmn)
           ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
           dij = aij(iatom,klmn,isp)
@@ -2064,10 +2106,12 @@ subroutine tt_me(aij,atindx,cwavef,dtset,gs_hamk,lmn2max,ndij,pawtab,tt,ucprj)
             end if
             tt = tt + CONJG(cpi)*cpj*dij
           end if
-        end do !jlmn
-      end do !ilmn
+        end do !ilmn
+      end do !jlmn
     end do ! isp
   end do !iat
+
+  ABI_SFREE(fofr)
 
 end subroutine tt_me
 !!***
