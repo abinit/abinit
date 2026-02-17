@@ -72,7 +72,7 @@ MODULE m_invovl
 
  ! Workaround with hidden global variables
 #ifdef HAVE_OPENMP_OFFLOAD
- public :: gpu_reset_state
+ public :: invovl_ompgpu_reset
 #endif
 
  ! Those routines are here to assess memory requirements
@@ -304,12 +304,10 @@ CONTAINS
 
 #ifdef HAVE_OPENMP_OFFLOAD
 
- subroutine gpu_reset_state()
-
+ subroutine invovl_ompgpu_reset()
      current_ikpt_in_gpu = -1
      gpu_initialized = 0
-
- end subroutine gpu_reset_state
+ end subroutine invovl_ompgpu_reset
 
  subroutine alloc_ompgpu_buffers(cplx,nprojs,nspinor,ndat)
   integer,intent(in) :: cplx,nprojs,nspinor,ndat

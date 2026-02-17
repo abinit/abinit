@@ -98,7 +98,7 @@ module m_slicewf
 
 #ifdef HAVE_OPENMP_OFFLOAD
 ! For use in getBm1X
- integer, save, private :: blockdim_evil = 0
+ integer, save, private :: l_blockdim_evil = 0
 #endif
 
  type(mpi_type),pointer,save :: l_mpi_enreg
@@ -446,10 +446,10 @@ subroutine getBm1X(X,Bm1X)
  call xgBlock_getSize(X,spacedim,blockdim)
 
 #ifdef HAVE_OPENMP_OFFLOAD
- if (blockdim_evil > 0 .and. blockdim /= blockdim_evil) then
-    call gpu_reset_state()
+ if (l_blockdim_evil > 0 .and. blockdim /= l_blockdim_evil) then
+    call invovl_ompgpu_reset()
  end if
- blockdim_evil = blockdim
+ l_blockdim_evil = blockdim
 #endif
  
  if(l_paw) then
