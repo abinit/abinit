@@ -15,11 +15,11 @@ module m_tdep_abitypes
   use netcdf
   use m_geometry,         only : xred2xcart
   use m_dynmat,           only : asrif9, d2cart_to_red
-  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+  use m_tdep_readwrite,   only : atdep_dataset_type, MPI_enreg_type
   use m_tdep_latt,        only : Lattice_type
   use m_tdep_phi2,        only : Eigen_type, tdep_build_phi2_33, Phi2_type
   use m_tdep_qpt,         only : Qpoints_type
-  use m_tdep_sym,         only : Symetries_type
+  use m_tdep_sym,         only : Symmetries_type
   use m_tdep_shell,       only : Shell_type
   use m_ifc,              only : ifc_type
   use m_crystal,          only : crystal_t
@@ -58,9 +58,9 @@ contains
  subroutine tdep_init_crystal(Crystal,Invar,Lattice,Sym)
 
   type(crystal_t),intent(out) :: Crystal
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Lattice_type),intent(in) :: Lattice
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
 
   integer :: timrev,npsp
   logical :: remove_inv,use_antiferro
@@ -94,41 +94,20 @@ contains
   type(crystal_t),intent(in) :: Crystal
   type(ifc_type),intent(out) :: Ifc
   type(ddb_type),intent(in) :: DDB
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Lattice_type),intent(in) :: Lattice
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
   type(Shell_type),intent(in) :: Shell2at
   type(MPI_enreg_type), intent(in) :: MPIdata
   type(Phi2_type),intent(inout) :: Phi2
   double precision,intent(in) :: Rlatt_cart(3,Invar%natom_unitcell,Invar%natom)
 
-  integer :: iatcell,dipdip,ii,asr,symdynmat,rfmeth
+  integer :: dipdip,asr,symdynmat,rfmeth
   integer :: iatom,nsphere,prtsrlr,enunit,nqshft
   integer :: ngqpt_in(3)
   double precision :: rifcsph
-  double precision :: dielt(3,3)
-  double precision, allocatable :: zeff(:,:,:)
   double precision, allocatable :: q1shft(:,:)
   real(dp),allocatable :: qdrp_cart(:,:,:,:)
-
-! Define matrices for LO-TO
-! =========================
-  ABI_MALLOC(zeff, (3,3,Invar%natom_unitcell)); zeff (:,:,:)=zero
-  dielt(:,:)=    zero
-  dielt(1,1)=    1.d0
-  dielt(2,2)=    1.d0
-  dielt(3,3)=    1.d0
-  if (Invar%loto) then
-    dipdip=1
-    do iatcell=1,Invar%natom_unitcell
-      do ii=1,3
-        zeff(ii,ii,iatcell)=Invar%born_charge(Invar%typat_unitcell(iatcell))
-        dielt(ii,ii)       =Invar%dielec_constant
-      end do
-    end do
-  else
-    dipdip=0
-  end if
 
 ! Initialize the Ifc datatype
 ! ===========================
@@ -146,6 +125,12 @@ contains
   ABI_MALLOC(qdrp_cart,(3,3,3,Invar%natom_unitcell))
   ABI_MALLOC(q1shft,(3,nqshft))
 
+  if (Invar%loto) then
+    dipdip=1
+  else
+    dipdip=0
+  end if
+
 !LOTO Keep the Gamma point in the q-point mesh
   if (Invar%loto) then
     q1shft(:,:)=0.0d0
@@ -154,14 +139,11 @@ contains
   end if
 
   call ifc%init(Crystal,DDB,Lattice%brav,asr,symdynmat,dipdip,&
-!LOTO Keep the correct definition of the Lattice
-!LOTO  call ifc_init(Ifc,Crystal,DDB,1,asr,symdynmat,dipdip,&
-  rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
+  rfmeth,ngqpt_in,nqshft,q1shft,Invar%dielt,Invar%zeff,qdrp_cart,nsphere,rifcsph,&
   prtsrlr,enunit,XMPI_WORLD, prtout=.false.)
 
   ABI_FREE(q1shft)
   ABI_FREE(qdrp_cart)
-  ABI_FREE(zeff)
 
 ! Read an IFC from ifc_in.dat input file, write it in the ifc_check.dat file and copy to Phi2
 ! =================================================================================
@@ -209,7 +191,7 @@ contains
   type(ddb_type),intent(out) :: DDB
   type(Qbz_type),intent(out) :: Qbz
   type(MPI_enreg_type), intent(in) :: MPIdata
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Lattice_type),intent(in) :: Lattice
 
   integer :: option,nqshft,mqpt,nqbz,iq_ibz
@@ -325,7 +307,7 @@ contains
 
   type(crystal_t),intent(inout) :: Crystal
   type(ddb_type),intent(inout) :: DDB
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
 
   character (len=fnlen):: filename
   type(ddb_hdr_type) :: ddb_hdr
@@ -351,7 +333,7 @@ contains
 subroutine tdep_read_ifc(Ifc,Invar,natom_unitcell)
 
   integer,intent(in) :: natom_unitcell
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(ifc_type),intent(inout) :: Ifc
 
   integer :: iatcell,ifcout,ii,irpt,jatcell,jj,mu
@@ -455,7 +437,7 @@ end subroutine tdep_read_ifc
 subroutine tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,unitfile)
 
   integer,intent(in) :: natom_unitcell,unitfile
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(ifc_type),intent(inout) :: Ifc
   type(crystal_t),intent(in) :: Crystal
 
@@ -503,9 +485,9 @@ end subroutine tdep_write_ifc
 subroutine tdep_ifc2phi2(dipdip,Ifc,Invar,Lattice,natom_unitcell,option,Phi2,Rlatt4abi,Shell2at,Sym)
 
   integer,intent(in) :: dipdip,natom_unitcell,option
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Lattice_type),intent(in) :: Lattice
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
   type(Shell_type),intent(in) :: Shell2at
   type(ifc_type),intent(inout) :: Ifc
   type(Phi2_type), intent(inout) :: Phi2

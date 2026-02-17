@@ -54,6 +54,7 @@ module m_ddb
  public :: rdddb9           ! This routine reads the derivative database entirely,
  public :: nlopt            ! Output of all quantities related to third-order derivatives of the energy.
  public :: chkin9
+ public :: gamma9
  public :: carttransf       ! Transform a second-derivative matrix (EIG2D) from reduced
                             ! coordinates to cartesian coordinates.
  public :: lwcart           ! Transform a 3rd order derivative tensor (long-wave) from reduced (actually
@@ -2345,7 +2346,7 @@ subroutine ddb_from_file(ddb, filename, ddb_hdr, crystal, comm, prtvol, raw)
  integer,intent(in) :: comm
  integer,optional,intent(in) :: prtvol, raw
  character(len=*),intent(in) :: filename
- type(crystal_t),intent(out) :: Crystal
+ type(crystal_t),intent(out) :: crystal
  type(ddb_hdr_type),intent(out) :: ddb_hdr
 !array
 

@@ -51,7 +51,7 @@ program atdep
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
   use m_tdep_abitypes,    only : Qbz_type, tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ddb, &
-&                                tdep_destroy_qbz, tdep_ifc2phi2
+&                                tdep_destroy_qbz, tdep_ifc2phi2, tdep_read_ifc, tdep_write_ifc
   use m_tdep_phi4,        only : tdep_calc_phi4fcoeff, tdep_calc_phi4ref, tdep_write_phi4, tdep_calc_ftot4
   use m_tdep_phi3,        only : tdep_calc_phi3fcoeff, tdep_calc_phi3ref, tdep_write_phi3, tdep_calc_ftot3, &
 &                                tdep_calc_alpha_gamma, tdep_write_gruneisen
@@ -59,9 +59,9 @@ program atdep
 &                                Eigen_type, tdep_init_eigen2nd, tdep_destroy_eigen2nd, tdep_calc_phi1, &
 &                                tdep_write_phi1, tdep_init_phi2, tdep_destroy_phi2, Phi2_type
   use m_tdep_latt,        only : Lattice_type, tdep_make_latt, tdep_shift_xred
-  use m_tdep_sym,         only : tdep_make_sym, Symetries_type, tdep_destroy_sym
+  use m_tdep_sym,         only : tdep_make_sym, Symmetries_type, tdep_destroy_sym
   use m_tdep_readwrite,   only : tdep_print_Aknowledgments, tdep_read_input, tdep_distrib_data, tdep_init_MPIdata, &
-&                                tdep_destroy_mpidata, Input_type, MPI_enreg_type, tdep_destroy_invar, version_string
+&                                tdep_destroy_mpidata, atdep_dataset_type, MPI_enreg_type, tdep_destroy_invar, version_string
   use m_tdep_utils,       only : Coeff_Moore_type, tdep_calc_MoorePenrose, tdep_MatchIdeal2Average, tdep_calc_model
   use m_tdep_qpt,         only : tdep_make_qptpath, Qpoints_type, tdep_destroy_qpt
   use m_tdep_phdos,       only : tdep_calc_phdos,tdep_calc_elastic,tdep_calc_thermo
@@ -89,10 +89,10 @@ program atdep
   double precision, allocatable :: Phi1Ui(:),Phi2UiUj(:),Phi3UiUjUk(:),Phi4UiUjUkUl(:)
   type(args_t) :: args
   type(phdos_t) :: PHdos
+  type(atdep_dataset_type) :: Invar
   type(Phi2_type) :: Phi2
-  type(Input_type) :: Invar
   type(Lattice_type) :: Lattice
-  type(Symetries_type) :: Sym
+  type(Symmetries_type) :: Sym
   type(Qpoints_type) :: Qpt
   type(Qbz_type) :: Qbz
   type(ifc_type) :: Ifc
@@ -226,6 +226,7 @@ program atdep
 !==========================================================================================
 !============== Initialize Crystal, DDB, and IFC ABINIT Datatypes =========================
 !==========================================================================================
+ ! GA: We really dont need the DDB object here. Only the Qbz is used.
  call tdep_init_crystal(Crystal,Invar,Lattice,Sym)
  call tdep_init_ddb(Crystal,DDB,Invar,Lattice,MPIdata,Qbz)
  call tdep_init_ifc(Crystal,DDB,Ifc,Invar,Lattice,MPIdata,Phi2,Rlatt4Abi,Shell2at,Sym)
@@ -277,6 +278,10 @@ program atdep
  CoeffMoore%ncoeff2nd=ncoeff2nd
  CoeffMoore%ncoeff3rd=ncoeff3rd
  CoeffMoore%ncoeff4th=ncoeff4th
+ ntotcoeff=CoeffMoore%ncoeff1st  + CoeffMoore%ncoeff2nd  + CoeffMoore%ncoeff3rd  + CoeffMoore%ncoeff4th
+ ntotconst=CoeffMoore%nconst_1st + CoeffMoore%nconst_2nd + CoeffMoore%nconst_3rd + CoeffMoore%nconst_4th
+ CoeffMoore%ntotcoeff=ntotcoeff
+ CoeffMoore%ntotconst=ntotconst
 
 !==========================================================================================
 !================= Build fcoeff and compute constraints ===================================
@@ -287,10 +292,6 @@ program atdep
  ABI_MALLOC(Phi2UiUj    ,(Invar%my_nstep)); Phi2UiUj    (:)=0.d0
  ABI_MALLOC(Phi3UiUjUk  ,(Invar%my_nstep)); Phi3UiUjUk  (:)=0.d0
  ABI_MALLOC(Phi4UiUjUkUl,(Invar%my_nstep)); Phi4UiUjUkUl(:)=0.d0
- ntotcoeff=CoeffMoore%ncoeff1st  + CoeffMoore%ncoeff2nd  + CoeffMoore%ncoeff3rd  + CoeffMoore%ncoeff4th
- ntotconst=CoeffMoore%nconst_1st + CoeffMoore%nconst_2nd + CoeffMoore%nconst_3rd + CoeffMoore%nconst_4th
- CoeffMoore%ntotcoeff=ntotcoeff
- CoeffMoore%ntotconst=ntotconst
 
 !LOTO
 !Remove the supercell contribution (the "LR part") included in total forces
@@ -473,6 +474,60 @@ program atdep
  ABI_FREE(Phi1)
 
 !==========================================================================================
+!===================== Convert Phi2 into IFC object =======================================
+!==========================================================================================
+
+! GA: Temporarily putting this back into tdep_calc_phdos
+
+!! Copy Phi2 to Phi2_tmp, then copy Phi2_tmp to Ifc%atmfrc
+!! ===========================
+!  call tdep_init_phi2(Phi2_tmp,Invar%loto,natom)
+!  Phi2_tmp%SR =Phi2%SR
+!  if (Invar%loto) then
+!    Phi2_tmp%Tot=Phi2%Tot
+!    Phi2_tmp%LR =Phi2%LR
+!  end if
+!  call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,natom_unitcell,0,Phi2_tmp,Rlatt4abi,Shell2at,Sym)
+!
+!! Write Ifc%atmfrc in the ifc_out.dat file
+!! ========================================
+!  if (MPIdata%iam_master) call tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,0)
+!
+!! For test purpose : read the previous IFC from ifc_out.dat and write it in ifc_check.dat
+!! =======================================================================================
+!  if (Invar%readifc.eq.2) then
+!    call tdep_init_ifc(Crystal,DDB,Ifc_tmp,Invar,Lattice,MPIdata,Phi2_tmp,Rlatt4Abi,Shell2at,Sym)
+!    if (MPIdata%iam_master) then
+!
+!!     Read IFC from ifc_out.dat (readifc=2)
+!      call tdep_read_ifc(Ifc_tmp,Invar,natom_unitcell)
+!
+!!     Copy Ifc_tmp%atmfrc to Phi2_tmp
+!      call tdep_ifc2phi2(Ifc_tmp%dipdip,Ifc_tmp,Invar,Lattice,natom_unitcell,1,Phi2_tmp,Rlatt4abi,Shell2at,Sym)
+!
+!!     Copy Phi2_tmp to Ifc_tmp%atmfrc
+!      call tdep_ifc2phi2(Ifc_tmp%dipdip,Ifc_tmp,Invar,Lattice,natom_unitcell,0,Phi2_tmp,Rlatt4abi,Shell2at,Sym)
+!
+!!     Write IFC in ifc_check.dat (for check)
+!      call tdep_write_ifc(Crystal,Ifc_tmp,Invar,natom_unitcell,1)
+!
+!!     Write the Phi2-tmp.dat file
+!      if (Invar%debug) then
+!        write(Invar%stdout,'(a)') ' See the Phi2-tmp.dat file corresponding to the ifc_out.dat/Phi2 file'
+!        open(unit=55,file=trim(Invar%output_prefix)//'_Phi2-tmp.dat')
+!        do iatom=1,3*natom
+!          write(55,'(10000(f10.6,1x))') Phi2_tmp%SR(iatom,:)
+!        end do
+!        close(55)
+!      end if
+!    end if
+!    call Ifc_tmp%free()
+!  end if
+!  call tdep_destroy_phi2(Phi2_tmp,Invar%loto)
+
+!  call DDB%free()
+
+!==========================================================================================
 !===================== Compute the phonon spectrum, the DOS, ==============================
 !=====================  the dynamical matrix and write them ===============================
 !==========================================================================================
@@ -482,12 +537,13 @@ program atdep
  write(stdout,*) '##############  the dynamical matrix and write them  ########################'
  write(stdout,*) '#############################################################################'
  call tdep_init_eigen2nd(Eigen2nd_MP,Invar%natom_unitcell,Qbz%nqbz)
-!FB call tdep_init_eigen2nd(Eigen2nd_MP,Invar%natom_unitcell,Qbz%nqibz)
  call tdep_init_eigen2nd(Eigen2nd_path,Invar%natom_unitcell,Qpt%nqpt)
+
  call tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Lattice,MPIdata,natom,&
 &                          natom_unitcell,Phi2,PHdos,Qbz,Qpt,Rlatt4abi,Shell2at,Sym)
  call tdep_destroy_shell(natom,2,Shell2at)
  ABI_FREE(Rlatt4Abi)
+
 
  ! Create a new DDB with the coarse q-point grid in the IBZ.
  call DDB%free()

@@ -14,10 +14,10 @@ module m_tdep_phi4
   use m_linalg_interfaces
   use m_io_tools
   use m_crystal,          only : crystal_t
-  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+  use m_tdep_readwrite,   only : atdep_dataset_type, MPI_enreg_type
   use m_tdep_latt,        only : Lattice_type
   use m_tdep_shell,       only : Shell_type
-  use m_tdep_sym,         only : Symetries_type
+  use m_tdep_sym,         only : Symmetries_type
   use m_tdep_utils,       only : Coeff_Moore_type, Constraints_type
 
   implicit none
@@ -33,9 +33,9 @@ contains
 !====================================================================================================
  subroutine tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Shell_type),intent(in) :: Shell4at
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
   double precision, intent(in)  :: ucart(3,Invar%natom,Invar%my_nstep)
   double precision, intent(in)  :: Phi4_ref(3,3,3,3,Shell4at%nshell)
   double precision, intent(out) :: Phi4UiUjUkUl(Invar%my_nstep)
@@ -100,8 +100,8 @@ contains
 !====================================================================================================
 subroutine tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj,Shell4at,Sym,ucart)
 
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   type(Shell_type),intent(in) :: Shell4at
   type(Coeff_Moore_type), intent(inout) :: CoeffMoore
   double precision, intent(in) :: ucart(3,Invar%natom,Invar%my_nstep)
@@ -284,8 +284,8 @@ end subroutine tdep_calc_phi4ref
 !=====================================================================================================
 subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
 
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   type(Shell_type),intent(in) :: Shell4at
   double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
   double precision, intent(in) :: Phi4_ref(3,3,3,3,Shell4at%nshell)
@@ -365,7 +365,7 @@ end subroutine tdep_write_phi4
 !=====================================================================================================
 subroutine tdep_build_phi4_3333(isym,Phi4_ref,Phi4_3333,Sym,itrans)
 
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
   double precision, intent(in) :: Phi4_ref(3,3,3,3)
   double precision, intent(out) :: Phi4_3333(3,3,3,3)
   integer,intent(in) :: isym,itrans

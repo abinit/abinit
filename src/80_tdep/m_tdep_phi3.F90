@@ -21,10 +21,10 @@ module m_tdep_phi3
   use m_htetra
   use m_kpts,             only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
   use m_tdep_qpt,         only : Qpoints_type
-  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+  use m_tdep_readwrite,   only : atdep_dataset_type, MPI_enreg_type
   use m_tdep_latt,        only : Lattice_type
   use m_tdep_shell,       only : Shell_type
-  use m_tdep_sym,         only : Symetries_type
+  use m_tdep_sym,         only : Symmetries_type
   use m_tdep_phi2,        only : Eigen_type,tdep_init_eigen2nd,tdep_destroy_eigen2nd
   use m_tdep_utils,       only : Coeff_Moore_type, Constraints_type
 
@@ -46,9 +46,9 @@ contains
 !====================================================================================================
  subroutine tdep_calc_ftot3(Forces_TDEP,Invar,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Shell_type),intent(in) :: Shell3at
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
   double precision, intent(in)  :: ucart(3,Invar%natom,Invar%my_nstep)
   double precision, intent(in)  :: Phi3_ref(3,3,3,Shell3at%nshell)
   double precision, intent(out) :: Phi3UiUjUk(Invar%my_nstep)
@@ -110,8 +110,8 @@ contains
 !====================================================================================================
 subroutine tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj,Shell3at,Sym,ucart)
 
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   type(Shell_type),intent(in) :: Shell3at
   type(Coeff_Moore_type), intent(inout) :: CoeffMoore
   double precision, intent(in) :: ucart(3,Invar%natom,Invar%my_nstep)
@@ -253,8 +253,8 @@ end subroutine tdep_calc_phi3ref
 !=====================================================================================================
 subroutine tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
 
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   type(Shell_type),intent(in) :: Shell3at
   double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
   double precision, intent(in) :: Phi3_ref(3,3,3,Shell3at%nshell)
@@ -326,8 +326,8 @@ end subroutine tdep_write_phi3
 !=====================================================================================================
 subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,Invar,Phi3_ref,qpt_cart,Rlatt_cart,Shell3at,Sym)
 
-  type(Symetries_type),intent(in) :: Sym
-  type(Input_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Shell_type),intent(in) :: Shell3at
   type(Eigen_type),intent(in) :: Eigen2nd
   integer,intent(in) :: iqpt
@@ -464,7 +464,7 @@ end subroutine tdep_calc_gruneisen
 !=====================================================================================================
 subroutine tdep_build_phi3_333(isym,Phi3_ref,Phi3_333,Sym,itrans)
 
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
   double precision, intent(in) :: Phi3_ref(3,3,3)
   double precision, intent(out) :: Phi3_333(3,3,3)
   integer,intent(in) :: isym,itrans
@@ -516,10 +516,10 @@ end subroutine tdep_build_phi3_333
 subroutine tdep_calc_alpha_gamma(distance,Eigen2nd,Invar,Lattice,MPIdata,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
 
   type(Eigen_type),intent(in) :: Eigen2nd
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Lattice_type),intent(inout) :: Lattice
   type(Shell_type),intent(in) :: Shell3at
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
   type(Qbz_type),intent(in) :: Qbz
   type(MPI_enreg_type), intent(in) :: MPIdata
   double precision,intent(in) :: distance(Invar%natom,Invar%natom,4)
@@ -816,8 +816,8 @@ end subroutine tdep_calc_alpha_gamma
 !=====================================================================================================
 subroutine tdep_write_gruneisen(distance,Eigen2nd,Invar,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
 
-  type(Symetries_type),intent(in) :: Sym
-  type(Input_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Shell_type),intent(in) :: Shell3at
   type(Eigen_type),intent(in) :: Eigen2nd
   type(Qpoints_type),intent(in) :: Qpt
@@ -903,8 +903,8 @@ end module m_tdep_phi3
 !FBsubroutine tdep_calc_lifetime1(Crystal,distance,Eigen2nd,Ifc,Invar,Lattice,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
 !FB
 !FB  type(crystal_t),intent(in) :: Crystal
-!FB  type(Symetries_type),intent(in) :: Sym
-!FB  type(Input_type),intent(in) :: Invar
+!FB  type(Symmetries_type),intent(in) :: Sym
+!FB  type(atdep_dataset_type),intent(in) :: Invar
 !FB  type(Shell_type),intent(in) :: Shell3at
 !FB  type(Lattice_type),intent(in) :: Lattice
 !FB  type(Eigen_type),intent(in) :: Eigen2nd
@@ -980,8 +980,8 @@ end module m_tdep_phi3
 !FB!arrays
 !FB
 !FB  type(crystal_t),intent(in) :: Crystal
-!FB  type(Symetries_type),intent(in) :: Sym
-!FB  type(Input_type),intent(in) :: Invar
+!FB  type(Symmetries_type),intent(in) :: Sym
+!FB  type(atdep_dataset_type),intent(in) :: Invar
 !FB  type(Shell_type),intent(in) :: Shell3at
 !FB  type(Lattice_type),intent(in) :: Lattice
 !FB  type(Eigen_type),intent(in) :: Eigen2nd

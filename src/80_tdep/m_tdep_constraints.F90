@@ -12,8 +12,8 @@ module m_tdep_constraints
   use m_profiling_abi
   use m_xmpi
   use m_abi_linalg,       only : abi_xorthonormalize  
-  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
-  use m_tdep_sym,         only : Symetries_type
+  use m_tdep_readwrite,   only : atdep_dataset_type, MPI_enreg_type
+  use m_tdep_sym,         only : Symmetries_type
   use m_tdep_utils,       only : Coeff_Moore_type, Constraints_type
   use m_tdep_shell,       only : Shell_type
   use m_tdep_phi3,        only : tdep_build_phi3_333
@@ -79,8 +79,8 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,nshell1at,nsh
 &                                proj3rd,Shell3at,proj4th,Shell4at) 
 
   type(Coeff_Moore_type), intent(inout) :: CoeffMoore
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   type(Shell_type),intent(in) :: Shell1at
   type(Shell_type),intent(in) :: Shell2at
@@ -841,12 +841,12 @@ end subroutine tdep_calc_constraints
  subroutine tdep_check_constraints(distance,Invar,Phi2,Phi1,nshell3at,nshell4at,Sym,&
 &                                  Phi3_ref,Shell3at,Phi4_ref,Shell4at) !Optional
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   integer, intent(in)  :: nshell3at,nshell4at
   double precision, intent(in)  :: Phi2(3*Invar%natom,3*Invar%natom)
   double precision, intent(in)  :: Phi1(3*Invar%natom)
   double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
   type(Shell_type),optional, intent(in) :: Shell3at
   type(Shell_type),optional, intent(in) :: Shell4at
   double precision,optional, intent(in) :: Phi3_ref(3,3,3,nshell3at)

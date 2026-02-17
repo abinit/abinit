@@ -12,9 +12,9 @@ module m_tdep_phi2
   use m_abicore
   use m_xmpi
   use m_io_tools
-  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+  use m_tdep_readwrite,   only : atdep_dataset_type, MPI_enreg_type
   use m_tdep_shell,       only : Shell_type
-  use m_tdep_sym,         only : Symetries_type
+  use m_tdep_sym,         only : Symmetries_type
   use m_tdep_qpt,         only : Qpoints_type
   use m_tdep_utils,       only : Coeff_Moore_type
 
@@ -57,7 +57,7 @@ contains
 !====================================================================================================
  subroutine tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2,Phi2UiUj,ucart)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   double precision, intent(in)  :: Phi2(3*Invar%natom,3*Invar%natom)
   double precision, intent(in)  :: ucart(3,Invar%natom,Invar%my_nstep)
   double precision, intent(in)  :: Phi1(3*Invar%natom)
@@ -93,8 +93,8 @@ contains
 !====================================================================================================
 subroutine tdep_calc_phi1fcoeff(CoeffMoore,Invar,proj,Shell1at,Sym)
 
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   type(Shell_type),intent(in) :: Shell1at
   type(Coeff_Moore_type), intent(inout) :: CoeffMoore
   double precision, intent(in) :: proj(3,3,Shell1at%nshell)
@@ -140,8 +140,8 @@ end subroutine tdep_calc_phi1fcoeff
 !====================================================================================================
 subroutine tdep_calc_phi2fcoeff(CoeffMoore,Invar,proj,Shell2at,Sym,ucart)
 
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   type(Shell_type),intent(in) :: Shell2at
   type(Coeff_Moore_type), intent(inout) :: CoeffMoore
   double precision, intent(in) :: ucart(3,Invar%natom,Invar%my_nstep)
@@ -215,8 +215,8 @@ end subroutine tdep_calc_phi2fcoeff
 !=====================================================================================================
 subroutine tdep_calc_phi1(Invar,ntotcoeff,proj,Phi1_coeff,Phi1,Shell1at,Sym)
 
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   type(Shell_type),intent(in) :: Shell1at
   integer,intent(in) :: ntotcoeff
   double precision,intent(in) :: proj(3,3,Shell1at%nshell)
@@ -269,7 +269,7 @@ end subroutine tdep_calc_phi1
 !=====================================================================================================
 subroutine tdep_write_phi1(Invar,Phi1)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   double precision,intent(in) :: Phi1(3*Invar%natom)
 
   integer :: iatcell,ii
@@ -292,8 +292,8 @@ end subroutine tdep_write_phi1
 !=====================================================================================================
 subroutine tdep_calc_phi2(Invar,ntotcoeff,proj,Phi2_coeff,Phi2,Shell2at,Sym)
 
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   type(Shell_type),intent(in) :: Shell2at
   integer,intent(in) :: ntotcoeff
   double precision,intent(in) :: Phi2_coeff(ntotcoeff,1),proj(9,9,Shell2at%nshell)
@@ -363,7 +363,7 @@ end subroutine tdep_calc_phi2
 !=====================================================================================================
 subroutine tdep_write_phi2(distance,Invar,MPIdata,Phi2,Shell2at)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Shell_type),intent(in) :: Shell2at
   type(MPI_enreg_type), intent(in) :: MPIdata
   double precision,intent(in) :: distance(Invar%natom,Invar%natom,4)
@@ -465,7 +465,7 @@ end subroutine tdep_write_phi2
 !=====================================================================================================
 subroutine tdep_calc_dij(dij,eigenV,iqpt,Invar,omega,Phi2,qpt_cart,Rlatt_cart)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   integer,intent(in) :: iqpt
   double precision,intent(in) :: Phi2(3*Invar%natom,3*Invar%natom)
   double precision,intent(in) :: Rlatt_cart(3,Invar%natom_unitcell,Invar%natom)
@@ -566,7 +566,7 @@ end subroutine tdep_calc_dij
 !FB subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt_cart)
 subroutine tdep_write_dij(Eigen2nd,iqpt,Invar,qpt)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   integer,intent(in) :: iqpt
 !FB  double precision,intent(in) :: qpt_cart(3)
   double precision,intent(in) :: qpt(3)
@@ -669,8 +669,8 @@ end subroutine tdep_write_dij
 !=====================================================================================================
 subroutine tdep_build_phi2_33(isym,Phi2_ref,Phi2_33,Sym,itrans)
 
-  type(Symetries_type),intent(in) :: Sym
-! type(Input_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
+! type(atdep_dataset_type),intent(in) :: Invar
   double precision, intent(in) :: Phi2_ref(3,3)
   double precision, intent(out) :: Phi2_33(3,3)
   integer,intent(in) :: isym,itrans

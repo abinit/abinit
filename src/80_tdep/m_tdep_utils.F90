@@ -14,8 +14,8 @@ module m_tdep_utils
   use m_wffile
   use m_numeric_tools,    only : uniformrandom
   use m_tdep_latt,        only : Lattice_type, tdep_make_inbox
-  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
-  use m_tdep_sym,         only : Symetries_type, tdep_SearchS_1at
+  use m_tdep_readwrite,   only : atdep_dataset_type, MPI_enreg_type
+  use m_tdep_sym,         only : Symmetries_type, tdep_SearchS_1at
   use m_io_tools
 
   implicit none
@@ -72,7 +72,7 @@ contains
 !=====================================================================================================
  subroutine tdep_calc_MoorePenrose(CoeffMoore,Forces,simult,Invar,IFC_coeff,MPIdata)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Coeff_Moore_type), intent(in) :: CoeffMoore
   double precision, intent(in)  :: Forces(3*Invar%natom*Invar%my_nstep)
   double precision, intent(out)  :: IFC_coeff(CoeffMoore%ntotcoeff,1)
@@ -278,9 +278,9 @@ contains
  subroutine tdep_MatchIdeal2Average(distance,Forces_MD,Invar,Lattice,MPIdata,&
 &                                   Rlatt_cart,Rlatt4dos,Sym,ucart)
 
-  type(Input_type),intent(inout) :: Invar
+  type(atdep_dataset_type),intent(inout) :: Invar
   type(Lattice_type),intent(in) :: Lattice
-  type(Symetries_type),intent(inout) :: Sym
+  type(Symmetries_type),intent(inout) :: Sym
   type(MPI_enreg_type),intent(in) :: MPIdata
   double precision, intent(out)  :: distance(Invar%natom,Invar%natom,4)
   double precision, intent(out)  :: Forces_MD(3*Invar%natom*Invar%my_nstep)
@@ -722,7 +722,7 @@ contains
  subroutine tdep_write_xred_average(Invar,MPIdata,Lattice,&
                                     xred_ideal,xred_center,&
                                     FromIdeal2Average)
-  type(Input_type), intent(in) :: Invar
+  type(atdep_dataset_type), intent(in) :: Invar
   type(MPI_enreg_type),intent(in) :: MPIdata
   type(Lattice_type),intent(in) :: Lattice
   double precision,intent(in) :: xred_ideal(3,Invar%natom)
@@ -788,7 +788,7 @@ contains
  subroutine tdep_calc_model(Forces_MD,Forces_TDEP,Invar,MPIdata,Phi1Ui,Phi2UiUj,&
 &                           Phi3UiUjUk,Phi4UiUjUkUl,U0)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(MPI_enreg_type), intent(in) :: MPIdata
   double precision, intent(in)  :: Forces_MD(3*Invar%natom*Invar%my_nstep)
   double precision, intent(in)  :: Forces_TDEP(3*Invar%natom*Invar%my_nstep)
@@ -948,8 +948,8 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,Invar,ishell,jatom,katom,latom,MPI
 
   integer,intent(in) :: iatcell,ishell,jatom,katom,latom,nshell,order,norder
   integer,intent(inout) :: ncoeff
-  type(Input_type),intent(in) :: Invar
-  type(Symetries_type),intent(in) :: Sym
+  type(atdep_dataset_type),intent(in) :: Invar
+  type(Symmetries_type),intent(in) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   double precision,intent(in) :: distance(Invar%natom,Invar%natom,4)
   double precision,intent(out) :: proj(norder,norder,nshell)
