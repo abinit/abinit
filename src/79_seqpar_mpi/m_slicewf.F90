@@ -96,7 +96,7 @@ module m_slicewf
  integer, save :: l_useria
  integer, save :: l_block_sliced
 
-#ifdef HAVE_OPENM_OFFLOAD
+#ifdef HAVE_OPENMP_OFFLOAD
 ! For use in getBm1X
  integer, save, private :: blockdim_evil = 0
 #endif
@@ -445,7 +445,7 @@ subroutine getBm1X(X,Bm1X)
  ! working bandpp will be equal to blockdim
  call xgBlock_getSize(X,spacedim,blockdim)
 
-#ifdef HAVE_OPENM_OFFLOAD
+#ifdef HAVE_OPENMP_OFFLOAD
  if (blockdim_evil > 0 .and. blockdim /= blockdim_evil) then
     call gpu_reset_state()
  end if
