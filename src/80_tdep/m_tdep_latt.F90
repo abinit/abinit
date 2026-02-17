@@ -14,7 +14,7 @@ module m_tdep_latt
 
  use m_matrix,           only : matr3inv, mat33det
  use m_geometry,         only : metric
- use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+ use m_tdep_readwrite,   only : atdep_dataset_type, MPI_enreg_type
 
  implicit none
 
@@ -98,7 +98,7 @@ end subroutine tdep_make_inbox
   double precision :: rotation(3,3), rotation_cart(3,3)
   double precision :: xi,hh
   character(len=500) :: msg
-  type(Input_type),intent(inout) :: Invar
+  type(atdep_dataset_type),intent(inout) :: Invar
   type(Lattice_type),intent(out) :: Lattice
 
 ! For bravais(1):
@@ -443,7 +443,7 @@ end subroutine tdep_make_inbox
 ! Shift xred to keep atoms in the same unit cell at each step.
 subroutine tdep_shift_xred(Invar,MPIdata)
 
-  type(Input_type), intent(inout) :: Invar
+  type(atdep_dataset_type), intent(inout) :: Invar
   type(MPI_enreg_type), intent(in) :: MPIdata
   integer :: natom,ii,iatom,istep,ierr
   integer :: shift,shift_max,shift_best

@@ -11,9 +11,9 @@ module m_tdep_shell
   use m_errors
   use m_abicore
   use m_xmpi
-  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+  use m_tdep_readwrite,   only : atdep_dataset_type, MPI_enreg_type
   use m_tdep_latt,        only : Lattice_type
-  use m_tdep_sym,         only : Symetries_type, tdep_SearchS_2at, tdep_SearchS_3at, tdep_SearchS_4at
+  use m_tdep_sym,         only : Symmetries_type, tdep_SearchS_2at, tdep_SearchS_3at, tdep_SearchS_4at
   use m_tdep_utils,       only : tdep_calc_nbcoeff
   use m_io_tools
 
@@ -49,9 +49,9 @@ contains
 !====================================================================================================
  subroutine tdep_init_shell1at(distance,Invar,MPIdata,norder,nshell_max,ntotcoeff,order,proj,Shell1at,Sym)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Shell_type),intent(out) :: Shell1at
-  type(Symetries_type),intent(inout) :: Sym
+  type(Symmetries_type),intent(inout) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   integer,intent(in) :: norder,order,nshell_max
   integer,intent(out) :: ntotcoeff
@@ -175,9 +175,9 @@ contains
 !====================================================================================================
  subroutine tdep_init_shell2at(distance,Invar,MPIdata,norder,nshell_max,ntotcoeff,order,proj,Shell2at,Sym)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Shell_type),intent(out) :: Shell2at
-  type(Symetries_type),intent(inout) :: Sym
+  type(Symmetries_type),intent(inout) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   integer,intent(in) :: norder,order,nshell_max
   integer,intent(out) :: ntotcoeff
@@ -216,7 +216,7 @@ contains
         do fatom=1,natom
           if ((ref2at(eatom,fatom,1).eq.0).and.&
 !FB&         (abs(distance(iatcell,jatom,1)-distance(eatom,fatom,1)).lt.1.d-3)) then
-&         (abs(distance(iatcell,jatom,1)-distance(eatom,fatom,1)).lt.1.d-6)) then
+&         (abs(distance(iatcell,jatom,1)-distance(eatom,fatom,1)).lt.tol6)) then
             call tdep_SearchS_2at(Invar,iatcell,jatom,eatom,fatom,Isym2at,Sym,Invar%xred_ideal)
             if (Isym2at(eatom,fatom,2)==1) then
               if (Invar%debug) write(Invar%stdout,'(a,1x,4(i4,1x),a,i4)') &
@@ -335,9 +335,9 @@ contains
 !====================================================================================================
  subroutine tdep_init_shell3at(distance,Invar,MPIdata,norder,nshell_max,ntotcoeff,order,proj,Shell3at,Sym)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Shell_type),intent(out) :: Shell3at
-  type(Symetries_type),intent(inout) :: Sym
+  type(Symmetries_type),intent(inout) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   integer, intent(in) :: norder,order,nshell_max
   integer, intent(out) :: ntotcoeff
@@ -699,9 +699,9 @@ contains
 !====================================================================================================
  subroutine tdep_init_shell4at(distance,Invar,MPIdata,norder,nshell_max,ntotcoeff,order,proj,Shell4at,Sym)
 
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Shell_type),intent(out) :: Shell4at
-  type(Symetries_type),intent(inout) :: Sym
+  type(Symmetries_type),intent(inout) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   integer, intent(in) :: norder,order,nshell_max
   integer, intent(out) :: ntotcoeff

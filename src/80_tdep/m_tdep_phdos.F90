@@ -20,9 +20,9 @@ module m_tdep_phdos
   use m_tdep_phi2,        only : Eigen_type, tdep_write_yaml, tdep_write_dij, tdep_calc_dij,&
 &                                tdep_init_phi2, tdep_destroy_phi2, Phi2_type
   use m_tdep_qpt,         only : Qpoints_type
-  use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
+  use m_tdep_readwrite,   only : atdep_dataset_type, MPI_enreg_type
   use m_tdep_latt,        only : Lattice_type
-  use m_tdep_sym,         only : Symetries_type
+  use m_tdep_sym,         only : Symmetries_type
   use m_tdep_shell,       only : Shell_type
   use m_tdep_abitypes,    only : Qbz_type, tdep_ifc2phi2, tdep_read_ifc, tdep_write_ifc, &
 &                                tdep_write_ddb,tdep_init_ifc
@@ -41,16 +41,17 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 
   integer, intent(in) :: natom,natom_unitcell
   double precision, intent(in) :: Rlatt4abi(3,natom_unitcell,natom)
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(phdos_t),intent(out) :: PHdos
   type(Phi2_type),intent(in) :: Phi2
   type(ifc_type),intent(inout) :: Ifc
   type(Lattice_type),intent(in) :: Lattice
-  type(Symetries_type),intent(in) :: Sym
+  type(Symmetries_type),intent(in) :: Sym
   type(crystal_t),intent(inout) :: Crystal
+  type(ddb_type),intent(in) :: DDB  ! To be removed
+  type(Phi2_type) :: Phi2_tmp  ! To be removed
   type(Qbz_type),intent(in) :: Qbz
   type(Qpoints_type),intent(in) :: Qpt
-  type(ddb_type),intent(inout) :: DDB
   type(MPI_enreg_type), intent(in) :: MPIdata
   type(Shell_type),intent(in) :: Shell2at
   type(Eigen_type),intent(inout) :: Eigen2nd_path
@@ -66,7 +67,6 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   character(len=500) :: message
   real(dp) :: wminmax(2)
   type(ifc_type) :: Ifc_tmp
-  type(Phi2_type) :: Phi2_tmp
 
 !FB  integer :: jatom,ii,jj
 !FB  double precision, allocatable :: omega (:)
@@ -79,7 +79,10 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   write(Invar%stdout,'(a)') ' #############################################################################'
   write(Invar%stdout,'(a)') ' See the vdos.dat and TDEP_PHDOS* files'
 
-! Copy Phi2_tmp to Ifc%atmfrc
+! ---------------------------------------
+! GA To be removed vvvvvvvvvvvvvvvvvvvvvv
+
+! Copy Phi2 to Phi2_tmp, then copy Phi2_tmp to Ifc%atmfrc
 ! ===========================
   call tdep_init_phi2(Phi2_tmp,Invar%loto,natom)
   Phi2_tmp%SR =Phi2%SR
@@ -98,12 +101,16 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   if (Invar%readifc.eq.2) then
     call tdep_init_ifc(Crystal,DDB,Ifc_tmp,Invar,Lattice,MPIdata,Phi2_tmp,Rlatt4Abi,Shell2at,Sym)
     if (MPIdata%iam_master) then
+
 !     Read IFC from ifc_out.dat (readifc=2)
       call tdep_read_ifc(Ifc_tmp,Invar,natom_unitcell)
+
 !     Copy Ifc_tmp%atmfrc to Phi2_tmp
       call tdep_ifc2phi2(Ifc_tmp%dipdip,Ifc_tmp,Invar,Lattice,natom_unitcell,1,Phi2_tmp,Rlatt4abi,Shell2at,Sym)
+
 !     Copy Phi2_tmp to Ifc_tmp%atmfrc
       call tdep_ifc2phi2(Ifc_tmp%dipdip,Ifc_tmp,Invar,Lattice,natom_unitcell,0,Phi2_tmp,Rlatt4abi,Shell2at,Sym)
+
 !     Write IFC in ifc_check.dat (for check)
       call tdep_write_ifc(Crystal,Ifc_tmp,Invar,natom_unitcell,1)
 
@@ -121,6 +128,8 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   end if
   call tdep_destroy_phi2(Phi2_tmp,Invar%loto)
 
+! GA To be removed ^^^^^^^^^^^^^^^^^^^^^^
+! ---------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ON THE FINE GRID !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -327,19 +336,13 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB    close(53)
 !FB  end if
 
-! Write the DDB
-! =============
-!BeginFB
-! if (MPIdata%iam_master) call tdep_write_ddb(Crystal,DDB,Eigen2nd_MP,Invar,Lattice,MPIdata,Qbz,Sym)
-!EndFB
-
 end subroutine tdep_calc_phdos
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_calc_thermo(Invar,Lattice,MPIdata,PHdos,U0)
 
   double precision, intent(in) :: U0
-  type(Input_type),intent(in) :: Invar
+  type(atdep_dataset_type),intent(in) :: Invar
   type(Lattice_type), intent(inout) :: Lattice
   type(MPI_enreg_type), intent(in) :: MPIdata
   type(phdos_t),intent(in) :: PHdos
@@ -464,7 +467,7 @@ subroutine tdep_calc_elastic(Phi2,distance,Invar,Lattice)
   double precision, allocatable :: eigenvalues(:)
   double precision, allocatable :: WORK(:)
   double precision, allocatable :: Sij(:,:),Cij(:,:),aijkl(:,:,:,:),cijkl(:,:,:,:)
-  type(Input_type), intent(in) :: Invar
+  type(atdep_dataset_type), intent(in) :: Invar
   type(Lattice_type), intent(inout) :: Lattice
   double precision, intent(in) :: distance(Invar%natom,Invar%natom,4)
   double precision, intent(in) :: Phi2(3*Invar%natom,3*Invar%natom)

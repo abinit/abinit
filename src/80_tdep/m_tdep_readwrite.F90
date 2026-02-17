@@ -13,17 +13,25 @@ module m_tdep_readwrite
   use m_xmpi
   use m_abihist
   use m_parser
-  use m_fstrings,  only : inupper,ljust,next_token
+  use m_fstrings, only : inupper,ljust,next_token
   use m_abimover, only : abimover
+  use m_io_tools, only : file_exists
+  use m_ddb,      only : ddb_type
+  use m_ddb_hdr,  only : ddb_hdr_type
+  use m_crystal,  only : crystal_t
 
  implicit none
 
   character(len=6),public,parameter :: version_string = '   4.0'
 
-  type Input_type
+  type atdep_dataset_type
 
     integer :: natom
+    ! Number of atoms in the supercell
+
     integer :: natom_unitcell
+    ! Number of atoms in the unit cell
+
     integer :: nstep_max
     integer :: nstep_min
     integer :: nstep_tot
@@ -47,14 +55,14 @@ module m_tdep_readwrite
     integer :: ngqpt2(3)
     integer :: bravais(11)
     integer :: use_weights
+    integer :: prtphdos
     integer, allocatable :: typat_unitcell(:)
     integer, allocatable :: typat(:)
     integer, allocatable :: lgth_segments(:)
     logical :: debug
-    logical :: loto
+    logical :: loto    ! TODO rename dipdip
     logical :: netcdf
     double precision :: angle_alpha
-    double precision :: dielec_constant
     double precision :: dosdeltae
     double precision :: rcut
     double precision :: rcut3
@@ -64,10 +72,24 @@ module m_tdep_readwrite
     double precision :: tolinbox
     double precision :: tolmatch
     double precision :: tolmotif
+
     double precision :: rprimd_md(3,3)
+    ! Dimensioned primitive vectors
+
     double precision :: multiplicity(3,3)
+    ! Supercell scaling matrix (integers)
+
+    double precision :: dielt(3,3)
+    ! Dielectric tensor
+
     double precision, allocatable :: amu(:)
-    double precision, allocatable :: born_charge(:)
+    ! amu(natom_unitcell)
+    ! Mass of the atoms (atomic mass unit)
+
+    double precision, allocatable :: zeff(:,:,:)
+    ! zeff(3,3,natom_unitcell)
+    ! Born effective charge tensor
+
     double precision, allocatable :: znucl(:)
     double precision, allocatable :: qpt(:,:)
     double precision, allocatable :: xred_ideal(:,:)
@@ -76,12 +98,13 @@ module m_tdep_readwrite
     double precision, allocatable :: fcart(:,:,:)
     double precision, allocatable :: etot(:)
     double precision, allocatable :: weights(:)
+
     character (len=2), allocatable :: special_qpt(:)
     character (len=fnlen) :: output_prefix
     character (len=fnlen) :: input_prefix
     character (len=fnlen) :: output_file
 
-  end type Input_type
+  end type atdep_dataset_type
 
   type MPI_enreg_type
 
@@ -118,7 +141,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_print_Aknowledgments(Invar)
 
-  type(Input_type) :: Invar
+  type(atdep_dataset_type) :: Invar
   integer :: stdout
   stdout = Invar%stdout
 
@@ -162,11 +185,12 @@ contains
 
 #if defined HAVE_NETCDF
  use netcdf
+ use m_nctk
 #endif
 
 ! Arguments-------------------------------
   character(len=*), intent(in):: input_path
-  type(Input_type),intent(out) :: Invar
+  type(atdep_dataset_type),intent(out) :: Invar
   type(abihist), intent(out) :: Hist
 
 ! Local variables-------------------------
@@ -178,18 +202,23 @@ contains
   integer :: ii,jj,shift,iatom,itypat,sum_alloy1,sum_alloy2
   integer:: lenstr, marr, jdtset, tread
   logical :: has_nimage
-  double precision :: dtion,amu_average,born_average
+  double precision :: dtion,amu_average
   character (len=8) :: date
   character (len=10) :: time
   character (len=5) :: zone
   character(len=500) :: msg
-  character(len=fnlen) :: ncfilename,inputfilename
+  character(len=fnlen) :: input_filename,hist_filename,ddb_filename
   character(len=strlen):: string, raw_string
+  type(crystal_t):: crystal
+  type(ddb_type):: ddb
+  type(ddb_hdr_type):: ddb_hdr
 ! arrays
   character(len=3),parameter :: month_names(12)=(/'Jan','Feb','Mar','Apr','May','Jun',&
 &                                                 'Jul','Aug','Sep','Oct','Nov','Dec'/)
   integer, allocatable:: intarr(:)
   integer, allocatable :: typat_unitcell_tmp(:)
+  real(dp) :: zeff_average(3,3)
+  real(dp), allocatable:: zeff_tmp(:,:,:)
   real(dp), allocatable :: xred_unitcell_tmp(:,:),amu_tmp(:),born_charge_tmp(:),znucl_tmp(:)
   real(dp), allocatable:: dprarr(:)
 
@@ -221,12 +250,15 @@ contains
   Invar%netcdf=.false.
   Invar%use_ideal_positions=0
   Invar%use_weights=0
+  Invar%prtphdos=1
 ! In order to have an accuracy better than 1meV
   Invar%ngqpt1(:)=8
   Invar%ngqpt2(:)=32
+  Invar%dielt(:,:)=zero; Invar%dielt(1,1)=one; Invar%dielt(2,2)=one; Invar%dielt(3,3)=one
 
+  master = 0
   me = xmpi_comm_rank(xmpi_world)
-  if (me==0) then
+  if (me==master) then
 
     if (len_trim(input_path) == 0) then
 
@@ -236,18 +268,13 @@ contains
       write(std_out, "(2a)")"     and use input variables output_file, indata_prefix, outdata_prefix.",ch10
 
       write(Invar%stdlog,'(a)',err=10) ' Give name for input file '
-      read(*, '(a)',err=10) inputfilename
-      if ( inputfilename == "" ) inputfilename='input.in'
-      write(Invar%stdlog, '(a)',err=10) '.'//trim(inputfilename)
+      read(*, '(a)',err=10) input_filename
+      if ( input_filename == "" ) input_filename='input.in'
+      write(Invar%stdlog, '(a)',err=10) '.'//trim(input_filename)
 10     continue
 !     Check if a NetCDF file is available
       write(Invar%stdlog,'(a)',err=11) ' Give root name for generic input files (NetCDF or ASCII)'
       read(*, '(a)',err=11) Invar%input_prefix
-      if ( Invar%input_prefix == "" ) then
-        ncfilename='HIST.nc'
-      else
-        ncfilename=trim(Invar%input_prefix)//'_HIST.nc'
-      end if
       write(Invar%stdlog, '(a)',err=11) '.'//trim(Invar%input_prefix)
 11     continue
       write(Invar%stdlog,'(a)', err=12)' Give root name for generic output files:'
@@ -257,12 +284,12 @@ contains
 12     continue
       Invar%output_file = trim(Invar%output_prefix)//'.abo'
     else
-      inputfilename = input_path
+      input_filename = input_path
 
       ! Read input
       string = repeat(" ", strlen)
       raw_string = repeat(" ", strlen)
-      call instrng(inputfilename, lenstr, 1, strlen, string, raw_string)
+      call instrng(input_filename, lenstr, 1, strlen, string, raw_string)
       ! To make case-insensitive, map characters to upper case.
       call inupper(string(1:lenstr))
 
@@ -275,9 +302,6 @@ contains
                   "indata_prefix", tread, 'KEY', key_value=Invar%input_prefix)
       if (tread == 0) then
         Invar%input_prefix = ''
-        ncfilename='HIST.nc'
-      else
-        ncfilename=trim(Invar%input_prefix)//'_HIST.nc'
       end if
       write(Invar%stdlog, "(2a)")"- Root name for input files: ", trim(Invar%input_prefix)
 
@@ -300,24 +324,33 @@ contains
 
     end if
 
+    ! Setup other filenames 
+    if ( Invar%input_prefix == "" ) then
+      hist_filename='HIST.nc'
+      ddb_filename='DDB'
+    else
+      hist_filename=trim(Invar%input_prefix)//'_HIST.nc'
+      ddb_filename=trim(Invar%input_prefix)//'_DDB'
+    end if
+
     open(unit=Invar%stdout,file=trim(Invar%output_file))
 
   end if !me
 
-  master = 0
-  call xmpi_bcast(inputfilename,master,xmpi_world,ierr)
-  call xmpi_bcast(ncfilename,master,xmpi_world,ierr)
+  call xmpi_bcast(input_filename,master,xmpi_world,ierr)
+  call xmpi_bcast(hist_filename,master,xmpi_world,ierr)
+  call xmpi_bcast(ddb_filename,master,xmpi_world,ierr)
   call xmpi_bcast(Invar%output_prefix,master,xmpi_world,ierr)
   call xmpi_bcast(Invar%input_prefix,master,xmpi_world,ierr)
 
 #if defined HAVE_NETCDF
  !Open netCDF file
-  ncerr=nf90_open(path=trim(ncfilename),mode=NF90_NOWRITE,ncid=ncid)
+  ncerr=nf90_open(path=trim(hist_filename),mode=NF90_NOWRITE,ncid=ncid)
   if(ncerr /= NF90_NOERR) then
-    write(Invar%stdlog,'(3a)') '-'//'Could not open ',trim(ncfilename),', starting from scratch'
+    write(Invar%stdlog,'(3a)') '-'//'Could not open ',trim(hist_filename),', starting from scratch'
     Invar%netcdf=.false.
   else
-    write(Invar%stdlog,'(3a)') '-'//'Succesfully open ',trim(ncfilename),' for reading'
+    write(Invar%stdlog,'(3a)') '-'//'Succesfully open ',trim(hist_filename),' for reading'
     write(Invar%stdlog,'(a)') ' Extracting information from NetCDF file...'
     Invar%netcdf=.true.
   end if
@@ -336,7 +369,7 @@ contains
     ! .true. -> acell and rprimd may change (2017_04 only NVT/isoK used but maybe
     ! .false. -> read all times
     ! NPT one day ?)
-    call read_md_hist(ncfilename,Hist,.false.,.true.,.false.)
+    call read_md_hist(hist_filename,Hist,.false.,.true.,.false.)
   end if
 #endif
 
@@ -345,7 +378,7 @@ contains
 
   string = repeat(" ", strlen)
   raw_string = repeat(" ", strlen)
-  call instrng(inputfilename, lenstr, 1, strlen, string, raw_string)
+  call instrng(input_filename, lenstr, 1, strlen, string, raw_string)
   ! To make case-insensitive, map characters to upper case.
   call inupper(string(1:lenstr))
 
@@ -552,6 +585,40 @@ contains
   end if
 
 ! =========================================================================== !
+! Read DDB file if available to retrieve the Born effective charges
+! and dielectric tensor. Enforce charge neutrality by equal redistribution of excess charge
+! (could add more input variables to control this).
+ABI_MALLOC(Invar%zeff, (3,3,Invar%natom_unitcell))
+Invar%zeff = zero
+
+if (file_exists(ddb_filename).or.file_exists(nctk_ncify(ddb_filename))) then
+
+  call ddb%from_file(ddb_filename, ddb_hdr, crystal, xmpi_world, -1)
+  ! TODO Check that the crystal in the DDB matches the unit cell.
+
+  ii = ddb%get_dielt_zeff(crystal,1,1,0,Invar%dielt,Invar%zeff)
+  if (ii/=0) Invar%loto = .true.
+
+  call crystal%free()
+  call ddb_hdr%free()
+  call ddb%free()
+
+  !! Take the average born effective charge for each atom.
+  !! Apparently this helps to preserve the symmetries
+  !do iatom=1,Invar%natom_unitcell
+  !  born_average = zero
+  !  do ii=1,3
+  !    born_average = born_average + Invar%zeff(ii,ii,iatom)
+  !  end do
+  !  Invar%zeff(:,:,iatom) = zero
+  !  do ii=1,3
+  !    Invar%zeff(ii,ii,iatom) = born_average
+  !  end do
+  !end do
+end if
+
+
+! =========================================================================== !
 ! Output header and mandatory input variables
 
 ! Write version, copyright, date...
@@ -637,8 +704,16 @@ contains
 
 ! =========================================================================== !
 ! Optional input variables
+! TODO separate reading optional input variables from writing in the output.
 
   write(Invar%stdout,'(a)') ' ======================= Optional input variables ============================'
+
+! prtphdos
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'prtphdos', tread, 'INT')
+  if (tread == 1) then
+    Invar%prtphdos = intarr(1)
+    write(Invar%stdout,'(1x,a20,1x,i4)') ljust('prtphdos',20),Invar%use_ideal_positions
+  end if
 
 ! dosdeltae
   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dosdeltae', tread, 'ENE')
@@ -657,17 +732,28 @@ contains
 ! born_charge
   call intagm(dprarr, intarr, jdtset, marr, Invar%ntypat, string(1:lenstr), 'born_charge', tread, 'DPR')
   if (tread == 1) then
-    ABI_MALLOC(Invar%born_charge,(Invar%ntypat)); Invar%born_charge(:)=zero
     Invar%loto=.true.
-    Invar%born_charge = dprarr(1:Invar%ntypat)
-    write(Invar%stdout,'(1x,a20,20(1x,f15.10))') ljust('born_charge',20),(Invar%born_charge(jj),jj=1,Invar%ntypat)
+    ABI_MALLOC(born_charge_tmp,(Invar%ntypat)) ; born_charge_tmp(:) = zero
+    born_charge_tmp(:) = dprarr(1:Invar%ntypat)
+    Invar%zeff(:,:,:) = zero
+    do iatom=1,Invar%natom_unitcell
+      itypat = Invar%typat_unitcell(iatom)
+      do ii=1,3
+        Invar%zeff(ii,ii,iatom) = born_charge_tmp(itypat)
+      end do
+    end do
+    ! GA: TODO eventually change the way this is reported
+    write(Invar%stdout,'(1x,a20,20(1x,f15.10))') ljust('born_charge',20),(born_charge_tmp(jj),jj=1,Invar%ntypat)
+    ABI_FREE(born_charge_tmp)
   end if
 
 ! dielec_constant
   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dielec_constant', tread, 'DPR')
   if (tread == 1) then
-    Invar%dielec_constant = dprarr(1)
-    write(Invar%stdout,'(1x,a20,1x,f15.10)') ljust('dielec_constant',20),Invar%dielec_constant
+    do ii=1,3
+      Invar%dielt(ii,ii) = dprarr(1)
+    end do
+    write(Invar%stdout,'(1x,a20,1x,f15.10)') ljust('dielec_constant',20),Invar%dielt(1,1)
   end if
 
 ! bzpath
@@ -883,6 +969,9 @@ contains
 ! Treat virtual crystal approximation (VCA) when alloy=1.
 ! Redefine all the data depending on (n)typat(_unitcell) and natom_unitcell
 
+! The mixing of zeff will only work for the isotropic case,
+! that is, if it was specified with input variables born_charge
+
   if (Invar%alloy.eq.1) then
     sum_alloy1=0
     sum_alloy2=0
@@ -894,22 +983,45 @@ contains
         sum_alloy2=sum_alloy2+1
       end if
     end do
-    amu_average   =(Invar%amu        (Invar%ityp_alloy1)*sum_alloy1+&
-&                   Invar%amu        (Invar%ityp_alloy2)*sum_alloy2)/(sum_alloy1+sum_alloy2)
+    amu_average   =(Invar%amu(Invar%ityp_alloy1)*sum_alloy1+&
+&                   Invar%amu(Invar%ityp_alloy2)*sum_alloy2)/(sum_alloy1+sum_alloy2)
     if (Invar%loto) then
-      born_average=(Invar%born_charge(Invar%ityp_alloy1)*sum_alloy1+&
-&                   Invar%born_charge(Invar%ityp_alloy2)*sum_alloy2)/(sum_alloy1+sum_alloy2)
+      zeff_average(:,:) = zero
+      do iatom=1,Invar%natom_unitcell
+        if (Invar%typat_unitcell(iatom).eq.Invar%ityp_alloy1) then
+          zeff_average(:,:) = zeff_average(:,:) + Invar%zeff(:,:,iatom) * sum_alloy1
+          exit
+        end if
+      end do
+      do iatom=1,Invar%natom_unitcell
+        if (Invar%typat_unitcell(iatom).eq.Invar%ityp_alloy2) then
+          zeff_average(:,:) = zeff_average(:,:) + Invar%zeff(:,:,iatom) * sum_alloy2
+          exit
+        end if
+      end do
+      zeff_average(:,:) = zeff_average(:,:) / (sum_alloy1 + sum_alloy2)
+      do iatom=1,Invar%natom_unitcell
+        if (Invar%typat_unitcell(iatom).eq.min(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
+          Invar%zeff(:,:,iatom) = zeff_average(:,:)
+        end if
+      end do
     end if
     shift=0
     do iatom=1,Invar%natom_unitcell
       if (Invar%typat_unitcell(iatom).lt.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
         Invar%typat_unitcell (iatom-shift)=Invar%typat_unitcell (iatom)
         Invar%xred_unitcell(:,iatom-shift)=Invar%xred_unitcell(:,iatom)
+        if (Invar%loto) then
+          Invar%zeff(:,:,iatom-shift) = Invar%zeff(:,:,iatom)
+        end if
       else if (Invar%typat_unitcell(iatom).eq.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
         shift=shift+1
       else if (Invar%typat_unitcell(iatom).gt.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
         Invar%typat_unitcell (iatom-shift)=Invar%typat_unitcell (iatom) - 1
         Invar%xred_unitcell(:,iatom-shift)=Invar%xred_unitcell(:,iatom)
+        if (Invar%loto) then
+          Invar%zeff(:,:,iatom-shift) = Invar%zeff(:,:,iatom)
+        end if
       end if
     end do
     Invar%natom_unitcell=Invar%natom_unitcell-shift
@@ -921,41 +1033,32 @@ contains
     do itypat=1,Invar%ntypat
       if (itypat.eq.min(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
         Invar%amu          (itypat)=amu_average
-        if (Invar%loto) then
-          Invar%born_charge(itypat)=born_average
-        end if
       else if (itypat.gt.max(Invar%ityp_alloy1,Invar%ityp_alloy2)) then
         Invar%amu          (itypat-1)=Invar%amu        (itypat)
-        if (Invar%loto) then
-          Invar%born_charge(itypat-1)=Invar%born_charge(itypat)
-        end if
       end if
     end do
     Invar%ntypat=Invar%ntypat-1
-!    write(6,*) 'ntypat=',Invar%ntypat
     ABI_MALLOC(typat_unitcell_tmp,(  Invar%natom_unitcell))
     ABI_MALLOC(xred_unitcell_tmp ,(3,Invar%natom_unitcell))
     ABI_MALLOC(amu_tmp           ,(  Invar%ntypat))
     if (Invar%loto) then
-      ABI_MALLOC(born_charge_tmp ,(  Invar%ntypat))
+      ABI_MALLOC(zeff_tmp        ,(3,3,Invar%natom_unitcell))
     end if
     typat_unitcell_tmp (:)=Invar%typat_unitcell(1:Invar%natom_unitcell)
     xred_unitcell_tmp(:,:)=Invar%xred_unitcell(:,1:Invar%natom_unitcell)
     amu_tmp            (:)=Invar%amu(1:Invar%ntypat)
     if (Invar%loto) then
-      born_charge_tmp  (:)=Invar%born_charge(1:Invar%ntypat)
+      zeff_tmp(:,:,:) = Invar%zeff(:,:,1:Invar%natom_unitcell)
     end if
     ABI_REMALLOC(Invar%typat_unitcell,(  Invar%natom_unitcell))
     ABI_REMALLOC(Invar%xred_unitcell ,(3,Invar%natom_unitcell))
     ABI_REMALLOC(Invar%amu           ,(  Invar%ntypat))
-    if (Invar%loto) then
-      ABI_REMALLOC(Invar%born_charge ,(  Invar%ntypat))
-    end if
+    ABI_REMALLOC(Invar%zeff          ,(3,3,Invar%natom_unitcell))
     Invar%typat_unitcell (:)=typat_unitcell_tmp (:)
     Invar%xred_unitcell(:,:)=xred_unitcell_tmp(:,:)
     Invar%amu            (:)=amu_tmp            (:)
     if (Invar%loto) then
-      Invar%born_charge  (:)=born_charge_tmp (:)
+      Invar%zeff(:,:,:)     =zeff_tmp(:,:,:)
     end if
     if (allocated(Invar%znucl)) then
       ABI_MALLOC(znucl_tmp,(Invar%ntypat))
@@ -968,7 +1071,7 @@ contains
     ABI_FREE(xred_unitcell_tmp)
     ABI_FREE(amu_tmp)
     if (Invar%loto) then
-      ABI_FREE(born_charge_tmp)
+      ABI_FREE(zeff_tmp)
     end if
 
     write(Invar%stdout,'(a)') ' ==================== Virtual Crystal Approximation =========================='
@@ -983,7 +1086,9 @@ contains
       write(Invar%stdout,'(22x,3(f15.10,1x))') (Invar%xred_unitcell(jj,ii), jj=1,3)
     end do
     if (Invar%loto) then
-      write(Invar%stdout,'(1x,a20,20(1x,f15.10))') ljust('born_charge',20),(Invar%born_charge(jj),jj=1,Invar%ntypat)
+      ! GA: TODO eventually change the way this is reported
+      ! At the moment it is inconsistent with previous report.
+      write(Invar%stdout,'(1x,a20,20(1x,f15.10))') ljust('born_charge',20),(Invar%zeff(1,1,jj),jj=1,Invar%natom_unitcell)
     end if
     write(Invar%stdout,'(1x,a20)') ljust('typat',20)
     do ii=1,Invar%natom,10
@@ -1008,7 +1113,7 @@ contains
 
  subroutine tdep_distrib_data(Hist,Invar,MPIdata)
 
-  type(Input_type), intent(inout) :: Invar
+  type(atdep_dataset_type), intent(inout) :: Invar
   type(MPI_enreg_type), intent(in) :: MPIdata
   type(abihist), intent(in) :: Hist
 
@@ -1108,7 +1213,7 @@ contains
 !FB subroutine tdep_init_MPIshell(Invar,MPIdata)
 !FB
 !FB
-!FB  type(Input_type), intent(in) :: Invar
+!FB  type(atdep_dataset_type), intent(in) :: Invar
 !FB  type(MPI_enreg_type), intent(in) :: MPIdata
 !FB
 !FB end subroutine tdep_init_MPIshell
@@ -1116,7 +1221,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_init_MPIdata(Invar,MPIdata)
 
-  type(Input_type), intent(in) :: Invar
+  type(atdep_dataset_type), intent(in) :: Invar
   type(MPI_enreg_type), intent(out) :: MPIdata
   integer :: ii,remain,ierr,iproc,istep
   integer, allocatable :: tab_step(:)
@@ -1271,7 +1376,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_destroy_invar(Invar)
 
-  type(Input_type), intent(inout) :: Invar
+  type(atdep_dataset_type), intent(inout) :: Invar
 
   ABI_FREE(Invar%amu)
   ABI_FREE(Invar%typat)
@@ -1290,12 +1395,8 @@ contains
   ABI_FREE(Invar%etot)
   ABI_FREE(Invar%weights)
   ABI_FREE(Invar%xred_ideal)
-  if (Invar%loto) then
-    ABI_FREE(Invar%born_charge)
-  end if
-  if (allocated(Invar%znucl)) then
-    ABI_FREE(Invar%znucl)
-  end if
+  ABI_SFREE(Invar%zeff)
+  ABI_SFREE(Invar%znucl)
 
  end subroutine tdep_destroy_invar
 
