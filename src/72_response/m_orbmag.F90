@@ -1216,8 +1216,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
          
          if (need_ormesh) then
            call orbmag_mesh%accum_rmesh(adir,bra,fofr,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
-             & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,incc,&
-             & mult_fact=one,conjg_flag=.FALSE.)
+             & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,incc)
          end if
        
        end do ! adir
@@ -1306,7 +1305,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
   integer :: adir,bdir,choice,cpopt,fourwf_cplex,fourwf_option,gdir,iatom,ndat,nn,nnlout,np,npwsp
   integer :: paw_opt,signs,t_atom,tim_fourwf,tim_getghc
   real(dp) :: epsabg,weight_i,weight_r
-  complex(dp) :: bdotc,bpdotc,gdotc,gpdotc
+  complex(dp) :: bdotc,bpdotc,eig_shift,gdotc,gpdotc
   complex(dp) :: prefac_b,prefac_m
   logical :: need_ormesh
   !arrays
@@ -1415,12 +1414,13 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
          m1_mu(adir) = m1_mu(adir) - prefac_m*CONJG(bdotc)*fermie
 
          if (need_ormesh) then
+           eig_shift = CMPLX(eig_k(nn)-fermie,zero)
            call orbmag_mesh%accum_rmesh(adir,brab,fofrg,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
              & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,invv1,&
-             & mult_fact=(eig_k(nn)-fermie),conjg_flag=.FALSE.)
+             & mult_fact=eig_shift,conjg_flag=.FALSE.)
            call orbmag_mesh%accum_rmesh(adir,brag,fofrb,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
              & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,invv1,&
-             & mult_fact=(eig_k(nn)-fermie),conjg_flag=.TRUE.)
+             & mult_fact=eig_shift,conjg_flag=.TRUE.)
          endif
 
        end do
@@ -2060,6 +2060,7 @@ subroutine tt_me(aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,ndij,npw_k,pa
       end if
     end do
     ABI_MALLOC(fofr,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
+    ABI_CHECK(ASSOCIATED(cwavef),"tt_me: input wavefunction needed for ormesh is not associated")
     ABI_CHECK(dtset%nspinor.EQ.1,"tt_me: orbmag_rmesh not coded for spinors yet")
   end if
 
@@ -2069,6 +2070,7 @@ subroutine tt_me(aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,ndij,npw_k,pa
     itypat=dtset%typat(iat)
     do isp = 1, dtset%nspinor
       do jlmn = 1, pawtab(itypat)%lmn_size
+  
         if (need_ormesh .AND. iat.EQ.t_atom) then
           ABI_MALLOC(fofgin,(2,npwsp))
           fofgin(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*cwavef(1,1:npwsp)
@@ -2080,6 +2082,7 @@ subroutine tt_me(aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,ndij,npw_k,pa
             & tim_fourwf,weight_r,weight_i)
           ABI_FREE(fofgin)
         end if
+ 
         do ilmn = 1, pawtab(itypat)%lmn_size
           klmn=MATPACK(ilmn,jlmn)
           ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
@@ -2090,6 +2093,14 @@ subroutine tt_me(aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,ndij,npw_k,pa
           if (ilmn .GT. jlmn) dij = CONJG(dij)
           ! note use of CONJG(cpi), because cpi is from the bra side cprj
           tt = tt + CONJG(cpi)*dij*cpj
+          
+          if (need_ormesh .AND. iat.EQ.t_atom) then
+            ABI_MALLOC(fofgin,(2,npwsp))
+            fofgin(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)*cwavef(1,1:npwsp)
+            fofgin(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)*cwavef(2,1:npwsp)
+            ABI_FREE(fofgin)
+          end if
+
           if (ndij == 4) then
             if (isp == 1) then
               dij = aij(iatom,klmn,3) ! up-down
@@ -2878,19 +2889,18 @@ subroutine orbmag_rmesh(omag,adir,bra,fofr,n4,n5,n6,natom,npw_k,ph3d,prefac_m,t_
   !scalars
   class(orbmag_mesh_type),intent(inout),target :: omag
   integer,intent(in) :: adir,n4,n5,n6,natom,npw_k,t_atom,term_index
-  real(dp),intent(in),optional :: mult_fact
-  complex(dp) :: prefac_m
+  complex(dp),intent(in) :: prefac_m
+  complex(dp),intent(in),optional :: mult_fact
   logical,intent(in),optional :: conjg_flag
-
   !arrays
   real(dp),intent(in),pointer :: bra(:,:),fofr(:,:,:,:)
   real(dp),intent(in) :: ph3d(2,npw_k,natom)
 
   !Local variables -------------------------
   !scalars
-  real(dp) :: the_mult_fact
+  real(dp) :: term_r, term_i
+  complex(dp) :: the_mult_fact
   logical :: the_conjg_flag
-
   !arrays
   real(dp) :: ffac(2),slowfft(2)
 
@@ -2899,7 +2909,7 @@ subroutine orbmag_rmesh(omag,adir,bra,fofr,n4,n5,n6,natom,npw_k,ph3d,prefac_m,t_
   if (present(mult_fact)) then
     the_mult_fact=mult_fact
   else
-    the_mult_fact=one
+    the_mult_fact=CMPLX(one,zero)
   end if
 
   if (present(conjg_flag)) then
@@ -2922,7 +2932,9 @@ subroutine orbmag_rmesh(omag,adir,bra,fofr,n4,n5,n6,natom,npw_k,ph3d,prefac_m,t_
   ffac(2)=slowfft(1)*AIMAG(prefac_m)+slowfft(2)*REAL(prefac_m)
 
   !scale by the_mult_fact (default value is 1.0)
-  ffac(1:2) = the_mult_fact*ffac(1:2)
+  term_r = REAL(the_mult_fact)*ffac(1)-AIMAG(the_mult_fact)*ffac(2)
+  term_i = AIMAG(the_mult_fact)*ffac(1)+REAL(the_mult_fact)*ffac(2)
+  ffac(1) = term_r; ffac(2) = term_i
 
   if (the_conjg_flag) then
     ! add ffac * conjg(fofr)
