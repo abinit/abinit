@@ -1,5 +1,6 @@
 This file contains information about the use of spin-orbit
 for format pspcod=5 of pseudopotentials.
+For the main pspcod=5 information, see the file [psp45 format](./psp45_info.md)
 
 The first line containing Haman grid parameters must be completed by
 an information about the spin-orbit format of the pseudopotential.
