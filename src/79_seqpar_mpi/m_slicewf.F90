@@ -51,6 +51,7 @@ module m_slicewf
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_getghc,      only : multithreaded_getghc
  use m_gemm_nonlop_projectors , only : gemm_nonlop_use_gemm
+ use m_mpinfo,      only : copy_mpi_enreg
 
  use m_xg
  use m_xgTransposer
@@ -102,6 +103,8 @@ module m_slicewf
  integer, parameter :: DEBUG_COLUMNS = 5
 
  public :: slicewf
+ public :: setter_evil ! workaround for save private
+ public :: getter_evil ! workaround for save private
 
  CONTAINS  !========================================================================================
 !!***
@@ -443,7 +446,7 @@ subroutine getBm1X(X,Bm1X)
 
    call xgBlock_reverseMap(X,ghc_filter,rows=1,cols=spacedim*blockdim)
    call xgBlock_reverseMap(Bm1X,gsm1hc_filter,rows=1,cols=spacedim*blockdim)
-
+   
    !cwaveprj_next is dummy
    if(gemm_nonlop_use_gemm) then
      ABI_MALLOC(cwaveprj_next, (1,1))
@@ -456,7 +459,7 @@ subroutine getBm1X(X,Bm1X)
    call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), &
        spacedim/l_nspinor, blockdim, l_mpi_enreg, l_nspinor, l_block_sliced)
    ABI_NVTX_END_RANGE()
-
+   
    call pawcprj_free(cwaveprj_next)
    ABI_FREE(cwaveprj_next)
 
@@ -470,6 +473,50 @@ end subroutine getBm1X
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_slicewf/setter_evil
+!! NAME
+!! setter_evil
+!!
+!! SOURCE
+
+subroutine setter_evil(mpi_enreg, cpopt, sij_opt)
+
+ implicit none
+
+ type(mpi_type), pointer, intent(in) :: mpi_enreg
+ integer, intent(in) :: cpopt
+ integer, intent(in) :: sij_opt
+
+ l_mpi_enreg => mpi_enreg
+ l_cpopt = cpopt
+ l_sij_opt = sij_opt
+
+end subroutine setter_evil
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slicewf/getter_evil
+!! NAME
+!! getter_evil
+!!
+!! SOURCE
+
+subroutine getter_evil(mpi_enreg, cpopt, sij_opt)
+
+ implicit none
+
+ type(mpi_type), pointer, intent(out) :: mpi_enreg
+ integer, intent(out) :: cpopt
+ integer, intent(out) :: sij_opt
+
+ call copy_mpi_enreg(l_mpi_enreg, mpi_enreg)
+ cpopt = l_cpopt
+ sij_opt = l_sij_opt
+
+end subroutine getter_evil
+!!***
 
 end module m_slicewf
 !!***
