@@ -147,10 +147,10 @@ module m_orbmag
     ! 3 for the 3 directions
     ! orbmag_trace(3,orbmag_nterms)
     
-    real(dp),allocatable :: rmesh(:,:,:,:,:)
+    real(dp),allocatable :: rmesh(:,:,:,:,:,:)
     ! total orbmag on real mesh
     ! 3 for the 3 directions
-    ! rmesh(2,n4,n5,n6,3)
+    ! rmesh(2,n4,n5,n6,3,orbmag_nterms)
 
     contains
 
@@ -605,13 +605,13 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 text after Eq. 42
      nl1_option = 1 ! LR
-     call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,mcprjk,mkmem_rbz,&
-       & nband_k,nl1_option,orbmag_mesh,pawtab)
+     call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppol,&
+       & mcgk,mcprjk,mkmem_rbz,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab)
 
      ! ZTG23 Eq. 43
      nl1_option = 2 ! BM
-     call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,mcprjk,mkmem_rbz,&
-       & nband_k,nl1_option,orbmag_mesh,pawtab)
+     call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppol,&
+       & mcgk,mcprjk,mkmem_rbz,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab)
 
      ! accumulate terms
      do nn = 1, nband_k
@@ -777,10 +777,10 @@ subroutine orbmag_mpisum(omag,nproc,spaceComm)
       ABI_MALLOC(buffer2,(buff_size))
       buffer1=zero;buffer2=zero
       buffer1(1:buff_size) = &
-        & reshape(omag%rmesh,(/2*omag%n4*omag%n5*omag%n6*3/))
+        & reshape(omag%rmesh,(/2*omag%n4*omag%n5*omag%n6*3*orbmag_nterms/))
       call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-      omag%rmesh(1:2,1:omag%n4,1:omag%n5,1:omag%n6,1:3)=&
-        & reshape(buffer2,(/2,omag%n4,omag%n5,omag%n6,3/))
+      omag%rmesh(1:2,1:omag%n4,1:omag%n5,1:omag%n6,1:3,1:orbmag_nterms)=&
+        & reshape(buffer2,(/2,omag%n4,omag%n5,omag%n6,3,orbmag_nterms/))
       ABI_FREE(buffer1)
       ABI_FREE(buffer2)
     end if
@@ -870,16 +870,20 @@ end subroutine orbmag_term_scale
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
+!!  cg_k(2,mcgk) ground state wavefunctions at this k point
 !!  cprj_k(dtset%natom,mcprjk)<type(pawcprj_type)>=cprj for cg_k
 !!  dimlmn(dtset%natom)=cprj lmn dimensions
 !!  dterm <type(dterm_type)> data related to onsite interactions
 !!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  gs_hamk<type(gs_hamiltonian_type)>=ground state Hamiltonian at this k
 !!  ikpt=current k pt
 !!  isppol=current spin polarization
+!!  mcgk=2nd dimension of cg_k
 !!  mcprjk=dimension of cprj_k
 !!  mkmem_rbz=kpts in memory
 !!  nband_k=bands at this kpt
 !!  nl1_option=chooses which onsite term to apply
+!!  npw_k=planewaves at this k point
 !!  pawtab(dtset%ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!
 !! OUTPUT
@@ -896,53 +900,61 @@ end subroutine orbmag_term_scale
 !!
 !! SOURCE
 
-subroutine orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,mcprjk,&
-    & mkmem_rbz,nband_k,nl1_option,orbmag_mesh,pawtab)
+subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppol,&
+    & mcgk,mcprjk,mkmem_rbz,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: ikpt,isppol,mcprjk,mkmem_rbz,nband_k,nl1_option
+  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,nl1_option,npw_k
   type(dterm_type),intent(in) :: dterm
   type(dataset_type),intent(in) :: dtset
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
+  real(dp),intent(in),target :: cg_k(2,mcgk)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,nn
+  integer :: adir,nn,npwsp
   complex(dp) :: tt
   !arrays
+  real(dp),pointer :: cwavef(:,:)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 !--------------------------------------------------------------------
 
+ npwsp = npw_k*dtset%nspinor
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
 
  do nn = 1, nband_k
+   cwavef => cg_k(1:2,(nn-1)*npwsp+1:nn*npwsp)
    call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
      & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
+  
    do adir = 1, 3
 
      select case (nl1_option)
      case(1)
-       call tt_me(dterm%LR(:,:,:,adir),atindx,dtset,dterm%lmn2max,dterm%ndij,pawtab,tt,cwaveprj)
+       call tt_me(dterm%LR(:,:,:,adir),atindx,cwavef,dtset,gs_hamk,dterm%lmn2max,dterm%ndij,pawtab,tt,cwaveprj)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inlr) = real(tt)
      case(2)
-       call tt_me(dterm%BM(:,:,:,adir),atindx,dtset,dterm%lmn2max,dterm%ndij,pawtab,tt,cwaveprj)
+       call tt_me(dterm%BM(:,:,:,adir),atindx,cwavef,dtset,gs_hamk,dterm%lmn2max,dterm%ndij,pawtab,tt,cwaveprj)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inbm) = real(tt)
      case default
        tt = czero
      end select
 
    end do !adir
+ 
  end do !nn
 
  call pawcprj_free(cwaveprj)
- ABI_FREE(cwaveprj)
+ ABI_SFREE(cwaveprj)
+ if (ASSOCIATED(cwavef)) NULLIFY(cwavef)
 
 end subroutine orbmag_nl1_k
 !!***
@@ -1199,7 +1211,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
          
          if (need_ormesh) then
            call orbmag_mesh%accum_rmesh(adir,bra,fofr,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
-             & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,&
+             & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,incc,&
              & mult_fact=one,conjg_flag=.FALSE.)
          end if
        
@@ -1399,10 +1411,10 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
 
          if (need_ormesh) then
            call orbmag_mesh%accum_rmesh(adir,brab,fofrg,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
-             & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,&
+             & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,invv1,&
              & mult_fact=(eig_k(nn)-fermie),conjg_flag=.FALSE.)
            call orbmag_mesh%accum_rmesh(adir,brag,fofrb,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
-             & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,&
+             & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,invv1,&
              & mult_fact=(eig_k(nn)-fermie),conjg_flag=.TRUE.)
          endif
 
@@ -1982,7 +1994,9 @@ end subroutine txt_me
 !! INPUTS
 !!  aij(dtset%natom,lmn2max,ndij)=(complex)scalar ij couplings
 !!  atindx(natom)=index table for atoms (see gstate.f)
+!!  cwavef(:,:),pointer=points to current wavefunction
 !!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  gs_hamk<type(gs_hamiltonian_type)>=ground state Hamiltonian at this k
 !!  lmn2max=max value of lmn2 over all psps
 !!  pawtab(dtset%ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  ndij=spin channels in dij
@@ -1996,16 +2010,18 @@ end subroutine txt_me
 !!
 !! SOURCE
 
-subroutine tt_me(aij,atindx,dtset,lmn2max,ndij,pawtab,tt,ucprj)
+subroutine tt_me(aij,atindx,cwavef,dtset,gs_hamk,lmn2max,ndij,pawtab,tt,ucprj)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: lmn2max,ndij
   complex(dp),intent(out) :: tt
   type(dataset_type),intent(in) :: dtset
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(in),pointer :: cwavef(:,:)
   complex(dp),intent(in) :: aij(dtset%natom,lmn2max,ndij)
   type(pawcprj_type),intent(in) :: ucprj(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
@@ -2616,7 +2632,7 @@ subroutine orbmag_init(omag,dtset)
   ABI_REMALLOC(omag%orbmag_trace,(3,orbmag_nterms))
   omag%orbmag_trace=zero
   if (dtset%orbmag .EQ. 4) then
-    ABI_REMALLOC(omag%rmesh,(2,omag%n4,omag%n5,omag%n6,3))
+    ABI_REMALLOC(omag%rmesh,(2,omag%n4,omag%n5,omag%n6,3,orbmag_nterms))
     omag%omesh=zero
   end if
 
@@ -2811,13 +2827,13 @@ end subroutine make_d
 !!
 !! SOURCE
 
-subroutine orbmag_rmesh(omag,adir,bra,fofr,n4,n5,n6,natom,npw_k,ph3d,prefac_m,t_atom,&
+subroutine orbmag_rmesh(omag,adir,bra,fofr,n4,n5,n6,natom,npw_k,ph3d,prefac_m,t_atom,term_index,&
     & mult_fact,conjg_flag) 
 
   !Arguments ------------------------------------
   !scalars
   class(orbmag_mesh_type),intent(inout),target :: omag
-  integer,intent(in) :: adir,n4,n5,n6,natom,npw_k,t_atom
+  integer,intent(in) :: adir,n4,n5,n6,natom,npw_k,t_atom,term_index
   real(dp),intent(in),optional :: mult_fact
   complex(dp) :: prefac_m
   logical,intent(in),optional :: conjg_flag
@@ -2866,15 +2882,15 @@ subroutine orbmag_rmesh(omag,adir,bra,fofr,n4,n5,n6,natom,npw_k,ph3d,prefac_m,t_
 
   if (the_conjg_flag) then
     ! add ffac * conjg(fofr)
-    omag%rmesh(1,:,:,:,adir) = omag%rmesh(1,:,:,:,adir) +&
+    omag%rmesh(1,:,:,:,adir,term_index) = omag%rmesh(1,:,:,:,adir,term_index) +&
       & ffac(1)*fofr(1,:,:,:) + ffac(2)*fofr(2,:,:,:)
-    omag%rmesh(2,:,:,:,adir) = omag%rmesh(2,:,:,:,adir) -&
+    omag%rmesh(2,:,:,:,adir,term_index) = omag%rmesh(2,:,:,:,adir,term_index) -&
       & ffac(1)*fofr(2,:,:,:) + ffac(2)*fofr(1,:,:,:)
   else
     ! add ffac * fofr
-    omag%rmesh(1,:,:,:,adir) = omag%rmesh(1,:,:,:,adir) +&
+    omag%rmesh(1,:,:,:,adir,term_index) = omag%rmesh(1,:,:,:,adir,term_index) +&
       & ffac(1)*fofr(1,:,:,:) - ffac(2)*fofr(2,:,:,:)
-    omag%rmesh(2,:,:,:,adir) = omag%rmesh(2,:,:,:,adir) +&
+    omag%rmesh(2,:,:,:,adir,term_index) = omag%rmesh(2,:,:,:,adir,term_index) +&
       & ffac(1)*fofr(2,:,:,:) + ffac(2)*fofr(1,:,:,:)
   end if
 
@@ -3046,7 +3062,7 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
  !! orbmag_rmesh dimensions, only if output
  if (has_ormesh) then
    ncerr = nctk_def_arrays(ncid, [&
-     nctkarr_t("orbmag_rmesh", "dp", "ormesh_cplex,n4,n5,n6,ndir")])
+     nctkarr_t("orbmag_rmesh", "dp", "ormesh_cplex,n4,n5,n6,ndir,orbmag_nterms")])
    NCF_CHECK(ncerr)
  endif
 
