@@ -277,7 +277,7 @@ the shielding, divide by the dipole strength (here, 1), and multiply by
 554.9~ppm. This result is underconverged--the fully converged result,
 with [[ecut]]=30, is 552.1 ppm. For comparison, the all-electron,
 wavefunction-based calculation using post-Hartree-Fock CCSD(T) of
-[[cite:Vaara2003relativistic]] yields 551.9 ppm, so clearly the
+[[cite:Vaara2003]] yields 551.9 ppm, so clearly the
 present method is capable of excellent accuracy.  The second line is
 the Chern vector [[cite:Ceresoli2006]], that is, the integral of the
 Berry curvature, which outside of exotic topological insulators,
