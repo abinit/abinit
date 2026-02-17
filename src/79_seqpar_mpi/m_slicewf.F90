@@ -96,6 +96,11 @@ module m_slicewf
  integer, save :: l_useria
  integer, save :: l_block_sliced
 
+#ifdef HAVE_OPENM_OFFLOAD
+! For use in getBm1X
+ integer, save, private :: blockdim_evil = 0
+#endif
+
  type(mpi_type),pointer,save :: l_mpi_enreg
  type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
 
@@ -103,8 +108,6 @@ module m_slicewf
  integer, parameter :: DEBUG_COLUMNS = 5
 
  public :: slicewf
- public :: setter_evil ! workaround for save private
- public :: getter_evil ! workaround for save private
 
  CONTAINS  !========================================================================================
 !!***
@@ -437,11 +440,18 @@ subroutine getBm1X(X,Bm1X)
  real(dp), pointer :: gsm1hc_filter(:,:)
  type(pawcprj_type), allocatable :: cwaveprj_next(:,:) !dummy
 
-! *********************************************************************
+! ********************************************************************* 
 
  ! working bandpp will be equal to blockdim
  call xgBlock_getSize(X,spacedim,blockdim)
 
+#ifdef HAVE_OPENM_OFFLOAD
+ if (blockdim_evil > 0 .and. blockdim /= blockdim_evil) then
+    call gpu_reset_state()
+ end if
+ blockdim_evil = blockdim
+#endif
+ 
  if(l_paw) then
 
    call xgBlock_reverseMap(X,ghc_filter,rows=1,cols=spacedim*blockdim)
@@ -470,52 +480,6 @@ subroutine getBm1X(X,Bm1X)
  end if
 
 end subroutine getBm1X
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slicewf/setter_evil
-!! NAME
-!! setter_evil
-!!
-!! SOURCE
-
-subroutine setter_evil(mpi_enreg, cpopt, sij_opt)
-
- implicit none
-
- type(mpi_type), pointer, intent(in) :: mpi_enreg
- integer, intent(in) :: cpopt
- integer, intent(in) :: sij_opt
-
- l_mpi_enreg => mpi_enreg
- l_cpopt = cpopt
- l_sij_opt = sij_opt
-
-end subroutine setter_evil
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slicewf/getter_evil
-!! NAME
-!! getter_evil
-!!
-!! SOURCE
-
-subroutine getter_evil(mpi_enreg, cpopt, sij_opt)
-
- implicit none
-
- type(mpi_type), pointer, intent(out) :: mpi_enreg
- integer, intent(out) :: cpopt
- integer, intent(out) :: sij_opt
-
- call copy_mpi_enreg(l_mpi_enreg, mpi_enreg)
- cpopt = l_cpopt
- sij_opt = l_sij_opt
-
-end subroutine getter_evil
 !!***
 
 end module m_slicewf

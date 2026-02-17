@@ -106,7 +106,6 @@ module m_slice
     use m_xg_ortho_RR
     use m_chebfi2
     use m_slice_cprj, only: smallestTridiagEigenpair, buildChebyshevJacksonCoeffs
-    use m_mpinfo,     only: init_mpi_enreg, destroy_mpi_enreg
 
     use m_xmpi
     use m_xomp
