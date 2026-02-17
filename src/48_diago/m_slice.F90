@@ -99,7 +99,6 @@ module m_slice
     use m_errors
     use m_time, only : timab
     use m_sort, only: sort_dp
-    !use m_io_tools, only : flush_unit
 
     use m_cgtools
     use m_xg
@@ -107,6 +106,7 @@ module m_slice
     use m_xg_ortho_RR
     use m_chebfi2
     use m_slice_cprj, only: smallestTridiagEigenpair, buildChebyshevJacksonCoeffs
+    use m_mpinfo,     only: init_mpi_enreg, destroy_mpi_enreg
 
     use m_xmpi
     use m_xomp
@@ -954,6 +954,8 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     ! Derived types
     type(xgBlock_t) :: xXColsRows
     type(xgTransposer_t) :: xgTransposerX
+    type(mpi_type) :: mpi_enreg_old
+    type(mpi_type) :: mpi_enreg_new
     ! Arrays
     complex(dp), allocatable :: cheby_moments(:,:)
 
@@ -996,12 +998,17 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     write(std_out,*) 'Here I write the Lanczos yeyyy'
     flush(std_out)
 
-    kmax = 100
+    !call init_mpi_enreg(mpi_enreg_old)
+    !call setter_evil(mpi_enreg_old)
+    
+    kmax = 30
     call computeBLanczos(slice, getAX_BX, getBm1X, kmax, lambda_min, res_norm)
 
     lanczos_lowb = lambda_min - res_norm
     call xmpi_min(lanczos_lowb,lanczos_lowb_global,slice%spacecom,ierr)
     
+    lanczos_lowb_global = -0.138d0
+
     write(std_out,*) 'Lanczos lambda_min=', lambda_min
     write(std_out,*) 'Lanczos res_norm  =', res_norm
     write(std_out,*) 'Lanczos guarantee =', lanczos_lowb
@@ -2301,12 +2308,15 @@ end subroutine print_scalar_filter
     spacedim = slice%total_spacedim
     gpu_option = slice%gpu_option
     me_g0 = slice%me_g0
+    if (slice%paral_kgb==1) then
+        me_g0 = slice%me_g0_fft
+    end if
     rank = xmpi_comm_rank(slice%spacecom)
     beta_prev = 0.0_dp
 
     ABI_MALLOC(v_min, (spacedim))
     
-    write(901+rank,*) 'Lanczos in rank=', rank; flush(901+rank)
+    write(std_out,*) 'Lanczos in rank=', rank; flush(std_out)
 
     ! workspace size (npw,5)
     call xg_init(W_vcol, space, spacedim, 5, xmpi_comm_null, me_g0=me_g0, gpu_option=gpu_option)
@@ -2323,8 +2333,8 @@ end subroutine print_scalar_filter
 
     ! q = random column vector
     call xgBlock_colwiseRandom(q, rank, 1)
-    write(901+rank,*) 'Random id=', xgBlock_getid(q) 
-    flush(901+rank)
+    write(std_out,*) 'Random id=', xgBlock_getid(q) 
+    flush(std_out)
 
     ! Bv = B * q / norml_q
     ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
@@ -2340,6 +2350,9 @@ end subroutine print_scalar_filter
     call xgBlock_scale(q, norml_q, 1)
     call xgBlock_scale(v, norml_q, 1)
     call xgBlock_scale(Bv, norml_q, 1)
+
+    alpha = 0.d0
+    beta = 0.d0
 
     do j = 1, k
 
@@ -2368,7 +2381,7 @@ end subroutine print_scalar_filter
             call xgBlock_copy(Bm1v, v)
             call timab(tim_copy, 2, tsec)
         end if
-        
+
         ! v = B^{-1} A q - alpha q - beta_prev q_prev
         call xgBlock_saxpy(v, -1.d0 * alpha(j), q)
         if (j > 1) then
@@ -2512,6 +2525,7 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
 
     ! Initialize Chebyshev recursion with orthonormalized X0
     chebfi%xXColsRows = X0
+    call xgBlock_setBlock(X0, chebfi%xXColsRows, tot_spacedim, nband)
     if (slice%paral_kgb==1) then
         ! Normalize X
         call xgBlock_reverseMap(Moment_ideg, momvals, nband, 1)
@@ -2538,6 +2552,11 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     
     call xmpi_max(maxeig, maxeig_global, spacecom, ierr)
 
+    write(std_out,*) 'maxeig_global=', maxeig_global
+    write(std_out,*) 'divresults=', xgBlock_getid(DivResults%self)
+    !call xgBlock_print(DivResults%self, std_out)
+    flush(std_out)
+
     ! Spectral interval to be amplified scaled to [-1,1)
     center = (max_upp_bound + min_low_bound)*0.5
     radius = (max_upp_bound - min_low_bound)*0.5 
@@ -2546,12 +2565,20 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
 
     do ideg = 0, ndeg_filter_max - 1
        
-        write(901+xmpi_comm_rank(spacecom),*) 'ideg=', ideg
-        flush(901+xmpi_comm_rank(spacecom))
+        write(std_out,*) 'ideg=', ideg
+        write(std_out,*) 'ok bug start'
+        write(std_out,*) 'xX=', xgBlock_getid(chebfi%xXColsRows)
+        write(std_out,*) 'xAX=', xgBlock_getid(chebfi%xAXColsRows)
+        write(std_out,*) 'xBX=', xgBlock_getid(chebfi%xBXColsRows)
+        write(std_out,*) 'X_next=', xgBlock_getid(chebfi%X_next)
+        flush(std_out)
 
         ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
         call chebfi_computeNextOrderChebfiPolynom(chebfi, ideg, center, one_over_r, two_over_r, getBm1X)
         ABI_NVTX_END_RANGE()
+
+        write(std_out,*) 'ok bug end'
+        flush(std_out)
 
         ! chebfi%xXColsRows = f_ideg X0
         ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
