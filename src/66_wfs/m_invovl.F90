@@ -70,6 +70,11 @@ MODULE m_invovl
  public :: apply_invovl
  public :: destroy_invovl
 
+ ! Workaround with hidden global variables
+#ifdef HAVE_OPENMP_OFFLOAD
+ public :: gpu_reset_state
+#endif
+
  ! Those routines are here to assess memory requirements
  public :: invovl_ompgpu_work_mem
  public :: invovl_ompgpu_static_mem
@@ -178,8 +183,8 @@ end type invovl_kpt_type
  real(dp),allocatable, target :: sm1proj_ompgpu(:,:,:)
  real(dp),allocatable, target :: PtPsm1proj_ompgpu(:,:,:)
  !Module variable keeping track of which K-point data is so=tored on GPU
- integer, save :: current_ikpt_in_gpu=-1
- integer, save :: gpu_initialized=0
+ integer, save, private :: current_ikpt_in_gpu=-1
+ integer, save, private :: gpu_initialized=0
 #endif
 
 #if defined(HAVE_GPU_CUDA)
@@ -298,6 +303,13 @@ CONTAINS
 #endif
 
 #ifdef HAVE_OPENMP_OFFLOAD
+
+ subroutine gpu_reset_state()
+
+     current_ikpt_in_gpu = -1
+     gpu_initialized = 0
+
+ end subroutine gpu_reset_state
 
  subroutine alloc_ompgpu_buffers(cplx,nprojs,nspinor,ndat)
   integer,intent(in) :: cplx,nprojs,nspinor,ndat
