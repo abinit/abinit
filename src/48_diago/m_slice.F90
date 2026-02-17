@@ -591,7 +591,8 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
 
     ! Slice left
     slice%neigenpairs_per_slice(1) = wanted_mass
-    slice%fcol_in_X(1) = 1
+    slice%fcol_in_X(1) = 1 ! todo big modif this should be replaced by a simple index
+    ! i propose to not apply the big modif and try to workaround as it is for now
     slice%fcol_in_Xext(1) = 1
     slice%poly_degrees(1) = slice%ndeg_filter
     slice%part_low_bounds(1) = slice%mineig_global ! todo
@@ -601,8 +602,8 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
 
     ! Slice right
     slice%neigenpairs_per_slice(2) = wanted_mass
-    slice%fcol_in_X(2) = 1
-    slice%fcol_in_Xext(2) = 1
+    slice%fcol_in_X(2) = 30
+    slice%fcol_in_Xext(2) = 30
     slice%poly_degrees(2) = slice%ndeg_filter
     slice%part_low_bounds(2) = slice%mineig_global ! todo
     slice%part_upp_bounds(2) = slice%maxeig_global ! todo
@@ -613,21 +614,12 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
 
     ! ===================== Resource management system ================================================= 
 
-    ! TODO half of the processes are assigned per slice
+    ! TODO half of the processes are assigned per slice, not true actually
     ! under the uniform mass splitting that simplifies things and we no longer need fair allocation
     ! Process: 
     ! 
-    ! - after debugging computeSpectrum: delete all this unwanted part if not used
-    ! must debug very carefuly. 
-    ! **Prefer to debug with _LOG files instead of 901+rank**
-    ! 
     
     ! Divide resources into slice tasks
-    slice%nproc_per_slice = xmpi_comm_size(slice%spacecom)
-    write(std_out,*) 'slice%nproc_per_slice=', slice%nproc_per_slice
-    write(std_out,*) 'slice%spacecom size=', xmpi_comm_size(slice%spacecom)
-    !slice%lookup_proc = 0
-     
     call slice_allocateResources(slice)
 
     ! Run on all ranks of spacecom: Mark my slice task and resources as actively in use
@@ -642,8 +634,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
 
     slice%neigenpairs_ext = sum(slice%neigenpairs_per_slice)
 
-    ! todo adapt to np=1
-    if (slice%nslice==1) then
+    if (slice%paral_kgb==0) then
         slice%XextLinalg = X0
     else 
         ! Allocate extended space in linalg representation
@@ -651,7 +642,6 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
             slice%spacecom, me_g0=slice%me_g0, gpu_option=slice%gpu_option)
         
         slice%XextLinalg = slice%X_ext%self
-
 
         ! TODO adapt we did not permute
         ! Copy X to XextLinalg by column blocks
@@ -667,7 +657,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     end if
 
     ! Unitary test
-    if (cols(slice%XextLinalg) /= slice%neigenpairs_ext) then
+    if (slice%paral_kgb==1 .and. cols(slice%XextLinalg) /= slice%neigenpairs_ext) then
         ABI_ERROR('wrong linalg representation')
     end if
     write(std_out,'(a,i6,i6)') '# proc has # cols of Xext_linalg ', xmpi_comm_rank(slice%spacecom), cols(slice%XextLinalg)
@@ -798,7 +788,8 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     slice%use_linalg = .false.
 
     ! Unitary test
-    if ( cols(slice%me_Xext_active) /= slice%ncolsColsRows(xmpi_comm_rank(slice%spacecom)+1) ) then
+    if ( slice%paral_kgb == 1 .and.&
+        cols(slice%me_Xext_active) /= slice%ncolsColsRows(xmpi_comm_rank(slice%spacecom)+1) ) then
         ABI_ERROR('wrong colsrows representation')
     end if
     write(std_out,'(a,i6,i6,i6)') '# proc has # cols of Xext ', xmpi_comm_rank(slice%spacecom),&
@@ -830,6 +821,10 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     ABI_MALLOC_IFNOT(nrowsLinalg,(num_proc))
     nrowsLinalg_ptr => nrowsLinalg
     nrowsLinalg = slice%me_nrowsLinalg_slice
+
+    write(std_out,*) "Allocating slice space..", slice%total_spacedim, neigenpairs
+    write(std_out,*) "bands per process=", bandpp
+    flush(std_out)
 
     ! Initialize chebfi object in MPI Colsrows distribution
     call chebfi_init(chebfi,neigenpairs,slice%total_spacedim,slice%tolerance,slice%ecut,slice%paral_kgb,bandpp,&
@@ -1005,8 +1000,6 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
 
     lanczos_lowb = lambda_min - res_norm
     call xmpi_min(lanczos_lowb,lanczos_lowb_global,slice%spacecom,ierr)
-    
-    lanczos_lowb_global = -0.138d0
 
     write(std_out,*) 'Lanczos lambda_min=', lambda_min
     write(std_out,*) 'Lanczos res_norm  =', res_norm
@@ -1030,6 +1023,18 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
 
     write(std_out,*) 'I finally split spectrum..', lanczos_lowb_global, maxeig_global
     flush(std_out)
+
+    ! TODO 
+    ! it would be nice to support nslice=2 and nslice=3
+    ! how to split: sketching the restart technique.
+    ! Step 1. find mass flip c_1; a < c_1 < b.
+    ! Step 2. Cut to this mass flip and restrict to [c_1,b)
+    ! Step 3. Repeat step 1 to find mass flip c_2; c_1 < c_2 < b.
+    !> other technique
+    ! capable of detecting gaps
+    ! detects steps where the mass stays constant. This is the
+    ! criterion of the constant mass.
+    
 
     nstep_bisect = 10 ! Parameter affects accuracy of splitSpectrum
     center = (slice%ecut + mineig_global) / 2.d0
@@ -1351,11 +1356,6 @@ subroutine slice_allocateResources(slice)
    
     call xmpi_barrier(slice%spacecom)
    
-    ! todo fix for MPI=1 this should work
-    if (maxval(slice%lookup_proc)+1 .ne. slice%nslice) then
-        ABI_ERROR("Resource error: not enough procs to divide into slices. Please increase npband")
-    end if
-
     do iproc = 1, slice%nproc
         write(std_out,'(a,i5,a,i5)') "Process ", iproc-1, " allocated to task ", slice%lookup_proc(iproc)
     end do
@@ -1403,24 +1403,19 @@ subroutine slice_markActiveTask(slice)
     slice%me_nproc_slice = slice%nproc_per_slice(slice%me_id_slice)
     slice%me_ndeg_slice = slice%poly_degrees(slice%me_id_slice)
 
-    ! TODO resolve normally it should not be very complicated like simple deactivate
-    ! all communicators set to null and then use distributions like none.
-    ! Make sure transposer routines are never called
-    if(slice%me_nproc_slice==1) then
-        ABI_ERROR("Slicing with a single MPI process not implemented.")
-    end if
-
     ABI_MALLOC_IFNOT(slice%me_ncolsColsRows_slice, (slice%me_nproc_slice))
     ABI_MALLOC_IFNOT(slice%me_nrowsLinalg_slice, (slice%me_nproc_slice))
 
-    ! Compute column distribution across active resources
-    call distribute_vectors(slice%me_neigenpairs_slice, slice%me_nproc_slice, slice%me_ncolsColsRows_slice)
+    if (slice%paral_kgb==1) then
+        ! Compute column distribution across active resources
+        call distribute_vectors(slice%me_neigenpairs_slice, slice%me_nproc_slice, slice%me_ncolsColsRows_slice)
     
-    ! Compute row distribution across active resources
-    call distribute_vectors(slice%total_spacedim, slice%me_nproc_slice, slice%me_nrowsLinalg_slice)
+        ! Compute row distribution across active resources
+        call distribute_vectors(slice%total_spacedim, slice%me_nproc_slice, slice%me_nrowsLinalg_slice)
+    end if
 
     ! Split global comm into disjoint sub-comms, only procs with the same color communicate
-    if (slice%nslice==1) then
+    if (slice%paral_kgb==0) then
         slice%me_comm_slice = slice%spacecom
         slice%me_comm_rows = slice%comm_rows
         slice%me_comm_cols = slice%comm_cols
@@ -1444,7 +1439,10 @@ subroutine slice_markActiveTask(slice)
 
     ! Concatenate slice%me_ncolsColsRows_slice into collective slice%ncolsColsRows
     my_rank_sub = xmpi_comm_rank(slice%me_comm_slice)
-    slice%me_bandpp_slice = slice%me_ncolsColsRows_slice(my_rank_sub + 1)
+    slice%me_bandpp_slice = slice%bandpp
+    if (slice%paral_kgb==1) then
+        slice%me_bandpp_slice = slice%me_ncolsColsRows_slice(my_rank_sub + 1)
+    end if
     call xmpi_allgather(slice%me_bandpp_slice, slice%ncolsColsRows, slice%spacecom, ierr)
     if ( ierr /= xmpi_success ) then
         ABI_ERROR("Error while gathering number of columns in colsrows for all slices")
@@ -2565,19 +2563,11 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     do ideg = 0, ndeg_filter_max - 1
        
         write(std_out,*) 'ideg=', ideg
-        write(std_out,*) 'ok bug start'
-        write(std_out,*) 'xX=', xgBlock_getid(chebfi%xXColsRows)
-        write(std_out,*) 'xAX=', xgBlock_getid(chebfi%xAXColsRows)
-        write(std_out,*) 'xBX=', xgBlock_getid(chebfi%xBXColsRows)
-        write(std_out,*) 'X_next=', xgBlock_getid(chebfi%X_next)
         flush(std_out)
 
         ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
         call chebfi_computeNextOrderChebfiPolynom(chebfi, ideg, center, one_over_r, two_over_r, getBm1X)
         ABI_NVTX_END_RANGE()
-
-        write(std_out,*) 'ok bug end'
-        flush(std_out)
 
         ! chebfi%xXColsRows = f_ideg X0
         ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
@@ -2604,7 +2594,7 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     end if
 
     call xgBlock_reverseMap(Moments%self, momvals, nband, ndeg_filter_max+1)
-    cheby_moments = momvals
+    cheby_moments(:,:) = momvals(:,:)
 
     ! Free memory
     call xg_free(Moments)
