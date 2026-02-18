@@ -161,8 +161,7 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  complex(gwp),allocatable :: vc_sqrt_gx(:), ur_nkp(:,:), ur_mk(:,:), kxcg(:,:), mu_mn(:,:)
  complex(dp),allocatable :: w_ee(:,:) ! w_kkp(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
- class(fstab_t),target,allocatable :: fstab(:)
- class(fstab_t),pointer :: fs
+ type(fstab_t),target,allocatable :: fstab(:)
 !************************************************************************
 
  ABI_CHECK(psps%usepaw == 0, "PAW not implemented")
@@ -192,8 +191,7 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
 
  ! Find Fermi surface k-points.
  ! TODO: support kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface!
- !ABI_MALLOC(fstab, (nsppol))
- allocate(fstab(nsppol))
+ ABI_MALLOC(fstab, (nsppol))
  call fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
  call tetra%free()
 
@@ -683,11 +681,9 @@ subroutine wkk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  call epsm1%free()
 
  do spin=1,ebands%nsppol
-   fs => fstab(spin)
-   call fs%free()
+   call fstab(spin)%free()
  end do
- deallocate(fstab)
- !ABI_FREE(fstab)
+ ABI_FREE(fstab)
 
  call xmpi_barrier(comm) ! This to make sure that the parallel output of WKK is completed
  call cwtime_report(" wkk_run: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
