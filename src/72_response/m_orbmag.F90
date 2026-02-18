@@ -942,12 +942,12 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppo
 
      select case (nl1_option)
      case(1)
-       call tt_me(dterm%LR(:,:,:,adir),atindx,cwavef,dtset,gs_hamk,dterm%lmn2max,mpi_enreg,&
-         & dterm%ndij,npw_k,pawtab,tt,cwaveprj)
+       call tt_me(adir,dterm%LR(:,:,:,adir),atindx,cwavef,dtset,gs_hamk,dterm%lmn2max,mpi_enreg,&
+         & dterm%ndij,npw_k,orbmag_mesh,inlr,pawtab,tt,cwaveprj)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inlr) = real(tt)
      case(2)
-       call tt_me(dterm%BM(:,:,:,adir),atindx,cwavef,dtset,gs_hamk,dterm%lmn2max,mpi_enreg,&
-         & dterm%ndij,npw_k,pawtab,tt,cwaveprj)
+       call tt_me(adir,dterm%BM(:,:,:,adir),atindx,cwavef,dtset,gs_hamk,dterm%lmn2max,mpi_enreg,&
+         & dterm%ndij,npw_k,orbmag_mesh,inbm,pawtab,tt,cwaveprj)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inbm) = real(tt)
      case default
        tt = czero
@@ -2016,15 +2016,17 @@ end subroutine txt_me
 !!
 !! SOURCE
 
-subroutine tt_me(aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,ndij,npw_k,pawtab,tt,ucprj)
+subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
+    & ndij,npw_k,orbmag_mesh,oterm,pawtab,tt,ucprj)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: lmn2max,ndij,npw_k
+  integer,intent(in) :: adir,lmn2max,ndij,npw_k,oterm
   complex(dp),intent(out) :: tt
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
+  type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
@@ -2036,13 +2038,13 @@ subroutine tt_me(aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,ndij,npw_k,pa
   !Local variables -------------------------
   !scalars
   integer :: fourwf_cplex,fourwf_option,iat,iatom,isp,itypat
-  integer :: ilmn,ipw,jlmn,klmn,ndat,npwsp,t_atom,tim_fourwf
+  integer :: il,ilmn,ipw,jl,jlmn,klmn,ndat,npwsp,t_atom,tim_fourwf
   logical :: need_ormesh
   real(dp) :: weight_i,weight_r
-  complex(dp) :: cpi,cpj,dij
+  complex(dp) :: cpi,cpj,dij,ormesh_fac
   !arrays
-  real(dp),allocatable,target :: fofr(:,:,:,:)
-  real(dp),allocatable :: denpot(:,:),fofgin(:,:),fofgout(:,:)
+  real(dp),allocatable,target :: fofgin(:,:),fofr(:,:,:,:)
+  real(dp),allocatable :: denpot(:,:),fofgout(:,:)
 !--------------------------------------------------------------------
 
   fourwf_cplex = 1
@@ -2054,7 +2056,7 @@ subroutine tt_me(aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,ndij,npw_k,pa
 
   if (need_ormesh) then
     do iat = 1, dtset%natom
-      if ( ANY(ABS(dtset%nucdipmom(1:3,iatom))>tol8) ) then
+      if ( ANY(ABS(dtset%nucdipmom(1:3,iat))>tol8) ) then
         t_atom = iat
         exit
       end if
@@ -2095,9 +2097,15 @@ subroutine tt_me(aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,ndij,npw_k,pa
           tt = tt + CONJG(cpi)*dij*cpj
           
           if (need_ormesh .AND. iat.EQ.t_atom) then
+            jl = pawtab(itypat)%indlmn(1,jlmn)
+            il = pawtab(itypat)%indlmn(1,ilmn)
+            ormesh_fac = dij*four_pi*CONJG(j_dpc**il)*four_pi*(j_dpc**jl)
             ABI_MALLOC(fofgin,(2,npwsp))
             fofgin(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)*cwavef(1,1:npwsp)
             fofgin(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)*cwavef(2,1:npwsp)
+            call orbmag_mesh%accum_rmesh(adir,fofgin,fofr,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
+              & dtset%natom,npw_k,gs_hamk%ph3d_k,cone,t_atom,oterm,&
+              & mult_fact=ormesh_fac,conjg_flag=.FALSE.)
             ABI_FREE(fofgin)
           end if
 
