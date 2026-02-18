@@ -1037,23 +1037,18 @@ subroutine orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
    m1(1:3) = czero
    do bdir = 1, 3
      do gdir = 1, 3
-
-       call txt_me(dterm%aij,atindx,bdir,dtset,gdir,dterm%lmn2max,dterm%ndij,&
-         & pawtab,txt_d,cwaveprj)
-
-       call txt_me(dterm%qij,atindx,bdir,dtset,gdir,dterm%lmn2max,dterm%ndij,&
-         & pawtab,txt_q,cwaveprj)
-
        do adir = 1, 3
-
+         
          epsabg = eijk(adir,bdir,gdir)
          if (ABS(epsabg) .LT. half) cycle
          prefac_m = com*c2*epsabg
+
+         call txt_me(atindx,bdir,dterm,dtset,eig_k,gdir,nn,nband_k,pawtab,txt_d,cwaveprj)
+       
          ! note rho^0 H^1 term has opposite sign of rho^1 H^0
-         m1(adir) = m1(adir) - prefac_m*(txt_d - eig_k(nn)*txt_q)
+         m1(adir) = m1(adir) - prefac_m*txt_d
 
        end do ! adir
-
      end do !gdir
    end do !bdir
 
@@ -1929,17 +1924,18 @@ end subroutine lamb_core
 !!
 !! SOURCE
 
-subroutine txt_me(aij,atindx,bdir,dtset,gdir,lmn2max,ndij,pawtab,txt,ucprj)
+subroutine txt_me(atindx,bdir,dterm,dtset,eig_k,gdir,iband,nband_k,pawtab,txt,ucprj)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: bdir,gdir,lmn2max,ndij
+  integer,intent(in) :: bdir,gdir,iband,nband_k
   complex(dp),intent(out) :: txt
   type(dataset_type),intent(in) :: dtset
+  type(dterm_type),intent(in) :: dterm
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  complex(dp),intent(in) :: aij(dtset%natom,lmn2max,ndij)
+  real(dp),intent(in) :: eig_k(nband_k)
   type(pawcprj_type),intent(in) :: ucprj(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -1958,23 +1954,29 @@ subroutine txt_me(aij,atindx,bdir,dtset,gdir,lmn2max,ndij,pawtab,txt,ucprj)
         do jlmn = 1, pawtab(itypat)%lmn_size
           klmn = MATPACK(ilmn,jlmn)
           ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
-          dij = aij(iatom,klmn,isp)
+          dij = dterm%aij(iatom,klmn,isp)-eig_k(iband)*dterm%qij(iatom,klmn,isp)
           ! see note at top of file near definition of MATPACK macro
           if (ilmn .GT. jlmn) dij = CONJG(dij)
           dcpi = CMPLX(ucprj(iatom,isp)%dcp(1,bdir,ilmn),ucprj(iatom,isp)%dcp(2,bdir,ilmn))
           dcpj = CMPLX(ucprj(iatom,isp)%dcp(1,gdir,jlmn),ucprj(iatom,isp)%dcp(2,gdir,jlmn))
           txt = txt + CONJG(dcpi)*dcpj*dij
-          if (ndij == 4) then
+          if (dterm%ndij == 4) then
             if (isp == 1) then
-              dij = aij(iatom,klmn,3) ! up-down
+              dij = dterm%aij(iatom,klmn,3)-eig_k(iband)*dterm%qij(iatom,klmn,3) ! up-down
               ! D^ss'_ij=D^s's_ji^*
-              if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,4))
+              !if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,4))
+              if (ilmn .GT. jlmn) then
+                dij = CONJG(dterm%aij(iatom,klmn,4)-eig_k(iband)*dterm%qij(iatom,klmn,4)) 
+              end if
               dcpi = CMPLX(ucprj(iatom,1)%dcp(1,bdir,ilmn),ucprj(iatom,1)%dcp(2,bdir,ilmn))
               dcpj = CMPLX(ucprj(iatom,2)%dcp(1,gdir,jlmn),ucprj(iatom,2)%dcp(2,gdir,jlmn))
             else
-              dij = aij(iatom,klmn,4) ! down-up
+              dij = dterm%aij(iatom,klmn,4)-eig_k(iband)*dterm%qij(iatom,klmn,4) ! down-up
               ! D^ss'_ij=D^s's_ji^*
-              if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,3))
+              !if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,3))
+              if (ilmn .GT. jlmn) then
+                dij = CONJG(dterm%aij(iatom,klmn,3)-eig_k(iband)*dterm%qij(iatom,klmn,3))
+              end if
               dcpi = CMPLX(ucprj(iatom,2)%dcp(1,bdir,ilmn),ucprj(iatom,2)%dcp(2,bdir,ilmn))
               dcpj = CMPLX(ucprj(iatom,1)%dcp(1,gdir,jlmn),ucprj(iatom,1)%dcp(2,gdir,jlmn))
             end if
