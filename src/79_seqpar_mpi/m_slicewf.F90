@@ -435,6 +435,7 @@ subroutine getBm1X(X,Bm1X)
 !scalars
  integer :: blockdim
  integer :: spacedim
+ character(len=500) :: msg
 !arrays
  real(dp), pointer :: ghc_filter(:,:)
  real(dp), pointer :: gsm1hc_filter(:,:)
@@ -446,10 +447,18 @@ subroutine getBm1X(X,Bm1X)
  call xgBlock_getSize(X,spacedim,blockdim)
 
 #ifdef HAVE_OPENMP_OFFLOAD
- if (l_blockdim_evil > 0 .and. blockdim /= l_blockdim_evil) then
-    call invovl_ompgpu_reset()
+ if (l_blockdim_evil > 0) then
+    if (blockdim /= l_blockdim_evil) then
+        write(msg,'(2(a,i0))')' you are about to apply_invovl with ndat=',blockdim,&
+            ' different from allocated ndat=',l_blockdim_evil
+        ABI_WARNING(msg)
+    end if
+    if (blockdim > l_blockdim_evil) then
+        ABI_ERROR('apply_invovl will not work with ndat larger than allocated')
+    end if
+ else
+    l_blockdim_evil = blockdim
  end if
- l_blockdim_evil = blockdim
 #endif
  
  if(l_paw) then

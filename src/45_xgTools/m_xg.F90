@@ -6006,7 +6006,7 @@ contains
     integer(C_SIZE_T) :: byte_count
 #endif
 
-#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD
     complex(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
     integer :: rows,cols,iblock,jblock
@@ -6018,21 +6018,6 @@ contains
     if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
 
 #if defined HAVE_OPENMP_OFFLOAD
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-      select case(xgBlock%space)
-      case (SPACE_R,SPACE_CR)
-        byte_count = int(fact, c_size_t) * xgBlock%ldim * xgBlock%cols * dp
-        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock%vecR)
-        call gpu_memset(c_loc(xgBlock%vecR), 1, byte_count)
-        !$OMP END TARGET DATA
-      case (SPACE_C)
-        byte_count = int(xgBlock%ldim, c_size_t) * xgBlock%cols * 2 * dp ! Note the factor 2, needed here!
-        !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock%vecC)
-        call gpu_memset(c_loc(xgBlock%vecC), 1, byte_count)
-        !$OMP END TARGET DATA
-      end select
-#else
-!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
       rows = xgBlock%rows; cols = xgBlock%cols
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
@@ -6052,7 +6037,6 @@ contains
           end do
         end do
       end select
-#endif
 #endif
 
     else
@@ -6494,8 +6478,6 @@ contains
 
   !!****f* m_xg/xgBlock_colwiseRandom
   !! 
-  !! TODO testing phase
-  !!
   !! NAME
   !! xgBlock_colwiseRandom
 
@@ -6505,6 +6487,7 @@ contains
     integer, intent(in) :: my_rank ! mpi-parallel safe seed
     integer, intent(in) :: jcol
 
+    type(xgBlock_t) :: xgBlock_part
     real(dp) :: re, reim(2)
     real(dp) :: norm2_vec
     integer :: tid, rank, seed_size, i, n
@@ -6520,7 +6503,8 @@ contains
     n = xgBlock%rows
     
     if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
-        call xgBlock_copy_from_gpu(xgBlock)
+        call xgBlock_setBlock(xgBlock, xgBlock_part, n, 1, fcol=jcol)
+        call xgBlock_copy_from_gpu(xgBlock_part)
     end if 
 
     ! Each thread each MPI process maintains its own seed
@@ -6570,7 +6554,7 @@ contains
     end select
     
     if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
-        call xgBlock_copy_to_gpu(xgBlock)
+        call xgBlock_copy_to_gpu(xgBlock_part)
     end if
 
   end subroutine xgBlock_colwiseRandom
