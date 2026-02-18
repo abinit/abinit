@@ -11,7 +11,7 @@ module m_tdep_qpt
  use m_errors
  use m_abicore
  use m_xmpi
- use m_tdep_readwrite,   only : atdep_dataset_type, MPI_enreg_type
+ use m_tdep_dataset,     only : atdep_dataset_type, MPI_enreg_type
  use m_tdep_latt,        only : Lattice_type
 
  implicit none

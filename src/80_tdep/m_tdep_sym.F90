@@ -14,8 +14,8 @@ module m_tdep_sym
  use m_matrix,           only : mati3inv
  use m_symtk,            only : symatm
  use m_symfind,          only : symfind, symanal, symlatt
+ use m_tdep_dataset,     only : atdep_dataset_type, MPI_enreg_type
  use m_tdep_latt,        only : Lattice_type, tdep_make_inbox
- use m_tdep_readwrite,   only : atdep_dataset_type, MPI_enreg_type
 
  implicit none
 

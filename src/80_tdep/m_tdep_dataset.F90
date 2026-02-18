@@ -5,7 +5,7 @@
 
 #include "abi_common.h"
 
-module m_tdep_readwrite
+module m_tdep_dataset
 
   use defs_basis
   use m_errors
@@ -14,7 +14,6 @@ module m_tdep_readwrite
   use m_abihist
   use m_parser
   use m_fstrings, only : inupper,ljust,next_token
-  use m_abimover, only : abimover
   use m_io_tools, only : file_exists
   use m_ddb,      only : ddb_type
   use m_ddb_hdr,  only : ddb_hdr_type
@@ -32,6 +31,7 @@ module m_tdep_readwrite
     integer :: natom_unitcell
     ! Number of atoms in the unit cell
 
+    integer :: nshell_max
     integer :: nstep_max
     integer :: nstep_min
     integer :: nstep_tot
@@ -92,12 +92,7 @@ module m_tdep_readwrite
 
     double precision, allocatable :: znucl(:)
     double precision, allocatable :: qpt(:,:)
-    double precision, allocatable :: xred_ideal(:,:)
     double precision, allocatable :: xred_unitcell(:,:)
-    double precision, allocatable :: xred(:,:,:)
-    double precision, allocatable :: fcart(:,:,:)
-    double precision, allocatable :: etot(:)
-    double precision, allocatable :: weights(:)
 
     character (len=2), allocatable :: special_qpt(:)
     character (len=fnlen) :: output_prefix
@@ -128,58 +123,14 @@ module m_tdep_readwrite
 
   end type MPI_enreg_type
 
- public :: tdep_print_Aknowledgments
  public :: tdep_read_input
- public :: tdep_distrib_data
- public :: tdep_init_MPIdata
-!FB public :: tdep_init_MPIshell
- public :: tdep_destroy_mpidata
  public :: tdep_destroy_invar
+ public :: tdep_init_MPIdata
+ public :: tdep_destroy_mpidata
 
 contains
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- subroutine tdep_print_Aknowledgments(Invar)
-
-  type(atdep_dataset_type) :: Invar
-  integer :: stdout
-  stdout = Invar%stdout
-
-  write(stdout,*) ' '
-  write(stdout,'(a)') ' #############################################################################'
-  write(stdout,'(a)') ' ######################### CALCULATION COMPLETED #############################'
-  write(stdout,'(a)') ' #############################################################################'
-  write(stdout,'(a)') ' Suggested references for the acknowledgment of ABINIT usage.'
-  write(stdout,'(a)') ' '
-  write(stdout,'(a)') ' The users of ABINIT have little formal obligations with respect to the ABINIT group'
-  write(stdout,'(a)') ' (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).'
-  write(stdout,'(a)') ' However, it is common practice in the scientific literature,'
-  write(stdout,'(a)') ' to acknowledge the efforts of people that have made the research possible.'
-  write(stdout,'(a)') ' In this spirit, please find below suggested citations of work written by ABINIT developers,'
-  write(stdout,'(a)') ' corresponding to implementations inside of ABINIT that you have used in the present run.'
-  write(stdout,'(a)') ' Note also that it will be of great value to readers of publications presenting these results,'
-  write(stdout,'(a)') ' to read papers enabling them to understand the theoretical formalism and details'
-  write(stdout,'(a)') ' of the ABINIT implementation.'
-  write(stdout,'(a)') ' For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.'
-  write(stdout,'(a)') ' '
-  write(stdout,'(a)') ' [1] a-TDEP: Temperature Dependent Effective Potential for Abinit '
-  write(stdout,'(a)') ' -- Lattice dynamic properties including anharmonicity'
-  write(stdout,'(a)') ' F. Bottin, J. Bieder and J. Bouchet, Comput. Phys. Comm. 254, 107301 (2020).' ! [[cite:Bottin2020]]
-  write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
-  write(stdout,'(a)') ' '
-  write(stdout,'(a)') ' [2] Thermal evolution of vibrational properties of alpha-U'
-  write(stdout,'(a)') ' J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).' ! [[cite:Bouchet2015]]
-  write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
-  write(stdout,'(a)') ' '
-  write(stdout,'(a)') ' [3] Lattice dynamics of anharmonic solids from first principles'
-  write(stdout,'(a)') ' O. Hellman, I.A. Abrikosov and S.I. Simak, Phys. Rev. B 84, 180301(R) (2011).' ! [[cite:Hellman2011]]
-  write(stdout,'(a)') ' '
-  write(stdout,'(a)') ' [4] Temperature dependent effective potential method for accurate free energy calculations of solids'
-  write(stdout,'(a)') ' O. Hellman, P. Steneteg, I.A. Abrikosov and S.I. Simak, Phys. Rev. B 87, 104111 (2013).' ! [[cite:Hellman2013]]
-
- end subroutine tdep_print_Aknowledgments
-
-!----------------------------------------------------------------------
+!====================================================================================================
 
  subroutine tdep_read_input(input_path,Hist,Invar)
 
@@ -229,6 +180,7 @@ contains
   Invar%stdlog=std_out
 
 ! Define default values
+  Invar%nshell_max=500
   Invar%angle_alpha=90.d0
   Invar%bzpath=0
   Invar%order=2
@@ -358,9 +310,9 @@ contains
   if ( Invar%netcdf) then
     call get_dims_hist(ncid,Invar%natom,Invar%ntypat,nimage,mdtime,&
 &       natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
-    ABI_MALLOC(Invar%amu,(Invar%ntypat)); Invar%amu(:)=zero
-    ABI_MALLOC(Invar%typat,(Invar%natom)); Invar%typat(:)=zero
-    ABI_MALLOC(Invar%znucl,(Invar%ntypat)) ; Invar%znucl(:)=zero
+    ABI_CALLOC(Invar%amu,(Invar%ntypat))
+    ABI_CALLOC(Invar%typat,(Invar%natom))
+    ABI_CALLOC(Invar%znucl,(Invar%ntypat))
     call read_csts_hist(ncid,dtion,Invar%typat,Invar%znucl,Invar%amu)
 
     ! Need to close NetCDF file because it is going to be reopened by read_md_hist
@@ -430,7 +382,7 @@ contains
   end if
 
 ! xred_unitcell
-  ABI_MALLOC(Invar%xred_unitcell,(3,Invar%natom_unitcell)); Invar%xred_unitcell(:,:)=zero
+  ABI_CALLOC(Invar%xred_unitcell,(3,Invar%natom_unitcell))
   call intagm(dprarr, intarr, jdtset, marr, 3*Invar%natom_unitcell, string(1:lenstr), 'xred_unitcell', tread, 'DPR')
   if (tread == 0) then
     write(msg,*)&
@@ -452,7 +404,7 @@ contains
   end do
 
 ! typat_unitcell
-  ABI_MALLOC(Invar%typat_unitcell,(Invar%natom_unitcell)); Invar%typat_unitcell(:)=0
+  ABI_CALLOC(Invar%typat_unitcell,(Invar%natom_unitcell))
   call intagm(dprarr, intarr, jdtset, marr, Invar%natom_unitcell, string(1:lenstr), 'typat_unitcell', tread, 'INT')
   if (tread == 0) then
     write(msg,*)&
@@ -1109,119 +1061,33 @@ end if
 
  end subroutine tdep_read_input
 
-! ---------------------------------------------------------------------------
-
- subroutine tdep_distrib_data(Hist,Invar,MPIdata)
+!====================================================================================================
+ subroutine tdep_destroy_invar(Invar)
 
   type(atdep_dataset_type), intent(inout) :: Invar
-  type(MPI_enreg_type), intent(in) :: MPIdata
-  type(abihist), intent(in) :: Hist
 
-  integer :: this_istep,istep,iatom,jstep
-  double precision :: tmp1,tmp2,tmp3
-
-  Invar%my_nstep=MPIdata%my_nstep
-
-! Read xred.dat, fcart.dat and etot.dat ASCII files or extract them from the HIST.nc netcdf file.
-  write(Invar%stdout,'(a)') ' '
-  ABI_MALLOC(Invar%xred,(3,Invar%natom,Invar%my_nstep))  ; Invar%xred(:,:,:)=0.d0
-  ABI_MALLOC(Invar%fcart,(3,Invar%natom,Invar%my_nstep)) ; Invar%fcart(:,:,:)=0.d0
-  ABI_MALLOC(Invar%etot,(Invar%my_nstep))                ; Invar%etot(:)=0.d0
-  ABI_MALLOC(Invar%weights,(Invar%my_nstep))             ; Invar%weights(:)=0.d0
-  this_istep=0
-  jstep=0
-  if (Invar%use_weights.eq.1) then
-    open(unit=30,file=trim(Invar%input_prefix)//'_weights.dat')
-  else if (Invar%use_weights.eq.0) then
-    Invar%weights=1.0d0/real(Invar%nstep_tot)
-  endif
-  if (Invar%netcdf) then
-    do istep=Invar%nstep_min,Invar%nstep_max
-      if (mod(istep-Invar%nstep_min,Invar%slice).ne.0) then
-        cycle
-      else
-        jstep=jstep+1
-        if (.not.MPIdata%my_step(jstep)) cycle
-        this_istep=this_istep+1
-        Invar%xred(:,:,this_istep) =Hist%xred (:,:,istep)
-        Invar%fcart(:,:,this_istep)=Hist%fcart(:,:,istep)
-        Invar%etot(this_istep)     =Hist%etot     (istep)
-      end if
-    end do !istep
-    write(Invar%stdout,'(a)') ' The positions, forces and energies are extracted from the NetCDF file: HIST.nc'
-  else
-    open(unit=60,file=trim(Invar%input_prefix)//'_fcart.dat')
-    open(unit=50,file=trim(Invar%input_prefix)//'_xred.dat')
-    open(unit=40,file=trim(Invar%input_prefix)//'_etot.dat')
-    do istep=1,Invar%nstep_min-1
-      if (Invar%use_weights.eq.1) then
-         read(30,*) tmp1
-      endif
-      read(40,*) tmp1
-      do iatom=1,Invar%natom
-        read(50,*) tmp1,tmp2,tmp3
-        read(60,*) tmp1,tmp2,tmp3
-      end do
-    end do
-    do istep=Invar%nstep_min,Invar%nstep_max
-      if (mod(istep-Invar%nstep_min,Invar%slice).ne.0) then
-        if (Invar%use_weights.eq.1) then
-           read(30,*) tmp1
-        endif
-        read(40,*) tmp1
-        do iatom=1,Invar%natom
-          read(50,*) tmp1,tmp2,tmp3
-          read(60,*) tmp1,tmp2,tmp3
-        end do
-      else
-        jstep=jstep+1
-        if (.not.MPIdata%my_step(jstep)) then
-          if (Invar%use_weights.eq.1) then
-             read(30,*) tmp1
-          endif
-          read(40,*) tmp1
-          do iatom=1,Invar%natom
-            read(50,*) tmp1,tmp2,tmp3
-            read(60,*) tmp1,tmp2,tmp3
-          end do
-        else
-          this_istep=this_istep+1
-          if (Invar%use_weights.eq.1) then
-             read(30,*) Invar%weights(this_istep)
-          endif
-          read(40,*) Invar%etot(this_istep)
-          do iatom=1,Invar%natom
-            read(50,*) Invar%xred (1,iatom,this_istep),Invar%xred (2,iatom,this_istep),Invar%xred (3,iatom,this_istep)
-            read(60,*) Invar%fcart(1,iatom,this_istep),Invar%fcart(2,iatom,this_istep),Invar%fcart(3,iatom,this_istep)
-          end do
-        end if !my_step
-      end if !slice
-    end do !istep
-    close(40)
-    close(50)
-    close(60)
-    write(Invar%stdout,'(2a)') ' The positions, forces and energies are extracted from the ASCII files:',&
-&                              ' xred.dat, fcart.dat & etot.dat'
-  end if !netcdf
-  if (Invar%use_weights.eq.1) then
-    close(30)
+  ABI_FREE(Invar%amu)
+  ABI_FREE(Invar%typat)
+  ABI_FREE(Invar%xred_unitcell)
+  ABI_FREE(Invar%typat_unitcell)
+  if (Invar%bzpath.lt.0) then
+    ABI_FREE(Invar%qpt)
+  else if (Invar%bzpath.gt.0) then
+    ABI_FREE(Invar%special_qpt)
+    end if
+  if (Invar%bzlength.gt.0) then
+    ABI_FREE(Invar%lgth_segments)
   end if
+  ABI_SFREE(Invar%zeff)
+  ABI_SFREE(Invar%znucl)
 
- end subroutine tdep_distrib_data
+ end subroutine tdep_destroy_invar
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!FB subroutine tdep_init_MPIshell(Invar,MPIdata)
-!FB
-!FB
-!FB  type(atdep_dataset_type), intent(in) :: Invar
-!FB  type(MPI_enreg_type), intent(in) :: MPIdata
-!FB
-!FB end subroutine tdep_init_MPIshell
+!====================================================================================================
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_init_MPIdata(Invar,MPIdata)
 
-  type(atdep_dataset_type), intent(in) :: Invar
+  type(atdep_dataset_type), intent(inout) :: Invar
   type(MPI_enreg_type), intent(out) :: MPIdata
   integer :: ii,remain,ierr,iproc,istep
   integer, allocatable :: tab_step(:)
@@ -1359,9 +1225,12 @@ end if
   end do
   ABI_FREE(tab_step)
 
+  Invar%my_nstep=MPIdata%my_nstep
+
  end subroutine tdep_init_MPIdata
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!====================================================================================================
+
  subroutine tdep_destroy_mpidata(MPIdata)
 
   type(MPI_enreg_type), intent(inout) :: MPIdata
@@ -1373,32 +1242,6 @@ end if
 
  end subroutine tdep_destroy_mpidata
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- subroutine tdep_destroy_invar(Invar)
+!====================================================================================================
 
-  type(atdep_dataset_type), intent(inout) :: Invar
-
-  ABI_FREE(Invar%amu)
-  ABI_FREE(Invar%typat)
-  ABI_FREE(Invar%xred_unitcell)
-  ABI_FREE(Invar%typat_unitcell)
-  if (Invar%bzpath.lt.0) then
-    ABI_FREE(Invar%qpt)
-  else if (Invar%bzpath.gt.0) then
-    ABI_FREE(Invar%special_qpt)
-    end if
-  if (Invar%bzlength.gt.0) then
-    ABI_FREE(Invar%lgth_segments)
-  end if
-  ABI_FREE(Invar%xred)
-  ABI_FREE(Invar%fcart)
-  ABI_FREE(Invar%etot)
-  ABI_FREE(Invar%weights)
-  ABI_FREE(Invar%xred_ideal)
-  ABI_SFREE(Invar%zeff)
-  ABI_SFREE(Invar%znucl)
-
- end subroutine tdep_destroy_invar
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-end module m_tdep_readwrite
+end module m_tdep_dataset

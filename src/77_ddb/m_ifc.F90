@@ -375,7 +375,7 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  integer :: nqbz,option,plus,sumg0,irpt,irpt_new, nprocs,my_rank,my_ierr,ierr
  logical :: prtout_
  real(dp),parameter :: qphnrm=one
- real(dp) :: xval,cpu,wall,gflops,rcut_min,r_inscribed_sphere,toldist
+ real(dp) :: cpu,wall,gflops,xval,rcut_min,r_inscribed_sphere,toldist
  character(len=500*4) :: msg
  type(ifc_type) :: ifc_tmp
 !arrays
@@ -416,16 +416,6 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  Ifc%asr = asr
  Ifc%brav = brav
 
- Ifc%rprim = ddb%rprim
- Ifc%gprim = ddb%gprim
- Ifc%acell = ddb%acell
- !GA: This way of setting rprim, gprim, and acell should be equivalent,
- !    but it changes the phonon frequencies! e.g. test v8_64
- !    I dont understand what is going on here.
- !Ifc%rprim = crystal%rprimd
- !Ifc%gprim = crystal%gprimd
- !Ifc%acell = one
-
  Ifc%dipdip = abs(dipdip)
  Ifc%dipquad=0; if (present(dipquad)) Ifc%dipquad = dipquad
  Ifc%quadquad=0; if (present(quadquad)) Ifc%quadquad = quadquad
@@ -435,10 +425,46 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  call alloc_copy(q1shft(:,1:Ifc%nqshft),Ifc%qshft)
  Ifc%ewald_option = 0; if (dipdip < 0) Ifc%ewald_option = 1 !HM TODO: expose this in the init?
 
- rprim = Ifc%rprim; gprim = Ifc%gprim
+
+ ! These two ways of defining rprim, gprim, acell should be equivalent.
+ ! Note that the crystal object does not know about acell.
+ Ifc%rprim = ddb%rprim
+ Ifc%gprim = ddb%gprim
+ Ifc%acell = ddb%acell
+ !Ifc%rprim = crystal%rprimd
+ !Ifc%gprim = crystal%gprimd
+ !Ifc%acell = one
+ !
+ !! When brav/=1, we need specific values of rprim.
+ !if (abs(brav)/=1) then
+ !  if (brav==2) then
+ !    !  Face Centered Lattice
+ !    fac = half_sqrt2
+ !  else if (brav==3) then
+ !    !  Body Centered Cubic Lattice
+ !    fac = half_sqrt3
+ !  else if (brav==4) then
+ !    !  Hexagonal Lattice
+ !    fac = one
+ !  end if
+ !  Ifc%acell(1) = sqrt(rprimd(1,1)**2 + rprimd(2,1)**2 + rprimd(3,1)**2) / fac
+ !  Ifc%acell(2) = sqrt(rprimd(1,2)**2 + rprimd(2,2)**2 + rprimd(3,2)**2) / fac
+ !  Ifc%acell(3) = sqrt(rprimd(1,3)**2 + rprimd(2,3)**2 + rprimd(3,3)**2) / fac
+ !  do ii=1,3
+ !    Ifc%rprim(ii, 1) = rprimd(ii, 1) / Ifc%acell(1)
+ !    Ifc%rprim(ii, 2) = rprimd(ii, 2) / Ifc%acell(2)
+ !    Ifc%rprim(ii, 3) = rprimd(ii, 3) / Ifc%acell(3)
+ !    Ifc%gprim(ii, 1) = crystal%gprimd(ii, 1) * Ifc%acell(1)
+ !    Ifc%gprim(ii, 2) = crystal%gprimd(ii, 2) * Ifc%acell(2)
+ !    Ifc%gprim(ii, 3) = crystal%gprimd(ii, 3) * Ifc%acell(3)
+ !  end do
+ !  
+ !end if
 
  ! Check if the rprim are coherent with the choice used in the interatomic forces generation
- call chkrp9(Ifc%brav,rprim)
+ call chkrp9(Ifc%brav,Ifc%rprim)
+
+ rprim = Ifc%rprim; gprim = Ifc%gprim
 
  ! -------------------------------------------------------------------------- !
  ! Compute dyewq0, the correction to be applied to the Ewald, see Eq.(71) of PRB55, 10355 (1997).
@@ -601,6 +627,7 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  call dymfz9(Ifc%dynmat,natom,nqbz,gprim,option,qbz,trans)
 
  ! -------------------------------------------------------------------------- !
+ ! Compute interatomic forces in real space
 
  ! Create the Big Box of R vectors in real space and compute the number of points (cells) in real space
  call make_bigbox(Ifc%brav,ifc_tmp%cell,ngqpt,nqshft,rprim,ifc_tmp%nrpt,ifc_tmp%rpt)
@@ -691,6 +718,8 @@ subroutine ifc_init(Ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  !end do
 
  call ifc_tmp%free()
+
+ ! -------------------------------------------------------------------------- !
 
  ! Copy other useful arrays.
  Ifc%dielt = dielt
@@ -2021,6 +2050,9 @@ end subroutine ifc_write
 !! indngb(ifcout)=indices in the unit cell of the neighbouring atoms
 !! posngb(3,ifcout)=position of the neighbouring atoms in cartesian coordinates
 !! output file
+!!
+!! SIDE EFFECTS
+!! The long-range part of the IFC (ewald_atmfrc) gets computed.
 !!
 !! NOTES
 !! This routine should be executed by one processor only
