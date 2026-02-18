@@ -600,8 +600,8 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
       & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh)
 
      ! ZTG23 Eq. 36 term 1
-     call orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
-       & mcprjk,mkmem_rbz,nband_k,orbmag_mesh,pawtab)
+     call orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab)
 
      ! ZTG23 text after Eq. 42
      nl1_option = 1 ! LR
@@ -930,7 +930,7 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppo
 
  npwsp = npw_k*dtset%nspinor
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
- ABI_MALLOC(cwavef,(2,npwsp))
+ !ABI_MALLOC(cwavef,(2,npwsp))
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
 
  do nn = 1, nband_k
@@ -999,28 +999,32 @@ end subroutine orbmag_nl1_k
 !!
 !! SOURCE
 
-subroutine orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
-    & mcprjk,mkmem_rbz,nband_k,orbmag_mesh,pawtab)
+subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
+    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: ikpt,isppol,mcprjk,mkmem_rbz,nband_k
+  integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,npw_k
   type(dterm_type),intent(in) :: dterm
   type(dataset_type),intent(in) :: dtset
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
   type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
+  real(dp),intent(in),target :: cg_k(2,mcgk)
   real(dp),intent(in) :: eig_k(nband_k)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,gdir,nn
+  integer :: adir,bdir,gdir,nn,npwsp
   real(dp) :: epsabg
   complex(dp) :: prefac_m,txt_d,txt_q
   !arrays
+  real(dp),pointer :: cwavef(:,:)
   complex(dp) :: m1(3)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
@@ -1031,6 +1035,7 @@ subroutine orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
 
  do nn = 1, nband_k
 
+   cwavef => cg_k(1:2,(nn-1)*npwsp+1:nn*npwsp)
    call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
      & mkmem_rbz,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
 
@@ -1041,12 +1046,13 @@ subroutine orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
          
          epsabg = eijk(adir,bdir,gdir)
          if (ABS(epsabg) .LT. half) cycle
-         prefac_m = com*c2*epsabg
+         ! note rho^0 H^1 terms have opposite sign of rho^1 H^0
+         prefac_m = -com*c2*epsabg
 
-         call txt_me(atindx,bdir,dterm,dtset,eig_k,gdir,nn,nband_k,pawtab,txt_d,cwaveprj)
+         call txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,&
+           & nn,nband_k,npw_k,orbmag_mesh,innl,pawtab,prefac_m,txt_d,cwaveprj)
        
-         ! note rho^0 H^1 term has opposite sign of rho^1 H^0
-         m1(adir) = m1(adir) - prefac_m*txt_d
+         m1(adir) = m1(adir) + txt_d
 
        end do ! adir
      end do !gdir
@@ -1057,7 +1063,8 @@ subroutine orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
  end do !nn
 
  call pawcprj_free(cwaveprj)
- ABI_FREE(cwaveprj)
+ ABI_SFREE(cwaveprj)
+ IF(ASSOCIATED(cwavef)) NULLIFY(cwavef)
 
 end subroutine orbmag_nl_k
 !!***
@@ -1924,34 +1931,63 @@ end subroutine lamb_core
 !!
 !! SOURCE
 
-subroutine txt_me(atindx,bdir,dterm,dtset,eig_k,gdir,iband,nband_k,pawtab,txt,ucprj)
+subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,nband_k,npw_k,&
+    & orbmag_mesh,oterm,pawtab,prefac_m,txt,ucprj)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: bdir,gdir,iband,nband_k
+  integer,intent(in) :: adir,bdir,gdir,iband,nband_k,npw_k,oterm
+  complex(dp),intent(in) :: prefac_m
   complex(dp),intent(out) :: txt
   type(dataset_type),intent(in) :: dtset
   type(dterm_type),intent(in) :: dterm
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   real(dp),intent(in) :: eig_k(nband_k)
+  real(dp),intent(in),pointer :: cwavef(:,:)
   type(pawcprj_type),intent(in) :: ucprj(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: iat,iatom,itypat,ilmn,isp,jlmn,klmn
+  integer :: fourwf_cplex,fourwf_option,iat,iatom,itypat,ilmn,isp
+  integer :: jlmn,klmn,ndat,npwsp,t_atom,tim_fourwf
   complex(dp) :: dcpi,dcpj,dij
+  logical :: need_ormesh
+  !arrays
+  real(dp),allocatable,target :: fofgin(:,:),fofr(:,:,:,:)
+  real(dp),allocatable :: denpot(:,:),fofgout(:,:)
 !--------------------------------------------------------------------
+
+  fourwf_cplex = 1
+  fourwf_option = 0
+  tim_fourwf = 1
+  ndat = 1
+  npwsp = npw_k*dtset%nspinor
+  need_ormesh = (dtset%orbmag .EQ. 4)
+
+  if (need_ormesh) then
+    do iat = 1, dtset%natom
+      if ( ANY(ABS(dtset%nucdipmom(1:3,iat))>tol8) ) then
+        t_atom = iat
+        exit
+      end if
+    end do
+    ABI_MALLOC(fofr,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
+    ABI_CHECK(ASSOCIATED(cwavef),"txt_me: input wavefunction needed for ormesh is not associated")
+    ABI_CHECK(dtset%nspinor.EQ.1,"txt_me: orbmag_rmesh not coded for spinors yet")
+  end if
 
   txt = czero
   do iat = 1, dtset%natom
     itypat=dtset%typat(iat)
     iatom = atindx(iat)
     do isp = 1, dtset%nspinor
-      do ilmn = 1, pawtab(itypat)%lmn_size
-        do jlmn = 1, pawtab(itypat)%lmn_size
+      do jlmn = 1, pawtab(itypat)%lmn_size
+        do ilmn = 1, pawtab(itypat)%lmn_size
           klmn = MATPACK(ilmn,jlmn)
           ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
           dij = dterm%aij(iatom,klmn,isp)-eig_k(iband)*dterm%qij(iatom,klmn,isp)
@@ -1959,7 +1995,7 @@ subroutine txt_me(atindx,bdir,dterm,dtset,eig_k,gdir,iband,nband_k,pawtab,txt,uc
           if (ilmn .GT. jlmn) dij = CONJG(dij)
           dcpi = CMPLX(ucprj(iatom,isp)%dcp(1,bdir,ilmn),ucprj(iatom,isp)%dcp(2,bdir,ilmn))
           dcpj = CMPLX(ucprj(iatom,isp)%dcp(1,gdir,jlmn),ucprj(iatom,isp)%dcp(2,gdir,jlmn))
-          txt = txt + CONJG(dcpi)*dcpj*dij
+          txt = txt + prefac_m*CONJG(dcpi)*dcpj*dij
           if (dterm%ndij == 4) then
             if (isp == 1) then
               dij = dterm%aij(iatom,klmn,3)-eig_k(iband)*dterm%qij(iatom,klmn,3) ! up-down
@@ -1980,12 +2016,14 @@ subroutine txt_me(atindx,bdir,dterm,dtset,eig_k,gdir,iband,nband_k,pawtab,txt,uc
               dcpi = CMPLX(ucprj(iatom,2)%dcp(1,bdir,ilmn),ucprj(iatom,2)%dcp(2,bdir,ilmn))
               dcpj = CMPLX(ucprj(iatom,1)%dcp(1,gdir,jlmn),ucprj(iatom,1)%dcp(2,gdir,jlmn))
             end if
-            txt = txt + CONJG(dcpi)*dcpj*dij
+            txt = txt + prefac_m*CONJG(dcpi)*dcpj*dij
           end if
-        end do !jlmn
-      end do !ilmn
+        end do !ilmn
+      end do !jlmn
     end do ! isp
   end do !iat
+
+  ABI_SFREE(fofr)
 
 end subroutine txt_me
 !!***
