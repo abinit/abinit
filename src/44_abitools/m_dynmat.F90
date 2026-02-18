@@ -1457,20 +1457,35 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  end if
 
 !Exchange of perturbations
+! write(ab_out,*)"HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
+!  do ipert1=1,mpert !See notes
+!     do idir1=1,3
+!      do ipert2=1,mpert !See notes
+!         do idir2=1,3
+!         if ((blkflg(idir2,ipert2,idir1,ipert1)==blkflg(idir1,ipert1,idir2,ipert2)) .and. blkflg(idir1,ipert1,idir2,ipert2)>0) then
+!         if ((d2(1,idir2,ipert2,idir1,ipert1)-d2(1,idir1,ipert1,idir2,ipert2)>tol16) .and. blkflg(idir1,ipert1,idir2,ipert2)>0) then
+! write(ab_out,*)idir1,ipert1, idir2,ipert2,d2(1,idir2,ipert2,idir1,ipert1),d2(1,idir1,ipert1,idir2,ipert2)
+! endif
+! endif
+! enddo
+! enddo
+! enddo
+! enddo
+! write(ab_out,*)"HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
 
 !Consider two cases : either time-reversal symmetry
 !conserves the wavevector, or not
  if(timrev==0)then
 
-!  do ipert1=1,mpert  See notes
-   do ipert1=1,min(natom+2,mpert)
+  do ipert1=1,mpert !See notes
+!   do ipert1=1,min(natom+2,mpert)
      do idir1=1,3
 
 !      Since the matrix is hermitian, the diagonal elements are real
        d2(2,idir1,ipert1,idir1,ipert1)=zero
 
-!      do ipert2=1,mpert See notes
-       do ipert2=1,min(natom+2,mpert)
+      do ipert2=1,mpert !See notes
+!       do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
 
            ! FIXME use is_type functions
@@ -1507,11 +1522,11 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 !  Here, case with time-reversal symmetry
  else
 
-!  do ipert1=1,mpert See notes
-   do ipert1=1,min(natom+2,mpert)
+  do ipert1=1,mpert !See notes
+!   do ipert1=1,min(natom+2,mpert)
      do idir1=1,3
-!      do ipert2=1,mpert See notes
-       do ipert2=1,min(natom+2,mpert)
+      do ipert2=1,mpert !See notes
+!       do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
            d2(2,idir1,ipert1,idir2,ipert2)=zero
 
