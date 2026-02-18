@@ -1050,7 +1050,7 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,
          prefac_m = -com*c2*epsabg
 
          call txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,&
-           & nn,nband_k,npw_k,orbmag_mesh,innl,pawtab,prefac_m,txt_d,cwaveprj)
+           & nn,mpi_enreg,nband_k,npw_k,orbmag_mesh,innl,pawtab,prefac_m,txt_d,cwaveprj)
        
          m1(adir) = m1(adir) + txt_d
 
@@ -1931,8 +1931,8 @@ end subroutine lamb_core
 !!
 !! SOURCE
 
-subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,nband_k,npw_k,&
-    & orbmag_mesh,oterm,pawtab,prefac_m,txt,ucprj)
+subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,&
+    & mpi_enreg,nband_k,npw_k,orbmag_mesh,oterm,pawtab,prefac_m,txt,ucprj)
 
   !Arguments ------------------------------------
   !scalars
@@ -1942,6 +1942,7 @@ subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,n
   type(dataset_type),intent(in) :: dtset
   type(dterm_type),intent(in) :: dterm
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
   type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
 
   !arrays
@@ -1953,9 +1954,10 @@ subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,n
 
   !Local variables -------------------------
   !scalars
-  integer :: fourwf_cplex,fourwf_option,iat,iatom,itypat,ilmn,isp
-  integer :: jlmn,klmn,ndat,npwsp,t_atom,tim_fourwf
-  complex(dp) :: dcpi,dcpj,dij
+  integer :: fourwf_cplex,fourwf_option,iat,iatom,itypat,il,ilmn,isp
+  integer :: jl,jlmn,klmn,ndat,npwsp,t_atom,tim_fourwf
+  real(dp) :: weight_i,weight_r
+  complex(dp) :: dcpi,dcpj,dij,ormesh_fac
   logical :: need_ormesh
   !arrays
   real(dp),allocatable,target :: fofgin(:,:),fofr(:,:,:,:)
@@ -1987,6 +1989,19 @@ subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,n
     iatom = atindx(iat)
     do isp = 1, dtset%nspinor
       do jlmn = 1, pawtab(itypat)%lmn_size
+  
+        if (need_ormesh .AND. iat.EQ.t_atom) then
+          ABI_MALLOC(fofgin,(2,npwsp))
+          fofgin(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+gdir,jlmn,itypat)*cwavef(1,1:npwsp)
+          fofgin(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+gdir,jlmn,itypat)*cwavef(2,1:npwsp)
+          call fourwf(fourwf_cplex,denpot,fofgin,fofgout,fofr,gs_hamk%gbound_k,&
+            & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
+            & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
+            & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,fourwf_option,&
+            & tim_fourwf,weight_r,weight_i)
+          ABI_FREE(fofgin)
+        end if
+  
         do ilmn = 1, pawtab(itypat)%lmn_size
           klmn = MATPACK(ilmn,jlmn)
           ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
@@ -1995,7 +2010,21 @@ subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,n
           if (ilmn .GT. jlmn) dij = CONJG(dij)
           dcpi = CMPLX(ucprj(iatom,isp)%dcp(1,bdir,ilmn),ucprj(iatom,isp)%dcp(2,bdir,ilmn))
           dcpj = CMPLX(ucprj(iatom,isp)%dcp(1,gdir,jlmn),ucprj(iatom,isp)%dcp(2,gdir,jlmn))
-          txt = txt + prefac_m*CONJG(dcpi)*dcpj*dij
+          txt = txt + prefac_m*CONJG(dcpi)*dij*dcpj
+
+          if (need_ormesh .AND. iat.EQ.t_atom) then
+            jl = pawtab(itypat)%indlmn(1,jlmn)
+            il = pawtab(itypat)%indlmn(1,ilmn)
+            ormesh_fac = prefac_m*dij*four_pi*CONJG(j_dpc**il)*four_pi*(j_dpc**jl)
+            ABI_MALLOC(fofgin,(2,npwsp))
+            fofgin(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+bdir,ilmn,itypat)*cwavef(1,1:npwsp)
+            fofgin(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+bdir,ilmn,itypat)*cwavef(2,1:npwsp)
+            call orbmag_mesh%accum_rmesh(adir,fofgin,fofr,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
+              & dtset%natom,npw_k,gs_hamk%ph3d_k,cone,t_atom,oterm,&
+              & mult_fact=ormesh_fac,conjg_flag=.FALSE.)
+            ABI_FREE(fofgin)
+          end if
+          
           if (dterm%ndij == 4) then
             if (isp == 1) then
               dij = dterm%aij(iatom,klmn,3)-eig_k(iband)*dterm%qij(iatom,klmn,3) ! up-down
