@@ -158,10 +158,10 @@ TODO
 
 In this section, we can finally compute the ZPR of MgO using the results produced previously.
 
-[[optdriver] 7
+[[optdriver]] 7
 [[eph_task]] 24
 
-[[gstore_vname]] "gvals"      # Use GWPT e-ph matrix elements from GSTORE (default)
+[[gstore_gname]] "gvals"      # Use GWPT e-ph matrix elements from GSTORE (default)
 [[eph_stern]] 1               # Activate Sterheimer to compute contribution given by states above nband
 
 It is important to understand that at this level of the calculations
@@ -170,6 +170,6 @@ of the e-ph matrix elements stored in the GSTORE file.
 
 The temperature mesh is defined by [[tmesh]]
 
-[[gstore_vname]]
+[[gstore_gname]]
 
 [[zcut]]
