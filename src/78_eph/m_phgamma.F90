@@ -3120,7 +3120,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  ! Find Fermi surface k-points
  ! TODO: support kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface!
- ABI_MALLOC(fstab, (nsppol))
+ allocate(fstab(nsppol))
+ !ABI_MALLOC(fstab, (nsppol))
  call fstab_init(fstab, ebands, cryst, dtset, tetra, comm)
  call tetra%free()
 
