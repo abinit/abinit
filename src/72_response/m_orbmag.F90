@@ -147,10 +147,10 @@ module m_orbmag
     ! 3 for the 3 directions
     ! orbmag_trace(3,orbmag_nterms)
     
-    real(dp),allocatable :: rmesh(:,:,:,:,:,:)
+    real(dp),allocatable :: rmesh(:,:,:,:,:)
     ! total orbmag on real mesh
     ! 3 for the 3 directions
-    ! rmesh(2,n4,n5,n6,3,orbmag_nterms)
+    ! rmesh(n4,n5,n6,3,orbmag_nterms)
 
     contains
 
@@ -777,10 +777,10 @@ subroutine orbmag_mpisum(omag,nproc,spaceComm)
       ABI_MALLOC(buffer2,(buff_size))
       buffer1=zero;buffer2=zero
       buffer1(1:buff_size) = &
-        & reshape(omag%rmesh,(/2*omag%n4*omag%n5*omag%n6*3*orbmag_nterms/))
+        & reshape(omag%rmesh,(/omag%n4*omag%n5*omag%n6*3*orbmag_nterms/))
       call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-      omag%rmesh(1:2,1:omag%n4,1:omag%n5,1:omag%n6,1:3,1:orbmag_nterms)=&
-        & reshape(buffer2,(/2,omag%n4,omag%n5,omag%n6,3,orbmag_nterms/))
+      omag%rmesh(1:omag%n4,1:omag%n5,1:omag%n6,1:3,1:orbmag_nterms)=&
+        & reshape(buffer2,(/omag%n4,omag%n5,omag%n6,3,orbmag_nterms/))
       ABI_FREE(buffer1)
       ABI_FREE(buffer2)
     end if
@@ -2764,7 +2764,7 @@ subroutine orbmag_init(omag,dtset)
   ABI_REMALLOC(omag%orbmag_trace,(3,orbmag_nterms))
   omag%orbmag_trace=zero
   if (dtset%orbmag .EQ. 4) then
-    ABI_REMALLOC(omag%rmesh,(2,omag%n4,omag%n5,omag%n6,3,orbmag_nterms))
+    ABI_REMALLOC(omag%rmesh,(omag%n4,omag%n5,omag%n6,3,orbmag_nterms))
     omag%omesh=zero
   end if
 
@@ -3015,16 +3015,16 @@ subroutine orbmag_rmesh(omag,adir,bra,fofr,n4,n5,n6,natom,npw_k,ph3d,prefac_m,t_
 
   if (the_conjg_flag) then
     ! add ffac * conjg(fofr)
-    omag%rmesh(1,:,:,:,adir,term_index) = omag%rmesh(1,:,:,:,adir,term_index) +&
+    omag%rmesh(:,:,:,adir,term_index) = omag%rmesh(:,:,:,adir,term_index) +&
       & ffac(1)*fofr(1,:,:,:) + ffac(2)*fofr(2,:,:,:)
-    omag%rmesh(2,:,:,:,adir,term_index) = omag%rmesh(2,:,:,:,adir,term_index) -&
-      & ffac(1)*fofr(2,:,:,:) + ffac(2)*fofr(1,:,:,:)
+    !omag%rmesh(2,:,:,:,adir,term_index) = omag%rmesh(2,:,:,:,adir,term_index) -&
+    !  & ffac(1)*fofr(2,:,:,:) + ffac(2)*fofr(1,:,:,:)
   else
     ! add ffac * fofr
-    omag%rmesh(1,:,:,:,adir,term_index) = omag%rmesh(1,:,:,:,adir,term_index) +&
+    omag%rmesh(:,:,:,adir,term_index) = omag%rmesh(:,:,:,adir,term_index) +&
       & ffac(1)*fofr(1,:,:,:) - ffac(2)*fofr(2,:,:,:)
-    omag%rmesh(2,:,:,:,adir,term_index) = omag%rmesh(2,:,:,:,adir,term_index) +&
-      & ffac(1)*fofr(2,:,:,:) + ffac(2)*fofr(1,:,:,:)
+    !omag%rmesh(2,:,:,:,adir,term_index) = omag%rmesh(2,:,:,:,adir,term_index) +&
+    !  & ffac(1)*fofr(2,:,:,:) + ffac(2)*fofr(1,:,:,:)
   end if
 
 end subroutine orbmag_rmesh
@@ -3180,8 +3180,7 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("n4", orbmag_mesh%n4),&
      nctkdim_t("n5", orbmag_mesh%n5),&
-     nctkdim_t("n6", orbmag_mesh%n6),&
-     nctkdim_t("ormesh_cplex", 2)],defmode=.True.)
+     nctkdim_t("n6", orbmag_mesh%n6)],defmode=.True.)
    NCF_CHECK(ncerr)
  endif
 
@@ -3195,7 +3194,7 @@ subroutine orbmag_ncwrite(crystal,dtset,ebands,hdr,ncid,orbmag_mesh)
  !! orbmag_rmesh dimensions, only if output
  if (has_ormesh) then
    ncerr = nctk_def_arrays(ncid, [&
-     nctkarr_t("orbmag_rmesh", "dp", "ormesh_cplex,n4,n5,n6,ndir,orbmag_nterms")])
+     nctkarr_t("orbmag_rmesh", "dp", "n4,n5,n6,ndir,orbmag_nterms")])
    NCF_CHECK(ncerr)
  endif
 
