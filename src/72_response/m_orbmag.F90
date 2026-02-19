@@ -1313,8 +1313,8 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
   !arrays
   real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1)
   real(dp),allocatable :: denpot(:,:,:)
-  real(dp),allocatable :: fofgout(:,:),svectoutb(:,:),svectoutg(:,:),vectout(:,:)
-  real(dp),allocatable,target :: fofrb(:,:,:,:),fofrg(:,:,:,:)
+  real(dp),allocatable :: fofgin(:,:),fofgout(:,:),svectoutg(:,:),vectout(:,:)
+  real(dp),allocatable,target :: fofrb(:,:,:,:),fofrg(:,:,:,:),svectoutb(:,:)
   real(dp),pointer :: bra(:,:),brab(:,:),brag(:,:),ket(:,:)
   complex(dp) :: b1(3),bv2b(3),m1(3),mv2b(3),m1_mu(3),mv2b_mu(3)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -1433,6 +1433,18 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
          gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
          bpdot=cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
 
+         if (need_ormesh) then
+           ABI_MALLOC(fofgin,(2,npwsp))
+           fofgin(1,1:npwsp) = bra(1,1:npwsp)*svectoutg(1,1:npwsp) + bra(2,1:npwsp)*svectoutg(2,1:npwsp)
+           fofgin(2,1:npwsp) = bra(1,1:npwsp)*svectoutg(2,1:npwsp) - bra(2,1:npwsp)*svectoutg(1,1:npwsp)
+           call fourwf(fourwf_cplex,denpot,fofgin,fofgout,fofrg,gs_hamk%gbound_k,&
+             & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
+             & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
+             & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,fourwf_option,&
+             & tim_fourwf,weight_r,weight_i)
+           ABI_SFREE(fofgin)
+         end if
+
          do adir=1,3 
            epsabg = eijk(adir,bdir,gdir)
            if (ABS(epsabg) .LT. half) cycle
@@ -1442,6 +1454,14 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
            bv2b(adir) = bv2b(adir) + prefac_b*CONJG(bpdotc)*gpdotc
            mv2b(adir) = mv2b(adir) - prefac_m*CONJG(bpdotc)*gpdotc*eig_k(nn)
            mv2b_mu(adir) = mv2b_mu(adir) + prefac_m*CONJG(bpdotc)*gpdotc*fermie
+         
+           if (need_ormesh) then
+             eig_shift = CMPLX(eig_k(nn)-fermie,zero)
+             call orbmag_mesh%accum_rmesh(adir,svectoutb,fofrg,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
+               & dtset%natom,npw_k,gs_hamk%ph3d_k,-prefac_m,t_atom,invv2,&
+               & mult_fact=eig_shift,conjg_flag=.FALSE.)
+           endif
+
          end do
        end do ! np
 
