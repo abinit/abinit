@@ -287,6 +287,7 @@ module m_xg
 
   public :: xgBlock_colwiseRandom
   public :: xgBlock_colwiseRandomGaussian
+  public :: xgBlock_colwiseRandomRademacher
   public :: xgBlock_randomizedRRQR
 
   public :: xgBlock_minmax
@@ -6630,6 +6631,72 @@ contains
     end if
 
   end subroutine xgBlock_colwiseRandomGaussian
+  !!***
+
+  !!****f* m_xg/xgBlock_colwiseRandomRademacher
+  !! 
+  !! NAME
+  !! xgBlock_colwiseRandomRademacher
+  !! 
+  !! FUNCTION
+  !! Every entry has |z_j| = 1 and E[z_j] = 0
+
+  subroutine xgBlock_colwiseRandomRademacher(xgBlock, my_rank, jcol)
+    
+    type(xgBlock_t), intent(inout) :: xgBlock
+    integer, intent(in) :: my_rank ! mpi-parallel safe seed
+    integer, intent(in) :: jcol
+
+    type(xgBlock_t) :: xgBlock_part
+    real(dp) :: u
+    integer :: tid, rank, seed_size, i, n, k
+    integer, allocatable :: seed(:)
+    complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC(:) => null()
+
+    if (jcol > xgBlock%cols) then
+        ABI_ERROR('given column is out of block')
+    end if
+    
+    tid = 0
+    n = xgBlock%rows
+    
+    if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
+        call xgBlock_setBlock(xgBlock, xgBlock_part, n, 1, fcol=jcol)
+        call xgBlock_copy_from_gpu(xgBlock_part)
+    end if 
+
+    ! Each thread each MPI process maintains its own seed
+    select case(xgBlock%space)
+    case (SPACE_R)
+        ABI_ERROR('Not implemented for SPACE_R')
+    case (SPACE_C)
+        vecC => xgBlock%vecC(:,jcol) ! contiguous in memory
+        !$omp parallel default(none) &
+        !$omp private(tid, seed, u, k, i, seed_size) &
+        !$omp shared(vecC, my_rank, n)
+            call random_seed(size=seed_size)
+            ABI_MALLOC(seed, (seed_size))
+            tid = xomp_get_thread_num()
+            seed = 123456 + 1000*my_rank + 97*tid + (/ (i, i=1,seed_size) /)
+            call random_seed(put=seed)
+            !$omp do
+            do i=1,n
+                call random_number(u)
+                k = int(4.0d0 * u)   ! 0,1,2,3
+                vecC(j) = exp(dcmplx(0.0d0, 1.0d0) * (0.5d0 * PI * k))
+            end do
+            !$omp end do
+            ABI_FREE(seed)
+        !$omp end parallel
+    case (SPACE_CR)
+        ABI_ERROR('Not implemented for SPACE_CR')
+    end select
+    
+    if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
+        call xgBlock_copy_to_gpu(xgBlock_part)
+    end if
+
+  end subroutine xgBlock_colwiseRandomRademacher
   !!***
 
   !!****f* m_xg/xgBlock_randomizedRRQR
