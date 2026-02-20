@@ -192,21 +192,29 @@ if(ABINIT_ENABLE_NVTX OR (ABINIT_ENABLE_GPU_MARKERS AND ABINIT_ENABLE_GPU_CUDA))
   endif()
 
 elseif(ABINIT_ENABLE_ROCTX OR (ABINIT_ENABLE_GPU_MARKERS AND ABINIT_ENABLE_GPU_HIP))
-  # check ROCtx library is available
-  find_library(ROCTX_LIBRARY
-    NAMES libroctx64.so
-    PATHS ${ROCM_ROOT}/roctracer/lib ${ROCM_PATH}/roctracer/lib ${ROCM_HOME}/roctracer/lib
-    DOC "Location of the ROCTX library"
-  )
-  if (ROCTX_LIBRARY)
-    message(STATUS "ROCTX found: ${ROCTX_LIBRARY}")
-    add_library(roctx64 UNKNOWN IMPORTED ${ROCTX_LIBRARY})
-    set_target_properties(roctx64 PROPERTIES IMPORTED_LOCATION ${ROCTX_LIBRARY})
-    add_library(abinit::gpu_markers ALIAS roctx64)
-    set(HAVE_GPU_MARKERS 1)
-    set(HAVE_GPU_MARKERS_ROCTX 1)
-  else()
-    message(SEND_ERROR "ROCTX (GPU markers for AMD tools) required but not found")
+  if(HIP_VERSION VERSION_GREATER_EQUAL "6.2.0") # New ROCprofiler SDK (rocprofv3, rocprof-sys, rocprof-compute)
+    find_package(rocprofiler-sdk-roctx)
+    add_library(abinit::gpu_markers ALIAS rocprofiler-sdk-roctx::rocprofiler-sdk-roctx)
+    if(NOT rocprofiler-sdk-roctx_FOUND)
+      message(SEND_ERROR "ROCTX (GPU markers for AMD tools) required but not found")
+    endif()
+  else() # Legacy ROCm profiler (rocprof, rocprofv2, rocm-sys)
+    # check ROCtx library is available
+    find_library(ROCTX_LIBRARY
+      NAMES libroctx64.so
+      PATHS ${ROCM_ROOT}/roctracer/lib ${ROCM_PATH}/roctracer/lib ${ROCM_HOME}/roctracer/lib
+      DOC "Location of the ROCTX library"
+    )
+    if (ROCTX_LIBRARY)
+      message(STATUS "ROCTX found: ${ROCTX_LIBRARY}")
+      add_library(roctx64 UNKNOWN IMPORTED ${ROCTX_LIBRARY})
+      set_target_properties(roctx64 PROPERTIES IMPORTED_LOCATION ${ROCTX_LIBRARY})
+      add_library(abinit::gpu_markers ALIAS roctx64)
+      set(HAVE_GPU_MARKERS 1)
+      set(HAVE_GPU_MARKERS_ROCTX 1)
+    else()
+      message(SEND_ERROR "ROCTX (GPU markers for AMD tools) required but not found")
+    endif()
   endif()
 
 endif()
