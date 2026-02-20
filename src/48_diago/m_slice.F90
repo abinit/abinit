@@ -2719,6 +2719,133 @@ end subroutine computeChebyshevMoments
 
 !----------------------------------------------------------------------
 
+!!****f* m_slice/computeTraceEstimation
+!! NAME
+!! computeTraceEstimation
+!! 
+!! FUNCTION
+!! Compute Girard-Hutchinson trace estimator
+!!
+!! SOURCE
+
+subroutine computeTraceEstimation(slice, m_probes, getAX_BX, getBm1X, lowb, ndeg_filter_max)
+
+    implicit none
+
+    type(slice_t), intent(in) :: slice
+    type(xgBlock_t), intent(inout) :: X0
+    integer, intent(in) :: ndeg_filter_max
+    real(dp), intent(in) :: min_low_bound, max_upp_bound
+    real(dp), intent(out) :: maxeig_global
+    complex(dp), intent(out) :: cheby_moments(:,:)
+    interface
+        subroutine getAX_BX(X,AX,BX)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: AX
+            type(xgBlock_t), intent(inout) :: BX
+        end subroutine getAX_BX
+    end interface
+    interface
+        subroutine getBm1X(X,Bm1X)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: Bm1X
+        end subroutine getBm1X
+    end interface
+
+    integer :: neigenpairs, nband
+    integer :: ideg
+    integer :: iband
+    integer :: tot_spacedim
+    integer :: space_res
+    integer :: space, spacecom, gpu_option
+    integer :: ierr
+    real(dp) :: maxeig, mineig
+    real(dp) :: center, radius
+    real(dp) :: one_over_r
+    real(dp) :: two_over_r
+    real(dp) :: tsec(2)
+    type(xg_t) :: Moments
+    type(xg_t) :: norm2_X
+    type(xg_t) :: DivResults
+    type(xgBlock_t) :: Moment_ideg
+    type(chebfi_t) :: chebfi
+    complex(dp), pointer :: momvals(:,:) => null()
+    complex(dp), allocatable :: cheby_moments(:,:)
+
+    ! *********************************************************************
+
+    ecut = slice%ecut
+    spacecom = slice%spacecom
+    spacedim = slice%spacedim
+    space = slice%space
+    my_rank = xmpi_comm_rank(slice%spacecom)
+    gpu_option = slice%gpu_option
+    me_g0 = slice%me_g0
+    if (slice%paral_kgb==1) then
+        me_g0 = slice%me_g0_fft
+    end if
+
+    ABI_MALLOC(cheby_moments, (slice%bandpp, ndeg_filter_max+1) )
+    call xg_init(xgX, slice%space, spacedim, m_probes, slice%spacecom, me_g00=me_g0, &
+        gpu_option=gpu_option)
+    ! total number of probes is m_probes * number of MPI processes
+
+    do jcol = 1, m_probes
+        call xgBlock_colwiseRandomRademacher(X_probe%self, my_rank, jcol)
+    end do
+
+    if (gpu_option==ABI_OMP_OFFLOAD) then
+        call xgBlock_copy_from_copy(X_probe%self)
+    end if
+
+    ! Chebyshev moments in maximal [a,ecut)
+    call computeChebyshevMoments(slice, X_probe%self, getAX_BX, getBm1X, &
+        lowb, ecut, b_init, ndeg_filter_max, cheby_moments)
+
+    nstep_bisect = 10 ! Parameter affects accuracy of splitSpectrum
+    center = (ecut + lowb) / 2.d0
+    radius = (ecut - lowb) / 2.d0
+    
+    ! Phase 1: incrementally estimate upper bound that includes all spectral mass
+    b_ext = b_init
+    call buildChebyshevJacksonCoeffs(lowb, b_ext, ndeg_filter, center, radius, cja)
+    call computeFilterEnergy(cja, cheby_moments, energy_per_band)
+    tot_mass = norm2(energy_per_band)**2
+    call xmpi_sum(tot_mass, comm, ierr)
+    iext_step = 0
+    width_ext = (b - a)/12.d0
+    write(std_out,*) 'width_ext=', width_ext
+    flush(std_out)
+    do while (tot_mass < nband_tot .and. iext_step < 100)
+        b_ext = b_ext + width_ext
+        call buildChebyshevJacksonCoeffs(a, b_ext, ndeg_filter, center, radius, cja)
+        call computeFilterEnergy(cja, cheby_moments, energy_per_band)
+        tot_mass = sum(energy_per_band)
+        call xmpi_sum(tot_mass, comm, ierr)
+        iext_step = iext_step + 1
+        write(std_out,*) 'extended interval to=', b_ext, 'nvec=', tot_mass
+        flush(std_out)
+    end do
+
+    trace_est = sum(accum) / m_vecs
+    
+    ! todo split spectrum here
+    ! first pass: detect gaps
+
+    ! second pass: detect uniform 
+
+
+    ! Free memory
+    ABI_FREE(cheby_moments)
+    call xg_free(xgX)
+    
+end subroutine computeTraceEstimation
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_slice/splitSpectrum
 !! NAME
 !! splitSpectrum
