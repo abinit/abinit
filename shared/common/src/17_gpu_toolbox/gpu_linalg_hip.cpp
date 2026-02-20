@@ -15,6 +15,14 @@
 #include <gpu_linalg.h>
 #include <rocblas/rocblas.h>
 #include <rocfft/rocfft.h>
+#include <rocm-core/rocm_version.h>
+
+#if ROCM_VERSION_MAJOR >= 7
+// This oddity isn't present from ROCm 7 onwards
+// Proper replacement in the code should be done
+// once ROCm 6 support isn't desired anymore
+#define hipblasDoubleComplex hipDoubleComplex
+#endif
 
 // SYEVG/SYGVD are too slow when using HIP (on CRAY)
 // We choose instead SYEVJ/SYGVJ (Jacobi) instead
