@@ -24,10 +24,6 @@
 #define hipblasDoubleComplex hipDoubleComplex
 #endif
 
-// SYEVG/SYGVD are too slow when using HIP (on CRAY)
-// We choose instead SYEVJ/SYGVJ (Jacobi) instead
-//  with a ridiculous number of iterations
-// This has to be tested forward...
 hipblasHandle_t hipblas_handle;
 hipsolverDnHandle_t hipsolverDn_handle;
 static hipStream_t stream_compute;
@@ -37,11 +33,6 @@ static bool linalg_multi_init;
 static hipStream_t   multi_stream_compute[32];
 hipblasHandle_t      multi_hipblas_handle[32];
 hipsolverDnHandle_t  multi_hipsolverDn_handle[32];
-
-// Parameters to HIP SYEVJ and SYGVJ (Jacobi-based eigensolver)
-hipsolverSyevjInfo_t syevj_params = nullptr;
-const int    MAX_SWEEPS  = 100;
-const double TOLERANCE   = 1.e-5;
 
 //! utility function for compatiblity between hipblas v1/v2 API
 hipblasOperation_t select_hipblas_op(char *c)
@@ -171,9 +162,6 @@ extern "C" void gpu_linalg_init_()
   HIP_API_CHECK( hipsolverDnSetStream(hipsolverDn_handle,stream_compute) );
   HIP_API_CHECK( hipblasSetStream(hipblas_handle,stream_compute) );
 
-  HIP_API_CHECK(hipsolverCreateSyevjInfo(&syevj_params));
-  HIP_API_CHECK(hipsolverXsyevjSetTolerance(syevj_params, TOLERANCE));
-  HIP_API_CHECK(hipsolverXsyevjSetMaxSweeps(syevj_params, MAX_SWEEPS));
   //fprintf(stdout, "Initializing hipBLAS, this may take 10 seconds...\n");
   //fflush(stdout);
   rocblas_initialize();
@@ -206,7 +194,6 @@ extern "C" void gpu_linalg_init_multi_()
 extern "C" void gpu_linalg_shutdown_()
 {
   HIP_API_CHECK( hipblasDestroy(hipblas_handle) );
-  HIP_API_CHECK( hipsolverDestroySyevjInfo(syevj_params) );
   HIP_API_CHECK( hipsolverDnDestroy(hipsolverDn_handle) );
   HIP_API_CHECK( hipStreamDestroy(stream_compute) );
   if(linalg_multi_init) {
