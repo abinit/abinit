@@ -131,8 +131,10 @@ if(ABINIT_ENABLE_GPU_HIP)
     )
   endif()
 
-  # For shutting annoying warning from ROCM Cmake module
+  # ROCm ~6.3.3 requires AMDGPU_TARGETS to be set
   set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
+  # ROCm > 6.4.3 deprecates the above and ask GPU_TARGETS to be set
+  set(GPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
 
   find_package(HIP)
   find_package(hipfft)
