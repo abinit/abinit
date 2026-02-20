@@ -282,9 +282,12 @@ module m_xg
   public :: xgBlock_zero_im_g0
   public :: xgBlock_one
   public :: xgBlock_ones
-  public :: xgBlock_colwiseRandom
   public :: xgBlock_diagonal
   public :: xgBlock_diagonalOnly
+
+  public :: xgBlock_colwiseRandom
+  public :: xgBlock_colwiseRandomGaussian
+  public :: xgBlock_randomizedRRQR
 
   public :: xgBlock_minmax
   public :: xgBlock_average
@@ -5670,7 +5673,8 @@ contains
       ABI_ERROR('X%space/=Y%space')
     end if
     if (X%rows/=Y%rows) then
-      ABI_ERROR('X%rows/=Y%rows')
+        write(std_out,*) X%rows, Y%rows; flush(std_out)
+        ABI_ERROR('X%rows/=Y%rows')
     end if
     if (fact_col_*X%cols/=Y%cols) then
       ABI_ERROR('X%cols/=Y%cols')
@@ -6558,6 +6562,285 @@ contains
     end if
 
   end subroutine xgBlock_colwiseRandom
+  !!***
+
+  !!****f* m_xg/xgBlock_colwiseRandomGaussian
+  !! 
+  !! NAME
+  !! xgBlock_colwiseRandomGaussian
+
+  subroutine xgBlock_colwiseRandomGaussian(xgBlock, my_rank, jcol)
+    
+    type(xgBlock_t), intent(inout) :: xgBlock
+    integer, intent(in) :: my_rank ! mpi-parallel safe seed
+    integer, intent(in) :: jcol
+
+    type(xgBlock_t) :: xgBlock_part
+    real(dp) :: u1, u2, r, theta
+    complex(dp) :: z
+    integer :: tid, rank, seed_size, i, n
+    integer, allocatable :: seed(:)
+    complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC(:) => null()
+
+    if (jcol > xgBlock%cols) then
+        ABI_ERROR('given column is out of block')
+    end if
+    
+    tid = 0
+    n = xgBlock%rows
+    
+    if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
+        call xgBlock_setBlock(xgBlock, xgBlock_part, n, 1, fcol=jcol)
+        call xgBlock_copy_from_gpu(xgBlock_part)
+    end if 
+
+    ! Each thread each MPI process maintains its own seed
+    select case(xgBlock%space)
+    case (SPACE_R)
+        ABI_ERROR('Not implemented for SPACE_R')
+    case (SPACE_C)
+        vecC => xgBlock%vecC(:,jcol) ! contiguous in memory
+        !$omp parallel default(none) &
+        !$omp private(tid, seed, u1, u2, r, theta, z, i, seed_size) &
+        !$omp shared(vecC, my_rank, n)
+            call random_seed(size=seed_size)
+            ABI_MALLOC(seed, (seed_size))
+            tid = xomp_get_thread_num()
+            seed = 123456 + 1000*my_rank + 97*tid + (/ (i, i=1,seed_size) /)
+            call random_seed(put=seed)
+            !$omp do
+            do i=1,n
+                call random_number(u1)
+                call random_number(u2)
+                if (u1 == 0.0d0) u1 = 1.0e-12
+                r = sqrt(-2.d0 * log(u1))
+                theta = 2.d0 * PI * u2
+                z = (r*cos(theta)+(0.d0,1.d0)*r*sin(theta))/sqrt(2.d0)
+                vecC(i) = dcmplx(real(z), aimag(z)) ! zero mean
+            end do
+            !$omp end do
+            ABI_FREE(seed)
+        !$omp end parallel
+    case (SPACE_CR)
+        ABI_ERROR('Not implemented for SPACE_CR')
+    end select
+    
+    if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
+        call xgBlock_copy_to_gpu(xgBlock_part)
+    end if
+
+  end subroutine xgBlock_colwiseRandomGaussian
+  !!***
+
+  !!****f* m_xg/xgBlock_randomizedRRQR
+  !! 
+  !! NAME
+  !! xgBlock_randomizedRRQR
+  !! 
+  !! FUNCTION
+  !! k target rank
+  !! p oversample default 10
+  !! q power iterations default 1
+  !! 
+  !! OUTPUT
+  !! X_k rank-k approximation of X
+  !! 
+
+  subroutine random_complex_gaussian_matrix(A)
+      complex(dp), intent(out) :: A(:,:)
+      integer :: i,j,m,n
+      real(dp) :: r,s
+      m = size(A,1)
+      n = size(A,2)
+      do j=1,n
+        do i=1,m
+            call random_number(r)
+            call random_number(s)
+            r = sqrt(-2.0d0*log(r)) * cos(2.0d0*PI*s)
+            call random_number(s)
+            s = sqrt(-2.0d0*log(s)) * cos(2.0d0*PI*s)
+            A(i,j) = dcmplx(r, s)/sqrt(2.d0)
+        end do
+      end do
+  end subroutine random_complex_gaussian_matrix
+
+  subroutine xgBlock_randomizedRRQR(xgBlock, k, xgBlock_k, p, qi)
+   
+    implicit none
+
+    type(xgBlock_t), intent(in) :: xgBlock
+    type(xgBlock_t), intent(inout) :: xgBlock_k
+    integer, intent(in) :: k
+    integer, intent(in), optional :: p, qi
+
+    integer :: n, m
+    integer :: l, lwork, i
+    integer :: info
+    integer :: np, nq
+    complex(dp), allocatable :: Omega(:,:), Y(:,:), Q(:,:), B(:,:)
+    complex(dp), allocatable :: Z(:,:), RY(:,:), QB(:,:), RB(:,:), work(:)
+    integer, allocatable :: jpvt(:)
+    complex(dp) :: alpha, beta
+    complex(dp), allocatable :: temp(:,:)
+    real(dp), allocatable :: rwork(:)
+    complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: X(:,:) => null()
+
+    complex(dp), allocatable :: U(:,:), VT(:,:)
+    real(dp), allocatable :: S(:)
+    
+    m = xgBlock%rows
+    n = xgBlock%cols
+    
+    if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
+        call xgBlock_copy_from_gpu(xgBlock)
+    end if
+
+    if (xgBlock%space/=SPACE_C) then
+        ABI_ERROR('Only implemented for SPACE_C')
+    end if
+
+    np = 10
+    if (present(p)) np = p
+    nq = 1
+    if (present(qi)) nq = qi
+    l = k + np
+
+    ABI_MALLOC(Omega, (n, l))
+    ABI_MALLOC(Y, (m, l))
+    ABI_MALLOC(RY, (min(m, l), min(m, l)))
+    ABI_MALLOC(Q, (m, l))
+    ABI_MALLOC(B, (l, n))
+    ABI_MALLOC(QB, (l, l))
+    ABI_MALLOC(RB, (l, n))
+    ABI_MALLOC(work, (1))
+    ABI_MALLOC(jpvt, (n))
+    ABI_MALLOC(rwork, (n))
+
+    ! Work with matrix xgBlock%vecC
+
+    write(std_out,*) 'debugging QR'
+    flush(std_out)
+
+    X => xgBlock%vecC
+   
+    ! Generate n x (k+p)
+    call random_seed()
+    call random_complex_gaussian_matrix(Omega)
+
+    write(std_out,*) 'size X=', size(X,1), size(X,2)
+    write(std_out,*) 'size Omega=', size(Omega,1), size(Omega,2)
+    flush(std_out)
+
+    ! Y = X * Omega (k+p) * m
+    !Y = matmul(X, Omega)
+    alpha = dcmplx(1.d0,0.d0)
+    beta = dcmplx(0.d0,0.d0)
+    call zgemm('n', 'n', m, l, n, alpha, X, m, Omega, n, beta, Y, m)
+    
+    if (nq > 0) then
+        ABI_MALLOC(Z, (n,l))
+        do i = 1, nq
+            ! Z = X^H * Y
+            call zgemm('c', 'n', n, l, m, alpha, X, m, Y, m, &
+                beta, Z, n)
+            ! Y = X * Z
+            call zgemm('n', 'n', m, l, n, alpha, X, m, Z, n, &
+                beta, Y, m)
+        end do
+        ABI_FREE(Z)
+    end if
+
+    ! QR of Y
+    lwork = -1
+    call zgeqrf(m, l, Y, m, RY, work, lwork, info)
+    lwork = int(real(work(1)))
+    ABI_FREE(work)
+    ABI_MALLOC(work, (lwork))
+    call zgeqrf(m, l, Y, m, RY, work, lwork, info)
+    call zungqr(m, l, l, Y, m, RY, work, lwork, info)
+    ABI_FREE(work)
+    Q = Y
+
+    write(std_out,*) 'QR of Y ok'; flush(std_out)
+
+    ! Project X onto Q
+    !B = matmul(conjg(transpose(Q)), X)
+    alpha = dcmplx(1.d0,0.d0)
+    beta = dcmplx(0.d0,0.d0)
+    call zgemm('c', 'n', l, n, m, alpha, Q, m, X, m, beta, B, l)
+
+
+    write(std_out,*) 'size B=', size(B,1), size(B,2)
+    write(std_out,*) 'project ok'; flush(std_out)
+
+    ! pivoted QR on B
+    jpvt = 0
+    lwork = -1
+    ABI_MALLOC(work, (1))
+    write(std_out,*) 'RY', size(RY); flush(std_out)
+    call zgeqp3(l, n, B, l, jpvt, RY, work, lwork, rwork, info)
+    lwork = int(real(work(1)))
+    ABI_FREE(work)
+    ABI_MALLOC(work, (lwork))
+    jpvt = 0
+    write(std_out,*) 'lwork=', lwork; flush(std_out)
+    call zgeqp3(l, n, B, l, jpvt, RY, work, lwork, rwork, info)
+    
+    write(std_out,*) 'pivoted QR of B ok'; flush(std_out)
+
+    QB = B ! in place upper triangle contains RB
+    RB = B
+
+    write(std_out,*) 'R diagonal entries (magnitude)'
+    do i = 1, l
+        write(std_out,*) abs(RB(i,i))
+    end do
+
+    ! Keep first k columns form X_k = Q * B_k
+    ABI_MALLOC(temp, (k, n))
+    alpha = dcmplx(1.d0, 0.d0)
+    beta = dcmplx(0.d0, 0.d0)
+    call zgemm('n', 'n', k, n, l, alpha, QB, l, RB, l, beta, temp, k)
+    call zgemm('n', 'n', m, n, k, alpha, Q, m, temp, k, beta, xgBlock_k%vecC, m)
+
+    ! SVD for verification
+    !ABI_MALLOC(S, (min(m,n)) )
+    !ABI_MALLOC(U, (m,m) )
+    !ABI_MALLOC(VT, (n,n) )
+    !lwork = -1
+    !ABI_FREE(work)
+    !ABI_MALLOC(work, (1))
+    !call zgesvd('a', 'a', m, n, X, m, S, U, m, VT, n, work, &
+    !    lwork, rwork, info)
+    !lwork = int(real(work(1)))
+    !ABI_FREE(work)
+    !ABI_MALLOC(work, (lwork))
+    !call zgesvd('a', 'a', m, n, X, m, S, U, m, VT, n, work, &
+    !    lwork, rwork, info)
+    !write(std_out,*) 'singular values='
+    !write(std_out,*) S(1:min(m,n))
+    !flush(std_out)
+    !ABI_FREE(S)
+    !ABI_FREE(U)
+    !ABI_FREE(VT)
+
+
+
+    ABI_FREE(Omega)
+    ABI_FREE(Y)
+    ABI_FREE(Q) 
+    ABI_FREE(B)
+    ABI_FREE(RY)
+    ABI_FREE(work)
+    ABI_FREE(rwork)
+    ABI_FREE(jpvt)
+    ABI_FREE(temp)
+
+    if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
+        call xgBlock_copy_to_gpu(xgBlock)
+    end if
+
+  end subroutine xgBlock_randomizedRRQR
   !!***
 
   !!****f* m_xg/xgBlock_diagonal
