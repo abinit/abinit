@@ -593,26 +593,25 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     ! todo simplify fix polynomial degree and give it here
 
     ! Slice left
-    slice%neigenpairs_per_slice(1) = wanted_mass
+    slice%neigenpairs_per_slice(1) = 100! wanted_mass
     slice%fcol_in_X(1) = 1 ! todo big modif this should be replaced by a simple index
     ! i propose to not apply the big modif and try to workaround as it is for now
     slice%fcol_in_Xext(1) = 1
-    slice%poly_degrees(1) = slice%ndeg_filter
-    slice%part_low_bounds(1) = slice%mineig_global ! todo
-    slice%part_upp_bounds(1) = slice%maxeig_global ! todo
-    slice%poly_low_bounds(1) = lambda_minus        ! todo
-    slice%poly_upp_bounds(1) = lambda_plus         ! todo
+    slice%poly_degrees(1) = 10! slice%ndeg_filter
+    slice%part_low_bounds(1) = -0.14        ! first slice is lowpass so interval to suppress
+    slice%part_upp_bounds(1) = 1.3
+    slice%poly_low_bounds(1) = -0.14     ! with overlap
+    slice%poly_upp_bounds(1) = 1.5       ! with overlap
 
     ! Slice right
-    slice%neigenpairs_per_slice(2) = wanted_mass
-    slice%fcol_in_X(2) = 30
-    slice%fcol_in_Xext(2) = 30
-    slice%poly_degrees(2) = slice%ndeg_filter
-    slice%part_low_bounds(2) = slice%mineig_global ! todo
-    slice%part_upp_bounds(2) = slice%maxeig_global ! todo
-    slice%poly_low_bounds(2) = lambda_minus        ! todo
-    slice%poly_upp_bounds(2) = lambda_plus         ! todo
-
+    slice%neigenpairs_per_slice(2) = 100! wanted_mass
+    slice%fcol_in_X(2) = 1
+    slice%fcol_in_Xext(2) = 101
+    slice%poly_degrees(2) = 80! slice%ndeg_filter
+    slice%part_low_bounds(2) = 1.3
+    slice%part_upp_bounds(2) = 3.0
+    slice%poly_low_bounds(2) = 1.2        ! with overlap
+    slice%poly_upp_bounds(2) = 3.2        ! with overlap
 
 
     ! ===================== Resource management system ================================================= 
@@ -639,7 +638,11 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
 
     if (slice%paral_kgb==0) then
         slice%XextLinalg = X0
-    else 
+    else
+
+        write(std_out,*) 'allocating extended space of size', slice%neigenpairs_ext
+        flush(std_out)
+
         ! Allocate extended space in linalg representation
         call xg_init(slice%X_ext, slice%space, slice%spacedim, slice%neigenpairs_ext, &
             slice%spacecom, me_g0=slice%me_g0, gpu_option=slice%gpu_option)
@@ -735,6 +738,7 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     type(xgBlock_t) :: eigen_active
     type(xgBlock_t) :: residu_active
     integer :: nbdbuf, oracle, num_proc
+    integer :: k_rank
     integer :: neigenpairs, bandpp, ndeg_filter
     integer :: comm, comm_rows, comm_cols
     real(dp) :: lambda_minus, lambda_plus
@@ -853,16 +857,18 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     ! 1) include restart
     ! 2) make for 1 MPI
 
+    k_rank = 60
     call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
-        slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, nrowsLinalg_ptr)
+        slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, k_rank, nrowsLinalg_ptr)
 
     !write(std_out,*) 'getid after runSlice X0_active', xgBlock_getId(X0_active) 
 
     !write(std_out,*) 'chebfi%eigenvalues converged='
     !call xgBlock_print(chebfi%eigenvalues,std_out)
 
-    !write(std_out,*) 'residuals='
-    !call xgBlock_print(residu_active,std_out)
+    write(std_out,*) 'residuals='
+    call xgBlock_print(residu_active,std_out)
+    flush(std_out)
 
     ! Free temporary memory
     call chebfi_free(chebfi)
@@ -984,26 +990,26 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     flush(std_out) 
 
     ! Y = X * Omega where Omega sketch matrix to reduce spreading
-    k_sketch = neigenpairs
-    call xg_init(X_sketch, space, spacedim, neigenpairs, spacecom, gpu_option=gpu_option)
-    call randomSketching(slice, X, X_sketch%self, k_sketch)
-    call xgBlock_copy(X_sketch%self, X)
-    write(std_out,*) 'Xsketch=', xgBlock_getid(X)
-    flush(std_out)
-    call xg_free(X_sketch)
+    !k_sketch = neigenpairs
+    !call xg_init(X_sketch, space, spacedim, neigenpairs, spacecom, gpu_option=gpu_option)
+    !call randomSketching(slice, X, X_sketch%self, k_sketch)
+    !call xgBlock_copy(X_sketch%self, X)
+    !write(std_out,*) 'Xsketch=', xgBlock_getid(X)
+    !flush(std_out)
+    !call xg_free(X_sketch)
 
     ! Chebyshev assumes normalized TODO
 
-    if (slice%paral_kgb==1) then
-        ! todo only perform this at iscf=1
-        call xg_init(BX, slice%space, spacedim, neigenpairs, slice%spacecom, &
-            me_g0=slice%me_g0, gpu_option=gpu_option)
-        call xgBlock_copy(X, BX%self)
-        call xg_Borthonormalize(X,BX%self,ierr,tim_Bortho_X,gpu_option)
-        call xg_free(BX)
-        write(std_out,*) 'Xortho=', xgBlock_getid(X)
-        flush(std_out)
-    end if
+    !if (slice%paral_kgb==1) then
+    !    ! todo only perform this at iscf=1
+    !    call xg_init(BX, slice%space, spacedim, neigenpairs, slice%spacecom, &
+    !        me_g0=slice%me_g0, gpu_option=gpu_option)
+    !    call xgBlock_copy(X, BX%self)
+    !    call xg_Borthonormalize(X,BX%self,ierr,tim_Bortho_X,gpu_option)
+    !    call xg_free(BX)
+    !    write(std_out,*) 'Xortho=', xgBlock_getid(X)
+    !    flush(std_out)
+    !end if
 
     ! ============== Transpose ==============
     if (slice%paral_kgb==1) then
@@ -1067,7 +1073,7 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     write(std_out,*) 'Here I compute Chebyshev moments yuhu'
     flush(std_out)
 
-    ndeg_filter_max = 130 ! Parameter affects accuracy of uniformMass
+    ndeg_filter_max = 20 ! Parameter affects accuracy of uniformMass
     !mineig_global = lanczos_lowb_global - 0.1
     mineig_global = lanczos_lowb_global
     ABI_MALLOC(cheby_moments, (slice%bandpp, ndeg_filter_max+1) )
@@ -1734,8 +1740,8 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     call xgBlock_reshape(eigen, slice%neigenpairs, 1) 
     call xgBlock_reshape(resid, slice%neigenpairs, 1)
  
-    write(std_out,*) 'residuals squared after all merge='
-    call xgBlock_print(resid,std_out)
+    !write(std_out,*) 'residuals squared after all merge='
+    !call xgBlock_print(resid,std_out)
 
     !write(std_out,*) 'KEPT slice eigs='
     !call xgBlock_print(eigen, std_out)
@@ -2525,7 +2531,7 @@ end subroutine print_scalar_filter
     do k = 1, k_sketch
         ! seed depends on column index
         ! rank * offset + k, with offset > nband to avoid overlap between columns across ranks
-        call xgBlock_colwiseRandom(Omega%self, rank*(k_sketch+10)+k, k)
+        call xgBlock_colwiseRandomGaussian(Omega%self, rank*(k_sketch+10)+k, k)
         
         ! test
         ! q = random column vector
