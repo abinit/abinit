@@ -829,10 +829,6 @@
 #   * in order to enable SCALAPACK, you might have to specify -lscalapack
 #     or use another appropriate syntax for your system.
 #
-#  Additional information might be obtained from
-#  https://wiki.abinit.org/doku.php?id=build:linear_algebra
-#  and
-#  https://wiki.abinit.org/doku.php?id=developers:buildsys:internals
 
 # Install prefix for linear algebra
 #
