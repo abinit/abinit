@@ -1073,7 +1073,7 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     write(std_out,*) 'Lanczos guarantee(global) =', lanczos_lowb_global
     flush(std_out)
  
-    ndeg_filter_max = 30
+    ndeg_filter_max = 60
     m_probe = 25 ! should be between 1 and slice%bandpp   
     
     write(std_out,*) 'Here I compute Stockastic Trace Estimation'
@@ -2813,6 +2813,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     real(dp) :: tot_mass
     real(dp) :: norml_x
     real(dp) :: step
+    real(dp) :: sigma, weight
     real(dp) :: a_slice, b_slice, ared, bred
     real(dp) :: xred, T0, T1, T_next, rho_x
     real(dp) :: theta_a, theta_b, trace_bin
@@ -2824,7 +2825,8 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     real(dp), allocatable :: energy_per_band(:)
     real(dp), allocatable :: cja(:)
     real(dp), allocatable :: moments(:)
-    real(dp), pointer :: norm2_layout(:,:) => null()
+    real(dp), allocatable :: rho(:)
+    real(dp), allocatable :: rho_smoothed(:)
     
     ! *********************************************************************
 
@@ -2843,9 +2845,12 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
 
     ABI_MALLOC(g_damp, (ndeg_filter))
     ABI_MALLOC(xpts, (npts))
+    ABI_MALLOC(rho, (npts))
+    ABI_MALLOC(rho_smoothed, (npts))
     ABI_MALLOC(cja, (ndeg_filter))
     ABI_MALLOC(moments, (ndeg_filter))
     ABI_MALLOC(cheby_moments, (m_probe, ndeg_filter) )
+
     call xg_init(X_probe, slice%space, tot_spacedim, m_probe, slice%spacecom, &
         me_g0=me_g0, gpu_option=gpu_option)
     ! total number of probes is m_probes * number of MPI processes
@@ -2895,8 +2900,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     ! dos
     
     ! x in -1 .. 1:
-    ! rho(x) = 1.d0/(Pi*sqrt(1-x*x)) * 
-    !               [g_1*mu_1 + 2 * sum_{k=2}^ndeg_filter g_k * mu_k * T_{k-1}(x)]
+    ! rho(x) = 1.d0/(Pi*sqrt(1-x*x)) * [sum_{k=1}^ndeg_filter g_k * mu_k * T_{k-1}(x)]
 
     ! Compute damping factors g_k (Jackson kernel)
     ! reduce Gibbs oscillations in the reconstructed DOS
@@ -2905,53 +2909,87 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
         g_damp(k) = ((np1 - k) * cos(PI*(k-1)/np1) + sin(PI*(k-1)/np1) / tan(PI/np1)) / np1 
     end do
     
-    a_slice = min_low_bound + 0.05
+    a_slice = min_low_bound + 0.01
     b_slice = 3.0
     step = (b_slice-a_slice) / (npts-1)
     xpts = [( a_slice + (i-1)*step, i=1,npts )]
 
-    center = (ecut + min_low_bound) / 2.d0
+    center = (ecut + min_low_bound) / 2.d0 ! this should be the same as cheby moms
     radius = (ecut - min_low_bound) / 2.d0
     write(std_out,*) 'i: x rho_x in ', a_slice, b_slice
     write(std_out,*) 'using number of points', npts
-    write(std_out,*) 'scaled in ', min_low_bound, ecut
     flush(std_out)
     do i=1, npts
         xred = (xpts(i) - center)/radius
-        rho_x = g_damp(1) * moments(1) ! first moment
         T0 = 1.d0
         T1 = xred
+        rho_x = g_damp(1) * moments(1)
         do k = 2, ndeg_filter
-            T_next = 2.0 * xred * T1 - T0
-            rho_x = rho_x + 2 * g_damp(k) * moments(k) * T1
+            rho_x = rho_x + g_damp(k) * moments(k) * T1
+            T_next = 2.0 * xred * T1 - T0 ! T_k = 2x T_k-1 - T_k-2
             T0 = T1
             T1 = T_next
         end do
         rho_x = rho_x / (PI*sqrt(1.0-xred**2))
-        write(std_out,*) i, xpts(i), rho_x
-        flush(std_out)
+        rho(i) = rho_x
+        !write(std_out,*) i, xpts(i), rho(i)
+        !flush(std_out)
     end do
 
     ! Now integrate dos in bin. This should give the number of eigenvalues
     ! returns approximate partial trace in the interval [a,b)
-    trace_bin = 0.0
     ! (a,b) bin edges in -1,1
     ared = (a_slice - center) / radius
     bred = (b_slice - center) / radius
     theta_a = acos(ared)
     theta_b = acos(bred)
-    do k=1, ndeg_filter
-        if (k==1) then
-            ! k = 0
-            trace_bin = trace_bin + g_damp(1) * moments(1) * (theta_a - theta_b) / PI
-        else
-            ! k > 0
-            trace_bin = trace_bin + g_damp(k) * moments(k) * (sin((k-1)*theta_b) - &
+    trace_bin = g_damp(1) * moments(1) * (theta_a - theta_b) / PI
+    do k=2, ndeg_filter
+        trace_bin = trace_bin + g_damp(k) * moments(k) * (sin((k-1)*theta_b) - &
                 sin((k-1)*theta_a)) / ((k-1)*PI)
-        end if
     end do
     write(std_out,*) 'trace_bin=', trace_bin
     flush(std_out)
+
+    ! debug area should be equal to the total number of eigenvalues
+    write(std_out,*) 'total area(before recale)=', sum(rho*step)
+    flush(std_out)
+    
+    ! rescale for correct area
+    rho = rho * trace_bin / sum(rho*step)
+    write(std_out,*) 'total area(after rescale)=', sum(rho*step)
+    flush(std_out)
+
+    do i=1, npts
+        write(std_out,*) i, xpts(i), rho(i)
+        flush(std_out)
+    end do
+
+    ! Gaussian smoothing
+    !sigma = 0.01
+    !rho_smoothed = 0.0
+    !do i = 1, npts
+    !    do k = 1, npts
+    !        weight = exp(-0.5 * ((xpts(i) - xpts(k)) / sigma)**2 ) / &
+    !            (sigma * sqrt(2.0*PI))
+    !        rho_smoothed(i) = rho_smoothed(i) + rho(k) * weight * step
+    !    end do
+    !end do
+    !rho(:) = rho_smoothed(:)
+
+    ! debug area should be equal to the total number of eigenvalues
+    !write(std_out,*) 'Smoothed total area(before recale)=', sum(rho*step)
+    !flush(std_out)
+    
+    ! rescale for correct area
+    !rho = rho * trace_bin / sum(rho*step)
+    !write(std_out,*) 'Smoothed total area(after rescale)=', sum(rho*step)
+    !flush(std_out)
+
+    !do i=1, npts
+    !    write(std_out,*) i, xpts(i), rho(i)
+    !    flush(std_out)
+    !end do
 
     
     ! Free memory
@@ -2960,6 +2998,9 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     ABI_FREE(moments)
     ABI_FREE(g_damp)
     ABI_FREE(xpts)
+    ABI_FREE(rho)
+    ABI_FREE(rho_smoothed)
+
     call xg_free(X_probe)
     
 end subroutine computeTraceEstimation
