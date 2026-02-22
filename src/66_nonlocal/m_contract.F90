@@ -2027,7 +2027,7 @@ end subroutine metcon_so
 !!              (bohr**-1)
 !!  soc_weight(3)=prefactors for the spin-orbit components (dimensionless):
 !!                (soc_weight(1),soc_weight(2),soc_weight(3))
-!!                scale the σ_x, σ_y, σ_z contributions, respectively.
+!!                scale the \sigma_x, \sigma_y, \sigma_z contributions, respectively.
 !!  alpha=Euler angle for rotation around z-axis
 !!  beta =Euler angle for rotation around y-axis
 !!

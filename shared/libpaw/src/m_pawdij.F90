@@ -221,7 +221,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical :: dijU_available,dijU_need,dijU_prereq
  logical :: has_nucdipmom,my_atmtab_allocated,is_sym
  logical :: need_to_print,paral_atom,v_dijhat_allocated
- real(dp) :: hyb_mixing_,hyb_mixing_sr_,alpha,beta
+ real(dp) :: hyb_mixing_,hyb_mixing_sr_
  character(len=500) :: msg
 !arrays
  integer,pointer :: my_atmtab(:)

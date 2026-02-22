@@ -1986,7 +1986,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
 
 !Local variables ------------------------------
 !scalars
- integer :: iatom,ix,icplex
+ integer :: iatom,icplex
  real(dp) :: mag_coll   , mag_x, mag_y, mag_z ! EB
  real(dp) :: mag_coll_im, mag_x_im, mag_y_im, mag_z_im ! SPr
  real(dp) :: rho_tot, rho_tot_im

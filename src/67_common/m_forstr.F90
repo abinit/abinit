@@ -667,7 +667,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_rwwf=7
- integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,dimffnl_str,iband,iband_cprj,iband_last,ibg,icg,ider,ider_str,ispin_gbt
+ integer :: bandpp,bdtot_index,choice,cpopt,dimffnl,dimffnl_str,iband,iband_cprj,iband_last,ibg,icg,ider,ider_str
  integer :: idir,idir_str,ierr,ii,ikg,ikpt,ilm,ipositron,ipw,ishift,isppol,istwf_k
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: nnlout,npw_k,paw_opt,signs,spaceComm
