@@ -1609,7 +1609,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call ingeo(acell,amu,atndlist,bravais,chrgat,dtset,dtset%field_red(1:3),&
     dtset%field_red_axial(1:3),dtset%genafm(1:3),iatfix,&
     iatnd,dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
-    msym,natnd,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
+    msym,natnd,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,&
     dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
     dtset%pawspnorb,dtset%ptgroupma,ratsph,&
     rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,spinat_cart,&
