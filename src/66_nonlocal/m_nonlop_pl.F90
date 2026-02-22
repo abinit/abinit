@@ -132,7 +132,7 @@ contains
 !!  ucvol=unit cell volume (bohr^3)
 !!  vectin(2,nspinor*npwin)=input cmplx wavefunction coefficients <G|Cnk>
 !!  use_gbt= if 1, no spin-orbit coupling (scaler-Relativistic only);
-!!           if 2, include only the σ_z component of the spin-orbit coupling. 
+!!           if 2, include only the \sigma_z component of the spin-orbit coupling. 
 !!
 !! OUTPUT
 !!  ==== if (signs==1) ====

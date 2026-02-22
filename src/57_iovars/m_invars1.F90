@@ -1190,7 +1190,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt,tread_cart, my_rank, nprocs
- real(dp) :: cellcharge,cellcharge_min, fband,kptnrm,kptrlen,norm,sum_spinat,zelect,zval
+ real(dp) :: cellcharge,cellcharge_min, fband,kptnrm,kptrlen,sum_spinat,zelect,zval
  character(len=1) :: blank=' ',string1
  character(len=2) :: string2,symbol
  character(len=500) :: msg
@@ -1206,7 +1206,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  character(len=fnlen) :: key_value
  character(len=len(string)) :: geo_string
  type(geo_t) :: geo
- logical :: trivial_axis
 !************************************************************************
 
  !write(std_out,'(a)')' m_invars1%invars1 : enter '; call flush(std_out)
