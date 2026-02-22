@@ -1543,6 +1543,9 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     ABI_NVTX_END_RANGE()
     call timab(tim_transpose,2,tsec)
 
+    ! todo harmonic Rayleigh-Ritz for generalized eigenvalue problem
+    ! we form (A-sigma*I)X = AX - sigma*X do this with xgTools
+
     ! Apply Rayleigh-Ritz to active MPI Linalg row-block
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
     call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,eigen,ierr,0,tim_RR,&

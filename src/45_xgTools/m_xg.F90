@@ -6683,7 +6683,7 @@ contains
             do i=1,n
                 call random_number(u)
                 k = int(4.0d0 * u)   ! 0,1,2,3
-                vecC(j) = exp(dcmplx(0.0d0, 1.0d0) * (0.5d0 * PI * k))
+                vecC(i) = exp(dcmplx(0.0d0, 1.0d0) * (0.5d0 * PI * k))
             end do
             !$omp end do
             ABI_FREE(seed)
