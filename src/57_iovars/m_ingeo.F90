@@ -136,7 +136,7 @@ contains
 
 subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_axial,&
   genafm,iatfix,iatnd,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
-  msym,natnd,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
+  msym,natnd,natom,nimage,npsp,npspalch,nspden,nsym,ntypalch,ntypat,&
   nucdipmom,nzchempot,pawspnorb,&
   ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,spinat_cart,string,supercell_lattice,symafm,&
   symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl,comm)
@@ -144,7 +144,7 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_ax
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iimage,iout,jdtset,lenstr,msym
- integer,intent(in) :: natnd,nimage,npsp,npspalch,nspden,nsppol
+ integer,intent(in) :: natnd,nimage,npsp,npspalch,nspden
  integer,intent(in) :: ntypalch,ntypat,nzchempot,pawspnorb,comm
  integer,intent(inout) :: natom,symmorphi
  integer,intent(out) :: icoulomb,jellslab,ptgroupma,spgroup !vz_i

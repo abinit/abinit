@@ -208,7 +208,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !scalars
  integer,parameter :: level=114, tim_fourwf=1
  integer :: choice,cplex,cpopt_here,fftalg,i1,i2,i3,idat,idir,ierr,i0
- integer :: ig,igspinor,istwf_k_,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor,ispin_gbt
+ integer :: ig,igspinor,istwf_k_,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
  integer :: n4,n5,n6,ndat_,nnlout,npw_fft,npw_k1,npw_k2,nspinortot,option_fft
  integer :: paw_opt,select_k_,shift1,shift2,signs,tim_nonlop
  logical(kind=c_bool) :: k1_eq_k2
