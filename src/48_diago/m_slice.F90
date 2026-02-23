@@ -142,9 +142,10 @@ module m_slice
     integer, parameter :: tim_swap      = 1761
     integer, parameter :: tim_RR_q      = 1759
     integer, parameter :: tim_barrier   = 1764
-    integer, parameter :: tim_invovl    = 1755
     integer, parameter :: tim_copy      = 1765
     integer, parameter :: tim_Bortho_X  = 1641
+    integer, parameter :: tim_getAX_BX  = 1754
+    integer, parameter :: tim_invovl    = 1755
     
     ! Public 'slice' datatype
     !-------------------------------------------------
@@ -537,10 +538,6 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     
     ! *********************************************************************
 
-    if (slice%nslice /= 2) then
-        ABI_ERROR("current implementation only supports 2 slices")
-    end if
-
     call timab(tim_slice_sched,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_SLICE_SCHEDULE)
     
@@ -593,7 +590,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     ! todo simplify fix polynomial degree and give it here
 
     ! Slice left
-    slice%neigenpairs_per_slice(1) = 150! wanted_mass
+    slice%neigenpairs_per_slice(1) = 96 ! wanted_mass
     slice%fcol_in_X(1) = 1 ! todo big modif this should be replaced by a simple index
     ! i propose to not apply the big modif and try to workaround as it is for now
     slice%fcol_in_Xext(1) = 1
@@ -604,15 +601,29 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     slice%poly_upp_bounds(1) = 2.5       ! with overlap
 
     ! Slice right
-    slice%neigenpairs_per_slice(2) = 150! wanted_mass
+    slice%neigenpairs_per_slice(2) = 96 ! wanted_mass
     slice%fcol_in_X(2) = 1
-    slice%fcol_in_Xext(2) = 151
+    slice%fcol_in_Xext(2) = 97
     slice%poly_degrees(2) = 50! slice%ndeg_filter
     slice%part_low_bounds(2) = 2.3
     slice%part_upp_bounds(2) = 5.0
     slice%poly_low_bounds(2) = 2.2        ! with overlap
     slice%poly_upp_bounds(2) = 5.2        ! with overlap
 
+    ! Slice three
+    slice%neigenpairs_per_slice(2) = 96 ! wanted_mass
+    slice%fcol_in_X(2) = 1
+    slice%fcol_in_Xext(2) = 97
+    slice%poly_degrees(2) = 50! slice%ndeg_filter
+    slice%part_low_bounds(2) = 2.3
+    slice%part_upp_bounds(2) = 5.0
+    slice%poly_low_bounds(2) = 2.2        ! with overlap
+    slice%poly_upp_bounds(2) = 5.2        ! with overlap
+
+    ! TODO analyze the lambda of Cheby converged in order to find out how many vectors to put per slice
+    ! then fix true slices and see what happens
+    ! You can try this with the small system alu as well. It has the mass splitted into two parts
+    ! then we can compare the total time spent to filter etc
 
     ! ===================== Resource management system ================================================= 
 
@@ -1083,15 +1094,17 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     write(std_out,*) 'Lanczos guarantee =', lanczos_lowb
     write(std_out,*) 'Lanczos guarantee(global) =', lanczos_lowb_global
     flush(std_out)
- 
-    ndeg_filter_max = 150
-    m_probe = 50 ! should be between 1 and slice%bandpp   
-    
+
+    ndeg_filter_max = 2
+    m_probe = 5 ! should be between 1 and slice%bandpp advice between 10 <= m <= 50 
+    ! Increasing probes does not reduce bias, only variance).
+    ! Keep m_probe small allows to reduce noise
+    ! Low degree and few probes stable N_est
+
     write(std_out,*) 'Here I compute Stochastic Trace Estimation'
     write(std_out,*) 'm_probe=    ', m_probe
     write(std_out,*) 'ndeg_filter=', ndeg_filter_max
     flush(std_out)
-    lanczos_lowb_global = -3.0
 
     call computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter_max, m_probe,& 
         lanczos_lowb_global)
@@ -2441,11 +2454,13 @@ end subroutine print_scalar_filter
     !flush(std_out)
 
     ! Bv = B * q / norml_q
+    call timab(tim_getAX_BX,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
     call getAX_BX(q, v, Bv)
     call xgBlock_zero_im_g0(v) ! v stores Aq
     call xgBlock_zero_im_g0(Bv) ! Bv stores Bq
     ABI_NVTX_END_RANGE() 
+    call timab(tim_getAX_BX,2,tsec)
 
     call xgBlock_colwiseDotProduct(q, Bv, dot_qTBv)
     call xgBlock_reverseMap(dot_qTBv,dot_qTBv_layout,rows=1,cols=1)    
@@ -2462,11 +2477,13 @@ end subroutine print_scalar_filter
 
         if (j>1) then ! rewrite v
             ! v = A * q
+            call timab(tim_getAX_BX,1,tsec)
             ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
             call getAX_BX(q, v, Bv)
             call xgBlock_zero_im_g0(v) ! v stores Aq
             call xgBlock_zero_im_g0(Bv) ! Bv stores Bq
             ABI_NVTX_END_RANGE()
+            call timab(tim_getAX_BX,2,tsec)
         end if
 
         ! alpha_j = q^T * Aq
@@ -2496,11 +2513,13 @@ end subroutine print_scalar_filter
         if (j < k) then
             
             ! Bv = B * v
+            call timab(tim_getAX_BX,1,tsec)
             ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
             call getAX_BX(v, Bm1v, Bv)
             call xgBlock_zero_im_g0(Bm1v) ! Bm1v dummy workspace
             call xgBlock_zero_im_g0(Bv) ! Bv 
             ABI_NVTX_END_RANGE()
+            call timab(tim_getAX_BX,2,tsec)
  
             call xgBlock_colwiseDotProduct(v, Bv, dot_vTBv)
             call xgBlock_reverseMap(dot_vTBv,dot_vTBv_layout,rows=1,cols=1)
@@ -2697,15 +2716,17 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     chebfi%xXColsRows = X0    
 
     ! Compute A*Psi
+    call timab(tim_getAX_BX,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
     call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
     call xgBlock_zero_im_g0(chebfi%xAXColsRows)
     call xgBlock_zero_im_g0(chebfi%xBXColsRows)
     ABI_NVTX_END_RANGE()
+    call timab(tim_getAX_BX,2,tsec)
 
     ! Initialize Chebyshev moment at k=1
     call xgBlock_setBlock(Moments%self, Moment_ideg, nband, 1, fcol=1) 
-    call xgBlock_colwiseDotProduct(X0_backup%self, chebfi%xBXColsRows, Moment_ideg, &
+    call xgBlock_colwiseDotProduct(X0_backup%self, chebfi%xXColsRows, Moment_ideg, &
         comm_loc=xmpi_comm_null)
 
     if (compute_QR) then
@@ -2722,23 +2743,23 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         write(std_out,*) 'divresults=', xgBlock_getid(DivResults%self)
         write(std_out,*) 'X0=', xgBlock_getid(X0)
         write(std_out,*) 'xX=', xgBlock_getid(chebfi%xXColsRows)
-        !call xgBlock_print(DivResults%self, std_out)
+        call xgBlock_print(DivResults%self, std_out)
         flush(std_out)
     end if
 
     ! Spectral interval to be amplified scaled to [-1,1)
-    center = (max_upp_bound + min_low_bound)*0.5
-    radius = (max_upp_bound - min_low_bound)*0.5 
-    one_over_r = 1.0/radius
-    two_over_r = 2.0/radius
+    center = (max_upp_bound + min_low_bound)/2.d0
+    radius = (max_upp_bound - min_low_bound)/2.d0 
+    one_over_r = 1.d0/radius
+    two_over_r = 2.d0/radius
 
     do ideg = 0, ndeg_filter - 1
      
-        chebfi%paw = .false.
+        !chebfi%paw = .false.
         ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
         call chebfi_computeNextOrderChebfiPolynom(chebfi, ideg, center, one_over_r, two_over_r, getBm1X)
         ABI_NVTX_END_RANGE()
-        chebfi%paw = .true.
+        !chebfi%paw = .true.
 
         ! chebfi%xXColsRows = f_ideg X0
         ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
@@ -2747,20 +2768,22 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         call timab(tim_swap,2,tsec)
         ABI_NVTX_END_RANGE()
 
+        ! M_ideg = < X0, f_ideg X0 >_B
+        call xgBlock_setBlock(Moments%self, Moment_ideg, nband, 1, fcol=ideg+2) 
+        call xgBlock_colwiseDotProduct(X0_backup%self, chebfi%xXColsRows, Moment_ideg, &
+            comm_loc=xmpi_comm_null)
+
         !A * Psi    
+        call timab(tim_getAX_BX,1,tsec)
         ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
         call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
         call xgBlock_zero_im_g0(chebfi%xAXColsRows)
         call xgBlock_zero_im_g0(chebfi%xBXColsRows)
         ABI_NVTX_END_RANGE()
-
-        ! M_ideg = < X0, f_ideg X0 >_B
-        call xgBlock_setBlock(Moments%self, Moment_ideg, nband, 1, fcol=ideg+2) 
-        call xgBlock_colwiseDotProduct(X0_backup%self, chebfi%xBXColsRows, Moment_ideg, &
-            comm_loc=xmpi_comm_null)
+        call timab(tim_getAX_BX,2,tsec)
 
     end do 
-
+    
     call xgBlock_reverseMap(Moments%self, momvals, nband, ndeg_filter+1)
     cheby_moments(:,:) = momvals(:,:)
 
@@ -2791,7 +2814,7 @@ end subroutine computeChebyshevMoments
 !! SOURCE
 
 subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe,&
-        min_low_bound)
+        min_low_bound, xXColsRows)
 
     implicit none
 
@@ -2799,6 +2822,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     integer, intent(in) :: ndeg_filter
     integer, intent(in) :: m_probe
     real(dp), intent(in) :: min_low_bound
+    type(xgBlock_t), optional, intent(inout) :: xXColsRows
     interface
         subroutine getAX_BX(X,AX,BX)
             use m_xg, only : xgBlock_t
@@ -2835,8 +2859,10 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     real(dp) :: center, radius
     real(dp) :: tot_mass
     real(dp) :: step
-    real(dp) :: a_slice, b_slice
+    real(dp) :: a_slice, b_slice, mid_slice, mid2_slice ! recursion manually
+    real(dp) :: b_cut
     real(dp) :: xred
+    real(dp) :: n_est_i
     real(dp) :: ared, bred, trace_bin, theta_a, theta_b
     real(dp) :: rho_x, T0, T1, T_next
     type(xg_t) :: X_probe
@@ -2854,6 +2880,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     ecut = slice%ecut
     spacecom = slice%spacecom
     spacedim = slice%spacedim
+    neigenpairs = slice%neigenpairs
     tot_spacedim = slice%total_spacedim
     space = slice%space
     my_rank = xmpi_comm_rank(slice%spacecom)
@@ -2862,7 +2889,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     if (slice%paral_kgb==1) then
         me_g0 = slice%me_g0_fft
     end if
-    npts = 100 ! points used to plot Cumulative eigenvalue count
+    npts = 50 ! points used to plot Cumulative eigenvalue count
     num_moments = ndeg_filter + 1
 
     ABI_MALLOC(xpts, (npts))
@@ -2874,7 +2901,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     ABI_MALLOC(g_damp, (num_moments))
 
     ! total number of probes is m_probes * number of MPI processes
-    call xg_init(X_probe, slice%space, tot_spacedim, m_probe, slice%spacecom, &
+    call xg_init(X_probe, slice%space, tot_spacedim, m_probe, spacecom, &
         me_g0=me_g0, gpu_option=gpu_option)
 
     ! Define random isotropic probes (unit variance NOT unit norm!)
@@ -2889,36 +2916,95 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
 
     ! Chebyshev moments in maximal [a,ecut)
     ! todo <X_probe, f(A) X_probe> (trace) and <X0, f(A) X_probe> (principal angles)
-    call computeChebyshevMoments(slice, X_probe%self, getAX_BX, getBm1X, &
-        min_low_bound, ecut, ndeg_filter, cheby_moments)
+    if (present(xXColsRows)) then
+        call computeChebyshevMoments(slice, xXColsRows, getAX_BX, getBm1X, &
+            min_low_bound, ecut, ndeg_filter, cheby_moments, b_init) ! debug
+    else
+        call computeChebyshevMoments(slice, X_probe%self, getAX_BX, getBm1X, &
+            min_low_bound, ecut, ndeg_filter, cheby_moments, b_init)
+    end if
 
-    !write(std_out,*) 'b_init=', b_init
-    !flush(std_out)
+    write(std_out,*) 'b_init=', b_init
+    flush(std_out)
 
     ! Compute mu_k = 1/Nv * Sum_{i=1}^Nv v_i^T T_k(A)v_i for every k=1,..,ndeg
     m_probe_tot = m_probe
+    call xmpi_barrier(spacecom)
     call xmpi_sum(m_probe_tot, spacecom, ierr)
     do k=1, num_moments
         sum_cheby = real(sum(cheby_moments(:,k)))
         sum_cheby_tot = sum_cheby
+        call xmpi_barrier(spacecom)
         call xmpi_sum(sum_cheby_tot, spacecom, ierr)
         moments(k) = sum_cheby_tot/m_probe_tot
         !write(std_out,*) 'maximum imag=', maxval(abs(aimag(cheby_moments(:,k))))
     end do
+    write(std_out,*) 'moments k=0=', real(sum(cheby_moments(:,1)))
+    write(std_out,*) 'moments k=1=', real(sum(cheby_moments(:,2)))
+    write(std_out,*) 'moments k=3=', real(sum(cheby_moments(:,3)))
+    flush(std_out)
+
+    ! ============ Sanity check <3
+    ! Compute total mass in interval
+    a_slice = min_low_bound
+    b_slice = ecut
+    call jackson_step_coeffs(a_slice,b_slice,min_low_bound,ecut,ndeg_filter,ctilde)
+    !call buildChebyshevJacksonCoeffs(-0.8d0, 0.5d0, ndeg_filter, ctilde)
+    write(std_out,*) '========================================'
+    write(std_out,*) 'in interval=', a_slice, b_slice
+    write(std_out,*) 'total mass=', dot_product(ctilde, moments)/tot_spacedim ! fraction of the spectrum
+    write(std_out,*) 'sum ctilde=', sum(ctilde)
+    flush(std_out)
+
+    ! Phase 0: coarse detection
+
+    step = (b_slice - a_slice) / 25.d0
+    do
+        call jackson_step_coeffs(a_slice,b_slice,min_low_bound,ecut,ndeg_filter,ctilde)
+        n_est_i = dot_product(ctilde, moments)/tot_spacedim
+        write(std_out,*) 'coarse iter=', b_slice, n_est_i; flush(std_out)
+        if ( (n_est_i <= neigenpairs/tot_spacedim * (1.d0 + 0.1d0)) .or. (b_slice<a_slice)) then
+            exit
+        end if
+        b_slice = b_slice - step
+    end do
+    write(std_out,*) 'coarse app=', b_slice, n_est_i
+    flush(std_out)
+
+
+    ! Alu ====
+    !a_slice = -0.5
+    !b_slice = 5.0
+    ! Au-31 ====
+    !a_slice = 0.d0
+    !b_slice = 1.d0
+
+    mid_slice = (a_slice + b_slice) / 2.d0
+    call jackson_step_coeffs(a_slice,mid_slice,min_low_bound,ecut,ndeg_filter,ctilde)
+    write(std_out,*) '========================================'
+    write(std_out,*) 'in interval=', a_slice, mid_slice
+    write(std_out,*) 'total mass=', dot_product(ctilde, moments)/tot_spacedim
+    flush(std_out)
+
+    call jackson_step_coeffs(mid_slice,b_slice,min_low_bound,ecut,ndeg_filter,ctilde)
+    write(std_out,*) '========================================'
+    write(std_out,*) 'in interval=', mid_slice, b_slice
+    write(std_out,*) 'total mass=', dot_product(ctilde, moments)/tot_spacedim
+    flush(std_out)
+    
+
 
     center = (ecut + min_low_bound) / 2.d0 ! this should be the same as cheby moms
     radius = (ecut - min_low_bound) / 2.d0
 
-    ! Compute total mass in interval
-    call jackson_step_coeffs(0.d0,4.d0,min_low_bound,ecut,ndeg_filter,ctilde)
-    !call buildChebyshevJacksonCoeffs(-0.8d0, 0.5d0, ndeg_filter, ctilde)
-    write(std_out,*) 'total mass=', dot_product(ctilde, moments)
-    write(std_out,*) 'sum ctilde=', sum(ctilde)
-    flush(std_out)
+    ! Phase 1: detect gaps with low degree and few probes (ndeg=2-5)
+
+    ! Phase 2: Refine intervals with eigenvalues this is for degree (10-20) 
+    ! and more probes -> accurate count
+    ! avoid using extremely high degree on nearly full intervals
+    ! Spanning the full spectrum will produce explosion
 
 
-    a_slice = -0.5
-    b_slice = 5.0
     step = (b_slice-a_slice) / (npts-1)
     xpts = [( a_slice + (i-1)*step, i=1,npts )]
     write(std_out,*) 'Jackson smoothing width', (ecut-min_low_bound)/num_moments
@@ -2940,8 +3026,8 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
              T1 = T_next
          end do
          rho_x = rho_x / (PI*sqrt(1.0-xred**2))
-         write(std_out,*) i, xpts(i), rho_x, xred
-         flush(std_out)
+         !write(std_out,*) i, xpts(i), rho_x, xred
+         !flush(std_out)
          rho(i) = rho_x
      end do
 
@@ -3278,8 +3364,8 @@ end subroutine computeFilterEnergy
       integer :: k
       real(dp) :: c, r, a_, b_, ck, gk, alpha, cotv
 
-      c  = 0.5d0*(lmin + lmax)
-      r  = 0.5d0*(lmax - lmin)
+      c  = (lmin + lmax)/2.d0
+      r  = (lmax - lmin)/2.d0
       a_ = (a - c)/r
       b_ = (b - c)/r
       alpha = pi/(deg+2)

@@ -559,6 +559,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  real(dp) :: tsec(2)
  !Pointers similar to old Chebfi
  integer,allocatable :: ndeg_filter_bands(:) !Oracle variable
+ ! IML
+ real(dp), pointer :: thetas(:,:) => null()
 
 ! *********************************************************************
 
@@ -659,6 +661,15 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  call timab(tim_RR_q, 2, tsec)
  ABI_NVTX_END_RANGE()
 
+ ! IML debug
+ write(std_out,*) 'maxeig_global=', maxeig_global
+ write(std_out,*) 'divresults=', xgBlock_getid(DivResults%self)
+ write(std_out,*) 'X0=', xgBlock_getid(X0)
+ write(std_out,*) 'xX=', xgBlock_getid(chebfi%xXColsRows)
+ call xgBlock_print(DivResults%self, std_out)
+ flush(std_out)
+ ! IML debug
+
  lambda_minus = maxeig_global
 
  call timab(tim_oracle,1,tsec)
@@ -750,6 +761,16 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,tim_RR,&
 &                     chebfi%gpu_option,solve_ax_bx=.true.)
  ABI_NVTX_END_RANGE()
+
+ ! Start IML write converged eigenvalues here
+ open(unit=1201, file='converged_eigenvalues.csv', status='replace')
+ call xgBlock_reverseMap(chebfi%eigenvalues, thetas, rows=1, cols=chebfi%neigenpairs)
+ write(1201,'(A)') "eig"
+ do ideg=1, chebfi%neigenpairs
+    write(1201,'(F15.5)') thetas(1,ideg)
+ end do
+ close(1201)
+ ! End IML
 
  ! Compute residual
  call timab(tim_residu, 1, tsec)
@@ -921,7 +942,7 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,ideg,center,one_over_r,tw
  call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%xXColsRows)
 
  !Psi^i-1  = 1/c * Psi^i-1
- call xgBlock_scale(chebfi%xXColsRows, 1/center, 1) !counter scale by 1/center
+ call xgBlock_scale(chebfi%xXColsRows, dble(1.0)/center, 1) !counter scale by 1/center
 
  if (ideg == 0) then
    call xgBlock_scale(chebfi%X_next, one_over_r, 1)
