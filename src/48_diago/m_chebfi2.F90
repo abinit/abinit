@@ -1352,7 +1352,6 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     integer, target, allocatable :: nrowsLinalg(:)
     integer, pointer :: nrowsLinalg_ptr(:) => null()
     real(dp) :: tsec(2)
-    type(xg_t) :: temp
 
     ! *********************************************************************
  
@@ -1363,7 +1362,6 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     spacedim = chebfi%spacedim
     neigenpairs = chebfi%neigenpairs
     num_proc = xmpi_comm_size(chebfi%spacecom)
-    chebfi%xXColsRows = X0
     chebfi%eigenvalues = eigen
 
     ABI_MALLOC_IFNOT(nrowsLinalg,(num_proc))
@@ -1392,6 +1390,9 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     ! Apply polynomial filtering to active MPI ColsRows block-column
     if (is_lowpass) then
         ! [lambda_minus,lambda_plus) is diminished using Chebyshev
+        write(std_out,*) 'lambda_minus=', lambda_minus
+        write(std_out,*) 'lambda_plus=', lambda_plus
+        flush(std_out)
         call chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,getBm1X)
     else
         ! [lambda_minus,lambda_plus) is amplified using Chebyshev-Jackson
@@ -1464,88 +1465,8 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     write(std_out,*) 'id of X, (before RR) ncols=', xgBlock_getId(chebfi%X), cols(chebfi%X)
     flush(std_out)
 
-    ! Normalize chebfi%X
-    !call xg_init(temp, chebfi%space, rows(chebfi%X), neigenpairs, chebfi%spacecom, me_g0=chebfi%me_g0, gpu_option=chebfi%gpu_option)
-    !call xgBlock_copy(chebfi%X, temp%self)
-    !write(std_out,*) 'X size=', rows(chebfi%X), cols(chebfi%X), space(chebfi%X)
-    !write(std_out,*) 'T size=', rows(temp%self), cols(temp%self), space(temp%self)
-    !flush(std_out)
-    !call xg_Borthonormalize(chebfi%X,temp%self,ierr,tim_RR,gpu_option=chebfi%gpu_option)
-    !call xg_free(temp)
-    !write(std_out,*) 'Xortho=', xgBlock_getid(chebfi%X)
-    !flush(std_out)
-
-    ! Allocate rank-k approximation in linalg representation
-    call xg_init(X_k, chebfi%space, rows(chebfi%X), neigenpairs, chebfi%spacecom, me_g0=chebfi%me_g0, &
-        gpu_option=chebfi%gpu_option)
-    call xgBlock_randomizedRRQR(chebfi%X, k_rank, X_k%self)
-    call xgBlock_copy(X_k%self, chebfi%X)
-    call xg_free(X_k)
-    write(std_out,*) 'Xrand=', xgBlock_getid(chebfi%X); flush(std_out)
-    call xgBlock_print(chebfi%X, std_out)
-    flush(std_out)
-
-    ! todo recompute AX, BX..? fixme avoid this transfer ..
-
-    ! MPI transpose to linalg state
-    call timab(tim_transpose,1,tsec)
-    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
-    if (chebfi%paral_kgb == 1) then
-        call xmpi_barrier(chebfi%spacecom)
-        call xgTransposer_transpose(chebfi%xgTransposerX, STATE_COLSROWS)
-        call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS)
-        call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS)
-        write(std_out,*) 'Xrand=', xgBlock_getid(chebfi%xXColsRows); flush(std_out)
-
-        !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
-        if (xmpi_comm_size(chebfi%spacecom) == 1) then 
-            call xgBlock_setBlock(chebfi%X,       chebfi%xXColsRows,  spacedim, chebfi%bandpp)
-            call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, spacedim, chebfi%bandpp)
-            call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, spacedim, chebfi%bandpp)
-        end if
-    else
-        call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows,  spacedim, chebfi%bandpp)
-        call xgBlock_setBlock(chebfi%X, chebfi%xAXColsRows, spacedim, chebfi%bandpp)
-        call xgBlock_setBlock(chebfi%X, chebfi%xBXColsRows, spacedim, chebfi%bandpp)
-    end if
-    ABI_NVTX_END_RANGE()
-    call timab(tim_transpose,2,tsec)
-
-    !A * Psi
-    call timab(tim_getAX_BX,1,tsec)
-    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
-    call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
-    call xgBlock_zero_im_g0(chebfi%xAXColsRows)
-    call xgBlock_zero_im_g0(chebfi%xBXColsRows)
-    ABI_NVTX_END_RANGE()
-    call timab(tim_getAX_BX,2,tsec)
-
-    ! MPI transpose to linalg state
-    call timab(tim_transpose,1,tsec)
-    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
-    if (chebfi%paral_kgb == 1) then
-        call xmpi_barrier(chebfi%spacecom)
-        call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
-        call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_LINALG)
-        call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG)
-
-        !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
-        if (xmpi_comm_size(chebfi%spacecom) == 1) then 
-            call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       spacedim, neigenpairs)
-            call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
-            call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
-        end if
-    else
-        call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       spacedim, neigenpairs)
-        call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
-        call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
-    end if
-    ABI_NVTX_END_RANGE()
-    call timab(tim_transpose,2,tsec)
-
-    ! todo harmonic Rayleigh-Ritz for generalized eigenvalue problem
-    ! we form (A-sigma*I)X = AX - sigma*X do this with xgTools
-
+    !call xg_Borthonormalize(chebfi%xXColsRows,chebfi%xBxColsRows,ierr,1,chebfi%gpu_option,AX=chebfi%xAXColsRows)
+    
     ! Apply Rayleigh-Ritz to active MPI Linalg row-block
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
     call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,eigen,ierr,0,tim_RR,&
@@ -1571,8 +1492,9 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     end if
     call xgBlock_colwiseNorm2(chebfi%AX%self,residu) ! performs MPI comm
 
-    !write(std_out,*) 'max colwise residual norm squared='; call xgBlock_print(residu, std_out)
- 
+    write(std_out,*) 'max colwise residual norm squared='; call xgBlock_print(residu, std_out)
+    flush(std_out)
+
     ! Copy in Linalg representation (see chebfi_run, kept for reference)
     ! call xgBlock_copy(chebfi%X,X0)
     
@@ -1582,11 +1504,17 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     if (chebfi%paral_kgb == 1) then
         call xmpi_barrier(chebfi%spacecom)
         call xgTransposer_transpose(chebfi%xgTransposerX, STATE_COLSROWS)
+        call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_COLSROWS)
+        call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_COLSROWS)
         if (xmpi_comm_size(chebfi%spacecom) == 1) then 
             call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, spacedim, neigenpairs)
+            call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, spacedim, neigenpairs)
+            call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, spacedim, neigenpairs)
         end if
     else
         call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, spacedim, neigenpairs)
+        call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, spacedim, neigenpairs)
+        call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, spacedim, neigenpairs)
     end if
     ABI_NVTX_END_RANGE()
     call timab(tim_transpose,2,tsec)
