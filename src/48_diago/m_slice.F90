@@ -1073,7 +1073,7 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     write(std_out,*) 'Lanczos guarantee(global) =', lanczos_lowb_global
     flush(std_out)
  
-    ndeg_filter_max = 60
+    ndeg_filter_max = 50
     m_probe = 25 ! should be between 1 and slice%bandpp   
     
     write(std_out,*) 'Here I compute Stockastic Trace Estimation'
@@ -1102,10 +1102,6 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     ! n'est pas hermitienne
     write(std_out,*) 'chebyshev moments sum='
     do ideg=1, ndeg_filter_max+1
-        if (any( ( abs( aimag(cheby_moments(:,ideg) )) > 1e-12))) then
-            ABI_ERROR("At least one moment is complex Chebyshev moment failed")
-        end if
-        ! TODO should sum across mpi
         write(std_out,*) 'ideg=', ideg, 'sum=', 1.d0 / slice%bandpp * sum(real(cheby_moments(:,ideg)))
         flush(std_out)
     end do
@@ -2623,7 +2619,7 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     integer :: ideg
     integer :: iband
     integer :: tot_spacedim
-    integer :: space_res
+    integer :: space_res, me_g0
     integer :: space, spacecom, gpu_option
     integer :: ierr
     logical :: compute_QR
@@ -2633,8 +2629,8 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     real(dp) :: two_over_r
     real(dp) :: tsec(2)
     type(xg_t) :: Moments
-    type(xg_t) :: norm2_X
     type(xg_t) :: DivResults
+    type(xg_t) :: X0_backup
     type(xgBlock_t) :: Moment_ideg
     type(chebfi_t) :: chebfi
     complex(dp), pointer :: momvals(:,:) => null()
@@ -2646,6 +2642,10 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     neigenpairs = slice%neigenpairs
     tot_spacedim = slice%total_spacedim
     gpu_option = slice%gpu_option
+    me_g0 = slice%me_g0
+    if (slice%paral_kgb==1) then
+        me_g0 = slice%me_g0_fft
+    end if
     nband = cols(X0)
  
     compute_QR = .false.
@@ -2665,7 +2665,8 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     end if
     
     ! Moment workspace size (nband, ndeg+1)
-    call xg_init(Moments, space, nband, ndeg_filter, gpu_option=gpu_option) ! M_n=<X0,f_n(A)X0>
+    call xg_init(Moments, space, nband, ndeg_filter+1, gpu_option=gpu_option) ! M_n=<X0,f_n(A)X0>
+    call xg_init(X0_backup, space, tot_spacedim, nband, spacecom, me_g0=me_g0, gpu_option=gpu_option) ! X0
 
     ! Initialize chebfi object in MPI Colsrows distribution
     call chebfi_init(chebfi,nband,tot_spacedim,slice%tolerance,slice%ecut,slice%paral_kgb,&
@@ -2675,7 +2676,13 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         from_linalg=.false.)
 
     ! Initialize Chebyshev recursion with orthonormalized X0
-    chebfi%xXColsRows = X0
+    call xgBlock_copy(X0, X0_backup%self)
+    chebfi%xXColsRows = X0    
+
+    ! Initialize Chebyshev moment at k=1
+    call xgBlock_setBlock(Moments%self, Moment_ideg, nband, 1, fcol=1) 
+    call xgBlock_colwiseDotProduct(X0_backup%self, chebfi%xXColsRows, Moment_ideg, &
+        comm_loc=xmpi_comm_null)
 
     ! Compute A*Psi
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
@@ -2683,10 +2690,6 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     call xgBlock_zero_im_g0(chebfi%xAXColsRows)
     call xgBlock_zero_im_g0(chebfi%xBXColsRows)
     ABI_NVTX_END_RANGE()
-
-    ! Initialize Chebyshev moment at k=1
-    call xgBlock_setBlock(Moments%self, Moment_ideg, nband, 1, fcol=1) 
-    call xgBlock_colwiseDotProduct(X0, chebfi%xBXColsRows, Moment_ideg, comm_loc=xmpi_comm_null)
 
     if (compute_QR) then
         ! Compute upper bound of interval as Rayleigh quotient
@@ -2713,10 +2716,10 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     two_over_r = 2.0/radius
 
     do ideg = 0, ndeg_filter - 1
-       
+     
         ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
         call chebfi_computeNextOrderChebfiPolynom(chebfi, ideg, center, one_over_r, two_over_r, getBm1X)
-        ABI_NVTX_END_RANGE() 
+        ABI_NVTX_END_RANGE()
 
         ! chebfi%xXColsRows = f_ideg X0
         ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
@@ -2725,22 +2728,21 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         call timab(tim_swap,2,tsec)
         ABI_NVTX_END_RANGE()
 
+        ! M_ideg = < X0, f_ideg X0 >_B
+        call xgBlock_setBlock(Moments%self, Moment_ideg, nband, 1, fcol=ideg+2) 
+        call xgBlock_colwiseDotProduct(X0_backup%self, chebfi%xXColsRows, Moment_ideg, &
+            comm_loc=xmpi_comm_null)
+
         !A * Psi    
         ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
         call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
         call xgBlock_zero_im_g0(chebfi%xAXColsRows)
         call xgBlock_zero_im_g0(chebfi%xBXColsRows)
-        ABI_NVTX_END_RANGE()
-
-        if (ideg>0) then
-            ! M_ideg = < X0, f_ideg X0 >_B with B-inner product
-            call xgBlock_setBlock(Moments%self, Moment_ideg, nband, 1, fcol=ideg+1) 
-            call xgBlock_colwiseDotProduct(X0, chebfi%xBXColsRows, Moment_ideg, comm_loc=xmpi_comm_null)
-        end if
+        ABI_NVTX_END_RANGE()        
 
     end do 
 
-    call xgBlock_reverseMap(Moments%self, momvals, nband, ndeg_filter)
+    call xgBlock_reverseMap(Moments%self, momvals, nband, ndeg_filter+1)
     cheby_moments(:,:) = momvals(:,:)
 
     ! Free memory
@@ -2806,27 +2808,21 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     integer :: seed
     integer :: m_probe_tot
     integer :: i, k, npts, np1
+    integer :: num_moments
+    real(dp) :: N_est
     real(dp) :: sum_cheby, sum_cheby_tot
     real(dp) :: b_init, b_ext, ecut
     real(dp) :: maxeig, mineig
     real(dp) :: center, radius
     real(dp) :: tot_mass
-    real(dp) :: norml_x
     real(dp) :: step
-    real(dp) :: sigma, weight
-    real(dp) :: a_slice, b_slice, ared, bred
-    real(dp) :: xred, T0, T1, T_next, rho_x
-    real(dp) :: theta_a, theta_b, trace_bin
+    real(dp) :: a_slice, b_slice
+    real(dp) :: ared, xred
     type(xg_t) :: X_probe
-    complex(dp), pointer :: momvals(:,:) => null()
     complex(dp), allocatable :: cheby_moments(:,:)
     real(dp), allocatable :: xpts(:)
-    real(dp), allocatable :: g_damp(:)
-    real(dp), allocatable :: energy_per_band(:)
-    real(dp), allocatable :: cja(:)
     real(dp), allocatable :: moments(:)
-    real(dp), allocatable :: rho(:)
-    real(dp), allocatable :: rho_smoothed(:)
+    real(dp), allocatable :: ctilde(:)
     
     ! *********************************************************************
 
@@ -2841,165 +2837,96 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     if (slice%paral_kgb==1) then
         me_g0 = slice%me_g0_fft
     end if
-    npts = 100 ! points used to plot DOS
+    npts = 10 ! points used to plot Cumulative eigenvalue count
+    num_moments = ndeg_filter + 1
 
-    ABI_MALLOC(g_damp, (ndeg_filter))
     ABI_MALLOC(xpts, (npts))
-    ABI_MALLOC(rho, (npts))
-    ABI_MALLOC(rho_smoothed, (npts))
-    ABI_MALLOC(cja, (ndeg_filter))
-    ABI_MALLOC(moments, (ndeg_filter))
-    ABI_MALLOC(cheby_moments, (m_probe, ndeg_filter) )
+    ABI_MALLOC(moments, (num_moments))
+    ABI_MALLOC(ctilde, (num_moments))
+    ABI_MALLOC(cheby_moments, (m_probe, num_moments) )
 
+    ! total number of probes is m_probes * number of MPI processes
     call xg_init(X_probe, slice%space, tot_spacedim, m_probe, slice%spacecom, &
         me_g0=me_g0, gpu_option=gpu_option)
-    ! total number of probes is m_probes * number of MPI processes
 
-    ! Define random isotropic probes
+    ! Define random isotropic probes (unit variance NOT unit norm!)
     do jcol = 1, m_probe
         seed = my_rank*(m_probe+10)+jcol ! seed depends on column index
         call xgBlock_colwiseRandomRademacher(X_probe%self, seed, jcol)
     end do
 
-    ! Compute mu_k = 1/Nv * Sum_{i=1}^Nv v_i^T T_k(A)v_i for every k=1,..,ndeg
+    write(std_out,*) 'moments are scaled in'
+    write(std_out,*) min_low_bound, ecut
+    flush(std_out)
 
     ! Chebyshev moments in maximal [a,ecut)
     ! todo <X_probe, f(A) X_probe> (trace) and <X0, f(A) X_probe> (principal angles)
     call computeChebyshevMoments(slice, X_probe%self, getAX_BX, getBm1X, &
-        min_low_bound, ecut, ndeg_filter, cheby_moments, b_init)
+        min_low_bound, ecut, ndeg_filter, cheby_moments)
 
-    ! do the sum
-    !write(std_out,*) 'cheby_moments=', cheby_moments
-    write(std_out,*) 'b_init=', b_init
-    flush(std_out)
+    !write(std_out,*) 'b_init=', b_init
+    !flush(std_out)
 
-    ! Reconstruct the formula for DOS integration here
+    ! Compute mu_k = 1/Nv * Sum_{i=1}^Nv v_i^T T_k(A)v_i for every k=1,..,ndeg
     m_probe_tot = m_probe
-    call xmpi_sum(m_probe_tot, spacecom, ierr)
-    write(std_out,*) 'm_probe    =', m_probe
-    write(std_out,*) 'm_probe_tot=', m_probe_tot
-    flush(std_out)
-    do k=1, ndeg_filter
-        write(std_out,*) 'for degree=', k
-        ! todo should sum across mpi
-        if (any( ( abs( aimag(cheby_moments(:,k) )) > 1e-12))) then
-            ABI_ERROR("At least one moment is complex Chebyshev moment failed")
-        end if
-        !write(std_out,*) cheby_moments(:,k)
-        sum_cheby = sum(real(cheby_moments(:,k)))
+    !call xmpi_sum(m_probe_tot, spacecom, ierr)
+    do k=1, num_moments
+        sum_cheby = real(sum(cheby_moments(:,k)))
         sum_cheby_tot = sum_cheby
-        call xmpi_sum(sum_cheby_tot, spacecom, ierr)
-        !write(std_out,*) 'sum_cheby    =', sum_cheby
-        !write(std_out,*) 'sub_cheby_tot=', sum_cheby_tot
-        !flush(std_out)
-        moments(k) = sum_cheby_tot * 1.d0 / m_probe_tot
-        write(std_out,*) 'Result=', moments(k)
+        !call xmpi_sum(sum_cheby_tot, spacecom, ierr)
+        moments(k) = sum_cheby_tot/m_probe_tot
+        write(std_out,*) 'moments=', sum(moments)
+        write(std_out,*) 'maximum imag=', maxval(abs(aimag(cheby_moments(:,k))))
         flush(std_out)
     end do
 
-    ! dos
-    
-    ! x in -1 .. 1:
-    ! rho(x) = 1.d0/(Pi*sqrt(1-x*x)) * [sum_{k=1}^ndeg_filter g_k * mu_k * T_{k-1}(x)]
+    center = (ecut + min_low_bound) / 2.d0 ! this should be the same as cheby moms
+    radius = (ecut - min_low_bound) / 2.d0
 
-    ! Compute damping factors g_k (Jackson kernel)
-    ! reduce Gibbs oscillations in the reconstructed DOS
-    np1 = ndeg_filter + 1
-    do k=1, ndeg_filter
-        g_damp(k) = ((np1 - k) * cos(PI*(k-1)/np1) + sin(PI*(k-1)/np1) / tan(PI/np1)) / np1 
-    end do
-    
-    a_slice = min_low_bound + 0.01
+    ! Compute total mass in interval
+    call jackson_step_coeffs(0.d0,3.d0,min_low_bound,ecut,ndeg_filter,ctilde)
+    !call buildChebyshevJacksonCoeffs(-0.8d0, 0.5d0, ndeg_filter, ctilde)
+    N_est = dot_product(ctilde, moments)
+    write(std_out,*) 'total mass=', N_est
+    write(std_out,*) 'sum ctilde=', sum(ctilde)
+    flush(std_out)
+
+
+    a_slice = 0.0
     b_slice = 3.0
     step = (b_slice-a_slice) / (npts-1)
     xpts = [( a_slice + (i-1)*step, i=1,npts )]
+    write(std_out,*) 'Jackson smoothing width', (ecut-min_low_bound)/num_moments
+    write(std_out,*) 'grid step=', step
+    flush(std_out)
 
-    center = (ecut + min_low_bound) / 2.d0 ! this should be the same as cheby moms
-    radius = (ecut - min_low_bound) / 2.d0
     write(std_out,*) 'i: x rho_x in ', a_slice, b_slice
     write(std_out,*) 'using number of points', npts
     flush(std_out)
     do i=1, npts
         xred = (xpts(i) - center)/radius
-        T0 = 1.d0
-        T1 = xred
-        rho_x = g_damp(1) * moments(1)
-        do k = 2, ndeg_filter
-            rho_x = rho_x + g_damp(k) * moments(k) * T1
-            T_next = 2.0 * xred * T1 - T0 ! T_k = 2x T_k-1 - T_k-2
-            T0 = T1
-            T1 = T_next
-        end do
-        rho_x = rho_x / (PI*sqrt(1.0-xred**2))
-        rho(i) = rho_x
-        !write(std_out,*) i, xpts(i), rho(i)
-        !flush(std_out)
-    end do
-
-    ! Now integrate dos in bin. This should give the number of eigenvalues
-    ! returns approximate partial trace in the interval [a,b)
-    ! (a,b) bin edges in -1,1
-    ared = (a_slice - center) / radius
-    bred = (b_slice - center) / radius
-    theta_a = acos(ared)
-    theta_b = acos(bred)
-    trace_bin = g_damp(1) * moments(1) * (theta_a - theta_b) / PI
-    do k=2, ndeg_filter
-        trace_bin = trace_bin + g_damp(k) * moments(k) * (sin((k-1)*theta_b) - &
-                sin((k-1)*theta_a)) / ((k-1)*PI)
-    end do
-    write(std_out,*) 'trace_bin=', trace_bin
-    flush(std_out)
-
-    ! debug area should be equal to the total number of eigenvalues
-    write(std_out,*) 'total area(before recale)=', sum(rho*step)
-    flush(std_out)
-    
-    ! rescale for correct area
-    rho = rho * trace_bin / sum(rho*step)
-    write(std_out,*) 'total area(after rescale)=', sum(rho*step)
-    flush(std_out)
-
-    do i=1, npts
-        write(std_out,*) i, xpts(i), rho(i)
+        ared = (a_slice - center)/radius
+        call jackson_step_coeffs(min_low_bound,xpts(i),min_low_bound,ecut,ndeg_filter,ctilde)
+        !call buildChebyshevJacksonCoeffs(-1.d0, xred, ndeg_filter, ctilde)
+        !N_est = 0.5d0*ctilde(1)*moments(1) + sum(ctilde(2:num_moments) * moments(2:num_moments))
+        N_est = dot_product(ctilde, moments)
+        write(std_out,*) xpts(i), N_est
         flush(std_out)
     end do
-
-    ! Gaussian smoothing
-    !sigma = 0.01
-    !rho_smoothed = 0.0
-    !do i = 1, npts
-    !    do k = 1, npts
-    !        weight = exp(-0.5 * ((xpts(i) - xpts(k)) / sigma)**2 ) / &
-    !            (sigma * sqrt(2.0*PI))
-    !        rho_smoothed(i) = rho_smoothed(i) + rho(k) * weight * step
-    !    end do
-    !end do
-    !rho(:) = rho_smoothed(:)
-
-    ! debug area should be equal to the total number of eigenvalues
-    !write(std_out,*) 'Smoothed total area(before recale)=', sum(rho*step)
-    !flush(std_out)
-    
-    ! rescale for correct area
-    !rho = rho * trace_bin / sum(rho*step)
-    !write(std_out,*) 'Smoothed total area(after rescale)=', sum(rho*step)
-    !flush(std_out)
-
+   
+    !Print coordinates to file
+    !open(unit=1201, file='dos_data.csv', status='replace')
+    !write(1201,'(A)') "X,Y"
     !do i=1, npts
-    !    write(std_out,*) i, xpts(i), rho(i)
-    !    flush(std_out)
+    !    write(1201,'(F15.5, ",", F15.5)') xpts(i), rho(i)
     !end do
-
+    !close(1201)
     
     ! Free memory
     ABI_FREE(cheby_moments)
-    ABI_FREE(cja)
     ABI_FREE(moments)
-    ABI_FREE(g_damp)
     ABI_FREE(xpts)
-    ABI_FREE(rho)
-    ABI_FREE(rho_smoothed)
+    ABI_FREE(ctilde)
 
     call xg_free(X_probe)
     
@@ -3065,7 +2992,7 @@ subroutine splitSpectrum(nband_tot, nstep_bisect, center, radius, a, b, c_split,
 
         ! Step 1: increase b until all mass is included            
         b_ext = b
-        call buildChebyshevJacksonCoeffs(a, b_ext, ndeg_filter, center, radius, cja)
+        call buildChebyshevJacksonCoeffs((a-center)/radius, (b_ext-center)/radius, ndeg_filter, cja)
         call computeFilterEnergy(cja, cheby_moments, energy_per_band)
         tot_mass = norm2(energy_per_band)**2
         call xmpi_sum(tot_mass, comm, ierr)
@@ -3075,7 +3002,7 @@ subroutine splitSpectrum(nband_tot, nstep_bisect, center, radius, a, b, c_split,
         flush(std_out)
         do while (tot_mass < nband_tot .and. iext_step < 100)
             b_ext = b_ext + width_ext
-            call buildChebyshevJacksonCoeffs(a, b_ext, ndeg_filter, center, radius, cja)
+            call buildChebyshevJacksonCoeffs((a-center)/radius, (b_ext-center)/radius, ndeg_filter, cja)
             call computeFilterEnergy(cja, cheby_moments, energy_per_band)
             tot_mass = sum(energy_per_band)
             call xmpi_sum(tot_mass, comm, ierr)
@@ -3098,7 +3025,7 @@ subroutine splitSpectrum(nband_tot, nstep_bisect, center, radius, a, b, c_split,
             flush(std_out)
 
             ! Slice Left [a,c)
-            call buildChebyshevJacksonCoeffs(a, c, ndeg_filter, center, radius, cja)
+            call buildChebyshevJacksonCoeffs((a-center)/radius, (c-center)/radius, ndeg_filter, cja)
             call computeFilterEnergy(cja, cheby_moments, energy_per_band)
             mass_left = sum(energy_per_band)
             write(std_out,*) 'energy_per_band=', energy_per_band; flush(std_out)
@@ -3109,7 +3036,7 @@ subroutine splitSpectrum(nband_tot, nstep_bisect, center, radius, a, b, c_split,
             flush(std_out)
 
             ! Slice Right [c,b)
-            call buildChebyshevJacksonCoeffs(c, b_ext, ndeg_filter, center, radius, cja)
+            call buildChebyshevJacksonCoeffs((c-center)/radius, (b_ext-center)/radius, ndeg_filter, cja)
             call computeFilterEnergy(cja, cheby_moments, energy_per_band)
             write(std_out,*) 'energy_per_band=', energy_per_band; flush(std_out)
             mass_right = sum(energy_per_band)
@@ -3186,7 +3113,7 @@ subroutine spectralPruning(a, b, center, radius, cheby_moments, tot_nband, idx, 
         ABI_MALLOC(energy_per_band_global, (tot_nband))
         ABI_MALLOC(cja, (ndeg_filter + 1))
 
-        call buildChebyshevJacksonCoeffs(a, b, ndeg_filter, center, radius, cja)
+        call buildChebyshevJacksonCoeffs((a-center)/radius, (b-center)/radius, ndeg_filter, cja)
         call computeFilterEnergy(cja, cheby_moments, energy_per_band)
       
         energy_per_band_global = 0.d0
@@ -3253,6 +3180,51 @@ subroutine computeFilterEnergy(cja, cheby_moments, energy_per_band)
       ABI_FREE(energy)
 
 end subroutine computeFilterEnergy
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/jackson_step_coeffs
+!! NAME
+!! jackson_step_coeffs
+!! 
+!! FUNCTION
+!! Jackson damped coefficients
+!! 
+!! SOURCE
+
+  subroutine jackson_step_coeffs(a,b,lmin,lmax,deg,ctilde)
+      
+      implicit none
+
+      integer, intent(in) :: deg
+      real(dp), intent(in) :: a,b,lmin,lmax
+      real(dp), intent(out) :: ctilde(1:deg+1)
+      integer :: k
+      real(dp) :: c, r, a_, b_, ck, gk, alpha, cotv
+
+      c  = 0.5d0*(lmin + lmax)
+      r  = 0.5d0*(lmax - lmin)
+      a_ = (a - c)/r
+      b_ = (b - c)/r
+      alpha = pi/(deg+2)
+      cotv = cos(alpha)/sin(alpha)
+
+      do k = 0, deg
+         ! Chebyshev coefficient for step function
+         if (k == 0) then
+            ck = (acos(a_) - acos(b_))/pi
+         else
+            ck = 2.0d0/pi*(sin(k*acos(a_)) - sin(k*acos(b_)))/k
+         end if
+
+         ! Jackson damping factor
+         gk = ((deg - k + 1)*cos(pi*k/(deg+1)) + sin(pi*k/(deg+1))*cotv) / (deg+1)
+
+         ctilde(k+1) = ck * gk
+      end do
+
+  end subroutine jackson_step_coeffs
 !!***
 
 end module m_slice

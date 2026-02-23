@@ -542,6 +542,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: nfilters, ifilter, nstep_bisect, ishift
  integer :: nvec_approx
  integer :: ideg_shift
+ integer :: nm
  real(dp) :: balance_prev, balance_this
  real(dp) :: conf_tol
  real(dp) :: tol_step
@@ -570,6 +571,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: min_upp_bound, max_upp_bound
  real(dp) :: lambda_min, res_norm ! lanczos
  real(dp) :: lower_i, upper_i, mid_i, width
+ complex(dp) :: meanz
+ real(dp)    :: norm2_, variance
  real(dp) :: tol12 = 1.0e-12
  type(xg_t) :: Xsum
  type(xg_t) :: DivResults
@@ -618,6 +621,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp), pointer :: resid(:) => null()
  !Pointers similar to old Chebfi
  type(xg_nonlop_t) :: xg_nonlop
+ type(xg_t) :: xgX
+ complex(dp), pointer :: Xprobe(:,:) => null() 
 
 ! *********************************************************************
 
@@ -759,7 +764,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  max_upp_bound = slice%ecut
  min_low_est = min_low_bound - min(5*res_norm,0.1d0) ! experimental
  trace_rank = neigenpairs ! FIXME for the moment changing this produces a bug
- trace_degree = 10
+ trace_degree = 50
 
  write(901,*) 'splitting spectrum to slices within global', min_low_est, max_upp_bound
  write(901,*) '                                    wanted', min_low_bound, min_upp_bound
@@ -770,20 +775,20 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 !     gpu_option=gpu_option)
  
  ! Au31 system
- upper_bound_slices(1) = 0.10d0 ! TODO hardcoded!
+ !upper_bound_slices(1) = 0.10d0 ! TODO hardcoded!
  ! Alu system
- !upper_bound_slices(1) = 1.37d0 ! hardcoded
+ upper_bound_slices(1) = 1.37d0 ! hardcoded
 
  ! Slice 1: 
  my_rank = xmpi_comm_rank(slice%spacecom)
  low_bound = min_low_bound  ! [a,b)
  upp_bound = upper_bound_slices(1)
- trace_degree = 50
+ trace_degree = 80
 
  !call computeTraceEstimation(slice, trace_rank, trace_degree, low_bound, upp_bound,&
  !    min_low_est, max_upp_bound, trace_est_slice1, getAX, kin, my_rank, gpu_option=gpu_option)
- !write(901,*) 'trace estimation for slice1, deg=', trace_est_slice1, trace_degree
- !flush(901)
+ write(901,*) 'trace estimation for slice1, deg=', trace_est_slice1, trace_degree
+ flush(901)
 
  ! Slice 2: 
  my_rank = xmpi_comm_rank(slice%spacecom)
@@ -835,7 +840,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
   call xg_setBlock(slice%X_NP,slice%X_next,slice%total_spacedim,slice%neigenpairs)
   call xg_setBlock(slice%X_NP,slice%X_prev,slice%total_spacedim,slice%neigenpairs,fcol=slice%neigenpairs+1)
 
-  ndeg_filter_max = 20 ! low degree
+  ndeg_filter_max = 80 ! low degree
   ! if energy oscillates instead of being monotonous this means we have to increase
   ! degree 
 
@@ -844,10 +849,28 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
   write(901,*) 'min_low_est=', min_low_est
   write(901,*) 'max_upp_bound=', max_upp_bound
   write(901,*) ' ********************** '
+  flush(901) 
+
+  call xg_init(xgX, slice%space, spacedim, neigenpairs, slice%spacecom, me_g0=slice%me_g0)
+  call xgBlock_reverseMap(xgX%self, Xprobe, spacedim, neigenpairs)
+  call generateRademacherMatrix(Xprobe, spacedim, neigenpairs, my_rank)
+  
+  nm = spacedim * neigenpairs
+  meanz = sum(Xprobe) / dcmplx(nm,0.0d0)
+  norm2_ = sum(abs(Xprobe)**2) / nm
+  variance = norm2_ - abs(meanz)**2
+
+  write(901,*) "mean = ", meanz
+  write(901,*) "E|z|^2 = ", norm2_
+  write(901,*) "variance = ", variance
+  call xgBlock_copy(xgX%self, slice%X)
+  write(901,*) xgBlock_getid(slice%X)
   flush(901)
 
   call computeChebyshevMoments(slice, getAX, kin, min_low_est, max_upp_bound, &
       ndeg_filter_max, cheby_moments, gpu_option)
+
+  call xg_free(xgX)
 
   ! Ugly loop to set slice intervals
   do islice=1, nslice
@@ -878,7 +901,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
   ABI_MALLOC(energy_interval, (neigenpairs))
   ABI_MALLOC(cja, (ndeg_filter_max+1))
 
-  upper_bounds(2) = 0.5d0 ! hardcoded FIXME auto
+  upper_bounds(2) = 3.0d0 ! hardcoded FIXME auto
   center = (max_upp_bound + min_low_est)*0.5
   radius = (max_upp_bound - min_low_est)*0.5
   lower_i = lower_bounds(1)
@@ -888,6 +911,15 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
   write(901,*)
   write(901,*) 'lower_i=', lower_i
   write(901,*) 'upper_i=', upper_i
+
+  ! total mass
+  call buildChebyshevJacksonCoeffs((lower_i-center)/radius, (upper_i-center)/radius, &
+      ndeg_filter_max, cja)
+  call computeFilterEnergy(neigenpairs, ndeg_filter_max, cja, cheby_moments, &
+      energy_interval, nvec_approx)
+  write(901,*) 'nvec estimate in total', lower_i, upper_i
+  write(901,*) nvec_approx
+  flush(901)
 
   ! shifted bisection
   do ishift = 1, nstep_bisect
@@ -900,7 +932,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     write(901,*) 'mid_i  =', mid_i
 
     ! Slice Left [a,b)
-    call buildChebyshevJacksonCoeffs(lower_i, mid_i, deg_i, center, radius, cja)
+    call buildChebyshevJacksonCoeffs((lower_i-center)/radius, (mid_i-center)/radius, deg_i, cja)
     call computeFilterEnergy(neigenpairs, deg_i, cja, cheby_moments, &
           energy_interval, nvec_approx)
 
@@ -910,7 +942,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     flush(901)
 
     ! Slice Right [b,c)
-    call buildChebyshevJacksonCoeffs(mid_i, upper_i, deg_i, center, radius, cja)
+    call buildChebyshevJacksonCoeffs((mid_i-center)/radius, (upper_i-center)/radius, deg_i, cja)
     call computeFilterEnergy(neigenpairs, deg_i, cja, cheby_moments, &
           energy_interval, nvec_approx)
 
@@ -2182,11 +2214,12 @@ subroutine generateRademacherMatrix(V, n, m, rank)
     implicit none
     
     ! input/output
-    real(dp), intent(out) :: V(2,n*m)
+    complex(dp), intent(out) :: V(n,m)
     integer, intent(in) :: n, m, rank
     ! local arguments
-    integer :: nseed, i
+    integer :: nseed, i, j, k
     integer :: base_seed
+    real(dp) :: R(n,m)
     integer, allocatable :: seed(:)
     
     ! *********************************************************************
@@ -2198,11 +2231,14 @@ subroutine generateRademacherMatrix(V, n, m, rank)
     base_seed = 123456789
     seed = mod( base_seed + rank*73856093 + [(i*19349663, i=1,nseed)], 2147483647 )
     call random_seed(put=seed)
-
-    ! Z(1,:) = ±1, Z(2,:) = 0
-    call random_number(V(1,1:n*m))
-    V(1,1:n*m) = merge(1.0, -1.0, V(1,1:n*m) > 0.5)
-    V(2,1:n*m) = 0.0
+  
+    call random_number(R)
+    do j = 1, m
+        do i = 1, n
+            k = int(4.0d0 * R(i,j))      ! 0,1,2,3
+            V(i,j) = dcmplx( cos(0.5d0*pi*k), sin(0.5d0*pi*k))
+        end do
+    end do
 
     ABI_FREE(seed)
 
@@ -2610,25 +2646,20 @@ end subroutine computeChebyshevMoments
 !! buildChebyshevJacksonCoeffs
 !!
 !! SOURCE
-subroutine buildChebyshevJacksonCoeffs(low_bound, upp_bound, ndeg_filter, &
-        center, radius, cja)
+subroutine buildChebyshevJacksonCoeffs(ls, us, ndeg_filter, cja)
 
     implicit none
 
     integer, intent(in) :: ndeg_filter
-    real(dp), intent(in) :: low_bound, upp_bound
-    real(dp), intent(in) :: center, radius
+    real(dp), intent(in) :: ls, us ! scaled to [-1,1)
     real(dp), intent(inout) :: cja(ndeg_filter+1)
 
     integer :: ideg
     real(dp) :: cdeg
-    real(dp) :: ls, us
     real(dp) :: mu, damp
     
     ! *********************************************************************
 
-    ls = (low_bound - center) / radius
-    us = (upp_bound - center) / radius
     cdeg = Pi/(ndeg_filter+2)
     mu = 1.d0/Pi*(ACOS(ls)-ACOS(us))
     damp = 1.d0 ! Jackson damping
@@ -2636,14 +2667,14 @@ subroutine buildChebyshevJacksonCoeffs(low_bound, upp_bound, ndeg_filter, &
     cja(1) = mu*damp
 
     do ideg = 0, ndeg_filter - 1
-
+        
         ! Accumulate X with weight in Xsum for bandpass filters
         mu = 2/Pi * (SIN((ideg+1)*ACOS(ls)) - SIN((ideg+1)*ACOS(us)))/(ideg+1)
         damp = ((1 - (ideg+1)/(ndeg_filter+2))*SIN(cdeg)*COS((ideg+1)*cdeg) + &
                 1/(ndeg_filter+2)*COS(cdeg)*SIN((ideg+1)*cdeg))/SIN(cdeg)
-
+        
         cja(ideg+2) = mu*damp
-
+        
     end do
 
 end subroutine buildChebyshevJacksonCoeffs
@@ -2695,7 +2726,7 @@ subroutine computeTraceEstimation(slice, m_vecs, trace_degree, low_bound, upp_bo
     real(dp) :: trace_tmp
     real(dp) :: normX
     real(dp), pointer :: accum(:,:) => null()
-    real(dp), pointer :: X(:,:) => null() 
+    complex(dp), pointer :: X(:,:) => null() 
     real(dp) :: tsec(2)
 
     ! *********************************************************************
@@ -2843,8 +2874,8 @@ subroutine splitSpectrumToSlices( &
          lower_i = min(max_bound, low_bound_wanted + (ipart - 1) * width)
          upper_i = min(max_bound, low_bound_wanted + ipart * width)
 
-        call computeTraceEstimation(slice, trace_rank, trace_degree, lower_i, upper_i,&
-            min_bound, max_bound, trace_est, getAX, kin, my_rank, gpu_option=l_gpu_option)
+         !call computeTraceEstimation(slice, trace_rank, trace_degree, lower_i, upper_i,&
+         !   min_bound, max_bound, trace_est, getAX, kin, my_rank, gpu_option=l_gpu_option)
         
         ! TODO keep this version and add second version that reuses Chebyshev 
         !      recursion to avoid repeated calculations... 
@@ -3367,7 +3398,8 @@ subroutine computeFilterEnergy(neigenpairs, ndeg_filter, cja, cheby_moments, &
           end do
       end do
       do j = 1, neigenpairs
-          energy_magn_j = hypot(E_re(j), E_im(j))
+          !energy_magn_j = hypot(E_re(j), E_im(j))
+          energy_magn_j = real(E_re(j))
           energy_interval(j) = energy_magn_j
           E_tot = E_tot + energy_magn_j 
       end do

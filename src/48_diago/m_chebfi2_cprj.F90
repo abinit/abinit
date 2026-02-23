@@ -479,6 +479,8 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  !Pointers similar to old Chebfi
  integer,allocatable :: ndeg_filter_bands(:) !Oracle variable
  type(xg_nonlop_t) :: xg_nonlop
+ ! IML
+ real(dp), pointer :: thetas(:,:) => null()
 
 ! *********************************************************************
 
@@ -629,7 +631,17 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
 
  if (.not.chebfi%paw) then
    call xgBlock_yxmax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X)
- end if
+ end if    
+
+ ! Start IML write converged eigenvalues here
+ open(unit=1201, file='converged_eigenvalues.csv', status='replace')
+ call xgBlock_reverseMap(chebfi%eigenvalues, thetas, rows=1, cols=chebfi%neigenpairs)
+ write(1201,'(A)') "eig"
+ do ideg=1, chebfi%neigenpairs
+    write(1201,'(F15.5)') thetas(1,ideg)
+ end do
+ close(1201)
+ ! End IML
 
  call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
  call timab(tim_residu, 2, tsec)
