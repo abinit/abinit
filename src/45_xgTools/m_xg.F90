@@ -6649,6 +6649,8 @@ contains
 
     type(xgBlock_t) :: xgBlock_part
     real(dp) :: u
+    complex(dp) :: meanz
+    real(dp)    :: norm2_, variance
     integer :: tid, rank, seed_size, i, n, k
     integer, allocatable :: seed(:)
     complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC(:) => null()
@@ -6688,6 +6690,13 @@ contains
             !$omp end do
             ABI_FREE(seed)
         !$omp end parallel
+        meanz = sum(vecC) / dcmplx(n,0.0d0)
+        norm2_ = sum(abs(vecC)**2) / n
+        variance = norm2_ - abs(meanz)**2
+        write(901,*) "mean = ", meanz
+        write(901,*) "E|z|^2 = ", norm2_
+        write(901,*) "variance = ", variance
+        flush(901)
     case (SPACE_CR)
         ABI_ERROR('Not implemented for SPACE_CR')
     end select
