@@ -590,35 +590,35 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     ! todo simplify fix polynomial degree and give it here
 
     ! Slice left
-    slice%neigenpairs_per_slice(1) = 96 ! wanted_mass
+    slice%neigenpairs_per_slice(1) = 200 ! wanted_mass
     slice%fcol_in_X(1) = 1 ! todo big modif this should be replaced by a simple index
     ! i propose to not apply the big modif and try to workaround as it is for now
     slice%fcol_in_Xext(1) = 1
     slice%poly_degrees(1) = 10! slice%ndeg_filter
     slice%part_low_bounds(1) = -0.14        ! first slice is lowpass so interval to suppress
-    slice%part_upp_bounds(1) = 2.3
+    slice%part_upp_bounds(1) = 2.3 ! used for convergence <----
     slice%poly_low_bounds(1) = -0.14     ! with overlap
     slice%poly_upp_bounds(1) = 2.5       ! with overlap
 
     ! Slice right
-    slice%neigenpairs_per_slice(2) = 96 ! wanted_mass
+    slice%neigenpairs_per_slice(2) = 200 ! wanted_mass
     slice%fcol_in_X(2) = 1
-    slice%fcol_in_Xext(2) = 97
+    slice%fcol_in_Xext(2) = 201
     slice%poly_degrees(2) = 50! slice%ndeg_filter
-    slice%part_low_bounds(2) = 2.3
-    slice%part_upp_bounds(2) = 5.0
+    slice%part_low_bounds(2) = 2.3 ! used for convergence <-----
+    slice%part_upp_bounds(2) = 5.0 ! used for convergence <-----
     slice%poly_low_bounds(2) = 2.2        ! with overlap
     slice%poly_upp_bounds(2) = 5.2        ! with overlap
 
     ! Slice three
-    slice%neigenpairs_per_slice(2) = 96 ! wanted_mass
-    slice%fcol_in_X(2) = 1
-    slice%fcol_in_Xext(2) = 97
-    slice%poly_degrees(2) = 50! slice%ndeg_filter
-    slice%part_low_bounds(2) = 2.3
-    slice%part_upp_bounds(2) = 5.0
-    slice%poly_low_bounds(2) = 2.2        ! with overlap
-    slice%poly_upp_bounds(2) = 5.2        ! with overlap
+    !slice%neigenpairs_per_slice(3) = 96 ! wanted_mass
+    !slice%fcol_in_X(3) = 1
+    !slice%fcol_in_Xext(3) = 97
+    !slice%poly_degrees(3) = 50! slice%ndeg_filter
+    !slice%part_low_bounds(3) = 2.3
+    !slice%part_upp_bounds(3) = 5.0
+    !slice%poly_low_bounds(3) = 2.2        ! with overlap
+    !slice%poly_upp_bounds(3) = 5.2        ! with overlap
 
     ! TODO analyze the lambda of Cheby converged in order to find out how many vectors to put per slice
     ! then fix true slices and see what happens
@@ -750,19 +750,27 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     type(xgBlock_t) :: residu_active
     integer :: nbdbuf, oracle, num_proc
     integer :: i
+    integer :: iband
     integer :: nrows
     integer :: neigenpairs, bandpp, ndeg_filter
     integer :: comm, comm_rows, comm_cols
     integer :: num_restart
+    integer :: num_kept
+    integer :: ierr
+    logical :: has_converged
     real(dp) :: lambda_minus, lambda_plus
+    real(dp) :: theta
     real(dp) :: oracle_factor, oracle_min_occ
+    real(dp) :: a_part, b_part, resid_norm2_kept
     logical :: is_lowpass, on_host, on_device
     ! Arrays
     real(dp) :: tsec(2)
     integer, allocatable, target :: nrowsLinalg(:)
     integer, pointer :: nrowsLinalg_ptr(:) => null() 
     integer, pointer :: ncolsColsRows_ptr(:) => null()
-
+    real(dp), pointer :: thetas_conv(:,:) => null()
+    real(dp), pointer :: residu_conv(:,:) => null()
+    
     ! *********************************************************************
     
     if (slice%me_id_slice==1) then
@@ -872,7 +880,6 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     !call xgBlock_print(eigen_active, std_out)
    
     ! TODO 
-    ! 1) include restart
     ! 2) make for 1 MPI
 
     num_restart = 10
@@ -881,6 +888,7 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         num_restart = 1
     end if
 
+    !ABI_MALLOC(theta_reshaped, (neigenpairs_slice)) 
     do i = 1, num_restart
        
         chebfi%xXColsRows = X0_active
@@ -898,6 +906,49 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
             slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, slice%neigenpairs,&
             nrowsLinalg_ptr)
 
+        ! compute residuals of eigenvalues in slice
+        ! reverseMap for active eigen and residuals
+        write(std_out,*) 'eigen_active dims=', rows(eigen_active), cols(eigen_active)
+        write(std_out,*) 'reisd_active dim=', rows(residu_active), cols(residu_active)
+        write(std_out,*) 'eigen_active space=', space(eigen_active)
+        write(std_out,*) 'reisd_active space=', space(residu_active)
+        write(std_out,*) 'slice%neigenpairs=', slice%neigenpairs
+        write(std_out,*) 'neigenpairs=', neigenpairs
+        flush(std_out)
+
+        call xgBlock_reverseMap(eigen_active , thetas_conv, rows=neigenpairs, cols=1)
+        call xgBlock_reverseMap(residu_active, residu_conv, rows=neigenpairs, cols=1)
+        resid_norm2_kept = 0.0d0
+        num_kept = 0
+        a_part = slice%part_low_bounds(slice%me_id_slice)
+        b_part = slice%part_upp_bounds(slice%me_id_slice)
+        do iband=1, neigenpairs
+            theta = thetas_conv(iband, 1)
+            has_converged = .false.
+            if (is_lowpass) then
+                has_converged = ( theta < b_part )
+            else 
+                has_converged = ( (a_part < theta) .and. (theta < b_part) )
+            end if
+            if (has_converged) then
+                resid_norm2_kept = resid_norm2_kept + residu_conv(iband, 1)
+                num_kept = num_kept + 1
+            end if
+        end do
+        call xmpi_sum(num_kept, slice%comm_rows, ierr)
+        call xmpi_sum(resid_norm2_kept, slice%comm_rows, ierr)
+        resid_norm2_kept = resid_norm2_kept / num_kept
+        write(std_out,*) '################################################# '
+        write(std_out,'(a,i5)') ' Convergence of inner iteration=', i
+        write(std_out,*) 'partition           =', a_part, b_part
+        write(std_out,*) 'num eigenvalues kept=', num_kept
+        write(std_out,*) '      out of(currentMPI)=', neigenpairs
+        write(std_out,*) 'resid_norm2_kept    =', resid_norm2_kept
+        write(std_out,*) 'resid_global(currentMPI)=', sum(residu_conv(:, 1))/neigenpairs
+        write(std_out,*) '################################################# '
+        flush(std_out)
+
+        ! Prepare next iteration
         ! reinitialize pointers to workspaces ... otherwise invovl complains
         call xg_setBlock(chebfi%X_NP, chebfi%X_next, nrows, bandpp)
         call xg_setBlock(chebfi%X_NP, chebfi%X_prev, nrows, bandpp, fcol=bandpp+1)
@@ -2957,40 +3008,39 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     flush(std_out)
 
     ! Phase 0: coarse detection
-
-    step = (b_slice - a_slice) / 25.d0
-    do
-        call jackson_step_coeffs(a_slice,b_slice,min_low_bound,ecut,ndeg_filter,ctilde)
-        n_est_i = dot_product(ctilde, moments)/tot_spacedim
-        write(std_out,*) 'coarse iter=', b_slice, n_est_i; flush(std_out)
-        if ( (n_est_i <= neigenpairs/tot_spacedim * (1.d0 + 0.1d0)) .or. (b_slice<a_slice)) then
-            exit
-        end if
-        b_slice = b_slice - step
-    end do
-    write(std_out,*) 'coarse app=', b_slice, n_est_i
-    flush(std_out)
+    !step = (b_slice - a_slice) / 25.d0
+    !do
+    !    call jackson_step_coeffs(a_slice,b_slice,min_low_bound,ecut,ndeg_filter,ctilde)
+    !    n_est_i = dot_product(ctilde, moments)/tot_spacedim
+    !    write(std_out,*) 'coarse iter=', b_slice, n_est_i; flush(std_out)
+    !    if ( (n_est_i <= neigenpairs/tot_spacedim * (1.d0 + 0.1d0)) .or. (b_slice<a_slice)) then
+    !        exit
+    !    end if
+    !    b_slice = b_slice - step
+    !end do
+    !write(std_out,*) 'coarse app=', b_slice, n_est_i
+    !flush(std_out)
 
 
     ! Alu ====
     !a_slice = -0.5
     !b_slice = 5.0
     ! Au-31 ====
-    !a_slice = 0.d0
-    !b_slice = 1.d0
+    a_slice = 0.d0
+    b_slice = 1.d0
 
-    mid_slice = (a_slice + b_slice) / 2.d0
-    call jackson_step_coeffs(a_slice,mid_slice,min_low_bound,ecut,ndeg_filter,ctilde)
-    write(std_out,*) '========================================'
-    write(std_out,*) 'in interval=', a_slice, mid_slice
-    write(std_out,*) 'total mass=', dot_product(ctilde, moments)/tot_spacedim
-    flush(std_out)
+    !mid_slice = (a_slice + b_slice) / 2.d0
+    !call jackson_step_coeffs(a_slice,mid_slice,min_low_bound,ecut,ndeg_filter,ctilde)
+    !write(std_out,*) '========================================'
+    !write(std_out,*) 'in interval=', a_slice, mid_slice
+    !write(std_out,*) 'total mass=', dot_product(ctilde, moments)/tot_spacedim
+    !flush(std_out)
 
-    call jackson_step_coeffs(mid_slice,b_slice,min_low_bound,ecut,ndeg_filter,ctilde)
-    write(std_out,*) '========================================'
-    write(std_out,*) 'in interval=', mid_slice, b_slice
-    write(std_out,*) 'total mass=', dot_product(ctilde, moments)/tot_spacedim
-    flush(std_out)
+    !call jackson_step_coeffs(mid_slice,b_slice,min_low_bound,ecut,ndeg_filter,ctilde)
+    !write(std_out,*) '========================================'
+    !write(std_out,*) 'in interval=', mid_slice, b_slice
+    !write(std_out,*) 'total mass=', dot_product(ctilde, moments)/tot_spacedim
+    !flush(std_out)
     
 
 
