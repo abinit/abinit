@@ -212,7 +212,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !Local variables-------------------------------
  logical :: has_fock,xg_diago,update_cprj
  logical :: do_subdiago,do_ortho,rotate_subvnlx,use_rmm_diis,is_distrib_tmp
- integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3,tim_getcprj=5
+ integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=300,tim_getcprj=5 ! IML modif
  integer,save :: nskip=0
 ! Flag use_subovl: 1 if "subovl" array is computed (see below)
 ! subovl should be Identity (in that case we should use use_subovl=0)
@@ -384,7 +384,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  do inonsc=1,nnsclo_now
    ABI_NVTX_START_RANGE(NVTX_VTOWFK_EXTRA1)
-   if (iscf < 0 .and. (inonsc <= enough .or. mod(inonsc, 10) == 0)) call cwtime(cpu, wall, gflops, "start")
+   !if (iscf < 0 .and. (inonsc <= enough .or. mod(inonsc, 10) == 0)) call cwtime(cpu, wall, gflops, "start")
+   ! IML modif
+   if (iscf < 0 .and. (inonsc <= enough)) call cwtime(cpu, wall, gflops, "start")
+   ! IML modif
 
    if (dtset%rmm_diis /= 0 .and. iscf < 0) then
      use_rmm_diis = inonsc > 3 + dtset%rmm_diis
@@ -718,7 +721,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
 
      ! Print residual and wall-time required by NSCF iteration.
-     if (inonsc <= enough .or. mod(inonsc, 20) == 0) then
+     ! IML modif
+     !if (inonsc <= enough .or. mod(inonsc, 20) == 0) then
+     if (inonsc <= enough) then
+     ! IML modif
        call cwtime(cpu, wall, gflops, "stop")
        if (ikpt == 1 .or. mod(ikpt, 100) == 0) then
          if (inonsc == 1) call wrtout(std_out, sjoin(" k-point: [", itoa(ikpt), "/", itoa(nkpt), "], spin:", itoa(isppol)))
