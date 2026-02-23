@@ -6,7 +6,7 @@
 !!  Screening object used in the BSE/GWPT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2025 ABINIT group (MG)
+!!  Copyright (C) 2014-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,6 +51,9 @@ module m_screen
  implicit none
 
  private
+
+ public :: em1_symmetrize_ip
+ public :: em1_symmetrize_op
 
  ! Flags defining the content of the %mat buffer in the fgg_t type.
  integer,public,parameter :: MAT_NOTYPE         = 0
@@ -804,7 +807,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 !arrays
  integer :: units(2), g0(3), iperm(Qmesh%nibz)
  real(dp) :: wt_list(Qmesh%nibz)
- !complex(gwp),ABI_CONTIGUOUS pointer :: em1_ggw(:,:,:)
+ !complex(gwp),contiguous, pointer :: em1_ggw(:,:,:)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -1275,7 +1278,7 @@ subroutine screen_w0gemv(screen, trans, in_npw, nspinor, only_diago, alpha, beta
 !scalars
  integer :: ig,lda
 !arrays
- complex(gwp),ABI_CONTIGUOUS pointer :: em1_qbz(:,:)
+ complex(gwp),contiguous, pointer :: em1_qbz(:,:)
 ! *************************************************************************
 
  lda = screen%npw; em1_qbz => screen%Fgg_qbz%mat(:,:,1)

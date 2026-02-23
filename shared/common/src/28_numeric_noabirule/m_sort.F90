@@ -6,7 +6,7 @@
 !! Sorting algorithms.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (XG, MG)
+!!  Copyright (C) 2008-2026 ABINIT group (XG, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

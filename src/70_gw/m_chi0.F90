@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2025 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
+!!  Copyright (C) 1999-2026 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -218,13 +218,13 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  type(gsphere_t) :: Gsph_FFT
  type(wave_t),pointer :: wave1, wave2
 !arrays
- integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
+ integer,contiguous, pointer :: kg_k(:,:)
  integer :: ucrpa_bands(2), got(Wfd%nproc)
  integer :: wtk_ltg(Kmesh%nbz)
  integer,allocatable :: tabr_k(:),tabrf_k(:), igffteps0(:),gspfft_igfft(:),igfftepsG0f(:)
  integer,allocatable :: gw_gfft(:,:),gw_gbound(:,:),dummy_gbound(:,:),gboundf(:,:), bbp_ks_distrb(:,:,:,:)
  real(dp) :: kbz(3),spinrot_kbz(4),q0(3)
- real(dp),ABI_CONTIGUOUS pointer :: ks_eig(:,:,:),qp_eig(:,:,:),qp_occ(:,:,:)
+ real(dp),contiguous, pointer :: ks_eig(:,:,:),qp_eig(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegasf(:), qdirs(:,:)
  complex(gwp) :: rhotwx(3,Wfd%nspinor**2)
  complex(gwp),allocatable :: rhotwg(:)
@@ -236,7 +236,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
  complex(gwp),allocatable :: ur1_kibz(:),ur2_kibz(:), usr1_k(:),ur2_k(:), wfwfg(:), sf_chi0(:,:,:)
  complex(gwp),allocatable :: ur_ae1(:),ur_ae_onsite1(:),ur_ps_onsite1(:)
  complex(gwp),allocatable :: ur_ae2(:),ur_ae_onsite2(:),ur_ps_onsite2(:)
- complex(gwp),ABI_CONTIGUOUS pointer :: ug1(:),ug2(:)
+ complex(gwp),contiguous, pointer :: ug1(:),ug2(:)
  complex(dp), allocatable :: coeffW_BZ(:,:,:,:,:,:), head_qvals(:)
  logical :: gradk_not_done(Kmesh%nibz)
  logical,allocatable :: bbp_mask(:,:)
@@ -1194,7 +1194,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
  integer,allocatable :: gw_gfft(:,:),gw_gbound(:,:),dummy_gbound(:,:),gboundf(:,:)
  integer,allocatable :: bbp_ks_distrb(:,:,:,:)
  real(dp) :: kbz(3),kmq_bz(3),spinrot_k(4),spinrot_kmq(4),q0(3),tsec(2)
- real(dp),ABI_CONTIGUOUS pointer :: qp_eig(:,:,:),qp_occ(:,:,:)
+ real(dp),contiguous, pointer :: qp_eig(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegasf(:)
  complex(dp),allocatable :: green_enhigh_w(:),green_w(:),kkweight(:,:)
  complex(gwp),allocatable :: sf_chi0(:,:,:),rhotwg(:)
@@ -2033,13 +2033,13 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  type(wave_t),pointer :: wave
 !arrays
  integer :: my_band_list(Wfd%mband)
- integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
+ integer,contiguous, pointer :: kg_k(:,:)
  integer,allocatable :: ktabr(:,:),irottb(:,:)
  !integer :: got(Wfd%nproc)
  integer,allocatable :: tabr_k(:),igffteps0(:),gw_gbound(:,:)
  real(dp),parameter :: q0(3)=(/zero,zero,zero/)
  real(dp) :: kpt(3),dedk(3),kbz(3),spinrot_kbz(4)
- !real(dp),ABI_CONTIGUOUS pointer :: ks_eig(:,:,:),qp_eig(:,:,:),qp_occ(:,:,:)
+ !real(dp),contiguous, pointer :: ks_eig(:,:,:),qp_eig(:,:,:),qp_occ(:,:,:)
  real(dp) :: shift_ene(BSt%mband,BSt%nkpt,BSt%nsppol)
  real(dp) :: delta_occ(BSt%mband,BSt%nkpt,BSt%nsppol)
  !real(dp) :: eigen_vec(BSt%bantot)
@@ -2054,7 +2054,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  complex(gwp),allocatable :: rhotwg(:)
  complex(dp) :: green_w(Ep%nomega)
  complex(gwp),allocatable :: ur1(:)
- complex(gwp),ABI_CONTIGUOUS pointer :: ug(:)
+ complex(gwp),contiguous, pointer :: ug(:)
  logical :: bmask(Wfd%mband)
  type(pawcprj_type),allocatable :: Cprj1_bz(:,:),Cprj1_ibz(:,:),Cp_bks(:,:)
  type(pawpwij_t),allocatable :: Pwij(:)

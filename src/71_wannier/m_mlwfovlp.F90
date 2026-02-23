@@ -6,7 +6,7 @@
 !!  Interface with Wannier90
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2025 ABINIT group (BAmadon, CEspejo, FJollet, TRangel, DRH, hexu)
+!!  Copyright (C) 2005-2026 ABINIT group (BAmadon, CEspejo, FJollet, TRangel, DRH, hexu)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3737,7 +3737,7 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
 !Local variables-------------------------------
 !scalars
  integer :: spin, root_ncid, spin_ncid, ncerr, natom3, ount, ir, var_id, units(2), batch_size, idat, ndat
- real(dp), ABI_CONTIGUOUS pointer :: rpt_d4(:,:,:,:), rpt_d6(:,:,:,:,:,:)
+ real(dp), contiguous, pointer :: rpt_d4(:,:,:,:), rpt_d6(:,:,:,:,:,:)
  character(len=fnlen) :: gwan_filepath, txt_path
  complex(dp),target,allocatable :: cbuf5(:,:,:,:,:)
  character(len=500) :: msg
@@ -3870,7 +3870,7 @@ subroutine wan_load_gwan(wan, gwan_filepath, cryst, spin, nsppol, all_comm)
  integer :: root_ncid, spin_ncid, ncerr, units(2)
  logical,parameter :: keep_umats = .False.
  type(crystal_t) :: gwan_cryst
- real(dp), ABI_CONTIGUOUS pointer :: rpt_d6(:,:,:,:,:,:) !, rpt_d4(:,:,:,:)
+ real(dp), contiguous, pointer :: rpt_d6(:,:,:,:,:,:) !, rpt_d4(:,:,:,:)
 !************************************************************************
 
  units = [std_out, ab_out]

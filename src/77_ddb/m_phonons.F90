@@ -8,7 +8,7 @@
 !! as well as the central phdos_init
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (XG, MG, MJV, GMR)
+!! Copyright (C) 1999-2026 ABINIT group (XG, MG, MJV, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -227,7 +227,7 @@ module m_phonons
    ! (0:%nprocs-1))
    ! Initial and final index of the IBZ qpoint treated by this MPI proc inside comm.
 
-   real(dp), ABI_CONTIGUOUS pointer :: qibz(:,:)
+   real(dp), contiguous, pointer :: qibz(:,:)
    ! q-points in the IBZ.
 
    real(dp),allocatable :: phfreqs_qibz(:,:)
@@ -1380,7 +1380,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
    ! loop over temperatures
    do itemper = 1, ntemper
      temperature_K = tempermin + dble(itemper-1)*temperinc  ! this is in Kelvin
-     temperature = temperature_K / Ha_K !=315774.65_dp
+     temperature = temperature_K / Ha_K
 
      ! trick supercell object into using present q point
      thm_scells(itemper)%qphon(:) = qibz(:,iq)

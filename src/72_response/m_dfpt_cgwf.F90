@@ -7,7 +7,7 @@
 !! Uses a conjugate-gradient algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2025 ABINIT group (XG,DRH,XW,FJ,MT,LB,MG)
+!!  Copyright (C) 1999-2026 ABINIT group (XG,DRH,XW,FJ,MT,LB,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +29,7 @@ module m_dfpt_cgwf
  use defs_basis
  use m_abicore
  use m_errors
+ use m_xomp
  use m_xmpi
  use m_cgtools
  use m_rf2
@@ -288,7 +289,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  integer,parameter :: level=15,tim_getgh1c=1,tim_getghc=2,tim_projbd=2
  integer,save :: nskip=0
  integer :: cpopt,iband,igs,iline,indx_cgq,ipw,me_g0,comm_fft
- integer :: iband_me, jband_me, ierr, me_band, np_band, band_off, u1_band !, unit_me
+ integer :: iband_me, jband_me, ierr, me_band, np_band, band_off, u1_band
  integer :: ipws,ispinor,istwf_k,jband,nline,optlocal,optnl,dc_shift_band,sij_opt
  integer :: test_is_ok,useoverlap,usepaw,usevnl,usetolrde__
  real(dp) :: d2edt2,d2te,d2teold,dedt,deltae,deold,dotgg
@@ -350,7 +351,6 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  comm_fft = mpi_enreg%comm_fft
  me_band = mpi_enreg%me_band
  np_band = mpi_enreg%nproc_band
- !unit_me = 300+u1_band
 
  skipme = 0
 
@@ -487,7 +487,6 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      end if
    end do
 
-
    ! ===== Check Pc.dcwavef=0 (for 2nd order only)
    if(ipert==natom+10.or.ipert==natom+11) then
      do iband = 1, nband
@@ -554,7 +553,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  !========== INITIALISATION OF MINIMIZATION ITERATIONS =================
  !======================================================================
 
- if(ipert/=natom+10.and.ipert/=natom+11) then
+ if (ipert/=natom+10.and.ipert/=natom+11) then
    !  The following is needed for first order perturbations only
    !  Otherwise, the work is already done in rf2_init (called in dfpt_vtowfk.F90)
 
@@ -863,9 +862,8 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  ! ====== BEGIN LOOP FOR A GIVEN BAND: MINIMIZATION ITERATIONS ==========
  ! ======================================================================
  ABI_NVTX_START_RANGE(NVTX_DFPT_CGWF_CORE)
+
  do iline=1,nline
-
-
    ! ======================================================================
    ! ================= COMPUTE THE RESIDUAL ===============================
    ! ======================================================================
@@ -1011,7 +1009,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
    ! Check that d2te is decreasing on succeeding lines:
    if (iline/=1) then
-     if (d2te>d2teold+tol6 .and. u1_band_ > 0) then
+     if (d2te>d2teold+tol6 .and. u1_band_ > 0 .and. prtvol > 0) then
        write(msg,'(a,i0,a,e16.8,a,e16.9)')'New trial energy at iline ',iline,' = ',d2te,' is higher than former: ',d2teold
        ABI_WARNING(msg)
      end if
@@ -1086,7 +1084,6 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
        direc = work - (mpi_enreg%nproc_band-1)*direc
      end if
    end do
-
 
    !DEBUG Keep this debugging feature !
    !call sqnorm_g(dotr,istwf_k,npw1*nspinor,direc,me_g0,comm_fft)
@@ -1192,6 +1189,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      !write(msg,'(a,3es16.6)') ' dfpt_cgwf: dedt,d2edt2,resid=',dedt,d2edt2,resid; call wrtout(std_out, msg)
      !write(msg, "(a, es16.6)")" eig0_k(n_k):", eig0_k(u1_band); call wrtout(std_out, msg)
      !write(msg, "(a, es16.6)")" eig0_kq(nband):", eig0_kq(nband); call wrtout(std_out, msg)
+     !write(msg, "(a, es16.6)")" prev resid:", resid; call wrtout(std_out, msg)
 
      resid=-two
      if (prtvol > 0 .and. u1_band_ > 0) then
@@ -1565,7 +1563,6 @@ end subroutine dfpt_cgwf
 !! full_active_wf1
 !!
 !! FUNCTION
-!! Response function calculation only:
 !! Restore the full "active space" contribution to the 1st-order wavefunctions.
 !! The 1st-order WF corrected in this way will no longer be orthogonal to the other occupied states.
 !! This routine will be only used in a non self-consistent calculation of the
@@ -1757,10 +1754,10 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
  stern%fermie1_idir_ipert = fermie1_idir_ipert
 
  call copy_mpi_enreg(mpi_enreg, stern%mpi_enreg)
- stern%mpi_enreg%comm_band = comm_band
- stern%mpi_enreg%me_band = xmpi_comm_rank(comm_band)
- stern%mpi_enreg%nproc_band = xmpi_comm_size(comm_band)
- stern%has_band_para = stern%mpi_enreg%nproc_band /= 1
+   stern%mpi_enreg%comm_band = comm_band
+   stern%mpi_enreg%me_band = xmpi_comm_rank(comm_band)
+   stern%mpi_enreg%nproc_band = xmpi_comm_size(comm_band)
+   stern%has_band_para = stern%mpi_enreg%nproc_band /= 1
 
  ABI_CALLOC(stern%eig1_k, (2, nband, nband))
  ABI_MALLOC(stern%dcwavef, (2, npw_kq*nspinor*stern%usedcwavef))
@@ -1777,6 +1774,9 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
  stern%rank_band = 0
 
  stern%nline_in = min(100, npw_kq); if (dtset%nline > stern%nline_in) stern%nline_in = min(dtset%nline, npw_kq)
+ if (dtset%tolwfr <= tiny(one)) then
+   ABI_ERROR("tolwfr must be specified in input when solving the Sterheimer equation non-self-consistently")
+ end if
 
  ABI_MALLOC(stern%cgq, (2, npw_kq * nspinor, stern%nband_me))
  ABI_MALLOC(stern%gscq, (2, npw_kq * nspinor, nband_me*usepaw))
@@ -1806,20 +1806,21 @@ end subroutine stern_init
 !! SOURCE
 
 subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_hamkq, eig0_k, eig0_kq, &
-                       cwave0, cwaveprj0, &               ! in
-                       cwavef, cwaveprj, err_msg, ierr, & ! out
-                       full_cg1, full_ur1) ! optional
+                       ug0_nk, cprj0_nk, &                  ! in
+                       ug1_nkq, cprj1_nkq, err_msg, ierr, & ! out
+                       full_cg1, full_ur1, init_mode) ! optional
 
 !Arguments ------------------------------------
- class(stern_t),intent(inout) :: stern
+ class(stern_t),target,intent(inout) :: stern
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
  integer,intent(in) :: u1_band, band_me, idir, ipert
+ character(len=*),optional,intent(in) :: init_mode
 !arrays
  real(dp),intent(in) :: qpt(3), eig0_k(stern%nband), eig0_kq(stern%nband)
- real(dp),intent(inout) :: cwave0(2, stern%npw_k*stern%nspinor), cwavef(2, stern%npw_kq*stern%nspinor)
- type(pawcprj_type),intent(inout) :: cwaveprj0(gs_hamkq%natom, stern%nspinor*gs_hamkq%usecprj)
- type(pawcprj_type),intent(inout) :: cwaveprj(gs_hamkq%natom, stern%nspinor)
+ real(dp),intent(inout) :: ug0_nk(2, stern%npw_k*stern%nspinor), ug1_nkq(2, stern%npw_kq*stern%nspinor)
+ type(pawcprj_type),intent(inout) :: cprj0_nk(gs_hamkq%natom, stern%nspinor*gs_hamkq%usecprj)
+ type(pawcprj_type),intent(inout) :: cprj1_nkq(gs_hamkq%natom, stern%nspinor)
  integer,intent(out) :: ierr
  character(len=*),intent(out) :: err_msg
  real(dp),optional,target,intent(out) :: full_cg1(2, stern%npw_kq*stern%nspinor)
@@ -1828,15 +1829,18 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 !Local variables ------------------------------
 !scalars
  integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, ibgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcount0 = 0
- integer :: opt_gvnlx1, grad_berry_size_mpw1, iband
+ integer :: opt_gvnlx1, grad_berry_size_mpw1, iband, gpu_option
  real(dp) :: out_resid, fermie1, eig0nk !, dotr
+ logical :: map_cgq, map_vlocal
+ character(len=500) :: init_mode__
  type(rf2_t) :: rf2
 !arrays
  real(dp),allocatable :: grad_berry(:,:)
+ real(dp), contiguous, pointer :: cgq_ptr(:,:,:), vlocal_ptr(:,:,:,:) !, work_ptr(:,:,:,:), gscq_ptr(:,:,:)
  complex(gwp),allocatable :: cwork_sp(:)
  logical :: cycle_bands(stern%nband)
 #ifdef HAVE_GW_DPC
- complex(gwp),pointer :: full_ug1_dp_ptr(:)
+ complex(dp),pointer :: full_ug1_dp_ptr(:)
 #endif
 ! *************************************************************************
 
@@ -1863,27 +1867,55 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
  !if (psps%usepaw==1) mcprjq = stern%nspinor*mband_mem*mkqmem*nsppol*usecprj
 
- ! Init entry in cg1s_kq, either from cache or with zeros.
- if (stern%use_cache) then
-    cwavef = zero
-    !u1c_ib_k = stern%u1c%find_band(band_ks)
-    !if (u1c_ib_k /= -1) then
-    !  call cgtk_change_gsphere(stern%nspinor, &
-    !                           stern%u1c%prev_npw_kq, istwfk1, stern%u1c%prev_kg_kq, stern%u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
-    !                           stern%npw_kq, istwfk1, kg_kq, cg1s_kq(1,1,ipc,ib_k), stern%work_ngfft, stern%work)
-    !else
-    !  cg1s_kq(:,:,ipc,ib_k) = zero
-    !end if
- else
-    !cg1s_kq(:,:,ipc,ib_k) = zero
-    cwavef = zero
+ gpu_option = stern%dtset%gpu_option
+ init_mode__ = "None"; if (present(init_mode)) init_mode__ = init_mode
+
+ select case (init_mode__)
+ case ("None")
+   ! Init entry in cg1s_kq, either from cache or with zeros.
+   if (stern%use_cache) then
+      ug1_nkq = zero
+      !u1c_ib_k = stern%u1c%find_band(band_ks)
+      !if (u1c_ib_k /= -1) then
+      !  call cgtk_change_gsphere(stern%nspinor, &
+      !                           stern%u1c%prev_npw_kq, istwfk1, stern%u1c%prev_kg_kq, stern%u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
+      !                           stern%npw_kq, istwfk1, kg_kq, cg1s_kq(1,1,ipc,ib_k), stern%work_ngfft, stern%work)
+      !else
+      !  cg1s_kq(:,:,ipc,ib_k) = zero
+      !end if
+   else
+      ug1_nkq = zero
+   end if
+
+ case ("input")
+   continue
+
+ !case ("random")
+   !call cg_randomize(istwfk1, stern%npw_kq, stern%nspinor, ndat1, stern%mpi_enreg%me_g0, ug1_nkq)
+   !call projbd(cgq, work, -1, icgq, igscq, istwfk1, mcgq, mgscq, nband_me, npw1, nspinor, &
+   !  gscq, scprod, 0, tim_projbd, useoverlap, me_g0, comm_fft, gpu_option=gs_hamkq%gpu_option)
+
+ case default
+   ABI_ERROR(sjoin("Invalid init_mode:", init_mode__))
+ end select
+
+ cgq_ptr => stern%cgq
+ vlocal_ptr => gs_hamkq%vlocal
+
+ if (gpu_option == ABI_GPU_OPENMP) then
+   ! Upload cgq array to GPU
+   map_cgq  =  .not. (xomp_target_is_present(c_loc(cgq_ptr)))
+   map_vlocal = .not. (xomp_target_is_present(c_loc(vlocal_ptr)))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:cgq_ptr) IF (map_cgq)
+   !$OMP TARGET ENTER DATA MAP(to:vlocal_ptr) IF (map_vlocal)
+#endif
  end if
 
+ !print *, "before dfpt_cgwf
  call dfpt_cgwf(u1_band, band_me, stern%rank_band, stern%bands_treated_now, berryopt0, &
-   !stern%cgq, cg1s_kq(:,:,ipc,ib_k), kets_k(:,:,ib_k), &  ! Important stuff
-   stern%cgq, cwavef, cwave0, &  ! Important stuff
-   cwaveprj, cwaveprj0, rf2, stern%dcwavef, &
-   !ebands%eig(:, ik_ibz, spin), ebands%eig(:, ikq_ibz, spin), stern%eig1_k, &
+   stern%cgq, ug1_nkq, ug0_nk, &  ! Important stuff
+   cprj1_nkq, cprj0_nk, rf2, stern%dcwavef, &
    eig0_k, eig0_kq, stern%eig1_k, &
    stern%ghc, stern%gh1c_n, grad_berry, stern%gsc, stern%gscq, &
    gs_hamkq, stern%gvnlxc, stern%gvnlx1, icgq0, idir, ipert, igscq0, &
@@ -1891,13 +1923,22 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    nbdbuf0, stern%nline_in, stern%npw_k, stern%npw_kq, stern%nspinor, &
    opt_gvnlx1, stern%dtset%prtvol, quit0, out_resid, rf_hamkq, stern%dtset%dfpt_sciss, -one, stern%dtset%tolwfr, &
    stern%usedcwavef, stern%dtset%wfoptalg, stern%nlines_done, usetolrde=0)
+ !print *, "after dfpt_cgwf
 
  ABI_FREE(grad_berry)
 
+ if (gpu_option == ABI_GPU_OPENMP) then
+   if (map_vlocal) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:vlocal_ptr)
+#endif
+   end if
+ end if
+
  if (stern%use_cache) then
-    ! Store |Psi_1> to init Sternheimer solver for the next q-point.
-    ABI_UNUSED(qpt(1))
-    !call stern%u1c%store(qpt, stern%npw_kq, stern%nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
+   ! Store |Psi_1> to init Sternheimer solver for the next q-point.
+   ABI_UNUSED(qpt(1))
+   !call stern%u1c%store(qpt, stern%npw_kq, stern%nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
  end if
 
  ! Handle possible convergence error.
@@ -1911,18 +1952,11 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
      ierr = 1
 
    else if (out_resid < zero) then
+     ! This may happen when the eigenvalue eig_mk(0) is higher than the lowest non-treated eig_mk+q(0). See dfpt_cgwf.
      write(err_msg, "(2(a,i0),a, (a,es13.5), a,i0)") &
        " Sternheimer solver didn't convergence for band: ", u1_band, "/", stern%nband, ch10, &
        " resid:", out_resid, ", after nline: ", stern%nlines_done
-     ! This may happen when the eigenvalue eig_mk(0) is higher than
-     ! the lowest non-treated eig_mk+q(0). The solution adopted here
-     ! is very crude, and rely upon the fact that occupancies of such
-     ! levels should be smaller and smaller with increasing nband, so that
-     ! a convergence study will give the right result.
-     !write(std_out, *)" eig0_k, eig0_kq, eig0_k - eig0_kq"
-     !do iband=1,stern%nband
      !  write(std_out, *)iband, eig0_k(iband), eig0_kq(iband), eig0_k(iband) - eig0_kq(iband)
-     !end do
      ierr = -2
    end if
 
@@ -1932,7 +1966,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    !    " after nlines_done: ", nlines_done
    !  enough_stern = enough_stern + 1
    !end if
- end if
+ end if ! u1_band > 0
 
  if (ierr /= 0) return
 
@@ -1940,7 +1974,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    ABI_CHECK(present(full_cg1), "full_ur1 requires full_cg1")
  end if
 
- ! At this stage, the 1st order function cwavef is orthogonal to cgq (unlike
+ ! At this stage, the 1st order function ug1_nkq is orthogonal to cgq (unlike
  ! when it is input to dfpt_cgwf). Here, restore the "active space" content
  ! of the first-order wavefunction, to give cwave1.
  ! PAW: note that dcwavef (1st-order change of WF due to overlap change)
@@ -1955,15 +1989,14 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    ! Compute full first order wavefunction
    ! =====================================
 
-   ! WARNING: Assuming all bands at k+q are on this cpu.
+   ! NOTE: Assuming all bands at k+q are on this cpu.
    cycle_bands(:) = .False.
-   !call proc_distrb_cycle_bands(cycle_bands, stern%mpi_enreg%proc_distrb, ikpt, isppol, me)
    ABI_CHECK_IGEQ(u1_band, 1, "u1_band")
    eig0nk = eig0_k(u1_band)
    fermie1 = zero; if (sum(qpt**2) < tol14) fermie1 = stern%fermie1_idir_ipert(idir, ipert)
 
    iband = u1_band
-   call full_active_wf1(stern%cgq, stern%cprjq, cwavef, full_cg1, cwaveprj, stern%cwaveprj1, cycle_bands, stern%eig1_k, fermie1, &
+   call full_active_wf1(stern%cgq, stern%cprjq, ug1_nkq, full_cg1, cprj1_nkq, stern%cwaveprj1, cycle_bands, stern%eig1_k, fermie1, &
                         eig0nk, eig0_kq, stern%dtset%elph2_imagden, iband, ibgq0, icgq0, stern%mcgq, stern%mcprjq, stern%mpi_enreg, &
                         stern%dtset%natom, stern%nband, stern%npw_kq, stern%nspinor, timcount0, gs_hamkq%usepaw)
 
@@ -2000,7 +2033,10 @@ end subroutine stern_solve
 subroutine stern_free(stern)
 
 !Arguments ------------------------------------
- class(stern_t),intent(inout) :: stern
+ class(stern_t),target,intent(inout) :: stern
+
+!Local variables ------------------------------
+ real(dp), contiguous, pointer :: cgq_ptr(:,:,:) !, work_ptr(:,:,:,:), gscq_ptr(:,:,:)
 !************************************************************************
 
  ! integer
@@ -2015,7 +2051,7 @@ subroutine stern_free(stern)
  ABI_SFREE(stern%ghc)
  ABI_SFREE(stern%gsc)
  ABI_SFREE(stern%gvnlxc)
- ABI_SFREE(stern%cgq)
+
  ABI_SFREE(stern%gscq)
  ABI_SFREE(stern%gvnlx1)
  ABI_SFREE(stern%work)
@@ -2030,6 +2066,15 @@ subroutine stern_free(stern)
  !end if
  ABI_SFREE(stern%cprjq)
  ABI_SFREE(stern%cwaveprj1)
+
+ cgq_ptr => stern%cgq
+#ifdef HAVE_OPENMP_OFFLOAD
+ ! Free array on the GPU
+ if (xomp_target_is_present(c_loc(cgq_ptr))) then
+   !$OMP TARGET EXIT DATA MAP(delete:cgq_ptr)
+ end if
+#endif
+ ABI_SFREE(stern%cgq)
 
 end subroutine stern_free
 !!***

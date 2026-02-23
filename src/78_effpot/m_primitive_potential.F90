@@ -4,18 +4,18 @@
 !!
 !! FUNCTION
 !! This module define the primitive potential type, which is a direct map to the xml file (or other format).
-!! 
+!!
 !! Datatypes:
 !!  primitive_potential_t
 !!
 !! Subroutines:
-!! 
+!!
 !!  * fill_supercell: use translation symmetry to fill the supercell.
 !!  * load_from_file: load potential from file.
 !!  * save_to_file: save to file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,7 +62,7 @@ module m_primitive_potential
      logical::has_spin=.False.
      logical::has_lwf=.False.
    contains
-     !procedure:: initialize       ! perhaps each effpot type should have own 
+     !procedure:: initialize       ! perhaps each effpot type should have own
      procedure :: finalize
      procedure :: fill_supercell   ! build potential for a supercell
      procedure :: load_from_files  ! load potential from the file list defined in files file.
@@ -93,7 +93,7 @@ subroutine fill_supercell(self, scmaker, params, scpot, supercell)
     class(primitive_potential_t), intent(inout) :: self
     type(supercell_maker_t),      intent(inout) :: scmaker
     type(multibinit_dtset_type),  intent(inout) :: params
-    class(abstract_potential_t), pointer, intent(inout) :: scpot 
+    class(abstract_potential_t), pointer, intent(inout) :: scpot
     type(mbsupercell_t), target :: supercell
 
     ! Note that sc_pot is a pointer

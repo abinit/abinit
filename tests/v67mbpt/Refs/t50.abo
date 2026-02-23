@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h12 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h13 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v67mbpt_t50/t50.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v67mbpt_t50/t50.abi
 - output file    -> t50.abo
 - root for input  files -> t50i
 - root for output files -> t50o
@@ -65,9 +65,9 @@ _ WF disk file :      0.196 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           3
        mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       3.281 Mbytes of memory.
+P This job should need less than                       3.266 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.209 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      0.196 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -103,10 +103,10 @@ _ WF disk file :      0.113 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
      bs_algorithm2          2
      bs_algorithm3          2
      bs_algorithm4          1
-     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh3     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh4     0.00000000E+00  3.67493254E-01  3.67493254E-04 Hartree
+     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh3     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh4     0.00000000E+00  3.67493222E-01  3.67493222E-04 Hartree
         bs_loband1          0
         bs_loband2          0
         bs_loband3          0
@@ -175,7 +175,7 @@ _ WF disk file :      0.113 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
        mbpt_sciss1     0.00000000E+00 Hartree
        mbpt_sciss2     0.00000000E+00 Hartree
        mbpt_sciss3     0.00000000E+00 Hartree
-       mbpt_sciss4     2.93994603E-02 Hartree
+       mbpt_sciss4     2.93994577E-02 Hartree
 P           mkmem1         10
 P           mkmem2          3
 P           mkmem3          3
@@ -296,12 +296,12 @@ P           mkmem4          3
               wtk3       0.12500    0.50000    0.37500
               wtk4       0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
-             zcut      3.67493254E-08 Hartree
+             zcut      3.67493222E-08 Hartree
             znucl       14.00000
 
 ================================================================================
@@ -343,8 +343,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -440,7 +440,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
@@ -452,7 +452,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t50o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.20600   Average Vxc (hartree)=  -0.35482
  Eigenvalues (hartree) for nkpt=  10  k points:
@@ -473,7 +473,7 @@ psp_core            :  8.60437873155177E-02
 local_psp           : -2.43141062809014E+00
 non_local_psp       :  1.88324866263482E+00
 total_energy        : -8.87565704142536E+00
-total_energy_eV     : -2.41518910763938E+02
+total_energy_eV     : -2.41518931941087E+02
 band_energy         :  2.28143225508712E-01
 ...
 
@@ -484,9 +484,9 @@ band_energy         :  2.28143225508712E-01
   sigma(3 3)=  3.38568146E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -9.9610E-01 GPa]
-- sigma(1 1)=  9.96101709E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  9.96101709E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  9.96101709E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  9.96101877E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  9.96101877E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  9.96101877E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -571,9 +571,9 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      1.35165088504101     1.35165088504101     1.35165088504101
+    2      1.35165089003201     1.35165089003201     1.35165089003201
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
-              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+              =  5.406603560128  5.406603560128  5.406603560128 angstroms
  prteigrs : about to open file t50o_DS2_EIG
  Eigenvalues (hartree) for nkpt=   3  k points:
  kpt#   1, nband= 14, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -873,7 +873,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  58.5659   0.0000  46.3385   0.0000  54.0088  -0.0000
-   0.0100  58.5666   0.0000  46.3388   0.0000  54.0093   0.0000
+   0.0100  58.5666   0.0000  46.3388   0.0000  54.0094   0.0000
    0.0200  58.5686   0.0000  46.3398   0.0000  54.0109   0.0000
    0.0300  58.5721   0.0000  46.3414   0.0000  54.0134   0.0000
    0.0400  58.5768   0.0000  46.3436   0.0000  54.0170   0.0000
@@ -890,7 +890,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  59.5204   0.0000  46.9208   0.0000  54.7583   0.1453
-   0.0100  59.5211   0.0043  46.9212   0.0021  54.7588   0.1478
+   0.0100  59.5211   0.0043  46.9212   0.0021  54.7589   0.1478
    0.0200  59.5232   0.0086  46.9222   0.0042  54.7605   0.1503
    0.0300  59.5268   0.0130  46.9239   0.0063  54.7631   0.1529
    0.0400  59.5318   0.0173  46.9262   0.0084  54.7669   0.1554
@@ -907,7 +907,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE>
    0.0000  59.6060   0.0000  46.9733   0.0000  54.8262   0.1565
-   0.0100  59.6067   0.0048  46.9737   0.0023  54.8267   0.1593
+   0.0100  59.6067   0.0048  46.9737   0.0023  54.8268   0.1593
    0.0200  59.6088   0.0095  46.9747   0.0046  54.8284   0.1621
    0.0300  59.6124   0.0143  46.9764   0.0069  54.8310   0.1650
    0.0400  59.6175   0.0191  46.9787   0.0092  54.8348   0.1679
@@ -1047,7 +1047,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
    0.0200  63.1160   0.0559  49.1063   0.0259  57.5528   0.5464
    0.0300  63.1203   0.0839  49.1082   0.0389  57.5557   0.5658
    0.0400  63.1263   0.1119  49.1109   0.0519  57.5599   0.5853
-   0.0500  63.1340   0.1399  49.1143   0.0649  57.5652   0.6049
+   0.0500  63.1340   0.1399  49.1144   0.0649  57.5652   0.6049
    0.0600  63.1434   0.1679  49.1186   0.0779  57.5719   0.6244
    0.0700  63.1546   0.1959  49.1236   0.0909  57.5797   0.6440
    0.0800  63.1674   0.2240  49.1294   0.1039  57.5889   0.6637
@@ -1067,10 +1067,10 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
      bs_algorithm2          2
      bs_algorithm3          2
      bs_algorithm4          1
-     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh3     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
-     bs_freq_mesh4     0.00000000E+00  3.67493254E-01  3.67493254E-04 Hartree
+     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh3     0.00000000E+00  0.00000000E+00  3.67493222E-04 Hartree
+     bs_freq_mesh4     0.00000000E+00  3.67493222E-01  3.67493222E-04 Hartree
         bs_loband1          0
         bs_loband2          0
         bs_loband3          0
@@ -1148,7 +1148,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
        mbpt_sciss1     0.00000000E+00 Hartree
        mbpt_sciss2     0.00000000E+00 Hartree
        mbpt_sciss3     0.00000000E+00 Hartree
-       mbpt_sciss4     2.93994603E-02 Hartree
+       mbpt_sciss4     2.93994577E-02 Hartree
 P           mkmem1         10
 P           mkmem2          3
 P           mkmem3          3
@@ -1275,12 +1275,12 @@ P           mkmem4          3
               wtk3       0.12500    0.50000    0.37500
               wtk4       0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+                       1.3516508900E+00  1.3516508900E+00  1.3516508900E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
-             zcut      3.67493254E-08 Hartree
+             zcut      3.67493222E-08 Hartree
             znucl       14.00000
 
 ================================================================================
@@ -1372,10 +1372,10 @@ P           mkmem4          3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.2
+- Proc.   0 individual time (sec): cpu=          3.0  wall=          3.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  57 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.1  wall=          3.2
+.Delivered  56 WARNINGs and  21 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.0  wall=          3.1

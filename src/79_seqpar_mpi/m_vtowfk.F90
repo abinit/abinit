@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MT)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -230,8 +230,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp) :: dummy(2,1),nonlop_dum(1,1),nonlop_dum2(1,1),tsec(2)
  real(dp),allocatable :: cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(real64), ABI_CONTIGUOUS pointer :: cwavef(:,:)  => null()
- real(real64), ABI_CONTIGUOUS pointer :: wfraug(:,:,:,:)
+ real(real64), contiguous, pointer :: cwavef(:,:)  => null()
+ real(real64), contiguous, pointer :: wfraug(:,:,:,:)
 #else
  real(dp),allocatable,target :: cwavef(:,:)
  real(dp),allocatable :: wfraug(:,:,:,:)

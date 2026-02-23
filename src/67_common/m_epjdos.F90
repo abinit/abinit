@@ -6,7 +6,7 @@
 !!  Tools for the computiation of electronic PJDOSes
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MVer, XG, SM, MT, BAmadon, MG, MB)
+!!  Copyright (C) 2008-2026 ABINIT group (MVer, XG, SM, MT, BAmadon, MG, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2413,7 +2413,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
  !character(len=500) :: msg
 !arrays
  integer ,allocatable :: dimcprj_atsph(:)
- integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
+ integer,contiguous, pointer :: indlmn(:,:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: int1(:,:),int2(:,:),int1m2(:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:)

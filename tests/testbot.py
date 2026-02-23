@@ -1,18 +1,24 @@
 #!/usr/bin/env python
-from __future__ import print_function, division, absolute_import  #, unicode_literals
+from __future__ import annotations
+
+__version__ = "1.0"
+__author__ = "Matteo Giantomassi"
 
 import sys
 import os
-# Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
-os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
+import dataclasses
 import platform
 import shutil
 import tempfile
+import argparse
 import json
 
 from os.path import join as pj, abspath as absp, basename
 from socket import gethostname
 from warnings import warn
+from optparse import OptionParser
+from dataclasses import dataclass, field
+from typing import Optional
 
 import logging
 logger = logging.getLogger(__name__)
@@ -23,14 +29,15 @@ except ImportError:
     # The ConfigParser module has been renamed to configparser in Python 3
     from configparser import ConfigParser as SafeConfigParser, NoOptionError
 
+
+# Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
+os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Pspdir"))
+
 # Add the directory [...]/abinit/tests to $PYTHONPATH
 pack_dir, x = os.path.split(absp(__file__))
 pack_dir, x = os.path.split(pack_dir)
 sys.path.insert(0, pack_dir)
 import tests
-
-__version__ = "0.3"
-__author__ = "Matteo Giantomassi"
 
 _my_name = basename(__file__) + "-" + __version__
 
@@ -41,6 +48,11 @@ from pymods import termcolor
 from pymods.testsuite import BuildEnvironment
 from pymods.jobrunner import TimeBomb, JobRunner, OMPEnvironment
 from pymods.tools import pprint_table
+
+ROOT, _ = os.path.split(absp(__file__))
+
+TESTBOT_YAML = pj(ROOT, "testbot.yaml")
+TESTBOT_JSON = pj(ROOT, "testbot.json")
 
 
 def lazy__str__(func):
@@ -61,14 +73,239 @@ def _yesno2bool(string):
 
 
 def _str2list(string):
+    if isinstance(string, (list, tuple)):
+        return string
+
+    #try:
     return [s.strip() for s in string.split(",") if s]
+    #except Exception as exc:
+    #    print(f"{type(string)=}, {string=}")
+    #    raise
 
 
-class TestBot(object):
+#from pydantic.dataclasses import dataclass as pydantic_dataclass
+#@pydantic_dataclass(kw_only=True)
+@dataclass(kw_only=True)
+class TestBotContext:
     """
-    This object drives the execution of the abinit automatic tests:
+    Configuration for TestBot builder
+    """
 
-      1) Read setup options from the file testbot.cfg uploaded by the master on the worker.
+    slavename: str
+    """Name of buildbot builder"""
+
+    type: str = ""
+    """'ref' if this builder is the reference builder where all tests should pass"""
+
+    ncpus: Optional[int] = None
+    """Max number of CPUs that can be used by TestBot"""
+
+    max_gpus: Optional[int] = 0
+    """Max number of GPUs that can be used by TestBot"""
+
+    mpi_prefix: str = ""
+    """MPI runner"""
+
+    mpirun_np: str = ""
+    """String used to execute `mpirun -n#NUM`"""
+
+    omp_num_threads: int = 0
+    """Number of OpenMP threads. 0 if OpenMP should not be used"""
+
+    enable_mpi: Optional[bool] = None
+    """True if MPI is activated"""
+
+    enable_openmp: Optional[bool] = None
+    """True if OpenMP is activated"""
+
+    poe: str = ""
+    """Deprecated"""
+
+    poe_args: str = ""
+    """Deprecated"""
+
+    with_tdirs: list[str] = field(default_factory=list)
+    """List of subsuites to include"""
+
+    without_tdirs: list[str] = field(default_factory=list)
+    """List of subsuites to exclude"""
+
+    timeout_time: float = 900.0
+    """Timeout time in seconds"""
+
+    cygwin_dir: str = ""
+    """Deprecated"""
+
+    runmode: str = "static"
+    """'static': run all tests with 1 MPI proc; use np > 1 only for multiparallel tests"""
+
+    keywords: list[str] = field(default_factory=list)
+    """Keywords to select/ignore tests"""
+
+    etsf_check: bool = False
+    """Activate validation of NetCDF files produced by Abinit"""
+
+    verbose: int = 0
+    """Verbosity level"""
+
+    tmp_basedir: str = ""
+    """Temporary folder where tests are executed and copied back"""
+
+    mpi_args: str = ""
+    """Arguments passed to the MPI command"""
+
+    force_mpi: bool = False
+    """Force usage of mpirun_np prefix"""
+
+    @classmethod
+    def from_builders(cls, all_builders: list[dict], builder_name: str):
+        """Build an instance from yaml file and builder name."""
+        for builder in all_builders:
+            if builder["name"] == builder_name: break
+        else:
+            raise ValueError(f"Cannot find {builder_name=}")
+
+        kwargs = {k: builder[k] for k in [field.name for field in dataclasses.fields(cls)] if k in builder}
+        return cls(**kwargs)
+
+    def __post_init__(self):
+        """
+        Enforce required fields and basic consistency.
+        """
+        missing = []
+
+        if not self.slavename:
+            missing.append("slavename")
+
+        if self.ncpus is None:
+            missing.append("ncpus")
+
+        #if self.enable_mpi is None:
+        #    missing.append("enable_mpi")
+
+        #if self.enable_openmp is None:
+        #    missing.append("enable_openmp")
+
+        if missing:
+            raise ValueError("Missing required configuration field(s): " + ", ".join(missing))
+
+        # Optional sanity checks
+        if self.ncpus is not None and self.ncpus <= 0:
+            raise ValueError(f"ncpus is negative {self.ncpus}")
+
+        if self.max_gpus < 0:
+            raise ValueError(f"max_gpus is negative: {self.max_gpus}")
+
+        if self.omp_num_threads < 0:
+            raise ValueError(f"omp_num_threads is negative: {self.omp_num_threads}")
+
+        if self.timeout_time <= 0:
+            raise ValueError(f"timeout_time is negative: {self.timeout_time}")
+
+
+def get_mpi_prefix_from_env() -> str | None:
+    # This is what JMB does in buildbot_worker/testbot.py
+    # The problem is that this has precedence over mpi_prefix. Should ask why!!
+    try:
+       return os.environ['MPI_HOME']
+    except:
+       pass
+    try:
+       return os.environ['MPIHOME']
+    except:
+        pass
+
+    return None
+
+
+def read_builders(fmt: str) -> list[dict]:
+    """Read builders from file."""
+    if fmt == "yaml":
+      import ruamel.yaml as yaml
+      with open(TESTBOT_YAML, "rt") as f:
+        all_builders = yaml.YAML(typ='safe', pure=True).load(f.read())
+    elif fmt == "json":
+      with open(TESTBOT_JSON, "rt") as f:
+        all_builders = json.load(f)
+    else:
+        raise ValueError(f"Invalid {fmt=}")
+
+    return all_builders
+
+
+def validate() -> int:
+    """
+    Validate configuration files.
+    """
+    # Read testfarm configuration file with builders.
+    build_examples = abenv.apath_of(pj("config", "specs", "testfarm.conf"))
+    parser = SafeConfigParser()
+    parser.read(build_examples)
+
+    all_builders = read_builders("yaml")
+    builder_names = [b["name"] for b in all_builders]
+
+    retcode = 0
+
+    if len(set(builder_names)) != len(builder_names):
+        retcode += 1
+        print("Builder names are not unique!")
+
+    allowed = set(TestBot._attrbs.keys())
+
+    for builder in all_builders:
+        b_keys = set(builder.keys())
+        #missing = allowed - b_keys
+        extra   = b_keys - allowed
+
+        if extra:
+            print("Unexpected:", extra)
+
+        #if missing:
+        #    print("Missing:", missing)
+
+    for builder_name in builder_names:
+        try:
+            ctx = TestBotContext.from_builders(all_builders, builder_name)
+            #print(ctx)
+        except Exception as exc:
+            print(exc)
+            retcode += 1
+
+    #print(ctx.type)
+    #for builder_name in parser.sections():
+    #convert()
+
+    for builder_name in builder_names:
+        testbot = TestBot(None, builder_name=builder_name)
+        #print("Running in dry-run mode, will return immediately.")
+        print(testbot)
+
+    if retcode == 0:
+        convert()
+    else:
+        print("Validation failed. JSON file won't be produced.")
+
+    return retcode
+
+
+def convert():
+    """
+    Convert yaml file to json.
+    """
+    all_builders = read_builders("yaml")
+
+    with open(TESTBOT_JSON, "w", encoding="utf-8") as f:
+      json.dump(all_builders, f, indent=2, sort_keys=True)
+
+    return 0
+
+
+class TestBot:
+    """
+    This object drives the execution of the ABINIT automatic tests:
+
+      1) Read setup options from the file testbot.cfg uploaded by the master on the builder.
       2) Initialize the job_runner and other objects used to run the tests.
       3) run the tests (see run method), and return the number of tests that failed.
 
@@ -77,8 +314,8 @@ class TestBot(object):
     _attrbs = {
       # name           --> (default, parser, info)
       # If default is None, the option must be specified.
-      "slavename"        : (None, str, "Name of buildbot worker"),
-      "type"             : ("",   str, "'ref' if this worker is the reference worker where all tests should pass"),
+      "slavename"        : (None, str, "Name of buildbot builder"),
+      "type"             : ("",   str, "'ref' if this builder is a reference builder where all tests should pass"),
       # TODO: ncpus should be replaced by max_cpus for clarity reasons
       "ncpus"            : (None, int, "Max number of CPUs that can be used by TestBot"),
       "max_gpus"         : (0,    int, "Max number of GPUs that can be used by TestBot"),
@@ -99,14 +336,13 @@ class TestBot(object):
       "verbose"          : (0,    int, "Verbosity level"),
       "tmp_basedir"      : ("", str, "temporary folder where the tests will be executed and copied back"),
       "mpi_args"         : ("", str, "args passed to the mpi command"),
-      "force_mpi"        : ("no", _yesno2bool, "force usage of of mpirun_np prefix"),
+      "force_mpi"        : ("no", _yesno2bool, "force usage of mpirun_np prefix"),
     }
 
     @classmethod
     def print_options(cls):
         """
-        Print the different options supported in testbot.cfg with a
-        brief description and the default value.
+        Print the different options supported in testbot.cfg with a brief description and the default value.
         """
         for opt_name, t in cls._attrbs.items():
             default, parser, info = t
@@ -115,15 +351,7 @@ class TestBot(object):
 
         print("# NB If default is None, the option must be specified.")
 
-    def __init__(self, testbot_cfg=None):
-
-        # Read the options specified in the testbot configuration file.
-        if testbot_cfg is None:
-            basedir, _ = os.path.split(absp(__file__))
-            testbot_cfg = pj(basedir, "testbot.cfg")
-
-        parser = SafeConfigParser()
-        parser.read(testbot_cfg)
+    def __init__(self, testbot_cfg=None, builder_name=None):
 
         attrs2read = [
             "slavename",
@@ -147,31 +375,87 @@ class TestBot(object):
             "force_mpi",
         ]
 
-        for attr in attrs2read:
-            default, parse, info = TestBot._attrbs[attr]
-            try:
-                value = parser.get("testbot", attr)
-            except NoOptionError:
-                value = default
+        if builder_name is None:
+            # Legacy mode based on INI file. Will be removed.
+            # Read the options specified in the testbot configuration file.
 
-            if value is None:
-                # Write out the cfg file and raise
-                for section in parser.sections():
-                    print("[" + section + "]")
-                    for opt in parser.options(section):
-                        print(opt + " = " + parser.get(section, opt))
-                raise ValueError("Mandatory option %s is not declared" % attr)
+            if testbot_cfg is None:
+                basedir, _ = os.path.split(absp(__file__))
+                testbot_cfg = pj(basedir, "testbot.cfg")
 
-            self.__dict__[attr] = parse(value)
+            # Here we init the attributes either from the cfg file
+            parser = SafeConfigParser()
+            parser.read(testbot_cfg)
+
+            for attr in attrs2read:
+                default, parse, info = TestBot._attrbs[attr]
+                try:
+                    value = parser.get("testbot", attr)
+                except NoOptionError:
+                    value = default
+
+                if value is None:
+                    # Write out the cfg file and raise
+                    for section in parser.sections():
+                        print("[" + section + "]")
+                        for opt in parser.options(section):
+                            print(opt + " = " + parser.get(section, opt))
+                    raise ValueError("Mandatory option %s is not declared" % attr)
+
+                self.__dict__[attr] = parse(value)
+
+        else:
+            #fmt = "yaml" # Use yaml file.
+            fmt = "json"
+            all_builders = read_builders(fmt)
+
+            for builder in all_builders:
+                if builder["name"] == builder_name: break
+            else:
+                all_names = [b["name"] for b in all_builders]
+                raise ValueError(f"Cannot find {builder_name=} in file {TESTBOT_YAML}\nChoose among: {all_names}")
+
+            print(builder)
+            ctx = TestBotContext.from_builders(all_builders, builder_name)
+            print(ctx)
+
+            for attr in attrs2read:
+                default, parse, info = TestBot._attrbs[attr]
+                value = builder.get(attr, default)
+
+                if value is None and default is None:
+                    # Write out the cfg file and raise
+                    print(builder)
+                    raise ValueError("Mandatory option %s is not declared" % attr)
+
+                if value is not None:
+                  value = parse(value)
+
+                self.__dict__[attr] = value
+
+            # Final fix.
+            self.slavename = builder["name"]
+
+            # This is what JMB does in buildbot_worker/testbot.py
+            mpi_prefix_from_env = get_mpi_prefix_from_env()
+            if mpi_prefix_from_env is not None:
+                if self.mpi_prefix:
+                    print("WARNING: About to overwrite mpi_prefix from yaml file with the one from $MPI_HOME")
+                    print(f"From Yaml     : {self.mpi_prefix}")
+                    print(f"From $MPI_HOME: {mpi_prefix_from_env}")
+                    self.mpi_prefix= mpi_prefix_from_env
 
         if self.with_tdirs and self.without_tdirs:
             raise ValueError("with_tdirs and without_tdirs attribute are mutually exclusive")
+
+        if self.type not in ["", "ref"]:
+            raise ValueError(f"type should be either 'ref' or empty string while it's: {self.type}")
 
         # TODO: ncpus should be replaced by max_cpus for clarity reasons
         self.max_cpus = self.ncpus
 
         system, node, release, version, machine, processor = platform.uname()
-        print("Running on %s -- worker %s -- system %s -- max_cpus %s -- Python %s -- %s" % (
+        print("Running on %s -- builder %s -- system %s -- max_cpus %s -- Python %s -- %s" % (
               gethostname(), self.slavename, system, self.max_cpus, platform.python_version(), _my_name))
 
         # Set the logger level.
@@ -184,32 +468,17 @@ class TestBot(object):
             raise ValueError('Invalid log level: %s' % numeric_level)
         logging.basicConfig(level=numeric_level)
 
-        # Read testfarm configuration file.
+        # Read testfarm configuration file with builders.
         build_examples = abenv.apath_of(pj("config", "specs", "testfarm.conf"))
-
         parser = SafeConfigParser()
         parser.read(build_examples)
 
         if self.slavename not in parser.sections():
-            raise ValueError("%s is not a valid buildbot worker." % self.slavename)
+            print(f"workers:", parser.sections())
+            raise ValueError("%s is not a valid buildbot builder." % self.slavename)
 
-        # TODO
-        # Consistency check
-        # d = self.__dict__
-        # for attr, (default, parse) in TestBot._attrbs.items():
-        #   try:
-        #     d[attr] = parser.get(self.slavename, attr)
-        #   except NoOptionError:
-        #     print "option %s is not declared" % attr
-        #     #raise ValueError(err_msg)
-        #     d[attr] = default
-        #     if default is None:
-        #       err_msg = "option %s is not declared" % attr
-        #       raise ValueError(err_msg)
-        #   d[attr] = parse(d[attr])
-
-        # 2 )Initialize the job_runner.
-        self.build_env = build_env = BuildEnvironment(os.curdir, cygwin_instdir=self.__dict__["cygwin_dir"])
+        # 2) Initialize the job_runner.
+        self.build_env = build_env = BuildEnvironment(os.curdir)
         self.build_env.set_buildbot_builder(self.slavename)
 
         # TODO: These parameters should be passed to testbot.cfg
@@ -357,10 +626,16 @@ class TestBot(object):
 
     def run(self):
         """
-        Run all the automatic tests depending on the environment and the options
-        specified in the testbot.cfg configuration file.
-        Return the number of failing tests (+ no. passed tests if this is the reference worker).
+        Run all the automatic tests depending on the environment and the options specified in the testbot.cfg configuration file.
+        Return the number of failing tests (+ no. passed tests if this is the reference builder).
         """
+        # TODO
+        #import multiprocessing
+        #multiprocessing.set_start_method("fork")  # Ensure compatibility on macOS/Linux
+
+        # Disable colors
+        termcolor.enable(False)
+
         # If with_tdirs and without_tdirs are not given => execute all tests.
         # else create a list of strings with the suites that should be executed|excluded.
         suite_args = None
@@ -421,7 +696,7 @@ class TestBot(object):
         self.summary.json_dump("testbot_summary.json")
 
         # Empty list of tests (usually due to the use of with, without options)
-        # Create file to signal this condition and return 0
+        # Create file to signal this condition and return 0.
         if nexecuted == 0:
             print("No file found")
             with open("__emptylist__", "wt") as fh:
@@ -430,70 +705,73 @@ class TestBot(object):
 
         # The status error depends on the builder type.
         if self.type == "ref":
-            # Reference worker --> all the tests must pass.
+            # Reference builder --> all the tests must pass.
             return nfailed + npassed
         else:
             return nfailed
 
-    def finalize(self):
-        """
-        This piece of code has been extracted from analysis9
-        """
-        fname = "testbot_summary.json"
-        with open(fname, "rt") as data_file:
-           d = json.load(data_file)
 
-        # FIXME What is this?
-        d['tag'] = sys.argv[1]
+def analyze(fname):
+    """
+    This piece of code has been extracted from analysis9
+    """
+    #fname = "testbot_summary.json"
+    with open(fname, "rt") as data_file:
+       d = json.load(data_file)
 
-        with open(fname, 'wt') as data_file:
-           json.dump(d, data_file)
+    # FIXME What is this?
+    #d['tag'] = sys.argv[1]
 
-        try:
-            tests_status = dict(zip(d["summary_table"][0],d["summary_table"][1]))
+    with open(fname, 'wt') as data_file:
+       json.dump(d, data_file)
 
-            dashline = "=========================================================================="
-            print( dashline )
-            print(     "          Serie   #failed   #passed  #succes  #skip  |   #CPU      #WALL")
+    try:
+        tests_status = dict(zip(d["summary_table"][0],d["summary_table"][1]))
+
+        dashline = "=========================================================================="
+        print( dashline )
+        print(     "          Serie   #failed   #passed  #succes  #skip  |   #CPU      #WALL")
+        print(dashline)
+        rtime = 0.0
+        ttime = 0.0
+        paral = ''
+        mpiio = ''
+        for t, s in sorted(tests_status.items()):
+            kt = False
+            for i in d[t].keys():
+               if  d[t][i]['status'] != "skipped":
+                  kt = True
+                  rtime += d[t][i]['run_etime']
+                  ttime += d[t][i]['tot_etime']
+            if kt:
+                 temp = ''.join(['%5s   |' % l for l in  s.split('/') ])
+                 temp = '%15s | %10s %7.1f  | %7.1f' % (t,temp,rtime,ttime)
+                 if t == 'mpiio':
+                    mpiio = temp
+                 elif t == 'paral':
+                    paral = temp
+                 else:
+                    print(temp)
+            rtime = ttime = 0.0
+
+        print(dashline)
+        putline = 0
+        if paral != '':
+            print(paral)
+            putline=1
+        if mpiio != '':
+            print(mpiio)
+            putline=1
+        if putline == 1:
             print(dashline)
-            rtime = 0.0
-            ttime = 0.0
-            paral = ''
-            mpiio = ''
-            for t, s in sorted(tests_status.items()):
-                kt = False
-                for i in d[t].keys():
-                   if  d[t][i]['status'] != "skipped":
-                      kt = True
-                      rtime += d[t][i]['run_etime']
-                      ttime += d[t][i]['tot_etime']
-                if kt:
-                     temp = ''.join(['%5s   |' % l for l in  s.split('/') ])
-                     temp = '%15s | %10s %7.1f  | %7.1f' % (t,temp,rtime,ttime)
-                     if t == 'mpiio':
-                        mpiio = temp
-                     elif t == 'paral':
-                        paral = temp
-                     else:
-                        print(temp)
-                rtime = ttime = 0.0
-
-            print(dashline)
-            putline = 0
-            if paral != '':
-                print(paral)
-                putline=1
-            if mpiio != '':
-                print(mpiio)
-                putline=1
-            if putline == 1:
-                print(dashline)
-        except:
-            print("no results")
-            sys.exit(99)
+    except:
+        print("no results")
+        with open("ANALYSIS_SUMMARY_FAILED", "wt") as f:
+            f.write("")
+        sys.exit(99)
 
 
-class TestBotSummary(object):
+class TestBotSummary:
     """Stores the final results of the tests performed by TestBot."""
 
     _possible_status = ["failed", "passed", "succeeded", "skipped"]
@@ -603,7 +881,7 @@ class TestBotSummary(object):
     def json_dump(self, fname):
         """
         Save self.res_table, self.failed, self.passed in json format.
-        The file will be transferred from the buildbot worker to the buildbot master.
+        The file will be transferred from the buildbot builder to the buildbot master.
         """
         # list of strings with the name of the tests that (failed|passed)
         d = {}
@@ -618,16 +896,91 @@ class TestBotSummary(object):
                 print("Warning: About to overwrite key %s" % suite_name)
             d[suite_name] = self.res_table[suite_name]
 
-
         with open(fname, "wt") as fh:
             json.dump(d, fh)
 
 
-def main():
+def get_epilog() -> str:
+    s = """\
+======================================================================================================
+Usage example:
+
+    testbot.py run BUILDER_NAME  => Run tests for the given builder.
+    testbot.py print             => Print info on options.
+    testbot.py validate          => Validate yaml file and convert to json.
+
+======================================================================================================
+"""
+    return s
+
+
+def get_parser(with_epilog=False):
+    """Build and return the command-line parser"""
+    parser = argparse.ArgumentParser(epilog=get_epilog() if with_epilog else "",
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    parser.add_argument('--loglevel', default="ERROR", type=str,
+        help="Set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG")
+    parser.add_argument('-V', '--version', action='version', version=__version__)
+
+    parser.add_argument('-v', '--verbose', default=0, action='count', # -vv --> verbose=2
+        help='verbose, can be supplied multiple times to increase verbosity')
+
+    # Create the parsers for the sub-commands
+    subparsers = parser.add_subparsers(dest='command', help='sub-command help',
+       description="Valid subcommands, use command --help for help")
+
+    # Subparser for run
+    p_run = subparsers.add_parser('run', # parents=[copts_parser],
+        help="Run tests.")
+    p_run.add_argument("builder_name", type=str, help="Name of the builder")
+    p_run.add_argument('-d', '--dry-run', default=False, action="store_true", help='Dry-run mode.')
+
+    p_info = subparsers.add_parser('info', help="Print info on options.")
+
+    # Subparser for validate
+    p_validate = subparsers.add_parser('validate', # parents=[copts_parser],
+        help="Validate yaml file and convert to JSON.")
+
+    return parser
+
+
+def new_main():
+    # Parse command line.
+    parser = get_parser(with_epilog=True)
+    options = parser.parse_args()
+
+    if options.command == "validate":
+        return validate()
+
+    if options.command == "info":
+        TestBot.print_options()
+        return 0
+
+    if options.command == "analyze":
+        return analyze(fname="testbot_summary.json")
+
+    if options.command == "run":
+        testbot = TestBot(None, builder_name=options.builder_name)
+        if options.dry_run:
+            print("Running in dry-run mode, will return immediately.")
+            print(testbot)
+            return 0
+
+        return testbot.run()
+
+    raise ValueError(f"Invalid command: {options.command}")
+
+
+def old_main():
+
     if "--help" in sys.argv or "-h" in sys.argv:
         # Print help and exit.
         TestBot.print_options()
         return 0
+
+    if len(sys.argv) > 1 and sys.argv[1] == "validate":
+        return validate()
 
     # Configuration file (hardcoded or from command line)
     testbot_cfg = None
@@ -648,6 +1001,6 @@ def main():
 
 
 if __name__ == "__main__":
-    #import multiprocessing
-    #multiprocessing.set_start_method("fork")  # Ensure compatibility on macOS/Linux
-    sys.exit(main())
+    #sys.exit(new_main())
+    sys.exit(old_main())
+

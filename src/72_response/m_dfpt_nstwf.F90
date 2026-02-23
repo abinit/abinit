@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group ()
+!!  Copyright (C) 2008-2026 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +33,7 @@ module m_dfpt_nstwf
  use m_nctk
  use m_dtset
  use m_dtfil
+ use m_gputk
  use m_abi_linalg
 
  use defs_datatypes, only : pseudopotential_type
@@ -108,7 +109,7 @@ contains
 !!  - on-site contributions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2025 ABINIT group (MT, AM)
+!! Copyright (C) 2010-2026 ABINIT group (MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -336,7 +337,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable,target :: ch1c_tmp(:,:)
  real(dp),allocatable :: cs1c_tmp(:,:)
  real(dp),allocatable :: dcwavef(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: cwave0(:,:),cwavef(:,:)!,dcwavef(:,:)
+ real(dp), contiguous, pointer :: cwave0(:,:),cwavef(:,:)!,dcwavef(:,:)
  real(dp),allocatable :: cg_ddk(:,:,:)
  real(dp),allocatable :: doccde_k(:),doccde_kq(:)
  real(dp),allocatable :: dnhat1(:,:),drhoaug1(:,:,:,:)
@@ -353,7 +354,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:),vtmp1(:,:),vxc10(:,:)
  real(dp),allocatable,target :: work(:,:,:),e1kb_work(:,:,:,:)
  real(dp),pointer :: e1kbfr(:,:,:,:,:),e1kb_ptr(:,:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: ffnl1_idir1(:,:,:,:)
+ real(dp), contiguous, pointer :: ffnl1_idir1(:,:,:,:)
  real(dp),pointer :: vhartr01(:),vpsp1_idir1(:),xccc3d1_idir1(:)
  type(pawcprj_type),allocatable :: dcwaveprj(:,:)
  type(pawcprj_type),allocatable,target :: cwaveprj0(:,:)
@@ -2265,7 +2266,7 @@ end subroutine dfpt_nstpaw
 !! Only for norm-conserving pseudopotentials (no PAW)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
+!! Copyright (C) 1999-2026 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

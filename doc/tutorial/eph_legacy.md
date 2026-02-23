@@ -42,7 +42,7 @@ It is presumed that the user has already followed the Tutorials [RF1](/tutorial/
 and understands the calculation of ground state and response (phonon using density-functional
 perturbation theory (DFPT)) properties with ABINIT.
 
-Copy the file *teph_legacy_1.abi* to your working directory. It contains in particular file names and root names 
+Copy the file *teph_legacy_1.abi* to your working directory. It contains in particular file names and root names
 for the first run (GS+perturbations).
 
 ```sh
@@ -101,7 +101,7 @@ precise determination of the Fermi surface of the metal. This implies a very
 dense k-point mesh, and the convergence of the grid must be checked. In our
 case, for Al, we will use a (non-shifted) 6x6x6 k-point grid, but a converged
 calculation needs more than 16x16x16 points. This will be re-considered in
-section 5. The q-point grid will be 2x2x2, and is selected by the [[ngqpt]], 
+section 5. The q-point grid will be 2x2x2, and is selected by the [[ngqpt]],
 qshift, nqshift, and [[qptopt]] variables. It must be a sub-grid of the full
 k-point grid, and must contain the Γ point. For the phonon and GKK datasets,
 the q-point is selected by the variable [[iqpt]]: this guarantees that there are
@@ -114,12 +114,12 @@ The value of [[acell]] is fixed to a rounded value from experiment.
 It, too, should be converged to get physical results (see [Tutorial 3](/tutorial/base3)).
 
 Note that the value of 1.0E-14 for [[tolwfr]] is tight, and should be even
-lower (down to 1.0E-20 or even 1.0E-22) for accurate results. This is because the wavefunctions
+lower (down to 1.0E-20 or even 1.0E-22) for precise results. This is because the wavefunctions
 will be used later explicitly in the matrix elements for ANADDB, as opposed to
 only energy values or densities, which are averages of the wavefunctions and
 eigenenergies over k-points and bands. Electron-phonon quantities are delicate
 sums of a few of these small matrix elements (those near the Fermi surface),
-so each matrix element must be accurate. You can however set [[prtwf]] to 0 in
+so each matrix element must be precise. You can however set [[prtwf]] to 0 in
 the phonon calculations, and avoid saving huge perturbed wavefunction files to
 disk (you only need to keep the ground state wave functions, with prtwf1 1).
 
@@ -153,7 +153,7 @@ minimal number of 2DTE for different mixed second derivatives of the total
 energy. In our case we use the first derivatives, and they must all be calculated explicitly.
 
 You are now the proud owner of 9 first-order matrix element files (suffixed
-\_GKKx, and corresponding copies in netcdf format \_GKKx.nc), 
+\_GKKx, and corresponding copies in netcdf format \_GKKx.nc),
 corresponding to the three directional perturbations of the atom at
 each of the three q-points. The \_GKK files contain the matrix elements of the
 electron-phonon interaction, which we will extract and use in the following.
@@ -232,7 +232,7 @@ ANADDB to carry out the calculation of the electron-phonon quantities.
 
 ANADDB has file path variables, just like ABINIT, which tells it where to find the input,
 ddb, and gkk files, and what to name the output, thermodynamical output, and
-electron phonon output files. 
+electron phonon output files.
 
 The new variables are at the head of the file:
 
@@ -301,7 +301,7 @@ K. The coupling strength is severely underestimated (experiment gives 0.44),
 and the logarithmic average frequency is a bit too high (converged value of 270 K in [[cite:Savrasov1996|Savrasov]]).
 The resulting critical temperature from McMillan's formula is unphysical, and you
 should always regard it critically: if $\lambda$ is close to or lower than the chosen value of
-$\mu^{\star}$, $T_c$ will diverge. 
+$\mu^{\star}$, $T_c$ will diverge.
 Aluminum is a good case in which things can be improved easily,
 because its Fermi surface is large and isotropic and the coupling is weak.
 
@@ -365,7 +365,7 @@ basically the first part of the normal DDK files for E field perturbation,
 without the wave function coefficients).
 
 The ANADDB input must specify where the ddk files are, so ANADDB can
-calculate the Fermi velocities. The variable ddk_filepath points to a 
+calculate the Fermi velocities. The variable ddk_filepath points to a
 small file listing the 3 DDK files to be used, whose contents in our case are:
 
     teph_legacy_1_DS5_GKK4
@@ -411,5 +411,5 @@ components, for the resistivity tensor (2 1 = y x or the current response
 along y when you apply an electric field along x). In many systems the tensor
 should be diagonal by symmetry, and the value of off-diagonal terms gives an
 estimate of the symmetrization error (tiny). Similarly the difference in the diagonal terms
-is due to numerical convergence: here is is a few per-mil, visible in the figure 
+is due to numerical convergence: here is is a few per-mil, visible in the figure
 between green and red lines (yy and xx components).

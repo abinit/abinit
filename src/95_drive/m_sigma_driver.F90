@@ -6,7 +6,7 @@
 !! Calculate the matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2025 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!!  Copyright (C) 1999-2026 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1818,7 +1818,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_MALLOC(kxcg, (nfftf_tot,dim_kxcg))
 
    case (-11)
-     !LR+ALDA kernel
+     ! LR+ALDA kernel
      ABI_CHECK(epsm1%ID==0,"epsm1%ID should be 0")
 
      if (Dtset%usepaw==1) then
@@ -2403,7 +2403,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
        if (any(mod10 == [SIG_SEX, SIG_COHSEX])) then
          ! Calculate static COHSEX or SEX using the coarse gwc_ngfft mesh.
-         call cohsex_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Cryst,qp_ebands,Sigp,Sr,epsm1,Gsph_c,Vcp,Kmesh,Qmesh,&
+         call cohsex_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,dtset, Cryst,qp_ebands,Sigp,Sr,epsm1,Gsph_c,Vcp,Kmesh,Qmesh,&
                         Ltg_k(ikcalc),Pawtab,Pawang,Paw_pwff,Psps,Wfd,QP_sym,&
                         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_k)
        else
@@ -2411,7 +2411,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
           if (x1rdm/=1 .and. sigmak_todo(ik_ibz)==1) then
             ! Do not compute correlation MELS if the k-point was read from the checkpoint file
             ! this IF only affects GW density matrix update
-            call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,qp_ebands, &
+            call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,dtfil, Cryst,qp_ebands, &
                               Sigp,Sr,epsm1,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
                               Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
                               gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
@@ -2952,7 +2952,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  integer :: mod10,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng, nsppol
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev,usefock_ixc
  integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange,ivcoul_init,nvcoul_init,xclevel_ixc
- real(dp),parameter :: OMEGASIMIN=0.01d0, tol_enediff=0.001_dp*eV_Ha
+ real(dp),parameter :: OMEGASIMIN=0.01d0
  real(dp) :: domegas,domegasi,ucvol,rcut, drude_plasmon_freq, wmax
  logical :: ltest,remove_inv,changed,found
  character(len=500) :: msg, iw_mesh_type
@@ -3038,7 +3038,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  mband = MAXVAL(Hdr_wfk%nband)
 
  remove_inv = .FALSE.
+ if (dtset%userie /= 456) then
  call hdr_wfk%vs_dtset(dtset)
+ end if
 
  test_npwkss = 0
  call make_gvec_kss(Dtset%nkpt,Dtset%kptns,Hdr_wfk%ecut_eff,Dtset%symmorphi,Dtset%nsym,Dtset%symrel,Dtset%tnons,&
@@ -3355,7 +3357,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
        if (kmesh%has_IBZ_item(Sigp%kptgw(:,ikcalc), ikibz, G0)) then
          call ks_ebands%enclose_degbands(ikibz,isppol, &
-               Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
+               Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,dtset%symsigma_de)
 
          if (changed) then
            write(msg,'(2(a,i0),2a,2(1x,i0))')&
@@ -3646,12 +3648,15 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  end do
 
-#if 0
+#if 1
  ! Using the random q for the optical limit is one of the reasons
  ! why sigma breaks the initial energy degeneracies.
- Vcp%i_sz=zero
- Vcp%vc_sqrt(1,1)=czero
- Vcp%vcqlwl_sqrt(1,1)=czero
+ if (dtset%userra > 100) then
+   call wrtout(units, "I am setting Vcp%i_sz=zero, Vcp%vc_sqrt(1,1)=czero, Vcp%vcqlwl_sqrt(1,1)=czero")
+   Vcp%i_sz=zero
+   Vcp%vc_sqrt(1,1)=czero
+   Vcp%vcqlwl_sqrt(1,1)=czero
+ end if
 #endif
 
  ABI_FREE(qlwl)

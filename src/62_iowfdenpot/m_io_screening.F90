@@ -7,7 +7,7 @@
 !!  _SCR and _SUSC file as well as methods used to read/write/echo.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (MG)
+!! Copyright (C) 2008-2026 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -408,7 +408,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
  character(len=nctk_slen) :: varname !,head_shape,wing_shape
 !arrays
  real(dp),allocatable :: real_omega(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: r2vals(:,:) !,rvals3(:,:,:)
+ real(dp), contiguous, pointer :: r2vals(:,:) !,rvals3(:,:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1362,9 +1362,9 @@ subroutine write_screening(varname, unt, iomode, npwe, nomega, iq_ibz, epsm1)
  complex(dp),allocatable :: epsm1d(:,:)
  integer :: varid,ncerr
 #ifdef HAVE_GW_DPC
- real(dp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
+ real(dp), contiguous, pointer :: real_epsm1(:,:,:,:,:,:,:)
 #else
- real(sp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
+ real(sp), contiguous, pointer :: real_epsm1(:,:,:,:,:,:,:)
 #endif
 ! *************************************************************************
 
@@ -1476,9 +1476,9 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
  complex(dp),allocatable :: bufdc2d(:,:),bufdc3d(:,:,:)
  ! pointers passed to netcdf4 routines (complex datatypes are not supported).
 #ifdef HAVE_GW_DPC
- real(dp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
+ real(dp), contiguous, pointer :: real_epsm1(:,:,:,:,:,:,:)
 #else
- real(sp), ABI_CONTIGUOUS pointer :: real_epsm1(:,:,:,:,:,:,:)
+ real(sp), contiguous, pointer :: real_epsm1(:,:,:,:,:,:,:)
 #endif
  integer :: spins(2),s1,s2
 ! *************************************************************************
@@ -1558,7 +1558,7 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
    ABI_COMMENT(msg)
  end if
 
- if (npweA>Hscr%npwe) then
+ if (npweA > Hscr%npwe) then
    write(msg,'(2(a,i0))')' Dimension of matrix = ',Hscr%npwe," requiring a too big matrix = ",npweA
    ABI_ERROR(msg)
  end if
@@ -1584,11 +1584,11 @@ subroutine read_screening(varname, fname, npweA, nqibzA, nomegaA, epsm1, iomode,
      ! Have to allocate workspace for dp data.
      ! FIXME: Change the file format of the SCR and SUC file so that
      ! they are written in single precision if not HAVE_GW_DPC
-     ABI_MALLOC_OR_DIE(bufdc3d,(npweA,npweA,nomegaA), ierr)
+     ABI_MALLOC_OR_DIE(bufdc3d, (npweA,npweA,nomegaA), ierr)
 
      call mpiotk_read_fsuba_dpc3D(mpi_fh,offset, [HScr%npwe,HScr%npwe,HScr%nomega], [npweA,npweA,nomegaA], [1,1,1],&
         buf_dim,bufdc3d,xmpio_chunk_bsize,sc_mode,comm,ierr)
-     ABI_CHECK(ierr==0,"Fortran matrix too big")
+     ABI_CHECK(ierr == 0,"Fortran matrix too big")
 
      epsm1(:,:,:,1) = bufdc3d
      ABI_FREE(bufdc3d)
@@ -2561,7 +2561,6 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
  integer,intent(in) :: comm
 
 !Local variables-------------------------------
-!scalars
  integer,parameter :: master = 0
  integer :: my_rank, fform, npwe_file, nqlwl, ierr
  character(len=500) :: msg
@@ -2585,7 +2584,7 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
 
    if (dtset%npweps > npwe_file) then
      write(msg,'(2(a,i0),2a,i0)')&
-      "The number of G-vectors stored on file (",npwe_file,") is smaller than dtset%npweps: ",dtset%npweps,ch10,&
+      "The number of G-vectors stored on file (",npwe_file,") is smaller than input dtset%npweps: ",dtset%npweps,ch10,&
       "Calculation will proceed with the maximum available set, npwe_file: ",npwe_file
      ABI_WARNING(msg)
      dtset%npweps = npwe_file
@@ -2598,15 +2597,15 @@ subroutine get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl,
      call Gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
      if (Gsph_c%ng > npwe_file) then
         dtset%npweps = npwe_file
-        write(msg,'(2a,f4.1,a,i0,a,a,i0)')&
-        "npweps was not set in input",&
+        write(msg,'(2a,f4.1,a,i0,2a,i0)')&
+        "npweps was not set in input.",&
         ch10//"The number of G-vectors generated according to ecuteps (",dtset%ecuteps,") is larger than that stored on file (",npwe_file,")",&
         ch10//"Calculation will proceed with the maximum available set: ",npwe_file
         ABI_COMMENT(msg)
      else
         dtset%npweps = Gsph_c%ng
-        write(msg,'(2a,f4.1,a,i0,a,a,f3.1)')&
-        "npweps was not set in input",&
+        write(msg,'(2a,f4.1,a,i0,2a,f4.1)')&
+        "npweps was not set in input.",&
         ch10//"The number of G-vectors generated according to ecuteps (",dtset%ecuteps,") is smaller than that stored on file (",npwe_file,")",&
         ch10//"Calculation will proceed with ecuteps: ",dtset%ecuteps
         ABI_COMMENT(msg)

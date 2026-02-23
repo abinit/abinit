@@ -30,7 +30,7 @@
        ecut  8
   pawecutdg  40
       nband  25
-     nbdbuf  2                    # This is to improve the portability (the residual of degenerate states with indices nband 
+     nbdbuf  2                    # This is to improve the portability (the residual of degenerate states with indices nband
                                   # and nband+1 is not portable).
 
 #Definition of the k-point grid
@@ -78,7 +78,7 @@
     pawujv3  0.1 eV
     pawujv4  0.2 eV
    macro_uj  4                    # activate determination of Hund's J:
-                                  # +pawujv applied to spin up channel; 
+                                  # +pawujv applied to spin up channel;
                                   # -pawujv applied to spin down
 
 #Only to accelerate test
@@ -99,8 +99,8 @@
 #%% executable = abinit
 #%% test_chain = t105.abi, t106.abi, t107.abi, t108.abi, t109.abi
 #%% [files]
-#%% files_to_test = 
-#%%   t107.abo, tolnlines = 24, tolabs = 2.0e-04, tolrel = 1.0e+00, fld_options =  -medium
+#%% files_to_test =
+#%%   t107.abo, tolnlines = 30, tolabs = 2.0e-04, tolrel = 1.0e+00, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

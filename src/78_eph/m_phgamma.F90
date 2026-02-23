@@ -7,7 +7,7 @@
 !!  to the linearized Boltzmann equation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,7 +77,7 @@ module m_phgamma
  use m_special_funcs,  only : fermi_dirac
  use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use defs_elphon,      only : complete_gamma !, complete_gamma_tr
- use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
@@ -85,6 +85,7 @@ module m_phgamma
  use m_wfd,            only : wfd_t
  use m_pstat,          only : pstat_proc
  use m_lgroup,         only : lgroup_t
+ use m_abi_linalg,     only : abi_gpu_xgemm_d
 
  implicit none
 
@@ -241,9 +242,9 @@ module m_phgamma
 
   real(dp),allocatable :: vals_qibz(:,:,:,:,:)
   ! vals_qibz(2,natom3,natom3,nqibz,nsppol)) in reduced coordinates for each q-point in the IBZ.
-  ! vals_qibz {\tau'\alpha',\tau\alpha} = sum over k, ib_kq, ib_k
-  !   <psi_{k+q,ib_kq} | H(1)_{\tau'\alpha'} | psi_{k,ib_k}>*  \cdot
-  !   <psi_{k+q,ib_kq} | H(1)_{\tau \alpha } | psi_{k,ib_k}>
+  ! vals_qibz {\tau'\alpha',\tau\alpha} = sum over k, im_kq, in_k
+  !   <psi_{k+q,im_kq} | H(1)_{\tau'\alpha'} | psi_{k,in_k}>*  \cdot
+  !   <psi_{k+q,im_kq} | H(1)_{\tau \alpha } | psi_{k,in_k}>
 
   !NOTE: choice to put nsppol before or after nqbz is a bit arbitrary
   !   abinit uses nband,nkpt,nsppol, but here for convenience nkpt_phon,nsppol,nqbz interpolation is on qpt
@@ -3026,9 +3027,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, qptopt1 = 1, master = 0, ndat1 = 1, eph_scalprod0 = 0
- integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,iq_ibz !, timrev_q
+ integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
- integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, band_kq, ib_k, ib_kq !ib1,ib2,
+ integer :: bstart_k,bstart_kq,nb_k,nb_kq,band_k, band_kq, in_k, im_kq
  integer :: ik_ibz,ik_bz,ikq_bz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,timrev_q
  integer :: ik_fs, my_ik, my_is, spin, istwf_k, istwf_kq, npw_k, npw_kq
  integer :: ii,jj,ipw,mpw,my_mpw,mnb,ierr,cnt,ncid
@@ -3037,7 +3038,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg
  integer :: jene, iene, comm_rpt, nesting, my_npert, my_ip, my_iq, ncerr, edos_intmeth
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
- real(dp) :: edos_step, edos_broad, sigma, ecut, eshift, eig0nk
+ real(dp) :: edos_step, edos_broad, sigma, ecut, eig0nk ! eshift,
  logical :: gen_eigenpb, need_velocities, isirr_k, isirr_kq, print_time_k, need_ftinterp
  type(wfd_t) :: wfd
  type(fstab_t),pointer :: fs
@@ -3063,10 +3064,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp),allocatable :: kinpw_k(:), kinpw_kq(:), displ_cart(:,:,:,:), displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:), kpg_kq(:,:), kpg_k(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:), ffnl_kq(:,:,:,:), ph3d_k(:,:,:), ph3d_kq(:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:), tgam(:,:,:), gkk_atm(:,:,:,:)
- real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:), cg_work(:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:), tgam(:,:,:), gkq_atm(:,:,:,:), gkq_atm_ipc(:,:,:), lambda(:)
+ real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1_kets_kq(:,:,:), cg_work(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
- real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
+ real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:,:), work(:,:,:,:)
  real(dp),allocatable :: gs1c_kq(:,:), v1_work(:,:,:,:), vcart_ibz(:,:,:,:)
  real(dp),allocatable :: wt_ek(:,:), wt_ekq(:,:), dbldelta_wts(:,:)
  real(dp),allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:), tgamvv_out(:,:,:,:), vv_kkq(:,:,:), tmp_vals_ee(:,:,:,:,:), emesh(:)
@@ -3416,8 +3417,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    spin = gams%my_spins(my_is); fs => fstab(spin)
    do ik_bz=1,fs%nkfs
      ik_ibz = fs%indkk_fs(1, ik_bz)
-     bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
-     bks_mask(bstart_k:bstart_k+nband_k-1, ik_ibz, spin) = .True.
+     bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nb_k = fs%bstart_cnt_ibz(2, ik_ibz)
+     bks_mask(bstart_k:bstart_k+nb_k-1, ik_ibz, spin) = .True.
    end do
  end do
  !bks_mask(1:mband,:,:) = .True. ! no memory distribution, each node has the full set of states.
@@ -3514,7 +3515,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  optlocal = 1    ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
  optnl = 2       ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
  opt_gvnlx1 = 0  ! gvnlx1 is output
- ABI_MALLOC(gvnlx1, (2, usevnl))
+
  ABI_MALLOC(grad_berry, (2, nspinor*(berryopt0/4)))
 
  ! This part is taken from dfpt_vtorho
@@ -3715,11 +3716,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      ! Allocate workspace for wavefunctions. Make npw larger than expected.
      ! maxnb is the maximum number of bands crossing the FS, used to dimension arrays.
      mnb = fs%maxnb
-     ABI_MALLOC(bras_kq, (2, mpw*nspinor, mnb))
-     ABI_MALLOC(kets_k, (2, mpw*nspinor, mnb))
-     ABI_MALLOC(h1kets_kq, (2, mpw*nspinor, mnb))
-     ABI_MALLOC(gkk_atm, (2, mnb, mnb, natom3))
-
      ! The weights for the integration of the double-delta.
      ABI_MALLOC(dbldelta_wts, (mnb, mnb))
 
@@ -3752,7 +3748,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        kk_ibz = ebands%kptns(:,ik_ibz)
 
        ! Number of bands crossing the Fermi level at k.
-       bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
+       bstart_k = fs%bstart_cnt_ibz(1, ik_ibz); nb_k = fs%bstart_cnt_ibz(2, ik_ibz)
 
        ! Find k+q in the extended zone and extract symmetry info. cycle if k+q not in FS.
        ! Be careful here because there are two umklapp vectors to be considered:
@@ -3784,30 +3780,40 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        if (wfd%npwarr(ik_ibz) == 1 .or. wfd%npwarr(ikq_ibz) == 1) cycle
 
        ! Number of bands crossing the Fermi level at k+q.
-       bstart_kq = fs%bstart_cnt_ibz(1, ikq_ibz); nband_kq = fs%bstart_cnt_ibz(2, ikq_ibz)
-       ABI_CHECK(nband_k <= mnb .and. nband_kq <= mnb, "wrong nband")
+       bstart_kq = fs%bstart_cnt_ibz(1, ikq_ibz); nb_kq = fs%bstart_cnt_ibz(2, ikq_ibz)
+       ABI_CHECK(nb_k <= mnb .and. nb_kq <= mnb, "wrong nband")
 
        ! Get npw_k, kg_k and symmetrize wavefunctions from IBZ (if needed).
-       call wfd%sym_ug_kg(ecut, kk, kk_ibz, bstart_k, nband_k, spin, mpw, fs%indkk_fs(:,ik_fs), cryst, &
-                          work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
+       call wfd%sym_ug_kg_npw(ecut, kk, kk_ibz, bstart_k, nb_k, spin, fs%indkk_fs(:,ik_fs), cryst, &
+                              work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
 
        ! Get npw_kq, kg_kq and symmetrize wavefunctions from IBZ (if needed).
-       call wfd%sym_ug_kg(ecut, kq, kq_ibz, bstart_kq, nband_kq, spin, mpw, indkk_kq(:,1), cryst, &
-                          work_ngfft, work, istwf_kq, npw_kq, kg_kq, bras_kq)
+       call wfd%sym_ug_kg_npw(ecut, kq, kq_ibz, bstart_kq, nb_kq, spin, indkk_kq(:,1), cryst, &
+                              work_ngfft, work, istwf_kq, npw_kq, kg_kq, bras_kq)
 
-       ! if PAW, one has to solve a generalized eigenproblem
-       ! Be careful here because I will need sij_opt==-1
+       call gs_hamkq%eph_setup_k("k" , kk, istwf_k, npw_k, kg_k, dtset, cryst, psps, &       ! in
+                                 nkpg, kpg_k, ffnl_k, kinpw_k, ph3d_k, pert_comm%value)      ! out
+
+       call gs_hamkq%eph_setup_k("kq", kq, istwf_k, npw_kq, kg_kq, dtset, cryst, psps, &     ! in
+                                 nkpg, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, pert_comm%value)  ! out
+
+       ! If PAW, one has to solve a generalized eigenproblem
        gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
-       ABI_MALLOC(gs1c_kq, (2, npw_kq*nspinor*((sij_opt+1)/2)))
 
-       call gs_hamkq%eph_setup_k("k" , kk, istwf_k, npw_k, kg_k,  dtset, cryst, psps, &
-                                 nkpg, kpg_k, ffnl_k, kinpw_k, ph3d_k, pert_comm%value)
+       ABI_MALLOC(lambda, (nb_k))
+       ABI_MALLOC(gkq_atm, (2, nb_kq, nb_k, natom3))
+       ABI_MALLOC(h1_kets_kq, (2, npw_kq*nspinor, nb_k))
+       ABI_MALLOC(gvnlx1, (2, npw_kq*nspinor, nb_k))
+       ABI_MALLOC(gs1c_kq, (2, npw_kq*nspinor*nb_k*((sij_opt+1)/2)))
+       ABI_MALLOC(gkq_atm_ipc, (2, nb_kq, nb_k))
+#ifdef HAVE_OPENMP_OFFLOAD
+      !$OMP TARGET ENTER DATA MAP(alloc:gkq_atm_ipc) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+      !$OMP TARGET ENTER DATA MAP(to:kets_k, bras_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+      !$OMP TARGET ENTER DATA MAP(alloc:h1_kets_kq, gvnlx1, kets_k, bras_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+      !$OMP TARGET ENTER DATA MAP(alloc:gs1c_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP .and. sij_opt /= 0)
+#endif
 
-       call gs_hamkq%eph_setup_k("kq", kq, istwf_k, npw_kq, kg_kq, dtset, cryst, psps, &
-                                 nkpg, kpg_kq, ffnl_kq, kinpw_kq, ph3d_kq, pert_comm%value)
-
-       ! Loop over all my atomic perturbations and compute gkk_atm.
-       gkk_atm = zero
+       ! Loop over all my atomic perturbations and compute gkq_atm.
        do my_ip=1,my_npert
          idir = dvdb%my_pinfo(1, my_ip); ipert = dvdb%my_pinfo(2, my_ip); ipc = dvdb%my_pinfo(3, my_ip)
 
@@ -3815,36 +3821,55 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          call rf_hamkq%init(cplex, gs_hamkq, ipert, has_e1kbsc=.true.)
          call rf_hamkq%load_spin(spin, vlocal1=vlocal1(:,:,:,:,my_ip), with_nonlocal=.true.)
 
-         ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
+#if 1
+         ! Calculate dvscf * psi_k, results stored in h1_kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
-         do ib_k=1,nband_k
-           band_k = ib_k + bstart_k - 1
-           eig0nk = ebands%eig(band_k, ik_ibz, spin)
+         do in_k=1,nb_k
            ! Use scissor shift on 0-order eigenvalue
-           eshift = eig0nk - dtset%dfpt_sciss
+           band_k = in_k + bstart_k - 1
+           lambda(in_k) = ebands%eig(band_k, ik_ibz, spin) - dtset%dfpt_sciss
+         end do
+         !call ebands%get_dfpt_eshifted(gqk%bstart_k, nb_k, ik_ibz, spin, dtset%dfpt_sciss, lambda)
 
-           call getgh1c(berryopt0, kets_k(:,:,ib_k), cwaveprj0, h1kets_kq(:,:,ib_k), &
+         call getgh1c(berryopt0, kets_k, cwaveprj0, h1_kets_kq, &
+                      grad_berry, gs1c_kq, gs_hamkq, gvnlx1, idir, ipert, lambda, mpi_enreg, nb_k, optlocal, &
+                      optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
+
+#else
+         do in_k=1,nb_k
+           ! Use scissor shift on 0-order eigenvalue
+           band_k = in_k + bstart_k - 1
+           eshift = ebands%eig(band_k, ik_ibz, spin) - dtset%dfpt_sciss
+
+           call getgh1c(berryopt0, kets_k(:,:,in_k), cwaveprj0, h1_kets_kq(:,:,in_k), &
                         grad_berry, gs1c_kq, gs_hamkq, gvnlx1, idir, ipert, [eshift], mpi_enreg, ndat1, optlocal, &
                         optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
-         end do
+         end do ! in_k
+#endif
 
          call rf_hamkq%free()
 
-         ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
+         ! Calculate <psi_{k+q,m}|dvscf_q|psi_{k,n}> for this perturbation.
          ! No need to handle istwf_kq because it's always 1.
-         ! The array eig1_k contains:
-         !
-         ! <u_(band,k+q)^(0)|H_(k+q,k)^(1)|u_(band,k)^(0)>                           (NC psps)
-         ! <u_(band,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(band,k)^(0)> (PAW)
-         do ib_k=1,nband_k
-           do ib_kq=1,nband_kq
-             gkk_atm(:, ib_kq, ib_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,ib_kq), h1kets_kq(1,1,ib_k))
-           end do
-         end do
+         if (dtset%gpu_option == ABI_GPU_OPENMP) then
+           call abi_gpu_xgemm_d(2, 'C', 'N', nb_kq, nb_k, npw_kq*nspinor, cone, bras_kq, npw_kq*nspinor, &
+                               h1_kets_kq, npw_kq*nspinor, czero, gkq_atm_ipc, nb_kq)
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET UPDATE FROM(gkq_atm_ipc)
+#endif
 
+         else
+           call ZGEMM('C', 'N', nb_kq, nb_k, npw_kq*nspinor, cone, bras_kq, npw_kq*nspinor, &
+                      h1_kets_kq, npw_kq*nspinor, czero, gkq_atm_ipc, nb_kq)
+         end if
+
+         ! Transfer data
+         gkq_atm(:,:,:,ipc) = gkq_atm_ipc
        end do ! my_ip (loop over my_npert atomic perturbations)
 
-       ABI_FREE(gs1c_kq)
+       ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
+       if (pert_comm%nproc > 1) call xmpi_sum(gkq_atm, pert_comm%value, ierr)
+
        ABI_FREE(ffnl_k)
        ABI_FREE(ffnl_kq)
        ABI_FREE(kpg_kq)
@@ -3854,8 +3879,15 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ABI_FREE(ph3d_k)
        ABI_FREE(ph3d_kq)
 
-       ! Collect gkk_atm inside pert_comm so that all procs can operate on the data.
-       if (pert_comm%nproc > 1) call xmpi_sum(gkk_atm, pert_comm%value, ierr)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:h1_kets_kq, gvnlx1, kets_k, bras_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+       !$OMP TARGET EXIT DATA MAP(delete:gs1c_kq) IF (dtset%gpu_option == ABI_GPU_OPENMP .and. sij_opt /= 0)
+#endif
+       ABI_FREE(kets_k)
+       ABI_FREE(bras_kq)
+       ABI_FREE(h1_kets_kq)
+       ABI_FREE(gs1c_kq)
+       ABI_FREE(gvnlx1)
 
        ! Compute group velocities if we are in transport mode or adaptive gaussian or
        ! tetrahedron with libtetrabz returning nesting condition.
@@ -3871,29 +3903,29 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          ! so q_bz = S^T q_ibz where S is the isym_kq symmetry
 
          !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, kg_k)
-         do ib_k=1,nband_k
-           band_k = ib_k + bstart_k - 1
+         do in_k=1,nb_k
+           band_k = in_k + bstart_k - 1
            vk = vcart_ibz(:, band_k, ik_ibz, spin)
            if (.not. isirr_k) then
              vk = matmul(transpose(cryst%symrel_cart(:,:,isym_k)), vk)
              if (trev_k /= 0) vk = -vk
            end if
            !vk = ddkop%get_vdiag(ebands%eig(band_k, ik_ibz, spin), &
-           !                     istwf_k, npw_k, wfd%nspinor, kets_k(:,:,ib_k), cwaveprj0)
-           fs%vk(:,ib_k) = vk
+           !                     istwf_k, npw_k, wfd%nspinor, kets_k(:,:,in_k), cwaveprj0)
+           fs%vk(:,in_k) = vk
          end do
 
          !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
-         do ib_kq=1,nband_kq
-           band_kq = ib_kq + bstart_kq - 1
+         do im_kq=1,nb_kq
+           band_kq = im_kq + bstart_kq - 1
            vkq = vcart_ibz(:, band_kq, ikq_ibz, spin)
            if (.not. isirr_kq) then
              vkq = matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vkq)
              if (trev_kq /= 0) vkq = -vkq
            end if
            !vkq = ddkop%get_vdiag(ebands%eig(band_kq, ikq_ibz, spin), &
-           !                                 istwf_kq, npw_kq, wfd%nspinor, bras_kq(:,:,ib_kq), cwaveprj0)
-           fs%vkq(:,ib_kq) = vkq
+           !                                 istwf_kq, npw_kq, wfd%nspinor, bras_kq(:,:,im_kq), cwaveprj0)
+           fs%vkq(:,im_kq) = vkq
          end do
        end if
 
@@ -3907,13 +3939,13 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ! Accumulate results in tgam (sum over FS k-points and bands for this spin).
        do ipc2=1,natom3
          do ipc1=1,natom3
-           do ib_k=1,nband_k
-             do ib_kq=1,nband_kq
-               lf = gkk_atm(:, ib_kq, ib_k, ipc1)
-               rg = gkk_atm(:, ib_kq, ib_k, ipc2)
+           do in_k=1,nb_k
+             do im_kq=1,nb_kq
+               lf = gkq_atm(:, im_kq, in_k, ipc1)
+               rg = gkq_atm(:, im_kq, in_k, ipc2)
                res(1) = lf(1) * rg(1) + lf(2) * rg(2)
                res(2) = lf(1) * rg(2) - lf(2) * rg(1)
-               tgam(:,ipc1,ipc2) = tgam(:,ipc1,ipc2) + res(:) * dbldelta_wts(ib_kq, ib_k)
+               tgam(:,ipc1,ipc2) = tgam(:,ipc1,ipc2) + res(:) * dbldelta_wts(im_kq, in_k)
              end do
            end do
          end do
@@ -3921,14 +3953,14 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
        if (dtset%eph_transport > 0) then
          ! TODO: could almost make this a BLAS call plus a reshape...
-         do ib_k = 1,nband_k
-           do ib_kq = 1,nband_kq
+         do in_k = 1,nb_k
+           do im_kq = 1,nb_kq
              do ipc2 = 1,3
                do ipc1 = 1,3
                  ! vk x vk
-                 vv_kk(ipc1 + (ipc2-1)*3, ib_kq, ib_k) = fs%vk(ipc1, ib_kq) * fs%vk(ipc2, ib_k)
+                 vv_kk(ipc1 + (ipc2-1)*3, im_kq, in_k) = fs%vk(ipc1, im_kq) * fs%vk(ipc2, in_k)
                  ! vk x vk+q
-                 vv_kkq(ipc1 + (ipc2-1)*3, ib_kq, ib_k) = fs%vkq(ipc1, ib_kq) * fs%vk(ipc2, ib_k)
+                 vv_kkq(ipc1 + (ipc2-1)*3, im_kq, in_k) = fs%vkq(ipc1, im_kq) * fs%vk(ipc2, in_k)
                end do
              end do
            end do
@@ -3937,19 +3969,19 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          ! Accumulate results (sum over FS and bands).
          do ipc2=1,natom3
            do ipc1=1,natom3
-              do ib_k=1,nband_k
-                do ib_kq=1,nband_kq
-                  lf = gkk_atm(:, ib_kq, ib_k, ipc1)
-                  rg = gkk_atm(:, ib_kq, ib_k, ipc2)
+              do in_k=1,nb_k
+                do im_kq=1,nb_kq
+                  lf = gkq_atm(:, im_kq, in_k, ipc1)
+                  rg = gkq_atm(:, im_kq, in_k, ipc2)
                   ! res was missing in MJV version!
                   res(1) = lf(1) * rg(1) + lf(2) * rg(2)
                   res(2) = lf(1) * rg(2) - lf(2) * rg(1)
-                  resvv_in(1,:) = res(1) * vv_kkq(:,ib_kq, ib_k)
-                  resvv_in(2,:) = res(2) * vv_kkq(:,ib_kq, ib_k)
-                  resvv_out(1,:) = res(1) * vv_kk(:,ib_kq, ib_k)
-                  resvv_out(2,:) = res(2) * vv_kk(:,ib_kq, ib_k)
-                  tgamvv_in(:,:,ipc1, ipc2)  = tgamvv_in(:,:,ipc1,ipc2) + resvv_in * dbldelta_wts(ib_kq, ib_k)
-                  tgamvv_out(:,:,ipc1, ipc2) = tgamvv_out(:,:,ipc1,ipc2) + resvv_out * dbldelta_wts(ib_kq, ib_k)
+                  resvv_in(1,:) = res(1) * vv_kkq(:,im_kq, in_k)
+                  resvv_in(2,:) = res(2) * vv_kkq(:,im_kq, in_k)
+                  resvv_out(1,:) = res(1) * vv_kk(:,im_kq, in_k)
+                  resvv_out(2,:) = res(2) * vv_kk(:,im_kq, in_k)
+                  tgamvv_in(:,:,ipc1, ipc2)  = tgamvv_in(:,:,ipc1,ipc2) + resvv_in * dbldelta_wts(im_kq, in_k)
+                  tgamvv_out(:,:,ipc1, ipc2) = tgamvv_out(:,:,ipc1,ipc2) + resvv_out * dbldelta_wts(im_kq, in_k)
                 end do
               end do
            end do
@@ -3957,40 +3989,39 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        end if ! add transport things
 
        if (dtset%prteliash == 3) then
-         !
          ! Precompute deltas with gaussian (tetra is not supported here
          ! also because one should allocate (nene, nene, mband, mband)
          !call get_dbldelta_weights_emesh()
-         do ib_k=1,nband_k
-           band_k = ib_k + bstart_k - 1
+         do in_k=1,nb_k
+           band_k = in_k + bstart_k - 1
            sigma = fs%eph_fsmear
            if (fs%eph_fsmear < zero) then
              do ii=1,3
-               abc(ii) = abs(dot_product(fs%vk(:, ib_k), fs%kmesh_cartvec(:,ii)))
+               abc(ii) = abs(dot_product(fs%vk(:, in_k), fs%kmesh_cartvec(:,ii)))
              end do
              sigma = max(maxval(abc), fs%min_smear)
            end if
-           wt_ek(:, ib_k) = gaussian(emesh - ebands%eig(band_k, ik_ibz, spin), sigma) / sqrt(one * fs%nktot)
+           wt_ek(:, in_k) = gaussian(emesh - ebands%eig(band_k, ik_ibz, spin), sigma) / sqrt(one * fs%nktot)
          end do
 
-         do ib_kq=1,nband_kq
-           band_kq = ib_kq + bstart_kq - 1
+         do im_kq=1,nb_kq
+           band_kq = im_kq + bstart_kq - 1
            sigma = fs%eph_fsmear
            if (fs%eph_fsmear < zero) then
              do ii=1,3
-               abc(ii) = abs(dot_product(fs%vkq(:, ib_kq), fs%kmesh_cartvec(:,ii)))
+               abc(ii) = abs(dot_product(fs%vkq(:, im_kq), fs%kmesh_cartvec(:,ii)))
              end do
              sigma = max(maxval(abc), fs%min_smear)
            end if
-           wt_ekq(:, ib_kq) = gaussian(emesh - ebands%eig(band_kq, ikq_ibz, spin), sigma) / sqrt(one * fs%nktot)
+           wt_ekq(:, im_kq) = gaussian(emesh - ebands%eig(band_kq, ikq_ibz, spin), sigma) / sqrt(one * fs%nktot)
          end do
 
-         do ib_k=1,nband_k
-           do ib_kq=1,nband_kq
+         do in_k=1,nb_k
+           do im_kq=1,nb_kq
              do ipc2=1,natom3
                do ipc1=1,natom3
-                 lf = gkk_atm(:, ib_kq, ib_k, ipc1)
-                 rg = gkk_atm(:, ib_kq, ib_k, ipc2)
+                 lf = gkq_atm(:, im_kq, in_k, ipc1)
+                 rg = gkq_atm(:, im_kq, in_k, ipc2)
                  res(1) = lf(1) * rg(1) + lf(2) * rg(2)
                  res(2) = lf(1) * rg(2) - lf(2) * rg(1)
                  do jene = 1, gams%nene
@@ -3998,7 +4029,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
                      ! TODO: distribute this in procs over q. Make a temp array here for 1 q
                      ! then mpi sync it and save it only on 1 processor below after mpisum over k
                      tmp_vals_ee(:,iene,jene,ipc1,ipc2) = tmp_vals_ee(:,iene,jene,ipc1,ipc2) + &
-                       res(:) * wt_ekq(iene, ib_kq) * wt_ek(jene, ib_k)
+                       res(:) * wt_ekq(iene, im_kq) * wt_ek(jene, in_k)
                    end do
                  end do
                end do
@@ -4007,17 +4038,20 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          end do
        end if ! prteliash == 3
 
+       ABI_FREE(lambda)
+       ABI_FREE(gkq_atm)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:gkq_atm_ipc) IF (dtset%gpu_option == ABI_GPU_OPENMP)
+#endif
+       ABI_FREE(gkq_atm_ipc)
+
        if (print_time_k) then
          write(msg,'(5x,2(a,i0),a)')"k-point [", my_ik, "/", gams%my_nfsk_q, "]"
          call cwtime_report(msg, cpu_k, wall_k, gflops_k)
        end if
-     end do ! ik_fs: sum over k-points on the BZ FS for this spin.
+     end do ! imyk: sum over k-points on the BZ FS for this spin.
 
      ABI_FREE(dbldelta_wts)
-     ABI_FREE(bras_kq)
-     ABI_FREE(kets_k)
-     ABI_FREE(h1kets_kq)
-     ABI_FREE(gkk_atm)
      ABI_SFREE(wt_ek)
      ABI_SFREE(wt_ekq)
 
@@ -4058,7 +4092,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call cwtime_report(" phonon linewidths q-loop", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ! Free memory
- ABI_FREE(gvnlx1)
  ABI_FREE(grad_berry)
  ABI_FREE(dummy_vtrial)
  ABI_FREE(work)

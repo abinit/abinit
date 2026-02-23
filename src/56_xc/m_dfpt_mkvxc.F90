@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2025 ABINIT group (XG, DRH, FR, EB, SPr)
+!!  Copyright (C) 2001-2026 ABINIT group (XG, DRH, FR, EB, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -151,8 +151,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
  real(dp) :: spin_scale
 !arrays
  real(dp) :: gprimd(3,3),tsec(2)
- real(dp), ABI_CONTIGUOUS pointer :: nhat1_(:,:),nhat1gr_(:,:,:),rhor1_(:,:)
-
+ real(dp), contiguous, pointer :: nhat1_(:,:),nhat1gr_(:,:,:),rhor1_(:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -525,8 +524,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  real(dp) :: r0(3),r0_dn(3),r0_up(3),r1(3),r1_dn(3),r1_up(3)
  real(dp) :: r1im(3),r1im_dn(3),r1im_up(3)
  real(dp),allocatable :: dnexcdn(:,:),rho1now(:,:,:)
- real(dp),ABI_CONTIGUOUS pointer :: rhor1_ptr(:,:)
-
+ real(dp),contiguous, pointer :: rhor1_ptr(:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -792,7 +790,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 !arrays
  real(dp) :: nhat1_zero(0,0),nhat1gr_zero(0,0,0),tsec(2)
  real(dp),allocatable :: m_norm(:),rhor1_diag(:,:),vxc1_diag(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: mag(:,:),rhor_(:,:),rhor1_(:,:)
+ real(dp), contiguous, pointer :: mag(:,:),rhor_(:,:),rhor1_(:,:)
 ! *************************************************************************
 
 !  Non-collinear magnetism
@@ -972,7 +970,7 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !scalars
  integer :: ii,ir,ishift,ngrad,nspgrad
  real(dp) :: gradrho_gradrho1
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp) :: qphon(3)
  real(dp) :: r0(3),r1(3)
@@ -980,15 +978,13 @@ subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  real(dp),allocatable :: a_gradi_r1(:,:)
  real(dp),allocatable :: dadgradn_t1(:,:,:),dadgradn_t2(:,:)
  real(dp),allocatable :: rho1now(:,:,:)
- real(dp),ABI_CONTIGUOUS pointer :: rhor1_ptr(:,:)
-
+ real(dp),contiguous, pointer :: rhor1_ptr(:,:)
 ! *************************************************************************
 
  DBG_EXIT("COLL")
 
  if (nkxc/=7) then
-   msg='Wrong nkxc value for GGA in the longwave driver (optdriver=10)!'
-   ABI_BUG(msg)
+   ABI_BUG('Wrong nkxc value for GGA in the longwave driver (optdriver=10)!')
  end if
 
 !Compute the gradients of the first-order density
@@ -1109,7 +1105,6 @@ subroutine dfpt_mkvxcgga_n0met(beta,cplex,delta,gamma,gprimd,kxc,mpi_enreg,nfft,
  real(dp) :: r0(3)
  real(dp),allocatable :: dadgg(:,:),dadgtgn(:,:),gna(:,:),dadgngn_1(:,:),dadgngn_2(:,:)
  real(dp),allocatable :: dadgngn(:,:,:),kro_an(:,:,:),sumgrad(:,:,:)
-
 ! *************************************************************************
 
  DBG_EXIT("COLL")
@@ -1250,7 +1245,6 @@ subroutine dfpt_mkvxcccdq(cplex,i3dir,ixc,gprimd,kxc,mpi_enreg,nfft, &
  real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:)
  real(dp),allocatable :: rhor1(:,:), rhor1_cplx(:,:)
  real(dp),allocatable :: vxc1dq_a(:,:),vxc1dq_b(:,:),vxc1dq_car(:,:,:)
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")

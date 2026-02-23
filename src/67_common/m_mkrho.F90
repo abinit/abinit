@@ -6,7 +6,7 @@
 !!  Procedures for computing densities from KS orbitals.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SM, VR, FJ)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SM, VR, FJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,6 +30,7 @@ module m_mkrho
  use m_errors
  use m_dtset
  use m_extfpmd
+ use m_gputk
  use m_abi_linalg
 
  use defs_abitypes,  only : MPI_type
@@ -103,6 +104,7 @@ contains
 !!   | symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !!   | symrel(3,3,nsym)=symmetry matrices in real space (integers)
 !!   | wtk(nkpt)=k point weights (they sum to 1.0)
+!!  extfpmd <type(extfpmd_type)>=--optional--extended first-principles molecular dynamics type
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
@@ -174,25 +176,25 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  !character(len=500) :: message
 !arrays
  integer,allocatable :: gbound(:,:)
- integer, ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
+ integer, contiguous, pointer :: kg_k(:,:) => null()
  logical :: locc_test,nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,gpu_cwavef
  real(dp) :: dummy(2,1) = reshape( (/0.0, 0.0/), shape(dummy))
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwavef_rot(:,:,:,:),occ_diag(:),occ_k(:)
  real(dp),allocatable :: kg_k_cart_block(:),taur_alphabeta(:,:,:,:),weight_t(:)
- real(dp), ABI_CONTIGUOUS pointer :: cwavef(:,:,:)  => null()
- real(dp), ABI_CONTIGUOUS pointer :: cwavefb(:,:,:) => null()
- real(dp), ABI_CONTIGUOUS pointer :: cwavef_x(:,:)  => null()
- real(dp), ABI_CONTIGUOUS pointer :: cwavef_y(:,:)  => null()
- real(dp), ABI_CONTIGUOUS pointer :: cwavefb_x(:,:) => null() ! only use when paral_kgb=0
- real(dp), ABI_CONTIGUOUS pointer :: cwavefb_y(:,:) => null() ! only use when paral_kgb=0
- real(dp), ABI_CONTIGUOUS pointer :: rhoaug(:,:,:)      => null()
- real(dp), ABI_CONTIGUOUS pointer :: rhoaug_down(:,:,:) => null()
- real(dp), ABI_CONTIGUOUS pointer :: rhoaug_up(:,:,:)   => null()
- real(dp), ABI_CONTIGUOUS pointer :: rhoaug_mx(:,:,:)   => null()
- real(dp), ABI_CONTIGUOUS pointer :: rhoaug_my(:,:,:)   => null()
- real(dp), ABI_CONTIGUOUS pointer :: wfraug(:,:,:,:)    => null()
- real(dp), ABI_CONTIGUOUS pointer :: cg_k(:,:) => null()
+ real(dp), contiguous, pointer :: cwavef(:,:,:)  => null()
+ real(dp), contiguous, pointer :: cwavefb(:,:,:) => null()
+ real(dp), contiguous, pointer :: cwavef_x(:,:)  => null()
+ real(dp), contiguous, pointer :: cwavef_y(:,:)  => null()
+ real(dp), contiguous, pointer :: cwavefb_x(:,:) => null() ! only use when paral_kgb=0
+ real(dp), contiguous, pointer :: cwavefb_y(:,:) => null() ! only use when paral_kgb=0
+ real(dp), contiguous, pointer :: rhoaug(:,:,:)      => null()
+ real(dp), contiguous, pointer :: rhoaug_down(:,:,:) => null()
+ real(dp), contiguous, pointer :: rhoaug_up(:,:,:)   => null()
+ real(dp), contiguous, pointer :: rhoaug_mx(:,:,:)   => null()
+ real(dp), contiguous, pointer :: rhoaug_my(:,:,:)   => null()
+ real(dp), contiguous, pointer :: wfraug(:,:,:,:)    => null()
+ real(dp), contiguous, pointer :: cg_k(:,:) => null()
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -822,10 +824,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                do ib=1,blocksize
                  cwavef_rot(:, :, ib, :) = cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :)
                end do
-
                call rot_cg(paw_dmft%occnd(:,:,:,ikpt,isppol), cwavef_rot, npw_k, nband_k, blocksize,&
 &                          dtset%nspinor, paw_dmft%include_bands(1), paw_dmft%mbandc, occ_diag,&
-&                          paw_dmft%dmft_optim)
+&                          (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7))
                do ib=1,blocksize
                  cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :) = cwavef_rot(:, :, ib, :)
                end do
@@ -1086,19 +1087,16 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
  nfftot=dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
 
-!Add extfpmd free electrons contribution to density
+!Add extfpmd electrons contributions to density on coarse grid.
+!When using a fine grid, space-dependant contributions to the
+!density are added in the pawmkrho subroutine.
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
-     if(extfpmd%version==10) then
-       do ispden=1,dtset%nspden
-         do ifft=1,dtset%nfft
-           rhor(ifft,ispden)=rhor(ifft,ispden)+extfpmd%nelectarr(ifft,ispden)/ucvol/dtset%nspden
-         end do
-       end do
+     if(extfpmd%version==10.and.allocated(extfpmd%nelectarr)) then
+       rhor(:,:)=rhor(:,:)+extfpmd%nelectarr(:,:)/ucvol/dtset%nspden
      else
        rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
      end if
-     rhog(1,1)=rhog(1,1)+extfpmd%nelect/ucvol/dtset%nspden
    end if
  end if
 
@@ -1216,11 +1214,10 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  real(dp) :: xnorm
  character(len=500) :: message
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
  real(dp) :: length(ntypat)
  real(dp),allocatable :: work(:), spinat_indx(:,:)
  logical :: use_gaussian(ntypat)
-
 ! *************************************************************************
 
  if (nspden==4) then
@@ -1626,7 +1623,6 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
  real(dp) :: zetmn2(2),zetmx1(2),zetmx2(2)
  real(dp),allocatable :: array(:),coord(:,:,:,:),value(:,:,:),integrated(:)
  real(dp),allocatable :: value_fft(:,:,:)
-
 ! *************************************************************************
 
  if(.not.(present(optrhor))) then

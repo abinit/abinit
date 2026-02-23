@@ -6,7 +6,7 @@
 !!  Routines to compute the macroscopic dielectric function in the Bethe-Salpeter code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2025 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi, Y. Gillet)
+!! Copyright (C) 2009-2026 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1156,8 +1156,7 @@ subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
 !Local variables-------------------------------
 !scalars
  integer :: ncerr
- real(dp), ABI_CONTIGUOUS pointer :: rvals(:,:,:)
-
+ real(dp), contiguous, pointer :: rvals(:,:,:)
 ! *************************************************************************
  ! =========================
  ! === Write the dimensions

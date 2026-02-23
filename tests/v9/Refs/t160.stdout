@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of MRGDDB, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  MRGDDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,14 +16,14 @@
 
 .Starting date : Sat 14 Sep 2024.
 - ( at 06h52 )
-  
-  Give name for output derivative database : 
+
+  Give name for output derivative database :
  t160o.ddb.nc
   Give short description of the derivative database :
  BaTiO3 DDB file converted from text to netcdf
   Give number of input ddbs
            1
-  Give name for derivative database number           1  : 
+  Give name for derivative database number           1  :
  BTO.DDB
 
   merge_ddb: Reading all headers.

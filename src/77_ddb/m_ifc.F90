@@ -7,7 +7,7 @@
 !!  used to handle interatomic force constants.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2025 ABINIT group (XG,MJV,EB,MG,GA)
+!! Copyright (C) 2011-2026 ABINIT group (XG,MJV,EB,MG,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

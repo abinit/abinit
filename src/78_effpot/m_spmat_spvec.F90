@@ -10,7 +10,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +24,7 @@
 #include "abi_common.h"
 
 module m_spmat_spvec
-  use defs_basis  
+  use defs_basis
   use m_xmpi
   use m_errors
   use m_abicore

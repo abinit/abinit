@@ -1,7 +1,7 @@
 /* dev_spec_cuda.cpp*/
 
 /*
- * Copyright (C) 2008-2025 ABINIT Group (MMancini,FDahm)
+ * Copyright (C) 2008-2026 ABINIT Group (MMancini,FDahm)
  * this file is distributed under the terms of the
  * gnu general public license, see ~abinit/COPYING
  * or http://www.gnu.org/copyleft/gpl.txt.
@@ -48,7 +48,7 @@ static void prt_dev_info()
       if(s__nprocs_per_gpu > 1) {
         printf("  Amount of global memory per MPI task:          %3.1f Mbytes\n", deviceProp.totalGlobalMem/1048576./s__nprocs_per_gpu);
       }
-      printf("  Clock rate:                                    %3.1f GHz\n", deviceProp.clockRate/1000000.);
+      printf("  Clock rate:                                    %3.1f GHz\n", clockRate/1000000.);
       printf("  Number of processors/cores:                    %d/%d\n", NProcs,NCores);
       if (NCores<0) {
         printf("  Max FP64 GFLOPS:                                    undefined (add new def. in version_2_cores function)\n");
@@ -562,7 +562,7 @@ extern "C" void gpu_allocated_impl_(void **gpu_ptr, bool* is_allocated)
 /* Utility routine to print memory location of a cuda managed pointer.        */
 /*                                                                            */
 /* We check that the pointer has actually been allocated with                 */
-/* cudaMallocManaged and then prints device and host addresses.               */
+/* cudaMallocManaged and then print device and host addresses.                */
 /*                                                                            */
 /* INPUTS                                                                     */
 /*  gpu_ptr = C_PTR on gpu memory location                                    */

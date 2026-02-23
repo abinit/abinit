@@ -4,7 +4,7 @@
 </head>
 <body>
 
-<h5>Copyright (C) 2010-2025 ABINIT group (XG)
+<h5>Copyright (C) 2010-2026 ABINIT group (XG)
 <br> This file is distributed under the terms of the GNU General Public License, see
 ~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
 http://www.gnu.org/copyleft/gpl.txt </a>.
@@ -56,17 +56,17 @@ __________________________________________________________________
 
 B.  Most noticeable achievements
 
-B.1 For the massively parallel computations (ground state), there is a new algorithm based on Chebyshev filtering, 
+B.1 For the massively parallel computations (ground state), there is a new algorithm based on Chebyshev filtering,
     designed for very large number of processors, in the regime where LOBPCG does not scale anymore (typically beyond 500 procs for band-FFT work)
     It is not able to use preconditionning and therefore might converge slower than other algorithms; when convergence is poor, a good idea is to use
     more bands than strictly necessary, by increasing nband and using nbdbuf input variable.
-    Use the input variable wfoptalg=1, and test patal#30. 
+    Use the input variable wfoptalg=1, and test patal#30.
     See also the new input variable use_gemm_nonlop, for more performance in case a good BLAS GEMM routine is available (at the expense of memory).
     For more information, see the performance guide (doc/theory/howto_chebfi.pdf).
     A paper, written by A. Levitt and M. Torrent is available at "http://arxiv.org/abs/1406.4350" .
 
 B.2 A more general implementation of projected local orbital Wannier functions, in view of doing Dynamical Mean Field Theory (DMFT).
-    See the input variable plowan_compute, as well as the auxiliary input variables plowan_bandi, plowan_bandf, 
+    See the input variable plowan_compute, as well as the auxiliary input variables plowan_bandi, plowan_bandf,
     plowan_iatom, plowan_it, plowan_lcalc, plowan_natom, plowan_nbl, plowan_nt, plowan_projcalc, plowan_realspace.
     See the tests v7#71 and 72.
     This can also be used to build a simplified interpolated band structure.
@@ -84,7 +84,7 @@ B.4 Computation of positron Doppler broadening.
 
 B.5 Temperature-dependence of the gap
     Inclusion of dynamical corrections, according to Eq. 5.42 of Grimvall. Computation of lifetime.
-    Writing of a tutorial for the temperature dependence of the gap, 
+    Writing of a tutorial for the temperature dependence of the gap,
     available at https://wiki.abinit.org/doku.php?id=howto:temperature .
     Work by S. Ponce
 
@@ -128,11 +128,11 @@ D.1 A mini-tutorial on work function is available, see doc/users/work_function_t
 
 D.2 Work on ABINIT GUI by F. Abreu and Y. Gillet
 
-D.3 Development of scripts for high-throughput GW calculations 
+D.3 Development of scripts for high-throughput GW calculations
     Work by M. Van Setten and G.-M. Rignanese
 
-D.4 Development of norm-conserving pseudopotentials for high-throughput calculations, see 
-    the pseudo-dojo at http://www.pseudo-dojo.org/dojo.html . 
+D.4 Development of norm-conserving pseudopotentials for high-throughput calculations, see
+    the pseudo-dojo at http://www.pseudo-dojo.org/dojo.html .
     This is the first release of the Website.
     Work by M. Van Setten, J.-M. Beuken, Matteo Giantomassi, and G.-M. Rignanese
 
@@ -151,9 +151,9 @@ D.8 Work is continuing on the JTH PAW dataset table.
      The JTH 0.2 table has been released.
     See https://www.abinit.org/downloads/PAW2 .
     Work by F. Jollet.
- 
+
 D.9 Continued efforts on the development of the abipy library
-    From M. Giantomassi 
+    From M. Giantomassi
 
 D.10 The memory requirements can be estimated and tested at the very beginning of a run,
      see the input variable mem_test .
@@ -176,7 +176,7 @@ D.15 The PLASMA library can be used
 
 D.16 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system,
      including patches for the fallbacks), and improvements of documentation by :
-     B. Amadon, J. Bieder, E. Bousquet, F.Bruneval, M. Delaveau, M. Giantomassi, Y. Gillet, F. Jollet, 
+     B. Amadon, J. Bieder, E. Bousquet, F.Bruneval, M. Delaveau, M. Giantomassi, Y. Gillet, F. Jollet,
      A. Levitt, S. Ponce, Y. Pouillon, M. Torrent, M. Verstraete, Bin Xu, J. Zwanziger
 
 </pre>

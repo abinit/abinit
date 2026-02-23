@@ -4,7 +4,7 @@
 # Object: compare 2 output files from ABINIT line by line with arithmetic
 # comparisons of floating point substrings
 #
-# Copyright (C) 1999-2025 ABINIT group (LSi,XG)
+# Copyright (C) 1999-2026 ABINIT group (LSi,XG)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,15 +39,15 @@
 # With -context option, save character strings for context and print it
 # with line number when floating difference is found.
 #
-# The -ignore and -include options affects the treatment of the ',' 
-# special character in the first column (see above) 
+# The -ignore and -include options affects the treatment of the ','
+# special character in the first column (see above)
 #
 # The -ignoreP and -includeP options affects the treatment of the 'P'
 # special character in the first column (see above)
 #
-# If -ridiculous   is specified, the default tolerance is set to 1.01e-2 
-# If -easy   is specified, the default tolerance is set to 1.01e-5 
-# If -medium is specified, the default tolerance is set to 1.01e-8 
+# If -ridiculous   is specified, the default tolerance is set to 1.01e-2
+# If -easy   is specified, the default tolerance is set to 1.01e-5
+# If -medium is specified, the default tolerance is set to 1.01e-8
 # These modifications do not apply to the tolerance determined by the
 # '%',and '.' first-column special signs
 #
@@ -276,7 +276,7 @@ while (1) {
      elsif ($ldc1 eq '.') {    # no floating point tolerance - characters, but do not count this line in the Summary
         $tolerance = 1;
         }
-      elsif ($ldc1 eq '-' || $field1[0] eq '' ) { 
+      elsif ($ldc1 eq '-' || $field1[0] eq '' ) {
         $tolerance = 1;
         }
       elsif ($ldc1 eq '%') {    # floating point very high tolerance
@@ -336,7 +336,7 @@ while (1) {
                 $fltnum  = -$fltnum  if ($fltnum  < 0);
                 }
 # Compute difference
-              $difflt =  $fltnum1-$fltnum;	
+              $difflt =  $fltnum1-$fltnum;
 # abs function is not recognized by all versions of perl; do it inline
               $difflt = -$difflt if ($difflt < 0);
 # compute sum of absolute values

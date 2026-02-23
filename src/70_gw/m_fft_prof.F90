@@ -3,7 +3,7 @@
 !! m_FFT_prof
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -16,7 +16,7 @@
 
 #include "abi_common.h"
 
-MODULE m_FFT_prof
+module m_FFT_prof
 
  use defs_basis
  use m_xomp
@@ -196,7 +196,6 @@ subroutine fft_test_init(Ftest, fft_setup, kpoint, ecut, boxcutmin, rprimd, nsym
  real(dp),parameter :: k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: tnons(:,:)
-
 ! *************************************************************************
 
  call nullify_mpi_enreg(Ftest%MPI_enreg)
@@ -270,7 +269,6 @@ subroutine fft_test_free_0D(Ftest)
 
 !Arguments -----------------------------------
  class(FFT_test_t),intent(inout) :: Ftest
-
 ! *********************************************************************
 
  ABI_SFREE(Ftest%indpw_k)
@@ -304,7 +302,6 @@ subroutine fft_test_free_1D(Ftest)
 
 !Local variables-------------------------------
  integer :: ii
-
 ! *********************************************************************
 
  do ii=LBOUND(Ftest,DIM=1),UBOUND(Ftest,DIM=1)
@@ -382,7 +379,6 @@ character(len=TNAME_LEN) function get_name(Ftest)
 
 !Local variables-------------------------------
  character(len=TNAME_LEN) :: library_name,cplex_mode,padding_mode
-
 ! *********************************************************************
 
  if (ftest%gpu_option == 0) then
@@ -456,7 +452,6 @@ subroutine fftprof_free_0D(Ftprof)
 
 !Arguments -----------------------------------
  class(FFT_prof_t),intent(inout) :: Ftprof
-
 ! *********************************************************************
 
  ABI_SFREE(Ftprof%results)
@@ -524,7 +519,6 @@ subroutine fftprofs_print(Fprof, header, unit, mode_paral, prtvol)
  real(dp) :: mabs_err,mean_err,check_mabs_err,check_mean_err, ref_wtime,para_eff
  character(len=4) :: my_mode
  character(len=500) :: ofmt,hfmt,nafmt,msg
-
 ! *********************************************************************
 
  my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
@@ -564,7 +558,7 @@ subroutine fftprofs_print(Fprof, header, unit, mode_paral, prtvol)
  check_mabs_err=zero; check_mean_err=zero
  do ii=1,SIZE(Fprof)
    ncalls = Fprof(ii)%ncalls
-   if (ncalls>0) then
+   if (ncalls > 0) then
      mabs_err = zero; mean_err=zero
      if (ref_lib>0) then
        mabs_err = MAXVAL( ABS(Fprof(ii)%results - Fprof(ref_lib)%results) )
@@ -587,7 +581,7 @@ subroutine fftprofs_print(Fprof, header, unit, mode_paral, prtvol)
    end if
  end do
 
- if (ref_lib>0) then
+ if (ref_lib > 0) then
    write(std_out,'(/,2(a,es9.2),2a)')&
     " Consistency check: MAX(Max_|Err|) = ",check_mabs_err,&
     ", Max(<|Err|>) = ",check_mean_err,", reference_lib: ",TRIM(Fprof(ref_lib)%test_name)
@@ -639,7 +633,7 @@ subroutine time_fourdp(Ftest, isign, cplex, header, Ftprof)
 
  write(header,'(2(a,i2),a)')" fourdp with cplex ",cplex,", isign ",isign,", ndat 1"
 
- if (Ftest%available==0) then
+ if (Ftest%available == 0) then
    call Ftprof%init(test_name,0,0,0,0,zero,zero,zero)
    RETURN
  end if
@@ -768,8 +762,8 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
  nfft = Ftest%nfft; ndat = Ftest%ndat
  write(header,'(3(a,i2))')" fftbox with isign ",isign,", in-place ",inplace,", ndat ",ndat
 
- ABI_CALLOC(ffc,(nfft*ndat))
- ABI_CALLOC(ggc,(nfft*ndat))
+ ABI_CALLOC(ffc, (nfft*ndat))
+ ABI_CALLOC(ggc, (nfft*ndat))
  ABI_CALLOC(results, (nfft*ndat))
 
  if (isign==-1) then
@@ -805,20 +799,36 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
  ! No augmentation here.
  call plan%init(ndat, Ftest%ngfft(1:3), Ftest%ngfft(1:3), Ftest%ngfft(7), fftcache0, ftest%gpu_option)
 
+ if (plan%gpu_option == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:ffc, ggc)
+#endif
+ end if
+
  select case (inplace)
  case (0)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call plan%execute(ffc, ggc, isign)
+     call plan%execute(ffc, ggc, isign, ndat, iscale=0)
      ! Store results at the first call.
-     if (icall == 1) results = ggc
+     if (icall == 1) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$omp target update from(ggc)
+#endif
+       results = ggc
+     end if
    end do
  case (1)
    do icall=1,NCALLS_FOR_TEST
      ifft = empty_cache(CACHE_KBSIZE)
-     call plan%execute(ffc, isign)
+     call plan%execute(ffc, isign, ndat, iscale=0)
      ! Store results at the first call.
-     if (icall == 1) results = ffc
+     if (icall == 1) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$omp target update from(ffc)
+#endif
+       results = ffc
+     end if
    end do
  case default
    ABI_ERROR(sjoin("Wrong value for inplace:", itoa(inplace)))
@@ -829,6 +839,12 @@ subroutine time_fftbox(Ftest, isign, inplace, header, Ftprof)
                   cpu_time,wall_time,gflops,results=results)
 
  call plan%free()
+
+ if (plan%gpu_option == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:ffc, ggc)
+#endif
+ end if
  ABI_FREE(ffc)
  ABI_FREE(ggc)
  ABI_FREE(results)
@@ -914,14 +930,14 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
  ABI_MALLOC(gbound_out, (2*Ftest%mgfft+8,2))
  call sphereboundary(gbound_out,Ftest%istwf_k,Ftest%kg_kout,Ftest%mgfft,Ftest%npw_kout)
 
- ABI_CALLOC(denpot,(cplex*n4,n5,n6))
- ABI_CALLOC(fofg_in,(2,Ftest%npw_k*ndat))
- ABI_CALLOC(fofg_out,(2,npw_out*ndat))
- ABI_CALLOC(fofr_4,(2,n4,n5,n6*ndat))
+ ABI_CALLOC(denpot, (cplex*n4,n5,n6))
+ ABI_CALLOC(fofg_in, (2,Ftest%npw_k*ndat))
+ ABI_CALLOC(fofg_out, (2,npw_out*ndat))
+ ABI_CALLOC(fofr_4, (2,n4,n5,n6*ndat))
  ABI_CALLOC(results, (Ftest%nfft*ndat))
 
  select case (option_fourwf)
- case (0,1,2)
+ case (0, 1, 2)
    !! for option==0, fofgin(2,npwin*ndat)=holds input wavefunction in G sphere;
    !!                fofr(2,n4,n5,n6) contains the output Fourier Transform of fofgin;
    !!                no use of denpot, fofgout and npwout.
@@ -933,7 +949,7 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
    !!                denpot(cplex*n4,n5,n6) contains the input local potential;
    !!                fofgout(2,npwout*ndat) contains the output function;
    !!
-   do cnt=0,(Ftest%npw_k * ndat) - 1
+   do cnt=0, (Ftest%npw_k * ndat) - 1
      ipw = 1 + MOD(cnt, Ftest%npw_k)
      gg = Ftest%kg_k(:,ipw)
      gsq = two_pi**2 * DOT_PRODUCT(gg,MATMUL(Ftest%gmet,gg))
@@ -941,19 +957,17 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
      fofg_in(2,cnt+1) = zero
    end do
 
-   if (option_fourwf==1) then ! Init denpot
-     denpot = one
-   end if
-   !
-   if (option_fourwf==2) then ! Init denpot
-     !
+   if (option_fourwf==1) denpot = one
+
+   if (option_fourwf==2) then
+     ! Init denpot
      if (cplex==1) then
        do i3=0,n3-1
          do i2=0,n2-1
            do i1=0,n1-1
              g0dotr= two_pi*( g0(1)*(i1/DBLE(n1)) &
-&                            +g0(2)*(i2/DBLE(n2)) &
-&                            +g0(3)*(i3/DBLE(n3)) )
+                             +g0(2)*(i2/DBLE(n2)) &
+                             +g0(3)*(i3/DBLE(n3)) )
              denpot(i1+1,i2+1,i3+1)=COS(g0dotr)
            end do
          end do
@@ -964,8 +978,8 @@ subroutine time_fourwf(Ftest, cplex, option_fourwf, header, Ftprof)
            idx=1
            do i1=0,n1-1
              g0dotr= two_pi*( g0(1)*(i1/DBLE(n1)) &
-&                            +g0(2)*(i2/DBLE(n2)) &
-&                            +g0(3)*(i3/DBLE(n3)) )
+                             +g0(2)*(i2/DBLE(n2)) &
+                             +g0(3)*(i3/DBLE(n3)) )
 
              denpot(idx,  i2+1,i3+1)= COS(g0dotr)
              denpot(idx+1,i2+1,i3+1)= SIN(g0dotr)
@@ -1360,8 +1374,8 @@ subroutine time_fftu(Ftest, isign, header, Ftprof)
      do i2=0,n2-1
        do i1=0,n1-1
          g0dotr= two_pi*( g0(1)*(i1/DBLE(n1)) &
-&                        +g0(2)*(i2/DBLE(n2)) &
-&                        +g0(3)*(i3/DBLE(n3)) )
+                         +g0(2)*(i2/DBLE(n2)) &
+                         +g0(3)*(i3/DBLE(n3)) )
          ifft = 1 + i1 + i2*n1 + i3*n2*n3
          ur(ifft)=DCMPLX(DCOS(g0dotr),DSIN(g0dotr))
        end do
@@ -1454,7 +1468,6 @@ subroutine prof_fourdp(fft_setups, isign, cplex, necut, ecut_arth, boxcutmin, rp
  real(dp),parameter :: k_gamma(3)=zero
  real(dp) :: ecut_list(necut)
  real(dp),allocatable :: prof_res(:,:,:)
-
 ! *********************************************************************
 
  nsetups = size(fft_setups, dim=2)
@@ -1549,7 +1562,6 @@ subroutine prof_fourwf(fft_setups, cplex, option, kpoint, necut, ecut_arth, &
  integer :: ngfft_ecut(18,necut)
  real(dp) :: ecut_list(necut)
  real(dp),allocatable :: prof_res(:,:,:)
-
 ! *********************************************************************
 
  nsetups = size(fft_setups, dim=2)
@@ -1646,7 +1658,6 @@ subroutine prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut
  real(dp),parameter :: k_gamma(3)=zero
  real(dp) :: ecut_list(necut)
  real(dp),allocatable :: prof_res(:,:,:)
-
 ! *********************************************************************
 
  nsetups = size(fft_setups, dim=2)
@@ -1732,7 +1743,6 @@ integer function empty_cache(kbsize) result(fake)
 !Local variables-------------------------------
  integer :: sz
  real(dp),allocatable :: chunk(:)
-
 ! *********************************************************************
 
  fake = 0
@@ -1750,5 +1760,5 @@ end function empty_cache
 
 !----------------------------------------------------------------------
 
-END MODULE m_FFT_prof
+end module m_FFT_prof
 !!***

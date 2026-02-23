@@ -8,7 +8,7 @@
 \author{Matthieu Verstraete, Univeristy of Li\`ege, Belgium}
 
 \maketitle
-Copyright (C) 2014-2025 ABINIT group (MV)
+Copyright (C) 2014-2026 ABINIT group (MV)
 
 This file is distributed under the terms of the
 GNU General Public License, see ~abinit/COPYING
@@ -55,7 +55,7 @@ There is an additional correction which should be taken into account, due to the
 
 You should now run the second input file, for the bulk system, and it should run even faster than the first. In principle you can use a primitive unit cell to get $E_F$, and this will also be the most efficient calculation. However, to get the planar averaged potential, you would need to do a little geometry and extract the real cartesian projection, which ABINIT does not do for you... For simplicity, we have replicated the same atoms as in the slab (same c direction) but removed the vacuum. As this cell is not primitive we set chkprim to 0 to force ABINIT to calculate it anyway. prt1dm is still turned on so we can get averaged $\bar{V}(z)$ to compare. The result is shown in Fig~\ref{fig2}(left): as you can see the potentials in the slab are very similar. If you shift the bulk potential and $E_F$ to align with the potential in the center of the slab (Fig~\ref{fig2}(right)) you can see a small difference in the $E_F$ values, which is the (quite small) correction for an infinitely thick slab.
 
-The final result is shown in Fig~\ref{fig3}, converted to electron-volts. The resulting value is 5.82 eV, which is ridiculously close to the experimental 5.2 given how badly we are converged. This rough estimation often holds, as the work function for simple metals is mainly due to atomic properties and densities, but do not bet on it... In practical calculations, you do not necessarily need to plot things, but it is easier. Find the plateau value of $\bar{V}$ at position $z_1$, compare the potentials in bulk and slab inside the slab - position $z_0$ - (this is easier done graphically, but does not give you good numerical precision), and shift $E_F$ for the bulk by this difference, to get 
+The final result is shown in Fig~\ref{fig3}, converted to electron-volts. The resulting value is 5.82 eV, which is ridiculously close to the experimental 5.2 given how badly we are converged. This rough estimation often holds, as the work function for simple metals is mainly due to atomic properties and densities, but do not bet on it... In practical calculations, you do not necessarily need to plot things, but it is easier. Find the plateau value of $\bar{V}$ at position $z_1$, compare the potentials in bulk and slab inside the slab - position $z_0$ - (this is easier done graphically, but does not give you good numerical precision), and shift $E_F$ for the bulk by this difference, to get
 \begin{eqnarray}
 \phi = \bar{V}_{slab}(z_1) - E_{F,bulk} - \bar{V}_{slab}(z_0) + \bar{V}_{bulk}(z_0)
 \end{eqnarray}
@@ -76,8 +76,8 @@ prt1dm 1
 
 ngkpt 4 4 1
 
-# 4.07 cubic lattice parameter, 
-# 5.76 in-plane 111 lattice parameter, and 
+# 4.07 cubic lattice parameter,
+# 5.76 in-plane 111 lattice parameter, and
 # 2.3498 interlayer distance -> 10 layers, 3 filled 7 vacuum
 acell 2*5.76 23.498 Angstr
 angdeg 90 90 120
@@ -111,8 +111,8 @@ chkprim 0
 
 ngkpt 4 4 4
 
-# 4.07 cubic lattice parameter, 
-# 5.76 in-plane 111 lattice parameter, and 
+# 4.07 cubic lattice parameter,
+# 5.76 in-plane 111 lattice parameter, and
 # 2.3498 interlayer distance -> 3 layers 0 vacuum
 acell 2*5.76 7.0494 Angstr
 angdeg 90 90 120
@@ -123,7 +123,7 @@ natom 3
 typat 1 1 1
 
 # z coordinate in thirds here!
-xred 
+xred
 0 0 0
 1/3 2/3 1/3
 2/3 1/3 2/3

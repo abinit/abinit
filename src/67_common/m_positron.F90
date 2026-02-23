@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (GJ, MT, JW)
+!!  Copyright (C) 1998-2026 ABINIT group (GJ, MT, JW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,6 +103,7 @@ contains
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  ecore=core psp energy (part of total energy) (hartree)
 !!  etotal=current value of total energy
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  forces_needed=if >0 forces are needed
 !!  gred(3,natom)=gradients wrt nuclear positions in reduced coordinates
@@ -1902,8 +1903,8 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 !arrays
  integer,allocatable :: gbound(:,:),gbound_pos(:,:),kg_k(:,:),kg_k_pos(:,:)
  integer,allocatable :: lmncmax(:),my_ffttab(:),my_gridtab(:),nphicor(:)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  logical,allocatable :: have_intc(:,:,:),have_rad(:,:)
  real(dp) :: buf(4),contrib(2),cp(2),cp_pos(2),expipr(2),pbn(3),pcart(3)
  real(dp) :: radsumnfftc(2),ylmgr(1,1,0),ylmr_nrm(1)

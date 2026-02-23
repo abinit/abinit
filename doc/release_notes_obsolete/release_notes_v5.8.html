@@ -4,7 +4,7 @@
 </head>
 <body>
 
-<h5>Copyright (C) 2009-2025 ABINIT group (XG)
+<h5>Copyright (C) 2009-2026 ABINIT group (XG)
 <br> This file is distributed under the terms of the GNU General Public License, see
 ~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
 http://www.gnu.org/copyleft/gpl.txt </a>.
@@ -20,10 +20,10 @@ WARNING : This file is still rudimentary. Style and description
 of contributions should be improved...
 
 The list of contributors includes :
-B. Amadon, P.M. Anglade, J.-M. Beuken, M. Boulanger, F. Bruneval, 
-D. Caliste, T. Deutsch, G.A. Franco, L. Genovese, M. Giantomassi, 
+B. Amadon, P.M. Anglade, J.-M. Beuken, M. Boulanger, F. Bruneval,
+D. Caliste, T. Deutsch, G.A. Franco, L. Genovese, M. Giantomassi,
 F. Jollet, A. Lherbier, D. Hamann, M. Mancini,
-S. Pesant, Y. Pouillon, T. Rangel, G.-M. Rignanese, M. Verstraete, 
+S. Pesant, Y. Pouillon, T. Rangel, G.-M. Rignanese, M. Verstraete,
 M. Torrent, J. Zwanziger
 
 It is worth to read carefully
@@ -52,12 +52,12 @@ A.  WARNINGS
 A.1 The default value for kptopt has been changed from 0 to 1 .
     So, if you are interested in doing Gamma only calculations
     (nkpt 1  kpt 0 0 0) you have to insert
-    kptopt 0 
-    in your input file. On the contrary, 
+    kptopt 0
+    in your input file. On the contrary,
     kptopt 1
     is not needed anymore when calculations are done on the basis of
     a grid of k point (with ngkpt or kptrlatt).
-    
+
 A.2 The default value for kptrlen has been changed from 20 to 30.
     With the above-mentioned kptopt default change, the calculation
     for a solid will proceed by default with a reasonable k point grid.
@@ -82,7 +82,7 @@ B.  Most noticeable achievements
 B.0 Note : several core developers have been working on the preparation of ABINITv6.0 ,
     hence the noticeable achievements of the present v5.8. appear to be quite light.
 
-B.1 The kinetic energy density is available, as well as the electron localisation function. 
+B.1 The kinetic energy density is available, as well as the electron localisation function.
     Availability for Norm-conserving pseudopotentials only, for
     non-spin-polarized and spin-collinear cases (but not yet non-spin-collinear
     case).
@@ -109,12 +109,12 @@ __________________________________________________________________
 C. Changes for the developers
 
 C.1 A script to check whether the input variables are documented (in doc/input_variables/*html),
-    of tested (in tests/*/Input/*in) has been written by Joe Zwanziger, 
+    of tested (in tests/*/Input/*in) has been written by Joe Zwanziger,
     and can be activated by issuing
     make abirules
     in the tests directory.
 
-C.2 There has been a complete renaming of the subdirectories of the src directory. 
+C.2 There has been a complete renaming of the subdirectories of the src directory.
     New adopted labelling scheme : xy_name  , where xy is a two-digit integer number,
     with the meaning of a level.
     The directories are strictly ordered, the higher level ones calling
@@ -126,7 +126,7 @@ C.2 There has been a complete renaming of the subdirectories of the src director
 
 C.3 The systematic constitution of modules containing the definition of objects and associated
     methods has been started, by M. Giantomassi .
-    See the directory 27_toolbox_oop, as well as several m_* files in src/* 
+    See the directory 27_toolbox_oop, as well as several m_* files in src/*
 
 C.4 A new testing directory tests/gwdp has been defined. It holds reference
     files obtained with GW calculations with double precision arithmetics (enable_gw_dpc).
@@ -139,7 +139,7 @@ D.  Other changes
 D.1 The computation of Raman scattering intensities, in the spin-polarized LDA case,
     is under development. Work by Fabiana Da Pieve.
 
-D.2 The use of Density Functional Perturbation Theory with PAW 
+D.2 The use of Density Functional Perturbation Theory with PAW
     (phonons, ddk, electric field, and magnetic field) is in preparation,
      by M. Torrent, F. Jollet and J. Zwanziger.
 
@@ -151,9 +151,9 @@ D.4 Self-consistent phonon calculations calculations have been implemented, by M
     Test (not yet portable) v5 #90
     Input variables : scphon_temp and scphon_supercell
 
-D.5 Continued work on GW by Matteo Giantomassi : 
+D.5 Continued work on GW by Matteo Giantomassi :
      improvement of the treatment of the GW singularity, treatment of G0W0 on top of LDA+U,
-     treatment of the optical limit, Arnaud-Alouani treatment of exact expansion for 
+     treatment of the optical limit, Arnaud-Alouani treatment of exact expansion for
      oscillators in sigma.F90
     New input variables, not yet documented : gw_nqlwl, gw_qlwl , nomegasi, omegasimax.
     No test either.

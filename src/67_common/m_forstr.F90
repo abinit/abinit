@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -156,6 +156,7 @@ contains
 !!   | e_corepsp(IN)=psp core-core energy
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  grchempottn(3,natom)=d(E_chemical potential)/d(xred) (hartree)
 !!  grcondft(3,natom)=d(E_constrainedDFT)/d(xred) (hartree)
@@ -330,8 +331,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp) :: kinstr(6),mggastr(6),nlstr(6),tsec(2),strdum(6),gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp) :: dummy(0)
  real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:),ylmbz(:,:),ylmgrbz(:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
-
+ real(dp), contiguous, pointer :: resid(:,:)
 ! *************************************************************************
 
  call timab(910,1,tsec)
@@ -684,7 +684,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  real(dp) :: kpoint(3),kphq(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
  real(dp) :: kgr(3),kgr_kphq(3),kgc(3),kgc_kphq(3)
 #if defined HAVE_GPU && defined HAVE_YAKL
- real(c_double), ABI_CONTIGUOUS pointer :: cwavef(:,:) => null()
+ real(c_double), contiguous, pointer :: cwavef(:,:) => null()
 #else
  real(dp),allocatable,target :: cwavef(:,:)
 #endif
@@ -704,7 +704,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  type(xg_t) :: cprj_xgx0,cprj_work
  real(dp),allocatable :: enlout_2d(:,:),enlout_2d_stress(:,:)
  real(dp),allocatable :: cwavef_spin(:,:),enlout_spin(:)
-
 !*************************************************************************
 
  ABI_NVTX_START_RANGE(NVTX_FORSTRNPS)
@@ -1669,7 +1668,6 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  real(dp) :: gmet(3,3),gprimd(3,3),qq(3),rmet(3,3)
  real(dp),allocatable :: dummy(:),kxc_cur(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: nresg(:,:),rhor0(:,:),vhres(:)
-
 ! *************************************************************************
 
 !Compatibility tests:

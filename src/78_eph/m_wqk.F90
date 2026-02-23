@@ -6,7 +6,7 @@
 !!  Compute
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt.
@@ -160,7 +160,7 @@ subroutine wqk_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, wfk_hd
  integer,allocatable :: gbound_k(:,:), gbound_kq(:,:), gbound_c(:,:), nband(:,:), wfd_istwfk(:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:)
  !integer(i1b),allocatable :: itreat_qibz(:)
- !integer, ABI_CONTIGUOUS pointer :: kg_c(:,:)
+ !integer, contiguous, pointer :: kg_c(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3), qq_ibz(3), qpt(3)
  !complex(gwp) :: ctmp_gwpc, xdot_tmp
 !arrays

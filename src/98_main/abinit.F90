@@ -6,7 +6,7 @@
 !! Main routine for conducting Density-Functional Theory calculations or Many-Body Perturbation Theory calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MKV, MT)
+!! Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, MKV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -248,8 +248,7 @@ program abinit
     '- root for output files -> ',trim(filnam(4)),ch10
    call wrtout([std_out, ab_out], msg)
  end if
-
- call wrtout(std_out, ' abinit : after writing the name of files ','PERS')
+ !call wrtout(std_out, ' abinit : after writing the name of files ','PERS')
 
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()

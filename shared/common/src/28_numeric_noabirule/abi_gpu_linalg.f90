@@ -7,342 +7,19 @@
 !!  Interfaces of GPU subroutines wrapper
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2025 ABINIT group (FDahm ))
+!!  Copyright (C) 2011-2026 ABINIT group (FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!  This is an include file.
 !!
 !! SOURCE
 
 !!***
 
 #ifndef HAVE_GPU
-
-!!****f* m_abi_gpu_linalg/gpu_device_synchronize
-!! NAME
-!!  gpu_device_synchronize
-!!
-!! FUNCTION
-!!  Wait for any running operation, compute and memory transfer, to complete on GPU.
-!!
-!! INPUTS
-!!  None
-!!
-!! OUTPUT
-!!  None
-!!
-!! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
-!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
-!!
-!! SOURCE
-
-subroutine gpu_device_synchronize()
-  use, intrinsic :: iso_c_binding
-  implicit none
-end subroutine gpu_device_synchronize
-!!***
-
-
-!!****f* m_abi_gpu_linalg/check_gpu_mem
-!! NAME
-!!  check_gpu_mem
-!!
-!! FUNCTION
-!!  Print information about amount of free memory on GPU and total amount of memory on GPU (current device).
-!!
-!! INPUTS
-!!  str is a string message (character array).
-!!
-!! OUTPUT
-!!  None
-!!
-!! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
-!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
-!!
-!! SOURCE
-
-subroutine check_gpu_mem(str)
-
-  !Arguments ------------------------------------
-  character (KIND=c_char), intent(in), target  :: str(*)
-  !Local variables ------------------------------
-  type(c_ptr)                                  :: dummy
-
-  if(.false.) dummy=c_loc(str)
-
-end subroutine check_gpu_mem
-!!***
-
-
-!!****f* m_abi_gpu_linalg/alloc_on_gpu
-!! NAME
-!!  alloc_on_gpu
-!!
-!! FUNCTION
-!!  Allocate size byte in gpu memory and returns in gpu_ptr this location
-!!
-!! INPUTS
-!!  size= size in byte to allocate
-!!
-!! OUTPUT
-!!  gpu_ptr= C_PTR on gpu memory location that has been allocated
-!!
-!! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
-!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
-!!
-!! SOURCE
-
-subroutine alloc_on_gpu(gpu_ptr,size)
-
-!Arguments ------------------------------------
- type(c_ptr),                intent(inout) :: gpu_ptr
- integer(kind=c_size_t),     intent(in)    :: size ! size in bytes to allocate
-
- ABI_UNUSED(gpu_ptr)
- ABI_UNUSED(size)
-
-end subroutine alloc_on_gpu
-!!***
-
-!!****f* m_abi_gpu_linalg/copy_from_gpu
-!! NAME
-!!  copy_from_gpu
-!!
-!! FUNCTION
-!!  copy size byte from gpu memory (pointed by gpu_ptr) to cpu memory (pointed by cpu_ptr)
-!!
-!! INPUTS
-!!  size_in_bytes = size in bytes to allocate
-!!  gpu_ptr = C_PTR on gpu memory location that has been allocated
-!!
-!! OUTPUT
-!!  dtab = fortran tab which will contains data
-!!
-!! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
-!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
-!!
-!! SOURCE
-
-subroutine copy_from_gpu(dtab,gpu_ptr,size_in_bytes)
-
-!Arguments ------------------------------------
- real(dp),dimension(*)               :: dtab
- type(c_ptr)                         :: gpu_ptr
- integer(kind=c_size_t), intent(in)  :: size_in_bytes ! size in byte (to be transfered)
-
-!Local variables ------------------------------
- type(c_ptr)                         :: cpu_ptr
-
- if(.false.) write(std_out,*) dtab(1)
- ABI_UNUSED(cpu_ptr)
- ABI_UNUSED(gpu_ptr)
- ABI_UNUSED(size_in_bytes)
-
-end subroutine copy_from_gpu
-!!***
-
-!!****f* m_abi_gpu_linalg/copy_on_gpu
-!! NAME
-!!  copy_on_gpu
-!!
-!! FUNCTION
-!!  copy size byte from cpu (pointed by cpu_ptr) to gpu memory (pointed by gpu_ptr)
-!!
-!! INPUTS
-!!  size_in_bytes = size in bytes to allocate
-!!  dtab = fortran tab to copy
-!!
-!! OUTPUT
-!!  gpu_ptr= C_PTR on gpu memory location
-!!
-!! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
-!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
-!!
-!! SOURCE
-
-subroutine copy_on_gpu(dtab,gpu_ptr,size_in_bytes)
-
-  !Arguments ------------------------------------
-  real(dp),dimension(*)               :: dtab
-  type(c_ptr)                         :: gpu_ptr
-  integer(kind=c_size_t), intent(in)  :: size_in_bytes ! size in byte (to be transfered)
-
-  !Local variables ------------------------------
-  type(c_ptr)                         :: cpu_ptr
-
- if(.false.) write(std_out,*) dtab(1)
-  ABI_UNUSED(cpu_ptr)
-  ABI_UNUSED(gpu_ptr)
-  ABI_UNUSED(size_in_bytes)
-
-end subroutine copy_on_gpu
-!!***
-
-!!****f* m_abi_gpu_linalg/copy_gpu_to_gpu
-!! NAME
-!!  copy_gpu_to_gpu
-!!
-!! FUNCTION
-!!  copy size byte from gpu (src) to gpu (dest)
-!!
-!! INPUTS
-!!  size_in_bytes = size in bytes to copy
-!!  src_gpu_ptr = C_PTR on gpu memory
-!!
-!! OUTPUT
-!!  dest_gpu_ptr = C_PTR on gpu memory
-!!
-!! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
-!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
-!!
-!! SOURCE
-
-subroutine copy_gpu_to_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
-
-  !Arguments ------------------------------------
-  type(c_ptr)                         :: cpu_ptr
-  type(c_ptr)                         :: gpu_ptr
-  integer(kind=c_size_t), intent(in)  :: size_in_bytes ! size in byte (to be transfered)
-
-  ABI_UNUSED(cpu_ptr)
-  ABI_UNUSED(gpu_ptr)
-  ABI_UNUSED(size_in_bytes)
-
-end subroutine copy_gpu_to_gpu
-!!***
-
-!!****f* m_abi_gpu_linalg/dealloc_on_gpu
-!! NAME
-!!  dealloc_on_gpu
-!!
-!! FUNCTION
-!!  free memory location pointed by gpu_ptr
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!  gpu_ptr= C_PTR on gpu memory location that has been allocated
-!!
-!! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
-!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
-!!
-!! SOURCE
-
-subroutine dealloc_on_gpu(gpu_ptr)
-
-  !Arguments ------------------------------------
-  type(c_ptr) :: gpu_ptr
-
-  ABI_UNUSED(gpu_ptr)
-
-end subroutine dealloc_on_gpu
-!!***
-
-!!****f* m_abi_gpu_linalg/gpu_memset
-!! NAME
-!!  gpu_memset
-!!
-!! FUNCTION
-!!  Initializes or sets device memory to a value.
-!!
-!! INPUTS
-!!  gpu_ptr= C_PTR on gpu memory location
-!!  val= value used to initialized each bytes
-!!  size= number of bytes to initialize
-!!
-!! OUTPUT
-!!  gpu_ptr= C_PTR on gpu memory location
-!!
-!! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
-!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
-!!
-!! SOURCE
-
-subroutine gpu_memset(gpu_ptr, val, array_size)
-
-  !Arguments ------------------------------------
-  type(c_ptr)                         :: gpu_ptr
-  integer(kind=c_int32_t), intent(in) :: val
-  integer(kind=c_size_t),  intent(in) :: array_size
-
-  ABI_UNUSED(gpu_ptr)
-  ABI_UNUSED(val)
-  ABI_UNUSED(array_size)
-
-end subroutine gpu_memset
-!!***
-
-!!****f* m_abi_gpu_linalg/gpu_allocated_impl
-!! NAME
-!!  gpu_allocated_impl
-!!
-!! FUNCTION
-!!  Check if pointer points to allocated gpu device memory.
-!!
-!! INPUTS
-!!  gpu_ptr= C_PTR on gpu memory location
-!!
-!! OUTPUT
-!!  is_allocate= logical(c_bool) : true (if allocated), false (if not allocated)
-!!
-!! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
-!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
-!!
-!! SOURCE
-
-subroutine gpu_allocated_impl(gpu_ptr, is_allocated)
-
-  !Arguments ------------------------------------
-  type(c_ptr)                       :: gpu_ptr
-  logical(kind=c_bool), intent(out) :: is_allocated
-
-  ABI_UNUSED(gpu_ptr)
-
-  is_allocated = .false.
-
-end subroutine gpu_allocated_impl
-!!***
-
-!!****f* m_abi_gpu_linalg/gpu_managed_ptr_status
-!! NAME
-!!  gpu_managed_ptr_status_impl
-!!
-!! FUNCTION
-!!  Print information about a managed pointer (host or device address when accessible).
-!!
-!! INPUTS
-!!  gpu_ptr= C_PTR on gpu memory location
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
-!!   the correct one is in 17_gpu_toolbox/dev_spec.cu
-!!
-!! SOURCE
-
-subroutine gpu_managed_ptr_status(gpu_ptr, str)
-
-  !Arguments ------------------------------------
-  type(c_ptr)                                  :: gpu_ptr
-  character (KIND=c_char), intent(in), target  :: str(*)
-  !Local variables ------------------------------
-  type(c_ptr)                                  :: dummy
-
-  ABI_UNUSED(gpu_ptr)
-  if(.false.) dummy=c_loc(str)
-
-end subroutine gpu_managed_ptr_status
-!!***
 
 !!****f* m_abi_gpu_linalg/gpu_linalg_init
 !! NAME
@@ -415,7 +92,6 @@ end subroutine gpu_linalg_shutdown
 !! OUTPUT
 !!  c     = c matrix
 !!
-!!
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
@@ -475,12 +151,12 @@ end subroutine gpu_xgemm
 !! n= Specifies the number of columns of b. The value of n must be at least zero
 !! alpha= Specifies the scalar alpha. When alpha is zero, then a is not referenced and b
 !!      need not be set before entry.
-!!  a_gpu = pointer to gpu memory location of  array a, DIMENSION (lda, k), where k is m when side = 'L' or 'l' and is n
+!! a_gpu = pointer to gpu memory location of  array a, DIMENSION (lda, k), where k is m when side = 'L' or 'l' and is n
 !!      when side = 'R' or 'r'.
 !! lda= Specifies the first dimension of a as declared in the calling
 !!     (sub)program. When side = 'L' or 'l', then lda must be at least max(1,
 !!      m), when side = 'R' or 'r', then lda must be at least max(1, n).
-!!  b_gpu = pointer to gpu memory location of  b Array, DIMENSION (ldb,n). Before entry, the leading m-by-n part of the array
+!! b_gpu = pointer to gpu memory location of  b Array, DIMENSION (ldb,n). Before entry, the leading m-by-n part of the array
 !!     b must contain the right-hand side matrix b.
 !! ldb= Specifies the first dimension of b as declared in the calling
 !!     (sub)program. The value of ldb must be at least max(1, m).
@@ -493,6 +169,7 @@ end subroutine gpu_xgemm
 !!   the correct one is in 17_gpu_toolbox/gpu_linalg.cu
 !!
 !! SOURCE
+
 subroutine gpu_xtrsm(cplx,side,uplo,transa,diag,m,n,alpha,a_gpu,lda,b_gpu,ldb)
 
 ! !Arguments ------------------------------------
@@ -723,187 +400,10 @@ subroutine gpu_xsygvd_buffersize(cplx, itype, jobz, uplo, A_nrows, &
   ABI_UNUSED((/A_ptr,B_ptr,W_ptr/))
 end subroutine gpu_xsygvd_bufferSize
 !!***
-
-
 #endif
 
-!------------------------------------------------------------------------------
-!                         gpu_set_to_zero
-!------------------------------------------------------------------------------
-!!****f* m_abi_gpu_linalg/gpu_set_to_zero
-!! NAME
-!!  gpu_set_to_zero
-!!
-!! FUNCTION
-!!  Set array content to zero
-!!
-!! INPUTS
-!!  size = size of array
-!!
-!! OUTPUT
-!!  array  = array to be set to zero
-!!
-!! SOURCE
-subroutine gpu_set_to_zero(array, sizea)
- use, intrinsic :: iso_c_binding
- integer(c_size_t),intent(in)  :: sizea
- real(dp),target,intent(out) :: array(sizea)
-
-! *********************************************************************
-
-#if defined HAVE_OPENMP_OFFLOAD
- integer(c_size_t)  :: i
-
-#if defined HAVE_GPU_CUDA
- !$OMP TARGET DATA USE_DEVICE_ADDR(array)
- call gpu_memset(c_loc(array), 0, sizea*dp)
- !$OMP END TARGET DATA
-#elif defined HAVE_GPU_HIP
- !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:array)
- do i=1,sizea
-   array(i)=zero
- end do
-#endif
-
-#endif
-
-end subroutine gpu_set_to_zero
 !!***
 
-!!****f* m_abi_gpu_linalg/gpu_set_to_zero_complex
-!! NAME
-!!  gpu_set_to_zero_complex
-!!
-!! FUNCTION
-!!  Set array content to zero
-!!
-!! INPUTS
-!!  size = size of array
-!!
-!! OUTPUT
-!!  array  = array to be set to zero
-!!
-!! SOURCE
-subroutine gpu_set_to_zero_complex(array, sizea)
- use, intrinsic :: iso_c_binding
- integer(c_size_t),intent(in)  :: sizea
- complex(dp),target,intent(out) :: array(sizea)
-! *********************************************************************
-
-#if defined HAVE_OPENMP_OFFLOAD
- integer(c_size_t)  :: i
-
-#if defined HAVE_GPU_CUDA
- !$OMP TARGET DATA USE_DEVICE_ADDR(array)
- call gpu_memset(c_loc(array), 0, sizea*dp*2)
- !$OMP END TARGET DATA
-#elif defined HAVE_GPU_HIP
- !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:array)
- do i=1,sizea
-   array(i)=czero
- end do
-#endif
-
-#endif
-
-end subroutine gpu_set_to_zero_complex
-!!***
-
-!------------------------------------------------------------------------------
-!                         gpu_copy
-!------------------------------------------------------------------------------
-!!****f* m_abi_gpu_linalg/gpu_copy
-!! NAME
-!!  gpu_copy
-!!
-!! FUNCTION
-!!  Copy array content on GPU to another
-!!
-!! INPUTS
-!!  src  = array to be copied
-!!  size = size of src and dest
-!!
-!! OUTPUT
-!!  dest = array to be set
-!!
-!! SOURCE
-subroutine gpu_copy(dest, src, sizea)
- use, intrinsic :: iso_c_binding
- integer(c_size_t),intent(in)  :: sizea
- real(dp),target,intent(in)  :: src(sizea)
- real(dp),target,intent(out) :: dest(sizea)
-
-! *********************************************************************
-
-#if defined HAVE_OPENMP_OFFLOAD
- integer(c_size_t)  :: i
-
-#if defined HAVE_GPU_CUDA
- !$OMP TARGET DATA USE_DEVICE_ADDR(dest,src)
- call copy_gpu_to_gpu(c_loc(dest), c_loc(src), sizea*dp)
- !$OMP END TARGET DATA
-#elif defined HAVE_GPU_HIP
- !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:src,dest)
- do i=1,sizea
-   dest(i)=src(i)
- end do
-#endif
-
-#else
- ! Make testfarm happy
- ABI_UNUSED((/src,dest/))
-#endif
-
-end subroutine gpu_copy
-!!***
-
-!!****f* m_abi_gpu_linalg/gpu_copy_complex
-!! NAME
-!!  gpu_copy_complex
-!!
-!! FUNCTION
-!!  Copy array content on GPU to another
-!!
-!! INPUTS
-!!  src  = array to be copied
-!!  size = size of src and dest
-!!
-!! OUTPUT
-!!  dest = array to be set
-!!
-!! SOURCE
-subroutine gpu_copy_complex(dest, src, sizea)
- use, intrinsic :: iso_c_binding
- integer(c_size_t),intent(in)  :: sizea
- complex(dp),target,intent(in)  :: src(sizea)
- complex(dp),target,intent(out) :: dest(sizea)
-! *********************************************************************
-
-#if defined HAVE_OPENMP_OFFLOAD
- integer(c_size_t)  :: i
-
-#if defined HAVE_GPU_CUDA
- !$OMP TARGET DATA USE_DEVICE_ADDR(dest,src)
- call copy_gpu_to_gpu(c_loc(dest), c_loc(src), sizea*dp*2)
- !$OMP END TARGET DATA
-#elif defined HAVE_GPU_HIP
- !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(i) MAP(to:src,dest)
- do i=1,sizea
-   dest(i)=src(i)
- end do
-#endif
-
-#else
- ! Make testfarm happy
- ABI_UNUSED((/src,dest/))
-#endif
-
-end subroutine gpu_copy_complex
-!!***
-
-!------------------------------------------------------------------------------
-!                         abi_gpu_xgemm
-!------------------------------------------------------------------------------
 !!****f* m_abi_gpu_linalg/abi_gpu_xgemm
 !! NAME
 !!  abi_gpu_xgemm
@@ -948,7 +448,6 @@ subroutine abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,
   end if
 
 #ifdef HAVE_GPU
-
   call gpu_xgemm(cplx,transa,transb,m,n,k,alpha,&
       a,lda,b,ldb,beta,c,ldc)
 
@@ -978,7 +477,6 @@ subroutine abi_gpu_xgemm_d(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc
  character(len=1),intent(in) :: transa,transb
  real(dp),   intent(in),target :: a(*),b(*)
  real(dp),   intent(inout),target :: c(*)
-
 ! *********************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1002,7 +500,7 @@ subroutine abi_gpu_xgemm_d(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xgemm_d
@@ -1039,7 +537,7 @@ subroutine abi_gpu_xgemm_z(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xgemm_z
@@ -1076,7 +574,7 @@ subroutine abi_gpu_xgemm_2d(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ld
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xgemm_2d
@@ -1113,15 +611,14 @@ subroutine abi_gpu_xgemm_2z(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ld
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xgemm_2z
 !!***
 
 !------------------------------------------------------------------------------
-!                         abi_gpu_xgemm_strided
-!------------------------------------------------------------------------------
+
 !!****f* m_abi_gpu_linalg/abi_gpu_xgemm_strided
 !! NAME
 !!  abi_gpu_xgemm_strided
@@ -1240,7 +737,7 @@ subroutine abi_gpu_xgemm_strided_d(cplx,transa,transb,m,n,k,alpha,a,lda,strideA,
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xgemm_strided_d
@@ -1278,7 +775,7 @@ subroutine abi_gpu_xgemm_strided_z(cplx,transa,transb,m,n,k,alpha,a,lda,strideA,
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xgemm_strided_z
@@ -1316,7 +813,7 @@ subroutine abi_gpu_xgemm_strided_2d(cplx,transa,transb,m,n,k,alpha,a,lda,strideA
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xgemm_strided_2d
@@ -1354,14 +851,12 @@ subroutine abi_gpu_xgemm_strided_2z(cplx,transa,transb,m,n,k,alpha,a,lda,strideA
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xgemm_strided_2z
 !!***
 
-!------------------------------------------------------------------------------
-!                         abi_gpu_xsymm
 !------------------------------------------------------------------------------
 !!****f* m_abi_gpu_linalg/abi_gpu_xsymm
 !! NAME
@@ -1466,7 +961,7 @@ subroutine abi_gpu_xsymm_d(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xsymm_d
@@ -1503,7 +998,7 @@ subroutine abi_gpu_xsymm_z(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xsymm_z
@@ -1540,7 +1035,7 @@ subroutine abi_gpu_xsymm_2d(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xsymm_2d
@@ -1577,14 +1072,12 @@ subroutine abi_gpu_xsymm_2z(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xsymm_2z
 !!***
 
-!------------------------------------------------------------------------------
-!                         abi_gpu_zhemm
 !------------------------------------------------------------------------------
 !!****f* m_abi_gpu_linalg/abi_gpu_zhemm
 !! NAME
@@ -1688,7 +1181,7 @@ subroutine abi_gpu_zhemm_d(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_zhemm_d
@@ -1725,7 +1218,7 @@ subroutine abi_gpu_zhemm_z(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_zhemm_z
@@ -1762,7 +1255,7 @@ subroutine abi_gpu_zhemm_2d(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_zhemm_2d
@@ -1799,14 +1292,12 @@ subroutine abi_gpu_zhemm_2z(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_zhemm_2z
 !!***
 
-!------------------------------------------------------------------------------
-!                         abi_gpu_xscal
 !------------------------------------------------------------------------------
 !!****f* m_abi_gpu_linalg/abi_gpu_xscal
 !! NAME
@@ -1867,7 +1358,6 @@ subroutine abi_gpu_xscal_d(cplx, size, alpha, x, incrx)
  complex(dp), intent(in)    :: alpha
  real(dp),     intent(inout), target :: x(*)
  integer,      intent(in)    :: incrx
-
 ! *************************************************************************
 
  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -1883,7 +1373,7 @@ subroutine abi_gpu_xscal_d(cplx, size, alpha, x, incrx)
    !$OMP END TARGET DATA
 #endif
  else
-   ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
  end if
 
 end subroutine abi_gpu_xscal_d
@@ -1912,7 +1402,7 @@ subroutine abi_gpu_xscal_z(cplx, size, alpha, x, incrx)
    !$OMP END TARGET DATA
 #endif
  else
-   ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
  end if
 
 end subroutine abi_gpu_xscal_z
@@ -1941,7 +1431,7 @@ subroutine abi_gpu_xscal_2d(cplx, size, alpha, x, incrx)
    !$OMP END TARGET DATA
 #endif
  else
-   ABI_BUG("Unhandled GPU mode !")
+   ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
  end if
 
 end subroutine abi_gpu_xscal_2d
@@ -1970,15 +1460,11 @@ subroutine abi_gpu_xscal_2z(cplx, size, alpha, x, incrx)
    !$OMP END TARGET DATA
 #endif
  else
-   ABI_BUG("Unhandled GPU mode !")
+   ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
  end if
 
 end subroutine abi_gpu_xscal_2z
 !!***
-
-!------------------------------------------------------------------------------
-!                         abi_gpu_xaxpy
-!------------------------------------------------------------------------------
 
 !!****f* m_abi_gpu_linalg/abi_gpu_xaxpy
 !! NAME
@@ -2037,7 +1523,7 @@ end subroutine abi_gpu_xaxpy_cptr
 
 subroutine abi_gpu_xaxpy_d(cplx, size, alpha, x, incrx, y, incry)
 
-  ! !Arguments ------------------------------------
+  !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
   complex(dp), intent(in)    :: alpha
@@ -2060,7 +1546,7 @@ subroutine abi_gpu_xaxpy_d(cplx, size, alpha, x, incrx, y, incry)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xaxpy_d
@@ -2068,7 +1554,7 @@ end subroutine abi_gpu_xaxpy_d
 
 subroutine abi_gpu_xaxpy_z(cplx, size, alpha, x, incrx, y, incry)
 
-  ! !Arguments ------------------------------------
+  !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
   complex(dp), intent(in)    :: alpha
@@ -2091,7 +1577,7 @@ subroutine abi_gpu_xaxpy_z(cplx, size, alpha, x, incrx, y, incry)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xaxpy_z
@@ -2099,7 +1585,7 @@ end subroutine abi_gpu_xaxpy_z
 
 subroutine abi_gpu_xaxpy_2d(cplx, size, alpha, x, incrx, y, incry)
 
-  ! !Arguments ------------------------------------
+  !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
   complex(dp), intent(in)    :: alpha
@@ -2122,7 +1608,7 @@ subroutine abi_gpu_xaxpy_2d(cplx, size, alpha, x, incrx, y, incry)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xaxpy_2d
@@ -2130,7 +1616,7 @@ end subroutine abi_gpu_xaxpy_2d
 
 subroutine abi_gpu_xaxpy_2z(cplx, size, alpha, x, incrx, y, incry)
 
-  ! !Arguments ------------------------------------
+  !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
   complex(dp), intent(in)    :: alpha
@@ -2153,15 +1639,11 @@ subroutine abi_gpu_xaxpy_2z(cplx, size, alpha, x, incrx, y, incry)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xaxpy_2z
 !!***
-
-!------------------------------------------------------------------------------
-!                         abi_gpu_xcopy
-!------------------------------------------------------------------------------
 
 !!****f* m_abi_gpu_linalg/abi_gpu_xcopy
 !! NAME
@@ -2180,6 +1662,7 @@ end subroutine abi_gpu_xaxpy_2z
 !!  incry  = stride between consecutive elements of y
 !!
 !! SOURCE
+
 subroutine abi_gpu_xcopy_cptr(cplx, size, x, incrx, y, incry)
 
   ! !Arguments ------------------------------------
@@ -2241,7 +1724,7 @@ subroutine abi_gpu_xcopy_d(cplx, size, x, incrx, y, incry)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xcopy_d
@@ -2271,7 +1754,7 @@ subroutine abi_gpu_xcopy_z(cplx, size, x, incrx, y, incry)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xcopy_z
@@ -2302,7 +1785,7 @@ subroutine abi_gpu_xcopy_2d(cplx, size, x, incrx, y, incry)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xcopy_2d
@@ -2310,7 +1793,7 @@ end subroutine abi_gpu_xcopy_2d
 
 subroutine abi_gpu_xcopy_2z(cplx, size, x, incrx, y, incry)
 
-  ! !Arguments ------------------------------------
+  !Arguments ------------------------------------
   integer,      intent(in)    :: cplx
   integer,      intent(in)    :: size
   complex(dp), intent(in),target    :: x(size,*)
@@ -2332,15 +1815,11 @@ subroutine abi_gpu_xcopy_2z(cplx, size, x, incrx, y, incry)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xcopy_2z
 !!***
-
-!------------------------------------------------------------------------------
-!                         abi_gpu_xtrsm
-!------------------------------------------------------------------------------
 
 !!****f* m_abi_gpu_linalg/abi_gpu_xtrsm
 !! NAME
@@ -2393,6 +1872,7 @@ end subroutine abi_gpu_xcopy_2z
 !!   the correct one is in 17_toolbox/gpu_linalg.cu
 !!
 !! SOURCE
+
 subroutine abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
 ! !Arguments ------------------------------------
@@ -2454,7 +1934,7 @@ subroutine abi_gpu_xtrsm_d(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xtrsm_d
@@ -2485,7 +1965,7 @@ subroutine abi_gpu_xtrsm_z(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xtrsm_z
@@ -2493,7 +1973,7 @@ end subroutine abi_gpu_xtrsm_z
 
 subroutine abi_gpu_xtrsm_2d(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
-! !Arguments ------------------------------------
+ !Arguments ------------------------------------
  integer, intent(in) :: cplx,lda,ldb,m,n
  complex(dp), intent(in) :: alpha
  character(len=1), intent(in) :: side,uplo,transa,diag
@@ -2516,7 +1996,7 @@ subroutine abi_gpu_xtrsm_2d(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xtrsm_2d
@@ -2524,7 +2004,7 @@ end subroutine abi_gpu_xtrsm_2d
 
 subroutine abi_gpu_xtrsm_2z(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
-! !Arguments ------------------------------------
+!Arguments ------------------------------------
  integer, intent(in) :: cplx,lda,ldb,m,n
  complex(dp), intent(in) :: alpha
  character(len=1), intent(in) :: side,uplo,transa,diag
@@ -2547,7 +2027,7 @@ subroutine abi_gpu_xtrsm_2z(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xtrsm_2z
@@ -2558,13 +2038,13 @@ end subroutine abi_gpu_xtrsm_2z
 !!
 !! NAME
 !! abi_gpu_work_resizeI
+
 subroutine abi_gpu_work_resizeI(array,array_managed,current_dim,asked_dim)
 
   integer, allocatable, intent(inout) :: array(:)
-  integer(kind=c_int32_t), ABI_CONTIGUOUS pointer, intent(inout) :: array_managed(:)
+  integer(kind=c_int32_t), contiguous, pointer, intent(inout) :: array_managed(:)
   integer, intent(inout)  :: current_dim
   integer, intent(in   )  :: asked_dim
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -2594,7 +2074,7 @@ subroutine abi_gpu_work_resizeI(array,array_managed,current_dim,asked_dim)
 #endif
 
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 #ifndef HAVE_GPU
@@ -2607,7 +2087,6 @@ subroutine abi_gpu_work_resizeI(array,array_managed,current_dim,asked_dim)
 end subroutine abi_gpu_work_resizeI
 !!***
 
-
 !!****f* m_abi_gpu_linalg/abi_gpu_work_resizeR
 !!
 !! NAME
@@ -2616,7 +2095,7 @@ end subroutine abi_gpu_work_resizeI
 subroutine abi_gpu_work_resizeR(array,array_managed,current_dim,asked_dim)
 
   double precision, allocatable, intent(inout) :: array(:)
-  real(kind=c_double), ABI_CONTIGUOUS pointer, intent(inout) :: array_managed(:)
+  real(kind=c_double), contiguous, pointer, intent(inout) :: array_managed(:)
   integer, intent(inout) :: current_dim
   integer, intent(in   ) :: asked_dim
 
@@ -2649,7 +2128,7 @@ subroutine abi_gpu_work_resizeR(array,array_managed,current_dim,asked_dim)
 #endif
 
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 #ifndef HAVE_GPU
@@ -2671,10 +2150,9 @@ end subroutine abi_gpu_work_resizeR
 subroutine abi_gpu_work_resizeC(array,array_managed,current_dim,asked_dim)
 
   complex(kind=8), allocatable, intent(inout) :: array(:)
-  complex(kind=c_double_complex), ABI_CONTIGUOUS pointer, intent(inout) :: array_managed(:)
+  complex(kind=c_double_complex), contiguous, pointer, intent(inout) :: array_managed(:)
   integer, intent(inout)  :: current_dim
   integer, intent(in   )  :: asked_dim
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -2704,7 +2182,7 @@ subroutine abi_gpu_work_resizeC(array,array_managed,current_dim,asked_dim)
 #endif
 
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 #ifndef HAVE_GPU
@@ -2727,11 +2205,10 @@ subroutine abi_gpu_work_resizeCptr(array,current_dim,asked_dim)
   type(c_ptr), intent(inout) :: array
   integer(c_size_t), intent(inout)  :: current_dim
   integer(c_size_t), intent(in   )  :: asked_dim
-
 ! *************************************************************************
 
   if ( current_dim < asked_dim  ) then
-    if(current_dim == 0) then
+    if(current_dim /= 0) then
       call dealloc_on_gpu(array)
     end if
     current_dim = asked_dim
@@ -2798,10 +2275,6 @@ subroutine abi_gpu_work_finalize()
 end subroutine abi_gpu_work_finalize
 !!***
 
-!------------------------------------------------------------------------------
-!                         abi_gpu_xhegvd
-!------------------------------------------------------------------------------
-
 !!****f* m_abi_gpu_linalg/abi_gpu_xhegvd
 !! NAME
 !!  abi_gpu_xhegvd
@@ -2831,6 +2304,7 @@ end subroutine abi_gpu_work_finalize
 !!  devInfo  =
 !!
 !! SOURCE
+
 subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
                    A, lda, &
                    B, ldb, &
@@ -2853,7 +2327,6 @@ subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
   ! Local variables ------------------------------
   integer     :: bufferSize
   type(c_ptr) :: gpu_ptr
-
 ! *************************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -2941,7 +2414,6 @@ subroutine abi_gpu_xhegvd_d(cplx, itype, jobz, uplo, A_nrows, &
   integer,         intent(in   ) :: ldb
   real(dp),        intent(inout),target :: W(*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -2963,7 +2435,7 @@ subroutine abi_gpu_xhegvd_d(cplx, itype, jobz, uplo, A_nrows, &
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xhegvd_d
@@ -3008,7 +2480,7 @@ subroutine abi_gpu_xhegvd_z(cplx, itype, jobz, uplo, A_nrows, &
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xhegvd_z
@@ -3030,7 +2502,6 @@ subroutine abi_gpu_xhegvd_2d(cplx, itype, jobz, uplo, A_nrows, &
   real(dp),        intent(in   ),target :: B(ldb,*)
   real(dp),        intent(inout),target :: W(A_nrows,*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -3052,7 +2523,7 @@ subroutine abi_gpu_xhegvd_2d(cplx, itype, jobz, uplo, A_nrows, &
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xhegvd_2d
@@ -3095,15 +2566,12 @@ subroutine abi_gpu_xhegvd_2z(cplx, itype, jobz, uplo, A_nrows, &
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xhegvd_2z
 !!***
 
-!------------------------------------------------------------------------------
-!                         abi_gpu_xheevd
-!------------------------------------------------------------------------------
 !!****f* m_abi_gpu_linalg/abi_gpu_xheevd
 !! NAME
 !!  abi_gpu_xheevd
@@ -3130,6 +2598,7 @@ end subroutine abi_gpu_xhegvd_2z
 !!  devInfo  =
 !!
 !! SOURCE
+
 subroutine abi_gpu_xheevd_cptr(cplx, jobz, uplo, A_nrows, &
                    A, lda, &
                    W,      &
@@ -3148,7 +2617,6 @@ subroutine abi_gpu_xheevd_cptr(cplx, jobz, uplo, A_nrows, &
   ! Local variables ------------------------------
   integer     :: bufferSize
   type(c_ptr) :: gpu_ptr
-
 ! *************************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -3228,7 +2696,6 @@ subroutine abi_gpu_xheevd_d(cplx, jobz, uplo, A_nrows, &
   integer,         intent(in   ) :: lda
   real(dp),        intent(inout),target :: W(*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -3248,7 +2715,7 @@ subroutine abi_gpu_xheevd_d(cplx, jobz, uplo, A_nrows, &
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xheevd_d
@@ -3287,7 +2754,7 @@ subroutine abi_gpu_xheevd_z(cplx, jobz, uplo, A_nrows, &
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xheevd_z
@@ -3306,7 +2773,6 @@ subroutine abi_gpu_xheevd_2d(cplx, jobz, uplo, A_nrows, &
   real(dp),        intent(in   ),target :: A(lda,*)
   real(dp),        intent(inout),target :: W(A_nrows,*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -3326,7 +2792,7 @@ subroutine abi_gpu_xheevd_2d(cplx, jobz, uplo, A_nrows, &
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xheevd_2d
@@ -3364,15 +2830,12 @@ subroutine abi_gpu_xheevd_2z(cplx, jobz, uplo, A_nrows, &
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xheevd_2z
 !!***
 
-!------------------------------------------------------------------------------
-!                         abi_gpu_xpotrf
-!------------------------------------------------------------------------------
 !!****f* m_abi_gpu_linalg/abi_gpu_xpotrf
 !! NAME
 !!  abi_gpu_xpotrf
@@ -3412,7 +2875,6 @@ subroutine abi_gpu_xpotrf_cptr(cplx, uplo, A_nrows, &
   ! Local variables ------------------------------
   integer     :: bufferSize
   type(c_ptr) :: gpu_ptr
-
 ! *************************************************************************
 
   if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
@@ -3487,7 +2949,6 @@ subroutine abi_gpu_xpotrf_d(cplx, uplo, A_nrows, &
   real(dp),        intent(in   ),target :: A(*)
   integer,         intent(in   ) :: lda
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -3505,7 +2966,7 @@ subroutine abi_gpu_xpotrf_d(cplx, uplo, A_nrows, &
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xpotrf_d
@@ -3539,7 +3000,7 @@ subroutine abi_gpu_xpotrf_z(cplx, uplo, A_nrows, &
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xpotrf_z
@@ -3555,7 +3016,6 @@ subroutine abi_gpu_xpotrf_2d(cplx, uplo, A_nrows, &
   integer,         intent(in   ) :: A_nrows,lda
   real(dp),        intent(in   ),target :: A(lda,*)
   integer,         intent(inout) :: devInfo
-
 ! *************************************************************************
 
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
@@ -3573,7 +3033,7 @@ subroutine abi_gpu_xpotrf_2d(cplx, uplo, A_nrows, &
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xpotrf_2d
@@ -3606,7 +3066,7 @@ subroutine abi_gpu_xpotrf_2z(cplx, uplo, A_nrows, &
     !$OMP END TARGET DATA
 #endif
   else
-    ABI_BUG("Unhandled GPU mode !")
+    ABI_BUG(sjoin("Unhandled GPU mode:", itoa(abi_linalg_gpu_mode)))
   end if
 
 end subroutine abi_gpu_xpotrf_2z
@@ -3641,15 +3101,11 @@ end subroutine abi_gpu_xpotrf_2z
 !!                  (e.g block of wavefunction)
 !!  blockvectorx  = on output, orthonormalized wavefunction. as a GPU ptr
 !!
-!!
 !! SOURCE
 
 subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spaceComm,&
 &                              sqgram_gpu,vectsize,&
 &                              x_cplx,timopt,tim_xortho) ! optional arguments
-
-  use, intrinsic :: iso_c_binding
-  implicit none
 
 !Arguments ------------------------------------
 !scalars

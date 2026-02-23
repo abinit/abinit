@@ -4,7 +4,7 @@
 </head>
 <body>
 
-<h5>Copyright (C) 2010-2025 ABINIT group (XG)
+<h5>Copyright (C) 2010-2026 ABINIT group (XG)
 <br> This file is distributed under the terms of the GNU General Public License, see
 ~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
 http://www.gnu.org/copyleft/gpl.txt </a>.
@@ -17,7 +17,7 @@ September 2011 and January 2012. These release notes
 are relative to improvements of ABINITv6.12 with respect to v6.10.
 
 The list of contributors includes :
-F. Abreu, B. Amadon, A. Berger, J.-M. Beuken, F. Bottin, J. Bouchet, E. Bousquet, 
+F. Abreu, B. Amadon, A. Berger, J.-M. Beuken, F. Bottin, J. Bouchet, E. Bousquet,
 F. Bruneval, D. Caliste, F. Dahm, H. Dammak, M. Delaveau, T. Deutsch,
 C. Espejo, G.A. Franco, G. Geneste, L. Genovese, M. Giantomassi, Y. Gillet,
 X. Gonze, A. Jacques, F. Jollet, G. Jomard, M. Marques,
@@ -46,7 +46,7 @@ __________________________________________________________________
 
 A.  WARNINGS AND IMPORTANT REMARKS
 
-A.1 As mentioned in B.2, the standard version of LibXC is now 1.1.0 instead of 1.0.0 . 
+A.1 As mentioned in B.2, the standard version of LibXC is now 1.1.0 instead of 1.0.0 .
     There has been a few numerical changes, esp. in the PBE functional and the mGGAs ...
     Also, functional number 104 is no more the Becke 86 Xalfa,beta,gamma (reoptimized)
     but Herman Xalphabeta GGA.
@@ -54,7 +54,7 @@ A.1 As mentioned in B.2, the standard version of LibXC is now 1.1.0 instead of 1
 __________________________________________________________________
 
 B.  Most noticeable achievements
- 
+
 B.1 The Ground-state calculations can benefit from GPUs, with CUDA library.
     See the input variable use_gpu_cuda, as well as the tests contained in the tests/gpu
     subdirectory.
@@ -72,12 +72,12 @@ B.1 The Ground-state calculations can benefit from GPUs, with CUDA library.
 
 B.2 The LibXC version 1.1.0 is now interfaced with ABINIT, instead of LibXC version 1.0.0 .
     There are numerous new LDA/GGA functionals of which the portability has been tested.
-    New functionals that can be used with ABINIT (numbers refer to the index given in the description of the ixc input variable): 
-    - 3 LDA (number 22,23,24) 
+    New functionals that can be used with ABINIT (numbers refer to the index given in the description of the ixc input variable):
+    - 3 LDA (number 22,23,24)
     - 9 X-GGA (number 139,140,141,142,144,145,149,183,184)
     - 4 C-GGA (number 143, 147, 148, 186)
     - 3 XC-GGA (number 146, 170, 171)
-    The documentation is up-to-date, and also include the documentation 
+    The documentation is up-to-date, and also include the documentation
     of different functionals that were previously already available (125,126, 172->181)
     See the automatic tests libxc#17,18,19 .
     See also the warning A.1
@@ -86,13 +86,13 @@ B.2 The LibXC version 1.1.0 is now interfaced with ABINIT, instead of LibXC vers
 B.3 Tutorials for parallelism (also Bethe-Salpether)
     For the needs of the ABINIT hands-on tutorial for High-performance computing at the TGCC in Bruyeres-le-chatel,
     November 2011, http://sites.google.com/site/abinit2011tutorial, a set of six new lessons for the ABINIT tutorial has been created :
-    ground state with plane waves, ground state with wavelets, molecular dynamics, parallelism on "images", 
+    ground state with plane waves, ground state with wavelets, molecular dynamics, parallelism on "images",
     response functions, Many-Body Perturbation Theory .
     They are available on the Web, as well as in the package, entry point doc/tutorial/welcome.html.
     A new directory for testing the has been created : tests/tutoparal.
     The old lesson on parallelism, obsolete, has been cleaned and is now up-to-date, and coherent with the other lessons.
     The tutorials all demonstrate, for different capabilities of ABINIT, that a speed-up of more than one hundred
-    is achievable. 
+    is achievable.
     By the way, in the process of setting up the tutorials, tests and improvements of the scaling were made, for the
     different functionalities.
 
@@ -102,7 +102,7 @@ B.3 Tutorials for parallelism (also Bethe-Salpether)
 
     Work by M. Torrent, F. Jollet, B. Amadon, G. Geneste, J. Bouchet, G. Jomard, M. Stankovski, M. Giantomassi, F. Bruneval,
     F. Bottin, D. Caliste, L. Genovese.
-   
+
 B.4 The latest version of the BigDFT library has been interfaced with ABINIT : switch from BigDFT 1.2 to BigDFT 1.6 .
     This allowed to develop the tutorial on BigDFT in parallel.
     Work by D. Caliste (and of course the whole BigDFT tesm, esp. L. Genovese and T. Deutsch).
@@ -120,7 +120,7 @@ C.2 Previously a set of blanks might have been introduced by abiauty, changing
     to something like
     !   $OMP
     depending on the alignment with other neighboring lines.
-    The abiauty script has been modified, so that the lines starting with 
+    The abiauty script has been modified, so that the lines starting with
     !$OMP
     will now be unchanged by abiauty. This is the expected behaviour of abiauty for future developments inside
     ABINIT, in order not to have abiauty destroying the OMP directives.
@@ -129,7 +129,7 @@ C.2 Previously a set of blanks might have been introduced by abiauty, changing
 C.3 There have been many improvements for the test farm.
     Among other developments :
     - new "on_push" server to test quickly the public branch freshly committed
-      (already active but not for production 
+      (already active but not for production
     - new nightly builders :
         - tikal with pathscale 4.0
         - max2 with Open64
@@ -137,7 +137,7 @@ C.3 There have been many improvements for the test farm.
     - new "on_demand only" builders :
         - buda_gcc45_checks to check quickly buildsys
         - buda_gcc45_cuda to test GPU/CUDA
-        - shiva_gcc45_abiauty 
+        - shiva_gcc45_abiauty
         - tikal_intel11_openmp to test OpenMP
     - removed nightly builder : bigmac_gcc43
     (JM Beuken)
@@ -193,11 +193,11 @@ D.4 More work on the Contour deformation approach to GW calculations (see sectio
     (introduction of the levmar library).
     (M. Stankovski)
 
-D.5 Work on the electron-phonon coupling part of ABINIT, especially the tools to analyse its effects. 
-    New input variables for ABINIT : fermie_nest. 
+D.5 Work on the electron-phonon coupling part of ABINIT, especially the tools to analyse its effects.
+    New input variables for ABINIT : fermie_nest.
     New input variable for ANADDB : ep_extrael.
     New tests : Tv6#103 and 104.
-    (Bin Xu, M. Verstraete) 
+    (Bin Xu, M. Verstraete)
 
 D.6 The preconditioners defined by non-zero iprcel values (extrapolar-type) can now be used used safely
     with PAW. See the input variable pawsushat, and the test paral#W .
@@ -223,7 +223,7 @@ D.10 Work on the geometry optimisation preconditioner.
 D.11 Work on the GW part of ABINIT, to allow to use OpenMP to speed up the code and also reduce the memory needs.
      (M. Giantomassi)
 
-D.12 Decomposition of the square of phonon frequencies at each q-point in short-range and long-range contributions, 
+D.12 Decomposition of the square of phonon frequencies at each q-point in short-range and long-range contributions,
      inside ANADDB. New input variable prtsrlr. Test Tv6#105.
      (E. Bousquet)
 
@@ -234,7 +234,7 @@ D.14 Implementation inside of ANADDB of Gaal Nagy algorithm to refine the set of
      Input variable : qrefine. See test v6#102. Not working yet ...
      (M. Verstraete)
 
-D.15 Work on automation of the distribution of the work load for the parallelism 
+D.15 Work on automation of the distribution of the work load for the parallelism
      (no need to explicitly specify the splitting of processors in npband / npfft / npspin / npkpt ...)
      An automatic test should be available ...
      By F. Jollet and M. Torrent.
@@ -253,7 +253,7 @@ D.18 A genetic algorithm to find new structures is under development.
      By AH. Romero and X. Gonze
 
 D.19 Phonon calculations using DFPT can be done reliably with the PAW methodology,
-     for the insulating case. 
+     for the insulating case.
      The metal case is operational (under the same conditions), except for q=0 (not fully implemented).
      The electric field response was already available previously.
      Still, for the time being, mixing of electric field and atomic displacement is not allowed.
@@ -268,7 +268,7 @@ D.21 The use of LDA+Dynamical Mean Field Theory is in progress.
      (see D.6 of the 6.4 release notes)
      By B. Amadon
 
-D.22 Work on parallelisation/distribution on the atoms in the PAW case 
+D.22 Work on parallelisation/distribution on the atoms in the PAW case
      By M. Delaveau, M. Torrent and F. Bottin.
 
 D.23 Work on the computation of polarisation (Berry phase) and finite electric-field computations,
@@ -277,7 +277,7 @@ D.23 Work on the computation of polarisation (Berry phase) and finite electric-f
 
 D.24 Numerous miscellaneous additional bug fixes (to the sources, as well as to the build system, including the plug-ins),
      and improvements of documentation by
-     A. Berger, J.M. Beuken, F. Bottin, E. Bousquet, D. Caliste, H. Dammak, M. Delaveau, 
-     G. Franco, Y. Gillet, A. Jacques, F. Jollet, 
+     A. Berger, J.M. Beuken, F. Bottin, E. Bousquet, D. Caliste, H. Dammak, M. Delaveau,
+     G. Franco, Y. Gillet, A. Jacques, F. Jollet,
      S. Poncé, A.H. Romero, M. Torrent, M. Verstraete, Bin Xu, J. Zwanziger, D. Waroquiers.
 </pre>

@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of MRGSCR, released Sep 2024.
+.Version 10.5.8.2 of MRGSCR, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  MRGSCR comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 14 Sep 2024.
-- ( at 06h47 )
+.Starting date : Sun 21 Dec 2025.
+- ( at 08h15 )
 
 ->>  Enter the number of files to merge:
 ->>  Enter the prefix for the final output file:
@@ -26,7 +26,7 @@
  Identifier                       4
  Kxc kernel                       0
  Treatment of q-->0 limit         2
-- headform                        80
+- headform                        81
  fform                         1004
  gwcalctyp                        2
  Number of components             1       1
@@ -88,7 +88,7 @@
  Identifier                       4
  Kxc kernel                       0
  Treatment of q-->0 limit         2
-- headform                        80
+- headform                        81
  fform                         1004
  gwcalctyp                        2
  Number of components             1       1
@@ -172,9 +172,9 @@
  Found real frequency:     3.100000E+01 [eV], number: 32, in file: 2 local index: 11
  Found imag frequency:     4.997053E+00 [eV], number: 1, in file: 1 local index: 22
  Found imag frequency:     1.292938E+01 [eV], number: 2, in file: 1 local index: 23
- Found imag frequency:     2.552116E+01 [eV], number: 3, in file: 1 local index: 24
+ Found imag frequency:     2.552117E+01 [eV], number: 3, in file: 1 local index: 24
  Found imag frequency:     4.550938E+01 [eV], number: 4, in file: 1 local index: 25
- Found imag frequency:     7.723868E+01 [eV], number: 5, in file: 1 local index: 26
+ Found imag frequency:     7.723869E+01 [eV], number: 5, in file: 1 local index: 26
 
  Merging 37 frequencies.
  32 real, and 5 imaginary.
@@ -185,7 +185,7 @@
  Identifier                       4
  Kxc kernel                       0
  Treatment of q-->0 limit         2
-- headform                        80
+- headform                        81
  fform                         1004
  gwcalctyp                        2
  Number of components             1       1

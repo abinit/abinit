@@ -6,7 +6,7 @@
 !!  Module to read PAW atomic data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2025 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
+!!  Copyright (C) 2012-2026 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1545,6 +1545,10 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
  Atm%mesh_size=0
  Atm%mult=1
  Atm%rcore=0.0_dp
+ atm%zcore_conv=.false.
+ atm%nc_conv=.false.
+ atm%nresid_c=one
+
 
 !Core WF file is in (proprietary) format
 ! if (.not.oldformat) then
@@ -1568,7 +1572,10 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
    Atm%zcore_orig=Atm%zcore
    write(msg,'(2f10.5,2x,i8,2x,a)' )Atm%znucl, Atm%zcore, pspdat,'znucl,zcore,pspdat'
    call wrtout(std_out,msg,'COLL')
-   if(Atm%zcore>zero) then
+   if(Atm%zcore==zero) then
+     LIBPAW_ALLOCATE(Atm%mode,(1,1))
+     Atm%mode = ORB_FROZEN
+   else
      !4)
      read(unt,*)pspcod,Atm%ixc,lmax
      write(msg,'(2i5,2x,2x,a)')Atm%ixc,lmax,'ixc,lmax'
@@ -1714,9 +1721,6 @@ subroutine pawpsp_read_corewf(Atm,filename_,rcut,radmesh_in)
      Atm%mode = ORB_FROZEN
      LIBPAW_ALLOCATE(Atm%max_occ,(Atm%ln_size,Atm%nsppol))
      Atm%max_occ=Atm%occ
-     atm%zcore_conv=.false.
-     atm%nc_conv=.false.
-     atm%nresid_c=one
 
      ! * Setup of kln2ln.
      !TODO this has to be tested

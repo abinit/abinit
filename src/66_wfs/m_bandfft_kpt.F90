@@ -7,7 +7,7 @@
 !!  used for kgb parallelization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2025 ABINIT group (FJ, FB, MT)
+!! Copyright (C) 2011-2026 ABINIT group (FJ, FB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,7 +84,7 @@ MODULE m_bandfft_kpt
                                             ! by the other processors band
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  integer(c_int32_t), ABI_CONTIGUOUS pointer :: kg_k_gather(:,:) => null()
+  integer(c_int32_t), contiguous, pointer :: kg_k_gather(:,:) => null()
 #else
   integer, allocatable :: kg_k_gather(:,:)  ! planewave coordinates
                                             ! (of the processor + sent by other processors band)
@@ -100,7 +100,7 @@ MODULE m_bandfft_kpt
   real(dp), allocatable :: ffnl_gather(:,:,:,:) ! ffnl tab (of the processor + sent by other processors band)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-  real(c_double), ABI_CONTIGUOUS pointer :: kinpw_gather(:) => null()     ! kinpw tab (of the processor + sent by other processors band)
+  real(c_double), contiguous, pointer :: kinpw_gather(:) => null()     ! kinpw tab (of the processor + sent by other processors band)
 #else
   real(dp), allocatable :: kinpw_gather(:)      ! kinpw tab (of the processor + sent by other processors band)
 #endif

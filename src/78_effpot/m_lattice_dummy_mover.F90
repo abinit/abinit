@@ -15,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (hexu)
+!! Copyright (C) 2001-2026 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,7 +103,7 @@ contains
     end do
 
     !self%displacement(:,:) = self%displacement(:,:)+self%current_vcart(:,:) * self%dt
-    
+
     call self%get_T_and_Ek()
     if (present(energy_table)) then
       key = 'Lattice kinetic energy'

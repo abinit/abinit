@@ -15,7 +15,7 @@
 !!  See notes below for more info.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2025 ABINIT group (MG)
+!! Copyright (C) 2009-2026 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1117,7 +1117,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, &
  integer :: npw_read,nspinor_read,nband_read
  character(len=500) :: msg,errmsg
 !arrays
- real(dp),ABI_CONTIGUOUS pointer :: tmp_eigk(:),tmp_occk(:)
+ real(dp),contiguous, pointer :: tmp_eigk(:),tmp_occk(:)
 #ifdef HAVE_MPI_IO
  integer :: mpierr,bufsz,gkk_type,cgblock_type
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
@@ -1765,7 +1765,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, &
  character(len=500) :: errmsg !msg,
  real(dp) :: cpu, wall, gflops
 !arrays
- real(dp),ABI_CONTIGUOUS pointer :: tmp_eigk(:)
+ real(dp),contiguous, pointer :: tmp_eigk(:)
  !real(dp), allocatable :: eig_buffer(:), cg_buffer(:,:)
 #ifdef HAVE_MPI_IO
  integer :: mpierr,bufsz,recnpw_type,gkk_type,cgblock_type
@@ -2207,7 +2207,7 @@ subroutine wfk_read_bmask(Wfk, bmask, ik_ibz, spin, sc_mode, kg_k, cg_k, eig_k, 
  integer :: npw_read,nspinor_read,nband_read,nb_tot,ncount,my_bcnt,my_maxb,base,nb, ierr
  character(len=500) :: msg,errmsg
 !arrays
- real(dp),ABI_CONTIGUOUS pointer :: tmp_eigk(:),tmp_occk(:)
+ real(dp),contiguous, pointer :: tmp_eigk(:),tmp_occk(:)
  integer :: mpierr,cgscatter_type,cg_type,method,block,nblocks,nbxblock
  integer :: bstart,bstop,bufsz,ugsz,brest,max_nband
  integer(XMPI_OFFSET_KIND) :: my_offset,base_ofs,my_offpad

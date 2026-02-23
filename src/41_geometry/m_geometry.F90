@@ -6,7 +6,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
+!! Copyright (C) 2008-2026 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4113,8 +4113,8 @@ subroutine vcart2ylm(vector, length, theta, phi)
 !scalars
   real(8),intent(out) :: length, theta, phi
 
-! Local 
-  real(8):: pi 
+! Local
+  real(8):: pi
 
   pi=4.0d0*datan(1.0d0)
   ! Compute spherical coordinates

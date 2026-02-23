@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h06 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h06 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_2.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_2.abi
 - output file    -> tgw2_2.abo
 - root for input  files -> tgw2_2i
 - root for output files -> tgw2_2o
@@ -196,8 +196,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Psdj_nc_sr_04_pbe_std_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -398,18 +398,18 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  calculating chi0 at frequencies [eV] :
   1    0.000000E+00    0.000000E+00
   2    3.023487E+00    0.000000E+00
-  3    6.046974E+00    0.000000E+00
-  4    9.070461E+00    0.000000E+00
+  3    6.046975E+00    0.000000E+00
+  4    9.070462E+00    0.000000E+00
   5    1.209395E+01    0.000000E+00
   6    1.511744E+01    0.000000E+00
   7    1.814092E+01    0.000000E+00
   8    2.116441E+01    0.000000E+00
   9    2.418790E+01    0.000000E+00
- 10    2.721138E+01    0.000000E+00
+ 10    2.721139E+01    0.000000E+00
  11    0.000000E+00    3.899779E+00
  12    0.000000E+00    1.068969E+01
  13    0.000000E+00    2.251161E+01
- 14    0.000000E+00    4.309476E+01
+ 14    0.000000E+00    4.309477E+01
 
 
 --------------------------------------------------------------------------------
@@ -1700,10 +1700,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          2.0
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.4  wall=          2.0
++Overall time at end (sec) : cpu=          1.6  wall=          1.7

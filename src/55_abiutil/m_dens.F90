@@ -7,7 +7,7 @@
 !! and also includes the computation of integrated atomic charge and magnetization, as well as Hirshfeld charges.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (MT,ILuk,MVer,EB,SPr)
+!! Copyright (C) 1998-2026 ABINIT group (MT,ILuk,MVer,EB,SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,7 +35,7 @@ MODULE m_dens
  use m_io_tools,      only : open_file
  use m_geometry,      only : dist2, xcart2xred, metric, vcart2ylm
  use m_mpinfo,        only : ptabs_fourdp
- use m_atomdata 
+ use m_atomdata
  use m_dtset
 
  implicit none
@@ -116,7 +116,7 @@ MODULE m_dens
 
   real(dp),allocatable :: znucl(:)
   ! znucl(ntypat)
-  ! 
+  !
 
  end type constrained_dft_t
 
@@ -490,8 +490,8 @@ subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,optio
  real(dp), allocatable :: difx(:)
  real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
  real(dp) :: tsec(2)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
 ! ***********************************************************************************************
 
 !We need the metric because it is needed to compute the "box" around each atom
@@ -1548,7 +1548,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp) :: dfsm,fact,fsm,ratsm2,ucvol
  logical  :: grid_found
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  integer :: overlap_ij(natom,natom)
  real(dp) :: gmet(3,3),gprimd(3,3),gr_intg(3,4)
  real(dp) :: intg(cplex,4),rhomag_(2,nspden)
@@ -1800,7 +1800,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
      !if (cplex==2) then
      !  intgden_im_(1,iatom)=intg(2,2)
      !  intgden_im_(2,iatom)=intg(2,1)-intg(2,2)
-     !endif 
+     !endif
      if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
        gr_intgden(:,1,iatom)=gr_intg(:,2)
        gr_intgden(:,2,iatom)=gr_intg(:,1)-gr_intg(:,2)
@@ -1986,7 +1986,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
  real(dp) :: rho_tot, rho_tot_im
  real(dp) :: sum_mag, sum_mag_x,sum_mag_y,sum_mag_z,sum_rho_up,sum_rho_dn,sum_rho_tot ! EB
  real(dp) :: sum_mag_im, sum_mag_x_im,sum_mag_y_im,sum_mag_z_im,sum_rho_up_im,sum_rho_dn_im,sum_rho_tot_im ! SR
- real(dp) :: mag_r, mag_theta, mag_phi, vec(3) 
+ real(dp) :: mag_r, mag_theta, mag_phi, vec(3)
  real(dp) :: sum_mag_r, sum_mag_theta, sum_mag_phi
  real(dp) :: exact_mag_r, exact_mag_theta, exact_mag_phi
  real(dp) :: exact_mag_r_im, exact_mag_theta_im, exact_mag_phi_im
@@ -2760,7 +2760,7 @@ end subroutine printmagvtk
 !!  None
 !!
 !! NOTES
-!!  This routine can handle both real and complex spin densities. 
+!!  This routine can handle both real and complex spin densities.
 !!
 !! SOURCE
 
@@ -2769,7 +2769,7 @@ subroutine calmaxdifmag(cplex,intgden,intgden0,natom,nspden,maxmag,difmag)
 !Arguments ---------------------------------------------
  integer,intent(in)   :: natom,nspden,cplex
  real(dp),intent(in) :: intgden(cplex,nspden,natom),intgden0(cplex,nspden,natom)
- real(dp),intent(out)::maxmag,difmag 
+ real(dp),intent(out)::maxmag,difmag
 !Local variables ------------------------------
  integer :: iatom
  real(dp)::mag,mag0

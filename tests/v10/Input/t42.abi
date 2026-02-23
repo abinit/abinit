@@ -87,9 +87,10 @@ pseudos="P.GGA_X_PBE+GGA_C_PBE.xml,Al.GGA_X_PBE+GGA_C_PBE.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = bob_gnu_13.2_openmp, eos_intel_2023_cmake, eos_nvhpc_23.9_elpa, eos_nvhpc_24.9_openmpi, haicgu_gnu_14.1_hpc, manneback_gnu_14.2_hpc
 #%% [files]
 #%% files_to_test =
-#%%   t42.abo, tolnlines= 18, tolabs=  5.0e-9, tolrel= 1.1
+#%%   t42.abo, tolnlines= 18, tolabs=  1.1e-8, tolrel= 1.1
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -6,7 +6,7 @@
 !!  Routines to precondition residual potential (or density) and forces.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, MT, PMA)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, MT, PMA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -119,6 +119,7 @@ contains
 !!   | prtvol=control print volume and debugging
 !!   | typat(natom)=integer type for each atom in cell
 !!  etotal=total ennergy
+!!  extfpmd <type(extfpmd_type)>=extended first-principles molecular dynamics type
 !!  fcart(3,natom)=cartesian forces (hartree/bohr)
 !!  ffttomix(nfft*(1-nfftprc/nfft))=Index of the points of the FFT (fine) grid on the grid used for mixing (coarse)
 !!  gmet(3,3)=metric tensor in G space in Bohr**-2.
@@ -239,7 +240,6 @@ subroutine prcref(atindx,dielar,dielinv,&
  real(dp),allocatable :: vres_diel(:,:),vxc_wk(:,:),work(:),work1(:,:),work2(:)
  real(dp),allocatable :: work3(:,:),xccc3d(:),xred_wk(:,:)
  logical,allocatable :: mask(:)
-
 ! *************************************************************************
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
@@ -896,7 +896,6 @@ end subroutine prcref
  real(dp),allocatable :: vres_diel(:,:),vxc_wk(:,:),work(:),work1(:,:),work2(:)
  real(dp),allocatable :: work3(:,:),xccc3d(:),xred_wk(:,:)
  logical,allocatable :: mask(:)
-
 ! *************************************************************************
 
  if(optres==1)then
@@ -1373,11 +1372,10 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon
  character(len=500) :: message
 !arrays
  integer :: id(3)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),potg0(4),rmet(3,3)
  real(dp),allocatable :: gq(:,:),work1(:,:),work2(:)
-
 ! *************************************************************************
 
 !Check that cplex has an allowed value
@@ -1601,15 +1599,12 @@ subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
  real(dp) :: tsec(2)
  real(dp),allocatable :: dielh(:),dielmat(:,:,:,:,:),dielvec(:,:,:)
  real(dp),allocatable :: eig_diel(:),zhpev1(:,:),zhpev2(:)
-!no_abirules
 !integer :: ipw3
 !real(dp) :: elementi,elementr
-
 ! *************************************************************************
 
 !DEBUG
 !write(std_out,*)' dielmt : enter '
-!if(.true.)stop
 !ENDDEBUG
 
 !tpisq is (2 Pi) **2:
@@ -1971,7 +1966,6 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occo
 !this limit value is truly empirical (exprmt on small Sr cell).
 !real(dp) :: kxc_min=-200.0
 !ENDDEBUG
-
 ! *************************************************************************
 
  call timab(96,1,tsec)
@@ -2425,7 +2419,6 @@ subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,v
  real(dp) :: deltaW(nfft,nspden)
  real(dp) :: g2cart(nfft)
  real(dp) :: mat(nfft,nspden)
-
 ! *************************************************************************
 
 !DEBUG
@@ -2635,14 +2628,13 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
  real(dp) :: C1,C2,DE,core,dielng,diemac,diemix,diemixmag,doti,dr,l1,l2,l3,l4,r
  real(dp) :: rdummy1,rdummy2,rmin,xr,y,yr,zr
 !arrays
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ integer, contiguous, pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, contiguous, pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: V1(nfft,nspden),V2(nfft,nspden),buffer(nfft,nspden)
  real(dp) :: deltaW(nfft,nspden)
  real(dp) :: mat(nfft,nspden)
  real(dp) :: rdielng(nfft),rdiemac(nfft),xcart(3,natom)
  real(dp) :: xcart27(3,natom*27)
-
 ! *************************************************************************
 
  dielng=dielar(2)
@@ -2978,7 +2970,7 @@ end subroutine cgpr
 !! first bracket the minimum then perform the minimization
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2026 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3062,7 +3054,6 @@ include "dummy_functions.inc"
 !scalars
  real(dp),parameter :: maglimit=10000.0_dp
  real(dp) :: c,fu,q,r,u,ulim
-
 ! *************************************************************************
 
  fa=dp_dum_v2dp(nv1,nv2,v(:,:)+(a*grad(:,:)))

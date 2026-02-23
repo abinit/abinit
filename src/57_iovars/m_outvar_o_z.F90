@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -707,7 +707,7 @@ contains
  dprarr(2,:)=dtsets(:)%qgbt(2)
  dprarr(3,:)=dtsets(:)%qgbt(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'qgbt','DPR',0)
- 
+
  dprarr(1,:)=dtsets(:)%qgbt_cart(1)
  dprarr(2,:)=dtsets(:)%qgbt_cart(2)
  dprarr(3,:)=dtsets(:)%qgbt_cart(3)
@@ -764,28 +764,41 @@ contains
  intarr(1,:)=dtsets(:)%rcpaw_frocc
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_frocc','INT',0)
 
- intarr(1,:)=dtsets(:)%rcpaw_nfrpaw
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_nfrpaw','INT',0)
+ intarr(1,:)=dtsets(:)%rcpaw_updatetnc
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_updatetnc','INT',0)
 
- intarr(1,:)=dtsets(:)%rcpaw_nfrtnc
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_nfrtnc','INT',0)
+ intarr(1,:)=dtsets(:)%rcpaw_elin
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_elin','INT',0)
+
+ intarr(1,:)=dtsets(:)%rcpaw_tpaw
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_tpaw','INT',0)
+
+ intarr(1,:)=dtsets(:)%rcpaw_vhtnzc
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_vhtnzc','INT',0)
 
  dprarr(1,:)=dtsets(:)%rcpaw_tolnc
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcpaw_tolnc','DPR',0)
 
  do idtset=0, ndtset_alloc
-   do ii = 1, ntypat
-     intarr(ii,idtset) = dtsets(idtset)%rcpaw_frtypat(ii)
+   do ii = 1, 2
+     intarr(ii,idtset) = dtsets(idtset)%rcpaw_updatepaw(ii)
    end do ! end loop over ntypat
  end do ! end loop over datasets
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'rcpaw_frtypat','INT',0)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'rcpaw_updatepaw','INT',0)
 
  do idtset=0, ndtset_alloc
    do ii = 1, ntypat
-     dprarr(ii,idtset) = dtsets(idtset)%rcpaw_scenergy(ii)
+     intarr(ii,idtset) = dtsets(idtset)%rcpaw_rctypat(ii)
    end do ! end loop over ntypat
  end do ! end loop over datasets
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'rcpaw_scenergy','ENE',0)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'rcpaw_rctypat','INT',0)
+
+ do idtset=0, ndtset_alloc
+   do ii = 1, ntypat
+     dprarr(ii,idtset) = dtsets(idtset)%rcpaw_sc(ii)
+   end do ! end loop over ntypat
+ end do ! end loop over datasets
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'rcpaw_sc','DPR',0)
 
  dprarr(1,:)=dtsets(:)%rcut
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rcut','LEN',0)
@@ -1081,6 +1094,9 @@ contains
 
  intarr(1,:)=dtsets(:)%symsigma
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symsigma','INT',0)
+
+ dprarr(1,:)=dtsets(:)%symsigma_de
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symsigma_de','ENE',0)
 
  intarr(1,:)=dtsets(:)%symv1scf
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symv1scf','INT',0)

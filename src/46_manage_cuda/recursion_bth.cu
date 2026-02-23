@@ -1,7 +1,7 @@
 /* recursion_bth.cu */
 
 /*
- * Copyright (C) 2008-2025 ABINIT Group (MMancini)
+ * Copyright (C) 2008-2026 ABINIT Group (MMancini)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -20,17 +20,17 @@
    Method DFT on GPU devices.
 
    Kernels function:
-  
+
    Host function:
    recursion_bth
 */
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 
-__host__ void 
+__host__ void
 recursion_bth(
-	      const int trotter, 
-	      const int gratio, 
-	      const int npt, 
+	      const int trotter,
+	      const int gratio,
+	      const int npt,
 	      const int nrec,           //- Max number of recursion
 	      const int nptrec,         //- Max number of points at the same time (depends on GPU)
 	      int* max_rec,             //- Out-max recursion to have required precision
@@ -52,13 +52,13 @@ recursion_bth(
    GPU memory copy efficient.
    -height_max= is the max number of vector(of size nfftrec) which can be
    putted in the matrix  to make the recursion and it depends on the device.
-   -At any call, the recursion is computed for npt points, by a single allocation on the device. 
+   -At any call, the recursion is computed for npt points, by a single allocation on the device.
    -The calculation is made only on min(height_max,pos[1]-pos[0])
    points where pos is the current number of point to compute.
    -oldtonew, for any step in recursion, for any point, the un,unold
    inthe next step are obtaind.
 */
-	        
+
 {
  /*------------------------------------------------------------------------------------*/
  /*---------------------------------INITIALIZATION-------------------------------------*/
@@ -86,19 +86,19 @@ recursion_bth(
 
  /*--------------------- FFT Planes ------------------------------*/
  cufftHandle plan_dir;
- /*----------------- FFT of the Green Kernel ---------------------*/ 
- //-Get the green kernel  from host 
+ /*----------------- FFT of the Green Kernel ---------------------*/
+ //-Get the green kernel  from host
  cureal *T_p_gpu = NULL;
  CHECK_CUDA_ERROR( cudaMalloc((void**)&T_p_gpu,largeur) );
  CHECK_CUDA_ERROR( cudaMemcpy(T_p_gpu,T_p,largeur,cudaMemcpyHostToDevice) );
- //-Compute the FFT 
+ //-Compute the FFT
  cucmplx *ZT_p_gpu = NULL;
  CHECK_CUDA_ERROR( cudaMalloc((void**)&ZT_p_gpu,clargeur) );
 
- /*Obtain the FFT of the Green Kernel on device */ 
+ /*Obtain the FFT of the Green Kernel on device */
  realtocmplx <<< ((size_t)nfftrec+320-1)/320,320 >>>(T_p_gpu, ZT_p_gpu,nfftrec);
  CUDA_KERNEL_CHECK("realtocmplx");
- 
+
  CHECK_CUDA_ERROR( cudaFree(T_p_gpu) );
  CHECK_CUDA_ERROR( cufftPlan3d(&plan_dir,ngfftrec[0],ngfftrec[1],ngfftrec[2],FFT_C2C) );
  CHECK_CUDA_ERROR( FFTEXECC2C(plan_dir,ZT_p_gpu ,ZT_p_gpu,CUFFT_FORWARD) );
@@ -106,7 +106,7 @@ recursion_bth(
 
  /*------------- Allocation of Matrices on Device ----------------*/
  cureal* vn_gpu    = NULL;
- CHECK_CUDA_ERROR( cudaMallocPitch((void**) &vn_gpu,&un_pitch,largeur,height_max) );  
+ CHECK_CUDA_ERROR( cudaMallocPitch((void**) &vn_gpu,&un_pitch,largeur,height_max) );
 
  cureal* un_gpu    = NULL;
  CHECK_CUDA_ERROR( cudaMallocPitch((void**) &un_gpu,&un_pitch,largeur,height_max) );
@@ -125,11 +125,11 @@ recursion_bth(
  CHECK_CUDA_ERROR( cudaMalloc((void**)&pot_gpu,largeur) );
  CHECK_CUDA_ERROR( cudaMemcpy(pot_gpu,pot,largeur,cudaMemcpyHostToDevice) );
 
-  
+
  /*------------ Local coordinates of points to calculate ---------------------*/
  int delta = pt0->x+ngfftrec[0]*(pt0->y+pt0->z*ngfftrec[1]); //-(virtual) linear initial point
  int final = pt1->x+ngfftrec[0]*(pt1->y+pt1->z*ngfftrec[1]); //-(virtual) linear final point
- int pth_size = (int)(un_pitch/sizeof(cureal));  //-Pitched size of vectors 
+ int pth_size = (int)(un_pitch/sizeof(cureal));  //-Pitched size of vectors
  int ntranche = (final-delta)+1;//-How many (virtual) pts to compute
 
  /*------------ Auxiliary Complex Vector -----------*/
@@ -142,20 +142,20 @@ recursion_bth(
  copytoconstmem(nfftrec, nptrec, pth_size, cvpthsz);
 
  /*------------ Position vector (if gratio!=1) -----------*/
- int* position = NULL;  
+ int* position = NULL;
  int* pos_cpu  = NULL;
- if(gratio!=1){   
+ if(gratio!=1){
    pos_cpu =(int*)malloc(npt*sizeof(int));
    CHECK_CUDA_ERROR( cudaMalloc((void**)&position,npt*sizeof(int)) );
-    
-   find_positions(pt0,pt1,delta,final,pos_cpu,ngfftrec,gratio);    
+
+   find_positions(pt0,pt1,delta,final,pos_cpu,ngfftrec,gratio);
    CHECK_CUDA_ERROR( cudaMemcpy(position,pos_cpu,npt*sizeof(int),cudaMemcpyHostToDevice) );
  }
 
  /*-------- Initialization points to compute in the First Loop ---*/
  int pos0 = 0;
  int loctranc = min(nptrec,npt);
- int pos1 = pos0+loctranc; 
+ int pos1 = pos0+loctranc;
  *max_rec = 0;
 
  /* printf("loctranc %d\n",loctranc); */
@@ -182,9 +182,9 @@ recursion_bth(
  printf(" Start  %10d\n End    %10d\n Npt    %10d\n gratio %10d\n Tot pt %10d\n",delta,final,npt,gratio,ntranche);
  do{
    int contrec = 0;
-   printf("now: from %d to %d, so %d pts of %d \n",pos0+delta,pos1+delta,loctranc,npt);    
-    
-   /*--------- Setting arrays Un,Unold on the Device --------------*/  
+   printf("now: from %d to %d, so %d pts of %d \n",pos0+delta,pos1+delta,loctranc,npt);
+
+   /*--------- Setting arrays Un,Unold on the Device --------------*/
    starttime(&start);
    if(gratio==1)
    {
@@ -194,7 +194,7 @@ recursion_bth(
      CUDA_KERNEL_CHECK("setting_un");
    }
    else
-   {	
+   {
      int maxcoord = min(npt,pos_cpu[pos1-1]+1);
      set_un_gratio <<< grid, block >>>(un_gpu, unold_gpu,vn_gpu,an_gpu,
 				       bn2_gpu, position,pos0, maxcoord,
@@ -202,11 +202,11 @@ recursion_bth(
      CUDA_KERNEL_CHECK("set_un_gratio");
      //printf("pos_cpu[pos0] %d,pos_cpu[pos1] %d,nptrec %d,npt %d\n",pos_cpu[pos0],pos_cpu[pos1-1],nptrec,npt);
    }
-    
+
    calctime(&stop,start,timing,1);
    //prt_dbg_arr(un_gpu,largeur,10,0,"un0");
    check_err(0);
-  
+
    CHECK_CUDA_ERROR( cufftPlanMany(&plan_dir,3,ngfftrec,NULL,1,0,NULL,1,0,FFT_C2C,loctranc) );
 
    /*------------------ Loop on nrec ------------------------------*/
@@ -223,7 +223,7 @@ recursion_bth(
      //prt_dbg_arrc(cvn_gpu,clargeur,10,0,"vn=un*pot");
 
      /*-------------- Loop on loctranc: CONVOLUTION by FFT -----*/
-      
+
      /*----- FFT -----*/
      starttime(&start);
      CHECK_CUDA_ERROR( FFTEXECC2C(plan_dir,cvn_gpu,cvn_gpu,CUFFT_FORWARD) );
@@ -231,14 +231,14 @@ recursion_bth(
      //prt_dbg_arrc(cvn_gpu,clargeur,10,0,"after FFT");
 
      /*---- Moltiplication of the FFT with the Green Kernel ------*/
-     starttime(&start); 
+     starttime(&start);
      complex_prod_tot <<< grid, block >>> (cvn_gpu, ZT_p_gpu,loctranc,nfftrec);
      CUDA_KERNEL_CHECK("complex_prod_tot");
      calctime(&stop,start,timing,4);
      //prt_dbg_arrc(cvn_gpu,clargeur,10,0,"after PROD");
 
      /*---- Inverse FFT -----*/
-     starttime(&start); 
+     starttime(&start);
      CHECK_CUDA_ERROR( FFTEXECC2C(plan_dir,cvn_gpu,cvn_gpu,CUFFT_INVERSE) );
      calctime(&stop,start,timing,3);
      //prt_dbg_arrc(cvn_gpu,clargeur,10,0,"after FFT-1");
@@ -247,7 +247,7 @@ recursion_bth(
      starttime(&start);
      vn_x_pot_dv <<< grid, block >>>(cvn_gpu,vn_gpu, pot_gpu, norm_vol, loctranc);
      CUDA_KERNEL_CHECK("vn_x_pot_dv");
-     calctime(&stop,start,timing,5);   
+     calctime(&stop,start,timing,5);
      //prt_dbg_arr(vn_gpu,largeur,10,0,"vn=vn*pot*infvol2");
 
      /*-------------- Compute An = Un*Vn -------------*/
@@ -258,7 +258,7 @@ recursion_bth(
      CHECK_CUDA_ERROR( cudaMemcpy(&(an[(irec)*npt+pos0]),an_gpu,(size_t)loctranc*sizeof(cureal),cudaMemcpyDeviceToHost) );
      calctime(&stop,start,timing,6);
      //prt_dbg_arr(an_gpu,(height_max)*sizeof(cureal),10,0,"an");
-   
+
      /*-------------- PREPARING NEXT ITERATION IN IREC -----------------*/
      if(irec<nrec){
        /*---------- Compute Un,Vn,Unold: Old to New -------*/
@@ -276,7 +276,7 @@ recursion_bth(
        calctime(&stop,start,timing,8);
        //prt_dbg_arr(bn2_gpu,(height_max)*sizeof(cureal),1,0,"bn2");
        //for(int mm=0;mm<1;mm++){printf("%9.5e ",bn2[(irec+1)*npt+pos0+mm]);}; printf("\n");
-       
+
        /*---------- Compute Un = Un/Sqrt(Bn) ---------------*/
        starttime(&start);
        un_invsqrt_scale <<< grid,block >>> (un_gpu, bn2_gpu, loctranc);
@@ -284,28 +284,28 @@ recursion_bth(
        calctime(&stop,start,timing,9);
        //prt_dbg_arr(un_gpu,largeur,5,0,"unnew rescaled");
 
- 
+
        /*--------- Exit Criterium: Density and Error Calculations ----------*/
        starttime(&start);
        density_calc( beta*fermie, 2./inf_vol,tolrec,irec,trotter,npt,loctranc,
 		     pos0,&(contrec), bn2, an,
-		     erreur,prod_b2, 
+		     erreur,prod_b2,
 		     acc_rho, ND, NDold, NDnew);
        calctime(&stop,start,timing,10);
 
-       if(contrec==loctranc) break; 
-     }          
+       if(contrec==loctranc) break;
+     }
    }//End loop on nrec
 
-   *max_rec = max(*max_rec,irec+1); 
+   *max_rec = max(*max_rec,irec+1);
 
    CHECK_CUDA_ERROR( cufftDestroy(plan_dir) );
-    
+
    /*-------- Points to compute in the Next Loop ---*/
    loctranc = min(nptrec,npt-pos1);
-   pos0 = pos1; 
+   pos0 = pos1;
    pos1 = min(pos0+loctranc,npt-1);
-   
+
  }while(pos0 <pos1);
 
  // HAVE_GPU_CUDA3 should be removed, only very old systems (if still any) are using cuda 3
@@ -313,7 +313,7 @@ recursion_bth(
  CHECK_CUDA_ERROR( cudaThreadSynchronize() ); // deprecated
 #else
  CHECK_CUDA_ERROR( cudaDeviceSynchronize() );
-#endif   
+#endif
 
  /*--------------Free Memory on Device and Host----------*/
  free(ND);
@@ -342,7 +342,7 @@ recursion_bth(
  CHECK_CUDA_ERROR( cudaEventDestroy(start) );
  CHECK_CUDA_ERROR( cudaEventDestroy(stop) );
 
- 
+
  printf("\n---end-cudarec--------- \n");
  return;
 }

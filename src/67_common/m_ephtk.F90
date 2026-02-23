@@ -6,7 +6,7 @@
 !!  Helper functions common to e-ph calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -406,7 +406,6 @@ subroutine ephtk_update_ebands(dtset, ebands, header)
  unts = [std_out, ab_out]
 
  if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
- !if (.True.) then
    write(msg,"(2a,2(a,i0,a,f14.6,a))")&
    " Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.",ch10,&
    "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&

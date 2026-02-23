@@ -6,7 +6,7 @@
 !!  This module provides routines to read the Bethe-Salpeter Hamiltonian from file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1455,7 +1455,7 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
 !Local variables-------------------------------
  integer :: ncerr
  integer :: max_nreh, sum_nreh
- real(dp), ABI_CONTIGUOUS pointer :: r2vals(:,:),r3vals(:,:,:)
+ real(dp), contiguous, pointer :: r2vals(:,:),r3vals(:,:,:)
 ! *************************************************************************
 
  ! ==============================================

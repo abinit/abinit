@@ -5,13 +5,13 @@
 !!****m* ABINIT/m_CtqmcInterface
 !! NAME
 !!  m_CtqmcInterface
-!! 
-!! FUNCTION 
-!!  Manage a ctqmc simulation. 
+!!
+!! FUNCTION
+!!  Manage a ctqmc simulation.
 !!  friendly interface for the user
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,7 +23,7 @@
 #include "defs.h"
 MODULE m_CtqmcInterface
 USE m_Ctqmc
-use defs_basis
+USE m_global
 
 IMPLICIT NONE
 
@@ -39,7 +39,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +47,9 @@ PRIVATE
 !! SOURCE
 
 TYPE, PUBLIC :: CtqmcInterface
-  TYPE(Ctqmc)         :: Hybrid
+  TYPE(Ctqmc), POINTER        :: Hybrid
+  TYPE(Ctqmc), ALLOCATABLE    :: Hybrid_chains(:)
+  INTEGER _PRIVATE :: num_chains   = 1
   INTEGER _PRIVATE :: opt_fk       = 0
   INTEGER _PRIVATE :: opt_order    = 0
   INTEGER _PRIVATE :: opt_histo    = 0
@@ -77,7 +79,7 @@ CONTAINS
 !!  Initialize with permanent parameters
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,10 +105,11 @@ CONTAINS
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,flavors,samples,beta,U,ostream,MPI_COMM,nspinor)
+SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,flavors,samples,beta,U,ostream,num_chains,&
+&    MPI_COMM,nspinor)
 
 !Arguments ------------------------------------
-  TYPE(CtqmcInterface), INTENT(INOUT) :: this
+  TYPE(CtqmcInterface), INTENT(INOUT), TARGET :: this
   INTEGER, OPTIONAL, INTENT(IN) :: MPI_COMM
   INTEGER, INTENT(IN) :: iseed
   DOUBLE PRECISION, INTENT(IN) :: sweeps
@@ -116,12 +119,13 @@ SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,fla
   INTEGER, INTENT(IN) :: samples
   !INTEGER, INTENT(IN) :: Wmax
   INTEGER, INTENT(IN) :: ostream
+  INTEGER, INTENT(IN) :: num_chains
   INTEGER, INTENT(IN) :: nspinor
   DOUBLE PRECISION, INTENT(IN) :: beta
   DOUBLE PRECISION, INTENT(IN) :: u
   !DOUBLE PRECISION, INTENT(IN) :: mu
 !Local arguements -----------------------------
-  INTEGER          :: ifstream!,opt_nondiag
+  INTEGER          :: ifstream,ichain!,opt_nondiag
   DOUBLE PRECISION, DIMENSION(1:10) :: buffer
  ! opt_nondiag=0
 
@@ -140,12 +144,23 @@ SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,fla
  ! buffer(10)=DBLE(opt_nondiag)
   !buffer(9)=0.d0!mu
   !buffer(9)=DBLE(Wmax)
-
+  this%num_chains = num_chains
+  MALLOC(this%Hybrid_chains, (this%num_chains))
+  this%Hybrid => this%Hybrid_chains(1)
   IF ( PRESENT( MPI_COMM ) ) THEN
     CALL Ctqmc_init(this%Hybrid, ostream, ifstream, .FALSE., MY_COMM=MPI_COMM,iBuffer=buffer)
   ELSE
     CALL Ctqmc_init(this%Hybrid, ostream, ifstream, .FALSE.,iBuffer=buffer)
   END IF
+  if(this%num_chains > 1) then
+    do ichain=2,this%num_chains
+      IF ( PRESENT( MPI_COMM ) ) THEN
+        CALL Ctqmc_init(this%Hybrid_chains(ichain), ostream, ifstream, .FALSE., MY_COMM=MPI_COMM,iBuffer=buffer)
+      ELSE
+        CALL Ctqmc_init(this%Hybrid_chains(ichain), ostream, ifstream, .FALSE.,iBuffer=buffer)
+      END IF
+    end do
+  end if
   this%opt_fk       = 0
   this%opt_order    = 0
   this%opt_histo    = 0
@@ -165,7 +180,7 @@ END SUBROUTINE CtqmcInterface_init
 !!  Set and save options for many runs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -194,7 +209,7 @@ END SUBROUTINE CtqmcInterface_init
 !! SOURCE
 
 SUBROUTINE CtqmcInterface_setOpts(this,opt_Fk,opt_order,opt_histo,opt_movie,&
-& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
+& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove)
 
 !Arguments ------------------------------------
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
@@ -238,7 +253,7 @@ END SUBROUTINE CtqmcInterface_setOpts
 !!  run a ctqmc simu and get results
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -264,7 +279,7 @@ END SUBROUTINE CtqmcInterface_setOpts
 !! SOURCE
 
 SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt_levels,Magmom_orb,Magmom_spin,Magmom_tot,Iatom, &
-&fname) 
+&fname)
 
 !Arguments ------------------------------------
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
@@ -281,15 +296,21 @@ SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt
   DOUBLE PRECISION, DIMENSION(:,:), OPTIONAL, INTENT(IN ) :: Magmom_spin
   DOUBLE PRECISION, DIMENSION(:,:), OPTIONAL, INTENT(IN ) :: Magmom_tot
   INTEGER, INTENT(IN )  :: Iatom
+  INTEGER               :: base_seed,ichain
   character(len=fnlen), INTENT(INOUT) :: fname
   CALL Ctqmc_reset(this%Hybrid)
+  if(this%num_chains > 1) then
+    do ichain=2,this%num_chains
+      CALL Ctqmc_reset(this%Hybrid_chains(ichain))
+    end do
+  end if
 
 !  ifstream = 42
 !
 !  OPEN(UNIT=ifstream, FILE="Gw.dat")
 !  CALL Ctqmc_setG0w(Hybrid, ifstream)
 !  CLOSE(ifstream)
-!  
+!
 
   IF ( PRESENT(opt_levels) ) &
     CALL Ctqmc_setMu(this%Hybrid, opt_levels)
@@ -302,16 +323,90 @@ SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt
   IF ( PRESENT(Magmom_orb) ) &
     CALL Ctqmc_setMagmom(this%Hybrid, Magmom_orb, Magmom_spin, Magmom_tot)
 
-  CALL Ctqmc_run(this%Hybrid,opt_order=this%opt_order, &
-                           opt_histo=this%opt_histo, &
-                           opt_movie=this%opt_movie, &
-                           opt_analysis=this%opt_analysis, &
-                           opt_check=this%opt_check, &
-                           opt_noise=this%opt_noise, &
-                           opt_spectra=this%opt_spectra, &
-                           opt_gMove=this%opt_gMove)
+  if(this%num_chains > 1) then
+    do ichain=2,this%num_chains
+      IF ( PRESENT(opt_levels) ) &
+        CALL Ctqmc_setMu(this%Hybrid_chains(ichain), opt_levels)
 
-  CALL Ctqmc_getResult(this%Hybrid,Iatom,fname)
+      CALL Ctqmc_setG0wTab(this%Hybrid_chains(ichain), G0omega,this%opt_fk)
+
+      IF ( PRESENT(matU) ) &
+        CALL Ctqmc_setU(this%Hybrid_chains(ichain), matU)
+
+      IF ( PRESENT(Magmom_orb) ) &
+        CALL Ctqmc_setMagmom(this%Hybrid_chains(ichain), Magmom_orb, Magmom_spin, Magmom_tot)
+    end do
+  end if
+
+  IF (this%Hybrid_chains(1)%rank == 0) THEN
+    WRITE(this%Hybrid_chains(1)%ostream,'(a,i0,a)') &
+      ' Ctqmc_run_parallel: Using ', this%num_chains, ' OpenMP chains'
+  END IF
+
+  ! If only 1 chain requested, just run serial version directly
+  IF (this%num_chains == 1) THEN
+    IF (this%Hybrid_chains(1)%rank == 0) THEN
+      WRITE(this%Hybrid_chains(1)%ostream,'(a)') &
+        'Running single chain (serial mode)'
+    END IF
+    CALL Ctqmc_run(this%Hybrid_chains(1), &
+                   opt_order=this%opt_order, &
+                   opt_histo=this%opt_histo, &
+                   opt_movie=this%opt_movie, &
+                   opt_analysis=this%opt_analysis, &
+                   opt_check=this%opt_check, &
+                   opt_noise=this%opt_noise, &
+                   opt_spectra=this%opt_spectra, &
+                   opt_gMove=this%opt_gMove)
+  ELSE
+
+    IF (this%Hybrid_chains(1)%rank == 0) THEN
+      WRITE(this%Hybrid_chains(1)%ostream,'(a,i0,a)') &
+        'Running ', this%num_chains, ' parallel CTQMC chains with OpenMP threads'
+    END IF
+
+
+    ! Save base seed and check template integrity
+    base_seed = this%Hybrid_chains(1)%seed
+
+    ! Copy template to each chain and set unique seed
+    DO ichain = 1, this%num_chains
+      ! Each chain gets a unique seed offset
+      this%Hybrid_chains(ichain)%seed = base_seed + (ichain - 1)*this%Hybrid%size
+      this%Hybrid_chains(ichain)%sweeps = this%Hybrid_chains(ichain)%sweeps / this%num_chains
+      this%Hybrid_chains(ichain)%tid = ichain
+    END DO
+
+    ! Run chains in parallel
+    !$omp parallel default(shared) private(ichain)
+    !$omp do schedule(static)
+    DO ichain = 1, this%num_chains
+      ! Each thread runs one chain
+      IF (this%Hybrid_chains(1)%rank == 0) THEN
+        !$omp critical
+        WRITE(this%Hybrid_chains(1)%ostream,'(a,i0,a,i0,a,i0)') &
+          '   Thread ', xomp_get_thread_num(), ' running chain ', ichain, &
+          ' with seed ', this%Hybrid_chains(ichain)%seed
+        !$omp end critical
+      END IF
+
+      ! Call with optional parameters
+      CALL Ctqmc_run(this%Hybrid_chains(ichain), &
+                     opt_order=this%opt_order, &
+                     opt_histo=this%opt_histo, &
+                     opt_movie=this%opt_movie, &
+                     opt_analysis=this%opt_analysis, &
+                     opt_check=this%opt_check, &
+                     opt_noise=this%opt_noise, &
+                     opt_spectra=this%opt_spectra, &
+                     opt_gMove=this%opt_gMove)
+    END DO
+    !$omp end do
+    !$omp end parallel
+
+  END IF
+
+  CALL Ctqmc_getResult(this%Hybrid,this%num_chains,this%Hybrid_chains,Iatom,fname)
 
   IF ( PRESENT(opt_sym) ) THEN
     CALL Ctqmc_symmetrizeGreen(this%Hybrid,opt_sym)
@@ -340,7 +435,7 @@ SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt
   END IF
 
 
-  CALL Ctqmc_printAll(this%Hybrid)
+  CALL Ctqmc_printAll(this%Hybrid, this%num_chains)
   !CALL Ctqmc_printQMC(this%Hybrid)
 
 END SUBROUTINE CtqmcInterface_run
@@ -354,7 +449,7 @@ END SUBROUTINE CtqmcInterface_run
 !!  change sweeps on the fly
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -389,7 +484,7 @@ END SUBROUTINE CtqmcInterface_setSweeps
 !!  Destroy simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -409,10 +504,16 @@ SUBROUTINE CtqmcInterface_finalize(this)
 
 !Arguments ------------------------------------
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
+  INTEGER :: ichain
 
   !IF ( this%Hybrid%init .EQV. .TRUE. ) THEN
 !    CALL Ctqmc_printAll(this%Hybrid)
-    CALL Ctqmc_destroy(this%Hybrid)
+  if(allocated(this%Hybrid_chains)) then
+    do ichain=1,this%num_chains
+      CALL Ctqmc_destroy(this%Hybrid_chains(ichain))
+    end do
+    FREE(this%Hybrid_chains)
+  end if
   !END IF
 
 END SUBROUTINE CtqmcInterface_finalize

@@ -9,7 +9,7 @@
 !!  using the perturbative approach.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (MG)
+!! Copyright (C) 2008-2026 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -329,7 +329,7 @@ subroutine my_select_melements(Mels, aname, flag_p, arr_p)
  character(len=*),intent(in) :: aname
  type(melements_t),target,intent(in) :: Mels
 !arrays
- complex(dp),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
+ complex(dp),contiguous, pointer :: arr_p(:,:,:,:)
 ! *************************************************************************
 
  SELECT CASE (tolower(aname))
@@ -509,7 +509,7 @@ subroutine melements_herm(Mels, aname)
  character(len=NAMELEN) :: key
 !arrays
  integer,parameter :: trsp_idx(2:4) = [2,4,3]
- complex(dp),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
+ complex(dp),contiguous, pointer :: arr_p(:,:,:,:)
 ! *************************************************************************
 
  ! === Symmetrize matrix elements ===
@@ -592,7 +592,7 @@ subroutine melements_mpisum(Mels, comm, aname)
  character(len=NAMELEN) :: key
  !character(len=500) :: msg
 !arrays
- complex(dp),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
+ complex(dp),contiguous, pointer :: arr_p(:,:,:,:)
 ! *************************************************************************
 
  do iname=1,NNAMES
@@ -656,7 +656,7 @@ subroutine melements_print(Mels, names_list, header, unit, prtvol, mode_paral)
  complex(dp),allocatable :: mat(:,:)
 
  type rarr_dpc4
-   complex(dp),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
+   complex(dp),contiguous, pointer :: arr_p(:,:,:,:)
  end type rarr_dpc4
  type(rarr_dpc4),allocatable :: data_p(:)
 ! *************************************************************************
@@ -804,7 +804,7 @@ subroutine melements_zero(Mels, irrep_tab, aname)
  integer,pointer :: flag_p
  character(len=NAMELEN) :: key
 !arrays
- complex(dp),ABI_CONTIGUOUS pointer :: arr_p(:,:,:,:)
+ complex(dp),contiguous, pointer :: arr_p(:,:,:,:)
 ! *************************************************************************
 
  do iname=1,NNAMES

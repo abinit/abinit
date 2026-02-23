@@ -6,7 +6,7 @@
 !!  management of output and log files when parallelisation on cells is activated
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2025 ABINIT group (FJ,MT)
+!!  Copyright (C) 2001-2026 ABINIT group (FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,7 +76,7 @@ contains
  character(len=10) :: appen,tag
 
 ! *********************************************************************
- 
+
  if (nfil<=1) return
 
  ABI_MALLOC(filout,(nfil))
@@ -143,7 +143,7 @@ contains
  if (prtvol>0) then
    if (do_write_log) then
      call abi_io_redirect(new_ab_out=get_unit())
-     if (me==0) then 
+     if (me==0) then
        if (open_file(NULL_FILE,msg,unit=ab_out,status='unknown') /= 0) then
          ABI_ERROR(msg)
        end if
@@ -153,7 +153,7 @@ contains
    end if
  else if (paral==1) then
    call abi_io_redirect(new_ab_out=get_unit())
-   if (me==0) then 
+   if (me==0) then
      if (open_file(filout(ii),msg,unit=ab_out,status='unknown') /= 0) then
        ABI_ERROR(msg)
      end if
@@ -209,7 +209,7 @@ contains
 ! *********************************************************************
 
  if (nfil<=1) return
- 
+
  me=xmpi_comm_rank(commworld)
  call xmpi_barrier(commspace) !waiting for all files to be written and close
 
@@ -282,7 +282,7 @@ contains
 !!   commworld= communicator of the world
 !!   nfil= number of files to be named
 !!   paral= flag to activate parallelisation
-!!   prtvol= flag to activate printing  
+!!   prtvol= flag to activate printing
 !!
 !! SOURCE
 !!

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Copyright (C) 2010-2025 ABINIT Group (Jean-Michel Beuken)
+# Copyright (C) 2010-2026 ABINIT Group (Jean-Michel Beuken)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -135,9 +135,9 @@ def Checking_on_warning_error_list(valid) :
   global warning_list
 
   for warning_error in warning_list:
-    
+
     v_rc = None
-    v_rc = warning_error['valid'].search(valid) 
+    v_rc = warning_error['valid'].search(valid)
     if v_rc != None :
        return True
 
@@ -240,15 +240,15 @@ def main(filename,home_dir=""):
 
   #
   tree = etree.parse(filename)
-  
-  rc=0 # true error counter 
+
+  rc=0 # true error counter
   frc=0 # false error counter
   wrc=0 # warning error counter
 
   urls=set()
 
   for child in tree.xpath("/linkchecker/urldata"):
-  
+
     url    = child.find('url')
     parent = child.find('parent')
     URL    = url.text
@@ -262,7 +262,7 @@ def main(filename,home_dir=""):
       if not ("FAKE_URL" in URL) :
           if URL in urls :
              continue
-          else: 
+          else:
              urls.add(URL)
       #else:
       #    if not ("index.html" in parent.text) :
@@ -298,7 +298,7 @@ def main(filename,home_dir=""):
     if valid == "syntax OK" :
         Check_connection = True
         if debug : print("check cnx : ",url.text)
-        try: 
+        try:
            request = requests.get(url.text, headers={"content-type":"text"}, timeout=(2,2) )
            cnx_status = request.status_code
         except (requests.Timeout, requests.ConnectionError, KeyError) as e:
@@ -308,7 +308,7 @@ def main(filename,home_dir=""):
            continue
         if cnx_status == 403 :  # cnx ok but Forbidden for robot
            continue
-    
+
     # check if the error is a "false" error
     if Checking_on_false_error_list(url=url, valid=valid, parent=parent.text, cnx=cnx_status) :
         frc += 1
@@ -334,10 +334,10 @@ def main(filename,home_dir=""):
     try:
        print("{0:12} {1}".format('Infos',info.text))
     except:
-       pass 
+       pass
     print("{0:12} {1}".format('Real URL',realurl.text))
     print("{0:12} {1}".format('Result',valid))
-    if Check_connection : 
+    if Check_connection :
           print("{0:12} {1}".format('Status CNX',request.status_code))
     print('---------------------------')
 

@@ -1,6 +1,6 @@
 #!/bin/csh
 #
-# Copyright (C) 2001-2025 ABINIT group (Lsi,XG)
+# Copyright (C) 2001-2026 ABINIT group (Lsi,XG)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .
@@ -8,7 +8,7 @@
 #
 # For a DOS-formatted file, each line end with a
 # CR-NL (Carriage Return-New Line), while with
-# Unix-formatted files, only the NL is used. 
+# Unix-formatted files, only the NL is used.
 # Under Unix, some commands recognize the CR-NL as being
 # simply a new line (e.g. vi), while some other do not (e.g. diff).
 # This script allows to suppress the CR at
@@ -39,7 +39,7 @@ while ($index <= $number_arg)
   rm -f tmp.file
 
   # Here is the suppression of the CR
-  awk '/\r$/ {sub("\r$","");print $0}' $file > tmp.file 
+  awk '/\r$/ {sub("\r$","");print $0}' $file > tmp.file
   echo " changes done "
   mv $file $file.OLD
   mv tmp.file $file

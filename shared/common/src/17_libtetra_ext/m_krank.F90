@@ -6,7 +6,7 @@
 !! This module deals with rank objects for hashing k-point vector lists
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2025 ABINIT group (MVer, HM, MG)
+!! Copyright (C) 2010-2026 ABINIT group (MVer, HM, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,7 +58,7 @@ module m_krank
 
    integer,allocatable :: invrank(:)
 
-   real(dp),ABI_CONTIGUOUS pointer :: kpts(:,:)
+   real(dp),contiguous, pointer :: kpts(:,:)
     ! Reference to input k-points or copy of the array depending on kpts_owns_memory
 
     ! Internal tables used by krank_get_mapping

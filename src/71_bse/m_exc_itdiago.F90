@@ -6,7 +6,7 @@
 !!  Iterative diagonalization of the BSE Hamiltonian with band-by-band conjugate gradient method
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,7 +18,6 @@
 #endif
 
 #include "abi_common.h"
-
 
 MODULE m_exc_itdiago
 
@@ -136,7 +135,7 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
 ! real(dp),allocatable :: gsc(:,:),cg(:,:)
  !complex,allocatable :: hexc(:,:)
  complex(dp),allocatable :: hexc(:,:),hji(:),vec_tmp(:)
- complex(dp),ABI_CONTIGUOUS pointer :: my_phi(:)
+ complex(dp),contiguous, pointer :: my_phi(:)
  real(dp),allocatable :: hexc_diagonal(:)
  complex(dp),target,allocatable :: phi_block(:,:)
  complex(dp),allocatable :: hphi(:) !,buffer_dpc(:)

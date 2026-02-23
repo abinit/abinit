@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MT)
+!!  Copyright (C) 2008-2026 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,6 +24,7 @@ module m_opernlc_ylm_allwf
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_gputk
  use m_abi_linalg
  use, intrinsic :: iso_c_binding
 

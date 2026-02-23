@@ -7,7 +7,7 @@
 !! Can use either FoX or pure Fortran routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (MT, FJ)
+!! Copyright (C) 2005-2026 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3073,7 +3073,14 @@ end subroutine paw_setup_copy
 !  End of reading loop
  end do
 
- if(Atm%ln_size>0)then
+ atm%zcore_conv=.false.
+ atm%nc_conv=.false.
+ atm%nresid_c=one
+
+ if(Atm%ln_size==0)then
+   LIBPAW_ALLOCATE(Atm%mode,(1,1))
+   Atm%mode = ORB_FROZEN
+ else
    LIBPAW_ALLOCATE(Atm%eig,(Atm%ln_size,Atm%nsppol))
    LIBPAW_ALLOCATE(Atm%occ,(Atm%ln_size,Atm%nsppol))
    LIBPAW_ALLOCATE(Atm%occ_res,(Atm%ln_size,Atm%nsppol))
@@ -3187,9 +3194,6 @@ end subroutine paw_setup_copy
    Atm%mode = ORB_FROZEN
    LIBPAW_ALLOCATE(Atm%max_occ,(Atm%ln_size,Atm%nsppol))
    Atm%max_occ=Atm%occ
-   atm%zcore_conv=.false.
-   atm%nc_conv=.false.
-   atm%nresid_c=one
 
 !   ! * Setup of kln2ln.
 !   !TODO this has to be tested

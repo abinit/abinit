@@ -9,7 +9,7 @@
 !!  xmpi_scatterv is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2025 ABINIT group (MT)
+!!  Copyright (C) 2001-2026 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -215,7 +215,7 @@ subroutine xmpi_scatterv_dp2d(xval,sendcounts,displs,recvbuf,recvcount,root,comm
  integer,intent(out) :: ier
 
 !Local variables-------------------
- integer :: cc,dd,sz1 
+ integer :: cc,dd,sz1
 
 ! *************************************************************************
 

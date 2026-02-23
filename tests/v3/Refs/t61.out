@@ -1,8 +1,8 @@
 
-.Version 9.0.0 of CUT3D 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.0.0 of CUT3D
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  CUT3D comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Mon 24 Feb 2020.
 - ( at 16h16 )
-  
+
 
   What is the name of the 3D function (density, potential or wavef) file ?
   => Your 3D function file is: t60o_DEN
@@ -24,11 +24,11 @@
 - Your file contains unformatted binary header + 3D data
 
  ===============================================================================
- ECHO of the ABINIT file header 
- 
+ ECHO of the ABINIT file header
+
  First record :
 .codvsn,headform,fform = 9.0.0      80   52
- 
+
  Second record :
  bantot,intxc,ixc,natom  =    10     0     1     2
  ngfft(1:3),nkpt         =    36    36    36     2
@@ -118,13 +118,13 @@
  title= Troullier-Martins psp for element  Cl        Thu Oct 27 17:32:09 EDT 1994
   znuclpsp= 17.00, zionpsp=  7.00, pspso=  0, pspdat=940714, pspcod=  1, pspxc=  1
   lmnmax  =  2
- 
+
  Last record :
  residm,etot,fermie=    1.767583E-09   -2.299289491072E+01   -5.546495E-02
  xred =
             0.000000E+00    0.000000E+00    0.000000E+00
             5.000000E-01    5.000000E-01    5.000000E-01
- End the ECHO of the ABINIT file header 
+ End the ECHO of the ABINIT file header
  ===============================================================================
 
  ===========================================================
@@ -143,7 +143,7 @@
    1    0.000000E+00    0.000000E+00    0.000000E+00
    2    5.235000E+00    5.235000E+00    5.235000E+00
 
-  This file is a Density or Potential file 
+  This file is a Density or Potential file
 
   3D function was read. Ready for further treatment.
 
@@ -157,7 +157,7 @@
    4 => volume (interpolation of data in a volume)
    5 => 3D formatted data (output the bare 3D data - one column)
    6 => 3D indexed data (bare 3D data, preceeded by 3D index)
-   7 => 3D Molekel formatted data 
+   7 => 3D Molekel formatted data
    8 => 3D data with coordinates (tecplot ASCII format)
    9 => output .xsf file for XCrysDen
   11 => compute atomic charge using the Hirshfeld method
@@ -176,7 +176,7 @@
 
 
      Hirshfeld analysis
-     Atom       Zion       Electron  Charge       Net charge 
+     Atom       Zion       Electron  Charge       Net charge
 
         1     1.000000E+00    -8.922569E-01     1.077431E-01
         2     7.000000E+00    -7.107726E+00    -1.077259E-01

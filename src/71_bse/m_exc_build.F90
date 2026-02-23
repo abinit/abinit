@@ -7,7 +7,7 @@
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!!  Copyright (C) 2009-2025 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!!  Copyright (C) 2009-2026 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -224,10 +224,9 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
  character(len=fnlen) :: tmpfname
  integer :: ii
 !END DBYG
- complex(gwp),allocatable :: vc_sqrt_qbz(:)
- complex(gwp),allocatable :: rhotwg1(:),rhotwg2(:),rhxtwg_vpv(:),rhxtwg_cpc(:),ctccp(:)
+ complex(gwp),allocatable :: vc_sqrt_qbz(:), rhotwg1(:),rhotwg2(:),rhxtwg_vpv(:),rhxtwg_cpc(:),ctccp(:)
  complex(gwp),target,allocatable :: ur_ckp(:),ur_vkp(:),ur_vk(:),ur_ck(:)
- complex(gwp),ABI_CONTIGUOUS pointer :: ptur_ckp(:),ptur_vkp(:),ptur_vk(:),ptur_ck(:)
+ complex(gwp),contiguous, pointer :: ptur_ckp(:),ptur_vkp(:),ptur_vk(:),ptur_ck(:)
  type(pawcprj_type),target,allocatable :: Cp_tmp1(:,:),Cp_tmp2(:,:)
  type(pawcprj_type),target,allocatable :: Cp_tmp3(:,:),Cp_tmp4(:,:)
  type(pawcprj_type),allocatable :: Cp_ckp(:,:),Cp_vkp(:,:)
@@ -286,7 +285,6 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
    ABI_MALLOC(bb_vpv1,(npweps))
    ABI_MALLOC(bb_vpv2,(npweps))
    ABI_MALLOC(cc_vpv,(npweps))
-
    ABI_MALLOC(aa_cpc,(npweps))
    ABI_MALLOC(bb_cpc1,(npweps))
    ABI_MALLOC(bb_cpc2,(npweps))
@@ -568,8 +566,8 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
 
      write(msg,'(a,2i2,a)')" Calculating direct Coulomb term for (spin1,spin2) ",spin1,spin2," using full W_{GG'} ..."
      if (w_is_diagonal) then
-        write(msg,'(a,2i2,a)')&
-&        " Calculating direct Coulomb term for (spin1, spin2) ",spin1,spin2," using diagonal approximation for W_{GG'} ..."
+       write(msg,'(a,2i2,a)')&
+         " Calculating direct Coulomb term for (spin1, spin2) ",spin1,spin2," using diagonal approximation for W_{GG'} ..."
      end if
      call wrtout(std_out, msg)
 
@@ -635,10 +633,6 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
          !
          ABI_MALLOC(gbound,(2*mgfft_osc+8,2))
          call Gsph_c%fft_tabs(g0,mgfft_osc,ngfft_osc,use_padfft,gbound,igfftg0)
-#ifdef FC_IBM
- ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
- use_padfft = 0
-#endif
          if ( ANY(fftalga_osc == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
          if (use_padfft==0) then
            ABI_FREE(gbound)
@@ -1741,15 +1735,12 @@ subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gs
  complex(sp) :: ctemp
  character(len=500) :: msg
 !arrays
- integer :: bidx(2,4),spin_ids(2,3)
+ integer :: bidx(2,4),spin_ids(2,3), my_cols(2),my_rows(2) !,proc_end(2),proc_start(2)
  integer(i8b) :: nels_block(3)
- integer :: my_cols(2),my_rows(2) !,proc_end(2),proc_start(2)
- integer,allocatable :: ncols_of(:)
- integer,allocatable :: col_start(:),col_stop(:)
+ integer,allocatable :: ncols_of(:), col_start(:),col_stop(:)
  real(dp) :: qbz(3),tsec(2) !kbz(3),kpbz(3),
  complex(dp),allocatable :: my_kxssp(:,:)
  complex(gwp),allocatable :: vc_sqrt_qbz(:),rhotwg1(:),rhotwg2(:)
-
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -2236,7 +2227,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  real(dp) :: qbz(3),spinrot_k(4),tsec(2)
  complex(gwp),allocatable :: rhotwg1(:)
  complex(gwp),target,allocatable :: ur1(:),ur2(:)
- complex(gwp),ABI_CONTIGUOUS pointer :: ptr_ur1(:),ptr_ur2(:)
+ complex(gwp),contiguous, pointer :: ptr_ur1(:),ptr_ur2(:)
  type(pawcprj_type),allocatable :: Cp1(:,:),Cp2(:,:)
  type(pawpwij_t),allocatable :: Pwij_q0(:)
 !************************************************************************
@@ -2306,10 +2297,6 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  ABI_MALLOC(gbound,(2*mgfft_osc+8,2))
  call Gsph_x%fft_tabs((/0,0,0/),mgfft_osc,ngfft_osc,use_padfft,gbound,igfftg0)
  if ( ANY(fftalga_osc == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
-#ifdef FC_IBM
- ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
- use_padfft = 0
-#endif
  if (use_padfft==0) then
    ABI_FREE(gbound)
    ABI_MALLOC(gbound,(2*mgfft_osc+8,2*use_padfft))

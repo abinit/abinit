@@ -240,7 +240,7 @@ A typical workflow for self-trapped polaron calculations involves the following 
    In the simplest case, one uses a $\qq$-mesh that is equal to the GS $\kk$-mesh (sub-meshes are also fine)
    and the DFPT calculations can directly start from the WFK produced in step #1.
    Remember to compute $\bm{\epsilon}^{\infty}$, $\bm{Z}^*$ (polar materials) and the dynamical quadrupoles
-   $\bm{Q}^*$ as these quantities are needed for an accurate interpolation of phonon frequencies and DFPT potentials.
+   $\bm{Q}^*$ as these quantities are needed for a precise interpolation of phonon frequencies and DFPT potentials.
 
 3. **NSCF computation** of a WFK file on a much denser $\kk$-mesh representing a BvK supercell hosting a polaron.
    The NSCF run uses the DEN file produced in step #1.
@@ -330,7 +330,7 @@ mv LiF_eph_varpeq-master LiF_eph_varpeq
 The script used to precompute the files is available [here](https://github.com/abinit/LiF_eph_varpeq/blob/main/run.sh),
 with the necessary `*abi` files provided in the same repository.
 
-Note that several parameters have been tuned to reach a reasonable **compromise between accuracy
+Note that several parameters have been tuned to reach a reasonable **compromise between precision
 and computational cost** so do not expect the results obtained at the end of the lesson to be fully converged.
 More specifically, we use norm-conserving pseudopotentials with a cutoff energy [[ecut]]
 of 30 Ha (too low, it should be ~45 Ha).

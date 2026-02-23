@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2026 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -278,7 +278,7 @@ ABI_FC_EXTENSIONS
 
 # Get module file case
 ABI_FC_MOD_CASE
-
+ABI_FC_MODDIR_FLAG
 # The IBM Fortran compiler crashes if the mpi module is included
 # more than once
 if test "${abi_fc_vendor}" = "ibm" -a "${abi_mpi_enable}" = "yes"; then
@@ -557,7 +557,7 @@ test "${CXX_LIBS}" = "" && \
 # Final adjustments for Fortran
 # Note: FCFLAGS_OPTIM must not be included (per-directory optimizations)
 test "${FCFLAGS}" = "" && \
-  FCFLAGS="${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_OPENMP} ${FCFLAGS_OPENMP_OFFLOAD} ${FCFLAGS_EXTRA}"
+  FCFLAGS="${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_OPENMP} ${FCFLAGS_OPENMP_OFFLOAD} ${FCFLAGS_EXTRA} "
 test "${FC_LDFLAGS}" = "" && \
   FC_LDFLAGS="${FC_LDFLAGS_DEBUG} ${FC_LDFLAGS_OPTIM} ${FC_LDFLAGS_HINTS} ${FC_LDFLAGS_EXTRA}"
 test "${FC_LIBS}" = "" && \
@@ -600,6 +600,14 @@ fi
 # Fixed in autoconf > 2.72.
 if test "${abi_fc_vendor}" = "nvhpc" -a "${target_cpu}" = "aarch64"; then
   FCLIBS=`echo ${FCLIBS} | sed -e 's/-lsr-complexity-limit=[[0-9]]* //g' -e 's/-lsr-complexity-limit=[[0-9]]*$//g'`
+
+  # Remove "ignoring -lnvmalloc" warnings on recent NVHPC versions
+  nvhpc_version_major=`echo ${abi_fc_version} | sed "s/-.*//" | cut -f1 -d'.'`
+  nvhpc_version_minor=`echo ${abi_fc_version} | sed "s/-.*//" | cut -f2 -d'.'`
+  nvhpc_version=`printf %d%02d ${nvhpc_version_major} ${nvhpc_version_minor}`
+  if test ${nvhpc_version} -gt 2501; then
+    FCLIBS=`echo ${FCLIBS} | sed -e 's/-lnvmalloc/-nvmalloc/g'`
+  fi
 fi
 
 # Determine Fortran-C name mangling scheme
@@ -1013,6 +1021,7 @@ ABI_TRIGGERS_SUMMARY
 
 status=""
 mandatory=""
+fb_path=""
 
 # Check linalg
 if test "${sd_linalg_flavor_req}" != "auto"; then
@@ -1023,13 +1032,16 @@ fi
 
 if test "${sd_linalg_enable}" != "yes"; then
       ABI_MSG_NOTICE_L([linalg-mandatory],[__CAUTION__ : linalg is __MANDATORY__ !])
-      mandatory="#"
+      mandatory="fail"
 fi
 
 # Check HDF5 serial
-if test "${sd_hdf5_enable}" = "no"; then
+if test "${sd_hdf5_enable}" = "no" -o "${sd_hdf5_init}" = "fb"; then
       ABI_MSG_NOTICE_L([hdf5-mandatory],[__CAUTION__ : HDF5 is __MANDATORY__ !])
       mandatory="#"
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
 else
   if test "${sd_hdf5_ok}" != "yes";then
       ABI_MSG_NOTICE_L([hdf5-nw],[__WARNING__ : HDF5 is not __WORKING__ !])
@@ -1037,11 +1049,14 @@ else
   fi
 fi
 
-if test "${sd_hdf5_ok}" = "yes";then
+if test "${sd_hdf5_ok}" = "yes" -o "${sd_hdf5_init}" = "fb";then
 # Check NetCDF
-  if test "${sd_netcdf_enable}" = "no"; then
+  if test "${sd_netcdf_enable}" = "no" -o "${sd_netcdf_init}" = "fb"; then
       ABI_MSG_NOTICE_L([netcdf-mandatory],[__CAUTION__ : NetCDF is __MANDATORY__ !])
       mandatory="#"
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
   else
      if test "${sd_netcdf_ok}" != "yes";then
         ABI_MSG_NOTICE_L([netcdf-nw],[__WARNING__ : NetCDF is not __WORKING__ !])
@@ -1050,9 +1065,12 @@ if test "${sd_hdf5_ok}" = "yes";then
   fi
 
 # Check NetCDF_fortran
-  if test "${sd_netcdf_fortran_enable}" = "no"; then
+  if test "${sd_netcdf_fortran_enable}" = "no" -o "${sd_netcdf_fortran_init}" = "fb"; then
       ABI_MSG_NOTICE_L([netcdf_fortran-mandatory],[__CAUTION__ : NetCDF Fortran is __MANDATORY__ !])
       mandatory="#"
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
   else
     if test "${sd_netcdf_fortran_ok}" != "yes";then
       ABI_MSG_NOTICE_L([netcdf_fortran-nw],[__WARNING__ : NetCDF Fortran is not __WORKING__ !])
@@ -1062,9 +1080,10 @@ if test "${sd_hdf5_ok}" = "yes";then
 fi
 
 # Check LibXC
-if test "${sd_libxc_enable}" = "no"; then
+if test "${sd_libxc_enable}" = "no" -o "${sd_libxc_init}" = "fb"; then
       ABI_MSG_NOTICE_L([libxc-mandatory],[__CAUTION__ : LibXC is __MANDATORY__ !])
       mandatory="#"
+      fb_path+=" --with-libxc=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version} "
 else
   if test "${sd_libxc_ok}" != "yes";then
       ABI_MSG_NOTICE_L([libxc-nw],[__WARNING__ : LibXC is not __WORKING__ !])
@@ -1100,9 +1119,14 @@ if test "${sd_xmlf90_enable}" = "yes"; then
 fi
 
 # Help to produce libraires
-if test ! -z "${mandatory}"; then
+if test "${mandatory}" = "#"; then
       ABI_MSG_NOTICE_L([help-fb],[We can __help__ you !])
+else
+   if test "${mandatory}" = "fail"; then
+   	ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
+   fi
 fi
+
 
 if test ! -z "${status}" -o ! -z "${mandatory}"; then
       ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
@@ -1128,9 +1152,9 @@ ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
 #fi
 
 # Check exit
-if test ! -z "${status}" -o ! -z "${mandatory}"; then
-      exit 2
-fi
+#if test ! -z "${status}" -o ! -z "${mandatory}"; then
+#      exit 2
+#fi
 
 
 #-------------------- END JMB --------------------------------------------#
@@ -1261,29 +1285,11 @@ ABI_OUTPUT
 
 # FIXME: Generate fake makefile for the fallbacks until the test farm is
 #        updated
+AC_MSG_NOTICE(["INSTALL is ${INSTALL}"])
 test -e "fallbacks" || ${INSTALL} -d -m 755 "fallbacks"
-${INSTALL} -m 644 "${abinit_srcdir}/config/makefiles/fallbacks.mf" \
+${INSTALL} -m 644 "${abinit_srcdir}/fallbacks/Makefile.am" \
   "fallbacks/Makefile"
 
-# Call CMake to generate Makefile for Kokkos sources directories
-if test "${sd_kokkos_enable}" = "yes"; then
-  rm ${abinit_builddir}/src/16_kokkos_toolbox/Makefile
-  cd ${abinit_builddir}/src/16_kokkos_toolbox && \
-    cmake ${abinit_srcdir}/shared/common/src/16_kokkos_toolbox/. -Wno-dev  \
-    -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
-    -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
-    -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
-    -DCMAKE_Fortran_COMPILER=${FC} && \
-    cd -
-  rm ${abinit_builddir}/src/44_manage_kokkos/Makefile
-  cd ${abinit_builddir}/src/44_manage_kokkos && \
-    cmake ${abinit_srcdir}/src/44_manage_kokkos/. -Wno-dev  \
-    -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
-    -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
-    -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
-    -DCMAKE_Fortran_COMPILER=${FC} && \
-    cd -
-fi
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -1306,3 +1312,56 @@ fi
 #fi
 ABI_MSG_FC_BUGGY(${abi_fc_vendor})
 ABI_MSG_END
+
+
+
+FALLBACKS_SUBDIRS=""
+AC_ARG_ENABLE([create_reconfigure_for_fb],
+    [],                                 dnl <- no help string: keeps it hidden
+    [enable_reconfigure_for_fb="$enableval"],       dnl action if given
+    [enable_reconfigure_for_fb="yes"]                dnl default if not given
+)
+
+
+
+if test "x${mandatory}" = "x#"; then
+  AC_MSG_NOTICE(["running cp ${abinit_srcdir}/config/scripts/install_fallbacks.sh ${abinit_builddir}"])
+  cp ${abinit_srcdir}/config/scripts/install_fallbacks.sh .
+  if test "x$enable_reconfigure_for_fb" = "xyes"; then
+      printf '%s/configure %s %s --disable-create_reconfigure_for_fb \n' "${abinit_srcdir}"  "$ac_configure_args" "$fb_path" > ${abinit_builddir}/.reconfigure
+      chmod +x ${abinit_builddir}/.reconfigure
+  fi
+  chmod +x ${abinit_builddir}/install_fallbacks.sh
+#  FALLBACKS_SUBDIRS="fallbacks"
+#else
+fi
+#AC_SUBST(FALLBACKS_SUBDIRS)
+
+AC_OUTPUT
+
+
+# Call CMake to generate Makefile for Kokkos sources directories
+if test "${sd_kokkos_enable}" = "yes"; then
+  rm ${abinit_builddir}/src/16_kokkos_toolbox/Makefile
+  cd ${abinit_builddir}/src/16_kokkos_toolbox && \
+    cmake ${abinit_srcdir}/shared/common/src/16_kokkos_toolbox/. -Wno-dev  \
+    -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
+    -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
+    -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
+    -DCMAKE_Fortran_COMPILER=${FC} && \
+    cd -
+  rm ${abinit_builddir}/src/44_manage_kokkos/Makefile
+  cd ${abinit_builddir}/src/44_manage_kokkos && \
+    cmake ${abinit_srcdir}/src/44_manage_kokkos/. -Wno-dev  \
+    -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abinit_srcdir} \
+    -DCMAKE_C_FLAGS="${CFLAGS}" -DCMAKE_Fortran_FLAGS="${FCFLAGS}"  \
+    -DCMAKE_CXX_FLAGS="-O2" -DCMAKE_C_COMPILER=${CC}  -DCMAKE_CXX_COMPILER=${CXX} \
+    -DCMAKE_Fortran_COMPILER=${FC} && \
+    cd -
+fi
+
+
+if test "x${mandatory}" = "x#"; then
+  ABI_TRIGGERS_SUMMARY
+  ABI_MSG_NOTICE_L([help-fb], [Missing Mandatory library!])
+fi

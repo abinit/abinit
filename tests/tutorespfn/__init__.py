@@ -15,6 +15,7 @@ subsuites = [
 "eph4mob",
 "eph4isotc",
 "eph4zpr",
+"eph4zpr_gwpt",
 "eph4vpq",
 "lw",
 "nlo",
@@ -71,6 +72,16 @@ inp_files = [
 "teph4zpr_7.abi",
 "teph4zpr_8.abi",
 "teph4zpr_9.abi",
+"teph4zpr_10.abi",
+#
+"teph4zpr_gwpt_1.abi",
+"teph4zpr_gwpt_2.abi",
+"teph4zpr_gwpt_3.abi",
+"teph4zpr_gwpt_4.abi",
+"teph4zpr_gwpt_5.abi",
+"teph4zpr_gwpt_6.abi",
+"teph4zpr_gwpt_7.abi",
+"teph4zpr_gwpt_8.abi",
 #
 "teph4vpq_1.abi",
 "teph4vpq_2.abi",
@@ -125,5 +136,4 @@ inp_files = [
 "trf2_4.abi",
 "trf2_5.abi",
 "trf2_6.abi",
-"trf2_7.abi",
 ]

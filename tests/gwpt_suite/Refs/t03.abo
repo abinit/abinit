@@ -1,8 +1,8 @@
 
-.Version 10.5.1.4 of ABINIT, released May 2025.
-.(MPI version, prepared for a x86_64_linux_gnu11.4 computer)
+.Version 10.7.0.2 of ABINIT, released Dec 2025.
+.(sequential version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 25 Jun 2025.
-- ( at 22h26 )
+.Starting date : Wed 31 Dec 2025.
+- ( at 10h48 )
 
-- input  file    -> /home/siyu/abinit/build/tests/Test_suite/gwpt_suite_t01-t02-t03-t04-t05/t03.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_serial/gmatteo_gwr/tests/TestBot_MPI1/gwpt_suite_t01-t02-t03-t04-t05-t06/t03.abi
 - output file    -> t03.abo
 - root for input  files -> t03i
 - root for output files -> t03o
@@ -126,7 +126,7 @@ P           mkmem           3
             typat      1  1
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.9311883380E-01  8.9311883380E-01  8.9311883380E-01
+                       8.9311883710E-01  8.9311883710E-01  8.9311883710E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.6877500000E+00  1.6877500000E+00  1.6877500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -188,15 +188,15 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ================================================================================
  prteigrs : about to open file t03o_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  3.37E-21  8.13E-22  2.94E-21  6.34E-22  5.19E-21  6.83E-22  5.34E-21  1.90E-21
-  7.08E-21  5.87E-22  6.42E-21  1.20E-21  5.66E-22  2.46E-21  6.18E-22  6.72E-22
-  6.90E-22  7.72E-22  5.08E-22  8.25E-21  7.52E-21  6.84E-21  8.41E-21  1.53E-21
-  4.20E-22  4.11E-21  3.39E-21  5.36E-22  4.77E-21  1.70E-21  4.00E-21  6.89E-22
-  9.65E-21  5.60E-21  8.82E-22  2.68E-21  5.84E-21  4.97E-21  2.10E-21  3.48E-21
-  2.06E-21  7.62E-21  2.87E-21  1.06E-21  5.92E-21  7.90E-21  8.83E-21  5.47E-21
-  1.02E-21  3.60E-22  4.76E-22  5.87E-21  2.94E-21  8.12E-22  3.85E-21  6.43E-21
-  2.84E-21  2.22E-21  3.33E-21  3.15E-21  2.16E-21  2.39E-21  3.10E-21  2.45E-20
-  2.10E-15  8.27E-16  4.62E-17  4.96E-14  3.05E-15  5.40E-16
+  3.37E-21  8.24E-22  2.94E-21  6.34E-22  5.19E-21  6.83E-22  5.34E-21  1.90E-21
+  7.08E-21  5.86E-22  6.42E-21  1.20E-21  5.66E-22  2.46E-21  6.18E-22  6.73E-22
+  6.90E-22  7.72E-22  5.08E-22  8.24E-21  7.52E-21  6.84E-21  8.41E-21  1.53E-21
+  4.20E-22  4.11E-21  3.39E-21  5.35E-22  4.77E-21  1.70E-21  4.00E-21  6.90E-22
+  9.65E-21  5.60E-21  8.83E-22  2.68E-21  5.83E-21  4.97E-21  2.10E-21  3.48E-21
+  2.08E-21  7.60E-21  2.87E-21  1.06E-21  5.92E-21  7.92E-21  8.82E-21  5.49E-21
+  1.04E-21  3.60E-22  4.76E-22  5.87E-21  2.94E-21  8.11E-22  3.85E-21  6.43E-21
+  2.86E-21  2.22E-21  3.33E-21  3.15E-21  2.17E-21  2.39E-21  3.10E-21  2.45E-20
+  2.10E-15  8.28E-16  4.62E-17  4.96E-14  3.05E-15  5.39E-16
  -4.1171E-01  3.7562E-01  3.7562E-01  3.7562E-01  5.8180E-01  5.8180E-01
   5.8180E-01  8.6143E-01  1.0825E+00  1.3607E+00  1.3607E+00  1.3889E+00
   1.3889E+00  1.3889E+00  1.6515E+00  2.1059E+00  2.1059E+00  2.1059E+00
@@ -223,7 +223,7 @@ lattice_vectors:
 lattice_lengths: [   4.77368,    4.77368,    4.77368, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6920896E+01
-convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.727E-21, diffor:  0.000E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.732E-21, diffor:  0.000E+00, }
 etotal    :  -1.20376446E+01
 entropy   :   0.00000000E+00
 fermie    :   3.75619764E-01
@@ -245,16 +245,16 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   32.481E-22; max=  97.267E-22
+ Mean square residual over all n,k,spin=   32.483E-22; max=  97.321E-22
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.89311883379777     0.89311883379777     0.89311883379777
+    2      0.89311883709564     0.89311883709564     0.89311883709564
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
-              =  0.529177208590  0.529177208590  0.529177208590 angstroms
+              =  0.529177210544  0.529177210544  0.529177210544 angstroms
  prteigrs : about to open file t03o_EIG
  Eigenvalues (hartree) for nkpt=   3  k points:
  kpt#   1, nband= 70, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -351,7 +351,7 @@ P           mkmem           3
             typat      1  1
               wtk        0.12500    0.50000    0.37500
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       8.9311883380E-01  8.9311883380E-01  8.9311883380E-01
+                       8.9311883710E-01  8.9311883710E-01  8.9311883710E-01
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        1.6877500000E+00  1.6877500000E+00  1.6877500000E+00
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -360,10 +360,56 @@ P           mkmem           3
 
 ================================================================================
 
+- Total cpu        time (s,m,h):          3.7        0.06      0.001
+- Total wall clock time (s,m,h):          3.8        0.06      0.001
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0
+-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            3.7, wall_time =            3.8
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                              1.515  40.9         1.508  39.9           7531      -1.00        1.00       1.00
+- projbd                                    0.686  18.5         0.727  19.2          10442      -1.00        0.94       0.94
+- vtowfk(ssdiag)                            0.427  11.5         0.430  11.4             -1      -1.00        0.99       0.99
+- pspini                                    0.215   5.8         0.215   5.7              1      -1.00        1.00       1.00
+- nonlop(apply)                             0.192   5.2         0.181   4.8           7531      -1.00        1.06       1.06
+- getghc(/=fourXX,nonlop,fock_XX)           0.122   3.3         0.106   2.8             -1      -1.00        1.15       1.15
+- timing timab                              0.113   3.0         0.113   3.0             10      -1.00        1.00       1.00
+- newkpt(excl. rwwf   )                     0.035   1.0         0.036   1.0             -1      -1.00        0.98       0.98
+- get_dtsets_pspheads                       0.034   0.9         0.034   0.9              1      -1.00        1.00       1.00
+- fourdp                                    0.020   0.5         0.099   2.6             11      -1.00        0.20       0.20
+- abinit(chkinp,chkvars)                    0.019   0.5         0.019   0.5              1      -1.00        1.00       1.00
+- others (205)                              0.051   1.4         0.049   1.3             -1      -1.00        1.05       1.05
+-<END_TIMER>
+-
+- subtotal                                  3.429  92.6         3.517  93.0                                  0.97       0.97
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =           3.7, wall_time =           3.8
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                              1.515  40.9         1.508  39.9           7531      -1.00        1.00       1.00
+- projbd                                    0.686  18.5         0.727  19.2          10442      -1.00        0.94       0.94
+- vtowfk(ssdiag)                            0.427  11.5         0.430  11.4             -1      -1.00        0.99       0.99
+- pspini                                    0.215   5.8         0.215   5.7              1      -1.00        1.00       1.00
+- nonlop(apply)                             0.192   5.2         0.181   4.8           7531      -1.00        1.06       1.06
+- getghc(/=fourXX,nonlop,fock_XX)           0.122   3.3         0.106   2.8             -1      -1.00        1.15       1.15
+- timing timab                              0.113   3.0         0.113   3.0             10      -1.00        1.00       1.00
+- newkpt(excl. rwwf   )                     0.035   1.0         0.036   1.0             -1      -1.00        0.98       0.98
+- get_dtsets_pspheads                       0.034   0.9         0.034   0.9              1      -1.00        1.00       1.00
+- fourdp                                    0.020   0.5         0.099   2.6             11      -1.00        0.20       0.20
+- abinit(chkinp,chkvars)                    0.019   0.5         0.019   0.5              1      -1.00        1.00       1.00
+- others (205)                              0.051   1.4         0.049   1.3             -1      -1.00        1.05       1.05
+-<END_TIMER>
 
+- subtotal                                  3.429  92.6         3.517  93.0                                  0.97       0.97
 
 ================================================================================
 

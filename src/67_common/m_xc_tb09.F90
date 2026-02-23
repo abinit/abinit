@@ -7,7 +7,7 @@
 !!    functional (modified Becke-Johnson)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2023-2025 ABINIT group (MT)
+!! Copyright (C) 2023-2026 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -96,7 +96,7 @@ CONTAINS  !=====================================================================
 !!  ----- Optional arguments -----
 !!  [computation_type]= 'only_pw' : update only plane-wave contribution
 !!                      'only_paw': update only PAW on-site contribution
-!!                      'all' (default): compute all contributions  
+!!                      'all' (default): compute all contributions
 !!  [mpi_atmtab(:)]= indexes of the atoms treated by current proc
 !!  [comm_atom]= MPI communicator over atoms
 !!  [xc_funcs(2)]= <type(libxc_functional_type)>=libxc XC functionals (if not the global one)
@@ -210,7 +210,7 @@ subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,natom,nfft,ngfft,nhat,nhatdim, &
    end if
  end if
 
-!Initialize cell data 
+!Initialize cell data
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !Other initializations
@@ -219,7 +219,7 @@ subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,natom,nfft,ngfft,nhat,nhatdim, &
 !Initialization of Int[|Grad(Rho)|/Rho] contributions (plane-wave and on-site if PAW)
  if (compute_pw) grho_over_rho_pw=zero
  if (compute_paw) grho_over_rho_paw=zero
- 
+
 ! ========================================================================
 ! =========== Plane wave contribution to Int[|Grad(Rho)|/Rho] ============
 
@@ -236,7 +236,7 @@ subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,natom,nfft,ngfft,nhat,nhatdim, &
 !  If not possible, the gradient will be computed in Fourier space (see call to xcden)
    use_exact_nhat_gradient=(nhatdim==1.and.nhatgrdim==1.and.usexcnhat==1.and.intxc==0)
    if (use_exact_nhat_gradient) rhotot(1:nfft)=rhotot(1:nfft)-nhat(1:nfft,1)
- 
+
 !  Loop on unshifted or shifted grids
    do ishift=0,intxc
 
@@ -285,7 +285,7 @@ subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,natom,nfft,ngfft,nhat,nhatdim, &
    ABI_FREE(rhotot)
 
  end if ! compute_pw
- 
+
 ! ========================================================================
 ! ========== PAW on-site contributions to Int[|Grad(Rho)|/Rho] ===========
 
@@ -340,7 +340,7 @@ subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,natom,nfft,ngfft,nhat,nhatdim, &
      ABI_MALLOC(rhoxc,(mesh_size,lm_size))
      ABI_MALLOC(drhoxc,(mesh_size))
      ABI_MALLOC(dcorexc,(mesh_size))
-     
+
 !    Loop over AE and PS contributions
      do iloop=1,2
        if (iloop==1) then
@@ -351,7 +351,7 @@ subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,natom,nfft,ngfft,nhat,nhatdim, &
          rhoxc(:,:)=trho1(:,:,1)
          corexc => pawtab(itypat)%tcoredens(:,1)
          usenhat=usexcnhat
-       end if   
+       end if
 
 !      Add  hat density if needed
        if (usenhat>0) rhoxc(:,:)=rhoxc(:,:)+nhat1(:,:,1)
@@ -440,7 +440,7 @@ subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,natom,nfft,ngfft,nhat,nhatdim, &
    call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  end if ! PAW and compute_paw
- 
+
 ! ========================================================================
 ! ============ Assemble contributions and update mBJ C value  ============
 

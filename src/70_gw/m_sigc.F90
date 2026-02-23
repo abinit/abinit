@@ -26,7 +26,10 @@ module m_sigc
  use m_splines
  use m_dtset
 
+ use m_io_tools,      only : iomode_from_fname
  use defs_datatypes,  only : pseudopotential_type
+ use m_dtfil,         only : datafiles_type
+ use m_array,         only : array2_gwpc_t
  use m_time,          only : timab, cwtime, cwtime_report
  use m_hide_blas,     only : xdotc, xgemv, xgemm, xherk
  use m_hide_lapack,   only : xheev
@@ -42,6 +45,7 @@ module m_sigc
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_screening,     only : epsm1_t
  use m_ppmodel,       only : ppmodel_t
+ use m_screen,        only : em1_symmetrize_op
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_pawang,        only : pawang_type
@@ -55,6 +59,7 @@ module m_sigc
  use m_occ,           only : get_fact_spin_tol_empty
  use m_ebands,        only : ebands_t
  use m_pstat,         only : pstat_proc
+ use m_io_screening,  only : read_screening  ! hscr_t, get_hscr_qmesh_gsph,
 
  implicit none
 
@@ -128,7 +133,7 @@ contains
 !! SOURCE
 
 subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
-                        Dtset,Cryst,QP_BSt,Sigp,Sr,epsm1,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,Ltg_k,&
+                        Dtset, dtfil, Cryst,QP_BSt,Sigp,Sr,epsm1,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,Ltg_k,&
                         PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,&
                         gwc_ngfft,rho_ngfft,rho_nfftot,rhor,use_aerhor,aepaw_rhor,sigcme_tmp)
 
@@ -141,6 +146,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
  type(vcoul_t),intent(in) :: Vcp
  type(dataset_type),intent(in) :: Dtset
+ type(datafiles_type),intent(in) :: dtfil
  type(epsm1_t),intent(inout) :: epsm1
  type(gsphere_t),intent(in) :: Gsph_Max,Gsph_c
  type(littlegroup_t),intent(in) :: Ltg_k
@@ -168,7 +174,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer :: npw_k,iab,ib,ib1,ib2,ierr,ig,ii,iik,itim_q,i1,i2,npls,ib_sum
  integer :: ik_bz,ik_ibz,io,iiw,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx,iiab,jiab
  integer :: band,band1,band2,idle,rank,jik,jk_bz,jk_ibz,kb,nspinor
- integer :: nomega_tot,nq_summed,ibsp,dimcprj_gw,npwc
+ integer :: nomega_tot,nq_summed,ibsp,dimcprj_gw,npwc, scr_iomode
  integer :: spad,spadc1,spadc2,irow,my_nbks,ndegs,wtqm,wtqp,mod10, iwc,ifft
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,nfftf,mgfftf,use_padfftf
  integer :: ilwrk, neigmax, ac_epsm1cqwz2_win
@@ -190,10 +196,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  real(dp) :: spinrot_kbz(4),spinrot_kgw(4)
  real(dp) :: gl_knots(epsm1%nomega_i),gl_wts(epsm1%nomega_i), omegap(epsm1%nomega_i), omegap2(epsm1%nomega_i), tmp_omegap(epsm1%nomega_i)
  real(dp) :: conv_gl_knots(epsm1%nomega_i_conv),conv_gl_wts(epsm1%nomega_i_conv),conv_omegap(epsm1%nomega_i_conv),conv_omegap2(epsm1%nomega_i_conv), tmp_conv_omegap(epsm1%nomega_i_conv)
- real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
+ real(dp),contiguous, pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegame0i(:), w_maxval(:)
  complex(gwp) :: sigcohme(Sigp%nsig_ab), omegap_cplx(epsm1%nomega_i)
- complex(gwp),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:)
+ complex(gwp),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:), coh_g(:)
  complex(gwp),allocatable :: botsq_conjg_transp(:,:)
  complex(gwp),pointer, contiguous :: ac_epsm1cqwz2(:,:,:) => null()
  complex(gwp),allocatable :: epsm1_trcc_qbz(:,:,:), epsm1_tmp(:,:)
@@ -202,8 +208,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  complex(gwp),allocatable :: sigcme2(:,:),sigcme_3(:),sigcme_new(:),sigctmp(:,:)
  complex(gwp),allocatable :: wfr_bdgw(:,:),ur_ibz(:),wf1swf2_g(:),usr_bz(:)
  complex(gwp),allocatable :: ur_ae_sum(:),ur_ae_onsite_sum(:),ur_ps_onsite_sum(:)
- complex(gwp),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:), otq_transp(:,:)
- complex(gwp),ABI_CONTIGUOUS pointer :: cg_jb(:),cg_sum(:)
+ complex(gwp),allocatable :: ur_ae_bdgw(:,:),ur_ae_onsite_bdgw(:,:),ur_ps_onsite_bdgw(:,:), otq_transp(:,:), epsm1_ggw(:,:,:)
+ complex(gwp),contiguous, pointer :: cg_jb(:),cg_sum(:)
  complex(dp),allocatable :: sym_cme(:,:,:,:),sigc(:,:,:,:,:)
  logical :: rank_mask(Wfd%nproc),can_symmetrize(Wfd%nsppol)
  !logical :: me_calc_poles(Sr%nomega_r+Sr%nomega4sd)
@@ -215,6 +221,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  real(gwp),allocatable :: epsm1_eig(:)
  complex(gwp),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_eqsm1_sqrt(:,:), rhotw_epsm1_rhotw(:,:,:,:), conv_rhotw_epsm1_rhotw(:,:,:,:)
  complex(dp) :: tmp_rhotw_epsm1_rhotw(epsm1%nomega_i), tmp_conv_rhotw_epsm1_rhotw(epsm1%nomega_i_conv)
+ type(array2_gwpc_t),allocatable :: wc0_qibz(:)
+ complex(gwp),allocatable :: wc0_qbz(:,:) !, vec_coh_nk(:,:), vec_coh_mkq(:,:),
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -374,17 +382,15 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  write(msg,'(a,i0,a)')" Will sum ",my_nbks," (b,k,s) states in Sigma_c."
  call wrtout(std_out, msg)
 
- if (Sigp%gwcomp==1) then
+ if (Sigp%gwcomp == 1) then
    en_high=MAXVAL(qp_ene(Sigp%nbnds,:,:)) + Sigp%gwencomp
    write(msg,'(6a,e11.4,a)')ch10,&
     ' Using the extrapolar approximation to accelerate convergence',ch10,&
     ' with respect to the number of bands included',ch10,&
     ' with extrapolar energy: ',en_high*Ha_eV,' [eV]'
    call wrtout(std_out, msg)
-   ABI_MALLOC(wf1swf2_g,(gwc_nfftot*nspinor))
- end if
+   ABI_MALLOC(wf1swf2_g, (gwc_nfftot*nspinor))
 
- if (Sigp%gwcomp == 1) then
    ! Setup of MPI table for extrapolar contributions.
    ABI_MALLOC(extrapolar_distrb,(ib1:ib2,ib1:ib2,Kmesh%nbz,Wfd%nsppol))
    extrapolar_distrb = xmpi_undefined_rank
@@ -411,6 +417,33 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
    write(msg,'(a,i0,a)')" Will treat ",COUNT(extrapolar_distrb==Wfd%my_rank)," extrapolar terms."
    call wrtout(std_out, msg)
+ end if
+
+ if (Sigp%gwcomp == 2) then
+   ! Allocate memory to store static screening in the IBZ and workspace array for the value at qq_bz in the BZ.
+   ! TODO: Store only the iq_ibz needed by this MPI rank to save memory.
+   call wrtout(units, " Activating COH remainder technique")
+
+   ABI_MALLOC(wc0_qibz, (qmesh%nibz))
+   ABI_MALLOC(wc0_qbz, (npwc, npwc))
+   ABI_MALLOC(epsm1_ggw, (npwc, npwc, 1))
+
+   scr_iomode = iomode_from_fname(dtfil%fnameabi_scr)
+   do iq_ibz=1,qmesh%nibz
+     call read_screening("inverse_dielectric_function", dtfil%fnameabi_scr, &
+                         npwc, 1, 1, epsm1_ggw, scr_iomode, wfd%comm, iqiA=iq_ibz)
+
+     ! Keep static limit of Wc in memory.
+     !do ii=1,npwc
+     !  epsm1_ggw(ii,ii,1) = epsm1_ggw(ii,ii,1) - one
+     !end do
+     ABI_MALLOC(wc0_qibz(iq_ibz)%vals, (npwc, npwc))
+     wc0_qibz(iq_ibz)%vals = epsm1_ggw(:,:,1)
+   end do
+
+   ABI_FREE(epsm1_ggw)
+   !call hscr%free()
+   ABI_MALLOC(coh_g, (npwc))
  end if
 
  ABI_MALLOC(rhotwg_ki, (npwc*nspinor, minbnd:maxbnd))
@@ -545,7 +578,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    do spin=1,Wfd%nsppol
      do ib=ib1,ib2
        do jb=ib1,ib2
-        if (abs(qp_ene(ib,jk_ibz,spin)-qp_ene(jb,jk_ibz,spin)) < 0.001/Ha_ev) degtab(ib,jb,spin)=1
+        if (abs(qp_ene(ib,jk_ibz,spin)-qp_ene(jb,jk_ibz,spin)) < dtset%symsigma_de) degtab(ib,jb,spin)=1
        end do
      end do
    end do
@@ -587,9 +620,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! If epsm1 is MPI-shared, we have to close the RMA epoch.
  if (epsm1%use_mpi_shared_win) call xmpi_win_fence(XMPI_MODE_NOPRECEDE, epsm1%epsm1_win, ierr)
 
- ! ==========================================
- ! ==== Fat loop over k_i in the full BZ ====
- ! ==========================================
+ ! Loop over collinear spins.
  do spin=1,Wfd%nsppol
    if (ALL(proc_distrb(:,:,spin)/=Wfd%my_rank)) CYCLE
    call timab(433,1,tsec) ! Init spin
@@ -633,6 +664,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
    call timab(433,2,tsec) ! Init spin
 
+   ! ==========================================
+   ! ==== Fat loop over k_i in the full BZ ====
+   ! ==========================================
+
    do ik_bz=1,Kmesh%nbz
      ! Parallelization over k-points and spin. For the spin there is another check in the inner loop
      if (ALL(proc_distrb(:,ik_bz,spin)/=Wfd%my_rank)) CYCLE
@@ -642,12 +677,12 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      if (print_time) call cwtime(cpu_k, wall_k, gflops_k, "start")
 
      ! Find the corresponding irreducible k-point
-     call kmesh%get_BZ_item(ik_bz,ksum,ik_ibz,isym_ki,iik,ph_mkt)
+     call kmesh%get_BZ_item(ik_bz, ksum, ik_ibz, isym_ki, iik, ph_mkt)
      spinrot_kbz(:)=Cryst%spinrot(:,isym_ki)
 
      ! Identify q and G0 where q + G0 = k_GW - k_i
      kgw_m_ksum=kgw-ksum
-     call findqg0(iq_bz,g0,kgw_m_ksum,Qmesh%nbz,Qmesh%bz,Sigp%mG0)
+     call findqg0(iq_bz, g0, kgw_m_ksum, Qmesh%nbz, Qmesh%bz, Sigp%mG0)
 
      ! If symsigma, symmetrize the matrix elements.
      ! Sum only q"s in IBZ_k. In this case elements are weighted
@@ -666,11 +701,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      call qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q)
      q_is_gamma = normv(qbz, Cryst%gmet, "G") < GW_TOLQ0
 
-     !q_is_gamma = (normv(qbz,Cryst%gmet,"G") < 0.7)
-     !if (iq_ibz/=2.and.iq_ibz/=1) CYCLE
-     !if (ANY(qbz<=-(half-tol16)) .or. ANY(qbz>(half+tol16))) CYCLE
-     !if (q_is_gamma) then; write(std_out,*)"skipping q=Gamma"; CYCLE; end if
-     !
      ! Tables for the FFT of the oscillators.
      !  a) FFT index of the G-G0.
      !  b) gw_gbound table for the zero-padded FFT performed in rhotwg.
@@ -726,16 +756,16 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        call PPm%get_qbz(Gsph_c, Qmesh, iq_bz, botsq, otq, eig)
      end if
 
-     if (ANY(mod10 == [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
+     if (any(mod10 == [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
 
        ! Numerical integration or model GW with contour deformation or Analytic Continuation
        ! TODO In case of AC we should symmetrize only the imaginary frequencies
-       if (mod10==SIG_GW_CD.and.epsm1%mqmem==0) then
-         ! Do in-place symmetrisation.
-         call epsm1%rotate_iqbz_inplace(iq_bz, epsm1%nomega, npwc, Gsph_c, Qmesh,.TRUE.)
+       if (mod10==SIG_GW_CD .and. epsm1%mqmem == 0) then
+         ! Do in-place symmetrization.
+         call epsm1%rotate_iqbz_inplace(iq_bz, epsm1%nomega, npwc, Gsph_c, Qmesh, remove_exchange=.TRUE.)
        else
          ! This call sets the value of epsm1%epsm1_qbz(npwc, npwc, epsm1%nomega)
-         call epsm1%rotate_iqbz(iq_bz, epsm1%nomega, npwc, Gsph_c, Qmesh, .TRUE.)
+         call epsm1%rotate_iqbz(iq_bz, epsm1%nomega, npwc, Gsph_c, Qmesh, remove_exchange=.TRUE.)
        end if
 
        if (mod10 == SIG_GW_AC) then
@@ -814,6 +844,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        end if
      end if ! gwcalctyp
 
+     if (dtset%gwcomp == 2) then
+       ! Compute static limit at pp_bz from the symmetrical image in the IBZ
+       call em1_symmetrize_op(iq_bz, npwc, 1, gsph_c, qmesh, wc0_qibz(iq_ibz)%vals, wc0_qbz)
+     end if
+
      ! Get Fourier components of the Coulomb interaction in the BZ
      ! In 3D systems, neglecting umklapp: vc(Sq,sG) = vc(q,G) = 4pi/|q+G|**2
      ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
@@ -822,12 +857,12 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      end do
 
      call timab(434,2,tsec) ! initq
-
-     ! Sum over band
      call timab(445,1,tsec) ! loop
+
+     ! Sum over bands
      do ib_sum=1,Sigp%nbnds
 
-       ! Parallelism over spin. This processor has this k-point but what about spin?
+       ! MPI Parallelism over spin.
        if (proc_distrb(ib_sum,ik_bz,spin) /= wfd%my_rank) CYCLE
 
        call wfd%get_ur(ib_sum, ik_ibz, spin, ur_ibz)
@@ -847,7 +882,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        call timab(436,2,tsec) ! (1)
        call timab(437,1,tsec) ! rho_tw_g
 
+       ! =====================================================
        ! Get all <k-q,ib_sum,s|e^{-i(q+G).r}|s,jb,k>, at once
+       ! =====================================================
        do jb=ib1,ib2
 
          call rho_tw_g(nspinor,npwc,gwc_nfftot,ndat1,gwc_ngfft,1,use_padfft,igfftcg0,gw_gbound,&
@@ -904,12 +941,13 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              end if
            end if
          end if
-       end do !jb  Got all matrix elements from minbnd up to maxbnd.
 
-       theta_mu_minus_e0i=fact_spin*qp_occ(ib_sum,ik_ibz,spin)
+       end do ! jb  Got all matrix elements from ib1 up to ib2.
+
+       theta_mu_minus_e0i = fact_spin*qp_occ(ib_sum,ik_ibz,spin)
 
        ! Starting point to evaluate the derivative of Sigma and the Spectral function
-       e0i=qp_ene(ib_sum,ik_ibz,spin)
+       e0i = qp_ene(ib_sum,ik_ibz,spin)
 
        ! Frequencies for the spectral function, e0i=qp_ene(ib_sum,ik_ibz,spin)
        ! FIXME the interval is not centered on eoi ! WHY?
@@ -919,9 +957,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        end if
 
        call timab(437,2,tsec) ! rho_tw_g
-       call timab(443,1,tsec) ! ac_lrk_appl
 
        if (mod10 == SIG_GW_AC) then
+         call timab(443,1,tsec) ! ac_lrk_appl
          rhotw_epsm1_rhotw(:,:,:,:) = czero_gw
          do iab=1,Sigp%nsig_ab
             do iiw=1,epsm1%nomega_i
@@ -988,14 +1026,14 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          ! Get frequencies $\omega$-\epsilon_in$ to evaluate $d\Sigma/dE$, note the spin
          ! subtract e_KS since we have stored e_KS+ Delta \omega in Sr%omega4sd, not required for AC
          do io=Sr%nomega_r+1,nomega_tot
-           omegame0i(io)=DBLE(Sr%omega4sd(kb,jk_ibz,io-Sr%nomega_r,spin))-e0i
+           omegame0i(io)=DBLE(Sr%omega4sd(kb,jk_ibz,io-Sr%nomega_r,spin)) - e0i
          end do
 
          ! Get the ket \Sigma|\phi_{k,kb}> according to the method.
          rhotwgp(:)=rhotwg_ki(:,kb)
 
-         SELECT CASE (mod10)
-         CASE (SIG_GW_PPM)
+         select case (mod10)
+         case (SIG_GW_PPM)
            ! GW WITH Plasmon-Pole Model.
            ! Note that ppmodel 3 or 4 work only in case of standard perturbative approach!
            ! Moreover, for ppmodel 3 and 4, spinorial case is not allowed
@@ -1007,10 +1045,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              sigcme2(:,kb)=sigcme2(:,kb) + (wtqp+wtqm)*DBLE(sigcme_3(:)) + (wtqp-wtqm)*j_gw*AIMAG(sigcme_3(:))
            end if
 
-         CASE (SIG_GW_AC)
+         case (SIG_GW_AC)
            ! GW with Analytic continuation. This part is so optimized for AC that there is nothing to do here!
 
-         CASE (SIG_GW_CD)
+         case (SIG_GW_CD)
            ! GW with contour deformation.
            ! Check if pole contributions need to be summed. This avoids unnecessary splint calls and saves time.
            !me_calc_poles = .TRUE.
@@ -1050,7 +1088,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            end if
 #endif
 
-         CASE (SIG_QPGW_PPM)
+         case (SIG_QPGW_PPM)
            ! MODEL GW calculation WITH PPm  TODO Spinor not tested.
            ! Calculate \Sigma(E_k) |k> to obtain <j|\Sigma(E_k)|k>
            ABI_MALLOC(sigcme_new, (nomega_tot))
@@ -1085,7 +1123,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
            ABI_FREE(sigcme_new)
 
-         CASE (SIG_QPGW_CD)
+         case (SIG_QPGW_CD)
            ! MODEL GW with numerical integration.
            ! Check if pole contributions need to be summed. this avoids unnecessary splint calls and saves time
            !me_calc_poles = .TRUE.
@@ -1116,14 +1154,19 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              sigc_ket = ket1
            end if
 
-         CASE DEFAULT
+         case default
            ABI_ERROR(sjoin("Unsupported value for mod10:", itoa(mod10)))
-         END SELECT
+         end select
 
          if (Sigp%gwcomp==1) then
            ! TODO spinor not implemented
            call calc_sig_ppm_comp(npwc,nomega_tot,rhotwgp,botsq,otq,DBLE(Sr%egw(kb,jk_ibz,spin)-en_high),&
               Sigp%zcut,theta_mu_minus_e0i,sigc_ket,PPm%model,npwc,PPm%dm2_botsq,PPm%dm2_otq)
+         end if
+
+         if (Sigp%gwcomp == 2) then
+           !wc0_qbz => epsm1%epsm1_qbz(:,:,1)
+           coh_g = matmul(wc0_qbz, rhotwg_ki(:,kb))
          end if
 
          call timab(438,2,tsec) !
@@ -1134,7 +1177,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          ! 2) If gwcalctyp>=20: only off-diagonal elements connecting states with same character.
          do irow=1,Sigcij_tab(spin)%col(kb)%size1
            jb = Sigcij_tab(spin)%col(kb)%bidx(irow)
-           rhotwg=rhotwg_ki(:,jb)
+           rhotwg = rhotwg_ki(:,jb)
 
            ! Calculate <\phi_j|\Sigma_c|\phi_k>
            ! Different freqs according to method (AC or Perturbative), see nomega_sigc.
@@ -1187,16 +1230,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
            if (Sigp%gwcomp==1) then
              ! Evaluate Extrapolar term TODO this does not work with spinor
-             if (extrapolar_distrb(jb,kb,ik_bz,spin) == Wfd%my_rank ) then
+             if (extrapolar_distrb(jb,kb,ik_bz,spin) == Wfd%my_rank) then
                ! Do it once as it does not depend on the ib_sum index being summed over.
                extrapolar_distrb(jb,kb,ik_bz,spin) = xmpi_undefined_rank
-#if 1
                call calc_wfwfg(ktabr(:,jk_ibz),jik, spinrot_kgw, & ! TODO: why jk_ibz?
                  gwc_nfftot,nspinor,gwc_ngfft,wfr_bdgw(:,jb),wfr_bdgw(:,kb),wf1swf2_g)
-#else
-               call calc_wfwfg(ktabr(:,jk_bz),jik,spinrot_kgw,&
-                 gwc_nfftot,nspinor,gwc_ngfft,wfr_bdgw(:,jb),wfr_bdgw(:,kb),wf1swf2_g)
-#endif
 
                if (Psps%usepaw==1) then
                  i1=jb; i2=kb
@@ -1222,8 +1260,16 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                do io=1,nomega_sigc
                  sigctmp(io,:) = sigctmp(io,:)+sigcohme(:)
                end do
-             end if ! gwcomp==1
-           end if ! gwcom==1
+             end if
+           end if ! gwcomp==1
+
+           if (Sigp%gwcomp == 2) then
+             !sigcohme(1) = quarter * dot_product(conjg(rhotwg), coh_g)
+             sigcohme(1) = quarter * dot_product(rhotwg, coh_g)
+             do io=1,nomega_sigc
+               sigctmp(io,:) = sigctmp(io,:) + sigcohme(1)
+             end do
+           end if
 
            ! Accumulate and, in case, symmetrize matrix elements of Sigma_c
            do iab=1,Sigp%nsig_ab
@@ -1451,6 +1497,15 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    else
      ABI_SFREE_PTR(ac_epsm1cqwz2)
    end if
+ end if
+
+ if (dtset%gwcomp == 2) then
+   ABI_SFREE(wc0_qbz)
+   do iq_ibz=1,qmesh%nibz
+     call wc0_qibz(iq_ibz)%free()
+   end do
+   ABI_FREE(wc0_qibz)
+   ABI_FREE(coh_g)
  end if
 
  call timab(431,2,tsec)

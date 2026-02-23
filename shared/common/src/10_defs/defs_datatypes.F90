@@ -25,7 +25,7 @@
 !! * pspheader_type: for norm-conserving pseudopotentials, the header of the file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2025 ABINIT group (XG)
+!! Copyright (C) 2001-2026 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -454,6 +454,8 @@ module defs_datatypes
    !   ekb (norm-conserving) is now diagonal (one dimension lnmax);
    !   it would be easy to give it a second (symmetric) dimension by putting
    !   dimekb=lnmax*(lnmax+1)/2 in the place of dimekb=lmnmax.
+   ! MG: if SOC is activate, dimekb accounts for bot scalar relativistic KB energies and SOC energies.
+   ! psps%ekb will be transfered to gs_hamiltonian_type in gham_init (see m_hamiltonian)
 
   real(dp), allocatable :: epsatm(:)
    ! epsatm(ntypat)

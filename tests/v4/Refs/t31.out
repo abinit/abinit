@@ -1,8 +1,8 @@
 
 .Version 10.1.4.5 of AIM, released Sep 2024.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2024 ABINIT group . 
+.Copyright (C) 1998-2026 ABINIT group .
  AIM comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -16,7 +16,7 @@
 
 .Starting date : Sat 14 Sep 2024.
 - ( at 06h44 )
-  
+
  ECHO of the INPUT
  ************************
  SURF                 1
@@ -31,11 +31,11 @@
  PHIMAX     1.5707963268E+00
  MAXATD     1.4000000000E+01
  ===============================================================================
- ECHO of the ABINIT file header 
- 
+ ECHO of the ABINIT file header
+
  First record :
 .codvsn,headform,fform = 10.1.4.5   80   52
- 
+
  Second record :
  bantot,intxc,ixc,natom  =     1     0     1     1
  ngfft(1:3),nkpt         =    54    54    54     1
@@ -121,14 +121,14 @@
  title= Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
   znuclpsp= 12.00, zionpsp=  2.00, pspso=  0, pspdat=940714, pspcod=  1, pspxc=  1
   lmnmax  =  2
- 
+
  Last record :
  residm,etot,fermie=    3.557162E-18   -1.212220991991E+00   -1.622247E-01
  xred =
             0.000000E+00    0.000000E+00    0.000000E+00
- End the ECHO of the ABINIT file header 
+ End the ECHO of the ABINIT file header
  ===============================================================================
- INVERSE OF RPRIMD: 
+ INVERSE OF RPRIMD:
       0.13513514      0.00000000      0.00000000
       0.00000000      0.13513514      0.00000000
       0.00000000      0.00000000      0.13513514
@@ -175,7 +175,7 @@
  BONDING CRITICAL POINTS (BCP)
  =============================
 
- Bonded atom (BAT) (indxatm,indxcell,position): 
+ Bonded atom (BAT) (indxatm,indxcell,position):
      1   123     -7.40000000      0.00000000      0.00000000
 %Bonding CP:      -3.70000000      0.00000000      0.00000000
 %Eigenval. of Hessian:       0.00336465     -0.00167618     -0.00167618
@@ -185,10 +185,10 @@
 -     -0.00000000      0.22940340      0.97333143
 
 %Density and laplacian in CP:       0.00631683      0.00001228
-%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT): 
+%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT):
       3.70000000      3.70000000      7.40000000      0.50000000
  ********************************************************************
- Bonded atom (BAT) (indxatm,indxcell,position): 
+ Bonded atom (BAT) (indxatm,indxcell,position):
      1   165      0.00000000     -7.40000000      0.00000000
 %Bonding CP:       0.00000000     -3.70000000      0.00000000
 %Eigenval. of Hessian:       0.00336465     -0.00167618     -0.00167618
@@ -198,10 +198,10 @@
 -      0.00000000      0.43434600      0.90074611
 
 %Density and laplacian in CP:       0.00631683      0.00001228
-%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT): 
+%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT):
       3.70000000      3.70000000      7.40000000      0.50000000
  ********************************************************************
- Bonded atom (BAT) (indxatm,indxcell,position): 
+ Bonded atom (BAT) (indxatm,indxcell,position):
      1   171      0.00000000      0.00000000     -7.40000000
 %Bonding CP:      -0.00000000     -0.00000000     -3.70000000
 %Eigenval. of Hessian:       0.00336465     -0.00167618     -0.00167618
@@ -211,10 +211,10 @@
 -      1.00000000     -0.00000000      0.00000000
 
 %Density and laplacian in CP:       0.00631683      0.00001228
-%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT): 
+%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT):
       3.70000000      3.70000000      7.40000000      0.50000000
  ********************************************************************
- Bonded atom (BAT) (indxatm,indxcell,position): 
+ Bonded atom (BAT) (indxatm,indxcell,position):
      1   173      0.00000000      0.00000000      7.40000000
 %Bonding CP:      -0.00000000     -0.00000000      3.70000000
 %Eigenval. of Hessian:       0.00336465     -0.00167618     -0.00167618
@@ -224,10 +224,10 @@
 -      1.00000000     -0.00000000     -0.00000000
 
 %Density and laplacian in CP:       0.00631683      0.00001228
-%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT): 
+%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT):
       3.70000000      3.70000000      7.40000000      0.50000000
  ********************************************************************
- Bonded atom (BAT) (indxatm,indxcell,position): 
+ Bonded atom (BAT) (indxatm,indxcell,position):
      1   179      0.00000000      7.40000000      0.00000000
 %Bonding CP:       0.00000000      3.70000000      0.00000000
 %Eigenval. of Hessian:       0.00336465     -0.00167618     -0.00167618
@@ -237,10 +237,10 @@
 -     -0.00000000      0.43434600      0.90074611
 
 %Density and laplacian in CP:       0.00631683      0.00001228
-%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT): 
+%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT):
       3.70000000      3.70000000      7.40000000      0.50000000
  ********************************************************************
- Bonded atom (BAT) (indxatm,indxcell,position): 
+ Bonded atom (BAT) (indxatm,indxcell,position):
      1   221      7.40000000      0.00000000      0.00000000
 %Bonding CP:       3.70000000      0.00000000      0.00000000
 %Eigenval. of Hessian:       0.00336465     -0.00167618     -0.00167618
@@ -250,7 +250,7 @@
 -     -0.00000000      0.22940340      0.97333143
 
 %Density and laplacian in CP:       0.00631683      0.00001228
-%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT): 
+%Relative position of BCP (AT-CP,BAT-CP,AT-BAT,relative(AT):
       3.70000000      3.70000000      7.40000000      0.50000000
  ********************************************************************
  Number of BCP found:    6
@@ -648,11 +648,11 @@ BCP-RCP-CCP       6      12       8
 
  CHARGE INTEGRATION
  ==================
- Core density contribution: 
+ Core density contribution:
 
          10.00000357
 
- Different density contributions: Core (only spherical part) and the rest 
+ Different density contributions: Core (only spherical part) and the rest
 
             9.99992513      2.03526845
 

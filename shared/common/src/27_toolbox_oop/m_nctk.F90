@@ -6,7 +6,7 @@
 !!  Tools and wrappers for NETCDF-IO.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -836,7 +836,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
  end if
 
  if (xmpi_comm_size(comm) > 1 .or. nctk_has_mpiio) then
-   call wrtout(std_out, sjoin("- Opening HDf5 file with MPI-IO support:", path))
+   call wrtout(std_out, sjoin(" nctk_open_modify: Opening HDf5 file with MPI-IO support:", path))
 #ifdef HAVE_NETCDF_MPI
    ncerr = nf90_open_par(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
                          comm=comm, info=xmpio_info, ncid=ncid)
@@ -845,13 +845,14 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
    ABI_ERROR("nprocs > 1 but netcdf does not support MPI-IO")
 #endif
  else
-   call wrtout(std_out, sjoin("- Opening netcdf file without MPI-IO support:", path))
+   call wrtout(std_out, sjoin(" nctk_open_modify: Opening netcdf file without MPI-IO support:", path))
    ncerr = nf90_open(path, nf90_write, ncid)
    NCF_CHECK_MSG(ncerr, sjoin("nf90_open: ", path))
  end if
 
  ! Set file in define mode.
  NCF_CHECK(nctk_set_defmode(ncid))
+ !call wrtout(std_out, "- Returning from nctk_open_modify")
 
 end function nctk_open_modify
 !!***

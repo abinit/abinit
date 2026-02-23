@@ -1,8 +1,8 @@
 %EffMass   Effective Mass of semiconductors
-%    EffMass(filename, Band, nDataSet) analyse the eigenenergies of datasets in output 
-%    file of ABINIT to get the curvature of band structure at Conduction Band Minimum 
+%    EffMass(filename, Band, nDataSet) analyse the eigenenergies of datasets in output
+%    file of ABINIT to get the curvature of band structure at Conduction Band Minimum
 %    and Valence Band Maximum. According to the formula,
-%          ( 1/Mass_eff )ij = ( 1/h_bar^2 ) * 2nd_Derivative( CBM/VBM eigenenergies ) 
+%          ( 1/Mass_eff )ij = ( 1/h_bar^2 ) * 2nd_Derivative( CBM/VBM eigenenergies )
 %                              with respect to ki to kj.
 %    We can easily acquire the three main components of effective mass tensors,
 %          Mass_eff_xx,  Mass_eff_yy, Mass_eff_zz.
@@ -15,7 +15,7 @@
 %
 %    Written by Mike Zhang, 8/11/2002, copyright reserved.
 %    Used by your own warranty, Mike Zhang(mz24cn@hotmail.com)
-%    Copyright (C) 2002-2025 ABINIT group (Mike Zhang)
+%    Copyright (C) 2002-2026 ABINIT group (Mike Zhang)
 %    This file is distributed under the terms of the
 %    GNU General Public License, see ~abinit/COPYING
 %    or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,8 +25,8 @@
 function [EffectiveMass, K, eigenE] = EffMass(filename, Band, nDataSet)
 
 % Currently we presumably nBand and nKpt of every dataset are same.
-nBand = mexData([1 1], filename, '== DATASET  2 ==', 'newkpt: treating', '', ''); 
-nKpt = mexData([1 1], filename, '== DATASET  2 ==', 'Eigenvalues (   eV  ) for nkpt=', '', ''); 
+nBand = mexData([1 1], filename, '== DATASET  2 ==', 'newkpt: treating', '', '');
+nKpt = mexData([1 1], filename, '== DATASET  2 ==', 'Eigenvalues (   eV  ) for nkpt=', '', '');
 % Find the HOMO(Highest Occupied Molecule Orbit) and LUMO(Lowest Unoccupied Molecule Orbit)
 occ = mexData([1 nBand], filename, '-outvars: echo values of preprocessed input variables --------', 'occ', '', '');
 i = 1;

@@ -1,8 +1,8 @@
 
-.Version 10.1.4.5 of ABINIT, released Sep 2024.
+.Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group .
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 13 Sep 2024.
-- ( at 19h09 )
+.Starting date : Sat 20 Dec 2025.
+- ( at 17h11 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/TestBot_MPI1/v4_t63/t63.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/v4_t63/t63.abi
 - output file    -> t63.abo
 - root for input  files -> t63i
 - root for output files -> t63o
@@ -65,6 +65,7 @@ _ WF disk file :      0.108 Mbytes ; DEN or POT disk file :      0.076 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           4
 -   mkqmem =           4        mk1mem =           4           mpw =         436
       nfft =        9720          nkpt =           4
+- my_mband =           8
 ================================================================================
 P This job should need less than                       3.881 Mbytes of memory.
 P Max. in main chain + fourwf.f
@@ -163,10 +164,10 @@ P          mk1mem2          4
             typat      1  1  2  2
               wtk1       0.25000    0.75000
               wtk2       0.25000    0.25000    0.25000    0.25000
-           xangst     -1.1537374562E+00  1.9983318928E+00  5.7358888199E-03
-                       1.1537374562E+00  1.9983318928E+00  3.2689865222E+00
-                      -1.1537374562E+00  1.9983318928E+00  2.4417742410E+00
-                       1.1537374562E+00  1.9983318928E+00  5.7050248744E+00
+           xangst     -1.1537374605E+00  1.9983319002E+00  5.7358888411E-03
+                       1.1537374605E+00  1.9983319002E+00  3.2689865342E+00
+                      -1.1537374605E+00  1.9983319002E+00  2.4417742500E+00
+                       1.1537374605E+00  1.9983319002E+00  5.7050248954E+00
             xcart     -2.1802478215E+00  3.7763000000E+00  1.0839258998E-02
                        2.1802478215E+00  3.7763000000E+00  6.1774892590E+00
                       -2.1802478215E+00  3.7763000000E+00  4.6142845939E+00
@@ -212,8 +213,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.16584
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/31ga.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/31ga.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/31ga.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/31ga.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ga,  from PRB58, 3641 (1998)
 - 31.00000   3.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -238,8 +239,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    0.945855
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/33as.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk_merge-10.0/tests/Pspdir/PseudosHGH_pwteter/33as.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/33as.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/PseudosHGH_pwteter/33as.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for As,  from PRB58, 3641 (1998)
 - 33.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -479,10 +480,10 @@ force_length_stats: {min:   2.02086175E-07, max:   2.02086175E-07, mean:   2.020
     4       0.000000000000      0.000000000000      0.000038433990
 
  cartesian coordinates (angstrom) at end:
-    1     -1.15373745623738     1.99833189279842     0.00573588881990
-    2      1.15373745623738     1.99833189279842     3.26898652217142
-    3     -1.15373745623738     1.99833189279842     2.44177424102495
-    4      1.15373745623738     1.99833189279842     5.70502487437647
+    1     -1.15373746049759     1.99833190017731     0.00573588884108
+    2      1.15373746049759     1.99833190017731     3.26898653424224
+    3     -1.15373746049759     1.99833190017731     2.44177425004126
+    4      1.15373746049759     1.99833190017731     5.70502489544242
 
  cartesian forces (hartree/bohr) at end:
     1     -0.00000000000000    -0.00000000000000     0.00000020208617
@@ -492,13 +493,13 @@ force_length_stats: {min:   2.02086175E-07, max:   2.02086175E-07, mean:   2.020
  frms,max,avg= 1.1667451E-07 2.0208617E-07   0.000E+00  0.000E+00 -2.914E-06 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00001039168806
-    2     -0.00000000000000    -0.00000000000000     0.00001039168806
-    3     -0.00000000000000    -0.00000000000000    -0.00001039168806
-    4     -0.00000000000000    -0.00000000000000    -0.00001039168806
- frms,max,avg= 5.9996439E-06 1.0391688E-05   0.000E+00  0.000E+00 -1.499E-04 e/A
+    1     -0.00000000000000    -0.00000000000000     0.00001039168893
+    2     -0.00000000000000    -0.00000000000000     0.00001039168893
+    3     -0.00000000000000    -0.00000000000000    -0.00001039168893
+    4     -0.00000000000000    -0.00000000000000    -0.00001039168893
+ frms,max,avg= 5.9996444E-06 1.0391689E-05   0.000E+00  0.000E+00 -1.499E-04 e/A
  length scales=  7.552600000000  7.552600000000 12.333300000000 bohr
-              =  3.996663785597  3.996663785597  6.526501266703 angstroms
+              =  3.996663800355  3.996663800355  6.526501290802 angstroms
  prteigrs : about to open file t63o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.12904   Average Vxc (hartree)=  -0.31612
  Eigenvalues (hartree) for nkpt=   2  k points:
@@ -524,7 +525,7 @@ psp_core            :  7.56646668043390E-01
 local_psp           : -6.16751323979469E+00
 non_local_psp       :  1.99153212155585E+00
 total_energy        : -1.70758811748936E+01
-total_energy_eV     : -4.64658357397779E+02
+total_energy_eV     : -4.64658398140507E+02
 band_energy         : -8.54423702702736E-01
 ...
 
@@ -557,9 +558,9 @@ band_energy         : -8.54423702702736E-01
   sigma(3 3)=  6.40657837E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.3632E+01 GPa]
-- sigma(1 1)=  1.10233323E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.10233323E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.88488011E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  1.10233341E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.10233341E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.88488043E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -684,7 +685,7 @@ tolerances: {tolvrs: 1.00E-16, }
  17 Non-relaxation  contributions : pseudopotential core energy
   pspcore=   7.56646668E-01
  Resulting in :
- 2DEtotal=    0.3681321200E+01 Ha. Also 2DEtotal=    0.100173844273E+03 eV
+ 2DEtotal=    0.3681321200E+01 Ha. Also 2DEtotal=    0.100173853057E+03 eV
     (2DErelax=   -1.4205790736E+01 Ha. 2DEnonrelax=    1.7887111935E+01 Ha)
     (  non-var. 2DEtotal :    3.6813211991E+00 Ha)
 
@@ -772,7 +773,7 @@ tolerances: {tolvrs: 1.00E-16, }
  17 Non-relaxation  contributions : pseudopotential core energy
   pspcore=   7.56646668E-01
  Resulting in :
- 2DEtotal=    0.3681321196E+01 Ha. Also 2DEtotal=    0.100173844166E+03 eV
+ 2DEtotal=    0.3681321196E+01 Ha. Also 2DEtotal=    0.100173852950E+03 eV
     (2DErelax=   -1.4205790740E+01 Ha. 2DEnonrelax=    1.7887111936E+01 Ha)
     (  non-var. 2DEtotal :    3.6813211958E+00 Ha)
 
@@ -1533,10 +1534,10 @@ P          mk1mem2          4
             typat      1  1  2  2
               wtk1       0.25000    0.75000
               wtk2       0.25000    0.25000    0.25000    0.25000
-           xangst     -1.1537374562E+00  1.9983318928E+00  5.7358888199E-03
-                       1.1537374562E+00  1.9983318928E+00  3.2689865222E+00
-                      -1.1537374562E+00  1.9983318928E+00  2.4417742410E+00
-                       1.1537374562E+00  1.9983318928E+00  5.7050248744E+00
+           xangst     -1.1537374605E+00  1.9983319002E+00  5.7358888411E-03
+                       1.1537374605E+00  1.9983319002E+00  3.2689865342E+00
+                      -1.1537374605E+00  1.9983319002E+00  2.4417742500E+00
+                       1.1537374605E+00  1.9983319002E+00  5.7050248954E+00
             xcart     -2.1802478215E+00  3.7763000000E+00  1.0839258998E-02
                        2.1802478215E+00  3.7763000000E+00  6.1774892590E+00
                       -2.1802478215E+00  3.7763000000E+00  4.6142845939E+00
@@ -1641,10 +1642,10 @@ P          mk1mem2          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.2  wall=          3.2
+- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.2  wall=          3.2
++Overall time at end (sec) : cpu=          2.2  wall=          2.2
