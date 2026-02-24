@@ -564,10 +564,10 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
         getAX_BX, getBm1X, nspinor)
     ABI_NVTX_END_RANGE()
     
-    write(std_out,*) 'wanted mass=', wanted_mass
-    write(std_out,*) 'bands_left=', bands_left(:)
-    write(std_out,*) 'bands_right=', bands_right(:)
-    flush(std_out)
+    !write(std_out,*) 'wanted mass=', wanted_mass
+    !write(std_out,*) 'bands_left=', bands_left(:)
+    !write(std_out,*) 'bands_right=', bands_right(:)
+    !flush(std_out)
 
     ABI_FREE(bands_left)
     ABI_FREE(bands_right)
@@ -590,25 +590,33 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     ! todo simplify fix polynomial degree and give it here
 
     ! Slice left
-    slice%neigenpairs_per_slice(1) = 200 ! wanted_mass
-    slice%fcol_in_X(1) = 1 ! todo big modif this should be replaced by a simple index
-    ! i propose to not apply the big modif and try to workaround as it is for now
-    slice%fcol_in_Xext(1) = 1
-    slice%poly_degrees(1) = 10! slice%ndeg_filter
-    slice%part_low_bounds(1) = -0.14        ! first slice is lowpass so interval to suppress
-    slice%part_upp_bounds(1) = 2.3 ! used for convergence <----
-    slice%poly_low_bounds(1) = -0.14     ! with overlap
-    slice%poly_upp_bounds(1) = 2.5       ! with overlap
+    !slice%neigenpairs_per_slice(1) = 180 ! number of TRUE eigenvalues in (poly_low, poly_upp)
+    !slice%poly_degrees(1) = 10           ! filter degree
+    !slice%part_low_bounds(1) = -0.14     ! first slice is lowpass so interval to suppress
+    !slice%part_upp_bounds(1) = 2.1       ! used for convergence <----
+    !slice%poly_low_bounds(1) = -0.14     ! with overlap
+    !slice%poly_upp_bounds(1) = 2.5       ! with overlap
 
     ! Slice right
-    slice%neigenpairs_per_slice(2) = 200 ! wanted_mass
+    !slice%neigenpairs_per_slice(2) = 180 ! number of TRUE eigenvalues in (poly_low, poly_upp)
+    !slice%poly_degrees(2) = 50           ! slice%ndeg_filter
+    !slice%part_low_bounds(2) = 2.1       ! used for convergence <-----
+    !slice%part_upp_bounds(2) = 5.0       ! used for convergence <-----
+    !slice%poly_low_bounds(2) = 1.9       ! with overlap
+    !slice%poly_upp_bounds(2) = 5.2       ! with overlap
+
+    ! Indices of test vectors
+    ! todo big modif col_in_X should be replaced by a simple index set
+    slice%fcol_in_X(1) = 1
+    slice%fcol_in_Xext(1) = 1
+    
     slice%fcol_in_X(2) = 1
-    slice%fcol_in_Xext(2) = 201
-    slice%poly_degrees(2) = 50! slice%ndeg_filter
-    slice%part_low_bounds(2) = 2.3 ! used for convergence <-----
-    slice%part_upp_bounds(2) = 5.0 ! used for convergence <-----
-    slice%poly_low_bounds(2) = 2.2        ! with overlap
-    slice%poly_upp_bounds(2) = 5.2        ! with overlap
+    slice%fcol_in_Xext(2) = slice%neigenpairs_per_slice(1) + 1
+
+    if (slice%nslice==3) then
+        slice%fcol_in_X(3) = 1
+        slice%fcol_in_Xext(3) = slice%fcol_in_Xext(2) + slice%neigenpairs_per_slice(2) + 1 
+    end if
 
     ! Slice three
     !slice%neigenpairs_per_slice(3) = 96 ! wanted_mass
@@ -761,7 +769,7 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     real(dp) :: lambda_minus, lambda_plus
     real(dp) :: theta
     real(dp) :: oracle_factor, oracle_min_occ
-    real(dp) :: a_part, b_part, resid_norm2_kept
+    real(dp) :: a_part, b_part, max_resid_kept
     logical :: is_lowpass, on_host, on_device
     ! Arrays
     real(dp) :: tsec(2)
@@ -876,21 +884,29 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
    
     write(std_out,*) 'calling runSlice from rank and subrank', xmpi_comm_rank(slice%spacecom), xmpi_comm_rank(comm)
  
+    a_part = slice%part_low_bounds(slice%me_id_slice)
+    b_part = slice%part_upp_bounds(slice%me_id_slice)
+    if (is_lowpass) then
+        write(std_out,*) 'spectral offset left=', lambda_minus - b_part
+    else
+        write(std_out,*) 'spectral offset left=', a_part - lambda_minus
+        write(std_out,*) 'spectral offset right=', lambda_plus - b_part
+    end if
+    
     !write(std_out,*) 'eigen_active='
     !call xgBlock_print(eigen_active, std_out)
    
     ! TODO 
     ! 2) make for 1 MPI
 
-    num_restart = 10
+    num_restart = 50
+    slice%tolerance = 1e-8
 
-    if (is_lowpass) then
-        num_restart = 1
-    end if
-
-    !ABI_MALLOC(theta_reshaped, (neigenpairs_slice)) 
-    do i = 1, num_restart
+    i = 0
+    max_resid_kept = 1e10
+    do while ( (max_resid_kept > slice%tolerance) .and. (i < num_restart) )
        
+        i = i + 1
         chebfi%xXColsRows = X0_active
         
         write(std_out,*) '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
@@ -918,10 +934,8 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
 
         call xgBlock_reverseMap(eigen_active , thetas_conv, rows=neigenpairs, cols=1)
         call xgBlock_reverseMap(residu_active, residu_conv, rows=neigenpairs, cols=1)
-        resid_norm2_kept = 0.0d0
+        max_resid_kept = -1e10 ! reset
         num_kept = 0
-        a_part = slice%part_low_bounds(slice%me_id_slice)
-        b_part = slice%part_upp_bounds(slice%me_id_slice)
         do iband=1, neigenpairs
             theta = thetas_conv(iband, 1)
             has_converged = .false.
@@ -931,20 +945,17 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
                 has_converged = ( (a_part < theta) .and. (theta < b_part) )
             end if
             if (has_converged) then
-                resid_norm2_kept = resid_norm2_kept + residu_conv(iband, 1)
+                max_resid_kept = max(max_resid_kept, residu_conv(iband, 1))
                 num_kept = num_kept + 1
             end if
         end do
         call xmpi_sum(num_kept, slice%comm_rows, ierr)
-        call xmpi_sum(resid_norm2_kept, slice%comm_rows, ierr)
-        resid_norm2_kept = resid_norm2_kept / num_kept
+        call xmpi_max(max_resid_kept, slice%comm_rows, ierr) ! entire slice
         write(std_out,*) '################################################# '
         write(std_out,'(a,i5)') ' Convergence of inner iteration=', i
         write(std_out,*) 'partition           =', a_part, b_part
         write(std_out,*) 'num eigenvalues kept=', num_kept
-        write(std_out,*) '      out of(currentMPI)=', neigenpairs
-        write(std_out,*) 'resid_norm2_kept    =', resid_norm2_kept
-        write(std_out,*) 'resid_global(currentMPI)=', sum(residu_conv(:, 1))/neigenpairs
+        write(std_out,*) 'max_resid_kept      =', max_resid_kept
         write(std_out,*) '################################################# '
         flush(std_out)
 
@@ -960,9 +971,9 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     !write(std_out,*) 'chebfi%eigenvalues converged='
     !call xgBlock_print(chebfi%eigenvalues,std_out)
 
-    write(std_out,*) 'residuals='
-    call xgBlock_print(residu_active,std_out)
-    flush(std_out)
+    !write(std_out,*) 'residuals='
+    !call xgBlock_print(residu_active,std_out)
+    !flush(std_out)
 
     ! Free temporary memory
     call chebfi_free(chebfi)
@@ -1146,22 +1157,22 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     write(std_out,*) 'Lanczos guarantee(global) =', lanczos_lowb_global
     flush(std_out)
 
-    ndeg_filter_max = 2
-    m_probe = 5 ! should be between 1 and slice%bandpp advice between 10 <= m <= 50 
+    !ndeg_filter_max = 2
+    !m_probe = 5 ! should be between 1 and slice%bandpp advice between 10 <= m <= 50 
     ! Increasing probes does not reduce bias, only variance).
     ! Keep m_probe small allows to reduce noise
     ! Low degree and few probes stable N_est
 
-    write(std_out,*) 'Here I compute Stochastic Trace Estimation'
-    write(std_out,*) 'm_probe=    ', m_probe
-    write(std_out,*) 'ndeg_filter=', ndeg_filter_max
-    flush(std_out)
+!    write(std_out,*) 'Here I compute Stochastic Trace Estimation'
+!    write(std_out,*) 'm_probe=    ', m_probe
+!    write(std_out,*) 'ndeg_filter=', ndeg_filter_max
+!    flush(std_out)
 
-    call computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter_max, m_probe,& 
-        lanczos_lowb_global)
+!    call computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter_max, m_probe,& 
+!        lanczos_lowb_global)
     
-    write(std_out,*) 'STE exited'
-    flush(std_out)
+!    write(std_out,*) 'STE exited'
+!    flush(std_out)
 
     ! TODO clean the next part
 

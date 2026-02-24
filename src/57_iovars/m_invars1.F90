@@ -1080,6 +1080,24 @@ subroutine indefo1(dtset)
  dtset%slabzend=zero
  dtset%so_psp(:)=1
  dtset%spinat(:,:)=zero
+ dtset%slice1_deg=1
+ dtset%slice1_m = 1
+ dtset%slice1_part_a=1.0
+ dtset%slice1_part_b=1.0
+ dtset%slice1_poly_a=1.0
+ dtset%slice1_poly_b=1.0
+ dtset%slice2_deg=1
+ dtset%slice2_m = 1
+ dtset%slice2_part_a=1.0
+ dtset%slice2_part_b=1.0
+ dtset%slice2_poly_a=1.0
+ dtset%slice2_poly_b=1.0
+ dtset%slice3_deg=1
+ dtset%slice3_m = 1
+ dtset%slice3_part_a=1.0
+ dtset%slice3_part_b=1.0
+ dtset%slice3_poly_a=1.0
+ dtset%slice3_poly_b=1.0
 !T
  dtset%tfkinfunc=0
  dtset%typat(:)=0  ! This init is important because dimension of typat is mx%natom (and not natom).
