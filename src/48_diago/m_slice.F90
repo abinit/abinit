@@ -449,15 +449,15 @@ subroutine slice_free(slice)
     ABI_SFREE(slice%poly_low_bounds)
     ABI_SFREE(slice%poly_upp_bounds)
 
-    if (slice%me_comm_slice /= slice%spacecom) then
-        call xmpi_comm_free(slice%me_comm_slice)
-    end if
-    if (slice%me_comm_rows /= slice%comm_rows) then
-        call xmpi_comm_free(slice%me_comm_rows)
-    end if
-    if (slice%me_comm_cols /= slice%comm_cols) then
-        call xmpi_comm_free(slice%me_comm_cols)
-    end if
+    !if (slice%me_comm_slice /= slice%spacecom) then
+    !    call xmpi_comm_free(slice%me_comm_slice)
+    !end if
+    !if (slice%me_comm_rows /= slice%comm_rows) then
+    !    call xmpi_comm_free(slice%me_comm_rows)
+    !end if
+    !if (slice%me_comm_cols /= slice%comm_cols) then
+    !    call xmpi_comm_free(slice%me_comm_cols)
+    !end if
 
 end subroutine slice_free
 !!***
@@ -899,22 +899,22 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     ! TODO 
     ! 2) make for 1 MPI
 
-    num_restart = 50
-    slice%tolerance = 1e-8
+    num_restart = 200
 
     i = 0
     max_resid_kept = 1e10
-    do while ( (max_resid_kept > slice%tolerance) .and. (i < num_restart) )
+    do while ( (max_resid_kept > slice%ramp) .and. (i < num_restart) )
        
         i = i + 1
         chebfi%xXColsRows = X0_active
         
         write(std_out,*) '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
-        write(std_out,*) 'Restart', i, 'with dimensions'
+        write(std_out,*) 'Restart', i, 'with dimensions' 
         write(std_out,*) 'rows=', rows(X0_active), rows(chebfi%xXColsRows), rows(chebfi%X_next)
         write(std_out,*) '     ', rows(chebfi%xAXColsRows), rows(chebfi%xBXColsRows)
         write(std_out,*) 'cols=', cols(X0_active), cols(chebfi%xXColsRows), cols(chebfi%X_next)
         write(std_out,*) '     ', cols(chebfi%xAXColsRows), cols(chebfi%xBXColsRows)
+        write(std_out,*) 'target tol=', slice%ramp
         write(std_out,*) '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
         flush(std_out)
     
@@ -949,8 +949,8 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
                 num_kept = num_kept + 1
             end if
         end do
-        call xmpi_sum(num_kept, slice%comm_rows, ierr)
-        call xmpi_max(max_resid_kept, slice%comm_rows, ierr) ! entire slice
+        call xmpi_sum(num_kept, slice%me_comm_rows, ierr)
+        call xmpi_max(max_resid_kept, slice%me_comm_rows, ierr) ! entire slice
         write(std_out,*) '################################################# '
         write(std_out,'(a,i5)') ' Convergence of inner iteration=', i
         write(std_out,*) 'partition           =', a_part, b_part
@@ -1801,13 +1801,13 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
 
         nkept = lcol_in_slice - fcol_in_slice + 1
 
-        write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
-        write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice, nkept
-        !write(std_out,*) 'filtered eigenvalues=', theta_reshaped
-        write(std_out,*) 'filtered eigval(first,last)=', theta_reshaped(1), theta_reshaped(neigenpairs_slice)
-        !write(std_out,*) 'kept eigenvalues=', theta_reshaped(fcol_in_slice:lcol_in_slice)
-        write(std_out,*) 'kept eigval(first,last)=', theta_reshaped(fcol_in_slice), theta_reshaped(lcol_in_slice)
-        write(std_out,*) 'tot_ncols_kept(prev)=', tot_ncols_kept 
+!        write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
+!        write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice, nkept
+!        !write(std_out,*) 'filtered eigenvalues=', theta_reshaped
+!        write(std_out,*) 'filtered eigval(first,last)=', theta_reshaped(1), theta_reshaped(neigenpairs_slice)
+!        !write(std_out,*) 'kept eigenvalues=', theta_reshaped(fcol_in_slice:lcol_in_slice)
+!        write(std_out,*) 'kept eigval(first,last)=', theta_reshaped(fcol_in_slice), theta_reshaped(lcol_in_slice)
+!        write(std_out,*) 'tot_ncols_kept(prev)=', tot_ncols_kept 
 
         ! After merge: Update first columns to copy from Xext to X
         slice%fcol_in_X(islice)= tot_ncols_kept + 1
@@ -1823,7 +1823,7 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     
     ! Detect missing or extra eigenvalues
     if (tot_ncols_kept < slice%neigenpairs) then
-        ABI_WARNING("Too few converged eigenvalues kept. Decrease tolfilter or nstep_mixed.")
+        ABI_WARNING("Not enough converged eigenvalues in slice")
     else if (tot_ncols_kept > slice%neigenpairs) then
         ABI_WARNING("Too many converged eigenvalues kept. Decrease tolfilter or nstep_mixed.")
     end if
