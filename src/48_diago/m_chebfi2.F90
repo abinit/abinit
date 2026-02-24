@@ -1416,8 +1416,9 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
         flush(std_out)
         call chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,getBm1X)
     else
-        do ierr=1,5
+        do ierr=1,3
             ! [lambda_minus,lambda_plus) is amplified using Chebyshev-Jackson
+            write(std_out,*) 'inner restart(filter only)=,', ierr
             write(std_out,*) 'lambda_minus=', lambda_minus
             write(std_out,*) 'lambda_plus=', lambda_plus
             write(std_out,*) 'mineig_global=', mineig_global
@@ -1501,10 +1502,10 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     if ( ierr /= 0 ) then
         ABI_WARNING("RayleighRitz did not work")
     else
-        !write(std_out,*) 'is lowpass=', is_lowpass
-        !write(std_out,*) 'chebfi%eigenvalues after RR'
-        !call xgBlock_print(chebfi%eigenvalues,std_out)
-        !flush(std_out)
+        write(std_out,*) 'is lowpass=', is_lowpass
+        write(std_out,*) 'chebfi%eigenvalues after RR'
+        call xgBlock_print(chebfi%eigenvalues,std_out)
+        flush(std_out)
     end if
 
     ! Compute residual norm *squared*

@@ -932,6 +932,11 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         write(std_out,*) 'neigenpairs=', neigenpairs
         flush(std_out)
 
+        if (slice%gpu_option == ABI_GPU_OPENMP) then
+            call xgBlock_copy_to_gpu(eigen_active)
+            call xgBlock_copy_to_gpu(residu_active)
+        end if
+        
         call xgBlock_reverseMap(eigen_active , thetas_conv, rows=neigenpairs, cols=1)
         call xgBlock_reverseMap(residu_active, residu_conv, rows=neigenpairs, cols=1)
         max_resid_kept = -1e10 ! reset
@@ -1134,7 +1139,7 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     ! make_invovl for 1 vector then make_invovl for nband vectors.
 #ifdef HAVE_OPENMP_OFFLOAD
     if (slice%paw) then
-        work_size = max(neigenpairs, maxval(slice%neigenpairs_per_slice))
+        work_size = maxval(slice%neigenpairs_per_slice)
         call xg_init(W_dummy, slice%space, tot_spacedim, work_size, xmpi_comm_null, &
             me_g0=me_g0, gpu_option=slice%gpu_option)
         call timab(tim_invovl, 1, tsec)
