@@ -1124,8 +1124,8 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     end if
 #endif
 
-    write(std_out,*) 'X=', xgBlock_getid(X)
-    flush(std_out) 
+    !write(std_out,*) 'X=', xgBlock_getid(X)
+    !flush(std_out) 
 
     ! ============== Transpose ==============
     if (slice%paral_kgb==1) then
@@ -1885,8 +1885,8 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     call xgBlock_reshape(eigen, slice%neigenpairs, 1) 
     call xgBlock_reshape(resid, slice%neigenpairs, 1)
 
-    write(std_out,*) 'residuals after merge=', xgBlock_getid(resid)
-    flush(std_out)
+    !write(std_out,*) 'residuals after merge=', xgBlock_getid(resid)
+    !flush(std_out)
  
     !write(std_out,*) 'residuals squared after all merge='
     !call xgBlock_print(resid,std_out)
@@ -2834,10 +2834,10 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         call xmpi_max(maxeig, maxeig_global, spacecom, ierr)
 
         write(std_out,*) 'maxeig_global=', maxeig_global
-        write(std_out,*) 'divresults=', xgBlock_getid(DivResults%self)
-        write(std_out,*) 'X0=', xgBlock_getid(X0)
-        write(std_out,*) 'xX=', xgBlock_getid(chebfi%xXColsRows)
-        call xgBlock_print(DivResults%self, std_out)
+        !write(std_out,*) 'divresults=', xgBlock_getid(DivResults%self)
+        !write(std_out,*) 'X0=', xgBlock_getid(X0)
+        !write(std_out,*) 'xX=', xgBlock_getid(chebfi%xXColsRows)
+        !call xgBlock_print(DivResults%self, std_out)
         flush(std_out)
     end if
 

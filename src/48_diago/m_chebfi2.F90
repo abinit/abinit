@@ -663,9 +663,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
 
  ! IML debug
  write(std_out,*) 'maxeig_global=', maxeig_global
- write(std_out,*) 'divresults=', xgBlock_getid(DivResults%self)
- write(std_out,*) 'X0=', xgBlock_getid(X0)
- write(std_out,*) 'xX=', xgBlock_getid(chebfi%xXColsRows)
+ !write(std_out,*) 'divresults=', xgBlock_getid(DivResults%self)
+ !write(std_out,*) 'X0=', xgBlock_getid(X0)
+ !write(std_out,*) 'xX=', xgBlock_getid(chebfi%xXColsRows)
  !call xgBlock_print(DivResults%self, std_out)
  flush(std_out)
  ! IML debug
@@ -1394,9 +1394,9 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     nrowsLinalg_ptr => nrowsLinalg
     nrowsLinalg = nrows_blockrows
     
-    write(std_out,*) 'getid inside runSlice xXColsRows', xgBlock_getId(chebfi%xXColsRows)
-    write(std_out,*) 'getid inside runSlice xAXColsRows', xgBlock_getId(chebfi%xAXColsRows)
-    flush(std_out)
+    !write(std_out,*) 'getid inside runSlice xXColsRows', xgBlock_getId(chebfi%xXColsRows)
+    !write(std_out,*) 'getid inside runSlice xAXColsRows', xgBlock_getId(chebfi%xAXColsRows)
+    !flush(std_out)
 
     !A * Psi
     call timab(tim_getAX_BX,1,tsec)
@@ -1407,8 +1407,8 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     ABI_NVTX_END_RANGE()
     call timab(tim_getAX_BX,2,tsec)
 
-    write(std_out,*) 'getid inside runSlice xXColsRows (filtered 1)', xgBlock_getId(chebfi%xXColsRows)
-    write(std_out,*) 'getid inside runSlice xAXColsRows (filtered 1)', xgBlock_getId(chebfi%xAXColsRows)
+    !write(std_out,*) 'getid inside runSlice xXColsRows (filtered 1)', xgBlock_getId(chebfi%xXColsRows)
+    !write(std_out,*) 'getid inside runSlice xAXColsRows (filtered 1)', xgBlock_getId(chebfi%xAXColsRows)
     
     write(std_out,*) 'starting filter in proc', xmpi_comm_rank(chebfi%spacecom)
     flush(std_out)
@@ -1434,9 +1434,9 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
             end do
     end if
 
-    write(std_out,*) 'getid inside runSlice xXColsRows (filtered N)', xgBlock_getId(chebfi%xXColsRows)
-    write(std_out,*) 'getid inside runSlice xAXColsRows (filtered N)', xgBlock_getId(chebfi%xAXColsRows)
-    flush(std_out)
+    !write(std_out,*) 'getid inside runSlice xXColsRows (filtered N)', xgBlock_getId(chebfi%xXColsRows)
+    !write(std_out,*) 'getid inside runSlice xAXColsRows (filtered N)', xgBlock_getId(chebfi%xAXColsRows)
+    !flush(std_out)
 
     ! MPI transpose to linalg state
     call timab(tim_transpose,1,tsec)
@@ -1458,10 +1458,10 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
         ! Note: at this point chebfi%AX and chebfi%BX are empty. Must transpose
         !       to fill with correct values.
 
-        write(std_out,*) 'getid before transpose AX', xgBlock_getId(chebfi%AX%self)
-        write(std_out,*) 'getid before transpose xAX', xgBlock_getId(chebfi%xAXColsRows)
-        write(std_out,*) 'getid before transpose xX', xgBlock_getId(chebfi%xXColsRows)
-        flush(std_out)
+        !write(std_out,*) 'getid before transpose AX', xgBlock_getId(chebfi%AX%self)
+        !write(std_out,*) 'getid before transpose xAX', xgBlock_getId(chebfi%xAXColsRows)
+        !write(std_out,*) 'getid before transpose xX', xgBlock_getId(chebfi%xXColsRows)
+        !flush(std_out)
 
         chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
         chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
@@ -1472,8 +1472,8 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
         call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_LINALG)
         call xmpi_barrier(chebfi%spacecom)
 
-        write(std_out,*) 'getid after transpose AX', xgBlock_getId(chebfi%AX%self)
-        flush(std_out)
+        !write(std_out,*) 'getid after transpose AX', xgBlock_getId(chebfi%AX%self)
+        !flush(std_out)
 
     else
         call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, spacedim, neigenpairs)
@@ -1491,8 +1491,8 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     !write(std_out,*) 'chebfi%eigenvalues before RR'
     !call xgBlock_print(chebfi%eigenvalues,std_out)
     
-    write(std_out,*) 'id of X, (before RR) ncols=', xgBlock_getId(chebfi%X), cols(chebfi%X)
-    flush(std_out)
+    !write(std_out,*) 'id of X, (before RR) ncols=', xgBlock_getId(chebfi%X), cols(chebfi%X)
+    !flush(std_out)
 
     !call xg_Borthonormalize(chebfi%xXColsRows,chebfi%xBxColsRows,ierr,1,chebfi%gpu_option,AX=chebfi%xAXColsRows)
     
@@ -1502,7 +1502,7 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
         chebfi%gpu_option,solve_ax_bx=.true.)
     ABI_NVTX_END_RANGE()
     
-    write(std_out,*) 'id of X, (after RR) ncols=', xgBlock_getId(chebfi%X), cols(chebfi%X)
+    !write(std_out,*) 'id of X, (after RR) ncols=', xgBlock_getId(chebfi%X), cols(chebfi%X)
 
     if ( ierr /= 0 ) then
         ABI_WARNING("RayleighRitz did not work")
