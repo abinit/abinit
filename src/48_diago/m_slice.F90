@@ -954,6 +954,9 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
                 num_kept = num_kept + 1
             end if
         end do
+        write(std_out,*) 'resid debug=', max_resid_kept
+        write(std_out,*) residu_conv(:,1)
+        flush(std_out)
         call xmpi_sum(num_kept, slice%me_comm_rows, ierr)
         call xmpi_max(max_resid_kept, slice%me_comm_rows, ierr) ! entire slice
         write(std_out,*) '################################################# '
