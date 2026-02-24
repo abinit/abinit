@@ -6495,7 +6495,7 @@ contains
     type(xgBlock_t) :: xgBlock_part
     real(dp) :: re, reim(2)
     real(dp) :: norm2_vec
-    integer :: tid, rank, seed_size, i, n
+    integer :: tid, rank, seed_size, i, n, fact
     integer, allocatable :: seed(:)
     complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC(:) => null()
     real(kind=c_double), ABI_CONTIGUOUS pointer:: vecR(:) => null()
@@ -6506,6 +6506,7 @@ contains
     
     tid = 0
     n = xgBlock%rows
+    fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
     
     if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
         call xgBlock_setBlock(xgBlock, xgBlock_part, n, 1, fcol=jcol)
@@ -6514,8 +6515,8 @@ contains
 
     ! Each thread each MPI process maintains its own seed
     select case(xgBlock%space)
-    case (SPACE_R)
-        vecR => xgBlock%vecR(:,jcol) ! contiguous in memory
+    case (SPACE_R,SPACE_CR)
+        vecR => xgBlock%vecR(1:fact*n,jcol) ! contiguous in memory
         !$omp parallel default(none) &
         !$omp private(tid, seed, re, i, seed_size) &
         !$omp shared(vecR, my_rank, n)
@@ -6529,7 +6530,7 @@ contains
             !$omp do
             do i=1,n
                 call random_number(re)
-                vecR(i) = re
+                vecR(i) = merge(1.d0, -1.d0, re>=0.5d0)
             end do
             !$omp end do
             ABI_FREE(seed)
@@ -6554,8 +6555,6 @@ contains
         !$omp end parallel
         norm2_vec = sum(conjg(vecC)*vecC)
         vecC = vecC / sqrt(real(norm2_vec, dp))
-    case (SPACE_CR)
-        ABI_ERROR('Not implemented for SPACE_CR')
     end select
     
     if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
@@ -6651,16 +6650,20 @@ contains
     real(dp) :: u
     complex(dp) :: meanz
     real(dp)    :: norm2_, variance
-    integer :: tid, rank, seed_size, i, n, k
+    integer :: tid, rank, seed_size, i, n, k, fact
     integer, allocatable :: seed(:)
     complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC(:) => null()
+    real(kind=c_double)            , ABI_CONTIGUOUS pointer :: vecR(:) => null()
 
     if (jcol > xgBlock%cols) then
         ABI_ERROR('given column is out of block')
     end if
     
     tid = 0
-    n = xgBlock%rows
+    fact = 1
+    fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
+    
+    n = fact*xgBlock%rows
     
     if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
         call xgBlock_setBlock(xgBlock, xgBlock_part, n, 1, fcol=jcol)
@@ -6698,7 +6701,23 @@ contains
         write(901,*) "variance = ", variance
         flush(901)
     case (SPACE_CR)
-        ABI_ERROR('Not implemented for SPACE_CR')
+        vecR => xgBlock%vecR(1:fact*xgBlock%rows,jcol) ! contiguous in memory
+        !$omp parallel default(none) &
+        !$omp private(tid, seed, u, k, i, seed_size) &
+        !$omp shared(vecR, my_rank, n)
+            call random_seed(size=seed_size)
+            ABI_MALLOC(seed, (seed_size))
+            tid = xomp_get_thread_num()
+            seed = 123456 + 1000*my_rank + 97*tid + (/ (i, i=1,seed_size) /)
+            call random_seed(put=seed)
+            !$omp do
+            do i=1,n
+                call random_number(u)
+                vecR(i) = merge(1.d0, -1.d0, u>=0.5d0)
+            end do
+            !$omp end do
+            ABI_FREE(seed)
+        !$omp end parallel
     end select
     
     if (xgBlock%gpu_option == ABI_GPU_OPENMP) then
