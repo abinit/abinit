@@ -615,7 +615,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
 
     if (slice%nslice==3) then
         slice%fcol_in_X(3) = 1
-        slice%fcol_in_Xext(3) = slice%fcol_in_Xext(2) + slice%neigenpairs_per_slice(2) + 1 
+        slice%fcol_in_Xext(3) = slice%fcol_in_Xext(2) + slice%neigenpairs_per_slice(2) 
     end if
 
     ! Slice three
