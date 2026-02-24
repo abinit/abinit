@@ -386,27 +386,27 @@ if(OpenMP_FOUND)
   endif()
 
   if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
+    include(manage_openmp_target)
+
+    #FIXME Experimental, only tested with NVHPC through Intel IFX, AMD Flang and GFortran might be handled.
+    # Examples:
+    #get_offload_flags(ARCH   gfx1030 RESULT OFFLOAD_FLAGS)  for AMD GPUs    (Flang > v16.0)
+    #get_offload_flags(TARGET 80      RESULT OFFLOAD_FLAGS)  for NVIDIA GPUs (NVHPC)
+    #get_offload_flags(ARCH   sm_80   RESULT OFFLOAD_FLAGS)  for NVIDIA GPUs (NVHPC > v23.x and Flang > v16.0)
+    #get_offload_flags(TARGET spir64  RESULT OFFLOAD_FLAGS)  for Intel GPUs  (IntelLLVM a.k.a IFX)
+    if (ABINIT_ENABLE_GPU_CUDA)
+      get_offload_flags(TARGET ${CMAKE_CUDA_ARCHITECTURES}    RESULT OPENMP_OFFLOAD_FLAGS)
+    elseif(ABINIT_ENABLE_GPU_HIP)
+      get_offload_flags(ARCH   ${CMAKE_HIP_ARCHITECTURES}     RESULT OPENMP_OFFLOAD_FLAGS)
+    endif()
+
     # check for OpenMP GPU offload support (OpenMP v5 onwards)
     try_compile(HAVE_OPENMP_OFFLOAD_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_openmp_offload.F90
-      LINK_OPTIONS ${OpenMP_Fortran_FLAGS}
+      LINK_OPTIONS ${OpenMP_Fortran_FLAGS} ${OPENMP_OFFLOAD_FLAGS}
       LINK_LIBRARIES OpenMP::OpenMP_Fortran)
 
     if(HAVE_OPENMP_OFFLOAD_BOOL)
       set(HAVE_OPENMP_OFFLOAD 1)
-
-      include(manage_openmp_target)
-      #FIXME Experimental, only tested with NVHPC through Intel IFX, AMD Flang and GFortran might be handled.
-      # Examples:
-      #get_offload_flags(ARCH   gfx1030 RESULT OFFLOAD_FLAGS)  for AMD GPUs    (Flang > v16.0)
-      #get_offload_flags(TARGET 80      RESULT OFFLOAD_FLAGS)  for NVIDIA GPUs (NVHPC)
-      #get_offload_flags(ARCH   sm_80   RESULT OFFLOAD_FLAGS)  for NVIDIA GPUs (NVHPC > v23.x and Flang > v16.0)
-      #get_offload_flags(TARGET spir64  RESULT OFFLOAD_FLAGS)  for Intel GPUs  (IntelLLVM a.k.a IFX)
-
-      if (ABINIT_ENABLE_GPU_CUDA)
-        get_offload_flags(TARGET ${CMAKE_CUDA_ARCHITECTURES}    RESULT OPENMP_OFFLOAD_FLAGS)
-      elseif(ABINIT_ENABLE_GPU_HIP)
-        get_offload_flags(ARCH   ${CMAKE_HIP_ARCHITECTURES}     RESULT OPENMP_OFFLOAD_FLAGS)
-      endif()
 
       # check whether compiler implements omp_get_mapped_ptr
       try_compile(HAVE_OPENMP_GET_MAPPED_PTR_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_openmp_get_mapped_ptr.F90
