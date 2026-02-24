@@ -175,6 +175,7 @@ module m_slice
         integer :: spacedim                                 ! nb of plane-waves per process in linalg representation
         integer :: nslice                                   ! number of spectral slices
         integer :: space                                    ! real or complex eigenvectors
+        integer :: nbdbuf
         
         ! GPU-related
         integer :: gpu_kokkos_nthrd                 
@@ -281,7 +282,7 @@ module m_slice
 !! SOURCE
 
 subroutine slice_init(slice,nslice,neigenpairs,spacedim,tolerance,paral_kgb,&
-        paral_slice,ndeg_filter,ramp,ecut,bandpp,space,spacecom,me_g0,me_g0_fft,&
+        paral_slice,ndeg_filter,nbdbuf,ramp,ecut,bandpp,space,spacecom,me_g0,me_g0_fft,&
         paw,comm_rows,comm_cols,spectral_cut,gpu_option,gpu_kokkos_nthrd,gpu_thread_limit)
 
     implicit none
@@ -300,6 +301,7 @@ subroutine slice_init(slice,nslice,neigenpairs,spacedim,tolerance,paral_kgb,&
     integer      , intent(in   ) :: spacecom
     integer      , intent(in   ) :: spacedim
     integer      , intent(in   ) :: ndeg_filter
+    integer      , intent(in   ) :: nbdbuf
     integer      , intent(in   ) :: spectral_cut
     integer      , intent(in   ) :: gpu_option
     logical      , intent(in   ) :: paw
@@ -333,6 +335,7 @@ subroutine slice_init(slice,nslice,neigenpairs,spacedim,tolerance,paral_kgb,&
     slice%spacecom      = spacecom
     slice%spacedim      = spacedim
     slice%ndeg_filter   = ndeg_filter
+    slice%nbdbuf        = nbdbuf
     slice%spectral_cut  = spectral_cut
     slice%gpu_option    = gpu_option
     slice%paw           = paw
@@ -757,9 +760,8 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     type(xgBlock_t) :: eigen_active
     type(xgBlock_t) :: residu_active
     integer :: nbdbuf, oracle, num_proc
-    integer :: i
-    integer :: iband
-    integer :: nrows
+    integer :: i, iband, nrows
+    integer :: me_nbdbuf
     integer :: neigenpairs, bandpp, ndeg_filter
     integer :: comm, comm_rows, comm_cols
     integer :: num_restart
@@ -936,34 +938,51 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
             call xgBlock_copy_to_gpu(eigen_active)
             call xgBlock_copy_to_gpu(residu_active)
         end if
-        
+       
+        !me_nbdbuf = neigenpairs + 100
+        !if (slice%me_id_slice==slice%nslice) then
+        !    if (nbdbuf > bandpp) then
+        !        ABI_WARNING("nbdbuf too large")
+        !    end if
+        !    if (xmpi_comm_rank(comm)==xmpi_comm_size(comm)-1) then
+        !        me_nbdbuf = neigenpairs - slice%nbdbuf
+        !        write(std_out,*) 'me_nbdbuf=', me_nbdbuf, " neigenpairs=", neigenpairs
+        !    end if
+        !end if
+        !flush(std_out)
+
         call xgBlock_reverseMap(eigen_active , thetas_conv, rows=neigenpairs, cols=1)
         call xgBlock_reverseMap(residu_active, residu_conv, rows=neigenpairs, cols=1)
         max_resid_kept = -1e10 ! reset
         num_kept = 0
         do iband=1, neigenpairs
-            theta = thetas_conv(iband, 1)
-            has_converged = .false.
-            if (is_lowpass) then
-                has_converged = ( theta < b_part )
-            else 
-                has_converged = ( (a_part < theta) .and. (theta < b_part) )
-            end if
-            if (has_converged) then
-                max_resid_kept = max(max_resid_kept, residu_conv(iband, 1))
-                num_kept = num_kept + 1
-            end if
+            !if (iband>me_nbdbuf) then
+            !    write(std_out,*) 'excluding ', iband, ' in nbdbuf ', me_nbdbuf
+            !    flush(std_out)
+            !else
+                theta = thetas_conv(iband, 1)
+                has_converged = .false.
+                if (is_lowpass) then
+                    has_converged = ( theta < b_part )
+                else 
+                    has_converged = ( (a_part < theta) .and. (theta < b_part) )
+                end if
+                if (has_converged) then
+                    max_resid_kept = max(max_resid_kept, residu_conv(iband, 1))
+                    num_kept = num_kept + 1
+                end if
+            !end if
         end do
-        write(std_out,*) 'resid debug=', max_resid_kept
-        write(std_out,*) residu_conv(:,1)
+        !write(std_out,*) 'resid debug=', max_resid_kept
+        !write(std_out,*) residu_conv(:,1)
         flush(std_out)
-        call xmpi_sum(num_kept, slice%me_comm_rows, ierr)
-        call xmpi_max(max_resid_kept, slice%me_comm_rows, ierr) ! entire slice
+        call xmpi_sum(num_kept, comm, ierr)
+        call xmpi_max(max_resid_kept, comm, ierr) ! entire slice
         write(std_out,*) '################################################# '
         write(std_out,'(a,i5)') ' Convergence of inner iteration=', i
-        write(std_out,*) 'partition           =', a_part, b_part
-        write(std_out,*) 'num eigenvalues kept=', num_kept
-        write(std_out,*) 'max_resid_kept      =', max_resid_kept
+        write(std_out,*) 'partition             =', a_part, b_part
+        write(std_out,*) 'eigenspace dimension  =', num_kept
+        write(std_out,*) 'max resid(excl nbdbuf)=', max_resid_kept
         write(std_out,*) '################################################# '
         flush(std_out)
 
@@ -973,6 +992,9 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         call xg_setBlock(chebfi%X_NP, chebfi%X_prev, nrows, bandpp, fcol=bandpp+1)
 
     end do
+
+    write(std_out,*) 'converged at ninner=', i
+    flush(std_out)
 
     !write(std_out,*) 'getid after runSlice X0_active', xgBlock_getId(X0_active) 
 

@@ -1507,10 +1507,10 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     if ( ierr /= 0 ) then
         ABI_WARNING("RayleighRitz did not work")
     else
-        write(std_out,*) 'is lowpass=', is_lowpass
-        write(std_out,*) 'chebfi%eigenvalues after RR'
-        call xgBlock_print(chebfi%eigenvalues,std_out)
-        flush(std_out)
+        !write(std_out,*) 'is lowpass=', is_lowpass
+        !write(std_out,*) 'chebfi%eigenvalues after RR'
+        !call xgBlock_print(chebfi%eigenvalues,std_out)
+        !flush(std_out)
     end if
 
     ! Compute residual norm *squared*
