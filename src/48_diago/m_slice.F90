@@ -1067,6 +1067,7 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
 #ifdef HAVE_OPENMP_OFFLOAD
     integer :: me_g0
     type(xg_t) :: W_dummy
+    integer :: work_size
 #endif
     type(xg_t) :: BX
     type(xg_t) :: X_sketch
@@ -1133,11 +1134,12 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     ! make_invovl for 1 vector then make_invovl for nband vectors.
 #ifdef HAVE_OPENMP_OFFLOAD
     if (slice%paw) then
-        call xg_init(W_dummy, slice%space, tot_spacedim, neigenpairs, xmpi_comm_null, &
+        work_size = max(neigenpairs, maxval(slice%neigenpairs_per_slice))
+        call xg_init(W_dummy, slice%space, tot_spacedim, work_size, xmpi_comm_null, &
             me_g0=me_g0, gpu_option=slice%gpu_option)
         call timab(tim_invovl, 1, tsec)
         ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_BM1X)
-        call getBm1X(xXColsRows, W_dummy%self)
+        call getBm1X(W_dummy%self, W_dummy%self)
         ABI_NVTX_END_RANGE()
         call timab(tim_invovl, 2, tsec)
         call xg_free(W_dummy)
