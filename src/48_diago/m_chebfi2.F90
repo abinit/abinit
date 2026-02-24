@@ -763,13 +763,18 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  ABI_NVTX_END_RANGE()
 
  ! Start IML write converged eigenvalues here
- open(unit=1201, file='converged_eigenvalues.csv', status='replace')
- call xgBlock_reverseMap(chebfi%eigenvalues, thetas, rows=1, cols=chebfi%neigenpairs)
- write(1201,'(A)') "eig"
- do ideg=1, chebfi%neigenpairs
-    write(1201,'(F15.5)') thetas(1,ideg)
- end do
- close(1201)
+ if (xmpi_comm_rank(chebfi%spacecom)==0) then
+    if (chebfi%gpu_option==ABI_GPU_OPENMP) then
+        call xgBlock_copy_from_gpu(chebfi%eigenvalues)
+    end if
+    open(unit=1201, file='converged_eigenvalues.csv', status='replace')
+    call xgBlock_reverseMap(chebfi%eigenvalues, thetas, rows=1, cols=chebfi%neigenpairs)
+    write(1201,'(A)') "eig"
+    do ideg=1, chebfi%neigenpairs
+        write(1201,'(F15.5)') thetas(1,ideg)
+    end do
+    close(1201)
+ end if 
  ! End IML
 
  ! Compute residual
