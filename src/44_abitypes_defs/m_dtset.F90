@@ -680,6 +680,24 @@ type, public :: dataset_type
  integer :: symsigma = 1
  integer :: symv1scf = 0
  integer :: scr_wrange(2) = 0
+ integer :: slice1_m
+ integer :: slice1_deg
+ real(dp) :: slice1_part_a
+ real(dp) :: slice1_part_b
+ real(dp) :: slice1_poly_a
+ real(dp) :: slice1_poly_b
+ integer :: slice2_m
+ integer :: slice2_deg
+ real(dp) :: slice2_part_a
+ real(dp) :: slice2_part_b
+ real(dp) :: slice2_poly_a
+ real(dp) :: slice2_poly_b
+ integer :: slice3_m
+ integer :: slice3_deg
+ real(dp) :: slice3_part_a
+ real(dp) :: slice3_part_b
+ real(dp) :: slice3_poly_a
+ real(dp) :: slice3_poly_b
 !T
  integer :: td_exp_order
  integer :: td_mexcit
@@ -1720,6 +1738,24 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%symdynmat         = dtin%symdynmat
  dtout%symv1scf          = dtin%symv1scf
  dtout%scr_wrange        = dtin%scr_wrange
+ dtout%slice1_m          = dtin%slice1_m
+ dtout%slice1_deg        = dtin%slice1_deg
+ dtout%slice1_part_a     = dtin%slice1_part_a
+ dtout%slice1_part_b     = dtin%slice1_part_b
+ dtout%slice1_poly_a     = dtin%slice1_poly_a
+ dtout%slice1_poly_b     = dtin%slice1_poly_b
+ dtout%slice2_m          = dtin%slice2_m
+ dtout%slice2_deg        = dtin%slice2_deg
+ dtout%slice2_part_a     = dtin%slice2_part_a
+ dtout%slice2_part_b     = dtin%slice2_part_b
+ dtout%slice2_poly_a     = dtin%slice2_poly_a
+ dtout%slice2_poly_b     = dtin%slice2_poly_b
+ dtout%slice3_m          = dtin%slice3_m
+ dtout%slice3_deg        = dtin%slice3_deg
+ dtout%slice3_part_a     = dtin%slice3_part_a
+ dtout%slice3_part_b     = dtin%slice3_part_b
+ dtout%slice3_poly_a     = dtin%slice3_poly_a
+ dtout%slice3_poly_b     = dtin%slice3_poly_b
  dtout%ph_nqshift        = dtin%ph_nqshift
  if (allocated(dtin%ph_qshift)) call alloc_copy(dtin%ph_qshift, dtout%ph_qshift)
  dtout%ph_smear          = dtin%ph_smear
@@ -3919,6 +3955,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' spinat spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
  list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'
+ list_vars=trim(list_vars)//' slice1_m slice1_deg slice1_part_a slice1_part_b slice1_poly_a slice1_poly_b'
+ list_vars=trim(list_vars)//' slice2_m slice2_deg slice2_part_a slice2_part_b slice2_poly_a slice2_poly_b'
+ list_vars=trim(list_vars)//' slice3_m slice3_deg slice3_part_a slice3_part_b slice3_poly_a slice3_poly_b'
  list_vars=trim(list_vars)//' structure '
 !T
  list_vars=trim(list_vars)//' td_exp_order td_maxene td_mexcit td_scnmax td_prtstr td_restart td_propagator td_scthr'

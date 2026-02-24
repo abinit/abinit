@@ -666,7 +666,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,eigen,occ,residu,nspinor)
  write(std_out,*) 'divresults=', xgBlock_getid(DivResults%self)
  write(std_out,*) 'X0=', xgBlock_getid(X0)
  write(std_out,*) 'xX=', xgBlock_getid(chebfi%xXColsRows)
- call xgBlock_print(DivResults%self, std_out)
+ !call xgBlock_print(DivResults%self, std_out)
  flush(std_out)
  ! IML debug
 
@@ -1494,15 +1494,15 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
         chebfi%gpu_option,solve_ax_bx=.true.)
     ABI_NVTX_END_RANGE()
     
-    !write(std_out,*) 'id of X, (after RR) ncols=', xgBlock_getId(chebfi%X), cols(chebfi%X)
+    write(std_out,*) 'id of X, (after RR) ncols=', xgBlock_getId(chebfi%X), cols(chebfi%X)
 
     if ( ierr /= 0 ) then
         ABI_WARNING("RayleighRitz did not work")
     else
-        write(std_out,*) 'is lowpass=', is_lowpass
-        write(std_out,*) 'chebfi%eigenvalues after RR'
-        call xgBlock_print(chebfi%eigenvalues,std_out)
-        flush(std_out)
+        !write(std_out,*) 'is lowpass=', is_lowpass
+        !write(std_out,*) 'chebfi%eigenvalues after RR'
+        !call xgBlock_print(chebfi%eigenvalues,std_out)
+        !flush(std_out)
     end if
 
     ! Compute residual norm *squared*
@@ -1513,8 +1513,8 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     end if
     call xgBlock_colwiseNorm2(chebfi%AX%self,residu) ! performs MPI comm
 
-    write(std_out,*) 'max colwise residual norm squared='; call xgBlock_print(residu, std_out)
-    flush(std_out)
+    !write(std_out,*) 'max colwise residual norm squared='; call xgBlock_print(residu, std_out)
+    !flush(std_out)
 
     ! Copy in Linalg representation (see chebfi_run, kept for reference)
     ! call xgBlock_copy(chebfi%X,X0)
