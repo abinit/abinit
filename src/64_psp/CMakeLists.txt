@@ -41,4 +41,11 @@ target_link_libraries(64_psp
   abinit::57_iopsp_parser
   )
 
+if(ABINIT_LIBPSML_FOUND)
+  target_link_libraries(64_psp
+    PUBLIC
+    abinit::libpsml
+    )
+endif()
+
 add_library(abinit::64_psp ALIAS 64_psp)
