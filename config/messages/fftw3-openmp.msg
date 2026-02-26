@@ -4,10 +4,7 @@ will be only linked in its single-threaded version,
 and FFT operations will NOT benefit from multi-threads
 parallelization.
 
-Certain implementations \\(e.g., cprj_in_memory\\) may
-suffer from this configuration.
-
-If you intended to use multithreaded FFT, please
-re-run configure with:
+If you intended to use multithreaded FFT \\(recommended\\),
+please re-run configure with:
 
 --with-fft-flavor=fftw3-threads
