@@ -3481,5 +3481,34 @@ end subroutine computeFilterEnergy
   end subroutine jackson_step_coeffs
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_slice/fast_erf
+!! NAME
+!! fast_erf
+!! 
+!! FUNCTION
+!! Fast approximation of erf(x) using Abramowitz & Stegun 7.1.26
+
+  function fast_erf(x) result(erf_val)
+    implicit none
+    real(dp), intent(in) :: x
+    real(dp) :: erf_val
+    real(dp) :: t, tau, ax
+    real(dp), parameter :: p  = 0.3275911_dp
+    real(dp), parameter :: a1 = 0.254829592_dp
+    real(dp), parameter :: a2 = -0.284496736_dp
+    real(dp), parameter :: a3 = 1.421413741_dp
+    real(dp), parameter :: a4 = -1.453152027_dp
+    real(dp), parameter :: a5 = 1.061405429_dp
+
+    ax = abs(x)
+    t = 1.0_dp / (1.0_dp + p * ax)
+    tau = (((((a5*t + a4)*t + a3)*t + a2)*t + a1)*t) * exp(-ax*ax)
+    erf_val = 1.0_dp - tau
+    if (x < 0.0_dp) erf_val = -erf_val
+  end function fast_erf
+!!***
+
 end module m_slice
 !!***
