@@ -481,6 +481,7 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  type(xg_nonlop_t) :: xg_nonlop
  ! IML
  real(dp), pointer :: thetas(:,:) => null()
+ real(dp), allocatable :: jackson_c(:)
 
 ! *********************************************************************
 
@@ -490,6 +491,7 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  xg_nonlop = chebfi%xg_nonlop
  chebfi%eigenvalues = eigen
 
+ ABI_MALLOC(jackson_c, (ndeg_filter+1))
  ABI_MALLOC(ndeg_filter_bands,(chebfi%bandpp))
  if (chebfi%space==SPACE_C) then
    space_res = SPACE_C
@@ -649,6 +651,8 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  call timab(tim_copy, 1, tsec)
  call xgBlock_copy(chebfi%X,X0)
  call timab(tim_copy, 2, tsec)
+
+ ABI_FREE(jackson_c)
 
  call xgTransposer_free(chebfi%xgTransposerX)
  call xgTransposer_free(chebfi%xgTransposerAX)
@@ -1146,6 +1150,39 @@ subroutine chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivRe
  ABI_FREE(ndeg_filter_bands)
 
 end subroutine chebfi_set_ndeg_from_residu
+!!***
+
+!!****f* m_chebfi2/jackson_lowpass_coeffs
+!! NAME
+!! jackson_lowpass_coeffs
+!!
+!! FUNCTION
+!! Compute Jackson-damped Chebyshev coefficients for a lowpass step
+!! on interval [lambda_min, lambda_max], degree M
+
+subroutine jackson_lowpass_coeffs(center, radius, M, c)
+    implicit none
+    integer, intent(in) :: M
+    real(dp), intent(in) :: center, radius
+    real(dp), intent(out) :: c(1:M+1)
+    integer :: k
+    real(dp) :: theta, g
+
+    ! Chebyshev coefficients for step at left end (-1 in scaled coords)
+    theta = acos(-1.0d0)   ! step at left edge
+    c(1) = theta / Pi       ! k = 0
+
+    do k = 1, M
+        c(k+1) = -2.0d0 / Pi * sin(k*theta) / k
+    end do
+
+    ! Apply Jackson damping
+    do k = 0, M
+        g = ((M-k+1)*cos(Pi*k/(M+1)) + sin(Pi*k/(M+1))/tan(Pi/(M+1)))/(M+1)
+        c(k+1) = c(k+1) * g
+    end do
+
+end subroutine jackson_lowpass_coeffs
 !!***
 
 end module m_chebfi2_cprj
