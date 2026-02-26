@@ -826,7 +826,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    end do
  end do
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(to:projs1,projs2) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:projs1,projs2,nattyp) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
 !------------------------------------------------------------------------
 !----- Loop over atoms types
@@ -934,7 +934,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  end do
 
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_ifftsph,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_indklmn,atom_nfgd,atom_ifftsph,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
    !$OMP TARGET ENTER DATA MAP(to:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_phonon)
    !$OMP TARGET ENTER DATA MAP(to:atom_gylmgr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_grad1)
 #endif
@@ -970,7 +970,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-       !$OMP& PRIVATE(idat1,idat2) MAP(to:cpf,projs1,projs2)
+       !$OMP& PRIVATE(idat1,idat2) MAP(to:cpf,projs1,projs2,atom_indklmn,atom_nfgd)
        do idat1=1,ndat1
          do idat2=1,ndat2
            !$OMP PARALLEL DO PRIVATE(ilmn,jlmn,klmn)
@@ -1027,7 +1027,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 #ifdef HAVE_OPENMP_OFFLOAD
          ang_gntselect => pawang%gntselect
          !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
-         !$OMP& MAP(to:nhat12_atm,atom_gylm,cpf,qijl,atom_ifftsph,atom_dltij,atom_indklmn,gnt_scal)&
+         !$OMP& MAP(to:nhat12_atm,atom_gylm,cpf,qijl,atom_ifftsph,atom_dltij,atom_indklmn,atom_nfgd,gnt_scal,nattyp)&
          !$OMP& PRIVATE(idat1,idat2,ia)
          do ia=1,nattyp(itypat)
            do idat1=1,ndat1
@@ -1099,7 +1099,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
        else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
-         !$OMP& MAP(to:grnhat_12,atom_gylmgr,cpf,qijl,atom_ifftsph,atom_dltij,atom_indklmn,gnt_scal)&
+         !$OMP& MAP(to:grnhat_12,atom_gylmgr,cpf,qijl,atom_ifftsph,atom_dltij,atom_indklmn,atom_nfgd,gnt_scal,nattyp)&
          !$OMP& PRIVATE(idat1,idat2,sumr,sumi,sumr2,sumi2,sumr3,sumi3)
          do ia=1,nattyp(itypat)
            do idat1=1,ndat1
@@ -1171,7 +1171,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
          else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
            !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-           !$OMP& MAP(to:atom_ifftsph,atom_expiqr,nhat12_atm)
+           !$OMP& MAP(to:atom_ifftsph,atom_expiqr,atom_nfgd,nhat12_atm,nattyp)
            do ia=1,nattyp(itypat)
              do idat1=1,ndat1
                !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ic,jc,ro)
@@ -1220,7 +1220,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
          else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
            !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
-           !$OMP&  MAP(to:atom_ifftsph,atom_expiqr,nhat12_atm,grnhat_12) PRIVATE(idat1,idat2)
+           !$OMP&  MAP(to:atom_ifftsph,atom_expiqr,atom_nfgd,nhat12_atm,grnhat_12,nattyp) PRIVATE(idat1,idat2)
            do ia=1,nattyp(itypat)
              do idat1=1,ndat1
                do idat2=1,ndat2
@@ -1303,7 +1303,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 
  iatm=iatm+nattyp(itypat)
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT  DATA MAP(delete:atom_nfgd,atom_gylm,atom_ifftsph,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:atom_nfgd,atom_indklmn,atom_gylm,atom_ifftsph,atom_dltij,qijl,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
  !$OMP TARGET EXIT DATA MAP(delete:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_phonon)
  !$OMP TARGET EXIT DATA MAP(delete:atom_gylmgr) IF(gpu_option_==ABI_GPU_OPENMP .and. compute_grad1)
 #endif
@@ -1325,7 +1325,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  end do ! itypat
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete:projs1,projs2) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:projs1,projs2,nattyp) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
  ABI_FREE(projs1)
  ABI_FREE(projs2)
@@ -2296,7 +2296,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(alloc:prod,dijhat_idij) IF(gpu_option_==ABI_GPU_OPENMP)
- !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn,atom_nfgd) IF(gpu_option_==ABI_GPU_OPENMP)
  !$OMP TARGET ENTER DATA MAP(to:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. has_qphase)
 #endif
 !----------------------------------------------------------
@@ -2355,7 +2355,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
 #ifdef HAVE_OPENMP_OFFLOAD
              !$OMP TARGET TEAMS DISTRIBUTE &
              !$OMP& PRIVATE(ia) &
-             !$OMP& MAP(to:prod,Pot,atom_ifftsph,atom_gylm)
+             !$OMP& MAP(to:prod,Pot,atom_ifftsph,atom_gylm,atom_nfgd)
              do ia=1,nattyp
                !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat,sum_r,sum_i,ilslm,ic,jc)
                do idat=1,ndat
@@ -2412,7 +2412,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
 #ifdef HAVE_OPENMP_OFFLOAD
              !$OMP TARGET TEAMS DISTRIBUTE &
              !$OMP& PRIVATE(ia) &
-             !$OMP& MAP(to:prod) MAP(to:Pot,atom_ifftsph,atom_expiqr,atom_gylm)
+             !$OMP& MAP(to:prod) MAP(to:Pot,atom_ifftsph,atom_expiqr,atom_gylm,atom_nfgd)
              do ia=1,nattyp
                !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ic,jc,ilslm,idat,sum_r,sum_i)
                do idat=1,ndat
@@ -2641,7 +2641,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatm,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET EXIT DATA MAP(delete:prod,dijhat_idij) IF(gpu_option_==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(delete:atom_gylm,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:atom_gylm,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn,atom_nfgd) IF(gpu_option_==ABI_GPU_OPENMP)
  !$OMP TARGET EXIT DATA MAP(delete:atom_expiqr) IF(gpu_option_==ABI_GPU_OPENMP .and. has_qphase)
  !$OMP TARGET EXIT DATA MAP(from:dijhat) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif

@@ -2070,6 +2070,7 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
  real(dp) :: arg,gsquar,rcut,rhogsq,tot,tot1 !tolfix=1.000000001_dp,
  logical :: rcut_spencer_alavi
 #ifdef HAVE_OPENMP_OFFLOAD
+ real(dp) :: hyb_mixing,hyb_mixing_sr,hyb_range_fock
  ! Cray has trouble with reduction on array, so we use 6 scalars instead
  real(dp) :: fockstr1,fockstr2,fockstr3,fockstr4,fockstr5,fockstr6
 #endif
@@ -2192,11 +2193,16 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
  else if(gpu_option==ABI_GPU_OPENMP) then
    ABI_MALLOC(v_gcart, (3,n1,n2,n3))
 #ifdef HAVE_OPENMP_OFFLOAD
+   hyb_mixing     = fockcommon%hyb_mixing
+   hyb_mixing_sr  = fockcommon%hyb_mixing_sr
+   hyb_range_fock = fockcommon%hyb_range_fock
+
    !$OMP TARGET ENTER DATA MAP(alloc:v_gcart)
+   !$OMP TARGET ENTER DATA MAP(to:gprimd,qphon,vqg,ffti2_local,fftn2_distrib)
 
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
    !$OMP& PRIVATE(idat,i3,i2,i1,ig3,ig2,ig1,tot,tot1,ii,gcart,gsquar,rhogsq,arg) &
-   !$OMP& MAP(to:v_gcart)
+   !$OMP& MAP(to:v_gcart,gprimd,qphon)
    do i3=1,n3
      do i2=1,n2
        do i1=1,n1
@@ -2214,7 +2220,7 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
 
    !$OMP TARGET TEAMS DISTRIBUTE &
    !$OMP& PRIVATE(idat,fockstr1,fockstr2,fockstr3,fockstr4,fockstr5,fockstr6) &
-   !$OMP& MAP(to:rhog,v_gcart) MAP(tofrom:fockstr)
+   !$OMP& MAP(to:rhog,v_gcart,vqg,ffti2_local,fftn2_distrib) MAP(tofrom:fockstr)
    do idat=1,ndat
      fockstr1=zero
      fockstr2=zero
@@ -2236,7 +2242,7 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
            rhogsq=rhog(re,ii,idat)**2+rhog(im,ii,idat)**2
   !        Case G=0:
            if(gsquar<tol10) then
-             if (abs(fockcommon%hyb_mixing)>tol8 .and. abs(fockcommon%hyb_mixing_sr)<tol8) then
+             if (abs(hyb_mixing)>tol8 .and. abs(hyb_mixing_sr)<tol8) then
                ! vqg(1) already contains the factor fockcommon%hyb_mixing
                if (rcut_spencer_alavi) then
                  fockstr1=fockstr1+vqg(1)/3.0_dp*rhogsq
@@ -2248,18 +2254,18 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
            else
 
     !        Spherical cutoff screening
-             if (abs(fockcommon%hyb_mixing)>tol8) then
+             if (abs(hyb_mixing)>tol8) then
                arg=two_pi*rcut*sqrt(gsquar)
-               tot=fockcommon%hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
+               tot=hyb_mixing*rhogsq*piinv/(gsquar**2)*(1-cos(arg)-arg*sin(arg)/two)
                if (rcut_spencer_alavi) then
-                 tot1=fockcommon%hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
+                 tot1=hyb_mixing*rhogsq/three*rcut*sin(arg)/sqrt(gsquar)
                end if
              end if
 
     !        Erfc screening
-             if (abs(fockcommon%hyb_mixing_sr)>tol8) then
-               arg=-gsquar*pi**2/(fockcommon%hyb_range_fock**2)
-               tot=tot+fockcommon%hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
+             if (abs(hyb_mixing_sr)>tol8) then
+               arg=-gsquar*pi**2/(hyb_range_fock**2)
+               tot=tot+hyb_mixing_sr*rhogsq*piinv/(gsquar**2)*(1.d0-exp(arg)*(1-arg))
              end if
              fockstr1=fockstr1+tot*v_gcart(1,i1,i2,i3)*v_gcart(1,i1,i2,i3)+tot1
              fockstr2=fockstr2+tot*v_gcart(2,i1,i2,i3)*v_gcart(2,i1,i2,i3)+tot1
@@ -2280,7 +2286,7 @@ subroutine strfock(fockcommon,gprimd,fockstr,mpi_enreg,nfft,ngfft,&
    fockstr(6,idat)=fockstr6
    end do !ndat
 
-   !$OMP TARGET EXIT DATA MAP(delete:v_gcart)
+   !$OMP TARGET EXIT DATA MAP(delete:v_gcart,gprimd,qphon,vqg,ffti2_local,fftn2_distrib)
 #endif
    ABI_FREE(v_gcart)
  end if
