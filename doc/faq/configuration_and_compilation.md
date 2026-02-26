@@ -8,7 +8,7 @@ This page collects FAQs related to
 
 ## I'm new to configure. Can you explain how to use it?
 
-Please consult <https://wiki.abinit.org/doku.php?id=build:configure>
+Please consult <https://docs.abinit.org/installation/>
 
 To obtain the full list of available options and their documentation, use
 
@@ -37,7 +37,7 @@ Well, there are many reasons why configure can fail.
 First of all, make sure that your LD_LIBRARY_PATH (DYLD_LIBRARY_PATH on MacOs), PATH environment variables
 are properly set **before** running configure.
 By the same token, one should load all the modules before configuring.
-If your environment is propertly set and configure keeps on failing, you will need to search 
+If your environment is propertly set and configure keeps on failing, you will need to search
 for inside *config.log*.
 
 ## Compilation stops with "internal compiler error"
