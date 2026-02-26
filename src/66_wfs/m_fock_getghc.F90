@@ -1168,7 +1168,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 #ifdef HAVE_OPENMP_OFFLOAD
        do idat_occ=1,ndat_occ
          !$OMP TARGET TEAMS DISTRIBUTE &
-         !$OMP& MAP(to:vlocpsi_r) MAP(to:cwaveocc_r,occ,vfock) PRIVATE(idat)
+         !$OMP& MAP(to:vlocpsi_r,ngfftf) MAP(to:cwaveocc_r,occ,vfock) PRIVATE(idat)
          do idat=1,ndat
            !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(ind,recwocc,imcwocc,revloc,imvloc,i3,i2,i1)
            do i3=1,ngfftf(3)
