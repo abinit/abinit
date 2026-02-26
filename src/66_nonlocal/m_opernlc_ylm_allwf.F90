@@ -467,7 +467,8 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
              index_enl=atindx1(iatm+ia)
              j0lmn=jlmn*(jlmn-1)/2
              enl_(1)=enl_ptr2(2*j0lmn+jlmn-1,index_enl,1,min(ndat_enl,idat))-lambda(idat)*sij(j0lmn+jlmn)
-             gxj(1:cplex)=gx(1:cplex,jlmn+(ia-1)*nlmn+ibeg,1,idat)
+             gxj(1    )=gx(1    ,jlmn+(ia-1)*nlmn+ibeg,1,idat)
+             gxj(cplex)=gx(cplex,jlmn+(ia-1)*nlmn+ibeg,1,idat)
              gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,1,idat) = &
 &               gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,1,idat)+enl_(1)*gxj(1)
              if (cplex==2) then
@@ -475,9 +476,11 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
 &                 gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,1,idat)+enl_(1)*gxj(2)
              end if
              do ilmn=1,jlmn-1
-               enl_(1:2)=enl_ptr2(2*j0lmn+ilmn-1:2*j0lmn+ilmn,index_enl,1,min(ndat_enl,idat))
+               enl_(1)=enl_ptr2(2*j0lmn+ilmn-1,index_enl,1,min(ndat_enl,idat))
+               enl_(2)=enl_ptr2(2*j0lmn+ilmn  ,index_enl,1,min(ndat_enl,idat))
                enl_(1)=enl_(1)-lambda(idat)*sij(j0lmn+ilmn)
-               gxi(1:cplex)=gx(1:cplex,ilmn+(ia-1)*nlmn+ibeg,1,idat)
+               gxi(1    )=gx(1    ,ilmn+(ia-1)*nlmn+ibeg,1,idat)
+               gxi(cplex)=gx(cplex,ilmn+(ia-1)*nlmn+ibeg,1,idat)
                gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,1,idat) = &
 &                 gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,1,idat)+enl_(1)*gxi(1)
                gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,1,idat) = &
@@ -500,9 +503,11 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
              if(jlmn<nlmn) then
                do ilmn=jlmn+1,nlmn
                  i0lmn=ilmn*(ilmn-1)/2
-                 enl_(1:2)=enl_ptr2(2*i0lmn+jlmn-1:2*i0lmn+jlmn,index_enl,1,min(ndat_enl,idat))
+                 enl_(1)=enl_ptr2(2*i0lmn+jlmn-1,index_enl,1,min(ndat_enl,idat))
+                 enl_(2)=enl_ptr2(2*i0lmn+jlmn  ,index_enl,1,min(ndat_enl,idat))
                  enl_(1)=enl_(1)-lambda(idat)*sij(i0lmn+jlmn)
-                 gxi(1:cplex)=gx(1:cplex,ilmn+(ia-1)*nlmn+ibeg,1,idat)
+                 gxi(1    )=gx(1   ,ilmn+(ia-1)*nlmn+ibeg,1,idat)
+                 gxi(cplex)=gx(cplex,ilmn+(ia-1)*nlmn+ibeg,1,idat)
                  gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,1,idat) = &
 &                   gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,1,idat)+enl_(1)*gxi(1)
                  gxfac_(2,jlmn+(ia-1)*nlmn+ibeg,1,idat)= &
@@ -1035,13 +1040,16 @@ subroutine opernlc_ylm_allwf(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cp
                  index_enl=atindx1(iatm+ia)
                  i0lmn=ilmn*(ilmn-1)/2
                  ijlmn=i0lmn+jlmn
-                 enl_(1:2)=enl_ptr(2*ijlmn-1:2*ijlmn,index_enl,ispinor_index)
+                 enl_(1)=enl_ptr(2*ijlmn-1,index_enl,ispinor_index)
+                 enl_(2)=enl_ptr(2*ijlmn  ,index_enl,ispinor_index)
                  if (paw_opt==2) enl_(1)=enl_(1)-lambda(idat)*sij(ijlmn)
                  do mu=1,ndgxdtfac
                    if(cplex_dgxdt(mu)==2)then
                      cplex_ = 2 ; gxfi(1) = zero ; gxfi(2) = dgxdt(1,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
                    else
-                     cplex_ = cplex ; gxfi(1:cplex)=dgxdt(1:cplex,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
+                     cplex_ = cplex ;
+                     gxfi(1    )=dgxdt(1    ,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
+                     gxfi(cplex)=dgxdt(cplex,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor,idat)
                    end if
                    dgxdtfac_(1,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=dgxdtfac_(1,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(1)*gxfi(1)
                    dgxdtfac_(2,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)=dgxdtfac_(2,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor,idat)+enl_(2)*gxfi(1)

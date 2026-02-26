@@ -1178,7 +1178,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
                do idat2=1,ndat2
                  do ic=1,atom_nfgd(ia)
                    jc=atom_ifftsph(ic,ia)
-                   ro(1:2)=nhat12_atm(1:2,jc,isploop,idat2,idat1,ia)
+                   ro(1)=nhat12_atm(1,jc,isploop,idat2,idat1,ia)
+                   ro(2)=nhat12_atm(2,jc,isploop,idat2,idat1,ia)
                    nhat12_atm(1,jc,isploop,idat2,idat1,ia)=ro(1)*atom_expiqr(1,ic,ia)-ro(2)*atom_expiqr(2,ic,ia)
                    nhat12_atm(2,jc,isploop,idat2,idat1,ia)=ro(2)*atom_expiqr(1,ic,ia)+ro(1)*atom_expiqr(2,ic,ia)
                  end do
