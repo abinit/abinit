@@ -977,7 +977,8 @@ contains
           !$OMP& PRIVATE(ipw,ilmn) MAP(to:projs,atom_projs)
           do ilmn=1,nlmn-(lmn_beg-1)
             do ipw=1,npw
-              projs(:, ipw, shift+ilmn) = atom_projs(:, ipw, ilmn+(lmn_beg-1))
+              projs(1, ipw, shift+ilmn) = atom_projs(1, ipw, ilmn+(lmn_beg-1))
+              projs(2, ipw, shift+ilmn) = atom_projs(2, ipw, ilmn+(lmn_beg-1))
             end do
           end do
         else ! istwf_k>1
