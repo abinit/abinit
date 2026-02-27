@@ -7,7 +7,7 @@
 !!  used to store results of the GW calculation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2025 ABINIT group (MG, FB, GMR, VO, LR, RWG)
+!! Copyright (C) 2008-2026 ABINIT group (MG, FB, GMR, VO, LR, RWG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

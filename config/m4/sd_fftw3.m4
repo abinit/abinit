@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2026 ABINIT group (Yann Pouillon)
 
 #
 # Fastest Fourier Transform in the West library (FFTW3)
@@ -60,9 +60,6 @@ AC_DEFUN([SD_FFTW3_INIT], [
   # Set reasonable defaults if not provided
   if test -z "${sd_fftw3_libs_def}"; then
     sd_fftw3_libs_def="-lfftw3"
-    if test "${abi_openmp_enable}" = "yes"; then
-      sd_fftw3_libs_def="-lfftw3_threads ${sd_fftw3_libs_def}"
-    fi
     if test "${sd_mpi_enable}" = "yes"; then
       sd_fftw3_libs_def="-lfftw3_mpi ${sd_fftw3_libs_def}"
     fi
@@ -188,10 +185,6 @@ AC_DEFUN([SD_FFTW3_INIT], [
         sd_fftw3_fcflags="${TMP_FFTW_FFLAGS} ${TMP_FFTWF_FFLAGS}"
         sd_fftw3_ldflags="${TMP_FFTW_LIBS} ${TMP_FFTWF_LIBS}"
         sd_fftw3_libs="${TMP_FFTW_LIBS} ${TMP_FFTWF_LIBS} "
-        if test "${abi_openmp_enable}" = "yes"; then
-           sd_fftw3_libs="-lfftw3_threads -lpthread -lfftw3f_threads ${sd_fftw3_libs}"
-           sd_fftw3_ldflags="-lfftw3_threads -lpthread -lfftw3f_threads ${sd_fftw3_ldflags}"
-        fi
         ;;
 
       *)

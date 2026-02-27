@@ -6,7 +6,7 @@
 !!  Description
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2023-2025 ABINIT group (VV, MG)
+!!  Copyright (C) 2023-2026 ABINIT group (VV, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
