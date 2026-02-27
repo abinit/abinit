@@ -671,7 +671,6 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
         
         slice%XextLinalg = slice%X_ext%self
 
-        ! TODO adapt we did not permute
         ! Copy X to XextLinalg by column blocks
         do islice=1,slice%nslice
             ncols = slice%neigenpairs_per_slice(islice)
@@ -2866,6 +2865,9 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         call xgBlock_setBlock(Moments%self, Moment_ideg, nband, 1, fcol=ideg+2) 
         call xgBlock_colwiseDotProduct(X0_backup%self, chebfi%xXColsRows, Moment_ideg, &
             comm_loc=xmpi_comm_null)
+        
+        ! trace = zdotc(n*s, X, 1, V, 1) for X(n,s) and V(n,s) complex arrays
+        ! first time it in CPU
 
         !A * Psi    
         call timab(tim_getAX_BX,1,tsec)
