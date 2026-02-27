@@ -167,7 +167,7 @@ The corresponding atomisation energies and interatomic distances are:
   30         | .1774                     |  1.451
   35         | .1774                     |  1.451
 
-In order to obtain 0.2% relative accuracy on the bond length or atomisation
+In order to obtain 0.2% relative precision on the bond length or atomisation
 energy, one should use a kinetic cut-off energy of 25 Ha.
 We will keep in mind this value for the final run.
 

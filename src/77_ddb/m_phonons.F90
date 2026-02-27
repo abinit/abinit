@@ -8,7 +8,7 @@
 !! as well as the central phdos_init
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (XG, MG, MJV, GMR)
+!! Copyright (C) 1999-2026 ABINIT group (XG, MG, MJV, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
