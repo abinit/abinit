@@ -900,7 +900,8 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     ! TODO 
     ! 2) make for 1 MPI
 
-    num_restart = 200
+    !num_restart = 200
+    num_restart = 1
 
     i = 0
     max_resid_kept = 1e10
@@ -2793,8 +2794,8 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         call xg_init(DivResults, space_res, nband, 1, gpu_option=gpu_option)
     end if
     
-    ! Moment workspace size (nband, ndeg+1)
-    call xg_init(Moments, space, nband, ndeg_filter+1, gpu_option=gpu_option) ! M_n=<X0,f_n(A)X0>
+    ! Moment workspace size (1, ndeg+1)
+    call xg_init(Moments, space, 1, ndeg_filter+1, gpu_option=gpu_option) ! M_n=<X0,f_n(A)X0>
     call xg_init(X0_backup, space, tot_spacedim, nband, spacecom, me_g0=me_g0, gpu_option=gpu_option) ! X0
 
     ! Initialize chebfi object in MPI Colsrows distribution
@@ -2818,9 +2819,8 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     call timab(tim_getAX_BX,2,tsec)
 
     ! Initialize Chebyshev moment at k=1
-    call xgBlock_setBlock(Moments%self, Moment_ideg, nband, 1, fcol=1) 
-    call xgBlock_colwiseDotProduct(X0_backup%self, chebfi%xXColsRows, Moment_ideg, &
-        comm_loc=xmpi_comm_null)
+    call xgBlock_setBlock(Moments%self, Moment_ideg, 1, 1, fcol=1) 
+    call xgBlock_dot(X0_backup%self, chebfi%xXColsRows, Moment_ideg)
 
     if (compute_QR) then
         ! Compute upper bound of interval as Rayleigh quotient
@@ -2862,11 +2862,12 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         ABI_NVTX_END_RANGE()
 
         ! M_ideg = < X0, f_ideg X0 >_B
-        call xgBlock_setBlock(Moments%self, Moment_ideg, nband, 1, fcol=ideg+2) 
-        call xgBlock_colwiseDotProduct(X0_backup%self, chebfi%xXColsRows, Moment_ideg, &
-            comm_loc=xmpi_comm_null)
-       
-        !call xgBlock_dot(X0_backup%self, chebfi%xXColsRows, Moment_ideg)
+        call xgBlock_setBlock(Moments%self, Moment_ideg, 1, 1, fcol=ideg+2) 
+        call xgBlock_dot(X0_backup%self, chebfi%xXColsRows, Moment_ideg)
+        
+        write(std_out,*) 'moments='
+        call xgBlock_print(Moment_ideg, std_out)
+        flush(std_out)
 
         !A * Psi    
         call timab(tim_getAX_BX,1,tsec)
@@ -2879,7 +2880,7 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
 
     end do 
     
-    call xgBlock_reverseMap(Moments%self, momvals, nband, ndeg_filter+1)
+    call xgBlock_reverseMap(Moments%self, momvals, 1, ndeg_filter+1)
     cheby_moments(:,:) = momvals(:,:)
 
     ! Free memory
@@ -2992,7 +2993,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     ABI_MALLOC(N_est, (npts))
     ABI_MALLOC(moments, (num_moments))
     ABI_MALLOC(ctilde, (num_moments))
-    ABI_MALLOC(cheby_moments, (m_probe, num_moments) )
+    ABI_MALLOC(cheby_moments, (1, num_moments) )
     ABI_MALLOC(g_damp, (num_moments))
 
     ! total number of probes is m_probes * number of MPI processes
@@ -3027,16 +3028,16 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     call xmpi_barrier(spacecom)
     call xmpi_sum(m_probe_tot, spacecom, ierr)
     do k=1, num_moments
-        sum_cheby = real(sum(cheby_moments(:,k)))
+        sum_cheby = real(cheby_moments(1,k))
         sum_cheby_tot = sum_cheby
         call xmpi_barrier(spacecom)
         call xmpi_sum(sum_cheby_tot, spacecom, ierr)
         moments(k) = sum_cheby_tot/m_probe_tot
         !write(std_out,*) 'maximum imag=', maxval(abs(aimag(cheby_moments(:,k))))
     end do
-    write(std_out,*) 'moments k=0=', real(sum(cheby_moments(:,1)))
-    write(std_out,*) 'moments k=1=', real(sum(cheby_moments(:,2)))
-    write(std_out,*) 'moments k=3=', real(sum(cheby_moments(:,3)))
+    write(std_out,*) 'moments k=0=', real(cheby_moments(1,1))
+    write(std_out,*) 'moments k=1=', real(cheby_moments(1,2))
+    write(std_out,*) 'moments k=3=', real(cheby_moments(1,3))
     flush(std_out)
 
     ! ============ Sanity check <3
