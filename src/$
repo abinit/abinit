@@ -2865,6 +2865,10 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         call xgBlock_setBlock(Moments%self, Moment_ideg, 1, 1, fcol=ideg+2) 
         call xgBlock_dot(X0_backup%self, chebfi%xXColsRows, Moment_ideg)
         
+        write(std_out,*) 'moments='
+        call xgBlock_print(Moment_ideg, std_out)
+        flush(std_out)
+
         !A * Psi    
         call timab(tim_getAX_BX,1,tsec)
         ABI_NVTX_START_RANGE(NVTX_SLICE_GET_AX_BX)
@@ -2943,19 +2947,17 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     integer :: my_rank
     integer :: seed
     integer :: m_probe_tot
-    integer :: i, k, npts, np1, ib
-    integer :: num_b
+    integer :: i, k, npts, np1
     integer :: num_moments
     integer :: Ngrid
-    integer :: uppb_loc
-    real(dp) :: sum_cheby_tot
+    real(dp) :: sum_cheby, sum_cheby_tot
     real(dp) :: b_init, b_ext, ecut
     real(dp) :: maxeig, mineig
     real(dp) :: center, radius
-    real(dp) :: tot_mass, partial_mass
+    real(dp) :: tot_mass
     real(dp) :: step
     real(dp) :: a_slice, b_slice, mid_slice, mid2_slice ! recursion manually
-    real(dp) :: b_cut, b_scaled
+    real(dp) :: b_cut
     real(dp) :: xred
     real(dp) :: n_est_i
     real(dp) :: ared, bred, trace_bin, theta_a, theta_b
@@ -2969,7 +2971,6 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     real(dp), allocatable :: g_damp(:)
     real(dp), allocatable :: rho(:)
     real(dp), allocatable :: N_est(:)
-    real(dp), allocatable :: b_list(:)
     character(len=100) :: filename
     
     ! *********************************************************************
@@ -2996,7 +2997,6 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     ABI_MALLOC(ctilde, (num_moments))
     ABI_MALLOC(cheby_moments, (1, num_moments) )
     ABI_MALLOC(g_damp, (num_moments))
-    ABI_MALLOC(b_list, (num_b))
 
     ! total number of probes is m_probes * number of MPI processes
     call xg_init(X_probe, slice%space, tot_spacedim, m_probe, spacecom, &
@@ -3030,7 +3030,8 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     call xmpi_barrier(spacecom)
     call xmpi_sum(m_probe_tot, spacecom, ierr)
     do k=1, num_moments
-        sum_cheby_tot = real(cheby_moments(1,k))
+        sum_cheby = real(cheby_moments(1,k))
+        sum_cheby_tot = sum_cheby
         call xmpi_barrier(spacecom)
         call xmpi_sum(sum_cheby_tot, spacecom, ierr)
         moments(k) = sum_cheby_tot/m_probe_tot
@@ -3042,53 +3043,34 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
 
     center = (ecut + min_low_bound) / 2.d0
     radius = (ecut - min_low_bound) / 2.d0
-    
+    b_list = (/ (min_low_bound + 
+
     ! scan with lowpass
-    ! first pass uppb is actually unknown
-    num_b = 10 ! coarse, just to find uppb
-    step = (ecut - min_low_bound) / (num_b - 1)
-    b_list = (/ ( min_low_bound + (ib-1)*step, ib=1,num_b ) /)
-    uppb_loc = -1
     do ib=1, num_b
         
         b_scaled = (b_list(ib) - center) / radius
     
-        ! Erf damping coefficients
-        ! debug first in [-1,1]
-        !sigma = 4.d0 / ndeg_filter
-        !Ngrid = 500
-        !ctilde = erf_step_coeffs(0.3d0, ndeg_filter, sigma, Ngrid)
-        !write(std_out,*) 'debug erf_step_coeffs'
-        !write(std_out,*) 'ndeg_filter=', ndeg_filter
-        !write(std_out,*) 'sigma=', sigma
-        !write(std_out,*) 'Ngrid=', Ngrid
-        !write(std_out,*) 'ctilde=', ctilde
-        !flush(std_out)
+    ! Erf damping coefficients
+    ! debug first in [-1,1]
+    !sigma = 4.d0 / ndeg_filter
+    !Ngrid = 500
+    !ctilde = erf_step_coeffs(0.3d0, ndeg_filter, sigma, Ngrid)
+    !write(std_out,*) 'debug erf_step_coeffs'
+    !write(std_out,*) 'ndeg_filter=', ndeg_filter
+    !write(std_out,*) 'sigma=', sigma
+    !write(std_out,*) 'Ngrid=', Ngrid
+    !write(std_out,*) 'ctilde=', ctilde
+    !flush(std_out)
 
-        alpha = 20
-        Ngrid = 500
-        ctilde = smooth_step_coeffs(b_scaled, ndeg_filter, alpha, Ngrid)
-        !write(std_out,*) 'debug smooth_step_coeffs'
-        !write(std_out,*) 'ndeg_filter=', ndeg_filter
-        !write(std_out,*) 'alpha=', alpha
-        !write(std_out,*) 'Ngrid=', Ngrid
-        !write(std_out,*) 'ctilde id=', sum(ctilde)
-        !flush(std_out)
-    
-        partial_mass = dot_product(ctilde, moments)
-        write(std_out,*) ib, ': <=', b_list(ib), 'mass=', partial_mass 
-        flush(std_out)
-
-        if (partial_mass > slice%neigenpairs) then
-            uppb_loc = ib
-            exit
-        end if
-
-    end do
-    write(std_out,*) 'found upp bound in', b_list(uppb_loc-1), b_list(uppb_loc)
+    alpha = 20
+    Ngrid = 500
+    ctilde = smooth_step_coeffs(b_scaled, ndeg_filter, alpha, Ngrid)
+    write(std_out,*) 'debug smooth_step_coeffs'
+    write(std_out,*) 'ndeg_filter=', ndeg_filter
+    write(std_out,*) 'alpha=', alpha
+    write(std_out,*) 'Ngrid=', Ngrid
+    write(std_out,*) 'ctilde id=', sum(ctilde)
     flush(std_out)
-
-    ! Start adaptive resolution
 
     ! ============ Sanity check <3
     ! Compute total mass in interval
@@ -3234,7 +3216,6 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     ABI_FREE(rho)
     ABI_FREE(N_est)
     ABI_FREE(g_damp)
-    ABI_FREE(b_list)
 
     call xg_free(X_probe)
     
