@@ -4466,12 +4466,6 @@ contains
 #endif
 
     else
-      write(std_out,*) 'debug'
-      write(std_out,*) 'test contiguity', xgBlock1%rows, xgBlock1%LDim
-      write(std_out,*) xgBlock1%cols*xgBlock1%LDim
-      write(std_out,*) rows(xgBlock1), cols(xgBlock1)
-      write(std_out,*) size(xgBlock1%vecC) 
-      flush(std_out)
       xgBlock_out%vecC = zdotc(xgBlock1%cols*xgBlock1%LDim, xgBlock1%vecC, 1, xgBlock2%vecC, 1)
     end if
 
