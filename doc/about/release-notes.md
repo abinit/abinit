@@ -11,6 +11,7 @@ then 1200 to 1275, except those that had been closed, and also
 EXCEPT MR1219, 1225, that had already been included in v10.4.
 MR1276, 1277, 1278, 1280 will be included in v10.8 .
 For release v10.6.3, also includes MR 1279 and 1281.
+MR 1284 and 1286 have been cherry-picked to 10.6.5 (perhaps also earlier onse, but I did not note ...)
 -->
 
 Many thanks to the contributors to the ABINIT project between April 2025 and February 2026 !
