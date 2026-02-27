@@ -7,7 +7,7 @@
 !!  related to time-dependent electric field
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2023 ABINIT group (FB)
+!!  Copyright (C) 2021-2026 ABINIT group (FBrieuc)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

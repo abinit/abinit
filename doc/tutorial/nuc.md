@@ -277,7 +277,7 @@ the shielding, divide by the dipole strength (here, 1), and multiply by
 554.9~ppm. This result is underconverged--the fully converged result,
 with [[ecut]]=30, is 552.1 ppm. For comparison, the all-electron,
 wavefunction-based calculation using post-Hartree-Fock CCSD(T) of
-[[cite:Vaara2003relativistic]] yields 551.9 ppm, so clearly the
+[[cite:Vaara2003]] yields 551.9 ppm, so clearly the
 present method is capable of excellent accuracy.  The second line is
 the Chern vector [[cite:Ceresoli2006]], that is, the integral of the
 Berry curvature, which outside of exotic topological insulators,
@@ -393,5 +393,5 @@ where the $\gamma$ factors are the nuclear gyromagnetic ratios in MHz/T and $h$ 
 Planck's constant in SI units. For our ClF example, we use
 4.17566 MHz/T for $^{35}$Cl, and 40.069244 MHz/T for $^{19}$F. These factors then yield
 $J_{yy} = 1166$ Hz, and $J_{zz} = 131$ Hz, for an isotropic value of 821 Hz. For comparison,
-the experimental value is 839 Hz [[cite:bryce2000indirect]] Note that this good level of agreement
+the experimental value is 839 Hz [[cite:Bryce2000]]. Note that this good level of agreement 
 with experiment should be checked very carefully against convergence parameters and molecular geometry.

@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2025 ABINIT group (XG)
+!!  Copyright (C) 1999-2026 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2245,11 +2245,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nberry',tread,'INT')
  if(tread==1) dtset%nberry=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nb_protected',tread,'INT')
- if(tread==1) dtset%nb_protected=intarr(1)
+ !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nb_protected',tread,'INT')
+ !if(tread==1) dtset%nb_protected=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nb_per_slice',tread,'INT')
- if(tread==1) dtset%nb_per_slice=intarr(1)
+ !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nb_per_slice',tread,'INT')
+ !if(tread==1) dtset%nb_per_slice=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nc_xccc_gspace',tread,'INT')
  if(tread==1) dtset%nc_xccc_gspace=intarr(1)

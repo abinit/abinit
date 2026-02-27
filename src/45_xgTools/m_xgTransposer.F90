@@ -38,7 +38,7 @@
 !! -add unitary tests for my custom transposition
 !! 
 !! COPYRIGHT
-!!  Copyright (C) 2017-2025 ABINIT group (J. Bieder, L. Baguet, I. Lygatsika)
+!!  Copyright (C) 2017-2026 ABINIT group (J. Bieder, L. Baguet, IML)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
