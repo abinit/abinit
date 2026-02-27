@@ -146,6 +146,8 @@ module m_slice
     integer, parameter :: tim_Bortho_X  = 1641
     integer, parameter :: tim_getAX_BX  = 1754
     integer, parameter :: tim_invovl    = 1755
+    integer, parameter :: tim_lanczos   = 2167
+    integer, parameter :: tim_trace     = 2168
     
     ! Public 'slice' datatype
     !-------------------------------------------------
@@ -1189,7 +1191,7 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     write(std_out,*) 'Lanczos guarantee(global) =', lanczos_lowb_global
     flush(std_out)
 
-    ndeg_filter_max = 5
+    ndeg_filter_max = 25
     m_probe = 5 ! should be between 1 and slice%bandpp advice between 10 <= m <= 50 
     ! Increasing probes does not reduce bias, only variance).
     ! Keep m_probe small allows to reduce noise
@@ -2515,6 +2517,8 @@ end subroutine print_scalar_filter
 
     ! *********************************************************************
 
+    call timab(tim_lanczos,1,tsec)
+    
     space = slice%space
     tot_spacedim = slice%total_spacedim
     gpu_option = slice%gpu_option
@@ -2636,6 +2640,8 @@ end subroutine print_scalar_filter
     call xg_free(W_vcol)
     call xg_free(W_dot)
     ABI_FREE(v_min)
+    
+    call timab(tim_lanczos,2,tsec)
 
   end subroutine computeBLanczos
 !!***
@@ -2971,8 +2977,11 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     real(dp), allocatable :: N_est(:)
     real(dp), allocatable :: b_list(:)
     character(len=100) :: filename
+    real(dp) :: tsec(2)
     
     ! *********************************************************************
+    
+    call timab(tim_trace,1,tsec)
 
     ecut = slice%ecut
     spacecom = slice%spacecom
@@ -3237,6 +3246,8 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     ABI_FREE(b_list)
 
     call xg_free(X_probe)
+    
+    call timab(tim_trace,2,tsec)
     
 end subroutine computeTraceEstimation
 !!***

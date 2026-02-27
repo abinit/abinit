@@ -1314,6 +1314,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2164) = 'slice3_diago                  '
  names(2165) = 'sliceX_diago                  '
  names(2166) = 'slice(other)                  '
+ names(2167) = 'slicingLanczos                '
+ names(2168) = 'slicingTrace                  '
 
  ! slice_cprj
  names(2170) = 'slicewf_cprj                  '
@@ -1626,7 +1628,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:8)=(/2159,2150,-2151,-2152,-2153,-2154,-2155,-2156/)
    case(61)
 !      Estimate the complement of slice
-     tslots(:7)=(/2166,2160,-2161,-2162,-2163,-2164,-2165/)
+     tslots(:9)=(/2166,2160,-2161,-2162,-2163,-2164,-2165,-2167,-2168/)
    case(62)
 !      Estimate the complement of slice_cprj
      tslots(:20)=(/2189,2170,(ii,ii=-2171,-2188,-1)/)
@@ -2046,7 +2048,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(90)
          list(:37)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2016,1) /) ; msg='low-level xgBlock type '
        case(91)
-         list(:7)=(/ 2160,2161,2162,2163,2164,2165,2166 /); msg='slicewf core engine '
+         list(:9)=(/(ii,ii=2160,2168,1)/); msg='slicewf core engine '
        case(92)
          list(:6)=(/ (ii,ii=2190,2195,1) /) ; msg='slicewf_cprj core engine '
        case default
