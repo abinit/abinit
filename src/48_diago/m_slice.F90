@@ -1189,7 +1189,7 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     write(std_out,*) 'Lanczos guarantee(global) =', lanczos_lowb_global
     flush(std_out)
 
-    ndeg_filter_max = 2
+    ndeg_filter_max = 5
     m_probe = 5 ! should be between 1 and slice%bandpp advice between 10 <= m <= 50 
     ! Increasing probes does not reduce bias, only variance).
     ! Keep m_probe small allows to reduce noise
@@ -2949,6 +2949,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     integer :: m_probe_tot
     integer :: i, k, npts, np1
     integer :: num_moments
+    integer :: Ngrid
     real(dp) :: sum_cheby, sum_cheby_tot
     real(dp) :: b_init, b_ext, ecut
     real(dp) :: maxeig, mineig
@@ -2961,6 +2962,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     real(dp) :: n_est_i
     real(dp) :: ared, bred, trace_bin, theta_a, theta_b
     real(dp) :: rho_x, T0, T1, T_next
+    real(dp) :: sigma, alpha
     type(xg_t) :: X_probe
     complex(dp), allocatable :: cheby_moments(:,:)
     real(dp), allocatable :: xpts(:)
@@ -3038,6 +3040,27 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     write(std_out,*) 'moments k=0=', real(cheby_moments(1,1))
     write(std_out,*) 'moments k=1=', real(cheby_moments(1,2))
     write(std_out,*) 'moments k=3=', real(cheby_moments(1,3))
+    flush(std_out)
+
+    ! Erf damping coefficients
+    ! debug first in [-1,1]
+    sigma = 4.d0 / ndeg_filter
+    Ngrid = 500
+    ctilde = erf_step_coeffs(0.3d0, ndeg_filter, sigma, Ngrid)
+    write(std_out,*) 'debug erf_step_coeffs'
+    write(std_out,*) 'ndeg_filter=', ndeg_filter
+    write(std_out,*) 'sigma=', sigma
+    write(std_out,*) 'Ngrid=', Ngrid
+    write(std_out,*) 'ctilde=', ctilde
+    flush(std_out)
+
+    alpha = 20
+    ctilde = smooth_step_coeffs(0.3d0, ndeg_filter, alpha, Ngrid)
+    write(std_out,*) 'debug smooth_step_coeffs'
+    write(std_out,*) 'ndeg_filter=', ndeg_filter
+    write(std_out,*) 'alpha=', alpha
+    write(std_out,*) 'Ngrid=', Ngrid
+    write(std_out,*) 'ctilde=', ctilde
     flush(std_out)
 
     ! ============ Sanity check <3
@@ -3485,6 +3508,39 @@ end subroutine computeFilterEnergy
 
 !----------------------------------------------------------------------
 
+!!****f* m_slice/erf_step_coeffs
+!! NAME
+!! erf_step_coeffs
+!! 
+!! FUNCTION
+!! Erf damped coefficients
+!! 
+!! SOURCE
+
+  function erf_step_coeffs(b, ndeg, sigma, Ngrid) result(coeffs)
+
+      implicit none
+      real(dp), intent(in) :: b, sigma
+      integer, intent(in) :: ndeg, Ngrid
+
+      real(dp) :: coeffs(ndeg+1)
+      integer :: i, k
+      real(dp) :: x(Ngrid+1)
+      real(dp) :: f(Ngrid+1)
+
+      x = (/ ( cos(Pi*(i-2)/(Ngrid-1) ) , i=1,Ngrid+1) /)
+      f = (/ ( 0.5 * (1.0 - fast_erf((x(i) - b)/sigma)), i=1,Ngrid+1) /)
+      
+      do k=0, ndeg
+        coeffs(k+1) = (2.0/Ngrid) * sum( (/ (f(i)*cos(k*acos(x(i))), i=1,Ngrid+1 ) /) )
+      end do
+      coeffs(1) = coeffs(1) / 2.d0 
+
+  end function erf_step_coeffs
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_slice/fast_erf
 !! NAME
 !! fast_erf
@@ -3510,6 +3566,39 @@ end subroutine computeFilterEnergy
     erf_val = 1.0_dp - tau
     if (x < 0.0_dp) erf_val = -erf_val
   end function fast_erf
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/smooth_step_coeffs
+!! NAME
+!! smooth_step_coeffs
+!! 
+!! FUNCTION
+!! Smooth damped coefficients
+!! 
+!! SOURCE
+
+  function smooth_step_coeffs(b, ndeg, alpha, Ngrid) result(coeffs)
+
+      implicit none
+      real(dp), intent(in) :: b, alpha
+      integer, intent(in) :: ndeg, Ngrid
+
+      real(dp) :: coeffs(ndeg+1)
+      integer :: i, k
+      real(dp) :: x(Ngrid+1)
+      real(dp) :: f(Ngrid+1)
+
+      x = (/ ( cos(Pi*(i-2)/(Ngrid-1) ) , i=1,Ngrid+1) /)
+      f = (/ ( 0.5 * (1.0 - tanh( alpha*(x(i) - b) )) , i=1,Ngrid+1) /)
+      
+      do k=0, ndeg
+        coeffs(k+1) = (2.0/Ngrid) * sum( (/ (f(i)*cos(k*acos(x(i))), i=1,Ngrid+1 ) /) )
+      end do
+      coeffs(1) = coeffs(1) / 2.d0 
+
+  end function smooth_step_coeffs
 !!***
 
 end module m_slice
