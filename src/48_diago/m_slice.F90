@@ -3095,6 +3095,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
 
     end do
     write(std_out,*) 'found upp bound in', b_list(uppb_loc-1), b_list(uppb_loc)
+    write(std_out,*) 'starting adaptive refinement ..'
     flush(std_out)
 
     ! Start adaptive resolution
