@@ -36,60 +36,63 @@ you can contact the ABINIT group for a possible arrangement, in which case co-au
 
 ## List of suggestions
 
-The 2020 ABINIT article [Gen.1](#g1), that describe the impact, environment and recent developments,
+The 2025 ABINIT article [Gen.1](#g1), that describe the recent developments in ABINIT,
 first in the list of suggestions below, should be cited in papers that have benefited from the
 ABINIT project, irrespective of their content.
-The other 2020 ABINIT article [Gen.2](#g2), an overview of the ABINIT project, with focus on specific developments,
-is also strongly suggested for citation. In particular, see the overview of ABINIT capabilities, in Tables I and II.
-There are four other ABINIT articles, [Gen.3](#g3), [Gen.4](#g4), [Gen.5](#g5), and [Gen.6](#g6) that might as well be
+There are six other ABINIT articles, [Gen.2](#g2), [Gen.3](#g3), [Gen.4](#g4), [Gen.5](#g5), [Gen.6](#g6), and [Gen.7](#g7) that might as well be
 considered, irrespective of ther content, because these publications are
-quite general as well, although they are older (2016, 2009, 2005 and 2002).  
+quite general as well, although they are older (two in 2020, then one in 2016, 2009, 2005 and 2002).  
 
 There are also many articles that are more focused: they describe some
 specific capability of ABINIT. The following list is actually not complete...
 More references will be proposed by ABINIT itself (see the end of the output
 file), see the [[varset:allvars|database]] of information on the input variables, 
-in the [[topic:index|topics files]]. as well as in the references of the five general papers.
+in the [[topic:index|topics files]], as well as in the references of the seven general papers.
 
 <a id="g1"></a>
-- **Gen.1** At least, the most recent article [[cite:Gonze2020]] that describes the ABINIT project
+- **Gen.1** The most recent article [[cite:Verstraete2025]] that describes the ABINIT project
 (impact, environment and recent developments)
-should be mentioned in the bibliography section of your paper.
+should be cited in the bibliography section of your paper.
+
+<a id="g2"></a>
+- **Gen.2** At least, the most recent article [[cite:Gonze2020]] that describes the ABINIT project
+(impact, environment and recent developments)
+is a strong suggestion for citation in the bibliography section of your paper.
 A version of this paper, that is not formatted for Computer Phys. Comm. is available
 [here](https://www.abinit.org/sites/default/files/ABINIT20.pdf).
 The licence allows the authors to put it on the Web.
 
-<a id="g2"></a>
-- **Gen.2** The other 2020 ABINIT article [[cite:Romero2020]] that describes the ABINIT project
+<a id="g3"></a>
+- **Gen.3** The other 2020 ABINIT article [[cite:Romero2020]] that describes the ABINIT project
 (overview and specific developments) is also a strong suggestion for citation 
 in the bibliography section of your paper.
 A version of this paper, that is not formatted for J. Chem. Phys. is available
 [here](https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf).
 The licence allows the authors to put it on the Web.
 
-<a id="g3"></a>
-- **Gen.3** A version of the 2016 ABINIT article [[cite:Gonze2016]],
+<a id="g4"></a>
+- **Gen.4** A version of the 2016 ABINIT article [[cite:Gonze2016]],
 that is not formatted for Computer Phys. Comm. is available 
 [here](https://www.abinit.org/sites/default/files/ABINIT16.pdf).
 The licence allows the authors to put it on the Web. 
 
-<a id="g4"></a>
-- **Gen.4**. The 2009 ABINIT article [[cite:Gonze2009]] is especially detailed. A version of this paper, 
+<a id="g5"></a>
+- **Gen.5**. The 2009 ABINIT article [[cite:Gonze2009]] is especially detailed. A version of this paper, 
 that is not formatted for Computer Phys. Comm. is available 
 [here](https://www.abinit.org/sites/default/files/about/ABINIT_CPC_v10.pdf). 
 The licence allows the authors to put it on the Web. 
 
-<a id="g5"></a>
-- **Gen.5**. The 2005 ABINIT article [[cite:Gonze2005]] is quite short. 
+<a id="g6"></a>
+- **Gen.6**. The 2005 ABINIT article [[cite:Gonze2005]] is quite short. 
 The .pdf of the latter paper is available [here](https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf). 
 Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag, 
 the licence allows the authors to put it on the Web).
 
-<a id="g6"></a>
-- **Gen.6**. The very first paper on the ABINIT project [[cite:Gonze2002]] might also be considered for citation.
+<a id="g7"></a>
+- **Gen.7**. The very first paper on the ABINIT project [[cite:Gonze2002]] might also be considered for citation.
 
 <a id="s1"></a>
-- **Spe.1.** If the Projector-Augmented Wave method as implemented in ABINIT is used [[cite:Torrent2008]] should be mentioned.
+- **Spe.1.** If the Projector-Augmented Wave method as implemented in ABINIT is used, [[cite:Torrent2008]] should be mentioned.
 
 <a id="s2"></a>
 - **Spe.2.** Many ingredients needed for the calculations of responses to atomic displacements 

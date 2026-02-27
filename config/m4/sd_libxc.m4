@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2025 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2026 ABINIT group (Yann Pouillon)
 
 #
 # Exchange-Correlation functionals library (LibXC)
@@ -78,7 +78,7 @@ AC_SUBST([abi_fb_libxc_version])
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_libxc_enable_fc}" && sd_libxc_enable_fc="yes"
+  test -z "${sd_libxc_enable_fc}" && sd_libxc_enable_fc="no"
   if test "${sd_libxc_enable_fc}" = "yes"; then
     test -z "${sd_libxc_libs_def}" && sd_libxc_libs_def="-lxcf90 -lxc"
   else
@@ -196,7 +196,7 @@ AC_SUBST([abi_fb_libxc_version])
 
        pkg)
           TMP_LIBXC_CPPFLAGS=`$PKG_CONFIG --cflags --keep-system-cflags libxc`
-          TMP_LIBXC_FFFLAGS="${TMP_HDF5_CPPFLAGS}"
+          TMP_LIBXC_FFFLAGS="${TMP_LIBXC_CPPFLAGS}"
           TMP_LIBXC_LIBS=`$PKG_CONFIG --libs  --keep-system-libs libxc`
 	  #if test "${sd_libxc_enable_fc}" = "yes"; then
 	  #    if "$PKG_CONFIG" --exists libxcf03; then
@@ -292,7 +292,7 @@ AC_DEFUN([SD_LIBXC_DETECT], [
     else
         sd_libxc_ok="yes"
         sd_libxc_cppflags=""
-        sd_libxc_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version}}/include"
+        sd_libxc_cflags="-I ${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version}/include"
         sd_libxc_fcflags=""
         sd_libxc_ldflags=""
         sd_libxc_kxc_ok="no"
@@ -303,7 +303,7 @@ AC_DEFUN([SD_LIBXC_DETECT], [
             sd_libxc_init='fb'
       else
         sd_libxc_init='fb'
-        if test "${sd_netcdf_policy}" = "fail"; then
+        if test "${sd_libxc_policy}" = "fail"; then
               AC_MSG_FAILURE([invalid LibXC configuration])
         else
               AC_MSG_WARN([invalid LibXC configuration])
@@ -554,14 +554,18 @@ AC_DEFUN([_SD_LIBXC_CHECK_CONFIG], [
         tmp_libxc_invalid="yes"
         ;;
       warn)
-        AC_MSG_WARN([conflicting option settings for LibXC])
-        tmp_libxc_invalid="yes"
+        if test "${sd_libxc_init}" = "dir" ; then
+          AC_MSG_WARN([conflicting option settings for LIBXC : when giving a path, environment variables are ignored. Set with_libxc="yes" to use environment variables])
+        else
+          AC_MSG_WARN([conflicting option settings for LIBXC])
+          tmp_libxc_invalid="yes"
+        fi
         ;;
     esac
   fi
 
   # When using environment variables, triggers must be set to yes
-  if test -n "${tmp_libxc_vars}" -a ! "${sd_netcdf_fortran_init}" = "pkg" ; then
+  if test -n "${tmp_libxc_vars}" -a "${sd_libxc_init}" != "pkg" -a "${sd_libxc_init}" != "dir" ; then
     sd_libxc_enable="yes"
     sd_libxc_init="env"
     if test "${tmp_libxc_invalid}" = "yes"; then
