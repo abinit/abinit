@@ -111,6 +111,7 @@ module m_xg
   integer, parameter :: tim_add_diag    = 2013
   integer, parameter :: tim_invert      = 2014
   integer, parameter :: tim_invert_sy   = 2015
+  integer, parameter :: tim_dot         = 2016
 
   integer, save, private :: lrwork = 0
   integer, save, private :: lcwork = 0
@@ -157,6 +158,11 @@ module m_xg
     module procedure xgBlock_saxpyR
     module procedure xgBlock_saxpyC
   end interface xgBlock_saxpy
+
+  interface xgBlock_dot
+    module procedure xgBlock_dotR
+    module procedure xgBlock_dotC
+  end interface xgBlock_dot
 
   interface xgBlock_colwiseMul
     module procedure xgBlock_colwiseMulR
@@ -257,6 +263,7 @@ module m_xg
   public :: xgBlock_yxmax
   public :: xgBlock_colwiseCymax
   public :: xgBlock_saxpy
+  public :: xgBlock_dot
   public :: xgBlock_colwiseMul
   public :: xgBlock_scale
   public :: xgBlock_transpose
@@ -4410,6 +4417,123 @@ contains
     call timab(tim_saxpy,2,tsec)
 
   end subroutine xgBlock_saxpyC
+  !!***
+
+  !!****f* m_xg/xgBlock_dotR
+  !!
+  !! NAME
+  !! xgBlock_dotR
+
+  subroutine xgBlock_dotR(xgBlock1, xgBlock2, da)
+
+    type(xgBlock_t),  intent(in ) :: xgBlock1
+    type(xgBlock_t),  intent(in ) :: xgBlock2
+    double precision, intent(out) :: da
+
+    integer :: fact
+    complex(dp) :: da_cplx
+    double precision,external :: ddot
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlock1__vecR(:,:),xgBlock2__vecR(:,:)
+#endif
+    double precision :: tsec(2)
+
+    call timab(tim_dot,1,tsec)
+
+    da_cplx = dcmplx(da,0.0_dp)
+
+    if ( xgBlock1%space /= xgBlock2%space ) then
+        ABI_ERROR("Must be same space for dot")
+    end if
+    if ( xgBlock1%LDim /= xgBlock2%LDim ) then
+        ABI_ERROR("Must have same LDim for dot")
+    end if
+    if ( xgBlock1%cols /= xgBlock2%cols ) then
+        ABI_ERROR("Must have same cols for dot")
+    end if
+    if ( xgBlock1%space == SPACE_C ) then
+      ABI_ERROR("Not correct space")
+    end if
+
+    call xgBlock_check_gpu_option(xgBlock1,xgBlock2)
+
+    fact = 1 ; if (xgBlock1%space==SPACE_CR) fact = 2
+
+    if (xgBlock1%gpu_option==ABI_GPU_KOKKOS .or. xgBlock1%gpu_option==ABI_GPU_OPENMP) then
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+      call abi_gpu_xdot(1, xgBlock1%cols*fact*xgBlock1%LDim, da_cplx, xgBlock2%vecR,1,xgBlock1%vecR,1)
+#elif defined HAVE_OPENMP_OFFLOAD
+!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
+      xgBlock1__vecR => xgBlock1%vecR
+      xgBlock2__vecR => xgBlock2%vecR
+      !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock1__vecR,xgBlock2__vecR)
+      call abi_gpu_xdot(1, xgBlock1%cols*fact*xgBlock1%LDim, da_cplx, c_loc(xgBlock2__vecR),1,c_loc(xgBlock1__vecR),1)
+      !$OMP END TARGET DATA
+#endif
+
+    else
+      da_cplx = ddot(xgBlock1%cols*fact*xgBlock1%LDim,xgBlock2%vecR,1,xgBlock1%vecR,1)
+    end if
+
+    call timab(tim_dot,2,tsec)
+
+  end subroutine xgBlock_dotR
+  !!***
+
+  !!****f* m_xg/xgBlock_dotC
+  !!
+  !! NAME
+  !! xgBlock_dotC
+
+  subroutine xgBlock_dotC(xgBlock1, xgBlock2, da)
+
+    type(xgBlock_t), intent(in  ) :: xgBlock1
+    type(xgBlock_t), intent(in  ) :: xgBlock2
+    double complex,  intent(out ) :: da
+
+    double complex,external :: zdotc !conjugated dot product
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+    complex(dp), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
+#endif
+    double precision :: tsec(2)
+
+    call timab(tim_dot,1,tsec)
+
+    if ( xgBlock1%space /= xgBlock2%space ) then
+        ABI_ERROR("Must be same space for dot")
+    end if
+    if ( xgBlock1%LDim /= xgBlock2%LDim ) then
+        ABI_ERROR("Must have same LDim for dot")
+    end if
+    if ( xgBlock1%cols /= xgBlock2%cols ) then
+        ABI_ERROR("Must have same cols for dot")
+    end if
+    if ( xgBlock1%space /= SPACE_C ) then
+      ABI_ERROR("Not correct space")
+    end if
+
+    call xgBlock_check_gpu_option(xgBlock1,xgBlock2)
+
+    if (xgBlock1%gpu_option==ABI_GPU_KOKKOS .or. xgBlock2%gpu_option==ABI_GPU_OPENMP) then
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+      call abi_gpu_xdot(2, xgBlock1%cols*xgBlock1%LDim, da, xgBlock2%vecC, 1, xgBlock1%vecC, 1)
+#elif defined HAVE_OPENMP_OFFLOAD
+!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
+      xgBlock1__vecC => xgBlock1%vecC
+      xgBlock2__vecC => xgBlock2%vecC
+      !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock1__vecC,xgBlock2__vecC)
+      call abi_gpu_xdot(2, xgBlock1%cols*xgBlock1%LDim, da, c_loc(xgBlock2__vecC),1,c_loc(xgBlock1__vecC),1)
+      !$OMP END TARGET DATA
+#endif
+
+    else
+      da = zdotc(xgBlock1%cols*xgBlock1%LDim, xgBlock2%vecC, 1, xgBlock1%vecC, 1)
+    end if
+
+    call timab(tim_dot,2,tsec)
+
+  end subroutine xgBlock_dotC
   !!***
 
   !!****f* m_xg/xgBlock_add
