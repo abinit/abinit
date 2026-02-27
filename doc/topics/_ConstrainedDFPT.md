@@ -7,7 +7,7 @@ authors: MR and MS
 This page describes how to perform noncollinear DFPT calculations in magnetic insulators 
 using the constrained magnetic moments formalism implemented in ABINIT. This approach, referred to 
 as **Constrained DFPT**, allows one to compute static and dynamic (at finite frequency) response functions 
---spanning interatomic force constatns, dielectric tensor, Born charges, etc.. but also magnetic susceptibilities, 
+--spanning interatomic force constants, dielectric tensor, Born charges, etc.. but also magnetic susceptibilities, 
 magnetic Born charges and magnetoelectric tensors-- while enforcing parametric control over the local magnetic moments.
 
 The implementation follows the theoretical framework introduced in [[cite:Royo2025]].
@@ -19,13 +19,21 @@ It is intended for medium to advanced users familiar with noncollinear magnetism
 ## Introduction
 
 In systems where time-reversal (TR) symmetry is broken due to the presence of internal ordering of spins,
-a standar, static linear-response calculation yields unphysical response functions that are invariant under TR symmetry. 
+a standard, static linear-response calculation yields unphysical response functions that are invariant under TR symmetry. 
 In the context of phonons, this was first noticed by Mead and Truhlar [[cite:Mead1979]] who, by carefully 
-considering the phases of the nuclear and electron wave functions when imposing the Born-Oppenheimer 
-approximation, introduced a vector-potential term in the effective Hamiltonian of the ions. This new 
-term enters the Born-Oppenheimer equations of motion as a Berry curvature and restores the expected 
-magnetic symmetries of  in the parameter space of the ionic displacements. 
+considering the phases of the nuclei and electrons wave functions when imposing the Born-Oppenheimer 
+approximation, introduced a vector-potential term in the effective Hamiltonian of the nuclei. This new 
+contribution enters the phonon equations of motion as a Berry curvature in the parameter space of the nuclei displacements, 
+with the physical meaning of a force induced by a velocity, and restores the expected magnetic symmetries of the crystal[[cite:Bonini2023]].
 
+Magnetic materials can also host spin-wave excitations (magnons) which typically overlap in energy with phonons
+and introduce additional complications in the linear-response regime. On the one hand, magnons and phonons can interact
+mutually influencing each other's spectra and, therefore, need to be simultaneously treated. This was solved in 
+[[cite:Ren2025]] by working with a set of Hessians and Berry curvatures living in an extended parameter space of 
+atomic displacements, local spin cantings and interactions thereof. The resulting generalized equation of motion
+provides the eigenfrequencies and eigenvectors of the coupled magnon-phonon system. On the other hand, the so-called
+acoustic magnons typically have very low frequencies at the center of the Brillouin zone, which cause severe numerical 
+instabilities in the self-consistent procedure whenever a given perturbation couples with these magnon excitations.
 
 
 
