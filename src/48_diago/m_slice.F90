@@ -1188,22 +1188,22 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     write(std_out,*) 'Lanczos guarantee(global) =', lanczos_lowb_global
     flush(std_out)
 
-    !ndeg_filter_max = 2
-    !m_probe = 5 ! should be between 1 and slice%bandpp advice between 10 <= m <= 50 
+    ndeg_filter_max = 2
+    m_probe = 5 ! should be between 1 and slice%bandpp advice between 10 <= m <= 50 
     ! Increasing probes does not reduce bias, only variance).
     ! Keep m_probe small allows to reduce noise
     ! Low degree and few probes stable N_est
 
-!    write(std_out,*) 'Here I compute Stochastic Trace Estimation'
-!    write(std_out,*) 'm_probe=    ', m_probe
-!    write(std_out,*) 'ndeg_filter=', ndeg_filter_max
-!    flush(std_out)
+    write(std_out,*) 'Here I compute Stochastic Trace Estimation'
+    write(std_out,*) 'm_probe=    ', m_probe
+    write(std_out,*) 'ndeg_filter=', ndeg_filter_max
+    flush(std_out)
 
-!    call computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter_max, m_probe,& 
-!        lanczos_lowb_global)
+    call computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter_max, m_probe,& 
+        lanczos_lowb_global)
     
-!    write(std_out,*) 'STE exited'
-!    flush(std_out)
+    write(std_out,*) 'STE exited'
+    flush(std_out)
 
     ! TODO clean the next part
 
@@ -2865,9 +2865,8 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         call xgBlock_setBlock(Moments%self, Moment_ideg, nband, 1, fcol=ideg+2) 
         call xgBlock_colwiseDotProduct(X0_backup%self, chebfi%xXColsRows, Moment_ideg, &
             comm_loc=xmpi_comm_null)
-        
-        ! trace = zdotc(n*s, X, 1, V, 1) for X(n,s) and V(n,s) complex arrays
-        ! first time it in CPU
+       
+        !call xgBlock_dot(X0_backup%self, chebfi%xXColsRows, Moment_ideg)
 
         !A * Psi    
         call timab(tim_getAX_BX,1,tsec)
