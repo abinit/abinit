@@ -1213,6 +1213,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2013)='xgBlock_add_diag                '; basic(2013) = 1
  names(2014)='xgBlock_invert                  '; basic(2014) = 1
  names(2015)='xgBlock_invert_sy               '; basic(2015) = 1
+ names(2016)='xgBlock_dot                     '; basic(2016) = 1
 
  ! lobpcg2_cprj
  names(2030) = 'lobpcgwf2_cprj                 ';
@@ -2043,7 +2044,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(89)
          list(:8)=(/2150,2151,2152,2153,2154,2155,2156,2159/) ; msg='xg_nonlop%forces_stress'
        case(90)
-         list(:36)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2015,1) /) ; msg='low-level xgBlock type '
+         list(:37)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2016,1) /) ; msg='low-level xgBlock type '
        case(91)
          list(:7)=(/ 2160,2161,2162,2163,2164,2165,2166 /); msg='slicewf core engine '
        case(92)
