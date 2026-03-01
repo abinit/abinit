@@ -2,7 +2,7 @@ Date released : date mentioned in the release notes
 
 Then, the other indicators should refer to the first production version
 
-Size of tar.gz      : ls -l *tar.gz    (currently alps_gnu_9.5_sdebug)
+Size of tar.gz      : ls -l *tar.gz    (do it currently on alps_gnu_9.5_sdebug)
 Number of F90 files : ls src/*/*.F90 shared/*/src/*/*.F90 shared/*/src/*.F90 | wc
 Number of F90 lines : cat src/*/*.F90 shared/*/src/*/*.F90 shared/*/src/*.F90 | wc
 Number of tests     : ls tests/*/Input/t*abi tests/*/Input/t*in | wc
@@ -58,3 +58,4 @@ Version  Date       Size         Number        Number        Number
 10.0     2024 Apr  129.5          788          999302       1480
 10.2     2024 Oct  131.3          802         1026056       1556
 10.4     2025 May  144.2          811         1063959       1657
+10.6     2026 Feb  179.1          970         1340383       1690
