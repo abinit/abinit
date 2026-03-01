@@ -195,7 +195,7 @@ In what follows, we will stick to these values of [[ecut]] and [[tsmear]] and tr
 Our final value for the aluminum lattice parameter, in the LDA, using the *Al.psp8* pseudopotential,
 is thus 7.5593 Bohr, which corresponds to 4.0002 Angstrom. The experimental value at 25 Celsius is 4.04958 Angstrom, hence our theoretical value has an error of 1.2%. We caution that converged parameters should be used to properly assess the accuracy of a pseudopotential and functional.
 
-The associated total energy and accuracy can be deduced from:
+The associated total energy and precision can be deduced from:
 
     etotal11   -2.3516656074E+00
     etotal12   -2.3532597160E+00
@@ -210,7 +210,7 @@ The associated total energy and accuracy can be deduced from:
     etotal33   -2.3581917663E+00
     etotal34   -2.3582884106E+00
 
-**etotal** 24 is -2.3578584768E+00 Ha, with an accuracy of 0.0005 Ha.
+**etotal** 24 is -2.3578584768E+00 Ha, with a precision of 0.0005 Ha.
 
 !!! tip
 
@@ -381,7 +381,7 @@ The total energy, in the relaxed case, is:
 giving the relaxed surface energy `0.0182 Ha = 0.495 eV`.
 There is a rather small 0.019 eV difference with the 2 vacuum layer case.
 
-For the next run, we will keep the 2 vacuum layer case, and we know that the accuracy
+For the next run, we will keep the 2 vacuum layer case, and we know that the precision
 of the coming calculation cannot be better than 0.019 eV. One might investigate the 4 vacuum layer case,
 but this is not worth, in the present tutorial.
 
@@ -474,8 +474,8 @@ will be required to obtain convergence whereas a *hard* pseudopotential implies 
 It can be understood by considering the pseudo-wave-functions of that atom.
 A *hard* pseudopotential has pseudo-wave-functions that have sharp features in real space which require many plane-waves to describe.
 
-On the other hand, a *soft* pseudopotential has rather smooth pseudo-wave-functions that need
-fewer plane-waves to describe accurately than the pseudo-wave-functions of *hard* pseudopotentials.
+On the other hand, a *soft* pseudopotential has rather smooth pseudo-wave-functions. They need
+fewer plane-waves to be described precisely than the pseudo-wave-functions of *hard* pseudopotentials.
 This designation is somewhat qualitative, and it is relative to other pseudopotentials.
 In other words, a pseudopotential can be *soft* when compared to a certain pseudopotential but *hard* with respect to another.
 

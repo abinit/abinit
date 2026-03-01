@@ -123,7 +123,7 @@ is employed since the DDA is ill-defined for $\qq = \Gamma$.
 
 !!! important
 
-    The tetrahedron method is more accurate and does not require any broadening parameter.
+    The tetrahedron method is more precise and does not require any broadening parameter.
     Note, however, that in the present implementation the computational cost of the double
     delta with the tetrahedron method quickly increases with the size of the $\kk$-mesh
     so the adaptive Gaussian scheme may represent a valid alternative, especially
@@ -326,7 +326,7 @@ and the Marzari smearing ([[occopt]] = 4) with [[tsmear]] = 0.02 Ha.
 The DFPT computations is done for 12 irreducible $\qq$-points corresponding
 to a $\Gamma$-centered 4x4x4 $\qq$-mesh (again, **too coarse** as we will see in the next sections).
 
-Please keep in mind that several parameters have been tuned in order to reach a reasonable **compromise between accuracy
+Please keep in mind that several parameters have been tuned in order to reach a reasonable **compromise between precision
 and computational cost** so do not expect the results obtained at the end of the lesson to be fully converged.
 It is clear that, in real life, one should start from convergence studies for
 lattice parameters and vibrational properties as a function of the $\kk$-mesh and [[tsmear]]
@@ -617,7 +617,7 @@ Other differences are visible above 40 meV, especially in the  $E_{2g}$ modes.
 
 <!--
 Note also that phonon frequencies in metals are also quite sensitive to the $\kk$-mesh and the smearing [[tsmear]].
-In real life one should perform an accurate convergence study...
+In real life one should perform a careful convergence study...
 -->
 
 !!! note
@@ -963,7 +963,7 @@ on a 24x24x24 $\kk$-mesh so that we can compare the following configurations:
 TODO: Discuss energy window, sigma_erange in connection with the FS window and the integration scheme
 
 As already mentioned in the introduction, the integration of the double delta requires very dense $\kk$-meshes
-for electrons in order to obtain accurate results for $\gamma_\qnu$.
+for electrons in order to obtain precise results for $\gamma_\qnu$.
 By the same token, converging the fine details of $\alpha^2F(\ww)$ and $\lambda$ requires
 sampling enough phonon $\qq$-wavectors in the IBZ.
 For this reason, convergence studies are performed by densifying both the mesh for electrons and for phonons.
@@ -1139,7 +1139,7 @@ the use of [[eph_ngqpt_fine]], [[getwfk_filepath]] and [[ngkpt]]:
 {% dialog tests/tutorespfn/Input/teph4isotc_5.abi %}
 
 <!--
-## A more accurate calculation
+## A more precise calculation
 
 If you want to reproduce the results, you can find another github repository here
 with the DFPT computation performed with a 24x24x24 $\kk$-mesh and a 6x6x6 $\qq$-mesh for phonons.
