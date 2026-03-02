@@ -9,6 +9,8 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <abi_gpu_header_common.h>
 #include <hip/hip_runtime_api.h>
 #include "hip_api_error_check.h"
