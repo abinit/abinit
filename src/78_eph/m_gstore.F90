@@ -1099,7 +1099,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      nctkarr_t("gstore_qbz2ibz", "i", "six, gstore_nqbz"), &
      nctkarr_t("gstore_qglob2bz", "i", "gstore_max_nq, number_of_spins"), &
      nctkarr_t("gstore_kglob2bz", "i", "gstore_max_nk, number_of_spins"), &
-     !nctkarr_t("gstore_state_kqs", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
+     !nctkarr_t("gstore_glob_state_kqs", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
      !
      ! These quantities are needed to interface GSTORE.nc with external codes.
      ! For the meaning of the different variables and conventions see m_ifc module.
@@ -1129,7 +1129,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    !  0 --> (k, q, spin) has not been computed.
    !  1 --> (k, q, spin) has been computed.
    !  2 --> (k, q, spin) has been reconstructed by symmetry.
-   !NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_state_kqs"), NF90_FILL, 0))
+   !NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_glob_state_kqs"), NF90_FILL, 0))
 
    ! Optional arrays
    if (allocated(gstore%delta_ef_kibz_spin)) then
@@ -4267,7 +4267,7 @@ subroutine dump_my_gbuf()
  NCF_CHECK(ncerr)
 
  !ABI_ICALLOC(itab_k, (gqk%my_nk))
- !nctkarr_t("gstore_state_kqs", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
+ !nctkarr_t("gstore_glob_state_kqs", "i", "gstore_max_nk, gstore_max_nq, number_of_spins"), &
 
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
  !if (all(gqk%coords_qkpb_sumbp(2:3) == [0, 0]))  then
@@ -4276,7 +4276,7 @@ subroutine dump_my_gbuf()
      NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
 
      !itab_k = 1
-     !ncerr = nf90_put_var(root_ncid, root_vid("gstore_state_kqs"), itab_k, &
+     !ncerr = nf90_put_var(root_ncid, root_vid("gstore_glob_state_kqs"), itab_k, &
      !                     start=[gqk%my_kstart, iq_glob, spin], &
      !                     count=[gqk%my_nk, iqbuf_cnt, 1])
      !NCF_CHECK(ncerr)
