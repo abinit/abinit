@@ -2016,7 +2016,7 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
 !    Compute grad of WF (multiplication by 2pi i (G+k)_idir in reciprocal space)
      if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:my_cwavef,gcwavef) PRIVATE(idat)
+       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:my_cwavef,gcwavef,kg_k) PRIVATE(idat)
        do idat=1,ndat
          !$OMP PARALLEL DO PRIVATE(ipw,kg_k_cart)
          do ipw=1,npw_k
