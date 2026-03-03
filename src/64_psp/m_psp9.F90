@@ -31,7 +31,7 @@ module m_psp9
 
  use defs_datatypes,  only : nctab_t
  use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free
- use m_psps,          only : nctab_eval_tvalespl
+ use m_psps,          only : nctab_eval_tvalespl, nctab_eval_tvaletauspl
  use m_psptk,         only : psp8lo, psp8nl
 
  implicit none
@@ -105,7 +105,7 @@ contains
 
 subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &                  mmax,mpsang,mpssoang,mqgrid,mqgrid_vl,nproj,n1xccc,pspso,qchrg,qgrid,qgrid_vl,&
-&                  useylm,vlspl,xcccrc,xccc1d,zion,znucl,nctab,maxrad)
+&                  useylm,vlspl,xcccrc,xccc1d,xcctau1d,zion,znucl,nctab,maxrad)
 
 !Arguments ------------------------------------
 !scalars
@@ -121,6 +121,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  real(dp),intent(in) :: qgrid(mqgrid),qgrid_vl(mqgrid_vl)
  real(dp),intent(out) :: ekb(lnmax),ffspl(mqgrid,2,lnmax),vlspl(mqgrid,2)
  real(dp),intent(inout) :: xccc1d(n1xccc,6) !vz_i
+ real(dp),intent(inout) :: xcctau1d(n1xccc,6)
 
 !Local variables-------------------------------
 !scalars
@@ -133,7 +134,8 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  real(dp) :: amesh,damesh,fchrg,rchrg,yp1,ypn,zval
  real(dp) :: rmax,rmatch,z,chgvps
  real(dp) :: val_occ
- logical :: has_nlcc,has_spin
+ real(dp) :: rchrg_tau
+ logical :: has_nlcc,has_spin,has_metagga
  logical :: has_tvale,oncvpsp
  character(len=500) :: message
  character(len=30)  :: creator
@@ -144,6 +146,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 #if defined HAVE_LIBPSML
  integer, allocatable :: idx_so(:),idx_sr(:)
  real(dp),allocatable :: rad(:),vloc(:),vpspll(:,:),work_spl(:)
+ real(dp),allocatable :: ff_cc(:),ff_tau(:)
  type(ps_t) :: psxml
 #endif
 
@@ -194,9 +197,16 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 ! PSML file.
 ! zval   = ps_Zpseudo(psxml)
 
+ has_metagga = .false.
+#if defined HAVE_LIBPSML_METAGGA
+ call ps_PseudoAtomSpec_Get(psxml, &
+& atomic_number=z, z_pseudo=zval, &
+& spin_dft=has_spin, core_corrections=has_nlcc, meta_gga=has_metagga)
+#else
  call ps_PseudoAtomSpec_Get(psxml, &
 & atomic_number=z, z_pseudo=zval, &
 & spin_dft=has_spin, core_corrections=has_nlcc)
+#endif
 
 !---
 
@@ -425,13 +435,37 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
 !Get core charge function and derivatives, if needed
    if(fchrg>1.0d-15)then
-     call psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
+!    Evaluate core charge on radial grid
+     ABI_MALLOC(ff_cc,(mmax))
+     do ii=1,mmax
+       ff_cc(ii) = ps_CoreCharge_Value(psxml,rad(ii))
+     end do
+     rchrg = zero
+     call psp9cc(mmax,n1xccc,rad,ff_cc,rchrg,xccc1d)
+     ABI_FREE(ff_cc)
 !  The core charge function for pspcod=9
 !  becomes zero beyond rchrg. Thus xcccrc must be set
 !  equal to rchrg.
      xcccrc=rchrg
+
+!    Get core kinetic energy density if meta-GGA pseudopotential
+#if defined HAVE_LIBPSML_METAGGA
+     if (has_metagga) then
+       ABI_MALLOC(ff_tau,(mmax))
+       do ii=1,mmax
+         ff_tau(ii) = ps_CoreKineticDensity_Value(psxml,rad(ii))
+       end do
+       rchrg_tau = rchrg
+       call psp9cc(mmax,n1xccc,rad,ff_tau,rchrg_tau,xcctau1d,apply_pi4i=.false.)
+       ABI_FREE(ff_tau)
+       write (message,'(1X,A)') "Reading pseudocore kinetic energy density for meta-GGA"
+       call wrtout(std_out,message,'COLL')
+     end if
+#endif
+
    else
      xccc1d(:,:) = zero
+     xcctau1d(:,:) = zero
      xcccrc = zero
      fchrg = zero
      qchrg = zero
@@ -618,6 +652,23 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    call pawrad_free(mesh)
  end if
 
+! Read pseudo valence kinetic energy density if meta-GGA pseudopotential
+#if defined HAVE_LIBPSML_METAGGA
+ if (has_metagga) then
+   vloc(:) = zero
+   do irad=1,mmax
+     vloc(irad) = ps_ValenceKineticDensity_Value(psxml,rad(irad))
+!    NB: no 4pi division for tau quantities
+   end do
+
+   call pawrad_init(mesh,mesh_size=mmax,mesh_type=1,rstep=amesh)
+   call nctab_eval_tvaletauspl(nctab, mesh, vloc, mqgrid_vl, qgrid_vl)
+   call pawrad_free(mesh)
+   write (message,'(1X,A)') "Reading pseudo valence kinetic energy density for meta-GGA"
+   call wrtout(std_out,message,'COLL')
+ end if
+#endif
+
  ABI_FREE(vpspll)
  ABI_FREE(vloc)
  ABI_FREE(rad)
@@ -639,7 +690,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  ABI_UNUSED(nctab%mqgrid_vl)
 !Initialize some arguments, for portability at compile time
  indlmn=0 ; mmax=0 ; nproj=0
- ekb=zero ; epsatm=zero ; ffspl=zero ; qchrg=zero ; vlspl=zero ; xcccrc=zero ; xccc1d=zero
+ ekb=zero ; epsatm=zero ; ffspl=zero ; qchrg=zero ; vlspl=zero ; xcccrc=zero ; xccc1d=zero ; xcctau1d=zero
 
  if(.false.)write(std_out,*)filpsp ! Just to keep filpsp when HAVE_LIBPSML is false
  if(.false.)write(std_out,*)lloc   ! Just to keep lloc when HAVE_LIBPSML is false
@@ -661,40 +712,42 @@ end subroutine psp9in
 !! psp9cc
 !!
 !! FUNCTION
-!! Compute the core charge density, for use in the XC core
-!! correction, following the function definition valid
-!! for format 9 of the pseudopotentials (PSML).
+!! Given a radial function on a linear grid (e.g. core charge density
+!! or core kinetic energy density), compute its first 4 derivatives
+!! and interpolate onto a normalized uniform mesh for use in ABINIT.
 !!
 !! INPUTS
-!!  mmax=maximum number of points in real space grid in the psp file
-!!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
+!!  mmax=maximum number of points in real space grid
+!!  n1xccc=dimension of result1d ; 0 if no XC core correction is used
+!!  rad(mmax)=radial grid points
+!!  ff_values(mmax)=function values on the radial grid
+!!  apply_pi4i=if .true. (default), multiply by 1/(4*pi); set to .false.
+!!             for kinetic energy density quantities which have no 4pi factor
 !!
 !! OUTPUT
-!!  rchrg=cut-off radius for the core density
-!!  xccc1d(n1xccc,6)= 1D core charge function and its four first derivatives
-!!
-!! NOTES
-!!  This routine will be built only if PSML support is enabled.
+!!  rchrg=cut-off radius (bohr). If zero on input, determined from the data;
+!!        if positive on input, used as-is (e.g. reusing core charge cutoff for tau).
+!!  result1d(n1xccc,6)= 1D function and its four first derivatives on normalized grid
 !!
 !! SOURCE
 
-#if defined HAVE_LIBPSML
-
-subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
+subroutine psp9cc(mmax,n1xccc,rad,ff_values,rchrg,result1d,apply_pi4i)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mmax,n1xccc
- real(dp),intent(out) :: rchrg
- type(ps_t),intent(in) :: psxml
+ real(dp),intent(inout) :: rchrg
+ logical,intent(in),optional :: apply_pi4i
 !arrays
  real(dp),intent(in) :: rad(mmax)
- real(dp),intent(inout) :: xccc1d(n1xccc,6) !vz_i
+ real(dp),intent(in) :: ff_values(mmax)
+ real(dp),intent(inout) :: result1d(n1xccc,6)
 
 !Local variables-------------------------------
 !scalars
  integer :: i1xccc,idum,irad,jj
- real(dp) :: amesh,c1,c2,c3,c4,damesh,dri,pi4i,tff,xp,xpm1,xpm2,xpp1,xx,twelvth
+ real(dp) :: amesh,c1,c2,c3,c4,damesh,dri,pi4i,normfact,tff,xp,xpm1,xpm2,xpp1,xx,twelvth
+ logical :: do_pi4i
  character(len=500) :: message
 !arrays
  integer :: iwork(8)
@@ -702,6 +755,9 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
  real(dp),allocatable :: ff(:,:)
 
 !**********************************************************************
+
+ do_pi4i = .true.
+ if (present(apply_pi4i)) do_pi4i = apply_pi4i
 
 !Check that rad grid is linear starting at zero
  amesh=rad(2)-rad(1)
@@ -724,14 +780,13 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
  pi4i = quarter / pi
  twelvth = one / 12.0_dp
 
-!Read from pp file the model core charge and calculate its first 4 derivatives
-!assumed to be on a linear grid starting at zero.
-!The input functions contain the 4pi factor, and must be rescaled.
+!Normalization factor: 1/(4*pi) for densities, 1 for kinetic energy densities
+ normfact = merge(pi4i, one, do_pi4i)
 
-!Store the value of the pseudo-core charge.
+!Store the function values
  ff(:,:) = zero
  do jj=1,mmax
-   ff(jj,1) = ps_CoreCharge_Value(psxml,rad(jj))
+   ff(jj,1) = ff_values(jj)
  end do
 
 !Calculate 4 first derivatives with 5-point stencil, except borders
@@ -786,24 +841,18 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
    ff(mmax-2+irad,5) = ff(mmax-2,5) + irad * (ff(mmax-2,5) - ff(mmax-3,5))
  end do
 
-!Renormalize core charge
-! ff(:,:) = ff(:,:) * pi4i
+!Determine rchrg where the function becomes 0, unless already provided
+ if (rchrg <= zero) then
+   rchrg = zero
+   do jj=mmax,1,-1
+     if (ff(jj,1) > tol13) then
+       rchrg=rad(jj)
+       exit
+     end if
+   end do
+ end if
 
-!determine xcccrc where the pseudocore becomes 0
-!This is a difference with respect the Hamann's treatment of the core
-!charge when reading PSP8.
-!In Hamann's case (PSP8), xcccrc = rchrg, and this value is
-!introduced in the pseudopotential input file.
-!rchrg is not included in the PSML format
- rchrg = zero
- do jj=mmax,1,-1
-   if (ff(jj,1) > tol13) then
-     rchrg=rad(jj)
-     exit
-   end if
- end do
-
-!Check that input rchrg is consistent with last grid point
+!Check that rchrg is consistent with last grid point
  if(rchrg>rad(mmax)) then
    write(message, '(5a)' )&
 &   'Pseudopotential input file core charge mesh',ch10,&
@@ -818,7 +867,7 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
  end do
 
 !Generate uniform mesh xx in the box cut by rchrg
-!and interpolate the core charge and derivatives
+!and interpolate the function and derivatives
 !Cubic polynomial interpolation is used which is consistent
 !with the original interpolation of these functions from
 !a log grid to the input linear grid.
@@ -841,25 +890,23 @@ subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
    c3 = - xp * xpp1 * xpm2 * half
    c4 = xp * xpp1 * xpm1 * sixth
 !  Now do the interpolation on all derivatives for this grid point
-!  Include 1/4pi normalization and unit range scaling
+!  Include normalization and unit range scaling
    do jj=1,5
      tff =  c1 * ff(irad - 1, jj) &
 &     + c2 * ff(irad    , jj) &
 &     + c3 * ff(irad + 1, jj) &
 &     + c4 * ff(irad + 2, jj)
-     xccc1d(i1xccc,jj)=pi4i*rscale(jj)*tff
+     result1d(i1xccc,jj)=normfact*rscale(jj)*tff
    end do
  end do
 
 !5th derivative is apparently not in use, so set to zero
- xccc1d(:,6)=zero
+ result1d(:,6)=zero
 
  ABI_FREE(ff)
 
 end subroutine psp9cc
 !!***
-
-#endif
 
 end module m_psp9
 !!***
