@@ -72,6 +72,9 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
  integer :: iproj, ll, ll_previous, nprojs, nprojsr, nprojso
  integer,parameter :: n1xccc_default=2501
  logical :: has_nlcc, has_spin
+#if defined HAVE_LIBPSML_METAGGA
+ logical :: has_metagga
+#endif
  real(dp) :: ekb
  type(ps_t) :: psxml
 !arrays
@@ -91,11 +94,19 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
 
 10 continue
 
+#if defined HAVE_LIBPSML_METAGGA
+ call ps_PseudoAtomSpec_Get(psxml, &
+&  atomic_symbol=atmsymb, atomic_label=label, &
+&  atomic_number=psphead%znuclpsp, z_pseudo=psphead%zionpsp, &
+&  pseudo_flavor=flavor, relativity=relat, &
+&  spin_dft=has_spin, core_corrections=has_nlcc, meta_gga=has_metagga)
+#else
  call ps_PseudoAtomSpec_Get(psxml, &
 &  atomic_symbol=atmsymb, atomic_label=label, &
 &  atomic_number=psphead%znuclpsp, z_pseudo=psphead%zionpsp, &
 &  pseudo_flavor=flavor, relativity=relat, &
 &  spin_dft=has_spin, core_corrections=has_nlcc)
+#endif
 
  psphead%pspcod = 9
 
@@ -120,6 +131,12 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
    write (message,'(a,I5)') '- psxml2ab: ps_NValenceShells ', nvshells
 !  call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
+#if defined HAVE_LIBPSML_METAGGA
+   if (has_metagga) then
+     write (message,'(a)') '- psxml2ab: Pseudopotential includes meta-GGA kinetic energy density data.'
+     call wrtout(std_out,  message,'COLL')
+   end if
+#endif
  end if
 
  ABI_MALLOC(zeld, (nvshells))

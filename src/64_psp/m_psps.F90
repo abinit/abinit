@@ -70,6 +70,7 @@ module m_psps
  public :: nctab_free              ! Free memory.
  public :: nctab_copy              ! Copy the object.
  public :: nctab_eval_tvalespl     ! Evaluate spline-fit of the atomic pseudo valence charge in reciprocal space.
+ public :: nctab_eval_tvaletauspl  ! Evaluate spline-fit of the atomic pseudo valence kinetic energy density in reciprocal space.
  public :: nctab_eval_tcorespl     ! Evalute spline-fit of the model core charge in reciprocal space.
  public :: nctab_mixalch           ! Mix the pseudopotential tables. Used for alchemical mixing.
 !!***
@@ -1475,6 +1476,7 @@ subroutine nctab_free(nctab)
 ! *************************************************************************
 
  ABI_SFREE(nctab%tvalespl)
+ ABI_SFREE(nctab%tvaletauspl)
  ABI_SFREE(nctab%tcorespl)
  ABI_SFREE(nctab%ttaucorespl)
  ABI_SFREE(nctab%tphi_qspl)
@@ -1510,9 +1512,12 @@ subroutine nctab_copy(nctabin, nctabout)
  nctabout%dtaucdq0   = nctabin%dtaucdq0
  nctabout%d2taucdq0  = nctabin%d2taucdq0
  nctabout%dnvdq0     = nctabin%dnvdq0
+ nctabout%has_tvaletau = nctabin%has_tvaletau
+ nctabout%dnvtaudq0  = nctabin%dnvtaudq0
 
  ! TODO Why not check values of has_tvale and has_tcore?
  if (allocated(nctabin%tvalespl)) call alloc_copy(nctabin%tvalespl, nctabout%tvalespl)
+ if (allocated(nctabin%tvaletauspl)) call alloc_copy(nctabin%tvaletauspl, nctabout%tvaletauspl)
  if (allocated(nctabin%tcorespl)) call alloc_copy(nctabin%tcorespl, nctabout%tcorespl)
  if (allocated(nctabin%ttaucorespl)) call alloc_copy(nctabin%ttaucorespl, nctabout%ttaucorespl)
 
@@ -1577,6 +1582,55 @@ subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
  call paw_spline(qgrid_vl,nctab%tvalespl(:,1),mqgrid_vl,yp1,ypn,nctab%tvalespl(:,2))
 
 end subroutine nctab_eval_tvalespl
+!!***
+
+!!****f* m_psps/nctab_eval_tvaletauspl
+!! NAME
+!!  nctab_eval_tvaletauspl
+!!
+!! FUNCTION
+!!  Evaluate spline-fit of the atomic pseudo valence kinetic energy density in reciprocal space.
+!!
+!! INPUTS
+!!  mesh<pawrad_type>Radial mesh (r-space) used for the valence kinetic energy density.
+!!  tauvalr(mesh%mesh_size)=Valence kinetic energy density in real space.
+!!  mqgrid_vl=Number of points in the reciprocal space grid
+!!  qgrid_vl(mqgrid_vl)=The coordinates of all the points of the radial q-grid
+!!
+!! SIDE EFFECTS
+!!  nctab%tvaletauspl(mqgrid_vl,2)
+!!  nctab%dnvtaudq0
+!!
+!! SOURCE
+
+subroutine nctab_eval_tvaletauspl(nctab, mesh, tauvalr, mqgrid_vl, qgrid_vl)
+
+!Arguments ------------------------------------
+ class(nctab_t),intent(inout) :: nctab
+ integer,intent(in) :: mqgrid_vl
+ type(pawrad_type),intent(in) :: mesh
+!arrays
+ real(dp),intent(in) :: tauvalr(mesh%mesh_size),qgrid_vl(mqgrid_vl)
+
+!Local variables-------------------------------
+ real(dp) :: yp1,ypn,d2nvtaudq0
+! *************************************************************************
+
+ nctab%has_tvaletau = .True.
+ if (.not. allocated(nctab%tvaletauspl)) then
+   ABI_MALLOC(nctab%tvaletauspl, (mqgrid_vl, 2))
+ else
+   ABI_CHECK(size(nctab%tvaletauspl, dim=1) == mqgrid_vl, "wrong mqgrid_vl")
+ end if
+
+ call pawpsp_cg(nctab%dnvtaudq0, d2nvtaudq0, mqgrid_vl, qgrid_vl, nctab%tvaletauspl(:,1), mesh, tauvalr, yp1, ypn)
+
+ ! No rescaling for kinetic energy density (unlike valence charge, we have no constraint on the integral).
+
+ ! Compute second derivative of tvaletauspl(q)
+ call paw_spline(qgrid_vl,nctab%tvaletauspl(:,1),mqgrid_vl,yp1,ypn,nctab%tvaletauspl(:,2))
+
+end subroutine nctab_eval_tvaletauspl
 !!***
 
 !!****f* m_psps/nctab_eval_tcorespl

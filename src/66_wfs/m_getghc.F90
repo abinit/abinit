@@ -246,7 +246,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(c_double), contiguous, pointer :: gvnlc(:,:)
  real(c_double), contiguous, pointer :: gvnlxc_(:,:)
 #else
- real(dp), allocatable            :: gvnlc(:,:)
+ real(dp), target, allocatable                :: gvnlc(:,:)
  real(dp), contiguous, pointer                :: gvnlxc_(:,:)
 #endif
  real(dp), allocatable            :: vlocal_tmp(:,:,:), work(:,:,:,:)
