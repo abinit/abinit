@@ -593,25 +593,29 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
      call orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,suppress_ormesh=.TRUE.)
 
      ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
      call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,&
-      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh)
+      & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,&
+      & suppress_ormesh=.TRUE.)
 
      ! ZTG23 Eq. 36 term 1
      call orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,&
+       & suppress_ormesh=.TRUE.)
 
      ! ZTG23 text after Eq. 42
      nl1_option = 1 ! LR
      call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab,&
+       & suppress_ormesh=.FALSE.)
 
      ! ZTG23 Eq. 43
      nl1_option = 2 ! BM
      call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab,&
+       & suppress_ormesh=.TRUE.)
 
      ! accumulate terms
      do nn = 1, nband_k
@@ -902,11 +906,13 @@ end subroutine orbmag_term_scale
 !! SOURCE
 
 subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppol,&
-    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab)
+    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab,&
+    & suppress_ormesh)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,nl1_option,npw_k
+  logical,intent(in),optional :: suppress_ormesh
   type(dterm_type),intent(in) :: dterm
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -923,11 +929,17 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppo
   !scalars
   integer :: adir,nn,npwsp
   complex(dp) :: tt
+  logical :: my_suppress_ormesh
   !arrays
   real(dp),pointer :: cwavef(:,:)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 !--------------------------------------------------------------------
 
+ if(present(suppress_ormesh)) then
+   my_suppress_ormesh=suppress_ormesh
+ else
+   my_suppress_ormesh=.FALSE.
+ end if
  npwsp = npw_k*dtset%nspinor
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
  !ABI_MALLOC(cwavef,(2,npwsp))
@@ -943,11 +955,11 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppo
      select case (nl1_option)
      case(1)
        call tt_me(adir,dterm%LR(:,:,:,adir),atindx,cwavef,dtset,gs_hamk,dterm%lmn2max,mpi_enreg,&
-         & dterm%ndij,npw_k,orbmag_mesh,inlr,pawtab,tt,cwaveprj)
+         & dterm%ndij,npw_k,orbmag_mesh,inlr,pawtab,tt,cwaveprj,suppress_ormesh=my_suppress_ormesh)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inlr) = real(tt)
      case(2)
        call tt_me(adir,dterm%BM(:,:,:,adir),atindx,cwavef,dtset,gs_hamk,dterm%lmn2max,mpi_enreg,&
-         & dterm%ndij,npw_k,orbmag_mesh,inbm,pawtab,tt,cwaveprj)
+         & dterm%ndij,npw_k,orbmag_mesh,inbm,pawtab,tt,cwaveprj,suppress_ormesh=my_suppress_ormesh)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inbm) = real(tt)
      case default
        tt = czero
@@ -1000,11 +1012,13 @@ end subroutine orbmag_nl1_k
 !! SOURCE
 
 subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
-    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab)
+    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,&
+    & suppress_ormesh)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,npw_k
+  logical,intent(in),optional :: suppress_ormesh
   type(dterm_type),intent(in) :: dterm
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -1023,6 +1037,7 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,
   integer :: adir,bdir,gdir,nn,npwsp
   real(dp) :: epsabg
   complex(dp) :: prefac_m,txt_d,txt_q
+  logical :: my_suppress_ormesh
   !arrays
   real(dp),pointer :: cwavef(:,:)
   complex(dp) :: m1(3)
@@ -1030,6 +1045,12 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,
 
 !--------------------------------------------------------------------
 
+ if(present(suppress_ormesh)) then
+   my_suppress_ormesh=suppress_ormesh
+ else
+   my_suppress_ormesh=.FALSE.
+ end if
+ 
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
  call pawcprj_alloc(cwaveprj,cprj_k(1,1)%ncpgr,dimlmn)
 
@@ -1050,7 +1071,8 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,
          prefac_m = -com*c2*epsabg
 
          call txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,&
-           & nn,mpi_enreg,nband_k,npw_k,orbmag_mesh,innl,pawtab,prefac_m,txt_d,cwaveprj)
+           & nn,mpi_enreg,nband_k,npw_k,orbmag_mesh,innl,pawtab,prefac_m,txt_d,cwaveprj,&
+           & suppress_ormesh=my_suppress_ormesh)
        
          m1(adir) = m1(adir) + txt_d
 
@@ -1109,12 +1131,14 @@ end subroutine orbmag_nl_k
 !! SOURCE
 
 subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh)
+    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,&
+    & suppress_ormesh)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,npw_k
   real(dp),intent(in) :: fermie
+  logical,intent(in),optional :: suppress_ormesh
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
@@ -1132,7 +1156,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
   integer :: nn,npwsp,sij_opt,t_atom,tim_fourwf,tim_getghc,type_calc
   real(dp) :: epsabg,lams,weight_i,weight_r
   complex(dp) :: ormeshfac,prefac_b,prefac_m
-  logical :: need_ormesh
+  logical :: my_suppress_ormesh,need_ormesh
   !arrays
   real(dp) bdot(2),mdot(2)
   real(dp),allocatable :: denpot(:,:,:),fofgout(:,:)
@@ -1143,11 +1167,16 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
   type(pawcprj_type),allocatable :: cwaveprj1(:,:)
 !--------------------------------------------------------------------
 
+ if(present(suppress_ormesh)) then
+   my_suppress_ormesh=suppress_ormesh
+ else
+   my_suppress_ormesh=.FALSE.
+ end if
  fourwf_cplex = 1
  fourwf_option = 0
  tim_fourwf = 1
  npwsp = npw_k*dtset%nspinor
- need_ormesh = (dtset%orbmag .EQ. 4)
+ need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
 
  ABI_MALLOC(ghc,(2,npwsp))
  ABI_MALLOC(gsc,(2,npwsp))
@@ -1285,12 +1314,14 @@ end subroutine orbmag_cc_k
 !! SOURCE
 
 subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,&
-    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh)
+    & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,&
+    & suppress_ormesh)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,npw_k
   real(dp),intent(in) :: fermie
+  logical,intent(in),optional :: suppress_ormesh
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
@@ -1309,7 +1340,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
   real(dp) :: epsabg,weight_i,weight_r
   complex(dp) :: bdotc,bpdotc,eig_shift,gdotc,gpdotc
   complex(dp) :: prefac_b,prefac_m
-  logical :: need_ormesh
+  logical :: my_suppress_ormesh,need_ormesh
   !arrays
   real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1)
   real(dp),allocatable :: denpot(:,:,:)
@@ -1320,11 +1351,16 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
 !--------------------------------------------------------------------
 
+ if(present(suppress_ormesh)) then
+   my_suppress_ormesh=suppress_ormesh
+ else
+   my_suppress_ormesh=.FALSE.
+ end if
  fourwf_cplex = 1
  fourwf_option = 0
  tim_fourwf = 1
  npwsp = npw_k*dtset%nspinor
- need_ormesh = (dtset%orbmag .EQ. 4)
+ need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
 
  ABI_MALLOC(svectoutb,(2,npwsp))
  ABI_MALLOC(svectoutg,(2,npwsp))
@@ -1952,13 +1988,15 @@ end subroutine lamb_core
 !! SOURCE
 
 subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,&
-    & mpi_enreg,nband_k,npw_k,orbmag_mesh,oterm,pawtab,prefac_m,txt,ucprj)
+    & mpi_enreg,nband_k,npw_k,orbmag_mesh,oterm,pawtab,prefac_m,txt,ucprj,&
+    & suppress_ormesh)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: adir,bdir,gdir,iband,nband_k,npw_k,oterm
   complex(dp),intent(in) :: prefac_m
   complex(dp),intent(out) :: txt
+  logical,intent(in),optional :: suppress_ormesh
   type(dataset_type),intent(in) :: dtset
   type(dterm_type),intent(in) :: dterm
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -1978,18 +2016,23 @@ subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,&
   integer :: jl,jlmn,klmn,ndat,npwsp,t_atom,tim_fourwf
   real(dp) :: weight_i,weight_r
   complex(dp) :: dcpi,dcpj,dij,ormesh_fac
-  logical :: need_ormesh
+  logical :: my_suppress_ormesh,need_ormesh
   !arrays
   real(dp),allocatable,target :: fofgin(:,:),fofr(:,:,:,:)
   real(dp),allocatable :: denpot(:,:),fofgout(:,:)
 !--------------------------------------------------------------------
 
+  if(present(suppress_ormesh)) then
+    my_suppress_ormesh=suppress_ormesh
+  else
+    my_suppress_ormesh=.FALSE.
+  end if
   fourwf_cplex = 1
   fourwf_option = 0
   tim_fourwf = 1
   ndat = 1
   npwsp = npw_k*dtset%nspinor
-  need_ormesh = (dtset%orbmag .EQ. 4)
+  need_ormesh = ((dtset%orbmag .EQ. 4).AND.(.NOT. my_suppress_ormesh))
 
   if (need_ormesh) then
     do iat = 1, dtset%natom
@@ -2106,12 +2149,14 @@ end subroutine txt_me
 !! SOURCE
 
 subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
-    & ndij,npw_k,orbmag_mesh,oterm,pawtab,tt,ucprj)
+    & ndij,npw_k,orbmag_mesh,oterm,pawtab,tt,ucprj,&
+    & suppress_ormesh)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: adir,lmn2max,ndij,npw_k,oterm
   complex(dp),intent(out) :: tt
+  logical,intent(in),optional :: suppress_ormesh
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
@@ -2128,7 +2173,7 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
   !scalars
   integer :: fourwf_cplex,fourwf_option,iat,iatom,isp,itypat
   integer :: il,ilmn,ipw,jl,jlmn,klmn,ndat,npwsp,t_atom,tim_fourwf
-  logical :: need_ormesh
+  logical :: my_suppress_ormesh,need_ormesh
   real(dp) :: weight_i,weight_r
   complex(dp) :: cpi,cpj,dij,ormesh_fac
   !arrays
@@ -2136,12 +2181,17 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
   real(dp),allocatable :: denpot(:,:),fofgout(:,:)
 !--------------------------------------------------------------------
 
+  if(present(suppress_ormesh)) then
+    my_suppress_ormesh=suppress_ormesh
+  else
+    my_suppress_ormesh=.FALSE.
+  end if
   fourwf_cplex = 1
   fourwf_option = 0
   tim_fourwf = 1
   ndat = 1
   npwsp = npw_k*dtset%nspinor
-  need_ormesh = (dtset%orbmag .EQ. 4)
+  need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
 
   if (need_ormesh) then
     do iat = 1, dtset%natom
