@@ -10,7 +10,7 @@ as **Constrained DFPT**, allows one to compute static and dynamic (at finite fre
 --spanning interatomic force constants, dielectric tensor, Born charges, etc.. but also magnetic susceptibilities, 
 magnetic Born charges and magnetoelectric tensors-- while enforcing parametric control over the local magnetic moments.
 
-The implementation follows the theoretical framework introduced in [[cite:Royo2025]].
+The implementation follows the theoretical framework introduced in [[cite:Royo2026]].
 
 It is intended for medium to advanced users familiar with noncollinear magnetism and DFPT.
 
@@ -24,44 +24,27 @@ In the context of phonons, this was first noticed by Mead and Truhlar [[cite:Mea
 considering the phases of the nuclei and electrons wave functions when imposing the Born-Oppenheimer 
 approximation, introduced a vector-potential term in the effective Hamiltonian of the nuclei. This new 
 contribution enters the phonon equations of motion as a Berry curvature in the parameter space of the nuclei displacements, 
-with the physical meaning of a force induced by a velocity, and restores the expected magnetic symmetries of the crystal[[cite:Bonini2023]].
+it has the physical meaning of a force induced by a velocity, and restores the expected magnetic symmetries of the crystal [[cite:Bonini2023]].
 
 Magnetic materials can also host spin-wave excitations (magnons) which typically overlap in energy with phonons
 and introduce additional complications in the linear-response regime. On the one hand, magnons and phonons can interact
 mutually influencing each other's spectra and, therefore, need to be simultaneously treated. This was solved in 
-[[cite:Ren2025]] by working with a set of Hessians and Berry curvatures living in an extended parameter space of 
+[[cite:Ren2025]] by working with a set of Hessians and Berry curvatures defined in an extended parameter space of 
 atomic displacements, local spin cantings and interactions thereof. The resulting generalized equation of motion
 provides the eigenfrequencies and eigenvectors of the coupled magnon-phonon system. On the other hand, the so-called
-acoustic magnons typically have very low frequencies at the center of the Brillouin zone, which cause severe numerical 
-instabilities in the self-consistent procedure whenever a given perturbation couples with these magnon excitations.
+acoustic magnons typically have very low frequencies at the center of the Brillouin zone, a fact that causes severe numerical 
+instabilities in the self-consistent linear-response calculation whenever a given perturbation couples with these magnon excitations.
 
-
-
-Noncollinear magnetic systems pose severe convergence difficulties within standard density-functional 
-perturbation theory (DFPT). The presence of low-energy magnon excitations leads to a poorly conditioned 
-linear-response problem, especially:
-
-- At the Brillouin zone center (acoustic magnon as Goldstone mode),
-- In frequency-dependent calculations near magnon resonances,
-- In coupled spin–phonon problems.
-
-Constrained DFPT resolves these issues by introducing a penalty functional that stiffens the magnetic 
-degrees of freedom during the linear-response calculation. The magnetic moments are constrained to remain 
-close to their ground-state configuration, thereby eliminating problematic low-energy resonances from the 
-self-consistent loop.
-
-The physically meaningful (relaxed-spin) response functions are subsequently reconstructed via exact 
+The constrained DFPT method implemented in ABINIT resolves these convergence issues by introducing a penalty functional that stiffens 
+the magnetic degrees of freedom during the linear-response calculation. The magnetic moments are constrained to remain 
+close to their ground-state configuration, thereby eliminating problematic low-energy resonances from the self-consistent loop.
+The physically meaningful response functions, i.e., those without the constraints, are subsequently reconstructed in ANADDB via exact 
 linear-algebra relations derived from Legendre transformations.
 
-This strategy:
-
-- Dramatically improves convergence,
-- Preserves full formal equivalence with the unconstrained theory,
-- Enables robust access to dynamical spin–phonon response functions.
-
 ---
-
 ## Theoretical background
+
+The theoretical formalism has been detailed in [[cite:Royo2026]], here we shall summarize it. 
 
 ### Magnetic functionals and Legendre transforms
 
@@ -95,77 +78,52 @@ level.
 
 ---
 
-### Spin susceptibilities
-
-The physical spin susceptibility matrix is defined as
-
-\[
-\chi_{jl} = \frac{\partial m_j}{\partial H_l}.
-\]
-
-Within the constrained formalism, it is reconstructed from the second derivatives of the penalty functional:
-
-\[
-\chi = \tilde U^{-1} - \frac{1}{\alpha} I.
-\]
-
-Thus, the unconstrained susceptibility is obtained by simple matrix inversion and subtraction of the 
-penalty contribution.
-
----
-
-### Spin–phonon coupling
-
-The method generalizes naturally to the coupled spin–phonon problem.
-
-The Hessian matrix in the extended parameter space takes block form:
-
-\[
-U =
-\begin{pmatrix}
-U^{(ss)} & U^{(sp)} \\
-U^{(ps)} & U^{(pp)}
-\end{pmatrix}
-\]
-
-where:
-
-- \( ss \): spin–spin sector,
-- \( pp \): phonon–phonon sector,
-- \( sp \), \( ps \): mixed spin–phonon couplings.
-
-The relaxed-spin interatomic force constants are obtained as
-
-\[
-\Phi^{RS} = \Phi^{FS} - U^{(sp)} \chi U^{(ps)}.
-\]
-
-This partition clearly separates:
-
-- Frozen-spin (non-resonant) contributions,
-- Resonant corrections mediated by spin canting.
-
----
-
 ### Dynamical regime
 
-At finite frequency \( \omega \), the formalism is formulated within time-dependent DFPT 
-(using the Kohn–Sham action functional).
+Regarding the dynamical linear-response regime required to study magnets, the implementation offers two routes.
 
-A key advantage of the constrained approach is that the frozen-spin internal energy matrix 
-\( U(\omega) \) is smooth and weakly frequency-dependent. This enables a controlled 
-adiabatic expansion:
+---
+
+#### First-order adiabatic approximation
+
+The first one is the so-called first-order adiabatic approximation (FOA) in Ref. [[cite:Royo2026]]. It emerges from adopting an
+adiabatic expansion on the frequency dependence of the second-order internal energies: 
 
 \[
-U(\omega) = K + i\omega G - \omega^2 M + \dots
+U_{\lambda_1,\lambda_2}(\omega) = K_{\lambda_1,\lambda_2} + i\omega G_{\lambda_1,\lambda_2} - \omega^2 M_{\lambda_1,\lambda_2} + \dots
 \]
 
-Two levels of approximation are available:
+where, \( \lambda_1, \lambda_2 \) indicate two possible perturbations (atomic displacements, electric or Zeeman fields).
+The FOA stops the above expansion at first order in the frequency and, therefore, requires the calculation 
+of static Hessians \( {\bf U} \) plus Berry curvatures \( {\bf G} \). The Hessians are obtained via static 
+constrained DFPT calculations. The Berry curvatures, in turn, correspond to frequency derivatives of second-order 
+energies in the static \( \omega \rightarrow 0 \) limit whose calculation, in the most general case, boils down to 
+obtain:
 
-- **First-order adiabatic approximation (FOA)**: neglect electronic mass corrections.
-- **Second-order adiabatic approximation (SOA)**: includes renormalization of magnon and phonon masses.
+\[
+\frac{d E_{ab}({\bf q},\omega)}{d\omega}=
+\int [d^3 k] \sum_m f_{n\bf k} \left( \langle u_{m\bf k,-q}^{\lambda_2} | {u}_{m\bf k,-q}^{\lambda_1} \rangle - 
+\langle {u}_{m\bf k,q}^{\lambda_1}|u_{m\bf k,q}^{\lambda_2} \rangle \right).
+\]
 
-The SOA yields modified equations of motion including finite magnon inertia.
+The above equation --related with the calculation of a time-dispersion property-- has been implemented in the longwave
+driver of ABINIT --originally devoted to calculate spatial-dispersion properties and now generalized to the case of time-- 
+for any arbitrary pair of perturbations. The longwave driver reads the first-order wave functions pre-calculated in a 
+constrained DFPT run and computes a set of constrained Berry curvatures. 
+
+Both constrained Hessians and Berry curvatures are written in DDB files as second- and third-order total-energy derivatives, 
+respectively. These DDB files are then used by ANADDB to switch between the different Legendre related magnetic functionals
+[[Royo2026]]. For instance, this allows one to obtain \( U_{\lambda_1,\lambda_2}(\omega) \) via a lineal (in this case) interpolation 
+in frequency to subsequently convert it to the physical spin- and ion-relaxed enthalpies: frequency dependent susceptibilites
+(dielectric, magnetic, magnetoelelectric, etc...) including coupled phonon and magnon resonances. 
+
+---
+
+#### Frequency-dependent DFPT
+
+
+
+
 
 ---
 
