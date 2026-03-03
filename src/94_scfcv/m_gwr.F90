@@ -5657,7 +5657,7 @@ subroutine gwr_build_sigmac(gwr)
  integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii, jj, irow
  integer :: iq_ibz, iq_bz, itau, ierr, ibc, ib1, ib2, bmin, bmax, band, band1, ifft, gpu_option
  integer :: band2, band2_start, band2_stop, nbc
- integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp
+ integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp, iter_ncid
  integer :: isym_k, trev_k, g0_k(3), tsign_k !, b1gw, b2gw, ! npwsp, my_iqi, sc_ir, ig, my_iqf
  integer :: gt_request, wct_request
  integer :: band_val, ibv, ncerr, unt_it, unt_iw, unt_rw
@@ -5700,7 +5700,7 @@ subroutine gwr_build_sigmac(gwr)
  real(dp) :: e0_kcalc(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol), rw_mesh(gwr%nwr)
  real(dp) :: spfunc_diag(gwr%nwr, gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
  integer :: pade_solver_ierr(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
- real(dp) :: ks_gaps(gwr%nkcalc, gwr%nsppol), qpz_gaps(gwr%nkcalc, gwr%nsppol) !, qp_pade_gaps(gwr%nkcalc, gwr%nsppol)
+ real(dp) :: ks_gaps(gwr%nkcalc, gwr%nsppol), qpz_gaps(gwr%nkcalc, gwr%nsppol), qp_pade_gaps(gwr%nkcalc, gwr%nsppol)
  complex(dp) :: ze0_kcalc(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigc_e0(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: qpz_ene(gwr%b1gw:gwr%b2gw, gwr%nkcalc, gwr%nsppol), imag_zmesh(gwr%ntau)
@@ -6271,7 +6271,7 @@ end if
 
  e0_kcalc = zero; spfunc_diag = zero; pade_solver_ierr = 0; ze0_kcalc = zero; sigc_e0 = zero
  qpz_ene = zero; qp_pade = zero; sigxc_rw_diag = zero
- ks_gaps = -one; qpz_gaps = -one !; qp_pade_gaps = -one
+ ks_gaps = -one; qpz_gaps = -one ; qp_pade_gaps = -one
 
  do spin=1,gwr%nsppol
  do ikcalc=1,gwr%nkcalc
@@ -6456,7 +6456,7 @@ end if
            call ydoc%add_int('QP_VBM_band', iperm(ibv) + gwr%bstart_ks(ikcalc, spin) - 1)
            call ydoc%add_int('QP_CBM_band', iperm(ibv+1) + gwr%bstart_ks(ikcalc, spin) - 1)
            qp_gap = sorted_qpe(ibv+1) - sorted_qpe(ibv)
-           !qp_pade_gap = qp_pade(band_val+1, ikcalc, spin) - qp_pade(band_val, ikcalc, spin)
+           qp_pade_gap = qp_pade(band_val+1, ikcalc, spin) - qp_pade(band_val, ikcalc, spin)
          else
            call ydoc%add_int('QP_VBM_band', ibv + gwr%bstart_ks(ikcalc, spin) - 1)
            call ydoc%add_int('QP_CBM_band', ibv+1 + gwr%bstart_ks(ikcalc, spin) - 1)
@@ -6471,7 +6471,7 @@ end if
          call ydoc%add_real('Delta_QP_KS', (qp_gap - ks_gap) * Ha_eV)
          ks_gaps(ikcalc, spin)= ks_gap
          qpz_gaps(ikcalc, spin) = qp_gap
-         !qp_pade_gaps(ikcalc, spin) = qp_pade_gap
+         qp_pade_gaps(ikcalc, spin) = qp_pade_gap
        end if
 
        call ydoc%open_tabular('data') !, tag='SigmaeeData')
@@ -6585,42 +6585,14 @@ end if
 
      ! Define arrays with results.
      ! TODO: Add matrix elements of vxc, have to trasfer data from vxcval to nkcalc packing
-     define = .True.
-     if (define) then
-       ncerr = nctk_def_arrays(ncid, [ &
-         nctkarr_t("e0_kcalc", "dp", "smat_bsize1, nkcalc, nsppol"), &
-         nctkarr_t("ze0_kcalc", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
-         !nctkarr_t("vxc_kcalc", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
-         nctkarr_t("qpz_ene", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
-         nctkarr_t("qp_pade", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
-         nctkarr_t("pade_solver_ierr", "int", "smat_bsize1, nkcalc, nsppol"), &
-         nctkarr_t("ks_gaps", "dp", "nkcalc, nsppol"), &
-         nctkarr_t("qpz_gaps", "dp", "nkcalc, nsppol"), &
-         !nctkarr_t("qp_pade_gaps", "dp", "nkcalc, nsppol"), &
-         nctkarr_t("sigx_mat", "dp", "two, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
-         nctkarr_t("sigc_it_mat", "dp", "two, two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
-         nctkarr_t("sigc_iw_mat", "dp", "two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
-         nctkarr_t("sigxc_rw_diag", "dp", "two, nwr, smat_bsize1, nkcalc, nsppol"), &
-         nctkarr_t("spfunc_diag", "dp", "nwr, smat_bsize1, nkcalc, nsppol") &
-       ])
-       NCF_CHECK(ncerr)
+     call ncwrite_sigmac(ncid)
+
+     if (.true.) then
+       NCF_CHECK(nf90_def_grp(ncid, strcat("iter", itoa(gwr%scf_iteration)), iter_ncid))
+       call ncwrite_sigmac(iter_ncid)
      end if
 
-     ! Write data.
-     NCF_CHECK(nctk_set_datamode(ncid))
-     NCF_CHECK(nf90_put_var(ncid, vid("e0_kcalc"), e0_kcalc))
-     NCF_CHECK(nf90_put_var(ncid, vid("ze0_kcalc"), c2r(ze0_kcalc)))
-     NCF_CHECK(nf90_put_var(ncid, vid("sigx_mat"), c2r(gwr%sigx_mat)))
-     NCF_CHECK(nf90_put_var(ncid, vid("qpz_ene"), c2r(qpz_ene)))
-     NCF_CHECK(nf90_put_var(ncid, vid("qp_pade"), c2r(qp_pade)))
-     NCF_CHECK(nf90_put_var(ncid, vid("pade_solver_ierr"), pade_solver_ierr))
-     NCF_CHECK(nf90_put_var(ncid, vid("ks_gaps"), ks_gaps))
-     NCF_CHECK(nf90_put_var(ncid, vid("qpz_gaps"), qpz_gaps))
-     !NCF_CHECK(nf90_put_var(ncid, vid("qp_pade_gaps"), qp_pade_gaps))
-     NCF_CHECK(nf90_put_var(ncid, vid("sigc_it_mat"), c2r(sigc_it_mat)))
-     NCF_CHECK(nf90_put_var(ncid, vid("sigc_iw_mat"), c2r(gwr%sigc_iw_mat)))
-     NCF_CHECK(nf90_put_var(ncid, vid("sigxc_rw_diag"), c2r(sigxc_rw_diag)))
-     NCF_CHECK(nf90_put_var(ncid, vid("spfunc_diag"), spfunc_diag))
+     NCF_CHECK(nf90_put_var(ncid, vid("scf_iteration"), gwr%scf_iteration))
      NCF_CHECK(nf90_put_var(ncid, vid("gwr_completed"), 1))
      NCF_CHECK(nf90_close(ncid))
    end if
@@ -6655,6 +6627,51 @@ subroutine print_sigma_header()
  call wrtout(std_out, sjoin("- FFT sc_batch_size:", itoa(gwr%sc_batch_size)), do_flush=.True.)
 
 end subroutine print_sigma_header
+
+subroutine ncwrite_sigmac(myncid, mydefine)
+ integer,intent(in) :: myncid
+ logical,intent(in), optional :: mydefine
+ integer :: myncerr
+
+ ! Write Sigma_c to GWR.nc
+ NCF_CHECK(nctk_set_datamode(myncid))
+!  if (.not. present(mydefine) .or. mydefine) then
+ if (.true.) then
+   myncerr = nctk_def_arrays(myncid, [ &
+     nctkarr_t("e0_kcalc", "dp", "smat_bsize1, nkcalc, nsppol"), &
+     nctkarr_t("ze0_kcalc", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
+     !nctkarr_t("vxc_kcalc", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
+     nctkarr_t("qpz_ene", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
+     nctkarr_t("qp_pade", "dp", "two, smat_bsize1, nkcalc, nsppol"), &
+     nctkarr_t("pade_solver_ierr", "int", "smat_bsize1, nkcalc, nsppol"), &
+     nctkarr_t("ks_gaps", "dp", "nkcalc, nsppol"), &
+     nctkarr_t("qpz_gaps", "dp", "nkcalc, nsppol"), &
+     nctkarr_t("qp_pade_gaps", "dp", "nkcalc, nsppol"), &
+     nctkarr_t("sigx_mat", "dp", "two, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
+     nctkarr_t("sigc_it_mat", "dp", "two, two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
+     nctkarr_t("sigc_iw_mat", "dp", "two, ntau, smat_bsize1, smat_bsize2, nkcalc, nsppol"), &
+     nctkarr_t("sigxc_rw_diag", "dp", "two, nwr, smat_bsize1, nkcalc, nsppol"), &
+     nctkarr_t("spfunc_diag", "dp", "nwr, smat_bsize1, nkcalc, nsppol") &
+   ])
+   NCF_CHECK(myncerr)
+ end if
+ ! Write data.
+ NCF_CHECK(nctk_set_datamode(myncid))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "e0_kcalc"), e0_kcalc))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "ze0_kcalc"), c2r(ze0_kcalc)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "sigx_mat"), c2r(gwr%sigx_mat)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "qpz_ene"), c2r(qpz_ene)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "qp_pade"), c2r(qp_pade)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "pade_solver_ierr"), pade_solver_ierr))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "ks_gaps"), ks_gaps))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "qpz_gaps"), qpz_gaps))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "qp_pade_gaps"), qp_pade_gaps))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "sigc_it_mat"), c2r(sigc_it_mat)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "sigc_iw_mat"), c2r(gwr%sigc_iw_mat)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "sigxc_rw_diag"), c2r(sigxc_rw_diag)))
+ NCF_CHECK(nf90_put_var(myncid, nctk_idname(myncid, "spfunc_diag"), spfunc_diag))
+
+end subroutine ncwrite_sigmac
 
 end subroutine gwr_build_sigmac
 !!***
