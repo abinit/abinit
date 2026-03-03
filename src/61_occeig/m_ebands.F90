@@ -103,7 +103,7 @@ contains
  procedure :: get_valence_idx       => ebands_get_valence_idx          ! Gives the index of the (valence|bands at E_f).
  procedure :: get_bands_from_erange => ebands_get_bands_from_erange    ! Return the indices of the mix and max band within an energy window.
  procedure :: vcbm_range_from_gaps  => ebands_vcbm_range_from_gaps     ! Find band and energy range for states close to the CBM/VBM given input energies.
- procedure :: apply_scissors        => ebands_apply_scissors           ! Apply scissors operator (no k-dependency)
+ procedure :: apply_scissors        => ebands_apply_scissors           ! Apply scissors operator (no k-dependency).
  procedure :: get_occupied          => ebands_get_occupied             ! Returns band indices after which occupations are less than an input value.
  procedure :: enclose_degbands      => ebands_enclose_degbands         ! Adjust band indices such that all degenerate states are treated.
  procedure :: get_bands_e0          => ebands_get_bands_e0             ! Find min/max band indices crossing energy e0
@@ -1740,7 +1740,7 @@ subroutine ebands_apply_scissors(ebands, scissor_energy)
    if (any(val_idx(:, spin) /= val_idx(1, spin))) then
      write(msg,'(a,i0,a)')&
       'Trying to apply a scissor operator on a metallic band structure for spin: ',spin,&
-      'Assuming you know what you are doing, continuing anyway! '
+      'Assuming you know what you are doing, continuing anyway!'
      ABI_COMMENT(msg)
      !Likely newocc will stop, unless the system is semimetallic ?
    end if
@@ -1758,7 +1758,7 @@ subroutine ebands_apply_scissors(ebands, scissor_energy)
        write(msg,'(2a,4(a,i0))')&
         'Not enough bands to apply the scissor operator. ',ch10,&
         'spin: ',spin,' ikpt: ',ikpt,' nband_k: ',nband_k,' but valence index: ',ival
-       ABI_COMMENT(msg)
+       ABI_ERROR(msg)
      end if
 
    end do
