@@ -409,8 +409,10 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
  *   - emit deprecation warnings at USE_DEVICE_PTR, while still supporting it
  * This macro exists to keep support for older NVHPC versions.
  */
+#ifdef FC_NVHPC
 #if __NVCOMPILER_MAJOR__ < 25
 #define USE_DEVICE_ADDR USE_DEVICE_PTR
+#endif
 #endif
 
 /* DFTI macros (should be declared in m_dfti but build-sys tests complain */
