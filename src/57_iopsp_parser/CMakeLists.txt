@@ -39,4 +39,11 @@ target_link_libraries(57_iopsp_parser
   abinit::44_abitypes_defs
   )
 
+if(ABINIT_LIBPSML_FOUND)
+  target_link_libraries(57_iopsp_parser
+    PUBLIC
+    abinit::libpsml
+    )
+endif()
+
 add_library(abinit::57_iopsp_parser ALIAS 57_iopsp_parser)

@@ -738,9 +738,8 @@ For different other reasons, it might nevertheless be useful to be able to
 grasp some information from the file. For norm-conserving pseudopotentials
 different format are possible (labelled 1 to 8 presently). The associated
 internal variable is called pspcod. Information on the header of these
-pseudopotential files can be found in the abinit wiki at
-[[https://wiki.abinit.org/doku.php?id=developers:pseudos]], that you should
-read now (do not pursue with the description of each format, though).
+pseudopotential files can be found at <https://docs.abinit.org/developers/pseudos_nc_header/>
+that you should read now (quickly, do not pursue with the description of each format, though).
 
 
 
