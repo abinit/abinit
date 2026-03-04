@@ -530,7 +530,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
    ! Unlinke the ebands stored in SIGEPH, the eigens read from WFK_FINE have not been
    ! shifted with the scissors operator or updated according to extrael_fermie so do it now.
-   call ephtk_update_ebands(dtset, new%ebands, "GS energies read from WFK_FINE")
+   call ephtk_update_ebands(dtset, dtfil%filqpdatain, new%ebands, "GS energies read from WFK_FINE", comm)
 
    ! And now interpolate linewidths on the fine k-mesh
    ! Note: k-points that close to the edge of the pocket may get zero linewidths

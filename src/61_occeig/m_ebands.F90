@@ -104,7 +104,7 @@ contains
  procedure :: get_bands_from_erange => ebands_get_bands_from_erange    ! Return the indices of the mix and max band within an energy window.
  procedure :: vcbm_range_from_gaps  => ebands_vcbm_range_from_gaps     ! Find band and energy range for states close to the CBM/VBM given input energies.
  procedure :: apply_scissors        => ebands_apply_scissors           ! Apply scissors operator (no k-dependency).
- !procedure :: read_qpdata           => ebands_read_qpdata              ! Read quasi-particle energies from file, update %eig and %fermi_energy
+ procedure :: read_qpdata           => ebands_read_qpdata              ! Read quasi-particle energies from file, update %eig and %fermi_energy
  procedure :: get_occupied          => ebands_get_occupied             ! Returns band indices after which occupations are less than an input value.
  procedure :: enclose_degbands      => ebands_enclose_degbands         ! Adjust band indices such that all degenerate states are treated.
  procedure :: get_bands_e0          => ebands_get_bands_e0             ! Find min/max band indices crossing energy e0
@@ -1814,7 +1814,7 @@ subroutine ebands_read_qpdata(ebands, filepath, comm)
  units = [std_out, ab_out]
 
  ! Only master read data and broadcast results.
- ! File format with energies in atomic units.
+ ! File format with energies in eV units.
  !
  ! # Comment
  ! version
@@ -1822,11 +1822,11 @@ subroutine ebands_read_qpdata(ebands, filepath, comm)
  ! for spin in range(nsppol):
  !   for kpoint in kpoints:
  !      kpoint spin b_start, b_stop
- !      real_energies_ha
- !      imag_energies_ha
+ !      real_energies_ev
+ !      imag_energies_ev
 
  if (xmpi_comm_rank(comm) == master) then
-   call wrtout(units, sjoin("- Reading QP energies from file:", filepath, ch10))
+   call wrtout(units, sjoin("- Reading QP energies from:", filepath, ch10))
    if (open_file(filepath, msg, newunit=unt, form="formatted", action="read") /= 0) then
      ABI_ERROR(msg)
    end if
@@ -1835,6 +1835,9 @@ subroutine ebands_read_qpdata(ebands, filepath, comm)
    read(unt, *, err=10, iomsg=err_msg) msg
    read(unt, *, err=10, iomsg=err_msg) version
    read(unt, *, err=10, iomsg=err_msg) nkibz_file, nsppol_file, nspinor_file
+   call wrtout(units, msg)
+   call wrtout(units, sjoin("nkibz_file", itoa(nkibz_file), ", nsppol_file:", itoa(nsppol_file)))
+
    ABI_CHECK_IEQ(ebands%nkpt, nkibz_file, "Different number of k-points.")
    ABI_CHECK_IEQ(ebands%nsppol, nsppol_file, "Different number of spins.")
    ABI_CHECK_IEQ(ebands%nspinor, nspinor_file, "Different values of nspinor.")
@@ -1843,7 +1846,7 @@ subroutine ebands_read_qpdata(ebands, filepath, comm)
    ifound = 0
    do irec=1, nkibz_file * nsppol_file
      read(unt, *, err=10, iomsg=err_msg) kpt, spin, b_start, b_stop
-     ! Find k-point in ebands%kptns
+     ! Find k-point in ebands%kptns.
      do ikpt=1,ebands%nkpt
        if (all(abs(ebands%kptns(:, ikpt) - kpt) < ktol)) exit
      end do
@@ -1859,21 +1862,23 @@ subroutine ebands_read_qpdata(ebands, filepath, comm)
      ABI_MALLOC(im_enes, (b_start:b_stop))
      read(unt, *, err=10, iomsg=err_msg) re_enes
      read(unt, *, err=10, iomsg=err_msg) im_enes
+     re_enes = re_enes * eV_Ha
+     im_enes = im_enes * eV_Ha
 
-     ! Handle extrapolation for low-energy states with band-independent shift.
      if (b_start /= 1) then
+       call wrtout(units, "Extrapolating QP energies for low-energy states with band-independent shift.")
        delta = re_enes(b_start) - ebands%eig(b_start, ikpt, spin)
        ebands%eig(1:b_start-1, ikpt, spin) = ebands%eig(1:b_start-1, ikpt, spin) + delta
      end if
 
-     ! Handle extrapolation for high-energy states with band-independent shift.
      b_stop__  = min(b_stop, nband_k)
      if (b_stop__ /= nband_k) then
+       call wrtout(units, "Extrapolating QP energies for high-energy states with band-independent shift.")
        delta = re_enes(b_stop__) - ebands%eig(b_stop__, ikpt, spin)
        ebands%eig(b_stop__:nband_k, ikpt, spin) = ebands%eig(b_stop__:nband_k, ikpt, spin) + delta
      end if
 
-     ! Update energies with results from file.
+     ! Update energies with results from QPDATA file.
      ebands%eig(b_start:b_stop__, ikpt, spin) = re_enes(b_start:b_stop__)
 
      ABI_FREE(re_enes)
