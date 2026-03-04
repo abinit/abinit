@@ -343,7 +343,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
    ! Here we change the GS bands (Fermi level, scissors operator ...)
    ! All the modifications to ebands should be done here.
-   call ephtk_update_ebands(dtset, ebands, "Ground state energies")
+   call ephtk_update_ebands(dtset, dtfil%filqpdatain, ebands, "Ground state energies", comm)
 
    ! Need to update the WFK header to reflect the changes in ebands.
    ! because we may need to write the header to ncfile
@@ -361,7 +361,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points then compare against dtset.
    !call wfq_hdr%vs_dtset(dtset)
    call wfq_hdr%free()
-   call ephtk_update_ebands(dtset, ebands_kq, "Ground state energies (K+Q)")
+   call ephtk_update_ebands(dtset, ABI_NOFILE, ebands_kq, "Ground state energies (K+Q)", comm)
  end if
 
  call cwtime_report(" eph%init", cpu, wall, gflops)

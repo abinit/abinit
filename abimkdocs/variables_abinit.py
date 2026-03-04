@@ -26067,6 +26067,23 @@ This option is very useful if the previous job has been killed due to timeout li
 ),
 
 Variable(
+    abivarname="getqpdata_filepath",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="GET the QPDATA.nc from FILEPATH",
+    added_in_version="10.7.0",
+    text=r"""
+This variable defines the path of the QPDATA file with the quasi-particle energies.
+to be used to update the initial KS band structure.
+To generate a QPDATA file, one can use AbiPy to extract the results from the SIGRES.nc file
+""",
+),
+
+
+Variable(
     abivarname="getabiwan_filepath",
     varset="eph",
     vartype="string",
