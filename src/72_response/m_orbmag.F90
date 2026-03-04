@@ -2186,8 +2186,6 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
   else
     my_suppress_ormesh=.FALSE.
   end if
-  fourwf_cplex = 1
-  fourwf_option = 0
   tim_fourwf = 1
   ndat = 1
   npwsp = npw_k*dtset%nspinor
@@ -2216,6 +2214,8 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
           ABI_MALLOC(fofgin,(2,npwsp))
           fofgin(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*cwavef(1,1:npwsp)
           fofgin(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*cwavef(2,1:npwsp)
+          fourwf_cplex = 1
+          fourwf_option = 0
           call fourwf(fourwf_cplex,denpot,fofgin,fofgout,fofr,gs_hamk%gbound_k,&
             & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
             & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
@@ -2242,6 +2242,8 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
             ABI_MALLOC(fofgin,(2,npwsp))
             fofgin(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)*cwavef(1,1:npwsp)
             fofgin(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)*cwavef(2,1:npwsp)
+            fourwf_cplex = 1
+            fourwf_option = 0
             call orbmag_mesh%accum_rmesh(adir,fofgin,fofr,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
               & dtset%natom,npw_k,gs_hamk%ph3d_k,cone,t_atom,oterm,&
               & mult_fact=ormesh_fac,conjg_flag=.FALSE.)
