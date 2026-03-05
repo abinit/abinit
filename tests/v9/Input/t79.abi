@@ -21,6 +21,9 @@ rprim 0.0 1/2 1/2
 nband 50
 occopt 7  tsmear 0.015
 
+# use lobpcg (better convergence)
+wfoptalg 114
+
 # === SCF cycle options
 nstep 8  tolvrs 1.d-7
 ecut 8. pawecutdg 10.
