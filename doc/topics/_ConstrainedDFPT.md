@@ -44,37 +44,22 @@ linear-algebra relations derived from Legendre transformations.
 ---
 ## Theoretical background
 
-The theoretical formalism has been detailed in [[cite:Royo2026]], here we shall summarize it. 
+The theoretical formalism is described in detail in [[cite:Royo2026]]. Below, we summarize its key aspects. 
 
 ### Magnetic functionals and Legendre transforms
 
-The formalism is based on introducing a penalty-modified Kohn–Sham functional,
+The formalism is based on four different magnetic energy functionals:
 
-\[
-\tilde U = E_{\mathrm{KS}} + \frac{\alpha}{2} \sum_l (B_l - m_l)^2,
-\]
+- Penalty-based internal energy \( \tilde U(B_l) \) , with \( B_l \) as target magnetic moments ( /(l=\kappa,\alpha /) is a composite index that runs over the magnetic sites and Cartesian directions),
+- Modified enthalpy \( \tilde F(H_l) \), with \( H_l \) as local Zeeman fields.
+- Internal energy based on holonomic constraints \( U(M_l) \), with \( M_l \) as target magnetic moments,
+- Magnetic enthalpy  .
 
-where:
+The two internal-energy functionals correspond to those introduced by Ma and Dudarev [[cite:Ma2015]] and by Gonze \emph{et al.} [[cite:Gonze2022]] and mentioned in [[topic:ConstrainedDFT]]. The corresponding enthalpies are in turn obtained via Legendre transforms. In [[cite:Royo2026]] it was demonstrated that the general response functions (second-order derivatives of the total energy with respect to two arbitrary perturbations) calculated using these four functionals are related via trivial linear-algebra equations. This means that all four functionals provide the same information, however, in practice it is more convenient to perform the linear-response calculation on the
+internal energies, as they are free from the problematic low-energy magnons. The physical, spin-relaxed response functions on the magnetic enthalpy \( F(H_l) \) are subsequently 
 
-- \( m_l \) are local magnetic moments,
-- \( B_l \) are target magnetic moments,
-- \( \alpha \) is a penalty parameter.
-
-This defines a **constrained-B internal energy functional**.  
-
-From it, one can construct a family of equivalent magnetic thermodynamic functionals:
-
-- Internal energy \( U(M_l) \) (constrained magnetic moments),
-- Magnetic enthalpy \( F(H_l) \) (fixed local Zeeman fields),
-- Penalty-based internal energy \( \tilde U(B_l) \),
-- Modified enthalpy \( \tilde F(H_l) \).
-
-All response functions can be expressed as second derivatives of one of these functionals. 
-The various representations are related via exact Legendre transformations.
-
-In practice, ABINIT performs the linear-response calculation using the penalty-based functional 
-\( \tilde U \), while the physically meaningful response tensors are reconstructed at post-processing 
-level.
+In the current ABINIT implementation, the linear-response calculation is done with the penalty-based functional  \( \tilde U(B_l) \). The output of such a calculation is 
+written in DDB files that are subsequently used by ANADDB to obtain the physical, spin-relaxed response functions defined on the magnetic enthalpy \( F(H_l) \).
 
 ---
 
@@ -111,9 +96,10 @@ driver of ABINIT --originally devoted to calculate spatial-dispersion properties
 for any arbitrary pair of perturbations. The longwave driver reads the first-order wave functions pre-calculated in a 
 constrained DFPT run and computes a set of constrained Berry curvatures. 
 
-Both constrained Hessians and Berry curvatures are written in DDB files as second- and third-order total-energy derivatives, 
+Both Hessians and Berry curvatures are calculated with the penalty-based functional \( \tilde U(B_l) \) and written in 
+DDB files as second- and third-order total-energy derivatives, 
 respectively. These DDB files are then used by ANADDB to switch between the different Legendre related magnetic functionals
-[[Royo2026]]. For instance, this allows one to obtain \( U_{\lambda_1,\lambda_2}(\omega) \) via a lineal (in this case) interpolation 
+[[cite:Royo2026]]. For instance, this allows one to obtain \( U_{\lambda_1,\lambda_2}(\omega) \) via a lineal (in this case) interpolation 
 in frequency to subsequently convert it to the physical spin- and ion-relaxed enthalpies: frequency dependent susceptibilites
 (dielectric, magnetic, magnetoelelectric, etc...) including coupled phonon and magnon resonances. 
 
