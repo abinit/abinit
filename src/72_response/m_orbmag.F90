@@ -602,7 +602,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
      ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
      call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,&
       & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,&
-      & suppress_ormesh=.TRUE.)
+      & trnrm)
 
      ! ZTG23 Eq. 36 term 1
      call orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
@@ -1345,7 +1345,7 @@ end subroutine orbmag_cc_k
 
 subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,&
     & ikpt,isppol,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,orbmag_mesh,&
-    & suppress_ormesh)
+    & trnrm,suppress_ormesh)
 
   !Arguments ------------------------------------
   !scalars
@@ -1359,7 +1359,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: eig_k(nband_k),occ_k(nband_k)
+  real(dp),intent(in) :: eig_k(nband_k),occ_k(nband_k),trnrm(nband_k)
   real(dp),intent(in),target :: cg_k(2,mcgk),gcg1_k(2,mcgk,3)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
 
@@ -1374,7 +1374,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
   !arrays
   real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1)
   real(dp),allocatable :: denpot(:,:,:)
-  real(dp),allocatable :: fofgin(:,:),fofgout(:,:),svectoutg(:,:),vectout(:,:)
+  real(dp),allocatable :: fofgin(:,:),fofgout(:,:),svectoutg(:,:),sv_scale(:,:),vectout(:,:)
   real(dp),allocatable,target :: fofrb(:,:,:,:),fofrg(:,:,:,:),svectoutb(:,:)
   real(dp),pointer :: bra(:,:),brab(:,:),brag(:,:),ket(:,:)
   complex(dp) :: b1(3),bv2b(3),m1(3),mv2b(3),m1_mu(3),mv2b_mu(3)
@@ -1436,11 +1436,14 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
        & paw_opt,signs,svectoutb,tim_getghc,ket,vectout)
 
      if (need_ormesh) then
-       call fourwf(fourwf_cplex,denpot,svectoutb,fofgout,fofrb,gs_hamk%gbound_k,&
+       ABI_MALLOC(sv_scale,(2,npwsp))
+       sv_scale(1:2,1:npwsp) = trnrm(nn)*svectoutb(1:2,1:npwsp)
+       call fourwf(fourwf_cplex,denpot,sv_scale,fofgout,fofrb,gs_hamk%gbound_k,&
          & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
          & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
          & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,fourwf_option,&
          & tim_fourwf,weight_r,weight_i)
+       ABI_SFREE(sv_scale)
      end if
      
      do gdir = 1, 3
@@ -1450,11 +1453,14 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
          & paw_opt,signs,svectoutg,tim_getghc,ket,vectout)
 
        if (need_ormesh) then
-         call fourwf(fourwf_cplex,denpot,svectoutg,fofgout,fofrg,gs_hamk%gbound_k,&
+         ABI_MALLOC(sv_scale,(2,npwsp))
+         sv_scale(1:2,1:npwsp) = trnrm(nn)*svectoutg(1:2,1:npwsp)
+         call fourwf(fourwf_cplex,denpot,sv_scale,fofgout,fofrg,gs_hamk%gbound_k,&
            & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
            & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
            & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,fourwf_option,&
            & tim_fourwf,weight_r,weight_i)
+         ABI_SFREE(sv_scale)
        end if
    
        ! extract |Pc du/dk_b>
@@ -1503,6 +1509,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
            ABI_MALLOC(fofgin,(2,npwsp))
            fofgin(1,1:npwsp) = bra(1,1:npwsp)*svectoutg(1,1:npwsp) + bra(2,1:npwsp)*svectoutg(2,1:npwsp)
            fofgin(2,1:npwsp) = bra(1,1:npwsp)*svectoutg(2,1:npwsp) - bra(2,1:npwsp)*svectoutg(1,1:npwsp)
+           !fofgin(1:2,1:npwsp)=trnrm(np)*fofgin(1:2,1:npwsp)
            call fourwf(fourwf_cplex,denpot,fofgin,fofgout,fofrg,gs_hamk%gbound_k,&
              & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
              & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
@@ -1521,12 +1528,12 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
            mv2b(adir) = mv2b(adir) - prefac_m*CONJG(bpdotc)*gpdotc*eig_k(nn)
            mv2b_mu(adir) = mv2b_mu(adir) + prefac_m*CONJG(bpdotc)*gpdotc*fermie
          
-           if (need_ormesh) then
-             eig_shift = CMPLX(eig_k(nn)-fermie,zero)
-             call orbmag_mesh%accum_rmesh(adir,svectoutb,fofrg,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
-               & dtset%natom,npw_k,gs_hamk%ph3d_k,-prefac_m,t_atom,invv2,&
-               & mult_fact=eig_shift,conjg_flag=.FALSE.)
-           endif
+           !if (need_ormesh) then
+           !  eig_shift = CMPLX(eig_k(nn)-fermie,zero)
+           !  call orbmag_mesh%accum_rmesh(adir,svectoutb,fofrg,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
+           !    & dtset%natom,npw_k,gs_hamk%ph3d_k,-prefac_m,t_atom,invv2,&
+           !    & mult_fact=eig_shift,conjg_flag=.FALSE.)
+           !endif
 
          end do
        end do ! np
