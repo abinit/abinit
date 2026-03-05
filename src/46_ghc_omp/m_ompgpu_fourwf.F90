@@ -91,8 +91,8 @@ subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 !scalars
  integer,intent(in) :: cplex,ngfft(18),ldx,ldy,ldz,ndat,isign
 !arrays
- real(dp),intent(inout) :: fofg(2*ldx*ldy*ldz*ndat)
- real(dp),intent(inout) :: fofr(cplex*ldx*ldy*ldz*ndat)
+ real(dp),target,intent(inout) :: fofg(2*ldx*ldy*ldz*ndat)
+ real(dp),target,intent(inout) :: fofr(cplex*ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -197,7 +197,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
- real(dp), allocatable :: fofrb(:,:,:,:)
+ real(dp),allocatable,target :: fofrb(:,:,:,:)
  logical :: l_use_ndo
 
  real(dp) :: xnorm,one,tmp

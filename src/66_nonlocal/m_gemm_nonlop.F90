@@ -486,7 +486,7 @@ contains
   !$OMP TARGET ENTER DATA MAP(alloc:vectout)  IF(transfer_vectout)
   !$OMP TARGET ENTER DATA MAP(alloc:svectout) IF(transfer_svectout)
 
-  !$OMP TARGET ENTER DATA MAP(to:atindx1,indlmn,enl_) IF(gpu_option==ABI_GPU_OPENMP)
+  !$OMP TARGET ENTER DATA MAP(to:atindx1,indlmn) IF(gpu_option==ABI_GPU_OPENMP)
   if(size(enl_)>0) then
     !$OMP TARGET ENTER DATA MAP(to:enl_) IF(gpu_option==ABI_GPU_OPENMP)
   end if
