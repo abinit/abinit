@@ -1434,6 +1434,17 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  real(dp),allocatable :: d2tmp1(:,:,:),d2tmp2(:,:,:),d2work(:,:,:,:,:)
 ! *********************************************************************
 
+!DEBUG
+ write(std_out,'(a)')' m_dynmat/d2sym3 : enter '
+ call flush(std_out)
+  write(std_out,*)' m_dynmat : mpert=',mpert
+  write(std_out,*)' m_dynmat : timrev=',timrev
+  write(std_out,*)' m_dynmat : blkflg(1,6,1,4)=',blkflg(1,6,1,4)
+  write(std_out,*)' m_dynmat : d2(1:2,1,6,1,4)=',d2(1:2,1,6,1,4)
+  write(std_out,*)' m_dynmat : blkflg(1,4,1,6)=',blkflg(1,4,1,6)
+  write(std_out,*)' m_dynmat : d2(1:2,1,4,1,6)=',d2(1:2,1,4,1,6)
+!ENDDEBUG
+
  qzero=(qpt(1)**2+qpt(2)**2+qpt(3)**2<tol16)
 
 !Here look after exchange of 1 and 2 axis,
@@ -1476,6 +1487,15 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 !Consider two cases : either time-reversal symmetry
 !conserves the wavevector, or not
  if(timrev==0)then
+
+
+!DEBUG
+  write(std_out,*)' m_dynmat : mpert=',mpert
+  write(std_out,*)' m_dynmat : blkflg(1,6,1,4)=',blkflg(1,6,1,4)
+  write(std_out,*)' m_dynmat : d2(1:2,1,6,1,4)=',d2(1:2,1,6,1,4)
+  write(std_out,*)' m_dynmat : blkflg(1,4,1,6)=',blkflg(1,4,1,6)
+  write(std_out,*)' m_dynmat : d2(1:2,1,4,1,6)=',d2(1:2,1,4,1,6)
+!ENDDEBUG
 
   do ipert1=1,mpert !See notes
 !   do ipert1=1,min(natom+2,mpert)
@@ -1683,7 +1703,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
                      end do
                    end if
 
-!                  In case zero_by_symm==0, the computed materix element must be associated to at least one really computed matrix element
+!                  In case zero_by_symm==0, the computed matrix element must be associated to at least one really computed matrix element
                    if(zero_by_symm==0 .and. nblkflg_is_one==0)then
                      found=0
                    endif
@@ -1841,6 +1861,15 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
    ABI_FREE(d2tmp2)
    ABI_FREE(d2work)
  end if
+
+!DEBUG  
+  write(std_out,*)' m_dynmat / d2sym3 : exit'
+  write(std_out,*)' m_dynmat : mpert=',mpert
+  write(std_out,*)' m_dynmat : blkflg(1,6,1,4)=',blkflg(1,6,1,4)
+  write(std_out,*)' m_dynmat : d2(1:2,1,6,1,4)=',d2(1:2,1,6,1,4)
+  write(std_out,*)' m_dynmat : blkflg(1,4,1,6)=',blkflg(1,4,1,6)
+  write(std_out,*)' m_dynmat : d2(1:2,1,4,1,6)=',d2(1:2,1,4,1,6)
+!ENDDEBUG  
 
 end subroutine d2sym3
 !!***
