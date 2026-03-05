@@ -606,8 +606,8 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 Eq. 36 term 1
      call orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,&
-       & suppress_ormesh=.TRUE.)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,trnrm,&
+       & suppress_ormesh=.FALSE.)
 
      ! ZTG23 text after Eq. 42
      nl1_option = 1 ! LR
@@ -1038,7 +1038,7 @@ end subroutine orbmag_nl1_k
 !! SOURCE
 
 subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
-    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,&
+    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,trnrm,&
     & suppress_ormesh)
 
   !Arguments ------------------------------------
@@ -1054,7 +1054,7 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in),target :: cg_k(2,mcgk)
-  real(dp),intent(in) :: eig_k(nband_k)
+  real(dp),intent(in) :: eig_k(nband_k),trnrm(nband_k)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -1062,7 +1062,7 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,
   !scalars
   integer :: adir,bdir,gdir,nn,npwsp
   real(dp) :: epsabg
-  complex(dp) :: prefac_m,txt_d,txt_q
+  complex(dp) :: prefac_m,txt
   logical :: my_suppress_ormesh
   !arrays
   real(dp),pointer :: cwavef(:,:)
@@ -1097,10 +1097,11 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,
          prefac_m = -com*c2*epsabg
 
          call txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,&
-           & nn,mpi_enreg,nband_k,npw_k,orbmag_mesh,innl,pawtab,prefac_m,txt_d,cwaveprj,&
+           & nn,mpi_enreg,nband_k,npw_k,orbmag_mesh,innl,pawtab,prefac_m,txt,&
+           & trnrm(nn),cwaveprj,&
            & suppress_ormesh=my_suppress_ormesh)
        
-         m1(adir) = m1(adir) + txt_d
+         m1(adir) = m1(adir) + txt
 
        end do ! adir
      end do !gdir
@@ -2014,12 +2015,13 @@ end subroutine lamb_core
 !! SOURCE
 
 subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,&
-    & mpi_enreg,nband_k,npw_k,orbmag_mesh,oterm,pawtab,prefac_m,txt,ucprj,&
+    & mpi_enreg,nband_k,npw_k,orbmag_mesh,oterm,pawtab,prefac_m,txt,trnrm,ucprj,&
     & suppress_ormesh)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: adir,bdir,gdir,iband,nband_k,npw_k,oterm
+  real(dp),intent(in) :: trnrm
   complex(dp),intent(in) :: prefac_m
   complex(dp),intent(out) :: txt
   logical,intent(in),optional :: suppress_ormesh
@@ -2053,8 +2055,6 @@ subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,&
   else
     my_suppress_ormesh=.FALSE.
   end if
-  fourwf_cplex = 1
-  fourwf_option = 0
   tim_fourwf = 1
   ndat = 1
   npwsp = npw_k*dtset%nspinor
@@ -2083,6 +2083,8 @@ subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,&
           ABI_MALLOC(fofgin,(2,npwsp))
           fofgin(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+gdir,jlmn,itypat)*cwavef(1,1:npwsp)
           fofgin(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+gdir,jlmn,itypat)*cwavef(2,1:npwsp)
+          fourwf_cplex = 1
+          fourwf_option = 0
           call fourwf(fourwf_cplex,denpot,fofgin,fofgout,fofr,gs_hamk%gbound_k,&
             & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
             & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
@@ -2104,7 +2106,7 @@ subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,&
           if (need_ormesh .AND. iat.EQ.t_atom) then
             jl = pawtab(itypat)%indlmn(1,jlmn)
             il = pawtab(itypat)%indlmn(1,ilmn)
-            ormesh_fac = prefac_m*dij*four_pi*CONJG(j_dpc**il)*four_pi*(j_dpc**jl)
+            ormesh_fac = trnrm*prefac_m*dij*four_pi*CONJG(j_dpc**il)*four_pi*(j_dpc**jl)
             ABI_MALLOC(fofgin,(2,npwsp))
             fofgin(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+bdir,ilmn,itypat)*cwavef(1,1:npwsp)
             fofgin(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+bdir,ilmn,itypat)*cwavef(2,1:npwsp)
