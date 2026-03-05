@@ -1623,14 +1623,6 @@ ABI_NVTX_END_RANGE()
    call ddb%set_qpt(iblok=1, qpt=qphon(1:3))
    call ddb%set_d2matr(1, d2matr, blkflg)
 
-!DEBUG
-  write(std_out,*)' m_respfn_driver : before ddb%write '
-  write(std_out,*)' m_respfn_driver : blkflg(1,6,1,4)=',blkflg(1,6,1,4)
-  write(std_out,*)' m_respfn_driver : d2matr(1:2,1,6,1,4)=',d2matr(1:2,1,6,1,4)
-  write(std_out,*)' m_respfn_driver : blkflg(1,4,1,6)=',blkflg(1,4,1,6)
-  write(std_out,*)' m_respfn_driver : d2matr(1:2,1,4,1,6)=',d2matr(1:2,1,4,1,6)
-!ENDDEBUG  
-
    ! Output dynamical matrix
    call ddb%write(ddb_hdr, dtfil%fnameabo_ddb)
 
@@ -3529,12 +3521,6 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
      end do
    end do
 
-!DEBUG
-  write(std_out,*)' m_respfn_driver : section 1'
-  write(std_out,*)' m_respfn_driver : d2matr(1:2,1,6,1,4)=',d2matr(1:2,1,6,1,4)
-  write(std_out,*)' m_respfn_driver : d2matr(1:2,1,4,1,6)=',d2matr(1:2,1,4,1,6)
-!ENDDEBUG
-
 !  Add the frozen-wavefunction part
    if (dyfr_nondiag==0) then
      do ipert2=1,natom
@@ -3564,13 +3550,6 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
      end do
    end if
 
-!DEBUG
-  write(std_out,*)' m_respfn_driver : section 2'
-  write(std_out,*)' m_respfn_driver : d2matr(1:2,1,6,1,4)=',d2matr(1:2,1,6,1,4)
-  write(std_out,*)' m_respfn_driver : d2matr(1:2,1,4,1,6)=',d2matr(1:2,1,4,1,6)
-!ENDDEBUG
-
-
 !  Add the frozen-wavefunction part of Born Effective Charges
    if (pawbec==1) then
      ipert2=natom+2
@@ -3589,13 +3568,6 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
        end do
      end do
    end if
-
-!DEBUG
-  write(std_out,*)' m_respfn_driver : section 3'
-  write(std_out,*)' m_respfn_driver : d2matr(1:2,1,6,1,4)=',d2matr(1:2,1,6,1,4)
-  write(std_out,*)' m_respfn_driver : d2matr(1:2,1,4,1,6)=',d2matr(1:2,1,4,1,6)
-!ENDDEBUG
-
 
 !  Section for piezoelectric tensor (from electric field response only for PAW)
 !  if(rfpert(natom+2)==1.and.pawpiezo==1) then
@@ -3617,14 +3589,6 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
        end do
      end do
    end if
-
-!DEBUG
-  write(std_out,*)' m_respfn_driver : section 4'
-  write(std_out,*)' m_respfn_driver : pawpiezo=',pawpiezo
-  write(std_out,*)' m_respfn_driver : d2matr(1:2,1,6,1,4)=',d2matr(1:2,1,6,1,4)
-  write(std_out,*)' m_respfn_driver : d2matr(1:2,1,4,1,6)=',d2matr(1:2,1,4,1,6)
-!ENDDEBUG
-
 
 !  Section for strain perturbation
    if(rfpert(natom+3)==1 .or. rfpert(natom+4)==1) then
@@ -3691,12 +3655,6 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
 !  End section for strain perturbation
 
 !  The second-order matrix has been computed.
-
-!DEBUG
-  write(std_out,*)' m_respfn_driver / dfpt_gatherdy the second-order matrix has been computed '
-  write(std_out,*)' m_respfn_driver : d2matr(1:2,1,6,1,4)=',d2matr(1:2,1,6,1,4)
-  write(std_out,*)' m_respfn_driver : d2matr(1:2,1,4,1,6)=',d2matr(1:2,1,4,1,6)
-!ENDDEBUG
 
 !  Filter now components smaller in absolute value than 1.0d-20,
 !  for automatic testing reasons
@@ -3917,13 +3875,6 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
 !end do
 !end do
 !ENDDEBUG
-
-!DEBUG 
-  write(std_out,*)' m_respfn_driver : exit dfpt_gatherdy'
-  write(std_out,*)' m_respfn_driver : d2matr(1:2,1,6,1,4)=',d2matr(1:2,1,6,1,4)
-  write(std_out,*)' m_respfn_driver : d2matr(1:2,1,4,1,6)=',d2matr(1:2,1,4,1,6)
-!ENDDEBUG
-
 
 end subroutine dfpt_gatherdy
 !!***

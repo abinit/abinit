@@ -1434,17 +1434,6 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  real(dp),allocatable :: d2tmp1(:,:,:),d2tmp2(:,:,:),d2work(:,:,:,:,:)
 ! *********************************************************************
 
-!DEBUG
- write(std_out,'(a)')' m_dynmat/d2sym3 : enter '
- call flush(std_out)
-  write(std_out,*)' m_dynmat : mpert=',mpert
-  write(std_out,*)' m_dynmat : timrev=',timrev
-  write(std_out,*)' m_dynmat : blkflg(1,6,1,4)=',blkflg(1,6,1,4)
-  write(std_out,*)' m_dynmat : d2(1:2,1,6,1,4)=',d2(1:2,1,6,1,4)
-  write(std_out,*)' m_dynmat : blkflg(1,4,1,6)=',blkflg(1,4,1,6)
-  write(std_out,*)' m_dynmat : d2(1:2,1,4,1,6)=',d2(1:2,1,4,1,6)
-!ENDDEBUG
-
  qzero=(qpt(1)**2+qpt(2)**2+qpt(3)**2<tol16)
 
 !Here look after exchange of 1 and 2 axis,
@@ -1487,15 +1476,6 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 !Consider two cases : either time-reversal symmetry
 !conserves the wavevector, or not
  if(timrev==0)then
-
-
-!DEBUG
-  write(std_out,*)' m_dynmat : mpert=',mpert
-  write(std_out,*)' m_dynmat : blkflg(1,6,1,4)=',blkflg(1,6,1,4)
-  write(std_out,*)' m_dynmat : d2(1:2,1,6,1,4)=',d2(1:2,1,6,1,4)
-  write(std_out,*)' m_dynmat : blkflg(1,4,1,6)=',blkflg(1,4,1,6)
-  write(std_out,*)' m_dynmat : d2(1:2,1,4,1,6)=',d2(1:2,1,4,1,6)
-!ENDDEBUG
 
   do ipert1=1,mpert !See notes
 !   do ipert1=1,min(natom+2,mpert)
@@ -1861,15 +1841,6 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
    ABI_FREE(d2tmp2)
    ABI_FREE(d2work)
  end if
-
-!DEBUG  
-  write(std_out,*)' m_dynmat / d2sym3 : exit'
-  write(std_out,*)' m_dynmat : mpert=',mpert
-  write(std_out,*)' m_dynmat : blkflg(1,6,1,4)=',blkflg(1,6,1,4)
-  write(std_out,*)' m_dynmat : d2(1:2,1,6,1,4)=',d2(1:2,1,6,1,4)
-  write(std_out,*)' m_dynmat : blkflg(1,4,1,6)=',blkflg(1,4,1,6)
-  write(std_out,*)' m_dynmat : d2(1:2,1,4,1,6)=',d2(1:2,1,4,1,6)
-!ENDDEBUG  
 
 end subroutine d2sym3
 !!***
@@ -5872,9 +5843,7 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
                ip= jdir + (jatom-1)*3 + (idir-1)*3*natom + (iatom-1)*9*natom
                ! Real and imaginary part of the interatomic forces
                gam_qpt(1,ip,iqpt) = gam_qpt(1,ip,iqpt) + re*gam_rpt(1,ip,irpt) - im*gam_rpt(2,ip,irpt)
-               !DEBUG
                gam_qpt(2,ip,iqpt) = gam_qpt(2,ip,iqpt) + im*gam_rpt(1,ip,irpt) + re*gam_rpt(2,ip,irpt)
-               !ENDDEBUG
              end do ! end jdir
            end do ! end idir
          end do
