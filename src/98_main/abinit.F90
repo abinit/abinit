@@ -251,10 +251,6 @@ program abinit
 
  call wrtout(std_out, ' abinit : after writing the name of files ','PERS')
 
-!DEBUG
- write(std_out,*)' COUCOU '
-!ENDDEBUG
-
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
 
