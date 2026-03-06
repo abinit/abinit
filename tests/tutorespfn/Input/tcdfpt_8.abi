@@ -124,9 +124,9 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% max_nprocs = 12
 #%% [extra_info]
 #%% authors = M. Royo
-#%% keywords = DFPT
+#%% keywords = CDFPT
 #%% description = Noncolinear ground state and response functions for MnF2 at finite q
-#%% topics = DFPT
+#%% topics = ConstrainedDFPT
 #%%<END TEST_INFO>
 
 
