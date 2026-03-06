@@ -378,7 +378,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  if(gs_ham%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
  transfer_ghc =  .not. xomp_target_is_present(c_loc(ghc))
- transfer_gsc =  .not. xomp_target_is_present(c_loc(gsc))
+ transfer_gsc =  .not. xomp_target_is_present(c_loc(gsc)) .and. sij_opt==1
  transfer_gvnlxc =  .not. xomp_target_is_present(c_loc(gvnlxc_))
  transfer_cwavef =  .not. xomp_target_is_present(c_loc(cwavef))
 
