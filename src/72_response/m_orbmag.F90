@@ -1274,7 +1274,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
          
          if (need_ormesh) then
            ! this factor needs further study, feel like it should be +1 not -1
-           mfac=CMPLX(-one,zero)
+           mfac=CMPLX(one,zero)
            call orbmag_mesh%accum_rmesh(adir,bra,fofr,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
              & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,incc,&
              & mult_fact=mfac)
@@ -1368,7 +1368,7 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
   integer :: adir,bdir,choice,cpopt,fourwf_cplex,fourwf_option,gdir,iatom,ndat,nn,nnlout,np,npwsp
   integer :: paw_opt,signs,t_atom,tim_fourwf,tim_getghc
   real(dp) :: epsabg,weight_i,weight_r
-  complex(dp) :: bdotc,bpdotc,eig_shift,gdotc,gpdotc
+  complex(dp) :: bdotc,bpdotc,eig_shift,gdotc,gpdotc,mfac
   complex(dp) :: prefac_b,prefac_m
   logical :: my_suppress_ormesh,need_ormesh
   !arrays
@@ -1489,6 +1489,8 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
 
          if (need_ormesh) then
            eig_shift = CMPLX(eig_k(nn)-fermie,zero)
+           mfac=CMPLX(one,zero)
+           eig_shift = eig_shift*mfac
            call orbmag_mesh%accum_rmesh(adir,brab,fofrg,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
              & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,invv1,&
              & mult_fact=eig_shift,conjg_flag=.FALSE.)
