@@ -1,5 +1,5 @@
 
-.Version 10.5.8.2 of ABINIT, released Oct 2025.
+.Version 10.6.4.5 of ABINIT, released Dec 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h07 )
+.Starting date : Wed  4 Mar 2026.
+- ( at 12h40 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorial_tpositron_7/tpositron_7.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/TestBot_MPI1/tutorial_tpositron_7/tpositron_7.abi
 - output file    -> tpositron_7.abo
 - root for input  files -> tpositron_7i
 - root for output files -> tpositron_7o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Si_paw_pw_12el.xml
+-   /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/Si_paw_pw_12el.xml
  Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -191,9 +191,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.05836
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Si_paw_pw_12el.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Si_paw_pw_12el.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/Si_paw_pw_12el.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/Si_paw_pw_12el.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/Si_paw_pw_12el.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/baguetl_fix-nhat-fft/tests/Pspdir/Si_paw_pw_12el.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 12), orbitals=   0   0   0   1   1   1
  Spheres core radius: rc_sph= 1.60149249
@@ -234,22 +234,22 @@ TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION
  ETOT  6  -204.31753230237     6.560E-05 5.293E-10 6.233E-05
  ETOT  7  -204.31753176883     5.335E-07 7.690E-12 4.450E-06
  ETOT  8  -204.31753171892     4.990E-08 2.056E-13 5.364E-09
- ETOT  9  -204.31753171893    -6.338E-12 1.189E-17 1.295E-09
- ETOT 10  -204.31753171892     7.219E-12 2.033E-17 5.989E-12
+ ETOT  9  -204.31753171893    -6.764E-12 1.189E-17 1.295E-09
+ ETOT 10  -204.31753171892     7.674E-12 2.033E-17 5.989E-12
 
  At SCF step   10       nres2   =  5.99E-12 < tolvrs=  1.00E-10 =>converged.
 
 TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS AND IONS
- ETOT 11  -204.66259421507    -3.451E-01 6.067E+00 8.808E-02
- ETOT 12  -204.67754204327    -1.495E-02 6.778E-02 4.663E-02
- ETOT 13  -204.67768089492    -1.389E-04 4.652E-04 1.861E-04
- ETOT 14  -204.67756277932     1.181E-04 4.417E-06 7.528E-05
- ETOT 15  -204.67755541053     7.369E-06 3.952E-07 2.849E-07
- ETOT 16  -204.67755541058    -5.184E-11 1.086E-09 7.317E-09
- ETOT 17  -204.67755541058    -1.137E-13 1.331E-15 9.031E-10
- ETOT 18  -204.67755541058     0.000E+00 4.776E-19 1.586E-13
+ ETOT 11  -204.66259422158    -3.451E-01 6.067E+00 8.808E-02
+ ETOT 12  -204.67754243982    -1.495E-02 6.776E-02 4.664E-02
+ ETOT 13  -204.67768157788    -1.391E-04 5.743E-05 1.876E-04
+ ETOT 14  -204.67756280753     1.188E-04 4.505E-06 7.568E-05
+ ETOT 15  -204.67755541055     7.397E-06 7.854E-07 2.980E-07
+ ETOT 16  -204.67755541058    -2.584E-11 2.859E-12 8.558E-09
+ ETOT 17  -204.67755541058    -2.842E-14 5.810E-14 1.038E-09
+ ETOT 18  -204.67755541058     0.000E+00 6.832E-19 2.291E-13
 
- At SCF step   18       nres2   =  1.59E-13 < tolvrs=  1.00E-10 =>converged.
+ At SCF step   18       nres2   =  2.29E-13 < tolvrs=  1.00E-10 =>converged.
 
  scprqt:  WARNING -
   posnstep=    2 was not enough SCF cycles to converge difference between
@@ -266,7 +266,7 @@ lattice_vectors:
 lattice_lengths: [   7.25577,    7.25577,    7.25577, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7010716E+02
-convergence: {deltae:  0.000E+00, res2:  1.586E-13, residm:  4.776E-19, diffor:  0.000E+00, }
+convergence: {deltae:  0.000E+00, res2:  2.291E-13, residm:  6.832E-19, diffor:  0.000E+00, }
 etotal    :  -2.04677555E+02
 entropy   :   0.00000000E+00
 fermie    :  -3.04042706E-01
@@ -288,8 +288,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.000117703363876
- Compensation charge over fine fft grid    =      0.000117752055303
+ Compensation charge over spherical meshes =      0.000117702058997
+ Compensation charge over fine fft grid    =      0.000117752055291
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -418,13 +418,13 @@ force_length_stats: {min: null, max: null, mean: null, }
 -Use ~abinit/scripts/post_processing/posdopspectra.F90 to process it.
 
  Annihilation rate obtained from integration of e-p pairs momentum distribution:
-   lambda=    5.083152776637E+00 ns-1
+   lambda=    5.083152776656E+00 ns-1
 
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   83.177E-21; max=  47.758E-20
+ Mean square residual over all n,k,spin=   90.874E-21; max=  68.319E-20
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -448,25 +448,25 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  7.02123799026955E+00
-hartree             :  5.84369299010484E+01
-xc                  : -3.25227044972454E+00
+kinetic             :  7.02123799026973E+00
+hartree             :  5.84369299010511E+01
+xc                  : -3.25227044972481E+00
 Ewald energy        : -7.55952467473022E+01
 psp_core            :  1.70689276751210E+00
-local_psp           : -1.71891659092241E+02
-PAW spherical_terms : -2.07434169289910E+01
-electronic          : -2.04317532559428E+02
-positronic          : -9.45391322490733E-01
-electron_positron_interaction:  5.85367630835670E-01
-total_energy        : -2.04677556251083E+02
-total_energy_eV     : -5.56956003903173E+03
+local_psp           : -1.71891659092242E+02
+PAW spherical_terms : -2.07434169289936E+01
+electronic          : -2.04317532559430E+02
+positronic          : -9.45391108919484E-01
+electron_positron_interaction:  5.85367417264528E-01
+total_energy        : -2.04677556251085E+02
+total_energy_eV     : -5.56956003903177E+03
 ...
 
 
 --- !EnergyTermsWithPAWCore
 iteration_state     : {dtset: 1, }
 comment             : 'Components of total free energy, including PAW core contributions'
-Total energy        : -5.78339885428029E+02
+Total energy        : -5.78339885428030E+02
 Total energy (eV)   : -1.57374300038385E+04
 ...
 
@@ -623,7 +623,25 @@ P           mkmem           8
 - Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
 -
-- [4] The Abinit project: Impact, environment and recent developments.
+- [4] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
+- J. Chem. Phys. 163, 164126 (2025).
+- M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,
+- M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,
+- J. Bieder, A. Blanchet, F. Bottin, J. Bouchet, J. Bouquiaux, E. Bousquet,
+- J. Boust, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval,
+- A. Castellano, E. Castiel, J.-B. Charraud, J. Clerouin, M. Cote, C. Duval,
+- A. Gallo, F. Gendron, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras,
+- F. Gomez-Ortiz, X. Gonze, F. Goudreault, A. Gruneis, R. Gupta, B. Guster,
+- D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
+- I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
+- Comment: the sixth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025
+-
+- [5] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -636,49 +654,33 @@ P           mkmem           8
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [5] ABINIT: Overview, and focus on selected capabilities
-- J. Chem. Phys. 152, 124102 (2020).
-- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
-- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
-- G.Brunin, D.Caliste, M.Cote,
-- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
-- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin, 
-- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
-- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
-- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- [6] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys 
-- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- is available at
+-  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [6] Recent developments in the ABINIT software package.
-- Computer Phys. Comm. 205, 106 (2016).
-- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
-- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
-- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
-- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
-- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
-- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
-- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
-- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
-- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
-- The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
--
-- Proc.   0 individual time (sec): cpu=         62.3  wall=         62.4
+- Proc.   0 individual time (sec): cpu=         58.7  wall=         58.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  19 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         62.3  wall=         62.4
++Overall time at end (sec) : cpu=         58.7  wall=         58.8
