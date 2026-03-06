@@ -1194,37 +1194,69 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          ! OpenMP GPU
 #ifdef HAVE_OPENMP_OFFLOAD
          if (k1_eq_k2) then
-           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef)
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,kinpw_k2,gvnlxc_,cwavef)
            do idat=1,ndat
              do ispinor=1,my_nspinor
                !$OMP PARALLEL DO PRIVATE(igspinor)
                do ig=1,npw_k2
                  igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
                  if(kinpw_k2(ig)<huge(zero)*1.d-11)then
-                   ghc(:,igspinor) = ghc(:,igspinor) + kinpw_k2(ig)*cwavef(:,igspinor) + gvnlxc_(:,igspinor)
+                   ghc(1,igspinor) = ghc(1,igspinor) + kinpw_k2(ig)*cwavef(1,igspinor) + gvnlxc_(1,igspinor)
+                   ghc(2,igspinor) = ghc(2,igspinor) + kinpw_k2(ig)*cwavef(2,igspinor) + gvnlxc_(2,igspinor)
                  else
-                   ghc(:,igspinor)=zero
-                   if (sij_opt==1) gsc(:,igspinor)=zero
+                   ghc(1,igspinor)=zero
+                   ghc(2,igspinor)=zero
                  end if
                end do ! ig
              end do ! ispinor
            end do ! idat
+           if(sij_opt==1) then
+             !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:gsc,kinpw_k2)
+             do idat=1,ndat
+               do ispinor=1,my_nspinor
+                 !$OMP PARALLEL DO PRIVATE(igspinor)
+                 do ig=1,npw_k2
+                   igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+                   if(kinpw_k2(ig)>=huge(zero)*1.d-11)then
+                     gsc(1,igspinor) = zero
+                     gsc(2,igspinor) = zero
+                   end if
+                 end do ! ig
+               end do ! ispinor
+             end do ! idat
+           end if
          else
-           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,gvnlxc_,gsc,kinpw_k2)
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,gvnlxc_,kinpw_k2)
            do idat=1,ndat
              do ispinor=1,my_nspinor
                !$OMP PARALLEL DO PRIVATE(igspinor)
                do ig=1,npw_k2
                  igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
                  if(kinpw_k2(ig)<huge(zero)*1.d-11)then
-                   ghc(:,igspinor)= ghc(:,igspinor) + gvnlxc_(:,igspinor)
+                   ghc(1,igspinor)= ghc(1,igspinor) + gvnlxc_(1,igspinor)
+                   ghc(2,igspinor)= ghc(2,igspinor) + gvnlxc_(2,igspinor)
                  else
-                   ghc(:,igspinor)=zero
-                   if (sij_opt==1) gsc(:,igspinor)=zero
+                   ghc(1,igspinor)=zero
+                   ghc(2,igspinor)=zero
                  end if
                end do ! ig
              end do ! ispinor
            end do ! idat
+           if(sij_opt==1) then
+             !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:gsc,kinpw_k2)
+             do idat=1,ndat
+               do ispinor=1,my_nspinor
+                 !$OMP PARALLEL DO PRIVATE(igspinor)
+                 do ig=1,npw_k2
+                   igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
+                   if(kinpw_k2(ig)>=huge(zero)*1.d-11)then
+                     gsc(1,igspinor)=zero
+                     gsc(2,igspinor)=zero
+                   end if
+                 end do ! ig
+               end do ! ispinor
+             end do ! idat
+           end if
          end if
 #endif
 
