@@ -21,8 +21,11 @@ rprim 0.0 1/2 1/2
 nband 50
 occopt 7  tsmear 0.015
 
+# use lobpcg (better convergence)
+wfoptalg 114
+
 # === SCF cycle options
-nstep 6  tolvrs 1.d-7
+nstep 8  tolvrs 1.d-7
 ecut 8. pawecutdg 10.
 diemix 0.5
 
@@ -54,6 +57,7 @@ pawprtvol 3
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_FFTW3 or HAVE_DFTI
 #%% [files]
 #%% files_to_test =
 #%%   t79.abo, tolnlines = 28, tolabs = 1.1e-05, tolrel = 8.0e-05, fld_options = -medium
