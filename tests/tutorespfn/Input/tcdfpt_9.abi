@@ -106,9 +106,9 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% max_nprocs = 12
 #%% [extra_info]
 #%% authors = M. Royo
-#%% keywords = DFPT
+#%% keywords = CDFPT
 #%% description = Berry curvatures calculation for adiabatic dynamics of MnF2
-#%% topics = DFPT
+#%% topics = ConstrainedDFPT
 #%%<END TEST_INFO>
 
 
