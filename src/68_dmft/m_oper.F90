@@ -466,6 +466,7 @@ subroutine copy_oper_from_ndat(oper1,oper2,ndat,nw,proct,me_freq,copy_ks)
  mbandc=oper1%mbandc
  if(oper1%has_opermatlu==1 .and. oper1%gpu_option==ABI_GPU_OPENMP) then
    do iatom=1,oper1%natom
+     if (oper1%matlu(iatom)%lpawu == -1) cycle
      mat => oper1%matlu(iatom)%mat ! array of structs in OpenMP loosely supported
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(mat)
@@ -545,6 +546,7 @@ subroutine copy_oper_to_ndat(oper1,oper2,ndat,nw,proct,me_freq,copy_ks)
  enddo
  if(oper2%has_opermatlu==1 .and. oper2%gpu_option==ABI_GPU_OPENMP) then
    do iatom=1,oper2%natom
+     if (oper2%matlu(iatom)%lpawu == -1) cycle
      mat => oper2%matlu(iatom)%mat ! array of structs in OpenMP loosely supported
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE TO(mat)
