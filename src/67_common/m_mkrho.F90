@@ -455,16 +455,16 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                    ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
                    if(gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-                     ABI_MALLOC_MANAGED(cwavef_x, (/2,npw_k*ndat/))
-                     ABI_MALLOC_MANAGED(cwavef_y, (/2,npw_k*ndat/))
-                     ABI_MALLOC_MANAGED(cwavefb_x,(/2,npw_k*ndat*paw_dmft%use_sc_dmft/))
-                     ABI_MALLOC_MANAGED(cwavefb_y,(/2,npw_k*ndat*paw_dmft%use_sc_dmft/))
+                     ABI_MALLOC_MANAGED(cwavef_x, (/2,npw_k*nband_occ/))
+                     ABI_MALLOC_MANAGED(cwavef_y, (/2,npw_k*nband_occ/))
+                     ABI_MALLOC_MANAGED(cwavefb_x,(/2,npw_k*nband_occ*paw_dmft%use_sc_dmft/))
+                     ABI_MALLOC_MANAGED(cwavefb_y,(/2,npw_k*nband_occ*paw_dmft%use_sc_dmft/))
 #endif
                    else
-                     ABI_MALLOC(cwavef_x,(2,npw_k*ndat))
-                     ABI_MALLOC(cwavef_y,(2,npw_k*ndat))
-                     ABI_MALLOC(cwavefb_x,(2,npw_k*ndat*paw_dmft%use_sc_dmft))
-                     ABI_MALLOC(cwavefb_y,(2,npw_k*ndat*paw_dmft%use_sc_dmft))
+                     ABI_MALLOC(cwavef_x,(2,npw_k*nband_occ))
+                     ABI_MALLOC(cwavef_y,(2,npw_k*nband_occ))
+                     ABI_MALLOC(cwavefb_x,(2,npw_k*nband_occ*paw_dmft%use_sc_dmft))
+                     ABI_MALLOC(cwavefb_y,(2,npw_k*nband_occ*paw_dmft%use_sc_dmft))
                    end if
                    ! $(\Psi^{1}+\Psi^{2})$
                    cwavef_x(:,:)=cwavef(:,1:npw_k*nband_occ,1)+cwavef(:,1:npw_k*nband_occ,2)
