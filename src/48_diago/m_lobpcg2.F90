@@ -707,7 +707,7 @@ module m_lobpcg2
       if ( lobpcg%paral_kgb == 1 ) then
         call xgTransposer_constructor(lobpcg%xgTransposerAllX0,lobpcg%AllX0,lobpcg%AllX0ColsRows,nspinor,&
           STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0,lobpcg%me_g0_fft,&
-          gpu_option=lobpcg%gpu_option)
+          gpu_option=lobpcg%gpu_option,gpu_thread_limit=lobpcg%gpu_thread_limit)
         call xgTransposer_copyConstructor(lobpcg%xgTransposerAllAX0,lobpcg%xgTransposerAllX0,&
           lobpcg%AllAX0%self,lobpcg%AllAX0ColsRows,STATE_LINALG)
         call xgTransposer_copyConstructor(lobpcg%xgTransposerAllBX0,lobpcg%xgTransposerAllX0,&
