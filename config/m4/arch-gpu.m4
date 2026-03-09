@@ -433,7 +433,17 @@ AC_DEFUN([_ABI_GPU_CHECK_HIP],[
   fi
 
   if test "${abi_gpu_markers_enable}" = "yes"; then
-    if test -e "${abi_gpu_hip_libdir}/libroctx64.${abi_so_ext}"; then
+    # Look for newer rocProfiler API (ROCm ≥ 6.2.0)
+    if test -e "${abi_gpu_hip_libdir}/librocprofiler-sdk-roctx.${abi_so_ext}"; then
+      # always add link flags to roctx if available
+      if test "${GPU_LIBS}" = "" -a "${ROCM_LIBS}" = ""; then
+        abi_gpu_hip_libs="-lrocprofiler-sdk-roctx ${abi_gpu_hip_libs}"
+      else
+        abi_gpu_hip_libs="${abi_gpu_hip_libs} -lrocprofiler-sdk-roctx"
+      fi
+      abi_gpu_roctx="yes"
+      abi_result="${abi_result} roctx"
+    elif test -e "${abi_gpu_hip_libdir}/libroctx64.${abi_so_ext}"; then
       # always add link flags to roctx if available
       if test "${GPU_LIBS}" = "" -a "${ROCM_LIBS}" = ""; then
         abi_gpu_hip_libs="-lroctx64 ${abi_gpu_hip_libs}"
@@ -443,7 +453,7 @@ AC_DEFUN([_ABI_GPU_CHECK_HIP],[
       abi_gpu_roctx="yes"
       abi_result="${abi_result} roctx"
     else
-      AC_MSG_ERROR([AMD ROCtx: ${abi_gpu_hip_libdir}/libroctx64.${abi_so_ext} not found])
+      AC_MSG_ERROR([AMD ROCtx: ${abi_gpu_hip_libdir}/lib{rocprofiler-sdk-roctx,roctx64}.${abi_so_ext} not found])
     fi
   fi
 

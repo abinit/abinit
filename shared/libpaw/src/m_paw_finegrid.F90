@@ -1078,10 +1078,8 @@ subroutine pawrfgd_fft(ifftsph,gmet,n1,n2,n3,nfgd,rcut,rfgd,rprimd,ucvol,xred, &
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: ishift=15
  integer :: i1,i2,i3,ifft_local,ix,iy,iz,izloc,me_fft_,n1a,n1b,n2a,n2b,n3a,n3b,ncmax
- real(dp),parameter :: delta=0.99_dp
- real(dp) :: difx,dify,difz,rr1,rr2,rr3,r2,r2cut,rx,ry,rz
+ real(dp) :: dif,difx,dify,difz,rr1,rr2,rr3,r2,r2cut,rx,ry,rz
  character(len=500) :: msg
 !arrays
  integer,allocatable :: ifftsph_tmp(:)
@@ -1095,12 +1093,30 @@ subroutine pawrfgd_fft(ifftsph,gmet,n1,n2,n3,nfgd,rcut,rfgd,rprimd,ucvol,xred, &
  rr1=sqrt(r2cut*gmet(1,1))
  rr2=sqrt(r2cut*gmet(2,2))
  rr3=sqrt(r2cut*gmet(3,3))
- n1a=int((xred(1)-rr1+ishift)*n1+delta)-ishift*n1
- n1b=int((xred(1)+rr1+ishift)*n1      )-ishift*n1
- n2a=int((xred(2)-rr2+ishift)*n2+delta)-ishift*n2
- n2b=int((xred(2)+rr2+ishift)*n2      )-ishift*n2
- n3a=int((xred(3)-rr3+ishift)*n3+delta)-ishift*n3
- n3b=int((xred(3)+rr3+ishift)*n3      )-ishift*n3
+
+ !Computing lower bounds of the box
+ !If dif<0, int(dif*n) will give an integer above what we want, so we subtract one
+ dif=xred(1)-rr1
+ n1a=int(dif*n1)+1
+ if (dif<0) n1a = n1a-1
+ dif=xred(2)-rr2
+ n2a=int(dif*n2)+1
+ if (dif<0) n2a = n2a-1
+ dif=xred(3)-rr3
+ n3a=int(dif*n3)+1
+ if (dif<0) n3a = n3a-1
+
+ !Computing upper bounds of the box
+ !If dif>0, int(dif*n) will give an integer below what we want, so we add one
+ dif=xred(1)+rr1
+ n1b=int(dif*n1)+1
+ if (dif>0) n1b = n1b+1
+ dif=xred(2)+rr2
+ n2b=int(dif*n2)+1
+ if (dif>0) n2b = n2b+1
+ dif=xred(3)+rr3
+ n3b=int(dif*n3)+1
+ if (dif>0) n3b = n3b+1
 
 !Get the distrib associated with this fft_grid
  if (present(fft_distrib).and.present(fft_index).and.present(me_fft)) then
@@ -1122,15 +1138,31 @@ subroutine pawrfgd_fft(ifftsph,gmet,n1,n2,n3,nfgd,rcut,rfgd,rprimd,ucvol,xred, &
 
 !Loop over FFT points
  do i3=n3a,n3b
-   iz=mod(i3+ishift*n3,n3)
+   iz=modulo(i3,n3)
+   if (iz<0.or.iz>n3-1) then
+     msg='iz<0 or iz>n3-1'
+     LIBPAW_ERROR(msg)
+   end if
    if (fft_distrib_(iz+1)==me_fft_) then
      izloc=fft_index_(iz+1) - 1
+     if (izloc<0.or.izloc>n3-1) then
+       msg='izloc<0 or izloc>n3-1'
+       LIBPAW_ERROR(msg)
+     end if
      difz=dble(i3)/dble(n3)-xred(3)
      do i2=n2a,n2b
-       iy=mod(i2+ishift*n2,n2)
+       iy=modulo(i2,n2)
+       if (iy<0.or.iy>n2-1) then
+         msg='iy<0 or iy>n2-1'
+         LIBPAW_ERROR(msg)
+       end if
        dify=dble(i2)/dble(n2)-xred(2)
        do i1=n1a,n1b
-         ix=mod(i1+ishift*n1,n1)
+         ix=modulo(i1,n1)
+         if (ix<0.or.ix>n1-1) then
+           msg='ix<0 or ix>n1-1'
+           LIBPAW_ERROR(msg)
+         end if
          difx=dble(i1)/dble(n1)-xred(1)
 
 !        Compute r-R
@@ -1142,6 +1174,10 @@ subroutine pawrfgd_fft(ifftsph,gmet,n1,n2,n3,nfgd,rcut,rfgd,rprimd,ucvol,xred, &
 !        Select matching points
          if (r2 <= r2cut) then
            ifft_local=1+ix+n1*(iy+n2*izloc)
+           if (ifft_local<1.or.ifft_local>n1*n2*n3) then
+             msg='ifft_local<1 or ifft_local>n1*n2*n3'
+             LIBPAW_ERROR(msg)
+           end if
            if (ifft_local>0) then
              nfgd=nfgd+1
              if (nfgd>ncmax) then
