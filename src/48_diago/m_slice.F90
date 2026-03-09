@@ -656,6 +656,17 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     ! Run on all ranks of spacecom: Mark my slice task and resources as actively in use
     call slice_markActiveTask(slice)
 
+    ! todo ok so normally here when tasks have been allocated we should sketch using G
+    ! of size nxk where k is the estimated rank of the eigenspace. Then we also sketch Omega nxp
+    ! with p oversampling. When applying the filter we should also restart while a condition is
+    ! satisfied. This condition can be: if the Ritz value is outside the slice for some
+    ! offset then we consider the slice is full and we can stop. One possibility is 
+    ! r = F(A)q - q. In the idea that F(A)q ~ q is q is already is the subspace.
+    ! the thing is that I don't store q because I apply F(A) in place and overwrite q.
+    ! Idea is to measure energy change which is ||F(A)Q||^2. If the change between two iterations is
+    ! small then it means that applying the filter does not capture more eigenvectors therefore
+    ! it is enough.
+
     ! ===================== Allocate and fill extended memory buffer ================================== 
   
     ! Sanity check
