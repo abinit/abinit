@@ -283,8 +283,8 @@ subroutine ingeo (acell,amu,atndlist,bravais,chrgat,dtset,field_red,field_red_ax
 end if
 
 do ii = 1, 3
-  if (norm2(dtset%hspinfield) > tol8) then
-    field_red_axial(ii) = dot_product(dtset%hspinfield(:), gprimd(:, ii))
+  if (norm2(dtset%hspinfield_cart) > tol8) then
+    field_red_axial(ii) = dot_product(dtset%hspinfield_cart(:), gprimd(:, ii))
   end if
 end do
 
