@@ -1509,6 +1509,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  end if
 
 !Read the hspinfield
+ field_loc(:) = zero; field_cart(:) = zero
+ hloc(:,1) = zero; hcart(:,1) = zero
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'hspinfield',tread,'BFI')
  if(tread==0) then
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
