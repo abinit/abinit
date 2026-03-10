@@ -65,4 +65,5 @@ inp_files = [
     "t109.abi",  # Test paw_add_core variable
     "t110.abi",  # Test for toldmag
     "t121.abi",  # Test for hybrid function using fock_icutcoul, fock_rcut
+    "t122.abi",  # Test meta-GGA NC pseudopotential reading: compare PSML vs UPF for bulk Si
 ]
