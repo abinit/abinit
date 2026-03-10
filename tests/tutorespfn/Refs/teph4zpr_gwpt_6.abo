@@ -57,6 +57,7 @@ _ WF disk file :      7.961 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
          ecutsigx      3.50000000E+01 Hartree
           ecutwfn      3.50000000E+01 Hartree
 -          fftalg         312
+       gw_qprange          -4
            istwfk        2    0    3    0    0    0    7    0
               ixc          11
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -296,12 +297,199 @@ QP_gap     :    6.528
 Delta_QP_KS:    2.049
 data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1 -68.031 -34.373 -58.114  14.685   0.227  -3.411 -36.426  -2.053 -70.084
+        2 -34.759 -32.313 -45.678   6.553   0.825  -0.212 -37.935  -5.622 -40.382
+        3 -34.759 -32.313 -45.678   6.553   0.825  -0.212 -37.935  -5.622 -40.382
+        4 -34.759 -32.313 -45.678   6.553   0.825  -0.212 -37.935  -5.622 -40.382
+        5 -12.564 -18.528 -30.572   9.385   0.808  -0.238 -20.676  -2.148 -14.711
         6   4.490 -20.036 -25.441   4.181   0.803  -0.246 -21.019  -0.983   3.507
         7   4.490 -20.036 -25.441   4.181   0.803  -0.246 -21.019  -0.983   3.507
         8   4.490 -20.036 -25.441   4.181   0.803  -0.246 -21.019  -0.983   3.507
         9   8.969 -13.280  -8.623  -3.404   0.851  -0.175 -12.214   1.066  10.035
+       10  20.266  -9.448  -3.582  -4.484   0.839  -0.191  -8.288   1.160  21.426
+       11  20.266  -9.448  -3.582  -4.484   0.839  -0.191  -8.288   1.160  21.426
+       12  20.266  -9.448  -3.582  -4.484   0.839  -0.191  -8.288   1.160  21.426
 ...
 
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
+kpoint     : [   0.250,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    7.167
+QP_gap     :    9.575
+Delta_QP_KS:    2.408
+data: !SigmaeeData |
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1 -68.027 -34.379 -58.121  13.312   0.300  -2.330 -37.511  -3.132 -71.159
+        2 -34.802 -32.236 -45.610   6.591   0.896  -0.116 -38.313  -6.077 -40.878
+        3 -34.767 -32.308 -45.674   6.535   0.806  -0.241 -37.813  -5.504 -40.271
+        4 -34.767 -32.308 -45.674   6.535   0.806  -0.241 -37.813  -5.504 -40.271
+        5 -11.991 -19.104 -31.060   9.107   0.723  -0.382 -21.165  -2.062 -14.053
+        6   1.897 -17.009 -22.873   4.048   0.802  -0.247 -18.465  -1.456   0.441
+        7   4.171 -19.629 -25.150   4.204   0.802  -0.246 -20.685  -1.056   3.114
+        8   4.171 -19.629 -25.150   4.204   0.802  -0.246 -20.685  -1.056   3.114
+        9  11.338 -14.128  -9.025  -3.502   0.844  -0.184 -12.776   1.352  12.690
+       10  16.931 -11.577  -5.583  -4.320   0.844  -0.185 -10.165   1.412  18.343
+       11  20.998 -10.522  -4.264  -4.567   0.875  -0.142  -9.042   1.481  22.479
+       12  20.998 -10.522  -4.264  -4.567   0.875  -0.142  -9.042   1.481  22.479
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
+kpoint     : [   0.500,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    8.360
+QP_gap     :   10.632
+Delta_QP_KS:    2.273
+data: !SigmaeeData |
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1 -68.023 -34.386 -58.128  11.974   0.221  -3.526 -36.986  -2.600 -70.623
+        2 -34.834 -32.152 -45.533   6.373   0.742  -0.348 -37.349  -5.197 -40.031
+        3 -34.769 -32.300 -45.664   6.727   0.767  -0.303 -37.391  -5.092 -39.861
+        4 -34.769 -32.300 -45.664   6.727   0.767  -0.303 -37.391  -5.092 -39.861
+        5 -11.319 -19.901 -31.780   9.109   0.790  -0.267 -22.088  -2.187 -13.506
+        6   0.016 -15.396 -21.888   4.282   0.794  -0.259 -17.151  -1.755  -1.738
+        7   3.879 -19.287 -24.925   4.237   0.802  -0.247 -20.411  -1.124   2.755
+        8   3.879 -19.287 -24.925   4.237   0.802  -0.247 -20.411  -1.124   2.755
+        9  12.239 -11.303  -6.091  -3.873   0.858  -0.166 -10.154   1.149  13.387
+       10  16.777 -16.563  -9.589  -4.360   0.827  -0.209 -14.401   2.163  18.940
+       11  20.555 -11.304  -4.892  -4.485   0.860  -0.162  -9.645   1.659  22.214
+       12  20.555 -11.304  -4.892  -4.485   0.860  -0.162  -9.645   1.659  22.214
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
+kpoint     : [   0.250,    0.250,    0.000, ]
+spin       : 1
+KS_gap     :    8.502
+QP_gap     :   11.173
+Delta_QP_KS:    2.671
+data: !SigmaeeData |
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1 -68.026 -34.381 -58.123  15.105   0.213  -3.692 -36.222  -1.841 -69.867
+        2 -34.798 -32.245 -45.616   6.056   0.737  -0.357 -37.638  -5.393 -40.191
+        3 -34.776 -32.292 -45.660   6.537   0.797  -0.254 -37.739  -5.447 -40.223
+        4 -34.776 -32.292 -45.660   6.537   0.797  -0.254 -37.739  -5.447 -40.223
+        5 -11.840 -19.237 -31.176   9.304   0.657  -0.522 -20.968  -1.731 -13.571
+        6   1.931 -17.040 -22.902   4.056   0.800  -0.249 -18.485  -1.445   0.485
+        7   3.782 -19.220 -24.835   4.204   0.803  -0.246 -20.353  -1.133   2.649
+        8   3.782 -19.220 -24.835   4.204   0.803  -0.246 -20.353  -1.133   2.649
+        9  12.284 -15.189  -9.817  -3.538   0.838  -0.193 -13.651   1.538  13.822
+       10  15.671  -8.808  -3.500  -4.208   0.864  -0.158  -7.858   0.950  16.621
+       11  19.703 -11.837  -5.321  -4.562   0.853  -0.172 -10.169   1.668  21.371
+       12  21.711 -12.123  -5.222  -4.833   0.845  -0.184 -10.376   1.747  23.458
+       13  21.711 -12.123  -5.222  -4.833   0.845  -0.184 -10.376   1.747  23.458
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
+kpoint     : [   0.500,    0.250,    0.000, ]
+spin       : 1
+KS_gap     :   10.503
+QP_gap     :   13.057
+Delta_QP_KS:    2.554
+data: !SigmaeeData |
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1 -68.022 -34.388 -58.130  12.497   0.177  -4.660 -36.375  -1.987 -70.009
+        2 -34.821 -32.190 -45.568   6.624   0.775  -0.291 -37.423  -5.232 -40.054
+        3 -34.790 -32.262 -45.630   6.522   0.953  -0.050 -38.784  -6.523 -41.312
+        4 -34.780 -32.284 -45.651   6.500   0.873  -0.145 -38.280  -5.996 -40.776
+        5 -11.220 -19.939 -31.813   9.163   0.668  -0.496 -21.751  -1.812 -13.032
+        6   0.802 -16.086 -22.369   4.231   0.801  -0.249 -17.728  -1.643  -0.841
+        7   2.654 -17.756 -23.588   4.150   0.803  -0.246 -19.107  -1.351   1.303
+        8   3.518 -18.948 -24.673   4.241   0.802  -0.247 -20.137  -1.189   2.329
+        9  14.021 -12.293  -6.722  -3.965   0.850  -0.177 -10.929   1.365  15.386
+       10  15.842 -14.160  -7.951  -4.138   0.834  -0.198 -12.432   1.728  17.570
+       11  17.521 -12.369  -6.090  -4.388   0.848  -0.179 -10.766   1.603  19.124
+       12  21.820 -12.780  -5.669  -4.834   0.824  -0.213 -10.902   1.878  23.697
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
+kpoint     : [  -0.250,    0.250,    0.000, ]
+spin       : 1
+KS_gap     :    9.845
+QP_gap     :   12.579
+Delta_QP_KS:    2.733
+data: !SigmaeeData |
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1 -68.023 -34.386 -58.128  14.361   0.180  -4.545 -36.077  -1.692 -69.715
+        2 -34.816 -32.204 -45.579   6.391   0.821  -0.218 -37.937  -5.733 -40.549
+        3 -34.793 -32.260 -45.632   6.448   0.827  -0.209 -37.987  -5.727 -40.520
+        4 -34.773 -32.303 -45.667   6.751   0.850  -0.177 -37.921  -5.618 -40.391
+        5 -11.396 -19.754 -31.641   9.118   0.703  -0.422 -21.701  -1.948 -13.344
+        6   1.097 -16.309 -22.476   4.156   0.795  -0.258 -17.908  -1.599  -0.502
+        7   2.575 -17.650 -23.490   4.143   0.803  -0.245 -19.013  -1.363   1.211
+        8   3.877 -19.289 -24.914   4.229   0.802  -0.247 -20.409  -1.120   2.757
+        9  13.722 -14.415  -8.647  -3.844   0.839  -0.192 -12.801   1.614  15.336
+       10  16.133 -12.508  -6.522  -4.167   0.834  -0.199 -10.991   1.517  17.649
+       11  18.204 -12.683  -6.257  -4.461   0.849  -0.178 -11.015   1.668  19.872
+       12  21.706 -12.316  -5.407  -4.746   0.865  -0.156 -10.444   1.872  23.578
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
+kpoint     : [   0.500,    0.500,    0.000, ]
+spin       : 1
+KS_gap     :   10.470
+QP_gap     :   12.597
+Delta_QP_KS:    2.126
+data: !SigmaeeData |
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1 -68.021 -34.390 -58.132  13.156   0.142  -6.018 -35.898  -1.508 -69.529
+        2 -34.828 -32.184 -45.562   6.412   0.749  -0.336 -37.399  -5.214 -40.042
+        3 -34.790 -32.267 -45.637   6.495   0.810  -0.234 -37.840  -5.572 -40.362
+        4 -34.790 -32.267 -45.637   6.495   0.810  -0.234 -37.840  -5.572 -40.362
+        5 -11.102 -20.017 -31.888   9.176   0.770  -0.299 -22.093  -2.076 -13.178
+        6   0.558 -16.018 -22.417   4.303   0.807  -0.240 -17.709  -1.691  -1.133
+        7   3.191 -18.683 -24.498   4.259   0.802  -0.248 -19.930  -1.248   1.943
+        8   3.191 -18.683 -24.498   4.259   0.802  -0.248 -19.930  -1.248   1.943
+        9  13.662  -8.748  -3.734  -4.002   0.867  -0.153  -7.870   0.878  14.540
+       10  14.177 -11.833  -6.228  -4.130   0.862  -0.160 -10.560   1.272  15.450
+       11  17.282 -15.998  -8.906  -4.489   0.811  -0.233 -13.886   2.111  19.393
+       12  23.047 -14.244  -6.331  -5.369   0.811  -0.233 -12.181   2.063  25.110
+       13  23.047 -14.244  -6.331  -5.369   0.811  -0.233 -12.181   2.063  25.110
+...
+
+
+--- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
+kpoint     : [  -0.250,    0.500,    0.250, ]
+spin       : 1
+KS_gap     :   13.191
+QP_gap     :   16.170
+Delta_QP_KS:    2.979
+data: !SigmaeeData |
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        1 -68.021 -34.390 -58.132  13.206   0.161  -5.219 -36.084  -1.694 -69.715
+        2 -34.806 -32.223 -45.596   6.448   0.794  -0.259 -37.723  -5.500 -40.305
+        3 -34.806 -32.223 -45.596   6.448   0.794  -0.259 -37.723  -5.500 -40.305
+        4 -34.787 -32.258 -45.627   6.522   0.700  -0.429 -37.051  -4.793 -39.580
+        5 -11.045 -20.122 -31.983   9.548   0.605  -0.652 -21.522  -1.400 -12.444
+        6   1.652 -16.819 -22.907   4.197   0.799  -0.251 -18.330  -1.511   0.141
+        7   1.652 -16.819 -22.907   4.197   0.799  -0.251 -18.330  -1.511   0.141
+        8   2.783 -17.970 -23.801   4.165   0.802  -0.247 -19.306  -1.336   1.447
+        9  15.974 -13.358  -7.243  -4.141   0.833  -0.201 -11.715   1.643  17.617
+       10  15.974 -13.358  -7.243  -4.141   0.833  -0.201 -11.715   1.643  17.617
+       11  16.328 -13.631  -7.440  -4.218   0.853  -0.172 -11.947   1.683  18.011
+       12  19.679 -12.292  -5.587  -4.764   0.827  -0.210 -10.687   1.605  21.284
+...
+
+
+ New Fermi energy :        2.488307E-01 Ha ,    6.771028E+00 eV
+ New Exchange energy :    -1.094784E+01 Ha ,   -2.979060E+02 eV
+
+ === QP Band Gaps ===
+  >>>> For spin  1
+   Minimum direct gap =   6.5276 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   6.5276 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -309,7 +497,6 @@ data: !SigmaeeData |
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.59994000E+01  2.43050000E+01
-             bdgw           8       9
              ecut      3.50000000E+01 Hartree
           ecuteps      8.00000000E+00 Hartree
          ecutsigx      3.50000000E+01 Hartree
@@ -318,6 +505,7 @@ data: !SigmaeeData |
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
+       gw_qprange          -4
            istwfk        2    0    3    0    0    0    7    0
               ixc          11
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -335,7 +523,6 @@ P           mkmem           8
             nband          50
             ngfft          32      32      32
              nkpt           8
-           nkptgw           1
            npweps         137
           npwsigx        1243
            npwwfn        1243
@@ -415,7 +602,30 @@ P           mkmem           8
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] The Abinit project: Impact, environment and recent developments.
+- [1] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
+- J. Chem. Phys. 163, 164126 (2025).
+- M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,
+- M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,
+- J. Bieder, A. Blanchet, F. Bottin, J. Bouchet, J. Bouquiaux, E. Bousquet,
+- J. Boust, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval,
+- A. Castellano, E. Castiel, J.-B. Charraud, J. Clerouin, M. Cote, C. Duval,
+- A. Gallo, F. Gendron, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras,
+- F. Gomez-Ortiz, X. Gonze, F. Goudreault, A. Gruneis, R. Gupta, B. Guster,
+- D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
+- I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
+- Comment: the sixth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025
+-
+- [2] Optimized norm-conserving Vanderbilt pseudopotentials.
+- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
+- Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
+-
+- [3] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -428,33 +638,30 @@ P           mkmem           8
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Optimized norm-conserving Vanderbilt pseudopotentials.
-- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
-- Comment: Some pseudopotential generated using the ONCVPSP code were used.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
--
-- [3] ABINIT: Overview, and focus on selected capabilities
-- J. Chem. Phys. 152, 124102 (2020).
-- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
-- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
-- G.Brunin, D.Caliste, M.Cote,
-- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
-- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
-- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
-- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
-- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- [4] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
-- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys.
+- is available at
+-  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [4] Recent developments in the ABINIT software package.
+- [5] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -468,26 +675,12 @@ P           mkmem           8
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- And optionally:
--
-- [5] ABINIT: First-principles approach of materials and nanosystem properties.
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
-- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
-- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
-- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
-- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
-- The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
--
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.4
+- Proc.   0 individual time (sec): cpu=         45.8  wall=         45.9
 
 ================================================================================
 
