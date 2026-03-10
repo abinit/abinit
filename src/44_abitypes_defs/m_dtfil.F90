@@ -670,7 +670,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! According to getgstore_filepath, build _GSTORE file name
  stringfile='_QPDATA'; stringvar='qpdata'
  call mkfilename(filnam, dtfil%filqpdatain, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
-                 getpath=dtset%getgstore_filepath)
+                 getpath=dtset%getqpdata_filepath)
  if (will_read == 0) dtfil%filqpdatain = ABI_NOFILE
 
  ! According to getabiwan_filepath, build _ABIWAN file name
