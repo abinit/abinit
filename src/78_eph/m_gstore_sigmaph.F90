@@ -212,7 +212,8 @@ contains
 !! dtset<dataset_type>=All input variables for this dataset.
 !! dtfil<datafiles_type>=Variables related to files.
 !! cryst: Crystalline structure
-!! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
+!! ks_ebands<ebands_t>=The KS band structure (energies, occupancies, k-weights...)
+!! qp_ebands<ebands_t>=The QP band structure (energies, occupancies, k-weights...)
 !! dvdb<dbdb_type>=Database with the DFPT SCF potentials.
 !! ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
@@ -227,7 +228,7 @@ contains
 !!
 !! SOURCE
 
-subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, dvdb, ifc, &
+subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_ebands, qp_ebands, dvdb, ifc, &
                           pawfgr, pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
@@ -236,7 +237,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
- type(ebands_t),intent(in) :: ebands
+ type(ebands_t),target,intent(in) :: ks_ebands, qp_ebands
  type(dvdb_t),intent(inout) :: dvdb
  type(ifc_type),target,intent(in) :: ifc
  type(pseudopotential_type),intent(in) :: psps
@@ -271,6 +272,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
  type(crystal_t) :: pot_cryst
  type(wfd_t) :: wfd
  !type(u1_cache_t) :: u1c
+ type(ebands_t),pointer :: ebands
  type(stern_t) :: stern
  type(gs_hamiltonian_type) :: gs_ham_kq
  type(rf_hamiltonian_type) :: rf_ham_kq
@@ -293,6 +295,9 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
 !----------------------------------------------------------------------
+
+ !ebands => ks_ebands
+ ebands => qp_ebands
 
  my_rank = xmpi_comm_rank(comm); units = [std_out, ab_out]
  natom = cryst%natom; natom3 = 3 * cryst%natom; nkpt = ebands%nkpt
@@ -812,8 +817,9 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands,
              call wfd%copy_cg(band_k, ik_ibz, spin, kets_k(1, 1, in_k))
 
              !print *, "Stern for band_k", band_k, " with nb_kq:", gqk%nb_kq
+             ! IMPORTANT: Here we always use the KS energies instead of the QP ones
              call stern%solve(u1_band, band_me, idir, ipert, qpt, gs_ham_kq, rf_ham_kq, &
-                              ebands%eig(:,ik_ibz,spin), ebands%eig(:,ikq_ibz,spin), &
+                              ks_ebands%eig(:,ik_ibz,spin), ks_ebands%eig(:,ikq_ibz,spin), &
                               kets_k(:,:,in_k), cwaveprj0, cg1s_kq(:,:,ipc,in_k), cwaveprj, msg, ierr)
              ABI_CHECK(ierr == 0, msg)
 

@@ -389,14 +389,13 @@ end subroutine ephtk_gkknu_from_atm
 !!
 !! SOURCE
 
-subroutine ephtk_update_ebands(dtset, filqpdatain, ebands, header, comm)
+subroutine ephtk_update_ebands(dtset, ebands, header)
 
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),intent(in) :: dtset
  type(ebands_t),intent(inout) :: ebands
- character(len=*),intent(in) :: filqpdatain, header
- integer,intent(in) :: comm
+ character(len=*),intent(in) :: header
 
 !Local variables-------------------------
 !scalars
@@ -406,11 +405,6 @@ subroutine ephtk_update_ebands(dtset, filqpdatain, ebands, header, comm)
 ! *************************************************************************
 
  units = [std_out, ab_out]
-
- if (filqpdatain /= ABI_NOFILE) then
-  ! Read QP energies from an external file.
-  call ebands%read_qpdata(filqpdatain, comm)
- end if
 
  if (abs(dtset%mbpt_sciss) > tol6) then
    ! Apply the scissor operator

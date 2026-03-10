@@ -1792,29 +1792,33 @@ end subroutine ebands_apply_scissors
 !!
 !! SOURCE
 
-subroutine ebands_read_qpdata(ebands, filepath, comm)
+subroutine ebands_read_qpdata(qp_ebands, ks_ebands, filepath, comm)
 
 !Arguments ------------------------------------
- class(ebands_t),intent(inout) :: ebands
+ class(ebands_t),intent(out) :: qp_ebands
+ class(ebands_t),intent(in) :: ks_ebands
  character(len=*),intent(in) :: filepath
  integer,intent(in) :: comm
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
- integer :: units(2), irec, unt, nkibz_file, nsppol_file, nspinor_file
+ integer :: units(2), irec, unt, nkibz_file, nsppol_file, nspinor_file, ii
  integer :: spin, b_start, b_stop, b_stop__, ikpt, nband_k, version, ierr
  real(dp),parameter :: ktol = tol6
  real(dp) :: kpt(3), spinmagntarget_, delta
  character(len=500) :: msg, err_msg
 !arrays
- integer :: ifound(ebands%nkpt, ebands%nsppol)
+ integer :: ifound(ks_ebands%nkpt, ks_ebands%nsppol)
+ integer, allocatable :: iperm(:)
  real(dp),allocatable :: re_enes(:), im_enes(:)
 ! *************************************************************************
 
  units = [std_out, ab_out]
 
+ call ks_ebands%copy(qp_ebands)
+
  ! Only master read data and broadcast results.
- ! File format with energies in eV units.
+ ! File format of QPDATA file with energies in eV units.
  !
  ! # Comment
  ! version
@@ -1836,26 +1840,28 @@ subroutine ebands_read_qpdata(ebands, filepath, comm)
    read(unt, *, err=10, iomsg=err_msg) version
    read(unt, *, err=10, iomsg=err_msg) nkibz_file, nsppol_file, nspinor_file
    call wrtout(units, msg)
-   call wrtout(units, sjoin("nkibz_file", itoa(nkibz_file), ", nsppol_file:", itoa(nsppol_file)))
+   call wrtout(units, sjoin("nkibz_file:", itoa(nkibz_file), ", nsppol_file:", itoa(nsppol_file)))
 
-   ABI_CHECK_IEQ(ebands%nkpt, nkibz_file, "Different number of k-points.")
-   ABI_CHECK_IEQ(ebands%nsppol, nsppol_file, "Different number of spins.")
-   ABI_CHECK_IEQ(ebands%nspinor, nspinor_file, "Different values of nspinor.")
+   ABI_CHECK_IEQ(ks_ebands%nkpt, nkibz_file, "Different number of k-points.")
+   ABI_CHECK_IEQ(ks_ebands%nsppol, nsppol_file, "Different number of spins.")
+   ABI_CHECK_IEQ(ks_ebands%nspinor, nspinor_file, "Different values of nspinor.")
 
    ! Read records.
    ifound = 0
    do irec=1, nkibz_file * nsppol_file
+     !write(std_out, *) "Reading record", irec
      read(unt, *, err=10, iomsg=err_msg) kpt, spin, b_start, b_stop
-     ! Find k-point in ebands%kptns.
-     do ikpt=1,ebands%nkpt
-       if (all(abs(ebands%kptns(:, ikpt) - kpt) < ktol)) exit
+     ! Find k-point in ks_ebands%kptns.
+     do ikpt=1,ks_ebands%nkpt
+       if (all(abs(ks_ebands%kptns(:, ikpt) - kpt) < ktol)) exit
      end do
-     ABI_CHECK_ILEQ(ikpt, ebands%nkpt, sjoin("Cannot find k-point:", ktoa(kpt)))
+     ABI_CHECK_ILEQ(ikpt, ks_ebands%nkpt, sjoin("Cannot find k-point:", ktoa(kpt)))
 
-     nband_k = ebands%nband(ikpt+(spin-1)*ebands%nkpt)
+     nband_k = ks_ebands%nband(ikpt+(spin-1)*ks_ebands%nkpt)
      ifound(ikpt, spin) = ifound(ikpt, spin) + 1
 
      ABI_CHECK_ILEQ(b_start, b_stop, "b_start cannot be greater than b_stop")
+     !write(std_out, *) "About to read energies"
 
      ! Read new energies (first real, then imaginary part)
      ABI_MALLOC(re_enes, (b_start:b_stop))
@@ -1866,20 +1872,26 @@ subroutine ebands_read_qpdata(ebands, filepath, comm)
      im_enes = im_enes * eV_Ha
 
      if (b_start /= 1) then
-       call wrtout(units, "Extrapolating QP energies for low-energy states with band-independent shift.")
-       delta = re_enes(b_start) - ebands%eig(b_start, ikpt, spin)
-       ebands%eig(1:b_start-1, ikpt, spin) = ebands%eig(1:b_start-1, ikpt, spin) + delta
+       call wrtout(units, " Extrapolating QP energies for low-energy states with band-independent shift.")
+       delta = re_enes(b_start) - ks_ebands%eig(b_start, ikpt, spin)
+       qp_ebands%eig(1:b_start-1, ikpt, spin) = qp_ebands%eig(1:b_start-1, ikpt, spin) + delta
      end if
 
      b_stop__  = min(b_stop, nband_k)
      if (b_stop__ /= nband_k) then
-       call wrtout(units, "Extrapolating QP energies for high-energy states with band-independent shift.")
-       delta = re_enes(b_stop__) - ebands%eig(b_stop__, ikpt, spin)
-       ebands%eig(b_stop__:nband_k, ikpt, spin) = ebands%eig(b_stop__:nband_k, ikpt, spin) + delta
+       call wrtout(units, " Extrapolating QP energies for high-energy states with band-independent shift.")
+       delta = re_enes(b_stop__) - ks_ebands%eig(b_stop__, ikpt, spin)
+       qp_ebands%eig(b_stop__:nband_k, ikpt, spin) = qp_ebands%eig(b_stop__:nband_k, ikpt, spin) + delta
      end if
 
      ! Update energies with results from QPDATA file.
-     ebands%eig(b_start:b_stop__, ikpt, spin) = re_enes(b_start:b_stop__)
+     qp_ebands%eig(b_start:b_stop__, ikpt, spin) = re_enes(b_start:b_stop__)
+
+     ! Make sure energies are sorted.
+     ABI_MALLOC(iperm, (nband_k))
+     iperm = [(ii, ii=1, nband_k)]
+     call sort_dp(nband_k, qp_ebands%eig(:, ikpt, spin), iperm, tol6)
+     ABI_FREE(iperm)
 
      ABI_FREE(re_enes)
      ABI_FREE(im_enes)
@@ -1896,12 +1908,12 @@ subroutine ebands_read_qpdata(ebands, filepath, comm)
  end if ! master
 
  ! Master broadcasts final results.
- call xmpi_bcast(ebands%eig, master, comm, ierr)
+ call xmpi_bcast(qp_ebands%eig, master, comm, ierr)
 
  ! Recalculate the Fermi level and occupation factors.
  ! For Semiconductors only the Fermi level is changed (in the middle of the new gap)
  spinmagntarget_ = -99.99_dp !?; if (PRESENT(spinmagntarget)) spinmagntarget_=spinmagntarget
- call ebands%update_occ(spinmagntarget_)
+ call qp_ebands%update_occ(spinmagntarget_)
 
  return
 
