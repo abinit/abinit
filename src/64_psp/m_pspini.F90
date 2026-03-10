@@ -1178,12 +1178,12 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      call psp9in(psps%filpsp(ipsp),ekb,epsatm,ffspl,indlmn,lloc,lmax,psps%lmnmax,psps%lnmax,mmax,&
        psps%mpsang,psps%mpssoang,psps%mqgrid_ff,psps%mqgrid_vl,nproj,psps%n1xccc, &
        psps%pspso(ipsp),qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,&
-       xcccrc,xccc1d,zion,psps%znuclpsp(ipsp),nctab,maxrad)
+       xcccrc,xccc1d,xcctau1d,zion,psps%znuclpsp(ipsp),nctab,maxrad)
 
      if (nc_debug) then
        call psp_dump_outputs("PSML",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
         psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
-        indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
+        indlmn,nproj,ekb,ffspl,vlspl,xccc1d,xcctau1d)
      end if
 #else
      write(msg,'(2a)')  &
