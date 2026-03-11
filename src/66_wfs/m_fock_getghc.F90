@@ -840,8 +840,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
              !$OMP& MAP(to:gvnlxc,ghc2,occ) PRIVATE(idat_occ,ipw)
              do ipw=1,npw
                do idat_occ=1,ndat_occ
-                 ghc2(1:2,ipw+(idat-1)*npw*nspinor)=ghc2(1:2,ipw+(idat-1)*npw*nspinor)&
-    &               -gvnlxc(1:2,ipw+(idat_occ-1)*npw*nspinor)*occ(idat_occ)*wtk
+                 ghc2(1,ipw+(idat-1)*npw*nspinor)=ghc2(1,ipw+(idat-1)*npw*nspinor)&
+    &               -gvnlxc(1,ipw+(idat_occ-1)*npw*nspinor)*occ(idat_occ)*wtk
+                 ghc2(2,ipw+(idat-1)*npw*nspinor)=ghc2(2,ipw+(idat-1)*npw*nspinor)&
+    &               -gvnlxc(2,ipw+(idat_occ-1)*npw*nspinor)*occ(idat_occ)*wtk
                end do
              end do ! idat_occ
 #endif
