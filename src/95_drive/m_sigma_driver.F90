@@ -2790,6 +2790,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      !ncerr = nctk_write_datar("qp_rhor",path,ngfft,cplex,nfft,nspden,&
      !                          comm_fft,fftn3_distrib,ffti3_local,datar,action)
      NCF_CHECK(nf90_close(ncid))
+
+     !if (Sigp%nkptgw==Wfd%nkibz) then
+     !  call write_qpdata(dtset, sr)
+     !end if
    end if
   end if ! MRM skipped if GW density matrix update
  end if ! ucrpa
