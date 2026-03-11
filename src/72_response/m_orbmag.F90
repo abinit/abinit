@@ -2217,11 +2217,11 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
   !Local variables -------------------------
   !scalars
   integer :: fourwf_cplex,fourwf_option,iat,iatom,ig,isp,itypat
-  integer :: il,ilmn,ipw,jl,jlmn,kg1,kg2,kg3,klmn,n1,n2,n3,n4,n5,n6,ndat,nfft,npwsp
-  integer :: shift1,shift2,shift3,t_atom,tim_fourwf
+  integer :: il,ilmn,ipw,jl,jlmn,klmn,n4,n5,n6,ndat,nfft,npwsp
+  integer :: t_atom,tim_fourwf
   logical :: my_suppress_ormesh,need_ormesh
   real(dp) :: weight_i,weight_r
-  complex(dp) :: cpi,cpj,crvec,dij,ormesh_fac,ph1,ph2,ph3
+  complex(dp) :: cpi,cpj,dij,ormesh_fac
   !arrays
   real(dp),allocatable,target :: fofgin(:,:),fofr(:,:,:,:)
   real(dp),allocatable :: denpot(:,:),fofgout(:,:)
@@ -2233,12 +2233,12 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
   else
     my_suppress_ormesh=.FALSE.
   end if
+  need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
+  
   tim_fourwf = 1
   ndat = 1
   npwsp = npw_k*dtset%nspinor
-  need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
 
-  n1=dtset%ngfft(1); n2=dtset%ngfft(2); n3=dtset%ngfft(3)
   n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6)
 
   if (need_ormesh) then
