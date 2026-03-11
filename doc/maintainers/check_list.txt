@@ -8,7 +8,7 @@ A.1 Update the year, use the script developers/maintainers/change_year.sh (read 
 A.2 Update shared/common/src/14_hidewrite/m_specialmsg.F90, lines 207-208
 A.3 Update KNOWN_PROBLEMS
 A.4 Run the "On-demand only slaves"
-A.5 Check manually that "make tests_in" works (on one of the slaves)
+A.5 Check manually that "make tests_in" works (on one of the slaves). Also check the echoed version of ABINIT.
 A.6 On abiref, under buildbot, possibly clean content of scripts/bbtools/LinkChecker_rm_false_errors.py, in "url_string_to_skip" [likely superceded by new procedure from JMB when ready]
 A.7 Issue ./mksite.py build, then ./mksite.py validate [generate lots of errors, but can be ignored at present]
 A.8 Issue pytest abimkdocs_tests/test_variables.py [generate lots of errors, can be ignored at present]

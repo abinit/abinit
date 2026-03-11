@@ -194,6 +194,7 @@ subroutine herald(code_name,code_version,iout)
  integer :: day,dd,ja,jy,jm,jdn,mm,mm_rel,year,year_rel
  integer :: values(8)
  character(len=5) :: strzone
+ character(len=7) :: version_rel
  character(len=8) :: strdat
  character(len=10) :: strtime
  character(len=500) :: msg
@@ -206,11 +207,13 @@ subroutine herald(code_name,code_version,iout)
 !RELEASE TIME FROM ABIRULES
  year_rel=2025
  mm_rel=12
+ version_rel='10.6.4 '
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
 !perfect transferability across platforms and OS.
- write(iout, '(/,a,a,a,a,a,a,a,i4,a)' ) '.Version ',trim(code_version),' of ',trim(code_name),', released ',month_names(mm_rel),' ',year_rel,'.'
+ write(iout, '(/,9a,i4,a)' )&
+& '.Version ',trim(code_version),' of ',trim(code_name),'. v',version_rel,'released ',month_names(mm_rel),' ',year_rel,'.'
 #if defined HAVE_MPI
  write(iout, '(a,a,a,/)' ) '.(MPI version, prepared for a ',build_target,' computer) '
 #else
