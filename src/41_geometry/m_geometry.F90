@@ -77,9 +77,9 @@ MODULE m_geometry
  public :: wedge_basis        ! compute rprimd x gprimd vectors needed for generalized cross product
  public :: wedge_product      ! compute wedge product given wedge basis
  public :: d3lwsym
- public :: sylwtens           ! Determines the set of irreductible elements of the spatial-dispersion tensors
+ public :: sylwtens             ! Determines the set of irreductible elements of the spatial-dispersion tensors
+ public :: cart2spinaxis        ! Compute the rotation matrix from cartesian to spinaxis coordinate     
  public :: vcart2ylm          ! Convert Cartesian vector to spherical coordinates for Y_lm
-
 
  interface normv
   module procedure normv_rdp_vector
@@ -4136,5 +4136,53 @@ subroutine vcart2ylm(vector, length, theta, phi)
 end subroutine vcart2ylm
 !!***
 
+!!****f* m_geometry/cart2spinaxis
+!! NAME
+!! cart2spinaxis
+!!
+!! FUNCTION
+!! Compute the rotation matrix R = Rz(alpha)*Ry(beta) and rotate a vector in 
+!! cartesian coordinate to spinaxis coordinates
+!!
+!! INPUTS
+!! alpha=Euler angle for rotation around z-axis
+!! beta=Euler angle for rotation around y-axis
+!! vin(3)=vector in the cartesian coordinate 
+!!
+!! OUTPUT
+!! R(3,3)=rotation matrix from cartesian to spinaxis coordinates
+!! vout(3)=vector in spinaxis coordinate
+!!
+!! SOURCE
+
+subroutine cart2spinaxis(alpha, beta, R, vin, vout)
+
+!Arguments -------------------------------
+!scalars
+ real(dp),intent(in) :: alpha, beta
+!arrays
+ real(dp),intent(out) :: R(3,3)
+ real(dp),optional,intent(in) :: vin(3)
+ real(dp),optional,intent(out) :: vout(3)
+
+!Local variables -------------------------
+!scalars
+ real(dp) :: sb, cb, sa, ca
+!***********************************************************************
+
+ sb = sin(beta); cb = cos(beta)
+ sa = sin(alpha); ca = cos(alpha)
+
+ R(1,1) = cb*ca;  R(2,1) = -sa;   R(3,1) = sb*ca
+ R(1,2) = cb*sa;  R(2,2) =  ca;   R(3,2) = sb*sa
+ R(1,3) = -sb;    R(2,3) = zero;  R(3,3) = cb
+
+ if (present(vin) .and. present(vout)) then
+     vout(:) = matmul(R, vin)
+ end if
+
+end subroutine cart2spinaxis
+!!***
+ 
 end module  m_geometry
 !!***
