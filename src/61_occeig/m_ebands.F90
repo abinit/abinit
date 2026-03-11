@@ -1815,6 +1815,7 @@ subroutine ebands_read_qpdata(qp_ebands, ks_ebands, filepath, comm)
 
  units = [std_out, ab_out]
 
+ ! Start by copying the input bands.
  call ks_ebands%copy(qp_ebands)
 
  ! Only master read data and broadcast results.

@@ -51,7 +51,6 @@ _ WF disk file :      7.961 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      1.59994000E+01  2.43050000E+01
-             bdgw           8       9
              ecut      3.50000000E+01 Hartree
           ecuteps      8.00000000E+00 Hartree
          ecutsigx      3.50000000E+01 Hartree
@@ -75,7 +74,6 @@ P           mkmem           8
             nband          50
             ngfft          32      32      32
              nkpt           8
-           nkptgw           1
            npweps         137
           npwsigx        1243
            npwwfn        1243

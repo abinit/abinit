@@ -817,7 +817,7 @@ subroutine gstore_sigmaph(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ks_eban
              call wfd%copy_cg(band_k, ik_ibz, spin, kets_k(1, 1, in_k))
 
              !print *, "Stern for band_k", band_k, " with nb_kq:", gqk%nb_kq
-             ! IMPORTANT: Here we always use the KS energies instead of the QP ones
+             ! NOTE: Here we are using the KS energies instead of the QP ones
              call stern%solve(u1_band, band_me, idir, ipert, qpt, gs_ham_kq, rf_ham_kq, &
                               ks_ebands%eig(:,ik_ibz,spin), ks_ebands%eig(:,ikq_ibz,spin), &
                               kets_k(:,:,in_k), cwaveprj0, cg1s_kq(:,:,ipc,in_k), cwaveprj, msg, ierr)
