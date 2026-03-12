@@ -2271,7 +2271,7 @@ New tests of the band parallelism in DFPT: [[test:paral_65]] and [[test:paral_66
 By M. Giantomassi (commit 31e8aa66d8).
 
 **D.10** Improved developer documentation, section .
-[How to add a new test](https://docs.abinit.org/developers/developers_howto/#how-to-add-a-new-test-in-the-test-suite).
+[How to add a new test](../developers/developers_howto/#how-to-add-a-new-test-in-the-test-suite).
 By X. Gonze (commit dabc1b905).
 
 **D.11** Fixed typo in CITATION.cff.

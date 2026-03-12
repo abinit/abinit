@@ -4,7 +4,7 @@ Something going wrong ? Better to realize this than to think everything is OK ..
 
 In this page, the user will find tips to fix several problems with ABINIT.   
 
-Many other tips might be found on the [[https://discourse.abinit.org|forum]], or in the [[https://docs.abinit.org|standard ABINIT documentation]].
+Many other tips might be found on the [[https://discourse.abinit.org|forum]], or in the [abimkdocs documentation](../index.html).
 
 
 ### Configure problems
@@ -47,7 +47,7 @@ Sometimes, the error message is prepared by another message giving preliminary i
 
 If you think to have obtained all information that ABINIT was supposed to give you, try to identify whether ABINIT stops because of geometry optimization problem or SCF problem. In the first case, your input geometry is perhaps crazy. Anyhow, see the next items in this troubleshooting page.
 
-By the way, there might also be memory problems ... See <https://docs.abinit.org/topics/TuningSpeedMem>.
+By the way, there might also be memory problems ... See the [tuning speed and memory topic](../topics/TuningSpeedMem).
 
 
 ### Incorrect initial geometry 
@@ -56,11 +56,11 @@ Many mistakes done by beginners are related to incorrect starting geometry.
 
 Here is a check list :
 
-  * Check that the **units** are correct for your cell parameters and atomic positions. __ABINIT uses atomic unit by default__, but can use several other units if specified by the user, see [[https://docs.abinit.org/guide/abinit/#parameters|ABINIT input parameters]].
-  * Check that the [[https://docs.abinit.org/variables/basic/#typat|typat]] atom types are correct with respect to [[https://docs.abinit.org/variables/basic/#xred|xred]] or [[https://docs.abinit.org/variables/basic/#xcart|xcart]]
-  * Check that the **number of atoms** [[https://docs.abinit.org/variables/basic/#natom|natom]] is coherent with your list of coordinates, [[https://docs.abinit.org/variables/basic/#xred|xred]] or [[https://docs.abinit.org/variables/basic/#xcart|xcart]]. __ABINIT reads only the coordinates of [[https://docs.abinit.org/variables/basic/#natom|natom]] nuclei, and **ignore others**__.
-  * Relax first the atomic positions **at fixed primitive vectors** before optimizing the cell. Explicitly, use a first datadet with [[https://docs.abinit.org/variables/rlx/#optcell|optcell]] = 0, then a second dataset with non-zero [[https://docs.abinit.org/variables/rlx/#optcell|optcell]], in which you tell ABINIT to read optimized atomic positions using [[https://docs.abinit.org/variables/rlx/#getxred|getxred]] or [[https://docs.abinit.org/variables/rlx/#getxcart|getxcart]]. In this second dataset, do not forget to use[[https://docs.abinit.org/variables/rlx/#dilatmx|dilatmx]] bigger than 1 if you expect the volume of the cell to increase during the optimization. Possibly after the atomic position relaxation, make a run with [[https://docs.abinit.org/variables/rlx/#chkdilatmx|chkdilatmx]]=0, then a third run with [[https://docs.abinit.org/variables/rlx/#dilatmx|dilatmx]]=1. See the additional suggestions in the documentation of [[https://docs.abinit.org/variables/rlx/#optcell|optcell]] . 
-  * ABINIT can read VASP POSCAR external files containing unit cell parameters and atomic positions. See the input variable [[https://docs.abinit.org/variables/basic/#structure|structure]]. This might help in setting the geometry correctly.
+  * Check that the **units** are correct for your cell parameters and atomic positions. __ABINIT uses atomic unit by default__, but can use several other units if specified by the user, see the [ABINIT user's guide](../guide/abinit/#parameters).
+  * Check that the [[typat]] atom types are correct with respect to [[xred]] or [[xcart]]
+  * Check that the **number of atoms** [[natom]] is coherent with your list of coordinates, [[xred]] or [[xcart]]. __ABINIT reads only the coordinates of [[natom]] nuclei, and **ignore others**__.
+  * Relax first the atomic positions **at fixed primitive vectors** before optimizing the cell. Explicitly, use a first datadet with [[optcell]] = 0, then a second dataset with non-zero [[optcell]], in which you tell ABINIT to read optimized atomic positions using [[getxred]] or [[getxcart]]. In this second dataset, do not forget to use[[dilatmx]] bigger than 1 if you expect the volume of the cell to increase during the optimization. Possibly after the atomic position relaxation, make a run with [[https:/chkdilatmx]]=0, then a third run with [[dilatmx]]=1. See the additional suggestions in the documentation of [[optcell]] . 
+  * ABINIT can read VASP POSCAR external files containing unit cell parameters and atomic positions. See the input variable [[structure]]. This might help in setting the geometry correctly.
   * Try to visualize your primitive cell. There are numerous possibilities, using Abipy, VESTA, XCrysDen (to be documented).
 
 
