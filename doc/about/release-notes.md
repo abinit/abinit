@@ -1,7 +1,7 @@
 ## v10.6
 
-Version 10.6, released on Mar 11, 2026.
-<!-- Release notes updated on Feb 6, 2026. -->
+Version 10.6, released on Feb 6, 2026.
+<!-- Release notes updated on Mar 11, 2026. -->
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.6 with respect to v10.4.
