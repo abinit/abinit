@@ -207,7 +207,7 @@ subroutine herald(code_name,code_version,iout)
 !RELEASE TIME FROM ABIRULES
  year_rel=2026
  mm_rel=3
- version_rel='10.6.5 '
+ version_rel='10.7.1 '
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
