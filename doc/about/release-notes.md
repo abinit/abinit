@@ -11,6 +11,7 @@ then 1200 to 1275, except those that had been closed, and also
 EXCEPT MR1219, 1225, that had already been included in v10.4.
 MR1276, 1277, 1278, 1280 will be included in v10.8 .
 For release v10.6.3, also includes MR 1279 and 1281.
+MR 1284 and 1286 have been cherry-picked to 10.6.5 (perhaps also earlier onse, but I did not note ...)
 -->
 
 Many thanks to the contributors to the ABINIT project between April 2025 and February 2026 !
@@ -5104,9 +5105,7 @@ B.10 Implementation of the LDA-1/2 methodology.
 
 C.1 There are large changes of the procedure to document ABINIT, for most of the documentation files.
     The HTML files are now produced from YAML files, under the control of the script ~abinit/doc/generate_doc.py .
-    The documentation that describes this procedure is available on the ABINIT wiki, at https://wiki.abinit.org/doku.php?id=developers:generate_doc .
     This is directly linked to the modifications in the doc presented in B1-B4.
-    In particular, the Dokuwiki syntax is used for the hyperlinks.
     By F. Jollet and X. Gonze.
 
 * * *

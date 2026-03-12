@@ -31,9 +31,9 @@ MODULE m_dens
  use defs_abitypes,   only : MPI_type
  use m_fft,           only : fourdp
  use m_time,          only : timab
- use m_numeric_tools, only : wrap2_zero_one
+ use m_numeric_tools, only : wrap2_zero_one, geteuler
  use m_io_tools,      only : open_file
- use m_geometry,      only : dist2, xcart2xred, metric, vcart2ylm
+ use m_geometry,      only : dist2, xcart2xred, metric, vcart2ylm, cart2spinaxis
  use m_mpinfo,        only : ptabs_fourdp
  use m_atomdata
  use m_dtset
@@ -118,7 +118,11 @@ MODULE m_dens
   ! znucl(ntypat)
   !
 
- end type constrained_dft_t
+  real(dp) :: spinaxis(3)
+  ! spinaxis(3)
+  ! Spin quantization axis
+
+end type constrained_dft_t
 
 !!***
 
@@ -636,7 +640,7 @@ end subroutine add_atomic_fcts
 
  subroutine constrained_dft_ini(chrgat,constrained_dft,constraint_kind,&
 & magconon,magcon_lambda,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
-& ratsm,ratsph,rprimd,spinat,typat,xred,ziontypat,znucl,qgbt,use_gbt)
+& ratsm,ratsph,rprimd,spinat,typat,xred,ziontypat,znucl,qgbt,use_gbt,spinaxis)
 
 !Arguments ------------------------------------
 !scalars
@@ -656,6 +660,7 @@ end subroutine add_atomic_fcts
  real(dp),intent(in) :: ziontypat(ntypat)
  real(dp),intent(in) :: znucl(ntypat)
  real(dp),intent(in) :: qgbt(3)
+ real(dp),intent(in) :: spinaxis(3)
 
 !Local variables-------------------------------
 !scalars
@@ -710,6 +715,7 @@ end subroutine add_atomic_fcts
  constrained_dft%typat            =typat
  constrained_dft%ziontypat        =ziontypat
  constrained_dft%znucl            =znucl
+ constrained_dft%spinaxis         =spinaxis
 
  ABI_FREE(intgf2)
 
@@ -847,7 +853,7 @@ end subroutine constrained_dft_free
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,&
                     xred,1,cplex1,qgbt,use_gbt,intgden=intgden,gr_intgden=gr_intgden,rhomag=rhomag,strs_intgden=strs_intgden)
 
- call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl)
+ call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl,c_dft%spinaxis)
 
 !DEBUG
 !write(std_out,*) ' intgden(1:nspden,1:natom)=',intgden(1:nspden,1:natom)
@@ -883,7 +889,7 @@ end subroutine constrained_dft_free
    if( mod(conkind,10)==0 .and. nspden>1)intgres(2:nspden,iatom)=zero
  enddo
 !Print the potential residuals
- call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,[std_out],11,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl)
+ call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,[std_out],11,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl,c_dft%spinaxis)
  ABI_FREE(intgres_tmp)
 
 !Also exchanges the spin and atom indices to prepare the solution of the linear system of equation
@@ -1237,7 +1243,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred,qgbt,use_gbt)
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
                     c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,cplex1,qgbt,use_gbt,intgden=intgden,rhomag=rhomag)
 
- call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl)
+ call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat,c_dft%znucl,c_dft%spinaxis)
 
 !Loop over atoms
 !-------------------------------------------
@@ -1349,7 +1355,7 @@ end subroutine mag_penalty
 !!
 !! SOURCE
 
-subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,spinat,typat,xred,znucl,qgbt,use_gbt)
+subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,spinat,typat,xred,znucl,qgbt,use_gbt,spinaxis)
 
 !Arguments ------------------------------------
 !scalars
@@ -1357,7 +1363,7 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
  real(dp),intent(in) :: magcon_lambda,ratsm,qgbt(3)
 !arrays
  integer, intent(in) :: ngfft(18),typat(natom)
- real(dp),intent(in) :: spinat(3,natom), rprimd(3,3),znucl(ntypat)
+ real(dp),intent(in) :: spinat(3,natom), rprimd(3,3),znucl(ntypat),spinaxis(3)
  real(dp),intent(in) :: ratsph(ntypat),rhor(nfft,nspden),xred(3,natom)
  type(MPI_type),intent(in) :: mpi_enreg
 
@@ -1383,7 +1389,7 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
  call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
                     1,cplex1,qgbt,use_gbt,intgden=intgden,rhomag=rhomag)
 
- call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,ratsm,ratsph,rhomag,typat,znucl)
+ call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,[std_out],1,qgbt,ratsm,ratsph,rhomag,typat,znucl,spinaxis)
 
  Epen=0
  Econstr=0
@@ -1963,7 +1969,7 @@ end subroutine calcdenmagsph
 !!
 !! SOURCE
 
-subroutine prtdenmagsph(cplex, intgden, natom, nspden, ntypat, units, option, qgbt, ratsm, ratsph, rhomag, typat, znucl, ziontypat)
+subroutine prtdenmagsph(cplex, intgden, natom, nspden, ntypat, units, option, qgbt, ratsm, ratsph, rhomag, typat, znucl, spinaxis, ziontypat)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1974,13 +1980,13 @@ integer ,intent(in) :: option
 integer, intent(in) :: cplex
 !arrays
 integer,intent(in)  :: typat(natom)
-real(dp),intent(in) :: intgden(cplex,nspden,natom),qgbt(3),znucl(ntypat)
+real(dp),intent(in) :: intgden(cplex,nspden,natom),qgbt(3),znucl(ntypat),spinaxis(3)
 real(dp),intent(in) :: ratsph(ntypat),rhomag(2,nspden)
 real(dp),intent(in),optional :: ziontypat(ntypat)
 
 !Local variables ------------------------------
 !scalars
- integer :: iatom,ix,icplex
+ integer :: iatom,icplex
  real(dp) :: mag_coll   , mag_x, mag_y, mag_z ! EB
  real(dp) :: mag_coll_im, mag_x_im, mag_y_im, mag_z_im ! SPr
  real(dp) :: rho_tot, rho_tot_im
@@ -1990,6 +1996,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
  real(dp) :: sum_mag_r, sum_mag_theta, sum_mag_phi
  real(dp) :: exact_mag_r, exact_mag_theta, exact_mag_phi
  real(dp) :: exact_mag_r_im, exact_mag_theta_im, exact_mag_phi_im
+ real(dp) :: alpha, beta, Rspin(3,3), Rspin_t(3,3), mag_cart(3), mag_spin(3), mag_tot_cart(3), mag_tot_cart_im(3)
  character(len=500) :: msg,msg1
  character(len=500) :: msg_cplex
  type(atomdata_t) :: atom
@@ -2027,6 +2034,45 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
    sum_rho_up_im=zero
    sum_rho_dn_im=zero
    sum_rho_tot_im=zero
+
+  !Rotation matrices identity by default
+   Rspin(:,:)=zero ; Rspin_t(:,:)=zero
+   Rspin(1,1)=one ; Rspin(2,2)=one ; Rspin(3,3)=one
+   Rspin_t(:,:)=Rspin(:,:)
+
+  !Print spinaxis info only if axis not aligned with z
+   if (abs(spinaxis(1))>tol8 .or. abs(spinaxis(2))>tol8) then
+      call geteuler(spinaxis, alpha, beta)
+      msg=' Spinaxis rotation information:'
+      write(msg, '(3a)' ) trim(msg),ch10,' ------------------------------'; call wrtout(units,msg)
+      write(msg, '(a,f12.6)') ' Alpha rotation angle around z-axis (degrees):', alpha * 180.0_dp / pi; call wrtout(units,msg)
+      write(msg, '(a,f12.6)') ' Beta rotation angle around y-axis (degrees): ', beta  * 180.0_dp / pi; call wrtout(units,msg)
+      write(msg, '(a)') ' ---------------------------------------------------------'; call wrtout(units,msg)
+      call cart2spinaxis(alpha, beta, Rspin)
+      write(msg, '(a)') ' Rotation matrix from cartesian coordinate to spinaxis coordinate'; call wrtout(units,msg)
+      write(msg, '(3f14.8)') Rspin(1,1), Rspin(1,2), Rspin(1,3); call wrtout(units,msg)
+      write(msg, '(3f14.8)') Rspin(2,1), Rspin(2,2), Rspin(2,3); call wrtout(units,msg)
+      write(msg, '(3f14.8)') Rspin(3,1), Rspin(3,2), Rspin(3,3); call wrtout(units,msg)
+
+      Rspin_t = transpose(Rspin)
+      write(msg, '(a)') ' Rotation matrix from spinaxis coordinate to cartesian coordinate'; call wrtout(units,msg)
+      write(msg, '(3f14.8)') Rspin_t(1,1), Rspin_t(1,2), Rspin_t(1,3); call wrtout(units,msg)
+      write(msg, '(3f14.8)') Rspin_t(2,1), Rspin_t(2,2), Rspin_t(2,3); call wrtout(units,msg)
+      write(msg, '(3f14.8)') Rspin_t(3,1), Rspin_t(3,2), Rspin_t(3,3); call wrtout(units,msg)
+      write(msg, '(a)') ' ----------------------------------------------------------------'
+      call wrtout(units,msg)
+   end if
+
+   mag_tot_cart=zero
+   mag_tot_cart_im=zero
+   if (nspden==4) then
+     mag_spin = [mag_x,mag_y,mag_z]
+     mag_tot_cart = matmul(Rspin_t,mag_spin)
+     if (cplex==2) then
+       mag_spin = [mag_x_im,mag_y_im,mag_z_im]
+       mag_tot_cart_im = matmul(Rspin_t,mag_spin)
+     end if
+   end if
 
    if(option==1 .or. option==11 .or. option==21) then
 
@@ -2173,20 +2219,21 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
            endif
          endif
          do iatom=1,natom
-           call vcart2ylm(intgden(icplex,2:4,iatom), mag_r, mag_theta, mag_phi)
+           mag_cart(:)=matmul(Rspin_t,intgden(icplex,2:4,iatom))
+           call vcart2ylm(mag_cart, mag_r, mag_theta, mag_phi)
            call atomdata_from_znucl(atom, znucl(typat(iatom)))
          if(option/=21)then
-           write(msg, '(i5,a3,f10.5,f16.6,a,6f12.6)' ) iatom,atom%symbol,ratsph(typat(iatom)),intgden(icplex,1,iatom),'  ',mag_r,(intgden(icplex,ix,iatom),ix=2,4),mag_theta,mag_phi
+           write(msg, '(i5,a3,f10.5,f16.6,a,6f12.6)' ) iatom,atom%symbol,ratsph(typat(iatom)),intgden(icplex,1,iatom),'  ',mag_r,mag_cart(1),mag_cart(2),mag_cart(3),mag_theta,mag_phi
          else
-           write(msg, '(i5,a3,f10.5,f16.6,a,6f12.6)' ) iatom,atom%symbol,ratsph(typat(iatom)),-intgden(icplex,1,iatom),'  ',mag_r,(intgden(icplex,ix,iatom),ix=2,4),mag_theta,mag_phi
+           write(msg, '(i5,a3,f10.5,f16.6,a,6f12.6)' ) iatom,atom%symbol,ratsph(typat(iatom)),-intgden(icplex,1,iatom),'  ',mag_r,mag_cart(1),mag_cart(2),mag_cart(3),mag_theta,mag_phi
          endif
          if(option==1 .and. present(ziontypat))&
 &          write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-intgden(icplex,1,iatom)
            call wrtout(units,msg)
            ! Compute the sum of the magnetization in x, y and z directions
-           sum_mag_x=sum_mag_x+intgden(icplex,2,iatom)
-           sum_mag_y=sum_mag_y+intgden(icplex,3,iatom)
-           sum_mag_z=sum_mag_z+intgden(icplex,4,iatom)
+           sum_mag_x=sum_mag_x+mag_cart(1)
+           sum_mag_y=sum_mag_y+mag_cart(2)
+           sum_mag_z=sum_mag_z+mag_cart(3)
          enddo
            vec = (/sum_mag_x,sum_mag_y,sum_mag_z /)
            call vcart2ylm(vec, sum_mag_r, sum_mag_theta, sum_mag_phi)
@@ -2214,16 +2261,16 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
            call wrtout(units,msg)
          endif
          if (icplex==1) then
-           vec = (/mag_x,mag_y,mag_z /)
+           vec = mag_tot_cart 
            call vcart2ylm(vec, exact_mag_r, exact_mag_theta, exact_mag_phi)
-           write(msg, '(a,3f12.6)') ' (cart.coord.)                                  ', mag_x,mag_y,mag_z
+           write(msg, '(a,3f12.6)') ' (cart.coord.)                                  ',  mag_tot_cart(1),mag_tot_cart(2),mag_tot_cart(3)
            call wrtout(units,msg)
            write(msg, '(a,f12.6,a,2f12.6)') ' (sph.coord.)                       ', exact_mag_r,"                                    ",exact_mag_theta,exact_mag_phi
            call wrtout(units,msg)
          elseif (icplex==2) then
-           vec = (/mag_x_im,mag_y_im,mag_z_im /)
+           vec = mag_tot_cart_im
            call vcart2ylm(vec, exact_mag_r_im, exact_mag_theta_im, exact_mag_phi_im)
-           write(msg, '(a,3f12.6)') ' (cart.coord.)                                  ', mag_x_im,mag_y_im,mag_z_im
+           write(msg, '(a,3f12.6)') ' (cart.coord.)                                  ', mag_tot_cart_im(1),mag_tot_cart_im(2),mag_tot_cart_im(3)
            call wrtout(units,msg)
            write(msg,'(a,f12.6,a,2f12.6)')' (sph.coord.)                       ', exact_mag_r_im,"                                     ", exact_mag_theta_im,exact_mag_phi_im
            call wrtout(units,msg)
@@ -2262,11 +2309,11 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
        end if
        call wrtout(units,msg)
      elseif (nspden==4) then
-       write(msg, '(a,f13.8)') '     mx_f  = ',mag_x
+       write(msg, '(a,f13.8)') '     mx_f  = ',mag_tot_cart(1)
        call wrtout(units,msg)
-       write(msg, '(a,f13.8)') '     my_f  = ',mag_y
+       write(msg, '(a,f13.8)') '     my_f  = ',mag_tot_cart(2)
        call wrtout(units,msg)
-       write(msg, '(a,f13.8)') '     mz_f  = ',mag_z
+       write(msg, '(a,f13.8)') '     mz_f  = ',mag_tot_cart(3)
        call wrtout(units,msg)
      end if
 

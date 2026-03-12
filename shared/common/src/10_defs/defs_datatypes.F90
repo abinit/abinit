@@ -276,6 +276,18 @@ module defs_datatypes
     ! Gives the pseudo core kinetic energy density in reciprocal space on a regular grid.
     ! ttaucorespl is **always** allocated and initialized with zeros if not has_tcore
 
+   logical :: has_tvaletau = .False.
+    ! True if the norm-conserving pseudopotential provides the pseudo valence kinetic energy density.
+
+   real(dp) :: dnvtaudq0 = zero
+    ! Gives 1/q d(tauNvale(q))/dq for q=0
+    ! (tauNvale(q) = FT of pseudo valence kinetic energy density)
+
+   real(dp), allocatable :: tvaletauspl(:,:)
+    ! tvaletauspl(mqgrid_vl,2)
+    ! Gives the pseudo valence kinetic energy density in reciprocal space on a regular grid.
+    ! Allocated only if has_tvaletau is True.
+
    integer :: num_tphi = 0
    ! Number of pseudo atomic orbitals. 0 if pseudo does not provide them
 

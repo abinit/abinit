@@ -120,9 +120,11 @@ AC_DEFUN([SD_FFT_DETECT], [
             AC_DEFINE([HAVE_FFTW3_MPI], 1,
               [Define to 1 if you have a MPI-enabled FFTW3 library.])
           fi
-          if test "${sd_fftw3_threads_ok}" = "yes" ; then
+          if test "${sd_fft_flavor}" = "fftw3-threads" -a "${sd_fftw3_threads_ok}" = "yes" ; then
             AC_DEFINE([HAVE_FFTW3_THREADS], 1,
               [Define to 1 if you have a threads-enabled FFTW3 library.])
+            sd_fft_libs="-lfftw3_threads -lpthread -lfftw3f_threads ${sd_fft_libs}"
+            sd_fft_ldflags="-lfftw3_threads -lpthread -lfftw3f_threads ${sd_fft_ldflags}"
           fi
         fi
         ;;

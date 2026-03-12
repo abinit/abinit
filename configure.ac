@@ -471,6 +471,10 @@ ABI_OPTIM_INIT([${abi_optim_flavor}])
   AC_MSG_NOTICE([disabling optimizations for src/43_ptgroups/])
   fcflags_opt_43_ptgroups="-O0"
 
+if test "${abi_fc_vendor}" == "cray"; then
+  AC_MSG_NOTICE([disabling optimizations for src/70_gw/])
+  fcflags_opt_70_gw="-O1"
+fi
 # FIXME: AMD LLVM fork for OpenMP GPU (aka AOMP) has a sensitive OpenMP GPU implementation, so we enable it where needed.
 # Checked with version 16.0.0 shipped with ROCm 5.6.0 (July 2023).
 if test "${abi_fc_vendor}" == "llvm" -a "${abi_gpu_flavor}" == "hip-double"; then
@@ -1304,6 +1308,10 @@ fi
 if test "${sd_libxc_kxc_ok}" = "no"; then
   ABI_MSG_NOTICE([libxc-kxc],
     [Suboptimal libxc configuration])
+fi
+if test "${sd_fft_flavor}" = "fftw3" -a "${abi_openmp_enable}" = "yes"; then
+  ABI_MSG_NOTICE([fftw3-openmp],
+    [WARNING: OpenMP enabled but FFTW3 Threads disabled])
 fi
 # GPU 2024 implementation : deactivate this warning
 #if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then

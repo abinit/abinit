@@ -103,7 +103,8 @@ contains
  procedure :: get_valence_idx       => ebands_get_valence_idx          ! Gives the index of the (valence|bands at E_f).
  procedure :: get_bands_from_erange => ebands_get_bands_from_erange    ! Return the indices of the mix and max band within an energy window.
  procedure :: vcbm_range_from_gaps  => ebands_vcbm_range_from_gaps     ! Find band and energy range for states close to the CBM/VBM given input energies.
- procedure :: apply_scissors        => ebands_apply_scissors           ! Apply scissors operator (no k-dependency)
+ procedure :: apply_scissors        => ebands_apply_scissors           ! Apply scissors operator (no k-dependency).
+ procedure :: read_qpdata           => ebands_read_qpdata              ! Read quasi-particle energies from file, update %eig and %fermi_energy
  procedure :: get_occupied          => ebands_get_occupied             ! Returns band indices after which occupations are less than an input value.
  procedure :: enclose_degbands      => ebands_enclose_degbands         ! Adjust band indices such that all degenerate states are treated.
  procedure :: get_bands_e0          => ebands_get_bands_e0             ! Find min/max band indices crossing energy e0
@@ -1707,7 +1708,7 @@ end function ebands_vcbm_range_from_gaps
 !!  Apply a scissor operator of amplitude scissor_energy.
 !!
 !! INPUTS
-!!  scissor_energy=The energy shift
+!!  scissor_energy=The energy shift in Hartree.
 !!
 !! OUTPUT
 !!
@@ -1740,7 +1741,7 @@ subroutine ebands_apply_scissors(ebands, scissor_energy)
    if (any(val_idx(:, spin) /= val_idx(1, spin))) then
      write(msg,'(a,i0,a)')&
       'Trying to apply a scissor operator on a metallic band structure for spin: ',spin,&
-      'Assuming you know what you are doing, continuing anyway! '
+      'Assuming you know what you are doing, continuing anyway!'
      ABI_COMMENT(msg)
      !Likely newocc will stop, unless the system is semimetallic ?
    end if
@@ -1758,7 +1759,7 @@ subroutine ebands_apply_scissors(ebands, scissor_energy)
        write(msg,'(2a,4(a,i0))')&
         'Not enough bands to apply the scissor operator. ',ch10,&
         'spin: ',spin,' ikpt: ',ikpt,' nband_k: ',nband_k,' but valence index: ',ival
-       ABI_COMMENT(msg)
+       ABI_ERROR(msg)
      end if
 
    end do
@@ -1770,6 +1771,157 @@ subroutine ebands_apply_scissors(ebands, scissor_energy)
  call ebands%update_occ(spinmagntarget_)
 
 end subroutine ebands_apply_scissors
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_read_qpdata
+!! NAME
+!!  ebands_read_qpdata
+!!
+!! FUNCTION
+!!  Read quasi-particle energies from QPDATA file, update %eig and %fermi_energy
+!!  The QPDATA is a text file usually produced by a python post-processing script
+!!
+!! INPUTS
+!!
+!! SIDE EFFECT
+!!  ebands<ebands_t>=The following quantities are modified:
+!!   %eig(mband,nkpt,nsppol)=The band structure after the application of the scissor operator
+!!   %fermi_energy
+!!
+!! SOURCE
+
+subroutine ebands_read_qpdata(qp_ebands, ks_ebands, filepath, comm)
+
+!Arguments ------------------------------------
+ class(ebands_t),intent(out) :: qp_ebands
+ class(ebands_t),intent(in) :: ks_ebands
+ character(len=*),intent(in) :: filepath
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+ integer,parameter :: master = 0
+ integer :: units(2), irec, unt, nkibz_file, nsppol_file, nspinor_file, ii
+ integer :: spin, b_start, b_stop, b_stop__, ikpt, nband_k, version, ierr
+ real(dp),parameter :: ktol = tol6
+ real(dp) :: kpt(3), spinmagntarget_, delta
+ character(len=500) :: msg, err_msg
+!arrays
+ integer :: ifound(ks_ebands%nkpt, ks_ebands%nsppol)
+ integer, allocatable :: iperm(:)
+ real(dp),allocatable :: re_enes(:), im_enes(:)
+! *************************************************************************
+
+ units = [std_out, ab_out]
+
+ ! Start by copying the input bands.
+ call ks_ebands%copy(qp_ebands)
+
+ ! Only master read data and broadcast results.
+ ! File format of QPDATA file with energies in eV units.
+ !
+ ! # Comment
+ ! version
+ ! nkibz, nsppol
+ ! for spin in range(nsppol):
+ !   for kpoint in kpoints:
+ !      kpoint spin b_start, b_stop
+ !      real_energies_ev
+ !      imag_energies_ev
+
+ if (xmpi_comm_rank(comm) == master) then
+   call wrtout(units, sjoin("- Reading QP energies from:", filepath, ch10))
+   if (open_file(filepath, msg, newunit=unt, form="formatted", action="read") /= 0) then
+     ABI_ERROR(msg)
+   end if
+
+   ! Read dimensions + consistency check.
+   read(unt, *, err=10, iomsg=err_msg) msg
+   read(unt, *, err=10, iomsg=err_msg) version
+   read(unt, *, err=10, iomsg=err_msg) nkibz_file, nsppol_file, nspinor_file
+   call wrtout(units, msg)
+   call wrtout(units, sjoin("nkibz_file:", itoa(nkibz_file), ", nsppol_file:", itoa(nsppol_file)))
+
+   ABI_CHECK_IEQ(ks_ebands%nkpt, nkibz_file, "Different number of k-points.")
+   ABI_CHECK_IEQ(ks_ebands%nsppol, nsppol_file, "Different number of spins.")
+   ABI_CHECK_IEQ(ks_ebands%nspinor, nspinor_file, "Different values of nspinor.")
+
+   ! Read records.
+   ifound = 0
+   do irec=1, nkibz_file * nsppol_file
+     !write(std_out, *) "Reading record", irec
+     read(unt, *, err=10, iomsg=err_msg) kpt, spin, b_start, b_stop
+     ! Find k-point in ks_ebands%kptns.
+     do ikpt=1,ks_ebands%nkpt
+       if (all(abs(ks_ebands%kptns(:, ikpt) - kpt) < ktol)) exit
+     end do
+     ABI_CHECK_ILEQ(ikpt, ks_ebands%nkpt, sjoin("Cannot find k-point:", ktoa(kpt)))
+
+     nband_k = ks_ebands%nband(ikpt+(spin-1)*ks_ebands%nkpt)
+     ifound(ikpt, spin) = ifound(ikpt, spin) + 1
+
+     ABI_CHECK_ILEQ(b_start, b_stop, "b_start cannot be greater than b_stop")
+     !write(std_out, *) "About to read energies"
+
+     ! Read new energies (first real, then imaginary part)
+     ABI_MALLOC(re_enes, (b_start:b_stop))
+     ABI_MALLOC(im_enes, (b_start:b_stop))
+     read(unt, *, err=10, iomsg=err_msg) re_enes
+     read(unt, *, err=10, iomsg=err_msg) im_enes
+     re_enes = re_enes * eV_Ha
+     im_enes = im_enes * eV_Ha
+
+     if (b_start /= 1) then
+       call wrtout(units, " Extrapolating QP energies for low-energy states with band-independent shift.")
+       delta = re_enes(b_start) - ks_ebands%eig(b_start, ikpt, spin)
+       qp_ebands%eig(1:b_start-1, ikpt, spin) = qp_ebands%eig(1:b_start-1, ikpt, spin) + delta
+     end if
+
+     b_stop__  = min(b_stop, nband_k)
+     if (b_stop__ /= nband_k) then
+       call wrtout(units, " Extrapolating QP energies for high-energy states with band-independent shift.")
+       delta = re_enes(b_stop__) - ks_ebands%eig(b_stop__, ikpt, spin)
+       qp_ebands%eig(b_stop__:nband_k, ikpt, spin) = qp_ebands%eig(b_stop__:nband_k, ikpt, spin) + delta
+     end if
+
+     ! Update energies with results from QPDATA file.
+     qp_ebands%eig(b_start:b_stop__, ikpt, spin) = re_enes(b_start:b_stop__)
+
+     ! Make sure energies are sorted.
+     ABI_MALLOC(iperm, (nband_k))
+     iperm = [(ii, ii=1, nband_k)]
+     call sort_dp(nband_k, qp_ebands%eig(:, ikpt, spin), iperm, tol6)
+     ABI_FREE(iperm)
+
+     ABI_FREE(re_enes)
+     ABI_FREE(im_enes)
+   end do ! irec
+
+   close(unt)
+
+   ! Final consistency check
+   if (any(ifound /= 1)) then
+     write(std_out)" ifound:", ifound
+     ABI_ERROR("Not all k-points and spins have been found!")
+   end if
+
+ end if ! master
+
+ ! Master broadcasts final results.
+ call xmpi_bcast(qp_ebands%eig, master, comm, ierr)
+
+ ! Recalculate the Fermi level and occupation factors.
+ ! For Semiconductors only the Fermi level is changed (in the middle of the new gap)
+ spinmagntarget_ = -99.99_dp !?; if (PRESENT(spinmagntarget)) spinmagntarget_=spinmagntarget
+ call qp_ebands%update_occ(spinmagntarget_)
+
+ return
+
+10 continue
+ ABI_ERROR(err_msg)
+
+end subroutine ebands_read_qpdata
 !!***
 
 !----------------------------------------------------------------------

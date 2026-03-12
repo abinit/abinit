@@ -82,7 +82,7 @@ module m_gwr_driver
  use m_vhxc_me,         only : calc_vhxc_me
  use m_gwr,             only : gwr_t
  use m_vcoul,           only : vcgen_t
- !use m_ephtk,          only : ephtk_update_ebands
+ use m_ephtk,           only : ephtk_update_ebands
  use m_pstat,           only : pstat_proc
 
  implicit none
@@ -523,7 +523,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_energies%paw,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
      Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
-     Cryst%xred,Cryst%ucvol,Psps%znuclpsp)
+     Cryst%xred,Cryst%ucvol,Psps%znuclpsp,Dtset%spinaxis)
 
  else
    ABI_MALLOC(ks_nhatgr, (0, 0, 0))
@@ -629,7 +629,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
                Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
                k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,&
                ks_vxc,Cryst%xred,Dtset%znucl,&
-               nucdipmom=Dtset%nucdipmom)
+               nucdipmom=Dtset%nucdipmom,spinaxis=Dtset%spinaxis)
 
    ! Symmetrize KS Dij
    call symdij_all(Cryst%gprimd,Cryst%indsym,ipert0,&
@@ -892,7 +892,7 @@ end if
 
      ! Here we change the GS bands (Fermi level, scissors operator ...)
      ! All the modifications to ebands should be done here.
-     !call ephtk_update_ebands(dtset, ks_ebands, "Ground state energies")
+     !call ephtk_update_ebands(dtset, dtfil%filqpdatain, ks_ebands, "Ground state energies", comm)
    end if
    call pstat_proc%print(_PSTAT_ARGS_)
 

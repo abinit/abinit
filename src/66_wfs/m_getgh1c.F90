@@ -165,10 +165,10 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  real(dp),allocatable :: cwave_sp(:,:),cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: gh1c_sp(:,:),gh1c1(:,:),gh1c2(:,:),gh1c3(:,:),gh1c4(:,:)
  real(dp),allocatable :: gh1c_mGGA(:,:),gh1ndc(:,:),gvnl2(:,:)
- real(dp),allocatable :: nonlop_out(:,:),vlocal1_tmp(:,:,:)
+ real(dp),target,allocatable :: nonlop_out(:,:),vlocal1_tmp(:,:,:)
 #define _DEV_USE_WORK
 #ifdef _DEV_USE_WORK
- real(dp),allocatable :: work(:,:,:,:)
+ real(dp),target,allocatable :: work(:,:,:,:)
 #endif
  real(dp),contiguous, pointer :: gvnlx1_(:,:), dkinpw(:),kinpw1(:)
  type(pawcprj_type),allocatable,target :: cwaveprj_tmp(:,:)

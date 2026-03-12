@@ -246,7 +246,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(c_double), contiguous, pointer :: gvnlc(:,:)
  real(c_double), contiguous, pointer :: gvnlxc_(:,:)
 #else
- real(dp), allocatable            :: gvnlc(:,:)
+ real(dp), target, allocatable                :: gvnlc(:,:)
  real(dp), contiguous, pointer                :: gvnlxc_(:,:)
 #endif
  real(dp), allocatable            :: vlocal_tmp(:,:,:), work(:,:,:,:)
@@ -1086,6 +1086,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        if (gs_ham%usepaw==1) gsc_ptr => gsc
 
        ! Apply Vnl{k-q/2} to u^up
+       gs_ham%ispin_gbt = 1
        call cg_copy_spin(1, npw_k1, nspinortot, ndat, cwavef, cwavef_spin)
        call nonlop(choice, cpopt_here, cwaveprj_nonlop, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
                    nnlout, paw_opt, signs, gsc_ptr, tim_nonlop, cwavef_spin, gvnlxc_spin, select_k=K_H_K)
@@ -1094,6 +1095,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
        ! Apply H_{k+q/2} to u^down
        !gvnlxc_spin = zero
+       gs_ham%ispin_gbt = 2
        call cg_copy_spin(2, npw_k1, nspinortot, ndat, cwavef, cwavef_spin)
        call nonlop(choice, cpopt_here, cwaveprj_nonlop, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
                    nnlout, paw_opt, signs, gsc_ptr, tim_nonlop, cwavef_spin, gvnlxc_spin, select_k=KPRIME_H_KPRIME)
