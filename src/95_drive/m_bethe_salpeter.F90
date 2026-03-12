@@ -589,7 +589,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call pawdenpot(compch_sph,el_temp,Cryst%gprimd,ipert0,Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_energies%paw,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
-     Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%xred,Cryst%ucvol,Psps%znuclpsp)
+     Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,Cryst%xred,Cryst%ucvol,Psps%znuclpsp,Dtset%spinaxis)
  end if !PAW
 
  if (.not.allocated(ks_nhatgr))  then
@@ -672,7 +672,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
      Dtset%nspden,Cryst%ntypat,KS_paw_an,KS_paw_ij,Pawang,Pawfgrtab,&
      Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
      k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,ks_vxc,Cryst%xred,&
-     Dtset%znucl,nucdipmom=Dtset%nucdipmom)
+     Dtset%znucl,nucdipmom=Dtset%nucdipmom,spinaxis=Dtset%spinaxis)
 
    ! Symmetrize KS Dij
    call symdij(Cryst%gprimd,Cryst%indsym,ipert0,&

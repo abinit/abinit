@@ -71,6 +71,12 @@ target_link_libraries(70_gw
   abinit::69_wfdesc
   )
 
+set_source_files_properties(
+    m_plowannier.F90
+    PROPERTIES
+    COMPILE_OPTIONS "-O1"
+)
+
 if(OpenMP_FOUND)
   target_link_libraries(70_gw
     PUBLIC
