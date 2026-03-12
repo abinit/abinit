@@ -598,7 +598,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
      call orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm,suppress_ormesh=.TRUE.)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph1d,trnrm)
 
      ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
      call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,&
@@ -1158,7 +1158,7 @@ end subroutine orbmag_nl_k
 !! SOURCE
 
 subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,trnrm,&
+    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph1d,trnrm,&
     & suppress_ormesh)
 
   !Arguments ------------------------------------
@@ -1175,6 +1175,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: eig_k(nband_k),trnrm(nband_k)
   real(dp),intent(in),target :: gcg1_k(2,mcgk,3)
+  real(dp),intent(in),pointer,dimension(:,:) :: ph1d
   type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,mcprjk,3)
 
   !Local variables -------------------------
@@ -1182,13 +1183,13 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
   integer :: adir,bdir,cpopt,fourwf_cplex,fourwf_option,gdir,iatom,ipw,ndat
   integer :: nn,npwsp,sij_opt,t_atom,tim_fourwf,tim_getghc,type_calc
   real(dp) :: epsabg,lams,weight_i,weight_r
-  complex(dp) :: mfac,ormeshfac,prefac_b,prefac_m
+  complex(dp) :: ormesh_fac,prefac_b,prefac_m
   logical :: my_suppress_ormesh,need_ormesh
   !arrays
   real(dp) bdot(2),mdot(2)
   real(dp),allocatable :: denpot(:,:,:),fofgout(:,:)
   real(dp),allocatable,target :: fofr(:,:,:,:)
-  real(dp),allocatable :: ghc(:,:),ghc_scale(:,:),gsc(:,:),gvnlxc(:,:)
+  real(dp),allocatable :: ghc(:,:),gsc(:,:),gvnlxc(:,:)
   real(dp),pointer :: bra(:,:),ket(:,:)
   complex(dp) :: m1(3),b1(3)
   type(pawcprj_type),allocatable :: cwaveprj1(:,:)
@@ -1199,9 +1200,6 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
  else
    my_suppress_ormesh=.FALSE.
  end if
- fourwf_cplex = 1
- fourwf_option = 0
- tim_fourwf = 1
  npwsp = npw_k*dtset%nspinor
  need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
 
@@ -1222,7 +1220,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
    ! need atom index with dipole for ph3d use below
    do iatom = 1, dtset%natom
      if ( ANY(ABS(dtset%nucdipmom(1:3,iatom))>tol8) ) then
-       t_atom = iatom
+       t_atom = atindx(iatom)
        exit
      end if
    end do
@@ -1250,14 +1248,14 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
      ghc(1:2,1:npwsp) = ghc(1:2,1:npwsp) + gsc(1:2,1:npwsp)*(eig_k(nn) - two*fermie)
      
      if (need_ormesh) then
-       ABI_MALLOC(ghc_scale,(2,npwsp))
-       ghc_scale(1:2,1:npwsp) = trnrm(nn)*ghc(1:2,1:npwsp)
-       call fourwf(fourwf_cplex,denpot,ghc_scale,fofgout,fofr,gs_hamk%gbound_k,&
+       fourwf_cplex = 1
+       fourwf_option = 0
+       tim_fourwf = 1
+       call fourwf(fourwf_cplex,denpot,ghc,fofgout,fofr,gs_hamk%gbound_k,&
          & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
          & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
          & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,fourwf_option,&
          & tim_fourwf,weight_r,weight_i)
-       ABI_SFREE(ghc_scale)
      end if
 
      do bdir = 1, 3
@@ -1275,13 +1273,11 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,i
          m1(adir) = m1(adir) + prefac_m*CMPLX(mdot(1),mdot(2))
          b1(adir) = b1(adir) - two*prefac_b*CMPLX(bdot(1),bdot(2))
          
-         !if (need_ormesh) then
-         !  ! this factor needs further study, feel like it should be +1 not -1
-         !  mfac=CMPLX(one,zero)
-         !  call orbmag_mesh%accum_rmesh(adir,bra,fofr,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
-         !    & dtset%natom,npw_k,gs_hamk%ph3d_k,prefac_m,t_atom,incc,&
-         !    & mult_fact=mfac)
-         !end if
+         if (need_ormesh) then
+           ormesh_fac = trnrm(nn)*prefac_m
+           call orbmag_mesh%accum_rmesh(adir,bra,dtset,fofr,gs_hamk,npw_k,&
+             & ph1d,ormesh_fac,t_atom,incc)
+         end if
        
        end do ! adir
    
@@ -2217,11 +2213,11 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
   !Local variables -------------------------
   !scalars
   integer :: fourwf_cplex,fourwf_option,iat,iatom,ig,isp,itypat
-  integer :: il,ilmn,ipw,jl,jlmn,kg1,kg2,kg3,klmn,n1,n2,n3,n4,n5,n6,ndat,nfft,npwsp
-  integer :: shift1,shift2,shift3,t_atom,tim_fourwf
+  integer :: il,ilmn,ipw,jl,jlmn,klmn,n4,n5,n6,ndat,nfft,npwsp
+  integer :: t_atom,tim_fourwf
   logical :: my_suppress_ormesh,need_ormesh
   real(dp) :: weight_i,weight_r
-  complex(dp) :: cpi,cpj,crvec,dij,ormesh_fac,ph1,ph2,ph3
+  complex(dp) :: cpi,cpj,dij,ormesh_fac
   !arrays
   real(dp),allocatable,target :: fofgin(:,:),fofr(:,:,:,:)
   real(dp),allocatable :: denpot(:,:),fofgout(:,:)
@@ -2238,7 +2234,6 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
   npwsp = npw_k*dtset%nspinor
   need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
 
-  n1=dtset%ngfft(1); n2=dtset%ngfft(2); n3=dtset%ngfft(3)
   n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6)
 
   if (need_ormesh) then
