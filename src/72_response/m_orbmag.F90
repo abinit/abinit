@@ -607,7 +607,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 Eq. 36 term 1
      call orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,trnrm,suppress_ormesh=.TRUE.)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,ph1d,trnrm)
 
      ! ZTG23 text after Eq. 42
      nl1_option = 1 ! LR
@@ -1038,7 +1038,7 @@ end subroutine orbmag_nl1_k
 !! SOURCE
 
 subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
-    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,trnrm,&
+    & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,ph1d,trnrm,&
     & suppress_ormesh)
 
   !Arguments ------------------------------------
@@ -1055,6 +1055,7 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in),target :: cg_k(2,mcgk)
   real(dp),intent(in) :: eig_k(nband_k),trnrm(nband_k)
+  real(dp),intent(in),pointer,dimension(:,:) :: ph1d
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -1097,7 +1098,7 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,
          prefac_m = -com*c2*epsabg
 
          call txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,&
-           & nn,mpi_enreg,nband_k,npw_k,orbmag_mesh,innl,pawtab,prefac_m,txt,&
+           & nn,mpi_enreg,nband_k,npw_k,orbmag_mesh,innl,pawtab,ph1d,prefac_m,txt,&
            & trnrm(nn),cwaveprj,&
            & suppress_ormesh=my_suppress_ormesh)
        
@@ -2026,7 +2027,7 @@ end subroutine lamb_core
 !! SOURCE
 
 subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,&
-    & mpi_enreg,nband_k,npw_k,orbmag_mesh,oterm,pawtab,prefac_m,txt,trnrm,ucprj,&
+    & mpi_enreg,nband_k,npw_k,orbmag_mesh,oterm,pawtab,ph1d,prefac_m,txt,trnrm,ucprj,&
     & suppress_ormesh)
 
   !Arguments ------------------------------------
@@ -2046,6 +2047,7 @@ subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,&
   integer,intent(in) :: atindx(dtset%natom)
   real(dp),intent(in) :: eig_k(nband_k)
   real(dp),intent(in),pointer :: cwavef(:,:)
+  real(dp),intent(in),pointer :: ph1d(:,:)
   type(pawcprj_type),intent(in) :: ucprj(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -2074,7 +2076,7 @@ subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,&
   if (need_ormesh) then
     do iat = 1, dtset%natom
       if ( ANY(ABS(dtset%nucdipmom(1:3,iat))>tol8) ) then
-        t_atom = iat
+        t_atom = atindx(iat)
         exit
       end if
     end do
@@ -2090,7 +2092,7 @@ subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,&
     do isp = 1, dtset%nspinor
       do jlmn = 1, pawtab(itypat)%lmn_size
   
-        if (need_ormesh .AND. iat.EQ.t_atom) then
+        if (need_ormesh .AND. iatom.EQ.t_atom) then
           ABI_MALLOC(fofgin,(2,npwsp))
           fofgin(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+gdir,jlmn,itypat)*cwavef(1,1:npwsp)
           fofgin(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+gdir,jlmn,itypat)*cwavef(2,1:npwsp)
@@ -2114,18 +2116,17 @@ subroutine txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,iband,&
           dcpj = CMPLX(ucprj(iatom,isp)%dcp(1,gdir,jlmn),ucprj(iatom,isp)%dcp(2,gdir,jlmn))
           txt = txt + prefac_m*CONJG(dcpi)*dij*dcpj
 
-          !if (need_ormesh .AND. iat.EQ.t_atom) then
-          !  jl = pawtab(itypat)%indlmn(1,jlmn)
-          !  il = pawtab(itypat)%indlmn(1,ilmn)
-          !  ormesh_fac = trnrm*prefac_m*dij*four_pi*CONJG(j_dpc**il)*four_pi*(j_dpc**jl)
-          !  ABI_MALLOC(fofgin,(2,npwsp))
-          !  fofgin(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+bdir,ilmn,itypat)*cwavef(1,1:npwsp)
-          !  fofgin(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+bdir,ilmn,itypat)*cwavef(2,1:npwsp)
-          !  call orbmag_mesh%accum_rmesh(adir,fofgin,fofr,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
-          !    & dtset%natom,npw_k,gs_hamk%ph3d_k,cone,t_atom,oterm,&
-          !    & mult_fact=ormesh_fac,conjg_flag=.FALSE.)
-          !  ABI_FREE(fofgin)
-          !end if
+          if (need_ormesh .AND. iatom.EQ.t_atom) then
+            jl = pawtab(itypat)%indlmn(1,jlmn)
+            il = pawtab(itypat)%indlmn(1,ilmn)
+            ormesh_fac = trnrm*prefac_m*dij*four_pi*CONJG(j_dpc**il)*four_pi*(j_dpc**jl)
+            ABI_MALLOC(fofgin,(2,npwsp))
+            fofgin(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+bdir,ilmn,itypat)*cwavef(1,1:npwsp)
+            fofgin(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+bdir,ilmn,itypat)*cwavef(2,1:npwsp)
+            call orbmag_mesh%accum_rmesh(adir,fofgin,dtset,fofr,gs_hamk,npw_k,&
+              & ph1d,ormesh_fac,t_atom,oterm)
+            ABI_SFREE(fofgin)
+          end if
           
           if (dterm%ndij == 4) then
             if (isp == 1) then
