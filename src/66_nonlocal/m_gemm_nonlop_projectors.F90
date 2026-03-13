@@ -8,7 +8,7 @@
 !!  which leads to excellent CPU efficiency and OpenMP scalability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2025 ABINIT group (AL)
+!! Copyright (C) 2014-2026 ABINIT group (AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,6 +39,7 @@ module m_gemm_nonlop_projectors
  use m_xomp
  use m_xmpi
  use m_fstrings,    only : itoa, ftoa, sjoin
+ use m_gputk
  use m_abi_linalg
 
  use defs_abitypes, only : MPI_type
@@ -53,9 +54,7 @@ module m_gemm_nonlop_projectors
  use m_alloc_hamilt_gpu, only : gemm_nonlop_gpu_data
 #endif
 
-#ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc, c_ptr
-#endif
 
  implicit none
 
@@ -977,7 +976,8 @@ contains
           !$OMP& PRIVATE(ipw,ilmn) MAP(to:projs,atom_projs)
           do ilmn=1,nlmn-(lmn_beg-1)
             do ipw=1,npw
-              projs(:, ipw, shift+ilmn) = atom_projs(:, ipw, ilmn+(lmn_beg-1))
+              projs(1, ipw, shift+ilmn) = atom_projs(1, ipw, ilmn+(lmn_beg-1))
+              projs(2, ipw, shift+ilmn) = atom_projs(2, ipw, ilmn+(lmn_beg-1))
             end do
           end do
         else ! istwf_k>1
@@ -1387,7 +1387,7 @@ contains
         if(istwf_k <= 1) then
 #ifdef HAVE_OPENMP_OFFLOAD
           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-          !$OMP& PRIVATE(ilmn,ipw,idir,idir1,idir2) MAP(to:atom_dprojs,dprojs,kpg,ipw,idir,idir1,idir2) &
+          !$OMP& PRIVATE(ilmn,ipw,idir,idir1,idir2) MAP(to:atom_dprojs,dprojs,kpg) &
           !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
           do ilmn=lmn_beg,nlmn

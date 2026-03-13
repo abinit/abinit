@@ -29,7 +29,7 @@ outdata_prefix = "trf2_4o"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain = trf2_1.abi, trf2_2.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
+#%% test_chain = trf2_1.abi, trf2_2.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi
 #%% [files]
 #%% files_to_test = 
 #%%   trf2_4.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00

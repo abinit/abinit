@@ -72,38 +72,38 @@ isotope of oxygen with a non-zero quadrupole moment.
 After running the file *tnuc_1.abi* through Abinit, you can find the following
 near the end of the output file:
 
-	Electric Field Gradient Calculation 
+    Electric Field Gradient Calculation
 
 
-	   atom :    1   typat :    1
+       atom :    1   typat :    1
 
-	   Nuclear quad. mom. (barns) :    1.0000   Cq (MHz) :    0.0000   eta :    0.0000
+       Nuclear quad. mom. (barns) :    0.0000   Cq (MHz) :    0.0000   eta :    0.0000
 
-	      efg eigval (au) :     -0.152323 ; (V/m^2) :  -1.48017693E+21
-	-         eigvec :     -0.000000    -0.000000    -1.000000
+          efg eigval (au) :     -0.152323 ; (1.0E+21 V/m^2) :      -1.48017682
+    -         eigvec :      0.000000     0.000000    -1.000000
 
-	      efg eigval (au) :     -0.054274 ; (V/m^2) :  -5.27401886E+20
-	-         eigvec :      0.707107    -0.707107     0.000000
+          efg eigval (au) :     -0.054274 ; (1.0E+21 V/m^2) :      -0.52740185
+    -         eigvec :      0.707107    -0.707107     0.000000
 
-	      efg eigval (au) :      0.206597 ; (V/m^2) :   2.00757882E+21
-	-         eigvec :      0.707107     0.707107    -0.000000
+          efg eigval (au) :      0.206597 ; (1.0E+21 V/m^2) :       2.00757867
+    -         eigvec :      0.707107     0.707107     0.000000
 
-	      total efg :      0.076161     0.130436    -0.000000
-	      total efg :      0.130436     0.076161    -0.000000
-	      total efg :     -0.000000    -0.000000    -0.152323
+          total efg :      0.076161     0.130436     0.000000
+          total efg :      0.130436     0.076161     0.000000
+          total efg :      0.000000     0.000000    -0.152323
 
 
-	      efg_el :      0.095557     0.004024    -0.000000
-	      efg_el :      0.004024     0.095557    -0.000000
-	      efg_el :     -0.000000    -0.000000    -0.191114
+          efg_el :      0.095557     0.004024     0.000000
+          efg_el :      0.004024     0.095557     0.000000
+          efg_el :      0.000000     0.000000    -0.191114
 
-	      efg_ion :     -0.099183     0.005966     0.000000
-	      efg_ion :      0.005966    -0.099183     0.000000
-	      efg_ion :      0.000000     0.000000     0.198365
+          efg_ion :     -0.099183     0.005966     0.000000
+          efg_ion :      0.005966    -0.099183     0.000000
+          efg_ion :      0.000000     0.000000     0.198365
 
-	      efg_paw :      0.079787     0.120445     0.000000
-	      efg_paw :      0.120445     0.079787     0.000000
-	      efg_paw :      0.000000     0.000000    -0.159574
+          efg_paw :      0.079787     0.120445     0.000000
+          efg_paw :      0.120445     0.079787     0.000000
+          efg_paw :      0.000000     0.000000    -0.159574
 
 This fragment gives the gradient at the first atom, which was silicon. Note
 that the gradient is not zero, but the coupling is---that's because the
@@ -112,39 +112,39 @@ nothing in the nucleus for it to couple to.
 
 Atom 3 is an oxygen atom, and its entry in the output is:
 
-	   atom :    3   typat :    2
+       atom :    3   typat :    2
 
-	   Nuclear quad. mom. (barns) :   -0.0256   Cq (MHz) :    6.6150   eta :    0.1403
+       Nuclear quad. mom. (barns) :   -0.0256   Cq (MHz) :    6.6150   eta :    0.1403
 
-	      efg eigval (au) :     -1.100599 ; (V/m^2) :  -1.06949233E+22
-	-         eigvec :      0.707107    -0.707107     0.000000
+          efg eigval (au) :     -1.100599 ; (1.0E+21 V/m^2) :     -10.69492247
+    -         eigvec :      0.707107    -0.707107     0.000000
 
-	      efg eigval (au) :      0.473085 ; (V/m^2) :   4.59714112E+21
-	-         eigvec :      0.000000     0.000000    -1.000000
+          efg eigval (au) :      0.473085 ; (1.0E+21 V/m^2) :       4.59714077
+    -         eigvec :     -0.000000    -0.000000     1.000000
 
-	      efg eigval (au) :      0.627514 ; (V/m^2) :   6.09778216E+21
-	-         eigvec :      0.707107     0.707107     0.000000
+          efg eigval (au) :      0.627514 ; (1.0E+21 V/m^2) :       6.09778170
+    -         eigvec :     -0.707107    -0.707107    -0.000000
 
-	      total efg :     -0.236543     0.864057     0.000000
-	      total efg :      0.864057    -0.236543     0.000000
-	      total efg :      0.000000     0.000000     0.473085
+          total efg :     -0.236543     0.864057     0.000000
+          total efg :      0.864057    -0.236543     0.000000
+          total efg :      0.000000     0.000000     0.473085
 
 
-	      efg_el :     -0.036290    -0.075078     0.000000
-	      efg_el :     -0.075078    -0.036290     0.000000
-	      efg_el :      0.000000     0.000000     0.072579
+          efg_el :     -0.036290    -0.075078     0.000000
+          efg_el :     -0.075078    -0.036290     0.000000
+          efg_el :      0.000000     0.000000     0.072579
 
-	      efg_ion :     -0.016807     0.291185    -0.000000
-	      efg_ion :      0.291185    -0.016807    -0.000000
-	      efg_ion :     -0.000000    -0.000000     0.033615
+          efg_ion :     -0.016807     0.291185    -0.000000
+          efg_ion :      0.291185    -0.016807    -0.000000
+          efg_ion :      0.000000     0.000000     0.033615
 
-	      efg_paw :     -0.183446     0.647950     0.000000
-	      efg_paw :      0.647950    -0.183446     0.000000
-	      efg_paw :      0.000000     0.000000     0.366891
- 
+          efg_paw :     -0.183446     0.647950     0.000000
+          efg_paw :      0.647950    -0.183446     0.000000
+          efg_paw :      0.000000     0.000000     0.366891
+
 Now we see the electric field gradient coupling, in frequency units, along
 with the asymmetry of the coupling tensor, and, finally, the three
-contributions to the total. Note that the valence part, efg_el, is 
+contributions to the total. Note that the valence part, efg_el, is
 small, while the ionic part and the on-site PAW part are larger. In fact, the
 PAW part is largest; this is why these calculations give very poor results
 with norm-conserving pseudopotentials, and need the full accuracy of PAW to capture
@@ -153,7 +153,7 @@ Experimentally, the nuclear quadrupole coupling for O-17 in stishovite is
 reported as $6.5\pm 0.1$ MHz, with asymmetry $0.125\pm 0.05$ [[cite:Xianyuxue1994]].
 It is not uncommon for PAW-based EFG calculations to give coupling values a few percent
 too large; often this can be improved by using PAW datasets with smaller PAW
-radii, at the expense of more expensive calculations [[cite:Zwanziger2016]]. 
+radii, at the expense of more expensive calculations [[cite:Zwanziger2016]].
 
 ## Fermi contact interaction
 
@@ -205,33 +205,33 @@ with other calculations of 6--7$\times 10^{-3}\mathrm{fm}^2$ [[cite:Svane1987]],
 
 ## Magnetic shielding
 
-The magnetic (chemical) shielding is routinely measured in NMR spectroscopy, and arises from the orbital 
+The magnetic (chemical) shielding is routinely measured in NMR spectroscopy, and arises from the orbital
 currents induced by an external magnetic field. From an energetic point of view, it can be
 understood as the joint response between an external magnetic field, and the nuclear magnetic
 dipole moment at an atomic site, that is,
 $$ \sigma_{ij} = \frac{\partial^2 E}{\partial m_i\partial B_j} $$
-for shielding $\sigma$ and magnetic dipole $m$. 
+for shielding $\sigma$ and magnetic dipole $m$.
 The total energy could then be viewed as
 $$ E = E^0 - m\cdot B + m_i\sigma_{ij}B_j, $$
-where the first term is the unperturbed energy, the second is the Zeeman interaction, 
+where the first term is the unperturbed energy, the second is the Zeeman interaction,
 and the third involves the shielding.
-The effect can thus be viewed either as a bare dipole interacting with a 
+The effect can thus be viewed either as a bare dipole interacting with a
 shielded magnetic field (the traditional view),
-or conversely [[cite:Thonhauser2009]] [[cite:Ceresoli2010]], 
+or conversely [[cite:Thonhauser2009]] [[cite:Ceresoli2010]],
 a shielded dipole interacting with the bare magnetic field. In Abinit we adopt
 the second view point, and so compute the perturbed energy $\partial E/\partial B$ in the
-presence of a nuclear dipole moment. The necessary expressions are found 
+presence of a nuclear dipole moment. The necessary expressions are found
 in [[cite:Zwanziger2023]], see also [[cite:Gonze2011a]] [[cite:Ceresoli2006]], and
 are quite complex; in highly abbreviated form we evaluate
-$$ \partial E/\partial B_\alpha = -M_{\alpha} = \frac{i}{2}\epsilon_{\alpha\beta\gamma}\sum_n^{\mathrm{occ}} \int d\mathbf{k} 
+$$ \partial E/\partial B_\alpha = -M_{\alpha} = \frac{i}{2}\epsilon_{\alpha\beta\gamma}\sum_n^{\mathrm{occ}} \int d\mathbf{k}
 \langle \partial_{k_\beta} u_{n\mathbf{k}}|(H_{\mathbf{k}}+E_{\mathbf{k}})|\partial_{k_\gamma} u_{n\mathbf{k}}\rangle $$
-for the induced magnetic moment $M$ in direction $\alpha$. 
+for the induced magnetic moment $M$ in direction $\alpha$.
 Notice the implied summation over the antisymmetric unit tensor $\epsilon_{\alpha\beta\gamma}$;
 the structure is hence that of a cross product, which yields the circulation induced by the Hamiltonian.
 In the full PAW treatment implemented in Abinit there are a number of other related terms as well. Note
 in this expression the appearance of the derivatives of the wavefunctions; these are obtained from the DDK
-perturbation in Abinit, as was examined in 
-[tutorial DFPT1](/tutorial/rf1) ). 
+perturbation in Abinit, as was examined in
+[tutorial DFPT1](/tutorial/rf1) ).
 
 Carrying out the calculation in Abinit is a two-step process: first, the ground state wavefunctions must be calculated
 in the presence of a nuclear magnetic dipole moment, on the atom of interest in the direction of interest; then these
@@ -265,8 +265,8 @@ minutes or so. After completion you will find in the output file:
 
     Orbital magnetic moment, Cartesian directions :
     -5.54877537E-04  6.30837909E-15  4.28342968E-15
-    
-    
+
+
     Chern vector, Cartesian directions :
     -2.52162344E-09  1.10115145E-17  6.96089655E-18
 
@@ -277,7 +277,7 @@ the shielding, divide by the dipole strength (here, 1), and multiply by
 554.9~ppm. This result is underconverged--the fully converged result,
 with [[ecut]]=30, is 552.1 ppm. For comparison, the all-electron,
 wavefunction-based calculation using post-Hartree-Fock CCSD(T) of
-[[cite:Vaara2003relativistic]] yields 551.9 ppm, so clearly the
+[[cite:Vaara2003]] yields 551.9 ppm, so clearly the
 present method is capable of excellent accuracy.  The second line is
 the Chern vector [[cite:Ceresoli2006]], that is, the integral of the
 Berry curvature, which outside of exotic topological insulators,
@@ -287,23 +287,25 @@ calculations one would like numbers about 3 orders of magnitude
 smaller.
 
 A final detail to note: the induced moment due to the filled core
-orbitals, is due to what is called the Lamb shielding. Usual PAW
-datasets do not include this value, but you can add it to your input
-file with the variable [[lambsig]]. To compute it you must obtain the
-core wavefunctions, which is a normal option in Atompaw (see [tutorial
-PAW2](/tutorial/paw2)). Then, you can integrate the core wavefunctions
-to generate the Lamb shielding, through
+orbitals, is due to what is called the Lamb shielding, which has
+the form
 
-$$ \sigma_{Lamb} = \frac{\alpha^2}{3}\sum^{cores}_n \left\langle\psi_n|\frac{1}{r}|\psi_n\right\rangle $$
+$$ \sigma_{Lamb} = \frac{\alpha^2}{3}\sum^{cores}_n \left\langle\psi_n|\frac{1}{r}|\psi_n\right\rangle, $$
 
 where $\alpha$ is the fine structure constant.
+The [[https://www.abinit.org/pseudopotential.html|current Abinit PAW datasets]],
+JTH-v2.0, include this quantity and it
+is automatically read in and used in the calculation. However, should you use other PAW
+datasets, you can input the Lamb shielding value to use with the input variable
+[[lambsig]].
+However, we strongly recommend using the up-to-date Abinit PAW datasets.
 
 Moving forward, should you want to compute the shielding tensor for an
 atomic site in a solid, the procedure is identical, except that you
 will have to run the sequence three times, once for each direction of
 the applied dipole. Then you will have obtained three component
 vectors $M_\alpha$, $M_\beta$, and $M_\gamma$, which you can assemble
-into a $3\times 3$ matrix. Note that this matrix is the complete 
+into a $3\times 3$ matrix. Note that this matrix is the complete
 magnetic shielding tensor, which means that it includes both a symmetric
 and an antisymmetric part. The symmetric part, which can be extracted
 as $\sigma^s=\frac{1}{2}(\sigma + \sigma^T)$ (the sum of the matrix
@@ -332,7 +334,7 @@ E(-1,+1) + E(-1,-1)\right], $$ where a term like $E(+1,+1)$ means the energy
 with both dipoles (of magnitude 1) along positive Cartesian directions;
 $E(+1,-1)$ means one dipole positive, one negative, and so forth. Therefore, to
 get a single element of the full $J_{ij}$ tensor (which can be written as a
-$3\times 3$ matrix), in general 4 total energy calculations are needed. 
+$3\times 3$ matrix), in general 4 total energy calculations are needed.
 
 An example calculation is provided in the following file:
 
@@ -340,25 +342,25 @@ An example calculation is provided in the following file:
 
 This file is for molecular ClF, treated as an isolated species in an
 otherwise empty cell. In this case we can take advantage of symmetry to greatly
-reduce the number of necessary energy calculations. The molecule is aligned along 
+reduce the number of necessary energy calculations. The molecule is aligned along
 the Cartesian z axis, and thus the only non-zero elements of the $J$ tensor are
 $J_{xx}=J_{yy}$, and $J_{zz}$. Furthermore, because it's a diatomic, the energy terms
 $E(+1,+1)=E(-1,-1)$ and $E(+1,-1)=E(-1,+1)$. Thus only four total calculations are needed,
-two with the dipoles along $y$ and two with the dipoles along $z$. These are input 
+two with the dipoles along $y$ and two with the dipoles along $z$. These are input
 with the code block
 
     ndtset 4
-     
+
     natnd 2
     iatnd 1 2
-     
-    atndlist1 
+
+    atndlist1
     0  1 0
     0  1 0
     atndlist2
     0  1 0
     0 -1 0
-    atndlist3 
+    atndlist3
     0 0  1
     0 0  1
     atndlist4
@@ -366,7 +368,7 @@ with the code block
     0 0 -1
 
 The dipoles are input with [[natnd]], [[iatnd]], and [[atndlist]]. The other critical input
-variable is [[zora]]=2, which activates the ZORA electron and nuclear spin terms. In any case, 
+variable is [[zora]]=2, which activates the ZORA electron and nuclear spin terms. In any case,
 once the calculation finishes, you will find near the bottom of the output file, the four
 total energies:
 
@@ -377,19 +379,19 @@ total energies:
 
 Note how similar they are. The $J$ tensor is quite weak, so energy must be very tightly converged and
 a convergence study of box size, [[ecut]], and so forth must be done carefully. In our case, the first
-two energies provide 
-$$ J_{yy} = \frac{1}{2}(-39.162256582 -    -39.162258242) = 8.30\times 10^{-7}, $$ 
+two energies provide
+$$ J_{yy} = \frac{1}{2}(-39.162256582 -    -39.162258242) = 8.30\times 10^{-7}, $$
 and
-$$ J_{zz}=\frac{1}{2}(-39.162255743 - -39.162255929) = 9.30\times 10^{-8} , $$ 
+$$ J_{zz}=\frac{1}{2}(-39.162255743 - -39.162255929) = 9.30\times 10^{-8} , $$
 where we have taken advantage of the symmetries to reduce the calculations from four to two for each element.
 
 The values obtained are in atomic units, where Energy/(dipole$^2$) in atomic units has the value
-$1.2673\times 10^{28}$ T$^2$/J in SI units. 
+$1.2673\times 10^{28}$ T$^2$/J in SI units.
 For comparison with typical NMR spectroscopy values, the tensor elements should be converted into Hz, and this is
 accomplished by multiplication by $h\times 10^{12}\times 1.2673\times 10^{28}\times\gamma_i\gamma_j$,
 where the $\gamma$ factors are the nuclear gyromagnetic ratios in MHz/T and $h$ is
 Planck's constant in SI units. For our ClF example, we use
 4.17566 MHz/T for $^{35}$Cl, and 40.069244 MHz/T for $^{19}$F. These factors then yield
 $J_{yy} = 1166$ Hz, and $J_{zz} = 131$ Hz, for an isotropic value of 821 Hz. For comparison,
-the experimental value is 839 Hz [[cite:bryce2000indirect]] Note that this good level of agreement 
+the experimental value is 839 Hz [[cite:Bryce2000]]. Note that this good level of agreement 
 with experiment should be checked very carefully against convergence parameters and molecular geometry.

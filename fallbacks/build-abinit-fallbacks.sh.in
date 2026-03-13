@@ -12,14 +12,8 @@ if [[ -z $1 ]]; then
    if [ "@sd_libxc_init@" != "fb" ]; then
 	   Disabled+=' --disable-libxc ' 
    fi 	   
-   if [ "@sd_hdf5_init@" != "fb" ]; then
-	   Disabled+=' --disable-hdf5 ' 
-   fi 	   
-   if [ "@sd_netcdf_init@" != "fb" ]; then
-	   Disabled+=' --disable-netcdf4 ' 
-   fi 	   
-   if [ "@sd_netcdf_fortran_init@" != "fb" ]; then
-	   Disabled+=' --disable-netcdf4-fortran ' 
+   if [ "@sd_hdf5_init@" != "fb" ]  && [ "@sd_netcdf_init@" != "fb" ]  && [  "@sd_netcdf_fortran_init@" != "fb" ]; then
+	   Disabled+=' --disable-hdf5  --disable-netcdf4 --disable-netcdf4_fortran' 
    fi 	   
 fi
 while [[ "$#" -gt 0 ]]; do

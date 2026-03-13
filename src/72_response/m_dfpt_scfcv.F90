@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2025 ABINIT group (XG, DRH, MB, XW, MT, SPr, XW, MV, MM, AR)
+!!  Copyright (C) 1999-2026 ABINIT group (XG, DRH, MB, XW, MT, SPr, XW, MV, MM, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -887,7 +887,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call pawdenpot(dum,el_temp,gprimd,ipert,dtset%ixc,my_natom,dtset%natom,&
 &     dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an1,paw_an,paw1_energies,&
 &     paw_ij1,pawang,dtset%pawprtvol,pawrad,pawrhoij1,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp, &
+&     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,dtset%spinaxis,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
      epaw1=paw1_energies%epaw
 
@@ -907,7 +907,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nfftf,nfftotf,dtset%nspden,psps%ntypat,paw_an1,paw_ij1,pawang,&
 &     pawfgrtab,dtset%pawprtvol,pawrad,pawrhoij1,dtset%pawspnorb,pawtab,&
 &     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial1_tmp,vxc1,xred,dtset%znucl,&
-&     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+&     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,spinaxis=dtset%spinaxis)
      if (has_dijfr>0) then
        ABI_FREE(vtrial1_tmp)
      end if
@@ -1102,7 +1102,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an1,paw_an,paw1_energies,&
 &       paw_ij1,pawang,dtset%pawprtvol,pawrad,pawrhoij1,dtset%pawspnorb,pawtab,&
 &       dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,&
-&       ucvol,psps%znuclpsp,mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+&       ucvol,psps%znuclpsp,dtset%spinaxis,mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
        epaw1=paw1_energies%epaw
      end if
 
@@ -1449,12 +1449,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
 &     prtopt,cplex,dtset%qgbt,dtset%use_gbt,intgden=intgden,dentot=dentot,rhomag=rhomag)
-     call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],prtopt,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
+     call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],prtopt,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl,dtset%spinaxis)
    end if
  end if
  !if((dtset%iscf>0).and.(dtset%nsppol==2.or.dtset%nspden>1).and.(ipert/=dtset%natom+5)) then
  if((iscf_mod>0).and.(dtset%nsppol==2.or.dtset%nspden>1)) then
-   call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],1,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl)
+   call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,[ab_out],1,dtset%qgbt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%znucl,dtset%spinaxis)
  endif
 
  if (iwrite_fftdatar(mpi_enreg)) then
@@ -3571,7 +3571,7 @@ end subroutine dfpt_nstdy
 !!
 !! NOTES
 !!  This routine will NOT work with nspden==4:
-!!    at least the use of fftpac should be modified.
+!!  at least the use of fftpac should be modified.
 !!
 !! SOURCE
 
@@ -4047,26 +4047,14 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    call timab(129,1,tsec)
 
 !  Identify MPI buffer size
-   buffer_size=cplex*dtset%nfft*nspden+2+mbd2kpsp
+   buffer_size=2
    ABI_MALLOC(buffer1,(buffer_size))
 
-!  Pack rhorfermi, fe1fixed, fe1norm
-   indx=cplex*dtset%nfft*nspden
-   if (psps%usepaw==0) then
-     buffer1(1:indx)=reshape(rhorfermi,(/indx/))
-   else
-     buffer1(1:indx)=reshape(rhowfr,(/indx/))
-   end if
-   buffer1(indx+1)=fe1fixed ; buffer1(indx+2)=fe1norm
-   indx=indx+2 ; bd2tot_index=0
-   do isppol=1,nsppol
-     do ikpt=1,nkpt_rbz
-       nband_k=nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
-       buffer1(indx+1:indx+2*nband_k**2)=eigen1(bd2tot_index+1:bd2tot_index+2*nband_k**2)
-       bd2tot_index=bd2tot_index+2*nband_k**2
-       indx=indx+2*nband_k**2
-     end do
-   end do
+!  Pack fe1fixed, fe1norm
+   indx = 0
+   buffer1(indx+1)=fe1fixed 
+   buffer1(indx+2)=fe1norm
+   indx=indx+2 
    if(indx<buffer_size)buffer1(indx+1:buffer_size)=zero
 
 !  Build sum of everything
@@ -4075,23 +4063,32 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    call timab(48,2,tsec)
 
 !  Unpack the final result
-   indx=cplex*dtset%nfft*nspden
-   if (psps%usepaw==0) then
-     rhorfermi(:,:)=reshape(buffer1(1:indx),(/cplex*dtset%nfft,nspden/))
-   else
-     rhowfr(:,:)=reshape(buffer1(1:indx),(/cplex*dtset%nfft,nspden/))
-   end if
+   indx=0
    fe1fixed=buffer1(indx+1) ; fe1norm =buffer1(indx+2)
-   indx=indx+2 ; bd2tot_index=0
-   do isppol=1,nsppol
-     do ikpt=1,nkpt_rbz
-       nband_k=nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
-       eigen1(bd2tot_index+1:bd2tot_index+2*nband_k**2)=buffer1(indx+1:indx+2*nband_k**2)
-       bd2tot_index=bd2tot_index+2*nband_k**2
-       indx=indx+2*nband_k**2
-     end do
-   end do
    ABI_FREE(buffer1)
+
+   call timab(48,1,tsec)
+   buffer_size=mbd2kpsp
+   call xmpi_sum(eigen1,buffer_size,spaceworld,ierr)
+   call timab(48,2,tsec)
+
+   if (psps%usepaw==0) then
+     call timab(48,1,tsec)
+     buffer_size = cplex*nfftf
+     ! TODO: there should be a primitive for a 2d array here, but the compiler does not seem to find it. 
+     ! would simplify the call to xmpi_sum
+     do isppol=1, nspden
+       call xmpi_sum(rhorfermi(:,isppol),buffer_size,spaceworld,ierr)
+     end do
+     call timab(48,2,tsec)
+   else
+     call timab(48,1,tsec)
+     buffer_size = cplex*dtset%nfft
+     do isppol=1, nspden
+       call xmpi_sum(rhowfr(:,isppol),buffer_size,spaceworld,ierr)
+     end do
+     call timab(48,2,tsec)
+   end if
 
 !  Accumulate PAW occupancies
    if (psps%usepaw==1) then
