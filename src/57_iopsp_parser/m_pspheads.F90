@@ -176,6 +176,10 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      end if
      close(unit=unt,err=10,iomsg=errmsg)
    end if
+   if(test_paw==0) then
+     ABI_ICALLOC(nproj,(0:3))
+     ABI_ICALLOC(nprojso,(3))
+   endif
 
    ! Read the header of the pseudopotential file
    if (usexml /= 1 .and. useupf == 0) then
@@ -194,10 +198,15 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      lmax=pspheads(ipsp)%lmax
      write(msg,'(a,f5.1,a,i4,a,i4)')'  read the values zionpsp=',pspheads(ipsp)%zionpsp,' , pspcod=',pspcod,' , lmax=',lmax
      call wrtout(std_out,msg,'PERS')
-
-     ABI_MALLOC(nproj,(0:lmax))
-     ABI_MALLOC(nprojso,(lmax))
-     nproj(0:lmax)=0 ; nprojso(1:lmax)=0
+   
+     if(test_paw==1) then
+       ABI_MALLOC(nproj,(0:lmax))
+       ABI_MALLOC(nprojso,(lmax))
+       nproj(0:lmax)=0
+       nprojso(1:lmax)=0
+     else
+       nproj(0:3)=0 ; nprojso(1:3)=0
+     endif 
 
      pspheads(ipsp)%xccc=0
      pspheads(ipsp)%pspso=0
@@ -215,10 +224,8 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      ! save some stuff locally for this ipsp
      pspcod = pspheads(ipsp)%pspcod
      lmax   = pspheads(ipsp)%lmax
-     ABI_MALLOC(nproj,(0:lmax))
-     ABI_MALLOC(nprojso,(lmax))
-     nproj = pspheads(ipsp)%nproj
-     nprojso = pspheads(ipsp)%nprojso
+     nproj(0:min(lmax,3)) = pspheads(ipsp)%nproj(0:min(lmax,3))
+     nprojso(1:min(lmax,3)) = pspheads(ipsp)%nprojso(1:min(lmax,3))
 
 #else
      write(msg, '(2a)') "XML norm-conserving pseudopotential has been input,", &
@@ -268,11 +275,21 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
 
    ! Initialize nproj, nprojso, pspso, as well as xccc, for each type of psp
    pspheads(ipsp)%GTHradii = zero
-   if(.not.allocated(pspheads(ipsp)%nproj)) ABI_MALLOC(pspheads(ipsp)%nproj,(0:lmax))
-   if(.not.allocated(pspheads(ipsp)%nprojso)) ABI_MALLOC(pspheads(ipsp)%nprojso,(lmax))
-   if(.not.allocated(nproj)) ABI_MALLOC(nproj,(0:lmax))
-   if(.not.allocated(nprojso)) ABI_MALLOC(nprojso,(lmax))
- 
+   if(test_paw/=1.and.lmax>3) then
+     ABI_ERROR('NC with l>3 not implmented')
+   endif
+    if(.not.allocated(pspheads(ipsp)%nproj)) then
+      ABI_MALLOC(pspheads(ipsp)%nproj,(0:lmax))
+   endif
+   if(.not.allocated(pspheads(ipsp)%nprojso)) then
+     ABI_MALLOC(pspheads(ipsp)%nprojso,(lmax))
+   endif
+   if(.not.allocated(nproj)) then
+     ABI_MALLOC(nproj,(0:lmax))
+   endif
+   if(.not.allocated(nprojso)) then
+     ABI_MALLOC(nprojso,(lmax))
+   endif
 
    if (pspcod==1 .or. pspcod==4)then
 
@@ -502,8 +519,8 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
 
    ! Compute md5 checksum
    pspheads(ipsp)%md5_checksum = md5_sum_from_file(filnam(ipsp))
-   ABI_SFREE(nproj)
-   ABI_SFREE(nprojso)
+   ABI_FREE(nproj)
+   ABI_FREE(nprojso)
  end do ! ipsp=1,npsp
 
  ! Note that mpsang is the max of 1+lmax, with minimal value 1 (even for local psps, at present)
@@ -837,8 +854,8 @@ subroutine upf1_to_psphead(filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, n
  integer,intent(out) :: pspxc, lmax_
  real(dp),intent(out) :: znucl, zion
 !arrays
- integer,allocatable,intent(out) :: nproj_l(:)
- integer,allocatable,intent(out) :: nprojso_l(:)
+ integer,intent(out) :: nproj_l(0:3)
+ integer,intent(out) :: nprojso_l(1:3)
 
 !Local variables -------------------------
  integer :: iproj, ll, iunit
@@ -864,8 +881,6 @@ subroutine upf1_to_psphead(filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, n
  znucl = atom%znucl
  zion = zp(1)
 
- ABI_MALLOC(nproj_l,(0:lmax_))
- ABI_MALLOC(nprojso_l,(lmax_))
  nproj_l = 0
  do iproj = 1, nbeta(1)
    ll = lll(iproj,1)
@@ -913,7 +928,7 @@ subroutine upf2_to_psphead(filpsp, znucl, zion, pspxc, lmax, n1xccc, nproj_l, np
  integer,intent(out) :: pspxc, lmax
  real(dp),intent(out) :: znucl, zion
 !arrays
- integer,allocatable,intent(out) :: nproj_l(:), nprojso_l(:)
+ integer,intent(out) :: nproj_l(0:3), nprojso_l(1:3)
 
 !Local variables -------------------------
  integer :: ierr , iprj, ll, mmax, irad
@@ -956,8 +971,6 @@ subroutine upf2_to_psphead(filpsp, znucl, zion, pspxc, lmax, n1xccc, nproj_l, np
    ABI_ERROR(msg)
  end if
 
- ABI_MALLOC(nproj_l,(0:lmax))
- ABI_MALLOC(nprojso_l,(lmax))
  nproj_l = 0; nprojso_l = 0
 
  if (.not. upf%has_so) then
@@ -999,7 +1012,7 @@ subroutine upf2_jl2srso(upf, nproj_l, nprojso_l, vsr, esr, vso, eso)
 !Arguments -------------------------------
  type(pseudo_upf),intent(in) :: upf
 !arrays
- integer,intent(out) :: nproj_l(:), nprojso_l(:)
+ integer,intent(out) :: nproj_l(0:3), nprojso_l(1:3)
  real(dp),allocatable,intent(out) :: vsr(:,:,:), esr(:,:), vso(:,:,:), eso(:,:)
 
 !Local variables -------------------------
