@@ -3117,8 +3117,12 @@ subroutine orbmag_rmesh(omag,adir,bra,dtset,fofr,gs_hamk,npw_k,ph1d,&
   crr=REAL(crvec);cri=AIMAG(crvec);sfr=REAL(scalar_factor);sfi=AIMAG(scalar_factor)
 
   omag%rmesh(:,:,:,adir,term_index) = omag%rmesh(:,:,:,adir,term_index) + &
-    & sfr*(crr*fofr(1,:,:,:)-cri*fofr(2,:,:,:)) + &
-    & conjg_fac*sfi*(cri*fofr(1,:,:,:)+crr*fofr(2,:,:,:))
+    & fofr(1,:,:,:)*(sfr*crr+conjg_fac*sfi*cri) + &
+    & fofr(2,:,:,:)*(-sfr*cri+conjg_fac*sfi*crr)
+
+!  omag%rmesh(:,:,:,adir,term_index) = omag%rmesh(:,:,:,adir,term_index) + &
+!    & sfr*(crr*fofr(1,:,:,:)-cri*fofr(2,:,:,:)) + &
+!    & conjg_fac*sfi*(cri*fofr(1,:,:,:)+crr*fofr(2,:,:,:))
 
 end subroutine orbmag_rmesh
 !!***
