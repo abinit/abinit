@@ -104,7 +104,7 @@ CONTAINS !===========================================================
  integer :: ii,regist,lenname,ncores,nprocs,nprocs_per_gpu
  real(sp) :: globalmem,clockRate
  integer  :: uuid(4)
- character(20)  :: name
+ character(256) :: name
  character(20)  :: formatdev
  character(60)  :: gflops_stg
  character(500) :: msg

@@ -1474,9 +1474,6 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  real(dp) :: convergence_rate,sum_tmp
  integer :: additional_steps_to_take,idat,iproj,icplx
  integer :: Ptsize(3)
-#ifdef HAVE_GPU_HIP
- type(c_ptr) :: sm1proj_amdcopy,PtPsm1proj_amdcopy
-#endif
 
 ! *************************************************************************
 
@@ -1484,11 +1481,6 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  Ptsize(2) = invovl%nprojs
  Ptsize(3) = ndat
  nprojs = invovl%nprojs
-#if defined HAVE_GPU_HIP  && defined FC_LLVM
- !FIXME Work-around for AOMP v15.0.3 (AMD Flang fork)
- sm1proj_amdref => sm1proj
- PtPsm1proj_amdref => PtPsm1proj
-#endif
 
  !$OMP TARGET ENTER DATA MAP(alloc:errs,precondresid,resid,normprojs)
 
@@ -1534,21 +1526,12 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
 
    ! compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * sm1proj(:,:,1)
    ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_GEMM)
-#if defined HAVE_GPU_HIP && defined FC_LLVM
-   !$OMP TARGET DATA USE_DEVICE_ADDR(current_gram_projs, sm1proj_amdref, PtPsm1proj_amdref)
-   call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
-                c_loc(current_gram_projs), nprojs,&
-                c_loc(sm1proj_amdref), nlmntot_this_proc, czero, &
-                c_loc(PtPsm1proj_amdref), nprojs)
-   !$OMP END TARGET DATA
-#else
    !$OMP TARGET DATA USE_DEVICE_ADDR(current_gram_projs, sm1proj, PtPsm1proj)
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
                 c_loc(current_gram_projs), nprojs,&
                 c_loc(sm1proj), nlmntot_this_proc, czero, &
                 c_loc(PtPsm1proj), nprojs)
    !$OMP END TARGET DATA
-#endif
 
    !$OMP TARGET TEAMS DISTRIBUTE &
    !$OMP& PRIVATE(idat) MAP(to:proj,resid,PtPsm1proj)
