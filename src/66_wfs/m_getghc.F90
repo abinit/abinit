@@ -6,7 +6,7 @@
 !! Compute <G|H|C> for input vector |C> expressed in reciprocal space;
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, LSI, MT, JB, JWZ)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, LSI, MT, JB, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,6 +30,7 @@ module m_getghc
  use m_abicore
  use m_xmpi
  use m_xomp
+ use m_gputk
  use m_abi_linalg
 
  use defs_abitypes, only : mpi_type
@@ -245,7 +246,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(c_double), ABI_CONTIGUOUS pointer :: gvnlc(:,:)
  real(c_double), ABI_CONTIGUOUS pointer :: gvnlxc_(:,:)
 #else
- real(dp), allocatable            :: gvnlc(:,:)
+ real(dp), target, allocatable                :: gvnlc(:,:)
  real(dp), contiguous, pointer                :: gvnlxc_(:,:)
 #endif
  real(dp), allocatable            :: vlocal_tmp(:,:,:), work(:,:,:,:)
@@ -956,7 +957,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(ghc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
-     ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_mGGA(1:2,1:npw_k2*my_nspinor*ndat)
+     !LB-2025-12-16: intel19 crashes here when npw_k1 is too big. A solution is to write the loop explicitely
+     !ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_mGGA(1:2,1:npw_k2*my_nspinor*ndat)
+     do idat=1,npw_k1*my_nspinor*ndat
+       do ig=1,2
+         ghc(ig,idat)=ghc(ig,idat)+ghc_mGGA(ig,idat)
+       end do
+     end do
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE TO(ghc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -978,7 +985,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE FROM(ghc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
-     ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_vectornd(1:2,1:npw_k2*my_nspinor*ndat)
+     !LB-2025-12-16: intel19 crashes here when npw_k1 is too big. A solution is to write the loop explicitely
+     !ghc(1:2,1:npw_k2*my_nspinor*ndat)=ghc(1:2,1:npw_k2*my_nspinor*ndat)+ghc_vectornd(1:2,1:npw_k2*my_nspinor*ndat)
+     do idat=1,npw_k1*my_nspinor*ndat
+       do ig=1,2
+         ghc(ig,idat)=ghc(ig,idat)+ghc_vectornd(ig,idat)
+       end do
+     end do
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE TO(ghc) IF(gs_ham%gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -1073,6 +1086,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        if (gs_ham%usepaw==1) gsc_ptr => gsc
 
        ! Apply Vnl{k-q/2} to u^up
+       gs_ham%ispin_gbt = 1
        call cg_copy_spin(1, npw_k1, nspinortot, ndat, cwavef, cwavef_spin)
        call nonlop(choice, cpopt_here, cwaveprj_nonlop, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
                    nnlout, paw_opt, signs, gsc_ptr, tim_nonlop, cwavef_spin, gvnlxc_spin, select_k=K_H_K)
@@ -1081,6 +1095,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
        ! Apply H_{k+q/2} to u^down
        !gvnlxc_spin = zero
+       gs_ham%ispin_gbt = 2
        call cg_copy_spin(2, npw_k1, nspinortot, ndat, cwavef, cwavef_spin)
        call nonlop(choice, cpopt_here, cwaveprj_nonlop, enlout, gs_ham, idir, lambda_ndat, mpi_enreg, ndat, &
                    nnlout, paw_opt, signs, gsc_ptr, tim_nonlop, cwavef_spin, gvnlxc_spin, select_k=KPRIME_H_KPRIME)
@@ -1182,7 +1197,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          ! OpenMP GPU
 #ifdef HAVE_OPENMP_OFFLOAD
          if (k1_eq_k2) then
-           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef) MAP(tofrom:kinpw_k2)
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,kinpw_k2,gvnlxc_,gsc,cwavef)
            do idat=1,ndat
              do ispinor=1,my_nspinor
                !$OMP PARALLEL DO PRIVATE(igspinor)
@@ -1198,7 +1213,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
              end do ! ispinor
            end do ! idat
          else
-           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,gvnlxc_,gsc) MAP(tofrom:kinpw_k2)
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(to:ghc,gvnlxc_,gsc,kinpw_k2)
            do idat=1,ndat
              do ispinor=1,my_nspinor
                !$OMP PARALLEL DO PRIVATE(igspinor)
@@ -1469,11 +1484,13 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: gcwavef(:,:,:),gcwavef1(:,:,:),gcwavef2(:,:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:),kgkpk(:,:),vectornd_dir(:,:,:,:)
- real(dp),allocatable :: work(:,:,:,:),zk(:,:,:)
+ real(dp),allocatable :: work(:,:,:,:),zk(:,:,:,:)
 ! *********************************************************************
 
  ghc_vectornd(:,:)=zero
- if (nvloc/=1) return
+
+ !! JWZ debug initial code was only for nvloc==1 case
+ !! if (nvloc/=1) return
 
  nspinortot=min(2,(1+mpi_enreg%paral_spinor)*my_nspinor)
  if (mpi_enreg%paral_spinor==0) then
@@ -1488,8 +1505,8 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
 
  usezora=((zora.EQ.1).OR.(zora.EQ.3))
  if(usezora) then
-   ABI_MALLOC(zk,(n4,n5,n6))
-   zk(1:n4,1:1:n5,1:n6)=1.0/(1.0-HalfFineStruct2*vlocal(1:n4,1:n5,1:n6,nvloc))
+   ABI_MALLOC(zk,(n4,n5,n6,nvloc))
+   zk(1:n4,1:1:n5,1:n6,1:nvloc)=1.0/(1.0-HalfFineStruct2*vlocal(1:n4,1:n5,1:n6,1:nvloc))
  end if
 
  ABI_MALLOC(work,(2,n4,n5,n6*ndat))
@@ -1525,9 +1542,9 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
     ABI_MALLOC(vectornd_dir,(n4,n5,n6,nvloc))
     do idir=1,3
       if (usezora) then
-        vectornd_dir(1:n4,1:n5,1:n6,nvloc)=zk(1:n4,1:n5,1:n6)*vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+        vectornd_dir(1:n4,1:n5,1:n6,1:nvloc)=zk(1:n4,1:n5,1:n6,1:nvloc)*vectornd(1:n4,1:n5,1:n6,1:nvloc,idir)
       else
-        vectornd_dir(1:n4,1:n5,1:n6,nvloc)=vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+        vectornd_dir(1:n4,1:n5,1:n6,1:nvloc)=vectornd(1:n4,1:n5,1:n6,1:nvloc,idir)
       end if
       call fourwf(1,vectornd_dir,gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
            istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
@@ -1582,9 +1599,9 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        ABI_MALLOC(vectornd_dir,(n4,n5,n6,nvloc))
        do idir=1,3
          if (usezora) then
-           vectornd_dir(1:n4,1:n5,1:n6,nvloc)=zk(1:n4,1:n5,1:n6)*vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+           vectornd_dir(1:n4,1:n5,1:n6,1:nvloc)=zk(1:n4,1:n5,1:n6,1:nvloc)*vectornd(1:n4,1:n5,1:n6,1:nvloc,idir)
          else
-           vectornd_dir(1:n4,1:n5,1:n6,nvloc)=vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+           vectornd_dir(1:n4,1:n5,1:n6,1:nvloc)=vectornd(1:n4,1:n5,1:n6,1:nvloc,idir)
          end if
          call fourwf(1,vectornd_dir,gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
            & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
@@ -1624,9 +1641,9 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
        ABI_MALLOC(vectornd_dir,(n4,n5,n6,nvloc))
        do idir=1,3
          if (usezora) then
-           vectornd_dir(1:n4,1:n5,1:n6,nvloc)=zk(1:n4,1:n5,1:n6)*vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+           vectornd_dir(1:n4,1:n5,1:n6,1:nvloc)=zk(1:n4,1:n5,1:n6,1:nvloc)*vectornd(1:n4,1:n5,1:n6,1:nvloc,idir)
          else
-           vectornd_dir(1:n4,1:n5,1:n6,nvloc)=vectornd(1:n4,1:n5,1:n6,nvloc,idir)
+           vectornd_dir(1:n4,1:n5,1:n6,1:nvloc)=vectornd(1:n4,1:n5,1:n6,1:nvloc,idir)
          end if
          call fourwf(1,vectornd_dir,gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
            & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&

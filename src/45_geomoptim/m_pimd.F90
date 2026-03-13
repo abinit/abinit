@@ -7,7 +7,7 @@
 !!  Path-Integral Molecular Dynamics (PIMD) implementation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2025 ABINIT group (GG,MT)
+!! Copyright (C) 2010-2026 ABINIT group (GG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1007,7 +1007,7 @@ subroutine pimd_initvel_from_scratch(pimd_param,natom,trotter,vel,vel_cell)
  do iimage=1,trotter
    inertmass(1:natom,iimage)=pimd_param%pimass(pimd_param%typat(1:natom))*amu_emass
  end do
- 
+
  irestart=pimd_is_restart(inertmass,vel,vel_cell)
 
 !Initialize derivatives

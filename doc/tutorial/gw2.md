@@ -94,9 +94,11 @@ as well as the lowest energy, at the $\Gamma$ point
 So, the occupied band width is 10.98 eV within PBE.
 This is to be compared to the experimental value of 10.6 eV (see references in [[cite:Bruneval2006]]).
 
+[HDIAGO_README]
+
 ## Calculation of the screening file
 
-Let's run the calculation of the screening file immediately.
+Let us run the calculation of the screening file immediately.
 So, copy the file *tgw2_2.abi*. Also, copy the WFK file (*tgw2_1o_WFK*) to *tgw2_2i_WFK*. Then
 run the calculation (it should take about 3 seconds).
 

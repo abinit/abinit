@@ -6,7 +6,7 @@
 !!  This module contains routines related to PAW on-site densities and on-site potentials.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group (FJ, MT)
+!! Copyright (C) 2018-2026 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,7 +18,7 @@
 #endif
 
 #include "abi_common.h"
-	
+
 MODULE m_paw_denpot
 
  use defs_basis
@@ -131,7 +131,7 @@ CONTAINS  !=====================================================================
 !!  paw_ij(my_natom)%dijhartree(qphase*lmn2_size)=Hartree contribution to dij;
 !!                                      Enters into calculation of hartree energy
 !!  ==== if option=0 or 2
-!!  paw_energies <type(pawang_type)>=several contributions to on-site PAW energies 
+!!  paw_energies <type(pawang_type)>=several contributions to on-site PAW energies
 !!    %epaw= total on-site PAW energy (direct scheme)
 !!    %epaw_dc= total on-site PAW energy (double counting scheme)
 !!    %epaw_core= core contribution to PAW energy (direct scheme)
@@ -165,7 +165,7 @@ CONTAINS  !=====================================================================
 
 subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,ntypat,nucdipmom,&
 & nzlmopt,option,paw_an,paw_an0,paw_energies,paw_ij,pawang,pawprtvol,pawrad,pawrhoij,&
-& pawspnorb,pawtab,pawxcdev,spnorbscl,xclevel,xc_denpos,xc_taupos,xred,ucvol,znucl,&
+& pawspnorb,pawtab,pawxcdev,spnorbscl,xclevel,xc_denpos,xc_taupos,xred,ucvol,znucl,spinaxis,&
 & electronpositron,mpi_atmtab,comm_atom,vpotzero,hyb_mixing,hyb_mixing_sr,rcpaw,extfpmd) ! optional arguments
 
 !Arguments ---------------------------------------------
@@ -183,7 +183,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
  type(extfpmd_type),pointer,intent(in),optional :: extfpmd
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
- real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom),xred(3,natom),znucl(ntypat)
+ real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom),xred(3,natom),znucl(ntypat),spinaxis(3)
  real(dp),intent(out),optional :: vpotzero(2)
  type(paw_an_type),intent(inout) :: paw_an(my_natom)
  type(paw_an_type), intent(in) :: paw_an0(my_natom)
@@ -903,7 +903,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
      call pawaccenergy_nospin(eh2,pawrhoij(iatom),paw_ij(iatom)%dijhartree,1,qphase,pawtab(itypat))
      if(extfpmd_pawsph) then
        eh2dc=eh2dc+two*eshift*extfpmd_rho
-       eh2=eh2+eshift*extfpmd_rho 
+       eh2=eh2+eshift*extfpmd_rho
      endif
    end if
 
@@ -1056,7 +1056,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
        call pawdijso(paw_ij(iatom)%dijso,cplex_dij,cplex,ndij,nspden,pawang,&
          & pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,paw_an(iatom)%vh1,&
          & paw_an(iatom)%vxc1,znucl(itypat),paw_ij(iatom)%zora,&
-         & nucdipmom=nucdipmom(1:3,iatom))
+         & nucdipmom=nucdipmom(1:3,iatom),spinaxis=spinaxis)
        paw_ij(iatom)%has_dijso=2
      end if
 
@@ -1241,7 +1241,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
      ii=0
      call paw_energies_to_array(paw_energies,mpiarr(ii+1:ii+n_paw_energies),-1)
      ii=ii+n_paw_energies
-     compch_sph=mpiarr(ii+1) ; ii=ii+1     
+     compch_sph=mpiarr(ii+1) ; ii=ii+1
      if (ipositron/=0) then
        electronpositron%e_paw=mpiarr(ii+1)
        electronpositron%e_pawdc=mpiarr(ii+2)
@@ -2603,7 +2603,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
    ABI_ERROR('RCPAW: cplex not 1')
  endif
  opt_compch=0;if (option/=1) opt_compch=1
- pawang_=>pawang 
+ pawang_=>pawang
  extfpmd_rho=zero
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
@@ -2612,7 +2612,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
      endif
    endif
  endif
- ! loop over atoms 
+ ! loop over atoms
  do itypat=1,dtset%ntypat
    mesh_size=pawtab(itypat)%mesh_size
    ABI_MALLOC(nval,(mesh_size))
@@ -2651,7 +2651,7 @@ subroutine paw_relax_core(pawtab,pawrad,pawang,pawrhoij,ntypat,rcpaw,psps,dtset,
    ABI_FREE(nval_tmp)
    ABI_FREE(tnval_tmp)
    ! mpi reduction
-   if(paral_atom) then 
+   if(paral_atom) then
      call xmpi_sum(nval,my_comm_atom,ierr)
      call xmpi_bcast(nval,0,my_comm_atom,ierr)
      call xmpi_sum(tnval,my_comm_atom,ierr)

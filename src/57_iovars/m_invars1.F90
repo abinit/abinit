@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
+!! Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,10 +39,10 @@ module m_invars1
 #endif
 
  use m_fstrings, only : inupper, itoa, endswith, strcat, sjoin, startswith
- use m_geometry, only : mkrdim
+ use m_geometry, only : mkrdim, cart2spinaxis
  use m_parser,   only : intagm, intagm_img, chkint_ge, ab_dimensions, geo_t, geo_from_abivar_string
  use m_inkpts,   only : inkpts, inqpt
- use m_ingeo,    only : ingeo, invacuum
+ use m_ingeo,    only : ingeo, invacuum, checkspvec
  use m_matrix,   only : mati3det
  use m_mep,      only : MEP_SOLVER_STEEPEST,NEB_ALGO_IMPROVED_TAN,NEB_CELL_ALGO_NONE,STRING_ALGO_SIMPLIFIED_EQUAL
  use m_fftcore,      only : get_cache_kb, fftalg_for_npfft
@@ -112,8 +112,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !Local variables-------------------------------
 !scalars
  integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm
- integer :: tread_pseudos,cnt,tread_geo,tread_gpu_option,treads
- integer :: idev,gpu_option
+ integer :: tread_pseudos,cnt,tread_geo,tread_gpu_option,treads, idev,gpu_option
  real(dp) :: cpus
  character(len=500) :: msg
  character(len=fnlen) :: pp_dirpath,gpu_option_string
@@ -242,7 +241,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  dtsets(:)%ntypat=1 ; dtsets(0)%ntypat=0    ! Will always echo ntypat
  dtsets(:)%macro_uj=0
  dtsets(:)%maxnsym=384
- dtsets(:)%use_gbt=0
  dtsets(:)%useria=0
  dtsets(:)%userib=0
  dtsets(:)%useric=0
@@ -372,10 +370,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! Read extfpmd calculations
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useextfpmd',tread,'INT')
    if(tread==1) dtsets(idtset)%useextfpmd=intarr(1)
-
-   ! Read use_gbt
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gbt',tread,'INT')
-   if (tread==1) dtsets(idtset)%use_gbt=intarr(1)
 
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
@@ -686,6 +680,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%rprimd_orig,(3,3,mxnimage))
    ABI_MALLOC(dtsets(idtset)%so_psp,(npsp))
    ABI_MALLOC(dtsets(idtset)%spinat,(3,mxnatom))
+   ABI_MALLOC(dtsets(idtset)%spinat_cart,(3,mxnatom))
+   ABI_MALLOC(dtsets(idtset)%spinat_in,(3,mxnatom))
    ABI_MALLOC(dtsets(idtset)%shiftk,(3,MAX_NSHIFTK))
    ABI_MALLOC(dtsets(idtset)%typat,(mxnatom))
    ABI_MALLOC(dtsets(idtset)%upawu,(mxntypat,mxnimage))
@@ -1002,6 +998,8 @@ subroutine indefo1(dtset)
  dtset%gwls_n_proj_freq=0
 !H
  dtset%hspinfield(:)=zero
+ dtset%hspinfield_cart(:)=zero
+ dtset%hspinfield_in(:)=zero
 !I
  dtset%iatfix(:,:)=0
  dtset%iatnd(:)=0
@@ -1079,10 +1077,15 @@ subroutine indefo1(dtset)
  dtset%slabzend=zero
  dtset%so_psp(:)=1
  dtset%spinat(:,:)=zero
+ dtset%spinat_cart(:,:)=zero
+ dtset%spinat_in(:,:)=zero
+ dtset%spinaxis(1:2)=zero
+ dtset%spinaxis(3)=1
 !T
  dtset%tfkinfunc=0
  dtset%typat(:)=0  ! This init is important because dimension of typat is mx%natom (and not natom).
 !U
+ dtset%use_gbt=0
  dtset%usedmatpu=0
  dtset%usedmft=0
  dtset%useexexch=0
@@ -1186,18 +1189,18 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: natnd,natom,nkpt,nkpthf,npsp,npspalch, ncid
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rf2_dkdk,rf2_dkde,rfmagn
- integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
+ integer :: tfband,tnband,tread,tread_alt,tread_cart, my_rank, nprocs
  real(dp) :: cellcharge,cellcharge_min, fband,kptnrm,kptrlen,sum_spinat,zelect,zval
  character(len=1) :: blank=' ',string1
  character(len=2) :: string2,symbol
  character(len=500) :: msg
  type(atomdata_t) :: atom
 !arrays
- integer :: cond_values(4),vacuum(3)
+ integer :: cond_values(4),vacuum(3), units(2)
  integer,allocatable :: iatfix(:,:),iatnd(:),intarr(:),istwfk(:),nband(:),typat(:)
- real(dp) :: acell(3),rprim(3,3)
+ real(dp) :: acell(3),rprim(3,3),field_loc(3),field_cart(3),hloc(3,1),hcart(3,1) 
  real(dp),allocatable :: amu(:),atndlist(:,:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:)
- real(dp),allocatable :: nucdipmom(:,:),ratsph(:),reaalloc(:),spinat(:,:)
+ real(dp),allocatable :: nucdipmom(:,:),ratsph(:),reaalloc(:),spinat(:,:),spinat_cart(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
  character(len=fnlen) :: key_value
@@ -1208,6 +1211,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  !write(std_out,'(a)')' m_invars1%invars1 : enter '; call flush(std_out)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ units = [std_out, ab_out]
 
  ! This counter is incremented when we find a non-critical error.
  ! The code outputs a warning and stops at end.
@@ -1426,6 +1430,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
  end if
  dtset%nsppol=nsppol
+ 
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spinaxis',tread,'DPR')
+ if (tread==1) dtset%spinaxis(1:3) = dprarr(1:3)
 
 ! here are ZORA, nspinor, pawspnorb flags
 ! flag for ZORA (zeroth order regularized approximation for relativistic terms)
@@ -1502,6 +1509,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  end if
 
 !Read the hspinfield
+ field_loc(:) = zero; field_cart(:) = zero
+ hloc(:,1) = zero; hcart(:,1) = zero
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'hspinfield',tread,'BFI')
  if(tread==0) then
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'zeemanfield',tread,'BFI')
@@ -1513,7 +1522,24 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
  end if
 
- if(tread==1) then
+ if (tread == 1) then
+   field_loc(1:3) = dprarr(1:3)
+   dtset%hspinfield_in(1:3)=field_loc(1:3)
+ end if
+
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'hspinfield_cart',tread_cart,'BFI')
+ if (tread_cart==1) then
+   field_cart(1:3) = dprarr(1:3)
+   dtset%hspinfield_cart(1:3) = field_cart(1:3)
+ end if
+
+ hloc(:,1)  = field_loc(:); hcart(:,1) = field_cart(:)
+ call checkspvec('hspinfield',1,dtset%spinaxis,tread,tread_cart,hloc,hcart)
+ dtset%hspinfield(1:3) = hloc(:,1)
+ if (tread == 0 .and. tread_cart == 1) dtset%hspinfield_in(1:3) = hloc(:,1)
+ if (tread == 1 .and. tread_cart == 0) dtset%hspinfield_cart(1:3) = hcart(:,1)
+
+ if(tread==1 .or. tread_cart==1) then
    if(dtset%nspden == 2)then
      write(msg,'(7a)')&
       'A spin magnetic field (hspinfield) has been specified without noncollinear spins.',ch10,&
@@ -1525,8 +1551,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
       'Action: check the input file.'
      ABI_ERROR(msg)
    end if
-
-   dtset%hspinfield(1:3) = dprarr(1:3)
  end if
 
 !Initialize geometry of the system, for different images. Also initialize cellcharge_min to be used later for estimating mband_upper..
@@ -1573,11 +1597,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ABI_MALLOC(iatfix,(3,natom))
    ABI_MALLOC(nucdipmom,(3,natom))
    ABI_MALLOC(spinat,(3,natom))
+   ABI_MALLOC(spinat_cart,(3,natom))
    ABI_MALLOC(typat,(natom))
    ABI_MALLOC(znucl,(dtset%npsp))
    chrgat(1:natom)=dtset%chrgat(1:natom)
    nucdipmom(1:3,1:natom)=dtset%nucdipmom(1:3,1:natom)
    spinat(1:3,1:natom)=dtset%spinat(1:3,1:natom)
+   spinat_cart(1:3,1:natom)=dtset%spinat_cart(1:3,1:natom)
    znucl(1:dtset%npsp)=dtset%znucl(1:dtset%npsp)
 
    !write(std_out,'(a)')' m_invars1%invars1 : before ingeo '; call flush(std_out)
@@ -1585,10 +1611,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call ingeo(acell,amu,atndlist,bravais,chrgat,dtset,dtset%field_red(1:3),&
     dtset%field_red_axial(1:3),dtset%genafm(1:3),iatfix,&
     iatnd,dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
-    msym,natnd,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
+    msym,natnd,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,&
     dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
     dtset%pawspnorb,dtset%ptgroupma,ratsph,&
-    rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
+    rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,spinat_cart,&
     string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
     typat,vel,vel_cell,xred,znucl, comm)
 
@@ -1598,11 +1624,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
    dtset%nucdipmom(1:3,1:natom)=nucdipmom(1:3,1:natom)
    dtset%spinat(1:3,1:natom)=spinat(1:3,1:natom)
+   dtset%spinat_cart(1:3,1:natom)=spinat_cart(1:3,1:natom)
    dtset%typat(1:natom)=typat(1:natom)
    ABI_FREE(chrgat)
    ABI_FREE(iatfix)
    ABI_FREE(nucdipmom)
    ABI_FREE(spinat)
+   ABI_FREE(spinat_cart)
    ABI_FREE(typat)
    ABI_FREE(znucl)
    dtset%acell_orig(1:3,iimage)=acell
@@ -2049,6 +2077,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
  end if
 
+ ! Read use_gbt
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gbt',tread,'INT')
+ if (tread==1) dtset%use_gbt=intarr(1)
+
 !---------------------------------------------------------------------------
 !Some PAW+DMFT keywords
  dtset%usedmft=0
@@ -2141,16 +2173,25 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%constraint_kind(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
 !Some special cases are not compatible with GPU implementation
- if (dtset%optdriver/=RUNL_GSTATE .and. dtset%optdriver/=RUNL_RESPFN) then
-   dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS and RESPFN
+!Warn user if value is changed at runtime.
+!We don't stop the code because we may want to run the test suite in GPU mode.
+ if (all(dtset%optdriver /= [RUNL_GSTATE, RUNL_RESPFN, RUNL_GWR])) then
+   if (dtset%gpu_option /= ABI_GPU_DISABLED) then
+     call wrtout(units, "- WARNING: GPU only compatible with GS, RESPFN and GWR. gpu_option has been set to 0!")
+   end if
+   dtset%gpu_option=ABI_GPU_DISABLED
  end if
  if (dtset%optdriver==RUNL_RESPFN .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
-   dtset%gpu_option=ABI_GPU_DISABLED  ! RESPFN on GPU only implemented with OpenMP
+   if (dtset%gpu_option /= ABI_GPU_DISABLED) then
+     call wrtout(units, "- WARNING: RESPFN on GPU only implemented with OpenMP. gpu_option has been set to 0!")
+   end if
+   dtset%gpu_option=ABI_GPU_DISABLED
  end if
- if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU impl
+ if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU implementation
  if (dtset%nspinor/=1) then
    if (dtset%gpu_option/=ABI_GPU_DISABLED .and. dtset%gpu_option/=ABI_GPU_OPENMP) then
-     dtset%gpu_option=ABI_GPU_DISABLED  ! nspinor=2 not supported outside of CPU and OpenMP GPU
+     dtset%gpu_option=ABI_GPU_DISABLED
+     call wrtout(units, "- WARNING: nspinor=2 not supported outside of CPU and OpenMP GPU. gpu_option has been set to 0!")
    end if
  end if
 
@@ -2400,6 +2441,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_meas=1
    dtsets(idtset)%dmftctqmc_mov=0
    dtsets(idtset)%dmftctqmc_mrka=0
+   dtsets(idtset)%dmftctqmc_chains=xomp_get_max_threads()
    dtsets(idtset)%dmftctqmc_order=0
    dtsets(idtset)%dmftqmc_l=0
    dtsets(idtset)%dmftqmc_n=0.0_dp
@@ -2426,7 +2468,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ecuteps=zero
    dtsets(idtset)%ecutsigx=zero ! If ecutsigx is not defined explicitly, npwsigx will be initialized from ecutwfn.
    dtsets(idtset)%ecutsm=zero
-   dtsets(idtset)%ecutwfn=zero ! The true default value is ecut . This is defined in invars2.F90
+   dtsets(idtset)%ecutwfn=zero ! The true default value is ecut. This is defined in invars2.F90
    dtsets(idtset)%effmass_free=one
    dtsets(idtset)%efmas=0
    dtsets(idtset)%efmas_bands=0 ! The true default is nband. This is defined in invars2.F90

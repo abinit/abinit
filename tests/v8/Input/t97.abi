@@ -4,7 +4,7 @@
  udtset 3 2
 
 #Definition of the atomic spheres
- ratsph    1.0 
+ ratsph    1.0
  ratsm     0.05
  constraint_kind  1
  magcon_lambda    2
@@ -16,7 +16,7 @@
  nband1? 4
 tsmear1? 0.01
 occopt1? 7
- acell1? 10 6 6 
+ acell1? 10 6 6
   xred1? 0 0 0   0.5 0 0
 
  spinat11       0.01  0.01  0.08   0.01  -0.01  0.08  # The spin system is invariant with respect to a gliding plane symmetry
@@ -46,23 +46,23 @@ occopt1? 7
  rprim3? 0 1 1
          1 0 1
          1 1 0
-  xcart3?  1.0 0 0   0 1.0 0  -1.0 0 0   0 -1.0 0    
+  xcart3?  1.0 0 0   0 1.0 0  -1.0 0 0   0 -1.0 0
 
- spinat31  0.04 0 0      0 -0.04 0     -0.04 0 0      0 0.04 0  
- spinat32  0.04 0 0.02   0 -0.04 0.02  -0.04 0 0.02   0 0.04 0.02 
+ spinat31  0.04 0 0      0 -0.04 0     -0.04 0 0      0 0.04 0
+ spinat32  0.04 0 0.02   0 -0.04 0.02  -0.04 0 0.02   0 0.04 0.02
 
 #Atom types
  ntypat  1
  znucl  1.0
  so_psp 0
 # Non-collinear case
- nspden 4  nspinor 2  
+ nspden 4  nspinor 2
 
  chksymtnons 3    # The default value for chksymtnons (which is 1) is not admitted in case of cDFT calculations.
 
 #Computational parameters
  tolvrs 1.0d-8
- nstep  60
+ nstep  40
  ecut 5
  kptopt 0
  nkpt 1
@@ -78,14 +78,14 @@ occopt1? 7
 #%% executable = abinit
 #%% exclude_builders = haicgu_*
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t97.abo, tolnlines = 220, tolabs = 4.0e+4, tolrel = 1.1, fld_options = -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. Gonze
-#%% references = 
-#%% keywords = 
+#%% references =
+#%% keywords =
 #%% description = Hydrogen systems for tests of symmetry recognition in the non-collinear case. Constrained DFT calculations for the magnetization.
 #%%    At present DS21, 31 and 32 do not work as expected. Hence the huge tolerance.
 #%%<END TEST_INFO>

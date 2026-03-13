@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -886,7 +886,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ABI_MALLOC(kstr5,(npw_k))
        ABI_MALLOC(kstr6,(npw_k))
        if (use_gbt /= 0) then
-         ABI_MALLOC(kstr1_kphq,(npw_k)) 
+         ABI_MALLOC(kstr1_kphq,(npw_k))
          ABI_MALLOC(kstr2_kphq,(npw_k))
          ABI_MALLOC(kstr3_kphq,(npw_k))
          ABI_MALLOC(kstr4_kphq,(npw_k))
@@ -977,13 +977,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !           kstr3(ipw)=fact_kin*kgc3*kgc3
 !           kstr4(ipw)=fact_kin*kgc3*kgc2
 !           kstr5(ipw)=fact_kin*kgc3*kgc1
-!           kstr6(ipw)=fact_kin*kgc2*kgc1 
+!           kstr6(ipw)=fact_kin*kgc2*kgc1
        end do ! ipw
        if (use_gbt/=0) then
          do ipw=1,npw_k
            kgr_kphq = kphq+kg_k(:,ipw)
            kgc_kphq = MATMUL(gprimd, kgr_kphq)
-           kin_kphq = htpisq * DOT_PRODUCT(kgc_kphq, kgc_kphq) 
+           kin_kphq = htpisq * DOT_PRODUCT(kgc_kphq, kgc_kphq)
            fact_kin=1.0_dp
            if (kin_kphq>ecut-ecutsm) then
              if (kin_kphq>ecut) then
@@ -1002,7 +1002,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            kstr5_kphq(ipw)=fact_kin*kgc_kphq(3)*kgc_kphq(1)
            kstr6_kphq(ipw)=fact_kin*kgc_kphq(2)*kgc_kphq(1)
          end do ! ipw
-       end if ! GBT 
+       end if ! GBT
        ABI_FREE(gprimd)
      end if
 
@@ -1012,7 +1012,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        nkpg=3*nloalg(3)
        ABI_MALLOC(kpg_k,(npw_k,nkpg))
        if (nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
-       if (use_gbt/=0) then       
+       if (use_gbt/=0) then
          ABI_MALLOC(kpg_kphq,(npw_k,nkpg))
          call mkkpg(kg_k,kpg_kphq,kphq,nkpg,npw_k)
        end if
@@ -1023,7 +1023,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        if (use_gbt/=0) then
          ABI_MALLOC(kpg_kphq,(npw_k,nkpg))
          call mkkpg(kg_k,kpg_kphq,kphq,nkpg,npw_k)
-       end if 
+       end if
      end if
 
 !    Compute nonlocal form factors ffnl at all (k+G)
@@ -1039,7 +1039,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ABI_MALLOC(ffnl_kphq,(npw_k,dimffnl,psps%lmnmax,ntypat)) ! 0
        call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl_kphq,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
 &        ider,idir,psps%indlmn,kg_k,kpg_kphq,kphq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,&
-&        nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k) 
+&        nkpg,npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
      end if
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET ENTER DATA MAP(to:ffnl) IF(gpu_option==ABI_GPU_OPENMP)
@@ -1066,7 +1066,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ABI_MALLOC(ph3d_kphq,(2,npw_k,gs_hamk%matblk))
        call gs_hamk%load_kprime(kpt_kp=kphq,&
 &       kpg_kp=kpg_kphq,ffnl_kp=ffnl_kphq,ph3d_kp=ph3d_kphq,compute_gbound=compute_gbound,compute_ph3d=.true.)
-     end if     
+     end if
 
 !    Load band-FFT tabs (transposed k-dependent arrays)
      if (mpi_enreg%paral_kgb==1.and.usexg/=1) then
@@ -1186,14 +1186,16 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
            else
-             gs_hamk%nspinor=1 
-             ABI_MALLOC(cwavef_spin, (2, npw_k*blocksize))  
+             gs_hamk%nspinor=1
+             ABI_MALLOC(cwavef_spin, (2, npw_k*blocksize))
              ABI_MALLOC(enlout_spin,(nnlout*blocksize))
              enlout_spin(:) = zero
+             gs_hamk%ispin_gbt = 1
              call cg_copy_spin(1,npw_k,my_nspinor,blocksize,cwavef,cwavef_spin)
              call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=K_H_K)
-             
+            
+             gs_hamk%ispin_gbt = 2 
              call cg_copy_spin(2,npw_k,my_nspinor,blocksize,cwavef,cwavef_spin)
              call nonlop(choice,cpopt,cwaveprj,enlout_spin,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=KPRIME_H_KPRIME)
@@ -1201,7 +1203,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              enlout(1:nnlout*blocksize) = enlout(1:nnlout*blocksize) + enlout_spin(1:nnlout*blocksize)
              gs_hamk%nspinor = 2
              ABI_FREE(cwavef_spin)
-             ABI_FREE(enlout_spin) 
+             ABI_FREE(enlout_spin)
            end if ! GBT
          else if (usexg/=1) then ! paral_kgb = 1
            ! here we MUST pass option gpu_option=ABI_GPU_DISABLED, as cwavef here is a host memory buffer
@@ -1329,13 +1331,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
                 call meanvalue_g(ar2,kstr1_kphq,0,istwf_k,mpi_enreg,npw_k,1,&
 &                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),&
 &                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),0)
-                kinstr(1)=kinstr(1)+weight(iblocksize)*(ar+ar2) ! (1,1) 
+                kinstr(1)=kinstr(1)+weight(iblocksize)*(ar+ar2) ! (1,1)
                 call meanvalue_g(ar,kstr2,0,istwf_k,mpi_enreg,npw_k,1,&
 &                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),&
 &                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),0)
                 call meanvalue_g(ar2,kstr2_kphq,0,istwf_k,mpi_enreg,npw_k,1,&
 &                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),&
-&                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),0) 
+&                 cwavef(:,1 + (iblocksize-1)*npw_k*my_nspinor+npw_k:),0)
                 kinstr(2)=kinstr(2)+weight(iblocksize)*(ar+ar2) ! (2,2)
                 call meanvalue_g(ar,kstr3,0,istwf_k,mpi_enreg,npw_k,1,&
 &                 cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:(iblocksize-1)*npw_k*my_nspinor+npw_k),&
@@ -2016,7 +2018,7 @@ subroutine stress_mGGA(mggastr,cwavef,effmass_free,gbound_k,gprimd,istwf_k,kg_k,
 !    Compute grad of WF (multiplication by 2pi i (G+k)_idir in reciprocal space)
      if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:my_cwavef,gcwavef) PRIVATE(idat)
+       !$OMP TARGET TEAMS DISTRIBUTE MAP(to:my_cwavef,gcwavef,kg_k) PRIVATE(idat)
        do idat=1,ndat
          !$OMP PARALLEL DO PRIVATE(ipw,kg_k_cart)
          do ipw=1,npw_k

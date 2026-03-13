@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2026 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -471,6 +471,10 @@ ABI_OPTIM_INIT([${abi_optim_flavor}])
   AC_MSG_NOTICE([disabling optimizations for src/43_ptgroups/])
   fcflags_opt_43_ptgroups="-O0"
 
+if test "${abi_fc_vendor}" == "cray"; then
+  AC_MSG_NOTICE([disabling optimizations for src/70_gw/])
+  fcflags_opt_70_gw="-O1"
+fi
 # FIXME: AMD LLVM fork for OpenMP GPU (aka AOMP) has a sensitive OpenMP GPU implementation, so we enable it where needed.
 # Checked with version 16.0.0 shipped with ROCm 5.6.0 (July 2023).
 if test "${abi_fc_vendor}" == "llvm" -a "${abi_gpu_flavor}" == "hip-double"; then
@@ -1021,6 +1025,7 @@ ABI_TRIGGERS_SUMMARY
 
 status=""
 mandatory=""
+fb_path=""
 
 # Check linalg
 if test "${sd_linalg_flavor_req}" != "auto"; then
@@ -1038,6 +1043,9 @@ fi
 if test "${sd_hdf5_enable}" = "no" -o "${sd_hdf5_init}" = "fb"; then
       ABI_MSG_NOTICE_L([hdf5-mandatory],[__CAUTION__ : HDF5 is __MANDATORY__ !])
       mandatory="#"
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
 else
   if test "${sd_hdf5_ok}" != "yes";then
       ABI_MSG_NOTICE_L([hdf5-nw],[__WARNING__ : HDF5 is not __WORKING__ !])
@@ -1050,6 +1058,9 @@ if test "${sd_hdf5_ok}" = "yes" -o "${sd_hdf5_init}" = "fb";then
   if test "${sd_netcdf_enable}" = "no" -o "${sd_netcdf_init}" = "fb"; then
       ABI_MSG_NOTICE_L([netcdf-mandatory],[__CAUTION__ : NetCDF is __MANDATORY__ !])
       mandatory="#"
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
   else
      if test "${sd_netcdf_ok}" != "yes";then
         ABI_MSG_NOTICE_L([netcdf-nw],[__WARNING__ : NetCDF is not __WORKING__ !])
@@ -1061,6 +1072,9 @@ if test "${sd_hdf5_ok}" = "yes" -o "${sd_hdf5_init}" = "fb";then
   if test "${sd_netcdf_fortran_enable}" = "no" -o "${sd_netcdf_fortran_init}" = "fb"; then
       ABI_MSG_NOTICE_L([netcdf_fortran-mandatory],[__CAUTION__ : NetCDF Fortran is __MANDATORY__ !])
       mandatory="#"
+      fb_path="--with-hdf5=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/hdf5/${abi_fb_hdf5_version}/ "
+      fb_path+="--with-netcdf=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4/${abi_fb_netcdf_version}/ "
+      fb_path+="--with-netcdf-fortran=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/netcdf4_fortran/${abi_fb_netcdf_fortran_version}/ "
   else
     if test "${sd_netcdf_fortran_ok}" != "yes";then
       ABI_MSG_NOTICE_L([netcdf_fortran-nw],[__WARNING__ : NetCDF Fortran is not __WORKING__ !])
@@ -1073,6 +1087,7 @@ fi
 if test "${sd_libxc_enable}" = "no" -o "${sd_libxc_init}" = "fb"; then
       ABI_MSG_NOTICE_L([libxc-mandatory],[__CAUTION__ : LibXC is __MANDATORY__ !])
       mandatory="#"
+      fb_path+=" --with-libxc=${ac_abs_top_builddir}/fallbacks/install_fb/${abi_cc_vendor}/${abi_cc_version}/libxc/${abi_fb_libxc_version} "
 else
   if test "${sd_libxc_ok}" != "yes";then
       ABI_MSG_NOTICE_L([libxc-nw],[__WARNING__ : LibXC is not __WORKING__ !])
@@ -1110,7 +1125,7 @@ fi
 # Help to produce libraires
 if test "${mandatory}" = "#"; then
       ABI_MSG_NOTICE_L([help-fb],[We can __help__ you !])
-else 
+else
    if test "${mandatory}" = "fail"; then
    	ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
    fi
@@ -1294,6 +1309,10 @@ if test "${sd_libxc_kxc_ok}" = "no"; then
   ABI_MSG_NOTICE([libxc-kxc],
     [Suboptimal libxc configuration])
 fi
+if test "${sd_fft_flavor}" = "fftw3" -a "${abi_openmp_enable}" = "yes"; then
+  ABI_MSG_NOTICE([fftw3-openmp],
+    [WARNING: OpenMP enabled but FFTW3 Threads disabled])
+fi
 # GPU 2024 implementation : deactivate this warning
 #if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
 #  ABI_MSG_NOTICE([gpu-without-magma],
@@ -1304,13 +1323,27 @@ ABI_MSG_END
 
 
 
-if test "x${mandatory}" = "x#"; then
-  FALLBACKS_SUBDIRS="fallbacks"
-else
-  FALLBACKS_SUBDIRS=""
-fi
+FALLBACKS_SUBDIRS=""
+AC_ARG_ENABLE([create_reconfigure_for_fb],
+    [],                                 dnl <- no help string: keeps it hidden
+    [enable_reconfigure_for_fb="$enableval"],       dnl action if given
+    [enable_reconfigure_for_fb="yes"]                dnl default if not given
+)
 
-AC_SUBST(FALLBACKS_SUBDIRS)
+
+
+if test "x${mandatory}" = "x#"; then
+  AC_MSG_NOTICE(["running cp ${abinit_srcdir}/config/scripts/install_fallbacks.sh ${abinit_builddir}"])	
+  cp ${abinit_srcdir}/config/scripts/install_fallbacks.sh .
+  if test "x$enable_reconfigure_for_fb" = "xyes"; then
+      printf '%s/configure %s %s --disable-create_reconfigure_for_fb \n' "${abinit_srcdir}"  "$ac_configure_args" "$fb_path" > ${abinit_builddir}/.reconfigure
+      chmod +x ${abinit_builddir}/.reconfigure
+  fi
+  chmod +x ${abinit_builddir}/install_fallbacks.sh
+#  FALLBACKS_SUBDIRS="fallbacks"
+#else
+fi
+#AC_SUBST(FALLBACKS_SUBDIRS)
 
 AC_OUTPUT
 
@@ -1337,6 +1370,6 @@ fi
 
 
 if test "x${mandatory}" = "x#"; then
-  ABI_TRIGGERS_SUMMARY	
+  ABI_TRIGGERS_SUMMARY
   ABI_MSG_NOTICE_L([help-fb], [Missing Mandatory library!])
-fi 
+fi

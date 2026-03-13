@@ -1,7 +1,7 @@
 #
 # M4 macros for LibPAW (imported from Abinit)
 #
-# Copyright (C) 2006-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2006-2026 ABINIT Group (Yann Pouillon)
 
 
 

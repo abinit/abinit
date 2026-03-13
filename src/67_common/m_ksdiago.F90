@@ -6,7 +6,7 @@
 !!  Direct diagonalization of the KS Hamiltonian H_k(G,G')
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (MG)
+!!  Copyright (C) 2008-2026 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1103,10 +1103,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  ! Initialize the Hamiltonian on the coarse FFT mesh.
  if (present(electronpositron)) then
    call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
-    mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0, electronpositron=electronpositron)
+    mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0, gpu_option=dtset%gpu_option, electronpositron=electronpositron)
  else
    call gs_hamk%init(psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
-    mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0)
+    mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0, gpu_option=dtset%gpu_option)
  end if
 
  ! Check on the number of stored bands.
@@ -1205,6 +1205,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  batch_size = 8 * omp_nt
  if (istwf_k == 2) batch_size = 1  ! FIXME
  !batch_size = 1
+ if (gs_hamk%gpu_option == ABI_GPU_OPENMP) then
+   batch_size = 32
+ end if
+
  call wrtout(std_out, sjoin(" Building H^KS with batch_size:", itoa(batch_size)))
 
  ABI_MALLOC(bras, (2, npwsp * batch_size))
@@ -1277,7 +1281,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
      end do
      if (psps%usepaw == 1) then
        NOT_IMPLEMENTED_ERROR()
-       !gsg_mat%buffer_real(...)
        !gsg_mat%buffer_real(...)
      end if
    end if ! istwf_k
@@ -1538,7 +1541,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, gs_fermie, nband_k, 
  ! ================
  ! Stochastic bands
  ! ================
- if (dtset%nb_protected /= 0) then
+ !if (dtset%nb_protected /= 0) then
+ if (.False.) then
    call wrtout(std_out, " Generating stochastic bands...")
    ! Initial setup.
    call psb%init(dtset, h_size, eig_ene, gs_fermie) !, nband_k)
@@ -2247,12 +2251,15 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie)
  real(dp),allocatable :: tmp_eig_k(:)
 ! *********************************************************************
 
+ ABI_UNUSED(dtset%natom)
+
  ! Shift energies wrt the input Fermi level.
  ABI_MALLOC(tmp_eig_k, (eig_size))
  tmp_eig_k = eig_k - gs_fermie
 
- psb%nb_protected = dtset%nb_protected
- psb%maxsto_per_slice = dtset%nb_per_slice
+ psb%nb_protected = huge(1)
+ !psb%nb_protected = dtset%nb_protected
+ !psb%maxsto_per_slice = dtset%nb_per_slice
  ! TODO
  psb%efrac = 0.02_dp   ! dtset%efrac
 
@@ -2278,7 +2285,7 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie)
      ! Won't use pseudo bands in this case.
      psb%subspace(3, psb%nslices) = 1
    else
-     psb%subspace(3, psb%nslices) = min(dtset%nb_per_slice, nb)
+     !psb%subspace(3, psb%nslices) = min(dtset%nb_per_slice, nb)
    end if
    first_band = last_band + 1
    !write(std_out,'(a,i0,a,*(1x,i0))')" islice: ", psb%nslices, " subspace:", psb%subspace(:, psb%nslices)
@@ -2306,7 +2313,7 @@ subroutine psbands_init(psb, dtset, eig_size, eig_k, gs_fermie)
  units = [std_out, ab_out]
  call wrtout(units, ' Stochastic pseudobands setup:', pre_newlines=1)
  call wrtout(units, sjoin('     Number of stochastic subspaces: ', itoa(psb%nslices)))
- call wrtout(units, sjoin('     Number of stochastic pseudobands per subspace: ', itoa(dtset%nb_per_slice)))
+ !call wrtout(units, sjoin('     Number of stochastic pseudobands per subspace: ', itoa(dtset%nb_per_slice)))
  call wrtout(units, sjoin('     Original number of bands: ', itoa(eig_size)))
  call wrtout(units, sjoin('     Number of bands in the protection window: ', itoa(psb%nb_protected)))
  call wrtout(units, sjoin('     Final number of bands: ', itoa(psb%nb_tot)), newlines=1)

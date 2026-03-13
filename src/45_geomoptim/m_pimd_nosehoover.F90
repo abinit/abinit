@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2025 ABINIT group (GG,MT)
+!!  Copyright (C) 2011-2026 ABINIT group (GG,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -458,7 +458,7 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 
 !If possible, estimate the velocities at t+dt
  !if (itimimage>1) then
-   call pimd_predict_vel(dtion,itimimage,natom,trotter,0,xcart,xcart_next,xcart_prev,vel_next) 
+   call pimd_predict_vel(dtion,itimimage,natom,trotter,0,xcart,xcart_next,xcart_prev,vel_next)
  !end if
 
 !Come back to reduced coordinates

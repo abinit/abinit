@@ -6,7 +6,7 @@
 !! Tool for profiling and and testing the IO routines used in abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2025 ABINIT group (MG)
+!! Copyright (C) 2004-2026 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -181,6 +181,12 @@ program ioprof
    ! Compress waves to reduce size on disk.
    NCF_CHECK(nf90_def_var_deflate(ncid, vid("compressed_waves"), shuffle=1, deflate=1, deflate_level=5))
 
+   ! This seems to be needed to avoid deadlocks
+   NCF_CHECK(nctk_prepare_mpiio(ncid, "waves"))
+   NCF_CHECK(nctk_prepare_mpiio(ncid, "compressed_waves"))
+   NCF_CHECK(nctk_prepare_mpiio(ncid, "collective_waves"))
+   NCF_CHECK(nctk_prepare_mpiio(ncid, "collective_compressed_waves"))
+
    ! Begin writing.
    NCF_CHECK(nctk_set_datamode(ncid))
 
@@ -218,6 +224,13 @@ program ioprof
 
    ! Now read the data and performs consistency check.
    NCF_CHECK(nctk_open_read(ncid, new_filename, comm))
+
+   ! This seems to be needed to avoid deadlocks
+   NCF_CHECK(nctk_prepare_mpiio(ncid, "waves"))
+   NCF_CHECK(nctk_prepare_mpiio(ncid, "compressed_waves"))
+   NCF_CHECK(nctk_prepare_mpiio(ncid, "collective_waves"))
+   NCF_CHECK(nctk_prepare_mpiio(ncid, "collective_compressed_waves"))
+
    test_ierr = 0
 
    call wrtout(std_out, "Reading data in indipendent mode...")

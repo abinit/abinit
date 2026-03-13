@@ -1,7 +1,7 @@
 /* dev_spec_hip.cpp*/
 
 /*
- * Copyright (C) 2008-2025 ABINIT Group (MMancini,FDahm)
+ * Copyright (C) 2008-2026 ABINIT Group (MMancini,FDahm)
  * this file is distributed under the terms of the
  * gnu general public license, see ~abinit/COPYING
  * or http://www.gnu.org/copyleft/gpl.txt.
@@ -9,6 +9,8 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <abi_gpu_header_common.h>
 #include <hip/hip_runtime_api.h>
 #include "hip_api_error_check.h"

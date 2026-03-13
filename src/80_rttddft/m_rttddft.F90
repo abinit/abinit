@@ -6,7 +6,7 @@
 !!  Contains various subroutines used in RT-TDDFT
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2025 ABINIT group (FB)
+!!  Copyright (C) 2021-2026 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -280,7 +280,8 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
                 & tdks%pawang,dtset%pawprtvol,tdks%pawrad,tdks%pawrhoij,    &
                 & dtset%pawspnorb,tdks%pawtab,dtset%pawxcdev,               &
                 & dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,            &
-                & dtset%xc_taupos,tdks%xred,tdks%ucvol,psps%znuclpsp,       &
+                & dtset%xc_taupos,tdks%xred,tdks%ucvol,                     &
+                & psps%znuclpsp,dtset%spinaxis,                             &
                 & comm_atom=mpi_enreg%comm_atom,                            &
                 & mpi_atmtab=mpi_enreg%my_atmtab,vpotzero=vpotzero)
    !Correct the average potential with the calculated constant vpotzero
@@ -313,7 +314,7 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
              & atvshift=dtset%atvshift, &
              & fatvshift=one,comm_atom=mpi_enreg%comm_atom,                          &
              & mpi_atmtab=mpi_enreg%my_atmtab,mpi_comm_grid=mpi_enreg%comm_fft,      &
-             & nucdipmom=dtset%nucdipmom)
+             & nucdipmom=dtset%nucdipmom,spinaxis=dtset%spinaxis)
 
    !Symetrize Dij
    call symdij(tdks%gprimd,tdks%indsym,ipert,my_natom,dtset%natom,dtset%nsym, &

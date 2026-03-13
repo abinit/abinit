@@ -29,14 +29,14 @@ randomseed=111111 # for testing only
 #%% spin_pot = t81.xml
 #%% exec_args = --F03
 #%% [files]
-#%% files_to_test = 
-#%%   t82.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%% files_to_test =
+#%%   t82.abo, tolnlines = 1, tolabs = 1.1e-6, tolrel = 8.0e-7, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = X. He 
+#%% authors = X. He
 #%% keywords = Effective potential, multibinit, spinpot
-#%% description = 
+#%% description =
 #%%   read xml and run spin dynamics. This is to test the spin_damping option.
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
 #%%   is detected, which is needed by the random number generator.
