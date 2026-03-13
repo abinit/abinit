@@ -57,8 +57,8 @@ module m_extfpmd
   !!
   !! SOURCE
   type,public :: extfpmd_type
-    logical :: truecg,pawsph
-    integer :: bcut,mband,nbcut,nbdbuf,nfftf,nspden,version
+    logical :: truecg
+    integer :: bcut,mband,nbcut,nbdbuf,nfftf,nspden,version,pawsph
     real(dp) :: ebcut,edc_kinetic,e_kinetic,entropy
     real(dp) :: nelect,eshift,ucvol,el_temp,bandshift,eshift_paw
     real(dp) :: nelect_res, nelect_respc
@@ -112,8 +112,7 @@ contains
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
-    logical,intent(in) :: pawsph
-    integer,intent(in) :: mband,nbcut,nbdbuf,nfftf,nspden
+    integer,intent(in) :: mband,nbcut,nbdbuf,nfftf,nspden,pawsph
     integer,intent(in) :: nsppol,nkpt,version,extfpmd_mband,occopt
     real(dp),intent(in) :: extfpmd_eshift,tphysel,tsmear
     type(MPI_type),intent(in) :: mpi_enreg
@@ -212,7 +211,7 @@ contains
     this%eshift_paw=zero
     this%ucvol=zero
     this%el_temp=zero
-    this%pawsph=.false.
+    this%pawsph=0
   end subroutine destroy
   !!***
 
@@ -298,8 +297,12 @@ contains
       ! Computes U_0 from the sum of local
       ! potentials (vtrial), averaging over all space.
       ! Simplest and most precise way to evaluate U_0.
-      this%eshift=sum(this%vtrial)/(nfftf*nspden)+this%eshift_paw
+      this%eshift=sum(this%vtrial)/(nfftf*nspden)
     end if
+
+    if(this%pawsph==2) then
+      this%eshift=this%eshift+this%eshift_paw
+    endif
 
     ! Get extended FPMD band energy cutoff
     this%ebcut=zero
@@ -567,6 +570,10 @@ contains
     else
       this%edc_kinetic=this%e_kinetic+this%nelect*this%eshift
     end if
+
+    if(this%pawsph==1) then
+      this%edc_kinetic=this%edc_kinetic+this%nelect*this%eshift_paw
+    endif
 
     if(cut_warn) then
       write(msg,'(11a)')&

@@ -611,6 +611,10 @@ program abinit
    call dtsets(ii)%free()
  end do
  ABI_FREE(dtsets)
+ do ii=1,size(pspheads)
+   ABI_SFREE(pspheads(ii)%nproj)
+   ABI_SFREE(pspheads(ii)%nprojso)
+ enddo
  ABI_FREE(pspheads)
 
 #if defined HAVE_GPU_CUDA

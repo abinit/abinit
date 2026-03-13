@@ -3526,8 +3526,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdos',dt%prtdos,6,(/0,1,2,3,4,5/),iout)
 
 ! for the moment prtdos 3,4,5 are not compatible with fft or band parallelization
-   if (dt%prtdos > 3 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
-     ABI_ERROR_NOSTOP('prtdos>3 and FFT or band parallelization are not compatible yet. Set prtdos <= 2', ierr)
+   if (dt%prtdos > 4 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
+     ABI_ERROR_NOSTOP('prtdos>4 and FFT or band parallelization are not compatible yet. Set prtdos <= 4', ierr)
    end if
 
 ! prtdos 5 only makes sense for nspinor == 2. Otherwise reset to prtdos 2

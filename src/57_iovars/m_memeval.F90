@@ -2278,7 +2278,7 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
 
 !Local variables-------------------------------
 !scalars
- integer :: ilang,ipsp,ipspalch,itypalch,itypat,ntyppure
+ integer :: ilang,ipsp,ipspalch,itypalch,itypat,ntyppure,max_l
 !integer :: llmax
  character(len=500) :: msg
 !arrays
@@ -2288,13 +2288,17 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
 ! *************************************************************************
 
 !write(std_out,*)' getdim_nloc: 'pspheads(1)%nproj(0:3)=',pspheads(1)%nproj(0:3)
+ max_l=0
+ do ipsp=1,npsp
+   max_l=max(max_l,pspheads(ipsp)%lmax)
+ enddo
 
  ABI_MALLOC(lmnproj_typat,(ntypat))
  ABI_MALLOC(lmnprojso_typat,(ntypat))
  ABI_MALLOC(lnproj_typat,(ntypat))
  ABI_MALLOC(lnprojso_typat,(ntypat))
- ABI_MALLOC(nproj_typat,(0:3,ntypat))
- ABI_MALLOC(nprojso_typat,(3,ntypat))
+ ABI_MALLOC(nproj_typat,(0:max_l,ntypat))
+ ABI_MALLOC(nprojso_typat,(max_l,ntypat))
  lmnproj_typat(:)=0 ; lmnprojso_typat(:)=0
  lnproj_typat(:)=0 ; lnprojso_typat(:)=0
  nproj_typat(:,:)=0 ; nprojso_typat(:,:)=0
@@ -2305,8 +2309,8 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
 !First, pure pseudo atoms
  if(ntyppure>0)then
    do itypat=1,ntyppure
-     nproj_typat(0:3,itypat)=pspheads(itypat)%nproj(0:3)
-     nprojso_typat(:,itypat)=pspheads(itypat)%nprojso(:)
+     nproj_typat(0:pspheads(itypat)%lmax,itypat)=pspheads(itypat)%nproj(0:pspheads(itypat)%lmax)
+     nprojso_typat(1:pspheads(itypat)%lmax,itypat)=pspheads(itypat)%nprojso(1:pspheads(itypat)%lmax)
    end do
  end if
 
@@ -2318,8 +2322,10 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
        ipspalch=ipsp-ntyppure
 !      If there is some mixing, must accumulate the projectors
        if(sum(abs(mixalch(ipspalch,itypalch,:)))>tol10)then
-         nproj_typat(0:3,itypat)=nproj_typat(0:3,itypat)+pspheads(ipsp)%nproj(0:3)
-         nprojso_typat(:,itypat)=nprojso_typat(:,itypat)+pspheads(ipsp)%nprojso(:)
+         nproj_typat(0:pspheads(ipsp)%lmax,itypat)=nproj_typat(0:pspheads(ipsp)%lmax,itypat)+&
+&                                                  pspheads(ipsp)%nproj(0:pspheads(ipsp)%lmax)
+         nprojso_typat(1:pspheads(ipsp)%lmax,itypat)=nprojso_typat(1:pspheads(ipsp)%lmax,itypat)+&
+&                                                    pspheads(ipsp)%nprojso(:)
        end if
      end do
    end do
@@ -2327,13 +2333,13 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
 
 !Now that the number of projectors is known, accumulate the dimensions
  do itypat=1,ntypat
-   do ilang=0,3
+   do ilang=0,max_l
      lnproj_typat(itypat)=lnproj_typat(itypat)+nproj_typat(ilang,itypat)
      lmnproj_typat(itypat)=lmnproj_typat(itypat)+nproj_typat(ilang,itypat)*(2*ilang+1)
    end do
    lnprojso_typat(itypat)=lnproj_typat(itypat)
    lmnprojso_typat(itypat)=lmnproj_typat(itypat)
-   do ilang=1,3
+   do ilang=1,max_l
      lnprojso_typat(itypat)=lnprojso_typat(itypat)+nprojso_typat(ilang,itypat)
      lmnprojso_typat(itypat)=lmnprojso_typat(itypat)+nprojso_typat(ilang,itypat)*(2*ilang+1)
    end do
