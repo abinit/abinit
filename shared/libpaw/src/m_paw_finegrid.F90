@@ -125,10 +125,10 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
    msg='rfgd array must be allocated at rfgd(3,nfgd)!'
    LIBPAW_BUG(msg)
  end if
- if (pawtab%lcut_size>9) then
-   msg='l_size>10 forbidden!'
-   LIBPAW_BUG(msg)
- end if
+ !if (pawtab%lcut_size>9) then
+ !  msg='l_size>10 forbidden!'
+ !  LIBPAW_BUG(msg)
+ !end if
  if (pawtab%shape_type==1.and.pawtab%shape_lambda<2) then
    msg='Exponent lambda of gaussian shape function must be > 1!'
    LIBPAW_ERROR(msg)
@@ -223,13 +223,13 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
 
 !If needed, compute limits at r=0 of shape function and derivatives
  if (izero>0) then
-   LIBPAW_ALLOCATE(cc,(3,min(l_size,3)))
+   LIBPAW_ALLOCATE(cc,(3,l_size))
    cc=zero
    if (shape_type==-1) then
      splfact=(pawtab%rad_for_spline(4)-pawtab%rad_for_spline(1))&
 &     /(pawtab%rad_for_spline(3)-pawtab%rad_for_spline(2))
    end if
-   do ll=1,min(l_size,3)
+   do ll=1,l_size
 !    cc(2,l) is g_prime(0)
      if (optgr0==1.or.optgr1==1.or.optgr2==1) then
        if (shape_type==-1) then

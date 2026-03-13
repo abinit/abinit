@@ -246,7 +246,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer :: bantot,fform,collect,timrev, accessfil,coordn
  integer :: ii,ierr,ifft,ikpt,ispden,isppol,itypat, me_fft,n1,n2,n3
  integer :: ifgd, iatom, iatom_tot,nradint, me,my_natom_tmp
- integer :: occopt, opt_moments, prtnabla, pawprtden, ncid, ncerr
+ integer :: occopt, opt_moments, prtnabla, pawprtden, ncid, ncerr,nphicor
  integer :: iband,nocc,comm,comm_fft,tmp_unt,nfft_tot, my_comm_atom, opt_imagonly
  integer :: indsym(4,dtset%nsym,dtset%natom)
  real(dp) :: norm,occ_norm,unocc_norm, rate_dum,rate_dum2, yp1, ypn, dr
@@ -285,6 +285,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(self_type), target :: self
  type(green_type) :: greenr
  type(matlu_type), allocatable :: opt_selflimit(:)
+ integer,allocatable :: nphicor_arr(:),lcor(:,:)
+ real(dp),allocatable :: energy_cor(:,:),occ_cor(:,:)
 
 ! *************************************************************************
 
@@ -1410,6 +1412,49 @@ if (dtset%prt_lorbmag==1) then
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "quadmom"), dtset%quadmom))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "efg"), efg))
    end if
+
+   if(present(rcpaw)) then
+     if(associated(rcpaw)) then
+       nphicor=0
+       do itypat=1,dtset%ntypat
+         nphicor=max(nphicor,rcpaw%atm(itypat)%ln_size)
+       enddo
+       ABI_MALLOC(nphicor_arr,(dtset%ntypat))
+       ABI_MALLOC(energy_cor,(nphicor,dtset%ntypat))
+       ABI_MALLOC(occ_cor,(nphicor,dtset%ntypat))
+       ABI_MALLOC(lcor,(nphicor,dtset%ntypat))
+       lcor=0
+       energy_cor=zero
+       occ_cor=one
+       do itypat=1,dtset%ntypat
+         nphicor_arr(itypat)=rcpaw%atm(itypat)%ln_size
+         do ii=1,rcpaw%atm(itypat)%ln_size
+           lcor(ii,itypat)=rcpaw%atm(itypat)%indln(1,ii)
+           energy_cor(ii,itypat)=rcpaw%atm(itypat)%eig(ii,1)
+           occ_cor(ii,itypat)=(two/dble(dtset%nsppol*dtset%nspinor))*rcpaw%atm(itypat)%occ(ii,1)/rcpaw%atm(itypat)%max_occ(ii,1)
+         enddo
+       enddo
+       ncerr = nctk_def_dims(ncid, [ &
+         nctkdim_t("max_number_of_core_states",nphicor),&
+         nctkdim_t("number_of_atom_types",dtset%ntypat)],defmode=.True.)
+       NCF_CHECK(ncerr)
+       ncerr = nctk_def_arrays(ncid, [&
+         nctkarr_t("eigenvalues_core", "dp", "max_number_of_core_states,number_of_atom_types"),&
+         nctkarr_t("occupation_core", "dp", "max_number_of_core_states,number_of_atom_types"),&
+         nctkarr_t("number_of_core_states", "int", "number_of_atom_types"),&
+         nctkarr_t("l_quantum_number_core", "int","max_number_of_core_states,number_of_atom_types")])
+       NCF_CHECK(ncerr)
+       NCF_CHECK(nctk_set_datamode(ncid))
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eigenvalues_core"),energy_cor))
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "occupation_core"),occ_cor))
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "number_of_core_states"),nphicor_arr))
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid,"l_quantum_number_core"),lcor))
+       ABI_FREE(nphicor_arr)
+       ABI_FREE(energy_cor)
+       ABI_FREE(occ_cor)
+       ABI_FREE(lcor)
+     endif
+   endif
 
    NCF_CHECK(nf90_close(ncid))
  end if
