@@ -908,8 +908,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
            end do ! idat
          else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(tofrom:for1) &
-           !$OMP& MAP(to:vfock,grnhat_12,atom_nfgd,atom_rfgd,atom_ifftsph) &
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+           !$OMP& MAP(to:vfock,grnhat_12,for1,atom_nfgd,atom_ifftsph) &
            !$OMP& PRIVATE(ifft,ind,iatom) PRIVATE(idat_occ,idir,esum)
            do idat=1,ndat
              do iatom=1,natom
@@ -928,6 +928,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
                end do ! idir
              end do ! iatom
            end do ! idat
+           !$OMP TARGET UPDATE FROM(for1)
 #endif
          end if
 
