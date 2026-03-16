@@ -149,6 +149,7 @@ module m_chebfi2
  public :: chebfi_memInfo
  public :: chebfi_run
  public :: chebfi_runSlice
+ public :: chebfi_runSubspaceIteration
  public :: chebfi_rayleighRitzQuotients
  public :: chebfi_computeNextOrderChebfiPolynom
  public :: chebfi_swapInnerBuffers
@@ -1455,6 +1456,11 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
         ! Note: at this point chebfi%AX and chebfi%BX are empty. Must transpose
         !       to fill with correct values.
 
+        ! todo use copy constructor to create an object by copying an existing object
+        ! actually copy constructor *allocates* memory for chebfi%AX. Write a version
+        ! that does not allocate memory and only reassigns pointers. Can pointers be reassigned
+        ! directly then used in the global constructor? Perform tests.
+
         !write(std_out,*) 'getid before transpose AX', xgBlock_getId(chebfi%AX%self)
         !write(std_out,*) 'getid before transpose xAX', xgBlock_getId(chebfi%xAXColsRows)
         !write(std_out,*) 'getid before transpose xX', xgBlock_getId(chebfi%xXColsRows)
@@ -1574,6 +1580,280 @@ end subroutine chebfi_runSlice
 
 !----------------------------------------------------------------------
 
+!!****f* m_chebfi/chebfi_runSubspaceIteration
+!! NAME
+!! chebfi_runSubspaceIteration 
+!! 
+!! FUNCTION
+!! Applies subspace iteration by Chebyshev polynomial filtering on slice
+!! then extracts eigenvectors using Rayleigh-Ritz. This execution is completely
+!! local on slice processors. Each slice does not see others. 
+!! 
+!! NOTES
+!! Restart logic in subspace iteration:
+!!   Allocate constructor (state=colsrows)
+!!   while (convergence not reached):
+!!    |  if (state=linalg) Transpose
+!!    |  Filter
+!!    |  Transpose (state=linalg)
+!!    |  Orthogonalize
+!!   Rayleigh-Ritz
+!! 
+!! INPUTS
+!! X0 input vectors distibuted by colsrows along slice processors
+!! 
+!! OUTPUTS
+!! X0 (in-place) converged vectors distributed by linalg along slice processors
+!! 
+!! dev=============
+!! - version 1: count number of converged vectors within iteration
+!!
+!! SOURCE
+
+subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
+        mineig_global,maxeig_global,lambda_minus,lambda_plus,is_lowpass,k_rank,nrows_blockrows)
+
+    implicit none
+
+    !Arguments ------------------------------------    
+    type(chebfi_t) , intent(inout) :: chebfi
+    type(xgBlock_t), intent(inout) :: X0
+    type(xgBlock_t), intent(inout) :: eigen
+    type(xgBlock_t), intent(inout) :: residu
+    integer        , intent(in   ) :: nspinor
+    integer        , intent(in   ) :: k_rank
+    integer, pointer, intent(in  ) :: nrows_blockrows(:)
+    real(dp)       , intent(in   ) :: mineig_global 
+    real(dp)       , intent(in   ) :: maxeig_global
+    real(dp)       , intent(in   ) :: lambda_minus
+    real(dp)       , intent(in   ) :: lambda_plus
+    logical        , intent(in   ) :: is_lowpass
+    interface
+        subroutine getAX_BX(X,AX,BX)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: AX
+            type(xgBlock_t), intent(inout) :: BX
+        end subroutine getAX_BX
+    end interface
+    interface
+        subroutine getBm1X(X,Bm1X)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: Bm1X
+        end subroutine getBm1X
+    end interface
+
+    !Local variables-------------------------------
+    integer :: iter_subspace, niter_subspace_max
+    integer :: spacedim, neigenpairs, num_proc, ierr
+    type(xg_t) :: X_k
+    ! Arrays
+    integer, target, allocatable :: nrowsLinalg(:)
+    integer, pointer :: nrowsLinalg_ptr(:) => null()
+    real(dp) :: tsec(2)
+
+    ! *********************************************************************
+ 
+    if (chebfi%from_linalg) then
+        ABI_ERROR("chebfi should be from colsrows")
+    end if
+
+    spacedim = chebfi%spacedim
+    neigenpairs = chebfi%neigenpairs
+    num_proc = xmpi_comm_size(chebfi%spacecom)
+    chebfi%eigenvalues = eigen
+
+    ABI_MALLOC_IFNOT(nrowsLinalg,(num_proc))
+    nrowsLinalg_ptr => nrowsLinalg
+    nrowsLinalg = nrows_blockrows
+    
+    !write(std_out,*) 'getid inside runSlice xXColsRows', xgBlock_getId(chebfi%xXColsRows)
+    !write(std_out,*) 'getid inside runSlice xAXColsRows', xgBlock_getId(chebfi%xAXColsRows)
+    !flush(std_out)
+
+    ! Initialize values of AX and BX
+    call timab(tim_getAX_BX,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
+    call getAX_BX(chebfi%xXColsRows, chebfi%xAXColsRows, chebfi%xBXColsRows)
+    call xgBlock_zero_im_g0(chebfi%xAXColsRows)
+    call xgBlock_zero_im_g0(chebfi%xBXColsRows)
+    ABI_NVTX_END_RANGE()
+    call timab(tim_getAX_BX,2,tsec)
+
+    ! Allocate memory for linalg distribution
+    call timab(tim_transpose,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+    if (chebfi%paral_kgb==1) then
+
+        ! Allocate chebfi%X
+        call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
+            STATE_COLSROWS,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0,&
+            gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
+            custom_ncolsColsRows=.true.,nrowsLinalg_sub=nrowsLinalg_ptr)
+        ! Note: bandpp is custom because it is created from resource allocator
+
+        ! Allocate chebfi%AX, chebfi%BX
+        call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,&
+            chebfi%AX%self,chebfi%xAXColsRows,STATE_COLSROWS)
+        call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,&
+            chebfi%BX%self,chebfi%xBXColsRows,STATE_COLSROWS)
+        ! Note: at this point chebfi%AX and chebfi%BX are empty. Must transpose
+        !       to fill with correct values.
+
+        ! todo use copy constructor to create an object by copying an existing object
+        ! actually copy constructor *allocates* memory for chebfi%AX. Write a version
+        ! that does not allocate memory and only reassigns pointers. Can pointers be reassigned
+        ! directly then used in the global constructor? Perform tests.
+
+        chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
+        chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
+        chebfi%xgTransposerBX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
+
+    else
+        call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X, spacedim, neigenpairs)
+        call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
+        call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
+    end if
+    call timab(tim_transpose,2,tsec)
+    ABI_NVTX_END_RANGE()
+    
+    write(std_out,*) 'starting filter in proc', xmpi_comm_rank(chebfi%spacecom)
+    flush(std_out)
+
+    niter_subspace_max = 50
+
+    do iter_subspace=1, niter_subspace_max
+
+        write(std_out,*) 'subspace iteration no=', iter_subspace
+        flush(std_out)
+
+        if (iter_subspace>1 .and. chebfi%paral_kgb==1) then
+            call timab(tim_transpose,1,tsec)
+            ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+            call xgTransposer_transpose(chebfi%xgTransposerX, STATE_COLSROWS)
+            call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_COLSROWS)
+            call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_COLSROWS)
+            !call xmpi_barrier(chebfi%spacecom)
+            call timab(tim_transpose,2,tsec)
+            ABI_NVTX_END_RANGE()
+        end if
+    
+        ! ############################ Filter active  ##############################
+        ! ############################ column vectors ##############################
+        if (is_lowpass) then
+            call chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,getBm1X)
+        else
+            call chebfi_bandpassFilter(chebfi,eigen,lambda_minus,lambda_plus,mineig_global,&
+                maxeig_global,getAX_BX,getBm1X)
+        end if
+
+        if (chebfi%paral_kgb==1) then
+            call timab(tim_transpose,1,tsec)
+            ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+            call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
+            call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_LINALG)
+            call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_LINALG)
+            !call xmpi_barrier(chebfi%spacecom)
+            call timab(tim_transpose,2,tsec)
+            ABI_NVTX_END_RANGE()
+        end if
+    
+        write(std_out,'(a,i6,i6)') 'local # proc has # rows ', xmpi_comm_rank(chebfi%spacecom), rows(chebfi%X)
+
+        call xg_Borthonormalize(chebfi%X,chebfi%BX%self,ierr,1,chebfi%gpu_option,AX=chebfi%AX%self)
+
+        ! this must be calculated on linalg distr because we possibly exit
+        ! after that
+        ! residual calculation on active vectors.. 
+        ! call chebfi_getResidual(chebfi%X)
+
+        ! lock vectors in small residual
+        ! actually redefine pointers Xactive and Xlock pointing to X that's all
+    
+    end do
+
+    ! Apply Rayleigh-Ritz to active MPI Linalg row-block
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
+    call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,eigen,ierr,0,tim_RR,&
+        chebfi%gpu_option,solve_ax_bx=.true.)
+    ABI_NVTX_END_RANGE()
+    
+    !write(std_out,*) 'id of X, (after RR) ncols=', xgBlock_getId(chebfi%X), cols(chebfi%X)
+
+    if ( ierr /= 0 ) then
+        ABI_WARNING("RayleighRitz did not work")
+    else
+        !write(std_out,*) 'is lowpass=', is_lowpass
+        !write(std_out,*) 'chebfi%eigenvalues after RR'
+        !call xgBlock_print(chebfi%eigenvalues,std_out)
+        !flush(std_out)
+    end if
+
+    ! Compute residual norm *squared*
+    if (chebfi%paw) then
+        call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%BX%self,chebfi%AX%self)
+    else
+        call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self)
+    end if
+    call xgBlock_colwiseNorm2(chebfi%AX%self,residu) ! performs MPI comm
+
+    !write(std_out,*) 'max colwise residual norm squared='; call xgBlock_print(residu, std_out)
+    !flush(std_out)
+
+    ! Copy in Linalg representation (see chebfi_run, kept for reference)
+    ! call xgBlock_copy(chebfi%X,X0)
+    
+    ! MPI Transpose to recover colsrows state (X only)
+    call timab(tim_transpose,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+    if (chebfi%paral_kgb == 1) then
+        call xmpi_barrier(chebfi%spacecom)
+        call xgTransposer_transpose(chebfi%xgTransposerX, STATE_COLSROWS)
+        call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_COLSROWS)
+        call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_COLSROWS)
+        if (xmpi_comm_size(chebfi%spacecom) == 1) then 
+            call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, spacedim, neigenpairs)
+            call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, spacedim, neigenpairs)
+            call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, spacedim, neigenpairs)
+        end if
+    else
+        call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, spacedim, neigenpairs)
+        call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, spacedim, neigenpairs)
+        call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, spacedim, neigenpairs)
+    end if
+    ABI_NVTX_END_RANGE()
+    call timab(tim_transpose,2,tsec)
+ 
+    ! Copy in ColsRows representation
+    call xgBlock_copy(chebfi%xXColsRows, X0)
+
+    if (cols(X0) /= chebfi%bandpp) then
+        ABI_ERROR('wrong colsrows representation')
+    end if
+    write(std_out,'(a,i6,i6,i6)') 'local # proc has # rows cols ', xmpi_comm_rank(chebfi%spacecom), rows(X0), cols(X0)
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+    if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
+        call gpu_device_synchronize()
+    end if
+#endif
+
+    ! Free transposer objects
+    if (chebfi%paral_kgb == 1) then
+        call xgTransposer_free(chebfi%xgTransposerX)
+        call xgTransposer_free(chebfi%xgTransposerAX)
+        call xgTransposer_free(chebfi%xgTransposerBX)
+    end if
+    
+    ! Free temporary memory
+    ABI_SFREE(nrowsLinalg)
+
+end subroutine chebfi_runSubspaceIteration
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_chebfi/chebfi_lowpassFilter
 !! NAME
 !! chebfi_lowpassFilter
@@ -1637,6 +1917,11 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
     else    
         ABI_MALLOC_IFNOT(ndeg_filter_bands,(chebfi%bandpp))
     end if
+    
+    ! [lambda_minus,lambda_plus) is diminished using Chebyshev
+    write(std_out,*) '@lowpass lambda_minus=', lambda_minus
+    write(std_out,*) '@lowpass lambda_plus=', lambda_plus
+    flush(std_out)
 
     ! Filter parameters
     ndeg_filter_bands(:) = chebfi%ndeg_filter
@@ -1757,6 +2042,12 @@ subroutine chebfi_bandpassFilter(chebfi,eigen,lambda_minus,lambda_plus,mineig_gl
     call xg_init(Heaviside, chebfi%space, chebfi%total_spacedim, chebfi%bandpp, chebfi%spacecom, &
         gpu_option=chebfi%gpu_option)
     !call xgBlock_zero(Heaviside%self)
+
+    write(std_out,*) '@bandpass lambda_minus=', lambda_minus
+    write(std_out,*) '@bandpass lambda_plus=', lambda_plus
+    write(std_out,*) '@bandpass mineig_global=', mineig_global
+    write(std_out,*) '@bandpass maxeig_global=', maxeig_global
+    flush(std_out)
  
     ! Filter parameters
     center = (maxeig_global + mineig_global)*0.5
@@ -2099,6 +2390,142 @@ subroutine chebfi_set_ndeg_from_residu(chebfi,lambda_minus,lambda_plus,occ,DivRe
  ABI_SFREE(ndeg_filter_bands)
 
 end subroutine chebfi_set_ndeg_from_residu
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/chebfi_Bdeflate_active
+!! NAME
+!! chebfi_Bdeflate_active
+!!
+!! FUNCTION
+!! Orthogonalize active block with respect to locked block in B-basis
+!!
+!! INPUT
+!! Xlock assumed to be B-orthonormal
+!! 
+!! OUTPUT
+!! in-place
+!! Xactive = Xactive - Xlock*(BXlock'*Xactive)
+
+!  subroutine chebfi_Bdeflate_active(lobpcg,var,iblock)
+!
+!    type(lobpcg_t) , intent(inout) :: lobpcg
+!    type(xgBlock_t), intent(inout) :: var
+!    integer        , intent(in   ) :: iblock
+!    integer :: previousBlock
+!    integer :: blockdim
+!    integer :: spacedim
+!    integer :: space_buf
+!    type(xg_t) :: buffer
+!    double precision :: tsec(2)
+!
+!    call timab(tim_ortho,1,tsec)
+!    ABI_NVTX_START_RANGE(NVTX_LOBPCG2_ORTHO_X_WRT)
+!
+!    blockdim = lobpcg%blockdim
+!    spacedim = lobpcg%spacedim
+!    previousBlock = (iblock-1)*lobpcg%blockdim
+!
+!    ! replace var by chebfi%Xactive
+!
+!    space_buf = space(var)
+!    if (space(var)==SPACE_CR) then
+!      space_buf = SPACE_R
+!    end if
+!   call xg_init(buffer,space_buf,previousBlock,blockdim,comm=lobpcg%spacecom,gpu_option=lobpcg%gpu_option)
+!
+!    ! buffer = BX0^T*X
+!    call xgBlock_gemm('t','n',1.0d0,lobpcg%BX0,var,0.d0,buffer%self,comm=lobpcg%spacecom)
+!
+!    ! sum all process contribution of X
+!    ! X = - X0*(BX0^T*X) + X 
+!   call xgBlock_gemm('n','n',-1.0d0,lobpcg%X0,buffer%self,1.0d0,var)
+!
+!    call xg_free(buffer)
+!
+!   ABI_NVTX_END_RANGE()
+!   call timab(tim_ortho,2,tsec)
+!
+!  end subroutine lobpcg_orthoXwrtBlocks
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/chebfi_getResidual
+!! NAME
+!! chebfi_getResidual
+!! 
+!! FUNCTION
+!! ||(I − qj qj' B)qj ||
+!!
+!! Inputs:
+!!   Q(n,m) : columns q_j
+!!   B(n,n)
+!! Workspace:
+!!   R(n,m)
+!! Temporary:
+!!   T(m,m), D(m,m)
+
+subroutine chebfi_getResidual(chebfi)
+
+    implicit none
+
+    type(chebfi_t), intent(inout) :: chebfi
+    
+    type(xg_t) :: resid ! todo move this allocation outside once
+    type(xg_t) :: alpha ! todo move outside to allocate once
+    integer :: blockdim
+    integer :: spacedim
+    integer :: comm
+    integer :: space_res
+
+    blockdim = chebfi%neigenpairs
+    spacedim = chebfi%spacedim
+    comm = chebfi%spacecom
+    space = chebfi%space
+
+    if (space==SPACE_CR) then
+        space = SPACE_R
+    end if
+
+    call xg_init(resid,space,spacedim,blockdim,comm=comm,gpu_option=chebfi%gpu_option)
+    call xg_init(alpha,space,spacedim,blockdim,comm=comm,gpu_option=chebfi%gpu_option)
+    
+    ! r_j <- Bx_j
+    call xgBlock_copy(chebfi%BX%self, resid)
+
+    ! alpha_j <- x_j'Bx_j
+    call xgBlock_colwiseDotProduct(chebfi%X, resid%self, spacedim, blockdim, alpha%self, &
+        comm_loc = xmpi_comm_null)
+
+    ! scale r_j by a_j
+    ! todo input must be 1d vec(:) (double precision or complex) so turn into array
+    call xgBlock_colwiseMul(resid%self, alpha%self)
+   
+    ! r_j <- r_j - x_j
+    call xgBlock_saxpy(resid%self, dble(-1.0), chebfi%X)
+    
+    call xgBlock_colwiseNorm2(chebfi%AX%self,residu) ! performs MPI comm
+
+    ! Sinon il faut faire comme dans LOBPCG où on a
+    ! W = AXW - BXW*lambda
+    call xgBlock_colwiseCymax(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX)
+    call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
+    ! where W is the residu of the pencil A-lambda*B ie W=AX-lambda*BX
+
+    ! dans mon cas c'est R = X-XX'BX 
+    ! donc si alpha a des valeurs alpha_j <- x_j'Bx_j
+    call xgBlock_colwiseDotProduct(chebfi%X, chebfi%BX%self, spacedim, blockdim, alpha%self, &
+        comm_loc = xmpi_comm_null)
+    call xgBlock_colwiseCymax(W,alpha%self,chebfi%X,chebfi%X)
+    call xgBlock_colwiseNorm2(W,residuBlock)
+    ! todo must allocate space for W
+
+    call xg_free(resid)
+    call xg_free(alpha)
+
+end subroutine chebfi_getResidual
 !!***
 
 end module m_chebfi2
