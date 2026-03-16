@@ -825,11 +825,21 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     !    call slice_queryHostDevice(slice, on_host, on_device)
     !    ABI_CHECK(on_device,"GPU not used when it should be!")
     !end if
-    
-    ! Distribute extended columns across **all** MPI processes
+   
+    ! ========================== Transpose ===================================
+    !! Function
+    ! This transposition allows for a slice to not see others. 
+    ! It serves as a transition from global communicator to slice communicator.
+    ! 
+    !! Notes
+    ! Distributes extended columns across **all** MPI processes
     ! After the transposition each process contains the correct
     ! bandpp corresponding to the slice so that no additional communication
     ! has to be performed in order to bring band slices to processes.
+    ! Input is Xext (linalg state) distributed across global processes.
+    ! Attention chebfi%X is distributed across slice processes =/= Xext per process.
+    ! Extracting chebfi%X in the slice distribution from Xext would require comms.
+    ! 
     ncolsColsRows_ptr => slice%ncolsColsRows
 
     ! Allocate slice%me_Xext_active according to the target MPI distribution for slices
@@ -938,9 +948,14 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         write(std_out,*) '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
         flush(std_out)
     
-        call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
-            slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, slice%neigenpairs,&
-            nrowsLinalg_ptr)
+        !call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
+        !    slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, slice%neigenpairs,&
+        !    nrowsLinalg_ptr)
+
+        call chebfi_runSubspaceIteration(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, &
+            nspinor, slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, &
+            slice%neigenpairs, nrowsLinalg_ptr)
+
 
         ! compute residuals of eigenvalues in slice
         ! reverseMap for active eigen and residuals
@@ -1003,6 +1018,12 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         write(std_out,*) 'max resid(excl nbdbuf)=', max_resid_kept
         write(std_out,*) '################################################# '
         flush(std_out)
+
+        write(std_out,*) 'residuals='
+        do iband=1, neigenpairs
+            write(std_out,*) residu_conv(iband, 1)
+            flush(std_out)
+        end do
 
         ! todo diagnostic
         ! count how may eigenvalues converged in slice and outside slice but in overlap
