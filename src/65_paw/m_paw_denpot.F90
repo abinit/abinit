@@ -165,7 +165,7 @@ CONTAINS  !=====================================================================
 
 subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,ntypat,nucdipmom,&
 & nzlmopt,option,paw_an,paw_an0,paw_energies,paw_ij,pawang,pawprtvol,pawrad,pawrhoij,&
-& pawspnorb,pawtab,pawxcdev,spnorbscl,xclevel,xc_denpos,xc_taupos,xred,ucvol,znucl,&
+& pawspnorb,pawtab,pawxcdev,spnorbscl,xclevel,xc_denpos,xc_taupos,xred,ucvol,znucl,spinaxis,&
 & electronpositron,mpi_atmtab,comm_atom,vpotzero,hyb_mixing,hyb_mixing_sr,rcpaw,extfpmd) ! optional arguments
 
 !Arguments ---------------------------------------------
@@ -183,7 +183,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
  type(extfpmd_type),pointer,intent(in),optional :: extfpmd
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
- real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom),xred(3,natom),znucl(ntypat)
+ real(dp),intent(in) :: gprimd(3,3),nucdipmom(3,natom),xred(3,natom),znucl(ntypat),spinaxis(3)
  real(dp),intent(out),optional :: vpotzero(2)
  type(paw_an_type),intent(inout) :: paw_an(my_natom)
  type(paw_an_type), intent(in) :: paw_an0(my_natom)
@@ -1041,7 +1041,7 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
        call pawdijso(paw_ij(iatom)%dijso,cplex_dij,cplex,ndij,nspden,pawang,&
          & pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,paw_an(iatom)%vh1,&
          & paw_an(iatom)%vxc1,znucl(itypat),paw_ij(iatom)%zora,&
-         & nucdipmom=nucdipmom(1:3,iatom))
+         & nucdipmom=nucdipmom(1:3,iatom),spinaxis=spinaxis)
        paw_ij(iatom)%has_dijso=2
      end if
 
