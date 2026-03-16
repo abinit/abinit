@@ -660,22 +660,22 @@ subroutine invars9 (anaddb_dtset, lenstr, natom, string)
  anaddb_dtset%frmax = ten
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'frmax',tread, 'DPR')
  if(tread == 1) anaddb_dtset%frmax = dprarr(1)
- if (anaddb_dtset%frmax < 0) then
-   write(message, '(a, f10.3, 5a)' )&
-   'frmax is ',anaddb_dtset%frmax, '. Only values > 0 ',ch10, &
-   'are allowed',ch10, 'Action: correct frmax in your input file.'
-   ABI_ERROR(message)
- end if
+! if (anaddb_dtset%frmax < 0) then
+!   write(message, '(a, f10.3, 5a)' )&
+!   'frmax is ',anaddb_dtset%frmax, '. Only values > 0 ',ch10, &
+!   'are allowed',ch10, 'Action: correct frmax in your input file.'
+!   ABI_ERROR(message)
+! end if
 
  anaddb_dtset%frmin = zero
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'frmin',tread, 'DPR')
  if(tread == 1) anaddb_dtset%frmin = dprarr(1)
- if (anaddb_dtset%frmin < 0) then
-   write(message, '(a, f10.3, 5a)' )&
-   'frmin is ',anaddb_dtset%frmin, '. Only values > 0 ',ch10, &
-   'are allowed',ch10, 'Action: correct frmin in your input file.'
-   ABI_ERROR(message)
- end if
+! if (anaddb_dtset%frmin < 0) then
+!   write(message, '(a, f10.3, 5a)' )&
+!   'frmin is ',anaddb_dtset%frmin, '. Only values > 0 ',ch10, &
+!   'are allowed',ch10, 'Action: correct frmin in your input file.'
+!   ABI_ERROR(message)
+! end if
 
 !G
 
