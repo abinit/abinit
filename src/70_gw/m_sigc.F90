@@ -296,9 +296,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
       end if
     end do
    end if
+   !  Symmetrization is available for nspinor = 2, and the difference from symsigma = 0 lies with degenerate bands.
+   !  By setting symsigma_de 0.000, the difference can be eliminated.
    if (Wfd%nspinor == 2) then
     ABI_WARNING("Symmetrization with nspinor = 2 not implemented")
-    ! can_symmetrize = .FALSE.
    end if
  end if
 
