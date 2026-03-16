@@ -27065,6 +27065,9 @@ The GBT requires [[nspinor]] = 2 and [[nspden]]=4, but is not compatible with sp
 Also, one has to disable spatial symmetries completely by setting [[nsym]] to 1, and
 time-reversal symmetry as well with [[kptopt]] = 4.
 
+If set to 2, the GBT is used together with a projected spin-orbit coupling (SOC),
+in which only the σ_z (S_z) component of the SOC operator is retained.
+
 Note that, for the time being, [[use_gbt]] /= 0 requires:
 
 - NC pseudos (no PAW)
@@ -27134,6 +27137,25 @@ If [[qgbt]] is ABSENT from the input file and [[qgbt_cart]] is
 provided, then the values of [[qgbt]] will be computed from the provided
 [[qgbt_cart]]
 One and only one of [[qgbt]] or [[qgbt_cart]] must be provided.
+""",
+),
+
+Variable(
+    abivarname="spinaxis",
+    varset="gstate",
+    vartype="real",
+    topics=['spinpolarisation_basic', 'MagMom_useful'],
+    dimensions=[3],
+    defaultval=[0, 0, 1],
+    mnemonics="Spin-quantization AXIS in CARTesian coordinates.",
+    added_in_version="10.7.0",
+    text=r"""
+Cartesian coordinates of the global spin-quantization axis.
+By default, the spin-quantization axis is aligned with the Cartesian z axis. 
+The variable [[spinaxis]] defined the orientation of spinor space spanned by the Pauli matrices \{\sigma_1,\sigma_2,\sigma_3\} 
+with respect to the Cartesian reference frame; in particular, it sets the \sigma_3 axis along the direction specified by [[spinaxis]].
+When [[spinaxis]] differs from its default value, it is recommended to specify magnetic vectors in Cartesian coordinates 
+using [[spinat_cart]] and [[hspinfield_cart]] rather than [[spinat]] and [[hspinfield]].
 """,
 ),
 ]

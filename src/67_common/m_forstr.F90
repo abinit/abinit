@@ -1190,10 +1190,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              ABI_MALLOC(cwavef_spin, (2, npw_k*blocksize))
              ABI_MALLOC(enlout_spin,(nnlout*blocksize))
              enlout_spin(:) = zero
+             gs_hamk%ispin_gbt = 1
              call cg_copy_spin(1,npw_k,my_nspinor,blocksize,cwavef,cwavef_spin)
              call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=K_H_K)
-
+            
+             gs_hamk%ispin_gbt = 2 
              call cg_copy_spin(2,npw_k,my_nspinor,blocksize,cwavef,cwavef_spin)
              call nonlop(choice,cpopt,cwaveprj,enlout_spin,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &             paw_opt,signs,nonlop_dum,tim_nonlop,cwavef_spin,cwavef_spin,select_k=KPRIME_H_KPRIME)

@@ -1256,6 +1256,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
                          sjoin(" Rescaling spin-orbit KB energies using spnorbscl.", ftoa(dtset%spnorbscl)))
              ekb(iln:iln + nproj(il + psps%mpsang) - 1) = ekb(iln:iln + nproj(il + psps%mpsang) - 1) * dtset%spnorbscl
            end if
+           if (dtset%so_psp(ipsp) == 0) cycle
            write(msg, '(2x,a,i1,4f12.6)' ) 'spin-orbit ',il,(ekb(iln+ii),ii=0,nproj(il+psps%mpsang)-1)
          end if
          call wrtout([std_out, ab_out], msg)
