@@ -60,7 +60,7 @@ module m_dfpt_loopert
  use m_fftcore,    only : fftcore_set_mixprec
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_iowf,       only : outwf, outresid
- use m_ioarr,      only : read_rhor
+ use m_ioarr,      only : read_rhor, fftdatar_write_from_hdr
  use m_orbmag,     only : orbmag
  use m_pawang,     only : pawang_type, pawang_init, pawang_free
  use m_pawrad,     only : pawrad_type
@@ -234,7 +234,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp), intent(in) :: eltfrnl(6+3*dtset%natom,6)
  real(dp), intent(in) :: eltfrxc(6+3*dtset%natom,6),eltvdw(6+3*dtset%natom,6*usevdw)
  real(dp), intent(in) :: kxc(nfftf,nkxc),nhat(nfftf,nspden)
- real(dp), intent(in) :: occ(dtset%mband*nkpt*dtset%nsppol)
+ real(dp), intent(inout) :: occ(dtset%mband*nkpt*dtset%nsppol)
  real(dp), intent(in) :: rhog(2,nfftf),rhor(nfftf,nspden),vxc(nfftf,nspden)
  real(dp), intent(in) :: vtrial(nfftf,nspden)
  real(dp), intent(inout) :: xred(3,dtset%natom)
@@ -284,7 +284,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  logical,parameter :: paral_pert_inplace=.true.,remove_inv=.false.
  logical :: first_entry,found_eq_gkk,t_exist,paral_atom,write_1wfk,init_rhor1
  logical :: kramers_deg
- character(len=fnlen) :: dscrpt,fiden1i,fiwf1i,fiwf1i_mq,fiwf1o,fiwf1o_mq,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam, fnamewffmq_
+ character(len=fnlen) :: dscrpt,fiden1i,fiwf1i,fiwf1i_mq,fiwf1o,fiwf1o_mq,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam, fnamewffmq_, fi1o
  character(len=500) :: msg
  type(crystal_t) :: crystal,ddb_crystal
  type(dataset_type), pointer :: dtset_tmp
@@ -297,6 +297,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(pawang_type) :: pawang1
  type(wfk_t) :: ddk_f(4)
  type(wvl_data) :: wvl
+ type(wffile_type) :: wff1,wff2,wfft1,wfft2
 !arrays
  integer :: eq_symop(3,3),ngfftf(18),file_index(4),rfdir(9),rf2dir(9),rf2_dir1(3),rf2_dir2(3)
  integer,allocatable :: blkflg_save(:,:,:,:),dimcprj_srt(:),dyn(:),indkpt1(:),indkpt1_tmp(:)
@@ -1565,6 +1566,16 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
            formeig, istwfk_rbz, kpq_rbz, mcg1, dtset%mband, mband_mem_rbz, mk1mem_rbz, mpw1,&
            dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
            cg1, eigen=eigen1, ask_accurate_=0)
+
+!     call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
+!     & formeig,hdr0,dtfil%ireadwf,dtset%istwfk,kg1,kpq_rbz,dtset%localrdwf,&
+!     & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
+!     & dtset%nband,dtset%ngfft,dtset%nkpt,npwar1,&
+!     & dtset%nsppol,dtset%nsym,&
+!     & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
+!     & dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i,wvl)
+!
+!     call WffClose (wff1,ierr)
    else
      cg1 = zero
      eigen1 = zero
@@ -1576,8 +1587,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ABI_MALLOC(resid_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
      !initialize cg1_mq:
      call timab(144,1,tsec)
-     if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
-       call wfk_read_my_kptbands(fiwf1i, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2, &
+     if ((file_exists(nctk_ncify(fiwf1i_mq)) .or. file_exists(fiwf1i_mq)) .and. (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
+       call wfk_read_my_kptbands(fiwf1i_mq, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2, &
           formeig, istwfk_rbz, kmq_rbz, mcg1mq, dtset%mband, mband_mem_rbz, mk1mem_rbz, mpw1_mq,&
           dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
           cg1_mq, eigen=eigen1_mq, ask_accurate_=0)
@@ -1852,36 +1863,58 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ! rhor1 not being forced to 0.0
      if(iscf_mod>0) then
 !      cplex=2 gets the complex density, =1 only real part
-       if (psps%usepaw==1) then
-!        Be careful: in PAW, rho does not include the 1st-order compensation density (to be added in dfpt_scfcv.F90) !
-         ABI_MALLOC(rho1wfg,(2,dtset%nfft))
-         ABI_MALLOC(rho1wfr,(dtset%nfft,nspden))
-         call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
-           kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
-           dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-           occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
-         call transgrid(cplex,mpi_enreg,nspden,+1,1,1,dtset%paral_kgb,pawfgr,rho1wfg,rhog1,rho1wfr,rhor1)
-         ABI_FREE(rho1wfg)
-         ABI_FREE(rho1wfr)
-       else
-         call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
-           kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
-           dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-           occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
+       if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
+         call appdig(pertcase,dtfil%fildens1in,fiden1i)
+         call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor1, &
+         hdr_den, pawrhoij1, spaceComm, check_hdr=hdr)
+         etotal = hdr_den%etot; call hdr_den%free()
+!TMP
+         call appdig(pertcase+100,dtfil%fnameabo_den,fi1o)
+         call fftdatar_write_from_hdr("first_order_density",fi1o,dtset%iomode,hdr,&
+         ngfftf,cplex,nfftf,dtset%nspden,rhor1,mpi_enreg)
 
-         if (.not.kramers_deg) then
-           rhor1_pq(:,:)=rhor1(:,:)
-           rhog1_pq(:,:)=rhog1(:,:)
-           call dfpt_mkrho(cg,cg1_mq,cplex,gprimd,irrzon1,istwfk_rbz,&
-             kg,kg1_mq,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1_mq,nband_rbz,&
-             dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1_mq,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-             occ_rbz,phnons1,rhog1_mq,rhor1_mq,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
+!        Compute up+down rho1(G) by fft
+         ABI_MALLOC(work,(cplex*nfftf))
+         work(:)=rhor1(:,1)
+         call fourdp(cplex,rhog1,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+         ABI_FREE(work)
+       else if (dtset%get1wf /= 0 .or. dtset%ird1wf /= 0 ) then
+          if (psps%usepaw==1) then
+!          Be careful: in PAW, rho does not include the 1st-order compensation density (to be added in dfpt_scfcv.F90) !
+           ABI_MALLOC(rho1wfg,(2,dtset%nfft))
+           ABI_MALLOC(rho1wfr,(dtset%nfft,nspden))
+           call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
+             kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
+             dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
+             occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
+           call transgrid(cplex,mpi_enreg,nspden,+1,1,1,dtset%paral_kgb,pawfgr,rho1wfg,rhog1,rho1wfr,rhor1)
+           ABI_FREE(rho1wfg)
+           ABI_FREE(rho1wfr)
+         else
+           call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
+             kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
+             dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
+             occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
 
-           do ifft=1,nfftf
-             rhor1(2*ifft-1,:) = half*(rhor1_pq(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
-             rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
-           end do
-           call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
+!TMP
+     call appdig(pertcase+100,dtfil%fnameabo_den,fi1o)
+     call fftdatar_write_from_hdr("first_order_density",fi1o,dtset%iomode,hdr,&
+     ngfftf,cplex,nfftf,dtset%nspden,rhor1,mpi_enreg)
+
+           if (.not.kramers_deg) then
+             rhor1_pq(:,:)=rhor1(:,:)
+             rhog1_pq(:,:)=rhog1(:,:)
+             call dfpt_mkrho(cg,cg1_mq,cplex,gprimd,irrzon1,istwfk_rbz,&
+               kg,kg1_mq,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1_mq,nband_rbz,&
+               dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1_mq,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
+               occ_rbz,phnons1,rhog1_mq,rhor1_mq,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
+
+             do ifft=1,nfftf
+               rhor1(2*ifft-1,:) = half*(rhor1_pq(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
+               rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
+             end do
+             call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
+           end if
          end if
        end if
 
