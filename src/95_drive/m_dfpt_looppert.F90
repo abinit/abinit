@@ -60,7 +60,7 @@ module m_dfpt_loopert
  use m_fftcore,    only : fftcore_set_mixprec
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_iowf,       only : outwf, outresid
- use m_ioarr,      only : read_rhor, fftdatar_write_from_hdr
+ use m_ioarr,      only : read_rhor
  use m_orbmag,     only : orbmag
  use m_pawang,     only : pawang_type, pawang_init, pawang_free
  use m_pawrad,     only : pawrad_type
@@ -75,7 +75,6 @@ module m_dfpt_loopert
  use m_paw_sphharm,only : setsym_ylm
  use m_rf2,        only : rf2_getidirs
  use m_iogkk,      only : outgkk
- use m_inwffil,    only : inwffil
  use m_spacepar,   only : rotate_rho, setsym
  use m_initylmg,   only : initylmg
  use m_dfpt_scfcv, only : dfpt_scfcv
@@ -234,7 +233,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp), intent(in) :: eltfrnl(6+3*dtset%natom,6)
  real(dp), intent(in) :: eltfrxc(6+3*dtset%natom,6),eltvdw(6+3*dtset%natom,6*usevdw)
  real(dp), intent(in) :: kxc(nfftf,nkxc),nhat(nfftf,nspden)
- real(dp), intent(inout) :: occ(dtset%mband*nkpt*dtset%nsppol)
+ real(dp), intent(in) :: occ(dtset%mband*nkpt*dtset%nsppol)
  real(dp), intent(in) :: rhog(2,nfftf),rhor(nfftf,nspden),vxc(nfftf,nspden)
  real(dp), intent(in) :: vtrial(nfftf,nspden)
  real(dp), intent(inout) :: xred(3,dtset%natom)
@@ -284,7 +283,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  logical,parameter :: paral_pert_inplace=.true.,remove_inv=.false.
  logical :: first_entry,found_eq_gkk,t_exist,paral_atom,write_1wfk,init_rhor1
  logical :: kramers_deg
- character(len=fnlen) :: dscrpt,fiden1i,fiwf1i,fiwf1i_mq,fiwf1o,fiwf1o_mq,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam, fnamewffmq_, fi1o
+ character(len=fnlen) :: dscrpt,fiden1i,fiwf1i,fiwf1i_mq,fiwf1o,fiwf1o_mq,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam, fnamewffmq_
  character(len=500) :: msg
  type(crystal_t) :: crystal,ddb_crystal
  type(dataset_type), pointer :: dtset_tmp
@@ -297,7 +296,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(pawang_type) :: pawang1
  type(wfk_t) :: ddk_f(4)
  type(wvl_data) :: wvl
- type(wffile_type) :: wff1,wff2,wfft1,wfft2
 !arrays
  integer :: eq_symop(3,3),ngfftf(18),file_index(4),rfdir(9),rf2dir(9),rf2_dir1(3),rf2_dir2(3)
  integer,allocatable :: blkflg_save(:,:,:,:),dimcprj_srt(:),dyn(:),indkpt1(:),indkpt1_tmp(:)
@@ -1566,16 +1564,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
            formeig, istwfk_rbz, kpq_rbz, mcg1, dtset%mband, mband_mem_rbz, mk1mem_rbz, mpw1,&
            dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
            cg1, eigen=eigen1, ask_accurate_=0)
-
-!     call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
-!     & formeig,hdr0,dtfil%ireadwf,dtset%istwfk,kg1,kpq_rbz,dtset%localrdwf,&
-!     & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
-!     & dtset%nband,dtset%ngfft,dtset%nkpt,npwar1,&
-!     & dtset%nsppol,dtset%nsym,&
-!     & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
-!     & dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i,wvl)
-!
-!     call WffClose (wff1,ierr)
    else
      cg1 = zero
      eigen1 = zero
@@ -1868,10 +1856,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor1, &
          hdr_den, pawrhoij1, spaceComm, check_hdr=hdr)
          etotal = hdr_den%etot; call hdr_den%free()
-!TMP
-         call appdig(pertcase+100,dtfil%fnameabo_den,fi1o)
-         call fftdatar_write_from_hdr("first_order_density",fi1o,dtset%iomode,hdr,&
-         ngfftf,cplex,nfftf,dtset%nspden,rhor1,mpi_enreg)
 
 !        Compute up+down rho1(G) by fft
          ABI_MALLOC(work,(cplex*nfftf))
@@ -1895,11 +1879,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
              kg,kg1,dtset%mband,mband_mem_rbz,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
              dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
              occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
-
-!TMP
-     call appdig(pertcase+100,dtfil%fnameabo_den,fi1o)
-     call fftdatar_write_from_hdr("first_order_density",fi1o,dtset%iomode,hdr,&
-     ngfftf,cplex,nfftf,dtset%nspden,rhor1,mpi_enreg)
 
            if (.not.kramers_deg) then
              rhor1_pq(:,:)=rhor1(:,:)
