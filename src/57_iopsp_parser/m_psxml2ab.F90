@@ -173,7 +173,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
  end if
 
  psphead%lmax = 0
- projs = 0
+ nprojs = 0
  nprojsr = 0
  nprojso = 0
  call ps_NonlocalProjectors_Filter(psxml, set=SET_NONREL, number=nprojs)
