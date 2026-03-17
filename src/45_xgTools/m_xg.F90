@@ -221,7 +221,8 @@ module m_xg
   public :: xgBlock_reverseMap_1d
   public :: xgBlock_prefetch_async
   public :: xgBlock_get ! LB-06/03/24: Be careful, this routine is not used (so not tested)
-  public :: xgBlock_copy ! IL-10/03/25: on GPU- Contains hidden one-way OMP calls (implicit H2D or D2H) 
+  public :: xgBlock_copy ! IL-10/03/25: on GPU- Contains hidden one-way OMP calls (implicit H2D or D2H)
+  public :: xgBlock_colwiseSwap
   public :: xgBlock_partialcopy
   public :: xgBlock_permuteCols 
   public :: xgBlock_hermitian_pd_cond ! computes condition number of Hermitian positive definite
@@ -1483,6 +1484,33 @@ contains
     call timab(tim_copy,2,tsec)
 
   end subroutine xgBlock_copy
+  !!***
+
+  !!****f* m_xg/xgBlock_colwiseSwap
+  !!
+  !! NAME
+  !! xgBlock_colwiseSwap
+
+  subroutine xgBlock_colwiseSwap(xgBlock, j, k, tmp)
+
+      implicit none
+
+      type(xgBlock_t), intent(inout) :: xgBlock
+      integer, intent(in) :: j, k
+      type(xgBlock_t), intent(inout) :: tmp
+
+      type(xgBlock_t) :: col_j, col_k
+
+      if (j == k) return
+
+      call xgBlock_setBlock(xgBlock, col_j, xgBlock%rows, 1, j)
+      call xgBlock_setBlock(xgBlock, col_k, xgBlock%rows, 1, k)
+
+      call xgBlock_copy(col_j, tmp)
+      call xgBlock_copy(col_k, col_j)
+      call xgBlock_copy(tmp,   col_k)
+
+  end subroutine xgBlock_colwiseSwap
   !!***
 
 !!****f* m_xg/xgBlock_partialcopy
