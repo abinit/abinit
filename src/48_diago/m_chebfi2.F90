@@ -1648,6 +1648,7 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     integer :: iter_subspace, niter_subspace_max
     integer :: spacedim, neigenpairs, num_proc, ierr
     type(xg_t) :: X_k
+    type(xg_t) :: resid_active
     ! Arrays
     integer, target, allocatable :: nrowsLinalg(:)
     integer, pointer :: nrowsLinalg_ptr(:) => null()
@@ -1667,6 +1668,8 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     ABI_MALLOC_IFNOT(nrowsLinalg,(num_proc))
     nrowsLinalg_ptr => nrowsLinalg
     nrowsLinalg = nrows_blockrows
+    
+    call xg_init(resid_active, SPACE_R, neigenpairs, 1, gpu_option=chebfi%gpu_option)
     
     !write(std_out,*) 'getid inside runSlice xXColsRows', xgBlock_getId(chebfi%xXColsRows)
     !write(std_out,*) 'getid inside runSlice xAXColsRows', xgBlock_getId(chebfi%xAXColsRows)
@@ -1734,7 +1737,6 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
             call xgTransposer_transpose(chebfi%xgTransposerX, STATE_COLSROWS)
             call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_COLSROWS)
             call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_COLSROWS)
-            !call xmpi_barrier(chebfi%spacecom)
             call timab(tim_transpose,2,tsec)
             ABI_NVTX_END_RANGE()
         end if
@@ -1758,7 +1760,6 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
             call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
             call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_LINALG)
             call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_LINALG)
-            !call xmpi_barrier(chebfi%spacecom)
             call timab(tim_transpose,2,tsec)
             ABI_NVTX_END_RANGE()
         end if
@@ -1768,8 +1769,9 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
 
         call xg_Borthonormalize(chebfi%X,chebfi%BX%self,ierr,1,chebfi%gpu_option,AX=chebfi%AX%self)
 
-        !    residual calculation on active vectors.. 
-        call chebfi_getSubspaceResidual(chebfi)
+        call chebfi_getSubspaceResidual(chebfi, resid_active%self)
+
+        call chebfi_lockConvergedVectors(chebfi, resid_active%self, 1e-3_dp)
         
         ! lock vectors in small residual
         ! actually redefine pointers Xactive and Xlock pointing to X that's all
@@ -1851,6 +1853,7 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     
     ! Free temporary memory
     ABI_SFREE(nrowsLinalg)
+    call xg_free(resid_active)
 
 end subroutine chebfi_runSubspaceIteration
 !!***
@@ -2461,14 +2464,15 @@ end subroutine chebfi_set_ndeg_from_residu
 !! 
 !! FUNCTION
 !! || (I-QQ'B)Aq_j ||^2 for j=1,..,bandpp
+!! stored to resid
 
-subroutine chebfi_getSubspaceResidual(chebfi)
+subroutine chebfi_getSubspaceResidual(chebfi, resid)
 
     implicit none
 
     type(chebfi_t), intent(inout) :: chebfi
+    type(xgBlock_t), intent(inout) :: resid
     
-    type(xg_t) :: resid ! todo move this allocation outside, alloc once
     type(xg_t) :: M, R 
     integer :: nrows, ncols
     integer :: space_buf
@@ -2488,7 +2492,6 @@ subroutine chebfi_getSubspaceResidual(chebfi)
 
     call xg_init(M, space_buf, ncols, ncols, comm=chebfi%spacecom, gpu_option=chebfi%gpu_option)
     call xg_init(R, space_buf, nrows, ncols, comm=chebfi%spacecom, gpu_option=chebfi%gpu_option)
-    call xg_init(resid, SPACE_R, ncols, 1, gpu_option=chebfi%gpu_option)
 
     ! Compute M = X^T*AX 
     ! sum all process contribution
@@ -2498,17 +2501,100 @@ subroutine chebfi_getSubspaceResidual(chebfi)
     call xgBlock_copy(chebfi%AX%self, R%self)
     call xgBlock_gemm('n','n',-1.0d0,chebfi%BX%self,M%self,1.0d0,R%self)
 
-    call xgBlock_colwiseNorm2(R%self, resid%self, comm_loc=xmpi_comm_null)
-
-    write(std_out,*) 'residual (inner)='
-    call xgBlock_print(resid%self, std_out)
-    flush(std_out)
+    call xgBlock_colwiseNorm2(R%self, resid, comm_loc=xmpi_comm_null)
 
     call xg_free(M)
     call xg_free(R)
-    call xg_free(resid)
 
 end subroutine chebfi_getSubspaceResidual
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/chebfi_lockConvergedVectors
+!! NAME
+!! chebfi_lockConvergedVectors
+!! 
+!! FUNCTION
+!! In-place contiguous-in-memory locking of column vectors in row distribution.
+!! Algorithm is based on swapping: at the end first k are locked last are active.
+!! | locked columns | active columns |
+!! |   1 ... k      |  k+1 ... m     |
+!! TODO logic could also be applied to divide Xext to slices.
+!! 
+
+subroutine chebfi_lockConvergedVectors(chebfi, resid, tol)
+
+    implicit none
+
+    type(chebfi_t), intent(inout) :: chebfi
+    type(xgBlock_t), intent(in) :: resid
+    real(dp), intent(in) :: tol
+   
+    integer :: i, nrows
+    integer :: j, left, n_locked
+    real(dp), pointer :: resid_vals(:,:)
+    logical, allocatable :: mask(:)
+    logical, allocatable :: is_locked(:)
+    integer, allocatable :: idx(:)
+    integer :: space_buf
+    type(xg_t) :: T_swap ! temporary column buffer
+
+! *********************************************************************
+
+    nrows = rows(resid)
+
+    if (chebfi%space==SPACE_C) then
+        space_buf = SPACE_C
+    else if (chebfi%space==SPACE_CR) then
+        space_buf = SPACE_R
+    else
+        ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
+    end if
+    
+    ABI_MALLOC(mask, (nrows))
+    ABI_MALLOC(is_locked, (nrows))
+    
+    call xg_init(T_swap, space_buf, nrows, 1, comm=chebfi%spacecom, gpu_option=chebfi%gpu_option)
+    
+    call xgBlock_reverseMap(resid, resid_vals, rows=nrows, cols=1)
+
+    mask = resid_vals(:,1) < tol
+    idx = pack([(i, i=1,nrows)], mask)
+    
+    write(std_out,*) 'testing locking on residuals='
+    write(std_out,*) resid_vals(:,1)
+    write(std_out,*) 'locking='
+    write(std_out,*) idx(:)
+    flush(std_out)
+
+    ! todo also return the number of locked vectors
+    is_locked = .false.
+    do j = 1, size(idx)
+        is_locked(idx(j)) = .true.
+    end do
+
+    ! partition via swapping (in-place)
+    do j = 1, nrows
+        if (is_locked(j)) then
+            if (j /= left) then
+                call xgBlock_colwiseSwap(chebfi%X, j, left, T_swap%self)
+                call xgBlock_colwiseSwap(chebfi%AX%self, j, left, T_swap%self)
+                call xgBlock_colwiseSwap(chebfi%BX%self, j, left, T_swap%self)
+
+                ! keep mask consistent after swap
+                is_locked(j)    = is_locked(left)
+                is_locked(left) = .true.
+            end if
+            left = left + 1
+        end if
+    end do
+
+    ABI_FREE(mask)
+    ABI_FREE(is_locked)
+    call xg_free(T_swap)
+
+end subroutine chebfi_lockConvergedVectors
 !!***
 
 end module m_chebfi2
