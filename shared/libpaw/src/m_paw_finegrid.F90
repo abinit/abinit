@@ -273,6 +273,7 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
        cc(3,ll)=cc(3,ll)*pawtab%gnorm(ll)
      end if
    end do
+   LIBPAW_DEALLOCATE(cc)
  end if
 
 !Y_lm(r-R) calculation
