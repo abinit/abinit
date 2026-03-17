@@ -1721,7 +1721,7 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     write(std_out,*) 'starting filter in proc', xmpi_comm_rank(chebfi%spacecom)
     flush(std_out)
 
-    niter_subspace_max = 50
+    niter_subspace_max = 10
 
     do iter_subspace=1, niter_subspace_max
 
@@ -1747,6 +1747,10 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
             call chebfi_bandpassFilter(chebfi,eigen,lambda_minus,lambda_plus,mineig_global,&
                 maxeig_global,getAX_BX,getBm1X)
         end if
+        
+        write(std_out,'(a,i6,i6)') 'chebfi%xXColsRows # rows # cols ', &
+            rows(chebfi%xXColsRows), cols(chebfi%xXColsRows)
+        flush(std_out)
 
         if (chebfi%paral_kgb==1) then
             call timab(tim_transpose,1,tsec)
@@ -1759,15 +1763,14 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
             ABI_NVTX_END_RANGE()
         end if
     
-        write(std_out,'(a,i6,i6)') 'local # proc has # rows ', xmpi_comm_rank(chebfi%spacecom), rows(chebfi%X)
+        write(std_out,'(a,i6,i6)') 'chebfi%X # rows # cols ', rows(chebfi%X), cols(chebfi%X)
+        flush(std_out)
 
         call xg_Borthonormalize(chebfi%X,chebfi%BX%self,ierr,1,chebfi%gpu_option,AX=chebfi%AX%self)
 
-        ! this must be calculated on linalg distr because we possibly exit
-        ! after that
-        ! residual calculation on active vectors.. 
-        ! call chebfi_getResidual(chebfi%X)
-
+        !    residual calculation on active vectors.. 
+        call chebfi_getSubspaceResidual(chebfi)
+        
         ! lock vectors in small residual
         ! actually redefine pointers Xactive and Xlock pointing to X that's all
     
@@ -2452,80 +2455,60 @@ end subroutine chebfi_set_ndeg_from_residu
 
 !----------------------------------------------------------------------
 
-!!****f* m_chebfi2/chebfi_getResidual
+!!****f* m_chebfi2/chebfi_getSubspaceResidual
 !! NAME
-!! chebfi_getResidual
+!! chebfi_getSubspaceResidual
 !! 
 !! FUNCTION
-!! ||(I − qj qj' B)qj ||
-!!
-!! Inputs:
-!!   Q(n,m) : columns q_j
-!!   B(n,n)
-!! Workspace:
-!!   R(n,m)
-!! Temporary:
-!!   T(m,m), D(m,m)
+!! || (I-QQ'B)Aq_j ||^2 for j=1,..,bandpp
 
-subroutine chebfi_getResidual(chebfi)
+subroutine chebfi_getSubspaceResidual(chebfi)
 
     implicit none
 
     type(chebfi_t), intent(inout) :: chebfi
     
-    type(xg_t) :: resid ! todo move this allocation outside once
-    type(xg_t) :: alpha ! todo move outside to allocate once
-    integer :: blockdim
-    integer :: spacedim
-    integer :: comm
-    integer :: space_res
+    type(xg_t) :: resid ! todo move this allocation outside, alloc once
+    type(xg_t) :: M, R 
+    integer :: nrows, ncols
+    integer :: space_buf
 
-    blockdim = chebfi%neigenpairs
-    spacedim = chebfi%spacedim
-    comm = chebfi%spacecom
-    space = chebfi%space
+! *********************************************************************
 
-    if (space==SPACE_CR) then
-        space = SPACE_R
+    nrows = rows(chebfi%X) ! todo this should be chebfi%spacedim
+    ncols = chebfi%neigenpairs ! todo active part only
+
+    if (chebfi%space==SPACE_C) then
+        space_buf = SPACE_C
+    else if (chebfi%space==SPACE_CR) then
+        space_buf = SPACE_R
+    else
+        ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
     end if
 
-    call xg_init(resid,space,spacedim,blockdim,comm=comm,gpu_option=chebfi%gpu_option)
-    call xg_init(alpha,space,spacedim,blockdim,comm=comm,gpu_option=chebfi%gpu_option)
-    
-    ! r_j <- Bx_j
-    call xgBlock_copy(chebfi%BX%self, resid)
+    call xg_init(M, space_buf, ncols, ncols, comm=chebfi%spacecom, gpu_option=chebfi%gpu_option)
+    call xg_init(R, space_buf, nrows, ncols, comm=chebfi%spacecom, gpu_option=chebfi%gpu_option)
+    call xg_init(resid, SPACE_R, ncols, 1, gpu_option=chebfi%gpu_option)
 
-    ! alpha_j <- x_j'Bx_j
-    call xgBlock_colwiseDotProduct(chebfi%X, resid%self, spacedim, blockdim, alpha%self, &
-        comm_loc = xmpi_comm_null)
+    ! Compute M = X^T*AX 
+    ! sum all process contribution
+    call xgBlock_gemm('t','n',1.0d0,chebfi%X,chebfi%AX%self,0.d0,M%self,comm=chebfi%spacecom)
 
-    ! scale r_j by a_j
-    ! todo input must be 1d vec(:) (double precision or complex) so turn into array
-    call xgBlock_colwiseMul(resid%self, alpha%self)
-   
-    ! r_j <- r_j - x_j
-    call xgBlock_saxpy(resid%self, dble(-1.0), chebfi%X)
-    
-    call xgBlock_colwiseNorm2(chebfi%AX%self,residu) ! performs MPI comm
+    ! Compute R = AX - BX*M
+    call xgBlock_copy(chebfi%AX%self, R%self)
+    call xgBlock_gemm('n','n',-1.0d0,chebfi%BX%self,M%self,1.0d0,R%self)
 
-    ! Sinon il faut faire comme dans LOBPCG où on a
-    ! W = AXW - BXW*lambda
-    call xgBlock_colwiseCymax(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX)
-    call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
-    ! where W is the residu of the pencil A-lambda*B ie W=AX-lambda*BX
+    call xgBlock_colwiseNorm2(R%self, resid%self, comm_loc=xmpi_comm_null)
 
-    ! dans mon cas c'est R = X-XX'BX 
-    ! donc si alpha a des valeurs alpha_j <- x_j'Bx_j
-    call xgBlock_colwiseDotProduct(chebfi%X, chebfi%BX%self, spacedim, blockdim, alpha%self, &
-        comm_loc = xmpi_comm_null)
-    call xgBlock_colwiseCymax(W,alpha%self,chebfi%X,chebfi%X)
-    call xgBlock_colwiseNorm2(W,residuBlock)
-    ! todo must allocate space for W
+    write(std_out,*) 'residual (inner)='
+    call xgBlock_print(resid%self, std_out)
+    flush(std_out)
 
+    call xg_free(M)
+    call xg_free(R)
     call xg_free(resid)
-    call xg_free(alpha)
 
-end subroutine chebfi_getResidual
+end subroutine chebfi_getSubspaceResidual
 !!***
 
 end module m_chebfi2
