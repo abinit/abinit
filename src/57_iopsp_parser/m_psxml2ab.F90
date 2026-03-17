@@ -173,9 +173,15 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
  end if
 
  psphead%lmax = 0
+ projs = 0
+ nprojsr = 0
+ nprojso = 0
  call ps_NonlocalProjectors_Filter(psxml, set=SET_NONREL, number=nprojs)
  call ps_NonlocalProjectors_Filter(psxml, set=SET_SO, number=nprojso, &
-&  indexes=idx_so) 
+ &  indexes=idx_so)
+ if (nprojs<=0) then
+   call ps_NonlocalProjectors_Filter(psxml, set=SET_SREL, number=nprojsr)
+ endif 
  if (iwrite == 1) then
    write (message,'(a,I5)') '- psxml2ab: ps_Number_of_Projectors not relativistic ',&
 &        nprojs
@@ -208,9 +214,6 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
 
 
 !    Find the number of projectors per angular momentum shell
- nprojs = 0
- nprojsr = 0
- nprojso = 0
  psphead%nproj(:)=0
  if (nprojs > 0) then
    call ps_NonlocalProjectors_Filter(psxml, set=SET_NONREL, indexes=idx_sr)
@@ -224,7 +227,6 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
      psphead%nproj(il) = psphead%nproj(il) + 1
    end do
  else
-   call ps_NonlocalProjectors_Filter(psxml, set=SET_SREL, number=nprojsr)
    if (nprojsr > 0) then
      call ps_NonlocalProjectors_Filter(psxml, set=SET_SREL, indexes=idx_sr)
      do iproj = 1, nprojsr
