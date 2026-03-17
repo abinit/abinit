@@ -637,8 +637,12 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
 
  list_size=0
  do ipsp=1,npsp
-   if(.not.allocated(pspheads(ipsp)%nproj)) ABI_MALLOC(pspheads(ipsp)%nproj,(0:pspheads(ipsp)%lmax))
-   if(.not.allocated(pspheads(ipsp)%nprojso)) ABI_MALLOC(pspheads(ipsp)%nprojso,(pspheads(ipsp)%lmax))
+   if(.not.allocated(pspheads(ipsp)%nproj)) then
+     ABI_MALLOC(pspheads(ipsp)%nproj,(0:pspheads(ipsp)%lmax))
+   endif
+   if(.not.allocated(pspheads(ipsp)%nprojso)) then
+     ABI_MALLOC(pspheads(ipsp)%nprojso,(pspheads(ipsp)%lmax))
+   endif
    list_size=list_size+2*pspheads(ipsp)%lmax+1
  enddo
  ABI_MALLOC(list_int,(list_size))
