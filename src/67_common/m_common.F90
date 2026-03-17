@@ -67,6 +67,7 @@ module m_common
  use m_lobpcg2,            only : lobpcg_memInfo
  use m_invovl,             only : invovl_ompgpu_static_mem,invovl_ompgpu_work_mem
  use m_gemm_nonlop,        only : gemm_nonlop_ompgpu_static_mem,gemm_nonlop_ompgpu_work_mem
+ use m_gemm_nonlop_projectors, only : gemm_nonlop_split_choice23
  use m_getghc,      only : getghc_ompgpu_work_mem
  use, intrinsic :: iso_c_binding, only : c_size_t
 
@@ -2430,6 +2431,40 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
      if(sum_mem < free_mem .or. print_and_exit) exit
 
    end do
+
+   ! Corner case : not enough GPU memory in forstrnps for forces and stress computation.
+   ! By default, forces and stress are computed in one gemm_nonlop call using choice==23
+   ! This translates to have various arrays sized by ndgxdt == 9 (6 for stress, 3 for forces)
+   ! To try circumventing the lack of GPU memory in that case, we may compute stress and forces
+   ! separately so arrays will be sized after ndgxdt=6 at most instead.
+   if(sum_mem > free_mem .and. optfor > 0 .and. optstr > 0 .and. wfoptalg < 0) then
+     ndgxdt = 6 ! number of derivatives for stress
+     nonlop_wmem = gemm_nonlop_ompgpu_work_mem(gs_hamk%istwf_k, ndat, ndgxdt, npw_fft,&
+     &               gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, gs_hamk%lmnmax, signs, wfoptalg)
+     blocksize=1
+     ! Same loop as above, simplified to forstrnps use case
+     do i=1,nprocs
+       ! Gemm nonlop static memory requirement is higher, split here
+       if(i>1 .and. .not. print_and_exit) blocksize = blocksize + 1
+       if(modulo(nprocs,blocksize)/=0 .and. use_distrib) cycle
+       !FIXME : Skipping uneven blocksize <=5 if using MPI distrib, as the amount of GPU per node is even usually
+       !For example, with 3 nodes of 4 GPU, we don't want to have a blocksize of 3 as
+       !it would generate 4 comms-block, with 2 inter-node comms.
+       !While using a blocksize of 4 would generate 3 comms, one for each node, leading to less MPI comms
+       if(i>1 .and. modulo(blocksize,2)/=0 .and. use_distrib .and. .not. print_and_exit) cycle
+       if(i>1) nblocks=nprocs/blocksize
+
+       nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,&
+       &                                           blocksize,ndgxdt, use_distrib)
+       sum_mem     = nonlop_smem + gs_ham_smem + nonlop_wmem + prep_nonlop_wmem
+
+       if(sum_mem < free_mem) then
+         gemm_nonlop_split_choice23 = .true.
+         exit
+       end if
+     end do
+   end if
+
    if(blocksize==1) then
      write(std_out,'(A,A,I3,A)') "GPU memory consumption estimate without ",&
      &                        "distribution in GEMM nonlop for K-point ",ikpt,":"
