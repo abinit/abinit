@@ -1645,7 +1645,7 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     end interface
 
     !Local variables-------------------------------
-    integer :: iter_subspace, niter_subspace_max
+    integer :: iter_subspace, niter_subspace_max, n_locked
     integer :: spacedim, neigenpairs, num_proc, ierr
     type(xg_t) :: X_k
     type(xg_t) :: resid_active
@@ -1725,6 +1725,10 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     flush(std_out)
 
     niter_subspace_max = 10
+    n_locked = 0
+
+    ! chebfi%X    contains active vectors
+    ! X_lock      contains locked vectors
 
     do iter_subspace=1, niter_subspace_max
 
@@ -1740,6 +1744,8 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
             call timab(tim_transpose,2,tsec)
             ABI_NVTX_END_RANGE()
         end if
+        ! todo this will transform the active+locked in colsrows. Locked is not necessary
+        ! therefore try to communicate less data is possible.
     
         ! ############################ Filter active  ##############################
         ! ############################ column vectors ##############################
@@ -1767,11 +1773,17 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
         write(std_out,'(a,i6,i6)') 'chebfi%X # rows # cols ', rows(chebfi%X), cols(chebfi%X)
         flush(std_out)
 
+        if (n_locked>0) then
+            call chebfi_deflateWrtLocked(chebfi, n_locked)
+        end if
+
         call xg_Borthonormalize(chebfi%X,chebfi%BX%self,ierr,1,chebfi%gpu_option,AX=chebfi%AX%self)
 
         call chebfi_getSubspaceResidual(chebfi, resid_active%self)
 
-        call chebfi_lockConvergedVectors(chebfi, resid_active%self, 1e-3_dp)
+        call chebfi_lockConvergedVectors(chebfi, resid_active%self, 1e-3_dp, n_locked) 
+
+        ! todo debug by recomputing the getSubspaceResidual for locked vectors and verify it is smaller than tol
         
         ! lock vectors in small residual
         ! actually redefine pointers Xactive and Xlock pointing to X that's all
@@ -2523,16 +2535,17 @@ end subroutine chebfi_getSubspaceResidual
 !! TODO logic could also be applied to divide Xext to slices.
 !! 
 
-subroutine chebfi_lockConvergedVectors(chebfi, resid, tol)
+subroutine chebfi_lockConvergedVectors(chebfi, resid, tol, n_locked)
 
     implicit none
 
     type(chebfi_t), intent(inout) :: chebfi
     type(xgBlock_t), intent(in) :: resid
     real(dp), intent(in) :: tol
-   
-    integer :: i, nrows
-    integer :: j, left, n_locked
+    integer, intent(out) :: n_locked
+
+    integer :: i, nrows, n_active
+    integer :: j, left
     real(dp), pointer :: resid_vals(:,:)
     logical, allocatable :: mask(:)
     logical, allocatable :: is_locked(:)
@@ -2562,19 +2575,12 @@ subroutine chebfi_lockConvergedVectors(chebfi, resid, tol)
     mask = resid_vals(:,1) < tol
     idx = pack([(i, i=1,nrows)], mask)
     
-    write(std_out,*) 'testing locking on residuals='
-    write(std_out,*) resid_vals(:,1)
-    write(std_out,*) 'locking='
-    write(std_out,*) idx(:)
-    flush(std_out)
-
-    ! todo also return the number of locked vectors
+    n_locked = size(idx)
     is_locked = .false.
-    do j = 1, size(idx)
-        is_locked(idx(j)) = .true.
-    end do
+    is_locked(idx) = .true.
 
     ! partition via swapping (in-place)
+    left = 1
     do j = 1, nrows
         if (is_locked(j)) then
             if (j /= left) then
@@ -2590,11 +2596,82 @@ subroutine chebfi_lockConvergedVectors(chebfi, resid, tol)
         end if
     end do
 
+    ! update pointers
+    n_active = chebfi%neigenpairs - n_locked
+    call xgBlock_setBlock(chebfi%X      , X_active , rows(chebfi%X), n_active, fcol=n_locked+1)
+    call xgBlock_setBlock(chebfi%AX%self, AX_active, rows(chebfi%X), n_active, fcol=n_locked+1)
+    call xgBlock_setBlock(chebfi%BX%self, BX_active, rows(chebfi%X), n_active, fcol=n_locked+1)
+
+    ! what I do is that I use X_lock vectors and update chebfi%X
+
+    ! todo this should be updated automatically after transposing...
+    ! ongoing modif in xgTransposer to be able to inverse on a subset of data
+    ! also test dimensions what happens if chebfi%X is smaller
+    !call xgBlock_setBlock(chebfi%xXColsRows , xX_active , chebfi%spacedim, n_active, f
+    !call xgBlock_setBlock(chebfi%xAXColsRows, xAX_active, 
+    !call xgBlock_setBlock(chebfi%xBXColsRows, xBX_active, 
+
     ABI_FREE(mask)
     ABI_FREE(is_locked)
     call xg_free(T_swap)
 
 end subroutine chebfi_lockConvergedVectors
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/chebfi_deflateWrtLocked
+!! NAME
+!! chebfi_deflateWrtLocked
+
+  subroutine chebfi_deflateWrtLocked(chebfi, X_lock, AX_lock, BX_lock, n_locked)
+
+    type(chebfi_t), intent(inout) :: chebfi
+    type(xgBlock_t), intent(in) :: X_lock, AX_lock, BX_lock
+    integer, intent(in) :: n_locked
+
+    integer :: previousBlock
+    integer :: blockdim
+    integer :: spacedim
+    integer :: space_buf
+    type(xg_t) :: buffer
+    type(xgBlock_t) :: 
+
+    blockdim = chebfi%blockdim
+    spacedim = chebfi%spacedim
+    previousBlock = (iblock-1)*lobpcg%blockdim
+
+    n_active = chebfi%neigenpairs - n_locked
+    call xgBlock_setBlock(chebfi%X      , X_active , rows(chebfi%X), n_active, fcol=n_locked+1)
+    call xgBlock_setBlock(chebfi%AX%self, AX_active, rows(chebfi%X), n_active, fcol=n_locked+1)
+    call xgBlock_setBlock(chebfi%BX%self, BX_active, rows(chebfi%X), n_active, fcol=n_locked+1)
+
+
+    space_buf = space(var)
+    if (space(var)==SPACE_CR) then
+      space_buf = SPACE_R
+    end if
+    call xg_init(buffer,space_buf,previousBlock,blockdim,comm=chebfi%spacecom,gpu_option=chebfi%gpu_option)
+
+    ! buffer = BX0^T*X
+    call xgBlock_gemm('t','n',1.0d0,chebfi%BX0,var,0.d0,buffer%self,comm=chebfi%spacecom)
+
+    ! sum all process contribution
+    ! X = - X0*(BX0^T*X) + X
+    call xgBlock_gemm('n','n',-1.0d0,chebfi%X0,buffer%self,1.0d0,var)
+
+    call xg_free(buffer)
+
+    ! todo AX and BX
+    ! X = X - X0*buffer
+    ! call xgBlock_gemm('n','n',-1.0d0,X_locked,buffer%self,1.0d0,chebfi%AX%self)
+    ! AX = AX - X0*buffer
+    ! call xgBlock_gemm('n','n',-1.0d0,X_locked,buffer%self,1.0d0,chebfi%AX%self)
+    ! BX = BX - X0*buffer
+    ! call xgBlock_gemm('n','n',-1.0d0,X_locked,buffer%self,1.0d0,chebfi%BX%self)
+
+
+  end subroutine chebfi_deflateWrtLocked
 !!***
 
 end module m_chebfi2
