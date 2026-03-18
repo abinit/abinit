@@ -968,6 +968,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
 !    Return header information
      call pawpsxml2ab(psps%filpsp(ipsp),ecut_tmp, pspheads_tmp,0)
+     ABI_FREE(pspheads_tmp%nproj)
+     ABI_FREE(pspheads_tmp%nprojso)
      lmax=pspheads_tmp%lmax
      pspxc=pspheads_tmp%pspxc
      znucl=pspheads_tmp%znuclpsp
