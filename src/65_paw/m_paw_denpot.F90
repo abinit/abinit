@@ -839,7 +839,6 @@ subroutine pawdenpot(compch_sph,el_temp,gprimd,ipert,ixc,my_natom,natom,nspden,n
            ff(ii)=zero
          endif
        enddo
-       ff(mesh_size-4:mesh_size)=zero
        call simp_gen(eshift,ff,pawrad(itypat))
        ehpw=ehpw+eshift*extfpmd_rho
        extfpmd%eshift_paw=extfpmd%eshift_paw+eshift/ucvol
