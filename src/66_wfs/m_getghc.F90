@@ -105,7 +105,7 @@ function getghc_ompgpu_work_mem(gs_ham, ndat) result(req_mem)
  !   - the sum of getghc and fourwf work buffers memory requirements
  !   - the amount of memory required by gemm_nonlop_ompgpu work buffers
  ghc_mem = 0
- ghc_mem = int(2, c_size_t) * dp * gs_ham%n4 * gs_ham%n5 * gs_ham%n6 * ndat
+ ghc_mem = int(2, c_size_t) * dp * gs_ham%n4 * gs_ham%n5 * gs_ham%n6 * (ndat/4 + modulo(ndat,4))
  !ghc_mem = ghc_mem + ompgpu_fourwf_work_mem(gs_ham%ngfft, ndat)
 
  nonlop_mem = gemm_nonlop_ompgpu_work_mem(gs_ham%istwf_k, ndat, 0, gs_ham%npw_fft_k,&
@@ -211,6 +211,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  integer :: ig,igspinor,istwf_k_,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
  integer :: n4,n5,n6,ndat_,nnlout,npw_fft,npw_k1,npw_k2,nspinortot,option_fft
  integer :: paw_opt,select_k_,shift1,shift2,signs,tim_nonlop
+ integer :: firstelt,firstband,lastelt,lastband,spacedim,chunk,residuchunk,nslices,islice
  logical(kind=c_bool) :: k1_eq_k2
  logical :: double_rfft_trick,have_to_reequilibrate,has_fock,local_gvnlxc
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,use_cwavef_r, filter_dilatmx_loc_
@@ -410,6 +411,11 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ABI_CHECK(k1_eq_k2, 'vlocal (fourwf) cannot be computed with k/=k^prime!')
    end if
 
+   spacedim     = size(cwavef  ,dim=2)/ndat
+   nslices = 4
+   chunk = ndat/nslices ! Divide by 2 to construct chunk of even number of bands
+   residuchunk = ndat - nslices*chunk
+
    ! Eventually adjust load balancing for FFT (by changing FFT distrib)
    ! Not that have_to_reequilibrate can be true only if mpi_enreg%nproc_fft>1
    have_to_reequilibrate=.false.
@@ -485,7 +491,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    if (gs_ham%gpu_option==ABI_GPU_DISABLED.and.fftalg/=401) then
      ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6))
    else
-     ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6*ndat))
+     ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6*(chunk+residuchunk)))
    end if
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(alloc:work) IF(gs_ham%gpu_option==ABI_GPU_OPENMP)
@@ -549,10 +555,22 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
           npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
           weight,weight,gpu_option=gs_ham%gpu_option)
        else
-         call fourwf(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
-          istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat_,gs_ham%ngfft,&
-          npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
-          weight,weight,gpu_option=gs_ham%gpu_option)
+         do ii=1,nslices
+           islice=ii-1
+           if ( islice < nslices-residuchunk ) then
+             firstband = islice*chunk+1
+             lastband = (islice+1)*chunk
+           else
+             firstband = (nslices-residuchunk)*chunk + ( islice -(nslices-residuchunk) )*(chunk+1) +1
+             lastband = firstband+chunk
+           end if
+           firstelt = (firstband-1)*spacedim+1
+           lastelt = lastband*spacedim
+           call fourwf(1,gs_ham%vlocal,cwavef(:,firstelt:lastelt),ghc(:,firstelt:lastelt),work,gbound_k1,gbound_k2,&
+            istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,lastband-firstband+1,gs_ham%ngfft,&
+            npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
+            weight,weight,gpu_option=gs_ham%gpu_option)
+         end do
        end if
 
      else
@@ -577,10 +595,22 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET ENTER DATA MAP(alloc:ghc1) IF(gs_ham%gpu_option==ABI_GPU_OPENMP)
 #endif
-         call fourwf(1,gs_ham%vlocal,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
-          istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-          npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
-          weight,weight,gpu_option=gs_ham%gpu_option)
+         do ii=1,nslices
+           islice=ii-1
+           if ( islice < nslices-residuchunk ) then
+             firstband = islice*chunk+1
+             lastband = (islice+1)*chunk
+           else
+             firstband = (nslices-residuchunk)*chunk + ( islice -(nslices-residuchunk) )*(chunk+1) +1
+             lastband = firstband+chunk
+           end if
+           firstelt = (firstband-1)*spacedim+1
+           lastelt = lastband*spacedim
+           call fourwf(1,gs_ham%vlocal,cwavef1(:,firstelt:lastelt),ghc1(:,firstelt:lastelt),work,gbound_k1,gbound_k2,&
+            istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,lastband-firstband+1,gs_ham%ngfft,&
+            npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
+            weight,weight,gpu_option=gs_ham%gpu_option)
+         end do
          if(gs_ham%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
            !$OMP TARGET TEAMS DISTRIBUTE MAP(to:ghc,ghc1)
@@ -621,10 +651,22 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET ENTER DATA MAP(alloc:ghc2) IF(gs_ham%gpu_option==ABI_GPU_OPENMP)
 #endif
-         call fourwf(1,gs_ham%vlocal,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
-           istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-           npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-           gpu_option=gs_ham%gpu_option)
+         do ii=1,nslices
+           islice=ii-1
+           if ( islice < nslices-residuchunk ) then
+             firstband = islice*chunk+1
+             lastband = (islice+1)*chunk
+           else
+             firstband = (nslices-residuchunk)*chunk + ( islice -(nslices-residuchunk) )*(chunk+1) +1
+             lastband = firstband+chunk
+           end if
+           firstelt = (firstband-1)*spacedim+1
+           lastelt = lastband*spacedim
+           call fourwf(1,gs_ham%vlocal,cwavef2(:,firstelt:lastelt),ghc2(:,firstelt:lastelt),work,gbound_k1,gbound_k2,&
+             istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,lastband-firstband+1,gs_ham%ngfft,&
+             npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
+             gpu_option=gs_ham%gpu_option)
+         end do
 
          if(gs_ham%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
