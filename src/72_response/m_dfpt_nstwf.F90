@@ -1499,8 +1499,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 #ifdef HAVE_OPENMP_OFFLOAD
                      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw) MAP(to:gvnlx1,gvnlx1_tmp)
                      do ipw=1,npw1_k*nspinor
-                       gvnlx1(:,(idat-1)*npw1_k*nspinor + ipw) = &
-                         gvnlx1_tmp(:,ipw) - (my_nproc_band-1)*gvnlx1(:,(idat-1)*npw1_k*nspinor + ipw)
+                       gvnlx1(1,(idat-1)*npw1_k*nspinor + ipw) = &
+                         gvnlx1_tmp(1,ipw) - (my_nproc_band-1)*gvnlx1(1,(idat-1)*npw1_k*nspinor + ipw)
+                       gvnlx1(2,(idat-1)*npw1_k*nspinor + ipw) = &
+                         gvnlx1_tmp(2,ipw) - (my_nproc_band-1)*gvnlx1(2,(idat-1)*npw1_k*nspinor + ipw)
                      end do
 #endif
                    end if
