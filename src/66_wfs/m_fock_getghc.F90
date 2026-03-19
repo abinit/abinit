@@ -840,8 +840,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
              !$OMP& MAP(to:gvnlxc,ghc2,occ) PRIVATE(idat_occ,ipw)
              do ipw=1,npw
                do idat_occ=1,ndat_occ
-                 ghc2(1:2,ipw+(idat-1)*npw*nspinor)=ghc2(1:2,ipw+(idat-1)*npw*nspinor)&
-    &               -gvnlxc(1:2,ipw+(idat_occ-1)*npw*nspinor)*occ(idat_occ)*wtk
+                 ghc2(1,ipw+(idat-1)*npw*nspinor)=ghc2(1,ipw+(idat-1)*npw*nspinor)&
+    &               -gvnlxc(1,ipw+(idat_occ-1)*npw*nspinor)*occ(idat_occ)*wtk
+                 ghc2(2,ipw+(idat-1)*npw*nspinor)=ghc2(2,ipw+(idat-1)*npw*nspinor)&
+    &               -gvnlxc(2,ipw+(idat_occ-1)*npw*nspinor)*occ(idat_occ)*wtk
                end do
              end do ! idat_occ
 #endif
@@ -855,9 +857,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        if (fockcommon%optfor.and.(fockcommon%ieigen/=0)) then
          ABI_MALLOC(vdotr,(ndat_occ,3,natom,ndat))
          ABI_MALLOC(vdoti,(ndat_occ))
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET ENTER DATA MAP(alloc:vdotr,vdoti) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
          ABI_MALLOC(for1,(ndat_occ,3,natom,ndat))
          ABI_MALLOC(atom_nfgd,    (natom))
          do iatom=1,natom
@@ -869,6 +868,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
            atom_ifftsph(1:atom_nfgd(iatom),iatom) = fockcommon%pawfgrtab(iatom)%ifftsph(1:atom_nfgd(iatom))
            atom_rfgd(:,1:atom_nfgd(iatom),iatom) =  fockcommon%pawfgrtab(iatom)%rfgd(:,1:atom_nfgd(iatom))
          end do
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET ENTER DATA MAP(alloc:vdotr,vdoti,for1,atom_ifftsph,atom_nfgd,atom_rfgd) IF(gpu_option==ABI_GPU_OPENMP)
+         !$OMP TARGET UPDATE TO(atom_ifftsph,atom_nfgd,atom_rfgd) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
          choice=2; vdotr=zero;doti=zero;cpopt=4;tim_nonlop=17
          do idir=1,3
            do idat=1,ndat
@@ -905,8 +908,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
            end do ! idat
          else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(tofrom:for1) &
-           !$OMP& MAP(to:vfock,grnhat_12,atom_nfgd,atom_rfgd,atom_ifftsph) &
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+           !$OMP& MAP(to:vfock,grnhat_12,for1,atom_nfgd,atom_ifftsph) &
            !$OMP& PRIVATE(ifft,ind,iatom) PRIVATE(idat_occ,idir,esum)
            do idat=1,ndat
              do iatom=1,natom
@@ -925,6 +928,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
                end do ! idir
              end do ! iatom
            end do ! idat
+           !$OMP TARGET UPDATE FROM(for1)
 #endif
          end if
 
@@ -948,7 +952,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
            end do ! idat
          end if
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET EXIT DATA MAP(delete:vdotr,vdoti) IF(gpu_option==ABI_GPU_OPENMP)
+         !$OMP TARGET EXIT DATA MAP(delete:vdotr,vdoti,for1,atom_ifftsph,atom_nfgd,atom_rfgd) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
          ABI_FREE(vdotr)
          ABI_FREE(vdoti)
