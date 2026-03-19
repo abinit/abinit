@@ -630,6 +630,10 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
        ddkinpw=ddkinpw,dkinpw2=dkinpw2,rf_hamk_dir2=rf_hamk_dir2,&                    ! Optional
        ffnl1_test=ffnl1_test)                                                         ! Optional
 
+     if (gs_hamkq%gpu_option == ABI_GPU_OPENMP) then
+       call ompgpu_load_hamilt_buffers(kg_k,kg1_k,ffnlk,ph3d)
+     end if
+
 !    Compute the gradient of the Berry-phase term
      if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 &     dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17) then
@@ -670,6 +674,10 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 &     mband,mband_mem,mcgq,mcprjq,mkmem,mk1mem,mpi_enreg,mpw,mpw1,natom,nband_k,ncpgr,nnsclo_now,&
 &     npw_k,npw1_k,dtset%nspinor,nsppol,n4,n5,n6,occ_k,pawrhoij1_unsym,prtvol,psps,resid_k,&
 &     rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,ddk_f,wtk_k,nlines_done,cg1_out)
+
+     if ( gs_hamkq%gpu_option == ABI_GPU_OPENMP) then
+       call ompgpu_free_hamilt_buffers()
+     end if
 
 !    Free temporary storage
      ABI_FREE(kinpw1)
