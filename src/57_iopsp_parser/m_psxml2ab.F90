@@ -218,9 +218,12 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
    end if
    psphead%lmax = max( psphead%lmax, ll)
  end do
- ABI_MALLOC(psphead%nproj,(0:psphead%lmax))
- ABI_MALLOC(psphead%nprojso,(psphead%lmax))
-
+ if(.not.allocated(psphead%nproj)) then
+   ABI_MALLOC(psphead%nproj,(0:psphead%lmax))
+ endif
+ if(.not.allocated(psphead%nprojso)) then
+   ABI_MALLOC(psphead%nprojso,(psphead%lmax))
+ endif
 
 !    Find the number of projectors per angular momentum shell
  psphead%nproj(:)=0
