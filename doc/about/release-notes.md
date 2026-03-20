@@ -1202,7 +1202,7 @@ By J.-M. Beuken (MR995) and M. Verstraete (MR1007)
 
 By M. Torrent (MR986, MR1032)
 
-**C.4** There is an embryo documentation for cmake build. Also, the need to modify CMakeLists.txt is not mentioned in [developers_howto](developers/developers_howto.md).
+**C.4** There is an embryo documentation for cmake build. Also, the need to modify CMakeLists.txt is not mentioned in [developers_howto](/developers/developers_howto.md).
 
 By P. Kestener (MR994), and a comment from Maxime Mignolet.
 
@@ -2271,7 +2271,7 @@ New tests of the band parallelism in DFPT: [[test:paral_65]] and [[test:paral_66
 By M. Giantomassi (commit 31e8aa66d8).
 
 **D.10** Improved developer documentation, section .
-[How to add a new test](developers/developers_howto/#how-to-add-a-new-test-in-the-test-suite).
+[How to add a new test](/developers/developers_howto/#how-to-add-a-new-test-in-the-test-suite).
 By X. Gonze (commit dabc1b905).
 
 **D.11** Fixed typo in CITATION.cff.
