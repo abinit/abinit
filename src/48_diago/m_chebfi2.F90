@@ -1649,6 +1649,10 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     integer :: spacedim, neigenpairs, num_proc, ierr
     type(xg_t) :: X_k
     type(xg_t) :: resid_active
+    type(xgBlock_t) :: X_active, AX_active, BX_active  ! linalg rep
+    type(xgBlock_t) :: X_lock, AX_lock, BX_lock        ! linalg rep
+    type(xgBlock_t) :: xX_active, xAX_active, xBX_active  ! colsrows rep
+    type(xgBlock_t) :: xX_lock, xAX_lock, xBX_lock        ! colsrows rep
     ! Arrays
     integer, target, allocatable :: nrowsLinalg(:)
     integer, pointer :: nrowsLinalg_ptr(:) => null()
@@ -1730,6 +1734,10 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     ! chebfi%X    contains active vectors
     ! X_lock      contains locked vectors
 
+    xX_active = chebfi%xXColsRows
+    xAX_active = chebfi%xAXColsRows
+    xBX_active = chebfi%xBXColsRows
+
     do iter_subspace=1, niter_subspace_max
 
         write(std_out,*) 'subspace iteration no=', iter_subspace
@@ -1743,6 +1751,13 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
             call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_COLSROWS)
             call timab(tim_transpose,2,tsec)
             ABI_NVTX_END_RANGE()
+
+            if (n_locked>1) then
+                ! n_locked_mpi each rank has different number of locked vectors todo
+                call xgBlock_setBlock(chebfi%xXColsRows , xX_active , spacedim, n_locked_mpi)
+                call xgBlock_setBlock(chebfi%xAXColsRows, xAX_active, spacedim, n_locked_mpi)
+                call xgBlock_setBlock(chebfi%xBXColsRows, xBX_active, spacedim, n_locked_mpi)
+            end if
         end if
         ! todo this will transform the active+locked in colsrows. Locked is not necessary
         ! therefore try to communicate less data is possible.
@@ -1750,10 +1765,11 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
         ! ############################ Filter active  ##############################
         ! ############################ column vectors ##############################
         if (is_lowpass) then
-            call chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,getBm1X)
+            call chebfi_lowpassFilterActive(chebfi,xX_active,xAX_active,xBX_active,eigen,&
+                lambda_minus,lambda_plus,getAX_BX,getBm1X)
         else
-            call chebfi_bandpassFilter(chebfi,eigen,lambda_minus,lambda_plus,mineig_global,&
-                maxeig_global,getAX_BX,getBm1X)
+            call chebfi_bandpassFilterActive(chebfi,xX_active,xAX_active,xBX_active,eigen,&
+                lambda_minus,lambda_plus,mineig_global,maxeig_global,getAX_BX,getBm1X)
         end if
         
         write(std_out,'(a,i6,i6)') 'chebfi%xXColsRows # rows # cols ', &
@@ -1985,6 +2001,114 @@ subroutine chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,g
     ABI_SFREE(ndeg_filter_bands)
 
 end subroutine chebfi_lowpassFilter
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi/chebfi_lowpassFilterActive
+!! NAME
+!! chebfi_lowpassFilterActive
+!!
+!! FUNCTION
+!! Apply Lowpass filter on Active vectors only
+!! TODO this function will replace lowpassFilter
+!!
+!! SOURCE
+
+subroutine chebfi_lowpassFilterActive(chebfi,X_active,AX_active,BX_active,eigen,&
+        lambda_minus,lambda_plus,getAX_BX,getBm1X)
+
+    implicit none
+
+    ! Arguments ------------------------------------
+    type(chebfi_t), intent(inout) :: chebfi
+    type(xgBlock_t), intent(inout) :: X_active
+    type(xgBlock_t), intent(inout) :: AX_active
+    type(xgBlock_t), intent(inout) :: BX_active
+    type(xgBlock_t), intent(inout) :: eigen
+    real(dp), intent(in) :: lambda_minus
+    real(dp), intent(in) :: lambda_plus
+    interface
+        subroutine getAX_BX(X,AX,BX)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: AX
+            type(xgBlock_t), intent(inout) :: BX
+        end subroutine getAX_BX
+    end interface
+    interface
+        subroutine getBm1X(X,Bm1X)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: Bm1X
+        end subroutine getBm1X
+    end interface
+    
+    !Local variables-------------------------------
+    integer :: ideg
+    real(dp) :: center, radius, one_over_r, two_over_r
+    type(xg_t) :: DivResults ! Rayleigh quotients
+    ! Arrays
+    real(dp) :: tsec(2)
+    integer, allocatable :: ndeg_filter_bands(:)
+
+    ! *********************************************************************
+   
+    if (chebfi%paral_kgb == 0) then
+        ABI_MALLOC_IFNOT(ndeg_filter_bands,(chebfi%neigenpairs))
+    else    
+        ABI_MALLOC_IFNOT(ndeg_filter_bands,(chebfi%bandpp))
+    end if
+    
+    ! [lambda_minus,lambda_plus) is diminished using Chebyshev
+    write(std_out,*) '@lowpass lambda_minus=', lambda_minus
+    write(std_out,*) '@lowpass lambda_plus=', lambda_plus
+    flush(std_out)
+
+    ! Filter parameters
+    ndeg_filter_bands(:) = chebfi%ndeg_filter
+    center = (lambda_plus + lambda_minus)*0.5
+    radius = (lambda_plus - lambda_minus)*0.5
+    one_over_r = 1/radius
+    two_over_r = 2/radius
+
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_CORE)
+    do ideg = 0, chebfi%ndeg_filter - 1
+
+        ! X_next=2/r*(AX_next-c*X_next)-X_prev
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
+        call chebfi_computeNextOrderChebfiPolynom(chebfi, ideg, center, one_over_r, two_over_r, getBm1X)
+        ABI_NVTX_END_RANGE()
+
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
+        if (chebfi%paral_kgb == 0) then
+            call chebfi_swapInnerBuffers(chebfi, chebfi%spacedim, chebfi%neigenpairs)
+        else
+            call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, chebfi%bandpp)
+        end if
+        ABI_NVTX_END_RANGE()
+
+        !A * Psi (=AX_next=A*X_next)
+        call timab(tim_getAX_BX,1,tsec)
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
+        call getAX_BX(X_active, AX_active, BX_active)
+        call xgBlock_zero_im_g0(AX_active)
+        call xgBlock_zero_im_g0(BX_active)
+        ABI_NVTX_END_RANGE()
+        call timab(tim_getAX_BX,2,tsec)
+
+    end do ! ideg
+    ABI_NVTX_END_RANGE()
+
+    ! Avoid overflow rescale
+    call chebfi_prepAmpfactor(chebfi, eigen, DivResults)
+    call chebfi_ampfactor(chebfi, DivResults%self, lambda_minus, lambda_plus, ndeg_filter_bands)
+
+    ! Free temporary memory
+    call xg_free(DivResults)
+    ABI_SFREE(ndeg_filter_bands)
+
+end subroutine chebfi_lowpassFilterActive
 !!***
 
 !----------------------------------------------------------------------
