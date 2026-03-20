@@ -142,6 +142,15 @@ module m_chebfi2
 
   end type chebfi_t
 
+  type, private :: bandPartition_t
+    integer :: n_locked
+    integer :: n_active
+    type(xgBlock_t) :: linalg_active
+    type(xgBlock_t) :: colsrows_locked
+    type(xgBlock_t) :: colsrows_active
+    type(xgBlock_t) :: transposer_active
+  end type bandPartition_t
+
 !Public methods associated to 'chebfi' datatype
 !-------------------------------------------------
  public :: chebfi_init
@@ -1649,10 +1658,9 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     integer :: spacedim, neigenpairs, num_proc, ierr
     type(xg_t) :: X_k
     type(xg_t) :: resid_active
-    type(xgBlock_t) :: X_active, AX_active, BX_active  ! linalg rep
-    type(xgBlock_t) :: X_lock, AX_lock, BX_lock        ! linalg rep
-    type(xgBlock_t) :: xX_active, xAX_active, xBX_active  ! colsrows rep
-    type(xgBlock_t) :: xX_lock, xAX_lock, xBX_lock        ! colsrows rep
+    type(bandPartition_t) :: part_X
+    type(bandPartition_t) :: part_AX
+    type(bandPartition_t) :: part_BX
     ! Arrays
     integer, target, allocatable :: nrowsLinalg(:)
     integer, pointer :: nrowsLinalg_ptr(:) => null()
@@ -1688,7 +1696,7 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     ABI_NVTX_END_RANGE()
     call timab(tim_getAX_BX,2,tsec)
 
-    ! Allocate memory for linalg distribution
+    ! Allocate memory for linalg distribution from colsrows
     call timab(tim_transpose,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
     if (chebfi%paral_kgb==1) then
@@ -1707,11 +1715,6 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
             chebfi%BX%self,chebfi%xBXColsRows,STATE_COLSROWS)
         ! Note: at this point chebfi%AX and chebfi%BX are empty. Must transpose
         !       to fill with correct values.
-
-        ! todo use copy constructor to create an object by copying an existing object
-        ! actually copy constructor *allocates* memory for chebfi%AX. Write a version
-        ! that does not allocate memory and only reassigns pointers. Can pointers be reassigned
-        ! directly then used in the global constructor? Perform tests.
 
         chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
         chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
@@ -1742,6 +1745,19 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
 
         write(std_out,*) 'subspace iteration no=', iter_subspace
         flush(std_out)
+
+        ! Construct transposer only for active vectors from linalg distribution
+        call chebfi_constructActiveTransposers(chebfi, n_locked, &
+            xgTransposerXactive, xgTransposerAXactive, xgTransposerBXactive)
+        
+        ! Transpose active vectors to colsrows distribution
+        call timab(tim_transpose,1,tsec)
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+        call xgTransposer_transpose(xgTransposerXactive, STATE_COLSROWS)
+        call xgTransposer_transpose(xgTransposerAXactive, STATE_COLSROWS)
+        call xgTransposer_transpose(xgTransposerBXactive, STATE_COLSROWS)
+        call timab(tim_transpose,2,tsec)
+        ABI_NVTX_END_RANGE()
 
         if (iter_subspace>1 .and. chebfi%paral_kgb==1) then
             call timab(tim_transpose,1,tsec)
@@ -1816,11 +1832,6 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
 
     if ( ierr /= 0 ) then
         ABI_WARNING("RayleighRitz did not work")
-    else
-        !write(std_out,*) 'is lowpass=', is_lowpass
-        !write(std_out,*) 'chebfi%eigenvalues after RR'
-        !call xgBlock_print(chebfi%eigenvalues,std_out)
-        !flush(std_out)
     end if
 
     ! Compute residual norm *squared*
@@ -1831,13 +1842,7 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     end if
     call xgBlock_colwiseNorm2(chebfi%AX%self,residu) ! performs MPI comm
 
-    !write(std_out,*) 'max colwise residual norm squared='; call xgBlock_print(residu, std_out)
-    !flush(std_out)
-
-    ! Copy in Linalg representation (see chebfi_run, kept for reference)
-    ! call xgBlock_copy(chebfi%X,X0)
-    
-    ! MPI Transpose to recover colsrows state (X only)
+    ! MPI Transpose to recover colsrows state
     call timab(tim_transpose,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
     if (chebfi%paral_kgb == 1) then
@@ -2796,6 +2801,41 @@ end subroutine chebfi_lockConvergedVectors
 
 
   end subroutine chebfi_deflateWrtLocked
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/chebfi_constructActiveTransposer
+!! NAME
+!! chebfi_constructActiveTransposer
+
+  subroutine chebfi_constructActiveTransposer(chebfi, bpart)
+
+      implicit none
+
+      type(chebfi_t), intent(inout) :: chebfi
+      type(bandPartition_t), intent(inout) :: bpart
+
+      integer :: n_active
+
+  ! *********************************************************************
+
+      n_active = chebfi%neigenpairs - bpart%n_locked
+
+      ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+      call timab(tim_transpose,1,tsec)
+
+      ! todo use n_active
+      call xgTransposer_constructor(bpart%transposer_active,bpart%linalg_active,bpart%colsrows_active,&
+          nspinor,STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,&
+          gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit)
+
+      bpart%transposer_active%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
+
+      ABI_NVTX_END_RANGE()
+      call timab(tim_transpose,2,tsec)
+
+  end subroutine chebfi_constructActiveTransposer
 !!***
 
 end module m_chebfi2
