@@ -121,6 +121,10 @@ module m_xg_ortho_RR
     ! Compute X^TBX
     call xgBlock_gemm('t','n',1.d0,X,BX,0.d0,buffer%self,comm=comm(X))
 
+    write(std_out,*) '@cholesky', xgBlock_getid(X)
+    write(std_out,*) '@cholesky', xgBlock_getid(BX)
+    flush(std_out)
+
     ! Compute Cholesky decomposition (Upper part)
     call xgBlock_potrf(buffer%self,'u',info)
 
