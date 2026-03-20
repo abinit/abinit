@@ -49,7 +49,7 @@ nline7       1
 nqpt7        0
 rfphon7      0
 
-# Compute the GKK correctly (no jauge problem)
+# Compute the GKK correctly (no gauge problem)
 # This step is very quick as NSCF+nstep 1
 qpt8         0.0 0.0 0.0
 prtgkk8      1            # Print out GKK files containing electron-phonon coupling
