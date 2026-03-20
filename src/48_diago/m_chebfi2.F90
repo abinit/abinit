@@ -142,13 +142,29 @@ module m_chebfi2
 
   end type chebfi_t
 
+  ! Partition column vectors X=(X_lock X_active)
+  ! Function: handles MPI distribution and transitions between them
+  !-------------------------------------------------
   type, private :: bandPartition_t
+
+    ! MPI sizes in linalg
     integer :: n_locked
     integer :: n_active
+
+    ! MPI sizes in colsrows
+    integer :: my_rank
+    logical :: rank_active ! true if process treats active bands
+    integer :: n_active_bandpp ! rank specific in colsrows
+
+    ! communicator for processes treating active bands
+    integer :: comm_active 
+
     type(xgBlock_t) :: linalg_active
     type(xgBlock_t) :: colsrows_locked
     type(xgBlock_t) :: colsrows_active
-    type(xgBlock_t) :: transposer_active
+    
+    type(xgTransposer_t) :: transposer_active
+
   end type bandPartition_t
 
 !Public methods associated to 'chebfi' datatype
@@ -1737,14 +1753,34 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     ! chebfi%X    contains active vectors
     ! X_lock      contains locked vectors
 
+    ! todo initialize partitions
+
     xX_active = chebfi%xXColsRows
     xAX_active = chebfi%xAXColsRows
     xBX_active = chebfi%xBXColsRows
+    
+    call bandPartition_setColsRowsActive(X_part , chebfi%xXColsRows, n_locked)
+    call bandPartition_setColsRowsActive(AX_part, chebfi%AXColsRows, n_locked)
+    call bandPartition_setColsRowsActive(BX_part, chebfi%BXColsRows, n_locked)
 
     do iter_subspace=1, niter_subspace_max
 
         write(std_out,*) 'subspace iteration no=', iter_subspace
         flush(std_out)
+
+        ! si n_locked_bandpp est trop petit, on ne va pas pouvoir distribuer
+        ! cas minimal: si n_active < bandpp alors utilise 1 seul proc bandpp=n_active pas de distr
+        ! en gros il faut mettre à jour comm_cols
+        ! comm_cols peut être le communicateur de p procs (p=size(comm_rows))
+        ! ou comm_cols peut être un sous-communicateur. Il nous faut une fonction qui décide
+        ! combien de processus les vecteurs active ont besoin.
+        ! pour cela on fait p_active =
+        ! min p = 1 et max p = nproc slice
+        ! avec capacité en bandes : min 1 et max bandpp
+
+        call bandPartition_getActiveDistribution(X_part)
+        call bandPartition_copyActiveDistribution(X_part, AX_part)
+        call bandPartition_copyActiveDistribution(X_part, BX_part)
 
         ! Construct transposer only for active vectors from linalg distribution
         call chebfi_constructActiveTransposers(chebfi, n_locked, &
@@ -1781,12 +1817,17 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
         ! ############################ Filter active  ##############################
         ! ############################ column vectors ##############################
         if (is_lowpass) then
+            ! todo set active pointers
             call chebfi_lowpassFilterActive(chebfi,xX_active,xAX_active,xBX_active,eigen,&
                 lambda_minus,lambda_plus,getAX_BX,getBm1X)
         else
             call chebfi_bandpassFilterActive(chebfi,xX_active,xAX_active,xBX_active,eigen,&
                 lambda_minus,lambda_plus,mineig_global,maxeig_global,getAX_BX,getBm1X)
         end if
+
+        call bandPartition_transposeActive(X_part)
+        call bandPartition_transposeActive(AX_part)
+        call bandPartition_transposeActive(BX_part)
         
         write(std_out,'(a,i6,i6)') 'chebfi%xXColsRows # rows # cols ', &
             rows(chebfi%xXColsRows), cols(chebfi%xXColsRows)
@@ -1813,7 +1854,12 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
 
         call chebfi_getSubspaceResidual(chebfi, resid_active%self)
 
+        ! todo change to swapConvergedVectors
         call chebfi_lockConvergedVectors(chebfi, resid_active%self, 1e-3_dp, n_locked) 
+
+        ! Definir les espace en utilisant n_locked, n_active
+        call bandPartition_setLinalg(chebfi, X_part, AX_part, BX_part)
+
 
         ! todo debug by recomputing the getSubspaceResidual for locked vectors and verify it is smaller than tol
         
@@ -2801,6 +2847,119 @@ end subroutine chebfi_lockConvergedVectors
 
 
   end subroutine chebfi_deflateWrtLocked
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/bandPartition_setColsRowsActive
+!! NAME
+!! bandPartition_setColsRowsActive
+
+  subroutine bandPartition_setColsRowsActive(bpart, X, n_locked)
+
+      implicit none
+
+      type(bandPartition_t), intent(inout) :: bpart
+      type(xgBlock_t), intent(in) :: X
+      integer, intent(in) :: n_locked
+      integer :: nrows
+  
+  ! *********************************************************************
+
+      nrows = rows(X)
+      bpart%n_locked = 
+
+      call xgBlock_setBlock(X, bpart%colsrows_locked, nrows, bpart%n_locked_mpi)
+    
+  end subroutine bandPartition_setColsRowsActive
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/bandPartition_setColsRowsActive
+!! NAME
+!! bandPartition_setColsRowsActive
+
+  subroutine bandPartition_setColsRowsActive(bpart, X, n_locked)
+
+      implicit none
+
+      type(bandPartition_t), intent(inout) :: bpart
+      type(xgBlock_t), intent(in) :: X
+      integer, intent(in) :: n_locked
+      integer :: nrows
+  
+  ! *********************************************************************
+
+      nrows = rows(X)
+      bpart%n_locked = 
+
+      call xgBlock_setBlock(X, bpart%colsrows_locked, nrows, bpart%n_locked_bandpp)
+    
+  end subroutine bandPartition_setColsRowsActive
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/bandPartition_getActiveDistribution
+!! NAME
+!! bandPartition_getActiveDistribution
+!! 
+!! FUNCTION
+!! Every process can treat between 1 and bandpp bands
+!! with p processes we cover p x bandpp bands at maximum.
+!! Solve problem find minimal p to cover n_active bands.
+!! Constraints: use at least 1 process and at max nproc.
+!! 
+!! OUTPUT
+!! bpart%n_active_bandpp    stores the result per mpi rank
+!! bpart%rank_active        true if process treats active bands
+
+  subroutine bandPartition_getActiveDistribution(bpart, n_locked)
+
+      implicit none
+
+      type(bandPartition_t), intent(inout) :: bpart
+      type(xgBlock_t), intent(in) :: X
+      integer, intent(in) :: n_locked
+      integer :: nrows
+  
+  ! *********************************************************************
+
+      nrows = rows(X)
+      bpart%n_locked =
+
+      min_p = ceiling(n_active / bandpp)
+      p = minval(nproc, maxval(1, min_p))
+
+      bpart%rank_active = ..
+      bpart%n_active_bandpp = ..
+      
+    
+  end subroutine bandPartition_getActiveDistribution
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/bandPartition_copyActiveDistribution
+!! NAME
+!! bandPartition_copyActiveDistribution
+!! 
+
+  subroutine bandPartition_copyActiveDistribution(bpart_in, bpart_out)
+
+      implicit none
+
+      type(bandPartition_t), intent(in   ) :: bpart_in
+      type(bandPartition_t), intent(inout) :: bpart_out
+  
+  ! *********************************************************************
+
+      bpart_out%rank_active = bpart_in%rank_active
+      bpart_out%n_active_bandpp = bpart_in%n_active_bandpp
+      bpart_out%comm_active = bpart_in%comm_active
+    
+  end subroutine bandPartition_copyActiveDistribution
 !!***
 
 !----------------------------------------------------------------------
