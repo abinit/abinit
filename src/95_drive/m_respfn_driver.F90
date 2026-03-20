@@ -3525,7 +3525,6 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
                  d2matr(ii,idir1,ipert1,idir2,ipert2)=  &
 &                 d2matr(ii,idir1,ipert1,idir2,ipert2)+ &
 &                 dyvdw(ii,idir1,ipert1,idir2,ipert2)
-                 end if
                end if
              end do
            end if
@@ -3582,8 +3581,6 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
        end do
      end do
    end if
-
-=====================
 
 !  For piezoelectric tensor add a contribution in PAW case
    if(pawpiezo==1) then
