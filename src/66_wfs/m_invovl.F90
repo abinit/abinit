@@ -1428,7 +1428,9 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
     ABI_FREE(cwaveprj_in)
   end if
 
-  call abi_gpu_xaxpy(1, 2*npw*nspinor*ndat, cone, cwavef, 1, sm1cwavef, 1)
+  !$OMP TARGET DATA USE_DEVICE_ADDR(cwavef,sm1cwavef)
+  call abi_gpu_xaxpy(1, 2*npw*nspinor*ndat, cone, c_loc(cwavef), 1, c_loc(sm1cwavef), 1)
+  !$OMP END TARGET DATA
 
   if(transfer_omp_args) then
     !$OMP TARGET UPDATE FROM(sm1cwavef,cwavef)
