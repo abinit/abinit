@@ -957,7 +957,11 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         ! residual will be converged for m values. Give m as input
         k_conv = slice%neigenpairs - 20 ! hardcoded assuming offset 20 fixme 
 
-        call chebfi_runSubspaceIteration(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, &
+        !call chebfi_runSubspaceIteration(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, &
+        !    nspinor, slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, &
+        !    k_conv, nrowsLinalg_ptr)
+
+        call chebfi_runSubspaceIterationDummy(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, &
             nspinor, slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, &
             k_conv, nrowsLinalg_ptr)
 
