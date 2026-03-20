@@ -372,6 +372,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr)
    call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr), FFT_INVERSE)
    !$OMP END TARGET DATA
+#endif
    call gpu_fft_stream_synchronize(FOURWF_ID)
 
    ! In non-diagonal specific use-case, perform same operation with fofginb:
