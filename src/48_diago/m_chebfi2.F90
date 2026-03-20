@@ -142,30 +142,28 @@ module m_chebfi2
 
   end type chebfi_t
 
-  ! Partition column vectors X=(X_lock X_active)
-  ! Function: handles MPI distribution and transitions between them
+  ! Partition Info for column vectors X=(X_lock X_active)
+  ! Function: handles MPI distribution variables and communicators
   !-------------------------------------------------
-  type, private :: bandPartition_t
+  type, private :: bandPartitionInfo_t
 
-    ! MPI sizes in linalg
-    integer :: n_locked
-    integer :: n_active
+    integer :: n_locked           ! MPI size in linalg for locked
+    integer :: n_active           ! MPI size in linalg for active
+    integer :: comm_active        ! communicator for processes treating active bands
 
-    ! MPI sizes in colsrows
-    integer :: my_rank
-    logical :: rank_active ! true if process treats active bands
-    integer :: n_active_bandpp ! rank specific in colsrows
+  end type bandPartitionInfo_t
 
-    ! communicator for processes treating active bands
-    integer :: comm_active 
+  ! Partition Data for column vectors X=(X_lock X_active)
+  ! Function: handles data (e.g. X, AX, BX) in MPI distributions
+  !-------------------------------------------------
+  type, private :: bandPartitionData_t
 
-    type(xgBlock_t) :: linalg_active
-    type(xgBlock_t) :: colsrows_locked
-    type(xgBlock_t) :: colsrows_active
-    
-    type(xgTransposer_t) :: transposer_active
+    type(xgBlock_t) :: linalg_active          ! active vectors in linalg MPI distribution
+    type(xgBlock_t) :: linalg_locked          ! locked vectors in linalg MPI distribution
+    type(xgBlock_t) :: colsrows_active        ! active vectors in colsrows MPI distribution
+    type(xgTransposer_t) :: transposer_active ! transposer to switch between MPI distrs for active only
 
-  end type bandPartition_t
+  end type bandPartitionData_t
 
 !Public methods associated to 'chebfi' datatype
 !-------------------------------------------------
@@ -1636,7 +1634,7 @@ end subroutine chebfi_runSlice
 !! SOURCE
 
 subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
-        mineig_global,maxeig_global,lambda_minus,lambda_plus,is_lowpass,k_rank,nrows_blockrows)
+        mineig_global,maxeig_global,lambda_minus,lambda_plus,is_lowpass,k_conv,nrows_blockrows)
 
     implicit none
 
@@ -1646,7 +1644,7 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     type(xgBlock_t), intent(inout) :: eigen
     type(xgBlock_t), intent(inout) :: residu
     integer        , intent(in   ) :: nspinor
-    integer        , intent(in   ) :: k_rank
+    integer        , intent(in   ) :: k_conv
     integer, pointer, intent(in  ) :: nrows_blockrows(:)
     real(dp)       , intent(in   ) :: mineig_global 
     real(dp)       , intent(in   ) :: maxeig_global
@@ -1670,13 +1668,14 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     end interface
 
     !Local variables-------------------------------
-    integer :: iter_subspace, niter_subspace_max, n_locked
-    integer :: spacedim, neigenpairs, num_proc, ierr
+    integer :: iter_subspace, niter_subspace_max, n_locked, n_locked_prev
+    integer :: spacedim, neigenpairs, num_proc, nrows, nrows_mpi, ierr
     type(xg_t) :: X_k
     type(xg_t) :: resid_active
-    type(bandPartition_t) :: part_X
-    type(bandPartition_t) :: part_AX
-    type(bandPartition_t) :: part_BX
+    type(bandPartitionInfo_t) :: mpiInfo
+    type(bandPartitionData_t) :: X_part
+    type(bandPartitionData_t) :: AX_part
+    type(bandPartitionData_t) :: BX_part
     ! Arrays
     integer, target, allocatable :: nrowsLinalg(:)
     integer, pointer :: nrowsLinalg_ptr(:) => null()
@@ -1699,10 +1698,6 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     
     call xg_init(resid_active, SPACE_R, neigenpairs, 1, gpu_option=chebfi%gpu_option)
     
-    !write(std_out,*) 'getid inside runSlice xXColsRows', xgBlock_getId(chebfi%xXColsRows)
-    !write(std_out,*) 'getid inside runSlice xAXColsRows', xgBlock_getId(chebfi%xAXColsRows)
-    !flush(std_out)
-
     ! Initialize values of AX and BX
     call timab(tim_getAX_BX,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
@@ -1713,6 +1708,7 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     call timab(tim_getAX_BX,2,tsec)
 
     ! Allocate memory for linalg distribution from colsrows
+    ! Note: bandpp is custom because it is created from resource allocator
     call timab(tim_transpose,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
     if (chebfi%paral_kgb==1) then
@@ -1722,7 +1718,6 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
             STATE_COLSROWS,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0,&
             gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit,&
             custom_ncolsColsRows=.true.,nrowsLinalg_sub=nrowsLinalg_ptr)
-        ! Note: bandpp is custom because it is created from resource allocator
 
         ! Allocate chebfi%AX, chebfi%BX
         call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,&
@@ -1749,124 +1744,143 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
 
     niter_subspace_max = 10
     n_locked = 0
+    n_locked_prev = 0
+    nrows = rows(chebfi%xXColsRows)
+    nrows_mpi = rows(chebfi%X)
 
-    ! chebfi%X    contains active vectors
-    ! X_lock      contains locked vectors
-
-    ! todo initialize partitions
-
-    xX_active = chebfi%xXColsRows
-    xAX_active = chebfi%xAXColsRows
-    xBX_active = chebfi%xBXColsRows
-    
-    call bandPartition_setColsRowsActive(X_part , chebfi%xXColsRows, n_locked)
-    call bandPartition_setColsRowsActive(AX_part, chebfi%AXColsRows, n_locked)
-    call bandPartition_setColsRowsActive(BX_part, chebfi%BXColsRows, n_locked)
+    ! Initialize active vectors (in colsrows distribution)
+    call xgBlock_setBlock(chebfi%xXColsRows , X_part%colsrows_active , nrows, chebfi%bandpp)
+    call xgBlock_setBlock(chebfi%xAXColsRows, AX_part%colsrows_active, nrows, chebfi%bandpp)
+    call xgBlock_setBlock(chebfi%xBXColsRows, BX_part%colsrows_active, nrows, chebfi%bandpp)
 
     do iter_subspace=1, niter_subspace_max
 
         write(std_out,*) 'subspace iteration no=', iter_subspace
         flush(std_out)
 
-        ! si n_locked_bandpp est trop petit, on ne va pas pouvoir distribuer
-        ! cas minimal: si n_active < bandpp alors utilise 1 seul proc bandpp=n_active pas de distr
-        ! en gros il faut mettre à jour comm_cols
-        ! comm_cols peut être le communicateur de p procs (p=size(comm_rows))
-        ! ou comm_cols peut être un sous-communicateur. Il nous faut une fonction qui décide
-        ! combien de processus les vecteurs active ont besoin.
-        ! pour cela on fait p_active =
-        ! min p = 1 et max p = nproc slice
-        ! avec capacité en bandes : min 1 et max bandpp
-
-        call bandPartition_getActiveDistribution(X_part)
-        call bandPartition_copyActiveDistribution(X_part, AX_part)
-        call bandPartition_copyActiveDistribution(X_part, BX_part)
-
-        ! Construct transposer only for active vectors from linalg distribution
-        call chebfi_constructActiveTransposers(chebfi, n_locked, &
-            xgTransposerXactive, xgTransposerAXactive, xgTransposerBXactive)
-        
-        ! Transpose active vectors to colsrows distribution
-        call timab(tim_transpose,1,tsec)
-        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
-        call xgTransposer_transpose(xgTransposerXactive, STATE_COLSROWS)
-        call xgTransposer_transpose(xgTransposerAXactive, STATE_COLSROWS)
-        call xgTransposer_transpose(xgTransposerBXactive, STATE_COLSROWS)
-        call timab(tim_transpose,2,tsec)
-        ABI_NVTX_END_RANGE()
-
+        ! ############################   Manage MPI   ##############################
         if (iter_subspace>1 .and. chebfi%paral_kgb==1) then
-            call timab(tim_transpose,1,tsec)
-            ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
-            call xgTransposer_transpose(chebfi%xgTransposerX, STATE_COLSROWS)
-            call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_COLSROWS)
-            call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_COLSROWS)
-            call timab(tim_transpose,2,tsec)
-            ABI_NVTX_END_RANGE()
+            
+            if (n_locked > 0 .and. n_locked /= n_locked_prev ) then
+                
+                ! Assign active bands to processes
+                call bandPartitionInfo_initActiveSubcomm(mpiInfo, chebfi%comm_cols, chebfi%bandpp)
+                
+                ! Allocate colsrows distributions for active vectors (from linalg distribution)
+                call bandPartitionData_allocActiveColsrows(X_part, chebfi, mpiInfo, nspinor)
+                call bandPartitionData_allocActiveColsrows(AX_part, chebfi, mpiInfo, nspinor)
+                call bandPartitionData_allocActiveColsrows(BX_part, chebfi, mpiInfo, nspinor)
+        
+                ! Transpose active vectors to colsrows distribution
+                ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+                call timab(tim_transpose,1,tsec)
+                call xgTransposer_transpose(X_part%transposer_active, STATE_COLSROWS)
+                call xgTransposer_transpose(AX_part%transposer_active, STATE_COLSROWS)
+                call xgTransposer_transpose(BX_part%transposer_active, STATE_COLSROWS)
+                call timab(tim_transpose,2,tsec)
+                ABI_NVTX_END_RANGE()
 
-            if (n_locked>1) then
-                ! n_locked_mpi each rank has different number of locked vectors todo
-                call xgBlock_setBlock(chebfi%xXColsRows , xX_active , spacedim, n_locked_mpi)
-                call xgBlock_setBlock(chebfi%xAXColsRows, xAX_active, spacedim, n_locked_mpi)
-                call xgBlock_setBlock(chebfi%xBXColsRows, xBX_active, spacedim, n_locked_mpi)
+            else
+
+                ! Use global transposer
+                ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+                call timab(tim_transpose,1,tsec)
+                call xgTransposer_transpose(chebfi%xgTransposerX, STATE_COLSROWS)
+                call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_COLSROWS)
+                call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_COLSROWS)
+                call timab(tim_transpose,2,tsec)
+                ABI_NVTX_END_RANGE()
             end if
+
         end if
-        ! todo this will transform the active+locked in colsrows. Locked is not necessary
-        ! therefore try to communicate less data is possible.
-    
+
         ! ############################ Filter active  ##############################
         ! ############################ column vectors ##############################
         if (is_lowpass) then
-            ! todo set active pointers
-            call chebfi_lowpassFilterActive(chebfi,xX_active,xAX_active,xBX_active,eigen,&
-                lambda_minus,lambda_plus,getAX_BX,getBm1X)
+            call chebfi_lowpassFilterActive(chebfi,X_part%colsrows_active,AX_part%colsrows_active,&
+                BX_part%colsrows_active,eigen,lambda_minus,lambda_plus,getAX_BX,getBm1X)
         else
-            call chebfi_bandpassFilterActive(chebfi,xX_active,xAX_active,xBX_active,eigen,&
-                lambda_minus,lambda_plus,mineig_global,maxeig_global,getAX_BX,getBm1X)
+            call chebfi_bandpassFilterActive(chebfi,X_part%colsrows_active,AX_part%colsrows_active,&
+                BX_part%colsrows_active,eigen,lambda_minus,lambda_plus,mineig_global,maxeig_global,&
+                getAX_BX,getBm1X)
         end if
+        ! todo prevent bug X_next, X_prev might need resetting
 
-        call bandPartition_transposeActive(X_part)
-        call bandPartition_transposeActive(AX_part)
-        call bandPartition_transposeActive(BX_part)
-        
-        write(std_out,'(a,i6,i6)') 'chebfi%xXColsRows # rows # cols ', &
-            rows(chebfi%xXColsRows), cols(chebfi%xXColsRows)
-        flush(std_out)
-
+        ! ############################   Manage MPI   ##############################
         if (chebfi%paral_kgb==1) then
-            call timab(tim_transpose,1,tsec)
-            ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
-            call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
-            call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_LINALG)
-            call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_LINALG)
-            call timab(tim_transpose,2,tsec)
-            ABI_NVTX_END_RANGE()
+
+            if (n_locked > 0) then
+            
+                call timab(tim_transpose,1,tsec)
+                ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+                call xgTransposer_transpose(X_part%transposer_active, STATE_LINALG)
+                call xgTransposer_transpose(AX_part%transposer_active, STATE_LINALG)
+                call xgTransposer_transpose(BX_part%transposer_active, STATE_LINALG)
+                ABI_NVTX_END_RANGE()
+                call timab(tim_transpose,2,tsec)
+
+            else
+
+                ! Use global transposer
+                ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
+                call timab(tim_transpose,1,tsec)
+                call xgTransposer_transpose(chebfi%xgTransposerX, STATE_LINALG)
+                call xgTransposer_transpose(chebfi%xgTransposerAX, STATE_LINALG)
+                call xgTransposer_transpose(chebfi%xgTransposerBX, STATE_LINALG)
+                call timab(tim_transpose,2,tsec)
+                ABI_NVTX_END_RANGE()
+
+                ! Initialize active vectors (in linalg distribution)
+                call xgBlock_setBlock(chebfi%X      , X_part%linalg_active , nrows_mpi, neigenpairs)
+                call xgBlock_setBlock(chebfi%AX%self, AX_part%linalg_active, nrows_mpi, neigenpairs)
+                call xgBlock_setBlock(chebfi%BX%self, BX_part%linalg_active, nrows_mpi, neigenpairs)
+            
+            end if
+
         end if
     
         write(std_out,'(a,i6,i6)') 'chebfi%X # rows # cols ', rows(chebfi%X), cols(chebfi%X)
+        write(std_out,'(a,i6,i6)') 'X_active(linalg) # rows # cols ', nrows_mpi, neigenpairs
         flush(std_out)
 
-        if (n_locked>0) then
-            call chebfi_deflateWrtLocked(chebfi, n_locked)
+        ! #######################   Deflate+Ortho+Residual  ##############################
+        ! ####################### for active column vectors ##############################
+
+        if (n_locked > 0) then
+            call chebfi_deflateActiveWrtLocked(chebfi, n_locked, X_part, AX_part, BX_part)
         end if
 
-        call xg_Borthonormalize(chebfi%X,chebfi%BX%self,ierr,1,chebfi%gpu_option,AX=chebfi%AX%self)
+        call xg_Borthonormalize(X_part%linalg_active,BX_part%linalg_active,ierr,1,&
+            chebfi%gpu_option,AX=AX_part%linalg_active)
 
         call chebfi_getSubspaceResidual(chebfi, resid_active%self)
-
-        ! todo change to swapConvergedVectors
-        call chebfi_lockConvergedVectors(chebfi, resid_active%self, 1e-3_dp, n_locked) 
-
-        ! Definir les espace en utilisant n_locked, n_active
-        call bandPartition_setLinalg(chebfi, X_part, AX_part, BX_part)
-
-
-        ! todo debug by recomputing the getSubspaceResidual for locked vectors and verify it is smaller than tol
         
-        ! lock vectors in small residual
-        ! actually redefine pointers Xactive and Xlock pointing to X that's all
-    
+        call chebfi_swapConvergedVectors(chebfi, resid_active%self, 1e-3_dp, n_locked)
+        ! todo check if residual of wanted bands has converged if yes skip parts
+        
+        if (chebfi%paral_kgb==1 .and. n_locked > 0 .and. n_locked /= n_locked_prev) then
+            call bandPartitionData_setLinalg(chebfi%X      , X_part , n_locked)
+            call bandPartitionData_setLinalg(chebfi%AX%self, AX_part, n_locked)
+            call bandPartitionData_setLinalg(chebfi%BX%self, BX_part, n_locked)
+        
+            ! free colsrows active objects
+            call xgTransposer_free(X_part%transposer_active)
+            call xgTransposer_free(AX_part%transposer_active)
+            call xgTransposer_free(BX_part%transposer_active)
+        end if
+
+        n_locked_prev = n_locked
+        mpiInfo%n_locked = n_locked
+        mpiInfo%n_active = chebfi%neigenpairs - n_locked
+        
+        ! todo debug by recomputing the getSubspaceResidual for locked vectors and verify it is smaller than tol
+
     end do
+
+    ! Transfer active data to full workspace
+    call xgBlock_copy(X_part%linalg_active, chebfi%X)
+    call xgBlock_copy(AX_part%linalg_active, chebfi%BX%self)
+    call xgBlock_copy(BX_part%linalg_active, chebfi%BX%self)
 
     ! Apply Rayleigh-Ritz to active MPI Linalg row-block
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
@@ -2312,6 +2326,157 @@ end subroutine chebfi_bandpassFilter
 
 !----------------------------------------------------------------------
 
+!!****f* m_chebfi/chebfi_bandpassFilterActive
+!! NAME
+!! chebfi_bandpassFilterActive
+!!
+!! FUNCTION
+!! Apply Bandpass filter using Chebyshev-Jackson polynomial, that is an 
+!! approximation of Heaviside step function by a Chebyshev expansion plus
+!! Jackson damping to reduce oscillations, applied on a set of vectors. 
+!! Amplifies interval [lambda_minus, lambda_plus).
+!! 
+!! INPUTS
+!! chebfi <type(chebfi_t)>=memory workspace used to apply filter
+!! eigen= Rayleigh quotients to use in amplification of chebfi%xXColsRows
+!! lambda_minus= lower bound of interval to amplify
+!! lambda_plus= upper bound of interval to amplify
+!! mineig_global= used to rescale to [-1,1), will le -1
+!! maxeig_global= used to rescale to [-1,1), will be 1
+!! getAX_BX= pointer to the function giving A|X> and B|X>
+!!           A is typically the Hamiltonian H, and B the overlap operator S
+!! getBm1X= pointer to the function giving B^-1|X>
+!!          B is typically the overlap operator S
+!!
+!! SIDE EFFECTS
+!!  chebfi%xXColsRows= Filtered vectors to use in Subspace iteration
+!!
+!! SOURCE
+
+subroutine chebfi_bandpassFilterActive(chebfi,X_active,AX_active,BX_active,eigen,&
+        lambda_minus,lambda_plus,mineig_global,maxeig_global,getAX_BX,getBm1X)
+
+    implicit none
+
+    ! Arguments ------------------------------------
+    type(chebfi_t), intent(inout) :: chebfi
+    type(xgBlock_t), intent(inout) :: X_active
+    type(xgBlock_t), intent(inout) :: AX_active
+    type(xgBlock_t), intent(inout) :: BX_active
+    type(xgBlock_t), intent(inout) :: eigen
+    real(dp), intent(in) :: lambda_minus
+    real(dp), intent(in) :: lambda_plus
+    real(dp), intent(in) :: mineig_global
+    real(dp), intent(in) :: maxeig_global
+    interface
+        subroutine getAX_BX(X,AX,BX)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: AX
+            type(xgBlock_t), intent(inout) :: BX
+        end subroutine getAX_BX
+    end interface
+    interface
+        subroutine getBm1X(X,Bm1X)
+            use m_xg, only : xgBlock_t
+            type(xgBlock_t), intent(inout) :: X
+            type(xgBlock_t), intent(inout) :: Bm1X
+        end subroutine getBm1X
+    end interface
+
+    ! Local variables-------------------------------
+    integer :: ndeg, n
+    real(dp) :: center, radius, one_over_r, two_over_r
+    real(dp) :: ls, us, cdeg, mu, damp
+    type(xg_t) :: Heaviside
+    type(xg_t) :: DivResults ! Rayleigh quotients
+    real(dp) :: tsec(2)
+
+    ! *********************************************************************
+
+    ndeg = chebfi%ndeg_filter 
+  
+    ! Allocate memory for Chebyshev expansion of Heaviside step function
+    call xg_init(Heaviside, chebfi%space, chebfi%total_spacedim, chebfi%bandpp, chebfi%spacecom, &
+        gpu_option=chebfi%gpu_option)
+    !call xgBlock_zero(Heaviside%self)
+
+    write(std_out,*) '@bandpass lambda_minus=', lambda_minus
+    write(std_out,*) '@bandpass lambda_plus=', lambda_plus
+    write(std_out,*) '@bandpass mineig_global=', mineig_global
+    write(std_out,*) '@bandpass maxeig_global=', maxeig_global
+    flush(std_out)
+ 
+    ! Filter parameters
+    center = (maxeig_global + mineig_global)*0.5
+    radius = (maxeig_global - mineig_global)*0.5
+    one_over_r = 1/radius
+    two_over_r = 2/radius
+
+    ! Scaled slice bounds to be amplified
+    ls = (lambda_minus - center) / radius
+    us = (lambda_plus - center) / radius
+    
+    ! TODO IL 10/3/2025 Deflate vectors to reduce linear dependence: Y=X-(B-projection)
+    !call xg_Borthonormalize(chebfi%xXCols,chebfi%xBxColsRows,ierr,1,chebfi%gpu_option,AX=chebfi%xAXColsRows)
+
+    ! Initialize expansion: Heaviside = mu(0)*damp(0)*X + Heaviside
+    cdeg = Pi/(ndeg+2)
+    mu = 1/Pi*(ACOS(ls)-ACOS(us))
+    damp = 1.d0 ! Jackson damping
+    call xgBlock_saxpy(Heaviside%self, mu*damp, X_active)
+
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_CORE)
+    do n = 0, ndeg - 1  
+
+        ! X_next=2/r*(AX_next-c*X_next)-X_prev
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
+        call chebfi_computeNextOrderChebfiPolynom(chebfi, n, center, one_over_r, two_over_r, getBm1X)
+        ABI_NVTX_END_RANGE()
+
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
+        if (chebfi%paral_kgb == 0) then
+            call chebfi_swapInnerBuffers(chebfi, chebfi%spacedim, chebfi%neigenpairs)
+        else
+            call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, chebfi%bandpp)
+        end if
+        ABI_NVTX_END_RANGE()
+
+        ! Update expansion: Heaviside = damp(i+1)*mu(i+1)*X_next + Heaviside
+        mu = 2/Pi * (SIN((n+1)*ACOS(ls)) - SIN((n+1)*ACOS(us)))/(n+1)
+        damp = ((1 - (n+1)/(ndeg+2))*SIN(cdeg)*COS((n+1)*cdeg) + 1/(ndeg+2)*COS(cdeg)*SIN((n+1)*cdeg))/SIN(cdeg)
+        call xgBlock_saxpy(Heaviside%self, mu*damp, X_active)
+   
+        ! Store final expansion before exit, X_next=Heaviside
+        if (n==ndeg-1) then
+            call xgBlock_copy(Heaviside%self, X_active)
+        end if
+
+        !A * Psi (=AX_next=A*X_next)
+        call timab(tim_getAX_BX,1,tsec)
+        ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
+        call getAX_BX(X_active, AX_active, BX_active)
+        call xgBlock_zero_im_g0(AX_active)
+        call xgBlock_zero_im_g0(BX_active)
+        ABI_NVTX_END_RANGE()
+        call timab(tim_getAX_BX,2,tsec)
+    
+    end do ! end n
+    ABI_NVTX_END_RANGE()
+
+    ! Avoid overflow
+    !call chebfi_prepAmpfactor(chebfi, eigen, DivResults)
+    !call chebfi_ampfactorBandpass(chebfi, DivResults%self, lambda_minus, lambda_plus, center, radius, ndeg)
+
+    ! Free temporary memory
+    call xg_free(DivResults)
+    call xg_free(Heaviside)
+
+end subroutine chebfi_bandpassFilterActive
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_chebfi2/chebfi_oracle1
 !! NAME
 !! chebfi_oracle1
@@ -2587,64 +2752,6 @@ end subroutine chebfi_set_ndeg_from_residu
 
 !----------------------------------------------------------------------
 
-!!****f* m_chebfi2/chebfi_Bdeflate_active
-!! NAME
-!! chebfi_Bdeflate_active
-!!
-!! FUNCTION
-!! Orthogonalize active block with respect to locked block in B-basis
-!!
-!! INPUT
-!! Xlock assumed to be B-orthonormal
-!! 
-!! OUTPUT
-!! in-place
-!! Xactive = Xactive - Xlock*(BXlock'*Xactive)
-
-!  subroutine chebfi_Bdeflate_active(lobpcg,var,iblock)
-!
-!    type(lobpcg_t) , intent(inout) :: lobpcg
-!    type(xgBlock_t), intent(inout) :: var
-!    integer        , intent(in   ) :: iblock
-!    integer :: previousBlock
-!    integer :: blockdim
-!    integer :: spacedim
-!    integer :: space_buf
-!    type(xg_t) :: buffer
-!    double precision :: tsec(2)
-!
-!    call timab(tim_ortho,1,tsec)
-!    ABI_NVTX_START_RANGE(NVTX_LOBPCG2_ORTHO_X_WRT)
-!
-!    blockdim = lobpcg%blockdim
-!    spacedim = lobpcg%spacedim
-!    previousBlock = (iblock-1)*lobpcg%blockdim
-!
-!    ! replace var by chebfi%Xactive
-!
-!    space_buf = space(var)
-!    if (space(var)==SPACE_CR) then
-!      space_buf = SPACE_R
-!    end if
-!   call xg_init(buffer,space_buf,previousBlock,blockdim,comm=lobpcg%spacecom,gpu_option=lobpcg%gpu_option)
-!
-!    ! buffer = BX0^T*X
-!    call xgBlock_gemm('t','n',1.0d0,lobpcg%BX0,var,0.d0,buffer%self,comm=lobpcg%spacecom)
-!
-!    ! sum all process contribution of X
-!    ! X = - X0*(BX0^T*X) + X 
-!   call xgBlock_gemm('n','n',-1.0d0,lobpcg%X0,buffer%self,1.0d0,var)
-!
-!    call xg_free(buffer)
-!
-!   ABI_NVTX_END_RANGE()
-!   call timab(tim_ortho,2,tsec)
-!
-!  end subroutine lobpcg_orthoXwrtBlocks
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_chebfi2/chebfi_getSubspaceResidual
 !! NAME
 !! chebfi_getSubspaceResidual
@@ -2698,9 +2805,9 @@ end subroutine chebfi_getSubspaceResidual
 
 !----------------------------------------------------------------------
 
-!!****f* m_chebfi2/chebfi_lockConvergedVectors
+!!****f* m_chebfi2/chebfi_swapConvergedVectors
 !! NAME
-!! chebfi_lockConvergedVectors
+!! chebfi_swapConvergedVectors
 !! 
 !! FUNCTION
 !! In-place contiguous-in-memory locking of column vectors in row distribution.
@@ -2710,7 +2817,7 @@ end subroutine chebfi_getSubspaceResidual
 !! TODO logic could also be applied to divide Xext to slices.
 !! 
 
-subroutine chebfi_lockConvergedVectors(chebfi, resid, tol, n_locked)
+subroutine chebfi_swapConvergedVectors(chebfi, resid, tol, n_locked)
 
     implicit none
 
@@ -2771,222 +2878,141 @@ subroutine chebfi_lockConvergedVectors(chebfi, resid, tol, n_locked)
         end if
     end do
 
-    ! update pointers
-    n_active = chebfi%neigenpairs - n_locked
-    call xgBlock_setBlock(chebfi%X      , X_active , rows(chebfi%X), n_active, fcol=n_locked+1)
-    call xgBlock_setBlock(chebfi%AX%self, AX_active, rows(chebfi%X), n_active, fcol=n_locked+1)
-    call xgBlock_setBlock(chebfi%BX%self, BX_active, rows(chebfi%X), n_active, fcol=n_locked+1)
-
-    ! what I do is that I use X_lock vectors and update chebfi%X
-
-    ! todo this should be updated automatically after transposing...
-    ! ongoing modif in xgTransposer to be able to inverse on a subset of data
-    ! also test dimensions what happens if chebfi%X is smaller
-    !call xgBlock_setBlock(chebfi%xXColsRows , xX_active , chebfi%spacedim, n_active, f
-    !call xgBlock_setBlock(chebfi%xAXColsRows, xAX_active, 
-    !call xgBlock_setBlock(chebfi%xBXColsRows, xBX_active, 
-
     ABI_FREE(mask)
     ABI_FREE(is_locked)
     call xg_free(T_swap)
 
-end subroutine chebfi_lockConvergedVectors
+end subroutine chebfi_swapConvergedVectors
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_chebfi2/chebfi_deflateWrtLocked
+!!****f* m_chebfi2/chebfi_deflateActiveWrtLocked
 !! NAME
-!! chebfi_deflateWrtLocked
+!! chebfi_deflateActiveWrtLocked
+!! 
+!! FUNCTION
+!! Deflate active vectors with respect to locked vectors in linalg representation
 
-  subroutine chebfi_deflateWrtLocked(chebfi, X_lock, AX_lock, BX_lock, n_locked)
+  subroutine chebfi_deflateActiveWrtLocked(chebfi, n_locked, X_part, AX_part, BX_part)
 
     type(chebfi_t), intent(inout) :: chebfi
-    type(xgBlock_t), intent(in) :: X_lock, AX_lock, BX_lock
     integer, intent(in) :: n_locked
-
-    integer :: previousBlock
-    integer :: blockdim
-    integer :: spacedim
+    type(bandPartitionData_t), intent(inout) :: X_part
+    type(bandPartitionData_t), intent(inout) :: AX_part
+    type(bandPartitionData_t), intent(inout) :: BX_part
+    
     integer :: space_buf
     type(xg_t) :: buffer
-    type(xgBlock_t) :: 
 
-    blockdim = chebfi%blockdim
-    spacedim = chebfi%spacedim
-    previousBlock = (iblock-1)*lobpcg%blockdim
+! *********************************************************************
 
-    n_active = chebfi%neigenpairs - n_locked
-    call xgBlock_setBlock(chebfi%X      , X_active , rows(chebfi%X), n_active, fcol=n_locked+1)
-    call xgBlock_setBlock(chebfi%AX%self, AX_active, rows(chebfi%X), n_active, fcol=n_locked+1)
-    call xgBlock_setBlock(chebfi%BX%self, BX_active, rows(chebfi%X), n_active, fcol=n_locked+1)
-
-
-    space_buf = space(var)
-    if (space(var)==SPACE_CR) then
-      space_buf = SPACE_R
+    if (chebfi%space==SPACE_C) then
+        space_buf = SPACE_C
+    else if (chebfi%space==SPACE_CR) then
+        space_buf = SPACE_R
+    else
+        ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
     end if
-    call xg_init(buffer,space_buf,previousBlock,blockdim,comm=chebfi%spacecom,gpu_option=chebfi%gpu_option)
+    
+    call xg_init(buffer,space_buf,n_locked,n_locked,comm=chebfi%spacecom,gpu_option=chebfi%gpu_option)
 
     ! buffer = BX0^T*X
-    call xgBlock_gemm('t','n',1.0d0,chebfi%BX0,var,0.d0,buffer%self,comm=chebfi%spacecom)
+    call xgBlock_gemm('t','n',1.0d0,BX_part%linalg_locked,X_part%linalg_active,0.d0,&
+        buffer%self,comm=chebfi%spacecom)
 
     ! sum all process contribution
-    ! X = - X0*(BX0^T*X) + X
-    call xgBlock_gemm('n','n',-1.0d0,chebfi%X0,buffer%self,1.0d0,var)
+    ! X = X - X0*buffer
+    call xgBlock_gemm('n','n',-1.0d0,X_part%linalg_locked,buffer%self,1.0d0,X_part%linalg_active)
+    ! AX = AX - X0*buffer
+    call xgBlock_gemm('n','n',-1.0d0,X_part%linalg_locked,buffer%self,1.0d0,AX_part%linalg_active)
+    ! BX = BX - X0*buffer
+    call xgBlock_gemm('n','n',-1.0d0,X_part%linalg_locked,buffer%self,1.0d0,BX_part%linalg_active)
 
     call xg_free(buffer)
 
-    ! todo AX and BX
-    ! X = X - X0*buffer
-    ! call xgBlock_gemm('n','n',-1.0d0,X_locked,buffer%self,1.0d0,chebfi%AX%self)
-    ! AX = AX - X0*buffer
-    ! call xgBlock_gemm('n','n',-1.0d0,X_locked,buffer%self,1.0d0,chebfi%AX%self)
-    ! BX = BX - X0*buffer
-    ! call xgBlock_gemm('n','n',-1.0d0,X_locked,buffer%self,1.0d0,chebfi%BX%self)
-
-
-  end subroutine chebfi_deflateWrtLocked
+  end subroutine chebfi_deflateActiveWrtLocked
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_chebfi2/bandPartition_setColsRowsActive
+!!****f* m_chebfi2/bandPartitionInfo_initActiveSubcomm
 !! NAME
-!! bandPartition_setColsRowsActive
-
-  subroutine bandPartition_setColsRowsActive(bpart, X, n_locked)
-
-      implicit none
-
-      type(bandPartition_t), intent(inout) :: bpart
-      type(xgBlock_t), intent(in) :: X
-      integer, intent(in) :: n_locked
-      integer :: nrows
-  
-  ! *********************************************************************
-
-      nrows = rows(X)
-      bpart%n_locked = 
-
-      call xgBlock_setBlock(X, bpart%colsrows_locked, nrows, bpart%n_locked_mpi)
-    
-  end subroutine bandPartition_setColsRowsActive
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_chebfi2/bandPartition_setColsRowsActive
-!! NAME
-!! bandPartition_setColsRowsActive
-
-  subroutine bandPartition_setColsRowsActive(bpart, X, n_locked)
-
-      implicit none
-
-      type(bandPartition_t), intent(inout) :: bpart
-      type(xgBlock_t), intent(in) :: X
-      integer, intent(in) :: n_locked
-      integer :: nrows
-  
-  ! *********************************************************************
-
-      nrows = rows(X)
-      bpart%n_locked = 
-
-      call xgBlock_setBlock(X, bpart%colsrows_locked, nrows, bpart%n_locked_bandpp)
-    
-  end subroutine bandPartition_setColsRowsActive
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_chebfi2/bandPartition_getActiveDistribution
-!! NAME
-!! bandPartition_getActiveDistribution
+!! bandPartitionInfo_initActiveSubcomm
 !! 
 !! FUNCTION
 !! Every process can treat between 1 and bandpp bands
 !! with p processes we cover p x bandpp bands at maximum.
 !! Solve problem find minimal p to cover n_active bands.
 !! Constraints: use at least 1 process and at max nproc.
+!!
+!! INPUT
+!! comm                       global communicator
 !! 
 !! OUTPUT
-!! bpart%n_active_bandpp    stores the result per mpi rank
-!! bpart%rank_active        true if process treats active bands
+!! mpiInfo%n_active_bandpp    stores the result per mpi rank
+!! mpiInfo%rank_active        true if process treats active bands
 
-  subroutine bandPartition_getActiveDistribution(bpart, n_locked)
+  subroutine bandPartitionInfo_initActiveSubcomm(mpiInfo, comm, bandpp_max)
 
       implicit none
 
-      type(bandPartition_t), intent(inout) :: bpart
-      type(xgBlock_t), intent(in) :: X
-      integer, intent(in) :: n_locked
-      integer :: nrows
+      type(bandPartitionInfo_t), intent(inout) :: mpiInfo
+      integer, intent(in) :: comm
+      integer, intent(in) :: bandpp_max
+
+      integer, allocatable :: ranks(:)
+      integer :: ierr, nproc
+      integer :: nproc_active, p, min_p, ii
   
   ! *********************************************************************
 
-      nrows = rows(X)
-      bpart%n_locked =
+      nproc = xmpi_comm_size(comm)
+      min_p = ceiling(1.d0 * mpiInfo%n_active / bandpp_max)
+      nproc_active = min(nproc, max(1, min_p))
 
-      min_p = ceiling(n_active / bandpp)
-      p = minval(nproc, maxval(1, min_p))
+      ABI_MALLOC(ranks,(0:nproc_active-1))
+      ranks(0:nproc_active-1)=(/((ii),ii=0,nproc_active-1)/)
+      mpiInfo%comm_active=xmpi_subcomm(comm,nproc_active,ranks)
+      ABI_FREE(ranks)
 
-      bpart%rank_active = ..
-      bpart%n_active_bandpp = ..
+      ! todo @debug all processes of slice must create the same active subcomm
+      write(std_out,*) '@initActiveSubcomm comm_active=', mpiInfo%comm_active
+      flush(std_out)
       
     
-  end subroutine bandPartition_getActiveDistribution
+  end subroutine bandPartitionInfo_initActiveSubcomm
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_chebfi2/bandPartition_copyActiveDistribution
+!!****f* m_chebfi2/bandPartitionData_allocActiveColsrows
 !! NAME
-!! bandPartition_copyActiveDistribution
-!! 
+!! bandPartitionData_allocActiveColsrows
 
-  subroutine bandPartition_copyActiveDistribution(bpart_in, bpart_out)
+  subroutine bandPartitionData_allocActiveColsrows(bpart, chebfi, mpiInfo, nspinor)
 
       implicit none
 
-      type(bandPartition_t), intent(in   ) :: bpart_in
-      type(bandPartition_t), intent(inout) :: bpart_out
-  
-  ! *********************************************************************
-
-      bpart_out%rank_active = bpart_in%rank_active
-      bpart_out%n_active_bandpp = bpart_in%n_active_bandpp
-      bpart_out%comm_active = bpart_in%comm_active
-    
-  end subroutine bandPartition_copyActiveDistribution
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_chebfi2/chebfi_constructActiveTransposer
-!! NAME
-!! chebfi_constructActiveTransposer
-
-  subroutine chebfi_constructActiveTransposer(chebfi, bpart)
-
-      implicit none
-
-      type(chebfi_t), intent(inout) :: chebfi
-      type(bandPartition_t), intent(inout) :: bpart
+      type(bandPartitionData_t), intent(inout) :: bpart
+      type(chebfi_t), intent(in) :: chebfi
+      type(bandPartitionInfo_t), intent(inout) :: mpiInfo
+      integer, intent(in)    :: nspinor
 
       integer :: n_active
+      integer :: comm_active
+      real(dp) :: tsec(2)
 
   ! *********************************************************************
 
-      n_active = chebfi%neigenpairs - bpart%n_locked
+      n_active = mpiInfo%n_active
+      comm_active = mpiInfo%comm_active
 
       ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
       call timab(tim_transpose,1,tsec)
 
-      ! todo use n_active
       call xgTransposer_constructor(bpart%transposer_active,bpart%linalg_active,bpart%colsrows_active,&
-          nspinor,STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,&
+          nspinor,STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,comm_active,0,0,chebfi%me_g0_fft,&
           gpu_option=chebfi%gpu_option,gpu_thread_limit=chebfi%gpu_thread_limit)
 
       bpart%transposer_active%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
@@ -2994,7 +3020,38 @@ end subroutine chebfi_lockConvergedVectors
       ABI_NVTX_END_RANGE()
       call timab(tim_transpose,2,tsec)
 
-  end subroutine chebfi_constructActiveTransposer
+  end subroutine bandPartitionData_allocActiveColsrows
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/bandPartitionData_setLinalg
+!! NAME
+!! bandPartitionData_setLinalg
+!! 
+!! FUNCTION
+!! Set active and locked vectors in linalg representation
+
+  subroutine bandPartitionData_setLinalg(X_in, bpart, n_locked)
+
+      implicit none
+
+      type(xgBlock_t), intent(in) :: X_in
+      type(bandPartitionData_t), intent(inout) :: bpart
+      integer, intent(in) :: n_locked
+
+      integer :: nrows
+      integer :: n_active
+
+  ! *********************************************************************
+    
+      nrows = rows(X_in)
+      n_active = cols(X_in) - n_locked
+
+      call xgBlock_setBlock(X_in, bpart%linalg_locked, nrows, n_locked)
+      call xgBlock_setBlock(X_in, bpart%linalg_active, nrows, n_active, fcol=n_locked+1)
+
+  end subroutine bandPartitionData_setLinalg
 !!***
 
 end module m_chebfi2
