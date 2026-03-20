@@ -4,7 +4,7 @@ Something going wrong ? Better to realize this than to think everything is OK ..
 
 In this page, the user will find tips to fix several problems with ABINIT.   
 
-Many other tips might be found on the [[https://discourse.abinit.org|forum]], or in the [abimkdocs documentation](/index.md).
+Many other tips might be found on the [[https://discourse.abinit.org|forum]], or in the [abimkdocs documentation](/index).
 
 
 ### Configure problems
