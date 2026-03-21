@@ -27,7 +27,7 @@ module m_alloc_hamilt_gpu
  use m_ompgpu_fourwf
 #if defined HAVE_GPU
  use m_gpu_toolbox
- use m_abi_linalg
+ use m_gputk
 #endif
 
 #ifdef HAVE_FC_ISO_C_BINDING
