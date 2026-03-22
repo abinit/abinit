@@ -99,7 +99,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use m_getghc,      only : getghc
  use m_prep_kgb,    only : prep_getghc
 #ifdef HAVE_GPU
- use m_abi_linalg
+ use m_gputk
 #endif
 
 !Arguments ------------------------------------
