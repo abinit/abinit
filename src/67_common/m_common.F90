@@ -2303,7 +2303,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem,fourwf_smem,fourwf_wmem,fourwf_mem
    integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs,nfourwf_slices
    integer, target :: t_fft(3)
-   logical  :: print_and_exit,l_warn_on_fail
+   logical  :: print_and_exit,l_warn_on_fail,fixed_blocksize
    integer(kind=c_size_t) :: chebfiMem(2),lobpcgMem(2)
    character(len=500) :: message
 
@@ -2361,7 +2361,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    call gpu_fft_get_estimate_work_size(3, c_loc(t_fft), FFT_Z2Z, ndat, fourwf_smem);
 #endif
 
-   nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, 1, ndgxdt, use_distrib)
+   nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, max(1,blocksize), ndgxdt, use_distrib)
    getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat, nfourwf_slices)
    fourwf_wmem  = int(2, c_size_t) * dp * gs_hamk%n4 * gs_hamk%n5 * gs_hamk%n6 &
    &             * (ndat/nfourwf_slices + modulo(ndat,nfourwf_slices))
@@ -2385,7 +2385,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    if(wfoptalg==111 .or. wfoptalg==112) then
      chebfiMem = chebfi_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,icplx*npw*nspinor,blockdim)
      invovl_smem = invovl_ompgpu_static_mem(gs_hamk)
-     invovl_wmem = invovl_ompgpu_work_mem(gs_hamk, ndat_try)
+     invovl_wmem = invovl_ompgpu_work_mem(gs_hamk, ndat)
    end if
    if(wfoptalg==114) then
      lobpcgMem = lobpcg_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,blockdim)
@@ -2410,10 +2410,12 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    end if
 
    print_and_exit=.false.
+   fixed_blocksize=.false.
    nblocks=0
    if(blocksize > 1) then
      nblocks=max(1,nprocs/blocksize)
-     print_and_exit=.true.
+     !print_and_exit=.true.
+     fixed_blocksize=.true.
    else
      blocksize=1
      write(std_out,*) "Setting GEMM nonlop block number...", new_line('A')
@@ -2437,9 +2439,21 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    ! we fail anyway and advise the user to increase nblock_lobpcg or run on more nodes.
    do i=1,max_slices
 
-     if(wfoptalg>=0 .and. nonlop_smem < fourwf_mem .and. fourwf_mem >= getghc_wmem .and. nfourwf_slices < ndat) then
+     if(fixed_blocksize .or. &
+     &    (wfoptalg >= 0 &
+     &     .and. nonlop_smem < fourwf_mem  &
+     &     .and. fourwf_mem >= getghc_wmem &
+     &     .and. nfourwf_slices < ndat &
+     &     .and. ndat_try > 1)) then
        ! Fourwf work memory requirement is higher, split here
-       if(i>1 .and. .not. print_and_exit) nfourwf_slices=nfourwf_slices+1
+       if(nfourwf_slices == ndat) cycle ! Can't split more than ndat
+
+       if(i>1 .and. .not. print_and_exit) then
+         do while(ndat_try <= (ndat/nfourwf_slices + modulo(ndat,nfourwf_slices)))
+           nfourwf_slices=nfourwf_slices+1
+         end do
+         ndat_try = (ndat/nfourwf_slices + modulo(ndat,nfourwf_slices))
+       end if
 #ifdef HAVE_GPU
        call gpu_fft_get_estimate_work_size(3, c_loc(t_fft), FFT_Z2Z, ndat/nfourwf_slices, fourwf_smem);
 #endif
