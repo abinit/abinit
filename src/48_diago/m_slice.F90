@@ -2947,16 +2947,20 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     integer :: i, k, ib
     integer :: num_moments
     integer :: uppb_loc
+    integer :: half_index, i_left, i_right
+    integer :: i_split
     integer :: ngrid_fine, ngrid_coarse
+    integer :: p_left, p_right
+    logical :: gap_left, gap_right
     real(dp) :: ncount_ovlp
     real(dp) :: lambda_plus_wanted
     real(dp) :: b_init, b_ext, ecut
     real(dp) :: maxeig, mineig
     real(dp) :: center, radius
-    real(dp) :: partial_mass
+    real(dp) :: partial_mass, half_mass
     real(dp) :: step_fine, step_coarse
     real(dp) :: b_scaled
-    real(dp) :: deriv_ib
+    real(dp) :: mass_left, mass_right
     type(xg_t) :: X_probe
     complex(dp), allocatable :: cheby_moments(:,:)
     real(dp), allocatable :: bgrid_fine(:)
@@ -3081,16 +3085,60 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     ! Now compute eigenvalue count
     step_fine = (lambda_plus_wanted - min_low_bound) / (ngrid_fine - 1)
     bgrid_fine = (/ (min_low_bound + (ib-1)*step_fine, ib=1,ngrid_fine) /) 
-    deriv_ib = 0.d0
     do ib=1, ngrid_fine
         b_scaled = (bgrid_fine(ib) - center) / radius
         partial_mass = get_eigenvalue_count(b_scaled, moments, work)
         cumm_eigen_count(ib) = partial_mass
-        if (ib>1) then
-            deriv_ib = partial_mass - cumm_eigen_count(ib-1)
-        end if 
-        write(std_out,*) ib, 'scan: <=', bgrid_fine(ib), 'mass=', partial_mass, 'deriv=', deriv_ib
+        write(std_out,*) ib, 'scan: <=', bgrid_fine(ib), 'mass=', partial_mass
     end do
+
+    ! Prepare: detect gap existence in the interior of slice
+    ! todo 
+
+    ! todo
+    if (slice%nslice/=2) then
+        ABI_ERROR("spectral split not implemented for more than 2 slices")
+    end if
+
+    ! step 1 cut in half balanced mass
+    half_mass = cumm_eigen_count(ngrid_fine)/2.d0 
+    half_index = minloc(abs(half_mass - cumm_eigen_count), dim=1)
+    ! step 2 adjust so that it is on constant mass (predicts gap)
+    ! bidirectional search left and right
+    write(std_out,*) 'bidirectional search from index=', half_index
+    write(std_out,*) 'half mass=', half_mass
+    flush(std_out)
+    i_left = half_index
+    i_right = half_index
+    gap_left = .false.
+    gap_right = .false.
+    do while((.not.gap_right .and. .not.gap_left) .and. (i_left >= 2 .and. i_right <=ngrid_fine-1))
+        ! this is if gap exists. If it does not exist.. 
+        gap_left = abs(cumm_eigen_count(i_left) - cumm_eigen_count(i_left-1)) < 1e-4
+        gap_right = abs(cumm_eigen_count(i_right) - cumm_eigen_count(i_right+1)) < 1e-4
+        i_left = i_left - 1
+        i_right = i_right + 1
+    end do
+    if (gap_right) then
+        i_split = i_right
+    end if
+    if (gap_left) then
+        i_split = i_left
+    end if
+    if (.not.gap_right .and. .not.gap_left) then
+        ! todo treat this case
+        ABI_ERROR("spectrum has no gap..")
+    end if
+    mass_left = get_eigenvalue_count((bgrid_fine(i_split)-center)/radius,moments,work)
+    mass_right = neigenpairs - mass_left
+    write(std_out,*) 'i_split val=', i_split, bgrid_fine(i_split)
+    write(std_out,*) 'mass left=', mass_left
+    write(std_out,*) 'mass right=', mass_right
+    flush(std_out)
+
+    ! oversample by 10% of slice
+    ! todo also minimize this
+    
 
     ! #########################################
     ! ########### Final decision  #############
@@ -3118,22 +3166,6 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     write(std_out,*) 'testing ncount 1=', slice%neigenpairs_per_slice(1)
     write(std_out,*) 'testing ncount 2=', slice%neigenpairs_per_slice(2)
     flush(std_out)
-
-    !do k=1, slice%nslice
-        ! find the closest zero
-
-        ! interval limits without overlap
-        !slice%part_low_bounds(k) = 
-        !slice%part_upp_bounds(k) = 
-
-        ! interval limits with overlap
-        !slice%poly_low_bounds(k) = 
-        !slice%poly_upp_bounds(k) = 
-
-        ! count with overlap
-        !slice%neigenpairs_per_slice(k) =
-
-    !end do
 
     ! Free memory
     ABI_FREE(cheby_moments)

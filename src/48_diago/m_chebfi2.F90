@@ -2034,11 +2034,13 @@ subroutine chebfi_runSubspaceIterationDummy(chebfi,X0,getAX_BX,getBm1X,eigen,res
     end interface
 
     !Local variables-------------------------------
-    integer :: iter_subspace, niter_subspace_max, n_locked
-    integer :: spacedim, neigenpairs, num_proc, ierr
+    integer :: iter_subspace, niter_subspace_max, n_locked, n_active, n_locked_prev
+    integer :: spacedim, neigenpairs, num_proc, nrows, ierr
     type(xg_t) :: X_k
     type(xg_t) :: resid_active
-    type(xg_t) :: X_locked
+    type(xg_t) :: X_locked, AX_locked, BX_locked ! spaces needed for deflation in linalg distr
+    type(xgBlock_t) :: chebfi_X_locked, chebfi_AX_locked, chebfi_BX_locked ! pointers used for copy
+    type(xgBlock_t) :: X_active, AX_active, BX_active
     ! Arrays
     integer, target, allocatable :: nrowsLinalg(:)
     integer, pointer :: nrowsLinalg_ptr(:) => null()
@@ -2114,8 +2116,9 @@ subroutine chebfi_runSubspaceIterationDummy(chebfi,X0,getAX_BX,getBm1X,eigen,res
     write(std_out,*) '@dummy starting filter in proc', xmpi_comm_rank(chebfi%spacecom)
     flush(std_out)
 
-    niter_subspace_max = 10
+    niter_subspace_max = 5
     n_locked = 0
+    n_locked_prev = 0
 
     ! chebfi%X    contains active vectors
     ! X_lock      contains locked vectors
@@ -2131,13 +2134,6 @@ subroutine chebfi_runSubspaceIterationDummy(chebfi,X0,getAX_BX,getBm1X,eigen,res
 
         if (iter_subspace>1 .and. chebfi%paral_kgb==1) then
 
-            if (n_locked>1) then
-                ! Allocate locked vectors in linalg representation
-                call xg_init(X_locked, chebfi%space, rows(chebfi%X), n_locked, &
-                    chebfi%spacecom, me_g0=chebfi%me_g0, gpu_option=chebfi%gpu_option)
-                call xgBlock_copy(chebfi%X, X_locked%self)
-            end if
-
             call timab(tim_transpose,1,tsec)
             ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
             call xgTransposer_transpose(chebfi%xgTransposerX, STATE_COLSROWS)
@@ -2147,7 +2143,7 @@ subroutine chebfi_runSubspaceIterationDummy(chebfi,X0,getAX_BX,getBm1X,eigen,res
             ABI_NVTX_END_RANGE()
 
             !if (n_locked>1) then
-            !    ! n_locked_mpi each rank has different number of locked vectors todo
+            !    ! n_locked_mpi each rank has different number of locked vectors todo (find this in v2)
             !    call xgBlock_setBlock(chebfi%xXColsRows , xX_active , spacedim, n_locked_mpi)
             !    call xgBlock_setBlock(chebfi%xAXColsRows, xAX_active, spacedim, n_locked_mpi)
             !    call xgBlock_setBlock(chebfi%xBXColsRows, xBX_active, spacedim, n_locked_mpi)
@@ -2178,28 +2174,106 @@ subroutine chebfi_runSubspaceIterationDummy(chebfi,X0,getAX_BX,getBm1X,eigen,res
             call timab(tim_transpose,2,tsec)
             ABI_NVTX_END_RANGE()
         end if
+        
+        if (n_locked > 0) then
+            ! undo the effect of filtering in locked vectors
+            call xgBlock_setBlock(chebfi%X, chebfi_X_locked, nrows, n_locked)
+            call xgBlock_setBlock(chebfi%AX%self, chebfi_AX_locked, nrows, n_locked)
+            call xgBlock_setBlock(chebfi%BX%self, chebfi_BX_locked, nrows, n_locked)
+            call xgBlock_copy(X_locked%self, chebfi_X_locked)
+            call xgBlock_copy(AX_locked%self, chebfi_AX_locked)
+            call xgBlock_copy(BX_locked%self, chebfi_BX_locked)
+        end if
 
         write(std_out,'(a,i6,i6)') 'chebfi%X # rows # cols ', rows(chebfi%X), cols(chebfi%X)
+        write(std_out,*) xgBlock_getid(chebfi%X)
+        flush(std_out)
+
+        ! recover active vectors in linalg
+        n_active = chebfi%neigenpairs - n_locked
+        nrows = rows(chebfi%X)
+
+        write(std_out,*) 'n_active=', n_active; flush(std_out)
+        call xgBlock_setBlock(chebfi%X, X_active, nrows, n_active, fcol=n_locked+1)
+        call xgBlock_setBlock(chebfi%AX%self, AX_active, nrows, n_active, fcol=n_locked+1)
+        call xgBlock_setBlock(chebfi%BX%self, BX_active, nrows, n_active, fcol=n_locked+1)
+
+        write(std_out,*) 'start deflation'
+        write(std_out,*) xgBlock_getid(chebfi%X), comm(chebfi%X), me_g0(chebfi%X), cols(chebfi%X), space(chebfi%X)
+        write(std_out,*) xgBlock_getid(X_active), comm(X_active), me_g0(X_active), cols(X_active), space(X_active)
         flush(std_out)
 
         if (n_locked>0) then
-            ! call chebfi_deflateWrtLocked(chebfi, n_locked)
+            call chebfi_deflateWrtLocked(chebfi, n_locked, X_locked%self, BX_locked%self)
             !call chebfi_deflateActiveWrtLocked(chebfi, n_locked, X_part, AX_part, BX_part)
-            call xg_free(X_locked)
         end if
+        
+        write(std_out,*) 'exit deflation'; flush(std_out)
+        write(std_out,*) 'start ortho'; flush(std_out)
 
-        call xg_Borthonormalize(chebfi%X,chebfi%BX%self,ierr,1,chebfi%gpu_option,AX=chebfi%AX%self)
+        write(std_out,*) 'cols=', cols(chebfi%X); flush(std_out)
+ 
+        call xg_Borthonormalize(X_active,BX_active,ierr,1,chebfi%gpu_option,AX=AX_active)
+        !call xg_Borthonormalize(chebfi%X,chebfi%BX%self,ierr,1,chebfi%gpu_option,AX=chebfi%AX%self)
+        
+        write(std_out,*) 'exit ortho'; flush(std_out)
+        write(std_out,*) 'start residual'; flush(std_out)
 
         call chebfi_getSubspaceResidual(chebfi, resid_active%self)
 
+        ! prevent errors in pointer corruption to non-contiguous memory
+        call xgBlock_setBlock(chebfi%X, X_active, nrows, 1)
+        call xgBlock_setBlock(chebfi%AX%self, AX_active, nrows, 1)
+        call xgBlock_setBlock(chebfi%BX%self, BX_active, nrows, 1)
+        call xgBlock_setBlock(chebfi%X, chebfi_X_locked, nrows, 1)
+        call xgBlock_setBlock(chebfi%BX%self, chebfi_BX_locked, nrows, 1)
+
         call chebfi_swapConvergedVectors(chebfi, resid_active%self, 1e-3_dp, n_locked)
+
+        if (n_locked>0) then
+            if (n_locked /= n_locked_prev) then
+
+                if (n_locked_prev>0) then
+                    call xg_free(X_locked)
+                    call xg_free(AX_locked)
+                    call xg_free(BX_locked)
+                end if
+                    
+                ! Allocate locked vectors in linalg representation
+                call xg_init(X_locked, chebfi%space, nrows, n_locked, &
+                    chebfi%spacecom, me_g0=chebfi%me_g0, gpu_option=chebfi%gpu_option)
+
+                ! same for AX
+                call xg_init(AX_locked, chebfi%space, nrows, n_locked, &
+                    chebfi%spacecom, me_g0=chebfi%me_g0, gpu_option=chebfi%gpu_option)
+
+                ! same for BX
+                call xg_init(BX_locked, chebfi%space, nrows, n_locked, &
+                    chebfi%spacecom, me_g0=chebfi%me_g0, gpu_option=chebfi%gpu_option)
+            end if
+
+            call xgBlock_setBlock(chebfi%X, chebfi_X_locked, nrows, n_locked)
+            call xgBlock_copy(chebfi_X_locked, X_locked%self)
+
+            call xgBlock_setBlock(chebfi%AX%self, chebfi_AX_locked, nrows, n_locked)
+            call xgBlock_copy(chebfi_AX_locked, AX_locked%self)
+
+            call xgBlock_setBlock(chebfi%BX%self, chebfi_BX_locked, nrows, n_locked)
+            call xgBlock_copy(chebfi_BX_locked, BX_locked%self)
+        end if
 
         ! todo debug by recomputing the getSubspaceResidual for locked vectors and verify it is smaller than tol
 
         ! lock vectors in small residual
         ! actually redefine pointers Xactive and Xlock pointing to X that's all
 
+        n_locked_prev = n_locked
+
     end do
+    
+    call xg_free(X_locked)
+    call xg_free(AX_locked)
+    call xg_free(BX_locked)
 
     ! Apply Rayleigh-Ritz to active MPI Linalg row-block
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
@@ -3125,7 +3199,8 @@ subroutine chebfi_getSubspaceResidual(chebfi, resid)
     call xgBlock_copy(chebfi%AX%self, R%self)
     call xgBlock_gemm('n','n',-1.0d0,chebfi%BX%self,M%self,1.0d0,R%self)
 
-    call xgBlock_colwiseNorm2(R%self, resid, comm_loc=xmpi_comm_null)
+    ! sum along rows communicator
+    call xgBlock_colwiseNorm2(R%self, resid)
 
     call xg_free(M)
     call xg_free(R)
@@ -3186,11 +3261,13 @@ subroutine chebfi_swapConvergedVectors(chebfi, resid, tol, n_locked)
 
     mask = resid_vals(:,1) < tol
     idx = pack([(i, i=1,nrows)], mask)
+    n_locked = size(idx)
 
+    write(std_out,*) 'n_locked=', n_locked
     write(std_out,*) 'locked indices=', idx(:)
+    write(std_out,*) 'residuals=', resid_vals(:,1)
     flush(std_out)
     
-    n_locked = size(idx)
     is_locked = .false.
     is_locked(idx) = .true.
 
@@ -3216,6 +3293,71 @@ subroutine chebfi_swapConvergedVectors(chebfi, resid, tol, n_locked)
     call xg_free(T_swap)
 
 end subroutine chebfi_swapConvergedVectors
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_chebfi2/chebfi_deflateWrtLocked
+!! NAME
+!! chebfi_deflateWrtLocked
+!! 
+
+  subroutine chebfi_deflateWrtLocked(chebfi, n_locked, X_locked, BX_locked)
+
+    type(chebfi_t), intent(inout) :: chebfi
+    integer, intent(in) :: n_locked
+    type(xgBlock_t), intent(inout) :: X_locked
+    type(xgBlock_t), intent(inout) :: BX_locked
+
+    integer :: nrows
+    integer :: space_buf
+    integer :: n_active
+    type(xg_t) :: buffer
+    type(xgBlock_t) :: X_active, AX_active, BX_active
+
+! *********************************************************************
+
+    if (chebfi%space==SPACE_C) then
+        space_buf = SPACE_C
+    else if (chebfi%space==SPACE_CR) then
+        space_buf = SPACE_R
+    else
+        ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
+    end if
+   
+    nrows = rows(chebfi%X)
+    n_active = chebfi%neigenpairs - n_locked
+    call xg_init(buffer,space_buf,n_locked,n_active,comm=chebfi%spacecom,gpu_option=chebfi%gpu_option)
+
+    write(std_out,*) 'start gemm with sum over comm'; flush(std_out)
+    write(std_out,*) 'getid', xgBlock_getid(buffer%self); flush(std_out)
+    write(std_out,*) 'getid', xgBlock_getid(buffer%self,comm=xmpi_comm_null); flush(std_out)
+    write(std_out,*) 'getid', xgBlock_getid(buffer%self,comm=chebfi%spacecom); flush(std_out)
+
+    ! buffer = BX0^T*X
+    ! sum all process contribution
+    call xgBlock_setBlock(chebfi%X, X_active, nrows, n_active, fcol=n_locked+1)
+    call xgBlock_gemm('t','n',1.0d0,BX_locked,X_active,0.d0,buffer%self, comm=chebfi%spacecom)
+    
+    write(std_out,*) 'exit gemm with sum over comm'; flush(std_out)
+
+    write(std_out,*) '@deflate W', rows(buffer%self), cols(buffer%self)
+    write(std_out,*) '@deflate A', rows(BX_locked), cols(BX_locked)
+    write(std_out,*) '@deflate B', rows(X_active), cols(X_active)
+    flush(std_out) 
+
+    ! X = X - X0*buffer
+    call xgBlock_gemm('n','n',-1.0d0,X_locked,buffer%self,1.0d0,X_active)
+    ! AX = AX - X0*buffer
+    call xgBlock_setBlock(chebfi%AX%self, AX_active, nrows, n_active, fcol=n_locked+1)
+    call xgBlock_gemm('n','n',-1.0d0,X_locked,buffer%self,1.0d0,AX_active)
+    ! BX = BX - X0*buffer
+    call xgBlock_setBlock(chebfi%BX%self, BX_active, nrows, n_active, fcol=n_locked+1)
+    call xgBlock_gemm('n','n',-1.0d0,X_locked,buffer%self,1.0d0,BX_active)
+
+    call xg_free(buffer)
+
+  end subroutine chebfi_deflateWrtLocked
 !!***
 
 !----------------------------------------------------------------------
