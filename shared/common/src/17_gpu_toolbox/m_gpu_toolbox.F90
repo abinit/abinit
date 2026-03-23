@@ -131,6 +131,15 @@ module m_gpu_toolbox
       integer    , intent(in)  :: fft_plan_id
     end subroutine gpu_fft_stream_synchronize
 
+    subroutine gpu_fft_get_estimate_work_size(rank, n,&
+        ffttype, batch, work_size) bind(c, name='gpu_fft_get_estimate_work_size_cpp')
+      use, intrinsic :: iso_c_binding
+      integer(kind=C_INT),    intent(in)  :: rank
+      type(c_ptr),            intent(in)  :: n
+      integer(kind=C_INT),    intent(in)  :: ffttype, batch
+      integer(kind=C_SIZE_T), intent(out)  :: work_size
+    end subroutine gpu_fft_get_estimate_work_size
+
     subroutine gpu_fft_plan_many(fft_plan_id, rank, n,&
         inembed, istride, idist,&
         onembed, ostride, odist,&
