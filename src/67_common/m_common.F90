@@ -2541,13 +2541,16 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    write(std_out,'(A,F10.3,1x,A)') "Sum                                      : ", real(sum_mem)/(1024*1024), "MiB"
    write(std_out,'(A)') new_line('A')
    flush(std_out)
-   if(sum_mem > free_mem) then
-     if(l_warn_on_fail) then
-       ABI_WARNING("It seems the test case you're trying to run is too big to run with given GPU resources !")
-     else
-       ABI_ERROR("It seems the test case you're trying to run is too big to run with given GPU resources !")
+   if(rank==0) then
+     if(sum_mem > free_mem) then
+       if(l_warn_on_fail) then
+         ABI_WARNING("It seems the test case you're trying to run is too big to run with given GPU resources !")
+       else
+         ABI_ERROR("It seems the test case you're trying to run is too big to run with given GPU resources !")
+       end if
      end if
    end if
+   !call xmpi_barrier(xmpi_world)
 
  end subroutine get_gemm_nonlop_ompgpu_blocksize
 !!***
