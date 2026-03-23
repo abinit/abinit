@@ -2137,7 +2137,7 @@ contains
 
     if (timing_) call timab(tim_gemm_blas,2,tsec)
     ! END CALL GEMM
-
+    
     ! MPI SUM
     if ( present(comm) ) then
       if (timing_) call timab(tim_gemm_mpi,1,tsec)
@@ -5764,7 +5764,6 @@ contains
       ABI_ERROR('X%space/=Y%space')
     end if
     if (X%rows/=Y%rows) then
-        write(std_out,*) X%rows, Y%rows; flush(std_out)
         ABI_ERROR('X%rows/=Y%rows')
     end if
     if (fact_col_*X%cols/=Y%cols) then
@@ -6903,18 +6902,11 @@ contains
 
     ! Work with matrix xgBlock%vecC
 
-    write(std_out,*) 'debugging QR'
-    flush(std_out)
-
     X => xgBlock%vecC
    
     ! Generate n x (k+p)
     call random_seed()
     call random_complex_gaussian_matrix(Omega)
-
-    write(std_out,*) 'size X=', size(X,1), size(X,2)
-    write(std_out,*) 'size Omega=', size(Omega,1), size(Omega,2)
-    flush(std_out)
 
     ! Y = X * Omega (k+p) * m
     !Y = matmul(X, Omega)
@@ -6946,33 +6938,23 @@ contains
     ABI_FREE(work)
     Q = Y
 
-    write(std_out,*) 'QR of Y ok'; flush(std_out)
-
     ! Project X onto Q
     !B = matmul(conjg(transpose(Q)), X)
     alpha = dcmplx(1.d0,0.d0)
     beta = dcmplx(0.d0,0.d0)
     call zgemm('c', 'n', l, n, m, alpha, Q, m, X, m, beta, B, l)
 
-
-    write(std_out,*) 'size B=', size(B,1), size(B,2)
-    write(std_out,*) 'project ok'; flush(std_out)
-
     ! pivoted QR on B
     jpvt = 0
     lwork = -1
     ABI_MALLOC(work, (1))
-    write(std_out,*) 'RY', size(RY); flush(std_out)
     call zgeqp3(l, n, B, l, jpvt, RY, work, lwork, rwork, info)
     lwork = int(real(work(1)))
     ABI_FREE(work)
     ABI_MALLOC(work, (lwork))
     jpvt = 0
-    write(std_out,*) 'lwork=', lwork; flush(std_out)
     call zgeqp3(l, n, B, l, jpvt, RY, work, lwork, rwork, info)
     
-    write(std_out,*) 'pivoted QR of B ok'; flush(std_out)
-
     QB = B ! in place upper triangle contains RB
     RB = B
 
