@@ -154,7 +154,7 @@ module m_gwr
  use m_numeric_tools, only : blocked_loop, get_diag, isdiagmat, arth, print_arr, imin_loc, imax_loc, &
                              c2r, linfit, bisect, hermitianize
  use m_copy,          only : alloc_copy
- use m_geometry,      only : normv, vdotw
+ use m_geometry,      only : normv, vdotw, spinrot_cmat
  use m_fstrings,      only : sjoin, itoa, strcat, ktoa, ltoa, ftoa, string_in, yesno
  use m_sort,          only : sort_rvals, sort_gvecs
  use m_krank,         only : krank_t, get_ibz2bz, star_from_ibz_idx
@@ -2899,12 +2899,13 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
 
 !Local variables-------------------------------
 !scalars
- integer :: ig1, ig2, il_g1, il_g2, ipm, ik_ibz, isym_k, trev_k, g0_k(3), tsign_k, ii, num_pm, ipm_list__(2)
+ integer :: ig1, ig2, il_g1, il_g2, ipm, ik_ibz, isym_k, trev_k, g0_k(3), tsign_k, ii, num_pm, ipm_list__(2), idx1, idx2
  logical :: isirr_k
 !arrays
  integer :: g1(3), g2(3)
- real(dp) :: tnon(3) !, cpu, wall, gflops
- complex(dp) :: ph2, ph1
+ real(dp) :: tnon(3), spinrot_k(4) !, cpu, wall, gflops
+ complex(dp) :: ph2, ph1, spinrot_cmat1(2,2), spinrot_cmat2(2,2), tmp_mat(2,2)
+ integer, parameter :: spinor_idxs(2, 4) = RESHAPE([1, 1, 2, 2, 1, 2, 2, 1], [2, 4])
 ! *************************************************************************
 
  !call cwtime(cpu, wall, gflops, "start")
@@ -2936,7 +2937,7 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
 
  ! From:
  !
- !      u_{Sk}(Sg) = e^{-i(Sk+g).tnon} u_k(g)
+ !      u_{Sk}(Sg) = e^{-i(Sk+Sg).tnon} u_k(g)
  !
  ! and
  !
@@ -2969,6 +2970,8 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
 
  ! Get G_k with k in the BZ.
  tnon = gwr%cryst%tnons(:, isym_k)
+ if (gwr%nspinor == 1) then
+!  if (.true.) then
  do ii=1,num_pm
    ipm = ipm_list__(ii)
    associate (gk_i => gwr%gt_kibz(ipm, ik_ibz, itau, spin), gk_f => gt_pm(ipm))
@@ -2988,6 +2991,57 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
    end do
    end associate
  end do ! ii
+ else
+
+ spinrot_k = gwr%cryst%spinrot(:, isym_k)
+
+ spinrot_cmat1(1,1) = spinrot_k(1) - j_dpc*spinrot_k(4)
+ spinrot_cmat1(1,2) =-spinrot_k(3) - j_dpc*spinrot_k(2)
+ spinrot_cmat1(2,1) = spinrot_k(3) - j_dpc*spinrot_k(2)
+ spinrot_cmat1(2,2) = spinrot_k(1) + j_dpc*spinrot_k(4)
+
+ spinrot_cmat2(1,1) = spinrot_k(1) + j_dpc*spinrot_k(4)
+ spinrot_cmat2(1,2) = spinrot_k(3) + j_dpc*spinrot_k(2)
+ spinrot_cmat2(2,1) =-spinrot_k(3) + j_dpc*spinrot_k(2)
+ spinrot_cmat2(2,2) = spinrot_k(1) - j_dpc*spinrot_k(4)
+
+ do ii=1,num_pm
+   ipm = ipm_list__(ii)
+   associate (gk_f => gt_pm(ipm))
+   call gwr%gt_kibz(ipm, ik_ibz, itau, 1)%copy(gk_f)
+   !!$OMP PARALLEL DO PRIVATE(ig1, g2, ph2, ig1, g2, ph1)
+   do il_g2=1, gk_f%size_local(2)
+     ig2 = mod(gk_f%loc2gcol(il_g2) - 1, desc_kbz%npw) + 1
+     g2 = desc_kbz%gvec(:,ig2)
+     ph2 = exp(+j_dpc * two_pi * dot_product(g2, tnon))
+     do il_g1=1, gk_f%size_local(1)
+       ig1 = mod(gk_f%loc2grow(il_g1) - 1, desc_kbz%npw) + 1
+       g1 = desc_kbz%gvec(:,ig1)
+       ph1 = exp(-j_dpc * two_pi * dot_product(g1, tnon))
+       tmp_mat(1, 1) = gwr%gt_kibz(ipm, ik_ibz, itau, 1)%buffer_cplx(il_g1, il_g2)
+       tmp_mat(1, 2) = gwr%gt_kibz(ipm, ik_ibz, itau, 3)%buffer_cplx(il_g1, il_g2)
+       tmp_mat(2, 1) = gwr%gt_kibz(ipm, ik_ibz, itau, 4)%buffer_cplx(il_g1, il_g2)
+       tmp_mat(2, 2) = gwr%gt_kibz(ipm, ik_ibz, itau, 2)%buffer_cplx(il_g1, il_g2)
+       tmp_mat = matmul(spinrot_cmat1, matmul(tmp_mat, spinrot_cmat2))
+       idx1 = spinor_idxs(1, spin); idx2 = spinor_idxs(2, spin)
+       gk_f%buffer_cplx(il_g1, il_g2) = tmp_mat(idx1, idx2) * ph1 * ph2
+       if (trev_k == 1) then
+         select case(spin)
+           case(1)
+             gk_f%buffer_cplx(il_g1, il_g2) = conjg(tmp_mat(2, 2))
+           case(2)
+             gk_f%buffer_cplx(il_g1, il_g2) = conjg(tmp_mat(1, 1))
+           case(3)
+             gk_f%buffer_cplx(il_g1, il_g2) = - conjg(tmp_mat(2, 1))
+           case(4)
+             gk_f%buffer_cplx(il_g1, il_g2) = - conjg(tmp_mat(1, 2))
+         end select
+       end if
+     end do
+   end do
+   end associate
+ end do ! ii
+ end if
  end associate
 
 10 continue
