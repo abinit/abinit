@@ -2305,6 +2305,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    integer, target :: t_fft(3)
    logical  :: print_and_exit,l_warn_on_fail
    integer(kind=c_size_t) :: chebfiMem(2),lobpcgMem(2)
+   character(len=500) :: message
 
 ! *********************************************************************
 
@@ -2391,6 +2392,23 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    end if
    localMem  = (int(2,c_size_t)*npw*nspinor*nband+3*nband)*kind(1.d0) ! cg, eig, occ, resid in chebfiwf/lobpcgwf
 
+   ! Check if arrays outside of GEMM nonlop projectors and ompgpu_fourwf fit in GPU memory
+   sum_other_mem    = gs_ham_smem
+
+   if(wfoptalg>=0) then
+     sum_other_mem    = sum_other_mem+updrho_wmem+prep_nonlop_wmem
+   else
+     sum_other_mem    = sum_other_mem+nonlop_wmem+prep_nonlop_wmem
+   end if
+
+   if(wfoptalg==111) then
+     sum_other_mem    = sum_other_mem  + invovl_wmem+invovl_smem+chebfiMem(1)+chebfiMem(2)+localMem
+   end if
+
+   if(wfoptalg==114) then
+     sum_other_mem    = sum_other_mem  + lobpcgMem(1)+lobpcgMem(2)+localMem
+   end if
+
    print_and_exit=.false.
    nblocks=0
    if(blocksize > 1) then
@@ -2401,7 +2419,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
      write(std_out,*) "Setting GEMM nonlop block number...", new_line('A')
    end if
 
-   max_slices=max(100,nprocs*2)
+   max_slices=max(100,nprocs*2); if(sum_other_mem > free_mem) max_slices=1
    ! How we try to optimize GPU memory consumption:
    ! We work on two variables :
    !    - blocksize : for slicing GEMM nonlop projectors arrays
@@ -2414,6 +2432,9 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    !
    ! User may hard set slicing for both fourwf and GEMM nonlop, in which case the code will
    ! warn the user about possible GPU memory overpassing instead of aborting.
+   !
+   ! However, if arrays from other parts of the code already have higher memory requirements,
+   ! we fail anyway and advise the user to increase nblock_lobpcg or run on more nodes.
    do i=1,max_slices
 
      if(wfoptalg>=0 .and. nonlop_smem < fourwf_mem .and. fourwf_mem >= getghc_wmem .and. nfourwf_slices < ndat) then
@@ -2570,6 +2591,12 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    write(std_out,'(A)') new_line('A')
    flush(std_out)
    if(rank==0) then
+     if(sum_other_mem > free_mem) then
+       write(message,'(3a)') &
+         &   '  Your case is too big to fit in GPU memory regardless of possible array optimizations in fourwf and GEMM nonlop.',ch10,&
+         &   '  Action : run on more nodes and/or increase nblock_lobpcg if using LOBPCG.'
+       ABI_ERROR(message)
+     end if
      if(sum_mem > free_mem) then
        if(l_warn_on_fail) then
          ABI_WARNING("It seems the test case you're trying to run is too big to run with given GPU resources !")
