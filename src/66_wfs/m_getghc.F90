@@ -94,10 +94,10 @@ contains
 !! OUTPUT
 !! req_mem=amount in bytes of required memory for getghc_ompgpu
 
-function getghc_ompgpu_work_mem(gs_ham, ndat) result(req_mem)
+function getghc_ompgpu_work_mem(gs_ham, ndat, nslices) result(req_mem)
 
  type(gs_hamiltonian_type),intent(in),target :: gs_ham
- integer, intent(in) :: ndat
+ integer, intent(in) :: ndat, nslices
  integer(kind=c_size_t) :: req_mem, ghc_mem, nonlop_mem
 
  ! getghc use a GPU work buffer only when using fourwf
@@ -105,7 +105,7 @@ function getghc_ompgpu_work_mem(gs_ham, ndat) result(req_mem)
  !   - the sum of getghc and fourwf work buffers memory requirements
  !   - the amount of memory required by gemm_nonlop_ompgpu work buffers
  ghc_mem = 0
- ghc_mem = int(2, c_size_t) * dp * gs_ham%n4 * gs_ham%n5 * gs_ham%n6 * (ndat/4 + modulo(ndat,4))
+ ghc_mem = int(2, c_size_t) * dp * gs_ham%n4 * gs_ham%n5 * gs_ham%n6 * (ndat/nslices + modulo(ndat,nslices))
  !ghc_mem = ghc_mem + ompgpu_fourwf_work_mem(gs_ham%ngfft, ndat)
 
  nonlop_mem = gemm_nonlop_ompgpu_work_mem(gs_ham%istwf_k, ndat, 0, gs_ham%npw_fft_k,&
@@ -412,7 +412,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
 
    spacedim     = size(cwavef  ,dim=2)/ndat
-   nslices = 1; if(gs_ham%nfourwf_slices /= -1) nslices = 4
+   nslices = 1; if(gs_ham%nfourwf_slices /= -1) nslices = gs_ham%nfourwf_slices
    chunk = ndat/nslices ! Divide by 2 to construct chunk of even number of bands
    residuchunk = ndat - nslices*chunk
 
