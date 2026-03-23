@@ -2300,8 +2300,9 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    integer,intent(out)    :: nblocks
 
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem,updrho_wmem,prep_nonlop_wmem
-   integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem
+   integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem,fourwf_smem
    integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs
+   integer, target :: t_fft(3)
    logical  :: print_and_exit,l_warn_on_fail
    integer(kind=c_size_t) :: chebfiMem(2),lobpcgMem(2)
 
@@ -2350,6 +2351,13 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    signs=2
    !wfoptalg==-1 means we're in forstr
    if(wfoptalg==-1) signs=1
+   t_fft(1) = gs_hamk%ngfft(3);
+   t_fft(2) = gs_hamk%ngfft(2);
+   t_fft(3) = gs_hamk%ngfft(1);
+
+#ifdef HAVE_GPU
+   call gpu_fft_get_estimate_work_size(3, c_loc(t_fft), FFT_Z2Z, ndat, fourwf_smem);
+#endif
 
    nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, 1, ndgxdt, use_distrib)
    getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat_try)
@@ -2412,7 +2420,8 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
      sum_other_mem    = nonlop_smem + gs_ham_smem
 
      if(wfoptalg>=0) then
-       sum_mem          = sum_mem+getghc_wmem+updrho_wmem+prep_nonlop_wmem
+       sum_mem          = sum_mem+getghc_wmem+updrho_wmem+prep_nonlop_wmem+fourwf_smem
+       sum_other_mem    = sum_other_mem + fourwf_smem
      else
        sum_mem          = sum_mem+nonlop_wmem+prep_nonlop_wmem
      end if
@@ -2493,6 +2502,11 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    ! LOBPCG2
    if(wfoptalg==114) then
      write(std_out,'(A,F10.3,1x,A)') "   lobpcg2                               : ",    real(lobpcgMem(1))/(1024*1024), "MiB"
+   end if
+
+   ! fourwf (any diago algorithm)
+   if(wfoptalg>=0) then
+     write(std_out,'(A,F10.3,1x,A)') "   fourwf~internal buffers        )      : ",  real(fourwf_smem,dp)/(1024*1024), "MiB"
    end if
 
    write(std_out,'(A,F10.3,1x,A)') "   hamiltonian arrays                    : ",      real(gs_ham_smem)/(1024*1024), "MiB"
