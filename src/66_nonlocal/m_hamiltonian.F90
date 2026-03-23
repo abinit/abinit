@@ -54,6 +54,7 @@ module m_hamiltonian
  use m_fock,              only : fock_common_type, fock_BZ_type, fock_ACE_type, fock_type
  use m_mkffnl,            only : mkffnl_objs
  use m_initylmg,          only : initylmg_k
+ use m_ompgpu_fourwf,     only : free_ompgpu_fourwf
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -686,6 +687,10 @@ subroutine gsham_free(Ham)
 #endif
  else
    ABI_FREE(Ham%ph1d)
+ end if
+
+ if(Ham%gpu_option==ABI_GPU_OPENMP) then
+   call free_ompgpu_fourwf()
  end if
 
 ! Structured datatype pointers
