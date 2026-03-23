@@ -160,6 +160,9 @@ module m_hamiltonian
   integer :: nfft = -1
    ! number of FFT grid points same as dtset%nfft
 
+  integer :: nfourwf_slices = -1
+   ! number of slices fourwf computation is divided
+
   integer :: npw_k = -1
    ! number of plane waves at k
    ! In case of band-FFT parallelism, npw_k is the number of plane waves
@@ -791,6 +794,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
  my_zora=0; if (present(zora)) my_zora=zora
 
+ ham%nfourwf_slices=4
  ham%use_gbt = 0; if (present(use_gbt)) ham%use_gbt = use_gbt
  ham%spinaxis = zero; if (present(spinaxis)) ham%spinaxis = spinaxis
 
@@ -1413,6 +1417,7 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
  gs_hamk_out%mpssoang = gs_hamk_in%mpssoang
  gs_hamk_out%natom = gs_hamk_in%natom
  gs_hamk_out%nfft = gs_hamk_in%nfft
+ gs_hamk_out%nfourwf_slices = gs_hamk_in%nfourwf_slices
  gs_hamk_out%npw_k = gs_hamk_in%npw_k
  gs_hamk_out%npw_kp = gs_hamk_in%npw_kp
  gs_hamk_out%npw_fft_k = gs_hamk_in%npw_fft_k
