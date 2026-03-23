@@ -135,7 +135,8 @@ module m_slice
     !---------------------------------------------------
     integer, parameter :: FAIR_BANDPP      = 1              ! bandpp (unweigted)
     integer, parameter :: FAIR_BANDPP_WDEG = 2              ! bandpp weighted by degree
-    integer, parameter :: EVEN_SLICES      = 3              ! all slices have the same num of procs 
+    integer, parameter :: EVEN_SLICES      = 3              ! all slices have the same num of procs
+    integer, parameter :: SEQUENTIAL_SLICE = 4              ! sequential slice treatment
 
     ! Timers
     !---------------------------------------------------
@@ -225,6 +226,7 @@ module m_slice
         ! Arrays related to data distribution (all slices)
         integer, allocatable :: fcol_in_X(:)                ! first band of slice in spectrum memory
         integer, allocatable :: fcol_in_Xext(:)             ! first band of slice in extended memory
+        integer, allocatable :: lookup_cols_X(:)            ! which slice each column serves
 
         ! Arrays related to polynomial filtering (all slices)
         integer, allocatable :: poly_degrees(:)            ! polynomial filter degrees
@@ -408,6 +410,7 @@ subroutine slice_allocateAll(slice)
 
     ABI_MALLOC_IFNOT(slice%fcol_in_X, (slice%nslice))
     ABI_MALLOC_IFNOT(slice%fcol_in_Xext, (slice%nslice))
+    ABI_MALLOC_IFNOT(slice%lookup_cols_X, (slice%nslice))
     ABI_MALLOC_IFNOT(slice%ncolsColsRows, (slice%nproc))
 
     ABI_MALLOC_IFNOT(slice%poly_degrees, (slice%nslice))
@@ -447,6 +450,7 @@ subroutine slice_free(slice)
 
     ABI_SFREE(slice%fcol_in_X)
     ABI_SFREE(slice%fcol_in_Xext)
+    ABI_SFREE(slice%lookup_cols_X)
 
     ABI_SFREE(slice%poly_degrees)
     ABI_SFREE(slice%part_low_bounds)
@@ -614,6 +618,11 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     !slice%poly_low_bounds(2) = 1.9       ! with overlap
     !slice%poly_upp_bounds(2) = 5.2       ! with overlap
 
+    call slice_initializeSubspaceIteration(slice)
+
+    ! todo degrees are deduced from maximum subspace residual divided by wanted residual
+    ! use only m residuals where k=m+p
+
     ! todo deduce from vector pruning
     ! Indices of test vectors
     ! todo big modif col_in_X should be replaced by a simple index set
@@ -645,27 +654,19 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
 
     ! ===================== Resource management system ================================================= 
 
-    ! TODO half of the processes are assigned per slice, not true actually
-    ! under the uniform mass splitting that simplifies things and we no longer need fair allocation
-    ! Process: 
-    ! 
+    if (slice%paral_slice==SEQUENTIAL_SLICE) then 
+
+        slice%nproc_per_slice(:) = slice%nproc
+
+    else
     
-    ! Divide resources into slice tasks
-    call slice_allocateResources(slice)
+        ! Divide resources into slice tasks
+        call slice_allocateResources(slice)
 
-    ! Run on all ranks of spacecom: Mark my slice task and resources as actively in use
-    call slice_markActiveTask(slice)
-
-    ! todo ok so normally here when tasks have been allocated we should sketch using G
-    ! of size nxk where k is the estimated rank of the eigenspace. Then we also sketch Omega nxp
-    ! with p oversampling. When applying the filter we should also restart while a condition is
-    ! satisfied. This condition can be: if the Ritz value is outside the slice for some
-    ! offset then we consider the slice is full and we can stop. One possibility is 
-    ! r = F(A)q - q. In the idea that F(A)q ~ q is q is already is the subspace.
-    ! the thing is that I don't store q because I apply F(A) in place and overwrite q.
-    ! Idea is to measure energy change which is ||F(A)Q||^2. If the change between two iterations is
-    ! small then it means that applying the filter does not capture more eigenvectors therefore
-    ! it is enough.
+        ! Mark my slice task and resources as actively in use
+        call slice_markActiveTask(slice)
+    
+    end if
 
     ! ===================== Allocate and fill extended memory buffer ================================== 
   
@@ -680,6 +681,8 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
         slice%XextLinalg = X0
     else
 
+        ! todo make sure that memory is contiguous on slices when copying
+
         write(std_out,*) 'allocating extended space of size', slice%neigenpairs_ext
         flush(std_out)
 
@@ -689,7 +692,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
         
         slice%XextLinalg = slice%X_ext%self
 
-        ! Copy X to XextLinalg by column blocks
+        ! Copy X to XextLinalg by contiguous column blocks
         do islice=1,slice%nslice
             ncols = slice%neigenpairs_per_slice(islice)
             fcol = slice%fcol_in_X(islice)
@@ -1213,6 +1216,7 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
 
     end if
 
+    ! Prevent invovl error
     ! dummy invovl calculation to allocate buffers of full size
     ! Workaround: getBm1X error related to invovl allocated buffers. 
     ! With this setup we allocate large then use 1 in Lanczos.
@@ -1271,7 +1275,9 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     ! capable of detecting gaps
     ! detects steps where the mass stays constant. This is the
     ! criterion of the constant mass.
-    
+   
+    ! call slice_initializeSubspaceIteration here
+    ! part of it that is colsrows
 
     ! ============== Transpose ==============
     if (slice%paral_kgb == 1) then
@@ -2507,7 +2513,7 @@ end subroutine print_scalar_filter
     integer :: gpu_option
     real(dp) :: tsec(2)
 
-    ! *********************************************************************
+  ! *********************************************************************
 
     call timab(tim_lanczos,1,tsec)
     
@@ -2644,6 +2650,8 @@ end subroutine print_scalar_filter
 !! NAME
 !! randomSketching
 !! 
+!! todo xg_randomSketching
+!! 
 !! SOURCE
   
   subroutine randomSketching(slice, X, X_sketch, k_sketch)
@@ -2663,7 +2671,7 @@ end subroutine print_scalar_filter
     type(xg_t) :: Omega
     type(xgBlock_t) :: q
 
-    ! *********************************************************************
+  ! *********************************************************************
 
     space = slice%space
     nband = slice%neigenpairs
@@ -2950,7 +2958,6 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     integer :: half_index, i_left, i_right
     integer :: i_split
     integer :: ngrid_fine, ngrid_coarse
-    integer :: p_left, p_right
     logical :: gap_left, gap_right
     real(dp) :: ncount_ovlp
     real(dp) :: lambda_plus_wanted
@@ -3093,6 +3100,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     end do
 
     ! Prepare: detect gap existence in the interior of slice
+    ! define value of smallest_gap
     ! todo 
 
     ! todo
@@ -3113,7 +3121,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     gap_left = .false.
     gap_right = .false.
     do while((.not.gap_right .and. .not.gap_left) .and. (i_left >= 2 .and. i_right <=ngrid_fine-1))
-        ! this is if gap exists. If it does not exist.. 
+        ! this is if gap exists. If it does not exist.. must minimize using smallest_gap 
         gap_left = abs(cumm_eigen_count(i_left) - cumm_eigen_count(i_left-1)) < 1e-4
         gap_right = abs(cumm_eigen_count(i_right) - cumm_eigen_count(i_right+1)) < 1e-4
         i_left = i_left - 1
@@ -3137,7 +3145,11 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     flush(std_out)
 
     ! oversample by 10% of slice
-    ! todo also minimize this
+    slice%neigenpairs_per_slice(1) = mass_left*1.1d0
+    slice%neigenpairs_per_slice(2) = mass_right*1.1d0
+
+    slice%part_upp_bounds(1) = bgrid_fine(i_split)
+    slice%part_upp_bounds(2) = bgrid_fine(ngrid_fine)
     
 
     ! #########################################
@@ -3429,6 +3441,63 @@ subroutine computeFilterEnergy(cja, cheby_moments, energy_per_band)
       ABI_FREE(energy)
 
 end subroutine computeFilterEnergy
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/slice_initializeSubspaceIteration
+!! NAME
+!! slice_initializeSubspaceIteration
+!!
+!! FUNCTION
+!! Input: k=m+p ou m la masse et p oversampling parameter
+!! step 1) calculer les valeurs de Ritz
+!! step 2) calculer les résidus
+!! step 3) mettre les valeurs de Ritz dans part_low_bounds, part_upp_bounds sous condition que res<tol
+!! step 4) sinon faire un sketch de taille K du reste
+!!slice%lookup_cols_X
+!!
+!! SOURCE
+
+  subroutine slice_initializeSubspaceIteartion(slice, p)
+
+    implicit none
+
+    type(slice_t), intent(inout) :: slice
+    integer, intent(in) :: p
+
+    integer :: k_sketch
+    type(xg_t) :: X_sketch
+
+  ! *********************************************************************
+
+    ! Compute Rayleigh quotients (colsrows distribution)
+    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RRQ)
+    call timab(tim_RR_q, 1, tsec)
+    call chebfi_rayleighRitzQuotients(chebfi, maxeig, mineig, DivResults%self)
+    call timab(tim_RR_q, 2, tsec)
+    ABI_NVTX_END_RANGE()
+
+    ! Compute subspace residuals
+    ! en gros il faut décider soit de faire le subspace residual (cher) soit le vector residual
+
+    do islice=1,slice%nslice
+        m = slice%mass(islice)
+        k = m + p
+        k_conv = ..
+    end if
+
+    ! Y = X * Omega where Omega sketch matrix to capture all directions at once (linalg distribution)
+    !k_sketch = neigenpairs
+    k_sketch = k - k_conv
+    call xg_init(X_sketch, space, spacedim, neigenpairs, spacecom, gpu_option=gpu_option)
+    call randomSketching(slice, X, X_sketch%self, k_sketch)
+    ! todo rename randomSketching or move to xg because does not directly depend on slice
+    call xgBlock_copy(X_sketch%self, X)
+    call xg_free(X_sketch)
+
+
+  end subroutine slice_initializeSubspaceIteration
 !!***
 
 !----------------------------------------------------------------------
