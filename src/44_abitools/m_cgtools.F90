@@ -757,8 +757,8 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_op
  character(len=1),intent(in) :: trans
  integer,optional,intent(in) :: gpu_option
 !arrays
- real(dp),intent(in) :: cgmat(2,nrows*ncols), vec(2,*)
- real(dp),intent(inout) :: matvec(2,*)
+ real(dp),intent(in), target :: cgmat(2,nrows*ncols), vec(2,*)
+ real(dp),intent(inout), target :: matvec(2,*)
 
 !Local variables-------------------------------
 !scalars
@@ -783,7 +783,11 @@ subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta, gpu_op
  else if(my_gpu_option==ABI_GPU_OPENMP) then
    my_calpha = DCMPLX(my_alpha(1), my_alpha(2))
    my_cbeta  = DCMPLX(my_beta(1), my_beta(2))
-   call abi_gpu_xgemm(2, trans, "N", mm, nn, kk, my_calpha, cgmat, lda, vec, ldb, my_cbeta, matvec, ldc)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET DATA USE_DEVICE_ADDR(cgmat,vec(1:2,1:nn*kk),matvec(1:2,1:mm*nn))
+   call abi_gpu_xgemm(2, trans, "N", mm, nn, kk, my_calpha, c_loc(cgmat), lda, c_loc(vec), ldb, my_cbeta, c_loc(matvec), ldc)
+   !$OMP END TARGET DATA
+#endif
  end if
  ! ZGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
 

@@ -222,7 +222,7 @@ contains
   real(dp),intent(out),  target :: svectout(:,:)
   real(dp),intent(inout),target :: vectout(:,:)
   real(dp),intent(inout),optional, ABI_CONTIGUOUS target :: vectproj(:,:,:)
-  type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
+  type(pawcprj_type),intent(inout) :: cprjin(:,:)
 
   ! locals
   integer :: ii, idat, igrad, nprojs, ngrads, ngrads2, shift, iatom, nlmn, ierr, ibeg, iend, ikin, ikout
