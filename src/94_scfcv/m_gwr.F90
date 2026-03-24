@@ -3022,9 +3022,9 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
        tmp_mat(1, 2) = gwr%gt_kibz(ipm, ik_ibz, itau, 3)%buffer_cplx(il_g1, il_g2)
        tmp_mat(2, 1) = gwr%gt_kibz(ipm, ik_ibz, itau, 4)%buffer_cplx(il_g1, il_g2)
        tmp_mat(2, 2) = gwr%gt_kibz(ipm, ik_ibz, itau, 2)%buffer_cplx(il_g1, il_g2)
-       tmp_mat = matmul(spinrot_cmat1, matmul(tmp_mat, spinrot_cmat2))
+       tmp_mat = matmul(spinrot_cmat1, matmul(tmp_mat, spinrot_cmat2)) * ph1 * ph2
        idx1 = spinor_idxs(1, spin); idx2 = spinor_idxs(2, spin)
-       gk_f%buffer_cplx(il_g1, il_g2) = tmp_mat(idx1, idx2) * ph1 * ph2
+       gk_f%buffer_cplx(il_g1, il_g2) = tmp_mat(idx1, idx2)
        if (trev_k == 1) then
          select case(spin)
            case(1)
