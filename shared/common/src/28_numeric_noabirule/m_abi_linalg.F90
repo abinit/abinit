@@ -340,14 +340,14 @@ module m_abi_linalg
       character (KIND=c_char), intent(in)  :: str(*)
     end subroutine check_gpu_mem
 
-    subroutine alloc_on_gpu(gpu_ptr,size_in_bytes) bind(c, name="alloc_on_gpu_")
+    subroutine alloc_on_gpu(gpu_ptr,size_in_bytes) bind(c, name="alloc_on_gpu_cpp_")
       use, intrinsic :: iso_c_binding
       implicit none
       type(c_ptr),                    intent(inout)  :: gpu_ptr
       integer(kind=c_size_t),         intent(in)     :: size_in_bytes
     end subroutine alloc_on_gpu
 
-    subroutine dealloc_on_gpu(gpu_ptr) bind(c, name="dealloc_on_gpu_")
+    subroutine dealloc_on_gpu(gpu_ptr) bind(c, name="dealloc_on_gpu_cpp_")
       use, intrinsic :: iso_c_binding
       implicit none
       type(c_ptr),                    intent(inout)  :: gpu_ptr
@@ -395,10 +395,8 @@ module m_abi_linalg
  !dummy routines replace gpu helper routines
  public :: gpu_device_synchronize
  public :: check_gpu_mem
- public :: alloc_on_gpu
  public :: copy_from_gpu
  public :: copy_on_gpu
- public :: dealloc_on_gpu
  public :: gpu_allocated_impl
  public :: gpu_managed_ptr_status
  public :: gpu_linalg_init
@@ -411,6 +409,9 @@ module m_abi_linalg
  public :: gpu_xsygvd
  public :: gpu_xsygvd_bufferSize
 #endif
+
+ public :: alloc_on_gpu
+ public :: dealloc_on_gpu
 
  public :: copy_gpu_to_gpu
  public :: gpu_memset
