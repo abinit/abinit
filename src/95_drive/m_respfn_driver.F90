@@ -3492,9 +3492,7 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
 !  Initialise the 2nd-derivative matrix
    d2matr(:,:,:,:,:)=0.0_dp
 
-!  Add the non-frozen-part, the
-!  Ewald part and the xc1 part of the frozen-wf part
-!  Add the vdw part (if any)
+!  Copy first the non-frozen-part for all possible elements
    do ipert2=1,mpert
      do idir2=1,3
        do ipert1=1,mpert
@@ -3503,16 +3501,30 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
              do ii=1,2
                d2matr(ii,idir1,ipert1,idir2,ipert2)=&
 &               d2nfr(ii,idir1,ipert1,idir2,ipert2)
-               if(ipert1<=natom .and. ipert2<=natom) then
-                 d2matr(ii,idir1,ipert1,idir2,ipert2)=&
-&                 d2matr(ii,idir1,ipert1,idir2,ipert2)+&
-&                 dyew(ii,idir1,ipert1,idir2,ipert2)  +&
+             end do
+           end if
+         end do
+       end do
+     end do
+   end do
+
+!  For the dynamical matrix
+!  Add the Ewald part and the xc1 part of the frozen-wf part
+!  Add the vdw part (if any)
+   do ipert2=1,natom
+     do idir2=1,3
+       do ipert1=1,natom
+         do idir1=1,3
+           if( blkflg(idir1,ipert1,idir2,ipert2)==1 ) then
+             do ii=1,2
+               d2matr(ii,idir1,ipert1,idir2,ipert2)=   &
+&               d2matr(ii,idir1,ipert1,idir2,ipert2)+  &
+&                 dyew(ii,idir1,ipert1,idir2,ipert2) + &
 &                 dyfrx1(ii,idir1,ipert1,idir2,ipert2)
-                 if (usevdw==1) then
-                   d2matr(ii,idir1,ipert1,idir2,ipert2)=&
-&                   d2matr(ii,idir1,ipert1,idir2,ipert2)+&
-&                   dyvdw(ii,idir1,ipert1,idir2,ipert2)
-                 end if
+               if (usevdw==1) then
+                 d2matr(ii,idir1,ipert1,idir2,ipert2)=  &
+&                 d2matr(ii,idir1,ipert1,idir2,ipert2)+ &
+&                 dyvdw(ii,idir1,ipert1,idir2,ipert2)
                end if
              end do
            end if
@@ -3521,6 +3533,7 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
      end do
    end do
 
+!  For the dynamical matrix
 !  Add the frozen-wavefunction part
    if (dyfr_nondiag==0) then
      do ipert2=1,natom
@@ -3569,8 +3582,8 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
      end do
    end if
 
-!  Section for piezoelectric tensor (from electric field response only for PAW)
-   if(rfpert(natom+2)==1.and.pawpiezo==1) then
+!  For piezoelectric tensor add a contribution in PAW case
+   if(pawpiezo==1) then
      ipert2=natom+2
      do idir2=1,3            ! Direction of electric field
        do ipert1=natom+3,natom+4     ! Strain
@@ -3578,65 +3591,60 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
            ii=idir1+3*(ipert1-natom-3)
            if(blkflg(idir1,ipert1,idir2,ipert2)==1 ) then
              d2matr(1,idir1,ipert1,idir2,ipert2)=&
-&             d2nfr(1,idir1,ipert1,idir2,ipert2)+piezofrnl(ii,idir2)
-           end if
+              d2matr(1,idir1,ipert1,idir2,ipert2)+piezofrnl(ii,idir2)
+           endif
+           if(blkflg(idir2,ipert2,idir1,ipert1)==1 ) then
+             d2matr(1,idir2,ipert2,idir1,ipert1)=&
+              d2matr(1,idir2,ipert2,idir1,ipert1)+piezofrnl(ii,idir2)
+           endif
          end do
        end do
      end do
    end if
 
-!  Section for strain perturbation
-   if(rfpert(natom+3)==1 .or. rfpert(natom+4)==1) then
-!    Make sure relevant columns of output are nulled
-     d2matr(:,:,:,:,natom+3:natom+4)=0.0_dp
-!    Accumulate all frozen parts of the elastic tensor
-     ABI_MALLOC(elfrtot,(6+3*natom,6))
-     elfrtot(:,:)=elteew(:,:)+eltfrloc(:,:)+eltfrnl(:,:)+eltfrxc(:,:)
-     elfrtot(1:6,1:6)=elfrtot(1:6,1:6)+eltcore(:,:)+eltfrhar(:,:)+eltfrkin(:,:)
-     if (usevdw==1) elfrtot(:,:)=elfrtot(:,:)+eltvdw(:,:)
+!  Internal strain and strain-strain
 
-     do ipert2=natom+3,natom+4
-       do idir2=1,3
-!        Internal strain components first
-         do ipert1=1,natom
-           do idir1=1,3
-             if( blkflg(1,ipert1,idir2,ipert2)==1 ) then
-               ii=idir1+6+3*(ipert1-1)
-               jj=idir2+3*(ipert2-natom-3)
-               d2matr(1,idir1,ipert1,idir2,ipert2)=&
-&               d2nfr(1,idir1,ipert1,idir2,ipert2)+elfrtot(ii,jj)
-             end if
-           end do
-         end do
-!        Now, electric field - strain mixed derivative (piezoelectric tensor)
-         ipert1=natom+2
+!  Accumulate all frozen parts of the elastic tensor
+   ABI_MALLOC(elfrtot,(6+3*natom,6))
+   elfrtot(:,:)=elteew(:,:)+eltfrloc(:,:)+eltfrnl(:,:)+eltfrxc(:,:)
+   elfrtot(1:6,1:6)=elfrtot(1:6,1:6)+eltcore(:,:)+eltfrhar(:,:)+eltfrkin(:,:)
+   if (usevdw==1) elfrtot(:,:)=elfrtot(:,:)+eltvdw(:,:)
+
+   do ipert2=natom+3,natom+4
+     do idir2=1,3
+
+!      Internal strain components
+       do ipert1=1,natom
          do idir1=1,3
+           ii=idir1+6+3*(ipert1-1)
+           jj=idir2+3*(ipert2-natom-3)
            if( blkflg(idir1,ipert1,idir2,ipert2)==1 ) then
              d2matr(1,idir1,ipert1,idir2,ipert2)=&
-&             d2nfr(1,idir1,ipert1,idir2,ipert2)
-             if (pawpiezo==1) then
-               ii=idir2+3*(ipert2-natom-3)
-               d2matr(1,idir1,ipert1,idir2,ipert2)=&
-&               d2matr(1,idir1,ipert1,idir2,ipert2)+piezofrnl(ii,idir1)
-             end if
-           end if
-         end do
-!        Now, strain-strain 2nd derivatives
-         do ipert1=natom+3,natom+4
-           do idir1=1,3
-             if( blkflg(idir1,ipert1,idir2,ipert2)==1 ) then
-               ii=idir1+3*(ipert1-natom-3)
-               jj=idir2+3*(ipert2-natom-3)
-               d2matr(1,idir1,ipert1,idir2,ipert2)=&
-&               d2nfr(1,idir1,ipert1,idir2,ipert2)+elfrtot(ii,jj)
-             end if
-           end do
+&             d2matr(1,idir1,ipert1,idir2,ipert2)+elfrtot(ii,jj)
+            endif
+           if( blkflg(idir2,ipert2,idir1,ipert1)==1 ) then
+             d2matr(1,idir2,ipert2,idir1,ipert1)=&
+&             d2matr(1,idir2,ipert2,idir1,ipert1)+elfrtot(ii,jj)
+           endif
          end do
        end do
+
+!      Now, strain-strain 2nd derivatives
+       do ipert1=natom+3,natom+4
+         do idir1=1,3
+           if( blkflg(idir1,ipert1,idir2,ipert2)==1 ) then
+             ii=idir1+3*(ipert1-natom-3)
+             jj=idir2+3*(ipert2-natom-3)
+             d2matr(1,idir1,ipert1,idir2,ipert2)=&
+&             d2matr(1,idir1,ipert1,idir2,ipert2)+elfrtot(ii,jj)
+           end if
+         end do
+       end do
+
      end do
-     ABI_FREE(elfrtot)
-   end if
-!  End section for strain perturbation
+   end do
+   ABI_FREE(elfrtot)
+!  End section for internal strain and strain-strain
 
 !  The second-order matrix has been computed.
 
@@ -3779,7 +3787,7 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
        end do
      end do
    end do
-!  Divide strain 2nd deriviative by ucvol to give elastic tensor
+!  Divide strain 2nd derivative by ucvol to give elastic tensor
    do ipert2=natom+3,natom+4
      do idir2=1,3
        do ipert1=natom+3,natom+4
