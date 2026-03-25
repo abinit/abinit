@@ -17641,9 +17641,8 @@ mode can be controlled with [[pawprtdos]] keyword (in
 particular, [[pawprtdos]] = 2 can be used to compute quickly a very good
 approximation of the DOS).
 
-If [[prtdos]] = 4, delivers the sphere-projected DOS (like [[prtdos]] = 3), on the
-basis of a smearing approach (like [[prtdos]] = 1). See (like [[prtdos]] = 1
-for the additional input variables to be specified.
+If [[prtdos]] = 4, delivers the total DOS like [[prtdos]]=1, but also the angular-momentum projections
+in the FATBANDS.nc file for post-processing.
 
 If [[prtdos]] = 5, delivers the spin-spin DOS in the [[nspinor]] == 2 case, using the
 tetrahedron method (as [[prtdos]] = 2).
