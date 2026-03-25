@@ -88,7 +88,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,fixed_mismatch,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
+ integer :: bantot,fixed_mismatch,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,intimage,ierrgrp!,ilang
  integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,lpawu,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,miniatsph,minidyn,mod10,mpierr,all_nprocs
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu
@@ -102,7 +102,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  character(len=1000) :: msg
  type(dataset_type) :: dt
 !arrays
- integer :: cond_values(4),nprojmax(0:3)
+ integer :: cond_values(4)!,nprojmax(0:3)
  integer :: gpu_devices(12)=(/-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2/)
  integer,allocatable :: ierr_dtset(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
@@ -2571,14 +2571,14 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  nproj
 !  If there is more than one projector for some angular momentum channel of some pseudopotential
-   do ilang=0,3
-     nprojmax(ilang)=pspheads(1)%nproj(ilang)
-     if(npsp>=2)then
-       do ii=2,npsp
-         nprojmax(ilang)=max(pspheads(ii)%nproj(ilang),nprojmax(ilang))
-       end do
-     end if
-   end do
+!   do ilang=0,3
+!     nprojmax(ilang)=pspheads(1)%nproj(ilang)
+!     if(npsp>=2)then
+!       do ii=2,npsp
+!         nprojmax(ilang)=max(pspheads(ii)%nproj(ilang),nprojmax(ilang))
+!       end do
+!     end if
+!   end do
 
 !  npspinor
 !  Must be equal to 1 or 2
@@ -3544,8 +3544,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdos',dt%prtdos,6,(/0,1,2,3,4,5/),iout)
 
 ! for the moment prtdos 3,4,5 are not compatible with fft or band parallelization
-   if (dt%prtdos > 3 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
-     ABI_ERROR_NOSTOP('prtdos>3 and FFT or band parallelization are not compatible yet. Set prtdos <= 2', ierr)
+   if (dt%prtdos > 4 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
+     ABI_ERROR_NOSTOP('prtdos>4 and FFT or band parallelization are not compatible yet. Set prtdos <= 4', ierr)
    end if
 
 ! prtdos 5 only makes sense for nspinor == 2. Otherwise reset to prtdos 2

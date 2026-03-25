@@ -615,9 +615,9 @@ module defs_datatypes
 ! declared in another part of ABINIT, that might need to take into account your modification.
 ! WARNING: Also pay attention to subroutine pspheads_comm, which broadcasts this datatype.
 
-  integer :: nproj(0:3) ! number of scalar projectors for each angular momentum
+  integer, allocatable :: nproj(:) ! number of scalar projectors for each angular momentum
 
-  integer :: nprojso(3) ! number of spin-orbit projectors for each angular momentum
+  integer, allocatable :: nprojso(:) ! number of spin-orbit projectors for each angular momentum
 
   integer :: lmax       ! maximum l quantum number (-1 if only local)
                         ! Example : s only       -> lmax=0

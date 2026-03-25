@@ -932,6 +932,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 ! the following is probably useless - already read in everything in inpspheads
 #if defined HAVE_LIBPSML
      call psxml2abheader( psps%filpsp(ipsp), psphead, atmsymb, creator, 0 )
+     ABI_FREE(psphead%nproj)
+     ABI_FREE(psphead%nprojso)
      znucl = psphead%znuclpsp
      zion = psphead%zionpsp
      pspdat = psphead%pspdat
@@ -968,6 +970,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
 !    Return header information
      call pawpsxml2ab(psps%filpsp(ipsp),ecut_tmp, pspheads_tmp,0)
+     ABI_FREE(pspheads_tmp%nproj)
+     ABI_FREE(pspheads_tmp%nprojso)
      lmax=pspheads_tmp%lmax
      pspxc=pspheads_tmp%pspxc
      znucl=pspheads_tmp%znuclpsp
