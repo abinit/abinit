@@ -161,7 +161,7 @@ module m_hamiltonian
   integer :: nfft = -1
    ! number of FFT grid points same as dtset%nfft
 
-  integer :: nfourwf_slices = -1
+  integer :: nfourwf_slices = 1
    ! number of slices fourwf computation is divided
 
   integer :: npw_k = -1
@@ -799,7 +799,7 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
  my_zora=0; if (present(zora)) my_zora=zora
 
- ham%nfourwf_slices=4
+ ham%nfourwf_slices=1
  ham%use_gbt = 0; if (present(use_gbt)) ham%use_gbt = use_gbt
  ham%spinaxis = zero; if (present(spinaxis)) ham%spinaxis = spinaxis
 

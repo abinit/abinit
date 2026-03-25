@@ -1946,10 +1946,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
+       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd,nslices=gs_hamk%nfourwf_slices)
      else
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,nslices=gs_hamk%nfourwf_slices)
      end if
 
      ABI_NVTX_END_RANGE()
@@ -2129,10 +2129,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if(dtset%usekden==1 .and. (iscf > 0 .or. iscf==-3 ) )then
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-         taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+         taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1,nslices=gs_hamk%nfourwf_slices)
      else
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-        tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+        tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1,nslices=gs_hamk%nfourwf_slices)
      end if
    end if
 

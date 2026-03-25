@@ -225,6 +225,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo,ndat_fft
  integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10
  integer :: gpu_option_tmp,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp
+ integer :: firstelt,firstband,lastelt,lastband,spacedim,chunk,residuchunk,islice
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar2,ar_im,eshift,occblock,norm
  real(dp) :: max_resid,weight,cpu,wall,gflops
@@ -759,6 +760,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  ndat=1;if (mpi_enreg%paral_kgb==1) ndat=mpi_enreg%bandpp
  if(iscf>0 .and. fixed_occ)  then
    ndat_fft=ndat; if(mpi_enreg%paral_kgb==0) ndat_fft=blocksize
+   chunk = ndat_fft/gs_hamk%nfourwf_slices ! Divide by 2 to construct chunk of even number of bands
+   residuchunk = ndat_fft - gs_hamk%nfourwf_slices*chunk
+   spacedim = npw_k
    if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
      ABI_MALLOC_MANAGED(wfraug,(/2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft/))
@@ -768,7 +772,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      if (gs_hamk%gpu_option==ABI_GPU_DISABLED.and.fftalg/=401) then
        ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6))
      else
-       ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft))
+       ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*(chunk+residuchunk)))
      end if
    end if
  end if
@@ -935,12 +939,24 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          end do
 
          if(dtset%nspinor==1) then
-           call fourwf(1,rhoaug(:,:,:,1),cwavef(:,:),dummy,wfraug,&
-               gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
-               gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
-               npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
-               weight_array_r=weight_t,weight_array_i=weight_t,&
-               gpu_option=dtset%gpu_option)
+           do ii=1,gs_hamk%nfourwf_slices
+             islice=ii-1
+             if ( islice < gs_hamk%nfourwf_slices-residuchunk ) then
+               firstband = islice*chunk+1
+               lastband = (islice+1)*chunk
+             else
+               firstband = (gs_hamk%nfourwf_slices-residuchunk)*chunk + ( islice -(gs_hamk%nfourwf_slices-residuchunk) )*(chunk+1) +1
+               lastband = firstband+chunk
+             end if
+             firstelt = (firstband-1)*spacedim+1
+             lastelt = lastband*spacedim
+             call fourwf(1,rhoaug(:,:,:,1),cwavef(:,firstelt:lastelt),dummy,wfraug,&
+                 gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
+                 gs_hamk%mgfft,mpi_enreg,lastband-firstband+1,gs_hamk%ngfft,&
+                 npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
+                 weight_array_r=weight_t,weight_array_i=weight_t,&
+                 gpu_option=dtset%gpu_option)
+           end do
 
          else if(dtset%nspinor==2) then
            ABI_MALLOC(cwavefb,(2,npw_k*blocksize,2))
@@ -1127,7 +1143,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          call prep_fourwf(rhoaug(:,:,:,1),blocksize,cwavef,wfraug,iblock,istwf_k,&
            gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,npw_k,&
            gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,&
-           1,gs_hamk%ucvol,wtk,gpu_option=dtset%gpu_option)
+           1,gs_hamk%ucvol,wtk,gs_hamk%nfourwf_slices,gpu_option=dtset%gpu_option)
          call timab(537,2,tsec)
        else if (dtset%nspinor==2) then
          ABI_MALLOC(cwavefb,(2,npw_k*blocksize,2))
@@ -1173,7 +1189,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          if (nspinor1TreatedByThisProc) then
            call prep_fourwf(rhoaug(:,:,:,1),blocksize,cwavefb(:,:,1),wfraug,iblock,&
              istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,npw_k,&
-             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
+             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,gs_hamk%nfourwf_slices,&
              gpu_option=dtset%gpu_option)
          end if
          if(dtset%nspden==1) then
@@ -1181,7 +1197,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              call prep_fourwf(rhoaug(:,:,:,1),blocksize,cwavefb(:,:,2),wfraug,&
                iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,&
                gs_hamk%ngfft,npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,&
-               gs_hamk%ucvol,wtk,gpu_option=dtset%gpu_option)
+               gs_hamk%ucvol,wtk,gs_hamk%nfourwf_slices,gpu_option=dtset%gpu_option)
            end if
          else if(dtset%nspden==4) then
            ABI_MALLOC(cwavef_x,(2,npw_k*blocksize))
@@ -1210,17 +1226,17 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            if (nspinor1TreatedByThisProc) then
              call prep_fourwf(rhoaug(:,:,:,4),blocksize,cwavefb(:,:,2),wfraug,&
                iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,&
-               npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
+               npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,gs_hamk%nfourwf_slices,&
                gpu_option=dtset%gpu_option)
            end if
            if (nspinor2TreatedByThisProc) then
              call prep_fourwf(rhoaug(:,:,:,2),blocksize,cwavef_x,wfraug,&
                iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,&
-               npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
+               npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,gs_hamk%nfourwf_slices,&
                gpu_option=dtset%gpu_option)
              call prep_fourwf(rhoaug(:,:,:,3),blocksize,cwavef_y,wfraug,&
                iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,&
-               npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
+               npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,gs_hamk%nfourwf_slices,&
                gpu_option=dtset%gpu_option)
            end if
 #ifdef HAVE_OPENMP_OFFLOAD
