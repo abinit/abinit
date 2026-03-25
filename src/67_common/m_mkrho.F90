@@ -136,12 +136,12 @@ contains
 
 subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &                rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
-&                option,extfpmd) !optional
+&                option,extfpmd,nslices) !optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcg,tim_mkrho
- integer,intent(in),optional :: option
+ integer,intent(in),optional :: option,nslices
  real(dp),intent(in) :: ucvol
  type(extfpmd_type),intent(in),pointer,optional :: extfpmd
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -168,7 +168,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  integer :: ifft,ikg,ikpt,ioption,ipw,ipwbd,ipwsp,ishf,ispden,ispinor,ispinor_index
  integer :: isppol,istwf_k,jspinor_index
  integer :: me,my_nspinor,n1,n2,n3,n4,n5,n6,nalpha,nband_k,nband_occ,nbandc1,nbdblock,nbeta
- integer :: ndat,nfftot,npw_k,spaceComm,tim_fourwf,gpu_option
+ integer :: ndat,nfftot,npw_k,spaceComm,tim_fourwf,gpu_option,nfourwf_slices
  integer :: iband_me
  integer :: mband_mem
  real(dp) :: kpt_cart,kg_k_cart,gp2pi1,gp2pi2,gp2pi3,cwftmp
@@ -211,6 +211,8 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  else
    ioption=option
  end if
+
+ nfourwf_slices=1; if(present(nslices)) nfourwf_slices=nslices
 
 ! Not sure what to do for Wannier90 DMFT
  if(ioption/=0.and.(paw_dmft%use_sc_dmft==1.or.paw_dmft%use_sc_dmft==10)) then
@@ -350,7 +352,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET ENTER DATA MAP(alloc:rhoaug) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-       ABI_MALLOC(wfraug,  (2,n4,n5,n6*ndat))
+       ABI_MALLOC(wfraug,  (2,n4,n5,n6*(ndat/nfourwf_slices+ndat-(ndat/nfourwf_slices)*nfourwf_slices)))
        ABI_MALLOC(cwavefb,  (2,dtset%mpw*paw_dmft%use_sc_dmft,my_nspinor))
        if(dtset%nspden==4) then
          ABI_MALLOC(rhoaug_up,  (n4,n5,n6))
@@ -848,7 +850,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              if (nspinor1TreatedByThisProc) then
                call prep_fourwf(rhoaug,blocksize,cwavef(:,:,1),wfraug,iblock,istwf_k,dtset%mgfft,mpi_enreg,&
 &               nband_k,ndat,dtset%ngfft,npw_k,n4,n5,n6,occ_k,1,ucvol,&
-&               dtset%wtk(ikpt),gpu_option=gpu_option)
+&               dtset%wtk(ikpt),nfourwf_slices,gpu_option=gpu_option)
              end if
              call timab(538,2,tsec)
              if(dtset%nspinor==2)then
@@ -857,7 +859,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                    call prep_fourwf(rhoaug,blocksize,cwavef(:,:,2),wfraug,&
 &                   iblock,istwf_k,dtset%mgfft,mpi_enreg,&
 &                   nband_k,ndat,dtset%ngfft,npw_k,n4,n5,n6,occ_k,1,ucvol,&
-&                   dtset%wtk(ikpt),gpu_option=gpu_option)
+&                   dtset%wtk(ikpt),nfourwf_slices,gpu_option=gpu_option)
                  end if
                else if(dtset%nspden==4 ) then
 
@@ -897,17 +899,17 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                    call prep_fourwf(rhoaug_down,blocksize,cwavef(:,:,2),wfraug,&
 &                   iblock,istwf_k,dtset%mgfft,mpi_enreg,&
 &                   nband_k,ndat,dtset%ngfft,npw_k,n4,n5,n6,occ_k,1,ucvol,&
-&                   dtset%wtk(ikpt),gpu_option=gpu_option)
+&                   dtset%wtk(ikpt),nfourwf_slices,gpu_option=gpu_option)
                  end if
                  if (nspinor2TreatedByThisProc) then
                    call prep_fourwf(rhoaug_mx,blocksize,cwavef_x,wfraug,&
 &                   iblock,istwf_k,dtset%mgfft,mpi_enreg,&
 &                   nband_k,ndat,dtset%ngfft,npw_k,n4,n5,n6,occ_k,1,ucvol,&
-&                   dtset%wtk(ikpt),gpu_option=gpu_option)
+&                   dtset%wtk(ikpt),nfourwf_slices,gpu_option=gpu_option)
                    call prep_fourwf(rhoaug_my,blocksize,cwavef_y,wfraug,&
 &                   iblock,istwf_k,dtset%mgfft,mpi_enreg,&
 &                   nband_k,ndat,dtset%ngfft,npw_k,n4,n5,n6,occ_k,1,ucvol,&
-&                   dtset%wtk(ikpt),gpu_option=gpu_option)
+&                   dtset%wtk(ikpt),nfourwf_slices,gpu_option=gpu_option)
                  end if
                  call timab(538,2,tsec)
 
