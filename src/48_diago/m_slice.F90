@@ -175,7 +175,7 @@ module m_slice
         integer :: me_bandpp_slice                          ! number of distributed bands per process for slice in use
         integer :: me_ndeg_slice                            ! polynomial filter degree for slice in use
 
-        integer, allocatable :: me_cols_X(:)                ! columns of shared used in task
+        integer, allocatable :: me_cols_X(:)                ! columns of shared memory used in task
         integer, allocatable :: me_cols_Xext(:)             ! columns of asynchronous memory used in task
 
         ! MPI column and row distribution for active task
@@ -255,7 +255,7 @@ module m_slice
         integer :: spacedim                                 ! nb of plane-waves per process in linalg representation
         integer :: nslice                                   ! number of spectral slices
         integer :: space                                    ! real or complex eigenvectors
-        integer :: nbdbuf                                   ! fixme for the moment not clear is useful
+        integer :: nbdbuf                                   ! fixme for the moment not clear if useful
         
         ! GPU-related
         integer :: gpu_kokkos_nthrd                 
@@ -583,7 +583,8 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     ! ===================== Compute Rayleigh quotients and residuals ===================================
     
     wanted_mass = ceiling(neigenpairs * 0.6d0) ! plus 10% extra vectors
-    
+   
+    ! not needed anymore I think...
     ABI_MALLOC(bands_left, (wanted_mass))
     ABI_MALLOC(bands_right, (wanted_mass)) 
 
@@ -624,84 +625,15 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
    
     ! todo simplify fix polynomial degree and give it here
 
-    ! Slice left
-    !slice%neigenpairs_per_slice(1) = 180 ! number of TRUE eigenvalues in (poly_low, poly_upp)
-    !slice%poly_degrees(1) = 10           ! filter degree
-    !slice%part_low_bounds(1) = -0.14     ! first slice is lowpass so interval to suppress
-    !slice%part_upp_bounds(1) = 2.1       ! used for convergence <----
-    !slice%poly_low_bounds(1) = -0.14     ! with overlap
-    !slice%poly_upp_bounds(1) = 2.5       ! with overlap
-
-    ! Slice right
-    !slice%neigenpairs_per_slice(2) = 180 ! number of TRUE eigenvalues in (poly_low, poly_upp)
-    !slice%poly_degrees(2) = 50           ! slice%ndeg_filter
-    !slice%part_low_bounds(2) = 2.1       ! used for convergence <-----
-    !slice%part_upp_bounds(2) = 5.0       ! used for convergence <-----
-    !slice%poly_low_bounds(2) = 1.9       ! with overlap
-    !slice%poly_upp_bounds(2) = 5.2       ! with overlap
-
     ! todo ongoing
     !call slice_initializeSubspaceIteration(slice, X, p, slice%tolerance)
 
     ! todo degrees are deduced from maximum subspace residual divided by wanted residual
     ! use only m residuals where k=m+p
 
-    ! todo deduce from vector pruning
-    ! Indices of test vectors
-    ! todo big modif col_in_X should be replaced by a simple index set
-    slice%fcol_in_X(1) = 1
-    slice%fcol_in_Xext(1) = 1
-    
-    slice%fcol_in_X(2) = 1
-    slice%fcol_in_Xext(2) = slice%neigenpairs_per_slice(1) + 1
-
-    if (slice%nslice==3) then
-        slice%fcol_in_X(3) = 1
-        slice%fcol_in_Xext(3) = slice%fcol_in_Xext(2) + slice%neigenpairs_per_slice(2) 
-    end if
-
-    ! Slice three
-    !slice%neigenpairs_per_slice(3) = 96 ! wanted_mass
-    !slice%fcol_in_X(3) = 1
-    !slice%fcol_in_Xext(3) = 97
-    !slice%poly_degrees(3) = 50! slice%ndeg_filter
-    !slice%part_low_bounds(3) = 2.3
-    !slice%part_upp_bounds(3) = 5.0
-    !slice%poly_low_bounds(3) = 2.2        ! with overlap
-    !slice%poly_upp_bounds(3) = 5.2        ! with overlap
-
-    ! TODO analyze the lambda of Cheby converged in order to find out how many vectors to put per slice
-    ! then fix true slices and see what happens
-    ! You can try this with the small system alu as well. It has the mass splitted into two parts
-    ! then we can compare the total time spent to filter etc
-
-    ! ===================== Resource management system ================================================= 
-
-    if (slice%paral_slice==SEQUENTIAL_SLICE) then 
-
-        slice%nproc_per_slice(:) = slice%nproc
-
-    else
-    
-        ! Divide resources into slice tasks
-        call slice_allocateResources(slice)
-
-        ! Mark my slice task and resources as actively in use
-        call slice_markActiveTask(slice)
-    
-    end if
-
-    ! ===================== Allocate and fill extended memory buffer ================================== 
- 
-    ! todo in new implementation I don't need of extended memory buffer. I always add random columns
-    ! in slice. I also don't need merge.
-
-    ! Sanity check
-    if ((.not. slice%use_linalg) .or. slice%use_colsrows) then
-        ABI_ERROR("not in linalg representation")
-    end if
-
-    slice%neigenpairs_ext = sum(slice%neigenpairs_per_slice)
+    ! todo 
+    !slice%lookup_in_X(:) = 
+    !slice%lookup_in_Xext(:) = 
 
     call xg_free(resid0)
     call xg_free(eigen0)
@@ -821,13 +753,12 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     if ( (.not. slice%use_linalg) .and. slice%use_colsrows) then
         ABI_ERROR("should be in linalg representation")
     end if
-    !if (slice%gpu_option==ABI_GPU_OPENMP) then
-    !    call slice_queryHostDevice(slice, on_host, on_device)
-    !    ABI_CHECK(on_device,"GPU not used when it should be!")
-    !end if
+    
 
     if (slice%paral_kgb==1) then
+        ! ===================== Resource management system ================================================= 
         call init_schedule(scheduler)
+        ! Divide resources into slice tasks
         select case(slice%paral_slice)
         case(DISABLE_PARAL)
             nband_ext = max(k+p)
@@ -840,8 +771,12 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
                 write(std_out,'(a,i5,a,i5)') "Process ", iproc-1, " allocated to task ", slice%lookup_proc(iproc)
             end do
         end select
-        call allocate_extended_memory(extendedMemory, nband_ext)
+        ! Mark my slice task and resources as actively in use
         call mark_active_task(scheduler, task) ! called once for parallel slices and in loop for sequential
+
+        ! ===================== Allocate and fill extended memory buffer ================================== 
+        nband_ext = sum(slice%neigenpairs_per_slice)
+        call allocate_extended_memory(extendedMemory, nband_ext)
         call free_schedule(scheduler)
     else
         !! set without any communications..
@@ -979,10 +914,6 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     if ( (.not. slice%use_colsrows) .and. slice%use_linalg) then
         ABI_ERROR("should be in colsrows representation")
     end if
-    !if (slice%gpu_option==ABI_GPU_OPENMP) then
-    !    call slice_queryHostDevice(slice, on_host, on_device)
-    !    ABI_CHECK(on_device,"GPU not used when it should be!")
-    !end if
 
     ! Timer is BEFORE the barrier !!
     call timab(tim_slice_me,2,tsec)
@@ -1710,6 +1641,8 @@ subroutine allocate_extended_memory(work, paral_kgb, ncol, ncol_ext, space, spac
 
     work%paral_kgb = paral_kgb
     work%neigenpairs_ext = ncol
+    work%use_linalg = .true.
+    work%use_colsrows = .false.
 
     ABI_MALLOC_IFNOT(work%lookup_cols_X, (ncol))
     ABI_MALLOC_IFNOT(work%lookup_cols_Xext, (ncol_ext))
@@ -1744,6 +1677,11 @@ subroutine init_extended_memory(work, task, X0)
 
     type(xgBlock_t) :: col_in, col_out
     integer :: j, nrows, ncols
+
+    ! Sanity check
+    if ((.not. work%use_linalg) .or. work%use_colsrows) then
+        ABI_ERROR("not in linalg representation")
+    end if
 
     if (work%paral_kgb==1) then
         work%XextLinalg = X0
@@ -2215,11 +2153,11 @@ end subroutine slice_allmerge
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/slice_mergeSolutions
+!!****f* m_slice/merge_parallel_tasks
 !! NAME
-!! slice_mergeSolutions
+!! merge_parallel_tasks
 
-subroutine slice_mergeSolutions(slice, X0, eigen, resid)
+subroutine merge_parallel_tasks(slice, X0, eigen, resid)
 
     implicit none
 
@@ -2248,7 +2186,39 @@ subroutine slice_mergeSolutions(slice, X0, eigen, resid)
     ! missing eigenvalues
 
 
-end subroutine slice_mergeSolutions
+end subroutine merge_parallel_tasks
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/copyfrom_extended_memory
+!! NAME
+!! copyfrom_extended_memory
+
+subroutine copyfrom_extended_memory(task, work, X0, eigen, resid)
+
+    implicit none
+    
+    type(activeSlice_t), intent(inout) :: task
+    type(extendedMemory_t), intent(inout) :: work
+    type(xgBlock_t), intent(inout) :: X0
+    type(xgBlock_t), intent(inout) :: eigen
+    type(xgBlock_t), intent(inout) :: resid
+
+    ! Sanity check
+    if (work%paral_kgb == 1 .and. ((.not. work%use_linalg) .or. work%use_colsrows) ) then
+        ABI_ERROR("not in linalg")
+    end if
+
+    if (work%paral_kgb==0) then
+        ! step one remove spurious modes
+        ! step two keep only those inside the limits
+
+        ! task%me_cols_X ! columns of shared memory 
+        ! task%me_cols_Xext ! columns of local memory
+    end if
+
+end subroutine copyfrom_extended_memory
 !!***
 
 !----------------------------------------------------------------------
