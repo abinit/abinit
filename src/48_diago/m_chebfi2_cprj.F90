@@ -479,9 +479,6 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  !Pointers similar to old Chebfi
  integer,allocatable :: ndeg_filter_bands(:) !Oracle variable
  type(xg_nonlop_t) :: xg_nonlop
- ! IML
- real(dp), pointer :: thetas(:,:) => null()
- real(dp), allocatable :: jackson_c(:)
 
 ! *********************************************************************
 
@@ -491,7 +488,6 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
  xg_nonlop = chebfi%xg_nonlop
  chebfi%eigenvalues = eigen
 
- ABI_MALLOC(jackson_c, (ndeg_filter+1))
  ABI_MALLOC(ndeg_filter_bands,(chebfi%bandpp))
  if (chebfi%space==SPACE_C) then
    space_res = SPACE_C
@@ -635,24 +631,12 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspin
    call xgBlock_yxmax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X)
  end if    
 
- ! Start IML write converged eigenvalues here
- open(unit=1201, file='converged_eigenvalues.csv', status='replace')
- call xgBlock_reverseMap(chebfi%eigenvalues, thetas, rows=1, cols=chebfi%neigenpairs)
- write(1201,'(A)') "eig"
- do ideg=1, chebfi%neigenpairs
-    write(1201,'(F15.5)') thetas(1,ideg)
- end do
- close(1201)
- ! End IML
-
  call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
  call timab(tim_residu, 2, tsec)
 
  call timab(tim_copy, 1, tsec)
  call xgBlock_copy(chebfi%X,X0)
  call timab(tim_copy, 2, tsec)
-
- ABI_FREE(jackson_c)
 
  call xgTransposer_free(chebfi%xgTransposerX)
  call xgTransposer_free(chebfi%xgTransposerAX)

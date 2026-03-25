@@ -227,6 +227,7 @@ module m_slice
         integer, allocatable :: fcol_in_X(:)                ! first band of slice in spectrum memory
         integer, allocatable :: fcol_in_Xext(:)             ! first band of slice in extended memory
         integer, allocatable :: lookup_cols_X(:)            ! which slice each column serves
+        integer, allocatable :: lookup_cols_Xext(:)         ! which slice each column serves in extended buffer
 
         ! Arrays related to polynomial filtering (all slices)
         integer, allocatable :: poly_degrees(:)            ! polynomial filter degrees
@@ -410,7 +411,8 @@ subroutine slice_allocateAll(slice)
 
     ABI_MALLOC_IFNOT(slice%fcol_in_X, (slice%nslice))
     ABI_MALLOC_IFNOT(slice%fcol_in_Xext, (slice%nslice))
-    ABI_MALLOC_IFNOT(slice%lookup_cols_X, (slice%nslice))
+    ABI_MALLOC_IFNOT(slice%lookup_cols_X, (slice%neigenpairs))
+    ABI_MALLOC_IFNOT(slice%lookup_cols_Xext, (slice%neigenpairs))
     ABI_MALLOC_IFNOT(slice%ncolsColsRows, (slice%nproc))
 
     ABI_MALLOC_IFNOT(slice%poly_degrees, (slice%nslice))
@@ -451,22 +453,13 @@ subroutine slice_free(slice)
     ABI_SFREE(slice%fcol_in_X)
     ABI_SFREE(slice%fcol_in_Xext)
     ABI_SFREE(slice%lookup_cols_X)
+    ABI_SFREE(slice%lookup_cols_Xext)
 
     ABI_SFREE(slice%poly_degrees)
     ABI_SFREE(slice%part_low_bounds)
     ABI_SFREE(slice%part_upp_bounds)
     ABI_SFREE(slice%poly_low_bounds)
     ABI_SFREE(slice%poly_upp_bounds)
-
-    !if (slice%me_comm_slice /= slice%spacecom) then
-    !    call xmpi_comm_free(slice%me_comm_slice)
-    !end if
-    !if (slice%me_comm_rows /= slice%comm_rows) then
-    !    call xmpi_comm_free(slice%me_comm_rows)
-    !end if
-    !if (slice%me_comm_cols /= slice%comm_cols) then
-    !    call xmpi_comm_free(slice%me_comm_cols)
-    !end if
 
 end subroutine slice_free
 !!***
@@ -618,7 +611,8 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     !slice%poly_low_bounds(2) = 1.9       ! with overlap
     !slice%poly_upp_bounds(2) = 5.2       ! with overlap
 
-    call slice_initializeSubspaceIteration(slice)
+    ! todo ongoing
+    !call slice_initializeSubspaceIteration(slice, X, p, slice%tolerance)
 
     ! todo degrees are deduced from maximum subspace residual divided by wanted residual
     ! use only m residuals where k=m+p
@@ -669,7 +663,10 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     end if
 
     ! ===================== Allocate and fill extended memory buffer ================================== 
-  
+ 
+    ! todo in new implementation I don't need of extended memory buffer. I always add random columns
+    ! in slice. I also don't need merge.
+
     ! Sanity check
     if ((.not. slice%use_linalg) .or. slice%use_colsrows) then
         ABI_ERROR("not in linalg representation")
@@ -692,7 +689,7 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
         
         slice%XextLinalg = slice%X_ext%self
 
-        ! Copy X to XextLinalg by contiguous column blocks
+        ! Copy X to XextLinalg to achieve contiguous column blocks
         do islice=1,slice%nslice
             ncols = slice%neigenpairs_per_slice(islice)
             fcol = slice%fcol_in_X(islice)
@@ -1050,6 +1047,9 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     write(std_out,*) 'converged at ninner=', i
     flush(std_out)
+
+    ! todo here keep residuals that are smaller than wanted value
+    ! consider remaining residuals are spurious nodes thus eliminate them.
 
     !write(std_out,*) 'getid after runSlice X0_active', xgBlock_getId(X0_active) 
 
@@ -1899,6 +1899,44 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     call xg_free(resid_ext)
 
 end subroutine slice_allmerge
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/slice_mergeSolutions
+!! NAME
+!! slice_mergeSolutions
+
+subroutine slice_mergeSolutions(slice, X0, eigen, resid)
+
+    implicit none
+
+    ! Arguments ------------------------------------
+    type(slice_t), intent(inout) :: slice
+    type(xgBlock_t), intent(inout) :: X0
+    type(xgBlock_t), intent(inout) :: eigen
+    type(xgBlock_t), intent(inout) :: resid
+
+    ! Local variables-------------------------------
+    type(xg_t) :: eigen_ext
+    type(xg_t) :: resid_ext
+
+    ! *********************************************************************
+
+    ! Allocate extended space for all slice eigenvalues and residuals
+    !call xg_init(eigen_ext, SPACE_R, rows=1, cols=slice%neigenpairs_ext, gpu_option=slice%gpu_option)
+    !call xg_init(resid_ext, SPACE_R, rows=1, cols=slice%neigenpairs_ext, gpu_option=slice%gpu_option)
+
+    ! Eliminate spurious nodes
+    !mask_spurious = resid(:,1) < slice%tolerance
+    !idx = pack([(i, i=1,neigenpairs_slice)], mask_spurious)
+
+    ! todo write X0 at exiting slice solver using this condition
+    ! do a xmpi_sum(neigenpairs_total) is the total sum is not correct then slice did not converge
+    ! missing eigenvalues
+
+
+end subroutine slice_mergeSolutions
 !!***
 
 !----------------------------------------------------------------------
@@ -3455,47 +3493,103 @@ end subroutine computeFilterEnergy
 !! step 2) calculer les résidus
 !! step 3) mettre les valeurs de Ritz dans part_low_bounds, part_upp_bounds sous condition que res<tol
 !! step 4) sinon faire un sketch de taille K du reste
-!!slice%lookup_cols_X
 !!
 !! SOURCE
 
-  subroutine slice_initializeSubspaceIteartion(slice, p)
+  subroutine slice_initializeSubspaceIteration(slice, X, p, tol)
 
     implicit none
 
     type(slice_t), intent(inout) :: slice
+    type(xgBlock_t), intent(inout) :: X
+    real(dp), intent(in) :: tol
     integer, intent(in) :: p
 
+    type(chebfi_t) :: chebfi
+    integer :: space_res
     integer :: k_sketch
+    integer :: nband, gpu_option
+    integer :: m, k, i, m_conv, i1, i2, islice
+    real(dp) :: uppb, lowb
+    real(dp) :: mineig, maxeig
     type(xg_t) :: X_sketch
+    type(xg_t) :: DivResults
+    type(xgBlock_t) :: resid
+    real(dp), pointer :: resid_vals(:,:) => null()
+    real(dp), pointer :: thetas(:,:) => null()
+    logical, allocatable :: mask_conv(:)
+    logical, allocatable :: mask(:)
+    integer, allocatable :: idx(:)
+    real(dp) :: tsec(2)
 
   ! *********************************************************************
 
+    nband = slice%neigenpairs
+    gpu_option = slice%gpu_option
+
+    if (slice%space==SPACE_C) then
+        space_res = SPACE_C
+    else if (slice%space==SPACE_CR) then
+        space_res = SPACE_R
+    else
+        ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
+    end if
+
+    call xg_init(DivResults, space_res, nband, 1, gpu_option=gpu_option)
+    
     ! Compute Rayleigh quotients (colsrows distribution)
     ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RRQ)
     call timab(tim_RR_q, 1, tsec)
     call chebfi_rayleighRitzQuotients(chebfi, maxeig, mineig, DivResults%self)
     call timab(tim_RR_q, 2, tsec)
     ABI_NVTX_END_RANGE()
+        
+    call xgBlock_reverseMap(DivResults%self , thetas, rows=nband, cols=1)
+    call xgBlock_reverseMap(resid, resid_vals, rows=rows(resid), cols=1)
 
     ! Compute subspace residuals
     ! en gros il faut décider soit de faire le subspace residual (cher) soit le vector residual
 
+    mask_conv = resid_vals(:,1) < tol
+    
     do islice=1,slice%nslice
-        m = slice%mass(islice)
+        m = slice%neigenpairs_per_slice(islice)
         k = m + p
-        k_conv = ..
-    end if
+        !k_conv = ..
+        lowb = slice%part_low_bounds(islice)
+        uppb = slice%part_upp_bounds(islice)
+        mask = mask_conv .and. lowb < thetas(:,1) .and. thetas(:,1) < uppb
+        idx = pack([(i, i=1,nband)], mask)
+        m_conv = size(idx)
 
-    ! Y = X * Omega where Omega sketch matrix to capture all directions at once (linalg distribution)
-    !k_sketch = neigenpairs
-    k_sketch = k - k_conv
-    call xg_init(X_sketch, space, spacedim, neigenpairs, spacecom, gpu_option=gpu_option)
-    call randomSketching(slice, X, X_sketch%self, k_sketch)
-    ! todo rename randomSketching or move to xg because does not directly depend on slice
-    call xgBlock_copy(X_sketch%self, X)
-    call xg_free(X_sketch)
+        slice%lookup_cols_X(idx) = islice
+    
+        ! sketch remaining offset using random vectors
+        k_sketch = k - m_conv
 
+        ! Est-ce que c'est mieux de prendre un melange aléatoire des autres directions ou de prendre simplement
+        ! des vecteurs aléatoires?
+        ! V1 essayer avec des vecteurs aléatoires, c'est plus facile d'implémenter
+
+        ! Y = X * Omega where Omega sketch matrix to capture all directions at once (linalg distribution)
+        !k_sketch = neigenpairs
+        call xg_init(X_sketch, slice%space, slice%spacedim, nband, slice%spacecom, gpu_option=gpu_option)
+        call randomSketching(slice, X, X_sketch%self, k_sketch)
+        ! todo rename randomSketching or move to xg because does not directly depend on slice
+        call xgBlock_copy(X_sketch%self, X)
+        call xg_free(X_sketch)
+    end do
+    
+    i1 = 1
+    i2 = 1
+    do islice=1,slice%nslice
+        i2 = slice%neigenpairs_per_slice(islice)
+        slice%lookup_cols_Xext(i1:i2) = islice
+        i1 = i2
+    end do
+   
+    ! Peut-être on n'a pas besoin du bloc extended parce que on ajoute des vecteurs aléatoires
+    ! call slice_initExtendedMemory(slice)
 
   end subroutine slice_initializeSubspaceIteration
 !!***
