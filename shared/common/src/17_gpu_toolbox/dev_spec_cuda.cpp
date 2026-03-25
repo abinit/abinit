@@ -411,7 +411,7 @@ extern "C" void check_gpu_mem_(const char* str)
 /* OUTPUT gpu_ptr= C_PTR on gpu memory location that has been allocated       */
 /*============================================================================*/
 
-extern "C" void alloc_on_gpu_(void **gpu_ptr, const size_t* size)
+extern "C" void alloc_on_gpu_cpp_(void **gpu_ptr, const size_t* size)
 {
 
   //check_gpu_mem_("alloc_on_gpu_");
@@ -431,7 +431,7 @@ extern "C" void alloc_on_gpu_(void **gpu_ptr, const size_t* size)
 /*            the correct one is in xx_gpu_toolbox/dev_spec.cu                */
 /*============================================================================*/
 
-extern "C" void dealloc_on_gpu_(void **gpu_ptr)
+extern "C" void dealloc_on_gpu_cpp_(void **gpu_ptr)
 {
   if(*gpu_ptr==NULL)
     return;
