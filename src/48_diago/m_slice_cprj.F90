@@ -36,7 +36,7 @@ module m_slice_cprj
  use m_xgTransposer
  use m_xg_ortho_RR
  use m_xg_nonlop
- use m_trace_estimation
+ !use m_trace_estimation
 
  use m_xmpi
  use m_xomp
@@ -633,6 +633,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  ! Warning; the entire code assumes this for simplicity and debugging purposes
  ABI_CHECK(slice%bandpp == slice%neigenpairs, "slice_cprj not implemented in MPI")
+ 
+ ABI_WARNING("experimental code is not debugged")
 
  ! Read scalar variables
  nslice = slice%nslice

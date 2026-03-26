@@ -14,6 +14,13 @@
 !! - uses logic for asynchronous slice memory avoiding race condition in read/write.
 !! - applies Rayleigh-Ritz for individual slices in parallel or sequentially.
 !!
+!! NOTES
+!! Dependence with other modules in this directory:
+!!   m_slice uses:
+!!      |- m_polynomial_filter
+!!      |- m_task_scheduler
+!!      |- m_trace_estimation
+!!      |- m_chebfi2
 !!
 !! COPYRIGHT
 !! Copyright (C) 2018-2026 ABINIT group (IML)
@@ -115,6 +122,8 @@ module m_slice
         integer :: comm_cols                                ! same as spacecom
         integer :: spacecom                                 ! same as comm_cols
         integer :: bandpp                                   ! nb of bands per process in colsrows representation 
+        integer :: me_g0                                    ! 1 if this processors treats G=0, 0 otherwise
+        integer :: me_g0_fft                                ! 1 if this processors treats G=0 in FFT, 0 otherwise
 
         ! Eigenpair parameters
         integer :: neigenpairs                              ! total number of bands (=number of eigenpairs)
@@ -144,6 +153,7 @@ module m_slice
         real(dp) :: maxeig_global                           ! guaranteed upper spectral bound
 
         ! Arrays related to polynomial filtering
+        integer, allocatable :: neigenpairs_per_slice(:)    ! number of total eigenpairs per slice
         integer, allocatable :: poly_degrees(:)            ! polynomial filter degrees
         real(dp), allocatable :: low_bounds(:)             ! lower bounds in spectral partition (disjoint)
         real(dp), allocatable :: upp_bounds(:)             ! upper bounds in spectral partition (disjoint) 
@@ -304,6 +314,7 @@ subroutine slice_allocateAll(slice)
 
     call slice_free(slice)
 
+    ABI_MALLOC_IFNOT(slice%neigenpairs_per_slice, (slice%nslice))
     ABI_MALLOC_IFNOT(slice%poly_degrees, (slice%nslice))
     ABI_MALLOC_IFNOT(slice%low_bounds, (slice%nslice))
     ABI_MALLOC_IFNOT(slice%upp_bounds, (slice%nslice))
@@ -324,6 +335,7 @@ subroutine slice_free(slice)
 
     ! *********************************************************************
 
+    ABI_SFREE(slice%neigenpairs_per_slice)
     ABI_SFREE(slice%poly_degrees)
     ABI_SFREE(slice%low_bounds)
     ABI_SFREE(slice%upp_bounds)
@@ -355,7 +367,7 @@ end subroutine slice_free
 !! 
 !! SOURCE
 
-subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
+subroutine slice_run(slice, X, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     implicit none
 
@@ -411,18 +423,16 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     
     ! *********************************************************************
     
-    if (slice%me_id_slice==1) then
+    if (task%me_id_slice==1) then
         tim_slice_me = tim_slice_1
-    else if (slice%me_id_slice==2) then
+    else if (task%me_id_slice==2) then
         tim_slice_me = tim_slice_2
-    else if (slice%me_id_slice==3) then
+    else if (task%me_id_slice==3) then
         tim_slice_me = tim_slice_3
     else
         tim_slice_me = tim_slice_X
     end if
     
-    call timab(tim_slice_me,1,tsec)
-
     nrows = slice%spacedim
     if (slice%paral_kgb==1) then
         nrows = slice%total_spacedim
@@ -502,6 +512,8 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
 !    
 !    ! ============================ Active task execution =======================================
 !
+!    call timab(tim_slice_me,1,tsec)
+!    
 !    if (slice%paral_kgb==0 .or. slice%paral_slice==DISABLE_PARAL) then
 !        ! execute active tasks sequentially
 !
@@ -592,11 +604,12 @@ subroutine slice_prepareSpectrum(slice, X, eigen, resid, getAX_BX, getBm1X, nspi
     integer :: nstep_bisect
     integer :: kmax
     integer :: m_probe
+    integer :: my_shift, my_rank
     integer :: space, spacecom, gpu_option
     integer :: k_sketch
     real(dp) :: lambda_min, res_norm
     real(dp) :: center, radius
-    real(dp) :: mineig, maxeig
+    real(dp) :: lowb, mineig, maxeig
     real(dp) :: mineig_global, maxeig_global
     real(dp) :: lanczos_lowb, lanczos_lowb_global
     ! Derived types
@@ -607,9 +620,9 @@ subroutine slice_prepareSpectrum(slice, X, eigen, resid, getAX_BX, getBm1X, nspi
 #endif
     type(xg_t) :: BX
     type(xgBlock_t) :: xXColsRows
+    type(xgBlock_t) :: eigen_me, resid_me
+    type(matrixInfo_t) :: matrixInfo
     type(xgTransposer_t) :: xgTransposerX
-    type(mpi_type) :: mpi_enreg_old
-    type(mpi_type) :: mpi_enreg_new
     ! Arrays
     complex(dp), allocatable :: cheby_moments(:,:)
     real(dp) :: tsec(2)
@@ -630,11 +643,12 @@ subroutine slice_prepareSpectrum(slice, X, eigen, resid, getAX_BX, getBm1X, nspi
 #endif
 
     ! Y = X * Omega where Omega sketch matrix to capture all directions at once
-    k_sketch = neigenpairs
-    call xg_init(X_sketch, space, spacedim, neigenpairs, spacecom, gpu_option=gpu_option)
-    call randomSketching(slice, X, X_sketch%self, k_sketch)
-    call xgBlock_copy(X_sketch%self, X)
-    call xg_free(X_sketch)
+    !k_sketch = neigenpairs
+    !call xg_init(X_sketch, space, spacedim, neigenpairs, spacecom, gpu_option=gpu_option)
+    !call randomSketching(slice, X, X_sketch%self, k_sketch)
+    !call xgBlock_copy(X_sketch%self, X)
+    !call xg_free(X_sketch)
+    ! fixme this has been moved elsewhere
 
     ! ============== Transpose ==============
     if (slice%paral_kgb==1) then
@@ -646,18 +660,10 @@ subroutine slice_prepareSpectrum(slice, X, eigen, resid, getAX_BX, getBm1X, nspi
          
         xgTransposerX%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
         
-        ! Sanity check
-        if ((.not. slice%use_linalg) .or. slice%use_colsrows) then
-            ABI_ERROR("not in linalg")
-        end if
-    
         !call xmpi_barrier(slice%spacecom)
         ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
         call xgTransposer_transpose(xgTransposerX, STATE_COLSROWS)
         ABI_NVTX_END_RANGE()
-
-        slice%use_linalg = .false.
-        slice%use_colsrows = .true.
 
     else
 
@@ -686,8 +692,12 @@ subroutine slice_prepareSpectrum(slice, X, eigen, resid, getAX_BX, getBm1X, nspi
     end if
 #endif
 
+    call init_matrixInfo(matrixInfo, slice%comm_rows, slice%comm_cols, slice%spacecom, slice%neigenpairs,&
+        slice%total_spacedim, slice%spacedim, slice%space, slice%gpu_kokkos_nthrd, slice%gpu_thread_limit,&
+        slice%gpu_option, slice%paral_kgb, slice%me_g0, slice%me_g0_fft)
+
     kmax = 30
-    call computeBLanczos(slice, getAX_BX, getBm1X, kmax, lambda_min, res_norm)
+    call computeBLanczos(matrixInfo, slice%paw, getAX_BX, getBm1X, kmax, lambda_min, res_norm)
 
     lanczos_lowb = lambda_min - res_norm
     call xmpi_min(lanczos_lowb,lanczos_lowb_global,slice%spacecom,ierr)
@@ -709,8 +719,8 @@ subroutine slice_prepareSpectrum(slice, X, eigen, resid, getAX_BX, getBm1X, nspi
     write(std_out,*) 'ndeg_filter=', ndeg_filter_max
     flush(std_out)
 
-    call computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter_max, m_probe,& 
-        lanczos_lowb_global)
+    call computeTraceEstimation(matrixInfo, slice%nslice, slice%ecut, slice%paw, &
+        slice%tolerance, getAX_BX, getBm1X, ndeg_filter_max, m_probe, lanczos_lowb_global)
     
     write(std_out,*) 'STE exited'
     flush(std_out)
@@ -721,12 +731,12 @@ subroutine slice_prepareSpectrum(slice, X, eigen, resid, getAX_BX, getBm1X, nspi
 
     if (slice%paral_kgb==1) then
         my_shift = my_rank * slice%bandpp
-        call xgBlock_reshape(eigen, (1, slice%neigenpairs))
-        call xgBlock_reshape(resid, (1, slice%neigenpairs))
+        call xgBlock_reshape(eigen, 1, slice%neigenpairs)
+        call xgBlock_reshape(resid, 1, slice%neigenpairs)
         call xgBlock_setBlock(eigen, eigen_me, 1, slice%bandpp, fcol=my_shift)
         call xgBlock_setBlock(resid, resid_me, 1, slice%bandpp, fcol=my_shift)
-        call xgBlock_reshape(eigen, (slice%neigenpairs, 1))
-        call xgBlock_reshape(resid, (slice%neigenpairs, 1))
+        call xgBlock_reshape(eigen, slice%neigenpairs, 1)
+        call xgBlock_reshape(resid, slice%neigenpairs, 1)
     else
         call xgBlock_setBlock(eigen, eigen_me, rows(eigen), 1)
         call xgBlock_setBlock(resid, resid_me, rows(resid), 1)
@@ -758,9 +768,6 @@ subroutine slice_prepareSpectrum(slice, X, eigen, resid, getAX_BX, getBm1X, nspi
     else
         call xgBlock_setBlock(xXColsRows, X, spacedim, neigenpairs)
     end if
-
-    slice%use_linalg = .true.
-    slice%use_colsrows = .false.
 
     if (slice%paral_kgb == 1) then
         call xgTransposer_free(xgTransposerX)
@@ -879,37 +886,6 @@ subroutine slice_queryCandidates(slice, xXColsRows, eigen, resid, getAX_BX)
     call xg_free(norml)
 
 end subroutine slice_queryCandidates
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_queryHostDevice
-!! NAME
-!! slice_queryHostDevice
-!! 
-!! FUNCTION
-!! Query OpenMP offloading API to update/get(optional) GPU/CPU flags
-!! 
-!! SOURCE
-
-subroutine slice_queryHostDevice(slice,on_host,on_device)
-
-    implicit none
-    type(slice_t), intent(inout) :: slice
-    logical, optional, intent(inout) :: on_host
-    logical, optional, intent(inout) :: on_device
-    integer :: device_id
-    
-    ! *********************************************************************
-
-    device_id = xomp_get_device_num()
-    slice%on_host = (device_id < 1) ! outside target (-1), inside target host (0)
-    slice%on_device = (device_id > 0) ! inside target not host (device number)
-
-    if (present(on_host)) on_host = slice%on_host
-    if (present(on_device)) on_device = slice%on_device
-
-end subroutine slice_queryHostDevice
 !!***
 
 !----------------------------------------------------------------------
@@ -1066,14 +1042,14 @@ end subroutine splitSpectrum
 !! 
 !! SOURCE
 
-  subroutine slice_applySelectionWindow(slice, mapper, eigen, residu, tol, safe)
+  subroutine slice_applySelectionWindow(slice, mapper, eigen, resid, tol, safe)
 
     implicit none
 
     type(slice_t), intent(inout) :: slice
-    intent, pointer, intent(inout) :: mapper(:,:)
+    integer, pointer, intent(inout) :: mapper(:,:)
     type(xgBlock_t), intent(inout) :: eigen
-    type(xgBlock_t), intent(inout) :: residu
+    type(xgBlock_t), intent(inout) :: resid
     real(dp), intent(in) :: tol
     integer, intent(in) :: safe
 
@@ -1090,8 +1066,6 @@ end subroutine splitSpectrum
     call xgBlock_reverseMap(eigen, thetas, rows=nband, cols=1)
     call xgBlock_reverseMap(resid, resid_vals, rows=nband, cols=1)
 
-    mask_conv = resid_vals(:,1) < tol
-    
     ! apply selection window per slice
     do islice=1,slice%nslice
         m = slice%neigenpairs_per_slice(islice)

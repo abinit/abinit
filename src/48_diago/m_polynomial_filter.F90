@@ -73,6 +73,7 @@ module m_polynomial_filter
     public :: cheb_poly
     public :: bandpass_sca
     public :: print_scalar_filter
+    public :: bandpassIndicator_sca
 
     CONTAINS  
 !=====================================================================
@@ -466,6 +467,71 @@ subroutine print_scalar_filter(a, b, lb, ub, glb, gub, ndeg, is_lowpass)
     write(std_out,*) ' '
 
 end subroutine print_scalar_filter
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_polynomial_filter/bandpassIndicator_sca
+!! NAME
+!! bandpassIndicator_sca
+!!
+!! FUNCTION
+!! Scalar Chebyshev-Jackson polynomial filter f(x) approximating an 
+!! indicator function, using degree deg evaluated at point x=t
+!!
+!! INPUTS
+!!  a,b=    interval to amplify included in -1,1
+!!  t=      scalar to evaluate filter on
+!!  deg=    order of Chebyshev expansion
+!!
+!! OUTPUT
+!!  res
+!!
+!! SOURCE
+
+function bandpassIndicator_sca(t,a,b,deg) result(f_t)
+
+    implicit none
+
+    !Arguments ------------------------------------
+    real(dp), intent(in ) :: t,a,b
+    integer , intent(in ) :: deg
+
+    real(dp) :: f_t
+    
+    !Local variables-------------------------------
+    real(dp) :: yt0,yt,yt_swap,ck,mu,damp
+    integer  :: i
+    
+    ! *********************************************************************
+
+    ! init cheby of deg=0,1 eval at t
+    yt0 = 1.d0
+    yt = t
+
+    ! init filter for deg=0
+    ck = Pi/(deg+2)
+    mu = 1/Pi*(ACOS(a)-ACOS(b))
+    damp = 1.d0
+    f_t = mu * damp * yt0
+
+    do i=1,deg 
+        
+        ! Update damping and expansion coefficient
+        mu = 2/Pi * (SIN(i*ACOS(a)) - SIN(i*ACOS(b)))/i
+        damp = ((1 - i/(deg+2))*SIN(ck)*COS(i*ck) + 1/(deg+2)*COS(ck)*SIN(i*ck))/SIN(ck)
+
+        ! Sum terms
+        f_t = f_t + mu * damp * yt
+
+        ! Update Chebyshev polynomial
+        yt_swap = yt
+        yt = 2 * t * yt - yt0
+        yt0 = yt_swap
+        
+    end do
+
+end function bandpassIndicator_sca
 !!***
 
 end module m_polynomial_filter
