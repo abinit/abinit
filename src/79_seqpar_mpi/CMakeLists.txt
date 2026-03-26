@@ -10,6 +10,7 @@ add_library(79_seqpar_mpi STATIC
   m_lobpcgwf_cprj.F90
   m_lobpcgwf_old.F90
   m_slicewf.F90
+  m_slicewf_cprj.F90
   m_tddft.F90
   m_vtowfk.F90
   m_vtorho.F90
