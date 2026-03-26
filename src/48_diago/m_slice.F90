@@ -465,7 +465,6 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     call timab(tim_slice_sched,2,tsec)
 
     call slice_splitSpectrum(slice, moments)
-    
     ABI_FREE(moments)
 
     ! Attribute column vectors of X0 to slices using query results
@@ -482,15 +481,9 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     write(std_out,*) mapper(1,:)
     flush(std_out)
 
-    !! IML debug start
-    !! debug up to here is independent of parallelism
+    ! offset
+    !p = 10
 
-    ! what to do next
-    ! sketch remaining offset using random vectors
-    !k_sketch = k - m_conv
-
-    ! IML here start the complicated part that depends on parallelism
- 
     ! ============================== Initialize guess for subspace iteration ===============================
 
     ! Resource management system 
