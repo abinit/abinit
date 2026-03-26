@@ -224,7 +224,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: iorder_cprj,ipw,ispinor,iispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
  integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo,ndat_fft
  integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10
- integer :: gpu_option_tmp,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp
+ integer :: gpu_option_tmp,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp,nfourwf_slices_tmp
  integer :: firstelt,firstband,lastelt,lastband,spacedim,chunk,residuchunk,islice
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar2,ar_im,eshift,occblock,norm
@@ -838,6 +838,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  gpu_option_tmp=gs_hamk%gpu_option
  if(optforces==1 .and. gs_hamk%gpu_option==ABI_GPU_OPENMP) then
    blksize_gemm_nonlop_tmp = gemm_nonlop_block_size; is_distrib_tmp = gemm_nonlop_is_distributed
+   nfourwf_slices_tmp = gs_hamk%nfourwf_slices
    gemm_nonlop_block_size = dtset%gpu_nl_splitsize
    call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
    &                        dtset%nspinor,dtset%nspden,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
@@ -1380,6 +1381,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    gs_hamk%gpu_option = gpu_option_tmp
    gemm_nonlop_block_size = blksize_gemm_nonlop_tmp
    gemm_nonlop_is_distributed = is_distrib_tmp
+   gs_hamk%nfourwf_slices = nfourwf_slices_tmp
  end if
 
  if (dtset%cprj_in_memory==1) then

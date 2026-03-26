@@ -171,6 +171,9 @@ module defs_abitypes
    integer :: nproc_fft
    ! number of processors in my group of FFT
 
+   integer :: gpu_fft_nslices
+   ! number of processors in my group of FFT
+
    type(distribfft_type),pointer :: distribfft  => null()
    ! Contains all the information related to the FFT distribution
 

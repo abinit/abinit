@@ -424,7 +424,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
 &   dtset%nucdipmom,occ,optfor,paw_ij,pawfgr,pawtab,ph1d,psps,dtset%qgbt,rprimd,stress_needed,symrec,dtset%typat,&
 &   dtset%use_gbt,usecprj,dtset%usefock,usevxctau,vxctau,usexg,dtset%gpu_option,dtset%gpu_nl_distrib,&
-&   dtset%gpu_nl_splitsize,dtset%wtk,xred,ylm,ylmgr,xg_nonlop)
+&   dtset%gpu_nl_splitsize,dtset%gpu_fft_nslices,dtset%wtk,xred,ylm,ylmgr,xg_nonlop)
  else if (optfor>0) then !WVL
    ABI_MALLOC(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
@@ -635,13 +635,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &  mpw,my_natom,natom,nband,nfft,nfftf,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
 &  ntypat,nucdipmom,occ,optfor,paw_ij,pawfgr,pawtab,ph1d,psps,qgbt,rprimd,&
 &  stress_needed,symrec,typat,use_gbt,usecprj,usefock,usevxctau,vxctau,usexg,&
-&  gpu_option,gpu_nl_distrib,gpu_nl_splitsize,wtk,xred,ylm,ylmgr,xg_nonlop)
+&  gpu_option,gpu_nl_distrib,gpu_nl_splitsize,gpu_fft_nslices,wtk,xred,ylm,ylmgr,xg_nonlop)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nfftf,nkpt
  integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor,stress_needed
- integer,intent(in) :: use_gbt,usecprj,usefock,usevxctau,usexg,gpu_option,gpu_nl_distrib,gpu_nl_splitsize
+ integer,intent(in) :: use_gbt,usecprj,usefock,usevxctau,usexg,gpu_option
+ integer,intent(in) :: gpu_nl_distrib,gpu_nl_splitsize,gpu_fft_nslices
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(electronpositron_type),pointer :: electronpositron
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -779,7 +780,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
-& nucdipmom=nucdipmom,gpu_option=gpu_option)
+& nucdipmom=nucdipmom,gpu_option=gpu_option,nfourwf_slices=gpu_fft_nslices)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
  if (usevxctau>0) then
