@@ -36,6 +36,7 @@ module m_slice_cprj
  use m_xgTransposer
  use m_xg_ortho_RR
  use m_xg_nonlop
+ use m_trace_estimation
 
  use m_xmpi
  use m_xomp
@@ -148,8 +149,6 @@ module m_slice_cprj
  public :: slice_free
  public :: slice_memInfo
  public :: slice_run_cprj
- public :: smallestTridiagEigenpair
- public :: buildChebyshevJacksonCoeffs
 
  CONTAINS  !========================================================================================
 !!***
@@ -2641,47 +2640,6 @@ end subroutine computeChebyshevMoments
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice_cprj/buildChebyshevJacksonCoeffs
-!! NAME
-!! buildChebyshevJacksonCoeffs
-!!
-!! SOURCE
-subroutine buildChebyshevJacksonCoeffs(ls, us, ndeg_filter, cja)
-
-    implicit none
-
-    integer, intent(in) :: ndeg_filter
-    real(dp), intent(in) :: ls, us ! scaled to [-1,1)
-    real(dp), intent(inout) :: cja(ndeg_filter+1)
-
-    integer :: ideg
-    real(dp) :: cdeg
-    real(dp) :: mu, damp
-    
-    ! *********************************************************************
-
-    cdeg = Pi/(ndeg_filter+2)
-    mu = 1.d0/Pi*(ACOS(ls)-ACOS(us))
-    damp = 1.d0 ! Jackson damping
-
-    cja(1) = mu*damp
-
-    do ideg = 0, ndeg_filter - 1
-        
-        ! Accumulate X with weight in Xsum for bandpass filters
-        mu = 2/Pi * (SIN((ideg+1)*ACOS(ls)) - SIN((ideg+1)*ACOS(us)))/(ideg+1)
-        damp = ((1 - (ideg+1)/(ndeg_filter+2))*SIN(cdeg)*COS((ideg+1)*cdeg) + &
-                1/(ndeg_filter+2)*COS(cdeg)*SIN((ideg+1)*cdeg))/SIN(cdeg)
-        
-        cja(ideg+2) = mu*damp
-        
-    end do
-
-end subroutine buildChebyshevJacksonCoeffs
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_slice_cprj/computeTraceEstimation
 !! NAME
 !! computeTraceEstimation
@@ -2942,59 +2900,6 @@ subroutine splitSpectrumToSlices( &
 
 
 end subroutine splitSpectrumToSlices
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice_cprj/smallestTridiagEigenpair
-!! NAME
-!! smallestTridiagEigenpair
-!! 
-!! FUNCTION
-!! Smallest eigenvalue of symmetric tridiagonal
-!!
-!! SOURCE
-
-  subroutine smallestTridiagEigenpair(n, d, e, lambda, v)
-    implicit none
-    integer, intent(in) :: n
-    real(dp), intent(in)  :: d(n), e(n-1)
-    real(dp), intent(out) :: lambda
-    real(dp), intent(out) :: v(n)
-
-    ! Local copies (DSTEVX overwrites input)
-    real(dp) :: dloc(n), eloc(n-1)
-    real(dp), allocatable :: z(:,:), work(:)
-    integer, allocatable :: iwork(:), ifail(:)
-    integer :: info, m
-    
-    ! *********************************************************************
-
-    dloc = d
-    eloc = e
-
-    ABI_MALLOC(z, (n,1))
-    ABI_MALLOC(work, (5*n))
-    ABI_MALLOC(iwork, (5*n))
-    ABI_MALLOC(ifail, (n))
-
-    ! DSTEVX computes selected eigenpairs (here smallest: index 1)
-    call dstevx('V', 'I', n, dloc, eloc, 0.0d0, 0.0d0, 1, 1, 1.0d-12, m, dloc, z, &
-        n, work, iwork, ifail, info)
-
-    if (info /= 0) then
-       ABI_ERROR('DSTEVX failed')
-    end if
-
-    lambda = dloc(1)
-    v      = z(:,1)
-
-    ABI_FREE(z)
-    ABI_FREE(work)
-    ABI_FREE(iwork)
-    ABI_FREE(ifail)
-
-  end subroutine smallestTridiagEigenpair
 !!***
 
 !----------------------------------------------------------------------
