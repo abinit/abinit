@@ -758,13 +758,14 @@ end subroutine gsham_free
 subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
                      xred,nfft,mgfft,ngfft,rprimd,nloalg,&
                      ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&   ! optional
-                     electronpositron,fock,nucdipmom,gpu_option,spinaxis,use_gbt,zora) ! optional
+                     electronpositron,fock,nucdipmom,gpu_option,spinaxis,&    ! optional
+                     use_gbt,zora,nfourwf_slices)    ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(gs_hamiltonian_type),intent(inout),target :: ham
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
- integer,optional,intent(in) :: comm_atom,usecprj,gpu_option,use_gbt,zora
+ integer,optional,intent(in) :: comm_atom,usecprj,gpu_option,use_gbt,zora,nfourwf_slices
  type(electronpositron_type),optional,pointer :: electronpositron
  type(fock_type),optional,pointer :: fock
  type(pseudopotential_type),intent(in) :: psps
@@ -799,7 +800,10 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
  my_zora=0; if (present(zora)) my_zora=zora
 
- ham%nfourwf_slices=1
+ ham%nfourwf_slices=1;
+ if (present(nfourwf_slices) .and. l_gpu_option==ABI_GPU_OPENMP) then
+   ham%nfourwf_slices=nfourwf_slices
+ end if
  ham%use_gbt = 0; if (present(use_gbt)) ham%use_gbt = use_gbt
  ham%spinaxis = zero; if (present(spinaxis)) ham%spinaxis = spinaxis
 

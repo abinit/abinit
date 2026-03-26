@@ -644,7 +644,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
   dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
   paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-  nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option,spinaxis=dtset%spinaxis,use_gbt=dtset%use_gbt)
+  nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option,spinaxis=dtset%spinaxis,&
+  use_gbt=dtset%use_gbt,nfourwf_slices=mpi_enreg%gpu_fft_nslices)
 
  if (dtset%cprj_in_memory==1) then
    call xg_nonlop_update_weight(xg_nonlop,ucvol) ! ucvol could have changed in mover
@@ -1089,6 +1090,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          &                        dtset%nspinor,dtset%nspden,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
          &                        0,0,dtset%wfoptalg,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
          &                        gemm_nonlop_block_size,nblk_gemm_nonlop)
+         mpi_enreg%gpu_fft_nslices = gs_hamk%nfourwf_slices
          gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
        end if
 
