@@ -101,8 +101,8 @@ xred
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% authors = Ioanna-Maria Lygatsika
-#%% keywords = 
+#%% authors = I.-M. Lygatsika
+#%% keywords = PAW
 #%% description = 
 #%%   Test sequential slice execution in spectrum slicing algorithm for ground-state calculation. 
 #%%<END TEST_INFO>
