@@ -173,10 +173,17 @@ module m_slice
         integer :: me_id_slice                              ! identifier from 1 to nslice of slice task in use
         integer :: me_neigenpairs_slice                     ! total number of eigenpairs of slice in use
         integer :: me_bandpp_slice                          ! number of distributed bands per process for slice in use
+        integer :: me_lowb
+        integer :: me_uppb
         integer :: me_ndeg_slice                            ! polynomial filter degree for slice in use
+
+        ! flags for slice location
+        logical :: is_lowpass
+        logical :: is_last
 
         integer, allocatable :: me_cols_X(:)                ! columns of shared memory used in task
         integer, allocatable :: me_cols_Xext(:)             ! columns of asynchronous memory used in task
+        integer, allocatable :: me_mask_Xext(:)             ! converged columns
 
         ! MPI column and row distribution for active task
         integer, allocatable :: me_ncolsColsRows_slice(:)   ! ncol of colsrows representation for my slice
@@ -186,7 +193,9 @@ module m_slice
         
         ! Memory address used for reads/writes
         type(xgBlock_t) :: me_Xext                          ! eigenvector memory in use by active slice
-        
+        type(xgBlock_t) :: me_resid
+        type(xgBlock_t) :: me_eigen
+
         ! Memory space used for computation
         type(chebfi_t) :: chebfi
 
@@ -220,7 +229,9 @@ module m_slice
 
         ! Memory buffers
         type(xg_t) :: X_ext                                 ! eigenvector memory used by all slices for I/O
-        type(xgTransposer_t) :: xgTransposerXext            ! transposer datastructure 
+        type(xg_t) :: eigen_ext                             ! eigenvalue memory used by all slices for I/O
+        type(xg_t) :: resid_ext                             ! residual memory used by all slices for I/O
+        type(xgTransposer_t) :: xgTransposerXext            ! transposer datastructure for eigenvectors
         
         ! Pointers
         type(xgBlock_t) :: XextLinalg
@@ -455,10 +466,8 @@ subroutine slice_allocateAll(slice)
     ABI_MALLOC_IFNOT(slice%ncolsColsRows, (slice%nproc))
 
     ABI_MALLOC_IFNOT(slice%poly_degrees, (slice%nslice))
-    ABI_MALLOC_IFNOT(slice%part_low_bounds, (slice%nslice))
-    ABI_MALLOC_IFNOT(slice%part_upp_bounds, (slice%nslice))
-    ABI_MALLOC_IFNOT(slice%poly_low_bounds, (slice%nslice))
-    ABI_MALLOC_IFNOT(slice%poly_upp_bounds, (slice%nslice))
+    ABI_MALLOC_IFNOT(slice%low_bounds, (slice%nslice))
+    ABI_MALLOC_IFNOT(slice%upp_bounds, (slice%nslice))
 
 end subroutine slice_allocateAll
 !!***
@@ -484,10 +493,8 @@ subroutine slice_free(slice)
     ABI_SFREE(slice%ncolsColsRows)   
 
     ABI_SFREE(slice%poly_degrees)
-    ABI_SFREE(slice%part_low_bounds)
-    ABI_SFREE(slice%part_upp_bounds)
-    ABI_SFREE(slice%poly_low_bounds)
-    ABI_SFREE(slice%poly_upp_bounds)
+    ABI_SFREE(slice%low_bounds)
+    ABI_SFREE(slice%upp_bounds)
 
 end subroutine slice_free
 !!***
@@ -500,21 +507,7 @@ end subroutine slice_free
 !! 
 !! FUNCTION
 !! Resource allocation for individual slice tasks.
-!! Create extended memory buffers and distribute them according
-!! to slice logic. Essentially allocates memory slice%me_Xext_active 
-!! favoring data overlap over communication overlap.
 !!
-!! INPUT 
-!! X0                =eigenvector guess used to split spectrum
-!!        not suitable for parallel Rayleigh-Ritz calculations
-!! 
-!! OUTPUT
-!! eigen= Rayleigh quotients associated to X0 of size (1,neigenpairs)
-!! 
-!! SIDE EFFECTS
-!! slice%me_Xext_active  = adapted version distributed correctly
-!!        and free of data overlap. Suitable for parallel RR.
-!! 
 !! SOURCE
 
 subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
@@ -544,32 +537,21 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
 
     ! Local variables --------------------------------
     integer, parameter :: tim_slice_sched = 2161
-    integer :: neigenpairs, iband, min_loc, islice
-    integer :: ncols, itest, iparal
-    integer :: npband_test
-    integer :: wanted_mass
+    integer :: neigenpairs
     integer :: space_res
-    logical :: on_host, on_device
-    real(dp) :: lowb, uppb, c_split
     real(dp) :: lambda_minus, lambda_plus
     real(dp) :: tol12 = 1.0e-12
     ! Derived types
     type(xg_t) :: resid0, eigen0
-    type(xgBlock_t) :: eigen_sorted
     ! Arrays
-    integer :: npband_list(4)
     real(dp) :: tsec(2)
-    integer, allocatable :: weights(:)
-    integer, allocatable :: npband_per_slice(:)
-    integer, allocatable :: nband_per_slice(:)
-    integer, allocatable :: bands_left(:)
-    integer, allocatable :: bands_right(:)
     
     ! *********************************************************************
 
     call timab(tim_slice_sched,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_SLICE_SCHEDULE)
     
+    neigenpairs = slice%neigenpairs
     if (slice%space==SPACE_C) then
         space_res = SPACE_C
     else if (slice%space==SPACE_CR) then
@@ -577,39 +559,16 @@ subroutine slice_allschedule(slice, X0, getAX_BX, getBm1X, eigen, nspinor)
     else
         ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
     end if
-
-    neigenpairs = slice%neigenpairs
   
     ! ===================== Compute Rayleigh quotients and residuals ===================================
     
-    wanted_mass = ceiling(neigenpairs * 0.6d0) ! plus 10% extra vectors
-   
-    ! not needed anymore I think...
-    ABI_MALLOC(bands_left, (wanted_mass))
-    ABI_MALLOC(bands_right, (wanted_mass)) 
-
-    call xg_init(eigen0, space_res, slice%bandpp, 1, gpu_option=slice%gpu_option)
-    call xg_init(resid0, SPACE_R, slice%bandpp, 1)
-    
-    write(std_out,*) 'X0 (init)=', xgBlock_getid(X0); flush(std_out)
+    call xg_init(eigen0, space_res, slice%neigenpairs, 1, gpu_option=slice%gpu_option)
+    call xg_init(resid0, SPACE_R, slice%neigenpairs, 1)
     
     ABI_NVTX_START_RANGE(NVTX_SLICE_RRQ)
-    call slice_prepareSpectrum(slice, X0, lowb, uppb, c_split, bands_left, bands_right, &
-        eigen0%self, resid0%self, getAX_BX, getBm1X, nspinor)
+    call slice_prepareSpectrum(slice, X0, eigen0%self, resid0%self, getAX_BX, getBm1X, nspinor)
     ABI_NVTX_END_RANGE()
     
-    write(std_out,*) 'X0 (sketched)=', xgBlock_getid(X0); flush(std_out)
-    
-    !write(std_out,*) 'wanted mass=', wanted_mass
-    !write(std_out,*) 'bands_left=', bands_left(:)
-    !write(std_out,*) 'bands_right=', bands_right(:)
-    !flush(std_out)
-
-    ABI_FREE(bands_left)
-    ABI_FREE(bands_right)
-
-    !! TODO actually some bands are never assigned to a slice..
-   
     ! Output:
     ! - c_split                 : between [a,b)
     ! - nvec_left, nvec_right   : trial vectors per slice
@@ -652,19 +611,16 @@ end subroutine slice_allschedule
 !!
 !! FUNCTION
 !! Run Spectrum slicing on a given set of active vectors. 
-!! Computation uses marked resources for current process **only**.
+!! Computation uses marked resources for current task **only**.
 !! 
 !! INPUTS
+!! X=            size (spacedim, neigenpairs)
+!! eigen,residu= size (neigenpairs, 1) (column vectors)
 !! getAX_BX= pointer to the function giving A|X> and B|X>
 !!           A is typically the Hamiltonian H, and B the overlap operator S
 !! getBm1X= pointer to the function giving B^-1|X>
 !!          B is typically the overlap operator S
 !! nspinor= number of spinorial components of the wavefunctions
-!!
-!! OUTPUT
-!! eigen=converged eigenvalue array of size (neigenpairs,1), first rows written only
-!! residu=slice residual array of size (neigenpairs,1), first rows written only
-!! slice%XextLinalg= guess/converged eigenvectors for all slices
 !! 
 !! SIDE EFFECTS
 !! slice <type(slice_t)>= memory workspace used for Spectrum slicing
@@ -677,8 +633,9 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     ! Arguments
     type(slice_t), target, intent(inout) :: slice
-    type(xgBlock_t), intent(inout) :: eigen
-    type(xgBlock_t), intent(inout) :: residu
+    type(xgBlock_t), intent(inout) :: X      ! size (spacedim, neigenpairs)
+    type(xgBlock_t), intent(inout) :: eigen  ! size (neigenpairs,1)
+    type(xgBlock_t), intent(inout) :: residu ! size (neigenpairs,1)
     integer, intent(in) :: nspinor
     interface
         subroutine getAX_BX(X,AX,BX)
@@ -704,10 +661,6 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     integer :: tim_slice_me
     ! Variables
     type(chebfi_t) :: chebfi
-    type(xgBlock_t) :: X0_active
-    type(xgBlock_t) :: eigen_active
-    type(xgBlock_t) :: residu_active
-    integer :: nbdbuf, oracle, num_proc
     integer :: i, iband, nrows
     integer :: me_nbdbuf
     integer :: neigenpairs, bandpp, ndeg_filter
@@ -719,16 +672,15 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     logical :: has_converged
     real(dp) :: lambda_minus, lambda_plus
     real(dp) :: theta
-    real(dp) :: oracle_factor, oracle_min_occ
+    real(dp) :: safe, tol ! for slice selection window
     real(dp) :: a_part, b_part, max_resid_kept
     logical :: is_lowpass, on_host, on_device
     ! Arrays
     real(dp) :: tsec(2)
+    integer, allocatable :: mapper(:,:)
     integer, allocatable, target :: nrowsLinalg(:)
     integer, pointer :: nrowsLinalg_ptr(:) => null() 
     integer, pointer :: ncolsColsRows_ptr(:) => null()
-    real(dp), pointer :: thetas_conv(:,:) => null()
-    real(dp), pointer :: residu_conv(:,:) => null()
     
     ! *********************************************************************
     
@@ -748,15 +700,32 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
     if (slice%paral_kgb==1) then
         nrows = slice%total_spacedim
     end if
-    
-    ! Sanity check
-    if ( (.not. slice%use_linalg) .and. slice%use_colsrows) then
-        ABI_ERROR("should be in linalg representation")
-    end if
-    
 
+    ! ================================== Prepare spectral slices ===========================================
+
+    ! Split spectrum and query X0
+    ABI_NVTX_START_RANGE(NVTX_SLICE_RRQ)
+    call slice_prepareSpectrum(slice, X0, eigen, residu, getAX_BX, getBm1X, nspinor)
+    ABI_NVTX_END_RANGE()
+
+    ! Attribute column vectors of X0 to slices using query results
+    ABI_MALLOC(mapper, (slice%neigenpairs, slice%nslice))
+    safe = 2
+    tol = 1.d0
+    call slice_applySelectionWindow(slice, mapper, eigen, residu, tol, safe)
+
+    write(std_out,*) 'created the following map slices to cols='
+    write(std_out,*) mapper(1,:)
+    flush(std_out)
+
+    ! what to do next
+    ! sketch remaining offset using random vectors
+    !k_sketch = k - m_conv
+ 
+    ! ============================== Initialize guess for subspace iteration ===============================
+
+    ! Resource management system 
     if (slice%paral_kgb==1) then
-        ! ===================== Resource management system ================================================= 
         call init_schedule(scheduler)
         ! Divide resources into slice tasks
         select case(slice%paral_slice)
@@ -774,159 +743,63 @@ subroutine slice_run(slice, getAX_BX, getBm1X, eigen, residu, nspinor)
         ! Mark my slice task and resources as actively in use
         call mark_active_task(scheduler, task) ! called once for parallel slices and in loop for sequential
 
-        ! ===================== Allocate and fill extended memory buffer ================================== 
+        ! Allocate and fill extended memory buffer
         nband_ext = sum(slice%neigenpairs_per_slice)
         call allocate_extended_memory(extendedMemory, nband_ext)
-        call free_schedule(scheduler)
+
+        ! k is the number of columbs from X0
+        ! p is the offset
+        call init_extended_memory(extendedMemory, task, X0, k, p)
+
     else
-        !! set without any communications..
+        ! configure task without any communicators
     end if
 
     call allocate_active_task(slice, scheduler, task)
 
-
-    call xgBlock_reshape(eigen, 1, slice%neigenpairs)
-    call xgBlock_setBlock(eigen, eigen_active, rows=1, cols=neigenpairs, fcol=slice%fcol_in_X(slice%me_id_slice))
-    call xgBlock_reshape(eigen_active, neigenpairs, 1)
-    call xgBlock_reshape(eigen, slice%neigenpairs, 1)
-    call xgBlock_setBlock(residu, residu_active, rows=neigenpairs, cols=1)
-   
-    write(std_out,*) 'calling runSlice from rank and subrank', xmpi_comm_rank(slice%spacecom), xmpi_comm_rank(comm)
- 
-    a_part = slice%part_low_bounds(slice%me_id_slice)
-    b_part = slice%part_upp_bounds(slice%me_id_slice)
-    if (is_lowpass) then
-        write(std_out,*) 'spectral offset left=', lambda_minus - b_part
-    else
-        write(std_out,*) 'spectral offset left=', a_part - lambda_minus
-        write(std_out,*) 'spectral offset right=', lambda_plus - b_part
-    end if
+  
+    ! will use mapper to copy columns of X0 to extended memory
+    !! assumes linalg representation of both ext and spectrum mem
+    call init_extended_memory(extendedMemory, X0, mapper)
     
-    !write(std_out,*) 'eigen_active='
-    !call xgBlock_print(eigen_active, std_out)
-   
-    ! TODO 
-    ! 2) make for 1 MPI
+    ! ============================ Active task execution =======================================
 
-    ! Recover actively used array
-    X0_active = task%me_Xext
-    
-    ! fixme move this inside chebfi_runSI?
-    task%chebfi%xXColsRows = X0_active
-        
-    !call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
-    !    slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, slice%neigenpairs,&
-    !    nrowsLinalg_ptr)
+    if (slice%paral_kgb==0 .or. slice%paral_slice==DISABLE_PARAL) then
+        ! execute active tasks sequentially
 
-    ! todo give k=m+p where p is oversample
-    ! residual will be converged for m values. Give m as input
-    k_conv = slice%neigenpairs - 20 ! hardcoded assuming offset 20 fixme 
-
-    !call chebfi_runSubspaceIteration(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, &
-    !    nspinor, slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, &
-    !    k_conv, nrowsLinalg_ptr)
-
-    call chebfi_runSubspaceIterationDummy(task%chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, &
-        nspinor, slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, &
-        k_conv, nrowsLinalg_ptr)
-
-    call eliminate_active_task(task, extendedMemory) 
-
-    ! why?
-    if (slice%gpu_option == ABI_GPU_OPENMP) then
-        call xgBlock_copy_to_gpu(eigen_active)
-        call xgBlock_copy_to_gpu(residu_active)
-    end if
+        do islice=1, nslice
+            call schedule_next_task(scheduler, neigenpairs)
+            call init_active_memory(extendedMemory, task, X0, p)
+            call execute_active_task(task)
+            call mask_active_task(task, tol) ! mask extendedMem
+        end do
        
-    call xgBlock_reverseMap(eigen_active , thetas_conv, rows=neigenpairs, cols=1)
-    call xgBlock_reverseMap(residu_active, residu_conv, rows=neigenpairs, cols=1)
+    else
+        ! execute active tasks in parallel
+
+        call init_active_memory(extendedMemory, task, X0, p)
+        call execute_active_task(task)
+        call mask_active_task(task, tol) ! mask extendedMem
+
+    end if
    
-    ! this is future merge
-    num_kept = 0
-        do iband=1, neigenpairs
-            !if (iband>me_nbdbuf) then
-            !    write(std_out,*) 'excluding ', iband, ' in nbdbuf ', me_nbdbuf
-            !    flush(std_out)
-            !else
-                theta = thetas_conv(iband, 1)
-                has_converged = .false.
-                if (is_lowpass) then
-                    has_converged = ( theta < b_part )
-                else 
-                    has_converged = ( (a_part < theta) .and. (theta < b_part) )
-                end if
-                if (has_converged) then
-                    max_resid_kept = max(max_resid_kept, residu_conv(iband, 1))
-                    num_kept = num_kept + 1
-                end if
-            !end if
-        end do
-        !write(std_out,*) 'resid debug=', max_resid_kept
-        !write(std_out,*) residu_conv(:,1)
-        flush(std_out)
-        call xmpi_sum(num_kept, comm, ierr)
-        call xmpi_max(max_resid_kept, comm, ierr) ! entire slice
-        write(std_out,*) '################################################# '
-        write(std_out,'(a,i5)') ' Convergence of inner iteration=', i
-        write(std_out,*) 'partition             =', a_part, b_part
-        write(std_out,*) 'eigenspace dimension  =', num_kept
-        write(std_out,*) 'max resid(excl nbdbuf)=', max_resid_kept
-        write(std_out,*) '################################################# '
-        flush(std_out)
+    ! Copy to spectrum memory only when active tasks have finished
+    call compress_extended_memory(work) ! extendendMem -> spectrumMem
 
-        write(std_out,*) 'residuals='
-        do iband=1, neigenpairs
-            write(std_out,*) residu_conv(iband, 1)
-            flush(std_out)
-        end do
 
-        ! todo diagnostic
-        ! count how may eigenvalues converged in slice and outside slice but in overlap
-        ! compare with expected count
+    call free_schedule(scheduler)
 
-        ! Prepare next iteration
-        ! reinitialize pointers to workspaces ... otherwise invovl complains
-        call xg_setBlock(chebfi%X_NP, chebfi%X_next, nrows, bandpp)
-        call xg_setBlock(chebfi%X_NP, chebfi%X_prev, nrows, bandpp, fcol=bandpp+1)
 
-    end do
-
-    write(std_out,*) 'converged at ninner=', i
-    flush(std_out)
-
-    ! todo here keep residuals that are smaller than wanted value
-    ! consider remaining residuals are spurious nodes thus eliminate them.
-
-    !write(std_out,*) 'getid after runSlice X0_active', xgBlock_getId(X0_active) 
-
-    write(std_out,*) 'chebfi%eigenvalues converged='
-    call xgBlock_print(chebfi%eigenvalues,std_out)
-
-    !write(std_out,*) 'residuals='
-    !call xgBlock_print(residu_active,std_out)
-    !flush(std_out)
 
     ! Free temporary memory
     call chebfi_free(chebfi)
     ABI_SFREE(nrowsLinalg)
 
-    ! Sanity check
-    if ( (.not. slice%use_colsrows) .and. slice%use_linalg) then
-        ABI_ERROR("should be in colsrows representation")
-    end if
-
     ! Timer is BEFORE the barrier !!
     call timab(tim_slice_me,2,tsec)
 
-    ! Actually do the transposition to linalg
-    call xmpi_barrier(slice%spacecom)
-    ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
-    call xgTransposer_transpose(slice%xgTransposerXext, STATE_LINALG)
-    ABI_NVTX_END_RANGE()
-    ! Note: At this point slice%me_Xext is recovered into slice%XextLinalg
-
-    slice%use_colsrows = .false.
-    slice%use_linalg = .true.
+    call free_extended_memory(extendedMemory)
+    ABI_FREE(mapper)
 
 end subroutine slice_run
 !!***
@@ -946,8 +819,7 @@ end subroutine slice_run
 !! 
 !! SOURCE
 
-subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, bands_right, &
-        eigen, resid, getAX_BX, getBm1X, nspinor)
+subroutine slice_prepareSpectrum(slice, X, eigen, resid, getAX_BX, getBm1X, nspinor)
 
     implicit none
 
@@ -956,9 +828,6 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     type(xgBlock_t), intent(inout) :: X
     type(xgBlock_t), intent(inout) :: eigen
     type(xgBlock_t), intent(inout) :: resid
-    real(dp), intent(out) :: lowb, uppb, c_split
-    integer, intent(out) :: bands_left(:)
-    integer, intent(out) :: bands_right(:)
     integer, intent(in) :: nspinor
     interface
         subroutine getAX_BX(X,AX,BX)
@@ -999,7 +868,6 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     integer :: work_size
 #endif
     type(xg_t) :: BX
-    type(xg_t) :: X_sketch
     type(xgBlock_t) :: xXColsRows
     type(xgTransposer_t) :: xgTransposerX
     type(mpi_type) :: mpi_enreg_old
@@ -1108,22 +976,7 @@ subroutine slice_prepareSpectrum(slice, X, lowb, uppb, c_split, bands_left, band
     
     write(std_out,*) 'STE exited'
     flush(std_out)
-
-    ! TODO 
-    ! it would be nice to support nslice=2 and nslice=3
-    ! how to split: sketching the restart technique.
-    ! Step 1. find mass flip c_1; a < c_1 < b.
-    ! Step 2. Cut to this mass flip and restrict to [c_1,b)
-    ! Step 3. Repeat step 1 to find mass flip c_2; c_1 < c_2 < b.
-    !> other technique
-    ! capable of detecting gaps
-    ! detects steps where the mass stays constant. This is the
-    ! criterion of the constant mass.
-   
-    ! call slice_initializeSubspaceIteration here
-    ! part of it that is colsrows
-
-
+ 
     ! Compute Rayleigh quotients (colsrows distribution)
     !ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RRQ)
     !call timab(tim_RR_q, 1, tsec)
@@ -1596,7 +1449,7 @@ subroutine free_schedule(scheduler)
     ABI_SFREE(scheduler%lookup_proc)
 end subroutine alloc_schedule
 
-!! Logic for parallel slice treatment (a slice has SOME MPI processes)
+!! Logic for parallel execution of tasks (a slice has SOME MPI processes)
 subroutine schedule_parallel_tasks(scheduler)
     implicit none
     type(taskScheduler_t), intent(inout) :: scheduler
@@ -1612,14 +1465,14 @@ subroutine schedule_parallel_tasks(scheduler)
     ABI_SFREE(weights)
 end subroutine schedule_parallel_tasks
 
-!! Logic for sequential slice treatment (a slice has ALL MPI processes)
+!! Logic for sequential execution of tasks (a slice has ALL MPI processes)
 subroutine schedule_next_task(scheduler, load_size)
     implicit none
     type(taskScheduler_t), intent(inout) :: scheduler
     integer, intent(in) :: load_size
     scheduler%next_task_id = scheduler%next_task_id + 1
     scheduler%neigenpairs_per_slice = load_size
-    scheduler%nproc_per_slice = scheduler%nresources !! use all MPI
+    scheduler%nproc_per_slice = scheduler%nresources !! use all MPI, can be 1
     scheduler%lookup_proc = scheduler%next_task_id
 end subroutine schedule_next_task
 
@@ -1628,6 +1481,11 @@ end subroutine schedule_next_task
 !!****f* m_slice/allocate_extended_memory
 !! NAME
 !! allocate_extended_memory
+!! 
+!! FUNCTION
+!! Create extended memory buffers and distribute them according
+!! to slice logic. Essentially allocates memory work%Xext
+!! favoring data overlap over communication overlap.
 !! 
 !! SOURCE
 
@@ -1640,7 +1498,7 @@ subroutine allocate_extended_memory(work, paral_kgb, ncol, ncol_ext, space, spac
     integer, intent(in) :: space, spacedim, spacecom, me_g0, gpu_option
 
     work%paral_kgb = paral_kgb
-    work%neigenpairs_ext = ncol
+    work%neigenpairs_ext = ncol_ext
     work%use_linalg = .true.
     work%use_colsrows = .false.
 
@@ -1648,12 +1506,10 @@ subroutine allocate_extended_memory(work, paral_kgb, ncol, ncol_ext, space, spac
     ABI_MALLOC_IFNOT(work%lookup_cols_Xext, (ncol_ext))
     
     if (work%paral_kgb==1) then
-        write(std_out,*) 'allocating extended space of size', slice%neigenpairs_ext
-        flush(std_out)
-
+        
         ! Allocate extended space in linalg representation
-        call xg_init(slice%X_ext, slice%space, slice%spacedim, slice%neigenpairs_ext, &
-            slice%spacecom, me_g0=slice%me_g0, gpu_option=slice%gpu_option)
+        call xg_init(work%X_ext, space, spacedim, work%neigenpairs_ext, spacecom, &
+            me_g0=me_g0, gpu_option=gpu_option)
         
     end if
 
@@ -1666,9 +1522,12 @@ end subroutine allocate_extended_memory
 !! NAME
 !! init_extended_memory
 !! 
+!! FUNCTION
+!! Initialize extended memory for active task only
+!! 
 !! SOURCE
 
-subroutine init_extended_memory(work, task, X0)
+subroutine init_extended_memory(work, task, X0, mapper)
 
     implicit none
     type(extendedMemory_t), intent(inout) :: work
@@ -1687,6 +1546,16 @@ subroutine init_extended_memory(work, task, X0)
         work%XextLinalg = X0
     else 
         work%XextLinalg = work%X_ext%self
+    end if
+        !i1 = 1
+        !i2 = 1
+        !do islice=1,slice%nslice
+        !    i2 = slice%neigenpairs_per_slice(islice)
+        !    slice%lookup_cols_Xext(i1:i2) = islice
+        !    i1 = i2
+        !end do
+
+        task%me_cols_X = mapper(:, task%me_id_slice)
 
         ! Copy X to XextLinalg to achieve contiguous column blocks
         ncols = task%me_neigenpairs_slice
@@ -1727,6 +1596,57 @@ subroutine free_extended_memory(work)
     end if
 
 end subroutine free_extended_memory
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/init_active_memory
+!! NAME
+!! init_active_memory
+!!
+!! FUNCTION
+!! apply offset, in linalg MPI distribution
+!! 
+!! SOURCE
+
+subroutine init_active_memory(work, task, X0, p)
+
+    implicit none
+
+    type(extendedMemory_t), intent(inout) :: work
+    type(extendedMemory_t), intent(inout) :: task
+    type(xgBlock_t), intent(in) :: X0
+    integer, intent(in) :: p
+    integer :: k_sketch, m, m_wanted
+    type(xg_t) :: X_sketch
+    type(xgBlock_t) :: X_last
+    integer :: space, nrows, ncols, spacecom, gpu_option
+
+    space = space(task%me_Xext)
+    nrows = rows(task%me_Xext)
+    ncols_large = ncols(X0)
+    spacecom = comm(task%me_Xext)
+    gpu_option = gpu_option(task%me_Xext)
+
+    m = size(task%me_cols_X)
+    m_wanted = task%me_neigenpairs_slice
+    k_sketch = m_wanted - m + p
+
+    call xgBlock_setBlock(task%me_Xext, X_last, nrows, k_sketch)
+
+    ! TODO 
+    ! Est-ce que c'est mieux de prendre un melange aléatoire des autres directions ou 
+    ! de prendre simplement des vecteurs aléatoires?
+    ! V1 essayer avec des vecteurs aléatoires, c'est plus facile d'implémenter
+
+    ! for remaining dimensions not in p
+    ! Y = X * Omega where Omega sketch matrix to capture all directions at once (linalg distribution)
+    call xg_init(X_sketch, space, nrows, ncols_large, spacedom, gpu_option=gpu_option)
+    call xgBlock_randomSketching(X0, X_sketch%self, k_sketch)
+    call xgBlock_copy(X_sketch%self, X_last)
+    call xg_free(X_sketch)
+
+end subroutine init_active_memory
 !!***
 
 !----------------------------------------------------------------------
@@ -1775,10 +1695,10 @@ subroutine mark_active_task(task, scheduler, spacecom, paral_slice)
 
     if (slice%paral_kgb==1) then
         ! Compute column distribution across active resources
-        call distribute_vectors(slice%me_neigenpairs_slice, slice%me_nproc_slice, slice%me_ncolsColsRows_slice)
+        call distribute_vectors(slice%me_neigenpairs_slice, slice%me_nproc_slice, task%me_ncolsColsRows_slice)
     
         ! Compute row distribution across active resources
-        call distribute_vectors(slice%total_spacedim, slice%me_nproc_slice, slice%me_nrowsLinalg_slice)
+        call distribute_vectors(slice%total_spacedim, slice%me_nproc_slice, task%me_nrowsLinalg_slice)
     end if
 
     ! Split global comm into disjoint sub-comms, only procs with the same color communicate
@@ -1832,26 +1752,38 @@ end subroutine mark_active_task
 !! Input is Xext (linalg state) distributed across global processes.
 !! Attention chebfi%X is distributed across slice processes =/= Xext per process.
 !! Extracting chebfi%X in the slice distribution from Xext would require comms.
+!!
+!! OUTPUT
+!! eigen=converged eigenvalue array of size (neigenpairs,1), first rows written only
+!! residu=slice residual array of size (neigenpairs,1), first rows written only
+!! work%XextLinalg= guess/converged eigenvectors for all slices
 !! 
 !! SOURCE
 
-subroutine allocate_active_task(slice, task, chebfi)
+subroutine allocate_active_task(slice, work, task, chebfi)
 
     implicit none
     type(activeTask_t), intent(inout) :: task
+    type(extendedMemory_t), intent(inout) :: work
     type(chebfi_t), intent(inout) :: chebfi
+    
+    integer :: nbdbuf, oracle, num_proc
+    real(dp) :: oracle_factor, oracle_min_occ
 
     ! ========================== Transpose ===================================
     !! Function
     ! This transposition allows for a slice to not see others. 
     ! It serves as a transition from global communicator to slice communicator.
     ! 
-    ! 
+    
+    ! what are all those things comm_rows etc must use the ones from task TODO
+
+
     ncolsColsRows_ptr => slice%ncolsColsRows ! todo this is not necessary but ok
 
     if (slice%paral_kgb==1) then
         ! Allocate slice%me_Xext according to the target MPI distribution for slices
-        call xgTransposer_constructor(slice%xgTransposerXext, slice%XextLinalg, slice%me_Xext,&
+        call xgTransposer_constructor(slice%xgTransposerXext, work%XextLinalg, slice%me_Xext,&
             nspinor, STATE_LINALG, TRANS_ALL2ALL, slice%comm_rows, slice%comm_cols, 0, 0, slice%me_g0_fft,&
             gpu_option=slice%gpu_option, gpu_thread_limit=slice%gpu_thread_limit,&
             custom_ncolsColsRows=.true., ncolsColsRows_sub=ncolsColsRows_ptr)
@@ -1871,7 +1803,7 @@ subroutine allocate_active_task(slice, task, chebfi)
         end if
         write(std_out,'(a,i6,i6,i6)') '# proc has # cols of Xext ', xmpi_comm_rank(slice%spacecom),cols(slice%me_Xext)
     else
-        call xgBlock_setBlock(slice%XextLinalg, slice%me_Xext, rows(slice%XextLinalg), cols(slice%XextLinalg))
+        call xgBlock_setBlock(work%XextLinalg, slice%me_Xext, rows(work%XextLinalg), cols(work%XextLinalg))
     end if
 
     ! Get parameters of active task
@@ -1916,199 +1848,163 @@ end subroutine allocate_active_task
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/slice_allmerge
+!!****f* m_slice/execute_active_task
 !! NAME
-!! slice_allmerge
+!! execute_active_task
+!! 
+!! SOURCE
+subroutine execute_active_task(task)
+
+    type(activeTask_t), intent(inout) :: task
+
+    type(xgBlock_t) :: X0_active
+    type(xgBlock_t) :: eigen_active
+    type(xgBlock_t) :: residu_active
+    
+    ! *********************************************************************
+
+    ! Recover actively used array
+    X0_active = task%me_Xext
+    
+    ! fixme move this inside chebfi_runSI?
+    task%chebfi%xXColsRows = X0_active
+        
+    !call chebfi_runSlice(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, nspinor,&
+    !    slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, slice%neigenpairs,&
+    !    nrowsLinalg_ptr)
+
+    ! todo give k=m+p where p is oversample
+    ! residual will be converged for m values. Give m as input
+    k_conv = slice%neigenpairs - 20 ! hardcoded assuming offset 20 fixme 
+
+    !call chebfi_runSubspaceIteration(chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, &
+    !    nspinor, slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, &
+    !    k_conv, nrowsLinalg_ptr)
+
+    call chebfi_runSubspaceIterationDummy(task%chebfi, X0_active, getAX_BX, getBm1X, eigen_active, residu_active, &
+        nspinor, slice%mineig_global, slice%maxeig_global, lambda_minus, lambda_plus, is_lowpass, &
+        k_conv, nrowsLinalg_ptr)
+
+    ! why?
+    if (slice%gpu_option == ABI_GPU_OPENMP) then
+        call xgBlock_copy_to_gpu(eigen_active)
+        call xgBlock_copy_to_gpu(residu_active)
+    end if
+
+
+
+end subroutine execute_active_task
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/mask_active_task
+!! NAME
+!! mask_active_task
 !! 
 !! FUNCTION
-!! Filter converged eigenvalues of each slice using a criterion
-!! based on spectral partition interval bounds.
-!!
-!! INPUTS
-!! eigen= slice eigenvalues written in first 1,..,neigenpairs_slice rows of (neigenpairs,1) 
-!! resid= slice residuals written in first 1,..,neigenpairs_slice rows of (neigenpairs,1)
-!! slice%me_Xext= converged slice eigenvectors of size (total_spacedim,bandpp)
-!! 
-!! OUTPUT
-!! X0= converged eigenvectors in Linalg representation of size (spacedim, neigenpairs)
-!! eigen= all converged eigenvalues of size (neigenpairs, 1)
-!! resid= all residuals of size (neigenpairs,1)
-!! 
-!! SIDE EFFECTS
-!! slice <type(slice_t)>= memory workspace used for Spectrum slicing
-!! slice%XextLinalg= converged eigenvectors in extended space of size (spacedim,neigenpairs_ext)
-!! slice%neigenpairs_per_slice= number of kept eigenpairs after merging
-!! slice%fcol_in_Xext= first index to copy from extended memory in 1,..,neigenpairs_ext
-!! slice%fcol_in_X= first index to copy to regular memory in 1,..,neigenpairs
+!! Mask converged solutions in active task (asynchronous).
+!! Create mask for converged solutions in active task
+!! that will be used to combine all active tasks to extended memory
 !!
 !! SOURCE
 
-subroutine slice_allmerge(slice, X0, eigen, resid)
+subroutine mask_active_task(task, tol)
 
     implicit none
 
     ! Arguments ------------------------------------
-    type(slice_t), intent(inout) :: slice
+    type(activeSlice_t), intent(inout) :: task
+    real(dp), intent(inout) :: tol
+
+    ! Local variables-------------------------------
+    integer :: n_active, iband
+    logical :: selected
+    real(dp) :: theta, res
+    real(dp), pointer :: thetas_conv(:,:) => null()
+    real(dp), pointer :: residu_conv(:,:) => null()
+
+    ! *********************************************************************
+
+    n_active = rows(eigen)
+    call xgBlock_reverseMap(task%me_eigen, thetas_conv, rows=n_active, cols=1)
+    call xgBlock_reverseMap(task%me_residu, residu_conv, rows=n_active, cols=1)
+   
+    ! Hard acceptance criterion so that slices do not overlap
+    do iband=1, n_active
+        res = residu_conv(iband, 1)
+        theta = thetas_conv(iband, 1)
+        selected = .false.
+        if (task%is_lowpass) then
+            selected = (res < tol .and. theta < task%me_uppb)
+        else if (task%is_last) then
+            selected = (res < tol .and. theta > task%me_lowb)
+        else
+            selected = (res < tol .and. theta < task%me_uppb .and. theta > task%me_lowb)
+        end do
+        if (selected) then
+            task%me_mask_Xext(iband) = 1
+        end if
+    end do
+
+end subroutine mask_active_task
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice/compress_extended_memory
+!! NAME
+!! compress_extended_memory 
+!!
+!! FUNCTION
+!! Copy data from extendedMemory to spectrum I/O memory (shared)
+!! Copy masked extended memory to spectrum memory
+!!
+!! SOURCE
+
+subroutine compress_extended_memory(task, work, X0, eigen, resid)
+
+    implicit none
+    
+    ! Arguments ------------------------------------
+    type(activeSlice_t), intent(inout) :: task
+    type(extendedMemory_t), intent(inout) :: work
     type(xgBlock_t), intent(inout) :: X0
     type(xgBlock_t), intent(inout) :: eigen
     type(xgBlock_t), intent(inout) :: resid
 
     ! Local variables-------------------------------
-    integer :: my_rank, my_slice, neigenpairs_slice, nkept
-    integer :: fcol_ext, fcol, tot_ncols_kept, lcol_ext
-    integer :: islice, fcol_in_slice, lcol_in_slice, rem
-    real(dp) :: part_low_bound, part_upp_bound
-    logical :: on_host, on_device
-    ! Derived types
-    type(xg_t) :: eigen_ext
-    type(xg_t) :: resid_ext
-    type(xgBlock_t) :: eigen_conv
-    type(xgBlock_t) :: resid_conv
-    type(xgBlock_t) :: eigen_ext_slice
-    type(xgBlock_t) :: resid_ext_slice
-    type(xgBlock_t) :: X_kept, eigen_kept, resid_kept
-    type(xgBlock_t) :: X0_out, eigen_out, resid_out
-    ! arrays
-    real(dp), pointer :: theta_ext(:,:) => null()
-    real(dp), allocatable :: theta_reshaped(:)
- 
+    integer :: nrows, ncols, fcol
+    
     ! *********************************************************************
 
-    ! Two ways to get slice eigenvalues to filter
-    ! 1) (implemented)
-    !    each slice writes its converged eigenvalues into a range of eigen_ext
-    !    without overlap. Then we recover this range and we filter it.
-    !    This used an extra memory space called eigen_ext.
-    ! 2) We recover the slice converged eigenvalues directly from eigen.
-    !    The convention is that we wrote to the first neigenpairs_slice
-    !    rows. This also uses a pointer pointing to the part of eigen
-    !    we want to discard. This part will be set to zero. Finally we 
-    !    call xgBlock_mpi_sum(eigen, spacecom) in order to sum non-discarded parts.
-    !    This is complicated because we also have to shift parts.
-
-    ! Allocate extended space for all slice eigenvalues and residuals
-    call xg_init(eigen_ext, SPACE_R, rows=1, cols=slice%neigenpairs_ext, gpu_option=slice%gpu_option)
-    call xg_init(resid_ext, SPACE_R, rows=1, cols=slice%neigenpairs_ext, gpu_option=slice%gpu_option)
-
-    write(std_out,*) 'db xgBlock_zero call'
-    call xgBlock_zero(eigen_ext%self)
-    call xgBlock_zero(resid_ext%self)
-
-    ! Bring to columns to be able to select column range
-    call xgBlock_reshape(eigen, 1, slice%neigenpairs)
-    call xgBlock_reshape(resid, 1, slice%neigenpairs)
-
-    ! MPI communication to gather slice eigen/resid to eigen_ext/resid_ext
-    if (slice%paral_kgb==1) then
-
-        if (xmpi_comm_size(slice%spacecom) > 1) then
+    if (work%paral_kgb==1) then
         
-            ! Copy only once, eg for first process in slice subcomm 
-            if (xmpi_comm_rank(slice%me_comm_slice)==0) then
-                my_rank = xmpi_comm_rank(slice%spacecom)
-                my_slice = slice%lookup_proc(my_rank + 1)
-                neigenpairs_slice = slice%neigenpairs_per_slice(my_slice + 1)
-                fcol_ext = slice%fcol_in_Xext(my_slice + 1)
-                fcol = slice%fcol_in_X(my_slice + 1)
-                ! set blocks copy from 
-                call xgBlock_setBlock(eigen, eigen_conv, rows=1, cols=neigenpairs_slice, fcol=fcol)
-                call xgBlock_setBlock(resid, resid_conv, rows=1, cols=neigenpairs_slice, fcol=fcol)
-                ! set blocks copy to
-                call xgBlock_setBlock(eigen_ext%self, eigen_ext_slice, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
-                call xgBlock_setBlock(resid_ext%self, resid_ext_slice, rows=1, cols=neigenpairs_slice, fcol=fcol_ext)
-                ! perform copy
-                call xgBlock_copy(eigen_conv, eigen_ext_slice)
-                call xgBlock_copy(resid_conv, resid_ext_slice)
-            end if
-    
-            ! All processes wait to finish copying before summing 
-            call xmpi_barrier(slice%spacecom)
-
-            call xgBlock_mpi_sum(eigen_ext%self, comm=slice%spacecom)
-            call xgBlock_mpi_sum(resid_ext%self, comm=slice%spacecom)
-
-        else
-            ABI_BUG("Not implemented!") 
-            call xgBlock_copy(eigen, eigen_ext%self)
-            call xgBlock_copy(resid, resid_ext%self)
+        ! Sanity check
+        if ((.not. work%use_linalg) .or. work%use_colsrows) ) then
+            ABI_ERROR("not in linalg")
         end if
-    else
-        ABI_BUG("Not implemented!") 
-        call xgBlock_copy(eigen, eigen_ext%self)
-        call xgBlock_copy(resid, resid_ext%self)
-    end if 
 
-    ! Copy is on CPU so update CPU data from GPU
-    if (slice%gpu_option==ABI_GPU_OPENMP) then
-        call xgBlock_copy_from_gpu(eigen_ext%self)
-        call xgBlock_copy_from_gpu(resid_ext%self)
+        ! Recover pointer task%me_Xext into memory work%XextLinalg
+        call xmpi_barrier(slice%spacecom)
+        ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
+        call xgTransposer_transpose(work%xgTransposerXext, STATE_LINALG)
+        ABI_NVTX_END_RANGE()
+    else
+
+        nrows = 
+        ncols = 
+        fcol = 
+        xgBlock_setBlock(work%XextLinalg, task%me_Xext, rows(work%XextLinalg), cols(
+
     end if
 
-    !write(std_out,*) 'residuals='
-    !call xgBlock_print(resid_ext%self,std_out)
-
-    ! Results could be complex, so neigenpairs has to be in cols, not rows
-    call xgBlock_reverseMap(eigen_ext%self, theta_ext, rows=1, cols=slice%neigenpairs_ext)
-
-    ! Filter eigenvalues in extended space using spectral partition
-    tot_ncols_kept = 0
-    do islice=1,slice%nslice
-
-        ! Before merge: get slice eigenvalues to filter
-        neigenpairs_slice = slice%neigenpairs_per_slice(islice)
-        ABI_MALLOC_IFNOT(theta_reshaped, (neigenpairs_slice)) 
-        fcol_ext = slice%fcol_in_Xext(islice)
-        lcol_ext = fcol_ext + neigenpairs_slice - 1
-        if (islice == slice%nslice) then
-            lcol_ext = slice%neigenpairs_ext
-        end if
-        theta_reshaped(1:neigenpairs_slice) = theta_ext(1,fcol_ext:lcol_ext)
-
-        ! Apply filter criterion to find kept first and last column in slice
-        part_low_bound = slice%part_low_bounds(islice)
-        part_upp_bound = slice%part_upp_bounds(islice)
-        fcol_in_slice = maxloc(theta_reshaped, dim=1, mask=(theta_reshaped < part_low_bound)) + 1
-        lcol_in_slice = maxloc(theta_reshaped, dim=1, mask=(theta_reshaped < part_upp_bound))            
-        if (islice == 1) then
-            fcol_in_slice = 1
-        else if (islice == slice%nslice) then
-            rem = slice%neigenpairs - tot_ncols_kept
-            if (rem < 0) then
-                ABI_ERROR("Not enough eigenvalues in last slice. Decrease tolfilter or nstep_mixed.")
-            else
-                lcol_in_slice = min(neigenpairs_slice, fcol_in_slice + rem - 1)
-                write(std_out,*) 'rem= lcol_in_slice=', rem, lcol_in_slice 
-            end if
-        end if
-
-        nkept = lcol_in_slice - fcol_in_slice + 1
-
-!        write(std_out,*) 'Filter in ', part_low_bound, part_upp_bound
-!        write(std_out,*) 'kept indices', fcol_in_slice, lcol_in_slice, nkept
-!        !write(std_out,*) 'filtered eigenvalues=', theta_reshaped
-!        write(std_out,*) 'filtered eigval(first,last)=', theta_reshaped(1), theta_reshaped(neigenpairs_slice)
-!        !write(std_out,*) 'kept eigenvalues=', theta_reshaped(fcol_in_slice:lcol_in_slice)
-!        write(std_out,*) 'kept eigval(first,last)=', theta_reshaped(fcol_in_slice), theta_reshaped(lcol_in_slice)
-!        write(std_out,*) 'tot_ncols_kept(prev)=', tot_ncols_kept 
-
-        ! After merge: Update first columns to copy from Xext to X
-        slice%fcol_in_X(islice)= tot_ncols_kept + 1
-        slice%fcol_in_Xext(islice) = fcol_ext + fcol_in_slice - 1
-        slice%neigenpairs_per_slice(islice) = nkept
-        tot_ncols_kept = tot_ncols_kept + slice%neigenpairs_per_slice(islice)
-        
-        write(std_out,*) 'tot_ncols_kept(next)=', tot_ncols_kept 
-
-        ABI_SFREE(theta_reshaped)
-
-    end do
-    
     ! Detect missing or extra eigenvalues
     if (tot_ncols_kept < slice%neigenpairs) then
         ABI_WARNING("Not enough converged eigenvalues in slice")
     else if (tot_ncols_kept > slice%neigenpairs) then
         ABI_WARNING("Too many converged eigenvalues kept. Decrease tolfilter or nstep_mixed.")
-    end if
+    end if    
 
     ! Copy from extended memory to regular memory
     do islice=1,slice%nslice
@@ -2135,90 +2031,11 @@ subroutine slice_allmerge(slice, X0, eigen, resid)
     call xgBlock_reshape(eigen, slice%neigenpairs, 1) 
     call xgBlock_reshape(resid, slice%neigenpairs, 1)
 
-    !write(std_out,*) 'residuals after merge=', xgBlock_getid(resid)
-    !flush(std_out)
- 
-    !write(std_out,*) 'residuals squared after all merge='
-    !call xgBlock_print(resid,std_out)
-
-    !write(std_out,*) 'KEPT slice eigs='
-    !call xgBlock_print(eigen, std_out)
-
     ! Free memory
     call xg_free(eigen_ext)
     call xg_free(resid_ext)
 
-end subroutine slice_allmerge
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/merge_parallel_tasks
-!! NAME
-!! merge_parallel_tasks
-
-subroutine merge_parallel_tasks(slice, X0, eigen, resid)
-
-    implicit none
-
-    ! Arguments ------------------------------------
-    type(slice_t), intent(inout) :: slice
-    type(xgBlock_t), intent(inout) :: X0
-    type(xgBlock_t), intent(inout) :: eigen
-    type(xgBlock_t), intent(inout) :: resid
-
-    ! Local variables-------------------------------
-    type(xg_t) :: eigen_ext
-    type(xg_t) :: resid_ext
-
-    ! *********************************************************************
-
-    ! Allocate extended space for all slice eigenvalues and residuals
-    !call xg_init(eigen_ext, SPACE_R, rows=1, cols=slice%neigenpairs_ext, gpu_option=slice%gpu_option)
-    !call xg_init(resid_ext, SPACE_R, rows=1, cols=slice%neigenpairs_ext, gpu_option=slice%gpu_option)
-
-    ! Eliminate spurious nodes
-    !mask_spurious = resid(:,1) < slice%tolerance
-    !idx = pack([(i, i=1,neigenpairs_slice)], mask_spurious)
-
-    ! todo write X0 at exiting slice solver using this condition
-    ! do a xmpi_sum(neigenpairs_total) is the total sum is not correct then slice did not converge
-    ! missing eigenvalues
-
-
-end subroutine merge_parallel_tasks
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/copyfrom_extended_memory
-!! NAME
-!! copyfrom_extended_memory
-
-subroutine copyfrom_extended_memory(task, work, X0, eigen, resid)
-
-    implicit none
-    
-    type(activeSlice_t), intent(inout) :: task
-    type(extendedMemory_t), intent(inout) :: work
-    type(xgBlock_t), intent(inout) :: X0
-    type(xgBlock_t), intent(inout) :: eigen
-    type(xgBlock_t), intent(inout) :: resid
-
-    ! Sanity check
-    if (work%paral_kgb == 1 .and. ((.not. work%use_linalg) .or. work%use_colsrows) ) then
-        ABI_ERROR("not in linalg")
-    end if
-
-    if (work%paral_kgb==0) then
-        ! step one remove spurious modes
-        ! step two keep only those inside the limits
-
-        ! task%me_cols_X ! columns of shared memory 
-        ! task%me_cols_Xext ! columns of local memory
-    end if
-
-end subroutine copyfrom_extended_memory
+end subroutine compress_extended_memory
 !!***
 
 !----------------------------------------------------------------------
@@ -2966,71 +2783,6 @@ end subroutine print_scalar_filter
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/randomSketching
-!! NAME
-!! randomSketching
-!! 
-!! todo xg_randomSketching
-!! 
-!! SOURCE
-  
-  subroutine randomSketching(slice, X, X_sketch, k_sketch)
-    
-    implicit none
-
-    type(slice_t), intent(in) :: slice
-    type(xgBlock_t), intent(in) :: X
-    type(xgBlock_t), intent(inout) :: X_sketch
-    integer, intent(in) :: k_sketch
-
-    integer :: k
-    integer :: rank
-    integer :: spacecom, space
-    integer :: nband, tot_spacedim
-    integer :: gpu_option
-    type(xg_t) :: Omega
-    type(xgBlock_t) :: q
-
-  ! *********************************************************************
-
-    space = slice%space
-    nband = slice%neigenpairs
-    tot_spacedim = slice%total_spacedim
-    gpu_option = slice%gpu_option
-    spacecom = slice%spacecom 
-
-    if (k_sketch > nband) then
-        ABI_ERROR("sketching dimension cannot be more than initial one")
-    end if
-
-    ! Each MPI has the same sketch matrix
-    call xg_init(Omega, space, nband, k_sketch, xmpi_comm_null, gpu_option=gpu_option) 
-    
-    rank = xmpi_comm_rank(spacecom)
-
-    do k = 1, k_sketch
-        ! seed depends on column index
-        ! rank * offset + k, with offset > nband to avoid overlap between columns across ranks
-        call xgBlock_colwiseRandomGaussian(Omega%self, rank*(k_sketch+10)+k, k)
-        
-        ! test
-        ! q = random column vector
-        !call xgBlock_setBlock(Omega%self, q, nband, 1, fcol=k)
-        !write(std_out,*) 'Random id=', xgBlock_getid(q) 
-        !flush(std_out)
-    end do
-
-    ! Compute X * Omega
-    call xgBlock_gemm('n','n',1.0d0,X,Omega%self,0.d0,X_sketch,comm=xmpi_comm_null)
-    !call xgBlock_copy(Omega%self, X_sketch)
-
-    call xg_free(Omega)
-
-  end subroutine randomSketching
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_slice/computeChebyshevMoments
 !! NAME
 !! computeChebyshevMoments
@@ -3468,9 +3220,16 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     slice%neigenpairs_per_slice(1) = mass_left*1.1d0
     slice%neigenpairs_per_slice(2) = mass_right*1.1d0
 
-    slice%part_upp_bounds(1) = bgrid_fine(i_split)
-    slice%part_upp_bounds(2) = bgrid_fine(ngrid_fine)
+
+    slice%low_bounds(1) = lambda_min
+    slice%low_bounds(2) = bgrid_fine(i_split)
+
+    slice%upp_bounds(1) = bgrid_fine(i_split)
+    slice%upp_bounds(2) = bgrid_fine(ngrid_fine)
     
+    if (slice%nslice>2) then
+        ABI_ERROR("spectral bidirectional split not yet implemented for 3 slices")
+    end if
 
     ! #########################################
     ! ########### Final decision  #############
@@ -3559,215 +3318,17 @@ subroutine splitSpectrum(nband_tot, nstep_bisect, center, radius, a, b, c_split,
 
         ! *********************************************************************
 
-        comm_ = xmpi_comm_null
-        if (present(comm)) then
-            comm_ = comm
-        end if
-        neigenpairs = size(cheby_moments, 1)
-        ndeg_filter = size(cheby_moments, 2)-1
-
-        ABI_MALLOC(energy_per_band, (neigenpairs))
-        ABI_MALLOC(cja, (ndeg_filter + 1))
-        ABI_MALLOC(spectral_mass_left, (nstep_bisect))
-        ABI_MALLOC(spectral_mass_right, (nstep_bisect))
-
-        ! Step 1: increase b until all mass is included            
-        b_ext = b
-        call buildChebyshevJacksonCoeffs((a-center)/radius, (b_ext-center)/radius, ndeg_filter, cja)
-        call computeFilterEnergy(cja, cheby_moments, energy_per_band)
-        tot_mass = norm2(energy_per_band)**2
-        call xmpi_sum(tot_mass, comm, ierr)
-        iext_step = 0
-        width_ext = (b - a)/12.d0
-        write(std_out,*) 'width_ext=', width_ext
-        flush(std_out)
-        do while (tot_mass < nband_tot .and. iext_step < 100)
-            b_ext = b_ext + width_ext
-            call buildChebyshevJacksonCoeffs((a-center)/radius, (b_ext-center)/radius, ndeg_filter, cja)
-            call computeFilterEnergy(cja, cheby_moments, energy_per_band)
-            tot_mass = sum(energy_per_band)
-            call xmpi_sum(tot_mass, comm, ierr)
-            iext_step = iext_step + 1
-            write(std_out,*) 'extended interval to=', b_ext, 'nvec=', tot_mass
-            flush(std_out)
-        end do
-
-        width = (b_ext - a) / (nstep_bisect + 1)
-        mass_diff_prev = 0.d0
-        c_split = a
-        ! TODO verify that it converges towards a limit that is upper bound of b_true
-
-        do ishift = 1, nstep_bisect
-    
-            c = a + ishift * width
-           
-            write(std_out,*) '======================================'
-            write(std_out,*) 'ishift=', ishift, 'c=', c
-            flush(std_out)
-
-            ! Slice Left [a,c)
-            call buildChebyshevJacksonCoeffs((a-center)/radius, (c-center)/radius, ndeg_filter, cja)
-            call computeFilterEnergy(cja, cheby_moments, energy_per_band)
-            mass_left = sum(energy_per_band)
-            write(std_out,*) 'energy_per_band=', energy_per_band; flush(std_out)
-            call xmpi_sum(mass_left, comm, ierr)
-            spectral_mass_left(ishift) = mass_left
-
-            write(std_out,*) '                      Nvec left=', mass_left
-            flush(std_out)
-
-            ! Slice Right [c,b)
-            call buildChebyshevJacksonCoeffs((c-center)/radius, (b_ext-center)/radius, ndeg_filter, cja)
-            call computeFilterEnergy(cja, cheby_moments, energy_per_band)
-            write(std_out,*) 'energy_per_band=', energy_per_band; flush(std_out)
-            mass_right = sum(energy_per_band)
-            call xmpi_sum(mass_right, comm_, ierr)
-            spectral_mass_right(ishift) = mass_right
-           
-            write(std_out,*) '                      Nvec right=', mass_right
-            flush(std_out)
-            
-            ! Detect spectral mass flip
-            mass_diff = mass_left - mass_right
-            if (ishift > 1 .and. mass_diff * mass_diff_prev < 0) then
-                c_split = (2 * a + (2*ishift - 1) * width) / 2.d0
-            end if
-            mass_diff_prev = mass_diff
-
-        end do
-
-        ABI_FREE(energy_per_band)
-        ABI_FREE(spectral_mass_left)
-        ABI_FREE(spectral_mass_right)
-        ABI_FREE(cja)
+        ! todo might be a good idea to put here what there is in 
+        ! computeTraceEstimation
 
 end subroutine splitSpectrum
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/spectralPruning
+!!****f* m_slice/slice_applySelectionWindow
 !! NAME
-!! spectralPruning
-!! 
-!! FUNCTION
-!! Selects max probes in [a,b) mapped to [-1,1) with center and radius.
-!! Returns indices out of tot_nband to keep of size wanted_mass.
-!! 
-!! SOURCE
-
-subroutine spectralPruning(a, b, center, radius, cheby_moments, tot_nband, idx, comm)
-
-        implicit none
-
-        real(dp), intent(in) :: a, b
-        real(dp), intent(in) :: center, radius
-        integer, intent(in) :: tot_nband
-        integer, intent(out) :: idx(:)
-        complex(dp), intent(in) :: cheby_moments(:,:)
-        integer, intent(in), optional :: comm
-
-        integer :: neigenpairs
-        integer :: ndeg_filter
-        integer :: ishift
-        integer :: wanted_mass
-        integer :: comm_, my_rank, ierr
-        integer :: iband
-        real(dp) :: tol12 = 1.0e-12
-        integer, allocatable :: jperm(:)
-        real(dp), allocatable :: energy_per_band(:)
-        real(dp), allocatable :: energy_per_band_global(:)
-        real(dp), allocatable :: cja(:)
-
-        ! *********************************************************************
-
-        comm_ = xmpi_comm_null
-        if (present(comm)) then
-            comm_ = comm
-        end if
-        neigenpairs = size(cheby_moments, 1)
-        ndeg_filter = size(cheby_moments, 2)-1
-        wanted_mass = size(idx)
-
-        ABI_MALLOC(jperm, (tot_nband))
-        ABI_MALLOC(energy_per_band, (neigenpairs))
-        ABI_MALLOC(energy_per_band_global, (tot_nband))
-        ABI_MALLOC(cja, (ndeg_filter + 1))
-
-        call buildChebyshevJacksonCoeffs((a-center)/radius, (b-center)/radius, ndeg_filter, cja)
-        call computeFilterEnergy(cja, cheby_moments, energy_per_band)
-      
-        energy_per_band_global = 0.d0
-        if (xmpi_comm_size(comm_) > 1) then
-            ! sum contributions across procs
-            my_rank = xmpi_comm_rank(comm_)
-            ishift = my_rank * neigenpairs
-            energy_per_band_global(ishift+1:ishift+neigenpairs) = energy_per_band(:)
-            call xmpi_sum(energy_per_band_global, comm_, ierr)
-        else
-            energy_per_band_global(:) = energy_per_band(:)
-        end if
-    
-        jperm = (/ (iband, iband=1, tot_nband) /)
-        call sort_dp(tot_nband, energy_per_band_global, jperm, tol12)
-        idx(1:wanted_mass) = jperm(tot_nband - wanted_mass + 1:tot_nband) 
-
-        ABI_FREE(jperm)
-        ABI_FREE(energy_per_band)
-        ABI_FREE(energy_per_band_global)
-        ABI_FREE(cja)
-
-end subroutine spectralPruning
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/computeFilterEnergy
-!! NAME
-!! computeFilterEnergy
-!! 
-!! SOURCE
-
-subroutine computeFilterEnergy(cja, cheby_moments, energy_per_band)
-
-      implicit none
-
-      real(dp), intent(in) :: cja(:)
-      complex(dp), intent(in) :: cheby_moments(:,:)
-      real(dp), intent(out) :: energy_per_band(:)
- 
-      complex(dp), allocatable :: energy(:)
-      integer :: neigenpairs, ndeg_filter
-      integer :: ideg, j
-
-      ! *********************************************************************
-
-      neigenpairs = size(cheby_moments,1)
-      ndeg_filter = size(cheby_moments,2)-1
-      ABI_MALLOC(energy, (neigenpairs))
-      energy = dcmplx(0.0d0,0.0d0)
-      !$omp parallel do private(ideg)
-      do j = 1, neigenpairs
-        do ideg = 1, ndeg_filter+1
-            energy(j) = energy(j) + cja(ideg) * cheby_moments(j, ideg)
-        end do
-      end do
-      !$omp end parallel do
-      !$omp parallel do
-      do j = 1, neigenpairs
-          energy_per_band(j) = real(energy(j))
-      end do
-      !$omp end parallel do
-      ABI_FREE(energy)
-
-end subroutine computeFilterEnergy
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice/slice_initializeSubspaceIteration
-!! NAME
-!! slice_initializeSubspaceIteration
+!! slice_applySelectionWindow
 !!
 !! FUNCTION
 !! Input: k=m+p ou m la masse et p oversampling parameter
@@ -3776,96 +3337,71 @@ end subroutine computeFilterEnergy
 !! step 3) mettre les valeurs de Ritz dans part_low_bounds, part_upp_bounds sous condition que res<tol
 !! step 4) sinon faire un sketch de taille K du reste
 !!
+!! INPUT
+!! safe is between 2 and 10
+!!
+!! OUTPUT
+!! mapper contains the column indices per slice (allowing repetitions)
+!! 
 !! SOURCE
 
-  subroutine slice_initializeSubspaceIteration(slice, X, p, tol)
+  subroutine slice_applySelectionWindow(slice, mapper, eigen, residu, tol, safe)
 
     implicit none
 
     type(slice_t), intent(inout) :: slice
-    type(xgBlock_t), intent(inout) :: X
+    intent, pointer, intent(inout) :: mapper(:,:)
+    type(xgBlock_t), intent(inout) :: eigen
+    type(xgBlock_t), intent(inout) :: residu
     real(dp), intent(in) :: tol
-    integer, intent(in) :: p
+    integer, intent(in) :: safe
 
-    type(chebfi_t) :: chebfi
-    integer :: space_res
-    integer :: k_sketch
-    integer :: nband, gpu_option
-    integer :: m, k, i, m_conv, i1, i2, islice
-    real(dp) :: uppb, lowb
-    real(dp) :: mineig, maxeig
-    type(xg_t) :: X_sketch
-    type(xg_t) :: DivResults
-    type(xgBlock_t) :: resid
+    integer :: nband, iband, islice, m, k_kept
+    real(dp) :: uppb, lowb, uppb_plus, lowb_minus
+    real(dp) :: theta, relaxf, relres
     real(dp), pointer :: resid_vals(:,:) => null()
     real(dp), pointer :: thetas(:,:) => null()
-    logical, allocatable :: mask_conv(:)
-    logical, allocatable :: mask(:)
-    integer, allocatable :: idx(:)
-    real(dp) :: tsec(2)
 
   ! *********************************************************************
 
     nband = slice%neigenpairs
-    gpu_option = slice%gpu_option
 
-    if (slice%space==SPACE_C) then
-        space_res = SPACE_C
-    else if (slice%space==SPACE_CR) then
-        space_res = SPACE_R
-    else
-        ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
-    end if
-
-        
-    call xgBlock_reverseMap(DivResults%self , thetas, rows=nband, cols=1)
-    call xgBlock_reverseMap(resid, resid_vals, rows=rows(resid), cols=1)
-
-    ! Compute subspace residuals
-    ! en gros il faut décider soit de faire le subspace residual (cher) soit le vector residual
+    call xgBlock_reverseMap(eigen, thetas, rows=nband, cols=1)
+    call xgBlock_reverseMap(resid, resid_vals, rows=nband, cols=1)
 
     mask_conv = resid_vals(:,1) < tol
     
+    ! apply selection window per slice
     do islice=1,slice%nslice
         m = slice%neigenpairs_per_slice(islice)
-        k = m + p
-        !k_conv = ..
-        lowb = slice%part_low_bounds(islice)
-        uppb = slice%part_upp_bounds(islice)
-        mask = mask_conv .and. lowb < thetas(:,1) .and. thetas(:,1) < uppb
-        idx = pack([(i, i=1,nband)], mask)
-        m_conv = size(idx)
+        lowb = slice%low_bounds(islice)
+        uppb = slice%upp_bounds(islice)
 
-        slice%lookup_cols_X(idx) = islice
-    
-        ! sketch remaining offset using random vectors
-        k_sketch = k - m_conv
+        ! keep candidates in expanded interval
+        k_kept = 0
+        do iband=1, nband
+            relres = resid_vals(iband, 1)
+            if (relres < tol) then
+                ! Soft selection:
+                ! relaxed bounds for converged eigenpairs near boundaries
+                relaxf = safe * relres
+                lowb_minus = lowb - relaxf
+                uppb_plus = uppb + relaxf
+                theta = thetas(iband, 1)
+            
+                ! accept if lambda in relaxed interval
+                if (theta < uppb_plus .and. theta > lowb_minus) then
+                    mapper(k_kept, islice) = iband
+                    k_kept = k_kept + 1
+                end if
+            end if
+        end do
 
-        ! Est-ce que c'est mieux de prendre un melange aléatoire des autres directions ou de prendre simplement
-        ! des vecteurs aléatoires?
-        ! V1 essayer avec des vecteurs aléatoires, c'est plus facile d'implémenter
-
-        ! Y = X * Omega where Omega sketch matrix to capture all directions at once (linalg distribution)
-        !k_sketch = neigenpairs
-        call xg_init(X_sketch, slice%space, slice%spacedim, nband, slice%spacecom, gpu_option=gpu_option)
-        call randomSketching(slice, X, X_sketch%self, k_sketch)
-        ! todo rename randomSketching or move to xg because does not directly depend on slice
-        call xgBlock_copy(X_sketch%self, X)
-        call xg_free(X_sketch)
-    end do
-    
-    i1 = 1
-    i2 = 1
-    do islice=1,slice%nslice
-        i2 = slice%neigenpairs_per_slice(islice)
-        slice%lookup_cols_Xext(i1:i2) = islice
-        i1 = i2
-    end do
+        write(std_out,*) 'selection window kept', k_kept, 'for eigendimension', m
+        flush(std_out)
+    end do 
    
-    ! Peut-être on n'a pas besoin du bloc extended parce que on ajoute des vecteurs aléatoires
-    ! call slice_initExtendedMemory(slice)
-
-  end subroutine slice_initializeSubspaceIteration
+  end subroutine slice_applySelectionWindow
 !!***
 
 !----------------------------------------------------------------------

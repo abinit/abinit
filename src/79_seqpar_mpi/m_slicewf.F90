@@ -273,14 +273,10 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  end if
  ! ==================================================
 
- call slice_allschedule(slice, xgx0, getghc_gsc1, getBm1X, xgeigen, nspinor)
-
 !################    RUUUUUUUN    #####################################
 !######################################################################
 
- call slice_run(slice, getghc_gsc1, getBm1X, xgeigen, xgresidu, nspinor)
-
- call slice_allmerge(slice, xgx0, xgeigen, xgresidu)
+ call slice_run(slice, xgx0, getghc_gsc1, getBm1X, xgeigen, xgresidu, nspinor)
 
  if ( .not. l_paw ) then
    call timab(tim_nonlop,1,tsec)
