@@ -839,8 +839,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
              !$OMP& MAP(to:gvnlxc,ghc2,occ) PRIVATE(idat_occ,ipw)
              do ipw=1,npw
                do idat_occ=1,ndat_occ
-                 ghc2(1:2,ipw+(idat-1)*npw*nspinor)=ghc2(1:2,ipw+(idat-1)*npw*nspinor)&
-    &               -gvnlxc(1:2,ipw+(idat_occ-1)*npw*nspinor)*occ(idat_occ)*wtk
+                 ghc2(1,ipw+(idat-1)*npw*nspinor)=ghc2(1,ipw+(idat-1)*npw*nspinor)&
+    &               -gvnlxc(1,ipw+(idat_occ-1)*npw*nspinor)*occ(idat_occ)*wtk
+                 ghc2(2,ipw+(idat-1)*npw*nspinor)=ghc2(2,ipw+(idat-1)*npw*nspinor)&
+    &               -gvnlxc(2,ipw+(idat_occ-1)*npw*nspinor)*occ(idat_occ)*wtk
                end do
              end do ! idat_occ
 #endif
@@ -854,9 +856,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        if (fockcommon%optfor.and.(fockcommon%ieigen/=0)) then
          ABI_MALLOC(vdotr,(ndat_occ,3,natom,ndat))
          ABI_MALLOC(vdoti,(ndat_occ))
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET ENTER DATA MAP(alloc:vdotr,vdoti) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
          ABI_MALLOC(for1,(ndat_occ,3,natom,ndat))
          ABI_MALLOC(atom_nfgd,    (natom))
          do iatom=1,natom
@@ -868,6 +867,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
            atom_ifftsph(1:atom_nfgd(iatom),iatom) = fockcommon%pawfgrtab(iatom)%ifftsph(1:atom_nfgd(iatom))
            atom_rfgd(:,1:atom_nfgd(iatom),iatom) =  fockcommon%pawfgrtab(iatom)%rfgd(:,1:atom_nfgd(iatom))
          end do
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET ENTER DATA MAP(alloc:vdotr,vdoti,for1,atom_ifftsph,atom_nfgd,atom_rfgd) IF(gpu_option==ABI_GPU_OPENMP)
+         !$OMP TARGET UPDATE TO(atom_ifftsph,atom_nfgd,atom_rfgd) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
          choice=2; vdotr=zero;doti=zero;cpopt=4;tim_nonlop=17
          do idir=1,3
            do idat=1,ndat
@@ -904,8 +907,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
            end do ! idat
          else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) MAP(tofrom:for1) &
-           !$OMP& MAP(to:vfock,grnhat_12,atom_nfgd,atom_rfgd,atom_ifftsph) &
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+           !$OMP& MAP(to:vfock,grnhat_12,for1,atom_nfgd,atom_ifftsph) &
            !$OMP& PRIVATE(ifft,ind,iatom) PRIVATE(idat_occ,idir,esum)
            do idat=1,ndat
              do iatom=1,natom
@@ -924,6 +927,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
                end do ! idir
              end do ! iatom
            end do ! idat
+           !$OMP TARGET UPDATE FROM(for1)
 #endif
          end if
 
@@ -947,7 +951,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
            end do ! idat
          end if
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET EXIT DATA MAP(delete:vdotr,vdoti) IF(gpu_option==ABI_GPU_OPENMP)
+         !$OMP TARGET EXIT DATA MAP(delete:vdotr,vdoti,for1,atom_ifftsph,atom_nfgd,atom_rfgd) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
          ABI_FREE(vdotr)
          ABI_FREE(vdoti)
@@ -1167,7 +1171,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 #ifdef HAVE_OPENMP_OFFLOAD
        do idat_occ=1,ndat_occ
          !$OMP TARGET TEAMS DISTRIBUTE &
-         !$OMP& MAP(to:vlocpsi_r) MAP(to:cwaveocc_r,occ,vfock) PRIVATE(idat)
+         !$OMP& MAP(to:vlocpsi_r,ngfftf) MAP(to:cwaveocc_r,occ,vfock) PRIVATE(idat)
          do idat=1,ndat
            !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(ind,recwocc,imcwocc,revloc,imvloc,i3,i2,i1)
            do i3=1,ngfftf(3)
@@ -1866,8 +1870,8 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),target,intent(inout) :: gs_ham
 ! Arrays
- real(dp),intent(inout) :: cwavef(:,:)!,ghc(2,gs_ham%npw_k*ndat)
- real(dp),intent(inout) :: ghc(:,:)
+ real(dp),target,intent(inout) :: cwavef(:,:)!,ghc(2,gs_ham%npw_k*ndat)
+ real(dp),target,intent(inout) :: ghc(:,:)
 
 !Local variables-------------------------------
 ! Scalars
@@ -1877,7 +1881,8 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
  type(fock_common_type),pointer :: fockcommon
 ! Arrays
  real(dp) :: tsec(2)
- real(dp), allocatable :: mat(:,:,:),ghc1(:,:),vdotr(:),vdoti(:)
+ real(dp), target, allocatable :: mat(:,:,:),ghc1(:,:)
+ real(dp), allocatable :: vdotr(:),vdoti(:)
  real(dp), ABI_CONTIGUOUS pointer :: xi(:,:,:)
 
 ! *************************************************************************

@@ -333,7 +333,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  pawpiezo=0; if(psps%usepaw==1.and.(rfstrs/=0.or.(rfelfd==1.or.rfelfd==3))) pawpiezo=1
 !AM 10152015 -- WARNING --- the full calculation of the piezoelectric tensor
 !from electric field perturbation is only available
-!if nsym==1 (strain perturbation is not symmetrized):
+!if nsym/=1 (strain perturbation is not symmetrized):
  has_full_piezo=.False. ; if(pawpiezo==1.and.dtset%nsym==1)  has_full_piezo=.True.
  usevdw=0;if (dtset%vdw_xc>=5.and.dtset%vdw_xc<=7) usevdw=1
 !mkmem variables (mkmem is already argument)
@@ -991,7 +991,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call pawdenpot(compch_sph,el_temp,gprimd,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
 &   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_energies,paw_ij,pawang,&
 &   dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp, &
+&   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,dtset%spinaxis, &
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
    call timab(561,1,tsec)
@@ -1000,7 +1000,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,k0,&
 &   dtset%spnorbscl,ucvol,dtset%cellcharge(1),vtrial,vxc,xred,dtset%znucl,&
 &   nucdipmom=dtset%nucdipmom,&
-&   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+&   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,&
+&   spinaxis=dtset%spinaxis)
    call symdij(gprimd,indsym,ipert,my_natom,natom,dtset%nsym,ntypat,0,&
 &   paw_ij,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
@@ -1573,9 +1574,9 @@ ABI_NVTX_END_RANGE()
    end if
 
 !  Complete the d2nfr matrix by symmetrization of the existing elements
-!   write(std_out,*)"blkflg before d2sym3: ", blkflg
+   !write(std_out,*)"blkflg before d2sym3: ", blkflg
    call d2sym3(blkflg,d2nfr,indsym,mpert,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev,zero_by_symm)
-!   write(std_out,*)"blkflg after d2sym3: ", blkflg
+   !write(std_out,*)"blkflg after d2sym3: ", blkflg
 
    if(rfphon==1.and.psps%n1xccc/=0)then
 !    Complete the dyfrx1 matrix by symmetrization of the existing elements
@@ -3492,9 +3493,7 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
 !  Initialise the 2nd-derivative matrix
    d2matr(:,:,:,:,:)=0.0_dp
 
-!  Add the non-frozen-part, the
-!  Ewald part and the xc1 part of the frozen-wf part
-!  Add the vdw part (if any)
+!  Copy first the non-frozen-part for all possible elements
    do ipert2=1,mpert
      do idir2=1,3
        do ipert1=1,mpert
@@ -3503,16 +3502,30 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
              do ii=1,2
                d2matr(ii,idir1,ipert1,idir2,ipert2)=&
 &               d2nfr(ii,idir1,ipert1,idir2,ipert2)
-               if(ipert1<=natom .and. ipert2<=natom) then
-                 d2matr(ii,idir1,ipert1,idir2,ipert2)=&
-&                 d2matr(ii,idir1,ipert1,idir2,ipert2)+&
-&                 dyew(ii,idir1,ipert1,idir2,ipert2)  +&
+             end do
+           end if
+         end do
+       end do
+     end do
+   end do
+
+!  For the dynamical matrix
+!  Add the Ewald part and the xc1 part of the frozen-wf part
+!  Add the vdw part (if any)
+   do ipert2=1,natom
+     do idir2=1,3
+       do ipert1=1,natom
+         do idir1=1,3
+           if( blkflg(idir1,ipert1,idir2,ipert2)==1 ) then
+             do ii=1,2
+               d2matr(ii,idir1,ipert1,idir2,ipert2)=   &
+&               d2matr(ii,idir1,ipert1,idir2,ipert2)+  &
+&                 dyew(ii,idir1,ipert1,idir2,ipert2) + &
 &                 dyfrx1(ii,idir1,ipert1,idir2,ipert2)
-                 if (usevdw==1) then
-                   d2matr(ii,idir1,ipert1,idir2,ipert2)=&
-&                   d2matr(ii,idir1,ipert1,idir2,ipert2)+&
-&                   dyvdw(ii,idir1,ipert1,idir2,ipert2)
-                 end if
+               if (usevdw==1) then
+                 d2matr(ii,idir1,ipert1,idir2,ipert2)=  &
+&                 d2matr(ii,idir1,ipert1,idir2,ipert2)+ &
+&                 dyvdw(ii,idir1,ipert1,idir2,ipert2)
                end if
              end do
            end if
@@ -3521,6 +3534,7 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
      end do
    end do
 
+!  For the dynamical matrix
 !  Add the frozen-wavefunction part
    if (dyfr_nondiag==0) then
      do ipert2=1,natom
@@ -3569,8 +3583,7 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
      end do
    end if
 
-!  Section for piezoelectric tensor (from electric field response only for PAW)
-!  if(rfpert(natom+2)==1.and.pawpiezo==1) then
+!  For piezoelectric tensor add a contribution in PAW case
    if(pawpiezo==1) then
      ipert2=natom+2
      do idir2=1,3            ! Direction of electric field
@@ -3579,80 +3592,60 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
            ii=idir1+3*(ipert1-natom-3)
            if(blkflg(idir1,ipert1,idir2,ipert2)==1 ) then
              d2matr(1,idir1,ipert1,idir2,ipert2)=&
-&             d2nfr(1,idir1,ipert1,idir2,ipert2)+piezofrnl(ii,idir2)
-           end if
+              d2matr(1,idir1,ipert1,idir2,ipert2)+piezofrnl(ii,idir2)
+           endif
            if(blkflg(idir2,ipert2,idir1,ipert1)==1 ) then
              d2matr(1,idir2,ipert2,idir1,ipert1)=&
-&             d2nfr(1,idir2,ipert2,idir1,ipert1)+piezofrnl(ii,idir2)
-           end if
+              d2matr(1,idir2,ipert2,idir1,ipert1)+piezofrnl(ii,idir2)
+           endif
          end do
        end do
      end do
    end if
 
-!  Section for strain perturbation
-   if(rfpert(natom+3)==1 .or. rfpert(natom+4)==1) then
-!    Make sure relevant columns of output are nulled
-     d2matr(:,:,:,:,natom+3:natom+4)=0.0_dp
-!    Accumulate all frozen parts of the elastic tensor
-     ABI_MALLOC(elfrtot,(6+3*natom,6))
-     elfrtot(:,:)=elteew(:,:)+eltfrloc(:,:)+eltfrnl(:,:)+eltfrxc(:,:)
-     elfrtot(1:6,1:6)=elfrtot(1:6,1:6)+eltcore(:,:)+eltfrhar(:,:)+eltfrkin(:,:)
-     if (usevdw==1) elfrtot(:,:)=elfrtot(:,:)+eltvdw(:,:)
+!  Internal strain and strain-strain
 
-     do ipert2=natom+3,natom+4
-       do idir2=1,3
-!        Internal strain components first
-         do ipert1=1,natom
-           do idir1=1,3
-!            There was a bug here : idir1 was 1 !!
-             if( blkflg(idir1,ipert1,idir2,ipert2)==1 ) then
-               ii=idir1+6+3*(ipert1-1)
-               jj=idir2+3*(ipert2-natom-3)
-               d2matr(1,idir1,ipert1,idir2,ipert2)=&
-&               d2nfr(1,idir1,ipert1,idir2,ipert2)+elfrtot(ii,jj)
-             endif
-!DEBUG  pawpiezo is not appropriate as a flag here - but just to test !
-             if(pawpiezo==0)then
-               if( blkflg(idir2,ipert2,idir1,ipert1)==1 ) then
-                 ii=idir1+6+3*(ipert1-1)
-                 jj=idir2+3*(ipert2-natom-3)
-                 d2matr(1,idir2,ipert2,idir1,ipert1)=&
- &                 d2nfr(1,idir2,ipert2,idir1,ipert1)+elfrtot(ii,jj)
-               endif
-             end if
-!ENDDEBUG
-           end do
-         end do
-!        Now, electric field - strain mixed derivative (piezoelectric tensor)
-         ipert1=natom+2
+!  Accumulate all frozen parts of the elastic tensor
+   ABI_MALLOC(elfrtot,(6+3*natom,6))
+   elfrtot(:,:)=elteew(:,:)+eltfrloc(:,:)+eltfrnl(:,:)+eltfrxc(:,:)
+   elfrtot(1:6,1:6)=elfrtot(1:6,1:6)+eltcore(:,:)+eltfrhar(:,:)+eltfrkin(:,:)
+   if (usevdw==1) elfrtot(:,:)=elfrtot(:,:)+eltvdw(:,:)
+
+   do ipert2=natom+3,natom+4
+     do idir2=1,3
+
+!      Internal strain components
+       do ipert1=1,natom
          do idir1=1,3
+           ii=idir1+6+3*(ipert1-1)
+           jj=idir2+3*(ipert2-natom-3)
            if( blkflg(idir1,ipert1,idir2,ipert2)==1 ) then
              d2matr(1,idir1,ipert1,idir2,ipert2)=&
-&             d2nfr(1,idir1,ipert1,idir2,ipert2)
-             if (pawpiezo==1) then
-               ii=idir2+3*(ipert2-natom-3)
-               d2matr(1,idir1,ipert1,idir2,ipert2)=&
-&               d2matr(1,idir1,ipert1,idir2,ipert2)+piezofrnl(ii,idir1)
-             end if
-           end if
-         end do
-!        Now, strain-strain 2nd derivatives
-         do ipert1=natom+3,natom+4
-           do idir1=1,3
-             if( blkflg(idir1,ipert1,idir2,ipert2)==1 ) then
-               ii=idir1+3*(ipert1-natom-3)
-               jj=idir2+3*(ipert2-natom-3)
-               d2matr(1,idir1,ipert1,idir2,ipert2)=&
-&               d2nfr(1,idir1,ipert1,idir2,ipert2)+elfrtot(ii,jj)
-             end if
-           end do
+&             d2matr(1,idir1,ipert1,idir2,ipert2)+elfrtot(ii,jj)
+            endif
+           if( blkflg(idir2,ipert2,idir1,ipert1)==1 ) then
+             d2matr(1,idir2,ipert2,idir1,ipert1)=&
+&             d2matr(1,idir2,ipert2,idir1,ipert1)+elfrtot(ii,jj)
+           endif
          end do
        end do
+
+!      Now, strain-strain 2nd derivatives
+       do ipert1=natom+3,natom+4
+         do idir1=1,3
+           if( blkflg(idir1,ipert1,idir2,ipert2)==1 ) then
+             ii=idir1+3*(ipert1-natom-3)
+             jj=idir2+3*(ipert2-natom-3)
+             d2matr(1,idir1,ipert1,idir2,ipert2)=&
+&             d2matr(1,idir1,ipert1,idir2,ipert2)+elfrtot(ii,jj)
+           end if
+         end do
+       end do
+
      end do
-     ABI_FREE(elfrtot)
-   end if
-!  End section for strain perturbation
+   end do
+   ABI_FREE(elfrtot)
+!  End section for internal strain and strain-strain
 
 !  The second-order matrix has been computed.
 
@@ -3795,7 +3788,7 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
        end do
      end do
    end do
-!  Divide strain 2nd deriviative by ucvol to give elastic tensor
+!  Divide strain 2nd derivative by ucvol to give elastic tensor
    do ipert2=natom+3,natom+4
      do idir2=1,3
        do ipert1=natom+3,natom+4
@@ -3875,6 +3868,7 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
 !end do
 !end do
 !ENDDEBUG
+
 
 end subroutine dfpt_gatherdy
 !!***
