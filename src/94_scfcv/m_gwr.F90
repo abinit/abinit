@@ -5829,7 +5829,7 @@ subroutine gwr_build_sigmac(gwr)
  complex(gwp) :: cpsi_r, sigc_pm(2)
  complex(dp) :: odd_t(gwr%ntau), even_t(gwr%ntau), avg_2ntau(2,gwr%ntau), cvals(gwr%ntau)
  complex(dp),target,allocatable :: sigc_it_mat(:,:,:,:,:,:), alphas_c(:,:,:)
- complex(gwp),allocatable :: loc_cwork(:)
+!  complex(gwp),allocatable :: loc_cwork(:)
  complex(gwp) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:), wct_scbox(:,:)
  complex(gwp),allocatable :: uc_psir_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:), ur(:), ucpsi_r(:)
  type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), wc_rpr, wc_gpr(gwr%my_nqbz)
@@ -6193,7 +6193,7 @@ else
  end do
 
  call wrtout(std_out, " Allocating PBLAS matrices to store Wc_q(r',r,tau), and Sigma_kcalc(r',r,+/-tau) in the unit cell.")
- nrsp = gwr%g_nfft * gwr%nspinor
+ nrsp = gwr%g_nfft
  col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
 
  call wc_rpr%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
@@ -6216,8 +6216,8 @@ else
  call wrtout(std_out, sjoin(" Local memory for PBLAS (r,r') matrices: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
  if (gwr%comm%me == 0) call pstat_proc%print(_PSTAT_ARGS_)
 
- ii = sigc_rpr(1,1,1)%size_local(2)
- ABI_MALLOC(loc_cwork, (ii))
+!  ii = sigc_rpr(1,1,1)%size_local(2)
+!  ABI_MALLOC(loc_cwork, (ii))
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -6225,7 +6225,7 @@ else
    ! Load wavefunctions for GW corrections in the real-space unit cell.
    ! TODO: MPI distribute or use MPI shared memory
    bmin = minval(gwr%bstart_ks(:, spin)); bmax = maxval(gwr%bstop_ks(:, spin))
-   ABI_MALLOC_OR_DIE(uc_psir_bk, (nrsp, bmin:bmax, gwr%nkcalc), ierr)
+   ABI_MALLOC_OR_DIE(uc_psir_bk, (gwr%g_nfft * gwr%nspinor, bmin:bmax, gwr%nkcalc), ierr)
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(alloc:uc_psir_bk) IF (gpu_option == ABI_GPU_OPENMP)
 #endif
@@ -6254,6 +6254,10 @@ else
      end do
    end do
 
+   do iab = 1, gwr%nsig_ab
+     is_idx = spin
+     if (gwr%nspinor == 2) is_idx = iab
+     iiab = spinor_idxs(1, is_idx); jiab = spinor_idxs(2, is_idx)
    ! Construct Sigma(itau) using convolutions in k-space and real-space representation in the unit cell.
    do my_it=1,gwr%my_ntau
      call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
@@ -6295,7 +6299,7 @@ else
        if (.not. compute_this_kbz) cycle ! my_ikf loop
 
        ! Use symmetries to get G_kbz from the IBZ then G_k(g,g') --> G_k(r',r)
-       call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm)
+       call gwr%get_gkbz_rpr_pm(ik_bz, itau, is_idx, gk_rpr_pm)
 
        do ikcalc=1,gwr%nkcalc
          if (gwr%dtset%symsigma /= 0 .and. ltg_kcalc(ikcalc)%ibzq(ik_bz) == 0) cycle ! FIXME: iq_bz or ikq?
@@ -6360,14 +6364,22 @@ else
          end do
        end if
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
-         call sig_braket_ur(sigc_rpr(:,:,ikcalc), gwr%g_nfft*gwr%nspinor, uc_psir_bk(:,band,ikcalc), loc_cwork, sigc_pm)
-         if (gwr%sig_diago) sigc_it_mat(:, itau, band, 1, ikcalc, spin) = sigc_pm
+         if (gwr%nspinor == 2) then
+           call sig_braket_ur(sigc_rpr(:,:,ikcalc), gwr%g_nfft, &
+                           &  uc_psir_bk((jiab-1)*gwr%g_nfft+1:jiab*gwr%g_nfft, band, ikcalc), &
+                           &  uc_psir_bk((iiab-1)*gwr%g_nfft+1:iiab*gwr%g_nfft, band, ikcalc), &
+                           &  sigc_pm)
+         else
+           call sig_braket_ur(sigc_rpr(:,:,ikcalc), gwr%g_nfft, uc_psir_bk(:,band,ikcalc), uc_psir_bk(:,band,ikcalc), sigc_pm)
+         end if
+         if (gwr%sig_diago) sigc_it_mat(:, itau, band, 1, ikcalc, is_idx) = sigc_pm
         end do
      end do ! ikcalc
 
      write(msg,'(3(a,i0),a)')" Sigma_c my_itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
      call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
    end do ! my_it
+   end do ! iab
 
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET EXIT DATA MAP(delete:uc_psir_bk) IF (gpu_option == ABI_GPU_OPENMP)
@@ -6377,7 +6389,7 @@ else
 
  sigc_it_mat = -sigc_it_mat * (one/gwr%g_nfft) ** 2
 
- ABI_FREE(loc_cwork)
+!  ABI_FREE(loc_cwork)
  call wc_rpr%free(); call slk_array_free(sigc_rpr); call slk_array_free(gk_rpr_pm)
  do ikcalc=1,gwr%nkcalc
    call ltg_kcalc(ikcalc)%free()
@@ -6399,16 +6411,19 @@ end if
    call wrtout(std_out, " Symsigma 1 --> Averaging Sig_c matrix elements within degenerate subspaces.")
    ABI_CHECK(gwr%sig_diago, "symsigma = 1 requires diagonal Sigma_c")
    do spin=1,gwr%nsppol
+   do iab = 1, gwr%nsig_ab
+     is_idx = spin; if (gwr%nspinor == 2) is_idx = iab
    do ikcalc=1,gwr%nkcalc
      do ideg=1,size(gwr%degtab(ikcalc, spin)%bids)
        associate (bids => gwr%degtab(ikcalc, spin)%bids(ideg)%vals)
        nstates = size(bids)
-       avg_2ntau = sum(sigc_it_mat(:,:,bids(:), 1,ikcalc, spin), dim=3) / nstates
+       avg_2ntau = sum(sigc_it_mat(:,:,bids(:), 1,ikcalc, is_idx), dim=3) / nstates
        do ii=1,nstates
-         sigc_it_mat(:,:,bids(ii), 1,ikcalc, spin) = avg_2ntau
+         sigc_it_mat(:,:,bids(ii), 1,ikcalc, is_idx) = avg_2ntau
        end do
        end associate
      end do ! ideg
+   end do
    end do
    end do
  end if ! symsigma == +1
@@ -6921,17 +6936,19 @@ end subroutine write_notations
 !!
 !! SOURCE
 
-subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, loc_cwork, sigm_pm)
+subroutine sig_braket_ur(sig_rpr, nfftsp, ur_bra_glob, ur_ket_glob, sigm_pm)
 
 !Arguments ------------------------------------
  type(__slkmat_t),intent(in) :: sig_rpr(2,2)
  integer,intent(in) :: nfftsp
- complex(gwp),intent(in) :: ur_glob(nfftsp)
- complex(gwp),intent(out) :: sigm_pm(2)
- complex(gwp),intent(inout) :: loc_cwork(sig_rpr(1,1)%size_local(2))
+ complex(gwp),intent(in) :: ur_bra_glob(nfftsp)
+ complex(gwp),intent(in) :: ur_ket_glob(nfftsp)
 
-!Local variables-------------------------------
+ complex(gwp),intent(out) :: sigm_pm(2)
+ 
+ !Local variables-------------------------------
  integer :: ipm, ir1, il_r1, nrows, ncols
+ complex(gwp) :: loc_cwork(sig_rpr(1,1)%size_local(2))
  !complex(gwp),allocatable :: loc_cwork(:)
 ! *************************************************************************
 
@@ -6947,12 +6964,12 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, loc_cwork, sigm_pm)
    !loc_cwork(:) = matmul(transpose(rp_r%buffer_cplx), ur_glob)
 
    nrows = rp_r%size_local(1); ncols = rp_r%size_local(2)
-   call xgemv('T', nrows, ncols, cone_gw, rp_r%buffer_cplx, nrows, ur_glob, 1, czero_gw, loc_cwork, 1)
+   call xgemv('T', nrows, ncols, cone_gw, rp_r%buffer_cplx, nrows, ur_ket_glob, 1, czero_gw, loc_cwork, 1)
 
    ! Integrate over r. Note complex conjugate.
    do il_r1=1,rp_r%size_local(2)
      ir1 = rp_r%loc2gcol(il_r1)
-     sigm_pm(ipm) = sigm_pm(ipm) + conjg(ur_glob(ir1)) * loc_cwork(il_r1)
+     sigm_pm(ipm) = sigm_pm(ipm) + conjg(ur_bra_glob(ir1)) * loc_cwork(il_r1)
    end do
    !ABI_FREE(loc_cwork)
    end associate
