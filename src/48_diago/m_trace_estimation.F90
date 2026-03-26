@@ -96,6 +96,7 @@ module m_trace_estimation
     public :: init_matrixInfo           ! wrapper for various MPI and dim parameters
     public :: computeBLanczos           ! for lower bound estimation
     public :: computeTraceEstimation    
+    public :: smallestTridiagEigenpair  ! used in slice_cprj (experimental)
 
     CONTAINS  
 !=====================================================================
