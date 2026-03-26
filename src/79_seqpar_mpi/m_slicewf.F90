@@ -243,35 +243,36 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
         dtset%spectral_cut,l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
         gpu_thread_limit=dtset%gpu_thread_limit)
 
-    ! todo will be cleaned
+    ! todo will be cleaned and input variables will be deleted
+    ! for debug purposes
  ! ==================================================
  ! Manually setting slices from .abi
  ! Slice 1
- slice%neigenpairs_per_slice(1) = dtset%slice1_m    ! number of TRUE eigenvalues in (poly_low, poly_upp)
- slice%poly_degrees(1)          = dtset%slice1_deg  ! filter degree
- slice%low_bounds(1)       = dtset%slice1_part_a ! first slice is lowpass so interval to suppress
- slice%upp_bounds(1)       = dtset%slice1_part_b ! used for convergence <----
- slice%low_bounds(1)       = dtset%slice1_poly_a ! with overlap
- slice%upp_bounds(1)       = dtset%slice1_poly_b ! with overlap
-
- ! Slice 2
- slice%neigenpairs_per_slice(2) = dtset%slice2_m ! number of TRUE eigenvalues in (poly_low, poly_upp)
- slice%poly_degrees(2)          = dtset%slice2_deg ! slice%ndeg_filter
- slice%low_bounds(2)       = dtset%slice2_part_a ! used for convergence <-----
- slice%upp_bounds(2)       = dtset%slice2_part_b ! used for convergence <-----
- slice%low_bounds(2)       = dtset%slice2_poly_a ! with overlap
- slice%upp_bounds(2)       = dtset%slice2_poly_b ! with overlap
-
- ! Slice 3
- if (dtset%nslice==3) then
-    slice%neigenpairs_per_slice(3) = dtset%slice3_m ! number of TRUE eigenvalues in (poly_low, poly_upp)
-    slice%poly_degrees(3)          = dtset%slice3_deg ! slice%ndeg_filter
-    slice%low_bounds(3)       = dtset%slice3_part_a ! used for convergence <-----
-    slice%upp_bounds(3)       = dtset%slice3_part_b ! used for convergence <-----
-    slice%low_bounds(3)       = dtset%slice3_poly_a ! with overlap
-    slice%upp_bounds(3)       = dtset%slice3_poly_b ! with overlap
-
- end if
+! slice%neigenpairs_per_slice(1) = dtset%slice1_m    ! number of TRUE eigenvalues in (poly_low, poly_upp)
+! slice%poly_degrees(1)          = dtset%slice1_deg  ! filter degree
+! slice%low_bounds(1)       = dtset%slice1_part_a ! first slice is lowpass so interval to suppress
+! slice%upp_bounds(1)       = dtset%slice1_part_b ! used for convergence <----
+! slice%low_bounds(1)       = dtset%slice1_poly_a ! with overlap
+! slice%upp_bounds(1)       = dtset%slice1_poly_b ! with overlap
+!
+! ! Slice 2
+! slice%neigenpairs_per_slice(2) = dtset%slice2_m ! number of TRUE eigenvalues in (poly_low, poly_upp)
+! slice%poly_degrees(2)          = dtset%slice2_deg ! slice%ndeg_filter
+! slice%low_bounds(2)       = dtset%slice2_part_a ! used for convergence <-----
+! slice%upp_bounds(2)       = dtset%slice2_part_b ! used for convergence <-----
+! slice%low_bounds(2)       = dtset%slice2_poly_a ! with overlap
+! slice%upp_bounds(2)       = dtset%slice2_poly_b ! with overlap
+!
+! ! Slice 3
+! if (dtset%nslice==3) then
+!    slice%neigenpairs_per_slice(3) = dtset%slice3_m ! number of TRUE eigenvalues in (poly_low, poly_upp)
+!    slice%poly_degrees(3)          = dtset%slice3_deg ! slice%ndeg_filter
+!    slice%low_bounds(3)       = dtset%slice3_part_a ! used for convergence <-----
+!    slice%upp_bounds(3)       = dtset%slice3_part_b ! used for convergence <-----
+!    slice%low_bounds(3)       = dtset%slice3_poly_a ! with overlap
+!    slice%upp_bounds(3)       = dtset%slice3_poly_b ! with overlap
+!
+! end if
  ! ==================================================
 
 !################    RUUUUUUUN    #####################################

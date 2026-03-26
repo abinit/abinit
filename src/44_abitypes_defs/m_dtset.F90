@@ -680,24 +680,24 @@ type, public :: dataset_type
  integer :: symsigma = 1
  integer :: symv1scf = 0
  integer :: scr_wrange(2) = 0
- integer :: slice1_m
- integer :: slice1_deg
- real(dp) :: slice1_part_a
- real(dp) :: slice1_part_b
- real(dp) :: slice1_poly_a
- real(dp) :: slice1_poly_b
- integer :: slice2_m
- integer :: slice2_deg
- real(dp) :: slice2_part_a
- real(dp) :: slice2_part_b
- real(dp) :: slice2_poly_a
- real(dp) :: slice2_poly_b
- integer :: slice3_m
- integer :: slice3_deg
- real(dp) :: slice3_part_a
- real(dp) :: slice3_part_b
- real(dp) :: slice3_poly_a
- real(dp) :: slice3_poly_b
+ integer :: slice1_m ! for debug
+ integer :: slice1_deg ! for debug
+ real(dp) :: slice1_part_a ! for debug
+ real(dp) :: slice1_part_b ! for debug
+ real(dp) :: slice1_poly_a ! for debug
+ real(dp) :: slice1_poly_b ! for debug
+ integer :: slice2_m ! for debug
+ integer :: slice2_deg ! for debug
+ real(dp) :: slice2_part_a ! for debug
+ real(dp) :: slice2_part_b ! for debug
+ real(dp) :: slice2_poly_a ! for debug
+ real(dp) :: slice2_poly_b ! for debug
+ integer :: slice3_m ! for debug
+ integer :: slice3_deg ! for debug
+ real(dp) :: slice3_part_a ! for debug
+ real(dp) :: slice3_part_b ! for debug
+ real(dp) :: slice3_poly_a ! for debug
+ real(dp) :: slice3_poly_b ! for debug
 !T
  integer :: td_exp_order
  integer :: td_mexcit
