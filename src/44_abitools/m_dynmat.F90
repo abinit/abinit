@@ -1561,8 +1561,8 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  do ithree=1,3
 
 !  Big loop on all elements
-!  do ipert1=1,mpert See notes
-   do ipert1=1,min(natom+2,mpert)
+  do ipert1=1,mpert !See notes
+!   do ipert1=1,min(natom+2,mpert)
 
 !    Select the symmetries according to pertubation 1
      if (ipert1<=natom)then
@@ -1572,8 +1572,8 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
      end if
 
      do idir1=1,3
-!      do ipert2=1,mpert See notes
-       do ipert2=1,min(natom+2,mpert)
+      do ipert2=1,mpert !See notes
+!       do ipert2=1,min(natom+2,mpert)
 
     !    Select the symmetries according to pertubation 2
          if (ipert2<=natom)then
@@ -1771,14 +1771,16 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
    ABI_MALLOC(d2tmp2,(2,3,3))
    ABI_MALLOC(d2work,(2,3,mpert,3,mpert))
    d2work(:,:,:,:,:)=d2(:,:,:,:,:)
-   do ipert1=1,min(natom+2,mpert)
+   do ipert1=1,mpert
+   !do ipert1=1,min(natom+2,mpert)
      if ((ipert1==natom+1.or.ipert1==natom+10.or.ipert1==natom+11).or.(ipert1==natom+2.and.(.not.qzero))) cycle
      if (ipert1<=natom)then
        sym1_ => symrec
      else
        sym1_ => symrel
      end if
-     do ipert2=1,min(natom+2,mpert)
+     do ipert2=1,mpert
+     !do ipert2=1,min(natom+2,mpert)
 !      if (any(blkflg(:,ipert1,:,ipert2)==0)) cycle
        if ((ipert2==natom+1.or.ipert2==natom+10.or.ipert2==natom+11).or.(ipert2==natom+2.and.(.not.qzero))) cycle
        if (ipert2<=natom)then

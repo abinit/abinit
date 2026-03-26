@@ -273,6 +273,37 @@ AC_DEFUN([_SD_LIBPSML_CHECK_USE], [
   AC_MSG_RESULT([${sd_libpsml_ok}])
   unset tmp_incs
 
+  # Check for meta-GGA kinetic energy density support (libpsml >= 2.0)
+  if test "${sd_libpsml_ok}" = "yes"; then
+    AC_MSG_CHECKING([whether LibPSML supports meta-GGA kinetic energy densities])
+    AC_LANG_PUSH([Fortran])
+    AC_LINK_IFELSE([[
+      subroutine psml_die(str)
+        character(len=*), intent(in) :: str
+        write(0,"(a)") str
+        stop
+      end subroutine
+      program main
+        use m_psml
+        use m_psml_api
+        interface
+          subroutine psml_die(str)
+            character(len=*), intent(in) :: str
+          end subroutine
+        end interface
+        type(ps_t) :: psxml
+        real(8) :: val
+        val = ps_CoreKineticDensity_Value(psxml, 1.0d0)
+      end program
+    ]], [sd_libpsml_metagga="yes"], [sd_libpsml_metagga="no"])
+    AC_LANG_POP([Fortran])
+    AC_MSG_RESULT([${sd_libpsml_metagga}])
+    if test "${sd_libpsml_metagga}" = "yes"; then
+      AC_DEFINE([HAVE_LIBPSML_METAGGA], 1,
+        [Define to 1 if LibPSML supports meta-GGA kinetic energy densities.])
+    fi
+  fi
+
   # Restore environment
   SD_ESL_RESTORE_FLAGS
 ]) # _SD_LIBPSML_CHECK_USE

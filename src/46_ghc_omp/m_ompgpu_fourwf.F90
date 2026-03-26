@@ -89,8 +89,8 @@ subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 !scalars
  integer,intent(in) :: cplex,ngfft(18),ldx,ldy,ldz,ndat,isign
 !arrays
- real(dp),intent(inout) :: fofg(2*ldx*ldy*ldz*ndat)
- real(dp),intent(inout) :: fofr(cplex*ldx*ldy*ldz*ndat)
+ real(dp),target,intent(inout) :: fofg(2*ldx*ldy*ldz*ndat)
+ real(dp),target,intent(inout) :: fofr(cplex*ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -195,7 +195,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
- real(dp), allocatable :: fofrb(:,:,:,:)
+ real(dp),allocatable,target :: fofrb(:,:,:,:)
  logical :: l_use_ndo
 
  real(dp) :: xnorm,one,tmp
@@ -208,10 +208,6 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  logical :: transfer_fofgin, transfer_fofginb, transfer_fofgout, transfer_denpot, transfer_fofr
  integer(C_SIZE_T) :: byte_count
  real(dp), ABI_CONTIGUOUS pointer :: work_gpu(:,:,:,:)
-
-#if defined HAVE_GPU_HIP && defined FC_LLVM
- real(dp), ABI_CONTIGUOUS pointer :: fofr_amdref(:,:,:,:)
-#endif
 
  npwmin=1; if(me_g0==1 .and. istwf_k==2) npwmin=2
  l_use_ndo=.false.; if(present(use_ndo)) l_use_ndo=use_ndo==1
@@ -292,13 +288,6 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
  if(option/=3) then
 
-#if defined HAVE_GPU_HIP && defined FC_LLVM
-   !FIXME Work-around for AOMP v15.0.3 (AMD Flang fork)
-   ! For some reason, fofr won't be processed normally when passed as argument
-   ! of FFT routine within TARGET DATA directives
-   fofr_amdref => fofr
-#endif
-
    ! GPU_SPHERE_IN
 
    cfft_size = 2*n1*n2*n3*ndat
@@ -375,15 +364,9 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    end if
 
    ! call backward fourier transform on gpu work_gpu => fofr_gpu
-#if defined HAVE_GPU_HIP && defined FC_LLVM
-   !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr_amdref)
-   call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr_amdref), FFT_INVERSE)
-   !$OMP END TARGET DATA
-#else
    !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr)
    call gpu_fft_exec_z2z(FOURWF_ID, c_loc(work_gpu), c_loc(fofr), FFT_INVERSE)
    !$OMP END TARGET DATA
-#endif
    call gpu_fft_stream_synchronize(FOURWF_ID)
 
    ! In non-diagonal specific use-case, perform same operation with fofginb:
@@ -518,15 +501,9 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  if(option==2 .or. option==3) then
 
    ! call forward fourier transform on gpu: fofr_gpu ==> work_gpu
-#if defined HAVE_GPU_HIP && defined FC_LLVM
-   !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr_amdref)
-   call gpu_fft_exec_z2z(FOURWF_ID, c_loc(fofr_amdref), c_loc(work_gpu), FFT_FORWARD)
-   !$OMP END TARGET DATA
-#else
    !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr)
    call gpu_fft_exec_z2z(FOURWF_ID, c_loc(fofr), c_loc(work_gpu), FFT_FORWARD)
    !$OMP END TARGET DATA
-#endif
    call gpu_fft_stream_synchronize(FOURWF_ID)
 
    one=1

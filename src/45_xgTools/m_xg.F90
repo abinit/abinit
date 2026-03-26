@@ -3899,6 +3899,7 @@ contains
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     integer :: cols
+    logical :: map_vec
     complex(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 #endif
@@ -3935,7 +3936,8 @@ contains
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
-      !$OMP TARGET ENTER DATA MAP(to:vec)
+      map_vec=.not. xomp_target_is_present(c_loc(vec))
+      !$OMP TARGET ENTER DATA MAP(to:vec) IF(map_vec)
       cols=xgBlock%cols
       select case(xgBlock%space)
       case (SPACE_R)
@@ -3964,7 +3966,7 @@ contains
           end do
         end do
       end select
-      !$OMP TARGET EXIT DATA MAP(delete:vec)
+      !$OMP TARGET EXIT DATA MAP(delete:vec) IF(map_vec)
 #endif
 
     else

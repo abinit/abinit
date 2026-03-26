@@ -76,4 +76,11 @@ if (ABINIT_YAKL_WANTED)
     ${YAKL_BINARY_DIR})
 endif()
 
+if(ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
+  target_link_libraries(79_seqpar_mpi
+    PUBLIC
+    abinit::28_numeric_noabirule
+    )
+endif()
+
 add_library(abinit::79_seqpar_mpi ALIAS 79_seqpar_mpi)
