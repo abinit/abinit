@@ -932,6 +932,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    gwr%use_supercell_for_sigma = gwr%dtset%gwr_sigma_algo == 1
  end if
 
+ if (.not. gwr%use_supercell_for_tchi .and. gwr%use_supercell_for_sigma) then
+   ABI_ERROR("BUG: Invalid combination for some reason.")
+ end if
+
  ! Set q0 for long-wavelength limit
  if (dtset%gw_nqlwl /= 0) gwr%q0 = dtset%gw_qlwl(:, 1)
 
@@ -1441,6 +1445,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      "Idle MPI processes are not supported. The product of the `nproc_*` vars should be equal to nproc while is it:", ch10, &
      "k_nproc (", np_k, ") x g_nproc (", np_g, ") x tau_nproc (", np_t,") x spin_nproc (", np_s, ") == ", product(dims_kgts)
    ABI_ERROR(msg)
+ end if
+
+ if (gwr%nspinor == 2 .and. np_s == 2) then
+   ABI_ERROR("Spin parallelism is not supported for nspinor=2!")
  end if
 
 #ifdef HAVE_MPI
