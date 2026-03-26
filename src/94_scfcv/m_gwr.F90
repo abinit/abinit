@@ -6330,7 +6330,7 @@ else
                                  gpu_option)
 
            if (abs(wtqm) > tol12) then
-             ABI_ERROR(sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
+             ABI_ERROR(sjoin("TR is not yet implemented:, wtqm:", ftoa(wtqm)))
 
              call cplx_mat_plus_bc(bufsize, sigc_rpr(2,ipm,ikcalc)%buffer_cplx(:,1), &
                                    wtqm, "C", gk_rpr_pm(ipm)%buffer_cplx(:,1), wc_rpr%buffer_cplx(:,1), &
