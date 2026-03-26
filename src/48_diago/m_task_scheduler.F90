@@ -130,6 +130,7 @@ module m_task_scheduler
     integer, parameter :: tim_invovl      = 1755
 
     ! Public 'activeSlice' datatype for active slice in use (me=current MPI process)
+    ! fixme think whether it is better to rename to 'activeTask'
     !-------------------------------------------------
     type, public :: activeSlice_t
 
@@ -259,7 +260,7 @@ subroutine free_schedule(scheduler)
     ABI_SFREE(scheduler%neigenpairs_per_slice)
     ABI_SFREE(scheduler%nproc_per_slice)
     ABI_SFREE(scheduler%lookup_proc)
-end subroutine alloc_schedule
+end subroutine free_schedule
 
 !! Logic for parallel execution of tasks (a slice has SOME MPI processes)
 subroutine schedule_parallel_tasks(scheduler)
@@ -346,8 +347,10 @@ subroutine init_extended_memory(work, task, X0, mapper)
     type(extendedMemory_t), intent(inout) :: work
     type(activeSlice_t), intent(inout) :: task
     type(xgBlock_t), intent(in) :: X0
+    integer, pointer, intent(in) :: mapper(:,:)
 
     type(xgBlock_t) :: col_in, col_out
+    integer :: fcol, fcol_ext
     integer :: j, nrows, ncols
 
     ! Sanity check
@@ -359,7 +362,6 @@ subroutine init_extended_memory(work, task, X0, mapper)
         work%XextLinalg = X0
     else 
         work%XextLinalg = work%X_ext%self
-    end if
         !i1 = 1
         !i2 = 1
         !do islice=1,slice%nslice
@@ -428,20 +430,20 @@ subroutine init_active_memory(work, task, X0, p)
     implicit none
 
     type(extendedMemory_t), intent(inout) :: work
-    type(extendedMemory_t), intent(inout) :: task
+    type(activeSlice_t), intent(inout) :: task
     type(xgBlock_t), intent(in) :: X0
     integer, intent(in) :: p
     integer :: k_sketch, m, m_wanted
     type(xg_t) :: X_sketch
     type(xgBlock_t) :: Xext_last
     type(xg_t) :: X_compl
-    integer :: space, nrows, ncols, spacecom, gpu_option
+    integer :: space_, nrows, ncols_large, spacecom, gpu_option_
 
-    space = space(task%me_Xext)
+    space_ = space(task%me_Xext)
     nrows = rows(task%me_Xext)
-    ncols_large = ncols(X0)
+    ncols_large = cols(X0)
     spacecom = comm(task%me_Xext)
-    gpu_option = gpu_option(task%me_Xext)
+    gpu_option_ = gpu_option(task%me_Xext)
 
     m = size(task%me_cols_X)
     m_wanted = task%me_neigenpairs_slice
@@ -459,7 +461,7 @@ subroutine init_active_memory(work, task, X0, p)
 
     ! for remaining dimensions not in p
     ! Y = X * Omega where Omega sketch matrix to capture all directions at once (linalg distribution)
-    call xg_init(X_sketch, space, nrows, ncols_large, spacedom, gpu_option=gpu_option)
+    call xg_init(X_sketch, space_, nrows, ncols_large, spacecom, gpu_option=gpu_option_)
     call xgBlock_randomSketching(X0, X_sketch%self, k_sketch)
     call xgBlock_copy(X_sketch%self, Xext_last)
     call xg_free(X_sketch)
@@ -500,7 +502,7 @@ subroutine mark_active_task(task, scheduler, spacecom, paral_slice)
 
     task%me_neigenpairs_slice = scheduler%neigenpairs_per_slice(my_id)
     task%me_nproc_slice = scheduler%nproc_per_slice(my_id)
-    task%me_ndeg_slice = scheduler%poly_degrees(my_id)
+    !task%me_ndeg_slice = scheduler%poly_degrees(my_id)
 
     if (task%me_nproc_slice<scheduler%nresources) then
         ! can split communicator
@@ -578,11 +580,11 @@ end subroutine mark_active_task
 !! 
 !! SOURCE
 
-subroutine allocate_active_task(slice, work, task)
+subroutine allocate_active_task(work, task)
 
     implicit none
     !type(slice_t), intent(inout) :: slice ! should not use slice objects at all!!!
-    type(activeTask_t), intent(inout) :: task
+    type(activeSlice_t), intent(inout) :: task
     type(extendedMemory_t), intent(inout) :: work
     !type(chebfi_t), intent(inout) :: chebfi ! should not use chebfi objects at all !!!
     
@@ -676,7 +678,7 @@ end subroutine allocate_active_task
 subroutine free_active_task(task)
 
     implicit none
-    type(activeTask_t), intent(inout) :: task
+    type(activeSlice_t), intent(inout) :: task
     
     ! *********************************************************************
 
@@ -696,7 +698,7 @@ end subroutine free_active_task
 
 subroutine execute_active_task(task)
 
-    type(activeTask_t), intent(inout) :: task
+    type(activeSlice_t), intent(inout) :: task
 
     type(xgBlock_t) :: X0_active
     type(xgBlock_t) :: eigen_active
@@ -766,9 +768,9 @@ subroutine mask_active_task(task, tol)
 
     ! *********************************************************************
 
-    n_active = rows(eigen)
+    n_active = rows(task%me_eigen)
     call xgBlock_reverseMap(task%me_eigen, thetas_conv, rows=n_active, cols=1)
-    call xgBlock_reverseMap(task%me_residu, residu_conv, rows=n_active, cols=1)
+    call xgBlock_reverseMap(task%me_resid, residu_conv, rows=n_active, cols=1)
    
     ! Hard acceptance criterion so that slices do not overlap
     do iband=1, n_active
@@ -781,7 +783,7 @@ subroutine mask_active_task(task, tol)
             selected = (res < tol .and. theta > task%me_lowb)
         else
             selected = (res < tol .and. theta < task%me_uppb .and. theta > task%me_lowb)
-        end do
+        end if
         if (selected) then
             task%me_mask_Xext(iband) = 1
         end if

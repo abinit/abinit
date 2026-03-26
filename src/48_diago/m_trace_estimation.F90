@@ -39,6 +39,7 @@ module m_trace_estimation
     use m_xgTransposer
     use m_xg_ortho_RR
     use m_chebfi2
+    use m_polynomial_filter
 
     use m_xmpi
     use m_xomp
@@ -70,17 +71,69 @@ module m_trace_estimation
     integer, parameter :: tim_lanczos     = 2167
     integer, parameter :: tim_trace       = 2168
 
+    ! Public 'matrixInfo' datatype
+    !-------------------------------------------------
+    type, public :: matrixInfo_t
+
+        integer :: comm_rows                                ! xmpi_comm_self ...
+        integer :: comm_cols                                ! same as spacecom
+        integer :: spacecom                                 ! same as comm_cols
+        integer :: neigenpairs                              ! total number of bands (=number of eigenpairs)
+        integer :: total_spacedim                           ! total number of plane-waves
+        integer :: spacedim                                 ! nb of plane-waves per process in linalg representation
+        integer :: space                                    ! real or complex eigenvectors
+        integer :: gpu_kokkos_nthrd                 
+        integer :: gpu_thread_limit 
+        integer :: gpu_option                               ! enable GPU
+        integer :: paral_kgb                                ! enable parallel (k-points, G basis, bands)
+        integer :: me_g0
+        integer :: me_g0_fft
+
+    end type matrixInfo_t
+
     ! Public methods
     !-------------------------------------------------
+    public :: init_matrixInfo           ! wrapper for various MPI and dim parameters
     public :: computeBLanczos           ! for lower bound estimation
     public :: computeTraceEstimation    
-
 
     CONTAINS  
 !=====================================================================
 !!***
 
-!!****f* m_slice/computeBLanczos
+!!****f* m_trace_estimation/init_matrixInfo
+!! NAME
+!! init_matrixInfo
+!! 
+!! SOURCE
+
+  subroutine init_matrixInfo(matrixInfo, comm_rows, comm_cols, spacecom, neigenpairs, total_spacedim, &
+          spacedim, space, gpu_kokkos_nthrd, gpu_thread_limit, gpu_option, paral_kgb, me_g0, me_g0_fft)
+
+      implicit none
+
+      type(matrixInfo_t), intent(inout) :: matrixInfo
+      integer, intent(in) :: comm_rows, comm_cols, spacecom, neigenpairs, total_spacedim, spacedim, space
+      integer, intent(in) :: gpu_kokkos_nthrd, gpu_thread_limit, gpu_option, paral_kgb, me_g0, me_g0_fft
+
+      matrixInfo%comm_rows      = comm_rows
+      matrixInfo%comm_cols      = comm_cols
+      matrixInfo%spacecom       = spacecom
+      matrixInfo%neigenpairs    = neigenpairs
+      matrixInfo%total_spacedim = total_spacedim
+      matrixInfo%spacedim       = spacedim
+      matrixInfo%space          = space
+      matrixInfo%gpu_kokkos_nthrd = gpu_kokkos_nthrd
+      matrixInfo%gpu_thread_limit = gpu_thread_limit
+      matrixInfo%gpu_option     = gpu_option
+      matrixInfo%paral_kgb      = paral_kgb
+      matrixInfo%me_g0          = me_g0
+      matrixInfo%me_g0_fft      = me_g0_fft
+
+  end subroutine init_matrixInfo
+!!***
+
+!!****f* m_trace_estimation/computeBLanczos
 !! NAME
 !! computeBLanczos
 !! 
@@ -90,11 +143,12 @@ module m_trace_estimation
 !!
 !! SOURCE
   
-  subroutine computeBLanczos(slice, getAX_BX, getBm1X, k, lambda_min, res_norm)
+  subroutine computeBLanczos(minfo, paw, getAX_BX, getBm1X, k, lambda_min, res_norm)
 
     implicit none
 
-    type(slice_t), intent(inout) :: slice
+    type(matrixInfo_t), intent(in) :: minfo
+    logical, intent(in) :: paw
     integer, intent(in) :: k
     real(dp), intent(out) :: lambda_min, res_norm
     interface
@@ -127,24 +181,21 @@ module m_trace_estimation
 
     integer :: i, j
     integer :: rank
-    integer :: space
-    integer :: tot_spacedim
-    integer :: me_g0
-    integer :: gpu_option
+    integer :: me_g0, space, tot_spacedim, gpu_option
     real(dp) :: tsec(2)
 
   ! *********************************************************************
 
     call timab(tim_lanczos,1,tsec)
     
-    space = slice%space
-    tot_spacedim = slice%total_spacedim
-    gpu_option = slice%gpu_option
-    me_g0 = slice%me_g0
-    if (slice%paral_kgb==1) then
-        me_g0 = slice%me_g0_fft
+    tot_spacedim = minfo%total_spacedim
+    gpu_option = minfo%gpu_option
+    space = minfo%space
+    me_g0 = minfo%me_g0
+    if (minfo%paral_kgb==1) then
+        me_g0 = minfo%me_g0_fft
     end if
-    rank = xmpi_comm_rank(slice%spacecom)
+    rank = xmpi_comm_rank(minfo%spacecom)
     beta_prev = 0.0_dp
 
     ABI_MALLOC(v_min, (tot_spacedim))
@@ -208,7 +259,7 @@ module m_trace_estimation
         alpha(j) = dot_qTv_layout(1,1)
 
         ! v = B^{-1} * A * q
-        if (slice%paw) then
+        if (paw) then
             call timab(tim_invovl, 1, tsec)
             ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_BM1X)
             call getBm1X(v, Bm1v)
@@ -266,7 +317,7 @@ module m_trace_estimation
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/computeChebyshevMoments
+!!****f* m_trace_estimation/computeChebyshevMoments
 !! NAME
 !! computeChebyshevMoments
 !! 
@@ -279,12 +330,14 @@ module m_trace_estimation
 !! 
 !! SOURCE
 
-subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
+subroutine computeChebyshevMoments(minfo, tolerance, ecut, paw, X0, getAX_BX, getBm1X, &
         lambda_minus, lambda_plus, ndeg_filter, cheby_moments, maxeig_global)
 
     implicit none
 
-    type(slice_t), intent(inout) :: slice
+    type(matrixInfo_t), intent(in) :: minfo
+    real(dp), intent(in) :: ecut, tolerance
+    logical, intent(in) :: paw
     type(xgBlock_t), intent(inout) :: X0
     integer, intent(in) :: ndeg_filter
     real(dp), intent(in) :: lambda_minus, lambda_plus
@@ -306,13 +359,8 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         end subroutine getBm1X
     end interface
 
-    integer :: neigenpairs, nband
-    integer :: ideg
-    integer :: iband
-    integer :: tot_spacedim
-    integer :: space_res, me_g0
-    integer :: space, spacecom, gpu_option
-    integer :: ierr
+    integer :: ideg, iband, ierr
+    integer :: nband, tot_spacedim, space, space_res, me_g0, gpu_option
     logical :: compute_QR ! compute quotients de Rayleigh
     real(dp) :: maxeig, mineig
     real(dp) :: center, radius
@@ -331,14 +379,12 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     ! todo add timer
     ! tim_cheby_moments
 
-    space = slice%space
-    spacecom = slice%spacecom
-    neigenpairs = slice%neigenpairs
-    tot_spacedim = slice%total_spacedim
-    gpu_option = slice%gpu_option
-    me_g0 = slice%me_g0
-    if (slice%paral_kgb==1) then
-        me_g0 = slice%me_g0_fft
+    gpu_option = minfo%gpu_option
+    tot_spacedim = minfo%total_spacedim
+    space = minfo%space
+    me_g0 = minfo%me_g0
+    if (minfo%paral_kgb==1) then
+        me_g0 = minfo%me_g0_fft
     end if
     nband = cols(X0)
  
@@ -347,9 +393,9 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         compute_QR = .true.
     end if
     if (compute_QR) then
-        if (slice%space==SPACE_C) then
+        if (space==SPACE_C) then
             space_res = SPACE_C
-        else if (slice%space==SPACE_CR) then
+        else if (space==SPACE_CR) then
             space_res = SPACE_R
         else
             ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
@@ -360,13 +406,13 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
     
     ! Moment workspace size (1, ndeg+1)
     call xg_init(Moments, space, 1, ndeg_filter+1, gpu_option=gpu_option) ! M_n=<X0,f_n(A)X0>
-    call xg_init(X0_backup, space, tot_spacedim, nband, spacecom, me_g0=me_g0, gpu_option=gpu_option) ! X0
+    call xg_init(X0_backup, space, tot_spacedim, nband, minfo%spacecom, me_g0=me_g0, gpu_option=gpu_option) ! X0
 
     ! Initialize chebfi object in MPI Colsrows distribution
-    call chebfi_init(chebfi,nband,tot_spacedim,slice%tolerance,slice%ecut,slice%paral_kgb,&
-        nband,ndeg_filter,0,space,1,xmpi_comm_null,slice%me_g0,slice%me_g0_fft,&
-        slice%paw,slice%comm_rows,slice%comm_cols,0,1.d0,0.d0,gpu_option,&
-        gpu_kokkos_nthrd=slice%gpu_kokkos_nthrd,gpu_thread_limit=slice%gpu_thread_limit,&
+    call chebfi_init(chebfi,nband,tot_spacedim,tolerance,ecut,minfo%paral_kgb,&
+        nband,ndeg_filter,0,minfo%space,1,xmpi_comm_null,minfo%me_g0,minfo%me_g0_fft,&
+        paw,minfo%comm_rows,minfo%comm_cols,0,1.d0,0.d0,minfo%gpu_option,&
+        gpu_kokkos_nthrd=minfo%gpu_kokkos_nthrd,gpu_thread_limit=minfo%gpu_thread_limit,&
         from_linalg=.false.)
 
     ! Initialize Chebyshev recursion
@@ -394,7 +440,7 @@ subroutine computeChebyshevMoments(slice, X0, getAX_BX, getBm1X, &
         call timab(tim_RR_q, 2, tsec)
         ABI_NVTX_END_RANGE()
     
-        call xmpi_max(maxeig, maxeig_global, spacecom, ierr)
+        call xmpi_max(maxeig, maxeig_global, minfo%spacecom, ierr)
 
         write(std_out,*) 'maxeig_global=', maxeig_global
         !write(std_out,*) 'divresults=', xgBlock_getid(DivResults%self)
@@ -456,7 +502,7 @@ end subroutine computeChebyshevMoments
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/computeTraceEstimation
+!!****f* m_trace_estimation/computeTraceEstimation
 !! NAME
 !! computeTraceEstimation
 !! 
@@ -469,15 +515,15 @@ end subroutine computeChebyshevMoments
 !!
 !! SOURCE
 
-subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe,&
-        min_low_bound, xXColsRows)
+subroutine computeTraceEstimation(minfo, nslice, ecut, paw, tolerance, getAX_BX, getBm1X, ndeg_filter, &
+        m_probe, min_low_bound, xXColsRows)
 
     implicit none
 
-    type(slice_t), intent(inout) :: slice
-    integer, intent(in) :: ndeg_filter
-    integer, intent(in) :: m_probe
-    real(dp), intent(in) :: min_low_bound
+    type(matrixInfo_t), intent(in) :: minfo
+    integer, intent(in) :: nslice, ndeg_filter, m_probe
+    logical, intent(in) :: paw
+    real(dp), intent(in) :: ecut, min_low_bound, tolerance
     type(xgBlock_t), optional, intent(inout) :: xXColsRows
     interface
         subroutine getAX_BX(X,AX,BX)
@@ -495,12 +541,9 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
         end subroutine getBm1X
     end interface
 
-    integer :: neigenpairs, nband
-    integer :: ideg
-    integer :: iband
-    integer :: spacedim, tot_spacedim
-    integer :: space_res
-    integer :: space, spacecom, gpu_option
+    integer :: ideg, iband
+    integer :: nband
+    integer :: space_res, tot_spacedim, gpu_option
     integer :: ierr
     integer :: me_g0
     integer :: jcol
@@ -516,7 +559,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     logical :: gap_left, gap_right
     real(dp) :: ncount_ovlp
     real(dp) :: lambda_plus_wanted
-    real(dp) :: b_init, b_ext, ecut
+    real(dp) :: b_init, b_ext
     real(dp) :: maxeig, mineig
     real(dp) :: center, radius
     real(dp) :: partial_mass, half_mass
@@ -536,17 +579,12 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     
     call timab(tim_trace,1,tsec)
 
-    ecut = slice%ecut
-    spacecom = slice%spacecom
-    spacedim = slice%spacedim
-    neigenpairs = slice%neigenpairs
-    tot_spacedim = slice%total_spacedim
-    space = slice%space
-    my_rank = xmpi_comm_rank(slice%spacecom)
-    gpu_option = slice%gpu_option
-    me_g0 = slice%me_g0
-    if (slice%paral_kgb==1) then
-        me_g0 = slice%me_g0_fft
+    tot_spacedim = minfo%total_spacedim
+    gpu_option = minfo%gpu_option
+    my_rank = xmpi_comm_rank(minfo%spacecom)
+    me_g0 = minfo%me_g0
+    if (minfo%paral_kgb==1) then
+        me_g0 = minfo%me_g0_fft
     end if
 
     num_moments = ndeg_filter + 1
@@ -561,7 +599,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     ABI_MALLOC(cumm_eigen_count, (ngrid_fine))
 
     ! total number of probes is m_probes * number of MPI processes
-    call xg_init(X_probe, slice%space, tot_spacedim, m_probe, spacecom, &
+    call xg_init(X_probe, minfo%space, tot_spacedim, m_probe, minfo%spacecom, &
         me_g0=me_g0, gpu_option=gpu_option)
 
     ! Define random isotropic probes (unit variance NOT unit norm!)
@@ -579,13 +617,8 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     ! todo <X_probe, f(A) X_probe> (trace) and <X0, f(A) X_probe> (principal angles)
     ! maybe <xX, f(A)X_probe> is useful for principal angles and column selection
     ! in that case incorporate it in the loop
-    if (present(xXColsRows)) then
-        call computeChebyshevMoments(slice, xXColsRows, getAX_BX, getBm1X, &
-            min_low_bound, ecut, ndeg_filter, cheby_moments, b_init) ! debug
-    else
-        call computeChebyshevMoments(slice, X_probe%self, getAX_BX, getBm1X, &
-            min_low_bound, ecut, ndeg_filter, cheby_moments, b_init)
-    end if
+    call computeChebyshevMoments(minfo, tolerance, ecut, paw, X_probe%self, &
+        getAX_BX, getBm1X, min_low_bound, ecut, ndeg_filter, cheby_moments, b_init)
 
     write(std_out,*) 'b_init=', b_init
     flush(std_out)
@@ -593,10 +626,10 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     ! Sum real part of moments and divide by number of probes
     ! moments(k) = 1/Nv * Sum_{i=1}^Nv v_i^T T_k(A)v_i
     m_probe_tot = m_probe
-    call xmpi_sum(m_probe_tot, spacecom, ierr)
+    call xmpi_sum(m_probe_tot, minfo%spacecom, ierr)
     !moments(1:num_moments) = (/ (real(cheby_moments(1,k)), k=1,num_moments) /)
     moments = real(cheby_moments(1,:))
-    call xmpi_sum(moments, spacecom, ierr)
+    call xmpi_sum(moments, minfo%spacecom, ierr)
     moments(1:num_moments) = moments(1:num_moments)/m_probe_tot
     
     write(std_out,*) 'moments k=0=', real(cheby_moments(1,1))
@@ -624,7 +657,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
         write(std_out,*) ib, 'scan: <=', bgrid_coarse(ib), 'mass=', partial_mass 
         flush(std_out)
 
-        if (partial_mass > slice%neigenpairs) then
+        if (partial_mass > minfo%neigenpairs) then
             uppb_loc = ib
             exit
         end if
@@ -659,7 +692,7 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     ! todo 
 
     ! todo
-    if (slice%nslice/=2) then
+    if (nslice/=2) then
         ABI_ERROR("spectral split not implemented for more than 2 slices")
     end if
 
@@ -693,25 +726,25 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
         ABI_ERROR("spectrum has no gap..")
     end if
     mass_left = get_eigenvalue_count((bgrid_fine(i_split)-center)/radius,moments,work)
-    mass_right = neigenpairs - mass_left
+    mass_right = minfo%neigenpairs - mass_left
     write(std_out,*) 'i_split val=', i_split, bgrid_fine(i_split)
     write(std_out,*) 'mass left=', mass_left
     write(std_out,*) 'mass right=', mass_right
     flush(std_out)
 
-    slice%neigenpairs_per_slice(1) = mass_left
-    slice%neigenpairs_per_slice(2) = mass_right
+    !slice%neigenpairs_per_slice(1) = mass_left
+    !slice%neigenpairs_per_slice(2) = mass_right
 
 
-    slice%low_bounds(1) = lambda_min
-    slice%low_bounds(2) = bgrid_fine(i_split)
+    !slice%low_bounds(1) = lambda_min
+    !slice%low_bounds(2) = bgrid_fine(i_split)
 
-    slice%upp_bounds(1) = bgrid_fine(i_split)
-    slice%upp_bounds(2) = bgrid_fine(ngrid_fine)
+    !slice%upp_bounds(1) = bgrid_fine(i_split)
+    !slice%upp_bounds(2) = bgrid_fine(ngrid_fine)
     
-    if (slice%nslice>2) then
-        ABI_ERROR("spectral bidirectional split not yet implemented for 3 slices")
-    end if
+    !if (slice%nslice>2) then
+    !    ABI_ERROR("spectral bidirectional split not yet implemented for 3 slices")
+    !end if
 
     ! #########################################
     ! ########### Final decision  #############
@@ -723,22 +756,22 @@ subroutine computeTraceEstimation(slice, getAX_BX, getBm1X, ndeg_filter, m_probe
     ! Bound placement
     ! Constraints: 
     ! 1) number of bands per slice balanced
-    write(std_out,*) 'target bands per slice=', slice%neigenpairs/slice%nslice
+    write(std_out,*) 'target bands per slice=', minfo%neigenpairs/nslice
     flush(std_out)
 
     ! 2) gap: bound is located at a region where deriv is zero 
 
     ! 3) no cluster is present after the bound, like the next bound does not contain a lot eigs
 
-    slice%neigenpairs_per_slice(1) = get_eigenvalue_count((slice%poly_upp_bounds(1)-center)/radius, moments, work)
+    !slice%neigenpairs_per_slice(1) = get_eigenvalue_count((slice%poly_upp_bounds(1)-center)/radius, moments, work)
 
-    ncount_ovlp = get_eigenvalue_count((slice%poly_low_bounds(2)-center)/radius, moments, work)
+    !ncount_ovlp = get_eigenvalue_count((slice%poly_low_bounds(2)-center)/radius, moments, work)
 
-    slice%neigenpairs_per_slice(2) = neigenpairs - 2*slice%neigenpairs_per_slice(1) + ncount_ovlp
+    !slice%neigenpairs_per_slice(2) = neigenpairs - 2*slice%neigenpairs_per_slice(1) + ncount_ovlp
 
-    write(std_out,*) 'testing ncount 1=', slice%neigenpairs_per_slice(1)
-    write(std_out,*) 'testing ncount 2=', slice%neigenpairs_per_slice(2)
-    flush(std_out)
+    !write(std_out,*) 'testing ncount 1=', slice%neigenpairs_per_slice(1)
+    !write(std_out,*) 'testing ncount 2=', slice%neigenpairs_per_slice(2)
+    !flush(std_out)
 
     ! Free memory
     ABI_FREE(cheby_moments)
@@ -757,7 +790,7 @@ end subroutine computeTraceEstimation
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice/get_eigenvalue_count
+!!****f* m_trace_estimation/get_eigenvalue_count
 !! NAME
 !! get_eigenvalue_count
 !! 
