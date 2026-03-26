@@ -36,7 +36,9 @@ module m_slice_cprj
  use m_xgTransposer
  use m_xg_ortho_RR
  use m_xg_nonlop
- !use m_trace_estimation
+
+ use m_polynomial_filter, only: buildChebyshevJacksonCoeffs
+ use m_trace_estimation, only: smallestTridiagEigenpair 
 
  use m_xmpi
  use m_xomp
