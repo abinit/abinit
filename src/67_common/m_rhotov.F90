@@ -210,6 +210,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 !scalars
  integer :: nk3xc,ifft,ipositron,ispden,nfftot,offset
  integer :: mpi_comm_sphgrid,ixc_current
+ integer :: mpicomm,nmpi,ierr
 !integer :: ii,jj,kk,ipt,nx,ny,nz           !SPr: debug
 !real(dp):: rx,ry,rz                        !SPr: debug
  real(dp) :: doti,e_xcdc_vxctau
@@ -219,7 +220,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 !arrays
  real(dp) :: evxc,tsec(2),vmean(dtset%nspden),vhspinfield(dtset%nspden)
  real(dp),target :: vxctau_dum(0,0,0)
- real(dp),allocatable :: rhowk(:,:),v_constr_dft_r(:,:),vnew(:,:),xcart(:,:)
+ real(dp),allocatable :: rhowk(:,:),v_constr_dft_r(:,:),vnew(:,:),xcart(:,:),tmp(:,:)
  real(dp),pointer :: vxctau_(:,:,:)
 !real(dp),allocatable :: vzeemanHarm(:,:)   !SPr: debug Zeeman field q/=0 real space
 
@@ -510,6 +511,29 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 &        grcondft,intgres,mpi_enreg,rhor,strscondft,vresidnew,xred,dtset%qgbt,dtset%use_gbt)
        vnew(:,1:dtset%nspden)=vtrial(:,1:dtset%nspden)+vresidnew(:,1:dtset%nspden)
      endif
+
+     ! /!\ ---- IT IS IMPORTANT TO NOT CHANGE THESE LINES ---- /!\
+     ! LB-03/2026:
+     ! A noise can accumulate in nvresid after each SCF cycle,
+     ! resulting in different densities/potentials for different MPI processes.
+     ! This has been observed using threads, but could happen in other contexts.
+     ! This slowly worsens the SCF cycle, leading to wrong results after many iterations.
+     ! So here we compute the mean of nvresid over all MPI processes to reduce the noise.
+     ! This error is difficult to test as it is observed in long runs only, so BE VERY CAREFUL.
+     ! Note : the cost of this MPI communication is not so big (much smaller than any communication done on WFs).
+     mpicomm = mpi_enreg%comm_kptband
+     nmpi = xmpi_comm_size(mpicomm)
+     if (nmpi>1) then
+       ABI_MALLOC(tmp,(size(vresidnew,1),size(vresidnew,2)))
+       tmp(:,:) = vresidnew(:,:) / nmpi
+       call xmpi_sum(tmp,mpicomm,ierr)
+       if (ierr/=0) then
+         ABI_ERROR("Error in mpi sum (vresidnew)")
+       end if
+       vresidnew(:,:) = tmp(:,:)
+       ABI_FREE(tmp)
+     end if
+     ! /!\--------------------/!\
 
      offset   = 0
 
