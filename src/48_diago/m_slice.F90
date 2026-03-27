@@ -15,12 +15,12 @@
 !! - applies Rayleigh-Ritz for individual slices in parallel or sequentially.
 !!
 !! NOTES
-!! Dependence with other modules in this directory:
+!! Dependence with other modules and hierarchy in this directory:
 !!   m_slice uses:
-!!      |- m_polynomial_filter
-!!      |- m_slice_task
-!!      |- m_trace_estimation
-!!      |- m_chebfi2
+!!      |- m_polynomial_filter | various computational routines
+!!      |- m_trace_estimation  | various computational routines
+!!      |- m_chebfi2           ! the Chebyshev recursion
+!!      |- m_slice_task        | Low-level
 !!
 !! COPYRIGHT
 !! Copyright (C) 2018-2026 ABINIT group (IML)
@@ -397,10 +397,13 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     real(dp) :: a_part, b_part, max_resid_kept
     logical :: is_lowpass, on_host, on_device
     ! todo use slice%..
+    ! IML ----> variables for logic of slice solver
+    type(matrixInfo_t) :: matrixInfo
     type(xg_t) :: DivResults
     type(activeTask_t) :: task
     type(taskScheduler_t) :: scheduler
-    type(extendedMemory_t) :: extendedMemory
+    type(asyncMemory_t) :: asyncMemory
+    ! <----- IML
     ! Arrays
     real(dp) :: tsec(2)
     real(dp), allocatable :: moments(:)
@@ -438,6 +441,10 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     call xg_init(DivResults, space_res, slice%neigenpairs, 1, gpu_option=slice%gpu_option)
 
+    call init_matrixInfo(matrixInfo, slice%comm_rows, slice%comm_cols, slice%spacecom, slice%neigenpairs,&
+        slice%total_spacedim, slice%spacedim, slice%space, slice%gpu_kokkos_nthrd, slice%gpu_thread_limit,&
+        slice%gpu_option, slice%paral_kgb, slice%me_g0, slice%me_g0_fft)
+
     write(std_out,*) 'in slice_run'; flush(std_out)
 
     ! ================================== Prepare spectral slices ===========================================
@@ -445,12 +452,12 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     call timab(tim_slice_sched,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_SLICE_SCHEDULE)
 
-    ndeg_filter_max = 25
+    ndeg_filter_max = 10 ! todo IML autotune based on the presence of oscillations
     ABI_MALLOC(moments, (ndeg_filter_max+1))
 
     ! Split spectrum and query X0
     ABI_NVTX_START_RANGE(NVTX_SLICE_RRQ)
-    call slice_prepareSpectrum(slice, X0, moments, DivResults%self, residu, getAX_BX, getBm1X, nspinor)
+    call slice_prepareSpectrum(slice, X0, matrixInfo, moments, DivResults%self, residu, getAX_BX, getBm1X, nspinor)
     ABI_NVTX_END_RANGE()
 
     ABI_NVTX_END_RANGE()
@@ -477,16 +484,14 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     slice%neigenpairs_per_slice = ceiling(slice%neigenpairs_per_slice*1.1d0)
     neigenpairs_ext = sum(slice%neigenpairs_per_slice)
 
-    write(std_out,*) 'allocating extended memory of size', neigenpairs_ext
+    write(std_out,*) 'allocating async memory of size', neigenpairs_ext
     flush(std_out)
 
     ! Allocate extended buffer in Linalg representation. Notice spacecom communicator (global)
-    call allocate_extended_memory(extendedMemory, slice%paral_kgb, slice%neigenpairs, neigenpairs_ext, &
-        slice%space, slice%spacedim, slice%spacecom, slice%me_g0, slice%gpu_option)
+    call slice_task_allocateAsyncMemory(asyncMemory, matrixInfo, neigenpairs_ext)
 
     ! Initilize extended buffer with vectors from X or random vectors. This part also uses global comm.
-    call init_extended_memory(extendedMemory, X0, mapper)
-    ! also use the neigenpairs_per_slice...
+    call slice_task_initAsyncMemory(asyncMemory, X0, mapper, slice%neigenpairs_per_slice)
     ! IML is here todo
 
     !IML dev
@@ -524,13 +529,13 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 !        ! Mark my slice task and resources as actively in use
 !        call mark_active_task(scheduler, task) ! called once for parallel slices and in loop for sequential
 !
-!        ! Allocate and fill extended memory buffer
+!        ! Allocate and fill async memory buffer
 !        nband_ext = sum(slice%neigenpairs_per_slice)
-!        call allocate_extended_memory(extendedMemory, nband_ext)
+!        call allocate_extended_memory(asyncMemory, nband_ext)
 !
 !        ! k is the number of columbs from X0
 !        ! p is the offset
-!        call init_extended_memory(extendedMemory, task, X0, k, p)
+!        call init_extended_memory(asyncMemory, task, X0, k, p)
 !
 !    else
 !        ! configure task without any communicators
@@ -539,9 +544,9 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 !    call allocate_active_task(slice, scheduler, task)
 !
 !  
-!    ! will use mapper to copy columns of X0 to extended memory
+!    ! will use mapper to copy columns of X0 to async memory
 !    !! assumes linalg representation of both ext and spectrum mem
-!    call init_extended_memory(extendedMemory, X0, mapper)
+!    call init_extended_memory(asyncMemory, X0, mapper)
 !    
 !    ! ============================ Active task execution =======================================
 !
@@ -553,7 +558,7 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 !        do islice=1, nslice
 !            if (task%active(islice)) then                   ! <--- normally it should not be that different.. 
 !            call schedule_next_task(scheduler, neigenpairs)
-!            call init_active_memory(extendedMemory, task, X0, p)
+!            call init_active_memory(asyncMemory, task, X0, p)
 !            call execute_active_task(task)
 !            call mask_active_task(task, tol) ! mask extendedMem
 !        end do
@@ -561,7 +566,7 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 !    else
 !        ! execute active tasks in parallel
 !
-!        call init_active_memory(extendedMemory, task, X0, p)
+!        call init_active_memory(asyncMemory, task, X0, p)
 !        call execute_active_task(task)
 !        call mask_active_task(task, tol) ! mask extendedMem
 !
@@ -582,7 +587,7 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 !    ! Timer is BEFORE the barrier !!
 !    call timab(tim_slice_me,2,tsec)
 !
-!    call free_extended_memory(extendedMemory)
+!    call free_extended_memory(asyncMemory)
 !    ABI_FREE(mapper)
     call xg_free(DivResults)
 
@@ -604,13 +609,14 @@ end subroutine slice_run
 !! 
 !! SOURCE
 
-subroutine slice_prepareSpectrum(slice, X, moments, eigen, resid, getAX_BX, getBm1X, nspinor)
+subroutine slice_prepareSpectrum(slice, X, matrixInfo, moments, eigen, resid, getAX_BX, getBm1X, nspinor)
 
     implicit none
 
     ! Arguments
     type(slice_t), intent(inout) :: slice
     type(xgBlock_t), intent(inout) :: X
+    type(matrixInfo_t), intent(inout) :: matrixInfo
     real(dp), intent(inout) :: moments(:)
     type(xgBlock_t), intent(inout) :: eigen
     type(xgBlock_t), intent(inout) :: resid
@@ -656,7 +662,6 @@ subroutine slice_prepareSpectrum(slice, X, moments, eigen, resid, getAX_BX, getB
     type(xg_t) :: BX
     type(xgBlock_t) :: xXColsRows
     type(xgBlock_t) :: eigen_me, resid_me
-    type(matrixInfo_t) :: matrixInfo
     type(xgTransposer_t) :: xgTransposerX
     ! Arrays
     real(dp) :: tsec(2)
@@ -725,10 +730,6 @@ subroutine slice_prepareSpectrum(slice, X, moments, eigen, resid, getAX_BX, getB
         call xg_free(W_dummy)
     end if
 #endif
-
-    call init_matrixInfo(matrixInfo, slice%comm_rows, slice%comm_cols, slice%spacecom, slice%neigenpairs,&
-        slice%total_spacedim, slice%spacedim, slice%space, slice%gpu_kokkos_nthrd, slice%gpu_thread_limit,&
-        slice%gpu_option, slice%paral_kgb, slice%me_g0, slice%me_g0_fft)
 
     kmax = 30
     call computeBLanczos(matrixInfo, slice%paw, getAX_BX, getBm1X, kmax, lambda_min, res_norm)
@@ -1051,6 +1052,7 @@ end function slice_unitTest
       real(dp), allocatable :: bgrid_fine(:)
       real(dp), allocatable :: bgrid_coarse(:)
       real(dp), allocatable :: work(:)
+      character(len=500) :: msg
 
     ! *********************************************************************
 
@@ -1113,8 +1115,14 @@ end function slice_unitTest
           b_scaled = (bgrid_fine(ib) - center) / radius
           partial_mass = get_eigenvalue_count(b_scaled, moments, work)
           cumm_eigen_count(ib) = partial_mass
+          if (partial_mass < 0.d0 .and. abs(partial_mass) > 1.d0) then
+              write(msg,'(a)') "fine resolution for eigenvalue count failed due to oscillations. ",&
+                  "Reduce ndeg_filter_max (hard-coded) as a solution"
+              ABI_ERROR(msg)
+          end if
           write(std_out,*) ib, 'scan: <=', bgrid_fine(ib), 'mass=', partial_mass
       end do
+      !! todo if not found then add points in the fine grid...
 
       ! Prepare: detect gap existence in the interior of slice
       ! define value of smallest_gap

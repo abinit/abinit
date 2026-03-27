@@ -294,12 +294,6 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
 
  call timab(tim_init,2,tsec)
 
- write(std_out,*) 'At chebfi_init:'
- write(std_out,*) 'chebfi%spacecom id=', chebfi%spacecom 
- write(std_out,*) 'chebfi%spacecom size=', xmpi_comm_size(chebfi%spacecom)
- write(std_out,*) 'chebfi%spacedim=', chebfi%spacedim
- write(std_out,*) 'chebfi%bandpp=', chebfi%bandpp
-
 end subroutine chebfi_init
 !!***
 
