@@ -1,6 +1,6 @@
 
-.Version 10.5.8.2 of ABINIT, released Oct 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.9 of ABINIT. v10.7.1 released Mar 2026.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 20 Dec 2025.
-- ( at 17h04 )
+.Starting date : Thu 26 Mar 2026.
+- ( at 11h25 )
 
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/TestBot_MPI1/tutorespfn_tlw_1-tlw_2-tlw_3/tlw_1.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/TestBot_MPI1/tutorespfn_tlw_1-tlw_2-tlw_3/tlw_1.abi
 - output file    -> tlw_1.abo
 - root for input  files -> tlw_1i
 - root for output files -> tlw_1o
@@ -608,8 +608,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.18799
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/14si.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/trunk__codata2022/tests/Pspdir/14si.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/14si.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/14si.fhi
 - Si, fhi98PP : LDA PerdewWang, l=2 local
 - 14.00000   4.00000    150901                znucl, zion, pspdat
     6    7    2    2       495   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -779,7 +779,7 @@ meta: {optdriver: 1, rfelfd: 2, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
@@ -1016,7 +1016,7 @@ meta: {optdriver: 1, }
 --------------------------------------------------------------------------------
 
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
 
@@ -1420,7 +1420,7 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, rfstrs: 3, }
 
  symkchk : k-point set has full space-group symmetry.
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1432,8 +1432,8 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, rfstrs: 3, }
     7)    idir= 2    ipert=   6
     8)    idir= 3    ipert=   6
 
- The following reducible perturbations will also be
- explicitly calculated for a correct subsequent
+ The following reducible perturbations will also be 
+ explicitly calculated for a correct subsequent 
  execution of the longwave driver:
 
     idir= 2    ipert=   4
@@ -2317,7 +2317,7 @@ tolerances: {tolvrs: 1.00E-08, }
        3               2        0.000000        0.000000
        3               3       -0.077121        0.000000
 
- Effective charge tensors after
+ Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
@@ -2331,8 +2331,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
-  cartesian coordinates for strain terms (1/ucvol factor
-   for elastic tensor components not included)
+  cartesian coordinates for strain terms (1/ucvol factor 
+   for elastic tensor components not included) 
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
 
@@ -2480,6 +2480,15 @@ tolerances: {tolvrs: 1.00E-08, }
    3    4   2    6         0.0000015649         0.0000000000
    3    4   3    6        -0.0000014279         0.0000000000
 
+   1    5   1    1         0.0000000186         0.0000000000
+   1    5   2    1         0.0000000145         0.0000000000
+   1    5   3    1        -0.0000000035         0.0000000000
+   1    5   1    2         0.0000000186         0.0000000000
+   1    5   2    2         0.0000000144         0.0000000000
+   1    5   3    2        -0.0000000035         0.0000000000
+   1    5   1    4        -0.0000000167         0.0000000000
+   1    5   2    4         0.0000000379         0.0000000000
+   1    5   3    4        -0.0000000458         0.0000000000
    1    5   1    5         1.6797151670         0.0000000000
    1    5   2    5         0.6143033780         0.0000000000
    1    5   3    5         0.6143033993         0.0000000000
@@ -2487,6 +2496,15 @@ tolerances: {tolvrs: 1.00E-08, }
    1    5   2    6         0.0000000000         0.0000000000
    1    5   3    6        -0.0000000000         0.0000000000
 
+   2    5   1    1         0.0000000145         0.0000000000
+   2    5   2    1         0.0000000186         0.0000000000
+   2    5   3    1        -0.0000000035         0.0000000000
+   2    5   1    2         0.0000000144         0.0000000000
+   2    5   2    2         0.0000000186         0.0000000000
+   2    5   3    2        -0.0000000035         0.0000000000
+   2    5   1    4         0.0000000379         0.0000000000
+   2    5   2    4        -0.0000000167         0.0000000000
+   2    5   3    4        -0.0000000459         0.0000000000
    2    5   1    5         0.6143033969         0.0000000000
    2    5   2    5         1.6797151445         0.0000000000
    2    5   3    5         0.6143033980         0.0000000000
@@ -2494,6 +2512,15 @@ tolerances: {tolvrs: 1.00E-08, }
    2    5   2    6         0.0000000000         0.0000000000
    2    5   3    6        -0.0000000000         0.0000000000
 
+   3    5   1    1         0.0000000112         0.0000000000
+   3    5   2    1         0.0000000112         0.0000000000
+   3    5   3    1         0.0000000152         0.0000000000
+   3    5   1    2         0.0000000112         0.0000000000
+   3    5   2    2         0.0000000112         0.0000000000
+   3    5   3    2         0.0000000152         0.0000000000
+   3    5   1    4        -0.0000000146         0.0000000000
+   3    5   2    4        -0.0000000146         0.0000000000
+   3    5   3    4         0.0000000790         0.0000000000
    3    5   1    5         0.6143034010         0.0000000000
    3    5   2    5         0.6143033762         0.0000000000
    3    5   3    5         1.6797151685         0.0000000000
@@ -2501,6 +2528,15 @@ tolerances: {tolvrs: 1.00E-08, }
    3    5   2    6         0.0000000000         0.0000000000
    3    5   3    6         0.0000000000         0.0000000000
 
+   1    6   1    1         0.0000000147         0.0000000000
+   1    6   2    1        -1.0025444318         0.0000000000
+   1    6   3    1        -1.0025444211         0.0000000000
+   1    6   1    2         0.0000000147         0.0000000000
+   1    6   2    2         1.0025459965         0.0000000000
+   1    6   3    2         1.0025460072         0.0000000000
+   1    6   1    4        -0.0000013857         0.0000000000
+   1    6   2    4         0.0000013878         0.0000000000
+   1    6   3    4         0.0000015649         0.0000000000
    1    6   1    5        -0.0000000000         0.0000000000
    1    6   2    5         0.0000000000         0.0000000000
    1    6   3    5         0.0000000000         0.0000000000
@@ -2508,6 +2544,15 @@ tolerances: {tolvrs: 1.00E-08, }
    1    6   2    6        -0.0000000000         0.0000000000
    1    6   3    6         0.0000000000         0.0000000000
 
+   2    6   1    1        -1.0025444699         0.0000000000
+   2    6   2    1         0.0000000147         0.0000000000
+   2    6   3    1        -1.0025444592         0.0000000000
+   2    6   1    2         1.0025460346         0.0000000000
+   2    6   2    2         0.0000000147         0.0000000000
+   2    6   3    2         1.0025460453         0.0000000000
+   2    6   1    4         0.0000013878         0.0000000000
+   2    6   2    4        -0.0000013857         0.0000000000
+   2    6   3    4         0.0000015649         0.0000000000
    2    6   1    5         0.0000000000         0.0000000000
    2    6   2    5         0.0000000000         0.0000000000
    2    6   3    5         0.0000000000         0.0000000000
@@ -2515,6 +2560,15 @@ tolerances: {tolvrs: 1.00E-08, }
    2    6   2    6         1.0692020829         0.0000000000
    2    6   3    6         0.0000000000         0.0000000000
 
+   3    6   1    1        -1.0025446882         0.0000000000
+   3    6   2    1        -1.0025446881         0.0000000000
+   3    6   3    1         0.0000000085         0.0000000000
+   3    6   1    2         1.0025462382         0.0000000000
+   3    6   2    2         1.0025462382         0.0000000000
+   3    6   3    2         0.0000000085         0.0000000000
+   3    6   1    4         0.0000014514         0.0000000000
+   3    6   2    4         0.0000014514         0.0000000000
+   3    6   3    4        -0.0000014279         0.0000000000
    3    6   1    5        -0.0000000000         0.0000000000
    3    6   2    5        -0.0000000000         0.0000000000
    3    6   3    5         0.0000000000         0.0000000000
@@ -2587,7 +2641,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    4   3    4        12.7980909116        -0.0000000000
 
   Effective charges, in cartesian coordinates,
-  (from electric field response)
+  (from electric field response) 
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
@@ -2614,7 +2668,7 @@ tolerances: {tolvrs: 1.00E-08, }
    3    2   3    4         0.0000000000         0.0000000000
 
   Effective charges, in cartesian coordinates,
-  (from phonon response)
+  (from phonon response) 
    if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
@@ -2838,8 +2892,8 @@ meta: {optdriver: 10, }
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  15  15  15
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.18799
 
- The list of irreducible elements of the spatial-dispersion third-order energy derivatives is:
- (in reduced coordinates except for strain pert.)
+ The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: 
+ (in reduced coordinates except for strain pert.) 
 
             i1dir   i1pert  i2dir   i2pert  i3dir  i3pert
      1)       1       1       1       1       1      10
@@ -3025,7 +3079,7 @@ meta: {optdriver: 10, }
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 
 ================================================================================
- ==> Compute spatial-dispersion 3rd-order energy derivatives <==
+ ==> Compute spatial-dispersion 3rd-order energy derivatives <== 
 
 -inwffil : will read wavefunctions from disk file tlw_1o_DS4_1WF1
 -inwffil : will read wavefunctions from disk file tlw_1o_DS4_1WF1
@@ -3448,9 +3502,9 @@ LONGWAVE :  perts :  4.3 /  6.3 / 10.2
 LONGWAVE :  perts :  4.3 /  6.3 / 10.3
 
 
- -- Spatial-dispersion 3rd-order derivatives completed --
+ -- Spatial-dispersion 3rd-order derivatives completed -- 
 
- First real-space moment of the polarization response
+ First real-space moment of the polarization response 
  to an atomic displacementatom, in cartesian coordinates,
  (1/ucvol factor not included),
  efidir   atom   atdir    qgrdir          real part        imaginary part
@@ -3811,7 +3865,7 @@ LONGWAVE :  perts :  4.3 /  6.3 / 10.3
     3        2        2        2        3            -0.0000000068         0.0000000000
     3        2        3        2        3            -0.0000000000         0.0000000000
 
- Piezoelectric force-response tensor, in cartesian coordinates
+ Piezoelectric force-response tensor, in cartesian coordinates 
  (from sum rule of 1st moment of IFCs),
  (for non-vanishing forces in the cell it lacks an improper contribution),
  iatom   iatddir  jatddir   qgrdir           real part          imaginary part
@@ -4000,7 +4054,7 @@ LONGWAVE :  perts :  4.3 /  6.3 / 10.3
     2       3       3       3       1           -0.0000000007         0.0000000000
     2       3       3       2       1           -0.0000000212         0.0000000000
 
- Clamped-ion elastic tensor, in cartesian coordinates
+ Clamped-ion elastic tensor, in cartesian coordinates 
  (from sum rule of clamped-ion flexoelectric force-response tensor),
  (for stressed cells it lacks an improper contribution),
  atdir   qgrdir  strdir1  strdir2         real part          imaginary part
@@ -4538,17 +4592,52 @@ P          mk1mem5        128
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] First-Principles Theory of Spatial Dispersion: Dynamical Quadrupoles and Flexoelectricity,
+- [1] First-Principles Theory of Spatial Dispersion: Dynamical Quadrupoles and Flexoelectricity, 
 - M. Royo and M. Stengel, Phys. Rev. X 9, 021050 (2019).
 - Comment : Flexoelectricity (see lw_flexo) or dynamical quadrupoles (see lw_qdrpl) have been computed.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#royo2019
 -
-- [2] Metric tensor formulation of strain in density-functional perturbation theory,
+- [2] Metric tensor formulation of strain in density-functional perturbation theory, 
 - D. R. Hamann, X. Wu, K. M. Rabe, and D. Vanderbilt, Phys. Rev. B71, 035117 (2005).
 - Comment: Non-vanishing rfstrs. Strong suggestion to cite this paper in your publications.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2005
 -
-- [3] The Abinit project: Impact, environment and recent developments.
+- [3] Abinit 2025: New Capabilities for the Predictive Modeling of Solids and Nanomaterials.
+- J. Chem. Phys. 163, 164126 (2025).
+- M.J. Verstraete, J. Abreu, G. Allemand, B. Amadon, G. Antonius,
+- M. Azizi, L. Baguet, C. Barat, L. Bastogne, R. Bejaud, J.-M. Beuken,
+- J. Bieder, A. Blanchet, F. Bottin, J. Bouchet, J. Bouquiaux, E. Bousquet,
+- J. Boust, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval,
+- A. Castellano, E. Castiel, J.-B. Charraud, J. Clerouin, M. Cote, C. Duval,
+- A. Gallo, F. Gendron, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras,
+- F. Gomez-Ortiz, X. Gonze, F. Goudreault, A. Gruneis, R. Gupta, B. Guster,
+- D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
+- I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
+- Comment: the sixth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#verstraete2025
+-
+- [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- using density-functional theory.
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- Comment: Some pseudopotential generated using the FHI code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
+-
+- [5] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
+-
+- [6] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- interatomic force constants from density-functional perturbation theory,
+- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
+-
+- [7] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -4560,67 +4649,34 @@ P          mk1mem5        128
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at
+- https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [4] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
-- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
--
-- [5] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
-- interatomic force constants from density-functional perturbation theory,
-- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
--
-- [6] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems,
-- using density-functional theory.
-- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
-- Comment: Some pseudopotential generated using the FHI code were used.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
--
-- [7] ABINIT: Overview, and focus on selected capabilities
-- J. Chem. Phys. 152, 124102 (2020).
-- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
-- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
-- G.Brunin, D.Caliste, M.Cote,
-- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
-- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
-- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
-- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
-- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- [8] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
-- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
+- is available at
+-  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [8] Recent developments in the ABINIT software package.
-- Computer Phys. Comm. 205, 106 (2016).
-- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
-- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
-- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
-- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
-- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
-- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
-- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
-- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
-- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
-- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
-- The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
--
-- Proc.   0 individual time (sec): cpu=         52.7  wall=         52.8
+- Proc.   0 individual time (sec): cpu=         51.5  wall=         51.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered 149 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         52.7  wall=         52.8
++Overall time at end (sec) : cpu=         51.5  wall=         51.5
