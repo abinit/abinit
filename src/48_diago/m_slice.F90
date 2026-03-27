@@ -18,7 +18,7 @@
 !! Dependence with other modules in this directory:
 !!   m_slice uses:
 !!      |- m_polynomial_filter
-!!      |- m_task_scheduler
+!!      |- m_slice_task
 !!      |- m_trace_estimation
 !!      |- m_chebfi2
 !!
@@ -56,7 +56,7 @@ module m_slice
     use m_chebfi2
 
     use m_trace_estimation
-    use m_task_scheduler
+    use m_slice_task
     use m_polynomial_filter
 
     use m_xmpi
@@ -398,7 +398,7 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     logical :: is_lowpass, on_host, on_device
     ! todo use slice%..
     type(xg_t) :: DivResults
-    type(activeSlice_t) :: task
+    type(activeTask_t) :: task
     type(taskScheduler_t) :: scheduler
     type(extendedMemory_t) :: extendedMemory
     ! Arrays

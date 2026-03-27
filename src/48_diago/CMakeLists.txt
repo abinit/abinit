@@ -9,7 +9,7 @@ add_library(48_diago STATIC
   m_polynomial_filter.F90
   m_slice.F90
   m_slice_cprj.F90
-  m_task_scheduler.F90
+  m_slice_task.F90
   m_trace_estimation.F90
   )
 
