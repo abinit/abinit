@@ -734,7 +734,7 @@ extern "C" void gpu_xscal_(int* cplx, int *N,
 
 extern "C" void gpu_xdot_(int* cplx, int *N, 
                            cuDoubleComplex *alpha,
-                           void **X_ptr, int *incrx, void **Y_ptr, int *incryx)
+                           void **X_ptr, int *incrx, void **Y_ptr, int *incry)
 {
 
   CUDA_API_CHECK( (*cplx==1) ?
@@ -742,7 +742,7 @@ extern "C" void gpu_xdot_(int* cplx, int *N,
                               &((*alpha).x),
                               (double *)(*X_ptr), *incrx,
                               (double *)(*Y_ptr), *incry) :
-                  cublasZdotC(cublas_handle, *N,
+                  cublasZdotc(cublas_handle, *N,
                               alpha,
                               (cuDoubleComplex *)(*X_ptr), *incrx,
                               (cuDoubleComplex *)(*Y_ptr), *incry) );
