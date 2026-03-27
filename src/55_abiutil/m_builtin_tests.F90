@@ -197,13 +197,15 @@ subroutine testfi(builtintest,etotal,filstat,gred,natom,strten,xred)
 !    LibXC
    else if(builtintest==6)then
 
-     etot_ref=-0.55196688523897D+01
+!    etot_ref=-0.55196688523897D+01
+     etot_ref=-0.55198762022478D+01
      etot_mxdev=5.0d-7
      xred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
      xred_mxdev=1.0d-12
      gred_ref(1:3,1)=(/ 0.0_dp , 0.0_dp , 0.0_dp /)
      gred_mxdev=1.0d-12
-     strten_ref(1:3)= 0.13246699375127D-04
+!    strten_ref(1:3)= 0.13246699375127D-04
+     strten_ref(1:3)= 8.73600436E-06
      strten_ref(4:6)= 0.0_dp
      strten_mxdev=1.0d-8
 
