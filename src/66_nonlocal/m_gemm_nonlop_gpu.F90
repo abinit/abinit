@@ -267,17 +267,13 @@ module m_gemm_nonlop_gpu
   end if
 
   ! These will store the non-local factors for vectin, svectout and vectout respectively
-  write(std_out,*) 'db gpu_memset call'
   call gpu_memset(gemm_nonlop_gpu_data%    projections_gpu, izero, INT(cplex,     c_size_t) * nprojs * nspinor*ndat * dp)
-  write(std_out,*) 'db gpu_memset call'
   call gpu_memset(gemm_nonlop_gpu_data%  s_projections_gpu, izero, INT(cplex,     c_size_t) * nprojs * nspinor*ndat * dp)
-  write(std_out,*) 'db gpu_memset call'
   call gpu_memset(gemm_nonlop_gpu_data%vnl_projections_gpu, izero, INT(cplex_fac, c_size_t) * nprojs * nspinor*ndat * dp)
 
   if (dimekbq>1) then
     ABI_CHECK(cplex_fac==2,"BUG: invalid cplex_fac==1 when dimekbq=2!")
     ABI_MALLOC_CUDA(vnl_projections2_gpu,        INT(cplex_fac, c_size_t) * nprojs * nspinor*ndat * dp)
-    write(std_out,*) 'db gpu_memset call'
     call gpu_memset(vnl_projections2_gpu, izero, INT(cplex_fac, c_size_t) * nprojs * nspinor*ndat * dp)
   end if
 
