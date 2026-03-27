@@ -1389,7 +1389,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        if(abs(occ_k(ind_occ)) < tol8) weight_t(iibandpp) = zero
      end do
 !    Accumulate time because it is not done in gpu_fourwf
-     call timab(240+tim_fourwf,1,tsec)
+     call timab(840+tim_fourwf,1,tsec)
      if(gpu_option_==ABI_GPU_LEGACY) then
 #if defined HAVE_GPU_CUDA
        call gpu_fourwf(1,rhoaug,&
@@ -1418,7 +1418,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &       weight_t,weight_t)
 #endif
      end if ! gpu_option_
-     call timab(240+tim_fourwf,2,tsec)
+     call timab(840+tim_fourwf,2,tsec)
      ABI_FREE(weight_t)
 
 !  Standard version
@@ -1519,7 +1519,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        weight1_t(iibandpp) = occ_k(ind_occ1)*wtk/ucvol
        weight2_t(iibandpp) = occ_k(ind_occ2)*wtk/ucvol
      end do
-     call timab(240+tim_fourwf,1,tsec)
+     call timab(840+tim_fourwf,1,tsec)
      if (gpu_option_==ABI_GPU_LEGACY) then
 #if defined HAVE_GPU_CUDA
        call gpu_fourwf(1,rhoaug,&
@@ -1548,7 +1548,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &       weight1_t,weight2_t)
 #endif
      end if ! gpu_option_
-     call timab(240+tim_fourwf,2,tsec)
+     call timab(840+tim_fourwf,2,tsec)
      ABI_FREE(weight1_t)
      ABI_FREE(weight2_t)
 
