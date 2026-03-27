@@ -72,9 +72,9 @@ inp_files = [
 "t72.abi",
 "t73.abi",
 "t74.abi",
-#"t75.abi",
-#"t76.abi",
-#"t77.abi", # Disabled!!
+"t75.abi",
+"t76.abi",
+"t77.abi",
 "t79.abi",
 "t81.abi",
 "t82.abi",
