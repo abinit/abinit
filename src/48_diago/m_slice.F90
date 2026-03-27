@@ -392,14 +392,13 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     type(chebfi_t) :: chebfi
     integer :: tim_slice_me
     integer :: i, iband, nrows, ncols
-    integer :: me_nbdbuf, space_res
+    integer :: space_res
     integer :: neigenpairs, bandpp, ndeg_filter
+    integer :: neigenpairs_ext
     integer :: comm, comm_rows, comm_cols
-    integer :: num_restart
     integer :: num_kept
     integer :: k_conv, ndeg_filter_max
     integer :: ierr
-    logical :: has_converged
     real(dp) :: theta
     real(dp) :: safe, tol ! for slice selection window
     real(dp) :: a_part, b_part, max_resid_kept
@@ -481,8 +480,28 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     write(std_out,*) mapper(1,:)
     flush(std_out)
 
-    ! offset
+    ! offset 10%
     !p = 10
+
+    neigenpairs_ext = sum(slice%neigenpairs_per_slice)
+
+    !IML dev
+    ! must allocate extended memory
+    ! this step is very simple we should use slice%neigenpairs_per_slice sum them across slices,
+    ! also include offset. This give the size of the buffer to allocate in Linalg representation.
+    ! only spacecom exists at this point
+
+    ! after this space is allocated we should initialize it with vectors from X or random vectors.
+    ! This part also uses slice%spacecom global communicator.
+
+    ! At the end we should compute the distribution of columns in colsrows representation.
+    ! ** This phase depends on the execution of slices **
+    ! - If enable_paral then we should first divide processes to slices then divide slice bands to processes.
+    ! - If disable_paral then we should use all available processes for every slice then divice slice bands to processes.
+    ! Notice that the last step where we divide slice bands to number of processes is the same.
+    ! Only the number of available processes to use per slice changes.
+
+    ! This should allow to mark every process with the color of the slice.
 
     ! ============================== Initialize guess for subspace iteration ===============================
 
