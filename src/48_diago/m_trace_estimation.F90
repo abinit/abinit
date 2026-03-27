@@ -38,8 +38,10 @@ module m_trace_estimation
     use m_xg
     use m_xgTransposer
     use m_xg_ortho_RR
+    
     use m_chebfi2
     use m_polynomial_filter
+    use m_slice_task, only: matrixInfo_t
 
     use m_xmpi
     use m_xomp
@@ -71,29 +73,8 @@ module m_trace_estimation
     integer, parameter :: tim_lanczos     = 2167
     integer, parameter :: tim_trace       = 2168
 
-    ! Public 'matrixInfo' datatype
-    !-------------------------------------------------
-    type, public :: matrixInfo_t
-
-        integer :: comm_rows                    ! xmpi_comm_self ...
-        integer :: comm_cols                    ! same as spacecom
-        integer :: spacecom                     ! same as comm_cols
-        integer :: neigenpairs                  ! total number of bands (=number of eigenpairs)
-        integer :: total_spacedim               ! total number of plane-waves
-        integer :: spacedim                     ! nb of plane-waves per process in linalg representation
-        integer :: space                        ! real or complex eigenvectors
-        integer :: gpu_kokkos_nthrd                 
-        integer :: gpu_thread_limit 
-        integer :: gpu_option                   ! enable GPU
-        integer :: paral_kgb                    ! enable parallel (k-points, G basis, bands)
-        integer :: me_g0
-        integer :: me_g0_fft
-
-    end type matrixInfo_t
-
     ! Public methods
     !-------------------------------------------------
-    public :: init_matrixInfo           ! wrapper for various MPI and dim parameters
     public :: computeBLanczos           ! for lower bound estimation
     public :: get_eigenvalue_count      ! count eigenvalues for lowpass intervals 
     public :: computeTraceEstimation    ! compute moments etc 
@@ -101,38 +82,6 @@ module m_trace_estimation
 
     CONTAINS  
 !=====================================================================
-!!***
-
-!!****f* m_trace_estimation/init_matrixInfo
-!! NAME
-!! init_matrixInfo
-!! 
-!! SOURCE
-
-  subroutine init_matrixInfo(matrixInfo, comm_rows, comm_cols, spacecom, neigenpairs, total_spacedim, &
-          spacedim, space, gpu_kokkos_nthrd, gpu_thread_limit, gpu_option, paral_kgb, me_g0, me_g0_fft)
-
-      implicit none
-
-      type(matrixInfo_t), intent(inout) :: matrixInfo
-      integer, intent(in) :: comm_rows, comm_cols, spacecom, neigenpairs, total_spacedim, spacedim, space
-      integer, intent(in) :: gpu_kokkos_nthrd, gpu_thread_limit, gpu_option, paral_kgb, me_g0, me_g0_fft
-
-      matrixInfo%comm_rows      = comm_rows
-      matrixInfo%comm_cols      = comm_cols
-      matrixInfo%spacecom       = spacecom
-      matrixInfo%neigenpairs    = neigenpairs
-      matrixInfo%total_spacedim = total_spacedim
-      matrixInfo%spacedim       = spacedim
-      matrixInfo%space          = space
-      matrixInfo%gpu_kokkos_nthrd = gpu_kokkos_nthrd
-      matrixInfo%gpu_thread_limit = gpu_thread_limit
-      matrixInfo%gpu_option     = gpu_option
-      matrixInfo%paral_kgb      = paral_kgb
-      matrixInfo%me_g0          = me_g0
-      matrixInfo%me_g0_fft      = me_g0_fft
-
-  end subroutine init_matrixInfo
 !!***
 
 !!****f* m_trace_estimation/computeBLanczos

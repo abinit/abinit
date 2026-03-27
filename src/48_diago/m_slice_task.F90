@@ -129,6 +129,26 @@ module m_slice_task
     integer, parameter :: tim_getAX_BX    = 1754
     integer, parameter :: tim_invovl      = 1755
 
+    ! Public 'matrixInfo' datatype
+    !-------------------------------------------------
+    type, public :: matrixInfo_t
+
+        integer :: comm_rows                    ! xmpi_comm_self ...
+        integer :: comm_cols                    ! same as spacecom
+        integer :: spacecom                     ! same as comm_cols
+        integer :: neigenpairs                  ! total number of bands (=number of eigenpairs)
+        integer :: total_spacedim               ! total number of plane-waves
+        integer :: spacedim                     ! nb of plane-waves per process in linalg representation
+        integer :: space                        ! real or complex eigenvectors
+        integer :: gpu_kokkos_nthrd                 
+        integer :: gpu_thread_limit 
+        integer :: gpu_option                   ! enable GPU
+        integer :: paral_kgb                    ! enable parallel (k-points, G basis, bands)
+        integer :: me_g0
+        integer :: me_g0_fft
+
+    end type matrixInfo_t
+
     ! Public 'activeTask' datatype for active slice in use (me=current MPI process)
     !-------------------------------------------------
     type, public :: activeTask_t
@@ -172,7 +192,7 @@ module m_slice_task
     end type activeTask_t
 
     ! Public 'taskScheduler' datatype for asynchronous slice treatment
-    ! it is basically for asynchronous treatment of the extended memory
+    ! it is basically for asynchronous treatment of the 'async' memory
     !-------------------------------------------------
     type, public :: taskScheduler_t
 
@@ -187,9 +207,10 @@ module m_slice_task
 
     end type taskScheduler_t
 
-    ! Public 'extendedMemory' datatype for slice input/output without race condition
+    ! Public 'asyncMemory' datatype for slice input/output without race condition
+    ! is basically created by blocks of number of asynchronous tasks
     !-------------------------------------------------
-    type, public :: extendedMemory_t
+    type, public :: asyncMemory_t
 
         integer :: neigenpairs_ext                          ! total numner of extended columns
         integer :: paral_kgb 
@@ -215,12 +236,13 @@ module m_slice_task
         logical :: use_linalg = .false.                     ! use linalg representation
         logical :: use_colsrows = .false.                   ! use colsrows representation
 
-    end type extendedMemory_t
+    end type asyncMemory_t
  
     ! Public methods
     !-------------------------------------------------
-    public :: allocate_extended_memory
-    public :: init_extended_memory
+    public :: init_matrixInfo                   ! wrapper for various xgBlock parameters
+    public :: slice_task_allocateAsyncMemory    ! allocates async memory buffer
+    public :: slice_task_initAsyncMemory        ! fills async memory colwise
     public :: free_extended_memory
     public :: init_active_memory
     public :: mark_active_task
@@ -232,6 +254,38 @@ module m_slice_task
 
     CONTAINS  
 !=====================================================================
+!!***
+
+!!****f* m_slice_task/init_matrixInfo
+!! NAME
+!! init_matrixInfo
+!! 
+!! SOURCE
+
+  subroutine init_matrixInfo(matrixInfo, comm_rows, comm_cols, spacecom, neigenpairs, total_spacedim, &
+          spacedim, space, gpu_kokkos_nthrd, gpu_thread_limit, gpu_option, paral_kgb, me_g0, me_g0_fft)
+
+      implicit none
+
+      type(matrixInfo_t), intent(inout) :: matrixInfo
+      integer, intent(in) :: comm_rows, comm_cols, spacecom, neigenpairs, total_spacedim, spacedim, space
+      integer, intent(in) :: gpu_kokkos_nthrd, gpu_thread_limit, gpu_option, paral_kgb, me_g0, me_g0_fft
+
+      matrixInfo%comm_rows      = comm_rows
+      matrixInfo%comm_cols      = comm_cols
+      matrixInfo%spacecom       = spacecom
+      matrixInfo%neigenpairs    = neigenpairs
+      matrixInfo%total_spacedim = total_spacedim
+      matrixInfo%spacedim       = spacedim
+      matrixInfo%space          = space
+      matrixInfo%gpu_kokkos_nthrd = gpu_kokkos_nthrd
+      matrixInfo%gpu_thread_limit = gpu_thread_limit
+      matrixInfo%gpu_option     = gpu_option
+      matrixInfo%paral_kgb      = paral_kgb
+      matrixInfo%me_g0          = me_g0
+      matrixInfo%me_g0_fft      = me_g0_fft
+
+  end subroutine init_matrixInfo
 !!***
 
 !! Initialization of scheduler object
@@ -293,60 +347,60 @@ end subroutine schedule_next_task
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice_task/allocate_extended_memory
+!!****f* m_slice_task/slice_task_allocateAsyncMemory
 !! NAME
-!! allocate_extended_memory
+!! slice_task_allocateAsyncMemory
 !! 
 !! FUNCTION
-!! Create extended memory buffers and distribute them according
+!! Allocate async memory buffers and distribute them according
 !! to slice logic. Essentially allocates memory work%Xext
 !! favoring data overlap over communication overlap.
 !! 
 !! SOURCE
 
-subroutine allocate_extended_memory(work, paral_kgb, ncol, ncol_ext, space, spacedim, &
-        spacecom, me_g0, gpu_option) 
+subroutine slice_task_allocateAsyncMemory(work, minfo, ncol_ext) 
 
     implicit none
-    type(extendedMemory_t), intent(inout) :: work
-    integer, intent(in) :: paral_kgb, ncol, ncol_ext
-    integer, intent(in) :: space, spacedim, spacecom, me_g0, gpu_option
+    type(asyncMemory_t), intent(inout) :: work
+    type(matrixInfo_t), intent(inout) :: minfo
+    integer, intent(in) :: ncol_ext
 
-    work%paral_kgb = paral_kgb
+    work%paral_kgb = minfo%paral_kgb
     work%neigenpairs_ext = ncol_ext
-    work%use_linalg = .true.
-    work%use_colsrows = .false.
-    work%is_init = .false.
+    work%use_linalg = .true.  ! for debug
+    work%use_colsrows = .false. ! for debug
+    work%is_init = .false. ! fixme bad management
 
-    ABI_MALLOC_IFNOT(work%lookup_cols_X, (ncol))
+    ABI_MALLOC_IFNOT(work%lookup_cols_X, (minfo%neigenpairs))
     ABI_MALLOC_IFNOT(work%lookup_cols_Xext, (ncol_ext))
     !ABI_MALLOC_IFNOT(work%ncolsColsRows, (nproc))
     
     ! Allocate extended space in linalg representation
-    call xg_init(work%X_ext, space, spacedim, work%neigenpairs_ext, spacecom, &
-        me_g0=me_g0, gpu_option=gpu_option)
+    call xg_init(work%X_ext, minfo%space, minfo%spacedim, work%neigenpairs_ext, &
+        minfo%spacecom, me_g0=minfo%me_g0, gpu_option=minfo%gpu_option)
 
-end subroutine allocate_extended_memory
+end subroutine slice_task_allocateAsyncMemory
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice_task/init_extended_memory
+!!****f* m_slice_task/slice_task_initAsyncMemory
 !! NAME
-!! init_extended_memory
+!! slice_task_initAsyncMemory
 !! 
 !! FUNCTION
-!! Initialize extended memory (for all tasks)
+!! Initialize async memory (for all tasks)
 !! todo also need neigenpairs_per_slice as well as number of random to add...
 !! 
 !! SOURCE
 
-subroutine init_extended_memory(work, X0, mapper)
+subroutine slice_task_initAsyncMemory(work, X0, mapper, ncols_per_task)
 
     implicit none
-    type(extendedMemory_t), intent(inout) :: work
+    type(asyncMemory_t), intent(inout) :: work
     type(xgBlock_t), intent(in) :: X0
     integer, pointer, intent(in) :: mapper(:,:)
+    integer, intent(in) :: ncols_per_task(:)
 
     ! fixme
     type(activeTask_t) :: task
@@ -364,6 +418,7 @@ subroutine init_extended_memory(work, X0, mapper)
     end if
 
     work%XextLinalg = work%X_ext%self
+    nslice = size(mapper, dim=2)
     task%me_cols_X = mapper(:, task%me_id_slice)
 
     ! Copy X to XextLinalg to achieve contiguous column blocks
@@ -398,7 +453,7 @@ subroutine init_extended_memory(work, X0, mapper)
     !! ok at this point should do a scheduler after that. 
     !! the scheduler is responsible for distributing the extended memory
 
-end subroutine init_extended_memory
+end subroutine slice_task_initAsyncMemory
 !!***
 
 !----------------------------------------------------------------------
@@ -412,7 +467,7 @@ end subroutine init_extended_memory
 subroutine free_extended_memory(work) 
 
     implicit none
-    type(extendedMemory_t), intent(inout) :: work
+    type(asyncMemory_t), intent(inout) :: work
 
     call xg_free(work%X_ext)
     ABI_SFREE(work%lookup_cols_X)
@@ -440,7 +495,7 @@ subroutine init_active_memory(work, task, X0, p)
 
     implicit none
 
-    type(extendedMemory_t), intent(inout) :: work
+    type(asyncMemory_t), intent(inout) :: work
     type(activeTask_t), intent(inout) :: task
     type(xgBlock_t), intent(in) :: X0
     integer, intent(in) :: p
@@ -596,7 +651,7 @@ subroutine allocate_active_task(work, task)
     implicit none
     !type(slice_t), intent(inout) :: slice ! should not use slice objects at all!!!
     type(activeTask_t), intent(inout) :: task
-    type(extendedMemory_t), intent(inout) :: work
+    type(asyncMemory_t), intent(inout) :: work
     !type(chebfi_t), intent(inout) :: chebfi ! should not use chebfi objects at all !!!
     
     integer :: nbdbuf, oracle, num_proc
@@ -810,8 +865,8 @@ end subroutine mask_active_task
 !! compress_extended_memory 
 !!
 !! FUNCTION
-!! Copy data from extendedMemory to spectrum I/O memory (shared)
-!! Copy masked extended memory to spectrum memory
+!! Copy data from asyncMemory to spectrum I/O memory (shared)
+!! Copy masked async memory to spectrum memory
 !!
 !! SOURCE
 
@@ -821,7 +876,7 @@ subroutine compress_extended_memory(task, work, X0, eigen, resid)
     
     ! Arguments ------------------------------------
     type(activeTask_t), intent(inout) :: task
-    type(extendedMemory_t), intent(inout) :: work
+    type(asyncMemory_t), intent(inout) :: work
     type(xgBlock_t), intent(inout) :: X0
     type(xgBlock_t), intent(inout) :: eigen
     type(xgBlock_t), intent(inout) :: resid
@@ -859,7 +914,7 @@ subroutine compress_extended_memory(task, work, X0, eigen, resid)
 !        ABI_WARNING("Too many converged eigenvalues kept. Decrease tolfilter or nstep_mixed.")
 !    end if    
 !
-!    ! Copy from extended memory to regular memory
+!    ! Copy from async memory to regular memory
 !    do islice=1,slice%nslice
 !        fcol = slice%fcol_in_X(islice)
 !        fcol_ext = slice%fcol_in_Xext(islice)

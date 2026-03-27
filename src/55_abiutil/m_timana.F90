@@ -1307,6 +1307,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2159)='xg_nl_fst(other)                '
 
  ! spectrum slicing routines
+ ! TODO IML timers become negative if we mix chebfi and slice must separate
  names(2160) = 'slicewf                       '
  names(2161) = 'slice_sched                   '
  names(2162) = 'slice1_diago                  '
