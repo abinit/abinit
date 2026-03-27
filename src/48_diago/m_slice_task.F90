@@ -1,6 +1,6 @@
-!!****f* ABINIT/m_task_scheduler
+!!****f* ABINIT/m_slice_task
 !! NAME
-!! m_task_scheduler
+!! m_slice_task
 !!
 !! FUNCTION
 !! This module contains types and routines to implement scheduler and resource allocator 
@@ -8,7 +8,7 @@
 !! Implements logic for asynchronous slice memory avoiding race condition in read/write.
 !!
 !! NOTES
-!! The logic for parallel slice treatment is the following.
+!! The logic for parallel slice treatment (a task) is the following.
 !! Memory and workload are distributed using a 2D cartesian grid. Let's assume 
 !! for simplicity that we have four MPI processes in the spacecom communicator. 
 !! Matrix X is distributed along plane-waves at the beginning:
@@ -87,7 +87,7 @@
 ! nvtx related macro definition
 #include "nvtx_macros.h"
 
-module m_task_scheduler
+module m_slice_task
 
     use defs_basis
     use defs_abitypes
@@ -129,10 +129,9 @@ module m_task_scheduler
     integer, parameter :: tim_getAX_BX    = 1754
     integer, parameter :: tim_invovl      = 1755
 
-    ! Public 'activeSlice' datatype for active slice in use (me=current MPI process)
-    ! fixme rename to 'activeTask'
+    ! Public 'activeTask' datatype for active slice in use (me=current MPI process)
     !-------------------------------------------------
-    type, public :: activeSlice_t
+    type, public :: activeTask_t
 
         ! MPI-related information for active task
         integer :: me_g0                                    ! process contains G(0,0,0) 
@@ -170,7 +169,7 @@ module m_task_scheduler
         ! Memory space used for computation
         !type(chebfi_t) :: chebfi ! should not use chebfi objects
 
-    end type activeSlice_t
+    end type activeTask_t
 
     ! Public 'taskScheduler' datatype for asynchronous slice treatment
     ! it is basically for asynchronous treatment of the extended memory
@@ -294,7 +293,7 @@ end subroutine schedule_next_task
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/allocate_extended_memory
+!!****f* m_slice_task/allocate_extended_memory
 !! NAME
 !! allocate_extended_memory
 !! 
@@ -332,7 +331,7 @@ end subroutine allocate_extended_memory
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/init_extended_memory
+!!****f* m_slice_task/init_extended_memory
 !! NAME
 !! init_extended_memory
 !! 
@@ -350,7 +349,7 @@ subroutine init_extended_memory(work, X0, mapper)
     integer, pointer, intent(in) :: mapper(:,:)
 
     ! fixme
-    type(activeSlice_t) :: task
+    type(activeTask_t) :: task
     type(xgBlock_t) :: col_in, col_out
     integer :: fcol, fcol_ext
     integer :: j, nrows, ncols
@@ -404,7 +403,7 @@ end subroutine init_extended_memory
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/free_extended_memory
+!!****f* m_slice_task/free_extended_memory
 !! NAME
 !! free_extended_memory
 !! 
@@ -428,7 +427,7 @@ end subroutine free_extended_memory
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/init_active_memory
+!!****f* m_slice_task/init_active_memory
 !! NAME
 !! init_active_memory
 !!
@@ -442,7 +441,7 @@ subroutine init_active_memory(work, task, X0, p)
     implicit none
 
     type(extendedMemory_t), intent(inout) :: work
-    type(activeSlice_t), intent(inout) :: task
+    type(activeTask_t), intent(inout) :: task
     type(xgBlock_t), intent(in) :: X0
     integer, intent(in) :: p
     integer :: k_sketch, m, m_wanted
@@ -483,7 +482,7 @@ end subroutine init_active_memory
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/mark_active_task
+!!****f* m_slice_task/mark_active_task
 !! NAME
 !! mark_active_task
 !!
@@ -498,7 +497,7 @@ subroutine mark_active_task(task, scheduler, spacecom, paral_slice)
     implicit none
 
     ! Arguments
-    type(activeSlice_t), intent(inout) :: task
+    type(activeTask_t), intent(inout) :: task
     type(taskScheduler_t), intent(inout) :: scheduler
     integer, intent(in) :: spacecom
     integer, intent(in) :: paral_slice
@@ -572,7 +571,7 @@ end subroutine mark_active_task
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/allocate_active_task
+!!****f* m_slice_task/allocate_active_task
 !! NAME
 !! allocate_active_task
 !! 
@@ -596,7 +595,7 @@ subroutine allocate_active_task(work, task)
 
     implicit none
     !type(slice_t), intent(inout) :: slice ! should not use slice objects at all!!!
-    type(activeSlice_t), intent(inout) :: task
+    type(activeTask_t), intent(inout) :: task
     type(extendedMemory_t), intent(inout) :: work
     !type(chebfi_t), intent(inout) :: chebfi ! should not use chebfi objects at all !!!
     
@@ -681,7 +680,7 @@ end subroutine allocate_active_task
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/free_active_task
+!!****f* m_slice_task/free_active_task
 !! NAME
 !! free_active_task
 !! 
@@ -690,7 +689,7 @@ end subroutine allocate_active_task
 subroutine free_active_task(task)
 
     implicit none
-    type(activeSlice_t), intent(inout) :: task
+    type(activeTask_t), intent(inout) :: task
     
     ! *********************************************************************
 
@@ -702,7 +701,7 @@ end subroutine free_active_task
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/execute_active_task
+!!****f* m_slice_task/execute_active_task
 !! NAME
 !! execute_active_task
 !! 
@@ -710,7 +709,7 @@ end subroutine free_active_task
 
 subroutine execute_active_task(task)
 
-    type(activeSlice_t), intent(inout) :: task
+    type(activeTask_t), intent(inout) :: task
 
     type(xgBlock_t) :: X0_active
     type(xgBlock_t) :: eigen_active
@@ -752,7 +751,7 @@ end subroutine execute_active_task
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/mask_active_task
+!!****f* m_slice_task/mask_active_task
 !! NAME
 !! mask_active_task
 !! 
@@ -768,7 +767,7 @@ subroutine mask_active_task(task, tol)
     implicit none
 
     ! Arguments ------------------------------------
-    type(activeSlice_t), intent(inout) :: task
+    type(activeTask_t), intent(inout) :: task
     real(dp), intent(inout) :: tol
 
     ! Local variables-------------------------------
@@ -806,7 +805,7 @@ end subroutine mask_active_task
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/compress_extended_memory
+!!****f* m_slice_task/compress_extended_memory
 !! NAME
 !! compress_extended_memory 
 !!
@@ -821,7 +820,7 @@ subroutine compress_extended_memory(task, work, X0, eigen, resid)
     implicit none
     
     ! Arguments ------------------------------------
-    type(activeSlice_t), intent(inout) :: task
+    type(activeTask_t), intent(inout) :: task
     type(extendedMemory_t), intent(inout) :: work
     type(xgBlock_t), intent(inout) :: X0
     type(xgBlock_t), intent(inout) :: eigen
@@ -894,7 +893,7 @@ end subroutine compress_extended_memory
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/assign_tasks_to_processes
+!!****f* m_slice_task/assign_tasks_to_processes
 !! NAME
 !! assign_tasks_to_processes
 !! 
@@ -924,7 +923,7 @@ end subroutine assign_tasks_to_processes
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/distribute_vectors
+!!****f* m_slice_task/distribute_vectors
 !! NAME
 !! distribute_vectors
 !!
@@ -963,7 +962,7 @@ end subroutine distribute_vectors
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/fair_allocation
+!!****f* m_slice_task/fair_allocation
 !! NAME
 !! fair_allocation
 !! 
@@ -1072,7 +1071,7 @@ end subroutine fair_allocation
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/adjust_allocation
+!!****f* m_slice_task/adjust_allocation
 !! NAME
 !! adjust_allocation
 !! 
@@ -1118,7 +1117,7 @@ end subroutine adjust_allocation
 
 !----------------------------------------------------------------------
 
-!!****f* m_task_scheduler/reduce_allocation
+!!****f* m_slice_task/reduce_allocation
 !! NAME
 !! reduce_allocation
 !! 
@@ -1165,5 +1164,5 @@ subroutine reduce_allocation(n, m, w, allocation, total_weight, p, total_allocat
 end subroutine reduce_allocation
 !!***
 
-end module m_task_scheduler
+end module m_slice_task
 !!***
