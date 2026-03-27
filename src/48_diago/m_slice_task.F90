@@ -200,10 +200,10 @@ module m_slice_task
         integer :: ntasks
         integer :: nresources
 
-        !! can rename neigenpairs_per_slice to load, can use purely task-based terminology in here
-        integer, allocatable :: neigenpairs_per_slice(:)    ! number of total eigenpairs per slice
-        integer, allocatable :: nproc_per_slice(:)          ! number of processes per slice
-        integer, allocatable :: lookup_proc(:)              ! which slice each process serves
+        integer, allocatable :: ncols_per_task(:)       ! number of bands per slice
+        integer, allocatable :: ncols_per_proc(:)       ! number of bands per MPI rank
+        integer, allocatable :: nresources_per_task(:)  ! number of available processes per slice
+        integer, allocatable :: lookup_proc(:)          ! which slice each MPI rank serves
 
     end type taskScheduler_t
 
@@ -212,9 +212,9 @@ module m_slice_task
     !-------------------------------------------------
     type, public :: asyncMemory_t
 
-        integer :: neigenpairs_ext                          ! total numner of extended columns
+        integer :: neigenpairs_ext                          ! total number of extended columns
         integer :: paral_kgb 
-        logical :: is_init
+        logical :: has_transposer
 
         ! Memory buffers
         type(xg_t) :: X_ext                                 ! eigenvector memory used by all slices for I/O
@@ -229,7 +229,6 @@ module m_slice_task
         integer, allocatable :: ncolsColsRows(:)            ! ncol of colsrows representation for global X
 
         ! Arrays related to data distribution (all-slice phase)
-        integer, allocatable :: lookup_cols_X(:)            ! which slice each column serves in spectrum memory
         integer, allocatable :: lookup_cols_Xext(:)         ! which slice each column serves in extented memory
 
         ! Flags for MPI distribution state
@@ -243,6 +242,7 @@ module m_slice_task
     public :: init_matrixInfo                   ! wrapper for various xgBlock parameters
     public :: slice_task_allocateAsyncMemory    ! allocates async memory buffer
     public :: slice_task_initAsyncMemory        ! fills async memory colwise
+    public :: slice_task_initSchedule           ! compute 'process-to-slices' distribution
     public :: free_extended_memory
     public :: init_active_memory
     public :: mark_active_task
@@ -288,16 +288,38 @@ module m_slice_task
   end subroutine init_matrixInfo
 !!***
 
-!! Initialization of scheduler object
-subroutine init_schedule(scheduler, nslice, nproc)
-    implicit none
-    type(taskScheduler_t), intent(inout) :: scheduler
-    integer, intent(in) :: nslice, nproc
-    scheduler%ntasks = nslice
-    scheduler%nresources = nproc
-    scheduler%next_task_id = 0
-    call alloc_schedule(scheduler)
-end subroutine init_schedule
+!----------------------------------------------------------------------
+
+!!****f* m_slice_task/slice_task_initSchedule
+!! NAME
+!! slice_task_initSchedule
+!!
+!! FUNCTION
+!! Initialization of scheduler object from 'npro'c available resources
+!! using execution options given by 'paral_kgb' and 'paral_task'.
+!! Essentially allows to compute and apply (via wrapper to xgTransposer) 
+!! an intermediate level of MPI distribution along tasks, on top of paral_kgb level. 
+!! - If enable_paral then we should first divide processes to slices 
+!! - If disable_paral then we should use all available processes for every slice (no division)
+!! 
+!! SOURCE
+
+  subroutine slice_task_initSchedule(scheduler, nproc, paral_kgb, paral_task)
+      implicit none
+      type(taskScheduler_t), intent(inout) :: scheduler
+      integer, intent(in) :: nproc, paral_kgb, paral_task
+      scheduler%ntasks = nslice
+      scheduler%nresources = nproc
+      scheduler%next_task_id = 0
+      call alloc_schedule(scheduler)
+      if (paral_kgb==0 .or. paral_task==0) then
+          ! do not divide available resources directly say that all processes are
+          ! available per slice
+      else 
+          ! compute
+      end if
+  end subroutine slice_task_initSchedule
+!!***
 
 !! Constructor for scheduler object
 subroutine alloc_schedule(scheduler)
@@ -364,20 +386,23 @@ subroutine slice_task_allocateAsyncMemory(work, minfo, ncol_ext)
     type(asyncMemory_t), intent(inout) :: work
     type(matrixInfo_t), intent(inout) :: minfo
     integer, intent(in) :: ncol_ext
+    integer :: gpu_option
 
     work%paral_kgb = minfo%paral_kgb
     work%neigenpairs_ext = ncol_ext
-    work%use_linalg = .true.  ! for debug
-    work%use_colsrows = .false. ! for debug
-    work%is_init = .false. ! fixme bad management
+    work%use_linalg = .true.  ! for sanity
+    work%use_colsrows = .false. ! for sanity
+    work%has_transposer = .false.
+    gpu_option = minfo%gpu_option
 
-    ABI_MALLOC_IFNOT(work%lookup_cols_X, (minfo%neigenpairs))
     ABI_MALLOC_IFNOT(work%lookup_cols_Xext, (ncol_ext))
-    !ABI_MALLOC_IFNOT(work%ncolsColsRows, (nproc))
     
     ! Allocate extended space in linalg representation
     call xg_init(work%X_ext, minfo%space, minfo%spacedim, work%neigenpairs_ext, &
-        minfo%spacecom, me_g0=minfo%me_g0, gpu_option=minfo%gpu_option)
+        minfo%spacecom, me_g0=minfo%me_g0, gpu_option=gpu_option)
+
+    call xg_init(work%resid_ext, SPACE_R, work%neigenpairs_ext, 1, gpu_option=gpu_option)
+    call xg_init(work%eigen_ext, SPACE_R, work%neigenpairs_ext, 1, gpu_option=gpu_option)
 
 end subroutine slice_task_allocateAsyncMemory
 !!***
@@ -390,68 +415,107 @@ end subroutine slice_task_allocateAsyncMemory
 !! 
 !! FUNCTION
 !! Initialize async memory (for all tasks)
-!! todo also need neigenpairs_per_slice as well as number of random to add...
+!! IML dev note: 
+!! current version initializes using sketching of wanted size. Might also need
+!! to test if choosing directly random vectors in better.
 !! 
 !! SOURCE
 
-subroutine slice_task_initAsyncMemory(work, X0, mapper, ncols_per_task)
+subroutine slice_task_initAsyncMemory(work, X0, minfo, mapper, ncols_per_task)
 
     implicit none
+    
+    !Arguments ------------------------------------
     type(asyncMemory_t), intent(inout) :: work
+    type(matrixInfo_t), intent(inout) :: minfo
     type(xgBlock_t), intent(in) :: X0
-    integer, pointer, intent(in) :: mapper(:,:)
+    logical, pointer, intent(in) :: mapper(:,:)
     integer, intent(in) :: ncols_per_task(:)
 
-    ! fixme
-    type(activeTask_t) :: task
-    type(xgBlock_t) :: col_in, col_out
-    integer :: fcol, fcol_ext
-    integer :: j, nrows, ncols
+    !Local variables-------------------------------
+    integer :: nslice, islice, fcol, fcol_ext_prev, fcol_ext
+    integer :: nrows, ncols, k_sketch, me_ncompl, nselect, fcol_compl
+    integer :: space, gpu_option, spacecom, fcol_ext_sketch
+    integer, allocatable :: nrand_per_task(:)
+    integer, allocatable :: ncompl_per_task(:)
+    ! typed
+    type(xg_t) :: X0_compl, X_sketch
+    type(xgBlock_t) :: col_in, col_out, Xext_last
+    
+    ! *********************************************************************
 
     ! Sanity check
     if ((.not. work%use_linalg) .or. work%use_colsrows) then
         ABI_ERROR("not in linalg representation")
     end if
 
-    if (work%is_init) then
-        ABI_ERROR("buffer is already initialized")
-    end if
+    nrows = rows(X0)
+    ncols = cols(X0)
+    space = minfo%space
+    gpu_option = minfo%gpu_option
+    spacecom = minfo%spacecom
 
     work%XextLinalg = work%X_ext%self
     nslice = size(mapper, dim=2)
-    task%me_cols_X = mapper(:, task%me_id_slice)
+    ABI_MALLOC(nrand_per_task, (nslice))
+    ABI_MALLOC(ncompl_per_task, (nslice))
 
     ! Copy X to XextLinalg to achieve contiguous column blocks
-    ncols = task%me_neigenpairs_slice
-    nrows = rows(X0)
+    fcol_ext_prev = 1
     fcol_ext = 0
-    do j=1,ncols
-        fcol = task%me_cols_X(j)
-        if (fcol>0) then
-            fcol_ext = fcol_ext + 1
-            task%me_cols_Xext(j) = fcol_ext ! not sure it is useful to store this array fixme
-
+    do islice=1, nslice
+        nselect = 0
+        do fcol=1, ncols
+            if (.not. mapper(fcol, islice)) then
+                exit
+            end if
+            nselect = nselect + 1
+            fcol_ext = fcol_ext + nselect
             call xgBlock_setBlock(X0, col_in, nrows, 1, fcol=fcol)
             call xgBlock_setBlock(work%XextLinalg, col_out, nrows, 1, fcol=fcol_ext)
-            
+
             ! Reminder: xgBlock_copy is always on CPU expect if both blocks are on GPU
             call xgBlock_copy(col_in, col_out)
-        end if
+        end do
+        nrand_per_task(islice) = ncols_per_task(islice) - nselect
+        ncompl_per_task(islice) = ncols - nselect
+        write(std_out,*) 'selected', nselect, 'out of', ncols_per_task(islice), 'then rand is', &
+            nrand_per_task(islice)
+        fcol_ext = ncols_per_task(islice) ! jump to end of slice
+        work%lookup_cols_Xext(fcol_ext_prev:fcol_ext) = islice
+        fcol_ext_prev = fcol_ext
     end do
 
-    ! todo initialize the rest with random vectors
-    ! OR do sketching
-    ! for this need neigenpairs_per_slice dunno do a small prep
+    ! recover the remaining columns not mapped to the slice and sketch them
+    do islice=1, nslice
+        k_sketch = nrand_per_task(islice) ! size of sketch
+        me_ncompl = ncompl_per_task(islice) ! size of complement in X0
+        if (k_sketch==0 .or. me_ncompl==0) then
+            exit
+        end if
+        call xg_init(X0_compl, space, nrows, me_ncompl, spacecom, gpu_option=gpu_option)
+        fcol_compl = 0
+        fcol_ext_sketch = 1
+        do fcol=1, ncols
+            if (.not. mapper(fcol, islice)) then ! for remaining dimensions not in slice
+                fcol_compl = fcol_compl + 1 
+                call xgBlock_setBlock(X0, col_in, nrows, 1, fcol=fcol)
+                call xgBlock_setBlock(X0_compl%self, col_out, nrows, 1, fcol=fcol_compl)
+                call xgBlock_copy(col_in, col_out)
+            end if
+        end do
+        ! Y = X * Omega where Omega sketch matrix to capture all directions at once (linalg distribution)
+        call xg_init(X_sketch, space, nrows, k_sketch, spacecom, gpu_option=gpu_option)
+        call xgBlock_randomSketching(X0_compl%self, X_sketch%self, k_sketch)
+        call xgBlock_setBlock(work%XextLinalg, Xext_last, nrows, k_sketch, fcol=fcol_ext_sketch)
+        call xgBlock_copy(X_sketch%self, Xext_last)
+        call xg_free(X0_compl)
+        call xg_free(X_sketch)
+        fcol_ext_sketch = ncols_per_task(islice) ! jump to end of slice
+    end do
 
-    ! for remaining dimensions not in p
-    ! Y = X * Omega where Omega sketch matrix to capture all directions at once (linalg distribution)
-    !call xg_init(X_sketch, space_, nrows, ncols_large, spacecom, gpu_option=gpu_option_)
-    !call xgBlock_randomSketching(X0, X_sketch%self, k_sketch)
-    !call xgBlock_copy(X_sketch%self, Xext_last)
-    !call xg_free(X_sketch)
-
-    !! ok at this point should do a scheduler after that. 
-    !! the scheduler is responsible for distributing the extended memory
+    ABI_FREE(nrand_per_task)
+    ABI_FREE(ncompl_per_task)
 
 end subroutine slice_task_initAsyncMemory
 !!***
@@ -470,10 +534,10 @@ subroutine free_extended_memory(work)
     type(asyncMemory_t), intent(inout) :: work
 
     call xg_free(work%X_ext)
-    ABI_SFREE(work%lookup_cols_X)
+    call xg_free(work%eigen_ext)
+    call xg_free(work%resid_ext)
     ABI_SFREE(work%lookup_cols_Xext)
-    if (work%is_init) then
-        ABI_SFREE(work%ncolsColsRows)   
+    if (work%has_transposer) then
         call xgTransposer_free(work%xgTransposerXext)
     end if
 
@@ -689,6 +753,7 @@ subroutine allocate_active_task(work, task)
 !            ABI_ERROR('wrong colsrows representation')
 !        end if
 !        write(std_out,'(a,i6,i6,i6)') '# proc has # cols of Xext ', xmpi_comm_rank(slice%spacecom),cols(slice%me_Xext)
+!        work%has_transposer = .true.
 !    else
 !        call xgBlock_setBlock(work%XextLinalg, slice%me_Xext, rows(work%XextLinalg), cols(work%XextLinalg))
 !    end if

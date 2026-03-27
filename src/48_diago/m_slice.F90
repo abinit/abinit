@@ -407,7 +407,7 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     ! Arrays
     real(dp) :: tsec(2)
     real(dp), allocatable :: moments(:)
-    integer, allocatable, target :: mapper(:,:)
+    logical, allocatable, target :: mapper(:,:)
     integer, allocatable, target :: nrowsLinalg(:)
     integer, pointer :: nrowsLinalg_ptr(:) => null() 
     integer, pointer :: ncolsColsRows_ptr(:) => null()
@@ -468,7 +468,7 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     ! Attribute column vectors of X0 to slices using query results
     ABI_MALLOC(mapper, (slice%neigenpairs, slice%nslice))
-    mapper = -1
+    mapper = .false.
     write(std_out,*) 'tolerance in residual window=', slice%tolerance
     flush(std_out)
 
@@ -491,13 +491,22 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     call slice_task_allocateAsyncMemory(asyncMemory, matrixInfo, neigenpairs_ext)
 
     ! Initilize extended buffer with vectors from X or random vectors. This part also uses global comm.
-    call slice_task_initAsyncMemory(asyncMemory, X0, mapper, slice%neigenpairs_per_slice)
-    ! IML is here todo
+    call slice_task_initAsyncMemory(asyncMemory, X0, matrixInfo, mapper, slice%neigenpairs_per_slice)
 
-    !IML dev
+    write(std_out,*) 'getid after init', xgBlock_getid(asyncMemory%XextLinalg)
+    flush(std_out)
 
-    ! after this space is allocated we should initialize it with vectors from X or random vectors.
-    ! This part also uses slice%spacecom global communicator.
+    ! MPI phase I: Compute 'process-to-slices' distribution according to paral options
+    call slice_task_initSchedule(scheduler, slice%paral_kgb, slice%paral_slice)
+
+    ! MPI phase II: Compute 'slice columns-to-process distribution
+
+    !! todo add in function
+    !! Here we compute the distribution of columns in colsrows representation.
+
+    ! Use scheduler to distribute the extended memory to processes
+
+
 
     ! At the end we should compute the distribution of columns in colsrows representation.
     ! ** This phase depends on the execution of slices **
@@ -1208,7 +1217,7 @@ end function slice_unitTest
     implicit none
 
     type(slice_t), intent(inout) :: slice
-    integer, intent(inout) :: mapper(:,:)
+    logical, intent(inout) :: mapper(:,:)
     type(xgBlock_t), intent(inout) :: eigen
     type(xgBlock_t), intent(inout) :: resid
     real(dp), intent(in) :: tol
@@ -1251,7 +1260,7 @@ end function slice_unitTest
                 ! accept if lambda in relaxed interval
                 if (theta < uppb_plus .and. theta > lowb_minus) then
                     k_kept = k_kept + 1
-                    mapper(k_kept, islice) = iband
+                    mapper(iband, islice) = .true.
                 end if
             end if
         end do
