@@ -75,17 +75,17 @@ module m_trace_estimation
     !-------------------------------------------------
     type, public :: matrixInfo_t
 
-        integer :: comm_rows                                ! xmpi_comm_self ...
-        integer :: comm_cols                                ! same as spacecom
-        integer :: spacecom                                 ! same as comm_cols
-        integer :: neigenpairs                              ! total number of bands (=number of eigenpairs)
-        integer :: total_spacedim                           ! total number of plane-waves
-        integer :: spacedim                                 ! nb of plane-waves per process in linalg representation
-        integer :: space                                    ! real or complex eigenvectors
+        integer :: comm_rows                    ! xmpi_comm_self ...
+        integer :: comm_cols                    ! same as spacecom
+        integer :: spacecom                     ! same as comm_cols
+        integer :: neigenpairs                  ! total number of bands (=number of eigenpairs)
+        integer :: total_spacedim               ! total number of plane-waves
+        integer :: spacedim                     ! nb of plane-waves per process in linalg representation
+        integer :: space                        ! real or complex eigenvectors
         integer :: gpu_kokkos_nthrd                 
         integer :: gpu_thread_limit 
-        integer :: gpu_option                               ! enable GPU
-        integer :: paral_kgb                                ! enable parallel (k-points, G basis, bands)
+        integer :: gpu_option                   ! enable GPU
+        integer :: paral_kgb                    ! enable parallel (k-points, G basis, bands)
         integer :: me_g0
         integer :: me_g0_fft
 
