@@ -104,5 +104,5 @@ xred
 #%% authors = I.-M. Lygatsika
 #%% keywords = PAW
 #%% description = 
-#%%   Test parallel slice execution in spectrum slicing algorithm for ground-state calculation. 
+#%%   Test parallel slice execution with 4 MPI in spectrum slicing algorithm for ground state energy. 
 #%%<END TEST_INFO>

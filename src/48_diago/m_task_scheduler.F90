@@ -130,7 +130,7 @@ module m_task_scheduler
     integer, parameter :: tim_invovl      = 1755
 
     ! Public 'activeSlice' datatype for active slice in use (me=current MPI process)
-    ! fixme think whether it is better to rename to 'activeTask'
+    ! fixme rename to 'activeTask'
     !-------------------------------------------------
     type, public :: activeSlice_t
 
@@ -349,6 +349,8 @@ subroutine init_extended_memory(work, X0, mapper)
     type(xgBlock_t), intent(in) :: X0
     integer, pointer, intent(in) :: mapper(:,:)
 
+    ! fixme
+    type(activeSlice_t) :: task
     type(xgBlock_t) :: col_in, col_out
     integer :: fcol, fcol_ext
     integer :: j, nrows, ncols
@@ -360,10 +362,6 @@ subroutine init_extended_memory(work, X0, mapper)
 
     if (work%is_init) then
         ABI_ERROR("buffer is already initialized")
-    end if
-
-    if (work%paral_kgb==0) then
-        ABI_ERROR("has not been tested with 1 MPI process")
     end if
 
     work%XextLinalg = work%X_ext%self

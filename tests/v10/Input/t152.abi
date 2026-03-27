@@ -12,7 +12,7 @@ spectral_cut 1 # not used kept for reference
 
 # Electronic bands
 nband           192
-npband          4
+paral_kgb 0
 
 #Plane wave basis
 ecut            8.
@@ -97,12 +97,12 @@ xred
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t150.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t152.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
-#%% max_nprocs = 4
+#%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = I.-M. Lygatsika
 #%% keywords = PAW
 #%% description = 
-#%%   Test sequential slice execution with 4 MPI in spectrum slicing algorithm for ground state energy. 
+#%%   Test sequential slice execution without MPI in spectrum slicing algorithm for ground state energy. 
 #%%<END TEST_INFO>
