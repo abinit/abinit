@@ -1,8 +1,8 @@
 
-.Version 10.5.8.1 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
+.Version 10.5.8.9 of ABINIT. v10.7.1 released Mar 2026.
+.(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
-.Copyright (C) 1998-2026 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 11 Feb 2026.
-- ( at 14h29 )
-
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v7_t99/t99.abi
+.Starting date : Thu 26 Mar 2026.
+- ( at 11h35 )
+  
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/TestBot_MPI1/v7_t99/t99.abi
 - output file    -> t99.abo
 - root for input  files -> t99i
 - root for output files -> t99o
@@ -177,8 +177,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10948
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/B-q3
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/B-q3
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/B-q3
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/B-q3
 - Goedecker pseudopotential for B
 -  5.00000   3.00000     70301                znucl, zion, pspdat
    10   11    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -199,8 +199,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.33797878
          --- l  ekb(1:nproj) -->
@@ -208,8 +208,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/PseudosHGH_pwteter/7n.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/PseudosHGH_pwteter/7n.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/PseudosHGH_pwteter/7n.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/PseudosHGH_pwteter/7n.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for N,  from PRB58, 3641 (1998)
 -  7.00000   5.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -222,8 +222,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
  pspatm : COMMENT -
   the projectors are not normalized,
-  so that the KB energies are not consistent with
-  definition in PRB44, 8503 (1991).
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
   pspatm : epsatm=   -0.01437983
          --- l  ekb(1:nproj) -->
@@ -399,7 +399,7 @@ meta: {optdriver: 1, rfphon: 1, rfstrs: 3, }
 
  symkchk : k-point set has full space-group symmetry.
 
- ==>  initialize data related to q vector <==
+ ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
@@ -1039,14 +1039,14 @@ tolerances: {tolvrs: 1.00E-16, }
 
 
  ==> Compute Derivative Database <==
-
+  
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
-  cartesian coordinates for strain terms (1/ucvol factor
-   for elastic tensor components not included)
+  cartesian coordinates for strain terms (1/ucvol factor 
+   for elastic tensor components not included) 
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
-
+  
    1    1   1    1        -0.9418808339         0.0000000000
    1    1   2    1         0.4709404169         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
@@ -1061,7 +1061,7 @@ tolerances: {tolvrs: 1.00E-16, }
    1    1   1    6        -0.0000000000         0.0000000000
    1    1   2    6         0.2250747392         0.0000000000
    1    1   3    6        -0.7881939605         0.0000000000
-
+  
    2    1   1    1         0.4709404169         0.0000000000
    2    1   2    1        -0.9418808339         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
@@ -1076,7 +1076,7 @@ tolerances: {tolvrs: 1.00E-16, }
    2    1   1    6         0.1949204419         0.0000000000
    2    1   2    6        -0.1125373697         0.0000000000
    2    1   3    6         0.3940969803         0.0000000000
-
+  
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         9.0395695591         0.0000000000
@@ -1089,7 +1089,7 @@ tolerances: {tolvrs: 1.00E-16, }
    3    1   1    6        -0.0000000007         0.0000000000
    3    1   2    6        -0.0000000000         0.0000000000
    3    1   3    6         0.0000000000         0.0000000000
-
+  
    1    2   1    1         0.9298386859         0.0000000000
    1    2   2    1        -0.4649193429         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
@@ -1104,7 +1104,7 @@ tolerances: {tolvrs: 1.00E-16, }
    1    2   1    6         0.0000000000         0.0000000000
    1    2   2    6        -0.2251095173         0.0000000000
    1    2   3    6         0.7833800009         0.0000000000
-
+  
    2    2   1    1        -0.4649193429         0.0000000000
    2    2   2    1         0.9298386859        -0.0000000000
    2    2   3    1         0.0000000000        -0.0000000000
@@ -1119,7 +1119,7 @@ tolerances: {tolvrs: 1.00E-16, }
    2    2   1    6        -0.1949505602         0.0000000000
    2    2   2    6         0.1125547584         0.0000000000
    2    2   3    6        -0.3916900004         0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000        -0.0000000000
    3    2   3    1        -9.0456646955        -0.0000000000
@@ -1132,62 +1132,62 @@ tolerances: {tolvrs: 1.00E-16, }
    3    2   1    6         0.0000000011         0.0000000000
    3    2   2    6         0.0000000000         0.0000000000
    3    2   3    6         0.0000000000         0.0000000000
-
+  
    1    4   2    1         0.0000000000         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
-
+  
    2    4   1    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
-
+  
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-
+  
    1    5   1    1         0.0000000000         0.0000000000
-   1    5   2    1        -1.6779442862         0.0000000000
-   1    5   3    1         0.0382804464         0.0000000000
-   1    5   1    2         0.0000000000         0.0000000000
-   1    5   2    2         1.9007987441         0.0000000000
-   1    5   3    2         0.0102648808         0.0000000000
+   1    5   2    1        -0.6825959923         0.0000000000
+   1    5   3    1         0.3373487746         0.0000000000
+   1    5   1    2        -0.0000000000         0.0000000000
+   1    5   2    2         0.6784269831         0.0000000000
+   1    5   3    2        -0.3395128679         0.0000000000
    1    5   1    5         0.8494228305         0.0000000000
    1    5   2    5         1.1920623168         0.0000000000
    1    5   3    5         8.0457543002         0.0000000000
    1    5   1    6        -0.1146890888         0.0000000000
    1    5   2    6         0.0000000000         0.0000000000
    1    5   3    6         0.0000000005         0.0000000000
-
+  
    2    5   1    1         0.0000000000         0.0000000000
-   2    5   2    1         1.6779442855         0.0000000000
-   2    5   3    1         0.0382804458         0.0000000000
-   2    5   1    2         0.0000000000         0.0000000000
-   2    5   2    2        -1.9007987420         0.0000000000
-   2    5   3    2         0.0102648827         0.0000000000
+   2    5   2    1         0.6825959916         0.0000000000
+   2    5   3    1         0.3373487740         0.0000000000
+   2    5   1    2        -0.0000000000         0.0000000000
+   2    5   2    2        -0.6784269808         0.0000000000
+   2    5   3    2        -0.3395128660         0.0000000000
    2    5   1    5         1.1920623170         0.0000000000
    2    5   2    5         0.8494227401         0.0000000000
    2    5   3    5         8.0457543058         0.0000000000
    2    5   1    6         0.1146890896         0.0000000000
    2    5   2    6         0.0000000000         0.0000000000
    2    5   3    6         0.0000000000         0.0000000000
-
+  
    3    5   1    1         0.0000000000         0.0000000000
-   3    5   2    1        -0.0000000000         0.0000000000
-   3    5   3    1         0.4750501794         0.0000000000
-   3    5   1    2         0.0000000000         0.0000000000
-   3    5   2    2        -0.0000000000         0.0000000000
-   3    5   3    2        -0.7154305794         0.0000000000
+   3    5   2    1         0.0000000000         0.0000000000
+   3    5   3    1         0.2843558004         0.0000000000
+   3    5   1    2        -0.0000000000         0.0000000000
+   3    5   2    2         0.0000000001         0.0000000000
+   3    5   3    2        -0.2845640945         0.0000000000
    3    5   1    5         8.0457543074         0.0000000000
    3    5   2    5         8.0457543019         0.0000000000
    3    5   3    5         8.5662087843         0.0000000000
    3    5   1    6         0.0000000001         0.0000000000
    3    5   2    6         0.0000000000         0.0000000000
    3    5   3    6         0.0000000002         0.0000000000
-
-   1    6   1    1         0.0000000000         0.0000000000
-   1    6   2    1         0.1176215472         0.0000000000
+  
+   1    6   1    1        -0.0000000000         0.0000000000
+   1    6   2    1         0.1949204419         0.0000000000
    1    6   3    1        -0.0000000007         0.0000000000
-   1    6   1    2        -0.0000000000         0.0000000000
-   1    6   2    2        -0.0890218782         0.0000000000
+   1    6   1    2         0.0000000000         0.0000000000
+   1    6   2    2        -0.1949505602         0.0000000000
    1    6   3    2         0.0000000011         0.0000000000
    1    6   1    5        -0.1146890887         0.0000000000
    1    6   2    5         0.1146890896         0.0000000000
@@ -1195,12 +1195,12 @@ tolerances: {tolvrs: 1.00E-16, }
    1    6   1    6         8.5403128455         0.0000000000
    1    6   2    6         0.0000000001         0.0000000000
    1    6   3    6         0.0000000000         0.0000000000
-
-   2    6   1    1         0.1358176638         0.0000000000
-   2    6   2    1        -0.0679088319         0.0000000000
+  
+   2    6   1    1         0.2250747392         0.0000000000
+   2    6   2    1        -0.1125373697         0.0000000000
    2    6   3    1        -0.0000000000         0.0000000000
-   2    6   1    2        -0.1027936112         0.0000000000
-   2    6   2    2         0.0513968053         0.0000000000
+   2    6   1    2        -0.2251095173         0.0000000000
+   2    6   2    2         0.1125547584         0.0000000000
    2    6   3    2         0.0000000000         0.0000000000
    2    6   1    5        -0.0000000001         0.0000000000
    2    6   2    5        -0.0000000000         0.0000000000
@@ -1208,12 +1208,12 @@ tolerances: {tolvrs: 1.00E-16, }
    2    6   1    6        -0.0000000006         0.0000000000
    2    6   2    6         8.5403128513         0.0000000000
    2    6   3    6        -0.1146890887         0.0000000000
-
-   3    6   1    1        -1.9375231714         0.0000000000
-   3    6   2    1         0.9687615857         0.0000000000
+  
+   3    6   1    1        -0.7881939605         0.0000000000
+   3    6   2    1         0.3940969803         0.0000000000
    3    6   3    1         0.0000000000         0.0000000000
-   3    6   1    2         2.1948533315         0.0000000000
-   3    6   2    2        -1.0974266657         0.0000000000
+   3    6   1    2         0.7833800009         0.0000000000
+   3    6   2    2        -0.3916900004         0.0000000000
    3    6   3    2         0.0000000000         0.0000000000
    3    6   1    5        -0.0000000018         0.0000000000
    3    6   2    5        -0.0000000002         0.0000000000
@@ -1221,141 +1221,141 @@ tolerances: {tolvrs: 1.00E-16, }
    3    6   1    6        -0.0000000000         0.0000000000
    3    6   2    6        -0.1146890887         0.0000000000
    3    6   3    6        -0.1713197449         0.0000000000
-
-
+  
+  
   Dynamical matrix, in cartesian coordinates,
    if specified in the inputs, asr has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    1        -0.0413719064         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2         0.0413719064        -0.0000000000
    1    1   2    2        -0.0000000000        -0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
-
+  
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1        -0.0413719064         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000        -0.0000000000
    2    1   2    2         0.0413719064        -0.0000000000
    2    1   3    2         0.0000000000        -0.0000000000
-
+  
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.2202285640        -0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2         0.0000000000        -0.0000000000
    3    1   3    2        -0.2202285640         0.0000000000
-
+  
    1    2   1    1         0.0413719064         0.0000000000
    1    2   2    1        -0.0000000000         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2        -0.0413719064        -0.0000000000
    1    2   2    2         0.0000000000        -0.0000000000
    1    2   3    2        -0.0000000000        -0.0000000000
-
+  
    2    2   1    1        -0.0000000000         0.0000000000
    2    2   2    1         0.0413719064         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2         0.0000000000        -0.0000000000
    2    2   2    2        -0.0413719064        -0.0000000000
    2    2   3    2        -0.0000000000        -0.0000000000
-
+  
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1        -0.2202285640        -0.0000000000
    3    2   1    2        -0.0000000000        -0.0000000000
    3    2   2    2        -0.0000000000        -0.0000000000
    3    2   3    2         0.2202285640         0.0000000000
-
+  
   Rigid-atom elastic tensor , in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    5   1    5         0.0068093836         0.0000000000
    1    5   2    5         0.0095561472         0.0000000000
    1    5   3    5         0.0644986519         0.0000000000
    1    5   1    6        -0.0009194031         0.0000000000
    1    5   2    6         0.0000000000         0.0000000000
    1    5   3    6         0.0000000000         0.0000000000
-
+  
    2    5   1    5         0.0095561472         0.0000000000
    2    5   2    5         0.0068093829         0.0000000000
    2    5   3    5         0.0644986519         0.0000000000
    2    5   1    6         0.0009194031         0.0000000000
    2    5   2    6         0.0000000000         0.0000000000
    2    5   3    6         0.0000000000         0.0000000000
-
+  
    3    5   1    5         0.0644986519         0.0000000000
    3    5   2    5         0.0644986519         0.0000000000
    3    5   3    5         0.0686708664         0.0000000000
    3    5   1    6         0.0000000000         0.0000000000
    3    5   2    6         0.0000000000         0.0000000000
    3    5   3    6         0.0000000000         0.0000000000
-
+  
    1    6   1    5        -0.0009194031         0.0000000000
    1    6   2    5         0.0009194031         0.0000000000
    1    6   3    5        -0.0000000000         0.0000000000
    1    6   1    6         0.0684632720         0.0000000000
    1    6   2    6         0.0000000000         0.0000000000
    1    6   3    6         0.0000000000         0.0000000000
-
+  
    2    6   1    5        -0.0000000000         0.0000000000
    2    6   2    5        -0.0000000000         0.0000000000
    2    6   3    5        -0.0000000000         0.0000000000
    2    6   1    6        -0.0000000000         0.0000000000
    2    6   2    6         0.0684632720         0.0000000000
    2    6   3    6        -0.0009194031         0.0000000000
-
+  
    3    6   1    5        -0.0000000000         0.0000000000
    3    6   2    5        -0.0000000000         0.0000000000
    3    6   3    5        -0.0000000000         0.0000000000
    3    6   1    6        -0.0000000000         0.0000000000
    3    6   2    6        -0.0009194031         0.0000000000
    3    6   3    6        -0.0013733818         0.0000000000
-
+  
   Internal strain coupling parameters, in cartesian coordinates,
-   zero average net force deriv. has been imposed
+   zero average net force deriv. has been imposed  
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
-
+  
    1    1   1    5        -0.0000000000         0.0000000000
    1    1   2    5        -0.0000000000         0.0000000000
    1    1   3    5        -0.0000000000         0.0000000000
    1    1   1    6         0.0000000000         0.0000000000
    1    1   2    6        -0.0474798424         0.0000000000
    1    1   3    6         0.1657500965         0.0000000000
-
+  
    2    1   1    5         0.1657500966         0.0000000000
    2    1   2    5        -0.1657500963         0.0000000000
    2    1   3    5         0.0000000000         0.0000000000
    2    1   1    6        -0.0474798423         0.0000000000
    2    1   2    6        -0.0000000000         0.0000000000
    2    1   3    6         0.0000000000         0.0000000000
-
+  
    3    1   1    5        -0.0528063912         0.0000000000
    3    1   2    5        -0.0528063910         0.0000000000
    3    1   3    5        -0.0443851515         0.0000000000
    3    1   1    6         0.0000000001         0.0000000000
    3    1   2    6         0.0000000000         0.0000000000
    3    1   3    6         0.0000000000         0.0000000000
-
+  
    1    2   1    5         0.0000000000         0.0000000000
    1    2   2    5         0.0000000000         0.0000000000
    1    2   3    5         0.0000000000         0.0000000000
    1    2   1    6        -0.0000000000         0.0000000000
    1    2   2    6         0.0474798424         0.0000000000
    1    2   3    6        -0.1657500965         0.0000000000
-
+  
    2    2   1    5        -0.1657500966         0.0000000000
    2    2   2    5         0.1657500963         0.0000000000
    2    2   3    5        -0.0000000000         0.0000000000
    2    2   1    6         0.0474798423         0.0000000000
    2    2   2    6         0.0000000000         0.0000000000
    2    2   3    6        -0.0000000000         0.0000000000
-
+  
    3    2   1    5         0.0528063912         0.0000000000
    3    2   2    5         0.0528063910         0.0000000000
    3    2   3    5         0.0443851515         0.0000000000
@@ -1373,7 +1373,7 @@ tolerances: {tolvrs: 1.00E-16, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      4.7407935029E+00  4.7407935029E+00  6.4088988780E+00 Bohr
               amu      1.08110000E+01  1.40067400E+01
@@ -1488,7 +1488,7 @@ P          mk1mem2          4
 - Strong suggestion to cite this paper in your publications.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#vantroeye2016
 -
-- [2] Metric tensor formulation of strain in density-functional perturbation theory,
+- [2] Metric tensor formulation of strain in density-functional perturbation theory, 
 - D. R. Hamann, X. Wu, K. M. Rabe, and D. Vanderbilt, Phys. Rev. B71, 035117 (2005).
 - Comment: Non-vanishing rfstrs. Strong suggestion to cite this paper in your publications.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2005
@@ -1505,7 +1505,7 @@ P          mk1mem2          4
 - D.R. Hamann, Xu He, O. Hellman, N. Holzwarth, F. Jollet, P. Kestener,
 - I.-M. Lygatsika, O. Nadeau, L. MacEnulty, E. Mara
 - Comment: the sixth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for J. Chem. Phys.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT25.pdf .
 - The licence allows the authors to put it on the Web.
@@ -1534,7 +1534,7 @@ P          mk1mem2          4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at
 - https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
@@ -1552,16 +1552,16 @@ P          mk1mem2          4
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys.
+- Note that a version of this paper, that is not formatted for J. Chem. Phys. 
 - is available at
 -  https://github.com/abinit/abinit_assets/tree/main/abinit_package/papers/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.8
+- Proc.   0 individual time (sec): cpu=          1.9  wall=          1.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  18 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.7  wall=          1.8
++Overall time at end (sec) : cpu=          1.9  wall=          1.9

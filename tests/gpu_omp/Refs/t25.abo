@@ -1,6 +1,6 @@
 
-.Version 10.5.8.1 of ABINIT, released Dec 2025.
-.(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
+.Version 10.5.8.9 of ABINIT. v10.7.1 released Mar 2026.
+.(MPI version, prepared for a x86_64_linux_nvhpc24.9-0 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 16 Feb 2026.
-- ( at 02h57 )
+.Starting date : Fri 27 Mar 2026.
+- ( at 13h39 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test_mroyo/tests/TestBot_MPI1/gpu_omp_t25/t25.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_debug/tests/TestBot_MPI1/gpu_omp_t25/t25.abi
 - output file    -> t25.abo
 - root for input  files -> t25i
 - root for output files -> t25o
  
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test_mroyo/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+-   /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_debug/tests/Pspdir/Psdj_paw_pw_std/Al.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test_mroyo/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+-   /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_debug/tests/Pspdir/As.LDA_PW-JTH_sp.xml
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -352,9 +352,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test_mroyo/tests/Pspdir/Psdj_paw_pw_std/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test_mroyo/tests/Pspdir/Psdj_paw_pw_std/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test_mroyo/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_debug/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_debug/tests/Pspdir/Psdj_paw_pw_std/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_debug/tests/Pspdir/Psdj_paw_pw_std/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -372,9 +372,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
  
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test_mroyo/tests/Pspdir/As.LDA_PW-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test_mroyo/tests/Pspdir/As.LDA_PW-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_nvhpc_23.9_elpa/srostami_test_mroyo/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_debug/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_debug/tests/Pspdir/As.LDA_PW-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/eos_nvhpc_24.9_openmpi/srostami_debug/tests/Pspdir/As.LDA_PW-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -1157,11 +1157,11 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT  9   1.3054483924948     -3.820E-09 1.482E-12 5.845E-08
  ETOT 10   1.3054483923593     -1.354E-10 3.367E-14 3.806E-09
  ETOT 11   1.3054483923448     -1.449E-11 3.011E-15 7.303E-11
- ETOT 12   1.3054483923447     -1.323E-13 6.282E-17 3.736E-12
- ETOT 13   1.3054483923447      2.665E-15 3.228E-18 9.222E-14
- ETOT 14   1.3054483923447     -4.441E-15 1.427E-19 1.057E-14
- ETOT 15   1.3054483923447      8.882E-16 1.307E-20 7.424E-16
- ETOT 16   1.3054483923447     -4.441E-15 8.314E-21 7.521E-17
+ ETOT 12   1.3054483923447     -1.306E-13 6.282E-17 3.736E-12
+ ETOT 13   1.3054483923447     -8.882E-16 3.228E-18 9.222E-14
+ ETOT 14   1.3054483923447     -2.665E-15 1.427E-19 1.057E-14
+ ETOT 15   1.3054483923447      0.000E+00 1.307E-20 7.424E-16
+ ETOT 16   1.3054483923447     -2.665E-15 8.314E-21 7.521E-17
  
  At SCF step   16   max residual=  8.31E-21 < tolwfr=  1.00E-20 =>converged.
 -open ddk wf file :t25o_DS3_1WF7.nc
@@ -1229,9 +1229,9 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT 11   1.3054483923443     -1.437E-11 3.009E-15 7.332E-11
  ETOT 12   1.3054483923441     -1.270E-13 6.224E-17 3.889E-12
  ETOT 13   1.3054483923441      0.000E+00 3.572E-18 9.645E-14
- ETOT 14   1.3054483923441     -5.329E-15 1.537E-19 1.084E-14
- ETOT 15   1.3054483923441      8.882E-16 1.312E-20 7.487E-16
- ETOT 16   1.3054483923441      1.776E-15 8.750E-21 7.831E-17
+ ETOT 14   1.3054483923441     -4.441E-15 1.537E-19 1.084E-14
+ ETOT 15   1.3054483923441      0.000E+00 1.312E-20 7.487E-16
+ ETOT 16   1.3054483923441      2.665E-15 8.750E-21 7.831E-17
  
  At SCF step   16   max residual=  8.75E-21 < tolwfr=  1.00E-20 =>converged.
 -open ddk wf file :t25o_DS3_1WF8.nc
@@ -1296,12 +1296,12 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT  8   1.3054483963137     -3.320E-09 3.730E-12 1.212E-06
  ETOT  9   1.3054483924935     -3.820E-09 1.481E-12 5.843E-08
  ETOT 10   1.3054483923581     -1.354E-10 3.366E-14 3.806E-09
- ETOT 11   1.3054483923436     -1.450E-11 3.011E-15 7.303E-11
- ETOT 12   1.3054483923435     -1.252E-13 6.282E-17 3.736E-12
- ETOT 13   1.3054483923435     -4.441E-15 3.229E-18 9.222E-14
- ETOT 14   1.3054483923435     -8.882E-16 1.427E-19 1.057E-14
- ETOT 15   1.3054483923435     -1.776E-15 1.307E-20 7.424E-16
- ETOT 16   1.3054483923435     -2.665E-15 8.314E-21 7.521E-17
+ ETOT 11   1.3054483923436     -1.449E-11 3.011E-15 7.303E-11
+ ETOT 12   1.3054483923435     -1.270E-13 6.282E-17 3.736E-12
+ ETOT 13   1.3054483923435     -5.329E-15 3.229E-18 9.222E-14
+ ETOT 14   1.3054483923435      0.000E+00 1.427E-19 1.057E-14
+ ETOT 15   1.3054483923435     -3.553E-15 1.307E-20 7.424E-16
+ ETOT 16   1.3054483923435     -8.882E-16 8.314E-21 7.521E-17
  
  At SCF step   16   max residual=  8.31E-21 < tolwfr=  1.00E-20 =>converged.
 -open ddk wf file :t25o_DS3_1WF9.nc
@@ -1429,11 +1429,11 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT  3  0.82999779162260     -8.346E-02 4.288E-05 7.493E-01
  ETOT  4  0.82882226548154     -1.176E-03 5.968E-07 1.927E-02
  ETOT  5  0.82879749222530     -2.477E-05 1.740E-08 3.493E-04
- ETOT  6  0.82879701887886     -4.733E-07 3.847E-10 1.154E-05
+ ETOT  6  0.82879701887885     -4.733E-07 3.847E-10 1.154E-05
  ETOT  7  0.82879699095283     -2.793E-08 2.280E-11 5.999E-07
  ETOT  8  0.82879699008558     -8.673E-10 4.492E-13 1.844E-08
  ETOT  9  0.82879699005812     -2.746E-11 1.434E-14 8.845E-10
- ETOT 10  0.82879699005710     -1.021E-12 5.722E-16 1.238E-11
+ ETOT 10  0.82879699005709     -1.021E-12 5.722E-16 1.238E-11
  ETOT 11  0.82879699005710      1.776E-15 4.425E-18 1.090E-12
  ETOT 12  0.82879699005709     -9.770E-15 3.520E-19 4.780E-14
  ETOT 13  0.82879699005709      2.665E-15 1.253E-20 3.907E-15
@@ -1674,7 +1674,7 @@ tolerances: {tolwfr: 1.00E-20, }
    2    5   2    6        -0.0000000000         0.0000000000
    2    5   3    6        -0.0000000001         0.0000000000
   
-   3    5   1    1        -0.0000000000         0.0000000000
+   3    5   1    1         0.0000000000         0.0000000000
    3    5   2    1        -0.0000000000         0.0000000000
    3    5   3    1        -0.0000000000         0.0000000000
    3    5   1    2        -0.0000000000         0.0000000000
@@ -1691,14 +1691,14 @@ tolerances: {tolwfr: 1.00E-20, }
    3    5   3    6        -0.0000000000         0.0000000000
   
    1    6   1    1         0.0000000000         0.0000000000
-   1    6   2    1         2.8149271996         0.0000000000
-   1    6   3    1         2.8149271996         0.0000000000
-   1    6   1    2        -0.0000000000         0.0000000000
-   1    6   2    2        -4.3507637747         0.0000000000
-   1    6   3    2        -4.3507637747         0.0000000000
-   1    6   1    4         2.4866728591         0.0000000000
-   1    6   2    4        -2.4866728589         0.0000000000
-   1    6   3    4        -2.4866728590         0.0000000000
+   1    6   2    1        -0.7861758174         0.0000000000
+   1    6   3    1        -0.7861758174         0.0000000000
+   1    6   1    2        -0.0000000001         0.0000000000
+   1    6   2    2         0.7852626163         0.0000000000
+   1    6   3    2         0.7852626163         0.0000000000
+   1    6   1    4         2.5027474640         0.0000000000
+   1    6   2    4        -2.5027474638         0.0000000000
+   1    6   3    4        -2.5027474639         0.0000000000
    1    6   1    5        -0.0000000000         0.0000000000
    1    6   2    5         0.0000000000         0.0000000000
    1    6   3    5         0.0000000000         0.0000000000
@@ -1706,15 +1706,15 @@ tolerances: {tolwfr: 1.00E-20, }
    1    6   2    6        -0.0000000000         0.0000000000
    1    6   3    6        -0.0000000000         0.0000000000
   
-   2    6   1    1         2.8149271998         0.0000000000
+   2    6   1    1        -0.7861758173         0.0000000000
    2    6   2    1        -0.0000000000         0.0000000000
-   2    6   3    1         2.8149271998         0.0000000000
-   2    6   1    2        -4.3507637747         0.0000000000
+   2    6   3    1        -0.7861758173         0.0000000000
+   2    6   1    2         0.7852626163         0.0000000000
    2    6   2    2         0.0000000001         0.0000000000
-   2    6   3    2        -4.3507637747         0.0000000000
-   2    6   1    4        -2.4866728588         0.0000000000
-   2    6   2    4         2.4866728593         0.0000000000
-   2    6   3    4        -2.4866728589         0.0000000000
+   2    6   3    2         0.7852626163         0.0000000000
+   2    6   1    4        -2.5027474638         0.0000000000
+   2    6   2    4         2.5027474642         0.0000000000
+   2    6   3    4        -2.5027474638         0.0000000000
    2    6   1    5        -0.0000000000         0.0000000000
    2    6   2    5         0.0000000000         0.0000000000
    2    6   3    5         0.0000000000         0.0000000000
@@ -1722,15 +1722,15 @@ tolerances: {tolwfr: 1.00E-20, }
    2    6   2    6         0.8287969900         0.0000000000
    2    6   3    6        -0.0000000000         0.0000000000
   
-   3    6   1    1         2.8149271996         0.0000000000
-   3    6   2    1         2.8149271996         0.0000000000
+   3    6   1    1        -0.7861758175         0.0000000000
+   3    6   2    1        -0.7861758174         0.0000000000
    3    6   3    1         0.0000000000         0.0000000000
-   3    6   1    2        -4.3507637747         0.0000000000
-   3    6   2    2        -4.3507637747         0.0000000000
+   3    6   1    2         0.7852626164         0.0000000000
+   3    6   2    2         0.7852626163         0.0000000000
    3    6   3    2        -0.0000000000         0.0000000000
-   3    6   1    4        -2.4866728591         0.0000000000
-   3    6   2    4        -2.4866728590         0.0000000000
-   3    6   3    4         2.4866728592         0.0000000000
+   3    6   1    4        -2.5027474640         0.0000000000
+   3    6   2    4        -2.5027474639         0.0000000000
+   3    6   3    4         2.5027474641         0.0000000000
    3    6   1    5        -0.0000000000         0.0000000000
    3    6   2    5        -0.0000000000         0.0000000000
    3    6   3    5         0.0000000000         0.0000000000
@@ -2182,10 +2182,10 @@ P          mk1mem4         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=         48.7  wall=         48.7
+- Proc.   0 individual time (sec): cpu=         61.4  wall=         61.4
  
 ================================================================================
  
  Calculation completed.
 .Delivered  23 WARNINGs and  24 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         48.7  wall=         48.7
++Overall time at end (sec) : cpu=         61.4  wall=         61.4

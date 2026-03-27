@@ -170,13 +170,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              0    1.464794   10.168092
              1    1.606367   -0.485330    0.000784   -0.000042
              2   -5.506727   -2.032910
-  spin-orbit 1
-  spin-orbit 1
-  spin-orbit 1
-  spin-orbit 1
-  spin-orbit 2
-  spin-orbit 2
-  spin-orbit 2
  pspatm: atomic psp has been read  and splines computed
 
    2.40156517E+02                                ecore*ucvol(ha*bohr**3)

@@ -88,7 +88,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,fixed_mismatch,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
+ integer :: bantot,fixed_mismatch,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,intimage,ierrgrp!,ilang
  integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,lpawu,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,miniatsph,minidyn,mod10,mpierr,all_nprocs
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu
@@ -98,11 +98,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  logical :: test,twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
  logical :: xc_is_lda,xc_is_gga,xc_is_mgga,xc_is_hybrid,xc_is_pot_only,xc_need_kden
- real(dp) :: dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom,zval
+ real(dp) :: dotval,dz,norm_spinat,norm_spinaxis,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom,zval
  character(len=1000) :: msg
  type(dataset_type) :: dt
 !arrays
- integer :: cond_values(4),nprojmax(0:3)
+ integer :: cond_values(4)!,nprojmax(0:3)
  integer :: gpu_devices(12)=(/-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2/)
  integer,allocatable :: ierr_dtset(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
@@ -2594,14 +2594,14 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  nproj
 !  If there is more than one projector for some angular momentum channel of some pseudopotential
-   do ilang=0,3
-     nprojmax(ilang)=pspheads(1)%nproj(ilang)
-     if(npsp>=2)then
-       do ii=2,npsp
-         nprojmax(ilang)=max(pspheads(ii)%nproj(ilang),nprojmax(ilang))
-       end do
-     end if
-   end do
+!   do ilang=0,3
+!     nprojmax(ilang)=pspheads(1)%nproj(ilang)
+!     if(npsp>=2)then
+!       do ii=2,npsp
+!         nprojmax(ilang)=max(pspheads(ii)%nproj(ilang),nprojmax(ilang))
+!       end do
+!     end if
+!   end do
 
 !  npspinor
 !  Must be equal to 1 or 2
@@ -3572,8 +3572,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdos',dt%prtdos,6,(/0,1,2,3,4,5/),iout)
 
 ! for the moment prtdos 3,4,5 are not compatible with fft or band parallelization
-   if (dt%prtdos > 3 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
-     ABI_ERROR_NOSTOP('prtdos>3 and FFT or band parallelization are not compatible yet. Set prtdos <= 2', ierr)
+   if (dt%prtdos > 4 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
+     ABI_ERROR_NOSTOP('prtdos>4 and FFT or band parallelization are not compatible yet. Set prtdos <= 4', ierr)
    end if
 
 ! prtdos 5 only makes sense for nspinor == 2. Otherwise reset to prtdos 2
@@ -3958,6 +3958,32 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
       'Action: re-run with spinat zero '
     ABI_ERROR_NOSTOP(msg,ierr)
   end if
+
+!  spinaxis: only avaliable for SOC/cDFT/hspinfield
+  norm_spinaxis = sqrt(dot_product(dt%spinaxis, dt%spinaxis))
+  ABI_CHECK_NOSTOP(norm_spinaxis > tol8, 'Spinaxis must be a non-zero vector', ierr)
+  if (dt%nspden == 2) then
+    do iatom = 1, dt%natom
+      ! use Cartesian spinat for consistency with spinaxis
+      norm_spinat = sqrt(dot_product(dt%spinat_cart(:,iatom),dt%spinat_cart(:,iatom)))
+      if (norm_spinat < tol8) cycle
+      dotval = dot_product(dt%spinat_cart(:,iatom), dt%spinaxis)
+      if (abs(abs(dotval) - norm_spinat*norm_spinaxis) > tol8*norm_spinat*norm_spinaxis) then
+        write(msg, '(3a)')&
+         'In collinear (nspden=2) calculation, spinat (Cartesian) must be parallel to spin quantization axis',ch10,&
+         'Action: modify spinat(_cart) or spinaxis in your input file '
+        ABI_ERROR_NOSTOP(msg,ierr)
+      end if
+    end do
+  end if
+
+  if (dt%spinaxis(1)**2 + dt%spinaxis(2)**2 > tol8*tol8 ) then
+    if(all(dt%so_psp(1:dt%ntypat)/=1) .and. & 
+        all(abs(dt%hspinfield(:))<tol8) .and. &
+        all(dt%constraint_kind(1:dt%ntypat)==0)) then
+        ABI_WARNING("Spinaxis is defined but no SOC, hspinfield or cDFT is active. spinaxis will not affect the calculation.")
+     end if
+   end if
 
 !  spinmagntarget
    if(abs(dt%spinmagntarget+99.99d0)>tol8 .and. abs(dt%spinmagntarget)>tol8)then
@@ -4738,7 +4764,6 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_CHECK_NOSTOP(dt%gpu_option == ABI_GPU_DISABLED, 'GBT is not compatible with GPUs', ierr)
      ABI_CHECK_NOSTOP(dt%nspinor == 2, 'GBT requires nspinor 2', ierr)
      ABI_CHECK_NOSTOP(dt%nspden == 4, 'GBT requires nspden 4', ierr)
-     ABI_CHECK_NOSTOP(all(dt%so_psp(1:npsp) == 0), 'GBT requires so_psp == 0', ierr)
      ABI_CHECK_NOSTOP(all(dt%istwfk(1:nkpt) == 1), 'GBT requires istwfk == 1', ierr)
      ABI_CHECK_NOSTOP(dt%usefock == 0, 'GBT with Fock is not coded', ierr)
      ABI_CHECK_NOSTOP(.not. xc_is_mgga, 'GBT with meta-GGA is not coded', ierr)
@@ -4746,6 +4771,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !     ABI_CHECK_NOSTOP(dt%optcell == 0, 'GBT and cell relaxation not coded', ierr)
      if (all(abs(dt%spinat(1:2, 1:dt%natom)) < tol8)) then
        ABI_CHECK_NOSTOP(.False., 'at least one spinat(:,iat) should have non-zero x or y components', ierr)
+     end if
+     if(dt%use_gbt == 1) then
+       ABI_CHECK_NOSTOP(all(dt%so_psp(1:npsp) == 0), 'use_gbt = 1 requires so_psp == 0', ierr)
      end if
 
      ! in calcdenmagsph we wrap the atoms in the first unit cell assuming the magnetization is periodic

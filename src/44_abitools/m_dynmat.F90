@@ -1528,6 +1528,21 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  eta_=zero; if(present(eta)) eta_=eta
 
 !Exchange of perturbations
+! write(ab_out,*)"HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
+!  do ipert1=1,mpert !See notes
+!     do idir1=1,3
+!      do ipert2=1,mpert !See notes
+!         do idir2=1,3
+!         if ((blkflg(idir2,ipert2,idir1,ipert1)==blkflg(idir1,ipert1,idir2,ipert2)) .and. blkflg(idir1,ipert1,idir2,ipert2)>0) then
+!         if ((d2(1,idir2,ipert2,idir1,ipert1)-d2(1,idir1,ipert1,idir2,ipert2)>tol16) .and. blkflg(idir1,ipert1,idir2,ipert2)>0) then
+! write(ab_out,*)idir1,ipert1, idir2,ipert2,d2(1,idir2,ipert2,idir1,ipert1),d2(1,idir1,ipert1,idir2,ipert2)
+! endif
+! endif
+! enddo
+! enddo
+! enddo
+! enddo
+! write(ab_out,*)"HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
 
 !Consider two cases : either time-reversal symmetry
 !conserves the wavevector, or not
@@ -1617,8 +1632,8 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  do ithree=1,3
 
 !  Big loop on all elements
-!  do ipert1=1,mpert See notes
-   do ipert1=1,min(natom+2,mpert)
+  do ipert1=1,mpert !See notes
+!   do ipert1=1,min(natom+2,mpert)
 
 !    Select the symmetries according to pertubation 1
      if (ipert1<=natom)then
@@ -1628,8 +1643,8 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
      end if
 
      do idir1=1,3
-!      do ipert2=1,mpert See notes
-       do ipert2=1,min(natom+2,mpert)
+      do ipert2=1,mpert !See notes
+!       do ipert2=1,min(natom+2,mpert)
 
     !    Select the symmetries according to pertubation 2
          if (ipert2<=natom)then
@@ -1739,7 +1754,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
                      end do
                    end if
 
-!                  In case zero_by_symm==0, the computed materix element must be associated to at least one really computed matrix element
+!                  In case zero_by_symm==0, the computed matrix element must be associated to at least one really computed matrix element
                    if(zero_by_symm==0 .and. nblkflg_is_one==0)then
                      found=0
                    endif
@@ -1827,14 +1842,16 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
    ABI_MALLOC(d2tmp2,(2,3,3))
    ABI_MALLOC(d2work,(2,3,mpert,3,mpert))
    d2work(:,:,:,:,:)=d2(:,:,:,:,:)
-   do ipert1=1,min(natom+2,mpert)
+   do ipert1=1,mpert
+   !do ipert1=1,min(natom+2,mpert)
      if ((ipert1==natom+1.or.ipert1==natom+10.or.ipert1==natom+11).or.(ipert1==natom+2.and.(.not.qzero))) cycle
      if (ipert1<=natom)then
        sym1_ => symrec
      else
        sym1_ => symrel
      end if
-     do ipert2=1,min(natom+2,mpert)
+     do ipert2=1,mpert
+     !do ipert2=1,min(natom+2,mpert)
 !      if (any(blkflg(:,ipert1,:,ipert2)==0)) cycle
        if ((ipert2==natom+1.or.ipert2==natom+10.or.ipert2==natom+11).or.(ipert2==natom+2.and.(.not.qzero))) cycle
        if (ipert2<=natom)then
@@ -5902,9 +5919,7 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
                ip= jdir + (jatom-1)*3 + (idir-1)*3*natom + (iatom-1)*9*natom
                ! Real and imaginary part of the interatomic forces
                gam_qpt(1,ip,iqpt) = gam_qpt(1,ip,iqpt) + re*gam_rpt(1,ip,irpt) - im*gam_rpt(2,ip,irpt)
-               !DEBUG
                gam_qpt(2,ip,iqpt) = gam_qpt(2,ip,iqpt) + im*gam_rpt(1,ip,irpt) + re*gam_rpt(2,ip,irpt)
-               !ENDDEBUG
              end do ! end jdir
            end do ! end idir
          end do

@@ -429,6 +429,7 @@ function chebfi_memInfo(neigenpairs,spacedim,space,paral_kgb,total_spacedim,band
    memX_CR = 0
    memAX_CR = 0
    memBX_CR = 0
+   mem_sendrecv_CR = 0
  end if
 
  !chebfi_rayleighRitz function variables

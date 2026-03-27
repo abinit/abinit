@@ -1,7 +1,7 @@
 ## v10.6
 
-Version 10.6, released on Feb 7, 2026.
-<!-- Release notes updated on Feb 6, 2026. -->
+Version 10.6, released on Feb 6, 2026.
+<!-- Release notes updated on Mar 11, 2026. -->
 
 These release notes
 are relative to modifications/improvements of ABINIT v10.6 with respect to v10.4.
@@ -9,11 +9,13 @@ are relative to modifications/improvements of ABINIT v10.6 with respect to v10.4
 MR1160, 1165, 1168, 1170, 1172, 1173, 1183, 1187, 1191, 1194, 1106,
 then 1200 to 1275, except those that had been closed, and also
 EXCEPT MR1219, 1225, that had already been included in v10.4.
-MR1276, 1277, 1278, 1280 will be included in v10.8 .
+MR1276, 1277, 1278, 1280, 1288 will be included in v10.8 . Perhaps MR 1282 if not a draft anymore.
 For release v10.6.3, also includes MR 1279 and 1281.
+MR 1284 and 1286 have been cherry-picked to 10.6.5 (perhaps also earlier ones, but I did not note ...)
+For release v10.6.5, also includes MR 1283, 1285, 1287, 1289 to 1292.
 -->
 
-Many thanks to the contributors to the ABINIT project between April 2025 and February 2026 !
+Many thanks to the contributors to the ABINIT project between April 2025 and March 2026 !
 The list of contributors includes:
 
 B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, A. Blanchet, J. Boust, F. Brieuc, F. Bruneval,
@@ -1200,7 +1202,7 @@ By J.-M. Beuken (MR995) and M. Verstraete (MR1007)
 
 By M. Torrent (MR986, MR1032)
 
-**C.4** There is an embryo documentation for cmake build. Also, the need to modify CMakeLists.txt is not mentioned in doc/developers/developers_howto.md .
+**C.4** There is an embryo documentation for cmake build. Also, the need to modify CMakeLists.txt is not mentioned in [developers_howto](/developers/developers_howto).
 
 By P. Kestener (MR994), and a comment from Maxime Mignolet.
 
@@ -2269,7 +2271,7 @@ New tests of the band parallelism in DFPT: [[test:paral_65]] and [[test:paral_66
 By M. Giantomassi (commit 31e8aa66d8).
 
 **D.10** Improved developer documentation, section .
-[How to add a new test](https://docs.abinit.org/developers/developers_howto/#how-to-add-a-new-test-in-the-test-suite).
+[How to add a new test](/developers/developers_howto/#how-to-add-a-new-test-in-the-test-suite).
 By X. Gonze (commit dabc1b905).
 
 **D.11** Fixed typo in CITATION.cff.
@@ -5104,9 +5106,7 @@ B.10 Implementation of the LDA-1/2 methodology.
 
 C.1 There are large changes of the procedure to document ABINIT, for most of the documentation files.
     The HTML files are now produced from YAML files, under the control of the script ~abinit/doc/generate_doc.py .
-    The documentation that describes this procedure is available on the ABINIT wiki, at https://wiki.abinit.org/doku.php?id=developers:generate_doc .
     This is directly linked to the modifications in the doc presented in B1-B4.
-    In particular, the Dokuwiki syntax is used for the hyperlinks.
     By F. Jollet and X. Gonze.
 
 * * *

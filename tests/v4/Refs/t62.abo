@@ -1,5 +1,5 @@
 
-.Version 10.5.8.1 of ABINIT, released Dec 2025.
+.Version 10.5.8.9 of ABINIT. v10.7.1 released Mar 2026.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 11 Feb 2026.
-- ( at 14h26 )
+.Starting date : Thu 26 Mar 2026.
+- ( at 11h32 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v4_t62/t62.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/TestBot_MPI1/v4_t62/t62.abi
 - output file    -> t62.abo
 - root for input  files -> t62i
 - root for output files -> t62o
@@ -192,8 +192,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/57la.drh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/57la.drh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/57la.drh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/57la.drh
 - psp for La for testing purposes only by D. R. Hamann in fhi format
 - 57.00000   3.00000    999999                znucl, zion, pspdat
     6    2    3    1      1295   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -206,8 +206,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              3   -8.662078
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/33as.drh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/33as.drh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/33as.drh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/33as.drh
 - psp for Asw for testing purposes only by D. R. Hamann in fhi format
 - 33.00000   5.00000    999999                znucl, zion, pspdat
     6    2    2    2      1249   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1113,12 +1113,12 @@ tolerances: {tolvrs: 1.00E-12, }
    3    2   1    5         0.2014623259         0.0000000000
    3    2   1    6         0.0316575778         0.0000000000
   
-   1    5   1    1         0.5766578361         0.0000000000
-   1    5   2    1         0.1375177177         0.0000000000
-   1    5   3    1         0.2105231917         0.0000000000
-   1    5   1    2        -1.0398563776         0.0000000000
-   1    5   2    2        -0.2277748388         0.0000000000
-   1    5   3    2        -0.3832558565         0.0000000000
+   1    5   1    1         0.0463854439         0.0000000000
+   1    5   2    1        -0.1280788665         0.0000000000
+   1    5   3    1        -0.1472284210         0.0000000000
+   1    5   1    2        -0.0247785394         0.0000000000
+   1    5   2    2         0.1088442071         0.0000000000
+   1    5   3    2         0.2014623259         0.0000000000
    1    5   1    5         3.8295144950         0.0000000000
    1    5   2    5         0.3588093766         0.0000000000
    1    5   3    5         0.3613570259         0.0000000000
@@ -1132,12 +1132,12 @@ tolerances: {tolvrs: 1.00E-12, }
    3    5   1    5         0.3613570259         0.0000000000
    3    5   1    6         0.0264434319         0.0000000000
   
-   1    6   1    1         0.4410285018         0.0000000000
-   1    6   2    1         0.2349293017         0.0000000000
-   1    6   3    1         0.2727325451         0.0000000000
-   1    6   1    2        -0.8184691318         0.0000000000
-   1    6   2    2        -0.4529340137         0.0000000000
-   1    6   3    2        -0.4582997780         0.0000000000
+   1    6   1    1        -0.1202875819         0.0000000000
+   1    6   2    1        -0.0036985962         0.0000000000
+   1    6   3    1        -0.0421115681         0.0000000000
+   1    6   1    2         0.1467452214         0.0000000000
+   1    6   2    2         0.0525733246         0.0000000000
+   1    6   3    2         0.0316575778         0.0000000000
    1    6   1    5        -0.0245151032         0.0000000000
    1    6   2    5        -0.1274559991         0.0000000000
    1    6   3    5         0.0264434319         0.0000000000

@@ -1,5 +1,5 @@
 
-.Version 10.5.8.1 of ABINIT, released Dec 2025.
+.Version 10.5.8.9 of ABINIT. v10.7.1 released Mar 2026.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 11 Feb 2026.
-- ( at 14h18 )
+.Starting date : Thu 26 Mar 2026.
+- ( at 11h25 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/tutorespfn_tnlo_2-tnlo_3-tnlo_4/tnlo_2.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/TestBot_MPI1/tutorespfn_tnlo_2-tnlo_3-tnlo_4/tnlo_2.abi
 - output file    -> tnlo_2.abo
 - root for input  files -> tnlo_2i
 - root for output files -> tnlo_2o
@@ -612,8 +612,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/P.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/P.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/P.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/P.psp8
 - P     ONCVPSP-3.3.0  r_core=   1.46089   1.55067   1.70594
 - 15.00000   5.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -627,8 +627,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -3.024864   -0.802189
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Al.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/Psdj_nc_sr_04_pw_std_psp8/Al.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2032,7 +2032,7 @@ tolerances: {tolvrs: 1.00E-12, }
    2    5   1    1        -0.0000000392         0.0000000000
    2    5   2    1        -0.0000000568         0.0000000000
    2    5   3    1        -0.0000000392         0.0000000000
-   2    5   1    2         0.0000000059         0.0000000000
+   2    5   1    2         0.0000000060         0.0000000000
    2    5   2    2         0.0000000085         0.0000000000
    2    5   3    2         0.0000000055         0.0000000000
    2    5   1    4        -0.0000000039         0.0000000000
@@ -2048,7 +2048,7 @@ tolerances: {tolvrs: 1.00E-12, }
    3    5   1    1        -0.0000000155         0.0000000000
    3    5   2    1        -0.0000000127         0.0000000000
    3    5   3    1        -0.0000000096         0.0000000000
-   3    5   1    2         0.0000000017         0.0000000000
+   3    5   1    2         0.0000000018         0.0000000000
    3    5   2    2         0.0000000015         0.0000000000
    3    5   3    2         0.0000000008         0.0000000000
    3    5   1    4        -0.0000000046         0.0000000000
@@ -2062,11 +2062,11 @@ tolerances: {tolvrs: 1.00E-12, }
    3    5   3    6         0.0000000034         0.0000000000
   
    1    6   1    1         0.0000000177         0.0000000000
-   1    6   2    1        -4.1558578733         0.0000000000
-   1    6   3    1        -4.1558578696         0.0000000000
+   1    6   2    1         1.0290817269         0.0000000000
+   1    6   3    1         1.0290817306         0.0000000000
    1    6   1    2        -0.0000000018         0.0000000000
-   1    6   2    2         2.7023217768         0.0000000000
-   1    6   3    2         2.7023217755         0.0000000000
+   1    6   2    2        -1.0294864903         0.0000000000
+   1    6   3    2        -1.0294864916         0.0000000000
    1    6   1    4         1.6473303255         0.0000000000
    1    6   2    4        -1.6473303193         0.0000000000
    1    6   3    4        -1.6473303170         0.0000000000
@@ -2077,12 +2077,12 @@ tolerances: {tolvrs: 1.00E-12, }
    1    6   2    6        -0.0000000019         0.0000000000
    1    6   3    6         0.0000000011         0.0000000000
   
-   2    6   1    1        -4.1558578756         0.0000000000
+   2    6   1    1         1.0290817246         0.0000000000
    2    6   2    1        -0.0000000035         0.0000000000
-   2    6   3    1        -4.1558578757         0.0000000000
-   2    6   1    2         2.7023217745         0.0000000000
+   2    6   3    1         1.0290817245         0.0000000000
+   2    6   1    2        -1.0294864925         0.0000000000
    2    6   2    2         0.0000000016         0.0000000000
-   2    6   3    2         2.7023217742         0.0000000000
+   2    6   3    2        -1.0294864928         0.0000000000
    2    6   1    4        -1.6473303167         0.0000000000
    2    6   2    4         1.6473303160         0.0000000000
    2    6   3    4        -1.6473303170         0.0000000000
@@ -2093,11 +2093,11 @@ tolerances: {tolvrs: 1.00E-12, }
    2    6   2    6         1.0569779455         0.0000000000
    2    6   3    6         0.0000000031         0.0000000000
   
-   3    6   1    1        -4.1558578694         0.0000000000
-   3    6   2    1        -4.1558578732         0.0000000000
+   3    6   1    1         1.0290817308         0.0000000000
+   3    6   2    1         1.0290817270         0.0000000000
    3    6   3    1         0.0000000178         0.0000000000
-   3    6   1    2         2.7023217753         0.0000000000
-   3    6   2    2         2.7023217768         0.0000000000
+   3    6   1    2        -1.0294864917         0.0000000000
+   3    6   2    2        -1.0294864903         0.0000000000
    3    6   3    2        -0.0000000019         0.0000000000
    3    6   1    4        -1.6473303170         0.0000000000
    3    6   2    4        -1.6473303193         0.0000000000
@@ -3420,10 +3420,10 @@ P          mk1mem5        432
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=         60.7  wall=         60.7
+- Proc.   0 individual time (sec): cpu=         61.0  wall=         61.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  60 WARNINGs and  37 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         60.7  wall=         60.7
++Overall time at end (sec) : cpu=         61.0  wall=         61.1
