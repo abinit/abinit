@@ -276,6 +276,18 @@ module defs_datatypes
     ! Gives the pseudo core kinetic energy density in reciprocal space on a regular grid.
     ! ttaucorespl is **always** allocated and initialized with zeros if not has_tcore
 
+   logical :: has_tvaletau = .False.
+    ! True if the norm-conserving pseudopotential provides the pseudo valence kinetic energy density.
+
+   real(dp) :: dnvtaudq0 = zero
+    ! Gives 1/q d(tauNvale(q))/dq for q=0
+    ! (tauNvale(q) = FT of pseudo valence kinetic energy density)
+
+   real(dp), allocatable :: tvaletauspl(:,:)
+    ! tvaletauspl(mqgrid_vl,2)
+    ! Gives the pseudo valence kinetic energy density in reciprocal space on a regular grid.
+    ! Allocated only if has_tvaletau is True.
+
    integer :: num_tphi = 0
    ! Number of pseudo atomic orbitals. 0 if pseudo does not provide them
 
@@ -603,9 +615,9 @@ module defs_datatypes
 ! declared in another part of ABINIT, that might need to take into account your modification.
 ! WARNING: Also pay attention to subroutine pspheads_comm, which broadcasts this datatype.
 
-  integer :: nproj(0:3) ! number of scalar projectors for each angular momentum
+  integer, allocatable :: nproj(:) ! number of scalar projectors for each angular momentum
 
-  integer :: nprojso(3) ! number of spin-orbit projectors for each angular momentum
+  integer, allocatable :: nprojso(:) ! number of spin-orbit projectors for each angular momentum
 
   integer :: lmax       ! maximum l quantum number (-1 if only local)
                         ! Example : s only       -> lmax=0

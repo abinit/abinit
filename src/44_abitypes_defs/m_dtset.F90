@@ -1056,6 +1056,8 @@ type, public :: dataset_type
  real(dp) :: genafm(3)
  real(dp) :: goprecprm(3)
  real(dp) :: hspinfield(3)
+ real(dp) :: hspinfield_cart(3)
+ real(dp) :: hspinfield_in(3)
  real(dp) :: neb_spring(2)
  real(dp) :: pol(3)
  real(dp) :: polcen(3)
@@ -1067,6 +1069,7 @@ type, public :: dataset_type
  real(dp) :: red_dfield(3)
  real(dp) :: red_efieldbar(3)
  real(dp) :: sigma_erange(2) = zero
+ real(dp) :: spinaxis(3) = [0.0_dp,0.0_dp,1.0_dp]
  real(dp) :: strtarget(6)
  real(dp) :: tmesh(3) = [5._dp, 59._dp, 6._dp]  ! [start, stop, num]
  real(dp) :: td_ef_pol(3)
@@ -1125,6 +1128,8 @@ type, public :: dataset_type
  real(dp) :: shiftk_orig(3,MAX_NSHIFTK)       ! original shifts given in input (changed in inkpts).
 
  real(dp), allocatable :: spinat(:,:)         ! spinat(3,natom)
+ real(dp), allocatable :: spinat_cart(:,:)    ! spinat_cart(3,natom)
+ real(dp), allocatable :: spinat_in(:,:)      ! spinat_in(3,natom)
  real(dp), allocatable :: tnons(:,:)          ! tnons(3,nsym)
  real(dp), allocatable :: upawu(:,:)          ! upawu(ntypat,nimage)
  real(dp), allocatable :: vel_cell_orig(:,:,:)! vel_cell_orig(3,3,nimage)
@@ -2495,6 +2500,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%genafm(:)          = dtin%genafm(:)
  dtout%goprecprm(:)       = dtin%goprecprm(:)
  dtout%hspinfield(:)      = dtin%hspinfield(:)
+ dtout%hspinfield_cart(:) = dtin%hspinfield_cart(:)
+ dtout%hspinfield_in(:)   = dtin%hspinfield_in(:)
  dtout%mdtemp(:)          = dtin%mdtemp(:)
  dtout%neb_spring(:)      = dtin%neb_spring(:)
  dtout%polcen(:)          = dtin%polcen(:)
@@ -2506,6 +2513,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%red_dfield(:)      = dtin%red_dfield(:)
  dtout%red_efieldbar(:)   = dtin%red_efieldbar(:)
  dtout%shiftk_orig        = dtin%shiftk_orig
+ dtout%spinaxis           = dtin%spinaxis
  dtout%strtarget(:)       = dtin%strtarget(:)
  dtout%ucrpa_window(:)    = dtin%ucrpa_window(:)
  dtout%rcpaw_updatepaw(:) = dtin%rcpaw_updatepaw(:)
@@ -2584,6 +2592,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  call alloc_copy(dtin%rprimd_orig, dtout%rprimd_orig)
  call alloc_copy(dtin%shiftk, dtout%shiftk)
  call alloc_copy(dtin%spinat, dtout%spinat)
+ call alloc_copy(dtin%spinat_cart, dtout%spinat_cart)
+ call alloc_copy(dtin%spinat_in, dtout%spinat_in)
  call alloc_copy(dtin%tnons, dtout%tnons)
  call alloc_copy(dtin%upawu, dtout%upawu)
  call alloc_copy(dtin%vel_orig, dtout%vel_orig)
@@ -2703,6 +2713,8 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%rprimd_orig)
  ABI_SFREE(dtset%shiftk)
  ABI_SFREE(dtset%spinat)
+ ABI_SFREE(dtset%spinat_cart)
+ ABI_SFREE(dtset%spinat_in)
  ABI_SFREE(dtset%tnons)
  ABI_SFREE(dtset%sigma_shiftk)
  ABI_SFREE(dtset%upawu)
@@ -3816,7 +3828,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gwr_boxcutmin gwr_chi_algo gwr_max_hwtene gwr_regterm gwr_np_kgts gwr_nstep gwr_ntau gwr_fit'
  list_vars=trim(list_vars)//' gwr_rpa_ncut gwr_sigma_algo gwr_task gwr_tolqpe gwr_ucsc_batch'
 !H
- list_vars=trim(list_vars)//' hmcsst hmctt hspinfield hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
+ list_vars=trim(list_vars)//' hmcsst hmctt hspinfield hspinfield_cart hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatnd iatsph'
  list_vars=trim(list_vars)//' ibte_abs_tol ibte_alpha_mix ibte_niter ibte_prep '
@@ -3951,7 +3963,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' spin_temperature_nstep spin_temperature_start'
  !list_vars=trim(list_vars)//' spin_tolavg spin_tolvar'
  list_vars=trim(list_vars)//' spin_var_temperature spin_write_traj'
- list_vars=trim(list_vars)//' spinat spinmagntarget spmeth'
+ list_vars=trim(list_vars)//' spinat spinaxis spinat_cart spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
  list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'
  list_vars=trim(list_vars)//' structure '

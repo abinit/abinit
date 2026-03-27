@@ -932,6 +932,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 ! the following is probably useless - already read in everything in inpspheads
 #if defined HAVE_LIBPSML
      call psxml2abheader( psps%filpsp(ipsp), psphead, atmsymb, creator, 0 )
+     ABI_FREE(psphead%nproj)
+     ABI_FREE(psphead%nprojso)
      znucl = psphead%znuclpsp
      zion = psphead%zionpsp
      pspdat = psphead%pspdat
@@ -968,6 +970,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
 !    Return header information
      call pawpsxml2ab(psps%filpsp(ipsp),ecut_tmp, pspheads_tmp,0)
+     ABI_FREE(pspheads_tmp%nproj)
+     ABI_FREE(pspheads_tmp%nprojso)
      lmax=pspheads_tmp%lmax
      pspxc=pspheads_tmp%pspxc
      znucl=pspheads_tmp%znuclpsp
@@ -1178,12 +1182,12 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      call psp9in(psps%filpsp(ipsp),ekb,epsatm,ffspl,indlmn,lloc,lmax,psps%lmnmax,psps%lnmax,mmax,&
        psps%mpsang,psps%mpssoang,psps%mqgrid_ff,psps%mqgrid_vl,nproj,psps%n1xccc, &
        psps%pspso(ipsp),qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,&
-       xcccrc,xccc1d,zion,psps%znuclpsp(ipsp),nctab,maxrad)
+       xcccrc,xccc1d,xcctau1d,zion,psps%znuclpsp(ipsp),nctab,maxrad)
 
      if (nc_debug) then
        call psp_dump_outputs("PSML",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
         psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
-        indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
+        indlmn,nproj,ekb,ffspl,vlspl,xccc1d,xcctau1d)
      end if
 #else
      write(msg,'(2a)')  &
@@ -1256,6 +1260,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
                          sjoin(" Rescaling spin-orbit KB energies using spnorbscl.", ftoa(dtset%spnorbscl)))
              ekb(iln:iln + nproj(il + psps%mpsang) - 1) = ekb(iln:iln + nproj(il + psps%mpsang) - 1) * dtset%spnorbscl
            end if
+           if (dtset%so_psp(ipsp) == 0) cycle
            write(msg, '(2x,a,i1,4f12.6)' ) 'spin-orbit ',il,(ekb(iln+ii),ii=0,nproj(il+psps%mpsang)-1)
          end if
          call wrtout([std_out, ab_out], msg)

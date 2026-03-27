@@ -638,7 +638,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 &                     nspden,psps%ntypat,dtset%nucdipmom,0,option,paw_an1_i2pert,paw_an0,&
 &                     paw_energies_dum,paw_ij1_i2pert,pawang,dtset%pawprtvol,pawrad,&
 &                     pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
-&                     dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp, &
+&                     dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,dtset%spinaxis, &
 &                     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
                 !    First-order Dij computation
 !                     call timab(561,1,tsec)
@@ -657,7 +657,8 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 &                     pawfgrtab,dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,&
 &                     dtset%pawxcdev,qphon,dtset%spnorbscl,ucvol,dtset%cellcharge(1),&
 &                     vtrial1_tmp,vxc1_i2pert,xred,dtset%znucl,&
-&                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+&                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,&
+&                     spinaxis=dtset%spinaxis)
                      if (has_dijfr>0) then
                        ABI_FREE(vtrial1_tmp)
                      end if

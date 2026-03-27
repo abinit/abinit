@@ -165,7 +165,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  real(dp),allocatable :: cwave_sp(:,:),cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: gh1c_sp(:,:),gh1c1(:,:),gh1c2(:,:),gh1c3(:,:),gh1c4(:,:)
  real(dp),allocatable :: gh1c_mGGA(:,:),gh1ndc(:,:),gvnl2(:,:)
- real(dp),allocatable :: nonlop_out(:,:),vlocal1_tmp(:,:,:),work(:,:,:,:)
+ real(dp),target,allocatable :: nonlop_out(:,:),vlocal1_tmp(:,:,:),work(:,:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: gvnlx1_(:,:)
  real(dp),pointer :: dkinpw(:),kinpw1(:)
  type(pawcprj_type),allocatable,target :: cwaveprj_tmp(:,:)
@@ -1611,7 +1611,8 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw) MAP(to:dcwavef,s1cwave0,dcwavef_tmp)
        do ipw=1,npw1*nspinor*ndat
-         dcwavef(1:2,ipw)= scal*(nproc_band*s1cwave0(1:2,ipw)-dcwavef_tmp(1:2,ipw))
+         dcwavef(1,ipw)= scal*(nproc_band*s1cwave0(1,ipw)-dcwavef_tmp(1,ipw))
+         dcwavef(2,ipw)= scal*(nproc_band*s1cwave0(2,ipw)-dcwavef_tmp(2,ipw))
        end do
 #endif
      end if
@@ -2248,7 +2249,8 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
        do idat=1,ndat
          !$OMP PARALLEL DO PRIVATE(ipw)
          do ipw=1,npw_k
-           cwavein1(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k)
+           cwavein1(1,ipw+(idat-1)*npw_k)=cwavein(1,ipw+(idat-1)*my_nspinor*npw_k)
+           cwavein1(2,ipw+(idat-1)*npw_k)=cwavein(2,ipw+(idat-1)*my_nspinor*npw_k)
          end do
        end do
 #endif
@@ -2311,7 +2313,8 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
        do idat=1,ndat
          !$OMP PARALLEL DO PRIVATE(ipw)
          do ipw=1,npw_k
-           cwavein2(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k+shift)
+           cwavein2(1,ipw+(idat-1)*npw_k)=cwavein(1,ipw+(idat-1)*my_nspinor*npw_k+shift)
+           cwavein2(2,ipw+(idat-1)*npw_k)=cwavein(2,ipw+(idat-1)*my_nspinor*npw_k+shift)
          end do
        end do
 #endif
