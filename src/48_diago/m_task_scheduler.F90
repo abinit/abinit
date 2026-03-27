@@ -173,6 +173,7 @@ module m_task_scheduler
     end type activeSlice_t
 
     ! Public 'taskScheduler' datatype for asynchronous slice treatment
+    ! it is basically for asynchronous treatment of the extended memory
     !-------------------------------------------------
     type, public :: taskScheduler_t
 
@@ -180,6 +181,7 @@ module m_task_scheduler
         integer :: ntasks
         integer :: nresources
 
+        !! can rename neigenpairs_per_slice to load, can use purely task-based terminology in here
         integer, allocatable :: neigenpairs_per_slice(:)    ! number of total eigenpairs per slice
         integer, allocatable :: nproc_per_slice(:)          ! number of processes per slice
         integer, allocatable :: lookup_proc(:)              ! which slice each process serves
@@ -336,6 +338,7 @@ end subroutine allocate_extended_memory
 !! 
 !! FUNCTION
 !! Initialize extended memory (for all tasks)
+!! todo also need neigenpairs_per_slice as well as number of random to add...
 !! 
 !! SOURCE
 
@@ -359,36 +362,44 @@ subroutine init_extended_memory(work, X0, mapper)
         ABI_ERROR("buffer is already initialized")
     end if
 
-    if (work%paral_kgb==1) then
-        work%XextLinalg = X0
-    else 
-        work%XextLinalg = work%X_ext%self
-        !i1 = 1
-        !i2 = 1
-        !do islice=1,slice%nslice
-        !    i2 = slice%neigenpairs_per_slice(islice)
-        !    slice%lookup_cols_Xext(i1:i2) = islice
-        !    i1 = i2
-        !end do
+    if (work%paral_kgb==0) then
+        ABI_ERROR("has not been tested with 1 MPI process")
+    end if
 
-        task%me_cols_X = mapper(:, task%me_id_slice)
+    work%XextLinalg = work%X_ext%self
+    task%me_cols_X = mapper(:, task%me_id_slice)
 
-        ! Copy X to XextLinalg to achieve contiguous column blocks
-        ncols = task%me_neigenpairs_slice
-        nrows = rows(X0)
-        do j=1,ncols
-            fcol = task%me_cols_X(j)
-            fcol_ext = task%me_cols_Xext(j)
+    ! Copy X to XextLinalg to achieve contiguous column blocks
+    ncols = task%me_neigenpairs_slice
+    nrows = rows(X0)
+    fcol_ext = 0
+    do j=1,ncols
+        fcol = task%me_cols_X(j)
+        if (fcol>0) then
+            fcol_ext = fcol_ext + 1
+            task%me_cols_Xext(j) = fcol_ext ! not sure it is useful to store this array fixme
 
             call xgBlock_setBlock(X0, col_in, nrows, 1, fcol=fcol)
             call xgBlock_setBlock(work%XextLinalg, col_out, nrows, 1, fcol=fcol_ext)
             
             ! Reminder: xgBlock_copy is always on CPU expect if both blocks are on GPU
             call xgBlock_copy(col_in, col_out)
-        end do
-    end if
+        end if
+    end do
 
     ! todo initialize the rest with random vectors
+    ! OR do sketching
+    ! for this need neigenpairs_per_slice dunno do a small prep
+
+    ! for remaining dimensions not in p
+    ! Y = X * Omega where Omega sketch matrix to capture all directions at once (linalg distribution)
+    !call xg_init(X_sketch, space_, nrows, ncols_large, spacecom, gpu_option=gpu_option_)
+    !call xgBlock_randomSketching(X0, X_sketch%self, k_sketch)
+    !call xgBlock_copy(X_sketch%self, Xext_last)
+    !call xg_free(X_sketch)
+
+    !! ok at this point should do a scheduler after that. 
+    !! the scheduler is responsible for distributing the extended memory
 
 end subroutine init_extended_memory
 !!***
