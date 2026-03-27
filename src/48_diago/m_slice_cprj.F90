@@ -2217,8 +2217,8 @@ subroutine generateRademacherMatrix(V, n, m, rank)
     implicit none
     
     ! input/output
-    complex(dp), intent(out) :: V(n,m)
     integer, intent(in) :: n, m, rank
+    complex(dp), intent(out) :: V(n,m)
     ! local arguments
     integer :: nseed, i, j, k
     integer :: base_seed
@@ -2260,8 +2260,8 @@ subroutine generateGaussianMatrix(V, n, m, rank)
     implicit none
 
     ! input/output
-    real(dp), intent(out) :: V(2, n*m)
     integer, intent(in)  :: n, m, rank
+    real(dp), intent(out) :: V(2, n*m)
 
     ! local arguments
     integer :: nseed, i, j, nm

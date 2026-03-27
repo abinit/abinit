@@ -319,13 +319,9 @@ subroutine allocate_extended_memory(work, paral_kgb, ncol, ncol_ext, space, spac
     ABI_MALLOC_IFNOT(work%lookup_cols_Xext, (ncol_ext))
     !ABI_MALLOC_IFNOT(work%ncolsColsRows, (slice%nproc))
     
-    if (work%paral_kgb==1) then
-        
-        ! Allocate extended space in linalg representation
-        call xg_init(work%X_ext, space, spacedim, work%neigenpairs_ext, spacecom, &
-            me_g0=me_g0, gpu_option=gpu_option)
-        
-    end if
+    ! Allocate extended space in linalg representation
+    call xg_init(work%X_ext, space, spacedim, work%neigenpairs_ext, spacecom, &
+        me_g0=me_g0, gpu_option=gpu_option)
 
 end subroutine allocate_extended_memory
 !!***
