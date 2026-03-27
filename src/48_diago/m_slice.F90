@@ -159,13 +159,6 @@ module m_slice
         real(dp), allocatable :: low_bounds(:)              ! lower bounds in spectral partition (disjoint)
         real(dp), allocatable :: upp_bounds(:)              ! upper bounds in spectral partition (disjoint) 
 
-        ! Main object of per-slice phase 
-        type(activeSlice_t) :: activeSlice
-
-        ! Main objects of all-slice phase
-        type(taskScheduler_t) :: taskScheduler
-        type(extendedMemory_t) :: extendedMemory
-
     end type slice_t
 
     ! Public methods associated to 'slice' datatype
@@ -480,16 +473,23 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     write(std_out,*) mapper(1,:)
     flush(std_out)
 
-    ! offset 10%
-    !p = 10
-
+    ! Include m+p where p offset 10%
+    slice%neigenpairs_per_slice = ceiling(slice%neigenpairs_per_slice*1.1d0)
     neigenpairs_ext = sum(slice%neigenpairs_per_slice)
 
+    write(std_out,*) 'allocating extended memory of size', neigenpairs_ext
+    flush(std_out)
+
+    ! Allocate extended buffer in Linalg representation. Notice spacecom communicator (global)
+    call allocate_extended_memory(extendedMemory, slice%paral_kgb, slice%neigenpairs, neigenpairs_ext, &
+        slice%space, slice%spacedim, slice%spacecom, slice%me_g0, slice%gpu_option)
+
+    ! Initilize extended buffer with vectors from X or random vectors. This part also uses global comm.
+    call init_extended_memory(extendedMemory, X0, mapper)
+    ! also use the neigenpairs_per_slice...
+    ! IML is here todo
+
     !IML dev
-    ! must allocate extended memory
-    ! this step is very simple we should use slice%neigenpairs_per_slice sum them across slices,
-    ! also include offset. This give the size of the buffer to allocate in Linalg representation.
-    ! only spacecom exists at this point
 
     ! after this space is allocated we should initialize it with vectors from X or random vectors.
     ! This part also uses slice%spacecom global communicator.

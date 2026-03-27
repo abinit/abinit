@@ -192,6 +192,7 @@ module m_task_scheduler
 
         integer :: neigenpairs_ext                          ! total numner of extended columns
         integer :: paral_kgb 
+        logical :: is_init
 
         ! Memory buffers
         type(xg_t) :: X_ext                                 ! eigenvector memory used by all slices for I/O
@@ -314,10 +315,11 @@ subroutine allocate_extended_memory(work, paral_kgb, ncol, ncol_ext, space, spac
     work%neigenpairs_ext = ncol_ext
     work%use_linalg = .true.
     work%use_colsrows = .false.
+    work%is_init = .false.
 
     ABI_MALLOC_IFNOT(work%lookup_cols_X, (ncol))
     ABI_MALLOC_IFNOT(work%lookup_cols_Xext, (ncol_ext))
-    !ABI_MALLOC_IFNOT(work%ncolsColsRows, (slice%nproc))
+    !ABI_MALLOC_IFNOT(work%ncolsColsRows, (nproc))
     
     ! Allocate extended space in linalg representation
     call xg_init(work%X_ext, space, spacedim, work%neigenpairs_ext, spacecom, &
@@ -333,15 +335,14 @@ end subroutine allocate_extended_memory
 !! init_extended_memory
 !! 
 !! FUNCTION
-!! Initialize extended memory for active task only
+!! Initialize extended memory (for all tasks)
 !! 
 !! SOURCE
 
-subroutine init_extended_memory(work, task, X0, mapper)
+subroutine init_extended_memory(work, X0, mapper)
 
     implicit none
     type(extendedMemory_t), intent(inout) :: work
-    type(activeSlice_t), intent(inout) :: task
     type(xgBlock_t), intent(in) :: X0
     integer, pointer, intent(in) :: mapper(:,:)
 
@@ -352,6 +353,10 @@ subroutine init_extended_memory(work, task, X0, mapper)
     ! Sanity check
     if ((.not. work%use_linalg) .or. work%use_colsrows) then
         ABI_ERROR("not in linalg representation")
+    end if
+
+    if (work%is_init) then
+        ABI_ERROR("buffer is already initialized")
     end if
 
     if (work%paral_kgb==1) then
@@ -383,6 +388,8 @@ subroutine init_extended_memory(work, task, X0, mapper)
         end do
     end if
 
+    ! todo initialize the rest with random vectors
+
 end subroutine init_extended_memory
 !!***
 
@@ -402,8 +409,8 @@ subroutine free_extended_memory(work)
     call xg_free(work%X_ext)
     ABI_SFREE(work%lookup_cols_X)
     ABI_SFREE(work%lookup_cols_Xext)
-    ABI_SFREE(work%ncolsColsRows)   
-    if (work%paral_kgb==1) then
+    if (work%is_init) then
+        ABI_SFREE(work%ncolsColsRows)   
         call xgTransposer_free(work%xgTransposerXext)
     end if
 
