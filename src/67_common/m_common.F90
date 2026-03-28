@@ -2301,7 +2301,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    integer,intent(out)    :: nblocks
 
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem,updrho_wmem,prep_nonlop_wmem
-   integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem,fourwf_smem,fourwf_wmem,fourwf_mem
+   integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem,fourwf_smem,fourwf_wmem,fourwf_mem,hegvd_mem
    integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs,nfourwf_slices
    integer, target :: t_fft(3)
    logical  :: print_and_exit,l_warn_on_fail,fixed_blocksize,fixed_fourwf_slices
@@ -2360,8 +2360,32 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
 
    nonlop_smem=0; invovl_smem=0; getghc_wmem=0; invovl_wmem=0; nonlop_wmem=0; gs_ham_smem=0
    updrho_wmem=0; prep_nonlop_wmem=0; sum_mem=0; sum_bandpp_mem=0; sum_other_mem=0;
-   localMem=0; fourwf_smem=0; fourwf_wmem=0; fourwf_mem=0
+   localMem=0; fourwf_smem=0; fourwf_wmem=0; fourwf_mem=0; hegvd_mem=0
    chebfiMem(:)=0; lobpcgMem(:)=0
+
+   !HEGVD work memory estimate.
+   ! Since *_bufferSize routines from (cu/hip)SOLVER require buffer
+   ! to be provided, I measeured the work size given by those routines
+   ! on many big cases and guess an approximate value.
+   ! hipSolver is eager than cuSolver, hence the extra multiplier
+
+   if(wfoptalg==111 .or. wfoptalg==11) then
+     hegvd_mem = int(dp, c_size_t) * nband * nband * 3
+   else if(wfoptalg==114 .or. wfoptalg==14) then
+     hegvd_mem = int(dp, c_size_t) * (ndat*3) * (ndat*3) * 3
+   end if
+#ifdef HAVE_GPU_CUDA
+   if(space == SPACE_C) hegvd_mem = hegvd_mem * 2
+#endif
+#ifdef HAVE_GPU_HIP
+   if(space == SPACE_C) hegvd_mem = hegvd_mem * 3
+   ! ROCm 7 memory usage was measured to be more or less
+   ! on par with CUDA but ROCm 6 was indeed ~9 times higher.
+   ! For now, we can't drop ROCm 6 so we keep this workaround.
+   if(gpu_get_lib_version_major() < 7) then
+     hegvd_mem = hegvd_mem * 9
+   end if
+#endif
 
    if(wfoptalg>=0) then
 #ifdef HAVE_GPU
@@ -2527,7 +2551,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
      sum_bandpp_mem   = getghc_wmem
 
      if(wfoptalg>=0) then
-       sum_mem          = sum_mem+getghc_wmem+updrho_wmem+prep_nonlop_wmem+fourwf_smem
+       sum_mem          = sum_mem+getghc_wmem+updrho_wmem+prep_nonlop_wmem+fourwf_smem+hegvd_mem
      else
        sum_mem          = sum_mem+nonlop_wmem+prep_nonlop_wmem
      end if
@@ -2597,8 +2621,10 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    write(std_out,*) "---------------------------------------------------------"
    write(std_out,*) "GEMM nonlop projectors, gouverned by blocking/slicing"
    write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop_ompgpu (projectors)       : ",  real(nonlop_smem,dp)/(1024*1024), "MiB"
-   write(std_out,*) "ompgpu_fourwf, gouverned by slicing and bandpp (incl. in getghc)"
-   write(std_out,'(A,F10.3,1x,A)') "   ompgpu_fourwf (getghc work array)     : ",  real(fourwf_wmem,dp)/(1024*1024), "MiB"
+   if(wfoptalg>=0) then
+     write(std_out,*) "ompgpu_fourwf, gouverned by slicing and bandpp (incl. in getghc)"
+     write(std_out,'(A,F10.3,1x,A)') "   ompgpu_fourwf (getghc work array)     : ",  real(fourwf_wmem,dp)/(1024*1024), "MiB"
+   end if
 
 
    write(std_out,*) "Static buffers, computed once and permanently on card"
@@ -2620,12 +2646,13 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
 
    write(std_out,'(A,F10.3,1x,A)') "   hamiltonian arrays                    : ",      real(gs_ham_smem)/(1024*1024), "MiB"
 
-   write(std_out,*) "Work buffers (sized after bandpp or nblock_lobpcg)"
+   write(std_out,*) "Work buffers (mostly sized after bandpp or nblock_lobpcg)"
 
    ! getghc (any diago algorithm)
    if(wfoptalg>=0) then
      write(std_out,'(A,F10.3,1x,A)') "   getghc (inc. fourwf+gemm_nonlop)      : ",  real(getghc_wmem,dp)/(1024*1024), "MiB"
      write(std_out,'(A,F10.3,1x,A)') "   mkrho~vtowfk_extra             )      : ",  real(updrho_wmem,dp)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.3,1x,A)') "   hegvd                          )      : ",  real(hegvd_mem,dp)/(1024*1024), "MiB"
    else
      write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop                           : ",  real(nonlop_wmem,dp)/(1024*1024), "MiB"
    end if
