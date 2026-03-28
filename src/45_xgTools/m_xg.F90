@@ -1697,6 +1697,7 @@ contains
       integer :: info
       external :: zheev
 
+      ! IML debug
       !write(901,*) 'space B', xgBlock%space 
 
       !# Validation
@@ -1711,6 +1712,7 @@ contains
       ! Copy input since LAPACK overwrites matrix
       vecC(1:n,1:n) = xgBlock%vecC(1:n,1:n)
 
+      ! IML debug
       ! Objects are independent(check)
       !write(901,*) 'temp', vecC(1,11)
       !write(901,*) 'ref', xgBlock%vecC(1,11)
@@ -1722,6 +1724,7 @@ contains
       call zheev('N','U', n, vecC, n, w, work, size(work), rwork, info)
       cond2 = maxval(w) / minval(w)
 
+      ! IML debug
       !write(901,*) 'eigenval(=singval)='
       !write(901,*) w
       !flush(901)
@@ -6787,10 +6790,11 @@ contains
         meanz = sum(vecC) / dcmplx(n,0.0d0)
         norm2_ = sum(abs(vecC)**2) / n
         variance = norm2_ - abs(meanz)**2
-        write(901,*) "mean = ", meanz
-        write(901,*) "E|z|^2 = ", norm2_
-        write(901,*) "variance = ", variance
-        flush(901)
+        ! IML debug
+        !write(901,*) "mean = ", meanz
+        !write(901,*) "E|z|^2 = ", norm2_
+        !write(901,*) "variance = ", variance
+        !flush(901)
     case (SPACE_CR)
         vecR => xgBlock%vecR(1:fact*xgBlock%rows,jcol) ! contiguous in memory
         !$omp parallel default(none) &

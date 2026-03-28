@@ -37,7 +37,6 @@ module m_trace_estimation
     use m_cgtools
     use m_xg
     use m_xgTransposer
-    use m_xg_ortho_RR
     
     use m_chebfi2
     use m_polynomial_filter
@@ -67,7 +66,6 @@ module m_trace_estimation
     integer, parameter :: tim_RR_q        = 1759
     integer, parameter :: tim_barrier     = 1764
     integer, parameter :: tim_copy        = 1765
-    integer, parameter :: tim_Bortho_X    = 1641
     integer, parameter :: tim_getAX_BX    = 1754
     integer, parameter :: tim_invovl      = 1755
     integer, parameter :: tim_lanczos     = 2167

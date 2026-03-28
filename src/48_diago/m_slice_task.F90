@@ -99,7 +99,6 @@ module m_slice_task
     use m_cgtools
     use m_xg
     use m_xgTransposer
-    use m_xg_ortho_RR
 
     use m_xmpi
     use m_xomp
@@ -125,7 +124,6 @@ module m_slice_task
     integer, parameter :: tim_RR_q        = 1759
     integer, parameter :: tim_barrier     = 1764
     integer, parameter :: tim_copy        = 1765
-    integer, parameter :: tim_Bortho_X    = 1641
     integer, parameter :: tim_getAX_BX    = 1754
     integer, parameter :: tim_invovl      = 1755
 
@@ -133,19 +131,20 @@ module m_slice_task
     !-------------------------------------------------
     type, public :: matrixInfo_t
 
-        integer :: comm_rows                    ! xmpi_comm_self ...
-        integer :: comm_cols                    ! same as spacecom
-        integer :: spacecom                     ! same as comm_cols
-        integer :: neigenpairs                  ! total number of bands (=number of eigenpairs)
-        integer :: total_spacedim               ! total number of plane-waves
-        integer :: spacedim                     ! nb of plane-waves per process in linalg representation
-        integer :: space                        ! real or complex eigenvectors
+        integer :: comm_rows            ! xmpi_comm_self ...
+        integer :: comm_cols            ! same as spacecom
+        integer :: spacecom             ! same as comm_cols
+        integer :: neigenpairs          ! total number of bands (=number of eigenpairs)
+        integer :: total_spacedim       ! total number of plane-waves
+        integer :: spacedim             ! nb of plane-waves per process in linalg representation
+        integer :: space                ! real or complex eigenvectors
         integer :: gpu_kokkos_nthrd                 
         integer :: gpu_thread_limit 
-        integer :: gpu_option                   ! enable GPU
-        integer :: paral_kgb                    ! enable parallel (k-points, G basis, bands)
+        integer :: gpu_option           ! enable GPU
+        integer :: paral_kgb            ! enable parallel (k-points, G basis, bands)
         integer :: me_g0
         integer :: me_g0_fft
+        integer :: nspinor
 
     end type matrixInfo_t
 
@@ -154,20 +153,21 @@ module m_slice_task
     type, public :: activeTask_t
 
         ! MPI-related information for active task
-        integer :: me_g0                                    ! process contains G(0,0,0) 
-        integer :: me_g0_fft                                ! process contains G(0,0,0) for fft
-        integer :: me_nproc_slice                           ! number of processes reserved to slice in use
-        integer :: me_comm_slice                            ! (sub-)communicator reserved to slice in use
-        integer :: me_comm_rows                             ! (sub-)communicator for rows in Transposer
-        integer :: me_comm_cols                             ! (sub-)communicator for cols in Transposer
-        integer :: me_id_slice                              ! identifier from 1 to nslice of slice task in use
-        integer :: me_neigenpairs_slice                     ! total number of eigenpairs of slice in use
-        integer :: me_bandpp_slice                          ! number of distributed bands per process for slice in use
-        integer :: me_lowb
-        integer :: me_uppb
-        integer :: me_ndeg_slice                            ! polynomial filter degree for slice in use
 
-        ! flags for slice location
+        integer :: me_g0                ! process contains G(0,0,0) 
+        integer :: me_g0_fft            ! process contains G(0,0,0) for fft
+        integer :: me_nproc             ! number of processes reserved to slice in use
+        integer :: me_comm              ! (sub-)communicator reserved to slice in use
+        integer :: me_comm_rows         ! (sub-)communicator for rows in Transposer
+        integer :: me_comm_cols         ! (sub-)communicator for cols in Transposer
+        integer :: me_id_slice          ! identifier from 1 to nslice of slice task in use
+        integer :: me_neigenpairs       ! total number of eigenpairs of slice in use
+        integer :: me_bandpp            ! number of distributed bands per process for slice in use
+        integer :: me_lowb              ! lower slice interval bound
+        integer :: me_uppb              ! upper slice interval bound
+        integer :: me_ndeg              ! polynomial filter degree for slice in use
+
+        ! flags for slice location in spectrum
         logical :: is_lowpass
         logical :: is_last
 
@@ -176,10 +176,8 @@ module m_slice_task
         integer, allocatable :: me_mask_Xext(:)             ! converged columns
 
         ! MPI column and row distribution for active task
-        integer, allocatable :: me_ncolsColsRows_slice(:)   ! ncol of colsrows representation for my slice
-                                                            !   (column capacity per process in colsrows repr)
-        integer, allocatable :: me_nrowsLinalg_slice(:)     ! nrow of linalg representation for my slice
-                                                            !   (row capacity per process in linalg repr)
+        integer, allocatable :: me_ncolsColsRows(:)         ! ncol of colsrows representation of asyncMem
+        integer, allocatable :: me_nrowsLinalg(:)           ! nrow of linalg representation of asyncMem
         
         ! Memory address used for reads/writes
         type(xgBlock_t) :: me_Xext                          ! eigenvector memory in use by active slice
@@ -196,15 +194,19 @@ module m_slice_task
     !-------------------------------------------------
     type, public :: taskScheduler_t
 
-        integer :: next_task_id
         integer :: ntasks
-        integer :: nresources
+        integer :: nprocs
+        integer :: tot_load         ! size of async memory buffer (columns)
 
-        integer, allocatable :: ncols_per_task(:)       ! number of bands per slice
-        integer, allocatable :: ncols_per_proc(:)       ! number of bands per MPI rank
-        integer, allocatable :: nresources_per_task(:)  ! number of available processes per slice
-        integer, allocatable :: lookup_proc(:)          ! which slice each MPI rank serves
-
+        ! Fixed quantities (global)
+        integer, allocatable :: load_per_task(:)        ! number of eigenpairs per slice
+        integer, allocatable :: nproc_per_task(:)       ! number of used processes per slice
+        
+        ! next task info (updated on every task)
+        integer :: next_task_id                         ! number from 1 to ntasks (1-base)
+        integer :: next_load                            ! number of eigenpairs
+        integer, allocatable :: next_lookup_proc(:)     ! which slice each MPI rank serves (0-base)
+    
     end type taskScheduler_t
 
     ! Public 'asyncMemory' datatype for slice input/output without race condition
@@ -214,7 +216,6 @@ module m_slice_task
 
         integer :: neigenpairs_ext                          ! total number of extended columns
         integer :: paral_kgb 
-        logical :: has_transposer
 
         ! Memory buffers
         type(xg_t) :: X_ext                                 ! eigenvector memory used by all slices for I/O
@@ -225,32 +226,34 @@ module m_slice_task
         ! Pointers
         type(xgBlock_t) :: XextLinalg
 
-        ! Arrays related to MPI (all-slice phase)
-        integer, allocatable :: ncolsColsRows(:)            ! ncol of colsrows representation for global X
-
         ! Arrays related to data distribution (all-slice phase)
         integer, allocatable :: lookup_cols_Xext(:)         ! which slice each column serves in extented memory
 
         ! Flags for MPI distribution state
         logical :: use_linalg = .false.                     ! use linalg representation
         logical :: use_colsrows = .false.                   ! use colsrows representation
+        logical :: has_transposer = .false.
 
     end type asyncMemory_t
  
     ! Public methods
     !-------------------------------------------------
     public :: init_matrixInfo                   ! wrapper for various xgBlock parameters
-    public :: slice_task_allocateAsyncMemory    ! allocates async memory buffer
+    public :: slice_task_allocAsyncMemory       ! allocates async memory buffer
     public :: slice_task_initAsyncMemory        ! fills async memory colwise
+    public :: slice_task_freeAsyncMemory        ! deallocates async buffer
     public :: slice_task_initSchedule           ! compute 'process-to-slices' distribution
-    public :: free_extended_memory
-    public :: init_active_memory
-    public :: mark_active_task
-    public :: allocate_active_task
-    public :: free_active_task
-    public :: execute_active_task
-    public :: mask_active_task
-    public :: compress_extended_memory
+    public :: slice_task_freeSchedule           ! deallocate all MPI distribution info
+    public :: slice_task_printSchedule          ! print a table of schedule
+    public :: slice_task_initNextTask           ! compute MPI distribution for next task
+    public :: slice_task_enableAsync            ! apply MPI distribution for next task
+    !public :: init_active_memory
+    !public :: mark_active_task
+    !public :: allocate_active_task
+    !public :: free_active_task
+    !public :: execute_active_task
+    !public :: mask_active_task
+    !public :: compress_extended_memory
 
     CONTAINS  
 !=====================================================================
@@ -262,116 +265,40 @@ module m_slice_task
 !! 
 !! SOURCE
 
-  subroutine init_matrixInfo(matrixInfo, comm_rows, comm_cols, spacecom, neigenpairs, total_spacedim, &
-          spacedim, space, gpu_kokkos_nthrd, gpu_thread_limit, gpu_option, paral_kgb, me_g0, me_g0_fft)
+  subroutine init_matrixInfo(matrixInfo, comm_rows, comm_cols, spacecom, neigenpairs,&
+          total_spacedim, spacedim, space, gpu_kokkos_nthrd, gpu_thread_limit, gpu_option,&
+          paral_kgb, me_g0, me_g0_fft, nspinor)
 
       implicit none
 
       type(matrixInfo_t), intent(inout) :: matrixInfo
-      integer, intent(in) :: comm_rows, comm_cols, spacecom, neigenpairs, total_spacedim, spacedim, space
-      integer, intent(in) :: gpu_kokkos_nthrd, gpu_thread_limit, gpu_option, paral_kgb, me_g0, me_g0_fft
+      integer, intent(in) :: comm_rows, comm_cols, spacecom, neigenpairs, total_spacedim 
+      integer, intent(in) :: spacedim, space, gpu_kokkos_nthrd, gpu_thread_limit, gpu_option
+      integer, intent(in) :: paral_kgb, me_g0, me_g0_fft, nspinor
 
-      matrixInfo%comm_rows      = comm_rows
-      matrixInfo%comm_cols      = comm_cols
-      matrixInfo%spacecom       = spacecom
-      matrixInfo%neigenpairs    = neigenpairs
-      matrixInfo%total_spacedim = total_spacedim
-      matrixInfo%spacedim       = spacedim
-      matrixInfo%space          = space
+      matrixInfo%comm_rows        = comm_rows
+      matrixInfo%comm_cols        = comm_cols
+      matrixInfo%spacecom         = spacecom
+      matrixInfo%neigenpairs      = neigenpairs
+      matrixInfo%total_spacedim   = total_spacedim
+      matrixInfo%spacedim         = spacedim
+      matrixInfo%space            = space
       matrixInfo%gpu_kokkos_nthrd = gpu_kokkos_nthrd
       matrixInfo%gpu_thread_limit = gpu_thread_limit
-      matrixInfo%gpu_option     = gpu_option
-      matrixInfo%paral_kgb      = paral_kgb
-      matrixInfo%me_g0          = me_g0
-      matrixInfo%me_g0_fft      = me_g0_fft
+      matrixInfo%gpu_option       = gpu_option
+      matrixInfo%paral_kgb        = paral_kgb
+      matrixInfo%me_g0            = me_g0
+      matrixInfo%me_g0_fft        = me_g0_fft
+      matrixInfo%nspinor          = nspinor
 
   end subroutine init_matrixInfo
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice_task/slice_task_initSchedule
+!!****f* m_slice_task/slice_task_allocAsyncMemory
 !! NAME
-!! slice_task_initSchedule
-!!
-!! FUNCTION
-!! Initialization of scheduler object from 'npro'c available resources
-!! using execution options given by 'paral_kgb' and 'paral_task'.
-!! Essentially allows to compute and apply (via wrapper to xgTransposer) 
-!! an intermediate level of MPI distribution along tasks, on top of paral_kgb level. 
-!! - If enable_paral then we should first divide processes to slices 
-!! - If disable_paral then we should use all available processes for every slice (no division)
-!! 
-!! SOURCE
-
-  subroutine slice_task_initSchedule(scheduler, nproc, paral_kgb, paral_task)
-      implicit none
-      type(taskScheduler_t), intent(inout) :: scheduler
-      integer, intent(in) :: nproc, paral_kgb, paral_task
-      scheduler%ntasks = nslice
-      scheduler%nresources = nproc
-      scheduler%next_task_id = 0
-      call alloc_schedule(scheduler)
-      if (paral_kgb==0 .or. paral_task==0) then
-          ! do not divide available resources directly say that all processes are
-          ! available per slice
-      else 
-          ! compute
-      end if
-  end subroutine slice_task_initSchedule
-!!***
-
-!! Constructor for scheduler object
-subroutine alloc_schedule(scheduler)
-    implicit none
-    type(taskScheduler_t), intent(inout) :: scheduler
-    call free_schedule(scheduler)
-    ABI_MALLOC_IFNOT(scheduler%neigenpairs_per_slice, (scheduler%ntasks))
-    ABI_MALLOC_IFNOT(scheduler%nproc_per_slice, (scheduler%ntasks))
-    ABI_MALLOC_IFNOT(scheduler%lookup_proc, (scheduler%nresources))
-end subroutine alloc_schedule
-
-!! Destructor for scheduler object
-subroutine free_schedule(scheduler)
-    implicit none
-    type(taskScheduler_t), intent(inout) :: scheduler
-    ABI_SFREE(scheduler%neigenpairs_per_slice)
-    ABI_SFREE(scheduler%nproc_per_slice)
-    ABI_SFREE(scheduler%lookup_proc)
-end subroutine free_schedule
-
-!! Logic for parallel execution of tasks (a slice has SOME MPI processes)
-subroutine schedule_parallel_tasks(scheduler)
-    implicit none
-    type(taskScheduler_t), intent(inout) :: scheduler
-    integer :: ntasks, nproc
-    integer, allocatable :: weights(:)
-    nproc = scheduler%nresources
-    ntasks = scheduler%ntasks 
-    !ABI_MALLOC_IFNOT(weights, (slice%ntasks))
-    weights = 1 
-    ! weights = slice%poly_degrees
-    !call fair_allocation(slice%ntasks, slice%neigenpairs_per_slice, weights, nproc, slice%nproc_per_slice)
-    !call assign_tasks_to_processes(slice%nproc_per_slice, slice%lookup_proc)
-    ABI_SFREE(weights)
-end subroutine schedule_parallel_tasks
-
-!! Logic for sequential execution of tasks (a slice has ALL MPI processes)
-subroutine schedule_next_task(scheduler, load_size)
-    implicit none
-    type(taskScheduler_t), intent(inout) :: scheduler
-    integer, intent(in) :: load_size
-    scheduler%next_task_id = scheduler%next_task_id + 1
-    scheduler%neigenpairs_per_slice = load_size
-    scheduler%nproc_per_slice = scheduler%nresources !! use all MPI, can be 1
-    scheduler%lookup_proc = scheduler%next_task_id
-end subroutine schedule_next_task
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice_task/slice_task_allocateAsyncMemory
-!! NAME
-!! slice_task_allocateAsyncMemory
+!! slice_task_allocAsyncMemory
 !! 
 !! FUNCTION
 !! Allocate async memory buffers and distribute them according
@@ -380,11 +307,11 @@ end subroutine schedule_next_task
 !! 
 !! SOURCE
 
-subroutine slice_task_allocateAsyncMemory(work, minfo, ncol_ext) 
+subroutine slice_task_allocAsyncMemory(work, minfo, ncol_ext) 
 
     implicit none
     type(asyncMemory_t), intent(inout) :: work
-    type(matrixInfo_t), intent(inout) :: minfo
+    type(matrixInfo_t), intent(in) :: minfo
     integer, intent(in) :: ncol_ext
     integer :: gpu_option
 
@@ -395,6 +322,9 @@ subroutine slice_task_allocateAsyncMemory(work, minfo, ncol_ext)
     work%has_transposer = .false.
     gpu_option = minfo%gpu_option
 
+    ! todo
+    ! call slice_task_freeAsyncMemory(asyncMemory)
+
     ABI_MALLOC_IFNOT(work%lookup_cols_Xext, (ncol_ext))
     
     ! Allocate extended space in linalg representation
@@ -404,7 +334,31 @@ subroutine slice_task_allocateAsyncMemory(work, minfo, ncol_ext)
     call xg_init(work%resid_ext, SPACE_R, work%neigenpairs_ext, 1, gpu_option=gpu_option)
     call xg_init(work%eigen_ext, SPACE_R, work%neigenpairs_ext, 1, gpu_option=gpu_option)
 
-end subroutine slice_task_allocateAsyncMemory
+end subroutine slice_task_allocAsyncMemory
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice_task/slice_task_freeAsyncMemory
+!! NAME
+!! slice_task_freeAsyncMemory
+!! 
+!! SOURCE
+
+subroutine slice_task_freeAsyncMemory(work) 
+
+    implicit none
+    type(asyncMemory_t), intent(inout) :: work
+
+    call xg_free(work%X_ext)
+    call xg_free(work%eigen_ext)
+    call xg_free(work%resid_ext)
+    ABI_SFREE(work%lookup_cols_Xext)
+    if (work%has_transposer) then
+        call xgTransposer_free(work%xgTransposerXext)
+    end if
+
+end subroutine slice_task_freeAsyncMemory
 !!***
 
 !----------------------------------------------------------------------
@@ -414,10 +368,10 @@ end subroutine slice_task_allocateAsyncMemory
 !! slice_task_initAsyncMemory
 !! 
 !! FUNCTION
-!! Initialize async memory (for all tasks)
+!! Initialize async memory content (for all tasks)
 !! IML dev note: 
 !! current version initializes using sketching of wanted size. Might also need
-!! to test if choosing directly random vectors in better.
+!! to test if choosing directly random vectors is better.
 !! 
 !! SOURCE
 
@@ -427,7 +381,7 @@ subroutine slice_task_initAsyncMemory(work, X0, minfo, mapper, ncols_per_task)
     
     !Arguments ------------------------------------
     type(asyncMemory_t), intent(inout) :: work
-    type(matrixInfo_t), intent(inout) :: minfo
+    type(matrixInfo_t), intent(in) :: minfo
     type(xgBlock_t), intent(in) :: X0
     logical, pointer, intent(in) :: mapper(:,:)
     integer, intent(in) :: ncols_per_task(:)
@@ -522,170 +476,291 @@ end subroutine slice_task_initAsyncMemory
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice_task/free_extended_memory
+!!****f* m_slice_task/slice_task_initSchedule
 !! NAME
-!! free_extended_memory
+!! slice_task_initSchedule
+!!
+!! FUNCTION
+!! Initialization of scheduler object from 'nproc' available resources
+!! using execution options given by 'paral_kgb' and 'paral_task'.
+!! Essentially allows to compute and apply (via wrapper to xgTransposer) 
+!! an intermediate level of MPI distribution along tasks, on top of paral_kgb level. 
+!! - If enable_paral then we should first divide processes to slices 
+!! - If disable_paral then we should use all available processes for every slice (no division)
+!! 
+!! OUTPUT
+!! scheduler%load_per_task
+!! scheduler%nproc_per_task
+!! scheduler%next_loookup_proc
 !! 
 !! SOURCE
 
-subroutine free_extended_memory(work) 
+  subroutine slice_task_initSchedule(scheduler, ntasks, nprocs, load, paral_kgb, paral_task)
+      
+      implicit none
+      
+      type(taskScheduler_t), intent(inout) :: scheduler
+      integer, intent(in) :: ntasks, nprocs, paral_kgb, paral_task
+      integer, intent(in) :: load(:)
+      integer, allocatable :: weights(:)
 
-    implicit none
-    type(asyncMemory_t), intent(inout) :: work
+      scheduler%tot_load = sum(load)
+      scheduler%ntasks = ntasks
+      scheduler%nprocs = nprocs
+      scheduler%next_task_id = 1
+      scheduler%next_load = load(1)
 
-    call xg_free(work%X_ext)
-    call xg_free(work%eigen_ext)
-    call xg_free(work%resid_ext)
-    ABI_SFREE(work%lookup_cols_Xext)
-    if (work%has_transposer) then
-        call xgTransposer_free(work%xgTransposerXext)
-    end if
+      call slice_task_allocSchedule(scheduler)
+      scheduler%load_per_task(:) = load(:)
+      
+      if (paral_kgb==0 .or. paral_task==0) then
+          ! do not divide available resources to slices at all
+          scheduler%nproc_per_task = nprocs !! use all MPI, can be 1
+          scheduler%next_lookup_proc = 0
+      else
+      
+          ! computation to divide resources
+          ABI_MALLOC_IFNOT(weights, (ntasks))
+          weights = 1 
+          ! weights = slice%poly_degrees ! IML works less well
+          call fair_allocation(ntasks, load, weights, nprocs, scheduler%nproc_per_task)
+          call assign_tasks_to_processes(scheduler%nproc_per_task, scheduler%next_lookup_proc)
+          ABI_SFREE(weights)
+     
+      end if
 
-end subroutine free_extended_memory
+  end subroutine slice_task_initSchedule
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice_task/init_active_memory
+!!****f* m_slice_task/slice_task_allocSchedule
 !! NAME
-!! init_active_memory
-!!
-!! FUNCTION
-!! apply offset, in linalg MPI distribution
+!! slice_task_allocSchedule
 !! 
-!! SOURCE
+!! FUNCTION
+!! Constructor for scheduler object
 
-subroutine init_active_memory(work, task, X0, p)
-
-    implicit none
-
-    type(asyncMemory_t), intent(inout) :: work
-    type(activeTask_t), intent(inout) :: task
-    type(xgBlock_t), intent(in) :: X0
-    integer, intent(in) :: p
-    integer :: k_sketch, m, m_wanted
-    type(xg_t) :: X_sketch
-    type(xgBlock_t) :: Xext_last
-    type(xg_t) :: X_compl
-    integer :: space_, nrows, ncols_large, spacecom, gpu_option_
-
-    space_ = space(task%me_Xext)
-    nrows = rows(task%me_Xext)
-    ncols_large = cols(X0)
-    spacecom = comm(task%me_Xext)
-    gpu_option_ = gpu_option(task%me_Xext)
-
-    m = size(task%me_cols_X)
-    m_wanted = task%me_neigenpairs_slice
-    k_sketch = m_wanted - m + p
-
-    call xgBlock_setBlock(task%me_Xext, Xext_last, nrows, k_sketch)
+subroutine slice_task_allocSchedule(scheduler)
     
-    !call xg_init(X_compl, ..)
-    ! todo gather complement of selected indices...
+    implicit none
+    
+    type(taskScheduler_t), intent(inout) :: scheduler
+    
+    call slice_task_freeSchedule(scheduler)
+    ABI_MALLOC_IFNOT(scheduler%load_per_task, (scheduler%ntasks))
+    ABI_MALLOC_IFNOT(scheduler%nproc_per_task, (scheduler%ntasks))
+    ABI_MALLOC_IFNOT(scheduler%next_lookup_proc, (scheduler%nprocs))
 
-    ! TODO 
-    ! Est-ce que c'est mieux de prendre un melange aléatoire des autres directions ou 
-    ! de prendre simplement des vecteurs aléatoires?
-    ! V1 essayer avec des vecteurs aléatoires, c'est plus facile d'implémenter
-
-    ! for remaining dimensions not in p
-    ! Y = X * Omega where Omega sketch matrix to capture all directions at once (linalg distribution)
-    call xg_init(X_sketch, space_, nrows, ncols_large, spacecom, gpu_option=gpu_option_)
-    call xgBlock_randomSketching(X0, X_sketch%self, k_sketch)
-    call xgBlock_copy(X_sketch%self, Xext_last)
-    call xg_free(X_sketch)
-
-end subroutine init_active_memory
+end subroutine slice_task_allocSchedule
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice_task/mark_active_task
+!!****f* m_slice_task/slice_task_freeSchedule
 !! NAME
-!! mark_active_task
-!!
+!! slice_task_freeSchedule
+!! 
 !! FUNCTION
-!! Mark allocated portion as actively used by setting all me_* variables.
-!! My process only marks resources its assigned slice has reserved.
+!! Destructor for scheduler object
+
+subroutine slice_task_freeSchedule(scheduler)
+    
+    implicit none
+    
+    type(taskScheduler_t), intent(inout) :: scheduler
+    
+    ABI_SFREE(scheduler%load_per_task)
+    ABI_SFREE(scheduler%nproc_per_task)
+    ABI_SFREE(scheduler%next_lookup_proc)
+
+end subroutine slice_task_freeSchedule
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice_task/slice_task_printSchedule
+!! NAME
+!! slice_task_printSchedule
+!! 
+
+subroutine slice_task_printSchedule(scheduler, wout)
+    
+    implicit none
+    
+    type(taskScheduler_t), intent(inout) :: scheduler
+    integer, intent(in) :: wout
+    
+    write(wout,*) '###### Schedule info ######'
+    write(wout,*) 'Process per task =', scheduler%nproc_per_task
+    write(wout,*) 'Task by process  =', scheduler%next_lookup_proc
+    flush(wout)
+
+end subroutine slice_task_printSchedule
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice_task/slice_task_initNextTask
+!! NAME
+!! slice_task_initNextTask
+!! 
+!! FUNCTION
+!! Apply logic for task execution and prepare MPI distribution
+!! either a slice has some MPI processes or a slice has ALL MPI processes
 !!
+!! OUTPUT
+!! Active 'task' object with a valid MPI distribution
+!! 
 !! SOURCE
 
-subroutine mark_active_task(task, scheduler, spacecom, paral_slice)
+  subroutine slice_task_initNextTask(scheduler, task, minfo)
+      
+      implicit none
+      
+      type(taskScheduler_t), intent(inout) :: scheduler
+      type(activeTask_t), intent(inout) :: task
+      type(matrixInfo_t), intent(in) :: minfo
 
-    implicit none
+      integer :: global_comm, comm_rows, comm_cols, ierr
+      integer :: my_rank, my_rank_sub, my_task, sanity_check
+    
+      ! *********************************************************************
+       
+      global_comm = minfo%spacecom
+      my_rank = xmpi_comm_rank(global_comm) 
+      my_task = scheduler%next_lookup_proc(my_rank + 1) + 1
+      scheduler%next_task_id = my_task
+      
+      task%me_id_slice = my_task
+      task%me_neigenpairs = scheduler%load_per_task(my_task)
+      task%me_nproc = scheduler%nproc_per_task(my_task)
+      
+      ! Split global comm into disjoint sub-comms, only procs with the same color (my_task) communicate
+      comm_rows = minfo%comm_rows
+      comm_cols = minfo%comm_cols
+      call xmpi_comm_split(global_comm, my_task, my_rank, task%me_comm, ierr)        
+      if ( ierr /= xmpi_success ) then
+          ABI_ERROR("Error while creating slice spacecom subcommunicator")
+      end if
+      call xmpi_comm_split(comm_rows, my_task, my_rank, task%me_comm_rows, ierr)
+      if ( ierr /= xmpi_success ) then
+          ABI_ERROR("Error while creating slice row subcommunicator")
+      end if      
+      call xmpi_comm_split(comm_cols, my_task, my_rank, task%me_comm_cols, ierr)
+      if ( ierr /= xmpi_success ) then
+          ABI_ERROR("Error while creating slice col subcommunicator")
+      end if
+      
+      ! process waits for others to create their subcommunicators before using its own
+      call xmpi_barrier(global_comm) 
 
-    ! Arguments
-    type(activeTask_t), intent(inout) :: task
-    type(taskScheduler_t), intent(inout) :: scheduler
-    integer, intent(in) :: spacecom
-    integer, intent(in) :: paral_slice
+      ! If using more than MPI processes, compute column and row distributions across processes
+      ABI_MALLOC_IFNOT(task%me_ncolsColsRows, (scheduler%nprocs))
+      ABI_MALLOC_IFNOT(task%me_nrowsLinalg, (scheduler%nprocs))
+      if (task%me_nproc>1) then
+          call distribute_vectors(task%me_neigenpairs, task%me_nproc, task%me_ncolsColsRows)
+          call distribute_vectors(minfo%total_spacedim, task%me_nproc, task%me_nrowsLinalg)
+          my_rank_sub = xmpi_comm_rank(task%me_comm)
+          task%me_bandpp = task%me_ncolsColsRows(my_rank_sub + 1)
+      else
+          task%me_bandpp = task%me_neigenpairs
+          task%me_nrowsLinalg = minfo%total_spacedim
+      end if
+   
+      ! Concatenate task%me_bandpp into collective task%me_ncolsColsRows (global)
+      call xmpi_allgather(task%me_bandpp, task%me_ncolsColsRows, global_comm, ierr)
+      if ( ierr /= xmpi_success ) then
+          ABI_ERROR("Error while gathering number of columns in colsrows for all slices")
+      end if
 
-    ! Local variables
-    integer :: my_rank, my_id, my_rank_sub, ierr
+      sanity_check = task%me_bandpp
+      call xmpi_sum(sanity_check, global_comm, ierr)
+      if (sanity_check == scheduler%tot_load) then
+          write(std_out,*) 'parallel execution of tasks, sum of bands across procs=', sanity_check
+      else
+          write(std_out,*) 'sequential execution of tasks, sum of bands across procs=', sanity_check
+      end if
+    
+      ! at some point fixme
+      ! ABI_SFREE(task%me_ncolsColsRows)
 
-    ! *********************************************************************
- 
-    my_rank = xmpi_comm_rank(spacecom) 
-    my_id = scheduler%lookup_proc(my_rank + 1) + 1
-    task%me_id_slice = my_id
+      write(std_out,*) '@task current rank has slice=', task%me_id_slice
+      write(std_out,*) '@task active process=', task%me_nproc
+      write(std_out,*) '@task bands per active process=', task%me_bandpp
+      flush(std_out)
+  
+  end subroutine slice_task_initNextTask
+!!***
 
-    task%me_neigenpairs_slice = scheduler%neigenpairs_per_slice(my_id)
-    task%me_nproc_slice = scheduler%nproc_per_slice(my_id)
-    !task%me_ndeg_slice = scheduler%poly_degrees(my_id)
+!----------------------------------------------------------------------
 
-    if (task%me_nproc_slice<scheduler%nresources) then
-        ! can split communicator
-    else
-        ! use spacecom entire one
-    end if
+!!****f* m_slice_task/slice_task_enableAsync
+!! NAME
+!! slice_task_enableAsync
+!! 
+!! FUNCTION
+!! Enable asynchronous memory treatment by MPI transposing global data
+!! 
+!! INPUT
+!! asyncMemory buffer in linalg distribution
+!! target colsrows distribution in task%me_ncolsColsRows of global data
+!! 
+!! OUTPUT
+!! asyncMemory buffer in colsrows distribution, stored in task%me_Xext
+!! allocated if multiple MPI ranks or just pointer if MPI disabled
+!! 
+!! SOURCE
 
-    ABI_MALLOC_IFNOT(task%me_ncolsColsRows_slice, (task%me_nproc_slice))
-    ABI_MALLOC_IFNOT(task%me_nrowsLinalg_slice, (task%me_nproc_slice))
+  subroutine slice_task_enableAsync(work, task, minfo)
+      
+      implicit none
+      
+      type(asyncMemory_t), intent(inout) :: work
+      type(activeTask_t), intent(inout) :: task
+      type(matrixInfo_t), intent(in) :: minfo
 
-!    if (slice%paral_kgb==1) then
-!        ! Compute column distribution across active resources
-!        call distribute_vectors(slice%me_neigenpairs_slice, slice%me_nproc_slice, task%me_ncolsColsRows_slice)
-!    
-!        ! Compute row distribution across active resources
-!        call distribute_vectors(slice%total_spacedim, slice%me_nproc_slice, task%me_nrowsLinalg_slice)
-!    end if
-!
-!    ! Split global comm into disjoint sub-comms, only procs with the same color communicate
-!    if (slice%paral_kgb==0) then ! todo also implement the case of sequential slices?
-!        slice%me_comm_slice = slice%spacecom
-!        slice%me_comm_rows = slice%comm_rows
-!        slice%me_comm_cols = slice%comm_cols
-!    else
-!        call xmpi_comm_split(slice%spacecom, slice%me_id_slice, my_rank, slice%me_comm_slice, ierr)        
-!        if ( ierr /= xmpi_success ) then
-!            ABI_ERROR("Error while creating slice spacecom subcommunicator")
-!        end if
-!        call xmpi_comm_split(slice%comm_rows, slice%me_id_slice, my_rank, slice%me_comm_rows, ierr)          
-!        if ( ierr /= xmpi_success ) then
-!            ABI_ERROR("Error while creating slice row subcommunicator")
-!        end if      
-!        call xmpi_comm_split(slice%comm_cols, slice%me_id_slice, my_rank, slice%me_comm_cols, ierr)         
-!        if ( ierr /= xmpi_success ) then
-!            ABI_ERROR("Error while creating slice col subcommunicator")
-!        end if 
-!    end if
-!    
-!    ! process waits for others to create their subcommunicators before using its own
-!    call xmpi_barrier(slice%spacecom) 
-!
-!    ! Concatenate slice%me_ncolsColsRows_slice into collective slice%ncolsColsRows
-!    my_rank_sub = xmpi_comm_rank(slice%me_comm_slice)
-!    slice%me_bandpp_slice = slice%bandpp
-!    if (slice%paral_kgb==1) then
-!        slice%me_bandpp_slice = slice%me_ncolsColsRows_slice(my_rank_sub + 1)
-!    end if
-!    call xmpi_allgather(slice%me_bandpp_slice, slice%ncolsColsRows, slice%spacecom, ierr)
-!    if ( ierr /= xmpi_success ) then
-!        ABI_ERROR("Error while gathering number of columns in colsrows for all slices")
-!    end if
+      integer :: nrows, ncols
+      
+      ! *********************************************************************
 
-end subroutine mark_active_task
+      ! todo add timers and make nvtx markers consistent
+      if (minfo%paral_kgb==1) then
+            
+          write(std_out,*) 'using distro as target='
+          write(std_out,*) task%me_ncolsColsRows
+          flush(std_out)
+
+          call xgTransposer_constructor(work%xgTransposerXext, work%XextLinalg, task%me_Xext,&
+              minfo%nspinor, STATE_LINALG, TRANS_ALL2ALL, minfo%comm_rows, minfo%comm_cols, &
+              0, 0, minfo%me_g0_fft, gpu_option=minfo%gpu_option, &
+              gpu_thread_limit=minfo%gpu_thread_limit, custom_ncolsColsRows=.true.,&
+              ncolsColsRows_sub=task%me_ncolsColsRows)
+
+          work%xgTransposerXext%gpu_kokkos_nthrd  = minfo%gpu_kokkos_nthrd
+
+          ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
+          call xgTransposer_transpose(work%xgTransposerXext, STATE_COLSROWS)
+          ABI_NVTX_END_RANGE()
+
+          work%use_colsrows = .true.
+          work%use_linalg = .false.
+          work%has_transposer = .true.
+      else
+          nrows = rows(work%XextLinalg)
+          nrows = rows(work%XextLinalg)
+          ncols = cols(work%XextLinalg)
+          call xgBlock_setBlock(work%XextLinalg, task%me_Xext, nrows, ncols)
+      end if
+
+      ! can also set slice params?? needs slice object. Maybe do a different called initActiveTask
+      !! containing chebfi and all
+      ! todo do the same with task%me_eigen and task%me_resid map to async memory
+      !! FUNCTION 
+      !! Mark allocated portion as actively used by setting all me_* variables.
+      !! My process only marks resources its assigned slice has reserved.
+
+  end subroutine slice_task_enableAsync
 !!***
 
 !----------------------------------------------------------------------
@@ -720,6 +795,10 @@ subroutine allocate_active_task(work, task)
     
     integer :: nbdbuf, oracle, num_proc
     real(dp) :: oracle_factor, oracle_min_occ
+
+    !integer, allocatable, target :: nrowsLinalg(:)
+    !integer, pointer :: nrowsLinalg_ptr(:) => null() 
+    !integer, pointer :: ncolsColsRows_ptr(:) => null()
 
 !    ! ========================== Transpose ===================================
 !    !! Function
@@ -813,8 +892,8 @@ subroutine free_active_task(task)
     
     ! *********************************************************************
 
-    ABI_SFREE(task%me_ncolsColsRows_slice)   
-    ABI_SFREE(task%me_nrowsLinalg_slice)
+    ABI_SFREE(task%me_ncolsColsRows)   
+    ABI_SFREE(task%me_nrowsLinalg)
 
 end subroutine free_active_task
 !!***
