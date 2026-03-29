@@ -2302,7 +2302,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
 
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem,updrho_wmem,prep_nonlop_wmem
    integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem,fourwf_smem,fourwf_wmem,fourwf_mem,hegvd_mem
-   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs,nfourwf_slices
+   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs,nfourwf_slices,nprojs,itypat
    integer, target :: t_fft(3)
    logical  :: print_and_exit,l_warn_on_fail,fixed_blocksize,fixed_fourwf_slices
    integer(kind=c_size_t) :: chebfiMem(2),lobpcgMem(2)
@@ -2357,6 +2357,10 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    t_fft(1) = gs_hamk%ngfft(3);
    t_fft(2) = gs_hamk%ngfft(2);
    t_fft(3) = gs_hamk%ngfft(1);
+   nprojs=0
+   do itypat=1,gs_hamk%ntypat
+     nprojs = nprojs + count(gs_hamk%indlmn(3,:,itypat)>0)*gs_hamk%nattyp(itypat)
+   end do
 
    nonlop_smem=0; invovl_smem=0; getghc_wmem=0; invovl_wmem=0; nonlop_wmem=0; gs_ham_smem=0
    updrho_wmem=0; prep_nonlop_wmem=0; sum_mem=0; sum_bandpp_mem=0; sum_other_mem=0;
@@ -2600,6 +2604,26 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
          exit
        end if
      end do
+   end if
+
+   ! Quickfix : sometimes, we may run out of GPU memory when computing forces/stresses because of fragmentation.
+   ! We try to reduce the risk by forcing even more blocking:
+   if((wfoptalg < 0 .and. (optfor > 0 .or. optstr > 0)) .and. sum_mem > 0.95*free_mem) then
+     if(blocksize > 5) then
+       if(.not. gemm_nonlop_split_choice23) then
+         gemm_nonlop_split_choice23 = .true.
+         ndgxdt=6
+       else
+         blocksize=blocksize*1.5
+         blocksize=min(nprojs,blocksize)
+       end if
+     else
+       blocksize=blocksize*1.5
+     end if
+
+     nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,&
+     &                                           blocksize,ndgxdt,use_distrib)
+     sum_mem     = nonlop_smem + gs_ham_smem + nonlop_wmem + prep_nonlop_wmem
    end if
 
    write(std_out,'(A,I3,A)') "GPU memory consumption estimate for K-point ",ikpt,":"
