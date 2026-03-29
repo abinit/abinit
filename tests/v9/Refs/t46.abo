@@ -1,5 +1,5 @@
 
-.Version 10.5.8.9 of ABINIT. v10.7.1 released Mar 2026.
+.Version 10.5.8.1 of ABINIT. v10.7.1 released Mar 2026.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 26 Mar 2026.
-- ( at 11h37 )
+.Starting date : Fri 27 Mar 2026.
+- ( at 16h58 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/TestBot_MPI1/v9_t46/t46.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI1/v9_t46/t46.abi
 - output file    -> t46.abo
 - root for input  files -> t46i
 - root for output files -> t46o
@@ -618,8 +618,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.18799
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/Si_GGA_noNLCC.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_debug/tests/Pspdir/Si_GGA_noNLCC.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Si_GGA_noNLCC.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/Pspdir/Si_GGA_noNLCC.psp8
 - Si    ONCVPSP-3.3.1  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    210513                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1039,6 +1039,9 @@ meta: {optdriver: 1, }
  ==>  initialize data related to q vector <== 
 
  The list of irreducible perturbations for this q vector is:
+    1)    idir= 1    ipert=  12
+    2)    idir= 2    ipert=  12
+    3)    idir= 3    ipert=  12
 
 ================================================================================
 
@@ -2922,7 +2925,7 @@ meta: {optdriver: 10, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.18799
 
  The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: 
- (in reduced coordinates except for strain pert.) 
+ (in reduced coordinates except for strain and hspinfield perturbations) 
 
             i1dir   i1pert  i2dir   i2pert  i3dir  i3pert
      1)       1       1       1       1       1      10
@@ -4711,10 +4714,10 @@ P          mk1mem5        128
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=         67.8  wall=         67.9
+- Proc.   0 individual time (sec): cpu=         69.2  wall=         69.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered 151 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         67.8  wall=         67.9
++Overall time at end (sec) : cpu=         69.2  wall=         69.3

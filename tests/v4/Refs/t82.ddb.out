@@ -1,6 +1,6 @@
 
  **** DERIVATIVE DATABASE ****    
-+DDB, Version number  20230401
++DDB, Version number  20240201
 
  merged DDB file of strained Si
 
@@ -103,6 +103,7 @@
   
  2nd derivatives (non-stat.)  - # elements :         144
  qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
+ frequency  0.00000000E+00
    1   1   1   1  0.79697865189734D+01  0.00000000000000D+00
    2   1   1   1  0.42861571472626D+01  0.00000000000000D+00
    3   1   1   1  0.39892451874428D+01  0.00000000000000D+00
