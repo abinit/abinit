@@ -717,6 +717,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     458.625     458.600
  DFT+DMFT Method is used
  ******************************************
 
+ DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT
+
  Magnetic DFT, with Magnetic FLL (Full Localized Limit) double counting
 
  Entropy is not computed, only the internal energy is printed
