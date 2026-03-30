@@ -211,9 +211,8 @@ type(pawfgr_type) :: pawfgr
 type(mttk_type) :: mttk_vars
 type(pimd_type) :: pimd_param
 integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
-integer :: ntime,option,comm,mgfftf,nfftf
+integer :: nmpi,ntime,option,comm,mgfftf,nfftf
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
-integer :: mpicomm,nmpi
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: msg
 !character(len=500) :: dilatmx_errmsg
@@ -897,12 +896,12 @@ real(dp) :: k0(3)
      ! So here we compute the mean over all MPI processes to reduce the noise.
      ! This error is difficult to test as it is observed in long runs only, so BE VERY CAREFUL.
      ! Note : the cost of these MPI communications is negligible.
-     mpicomm = scfcv_args%mpi_enreg%comm_kptband
-     nmpi = xmpi_comm_size(mpicomm)
+     ! comm = comm_cell
+     nmpi = xmpi_comm_size(comm)
      if (nmpi>1) then
        ABI_MALLOC(tmp,(size(xred,1),size(xred,2)))
        tmp(:,:) = xred(:,:) / nmpi
-       call xmpi_sum(tmp,mpicomm,ierr)
+       call xmpi_sum(tmp,comm,ierr)
        if (ierr/=0) then
          ABI_ERROR("Error in mpi sum (tmp)")
        end if
@@ -910,7 +909,7 @@ real(dp) :: k0(3)
        ABI_FREE(tmp)
        ABI_MALLOC(tmp,(size(rprimd,1),size(rprimd,2)))
        tmp(:,:) = rprimd(:,:) / nmpi
-       call xmpi_sum(tmp,mpicomm,ierr)
+       call xmpi_sum(tmp,comm,ierr)
        if (ierr/=0) then
          ABI_ERROR("Error in mpi sum (tmp)")
        end if
@@ -918,7 +917,7 @@ real(dp) :: k0(3)
        ABI_FREE(tmp)
        ABI_MALLOC(tmp_1d,(size(acell)))
        tmp_1d(:) = acell(:) / nmpi
-       call xmpi_sum(tmp_1d,mpicomm,ierr)
+       call xmpi_sum(tmp_1d,comm,ierr)
        if (ierr/=0) then
          ABI_ERROR("Error in mpi sum (tmp)")
        end if
