@@ -436,6 +436,7 @@ subroutine compute_energy(energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ
      end if
      ! == Compute Correlation energy from QMC correlations.
      ! -----------------------------------------------------------------------
+     energies_dmft%e_hu_qmc_tot = zero
      do iatom=1,paw_dmft%natom
        lpawu = paw_dmft%lpawu(iatom)
        if (lpawu == -1) cycle
