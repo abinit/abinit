@@ -166,6 +166,7 @@ module m_slice_task
         integer :: me_lowb              ! lower slice interval bound
         integer :: me_uppb              ! upper slice interval bound
         integer :: me_ndeg              ! polynomial filter degree for slice in use
+        integer :: me_fcol_async        ! first column of task load in async memory
 
         ! flags for slice location in spectrum
         logical :: is_lowpass
@@ -181,8 +182,8 @@ module m_slice_task
         
         ! Memory address used for reads/writes
         type(xgBlock_t) :: me_Xext                          ! eigenvector memory in use by active slice
-        type(xgBlock_t) :: me_resid
-        type(xgBlock_t) :: me_eigen
+        type(xgBlock_t) :: me_eigen                         ! eigenvalue memory in use by active slice
+        type(xgBlock_t) :: me_resid                         ! residual memory in use by active slice
 
         ! Memory space used for computation
         !type(chebfi_t) :: chebfi ! should not use chebfi objects
@@ -214,6 +215,7 @@ module m_slice_task
     !-------------------------------------------------
     type, public :: asyncMemory_t
 
+        integer :: nslice
         integer :: neigenpairs_ext                          ! total number of extended columns
         integer :: paral_kgb 
 
@@ -240,14 +242,14 @@ module m_slice_task
     !-------------------------------------------------
     public :: init_matrixInfo                   ! wrapper for various xgBlock parameters
     public :: slice_task_allocAsyncMemory       ! allocates async memory buffer
-    public :: slice_task_initAsyncMemory        ! fills async memory colwise
+    public :: slice_task_copyToAsyncMemory     ! fills async memory colwise (deep copy)
     public :: slice_task_freeAsyncMemory        ! deallocates async buffer
     public :: slice_task_initSchedule           ! compute 'process-to-slices' distribution
     public :: slice_task_freeSchedule           ! deallocate all MPI distribution info
     public :: slice_task_printSchedule          ! print a table of schedule
     public :: slice_task_initNextTask           ! compute MPI distribution for next task
     public :: slice_task_enableAsync            ! apply MPI distribution for next task
-    !public :: init_active_memory
+    public :: slice_task_runActiveTask          ! execute Subspace Iteration for active vectors
     !public :: mark_active_task
     !public :: allocate_active_task
     !public :: free_active_task
@@ -331,9 +333,10 @@ subroutine slice_task_allocAsyncMemory(work, minfo, ncol_ext)
     call xg_init(work%X_ext, minfo%space, minfo%spacedim, work%neigenpairs_ext, &
         minfo%spacecom, me_g0=minfo%me_g0, gpu_option=gpu_option)
 
-    call xg_init(work%resid_ext, SPACE_R, work%neigenpairs_ext, 1, gpu_option=gpu_option)
-    call xg_init(work%eigen_ext, SPACE_R, work%neigenpairs_ext, 1, gpu_option=gpu_option)
-
+    ! row-array so that columns of tasks can be pointed more easily
+    call xg_init(work%resid_ext, SPACE_R, 1, work%neigenpairs_ext, gpu_option=gpu_option)
+    call xg_init(work%eigen_ext, SPACE_R, 1, work%neigenpairs_ext, gpu_option=gpu_option)
+    
 end subroutine slice_task_allocAsyncMemory
 !!***
 
@@ -363,9 +366,9 @@ end subroutine slice_task_freeAsyncMemory
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice_task/slice_task_initAsyncMemory
+!!****f* m_slice_task/slice_task_copyToAsyncMemory
 !! NAME
-!! slice_task_initAsyncMemory
+!! slice_task_copyToAsyncMemory
 !! 
 !! FUNCTION
 !! Initialize async memory content (for all tasks)
@@ -375,7 +378,7 @@ end subroutine slice_task_freeAsyncMemory
 !! 
 !! SOURCE
 
-subroutine slice_task_initAsyncMemory(work, X0, minfo, mapper, ncols_per_task)
+subroutine slice_task_copyToAsyncMemory(work, X0, minfo, mapper, ncols_per_task)
 
     implicit none
     
@@ -408,9 +411,10 @@ subroutine slice_task_initAsyncMemory(work, X0, minfo, mapper, ncols_per_task)
     space = minfo%space
     gpu_option = minfo%gpu_option
     spacecom = minfo%spacecom
+    nslice = size(mapper, dim=2)
 
     work%XextLinalg = work%X_ext%self
-    nslice = size(mapper, dim=2)
+
     ABI_MALLOC(nrand_per_task, (nslice))
     ABI_MALLOC(ncompl_per_task, (nslice))
 
@@ -471,7 +475,7 @@ subroutine slice_task_initAsyncMemory(work, X0, minfo, mapper, ncols_per_task)
     ABI_FREE(nrand_per_task)
     ABI_FREE(ncompl_per_task)
 
-end subroutine slice_task_initAsyncMemory
+end subroutine slice_task_copyToAsyncMemory
 !!***
 
 !----------------------------------------------------------------------
@@ -507,8 +511,8 @@ end subroutine slice_task_initAsyncMemory
       scheduler%tot_load = sum(load)
       scheduler%ntasks = ntasks
       scheduler%nprocs = nprocs
-      scheduler%next_task_id = 1
-      scheduler%next_load = load(1)
+      scheduler%next_task_id = 1 ! fixme this is not true if paral slices
+      scheduler%next_load = load(1) ! fixme this is not true if paral slices
 
       call slice_task_allocSchedule(scheduler)
       scheduler%load_per_task(:) = load(:)
@@ -607,7 +611,9 @@ end subroutine slice_task_printSchedule
 !! 
 !! FUNCTION
 !! Apply logic for task execution and prepare MPI distribution
-!! either a slice has some MPI processes or a slice has ALL MPI processes
+!! either a slice has some MPI processes or a slice has ALL MPI processes.
+!! Mark allocated portion as actively used by setting me_* variables.
+!! My process only marks resources its assigned slice has reserved.
 !!
 !! OUTPUT
 !! Active 'task' object with a valid MPI distribution
@@ -634,6 +640,10 @@ end subroutine slice_task_printSchedule
       
       task%me_id_slice = my_task
       task%me_neigenpairs = scheduler%load_per_task(my_task)
+      task%me_fcol_async = 1
+      if (my_task>1) then
+        task%me_fcol_async = sum(scheduler%load_per_task(1:my_task-1))+1
+      end if
       task%me_nproc = scheduler%nproc_per_task(my_task)
       
       ! Split global comm into disjoint sub-comms, only procs with the same color (my_task) communicate
@@ -701,6 +711,10 @@ end subroutine slice_task_printSchedule
 !! 
 !! FUNCTION
 !! Enable asynchronous memory treatment by MPI transposing global data
+!! across all available MPI processes. After the transposition each 
+!! process contains the correct bandpp corresponding to the slice so 
+!! that no additional communication has to be performed in order to 
+!! bring band slices to processes. 
 !! 
 !! INPUT
 !! asyncMemory buffer in linalg distribution
@@ -708,7 +722,8 @@ end subroutine slice_task_printSchedule
 !! 
 !! OUTPUT
 !! asyncMemory buffer in colsrows distribution, stored in task%me_Xext
-!! allocated if multiple MPI ranks or just pointer if MPI disabled
+!! allocated if multiple MPI ranks or just pointer if MPI disabled.
+!! Same for task%me_eigen, task%me_resid. 
 !! 
 !! SOURCE
 
@@ -720,7 +735,7 @@ end subroutine slice_task_printSchedule
       type(activeTask_t), intent(inout) :: task
       type(matrixInfo_t), intent(in) :: minfo
 
-      integer :: nrows, ncols
+      integer :: nrows, ncols, neigen, fcol
       
       ! *********************************************************************
 
@@ -748,57 +763,58 @@ end subroutine slice_task_printSchedule
           work%has_transposer = .true.
       else
           nrows = rows(work%XextLinalg)
-          nrows = rows(work%XextLinalg)
           ncols = cols(work%XextLinalg)
           call xgBlock_setBlock(work%XextLinalg, task%me_Xext, nrows, ncols)
       end if
 
+      ! Every process has all eigen and resid of slice (not distributed)
+      neigen = task%me_neigenpairs
+      fcol = task%me_fcol_async
+      call xgBlock_setBlock(work%eigen_ext%self, task%me_eigen, 1, neigen, fcol=fcol)
+      call xgBlock_setBlock(work%resid_ext%self, task%me_resid, 1, neigen, fcol=fcol)
+      call xgBlock_reshape(task%me_eigen, neigen, 1)
+      call xgBlock_reshape(task%me_resid, neigen, 1)
+
       ! can also set slice params?? needs slice object. Maybe do a different called initActiveTask
       !! containing chebfi and all
-      ! todo do the same with task%me_eigen and task%me_resid map to async memory
       !! FUNCTION 
-      !! Mark allocated portion as actively used by setting all me_* variables.
-      !! My process only marks resources its assigned slice has reserved.
 
   end subroutine slice_task_enableAsync
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_slice_task/allocate_active_task
+!!****f* m_slice_task/slice_task_runActiveTask
 !! NAME
-!! allocate_active_task
+!! slice_task_runActiveTask
 !! 
 !! FUNCTION
-!! Distributes extended columns across **all** MPI processes
-!! After the transposition each process contains the correct
-!! bandpp corresponding to the slice so that no additional communication
-!! has to be performed in order to bring band slices to processes.
-!! Input is Xext (linalg state) distributed across global processes.
-!! Attention chebfi%X is distributed across slice processes =/= Xext per process.
-!! Extracting chebfi%X in the slice distribution from Xext would require comms.
+!! Execute Subspace iteration using active task memory.
+!! Runs entirely independently of other tasks thanks to asynchronous memory.
+!! Allocate internal memory of slice based on intermediate 'chebfi' structure.
+!! 
+!! INPUT
+!! task%me_Xext: initial guess of size (total_spacedim, task%me_bandpp)
+!! task%me_eigen: empty array of size (task%me_neigenpairs, 1) 
+!! task%me_resid: empty array of size (task%me_neigenpairs, 1)
 !!
 !! OUTPUT
-!! eigen=converged eigenvalue array of size (neigenpairs,1), first rows written only
-!! residu=slice residual array of size (neigenpairs,1), first rows written only
-!! work%XextLinalg= guess/converged eigenvectors for all slices
+!! eigen=converged eigenvalue array of size (neigenpairs,1)
+!! residu=slice residual array of size (neigenpairs,1)
+!! /IML\ true output work%XextLinalg= guess/converged eigenvectors for all slices
 !! 
 !! SOURCE
 
-subroutine allocate_active_task(work, task)
+subroutine slice_task_runActiveTask(work, task)
 
     implicit none
-    !type(slice_t), intent(inout) :: slice ! should not use slice objects at all!!!
-    type(activeTask_t), intent(inout) :: task
     type(asyncMemory_t), intent(inout) :: work
+    type(activeTask_t), intent(inout) :: task
+    !type(slice_t), intent(inout) :: slice ! should not use slice objects at all!!!
     !type(chebfi_t), intent(inout) :: chebfi ! should not use chebfi objects at all !!!
     
     integer :: nbdbuf, oracle, num_proc
     real(dp) :: oracle_factor, oracle_min_occ
-
-    !integer, allocatable, target :: nrowsLinalg(:)
-    !integer, pointer :: nrowsLinalg_ptr(:) => null() 
-    !integer, pointer :: ncolsColsRows_ptr(:) => null()
 
 !    ! ========================== Transpose ===================================
 !    !! Function
@@ -806,52 +822,24 @@ subroutine allocate_active_task(work, task)
 !    ! It serves as a transition from global communicator to slice communicator.
 !    ! 
 !    
-!    ! what are all those things comm_rows etc must use the ones from task TODO
-!
-!
-!    ncolsColsRows_ptr => slice%ncolsColsRows ! todo this is not necessary but ok
-!
-!    if (slice%paral_kgb==1) then
-!        ! Allocate slice%me_Xext according to the target MPI distribution for slices
-!        call xgTransposer_constructor(slice%xgTransposerXext, work%XextLinalg, slice%me_Xext,&
-!            nspinor, STATE_LINALG, TRANS_ALL2ALL, slice%comm_rows, slice%comm_cols, 0, 0, slice%me_g0_fft,&
-!            gpu_option=slice%gpu_option, gpu_thread_limit=slice%gpu_thread_limit,&
-!            custom_ncolsColsRows=.true., ncolsColsRows_sub=ncolsColsRows_ptr)
-!   
-!        slice%xgTransposerXext%gpu_kokkos_nthrd  = slice%gpu_kokkos_nthrd
-!    
-!        ABI_NVTX_START_RANGE(NVTX_SLICE_TRANSPOSE)
-!        call xgTransposer_transpose(slice%xgTransposerXext, STATE_COLSROWS)
-!        ABI_NVTX_END_RANGE()
-!
-!        slice%use_colsrows = .true.
-!        slice%use_linalg = .false.
-!
-!        ! Unitary test
-!        if ( cols(slice%me_Xext) /= slice%ncolsColsRows(xmpi_comm_rank(slice%spacecom)+1) ) then
-!            ABI_ERROR('wrong colsrows representation')
-!        end if
-!        write(std_out,'(a,i6,i6,i6)') '# proc has # cols of Xext ', xmpi_comm_rank(slice%spacecom),cols(slice%me_Xext)
-!        work%has_transposer = .true.
-!    else
-!        call xgBlock_setBlock(work%XextLinalg, slice%me_Xext, rows(work%XextLinalg), cols(work%XextLinalg))
-!    end if
 !
 !    ! Get parameters of active task
-!    neigenpairs = task%me_neigenpairs_slice
-!    bandpp = task%me_bandpp_slice
-!    ndeg_filter = task%me_ndeg_slice
-!    comm = task%me_comm_slice
+!    neigenpairs = task%me_neigenpairs
+!    bandpp = task%me_bandpp
+!    ndeg_filter = task%me_ndeg
+!    comm = task%me_comm
 !    comm_rows = task%me_comm_rows
 !    comm_cols = task%me_comm_cols
+
+
 !    if (slice%me_id_slice==1) then   
 !        is_lowpass = .true. ! [lambda_minus,lambda_plus) to be diminished
-!        lambda_minus = slice%poly_upp_bounds(task%me_id_slice)
+!        lambda_minus = slice%upp_bounds(task%me_id_slice)
 !        lambda_plus = slice%maxeig_global
 !    else
 !        is_lowpass = .false. ! [lambda_minus,lambda_plus) to be amplified
-!        lambda_minus = slice%poly_low_bounds(task%me_id_slice)
-!        lambda_plus = slice%poly_upp_bounds(task%me_id_slice)
+!        lambda_minus = slice%low_bounds(task%me_id_slice)
+!        lambda_plus = slice%upp_bounds(task%me_id_slice)
 !    end if
 !    ! deactivate chebfi oracle
 !    oracle = 0
@@ -873,49 +861,7 @@ subroutine allocate_active_task(work, task)
 !        ndeg_filter,nbdbuf,slice%space,1,comm,task%me_g0,task%me_g0_fft,slice%paw,comm_rows,comm_cols,&
 !        oracle,oracle_factor,oracle_min_occ,slice%gpu_option,gpu_kokkos_nthrd=slice%gpu_kokkos_nthrd,&
 !        gpu_thread_limit=slice%gpu_thread_limit,from_linalg=.false.)
-
-end subroutine allocate_active_task
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice_task/free_active_task
-!! NAME
-!! free_active_task
-!! 
-!! SOURCE
-
-subroutine free_active_task(task)
-
-    implicit none
-    type(activeTask_t), intent(inout) :: task
-    
-    ! *********************************************************************
-
-    ABI_SFREE(task%me_ncolsColsRows)   
-    ABI_SFREE(task%me_nrowsLinalg)
-
-end subroutine free_active_task
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice_task/execute_active_task
-!! NAME
-!! execute_active_task
-!! 
-!! SOURCE
-
-subroutine execute_active_task(task)
-
-    type(activeTask_t), intent(inout) :: task
-
-    type(xgBlock_t) :: X0_active
-    type(xgBlock_t) :: eigen_active
-    type(xgBlock_t) :: residu_active
-    
-    ! *********************************************************************
-
+!
 !    ! Recover actively used array
 !    X0_active = task%me_Xext
 !    
@@ -944,8 +890,28 @@ subroutine execute_active_task(task)
 !        call xgBlock_copy_to_gpu(residu_active)
 !    end if
 
+end subroutine slice_task_runActiveTask
+!!***
 
-end subroutine execute_active_task
+!----------------------------------------------------------------------
+
+!!****f* m_slice_task/free_active_task
+!! NAME
+!! free_active_task
+!! 
+!! SOURCE
+
+subroutine free_active_task(task)
+
+    implicit none
+    type(activeTask_t), intent(inout) :: task
+    
+    ! *********************************************************************
+
+    ABI_SFREE(task%me_ncolsColsRows)   
+    ABI_SFREE(task%me_nrowsLinalg)
+
+end subroutine free_active_task
 !!***
 
 !----------------------------------------------------------------------

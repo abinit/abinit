@@ -484,17 +484,20 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     ! Allocate extended buffer in Linalg representation. Notice spacecom communicator (global)
     call slice_task_allocAsyncMemory(asyncMemory, matrixInfo, neigenpairs_ext)
 
-    ! Initilize extended buffer with vectors from X or random vectors. This part also uses global comm.
-    call slice_task_initAsyncMemory(asyncMemory, X0, matrixInfo, mapper, slice%neigen_per_slice)
+    ! Init extended buffer with vectors from X or random vectors. This part also uses global comm.
+    call slice_task_copyToAsyncMemory(asyncMemory, X0, matrixInfo, mapper, slice%neigen_per_slice)
 
     write(std_out,*) 'getid after init', xgBlock_getid(asyncMemory%XextLinalg)
     flush(std_out)
     
-    ! ================================ MPI distribution for slices =========================================
+    ! =========================== MPI distribution for slices ==================================
 
     ! MPI phase I: Compute 'process-to-slice(task)' distribution according to paral options
     call slice_task_initSchedule(scheduler, slice%nslice, slice%nproc, slice%neigen_per_slice,&
         slice%paral_kgb, slice%paral_slice)
+    ! /IML\ in here there should be some per-rank parameter called slice%neigen_per_slice
+    ! that is updated along slice iterations
+    ! also nslice should be rank-wise as well
 
     call slice_task_printSchedule(scheduler, std_out)
 
@@ -505,12 +508,15 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     !!! ^------- start region containing data on slice only --------^
 
-    ! IML is here
-
     ! ============================ Active task execution =======================================
 
-    ! call slice_task_executeActive(task...)
+    ! IML is here
+    ! pass explicit slice parameters such as degree, lowb, uppb
+    ! call slice_task_runActiveTask(task...)
 
+    ! if (paral_slice==yes) then
+    !! exit
+    !! otherwise, update slice%neigen_per_slice etc
 
     !
 !    call timab(tim_slice_me,1,tsec)
