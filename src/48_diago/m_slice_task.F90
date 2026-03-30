@@ -711,7 +711,9 @@ end subroutine slice_task_printSchedule
 !! 
 !! FUNCTION
 !! Enable asynchronous memory treatment by MPI transposing global data
-!! across all available MPI processes. After the transposition each 
+!! across all available MPI processes. This transposition allows for a 
+!! slice to not see others. It serves as a transition from global 
+!! communicator to slice communicator. After the transposition each 
 !! process contains the correct bandpp corresponding to the slice so 
 !! that no additional communication has to be performed in order to 
 !! bring band slices to processes. 
@@ -775,10 +777,6 @@ end subroutine slice_task_printSchedule
       call xgBlock_reshape(task%me_eigen, neigen, 1)
       call xgBlock_reshape(task%me_resid, neigen, 1)
 
-      ! can also set slice params?? needs slice object. Maybe do a different called initActiveTask
-      !! containing chebfi and all
-      !! FUNCTION 
-
   end subroutine slice_task_enableAsync
 !!***
 
@@ -816,12 +814,7 @@ subroutine slice_task_runActiveTask(work, task)
     integer :: nbdbuf, oracle, num_proc
     real(dp) :: oracle_factor, oracle_min_occ
 
-!    ! ========================== Transpose ===================================
-!    !! Function
-!    ! This transposition allows for a slice to not see others. 
-!    ! It serves as a transition from global communicator to slice communicator.
-!    ! 
-!    
+      ! can also set slice params?? needs slice object. Maybe do a different called initActiveTask
 !
 !    ! Get parameters of active task
 !    neigenpairs = task%me_neigenpairs
