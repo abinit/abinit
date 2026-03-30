@@ -281,7 +281,10 @@ contains
    ABI_FREE(pc_in)
    ABI_FREE(pc_out)
  end if
- if (omegaflag == 2) ABI_MALLOC(pc_in,(nwcalc))
+ if (omegaflag == 2) then
+     ABI_MALLOC(pc_in,(nwcalc))
+ endif
+
 
 !Loop over the frequency
  do iw=1,nomega
