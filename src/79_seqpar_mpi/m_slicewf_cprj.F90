@@ -207,7 +207,7 @@ subroutine slicewf_cprj(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  call slice_init(slice,nband,npw*nspinor,cprjdim,dtset%tolwfr_diago,dtset%ecut, &
 &                 mpi_enreg%bandpp, dtset%nline, dtset%nbdbuf, space,space_cprj,1, &
 &                 l_mpi_enreg%comm_band,me_g0,paw,&
-&                 dtset%nslice,dtset%tolfilter,dtset%paral_slice,dtset%spectral_cut,&
+&                 dtset%nslice,0.d0,dtset%paral_slice,0,&
 &                 xg_nonlop,me_g0_fft)
 
  ! Run slice

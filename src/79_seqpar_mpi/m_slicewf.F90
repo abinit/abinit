@@ -238,9 +238,9 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  write(std_out,*) 'spacedim=', spacedim
 
  call slice_init(slice,dtset%nslice,nband,spacedim,dtset%tolwfr_diago,dtset%paral_kgb,&
-        dtset%paral_slice,dtset%mdeg_filter,dtset%nbdbuf,dtset%tolfilter,dtset%ecut,l_mpi_enreg%bandpp,&
+        dtset%paral_slice,dtset%mdeg_filter,dtset%nbdbuf,0.d0,dtset%ecut,l_mpi_enreg%bandpp,&
         space,spacecom,me_g0,me_g0_fft,l_paw,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
-        dtset%spectral_cut,l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
+        0,l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd,&
         gpu_thread_limit=dtset%gpu_thread_limit)
 
     ! todo will be cleaned and input variables will be deleted

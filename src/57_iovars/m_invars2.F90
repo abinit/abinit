@@ -986,9 +986,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'pimass',tread,'DPR')
  if(tread==1) dtset%pimass(1:ntypat)=dprarr(1:ntypat)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spectral_cut',tread,'INT')
- if(tread==1) dtset%spectral_cut=intarr(1)
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spinmagntarget',tread,'DPR')
  if(tread==1) dtset%spinmagntarget=dprarr(1)
 
@@ -1442,45 +1439,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symv1scf',tread,'INT')
  if(tread==1) dtset%symv1scf = intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice1_m',tread,'INT')
- if(tread==1) dtset%slice1_m = intarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice1_deg',tread,'INT')
- if(tread==1) dtset%slice1_deg = intarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice1_part_a',tread,'DPR')
- if(tread==1) dtset%slice1_part_a = dprarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice1_part_b',tread,'DPR')
- if(tread==1) dtset%slice1_part_b = dprarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice1_poly_a',tread,'DPR')
- if(tread==1) dtset%slice1_poly_a = dprarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice1_poly_b',tread,'DPR')
- if(tread==1) dtset%slice1_poly_b = dprarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice2_m',tread,'INT')
- if(tread==1) dtset%slice2_m = intarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice2_deg',tread,'INT')
- if(tread==1) dtset%slice2_deg = intarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice2_part_a',tread,'DPR')
- if(tread==1) dtset%slice2_part_a = dprarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice2_part_b',tread,'DPR')
- if(tread==1) dtset%slice2_part_b = dprarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice2_poly_a',tread,'DPR')
- if(tread==1) dtset%slice2_poly_a = dprarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice2_poly_b',tread,'DPR')
- if(tread==1) dtset%slice2_poly_b = dprarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice3_m',tread,'INT')
- if(tread==1) dtset%slice3_m = intarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice3_deg',tread,'INT')
- if(tread==1) dtset%slice3_deg = intarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice3_part_a',tread,'DPR')
- if(tread==1) dtset%slice3_part_a = dprarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice3_part_b',tread,'DPR')
- if(tread==1) dtset%slice3_part_b = dprarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice3_poly_a',tread,'DPR')
- if(tread==1) dtset%slice3_poly_a = dprarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slice3_poly_b',tread,'DPR')
- if(tread==1) dtset%slice3_poly_b = dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'scr_wrange',tread,'INT')
  if(tread==1) dtset%scr_wrange = intarr(1:2)
@@ -3756,9 +3714,6 @@ if (dtset%usekden==1) then
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolcum',tread,'DPR',ds_input)
  if(tread==1) dtset%tolcum=dprarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolfilter',tread,'DPR')
- if(tread==1) dtset%tolfilter=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
  if(tread==1) dtset%focktoldfe=dprarr(1)

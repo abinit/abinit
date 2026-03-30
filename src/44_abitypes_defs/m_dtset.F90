@@ -502,7 +502,7 @@ type, public :: dataset_type
  integer :: nscforder
  integer :: nshiftk
  integer :: nshiftk_orig  ! original number of shifts given in input (changed in inkpts, the actual value is nshiftk)
- integer :: nslice = 1
+ integer :: nslice
  integer :: nspden
  integer :: nspinor
  integer :: nsppol
@@ -668,7 +668,6 @@ type, public :: dataset_type
  integer :: signperm
  integer :: slk_rankpp
  integer :: smdelta
- integer :: spectral_cut
  integer :: spgaxor
  integer :: spgorig
  integer :: spgroup
@@ -680,24 +679,6 @@ type, public :: dataset_type
  integer :: symsigma = 1
  integer :: symv1scf = 0
  integer :: scr_wrange(2) = 0
- integer :: slice1_m ! for debug
- integer :: slice1_deg ! for debug
- real(dp) :: slice1_part_a ! for debug
- real(dp) :: slice1_part_b ! for debug
- real(dp) :: slice1_poly_a ! for debug
- real(dp) :: slice1_poly_b ! for debug
- integer :: slice2_m ! for debug
- integer :: slice2_deg ! for debug
- real(dp) :: slice2_part_a ! for debug
- real(dp) :: slice2_part_b ! for debug
- real(dp) :: slice2_poly_a ! for debug
- real(dp) :: slice2_poly_b ! for debug
- integer :: slice3_m ! for debug
- integer :: slice3_deg ! for debug
- real(dp) :: slice3_part_a ! for debug
- real(dp) :: slice3_part_b ! for debug
- real(dp) :: slice3_poly_a ! for debug
- real(dp) :: slice3_poly_b ! for debug
 !T
  integer :: td_exp_order
  integer :: td_mexcit
@@ -995,7 +976,6 @@ type, public :: dataset_type
  real(dp) :: tl_radius
  real(dp) :: tolcum = zero
  real(dp) :: toldfe
- real(dp) :: tolfilter = 1.1_dp
  real(dp) :: tolmxde
  real(dp) :: toldff
  real(dp) :: toldmag
@@ -1743,24 +1723,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%symdynmat         = dtin%symdynmat
  dtout%symv1scf          = dtin%symv1scf
  dtout%scr_wrange        = dtin%scr_wrange
- dtout%slice1_m          = dtin%slice1_m
- dtout%slice1_deg        = dtin%slice1_deg
- dtout%slice1_part_a     = dtin%slice1_part_a
- dtout%slice1_part_b     = dtin%slice1_part_b
- dtout%slice1_poly_a     = dtin%slice1_poly_a
- dtout%slice1_poly_b     = dtin%slice1_poly_b
- dtout%slice2_m          = dtin%slice2_m
- dtout%slice2_deg        = dtin%slice2_deg
- dtout%slice2_part_a     = dtin%slice2_part_a
- dtout%slice2_part_b     = dtin%slice2_part_b
- dtout%slice2_poly_a     = dtin%slice2_poly_a
- dtout%slice2_poly_b     = dtin%slice2_poly_b
- dtout%slice3_m          = dtin%slice3_m
- dtout%slice3_deg        = dtin%slice3_deg
- dtout%slice3_part_a     = dtin%slice3_part_a
- dtout%slice3_part_b     = dtin%slice3_part_b
- dtout%slice3_poly_a     = dtin%slice3_poly_a
- dtout%slice3_poly_b     = dtin%slice3_poly_b
  dtout%ph_nqshift        = dtin%ph_nqshift
  if (allocated(dtin%ph_qshift)) call alloc_copy(dtin%ph_qshift, dtout%ph_qshift)
  dtout%ph_smear          = dtin%ph_smear
@@ -2245,7 +2207,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%slabzend           = dtin%slabzend
  dtout%slk_rankpp         = dtin%slk_rankpp
  dtout%smdelta            = dtin%smdelta
- dtout%spectral_cut       = dtin%spectral_cut
  dtout%spgaxor            = dtin%spgaxor
  dtout%spgorig            = dtin%spgorig
  dtout%spgroup            = dtin%spgroup
@@ -2465,7 +2426,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%td_maxene          = dtin%td_maxene
  dtout%tolcum             = dtin%tolcum
  dtout%toldfe             = dtin%toldfe
- dtout%tolfilter          = dtin%tolfilter
  dtout%tolmxde            = dtin%tolmxde
  dtout%toldff             = dtin%toldff
  dtout%toldmag            = dtin%toldmag
@@ -3897,8 +3857,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' optnlxccc optstress oracle_factor oracle_min_occ orbmag ortalg'
  list_vars=trim(list_vars)//' opt_effpot opt_ncoeff opt_coeff output_file outdata_prefix'
 !P
- list_vars=trim(list_vars)//' papiopt paral_atom paral_kgb paral_rf paral_slice paw_add_core pawcpxocc'
- list_vars=trim(list_vars)//' pawcross pawecutdg pawfatbnd pawlcutd pawlmix'
+ list_vars=trim(list_vars)//' papiopt paral_atom paral_kgb paral_rf paral_slice paw_add_core pawcpxocc pawcross'
+ list_vars=trim(list_vars)//' pawecutdg pawfatbnd pawlcutd pawlmix'
  list_vars=trim(list_vars)//' pawmixdg pawnhatxc pawnphi pawntheta pawnzlm pawoptmix pawoptosc pawovlp'
  list_vars=trim(list_vars)//' pawprtdos pawprtvol pawprtwf pawprt_b pawprt_k pawspnorb pawstgylm'
  list_vars=trim(list_vars)//' pawsushat pawujat pawujrad pawujv'
@@ -3949,7 +3909,7 @@ subroutine chkvars(string)
 !End SCALE-UP variables
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
  list_vars=trim(list_vars)//' slc_coupling slc_pot_fname'
- list_vars=trim(list_vars)//' spbroad spectral_cut spgaxor spgorig spgroup spgroupma'
+ list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'
  !list_vars=trim(list_vars)//' spin_calc_correlation_obs spin_calc_thermo_obs spin_calc_traj_obs'
  list_vars=trim(list_vars)//' spin_calc_thermo_obs'
  list_vars=trim(list_vars)//' spin_damping'
@@ -3967,16 +3927,13 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' spinat spinaxis spinat_cart spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
  list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'
- list_vars=trim(list_vars)//' slice1_m slice1_deg slice1_part_a slice1_part_b slice1_poly_a slice1_poly_b'
- list_vars=trim(list_vars)//' slice2_m slice2_deg slice2_part_a slice2_part_b slice2_poly_a slice2_poly_b'
- list_vars=trim(list_vars)//' slice3_m slice3_deg slice3_part_a slice3_part_b slice3_poly_a slice3_poly_b'
  list_vars=trim(list_vars)//' structure '
 !T
  list_vars=trim(list_vars)//' td_exp_order td_maxene td_mexcit td_scnmax td_prtstr td_restart td_propagator td_scthr'
  list_vars=trim(list_vars)//' td_ef_type td_ef_induced_vecpot td_ef_tzero td_ef_tau td_ef_lambda td_ef_pol td_ef_ezero'
  list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix transport_ngkpt'
- list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons tolcum toldfe tolfilter tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
+ list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons tolcum toldfe tolmxde toldff toldmag tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tolwfr_diago tphysel ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
