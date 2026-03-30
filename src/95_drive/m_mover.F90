@@ -888,7 +888,7 @@ real(dp) :: k0(3)
 !    ### 18. Use the history  to extract the new values of acell, rprimd and xred
 
      call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
-     ! /!\ ---- IT IS IMPORTANT TO NOT CHANGE THESE LINES ---- /!\
+     ! /!\ ---- DO NOT CHANGE THESE LINES WITHOUT CORE DEVELOPERS PERMISSION ---- /!\
      ! LB-03/2026:
      ! A noise can accumulate in acell,rprimd and xred after each iterations,
      ! resulting in different results for different MPI processes.
@@ -896,7 +896,7 @@ real(dp) :: k0(3)
      ! This slowly worsens the ionic dynamics, leading to wrong results after many iterations.
      ! So here we compute the mean over all MPI processes to reduce the noise.
      ! This error is difficult to test as it is observed in long runs only, so BE VERY CAREFUL.
-     ! Note : the cost of these MPI communications are negligible.
+     ! Note : the cost of these MPI communications is negligible.
      mpicomm = scfcv_args%mpi_enreg%comm_kptband
      nmpi = xmpi_comm_size(mpicomm)
      if (nmpi>1) then

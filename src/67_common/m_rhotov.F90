@@ -27,6 +27,7 @@ module m_rhotov
  use m_abi_mixing
  use m_abi2big
  use m_xmpi
+ use m_xomp
  use m_cgtools
  use m_xcdata
  use m_dtset
@@ -210,7 +211,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
 !scalars
  integer :: nk3xc,ifft,ipositron,ispden,nfftot,offset
  integer :: mpi_comm_sphgrid,ixc_current
- integer :: mpicomm,nmpi,ierr
+ integer :: mpicomm,nthreads,nmpi,ierr
 !integer :: ii,jj,kk,ipt,nx,ny,nz           !SPr: debug
 !real(dp):: rx,ry,rz                        !SPr: debug
  real(dp) :: doti,e_xcdc_vxctau
@@ -512,7 +513,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
        vnew(:,1:dtset%nspden)=vtrial(:,1:dtset%nspden)+vresidnew(:,1:dtset%nspden)
      endif
 
-     ! /!\ ---- IT IS IMPORTANT TO NOT CHANGE THESE LINES ---- /!\
+     ! /!\ ---- DO NOT CHANGE THESE LINES WITHOUT CORE DEVELOPERS PERMISSION ---- /!\
      ! LB-03/2026:
      ! A noise can accumulate in nvresid after each SCF cycle,
      ! resulting in different densities/potentials for different MPI processes.
@@ -520,10 +521,10 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
      ! This slowly worsens the SCF cycle, leading to wrong results after many iterations.
      ! So here we compute the mean of nvresid over all MPI processes to reduce the noise.
      ! This error is difficult to test as it is observed in long runs only, so BE VERY CAREFUL.
-     ! Note : the cost of this MPI communication is not so big (much smaller than any communication done on WFs).
      mpicomm = mpi_enreg%comm_kptband
      nmpi = xmpi_comm_size(mpicomm)
-     if (nmpi>1) then
+     nthreads = xomp_get_num_threads(open_parallel=.true.)
+     if (nmpi>1.and.nthreads>1) then
        ABI_MALLOC(tmp,(size(vresidnew,1),size(vresidnew,2)))
        tmp(:,:) = vresidnew(:,:) / nmpi
        call xmpi_sum(tmp,mpicomm,ierr)
