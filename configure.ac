@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2025 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2026 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -471,19 +471,9 @@ ABI_OPTIM_INIT([${abi_optim_flavor}])
   AC_MSG_NOTICE([disabling optimizations for src/43_ptgroups/])
   fcflags_opt_43_ptgroups="-O0"
 
-# FIXME: AMD LLVM fork for OpenMP GPU (aka AOMP) has a sensitive OpenMP GPU implementation, so we enable it where needed.
-# Checked with version 16.0.0 shipped with ROCm 5.6.0 (July 2023).
-if test "${abi_fc_vendor}" == "llvm" -a "${abi_gpu_flavor}" == "hip-double"; then
-  if test "${abi_openmp_offload_enable}" = "yes"; then
-    fcflags_opt_28_numeric_noabirule="${amd_openmp_flags}"
-    fcflags_opt_45_xgTools="${amd_openmp_flags}"
-    fcflags_opt_46_ghc_omp="${amd_openmp_flags}"
-    fcflags_opt_66_nonlocal="${amd_openmp_flags}"
-    fcflags_opt_66_wfs="${amd_openmp_flags}"
-    fcflags_opt_67_common="${amd_openmp_flags}"
-    fcflags_opt_79_seqpar_mpi="${amd_openmp_flags}"
-    fcflags_opt_98_main="${amd_openmp_flags}"
-  fi
+if test "${abi_fc_vendor}" == "cray"; then
+  AC_MSG_NOTICE([disabling optimizations for src/70_gw/])
+  fcflags_opt_70_gw="-O1"
 fi
 
 # Set per-directory Fortran optimizations
@@ -585,12 +575,19 @@ fi
 # Determine Fortran link flags (FCLIBS)
 # This is needed after FCFLAGS has been set as some compilers have extra
 # libraries linked due to optimizations levels or OpenMP
-# This step would be performed inside AC_FC_WRAPPERS but it fails due to a mischievous
+# This step would norally be performed inside AC_FC_WRAPPERS but...
+
+# With CRAY, it fails due to a mischievous
 # double-quote in FCLIBS when using Cray compiler, so we trim it out in that specific case.
 AC_FC_LIBRARY_LDFLAGS
 
 if test "${abi_fc_vendor}" = "cray"; then
   FCLIBS=`echo ${FCLIBS} | tr '"' ' '`
+fi
+
+# With LLVM, a syntax error happens
+if test "${abi_fc_vendor}" = "llvm"; then
+  FCLIBS=`echo ${FCLIBS} | sed -e "s/-l \// \//"`
 fi
 
 # Remove -lsr-complexity-limit=<some-number> from FCLIBS, as it is
@@ -1304,6 +1301,10 @@ fi
 if test "${sd_libxc_kxc_ok}" = "no"; then
   ABI_MSG_NOTICE([libxc-kxc],
     [Suboptimal libxc configuration])
+fi
+if test "${sd_fft_flavor}" = "fftw3" -a "${abi_openmp_enable}" = "yes"; then
+  ABI_MSG_NOTICE([fftw3-openmp],
+    [WARNING: OpenMP enabled but FFTW3 Threads disabled])
 fi
 # GPU 2024 implementation : deactivate this warning
 #if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then

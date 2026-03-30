@@ -267,6 +267,7 @@ nav:
     - Bibliography: theory/bibliography.md
     - Acronyms: theory/acronyms.md
 - Developers:
+    - Overview: developers/overview_development.md
     - Git and Gitlab: developers/git_and_gitlab.md
     - HowTo for developers: developers/developers_howto.md
     - Abimkdocs: developers/abimkdocs.md
@@ -278,10 +279,11 @@ nav:
         - YAML-based test suite Python tools and API: developers/yaml_tools_api.md
     - XgType: developers/XgType.md
     - Pseudos:
+        - psp_header: developers/pseudos_nc_header.md
         - psp1: developers/psp1_info.md
         - psp3: developers/psp3_info.md
         - psp45: developers/psp45_info.md
-        - psp5: developers/psp5spinorbit_info.md
+        - psp5spinorbit: developers/psp5spinorbit_info.md
         - psp6: developers/psp6_info.md
         - psp8: developers/psp8_info.md
     - Code stats: developers/codestats.md
@@ -289,9 +291,8 @@ nav:
     - Test Page for linkcheck: developers/testlink.md
     #- External Resources: developers/external_resources.md
 - About:
-    - Release Notes: about/release-notes.md
-    - Contributing: about/contributing.md
     - History: about/history.md
+    - Release Notes: about/release-notes.md
     - License: about/license.md
 
 # The section below activates markdown/theme extensions and other parameters related to
@@ -370,7 +371,7 @@ extra_javascript:
     #- extra_javascript/mathjax.js
     #- https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
-copyright: Copyright &copy; 2020-2025 The Abinit Group
+copyright: Copyright &copy; 2020-2026 The Abinit Group
 
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 

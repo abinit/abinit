@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2026 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -406,7 +406,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    call pawdenpot(compch_sph,el_temp,gprimd,0,dtset%ixc,my_natom,dtset%natom,dtset%nspden,ntypat,&
 &   dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,energies%paw,paw_ij,pawang,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,&
-&   dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,comm_atom=mpi_enreg%comm_atom,&
+&   dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,dtset%spinaxis,comm_atom=mpi_enreg%comm_atom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab)
    do iatom=1,my_natom
      ABI_FREE(paw_ij(iatom)%dijhartree)
@@ -645,7 +645,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    call pawdenpot(compch_sph,el_temp,gprimd,0,dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
 &   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,energies%paw,paw_ij,pawang,&
 &   dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
-&   dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,&
+&   dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,xred,ucvol,psps%znuclpsp,dtset%spinaxis,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    do iatom=1,my_natom
      ABI_FREE(paw_ij(iatom)%dijhartree)

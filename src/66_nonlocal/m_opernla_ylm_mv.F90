@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2025 ABINIT group (LB,MT)
+!!  Copyright (C) 2021-2026 ABINIT group (LB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -177,8 +177,11 @@ subroutine opernla_ylm_mv(choice,cplex,dimffnl,ffnl,gx,&
  cil(3) = (-1.0_DP, 0.0_DP) * wt
  cil(4) = ( 0.0_DP,-1.0_DP) * wt
 
+ ! FIXME OpenMP parallelism is still flawed here so forcing NUM_THREADS=1 here
+ ! Bug reproducible with v9[71] and bounds checks enabled
 !$OMP PARALLEL PRIVATE(il,ilmn,ipw,jpw), &
-!$OMP PRIVATE(ispinor,ipwshft,ia,iaph3d)
+!$OMP PRIVATE(ispinor,ipwshft,ia,iaph3d) &
+!$OMP NUM_THREADS(1)
 
 !Loop on spinorial components
  do ispinor =1,nspinor

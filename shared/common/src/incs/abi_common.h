@@ -1,7 +1,7 @@
 /* abi_common.h */
 
 /*
- * Copyright (C) 2008-2025 ABINIT Group (MG)
+ * Copyright (C) 2008-2026 ABINIT Group (MG)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -409,8 +409,10 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
  *   - emit deprecation warnings at USE_DEVICE_PTR, while still supporting it
  * This macro exists to keep support for older NVHPC versions.
  */
+#ifdef FC_NVHPC
 #if __NVCOMPILER_MAJOR__ < 25
 #define USE_DEVICE_ADDR USE_DEVICE_PTR
+#endif
 #endif
 
 /* DFTI macros (should be declared in m_dfti but build-sys tests complain */

@@ -13,7 +13,7 @@
 !!    where U is an upper triangular matrix and L is lower triangular.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2025 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2026 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
