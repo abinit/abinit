@@ -402,7 +402,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #if defined HAVE_GPU_CUDA
  integer(c_int64_t)   :: ph3d_size
 #endif
- integer :: nmpi,mpicomm
+ integer :: nthreads,nmpi,mpicomm
 
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd,step_cond
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
@@ -2301,7 +2301,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
      if (optres==1) then
        nvresid=rhor-nvresid
-       ! /!\ ---- IT IS IMPORTANT TO NOT CHANGE THESE LINES ---- /!\
+       ! /!\ ---- DO NOT CHANGE THESE LINES WITHOUT CORE DEVELOPERS PERMISSION ---- /!\
        ! LB-03/2026:
        ! A noise can accumulate in nvresid after each SCF cycle,
        ! resulting in different densities/potentials for different MPI processes.
@@ -2309,10 +2309,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ! This slowly worsens the SCF cycle, leading to wrong results after many iterations.
        ! So here we compute the mean of nvresid over all MPI processes to reduce the noise.
        ! This error is difficult to test as it is observed in long runs only, so BE VERY CAREFUL.
-       ! Note : the cost of this MPI communication is not so big (much smaller than any communication done on WFs).
        mpicomm = mpi_enreg%comm_kptband
        nmpi = xmpi_comm_size(mpicomm)
-       if (nmpi>1) then
+       nthreads = xomp_get_num_threads(open_parallel=.true.)
+       if (nmpi>1.and.nthreads>1) then
          ABI_MALLOC(nvresid_tmp,(nfftf,dtset%nspden))
          nvresid_tmp(:,:) = nvresid(:,:) / nmpi
          call xmpi_sum(nvresid_tmp,mpicomm,ierr)
@@ -2328,8 +2328,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (dtset%usekden==1) then
          if (optres==1) then
            tauresid=taur-tauresid
-           ! /!\ ---- IT IS IMPORTANT TO NOT CHANGE THESE LINES ---- /!\
-           if (nmpi>1) then
+           ! /!\ ---- DO NOT CHANGE THESE LINES WITHOUT CORE DEVELOPERS PERMISSION ---- /!\
+           if (nmpi>1.and.nthreads>1) then
              ABI_MALLOC(nvresid_tmp,(nfftf,dtset%nspden))
              nvresid_tmp(:,:) = tauresid(:,:) / nmpi
              call xmpi_sum(nvresid_tmp,mpicomm,ierr)
