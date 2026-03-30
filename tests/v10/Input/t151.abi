@@ -94,11 +94,11 @@ xred
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t151.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = t151.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [extra_info]
 #%% authors = I.-M. Lygatsika
 #%% keywords = PAW
