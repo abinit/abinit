@@ -406,7 +406,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd,step_cond
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
- logical :: do_last_ortho,wvlbigdft=.false.,do_invS,calc_ffnl_ph3d
+ logical :: do_last_ortho,wvlbigdft=.false.,do_invS,calc_ffnl_ph3d,gpu_mem_estimated
  integer :: dmft_dftocc
  real(dp) :: nelect,min_eigv
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
@@ -495,6 +495,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  paral_atom=(my_natom/=natom)
  compch_fft=-1.d5
+ gpu_mem_estimated=.false.; if(istep>1) gpu_mem_estimated=.true.
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.dtset%usekden/=0.and.usevxctau/=0)
@@ -1084,7 +1085,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
-       if(gemm_nonlop_use_gemm .and. istep <= 1 .and. isppol < 2 .and. dtset%gpu_option==ABI_GPU_OPENMP) then
+       if(gemm_nonlop_use_gemm .and. istep <= 1 .and. dtset%gpu_option==ABI_GPU_OPENMP .and. .not. gpu_mem_estimated) then
          gemm_nonlop_block_size = dtset%gpu_nl_splitsize
          call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
          &                        dtset%nspinor,dtset%nspden,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
@@ -1092,6 +1093,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          &                        gemm_nonlop_block_size,nblk_gemm_nonlop)
          mpi_enreg%gpu_fft_nslices = gs_hamk%nfourwf_slices
          gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
+         gpu_mem_estimated=.true.
        end if
 
         ! Build inverse of overlap matrix for chebfi or slice
