@@ -713,7 +713,7 @@ extern "C" void gpu_xscal_(int* cplx, int *N,
 
 /*=========================================================================*/
 // NAME
-//  gpu_zdot
+//  gpu_xdot
 //
 // FUNCTION
 //  Compute blas-3 DOT on GPU
