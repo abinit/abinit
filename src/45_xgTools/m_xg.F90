@@ -4488,13 +4488,17 @@ contains
 
     if (xgBlock1%gpu_option==ABI_GPU_KOKKOS .or. xgBlock2%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-      call abi_gpu_xdot(2, xgBlock1%cols*xgBlock1%LDim, xgBlock_out%vecC, xgBlock1%vecC, 1, xgBlock2%vecC, 1)
+      ! /IML\ will fix later compilation bug
+      ABI_ERROR("not implemented")
+      !call abi_gpu_xdot(2, xgBlock1%cols*xgBlock1%LDim, xgBlock_out%vecC, xgBlock1%vecC, 1, xgBlock2%vecC, 1)
 #elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
       xgBlock1__vecC => xgBlock1%vecC
       xgBlock2__vecC => xgBlock2%vecC
       !$OMP TARGET DATA USE_DEVICE_ADDR(xgBlock1__vecC,xgBlock2__vecC)
-      call abi_gpu_xdot(2, xgBlock1%cols*xgBlock1%LDim, xgBlock_out%vecC, c_loc(xgBlock1__vecC),1,c_loc(xgBlock2__vecC),1)
+      ! /IML\ will fix later compilation bug
+      ABI_ERROR("not implemented")
+      !call abi_gpu_xdot(2, xgBlock1%cols*xgBlock1%LDim, xgBlock_out%vecC, c_loc(xgBlock1__vecC),1,c_loc(xgBlock2__vecC),1)
       !$OMP END TARGET DATA
 #endif
 
