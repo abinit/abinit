@@ -6,9 +6,7 @@ wfoptalg 112
 nslice 2
 nline 12
 paral_slice 1
-nstep_mixed 0  # not used kept for reference
-tolfilter 1e-10 # not used kept for reference
-spectral_cut 1 # not used kept for reference
+nstep_mixed 0
 
 # Electronic bands
 nband           192

@@ -999,9 +999,6 @@ contains
  dprarr(1,:)=dtsets(:)%spbroad
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'spbroad','ENE',0)
 
- intarr(1,:)=dtsets(:)%spectral_cut
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'spectral_cut','INT',0)
-
  intarr(1,:)=dtsets(:)%spgroup
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'spgroup','INT',0)
 
@@ -1133,46 +1130,6 @@ contains
  intarr(1,:)=dtsets(:)%symv1scf
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'symv1scf','INT',0)
 
- intarr(1,:)=dtsets(:)%slice1_m
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice1_m','INT',0)
- intarr(1,:)=dtsets(:)%slice1_deg
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice1_deg','INT',0)
- dprarr(1,:)=dtsets(:)%slice1_part_a
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice1_part_a','DPR',0)
- dprarr(1,:)=dtsets(:)%slice1_part_b
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice1_part_b','DPR',0)
- dprarr(1,:)=dtsets(:)%slice1_poly_a
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice1_poly_a','DPR',0)
- dprarr(1,:)=dtsets(:)%slice1_poly_b
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice1_poly_b','DPR',0)
-
- intarr(1,:)=dtsets(:)%slice2_m
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice2_m','INT',0)
- intarr(1,:)=dtsets(:)%slice2_deg
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice2_deg','INT',0)
- dprarr(1,:)=dtsets(:)%slice2_part_a
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice2_part_a','DPR',0)
- dprarr(1,:)=dtsets(:)%slice2_part_b
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice2_part_b','DPR',0)
- dprarr(1,:)=dtsets(:)%slice2_poly_a
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice2_poly_a','DPR',0)
- dprarr(1,:)=dtsets(:)%slice2_poly_b
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice2_poly_b','DPR',0)
-
- intarr(1,:)=dtsets(:)%slice3_m
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice3_m','INT',0)
- intarr(1,:)=dtsets(:)%slice3_deg
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice3_deg','INT',0)
- dprarr(1,:)=dtsets(:)%slice3_part_a
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice3_part_a','DPR',0)
- dprarr(1,:)=dtsets(:)%slice3_part_b
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice3_part_b','DPR',0)
- dprarr(1,:)=dtsets(:)%slice3_poly_a
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice3_poly_a','DPR',0)
- dprarr(1,:)=dtsets(:)%slice3_poly_b
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'slice3_poly_b','DPR',0)
-
-
  intarr(1,:)=dtsets(:)%scr_wrange(1)
  intarr(2,:)=dtsets(:)%scr_wrange(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'scr_wrange','INT',0)
@@ -1225,9 +1182,6 @@ contains
 
  dprarr(1,:)=dtsets(:)%tolcum
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolcum','DPR',0)
-
- dprarr(1,:)=dtsets(:)%tolfilter
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolfilter','DPR',0)
 
  dprarr(1,:)=dtsets(:)%toldfe
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'toldfe','ENE',0)
