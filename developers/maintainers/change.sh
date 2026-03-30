@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (C) 1998-2025 ABINIT group (XG)
+# Copyright (C) 1998-2026 ABINIT group (XG)
 #
 # The purpose of this script is to change some
 # expression by another in a whole set of files
@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file
- sed -e 's!tlw_!t3!' $file > tmp.file
+ sed -e 's!2025 ABINIT group . !2025 ABINIT group .!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file

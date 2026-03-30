@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2908,7 +2908,7 @@ end subroutine compa_occup_ks
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2989,7 +2989,7 @@ end subroutine add_int_fct
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3111,7 +3111,7 @@ end subroutine int_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3244,7 +3244,7 @@ end subroutine fourier_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3506,7 +3506,7 @@ end subroutine occup_green_tau
 !! Compute levels for ctqmc
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3588,7 +3588,7 @@ end subroutine occup_green_tau
 !!  Compute Fermi level for DMFT or DFT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3734,7 +3734,7 @@ end subroutine fermi_green
 !!  Compute root of a function with newton methods (newton/halley)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4268,7 +4268,7 @@ end subroutine newton
 !! do the fourier transformation and print it
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4425,7 +4425,7 @@ end subroutine local_ks_green
 !! Compute the high-frequency moments of the Green's function in KS space
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4617,7 +4617,7 @@ end subroutine compute_moments_ks
 !! Fermi level search)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2024 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

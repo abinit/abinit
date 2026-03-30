@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -878,7 +878,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ABI_MALLOC(extfpmd,)
      call extfpmd%init(dtset%mband,hdr%extfpmd_eshift,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
 &     nfftf,dtset%nspden,dtset%nsppol,dtset%nkpt,dtset%occopt,rprimd,dtset%tphysel,&
-&     dtset%tsmear,dtset%useextfpmd,mpi_enreg,dtset%extfpmd_nband,dtset%extfpmd_pawsph==1)
+&     dtset%tsmear,dtset%useextfpmd,mpi_enreg,dtset%extfpmd_nband,dtset%extfpmd_pawsph)
    end if
  end if
 
@@ -2086,7 +2086,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
  end if
 
 !If needed, print DOS (unitdos is closed in getnel, occ is not changed if option == 2
- if (dtset%prtdos==1 .and. me == master) then
+ if ((dtset%prtdos==1.or.dtset%prtdos==4) .and. me == master) then
    if (open_file(fnameabo_dos,msg, newunit=unitdos, status='unknown', action="write", form='formatted') /= 0) then
      ABI_ERROR(msg)
    end if
@@ -2609,7 +2609,7 @@ end subroutine pawuj_drive
 !!  read/write xfhist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2025 ABINIT group (MB)
+!! Copyright (C) 2003-2026 ABINIT group (MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

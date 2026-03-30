@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -711,7 +711,7 @@ end subroutine print_matlu
 !! Symmetrize local quantity.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -737,8 +737,8 @@ end subroutine print_matlu
 !Local variables-------------------------------
  integer :: at_indx,iatom,irot,isppol,lpawu,m1,m2,mu,natom
  integer :: ndim,ndim_max,nspinor,nsppol,nsym,nu,gpu_option
- complex(dp), allocatable :: gloc_tmp(:,:,:),gloc_tmp2(:,:,:)
- complex(dp), allocatable :: gloc_tmp3(:,:,:,:),gloc_tmp4(:,:,:,:)
+ complex(dp), target, allocatable :: gloc_tmp(:,:,:),gloc_tmp2(:,:,:)
+ complex(dp), target, allocatable :: gloc_tmp3(:,:,:,:),gloc_tmp4(:,:,:,:)
  type(matlu_type), allocatable, target :: gloc_nmrep(:),glocsym(:)
  complex(dp), ABI_CONTIGUOUS pointer :: zarot(:,:,:,:),gloc_mat(:,:,:),glocsym_mat(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: symrec_cart(:,:,:)
@@ -1238,7 +1238,7 @@ end subroutine print_matlu
 !! Inverse local quantity.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1464,7 +1464,7 @@ end subroutine add_matlu
 !! Change representation of density matrix (useful for nspinor=2)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1513,7 +1513,7 @@ end subroutine add_matlu
      glocspsp_mat => glocspsp(iatom)%mat
 
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(isppol) MAP(to:glocnm,glocspsp) &
+     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(isppol) MAP(to:glocnm_mat,glocspsp_mat) &
      !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      do isppol=1,nsppol
@@ -1556,7 +1556,7 @@ end subroutine add_matlu
      glocspsp_mat => glocspsp(iatom)%mat
 
 #ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(isppol) MAP(to:glocnm,glocspsp) &
+     !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(isppol) MAP(to:glocnm_mat,glocspsp_mat) &
      !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      do isppol=1,nsppol
@@ -1734,7 +1734,7 @@ end subroutine add_matlu
 !! Create new array from matlu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1846,7 +1846,7 @@ end subroutine add_matlu
 !! Diagonalize hermitian matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2300,7 +2300,7 @@ end subroutine add_matlu
 !! Rotate matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2531,7 +2531,7 @@ end subroutine add_matlu
 !! Add/subtract a scalar to the diagonal part
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2592,7 +2592,7 @@ end subroutine add_matlu
 !! Check that matlu is real and diagonal with given precision
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2684,7 +2684,7 @@ end subroutine add_matlu
 !! Check that matlu is diagonal in the orbital index with given precision
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2762,7 +2762,7 @@ end subroutine add_matlu
 !! Matrix product of two matlus
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2839,7 +2839,7 @@ end subroutine add_matlu
 !! conjugate of input matlu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2896,7 +2896,7 @@ end subroutine add_matlu
 !! Compute the logarithm of matlu (only if diagonal for the moment)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2956,7 +2956,7 @@ end subroutine add_matlu
 !! Transform mat from Slm to Ylm basis or vice versa
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3185,7 +3185,7 @@ end subroutine add_matlu
 !! Multiply matlu by a scalar
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3232,7 +3232,7 @@ end subroutine add_matlu
 !! Write matlu for a given frequency
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3311,7 +3311,7 @@ end subroutine add_matlu
 !!  Set the diagonal elements to 1 (the off-diagonal are not set to 0)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3365,7 +3365,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3605,7 +3605,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3870,7 +3870,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4163,7 +4163,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4354,7 +4354,7 @@ end subroutine add_matlu
 !! suboptimal if this is the case.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2024 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4562,7 +4562,7 @@ end subroutine add_matlu
 !! Transform mat from Ylm to JmJ basis or vice versa
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2024 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2026 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4633,7 +4633,7 @@ end subroutine add_matlu
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4762,117 +4762,118 @@ end subroutine add_matlu
  end subroutine magnfield_matlu
 !!***
 
-!!****f* m_matlu/magmomjmj_matlu
-!! NAME
-!! magmomjmj_matlu
-!!
-!! FUNCTION
-!! return the matrix of magnetic moments in the Jmj basis
-!!
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2025 ABINIT group (FGendron)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!!
-!! SOURCE
- subroutine magmomjmj_matlu(matlu,natom)
- use defs_basis
- use defs_wvltypes
- implicit none
 
-!Arguments ------------------------------------
-!scalars
- integer, intent(in) :: natom
-!arrays
- type(matlu_type), intent(inout) :: matlu(natom)
-!Local variables-------------------------------
-!scalars
- integer :: iatom,lpawu,ll,ml1,ms1,jm,jc1,tndim,jj
- real(dp) :: xj,xmj
-!arrays
- integer, allocatable :: ind_msml(:,:)
- type(coeff2c_type), allocatable :: gathermatlu(:)
- complex(dpc),allocatable :: mlms2jmj(:,:)
-!************************************************************************
-
- !=====================================
- ! Allocate Matrices
- !=====================================
-
- ABI_MALLOC(gathermatlu,(natom))
-
- do iatom=1,natom
-   lpawu=matlu(iatom)%lpawu
-   if(lpawu.ne.-1) then
-     ll=lpawu
-     tndim=2*(2*ll+1)
-
-     ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
-     gathermatlu(iatom)%value=czero
-     ABI_MALLOC(mlms2jmj,(tndim,tndim))
-     mlms2jmj=czero
-     ABI_MALLOC(ind_msml,(2,-ll:ll))
-     mlms2jmj=czero
-
- !=====================================
- ! Build J,M_J matrix
- !=====================================
-
-    jc1=0
-    do ms1=1,2
-      do ml1=-ll,ll
-        jc1=jc1+1
-        ind_msml(ms1,ml1)=jc1
-      end do
-    end do
-
-    jc1=0
-    do jj=ll,ll+1
-      xj=float(jj)-half !  xj is in {ll-0.5, ll+0.5}
-      do jm=-jj,jj-1
-        xmj=float(jm)+half  ! xmj is in {-xj,xj}
-        jc1=jc1+1           ! Global index for JMJ
-        if(nint(xj+0.5)==ll+1) then  ! if xj=ll+0.5
-          mlms2jmj(jc1,jc1)=xmj   !  J=L+0.5 and m_J=L+0.5
-        else if(nint(xj-0.5)==ll-1) then
-          mlms2jmj(jc1,jc1)=xmj   !  J=L+0.5 and m_J=-L-0.5
-        end if
-      end do
-    end do
-
-    !print to debug
-    !write(message,'(3a)') ch10,"JMJ Matrix"
-    !call wrtout(std_out,message,"COLL")
-    !do im=1,2*(ll*2+1)
-    !  write(message,'(12(1x,18(1x,f5.2,f5.2)))') (mlms2jmj(im,jm),jm=1,2*(ll*2+1))
-    !  call wrtout(std_out,message,"COLL")
-    !end do
-
-  !=====================================
-  ! Put back into matlu format
-  !=====================================
-
-   gathermatlu(iatom)%value=mlms2jmj
-
-   call gather_matlu(matlu,gathermatlu(iatom),natom=1,option=-1,prtopt=0)
-
-  !=====================================
-  ! Deallocate Matrices
-  !=====================================
-
-   ABI_FREE(gathermatlu(iatom)%value)
-    end if !lpawu
-  end do !natom
+!!****f* m_matlu/magmomjmj_matlu                                                                         
+!! NAME                                                                                                  
+!! magmomjmj_matlu                                                                                       
+!!                                                                                                       
+!! FUNCTION                                                                                              
+!! return the matrix of magnetic moments in the Jmj basis                  
+!!                                                                                                       
+!!                                                                                                       
+!! COPYRIGHT                                                                                             
+!! Copyright (C) 2005-2026 ABINIT group (FGendron)                                                       
+!! This file is distributed under the terms of the                                                       
+!! GNU General Public License, see ~abinit/COPYING                                                       
+!! or http://www.gnu.org/copyleft/gpl.txt .                                                              
+!!                                                                                                       
+!! INPUTS                                                                                                
+!!                                                                                                       
+!! OUTPUT                                                                                                
+!!                                                                                                       
+!! SIDE EFFECTS                                                                                          
+!!                                                                                                       
+!! NOTES                                                                                                  
+!!                                                                                                        
+!! SOURCE                                                                                                 
+ subroutine magmomjmj_matlu(matlu,natom)                                                                  
+ use defs_basis                                                                                           
+ use defs_wvltypes                                                                                        
+ implicit none                                                                                            
+                                                                                                          
+!Arguments ------------------------------------                                                           
+!scalars                                                                                                  
+ integer, intent(in) :: natom                                                                             
+!arrays                                                                                                   
+ type(matlu_type), intent(inout) :: matlu(natom)                                                          
+!Local variables-------------------------------                                                           
+!scalars                                                                                                  
+ integer :: iatom,lpawu,ll,ml1,ms1,jm,jc1,tndim,jj                                                        
+ real(dp) :: xj,xmj                                                                                       
+!arrays                                                                                                   
+ integer, allocatable :: ind_msml(:,:)                                                                    
+ type(coeff2c_type), allocatable :: gathermatlu(:)                                                        
+ complex(dpc),allocatable :: mlms2jmj(:,:)                                                                
+!************************************************************************                                 
+                                                                                                          
+ !=====================================                                                                   
+ ! Allocate Matrices                                                                                      
+ !=====================================                                                                   
+                                                                                                          
+ ABI_MALLOC(gathermatlu,(natom))                                                                          
+                                                                                                          
+ do iatom=1,natom                                                                                         
+   lpawu=matlu(iatom)%lpawu                                                                               
+   if(lpawu.ne.-1) then                                                                                   
+     ll=lpawu                                                                                             
+     tndim=2*(2*ll+1)                                                                                     
+                                                                                                          
+     ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))                                                   
+     gathermatlu(iatom)%value=czero                                                                       
+     ABI_MALLOC(mlms2jmj,(tndim,tndim))                                                                   
+     mlms2jmj=czero                                                                                       
+     ABI_MALLOC(ind_msml,(2,-ll:ll))                                                                      
+     mlms2jmj=czero                                                                                       
+                                                                                                          
+ !=====================================                                                                   
+ ! Build J,M_J matrix                                                                                     
+ !=====================================                                                                   
+                                                                                                          
+    jc1=0                                                                                                 
+    do ms1=1,2                                                                                            
+      do ml1=-ll,ll                                                                                       
+        jc1=jc1+1                                                                                         
+        ind_msml(ms1,ml1)=jc1                                                                             
+      end do                                                                                              
+    end do                                                                                                
+                                                                                                          
+    jc1=0                                                                                                 
+    do jj=ll,ll+1                                                                                         
+      xj=float(jj)-half !  xj is in {ll-0.5, ll+0.5}                                                      
+      do jm=-jj,jj-1                                                                                      
+        xmj=float(jm)+half  ! xmj is in {-xj,xj}                                                          
+        jc1=jc1+1           ! Global index for JMJ                                                        
+        if(nint(xj+0.5)==ll+1) then  ! if xj=ll+0.5                                                       
+          mlms2jmj(jc1,jc1)=xmj   !  J=L+0.5 and m_J=L+0.5                                                
+        else if(nint(xj-0.5)==ll-1) then                                                                  
+          mlms2jmj(jc1,jc1)=xmj   !  J=L+0.5 and m_J=-L-0.5                                               
+        end if                                                                                            
+      end do                                                                                              
+    end do                                                                                                
+                                                                                                          
+    !print to debug                                                                    
+    !write(message,'(3a)') ch10,"JMJ Matrix"                                           
+    !call wrtout(std_out,message,"COLL")                                               
+    !do im=1,2*(ll*2+1)                                                                
+    !  write(message,'(12(1x,18(1x,f5.2,f5.2)))') (mlms2jmj(im,jm),jm=1,2*(ll*2+1))    
+    !  call wrtout(std_out,message,"COLL")                                             
+    !end do                                                                            
+                                                                                        
+  !=====================================                                                
+  ! Put back into matlu format                                                          
+  !=====================================                                                
+                                                                                        
+   gathermatlu(iatom)%value=mlms2jmj                                                  
+                                                                                       
+   call gather_matlu(matlu,gathermatlu(iatom),natom=1,option=-1,prtopt=0)             
+                                                                                        
+  !=====================================                                                
+  ! Deallocate Matrices                                                                 
+  !=====================================                                                
+                                                                                        
+   ABI_FREE(gathermatlu(iatom)%value)                                                
+    end if !lpawu                                                                       
+  end do !natom                                                                         
 
 ABI_FREE(mlms2jmj)
 ABI_FREE(ind_msml)

@@ -7,7 +7,7 @@
 !!  approach
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2019-2019 ABINIT group (NBrouwer,MT, JBoust)
+!!  Copyright (C) 2019-2026 ABINIT group (NBrouwer,MT, JBoust)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,6 +30,7 @@ module m_rcpaw
  use m_pawtab
  use m_pawrad
  use m_xmpi
+ use m_abicore
  use m_errors
  use m_paw_atomorb
  use m_paw_atom
@@ -439,6 +440,7 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
  integer :: il,nfgd,ifft,iln
  integer :: n1,n2,n3,i3,ispden
  integer :: my_comm_atom,iat,ierr
+ character(len=500) :: message
  logical :: my_atmtab_allocated,paral_atom,grid_found
  real(dp) :: eigshift,r1,r2,est_err,vh1,vh2
 !arrays
@@ -574,9 +576,12 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
      rcpaw%atm(itypat)%eigshift=eigshift/rcpaw%atm(itypat)%mult
      write(std_out,*) 'ESTIMATED ERROR ON CORE EIGS OF TYPAT',itypat,' = ',est_err*Ha_eV, ' eV'
      if(allocated(rcpaw%atm(itypat)%eig)) rcpaw%atm(itypat)%eig=rcpaw%atm(itypat)%eig+eigshift/rcpaw%atm(itypat)%mult ! Average on atoms of same type
-     if(rcpaw%atm(itypat)%nresid_c<rcpaw%tolnc.and.rcpaw%istep>rcpaw%updatepaw(2).and.rcpaw%updatepaw(2)/=0)then
+     if(rcpaw%atm(itypat)%nresid_c<rcpaw%tolnc.and.rcpaw%istep>rcpaw%updatepaw(2).and.rcpaw%updatepaw(2)/=0.and.&
+&       (dtset%rcpaw_vhtnzc/=2.or.dtset%rcpaw_frocc==1))then
         rcpaw%atm(itypat)%nc_conv=.true.
-     endif
+        write(message,'(a,i5,a)') 'RCPAW: core for typat ',itypat, ' converged'
+        call wrtout(ab_out,message) 
+    endif
    endif
  enddo
 
@@ -606,6 +611,18 @@ subroutine rcpaw_core_eig(pawtab,pawrad,ntypat,rcpaw,dtset,&
      write(std_out,*) rcpaw%atm(itypat)%eig(iln,1),rcpaw%atm(itypat)%occ(iln,1)
    enddo
  enddo
+
+ ! Print in abo
+ if(rcpaw%istep>=rcpaw%updatepaw(1).and.rcpaw%updatepaw(2)/=0.and.rcpaw%istep<=rcpaw%updatepaw(2))then
+   write(message,'(a)') 'RCPAW: updated PAW transform'
+   call wrtout(ab_out,message)
+   write(std_out,*) 'RCPAW: updated PAW transform'
+ endif
+ if(rcpaw%istep==rcpaw%updateocc.and.rcpaw%frocc) then
+   write(message,'(a)') 'RCPAW: freezing core occupations'
+   call wrtout(ab_out,message)
+   write(std_out,*) 'RCPAW: freezing core occupations'
+ endif
 
 end subroutine rcpaw_core_eig
 !!***

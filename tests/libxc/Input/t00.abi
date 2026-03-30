@@ -27,7 +27,7 @@ znucl 83
 nspinor 1
 nsppol  2
 nspden  2
-spinat  1.0 0.0 0.0
+spinat  0.0 0.0 1.0
 
 
 

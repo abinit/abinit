@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2025 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
+!!  Copyright (C) 1998-2026 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -404,7 +404,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd,step_cond
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
- logical :: do_last_ortho,wvlbigdft=.false.,do_invS
+ logical :: do_last_ortho,wvlbigdft=.false.,do_invS,calc_ffnl_ph3d
  integer :: dmft_dftocc
  real(dp) :: nelect,min_eigv
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
@@ -641,7 +641,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
   dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
   paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-  nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option,use_gbt=dtset%use_gbt)
+  nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option,spinaxis=dtset%spinaxis,use_gbt=dtset%use_gbt)
 
  if (dtset%cprj_in_memory==1) then
    call xg_nonlop_update_weight(xg_nonlop,ucvol) ! ucvol could have changed in mover
@@ -994,7 +994,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ider=0;idir=0;dimffnl=1
 
        ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,ntypat))
-       if (mpi_enreg%paral_kgb/=1.or.istep<=1) then
+       calc_ffnl_ph3d=.false.
+       if(mpi_enreg%paral_kgb/=1.or.istep<=1) calc_ffnl_ph3d=.true.
+       if(associated(rcpaw)) then
+         if(rcpaw%istep>=rcpaw%updatepaw(1)+1.and.rcpaw%istep<=rcpaw%updatepaw(2)+1.and.&
+              (dtset%wfoptalg==111.or.dtset%wfoptalg == 1)) then
+           calc_ffnl_ph3d=.true.
+         endif
+       endif
+       if (calc_ffnl_ph3d) then
          call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,&
           gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
           psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
@@ -1030,7 +1038,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (usefock_ACE/=0) then
          call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
            kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt,isppol),ph3d_k=ph3d,&
-           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), compute_gbound=(mpi_enreg%paral_kgb/=1))
+           compute_ph3d=calc_ffnl_ph3d, compute_gbound=(mpi_enreg%paral_kgb/=1))
 
            if (dtset%use_gbt /= 0) then
              ABI_ERROR("GBT with fock_ace not implemented")
@@ -1038,12 +1046,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        else
          call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
            kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
-           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), compute_gbound=(mpi_enreg%paral_kgb/=1))
+           compute_ph3d=calc_ffnl_ph3d, compute_gbound=(mpi_enreg%paral_kgb/=1))
 
          if (dtset%use_gbt /= 0) then
            call gs_hamk%load_kprime(kpt_kp=kphq,&
              kinpw_kp=kinpw_kphq,kpg_kp=kpg_kphq,ffnl_kp=ffnl_kphq,ph3d_kp=ph3d_kphq,&
-             compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), compute_gbound=(mpi_enreg%paral_kgb/=1))
+             compute_ph3d=calc_ffnl_ph3d, compute_gbound=(mpi_enreg%paral_kgb/=1))
          end if
        end if
 
@@ -1083,7 +1091,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        ! Build inverse of overlap matrix for chebfi
        if(associated(rcpaw)) then
-         step_cond=istep<=1.or.(rcpaw%istep>=rcpaw%updatepaw(1)+1.and.rcpaw%istep<=rcpaw%updatepaw(2)+1)
+         step_cond=istep<=1.or.(rcpaw%istep>=rcpaw%updatepaw(1)+1.and.rcpaw%istep<=rcpaw%updatepaw(2)+1.and.&
+              (dtset%wfoptalg==111.or.dtset%wfoptalg == 1))
        else
          step_cond=istep <= 1
        endif

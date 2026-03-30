@@ -8,7 +8,7 @@
 !! It mainly defines a 'chebfi' datatypes and associated methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2025 ABINIT group (BS, L. Baguet)
+!! Copyright (C) 2018-2026 ABINIT group (BS, L. Baguet)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -429,6 +429,7 @@ function chebfi_memInfo(neigenpairs,spacedim,space,paral_kgb,total_spacedim,band
    memX_CR = 0
    memAX_CR = 0
    memBX_CR = 0
+   mem_sendrecv_CR = 0
  end if
 
  !chebfi_rayleighRitz function variables
