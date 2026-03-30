@@ -1354,6 +1354,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     138.000
  DFT+DMFT Method is used
  ******************************************
 
+ DMFT check: static solver
+
  Magnetic DFT, with Magnetic FLL (Full Localized Limit) double counting
 
  Entropy is not computed, only the internal energy is printed
@@ -1808,6 +1810,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     138.000
  DFT+DMFT Method is used
  ******************************************
 
+ DMFT check: static solver without renormalization of projectors: should recover DFT+U
+
  Magnetic DFT, with Magnetic FLL (Full Localized Limit) double counting
 
  Entropy is not computed, only the internal energy is printed
@@ -2261,6 +2265,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     138.000
  ******************************************
  DFT+DMFT Method is used
  ******************************************
+
+ DMFT uses the Hubbard one solver
 
  Magnetic DFT, with Magnetic FLL (Full Localized Limit) double counting
 
