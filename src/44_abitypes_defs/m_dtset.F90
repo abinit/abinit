@@ -3897,8 +3897,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' optnlxccc optstress oracle_factor oracle_min_occ orbmag ortalg'
  list_vars=trim(list_vars)//' opt_effpot opt_ncoeff opt_coeff output_file outdata_prefix'
 !P
- list_vars=trim(list_vars)//' papiopt paral_atom paral_kgb paral_rf paral_slice pawcpxocc pawcross'
- list_vars=trim(list_vars)//' pawecutdg pawfatbnd pawlcutd pawlmix'
+ list_vars=trim(list_vars)//' papiopt paral_atom paral_kgb paral_rf paral_slice paw_add_core pawcpxocc'
+ list_vars=trim(list_vars)//' pawcross pawecutdg pawfatbnd pawlcutd pawlmix'
  list_vars=trim(list_vars)//' pawmixdg pawnhatxc pawnphi pawntheta pawnzlm pawoptmix pawoptosc pawovlp'
  list_vars=trim(list_vars)//' pawprtdos pawprtvol pawprtwf pawprt_b pawprt_k pawspnorb pawstgylm'
  list_vars=trim(list_vars)//' pawsushat pawujat pawujrad pawujv'
