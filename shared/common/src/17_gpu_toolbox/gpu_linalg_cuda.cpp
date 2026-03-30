@@ -736,14 +736,31 @@ extern "C" void gpu_xdot_(int* cplx, int *N,
                            cuDoubleComplex *alpha,
                            void **X_ptr, int *incrx, void **Y_ptr, int *incry)
 {
+  if (*cplx == 1) {
+    double result;
 
-  (*cplx==1)?
-      CUDA_API_CHECK( cublasDdot(cublas_handle,*N, &((*alpha).x),
-                              (double *)(*X_ptr), *incrx,
-                              (double *)(*Y_ptr), *incry)) :
-      CUDA_API_CHECK( cublasZdotc(cublas_handle, *N, alpha,
-                              (cuDoubleComplex *)(*X_ptr), *incrx,
-                              (cuDoubleComplex *)(*Y_ptr), *incry) );
+    CUDA_API_CHECK(
+      cublasDdot(cublas_handle, *N,
+                 (const double *)(*X_ptr), *incrx,
+                 (const double *)(*Y_ptr), *incry,
+                 &result)
+    );
+
+    alpha->x = result;
+    alpha->y = 0.0;
+
+  } else {
+    cuDoubleComplex result;
+
+    CUDA_API_CHECK(
+      cublasZdotc(cublas_handle, *N,
+                  (const cuDoubleComplex *)(*X_ptr), *incrx,
+                  (const cuDoubleComplex *)(*Y_ptr), *incry,
+                  &result)
+    );
+
+    *alpha = result;
+  }
 } // gpu_xdot_
 
 /*=========================================================================*/
