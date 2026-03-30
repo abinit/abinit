@@ -225,6 +225,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  DFT+DMFT Method is used
  ******************************************
 
+ DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT
+
  Non Magnetic DFT, with Non-Magnetic FLL (Full Localized Limit) double counting
 
  Entropy is not computed, only the internal energy is printed
