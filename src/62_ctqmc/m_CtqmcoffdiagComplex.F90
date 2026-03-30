@@ -1494,7 +1494,7 @@ SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
     !== Read Hybridization function from file ==
     !reset previous hybridization
     write(message,'(a)') "Warning: About to read Hybridization from file!"
-    call wrtout(std_out,messqge,'COLL')
+    call wrtout(std_out,message,'COLL')
     DO iflavor = 1, flavors             
       DO iflavor2 = 1, flavors          
         DO itau=1,samples+1             
