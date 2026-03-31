@@ -206,7 +206,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_fft_nslices',tread0,'INT')
    if(tread0==1) dtsets(idtset)%gpu_fft_nslices=intarr(1)
-   if(tread0==1) mpi_enregs(idtset)%gpu_fft_nslices=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_kokkos_nthrd',tread0,'INT')
    if(tread0==1) dtsets(idtset)%gpu_kokkos_nthrd=intarr(1)
