@@ -520,8 +520,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: ideg, ierr, j
  integer :: iband, islice
  integer :: slicedim
- integer :: shift_x,shift_cprj
- integer :: niter, max_niter_restart
+ !integer :: shift_x,shift_cprj
+ !integer :: niter, max_niter_restart
  integer :: nband_slice
  integer :: count_mask
  integer :: count_rr
@@ -540,14 +540,14 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: trace_degree, trace_rank
  integer :: nstep_spectrum
  integer :: kmax
- integer :: nfilters, ifilter, nstep_bisect, ishift
+ integer :: nfilters, nstep_bisect, ishift
  integer :: nvec_approx
- integer :: ideg_shift
+ !integer :: ideg_shift
  integer :: nm
  real(dp) :: balance_prev, balance_this
  real(dp) :: conf_tol
- real(dp) :: tol_step
- real(dp) :: tol_probe
+ !real(dp) :: tol_step
+ !real(dp) :: tol_probe
  real(dp) :: tolerance
  real(dp) :: tolfilter
  real(dp) :: ramp
@@ -564,10 +564,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp) :: radius
  real(dp) :: ls, us, cdeg, mu, damp
  real(dp) :: min_low_est
- real(dp) :: amp_ideg
- real(dp) :: ein_ideg, eout_ideg
- real(dp) :: trace_est
- real(dp) :: trace_est_slice1, trace_est_slice2
+ !real(dp) :: amp_ideg
+ !real(dp) :: ein_ideg, eout_ideg
+ !real(dp) :: trace_est
+ real(dp) :: trace_est_slice1!, trace_est_slice2
  real(dp) :: low_bound, upp_bound, min_low_bound
  real(dp) :: min_upp_bound, max_upp_bound
  real(dp) :: lambda_min, res_norm ! lanczos
@@ -579,7 +579,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  type(xg_t) :: DivResults
  type(xg_t) :: norm2_X
  type(xg_t) :: dot_XfX, norm2_fX
- type(xg_t) :: res_temp
+ !type(xg_t) :: res_temp
  type(xg_t) :: X0_out, eigen_out
  type(xgBlock_t) :: X0_out_part, eigen_out_part
  type(xgBlock_t) :: X_in, eigen_in
@@ -1967,7 +1967,7 @@ subroutine slice_ampfactor(slice,DivResults,lambda_minus,lambda_plus,ndeg_filter
   ! Local variables-------------------------------
   ! scalars
   integer         :: iband
-  integer         :: npw, nband
+  !integer         :: npw, nband
   real(dp)        :: ampfactor
   real(dp)        :: eig_per_band
   type(xgBlock_t) :: X_part
@@ -2011,8 +2011,8 @@ subroutine slice_ampfactorMax(slice,DivResults,lambda_minus,lambda_plus,ndeg_fil
   ! scalars
   integer         :: iband
   real(dp)        :: ampfactor
-  type(xgBlock_t) :: X_part
-  type(xgBlock_t) :: AX_part
+  !type(xgBlock_t) :: X_part
+  !type(xgBlock_t) :: AX_part
   real(dp),pointer :: eig(:,:)
 
   ! *********************************************************************
@@ -2264,7 +2264,7 @@ subroutine generateGaussianMatrix(V, n, m, rank)
     real(dp), intent(out) :: V(2, n*m)
 
     ! local arguments
-    integer :: nseed, i, j, nm
+    integer :: nseed, i, nm
     integer :: base_seed
     integer, allocatable :: seed(:)
     real(dp) :: u1, u2
@@ -2679,14 +2679,14 @@ subroutine computeTraceEstimation(slice, m_vecs, trace_degree, low_bound, upp_bo
     type(xg_t) :: xgX
     type(xg_nonlop_t) :: xg_nonlop
     integer :: cprjdim
-    integer :: spacedim, i, j, k
+    integer :: spacedim
     integer :: blockdim_cprj
     integer :: nspinor
     integer :: l_gpu_option
-    integer :: idx_i, idx_j
+    !integer :: idx_i, idx_j
     real(dp) :: tolerance
-    real(dp) :: trace_tmp
-    real(dp) :: normX
+    !real(dp) :: trace_tmp
+    !real(dp) :: normX
     real(dp), pointer :: accum(:,:) => null()
     complex(dp), pointer :: X(:,:) => null() 
     real(dp) :: tsec(2)
@@ -2935,7 +2935,7 @@ end subroutine splitSpectrumToSlices
     end interface
     
     type(xg_nonlop_t) :: xg_nonlop
-    type(xg_t) :: xg_Bv
+    !type(xg_t) :: xg_Bv
     real(dp) :: Bv(n), Bv2(2,n)
     real(dp) :: q(n), q2(2,n), v(n), v2(2,n)
     real(dp) :: Bm1v2(2,n)

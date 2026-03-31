@@ -1367,7 +1367,7 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
 
     !Local variables-------------------------------
     integer :: spacedim, neigenpairs, num_proc, ierr
-    type(xg_t) :: X_k
+    !type(xg_t) :: X_k
     ! Arrays
     integer, target, allocatable :: nrowsLinalg(:)
     integer, pointer :: nrowsLinalg_ptr(:) => null()
@@ -1639,7 +1639,7 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
     !Local variables-------------------------------
     integer :: iter_subspace, niter_subspace_max, n_locked, n_locked_prev
     integer :: spacedim, neigenpairs, num_proc, nrows, nrows_mpi, ierr
-    type(xg_t) :: X_k
+    !type(xg_t) :: X_k
     type(xg_t) :: resid_active
     type(bandPartitionInfo_t) :: mpiInfo
     type(bandPartitionData_t) :: X_part
@@ -2004,7 +2004,7 @@ subroutine chebfi_runSubspaceIterationDummy(chebfi,X0,getAX_BX,getBm1X,eigen,res
     !Local variables-------------------------------
     integer :: iter_subspace, niter_subspace_max, n_locked, n_active, n_locked_prev
     integer :: spacedim, neigenpairs, num_proc, nrows, ierr
-    type(xg_t) :: X_k
+    !type(xg_t) :: X_k
     type(xg_t) :: resid_active
     type(xg_t) :: X_locked, AX_locked, BX_locked ! spaces needed for deflation in linalg distr
     type(xgBlock_t) :: chebfi_X_locked, chebfi_AX_locked, chebfi_BX_locked ! pointers used for copy
@@ -3134,7 +3134,7 @@ subroutine chebfi_swapConvergedVectors(chebfi, resid, tol, n_locked)
     real(dp), intent(in) :: tol
     integer, intent(out) :: n_locked
 
-    integer :: i, nrows, n_active
+    integer :: i, nrows
     integer :: j, left
     real(dp), pointer :: resid_vals(:,:)
     logical, allocatable :: mask(:)
@@ -3347,8 +3347,8 @@ end subroutine chebfi_swapConvergedVectors
       integer, intent(in) :: bandpp_max
 
       integer, allocatable :: ranks(:)
-      integer :: ierr, nproc
-      integer :: nproc_active, p, min_p, ii
+      integer :: nproc
+      integer :: nproc_active, min_p, ii
   
   ! *********************************************************************
 
