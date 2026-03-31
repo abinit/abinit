@@ -9,8 +9,8 @@ paral_slice 1
 nstep_mixed 0
 
 # Electronic bands
-nband           192
-npband          4
+nband      192
+npband     4
 
 #Plane wave basis
 ecut            8.
@@ -98,7 +98,7 @@ xred
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t151.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% files_to_test = t151_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [extra_info]
 #%% authors = I.-M. Lygatsika
 #%% keywords = PAW
