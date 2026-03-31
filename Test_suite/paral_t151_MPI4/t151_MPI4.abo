@@ -15,12 +15,12 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 31 Mar 2026.
-- ( at 14h57 )
+- ( at 14h58 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/lygatsika_spectrum-slicing-optim/Test_suite/paral_t150_MPI4/t150.abi
-- output file    -> t150_MPI4.abo
-- root for input  files -> t150_MPI4i
-- root for output files -> t150_MPI4o
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/lygatsika_spectrum-slicing-optim/Test_suite/paral_t151_MPI4/t151.abi
+- output file    -> t151_MPI4.abo
+- root for input  files -> t151_MPI4i
+- root for output files -> t151_MPI4o
 
  Symmetries : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -112,6 +112,7 @@ P           mkmem           1
         optforces           0
         optstress           0
         paral_kgb           1
+      paral_slice           1
         pawecutdg      1.00000000E+01 Hartree
            prtden           0
         prtebands           0
@@ -770,6 +771,7 @@ P           mkmem           1
         optforces           0
         optstress           0
         paral_kgb           1
+      paral_slice           1
         pawecutdg      1.00000000E+01 Hartree
            prtden           0
         prtebands           0

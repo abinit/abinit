@@ -1,0 +1,3 @@
+Suite   failed  passed  succeeded  skipped  disabled  run_etime  tot_etime
+paral        0       0          2        0         0      14.59      14.62
+v10          0       0          1        0         0       9.45       9.46
