@@ -1154,7 +1154,7 @@ end function slice_unitTest
 !! FUNCTION
 !! Input: k=m+p ou m la masse et p oversampling parameter
 !! step 1) calculer les valeurs de Ritz
-!! step 2) calculer les résidus
+!! step 2) calculer les residus
 !! step 3) mettre les valeurs de Ritz dans part_low_bounds, part_upp_bounds sous condition que res<tol
 !! step 4) sinon faire un sketch de taille K du reste
 !!

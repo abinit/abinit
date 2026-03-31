@@ -809,8 +809,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  !write(901,*) 'trace estimation for slice2, deg=', trace_est_slice2, trace_degree
  !flush(901)
  
- ! attention slice%X est modifié n'est plus X0..
- !! normalement il faut remettre slice%X à valeurs de AllX --->
+ ! attention slice%X est modifie n'est plus X0..
+ !! normalement il faut remettre slice%X a valeurs de AllX --->
 
 
   !! ------------------------------------------------------------
@@ -955,12 +955,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     flush(901)
 
     !! Uniform mass bisection
-    !! si le degré est assez elevé alors la masse totale est
+    !! si le degre est assez eleve alors la masse totale est
     !! - constante
-    !! - égale à nband
+    !! - egale a nband
     !!
-    !! Actuellement la masse totale est 88<192. Ça veut dire qu'on pert de la masse. 
-    !! Pour ça il faut augmenter l'overlap à droite et à gauche à mon avis.
+    !! Actuellement la masse totale est 88<192. Ca veut dire qu'on pert de la masse. 
+    !! Pour ca il faut augmenter l'overlap a droite et a gauche a mon avis.
     !! todo nvec_approx sign flip means that we found important spectral
     !! mass. Do not split there. also follow how the sign flip moves with degree
     !! if it tends to go left or right. Take convergence into account by taking the limit.
@@ -1003,7 +1003,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  !! -                      Main slice loop                     -
  !! 
  !! How to optimize degree using energies:
- !! Increase degree until the band becomes “energetically isolated” 
+ !! Increase degree until the band becomes "energetically isolated"
  !! and further degree increase changes nothing important.
  !! 
  !! TODO compute Chebyshev recursion for all filters at the same
@@ -1324,7 +1324,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     call xgblock_reshape(eigenvalues_slice, count_rr, 1)
     call xgblock_reshape(slice%eigenvalues, neigenpairs, 1)
 
-    ! Orthonormalize (ça fait aucune différence)
+    ! Orthonormalize (ca fait aucune difference)
     !call xg_Borthonormalize_cprj(xg_nonlop,slice%X,slice%cprjX,ierr,tim_ortho,&
     !    gpu_option,count_rr*xg_nonlop%nspinor,AX=slice%AX)
                   !=blocksize_cprj
@@ -1415,9 +1415,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     end if
     flush(901)
 
-    !! TODO étape suivante: une fois qu'on a diagnostiquer une mauvaise convergence
-    !! dans une slice on pourrait faire une procédure de restart pour corriger
-    !! l'erreur soit en ajoutant plus de vecteurs soit jsp à réflechir
+    !! TODO etape suivante: une fois qu'on a diagnostiquer une mauvaise convergence
+    !! dans une slice on pourrait faire une procedure de restart pour corriger
+    !! l'erreur soit en ajoutant plus de vecteurs soit jsp a reflechir
 
     
     !! ------------------------------------------------------------
@@ -2287,7 +2287,7 @@ subroutine generateGaussianMatrix(V, n, m, rank)
         call random_number(u1)
         call random_number(u2)
 
-        ! Box–Muller transform
+        ! Box-Muller transform
         V(1, i) = sqrt(-2.0_dp * log(u1)) * cos(2.0_dp * Pi * u2)
 
         if (i + 1 <= nm) then
