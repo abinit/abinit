@@ -10,7 +10,7 @@ nstep_mixed 0
 
 # Electronic bands
 nband           192
-paral_kgb 0
+npband          1
 
 #Plane wave basis
 ecut            8.
@@ -98,10 +98,10 @@ xred
 #%% nprocs_to_test = 1
 #%% max_nprocs = 1
 #%% [NCPU_1]
-#%% files_to_test = t152.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% files_to_test = t152_MPI1.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [extra_info]
 #%% authors = I.-M. Lygatsika
 #%% keywords = PAW
 #%% description = 
-#%%   Test sequential slice execution without MPI in spectrum slicing algorithm for ground state energy. 
+#%%   Test sequential slice execution with 1 and 4 MPI in spectrum slicing algorithm for ground state energy. 
 #%%<END TEST_INFO>

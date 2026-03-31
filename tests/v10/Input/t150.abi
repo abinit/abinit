@@ -98,10 +98,10 @@ xred
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t150.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% files_to_test = t150_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [extra_info]
 #%% authors = I.-M. Lygatsika
 #%% keywords = PAW
 #%% description = 
-#%%   Test sequential slice execution with 4 MPI in spectrum slicing algorithm for ground state energy. 
+#%%   Test sequential slice execution with 1 and 4 MPI in spectrum slicing algorithm for ground state energy. 
 #%%<END TEST_INFO>

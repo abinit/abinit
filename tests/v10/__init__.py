@@ -68,5 +68,5 @@ inp_files = [
     "t122.abi",  # Test meta-GGA NC pseudopotential reading: compare PSML vs UPF for bulk Si
     "t150.abi",  # Test sequential slice execution in spectrum slicing diagonalization with 4 MPI
     "t151.abi",  # Test parallel slice execution in spectrum slicing diagonalization with 4 MPI
-    "t152.abi",  # Test sequential slice execution in spectrum slicing diagonalization without MPI
+    "t152.abi",  # Test sequential slice execution in spectrum slicing diagonalization with 1 MPI
 ]
