@@ -93,6 +93,7 @@ module m_vtorho
  use m_inwffil,            only : cg_from_atoms
  use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, gemm_nonlop_use_gemm, &
                                       gemm_nonlop_block_size, gemm_nonlop_is_distributed
+ use m_alloc_hamilt_gpu,   only : hamilt_gpu_fft_nslices
 
  use m_abstract_wf,        only : abstract_wf, init_mywfc
  use m_mlwfovlp,           only : mlwfovlp
@@ -646,7 +647,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
   paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
   nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option,spinaxis=dtset%spinaxis,&
-  use_gbt=dtset%use_gbt,nfourwf_slices=mpi_enreg%gpu_fft_nslices)
+  use_gbt=dtset%use_gbt,nfourwf_slices=hamilt_gpu_fft_nslices)
 
  if (dtset%cprj_in_memory==1) then
    call xg_nonlop_update_weight(xg_nonlop,ucvol) ! ucvol could have changed in mover
@@ -1090,8 +1091,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
          &                        dtset%nspinor,dtset%nspden,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
          &                        0,0,dtset%wfoptalg,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
-         &                        gemm_nonlop_block_size,nblk_gemm_nonlop)
-         mpi_enreg%gpu_fft_nslices = gs_hamk%nfourwf_slices
+         &                        gemm_nonlop_block_size,nblk_gemm_nonlop,hamilt_gpu_fft_nslices)
+         gs_hamk%nfourwf_slices = hamilt_gpu_fft_nslices
          gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
          gpu_mem_estimated=.true.
        end if

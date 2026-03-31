@@ -843,7 +843,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
    &                        dtset%nspinor,dtset%nspden,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
    &                        optforces,0,-1,gs_hamk%gpu_option,(dtset%gpu_nl_distrib/=0),&
-   &                        gemm_nonlop_block_size,nblk_gemm_nonlop,warn_on_fail=.true.)
+   &                        gemm_nonlop_block_size,nblk_gemm_nonlop,gs_hamk%nfourwf_slices,warn_on_fail=.true.)
    gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
    if(nblk_gemm_nonlop==-1) then
      gs_hamk%gpu_option=ABI_GPU_DISABLED

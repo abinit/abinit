@@ -412,7 +412,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
 
    spacedim     = size(cwavef  ,dim=2)/ndat
-   nslices = 1; if(gs_ham%nfourwf_slices /= -1) nslices = gs_ham%nfourwf_slices
+   nslices = 1; if(gs_ham%nfourwf_slices > 1) nslices = gs_ham%nfourwf_slices
    chunk = ndat/nslices ! Divide by 2 to construct chunk of even number of bands
    residuchunk = ndat - nslices*chunk
 

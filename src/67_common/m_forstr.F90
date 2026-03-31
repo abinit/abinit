@@ -79,6 +79,7 @@ module m_forstr
  use m_psolver,          only : psolver_hartree
  use m_wvl_psi,          only : wvl_nl_gradient
  use m_fft,              only : fourdp,fourwf
+ use m_alloc_hamilt_gpu, only : hamilt_gpu_fft_nslices
  use, intrinsic :: iso_c_binding,      only : c_loc,c_f_pointer,c_double,c_size_t
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
@@ -1103,7 +1104,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          call get_gemm_nonlop_ompgpu_blocksize(my_ikpt,gs_hamk,mpi_enreg%bandpp,nband_k,&
          &                        nspinor,1,mpi_enreg%paral_kgb,mpi_enreg%nproc_band,&
          &                        optfor,stress_needed,-1,gs_hamk%gpu_option,(gpu_nl_distrib/=0),&
-         &                        gemm_nonlop_block_size,nblk_gemm_nonlop,warn_on_fail=.true.)
+         &                        gemm_nonlop_block_size,nblk_gemm_nonlop,gs_hamk%nfourwf_slices,warn_on_fail=.true.)
          gemm_nonlop_is_distributed = (gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
          if(nblk_gemm_nonlop==-1) then
            gs_hamk%gpu_option=ABI_GPU_DISABLED

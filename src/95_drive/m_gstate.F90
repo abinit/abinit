@@ -47,6 +47,7 @@ module m_gstate
  use m_dtfil
  use m_extfpmd
  use m_rcpaw
+ use m_alloc_hamilt_gpu
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -105,10 +106,6 @@ module m_gstate
  use m_nonlop_ylm,       only : nonlop_ylm_init_counters,nonlop_ylm_output_counters
  use m_fft,              only : fft_init_counters,fft_output_counters
  use m_pstat,            only : pstat_proc
-
-#if defined HAVE_GPU
- use m_alloc_hamilt_gpu
-#endif
 
 #if defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
@@ -445,6 +442,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    gemm_nonlop_use_gemm = .true.
    call init_gemm_nonlop(dtset%gpu_option)
  end if
+
+ ! Handle GPU FFT slicing
+ hamilt_gpu_fft_nslices = dtset%gpu_fft_nslices
 
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then

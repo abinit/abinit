@@ -2284,25 +2284,25 @@ end function crystal_from_file
 !!  blocksize        :  if higher than 0, only print memory estimation and exit
 !!
 !! OUTPUT
-!!  gs_hamk%nfourwf_slices :  Number of slices fourwf computation will be divided into
+!!  nfourwf_slices   :  Number of slices fourwf computation will be divided into
 !!  blocksize        :  Size of MPI tasks blocks to be used in GEMM nonlop
 !!  nblocks          :  Number of MPI blocks to be used in GEMM nonlop
 !!
 !! SOURCE
 subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspden,paral_kgb,&
 &                                           npband,optfor,optstr,wfoptalg,gpu_option,use_distrib,&
-&                                           blocksize,nblocks,warn_on_fail)
+&                                           blocksize,nblocks,nfourwf_slices,warn_on_fail)
 
    integer,intent(in)     :: ikpt,ndat,nband,nspinor,nspden,paral_kgb,npband,optfor,optstr,wfoptalg,gpu_option
    logical,intent(in)     :: use_distrib
    logical,intent(in),optional  :: warn_on_fail
-   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
-   integer,intent(inout)  :: blocksize
+   type(gs_hamiltonian_type),intent(in) :: gs_hamk
+   integer,intent(inout)  :: blocksize,nfourwf_slices
    integer,intent(out)    :: nblocks
 
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem,updrho_wmem,prep_nonlop_wmem
    integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem,fourwf_smem,fourwf_wmem,fourwf_mem,hegvd_mem
-   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs,nfourwf_slices,nprojs,itypat
+   integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs,nprojs,itypat
    integer, target :: t_fft(3)
    logical  :: print_and_exit,l_warn_on_fail,fixed_blocksize,fixed_fourwf_slices
    integer(kind=c_size_t) :: chebfiMem(2),lobpcgMem(2)
@@ -2330,7 +2330,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
 
    if(gpu_option /= ABI_GPU_OPENMP) then
      ! No distribution is attempted outside of OpenMP GPU. User is already warned in chkinp
-     blocksize=1; nblocks=0; gs_hamk%nfourwf_slices=1
+     blocksize=1; nblocks=0; nfourwf_slices=1
      return
    end if
 
@@ -2346,7 +2346,6 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    npw=gs_hamk%npw_k
    npw_fft=gs_hamk%npw_fft_k
    ndat_try=ndat
-   nfourwf_slices=gs_hamk%nfourwf_slices
    blockdim=npband*ndat
    ndgxdt=0
    if(optfor>0) ndgxdt=ndgxdt+3
@@ -2717,7 +2716,6 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
      end if
    end if
    !call xmpi_barrier(xmpi_world)
-   gs_hamk%nfourwf_slices = nfourwf_slices
 
  end subroutine get_gemm_nonlop_ompgpu_blocksize
 !!***
