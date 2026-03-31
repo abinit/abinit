@@ -1,0 +1,6 @@
+# YAML support is available, but is disabled for this test.
+# Start legacy fldiff comparison report
+1003
+< +Overall time at end (sec) : cpu=          9.3  wall=          9.3
+> +Overall time at end (sec) : cpu=          9.3  wall=          9.3
+Summary t150.abo: no significant difference has been found.

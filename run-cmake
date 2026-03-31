@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# add PATH : 220525 ( MS, JMB )
+
+touch ../cmake/help_cmake_check.txt
+
+PKG_CONFIG_PATH="${FALLBACKS_HOME}_9.8/${FB}/netcdf4/4.9.0/lib/pkgconfig:${FALLBACKS_HOME}_9.8/${FB}/netcdf4_fortran/4.6.0/lib/pkgconfig:${FALLBACKS_HOME}_9.8/${FB}/libxc/6.0.0/lib/pkgconfig:${PKG_CONFIG_PATH}" \
+    PATH=${FALLBACKS_HOME}_9.8/${FB}/hdf5/1.12.2/bin/:$PATH \
+    CC="mpiicx -cc=icx" CXX=mpiicpx FC=mpiifort \
+    CPP="icpx -E" FC_LIBS="-lstdc++ -ldl" \
+    cmake ..
+
