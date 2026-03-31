@@ -6114,7 +6114,6 @@ contains
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
     integer :: rows,cols,iblock,jblock
 #endif
-    double precision :: tsec(2)
 
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
 
@@ -6593,7 +6592,7 @@ contains
     type(xgBlock_t) :: xgBlock_part
     real(dp) :: re, reim(2)
     real(dp) :: norm2_vec
-    integer :: tid, rank, seed_size, i, n, fact
+    integer :: tid, seed_size, i, n, fact
     integer, allocatable :: seed(:)
     complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC(:) => null()
     real(kind=c_double), ABI_CONTIGUOUS pointer:: vecR(:) => null()
@@ -6676,7 +6675,7 @@ contains
     type(xgBlock_t) :: xgBlock_part
     real(dp) :: u1, u2, r, theta
     complex(dp) :: z
-    integer :: tid, rank, seed_size, i, n
+    integer :: tid, seed_size, i, n
     integer, allocatable :: seed(:)
     complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC(:) => null()
 
@@ -6748,7 +6747,7 @@ contains
     real(dp) :: u
     complex(dp) :: meanz
     real(dp)    :: norm2_, variance
-    integer :: tid, rank, seed_size, i, n, k, fact
+    integer :: tid, seed_size, i, n, k, fact
     integer, allocatable :: seed(:)
     complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC(:) => null()
     real(kind=c_double)            , ABI_CONTIGUOUS pointer :: vecR(:) => null()
@@ -6846,7 +6845,7 @@ contains
     integer :: ncols, nrows
     integer :: gpu_option
     type(xg_t) :: Omega
-    type(xgBlock_t) :: q
+    !type(xgBlock_t) :: q
 
   ! *********************************************************************
 
