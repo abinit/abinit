@@ -1229,7 +1229,7 @@ contains
   real(dp),pointer :: gram_proj_k_(:,:),Sijm1_(:,:)
   integer :: ierr, iblock, shift, shiftc, shift_sij, shift_itypat, itypat, ilmn, jlmn, nlmn, nlmn_max, ia
   integer :: cplex,cols,ntypat,nmpi,me_g0_loc,me_g0_fft_loc,space_cprj
-  real(dp) :: cond
+  !real(dp) :: cond
   real(dp) :: tsec(2)
   type(xg_t) :: work
   type(xgBlock_t) :: projs,invSij_approx_k_itypat,Sijm1_itypat
@@ -2201,10 +2201,10 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
    type(xgBlock_t), intent(inout) :: cprj_out,cprj_work
 
    integer :: iter,cprjdim,ncols,additional_steps_to_take
-   integer :: rows_A
+   !integer :: rows_A
    real(dp), parameter :: tolerance = 1e-14 ! maximum relative error. TODO: use tolwfr ?
    type(xg_t) :: err
-   real(dp) :: cond
+   !real(dp) :: cond
    real(dp) :: norm,max_err,previous_max_err,convergence_rate,tsec(2)
 
    call timab(tim_iter_refinement,1,tsec)

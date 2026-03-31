@@ -423,13 +423,13 @@ end subroutine computeChebyshevMoments
 !!
 !! SOURCE
 
-subroutine computeTraceEstimation(minfo, nslice, ecut, paw, tolerance, getAX_BX, getBm1X, ndeg_filter, &
+subroutine computeTraceEstimation(minfo, ecut, paw, tolerance, getAX_BX, getBm1X, ndeg_filter, &
         m_probe, min_low_bound, moments)
 
     implicit none
 
     type(matrixInfo_t), intent(in) :: minfo
-    integer, intent(in) :: nslice, ndeg_filter, m_probe
+    integer, intent(in) :: ndeg_filter, m_probe
     logical, intent(in) :: paw
     real(dp), intent(in) :: ecut, min_low_bound, tolerance
     real(dp), intent(inout) :: moments(:)

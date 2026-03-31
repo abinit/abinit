@@ -716,8 +716,8 @@ subroutine slice_getSpectralInfo(slice, X, matrixInfo, moments, eigen, resid, ge
     write(std_out,*) 'ndeg_filter=', ndeg_filter_max
     flush(std_out)
 
-    call computeTraceEstimation(matrixInfo, slice%nslice, slice%ecut, slice%paw, &
-        slice%tolerance, getAX_BX, getBm1X, ndeg_filter_max, m_probe, lanczos_lowb_global, moments)
+    call computeTraceEstimation(matrixInfo, slice%ecut, slice%paw, slice%tolerance, &
+        getAX_BX, getBm1X, ndeg_filter_max, m_probe, lanczos_lowb_global, moments)
    
     ! Define working spectrum to be splitted to slices
     slice%mineig = lanczos_lowb 

@@ -139,7 +139,7 @@ module m_slicewf
 !!
 !! SOURCE
 
-subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
+subroutine slicewf(cg,dtset,eig,enl_out,gs_hamk,mpi_enreg,&
 &                    nband,npw,nspinor,prtvol,resid)
 
  implicit none
@@ -151,7 +151,7 @@ subroutine slicewf(cg,dtset,eig,occ,enl_out,gs_hamk,mpi_enreg,&
  real(dp),target,intent(out) :: resid(nband)
  real(dp),intent(out) :: enl_out(nband)
  real(dp),target,intent(out) :: eig(nband)
- real(dp),target,intent(in) :: occ(nband)
+ !real(dp),target,intent(in) :: occ(nband) ! kept for reference
  type(dataset_type),intent(in) :: dtset
  type(gs_hamiltonian_type),target,intent(inout) :: gs_hamk
 
