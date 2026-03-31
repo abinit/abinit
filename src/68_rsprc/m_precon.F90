@@ -138,9 +138,13 @@ contains
     ! TODO :  
     ! - debug quasidiag
     ! - non col with band paral
+    ! - non coll : what spin representations are use for : kxc (dfpt_mkvxc_noncoll), prcref.
     ! - LOBPCG : loop over blocks
     ! - write actual logs that can be controlled by an input param (ex precon_verbose?)
     ! - in chkinp : forbid iprcel that need kxc + noncoll + not LSDA
+    ! - TODO : check places where it is assumed that nspinor=2 => nspden=4 and nsppol=2 => nspden=2
+    !                                       on peut avoir nspden=1 dans les deux cas.
+    ! - Linear solver : the tol is the absolute tol -> change to relative tol (in gmresm?)
 
     !****f* m_precon/precon_init
     !! NAME
@@ -326,7 +330,7 @@ contains
                 write(6,*)'chi0diel precon_init : dtset%xclevel', dtset%xclevel; flush(6) !DEBUG
                 if (dtset%xclevel==1) then  !LDA
                     this%nkxc = 2*min(dtset%nspden,2)-1
-                else if (dtset%xclevel==2)then  !GGA
+                else if (dtset%xclevel==2)then  !GGA+...
                     if (dtset%nspden==1) then
                         this%nkxc = 7
                     else if (dtset%nspden==2) then
@@ -1792,7 +1796,7 @@ contains
         
         ! TODO : check iband, ikpt, isppol belong to proc and return error if not
         !if () then
-        !    ABI_BUG("chi0-based preconditioner : nfftprc /= nfft in norm-conserving not implemented.")
+        !    ABI_BUG("chi0-based preconditioner (iprcel=2**): nfftprc /= nfft in norm-conserving not implemented.")
         !end if
 
         ! No spin or collinear spins - Wafefunctions have one spin component.
@@ -1980,7 +1984,7 @@ contains
         this%precomputed_rhoi_indices = zero
         i_psii = 1
         
-        ABI_MALLOC(psii_aug, (2, n4, n5, n6*dtset%mband))   ! TODO : check, this dtset%mband take band paral into account
+        ABI_MALLOC(psii_aug, (2, n4, n5, n6*dtset%mband))
         ABI_MALLOC(rhoi_aug, (n4, n5, n6))
 
         !Loop over spins and kpoints
@@ -2209,7 +2213,7 @@ contains
                         ibandblock1 = blocksize*(iblock-1) + 1  
                         ibandblock2 = blocksize*(iblock)
                         i_cg_ibandblock1 = this%cg_indices(:, ibandblock1, ikpt, isppol)
-                        i_cg_ibandblock2 = this%cg_indices(:, ibandblock2, ikpt, isppol)    ! Changer
+                        i_cg_ibandblock2 = this%cg_indices(:, ibandblock2, ikpt, isppol)
 
                         ABI_MALLOC(psii_aug, (2, n4, n5, n6*ndat))
                         ABI_MALLOC(dummy_occ_k, (nband_k))
@@ -2438,10 +2442,8 @@ contains
                             ! delta_V(:, 1) + (1-2*(isppol-1)) * delta_V(:, 2) is delta_V in the (up/down) coordinate 'isppol'.
                         end if
 
-                    end if
-
                     ! Non collinear spins - Wavefunctions have two spins components.
-                    if (dtset%nspinor == 2) then
+                    elseif (dtset%nspinor == 2 .and. dtset%nspden==4) then
 
                         !2.2) Computing rho_i (4-dim, in pauli basis).
                         if (this%use_precomputed_rhoi) then
@@ -2452,11 +2454,14 @@ contains
                         
                         ! dot product in Pauli basis :
                         delta_occ(i_eigen) = zero
-                        do ispden=1, 4
+                        do ispden = 1, 4
                             ! rhoi_r has 4 spin-components in the pauli basis that all needs to be multiplied to the corresponding component in delta_V
                             delta_occ(i_eigen) = delta_occ(i_eigen) + fp * dot_product(rhoi_r(:, ispden), delta_V(:, ispden)) * this%dvol
                         end do
 
+                    else
+                        ABI_BUG("TODO non-collinear magnetism with nspden=/4")
+                        ! The calculation above is probably true even when nspden=1, TODO: check
                     end if
 
                     delta_occ_tot = delta_occ_tot + delta_occ(i_eigen) * dtset%wtk(ikpt)
@@ -2700,6 +2705,8 @@ contains
 
                     ! Compute and add the contribution to delta_rhol.
                     if (dtset%nspinor == 1) then
+                        ! Collinear magnetism or no magnetism
+                    
                         ispden = isppol
                         if (this%use_precomputed_rhoi) then
                         ! We use the precomputed orbital density.
@@ -2715,7 +2722,12 @@ contains
                             ABI_FREE(rhoi_r)
                         end if
                         ! delta_rho in up/down representation = expected representation by symrhg
-                    else
+
+                        ! TODO : here it is assumed that nsppol=2 => nspden=2 ... 
+
+                    elseif (dtset%nspden == 4) then
+                        ! Non collinear magnetism
+
                         if (this%use_precomputed_rhoi) then
                         ! We use the precomputed orbital density.
                             do ispden = 1, 4
@@ -2734,6 +2746,9 @@ contains
                             ABI_FREE(rhoi_r)
                         end if
                         ! delta_rho in Pauli representation = NOT the expected representation by symrhg
+
+                    else
+                        ABI_BUG("TODO non-collinear magnetism with nspden=/4")
                     end if
                     
                 end do  ! iband
@@ -2757,7 +2772,7 @@ contains
         else
         ! In non-collinear magnetism, we apply symrhg independantly to each spin component, 
         ! to avoid having to change the spin representation of delta_rho.
-            do ispden = 1, 4
+            do ispden = 1, dtset%nspden
                 call symrhg(1, this%gprimd, this%irrzon, mpi_enreg, dtset%nfft, dtset%nfft, dtset%ngfft, 1, 1, &
                 &   dtset%nsym, this%phnons, delta_rho_g, delta_rho(:, ispden:ispden), this%rprimd, dtset%symafm, dtset%symrel, dtset%tnons)
             end do

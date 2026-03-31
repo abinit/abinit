@@ -1008,7 +1008,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    if (dtset%xclevel==2.and.dtset%nspden==1.and.dtset%densfor_pred<0) nkxc=7    ! This is not full kxc for mGGA
    if (dtset%xclevel==2.and.dtset%nspden==2.and.dtset%densfor_pred<0) nkxc=19   ! This is not full kxc for mGGA
  end if
-!Eventually need Kxc for preconditioning the SCF. 
+!Eventually need Kxc to precondition the SCF. 
  if (precon%use_kxc) then
    nkxc = precon%nkxc
  end if
