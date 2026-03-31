@@ -1,6 +1,0 @@
-# YAML support is available, but is disabled for this test.
-# Start legacy fldiff comparison report
-1014
-< +Overall time at end (sec) : cpu=         22.7  wall=         22.7
-> +Overall time at end (sec) : cpu=         22.7  wall=         22.8
-Summary t151_MPI4.abo: no significant difference has been found.
