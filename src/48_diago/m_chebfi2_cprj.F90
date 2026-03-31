@@ -908,8 +908,8 @@ subroutine chebfi_ampfactorMax(chebfi,DivResults,lambda_minus,lambda_plus,ndeg_f
   ! scalars
   integer         :: iband
   real(dp)        :: ampfactor
-  type(xgBlock_t) :: X_part
-  type(xgBlock_t) :: AX_part
+  !type(xgBlock_t) :: X_part
+  !type(xgBlock_t) :: AX_part
   real(dp),pointer :: eig(:,:)
 
   ! *********************************************************************
