@@ -101,7 +101,7 @@ xred
 #%% files_to_test = t151_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [extra_info]
 #%% authors = I.-M. Lygatsika
-#%% keywords = PAW
+#%% keywords = PAW, SLICING
 #%% description = 
 #%%   Test parallel slice execution with 4 MPI in spectrum slicing algorithm for ground state energy. 
 #%%<END TEST_INFO>
