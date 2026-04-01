@@ -814,6 +814,13 @@ subroutine slice_task_runActiveTask(work, task)
     integer :: nbdbuf, oracle, num_proc
     real(dp) :: oracle_factor, oracle_min_occ
 
+    ! fix dummy
+    nbdbuf = 0
+    oracle = 0
+    num_proc = 0
+    oracle_factor = 1.0
+    oracle_min_occ = 1.0
+
       ! can also set slice params?? needs slice object. Maybe do a different called initActiveTask
 !
 !    ! Get parameters of active task
@@ -973,22 +980,22 @@ end subroutine mask_active_task
 !!
 !! SOURCE
 
-subroutine compress_extended_memory(task, work, X0, eigen, resid)
-
-    implicit none
-    
-    ! Arguments ------------------------------------
-    type(activeTask_t), intent(inout) :: task
-    type(asyncMemory_t), intent(inout) :: work
-    type(xgBlock_t), intent(inout) :: X0
-    type(xgBlock_t), intent(inout) :: eigen
-    type(xgBlock_t), intent(inout) :: resid
-
-    ! Local variables-------------------------------
-    integer :: nrows, ncols, fcol
-    
-    ! *********************************************************************
-
+!subroutine compress_extended_memory(task, work, X0, eigen, resid)
+!
+!    implicit none
+!    
+!    ! Arguments ------------------------------------
+!    type(activeTask_t), intent(inout) :: task
+!    type(asyncMemory_t), intent(inout) :: work
+!    type(xgBlock_t), intent(inout) :: X0
+!    type(xgBlock_t), intent(inout) :: eigen
+!    type(xgBlock_t), intent(inout) :: resid
+!
+!    ! Local variables-------------------------------
+!    integer :: nrows, ncols, fcol
+!    
+!    ! *********************************************************************
+!
 !    if (work%paral_kgb==1) then
 !        
 !        ! Sanity check
@@ -1046,7 +1053,7 @@ subroutine compress_extended_memory(task, work, X0, eigen, resid)
 !    call xg_free(eigen_ext)
 !    call xg_free(resid_ext)
 !
-end subroutine compress_extended_memory
+!end subroutine compress_extended_memory
 !!***
 
 !----------------------------------------------------------------------

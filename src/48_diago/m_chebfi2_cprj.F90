@@ -1144,10 +1144,9 @@ end subroutine chebfi_set_ndeg_from_residu
 !! Compute Jackson-damped Chebyshev coefficients for a lowpass step
 !! on interval [lambda_min, lambda_max], degree M
 
-subroutine jackson_lowpass_coeffs(center, radius, M, c)
+subroutine jackson_lowpass_coeffs(M, c)
     implicit none
     integer, intent(in) :: M
-    real(dp), intent(in) :: center, radius
     real(dp), intent(out) :: c(1:M+1)
     integer :: k
     real(dp) :: theta, g

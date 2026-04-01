@@ -235,7 +235,7 @@ subroutine slice_init(slice,nslice,neigenpairs,spacedim,tolerance,paral_kgb,&
     
     ! Local variables --------------------------------
     integer :: total_spacedim, ierr
-    logical :: on_host, on_device
+    !logical :: on_host, on_device
 
     ! *********************************************************************
 
@@ -383,15 +383,15 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
 
     ! Local scalars
     integer :: tim_slice_me
-    integer :: i, iband, nrows, ncols
+    integer :: nrows, ncols
     integer :: space_res
-    integer :: neigenpairs, bandpp, ndeg_filter
+    !integer :: neigenpairs, bandpp, ndeg_filter
     integer :: neigenpairs_ext
     integer :: p_offset, ndeg_filter_max
-    integer :: ierr
-    real(dp) :: theta
+    !integer :: ierr
+    !real(dp) :: theta
     real(dp) :: safe, tol ! for slice selection window
-    logical :: is_lowpass, on_host, on_device ! todo use slice%..
+    !logical :: is_lowpass, on_host, on_device ! todo use slice%..
     ! ----> variables for logic of slice solver
     type(matrixInfo_t) :: matrixInfo
     type(xg_t) :: DivResults
@@ -400,7 +400,7 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     type(asyncMemory_t) :: asyncMemory
     ! <----- 
     ! Arrays
-    real(dp) :: tsec(2)
+    !real(dp) :: tsec(2)
     real(dp), allocatable :: moments(:)
     logical, allocatable, target :: mapper(:,:)
     
@@ -438,7 +438,9 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
         slice%gpu_kokkos_nthrd, slice%gpu_thread_limit,slice%gpu_option, slice%paral_kgb, &
         slice%me_g0, slice%me_g0_fft, nspinor)
 
-    write(std_out,*) 'in slice_run'; flush(std_out)
+    write(std_out,*) 'in slice_run'
+    write(std_out,*) 'array of eigenvalues', rows(eigen), cols(eigen)
+    flush(std_out)
 
     ! ============================= Prepare spectral slices =====================================
 
@@ -613,15 +615,15 @@ subroutine slice_getSpectralInfo(slice, X, matrixInfo, moments, eigen, resid, ge
     integer :: spacedim, tot_spacedim, nspinor
     integer :: ndeg_filter_max, neigenpairs
     integer :: ierr
-    integer :: ideg
+    !integer :: ideg
     integer :: kmax
     integer :: m_probe
     integer :: my_shift, my_rank
     integer :: space, spacecom, gpu_option
-    integer :: k_sketch
+    !integer :: k_sketch
     real(dp) :: lambda_min, res_norm
-    real(dp) :: center, radius
-    real(dp) :: lowb, mineig, maxeig
+    !real(dp) :: center, radius
+    real(dp) :: lowb!, mineig, maxeig
     real(dp) :: lanczos_lowb, lanczos_lowb_global
     ! Derived types
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -629,12 +631,12 @@ subroutine slice_getSpectralInfo(slice, X, matrixInfo, moments, eigen, resid, ge
     type(xg_t) :: W_dummy
     integer :: work_size
 #endif
-    type(xg_t) :: BX
+    !type(xg_t) :: BX
     type(xgBlock_t) :: xXColsRows
     type(xgBlock_t) :: eigen_me, resid_me
     type(xgTransposer_t) :: xgTransposerX
     ! Arrays
-    real(dp) :: tsec(2)
+    !real(dp) :: tsec(2)
 
     ! *********************************************************************
 
@@ -1177,7 +1179,7 @@ end function slice_unitTest
     real(dp), intent(in) :: tol
     real(dp), intent(in) :: safe
 
-    integer :: nband, iband, islice, m, k_kept, ierr
+    integer :: nband, iband, islice, m, k_kept
     real(dp) :: uppb, lowb, uppb_plus, lowb_minus
     real(dp) :: theta, relaxf, relres
     real(dp), pointer :: resid_vals(:,:) => null()
