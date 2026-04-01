@@ -562,6 +562,7 @@ subroutine slice_run(slice, X0, getAX_BX, getBm1X, eigen, residu, nspinor)
     call xg_free(DivResults)
     call slice_task_freeAsyncMemory(asyncMemory)
     call slice_task_freeSchedule(scheduler)
+    call slice_task_freeActiveTask(task)
 
 end subroutine slice_run
 !!***

@@ -172,8 +172,8 @@ module m_slice_task
         logical :: is_lowpass
         logical :: is_last
 
-        integer, allocatable :: me_cols_X(:)                ! columns of shared memory used in task
-        integer, allocatable :: me_cols_Xext(:)             ! columns of asynchronous memory used in task
+        !integer, allocatable :: me_cols_X(:)                ! columns of shared memory used in task
+        !integer, allocatable :: me_cols_Xext(:)             ! columns of asynchronous memory used in task
         integer, allocatable :: me_mask_Xext(:)             ! converged columns
 
         ! MPI column and row distribution for active task
@@ -242,12 +242,13 @@ module m_slice_task
     !-------------------------------------------------
     public :: init_matrixInfo                   ! wrapper for various xgBlock parameters
     public :: slice_task_allocAsyncMemory       ! allocates async memory buffer
-    public :: slice_task_copyToAsyncMemory     ! fills async memory colwise (deep copy)
+    public :: slice_task_copyToAsyncMemory      ! fills async memory colwise (deep copy)
     public :: slice_task_freeAsyncMemory        ! deallocates async buffer
     public :: slice_task_initSchedule           ! compute 'process-to-slices' distribution
     public :: slice_task_freeSchedule           ! deallocate all MPI distribution info
     public :: slice_task_printSchedule          ! print a table of schedule
     public :: slice_task_initNextTask           ! compute MPI distribution for next task
+    public :: slice_task_freeActiveTask         ! deallocate memory for active task
     public :: slice_task_enableAsync            ! apply MPI distribution for next task
     public :: slice_task_runActiveTask          ! execute Subspace Iteration for active vectors
     !public :: mark_active_task
@@ -631,7 +632,7 @@ end subroutine slice_task_printSchedule
       integer :: my_rank, my_rank_sub, my_task, sanity_check
     
       ! *********************************************************************
-       
+      
       global_comm = minfo%spacecom
       my_rank = xmpi_comm_rank(global_comm) 
       my_task = scheduler%next_lookup_proc(my_rank + 1) + 1
@@ -665,6 +666,7 @@ end subroutine slice_task_printSchedule
       call xmpi_barrier(global_comm) 
 
       ! If using more than MPI processes, compute column and row distributions across processes
+      call slice_task_freeActiveTask(task)
       ABI_MALLOC_IFNOT(task%me_ncolsColsRows, (scheduler%nprocs))
       ABI_MALLOC_IFNOT(task%me_nrowsLinalg, (scheduler%nprocs))
       if (task%me_nproc>1) then
@@ -699,6 +701,25 @@ end subroutine slice_task_printSchedule
       write(std_out,*) '@task bands per active process=', task%me_bandpp
       flush(std_out)
   
+  end subroutine slice_task_initNextTask
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_slice_task/slice_task_freeActiveTask
+!! NAME
+!! slice_task_freeActiveTask
+ 
+  subroutine slice_task_initNextTask(task)
+
+      implicit none
+      type(activeTask_t) :: task
+
+      !ABI_FREE(task%me_cols_X)
+      !ABI_FREE(task%me_cols_Xext)
+      ABI_FREE(task%me_ncolsColsRows)
+      ABI_FREE(task%me_nrowsLinalg)
+        
   end subroutine slice_task_initNextTask
 !!***
 
@@ -819,6 +840,9 @@ subroutine slice_task_runActiveTask(work, task)
     num_proc = 0
     oracle_factor = 1.0
     oracle_min_occ = 1.0
+    write(std_out,*) 'dummy arg=', work%nslice
+    write(std_out,*) 'dummu arg=', task%me_g0
+    flush(std_out)
 
       ! can also set slice params?? needs slice object. Maybe do a different called initActiveTask
 !

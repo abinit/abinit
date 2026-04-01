@@ -435,11 +435,11 @@ end function bandpass_sca
 !! ndeg= polynomial degree of filter
 !! is_lowpass= flag. If true then Chebyshev if false Chebyshev-Jackson
 
-subroutine print_scalar_filter(a, b, lb, ub, glb, gub, ndeg, is_lowpass)
+subroutine print_scalar_filter(a, b, ub, glb, gub, ndeg, is_lowpass)
 
     implicit none
 
-    real(dp), intent(in) :: a,b,lb,ub,glb,gub
+    real(dp), intent(in) :: a,b,ub,glb,gub
     integer, intent(in) :: ndeg
     logical, intent(in) :: is_lowpass
 
