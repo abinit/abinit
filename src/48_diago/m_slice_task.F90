@@ -253,7 +253,6 @@ module m_slice_task
     public :: slice_task_runActiveTask          ! execute Subspace Iteration for active vectors
     !public :: mark_active_task
     !public :: allocate_active_task
-    !public :: free_active_task
     !public :: execute_active_task
     !public :: mask_active_task
     !public :: compress_extended_memory
@@ -710,17 +709,17 @@ end subroutine slice_task_printSchedule
 !! NAME
 !! slice_task_freeActiveTask
  
-  subroutine slice_task_initNextTask(task)
+  subroutine slice_task_freeActiveTask(task)
 
       implicit none
-      type(activeTask_t) :: task
+      type(activeTask_t), intent(inout) :: task
 
-      !ABI_FREE(task%me_cols_X)
-      !ABI_FREE(task%me_cols_Xext)
-      ABI_FREE(task%me_ncolsColsRows)
-      ABI_FREE(task%me_nrowsLinalg)
+      !ABI_SFREE(task%me_cols_X)
+      !ABI_SFREE(task%me_cols_Xext)
+      ABI_SFREE(task%me_ncolsColsRows)
+      ABI_SFREE(task%me_nrowsLinalg)
         
-  end subroutine slice_task_initNextTask
+  end subroutine slice_task_freeActiveTask
 !!***
 
 !----------------------------------------------------------------------
@@ -914,27 +913,6 @@ subroutine slice_task_runActiveTask(work, task)
 !    end if
 
 end subroutine slice_task_runActiveTask
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_slice_task/free_active_task
-!! NAME
-!! free_active_task
-!! 
-!! SOURCE
-
-subroutine free_active_task(task)
-
-    implicit none
-    type(activeTask_t), intent(inout) :: task
-    
-    ! *********************************************************************
-
-    ABI_SFREE(task%me_ncolsColsRows)   
-    ABI_SFREE(task%me_nrowsLinalg)
-
-end subroutine free_active_task
 !!***
 
 !----------------------------------------------------------------------
