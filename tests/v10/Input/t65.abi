@@ -16,7 +16,7 @@
  ddb_ngqpt2        2 2 2
  tmesh2            0 300 1
  eph_stern2        1
- eph_ahc_type2     0  # adibatic
+ eph_ahc_type2     0  # adiabatic
  eph_ngqpt_fine2   4 4 4
  dvdb_add_lr2      1 # Add long-range quadrupoles
  getddb_filepath2 "t63.ddb.out"

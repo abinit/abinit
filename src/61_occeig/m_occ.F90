@@ -6,7 +6,7 @@
 !!  Low-level functions for occupation factors.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group (XG, AF, MG)
+!!  Copyright (C) 2008-2026 ABINIT group (XG, AF, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -156,7 +156,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,fermih,maxocc,mband,nban
  integer :: iband,iene,ikpt,index,index_tot,index_start,isppol,nene,nptsdiv2
  integer :: low_band_index, high_band_index, number_of_bands,itypat,iln
  real(dp) :: buffer,deltaene,dosdbletot,doshalftot,dostot, wk
- real(dp) :: enemax,enemin,enex,intdostot,limit,tsmearinv
+ real(dp) :: enemax,enemin,enex,intdostot,limit,tsmearinv,tsmear_eff
  !real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
 !arrays
@@ -334,9 +334,13 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,fermih,maxocc,mband,nban
 
  else if (option==2) then
    ! evaluate DOS for smearing, half smearing, and double.
-
+   if(tsmearinv>two*Ha_eV) then
+     tsmear_eff=tsmear
+   else ! Dirty fix for high temperatures (T>0.5eV)
+     tsmearinv=two*Ha_eV
+     tsmear_eff=half*ev_Ha
+   endif
    buffer=limit/tsmearinv*.5_dp
-
    ! A Similar section is present is dos_calcnwrite. Should move all DOS stuff to m_ebands
    ! Choose the lower and upper energies
    enemax=maxval(eigen(1:number_of_bands))+buffer
@@ -355,9 +359,10 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,fermih,maxocc,mband,nban
    end if
    nene=nint((enemax-enemin)/deltaene)+1
 
+
    ! Write the header of the DOS file, and also decides the energy range and increment
    call dos_hdr_write(deltaene,eigen,enemax,enemin,fermie,fermih,mband,nband,nene,&
-           nkpt,nsppol,occopt,prtdos1,tphysel,tsmear,unitdos)
+           nkpt,nsppol,occopt,prtdos1,tphysel,tsmear_eff,unitdos)
 
    ABI_MALLOC(dos,(number_of_bands))
    ABI_MALLOC(dosdble,(number_of_bands))

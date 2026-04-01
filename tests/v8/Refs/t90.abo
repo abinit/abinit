@@ -2,7 +2,7 @@
 .Version 10.5.8.2 of ABINIT, released Oct 2025.
 .(MPI version, prepared for a x86_64_linux_gnu13.2 computer)
 
-.Copyright (C) 1998-2025 ABINIT group .
+.Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -537,13 +537,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              0    0.840891    5.077806
              1    2.715487    0.601430    0.000397
              2  -10.098948   -0.937382
-  spin-orbit 1
-  spin-orbit 1
-  spin-orbit 1
-  spin-orbit 1
-  spin-orbit 2
-  spin-orbit 2
-  spin-orbit 2
  pspatm: atomic psp has been read  and splines computed
 
    1.49580505E+02                                ecore*ucvol(ha*bohr**3)
@@ -1062,13 +1055,6 @@ meta: {optdriver: 4, gwcalctyp: 5, }
              0    0.840891    5.077806
              1    2.715487    0.601430    0.000397
              2  -10.098948   -0.937382
-  spin-orbit 1
-  spin-orbit 1
-  spin-orbit 1
-  spin-orbit 1
-  spin-orbit 2
-  spin-orbit 2
-  spin-orbit 2
  pspatm: atomic psp has been read  and splines computed
 
 --------------------------------------------------------------------------------

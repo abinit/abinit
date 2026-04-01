@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2025 ABINIT group ()
+!!  Copyright (C) 2008-2026 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -109,7 +109,7 @@ contains
 !!  - on-site contributions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2025 ABINIT group (MT, AM)
+!! Copyright (C) 2010-2026 ABINIT group (MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1500,8 +1500,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 #ifdef HAVE_OPENMP_OFFLOAD
                      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw) MAP(to:gvnlx1,gvnlx1_tmp)
                      do ipw=1,npw1_k*nspinor
-                       gvnlx1(:,(idat-1)*npw1_k*nspinor + ipw) = &
-                         gvnlx1_tmp(:,ipw) - (my_nproc_band-1)*gvnlx1(:,(idat-1)*npw1_k*nspinor + ipw)
+                       gvnlx1(1,(idat-1)*npw1_k*nspinor + ipw) = &
+                         gvnlx1_tmp(1,ipw) - (my_nproc_band-1)*gvnlx1(1,(idat-1)*npw1_k*nspinor + ipw)
+                       gvnlx1(2,(idat-1)*npw1_k*nspinor + ipw) = &
+                         gvnlx1_tmp(2,ipw) - (my_nproc_band-1)*gvnlx1(2,(idat-1)*npw1_k*nspinor + ipw)
                      end do
 #endif
                    end if
@@ -2266,7 +2268,7 @@ end subroutine dfpt_nstpaw
 !! Only for norm-conserving pseudopotentials (no PAW)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2025 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
+!! Copyright (C) 1999-2026 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

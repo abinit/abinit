@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2025 ABINIT group (MT, FDahm)
+!!  Copyright (C) 2000-2026 ABINIT group (MT, FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,6 +27,7 @@ module m_alloc_hamilt_gpu
  use m_ompgpu_fourwf
 #if defined HAVE_GPU
  use m_gpu_toolbox
+ use m_gputk
 #endif
 
 #ifdef HAVE_FC_ISO_C_BINDING

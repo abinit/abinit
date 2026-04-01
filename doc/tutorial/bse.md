@@ -224,7 +224,7 @@ have any significant effect on the CPU time, but it is important to stress
 that the number of bands included in the transition space defines, in
 conjunction with the number of k-points, the frequency range that can be
 described. As a consequence [[bs_loband]] and [[nband]] should be subject to
-an accurate converge study.
+a careful convergence study.
 
 Then we have the parameters that define and control the algorithm employed to
 calculate the macroscopic dielectric function
@@ -476,7 +476,7 @@ Converging the excitonic spectrum requires a careful analysis of many different 
 Since the memory requirements scale quadratically with the number of k-points
 in the **full** Brillouin zone **times** the number of valence bands
 **times** the number of conduction bands included in the transition space,
-it is very important to find a good compromise between accuracy and computational efficiency.
+it is very important to find a good compromise between precision and computational efficiency.
 
 First of all one should select the frequency range of interest since this
 choice has an important effect on the number of valence and conduction states
@@ -485,7 +485,7 @@ expected to converge faster in the number of bands than the GW corrections
 since only those transitions whose energy is "close" to the frequency range
 under investigation are expected to contribute.
 
-[[ecutwfn]] usually plays a secondary role since it only affects the accuracy
+[[ecutwfn]] usually plays a secondary role since it only affects the precision
 of the oscillator matrix elements. We suggest avoiding any truncation of the
 initial basis set by setting [[ecutwfn]] to a value slightly larger than the
 value of [[ecut]] used to generate the WFK file. One should truncate the
@@ -493,9 +493,9 @@ initial planewave basis set only when experiencing memory problems although
 this kind of problems can be usually solved by just increasing the number of
 processors or, alternatively, with an appropriate choice of [[gwmem]].
 
-The value of [[ecuteps]] affects the accuracy of the matrix elements of the
+The value of [[ecuteps]] affects the precision of the matrix elements of the
 Coulomb term, the fundamental term that drives the creation of the excitons.
-As a consequence [[ecuteps]] should be subject to an accurate convergence
+As a consequence [[ecuteps]] should be subject of a careful convergence
 test. As a rule of thumb, [[ecuteps]] can be chosen equal or, sometimes, even
 smaller than the value needed to converge the GW corrections.
 
@@ -722,7 +722,7 @@ test in the figure below.
 
 As anticipated, the spectrum converges slowly with the number of k-points and
 our first calculation done with the 4x4x4 grid is severely unconverged. The
-most accurate results are obtained with the 12x12x12 k-mesh, but even this
+most precise results are obtained with the 12x12x12 k-mesh, but even this
 sampling leads to converged results only for frequencies below 4.5 eV. This is
 a problem common to all BS computations, in the sense that it is extremely
 difficult to achieve global converge in the spectra. This analysis shows that

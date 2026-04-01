@@ -7,7 +7,7 @@
 !!  Interfaces of GPU subroutines wrapper
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2025 ABINIT group (FDahm)
+!!  Copyright (C) 2011-2026 ABINIT group (FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2203,6 +2203,7 @@ end subroutine abi_gpu_work_resizeC
 !! abi_gpu_work_resizeCptr
 
 subroutine abi_gpu_work_resizeCptr(array,current_dim,asked_dim)
+ use, intrinsic :: iso_c_binding
 
   type(c_ptr), intent(inout) :: array
   integer(c_size_t), intent(inout)  :: current_dim
@@ -2228,6 +2229,7 @@ end subroutine abi_gpu_work_resizeCptr
 !!***
 
 subroutine abi_gpu_work_finalize()
+ use, intrinsic :: iso_c_binding
 
 #ifdef HAVE_GPU
   !FIXME Assuming managed here ?
