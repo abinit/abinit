@@ -636,7 +636,7 @@ subroutine slice_getSpectralInfo(slice, X, matrixInfo, moments, eigen, resid, ge
     type(xgBlock_t) :: eigen_me, resid_me
     type(xgTransposer_t) :: xgTransposerX
     ! Arrays
-    !real(dp) :: tsec(2)
+    real(dp) :: tsec(2)
 
     ! *********************************************************************
 
