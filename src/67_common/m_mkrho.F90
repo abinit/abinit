@@ -37,7 +37,7 @@ module m_mkrho
  use m_fstrings,     only : sjoin, itoa
  use m_time,         only : timab
  use m_fftcore,      only : sphereboundary
- use m_fft,          only : fftpac, zerosym, fourwf, fourdp
+ use m_fft,          only : fftpac, zerosym, fourwf, fourwf_optmem, fourdp
  use m_bandfft_kpt,  only : bandfft_kpt_set_ikpt
  use m_paw_dmft,     only : paw_dmft_type
  use m_spacepar,     only : symrhg
@@ -168,7 +168,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  integer :: ifft,ikg,ikpt,ioption,ipw,ipwbd,ipwsp,ishf,ispden,ispinor,ispinor_index
  integer :: isppol,istwf_k,jspinor_index
  integer :: me,my_nspinor,n1,n2,n3,n4,n5,n6,nalpha,nband_k,nband_occ,nbandc1,nbdblock,nbeta
- integer :: ndat,nfftot,npw_k,spaceComm,tim_fourwf,gpu_option,nfourwf_slices
+ integer :: ndat,nfftot,npw_k,spaceComm,tim_fourwf,gpu_option,nfourwf_slices,nfourwf_slices_occ,nbandslice_occ
  integer :: iband_me
  integer :: mband_mem
  real(dp) :: kpt_cart,kg_k_cart,gp2pi1,gp2pi2,gp2pi3,cwftmp
@@ -211,8 +211,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  else
    ioption=option
  end if
-
- nfourwf_slices=1; if(present(nslices)) nfourwf_slices=nslices
 
 ! Not sure what to do for Wannier90 DMFT
  if(ioption/=0.and.(paw_dmft%use_sc_dmft==1.or.paw_dmft%use_sc_dmft==10)) then
@@ -298,6 +296,8 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  gpu_option=ABI_GPU_DISABLED
 #endif
  gpu_cwavef=(gpu_option==ABI_GPU_OPENMP .and. paw_dmft%use_sc_dmft/=1)
+
+ nfourwf_slices=1; if(present(nslices) .and. gpu_option/=ABI_GPU_DISABLED) nfourwf_slices=nslices
 
 !start loop over alpha and beta
 
@@ -439,16 +439,23 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                end if ! end if locc_test
              end do ! end iband=1,nband_k
              if (nband_occ>0) then
-               call fourwf(1,rhoaug,cwavef(:,1:nband_occ*npw_k,1),dummy,wfraug(:,:,:,1:n6*nband_occ),&
-&                gbound,gbound,istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+               nfourwf_slices_occ=1; nbandslice_occ=nband_occ
+               if(nfourwf_slices>1) then
+                 nfourwf_slices_occ = real(nband_occ)/mpi_enreg%bandpp * nfourwf_slices
+                 nfourwf_slices_occ = min(nband_occ,nfourwf_slices_occ)
+                 nbandslice_occ = nband_occ/nfourwf_slices_occ
+               end if
+
+               call fourwf_optmem(1,rhoaug,cwavef(:,1:nband_occ*npw_k,1),dummy,wfraug(:,:,:,1:n6*nbandslice_occ),&
+&                gbound,gbound,istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,nfourwf_slices_occ,dtset%ngfft,&
 &                npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
 &                gpu_option=gpu_option)
                if(dtset%nspinor==2)then
                  if(dtset%nspden==1) then
                    ! We need only the total density : accumulation continues on top of rhoaug
-                   call fourwf(1,rhoaug,cwavef(:,1:nband_occ*npw_k,2),dummy,wfraug(:,:,:,1:n6*nband_occ),&
-&                      gbound,gbound,istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+                   call fourwf_optmem(1,rhoaug,cwavef(:,1:nband_occ*npw_k,2),dummy,wfraug(:,:,:,1:n6*nbandslice_occ),&
+&                      gbound,gbound,istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,nfourwf_slices_occ,dtset%ngfft,&
 &                      npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                      weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
 &                      gpu_option=gpu_option)
@@ -487,22 +494,22 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                    !$OMP TARGET UPDATE FROM(rhoaug) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
                    rhoaug_up(:,:,:)=rhoaug(:,:,:) !Already computed
-                   call fourwf(1,rhoaug_down,cwavef(:,1:nband_occ*npw_k,2),dummy,wfraug,gbound,gbound,&
-                     &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+                   call fourwf_optmem(1,rhoaug_down,cwavef(:,1:nband_occ*npw_k,2),dummy,wfraug(:,:,:,1:n6*nbandslice_occ),gbound,gbound,&
+                     &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,nfourwf_slices_occ,dtset%ngfft,&
                      &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
                      &                     weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
                      &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_2,&
                      &                     gpu_option=gpu_option)
 
-                   call fourwf(1,rhoaug_mx,cwavef_x,dummy,wfraug,gbound,gbound,&
-                     &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+                   call fourwf_optmem(1,rhoaug_mx,cwavef_x,dummy,wfraug(:,:,:,1:n6*nbandslice_occ),gbound,gbound,&
+                     &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,nfourwf_slices_occ,dtset%ngfft,&
                      &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
                      &                     weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
                      &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_x,&
                      &                     gpu_option=gpu_option)
 
-                   call fourwf(1,rhoaug_my,cwavef_y,dummy,wfraug,gbound,gbound,&
-                     &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+                   call fourwf_optmem(1,rhoaug_my,cwavef_y,dummy,wfraug(:,:,:,1:n6*nbandslice_occ),gbound,gbound,&
+                     &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,nfourwf_slices_occ,dtset%ngfft,&
                      &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
                      &                     weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
                      &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_y,&

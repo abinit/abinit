@@ -38,7 +38,7 @@ module m_prep_kgb
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_nonlop,      only : nonlop
  use m_getghc,      only : multithreaded_getghc
- use m_fft,         only : fourwf
+ use m_fft,         only : fourwf, fourwf_optmem
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -1112,12 +1112,13 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  real(dp),intent(in) :: occ_k(nband_k)
  real(dp),intent(out) :: rhoaug(n4,n5,n6)
  real(dp),intent(in), target :: cwavef(2,npw_k*blocksize)
- real(dp),target,intent(inout) :: wfraug(2,n4,n5,n6*(ndat/nslices+ndat-(ndat/nslices)*nslices))
+ real(dp),target,intent(inout) :: wfraug(:,:,:,:) !(2,n4,n5,n6*{ndat,ndat/nslices+mod(ndat,nslices))
 
 !Local variables-------------------------------
 !scalars
  integer :: bandpp,bandpp_sym,ier,iibandpp,ikpt_this_proc,ind_occ,ind_occ1,ind_occ2,ipw
- integer :: istwf_k_,jjbandpp,me_fft,nd3,nproc_band,nproc_fft,npw_fft,nslices_sym
+ integer :: istwf_k_,jjbandpp,me_fft,nd3,nproc_band,nproc_fft,npw_fft
+ integer :: nslices_sym,nbandslice
  integer :: spaceComm=0,tim_fourwf,gpu_option_
  integer,pointer :: idatarecv0,ndatarecv,ndatarecv_tot,ndatasend_sym
  logical :: flag_inv_sym,have_to_reequilibrate,transfer_cwavef
@@ -1137,10 +1138,6 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  integer,pointer :: gbound_(:,:)
  real(dp) :: dummy(2,1),tsec(2)
  real(dp),allocatable :: buff_wf(:,:)
-
-#ifdef HAVE_OPENMP_OFFLOAD
- integer :: ii,firstelt,firstband,lastelt,lastband,spacedim,chunk,residuchunk,islice
-#endif
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: cwavef_alltoall1(:,:) => null()
@@ -1398,28 +1395,14 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        if(abs(occ_k(ind_occ)) < tol8) weight_t(iibandpp) = zero
      end do
 
-     chunk = bandpp/nslices ! Divide by 2 to construct chunk of even number of bands
-     residuchunk = bandpp - nslices*chunk
-     spacedim    = ndatarecv
-     do ii=1,nslices
-       islice=ii-1
-       if ( islice < nslices-residuchunk ) then
-         firstband = islice*chunk+1
-         lastband = (islice+1)*chunk
-       else
-         firstband = (nslices-residuchunk)*chunk + ( islice -(nslices-residuchunk) )*(chunk+1) +1
-         lastband = firstband+chunk
-       end if
-       firstelt = (firstband-1)*spacedim+1
-       lastelt = lastband*spacedim
-       call fourwf(1,rhoaug,&
-       &      cwavef_alltoall1(:,firstelt:lastelt),&
-       &      dummy,wfraug_ptr,gbound_,gbound_,&
-       &      istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,lastband-firstband+1,&
-       &      ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,tim_fourwf,weight,weight,&
-       &      weight_array_r=weight_t(firstband:lastband),weight_array_i=weight_t(firstband:lastband),&
-       &      gpu_option=gpu_option_)
-     end do
+     nbandslice=bandpp/nslices+modulo(bandpp,nslices)
+     call fourwf_optmem(1,rhoaug,&
+     &      cwavef_alltoall1,&
+     &      dummy,wfraug(:,:,:,1:n6*nbandslice),gbound_,gbound_,&
+     &      istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,bandpp,nslices,&
+     &      ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,tim_fourwf,weight,weight,&
+     &      weight_array_r=weight_t,weight_array_i=weight_t,&
+     &      gpu_option=gpu_option_)
      ABI_FREE(weight_t)
 
 !  Standard version
@@ -1521,29 +1504,14 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        weight2_t(iibandpp) = occ_k(ind_occ2)*wtk/ucvol
      end do
 
-     chunk = bandpp_sym/nslices_sym ! Divide by 2 to construct chunk of even number of bands
-     residuchunk = bandpp_sym - nslices_sym*chunk
-     spacedim    = ndatarecv_tot
-     do ii=1,nslices_sym
-       islice=ii-1
-       if ( islice < nslices_sym-residuchunk ) then
-         firstband = islice*chunk+1
-         lastband = (islice+1)*chunk
-       else
-         firstband = (nslices_sym-residuchunk)*chunk + ( islice -(nslices_sym-residuchunk) )*(chunk+1) +1
-         lastband = firstband+chunk
-       end if
-       firstelt = (firstband-1)*spacedim+1
-       lastelt = lastband*spacedim
-
-       call fourwf(1,rhoaug,&
-       &      ewavef_alltoall_sym(:,firstelt:lastelt),&
-       &      dummy,wfraug,gbound_,gbound_,&
-       &      istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,lastband-firstband+1,&
-       &      ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,tim_fourwf,weight,weight,&
-       &      weight_array_r=weight1_t(firstband:lastband),weight_array_i=weight2_t(firstband:lastband),&
-       &      gpu_option=gpu_option_)
-     end do
+     nbandslice=bandpp_sym/nslices_sym+modulo(bandpp_sym,nslices_sym)
+     call fourwf_optmem(1,rhoaug,&
+     &      ewavef_alltoall_sym,&
+     &      dummy,wfraug(:,:,:,1:n6*nbandslice),gbound_,gbound_,&
+     &      istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,bandpp_sym,nslices_sym,&
+     &      ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,tim_fourwf,weight,weight,&
+     &      weight_array_r=weight1_t,weight_array_i=weight2_t,&
+     &      gpu_option=gpu_option_)
 
      ABI_FREE(weight1_t)
      ABI_FREE(weight2_t)
