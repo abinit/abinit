@@ -2775,7 +2775,7 @@ end subroutine computeTraceEstimation
 !        getAX, kin, nb_vec_slices, upp_bound_slices, gpu_option)
 subroutine splitSpectrumToSlices( &
         nslice, nstep_spectrum, &
-        low_bound_wanted, upp_bound_wanted, min_bound, max_bound, my_rank, &
+        low_bound_wanted, upp_bound_wanted, min_bound, max_bound, &
         nb_vec_slices, upp_bound_slices, gpu_option)
 
     implicit none
