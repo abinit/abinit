@@ -64,7 +64,7 @@ module m_vtowfk
  use m_nonlop,      only : nonlop !, nonlop_counter
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
  use m_cgprj,       only : cprj_rotate,xg_cprj_copy,XG_TO_CPRJ
- use m_fft,         only : fourwf
+ use m_fft,         only : fourwf, fourwf_optmem
  use m_cgtk,        only : cgtk_fixphase
  use m_common,      only : get_gemm_nonlop_ompgpu_blocksize
  use m_gemm_nonlop_projectors, only : gemm_nonlop_block_size, gemm_nonlop_is_distributed
@@ -225,7 +225,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo,ndat_fft
  integer :: paw_opt,quit,signs,space,spaceComm,tim_nonlop,wfoptalg,wfopta10
  integer :: gpu_option_tmp,nblk_gemm_nonlop,blksize_gemm_nonlop_tmp,nfourwf_slices_tmp
- integer :: firstelt,firstband,lastelt,lastband,spacedim,chunk,residuchunk,islice
+ integer :: chunk,residuchunk
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar2,ar_im,eshift,occblock,norm
  real(dp) :: max_resid,weight,cpu,wall,gflops
@@ -762,7 +762,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ndat_fft=ndat; if(mpi_enreg%paral_kgb==0) ndat_fft=blocksize
    chunk = ndat_fft/gs_hamk%nfourwf_slices ! Divide by 2 to construct chunk of even number of bands
    residuchunk = ndat_fft - gs_hamk%nfourwf_slices*chunk
-   spacedim = npw_k
    if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
      ABI_MALLOC_MANAGED(wfraug,(/2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat_fft/))
@@ -940,24 +939,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          end do
 
          if(dtset%nspinor==1) then
-           do ii=1,gs_hamk%nfourwf_slices
-             islice=ii-1
-             if ( islice < gs_hamk%nfourwf_slices-residuchunk ) then
-               firstband = islice*chunk+1
-               lastband = (islice+1)*chunk
-             else
-               firstband = (gs_hamk%nfourwf_slices-residuchunk)*chunk + ( islice -(gs_hamk%nfourwf_slices-residuchunk) )*(chunk+1) +1
-               lastband = firstband+chunk
-             end if
-             firstelt = (firstband-1)*spacedim+1
-             lastelt = lastband*spacedim
-             call fourwf(1,rhoaug(:,:,:,1),cwavef(:,firstelt:lastelt),dummy,wfraug,&
-                 gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
-                 gs_hamk%mgfft,mpi_enreg,lastband-firstband+1,gs_hamk%ngfft,&
-                 npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
-                 weight_array_r=weight_t,weight_array_i=weight_t,&
-                 gpu_option=dtset%gpu_option)
-           end do
+           call fourwf_optmem(1,rhoaug(:,:,:,1),cwavef(:,:),dummy,wfraug,&
+               gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
+               gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%nfourwf_slices,gs_hamk%ngfft,&
+               npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
+               weight_array_r=weight_t,weight_array_i=weight_t,&
+               gpu_option=dtset%gpu_option)
 
          else if(dtset%nspinor==2) then
            ABI_MALLOC(cwavefb,(2,npw_k*blocksize,2))
@@ -984,17 +971,17 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              end do
            end if
 
-           call fourwf(1,rhoaug(:,:,:,1),cwavefb(:,:,1),dummy,wfraug,&
+           call fourwf_optmem(1,rhoaug(:,:,:,1),cwavefb(:,:,1),dummy,wfraug,&
                        gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
-                       gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
+                       gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%nfourwf_slices,gs_hamk%ngfft,&
                        npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
                        weight_array_r=weight_t,weight_array_i=weight_t,&
                        gpu_option=dtset%gpu_option)
 
            if(dtset%nspden==1) then
-             call fourwf(1,rhoaug(:,:,:,1),cwavefb(:,:,2),dummy,wfraug,&
+             call fourwf_optmem(1,rhoaug(:,:,:,1),cwavefb(:,:,2),dummy,wfraug,&
                          gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
-                         gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
+                         gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%nfourwf_slices,gs_hamk%ngfft,&
                          npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
                          weight_array_r=weight_t,weight_array_i=weight_t,&
                          gpu_option=dtset%gpu_option)
@@ -1032,23 +1019,23 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              end if
 
              ! z component
-             call fourwf(1,rhoaug(:,:,:,4),cwavefb(:,:,2),dummy,wfraug,&
+             call fourwf_optmem(1,rhoaug(:,:,:,4),cwavefb(:,:,2),dummy,wfraug,&
                          gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
-                         gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
+                         gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%nfourwf_slices,gs_hamk%ngfft,&
                          npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
                          weight_array_r=weight_t,weight_array_i=weight_t,&
                          gpu_option=dtset%gpu_option)
              ! x component
-             call fourwf(1,rhoaug(:,:,:,2),cwavef_x(:,:),dummy,wfraug,&
+             call fourwf_optmem(1,rhoaug(:,:,:,2),cwavef_x(:,:),dummy,wfraug,&
                          gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
-                         gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
+                         gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%nfourwf_slices,gs_hamk%ngfft,&
                          npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
                          weight_array_r=weight_t,weight_array_i=weight_t,&
                          gpu_option=dtset%gpu_option)
              ! y component
-             call fourwf(1,rhoaug(:,:,:,3),cwavef_y(:,:),dummy,wfraug,&
+             call fourwf_optmem(1,rhoaug(:,:,:,3),cwavef_y(:,:),dummy,wfraug,&
                          gs_hamk%gbound_k,gs_hamk%gbound_k,istwf_k,kg_k,kg_k,&
-                         gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%ngfft,&
+                         gs_hamk%mgfft,mpi_enreg,blocksize,gs_hamk%nfourwf_slices,gs_hamk%ngfft,&
                          npw_k,1,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,tim_fourwf,weight,weight,&
                          weight_array_r=weight_t,weight_array_i=weight_t,&
                          gpu_option=dtset%gpu_option)
