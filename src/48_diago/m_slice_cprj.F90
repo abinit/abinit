@@ -2774,14 +2774,14 @@ end subroutine computeTraceEstimation
 !        low_bound_wanted, upp_bound_wanted, min_bound, max_bound, my_rank, &
 !        getAX, kin, nb_vec_slices, upp_bound_slices, gpu_option)
 subroutine splitSpectrumToSlices( &
-        nslice, nstep_spectrum, &
+        slice, nslice, nstep_spectrum, &
         low_bound_wanted, upp_bound_wanted, min_bound, max_bound, &
         nb_vec_slices, upp_bound_slices, gpu_option)
 
     implicit none
  
     ! Arguments
-    !type(slice_t), intent(inout) :: slice
+    type(slice_t), intent(inout) :: slice
     !type(xgBlock_t), intent(in) :: kin
     integer, intent(in) :: nslice
     !integer, intent(in) :: trace_rank
