@@ -1404,7 +1404,6 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     !write(std_out,*) 'getid inside runSlice xAXColsRows (filtered 1)', xgBlock_getId(chebfi%xAXColsRows)
     
     write(std_out,*) 'starting filter in proc', xmpi_comm_rank(chebfi%spacecom)
-    write(std_out,*) 'wanted rank=', k_rank
     flush(std_out)
 
     ! Apply polynomial filtering to active MPI ColsRows block-column
@@ -2032,6 +2031,8 @@ subroutine chebfi_runSubspaceIterationDummy(chebfi,X0,getAX_BX,getBm1X,eigen,res
     nrowsLinalg = nrows_blockrows
 
     call xg_init(resid_active, SPACE_R, neigenpairs, 1, gpu_option=chebfi%gpu_option)
+    
+    write(std_out,*) 'wanted rank=', k_rank
 
     !write(std_out,*) 'getid inside runSlice xXColsRows', xgBlock_getId(chebfi%xXColsRows)
     !write(std_out,*) 'getid inside runSlice xAXColsRows', xgBlock_getId(chebfi%xAXColsRows)
