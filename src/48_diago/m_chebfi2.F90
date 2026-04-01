@@ -1840,7 +1840,7 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
         call chebfi_swapConvergedVectors(chebfi, resid_active%self, 1e-3_dp, n_locked)
         ! todo check if residual of wanted bands has converged if yes skip parts
         ! use k_conv as number of wanted bands
-        write(std_out,*) 'keeping', k_conv, bands
+        write(std_out,*) 'keeping', k_conv, 'bands'
         flush(std_out)
         
         if (chebfi%paral_kgb==1 .and. iter_subspace>1 .and. n_locked > 0 .and. n_locked /= n_locked_prev) then
