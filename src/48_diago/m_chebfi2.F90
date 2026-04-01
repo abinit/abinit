@@ -1404,6 +1404,7 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     !write(std_out,*) 'getid inside runSlice xAXColsRows (filtered 1)', xgBlock_getId(chebfi%xAXColsRows)
     
     write(std_out,*) 'starting filter in proc', xmpi_comm_rank(chebfi%spacecom)
+    write(std_out,*) 'wanted rank=', k_rank
     flush(std_out)
 
     ! Apply polynomial filtering to active MPI ColsRows block-column
@@ -1419,7 +1420,7 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
         write(std_out,*) 'mineig_global=', mineig_global
         write(std_out,*) 'maxeig_global=', maxeig_global
         flush(std_out)
-        call chebfi_bandpassFilter(chebfi,eigen,lambda_minus,lambda_plus,mineig_global,&
+        call chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
             maxeig_global,getAX_BX,getBm1X)
     end if
 
@@ -1769,7 +1770,7 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
                 BX_part%colsrows_active,eigen,lambda_minus,lambda_plus,getAX_BX,getBm1X)
         else
             call chebfi_bandpassFilterActive(chebfi,X_part%colsrows_active,AX_part%colsrows_active,&
-                BX_part%colsrows_active,eigen,lambda_minus,lambda_plus,mineig_global,maxeig_global,&
+                BX_part%colsrows_active,lambda_minus,lambda_plus,mineig_global,maxeig_global,&
                 getAX_BX,getBm1X)
         end if
         ! todo prevent bug X_next, X_prev might need resetting
@@ -2126,7 +2127,7 @@ subroutine chebfi_runSubspaceIterationDummy(chebfi,X0,getAX_BX,getBm1X,eigen,res
         if (is_lowpass) then
             call chebfi_lowpassFilter(chebfi,eigen,lambda_minus,lambda_plus,getAX_BX,getBm1X)
         else
-            call chebfi_bandpassFilter(chebfi,eigen,lambda_minus,lambda_plus,mineig_global,&
+            call chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
                 maxeig_global,getAX_BX,getBm1X)
         end if
 
@@ -2578,14 +2579,14 @@ end subroutine chebfi_lowpassFilterActive
 !!
 !! SOURCE
 
-subroutine chebfi_bandpassFilter(chebfi,eigen,lambda_minus,lambda_plus,mineig_global,&
+subroutine chebfi_bandpassFilter(chebfi,lambda_minus,lambda_plus,mineig_global,&
         maxeig_global,getAX_BX,getBm1X)
 
     implicit none
 
     ! Arguments ------------------------------------
     type(chebfi_t), intent(inout) :: chebfi
-    type(xgBlock_t), intent(inout) :: eigen
+    !type(xgBlock_t), intent(inout) :: eigen
     real(dp), intent(in) :: lambda_minus
     real(dp), intent(in) :: lambda_plus
     real(dp), intent(in) :: mineig_global
@@ -2726,7 +2727,7 @@ end subroutine chebfi_bandpassFilter
 !!
 !! SOURCE
 
-subroutine chebfi_bandpassFilterActive(chebfi,X_active,AX_active,BX_active,eigen,&
+subroutine chebfi_bandpassFilterActive(chebfi,X_active,AX_active,BX_active,&
         lambda_minus,lambda_plus,mineig_global,maxeig_global,getAX_BX,getBm1X)
 
     implicit none
@@ -2736,7 +2737,7 @@ subroutine chebfi_bandpassFilterActive(chebfi,X_active,AX_active,BX_active,eigen
     type(xgBlock_t), intent(inout) :: X_active
     type(xgBlock_t), intent(inout) :: AX_active
     type(xgBlock_t), intent(inout) :: BX_active
-    type(xgBlock_t), intent(inout) :: eigen
+    !type(xgBlock_t), intent(inout) :: eigen
     real(dp), intent(in) :: lambda_minus
     real(dp), intent(in) :: lambda_plus
     real(dp), intent(in) :: mineig_global

@@ -2048,14 +2048,14 @@ end subroutine slice_ampfactorMax
 !! IML debug version 08/07:
 !! probe an interior slice, works for test case only
 
-subroutine slice_probeProximity(slice,islice)
-
-    implicit none
-    type(slice_t), intent(inout) :: slice
-    integer, intent(in) :: islice
-
-
-end subroutine slice_probeProximity
+!subroutine slice_probeProximity(slice,islice)
+!
+!    implicit none
+!    type(slice_t), intent(inout) :: slice
+!    integer, intent(in) :: islice
+!
+!
+!end subroutine slice_probeProximity
 !!***
 
 !----------------------------------------------------------------------
@@ -2769,21 +2769,25 @@ end subroutine computeTraceEstimation
 !! splitSpectrumToSlices
 !!
 !! SOURCE
+!subroutine splitSpectrumToSlices( &
+!        slice, nslice, trace_rank, trace_degree, nstep_spectrum, &
+!        low_bound_wanted, upp_bound_wanted, min_bound, max_bound, my_rank, &
+!        getAX, kin, nb_vec_slices, upp_bound_slices, gpu_option)
 subroutine splitSpectrumToSlices( &
-        slice, nslice, trace_rank, trace_degree, nstep_spectrum, &
+        nslice, nstep_spectrum, &
         low_bound_wanted, upp_bound_wanted, min_bound, max_bound, my_rank, &
-        getAX, kin, nb_vec_slices, upp_bound_slices, gpu_option)
+        nb_vec_slices, upp_bound_slices, gpu_option)
 
     implicit none
  
     ! Arguments
-    type(slice_t), intent(inout) :: slice
-    type(xgBlock_t), intent(in) :: kin
+    !type(slice_t), intent(inout) :: slice
+    !type(xgBlock_t), intent(in) :: kin
     integer, intent(in) :: nslice
-    integer, intent(in) :: trace_rank
-    integer, intent(in) :: trace_degree
+    !integer, intent(in) :: trace_rank
+    !integer, intent(in) :: trace_degree
     integer, intent(in) :: nstep_spectrum
-    integer, intent(in) :: my_rank
+    !integer, intent(in) :: my_rank
     real(dp), intent(in) :: low_bound_wanted
     real(dp), intent(in) :: upp_bound_wanted
     real(dp), intent(in) :: min_bound
@@ -2791,13 +2795,13 @@ subroutine splitSpectrumToSlices( &
     integer, intent(inout) :: nb_vec_slices(nslice)
     real(dp), intent(inout) :: upp_bound_slices(nslice)
     integer, optional, intent(in) :: gpu_option
-    interface
-        subroutine getAX(X,AX)
-            use m_xg, only : xgBlock_t
-            type(xgBlock_t), intent(inout) :: X
-            type(xgBlock_t), intent(inout) :: AX
-        end subroutine getAX
-    end interface
+    !interface
+    !    subroutine getAX(X,AX)
+    !        use m_xg, only : xgBlock_t
+    !        type(xgBlock_t), intent(inout) :: X
+    !        type(xgBlock_t), intent(inout) :: AX
+    !    end subroutine getAX
+    !end interface
 
     ! Local variables
     integer, parameter :: trace_crit = 2
