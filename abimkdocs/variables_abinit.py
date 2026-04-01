@@ -2216,9 +2216,9 @@ Variable(
     vartype="integer",
     topics=['longwave_expert'],
     dimensions=[2],
-    defaultval=[1, '[[natom]]' ],
+    defaultval=MultipleValue(number=1, value='[[natom]]'),
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: limits of local MAGnetic fields on ATomic spheres",
-    requires="[[optdriver]] == 10 and [[timdisp==1]] (time-dispersion calculation)",
+    requires="[[optdriver]] == 10 and [[timdisp]]==1 (time-dispersion calculation)",
     characteristics=['[[DEVELOP]]'],
     added_in_version="10.4",
     text=r"""
@@ -2238,7 +2238,7 @@ Variable(
     dimensions=[3],
     defaultval=[1, 1, 1],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: MAGnetic field DIRections",
-    requires="[[optdriver]] == 10 and [[timdisp==1]] (time-dispersion calculation)",
+    requires="[[optdriver]] == 10 and [[timdisp]]==1 (time-dispersion calculation)",
     characteristics=['[[DEVELOP]]'],
     added_in_version="10.4",
     text=r"""
@@ -2255,7 +2255,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 1: MAGNetic field",
-    requires="[[optdriver]] == 10 and [[timdisp==1]] (time-dispersion calculation)",
+    requires="[[optdriver]] == 10 and [[timdisp]]==1 (time-dispersion calculation)",
     characteristics=['[[DEVELOP]]'],
     added_in_version="10.4",
     text=r"""
@@ -2344,9 +2344,9 @@ Variable(
     vartype="integer",
     topics=['longwave_expert'],
     dimensions=[2],
-    defaultval=[1, '[[natom]]' ],
+    defaultval=MultipleValue(number=1, value='[[natom]]'),
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: limits of local MAGnetic fields on ATomic spheres",
-    requires="[[optdriver]] == 10 and [[timdisp==1]] (time-dispersion calculation)",
+    requires="[[optdriver]] == 10 and [[timdisp]]==1 (time-dispersion calculation)",
     characteristics=['[[DEVELOP]]'],
     added_in_version="10.4",
     text=r"""
@@ -2366,7 +2366,7 @@ Variable(
     dimensions=[3],
     defaultval=[1, 1, 1],
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: MAGnetic field DIRections",
-    requires="[[optdriver]] == 10 and [[timdisp==1]] (time-dispersion calculation)",
+    requires="[[optdriver]] == 10 and [[timdisp]]==1 (time-dispersion calculation)",
     characteristics=['[[DEVELOP]]'],
     added_in_version="10.4",
     text=r"""
@@ -2383,7 +2383,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="3rd Derivative of Energy, mixed PERTurbation 2: MAGNetic field",
-    requires="[[optdriver]] == 10 and [[timdisp==1]] (time-dispersion calculation)",
+    requires="[[optdriver]] == 10 and [[timdisp]]==1 (time-dispersion calculation)",
     characteristics=['[[DEVELOP]]'],
     added_in_version="10.4",
     text=r"""
@@ -12374,7 +12374,7 @@ Variable(
     vartype="integer",
     topics=['DFPT_expert'],
     dimensions=[2],
-    defaultval=[1, '[[natom]]' ],
+    defaultval=MultipleValue(number=1, value='[[natom]]'),
     mnemonics="Magnetic Penalty: ATomic POLarisation",
     characteristics=['[[DEVELOP]]'],
     added_in_version="10.4",
@@ -19858,7 +19858,7 @@ Variable(
     mnemonics="Response Function with respect to MAGNetic B-field perturbation",
     added_in_version="before_v9",
     text=r"""
-This variable enables response-function calculations with respect to external Zeeman magnetic fields. At present, orbital magnetism is not included, and the perturbing potential has purely Zeeman form. For further details, see Refs. [[cite:Ricci2019]] and [[cite:Royo25]].
+This variable enables response-function calculations with respect to external Zeeman magnetic fields. At present, orbital magnetism is not included, and the perturbing potential has purely Zeeman form. For further details, see Refs. [[cite:Ricci2019]] and [[cite:Royo2025]].
 
   * 0 --> no magnetic-field perturbation
   * 1 --> uniform magnetic-field perturbation (possibly at finite q) applied along the Cartesian directions specified by [[rfdir]]
@@ -19868,8 +19868,8 @@ This variable enables response-function calculations with respect to external Ze
 
 Note for constrained DFPT calculations:
 A set of local magnetic-field response calculations, combined with a geometrically equivalent magnetic penalty 
-(defined by the variables [[magpen]], [[mpatpol]], and [[mpatdir]]), enables the computation of the so-called 
-local spin susceptibility within the constrained-B functional introduced in Ref. [[cite:Royo25]]. This quantity 
+(defined by the variables [[magpen]], [[mpatpol]], and [[mpdir]]), enables the computation of the so-called 
+local spin susceptibility within the constrained-B functional introduced in Ref. [[cite:Royo2025]]. This quantity 
 is stored in the DDB file and subsequently used by anaddb to transform the second- and third-order energy derivatives 
 computed with the magnetic penalty--i.e., within the constrained-B functional--into the corresponding physically 
 relevant magnetic functionals.
