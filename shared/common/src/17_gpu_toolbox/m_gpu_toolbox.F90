@@ -86,6 +86,16 @@ module m_gpu_toolbox
 
   interface
 
+    function gpu_get_lib_version_major() bind(c, name='gpu_get_lib_version_major_cpp') result(major)
+      use, intrinsic :: iso_c_binding
+      integer(kind=c_int) :: major
+    end function gpu_get_lib_version_major
+
+    function gpu_get_lib_version_minor() bind(c, name='gpu_get_lib_version_minor_cpp') result(minor)
+      use, intrinsic :: iso_c_binding
+      integer(kind=c_int) :: minor
+    end function gpu_get_lib_version_minor
+
     subroutine gpu_device_synchronize() bind(c, name='gpu_device_synchronize_cpp')
       use, intrinsic :: iso_c_binding
     end subroutine gpu_device_synchronize
