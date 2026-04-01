@@ -637,8 +637,9 @@ subroutine slice_getSpectralInfo(slice, X, matrixInfo, moments, eigen, resid, ge
     type(xgBlock_t) :: eigen_me, resid_me
     type(xgTransposer_t) :: xgTransposerX
     ! Arrays
+#ifdef HAVE_OPENMP_OFFLOAD
     real(dp) :: tsec(2)
-
+#endif
     ! *********************************************************************
 
     neigenpairs = slice%neigenpairs
