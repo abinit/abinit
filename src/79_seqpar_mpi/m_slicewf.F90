@@ -424,7 +424,9 @@ subroutine getBm1X(X,Bm1X)
 !scalars
  integer :: blockdim
  integer :: spacedim
+#ifdef HAVE_OPENMP_OFFLOAD
  character(len=500) :: msg
+#endif
 !arrays
  real(dp), pointer :: ghc_filter(:,:)
  real(dp), pointer :: gsm1hc_filter(:,:)

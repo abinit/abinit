@@ -1332,7 +1332,7 @@ end subroutine chebfi_ampfactorBandpass
 !! SOURCE
 
 subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
-        mineig_global,maxeig_global,lambda_minus,lambda_plus,is_lowpass,k_rank,nrows_blockrows)
+        mineig_global,maxeig_global,lambda_minus,lambda_plus,is_lowpass,nrows_blockrows)
 
     implicit none
 
@@ -1342,7 +1342,6 @@ subroutine chebfi_runSlice(chebfi,X0,getAX_BX,getBm1X,eigen,residu,nspinor,&
     type(xgBlock_t), intent(inout) :: eigen
     type(xgBlock_t), intent(inout) :: residu
     integer        , intent(in   ) :: nspinor
-    integer        , intent(in   ) :: k_rank
     integer, pointer, intent(in  ) :: nrows_blockrows(:)
     real(dp)       , intent(in   ) :: mineig_global 
     real(dp)       , intent(in   ) :: maxeig_global
@@ -1841,6 +1840,8 @@ subroutine chebfi_runSubspaceIteration(chebfi,X0,getAX_BX,getBm1X,eigen,residu,n
         call chebfi_swapConvergedVectors(chebfi, resid_active%self, 1e-3_dp, n_locked)
         ! todo check if residual of wanted bands has converged if yes skip parts
         ! use k_conv as number of wanted bands
+        write(std_out,*) 'keeping', k_conv, bands
+        flush(std_out)
         
         if (chebfi%paral_kgb==1 .and. iter_subspace>1 .and. n_locked > 0 .and. n_locked /= n_locked_prev) then
             call bandPartitionData_setLinalg(chebfi%X      , X_part , n_locked)

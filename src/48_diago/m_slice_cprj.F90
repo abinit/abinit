@@ -522,7 +522,6 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  integer :: slicedim
  !integer :: shift_x,shift_cprj
  !integer :: niter, max_niter_restart
- integer :: nband_slice
  integer :: count_mask
  integer :: count_rr
  integer :: count_merge
@@ -583,24 +582,24 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  type(xg_t) :: X0_out, eigen_out
  type(xgBlock_t) :: X0_out_part, eigen_out_part
  type(xgBlock_t) :: X_in, eigen_in
- type(xgBlock_t) :: DivResults_part
- type(xgBlock_t) :: X_prev
- type(xgBlock_t) :: cprjX_prev
- type(xgBlock_t) :: cprj_work_prev
- type(xgBlock_t) :: eig_part
+ !type(xgBlock_t) :: DivResults_part
+ !type(xgBlock_t) :: X_prev
+ !type(xgBlock_t) :: cprjX_prev
+ !type(xgBlock_t) :: cprj_work_prev
+ !type(xgBlock_t) :: eig_part
  type(xgBlock_t) :: X_col, AX_col
  type(xg_t) :: X_kept, AX_kept
  type(xg_t) :: cprj_work_slice, cprj_work2_slice
  type(xgBlock_t) :: X_kept_col, AX_kept_col
  type(xgBlock_t) :: eigenvalues_slice, residu_slice
- type(xg_t) :: X_part
- type(xg_t) :: AX_part
- type(xg_t) :: cprjX_part
+ !type(xg_t) :: X_part
+ !type(xg_t) :: AX_part
+ !type(xg_t) :: cprjX_part
  integer,parameter :: gpu_option=ABI_GPU_DISABLED
 !arrays
  real(dp) :: tsec(2)
  integer, allocatable :: permute_cols(:)
- integer, allocatable :: sorted_idx(:) ! same as permute_cols but used elsewhere
+ !integer, allocatable :: sorted_idx(:) ! same as permute_cols but used elsewhere
  integer, allocatable :: probe_idx(:)
  integer, allocatable :: nb_vec_slices(:)
  real(dp), allocatable :: upper_bound_slices(:)
@@ -615,7 +614,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  real(dp), pointer :: probe(:) => null()
  real(dp), pointer :: probe_XfX(:,:) => null()
  real(dp), pointer :: X0_norm2(:) => null()
- real(dp), pointer :: lambda_apost(:) => null()
+ !real(dp), pointer :: lambda_apost(:) => null()
  real(dp), pointer :: lambda_apost_slice(:) => null()
  real(dp), pointer :: theta_(:,:) => null()
  real(dp), pointer :: cheby_moments(:,:) => null()
@@ -628,10 +627,13 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 ! *********************************************************************
 
  ! ITEST 
- write(901,*) 'inside slice_run'
- write(901,*) 'nslice=', slice%nslice
- flush(901)
+ write(std_out,*) 'inside slice_run'
+ write(std_out,*) 'nslice=', slice%nslice
+ flush(std_out)
  ! ITEST
+
+ write(std_out,*) 'occ array not used', rows(occ), cols(occ)
+ flush(std_out)
 
  ! Warning; the entire code assumes this for simplicity and debugging purposes
  ABI_CHECK(slice%bandpp == slice%neigenpairs, "slice_cprj not implemented in MPI")
@@ -720,9 +722,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  rayleigh_quotients(1:neigenpairs) = theta_(1,1:neigenpairs)
 
  ! ITEST
- write(901,*) 'rayleigh quotients='
- call xgBlock_print(DivResults%self, 901)
- flush(901)
+ write(std_out,*) 'rayleigh quotients='
+ call xgBlock_print(DivResults%self, std_out)
+ flush(std_out)
  ! ITEST
 
  ! Compute |X|^2 colwise L2-norm (before any filter)
@@ -730,9 +732,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call xgBlock_reverseMap_1d(norm2_X%self,X0_norm2)
 
  ! ITEST
- !write(901,*) 'norm2(squared) ||X||='
- !call xgBlock_print(norm2_X%self,901)
- !flush(901)
+ !write(std_out,*) 'norm2(squared) ||X||='
+ !call xgBlock_print(norm2_X%self,std_out)
+ !flush(std_out)
  ! ITEST
  ! Results: |X|=1 so we don't have to normalize everything after..
 
@@ -746,10 +748,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  call computeBLanczos(slice, getAX, kin, spacedim, kmax, lambda_min, res_norm, gpu_option)
  min_low_bound = lambda_min - res_norm
 
- write(901,*) 'Lanczos lambda_min=', lambda_min
- write(901,*) 'Lanczos res_norm  =', res_norm
- write(901,*) 'Lanczos guarantee =', min_low_bound
- flush(901)
+ write(std_out,*) 'Lanczos lambda_min=', lambda_min
+ write(std_out,*) 'Lanczos res_norm  =', res_norm
+ write(std_out,*) 'Lanczos guarantee =', min_low_bound
+ flush(std_out)
 
  if (res_norm > 0.1d0) then
      ABI_WARNING("Lanczos has residual > 0.1 may need greater kmax to guarantee lower bound")
@@ -769,9 +771,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
  trace_rank = neigenpairs ! FIXME for the moment changing this produces a bug
  trace_degree = 50
 
- write(901,*) 'splitting spectrum to slices within global', min_low_est, max_upp_bound
- write(901,*) '                                    wanted', min_low_bound, min_upp_bound
- flush(901)
+ write(std_out,*) 'splitting spectrum to slices within global', min_low_est, max_upp_bound
+ write(std_out,*) '                                    wanted', min_low_bound, min_upp_bound
+ flush(std_out)
 ! call splitSpectrumToSlices(slice, nslice, trace_rank, trace_degree, nstep_spectrum, &
 !     min_low_bound, min_upp_bound, min_low_est, max_upp_bound, my_rank, getAX, kin, &
 !     nb_vec_slices, upper_bound_slices, & ! output
@@ -790,8 +792,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  !call computeTraceEstimation(slice, trace_rank, trace_degree, low_bound, upp_bound,&
  !    min_low_est, max_upp_bound, trace_est_slice1, getAX, kin, my_rank, gpu_option=gpu_option)
- write(901,*) 'trace estimation for slice1, deg=', trace_est_slice1, trace_degree
- flush(901)
+ write(std_out,*) 'trace estimation for slice1, deg=', trace_est_slice1, trace_degree
+ flush(std_out)
 
  ! Slice 2: 
  my_rank = xmpi_comm_rank(slice%spacecom)
@@ -806,8 +808,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  !call computeTraceEstimation(slice, trace_rank, trace_degree, low_bound, upp_bound,&
  !    min_low_est, max_upp_bound, trace_est_slice2, getAX, kin, my_rank, gpu_option=gpu_option)
- !write(901,*) 'trace estimation for slice2, deg=', trace_est_slice2, trace_degree
- !flush(901)
+ !write(std_out,*) 'trace estimation for slice2, deg=', trace_est_slice2, trace_degree
+ !flush(std_out)
  
  ! attention slice%X est modifie n'est plus X0..
  !! normalement il faut remettre slice%X a valeurs de AllX --->
@@ -847,12 +849,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
   ! if energy oscillates instead of being monotonous this means we have to increase
   ! degree 
 
-  write(901,*) 'Spectral trees %%%%%%%%%'
-  write(901,*) 'ndeg_filter_max=', ndeg_filter_max
-  write(901,*) 'min_low_est=', min_low_est
-  write(901,*) 'max_upp_bound=', max_upp_bound
-  write(901,*) ' ********************** '
-  flush(901) 
+  write(std_out,*) 'Spectral trees %%%%%%%%%'
+  write(std_out,*) 'ndeg_filter_max=', ndeg_filter_max
+  write(std_out,*) 'min_low_est=', min_low_est
+  write(std_out,*) 'max_upp_bound=', max_upp_bound
+  write(std_out,*) ' ********************** '
+  flush(std_out) 
 
   call xg_init(xgX, slice%space, spacedim, neigenpairs, slice%spacecom, me_g0=slice%me_g0)
   call xgBlock_reverseMap(xgX%self, Xprobe, spacedim, neigenpairs)
@@ -863,12 +865,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
   norm2_ = sum(abs(Xprobe)**2) / nm
   variance = norm2_ - abs(meanz)**2
 
-  write(901,*) "mean = ", meanz
-  write(901,*) "E|z|^2 = ", norm2_
-  write(901,*) "variance = ", variance
+  write(std_out,*) "mean = ", meanz
+  write(std_out,*) "E|z|^2 = ", norm2_
+  write(std_out,*) "variance = ", variance
   call xgBlock_copy(xgX%self, slice%X)
-  write(901,*) xgBlock_getid(slice%X)
-  flush(901)
+  write(std_out,*) xgBlock_getid(slice%X)
+  flush(std_out)
 
   call computeChebyshevMoments(slice, getAX, kin, min_low_est, max_upp_bound, &
       ndeg_filter_max, cheby_moments, gpu_option)
@@ -911,18 +913,18 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
   upper_i = upper_bounds(2)
   width = (upper_i - lower_i) / (nstep_bisect + 1)
 
-  write(901,*)
-  write(901,*) 'lower_i=', lower_i
-  write(901,*) 'upper_i=', upper_i
+  write(std_out,*)
+  write(std_out,*) 'lower_i=', lower_i
+  write(std_out,*) 'upper_i=', upper_i
 
   ! total mass
   call buildChebyshevJacksonCoeffs((lower_i-center)/radius, (upper_i-center)/radius, &
       ndeg_filter_max, cja)
   call computeFilterEnergy(neigenpairs, ndeg_filter_max, cja, cheby_moments, &
       energy_interval, nvec_approx)
-  write(901,*) 'nvec estimate in total', lower_i, upper_i
-  write(901,*) nvec_approx
-  flush(901)
+  write(std_out,*) 'nvec estimate in total', lower_i, upper_i
+  write(std_out,*) nvec_approx
+  flush(std_out)
 
   ! shifted bisection
   do ishift = 1, nstep_bisect
@@ -930,9 +932,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     mid_i = lower_i + ishift * width
     deg_i = ndeg_filter_max
      
-    write(901,*) '========================================'
-    write(901,*) 'ishift=', ishift
-    write(901,*) 'mid_i  =', mid_i
+    write(std_out,*) '========================================'
+    write(std_out,*) 'ishift=', ishift
+    write(std_out,*) 'mid_i  =', mid_i
 
     ! Slice Left [a,b)
     call buildChebyshevJacksonCoeffs((lower_i-center)/radius, (mid_i-center)/radius, deg_i, cja)
@@ -941,8 +943,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     energy_filters_left(:,ishift) = energy_interval(:)
 
-    write(901,*) 'nvec estimate left from X0 probe=', nvec_approx
-    flush(901)
+    write(std_out,*) 'nvec estimate left from X0 probe=', nvec_approx
+    flush(std_out)
 
     ! Slice Right [b,c)
     call buildChebyshevJacksonCoeffs((mid_i-center)/radius, (upper_i-center)/radius, deg_i, cja)
@@ -951,8 +953,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     energy_filters_right(:,ishift) = energy_interval(:)
 
-    write(901,*) 'nvec estimate right from X0 probe=', nvec_approx
-    flush(901)
+    write(std_out,*) 'nvec estimate right from X0 probe=', nvec_approx
+    flush(std_out)
 
     !! Uniform mass bisection
     !! si le degre est assez eleve alors la masse totale est
@@ -968,23 +970,23 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
   end do 
 
   ! for every band print its nfilter scores
-  write(901,*)
-  write(901,*) 'j=    ', nstep_bisect, 'scores'
+  write(std_out,*)
+  write(std_out,*) 'j=    ', nstep_bisect, 'scores'
   do j = 1, neigenpairs
-    write(901,*) 'eigenvalue', j
+    write(std_out,*) 'eigenvalue', j
     do ishift = 1, nstep_bisect
         balance_this = energy_filters_left(j,ishift) - energy_filters_right(j,ishift)
         if (ishift > 1) then
             if (balance_prev * balance_this < 0) then
-                write(901,*) 'sign flip! significant mass between=', ishift-1, ishift
+                write(std_out,*) 'sign flip! significant mass between=', ishift-1, ishift
             end if
         end if
-        write(901,*) energy_filters_left(j,ishift), energy_filters_right(j,ishift)
+        write(std_out,*) energy_filters_left(j,ishift), energy_filters_right(j,ishift)
         balance_prev = balance_this
     end do
   end do
-  write(901,*)
-  flush(901)
+  write(std_out,*)
+  flush(std_out)
 
   ! sign flip indicates presence of importance spectral mass
   ! we should NOT cut in the (bi,bi+1) that contains the largest spectral mass
@@ -1017,9 +1019,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  do islice=1, nslice
 
-    write(901,*)
-    write(901,*) '====================Slice=================', islice
-    flush(901)
+    write(std_out,*)
+    write(std_out,*) '====================Slice=================', islice
+    flush(std_out)
 
     !! ------------------------------------------------------------
     !! 
@@ -1078,10 +1080,10 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     end if
 
     ! ITEST
-    write(901,*) 'global spectrum=', min_low_est, slice%ecut
-    write(901,*) 'wanted slice=', alpha_minus, alpha_plus
-    write(901,*) 'with overlap=', lambda_minus, lambda_plus
-    flush(901)
+    write(std_out,*) 'global spectrum=', min_low_est, slice%ecut
+    write(std_out,*) 'wanted slice=', alpha_minus, alpha_plus
+    write(std_out,*) 'with overlap=', lambda_minus, lambda_plus
+    flush(std_out)
     ! ITEST
 
     lower_bounds(islice) = lambda_minus
@@ -1122,9 +1124,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     ndeg_filter = ndeg
        
     ! ITEST
-    write(901,*) 'left/right amplif factor f(out)/f(in)=', f_lw/f_l, f_uw/f_u
-    write(901,*) 'minimal polynomial degree=', ndeg_filter
-    flush(901)
+    write(std_out,*) 'left/right amplif factor f(out)/f(in)=', f_lw/f_l, f_uw/f_u
+    write(std_out,*) 'minimal polynomial degree=', ndeg_filter
+    flush(std_out)
     ! ITEST
 
     !! ------------------------------------------------------------
@@ -1153,8 +1155,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     do ideg = 0, ndeg_filter - 1
         
         ! ITEST
-        write(901,*) 'polynomial degree=', ideg
-        flush(901)
+        write(std_out,*) 'polynomial degree=', ideg
+        flush(std_out)
         ! ITEST
 
         call timab(tim_cprj,1,tsec)
@@ -1236,9 +1238,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
         probe => probe_XfX(1,1:neigenpairs)
     end if
     
-    !write(901,*) 
-    !write(901,*) 'probe=', probe(:)
-    !flush(901)
+    !write(std_out,*) 
+    !write(std_out,*) 'probe=', probe(:)
+    !flush(std_out)
 
     !    Step 2
     ! =============
@@ -1259,7 +1261,7 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     call sort_dp(neigenpairs, probe, probe_idx, tol12)
     probe = -probe
 
-    write(901,*) 'kept probes', probe(1:count_mask)
+    write(std_out,*) 'kept probes', probe(1:count_mask)
 
     ! TODO 
     ! deal with extra vectors: if great probes are found outside the kept ones maybe include them
@@ -1347,9 +1349,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 !    end if
 
     ! ITEST
-    write(901,*) 'converged eigenval='
-    call xgBlock_print(eigenvalues_slice, 901)
-    flush(901)
+    write(std_out,*) 'converged eigenval='
+    call xgBlock_print(eigenvalues_slice, std_out)
+    flush(std_out)
     ! ITEST
 
     ! Restrict dimension of residual array
@@ -1390,9 +1392,9 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     call xgBlock_reverseMap_1d(residu_slice, resid)
  
     ! ITEST
-    write(901,*) 'Slice ', islice, ': colwiseNorm2 residu='
-    call xgBlock_print(residu_slice, 901)
-    flush(901)
+    write(std_out,*) 'Slice ', islice, ': colwiseNorm2 residu='
+    call xgBlock_print(residu_slice, std_out)
+    flush(std_out)
     ! ITEST
 
     !! ------------------------------------------------------------
@@ -1409,11 +1411,11 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     confi_interval_right(1:count_rr) = lambda_apost_slice - sqrt(resid)
    
     if (islice==1) then
-        write(901,*) 'wanted is <', lambda_minus
+        write(std_out,*) 'wanted is <', lambda_minus
     else
-        write(901,*) 'wanted is ', alpha_minus, alpha_plus
+        write(std_out,*) 'wanted is ', alpha_minus, alpha_plus
     end if
-    flush(901)
+    flush(std_out)
 
     !! TODO etape suivante: une fois qu'on a diagnostiquer une mauvaise convergence
     !! dans une slice on pourrait faire une procedure de restart pour corriger
@@ -1433,34 +1435,34 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
    
     conf_tol = maxval(sqrt(resid))
     fcol_dummy = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice+conf_tol < alpha_minus)) + 1
-    write(901,*) 'mergeD: fcol slice    ', islice, '        ', fcol_in
-    write(901,*) 'mergeD: fcol slice    ', islice, 'interval', fcol_dummy
+    write(std_out,*) 'mergeD: fcol slice    ', islice, '        ', fcol_in
+    write(std_out,*) 'mergeD: fcol slice    ', islice, 'interval', fcol_dummy
     ncount_out = count(lambda_apost_slice+conf_tol < alpha_minus)
-    write(901,*) 'mergeD: count out left', islice, '        ', ncount_out, 'out of', count_rr
+    write(std_out,*) 'mergeD: count out left', islice, '        ', ncount_out, 'out of', count_rr
     ncount_out = count(lambda_apost_slice-conf_tol > alpha_plus)
-    write(901,*) 'mergeD: count outright', islice, '        ', ncount_out, 'out of', count_rr
-    write(901,*) 'mergeD-----------------------'
-    flush(901)
+    write(std_out,*) 'mergeD: count outright', islice, '        ', ncount_out, 'out of', count_rr
+    write(std_out,*) 'mergeD-----------------------'
+    flush(std_out)
     
     if (islice<nslice) then
 
         lcol_in = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < alpha_plus))
-        write(901,*) 'merge: interval on slice   ', islice, ':', lcol_in; flush(901)
+        write(std_out,*) 'merge: interval on slice   ', islice, ':', lcol_in; flush(std_out)
 
     else
         
-        write(901,*) 'merge: maximized on slice  ', islice, ':', lcol_in
+        write(std_out,*) 'merge: maximized on slice  ', islice, ':', lcol_in
         lcol_dummy = maxloc(lambda_apost_slice, dim=1, mask=(lambda_apost_slice < alpha_plus))
-        write(901,*) 'merge: interval on slice***', islice, ':', lcol_in
-        write(901,*) 'merge: resid***************', islice, ':', sqrt(sum(resid(fcol_in:lcol_dummy)))
-        flush(901)
+        write(std_out,*) 'merge: interval on slice***', islice, ':', lcol_in
+        write(std_out,*) 'merge: resid***************', islice, ':', sqrt(sum(resid(fcol_in:lcol_dummy)))
+        flush(std_out)
 
         if (count_merge + lcol_in-fcol_in+1 > neigenpairs) then
-            write(901,*) 'merge: pass on slice       ', islice, ':', lcol_in; flush(901)
+            write(std_out,*) 'merge: pass on slice       ', islice, ':', lcol_in; flush(std_out)
             lcol_in = fcol_in + neigenpairs - count_merge - 1
-            write(901,*) 'merge: pass after on slice ', islice, ':', lcol_in, fcol_in, neigenpairs, count_merge
-            write(901,*) 'merge: residBBBBBBBBBBBBBBB', islice, ':', sqrt(sum(resid(fcol_in:lcol_in)))
-            flush(901)
+            write(std_out,*) 'merge: pass after on slice ', islice, ':', lcol_in, fcol_in, neigenpairs, count_merge
+            write(std_out,*) 'merge: residBBBBBBBBBBBBBBB', islice, ':', sqrt(sum(resid(fcol_in:lcol_in)))
+            flush(std_out)
         end if
 
     end if
@@ -1468,22 +1470,22 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
     count_slice = lcol_in - fcol_in + 1
 
     ! ITEST
-    write(901,*) 'Frobenius norm (inside slice', islice, 'only)=', sqrt(sum(resid(fcol_in:lcol_in)))
-    flush(901)
+    write(std_out,*) 'Frobenius norm (inside slice', islice, 'only)=', sqrt(sum(resid(fcol_in:lcol_in)))
+    flush(std_out)
     ! ITEST
 
     ! ITEST
-    write(901,*) 
-    write(901,*) '====================================== Slice', islice
-    write(901,*) 'interval bounds', lambda_minus, alpha_minus, alpha_plus
-    !write(901,*) 'count_merged=', count_merge 
-    write(901,*) 'count_slice =', count_slice
-    write(901,*) 'count_rr    =', count_rr
-    write(901,*) 'fcol_in,val =', fcol_in, lambda_apost_slice(fcol_in)
-    write(901,*) 'lcol_in,val =', lcol_in, lambda_apost_slice(lcol_in)
-    write(901,*) '======================================'
-    write(901,*)
-    flush(901)
+    write(std_out,*) 
+    write(std_out,*) '====================================== Slice', islice
+    write(std_out,*) 'interval bounds', lambda_minus, alpha_minus, alpha_plus
+    !write(std_out,*) 'count_merged=', count_merge 
+    write(std_out,*) 'count_slice =', count_slice
+    write(std_out,*) 'count_rr    =', count_rr
+    write(std_out,*) 'fcol_in,val =', fcol_in, lambda_apost_slice(fcol_in)
+    write(std_out,*) 'lcol_in,val =', lcol_in, lambda_apost_slice(lcol_in)
+    write(std_out,*) '======================================'
+    write(std_out,*)
+    flush(std_out)
     ! ITEST
 
     count_merge = count_merge + count_slice
@@ -1495,8 +1497,8 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
     if (count_merge < neigenpairs .and. islice==nslice) then
     
-        write(901,*) 'missing eigenvalues!'
-        flush(901)
+        write(std_out,*) 'missing eigenvalues!'
+        flush(std_out)
 
     end if
     
@@ -1571,12 +1573,12 @@ subroutine slice_run_cprj(slice,X0,cprjX0,getAX,kin,eigen,occ,residu,enl,nspinor
 
  ! ITEST
  call xgBlock_reverseMap_1d(residu, resid)
- write(901,*) 'Frobenius norm (merged slices)=', sqrt(sum(resid))
- write(901,*) 'resid (merged slices)='
- call xgBlock_print(residu, 901)
- write(901,*) 'eigen (merged slices)='
- call xgBlock_print(eigen, 901)
- flush(901)
+ write(std_out,*) 'Frobenius norm (merged slices)=', sqrt(sum(resid))
+ write(std_out,*) 'resid (merged slices)='
+ call xgBlock_print(residu, std_out)
+ write(std_out,*) 'eigen (merged slices)='
+ call xgBlock_print(eigen, std_out)
+ flush(std_out)
  ! ITEST
 
  if (.not.slice%paw) then
@@ -2365,8 +2367,8 @@ subroutine applyLowpassFilter(slice, getAX, ampl_factors, kin, low_bound, upp_bo
     do ideg = 0, ndeg_filter - 1
         
         ! ITEST
-        write(901,*) 'polynomial degree=', ideg
-        flush(901)
+        write(std_out,*) 'polynomial degree=', ideg
+        flush(std_out)
         ! ITEST
 
         call timab(tim_cprj,1,tsec)
@@ -2844,8 +2846,8 @@ subroutine splitSpectrumToSlices( &
 
         found_gap(ipart) = ( ipart>1 .and. trace_est < trace_crit )
 
-        write(901,*) 'spectrum part : nbvecs', ipart, lower_i, upper_i, ceiling(trace_est)
-        flush(901)
+        write(std_out,*) 'spectrum part : nbvecs', ipart, lower_i, upper_i, ceiling(trace_est)
+        flush(std_out)
         
         upper_bound_spectrum(ipart) = upper_i
         trace_estim_spectrum(ipart) = ceiling(trace_est)
@@ -2860,13 +2862,13 @@ subroutine splitSpectrumToSlices( &
 
     ! Chose the spectral gap with the index closer to the middle
     ! same for interval bound closer to the midpoint
-    write(901,*) "found_gap=", found_gap
-    write(901,*) "upper_bound=", upper_bound_spectrum
-    flush(901)
+    write(std_out,*) "found_gap=", found_gap
+    write(std_out,*) "upper_bound=", upper_bound_spectrum
+    flush(std_out)
 
     found_gap = ( trace_estim_spectrum == minval(trace_estim_spectrum) )
     
-    write(901,*) "found_gap(mod)=", found_gap
+    write(std_out,*) "found_gap(mod)=", found_gap
 
     n = nstep_spectrum
     mid = (n + 1) / 2
@@ -2893,11 +2895,11 @@ subroutine splitSpectrumToSlices( &
 
     nb_vec_slices(1) = min(ceiling(sum(trace_estim_spectrum(1:idx+1))), neigenpairs)
     nb_vec_slices(2) = min(ceiling(sum(trace_estim_spectrum(idx+2:nstep_spectrum))), neigenpairs)
-    write(901,*) 'gap idx    =', idx
-    write(901,*) 'gap value  =', upper_bound_spectrum(idx)
-    write(901,*) 'trace left =', nb_vec_slices(1)
-    write(901,*) 'trace right=', nb_vec_slices(2)
-    flush(901)
+    write(std_out,*) 'gap idx    =', idx
+    write(std_out,*) 'gap value  =', upper_bound_spectrum(idx)
+    write(std_out,*) 'trace left =', nb_vec_slices(1)
+    write(std_out,*) 'trace right=', nb_vec_slices(2)
+    flush(std_out)
 
     ! output the gap
     upp_bound_slices(1) = upper_bound_spectrum(idx)

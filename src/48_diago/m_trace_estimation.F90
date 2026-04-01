@@ -128,7 +128,7 @@ module m_trace_estimation
     real(dp), pointer :: dot_vTBv_layout(:,:) => null()
     real(dp), allocatable :: v_min(:)
 
-    integer :: i, j
+    integer :: j
     integer :: rank
     integer :: me_g0, space, tot_spacedim, gpu_option
     real(dp) :: tsec(2)
@@ -307,7 +307,7 @@ subroutine computeChebyshevMoments(minfo, tolerance, ecut, paw, X0, getAX_BX, ge
         end subroutine getBm1X
     end interface
 
-    integer :: ideg, ierr
+    integer :: ideg
     integer :: nband, tot_spacedim, space, me_g0, gpu_option
     real(dp) :: center, radius
     real(dp) :: one_over_r
@@ -449,8 +449,8 @@ subroutine computeTraceEstimation(minfo, ecut, paw, tolerance, getAX_BX, getBm1X
         end subroutine getBm1X
     end interface
 
-    integer :: nband
-    integer :: space_res, tot_spacedim, gpu_option
+    !integer :: nband
+    integer :: tot_spacedim, gpu_option
     integer :: ierr
     integer :: me_g0
     integer :: jcol
@@ -539,8 +539,8 @@ function get_eigenvalue_count(b, moments, work) result(mass)
     real(dp), intent(inout) :: work(:)
     real(dp) :: mass
     integer :: ndeg_filter
-    real(dp) :: sigma, alpha
-    integer :: Ngrid
+    !real(dp) :: sigma, alpha
+    !integer :: Ngrid
 
     ndeg_filter = size(moments)-1
 
