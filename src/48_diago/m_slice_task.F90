@@ -324,7 +324,7 @@ subroutine slice_task_allocAsyncMemory(work, minfo, ncol_ext)
     work%has_transposer = .false.
     gpu_option = minfo%gpu_option
 
-    call slice_task_freeAsyncMemory(asyncMemory)
+    call slice_task_freeAsyncMemory(work)
 
     ABI_MALLOC_IFNOT(work%lookup_cols_Xext, (ncol_ext))
     
