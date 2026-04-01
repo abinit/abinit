@@ -32,7 +32,7 @@ rfatpol3  1 2
 rfelfd3   3
 rfdir3    1 1 1       
 prtwf3    0
-tolwfr3   1.0d-8    
+tolwfr3   1.0d-10    
 
 #Set 4: Non-self consistent ground-state calculation, with q=(0.01 0 0)
 nqpt4     1
@@ -50,7 +50,7 @@ nqpt5     1
 qpt5      0.01 0.0 0.0   
 getwfq5  -1             
 kptopt5   3             
-tolwfr5   1.1d-8   
+tolwfr5   1.1d-10   
 
 ###################  Common data  ######################
 prtwf     0
@@ -87,7 +87,7 @@ nband 4
 ixc   7           # Perdew-Wang 92
 
 #Definition of the planewave basis set
-ecut   6.0       # Maximal kinetic energy cut-off, in Hartree
+ecut   5.0       # Maximal kinetic energy cut-off, in Hartree
 
 #Definition of the k-point grid
 ngkpt 6 6 1
