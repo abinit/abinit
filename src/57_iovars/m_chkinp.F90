@@ -1259,8 +1259,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%eph_task == 1 .and. .not. isdiagmat(dt%kptrlatt)) then
        ABI_ERROR_NOSTOP("kptrlatt must be diagonal in phgamma.", ierr)
      end if
-     if (dt%eph_task == 2 .and. dt%irdwfq == 0 .and. dt%getwfq == 0) then
-       ABI_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
+     if (dt%eph_task == 2 .and. dt%irdwfk == 0 .and. &
+          dt%getwfk == 0 .and. dt%getwfk_filepath == ABI_NOFILE) then
+       ABI_ERROR_NOSTOP('Neither getwfk, irdwfk, getwfk_filepath were given in order to compute the gkk', ierr)
      end if
      if (any(dt%eph_task == [-5])) then
        ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
