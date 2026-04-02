@@ -277,11 +277,11 @@ contains
    nlmn_max=0
    do itypat=1,ntypat
      nlmn = count(indlmn(3,:,itypat)>0)
+     if (nlmn>nlmn_max) nlmn_max=nlmn
+     xg_nonlop%nlmn_ntypat(itypat) = nlmn
      nattyp_i = nattyp(itypat)
      if (nattyp_i>0) then
-       if (nlmn>nlmn_max) nlmn_max=nlmn
        cprjdim = cprjdim + nattyp_i*nlmn
-       xg_nonlop%nlmn_ntypat(itypat) = nlmn
        xg_nonlop%nlmn_natom(1+shift:nattyp_i+shift) = nlmn
        shift = shift + nattyp_i
      end if
@@ -617,26 +617,24 @@ contains
 
     nlmn=xg_nonlop%nlmn_ntypat(itypat)
 
-    if (xg_nonlop%nattyp(itypat)>0) then
-      shift=1+(itypat-1)*nlmn_max
-      call xg_setBlock(xg_nonlop%Sij,Sij_itypat,nlmn,nlmn,fcol=shift)
-      call xgBlock_reverseMap(Sij_itypat,Sij_itypat_)
-      do jlmn=1,nlmn
-        j0lmn=jlmn*(jlmn-1)/2
-        jjlmn=j0lmn+jlmn
-        Sij_itypat_(jlmn,jlmn) = pawtab(itypat)%sij(jjlmn)
-        do ilmn=1,jlmn-1
-          ijlmn=j0lmn+ilmn
-          Sij_itypat_(ilmn,jlmn) = pawtab(itypat)%sij(ijlmn)
-          Sij_itypat_(jlmn,ilmn) = pawtab(itypat)%sij(ijlmn)
-        end do
+    shift=1+(itypat-1)*nlmn_max
+    call xg_setBlock(xg_nonlop%Sij,Sij_itypat,nlmn,nlmn,fcol=shift)
+    call xgBlock_reverseMap(Sij_itypat,Sij_itypat_)
+    do jlmn=1,nlmn
+      j0lmn=jlmn*(jlmn-1)/2
+      jjlmn=j0lmn+jlmn
+      Sij_itypat_(jlmn,jlmn) = pawtab(itypat)%sij(jjlmn)
+      do ilmn=1,jlmn-1
+        ijlmn=j0lmn+ilmn
+        Sij_itypat_(ilmn,jlmn) = pawtab(itypat)%sij(ijlmn)
+        Sij_itypat_(jlmn,ilmn) = pawtab(itypat)%sij(ijlmn)
       end do
-      if (inv_sij_) then
-        call xg_init(work,SPACE_R,nlmn,nlmn,xmpi_comm_self)
-        call xg_setBlock(xg_nonlop%Sijm1,Sijm1_itypat,nlmn,nlmn,fcol=shift)
-        call xgBlock_invert_sy(Sijm1_itypat,work%self,xg_input=Sij_itypat)
-        call xg_free(work)
-      end if
+    end do
+    if (inv_sij_) then
+      call xg_init(work,SPACE_R,nlmn,nlmn,xmpi_comm_self)
+      call xg_setBlock(xg_nonlop%Sijm1,Sijm1_itypat,nlmn,nlmn,fcol=shift)
+      call xgBlock_invert_sy(Sijm1_itypat,work%self,xg_input=Sij_itypat)
+      call xg_free(work)
     end if
 
   end do
@@ -1339,11 +1337,11 @@ contains
       call xg_init(xg_nonlop%invSij_approx_k,space_cprj,nlmn_max,nlmn_max*ntypat,xmpi_comm_self)
 
       shift_itypat=1
-      shift_sij=1
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
         nattyp_i = xg_nonlop%nattyp(itypat)
         if (nattyp_i>0) then
+          shift_sij = 1+(itypat-1)*nlmn_max
           call xgBlock_setBlock(xg_nonlop%projectors_k%self,projs,npw_k,nlmn,fcol=shift_itypat)
           call xg_setBlock(xg_nonlop%invSij_approx_k,invSij_approx_k_itypat,nlmn,nlmn,fcol=shift_sij)
           call xg_setBlock(xg_nonlop%Sijm1,Sijm1_itypat,nlmn,nlmn,fcol=shift_sij)
@@ -1358,7 +1356,6 @@ contains
           call xgBlock_invert_sy(invSij_approx_k_itypat,work%self)
           call xg_free(work)
           shift_itypat = shift_itypat + nlmn*nattyp_i
-          shift_sij    = shift_sij + nlmn_max
         end if
       end do
 
@@ -1379,11 +1376,11 @@ contains
       call xgBlock_reverseMap(xg_nonlop%gram_proj_k%self,gram_proj_k_)
       shift=0
       shiftc=0
-      shift_sij=1
       do itypat = 1, ntypat
         nlmn = xg_nonlop%nlmn_ntypat(itypat)
         nattyp_i = xg_nonlop%nattyp(itypat)
         if (nattyp_i>0) then
+          shift_sij = 1+(itypat-1)*nlmn_max
           call xg_setBlock(xg_nonlop%Sijm1,Sijm1_itypat,nlmn,nlmn,fcol=shift_sij)
           call xgBlock_reverseMap(Sijm1_itypat,Sijm1_)
           do ia = 1, nattyp_i
@@ -1396,7 +1393,6 @@ contains
             shift  = shift  + nlmn
             shiftc = shiftc + cplex*nlmn
           end do
-          shift_sij    = shift_sij + nlmn_max
         end if
       end do
 
