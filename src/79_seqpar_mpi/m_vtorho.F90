@@ -1089,7 +1089,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
        end if
 
-       ! Build inverse of overlap matrix for chebfi
+        ! Build inverse of overlap matrix for chebfi or slice
        if(associated(rcpaw)) then
          step_cond=istep<=1.or.(rcpaw%istep>=rcpaw%updatepaw(1)+1.and.rcpaw%istep<=rcpaw%updatepaw(2)+1.and.&
               (dtset%wfoptalg==111.or.dtset%wfoptalg == 1))
@@ -1098,7 +1098,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        endif
 
        if (dtset%cprj_in_memory==0) then
-         if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. step_cond) then
+         if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112) &
+&           .and. step_cond) then
             call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
          end if
        end if
@@ -1135,7 +1136,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
        if (dtset%cprj_in_memory==1) then
-         do_invS=xg_nonlop%paw.and.dtset%wfoptalg==111
+         do_invS=xg_nonlop%paw.and.(dtset%wfoptalg==111.or.dtset%wfoptalg==112)
          call xg_nonlop_make_k(xg_nonlop,my_ikpt,istwf_k,mpi_enreg%me_g0,mpi_enreg%me_g0_fft,npw_k,ffnl,ph3d,kpg_k,&
            & step_cond,compute_invS_approx=do_invS,compute_gram=do_invS)
        end if

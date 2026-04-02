@@ -706,8 +706,12 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  call timab(570,1,tsec)
 
  do_transpose = .true.
+ bandpp       = mpi_enreg%bandpp
  if(present(already_transposed)) then
-   if(already_transposed) do_transpose = .false.
+   if(already_transposed) then
+     do_transpose = .false.
+     bandpp = blocksize
+   end if
  end if
 
  l_gpu_option=ABI_GPU_DISABLED
@@ -716,7 +720,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  end if
 
  nproc_band = mpi_enreg%nproc_band
- bandpp     = mpi_enreg%bandpp
+
  spaceComm=mpi_enreg%comm_fft
  if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_band
  my_nspinor=max(1,hamk%nspinor/mpi_enreg%nproc_spinor)
@@ -740,7 +744,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    end if
  end if
  if(cpopt>=0.and. .not. present(vectproj)) then
-   if (size(cwaveprj)/=hamk%natom*my_nspinor*mpi_enreg%bandpp) then
+   if (size(cwaveprj)/=hamk%natom*my_nspinor*bandpp) then
      ABI_BUG('Incorrect size for cwaveprj!')
    end if
  end if
