@@ -25,7 +25,7 @@ module m_nvtx_data
 
   implicit none
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 117
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 122
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -146,6 +146,11 @@ module m_nvtx_data
   integer, parameter :: NVTX_DMFT_RW_SELF = 115
   integer, parameter :: NVTX_DMFT_SAVEOCC = 116
   integer, parameter :: NVTX_TRANSPOSER_MPI_ALL2ALL = 117
+  integer, parameter :: NVTX_SLICE_GET_AX_BX = 118
+  integer, parameter :: NVTX_SLICE_TRANSPOSE = 119 
+  integer, parameter :: NVTX_SLICE_RRQ = 120
+  integer, parameter :: NVTX_SLICE_SCHEDULE = 121
+  integer, parameter :: NVTX_SLICE_NONLOP = 122
 
 contains
 
@@ -270,8 +275,13 @@ contains
          & "DMFT_SYM_MATLU", &
          & "DMFT_RW_SELF", &
          & "DMFT_SAVEOCC", &
-         & "TRANSPOSER_MPI_ALL2ALL" &
-         & ]
+         & "TRANSPOSER_MPI_ALL2ALL", &
+         & "SLICE_GET_AX_BX", &
+         & "SLICE_TRANSPOSE", & 
+         & "SLICE_RRQ", &
+         & "SLICE_SCHEDULE", &
+         & "SLICE_NONLOP" &
+         ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
     nvtx_ids(2) = NVTX_SCF
@@ -390,6 +400,11 @@ contains
     nvtx_ids(115)=NVTX_DMFT_RW_SELF
     nvtx_ids(116)=NVTX_DMFT_SAVEOCC
     nvtx_ids(117)=NVTX_TRANSPOSER_MPI_ALL2ALL
+    nvtx_ids(118)=NVTX_SLICE_GET_AX_BX
+    nvtx_ids(119)=NVTX_SLICE_TRANSPOSE
+    nvtx_ids(120)=NVTX_SLICE_RRQ
+    nvtx_ids(121)=NVTX_SLICE_SCHEDULE
+    nvtx_ids(121)=NVTX_SLICE_NONLOP
 
   end subroutine nvtx_init
 

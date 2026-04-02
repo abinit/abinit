@@ -713,6 +713,58 @@ extern "C" void gpu_xscal_(int* cplx, int *N,
 
 /*=========================================================================*/
 // NAME
+//  gpu_xdot
+//
+// FUNCTION
+//  Compute blas-3 DOT on GPU
+//  trace(X^H*Y)
+//
+// INPUTS
+//  cplx  = 1 if real 2 if complex
+//  N     = number of elements n*s
+//  X     = array (n,s)
+//  incrx = stride for X
+//  Y     = array (n,s)
+//  incry = stride for Y
+//  alpha = output pointer
+//
+// OUTPUT
+//  alpha
+/*=========================================================================*/
+
+extern "C" void gpu_xdot_(int* cplx, int *N, 
+                           cuDoubleComplex *alpha,
+                           void **X_ptr, int *incrx, void **Y_ptr, int *incry)
+{
+  if (*cplx == 1) {
+    double result;
+
+    CUDA_API_CHECK(
+      cublasDdot(cublas_handle, *N,
+                 (const double *)(*X_ptr), *incrx,
+                 (const double *)(*Y_ptr), *incry,
+                 &result)
+    );
+
+    alpha->x = result;
+    alpha->y = 0.0;
+
+  } else {
+    cuDoubleComplex result;
+
+    CUDA_API_CHECK(
+      cublasZdotc(cublas_handle, *N,
+                  (const cuDoubleComplex *)(*X_ptr), *incrx,
+                  (const cuDoubleComplex *)(*Y_ptr), *incry,
+                  &result)
+    );
+
+    *alpha = result;
+  }
+} // gpu_xdot_
+
+/*=========================================================================*/
+// NAME
 //  gpu_xpotrf
 //
 // FUNCTION
