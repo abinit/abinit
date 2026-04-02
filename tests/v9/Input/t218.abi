@@ -110,6 +110,7 @@ pseudos "B.psp8, N.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = scope_gnu_12.2_mpich ,bob_gnu_13.2_openmp  
 #%% test_chain =  t218.abi
 #%% [files]
 #%% files_to_test =
@@ -117,7 +118,6 @@ pseudos "B.psp8, N.psp8"
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% exclude_builders = scope_gnu_12.2_mpich ,bob_gnu_13.2_openmp  
 #%% authors = M. Royo
 #%% keywords = DFPT
 #%% description = Linear response to phonons and electric field with the 2D Coulomb cutoff kernel
