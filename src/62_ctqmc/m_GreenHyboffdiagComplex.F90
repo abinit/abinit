@@ -550,15 +550,18 @@ SUBROUTINE GreenHyboffdiagComplex_measHybrid(op, Mmatrix, ListCdagC_1, updated,s
           !write(6,*) "size listDBLE",size(op%map(iflavor,iflavorbis)%listDBLE)
           !write(6,*) " measHybrid",old_size,iflavor,iflavorbis
           DO iC = 1, old_size
-            if(op%map(iflavor,iflavorbis)%listINT(iC)==0) then
-              !write(6,*) "listINT(iC)=",iC,op%map(iflavor,iflavorbis)%listINT(iC)
-            endif
             !write(6,*) " measHybrid  iflavor,iflavorbis,iC listINT ",iflavor,iflavorbis,iC,op%map(iflavor,iflavorbis)%listINT(iC)
                !write(6,*) " measHybrid  listDBLE ",iflavor,iflavorbis,iC,op%map(iflavor,iflavorbis)%listDBLE(iC),argument
            ! write(6,*) "measHybrid ic iflavor1 iflavor2 op%map(iflav1,iflav2) oper",ic,iflavor,iflavorbis,op%map(iflavor,iflavorbis)%listDBLE(iC),op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold * argument
-            op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) =                &
+            if (iflavor .eq. iflavorbis) then
+              op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) = &
+              & cmplx(dble(op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) &
+              & + op%map(iflavor,iflavorbis)%listDBLE(iC) * op%phasevalueold * argument),0.d0,kind=8)
+            else 
+              op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) =                &
                            op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis) &
                          + op%map(iflavor,iflavorbis)%listDBLE(iC) *  op%phasevalueold * argument
+            endif
            !if(op%map(iflavor,iflavorbis)%listINT(iC)==1.and.iflavor==iflavorbis) then
           !  if(iflavor==iflavorbis) then
           !   !sui!write(6,*) "G(0)", op%map(iflavor,iflavorbis)%listINT(iC),op%map(iflavor,iflavorbis)%listDBLE(iC) * op%signvalueold,op%oper(op%map(iflavor,iflavorbis)%listINT(iC),iflavor,iflavorbis),iflavor
@@ -887,7 +890,7 @@ SUBROUTINE GreenHyboffdiagComplex_setN(op,N)
     ! exactly the number of electrons in the flavor iflavor whereas
     ! op%oper is not exact, because it still has to be divided by
     ! signvaluemeas after the MPIREDUCE
-    op%oper(1,iflavor,iflavor) = (N(iflavor) - 1.d0)*op%phasevaluemeas 
+    op%oper(1,iflavor,iflavor) = cmplx(dble((N(iflavor) - 1.d0)*op%phasevaluemeas),0.d0,kind=8) 
     op%oper(op%samples,iflavor,iflavor) = - N(iflavor)*op%phasevaluemeas  
     !op%oper(op%samples,iflavor,iflavor) = 2*op%oper(op%samples,iflavor,iflavor)
     !op%oper(1,iflavor,iflavor) = 2*op%oper(1,iflavor,iflavor)
@@ -1457,8 +1460,8 @@ include 'mpif.h'
         A = 0.d0
       endif ! funct
       
-      !C=cmplx(-A,0.d0,kind=8)
-      C=B
+      C=cmplx(-A,0.d0,kind=8)
+      !C=B
       !write(*,*) "Hello C before hybri_limit", C
       if(present(hybri_limit)) then
         if(present(opt_hybri_limit)) then
@@ -2096,6 +2099,7 @@ IF ( PRESENT(Gomega) ) THEN
   lastR(2) = -0.25d0
   lastC(2) = -1.d0
 
+  ! -- Fill matrix (LU decomposition)
   DO i = 3, L-2
     tmp = 4.d0 - diagL(i-1)
     diagL(i) = 1.d0 / tmp
@@ -2105,7 +2109,8 @@ IF ( PRESENT(Gomega) ) THEN
     lastR(i) = -(lastR(i-1)*diagL(i))
     lastC(i) = -(lastC(i-1)*diagL(i-1))
   END DO
-  
+ 
+  ! -- Boundary conditions 
   tmp = 1.d0/diag(L-2)
   diag (L-1) = 4.d0 - tmp
   lastR(L-1) = (1.d0 - lastR(L-2))/ diag(L-1)
@@ -2155,12 +2160,6 @@ IF ( PRESENT(Gomega) ) THEN
     omegaEnd   = Nom 
   END IF
 
-!  op%Mk(iflavor1,iflavor2,1) = 0.d0
-!  DO iflavor1 = 1, nflavors
-!    op%Mk(iflavor1,iflavor1,1) = -1.d0
-!  ENDDO
-!  op%Mk(:,:,3) = 0.d0
-
   MALLOC(omegatmp,(omegaBegin:omegaEnd))
   IF ( PRESENT(omega) ) THEN
     omegatmp(omegaBegin:omegaEnd) = (/ (AIMAG(omega(i)),i=omegaBegin,omegaEnd) /)
@@ -2168,6 +2167,7 @@ IF ( PRESENT(Gomega) ) THEN
     omegatmp(omegaBegin:omegaEnd) = (/ ((((2.d0*DBLE(i)-1.d0)*xpi)/Beta), i=omegaBegin,omegaEnd) /)
   END IF
 
+  ! -- Main loop over flavors --
   DO iflavor1 = 1, nflavors
     DO iflavor2 = 1, nflavors
    ! write(6,*) "   Moments:",op%Mk(iflavor1,iflavor2,:),iflavor1,iflavor2
@@ -2184,12 +2184,12 @@ IF ( PRESENT(Gomega) ) THEN
       END DO
       !complex version
       XMC(1) = 4.d0*op%Mk(iflavor1,iflavor2,3)                                                   
-      XMC(L) = cmplx(6.d0 * inv_delta,0.d0,kind=8) * ( op%Mk(iflavor1,iflavor2,2) - ( &                           
+      XMC(L) = (6.d0 * inv_delta) * ( op%Mk(iflavor1,iflavor2,2) - ( &                           
         (op%oper(2,iflavor1,iflavor2)-op%oper(1,iflavor1,iflavor2)) + &                   
-        (op%oper(L,iflavor1,iflavor2)-op%oper(L-1,iflavor1,iflavor2)) ) * cmplx(inv_delta,0.d0,kind=8))        
+        (op%oper(L,iflavor1,iflavor2)-op%oper(L-1,iflavor1,iflavor2)) ) * inv_delta)        
       ! build d_ni terms of B                                                                         
       DO i = 2, L-1                                                                                   
-        XMC(i) = cmplx(6.d0 * inv_delta2,0.d0,kind=8) * ( (op%oper(i+1,iflavor1,iflavor2) &                       
+        XMC(i) = (6.d0 * inv_delta2) * ( (op%oper(i+1,iflavor1,iflavor2) &                       
           - 2.d0 * op%oper(i,iflavor1,iflavor2)) &                                              
           +        op%oper(i-1,iflavor1,iflavor2))                                              
       END DO                                                                                          
@@ -2202,8 +2202,8 @@ IF ( PRESENT(Gomega) ) THEN
           XM(L)  =XM(L)  -(lastR(j)*XM(j))
           !complex version
           !write(*,*)"diagL(j) lastR(j)",diagL(j),lastR(j)
-          XMC(j+1)=XMC(j+1)-(cmplx(diagL(j),0.d0,kind=8)*XM(j))
-          XMC(L)  =XMC(L)  -(cmplx(lastR(j),0.d0,kind=8)*XM(j))
+          XMC(j+1)=XMC(j+1)-(cmplx(diagL(j),0.d0,kind=8)*XMC(j))
+          XMC(L)  =XMC(L)  -(cmplx(lastR(j),0.d0,kind=8)*XMC(j))
           !write(*,*)"XM XMC",XM(j),XMC(j)
       end do
 
@@ -2238,13 +2238,7 @@ IF ( PRESENT(Gomega) ) THEN
       !version complex
       !write(*,*) "X2(1) X2C(1) X2(2) X2C(2)",X2(1),X2C(1),X2(2),X2C(2)
      
-     ! do i=1,nflavors
-     !   do j=1,nflavors
-     !     write(*,*) "orb1, orb2, moment1",i,j,op%Mk(i,j,1)
-     !     write(*,*) "orb1, orb2, moment3",i,j,op%Mk(i,j,3)
-     !   enddo 
-     ! enddo  
-       
+      ! -- Fourier Transform -- 
        DO i = omegaBegin, omegaEnd
          iw = omegatmp(i)
          omdeltabis = iw*deltabis
