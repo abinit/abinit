@@ -1260,6 +1260,7 @@ subroutine makebasis_marsman(atp)
  do io=1,atp%PAW%nbase
    atp%PAW%otphi(:,io)=atp%PAW%tphi(:,io)
    atp%PAW%ophi(:,io)=atp%PAW%phi(:,io)*atp%PAW%otphi(atp%PAW%irc,io)/atp%PAW%phi(atp%PAW%irc,io)
+   atp%PAW%otphi(atp%PAW%irc:atp%Grid%n,io)=atp%PAW%ophi(atp%PAW%irc:atp%Grid%n,io)
    atp%PAW%Kop(1,io)=zero
    atp%PAW%Kop(2:atp%Grid%n,io)=(atp%PAW%eig(io)-atp%Pot%rv(2:atp%Grid%n)/&
 &                                atp%Grid%r(2:atp%Grid%n))*atp%PAW%ophi(2:atp%Grid%n,io)
@@ -1382,10 +1383,8 @@ subroutine marsman_tphi(atp,map,l_in,n)
     ! In some cases, numerical error => need to fit tail of the orbital
     ! Check if low lying orbital
      if(atp%basis_func_rc(ioj)<atp%rc) then
-       write(std_out,*) 'TT1',ioj,atp%PAW%eig(ioj)
        ! Check if tphi is close to 0 at irc
        if(abs(atp%PAW%tphi(irc,ioj))/maxval(abs(atp%PAW%tphi(:,ioj)))<tol2) then
-          write(std_out,*) 'TT2'
           ! Check if tphi is non-decreasing at irc
           need_fit=.false.
           call derivative(atp%grid,abs(atp%PAW%tphi(:,ioj)),dp2,1,irc)
@@ -1403,7 +1402,6 @@ subroutine marsman_tphi(atp,map,l_in,n)
             call derivative(atp%grid,atp%PAW%phi(:,ioj),dp1,1,irc)
             y2=dp1(irc)/atp%PAW%phi(irc,ioj)
             r1=atp%grid%r(ir1)
-            write(std_out,*) 'R1',r1
             r2=atp%grid%r(irc)
             c=(y1-y2)/(one/r1-one/r2)
             b=c/r1-y1
@@ -1711,6 +1709,9 @@ end subroutine Prepare_Orbit
 subroutine print_check_atompaw_params(atp)
  type(atompaw_type),intent(in) :: atp
  integer :: norb,io
+ if(atp%scalarrelativistic.and.atp%tpaw_mode>1) then
+   LIBPAW_ERROR('tpaw_mode>1 and scalarrelativistic not compatible')
+ endif
  if(atp%finitenucleus) then
    LIBPAW_ERROR('Finitenucleus not implemented')
  endif

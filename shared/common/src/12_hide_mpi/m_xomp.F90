@@ -41,6 +41,7 @@ MODULE m_xomp
  ! OpenMP 5.0 GPU device routines
  public :: xomp_set_default_device
  public :: xomp_get_default_device
+ public :: xomp_get_device_num
  public :: xomp_get_initial_device
  public :: xomp_get_num_devices
  public :: xomp_is_initial_device
@@ -382,6 +383,42 @@ function xomp_get_default_device()
 #endif
 
 end function xomp_get_default_device
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xomp/xomp_get_device_num
+!! NAME
+!!  xomp_get_device_num
+!!
+!! FUNCTION
+!!  Wrapper for omp_get_device_num
+!!
+!! OUTPUT
+!!  (integer) id of OpenMP device on which the calling thread is executing.
+!!  When called on the host device, it will return the same value as the 
+!!  omp_get_initial_device routine.
+!!  Inside a target OpenMP region: device number executing that region.
+!!                                 CPU-only this is host (device 0).
+!!  Outside a target region: return -1 as running on host not a device.
+!!
+!! SOURCE
+
+function xomp_get_device_num()
+
+!Arguments ------------------------------------
+!scalars
+ integer :: xomp_get_device_num
+
+! *************************************************************************
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ xomp_get_device_num = omp_get_device_num()
+#else
+ xomp_get_device_num = -1
+#endif
+
+end function xomp_get_device_num
 !!***
 
 !----------------------------------------------------------------------

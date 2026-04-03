@@ -116,4 +116,6 @@ inp_files = [
 "t118.abi", # DMFT dmftctqmc_basis = 4 + ctqmc_localprop soc
 "t120.abi", # Test meta-GGA + PAW + paral_kgb + cprj_in_memory + istwfk
 "t121.abi", #DMFT magnfield=1, with 4 chains per MPI (demonstrate dmftctqmc_chains)
+"t150.abi",  # Test sequential slice execution in spectrum slicing diagonalization with 4 MPI
+"t151.abi",  # Test parallel slice execution in spectrum slicing diagonalization with 4 MPI
 ]
