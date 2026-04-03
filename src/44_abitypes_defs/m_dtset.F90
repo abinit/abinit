@@ -506,10 +506,12 @@ type, public :: dataset_type
  integer :: nscforder
  integer :: nshiftk
  integer :: nshiftk_orig  ! original number of shifts given in input (changed in inkpts, the actual value is nshiftk)
+ integer :: nslice
  integer :: nspden
  integer :: nspinor
  integer :: nsppol
  integer :: nstep
+ integer :: nstep_mixed
  integer :: nsym
  integer :: ntime
  integer :: ntimimage
@@ -534,6 +536,7 @@ type, public :: dataset_type
  integer :: paral_atom
  integer :: paral_kgb
  integer :: paral_rf
+ integer :: paral_slice
  integer :: paw_add_Core
  integer :: pawcpxocc
  integer :: pawcross
@@ -2065,10 +2068,12 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nscforder          = dtin%nscforder
  dtout%nshiftk            = dtin%nshiftk
  dtout%nshiftk_orig       = dtin%nshiftk_orig
+ dtout%nslice             = dtin%nslice
  dtout%nspden             = dtin%nspden
  dtout%nspinor            = dtin%nspinor
  dtout%nsppol             = dtin%nsppol
  dtout%nstep              = dtin%nstep
+ dtout%nstep_mixed        = dtin%nstep_mixed
  dtout%nsym               = dtin%nsym
  dtout%ntime              = dtin%ntime
  dtout%ntimimage          = dtin%ntimimage
@@ -2091,6 +2096,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%paral_atom         = dtin%paral_atom
  dtout%paral_kgb          = dtin%paral_kgb
  dtout%paral_rf           = dtin%paral_rf
+ dtout%paral_slice        = dtin%paral_slice
  dtout%prt_lorbmag        = dtin%prt_lorbmag
  dtout%pawcpxocc          = dtin%pawcpxocc
  dtout%paw_add_core       = dtin%paw_add_core
@@ -3882,7 +3888,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' npfft nphf nph1l npimage np_spkpt npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
  list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqfd nscforder nshiftk nshiftq nqshft'
- list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'
+ list_vars=trim(list_vars)//' nslice nspden nspinor nsppol nstep nstep_mixed nsym'
  list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat'
  list_vars=trim(list_vars)//' nucdipmom nucefg nucfc nwfshist nzchempot'
 !O
@@ -3892,7 +3898,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' optnlxccc optstress oracle_factor oracle_min_occ orbmag ortalg'
  list_vars=trim(list_vars)//' opt_effpot opt_ncoeff opt_coeff output_file outdata_prefix'
 !P
- list_vars=trim(list_vars)//' papiopt paral_atom paral_kgb paral_rf paw_add_core pawcpxocc pawcross'
+ list_vars=trim(list_vars)//' papiopt paral_atom paral_kgb paral_rf paral_slice paw_add_core pawcpxocc pawcross'
  list_vars=trim(list_vars)//' pawecutdg pawfatbnd pawlcutd pawlmix'
  list_vars=trim(list_vars)//' pawmixdg pawnhatxc pawnphi pawntheta pawnzlm pawoptmix pawoptosc pawovlp'
  list_vars=trim(list_vars)//' pawprtdos pawprtvol pawprtwf pawprt_b pawprt_k pawspnorb pawstgylm'
