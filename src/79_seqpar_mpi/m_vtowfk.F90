@@ -56,6 +56,8 @@ module m_vtowfk
  use m_chebfiwf,    only : chebfiwf2
  use m_chebfiwf_cprj,only : chebfiwf2_cprj
  use m_lobpcgwf_cprj,only : lobpcgwf2_cprj
+ use m_slicewf,     only : slicewf
+ use m_slicewf_cprj,  only : slicewf_cprj
  use m_spacepar,    only : meanvalue_g
  use m_chebfi,      only : chebfi
  use m_rmm_diis,    only : rmm_diis
@@ -217,6 +219,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 ! But this is true only if conjugate gradient algo. converges
  integer :: use_subovl=0, use_subvnlx=0, use_totvnlx=0
  integer :: bandpp_cprj,blocksize,choice,cpopt,fftalg,iband,iband1,filter
+ integer :: nstep_mixed
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,inonsc
  integer :: iorder_cprj,ipw,ispinor,iispinor,ispinor_index,istwf_k,iwavef,me_g0,mgsc,my_nspinor,n1,n2,n3 !kk
  integer :: nband_k_cprj,ncols_cprj,nblockbd,ncpgr,ndat,niter,nkpt_max,nnlout,ortalgo,ndat_fft
@@ -263,7 +266,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  nkpt_max=50; if(xmpi_paral==1)nkpt_max=-1
 
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
- xg_diago = dtset%wfoptalg == 114 .or. dtset%wfoptalg == 111
+ xg_diago = dtset%wfoptalg == 114 .or. dtset%wfoptalg == 112 .or. dtset%wfoptalg == 111
  istwf_k=gs_hamk%istwf_k
  has_fock=(associated(gs_hamk%fockcommon))
  quit=0
@@ -507,6 +510,48 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          end if
        end if
 
+!    =========================================================================
+!    ============ MINIMIZATION OF BANDS: SPECTRUM SLICING == =================
+!    =========================================================================
+       else if (wfopta10 == 2) then
+         nstep_mixed = dtset%nstep_mixed ! below which perform chebfi
+         write(std_out,'(a,i0)') 'running vtowfk for nstep_mixed=', nstep_mixed
+         if ( xg_diago .and. dtset%cprj_in_memory == 0 ) then
+            if (istep > nstep_mixed) then
+                write(std_out,'(a,i0)') 'entering slicewf'
+                !ABI_NVTX_START_RANGE(NVTX_SPESLI)
+                call slicewf(cg_k,dtset,eig_k,enlx_k,gs_hamk,mpi_enreg,&
+&                             nband_k,npw_k,my_nspinor,prtvol,resid_k)
+                !ABI_NVTX_END_RANGE()
+            else
+                write(std_out,'(a,i0)') 'entering chebfiwf2'
+                ABI_NVTX_START_RANGE(NVTX_CHEBFI2)
+                call chebfiwf2(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
+&                              mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
+                ABI_NVTX_END_RANGE()
+            end if
+         else            
+             if (istep > nstep_mixed) then
+                write(std_out,'(a,i0)') 'entering slicewf_cprj'
+                ! ITEST
+                write(901,*)
+                write(901,*) '**'
+                write(901,*) 'SCF iteration=', istep
+                write(901,*) '**'
+                write(901,*)
+                flush(901)
+                ! ITEST
+                !ABI_NVTX_START_RANGE(NVTX_SPESLI)
+                call slicewf_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,mpi_enreg,&
+&                             nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
+                !ABI_NVTX_END_RANGE()
+            else
+                write(std_out,'(a,i0)') 'entering chebfiwf2_cprj'
+                call chebfiwf2_cprj(cg_k,dtset,eig_k,occ_k,enlx_k,gs_hamk,&
+                    mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
+            end if
+         end if
+     
 !      =========================================================================
 !      ======== MINIMIZATION OF BANDS: CONJUGATE GRADIENT (Teter et al.) =======
 !      =========================================================================
@@ -625,7 +670,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ortalgo = mpi_enreg%paral_kgb
    ! The orthogonalization is completely disabled with ortalg<=-10.
    ! This option is useful for testing only and is not documented.
-   do_ortho = (wfoptalg/=14 .and. wfoptalg /= 1 .and. wfoptalg /= 11 .and. dtset%ortalg>-10) .or. dtset%ortalg > 0
+   do_ortho = (wfoptalg/=14 .and. wfoptalg /= 1 .and. wfoptalg /= 12 .and. wfoptalg /= 11 .and. dtset%ortalg>-10) .or. dtset%ortalg > 0
    if (xg_diago) do_ortho = .false.
    if (use_rmm_diis) do_ortho = .False.
 
