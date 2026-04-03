@@ -882,7 +882,7 @@ contains
         end if
 
         lmn_beg = max(1,ibeg-shift_do)
-        if(shift_do+nlmn > iend) nlmn = iend - shift_do - 1
+        if(shift_do+nlmn > iend - 1) nlmn = iend - shift_do - 1
       end if
 
       !! build atom_projs, from opernlb
