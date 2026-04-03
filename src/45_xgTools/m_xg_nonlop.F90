@@ -1229,6 +1229,7 @@ contains
   real(dp),pointer :: gram_proj_k_(:,:),Sijm1_(:,:)
   integer :: ierr, iblock, shift, shiftc, shift_sij, shift_itypat, itypat, ilmn, jlmn, nlmn, nlmn_max, ia
   integer :: cplex,cols,ntypat,nmpi,me_g0_loc,me_g0_fft_loc,space_cprj
+  !real(dp) :: cond
   real(dp) :: tsec(2)
   type(xg_t) :: work
   type(xgBlock_t) :: projs,invSij_approx_k_itypat,Sijm1_itypat
@@ -1372,6 +1373,13 @@ contains
         end do
         shift_sij    = shift_sij + nlmn_max
       end do
+
+      !ITEST
+      !write(903,*) 'make_cprj, compute gram', cols, space_cprj==SPACE_C
+      !call xgBlock_hermitian_pd_cond(xg_nonlop%gram_proj_k%self, cols, cond)
+      !write(903,*) 'cond(B)=', cond
+      !flush(903)
+      !ITEST
 
     end if
 
@@ -2193,8 +2201,10 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
    type(xgBlock_t), intent(inout) :: cprj_out,cprj_work
 
    integer :: iter,cprjdim,ncols,additional_steps_to_take
+   !integer :: rows_A
    real(dp), parameter :: tolerance = 1e-14 ! maximum relative error. TODO: use tolwfr ?
    type(xg_t) :: err
+   !real(dp) :: cond
    real(dp) :: norm,max_err,previous_max_err,convergence_rate,tsec(2)
 
    call timab(tim_iter_refinement,1,tsec)
@@ -2224,6 +2234,13 @@ subroutine xg_nonlop_getcprj_deriv(xg_nonlop,X,cprjX,work_mpi,option)
    do iter=1,30
      ! compute AY_i
      call xgBlock_gemm('n','n',1.0d0,A,cprj_out,0.0d0,cprj_work)
+     ! ITEST
+     !write(903,*) 'Apply getBm1X to spd matrix of size', rows(A), cols(A)
+     !rows_A = rows(A)
+     !call xgBlock_hermitian_pd_cond(A, rows_A, cond)
+     !write(903,*) 'cond(B)=', cond
+     !flush(903)
+     ! ITEST
      ! RES = AY_i - X
      call xgBlock_saxpy(cprj_work,-1.0d0,cprj_in)
      call xgBlock_colwiseNorm2(cprj_work,err%self,max_val=max_err)
