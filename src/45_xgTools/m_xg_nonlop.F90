@@ -1248,8 +1248,8 @@ contains
   logical :: compute_gram_,compute_invS_approx_
   real(dp),pointer :: gram_proj_k_(:,:),Sijm1_(:,:)
   integer :: ierr, iblock, shift, shiftc, shift_sij, shift_itypat, itypat, ilmn, jlmn, nlmn, nlmn_max, ia
-  integer :: cplex,cols,nattyp_i,ntypat,nmpi,me_g0_loc,me_g0_fft_loc,space_cprj
-  !integer :: cond, ncols
+  integer :: cplex,nattyp_i,ntypat,ncols,nmpi,me_g0_loc,me_g0_fft_loc,space_cprj
+  !integer :: cols,cond
   real(dp) :: tsec(2)
   type(xg_t) :: work
   type(xgBlock_t) :: projs,invSij_approx_k_itypat,Sijm1_itypat
