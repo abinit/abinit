@@ -893,7 +893,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
      end if ! rot_type /= 0 and jpawu /= zero
      
      if (paw_dmft%dmft_solv .eq. 10) then
-       call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),basis_vee,prtonly=2)
+       call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),"CTQMC",prtonly=2)
 
        !xsum=0
        !xsum2=0                                                               
@@ -1698,7 +1698,7 @@ subroutine vee2udensatom_hu(ndim,udens_atoms,veetemp,basis,prtonly)
 
  end if ! prt_only=0
 
-
+ message=''
  write(message,'(4a)') ch10,"   -------- Interactions in the ",trim(basis)," basis "
  call wrtout(std_out,message,'COLL')
  if (prtonly .eq. 2) then
