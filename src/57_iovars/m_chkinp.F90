@@ -88,7 +88,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,fixed_mismatch,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
+ integer :: bantot,fixed_mismatch,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,intimage,ierrgrp!,ilang
  integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,lpawu,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,miniatsph,minidyn,mod10,mpierr,all_nprocs
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu
@@ -102,7 +102,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
  character(len=1000) :: msg
  type(dataset_type) :: dt
 !arrays
- integer :: cond_values(4),nprojmax(0:3)
+ integer :: cond_values(4)!,nprojmax(0:3)
  integer :: gpu_devices(12)=(/-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2/)
  integer,allocatable :: ierr_dtset(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
@@ -550,8 +550,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        ABI_CHECK(dt%gpu_option==0,"cprj_in_memory/=0 is not implemented for GPUs. Change cprj_in_memory or gpu_option.")
        write(msg,'(a)') "cprj_in_memory/=0 is not compatible with use_gemm_nonlop/=0. Change cprj_in_memory or use_gemm_nonlop."
        ABI_CHECK(dt%use_gemm_nonlop==0,msg)
-       test = dt%wfoptalg==10 .or. dt%wfoptalg==114 .or. dt%wfoptalg==111
-       write(msg,'(a)') "With cprj_in_memory/=0, only wfoptalg==10,114 or 111 are implemented. Change cprj_in_memory or wfoptalg."
+       test = dt%wfoptalg==10 .or. dt%wfoptalg==114 .or. dt%wfoptalg==111 .or. dt%wfoptalg==112
+       write(msg,'(a)') "With cprj_in_memory/=0, only wfoptalg==10,114,112 or 111 are implemented. Change cprj_in_memory or wfoptalg."
        ABI_CHECK(test,msg)
        ABI_CHECK(dt%rmm_diis==0, "With cprj_in_memory/=0, rmm_diis/=0 is not implemented. Change cprj_in_memory or rmm_diis.")
        ABI_CHECK(dt%berryopt==0, "With cprj_in_memory/=0, berryopt/=0 is not implemented. Change cprj_in_memory or berryopt.")
@@ -578,6 +578,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          ABI_ERROR_NOSTOP('xg_nonlop_option/=0 is useful only for Chebfi (wfoptalg=111).',ierr)
        end if
      end if
+   end if
+
+!  spectrum slicing
+   if (dt%wfoptalg/=112 .and. dt%paral_slice/=0) then
+       ABI_ERROR_NOSTOP("paral_slice is useful only for Spectrum Slicing (wfoptalg=112).", ierr)
    end if
 
 !  d3e_pert1_atpol
@@ -720,7 +725,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_mxsf',dt%dmft_mxsf,-1,one,iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,10,(/-2,-1,0,1,2,5,6,7,8,9/),iout)
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,11,(/-2,-1,0,1,2,5,6,7,8,9,10/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_tolfreq',dt%dmft_tolfreq,-1,0.01_dp,iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
@@ -767,7 +772,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
          call chkint_eq(0,1,cond_string,cond_values,ierr,'ixc',dt%ixc,4,(/7,-1012,11,-101130/),iout)
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
-         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,9,(/-2,0,1,2,5,6,7,8,9/),iout)
+         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,10,(/-2,0,1,2,5,6,7,8,9,10/),iout)
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_t2g',dt%dmft_t2g,1,(/0/),iout)
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
@@ -781,6 +786,16 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
            call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_yukawa_epsilon',dt%dmft_yukawa_epsilon,1,zero,iout)
          end if
        end if
+       
+       if (dt%dmft_solv .eq. 10 .and. dt%nspinor .eq. 1) then 
+         write(msg,'(2a)') "dmft_solv == 10 is not implemented for nspinor == 1 "
+         ABI_ERROR(msg)
+       endif
+
+       if (dt%dmft_solv .eq. 10) then
+          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
+          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_hybri_limit',dt%dmft_hybri_limit,2,(/0,1/),iout)
+       endif
 
        do itypat=1,dt%ntypat
          if (dt%lpawu(itypat)==-1) cycle
@@ -1254,8 +1269,9 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      if (dt%eph_task == 1 .and. .not. isdiagmat(dt%kptrlatt)) then
        ABI_ERROR_NOSTOP("kptrlatt must be diagonal in phgamma.", ierr)
      end if
-     if (dt%eph_task == 2 .and. dt%irdwfq == 0 .and. dt%getwfq == 0) then
-       ABI_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
+     if (dt%eph_task == 2 .and. dt%irdwfk == 0 .and. &
+          dt%getwfk == 0 .and. dt%getwfk_filepath == ABI_NOFILE) then
+       ABI_ERROR_NOSTOP('Neither getwfk, irdwfk, getwfk_filepath were given in order to compute the gkk', ierr)
      end if
      if (any(dt%eph_task == [-5])) then
        ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
@@ -2506,7 +2522,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      call chkint_eq(1,2,cond_string,cond_values,ierr,'npfft',dt%npfft,1,(/1/),iout)
    end if
 #ifdef HAVE_OPENMP
-   if (dt%wfoptalg==114 .or. dt%wfoptalg==1 .or. dt%wfoptalg==111) then
+   if (dt%wfoptalg==114 .or. dt%wfoptalg==1 .or. dt%wfoptalg==111 .or. dt%wfoptalg==112) then
      if ( nthreads > 1 ) then
        if ( dt%npfft > 1 ) then
          write(msg,'(4a,i4,a,i4,a)') "Using LOBPCG algorithm (wfoptalg=114), the FFT parallelization is not ",&
@@ -2529,7 +2545,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 #endif
    !Not yet implemented
-   if (dt%wfoptalg==111 .and. dt%npfft > 1) then
+   if ((dt%wfoptalg==111 .or. dt%wfoptalg==112) .and. dt%npfft > 1) then
      write(msg,'(5a,i3,5a)') "The FFT parallelization (npfft>1) is not compatible ",&
 &      "with Chebyshev filtering algorithm (wfoptalg=111)!",ch10,&
 &      "Please use multithreading instead (export OMP_NUM_THREADS=...)",&
@@ -2566,14 +2582,14 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  nproj
 !  If there is more than one projector for some angular momentum channel of some pseudopotential
-   do ilang=0,3
-     nprojmax(ilang)=pspheads(1)%nproj(ilang)
-     if(npsp>=2)then
-       do ii=2,npsp
-         nprojmax(ilang)=max(pspheads(ii)%nproj(ilang),nprojmax(ilang))
-       end do
-     end if
-   end do
+!   do ilang=0,3
+!     nprojmax(ilang)=pspheads(1)%nproj(ilang)
+!     if(npsp>=2)then
+!       do ii=2,npsp
+!         nprojmax(ilang)=max(pspheads(ii)%nproj(ilang),nprojmax(ilang))
+!       end do
+!     end if
+!   end do
 
 !  npspinor
 !  Must be equal to 1 or 2
@@ -3548,8 +3564,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdos',dt%prtdos,6,(/0,1,2,3,4,5/),iout)
 
 ! for the moment prtdos 3,4,5 are not compatible with fft or band parallelization
-   if (dt%prtdos > 3 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
-     ABI_ERROR_NOSTOP('prtdos>3 and FFT or band parallelization are not compatible yet. Set prtdos <= 2', ierr)
+   if (dt%prtdos > 4 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
+     ABI_ERROR_NOSTOP('prtdos>4 and FFT or band parallelization are not compatible yet. Set prtdos <= 4', ierr)
    end if
 
 ! prtdos 5 only makes sense for nspinor == 2. Otherwise reset to prtdos 2
@@ -4400,10 +4416,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 !  wfoptalg
 !  Must be greater or equal to 0
    call chkint_ge(0,0,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,0,iout)
-!  wfoptalg==0,1,4,10,14 or 114 if PAW
+!  wfoptalg==0,1,2,4,10,12,14 or 114 if PAW
    if (usepaw==1) then
      cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,7,(/0,1,4,10,14,111,114/),iout)
+     call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,10,(/0,1,2,4,10,12,14,111,112,114/),iout)
    end if
 !  wfoptalg/=114 if PAW+Fock
    if (usepaw==1 .and. dt%usefock==1) then
@@ -4418,8 +4434,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      ABI_ERROR_NOSTOP(msg,ierr)
    end if
 
-   ! Chebyshev
-   if(dt%wfoptalg == 1 .or. dt%wfoptalg == 111) then
+   ! Chebyshev and Spectrum Slicing
+   if(dt%wfoptalg == 1 .or. dt%wfoptalg == 111 .or. dt%wfoptalg == 112) then
      if(dt%nspinor > 1 .and. dt%wfoptalg == 1) then
        msg='Nspinor > 1 not yet compatible with wfoptalg 1. Use chebfi V2 instead (wfoptalg=111).'
        ABI_ERROR_NOSTOP(msg, ierr)
@@ -4535,11 +4551,11 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
 
 !  bandFFT
    if(dt%paral_kgb==1.and.dt%optdriver==RUNL_GSTATE) then
-     if (mod(dt%wfoptalg,10) /= 4 .and. mod(dt%wfoptalg,10) /= 1) then
+     if (mod(dt%wfoptalg,10) /= 4 .and. mod(dt%wfoptalg,10) /= 2 .and. mod(dt%wfoptalg,10) /= 1) then
        write(msg,'(a,i0,a,a,a,a)')&
-        'The value of wfoptalg is found to be ',dt%wfoptalg,ch10,&
-        'This is not allowed in the case of band-FFT parallelization.',ch10,&
-        'Action: put wfoptalg = 4, 14 or 114 in your input file'
+&       'The value of wfoptalg is found to be ',dt%wfoptalg,ch10,&
+&       'This is not allowed in the case of band-FFT parallelization.',ch10,&
+&       'Action: put wfoptalg = 4, 14 or 112, 114 in your input file'
        ABI_ERROR_NOSTOP(msg,ierr)
      end if
 !    Make sure all nband are equal

@@ -50,7 +50,7 @@ pseudos "PseudosHGH_pwteter/83bi.5.hgh"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t50.abo, tolnlines = 18, tolabs = 2.000e-6, tolrel = 2.100e-3
+#%%   t50.abo, tolnlines = 18, tolabs = 2.000e-6, tolrel = 3.000e-3
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

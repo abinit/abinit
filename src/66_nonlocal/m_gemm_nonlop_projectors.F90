@@ -882,7 +882,7 @@ contains
         end if
 
         lmn_beg = max(1,ibeg-shift_do)
-        if(shift_do+nlmn > iend) nlmn = iend - shift_do - 1
+        if(shift_do+nlmn > iend - 1) nlmn = iend - shift_do - 1
       end if
 
       !! build atom_projs, from opernlb
@@ -1181,7 +1181,7 @@ contains
 
         lmn_beg = max(1,ibeg-shift_do)
         if(lmn_grad_beg==-1) lmn_grad_beg = (lmn_beg-1)*ngrads
-        if(shift_do+nlmn > iend) nlmn = iend - shift_do - 1
+        if(shift_do+nlmn > iend - 1) nlmn = iend - shift_do - 1
       end if
 
       !! build atom_dprojs, from opernlb
@@ -1201,45 +1201,68 @@ contains
       end if
       if (signs==1 .and. (choice==3 .or. choice==23 .or. choice==54 .or. choice==55 .or. choice==6)) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_dprojs,ffnl) &
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+        !$OMP& PRIVATE(ilmn,idir,ipw) MAP(to:atom_dprojs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_dprojs(1,ipw, 1:ndprojs, 1:nlmn_o) = wt * ffnl(ipw, 2:ndprojs+1, 1:nlmn_o, itypat)
+        do ilmn=1,nlmn_o
+          do idir=1,ndprojs
+            do ipw=1, npw
+              atom_dprojs(1, ipw, idir, ilmn) = wt * ffnl(ipw, idir+1, ilmn, itypat)
+            end do
+          end do
         end do
       end if
       if (signs==2 .and. (choice==3 .or. choice==5 .or. choice==51)) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_dprojs,ffnl) &
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+        !$OMP& PRIVATE(ilmn,ipw) MAP(to:atom_dprojs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_dprojs(1,ipw, 1, 1:nlmn_o) = wt * ffnl(ipw, 1+ffnl_dir, 1:nlmn_o, itypat)
+        do ilmn=1,nlmn_o
+          do ipw=1, npw
+            atom_dprojs(1, ipw, 1, ilmn) = wt * ffnl(ipw, 1+ffnl_dir, ilmn, itypat)
+          end do
         end do
       end if
       if(signs==1 .and. choice==54) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_d2projs,ffnl) &
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+        !$OMP& PRIVATE(ilmn,idir,ipw) MAP(to:atom_d2projs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_d2projs(1,ipw, 1:nd2projs, 1:nlmn_o) = wt * ffnl(ipw, 2:nd2projs+1, 1:nlmn_o, itypat)
+        do ilmn=1,nlmn_o
+          do idir=1,nd2projs
+            do ipw=1, npw
+              atom_d2projs(1, ipw, idir, ilmn) = wt * ffnl(ipw, idir+1, ilmn, itypat)
+            end do
+          end do
         end do
       else if(signs==1 .and. choice==55) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_d2projs,ffnl) &
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+        !$OMP& PRIVATE(ilmn,idir,ipw) MAP(to:atom_d2projs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_d2projs(1,ipw, 1:nd2projs, 1:nlmn_o) = wt * ffnl(ipw, 5:nd2projs+4, 1:nlmn_o, itypat)
+        do ilmn=1,nlmn_o
+          do idir=1,nd2projs
+            do ipw=1, npw
+              atom_d2projs(1, ipw, idir, ilmn) = wt * ffnl(ipw, idir+4, ilmn, itypat)
+            end do
+          end do
         end do
       else if(signs==1 .and. choice==6) then
 #ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_d2projs,ffnl) &
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+        !$OMP& PRIVATE(ilmn,idir,ipw) MAP(to:atom_d2projs,ffnl) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-        do ipw=1, npw
-          atom_d2projs(1,ipw, 1:10, 1:nlmn_o) = wt * ffnl(ipw, 1:10, 1:nlmn_o, itypat)
+        do ilmn=1,nlmn_o
+          do idir=1,10
+            do ipw=1, npw
+              atom_d2projs(1, ipw, idir, ilmn) = wt * ffnl(ipw, idir, ilmn, itypat)
+            end do
+          end do
         end do
       end if
 
