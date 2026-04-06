@@ -290,6 +290,42 @@ subroutine gpu_xscal(cplx, size, alpha, x_gpu, incrx)
 end subroutine gpu_xscal
 !!***
 
+!!****f* m_abi_gpu_linalg/gpu_xdot
+!! NAME
+!!  gpu_xdot
+!!
+!! FUNCTION
+!!  Compute blas-3 DOT on GPU
+!!  trace(X^H*Y)
+!!
+!! INPUTS
+!!  cplx  = 1 if real 2 if complex
+!!  N     = number of elements n*s
+!!  X     = array (n,s)
+!!  incrx = stride for X
+!!  Y     = array (n,s)
+!!  incry = stride for Y
+!!  alpha = output pointer
+!!
+!! SOURCE
+subroutine gpu_xdot(cplx, size, alpha, x_gpu, incrx, y_gpu, incry)
+
+  ! !Arguments ------------------------------------
+  integer,      intent(in)    :: cplx
+  integer,      intent(in)    :: size
+  complex(dp), intent(in)    :: alpha
+  type(c_ptr),  intent(in)    :: x_gpu
+  integer,      intent(in)    :: incrx
+  type(c_ptr),  intent(inout) :: y_gpu
+  integer,      intent(in)    :: incry
+
+  ABI_UNUSED((/cplx,size,incrx,incry/))
+  ABI_UNUSED(alpha)
+  ABI_UNUSED_A(x_gpu)
+  ABI_UNUSED_A(y_gpu)
+end subroutine gpu_xdot
+!!***
+
 !!****f* m_abi_gpu_linalg/gpu_xsygvd
 !! NAME
 !!  gpu_xsygvd
@@ -1467,6 +1503,123 @@ subroutine abi_gpu_xscal_2z(cplx, size, alpha, x, incrx)
 end subroutine abi_gpu_xscal_2z
 !!***
 
+!!****f* m_abi_gpu_linalg/abi_gpu_xdot
+!! NAME
+!!  abi_gpu_xdot
+!!
+!! FUNCTION
+!!  Compute blas-3 DOT on GPU
+!!  trace(X^H*Y)
+!!
+!! INPUTS
+!!  cplx  = 1 if real 2 if complex
+!!  size  = vector size
+!!  alpha = scalar complex value
+!!  x_gpu = pointer to gpu memory location of array x
+!! incrx  = stride between consecutive elements of x
+!!  y_gpu = pointer to gpu memory location of array y
+!! incry  = stride between consecutive elements of y
+!!
+!! SOURCE
+subroutine abi_gpu_xdot_cptr(cplx, size, alpha, x, incrx, y, incry)
+
+  ! !Arguments ------------------------------------
+  integer,      intent(in)    :: cplx
+  integer,      intent(in)    :: size
+  complex(dp), intent(in)    :: alpha
+  type(c_ptr),  intent(in)    :: x
+  integer,      intent(in)    :: incrx
+  type(c_ptr),  intent(in)    :: y
+  integer,      intent(in)    :: incry
+! *************************************************************************
+
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
+    ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
+  end if
+
+#ifdef HAVE_GPU
+
+  call gpu_xdot(cplx, size, alpha, x, incrx, y, incry)
+
+  if (abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+    ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
+    ! Therefore, we issue a stream sync here to avoid
+    !potential mistakes in calling context.
+    call gpu_linalg_stream_synchronize()
+  end if
+
+#else
+  ! Unused if GPU code disabled
+  ABI_UNUSED((/cplx,incrx,incry,size/))
+  ABI_UNUSED((/alpha/))
+  ABI_UNUSED((/x,y/))
+#endif
+
+end subroutine abi_gpu_xdot_cptr
+!!***
+
+subroutine abi_gpu_xdot_d(cplx, size, alpha, x, incrx, y, incry)
+
+  !Arguments ------------------------------------
+  integer,      intent(in)    :: cplx
+  integer,      intent(in)    :: size
+  complex(dp), intent(in)    :: alpha
+  real(dp),     intent(in), target    :: x(*)
+  integer,      intent(in)    :: incrx
+  real(dp),     intent(inout), target :: y(*)
+  integer,      intent(in)    :: incry
+! *************************************************************************
+
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
+    ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
+  end if
+
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+    call abi_gpu_xdot_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+    !$OMP TARGET DATA USE_DEVICE_ADDR(x,y)
+    call abi_gpu_xdot_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
+    !$OMP END TARGET DATA
+#endif
+  else
+    ABI_BUG("Unhandled GPU mode !")
+  end if
+
+end subroutine abi_gpu_xdot_d
+!!***
+
+subroutine abi_gpu_xdot_z(cplx, size, alpha, x, incrx, y, incry)
+
+  !Arguments ------------------------------------
+  integer,      intent(in)    :: cplx
+  integer,      intent(in)    :: size
+  complex(dp), intent(in)    :: alpha
+  complex(dp), intent(in), target    :: x(*)
+  integer,      intent(in)    :: incrx
+  complex(dp), intent(inout), target :: y(*)
+  integer,      intent(in)    :: incry
+! *************************************************************************
+
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
+    ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
+  end if
+
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+    call abi_gpu_xdot_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+    !$OMP TARGET DATA USE_DEVICE_ADDR(x,y)
+    call abi_gpu_xdot_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
+    !$OMP END TARGET DATA
+#endif
+  else
+    ABI_BUG("Unhandled GPU mode !")
+  end if
+
+end subroutine abi_gpu_xdot_z
+!!***
+
 !!****f* m_abi_gpu_linalg/abi_gpu_xaxpy
 !! NAME
 !!  abi_gpu_xaxpy
@@ -2203,6 +2356,7 @@ end subroutine abi_gpu_work_resizeC
 !! abi_gpu_work_resizeCptr
 
 subroutine abi_gpu_work_resizeCptr(array,current_dim,asked_dim)
+ use, intrinsic :: iso_c_binding
 
   type(c_ptr), intent(inout) :: array
   integer(c_size_t), intent(inout)  :: current_dim
@@ -2228,6 +2382,7 @@ end subroutine abi_gpu_work_resizeCptr
 !!***
 
 subroutine abi_gpu_work_finalize()
+ use, intrinsic :: iso_c_binding
 
 #ifdef HAVE_GPU
   !FIXME Assuming managed here ?

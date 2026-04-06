@@ -1045,6 +1045,8 @@ subroutine indefo1(dtset)
  dtset%npspalch=0
  dtset%npspinor=1
  dtset%np_slk=1000000
+ dtset%nslice=2
+ dtset%nstep_mixed=0
  dtset%nqptdm=0
  dtset%nspden=1
  dtset%nspinor=1
@@ -1059,6 +1061,7 @@ subroutine indefo1(dtset)
  dtset%optdriver=0
 !P
  dtset%paral_rf=0
+ dtset%paral_slice=0
 !dtset%paral_kgb ! Is even initialized earlier.
  dtset%pawspnorb=0  ! will be changed to 1 as soon as usepaw==1 and nspinor==2
  dtset%pimass(:)=-one
@@ -2365,6 +2368,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_dc=1
    dtsets(idtset)%dmft_entropy=0
    dtsets(idtset)%dmft_fermi_step=0.02_dp
+   dtsets(idtset)%dmft_hybri_limit=0
    dtsets(idtset)%dmft_iter=10
    dtsets(idtset)%dmft_kspectralfunc=0
    dtsets(idtset)%dmft_magnfield=0

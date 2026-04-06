@@ -211,7 +211,7 @@ type(pawfgr_type) :: pawfgr
 type(mttk_type) :: mttk_vars
 type(pimd_type) :: pimd_param
 integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
-integer :: ntime,option,comm,mgfftf,nfftf
+integer :: nmpi,ntime,option,comm,mgfftf,nfftf
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: msg
@@ -236,7 +236,7 @@ real(dp) :: minE,wtime_step,now,prev
 !arrays
 integer :: itimes(2),ngfft(18),ngfftf(18)
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3),gmet(3,3),rmet(3,3)
-real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:),ph1df(:,:)
+real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:),ph1df(:,:),tmp(:,:),tmp_1d(:)
 real(dp) :: k0(3)
 ! ***************************************************************
  need_verbose=.TRUE.
@@ -887,6 +887,44 @@ real(dp) :: k0(3)
 !    ### 18. Use the history  to extract the new values of acell, rprimd and xred
 
      call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
+     ! /!\ ---- DO NOT CHANGE THESE LINES WITHOUT CORE DEVELOPERS PERMISSION ---- /!\
+     ! LB-03/2026:
+     ! A noise can accumulate in acell,rprimd and xred after each iterations,
+     ! resulting in different results for different MPI processes.
+     ! This has been observed using threads, but could happen in other contexts.
+     ! This slowly worsens the ionic dynamics, leading to wrong results after many iterations.
+     ! So here we compute the mean over all MPI processes to reduce the noise.
+     ! This error is difficult to test as it is observed in long runs only, so BE VERY CAREFUL.
+     ! Note : the cost of these MPI communications is negligible.
+     ! comm = comm_cell
+     nmpi = xmpi_comm_size(comm)
+     if (nmpi>1) then
+       ABI_MALLOC(tmp,(size(xred,1),size(xred,2)))
+       tmp(:,:) = xred(:,:) / nmpi
+       call xmpi_sum(tmp,comm,ierr)
+       if (ierr/=0) then
+         ABI_ERROR("Error in mpi sum (tmp)")
+       end if
+       xred(:,:) = tmp(:,:)
+       ABI_FREE(tmp)
+       ABI_MALLOC(tmp,(size(rprimd,1),size(rprimd,2)))
+       tmp(:,:) = rprimd(:,:) / nmpi
+       call xmpi_sum(tmp,comm,ierr)
+       if (ierr/=0) then
+         ABI_ERROR("Error in mpi sum (tmp)")
+       end if
+       rprimd(:,:) = tmp(:,:)
+       ABI_FREE(tmp)
+       ABI_MALLOC(tmp_1d,(size(acell)))
+       tmp_1d(:) = acell(:) / nmpi
+       call xmpi_sum(tmp_1d,comm,ierr)
+       if (ierr/=0) then
+         ABI_ERROR("Error in mpi sum (tmp)")
+       end if
+       acell(:) = tmp_1d(:)
+       ABI_FREE(tmp_1d)
+     end if
+     ! /!\--------------------/!\
 
      if (ab_mover%optcell/=0) then
        ! Cell may change

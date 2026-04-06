@@ -29,6 +29,7 @@ module m_vtorho
  use defs_wvltypes
  use m_abicore
  use m_xmpi
+ use m_xomp
  use m_abi_mixing
  use m_errors
  use m_wffile
@@ -401,10 +402,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #if defined HAVE_GPU_CUDA
  integer(c_int64_t)   :: ph3d_size
 #endif
+ integer :: nthreads,nmpi,mpicomm
 
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd,step_cond
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
- logical :: do_last_ortho,wvlbigdft=.false.,do_invS
+ logical :: do_last_ortho,wvlbigdft=.false.,do_invS,calc_ffnl_ph3d
  integer :: dmft_dftocc
  real(dp) :: nelect,min_eigv
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
@@ -420,6 +422,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: dphasek(:,:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:), ffnl_kphq(:,:,:,:)
  real(dp),allocatable :: grnlnk(:,:), grnl_k(:,:), xcart(:,:)
+ real(dp),allocatable :: nvresid_tmp(:,:)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  real(c_double), ABI_CONTIGUOUS pointer :: kinpw(:) => null()
@@ -994,7 +997,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ider=0;idir=0;dimffnl=1
 
        ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,ntypat))
-       if (mpi_enreg%paral_kgb/=1.or.istep<=1) then
+       calc_ffnl_ph3d=.false.
+       if(mpi_enreg%paral_kgb/=1.or.istep<=1) calc_ffnl_ph3d=.true.
+       if(associated(rcpaw)) then
+         if(rcpaw%istep>=rcpaw%updatepaw(1)+1.and.rcpaw%istep<=rcpaw%updatepaw(2)+1.and.&
+              (dtset%wfoptalg==111.or.dtset%wfoptalg == 1)) then
+           calc_ffnl_ph3d=.true.
+         endif
+       endif
+       if (calc_ffnl_ph3d) then
          call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,&
           gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
           psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
@@ -1030,7 +1041,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (usefock_ACE/=0) then
          call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
            kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,fockACE_k=fock%fockACE(ikpt,isppol),ph3d_k=ph3d,&
-           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), compute_gbound=(mpi_enreg%paral_kgb/=1))
+           compute_ph3d=calc_ffnl_ph3d, compute_gbound=(mpi_enreg%paral_kgb/=1))
 
            if (dtset%use_gbt /= 0) then
              ABI_ERROR("GBT with fock_ace not implemented")
@@ -1038,12 +1049,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        else
          call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
            kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
-           compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), compute_gbound=(mpi_enreg%paral_kgb/=1))
+           compute_ph3d=calc_ffnl_ph3d, compute_gbound=(mpi_enreg%paral_kgb/=1))
 
          if (dtset%use_gbt /= 0) then
            call gs_hamk%load_kprime(kpt_kp=kphq,&
              kinpw_kp=kinpw_kphq,kpg_kp=kpg_kphq,ffnl_kp=ffnl_kphq,ph3d_kp=ph3d_kphq,&
-             compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=1), compute_gbound=(mpi_enreg%paral_kgb/=1))
+             compute_ph3d=calc_ffnl_ph3d, compute_gbound=(mpi_enreg%paral_kgb/=1))
          end if
        end if
 
@@ -1081,15 +1092,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          gemm_nonlop_is_distributed = (dtset%gpu_nl_distrib/=0 .and. nblk_gemm_nonlop > 0)
        end if
 
-       ! Build inverse of overlap matrix for chebfi
+        ! Build inverse of overlap matrix for chebfi or slice
        if(associated(rcpaw)) then
-         step_cond=istep<=1.or.(rcpaw%istep>=rcpaw%updatepaw(1)+1.and.rcpaw%istep<=rcpaw%updatepaw(2)+1)
+         step_cond=istep<=1.or.(rcpaw%istep>=rcpaw%updatepaw(1)+1.and.rcpaw%istep<=rcpaw%updatepaw(2)+1.and.&
+              (dtset%wfoptalg==111.or.dtset%wfoptalg == 1))
        else
          step_cond=istep <= 1
        endif
 
        if (dtset%cprj_in_memory==0) then
-         if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. step_cond) then
+         if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111 .or. dtset%wfoptalg == 112) &
+&           .and. step_cond) then
             call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
          end if
        end if
@@ -1126,7 +1139,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
        if (dtset%cprj_in_memory==1) then
-         do_invS=xg_nonlop%paw.and.dtset%wfoptalg==111
+         do_invS=xg_nonlop%paw.and.(dtset%wfoptalg==111.or.dtset%wfoptalg==112)
          call xg_nonlop_make_k(xg_nonlop,my_ikpt,istwf_k,mpi_enreg%me_g0,mpi_enreg%me_g0_fft,npw_k,ffnl,ph3d,kpg_k,&
            & step_cond,compute_invS_approx=do_invS,compute_gram=do_invS)
        end if
@@ -2294,10 +2307,47 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
      if (optres==1) then
        nvresid=rhor-nvresid
+       ! /!\ ---- DO NOT CHANGE THESE LINES WITHOUT CORE DEVELOPERS PERMISSION ---- /!\
+       ! LB-03/2026:
+       ! A noise can accumulate in nvresid after each SCF cycle,
+       ! resulting in different densities/potentials for different MPI processes.
+       ! This has been observed using threads, but could happen in other contexts.
+       ! This slowly worsens the SCF cycle, leading to wrong results after many iterations.
+       ! So here we compute the mean of nvresid over all MPI processes to reduce the noise.
+       ! This error is difficult to test as it is observed in long runs only, so BE VERY CAREFUL.
+       mpicomm = mpi_enreg%comm_kptband
+       nmpi = xmpi_comm_size(mpicomm)
+       nthreads = xomp_get_num_threads(open_parallel=.true.)
+       if (nmpi>1.and.nthreads>1) then
+         ABI_MALLOC(nvresid_tmp,(nfftf,dtset%nspden))
+         nvresid_tmp(:,:) = nvresid(:,:) / nmpi
+         call xmpi_sum(nvresid_tmp,mpicomm,ierr)
+         if (ierr/=0) then
+           ABI_ERROR("Error in mpi sum (nvresid)")
+         end if
+         nvresid(:,:) = nvresid_tmp(:,:)
+         ABI_FREE(nvresid_tmp)
+       end if
+       ! /!\--------------------/!\
+       !
        call sqnorm_v(1,nfftf,nres2,dtset%nspden,optres,nvresid,mpi_comm_sphgrid=mpi_comm_sphgrid)
        if (dtset%usekden==1) then
-         if (optres==1) tauresid=taur-tauresid
-       endif
+         if (optres==1) then
+           tauresid=taur-tauresid
+           ! /!\ ---- DO NOT CHANGE THESE LINES WITHOUT CORE DEVELOPERS PERMISSION ---- /!\
+           if (nmpi>1.and.nthreads>1) then
+             ABI_MALLOC(nvresid_tmp,(nfftf,dtset%nspden))
+             nvresid_tmp(:,:) = tauresid(:,:) / nmpi
+             call xmpi_sum(nvresid_tmp,mpicomm,ierr)
+             if (ierr/=0) then
+               ABI_ERROR("Error in mpi sum (tauresid)")
+             end if
+             tauresid(:,:) = nvresid_tmp(:,:)
+             ABI_FREE(nvresid_tmp)
+           end if
+           ! /!\--------------------/!\
+         end if
+       end if
      end if
    end if
 
