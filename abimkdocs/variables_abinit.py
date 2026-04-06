@@ -23370,16 +23370,18 @@ The different possibilities are:
 
 * [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
 
-* [[wfoptalg]] = 112: A **highly** experimental version of Spectrum Slicing algorithm. A spectral filtering
-algorithm by spectral slices based on lowpass and bandpass Chebyshev polynomials. The polynomial degree is tuned
-using [[mdeg_filter]] (formerly [[nline]]). The number of slices is tuned with [[nslice]] variable.
 > **Notes**:
 >
 > * For more performance, try enabling [[use_gemm_nonlop]] (default on [[GPU]]).
 >
 > * This algorithm struggles to converge the last bands, so it is advisable to use slightly more bands than required. When using [[tolwfr_diago]], it is mandatory to set [[nbdbuf]].
 >
-> * By design, this algorithm cannot use preconditioning and, therefore, cannot handle [[ecutsm]]. Consequently, _Pulay stresses_ are not corrected. If stresses are important for the calculation (e.g., when pressure is required), it is necessary to slightly increase the plane-wave cutoff ([[ecut]]). """,
+> * By design, this algorithm cannot use preconditioning and, therefore, cannot handle [[ecutsm]]. Consequently, _Pulay stresses_ are not corrected. If stresses are important for the calculation (e.g., when pressure is required), it is necessary to slightly increase the plane-wave cutoff ([[ecut]]).
+
+* [[wfoptalg]] = 112: A **highly** experimental Spectrum Slicing algorithm. A spectral filtering
+algorithm by spectral slices based on lowpass and bandpass Chebyshev polynomials. The polynomial degree is tuned
+using [[mdeg_filter]] (formerly [[nline]]). The number of slices is tuned with [[nslice]] variable.
+""",
 ),
 
 Variable(
