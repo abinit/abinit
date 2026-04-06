@@ -14,7 +14,7 @@
 !!
 !! NOTES
 !! These routines implement the theory developed in Zwanziger, Torrent, Gonze
-!! Phys Rev B 107, 165157 (2023). This paper will be referred to the comments as ZTG23.
+!! Phys Rev B 107, 165157 (2023). This paper will be referred to in the comments as ZTG23.
 !!
 !! SOURCE
 
