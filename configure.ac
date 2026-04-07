@@ -586,8 +586,10 @@ if test "${abi_fc_vendor}" = "cray"; then
 fi
 
 # With LLVM, a syntax error happens
+# An error also occurs with multiple definitions that is addressed by a linker flag
 if test "${abi_fc_vendor}" = "llvm"; then
   FCLIBS=`echo ${FCLIBS} | sed -e "s/-l \// \//"`
+  FCLIBS=`echo ${FCLIBS} -Wl,--allow-multiple-definition`
 fi
 
 # Remove -lsr-complexity-limit=<some-number> from FCLIBS, as it is
