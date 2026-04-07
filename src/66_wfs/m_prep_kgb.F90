@@ -1081,7 +1081,7 @@ end subroutine prep_nonlop
 !!  option_fourwf=option for fourwf (see fourwf.F90)
 !!  prtvol=control print volume and debugging output
 !!  ucvol=unit cell volume
-!!  nslices=number of slices fourwf is split into.
+!!  nfft_blocks=number of blocks fourwf is split into.
 !!  [bandfft_kpt_tab]= (optional) if present, contains tabs used to implement
 !!                     the "band-fft" parallelism
 !!                      if not present, the bandfft_kpt global variable is used
@@ -1096,12 +1096,12 @@ end subroutine prep_nonlop
 
 subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &          mpi_enreg,nband_k,ndat,ngfft,npw_k,n4,n5,n6,occ_k,option_fourwf,ucvol,wtk,&
-&          nslices,&
+&          nfft_blocks,&
 &          bandfft_kpt_tab,gpu_option) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: blocksize,iblock,istwf_k,mgfft,n4,n5,n6,nband_k,ndat,npw_k,nslices
+ integer,intent(in) :: blocksize,iblock,istwf_k,mgfft,n4,n5,n6,nband_k,ndat,npw_k,nfft_blocks
  integer,intent(in) :: option_fourwf
  integer,intent(in),optional :: gpu_option
  real(dp),intent(in) :: ucvol,wtk
@@ -1112,13 +1112,13 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  real(dp),intent(in) :: occ_k(nband_k)
  real(dp),intent(out) :: rhoaug(n4,n5,n6)
  real(dp),intent(in), target :: cwavef(2,npw_k*blocksize)
- real(dp),target,intent(inout) :: wfraug(:,:,:,:) !(2,n4,n5,n6*{ndat,ndat/nslices+mod(ndat,nslices))
+ real(dp),target,intent(inout) :: wfraug(:,:,:,:) !(2,n4,n5,n6*{ndat,ndat/nfft_blocks+mod(ndat,nfft_blocks))
 
 !Local variables-------------------------------
 !scalars
  integer :: bandpp,bandpp_sym,ier,iibandpp,ikpt_this_proc,ind_occ,ind_occ1,ind_occ2,ipw
  integer :: istwf_k_,jjbandpp,me_fft,nd3,nproc_band,nproc_fft,npw_fft
- integer :: nslices_sym,nbandslice
+ integer :: nfft_blocks_sym,nband_fftblock
  integer :: spaceComm=0,tim_fourwf,gpu_option_
  integer,pointer :: idatarecv0,ndatarecv,ndatarecv_tot,ndatasend_sym
  logical :: flag_inv_sym,have_to_reequilibrate,transfer_cwavef
@@ -1164,7 +1164,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 ! *************************************************************************
 
  ABI_CHECK((option_fourwf/=3),'Option=3 (FFT r->g) not implemented')
- ABI_CHECK((nslices>0),'nslices is null')
+ ABI_CHECK((nfft_blocks>0),'nfft_blocks is null')
  ABI_CHECK((mpi_enreg%bandpp==ndat),'BUG: bandpp/=ndat')
 
  spaceComm=mpi_enreg%comm_band
@@ -1191,10 +1191,10 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
    istwf_k_       = 1
    if (modulo(bandpp,2)==0) then
      bandpp_sym   = bandpp/2
-     nslices_sym  = nslices/2; if(modulo(nslices,2)/=0) nslices_sym=nslices_sym+1
+     nfft_blocks_sym  = nfft_blocks/2; if(modulo(nfft_blocks,2)/=0) nfft_blocks_sym=nfft_blocks_sym+1
    else
      bandpp_sym   = bandpp
-     nslices_sym  = nslices
+     nfft_blocks_sym  = nfft_blocks
    end if
  end if
 
@@ -1395,11 +1395,11 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        if(abs(occ_k(ind_occ)) < tol8) weight_t(iibandpp) = zero
      end do
 
-     nbandslice=bandpp/nslices+modulo(bandpp,nslices)
+     nband_fftblock=bandpp/nfft_blocks+modulo(bandpp,nfft_blocks)
      call fourwf_optmem(1,rhoaug,&
      &      cwavef_alltoall1,&
-     &      dummy,wfraug(:,:,:,1:n6*nbandslice),gbound_,gbound_,&
-     &      istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,bandpp,nslices,&
+     &      dummy,wfraug(:,:,:,1:n6*nband_fftblock),gbound_,gbound_,&
+     &      istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,bandpp,nfft_blocks,&
      &      ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,tim_fourwf,weight,weight,&
      &      weight_array_r=weight_t,weight_array_i=weight_t,&
      &      gpu_option=gpu_option_)
@@ -1504,11 +1504,11 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        weight2_t(iibandpp) = occ_k(ind_occ2)*wtk/ucvol
      end do
 
-     nbandslice=bandpp_sym/nslices_sym+modulo(bandpp_sym,nslices_sym)
+     nband_fftblock=bandpp_sym/nfft_blocks_sym+modulo(bandpp_sym,nfft_blocks_sym)
      call fourwf_optmem(1,rhoaug,&
      &      ewavef_alltoall_sym,&
-     &      dummy,wfraug(:,:,:,1:n6*nbandslice),gbound_,gbound_,&
-     &      istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,bandpp_sym,nslices_sym,&
+     &      dummy,wfraug(:,:,:,1:n6*nband_fftblock),gbound_,gbound_,&
+     &      istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,bandpp_sym,nfft_blocks_sym,&
      &      ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,tim_fourwf,weight,weight,&
      &      weight_array_r=weight1_t,weight_array_i=weight2_t,&
      &      gpu_option=gpu_option_)

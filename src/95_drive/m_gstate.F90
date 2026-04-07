@@ -444,7 +444,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  ! Handle GPU FFT slicing
- hamilt_gpu_fft_nslices = dtset%gpu_fft_nslices
+ hamilt_gpu_nfft_blocks = dtset%gpu_nfft_blocks
 
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then

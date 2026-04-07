@@ -94,10 +94,10 @@ contains
 !! OUTPUT
 !! req_mem=amount in bytes of required memory for getghc_ompgpu
 
-function getghc_ompgpu_work_mem(gs_ham, ndat, nslices) result(req_mem)
+function getghc_ompgpu_work_mem(gs_ham, ndat, nfft_blocks) result(req_mem)
 
  type(gs_hamiltonian_type),intent(in),target :: gs_ham
- integer, intent(in) :: ndat, nslices
+ integer, intent(in) :: ndat, nfft_blocks
  integer(kind=c_size_t) :: req_mem, ghc_mem, nonlop_mem
 
  ! getghc use a GPU work buffer only when using fourwf
@@ -105,7 +105,7 @@ function getghc_ompgpu_work_mem(gs_ham, ndat, nslices) result(req_mem)
  !   - the sum of getghc and fourwf work buffers memory requirements
  !   - the amount of memory required by gemm_nonlop_ompgpu work buffers
  ghc_mem = 0
- ghc_mem = int(2, c_size_t) * dp * gs_ham%n4 * gs_ham%n5 * gs_ham%n6 * (ndat/nslices + modulo(ndat,nslices))
+ ghc_mem = int(2, c_size_t) * dp * gs_ham%n4 * gs_ham%n5 * gs_ham%n6 * (ndat/nfft_blocks + modulo(ndat,nfft_blocks))
  !ghc_mem = ghc_mem + ompgpu_fourwf_work_mem(gs_ham%ngfft, ndat)
 
  nonlop_mem = gemm_nonlop_ompgpu_work_mem(gs_ham%istwf_k, ndat, 0, gs_ham%npw_fft_k,&
@@ -211,7 +211,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  integer :: ig,igspinor,istwf_k_,ii,iispinor,ikpt_this_proc,ipw,ispinor,my_nspinor
  integer :: n4,n5,n6,ndat_,nnlout,npw_fft,npw_k1,npw_k2,nspinortot,option_fft
  integer :: paw_opt,select_k_,shift1,shift2,signs,tim_nonlop
- integer :: chunk,residuchunk,nslices
+ integer :: chunk,residuchunk,nfft_blocks
  logical(kind=c_bool) :: k1_eq_k2
  logical :: double_rfft_trick,have_to_reequilibrate,has_fock,local_gvnlxc
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,use_cwavef_r, filter_dilatmx_loc_
@@ -411,12 +411,12 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ABI_CHECK(k1_eq_k2, 'vlocal (fourwf) cannot be computed with k/=k^prime!')
    end if
 
-   nslices = 1;
-   if(gs_ham%nfourwf_slices > 1 .and. gs_ham%gpu_option/=ABI_GPU_DISABLED) then
-     nslices = gs_ham%nfourwf_slices
+   nfft_blocks = 1;
+   if(gs_ham%nfft_blocks > 1 .and. gs_ham%gpu_option/=ABI_GPU_DISABLED) then
+     nfft_blocks = gs_ham%nfft_blocks
    end if
-   chunk = ndat/nslices ! Divide by 2 to construct chunk of even number of bands
-   residuchunk = ndat - nslices*chunk
+   chunk = ndat/nfft_blocks ! Divide by 2 to construct chunk of even number of bands
+   residuchunk = ndat - nfft_blocks*chunk
 
    ! Eventually adjust load balancing for FFT (by changing FFT distrib)
    ! Not that have_to_reequilibrate can be true only if mpi_enreg%nproc_fft>1
@@ -492,7 +492,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    fftalg = gs_ham%ngfft(7)
    if (gs_ham%gpu_option==ABI_GPU_DISABLED.and.fftalg/=401) then
      ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6))
-   else if(nslices==1) then
+   else if(nfft_blocks==1) then
      ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6*ndat))
    else
      ABI_MALLOC(work,(2,gs_ham%n4,gs_ham%n5,gs_ham%n6*(chunk+residuchunk)))
@@ -532,7 +532,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      end if
    else
      option_fft=3
-     nslices=1
+     nfft_blocks=1
      if (nspinortot==2) then
        ABI_MALLOC(cwavef1,(0,0))
        ABI_MALLOC(cwavef2,(0,0))
@@ -561,7 +561,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
           weight,weight,gpu_option=gs_ham%gpu_option)
        else
          call fourwf_optmem(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
-          istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat_,nslices,gs_ham%ngfft,&
+          istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat_,nfft_blocks,gs_ham%ngfft,&
           npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
           weight,weight,gpu_option=gs_ham%gpu_option)
        end if
@@ -589,7 +589,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          !$OMP TARGET ENTER DATA MAP(alloc:ghc1) IF(gs_ham%gpu_option==ABI_GPU_OPENMP)
 #endif
          call fourwf_optmem(1,gs_ham%vlocal,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
-          istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nslices,gs_ham%ngfft,&
+          istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nfft_blocks,gs_ham%ngfft,&
           npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
           weight,weight,gpu_option=gs_ham%gpu_option)
          if(gs_ham%gpu_option==ABI_GPU_OPENMP) then
@@ -633,7 +633,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          !$OMP TARGET ENTER DATA MAP(alloc:ghc2) IF(gs_ham%gpu_option==ABI_GPU_OPENMP)
 #endif
          call fourwf_optmem(1,gs_ham%vlocal,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
-           istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nslices,gs_ham%ngfft,&
+           istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nfft_blocks,gs_ham%ngfft,&
            npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
            gpu_option=gs_ham%gpu_option)
 
@@ -715,7 +715,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          end do
        end if
        call fourwf_optmem(1,vlocal_tmp,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
-         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nslices,gs_ham%ngfft,&
+         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nfft_blocks,gs_ham%ngfft,&
          npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
          gpu_option=gs_ham%gpu_option)
      end if
@@ -750,7 +750,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 #endif
        end if
        call fourwf_optmem(1,vlocal_tmp,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
-         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nslices,gs_ham%ngfft,&
+         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nfft_blocks,gs_ham%ngfft,&
          npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
          gpu_option=gs_ham%gpu_option)
      end if
@@ -786,7 +786,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          end do
        end if
        call fourwf_optmem(cplex,vlocal_tmp,cwavef1,ghc3,work,gbound_k1,gbound_k2,&
-         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nslices,gs_ham%ngfft,&
+         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nfft_blocks,gs_ham%ngfft,&
          npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
          gpu_option=gs_ham%gpu_option)
      end if
@@ -815,7 +815,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          end do
        end if
        call fourwf_optmem(cplex,vlocal_tmp,cwavef2,ghc4,work,gbound_k1,gbound_k2,&
-         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nslices,gs_ham%ngfft,&
+         istwf_k_,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,nfft_blocks,gs_ham%ngfft,&
          npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
          gpu_option=gs_ham%gpu_option)
      end if

@@ -66,7 +66,7 @@ module m_alloc_hamilt_gpu
 
  type(gemm_nonlop_gpu_data_type), save, public, target :: gemm_nonlop_gpu_data
 
- integer, save, public :: hamilt_gpu_fft_nslices
+ integer, save, public :: hamilt_gpu_nfft_blocks
 
 contains
 !!***
