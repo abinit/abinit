@@ -587,9 +587,11 @@ fi
 
 # With LLVM, a syntax error happens
 # An error also occurs with multiple definitions that is addressed by a linker flag
+# And a weird error occurs due to the inclusion of device-specific libs, that need to be removed
 if test "${abi_fc_vendor}" = "llvm"; then
   FCLIBS=`echo ${FCLIBS} | sed -e "s/-l \// \//"`
   FCLIBS=`echo ${FCLIBS} -Wl,--allow-multiple-definition`
+  FCLIBS=`echo ${FCLIBS} | sed -e "s/-lompdevice -lclang_rt.builtins//"`
 fi
 
 # Remove -lsr-complexity-limit=<some-number> from FCLIBS, as it is
