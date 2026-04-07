@@ -3109,17 +3109,6 @@ subroutine orbmag_rmesh(omag,adir,bra,dtset,gs_hamk,ket,local_term,mpi_enreg,&
 
   omag%rmesh(:,:,:,adir,term_index)=omag%rmesh(:,:,:,adir,term_index)+fofr(1,:,:,:)
   
-  !crr=REAL(crvec);cri=AIMAG(crvec);sfr=REAL(scalar_factor);sfi=AIMAG(scalar_factor)
-
-  !if (term_index.EQ.incc) then
-  !  omag%rmesh(:,:,:,adir,term_index) = omag%rmesh(:,:,:,adir,term_index) + &
-  !    & fofr(1,:,:,:)
-  !else
-  !  omag%rmesh(:,:,:,adir,term_index) = omag%rmesh(:,:,:,adir,term_index) + &
-  !    & fofr(1,:,:,:)*(sfr*crr+conjg_fac*sfi*cri) + &
-  !    & fofr(2,:,:,:)*(-sfr*cri+conjg_fac*sfi*crr)
-  !end if
-
   ABI_SFREE(fofr)
   ABI_SFREE(phgr)
 
