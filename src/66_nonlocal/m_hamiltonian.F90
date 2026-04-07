@@ -161,8 +161,8 @@ module m_hamiltonian
   integer :: nfft = -1
    ! number of FFT grid points same as dtset%nfft
 
-  integer :: nfourwf_slices = 1
-   ! number of slices fourwf computation is divided
+  integer :: nfft_blocks = 1
+  ! number of blocks fourwf computation is divided into
 
   integer :: npw_k = -1
    ! number of plane waves at k
@@ -759,13 +759,13 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
                      xred,nfft,mgfft,ngfft,rprimd,nloalg,&
                      ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&   ! optional
                      electronpositron,fock,nucdipmom,gpu_option,spinaxis,&    ! optional
-                     use_gbt,zora,nfourwf_slices)    ! optional
+                     use_gbt,zora,nfft_blocks)    ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(gs_hamiltonian_type),intent(inout),target :: ham
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
- integer,optional,intent(in) :: comm_atom,usecprj,gpu_option,use_gbt,zora,nfourwf_slices
+ integer,optional,intent(in) :: comm_atom,usecprj,gpu_option,use_gbt,zora,nfft_blocks
  type(electronpositron_type),optional,pointer :: electronpositron
  type(fock_type),optional,pointer :: fock
  type(pseudopotential_type),intent(in) :: psps
@@ -800,9 +800,9 @@ subroutine gsham_init(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  l_gpu_option=ABI_GPU_DISABLED; if(present(gpu_option)) l_gpu_option=gpu_option
  my_zora=0; if (present(zora)) my_zora=zora
 
- ham%nfourwf_slices=1;
- if (present(nfourwf_slices) .and. l_gpu_option==ABI_GPU_OPENMP) then
-   ham%nfourwf_slices=nfourwf_slices
+ ham%nfft_blocks=1;
+ if (present(nfft_blocks) .and. l_gpu_option==ABI_GPU_OPENMP) then
+   ham%nfft_blocks=nfft_blocks
  end if
  ham%use_gbt = 0; if (present(use_gbt)) ham%use_gbt = use_gbt
  ham%spinaxis = zero; if (present(spinaxis)) ham%spinaxis = spinaxis
@@ -1426,7 +1426,7 @@ subroutine gsham_copy(gs_hamk_in, gs_hamk_out)
  gs_hamk_out%mpssoang = gs_hamk_in%mpssoang
  gs_hamk_out%natom = gs_hamk_in%natom
  gs_hamk_out%nfft = gs_hamk_in%nfft
- gs_hamk_out%nfourwf_slices = gs_hamk_in%nfourwf_slices
+ gs_hamk_out%nfft_blocks = gs_hamk_in%nfft_blocks
  gs_hamk_out%npw_k = gs_hamk_in%npw_k
  gs_hamk_out%npw_kp = gs_hamk_in%npw_kp
  gs_hamk_out%npw_fft_k = gs_hamk_in%npw_fft_k

@@ -204,8 +204,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,12,string(1:lenstr),'gpu_devices',tread0,'INT')
    if(tread0==1) dtsets(idtset)%gpu_devices(1:12)=intarr(1:12)
 
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_fft_nslices',tread0,'INT')
-   if(tread0==1) dtsets(idtset)%gpu_fft_nslices=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_nfft_blocks',tread0,'INT')
+   if(tread0==1) dtsets(idtset)%gpu_nfft_blocks=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_kokkos_nthrd',tread0,'INT')
    if(tread0==1) dtsets(idtset)%gpu_kokkos_nthrd=intarr(1)

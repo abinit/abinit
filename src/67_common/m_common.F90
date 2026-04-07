@@ -2284,27 +2284,27 @@ end function crystal_from_file
 !!  blocksize        :  if higher than 0, only print memory estimation and exit
 !!
 !! OUTPUT
-!!  nfourwf_slices   :  Number of slices fourwf computation will be divided into
+!!  nfft_blocks      :  Number of blocks fourwf computation will be divided into
 !!  blocksize        :  Size of MPI tasks blocks to be used in GEMM nonlop
 !!  nblocks          :  Number of MPI blocks to be used in GEMM nonlop
 !!
 !! SOURCE
 subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspden,paral_kgb,&
 &                                           npband,optfor,optstr,wfoptalg,gpu_option,use_distrib,&
-&                                           blocksize,nblocks,nfourwf_slices,warn_on_fail)
+&                                           blocksize,nblocks,nfft_blocks,warn_on_fail)
 
    integer,intent(in)     :: ikpt,ndat,nband,nspinor,nspden,paral_kgb,npband,optfor,optstr,wfoptalg,gpu_option
    logical,intent(in)     :: use_distrib
    logical,intent(in),optional  :: warn_on_fail
    type(gs_hamiltonian_type),intent(in) :: gs_hamk
-   integer,intent(inout)  :: blocksize,nfourwf_slices
+   integer,intent(inout)  :: blocksize,nfft_blocks
    integer,intent(out)    :: nblocks
 
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem,nonlop_wmem,gs_ham_smem,updrho_wmem,prep_nonlop_wmem
    integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem,localMem,fourwf_smem,fourwf_wmem,fourwf_mem,hegvd_mem
    integer  :: icplx,space,i,ndat_try,rank,nprocs,ndgxdt,blockdim,max_slices,npw,npw_fft,signs,nprojs,itypat
    integer, target :: t_fft(3)
-   logical  :: print_and_exit,l_warn_on_fail,fixed_blocksize,fixed_fourwf_slices
+   logical  :: print_and_exit,l_warn_on_fail,fixed_blocksize,fixed_fourwf_blocks
    integer(kind=c_size_t) :: chebfiMem(2),lobpcgMem(2)
    character(len=500) :: message
 
@@ -2330,7 +2330,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
 
    if(gpu_option /= ABI_GPU_OPENMP) then
      ! No distribution is attempted outside of OpenMP GPU. User is already warned in chkinp
-     blocksize=1; nblocks=0; nfourwf_slices=1
+     blocksize=1; nblocks=0; nfft_blocks=1
      return
    end if
 
@@ -2397,9 +2397,9 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    end if
 
    nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, max(1,blocksize), ndgxdt, use_distrib)
-   getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat, max(nfourwf_slices,1))
+   getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat, max(nfft_blocks,1))
    fourwf_wmem  = int(2, c_size_t) * dp * gs_hamk%n4 * gs_hamk%n5 * gs_hamk%n6 &
-   &             * (ndat/max(nfourwf_slices,1) + modulo(ndat,max(nfourwf_slices,1)))
+   &             * (ndat/max(nfft_blocks,1) + modulo(ndat,max(nfft_blocks,1)))
    fourwf_mem  = fourwf_wmem+fourwf_smem
 
    nonlop_wmem = gemm_nonlop_ompgpu_work_mem(gs_hamk%istwf_k, ndat, ndgxdt, npw_fft,&
@@ -2446,9 +2446,9 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
 
    print_and_exit=.false.
    fixed_blocksize=.false.
-   fixed_fourwf_slices=.false.
+   fixed_fourwf_blocks=.false.
    nblocks=0
-   if(blocksize > 0 .and. nfourwf_slices > 0) then
+   if(blocksize > 0 .and. nfft_blocks > 0) then
      nblocks=max(1,nprocs/blocksize)
      print_and_exit=.true.
    else
@@ -2460,11 +2460,11 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
        write(std_out,*) "Setting GEMM nonlop block number...", new_line('A')
      end if
 
-     if(nfourwf_slices > 0) then
-       fixed_fourwf_slices=.true.
+     if(nfft_blocks > 0) then
+       fixed_fourwf_blocks=.true.
      else
-       nfourwf_slices=1
-       write(std_out,*) "Setting FFT slices number...", new_line('A')
+       nfft_blocks=1
+       write(std_out,*) "Setting FFT blocks number...", new_line('A')
      end if
    end if
 
@@ -2472,7 +2472,7 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
    ! How we try to optimize GPU memory consumption:
    ! We work on two variables :
    !    - blocksize : for slicing GEMM nonlop projectors arrays
-   !    - nfourwf_slices : for slicing ompgpu_fourwf work buffer
+   !    - nfft_blocks : for slicing ompgpu_fourwf work buffer
    ! At each iteration, we check which routine from GEMM nonlop or ompgpu_fourwf
    ! have the higher memory requirement and increase related variable.
    !
@@ -2491,11 +2491,11 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
      if(i==1 .or. print_and_exit) then
        if(wfoptalg>=0) then
 #ifdef HAVE_GPU
-         call gpu_fft_get_estimate_work_size(3, c_loc(t_fft), FFT_Z2Z, ndat/nfourwf_slices, fourwf_smem);
+         call gpu_fft_get_estimate_work_size(3, c_loc(t_fft), FFT_Z2Z, ndat/nfft_blocks, fourwf_smem);
 #endif
-         getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat, nfourwf_slices)
+         getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat, nfft_blocks)
          fourwf_wmem  = int(2, c_size_t) * dp * gs_hamk%n4 * gs_hamk%n5 * gs_hamk%n6 &
-         &             * (ndat/nfourwf_slices + modulo(ndat,nfourwf_slices))
+         &             * (ndat/nfft_blocks + modulo(ndat,nfft_blocks))
          fourwf_mem  = fourwf_wmem + fourwf_smem
        end if
        nonlop_smem = gemm_nonlop_ompgpu_static_mem(npw_fft,gs_hamk%indlmn,gs_hamk%nattyp,&
@@ -2513,24 +2513,24 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
        &    (wfoptalg >= 0 &
        &     .and. nonlop_smem < fourwf_mem  &
        &     .and. fourwf_mem >= getghc_wmem &
-       &     .and. .not. fixed_fourwf_slices &
-       &     .and. nfourwf_slices < ndat &
+       &     .and. .not. fixed_fourwf_blocks &
+       &     .and. nfft_blocks < ndat &
        &     .and. ndat_try > 1)) then
          ! Fourwf work memory requirement is higher, split here
-         if(nfourwf_slices == ndat) cycle ! Can't split more than ndat
+         if(nfft_blocks == ndat) cycle ! Can't split more than ndat
 
          if(i>1 .and. .not. print_and_exit) then
-           do while(ndat_try <= (ndat/nfourwf_slices + modulo(ndat,nfourwf_slices)))
-             nfourwf_slices=nfourwf_slices+1
+           do while(ndat_try <= (ndat/nfft_blocks + modulo(ndat,nfft_blocks)))
+             nfft_blocks=nfft_blocks+1
            end do
-           ndat_try = (ndat/nfourwf_slices + modulo(ndat,nfourwf_slices))
+           ndat_try = (ndat/nfft_blocks + modulo(ndat,nfft_blocks))
          end if
 #ifdef HAVE_GPU
-         call gpu_fft_get_estimate_work_size(3, c_loc(t_fft), FFT_Z2Z, ndat/nfourwf_slices, fourwf_smem);
+         call gpu_fft_get_estimate_work_size(3, c_loc(t_fft), FFT_Z2Z, ndat/nfft_blocks, fourwf_smem);
 #endif
-         getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat, nfourwf_slices)
+         getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat, nfft_blocks)
          fourwf_wmem  = int(2, c_size_t) * dp * gs_hamk%n4 * gs_hamk%n5 * gs_hamk%n6 &
-         &             * (ndat/nfourwf_slices + modulo(ndat,nfourwf_slices))
+         &             * (ndat/nfft_blocks + modulo(ndat,nfft_blocks))
          fourwf_mem  = fourwf_wmem + fourwf_smem
        else
          ! Gemm nonlop static memory requirement is higher, split here
@@ -2635,9 +2635,9 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
          &                        blocksize, " slices."
      end if
    end if
-   if(nfourwf_slices>1 .and. wfoptalg>=0) then
+   if(nfft_blocks>1 .and. wfoptalg>=0) then
      write(std_out,'(A,I3,A)') "Local slicing of ompgpu_fourwf work array using ",&
-       &                        nfourwf_slices, " slices."
+       &                        nfft_blocks, " blocks."
    end if
    write(std_out,'(A,F10.3,1x,A)') " Available memory                        : ", real(free_mem)/(1024*1024), "MiB"
    write(std_out,*) "Memory requirements per MPI task (OpenMP GPU)"

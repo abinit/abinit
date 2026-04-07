@@ -7512,25 +7512,25 @@ the eigenstates.
 ),
 
 Variable(
-    abivarname="gpu_fft_nslices",
+    abivarname="gpu_nfft_blocks",
     varset="paral",
     vartype="integer",
     topics=['parallelism_expert'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="GPU: Fast Fourier Transform SPLITting SIZE",
+    mnemonics="GPU: Number of Fast Fourier Transform Blocks",
     requires="[[gpu_option]] == 2 ([[OPENMP_OFFLOAD]])",
     added_in_version="10.8",
     text=r"""
 When using GPU acceleration, Fast Fourier Transforms (FFT) are computed on bands in parallel according
 to the value of either [[bandpp]] or [[nblock_lobpcg]].
-[[gpu_fft_nslices]] defines the number of slices used to split these FFT operations to
+[[gpu_nfft_blocks]] defines the number of blocks used to split these FFT operations to
 save GPU memory usage.
 In standard executions, the distribution is only needed on large use cases to address
 the high memory needs. ABINIT automatically assess memory consumption and enable splitting
 to fit in memory if needed.
-As its heuristic to assess memory may be error-prone, user may to use this parameter to force a
-specific splitting size.
+As its heuristic to assess memory may be error-prone, user may use this parameter to force a
+specific number of blocks.
 """,
 ),
 

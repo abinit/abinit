@@ -2534,7 +2534,7 @@ end function fftu_mpi_utests
 !! fourwf computation to be done in many times to save on memory.
 !! For now, only GPU usecases are handled, where lack of memory is problematic
 !! even if CPU usecases can be handled by this routine.
-!! Arguments are identical to fourwf, except for extra 'nslices', and the size of fofr array.
+!! Arguments are identical to fourwf, except for extra 'nblocks', and the size of fofr array.
 !! For option={0,3} or gpu_option=ABI_GPU_DISABLED, regular fourwf is used and fofr is assumed sized by ndat
 !!
 !! Carry out composite Fourier transforms between real and reciprocal (G) space.
@@ -2579,6 +2579,7 @@ end function fftu_mpi_utests
 !! mgfft=maximum size of 1D FFTs
 !! mpi_enreg=information about MPI parallelization
 !! ndat=number of FFT to do in //
+!! nblocks=number of FFT to split computation into
 !! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !! npwin=number of elements in fofgin array (for option 0, 1 and 2)
 !! npwout=number of elements in fofgout array (for option 2 and 3)
@@ -2633,13 +2634,13 @@ end function fftu_mpi_utests
 !! SOURCE
 
 subroutine fourwf_optmem(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-                  kg_kin,kg_kout,mgfft,mpi_enreg,ndat,nslices,ngfft,npwin,npwout,n4,n5,n6,option,&
+                  kg_kin,kg_kout,mgfft,mpi_enreg,ndat,nblocks,ngfft,npwin,npwout,n4,n5,n6,option,&
                   tim_fourwf,weight_r,weight_i, &
                   weight_array_r,weight_array_i,gpu_option,use_ndo,fofginb) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,istwf_k,mgfft,n4,n5,n6,ndat,nslices,npwin,npwout,option
+ integer,intent(in) :: cplex,istwf_k,mgfft,n4,n5,n6,ndat,nblocks,npwin,npwout,option
  integer,intent(in) :: tim_fourwf
  integer,intent(in),optional :: gpu_option,use_ndo
  real(dp),intent(in) :: weight_r,weight_i
@@ -2650,12 +2651,12 @@ subroutine fourwf_optmem(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  integer,intent(in) :: kg_kin(3,npwin),kg_kout(3,npwout),ngfft(18)
  real(dp),intent(inout) :: denpot(cplex*n4,n5,n6),fofgin(2,npwin*ndat)
  real(dp),intent(inout),optional :: fofginb(:,:) ! (2,npwin*ndat)
- real(dp),intent(inout) :: fofr(:,:,:,:) !(2,n4,n5,n6*(ndat/nslices+ndat-(ndat/nslices)*nslices))
+ real(dp),intent(inout) :: fofr(:,:,:,:) !(2,n4,n5,n6*(ndat/nblocks+ndat-(ndat/nblocks)*nblocks))
  real(dp),intent(out) :: fofgout(2,npwout*ndat)
 
  real(dp),pointer :: weight_ptr_r(:),weight_ptr_i(:)
 
- integer :: ii,chunk,residuchunk,islice,gpu_option_
+ integer :: ii,chunk,residuchunk,iblock,gpu_option_
  integer :: firstelt,firstelt_out,firstband,lastelt,lastelt_out,lastband
 
  gpu_option_=ABI_GPU_DISABLED; if(present(gpu_option)) gpu_option_=gpu_option
@@ -2676,8 +2677,8 @@ subroutine fourwf_optmem(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    &    gpu_option=gpu_option,use_ndo=use_ndo,fofginb=fofginb)
 
  else
-   chunk = ndat/nslices
-   residuchunk = ndat - nslices*chunk
+   chunk = ndat/nblocks
+   residuchunk = ndat - nblocks*chunk
 
    ABI_CHECK_IEQ(size(fofr,dim=4), n6*(chunk+residuchunk), 'wrong size for fofr (dim 4)')
 
@@ -2696,13 +2697,13 @@ subroutine fourwf_optmem(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
        weight_ptr_i(:)=weight_i
      end if
 
-     do ii=1,nslices
-       islice=ii-1
-       if ( islice < nslices-residuchunk ) then
-         firstband = islice*chunk+1
-         lastband = (islice+1)*chunk
+     do ii=1,nblocks
+       iblock=ii-1
+       if ( iblock < nblocks-residuchunk ) then
+         firstband = iblock*chunk+1
+         lastband = (iblock+1)*chunk
        else
-         firstband = (nslices-residuchunk)*chunk + ( islice -(nslices-residuchunk) )*(chunk+1) +1
+         firstband = (nblocks-residuchunk)*chunk + ( iblock -(nblocks-residuchunk) )*(chunk+1) +1
          lastband = firstband+chunk
        end if
        firstelt = (firstband-1)*npwin+1; lastelt = lastband*npwin
@@ -2725,13 +2726,13 @@ subroutine fourwf_optmem(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
    else if(option==2) then
 
-     do ii=1,nslices
-       islice=ii-1
-       if ( islice < nslices-residuchunk ) then
-         firstband = islice*chunk+1
-         lastband = (islice+1)*chunk
+     do ii=1,nblocks
+       iblock=ii-1
+       if ( iblock < nblocks-residuchunk ) then
+         firstband = iblock*chunk+1
+         lastband = (iblock+1)*chunk
        else
-         firstband = (nslices-residuchunk)*chunk + ( islice -(nslices-residuchunk) )*(chunk+1) +1
+         firstband = (nblocks-residuchunk)*chunk + ( iblock -(nblocks-residuchunk) )*(chunk+1) +1
          lastband = firstband+chunk
        end if
        firstelt = (firstband-1)*npwin+1; lastelt = lastband*npwin

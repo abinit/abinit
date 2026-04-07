@@ -1465,10 +1465,10 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
    end if
 
-!  gpu_fft_nslices
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_fft_nslices',dt%gpu_fft_nslices,0,iout)
-   if (dt%gpu_option/=ABI_GPU_OPENMP .and. dt%gpu_fft_nslices/=0) then
-     ABI_WARNING('gpu_fft_nslices is ignored outside of OpenMP GPU (gpu_option 2)!')
+!  gpu_nfft_blocks
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_nfft_blocks',dt%gpu_nfft_blocks,0,iout)
+   if (dt%gpu_option/=ABI_GPU_OPENMP .and. dt%gpu_nfft_blocks/=0) then
+     ABI_WARNING('gpu_nfft_blocks is ignored outside of OpenMP GPU (gpu_option 2)!')
    end if
 
 !  gpu_kokkos_nthrd
