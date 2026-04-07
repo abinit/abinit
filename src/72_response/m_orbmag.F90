@@ -598,7 +598,7 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
      call orbmag_cc_k(atindx,cprj1_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph1d,trnrm,suppress_ormesh=.FALSE.)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph1d,trnrm)
 
      ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
      call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,&
@@ -607,20 +607,19 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 Eq. 36 term 1
      call orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,ph1d,trnrm,&
-       & suppress_ormesh=.FALSE.)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,pawtab,ph1d,trnrm)
 
      ! ZTG23 text after Eq. 42
      nl1_option = 1 ! LR
      call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppol,&
        & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab,&
-       & ph1d,trnrm,suppress_ormesh=.FALSE.)
+       & ph1d,trnrm)
 
      ! ZTG23 Eq. 43
      nl1_option = 2 ! A0.An
      call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppol,&
        & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab,&
-       & ph1d,trnrm,suppress_ormesh=.FALSE.)
+       & ph1d,trnrm)
 
      ! accumulate terms
      do nn = 1, nband_k
@@ -3076,7 +3075,9 @@ subroutine orbmag_rmesh(omag,adir,bra,dtset,gs_hamk,ket,local_term,mpi_enreg,&
   end do
 
   if (local_term) then
-    ! if local field, compute exp(-iG.R)*conjg(bra)*scalar_factor*ket and then transform with fourwf
+    ! if term of interest is local, compute exp(-iG.R)*conjg(bra)*scalar_factor*ket 
+    ! and then transform with fourwf. Here R is t_atom position; factor shifts from 
+    ! unit cell origin to dipole location
     ABI_MALLOC(work,(2,npw_k))
     do ig = 1, npw_k
       cpw = CONJG(phgr(ig))*CONJG(CMPLX(bra(1,ig),bra(2,ig)))*scalar_factor*CMPLX(ket(1,ig),ket(2,ig))
@@ -3092,6 +3093,7 @@ subroutine orbmag_rmesh(omag,adir,bra,dtset,gs_hamk,ket,local_term,mpi_enreg,&
     ABI_SFREE(work)
   else
     ! if nonlocal, transform ket with fourwf, then slow FT as scalar_factor*(sum_G exp(+iG.R)*conjg(bra))*fofr
+    ! here R is t_atom location; slow FT computes nonlocal field T(r',r) as T(R,r)
     fourwf_cplex = 1
     fourwf_option = 0
     tim_fourwf = 1
@@ -3109,17 +3111,6 @@ subroutine orbmag_rmesh(omag,adir,bra,dtset,gs_hamk,ket,local_term,mpi_enreg,&
 
   omag%rmesh(:,:,:,adir,term_index)=omag%rmesh(:,:,:,adir,term_index)+fofr(1,:,:,:)
   
-  !crr=REAL(crvec);cri=AIMAG(crvec);sfr=REAL(scalar_factor);sfi=AIMAG(scalar_factor)
-
-  !if (term_index.EQ.incc) then
-  !  omag%rmesh(:,:,:,adir,term_index) = omag%rmesh(:,:,:,adir,term_index) + &
-  !    & fofr(1,:,:,:)
-  !else
-  !  omag%rmesh(:,:,:,adir,term_index) = omag%rmesh(:,:,:,adir,term_index) + &
-  !    & fofr(1,:,:,:)*(sfr*crr+conjg_fac*sfi*cri) + &
-  !    & fofr(2,:,:,:)*(-sfr*cri+conjg_fac*sfi*crr)
-  !end if
-
   ABI_SFREE(fofr)
   ABI_SFREE(phgr)
 
