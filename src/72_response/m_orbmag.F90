@@ -2197,8 +2197,6 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
   need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
   npwsp = npw_k*dtset%nspinor
 
-  n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6)
-
   if (need_ormesh) then
     ABI_CHECK(ASSOCIATED(cwavef),"tt_me: input wavefunction needed for ormesh is not associated")
     ABI_CHECK(dtset%nspinor.EQ.1,"tt_me: orbmag_rmesh not coded for spinors yet")
