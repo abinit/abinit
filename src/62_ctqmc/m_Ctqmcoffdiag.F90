@@ -910,20 +910,21 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk)
+SUBROUTINE Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk,fname)
 
 !Arguments ------------------------------------
   TYPE(Ctqmcoffdiag), INTENT(INOUT)                      :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN ) :: Gomega
   INTEGER                         , INTENT(IN ) :: opt_fk
 !Local variable -------------------------------
+  CHARACTER(LEN=fnlen), INTENT(INOUT)             :: fname
   DOUBLE PRECISION, DIMENSION(:,:,:), ALLOCATABLE :: F
 
   IF ( .NOT. op%para ) &
     CALL ERROR("Ctqmcoffdiag_setG0wTab : Ctqmcoffdiag_setParameters never called    ")
 
   MALLOC(F,(1:op%samples+1,1:op%flavors,1:op%flavors))
-  CALL Ctqmcoffdiag_computeF(op,Gomega, F, opt_fk)  ! mu is changed
+  CALL Ctqmcoffdiag_computeF(op,Gomega, F, opt_fk,fname)  ! mu is changed
  !write(6,*) "eee111"
   CALL BathOperatoroffdiag_setF(op%Bath, F)
  ! CALL BathOperatoroffdiag_printF(op%Bath,333)
@@ -1253,7 +1254,7 @@ END SUBROUTINE Ctqmcoffdiag_sethybri_limit
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
+SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk,fname)
 
  use m_hide_lapack,  only : xginv
 !Arguments ------------------------------------
@@ -1262,6 +1263,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   !INTEGER                         , INTENT(IN   ) :: Wmax
   DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(INOUT) :: F
   INTEGER                         , INTENT(IN   ) :: opt_fk
+  CHARACTER(LEN=fnlen), INTENT(INOUT)             :: fname
 !Local variables ------------------------------
   INTEGER                                         :: flavors
   INTEGER                                         :: samples
@@ -1665,6 +1667,17 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
     END DO
   ENDIF
   close(436)
+  
+  IF (op%rank .eq. 0) then
+    open(unit=735,file=trim(fname)//'_Hybridization_iatom_01.dat',status='unknown',form='formatted')
+    write(735,'(6a)') " Real and Imaginary part of the Hybridization function Delta(tau) in the CTQMC basis"
+    do itau=1,op%samples+1
+      write(735,'(2x,393(e25.17e3,2x))') DBLE(itau-1)*(op%beta/op%samples),&
+      & ((-1*(F(op%samples+2-itau,iflavor,iflavor2)),0.d0,iflavor=1,flavors),iflavor2=1,flavors)
+   enddo
+   close(735)
+  ENDIF
+
   !   call xmpi_barrier(op%MY_COMM)
   !write(6,*) "QQQQ3"
   FREE(Gomega_tmp)

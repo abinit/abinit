@@ -1213,6 +1213,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2013)='xgBlock_add_diag                '; basic(2013) = 1
  names(2014)='xgBlock_invert                  '; basic(2014) = 1
  names(2015)='xgBlock_invert_sy               '; basic(2015) = 1
+ names(2016)='xgBlock_dot                     '; basic(2016) = 1
 
  ! lobpcg2_cprj
  names(2030) = 'lobpcgwf2_cprj                 ';
@@ -1304,6 +1305,47 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2155)='xg_nl_fst%mult_cprj_str         '
  names(2156)='xg_nl_fst%work_str              '
  names(2159)='xg_nl_fst(other)                '
+
+ ! spectrum slicing routines
+ ! TODO IML timers become negative if we mix chebfi and slice must separate
+ names(2160) = 'slicewf                       '
+ names(2161) = 'slice_sched                   '
+ names(2162) = 'slice1_diago                  '
+ names(2163) = 'slice2_diago                  '
+ names(2164) = 'slice3_diago                  '
+ names(2165) = 'sliceX_diago                  '
+ names(2166) = 'slice(other)                  '
+ names(2167) = 'slicingLanczos                '
+ names(2168) = 'slicingTrace                  '
+
+ ! slice_cprj
+ names(2170) = 'slicewf_cprj                  '
+ names(2171) = 'slice_init                    '
+ names(2172) = 'slice_free                    '
+ names(2173) = 'slice_cprj                    '
+ names(2174) = 'slice_invovl                  '
+ names(2175) = 'slice_residu                  '
+ names(2176) = 'slice_RayleighRitz            '
+ names(2177) = 'slice_transpose               '
+ names(2178) = 'slice_RR_q                    '
+ names(2179) = 'slice_postinvovl              '
+ names(2180) = 'slice_swap                    '
+ names(2181) = 'slice_amp_f                   '
+ names(2182) = 'slice_barrier                 '
+ names(2183) = 'slice_copy                    '
+ names(2184) = 'slice_AX(kin)                 '
+ names(2185) = 'slice_AX(loc)                 '
+ names(2186) = 'slice_AX(nl)                  '
+ names(2187) = 'slice_enl                     '
+ names(2188) = 'slice_ortho                   '
+ names(2189) = 'slice(other)                  '
+
+ names(2190) = 'slice1(filter)                '
+ names(2191) = 'slice1(RR)                    '
+ names(2192) = 'slice1(probe)                 '
+ names(2193) = 'slice2(filter)                '
+ names(2194) = 'slice2(RR)                    '
+ names(2195) = 'slice2(probe)                 '
 
  ! TIMER_SIZE is 2199. See m_time
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
@@ -1585,6 +1627,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(60)
 !      Estimate the complement of xg_nonlop_forces_stress
      tslots(:8)=(/2159,2150,-2151,-2152,-2153,-2154,-2155,-2156/)
+   case(61)
+!      Estimate the complement of slice
+     tslots(:9)=(/2166,2160,-2161,-2162,-2163,-2164,-2165,-2167,-2168/)
+   case(62)
+!      Estimate the complement of slice_cprj
+     tslots(:20)=(/2189,2170,(ii,ii=-2171,-2188,-1)/)
 
    case default
      cycle
@@ -1999,7 +2047,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(89)
          list(:8)=(/2150,2151,2152,2153,2154,2155,2156,2159/) ; msg='xg_nonlop%forces_stress'
        case(90)
-         list(:36)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2015,1) /) ; msg='low-level xgBlock type '
+         list(:37)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2016,1) /) ; msg='low-level xgBlock type '
+       case(91)
+         list(:9)=(/(ii,ii=2160,2168,1)/); msg='slicewf core engine '
+       case(92)
+         list(:6)=(/ (ii,ii=2190,2195,1) /) ; msg='slicewf_cprj core engine '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 

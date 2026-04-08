@@ -1,0 +1,66 @@
+# Bulk silicon with meta-GGA R2SCAN01, comparing UPF and PSML pseudopotential formats.
+# Two datasets with the same structure but different pseudopotential formats:
+#   Dataset 1: both atoms use type 1 (UPF)
+#   Dataset 2: both atoms use type 2 (PSML)
+# Both pseudopotentials should be identical in content, so total energies should match.
+
+ndtset 2
+
+# Structure: bulk Si, diamond
+acell 3*10.26311
+rprim
+ 0   0.5 0.5
+ 0.5 0   0.5
+ 0.5 0.5 0
+xred
+ 0.0  0.0  0.0
+ 0.25 0.25 0.25
+natom 2
+ntypat 2
+znucl 14 14
+
+# Dataset 1: UPF format (both atoms use type 1)
+typat1 1 1
+
+# Dataset 2: PSML format (both atoms use type 2)
+typat2 2 2
+
+# Basis set and k-points
+ecut 10
+ngkpt 2 2 2
+shiftk 0 0 0
+nband 8
+
+# SCF parameters
+iscf 17
+nstep 30
+toldfe 1.e-8
+diemac 10.0
+
+# Meta-GGA settings
+ixc -645642    # R2SCAN01 meta-GGA
+usekden 1
+nc_xccc_gspace 0  # real-space core contribution, cleaner for meta-GGA
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "14_Si_mGGA.UPF, 14_Si_mGGA.psml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_LIBPSML
+#%% exclude_builders =
+#%% [files]
+#%% files_to_test =
+#%%   t122.abo, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -ridiculous;
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Verstraete
+#%% keywords = metaGGA, PSML, NC
+#%% description =
+#%%   Bulk silicon, diamond structure, meta-GGA R2SCAN01 with norm-conserving pseudopotentials.
+#%%   Two datasets comparing UPF (dataset 1) and PSML (dataset 2) formats for the same pseudopotential.
+#%%   Tests reading of pseudocore and valence kinetic energy densities from PSML files.
+#%% topics = xc
+#%%<END TEST_INFO>

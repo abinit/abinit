@@ -787,5 +787,5 @@ if __name__ == "__main__":
 
         if arg0 in ("tuna", "snakeviz"):
             cmd = f"{arg0} {prof_file}"
-            print(f"Executing {cmd=}")
+            print(f"Executing cmd={cmd}")
             os.system(cmd)
