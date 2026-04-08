@@ -626,5 +626,24 @@ which tells atdep to construct output file names like "run_DDB".
 """
 ),
 
+Variable(
+    abivarname="symbec@atdep",
+    varset="atdep",
+    vartype="integer",
+    topics=['aTDEP_expert'],
+    dimensions="scalar",
+    defaultval="0",
+    mnemonics="SYMmetrize Born Effective Charges",
+    added_in_version="10.7",
+    text="""
+OPTIONAL: Symmetrize the Born Effective Charges after reading them.
+
+- No symmetrization : [[atdep:symbec]] = 0
+- Spatial average : [[atdep:symbec]] = 1
+    Zero-out the non-diagonal part of the 3x3 BEC tensor of each atom,
+    and average the diagonal components, so that the BEC are spherically
+    symmetric.
+""",
+),
 
 ]

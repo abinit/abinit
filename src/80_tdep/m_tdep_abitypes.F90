@@ -87,7 +87,8 @@ contains
   ABI_FREE(zion)
 
  end subroutine tdep_init_crystal
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=====================================================================================================
 
  subroutine tdep_init_ifc(Crystal,DDB,Ifc,Invar,Lattice,MPIdata,Phi2,Rlatt_scaled,Shell2at,Sym)
 
@@ -102,6 +103,7 @@ contains
   type(Phi2_type),intent(inout) :: Phi2
   double precision,intent(in) :: Rlatt_scaled(3,Invar%natom_unitcell,Invar%natom)
 
+  integer :: ierr
   integer :: dipdip,asr,symdynmat,rfmeth
   integer :: iatom,nsphere,prtsrlr,enunit,nqshft
   integer :: ngqpt_in(3)
@@ -172,20 +174,35 @@ contains
     end if
   end if
 
-! GA: This part should NOT be commented.
 ! If the IFC is read (as above), we assume that there is no residual contribution of the
-! "LR part" within or that the decomposition between "LR" and "SR" parts is done (as it is
-! performed in the ABINIT output of IFC).
+! "LR part" within or that the decomposition between "LR" and "SR" parts is done
+! (as it is performed in the ABINIT output of IFC).
 ! ============================================================================================
-  !if (Invar%loto) then
-  !  ! GA: It is necessary to write the ifc so that the long-range part
-  !  !     of the IFC is computed.
-  !  if (MPIdata%iam_master) call tdep_write_ifc(Crystal,Ifc,Invar,Invar%natom_unitcell,1)
-  !  call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,1,Phi2,Rlatt_scaled,Shell2at,Sym)
-  !end if
+  if (Invar%loto) then
+
+
+    Ifc%short_atmfrc(:,:,:,:,:) = zero
+    Ifc%ewald_atmfrc(:,:,:,:,:) = zero
+
+    ! GA: It is necessary to write the ifc so that the long-range part of the IFC is computed.
+    if (MPIdata%iam_master) then
+      call tdep_write_ifc(Crystal,Ifc,Invar,Invar%natom_unitcell,1)
+    end if
+
+    ! Now communicate IFC
+    call xmpi_sum(Ifc%short_atmfrc, MPIdata%comm_step, ierr)
+    call xmpi_sum(Ifc%ewald_atmfrc, MPIdata%comm_step, ierr)
+    call xmpi_bcast(Ifc%short_atmfrc, MPIdata%master, MPIdata%comm_step, ierr)
+    call xmpi_bcast(Ifc%ewald_atmfrc, MPIdata%master, MPIdata%comm_step, ierr)
+
+    ! Copy long-range IFC into Phi2
+    call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,1,Phi2,Rlatt_scaled,Shell2at,Sym)
+
+  end if
 
  end subroutine tdep_init_ifc
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=====================================================================================================
 
  subroutine tdep_init_ddb(Crystal,DDB,Invar,Lattice,MPIdata,Qbz)
 
@@ -458,7 +475,7 @@ subroutine tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,unitfile)
     write(Invar%stdout,'(a)') ' Write the IFC of TDEP in ifc_out.dat (and ifc_out.nc)'
     open(unit=77,file=trim(Invar%output_prefix)//'_ifc_out.dat')
   else if (unitfile.eq.1) then
-    write(Invar%stdout,'(a)') ' Write in ifc_check.dat (and ifc_check.nc) the IFC read previously'
+    write(Invar%stdout,'(a)') ' Write the IFC in ifc_check.dat (and ifc_check.nc)'
     open(unit=77,file=trim(Invar%output_prefix)//'_ifc_check.dat')
   else if (unitfile.eq.2) then
     write(Invar%stdout,'(a)') ' Write in ifc_ddb.dat (and ifc_ddb.nc) the IFC read from DDB file'
@@ -483,7 +500,39 @@ subroutine tdep_write_ifc(Crystal,Ifc,Invar,natom_unitcell,unitfile)
   write(Invar%stdout,'(a)') ' ------- achieved'
 
 end subroutine tdep_write_ifc
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!=====================================================================================================
+
+!!****f* ABINIT/m_tdep_abitypes/tdep_ifc2phi2
+!! NAME
+!!  tdep_ifc2phi2
+!!
+!! FUNCTION
+!! Conversion between interatomic force constants (IFC) object
+!! and fitted second-order coefficients (Phi2).
+!!
+!! INPUTS
+!!  option
+!!      0 = Copy Phi2 into IFC
+!!      1 = Copy IFC into Phi2
+!!
+!!  Ifc = IFC object.
+!!  Phi2 = IFC object.
+!!  Invar = Input object containing the input variables.
+!!  Lattice = Lattice object describing the ideal structure.
+!!  Sym = Symetries object describing all the symmetry operations of the crystal.
+!!  Shell2at = Shell object for second-order interactions.
+!!  dipdip = Include long-range dipole-dipole interaction from IFC into Phi2.
+!!  Rlatt_scaled = Rlatt_cart divided by acell_unitcell.
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  The following quantities in MD are computed:
+!!
+!! NOTES
+!!
+!! SOURCE
 
 subroutine tdep_ifc2phi2(dipdip,Ifc,Invar,Lattice,natom_unitcell,option,Phi2,Rlatt_scaled,Shell2at,Sym)
 
