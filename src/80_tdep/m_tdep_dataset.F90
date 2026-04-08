@@ -56,6 +56,7 @@ module m_tdep_dataset
     integer :: bravais(11)
     integer :: use_weights
     integer :: prtphdos
+    integer :: symbec                   ! Symmetrize born effective charges
     integer, allocatable :: typat_unitcell(:)
     integer, allocatable :: typat(:)
     integer, allocatable :: lgth_segments(:)
@@ -153,7 +154,7 @@ contains
   integer :: ii,jj,shift,iatom,itypat,sum_alloy1,sum_alloy2
   integer:: lenstr, marr, jdtset, tread
   logical :: has_nimage
-  double precision :: dtion,amu_average
+  double precision :: dtion,amu_average,born_average
   character (len=8) :: date
   character (len=10) :: time
   character (len=5) :: zone
@@ -203,6 +204,7 @@ contains
   Invar%use_ideal_positions=0
   Invar%use_weights=0
   Invar%prtphdos=1
+  Invar%symbec=0
 ! In order to have an accuracy better than 1meV
   Invar%ngqpt1(:)=8
   Invar%ngqpt2(:)=32
@@ -539,7 +541,16 @@ contains
 ! =========================================================================== !
 ! Read DDB file if available to retrieve the Born effective charges
 ! and dielectric tensor. Enforce charge neutrality by equal redistribution of excess charge
-! (could add more input variables to control this).
+! =========================================================================== !
+
+! symbec
+  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'symbec', tread, 'INT')
+  if (tread == 1) then
+    Invar%symbec = intarr(1)
+    !write(Invar%stdout,'(1x,a20,1x,i4)') ljust('symbec',20),Invar%symbec
+  end if
+
+
 ABI_MALLOC(Invar%zeff, (3,3,Invar%natom_unitcell))
 Invar%zeff = zero
 
@@ -556,22 +567,24 @@ if (file_exists(ddb_filename).or.file_exists(nctk_ncify(ddb_filename))) then
   call ddb%free()
 
   !! Take the average born effective charge for each atom.
-  !! Apparently this helps to preserve the symmetries
-  !do iatom=1,Invar%natom_unitcell
-  !  born_average = zero
-  !  do ii=1,3
-  !    born_average = born_average + Invar%zeff(ii,ii,iatom)
-  !  end do
-  !  Invar%zeff(:,:,iatom) = zero
-  !  do ii=1,3
-  !    Invar%zeff(ii,ii,iatom) = born_average
-  !  end do
-  !end do
+  if (Invar%symbec==1) then
+    do iatom=1,Invar%natom_unitcell
+      born_average = zero
+      do ii=1,3
+        born_average = born_average + Invar%zeff(ii,ii,iatom)
+      end do
+      Invar%zeff(:,:,iatom) = zero
+      do ii=1,3
+        Invar%zeff(ii,ii,iatom) = born_average / 3
+      end do
+    end do
+  end if
 end if
 
 
 ! =========================================================================== !
 ! Output header and mandatory input variables
+! =========================================================================== !
 
 ! Write version, copyright, date...
   write(Invar%stdout,*) ' '

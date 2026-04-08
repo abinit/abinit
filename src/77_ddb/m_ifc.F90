@@ -1892,6 +1892,10 @@ subroutine ifc_write(Ifc,ifcana,atifcflg,ifcout,prt_ifc,ncid,prefix,&
        write(iout, '(a)' )
      end if
 
+     ! =========================================================================== !
+     ! Side effects happen here
+     ! The long-range part of the IFC (ewald_atmfrc) gets computed.
+
      ! BEGIN DEBUG
      !write(*,*) 'ifc_write (1) : Writing atmfrc'
      !write(*,*) 'atmfrc         : ', Ifc%atmfrc
@@ -1899,6 +1903,8 @@ subroutine ifc_write(Ifc,ifcana,atifcflg,ifcout,prt_ifc,ncid,prefix,&
      ! END DEBUG
      call ifc_getiaf(Ifc,ifcana,ifcout1,iout,ifc%zeff,ia,ra,list,dist,invdlt,&
                      detdlt,rsiaf,sriaf,vect,indngb,posngb)
+
+     ! =========================================================================== !
 
      if (prt_ifc == 1) then
        do ii=1,ifcout1
