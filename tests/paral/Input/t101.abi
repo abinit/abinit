@@ -88,6 +88,7 @@ dmft_rslf 1             # Read self-energy, if nothing (like here) initialize.
 dmft_mxsf 0.7           # Mixing of the old and new self-energy at every iterations.
 dmft_dc   5             # Double counting type. 1 is Fully Localized Limit (FLL)
 dmftqmc_seed 2
+dmft_wanorthnorm 2
 
 #Definition of impurity solver
 dmft_solv = 8           # CT-QMC solver in density-density approximation

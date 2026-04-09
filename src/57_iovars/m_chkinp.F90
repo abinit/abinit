@@ -735,7 +735,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_mxsf',dt%dmft_mxsf,-1,one,iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,10,(/-2,-1,0,1,2,5,6,7,8,9/),iout)
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,11,(/-2,-1,0,1,2,5,6,7,8,9,10/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_tolfreq',dt%dmft_tolfreq,-1,0.01_dp,iout)
        cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
@@ -782,7 +782,7 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
          call chkint_eq(0,1,cond_string,cond_values,ierr,'ixc',dt%ixc,4,(/7,-1012,11,-101130/),iout)
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
-         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,9,(/-2,0,1,2,5,6,7,8,9/),iout)
+         call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,10,(/-2,0,1,2,5,6,7,8,9,10/),iout)
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_t2g',dt%dmft_t2g,1,(/0/),iout)
          cond_string(1)='dmft_dc' ; cond_values(1)=dt%dmft_dc
@@ -796,6 +796,16 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
            call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_yukawa_epsilon',dt%dmft_yukawa_epsilon,1,zero,iout)
          end if
        end if
+       
+       if (dt%dmft_solv .eq. 10 .and. dt%nspinor .eq. 1) then 
+         write(msg,'(2a)') "dmft_solv == 10 is not implemented for nspinor == 1 "
+         ABI_ERROR(msg)
+       endif
+
+       if (dt%dmft_solv .eq. 10) then
+          cond_string(1)='usedmft' ; cond_values(1)=dt%usedmft
+          call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_hybri_limit',dt%dmft_hybri_limit,2,(/0,1/),iout)
+       endif
 
        do itypat=1,dt%ntypat
          if (dt%lpawu(itypat)==-1) cycle
