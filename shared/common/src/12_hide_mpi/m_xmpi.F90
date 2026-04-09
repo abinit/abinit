@@ -2756,8 +2756,8 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
  if (XMPI_ADDRESS_KIND<int64) call xmpi_abort(msg="Too much data to communicate for this architecture!")
 
 !Divide data in chunks
- cc=int(largecount,kind=int32)/INT_MAX
- rr=int(largecount,kind=int32)-cc*INT_MAX
+ cc=int(largecount/INT_MAX,kind=int32)
+ rr=int(largecount-cc*INT_MAX,kind=int32)
 
 !Create user-defined datatype
  if (rr==0) then
