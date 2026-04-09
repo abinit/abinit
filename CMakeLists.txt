@@ -605,18 +605,33 @@ else()
   message(STATUS "libpsml NOT FOUND")
 endif()
 
+
 #
 # HDF5
 #
 # HDF5 is not really used for now apparently
+# But since NetCDF 1.14, it is no more exposed by netcdf
 if (ABINIT_ENABLE_PARALLEL_HDF5)
   set(HDF5_PREFER_PARALLEL TRUE)
 endif()
 
-find_package(HDF5)
+find_package(HDF5 COMPONENTS C HL)
 if(HDF5_FOUND)
   message(STATUS "HDF5 found via find_package")
-  add_library(abinit::hdf5 ALIAS HDF5::HDF5)
+  add_library(abinit_hdf5 INTERFACE)
+  if(TARGET HDF5::HL)
+    target_link_libraries(abinit_hdf5 INTERFACE HDF5::HL)
+  elseif(TARGET hdf5::hdf5_hl)
+    target_link_libraries(abinit_hdf5 INTERFACE hdf5::hdf5_hl)
+  endif()
+  target_link_libraries(abinit_hdf5 INTERFACE HDF5::HDF5)
+  #Add again hdf5_hl because some compilers want it before, and some after
+  if(TARGET HDF5::HL)
+    target_link_libraries(abinit_hdf5 INTERFACE HDF5::HL)
+  elseif(TARGET hdf5::hdf5_hl)
+    target_link_libraries(abinit_hdf5 INTERFACE hdf5::hdf5_hl)
+  endif()
+  add_library(abinit::hdf5 ALIAS abinit_hdf5)
   set(ABINIT_HDF5_FOUND TRUE)
 else()
   pkg_check_modules(ABINIT_HDF5 QUIET IMPORTED_TARGET hdf5)
@@ -632,7 +647,6 @@ endif()
 
 if(ABINIT_HDF5_FOUND)
   set(HAVE_HDF5 1)
-
   if(HDF5_IS_PARALLEL)
     set(HAVE_HDF5_MPI 1)
   endif()
@@ -947,6 +961,17 @@ if (Libxc_FOUND)
   message(STATUS "  > Libxc libraries    : ${Libxc_LIBRARIES}")
 else()
   message(STATUS "Libxc not found!")
+endif()
+
+if (ABINIT_HDF5_FOUND)
+  message(STATUS "HDF5 found:")
+  message(STATUS "  > HDF5 version       : ${HDF5_VERSION}")
+  message(STATUS "  > HDF5 libraries     : ${HDF5_LIBRARIES}")
+  if (HDF5_HL_LIBRARIES} OR HDF5_C_HL_LIBRARIES)
+    message(STATUS "                         ${HDF5_HL_LIBRARIES};${HDF5_C_HL_LIBRARIES}")
+  endif()
+else()
+  message(STATUS "HDF5 not found!")
 endif()
 
 if (ABINIT_NETCDF_FOUND)
