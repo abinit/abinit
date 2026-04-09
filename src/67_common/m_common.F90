@@ -2625,80 +2625,89 @@ subroutine get_gemm_nonlop_ompgpu_blocksize(ikpt,gs_hamk,ndat,nband,nspinor,nspd
      sum_mem     = nonlop_smem + gs_ham_smem + nonlop_wmem + prep_nonlop_wmem
    end if
 
-   write(std_out,'(A,I3,A)') "GPU memory consumption estimate for K-point ",ikpt,":"
+   write(std_out,'(A,I3,A)') "GPU memory consumption estimate per MPI task for K-point ",ikpt,":"
    if(blocksize>1) then
      if(use_distrib) then
        write(std_out,'(A,I3,A,I3,A)') "MPI distribution of GEMM nonlop projectors using ",&
        &                        nblocks, " blocks of ", blocksize, " MPI tasks."
      else
        write(std_out,'(A,I3,A)') "Local slicing of GEMM nonlop projectors using ",&
-         &                        blocksize, " slices."
+         &                        blocksize, " blocks."
      end if
    end if
    if(nfft_blocks>1 .and. wfoptalg>=0) then
-     write(std_out,'(A,I3,A)') "Local slicing of ompgpu_fourwf work array using ",&
+     write(std_out,'(A,I3,A)') "Local slicing of FFT work array using ",&
        &                        nfft_blocks, " blocks."
    end if
-   write(std_out,'(A,F10.3,1x,A)') " Available memory                        : ", real(free_mem)/(1024*1024), "MiB"
-   write(std_out,*) "Memory requirements per MPI task (OpenMP GPU)"
-   write(std_out,*) "---------------------------------------------------------"
-   write(std_out,*) "GEMM nonlop projectors, gouverned by blocking/slicing"
-   write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop_ompgpu (projectors)       : ",  real(nonlop_smem,dp)/(1024*1024), "MiB"
+   write(std_out,'(A,F10.3,1x,A)') " Considered available memory             : ", real(free_mem)/(1024*1024), "MiB"
+   write(std_out,'(A)')
+   write(std_out,'(A)') "|                 Buffers gouverned by blocking/slicing                |"
+   write(std_out,'(A)') "|:--------------------------|---------:|-------------:|---------------:|"
+   write(std_out,'(A,I4,A,F10.2,1x,A)') "|  gemm_nonlop_projectors   | ", blocksize, " blk |  npw,*natom* | ",  real(nonlop_smem,dp)/(1024*1024), "MiB |"
    if(wfoptalg>=0) then
-     write(std_out,*) "ompgpu_fourwf, gouverned by slicing and bandpp (incl. in getghc)"
-     write(std_out,'(A,F10.3,1x,A)') "   ompgpu_fourwf (getghc work array)     : ",  real(fourwf_wmem,dp)/(1024*1024), "MiB"
+     write(std_out,'(A,I4,A,F10.2,1x,A)') "|  fourwf (fofr work array) | ", nfft_blocks, " blk | npw,*bandpp* | ",  real(fourwf_wmem,dp)/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  xFFT~internal buffers    |       NA |           NA | ",  real(fourwf_smem,dp)/(1024*1024), "MiB |"
    end if
 
+   if(sum_other_mem > free_mem) then
+     write(std_out,'(A)')
+     write(std_out,'(A)') "/!\ No slicing attempted as other arrays are too big to fit"
+     write(std_out,'(A)')
+   end if
 
-   write(std_out,*) "Static buffers, computed once and permanently on card"
+   write(std_out,'(A)')
+   write(std_out,'(A)') "|   Static buffers, computed once and permanently on card    |"
+   write(std_out,'(A)') "|:-------------------------|--------------:|----------------:|"
    ! CHEBFI2 or SLICE
    if(wfoptalg==111 .or. wfoptalg==112) then
-     write(std_out,'(A,F10.3,1x,A)') "   invovl_ompgpu (mkinvovl)              : ",  real(invovl_smem,dp)/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   chebfi2                               : ",    real(chebfiMem(1))/(1024*1024), "MiB"
+     write(std_out,'(A,F10.2,1x,A)') "|  invovl (mkinvovl)       |        natom  |  ",  real(invovl_smem,dp)/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  chebfi2                 |          npw  |  ",    real(chebfiMem(1))/(1024*1024), "MiB |"
    end if
 
    ! LOBPCG2
    if(wfoptalg==114) then
-     write(std_out,'(A,F10.3,1x,A)') "   lobpcg2                               : ",    real(lobpcgMem(1))/(1024*1024), "MiB"
+     write(std_out,'(A,F10.2,1x,A)') "|  lobpcg2                 |          npw  |  ",    real(lobpcgMem(1))/(1024*1024), "MiB |"
    end if
 
-   ! fourwf (any diago algorithm)
-   if(wfoptalg>=0) then
-     write(std_out,'(A,F10.3,1x,A)') "   fourwf~internal buffers        )      : ",  real(fourwf_smem,dp)/(1024*1024), "MiB"
-   end if
+   write(std_out,'(A,F10.2,1x,A)') "|  hamiltonian arrays      |          npw  |  ",      real(gs_ham_smem)/(1024*1024), "MiB |"
 
-   write(std_out,'(A,F10.3,1x,A)') "   hamiltonian arrays                    : ",      real(gs_ham_smem)/(1024*1024), "MiB"
-
-   write(std_out,*) "Work buffers (mostly sized after bandpp or nblock_lobpcg)"
-
+   write(std_out,'(A)')
+   write(std_out,'(A)') "|  Work buffers (mostly sized after bandpp or nblock_lobpcg) |"
+   write(std_out,'(A)') "|:-------------------------|--------------:|----------------:|"
    ! getghc (any diago algorithm)
    if(wfoptalg>=0) then
-     write(std_out,'(A,F10.3,1x,A)') "   getghc (inc. fourwf+gemm_nonlop)      : ",  real(getghc_wmem,dp)/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   mkrho~vtowfk_extra             )      : ",  real(updrho_wmem,dp)/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   hegvd                          )      : ",  real(hegvd_mem,dp)/(1024*1024), "MiB"
+     if(getghc_wmem /= fourwf_wmem) then
+       write(std_out,'(A,F10.2,1x,A)') "|  gemm_nonlop             |     bandpp  |  ",  real(getghc_wmem,dp)/(1024*1024), "MiB |"
+     end if
+     write(std_out,'(A,F10.2,1x,A)') "|  mkrho~vtowfk_extra      |   npw,bandpp  |  ",  real(updrho_wmem,dp)/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  hegvd                   |       bandpp  |  ",  real(hegvd_mem,dp)/(1024*1024), "MiB |"
    else
-     write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop                           : ",  real(nonlop_wmem,dp)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.2,1x,A)') "|  gemm_nonlop             | natom,bandpp  |  ",  real(nonlop_wmem,dp)/(1024*1024), "MiB |"
    end if
    if(paral_kgb==1) then
-     write(std_out,'(A,F10.3,1x,A)') "   prep_nonlop                           : ",  real(prep_nonlop_wmem,dp)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.2,1x,A)') "|  prep_nonlop             |   npw,bandpp  |  ",  real(prep_nonlop_wmem,dp)/(1024*1024), "MiB |"
    end if
 
    ! CHEBFI2 or SLICE
    if(wfoptalg==111 .or. wfoptalg==112) then
-     write(std_out,'(A,F10.3,1x,A)') "   invovl                                : ",  real(invovl_wmem,dp)/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   chebfi2 (RR buffers)                  : ",    real(chebfiMem(2))/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   chebfiwf (cg,resid,eig)               : ",        real(localMem)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.2,1x,A)') "|  invovl                  | natom,bandpp  |  ",  real(invovl_wmem,dp)/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  chebfi2 (RR buffers)    |        nband  |  ",    real(chebfiMem(2))/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  chebfiwf (cg,resid,eig) |    npw,nband  |  ",        real(localMem)/(1024*1024), "MiB |"
    end if
 
    ! LOBPCG2
    if(wfoptalg==114) then
-     write(std_out,'(A,F10.3,1x,A)') "   lobpcg2 (RR buffers)                  : ",    real(lobpcgMem(2))/(1024*1024), "MiB"
-     write(std_out,'(A,F10.3,1x,A)') "   lobpcgwf (cg,resid,eig)               : ",        real(localMem)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.2,1x,A)') "|  lobpcg2 (RR buffers)    |       bandpp  |  ",    real(lobpcgMem(2))/(1024*1024), "MiB |"
+     write(std_out,'(A,F10.2,1x,A)') "|  lobpcgwf (cg,resid,eig) |    npw,nband  |  ",        real(localMem)/(1024*1024), "MiB |"
    end if
 
-   write(std_out,*) "---------------------------------------------------------"
-   write(std_out,'(A,F10.3,1x,A)') "Sum                                      : ", real(sum_mem)/(1024*1024), "MiB"
-   write(std_out,'(A)') new_line('A')
+   write(std_out,'(A)')
+   if(sum_other_mem > free_mem) then
+     write(std_out,'(A,F10.2,1x,A)') "Sum                                      : ", real(sum_other_mem)/(1024*1024), "MiB"
+   else
+     write(std_out,'(A,F10.2,1x,A)') "Sum                                      : ", real(sum_mem)/(1024*1024), "MiB"
+   end if
+   write(std_out,'(A)')
    flush(std_out)
    if(rank==0) then
      if(sum_other_mem > free_mem) then
