@@ -111,21 +111,20 @@ upawu2      5.5  eV  # Values of U for each angular momentum
 jpawu1      0.00 eV                                                                                                
 jpawu2      0.7 eV  # Values of J                                                                                  
 
-#%%<BEGIN TEST_INFO>                                                                                                             
-#%% [setup]                                                                                                                      
-#%% executable = abinit                                                                                                          
-#%% [paral_info]                                                                                                                 
-#%% nprocs_to_test = 10                                                                                                          
-#%% max_nprocs = 10                                                                                                              
-#%% [NCPU_10]                                                                                                                    
-#%% files_to_test = t119_MPI10.abo, tolnlines = 10, tolabs = 5.0e-04, tolrel = 5.0e-03, fld_options=-ridiculous;                 
-#%%   t119_MPI10o_DS2_Hybridization_iatom_02.dat, tolnlines = 10, tolabs = 5.0e-04, tolrel = 5.0e-03, fld_options=-ridiculous; 
-#%%   t119_MPI10o_DS2_atom_02_Gtau_diag_CTQMC_01.dat, tolnlines = 10, tolabs = 5.0e-04, tolrel = 5.0e-03, fld_options=-ridiculous; 
-#%%   t119_MPI10o_DS2_atom_02_Gtau_full_CTQMC_01.dat, tolnlines = 10, tolabs = 5.0e-04, tolrel = 5.0e-03, fld_options=-ridiculous; 
-#%% [extra_info]                                                                                                                 
-#%% authors = F. Gendron                                                                                                         
-#%% keywords = DMFT, CTQMC                                                                                                       
-#%% description = Test CT-QMC abinit (dmft_solv=10) and dmft_hybri_limit=1                                 
-#%% topics = DMFT                                                                                                                
-#%%<END TEST_INFO>                                                                                                               
-
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [paral_info]
+#%% nprocs_to_test = 10
+#%% max_nprocs = 10
+#%% [NCPU_10]
+#%% files_to_test = t119_MPI10.abo, tolnlines = 10, tolabs = 5.0e-04, tolrel = 5.0e-03, fld_options=-ridiculous;
+#%%   t119_MPI10o_DS2_Hybridization_iatom_02.dat, tolnlines = 10, tolabs = 5.0e-04, tolrel = 5.0e-03, fld_options=-ridiculous;
+#%%   t119_MPI10o_DS2_atom_02_Gtau_diag_CTQMC_01.dat, tolnlines = 10, tolabs = 5.0e-04, tolrel = 5.0e-03, fld_options=-ridiculous;
+#%%   t119_MPI10o_DS2_atom_02_Gtau_full_CTQMC_01.dat, tolnlines = 10, tolabs = 5.0e-04, tolrel = 5.0e-03, fld_options=-ridiculous;
+#%% [extra_info]
+#%% authors = F. Gendron
+#%% keywords = DMFT, CTQMC
+#%% description = Test CT-QMC abinit (dmft_solv=10) and dmft_hybri_limit=1
+#%% topics = DMFT
+#%%<END TEST_INFO>
