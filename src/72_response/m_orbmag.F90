@@ -2180,8 +2180,7 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
 
   !Local variables -------------------------
   !scalars
-  integer :: iat,iatom,ig,isp,itypat,il,ilmn,ipw,jl,jlmn,klmn,n4,n5,n6,npwsp
-  integer :: t_atom
+  integer :: iat,iatom,isp,itypat,il,ilmn,jl,jlmn,klmn,npwsp,t_atom
   logical :: my_suppress_ormesh,need_ormesh
   real(dp) :: weight_i,weight_r
   complex(dp) :: cpi,cpj,dij,ormesh_fac
@@ -2194,10 +2193,8 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
   else
     my_suppress_ormesh=.FALSE.
   end if
-  npwsp = npw_k*dtset%nspinor
   need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
-
-  n4=dtset%ngfft(4); n5=dtset%ngfft(5); n6=dtset%ngfft(6)
+  npwsp = npw_k*dtset%nspinor
 
   if (need_ormesh) then
     ABI_CHECK(ASSOCIATED(cwavef),"tt_me: input wavefunction needed for ormesh is not associated")
