@@ -980,12 +980,12 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,gs_hamk,ikpt,isppo
 
      select case (nl1_option)
      case(1)
-       call tt_me(adir,dterm%LR(:,:,:,adir),atindx,cwavef,dtset,gs_hamk,dterm%lmn2max,mpi_enreg,&
+       call tt_me(adir,atindx,cwavef,dterm,dtset,gs_hamk,dterm%lmn2max,mpi_enreg,&
          & dterm%ndij,nband_k,npw_k,orbmag_mesh,inlr,pawtab,ph1d,tt,trnrm(nn),cwaveprj,&
          & suppress_ormesh=my_suppress_ormesh)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inlr) = real(tt)
      case(2)
-       call tt_me(adir,dterm%BM(:,:,:,adir),atindx,cwavef,dtset,gs_hamk,dterm%lmn2max,mpi_enreg,&
+       call tt_me(adir,atindx,cwavef,dterm,dtset,gs_hamk,dterm%lmn2max,mpi_enreg,&
          & dterm%ndij,nband_k,npw_k,orbmag_mesh,inbm,pawtab,ph1d,tt,trnrm(nn),cwaveprj,&
          & suppress_ormesh=my_suppress_ormesh)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inbm) = real(tt)
@@ -2156,7 +2156,7 @@ end subroutine txt_me
 !!
 !! SOURCE
 
-subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
+subroutine tt_me(adir,atindx,cwavef,dterm,dtset,gs_hamk,lmn2max,mpi_enreg,&
     & ndij,nband_k,npw_k,orbmag_mesh,oterm,pawtab,ph1d,tt,trnrm,ucprj,&
     & suppress_ormesh)
 
@@ -2167,6 +2167,7 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
   complex(dp),intent(out) :: tt
   logical,intent(in),optional :: suppress_ormesh
   type(dataset_type),intent(in) :: dtset
+  type(dterm_type),intent(in) :: dterm
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
   type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
@@ -2174,7 +2175,6 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   real(dp),intent(in),pointer :: cwavef(:,:),ph1d(:,:)
-  complex(dp),intent(in) :: aij(dtset%natom,lmn2max,ndij)
   type(pawcprj_type),intent(in) :: ucprj(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -2186,6 +2186,7 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
   complex(dp) :: cpi,cpj,dij,ormesh_fac
   !arrays
   real(dp),allocatable,target :: bra(:,:),ket(:,:)
+  complex(dp),allocatable :: dij_data(:,:,:)
 !--------------------------------------------------------------------
 
   if(present(suppress_ormesh)) then
@@ -2195,6 +2196,18 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
   end if
   need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
   npwsp = npw_k*dtset%nspinor
+
+  ABI_MALLOC(dij_data,(dtset%natom,lmn2max,ndij))
+  select case (oterm)
+  case (inlr)
+    dij_data = dterm%LR(:,:,:,adir)
+  case (inbm)
+    dij_data = dterm%BM(:,:,:,adir)
+  case (incc) 
+    dij_data = dterm%aij + dterm%qij
+  case DEFAULT
+    dij_data = czero
+  end select
 
   if (need_ormesh) then
     ABI_CHECK(ASSOCIATED(cwavef),"tt_me: input wavefunction needed for ormesh is not associated")
@@ -2225,7 +2238,7 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
         do ilmn = 1, pawtab(itypat)%lmn_size
           klmn=MATPACK(ilmn,jlmn)
           ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
-          dij = aij(iatom,klmn,isp)
+          dij = dij_data(iatom,klmn,isp)
           cpi =  CMPLX(ucprj(iatom,isp)%cp(1,ilmn),ucprj(iatom,isp)%cp(2,ilmn))
           cpj =  CMPLX(ucprj(iatom,isp)%cp(1,jlmn),ucprj(iatom,isp)%cp(2,jlmn))
           ! see note at top of file near definition of MATPACK macro
@@ -2246,15 +2259,15 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
             
           if (ndij == 4) then
             if (isp == 1) then
-              dij = aij(iatom,klmn,3) ! up-down
+              dij = dij_data(iatom,klmn,3) ! up-down
               ! D^ss'_ij=D^s's_ji^*
-              if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,4))
+              if (ilmn .GT. jlmn) dij = CONJG(dij_data(iatom,klmn,4))
               cpi = CMPLX(ucprj(iatom,1)%cp(1,ilmn),ucprj(iatom,1)%cp(2,ilmn))
               cpj = CMPLX(ucprj(iatom,2)%cp(1,jlmn),ucprj(iatom,2)%cp(2,jlmn))
             else
-              dij = aij(iatom,klmn,4) ! down-up
+              dij = dij_data(iatom,klmn,4) ! down-up
               ! D^ss'_ij=D^s's_ji^*
-              if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,3))
+              if (ilmn .GT. jlmn) dij = CONJG(dij_data(iatom,klmn,3))
               cpi = CMPLX(ucprj(iatom,2)%cp(1,ilmn),ucprj(iatom,2)%cp(2,ilmn))
               cpj = CMPLX(ucprj(iatom,1)%cp(1,jlmn),ucprj(iatom,1)%cp(2,jlmn))
             end if
@@ -2267,6 +2280,7 @@ subroutine tt_me(adir,aij,atindx,cwavef,dtset,gs_hamk,lmn2max,mpi_enreg,&
 
   ABI_SFREE(bra)
   ABI_SFREE(ket)
+  ABI_SFREE(dij_data)
 
 end subroutine tt_me
 !!***
