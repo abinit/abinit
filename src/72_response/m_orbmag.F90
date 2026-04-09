@@ -979,13 +979,13 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt
 
      select case (nl1_option)
      case(1)
-       call tt_me(adir,atindx,cwavef,dterm,dtset,eig_k(nn),gs_hamk,dterm%lmn2max,mpi_enreg,&
-         & dterm%ndij,nband_k,npw_k,orbmag_mesh,inlr,pawtab,ph1d,tt,trnrm(nn),cwaveprj,&
+       call tt_me(adir,atindx,cwavef,dterm,dtset,eig_k(nn),gs_hamk,cwavef,mpi_enreg,&
+         & nband_k,npw_k,orbmag_mesh,inlr,pawtab,ph1d,tt,trnrm(nn),cwaveprj,&
          & suppress_ormesh=my_suppress_ormesh)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inlr) = real(tt)
      case(2)
-       call tt_me(adir,atindx,cwavef,dterm,dtset,eig_k(nn),gs_hamk,dterm%lmn2max,mpi_enreg,&
-         & dterm%ndij,nband_k,npw_k,orbmag_mesh,inbm,pawtab,ph1d,tt,trnrm(nn),cwaveprj,&
+       call tt_me(adir,atindx,cwavef,dterm,dtset,eig_k(nn),gs_hamk,cwavef,mpi_enreg,&
+         & nband_k,npw_k,orbmag_mesh,inbm,pawtab,ph1d,tt,trnrm(nn),cwaveprj,&
          & suppress_ormesh=my_suppress_ormesh)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inbm) = real(tt)
      case default
@@ -2155,13 +2155,13 @@ end subroutine txt_me
 !!
 !! SOURCE
 
-subroutine tt_me(adir,atindx,cwavef,dterm,dtset,eignk,gs_hamk,lmn2max,mpi_enreg,&
-    & ndij,nband_k,npw_k,orbmag_mesh,oterm,pawtab,ph1d,tt,trnrm,ucprj,&
+subroutine tt_me(adir,atindx,bra,dterm,dtset,eignk,gs_hamk,ket,mpi_enreg,&
+    & nband_k,npw_k,orbmag_mesh,oterm,pawtab,ph1d,tt,trnrm,ucprj,&
     & suppress_ormesh)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: adir,lmn2max,ndij,nband_k,npw_k,oterm
+  integer,intent(in) :: adir,nband_k,npw_k,oterm
   real(dp),intent(in) :: eignk,trnrm
   complex(dp),intent(out) :: tt
   logical,intent(in),optional :: suppress_ormesh
@@ -2173,7 +2173,7 @@ subroutine tt_me(adir,atindx,cwavef,dterm,dtset,eignk,gs_hamk,lmn2max,mpi_enreg,
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  real(dp),intent(in),pointer :: cwavef(:,:),ph1d(:,:)
+  real(dp),intent(in),pointer :: bra(:,:),ket(:,:),ph1d(:,:)
   type(pawcprj_type),intent(in) :: ucprj(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -2184,7 +2184,7 @@ subroutine tt_me(adir,atindx,cwavef,dterm,dtset,eignk,gs_hamk,lmn2max,mpi_enreg,
   real(dp) :: weight_i,weight_r
   complex(dp) :: cpi,cpj,dij,ormesh_fac
   !arrays
-  real(dp),allocatable,target :: bra(:,:),ket(:,:)
+  real(dp),allocatable,target :: bra_mesh(:,:),ket_mesh(:,:)
   complex(dp),allocatable :: dij_data(:,:,:)
 !--------------------------------------------------------------------
 
@@ -2196,7 +2196,7 @@ subroutine tt_me(adir,atindx,cwavef,dterm,dtset,eignk,gs_hamk,lmn2max,mpi_enreg,
   need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
   npwsp = npw_k*dtset%nspinor
 
-  ABI_MALLOC(dij_data,(dtset%natom,lmn2max,ndij))
+  ABI_MALLOC(dij_data,(dtset%natom,dterm%lmn2max,dterm%ndij))
   select case (oterm)
   case (inlr)
     dij_data = dterm%LR(:,:,:,adir)
@@ -2209,7 +2209,8 @@ subroutine tt_me(adir,atindx,cwavef,dterm,dtset,eignk,gs_hamk,lmn2max,mpi_enreg,
   end select
 
   if (need_ormesh) then
-    ABI_CHECK(ASSOCIATED(cwavef),"tt_me: input wavefunction needed for ormesh is not associated")
+    ABI_CHECK(ASSOCIATED(ket),"tt_me: input wavefunction needed for ormesh is not associated")
+    ABI_CHECK(ASSOCIATED(bra),"tt_me: input wavefunction needed for ormesh is not associated")
     ABI_CHECK(dtset%nspinor.EQ.1,"tt_me: orbmag_rmesh not coded for spinors yet")
     do iat = 1, dtset%natom
       if ( ANY(ABS(dtset%nucdipmom(1:3,iat))>tol8) ) then
@@ -2217,8 +2218,8 @@ subroutine tt_me(adir,atindx,cwavef,dterm,dtset,eignk,gs_hamk,lmn2max,mpi_enreg,
         exit
       end if
     end do
-    ABI_MALLOC(bra,(2,npwsp))
-    ABI_MALLOC(ket,(2,npwsp))
+    ABI_MALLOC(bra_mesh,(2,npwsp))
+    ABI_MALLOC(ket_mesh,(2,npwsp))
   end if
 
   tt = czero
@@ -2230,8 +2231,8 @@ subroutine tt_me(adir,atindx,cwavef,dterm,dtset,eignk,gs_hamk,lmn2max,mpi_enreg,
   
         if (need_ormesh .AND. iatom.EQ.t_atom) then
           ! FFT ket-side to fofr, real space representation
-          ket(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*cwavef(1,1:npwsp)
-          ket(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*cwavef(2,1:npwsp)
+          ket_mesh(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*ket(1,1:npwsp)
+          ket_mesh(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*ket(2,1:npwsp)
         end if
  
         do ilmn = 1, pawtab(itypat)%lmn_size
@@ -2250,13 +2251,13 @@ subroutine tt_me(adir,atindx,cwavef,dterm,dtset,eignk,gs_hamk,lmn2max,mpi_enreg,
             il = pawtab(itypat)%indlmn(1,ilmn)
             ormesh_fac = trnrm*dij*four_pi*CONJG(j_dpc**il)*four_pi*(j_dpc**jl)
             
-            bra(1,1:npwsp)=cwavef(1,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)
-            bra(2,1:npwsp)=cwavef(2,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)
-            call orbmag_mesh%accum_rmesh(adir,bra,dtset,gs_hamk,ket,.FALSE.,mpi_enreg,&
-              & npwsp,ph1d,ormesh_fac,t_atom,oterm)
+            bra_mesh(1,1:npwsp)=bra(1,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)
+            bra_mesh(2,1:npwsp)=bra(2,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)
+            call orbmag_mesh%accum_rmesh(adir,bra_mesh,dtset,gs_hamk,ket_mesh,.FALSE.,&
+              & mpi_enreg,npwsp,ph1d,ormesh_fac,t_atom,oterm)
           end if
             
-          if (ndij == 4) then
+          if (dterm%ndij == 4) then
             if (isp == 1) then
               dij = dij_data(iatom,klmn,3) ! up-down
               ! D^ss'_ij=D^s's_ji^*
@@ -2277,8 +2278,8 @@ subroutine tt_me(adir,atindx,cwavef,dterm,dtset,eignk,gs_hamk,lmn2max,mpi_enreg,
     end do ! isp
   end do !iat
 
-  ABI_SFREE(bra)
-  ABI_SFREE(ket)
+  ABI_SFREE(bra_mesh)
+  ABI_SFREE(ket_mesh)
   ABI_SFREE(dij_data)
 
 end subroutine tt_me
