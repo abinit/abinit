@@ -34,7 +34,7 @@
                                                                                                
 #Definition pseudopotentials                                                                   
  pp_dirpath "$ABI_PSPDIR"         # repository with pseudopotentials                           
- pseudos "Ce.LDA_PW-JTH.xml"   # name of pseudopotential                                       
+ pseudos "58ce.paw"   # name of pseudopotential                                       
                                                                                                
 #Definition of the k-point grid                                                                
  kptopt 4                                                                                      
