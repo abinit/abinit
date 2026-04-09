@@ -3196,7 +3196,7 @@ SUBROUTINE Ctqmc_printQMC(this, num_chains)
 !#endif
   WRITE(ostream,'(A28,ES22.14,A5,ES21.14)') "<Epot>                [U] : ", this%measDE(1,1), " +/- ",&
 !#ifdef HAVE_MPI
-         SUM(this%Impurity%mat_U)/(this%flavors*(this%flavors-1)) * this%a_Noise*(sweeps*DBLE(this%size*num_chains))**this%b_Noise
+         SUM(DBLE(this%Impurity%mat_U))/(this%flavors*(this%flavors-1)) * this%a_Noise*(sweeps*DBLE(this%size*num_chains))**this%b_Noise
 !#else
 !                                                              this%a_Noise*(sweeps)**this%b_Noise
 !#endif
