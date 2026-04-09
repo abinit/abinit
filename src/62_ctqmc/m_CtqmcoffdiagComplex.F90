@@ -2,17 +2,17 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!!****m* ABINIT/m_Ctqmcoffdiag
+!!****m* ABINIT/m_CtqmcoffdiagComplex
 !! NAME
-!!  m_Ctqmcoffdiag
-!!
-!! FUNCTION
+!!  m_CtqmcoffdiagComplex
+!! 
+!! FUNCTION 
 !!  Manage and drive all the CTQMC
 !!  Should not be used if you don't know what you do
-!!  Please use CtqmcoffdiagInterface
+!!  Please use CtqmcoffdiagComplexComplexInterface
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder, B. Amadon, J. Denier)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder, B. Amadon, J. Denier)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,75 +28,79 @@
 ! Coupe modNoise1 en 2000
 #define CTQMC_SEGME  1
 #define CTQMC_ANTIS -2
-#define CTQMC_ADDED  3
+#define CTQMC_ADDED  3  
 #define CTQMC_REMOV  4
 #define CTQMC_DETSI  5
-MODULE m_Ctqmcoffdiag
+MODULE m_CtqmcoffdiagComplex
 
  USE m_Global
- USE m_GreenHyboffdiag
- USE m_BathOperatoroffdiag
+ USE m_GreenHyboffdiagComplex
+ USE m_BathOperatoroffdiagComplex
  USE m_ImpurityOperator
  USE m_Stat
  USE m_FFTHyb
  USE m_OurRng
  use defs_basis
- USE_MPI
+ use m_abicore
+ use m_io_tools, only : open_file
 
+#ifdef HAVE_MPI2
+ USE mpi
+#endif
  IMPLICIT NONE
 
- public :: Ctqmcoffdiag_init
- public :: Ctqmcoffdiag_setParameters
- public :: Ctqmcoffdiag_setSweeps
- public :: Ctqmcoffdiag_setSeed
- public :: Ctqmcoffdiag_allocateAll
- public :: Ctqmcoffdiag_allocateOpt
- public :: Ctqmcoffdiag_setG0wTab
- public :: Ctqmcoffdiag_setU
- public :: Ctqmcoffdiag_clear
- public :: Ctqmcoffdiag_reset
- public :: Ctqmcoffdiag_setMu
- public :: Ctqmcoffdiag_computeF
- public :: Ctqmcoffdiag_run
- public :: Ctqmcoffdiag_tryAddRemove
- public :: Ctqmcoffdiag_trySwap
- public :: Ctqmcoffdiag_measN
- public :: Ctqmcoffdiag_measCorrelation
- public :: Ctqmcoffdiag_measPerturbation
- public :: Ctqmcoffdiag_getResult
- public :: Ctqmcoffdiag_symmetrizeGreen
- public :: Ctqmcoffdiag_getGreen
- public :: Ctqmcoffdiag_getD
- public :: Ctqmcoffdiag_getE
- public :: Ctqmcoffdiag_printAll
- public :: Ctqmcoffdiag_printQMC
- public :: Ctqmcoffdiag_printGreen
- public :: Ctqmcoffdiag_printD
- public :: Ctqmcoffdiag_printE
- public :: Ctqmcoffdiag_printPerturbation
- public :: Ctqmcoffdiag_printCorrelation
- public :: Ctqmcoffdiag_printSpectra
- public :: Ctqmcoffdiag_destroy
- public :: Ctqmcoffdiag_setMagmom
+ public :: CtqmcoffdiagComplex_init
+ public :: CtqmcoffdiagComplex_setParameters
+ public :: CtqmcoffdiagComplex_setSweeps
+ public :: CtqmcoffdiagComplex_setSeed
+ public :: CtqmcoffdiagComplex_allocateAll
+ public :: CtqmcoffdiagComplex_allocateOpt
+ public :: CtqmcoffdiagComplex_setG0wTab
+ public :: CtqmcoffdiagComplex_setU
+ public :: CtqmcoffdiagComplex_clear
+ public :: CtqmcoffdiagComplex_reset
+ public :: CtqmcoffdiagComplex_setMu
+ public :: CtqmcoffdiagComplex_computeF
+ public :: CtqmcoffdiagComplex_run
+ public :: CtqmcoffdiagComplex_tryAddRemove
+ public :: CtqmcoffdiagComplex_trySwap
+ public :: CtqmcoffdiagComplex_measN
+ public :: CtqmcoffdiagComplex_measCorrelation
+ public :: CtqmcoffdiagComplex_measPerturbation
+ public :: CtqmcoffdiagComplex_getResult
+ public :: CtqmcoffdiagComplex_symmetrizeGreen
+ public :: CtqmcoffdiagComplex_getGreen
+ public :: CtqmcoffdiagComplex_getD
+ public :: CtqmcoffdiagComplex_getE
+ public :: CtqmcoffdiagComplex_printAll
+ public :: CtqmcoffdiagComplex_printQMC
+ public :: CtqmcoffdiagComplex_printGreen
+ public :: CtqmcoffdiagComplex_printD
+ public :: CtqmcoffdiagComplex_printE
+ public :: CtqmcoffdiagComplex_printPerturbation
+ public :: CtqmcoffdiagComplex_printCorrelation
+ public :: CtqmcoffdiagComplex_printSpectra
+ public :: CtqmcoffdiagComplex_destroy
+ public :: CtqmcoffdiagComplex_setMagmom
 
 !!***
 
-!!****t* m_Ctqmcoffdiag/Ctqmcoffdiag
+!!****t* m_CtqmcoffdiagComplex/CtqmcoffdiagComplex
 !! NAME
-!!  Ctqmcoffdiag
+!!  CtqmcoffdiagComplex
 !!
 !! FUNCTION
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
 
-TYPE Ctqmcoffdiag
+TYPE CtqmcoffdiagComplex
 
   LOGICAL :: init = .FALSE.
 ! Flag: is MC initialized
@@ -117,13 +121,13 @@ TYPE Ctqmcoffdiag
 ! Flag:  do we have parameters in input
 
   LOGICAL :: have_MPI = .FALSE.
-! Flag:
+! Flag: 
 
   INTEGER :: opt_movie = 0
 !
 
   INTEGER :: opt_analysis = 0
-! correlations
+! correlations 
 
   INTEGER :: opt_check = 0
 ! various check 0
@@ -156,13 +160,13 @@ TYPE Ctqmcoffdiag
 ! printing
 
   INTEGER :: flavors
-! number of flavors
+! number of flavors 
 
   INTEGER :: nspinor
 ! number of spinor
 
   INTEGER :: measurements
-!  The modulo used to measure the interaction energy and the number of electrons. Example : 2 means the measure is perform every two sweeps.
+!  The modulo used to measure the interaction energy and the number of electrons. Example : 2 means the measure is perform every two sweeps. 
 
   INTEGER :: samples
 ! nb of L points (dmftqmc_l)
@@ -209,8 +213,10 @@ TYPE Ctqmcoffdiag
 
   DOUBLE PRECISION :: signvalue
 
+  COMPLEX(KIND=8) :: phasevalue
+
   INTEGER :: MY_COMM
-!
+! 
 
   INTEGER :: rank
 !
@@ -219,24 +225,25 @@ TYPE Ctqmcoffdiag
 ! size of MY_COMM
 
   DOUBLE PRECISION :: runTime ! time for the run routine
-!
+!  
 
   DOUBLE PRECISION :: beta
 !
 
   DOUBLE PRECISION :: U
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: mu
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: mu
 ! levels
 
   COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:) :: hybri_limit
 ! coeff A such that F=-A/(iwn)
 
-  TYPE(GreenHyboffdiag)                        :: Greens
+  TYPE(GreenHyboffdiagComplex)                        :: Greens 
 ! Green's function
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: measN
-! measure of occupations (3or4,flavor)
+!  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: measN 
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:) :: measN
+! measure of occupations (3or4,flavor) 
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) :: measDE
 !  (flavor,flavor) double occupancies
@@ -251,16 +258,16 @@ TYPE Ctqmcoffdiag
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: abNoiseG   !(ab,tau,flavor)
 ! Noise but for G
 
-  TYPE(Vector)             , DIMENSION(1:2) :: measNoise
-  TYPE(Vector), ALLOCATABLE, DIMENSION(:,:,:) :: measNoiseG       !(tau,flavor,mod)
+  TYPE(Vector)             , DIMENSION(1:2) :: measNoise 
+  TYPE(Vector), ALLOCATABLE, DIMENSION(:,:,:) :: measNoiseG       !(tau,flavor,mod) 
 ! accumulate each value relataed to measurenoise 1 2
 
-!#ifdef CTCtqmcoffdiag_ANALYSIS
+!#ifdef CTCtqmcoffdiagComplex_ANALYSIS
 !  INTEGER                                     :: order
   DOUBLE PRECISION                            :: inv_dt
 ! 1/(beta/L)
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) :: measPerturbation
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) :: measPerturbation 
 ! opt_order,nflavor
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: occup_histo_time
@@ -284,45 +291,45 @@ TYPE Ctqmcoffdiag
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:  ) :: meas_fullemptylines
 ! opt_order,nflavor
 
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: measCorrelation
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: measCorrelation 
 ! segment,antisegment,nflavor,nflavor
 
 !#endif
-!#ifdef CTCtqmcoffdiag_CHECK
+!#ifdef CTCtqmcoffdiagComplex_CHECK
   DOUBLE PRECISION :: errorImpurity
-! check
+! check 
 
   DOUBLE PRECISION :: errorBath
 ! for check
 
 !#endif
-  TYPE(BathOperatoroffdiag)              :: Bath
+  TYPE(BathOperatoroffdiagComplex)              :: Bath
 
 
   TYPE(ImpurityOperator)          :: Impurity
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: density
 
-END TYPE Ctqmcoffdiag
+END TYPE CtqmcoffdiagComplex
 !!***
 
-!INTERFACE Ctqmcoffdiag_setG0w
-!  MODULE PROCEDURE Ctqmcoffdiag_setG0wFile, Ctqmcoffdiag_setG0wTab
+!INTERFACE CtqmcoffdiagComplex_setG0w
+!  MODULE PROCEDURE CtqmcoffdiagComplex_setG0wFile, CtqmcoffdiagComplex_setG0wTab
 !END INTERFACE
 
 CONTAINS
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_init
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_init
 !! NAME
-!!  Ctqmcoffdiag_init
+!!  CtqmcoffdiagComplex_init
 !!
 !! FUNCTION
-!!  Initialize the type Ctqmcoffdiag
+!!  Initialize the type CtqmcoffdiagComplex
 !!  Allocate all the non optional variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -343,14 +350,14 @@ CONTAINS
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_init(op, ostream, istream, bFile, MY_COMM, iBuffer)
+SUBROUTINE CtqmcoffdiagComplex_init(op, ostream, istream, bFile, MY_COMM, iBuffer)
 
 
 #ifdef HAVE_MPI1
 include 'mpif.h'
 #endif
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT)                      :: op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT)                      :: op
   INTEGER  , INTENT(IN   )                      :: ostream
   INTEGER  , INTENT(IN   )                      :: istream
   LOGICAL  , INTENT(IN   )                      :: bFile
@@ -370,7 +377,7 @@ include 'mpif.h'
 
   op%ostream = ostream
   op%istream = istream
-
+  
 ! --- RENICE ---
 !#ifdef __GFORTRAN__
 !  pid = GetPid()
@@ -418,7 +425,7 @@ include 'mpif.h'
       READ(istream,*) buffer(9) !iTech
       READ(istream,*) buffer(11)!op%nspinor
       !READ(istream,*) buffer(9) !Wmax
-!#ifdef CTCtqmcoffdiag_ANALYSIS
+!#ifdef CTCtqmcoffdiagComplex_ANALYSIS
       !READ(istream,*) buffer(10) !order
 !#endif
     END IF
@@ -431,14 +438,14 @@ include 'mpif.h'
   ELSE IF ( PRESENT(iBuffer) ) THEN
     buffer(1:11) = iBuffer(1:11)
   ELSE
-    CALL ERROR("Ctqmcoffdiag_init : No input parameters                    ")
+    CALL ERROR("CtqmcoffdiagComplex_init : No input parameters                    ")
   END IF
 
-  CALL Ctqmcoffdiag_setParameters(op, buffer)
+  CALL CtqmcoffdiagComplex_setParameters(op, buffer)
 
-  CALL Ctqmcoffdiag_allocateAll(op)
+  CALL CtqmcoffdiagComplex_allocateAll(op)
 
-  CALL GreenHyboffdiag_init(op%Greens,op%samples, op%beta,INT(buffer(5)), &
+  CALL GreenHyboffdiagComplex_init(op%Greens,op%samples, op%beta,INT(buffer(5)), &
   iTech=INT(buffer(9)),MY_COMM=op%MY_COMM)
 
 
@@ -451,6 +458,7 @@ include 'mpif.h'
   op%stats(:)     = 0.d0
  ! write(std_out,*) "op%stats",op%stats
   op%signvalue    = 1.d0
+  op%phasevalue   = cmplx(1.d0,0.d0,kind=8) 
 !  op%signvaluecurrent    = 0.d0
 !  op%signvaluemeas = 0.d0
   op%swap         = 0.d0
@@ -465,22 +473,22 @@ include 'mpif.h'
   op%done = .FALSE.
   op%init = .TRUE.
 
-!#ifdef CTCtqmcoffdiag_CHECK
+!#ifdef CTCtqmcoffdiagComplex_CHECK
   op%errorImpurity = 0.d0
   op%errorBath     = 0.d0
 !#endif
-END SUBROUTINE Ctqmcoffdiag_init
+END SUBROUTINE CtqmcoffdiagComplex_init
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_setParameters
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_setParameters
 !! NAME
-!!  Ctqmcoffdiag_setParameters
+!!  CtqmcoffdiagComplex_setParameters
 !!
 !! FUNCTION
 !!  set all parameters and operators
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -497,16 +505,16 @@ END SUBROUTINE Ctqmcoffdiag_init
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_setParameters(op,buffer)
+SUBROUTINE CtqmcoffdiagComplex_setParameters(op,buffer)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT)                         :: op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT)                         :: op
   DOUBLE PRECISION, DIMENSION(1:11), INTENT(IN   ) :: buffer
 
 
   op%thermalization = INT(buffer(3)) !op%thermalization
-  CALL Ctqmcoffdiag_setSeed(op,INT(buffer(1)))
-  CALL Ctqmcoffdiag_setSweeps(op,buffer(2))
+  CALL CtqmcoffdiagComplex_setSeed(op,INT(buffer(1)))
+  CALL CtqmcoffdiagComplex_setSweeps(op,buffer(2))
 
   op%measurements   = INT(buffer(4)) !op%measurements
   op%flavors        = INT(buffer(5))
@@ -517,7 +525,7 @@ SUBROUTINE Ctqmcoffdiag_setParameters(op,buffer)
   op%nspinor        = INT(buffer(11)) !op%nspinor
 !  op%mu             = buffer(9)      !op%mu
   !op%Wmax           = INT(buffer(9)) !Freq
-!#ifdef CTCtqmcoffdiag_ANALYSIS
+!#ifdef CTCtqmcoffdiagComplex_ANALYSIS
 !  op%order          = INT(buffer(10)) ! order
   op%inv_dt         = op%samples / op%beta
 !#endif
@@ -530,22 +538,22 @@ SUBROUTINE Ctqmcoffdiag_setParameters(op,buffer)
   END IF
 !  op%mu = op%mu + op%Impurity%shift_mu
 !sui!write(std_out,*) "op%opt_nondiag",op%opt_nondiag
-  CALL BathOperatoroffdiag_init(op%Bath, op%flavors, op%samples, op%beta, INT(buffer(9)), op%opt_nondiag)
+  CALL BathOperatoroffdiagComplex_init(op%Bath, op%flavors, op%samples, op%beta, INT(buffer(9)), op%opt_nondiag)
 
   op%para = .TRUE.
 
-END SUBROUTINE Ctqmcoffdiag_setParameters
+END SUBROUTINE CtqmcoffdiagComplex_setParameters
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_setSweeps
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_setSweeps
 !! NAME
-!!  Ctqmcoffdiag_setSweeps
+!!  CtqmcoffdiagComplex_setSweeps
 !!
 !! FUNCTION
 !!  set the number of sweeps
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -562,21 +570,21 @@ END SUBROUTINE Ctqmcoffdiag_setParameters
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_setSweeps(op,sweeps)
+SUBROUTINE CtqmcoffdiagComplex_setSweeps(op,sweeps)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)         , INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagComplex)         , INTENT(INOUT) :: op
   DOUBLE PRECISION  , INTENT(IN   ) :: sweeps
 
   op%sweeps = NINT(sweeps / DBLE(op%size))
 !  !write(std_out,*) op%sweeps,NINT(sweeps / DBLE(op%size)),ANINT(sweeps/DBLE(op%size))
   IF ( DBLE(op%sweeps) .NE. ANINT(sweeps/DBLE(op%size)) ) &
-    CALL ERROR("Ctqmcoffdiag_setSweeps : sweeps is negative or too big     ")
+    CALL ERROR("CtqmcoffdiagComplex_setSweeps : sweeps is negative or too big     ")
   IF ( op%sweeps .LT. 2*CTQMC_SLICE1 ) THEN  !202
-    CALL WARNALL("Ctqmcoffdiag_setSweeps : # sweeps automtically changed     ")
+    CALL WARNALL("CtqmcoffdiagComplex_setSweeps : # sweeps automtically changed     ")
     op%sweeps = 2*CTQMC_SLICE1
 !  ELSE IF ( op%sweeps .LT. op%thermalization ) THEN
-!    CALL WARNALL("Ctqmcoffdiag_setSweeps : Thermalization > sweeps / cpu -> auto fix")
+!    CALL WARNALL("CtqmcoffdiagComplex_setSweeps : Thermalization > sweeps / cpu -> auto fix")
 !    op%sweeps = op%thermalization
   END IF
   IF ( DBLE(NINT(DBLE(op%sweeps)*DBLE(op%size)/DBLE(CTQMC_SLICE1))) .NE.  &
@@ -589,18 +597,18 @@ SUBROUTINE Ctqmcoffdiag_setSweeps(op,sweeps)
 !  op%modGlobalMove(1) = op%thermalization / 10 + 1
 !  op%modGlobalMove(2) = 0
 
-END SUBROUTINE Ctqmcoffdiag_setSweeps
+END SUBROUTINE CtqmcoffdiagComplex_setSweeps
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_setSeed
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_setSeed
 !! NAME
-!!  Ctqmcoffdiag_setSeed
+!!  CtqmcoffdiagComplex_setSeed
 !!
 !! FUNCTION
 !!  initialize random number generator
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -617,10 +625,10 @@ END SUBROUTINE Ctqmcoffdiag_setSweeps
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_setSeed(op,iseed)
+SUBROUTINE CtqmcoffdiagComplex_setSeed(op,iseed)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT)           :: op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT)           :: op
   INTEGER  , INTENT(IN   )           :: iseed
 !Local variables ------------------------------
   !INTEGER                            :: n
@@ -638,18 +646,18 @@ SUBROUTINE Ctqmcoffdiag_setSeed(op,iseed)
 
   op%seed=INT(iseed+op%rank,8)
 
-END SUBROUTINE Ctqmcoffdiag_setSeed
+END SUBROUTINE CtqmcoffdiagComplex_setSeed
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_allocateAll
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_allocateAll
 !! NAME
-!!  Ctqmcoffdiag_allocateAll
+!!  CtqmcoffdiagComplex_allocateAll
 !!
 !! FUNCTION
 !!  Allocate all non option variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -665,15 +673,15 @@ END SUBROUTINE Ctqmcoffdiag_setSeed
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_allocateAll(op)
+SUBROUTINE CtqmcoffdiagComplex_allocateAll(op)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER                  :: flavors
 
   IF ( .NOT. op%para ) &
-    CALL ERROR("Ctqmcoffdiag_allocateAll : Ctqmcoffdiag_setParameters never called  ")
+    CALL ERROR("CtqmcoffdiagComplex_allocateAll : CtqmcoffdiagComplex_setParameters never called  ")
 
   flavors = op%flavors
 
@@ -681,12 +689,12 @@ SUBROUTINE Ctqmcoffdiag_allocateAll(op)
 !  number of electrons
   FREEIF(op%measN)
   MALLOC(op%measN,(1:4,1:flavors))
-  op%measN = 0.d0
+  op%measN = cmplx(0.d0,0.d0,kind=8)
 
-!  double occupancies
+!  double occupancies 
   FREEIF(op%measDE)
   MALLOC(op%measDE,(1:flavors,1:flavors) )
-  op%measDE = 0.d0
+  op%measDE = real(cmplx(0.d0,0.d0,kind=8))
 
   FREEIF(op%mu)
 #ifdef FC_LLVM
@@ -704,19 +712,19 @@ SUBROUTINE Ctqmcoffdiag_allocateAll(op)
   MALLOC(op%hybri_limit, (flavors,flavors))
 #endif
   op%hybri_limit = czero
-END SUBROUTINE Ctqmcoffdiag_allocateAll
+END SUBROUTINE CtqmcoffdiagComplex_allocateAll
 !!***
 
-!#ifdef CTCtqmcoffdiag_ANALYSIS
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_allocateOpt
+!#ifdef CTCtqmcoffdiagComplex_ANALYSIS
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_allocateOpt
 !! NAME
-!!  Ctqmcoffdiag_allocateOpt
+!!  CtqmcoffdiagComplex_allocateOpt
 !!
 !! FUNCTION
-!!  allocate all option variables
+!!  allocate all option variables 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -732,17 +740,17 @@ END SUBROUTINE Ctqmcoffdiag_allocateAll
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_allocateOpt(op)
+SUBROUTINE CtqmcoffdiagComplex_allocateOpt(op)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER :: i
   INTEGER :: j
   INTEGER :: k
 
   IF ( .NOT. op%para ) &
-    CALL ERROR("Ctqmcoffdiag_allocateOpt : Ctqmcoffdiag_setParameters never called  ")
+    CALL ERROR("CtqmcoffdiagComplex_allocateOpt : CtqmcoffdiagComplex_setParameters never called  ")
 
   IF ( op%opt_analysis .EQ. 1 ) THEN
     FREEIF(op%measCorrelation)
@@ -820,13 +828,13 @@ SUBROUTINE Ctqmcoffdiag_allocateOpt(op)
 
   END IF
 !#endif
-END SUBROUTINE Ctqmcoffdiag_allocateOpt
+END SUBROUTINE CtqmcoffdiagComplex_allocateOpt
 !!***
 
-!SUBROUTINE Ctqmcoffdiag_setG0wFile(op,istream,opt_fk)
+!SUBROUTINE CtqmcoffdiagComplex_setG0wFile(op,istream,opt_fk)
 !include 'mpif.h'
 !#endif
-!  TYPE(Ctqmcoffdiag), INTENT(INOUT)                      :: op
+!  TYPE(CtqmcoffdiagComplex), INTENT(INOUT)                      :: op
 !  INTEGER  , INTENT(IN   )                      :: istream
 !  INTEGER                         , INTENT(IN ) :: opt_fk
 !!  DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE :: F
@@ -840,7 +848,7 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 !#endif
 !
 !  IF ( .NOT. op%para ) &
-!    CALL ERROR("Ctqmcoffdiag_setG0wFile : Ctqmcoffdiag_setParameters never called   ")
+!    CALL ERROR("CtqmcoffdiagComplex_setG0wFile : CtqmcoffdiagComplex_setParameters never called   ") 
 !
 !  flavors = op%flavors
 !
@@ -870,8 +878,8 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 !!  CALL GreenHyboffdiag_print(temp)
 !!  CALL GreenHyboffdiag_forFourier (temp,Gomega(:,1))
 !!  WRITE(11,*) Gomega(:,1)
-!  CALL Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk)
-!!  CALL Ctqmcoffdiag_computeF(op,Gomega, op%Wmax, F) ! mu is changed
+!  CALL CtqmcoffdiagComplex_setG0wTab(op,Gomega,opt_fk)
+!!  CALL CtqmcoffdiagComplex_computeF(op,Gomega, op%Wmax, F) ! mu is changed
 !  FREE(Gomega)
 !!  CALL BathOperatoroffdiag_setF(op%Bath, F)
 !!  CALL BathOperatoroffdiag_printF(op%Bath)
@@ -879,20 +887,20 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 !
 !!  stop
 !!  op%inF = .TRUE.
-!!  op%set = .TRUE.
+!!  op%set = .TRUE. 
 !
-!END SUBROUTINE Ctqmcoffdiag_setG0wFile
+!END SUBROUTINE CtqmcoffdiagComplex_setG0wFile
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_setG0wTab
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_setG0wTab
 !! NAME
-!!  Ctqmcoffdiag_setG0wTab
+!!  CtqmcoffdiagComplex_setG0wTab
 !!
 !! FUNCTION
 !!  Set Gow from input array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -910,73 +918,74 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk,fname)
+SUBROUTINE CtqmcoffdiagComplex_setG0wTab(op,Gomega,opt_fk,Iatom,fname)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT)                      :: op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT)       :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN ) :: Gomega
-  INTEGER                         , INTENT(IN ) :: opt_fk
+  INTEGER                         , INTENT(IN )  :: opt_fk
+  INTEGER, INTENT(IN)                            :: Iatom
+  CHARACTER(LEN=fnlen), INTENT(INOUT)            :: fname
 !Local variable -------------------------------
-  CHARACTER(LEN=fnlen), INTENT(INOUT)             :: fname
-  DOUBLE PRECISION, DIMENSION(:,:,:), ALLOCATABLE :: F
+  COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE :: F
 
   IF ( .NOT. op%para ) &
-    CALL ERROR("Ctqmcoffdiag_setG0wTab : Ctqmcoffdiag_setParameters never called    ")
+    CALL ERROR("CtqmcoffdiagComplex_setG0wTab : CtqmcoffdiagComplex_setParameters never called    ") 
 
   MALLOC(F,(1:op%samples+1,1:op%flavors,1:op%flavors))
-  CALL Ctqmcoffdiag_computeF(op,Gomega, F, opt_fk,fname)  ! mu is changed
+  CALL CtqmcoffdiagComplex_computeF(op,Gomega, F, opt_fk,Iatom,fname)  ! mu is changed
  !write(6,*) "eee111"
-  CALL BathOperatoroffdiag_setF(op%Bath, F)
+  CALL BathOperatoroffdiagComplex_setF(op%Bath, F)
  ! CALL BathOperatoroffdiag_printF(op%Bath,333)
  !write(6,*) "eee"
   FREE(F)
 
   op%inF = .TRUE.
-  op%set = .TRUE.
+  op%set = .TRUE. 
 
-END SUBROUTINE Ctqmcoffdiag_setG0wTab
+END SUBROUTINE CtqmcoffdiagComplex_setG0wTab
 !!***
 
-!SUBROUTINE Ctqmcoffdiag_setFwK(op,Gomega)
+!SUBROUTINE CtqmcoffdiagComplex_setFwK(op,Gomega)
 !  COMPLEX*16      , DIMENSION(:,:), INTENT(IN ) :: Gomega
 !  DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE :: F
 !
 !  IF ( .NOT. op%para ) &
-!    CALL ERROR("Ctqmcoffdiag_setG0wTab : Ctqmcoffdiag_setParameters never called    ")
+!    CALL ERROR("CtqmcoffdiagComplex_setG0wTab : CtqmcoffdiagComplex_setParameters never called    ") 
 !
 !  MALLOC(F,(1:op%samples+1,1:op%flavors))
-!  CALL Ctqmcoffdiag_computeFK(op,Gomega, op%Wmax, F)  ! mu is changed
+!  CALL CtqmcoffdiagComplex_computeFK(op,Gomega, op%Wmax, F)  ! mu is changed
 !  CALL BathOperatoroffdiag_setF(op%Bath, F)
 !  CALL BathOperatoroffdiag_printF(op%Bath)
 !  FREE(F)
 !
 !  op%inF = .TRUE.
-!  op%set = .TRUE.
+!  op%set = .TRUE. 
 !
-!END SUBROUTINE Ctqmcoffdiag_setFwK
+!END SUBROUTINE CtqmcoffdiagComplex_setFwK
 !!***
 
-!SUBROUTINE Ctqmcoffdiag_setBand(op, mu, U)
+!SUBROUTINE CtqmcoffdiagComplex_setBand(op, mu, U)
 !  DOUBLE PRECISION, INTENT(IN   ) :: mu
 !  DOUBLE PRECISION, INTENT(IN   ) :: U
 !
 !  IF ( .NOT. op%para ) &
-!    CALL ERROR("Ctqmcoffdiag_setBand : Ctqmcoffdiag_setParameters never called      ")
+!    CALL ERROR("CtqmcoffdiagComplex_setBand : CtqmcoffdiagComplex_setParameters never called      ")
 !
 !  CALL ImpurityOperator_setU(op%Impurity, U, 0.d0)
 !  !op%mu = mu + op%Impurity%shift_mu
-!END SUBROUTINE Ctqmcoffdiag_setBand
+!END SUBROUTINE CtqmcoffdiagComplex_setBand
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_setU
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_setU
 !! NAME
-!!  Ctqmcoffdiag_setU
+!!  CtqmcoffdiagComplex_setU
 !!
 !! FUNCTION
 !!  set the interaction matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -993,30 +1002,30 @@ END SUBROUTINE Ctqmcoffdiag_setG0wTab
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_setU(op,matU)
+SUBROUTINE CtqmcoffdiagComplex_setU(op,matU)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT) ::op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT) ::op
 !Local variables ------------------------------
-  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: matU
+ COMPLEX(KIND=8), DIMENSION(:,:), INTENT(IN) :: matU
 
   IF ( SIZE(matU) .NE. op%flavors*op%flavors ) &
-    CALL ERROR("Ctqmcoffdiag_setU : Wrong interaction matrix (size)        ")
+    CALL ERROR("CtqmcoffdiagComplex_setU : Wrong interaction matrix (size)        ")
 
-  CALL ImpurityOperator_setUmat(op%Impurity, matU)
+  CALL ImpurityOperator_setUmatComplex(op%Impurity, matU)
   op%setU = .TRUE.
-END SUBROUTINE Ctqmcoffdiag_setU
+END SUBROUTINE CtqmcoffdiagComplex_setU
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_clear
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_clear
 !! NAME
-!!  Ctqmcoffdiag_clear
+!!  CtqmcoffdiagComplex_clear
 !!
 !! FUNCTION
 !!  clear a ctqmc run
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1032,20 +1041,20 @@ END SUBROUTINE Ctqmcoffdiag_setU
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_clear(op)
+SUBROUTINE CtqmcoffdiagComplex_clear(op)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER :: i
   INTEGER :: j
   INTEGER :: k
 
-  op%measN(1,:) = 0.d0
-  op%measN(2,:) = 0.d0
+  op%measN(1,:) = cmplx(0.d0,0.d0,kind=8)
+  op%measN(2,:) = cmplx(0.d0,0.d0,kind=8)
   !Do not set measN(3,:) to 0 to avoid erasing N between therm and ctqmc
-  op%measN(4,:) = 0.d0
-  op%measDE = 0.d0
+  op%measN(4,:) = cmplx(0.d0,0.d0,kind=8)
+  op%measDE = real(cmplx(0.d0,0.d0,kind=8))
 !  op%seg_added    = 0.d0
 !  op%anti_added   = 0.d0
 !  op%seg_removed  = 0.d0
@@ -1057,17 +1066,17 @@ SUBROUTINE Ctqmcoffdiag_clear(op)
 !  op%signvaluemeas    = 0.d0
   op%swap         = 0.d0
   op%runTime      = 0.d0
-  op%modGlobalMove(2) = 0
+  op%modGlobalMove(2) = 0 
   CALL Vector_clear(op%measNoise(1))
   CALL Vector_clear(op%measNoise(2))
-!#ifdef CTCtqmcoffdiag_CHECK
+!#ifdef CTCtqmcoffdiagComplex_CHECK
   op%errorImpurity = 0.d0
   op%errorBath     = 0.d0
 !#endif
-  CALL GreenHyboffdiag_clear(op%Greens)
-!#ifdef CTCtqmcoffdiag_ANALYSIS
-  IF ( op%opt_analysis .EQ. 1 .AND. ALLOCATED(op%measCorrelation) ) &
-    op%measCorrelation = 0.d0
+  CALL GreenHyboffdiagComplex_clear(op%Greens)
+!#ifdef CTCtqmcoffdiagComplex_ANALYSIS
+  IF ( op%opt_analysis .EQ. 1 .AND. ALLOCATED(op%measCorrelation) ) &    
+    op%measCorrelation = 0.d0 
   IF ( op%opt_order .GT. 0 .AND. ALLOCATED(op%measPerturbation) ) &
     op%measPerturbation = 0.d0
   IF ( op%opt_order .GT. 0 .AND. ALLOCATED(op%meas_fullemptylines) ) &
@@ -1085,18 +1094,18 @@ SUBROUTINE Ctqmcoffdiag_clear(op)
     !END DO
   END IF
 !#endif
-END SUBROUTINE Ctqmcoffdiag_clear
+END SUBROUTINE CtqmcoffdiagComplex_clear
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_reset
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_reset
 !! NAME
-!!  Ctqmcoffdiag_reset
+!!  CtqmcoffdiagComplex_reset
 !!
 !! FUNCTION
 !!  reset a ctqmc simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1112,19 +1121,19 @@ END SUBROUTINE Ctqmcoffdiag_clear
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_reset(op)
+SUBROUTINE CtqmcoffdiagComplex_reset(op)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT) :: op
 !Local variables ------------------------------
   !INTEGER                  :: iflavor
   DOUBLE PRECISION         :: sweeps
 
-  CALL GreenHyboffdiag_reset(op%Greens)
-  CALL Ctqmcoffdiag_clear(op)
+  CALL GreenHyboffdiagComplex_reset(op%Greens)
+  CALL CtqmcoffdiagComplex_clear(op)
   CALL ImpurityOperator_reset(op%Impurity)
-  CALL BathOperatoroffdiag_reset    (op%Bath)
-  op%measN(3,:) = 0.d0
+  CALL BathOperatoroffdiagComplex_reset    (op%Bath)
+  op%measN(3,:) = cmplx(0.d0,0.d0,kind=8)
   !complete restart -> measN=0
   op%done = .FALSE.
   op%set  = .FALSE.
@@ -1137,25 +1146,25 @@ SUBROUTINE Ctqmcoffdiag_reset(op)
   op%opt_spectra = 0
   op%opt_levels = 0
   sweeps = DBLE(op%sweeps)*DBLE(op%size)
-  CALL Ctqmcoffdiag_setSweeps(op, sweeps)
+  CALL CtqmcoffdiagComplex_setSweeps(op, sweeps)
 !#ifdef HAVE_MPI
 !  CALL MPI_BARRIER(op%MY_COMM,iflavor)
 !  IF ( op%rank .EQ. 0 ) &
 !#endif
 !  WRITE(op%ostream,'(A9)') "QMC reset"
 !  CALL FLUSH(op%ostream)
-END SUBROUTINE Ctqmcoffdiag_reset
+END SUBROUTINE CtqmcoffdiagComplex_reset
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_setMu
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_setMu
 !! NAME
-!!  Ctqmcoffdiag_setMu
+!!  CtqmcoffdiagComplex_setMu
 !!
 !! FUNCTION
 !!  impose energy levels
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1173,30 +1182,30 @@ END SUBROUTINE Ctqmcoffdiag_reset
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_setMu(op, levels)
+SUBROUTINE CtqmcoffdiagComplex_setMu(op, levels)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)                     , INTENT(INOUT) :: op
-  DOUBLE PRECISION, DIMENSION(:), INTENT(IN   ) :: levels
+  TYPE(CtqmcoffdiagComplex)                     , INTENT(INOUT) :: op
+  COMPLEX(KIND=8), DIMENSION(:), INTENT(IN ) :: levels
 
   IF ( op%flavors .NE. SIZE(levels,1) ) &
-    CALL WARNALL("Ctqmcoffdiag_setMu : Taking energy levels from weiss G(iw)")
+    CALL WARNALL("CtqmcoffdiagComplex_setMu : Taking energy levels from weiss G(iw)")
 
   op%mu(:)=-levels(:)  ! levels = \epsilon_j - \mu
   !op%mu =\tilde{\mu} = \mu -\epsilon_j
   op%opt_levels = 1
-END SUBROUTINE Ctqmcoffdiag_setMu
+END SUBROUTINE CtqmcoffdiagComplex_setMu
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_sethybri_limit
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_sethybri_limit
 !! NAME
-!!  Ctqmcoffdiag_sethybri_limit
+!!  CtqmcoffdiagComplex_sethybri_limit
 !!
 !! FUNCTION
 !!  use coefficient A such that F=-A/(iwn) given by DMFT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1208,34 +1217,35 @@ END SUBROUTINE Ctqmcoffdiag_setMu
 !!  argout(sizeout)=description
 !!
 !! SIDE EFFECTS
-!!  op(Ctqmcoffdiag_type) = is the ctqmc main variable
+!!  op(CtqmcoffdiagComplex_type) = is the ctqmc main variable
 !!           op&limit is now filled
 !! NOTES
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_sethybri_limit(op, hybri_limit)
+SUBROUTINE CtqmcoffdiagComplex_sethybri_limit(op, hybri_limit,opthybri)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)                     , INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagComplex)                     , INTENT(INOUT) :: op
   COMPLEX(KIND=8) , DIMENSION(:,:),  INTENT(IN ) :: hybri_limit
-
+  INTEGER, INTENT(IN)   :: opthybri
+!----------------------------------------------  
   IF ( op%flavors .NE. SIZE(hybri_limit,1) ) &
     CALL ERROR("Error in sethybri_limit")
 
-  op%hybri_limit(:,:)=hybri_limit(:,:)
-  op%opt_hybri_limit = 1
-END SUBROUTINE Ctqmcoffdiag_sethybri_limit
+  op%hybri_limit(:,:)=hybri_limit(:,:)  
+  op%opt_hybri_limit = opthybri
+END SUBROUTINE CtqmcoffdiagComplex_sethybri_limit
 !!***
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_computeF
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_computeF
 !! NAME
-!!  Ctqmcoffdiag_computeF
+!!  CtqmcoffdiagComplex_computeF
 !!
 !! FUNCTION
 !!  Compute the hybridization function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1254,33 +1264,38 @@ END SUBROUTINE Ctqmcoffdiag_sethybri_limit
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk,fname)
+SUBROUTINE CtqmcoffdiagComplex_computeF(op, Gomega, F, opt_fk,Iatom,fname)
 
  use m_hide_lapack,  only : xginv
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)                       , INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagComplex)        , INTENT(INOUT) :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN   ) :: Gomega
   !INTEGER                         , INTENT(IN   ) :: Wmax
-  DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(INOUT) :: F
-  INTEGER                         , INTENT(IN   ) :: opt_fk
-  CHARACTER(LEN=fnlen), INTENT(INOUT)             :: fname
+  COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(INOUT) :: F
+  INTEGER                          , INTENT(IN   ) :: opt_fk
+  INTEGER, INTENT(IN)                              :: Iatom
+  CHARACTER(LEN=fnlen), INTENT(INOUT)              :: fname
 !Local variables ------------------------------
   INTEGER                                         :: flavors
   INTEGER                                         :: samples
-  INTEGER                                         :: iflavor,ifl
+  INTEGER                                         :: iflavor
   INTEGER                                         :: iflavor2
   INTEGER                                         :: iomega
-  INTEGER                                         :: itau
+  INTEGER                                         :: itau,ioerr,debug
   DOUBLE PRECISION                                :: pi_invBeta
-  DOUBLE PRECISION                                :: K
+  COMPLEX(KIND=8)                                 :: K
   !DOUBLE PRECISION                                :: re
   !DOUBLE PRECISION                                :: im
   !DOUBLE PRECISION                                :: det
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: F_omega
   COMPLEX(KIND=8), DIMENSION(:,:), ALLOCATABLE   :: F_omega_inv
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: Gomega_tmp
-  TYPE(GreenHyboffdiag)                                     :: F_tmp
-  !character(len=4) :: tag_proc
+  TYPE(GreenHyboffdiagComplex)                     :: F_tmp
+  CHARACTER(LEN=200) :: message
+  character(len=2) :: atomnb
+  DOUBLE PRECISION, allocatable :: x_r(:,:,:), x_i(:,:,:)
+  CHARACTER(LEN=256) :: dummy
+  DOUBLE PRECISION    :: tautemp
   !character(len=30) :: tmpfil
   !INTEGER :: unitnb
 
@@ -1291,14 +1306,16 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk,fname)
   samples    = op%samples
   pi_invBeta = ACOS(-1.d0) / op%beta
   op%Wmax=SIZE(Gomega,1)
-!sui!write(std_out,*) "op%Wmax",op%Wmax
+
+  debug = 0 !set to one to build G0
+
   !=================================
-  ! --- Initialize F_tmp
+  ! --- Initialize F_tmp 
   !=================================
   IF ( op%have_MPI .EQV. .TRUE. ) THEN
-    CALL GreenHyboffdiag_init(F_tmp,samples,op%beta,flavors,MY_COMM=op%MY_COMM)
+    CALL GreenHyboffdiagComplex_init(F_tmp,samples,op%beta,flavors,MY_COMM=op%MY_COMM)
   ELSE
-    CALL GreenHyboffdiag_init(F_tmp,samples,op%beta,flavors)
+    CALL GreenHyboffdiagComplex_init(F_tmp,samples,op%beta,flavors)
   END IF
 !  K = op%mu
 
@@ -1308,178 +1325,108 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk,fname)
   MALLOC(F_omega,(1:op%Wmax,1:flavors,1:flavors))
   MALLOC(F_omega_inv,(1:flavors,1:flavors))
   MALLOC(Gomega_tmp,(1:op%Wmax,1:flavors,1:flavors))
-  !op%hybri_limit(2,2)=op%hybri_limit(1,1)
-  !op%mu(1)=op%mu(1)/10
-  !op%mu(2)=op%mu(1)
-  DO iomega=1,op%Wmax
-    do iflavor=1,flavors
-      do iflavor2=1,flavors
-       ! Gomega_tmp(iomega,iflavor,iflavor2)=op%hybri_limit(iflavor,iflavor2)/(cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta))/3.d0
-      enddo
-    enddo
-  END DO
   Gomega_tmp=Gomega
 
-  !IF ( op%rank .EQ. 0 ) &
-    !OPEN(UNIT=9876,FILE="K.dat",POSITION="APPEND")
 
-  !=============================================================================================
-  ! --- Compute Bath Green's function from Hybridization function in imaginary time
-  !=============================================================================================
-  !IF ( opt_fk .EQ. 0 ) THEN
-   IF ( op%rank .EQ. 0 ) THEN
-   !  DO iflavor = 1, flavors
-   !    DO iflavor2 = 1, flavors
-   !        write(330,*) "#",iflavor,iflavor2
-   !        write(331,*) "#",iflavor,iflavor2
-   !      do  iomega=1,op%Wmax
-   !        write(330,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(Gomega_tmp(iomega,iflavor,iflavor2))
-   !        write(331,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(Gomega_tmp(iomega,iflavor,iflavor2))
-   !      enddo
-   !        write(330,*)
-   !        write(331,*)
-   !    END DO
-   !  END DO
-   ENDIF
-     DO iomega=1,op%Wmax
-     !  be careful...here
-     ! Gomega in input is Fomega and
-     ! F_omega is   Gomega.
-     ! COMPUTE G0 FROM F
-       do iflavor=1,flavors
-         do iflavor2=1,flavors
-           if (iflavor==iflavor2) then
-             F_omega_inv(iflavor,iflavor2)= (cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta,kind=8) &
-&             + op%mu(iflavor)- Gomega_tmp(iomega,iflavor,iflavor2))
-           else
-             F_omega_inv(iflavor,iflavor2)= (- Gomega_tmp(iomega,iflavor,iflavor2))
-           endif
-         enddo
-       enddo
-  !   END DO
-  ! IF ( op%rank .EQ. 0 ) THEN
-  !   DO iflavor = 1, flavors
-  !     DO iflavor2 = 1, flavors
-  !         write(334,*) "#",iflavor,iflavor2
-  !         write(335,*) "#",iflavor,iflavor2
-  !       do  iomega=1,op%Wmax
-  !         write(334,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_omega(iomega,iflavor,iflavor2))
-  !         write(335,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(F_omega(iomega,iflavor,iflavor2))
-  !       enddo
-  !         write(334,*)
-  !         write(335,*)
-  !     END DO
-  !   END DO
-  ! ENDIF
+  !This section of the code is not used / Only building G0 so just skip it
+  if(debug == 1) then
+    !=============================================================================================
+    ! --- Compute Bath Green's function from Hybridization function in imaginary time
+    !=============================================================================================
+    ! In the following we want to get G_0(iw_n) from F(iw_n).
+    ! Be careful : G_0 is called F and F is called G_0 (Why ????)
+    !-----------------------------------------------------------
+    ! G_0(iw_n)^-1 = iw_n + mu - F(iw_n)
+    !-----------------------------------
+    do iomega=1,op%Wmax
+      do iflavor=1,flavors
+        do iflavor2=1,flavors
+          if (iflavor==iflavor2) then
+            F_omega_inv(iflavor,iflavor2)= (cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta,kind=8) &
+  &          + op%mu(iflavor)- Gomega_tmp(iomega,iflavor,iflavor2))
+          else
+            F_omega_inv(iflavor,iflavor2)= (- Gomega_tmp(iomega,iflavor,iflavor2))
+          endif
+        enddo
+      enddo
 
-  !   DO iomega=1,op%Wmax
-       call xginv(F_omega_inv,flavors)
-       do iflavor=1,flavors
-         do iflavor2=1,flavors
-           F_omega(iomega,iflavor,iflavor2) = F_omega_inv(iflavor,iflavor2)
-         enddo
-       enddo
-     END DO
+      !Inverse of G_0(iw_n)^-1 to get G_0(iw_n)
+      !--------------------
+      call xginv(F_omega_inv,flavors)
 
-   !IF ( op%rank .EQ. 0 ) THEN
-   !  DO iflavor = 1, flavors
-   !    DO iflavor2 = 1, flavors
-   !        write(332,*) "#",iflavor,iflavor2
-   !        write(333,*) "#",iflavor,iflavor2
-   !      do  iomega=1,op%Wmax
-   !        write(332,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_omega(iomega,iflavor,iflavor2))
-   !        write(333,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(F_omega(iomega,iflavor,iflavor2))
-   !      enddo
-   !        write(332,*)
-   !        write(333,*)
-   !    END DO
-   !  END DO
-   !ENDIF
-     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     !  for test: Fourier of G0(iwn)
-     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   !sui!write(std_out,*) "opt_fk=0"
-     CALL GreenHyboffdiag_setOperW(F_tmp,F_omega)
-  ! IF ( op%rank .EQ. 0 ) THEN
-  !    DO iflavor = 1, flavors
-  !      DO iflavor2 = 1, flavors
-  !          write(336,*) "#",iflavor,iflavor2
-  !          write(337,*) "#",iflavor,iflavor2
-  !        do  iomega=1,op%Wmax
-  !          write(336,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_tmp%oper_w(iomega,iflavor,iflavor2))
-  !          write(337,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(F_tmp%oper_w(iomega,iflavor,iflavor2))
-  !        enddo
-  !          write(336,*)
-  !          write(337,*)
-  !      END DO
-  !    END DO
-  !  ENDIF
-     CALL GreenHyboffdiag_backFourier(F_tmp,func="green")
-     ! --- Put the result in F
-     DO iflavor = 1, flavors
-       DO iflavor2 = 1, flavors
-         DO itau=1,samples+1
-         F(itau,iflavor,iflavor2) = F_tmp%oper(itau,iflavor,iflavor2)
-         END DO
-       END DO
-     END DO
-     !IF ( op%rank .EQ. 0 ) THEN
-     !  DO iflavor = 1, flavors
-     !    DO iflavor2 = 1, flavors
-     !        write(346,*) "#",iflavor,iflavor2
-     !      do  itau=1,op%samples+1
-     !        write(346,*) (itau-1)*op%beta/(op%samples),real(F(itau,iflavor,iflavor2))
-     !      enddo
-     !        write(346,*)
-     !    END DO
-     !  END DO
-     !ENDIF
-     DO iflavor = 1, flavors
-       DO iflavor2 = 1, flavors
-         DO itau=1,samples+1
-!         This symetrization is general and valid even with SOC
-!         Without SOC, it leads to zero.
-         F(itau,iflavor,iflavor2) = (F_tmp%oper(itau,iflavor,iflavor2)+F_tmp%oper(itau,iflavor2,iflavor))/2.d0
-         END DO
-       END DO
-     END DO
-     open (unit=4367,file='G0tau_fromF',status='unknown',form='formatted')
-     rewind(4367)
-     IF ( op%rank .EQ. 0 ) THEN
-       DO iflavor = 1, flavors
-         DO iflavor2 = 1, flavors
-             write(4367,*) "#",iflavor,iflavor2
-           do  itau=1,op%samples+1
-             write(4367,*) (itau-1)*op%beta/(op%samples),F(itau,iflavor,iflavor2)
-           enddo
-             write(4367,*)
-         END DO
-       !sui!write(std_out,'(5x,14(2f9.5,2x))') (F(op%samples+1,iflavor,iflavor2),iflavor2=1,flavors)
-       END DO
-     ENDIF
-     !call flush(437)
-     close(4367)
-     !call flush(6)
+      do iflavor=1,flavors
+        do iflavor2=1,flavors
+          F_omega(iomega,iflavor,iflavor2) = F_omega_inv(iflavor,iflavor2)
+        enddo
+      enddo
+    enddo !iomega
 
-     call xmpi_barrier(op%MY_COMM)
-     !CALL ERROR("END OF CALCULATION")
-     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     !  END OF TEST
-     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    CALL GreenHyboffdiagComplex_setOperW(F_tmp,F_omega)
+     
+    CALL GreenHyboffdiagComplex_backFourier(F_tmp,func="green")
 
-     !DO iomega=1,op%Wmax
-     !  call xginv(F_omega(iomega,:,:),flavors)
-     !END DO
-    !F_omega = CMPLX(-1.d0,0,8)/Gomega_tmp
-  !ELSE
+    !Put the result in F(tau) aka G_0(tau).
+    !--------------------------------------
+    DO iflavor = 1, flavors                                                                                                        
+      DO iflavor2 = 1, flavors                                                                                                     
+        DO itau=1,samples+1                                                                                                        
+  !     This symetrization is general and valid even with SOC                                                                     
+  !     Without SOC, it is useless ?                                                                                              
+        F(itau,iflavor,iflavor2) = (        F_tmp%oper(itau,iflavor,iflavor2)   +         &                                        
+   &                                  dconjg(F_tmp%oper(itau,iflavor2,iflavor))   )/2.d0                                           
+        END DO                                                                                                                     
+      END DO                                                                                                                       
+    END DO                                                                                                                         
+ 
+    !Print G_0(tau) in file
+    !------------------------
+    !Real part
+    open (unit=4367,file='G0tau_fromF_Re',status='unknown',form='formatted')
+    rewind(4367)
+    IF ( op%rank .EQ. 0 ) THEN
+      DO iflavor = 1, flavors
+        DO iflavor2 = 1, flavors
+          write(4367,*) "#",iflavor,iflavor2
+          do  itau=1,op%samples+1
+            write(4367,*) (itau-1)*op%beta/(op%samples),real(F(itau,iflavor,iflavor2))
+          enddo
+          write(4367,*) 
+        END DO
+      END DO
+    ENDIF
+    !call flush(4367) nag compiler problrem
+    close(4367)
+
+    !Imag part
+    open (unit=4367,file='G0tau_fromF_Im',status='unknown',form='formatted')                               
+    rewind(4367)                                                                                           
+    IF ( op%rank .EQ. 0 ) THEN                                                                             
+      DO iflavor = 1, flavors                                                                              
+        DO iflavor2 = 1, flavors                                                                           
+          write(4367,*) "#",iflavor,iflavor2                                                             
+          do  itau=1,op%samples+1                                                                          
+            write(4367,*) (itau-1)*op%beta/(op%samples),aimag(F(itau,iflavor,iflavor2))                     
+          enddo                                                                                            
+          write(4367,*)                                                                                  
+        END DO                                                                                             
+      END DO                                                                                               
+    ENDIF   
+    !call flush(4367) !nag compiler problem                                                                                              
+    close(4367)                                                                                            
+  
+  endif  ! end of building G0
+
+  call xmpi_barrier(op%MY_COMM)
+
   !=============================================================================================
   ! --- Restore Hybridization in F_omega
   !=============================================================================================
 
-!   Restore Hybridization in F_omega for the following operations
+  ! Restore Hybridization in F_omega for the following operations
   F_omega = Gomega_tmp
-  !END IF
-
+  ! From now F_omega is actually F(iw_n) calculated in m_forctqmc.f90
+  ! and corresponding to F(iw_n) = -[G_0(iw_n^-1 - iwn - levels)]
+  
   !==================================================================
   ! --- Full double loop on flavors to compute F (remove levels)
   !==================================================================
@@ -1491,115 +1438,36 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk,fname)
         IF ( op%opt_levels .EQ. 1 ) THEN
           K = op%mu(iflavor)
         ELSE
-          K = -REAL(F_omega(op%Wmax, iflavor,iflavor))
-!        op%mu = K
-          op%mu(iflavor) = K
+          K = -(F_omega(op%Wmax,iflavor,iflavor)) 
+          op%mu(iflavor) = K 
         END IF
       ELSE
-        K=0.d0
+        K=cmplx(0.d0,0.d0,kind=8)
       ENDIF
-      !IF ( op%rank .EQ. 0 ) &
-      !WRITE(9876,'(I4,2E22.14)') iflavor, K, REAL(-F_omega(op%Wmax, iflavor))
-     ! IF(op%rank .EQ.0) &
-     ! WRITE(op%ostream,*) "CTQMC K, op%mu = ",K,op%mu(iflavor)
-      !WRITE(op%ostream,*) "CTQMC beta     = ",op%beta
 
-  ! --- Compute F (by removing the levels) if opt_fk==0
-    !  IF ( opt_fk .EQ. 0 ) THEN
-    !   ! DO iomega = 1, op%Wmax
-    !   !   re = REAL(F_omega(iomega,iflavor,iflavor2))
-    !   !   im = AIMAG(F_omega(iomega,iflavor,iflavor2))
-    !   !   if (iflavor==iflavor2) then
-    !   !     F_omega(iomega,iflavor,iflavor) = CMPLX(re + K, im + (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, 8)
-    !   !   else
-    !   !     F_omega(iomega,iflavor,iflavor2) = CMPLX(re , im  , 8)
-    !   !   endif
-    !   !   !if(iflavor==1.and.op%rank==0) then
-    !   !     !write(224,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(F_omega(iomega,iflavor)),imag(F_omega(iomega,iflavor))
-    !   !     !write(225,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(Gomega_tmp(iomega, iflavor)),imag(Gomega_tmp(iomega, iflavor))
-    !   !   !end if
-    !   ! END DO
-    !  ELSE
-    !    DO iomega = 1, op%Wmax
-    !      !F_omega(iomega,iflavor,iflavor2) = F_omega(iomega,iflavor,iflavor2) + CMPLX(K, 0.d0, 8)
-
-
-    !      !if(iflavor==1.and.op%rank==0) then
-    !        !write(224,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(F_omega(iomega,iflavor)),imag(F_omega(iomega,iflavor))
-    !        !write(225,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(Gomega_tmp(iomega, iflavor)),imag(Gomega_tmp(iomega, iflavor))
-    !      !end if
-    !    END DO
-    !  END IF
   ! --- compute residual K (?)
-      K = REAL(CMPLX(0,(2.d0*DBLE(op%Wmax)-1.d0)*pi_invBeta,8)*F_omega(op%Wmax,iflavor,iflavor2))
-      CALL GreenHyboffdiag_setMuD1(op%Greens,iflavor,iflavor2,op%mu(iflavor),K)
+  ! K corresponds to the first moment of hybridization (d1 in setMuD1)
+  ! ------------------------------------------------------------------
+      K = CMPLX(0,(2.d0*DBLE(op%Wmax)-1.d0)*pi_invBeta,8)*F_omega(op%Wmax,iflavor,iflavor2)
+      CALL GreenHyboffdiagComplex_setMuD1(op%Greens,iflavor,iflavor2,op%mu(iflavor),K)
     END DO
   END DO
 
-  do  iomega=1,op%Wmax
-   ! write(336,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_omega(iomega,1,1)),imag(F_omega(iomega,1,1))
-  enddo
-
   ! --- Creates F_tmp%oper_w
-  CALL GreenHyboffdiag_setOperW(F_tmp,F_omega)
- ! do  iflavor=1, flavors ; do  iflavor2=1, flavors ; write(337,*) "#",iflavor,iflavor2 ; do  iomega=1,op%Wmax
- !   write(337,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_tmp%oper_w(iomega,iflavor,iflavor2)),&
- !&   imag(F_tmp%oper_w(iomega,iflavor,iflavor2))
- ! enddo ; write(337,*) ; enddo ; enddo
-!  IF ( op%rank .EQ. 0 ) THEN
-!    DO iflavor = 1, flavors
-!      DO iflavor2 = 1, flavors
-!        write(336,*) "#",iflavor,iflavor2
-!        write(337,*) "#",iflavor,iflavor2
-!        do  iomega=1,op%Wmax
-!          write(336,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_tmp%oper_w(iomega,iflavor,iflavor2))
-!          write(337,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(F_tmp%oper_w(iomega,iflavor,iflavor2))
-!        enddo
-!        write(336,*)
-!        write(337,*)
-!        write(136,*) "#",iflavor,iflavor2
-!        write(137,*) "#",iflavor,iflavor2
-!        do  iomega=1,op%Wmax
-!        write(136,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_tmp%oper_w(iomega,iflavor,iflavor2)-op%hybri_limit(iflavor,iflavor2)/(cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta,kind=8)))
-!        write(137,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(F_tmp%oper_w(iomega,iflavor,iflavor2)-op%hybri_limit(iflavor,iflavor2)/(cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta,kind=8)))
-!        enddo
-!        write(136,*)
-!        write(137,*)
-!        write(836,*) "#",iflavor,iflavor2
-!        write(837,*) "#",iflavor,iflavor2
-!        do  iomega=1,op%Wmax
-!        write(836,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(op%hybri_limit(iflavor,iflavor2)/(cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta)))
-!        write(837,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,imag(op%hybri_limit(iflavor,iflavor2)/(cmplx(0.d0,(2.d0*DBLE(iomega)-1.d0) * pi_invBeta)))
-!        enddo
-!        write(836,*)
-!        write(837,*)
-!      END DO
-!    END DO
-!  ENDIF
-  !CALL GreenHyboffdiag_backFourier(F_tmp,F_omega(:,iflavor))
-   ! DO iflavor = 1, flavors
-   !   DO iflavor2 = 1, flavors
-   !   unitnb=80000+F_tmp%rank
-   !   call int2char4(F_tmp%rank,tag_proc)
-   !   tmpfil = 'oper_wavantFOURIER'//tag_proc
-   !   open (unit=unitnb,file=trim(tmpfil),status='unknown',form='formatted')
-   !   write(unitnb,*) "#",iflavor,iflavor2
-   !   ! C_omega et oper_w differents Domega identique. Est ce du a des
-   !   ! diago differentes   pour chaque procs dans qmc_prep_ctqmc
-   !   do  iomega=1,F_tmp%Wmax
-   !   write(unitnb,*)  (2.d0*DBLE(iomega)-1.d0) * pi_invBeta,real(F_tmp%oper_w(iomega,iflavor,iflavor2))
-   !   enddo
-   !   write(unitnb,*)
-   !   END DO
-   ! END DO
-
-  ! --- For all iflavor and iflavor2, do the Fourier transformation to
-  ! --- have (F(\tau))
-  !CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=op%opt_hybri_limit)
-   write(std_out,*) "WARNING opt_hybri_limit==0"
-  CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=0)
-!  CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=1)
- ! CALL GreenHyboffdiag_backFourier(F_tmp)
+  CALL GreenHyboffdiagComplex_setOperW(F_tmp,F_omega)
+  
+  ! For all iflavor and iflavor2, do the Fourier transformation to have F(tau)
+  ! ---------------------------------------------
+  if (op%opt_hybri_limit .eq. 0) then
+    write(message,'(a,a)') "   == Not using the asymptotic limit of hybridization to enforce F(iw_n) -> -C_ij/iw_n (dmft_hybri_limit = 0)", ch10
+  else
+  ! Take into account asymptotic limit of hybridization function such that F(iw_n) -> -C_ij/iw_n
+  ! with C_ij calculated in m_forctqmc.f90
+  ! --------------------------------------
+    write(message,'(a,a)') "   == Use asymptotic limit of hybridization function such that F(iw_n) -> -C_ij/iw_n (dmft_hybri_limit = 1)", ch10 
+  endif
+  CALL wrtout(std_out,message,'COLL')
+  CALL GreenHyboffdiagComplex_backFourierComplex(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=op%opt_hybri_limit)
 
   ! --- Put the result in F
   DO iflavor = 1, flavors
@@ -1609,74 +1477,77 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk,fname)
       END DO
     END DO
   END DO
-! IF ( op%rank .EQ. 0 ) THEN
-!   ifl=0
-!   DO iflavor = 1, flavors
-!     DO iflavor2 = 1, flavors
-!       ifl=ifl+1
-!       write(346,*) "#",iflavor,iflavor2,ifl
-!       do  itau=1,op%samples+1
-!         write(346,*) itau,real(F(itau,iflavor,iflavor2))
-!       enddo
-!       write(346,*)
-!     END DO
-!   END DO
-! ENDIF
-! close(346)
+  
   DO iflavor = 1, flavors
     DO iflavor2 = 1, flavors
       DO itau=1,samples+1
 !      This symetrization is general and valid even with SOC
 !      Without SOC, it leads to zero.
-      F(itau,iflavor,iflavor2) = -(F_tmp%oper(samples+2-itau,iflavor,iflavor2)+F_tmp%oper(samples+2-itau,iflavor2,iflavor))/2.d0
+       F(itau,iflavor,iflavor2) = -(        (F_tmp%oper(samples+2-itau,iflavor,iflavor2))   +         &     
+  &                                  dconjg(F_tmp%oper(samples+2-itau,iflavor2,iflavor))   )/2.d0         
       END DO
     END DO
   END DO
-  !DO iflavor = 1, flavors
-  !  DO iflavor2 = 1, flavors
-  !    DO itau=1,samples+1
-  !    F(itau,iflavor,iflavor2) = F(samples/2,iflavor,iflavor2)
-  !    END DO
-  !  END DO
-  !END DO
 
- !  SOME TRY TO ADJUST F
-  !DO iflavor = 1, flavors
-  !  DO iflavor2 = 1, flavors
-  !    do  itau=1,op%samples+1
-  !    !if(iflavor/=iflavor2) F(itau,iflavor,iflavor2)=F((op%samples+1)/2,iflavor,iflavor2)
-  !    !if(iflavor==iflavor2) F(itau,iflavor,iflavor2)=F((op%samples+1)/2,iflavor,iflavor2)
-  !    enddo
-  !  END DO
-  !END DO
-  !write(6,*) "QQQQ1",op%rank
-
-  open (unit=436,file='Hybridization.dat',status='unknown',form='formatted')
-  rewind(436)
-  IF ( op%rank .EQ. 0 ) THEN
-    ifl=0
-    DO iflavor = 1, flavors
-      DO iflavor2 = 1, flavors
-        ifl=ifl+1
-          write(436,*) "#",iflavor,iflavor2 !,ifl,op%hybri_limit(iflavor,iflavor2)
-        do  itau=1,op%samples+1
-          write(436,*) itau,F(itau,iflavor,iflavor2)
-        enddo
-          write(436,*)
+  !debug
+  if (3 .eq. 4) then
+    !== Read Hybridization function from file ==
+    !reset previous hybridization
+    write(message,'(a)') "Warning: About to read Hybridization from file!"
+    call wrtout(std_out,message,'COLL')
+    DO iflavor = 1, flavors             
+      DO iflavor2 = 1, flavors          
+        DO itau=1,samples+1             
+          F(itau,iflavor,iflavor2) = czero
+        END DO
       END DO
-    END DO
-  ENDIF
-  close(436)
-  
-  IF (op%rank .eq. 0) then
-    open(unit=735,file=trim(fname)//'_Hybridization_iatom_01.dat',status='unknown',form='formatted')
-    write(735,'(6a)') " Real and Imaginary part of the Hybridization function Delta(tau) in the CTQMC basis"
+    END DO  
+
+   if (op%rank .eq. 0 ) then
+     ABI_MALLOC(x_r,(op%samples+1,flavors,flavors))
+     ABI_MALLOC(x_i,(op%samples+1,flavors,flavors))     
+     open(unit=735,file='Hybridization.dat',status='old',form='formatted',action='read',iostat=ioerr)
+
+     read(735, '(a)') dummy
+
+     do itau=1, op%samples+1
+        read(735, '(2x,393(e25.17e3,2x))') tautemp, &
+                & ((x_r(itau,iflavor,iflavor2), x_i(itau,iflavor,iflavor2), iflavor=1, flavors), iflavor2=1, flavors)
+     end do
+     
+     close(735)
+
+     ! Now assign to F array (reverse the sign flip and time ordering)
+     do itau=1, op%samples+1
+        do iflavor=1, flavors
+           do iflavor2=1, flavors
+              F(op%samples+2-itau, iflavor, iflavor2) = &
+                      CMPLX(-x_r(itau,iflavor,iflavor2), -x_i(itau,iflavor,iflavor2), kind=8)
+           enddo
+        enddo
+     enddo
+   ABI_FREE(x_r)
+   ABI_FREE(x_i)  
+   endif  
+  end if ! end reading F from file
+
+  !== Write Hybridization function in file ==
+  If (Iatom .lt. 10) then
+     write(atomnb,'("0",i1)') Iatom
+  else
+     write(atomnb,'(i2)') Iatom
+  endif
+
+  IF ( op%rank .EQ. 0 ) THEN
+    open (unit=735,file=trim(fname)//'_Hybridization_iatom_'//atomnb//'.dat',status='unknown',form='formatted')      
+    write(735,'(6a)') "# Real and Imaginary part of the Hybridization function Delta(tau) in the CTQMC basis"
     do itau=1,op%samples+1
       write(735,'(2x,393(e25.17e3,2x))') DBLE(itau-1)*(op%beta/op%samples),&
-      & ((-1*(F(op%samples+2-itau,iflavor,iflavor2)),0.d0,iflavor=1,flavors),iflavor2=1,flavors)
-   enddo
-   close(735)
+              &((-1*real(F(op%samples+2-itau,iflavor,iflavor2)),-1*AIMAG(F(op%samples+2-itau,iflavor,iflavor2)),iflavor=1,flavors),iflavor2=1,flavors)
+    enddo
+    close(735)
   ENDIF
+
 
   !   call xmpi_barrier(op%MY_COMM)
   !write(6,*) "QQQQ3"
@@ -1684,14 +1555,14 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk,fname)
   FREE(F_omega)
   FREE(F_omega_inv)
   !write(6,*) "QQQQ4"
-  CALL GreenHyboffdiag_destroy(F_tmp)
+  CALL GreenHyboffdiagComplex_destroy(F_tmp)
   !write(6,*) "QQQQ2"
 
 
-END SUBROUTINE Ctqmcoffdiag_computeF
+END SUBROUTINE CtqmcoffdiagComplex_computeF
 !!***
 
-!SUBROUTINE Ctqmcoffdiag_computeFK(op, Gomega, Wmax, F)
+!SUBROUTINE CtqmcoffdiagComplex_computeFK(op, Gomega, Wmax, F)
 !  COMPLEX*16      , DIMENSION(:,:), INTENT(IN   ) :: Gomega
 !  INTEGER                         , INTENT(IN   ) :: Wmax
 !  DOUBLE PRECISION, DIMENSION(:,:), INTENT(INOUT) :: F
@@ -1723,32 +1594,32 @@ END SUBROUTINE Ctqmcoffdiag_computeF
 !    K = REAL(Gomega(Wmax, iflavor))
 !    WRITE(op%ostream,*) "CTQMC K, op%mu = ",K,op%mu
 !    WRITE(op%ostream,*) "CTQMC beta     = ",op%beta
-!    op%mu(iflavor) = K
+!    op%mu(iflavor) = K 
 !    DO iomega = 1, Wmax
 !      F_omega(iomega,iflavor) = Gomega(iomega,iflavor) &
 !                  - CMPLX(K, 0.d0, 8)
 !      !if(iflavor==1.and.op%rank==0) then
 !        !write(224,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(F_omega(iomega,iflavor)),imag(F_omega(iomega,iflavor))
 !        !write(225,*) (2.d0*DBLE(iomega)-1.d0) * pi_invBeta, real(Gomega(iomega, iflavor)),imag(Gomega(iomega, iflavor))
-!      !end if
+!      !end if 
 !    END DO
 !    CALL GreenHyboffdiag_backFourier(F_tmp,F_omega(:,iflavor))
 !    F(1:samples+1,iflavor) = (/ (-F_tmp%oper(samples+1-itau),itau=0,samples) /)
 !  END DO
 !  FREE(F_omega)
 !  CALL GreenHyboffdiag_destroy(F_tmp)
-!END SUBROUTINE Ctqmcoffdiag_computeFK
+!END SUBROUTINE CtqmcoffdiagComplex_computeFK
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_run
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_run
 !! NAME
-!!  Ctqmcoffdiag_run
+!!  CtqmcoffdiagComplex_run
 !!
 !! FUNCTION
 !!  set all options and run a simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1771,14 +1642,14 @@ END SUBROUTINE Ctqmcoffdiag_computeF
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_run(op,opt_order,opt_histo,opt_movie,opt_analysis,opt_check,opt_noise,opt_spectra,opt_gMove)
+SUBROUTINE CtqmcoffdiagComplex_run(op,opt_order,opt_histo,opt_movie,opt_analysis,opt_check,opt_noise,opt_spectra,opt_gMove)
 
 
 #ifdef HAVE_MPI1
 include 'mpif.h'
 #endif
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT)           :: op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT)           :: op
   INTEGER, OPTIONAL, INTENT(IN   )  :: opt_order
   INTEGER, OPTIONAL, INTENT(IN   )  :: opt_histo
   INTEGER, OPTIONAL, INTENT(IN   )  :: opt_movie
@@ -1792,34 +1663,35 @@ include 'mpif.h'
   INTEGER                            :: ierr
   DOUBLE PRECISION                   :: rtime(1)
 #endif
-!#ifdef CTCtqmcoffdiag_MOVIE
+!#ifdef CTCtqmcoffdiagComplex_MOVIE
   INTEGER                            :: ilatex
   CHARACTER(LEN=4)                   :: Cchar
 !#endif
   DOUBLE PRECISION                   :: estimatedTime
+  CHARACTER(LEN=100) :: message
 
   IF ( .NOT. op%set  ) &
-    CALL ERROR("Ctqmcoffdiag_run : QMC not set up                          ")
+    CALL ERROR("CtqmcoffdiagComplex_run : QMC not set up                          ")
   IF ( .NOT. op%setU ) &
-    CALL ERROR("Ctqmcoffdiag_run : QMC does not have a U matrix            ")
+    CALL ERROR("CtqmcoffdiagComplex_run : QMC does not have a U matrix            ")
 
 
 ! OPTIONS of the run
   IF ( PRESENT( opt_check ) ) THEN
     op%opt_check = opt_check
     CALL ImpurityOperator_doCheck(op%Impurity,opt_check)
-    CALL BathOperatoroffdiag_doCheck(op%Bath,opt_check)
+    CALL BathOperatoroffdiagComplex_doCheck(op%Bath,opt_check)
   END IF
   IF ( PRESENT( opt_movie ) ) &
     op%opt_movie = opt_movie
   IF ( PRESENT( opt_analysis ) ) &
     op%opt_analysis = opt_analysis
   IF ( PRESENT ( opt_order ) ) &
-    op%opt_order = opt_order
+    op%opt_order = opt_order 
   IF ( PRESENT ( opt_histo ) ) &
-    op%opt_histo = opt_histo
+    op%opt_histo = opt_histo 
   IF ( PRESENT ( opt_noise ) ) THEN
-    op%opt_noise = opt_noise
+    op%opt_noise = opt_noise 
   END IF
   IF ( PRESENT ( opt_spectra ) ) &
     op%opt_spectra = opt_spectra
@@ -1832,20 +1704,22 @@ include 'mpif.h'
      ! op%modGlobalMove(1) = op%sweeps+1
       op%modGlobalMove(1) = max(op%sweeps,op%thermalization)+1 ! No Global Move
       !write(std_out,*) "op%sweeps",op%sweeps, op%modGlobalMove(1)
-      CALL WARNALL("Ctqmcoffdiag_run : global moves option is <= 0 or > sweeps/cpu -> No global Moves")
-    ELSE
-      op%modGlobalMove(1) = opt_gMove
+      !CALL WARNALL("CtqmcoffdiagComplex_run : global moves option is <= 0 or > sweeps/cpu -> No global Moves")
+      write(message,'(a,a)') "   == No global moves are used in CT-QMC. Make sure it is correct", ch10
+      CALL wrtout(std_out,message,'COLL') 
+    ELSE 
+      op%modGlobalMove(1) = opt_gMove 
     END IF
   END IF
 !sui!write(std_out,*) "op%sweeps",op%thermalization,op%sweeps
 
-  CALL Ctqmcoffdiag_allocateOpt(op)
-
-!#ifdef CTCtqmcoffdiag_MOVIE
+  CALL CtqmcoffdiagComplex_allocateOpt(op)
+  
+!#ifdef CTCtqmcoffdiagComplex_MOVIE  
   ilatex = 0
   IF ( op%opt_movie .EQ. 1 ) THEN
     Cchar ="0000"
-    WRITE(Cchar,'(I4)') op%rank
+    WRITE(Cchar,'(I4)') op%rank 
     ilatex = 87+op%rank
     OPEN(UNIT=ilatex, FILE="Movie_"//TRIM(ADJUSTL(Cchar))//".tex")
     WRITE(ilatex,'(A)') "\documentclass{beamer}"
@@ -1854,24 +1728,24 @@ include 'mpif.h'
     WRITE(ilatex,'(A)') "\setbeamersize{sidebar width right=0pt}"
     WRITE(ilatex,'(A)') "\setbeamersize{text width left=0pt}"
     WRITE(ilatex,'(A)') "\setbeamersize{text width right=0pt}"
-    WRITE(ilatex,*)
+    WRITE(ilatex,*) 
     WRITE(ilatex,'(A)') "\begin{document}"
-    WRITE(ilatex,*)
+    WRITE(ilatex,*) 
   END IF
 !#endif
 
   IF ( op%rank .EQ. 0 ) THEN
-    WRITE(op%ostream,'(A29)') "Starting QMC (Thermalization)"
+    WRITE(op%ostream,'(A25)') "== Starting QMC Solver"
   END IF
-
+  
   !=================================
-  ! STARTING THERMALIZATION
+  ! STARTING THERMALIZATION 
   !=================================
   !write(std_out,*) "sweeps before thermalization",op%sweeps
   !write(std_out,*) "op%stats",op%stats
-  CALL Ctqmcoffdiag_loop(op,op%thermalization,ilatex)
+  CALL CtqmcoffdiagComplex_loop(op,op%thermalization,ilatex)
   !=================================
-  ! ENDING   THERMALIZATION
+  ! ENDING   THERMALIZATION 
   !=================================
 
   estimatedTime = op%runTime
@@ -1888,18 +1762,18 @@ include 'mpif.h'
   END IF
 
   !=================================
-  ! CLEANING CTQMC
+  ! CLEANING CTQMC          
   !=================================
-  CALL Ctqmcoffdiag_clear(op)
+  CALL CtqmcoffdiagComplex_clear(op)
 
   !=================================
-  ! STARTING CTQMC
+  ! STARTING CTQMC          
   !=================================
   !write(std_out,*) "sweeps before loop",op%sweeps
   !write(std_out,*) "op%stats",op%stats
-  CALL Ctqmcoffdiag_loop(op,op%sweeps,ilatex)
+  CALL CtqmcoffdiagComplex_loop(op,op%sweeps,ilatex)
   !=================================
-  ! ENDING   CTQMC
+  ! ENDING   CTQMC          
   !=================================
 
   IF ( op%opt_movie .EQ. 1 ) THEN
@@ -1911,18 +1785,18 @@ include 'mpif.h'
   op%done     = .TRUE.
 !sui!write(std_out,*) "op%stats en of ctqmc_run",op%stats
 
-END SUBROUTINE Ctqmcoffdiag_run
+END SUBROUTINE CtqmcoffdiagComplex_run
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_loop
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_loop
 !! NAME
-!!  Ctqmcoffdiag_loop
+!!  CtqmcoffdiagComplex_loop
 !!
 !! FUNCTION
 !!  Definition the main loop of the CT-QMC
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1940,14 +1814,14 @@ END SUBROUTINE Ctqmcoffdiag_run
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
+SUBROUTINE CtqmcoffdiagComplex_loop(op,itotal,ilatex)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT)         :: op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT)         :: op
   INTEGER    , INTENT(IN   )         :: itotal
   INTEGER    , INTENT(IN   )         :: ilatex
 !Local variables ------------------------------
-  LOGICAL                            :: updated
+  LOGICAL                            :: updated 
   LOGICAL                            :: updated_seg
   LOGICAL, DIMENSION(:), ALLOCATABLE :: updated_swap
 
@@ -1957,7 +1831,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   INTEGER                            :: modNoise2
   INTEGER                            :: modGlobalMove
   INTEGER                            :: sp1
-  INTEGER                            :: itau
+  INTEGER                            :: itau   
   INTEGER                            :: ind
   INTEGER                            :: endDensity
   INTEGER                            :: indDensity
@@ -2050,40 +1924,40 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
 
       ! For iflavor, Try a move
       !==========================
-      CALL Ctqmcoffdiag_tryAddRemove(op,updated_seg)
+      CALL CtqmcoffdiagComplex_tryAddRemove(op,updated_seg)
     !sui!write(std_out,*) "after tryaddremove",updated_seg
 
       updated = updated_seg .OR.  updated_swap(iflavor).OR.(isweep==1)
       updated_swap(iflavor) = .FALSE.
       if ( op%opt_nondiag >0 )  iflavor_d=0
       if ( op%opt_nondiag==0 )  iflavor_d=iflavor
-      CALL GreenHyboffdiag_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, updated,op%signvalue,iflavor_d)
+      CALL GreenHyboffdiagComplex_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, updated,op%signvalue,op%phasevalue,iflavor_d) 
 
-      CALL Ctqmcoffdiag_measN        (op, iflavor, updated)
+      CALL CtqmcoffdiagComplex_measN        (op, iflavor, updated)
       IF ( op%opt_analysis .EQ. 1 ) &
-        CALL Ctqmcoffdiag_measCorrelation (op, iflavor)
+        CALL CtqmcoffdiagComplex_measCorrelation (op, iflavor)
       IF ( op%opt_order .GT. 0 ) &
-        CALL Ctqmcoffdiag_measPerturbation(op, iflavor)
+        CALL CtqmcoffdiagComplex_measPerturbation(op, iflavor)
     END DO
-    !CALL GreenHyboffdiag_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, updated,op%signvalue,iflavor_d)
+    !CALL GreenHyboffdiag_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, updated,op%signvalue,iflavor_d) 
     !DO iflavor = 1,flavors
-    !  CALL Ctqmcoffdiag_measN        (op, iflavor, updated)
+    !  CALL CtqmcoffdiagComplex_measN        (op, iflavor, updated)
     !END DO
 
     IF ( MOD(isweep,modGlobalMove) .EQ. 0 ) THEN
   ! !sui!write(std_out,*) "isweep,modGlobalMove,inside",isweep,modGlobalMove
-      CALL Ctqmcoffdiag_trySwap(op,swapUpdate1, swapUpdate2)
+      CALL CtqmcoffdiagComplex_trySwap(op,swapUpdate1, swapUpdate2)
      ! !write(std_out,*) "no global move yet for non diag hybridization"
       IF ( swapUpdate1 .NE. 0 .AND. swapUpdate2 .NE. 0 ) THEN
         updated_swap(swapUpdate1) = .TRUE.
         updated_swap(swapUpdate2) = .TRUE.
       END IF
     END IF
-
-    IF ( MOD(isweep,measurements) .EQ. 0 ) THEN ! default is always
+    
+    IF ( MOD(isweep,measurements) .EQ. 0 ) THEN ! default is always 
       CALL ImpurityOperator_measDE(op%Impurity,op%measDE)
       IF ( op%opt_spectra .GE. 1 .AND. MOD(isweep,measurements*op%opt_spectra) .EQ. 0 ) THEN
-        op%density(1:flavors,indDensity) = op%measN(3,1:flavors)
+        op%density(1:flavors,indDensity) = real(op%measN(3,1:flavors))
         indDensity = indDensity+1
       END IF
     END IF
@@ -2108,7 +1982,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
         DO ifl1 = 1, flavors
           DO ind = 1, op%Greens%map(ifl1,ifl1)%tail
             itau = op%Greens%map(ifl1,ifl1)%listINT(ind)
-            gtmp_new(itau,ifl1) = op%Greens%oper(itau,ifl1,ifl1) &
+            gtmp_new(itau,ifl1) = op%Greens%oper(itau,ifl1,ifl1) & 
                      +op%Greens%map(ifl1,ifl1)%listDBLE(ind)*DBLE(op%Greens%factor)
           END DO
           DO itau = 1, sp1
@@ -2127,19 +2001,19 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
         DO ifl1 = 1, flavors
           DO ind = 1, op%Greens%map(ifl1,ifl1)%tail
             itau = op%Greens%map(ifl1,ifl1)%listINT(ind)
-            gtmp_new(itau,ifl1) = op%Greens%oper(itau,ifl1,ifl1) &
+            gtmp_new(itau,ifl1) = op%Greens%oper(itau,ifl1,ifl1) & 
                   +op%Greens%map(ifl1,ifl1)%listDBLE(ind)*op%Greens%factor
           END DO
           DO itau = 1, sp1
             CALL Vector_pushBack(op%measNoiseG(itau,ifl1,2), gtmp_new(itau,ifl1) - gtmp_old2(itau,ifl1))
             gtmp_old2(itau,ifl1) = gtmp_new(itau,ifl1)
           END DO
-        END DO
+        END DO 
       END IF
 
-      IF ( op%rank .EQ. 0 ) THEN
+      IF ( op%rank .EQ. 0 ) THEN 
         new_percent = CEILING(DBLE(isweep)*100.d0/DBLE(itotal))
-        DO ipercent = old_percent+1, new_percent
+        DO ipercent = old_percent+1, new_percent 
           WRITE(op%ostream,'(A)',ADVANCE="NO") "-"
         END DO
         old_percent = new_percent
@@ -2159,7 +2033,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
     END DO
     WRITE(op%ostream,'(A)') "|"
   END IF
-
+ 
   FREE(gtmp_new)
   FREE(gtmp_old1)
   FREE(gtmp_old2)
@@ -2174,20 +2048,20 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   CALL CPU_TIME(cpu_time2)
 
   op%runTime = (cpu_time2 - cpu_time1)*1.05d0 ! facteur arbitraire de correction
-END SUBROUTINE Ctqmcoffdiag_loop
+END SUBROUTINE CtqmcoffdiagComplex_loop
 !!***
 
 
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_tryAddRemove
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_tryAddRemove
 !! NAME
-!!  Ctqmcoffdiag_tryAddRemove
+!!  CtqmcoffdiagComplex_tryAddRemove
 !!
 !! FUNCTION
 !!  Try to add or remove a segment and an anti-segment
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2204,12 +2078,12 @@ END SUBROUTINE Ctqmcoffdiag_loop
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
+SUBROUTINE CtqmcoffdiagComplex_tryAddRemove(op,updated)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)             , INTENT(INOUT) :: op
-!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath
-!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity
+  TYPE(CtqmcoffdiagComplex)             , INTENT(INOUT) :: op
+!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
+!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
   LOGICAL               , INTENT(  OUT) :: updated
 !Local variables ------------------------------
   INTEGER                               :: position
@@ -2221,7 +2095,8 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
   DOUBLE PRECISION                      :: time1
   DOUBLE PRECISION                      :: time2
   DOUBLE PRECISION                      :: time_avail
-  DOUBLE PRECISION                      :: det_ratio,sign_det_ratio
+  COMPLEX(KIND=8)                       :: det_ratio
+  DOUBLE PRECISION                      :: sign_det_ratio
   DOUBLE PRECISION                      :: overlap
   DOUBLE PRECISION                      :: length
   DOUBLE PRECISION                      :: signe
@@ -2231,7 +2106,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
   DOUBLE PRECISION, DIMENSION(1:2)      :: CdagC_1
 
   IF ( .NOT. op%set ) &
-    CALL ERROR("Ctqmcoffdiag_trySegment : QMC not set                       ")
+    CALL ERROR("CtqmcoffdiagComplex_trySegment : QMC not set                       ")
 
         !write(std_out,*) "      TryAddRemove start"
   nature(1) = CTQMC_SEGME
@@ -2239,52 +2114,43 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
   beta      = op%beta
 
   updated = .FALSE.
+  !tail is the number of segments for a given flavor
   tailint  = (op%Impurity%particles(op%Impurity%activeFlavor)%tail)
   tail  = DBLE(tailint)
-  !write(std_out,*) "op%Impurity%particles(op%Impurity%activeFlavor)%tail",op%Impurity%activeFlavor,tail
 
 
   !=====================================
   ! First choose segment or antisegment
   !=====================================
   DO i = 1, 2
-    signe = SIGN(1.d0,DBLE(nature(i)))
+    signe = SIGN(1.d0,DBLE(nature(i))) 
 !      -----  1: segment        signe= 1  ( CTQMC_SEGME =  1 )
 !      -----  2: antisegment    signe=-1  ( CTQMC_ANTIS = -2 )
-!    NB: Sign(a,b) = sign(b) * a
 
- !prt!if(op%prtopt==1) write(std_out,*) "       ==Starting configuration",i
- !prt!if(op%prtopt==1) write(std_out,*) "        = Segments:"
     tailint  = (op%Impurity%particles(op%Impurity%activeFlavor)%tail)
-!prt!    do ii=0, op%Impurity%Particles(op%Impurity%activeFlavor)%tail
- !prt!if(op%prtopt==1)  write(std_out,*) ii, op%Impurity%Particles(op%Impurity%activeFlavor)%list(ii,1), &
-!prt!&                    op%Impurity%Particles(op%Impurity%activeFlavor)%list(ii,2)
-!prt!    enddo
-  !sui!write(std_out,*) "        = M Matrix",op%Bath%sumtails
-!prt!    do it=1,op%Bath%sumtails
-    !sui!write(std_out,'(a,3x,500e10.3)') "        M start",(op%Bath%M%mat(it,it1),it1=1,op%Bath%sumtails)
-!prt!    enddo
+
+    !CALL RANDOM_NUMBER(action)
     CALL OurRng(op%seed,action)
 
     !==========================
     ! Add segment/antisegment
     !==========================
     IF ( action .LT. .5d0 ) THEN ! Add a segment or antisegment
-     !ii  write(std_out,*) "        =try: Segment added of type",i,op%prtopt
 
       ! Select time1 (>0) in [0,beta]
       !==============================
+      !CALL RANDOM_NUMBER(time1)
       CALL OurRng(op%seed,time1)
       time1 = time1 * beta
 
-      ! time_avail is the distance between between time1 and
+      ! time_avail is the distance between between time1 and 
       !   - the next start of a segment for a segment addition
       !   - the next end of a segment for an antisegment addition
       ! ImpurityOperator_getAvailableTime > 0 for a segment      (signe>0) -> time_avail>0
       ! ImpurityOperator_getAvailableTime < 0 for an antisegment (signe<0) -> time_avail>0
       !====================================================================
       time_avail = ImpurityOperator_getAvailableTime(op%Impurity,time1,position) * signe
-     !ii  write(std_out,*) "        =try: time_avail",time_avail,time1
+
       IF ( time_avail .GT. 0.d0 ) THEN
 
         ! Time2 is  the length of the proposed new (anti)segment
@@ -2293,11 +2159,9 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         IF ( time2 .EQ. 0.d0 ) CALL OurRng(op%seed,time2) ! Prevent null segment
 
         ! Now time2 is the time at the end of the proposed new (anti) segment
-        ! time2 > time1
+        ! time2 > time1 
         !====================================================================
         time2     = time1 + time2 * time_avail
-      !sui!write(std_out,*) tailint+1,time1,time2,position
-!        CALL CdagC_init(CdagC_1,time1,time2)
 
         ! CdagC_1 gives the stard/end times for the proposed new segment/antisegment
         ! CdagC1(C_) can  be above beta.
@@ -2310,72 +2174,47 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         !====================================================================================
         CdagC_1(Cdag_) = ((1.d0+signe)*time1+(1.d0-signe)*time2)*0.5d0
         CdagC_1(C_   ) = ((1.d0+signe)*time2+(1.d0-signe)*time1)*0.5d0
-!        length    = CdagC_length(CdagC_1)
         length    = CdagC_1(C_   ) - CdagC_1(Cdag_)
-        !write(std_out,*) "      try : times", CdagC_1(C_   ),CdagC_1(Cdag_)
-        !write(std_out,*) "      length", length
 
 !      -----  Computes the determinant ratio
-        det_ratio = BathOperatoroffdiag_getDetAdd(op%Bath,CdagC_1,position,op%Impurity%particles)
+        det_ratio = BathOperatoroffdiagComplex_getDetAdd(op%Bath,CdagC_1,position,op%Impurity%particles) 
 
 !      -----  Computes the overlap
         overlap   = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1)
         signdetprev  = ImpurityOperator_getsign(op%Impurity, time2, i, action, position)
+        !write(std_out,*)"det_ratio",det_ratio,"signdetprev",signdetprev  
 
-        !write(std_out,*) "      overlap   ", overlap
-        CALL OurRng(op%seed,time1)
-        !write(std_out,*) "      Rnd", time1
-        signdet=1.d0
+        !Remove negative sign of det_ration
         det_ratio=det_ratio*signdetprev
-
-        IF ( det_ratio .LT. 0.d0 ) THEN
-        !sui!write(std_out,*) "         NEGATIVE DET",det_ratio,signdetprev
+      
+        IF ( real(det_ratio) .LT. 0.d0 ) THEN
           det_ratio   = - det_ratio
           sign_det_ratio=-1
           op%stats(nature(i)+CTQMC_DETSI) = op%stats(nature(i)+CTQMC_DETSI) + 1.d0
-       !  op%signvaluecurrent=-1.d0
         ELSE
           sign_det_ratio=1
-       !  op%signvaluecurrent=+1.d0
-         ! signdet=-1.d0
-        !sui!write(std_out,*) "                  DET",det_ratio,signdetprev
         END IF
-      !ii  write(std_out,*) "                  DET",det_ratio
-       ! op%signvaluemeas=op%signvaluemeas+1.d0
-        !write(std_out,*) "        .................",(time1 * (tail + 1.d0 )),beta * time_avail * det_ratio * DEXP(op%mu(op%Impurity%activeFlavor)*length + overlap)
-        !write(std_out,*) "        .................",beta , time_avail , op%mu(op%Impurity%activeFlavor),op%Impurity%activeFlavor
 
+        CALL OurRng(op%seed,time1)
+        !write(std_out,*) "        .................",(time1 * (tail + 1.d0 )),beta * time_avail * abs(det_ratio) * DEXP(real(op%mu(op%Impurity%activeFlavor))*length + overlap)
+        !write(std_out,*) "        .................",beta , time_avail , op%mu(op%Impurity%activeFlavor),op%Impurity%activeFlavor  
+ 
         IF ( (time1 * (tail + 1.d0 )) &
-             .LT. (beta * time_avail * det_ratio * DEXP(op%mu(op%Impurity%activeFlavor)*length + overlap) ) ) THEN
-!          write(*,*) "before"
-!          CALL ListCdagCoffdiag_print(op%Impurity%particles(op%Impurity%activeFlavor),6)
+             .LT. (beta * time_avail * abs(det_ratio) * DEXP(real(op%mu(op%Impurity%activeFlavor))*length + overlap) ) ) THEN
           CALL ImpurityOperator_add(op%Impurity,CdagC_1,position)
-!          write(*,*) "after "
-!          CALL ListCdagCoffdiag_print(op%Impurity%particles(op%Impurity%activeFlavor),6)
-          CALL BathOperatoroffdiag_setMAdd(op%bath,op%Impurity%particles)
+         ! write(*,*) "after "
+         ! CALL ListCdagC_print(op%Impurity%particles(op%Impurity%activeFlavor),6)
+          CALL BathOperatoroffdiagComplex_setMAdd(op%bath,op%Impurity%particles) 
           op%stats(nature(i)+CTQMC_ADDED) = op%stats(nature(i)+CTQMC_ADDED)  + 1.d0
           updated = .TRUE. .OR. updated
           tail = tail + 1.d0
           tailint = tailint + 1
-!          read(*,*) time1
-          !ii  write(6,*) "        Accepted addition, new conf is",time1
-         !prt! do ii=0, op%Impurity%Particles(op%Impurity%activeFlavor)%tail
-          !prt!if(op%prtopt==1)  write(6,*) ii, op%Impurity%Particles(op%Impurity%activeFlavor)%list(ii,1),&
-!prt!&                          op%Impurity%Particles(op%Impurity%activeFlavor)%list(ii,2)
-         !prt! enddo
-        !sui!write(6,*) "        = M Matrix"
-         !prt! do it=1,op%Bath%sumtails
-          !sui!write(6,*) "        M new",(op%Bath%M%mat(it,it1),it1=1,op%Bath%sumtails)
-         !prt! enddo
 
           IF ( sign_det_ratio .LT. 0.d0 ) op%signvalue=-op%signvalue
-        !sui!write(6,*) "                  signvalue",op%signvalue
-        ELSE
-     !ii  write(6,*) "        Refused      addition: proba",time1
-        END IF
-      ELSE
-    !sui!write(6,*) "        Refused      addition: time_avail <0"
-      END IF
+          op%phasevalue=op%phasevalue*det_ratio/abs(det_ratio)*sign_det_ratio
+        END IF 
+
+      END IF ! time_avail > 0
 
     !========================================
     ! Remove segment/antisegment
@@ -2385,9 +2224,9 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
       IF ( tail .GT. 0.d0 ) THEN
         CALL OurRng(op%seed,time1)
         position = INT(((time1 * tail) + 1.d0) * signe )
-        !prt!if(op%prtopt==1)  write(6,*) "         position",position
+        !prt!if(op%prtopt==1)  write(6,*) "         position",position 
         time_avail = ImpurityOperator_getAvailedTime(op%Impurity,position)
-        det_ratio  = BathOperatoroffdiag_getDetRemove(op%Bath,position)
+        det_ratio  = BathOperatoroffdiagComplex_getDetRemove(op%Bath,position)
         !write(6,*) "        det_ratio", det_ratio
         CdagC_1    = ImpurityOperator_getSegment(op%Impurity,position)
 !        length     = CdagC_length(CdagC_1)
@@ -2400,55 +2239,42 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         signdetprev = ImpurityOperator_getsign(op%Impurity, time2, i, action, position)
         det_ratio=det_ratio*signdetprev
         signdet=1.d0
-        IF ( det_ratio .LT. 0.d0 ) THEN
+
+        IF ( real(det_ratio) .LT. 0.d0 ) THEN
         !sui!write(6,*) "         NEGATIVE DET",det_ratio,signdetprev
           det_ratio   = -det_ratio
           sign_det_ratio=-1
-!          op%seg_sign = op%seg_sign + 1.d0
           op%stats(nature(i)+CTQMC_DETSI) = op%stats(nature(i)+CTQMC_DETSI) + 1.d0
           signdet=-1.d0
-        ELSE
+        ELSE 
           sign_det_ratio=1
-        !sui!write(6,*) "                  DET",det_ratio,signdetprev
         END IF
-       !ii  write(6,*) "                  DET",det_ratio
-        IF ( (time1 * beta * time_avail * DEXP(op%mu(op%Impurity%activeFlavor)*length+overlap)) &
-             .LT. (tail * det_ratio ) ) THEN
+
+        IF ( (time1 * beta * time_avail * DEXP(real(op%mu(op%Impurity%activeFlavor))*length+overlap)) &
+             .LT. (tail * abs(det_ratio) ) ) THEN
           CALL ImpurityOperator_remove(op%Impurity,position)
-          CALL BathOperatoroffdiag_setMRemove(op%Bath,op%Impurity%particles)
+          CALL BathOperatoroffdiagComplex_setMRemove(op%Bath,op%Impurity%particles) 
           !op%seg_removed = op%seg_removed  + 1.d0
           op%stats(nature(i)+CTQMC_REMOV) = op%stats(nature(i)+CTQMC_REMOV)  + 1.d0
           updated = .TRUE. .OR. updated
           tail = tail -1.d0
           tailint = tailint -1
-          !ii  write(6,*) "        Accepted removal, new conf is:",time1
-      !prt!    do ii=0, op%Impurity%Particles(op%Impurity%activeFlavor)%tail
-          !prt!if(op%prtopt==1)  write(6,*) ii, op%Impurity%Particles(op%Impurity%activeFlavor)%list(ii,1),&
-!prt!&                          op%Impurity%Particles(op%Impurity%activeFlavor)%list(ii,2)
-      !prt!    enddo
-        !sui!write(6,*) "        = M Matrix"
-       !prt!   do it=1,op%Bath%sumtails
-          !sui!write(6,*) "        M new",(op%Bath%M%mat(it,it1),it1=1,op%Bath%sumtails)
-        !prt!  enddo
+
           IF ( sign_det_ratio .LT. 0.d0 ) op%signvalue=-op%signvalue
-        !sui!write(6,*) "                  signvalue",op%signvalue
-        ELSE
-     !ii  write(6,*) "        Refused      removal",time1
+          op%phasevalue=op%phasevalue*det_ratio/abs(det_ratio)*sign_det_ratio
         END IF
-      ELSE
-      !sui!write(6,*) "        Refused      removal: no segment available"
-      END IF
-    END IF
+      END IF !tail > O
+    END IF ! action
     !========================================
     ! End Add/Remove Antisegment
     !========================================
   END DO
-END SUBROUTINE Ctqmcoffdiag_tryAddRemove
+END SUBROUTINE CtqmcoffdiagComplex_tryAddRemove
 !!***
 
-!!SUBROUTINE Ctqmcoffdiag_trySegment(op,updated)
-!!!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath
-!!!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity
+!!SUBROUTINE CtqmcoffdiagComplex_trySegment(op,updated)
+!!!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
+!!!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
 !!  LOGICAL               , INTENT(INOUT) :: updated
 !!  INTEGER                               :: position
 !!  DOUBLE PRECISION                      :: action
@@ -2463,13 +2289,13 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!  DOUBLE PRECISION, DIMENSION(1:2)      :: CdagC_1
 !!
 !!  IF ( .NOT. op%set ) &
-!!    CALL ERROR("Ctqmcoffdiag_trySegment : QMC not set                       ")
+!!    CALL ERROR("CtqmcoffdiagComplex_trySegment : QMC not set                       ")
 !!
 !!  beta     =  op%beta
 !!  tail     = DBLE(op%Impurity%particles(op%Impurity%activeFlavor)%tail)
 !!
 !!  CALL RANDOM_NUMBER(action)
-!!
+!!  
 !!  updated = .FALSE.
 !!
 !!  IF ( action .LT. .5d0 ) THEN ! Ajout de segment
@@ -2483,7 +2309,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!      CdagC_1(Cdag_) = time1
 !!      CdagC_1(C_   ) = time2
 !!!      length    = CdagC_length(CdagC_1)
-!!      length    = time2 - time1
+!!      length    = time2 - time1 
 !!      det_ratio = BathOperatoroffdiag_getDetAdd(op%Bath,CdagC_1,position,op%Impurity%particles(op%Impurity%activeFlavor))
 !!      overlap   = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1)
 !!      CALL RANDOM_NUMBER(time1)
@@ -2498,8 +2324,8 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!        CALL BathOperatoroffdiag_setMAdd(op%bath,op%Impurity%particles(op%Impurity%activeFlavor))
 !!        op%stats(CTQMC_SEGME+CTQMC_ADDED) = op%stats(CTQMC_SEGME+CTQMC_ADDED)  + 1.d0
 !!        updated = .TRUE.
-!!      END IF
-!!    END IF
+!!      END IF 
+!!    END IF 
 !!
 !!  ELSE ! Supprimer un segment
 !!    IF ( tail .GT. 0.d0 ) THEN
@@ -2528,12 +2354,12 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!      END IF
 !!    END IF
 !!  END IF
-!!END SUBROUTINE Ctqmcoffdiag_trySegment
+!!END SUBROUTINE CtqmcoffdiagComplex_trySegment
 !!***
 !!
-!!SUBROUTINE Ctqmcoffdiag_tryAntiSeg(op, updated)
-!!!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath
-!!!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity
+!!SUBROUTINE CtqmcoffdiagComplex_tryAntiSeg(op, updated)
+!!!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
+!!!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
 !!  LOGICAL               , INTENT(INOUT) :: updated
 !!  INTEGER                               :: position
 !!  DOUBLE PRECISION                      :: action
@@ -2548,7 +2374,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!  DOUBLE PRECISION, DIMENSION(1:2)      :: CdagC_1
 !!
 !!  IF ( .NOT. op%set ) &
-!!    CALL ERROR("Ctqmcoffdiag_trySegment : QMC not set                       ")
+!!    CALL ERROR("CtqmcoffdiagComplex_trySegment : QMC not set                       ")
 !!
 !!  beta     =  op%beta
 !!  tail     =  DBLE(op%Impurity%particles(op%Impurity%activeFlavor)%tail)
@@ -2577,23 +2403,23 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!!        op%anti_sign = op%anti_sign + 1.d0
 !!        op%stats(CTQMC_ANTIS+CTQMC_DETSI) = op%stats(CTQMC_ANTIS+CTQMC_DETSI) + SIGN(1.d0,det_ratio)
 !!      END IF
-!!      IF ( (time1 * (tail + 1.d0 )) &
+!!      IF ( (time1 * (tail + 1.d0 )) & 
 !!           .LT. (beta * ABS(time_avail) * det_ratio * DEXP(op%mu(op%Impurity%activeFlavor)*length + overlap) ) ) THEN
-!!        CALL ImpurityOperator_add(op%Impurity,CdagC_1,position)
+!!        CALL ImpurityOperator_add(op%Impurity,CdagC_1,position) 
 !!        !write(*,*) position
-!!        CALL BathOperatoroffdiag_setMAdd(op%bath,op%Impurity%particles(op%Impurity%activeFlavor))
+!!        CALL BathOperatoroffdiag_setMAdd(op%bath,op%Impurity%particles(op%Impurity%activeFlavor)) 
 !!        !op%anti_added = op%anti_added  + 1.d0
 !!        op%stats(CTQMC_ANTIS+CTQMC_ADDED) = op%stats(CTQMC_ANTIS+CTQMC_ADDED)  + 1.d0
 !!        updated = .TRUE.
-!!      END IF
-!!    END IF
+!!      END IF 
+!!    END IF 
 !!  ELSE ! Supprimer un antiseg
 !!    IF ( tail .GT. 0.d0 ) THEN
 !!      CALL RANDOM_NUMBER(time1)
 !!      position = -(INT(time1 * tail) + 1)
 !!      time_avail = ImpurityOperator_getAvailedTime(op%Impurity,position)!OK
 !!      det_ratio  = BathOperatoroffdiag_getDetRemove(op%Bath,position)!OK
-!!      CdagC_1    = ImpurityOperator_getSegment(op%Impurity,position)!OK
+!!      CdagC_1    = ImpurityOperator_getSegment(op%Impurity,position)!OK 
 !!!      length     = CdagC_length(CdagC_1) ! /!\ length is negative
 !!      length = CdagC_1(C_) - CdagC_1(Cdag_)
 !!      overlap    = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1) !OK
@@ -2614,18 +2440,18 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!      END IF
 !!    END IF
 !!  END IF
-!!END SUBROUTINE Ctqmcoffdiag_tryAntiSeg
+!!END SUBROUTINE CtqmcoffdiagComplex_tryAntiSeg
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_trySwap
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_trySwap
 !! NAME
-!!  Ctqmcoffdiag_trySwap
+!!  CtqmcoffdiagComplex_trySwap
 !!
 !! FUNCTION
 !!  try a global move (swap to flavors)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2643,12 +2469,12 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
+SUBROUTINE CtqmcoffdiagComplex_trySwap(op,flav_i,flav_j)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)           , INTENT(INOUT) :: op
-!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath
-!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity
+  TYPE(CtqmcoffdiagComplex)           , INTENT(INOUT) :: op
+!  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
+!  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
   INTEGER               , INTENT(  OUT) :: flav_i
   INTEGER               , INTENT(  OUT) :: flav_j
 !Local variables ------------------------------
@@ -2677,7 +2503,7 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
   CALL OurRng(op%seed,rnd)
   flavor_j = NINT(rnd*DBLE(op%flavors-1.d0))+1
   !ii write(6,'(a,2i4)') "--------------- new swap --------------------------------",flavor_i,flavor_j
-
+  
   flav_i = 0
   flav_j = 0
   !ii   do iflavor=1,op%flavors
@@ -2704,17 +2530,17 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
     ! ===========================================
     ! First use M matrix to compute determinant
     ! ===========================================
-    detold     = BathOperatoroffdiag_getDetF(op%Bath) ! use op%Bath%M
+    detold     = BathOperatoroffdiagComplex_getDetF(op%Bath) ! use op%Bath%M
 
     ! ===========================================
     ! Second build M_update matrix to compute determinant after.
     ! ===========================================
     !CALL ListCdagCoffdiag_print(particle)
-    call BathOperatoroffdiag_recomputeM(op%Bath,op%impurity%particles,flavor_i,flavor_j) ! compute op%Bath%M_update
-    detnew     = BathOperatoroffdiag_getDetF(op%Bath,option=1) ! use op%Bath%M_update
+    call BathOperatoroffdiagComplex_recomputeM(op%Bath,op%impurity%particles,flavor_i,flavor_j) ! compute op%Bath%M_update
+    detnew     = BathOperatoroffdiagComplex_getDetF(op%Bath,option=1) ! use op%Bath%M_update
 
-    lengthi    = ImpurityOperator_measN(op%Impurity,flavor_i)
-    lengthj    = ImpurityOperator_measN(op%Impurity,flavor_j)
+    lengthi    = real(ImpurityOperator_measN(op%Impurity,flavor_i))
+    lengthj    = real(ImpurityOperator_measN(op%Impurity,flavor_j))
     overlapic1 = ImpurityOperator_overlapFlavor(op%Impurity,flavor_i)
     overlapjc1 = ImpurityOperator_overlapFlavor(op%Impurity,flavor_j)
     ! lengths unchanged
@@ -2732,7 +2558,7 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
 
 !    END IF
     local_ratio = DEXP(-overlapic2*overlapjc2+overlapic1*overlapjc1 &
-                      +(lengthj-lengthi)*(op%mu(flavor_i)-op%mu(flavor_j)))
+                      +(lengthj-lengthi)*real((op%mu(flavor_i))-real(op%mu(flavor_j))))
    !ii  write(6,*) "local_ratio",local_ratio
 
     ! Wloc = exp(muN-Uo)
@@ -2750,8 +2576,8 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
    !ii    enddo
    !ii    write(6,*) "Gmove accepted",rnd,local_ratio*det_ratio
       CALL ImpurityOperator_swap(op%Impurity, flavor_i,flavor_j)
-      CALL BathOperatoroffdiag_swap    (op%Bath    , flavor_i,flavor_j) !  use op%Bath%M_update to built new op%Bath%M
-
+      CALL BathOperatoroffdiagComplex_swap    (op%Bath    , flavor_i,flavor_j) !  use op%Bath%M_update to built new op%Bath%M
+      
       op%swap = op%swap + 1.d0
       flav_i = flavor_i
       flav_j = flavor_j
@@ -2779,12 +2605,12 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
  !ii    write(6,'(a,100f12.3)') " update M after ",(op%Bath%M_update%mat(it,it1),it1=1,op%Bath%sumtails)
  !ii  enddo
 
-END SUBROUTINE Ctqmcoffdiag_trySwap
+END SUBROUTINE CtqmcoffdiagComplex_trySwap
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_measN
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_measN
 !! NAME
-!!  Ctqmcoffdiag_measN
+!!  CtqmcoffdiagComplex_measN
 !!
 !! FUNCTION
 !!  measures the number of electron
@@ -2792,7 +2618,7 @@ END SUBROUTINE Ctqmcoffdiag_trySwap
 !!  with the correct weight.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2810,25 +2636,25 @@ END SUBROUTINE Ctqmcoffdiag_trySwap
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_measN(op, iflavor, updated)
+SUBROUTINE CtqmcoffdiagComplex_measN(op, iflavor, updated)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)             , INTENT(INOUT)     :: op
+  TYPE(CtqmcoffdiagComplex)             , INTENT(INOUT)     :: op
   !TYPE(ImpurityOperator), INTENT(IN   )     :: impurity
   INTEGER               , INTENT(IN   )     :: iflavor
   LOGICAL               , INTENT(IN   )     :: updated
 
 !  IF ( .NOT. op%set ) &
-!    CALL ERROR("Ctqmcoffdiag_measN : QMC not set                           ")
+!    CALL ERROR("CtqmcoffdiagComplex_measN : QMC not set                           ")
 
-
+  
   IF ( updated .EQV. .TRUE. ) THEN
 !  --- accumulate occupations with values op%measN(3,iflavor) from the last measurements with the corresponding weight
 !  ---  op*measN(4,iflavor)
     op%measN(1,iflavor) = op%measN(1,iflavor) + op%measN(3,iflavor)*op%measN(4,iflavor)
    ! write(6,*) "Cllll42"
 
-!  --- Compute total number of new measurements
+!  --- Compute total number of new measurements 
     op%measN(2,iflavor) = op%measN(2,iflavor) + op%measN(4,iflavor)
 
    ! write(6,*) "Allll42"
@@ -2845,19 +2671,19 @@ SUBROUTINE Ctqmcoffdiag_measN(op, iflavor, updated)
     op%measN(4,iflavor) = op%measN(4,iflavor) + 1.d0
    ! write(6,*) "Bllll42"
   END IF
-END SUBROUTINE Ctqmcoffdiag_measN
+END SUBROUTINE CtqmcoffdiagComplex_measN
 !!***
 
-!#ifdef CTCtqmcoffdiag_ANALYSIS
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_measCorrelation
+!#ifdef CTCtqmcoffdiagComplex_ANALYSIS
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_measCorrelation
 !! NAME
-!!  Ctqmcoffdiag_measCorrelation
+!!  CtqmcoffdiagComplex_measCorrelation
 !!
 !! FUNCTION
 !!  measure all correlations in times for a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2874,10 +2700,10 @@ END SUBROUTINE Ctqmcoffdiag_measN
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_measCorrelation(op, iflavor)
+SUBROUTINE CtqmcoffdiagComplex_measCorrelation(op, iflavor)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)             , INTENT(INOUT)       :: op
+  TYPE(CtqmcoffdiagComplex)             , INTENT(INOUT)       :: op
   !TYPE(ImpurityOperator), INTENT(IN   )       :: impurity
   INTEGER               , INTENT(IN   )       :: iflavor
 !Local variables ------------------------------
@@ -2893,7 +2719,7 @@ SUBROUTINE Ctqmcoffdiag_measCorrelation(op, iflavor)
   DOUBLE PRECISION                            :: beta
 
   IF ( .NOT. op%set ) &
-    CALL ERROR("Ctqmcoffdiag_measCorrelation : QMC not set                 ")
+    CALL ERROR("CtqmcoffdiagComplex_measCorrelation : QMC not set                 ")
     !write(6,*) "not available"
     stop
 
@@ -2901,7 +2727,7 @@ SUBROUTINE Ctqmcoffdiag_measCorrelation(op, iflavor)
   beta = op%beta
 
   IF ( size .EQ. 0 ) RETURN
-
+  
   inv_dt = op%inv_dt
 
   DO iCdag = 1, size ! first segments
@@ -2915,7 +2741,7 @@ SUBROUTINE Ctqmcoffdiag_measCorrelation(op, iflavor)
                     + AINT(DBLE(iCdag)/DBLE(size))*beta &
                    )  * inv_dt ) + .5d0 ) + 1
     IF ( index .LT. 1 .OR. index .GT. op%samples+1 ) THEN
-      CALL WARN("Ctqmcoffdiag_measCorrelation : bad index line 1095         ")
+      CALL WARN("CtqmcoffdiagComplex_measCorrelation : bad index line 1095         ")
     ELSE
       op%measCorrelation(index,2,iflavor) = op%measCorrelation(index,2,iflavor) + 1.d0
     END IF
@@ -2926,24 +2752,24 @@ SUBROUTINE Ctqmcoffdiag_measCorrelation(op, iflavor)
 !      index = INT( ( time * inv_dt ) + .5d0 ) + 1
 !      op%measCorrelation(index,3,iflavor) = op%measCorrelation(index,3,iflavor) + 1.d0
 !    END DO
-    DO iC = 1, size!  op%Greens(iflavor)%index_old%tail
+    DO iC = 1, size!  op%Greens(iflavor)%index_old%tail 
 !todoba        op%measCorrelation(op%Greens(iflavor)%map%listINT(iC+(iCdag-1)*size),3,iflavor) = &
 !todoba        op%measCorrelation(op%Greens(iflavor)%map%listINT(iC+(iCdag-1)*size),3,iflavor) + 1.d0
     END DO
   END DO
 
-END SUBROUTINE Ctqmcoffdiag_measCorrelation
+END SUBROUTINE CtqmcoffdiagComplex_measCorrelation
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_measPerturbation
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_measPerturbation
 !! NAME
-!!  Ctqmcoffdiag_measPerturbation
+!!  CtqmcoffdiagComplex_measPerturbation
 !!
 !! FUNCTION
 !!  measure perturbation order
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2960,17 +2786,17 @@ END SUBROUTINE Ctqmcoffdiag_measCorrelation
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_measPerturbation(op, iflavor)
+SUBROUTINE CtqmcoffdiagComplex_measPerturbation(op, iflavor)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)             , INTENT(INOUT)     :: op
+  TYPE(CtqmcoffdiagComplex)             , INTENT(INOUT)     :: op
   !TYPE(ImpurityOperator), INTENT(IN   )     :: impurity
   INTEGER               , INTENT(IN   )     :: iflavor
 !Local variables ------------------------------
   INTEGER                                   :: index
 
   IF ( .NOT. op%set ) &
-    CALL ERROR("Ctqmcoffdiag_measiPerturbation : QMC not set               ")
+    CALL ERROR("CtqmcoffdiagComplex_measiPerturbation : QMC not set               ")
 
   index = op%impurity%particles(op%impurity%activeFlavor)%tail + 1
   IF ( index .LE. op%opt_order ) &
@@ -2983,19 +2809,19 @@ SUBROUTINE Ctqmcoffdiag_measPerturbation(op, iflavor)
     ENDIF
   ENDIF
 
-END SUBROUTINE Ctqmcoffdiag_measPerturbation
+END SUBROUTINE CtqmcoffdiagComplex_measPerturbation
 !!***
 !#endif
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_getResult
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_getResult
 !! NAME
-!!  Ctqmcoffdiag_getResult
+!!  CtqmcoffdiagComplex_getResult
 !!
 !! FUNCTION
 !!  reduce everything to get the result of the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder,F. Gendron)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder,F. Gendron)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3011,17 +2837,16 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_getResult(op,Iatom,fname,jmjbasis)
+SUBROUTINE CtqmcoffdiagComplex_getResult(op,Iatom,fname)
 
 
 #ifdef HAVE_MPI1
 include 'mpif.h'
 #endif
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)  , INTENT(INOUT)                    :: op
+  TYPE(CtqmcoffdiagComplex)  , INTENT(INOUT)                    :: op
   INTEGER, INTENT(IN ) :: Iatom
   character(len=fnlen), INTENT(INOUT) :: fname
-  INTEGER, OPTIONAL, INTENT(IN )   :: jmjbasis
 !Local variables ------------------------------
   INTEGER                                       :: iflavor
 !  INTEGER                                       :: iflavor1
@@ -3036,7 +2861,7 @@ include 'mpif.h'
   DOUBLE PRECISION                              :: r
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: alpha
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: beta
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)   :: measN_1
+  COMPLEX(kind=8), ALLOCATABLE, DIMENSION(:)   :: measN_1
   DOUBLE PRECISION,              DIMENSION(1:2) :: TabX
   DOUBLE PRECISION,              DIMENSION(1:2) :: TabY
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)   :: freqs
@@ -3052,6 +2877,7 @@ include 'mpif.h'
   INTEGER                                       :: n2,n3,quotient,remainder,signe
   INTEGER                                       :: debut
   DOUBLE PRECISION                                       :: signvaluemeassum
+   COMPLEX(KIND=8)                               :: phasevaluemeassum       
 !  INTEGER                                       :: fin
 #ifdef HAVE_MPI
   INTEGER                                       :: ierr
@@ -3059,10 +2885,9 @@ include 'mpif.h'
 #endif
   INTEGER                                       :: sizeoper,nbprocs,myrank
   DOUBLE PRECISION                              :: inv_size,sumh,sumtot
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: buffer2,buffer2s
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer 
+  COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:,:,:) :: buffer2,buffer2s
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: fullempty
-  DOUBLE PRECISION                              :: xsum
   TYPE(FFTHyb) :: FFTmrka
 
 #if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
@@ -3071,7 +2896,7 @@ include 'mpif.h'
 #endif
 
   IF ( .NOT. op%done ) &
-    CALL ERROR("Ctqmcoffdiag_getResult : Simulation not run                ")
+    CALL ERROR("CtqmcoffdiagComplex_getResult : Simulation not run                ")
 
   flavors     =  op%flavors
   inv_flavors = 1.d0 / DBLE(flavors)
@@ -3081,10 +2906,10 @@ include 'mpif.h'
   sp1 = 0
   spAll = 0
 
-!#ifdef CTCtqmcoffdiag_CHECK
+!#ifdef CTCtqmcoffdiagComplex_CHECK
   IF ( op%opt_check .GT. 0 ) THEN
-    op%errorImpurity = ImpurityOperator_getError(op%Impurity) * inv_flavors
-    op%errorBath     = BathOperatoroffdiag_getError    (op%Bath    ) * inv_flavors
+    op%errorImpurity = ImpurityOperator_getError(op%Impurity) * inv_flavors 
+    op%errorBath     = BathOperatoroffdiagComplex_getError(op%Bath) * inv_flavors 
   END IF
 !#endif
 
@@ -3098,15 +2923,15 @@ include 'mpif.h'
     MALLOC(beta,(1:op%samples+1,1:flavors))
   END IF
 
-  IF ( op%have_MPI .EQV. .TRUE.) THEN
+  IF ( op%have_MPI .EQV. .TRUE.) THEN 
     sp1   = 0
-    spAll = sp1 + flavors + 6
+    spAll = sp1 + flavors + 6 
 
-!#ifdef CTCtqmcoffdiag_ANALYSIS
+!#ifdef CTCtqmcoffdiagComplex_ANALYSIS
     IF ( op%opt_analysis .EQ. 1 ) &
-      spAll = spAll + 3*sp1
+      spAll = spAll + 3*sp1 
     IF ( op%opt_order .GT. 0 ) &
-      spAll = spAll + op%opt_order
+      spAll = spAll + op%opt_order 
     IF ( op%opt_noise .EQ. 1 ) &
       spAll = spAll + 2*(op%samples + 1)
 !#endif
@@ -3115,7 +2940,7 @@ include 'mpif.h'
     MALLOC(buffer,(1:spAll,1:MAX(2,flavors)))
   END IF
 
-!  op%seg_added    = op%seg_added    * inv_flavors
+!  op%seg_added    = op%seg_added    * inv_flavors 
 !  op%seg_removed  = op%seg_removed  * inv_flavors
 !  op%seg_sign     = op%seg_sign     * inv_flavors
 !  op%anti_added   = op%anti_added   * inv_flavors
@@ -3130,41 +2955,34 @@ include 'mpif.h'
     ! Reduction
     op%measN(1,iflavor)  = op%measN(1,iflavor) / ( op%measN(2,iflavor) * op%beta )
     ! Correction
-!#ifdef CTCtqmcoffdiag_ANALYSIS
+!#ifdef CTCtqmcoffdiagComplex_ANALYSIS
     IF ( op%opt_order .GT. 0 ) &
       op%measPerturbation(:   ,iflavor) = op%measPerturbation(:,iflavor) &
                                     / SUM(op%measPerturbation(:,iflavor))
-
-    IF ( op%opt_order .GT. 0 ) then
-      xsum = SUM(op%meas_fullemptylines(:,iflavor))
-      IF (xsum /= 0.0 ) then
-        op%meas_fullemptylines(:   ,iflavor) = op%meas_fullemptylines(:,iflavor) &
-                                      / SUM(op%meas_fullemptylines(:,iflavor))
-      else
-       op%meas_fullemptylines(:   ,iflavor) = zero
-      ENDIF
-      !write(6,*) "sum fullempty",iflavor,op%meas_fullemptylines(:,iflavor)
-    ENDIF
+    IF ( op%opt_order .GT. 0 ) &
+      op%meas_fullemptylines(:   ,iflavor) = op%meas_fullemptylines(:,iflavor) &
+                                    / SUM(op%meas_fullemptylines(:,iflavor))
+    !write(6,*) "sum fullempty",iflavor,op%meas_fullemptylines(:,iflavor)
 
     IF ( op%opt_analysis .EQ. 1 ) THEN
       op%measCorrelation (:,1,iflavor) = op%measCorrelation  (:,1,iflavor) &
                                     / SUM(op%measCorrelation (:,1,iflavor)) &
-                                    * op%inv_dt
+                                    * op%inv_dt 
       op%measCorrelation (:,2,iflavor) = op%measCorrelation  (:,2,iflavor) &
                                     / SUM(op%measCorrelation (:,2,iflavor)) &
-                                    * op%inv_dt
+                                    * op%inv_dt 
       op%measCorrelation (:,3,iflavor) = op%measCorrelation  (:,3,iflavor) &
                                     / SUM(op%measCorrelation (:,3,iflavor)) &
-                                    * op%inv_dt
+                                    * op%inv_dt 
     END IF
 !#endif
     IF ( op%opt_noise .EQ. 1 ) THEN
       TabX(1) = DBLE(op%modNoise2)
       TabX(2) = DBLE(op%modNoise1)
       DO itau = 1, op%samples+1
-        op%measNoiseG(itau,iflavor,2)%vec = -op%measNoiseG(itau,iflavor,2)%vec*op%inv_dt &
+        op%measNoiseG(itau,iflavor,2)%vec = -op%measNoiseG(itau,iflavor,2)%vec*op%inv_dt &  
                                            /(op%beta*DBLE(op%modNoise2))
-        op%measNoiseG(itau,iflavor,1)%vec = -op%measNoiseG(itau,iflavor,1)%vec*op%inv_dt &
+        op%measNoiseG(itau,iflavor,1)%vec = -op%measNoiseG(itau,iflavor,1)%vec*op%inv_dt &  
                                            /(op%beta*DBLE(op%modNoise1))
         n2 = op%measNoiseG(itau,iflavor,2)%tail
         TabY(1) = Stat_deviation(op%measNoiseG(itau,iflavor,2)%vec(1:n2))!*SQRT(n2/(n2-1))
@@ -3178,14 +2996,14 @@ include 'mpif.h'
 
   END DO
 !sui!write(6,*) "getresults"
-  CALL GreenHyboffdiag_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, .TRUE.,op%signvalue)
-  CALL GreenHyboffdiag_getHybrid(op%Greens)
- ! write(6,*) "op%measN",op%measN(1,:)
+  CALL GreenHyboffdiagComplex_measHybrid(op%Greens, op%Bath%M, op%Impurity%Particles, .TRUE.,op%signvalue,op%phasevalue)
+  CALL GreenHyboffdiagComplex_getHybrid(op%Greens)
+  !write(6,*) "op%measN",op%measN(1,:)
   MALLOC(measN_1,(flavors))
   do iflavor=1,flavors
     measN_1(iflavor)=op%measN(1,iflavor)
   enddo
-  CALL GreenHyboffdiag_setN(op%Greens, measN_1(:))
+  CALL GreenHyboffdiagComplex_setN(op%Greens, measN_1(:))
   FREE(measN_1)
 
 ! todoab case _nd and _d are not completely described.
@@ -3199,7 +3017,7 @@ include 'mpif.h'
   MALLOC(buffer2s,(1:sizeoper,flavors,flavors))
   MALLOC(fullempty,(2,flavors))
       !sui!write(6,*) "greens1"
-  IF ( op%have_MPI .EQV. .TRUE. ) THEN
+  IF ( op%have_MPI .EQV. .TRUE. ) THEN 
       !sui!write(6,*) "greens2"
     fullempty=0.d0
     buffer2 = op%Greens%oper
@@ -3253,7 +3071,7 @@ include 'mpif.h'
     displs(:) = (/ ( iflavor*n1, iflavor=0, op%size-1 ) /)
 #ifdef HAVE_MPI
 #if defined HAVE_MPI2_INPLACE
-    freqs(n1*op%rank+1:n1*(op%rank+1)) = op%measNoise(1)%vec(1:n1)
+    freqs(n1*op%rank+1:n1*(op%rank+1)) = op%measNoise(1)%vec(1:n1) 
     CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                         freqs, counts, displs, &
                         MPI_DOUBLE_PRECISION, op%MY_COMM, ierr)
@@ -3277,7 +3095,7 @@ include 'mpif.h'
     displs(:) = (/ ( iflavor*n2, iflavor=0, op%size-1 ) /)
 #ifdef HAVE_MPI
 #if defined HAVE_MPI2_INPLACE
-    freqs(n2*op%rank+1:n2*(op%rank+1)) = op%measNoise(2)%vec(1:n2)
+    freqs(n2*op%rank+1:n2*(op%rank+1)) = op%measNoise(2)%vec(1:n2) 
     CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                         freqs, counts, displs, &
                         MPI_DOUBLE_PRECISION, op%MY_COMM, ierr)
@@ -3385,8 +3203,8 @@ include 'mpif.h'
   CALL ImpurityOperator_getErrorOverlap(op%Impurity,op%measDE)
   ! Add the difference between true calculation and quick calculation of the
   ! last sweep overlap to measDE(2,2)
-  !op%measDE = op%measDE * DBLE(op%measurements)
-  IF ( op%have_MPI .EQV. .TRUE. ) THEN
+  !op%measDE = op%measDE * DBLE(op%measurements) 
+  IF ( op%have_MPI .EQV. .TRUE. ) THEN 
     IF ( op%opt_analysis .EQ. 1 ) THEN
       buffer(last+1:last+sp1,:) = op%measCorrelation(:,1,:)
       last = last + sp1
@@ -3407,12 +3225,12 @@ include 'mpif.h'
     END IF
 !  op%measDE(2,2) = a*EXP(b*LOG(DBLE(op%sweeps*op%size)))
     buffer(spall-(flavors+5):spAll-6,:) = op%measDE(:,:)
-!    buffer(spAll  ,1) = op%seg_added
-!    buffer(spAll-1,1) = op%seg_removed
-!    buffer(spAll-2,1) = op%seg_sign
-!    buffer(spAll  ,2) = op%anti_added
+!    buffer(spAll  ,1) = op%seg_added   
+!    buffer(spAll-1,1) = op%seg_removed 
+!    buffer(spAll-2,1) = op%seg_sign    
+!    buffer(spAll  ,2) = op%anti_added  
 !    buffer(spAll-1,2) = op%anti_removed
-!    buffer(spAll-2,2) = op%anti_sign
+!    buffer(spAll-2,2) = op%anti_sign   
     buffer(spAll  ,1) = op%stats(1)
     buffer(spAll-1,1) = op%stats(2)
     buffer(spAll-2,1) = op%stats(3)
@@ -3423,10 +3241,11 @@ include 'mpif.h'
     buffer(spAll-3,2) = DBLE(op%modGlobalMove(2))
     buffer(spAll-4,1) = a
     buffer(spAll-4,2) = b
-!#ifdef CTCtqmcoffdiag_CHECK
+!#ifdef CTCtqmcoffdiagComplex_CHECK
     buffer(spAll-5,1) = op%errorImpurity
-    buffer(spAll-5,2) = op%errorBath
+    buffer(spAll-5,2) = op%errorBath 
     signvaluemeassum = 0
+    phasevaluemeassum = 0
 !#endif
 
 #ifdef HAVE_MPI
@@ -3441,11 +3260,13 @@ include 'mpif.h'
     FREE(buffer2_out)
 #endif
     CALL MPI_ALLREDUCE(buffer2, buffer2s, sizeoper*flavors*flavors, &
-                     MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
+                     MPI_DOUBLE_COMPLEX, MPI_SUM, op%MY_COMM, ierr)
     CALL MPI_ALLREDUCE([op%runtime], arr, 1, MPI_DOUBLE_PRECISION, MPI_MAX, op%MY_COMM, ierr)
     op%runtime=arr(1)
     CALL MPI_ALLREDUCE([op%Greens%signvaluemeas], arr, 1, MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
     signvaluemeassum=arr(1)
+    CALL MPI_ALLREDUCE([op%Greens%phasevaluemeas], arr , 1, MPI_DOUBLE_COMPLEX, MPI_SUM, op%MY_COMM, ierr)                                                                                   
+    phasevaluemeassum=arr(1)
 #if defined HAVE_MPI2_INPLACE
     IF ( op%opt_histo .GT. 0 ) THEN
       CALL MPI_ALLREDUCE(MPI_IN_PLACE,op%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
@@ -3462,7 +3283,7 @@ include 'mpif.h'
                op%MY_COMM, ierr)
     END IF
     CALL MPI_ALLREDUCE(MPI_IN_PLACE, sumh, 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
-              op%MY_COMM, ierr)
+              op%MY_COMM, ierr)     
 #else
       MALLOC(buffer1_out,(flavors+1))
       CALL MPI_ALLREDUCE(op%occup_histo_time, buffer1_out, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
@@ -3478,7 +3299,7 @@ include 'mpif.h'
     ENDIF
 #endif
 
-
+  
     buffer          = buffer * inv_size
     op%measDE(:,:)  = buffer(spall-(flavors+5):spAll-6,:)
 !    op%seg_added    = buffer(spAll  ,1)
@@ -3495,11 +3316,11 @@ include 'mpif.h'
     op%stats(6)    = buffer(spAll-2,2)
     op%swap         = buffer(spAll-3,1)
     op%modGlobalMove(2) = NINT(buffer(spAll-3,2))
-    a               = buffer(spAll-4,1)
+    a               = buffer(spAll-4,1) 
     b               = buffer(spAll-4,2)
-!!#ifdef CTCtqmcoffdiag_CHECK
-    op%errorImpurity= buffer(spAll-5,1)
-    op%errorBath    = buffer(spAll-5,2)
+!!#ifdef CTCtqmcoffdiagComplex_CHECK
+    op%errorImpurity= buffer(spAll-5,1) 
+    op%errorBath    = buffer(spAll-5,2)   
 !#endif
 
    ! DO iflavor = 1, flavors
@@ -3508,8 +3329,9 @@ include 'mpif.h'
     op%Greens%oper = buffer2s/float(nbprocs)
    ! write(6,*) "buffer2s",(op%Greens%oper(1,n1,n1),n1=1,flavors)
     op%Greens%signvaluemeas = signvaluemeassum/float(nbprocs)
+    op%Greens%phasevaluemeas = phasevaluemeassum/float(nbprocs)   
     !sui!write(6,*) "nbprocs",nbprocs,op%Greens%signvaluemeas
-    op%Greens%oper = op%Greens%oper / op%Greens%signvaluemeas
+    op%Greens%oper = op%Greens%oper / op%Greens%phasevaluemeas  
    ! write(6,*) "buffer3s",(op%Greens%oper(1,n1,n1),n1=1,flavors)
     IF ( op%opt_order .GT. 0 ) THEN
       op%meas_fullemptylines= fullempty/float(nbprocs)
@@ -3522,11 +3344,11 @@ include 'mpif.h'
    !write(6,*) "aftermpi",op%Greens%oper(1,1,1) ,buffer2s(1,1,1)
     last = sp1
     IF ( op%opt_analysis .EQ. 1 ) THEN
-      op%measCorrelation(:,1,:) = buffer(last+1:last+sp1,:)
+      op%measCorrelation(:,1,:) = buffer(last+1:last+sp1,:) 
       last = last + sp1
-      op%measCorrelation(:,2,:) = buffer(last+1:last+sp1,:)
+      op%measCorrelation(:,2,:) = buffer(last+1:last+sp1,:) 
       last = last + sp1
-      op%measCorrelation(:,3,:) = buffer(last+1:last+sp1,:)
+      op%measCorrelation(:,3,:) = buffer(last+1:last+sp1,:) 
       last = last + sp1
     END IF
     IF ( op%opt_order .GT. 0 ) THEN
@@ -3558,11 +3380,11 @@ include 'mpif.h'
     IF ( op%density(1,endDensity) .EQ. -1.d0 ) &
       endDensity = endDensity - 1
     CALL FFTHyb_init(FFTmrka,endDensity,DBLE(op%thermalization)/DBLE(op%measurements*op%opt_spectra))
-    ! Not very Beauty
+    ! Not very Beauty 
     MALLOC(freqs,(1:FFTmrka%size/2))
     DO iflavor = 1, flavors
-      ! mean value is removed to supress the continue composent
-      CALL FFTHyb_setData(FFTmrka,op%density(iflavor,1:endDensity)/op%beta+op%Greens%oper(op%samples+1,iflavor,iflavor))
+      ! mean value is removed to supress the continue composent 
+      CALL FFTHyb_setData(FFTmrka,op%density(iflavor,1:endDensity)/op%beta+real(op%Greens%oper(op%samples+1,iflavor,iflavor)))
       CALL FFTHyb_run(FFTmrka,1)
       CALL FFTHyb_getData(FFTmrka,endDensity,op%density(iflavor,:),freqs)
     END DO
@@ -3632,7 +3454,7 @@ include 'mpif.h'
       enddo
     end if
     write(op%ostream,'(a,f10.4)') " all" , sumh
-
+    
     sumtot=0
     do nelec=0,10
       spinmin=modulo(nelec,2)
@@ -3689,35 +3511,20 @@ include 'mpif.h'
 
       else
         ! SOC
-        ! In the jmj local basis
-        if (jmjbasis .eq. 1) then
-          open (unit=735,file=trim(fname)//'_LocalMagnSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
-          write(735,*) '#Tau <gjJz(tau).gjJz(0)>'
-          do n1=1,op%samples
-            op%chi(:,n1) = op%chi(:,n1)/float(nbprocs)/float(op%samples)
-            write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chi(1,n1))
-          end do
-          !add tau=beta
-          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%chi(1,1))
-
-        else
-        ! SOC
-        ! In the Ylm or CTQMC basis
-          open (unit=735,file=trim(fname)//'_LocalMagnSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
-          write(735,*) '#Tau Total Orbital Spin'
-          do n1=1,op%samples
-            op%chi(:,n1) = op%chi(:,n1)/float(nbprocs)/float(op%samples)
-            write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chi(n2,n1),n2=1,3)
-          end do
-          !add tau=beta
-          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%chi(n2,1),n2=1,3)
-        endif
+        open (unit=735,file=trim(fname)//'_LocalMagnSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+        write(735,*) '#Tau Total Orbital Spin'
+        do n1=1,op%samples
+          op%chi(:,n1) = op%chi(:,n1)/float(nbprocs)/float(op%samples)
+          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chi(n2,n1),n2=1,3)
+        end do
+        !add tau=beta
+        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (op%samples)*op%beta/op%samples,(op%chi(n2,1),n2=1,3)
       endif
     close(unit=735)
     endif
 
     ! Local Charge Susceptiblity
-    if(op%opt_histo .gt. 2) then
+    if(op%opt_histo .gt. 2) then 
       op%ntot(:) = op%ntot(:)/float(nbprocs)/float(op%samples)
       open (unit=735,file=trim(fname)//'_LocalChargeSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
       write(735,*) '#Tau Total <ntot>'
@@ -3735,18 +3542,18 @@ include 'mpif.h'
   END IF
 
 
-END SUBROUTINE Ctqmcoffdiag_getResult
+END SUBROUTINE CtqmcoffdiagComplex_getResult
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_symmetrizeGreen
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_symmetrizeGreen
 !! NAME
-!!  Ctqmcoffdiag_symmetrizeGreen
+!!  CtqmcoffdiagComplex_symmetrizeGreen
 !!
 !! FUNCTION
 !!  optionnaly symmetrize the green functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3764,10 +3571,10 @@ END SUBROUTINE Ctqmcoffdiag_getResult
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_symmetrizeGreen(op, syms)
+SUBROUTINE CtqmcoffdiagComplex_symmetrizeGreen(op, syms)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)                     , INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagComplex)                     , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: syms
 !Local variables ------------------------------
   !INTEGER :: iflavor1
@@ -3780,10 +3587,10 @@ SUBROUTINE Ctqmcoffdiag_symmetrizeGreen(op, syms)
 
 !  flavors = op%flavors
 !  IF ( SIZE(syms,1) .NE. flavors .OR. SIZE(syms,2) .NE. flavors ) THEN
-!    CALL WARNALL("Ctqmcoffdiag_symmetrizeGreen : wrong opt_sym -> not symmetrizing")
+!    CALL WARNALL("CtqmcoffdiagComplex_symmetrizeGreen : wrong opt_sym -> not symmetrizing")
 !    RETURN
 !  END IF
-!
+! 
 !  MALLOC(green_tmp,(1:op%samples+1,flavors))
 !  green_tmp(:,:) = 0.d0
 !  MALLOC(n_tmp,(1:flavors))
@@ -3802,18 +3609,18 @@ SUBROUTINE Ctqmcoffdiag_symmetrizeGreen(op, syms)
 !  END DO
 !  FREE(green_tmp)
 !  FREE(n_tmp)
-END SUBROUTINE Ctqmcoffdiag_symmetrizeGreen
+END SUBROUTINE CtqmcoffdiagComplex_symmetrizeGreen
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_getGreen
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_getGreen
 !! NAME
-!!  Ctqmcoffdiag_getGreen
+!!  CtqmcoffdiagComplex_getGreen
 !!
 !! FUNCTION
 !!  Get the full green functions in time and/or frequency
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3831,12 +3638,12 @@ END SUBROUTINE Ctqmcoffdiag_symmetrizeGreen
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
+SUBROUTINE CtqmcoffdiagComplex_getGreen(op, Gtau, Gw)
 
 !Arguments ------------------------------------
- USE m_GreenHyboffdiag
-  TYPE(Ctqmcoffdiag)          , INTENT(INOUT)    :: op
-  DOUBLE PRECISION, DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gtau
+ USE m_GreenHyboffdiagComplex
+  TYPE(CtqmcoffdiagComplex)          , INTENT(INOUT)    :: op
+  COMPLEX(KIND=8), DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gtau
   COMPLEX(KIND=8), DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gw
 !Local variables ------------------------------
   !INTEGER                            :: itime
@@ -3846,40 +3653,41 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
   INTEGER                            :: iflavor3
   INTEGER                            :: flavors,tail
   INTEGER                            :: ifreq,itime
-  DOUBLE PRECISION :: u1
-  DOUBLE PRECISION :: u2
-  DOUBLE PRECISION :: u3
-  DOUBLE PRECISION :: Un
-  DOUBLE PRECISION :: UUnn,iw !omega,
+  COMPLEX(KIND=8) :: u1 
+  COMPLEX(KIND=8) :: u2
+  COMPLEX(KIND=8) :: u3
+  COMPLEX(KIND=8) :: Un
+  COMPLEX(KIND=8) :: UUnn
+  DOUBLE PRECISION :: iw !omega,
   CHARACTER(LEN=4)                   :: cflavors
   CHARACTER(LEN=50)                  :: string
-  TYPE(GreenHyboffdiag)                     :: F_tmp
+  TYPE(GreenHyboffdiagComplex)       :: F_tmp
 
   flavors = op%flavors
   DO iflavor1 = 1, flavors
-    u1 = 0.d0
-    u2 = 0.d0
-    u3 = 0.d0
+    u1 = cmplx(0.d0,0.d0,kind=8)
+    u2 = cmplx(0.d0,0.d0,kind=8)
+    u3 = cmplx(0.d0,0.d0,kind=8)
     DO iflavor2 = 1, flavors
       IF ( iflavor2 .EQ. iflavor1 ) CYCLE
       Un = op%Impurity%mat_U(iflavor2,iflavor1) * op%measN(1,iflavor2)
 !      Un = op%Impurity%mat_U(iflavor2,iflavor1) * (op%Greens%oper(1,iflavor2,iflavor2) + 1.d0)
       !write(6,*) "forsetmoments",iflavor1,iflavor2,(op%Greens%oper(1,iflavor2,iflavor2) + 1.d0), Un
-      u1 = u1 + Un
-      u2 = u2 + Un*op%Impurity%mat_U(iflavor2,iflavor1)
+      u1 = u1 + Un 
+      u2 = u2 + Un*op%Impurity%mat_U(iflavor2,iflavor1) 
       DO iflavor3 = 1, flavors
         IF ( iflavor3 .EQ. iflavor2 .OR. iflavor3 .EQ. iflavor1 ) CYCLE
         UUnn = (op%Impurity%mat_U(iflavor2,iflavor1)*op%Impurity%mat_U(iflavor3,iflavor1)) * &
-&                                                    op%measDE(iflavor2,iflavor3)
-        u2 = u2 + UUnn
+&                                                    op%measDE(iflavor2,iflavor3) 
+        u2 = u2 + UUnn 
       END DO
-    END DO
+    END DO  
      ! write(6,*) "u1,u2",u1,u2
 
     DO iflavor1b = 1, flavors
       u3 =-(op%Impurity%mat_U(iflavor1,iflavor1b))*op%Greens%oper(1,iflavor1,iflavor1b)
       ! u3=U_{1,1b}*G_{1,1b}
-      CALL GreenHyboffdiag_setMoments(op%Greens,iflavor1,iflavor1b,u1,u2,u3)
+      CALL GreenHyboffdiagComplex_setMoments(op%Greens,iflavor1,iflavor1b,u1,u2,u3)
     END DO ! iflavor1b
 
   END DO ! iflavor1
@@ -3888,7 +3696,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
     DO iflavor1 = 1, flavors
       DO iflavor2 = 1, flavors
         Gtau(1:op%samples,iflavor1,iflavor2) = op%Greens%oper(1:op%samples,iflavor1,iflavor2)
-      END DO
+      END DO  
     END DO ! iflavor1
   END IF
 ! !--------- Write Occupation matrix before Gtau
@@ -3916,7 +3724,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
     DO iflavor1 = 1, flavors
       DO iflavor1b = 1, flavors
        !call nfourier3(op%Greens%oper(1:op%samples,iflavor1,iflavor1b),Gw(1:op%samples,iflavor1,iflavor1b),iflavor1==iflavor1b,op%Greens%samples,op%Greens%samples-1,op%Greens%beta,1.d0,op%Greens%Mk(iflavor1,iflavor1b,1),op%Greens%Mk(iflavor1,iflavor1b,2),op%Greens%Mk(iflavor1,iflavor1b,3))
-      END DO
+      END DO  
     END DO ! iflavor1
 !    ============== write Gomega_nd.dat
     if(op%rank==0) then
@@ -3924,8 +3732,8 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
     WRITE(cflavors,'(I4)') 2*(flavors*flavors+1)
     string = '(1x,'//TRIM(ADJUSTL(cflavors))//'E15.5)'
     !write(6,*) " op%Greens%Wmax", op%Greens%Wmax
-    do  iflavor1=1, flavors
-      do  iflavor1b=1, flavors
+    do  iflavor1=1, flavors 
+      do  iflavor1b=1, flavors 
     write(44,*) "#op%Greens%Mk(iflavor1,iflavor2,1",op%Greens%Mk(iflavor1,iflavor1b,:)
         DO ifreq = 1, op%samples
 !      !write(6,string) (DBLE(ifreq)*2-1)*3.1415/op%Greens%beta, &
@@ -3934,10 +3742,10 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
         iw=aimag(Gw(ifreq,op%flavors,op%flavors+1))
          WRITE(44,string) aimag(Gw(ifreq,op%flavors,op%flavors+1)),&
          real(Gw(ifreq,iflavor1,iflavor1b)),aimag(Gw(ifreq,iflavor1,iflavor1b)),&
-            ( -op%Greens%Mk(iflavor1,iflavor1b,2) )/(iw*iw) , (op%Greens%Mk(iflavor1,iflavor1b,1))/iw!-op%Greens%Mk(iflavor1,iflavor1b,3)/(iw*iw))/iw
+            ( -op%Greens%Mk(iflavor1,iflavor1b,2) )/(iw*iw) , (op%Greens%Mk(iflavor1,iflavor1b,1))/iw!-op%Greens%Mk(iflavor1,iflavor1b,3)/(iw*iw))/iw 
       !   WRITE(102,*) aimag(Gw(ifreq,op%flavors,op%flavors+1)), (op%Greens%Mk(iflavor1,iflavor1b,1))/iw,op%Greens%Mk(iflavor1,iflavor1b,1),iw
         END DO
-         WRITE(44,*)
+         WRITE(44,*) 
       END DO
     END DO
     close(44)
@@ -3947,22 +3755,22 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
 !================================================
        !!write(6,*) "present gw", present(gw)
   IF ( PRESENT( Gw ) ) THEN
-     !!write(6,*) "size gw",SIZE(Gw,DIM=2) ,flavors+1
+     !!write(6,*) "size gw",SIZE(Gw,DIM=2) ,flavors+1 
     IF ( SIZE(Gw,DIM=3) .EQ. flavors+1 ) THEN
      ! CALL GreenHyboffdiag_forFourier(op%Greens, Gomega=Gw, omega=Gw(:,op%flavors,op%flavors+1))
-      CALL GreenHyboffdiag_forFourier(op%Greens, Gomega=Gw, omega=Gw(:,op%flavors,op%flavors+1))
+      CALL GreenHyboffdiagComplex_forFourierComplex(op%Greens, Gomega=Gw, omega=Gw(:,op%flavors,op%flavors+1))
       !write(6,*) "1"
       !IF ( op%rank .EQ. 0 ) write(20,*) Gw(:,iflavor1)
-    ELSE IF ( SIZE(Gw,DIM=3) .EQ. flavors ) THEN
-      CALL GreenHyboffdiag_forFourier(op%Greens,Gomega=Gw)
+    ELSE IF ( SIZE(Gw,DIM=3) .EQ. flavors ) THEN  
+      CALL GreenHyboffdiagComplex_forFourierComplex(op%Greens,Gomega=Gw)
       !write(6,*) "2"
     ELSE
-      CALL WARNALL("Ctqmcoffdiag_getGreen : Gw is not valid                    ")
-      CALL GreenHyboffdiag_forFourier(op%Greens,Wmax=op%Wmax)
+      CALL WARNALL("CtqmcoffdiagComplex_getGreen : Gw is not valid                    ")
+      CALL GreenHyboffdiagComplex_forFourierComplex(op%Greens,Wmax=op%Wmax)
       !write(6,*) "3"
     END IF
   ELSE
-    CALL GreenHyboffdiag_forFourier(op%Greens,Wmax=op%Wmax)
+    CALL GreenHyboffdiagComplex_forFourierComplex(op%Greens,Wmax=op%Wmax)
   END IF
 !  ============== write Gomega_nd.dat
 !================================================
@@ -3973,10 +3781,10 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
   WRITE(cflavors,'(I4)') 2*(flavors*flavors+1)
   string = '(1x,'//TRIM(ADJUSTL(cflavors))//'E15.5)'
   !write(6,*) " op%Greens%Wmax", op%Greens%Wmax
-  do  iflavor1=1, flavors
-    do  iflavor1b=1, flavors
+  do  iflavor1=1, flavors 
+    do  iflavor1b=1, flavors 
   write(44,*) "#op%Greens%Mk(iflavor1,iflavor2,1",op%Greens%Mk(iflavor1,iflavor1b,:)
-      DO ifreq = 1, SIZE(Gw,1)
+      DO ifreq = 1, SIZE(Gw,1)    
 !    !write(6,string) (DBLE(ifreq)*2-1)*3.1415/op%Greens%beta, &
 !    (/ ((real(Gw(ifreq,iflavor1,iflavor1b)),imag(Gw(ifreq,iflavor1,iflavor1b)), iflavor1=1, flavors),iflavor1b=1,flavors) /)
 !    WRITE(44,string) (DBLE(ifreq)*2.d0-1.d0)*3.1415926/op%Greens%beta, &
@@ -3984,9 +3792,9 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
        WRITE(44,string) aimag(Gw(ifreq,op%flavors,op%flavors+1)),&
        real(Gw(ifreq,iflavor1,iflavor1b)),aimag(Gw(ifreq,iflavor1,iflavor1b)),&
           ( -op%Greens%Mk(iflavor1,iflavor1b,2) )/(iw*iw) , &
-&          (op%Greens%Mk(iflavor1,iflavor1b,1)-op%Greens%Mk(iflavor1,iflavor1b,3)/(iw*iw))/iw
+&          (op%Greens%Mk(iflavor1,iflavor1b,1)-op%Greens%Mk(iflavor1,iflavor1b,3)/(iw*iw))/iw 
       END DO
-       WRITE(44,*)
+       WRITE(44,*) 
     END DO
   END DO
   endif
@@ -3996,22 +3804,22 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
 
 
 !  ==============================
-  ! --- Initialize F_tmp
+  ! --- Initialize F_tmp 
   !write(6,*) "10"
 
   IF ( op%have_MPI .EQV. .TRUE. ) THEN
     !CALL GreenHyboffdiag_init(F_tmp,op%samples,op%beta,op%flavors,MY_COMM=op%MY_COMM)
-    CALL GreenHyboffdiag_init(F_tmp,op%samples,op%beta,flavors)
+    CALL GreenHyboffdiagComplex_init(F_tmp,op%samples,op%beta,flavors)
     !write(6,*) "10a"
   ELSE
-    CALL GreenHyboffdiag_init(F_tmp,op%samples,op%beta,flavors)
+    CALL GreenHyboffdiagComplex_init(F_tmp,op%samples,op%beta,flavors)
     !write(6,*) "10b"
   END IF
 
   !write(6,*) "11"
 !  CALL GreenHyboffdiag_setOperW(F_tmp,Gw)
 
-  tail = op%samples
+  tail = op%samples 
   F_tmp%Wmax=op%samples ! backFourier only works for linear freq: calculation of A and etc..
   MALLOC(F_tmp%oper_w,(1:tail,op%flavors,op%flavors))
   F_tmp%oper_w(1:tail,1:F_tmp%nflavors,1:F_tmp%nflavors) = Gw(1:tail,1:F_tmp%nflavors,1:F_tmp%nflavors)
@@ -4030,8 +3838,8 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
   if(3==4) then
 !================================================
     OPEN(UNIT=3337, FILE="Gomega_nd2.dat")
-    do  iflavor1=1, flavors
-      do  iflavor1b=1, flavors
+    do  iflavor1=1, flavors 
+      do  iflavor1b=1, flavors 
         do  ifreq=1, tail
 !         write(3337,*) (2.d0*DBLE(ifreq)-1.d0) * 3.1415/op%beta,real(F_tmp%oper_w(ifreq,iflavor1,iflavor1b)),&
 !   &     imag(F_tmp%oper_w(ifreq,iflavor1,iflavor1b))
@@ -4040,9 +3848,9 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
 
       !    omega=(2.d0*DBLE(ifreq)-1.d0) * 3.1415/op%beta
  !        F_tmp%oper_w(ifreq,iflavor1,iflavor1b)=0.1**2/Gw(ifreq,op%flavors,op%flavors+1)
-        enddo
+        enddo 
         write(3337,*)
-      enddo
+      enddo 
     enddo
     close(3337)
 !================================================
@@ -4070,22 +3878,22 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
   endif
 !================================================
 
-  CALL GreenHyboffdiag_destroy(F_tmp)
+  CALL GreenHyboffdiagComplex_destroy(F_tmp)
 
   !FREE(F_tmp%oper_w)
 !  ==============================
-END SUBROUTINE Ctqmcoffdiag_getGreen
+END SUBROUTINE CtqmcoffdiagComplex_getGreen
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_getD
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_getD
 !! NAME
-!!  Ctqmcoffdiag_getD
+!!  CtqmcoffdiagComplex_getD
 !!
 !! FUNCTION
 !!  get double occupation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4102,10 +3910,10 @@ END SUBROUTINE Ctqmcoffdiag_getGreen
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_getD(op, D)
+SUBROUTINE CtqmcoffdiagComplex_getD(op, D)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)       , INTENT(IN ) :: op
+  TYPE(CtqmcoffdiagComplex)       , INTENT(IN ) :: op
   DOUBLE PRECISION, INTENT(OUT) :: D
 !Local variables ------------------------------
   INTEGER                       :: iflavor1
@@ -4128,18 +3936,18 @@ SUBROUTINE Ctqmcoffdiag_getD(op, D)
 
   !ENDIF
 
-END SUBROUTINE Ctqmcoffdiag_getD
+END SUBROUTINE CtqmcoffdiagComplex_getD
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_getE
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_getE
 !! NAME
-!!  Ctqmcoffdiag_getE
+!!  CtqmcoffdiagComplex_getE
 !!
 !! FUNCTION
 !!  get interaction energy and noise on it
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4157,27 +3965,27 @@ END SUBROUTINE Ctqmcoffdiag_getD
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_getE(op,E,noise)
+SUBROUTINE CtqmcoffdiagComplex_getE(op,E,noise)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)       , INTENT(IN ) :: op
+  TYPE(CtqmcoffdiagComplex)       , INTENT(IN ) :: op
   DOUBLE PRECISION, INTENT(OUT) :: E
   DOUBLE PRECISION, INTENT(OUT) :: Noise
 
-  E = op%measDE(1,1)
+  E = op%measDE(1,1)  
   Noise = op%a_Noise*(DBLE(op%sweeps)*DBLE(op%size))**op%b_Noise
-END SUBROUTINE Ctqmcoffdiag_getE
+END SUBROUTINE CtqmcoffdiagComplex_getE
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_printAll
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_printAll
 !! NAME
-!!  Ctqmcoffdiag_printAll
+!!  CtqmcoffdiagComplex_printAll
 !!
 !! FUNCTION
 !!  print different functions computed during the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4193,43 +4001,43 @@ END SUBROUTINE Ctqmcoffdiag_getE
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_printAll(op)
+SUBROUTINE CtqmcoffdiagComplex_printAll(op)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT) :: op
 
   IF ( .NOT. op%done ) &
-    CALL WARNALL("Ctqmcoffdiag_printAll : Simulation not run                 ")
+    CALL WARNALL("CtqmcoffdiagComplex_printAll : Simulation not run                 ")
 
 !sui!write(6,*) "op%stats",op%stats
-  CALL Ctqmcoffdiag_printQMC(op)
+  CALL CtqmcoffdiagComplex_printQMC(op)
 
-  CALL Ctqmcoffdiag_printGreen(op)
+  CALL CtqmcoffdiagComplex_printGreen(op)
 
-  CALL Ctqmcoffdiag_printD(op)
+  CALL CtqmcoffdiagComplex_printD(op)
 
-!  CALL Ctqmcoffdiag_printE(op)
+!  CALL CtqmcoffdiagComplex_printE(op)
 
-!#ifdef CTCtqmcoffdiag_ANALYSIS
-  CALL Ctqmcoffdiag_printPerturbation(op)
+!#ifdef CTCtqmcoffdiagComplex_ANALYSIS
+!  CALL CtqmcoffdiagComplex_printPerturbation(op)
 
-  CALL Ctqmcoffdiag_printCorrelation(op)
+  CALL CtqmcoffdiagComplex_printCorrelation(op)
 !#endif
 
-  CALL Ctqmcoffdiag_printSpectra(op)
+  CALL CtqmcoffdiagComplex_printSpectra(op)
 
-END SUBROUTINE Ctqmcoffdiag_printAll
+END SUBROUTINE CtqmcoffdiagComplex_printAll
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_printQMC
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_printQMC
 !! NAME
-!!  Ctqmcoffdiag_printQMC
+!!  CtqmcoffdiagComplex_printQMC
 !!
 !! FUNCTION
 !!  print ctqmc statistics
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4245,10 +4053,10 @@ END SUBROUTINE Ctqmcoffdiag_printAll
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_printQMC(op)
+SUBROUTINE CtqmcoffdiagComplex_printQMC(op)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER                  :: ostream
   INTEGER                  :: iflavor,iflavorbis,iorder
@@ -4264,7 +4072,7 @@ SUBROUTINE Ctqmcoffdiag_printQMC(op)
   sweeps    = DBLE(op%sweeps)
   invSweeps = 1.d0/sweeps
 
-  WRITE(ostream,'(1x,F13.0,A11,F10.2,A12,I5,A5)') sweeps*DBLE(op%size), " sweeps in ", op%runTime, &
+  WRITE(ostream,'(a,F13.0,A11,F10.2,A12,I5,A5)') "The QMC Solver did ",sweeps*DBLE(op%size), " sweeps in ", op%runTime, &
                  " seconds on ", op%size, " CPUs"
   WRITE(ostream,'(A28,F6.2)') "Segments added        [%] : ", op%stats(4)*invSweeps*100.d0
   WRITE(ostream,'(A28,F6.2)') "Segments removed      [%] : ", op%stats(5)*invSweeps*100.d0
@@ -4275,11 +4083,12 @@ SUBROUTINE Ctqmcoffdiag_printQMC(op)
   WRITE(ostream,'(A28,F6.2)') "Anti-segments <0 sign [%] : ", op%stats(3)*invSweeps*100.d0
   !WRITE(ostream,'(A28,F12.2)') "Sum of sign       [%] : ", op%stats(3)
   WRITE(ostream,'(A28,F13.2)') "Signe value               : ", op%Greens%signvaluemeas
+  WRITE(ostream,'(A28,F13.2,F13.2)') "Phase value               : ", op%Greens%phasevaluemeas
   IF ( op%modGlobalMove(1) .LT. op%sweeps + 1 ) THEN
     WRITE(ostream,'(A28,F6.2)') "Global Move           [%] : ", op%swap         *invSweeps*100.d0*op%modGlobalMove(1)
     WRITE(ostream,'(A28,F6.2)') "Global Move Reduced   [%] : ", op%swap         / DBLE(op%modGlobalMove(2))*100.d0
   END IF
-!#ifdef CTCtqmcoffdiag_CHECK
+!#ifdef CTCtqmcoffdiagComplex_CHECK
   IF ( op%opt_check .EQ. 1 .OR. op%opt_check .EQ. 3 ) &
     WRITE(ostream,'(A28,E22.14)') "Impurity test         [%] : ", op%errorImpurity*100.d0
   IF ( op%opt_check .GE. 2 ) &
@@ -4306,25 +4115,25 @@ SUBROUTINE Ctqmcoffdiag_printQMC(op)
  ! write(ostream,'(17x,30i10)') (iflavorbis,iflavorbis=1,op%flavors)
  ! write(ostream,'(17x,30a)') ("----------",iflavorbis=1,op%flavors)
  ! do iflavor=1, op%flavors
- !   write(ostream,'(i17,a,30f10.4)') iflavor,"|",(op%Impurity%particles(IT)%tail
+ !   write(ostream,'(i17,a,30f10.4)') iflavor,"|",(op%Impurity%particles(IT)%tail)
  ! enddo
  ! write(ostream,'(17x,30a)') ("----------",iflavorbis=1,op%flavors)
  !------------------------------------------------------------------------------------------
  !--------- Write G(L)
-  write(ostream,'(17x,a)') "G(L)"
+  write(ostream,'(17x,a)') "G(tau = L)"
   write(ostream,'(17x,30i10)') (iflavorbis,iflavorbis=1,op%flavors)
   write(ostream,'(18x,30a)') ("----------",iflavorbis=1,op%flavors)
   do iflavor=1, op%flavors
-    write(ostream,'(7x,i10,a,30f10.4)') iflavor,"|",(op%Greens%oper(op%samples,iflavor,iflavorbis),iflavorbis=1,op%flavors)
+    write(ostream,'(7x,i10,a,30f10.4)') iflavor,"|",(real(op%Greens%oper(op%samples,iflavor,iflavorbis)),iflavorbis=1,op%flavors)
   enddo
   write(ostream,'(18x,30a)') ("----------",iflavorbis=1,op%flavors),ch10
  !------------------------------------------------------------------------------------------
  !--------- Write G(1)
-  write(ostream,'(17x,a)') "G(1)"
+  write(ostream,'(17x,a)') "G(tau = 1)"
   write(ostream,'(17x,30i10)') (iflavorbis,iflavorbis=1,op%flavors)
   write(ostream,'(18x,30a)') ("----------",iflavorbis=1,op%flavors)
   do iflavor=1, op%flavors
-    write(ostream,'(7x,i10,a,30f10.4)') iflavor,"|",(op%Greens%oper(1,iflavor,iflavorbis),iflavorbis=1,op%flavors)
+    write(ostream,'(7x,i10,a,30f10.4)') iflavor,"|",(real(op%Greens%oper(1,iflavor,iflavorbis)),iflavorbis=1,op%flavors)
   enddo
   write(ostream,'(18x,30a)') ("----------",iflavorbis=1,op%flavors),ch10
  !------------------------------------------------------------------------------------------
@@ -4332,12 +4141,12 @@ SUBROUTINE Ctqmcoffdiag_printQMC(op)
   WRITE(ostream,'(A28,F8.4,A3,F7.4)') "Noise                 [U] : ", op%a_Noise, " x^", op%b_Noise
   WRITE(ostream,'(A28,E10.2)')  "Niquist puls.     [/beta] : ", ACOS(-1.d0)*op%inv_dt
   WRITE(ostream,'(A28,E22.14)') "Max Acc. Epot Error   [U] : ", op%measDE(2,2)/(op%beta*op%modNoise1*2.d0)*sweeps
-
+  
   !WRITE(ostream,'(A28,F7.4,A3,F7.4,A4,E20.14)') "Noise            [G(tau)] : ", op%a_Noise(2), "x^", op%b_Noise(2), " -> ", &
                                                               !op%a_Noise(2)*(sweeps*DBLE(op%size))**op%b_Noise(2)
  !----- PERTURBATION ORDER------------------------------------------------------------------
-  IF ( op%opt_order .GT. 0 ) THEN
-    write(ostream,*)
+  IF ( op%opt_order .GT. 0 ) THEN 
+    write(ostream,*) 
     WRITE(a,'(I2)') op%flavors
     string = '(A28,'//TRIM(ADJUSTL(a))//'(1x,I3))'
     WRITE(ostream,string) "Perturbation orders       : ",(/ (MAXLOC(op%measPerturbation(:, iflavor))-1, iflavor=1, op%flavors) /)
@@ -4352,8 +4161,8 @@ SUBROUTINE Ctqmcoffdiag_printQMC(op)
   END IF
  !------------------------------------------------------------------------------------------
  !----- PERTURBATION ORDER------------------------------------------------------------------
-  IF ( op%opt_order .GT. 0 ) THEN
-    write(ostream,*)
+  IF ( op%opt_order .GT. 0 ) THEN 
+    write(ostream,*) 
     write(ostream,'(17x,a)') "Proportion of full and empty orbital for order 0"
     write(ostream,'(17x,30i10)') (iflavorbis,iflavorbis=1,op%flavors)
     write(ostream,'(18x,30a)') ("----------",iflavorbis=1,op%flavors)
@@ -4364,27 +4173,27 @@ SUBROUTINE Ctqmcoffdiag_printQMC(op)
   !CALL FLUSH(op%ostream)
   IF ( ABS(((op%stats(4) *invSweeps*100.d0) / (op%stats(5) *invSweeps*100.d0) - 1.d0)) .GE. 0.02d0 &
    .OR. ABS(((op%stats(1)*invSweeps*100.d0) / (op%stats(2)*invSweeps*100.d0) - 1.d0)) .GE. 0.02d0 ) &
-    THEN
-    CALL WARNALL("Ctqmcoffdiag_printQMC : bad statistic according to moves. Increase sweeps")
+    THEN 
+    CALL WARNALL("CtqmcoffdiagComplex_printQMC : bad statistic according to moves. Increase sweeps")
   END IF
   IF ( ABS(op%b_Noise+0.5)/0.5d0 .GE. 0.05d0 ) &
-    CALL WARNALL("Ctqmcoffdiag_printQMC : bad statistic according to Noise. Increase sweeps")
+    CALL WARNALL("CtqmcoffdiagComplex_printQMC : bad statistic according to Noise. Increase sweeps")
 !  IF ( ISNAN(op%a_Noise) .OR. ISNAN(op%a_Noise) ) &
-!    CALL WARNALL("Ctqmcoffdiag_printQMC : NaN appeared. Increase sweeps    ")
+!    CALL WARNALL("CtqmcoffdiagComplex_printQMC : NaN appeared. Increase sweeps    ")
 
 
-END SUBROUTINE Ctqmcoffdiag_printQMC
+END SUBROUTINE CtqmcoffdiagComplex_printQMC
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_printGreen
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_printGreen
 !! NAME
-!!  Ctqmcoffdiag_printGreen
+!!  CtqmcoffdiagComplex_printGreen
 !!
 !! FUNCTION
 !!  print green functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4401,11 +4210,11 @@ END SUBROUTINE Ctqmcoffdiag_printQMC
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
+SUBROUTINE CtqmcoffdiagComplex_printGreen(op, oFileIn)
 
 !Arguments ------------------------------------
   use m_io_tools, only : flush_unit
-  TYPE(Ctqmcoffdiag)        , INTENT(IN)    :: op
+  TYPE(CtqmcoffdiagComplex)        , INTENT(IN)    :: op
   INTEGER  , OPTIONAL, INTENT(IN)    :: oFileIn
 !Local variables ------------------------------
   INTEGER                            :: oFile
@@ -4413,8 +4222,8 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
   INTEGER                            :: sp1
   INTEGER                            :: iflavor,iflavorb
   INTEGER                            :: flavors !, iflavor2 !,iflavor1,
-  CHARACTER(LEN=4)                   :: cflavors
-  CHARACTER(LEN=50)                  :: string
+  CHARACTER(LEN=4)                   :: cflavors,hcflavors
+  CHARACTER(LEN=50)                  :: string,hstring
   DOUBLE PRECISION                   :: dt
   DOUBLE PRECISION                   :: sweeps
 
@@ -4429,6 +4238,10 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
   END IF
   OPEN(UNIT=43, FILE="Gtau_nd.dat")
   rewind(43)
+  OPEN(UNIT=143, FILE="Gtau_nd_Re_ctqmc.dat")             
+  rewind(143)                                             
+  OPEN(UNIT=243, FILE="Gtau_nd_Im_ctqmc.dat")             
+  rewind(243)                                             
   sp1     =  op%samples
   dt      =  op%beta / DBLE(sp1)
   sp1     =  sp1 + 1
@@ -4460,18 +4273,26 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
 !   END DO
 !  --- Print full non diagonal Gtau in Gtau_nd.dat
     WRITE(cflavors,'(I4)') (flavors*flavors+1)
+    WRITE(hcflavors,'(I4)') (flavors*flavors+1) 
 !   write(47,*) "cflavors",cflavors
     string = '(1x,'//TRIM(ADJUSTL(cflavors))//'ES22.14)'
+    hstring = '(1x,'//TRIM(ADJUSTL(hcflavors))//'ES22.14)' 
 !   write(47,*) string
     DO itime = 1, sp1
       WRITE(43,string) DBLE(itime-1)*dt, &
       & (/ ((op%Greens%oper(itime,iflavor,iflavorb), iflavorb=1, flavors),iflavor=1,flavors) /)
+      WRITE(143,hstring) DBLE(itime-1)*dt, &                                                             
+      & (/ ((real(op%Greens%oper(itime,iflavor,iflavorb)), iflavorb=1, flavors),iflavor=1,flavors) /)    
+      WRITE(243,hstring) DBLE(itime-1)*dt, &                                                             
+      & (/ ((aimag(op%Greens%oper(itime,iflavor,iflavorb)), iflavorb=1, flavors),iflavor=1,flavors) /)   
 !     WRITE(44,*) DBLE(itime-1)*dt, &
 !     & (op%Greens%oper(itime,iflavor,iflavor), iflavor=1, flavors)
 !     WRITE(44,string) DBLE(itime-1)*dt, &
 !     & (op%Greens%oper(itime,iflavor,iflavor), iflavor=1, flavors)
     END DO
-      WRITE(43,*)
+      WRITE(43,*) 
+      WRITE(143,*)
+      WRITE(243,*)
   END IF
 !    DO iflavor = 1, flavors
 !      DO iflavor2 = 1, flavors
@@ -4479,31 +4300,31 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
 !        do  itime=1,sp1
 !          write(4436,*) DBLE(itime-1)*dt,real(op%Greens%oper(itime,iflavor,iflavor2))
 !        enddo
-!          write(4436,*)
+!          write(4436,*) 
 !      END DO
 !    END DO
 !    close(4436)
 
   IF ( .NOT. PRESENT(oFileIn) ) CLOSE(oFile)
   CLOSE(43)
-! CLOSE(44)
-! CLOSE(45)
+  CLOSE(143)
+  CLOSE(243)
 ! CLOSE(46)
 ! CLOSE(47)
   !call flush_unit(43)
 
-END SUBROUTINE Ctqmcoffdiag_printGreen
+END SUBROUTINE CtqmcoffdiagComplex_printGreen
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_printD
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_printD
 !! NAME
-!!  Ctqmcoffdiag_printD
+!!  CtqmcoffdiagComplex_printD
 !!
 !! FUNCTION
 !!  print individual double occupancy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4520,10 +4341,10 @@ END SUBROUTINE Ctqmcoffdiag_printGreen
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_printD(op,oFileIn)
+SUBROUTINE CtqmcoffdiagComplex_printD(op,oFileIn)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)          , INTENT(IN)    :: op
+  TYPE(CtqmcoffdiagComplex)          , INTENT(IN)    :: op
   INTEGER  , OPTIONAL, INTENT(IN)    :: oFileIn
 !Local variables ------------------------------
   INTEGER                            :: oFile
@@ -4548,18 +4369,18 @@ SUBROUTINE Ctqmcoffdiag_printD(op,oFileIn)
 
   IF ( .NOT. PRESENT(oFileIn) ) CLOSE(oFile)
 
-END SUBROUTINE Ctqmcoffdiag_printD
+END SUBROUTINE CtqmcoffdiagComplex_printD
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_printE
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_printE
 !! NAME
-!!  Ctqmcoffdiag_printE
+!!  CtqmcoffdiagComplex_printE
 !!
 !! FUNCTION
-!!  print energy and noise
+!!  print energy and noise 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4576,10 +4397,10 @@ END SUBROUTINE Ctqmcoffdiag_printD
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_printE(op,oFileIn)
+SUBROUTINE CtqmcoffdiagComplex_printE(op,oFileIn)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)          , INTENT(IN)    :: op
+  TYPE(CtqmcoffdiagComplex)          , INTENT(IN)    :: op
   INTEGER  , OPTIONAL, INTENT(IN)    :: oFileIn
 !Local variables ------------------------------
   INTEGER                            :: oFile
@@ -4596,25 +4417,25 @@ SUBROUTINE Ctqmcoffdiag_printE(op,oFileIn)
     OPEN(UNIT=oFile, FILE="BetaENoise.dat")
   END IF
 
-  CALL Ctqmcoffdiag_getE(op,E,Noise)
+  CALL CtqmcoffdiagComplex_getE(op,E,Noise)
 
   WRITE(oFile,'(1x,F3.2,A2,ES21.14,A2,ES21.14)') op%beta, "  ", E, "  ",  Noise
 
   IF ( .NOT. PRESENT(oFileIn) ) CLOSE(oFile)
 
-END SUBROUTINE Ctqmcoffdiag_printE
+END SUBROUTINE CtqmcoffdiagComplex_printE
 !!***
 
-!#ifdef CTCtqmcoffdiag_ANALYSIS
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_printPerturbation
+!#ifdef CTCtqmcoffdiagComplex_ANALYSIS
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_printPerturbation
 !! NAME
-!!  Ctqmcoffdiag_printPerturbation
+!!  CtqmcoffdiagComplex_printPerturbation
 !!
 !! FUNCTION
 !!  print perturbation order
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4632,10 +4453,10 @@ END SUBROUTINE Ctqmcoffdiag_printE
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_printPerturbation(op, oFileIn)
+SUBROUTINE CtqmcoffdiagComplex_printPerturbation(op, oFileIn)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)          , INTENT(IN)           :: op
+  TYPE(CtqmcoffdiagComplex)          , INTENT(IN)           :: op
   INTEGER  , OPTIONAL,  INTENT(IN)          :: oFileIn
 !Local variables-------------------------------
   INTEGER                                   :: oFile
@@ -4656,7 +4477,7 @@ SUBROUTINE Ctqmcoffdiag_printPerturbation(op, oFileIn)
   ELSE
     OPEN(UNIT=oFile, FILE="Perturbation.dat")
   END IF
-
+    
   order        =  op%opt_order
   flavors      =  op%flavors
 
@@ -4668,18 +4489,18 @@ SUBROUTINE Ctqmcoffdiag_printPerturbation(op, oFileIn)
   END DO
 
   IF ( .NOT. PRESENT(oFileIn) ) CLOSE(oFile)
-END SUBROUTINE Ctqmcoffdiag_printPerturbation
+END SUBROUTINE CtqmcoffdiagComplex_printPerturbation
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_printCorrelation
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_printCorrelation
 !! NAME
-!!  Ctqmcoffdiag_printCorrelation
+!!  CtqmcoffdiagComplex_printCorrelation
 !!
 !! FUNCTION
 !!  print correlation fonctions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4696,10 +4517,10 @@ END SUBROUTINE Ctqmcoffdiag_printPerturbation
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_printCorrelation(op, oFileIn)
+SUBROUTINE CtqmcoffdiagComplex_printCorrelation(op, oFileIn)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)          , INTENT(IN)             :: op
+  TYPE(CtqmcoffdiagComplex)          , INTENT(IN)             :: op
   INTEGER  , OPTIONAL, INTENT(IN)             :: oFileIn
 !Local variables ------------------------------
   INTEGER                                     :: oFile
@@ -4741,19 +4562,19 @@ SUBROUTINE Ctqmcoffdiag_printCorrelation(op, oFileIn)
 
   IF ( .NOT. PRESENT(oFileIn) ) CLOSE(oFile)
 
-END SUBROUTINE Ctqmcoffdiag_printCorrelation
+END SUBROUTINE CtqmcoffdiagComplex_printCorrelation
 !!***
 !#endif
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_printSpectra
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_printSpectra
 !! NAME
-!!  Ctqmcoffdiag_printSpectra
+!!  CtqmcoffdiagComplex_printSpectra
 !!
 !! FUNCTION
 !!  print fourier transform of time evolution of number of electrons
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4770,10 +4591,10 @@ END SUBROUTINE Ctqmcoffdiag_printCorrelation
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_printSpectra(op, oFileIn)
+SUBROUTINE CtqmcoffdiagComplex_printSpectra(op, oFileIn)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag)          , INTENT(IN)             :: op
+  TYPE(CtqmcoffdiagComplex)          , INTENT(IN)             :: op
   INTEGER  , OPTIONAL, INTENT(IN)             :: oFileIn
 !Local variables ------------------------------
   INTEGER                                     :: oFile
@@ -4814,18 +4635,18 @@ SUBROUTINE Ctqmcoffdiag_printSpectra(op, oFileIn)
 
   IF ( .NOT. PRESENT(oFileIn) ) CLOSE(oFile)
 
-END SUBROUTINE Ctqmcoffdiag_printSpectra
+END SUBROUTINE CtqmcoffdiagComplex_printSpectra
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_destroy
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_destroy
 !! NAME
-!!  Ctqmcoffdiag_destroy
+!!  CtqmcoffdiagComplex_destroy
 !!
 !! FUNCTION
 !!  destroy and deallocate all variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2025 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4841,10 +4662,10 @@ END SUBROUTINE Ctqmcoffdiag_printSpectra
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_destroy(op)
+SUBROUTINE CtqmcoffdiagComplex_destroy(op)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT) :: op
 !Local variables ------------------------------
   !INTEGER                  :: iflavor
   INTEGER                  :: flavors
@@ -4855,13 +4676,13 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
   flavors = op%flavors
 
   CALL ImpurityOperator_destroy(op%Impurity)
-  CALL BathOperatoroffdiag_destroy(op%Bath)
+  CALL BathOperatoroffdiagComplex_destroy(op%Bath)
   CALL Vector_destroy(op%measNoise(1))
   CALL Vector_destroy(op%measNoise(2))
 
 !sui!write(6,*) "before greenhyb_destroy in ctmqc_destroy"
-  CALL GreenHyboffdiag_destroy(op%Greens)
-!#ifdef CTCtqmcoffdiag_ANALYSIS
+  CALL GreenHyboffdiagComplex_destroy(op%Greens)
+!#ifdef CTCtqmcoffdiagComplex_ANALYSIS
   FREEIF(op%measCorrelation)
   FREEIF(op%measPerturbation)
   FREEIF(op%meas_fullemptylines)
@@ -4892,7 +4713,7 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
 !#endif
   op%ostream        = 0
   op%istream        = 0
-
+ 
   op%sweeps         = 0
   op%thermalization = 0
   op%flavors        = 0
@@ -4912,18 +4733,18 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
   op%set  = .FALSE.
   op%done = .FALSE.
   op%init = .FALSE.
-END SUBROUTINE Ctqmcoffdiag_destroy
+END SUBROUTINE CtqmcoffdiagComplex_destroy
 !!***
 
-!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmcoffdiag_setMagmom
+!!****f* ABINIT/m_CtqmcoffdiagComplex/CtqmcoffdiagComplex_setMagmom
 !! NAME
-!!  Ctqmcoffdiag_setMagmom
+!!  CtqmcoffdiagComplex_setMagmom
 !!
 !! FUNCTION
 !!  set the Magnetic moment matrix for susceptibility
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2026 ABINIT group (F. Gendron)
+!!  Copyright (C) 2013-2025 ABINIT group (F. Gendron)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4932,12 +4753,22 @@ END SUBROUTINE Ctqmcoffdiag_destroy
 !!
 !! OUTPUT
 !!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!  Will be filled automatically by the parent script
+!!
+!! CHILDREN
+!!  Will be filled automatically by the parent script
+!!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_setMagmom(op,Magmom_orb, Magmom_spin, Magmom_tot)
+SUBROUTINE CtqmcoffdiagComplex_setMagmom(op,Magmom_orb, Magmom_spin, Magmom_tot)
 
 !Arguments ------------------------------------
-  TYPE(Ctqmcoffdiag), INTENT(INOUT) ::op
+  TYPE(CtqmcoffdiagComplex), INTENT(INOUT) ::op
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_orb
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_spin
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_tot
@@ -4953,20 +4784,20 @@ SUBROUTINE Ctqmcoffdiag_setMagmom(op,Magmom_orb, Magmom_spin, Magmom_tot)
  ! end do
 
   IF ( SIZE(Magmom_orb) .NE. op%flavors*op%flavors ) &
-    CALL ERROR("Ctqmcoffdiag_setU : Wrong Magnetic Moment matrix (size)        ")
+    CALL ERROR("CtqmcoffdiagComplex_setU : Wrong Magnetic Moment matrix (size)        ")
 
   CALL ImpurityOperator_setMagmommat(op%Impurity, Magmom_orb, Magmom_spin, Magmom_tot)
 
-END SUBROUTINE Ctqmcoffdiag_setMagmom
+END SUBROUTINE CtqmcoffdiagComplex_setMagmom
 !!***
 
-END MODULE m_Ctqmcoffdiag
+END MODULE m_CtqmcoffdiagComplex
 !!***
 
 #undef CTQMC_SLICE1
 #undef CTQMC_SLICE2
-#undef CTQMC_SEGME
-#undef CTQMC_ANTIS
-#undef CTQMC_ADDED
-#undef CTQMC_REMOV
-#undef CTQMC_DETSI
+#undef CTQMC_SEGME 
+#undef CTQMC_ANTIS 
+#undef CTQMC_ADDED 
+#undef CTQMC_REMOV 
+#undef CTQMC_DETSI 

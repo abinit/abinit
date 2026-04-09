@@ -143,6 +143,9 @@ MODULE m_paw_dmft
   ! = 0: do not compute entropy
   ! >= 1: compute entropy with an integration over self-consistent calculations
 
+  integer :: dmft_hybri_limit
+  ! = 1 : Use asymptotic limit to build hybridization function
+
   integer :: dmft_iter
   ! Nb of iterations for DMFT self-consistent cycle.
 
@@ -989,9 +992,13 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    else if (dmft_solv == 7) then
      write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
        &(with rotationally invariant interactions)'
+   else if (dmft_solv == 8) then                                                                            
+      write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT'
    else if (dmft_solv == 9) then
      write(message,'(2a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
        & give your personal script'
+    else if (dmft_solv == 10) then                                                                          
+      write(message,'(2a)') ch10,' DMFT uses the Complex Continuous Time Quantum Monte Carlo solver of ABINIT'     
    end if ! dmft_solv
  else if(use_dmft == 10) then
    write(message, '(a,a)') ch10,' DMFT uses the python invocation and orbitals constructed using Wannier90 '
@@ -1032,7 +1039,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    write(message,'(a,1x,a)') ch10,"The imaginary part of the Green's function is neglected"
    call wrtout([std_out,ab_out],message,'COLL')
 #endif
- else if (dmft_solv /= 6 .and. dmft_solv /= 7) then
+ else if (dmft_solv /= 6 .and. dmft_solv /= 7 .and. dmft_solv /= 10) then
    write(message,'(a,1x,a)') ch10,"The imaginary part of the Green's function is neglected"
    call wrtout([std_out,ab_out],message,'COLL')
  end if
@@ -1055,6 +1062,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%natpawu              = dtset%natpawu
  paw_dmft%natom                = natom
  paw_dmft%temp                 = dtset%tsmear!*unit_e
+ paw_dmft%dmft_hybri_limit     = dtset%dmft_hybri_limit
  paw_dmft%dmft_iter            = dtset%dmft_iter
  paw_dmft%dmft_entropy         = dtset%dmft_entropy
  paw_dmft%dmft_kspectralfunc   = dtset%dmft_kspectralfunc
