@@ -23379,8 +23379,7 @@ The different possibilities are:
 > * By design, this algorithm cannot use preconditioning and, therefore, cannot handle [[ecutsm]]. Consequently, _Pulay stresses_ are not corrected. If stresses are important for the calculation (e.g., when pressure is required), it is necessary to slightly increase the plane-wave cutoff ([[ecut]]).
 
 * [[wfoptalg]] = 112: A **highly** experimental Spectrum Slicing algorithm. A spectral filtering
-algorithm by spectral slices based on lowpass and bandpass Chebyshev polynomials. The polynomial degree is tuned
-using [[mdeg_filter]] (formerly [[nline]]). The number of slices is tuned with [[nslice]] variable.
+algorithm by spectral slices based on lowpass and bandpass Chebyshev polynomials. The polynomial degree is tuned using [[mdeg_filter]] (formerly [[nline]]). The number of slices is tuned with [[nslice]] variable.
 """,
 ),
 
