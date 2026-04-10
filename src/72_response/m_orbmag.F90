@@ -1196,7 +1196,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
   real(dp) bdot(2),mdot(2)
   real(dp),allocatable :: denpot(:,:,:),fofgout(:,:)
   real(dp),allocatable :: ghc(:,:),gsc(:,:),gvnlxc(:,:)
-  real(dp),allocatable,target :: ghc_local(:,:)
+  real(dp),allocatable,target :: ghc_local(:,:),gsc_local(:,:),gvnlxc_local(:,:)
   real(dp),pointer :: bra(:,:),ket(:,:)
   complex(dp) :: m1(3),b1(3)
   type(pawcprj_type),allocatable :: cwaveprj1(:,:)
@@ -1222,6 +1222,8 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
  
  if (need_ormesh) then
    ABI_MALLOC(ghc_local,(2,npwsp))
+   ABI_MALLOC(gsc_local,(2,npwsp))
+   ABI_MALLOC(gvnlxc_local,(2,npwsp))
    ! need atom index with dipole for ph3d use below
    do iatom = 1, dtset%natom
      if ( ANY(ABS(dtset%nucdipmom(1:3,iatom))>tol8) ) then
@@ -1257,7 +1259,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
      if (need_ormesh) then
        type_calc = 3 ! apply local and kinetic only
        sij_opt = 0 ! compute ghc only
-       call getghc(cpopt,ket,cwaveprj1,ghc_local,gsc,gs_hamk,gvnlxc,lams,mpi_enreg,&
+       call getghc(cpopt,ket,cwaveprj1,ghc_local,gsc_local,gs_hamk,gvnlxc_local,lams,mpi_enreg,&
          & ndat,dtset%prtvol,sij_opt,tim_getghc,type_calc)
      end if
 
@@ -1278,8 +1280,8 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
          
          if (need_ormesh) then
            ormesh_fac = trnrm(nn)*prefac_m
-           !call orbmag_mesh%accum_rmesh(adir,bra,dtset,gs_hamk,ghc_local,.TRUE.,mpi_enreg,&
-           !  & npwsp,ph1d,ormesh_fac,t_atom,incc)
+           call orbmag_mesh%accum_rmesh(adir,bra,dtset,gs_hamk,ghc_local,.TRUE.,mpi_enreg,&
+             & npwsp,ph1d,ormesh_fac,t_atom,incc)
            call tt_me(adir,atindx,bra,dterm,dtset,eig_k(nn),gs_hamk,ket,mpi_enreg,&
              & nband_k,npw_k,orbmag_mesh,incc,ph1d,pawtab,prefac_m,tt,trnrm(nn),cwaveprj1)
          end if
@@ -1303,6 +1305,8 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
  call pawcprj_free(cwaveprj1)
  ABI_SFREE(cwaveprj1)
  ABI_SFREE(ghc_local)
+ ABI_SFREE(gsc_local)
+ ABI_SFREE(gvnlxc_local)
 
 end subroutine orbmag_cc_k
 !!***
