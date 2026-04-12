@@ -1375,16 +1375,15 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,choice,cpopt,fourwf_cplex,fourwf_option,gdir,iatom,ndat,nn,nnlout,np,npwsp
-  integer :: paw_opt,signs,t_atom,tim_fourwf,tim_getghc
+  integer :: adir,bdir,choice,cpopt,gdir,iatom,ndat,nn,nnlout,np,npwsp
+  integer :: paw_opt,signs,t_atom,tim_getghc
   real(dp) :: epsabg,weight_i,weight_r
   complex(dp) :: bdotc,bpdotc,gdotc,gpdotc,ormesh_fac,prefac_b,prefac_m
   logical :: my_suppress_ormesh,need_ormesh
   !arrays
   real(dp) :: bdot(2),bpdot(2),gdot(2),gpdot(2),enlout(1),lamv(1)
-  real(dp),allocatable :: denpot(:,:,:)
-  real(dp),allocatable :: fofgin(:,:),fofgout(:,:),vectout(:,:)
-  real(dp),allocatable,target :: fofrb(:,:,:,:),fofrg(:,:,:,:),svectoutb(:,:),svectoutg(:,:)
+  real(dp),allocatable :: vectout(:,:)
+  real(dp),allocatable,target :: svectoutb(:,:),svectoutg(:,:)
   real(dp),pointer :: bra(:,:),brab(:,:),brag(:,:),ket(:,:)
   complex(dp) :: b1(3),bv2b(3),m1(3),mv2b(3),m1_mu(3),mv2b_mu(3)
   type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -1395,12 +1394,10 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
  else
    my_suppress_ormesh=.FALSE.
  end if
- fourwf_cplex = 1
- fourwf_option = 0
- tim_fourwf = 1
  npwsp = npw_k*dtset%nspinor
  need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
 
+ ABI_MALLOC(vectout,(2,npwsp))
  ABI_MALLOC(svectoutb,(2,npwsp))
  ABI_MALLOC(svectoutg,(2,npwsp))
  ABI_MALLOC(cwaveprj,(dtset%natom,dtset%nspinor))
@@ -1416,8 +1413,6 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
  nnlout = 1
 
  if (need_ormesh) then
-   ABI_MALLOC(fofrb,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
-   ABI_MALLOC(fofrg,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
    ! need atom index with dipole for ph3d use below
    do iatom = 1, dtset%natom
      if ( ANY(ABS(dtset%nucdipmom(1:3,iatom))>tol8) ) then
@@ -1444,28 +1439,12 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,bdir,lamv,mpi_enreg,ndat,nnlout,&
        & paw_opt,signs,svectoutb,tim_getghc,ket,vectout)
 
-     if (need_ormesh) then
-       call fourwf(fourwf_cplex,denpot,svectoutb,fofgout,fofrb,gs_hamk%gbound_k,&
-         & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
-         & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
-         & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,fourwf_option,&
-         & tim_fourwf,weight_r,weight_i)
-     end if
-     
      do gdir = 1, 3
 
        ! compute dS/dk_g |u_nk>
        call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,gdir,lamv,mpi_enreg,ndat,nnlout,&
          & paw_opt,signs,svectoutg,tim_getghc,ket,vectout)
 
-       if (need_ormesh) then
-         call fourwf(fourwf_cplex,denpot,svectoutg,fofgout,fofrg,gs_hamk%gbound_k,&
-           & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
-           & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
-           & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,fourwf_option,&
-           & tim_fourwf,weight_r,weight_i)
-       end if
-   
        ! extract |Pc du/dk_b>
        brab => gcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,bdir)
        gdot=cg_zdotc(npwsp,brab,svectoutg); gdotc=CMPLX(gdot(1),gdot(2))
@@ -1490,14 +1469,6 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
          m1(adir) = m1(adir) + prefac_m*CONJG(bdotc)*eig_k(nn)
          m1_mu(adir) = m1_mu(adir) - prefac_m*CONJG(bdotc)*fermie
 
-         !if (need_ormesh) then
-         !  ormesh_fac=trnrm(nn)*prefac_m*(eig_k(nn)-fermie)
-         !  call orbmag_mesh%accum_rmesh(adir,brab,dtset,fofrg,gs_hamk,npw_k,&
-         !    & ph1d,ormesh_fac,t_atom,invv1,conjg_flag=.FALSE.)
-         !  call orbmag_mesh%accum_rmesh(adir,brag,dtset,fofrb,gs_hamk,npw_k,&
-         !    & ph1d,ormesh_fac,t_atom,invv1,conjg_flag=.TRUE.)
-         !endif
-
        end do
 
        do np = 1, nband_k
@@ -1505,19 +1476,6 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
          bra => cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
          gpdot=cg_zdotc(npwsp,bra,svectoutg); gpdotc=CMPLX(gpdot(1),gpdot(2))
          bpdot=cg_zdotc(npwsp,bra,svectoutb); bpdotc=CMPLX(bpdot(1),bpdot(2))
-
-         !if (need_ormesh) then
-         !  ABI_MALLOC(fofgin,(2,npwsp))
-         !  fofgin(1,1:npwsp) = bra(1,1:npwsp)*svectoutg(1,1:npwsp) + bra(2,1:npwsp)*svectoutg(2,1:npwsp)
-         !  fofgin(2,1:npwsp) = bra(1,1:npwsp)*svectoutg(2,1:npwsp) - bra(2,1:npwsp)*svectoutg(1,1:npwsp)
-         !  !fofgin(1:2,1:npwsp)=trnrm(np)*fofgin(1:2,1:npwsp)
-         !  call fourwf(fourwf_cplex,denpot,fofgin,fofgout,fofrg,gs_hamk%gbound_k,&
-         !    & gs_hamk%gbound_k,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,&
-         !    & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npwsp,npwsp,&
-         !    & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,fourwf_option,&
-         !    & tim_fourwf,weight_r,weight_i)
-         !  ABI_SFREE(fofgin)
-         !end if
 
          do adir=1,3 
            epsabg = eijk(adir,bdir,gdir)
@@ -1529,13 +1487,6 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
            mv2b(adir) = mv2b(adir) - prefac_m*CONJG(bpdotc)*gpdotc*eig_k(nn)
            mv2b_mu(adir) = mv2b_mu(adir) + prefac_m*CONJG(bpdotc)*gpdotc*fermie
          
-           !if (need_ormesh) then
-           !  eig_shift = CMPLX(eig_k(nn)-fermie,zero)
-           !  call orbmag_mesh%accum_rmesh(adir,svectoutb,fofrg,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,&
-           !    & dtset%natom,npw_k,gs_hamk%ph3d_k,-prefac_m,t_atom,invv2,&
-           !    & mult_fact=eig_shift,conjg_flag=.FALSE.)
-           !endif
-
          end do
        end do ! np
 
@@ -1554,13 +1505,12 @@ subroutine orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_ha
  IF(ASSOCIATED(brag)) NULLIFY(brag)
  IF(ASSOCIATED(ket)) NULLIFY(ket)
  IF(ASSOCIATED(bra)) NULLIFY(bra)
- 
- ABI_FREE(svectoutb)
- ABI_FREE(svectoutg)
+
+ ABI_SFREE(vectout) 
+ ABI_SFREE(svectoutb)
+ ABI_SFREE(svectoutg)
  call pawcprj_free(cwaveprj)
- ABI_FREE(cwaveprj)
- ABI_SFREE(fofrb)
- ABI_SFREE(fofrg)
+ ABI_SFREE(cwaveprj)
 
 end subroutine orbmag_vv_k
 !!***
