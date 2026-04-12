@@ -611,13 +611,13 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 text after Eq. 42
      nl1_option = 1 ! LR
-     call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
+     call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
        & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab,&
        & ph1d,trnrm)
 
      ! ZTG23 Eq. 43
      nl1_option = 2 ! A0.An
-     call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
+     call orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
        & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab,&
        & ph1d,trnrm)
 
@@ -928,13 +928,14 @@ end subroutine orbmag_term_scale
 !!
 !! SOURCE
 
-subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt,isppol,&
+subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
     & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,nl1_option,npw_k,orbmag_mesh,pawtab,ph1d,trnrm,&
     & suppress_ormesh)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,mkmem_rbz,nband_k,nl1_option,npw_k
+  real(dp),intent(in) :: fermie
   logical,intent(in),optional :: suppress_ormesh
   type(dterm_type),intent(in) :: dterm
   type(dataset_type),intent(in) :: dtset
@@ -980,12 +981,12 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,gs_hamk,ikpt
 
      select case (nl1_option)
      case(1)
-       call tt_me(adir,atindx,cwavef,dterm,dtset,eig_k(nn),gs_hamk,cwavef,mpi_enreg,&
+       call tt_me(adir,atindx,cwavef,dterm,dtset,eig_k(nn),fermie,gs_hamk,cwavef,mpi_enreg,&
          & nband_k,npw_k,orbmag_mesh,inlr,ph1d,pawtab,prefac_m,tt,trnrm(nn),cwaveprj,&
          & suppress_ormesh=my_suppress_ormesh)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inlr) = real(tt)
      case(2)
-       call tt_me(adir,atindx,cwavef,dterm,dtset,eig_k(nn),gs_hamk,cwavef,mpi_enreg,&
+       call tt_me(adir,atindx,cwavef,dterm,dtset,eig_k(nn),fermie,gs_hamk,cwavef,mpi_enreg,&
          & nband_k,npw_k,orbmag_mesh,inbm,ph1d,pawtab,prefac_m,tt,trnrm(nn),cwaveprj,&
          & suppress_ormesh=my_suppress_ormesh)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inbm) = real(tt)
@@ -1282,7 +1283,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
            ormesh_fac = trnrm(nn)*prefac_m
            call orbmag_mesh%accum_rmesh(adir,bra,dtset,gs_hamk,ghc_local,.TRUE.,mpi_enreg,&
              & npwsp,ph1d,ormesh_fac,t_atom,incc)
-           call tt_me(adir,atindx,bra,dterm,dtset,eig_k(nn),gs_hamk,ket,mpi_enreg,&
+           call tt_me(adir,atindx,bra,dterm,dtset,eig_k(nn),fermie,gs_hamk,ket,mpi_enreg,&
              & nband_k,npw_k,orbmag_mesh,incc,ph1d,pawtab,prefac_m,tt,trnrm(nn),cwaveprj1)
          end if
        
@@ -2165,14 +2166,14 @@ end subroutine txt_me
 !!
 !! SOURCE
 
-subroutine tt_me(adir,atindx,bra,dterm,dtset,eignk,gs_hamk,ket,mpi_enreg,&
+subroutine tt_me(adir,atindx,bra,dterm,dtset,eignk,fermie,gs_hamk,ket,mpi_enreg,&
     & nband_k,npw_k,orbmag_mesh,oterm,ph1d,pawtab,prefac_m,tt,trnrm,ucprj,&
     & suppress_ormesh)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: adir,nband_k,npw_k,oterm
-  real(dp),intent(in) :: eignk,trnrm
+  real(dp),intent(in) :: eignk,fermie,trnrm
   complex(dp),intent(in) :: prefac_m
   complex(dp),intent(out) :: tt
   logical,intent(in),optional :: suppress_ormesh
@@ -2214,7 +2215,9 @@ subroutine tt_me(adir,atindx,bra,dterm,dtset,eignk,gs_hamk,ket,mpi_enreg,&
   case (inbm)
     dij_data = dterm%BM(:,:,:,adir)
   case (incc) 
-    dij_data = dterm%aij + eignk*dterm%qij
+    dij_data = dterm%aij + (eignk-two*fermie)*dterm%qij
+  case (invv1)
+    dij_data = (eignk-fermie)*dterm%qij
   case DEFAULT
     dij_data = czero
   end select
