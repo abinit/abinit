@@ -14,6 +14,17 @@ is_multi_parallel = True
 
 #: List of input files
 inp_files = [
+"tcdfpt_1.abi",
+"tcdfpt_2.abi",
+"tcdfpt_3.abi",
+"tcdfpt_4.abi",
+"tcdfpt_5.abi",
+"tcdfpt_6.abi",
+"tcdfpt_8.abi",
+"tcdfpt_10.abi",
+"tcdfpt_11.abi",
+"tcdfpt_12.abi",
+"tcdfpt_14.abi",
 "t01.abi",
 "t02.abi",
 "t03.abi",
