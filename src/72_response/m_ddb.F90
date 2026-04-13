@@ -4523,6 +4523,9 @@ subroutine ddb_symmetrize_and_transform(ddb, crystal, iblok)
    ! Examine the symmetries of the q wavevector
    call littlegroup_q(crystal%nsym,qpt,symq,crystal%symrec,crystal%symafm,timrev,prtvol=0)
 
+   ! Deactuvate TRS for finite-omega calculations
+   if (any(abs(ddb%omega(:,iblok)) > tol8)) timrev=0
+
    !GA: Note that d2sym3 and cart29 expect different shapes for tmpflg and tmpval
    !    hence the extra dimensions
    nsize=3*mpert*3*mpert
