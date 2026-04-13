@@ -598,7 +598,8 @@ subroutine orbmag(cg,cg1,cprj,crystal,dtfil,dtset,ebands_k,gsqcut,hdr,kg,mcg,mcg
 
      ! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
      call orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,gcg1_k,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph1d,pawtab,trnrm)
+       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,orbmag_mesh,ph1d,pawtab,trnrm,&
+       & suppress_ormesh=.FALSE.)
 
      ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
      call orbmag_vv_k(atindx,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gcg1_k,gs_hamk,&
@@ -982,15 +983,19 @@ subroutine orbmag_nl1_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ha
 
      select case (nl1_option)
      case(1)
-       call nonlocal_me(adir,atindx,bdir,cwaveprj,.FALSE.,.FALSE.,dterm,dtset,&
-         & eig_k(nn),fermie,gdir,tt,inlr,prefac_m,pawtab)
+       call nonlocal_me(adir,atindx,bdir,cwavef,cwaveprj,.FALSE.,.FALSE.,&
+         & dterm,dtset,eig_k(nn),fermie,gdir,gs_hamk,cwavef,mpi_enreg,tt,npw_k,&
+         & orbmag_mesh,inlr,ph1d,prefac_m,pawtab,trnrm(nn),&
+         & suppress_ormesh=my_suppress_ormesh)
        !call tt_me(adir,atindx,cwavef,dterm,dtset,eig_k(nn),fermie,gs_hamk,cwavef,mpi_enreg,&
        !  & nband_k,npw_k,orbmag_mesh,inlr,ph1d,pawtab,prefac_m,tt,trnrm(nn),cwaveprj,&
        !  & suppress_ormesh=my_suppress_ormesh)
        orbmag_mesh%omesh(nn,ikpt,isppol,adir,inlr) = real(tt)
      case(2)
-       call nonlocal_me(adir,atindx,bdir,cwaveprj,.FALSE.,.FALSE.,dterm,dtset,&
-         & eig_k(nn),fermie,gdir,tt,inbm,prefac_m,pawtab)
+       call nonlocal_me(adir,atindx,bdir,cwavef,cwaveprj,.FALSE.,.FALSE.,&
+         & dterm,dtset,eig_k(nn),fermie,gdir,gs_hamk,cwavef,mpi_enreg,tt,npw_k,&
+         & orbmag_mesh,inbm,ph1d,prefac_m,pawtab,trnrm(nn),&
+         & suppress_ormesh=my_suppress_ormesh)
        !call tt_me(adir,atindx,cwavef,dterm,dtset,eig_k(nn),fermie,gs_hamk,cwavef,mpi_enreg,&
        !  & nband_k,npw_k,orbmag_mesh,inbm,ph1d,pawtab,prefac_m,tt,trnrm(nn),cwaveprj,&
        !  & suppress_ormesh=my_suppress_ormesh)
@@ -1106,8 +1111,10 @@ subroutine orbmag_nl_k(atindx,cg_k,cprj_k,dimlmn,dterm,dtset,eig_k,fermie,gs_ham
          ! note rho^0 H^1 terms have opposite sign of rho^1 H^0
          prefac_m = -com*c2*epsabg
 
-         call nonlocal_me(adir,atindx,bdir,cwaveprj,.TRUE.,.TRUE.,dterm,dtset,&
-           & eig_k(nn),fermie,gdir,txt,innl,prefac_m,pawtab)
+         call nonlocal_me(adir,atindx,bdir,cwavef,cwaveprj,.TRUE.,.TRUE.,&
+           & dterm,dtset,eig_k(nn),fermie,gdir,gs_hamk,cwavef,mpi_enreg,&
+           & txt,npw_k,orbmag_mesh,innl,ph1d,prefac_m,pawtab,trnrm(nn),&
+           & suppress_ormesh=my_suppress_ormesh)
          !call txt_me(adir,atindx,bdir,cwavef,dterm,dtset,eig_k,gdir,gs_hamk,&
          !  & nn,mpi_enreg,nband_k,npw_k,orbmag_mesh,innl,pawtab,ph1d,prefac_m,txt,&
          !  & trnrm(nn),cwaveprj,&
@@ -1199,7 +1206,7 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
   integer :: nn,npwsp,sij_opt,t_atom,tim_fourwf,tim_getghc,type_calc
   integer :: kg1,kg2,kg3,n1,n2,n3,shift1,shift2,shift3
   real(dp) :: epsabg,lams,weight_i,weight_r
-  complex(dp) :: bc,kc,ormesh_fac,ph1,ph2,ph3,prefac_b,prefac_m,tt
+  complex(dp) :: bc,kc,nlme,ormesh_fac,ph1,ph2,ph3,prefac_b,prefac_m
   logical :: my_suppress_ormesh,need_ormesh
   !arrays
   real(dp) bdot(2),mdot(2)
@@ -1289,10 +1296,15 @@ subroutine orbmag_cc_k(atindx,cprj1_k,dimlmn,dterm,dtset,eig_k,fermie,&
          
          if (need_ormesh) then
            ormesh_fac = trnrm(nn)*prefac_m
+           ! local part 
            call orbmag_mesh%accum_rmesh(adir,bra,dtset,gs_hamk,ghc_local,.TRUE.,mpi_enreg,&
              & npwsp,ph1d,ormesh_fac,t_atom,incc)
-           call tt_me(adir,atindx,bra,dterm,dtset,eig_k(nn),fermie,gs_hamk,ket,mpi_enreg,&
-             & nband_k,npw_k,orbmag_mesh,incc,ph1d,pawtab,prefac_m,tt,trnrm(nn),cwaveprj1)
+           ! nonlocal part
+           call nonlocal_me(adir,atindx,bdir,bra,cwaveprj1,.FALSE.,.FALSE.,dterm,dtset,&
+             & eig_k(nn),fermie,gdir,gs_hamk,ket,mpi_enreg,nlme,npw_k,orbmag_mesh,incc,ph1d,&
+             & prefac_m,pawtab,trnrm(nn),suppress_ormesh=my_suppress_ormesh)
+           !call tt_me(adir,atindx,bra,dterm,dtset,eig_k(nn),fermie,gs_hamk,ket,mpi_enreg,&
+           !  & nband_k,npw_k,orbmag_mesh,incc,ph1d,pawtab,prefac_m,tt,trnrm(nn),cwaveprj1)
          end if
        
        end do ! adir
@@ -2110,34 +2122,50 @@ end subroutine txt_me
 !!
 !! NOTES
 !! computes on-site prefac*\sum_{Rij}<bra|d_bra_dir p_i>aij<d_ket_dir p_j|ket>
-!! dnlbra = .false. if no derivative, .true. if derivative in bdir direction
-!! dnlket = .false. if no derivative, .true. if derivative in gdir direction
+!! dnlbra = .false. if no derivative, .true. for derivative in bdir direction
+!! dnlket = .false. if no derivative, .true. for derivative in gdir direction
 !!
 !! SOURCE
 
-subroutine nonlocal_me(adir,atindx,bdir,cwaveprj,dnlbra,dnlket,dterm,dtset,&
-    & eignk,fermie,gdir,nlme,oterm,prefac,pawtab)
+subroutine nonlocal_me(adir,atindx,bdir,bra,cwaveprj,dnlbra,dnlket,dterm,dtset,&
+    & eignk,fermie,gdir,gs_hamk,ket,mpi_enreg,nlme,npw_k,orbmag_mesh,oterm,ph1d,&
+    & prefac,pawtab,trnrm,suppress_ormesh)
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: adir,bdir,gdir,oterm
-  real(dp),intent(in) :: eignk,fermie
+  integer,intent(in) :: adir,bdir,gdir,npw_k,oterm
+  real(dp),intent(in) :: eignk,fermie,trnrm
   complex(dp),intent(in) :: prefac
   complex(dp),intent(out) :: nlme
   logical,intent(in) :: dnlbra,dnlket
+  logical,intent(in),optional :: suppress_ormesh
   type(dataset_type),intent(in) :: dtset
   type(dterm_type),intent(in) :: dterm
+  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
+  type(orbmag_mesh_type),intent(inout) :: orbmag_mesh
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
+  real(dp),intent(in),pointer :: bra(:,:),ket(:,:),ph1d(:,:)
   type(pawcprj_type),intent(in) :: cwaveprj(dtset%natom,dtset%nspinor)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: iat,iatom,ilmn,isp,itypat,jlmn,klmn
-  complex(dp) :: cpi,cpj,dij
+  integer :: iat,iatom,il,ilmn,isp,itypat,jl,jlmn,klmn,npwsp,t_atom
+  complex(dp) :: cpi,cpj,dij,ormesh_fac
+  logical :: my_suppress_ormesh,need_ormesh
   ! arrays
+  real(dp),allocatable,target :: bra_mesh(:,:),ket_mesh(:,:)
   complex(dp),allocatable :: dij_data(:,:,:)
 !--------------------------------------------------------------------
+  
+  if(present(suppress_ormesh)) then
+    my_suppress_ormesh=suppress_ormesh
+  else
+    my_suppress_ormesh=.FALSE.
+  end if
+  need_ormesh = ((dtset%orbmag .EQ. 4) .AND. (.NOT. my_suppress_ormesh))
+  npwsp = npw_k*dtset%nspinor
   
   ABI_MALLOC(dij_data,(dtset%natom,dterm%lmn2max,dterm%ndij))
   select case (oterm)
@@ -2151,9 +2179,25 @@ subroutine nonlocal_me(adir,atindx,bdir,cwaveprj,dnlbra,dnlket,dterm,dtset,&
     dij_data = dterm%aij + (eignk-two*fermie)*dterm%qij
   case (invv1)
     dij_data = (eignk-fermie)*dterm%qij
+  case (invv2)
+    dij_data = (eignk-fermie)*dterm%qij
   case DEFAULT
     dij_data = czero
   end select
+
+  if (need_ormesh) then
+    ABI_CHECK(ASSOCIATED(ket),"nonlocal_me: input ket needed for ormesh is not associated")
+    ABI_CHECK(ASSOCIATED(bra),"nonlocal_me: input bra needed for ormesh is not associated")
+    ABI_CHECK(dtset%nspinor.EQ.1,"nonlocal_me: orbmag_rmesh not coded for spinors yet")
+    do iat = 1, dtset%natom
+      if ( ANY(ABS(dtset%nucdipmom(1:3,iat))>tol8) ) then
+        t_atom = atindx(iat)
+        exit
+      end if
+    end do
+    ABI_MALLOC(bra_mesh,(2,npwsp))
+    ABI_MALLOC(ket_mesh,(2,npwsp))
+  end if
 
   nlme = czero
   do iat = 1, dtset%natom
@@ -2161,6 +2205,18 @@ subroutine nonlocal_me(adir,atindx,bdir,cwaveprj,dnlbra,dnlket,dterm,dtset,&
     itypat=dtset%typat(iat)
     do isp = 1, dtset%nspinor
       do jlmn = 1, pawtab(itypat)%lmn_size
+
+        if (need_ormesh .AND. iatom.EQ.t_atom) then
+          ! FFT ket-side to fofr, real space representation
+          if (dnlket) then
+            ket_mesh(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+gdir,jlmn,itypat)*ket(1,1:npwsp)
+            ket_mesh(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1+gdir,jlmn,itypat)*ket(2,1:npwsp)
+          else
+            ket_mesh(1,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*ket(1,1:npwsp)
+            ket_mesh(2,1:npwsp) = gs_hamk%ffnl_k(1:npwsp,1,jlmn,itypat)*ket(2,1:npwsp)
+          end if
+        end if
+
         do ilmn = 1, pawtab(itypat)%lmn_size
           klmn=MATPACK(ilmn,jlmn)
           if (dnlbra) then
@@ -2176,6 +2232,24 @@ subroutine nonlocal_me(adir,atindx,bdir,cwaveprj,dnlbra,dnlket,dterm,dtset,&
           dij = dij_data(iatom,klmn,isp)
           ! see note at top of file near definition of MATPACK macro
           if (ilmn .GT. jlmn) dij = CONJG(dij)
+         
+          if (need_ormesh .AND. iatom.EQ.t_atom) then
+            jl = pawtab(itypat)%indlmn(1,jlmn)
+            il = pawtab(itypat)%indlmn(1,ilmn)
+            ormesh_fac = prefac*trnrm*dij*four_pi*CONJG(j_dpc**il)*four_pi*(j_dpc**jl)
+        
+            if (dnlbra) then    
+              bra_mesh(1,1:npwsp)=bra(1,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+bdir,ilmn,itypat)
+              bra_mesh(2,1:npwsp)=bra(2,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1+bdir,ilmn,itypat)
+            else
+              bra_mesh(1,1:npwsp)=bra(1,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)
+              bra_mesh(2,1:npwsp)=bra(2,1:npwsp)*gs_hamk%ffnl_k(1:npwsp,1,ilmn,itypat)
+            end if
+            call orbmag_mesh%accum_rmesh(adir,bra_mesh,dtset,gs_hamk,ket_mesh,.FALSE.,&
+              & mpi_enreg,npwsp,ph1d,ormesh_fac,t_atom,oterm)
+
+          end if
+          
           ! note use of CONJG(cpi), because cpi is from the bra side cprj
           nlme = nlme + prefac*CONJG(cpi)*dij*cpj
           
@@ -2218,6 +2292,8 @@ subroutine nonlocal_me(adir,atindx,bdir,cwaveprj,dnlbra,dnlket,dterm,dtset,&
   end do !iat
 
   ABI_SFREE(dij_data)
+  ABI_SFREE(bra_mesh)
+  ABI_SFREE(ket_mesh)
 
 end subroutine nonlocal_me
 !!***
