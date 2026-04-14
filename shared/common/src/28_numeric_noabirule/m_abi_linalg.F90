@@ -195,6 +195,12 @@ module m_abi_linalg
     module procedure abi_gpu_xscal_2z
  end interface abi_gpu_xscal
 
+ interface abi_gpu_xdot
+    module procedure abi_gpu_xdot_cptr
+    module procedure abi_gpu_xdot_d
+    module procedure abi_gpu_xdot_z
+ end interface abi_gpu_xdot
+
  interface abi_gpu_xaxpy
     module procedure abi_gpu_xaxpy_cptr
     module procedure abi_gpu_xaxpy_d
@@ -339,6 +345,7 @@ module m_abi_linalg
  public :: gpu_xaxpy
  public :: gpu_xcopy
  public :: gpu_xscal
+ public :: gpu_xdot
  public :: gpu_xsygvd
  public :: gpu_xsygvd_bufferSize
 #endif
@@ -350,6 +357,7 @@ module m_abi_linalg
  public :: abi_gpu_xsymm
  public :: abi_gpu_zhemm
  public :: abi_gpu_xscal
+ public :: abi_gpu_xdot
  public :: abi_gpu_xaxpy
  public :: abi_gpu_xcopy
  public :: abi_gpu_xtrsm

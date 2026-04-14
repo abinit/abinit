@@ -172,73 +172,25 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
    call wrtout(std_out,  message,'COLL')
  end if
 
-!    Find the number of projectors per angular momentum shell
+ psphead%lmax = 0
  nprojs = 0
  nprojsr = 0
  nprojso = 0
- psphead%nproj(:)=0
  call ps_NonlocalProjectors_Filter(psxml, set=SET_NONREL, number=nprojs)
+ call ps_NonlocalProjectors_Filter(psxml, set=SET_SO, number=nprojso, &
+ &  indexes=idx_so)
+ if (nprojs<=0) then
+   call ps_NonlocalProjectors_Filter(psxml, set=SET_SREL, number=nprojsr)
+ endif
  if (nprojs > 0) then
    call ps_NonlocalProjectors_Filter(psxml, set=SET_NONREL, indexes=idx_sr)
-   do iproj = 1, nprojs
-     if (iwrite == 1) then
-       write (message,'(a,2I5)') '- psxml2ab: iproj, idx for nonrel ', iproj, idx_sr(iproj)
-!      call wrtout(ab_out,  message,'COLL')
-       call wrtout(std_out,  message,'COLL')
-     end if
-     call ps_Projector_Get(psxml, idx_sr(iproj), l=il)
-     psphead%nproj(il) = psphead%nproj(il) + 1
-   end do
  else
-   call ps_NonlocalProjectors_Filter(psxml, set=SET_SREL, number=nprojsr)
    if (nprojsr > 0) then
      call ps_NonlocalProjectors_Filter(psxml, set=SET_SREL, indexes=idx_sr)
-     do iproj = 1, nprojsr
-       if (iwrite == 1) then
-         write (message,'(a,2I5)') '- psxml2ab: iproj, idx for srel ', iproj, idx_sr(iproj)
-!        call wrtout(ab_out,  message,'COLL')
-         call wrtout(std_out,  message,'COLL')
-       end if
-       call ps_Projector_Get(psxml, idx_sr(iproj), l=il)
-       psphead%nproj(il) = psphead%nproj(il) + 1
-     end do
    else
-     ABI_BUG('Your psml potential should have either scalar- or non- relativistic projectors')
-   end if
- end if
-
- psphead%nprojso(:)=0
- call ps_NonlocalProjectors_Filter(psxml, set=SET_SO, number=nprojso, &
-&  indexes=idx_so)
- do iproj = 1, nprojso
-   if (iwrite == 1) then
-     write (message,'(a,2I5)') '- psxml2ab: iproj, idx for soc ', iproj, idx_so(iproj)
-!    call wrtout(ab_out,  message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-   end if
-   call ps_Projector_Get(psxml, idx_so(iproj), l=il)
-   psphead%nprojso(il) = psphead%nprojso(il) + 1
- end do
- if (iwrite == 1) then
-   write (message,'(a,5I5)') '- psxml2ab: nproj ', psphead%nproj
-!  call wrtout(ab_out,  message,'COLL')
-   call wrtout(std_out,  message,'COLL')
-   write (message,'(a,5I5)') '- psxml2ab: nprojso ', psphead%nprojso
-!  call wrtout(ab_out,  message,'COLL')
-   call wrtout(std_out,  message,'COLL')
- end if
-
- if( has_nlcc) then
-   psphead%xccc  = n1xccc_default
- else
-   psphead%xccc  = 0
- end if
-
- psphead%pspso = 0
- if (sum(abs(psphead%nprojso(:))) > 0) psphead%pspso = 2
-
-
- psphead%lmax = 0
+     ABI_BUG('Your psml potential should have either scalar- or non-relativistic projectors')
+   endif
+ endif
  if (iwrite == 1) then
    write (message,'(a,I5)') '- psxml2ab: ps_Number_of_Projectors not relativistic ',&
 &        nprojs
@@ -266,6 +218,68 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
    end if
    psphead%lmax = max( psphead%lmax, ll)
  end do
+ if(.not.allocated(psphead%nproj)) then
+   ABI_MALLOC(psphead%nproj,(0:psphead%lmax))
+ endif
+ if(.not.allocated(psphead%nprojso)) then
+   ABI_MALLOC(psphead%nprojso,(psphead%lmax))
+ endif
+
+!    Find the number of projectors per angular momentum shell
+ psphead%nproj(:)=0
+ if (nprojs > 0) then
+   do iproj = 1, nprojs
+     if (iwrite == 1) then
+       write (message,'(a,2I5)') '- psxml2ab: iproj, idx for nonrel ', iproj, idx_sr(iproj)
+!      call wrtout(ab_out,  message,'COLL')
+       call wrtout(std_out,  message,'COLL')
+     end if
+     call ps_Projector_Get(psxml, idx_sr(iproj), l=il)
+     psphead%nproj(il) = psphead%nproj(il) + 1
+   end do
+ else
+   if (nprojsr > 0) then
+     do iproj = 1, nprojsr
+       if (iwrite == 1) then
+         write (message,'(a,2I5)') '- psxml2ab: iproj, idx for srel ', iproj, idx_sr(iproj)
+!        call wrtout(ab_out,  message,'COLL')
+         call wrtout(std_out,  message,'COLL')
+       end if
+       call ps_Projector_Get(psxml, idx_sr(iproj), l=il)
+       psphead%nproj(il) = psphead%nproj(il) + 1
+     end do
+   else
+     ABI_BUG('Your psml potential should have either scalar- or non- relativistic projectors')
+   end if
+ end if
+
+ psphead%nprojso(:)=0
+ do iproj = 1, nprojso
+   if (iwrite == 1) then
+     write (message,'(a,2I5)') '- psxml2ab: iproj, idx for soc ', iproj, idx_so(iproj)
+!    call wrtout(ab_out,  message,'COLL')
+     call wrtout(std_out,  message,'COLL')
+   end if
+   call ps_Projector_Get(psxml, idx_so(iproj), l=il)
+   psphead%nprojso(il) = psphead%nprojso(il) + 1
+ end do
+ if (iwrite == 1) then
+   write (message,'(a,5I5)') '- psxml2ab: nproj ', psphead%nproj
+!  call wrtout(ab_out,  message,'COLL')
+   call wrtout(std_out,  message,'COLL')
+   write (message,'(a,5I5)') '- psxml2ab: nprojso ', psphead%nprojso
+!  call wrtout(ab_out,  message,'COLL')
+   call wrtout(std_out,  message,'COLL')
+ end if
+
+ if( has_nlcc) then
+   psphead%xccc  = n1xccc_default
+ else
+   psphead%xccc  = 0
+ end if
+
+ psphead%pspso = 0
+ if (sum(abs(psphead%nprojso(:))) > 0) psphead%pspso = 2
 
  if (iwrite == 1) then
    write (message,'(a,I5)') '- psxml2ab: ps_Number_of_Projectors SOC ', nprojso

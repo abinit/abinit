@@ -63,14 +63,12 @@ in such a way that the test is reproduced in a satisfactory way.
 The subsequent maintenance will be automatically done by checking that the corresponding test is still working despite modifications.
 
 
-## Developer environment
-
 In order to implement this basic philosophy of development within ABINIT, different languages/tools are  used,
 and mastered at different levels by different people (depending the kind of development contribution) :
 the Autotools (autoconf, automake, ...), buildbot, git, gitlab, CPP, Fortran90, HTML, markdown, MPI, Python.
 These, with the developer's Web pages of the ABINIT web site, constitute the ABINIT developer environment.
 For some of these languages/tools, the [Web site ABINIT developer's corner](https://www.abinit.org/corner.html) and
-the [ABINIT package developer documentation](https://docs.abinit.org/developers/git_and_gitlab)
+the [ABINIT package developer documentation](/developers/git_and_gitlab)
 provides documentation:
 external links (like the language reference, repository, tutorials), some internal links (additional tutorials), and the particulars of the use of such language/tools within ABINIT.
 

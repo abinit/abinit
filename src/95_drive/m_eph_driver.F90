@@ -244,7 +244,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    wfq_path = wfk0_path
    use_wfq = .True.
    write(msg, "(4a)")&
-     "eph_task requires WFQ but none among (irdwfq, getwfq, getwfk_filepath) is specified in input.", ch10, &
+     "eph_task requires WFQ but none among (irdwfq, getwfq, getwfq_filepath) is specified in input.", ch10, &
      "Will read WFQ wavefunctions from WFK file:", trim(wfk0_path)
    ABI_COMMENT(msg)
  end if

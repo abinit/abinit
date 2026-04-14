@@ -369,6 +369,24 @@ subroutine init_hu(hu,paw_dmft,pawtab)
    call wrtout(std_out,message,'COLL')
    ABI_FREE(xij)
 
+  !imag part for debug
+  ! ij2 = 0
+  ! do i=1,tndim
+  !   if (i < tndim) then
+  !     ij1 = ij2 + 1
+  !     ij2 = ij2 + tndim - i
+  !   end if
+  !   if (i == 1) write(message,'(i3,14f7.3)') i,xtemp,(aimag(hu(itypat)%uqmc(m)),m=ij1,ij2)
+  !   if (i /= tndim .and. i /= 1) write(message,'(i3,14f7.3)') i, &
+  !       & (aimag(hu(itypat)%uqmc(xij(i,m))),m=1,i-1),xtemp,(aimag(hu(itypat)%uqmc(m)),m=ij1,ij2)
+  !   if (i == tndim) write(message,'(i3,14f7.3)') i,(aimag(hu(itypat)%uqmc(xij(i,m))),m=1,i-1),xtemp
+  !   call wrtout(std_out,message,'COLL')
+  ! end do ! i
+  ! write(message,'(5x,a)') "--------------------------------------------------------"
+  ! call wrtout(std_out,message,'COLL')
+  ! ABI_FREE(xij)
+
+
  end do ! itypat
 
 end subroutine init_hu
@@ -635,7 +653,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
  type(vee_type), target, intent(inout) :: vee_rotated(paw_dmft%natom)
 !Local variables-------------------------------
  integer  :: iatom,itypat,lpawu,m,m1,m2,mi,ms,ms1,nat_correl
- integer  :: natom,ndim,nflavor,nspinor,nsppol,nsppol_,prtonly,tndim
+ integer  :: natom,ndim,nflavor,nspinor,nsppol,nsppol_,prtonly,tndim,prtopt
  logical  :: triqs
  real(dp) :: f2,jpawu,xsum,xsum2,xsum2new,xsumnew
  character(len=4) :: tag_at
@@ -651,7 +669,13 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
  nspinor = paw_dmft%nspinor
  nsppol  = paw_dmft%nsppol
 
- triqs = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
+ triqs = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7 .or. paw_dmft%dmft_solv == 10)
+
+ if(paw_dmft%dmft_solv .eq. 10) then
+   prtopt = 4
+ else
+   prtopt = 1
+ endif
 
  write(message,'(a,3x,a)') ch10,"== Rotate interaction to the CTQMC basis"
  call wrtout(std_out,message,"COLL")
@@ -669,14 +693,14 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
      jpawu  = hu(itypat)%jpawu
      ndim   = 2*lpawu + 1
      tndim  = nspinor * ndim
-      !if(pawprtvol>=3) then
-!         write(message,'(2a)')  ch10," VEE INPUT AVANT TRANSFORMATION"
-!         call wrtout(std_out,  message,'COLL')
-!         call printvee_hu(ndim,hu(itypat)%vee,1,'Slm')
-       !endif
+     !if(pawprtvol>=3) then
+     !    write(message,'(2a)')  ch10," VEE INPUT AVANT TRANSFORMATION"
+     !    call wrtout(std_out,  message,'COLL')
+     !    call printvee_hu(ndim,hu(itypat)%vee,4,'Slm')
+     !endif
 
      write(tag_at,'(i4)') iatom
-     write(message,'(3a)') ch10,'  -------> For Correlated atom ',adjustl(tag_at)
+     write(message,'(3a)') ch10,'   -------> For Correlated atom ',adjustl(tag_at)
      call wrtout(std_out,message,'COLL')
 
 !    ==================================
@@ -686,10 +710,12 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
      ! Print udens in the Slm basis
      call vee2udensatom_hu(ndim,hu(itypat)%udens(:,:),hu(itypat)%vee(:,:,:,:),"cubic",prtonly=1)
 
-     basis_vee = 'cubic'
+     if (.not. paw_dmft%dmft_solv .eq. 10) then
+       basis_vee = "cubic"
 !    First print veeslm
        !call printvee_hu(ndim,real(veeslm),1,basis_vee)
-     call printvee_hu(tndim,hu(itypat)%veeslm2(:,:,:,:),1,basis_vee)
+       call printvee_hu(tndim,hu(itypat)%veeslm2(:,:,:,:),prtopt,basis_vee)
+     end if
 
 !    ==================================
 !    Then compute veerotated
@@ -728,7 +754,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
         ! enddo
 
        call rotate_hu(rot_mat(iatom)%mat(:,:,:),1,tndim,hu(itypat)%veeslm2(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
-       basis_vee = 'CTQMC basis from cubic'
+       basis_vee = "CTQMC basis from cubic"
 
 !    In the Ylm basis
 !    ================================================================================
@@ -742,39 +768,43 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
          ABI_MALLOC(veeylm2,(tndim,tndim,tndim,tndim))
        end if
 !      Change basis from slm to ylm basis
-       if (triqs) then
+       !if (triqs) then
          veeslm => hu(itypat)%vee(:,:,:,:)
-       else
-         ABI_MALLOC(veeslm,(ndim,ndim,ndim,ndim))
-         veeslm(:,:,:,:) = cmplx(real(hu(itypat)%vee(:,:,:,:)),zero,kind=sp)
-       end if
+       !else
+       !  ABI_MALLOC(veeslm,(ndim,ndim,ndim,ndim))
+       !  veeslm(:,:,:,:) = cmplx(real(hu(itypat)%vee(:,:,:,:)),zero,kind=sp)
+       !end if
 
        call vee_slm2ylm_hu(lpawu,veeslm(:,:,:,:),veeylm(:,:,:,:),paw_dmft,1,2)
 
-       if (.not. triqs) then
-         ABI_FREE(veeslm)
-       end if
+       !if (.not. triqs) then
+       !  ABI_FREE(veeslm)
+       !end if
+
        veeslm => null()
 
        ! The line below is not really useful
-       if (.not. triqs) veeylm(:,:,:,:) = cmplx(dble(veeylm(:,:,:,:)),zero,kind=dp)
+       !if (.not. triqs) veeylm(:,:,:,:) = cmplx(dble(veeylm(:,:,:,:)),zero,kind=dp)
 
        basis_vee = 'Ylm'
-
+       if (.not. paw_dmft%dmft_solv .eq. 10) then
 !      Print interaction matrix in the ylm basis
-       call printvee_hu(ndim,veeylm(:,:,:,:),1,basis_vee,hu(itypat)%upawu)
+         call printvee_hu(ndim,veeylm(:,:,:,:),prtopt,basis_vee,hu(itypat)%upawu)
 
 !      Print interaction matrix in the ylm basis from Slater tables
-       if (pawprtvol >= 3) then
-         call udens_slatercondon_hu(hu(itypat)%fk(:),lpawu)
+         if (pawprtvol >= 4) then
+           call udens_slatercondon_hu(hu(itypat)%fk(:),lpawu)
+         end if
        end if
 
 !      Build large matrix
        call vee_ndim2tndim_hu(lpawu,veeylm(:,:,:,:),veeylm2(:,:,:,:))
 
-       if (rot_type == 3 .or. rot_type == 4) then
-         call printvee_hu(tndim,veeylm2(:,:,:,:),1,basis_vee)
-       end if
+       if(.not. paw_dmft%dmft_solv .eq. 10) then
+         if (rot_type == 3 .or. rot_type == 4) then
+           call printvee_hu(tndim,veeylm2(:,:,:,:),prtopt,basis_vee)
+         end if
+       endif
 
 !      ---------------------------
 !
@@ -792,7 +822,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 
 !        new dimension
 
-         basis_vee = 'JmJ'
+         basis_vee = "JmJ"
 
        else if (rot_type == 4) then
 
@@ -821,8 +851,9 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
            !    enddo
            !  enddo
            !enddo
-
-         call udens_inglis_hu(hu(itypat)%fk(:),lpawu)
+         if (.not. paw_dmft%dmft_solv .eq. 10) then
+           call udens_inglis_hu(hu(itypat)%fk(:),lpawu)
+         endif
          call rotate_hu(rot_mat(iatom)%mat(:,:,:),1,tndim,veeylm2(:,:,:,:),vee_rotated(iatom)%mat(:,:,:,:))
          basis_vee = 'CTQMC basis from Ylm'
 
@@ -844,8 +875,10 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
      f2 = zero
      if (lpawu /= 0) f2 = hu(itypat)%fk(1)
 
-     call printvee_hu(tndim,vee_rotated(iatom)%mat(:,:,:,:),1,basis_vee,hu(itypat)%upawu,f2)
+     if (.not. paw_dmft%dmft_solv .eq. 10) then
+       call printvee_hu(tndim,vee_rotated(iatom)%mat(:,:,:,:),prtopt,basis_vee,hu(itypat)%upawu,f2)
 !       call printvee_hu(dim_vee,real(veeylm),1,hu(itypat)%upawu)
+     endif
 
        !uaver=zero
      if (rot_type /= 0 .and. jpawu > tol10) then
@@ -859,7 +892,25 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
        end do ! ms1
      end if ! rot_type /= 0 and jpawu /= zero
 
-     call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),basis_vee,prtonly=1)
+     if (paw_dmft%dmft_solv .eq. 10) then
+       call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),"CTQMC",prtonly=2)
+
+       !xsum=0
+       !xsum2=0
+       !do m1=1,ndim
+       !  do m2=1,ndim
+       !    xsum = xsum + aimag(vee_rotated(iatom)%mat(m1,m2,m1,m2))
+       !    xsum2 = xsum2 + aimag(udens_atoms(iatom)%mat(m1,m2,1))
+       !  end do ! m2
+       !end do ! m1
+
+       !write(*,*)"Sum of Imag part of Rotated Interaction Vee",xsum
+       !write(message,'(5a)') "   == Sum of Imag part of Rotated Interaction Udens",xsum2
+       !call wrtout(std_out,message,'COLL')
+
+     else
+       call vee2udensatom_hu(ndim,udens_atoms(iatom)%mat(:,:,1),vee_rotated(iatom)%mat(:,:,:,:),basis_vee,prtonly=1)
+     endif
 
    end do ! iatom
    !ABI_ERROR("Aborting now!")
@@ -1082,7 +1133,7 @@ subroutine rotatevee_hu(hu,paw_dmft,pawprtvol,rot_mat,rot_type,udens_atoms,vee_r
 !             hu(itypat)%uqmc(ij)=veetemp(m,m1,m,m1)
 !             udens_atoms(iatom)%value(ms,ms1)= veetemp(m,m1,m,m1)
 !             udens_atoms(iatom)%value(ms1,ms)= udens_atoms(iatom)%value(ms,ms1)
-!           else if(ms<=ndim.and.ms1<=ndim) then
+!          else if(ms<=ndim.and.ms1<=ndim) then
 !             m1 = ms1
 !             m  = ms
 !             hu(itypat)%uqmc(ij)=veetemp(m,m1,m,m1)-veetemp(m,m1,m1,m)
@@ -1222,7 +1273,7 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
      & '  Coulomb interaction in the ',trim(basis),' basis'
  call wrtout(std_out,message,'COLL')
 
- if (prtopt >= 2) then
+ if (prtopt .eq. 2) then
 
    write(message,'(2a)') ch10," <mi,mi|vee|mi mi> : U1"
    call wrtout(std_out,message,'COLL')
@@ -1280,7 +1331,7 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
 
  end if ! prtopt>=2
 
- if (prtopt >= 1) then
+ if (prtopt .eq. 1) then
 
    write(message,'(2x,a,3x,14f10.4)') "Um1m2=Vee(m1,m2,m1,m2)"
    call wrtout(std_out,message,'COLL')
@@ -1531,6 +1582,52 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
 
  end if ! prtopt>=1
 
+ if (prtopt .eq. 4 ) then
+  ! write(message,'(2x,a,3x,14f10.4)') "Real part of Um1m2=Vee(m1,m2,m1,m2)"
+  ! call wrtout(std_out,message,'COLL')
+  ! write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)
+  ! call wrtout(std_out,message,'COLL')
+  ! do m1=1,ndim
+  !   write(message,'(2x,i4,3x,14f10.4)') m1,(dble(vee(m1,m2,m1,m2)),m2=1,ndim)
+  !   call wrtout(std_out,message,'COLL')
+  ! end do ! m1
+  ! write(message,'(a)') ch10
+  ! call wrtout(std_out,message,'COLL')
+
+   !write(message,'(2x,a,3x,14f10.4)') "Imag part of Um1m2=Vee(m1,m2,m1,m2)"
+   !call wrtout(std_out,message,'COLL')
+   !write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)
+   !call wrtout(std_out,message,'COLL')
+   !do m1=1,ndim
+   !  write(message,'(2x,i4,3x,14f10.6)') m1,(aimag(vee(m1,m2,m1,m2)),m2=1,ndim)
+   !  call wrtout(std_out,message,'COLL')
+   !end do ! m1
+   !write(message,'(a)') ch10
+   !call wrtout(std_out,message,'COLL')
+
+  ! write(message,'(2x,a,3x,14f10.4)') "Real part of Jm1m2=Vee(m1,m2,m2,m1)"
+  ! call wrtout(std_out,message,'COLL')
+  ! write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)
+  ! call wrtout(std_out,message,'COLL')
+  ! do m1=1,ndim
+  !   write(message,'(2x,i4,3x,14f10.4)') m1,(dble(vee(m1,m2,m2,m1)),m2=1,ndim)
+  !   call wrtout(std_out,message,'COLL')
+  ! end do ! m1
+  ! write(message,'(a)') ch10
+  ! call wrtout(std_out,message,'COLL')
+
+   !write(message,'(2x,a,3x,14f10.4)') "Imag part of Jm1m2=Vee(m1,m2,m2,m1)"
+   !call wrtout(std_out,message,'COLL')
+   !write(message,'(2x,4x,14(2x,i8))') (m1,m1=1,ndim)
+   !call wrtout(std_out,message,'COLL')
+   !do m1=1,ndim
+   !  write(message,'(2x,i4,3x,14f10.6)') m1,(aimag(vee(m1,m2,m2,m1)),m2=1,ndim)
+   !  call wrtout(std_out,message,'COLL')
+   !end do ! m1
+   !write(message,'(a)') ch10
+   !call wrtout(std_out,message,'COLL')
+
+ endif !prtopt == 4
 end subroutine printvee_hu
 !!***
 
@@ -1548,7 +1645,7 @@ end subroutine printvee_hu
 !!  basis = basis of the interaction tensor
 !!  prtonly = 0 (default) : compute and print udens_atoms
 !!          = 1 : only print udens_atoms
-!!
+!!          = 2 : print also complex part
 !! OUTPUT
 !!
 !! SOURCE
@@ -1601,16 +1698,25 @@ subroutine vee2udensatom_hu(ndim,udens_atoms,veetemp,basis,prtonly)
 
  end if ! prt_only=0
 
-
- write(message,'(4a)') ch10,"-------- Interactions in the ",trim(basis)," basis "
+ message=''
+ write(message,'(4a)') ch10,"   -------- Interactions in the ",trim(basis)," basis "
  call wrtout(std_out,message,'COLL')
- write(message,'(1x,14(2x,i5))') (m,m=1,tndim)
- call wrtout(std_out,message,'COLL')
- do ms=1,tndim
-   write(message,'(i3,14f7.3)') ms,(dble(udens_atoms(ms,ms1)),ms1=1,tndim)
+ if (prtonly .eq. 2) then
+   write(message,'(14(i14))') (m,m=1,tndim)
    call wrtout(std_out,message,'COLL')
- end do ! ms
- write(message,'(5x,a)') "--------------------------------------------------------"
+   do ms=1,tndim
+     write(message,'(i3,14(2x,28f7.3))') ms,((udens_atoms(ms,ms1)),ms1=1,tndim)
+     call wrtout(std_out,message,'COLL')
+   enddo
+ else
+   write(message,'(1x,14(2x,i5))') (m,m=1,tndim)
+   call wrtout(std_out,message,'COLL')
+   do ms=1,tndim
+     write(message,'(i3,14f7.3)') ms,(dble(udens_atoms(ms,ms1)),ms1=1,tndim)
+     call wrtout(std_out,message,'COLL')
+   enddo !ms
+ endif
+ write(message,'(3a)') "--------------------------------------------------------"
  call wrtout(std_out,message,'COLL')
 
 end subroutine vee2udensatom_hu

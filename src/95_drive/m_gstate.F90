@@ -284,7 +284,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
  real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie,fermih
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
- logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
+ logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk,inv_sij
  logical :: is_dfpt=.false.,wvlbigdft=.false.
  character(len=500) :: msg
  character(len=fnlen) :: dscrpt,filnam,wfkfull_path
@@ -877,7 +877,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ABI_MALLOC(extfpmd,)
      call extfpmd%init(dtset%mband,hdr%extfpmd_eshift,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
 &     nfftf,dtset%nspden,dtset%nsppol,dtset%nkpt,dtset%occopt,rprimd,dtset%tphysel,&
-&     dtset%tsmear,dtset%useextfpmd,mpi_enreg,dtset%extfpmd_nband,dtset%extfpmd_pawsph==1)
+&     dtset%tsmear,dtset%useextfpmd,mpi_enreg,dtset%extfpmd_nband,dtset%extfpmd_pawsph)
    end if
  end if
 
@@ -1056,7 +1056,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !###########################################################
 ! Initialisation of cprj
 
- ! xg_nonlop available only for cprj_in_memory=1 and (LOBPCG or Chebfi)
+ ! xg_nonlop available only for cprj_in_memory=1 and (LOBPCG or Chebfi or Slicing)
  ! cprj_in_memory=2 is used for Congugate Gradient
  if (dtset%cprj_in_memory==1) then
    if (dtset%useylm/=1) then
@@ -1067,7 +1067,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
                      mpi_enreg%me_band,mpi_enreg%comm_band,mpi_enreg%comm_atom,&
                      mpi_atmtab=mpi_enreg%my_atmtab)
    if (xg_nonlop%paw) then
-     call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111)
+     inv_sij=dtset%wfoptalg==111.or.dtset%wfoptalg==112
+     call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=inv_sij)
    else
      call xg_nonlop_make_ekb(xg_nonlop,psps%ekb)
    end if
@@ -2084,7 +2085,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
  end if
 
 !If needed, print DOS (unitdos is closed in getnel, occ is not changed if option == 2
- if (dtset%prtdos==1 .and. me == master) then
+ if ((dtset%prtdos==1.or.dtset%prtdos==4) .and. me == master) then
    if (open_file(fnameabo_dos,msg, newunit=unitdos, status='unknown', action="write", form='formatted') /= 0) then
      ABI_ERROR(msg)
    end if
