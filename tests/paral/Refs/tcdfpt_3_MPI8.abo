@@ -1,6 +1,6 @@
 
-.Version 10.7.2.9 of ABINIT. v10.7.1 released Mar 2026.
-.(MPI version, prepared for a x86_64_linux_gnu11.4 computer) 
+.Version 10.5.8.1 of ABINIT. v10.7.1 released Mar 2026.
+.(MPI version, prepared for a x86_64_linux_gnu14.3 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 13 Apr 2026.
-- ( at 12h46 )
+.Starting date : Tue 14 Apr 2026.
+- ( at 16h28 )
   
-- input  file    -> tcdfpt_3.abi
-- output file    -> tcdfpt_3.abo
-- root for input  files -> tcdfpt_3i
-- root for output files -> tcdfpt_2o
+- input  file    -> /opt/ABINIT/atlas_gnu_14.2_triqs/srostami_test_mroyo/tests/TestBot_MPI8_OMP1/paral_tcdfpt_1_MPI8-tcdfpt_2_MPI8-tcdfpt_3_MPI8-tcdfpt_4_MPI8-tcdfpt_5_MPI8-tcdfpt_6_MPI8-tcdfpt_8_MPI8-tcdfpt_10_MPI8/tcdfpt_3.abi
+- output file    -> tcdfpt_3_MPI8.abo
+- root for input  files -> tcdfpt_3_MPI8i
+- root for output files -> tcdfpt_2_MPI8o
 
  DATASET    4 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -45,7 +45,7 @@ _ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
@@ -56,7 +56,7 @@ _ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
               asr           0
            diemac      8.00000000E+00
              ecut      3.00000000E+00 Hartree
--          fftalg         112
+-          fftalg         512
            getddk           2
            getwfk           1
               ixc       -1012
@@ -170,8 +170,8 @@ meta: {optdriver: 1, rfmagn: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05011
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/rostami/abinit_mroyo_merge2/tests/Pspdir/Mn_LDA_FR_7e.psp8
-- pspatm: opening atomic psp file    /home/rostami/abinit_mroyo_merge2/tests/Pspdir/Mn_LDA_FR_7e.psp8
+- pspini: atom type   1  psp file is /opt/ABINIT/atlas_gnu_14.2_triqs/srostami_test_mroyo/tests/Pspdir/Mn_LDA_FR_7e.psp8
+- pspatm: opening atomic psp file    /opt/ABINIT/atlas_gnu_14.2_triqs/srostami_test_mroyo/tests/Pspdir/Mn_LDA_FR_7e.psp8
 - Mn    ONCVPSP-4.0.1  r_core=   3.51846   2.80304   2.20653
 - 25.00000   7.00000    260121                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -188,8 +188,8 @@ meta: {optdriver: 1, rfmagn: 2, }
   spin-orbit 2   -0.012806    0.009932    0.001874   -0.000335
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/rostami/abinit_mroyo_merge2/tests/Pspdir/F_LDA_FR.psp8
-- pspatm: opening atomic psp file    /home/rostami/abinit_mroyo_merge2/tests/Pspdir/F_LDA_FR.psp8
+- pspini: atom type   2  psp file is /opt/ABINIT/atlas_gnu_14.2_triqs/srostami_test_mroyo/tests/Pspdir/F_LDA_FR.psp8
+- pspatm: opening atomic psp file    /opt/ABINIT/atlas_gnu_14.2_triqs/srostami_test_mroyo/tests/Pspdir/F_LDA_FR.psp8
 - F     ONCVPSP-4.0.1  r_core=   1.30176   1.45845   1.60495
 -  9.00000   7.00000    250506                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -241,15 +241,15 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1 -0.95009456300469     -9.501E-01 2.334E-04 1.525E+00 1.618E+00 1.618E+00
- ETOT  2 -0.98802118097119     -3.793E-02 3.157E-06 5.090E-01 1.696E-01 1.788E+00
- ETOT  3  -1.0043969436243     -1.638E-02 2.494E-06 1.169E-01 1.310E-01 1.919E+00
- ETOT  4  -1.0085988154393     -4.202E-03 9.871E-07 9.028E-03 7.880E-02 1.997E+00
+-ETOT  1 -0.95009456300829     -9.501E-01 2.334E-04 1.525E+00 1.618E+00 1.618E+00
+ ETOT  2 -0.98802118098645     -3.793E-02 3.157E-06 5.090E-01 1.696E-01 1.788E+00
+ ETOT  3  -1.0043969436432     -1.638E-02 2.494E-06 1.169E-01 1.310E-01 1.919E+00
+ ETOT  4  -1.0085988154586     -4.202E-03 9.871E-07 9.028E-03 7.880E-02 1.997E+00
 
  At SCF step    4       vres2   =  9.03E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -277,7 +277,7 @@ tolerances: {tolvrs: 1.00E-02, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.12692877E+01 eigvalue=  -4.18604447E+00  local=  -6.82833081E+00
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-    Hspinfield=  -1.99743924E+00  Hartree=   3.55672137E-15     xc=  -2.89665240E-01
+    Hspinfield=  -1.99743924E+00  Hartree=   3.55649738E-15     xc=  -2.89665240E-01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.00908943E+00   enl1=   0.00000000E+00
@@ -306,15 +306,15 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1 -0.95009456298841     -9.501E-01 2.334E-04 1.525E+00 1.618E+00 1.618E+00
- ETOT  2 -0.98802118095010     -3.793E-02 3.157E-06 5.090E-01 1.696E-01 1.788E+00
- ETOT  3  -1.0043969436030     -1.638E-02 2.494E-06 1.169E-01 1.310E-01 1.919E+00
- ETOT  4  -1.0085988154180     -4.202E-03 9.871E-07 9.028E-03 7.880E-02 1.997E+00
+-ETOT  1 -0.95009456299205     -9.501E-01 2.334E-04 1.525E+00 1.618E+00 1.618E+00
+ ETOT  2 -0.98802118096538     -3.793E-02 3.157E-06 5.090E-01 1.696E-01 1.788E+00
+ ETOT  3  -1.0043969436220     -1.638E-02 2.494E-06 1.169E-01 1.310E-01 1.919E+00
+ ETOT  4  -1.0085988154373     -4.202E-03 9.871E-07 9.028E-03 7.880E-02 1.997E+00
 
  At SCF step    4       vres2   =  9.03E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -342,7 +342,7 @@ tolerances: {tolvrs: 1.00E-02, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.12692877E+01 eigvalue=  -4.18604447E+00  local=  -6.82833081E+00
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-    Hspinfield=  -1.99743924E+00  Hartree=   1.37410299E-14     xc=  -2.89665240E-01
+    Hspinfield=  -1.99743924E+00  Hartree=   1.37405141E-14     xc=  -2.89665240E-01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.00908943E+00   enl1=   0.00000000E+00
@@ -371,15 +371,15 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1 -0.95009451724822     -9.501E-01 2.334E-04 1.525E+00 1.618E+00 1.618E+00
- ETOT  2 -0.98802113115590     -3.793E-02 3.157E-06 5.090E-01 1.696E-01 1.788E+00
- ETOT  3  -1.0043968926392     -1.638E-02 2.494E-06 1.169E-01 1.310E-01 1.919E+00
- ETOT  4  -1.0085987643059     -4.202E-03 9.871E-07 9.028E-03 7.880E-02 1.997E+00
+-ETOT  1 -0.95009451717174     -9.501E-01 2.334E-04 1.525E+00 1.618E+00 1.618E+00
+ ETOT  2 -0.98802113106579     -3.793E-02 3.157E-06 5.090E-01 1.696E-01 1.788E+00
+ ETOT  3  -1.0043968925398     -1.638E-02 2.494E-06 1.169E-01 1.310E-01 1.919E+00
+ ETOT  4  -1.0085987642063     -4.202E-03 9.871E-07 9.028E-03 7.880E-02 1.997E+00
 
  At SCF step    4       vres2   =  9.03E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -407,7 +407,7 @@ tolerances: {tolvrs: 1.00E-02, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.12692875E+01 eigvalue=  -4.18604452E+00  local=  -6.82833045E+00
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-    Hspinfield=  -1.99743914E+00  Hartree=   6.80014185E-15     xc=  -2.89665219E-01
+    Hspinfield=  -1.99743914E+00  Hartree=   6.80015573E-15     xc=  -2.89665219E-01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.00908924E+00   enl1=   0.00000000E+00
@@ -436,15 +436,15 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1 -0.95009451721428     -9.501E-01 2.334E-04 1.525E+00 1.618E+00 1.618E+00
- ETOT  2 -0.98802113111613     -3.793E-02 3.157E-06 5.090E-01 1.696E-01 1.788E+00
- ETOT  3  -1.0043968925992     -1.638E-02 2.494E-06 1.169E-01 1.310E-01 1.919E+00
- ETOT  4  -1.0085987642660     -4.202E-03 9.871E-07 9.028E-03 7.880E-02 1.997E+00
+-ETOT  1 -0.95009451713805     -9.501E-01 2.334E-04 1.525E+00 1.618E+00 1.618E+00
+ ETOT  2 -0.98802113102632     -3.793E-02 3.157E-06 5.090E-01 1.696E-01 1.788E+00
+ ETOT  3  -1.0043968925001     -1.638E-02 2.494E-06 1.169E-01 1.310E-01 1.919E+00
+ ETOT  4  -1.0085987641667     -4.202E-03 9.871E-07 9.028E-03 7.880E-02 1.997E+00
 
  At SCF step    4       vres2   =  9.03E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -472,7 +472,7 @@ tolerances: {tolvrs: 1.00E-02, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.12692875E+01 eigvalue=  -4.18604452E+00  local=  -6.82833045E+00
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-    Hspinfield=  -1.99743914E+00  Hartree=   3.97164668E-15     xc=  -2.89665219E-01
+    Hspinfield=  -1.99743914E+00  Hartree=   3.97140670E-15     xc=  -2.89665219E-01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.00908924E+00   enl1=   0.00000000E+00
@@ -542,7 +542,7 @@ tolerances: {tolvrs: 1.00E-02, }
    1    4   2   19        -0.0000004911         0.0000000000
   
    2    4   1   18         0.0000003468         0.0000000000
-   2    4   2   18        -0.0000010366         0.0000000000
+   2    4   2   18        -0.0000010365         0.0000000000
    2    4   1   19        -0.0000005932         0.0000000000
    2    4   2   19         0.0000005370         0.0000000000
   
@@ -552,7 +552,7 @@ tolerances: {tolvrs: 1.00E-02, }
    3    4   2   19        -0.0000000240         0.0000000000
   
    1    5   1   18        -0.0000004828         0.0000000000
-   1    5   2   18         0.0000008460         0.0000000000
+   1    5   2   18         0.0000008459         0.0000000000
    1    5   1   19         0.0000006201         0.0000000000
    1    5   2   19        -0.0000005265         0.0000000000
   
@@ -612,8 +612,8 @@ tolerances: {tolvrs: 1.00E-02, }
    3   11   2   19        -0.0000000020         0.0000000000
   
    1   12   1   18         0.0000000000         0.0000000000
-   1   12   2   18         0.0000000000         0.0000000000
-   1   12   1   19         0.0000000000         0.0000000000
+   1   12   2   18        -0.0000000000         0.0000000000
+   1   12   1   19        -0.0000000000         0.0000000000
    1   12   2   19         0.0000000000         0.0000000000
   
    1   18   1    1        -0.0000001051         0.0000000000
@@ -655,7 +655,7 @@ tolerances: {tolvrs: 1.00E-02, }
    1   18   3   21         0.0000000000         0.0000000000
    1   18   1   22         0.1219331594         0.0000000000
    1   18   2   22         0.0000336942         0.0000000000
-   1   18   3   22         0.0000000003         0.0000000000
+   1   18   3   22         0.0000000002         0.0000000000
    1   18   1   23         0.0899239890         0.0000000000
    1   18   2   23         0.0000399462         0.0000000000
    1   18   3   23        -0.0000000000         0.0000000000
@@ -670,9 +670,9 @@ tolerances: {tolvrs: 1.00E-02, }
    2   18   2    3        -0.0000008194         0.0000000000
    2   18   3    3        -0.0000000252         0.0000000000
    2   18   1    4         0.0000010148         0.0000000000
-   2   18   2    4        -0.0000010366         0.0000000000
+   2   18   2    4        -0.0000010365         0.0000000000
    2   18   3    4         0.0000000150         0.0000000000
-   2   18   1    5         0.0000008460         0.0000000000
+   2   18   1    5         0.0000008459         0.0000000000
    2   18   2    5         0.0000009947         0.0000000000
    2   18   3    5         0.0000000230         0.0000000000
    2   18   1    6        -0.0000007751         0.0000000000
@@ -684,7 +684,7 @@ tolerances: {tolvrs: 1.00E-02, }
    2   18   1   11         0.0009120233         0.0000000000
    2   18   2   11        -0.0035029996         0.0000000000
    2   18   3   11         0.0000000026         0.0000000000
-   2   18   1   12         0.0000000000         0.0000000000
+   2   18   1   12        -0.0000000000         0.0000000000
    2   18   1   18         0.0002601649         0.0000000000
    2   18   2   18        -0.9987196179         0.0000000000
    2   18   3   18        -0.0000000000         0.0000000000
@@ -733,11 +733,11 @@ tolerances: {tolvrs: 1.00E-02, }
    1   19   1   11        -0.0035029985         0.0000000000
    1   19   2   11        -0.0009120235         0.0000000000
    1   19   3   11        -0.0000000028         0.0000000000
-   1   19   1   12         0.0000000000         0.0000000000
+   1   19   1   12        -0.0000000000         0.0000000000
    1   19   1   18         0.4035609981         0.0000000000
    1   19   2   18        -0.0000002513         0.0000000000
    1   19   3   18        -0.0000000007         0.0000000000
-   1   19   1   19        -0.9987195679         0.0000000000
+   1   19   1   19        -0.9987195678         0.0000000000
    1   19   2   19        -0.0002601648         0.0000000000
    1   19   3   19        -0.0000000000         0.0000000000
    1   19   1   20         0.0899239518         0.0000000000
@@ -782,13 +782,13 @@ tolerances: {tolvrs: 1.00E-02, }
    2   19   2   18         0.4035609981         0.0000000000
    2   19   3   18        -0.0000000007         0.0000000000
    2   19   1   19        -0.0002601648         0.0000000000
-   2   19   2   19        -0.9987195679         0.0000000000
+   2   19   2   19        -0.9987195678         0.0000000000
    2   19   3   19        -0.0000000000         0.0000000000
    2   19   1   20        -0.0000399461         0.0000000000
    2   19   2   20         0.0899239518         0.0000000000
    2   19   3   20        -0.0000000000         0.0000000000
    2   19   1   21        -0.0000336942         0.0000000000
-   2   19   2   21         0.1219331365         0.0000000000
+   2   19   2   21         0.1219331364         0.0000000000
    2   19   3   21        -0.0000000002         0.0000000000
    2   19   1   22        -0.0000399461         0.0000000000
    2   19   2   22         0.0899239516         0.0000000000
@@ -825,7 +825,7 @@ tolerances: {tolvrs: 1.00E-02, }
    2   21   1   18         0.0000399461         0.0000000000
    2   21   2   18         0.0899239886         0.0000000000
    2   21   1   19        -0.0000336942         0.0000000000
-   2   21   2   19         0.1219331365         0.0000000000
+   2   21   2   19         0.1219331364         0.0000000000
   
    3   21   1   18         0.0000000000         0.0000000000
    3   21   2   18         0.0000000000         0.0000000000
@@ -842,7 +842,7 @@ tolerances: {tolvrs: 1.00E-02, }
    2   22   1   19        -0.0000399462         0.0000000000
    2   22   2   19         0.0899239516         0.0000000000
   
-   3   22   1   18         0.0000000003         0.0000000000
+   3   22   1   18         0.0000000002         0.0000000000
    3   22   2   18         0.0000000001         0.0000000000
    3   22   1   19         0.0000000000         0.0000000000
    3   22   2   19         0.0000000000         0.0000000000
@@ -881,7 +881,7 @@ tolerances: {tolvrs: 1.00E-02, }
    1   18   3   21        -0.0000000000        -0.0000000000
    1   18   1   22        -0.1219331594        -0.0000000000
    1   18   2   22        -0.0000336942        -0.0000000000
-   1   18   3   22        -0.0000000003        -0.0000000000
+   1   18   3   22        -0.0000000002        -0.0000000000
    1   18   1   23        -0.0899239890        -0.0000000000
    1   18   2   23        -0.0000399462        -0.0000000000
    1   18   3   23         0.0000000000        -0.0000000000
@@ -913,7 +913,7 @@ tolerances: {tolvrs: 1.00E-02, }
    1   19   1   18        -0.4035609981        -0.0000000000
    1   19   2   18         0.0000002513        -0.0000000000
    1   19   3   18         0.0000000007        -0.0000000000
-   1   19   1   19         0.9987195679        -0.0000000000
+   1   19   1   19         0.9987195678        -0.0000000000
    1   19   2   19         0.0002601648        -0.0000000000
    1   19   3   19         0.0000000000        -0.0000000000
    1   19   1   20        -0.0899239518        -0.0000000000
@@ -933,13 +933,13 @@ tolerances: {tolvrs: 1.00E-02, }
    2   19   2   18        -0.4035609981        -0.0000000000
    2   19   3   18         0.0000000007        -0.0000000000
    2   19   1   19         0.0002601648        -0.0000000000
-   2   19   2   19         0.9987195679        -0.0000000000
+   2   19   2   19         0.9987195678        -0.0000000000
    2   19   3   19         0.0000000000        -0.0000000000
    2   19   1   20         0.0000399461        -0.0000000000
    2   19   2   20        -0.0899239518        -0.0000000000
    2   19   3   20         0.0000000000        -0.0000000000
    2   19   1   21         0.0000336942        -0.0000000000
-   2   19   2   21        -0.1219331365        -0.0000000000
+   2   19   2   21        -0.1219331364        -0.0000000000
    2   19   3   21         0.0000000002        -0.0000000000
    2   19   1   22         0.0000399461        -0.0000000000
    2   19   2   22        -0.0899239516        -0.0000000000
@@ -976,7 +976,7 @@ tolerances: {tolvrs: 1.00E-02, }
    2   21   1   18        -0.0000399461        -0.0000000000
    2   21   2   18        -0.0899239886        -0.0000000000
    2   21   1   19         0.0000336942        -0.0000000000
-   2   21   2   19        -0.1219331365        -0.0000000000
+   2   21   2   19        -0.1219331364        -0.0000000000
   
    3   21   1   18        -0.0000000000        -0.0000000000
    3   21   2   18        -0.0000000000        -0.0000000000
@@ -993,7 +993,7 @@ tolerances: {tolvrs: 1.00E-02, }
    2   22   1   19         0.0000399462        -0.0000000000
    2   22   2   19        -0.0899239516        -0.0000000000
   
-   3   22   1   18        -0.0000000003        -0.0000000000
+   3   22   1   18        -0.0000000002        -0.0000000000
    3   22   2   18        -0.0000000001        -0.0000000000
    3   22   1   19        -0.0000000000        -0.0000000000
    3   22   2   19        -0.0000000000        -0.0000000000
@@ -1029,7 +1029,7 @@ tolerances: {tolvrs: 1.00E-02, }
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         512
            getddk           2
            getwfk           1
               ixc       -1012
@@ -1204,10 +1204,10 @@ P          mk1mem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=          4.8  wall=          4.9
+- Proc.   0 individual time (sec): cpu=          4.2  wall=          4.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         38.4  wall=         38.7
++Overall time at end (sec) : cpu=         33.4  wall=         33.5

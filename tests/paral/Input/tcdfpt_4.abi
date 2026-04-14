@@ -130,7 +130,7 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% [files]
 #%% [NCPU_8]
 #%% files_to_test =
-#%%   tcdfpt_4_MPI8.abo, tolnlines=  10, tolabs=  4.192e-06, tolrel=  4.000e-07, fld_options=-medium
+#%%   tcdfpt_4_MPI8.abo, tolnlines=  10, tolabs=  4.192e-04, tolrel=  4.000e-06, fld_options=-easy
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8

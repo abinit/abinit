@@ -1,6 +1,6 @@
 
-.Version 10.7.2.9 of ABINIT. v10.7.1 released Mar 2026.
-.(MPI version, prepared for a x86_64_linux_gnu11.4 computer) 
+.Version 10.5.8.1 of ABINIT. v10.7.1 released Mar 2026.
+.(MPI version, prepared for a x86_64_linux_gnu14.3 computer) 
 
 .Copyright (C) 1998-2026 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 13 Apr 2026.
-- ( at 12h40 )
+.Starting date : Tue 14 Apr 2026.
+- ( at 16h27 )
   
-- input  file    -> tcdfpt_2.abi
-- output file    -> tcdfpt_2.abo
-- root for input  files -> tcdfpt_2i
-- root for output files -> tcdfpt_2o
+- input  file    -> /opt/ABINIT/atlas_gnu_14.2_triqs/srostami_test_mroyo/tests/TestBot_MPI8_OMP1/paral_tcdfpt_1_MPI8-tcdfpt_2_MPI8-tcdfpt_3_MPI8-tcdfpt_4_MPI8-tcdfpt_5_MPI8-tcdfpt_6_MPI8-tcdfpt_8_MPI8-tcdfpt_10_MPI8/tcdfpt_2.abi
+- output file    -> tcdfpt_2_MPI8.abo
+- root for input  files -> tcdfpt_2_MPI8i
+- root for output files -> tcdfpt_2_MPI8o
 
  DATASET    3 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -45,7 +45,7 @@ _ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file
 -  max_nthreads =    0
@@ -56,7 +56,7 @@ _ WF disk file :      1.025 Mbytes ; DEN or POT disk file :      0.022 Mbytes.
               asr           0
            diemac      8.00000000E+00
              ecut      3.00000000E+00 Hartree
--          fftalg         112
+-          fftalg         512
            getddk           2
            getwfk           1
               ixc       -1012
@@ -170,8 +170,8 @@ meta: {optdriver: 1, rfelfd: 3, rfmagn: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05011
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/rostami/abinit_mroyo_merge2/tests/Pspdir/Mn_LDA_FR_7e.psp8
-- pspatm: opening atomic psp file    /home/rostami/abinit_mroyo_merge2/tests/Pspdir/Mn_LDA_FR_7e.psp8
+- pspini: atom type   1  psp file is /opt/ABINIT/atlas_gnu_14.2_triqs/srostami_test_mroyo/tests/Pspdir/Mn_LDA_FR_7e.psp8
+- pspatm: opening atomic psp file    /opt/ABINIT/atlas_gnu_14.2_triqs/srostami_test_mroyo/tests/Pspdir/Mn_LDA_FR_7e.psp8
 - Mn    ONCVPSP-4.0.1  r_core=   3.51846   2.80304   2.20653
 - 25.00000   7.00000    260121                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -188,8 +188,8 @@ meta: {optdriver: 1, rfelfd: 3, rfmagn: 1, rfphon: 1, }
   spin-orbit 2   -0.012806    0.009932    0.001874   -0.000335
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/rostami/abinit_mroyo_merge2/tests/Pspdir/F_LDA_FR.psp8
-- pspatm: opening atomic psp file    /home/rostami/abinit_mroyo_merge2/tests/Pspdir/F_LDA_FR.psp8
+- pspini: atom type   2  psp file is /opt/ABINIT/atlas_gnu_14.2_triqs/srostami_test_mroyo/tests/Pspdir/F_LDA_FR.psp8
+- pspatm: opening atomic psp file    /opt/ABINIT/atlas_gnu_14.2_triqs/srostami_test_mroyo/tests/Pspdir/F_LDA_FR.psp8
 - F     ONCVPSP-4.0.1  r_core=   1.30176   1.45845   1.60495
 -  9.00000   7.00000    250506                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -261,17 +261,17 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   492.59882898134      6.419E+01 2.016E-01 8.529E+04 8.058E-07 8.058E-07
- ETOT  2   205.72266666455     -2.869E+02 1.632E-01 3.849E+04 5.757E-07 3.512E-07
- ETOT  3   26.647426637382     -1.791E+02 1.553E-02 6.964E+01 1.750E-07 2.287E-07
- ETOT  4   26.315676063965     -3.318E-01 8.043E-05 1.239E+01 5.469E-08 2.163E-07
- ETOT  5   26.262738483288     -5.294E-02 5.556E-06 9.870E-02 7.282E-09 2.156E-07
- ETOT  6   26.262271193495     -4.673E-04 5.182E-08 3.300E-03 4.906E-09 2.143E-07
+-ETOT  1   492.59882898855      6.419E+01 2.016E-01 8.529E+04 8.057E-07 8.057E-07
+ ETOT  2   205.72266667450     -2.869E+02 1.632E-01 3.849E+04 5.756E-07 3.512E-07
+ ETOT  3   26.647426635408     -1.791E+02 1.553E-02 6.964E+01 1.750E-07 2.287E-07
+ ETOT  4   26.315676061938     -3.318E-01 8.043E-05 1.239E+01 5.469E-08 2.163E-07
+ ETOT  5   26.262738481244     -5.294E-02 5.556E-06 9.870E-02 7.282E-09 2.156E-07
+ ETOT  6   26.262271191452     -4.673E-04 5.182E-08 3.300E-03 4.906E-09 2.143E-07
 
  At SCF step    6       vres2   =  3.30E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -310,9 +310,9 @@ tolerances: {tolvrs: 1.00E-02, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.82523789E+02  frxc 2 =   1.68325274E+02
  Resulting in :
- 2DEtotal=    0.2626227119E+02 Ha. Also 2DEtotal=    0.714632805143E+03 eV
+ 2DEtotal=    0.2626227119E+02 Ha. Also 2DEtotal=    0.714632805087E+03 eV
     (2DErelax=   -4.0214243149E+02 Ha. 2DEnonrelax=    4.2840470268E+02 Ha)
-    (  non-var. 2DEtotal :    2.6234560654E+01 Ha)
+    (  non-var. 2DEtotal :    2.6234560652E+01 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -336,17 +336,17 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   492.59882819449      6.419E+01 2.016E-01 8.529E+04 7.909E-07 7.909E-07
- ETOT  2   205.72266551679     -2.869E+02 1.632E-01 3.849E+04 5.401E-07 3.455E-07
- ETOT  3   26.647426524198     -1.791E+02 1.553E-02 6.964E+01 2.134E-07 2.318E-07
- ETOT  4   26.315675950520     -3.318E-01 8.043E-05 1.239E+01 4.448E-08 2.180E-07
- ETOT  5   26.262738369553     -5.294E-02 5.556E-06 9.870E-02 4.709E-09 2.188E-07
- ETOT  6   26.262271079763     -4.673E-04 5.182E-08 3.300E-03 4.324E-09 2.175E-07
+-ETOT  1   492.59882820178      6.419E+01 2.016E-01 8.529E+04 7.909E-07 7.909E-07
+ ETOT  2   205.72266552683     -2.869E+02 1.632E-01 3.849E+04 5.401E-07 3.455E-07
+ ETOT  3   26.647426522230     -1.791E+02 1.553E-02 6.964E+01 2.135E-07 2.318E-07
+ ETOT  4   26.315675948501     -3.318E-01 8.043E-05 1.239E+01 4.447E-08 2.180E-07
+ ETOT  5   26.262738367518     -5.294E-02 5.556E-06 9.870E-02 4.709E-09 2.188E-07
+ ETOT  6   26.262271077728     -4.673E-04 5.182E-08 3.300E-03 4.324E-09 2.175E-07
 
  At SCF step    6       vres2   =  3.30E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -385,9 +385,9 @@ tolerances: {tolvrs: 1.00E-02, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.82523789E+02  frxc 2 =   1.68325274E+02
  Resulting in :
- 2DEtotal=    0.2626227108E+02 Ha. Also 2DEtotal=    0.714632802048E+03 eV
+ 2DEtotal=    0.2626227108E+02 Ha. Also 2DEtotal=    0.714632801993E+03 eV
     (2DErelax=   -4.0214243171E+02 Ha. 2DEnonrelax=    4.2840470279E+02 Ha)
-    (  non-var. 2DEtotal :    2.6234560541E+01 Ha)
+    (  non-var. 2DEtotal :    2.6234560539E+01 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -411,17 +411,17 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   217.63876605380      5.548E+01 1.180E-01 2.675E+04 1.115E-07 1.115E-07
- ETOT  2   80.932894554404     -1.367E+02 6.761E-02 9.646E+03 3.899E-08 1.083E-07
- ETOT  3   3.8850096504692     -7.705E+01 8.148E-03 1.316E+01 2.094E-08 8.740E-08
- ETOT  4   3.7459357055820     -1.391E-01 2.236E-05 3.251E+00 2.517E-09 8.992E-08
- ETOT  5   3.7209050182700     -2.503E-02 1.908E-06 1.690E-02 1.543E-09 9.146E-08
- ETOT  6   3.7207370559527     -1.680E-04 2.184E-08 1.422E-04 7.995E-10 9.226E-08
+-ETOT  1   217.63876605661      5.548E+01 1.180E-01 2.675E+04 1.115E-07 1.115E-07
+ ETOT  2   80.932894557184     -1.367E+02 6.761E-02 9.646E+03 3.899E-08 1.083E-07
+ ETOT  3   3.8850096495351     -7.705E+01 8.148E-03 1.316E+01 2.094E-08 8.740E-08
+ ETOT  4   3.7459357046502     -1.391E-01 2.236E-05 3.251E+00 2.517E-09 8.992E-08
+ ETOT  5   3.7209050173396     -2.503E-02 1.908E-06 1.690E-02 1.543E-09 9.146E-08
+ ETOT  6   3.7207370550228     -1.680E-04 2.184E-08 1.422E-04 7.995E-10 9.226E-08
 
  At SCF step    6       vres2   =  1.42E-04 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -460,9 +460,9 @@ tolerances: {tolvrs: 1.00E-02, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -8.43386884E+01  frxc 2 =   7.67473481E+01
  Resulting in :
- 2DEtotal=    0.3720737056E+01 Ha. Also 2DEtotal=    0.101246413149E+03 eV
+ 2DEtotal=    0.3720737055E+01 Ha. Also 2DEtotal=    0.101246413124E+03 eV
     (2DErelax=   -1.5844140799E+02 Ha. 2DEnonrelax=    1.6216214504E+02 Ha)
-    (  non-var. 2DEtotal :    3.7195600510E+00 Ha)
+    (  non-var. 2DEtotal :    3.7195600500E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -486,17 +486,17 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   492.59868745295      6.419E+01 2.016E-01 8.529E+04 8.104E-07 8.104E-07
- ETOT  2   205.72246099864     -2.869E+02 1.632E-01 3.848E+04 5.391E-07 3.578E-07
- ETOT  3   26.647467882684     -1.791E+02 1.553E-02 6.964E+01 1.914E-07 2.834E-07
- ETOT  4   26.315718441016     -3.317E-01 8.043E-05 1.239E+01 2.500E-08 2.588E-07
- ETOT  5   26.262781151103     -5.294E-02 5.556E-06 9.871E-02 6.696E-09 2.541E-07
- ETOT  6   26.262313861062     -4.673E-04 5.183E-08 3.300E-03 4.078E-09 2.524E-07
+-ETOT  1   492.59868744466      6.419E+01 2.016E-01 8.529E+04 8.104E-07 8.104E-07
+ ETOT  2   205.72246098634     -2.869E+02 1.632E-01 3.848E+04 5.391E-07 3.578E-07
+ ETOT  3   26.647467885170     -1.791E+02 1.553E-02 6.964E+01 1.914E-07 2.834E-07
+ ETOT  4   26.315718443572     -3.317E-01 8.043E-05 1.239E+01 2.499E-08 2.588E-07
+ ETOT  5   26.262781153676     -5.294E-02 5.556E-06 9.871E-02 6.696E-09 2.541E-07
+ ETOT  6   26.262313863635     -4.673E-04 5.183E-08 3.300E-03 4.078E-09 2.524E-07
 
  At SCF step    6       vres2   =  3.30E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -535,9 +535,9 @@ tolerances: {tolvrs: 1.00E-02, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.82523786E+02  frxc 2 =   1.68325271E+02
  Resulting in :
- 2DEtotal=    0.2626231386E+02 Ha. Also 2DEtotal=    0.714633966187E+03 eV
+ 2DEtotal=    0.2626231386E+02 Ha. Also 2DEtotal=    0.714633966257E+03 eV
     (2DErelax=   -4.0214243632E+02 Ha. 2DEnonrelax=    4.2840475018E+02 Ha)
-    (  non-var. 2DEtotal :    2.6234603537E+01 Ha)
+    (  non-var. 2DEtotal :    2.6234603539E+01 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -561,17 +561,17 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   492.59868870219      6.419E+01 2.016E-01 8.529E+04 7.955E-07 7.955E-07
- ETOT  2   205.72246266015     -2.869E+02 1.632E-01 3.848E+04 5.115E-07 3.493E-07
- ETOT  3   26.647467977363     -1.791E+02 1.553E-02 6.964E+01 2.263E-07 3.004E-07
- ETOT  4   26.315718535867     -3.317E-01 8.043E-05 1.239E+01 2.738E-08 2.735E-07
- ETOT  5   26.262781246637     -5.294E-02 5.556E-06 9.871E-02 5.348E-09 2.681E-07
- ETOT  6   26.262313956601     -4.673E-04 5.183E-08 3.300E-03 4.200E-09 2.662E-07
+-ETOT  1   492.59868869388      6.419E+01 2.016E-01 8.529E+04 7.954E-07 7.954E-07
+ ETOT  2   205.72246264777     -2.869E+02 1.632E-01 3.848E+04 5.115E-07 3.493E-07
+ ETOT  3   26.647467979842     -1.791E+02 1.553E-02 6.964E+01 2.264E-07 3.004E-07
+ ETOT  4   26.315718538415     -3.317E-01 8.043E-05 1.239E+01 2.737E-08 2.734E-07
+ ETOT  5   26.262781249204     -5.294E-02 5.556E-06 9.871E-02 5.348E-09 2.681E-07
+ ETOT  6   26.262313959167     -4.673E-04 5.183E-08 3.300E-03 4.200E-09 2.662E-07
 
  At SCF step    6       vres2   =  3.30E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -610,9 +610,9 @@ tolerances: {tolvrs: 1.00E-02, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.82523786E+02  frxc 2 =   1.68325271E+02
  Resulting in :
- 2DEtotal=    0.2626231396E+02 Ha. Also 2DEtotal=    0.714633968786E+03 eV
+ 2DEtotal=    0.2626231396E+02 Ha. Also 2DEtotal=    0.714633968856E+03 eV
     (2DErelax=   -4.0214243585E+02 Ha. 2DEnonrelax=    4.2840474981E+02 Ha)
-    (  non-var. 2DEtotal :    2.6234603631E+01 Ha)
+    (  non-var. 2DEtotal :    2.6234603634E+01 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -636,17 +636,17 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   217.63870845874      5.548E+01 1.180E-01 2.675E+04 7.966E-08 7.966E-08
- ETOT  2   80.932836130584     -1.367E+02 6.761E-02 9.645E+03 5.922E-08 4.955E-08
- ETOT  3   3.8850289064590     -7.705E+01 8.148E-03 1.316E+01 2.205E-08 4.498E-08
- ETOT  4   3.7459549540436     -1.391E-01 2.236E-05 3.251E+00 3.146E-09 4.597E-08
- ETOT  5   3.7209242416551     -2.503E-02 1.908E-06 1.690E-02 6.896E-10 4.666E-08
- ETOT  6   3.7207562797481     -1.680E-04 2.184E-08 1.422E-04 4.633E-10 4.713E-08
+-ETOT  1   217.63870845509      5.548E+01 1.180E-01 2.675E+04 7.966E-08 7.966E-08
+ ETOT  2   80.932836126846     -1.367E+02 6.761E-02 9.645E+03 5.922E-08 4.955E-08
+ ETOT  3   3.8850289076650     -7.705E+01 8.148E-03 1.316E+01 2.205E-08 4.498E-08
+ ETOT  4   3.7459549552511     -1.391E-01 2.236E-05 3.251E+00 3.146E-09 4.597E-08
+ ETOT  5   3.7209242428610     -2.503E-02 1.908E-06 1.690E-02 6.896E-10 4.666E-08
+ ETOT  6   3.7207562809541     -1.680E-04 2.184E-08 1.422E-04 4.633E-10 4.712E-08
 
  At SCF step    6       vres2   =  1.42E-04 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -685,9 +685,9 @@ tolerances: {tolvrs: 1.00E-02, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -8.43386872E+01  frxc 2 =   7.67473469E+01
  Resulting in :
- 2DEtotal=    0.3720756280E+01 Ha. Also 2DEtotal=    0.101246936255E+03 eV
+ 2DEtotal=    0.3720756281E+01 Ha. Also 2DEtotal=    0.101246936288E+03 eV
     (2DErelax=   -1.5844140682E+02 Ha. 2DEnonrelax=    1.6216216310E+02 Ha)
-    (  non-var. 2DEtotal :    3.7195792793E+00 Ha)
+    (  non-var. 2DEtotal :    3.7195792805E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -711,18 +711,18 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   754.11935878698     -6.911E+02 2.079E-01 2.774E+04 1.100E-05 1.100E-05
- ETOT  2   651.89229047286     -1.022E+02 7.484E-02 8.830E+03 3.566E-06 1.217E-05
- ETOT  3   653.12508366481      1.233E+00 3.423E-03 9.212E+03 9.318E-06 2.854E-06
- ETOT  4   619.91349049023     -3.321E+01 1.374E-03 1.297E+02 1.738E-06 1.116E-06
- ETOT  5   619.38091346770     -5.326E-01 2.832E-05 9.437E-01 3.993E-07 7.170E-07
- ETOT  6   619.37677374919     -4.140E-03 2.784E-07 6.986E-02 1.590E-07 5.580E-07
- ETOT  7   619.37654460906     -2.291E-04 1.683E-08 3.224E-03 7.191E-08 4.861E-07
+-ETOT  1   754.11935882931     -6.911E+02 2.079E-01 2.774E+04 1.100E-05 1.100E-05
+ ETOT  2   651.89229051964     -1.022E+02 7.484E-02 8.830E+03 3.566E-06 1.217E-05
+ ETOT  3   653.12508368511      1.233E+00 3.423E-03 9.212E+03 9.319E-06 2.854E-06
+ ETOT  4   619.91349049225     -3.321E+01 1.374E-03 1.297E+02 1.737E-06 1.116E-06
+ ETOT  5   619.38091346884     -5.326E-01 2.832E-05 9.437E-01 3.992E-07 7.170E-07
+ ETOT  6   619.37677375034     -4.140E-03 2.784E-07 6.986E-02 1.590E-07 5.580E-07
+ ETOT  7   619.37654461021     -2.291E-04 1.683E-08 3.224E-03 7.190E-08 4.861E-07
 
  At SCF step    7       vres2   =  3.22E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -787,18 +787,18 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   754.11933811944     -6.911E+02 2.079E-01 2.774E+04 1.058E-05 1.058E-05
- ETOT  2   651.89226331174     -1.022E+02 7.484E-02 8.830E+03 4.148E-06 1.211E-05
- ETOT  3   653.12506913290      1.233E+00 3.423E-03 9.212E+03 7.841E-06 4.269E-06
- ETOT  4   619.91348992931     -3.321E+01 1.374E-03 1.297E+02 3.230E-06 1.038E-06
- ETOT  5   619.38091325727     -5.326E-01 2.832E-05 9.437E-01 3.189E-07 7.196E-07
- ETOT  6   619.37677355216     -4.140E-03 2.784E-07 6.986E-02 1.891E-07 5.305E-07
- ETOT  7   619.37654441189     -2.291E-04 1.684E-08 3.224E-03 6.885E-08 4.616E-07
+-ETOT  1   754.11933816438     -6.911E+02 2.079E-01 2.774E+04 1.058E-05 1.058E-05
+ ETOT  2   651.89226336284     -1.022E+02 7.484E-02 8.830E+03 4.148E-06 1.211E-05
+ ETOT  3   653.12506915656      1.233E+00 3.423E-03 9.212E+03 7.841E-06 4.269E-06
+ ETOT  4   619.91348993133     -3.321E+01 1.374E-03 1.297E+02 3.231E-06 1.039E-06
+ ETOT  5   619.38091325844     -5.326E-01 2.832E-05 9.437E-01 3.189E-07 7.196E-07
+ ETOT  6   619.37677355332     -4.140E-03 2.784E-07 6.986E-02 1.891E-07 5.305E-07
+ ETOT  7   619.37654441304     -2.291E-04 1.684E-08 3.224E-03 6.886E-08 4.616E-07
 
  At SCF step    7       vres2   =  3.22E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -863,16 +863,16 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   600.38896289518     -2.934E+02 1.095E-01 9.393E+03 2.275E-06 2.275E-06
- ETOT  2   547.84722716683     -5.254E+01 3.113E-02 4.207E+02 1.387E-06 8.883E-07
- ETOT  3   545.19616407659     -2.651E+00 6.350E-04 3.586E+01 6.542E-07 2.516E-07
- ETOT  4   544.92616471695     -2.700E-01 4.391E-05 6.338E-01 2.034E-07 7.986E-08
- ETOT  5   544.92133493508     -4.830E-03 5.061E-07 9.404E-03 2.412E-08 6.797E-08
+-ETOT  1   600.38896288944     -2.934E+02 1.095E-01 9.393E+03 2.275E-06 2.275E-06
+ ETOT  2   547.84722716479     -5.254E+01 3.113E-02 4.207E+02 1.387E-06 8.882E-07
+ ETOT  3   545.19616407611     -2.651E+00 6.350E-04 3.586E+01 6.542E-07 2.516E-07
+ ETOT  4   544.92616471733     -2.700E-01 4.391E-05 6.338E-01 2.034E-07 7.984E-08
+ ETOT  5   544.92133493545     -4.830E-03 5.061E-07 9.404E-03 2.412E-08 6.796E-08
 
  At SCF step    5       vres2   =  9.40E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -937,18 +937,18 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   754.11925716724     -6.911E+02 2.079E-01 2.774E+04 9.071E-06 9.071E-06
- ETOT  2   651.89213383926     -1.022E+02 7.484E-02 8.830E+03 4.143E-06 8.700E-06
- ETOT  3   653.12493581293      1.233E+00 3.422E-03 9.212E+03 5.912E-06 2.788E-06
- ETOT  4   619.91346950850     -3.321E+01 1.374E-03 1.297E+02 2.040E-06 7.479E-07
- ETOT  5   619.38089278620     -5.326E-01 2.832E-05 9.437E-01 2.577E-07 4.902E-07
- ETOT  6   619.37675306629     -4.140E-03 2.784E-07 6.986E-02 8.315E-08 4.070E-07
- ETOT  7   619.37652392280     -2.291E-04 1.676E-08 3.224E-03 2.237E-08 4.018E-07
+-ETOT  1   754.11925720136     -6.911E+02 2.079E-01 2.774E+04 9.072E-06 9.072E-06
+ ETOT  2   651.89213387325     -1.022E+02 7.484E-02 8.830E+03 4.143E-06 8.700E-06
+ ETOT  3   653.12493584070      1.233E+00 3.422E-03 9.212E+03 5.911E-06 2.789E-06
+ ETOT  4   619.91346950903     -3.321E+01 1.374E-03 1.297E+02 2.041E-06 7.480E-07
+ ETOT  5   619.38089278541     -5.326E-01 2.832E-05 9.437E-01 2.578E-07 4.902E-07
+ ETOT  6   619.37675306550     -4.140E-03 2.784E-07 6.986E-02 8.317E-08 4.070E-07
+ ETOT  7   619.37652392201     -2.291E-04 1.676E-08 3.224E-03 2.237E-08 4.018E-07
 
  At SCF step    7       vres2   =  3.22E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -987,7 +987,7 @@ tolerances: {tolvrs: 1.00E-02, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.32474146E+02  frxc 2 =   7.47612028E+02
  Resulting in :
- 2DEtotal=    0.6193765239E+03 Ha. Also 2DEtotal=    0.168540938242E+05 eV
+ 2DEtotal=    0.6193765239E+03 Ha. Also 2DEtotal=    0.168540938241E+05 eV
     (2DErelax=   -8.2583186750E+02 Ha. 2DEnonrelax=    1.4452083914E+03 Ha)
     (  non-var. 2DEtotal :    6.1935252789E+02 Ha)
 
@@ -1013,18 +1013,18 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   754.11931816286     -6.911E+02 2.079E-01 2.774E+04 8.641E-06 8.641E-06
- ETOT  2   651.89225245249     -1.022E+02 7.484E-02 8.830E+03 4.148E-06 8.188E-06
- ETOT  3   653.12502665379      1.233E+00 3.422E-03 9.212E+03 4.819E-06 4.503E-06
- ETOT  4   619.91346939177     -3.321E+01 1.374E-03 1.297E+02 3.841E-06 6.621E-07
- ETOT  5   619.38089269215     -5.326E-01 2.832E-05 9.437E-01 1.785E-07 4.965E-07
- ETOT  6   619.37675298162     -4.140E-03 2.784E-07 6.986E-02 7.921E-08 4.173E-07
- ETOT  7   619.37652383853     -2.291E-04 1.677E-08 3.224E-03 2.279E-08 3.988E-07
+-ETOT  1   754.11931819823     -6.911E+02 2.079E-01 2.774E+04 8.641E-06 8.641E-06
+ ETOT  2   651.89225248793     -1.022E+02 7.484E-02 8.830E+03 4.148E-06 8.188E-06
+ ETOT  3   653.12502668237      1.233E+00 3.422E-03 9.212E+03 4.819E-06 4.503E-06
+ ETOT  4   619.91346939233     -3.321E+01 1.374E-03 1.297E+02 3.841E-06 6.620E-07
+ ETOT  5   619.38089269137     -5.326E-01 2.832E-05 9.437E-01 1.785E-07 4.964E-07
+ ETOT  6   619.37675298083     -4.140E-03 2.784E-07 6.986E-02 7.918E-08 4.173E-07
+ ETOT  7   619.37652383775     -2.291E-04 1.677E-08 3.224E-03 2.279E-08 3.988E-07
 
  At SCF step    7       vres2   =  3.22E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -1063,7 +1063,7 @@ tolerances: {tolvrs: 1.00E-02, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.32474146E+02  frxc 2 =   7.47612028E+02
  Resulting in :
- 2DEtotal=    0.6193765238E+03 Ha. Also 2DEtotal=    0.168540938219E+05 eV
+ 2DEtotal=    0.6193765238E+03 Ha. Also 2DEtotal=    0.168540938218E+05 eV
     (2DErelax=   -8.2583186747E+02 Ha. 2DEnonrelax=    1.4452083913E+03 Ha)
     (  non-var. 2DEtotal :    6.1935252791E+02 Ha)
 
@@ -1089,16 +1089,16 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   600.38321200448     -2.934E+02 1.095E-01 9.393E+03 1.826E-06 1.826E-06
- ETOT  2   547.84678923725     -5.254E+01 3.113E-02 4.207E+02 7.326E-07 1.094E-06
- ETOT  3   545.19611162883     -2.651E+00 6.339E-04 3.586E+01 7.414E-07 3.522E-07
- ETOT  4   544.92615678313     -2.700E-01 4.389E-05 6.336E-01 2.938E-07 1.556E-07
- ETOT  5   544.92132942792     -4.827E-03 5.066E-07 9.392E-03 1.993E-08 1.483E-07
+-ETOT  1   600.38321199493     -2.934E+02 1.095E-01 9.393E+03 1.827E-06 1.827E-06
+ ETOT  2   547.84678923455     -5.254E+01 3.113E-02 4.207E+02 7.328E-07 1.094E-06
+ ETOT  3   545.19611162863     -2.651E+00 6.339E-04 3.586E+01 7.415E-07 3.523E-07
+ ETOT  4   544.92615678295     -2.700E-01 4.389E-05 6.336E-01 2.938E-07 1.556E-07
+ ETOT  5   544.92132942774     -4.827E-03 5.066E-07 9.392E-03 1.993E-08 1.483E-07
 
  At SCF step    5       vres2   =  9.39E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -1163,18 +1163,18 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   754.11935763758     -6.911E+02 2.079E-01 2.774E+04 1.106E-05 1.106E-05
- ETOT  2   651.89228931159     -1.022E+02 7.484E-02 8.830E+03 3.823E-06 1.234E-05
- ETOT  3   653.12508256197      1.233E+00 3.423E-03 9.212E+03 9.644E-06 2.698E-06
- ETOT  4   619.91348946576     -3.321E+01 1.374E-03 1.297E+02 1.454E-06 1.244E-06
- ETOT  5   619.38091244653     -5.326E-01 2.832E-05 9.437E-01 3.937E-07 8.502E-07
- ETOT  6   619.37677272801     -4.140E-03 2.784E-07 6.986E-02 2.221E-07 6.281E-07
- ETOT  7   619.37654358787     -2.291E-04 1.683E-08 3.224E-03 9.364E-08 5.344E-07
+-ETOT  1   754.11935767996     -6.911E+02 2.079E-01 2.774E+04 1.106E-05 1.106E-05
+ ETOT  2   651.89228935842     -1.022E+02 7.484E-02 8.830E+03 3.823E-06 1.234E-05
+ ETOT  3   653.12508258233      1.233E+00 3.423E-03 9.212E+03 9.645E-06 2.697E-06
+ ETOT  4   619.91348946783     -3.321E+01 1.374E-03 1.297E+02 1.453E-06 1.244E-06
+ ETOT  5   619.38091244773     -5.326E-01 2.832E-05 9.437E-01 3.937E-07 8.502E-07
+ ETOT  6   619.37677272920     -4.140E-03 2.784E-07 6.986E-02 2.221E-07 6.281E-07
+ ETOT  7   619.37654358907     -2.291E-04 1.683E-08 3.224E-03 9.363E-08 5.345E-07
 
  At SCF step    7       vres2   =  3.22E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -1239,18 +1239,18 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   754.11933745573     -6.911E+02 2.079E-01 2.774E+04 1.059E-05 1.059E-05
- ETOT  2   651.89226293086     -1.022E+02 7.484E-02 8.830E+03 4.106E-06 1.197E-05
- ETOT  3   653.12506875673      1.233E+00 3.423E-03 9.212E+03 7.349E-06 4.622E-06
- ETOT  4   619.91348938526     -3.321E+01 1.374E-03 1.297E+02 3.395E-06 1.227E-06
- ETOT  5   619.38091271739     -5.326E-01 2.832E-05 9.437E-01 4.189E-07 8.085E-07
- ETOT  6   619.37677301236     -4.140E-03 2.784E-07 6.986E-02 1.767E-07 6.318E-07
- ETOT  7   619.37654387209     -2.291E-04 1.684E-08 3.224E-03 9.242E-08 5.394E-07
+-ETOT  1   754.11933750070     -6.911E+02 2.079E-01 2.774E+04 1.059E-05 1.059E-05
+ ETOT  2   651.89226298197     -1.022E+02 7.484E-02 8.830E+03 4.106E-06 1.197E-05
+ ETOT  3   653.12506878040      1.233E+00 3.423E-03 9.212E+03 7.349E-06 4.622E-06
+ ETOT  4   619.91348938729     -3.321E+01 1.374E-03 1.297E+02 3.395E-06 1.227E-06
+ ETOT  5   619.38091271857     -5.326E-01 2.832E-05 9.437E-01 4.190E-07 8.085E-07
+ ETOT  6   619.37677301353     -4.140E-03 2.784E-07 6.986E-02 1.767E-07 6.318E-07
+ ETOT  7   619.37654387326     -2.291E-04 1.684E-08 3.224E-03 9.241E-08 5.394E-07
 
  At SCF step    7       vres2   =  3.22E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -1290,7 +1290,7 @@ tolerances: {tolvrs: 1.00E-02, }
  frxc 1  =  -1.32474146E+02  frxc 2 =   7.47612028E+02
  Resulting in :
  2DEtotal=    0.6193765439E+03 Ha. Also 2DEtotal=    0.168540943670E+05 eV
-    (2DErelax=   -8.2583185440E+02 Ha. 2DEnonrelax=    1.4452083983E+03 Ha)
+    (2DErelax=   -8.2583185439E+02 Ha. 2DEnonrelax=    1.4452083983E+03 Ha)
     (  non-var. 2DEtotal :    6.1935254815E+02 Ha)
 
 
@@ -1315,16 +1315,16 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   600.38896267175     -2.934E+02 1.095E-01 9.393E+03 2.282E-06 2.282E-06
- ETOT  2   547.84722702060     -5.254E+01 3.113E-02 4.207E+02 1.344E-06 9.375E-07
- ETOT  3   545.19616392041     -2.651E+00 6.350E-04 3.586E+01 6.825E-07 2.550E-07
- ETOT  4   544.92616456005     -2.700E-01 4.391E-05 6.338E-01 2.107E-07 1.083E-07
- ETOT  5   544.92133477817     -4.830E-03 5.061E-07 9.404E-03 3.080E-08 7.755E-08
+-ETOT  1   600.38896266602     -2.934E+02 1.095E-01 9.393E+03 2.282E-06 2.282E-06
+ ETOT  2   547.84722701855     -5.254E+01 3.113E-02 4.207E+02 1.344E-06 9.374E-07
+ ETOT  3   545.19616391993     -2.651E+00 6.350E-04 3.586E+01 6.824E-07 2.549E-07
+ ETOT  4   544.92616456043     -2.700E-01 4.391E-05 6.338E-01 2.107E-07 1.083E-07
+ ETOT  5   544.92133477855     -4.830E-03 5.061E-07 9.404E-03 3.079E-08 7.755E-08
 
  At SCF step    5       vres2   =  9.40E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -1389,18 +1389,18 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   754.11925910192     -6.911E+02 2.079E-01 2.774E+04 9.213E-06 9.213E-06
- ETOT  2   651.89213553089     -1.022E+02 7.484E-02 8.830E+03 3.926E-06 9.140E-06
- ETOT  3   653.12493747117      1.233E+00 3.422E-03 9.212E+03 6.037E-06 3.103E-06
- ETOT  4   619.91347111001     -3.321E+01 1.374E-03 1.297E+02 2.427E-06 1.098E-06
- ETOT  5   619.38089438279     -5.326E-01 2.832E-05 9.437E-01 2.673E-07 8.305E-07
- ETOT  6   619.37675466286     -4.140E-03 2.784E-07 6.986E-02 1.864E-07 6.441E-07
- ETOT  7   619.37652551938     -2.291E-04 1.676E-08 3.224E-03 8.943E-08 5.547E-07
+-ETOT  1   754.11925913594     -6.911E+02 2.079E-01 2.774E+04 9.213E-06 9.213E-06
+ ETOT  2   651.89213556479     -1.022E+02 7.484E-02 8.830E+03 3.926E-06 9.140E-06
+ ETOT  3   653.12493749884      1.233E+00 3.422E-03 9.212E+03 6.036E-06 3.104E-06
+ ETOT  4   619.91347111046     -3.321E+01 1.374E-03 1.297E+02 2.428E-06 1.098E-06
+ ETOT  5   619.38089438192     -5.326E-01 2.832E-05 9.437E-01 2.673E-07 8.306E-07
+ ETOT  6   619.37675466199     -4.140E-03 2.784E-07 6.986E-02 1.864E-07 6.442E-07
+ ETOT  7   619.37652551850     -2.291E-04 1.676E-08 3.224E-03 8.944E-08 5.547E-07
 
  At SCF step    7       vres2   =  3.22E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -1465,18 +1465,18 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   754.11931995246     -6.911E+02 2.079E-01 2.774E+04 8.736E-06 8.736E-06
- ETOT  2   651.89225386365     -1.022E+02 7.484E-02 8.830E+03 4.019E-06 8.486E-06
- ETOT  3   653.12502805566      1.233E+00 3.422E-03 9.212E+03 4.641E-06 4.880E-06
- ETOT  4   619.91347088131     -3.321E+01 1.374E-03 1.297E+02 3.827E-06 1.053E-06
- ETOT  5   619.38089417612     -5.326E-01 2.832E-05 9.437E-01 2.937E-07 7.592E-07
- ETOT  6   619.37675446552     -4.140E-03 2.784E-07 6.986E-02 1.422E-07 6.170E-07
- ETOT  7   619.37652532242     -2.291E-04 1.677E-08 3.224E-03 8.086E-08 5.361E-07
+-ETOT  1   754.11931998774     -6.911E+02 2.079E-01 2.774E+04 8.737E-06 8.737E-06
+ ETOT  2   651.89225389900     -1.022E+02 7.484E-02 8.830E+03 4.019E-06 8.486E-06
+ ETOT  3   653.12502808417      1.233E+00 3.422E-03 9.212E+03 4.641E-06 4.881E-06
+ ETOT  4   619.91347088178     -3.321E+01 1.374E-03 1.297E+02 3.828E-06 1.053E-06
+ ETOT  5   619.38089417525     -5.326E-01 2.832E-05 9.437E-01 2.937E-07 7.592E-07
+ ETOT  6   619.37675446465     -4.140E-03 2.784E-07 6.986E-02 1.422E-07 6.170E-07
+ ETOT  7   619.37652532155     -2.291E-04 1.677E-08 3.224E-03 8.087E-08 5.361E-07
 
  At SCF step    7       vres2   =  3.22E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -1541,16 +1541,16 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1   600.38321252441     -2.934E+02 1.095E-01 9.393E+03 1.826E-06 1.826E-06
- ETOT  2   547.84678960889     -5.254E+01 3.113E-02 4.207E+02 7.334E-07 1.092E-06
- ETOT  3   545.19611201813     -2.651E+00 6.339E-04 3.586E+01 7.530E-07 3.394E-07
- ETOT  4   544.92615717415     -2.700E-01 4.389E-05 6.336E-01 2.963E-07 1.146E-07
- ETOT  5   544.92132981896     -4.827E-03 5.066E-07 9.392E-03 1.987E-08 1.254E-07
+-ETOT  1   600.38321251483     -2.934E+02 1.095E-01 9.393E+03 1.826E-06 1.826E-06
+ ETOT  2   547.84678960617     -5.254E+01 3.113E-02 4.207E+02 7.336E-07 1.093E-06
+ ETOT  3   545.19611201790     -2.651E+00 6.339E-04 3.586E+01 7.531E-07 3.394E-07
+ ETOT  4   544.92615717394     -2.700E-01 4.389E-05 6.336E-01 2.964E-07 1.146E-07
+ ETOT  5   544.92132981876     -4.827E-03 5.066E-07 9.392E-03 1.987E-08 1.254E-07
 
  At SCF step    5       vres2   =  9.39E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -1607,7 +1607,7 @@ tolerances: {tolvrs: 1.00E-02, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tcdfpt_2o_DS2_1WF19
+- dfpt_looppert: read the DDK wavefunctions from file: tcdfpt_2_MPI8o_DS2_1WF19
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1616,21 +1616,21 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1  -223.84260065304     -2.238E+02 7.481E-02 9.332E+02 9.756E-07 9.756E-07
- ETOT  2  -228.32978472379     -4.487E+00 7.053E-04 4.661E+01 2.134E-07 9.837E-07
- ETOT  3  -228.49009627770     -1.603E-01 2.214E-05 4.397E+00 1.128E-07 1.096E-06
- ETOT  4  -228.50522479976     -1.513E-02 9.164E-07 5.071E-03 7.242E-08 1.169E-06
+-ETOT  1  -223.84260065177     -2.238E+02 7.481E-02 9.332E+02 9.756E-07 9.756E-07
+ ETOT  2  -228.32978472242     -4.487E+00 7.053E-04 4.661E+01 2.134E-07 9.837E-07
+ ETOT  3  -228.49009627631     -1.603E-01 2.214E-05 4.397E+00 1.128E-07 1.096E-06
+ ETOT  4  -228.50522479837     -1.513E-02 9.164E-07 5.071E-03 7.242E-08 1.169E-06
 
  At SCF step    4       vres2   =  5.07E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
     Atom    Radius     Total density      |mag|      mag(x)      mag(y)      mag(z)    mag(theta)  mag(phi)
-    1 Mn   2.00000        0.000000      0.000001    0.000001    0.000001    0.000001   61.743794    0.000000
-    2 Mn   2.00000       -0.000000      0.000001   -0.000001   -0.000001   -0.000001  118.196290    0.000000
+    1 Mn   2.00000        0.000000      0.000001    0.000001    0.000001    0.000001   61.744405    0.000000
+    2 Mn   2.00000       -0.000000      0.000001   -0.000001   -0.000001   -0.000001  118.195768    0.000000
     3  F   2.00000       -0.542662      0.000001   -0.000000   -0.000000    0.000001    0.000000    0.000000
     4  F   2.00000       -0.542662      0.000001    0.000000    0.000000   -0.000001    0.000000    0.000000
     5  F   2.00000        0.542662      0.000001   -0.000000   -0.000000   -0.000001    0.000000    0.000000
@@ -1658,7 +1658,7 @@ tolerances: {tolvrs: 1.00E-02, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -2.28505225E+02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.2285052248E+03 Ha. Also 2DEtotal=   -0.621794393125E+04 eV
+ 2DEtotal=   -0.2285052248E+03 Ha. Also 2DEtotal=   -0.621794393121E+04 eV
     (  non-var. 2DEtotal :   -2.2851480132E+02 Ha)
 
 --------------------------------------------------------------------------------
@@ -1674,7 +1674,7 @@ tolerances: {tolvrs: 1.00E-02, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tcdfpt_2o_DS2_1WF20
+- dfpt_looppert: read the DDK wavefunctions from file: tcdfpt_2_MPI8o_DS2_1WF20
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1683,15 +1683,15 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1  -223.84260110865     -2.238E+02 7.481E-02 9.332E+02 8.845E-07 8.845E-07
- ETOT  2  -228.32978518050     -4.487E+00 7.053E-04 4.661E+01 1.208E-07 8.847E-07
- ETOT  3  -228.49009674150     -1.603E-01 2.214E-05 4.397E+00 7.061E-08 8.906E-07
- ETOT  4  -228.50522526510     -1.513E-02 9.164E-07 5.071E-03 4.039E-08 8.874E-07
+-ETOT  1  -223.84260110453     -2.238E+02 7.481E-02 9.332E+02 8.845E-07 8.845E-07
+ ETOT  2  -228.32978517636     -4.487E+00 7.053E-04 4.661E+01 1.208E-07 8.847E-07
+ ETOT  3  -228.49009673736     -1.603E-01 2.214E-05 4.397E+00 7.061E-08 8.906E-07
+ ETOT  4  -228.50522526096     -1.513E-02 9.164E-07 5.071E-03 4.039E-08 8.874E-07
 
  At SCF step    4       vres2   =  5.07E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -1725,8 +1725,8 @@ tolerances: {tolvrs: 1.00E-02, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -2.28505225E+02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.2285052253E+03 Ha. Also 2DEtotal=   -0.621794394391E+04 eV
-    (  non-var. 2DEtotal :   -2.2851480179E+02 Ha)
+ 2DEtotal=   -0.2285052253E+03 Ha. Also 2DEtotal=   -0.621794394380E+04 eV
+    (  non-var. 2DEtotal :   -2.2851480178E+02 Ha)
 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
@@ -1741,7 +1741,7 @@ tolerances: {tolvrs: 1.00E-02, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-- dfpt_looppert: read the DDK wavefunctions from file: tcdfpt_2o_DS2_1WF21
+- dfpt_looppert: read the DDK wavefunctions from file: tcdfpt_2_MPI8o_DS2_1WF21
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1750,15 +1750,15 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1  -1904.7504868935     -1.905E+03 5.616E-01 1.752E+03 1.598E-07 1.598E-07
- ETOT  2  -1915.9788830285     -1.123E+01 6.913E-03 4.079E+02 3.325E-08 1.782E-07
- ETOT  3  -1919.4009428331     -3.422E+00 5.039E-04 6.727E+00 1.059E-08 1.870E-07
- ETOT  4  -1919.4642065782     -6.326E-02 6.765E-06 3.188E-03 9.183E-09 1.962E-07
+-ETOT  1  -1904.7504868346     -1.905E+03 5.616E-01 1.752E+03 1.598E-07 1.598E-07
+ ETOT  2  -1915.9788829693     -1.123E+01 6.913E-03 4.079E+02 3.325E-08 1.782E-07
+ ETOT  3  -1919.4009427739     -3.422E+00 5.039E-04 6.727E+00 1.059E-08 1.870E-07
+ ETOT  4  -1919.4642065190     -6.326E-02 6.765E-06 3.188E-03 9.182E-09 1.962E-07
 
  At SCF step    4       vres2   =  3.19E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -1792,7 +1792,7 @@ tolerances: {tolvrs: 1.00E-02, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.91946421E+03
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1919464207E+04 Ha. Also 2DEtotal=   -0.522312819105E+05 eV
+ 2DEtotal=   -0.1919464207E+04 Ha. Also 2DEtotal=   -0.522312819089E+05 eV
     (  non-var. 2DEtotal :   -1.9195402472E+03 Ha)
 
 --------------------------------------------------------------------------------
@@ -1816,12 +1816,12 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1 -2.47311538896226E-02 -2.473E-02 3.230E-05 2.924E-03 6.750E-03 6.750E-03
+-ETOT  1 -2.47311538894876E-02 -2.473E-02 3.230E-05 2.924E-03 6.750E-03 6.750E-03
 
  At SCF step    1       vres2   =  2.92E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -1849,7 +1849,7 @@ tolerances: {tolvrs: 1.00E-02, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.05464374E-01 eigvalue=  -1.74194689E-01  local=  -2.64300376E-01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-    Hspinfield=  -4.89741854E-02  Hartree=   4.44720447E-15     xc=  -2.44345944E-04
+    Hspinfield=  -4.89741854E-02  Hartree=   4.44715002E-15     xc=  -2.44345944E-04
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   5.75177837E-02   enl1=   0.00000000E+00
@@ -1878,12 +1878,12 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1 -2.47311523203334E-02 -2.473E-02 3.230E-05 2.924E-03 6.750E-03 6.750E-03
+-ETOT  1 -2.47311523202650E-02 -2.473E-02 3.230E-05 2.924E-03 6.750E-03 6.750E-03
 
  At SCF step    1       vres2   =  2.92E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -1911,7 +1911,7 @@ tolerances: {tolvrs: 1.00E-02, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.05464306E-01 eigvalue=  -1.74194660E-01  local=  -2.64300338E-01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-    Hspinfield=  -4.89741819E-02  Hartree=   4.38735533E-15     xc=  -2.44346098E-04
+    Hspinfield=  -4.89741819E-02  Hartree=   4.38731185E-15     xc=  -2.44346098E-04
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   5.75177835E-02   enl1=   0.00000000E+00
@@ -1940,12 +1940,12 @@ tolerances: {tolvrs: 1.00E-02, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2    difmagsph maxmagsph
--ETOT  1 -3.36195458873302E-02 -3.362E-02 5.234E-05 2.551E-03 9.295E-03 9.295E-03
+-ETOT  1 -3.36195458872508E-02 -3.362E-02 5.234E-05 2.551E-03 9.295E-03 9.295E-03
 
  At SCF step    1       vres2   =  2.55E-03 < tolvrs=  1.00E-02 =>converged.
--open ddk wf file :tcdfpt_2o_DS2_1WF19
--open ddk wf file :tcdfpt_2o_DS2_1WF20
--open ddk wf file :tcdfpt_2o_DS2_1WF21
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF19
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF20
+-open ddk wf file :tcdfpt_2_MPI8o_DS2_1WF21
  Integrated electronic and magnetization densities in atomic spheres:
  ------------------------------------------------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
@@ -1973,7 +1973,7 @@ tolerances: {tolvrs: 1.00E-02, }
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   6.10277412E-01 eigvalue=  -2.66543192E-01  local=  -4.09327599E-01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-    Hspinfield=  -6.67961629E-02  Hartree=   3.46274628E-17     xc=  -2.21464433E-04
+    Hspinfield=  -6.67961629E-02  Hartree=   3.46275365E-17     xc=  -2.21464433E-04
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   9.89914603E-02   enl1=   0.00000000E+00
@@ -1991,27 +1991,27 @@ tolerances: {tolvrs: 1.00E-02, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        26.2345606541         0.0000000000
-   1    1   2    1         8.4377744690         0.0000000000
+   1    1   1    1        26.2345606521         0.0000000000
+   1    1   2    1         8.4377744692         0.0000000000
    1    1   3    1         0.0000000914         0.0000000000
    1    1   1    2        -8.7630913787         0.0000000000
-   1    1   2    2         0.0092804111         0.0000000000
+   1    1   2    2         0.0092804110         0.0000000000
    1    1   3    2        -0.0000000767         0.0000000000
-   1    1   1    3        -5.4623040104        -0.0000000000
-   1    1   2    3        -2.3268728303         0.0000000000
-   1    1   3    3         0.0000164278         0.0000000000
-   1    1   1    4        -3.0995573189         0.0000000000
-   1    1   2    4        -1.9389756157        -0.0000000000
-   1    1   3    4        -0.0000014729        -0.0000000000
-   1    1   1    5        -5.4623039423        -0.0000000000
-   1    1   2    5        -2.3268728048        -0.0000000000
-   1    1   3    5         0.0000164078        -0.0000000000
-   1    1   1    6        -3.0995573245        -0.0000000000
-   1    1   2    6        -1.9389754949         0.0000000000
-   1    1   3    6        -0.0000015104         0.0000000000
-   1    1   1    8       -28.4284520703         0.0000000000
-   1    1   2    8         4.6465046494         0.0000000000
-   1    1   3    8         0.0000001337         0.0000000000
+   1    1   1    3        -5.4623040103        -0.0000000000
+   1    1   2    3        -2.3268728304         0.0000000000
+   1    1   3    3         0.0000164274         0.0000000000
+   1    1   1    4        -3.0995573190         0.0000000000
+   1    1   2    4        -1.9389756159        -0.0000000000
+   1    1   3    4        -0.0000014733        -0.0000000000
+   1    1   1    5        -5.4623039422        -0.0000000000
+   1    1   2    5        -2.3268728049        -0.0000000000
+   1    1   3    5         0.0000164075        -0.0000000000
+   1    1   1    6        -3.0995573246        -0.0000000000
+   1    1   2    6        -1.9389754951         0.0000000000
+   1    1   3    6        -0.0000015108         0.0000000000
+   1    1   1    8       -28.4284520704         0.0000000000
+   1    1   2    8         4.6465046487         0.0000000000
+   1    1   3    8         0.0000001340         0.0000000000
    1    1   1   11         0.0000000049         0.0000000000
    1    1   2   11        -0.0000000046         0.0000000000
    1    1   3   11        -0.0000000006         0.0000000000
@@ -2033,33 +2033,33 @@ tolerances: {tolvrs: 1.00E-02, }
    1    1   3   22         0.0000001065         0.0000000000
    1    1   1   23         0.0000000114         0.0000000000
    1    1   2   23         0.0000000120         0.0000000000
-   1    1   3   23         0.0000000595         0.0000000000
+   1    1   3   23         0.0000000594         0.0000000000
   
-   2    1   1    1         8.4377744688         0.0000000000
-   2    1   2    1        26.2345605411         0.0000000000
+   2    1   1    1         8.4377744689         0.0000000000
+   2    1   2    1        26.2345605391         0.0000000000
    2    1   3    1         0.0000000253         0.0000000000
-   2    1   1    2         0.0092804017         0.0000000000
+   2    1   1    2         0.0092804016         0.0000000000
    2    1   2    2        -8.7630913689         0.0000000000
    2    1   3    2        -0.0000000342         0.0000000000
-   2    1   1    3        -2.3268724182         0.0000000000
-   2    1   2    3        -5.4623034765        -0.0000000000
-   2    1   3    3        -0.0000157672         0.0000000000
-   2    1   1    4        -1.9389754673        -0.0000000000
-   2    1   2    4        -3.0995572508         0.0000000000
-   2    1   3    4        -0.0000018822        -0.0000000000
-   2    1   1    5        -2.3268723969        -0.0000000000
-   2    1   2    5        -5.4623035177         0.0000000000
-   2    1   3    5        -0.0000157820        -0.0000000000
-   2    1   1    6        -1.9389753350         0.0000000000
-   2    1   2    6        -3.0995572712        -0.0000000000
-   2    1   3    6        -0.0000018536        -0.0000000000
-   2    1   1    8         4.6465044651         0.0000000000
-   2    1   2    8       -28.4284519160         0.0000000000
-   2    1   3    8         0.0000012555         0.0000000000
+   2    1   1    3        -2.3268724183         0.0000000000
+   2    1   2    3        -5.4623034764        -0.0000000000
+   2    1   3    3        -0.0000157668         0.0000000000
+   2    1   1    4        -1.9389754674        -0.0000000000
+   2    1   2    4        -3.0995572509         0.0000000000
+   2    1   3    4        -0.0000018827        -0.0000000000
+   2    1   1    5        -2.3268723970        -0.0000000000
+   2    1   2    5        -5.4623035176         0.0000000000
+   2    1   3    5        -0.0000157816        -0.0000000000
+   2    1   1    6        -1.9389753352         0.0000000000
+   2    1   2    6        -3.0995572713        -0.0000000000
+   2    1   3    6        -0.0000018540        -0.0000000000
+   2    1   1    8         4.6465044639         0.0000000000
+   2    1   2    8       -28.4284519162         0.0000000000
+   2    1   3    8         0.0000012554         0.0000000000
    2    1   1   11         0.0000000009         0.0000000000
    2    1   2   11        -0.0000000033         0.0000000000
    2    1   3   11         0.0000000006         0.0000000000
-   2    1   1   12        -0.0000000000         0.0000000000
+   2    1   1   12         0.0000000000         0.0000000000
    2    1   1   18        -0.0000000315         0.0000000000
    2    1   2   18        -0.0000000406         0.0000000000
    2    1   3   18        -0.0000000348         0.0000000000
@@ -2081,29 +2081,29 @@ tolerances: {tolvrs: 1.00E-02, }
   
    3    1   1    1         0.0000000919         0.0000000000
    3    1   2    1         0.0000000232         0.0000000000
-   3    1   3    1         3.7195600510         0.0000000000
+   3    1   3    1         3.7195600500         0.0000000000
    3    1   1    2        -0.0000000491         0.0000000000
    3    1   2    2         0.0000000443         0.0000000000
    3    1   3    2         3.8629253066         0.0000000000
    3    1   1    3         0.0000003318         0.0000000000
-   3    1   2    3        -0.0000005196         0.0000000000
-   3    1   3    3        -1.1659436745        -0.0000000000
+   3    1   2    3        -0.0000005197         0.0000000000
+   3    1   3    3        -1.1659436744        -0.0000000000
    3    1   1    4         0.0000001946        -0.0000000000
    3    1   2    4        -0.0000002632        -0.0000000000
-   3    1   3    4        -2.3119613708         0.0000000000
+   3    1   3    4        -2.3119613705         0.0000000000
    3    1   1    5         0.0000003379        -0.0000000000
-   3    1   2    5        -0.0000005134        -0.0000000000
-   3    1   3    5        -1.1659436736         0.0000000000
+   3    1   2    5        -0.0000005135        -0.0000000000
+   3    1   3    5        -1.1659436735         0.0000000000
    3    1   1    6         0.0000001887         0.0000000000
    3    1   2    6        -0.0000002724        -0.0000000000
-   3    1   3    6        -2.3119614183         0.0000000000
-   3    1   1    8        -0.0000000340         0.0000000000
-   3    1   2    8         0.0000033147         0.0000000000
-   3    1   3    8       -29.1681151795         0.0000000000
+   3    1   3    6        -2.3119614180         0.0000000000
+   3    1   1    8        -0.0000000331         0.0000000000
+   3    1   2    8         0.0000033143         0.0000000000
+   3    1   3    8       -29.1681151777         0.0000000000
    3    1   1   11        -0.0000000003         0.0000000000
    3    1   2   11         0.0000000025         0.0000000000
    3    1   3   11        -0.0000000054         0.0000000000
-   3    1   1   12        -0.0000000000         0.0000000000
+   3    1   1   12         0.0000000000         0.0000000000
    3    1   1   18         0.0000000058         0.0000000000
    3    1   2   18        -0.0000000047         0.0000000000
    3    1   3   18        -0.0000000111         0.0000000000
@@ -2124,26 +2124,26 @@ tolerances: {tolvrs: 1.00E-02, }
    3    1   3   23        -0.0000000362         0.0000000000
   
    1    2   1    1        -8.7630912362         0.0000000000
-   1    2   2    1        -0.0092815706         0.0000000000
+   1    2   2    1        -0.0092815707         0.0000000000
    1    2   3    1        -0.0000000484         0.0000000000
-   1    2   1    2        26.2346035368         0.0000000000
-   1    2   2    2        -8.4377714635         0.0000000000
+   1    2   1    2        26.2346035393         0.0000000000
+   1    2   2    2        -8.4377714633         0.0000000000
    1    2   3    2        -0.0000000337         0.0000000000
-   1    2   1    3        -3.0995567339        -0.0000000000
-   1    2   2    3         1.9389727665         0.0000000000
-   1    2   3    3        -0.0000114706         0.0000000000
-   1    2   1    4        -5.4623036933         0.0000000000
+   1    2   1    3        -3.0995567338        -0.0000000000
+   1    2   2    3         1.9389727663         0.0000000000
+   1    2   3    3        -0.0000114702         0.0000000000
+   1    2   1    4        -5.4623036936         0.0000000000
    1    2   2    4         2.3268743466         0.0000000000
-   1    2   3    4        -0.0000005024         0.0000000000
+   1    2   3    4        -0.0000005021         0.0000000000
    1    2   1    5        -3.0995567163         0.0000000000
-   1    2   2    5         1.9389728069         0.0000000000
-   1    2   3    5        -0.0000114759        -0.0000000000
-   1    2   1    6        -5.4623037544         0.0000000000
+   1    2   2    5         1.9389728067         0.0000000000
+   1    2   3    5        -0.0000114756        -0.0000000000
+   1    2   1    6        -5.4623037547         0.0000000000
    1    2   2    6         2.3268744231        -0.0000000000
-   1    2   3    6        -0.0000004814         0.0000000000
-   1    2   1    8       -28.4284548248         0.0000000000
-   1    2   2    8        -4.6465099579         0.0000000000
-   1    2   3    8        -0.0000008321         0.0000000000
+   1    2   3    6        -0.0000004811         0.0000000000
+   1    2   1    8       -28.4284548241         0.0000000000
+   1    2   2    8        -4.6465099587         0.0000000000
+   1    2   3    8        -0.0000008318         0.0000000000
    1    2   1   11         0.0000000111         0.0000000000
    1    2   2   11        -0.0000000066         0.0000000000
    1    2   3   11         0.0000000001         0.0000000000
@@ -2167,31 +2167,31 @@ tolerances: {tolvrs: 1.00E-02, }
    1    2   2   23        -0.0000000217         0.0000000000
    1    2   3   23        -0.0000001235         0.0000000000
   
-   2    2   1    1        -0.0092815620         0.0000000000
+   2    2   1    1        -0.0092815621         0.0000000000
    2    2   2    1        -8.7630912265         0.0000000000
-   2    2   3    1         0.0000000434         0.0000000000
-   2    2   1    2        -8.4377714630         0.0000000000
-   2    2   2    2        26.2346036315         0.0000000000
+   2    2   3    1         0.0000000435         0.0000000000
+   2    2   1    2        -8.4377714628         0.0000000000
+   2    2   2    2        26.2346036340         0.0000000000
    2    2   3    2        -0.0000000485         0.0000000000
-   2    2   1    3         1.9389726085         0.0000000000
-   2    2   2    3        -3.0995566626        -0.0000000000
-   2    2   3    3         0.0000105728        -0.0000000000
-   2    2   1    4         2.3268738764         0.0000000000
-   2    2   2    4        -5.4623032604         0.0000000000
-   2    2   3    4         0.0000007991        -0.0000000000
-   2    2   1    5         1.9389726965         0.0000000000
-   2    2   2    5        -3.0995566793        -0.0000000000
-   2    2   3    5         0.0000105711         0.0000000000
+   2    2   1    3         1.9389726083         0.0000000000
+   2    2   2    3        -3.0995566625        -0.0000000000
+   2    2   3    3         0.0000105725        -0.0000000000
+   2    2   1    4         2.3268738765         0.0000000000
+   2    2   2    4        -5.4623032607         0.0000000000
+   2    2   3    4         0.0000007995        -0.0000000000
+   2    2   1    5         1.9389726964         0.0000000000
+   2    2   2    5        -3.0995566792        -0.0000000000
+   2    2   3    5         0.0000105708         0.0000000000
    2    2   1    6         2.3268739502        -0.0000000000
-   2    2   2    6        -5.4623032715         0.0000000000
-   2    2   3    6         0.0000007724        -0.0000000000
-   2    2   1    8        -4.6465101993         0.0000000000
-   2    2   2    8       -28.4284549294         0.0000000000
-   2    2   3    8        -0.0000010642         0.0000000000
+   2    2   2    6        -5.4623032718         0.0000000000
+   2    2   3    6         0.0000007728        -0.0000000000
+   2    2   1    8        -4.6465102002         0.0000000000
+   2    2   2    8       -28.4284549293         0.0000000000
+   2    2   3    8        -0.0000010641         0.0000000000
    2    2   1   11         0.0000000087         0.0000000000
    2    2   2   11        -0.0000000125         0.0000000000
    2    2   3   11        -0.0000000002         0.0000000000
-   2    2   1   12        -0.0000000000         0.0000000000
+   2    2   1   12         0.0000000000         0.0000000000
    2    2   1   18         0.0000000117         0.0000000000
    2    2   2   18         0.0000000116         0.0000000000
    2    2   3   18         0.0000000090         0.0000000000
@@ -2216,26 +2216,26 @@ tolerances: {tolvrs: 1.00E-02, }
    3    2   3    1         3.8629253003         0.0000000000
    3    2   1    2        -0.0000000330         0.0000000000
    3    2   2    2        -0.0000000472         0.0000000000
-   3    2   3    2         3.7195792793         0.0000000000
-   3    2   1    3         0.0000001074         0.0000000000
-   3    2   2    3        -0.0000002718        -0.0000000000
-   3    2   3    3        -2.3119670567         0.0000000000
+   3    2   3    2         3.7195792805         0.0000000000
+   3    2   1    3         0.0000001073         0.0000000000
+   3    2   2    3        -0.0000002719        -0.0000000000
+   3    2   3    3        -2.3119670568         0.0000000000
    3    2   1    4        -0.0000001832         0.0000000000
    3    2   2    4         0.0000001651        -0.0000000000
    3    2   3    4        -1.1659167005        -0.0000000000
    3    2   1    5         0.0000000894        -0.0000000000
    3    2   2    5        -0.0000002890         0.0000000000
-   3    2   3    5        -2.3119670367        -0.0000000000
+   3    2   3    5        -2.3119670368        -0.0000000000
    3    2   1    6        -0.0000001937         0.0000000000
    3    2   2    6         0.0000001803        -0.0000000000
-   3    2   3    6        -1.1659166826        -0.0000000000
-   3    2   1    8        -0.0000018160         0.0000000000
-   3    2   2    8        -0.0000039126         0.0000000000
-   3    2   3    8       -29.1681425855         0.0000000000
+   3    2   3    6        -1.1659166825        -0.0000000000
+   3    2   1    8        -0.0000018169         0.0000000000
+   3    2   2    8        -0.0000039125         0.0000000000
+   3    2   3    8       -29.1681425872         0.0000000000
    3    2   1   11        -0.0000000052         0.0000000000
    3    2   2   11         0.0000000058         0.0000000000
    3    2   3   11        -0.0000000023         0.0000000000
-   3    2   1   12        -0.0000000000         0.0000000000
+   3    2   1   12         0.0000000000         0.0000000000
    3    2   1   18        -0.0000000009         0.0000000000
    3    2   2   18         0.0000000012         0.0000000000
    3    2   3   18        -0.0000000017         0.0000000000
@@ -2257,29 +2257,29 @@ tolerances: {tolvrs: 1.00E-02, }
   
    1    3   1    1        -5.4523713429         0.0000000000
    1    3   2    1        -2.3107292006        -0.0000000000
-   1    3   3    1        -0.0000003056        -0.0000000000
-   1    3   1    2        -3.1151038148         0.0000000000
-   1    3   2    2         1.9270042305        -0.0000000000
+   1    3   3    1        -0.0000003055        -0.0000000000
+   1    3   1    2        -3.1151038147         0.0000000000
+   1    3   2    2         1.9270042303        -0.0000000000
    1    3   3    2        -0.0000003099        -0.0000000000
-   1    3   1    3       619.3525488827         0.0000000000
-   1    3   2    3       -52.4148361162         0.0000000000
-   1    3   3    3         0.0000329354         0.0000000000
-   1    3   1    4        -4.4397564463        -0.0000000000
-   1    3   2    4        -1.4304840976        -0.0000000000
-   1    3   3    4         0.0000368589         0.0000000000
-   1    3   1    5         1.5110298914        -0.0000000000
+   1    3   1    3       619.3525488838         0.0000000000
+   1    3   2    3       -52.4148361165         0.0000000000
+   1    3   3    3         0.0000329386         0.0000000000
+   1    3   1    4        -4.4397564464        -0.0000000000
+   1    3   2    4        -1.4304840973        -0.0000000000
+   1    3   3    4         0.0000368583         0.0000000000
+   1    3   1    5         1.5110298915        -0.0000000000
    1    3   2    5        -1.4225876355         0.0000000000
-   1    3   3    5        -0.0000452669        -0.0000000000
-   1    3   1    6         1.5975939479        -0.0000000000
-   1    3   2    6         1.4347241354         0.0000000000
-   1    3   3    6        -0.0000334953        -0.0000000000
-   1    3   1    8       -41.4862860513         0.0000000000
-   1    3   2    8         3.0805744671         0.0000000000
-   1    3   3    8         0.0000003448         0.0000000000
+   1    3   3    5        -0.0000452695        -0.0000000000
+   1    3   1    6         1.5975939480        -0.0000000000
+   1    3   2    6         1.4347241357         0.0000000000
+   1    3   3    6        -0.0000334940        -0.0000000000
+   1    3   1    8       -41.4862860507         0.0000000000
+   1    3   2    8         3.0805744677         0.0000000000
+   1    3   3    8         0.0000003446         0.0000000000
    1    3   1   11        -0.0000000065         0.0000000000
    1    3   2   11         0.0000000039         0.0000000000
-   1    3   3   11        -0.0000000199         0.0000000000
-   1    3   1   12        -0.0000000000         0.0000000000
+   1    3   3   11        -0.0000000200         0.0000000000
+   1    3   1   12         0.0000000000         0.0000000000
    1    3   1   18        -0.0000000527         0.0000000000
    1    3   2   18         0.0000000915         0.0000000000
    1    3   3   18         0.0000001310         0.0000000000
@@ -2300,36 +2300,36 @@ tolerances: {tolvrs: 1.00E-02, }
    1    3   3   23        -0.0000000574         0.0000000000
   
    2    3   1    1        -2.3107313648        -0.0000000000
-   2    3   2    1        -5.4523691183         0.0000000000
+   2    3   2    1        -5.4523691184         0.0000000000
    2    3   3    1        -0.0000003053        -0.0000000000
-   2    3   1    2         1.9270037726        -0.0000000000
+   2    3   1    2         1.9270037724        -0.0000000000
    2    3   2    2        -3.1151033280         0.0000000000
    2    3   3    2        -0.0000002595         0.0000000000
-   2    3   1    3       -52.4148359014         0.0000000000
-   2    3   2    3       619.3525486867         0.0000000000
-   2    3   3    3         0.0000559675         0.0000000000
-   2    3   1    4         1.4347243577        -0.0000000000
-   2    3   2    4         1.5975937703         0.0000000000
-   2    3   3    4         0.0000388587        -0.0000000000
+   2    3   1    3       -52.4148359017         0.0000000000
+   2    3   2    3       619.3525486878         0.0000000000
+   2    3   3    3         0.0000559705         0.0000000000
+   2    3   1    4         1.4347243581        -0.0000000000
+   2    3   2    4         1.5975937705         0.0000000000
+   2    3   3    4         0.0000388581        -0.0000000000
    2    3   1    5        -1.4225874294         0.0000000000
-   2    3   2    5         1.5110299340         0.0000000000
-   2    3   3    5        -0.0000441962        -0.0000000000
-   2    3   1    6        -1.4304838069         0.0000000000
-   2    3   2    6        -4.4397567001        -0.0000000000
-   2    3   3    6        -0.0000343474         0.0000000000
-   2    3   1    8         3.0805773108         0.0000000000
-   2    3   2    8       -41.4862887947         0.0000000000
-   2    3   3    8         0.0000001198         0.0000000000
+   2    3   2    5         1.5110299341         0.0000000000
+   2    3   3    5        -0.0000441997        -0.0000000000
+   2    3   1    6        -1.4304838066         0.0000000000
+   2    3   2    6        -4.4397567003        -0.0000000000
+   2    3   3    6        -0.0000343461         0.0000000000
+   2    3   1    8         3.0805773111         0.0000000000
+   2    3   2    8       -41.4862887939         0.0000000000
+   2    3   3    8         0.0000001197         0.0000000000
    2    3   1   11        -0.0000000166         0.0000000000
    2    3   2   11        -0.0000000009         0.0000000000
    2    3   3   11        -0.0000000166         0.0000000000
    2    3   1   12         0.0000000000         0.0000000000
    2    3   1   18         0.0000000718         0.0000000000
    2    3   2   18        -0.0000000452         0.0000000000
-   2    3   3   18         0.0000001113         0.0000000000
+   2    3   3   18         0.0000001114         0.0000000000
    2    3   1   19        -0.0000000907         0.0000000000
    2    3   2   19         0.0000000595         0.0000000000
-   2    3   3   19        -0.0000002037         0.0000000000
+   2    3   3   19        -0.0000002038         0.0000000000
    2    3   1   20         0.0000000134         0.0000000000
    2    3   2   20        -0.0000000174         0.0000000000
    2    3   3   20         0.0000001846         0.0000000000
@@ -2348,26 +2348,26 @@ tolerances: {tolvrs: 1.00E-02, }
    3    3   3    1        -1.1453643533         0.0000000000
    3    3   1    2        -0.0000000268        -0.0000000000
    3    3   2    2        -0.0000000096         0.0000000000
-   3    3   3    2        -2.3071152320        -0.0000000000
+   3    3   3    2        -2.3071152322        -0.0000000000
    3    3   1    3         0.0000009224         0.0000000000
    3    3   2    3         0.0000004747         0.0000000000
-   3    3   3    3       544.8889815414         0.0000000000
-   3    3   1    4         0.0000014080         0.0000000000
-   3    3   2    4         0.0000025111        -0.0000000000
+   3    3   3    3       544.8889815419         0.0000000000
+   3    3   1    4         0.0000014079         0.0000000000
+   3    3   2    4         0.0000025109        -0.0000000000
    3    3   3    4         0.1009320410         0.0000000000
    3    3   1    5         0.0000002527        -0.0000000000
    3    3   2    5         0.0000006146        -0.0000000000
-   3    3   3    5        -0.5518133640        -0.0000000000
-   3    3   1    6        -0.0000022357        -0.0000000000
-   3    3   2    6        -0.0000013441         0.0000000000
+   3    3   3    5        -0.5518133642        -0.0000000000
+   3    3   1    6        -0.0000022356        -0.0000000000
+   3    3   2    6        -0.0000013440         0.0000000000
    3    3   3    6         0.1009318768         0.0000000000
-   3    3   1    8         0.0000001735         0.0000000000
+   3    3   1    8         0.0000001737         0.0000000000
    3    3   2    8         0.0000005840         0.0000000000
-   3    3   3    8       -39.4788458458         0.0000000000
+   3    3   3    8       -39.4788458451         0.0000000000
    3    3   1   11        -0.0000000529         0.0000000000
    3    3   2   11        -0.0000000570         0.0000000000
    3    3   3   11         0.0000000031         0.0000000000
-   3    3   1   12         0.0000000000         0.0000000000
+   3    3   1   12        -0.0000000000         0.0000000000
    3    3   1   18        -0.0000000150         0.0000000000
    3    3   2   18        -0.0000000260         0.0000000000
    3    3   3   18         0.0000000159         0.0000000000
@@ -2387,27 +2387,27 @@ tolerances: {tolvrs: 1.00E-02, }
    3    3   2   23        -0.0000000124         0.0000000000
    3    3   3   23         0.0000000056         0.0000000000
   
-   1    4   1    1        -3.1151026079        -0.0000000000
+   1    4   1    1        -3.1151026080        -0.0000000000
    1    4   2    1        -1.9270085047         0.0000000000
    1    4   3    1         0.0000002742         0.0000000000
-   1    4   1    2        -5.4523695902        -0.0000000000
-   1    4   2    2         2.3107318015        -0.0000000000
+   1    4   1    2        -5.4523695903        -0.0000000000
+   1    4   2    2         2.3107318016        -0.0000000000
    1    4   3    2         0.0000002886        -0.0000000000
-   1    4   1    3        -4.4397569127         0.0000000000
-   1    4   2    3         1.4304841454         0.0000000000
-   1    4   3    3        -0.0000382667        -0.0000000000
-   1    4   1    4       619.3525278937         0.0000000000
-   1    4   2    4        52.4148357832         0.0000000000
-   1    4   3    4        -0.0000321715         0.0000000000
-   1    4   1    5         1.5975944660        -0.0000000000
-   1    4   2    5        -1.4347243398        -0.0000000000
-   1    4   3    5         0.0000464374         0.0000000000
-   1    4   1    6         1.5110312081        -0.0000000000
-   1    4   2    6         1.4225884322         0.0000000000
-   1    4   3    6         0.0000295633         0.0000000000
-   1    4   1    8       -41.4863009948         0.0000000000
-   1    4   2    8        -3.0805712317         0.0000000000
-   1    4   3    8        -0.0000002929         0.0000000000
+   1    4   1    3        -4.4397569125         0.0000000000
+   1    4   2    3         1.4304841456         0.0000000000
+   1    4   3    3        -0.0000382700        -0.0000000000
+   1    4   1    4       619.3525278929         0.0000000000
+   1    4   2    4        52.4148357831         0.0000000000
+   1    4   3    4        -0.0000321706         0.0000000000
+   1    4   1    5         1.5975944658        -0.0000000000
+   1    4   2    5        -1.4347243395        -0.0000000000
+   1    4   3    5         0.0000464402         0.0000000000
+   1    4   1    6         1.5110312080        -0.0000000000
+   1    4   2    6         1.4225884321         0.0000000000
+   1    4   3    6         0.0000295617         0.0000000000
+   1    4   1    8       -41.4863009954         0.0000000000
+   1    4   2    8        -3.0805712314         0.0000000000
+   1    4   3    8        -0.0000002930         0.0000000000
    1    4   1   11        -0.0000000094         0.0000000000
    1    4   2   11         0.0000000133         0.0000000000
    1    4   3   11         0.0000000207         0.0000000000
@@ -2431,27 +2431,27 @@ tolerances: {tolvrs: 1.00E-02, }
    1    4   2   23         0.0000000120         0.0000000000
    1    4   3   23        -0.0000001200         0.0000000000
   
-   2    4   1    1        -1.9270086962         0.0000000000
-   2    4   2    1        -3.1151027906        -0.0000000000
+   2    4   1    1        -1.9270086963         0.0000000000
+   2    4   2    1        -3.1151027907        -0.0000000000
    2    4   3    1        -0.0000003278         0.0000000000
-   2    4   1    2         2.3107307536        -0.0000000000
+   2    4   1    2         2.3107307538        -0.0000000000
    2    4   2    2        -5.4523706708        -0.0000000000
    2    4   3    2        -0.0000002763         0.0000000000
-   2    4   1    3        -1.4347246485         0.0000000000
-   2    4   2    3         1.5975942725        -0.0000000000
-   2    4   3    3         0.0000411130         0.0000000000
-   2    4   1    4        52.4148355986         0.0000000000
-   2    4   2    4       619.3525279146         0.0000000000
-   2    4   3    4         0.0000312896         0.0000000000
-   2    4   1    5         1.4304838952        -0.0000000000
-   2    4   2    5        -4.4397571299        -0.0000000000
-   2    4   3    5        -0.0000476087        -0.0000000000
-   2    4   1    6         1.4225882253         0.0000000000
-   2    4   2    6         1.5110312026        -0.0000000000
-   2    4   3    6        -0.0000363464        -0.0000000000
-   2    4   1    8        -3.0805701551         0.0000000000
-   2    4   2    8       -41.4862998750         0.0000000000
-   2    4   3    8         0.0000002796         0.0000000000
+   2    4   1    3        -1.4347246482         0.0000000000
+   2    4   2    3         1.5975942722        -0.0000000000
+   2    4   3    3         0.0000411163         0.0000000000
+   2    4   1    4        52.4148355985         0.0000000000
+   2    4   2    4       619.3525279139         0.0000000000
+   2    4   3    4         0.0000312885         0.0000000000
+   2    4   1    5         1.4304838953        -0.0000000000
+   2    4   2    5        -4.4397571297        -0.0000000000
+   2    4   3    5        -0.0000476116        -0.0000000000
+   2    4   1    6         1.4225882251         0.0000000000
+   2    4   2    6         1.5110312025        -0.0000000000
+   2    4   3    6        -0.0000363461        -0.0000000000
+   2    4   1    8        -3.0805701545         0.0000000000
+   2    4   2    8       -41.4862998755         0.0000000000
+   2    4   3    8         0.0000002795         0.0000000000
    2    4   1   11         0.0000000096         0.0000000000
    2    4   2   11        -0.0000000156         0.0000000000
    2    4   3   11        -0.0000000166         0.0000000000
@@ -2475,33 +2475,33 @@ tolerances: {tolvrs: 1.00E-02, }
    2    4   2   23        -0.0000000172         0.0000000000
    2    4   3   23         0.0000001233         0.0000000000
   
-   3    4   1    1        -0.0000000521         0.0000000000
+   3    4   1    1        -0.0000000520         0.0000000000
    3    4   2    1         0.0000000300         0.0000000000
-   3    4   3    1        -2.3071125840        -0.0000000000
+   3    4   3    1        -2.3071125839        -0.0000000000
    3    4   1    2         0.0000000044        -0.0000000000
    3    4   2    2         0.0000000068         0.0000000000
    3    4   3    2        -1.1453644374         0.0000000000
    3    4   1    3        -0.0000000734        -0.0000000000
-   3    4   2    3         0.0000002516         0.0000000000
-   3    4   3    3         0.1009778067        -0.0000000000
-   3    4   1    4         0.0000007908         0.0000000000
-   3    4   2    4        -0.0000006813         0.0000000000
-   3    4   3    4       544.8889914593         0.0000000000
-   3    4   1    5        -0.0000017962         0.0000000000
+   3    4   2    3         0.0000002517         0.0000000000
+   3    4   3    3         0.1009778066        -0.0000000000
+   3    4   1    4         0.0000007907         0.0000000000
+   3    4   2    4        -0.0000006812         0.0000000000
+   3    4   3    4       544.8889914592         0.0000000000
+   3    4   1    5        -0.0000017961         0.0000000000
    3    4   2    5         0.0000008536        -0.0000000000
-   3    4   3    5         0.1009776296        -0.0000000000
-   3    4   1    6         0.0000004812         0.0000000000
-   3    4   2    6        -0.0000007411        -0.0000000000
-   3    4   3    6        -0.5518081399        -0.0000000000
-   3    4   1    8         0.0000001675         0.0000000000
-   3    4   2    8        -0.0000005776         0.0000000000
-   3    4   3    8       -39.4788570690         0.0000000000
+   3    4   3    5         0.1009776295        -0.0000000000
+   3    4   1    6         0.0000004811         0.0000000000
+   3    4   2    6        -0.0000007410        -0.0000000000
+   3    4   3    6        -0.5518081405        -0.0000000000
+   3    4   1    8         0.0000001673         0.0000000000
+   3    4   2    8        -0.0000005775         0.0000000000
+   3    4   3    8       -39.4788570695         0.0000000000
    3    4   1   11         0.0000000605         0.0000000000
    3    4   2   11        -0.0000000610         0.0000000000
    3    4   3   11         0.0000000011         0.0000000000
    3    4   1   12         0.0000000000         0.0000000000
    3    4   1   18        -0.0000000009         0.0000000000
-   3    4   2   18         0.0000000167         0.0000000000
+   3    4   2   18         0.0000000168         0.0000000000
    3    4   3   18         0.0000000722         0.0000000000
    3    4   1   19         0.0000000136         0.0000000000
    3    4   2   19        -0.0000000221         0.0000000000
@@ -2515,30 +2515,30 @@ tolerances: {tolvrs: 1.00E-02, }
    3    4   1   22         0.0000000065         0.0000000000
    3    4   2   22         0.0000000003         0.0000000000
    3    4   3   22        -0.0000000208         0.0000000000
-   3    4   1   23        -0.0000000009         0.0000000000
+   3    4   1   23        -0.0000000010         0.0000000000
    3    4   2   23         0.0000000009         0.0000000000
    3    4   3   23         0.0000000220         0.0000000000
   
-   1    5   1    1        -5.4523689113         0.0000000000
-   1    5   2    1        -2.3107311624         0.0000000000
+   1    5   1    1        -5.4523689114         0.0000000000
+   1    5   2    1        -2.3107311622         0.0000000000
    1    5   3    1         0.0000002879         0.0000000000
    1    5   1    2        -3.1151022563        -0.0000000000
-   1    5   2    2         1.9270048981        -0.0000000000
+   1    5   2    2         1.9270048979        -0.0000000000
    1    5   3    2         0.0000002495         0.0000000000
-   1    5   1    3         1.5110298907         0.0000000000
+   1    5   1    3         1.5110298908         0.0000000000
    1    5   2    3        -1.4225876515        -0.0000000000
-   1    5   3    3        -0.0000451397         0.0000000000
-   1    5   1    4         1.5975939454         0.0000000000
-   1    5   2    4         1.4347241468         0.0000000000
-   1    5   3    4        -0.0000334386        -0.0000000000
-   1    5   1    5       619.3525478605         0.0000000000
-   1    5   2    5       -52.4148362293         0.0000000000
-   1    5   3    5         0.0000329279         0.0000000000
-   1    5   1    6        -4.4397564421         0.0000000000
-   1    5   2    6        -1.4304840894         0.0000000000
-   1    5   3    6         0.0000369186         0.0000000000
-   1    5   1    8       -41.4862899281         0.0000000000
-   1    5   2    8         3.0805761796         0.0000000000
+   1    5   3    3        -0.0000451422         0.0000000000
+   1    5   1    4         1.5975939456         0.0000000000
+   1    5   2    4         1.4347241472         0.0000000000
+   1    5   3    4        -0.0000334373        -0.0000000000
+   1    5   1    5       619.3525478616         0.0000000000
+   1    5   2    5       -52.4148362296         0.0000000000
+   1    5   3    5         0.0000329311         0.0000000000
+   1    5   1    6        -4.4397564423         0.0000000000
+   1    5   2    6        -1.4304840892         0.0000000000
+   1    5   3    6         0.0000369179         0.0000000000
+   1    5   1    8       -41.4862899273         0.0000000000
+   1    5   2    8         3.0805761800         0.0000000000
    1    5   3    8        -0.0000002881         0.0000000000
    1    5   1   11        -0.0000000076         0.0000000000
    1    5   2   11         0.0000000120         0.0000000000
@@ -2564,25 +2564,25 @@ tolerances: {tolvrs: 1.00E-02, }
    1    5   3   23         0.0000000835         0.0000000000
   
    2    5   1    1        -2.3107289778         0.0000000000
-   2    5   2    1        -5.4523711442        -0.0000000000
+   2    5   2    1        -5.4523711441        -0.0000000000
    2    5   3    1         0.0000002884         0.0000000000
-   2    5   1    2         1.9270053505        -0.0000000000
+   2    5   1    2         1.9270053503        -0.0000000000
    2    5   2    2        -3.1151027655         0.0000000000
    2    5   3    2         0.0000003006        -0.0000000000
    2    5   1    3        -1.4225874130        -0.0000000000
-   2    5   2    3         1.5110299341        -0.0000000000
-   2    5   3    3        -0.0000440669         0.0000000000
-   2    5   1    4        -1.4304838172         0.0000000000
-   2    5   2    4        -4.4397567114         0.0000000000
-   2    5   3    4        -0.0000342913         0.0000000000
-   2    5   1    5       -52.4148360130         0.0000000000
-   2    5   2    5       619.3525481467         0.0000000000
-   2    5   3    5         0.0000559288         0.0000000000
-   2    5   1    6         1.4347243515         0.0000000000
-   2    5   2    6         1.5975937754        -0.0000000000
-   2    5   3    6         0.0000389189         0.0000000000
-   2    5   1    8         3.0805735638         0.0000000000
-   2    5   2    8       -41.4862873727         0.0000000000
+   2    5   2    3         1.5110299342        -0.0000000000
+   2    5   3    3        -0.0000440705         0.0000000000
+   2    5   1    4        -1.4304838170         0.0000000000
+   2    5   2    4        -4.4397567116         0.0000000000
+   2    5   3    4        -0.0000342900         0.0000000000
+   2    5   1    5       -52.4148360133         0.0000000000
+   2    5   2    5       619.3525481479         0.0000000000
+   2    5   3    5         0.0000559317         0.0000000000
+   2    5   1    6         1.4347243519         0.0000000000
+   2    5   2    6         1.5975937756        -0.0000000000
+   2    5   3    6         0.0000389184         0.0000000000
+   2    5   1    8         3.0805735643         0.0000000000
+   2    5   2    8       -41.4862873720         0.0000000000
    2    5   3    8        -0.0000002702         0.0000000000
    2    5   1   11        -0.0000000035         0.0000000000
    2    5   2   11         0.0000000146         0.0000000000
@@ -2612,22 +2612,22 @@ tolerances: {tolvrs: 1.00E-02, }
    3    5   3    1        -1.1453643523        -0.0000000000
    3    5   1    2        -0.0000000316         0.0000000000
    3    5   2    2        -0.0000000107        -0.0000000000
-   3    5   3    2        -2.3071152123         0.0000000000
-   3    5   1    3         0.0000002561         0.0000000000
+   3    5   3    2        -2.3071152125         0.0000000000
+   3    5   1    3         0.0000002562         0.0000000000
    3    5   2    3         0.0000006164         0.0000000000
-   3    5   3    3        -0.5518133636         0.0000000000
-   3    5   1    4        -0.0000022209        -0.0000000000
-   3    5   2    4        -0.0000013423         0.0000000000
+   3    5   3    3        -0.5518133638         0.0000000000
+   3    5   1    4        -0.0000022207        -0.0000000000
+   3    5   2    4        -0.0000013422         0.0000000000
    3    5   3    4         0.1009318728         0.0000000000
    3    5   1    5         0.0000007851         0.0000000000
    3    5   2    5         0.0000003063         0.0000000000
-   3    5   3    5       544.8889813834         0.0000000000
-   3    5   1    6         0.0000014081         0.0000000000
-   3    5   2    6         0.0000025245         0.0000000000
+   3    5   3    5       544.8889813838         0.0000000000
+   3    5   1    6         0.0000014080         0.0000000000
+   3    5   2    6         0.0000025243         0.0000000000
    3    5   3    6         0.1009320444         0.0000000000
-   3    5   1    8         0.0000004613         0.0000000000
-   3    5   2    8         0.0000007482         0.0000000000
-   3    5   3    8       -39.4788461572         0.0000000000
+   3    5   1    8         0.0000004615         0.0000000000
+   3    5   2    8         0.0000007481         0.0000000000
+   3    5   3    8       -39.4788461566         0.0000000000
    3    5   1   11         0.0000000552         0.0000000000
    3    5   2   11         0.0000000532         0.0000000000
    3    5   3   11         0.0000000001         0.0000000000
@@ -2652,30 +2652,30 @@ tolerances: {tolvrs: 1.00E-02, }
    3    5   3   23        -0.0000000155         0.0000000000
   
    1    6   1    1        -3.1151049752         0.0000000000
-   1    6   2    1        -1.9270063923        -0.0000000000
+   1    6   2    1        -1.9270063925        -0.0000000000
    1    6   3    1        -0.0000003221        -0.0000000000
    1    6   1    2        -5.4523711926        -0.0000000000
-   1    6   2    2         2.3107312950         0.0000000000
+   1    6   2    2         2.3107312951         0.0000000000
    1    6   3    2        -0.0000002962        -0.0000000000
-   1    6   1    3         1.5975944681         0.0000000000
-   1    6   2    3        -1.4347243287        -0.0000000000
-   1    6   3    3         0.0000462914         0.0000000000
-   1    6   1    4         1.5110312090         0.0000000000
-   1    6   2    4         1.4225884241        -0.0000000000
-   1    6   3    4         0.0000295116        -0.0000000000
-   1    6   1    5        -4.4397569068        -0.0000000000
-   1    6   2    5         1.4304841397        -0.0000000000
-   1    6   3    5        -0.0000383972        -0.0000000000
-   1    6   1    6       619.3525294916         0.0000000000
-   1    6   2    6        52.4148357246         0.0000000000
-   1    6   3    6        -0.0000321274         0.0000000000
-   1    6   1    8       -41.4862967691         0.0000000000
-   1    6   2    8        -3.0805729365         0.0000000000
-   1    6   3    8         0.0000005599         0.0000000000
+   1    6   1    3         1.5975944678         0.0000000000
+   1    6   2    3        -1.4347243284        -0.0000000000
+   1    6   3    3         0.0000462942         0.0000000000
+   1    6   1    4         1.5110312089         0.0000000000
+   1    6   2    4         1.4225884240        -0.0000000000
+   1    6   3    4         0.0000295100        -0.0000000000
+   1    6   1    5        -4.4397569066        -0.0000000000
+   1    6   2    5         1.4304841398        -0.0000000000
+   1    6   3    5        -0.0000384006        -0.0000000000
+   1    6   1    6       619.3525294908         0.0000000000
+   1    6   2    6        52.4148357245         0.0000000000
+   1    6   3    6        -0.0000321266         0.0000000000
+   1    6   1    8       -41.4862967699         0.0000000000
+   1    6   2    8        -3.0805729361         0.0000000000
+   1    6   3    8         0.0000005598         0.0000000000
    1    6   1   11         0.0000000075         0.0000000000
    1    6   2   11        -0.0000000194         0.0000000000
    1    6   3   11        -0.0000000210         0.0000000000
-   1    6   1   12         0.0000000000         0.0000000000
+   1    6   1   12        -0.0000000000         0.0000000000
    1    6   1   18         0.0000000213         0.0000000000
    1    6   2   18         0.0000000906         0.0000000000
    1    6   3   18        -0.0000002613         0.0000000000
@@ -2695,31 +2695,31 @@ tolerances: {tolvrs: 1.00E-02, }
    1    6   2   23         0.0000000035         0.0000000000
    1    6   3   23         0.0000002192         0.0000000000
   
-   2    6   1    1        -1.9270062178        -0.0000000000
+   2    6   1    1        -1.9270062180        -0.0000000000
    2    6   2    1        -3.1151047943         0.0000000000
    2    6   3    1         0.0000002535         0.0000000000
    2    6   1    2         2.3107323703         0.0000000000
-   2    6   2    2        -5.4523701000        -0.0000000000
+   2    6   2    2        -5.4523701001        -0.0000000000
    2    6   3    2         0.0000003129         0.0000000000
-   2    6   1    3         1.4304838854        -0.0000000000
-   2    6   2    3        -4.4397571175         0.0000000000
-   2    6   3    3        -0.0000474796        -0.0000000000
-   2    6   1    4         1.4225882333        -0.0000000000
+   2    6   1    3         1.4304838856        -0.0000000000
+   2    6   2    3        -4.4397571174         0.0000000000
+   2    6   3    3        -0.0000474825        -0.0000000000
+   2    6   1    4         1.4225882331        -0.0000000000
    2    6   2    4         1.5110312026         0.0000000000
-   2    6   3    4        -0.0000362959         0.0000000000
-   2    6   1    5        -1.4347246402        -0.0000000000
-   2    6   2    5         1.5975942768         0.0000000000
-   2    6   3    5         0.0000412574        -0.0000000000
-   2    6   1    6        52.4148355405         0.0000000000
-   2    6   2    6       619.3525293998         0.0000000000
-   2    6   3    6         0.0000312714         0.0000000000
-   2    6   1    8        -3.0805738855         0.0000000000
-   2    6   2    8       -41.4862977060         0.0000000000
-   2    6   3    8        -0.0000004109         0.0000000000
+   2    6   3    4        -0.0000362957         0.0000000000
+   2    6   1    5        -1.4347246399        -0.0000000000
+   2    6   2    5         1.5975942765         0.0000000000
+   2    6   3    5         0.0000412608        -0.0000000000
+   2    6   1    6        52.4148355403         0.0000000000
+   2    6   2    6       619.3525293990         0.0000000000
+   2    6   3    6         0.0000312703         0.0000000000
+   2    6   1    8        -3.0805738847         0.0000000000
+   2    6   2    8       -41.4862977065         0.0000000000
+   2    6   3    8        -0.0000004108         0.0000000000
    2    6   1   11         0.0000000007         0.0000000000
    2    6   2   11         0.0000000137         0.0000000000
    2    6   3   11         0.0000000164         0.0000000000
-   2    6   1   12        -0.0000000000         0.0000000000
+   2    6   1   12         0.0000000000         0.0000000000
    2    6   1   18         0.0000000874         0.0000000000
    2    6   2   18         0.0000000168         0.0000000000
    2    6   3   18         0.0000002528         0.0000000000
@@ -2739,27 +2739,27 @@ tolerances: {tolvrs: 1.00E-02, }
    2    6   2   23        -0.0000000023         0.0000000000
    2    6   3   23        -0.0000001951         0.0000000000
   
-   3    6   1    1        -0.0000000895        -0.0000000000
+   3    6   1    1        -0.0000000894        -0.0000000000
    3    6   2    1         0.0000000586         0.0000000000
-   3    6   3    1        -2.3071126312        -0.0000000000
-   3    6   1    2         0.0000000231        -0.0000000000
+   3    6   3    1        -2.3071126310        -0.0000000000
+   3    6   1    2         0.0000000232        -0.0000000000
    3    6   2    2        -0.0000000176         0.0000000000
    3    6   3    2        -1.1453644196         0.0000000000
-   3    6   1    3        -0.0000018014         0.0000000000
+   3    6   1    3        -0.0000018013         0.0000000000
    3    6   2    3         0.0000008487        -0.0000000000
-   3    6   3    3         0.1009776336        -0.0000000000
-   3    6   1    4         0.0000004815        -0.0000000000
+   3    6   3    3         0.1009776335        -0.0000000000
+   3    6   1    4         0.0000004814        -0.0000000000
    3    6   2    4        -0.0000007401         0.0000000000
-   3    6   3    4        -0.5518081398         0.0000000000
-   3    6   1    5        -0.0000000649        -0.0000000000
-   3    6   2    5         0.0000002604        -0.0000000000
-   3    6   3    5         0.1009778100        -0.0000000000
-   3    6   1    6         0.0000008863         0.0000000000
-   3    6   2    6        -0.0000007510         0.0000000000
-   3    6   3    6       544.8889918526         0.0000000000
-   3    6   1    8         0.0000001081         0.0000000000
-   3    6   2    8        -0.0000005021         0.0000000000
-   3    6   3    8       -39.4788563100         0.0000000000
+   3    6   3    4        -0.5518081404         0.0000000000
+   3    6   1    5        -0.0000000650        -0.0000000000
+   3    6   2    5         0.0000002605        -0.0000000000
+   3    6   3    5         0.1009778099        -0.0000000000
+   3    6   1    6         0.0000008862         0.0000000000
+   3    6   2    6        -0.0000007509         0.0000000000
+   3    6   3    6       544.8889918525         0.0000000000
+   3    6   1    8         0.0000001079         0.0000000000
+   3    6   2    8        -0.0000005020         0.0000000000
+   3    6   3    8       -39.4788563105         0.0000000000
    3    6   1   11        -0.0000000577         0.0000000000
    3    6   2   11         0.0000000570         0.0000000000
    3    6   3   11         0.0000000032         0.0000000000
@@ -2784,30 +2784,30 @@ tolerances: {tolvrs: 1.00E-02, }
    3    6   3   23         0.0000000069         0.0000000000
   
    1    8   1    1       -28.4279481856         0.0000000000
-   1    8   2    1         4.6519729060         0.0000000000
-   1    8   3    1        -0.0000000174         0.0000000000
-   1    8   1    2       -28.4279505099         0.0000000000
-   1    8   2    2        -4.6519785958         0.0000000000
-   1    8   3    2        -0.0000018147         0.0000000000
-   1    8   1    3       -41.4632849193         0.0000000000
-   1    8   2    3         3.0698816497         0.0000000000
-   1    8   3    3         0.0000052252         0.0000000000
-   1    8   1    4       -41.4632957691         0.0000000000
-   1    8   2    4        -3.0698785132         0.0000000000
-   1    8   3    4         0.0000003293         0.0000000000
-   1    8   1    5       -41.4632848291         0.0000000000
-   1    8   2    5         3.0698818621         0.0000000000
-   1    8   3    5         0.0000055051         0.0000000000
-   1    8   1    6       -41.4632955117         0.0000000000
-   1    8   2    6        -3.0698782830         0.0000000000
-   1    8   3    6         0.0000002684         0.0000000000
-   1    8   1    8      -228.5148013228         0.0000000000
-   1    8   2    8         0.0001300387         0.0000000000
-   1    8   3    8         0.0000507486         0.0000000000
+   1    8   2    1         4.6519729047         0.0000000000
+   1    8   3    1        -0.0000000165         0.0000000000
+   1    8   1    2       -28.4279505093         0.0000000000
+   1    8   2    2        -4.6519785967         0.0000000000
+   1    8   3    2        -0.0000018156         0.0000000000
+   1    8   1    3       -41.4632849185         0.0000000000
+   1    8   2    3         3.0698816502         0.0000000000
+   1    8   3    3         0.0000052254         0.0000000000
+   1    8   1    4       -41.4632957697         0.0000000000
+   1    8   2    4        -3.0698785125         0.0000000000
+   1    8   3    4         0.0000003291         0.0000000000
+   1    8   1    5       -41.4632848284         0.0000000000
+   1    8   2    5         3.0698818626         0.0000000000
+   1    8   3    5         0.0000055053         0.0000000000
+   1    8   1    6       -41.4632955123         0.0000000000
+   1    8   2    6        -3.0698782823         0.0000000000
+   1    8   3    6         0.0000002682         0.0000000000
+   1    8   1    8      -228.5148013214         0.0000000000
+   1    8   2    8         0.0001300476         0.0000000000
+   1    8   3    8         0.0000507496         0.0000000000
    1    8   1   11         0.0000001057         0.0000000000
    1    8   2   11        -0.0000000656         0.0000000000
    1    8   3   11         0.0000000019         0.0000000000
-   1    8   1   12        -0.0000000000         0.0000000000
+   1    8   1   12         0.0000000000         0.0000000000
    1    8   1   18        -0.0000002600         0.0000000000
    1    8   2   18        -0.0000004443         0.0000000000
    1    8   3   18        -0.0000002767         0.0000000000
@@ -2827,31 +2827,31 @@ tolerances: {tolvrs: 1.00E-02, }
    1    8   2   23        -0.0000000974         0.0000000000
    1    8   3   23        -0.0000004796         0.0000000000
   
-   2    8   1    1         4.6519730865         0.0000000000
-   2    8   2    1       -28.4279480256         0.0000000000
-   2    8   3    1         0.0000033403         0.0000000000
-   2    8   1    2        -4.6519783497         0.0000000000
-   2    8   2    2       -28.4279506205         0.0000000000
-   2    8   3    2        -0.0000039342         0.0000000000
-   2    8   1    3         3.0698816824         0.0000000000
-   2    8   2    3       -41.4632847823         0.0000000000
-   2    8   3    3        -0.0000037406         0.0000000000
-   2    8   1    4        -3.0698785173         0.0000000000
-   2    8   2    4       -41.4632957275         0.0000000000
-   2    8   3    4        -0.0000014727         0.0000000000
-   2    8   1    5         3.0698815996         0.0000000000
-   2    8   2    5       -41.4632851575         0.0000000000
+   2    8   1    1         4.6519730858         0.0000000000
+   2    8   2    1       -28.4279480259         0.0000000000
+   2    8   3    1         0.0000033399         0.0000000000
+   2    8   1    2        -4.6519783505         0.0000000000
+   2    8   2    2       -28.4279506204         0.0000000000
+   2    8   3    2        -0.0000039341         0.0000000000
+   2    8   1    3         3.0698816829         0.0000000000
+   2    8   2    3       -41.4632847815         0.0000000000
+   2    8   3    3        -0.0000037407         0.0000000000
+   2    8   1    4        -3.0698785170         0.0000000000
+   2    8   2    4       -41.4632957280         0.0000000000
+   2    8   3    4        -0.0000014726         0.0000000000
+   2    8   1    5         3.0698816001         0.0000000000
+   2    8   2    5       -41.4632851567         0.0000000000
    2    8   3    5        -0.0000035701         0.0000000000
-   2    8   1    6        -3.0698784278         0.0000000000
-   2    8   2    6       -41.4632953562         0.0000000000
-   2    8   3    6        -0.0000013965         0.0000000000
-   2    8   1    8         0.0001300389         0.0000000000
-   2    8   2    8      -228.5148017883         0.0000000000
-   2    8   3    8         0.0000170792         0.0000000000
+   2    8   1    6        -3.0698784275         0.0000000000
+   2    8   2    6       -41.4632953567         0.0000000000
+   2    8   3    6        -0.0000013964         0.0000000000
+   2    8   1    8         0.0001300478         0.0000000000
+   2    8   2    8      -228.5148017841         0.0000000000
+   2    8   3    8         0.0000170818         0.0000000000
    2    8   1   11         0.0000000329         0.0000000000
    2    8   2   11        -0.0000000307         0.0000000000
    2    8   3   11        -0.0000000027         0.0000000000
-   2    8   1   12        -0.0000000000         0.0000000000
+   2    8   1   12         0.0000000000         0.0000000000
    2    8   1   18         0.0000001999         0.0000000000
    2    8   2   18         0.0000001694         0.0000000000
    2    8   3   18         0.0000001934         0.0000000000
@@ -2871,27 +2871,27 @@ tolerances: {tolvrs: 1.00E-02, }
    2    8   2   23         0.0000000332         0.0000000000
    2    8   3   23         0.0000004392         0.0000000000
   
-   3    8   1    1         0.0000001416         0.0000000000
-   3    8   2    1         0.0000012455         0.0000000000
-   3    8   3    1       -29.1756550074         0.0000000000
-   3    8   1    2        -0.0000007389         0.0000000000
-   3    8   2    2        -0.0000010238         0.0000000000
-   3    8   3    2       -29.1756816140         0.0000000000
-   3    8   1    3        -0.0000362121         0.0000000000
-   3    8   2    3        -0.0000005591         0.0000000000
-   3    8   3    3       -39.4524019732         0.0000000000
-   3    8   1    4        -0.0000534764         0.0000000000
-   3    8   2    4         0.0000586099         0.0000000000
-   3    8   3    4       -39.4524129608         0.0000000000
-   3    8   1    5        -0.0000359892         0.0000000000
-   3    8   2    5        -0.0000001021         0.0000000000
-   3    8   3    5       -39.4524022791         0.0000000000
-   3    8   1    6        -0.0000534930         0.0000000000
-   3    8   2    6         0.0000587815         0.0000000000
-   3    8   3    6       -39.4524122001         0.0000000000
-   3    8   1    8         0.0000506690         0.0000000000
-   3    8   2    8         0.0000170577         0.0000000000
-   3    8   3    8     -1919.5402472183         0.0000000000
+   3    8   1    1         0.0000001418         0.0000000000
+   3    8   2    1         0.0000012454         0.0000000000
+   3    8   3    1       -29.1756550056         0.0000000000
+   3    8   1    2        -0.0000007387         0.0000000000
+   3    8   2    2        -0.0000010237         0.0000000000
+   3    8   3    2       -29.1756816156         0.0000000000
+   3    8   1    3        -0.0000362097         0.0000000000
+   3    8   2    3        -0.0000005589         0.0000000000
+   3    8   3    3       -39.4524019726         0.0000000000
+   3    8   1    4        -0.0000534728         0.0000000000
+   3    8   2    4         0.0000586060         0.0000000000
+   3    8   3    4       -39.4524129613         0.0000000000
+   3    8   1    5        -0.0000359868         0.0000000000
+   3    8   2    5        -0.0000001019         0.0000000000
+   3    8   3    5       -39.4524022786         0.0000000000
+   3    8   1    6        -0.0000534895         0.0000000000
+   3    8   2    6         0.0000587776         0.0000000000
+   3    8   3    6       -39.4524122006         0.0000000000
+   3    8   1    8         0.0000506700         0.0000000000
+   3    8   2    8         0.0000170603         0.0000000000
+   3    8   3    8     -1919.5402471590         0.0000000000
    3    8   1   11         0.0000000468         0.0000000000
    3    8   2   11        -0.0000000724         0.0000000000
    3    8   3   11         0.0000000602         0.0000000000
@@ -2939,7 +2939,7 @@ tolerances: {tolvrs: 1.00E-02, }
    1   11   1   11        -0.0244870927         0.0000000000
    1   11   2   11        -0.0000000005         0.0000000000
    1   11   3   11        -0.0000000002         0.0000000000
-   1   11   1   12        -0.0000000000         0.0000000000
+   1   11   1   12         0.0000000000         0.0000000000
    1   11   1   18        -0.0033020474         0.0000000000
    1   11   2   18         0.0006969494         0.0000000000
    1   11   3   18        -0.0000000015         0.0000000000
@@ -3015,7 +3015,7 @@ tolerances: {tolvrs: 1.00E-02, }
    3   11   1    4         0.0000000007         0.0000000000
    3   11   2    4        -0.0000000013         0.0000000000
    3   11   3    4         0.0000000002         0.0000000000
-   3   11   1    5         0.0000000004         0.0000000000
+   3   11   1    5         0.0000000005         0.0000000000
    3   11   2    5         0.0000000012         0.0000000000
    3   11   3    5         0.0000000008         0.0000000000
    3   11   1    6        -0.0000000010         0.0000000000
@@ -3027,7 +3027,7 @@ tolerances: {tolvrs: 1.00E-02, }
    3   11   1   11        -0.0000000002         0.0000000000
    3   11   2   11        -0.0000000000         0.0000000000
    3   11   3   11        -0.0333980815         0.0000000000
-   3   11   1   12        -0.0000000000         0.0000000000
+   3   11   1   12         0.0000000000         0.0000000000
    3   11   1   18         0.0000000015         0.0000000000
    3   11   2   18         0.0000000016         0.0000000000
    3   11   3   18        -0.0046473316         0.0000000000
@@ -3048,29 +3048,29 @@ tolerances: {tolvrs: 1.00E-02, }
    3   11   3   23        -0.0017645387         0.0000000000
   
    1   12   1    1        -0.0000000000         0.0000000000
-   1   12   2    1        -0.0000000000         0.0000000000
-   1   12   3    1        -0.0000000000         0.0000000000
+   1   12   2    1         0.0000000000         0.0000000000
+   1   12   3    1         0.0000000000         0.0000000000
    1   12   1    2         0.0000000000         0.0000000000
-   1   12   2    2        -0.0000000000         0.0000000000
-   1   12   3    2        -0.0000000000         0.0000000000
-   1   12   1    3        -0.0000000000         0.0000000000
+   1   12   2    2         0.0000000000         0.0000000000
+   1   12   3    2         0.0000000000         0.0000000000
+   1   12   1    3         0.0000000000         0.0000000000
    1   12   2    3         0.0000000000         0.0000000000
-   1   12   3    3         0.0000000000         0.0000000000
+   1   12   3    3        -0.0000000000         0.0000000000
    1   12   1    4        -0.0000000000         0.0000000000
    1   12   2    4        -0.0000000000         0.0000000000
    1   12   3    4         0.0000000000         0.0000000000
    1   12   1    5         0.0000000000         0.0000000000
    1   12   2    5        -0.0000000000         0.0000000000
    1   12   3    5        -0.0000000000         0.0000000000
-   1   12   1    6         0.0000000000         0.0000000000
-   1   12   2    6        -0.0000000000         0.0000000000
+   1   12   1    6        -0.0000000000         0.0000000000
+   1   12   2    6         0.0000000000         0.0000000000
    1   12   3    6        -0.0000000000         0.0000000000
-   1   12   1    8        -0.0000000000         0.0000000000
-   1   12   2    8        -0.0000000000         0.0000000000
+   1   12   1    8         0.0000000000         0.0000000000
+   1   12   2    8         0.0000000000         0.0000000000
    1   12   3    8         0.0000000000         0.0000000000
-   1   12   1   11        -0.0000000000         0.0000000000
+   1   12   1   11         0.0000000000         0.0000000000
    1   12   2   11         0.0000000000         0.0000000000
-   1   12   3   11        -0.0000000000         0.0000000000
+   1   12   3   11         0.0000000000         0.0000000000
   
    1   18   1    1         0.0000000271         0.0000000000
    1   18   2    1        -0.0000000315         0.0000000000
@@ -3108,7 +3108,7 @@ tolerances: {tolvrs: 1.00E-02, }
    2   18   3    3        -0.0000000260         0.0000000000
    2   18   1    4         0.0000000776         0.0000000000
    2   18   2    4         0.0000000353         0.0000000000
-   2   18   3    4         0.0000000167         0.0000000000
+   2   18   3    4         0.0000000168         0.0000000000
    2   18   1    5         0.0000000737         0.0000000000
    2   18   2    5        -0.0000000427         0.0000000000
    2   18   3    5         0.0000000141         0.0000000000
@@ -3129,7 +3129,7 @@ tolerances: {tolvrs: 1.00E-02, }
    3   18   2    2         0.0000000090         0.0000000000
    3   18   3    2        -0.0000000017         0.0000000000
    3   18   1    3         0.0000001310         0.0000000000
-   3   18   2    3         0.0000001113         0.0000000000
+   3   18   2    3         0.0000001114         0.0000000000
    3   18   3    3         0.0000000159         0.0000000000
    3   18   1    4         0.0000001768         0.0000000000
    3   18   2    4        -0.0000001750         0.0000000000
@@ -3204,7 +3204,7 @@ tolerances: {tolvrs: 1.00E-02, }
    3   19   2    2        -0.0000000130         0.0000000000
    3   19   3    2        -0.0000000179         0.0000000000
    3   19   1    3        -0.0000002059         0.0000000000
-   3   19   2    3        -0.0000002037         0.0000000000
+   3   19   2    3        -0.0000002038         0.0000000000
    3   19   3    3        -0.0000000116         0.0000000000
    3   19   1    4        -0.0000001039         0.0000000000
    3   19   2    4         0.0000000871         0.0000000000
@@ -3458,7 +3458,7 @@ tolerances: {tolvrs: 1.00E-02, }
    1   23   3    3        -0.0000000004         0.0000000000
    1   23   1    4        -0.0000000071         0.0000000000
    1   23   2    4         0.0000000024         0.0000000000
-   1   23   3    4        -0.0000000009         0.0000000000
+   1   23   3    4        -0.0000000010         0.0000000000
    1   23   1    5         0.0000000070         0.0000000000
    1   23   2    5         0.0000000030         0.0000000000
    1   23   3    5         0.0000000018         0.0000000000
@@ -3497,7 +3497,7 @@ tolerances: {tolvrs: 1.00E-02, }
    2   23   2   11        -0.0013284524         0.0000000000
    2   23   3   11         0.0000000006         0.0000000000
   
-   3   23   1    1         0.0000000595         0.0000000000
+   3   23   1    1         0.0000000594         0.0000000000
    3   23   2    1        -0.0000000499         0.0000000000
    3   23   3    1        -0.0000000362         0.0000000000
    3   23   1    2        -0.0000001235         0.0000000000
@@ -3547,14 +3547,14 @@ tolerances: {tolvrs: 1.00E-02, }
    1    1   3    6        -0.0000000262         0.0000000000
   
    2    1   1    1         0.0994737872         0.0000000000
-   2    1   2    1         0.3092819204         0.0000000000
+   2    1   2    1         0.3092819203         0.0000000000
    2    1   3    1         0.0000000004         0.0000000000
    2    1   1    2         0.0001094076         0.0000000000
    2    1   2    2        -0.1033089814         0.0000000000
    2    1   3    2        -0.0000000006         0.0000000000
    2    1   1    3        -0.0274317372         0.0000000000
    2    1   2    3        -0.0643956550        -0.0000000000
-   2    1   3    3        -0.0000002737         0.0000000000
+   2    1   3    3        -0.0000002736         0.0000000000
    2    1   1    4        -0.0228587803        -0.0000000000
    2    1   2    4        -0.0365409978         0.0000000000
    2    1   3    4        -0.0000000327        -0.0000000000
@@ -3587,7 +3587,7 @@ tolerances: {tolvrs: 1.00E-02, }
    1    2   1    1        -0.1033089798         0.0000000000
    1    2   2    1        -0.0001094214         0.0000000000
    1    2   3    1        -0.0000000008         0.0000000000
-   1    2   1    2         0.3092824272         0.0000000000
+   1    2   1    2         0.3092824273         0.0000000000
    1    2   2    2        -0.0994737517         0.0000000000
    1    2   3    2        -0.0000000006         0.0000000000
    1    2   1    3        -0.0365409917        -0.0000000000
@@ -3597,11 +3597,11 @@ tolerances: {tolvrs: 1.00E-02, }
    1    2   2    4         0.0274317599         0.0000000000
    1    2   3    4        -0.0000000087         0.0000000000
    1    2   1    5        -0.0365409915         0.0000000000
-   1    2   2    5         0.0228587490         0.0000000000
+   1    2   2    5         0.0228587489         0.0000000000
    1    2   3    5        -0.0000001992        -0.0000000000
    1    2   1    6        -0.0643956582         0.0000000000
    1    2   2    6         0.0274317608        -0.0000000000
-   1    2   3    6        -0.0000000084         0.0000000000
+   1    2   3    6        -0.0000000083         0.0000000000
   
    2    2   1    1        -0.0001094213         0.0000000000
    2    2   2    1        -0.1033089797         0.0000000000
@@ -3615,7 +3615,7 @@ tolerances: {tolvrs: 1.00E-02, }
    2    2   1    4         0.0274317544         0.0000000000
    2    2   2    4        -0.0643956524         0.0000000000
    2    2   3    4         0.0000000139        -0.0000000000
-   2    2   1    5         0.0228587477         0.0000000000
+   2    2   1    5         0.0228587476         0.0000000000
    2    2   2    5        -0.0365409911        -0.0000000000
    2    2   3    5         0.0000001835         0.0000000000
    2    2   1    6         0.0274317552        -0.0000000000
@@ -3627,7 +3627,7 @@ tolerances: {tolvrs: 1.00E-02, }
    3    2   3    1         0.0987012902         0.0000000000
    3    2   1    2        -0.0000000006         0.0000000000
    3    2   2    2        -0.0000000008         0.0000000000
-   3    2   3    2         0.0950386677         0.0000000000
+   3    2   3    2         0.0950386678         0.0000000000
    3    2   1    3         0.0000000019         0.0000000000
    3    2   2    3        -0.0000000047        -0.0000000000
    3    2   3    3        -0.0590728823         0.0000000000
@@ -3649,13 +3649,13 @@ tolerances: {tolvrs: 1.00E-02, }
    1    3   3    2        -0.0000000054        -0.0000000000
    1    3   1    3         7.3016106140         0.0000000000
    1    3   2    3        -0.6179238697         0.0000000000
-   1    3   3    3         0.0000005716         0.0000000000
+   1    3   3    3         0.0000005717         0.0000000000
    1    3   1    4        -0.0523407433        -0.0000000000
    1    3   2    4        -0.0168641235        -0.0000000000
    1    3   3    4         0.0000006397         0.0000000000
    1    3   1    5         0.0178136861        -0.0000000000
    1    3   2    5        -0.0167710313         0.0000000000
-   1    3   3    5        -0.0000007856        -0.0000000000
+   1    3   3    5        -0.0000007857        -0.0000000000
    1    3   1    6         0.0188341986        -0.0000000000
    1    3   2    6         0.0169141097         0.0000000000
    1    3   3    6        -0.0000005813        -0.0000000000
@@ -3706,10 +3706,10 @@ tolerances: {tolvrs: 1.00E-02, }
    1    4   3    2         0.0000000050        -0.0000000000
    1    4   1    3        -0.0523407488         0.0000000000
    1    4   2    3         0.0168641241         0.0000000000
-   1    4   3    3        -0.0000006641        -0.0000000000
-   1    4   1    4         7.3016103666         0.0000000000
+   1    4   3    3        -0.0000006642        -0.0000000000
+   1    4   1    4         7.3016103665         0.0000000000
    1    4   2    4         0.6179238658         0.0000000000
-   1    4   3    4        -0.0000005584         0.0000000000
+   1    4   3    4        -0.0000005583         0.0000000000
    1    4   1    5         0.0188342047        -0.0000000000
    1    4   2    5        -0.0169141121        -0.0000000000
    1    4   3    5         0.0000008060         0.0000000000
@@ -3720,15 +3720,15 @@ tolerances: {tolvrs: 1.00E-02, }
    2    4   1    1        -0.0227177028         0.0000000000
    2    4   2    1        -0.0367242658        -0.0000000000
    2    4   3    1        -0.0000000057         0.0000000000
-   2    4   1    2         0.0272414414        -0.0000000000
+   2    4   1    2         0.0272414415        -0.0000000000
    2    4   2    2        -0.0642785561        -0.0000000000
    2    4   3    2        -0.0000000048         0.0000000000
    2    4   1    3        -0.0169141158         0.0000000000
    2    4   2    3         0.0188342025        -0.0000000000
-   2    4   3    3         0.0000007135         0.0000000000
+   2    4   3    3         0.0000007136         0.0000000000
    2    4   1    4         0.6179238636         0.0000000000
    2    4   2    4         7.3016103668         0.0000000000
-   2    4   3    4         0.0000005431         0.0000000000
+   2    4   3    4         0.0000005430         0.0000000000
    2    4   1    5         0.0168641211        -0.0000000000
    2    4   2    5        -0.0523407514        -0.0000000000
    2    4   3    5        -0.0000008263        -0.0000000000
@@ -3751,7 +3751,7 @@ tolerances: {tolvrs: 1.00E-02, }
    3    4   1    5        -0.0000000312         0.0000000000
    3    4   2    5         0.0000000148        -0.0000000000
    3    4   3    5         0.0025800712        -0.0000000000
-   3    4   1    6         0.0000000084         0.0000000000
+   3    4   1    6         0.0000000083         0.0000000000
    3    4   2    6        -0.0000000129        -0.0000000000
    3    4   3    6        -0.0140992049        -0.0000000000
   
@@ -3763,11 +3763,11 @@ tolerances: {tolvrs: 1.00E-02, }
    1    5   3    2         0.0000000043         0.0000000000
    1    5   1    3         0.0178136861         0.0000000000
    1    5   2    3        -0.0167710315        -0.0000000000
-   1    5   3    3        -0.0000007834         0.0000000000
+   1    5   3    3        -0.0000007835         0.0000000000
    1    5   1    4         0.0188341986         0.0000000000
    1    5   2    4         0.0169141099         0.0000000000
-   1    5   3    4        -0.0000005804        -0.0000000000
-   1    5   1    5         7.3016106019         0.0000000000
+   1    5   3    4        -0.0000005803        -0.0000000000
+   1    5   1    5         7.3016106020         0.0000000000
    1    5   2    5        -0.6179238710         0.0000000000
    1    5   3    5         0.0000005715         0.0000000000
    1    5   1    6        -0.0523407433         0.0000000000
@@ -3782,10 +3782,10 @@ tolerances: {tolvrs: 1.00E-02, }
    2    5   3    2         0.0000000052        -0.0000000000
    2    5   1    3        -0.0167710287        -0.0000000000
    2    5   2    3         0.0178136866        -0.0000000000
-   2    5   3    3        -0.0000007648         0.0000000000
+   2    5   3    3        -0.0000007649         0.0000000000
    2    5   1    4        -0.0168641202         0.0000000000
    2    5   2    4        -0.0523407465         0.0000000000
-   2    5   3    4        -0.0000005952         0.0000000000
+   2    5   3    4        -0.0000005951         0.0000000000
    2    5   1    5        -0.6179238685         0.0000000000
    2    5   2    5         7.3016106053         0.0000000000
    2    5   3    5         0.0000009707         0.0000000000
@@ -3820,13 +3820,13 @@ tolerances: {tolvrs: 1.00E-02, }
    1    6   3    2        -0.0000000051        -0.0000000000
    1    6   1    3         0.0188342048         0.0000000000
    1    6   2    3        -0.0169141120        -0.0000000000
-   1    6   3    3         0.0000008034         0.0000000000
+   1    6   3    3         0.0000008035         0.0000000000
    1    6   1    4         0.0178137016         0.0000000000
    1    6   2    4         0.0167710406        -0.0000000000
    1    6   3    4         0.0000005122        -0.0000000000
    1    6   1    5        -0.0523407488        -0.0000000000
    1    6   2    5         0.0168641240        -0.0000000000
-   1    6   3    5        -0.0000006664        -0.0000000000
+   1    6   3    5        -0.0000006665        -0.0000000000
    1    6   1    6         7.3016103854         0.0000000000
    1    6   2    6         0.6179238651         0.0000000000
    1    6   3    6        -0.0000005576         0.0000000000
@@ -3839,7 +3839,7 @@ tolerances: {tolvrs: 1.00E-02, }
    2    6   3    2         0.0000000054         0.0000000000
    2    6   1    3         0.0168641210        -0.0000000000
    2    6   2    3        -0.0523407512         0.0000000000
-   2    6   3    3        -0.0000008240        -0.0000000000
+   2    6   3    3        -0.0000008241        -0.0000000000
    2    6   1    4         0.0167710383        -0.0000000000
    2    6   2    4         0.0178137016         0.0000000000
    2    6   3    4        -0.0000006299         0.0000000000
@@ -3873,17 +3873,17 @@ tolerances: {tolvrs: 1.00E-02, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    8   1    8        12.6270013428        -0.0000000000
-   1    8   2    8        -0.0000066165        -0.0000000000
-   1    8   3    8        -0.0000017539        -0.0000000000
+   1    8   1    8        12.6270013427        -0.0000000000
+   1    8   2    8        -0.0000066169        -0.0000000000
+   1    8   3    8        -0.0000017540        -0.0000000000
   
-   2    8   1    8        -0.0000066165        -0.0000000000
-   2    8   2    8        12.6270013665        -0.0000000000
-   2    8   3    8        -0.0000005903        -0.0000000000
+   2    8   1    8        -0.0000066169        -0.0000000000
+   2    8   2    8        12.6270013662        -0.0000000000
+   2    8   3    8        -0.0000005904        -0.0000000000
   
    3    8   1    8        -0.0000017512        -0.0000000000
-   3    8   2    8        -0.0000005895        -0.0000000000
-   3    8   3    8        46.0634906463        -0.0000000000
+   3    8   2    8        -0.0000005896        -0.0000000000
+   3    8   3    8        46.0634906449        -0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
@@ -3891,59 +3891,59 @@ tolerances: {tolvrs: 1.00E-02, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    8         2.4754713286         0.0000000000
-   2    1   1    8         0.7395141537         0.0000000000
-   3    1   1    8        -0.0000000080         0.0000000000
-   1    2   1    8         2.4754708902         0.0000000000
-   2    2   1    8        -0.7395150663         0.0000000000
-   3    2   1    8        -0.0000004255         0.0000000000
-   1    3   1    8         0.3972525044         0.0000000000
+   1    1   1    8         2.4754713285         0.0000000000
+   2    1   1    8         0.7395141535         0.0000000000
+   3    1   1    8        -0.0000000078         0.0000000000
+   1    2   1    8         2.4754708903         0.0000000000
+   2    2   1    8        -0.7395150665         0.0000000000
+   3    2   1    8        -0.0000004257         0.0000000000
+   1    3   1    8         0.3972525045         0.0000000000
    2    3   1    8         0.4902891066         0.0000000000
    3    3   1    8         0.0000000407         0.0000000000
-   1    4   1    8         0.3972501261         0.0000000000
-   2    4   1    8        -0.4902879677         0.0000000000
-   3    4   1    8         0.0000000393         0.0000000000
-   1    5   1    8         0.3972518874         0.0000000000
-   2    5   1    8         0.4902885102         0.0000000000
+   1    4   1    8         0.3972501260         0.0000000000
+   2    4   1    8        -0.4902879676         0.0000000000
+   3    4   1    8         0.0000000392         0.0000000000
+   1    5   1    8         0.3972518875         0.0000000000
+   2    5   1    8         0.4902885103         0.0000000000
    3    5   1    8         0.0000001081         0.0000000000
-   1    6   1    8         0.3972507986         0.0000000000
-   2    6   1    8        -0.4902885614         0.0000000000
+   1    6   1    8         0.3972507985         0.0000000000
+   2    6   1    8        -0.4902885613         0.0000000000
    3    6   1    8         0.0000000253         0.0000000000
   
-   1    1   2    8         0.7395141831         0.0000000000
+   1    1   2    8         0.7395141829         0.0000000000
    2    1   2    8         2.4754713531         0.0000000000
-   3    1   2    8         0.0000007767         0.0000000000
-   1    2   2    8        -0.7395150279         0.0000000000
+   3    1   2    8         0.0000007766         0.0000000000
+   1    2   2    8        -0.7395150281         0.0000000000
    2    2   2    8         2.4754708735         0.0000000000
    3    2   2    8        -0.0000009167         0.0000000000
-   1    3   2    8         0.4902886540         0.0000000000
-   2    3   2    8         0.3972520678         0.0000000000
+   1    3   2    8         0.4902886541         0.0000000000
+   2    3   2    8         0.3972520679         0.0000000000
    3    3   2    8         0.0000001368         0.0000000000
-   1    4   2    8        -0.4902881391         0.0000000000
-   2    4   2    8         0.3972503043         0.0000000000
+   1    4   2    8        -0.4902881390         0.0000000000
+   2    4   2    8         0.3972503042         0.0000000000
    3    4   2    8        -0.0000001353         0.0000000000
    1    5   2    8         0.4902889266         0.0000000000
-   2    5   2    8         0.3972522941         0.0000000000
+   2    5   2    8         0.3972522942         0.0000000000
    3    5   2    8         0.0000001753         0.0000000000
-   1    6   2    8        -0.4902884104         0.0000000000
-   2    6   2    8         0.3972506495         0.0000000000
+   1    6   2    8        -0.4902884103         0.0000000000
+   2    6   2    8         0.3972506494         0.0000000000
    3    6   2    8        -0.0000001176         0.0000000000
   
    1    1   3    8         0.0000000145         0.0000000000
    2    1   3    8         0.0000001357         0.0000000000
-   3    1   3    8         2.3577502885         0.0000000000
-   1    2   3    8        -0.0000000900         0.0000000000
+   3    1   3    8         2.3577502888         0.0000000000
+   1    2   3    8        -0.0000000899         0.0000000000
    2    2   3    8        -0.0000001150         0.0000000000
-   3    2   3    8         2.3577459267         0.0000000000
+   3    2   3    8         2.3577459264         0.0000000000
    1    3   3    8         0.0000000373         0.0000000000
    2    3   3    8         0.0000000129         0.0000000000
-   3    3   3    8         0.7167465361         0.0000000000
+   3    3   3    8         0.7167465362         0.0000000000
    1    4   3    8        -0.0000000317         0.0000000000
    2    4   3    8         0.0000000302         0.0000000000
    3    4   3    8         0.7167447498         0.0000000000
    1    5   3    8        -0.0000000311         0.0000000000
    2    5   3    8        -0.0000000292         0.0000000000
-   3    5   3    8         0.7167464865         0.0000000000
+   3    5   3    8         0.7167464866         0.0000000000
    1    6   3    8         0.0000000605         0.0000000000
    2    6   3    8        -0.0000000444         0.0000000000
    3    6   3    8         0.7167448706         0.0000000000
@@ -3955,76 +3955,76 @@ tolerances: {tolvrs: 1.00E-02, }
   dir pert dir pert     real part    imaginary part
   
    1    8   1    1         2.4755515243         0.0000000000
-   2    8   1    1         0.7403845118         0.0000000000
+   2    8   1    1         0.7403845117         0.0000000000
    3    8   1    1         0.0000000153         0.0000000000
   
-   1    8   2    1         0.7403844831         0.0000000000
-   2    8   2    1         2.4755515498         0.0000000000
+   1    8   2    1         0.7403844829         0.0000000000
+   2    8   2    1         2.4755515497         0.0000000000
    3    8   2    1         0.0000001346         0.0000000000
   
-   1    8   3    1        -0.0000000041         0.0000000000
+   1    8   3    1        -0.0000000039         0.0000000000
    2    8   3    1         0.0000007826         0.0000000000
-   3    8   3    1         2.3565502876         0.0000000000
+   3    8   3    1         2.3565502879         0.0000000000
   
-   1    8   1    2         2.4755511544         0.0000000000
-   2    8   1    2        -0.7403853495         0.0000000000
+   1    8   1    2         2.4755511545         0.0000000000
+   2    8   1    2        -0.7403853496         0.0000000000
    3    8   1    2        -0.0000000799         0.0000000000
   
-   1    8   2    2        -0.7403853887         0.0000000000
+   1    8   2    2        -0.7403853888         0.0000000000
    2    8   2    2         2.4755511368         0.0000000000
    3    8   2    2        -0.0000001107         0.0000000000
   
-   1    8   3    2        -0.0000004252         0.0000000000
+   1    8   3    2        -0.0000004254         0.0000000000
    2    8   3    2        -0.0000009218         0.0000000000
-   3    8   3    2         2.3565460531         0.0000000000
+   3    8   3    2         2.3565460528         0.0000000000
   
-   1    8   1    3         0.4009132483         0.0000000000
+   1    8   1    3         0.4009132484         0.0000000000
    2    8   1    3         0.4885868445         0.0000000000
-   3    8   1    3        -0.0000039148         0.0000000000
+   3    8   1    3        -0.0000039146         0.0000000000
   
    1    8   2    3         0.4885868393         0.0000000000
-   2    8   2    3         0.4009132701         0.0000000000
+   2    8   2    3         0.4009132702         0.0000000000
    3    8   2    3        -0.0000000604         0.0000000000
   
    1    8   3    3         0.0000012243         0.0000000000
    2    8   3    3        -0.0000008765         0.0000000000
-   3    8   3    3         0.7209552091         0.0000000000
+   3    8   3    3         0.7209552092         0.0000000000
   
-   1    8   1    4         0.4009115215         0.0000000000
+   1    8   1    4         0.4009115214         0.0000000000
    2    8   1    4        -0.4885863407         0.0000000000
-   3    8   1    4        -0.0000057812         0.0000000000
+   3    8   1    4        -0.0000057808         0.0000000000
   
-   1    8   2    4        -0.4885863401         0.0000000000
-   2    8   2    4         0.4009115281         0.0000000000
-   3    8   2    4         0.0000063362         0.0000000000
+   1    8   2    4        -0.4885863399         0.0000000000
+   2    8   2    4         0.4009115280         0.0000000000
+   3    8   2    4         0.0000063358         0.0000000000
   
-   1    8   3    4         0.0000000772         0.0000000000
-   2    8   3    4        -0.0000003451         0.0000000000
-   3    8   3    4         0.7209534604         0.0000000000
+   1    8   3    4         0.0000000771         0.0000000000
+   2    8   3    4        -0.0000003450         0.0000000000
+   3    8   3    4         0.7209534603         0.0000000000
   
-   1    8   1    5         0.4009132626         0.0000000000
-   2    8   1    5         0.4885868313         0.0000000000
-   3    8   1    5        -0.0000038907         0.0000000000
+   1    8   1    5         0.4009132627         0.0000000000
+   2    8   1    5         0.4885868314         0.0000000000
+   3    8   1    5        -0.0000038905         0.0000000000
   
    1    8   2    5         0.4885868731         0.0000000000
-   2    8   2    5         0.4009132104         0.0000000000
+   2    8   2    5         0.4009132105         0.0000000000
    3    8   2    5        -0.0000000110         0.0000000000
   
    1    8   3    5         0.0000012899         0.0000000000
    2    8   3    5        -0.0000008365         0.0000000000
-   3    8   3    5         0.7209551604         0.0000000000
+   3    8   3    5         0.7209551605         0.0000000000
   
-   1    8   1    6         0.4009115624         0.0000000000
-   2    8   1    6        -0.4885863265         0.0000000000
-   3    8   1    6        -0.0000057830         0.0000000000
+   1    8   1    6         0.4009115623         0.0000000000
+   2    8   1    6        -0.4885863264         0.0000000000
+   3    8   1    6        -0.0000057826         0.0000000000
   
-   1    8   2    6        -0.4885863034         0.0000000000
-   2    8   2    6         0.4009115872         0.0000000000
-   3    8   2    6         0.0000063547         0.0000000000
+   1    8   2    6        -0.4885863033         0.0000000000
+   2    8   2    6         0.4009115871         0.0000000000
+   3    8   2    6         0.0000063543         0.0000000000
   
-   1    8   3    6         0.0000000629         0.0000000000
+   1    8   3    6         0.0000000628         0.0000000000
    2    8   3    6        -0.0000003272         0.0000000000
-   3    8   3    6         0.7209535815         0.0000000000
+   3    8   3    6         0.7209535814         0.0000000000
   
   
   
@@ -4147,7 +4147,7 @@ tolerances: {tolvrs: 1.00E-02, }
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         512
            getddk           2
            getwfk           1
               ixc       -1012
@@ -4333,10 +4333,10 @@ P          mk1mem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=         51.6  wall=         52.4
+- Proc.   0 individual time (sec): cpu=         30.0  wall=         30.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        415.5  wall=        418.8
++Overall time at end (sec) : cpu=        239.5  wall=        240.3
