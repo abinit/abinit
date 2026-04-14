@@ -386,27 +386,27 @@ if(OpenMP_FOUND)
   endif()
 
   if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
+    include(manage_openmp_target)
+
+    #FIXME Experimental, only tested with NVHPC through Intel IFX, AMD Flang and GFortran might be handled.
+    # Examples:
+    #get_offload_flags(ARCH   gfx1030 RESULT OFFLOAD_FLAGS)  for AMD GPUs    (Flang > v16.0)
+    #get_offload_flags(TARGET 80      RESULT OFFLOAD_FLAGS)  for NVIDIA GPUs (NVHPC)
+    #get_offload_flags(ARCH   sm_80   RESULT OFFLOAD_FLAGS)  for NVIDIA GPUs (NVHPC > v23.x and Flang > v16.0)
+    #get_offload_flags(TARGET spir64  RESULT OFFLOAD_FLAGS)  for Intel GPUs  (IntelLLVM a.k.a IFX)
+    if (ABINIT_ENABLE_GPU_CUDA)
+      get_offload_flags(TARGET ${CMAKE_CUDA_ARCHITECTURES}    RESULT OPENMP_OFFLOAD_FLAGS)
+    elseif(ABINIT_ENABLE_GPU_HIP)
+      get_offload_flags(ARCH   ${CMAKE_HIP_ARCHITECTURES}     RESULT OPENMP_OFFLOAD_FLAGS)
+    endif()
+
     # check for OpenMP GPU offload support (OpenMP v5 onwards)
     try_compile(HAVE_OPENMP_OFFLOAD_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_openmp_offload.F90
-      LINK_OPTIONS ${OpenMP_Fortran_FLAGS}
+      LINK_OPTIONS ${OpenMP_Fortran_FLAGS} ${OPENMP_OFFLOAD_FLAGS}
       LINK_LIBRARIES OpenMP::OpenMP_Fortran)
 
     if(HAVE_OPENMP_OFFLOAD_BOOL)
       set(HAVE_OPENMP_OFFLOAD 1)
-
-      include(manage_openmp_target)
-      #FIXME Experimental, only tested with NVHPC through Intel IFX, AMD Flang and GFortran might be handled.
-      # Examples:
-      #get_offload_flags(ARCH   gfx1030 RESULT OFFLOAD_FLAGS)  for AMD GPUs    (Flang > v16.0)
-      #get_offload_flags(TARGET 80      RESULT OFFLOAD_FLAGS)  for NVIDIA GPUs (NVHPC)
-      #get_offload_flags(ARCH   sm_80   RESULT OFFLOAD_FLAGS)  for NVIDIA GPUs (NVHPC > v23.x and Flang > v16.0)
-      #get_offload_flags(TARGET spir64  RESULT OFFLOAD_FLAGS)  for Intel GPUs  (IntelLLVM a.k.a IFX)
-
-      if (ABINIT_ENABLE_GPU_CUDA)
-        get_offload_flags(TARGET ${CMAKE_CUDA_ARCHITECTURES}    RESULT OPENMP_OFFLOAD_FLAGS)
-      elseif(ABINIT_ENABLE_GPU_HIP)
-        get_offload_flags(ARCH   ${CMAKE_HIP_ARCHITECTURES}     RESULT OPENMP_OFFLOAD_FLAGS)
-      endif()
 
       # check whether compiler implements omp_get_mapped_ptr
       try_compile(HAVE_OPENMP_GET_MAPPED_PTR_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_openmp_get_mapped_ptr.F90
@@ -605,18 +605,33 @@ else()
   message(STATUS "libpsml NOT FOUND")
 endif()
 
+
 #
 # HDF5
 #
 # HDF5 is not really used for now apparently
+# But since NetCDF 1.14, it is no more exposed by netcdf
 if (ABINIT_ENABLE_PARALLEL_HDF5)
   set(HDF5_PREFER_PARALLEL TRUE)
 endif()
 
-find_package(HDF5)
+find_package(HDF5 COMPONENTS C HL)
 if(HDF5_FOUND)
   message(STATUS "HDF5 found via find_package")
-  add_library(abinit::hdf5 ALIAS HDF5::HDF5)
+  add_library(abinit_hdf5 INTERFACE)
+  if(TARGET HDF5::HL)
+    target_link_libraries(abinit_hdf5 INTERFACE HDF5::HL)
+  elseif(TARGET hdf5::hdf5_hl)
+    target_link_libraries(abinit_hdf5 INTERFACE hdf5::hdf5_hl)
+  endif()
+  target_link_libraries(abinit_hdf5 INTERFACE HDF5::HDF5)
+  #Add again hdf5_hl because some compilers want it before, and some after
+  if(TARGET HDF5::HL)
+    target_link_libraries(abinit_hdf5 INTERFACE HDF5::HL)
+  elseif(TARGET hdf5::hdf5_hl)
+    target_link_libraries(abinit_hdf5 INTERFACE hdf5::hdf5_hl)
+  endif()
+  add_library(abinit::hdf5 ALIAS abinit_hdf5)
   set(ABINIT_HDF5_FOUND TRUE)
 else()
   pkg_check_modules(ABINIT_HDF5 QUIET IMPORTED_TARGET hdf5)
@@ -632,7 +647,6 @@ endif()
 
 if(ABINIT_HDF5_FOUND)
   set(HAVE_HDF5 1)
-
   if(HDF5_IS_PARALLEL)
     set(HAVE_HDF5_MPI 1)
   endif()
@@ -947,6 +961,17 @@ if (Libxc_FOUND)
   message(STATUS "  > Libxc libraries    : ${Libxc_LIBRARIES}")
 else()
   message(STATUS "Libxc not found!")
+endif()
+
+if (ABINIT_HDF5_FOUND)
+  message(STATUS "HDF5 found:")
+  message(STATUS "  > HDF5 version       : ${HDF5_VERSION}")
+  message(STATUS "  > HDF5 libraries     : ${HDF5_LIBRARIES}")
+  if (HDF5_HL_LIBRARIES} OR HDF5_C_HL_LIBRARIES)
+    message(STATUS "                         ${HDF5_HL_LIBRARIES};${HDF5_C_HL_LIBRARIES}")
+  endif()
+else()
+  message(STATUS "HDF5 not found!")
 endif()
 
 if (ABINIT_NETCDF_FOUND)

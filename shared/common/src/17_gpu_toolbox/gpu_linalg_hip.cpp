@@ -745,6 +745,58 @@ extern "C" void gpu_xscal_(int* cplx, int *N,
 
 /*=========================================================================*/
 // NAME
+//  gpu_xdot
+//
+// FUNCTION
+//  Compute blas-3 DOT on GPU
+//  trace(X^H*Y)
+//
+// INPUTS
+//  cplx  = 1 if real 2 if complex
+//  N     = number of elements n*s
+//  X     = array (n,s)
+//  incrx = stride for X
+//  Y     = array (n,s)
+//  incry = stride for Y
+//  alpha = output pointer
+//
+// OUTPUT
+//  alpha
+/*=========================================================================*/
+
+extern "C" void gpu_xdot_(int* cplx, int *N,
+                           hipDoubleComplex *alpha,
+                           void **X_ptr, int *incrx, void **Y_ptr, int *incry)
+{
+  if (*cplx == 1) {
+    double result;
+
+    HIP_API_CHECK(
+      hipblasDdot(hipblas_handle, *N,
+                 (const double *)(*X_ptr), *incrx,
+                 (const double *)(*Y_ptr), *incry,
+                 &result)
+    );
+
+    alpha->x = result;
+    alpha->y = 0.0;
+
+  } else {
+    hipDoubleComplex result;
+
+    HIP_API_CHECK(
+      hipblasZdotc(hipblas_handle, *N,
+                  (const hipblasDoubleComplex *)(*X_ptr), *incrx,
+                  (const hipblasDoubleComplex *)(*Y_ptr), *incry,
+                  (hipblasDoubleComplex*) (&result))
+    );
+
+    *alpha = result;
+  }
+} // gpu_xdot_
+
+/*=========================================================================*/
+// NAME
 //  gpu_xpotrf
 //
 // FUNCTION

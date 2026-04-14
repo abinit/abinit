@@ -266,9 +266,14 @@ AC_DEFUN([SD_OPENMP_DETECT], [
       if test "${sd_openmp_enable_cxx}" = "yes"; then
         CXXFLAGS="${CXXFLAGS} ${sd_openmp_cxxflags}"
       fi
-      if test "${sd_openmp_enable_fc}" = "yes"; then
-        FCFLAGS="${FCFLAGS} ${sd_openmp_fcflags}"
-      fi
+      # FIXME For now, OpenMP Fortran flags are specified
+      # early in FCFLAGS in configure.ac in order to be processed by
+      # AC_FC_LIBRARY_LDFLAGS and find related libraries.
+      # Commenting this here to avoid double-presence of those flags
+      # in final FCFLAGS
+      #if test "${sd_openmp_enable_fc}" = "yes"; then
+      #  FCFLAGS="${FCFLAGS} ${sd_openmp_fcflags}"
+      #fi
       LIBS="${sd_openmp_libs} ${LIBS}"
       LDFLAGS="${LDFLAGS} ${sd_openmp_ldflags}"
     else

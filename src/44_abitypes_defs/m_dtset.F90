@@ -133,6 +133,7 @@ type, public :: dataset_type
  integer :: dmatudiag
  integer :: dmft_dc
  integer :: dmft_entropy
+ integer :: dmft_hybri_limit
  integer :: dmft_iter
  integer :: dmft_kspectralfunc
  integer :: dmft_magnfield
@@ -174,6 +175,7 @@ type, public :: dataset_type
  integer :: dmft_triqs_read_ctqmcdata
  integer :: dmft_triqs_time_invariance
  integer :: dmft_triqs_use_norm_as_weight
+ integer :: dmft_full_chipsi
  integer :: dmft_wanorthnorm
  integer :: dmft_x2my2d
  integer :: dmft_yukawa_param
@@ -503,10 +505,12 @@ type, public :: dataset_type
  integer :: nscforder
  integer :: nshiftk
  integer :: nshiftk_orig  ! original number of shifts given in input (changed in inkpts, the actual value is nshiftk)
+ integer :: nslice
  integer :: nspden
  integer :: nspinor
  integer :: nsppol
  integer :: nstep
+ integer :: nstep_mixed
  integer :: nsym
  integer :: ntime
  integer :: ntimimage
@@ -531,6 +535,7 @@ type, public :: dataset_type
  integer :: paral_atom
  integer :: paral_kgb
  integer :: paral_rf
+ integer :: paral_slice
  integer :: paw_add_Core
  integer :: pawcpxocc
  integer :: pawcross
@@ -1592,6 +1597,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_dc            = dtin%dmft_dc
  dtout%dmft_entropy       = dtin%dmft_entropy
  dtout%dmft_fermi_step    = dtin%dmft_fermi_step
+ dtout%dmft_hybri_limit   = dtin%dmft_hybri_limit
  dtout%dmft_iter          = dtin%dmft_iter
  dtout%dmft_kspectralfunc = dtin%dmft_kspectralfunc
  dtout%dmft_magnfield     = dtin%dmft_magnfield
@@ -1647,6 +1653,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_triqs_time_invariance = dtin%dmft_triqs_time_invariance
  dtout%dmft_triqs_tol_block = dtin%dmft_triqs_tol_block
  dtout%dmft_triqs_use_norm_as_weight = dtin%dmft_triqs_use_norm_as_weight
+ dtout%dmft_full_chipsi   = dtin%dmft_full_chipsi
  dtout%dmft_wanorthnorm   = dtin%dmft_wanorthnorm
  dtout%dmft_wanrad        = dtin%dmft_wanrad
  dtout%dmft_x2my2d        = dtin%dmft_x2my2d
@@ -2048,10 +2055,12 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nscforder          = dtin%nscforder
  dtout%nshiftk            = dtin%nshiftk
  dtout%nshiftk_orig       = dtin%nshiftk_orig
+ dtout%nslice             = dtin%nslice
  dtout%nspden             = dtin%nspden
  dtout%nspinor            = dtin%nspinor
  dtout%nsppol             = dtin%nsppol
  dtout%nstep              = dtin%nstep
+ dtout%nstep_mixed        = dtin%nstep_mixed
  dtout%nsym               = dtin%nsym
  dtout%ntime              = dtin%ntime
  dtout%ntimimage          = dtin%ntimimage
@@ -2074,6 +2083,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%paral_atom         = dtin%paral_atom
  dtout%paral_kgb          = dtin%paral_kgb
  dtout%paral_rf           = dtin%paral_rf
+ dtout%paral_slice        = dtin%paral_slice
  dtout%prt_lorbmag        = dtin%prt_lorbmag
  dtout%pawcpxocc          = dtin%pawcpxocc
  dtout%paw_add_core       = dtin%paw_add_core
@@ -3699,9 +3709,22 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' diemix diemixmag diismemory'
  list_vars=trim(list_vars)//' dilatmx dipdip dipquad dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
-
- list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_entropy dmft_fermi_step dmft_iter'
- list_vars=trim(list_vars)//' dmft_kspectralfunc dmft_magnfield dmft_magnfield_b dmft_mxsf'
+ list_vars=trim(list_vars)//' dmftbandi dmftbandf dmftctqmc_basis'
+ list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
+ list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_localprop dmftctqmc_meas dmftctqmc_mrka'
+ list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmft_triqs_compute_integral dmft_triqs_det_init_size'
+ list_vars=trim(list_vars)//' dmft_triqs_det_n_operations_before_check dmft_triqs_det_precision_error'
+ list_vars=trim(list_vars)//' dmft_triqs_det_precision_warning dmft_triqs_det_singular_threshold'
+ list_vars=trim(list_vars)//' dmft_triqs_entropy dmft_triqs_epsilon dmft_triqs_gaussorder dmft_triqs_imag_threshold'
+ list_vars=trim(list_vars)//' dmft_triqs_leg_measure dmft_triqs_loc_n_min dmft_triqs_loc_n_max'
+ list_vars=trim(list_vars)//' dmft_triqs_measure_density_matrix dmft_triqs_move_double'
+ list_vars=trim(list_vars)//' dmft_triqs_move_shift'
+ list_vars=trim(list_vars)//' dmft_triqs_nleg dmft_triqs_nsubdivisions dmft_triqs_off_diag dmft_triqs_pauli_prob dmft_triqs_read_ctqmcdata'
+ list_vars=trim(list_vars)//' dmft_triqs_seed_a dmft_triqs_seed_b dmft_triqs_therm_restart'
+ list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight dmft_triqs_wmax dmftcheck'
+ list_vars=trim(list_vars)//' dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dmft_charge_prec dmft_dc'
+ list_vars=trim(list_vars)//' dmft_entropy dmft_epsilon_yukawa dmft_fermi_step'
+ list_vars=trim(list_vars)//' dmft_hybri_limit dmft_iter dmft_kspectralfunc dmft_lambda_yukawa dmft_magnfield dmft_magnfield_b dmft_mxsf '
  list_vars=trim(list_vars)//' dmft_nlambda dmft_nominal dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_orbital dmft_orbital_filepath dmft_prt_maxent dmft_prtself dmft_prtwan dmft_read_occnd'
  list_vars=trim(list_vars)//' dmft_rslf dmft_shiftself dmft_solv dmft_t2g dmft_tolfreq dmft_tollc'
@@ -3714,7 +3737,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_triqs_move_shift dmft_triqs_n_cycles dmft_triqs_n_iw dmft_triqs_n_l dmft_triqs_n_tau dmft_triqs_n_warmup_cycles_init'
  list_vars=trim(list_vars)//' dmft_triqs_n_warmup_cycles_restart dmft_triqs_nsubdivisions dmft_triqs_off_diag dmft_triqs_pauli_prob'
  list_vars=trim(list_vars)//' dmft_triqs_prt_entropy dmft_triqs_random_seed_a dmft_triqs_random_seed_b dmft_triqs_read_ctqmcdata dmft_triqs_shift_mu'
- list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight'
+ list_vars=trim(list_vars)//' dmft_triqs_time_invariance dmft_triqs_tol_block dmft_triqs_use_norm_as_weight dmft_full_chipsi'
  list_vars=trim(list_vars)//' dmft_wanorthnorm dmft_wanrad dmft_x2my2d dmft_yukawa_epsilon dmft_yukawa_lambda dmft_yukawa_param'
  list_vars=trim(list_vars)//' dmftbandf dmftbandi dmftcheck dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
@@ -3847,7 +3870,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' npfft nphf nph1l npimage np_spkpt npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
  list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqfd nscforder nshiftk nshiftq nqshft'
- list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'
+ list_vars=trim(list_vars)//' nslice nspden nspinor nsppol nstep nstep_mixed nsym'
  list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat'
  list_vars=trim(list_vars)//' nucdipmom nucefg nucfc nwfshist nzchempot'
 !O
@@ -3857,7 +3880,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' optnlxccc optstress oracle_factor oracle_min_occ orbmag ortalg'
  list_vars=trim(list_vars)//' opt_effpot opt_ncoeff opt_coeff output_file outdata_prefix'
 !P
- list_vars=trim(list_vars)//' papiopt paral_atom paral_kgb paral_rf paw_add_core pawcpxocc pawcross'
+ list_vars=trim(list_vars)//' papiopt paral_atom paral_kgb paral_rf paral_slice paw_add_core pawcpxocc pawcross'
  list_vars=trim(list_vars)//' pawecutdg pawfatbnd pawlcutd pawlmix'
  list_vars=trim(list_vars)//' pawmixdg pawnhatxc pawnphi pawntheta pawnzlm pawoptmix pawoptosc pawovlp'
  list_vars=trim(list_vars)//' pawprtdos pawprtvol pawprtwf pawprt_b pawprt_k pawspnorb pawstgylm'

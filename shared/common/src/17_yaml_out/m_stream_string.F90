@@ -76,6 +76,10 @@ subroutine stream_flush_unit(stream, unit, newline, firstchar)
 
   character(len=stream%length) :: s
   character(len=2 * stream%length) :: new_s
+#ifdef FC_CRAY
+  integer :: i,l
+  integer, parameter :: c = 32767
+#endif
 
   if (unit == dev_null) then
     call stream%free()
@@ -92,7 +96,19 @@ subroutine stream_flush_unit(stream, unit, newline, firstchar)
 #if defined FC_NVHPC || defined FC_LLVM
     write(unit, "(a)") s
 #else
+#ifdef FC_CRAY
+    if(len_trim(s) <= c) then
+      write(unit, "(a)") trim(s)
+    else
+      l=len_trim(s)/c
+      do i=1,l
+        write(unit, "(a)") s((i-1)*c+1:i*c)
+      end do
+      write(unit, "(a)") s(l*c+1:len_trim(s))
+    end if
+#else
     write(unit, "(a)") trim(s)
+#endif
 #endif
   end if
 

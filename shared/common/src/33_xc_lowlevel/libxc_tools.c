@@ -399,11 +399,11 @@ void xc_func_set_density_threshold(XC(func_type) *xc_func, double *dens_threshol
 #endif
 
 void xc_func_set_grad_sig_threshold(XC(func_type) *xc_func, double *sigma_threshold)
-#if ( XC_MAJOR_VERSION > 4 )
-/* ==== libXC v5.0 and later ==== */
+#if ( XC_MAJOR_VERSION > 5 || ( XC_MAJOR_VERSION == 5 && XC_MINOR_VERSION > 0 ) )
+/* ==== libXC v5.1 and later ==== */
    {xc_func_set_sigma_threshold(xc_func, *sigma_threshold);}
 #else
-   {fprintf(stderr, "WARNING: setting sigma threshold not available for libXC<4.0!\n");}
+   {fprintf(stderr, "WARNING: setting sigma threshold not available for libXC<5.1!\n");}
 #endif
 
 /* ===============================================================

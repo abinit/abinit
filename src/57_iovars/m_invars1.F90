@@ -1045,6 +1045,8 @@ subroutine indefo1(dtset)
  dtset%npspalch=0
  dtset%npspinor=1
  dtset%np_slk=1000000
+ dtset%nslice=2
+ dtset%nstep_mixed=0
  dtset%nqptdm=0
  dtset%nspden=1
  dtset%nspinor=1
@@ -1059,6 +1061,7 @@ subroutine indefo1(dtset)
  dtset%optdriver=0
 !P
  dtset%paral_rf=0
+ dtset%paral_slice=0
 !dtset%paral_kgb ! Is even initialized earlier.
  dtset%pawspnorb=0  ! will be changed to 1 as soon as usepaw==1 and nspinor==2
  dtset%pimass(:)=-one
@@ -1198,7 +1201,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !arrays
  integer :: cond_values(4),vacuum(3), units(2)
  integer,allocatable :: iatfix(:,:),iatnd(:),intarr(:),istwfk(:),nband(:),typat(:)
- real(dp) :: acell(3),rprim(3,3),field_loc(3),field_cart(3),hloc(3,1),hcart(3,1) 
+ real(dp) :: acell(3),rprim(3,3),field_loc(3),field_cart(3),hloc(3,1),hcart(3,1)
  real(dp),allocatable :: amu(:),atndlist(:,:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:)
  real(dp),allocatable :: nucdipmom(:,:),ratsph(:),reaalloc(:),spinat(:,:),spinat_cart(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
@@ -1430,7 +1433,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
  end if
  dtset%nsppol=nsppol
- 
+
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spinaxis',tread,'DPR')
  if (tread==1) dtset%spinaxis(1:3) = dprarr(1:3)
 
@@ -2365,6 +2368,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_dc=1
    dtsets(idtset)%dmft_entropy=0
    dtsets(idtset)%dmft_fermi_step=0.02_dp
+   dtsets(idtset)%dmft_hybri_limit=0
    dtsets(idtset)%dmft_iter=10
    dtsets(idtset)%dmft_kspectralfunc=0
    dtsets(idtset)%dmft_magnfield=0
@@ -2423,6 +2427,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmft_triqs_time_invariance=1
    dtsets(idtset)%dmft_triqs_tol_block=tol12
    dtsets(idtset)%dmft_triqs_use_norm_as_weight=1
+   dtsets(idtset)%dmft_full_chipsi=0
    dtsets(idtset)%dmft_wanorthnorm=3
    dtsets(idtset)%dmft_wanrad=-1.0_dp
    dtsets(idtset)%dmft_x2my2d=0

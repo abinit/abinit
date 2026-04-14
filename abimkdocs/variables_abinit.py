@@ -3069,6 +3069,21 @@ See [[dmft_charge_prec]] for further tuning of the root-finding algorithm.
 ),
 
 Variable(
+    abivarname="dmft_hybri_limit",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: Hybridization asymptotic limit",
+    requires="[[usedmft]] == 1 and [[dmft_solv]] == 10",
+    added_in_version="before_v10.7",
+    text=r"""
+Use of the asymptotic limit of the hybridization funtion to enforce that F(iw_n) -> -C_ij/iw_n
+""",
+),
+
+Variable(
     abivarname="dmft_iter",
     varset="dmft",
     vartype="integer",
@@ -3456,6 +3471,7 @@ Choice of solver for the Impurity model.
   * 7 --> TRIQS/CTHYB with the full rotationally invariant Slater Hamiltonian.
   * 8 --> Same as 5, but off-diagonal elements of the hybridization function are taken into account (useful for low symmetry systems or with spin orbit coupling).
   * 9 --> Python invocation. Give a symbolic link to your python interpreter as an input like 'input-tag'_TRIQS_python_lib and the python script as an input like 'input-tag'_TRIQS_script.py. The inputs for the script will be written in dft_for_triqs.nc and the output as triqs_for_dft.nc.
+  * 10 --> Internal Abinit CT-Hyb solver in the density-density approximation with the real and imaginary part of the full hybridization function taken into account.
 
 The CT Hyb algorithm is described in [[cite:Werner2006]]. For a
 discussion of density-density approximation with respect with the
@@ -17641,9 +17657,8 @@ mode can be controlled with [[pawprtdos]] keyword (in
 particular, [[pawprtdos]] = 2 can be used to compute quickly a very good
 approximation of the DOS).
 
-If [[prtdos]] = 4, delivers the sphere-projected DOS (like [[prtdos]] = 3), on the
-basis of a smearing approach (like [[prtdos]] = 1). See (like [[prtdos]] = 1
-for the additional input variables to be specified.
+If [[prtdos]] = 4, delivers the total DOS like [[prtdos]]=1, but also the angular-momentum projections
+in the FATBANDS.nc file for post-processing.
 
 If [[prtdos]] = 5, delivers the spin-spin DOS in the [[nspinor]] == 2 case, using the
 tetrahedron method (as [[prtdos]] = 2).
@@ -23388,13 +23403,18 @@ The different possibilities are:
 > See **notes** in the "[[wfoptalg]] = 111" section.
 
 * [[wfoptalg]] = 111: A **modern and highly efficient version** of [[wfoptalg]] = 1, a spectrum filtering algorithm based on **Chebyshev filtering**, designed for use with a large number of processors. The degree of the polynomial filter can be adjusted with [[mdeg_filter]] (formerly [[nline]]). For more information, see the [performance guide](/theory/howto_chebfi.pdf) and [[cite:Levitt2015]].
+
+* [[wfoptalg]] = 112: A **highly** experimental version of Spectrum Slicing algorithm. A spectral filtering
+algorithm by spectral slices based on lowpass and bandpass Chebyshev polynomials. The polynomial degree is tuned
+using [[mdeg_filter]] (formerly [[nline]]). The number of slices is tuned with [[nslice]] variable.
 > **Notes**:
 >
 > * For more performance, try enabling [[use_gemm_nonlop]] (default on [[GPU]]).
 >
 > * This algorithm struggles to converge the last bands, so it is advisable to use slightly more bands than required. When using [[tolwfr_diago]], it is mandatory to set [[nbdbuf]].
 >
-> * By design, this algorithm cannot use preconditioning and, therefore, cannot handle [[ecutsm]]. Consequently, _Pulay stresses_ are not corrected. If stresses are important for the calculation (e.g., when pressure is required), it is necessary to slightly increase the plane-wave cutoff ([[ecut]]). """,
+> * By design, this algorithm cannot use preconditioning and, therefore, cannot handle [[ecutsm]]. Consequently, _Pulay stresses_ are not corrected. If stresses are important for the calculation (e.g., when pressure is required), it is necessary to slightly increase the plane-wave cutoff ([[ecut]]).
+""",
 ),
 
 Variable(
@@ -27205,11 +27225,59 @@ Variable(
     added_in_version="10.7.0",
     text=r"""
 Cartesian coordinates of the global spin-quantization axis.
-By default, the spin-quantization axis is aligned with the Cartesian z axis. 
-The variable [[spinaxis]] defined the orientation of spinor space spanned by the Pauli matrices \{\sigma_1,\sigma_2,\sigma_3\} 
+By default, the spin-quantization axis is aligned with the Cartesian z axis.
+The variable [[spinaxis]] defined the orientation of spinor space spanned by the Pauli matrices \{\sigma_1,\sigma_2,\sigma_3\}
 with respect to the Cartesian reference frame; in particular, it sets the \sigma_3 axis along the direction specified by [[spinaxis]].
-When [[spinaxis]] differs from its default value, it is recommended to specify magnetic vectors in Cartesian coordinates 
+When [[spinaxis]] differs from its default value, it is recommended to specify magnetic vectors in Cartesian coordinates
 using [[spinat_cart]] and [[hspinfield_cart]] rather than [[spinat]] and [[hspinfield]].
+""",
+),
+
+Variable(
+    abivarname="nslice",
+    varset="dev",
+    vartype="integer",
+    topics=['SCFAlgorithms_expert'],
+    dimensions="scalar",
+    defaultval=2,
+    mnemonics="Number of spectral SLICEs",
+    requires="[[wfoptalg]] = 112",
+    added_in_version="10.7.2",
+    text=r"""
+Number of spectral slices to be used in Spectrum Slicing diagonalization algorithm.
+Highly experimental, current implementation supports 2 slices.
+""",
+),
+
+Variable(
+    abivarname="nstep_mixed",
+    varset="dev",
+    vartype="integer",
+    topics=['SCFAlgorithms_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Number of STEPs for MIXED chebyshev filtering and spectrum slicing",
+    requires="[[wfoptalg]] = 112",
+    added_in_version="10.7.2",
+    text=r"""
+Number of initial Chebyshev filtering SCF iterations before launching Spectrum Slicing.
+This option is useful if Spectrum Slicing does not converge or converge very slowly during first iterations.
+Highly experimental.
+""",
+),
+
+Variable(
+    abivarname="paral_slice",
+    varset="dev",
+    vartype="integer",
+    topics=['SCFAlgorithms_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PARALell option for spectral SLICE execution",
+    requires="[[wfoptalg]] = 112",
+    added_in_version="10.7.2",
+    text=r"""
+Option for slice execution sequential [[paral_slice]] = 0 or parallel [[paral_slice]] = 1. Highly experimental.
 """,
 ),
 ]

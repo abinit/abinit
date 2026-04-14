@@ -1740,6 +1740,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ionmov',tread,'INT')
  if(tread==1) dtset%ionmov=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'paral_slice',tread,'INT')
+ if(tread==1) dtset%paral_slice=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'intxc',tread,'INT')
  if(tread==1) dtset%intxc=intarr(1)
 
@@ -2552,6 +2555,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_fermi_step',tread,'ENE')
    if(tread==1) dtset%dmft_fermi_step=dprarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_hybri_limit',tread,'INT')
+   if(tread==1) dtset%dmft_hybri_limit=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_kspectralfunc',tread,'INT')
@@ -2591,10 +2596,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    do iatom=1,dtset%natom
      if(dtset%lpawu(dtset%typat(iatom))>0) natomcor=natomcor+1
    enddo
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_full_chipsi',tread,'INT')
+   if(tread==1) dtset%dmft_full_chipsi=intarr(1)
+
    if(natomcor>1.and.dtset%dmft_solv/=6.and.dtset%dmft_solv/=7) dtset%dmft_wanorthnorm=2
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_wanorthnorm',tread,'INT')
    if(tread==1) dtset%dmft_wanorthnorm=intarr(1)
-
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_wanrad',tread,'LEN')
    if(tread==1) dtset%dmft_wanrad=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_x2my2d',tread,'INT')
@@ -2643,7 +2650,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      if(tread==1) dtset%dmftqmc_seed=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_therm',tread,'INT')
      if(tread==1) dtset%dmftqmc_therm=intarr(1)
-     if(dtset%dmft_solv>=5.and.dtset%dmft_solv<=9) then
+     if(dtset%dmft_solv>=5.and.dtset%dmft_solv<=10) then
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_check',tread,'INT')
        if(tread==1) dtset%dmftctqmc_check  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_correl',tread,'INT')
@@ -2935,6 +2942,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if (tread_alt==1.and.tread/=1) dtset%nline = dtset%mdeg_filter
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nslice',tread,'INT')
+ if(tread==1) dtset%nslice=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nblock_lobpcg',tread,'INT')
  if(tread==1) dtset%nblock_lobpcg=intarr(1)
 
@@ -2946,6 +2956,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nstep',tread,'INT')
  if(tread==1) dtset%nstep=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nstep_mixed',tread,'INT')
+ if(tread==1) dtset%nstep_mixed=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntime',tread,'INT')
  if(tread==1) dtset%ntime=intarr(1)

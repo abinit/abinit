@@ -66,7 +66,7 @@ _ WF disk file :      0.324 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file
--  max_nthreads =    0
+-  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
 -          iomode           1
@@ -99,6 +99,8 @@ _ WF disk file :      0.324 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
         dmft_rslf2          0
         dmft_solv1          5
         dmft_solv2          8
+ dmft_wanorthnorm1          3
+ dmft_wanorthnorm2          2
              ecut      1.60000000E+01 Hartree
 -          fftalg         512
            getwfk1          0
@@ -218,7 +220,7 @@ P           mkmem           2
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 10, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 10, omp_nthreads: 1 (-1 if OMP is not activated)
 -    --> not optimal distribution: autoparal keyword recommended in input file <--
 
 
@@ -978,7 +980,7 @@ total_energy_dc_eV  : -1.96362839613338E+03
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 10, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 10, omp_nthreads: 1 (-1 if OMP is not activated)
 -    --> not optimal distribution: autoparal keyword recommended in input file <--
 
 
@@ -1032,10 +1034,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     131.963     131.939
  DFT+DMFT Method is used
  ******************************************
 
-
- ******************************************
- DFT+DMFT Method is used
- ******************************************
+ DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT
 
  Magnetic DFT, with Magnetic FLL (Full Localized Limit) double counting
 
@@ -1377,7 +1376,7 @@ force_length_stats: {min: null, max: null, mean: null, }
   -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
    0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
    0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-   0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000 ...
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000 ...
    0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00097   0.00000  -0.00000  -0.01755  -0.00000  -0.00000   0.00426 ...
    0.00000   0.00000   0.00000  -0.00000   0.00097   0.00000  -0.00000   0.01755  -0.00000   0.00000  -0.00426  -0.00000 ...
    0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000 ...
@@ -1818,6 +1817,8 @@ total_energy_dc_eV  : -1.96121659998118E+03
         dmft_rslf2          0
         dmft_solv1          5
         dmft_solv2          8
+ dmft_wanorthnorm1          3
+ dmft_wanorthnorm2          2
              ecut      1.60000000E+01 Hartree
            etotal1    -7.2162012563E+01
            etotal2    -7.2073380689E+01

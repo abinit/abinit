@@ -29,7 +29,7 @@ working in the terminal), the installation/compilation steps are:
      See below for more information, as well as [this section](#how-to-write-the-hostnameac9-file).
   4. Issue `./configure` (or, even better, first create a *tmp* directory for the build
      then `cd tmp` and finally run `../configure` within the build directory).
-     For further details, consult [this link](https://docs.abinit.org/tutorial/abinit_build/).
+     For further details, consult [the ABINIT_build tutorial](/tutorial/abinit_build/).
   5. Issue `make` (or `make -jN` for compiling with N processors, e.g. `make -j4`
      to use four processors). This step might take dozen of minutes depending on the compilation options.
      More information are available [here](#how-to-compile-the-executables).

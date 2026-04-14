@@ -143,6 +143,9 @@ MODULE m_paw_dmft
   ! = 0: do not compute entropy
   ! >= 1: compute entropy with an integration over self-consistent calculations
 
+  integer :: dmft_hybri_limit
+  ! = 1 : Use asymptotic limit to build hybridization function
+
   integer :: dmft_iter
   ! Nb of iterations for DMFT self-consistent cycle.
 
@@ -250,6 +253,10 @@ MODULE m_paw_dmft
 
   integer :: dmft_triqs_therm_restart
   ! TRIQS CTQMC: Number of thermalization steps when we restart from a previous configuration.
+
+  integer :: dmft_full_chipsi
+  ! =0 do not use
+  ! =1 build Wannier functions
 
   integer :: dmft_wanorthnorm
   ! =2 orthonormalization of Wannier functions for each k-point
@@ -989,9 +996,13 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    else if (dmft_solv == 7) then
      write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
        &(with rotationally invariant interactions)'
+   else if (dmft_solv == 8) then
+      write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT'
    else if (dmft_solv == 9) then
      write(message,'(2a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
        & give your personal script'
+    else if (dmft_solv == 10) then
+      write(message,'(2a)') ch10,' DMFT uses the Complex Continuous Time Quantum Monte Carlo solver of ABINIT'
    end if ! dmft_solv
  else if(use_dmft == 10) then
    write(message, '(a,a)') ch10,' DMFT uses the python invocation and orbitals constructed using Wannier90 '
@@ -1032,7 +1043,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    write(message,'(a,1x,a)') ch10,"The imaginary part of the Green's function is neglected"
    call wrtout([std_out,ab_out],message,'COLL')
 #endif
- else if (dmft_solv /= 6 .and. dmft_solv /= 7) then
+ else if (dmft_solv /= 6 .and. dmft_solv /= 7 .and. dmft_solv /= 10) then
    write(message,'(a,1x,a)') ch10,"The imaginary part of the Green's function is neglected"
    call wrtout([std_out,ab_out],message,'COLL')
  end if
@@ -1055,12 +1066,14 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%natpawu              = dtset%natpawu
  paw_dmft%natom                = natom
  paw_dmft%temp                 = dtset%tsmear!*unit_e
+ paw_dmft%dmft_hybri_limit     = dtset%dmft_hybri_limit
  paw_dmft%dmft_iter            = dtset%dmft_iter
  paw_dmft%dmft_entropy         = dtset%dmft_entropy
  paw_dmft%dmft_kspectralfunc   = dtset%dmft_kspectralfunc
  paw_dmft%dmft_magnfield       = dtset%dmft_magnfield
  paw_dmft%dmft_magnfield_b     = dtset%dmft_magnfield_b
  paw_dmft%dmft_dc              = dmft_dc
+ paw_dmft%dmft_full_chipsi     = dtset%dmft_full_chipsi
  paw_dmft%dmft_wanorthnorm     = dtset%dmft_wanorthnorm
  paw_dmft%prtvol               = dtset%prtvol
  paw_dmft%prtdos               = dtset%prtdos
@@ -1360,7 +1373,12 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
 
  ! Now build radial grid by extending the PAW mesh up to max(rmax,size(proj))
  ! The mesh inside the PAW sphere is still exactly the same.
- use_full_chipsi = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
+ !use_full_chipsi = (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7)
+ if (paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then
+   use_full_chipsi = .true.
+ else
+   use_full_chipsi = (paw_dmft%dmft_full_chipsi /= 0)
+ endif
  paw_dmft%int_meshsz => pawrad(:)%int_meshsz
 
  if (use_full_chipsi) then
@@ -1399,7 +1417,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
      ABI_ERROR(message)
    end if
    if (mesh_size > pawrad(itypat)%int_meshsz .and. (.not. use_full_chipsi)) then
-     message = "You need to activate use_full_chipsi if you use an orbital that extends outside the PAW sphere"
+     message = "You need to activate dmft_full_chipsi if you use an orbital that extends outside the PAW sphere"
      ABI_ERROR(message)
    end if
    call pawrad_init(paw_dmft%radgrid(itypat),mesh_size,mesh_type,rstep,lstep)
