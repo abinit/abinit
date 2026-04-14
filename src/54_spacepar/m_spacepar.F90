@@ -1512,7 +1512,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  integer :: n1,n2,n3,nd2,nproc_fft,nspden_eff,nsym_used,numpt,nup
  integer :: r2,rep,spaceComm
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used in non-collinear magnetism
- real(dp) :: arg,det_R,tau1,tau2,tau3
+ real(dp) :: arg,tau1,tau2,tau3
  real(dp) :: magxsu1,magxsu2,magysu1,magysu2,magzsu1,magzsu2,mxi,mxr,myi,myr,mzi,mzr,phi,phr,rhosu1,rhosu2
  !character(len=500) :: message
 !arrays
@@ -1779,12 +1779,6 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
              ABI_ERROR("ind2/=indsy in symrhg !")
            end if
            if (isymg(iup)==0) isymg(iup)=jsym
-
-           !Determinant of symmetry operation to rotate a pseudovector magnetization.
-!           det_R = symrel_cart(1,1,jsym)*(symrel_cart(2,2,jsym)*symrel_cart(3,3,jsym)-symrel_cart(2,3,jsym)*symrel_cart(3,2,jsym)) &
-!         & -symrel_cart(1,2,jsym)*(symrel_cart(2,1,jsym)*symrel_cart(3,3,jsym)-symrel_cart(2,3,jsym)*symrel_cart(3,1,jsym)) &
-!         & +symrel_cart(1,3,jsym)*(symrel_cart(2,1,jsym)*symrel_cart(3,2,jsym)-symrel_cart(2,2,jsym)*symrel_cart(3,1,jsym))
-
            if(fftn2_distrib(modulo((indsy-1)/n1,n2) + 1) == me_fft ) then  ! this is indsy is to be treated by me_fft
              indsy=n1*(nd2*k3+ ffti2_local(k2+1) -1)+k1+1        ! this is indsy in the current proc
 
@@ -1807,24 +1801,15 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !            phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
 !            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
 
-!            MR: Needed for pseudovector m?
-!             mxr=det_R*(symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(1,2,jsym)*magngy(1,indsy)+symrel_cart(1,3,jsym)*magngz(1,indsy)) 
-!             mxi=det_R*(symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(1,2,jsym)*magngy(2,indsy)+symrel_cart(1,3,jsym)*magngz(2,indsy))
-!             myr=det_R*(symrel_cart(2,1,jsym)*magngx(1,indsy)+symrel_cart(2,2,jsym)*magngy(1,indsy)+symrel_cart(2,3,jsym)*magngz(1,indsy))
-!             myi=det_R*(symrel_cart(2,1,jsym)*magngx(2,indsy)+symrel_cart(2,2,jsym)*magngy(2,indsy)+symrel_cart(2,3,jsym)*magngz(2,indsy))
-!             mzr=det_R*(symrel_cart(3,1,jsym)*magngx(1,indsy)+symrel_cart(3,2,jsym)*magngy(1,indsy)+symrel_cart(3,3,jsym)*magngz(1,indsy))
-!             mzi=det_R*(symrel_cart(3,1,jsym)*magngx(2,indsy)+symrel_cart(3,2,jsym)*magngy(2,indsy)+symrel_cart(3,3,jsym)*magngz(2,indsy))
-
 !            The magnetization should transform as a vector in real space
 !            However, one acts with the INVERSE of the symmetry operation.
 !            => Inverse[symrel_cart] = Transpose[symrel_cart] because symrel_cart is unitary   ?!?!?
-             mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(1,2,jsym)*magngy(1,indsy)+symrel_cart(1,3,jsym)*magngz(1,indsy) 
+             mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(1,2,jsym)*magngy(1,indsy)+symrel_cart(1,3,jsym)*magngz(1,indsy)
              mxi=symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(1,2,jsym)*magngy(2,indsy)+symrel_cart(1,3,jsym)*magngz(2,indsy)
              myr=symrel_cart(2,1,jsym)*magngx(1,indsy)+symrel_cart(2,2,jsym)*magngy(1,indsy)+symrel_cart(2,3,jsym)*magngz(1,indsy)
              myi=symrel_cart(2,1,jsym)*magngx(2,indsy)+symrel_cart(2,2,jsym)*magngy(2,indsy)+symrel_cart(2,3,jsym)*magngz(2,indsy)
              mzr=symrel_cart(3,1,jsym)*magngx(1,indsy)+symrel_cart(3,2,jsym)*magngy(1,indsy)+symrel_cart(3,3,jsym)*magngz(1,indsy)
              mzi=symrel_cart(3,1,jsym)*magngx(2,indsy)+symrel_cart(3,2,jsym)*magngy(2,indsy)+symrel_cart(3,3,jsym)*magngz(2,indsy)
-
 
 !            mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(2,1,jsym)*magngy(1,indsy)+symrel_cart(3,1,jsym)*magngz(1,indsy)
 !            mxi=symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(2,1,jsym)*magngy(2,indsy)+symrel_cart(3,1,jsym)*magngz(2,indsy)
@@ -1873,12 +1858,6 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
              r2=ffti2_local(j2+1) - 1
              ind=n1*(nd2*j3+r2)+j1+1  ! this is ind in the current proc
              jsym=isymg(iup+numpt)
-
-             !Determinant of symmetry operation to rotate a pseudovector magnetization.
-!             det_R = symrel_cart(1,1,jsym)*(symrel_cart(2,2,jsym)*symrel_cart(3,3,jsym)-symrel_cart(2,3,jsym)*symrel_cart(3,2,jsym)) &
-!           & -symrel_cart(1,2,jsym)*(symrel_cart(2,1,jsym)*symrel_cart(3,3,jsym)-symrel_cart(2,3,jsym)*symrel_cart(3,1,jsym)) &
-!           & +symrel_cart(1,3,jsym)*(symrel_cart(2,1,jsym)*symrel_cart(3,2,jsym)-symrel_cart(2,2,jsym)*symrel_cart(3,1,jsym))
-
              if (jsym==0) then
                ABI_ERROR("jsym=0 in symrhg !")
              end if
@@ -1911,21 +1890,12 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
              myi=symrec_cart(1,2,jsym)*magxsu2+symrec_cart(2,2,jsym)*magysu2+symrec_cart(3,2,jsym)*magzsu2
              mzr=symrec_cart(1,3,jsym)*magxsu1+symrec_cart(2,3,jsym)*magysu1+symrec_cart(3,3,jsym)*magzsu1
              mzi=symrec_cart(1,3,jsym)*magxsu2+symrec_cart(2,3,jsym)*magysu2+symrec_cart(3,3,jsym)*magzsu2
-
-!             mxr=symrel_cart(1,1,jsym)*magxsu1+symrel_cart(1,2,jsym)*magysu1+symrel_cart(1,3,jsym)*magzsu1 
-!             mxi=symrel_cart(1,1,jsym)*magxsu2+symrel_cart(1,2,jsym)*magysu2+symrel_cart(1,3,jsym)*magzsu2
-!             myr=symrel_cart(2,1,jsym)*magxsu1+symrel_cart(2,2,jsym)*magysu1+symrel_cart(2,3,jsym)*magzsu1
-!             myi=symrel_cart(2,1,jsym)*magxsu2+symrel_cart(2,2,jsym)*magysu2+symrel_cart(2,3,jsym)*magzsu2
-!             mzr=symrel_cart(3,1,jsym)*magxsu1+symrel_cart(3,2,jsym)*magysu1+symrel_cart(3,3,jsym)*magzsu1
-!             mzi=symrel_cart(3,1,jsym)*magxsu2+symrel_cart(3,2,jsym)*magysu2+symrel_cart(3,3,jsym)*magzsu2
-!            MR: Needed for pseudovector m?
-!             mxr=det_R*(symrel_cart(1,1,jsym)*magxsu1+symrel_cart(1,2,jsym)*magysu1+symrel_cart(1,3,jsym)*magzsu1) 
-!             mxi=det_R*(symrel_cart(1,1,jsym)*magxsu2+symrel_cart(1,2,jsym)*magysu2+symrel_cart(1,3,jsym)*magzsu2)
-!             myr=det_R*(symrel_cart(2,1,jsym)*magxsu1+symrel_cart(2,2,jsym)*magysu1+symrel_cart(2,3,jsym)*magzsu1)
-!             myi=det_R*(symrel_cart(2,1,jsym)*magxsu2+symrel_cart(2,2,jsym)*magysu2+symrel_cart(2,3,jsym)*magzsu2)
-!             mzr=det_R*(symrel_cart(3,1,jsym)*magxsu1+symrel_cart(3,2,jsym)*magysu1+symrel_cart(3,3,jsym)*magzsu1)
-!             mzi=det_R*(symrel_cart(3,1,jsym)*magxsu2+symrel_cart(3,2,jsym)*magysu2+symrel_cart(3,3,jsym)*magzsu2)
-
+!            mxr=symrel_cart(1,1,jsym)*magxsu1+symrel_cart(1,2,jsym)*magysu1+symrel_cart(1,3,jsym)*magzsu1
+!            mxi=symrel_cart(1,1,jsym)*magxsu2+symrel_cart(1,2,jsym)*magysu2+symrel_cart(1,3,jsym)*magzsu2
+!            myr=symrel_cart(2,1,jsym)*magxsu1+symrel_cart(2,2,jsym)*magysu1+symrel_cart(2,3,jsym)*magzsu1
+!            myi=symrel_cart(2,1,jsym)*magxsu2+symrel_cart(2,2,jsym)*magysu2+symrel_cart(2,3,jsym)*magzsu2
+!            mzr=symrel_cart(3,1,jsym)*magxsu1+symrel_cart(3,2,jsym)*magysu1+symrel_cart(3,3,jsym)*magzsu1
+!            mzi=symrel_cart(3,1,jsym)*magxsu2+symrel_cart(3,2,jsym)*magysu2+symrel_cart(3,3,jsym)*magzsu2
              magngx(1,ind)=mxr*phr-mxi*phi
              magngx(2,ind)=mxi*phr+mxr*phi
              magngy(1,ind)=myr*phr-myi*phi
