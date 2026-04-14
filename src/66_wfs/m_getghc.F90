@@ -214,7 +214,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  logical(kind=c_bool) :: k1_eq_k2
  logical :: double_rfft_trick,have_to_reequilibrate,has_fock,local_gvnlxc
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc,use_cwavef_r, filter_dilatmx_loc_
- real(dp) :: ghcim,ghcre,weight, kscale
+ real(dp) :: ghcim,ghcre,weight !, kscale
 #ifdef HAVE_OPENMP_OFFLOAD
  complex(dp), parameter :: cminusone  = (-1._dp,0._dp)
 #endif
