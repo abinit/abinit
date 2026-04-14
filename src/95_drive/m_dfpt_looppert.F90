@@ -2998,7 +2998,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
 
- if (emagpen1>tol8) then
+ if (abs(emagpen1)>tol8) then
    write(msg,'(a,es17.8)') &
 &   '     Magnetic penalty contribution=', emagpen1   
    call wrtout(iout,msg)
@@ -3026,7 +3026,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    else if(ipert>natom+11.and.ipert<=2*natom+11)then
      erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1+elmag1
    end if
-   if (emagpen1>tol8) erelax=erelax+emagpen1
+   if (abs(emagpen1)>tol8) erelax=erelax+emagpen1
    enl1_effective=enl1
    if (ipert==natom+1.or.ipert==natom+2) then
      if (1.0_dp+enl1/10.0_dp==1.0_dp) enl1_effective=zero
