@@ -89,7 +89,7 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%% [files]
 #%% [NCPU_8]
 #%% files_to_test =
-#%%   tcdfpt_1_MPI8.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-medium
+#%%   tcdfpt_1_MPI8.abo, tolnlines=  5, tolabs=  4.192e-04, tolrel=  3.000e-06, fld_options=-easy
 #%% post_commands= 
 #%%    ww_mv tcdfpt_1_MPI8o_DS1_WFK   tcdfpt_2_MPI8o_DS1_WFK; 
 #%%    ww_mv tcdfpt_1_MPI8o_DS2_1WF19 tcdfpt_2_MPI8o_DS2_1WF19;

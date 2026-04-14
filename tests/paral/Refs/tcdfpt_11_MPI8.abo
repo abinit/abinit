@@ -15,9 +15,9 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 14 Apr 2026.
-- ( at 09h46 )
+- ( at 16h08 )
   
-- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/test2/Test_suite/paral_tcdfpt_11_MPI8-tcdfpt_12_MPI8-tcdfpt_14_MPI8/tcdfpt_11.abi
+- input  file    -> /home/buildbot/ABINIT3/eos_gnu_13.2_mpich/srostami_test_mroyo/tests/TestBot_MPI8/paral_tcdfpt_11_MPI8-tcdfpt_12_MPI8-tcdfpt_14_MPI8/tcdfpt_11.abi
 - output file    -> tcdfpt_11_MPI8.abo
 - root for input  files -> tcdfpt_11_MPI8i
 - root for output files -> tcdfpt_11_MPI8o
@@ -6136,10 +6136,10 @@ P          mk1mem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- Proc.   0 individual time (sec): cpu=        692.2  wall=        692.4
+- Proc.   0 individual time (sec): cpu=        698.4  wall=        698.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       5537.9  wall=       5538.7
++Overall time at end (sec) : cpu=       5588.0  wall=       5589.7
