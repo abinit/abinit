@@ -102,7 +102,15 @@ class xcopier(copier):
         yinf.close()
 
     def _x2y_translate(self, xStr):
-        ' Converts xyaptu markup in input string to yaptu delimiters '
+        """
+        Convert xyaptu markup in input string to yaptu delimiters.
+
+        Args:
+            xStr (str): Input string with xyaptu markup.
+
+        Returns:
+            str: Translated string in YAPTU format.
+        """
 
         # Define regexps to match xml elements on.
         # The variations (all except for py-expr, py-close) we look for are:
@@ -175,17 +183,43 @@ class xcopier(copier):
 
     # Handle expressions that do not evaluate
     def _handleBadExps(self, s):
-        ' Handle expressions that do not evaluate '
+        """
+        Handle expressions that do not evaluate.
+
+        Args:
+            s (str): The expression string.
+
+        Returns:
+            str: Error placeholder string.
+        """
         if self.dbg:
             self.dbgOuf.write('!!! ERROR: failed to evaluate expression: %s \n' % s)
         return '***! %s !***' % s
 
     # Preprocess code
     def _preProcess(self, s, why):
-        ' Preprocess embedded python statements and expressions '
+        """
+        Preprocess embedded python statements and expressions.
+
+        Args:
+            s (str): The code string.
+            why (str): "exec" or "eval".
+
+        Returns:
+            str: Decoded code string.
+        """
         return self._xmlDecode(s)
     def _preProcessDbg(self, s, why):
-        ' Preprocess embedded python statements and expressions '
+        """
+        Preprocess embedded python statements and expressions with debug logging.
+
+        Args:
+            s (str): The code string.
+            why (str): "exec" or "eval".
+
+        Returns:
+            str: Decoded code string.
+        """
         self.dbgOuf.write('!!! DBG: %s %s \n' % (s, why))
         return self._xmlDecode(s)
 
@@ -197,7 +231,15 @@ class xcopier(copier):
       ['&', '&amp;'],
     ]
     def _xmlDecode(self, s):
-        ' Returns the ASCII decoded version of the given HTML string. '
+        """
+        Return the ASCII decoded version of the given HTML string.
+
+        Args:
+            s (str): HTML string to decode.
+
+        Returns:
+            str: Decoded string.
+        """
         codes = self._xmlCodes
         for code in codes:
             #s = string.replace(s, code[1], code[0])

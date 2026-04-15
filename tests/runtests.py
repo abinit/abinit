@@ -106,7 +106,13 @@ Debugging mode:
 
 
 def show_examples_and_exit(err_msg=None, error_code=1):
-    """Display the usage of the script."""
+    """
+    Display the usage examples and exit the script.
+
+    Args:
+        err_msg (str, optional): An error message to display before exiting.
+        error_code (int, optional): The exit code to return.
+    """
     sys.stderr.write(str_examples())
     if err_msg:
         sys.stderr.write("Fatal Error\n" + err_msg + "\n")
@@ -114,7 +120,15 @@ def show_examples_and_exit(err_msg=None, error_code=1):
 
 
 def vararg_callback(option, opt_str, value, parser):
-    """Callback for an option with variable arguments"""
+    """
+    Callback for an option with variable arguments.
+
+    Args:
+        option: The option instance.
+        opt_str (str): The option string.
+        value: The option value (unused, should be None).
+        parser: The option parser instance.
+    """
     assert value is None
     value = []
 
@@ -139,7 +153,14 @@ def vararg_callback(option, opt_str, value, parser):
 def make_abinit(num_threads, touch_patterns=None, target=""):
     """
     Find the top-level directory of the build tree and issue `make -j num_threads`.
-    Return: Exit status of the subprocess.
+
+    Args:
+        num_threads (int): Number of threads for parallel make.
+        touch_patterns (str, optional): Comma-separated patterns of files to touch.
+        target (str, optional): The make target (e.g., 'abinit').
+
+    Returns:
+        int: Exit status of the make process.
     """
     top = find_top_build_tree(".", with_abinit=False)
 
@@ -158,6 +179,18 @@ def make_abinit(num_threads, touch_patterns=None, target=""):
 
 
 def parse_stats(stats):
+    """
+    Parse a status string (e.g., 'failed+passed', 'all', 'not_succeeded').
+
+    Args:
+        stats (str): The status specification string.
+
+    Returns:
+        list: A list of valid status strings.
+
+    Raises:
+        ValueError: If an invalid status is encountered.
+    """
     # TODO Use BaseTest class attribute
     _possible_status = ["failed", "passed", "succeeded", "skipped", "disabled",]
 
@@ -181,6 +214,15 @@ def parse_stats(stats):
 
 
 def reload_test_suite(status_list):
+    """
+    Reload a test suite from the pickle file of a previous run.
+
+    Args:
+        status_list (list): List of status strings to filter tests.
+
+    Returns:
+        AbinitTestSuite: A new test suite containing the filtered tests.
+    """
     cprint("Reading previous tests from pickle file", "yellow")
     with open(".prev_run.pickle", "rb") as fh:
         test_suite = pickle.load(fh)
@@ -191,6 +233,10 @@ def reload_test_suite(status_list):
 
 
 def main():
+    """
+    Main entry point for runtests.py.
+    Parses command-line options and executes the test suite.
+    """
     usage = "usage: %prog [suite_args] [options]. Use [-h|--help] for help."
     version = "%prog " + str(__version__)
 

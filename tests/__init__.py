@@ -48,6 +48,12 @@ class AbinitEnvironment:
         self.fldiff_path = os.path.join(self.tests_dir, "Scripts", "fldiff.pl")
 
     def __str__(self):
+        """
+        Return a summary of the environment.
+
+        Returns:
+            str: Environment details.
+        """
         return "\n".join([str(k) + " : " + str(v) for (k, v) in self.__dict__.items()])
 
     def apath_of(self, *p):
@@ -712,6 +718,16 @@ class AbinitTests:
     #    return all_need_cppvars
 
     def inputs_of_suite(self, suite_name, active=True):
+        """
+        Get the list of input files for a specific suite.
+
+        Args:
+            suite_name (str): Name of the suite.
+            active (bool): If True, return active tests. Otherwise, return disabled ones.
+
+        Returns:
+            list: Paths to the input files.
+        """
         if active:
             return self._suites[suite_name].inp_paths
         return self._suites[suite_name].disabled_inp_paths

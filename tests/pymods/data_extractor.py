@@ -96,7 +96,10 @@ class DataExtractor:
             src_lines (list): List of strings to process.
 
         Returns:
-            tuple: (significant_lines, documents, ignored_lines)
+            tuple: (significant_lines, documents, ignored_lines) where:
+                significant_lines (list): List of (index, metachar, content) tuples.
+                documents (dict): Dictionary mapping document IDs to Document objects.
+                ignored_lines (list): List of (index, content) tuples for lines not belonging to a doc.
         """
         # Reset internal state to allow several extractions with the same instance.
         self.iterators_state = {}
