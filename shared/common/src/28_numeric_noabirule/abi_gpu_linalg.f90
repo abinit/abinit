@@ -2510,8 +2510,10 @@ subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
       call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = c_loc(r_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
-      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
-      gpu_ptr = gpu_work
+      !call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
+      !gpu_ptr = gpu_work
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
+      gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
     end if
 
   case (2)
@@ -2521,8 +2523,10 @@ subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
       call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = c_loc(c_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
-      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(2,c_size_t)*bufferSize*dp)
-      gpu_ptr = gpu_work
+      !call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(2,c_size_t)*bufferSize*dp)
+      !gpu_ptr = gpu_work
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
+      gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
     end if
 
   end select
@@ -2801,8 +2805,10 @@ subroutine abi_gpu_xheevd_cptr(cplx, jobz, uplo, A_nrows, &
       call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = c_loc(r_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
-      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
-      gpu_ptr = gpu_work
+      !call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
+      !gpu_ptr = gpu_work
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
+      gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
     end if
 
   case (2)
@@ -2812,8 +2818,10 @@ subroutine abi_gpu_xheevd_cptr(cplx, jobz, uplo, A_nrows, &
       call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = c_loc(c_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
-      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(2,c_size_t)*bufferSize*dp)
-      gpu_ptr = gpu_work
+      !call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(2,c_size_t)*bufferSize*dp)
+      !gpu_ptr = gpu_work
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
+      gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
     end if
 
   end select
@@ -3061,8 +3069,10 @@ subroutine abi_gpu_xpotrf_cptr(cplx, uplo, A_nrows, &
       call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = c_loc(r_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
-      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
-      gpu_ptr = gpu_work
+      !call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
+      !gpu_ptr = gpu_work
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
+      gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
     end if
 
   case (2)
@@ -3072,8 +3082,10 @@ subroutine abi_gpu_xpotrf_cptr(cplx, uplo, A_nrows, &
       call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = c_loc(c_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
-      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
-      gpu_ptr = gpu_work
+      !call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
+      !gpu_ptr = gpu_work
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
+      gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
     end if
 
   end select
