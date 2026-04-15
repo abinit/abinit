@@ -3,6 +3,7 @@
 """
 from __future__ import print_function, division, unicode_literals, absolute_import
 
+import functools
 import os
 import sys
 import io
@@ -926,7 +927,7 @@ class AbinitProject(NotebookWriter):
                 set of dependencies of the directory.
         """
         dir2files = self.groupby_dirname()
-        allmods = self._find_allmods(head_path, dir2files=dir2files)
+        allmods = set(self._find_allmods(head_path))
         if not include_files_in_dirs: return allmods
         #print("initial list of modules", "\n".join(mod.basename for mod in allmods), "end initial list"
 
@@ -944,7 +945,7 @@ class AbinitProject(NotebookWriter):
             #print("In dirpath:", dirpath)
             for fort_file in dir2files[dirpath]:
                 #print("Adding", fort_file.basename, "in dir", fort_file.dirpath)
-                other_mods = self._find_allmods(fort_file.basename, dir2files=dir2files)
+                other_mods = self._find_allmods(fort_file.basename)
                 allmods.update(other_mods)
                 #other_dirpaths = set(os.path.join(self.srcdir, os.path.basename(d))
                 #        for d in set(mod.dirname for mod in other_mods))
@@ -953,9 +954,8 @@ class AbinitProject(NotebookWriter):
 
         return allmods
 
-    def _find_allmods(self, head_path, dir2files=None, include_files_in_dirs=True):
-        dir2files = dir2files if dir2files is not None else self.groupby_dirname()
-
+    @functools.lru_cache(maxsize=None)
+    def _find_allmods(self, head_path):
         # This trick is needed for F90.in files that will be post-processed by the build system
         if head_path.endswith(".F90.in"): head_path = head_path[:-3]
         head = self.fort_files[head_path]
@@ -970,7 +970,7 @@ class AbinitProject(NotebookWriter):
                 allmods.add(mod)
                 queue.add(self.fort_files[mod.basename])
 
-        return allmods
+        return frozenset(allmods)
 
     def get_program_names_dirnames(self, verbose):
         """
