@@ -48,7 +48,7 @@ class WikiLinkExtension(Extension):
             "build_url": [build_url, "Callable formats URL from label."],
         }
 
-        super(WikiLinkExtension, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def extendMarkdown(self, md):
     #def extendMarkdown(self, md, md_globals):
@@ -67,7 +67,7 @@ class WikiLinkExtension(Extension):
 
 class WikiLinks(Pattern):
     def __init__(self, pattern, config):
-        super(WikiLinks, self).__init__(pattern)
+        super().__init__(pattern)
         self.config = config
 
     def handleMatch(self, m):

@@ -32,7 +32,7 @@ class Matrix33(BaseArray):
             **kwargs: Arbitrary keyword arguments.
         """
         assert shape == (3, 3)
-        super(Matrix33, self).__init__(shape, *args, **kwargs)
+        super().__init__(shape, *args, **kwargs)
 
     @classmethod
     def from_seq(cls, s):
@@ -45,7 +45,7 @@ class Matrix33(BaseArray):
         Returns:
             Matrix33: A new 3x3 matrix.
         """
-        new = super(Matrix33, cls).from_seq(s)
+        new = super().from_seq(s)
         assert new.shape == (3, 3)
         return new
 

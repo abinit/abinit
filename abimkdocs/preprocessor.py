@@ -31,7 +31,7 @@ class IncludePreprocessor(Preprocessor):
     from which Markdown is being called.
     """
     def __init__(self, md, config):
-        super(IncludePreprocessor, self).__init__(md)
+        super().__init__(md)
         self.base_path = config["base_path"]
         self.encoding = config["encoding"]
 

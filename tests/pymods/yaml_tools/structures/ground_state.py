@@ -38,7 +38,7 @@ class EnergyTerms:
         Returns:
             EnergyTerms: A new instance populated with components.
         """
-        new = super(EnergyTerms, cls).from_map(map)
+        new = super().from_map(map)
         new.components = {
             name: value for name, value in new.__dict__.items()
             if name not in cls.not_components

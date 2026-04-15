@@ -539,40 +539,38 @@ filters:
         DriverTestConf.default_conf = "/dev/null"
         driver = DriverTestConf(src=self.src1)
 
-        with driver.use_filter({"dtset": 1, "image": 4}):
-            with driver.go_down("sp1"):
-                with driver.go_down("sp2 with spaces"):
-                    constraints = driver.get_constraints_for(1.0)
-                    assert len(constraints) == 1
-                    assert constraints[0].name == "ceil"
-                    assert constraints[0].value == 1.0e-8
-                with driver.go_down("sp3"):
-                    constraints = driver.get_constraints_for(1.0)
-                    assert len(constraints) == 2
-                    for c in constraints:
-                        assert c.name in ("tol_abs", "tol_rel")
-                        if c.name == "tol_abs":
-                            assert c.value == 1.8e-9
-                        elif c.name == "tol_rel":
-                            assert c.value == 1.4e-8
+        with driver.use_filter({"dtset": 1, "image": 4}), driver.go_down("sp1"):
+            with driver.go_down("sp2 with spaces"):
+                constraints = driver.get_constraints_for(1.0)
+                assert len(constraints) == 1
+                assert constraints[0].name == "ceil"
+                assert constraints[0].value == 1.0e-8
+            with driver.go_down("sp3"):
+                constraints = driver.get_constraints_for(1.0)
+                assert len(constraints) == 2
+                for c in constraints:
+                    assert c.name in ("tol_abs", "tol_rel")
+                    if c.name == "tol_abs":
+                        assert c.value == 1.8e-9
+                    elif c.name == "tol_rel":
+                        assert c.value == 1.4e-8
 
-        with driver.use_filter({"dtset": 1, "image": 1}):
-            with driver.go_down("sp1"):
-                with driver.go_down("sp2 with spaces"):
-                    constraints = driver.get_constraints_for(1.0)
-                    assert len(constraints) == 1
-                    assert constraints[0].name == "ceil"
-                    assert constraints[0].value == 1.0e-8
-                with driver.go_down("sp3"):
-                    constraints = driver.get_constraints_for(1.0)
-                    assert len(constraints) == 1
-                    assert constraints[0].name == "tol_abs"
-                    assert constraints[0].value == 1.8e-9
-                with driver.go_down("sp4"):
-                    constraints = driver.get_constraints_for(1.0)
-                    assert len(constraints) == 1
-                    assert constraints[0].name == "ceil"
-                    assert constraints[0].value == 1.5e-8
+        with driver.use_filter({"dtset": 1, "image": 1}), driver.go_down("sp1"):
+            with driver.go_down("sp2 with spaces"):
+                constraints = driver.get_constraints_for(1.0)
+                assert len(constraints) == 1
+                assert constraints[0].name == "ceil"
+                assert constraints[0].value == 1.0e-8
+            with driver.go_down("sp3"):
+                constraints = driver.get_constraints_for(1.0)
+                assert len(constraints) == 1
+                assert constraints[0].name == "tol_abs"
+                assert constraints[0].value == 1.8e-9
+            with driver.go_down("sp4"):
+                constraints = driver.get_constraints_for(1.0)
+                assert len(constraints) == 1
+                assert constraints[0].name == "ceil"
+                assert constraints[0].value == 1.5e-8
 
     src2 = """\
 tol_abs: 1.2e-7
@@ -604,23 +602,22 @@ filters:
         DriverTestConf.default_conf = "/dev/null"
         driver = DriverTestConf(src=self.src2)
 
-        with driver.use_filter({"dtset": 1, "image": 1}):
-            with driver.go_down("sp1"):
-                with driver.go_down("sp2"):
-                    constraints = driver.get_constraints_for(1.0)
-                    assert len(constraints) == 1
-                    assert constraints[0].name == "ceil"
-                    assert constraints[0].value == 1.5e-8
-                with driver.go_down("sp3"):
-                    constraints = driver.get_constraints_for(1.0)
-                    assert len(constraints) == 1
-                    assert constraints[0].name == "ceil"
-                    assert constraints[0].value == 1.5e-8
-                with driver.go_down("sp4"):
-                    constraints = driver.get_constraints_for(1.0)
-                    assert len(constraints) == 1
-                    assert constraints[0].name == "ceil"
-                    assert constraints[0].value == 1.5e-8
+        with driver.use_filter({"dtset": 1, "image": 1}), driver.go_down("sp1"):
+            with driver.go_down("sp2"):
+                constraints = driver.get_constraints_for(1.0)
+                assert len(constraints) == 1
+                assert constraints[0].name == "ceil"
+                assert constraints[0].value == 1.5e-8
+            with driver.go_down("sp3"):
+                constraints = driver.get_constraints_for(1.0)
+                assert len(constraints) == 1
+                assert constraints[0].name == "ceil"
+                assert constraints[0].value == 1.5e-8
+            with driver.go_down("sp4"):
+                constraints = driver.get_constraints_for(1.0)
+                assert len(constraints) == 1
+                assert constraints[0].name == "ceil"
+                assert constraints[0].value == 1.5e-8
 
     src4 = """\
 sp1:

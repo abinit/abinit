@@ -607,7 +607,7 @@ class Module(Procedure):
     proc_type = "module"
 
     def __init__(self, name, ancestor, preamble, path=None):
-        super(Module, self).__init__(name, ancestor, preamble, path=path)
+        super().__init__(name, ancestor, preamble, path=path)
         self.default_visibility = True
         # self.variables = OrderedDict()
         # self.public_procedure_names = []
@@ -617,7 +617,7 @@ class Module(Procedure):
     def to_string(self, verbose=0, width=90):
         lines = []
         app = lines.append
-        app(super(Module, self).to_string(verbose=verbose, width=width))
+        app(super().to_string(verbose=verbose, width=width))
         # w = TextWrapper(initial_indent="\t", subsequent_indent="\t", width=width)
         return "\n".join(lines)
 
@@ -1562,7 +1562,7 @@ class RobodocHeader(OrderedDict):
         return new
 
     def __init__(self, *args, **kwargs):
-        super(RobodocHeader, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for k in self.ALL_KEYS:
             self[k] = []
 
@@ -1576,7 +1576,7 @@ class RobodocHeader(OrderedDict):
             if not value:
                 continue
             app("!! %s" % key)
-            app(self[key])
+            app(value)
             app("!!")
 
         return "\n".join(lines)

@@ -18,7 +18,6 @@ from os.path import abspath as absp
 from os.path import basename
 from os.path import join as pj
 from socket import gethostname
-from typing import Optional
 from warnings import warn
 
 logger = logging.getLogger(__name__)
@@ -124,10 +123,10 @@ class TestBotContext:
     type: str = ""
     """'ref' if this builder is the reference builder where all tests should pass"""
 
-    ncpus: Optional[int] = None
+    ncpus: int | None = None
     """Max number of CPUs that can be used by TestBot"""
 
-    max_gpus: Optional[int] = 0
+    max_gpus: int | None = 0
     """Max number of GPUs that can be used by TestBot"""
 
     mpi_prefix: str = ""
@@ -139,10 +138,10 @@ class TestBotContext:
     omp_num_threads: int = 0
     """Number of OpenMP threads. 0 if OpenMP should not be used"""
 
-    enable_mpi: Optional[bool] = None
+    enable_mpi: bool | None = None
     """True if MPI is activated"""
 
-    enable_openmp: Optional[bool] = None
+    enable_openmp: bool | None = None
     """True if OpenMP is activated"""
 
     poe: str = ""
@@ -427,7 +426,6 @@ class TestBot:
         Raises:
             ValueError: If mandatory options are missing or invalid.
         """
-
         attrs2read = [
             "slavename",
             "type",
@@ -886,7 +884,6 @@ class TestBotSummary:
         """
         Default string representation.
         """
-        pass
 
     def _min_status(self, items):
         indices = [self._possible_status.index(item) for item in items]
@@ -1118,7 +1115,6 @@ def old_main():
     Returns:
         int: The exit code of the execution.
     """
-
     if "--help" in sys.argv or "-h" in sys.argv:
         # Print help and exit.
         TestBot.print_options()

@@ -1,18 +1,15 @@
 """
-Pyinvoke file for automating build/config stuff.
+Pyinvoke file for automating build and configuration tasks within the Abinit repository.
 
-Can be executed everywhere inside the Abinit directory, including build directories.
+This file can be executed from any location within the Abinit directory structure,
+including build directories.
 
-Examples:
-To get list of commands:
+General usage:
+    To list available commands:
+        invoke --list
 
-    invoke --list
-
-To run  (some of the) abichecks scripts:
-
-    invoke abichecks
-
-
+    To run specific tasks (e.g., abichecks):
+        invoke abichecks
 """
 from __future__ import annotations
 
@@ -69,7 +66,13 @@ SYSTEM = platform.system()
 
 def which_vim() -> str:
     """
-    Find vim in $PATH
+    Find a Vim-compatible editor in the system PATH.
+
+    Returns:
+        str: Name of the Vim executable found (mvim, nvim, or vim).
+
+    Raises:
+        RuntimeError: If no Vim executable is found.
     """
     if which("mvim") is not None: return "mvim"
     if which("nvim") is not None: return "nvim"
@@ -79,7 +82,13 @@ def which_vim() -> str:
 
 def which_differ() -> str:
     """
-    Find differ in $PATH
+    Find a visual diff tool in the system PATH.
+
+    Returns:
+        str: Name of the differ executable found (mvimdiff or vimdiff).
+
+    Raises:
+        RuntimeError: If no differ executable is found.
     """
     differ = "vimdiff"
     if which("mvimdiff") is not None: differ = "mvimdiff"
@@ -92,11 +101,15 @@ def which_differ() -> str:
 
 def change_output_file(input_file, output_file):
     """
-    Change the name of the main output file in the `input_file` using `output_file`
+    Set or update the `output_file` variable in an ABINIT input file.
+
+    Args:
+        input_file (str or Path): Path to the input file to modify.
+        output_file (str): New output file name to insert.
     """
     with open(input_file) as fh:
         remove_iline = None
-        lines = [l.lstrip() for l in fh.readlines()]
+        lines = [l.lstrip() for l in fh]
         for i, l in enumerate(lines):
             if l.lstrip().startswith("output_file"):
                 remove_iline = i
@@ -133,6 +146,16 @@ def cd(path):
 
 
 def list_from_string(string, type=int) -> list[str]:
+    """
+    Convert a comma or space-separated string into a list of typed values.
+
+    Args:
+        string (str): The input string to parse.
+        type (type, optional): The type to convert elements to. Defaults to int.
+
+    Returns:
+        list: List of converted values.
+    """
     if "," in string:
         return [type(s) for s in string.split(",")]
     return [type(s) for s in string.split(" ")]
@@ -141,13 +164,18 @@ def list_from_string(string, type=int) -> list[str]:
 @task
 def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
     """
-    Touch all modified files and recompile the code
+    Recompile the Abinit source code.
 
     Args:
-        jobs: Use `jobs` threads for make -jNUM
-        touch: Touch all changed files
-        clean: Issue `make clean` before `make`.
-        binary: Binary to recompile, default: all
+        ctx: Invoke context.
+        jobs (str or int, optional): Number of parallel threads for make.
+            Use "auto" to use half of available CPUs. Defaults to "auto".
+        touch (bool, optional): If True, touch all modified source files
+            before recompilation. Defaults to False.
+        clean (bool, optional): If True, execute `make clean` before recompiling.
+            Defaults to False.
+        binary (str, optional): Specific binary to recompile (e.g., "abinit").
+            Defaults to all binaries.
     """
     if touch:
         with cd(ABINIT_ROOTDIR):
@@ -185,7 +213,15 @@ def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
 
 @task
 def clean(ctx):
-    """Remove object files in src and shared. Do not remove object files in fallbacks"""
+    """
+    Remove object files in the `src` and `shared` directories.
+
+    Note:
+        Does not affect object files in the `fallbacks` directory.
+
+    Args:
+        ctx: Invoke context.
+    """
     top = find_top_build_tree(".", with_abinit=False)
     with cd(top):
         ctx.run("cd src && make clean && cd ..", pty=True)
@@ -194,7 +230,23 @@ def clean(ctx):
 
 @task
 def runemall(ctx, make=True, jobs="auto", touch=False, clean=False, keywords=None):
-    """Run all tests (sequential and parallel). Exit immediately if errors"""
+    """
+    Run all sequential and parallel tests.
+
+    The task first ensures the code is compiled, and then executes the
+    test suite. It exits immediately if any critical error occurs.
+
+    Args:
+        ctx: Invoke context.
+        make (bool, optional): If True, compile the code before running tests.
+            Defaults to True.
+        jobs (str or int, optional): Parallel threads for compilation. Defaults to "auto".
+        touch (bool, optional): If True, touch modified files before recompilation.
+            Defaults to False.
+        clean (bool, optional): If True, perform a clean build. Defaults to False.
+        keywords (str, optional): Keyword filter for selecting specific tests.
+            Defaults to None.
+    """
     make(ctx, jobs=jobs, touch=touch, clean=clean)
 
     top = find_top_build_tree(".", with_abinit=True)
@@ -216,21 +268,40 @@ def runemall(ctx, make=True, jobs="auto", touch=False, clean=False, keywords=Non
 
 @task
 def makemake(ctx):
-    """Invoke makemake"""
+    """
+    Invoke the `makemake` script to rebuild the build system.
+
+    Args:
+        ctx: Invoke context.
+    """
     with cd(ABINIT_ROOTDIR):
-        ctx.run(f"./config/scripts/makemake", pty=True)
+        ctx.run("./config/scripts/makemake", pty=True)
 
 
 @task
 def makedeep(ctx, jobs="auto"):
-    """Execute `makemake && make clean && make`"""
+    """
+    Perform a complete rebuild cycle: makemake, clean, and build.
+
+    Args:
+        ctx: Invoke context.
+        jobs (str or int, optional): Parallel threads for compilation. Defaults to "auto".
+    """
     makemake(ctx)
     make(ctx, jobs=jobs, clean=True)
 
 
 @task
 def abichecks(ctx):
-    """Execute (some of the) abichecks scripts."""
+    """
+    Execute the Abinit sanity check scripts (abichecks).
+
+    Returns:
+        int: The number of failed check scripts.
+
+    Args:
+        ctx: Invoke context.
+    """
     import time
     retcode = 0
     with cd(ABINIT_ROOTDIR):
@@ -257,7 +328,12 @@ def abichecks(ctx):
 
 @task
 def robodoc(ctx):
-    """Build robodoc documentation."""
+    """
+    Build the Robodoc documentation and open the index in the browser.
+
+    Args:
+        ctx: Invoke context.
+    """
     with cd(ABINIT_ROOTDIR):
         result = ctx.run("./mkrobodoc.sh", pty=True)
 
@@ -275,7 +351,10 @@ def robodoc(ctx):
 @task
 def mksite(ctx):
     """
-    Build the Abinit documentation by running the mksite.py script, and open the main page in the browser.
+    Build the Abinit documentation site and serve it locally.
+
+    Args:
+        ctx: Invoke context.
     """
     with cd(ABINIT_ROOTDIR):
         webbrowser.open_new_tab("http://127.0.0.1:8000")
@@ -285,7 +364,10 @@ def mksite(ctx):
 @task
 def links(ctx):
     """
-    Create symbolic links to Abinit executables in current working directory.
+    Create symbolic links to all Abinit executables in the current directory.
+
+    Args:
+        ctx: Invoke context.
     """
     top = find_top_build_tree(".", with_abinit=True)
     main98 = os.path.join(top, "src", "98_main")
@@ -301,7 +383,10 @@ def links(ctx):
 @task
 def ctags(ctx):
     """
-    Update ctags file.
+    Regenerate the ctags file for the Abinit source tree.
+
+    Args:
+        ctx: Invoke context.
     """
     with cd(ABINIT_ROOTDIR):
         cmd = "ctags -R --langmap=fortran:+.finc.f90.F90,c:.c.cpp.cu shared/ src/"
@@ -311,7 +396,11 @@ def ctags(ctx):
 @task
 def fgrep(ctx, pattern):
     """
-    Grep for `pattern` in all F90 files contained in `src` and `shared` directories.
+    Case-insensitive search for a pattern in all Fortran and C/C++ files.
+
+    Args:
+        ctx: Invoke context.
+        pattern (str): The pattern to search for.
     """
     # grep -r -i --include \*.h
     # Syntax notes:
@@ -327,7 +416,11 @@ def fgrep(ctx, pattern):
 @task
 def cgrep(ctx, pattern):
     """
-    Grep for `pattern` in all C files contained in `src` and `shared` directories.
+    Case-insensitive search for a pattern specifically in C files.
+
+    Args:
+        ctx: Invoke context.
+        pattern (str): The pattern to search for.
     """
     with cd(ABINIT_ROOTDIR):
         cmd  = 'grep -r -i --color --include "*.c" "%s" src shared' % pattern
@@ -338,7 +431,11 @@ def cgrep(ctx, pattern):
 @task
 def tgrep(ctx, pattern):
     """
-    Grep for `pattern` in all input files contained in the `tests` directory.
+    Search for a pattern within all test input files.
+
+    Args:
+        ctx: Invoke context.
+        pattern (str): The pattern to search for.
     """
     with cd(ABINIT_ROOTDIR):
         cmd  = 'grep -r -i --color "%s" tests/*/Input/*' % pattern
@@ -349,7 +446,11 @@ def tgrep(ctx, pattern):
 @task
 def vimt(ctx, tagname):
     """
-    Execute `vim -t tagname` with tagname as ctags tag.
+    Open the file defining a ctags tag in Vim.
+
+    Args:
+        ctx: Invoke context.
+        tagname (str): The tag to jump to.
     """
     vim = which_vim()
     with cd(ABINIT_ROOTDIR):
@@ -360,7 +461,14 @@ def vimt(ctx, tagname):
 
 @task
 def env(ctx):
-    """Print bash commands to set $PATH and $ABI_PSPDIR in order to work with build directory."""
+    """
+    Generate shell commands to configure the environment for the current build.
+
+    Prints the `export` commands for $PATH and $ABI_PSPDIR.
+
+    Args:
+        ctx: Invoke context.
+    """
     cprint("\nExecute the following lines in the shell to set the env:\n", color="green")
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main")
@@ -371,7 +479,11 @@ def env(ctx):
 @task
 def diff2(ctx, filename="run.abo"):
     """
-    Execute `vimdiff` to compare run.abo with the last run.abo0001 found in the cwd.
+    Compare the specified output file with the most recent backup file.
+
+    Args:
+        ctx: Invoke context.
+        filename (str, optional): The base output filename. Defaults to "run.abo".
     """
     vimdiff = which_differ()
     files = sorted([f for f in os.listdir(".") if f.startswith(filename)])
@@ -384,7 +496,11 @@ def diff2(ctx, filename="run.abo"):
 @task
 def diff3(ctx, filename="run.abo"):
     """
-    Execute `vimdiff` to compare run.abo with the last run.abo0001 found in the cwd.
+    Compare the current output file with the two most recent backup files.
+
+    Args:
+        ctx: Invoke context.
+        filename (str, optional): The base output filename. Defaults to "run.abo".
     """
     differ = which_differ()
 
@@ -401,7 +517,12 @@ def diff3(ctx, filename="run.abo"):
 
 @task
 def add_trunk(ctx):
-    """Register trunk as remote."""
+    """
+    Add the main Abinit GitLab repository as a git remote named "trunk".
+
+    Args:
+        ctx: Invoke context.
+    """
     cmd = "git remote add trunk git@gitlab.abinit.org:trunk/abinit.git"
     print("Executing:", cmd)
     ctx.run(cmd, pty=True)
@@ -412,7 +533,13 @@ def add_trunk(ctx):
 
 @task
 def remote_add(ctx, remote):
-    """Register `remote` as remote branch and fetch it"""
+    """
+    Register a developer's fork as a git remote and fetch it.
+
+    Args:
+        ctx: Invoke context.
+        remote (str): GitLab username of the developer.
+    """
     cmd = f"git remote add {remote} git@gitlab.abinit.org:{remote}/abinit.git"
     print("Executing:", cmd)
     ctx.run(cmd, pty=True)
@@ -424,7 +551,13 @@ def remote_add(ctx, remote):
 @task
 def gdb(ctx, input_name, exec_name="abinit", run_make=False):
     """
-    Execute `gdb` debugger with the given `input_name`.
+    Launch the GDB debugger for a specific executable and input file.
+
+    Args:
+        ctx: Invoke context.
+        input_name (str): Path to the ABINIT input file.
+        exec_name (str, optional): Name of the executable. Defaults to "abinit".
+        run_make (bool, optional): If True, build before debugging. Defaults to False.
     """
     if run_make: make(ctx)
 
@@ -442,7 +575,13 @@ def gdb(ctx, input_name, exec_name="abinit", run_make=False):
 @task
 def lldb(ctx, input_name, exec_name="abinit", run_make=False):
     """
-    Execute `lldb` debugger with the given `input_name`.
+    Launch the LLDB debugger for a specific executable and input file.
+
+    Args:
+        ctx: Invoke context.
+        input_name (str): Path to the ABINIT input file.
+        exec_name (str, optional): Name of the executable. Defaults to "abinit".
+        run_make (bool, optional): If True, build before debugging. Defaults to False.
     """
     if run_make: make(ctx)
 
@@ -459,10 +598,14 @@ def lldb(ctx, input_name, exec_name="abinit", run_make=False):
 @task
 def mpi_check(ctx, np_list="1, 2", abinit_input_file="run.abi", mpi_runner="mpiexec", run_make=False):
     """
-    Run Abinit input (run.abi) with different number of MPI procs.
+    Run an ABINIT input file with various MPI process counts and compare results.
 
     Args:
-        np_list: List of MPI procs
+        ctx: Invoke context.
+        np_list (str): List of process counts (e.g., "1, 2, 4"). Defaults to "1, 2".
+        abinit_input_file (str, optional): Path to the input file. Defaults to "run.abi".
+        mpi_runner (str, optional): Command used to launch MPI. Defaults to "mpiexec".
+        run_make (bool, optional): If True, build before running. Defaults to False.
     """
     if run_make: make(ctx)
 
@@ -490,7 +633,15 @@ def mpi_check(ctx, np_list="1, 2", abinit_input_file="run.abi", mpi_runner="mpie
 @task
 def omp_check(ctx, omp_threads="1, 2", np=1, abinit_input_file="run.abi", mpi_runner="mpiexec", run_make=False):
     """
-    Run Abinit input (run.abi) with different number of OpenMP threads.
+    Run an ABINIT input file with various OpenMP thread counts and compare results.
+
+    Args:
+        ctx: Invoke context.
+        omp_threads (str): List of thread counts (e.g., "1, 2, 4"). Defaults to "1, 2".
+        np (int, optional): Number of MPI processes to use. Defaults to 1.
+        abinit_input_file (str, optional): Path to the input file. Defaults to "run.abi".
+        mpi_runner (str, optional): Command used to launch MPI. Defaults to "mpiexec".
+        run_make (bool, optional): If True, build before running. Defaults to False.
     """
     if run_make: make(ctx)
 
@@ -516,7 +667,12 @@ def omp_check(ctx, omp_threads="1, 2", np=1, abinit_input_file="run.abi", mpi_ru
 
 @task
 def pyenv_clean(ctx):
-    """Clean conda/pip cache."""
+    """
+    Purge the Conda and Pip caches.
+
+    Args:
+        ctx: Invoke context.
+    """
     if which("conda") is not None:
         cmd = "conda clean --all --yes"
         cprint(f"About to execute {cmd=}")
@@ -530,19 +686,39 @@ def pyenv_clean(ctx):
 @task
 def abinit(ctx, input_name, run_make=False):
     """
-    Execute `abinit` with the given `input_name`.
+    Run the `abinit` executable with the specified input file.
+
+    Args:
+        ctx: Invoke context.
+        input_name (str): Path to the ABINIT input file.
+        run_make (bool, optional): If True, build before running. Defaults to False.
     """
     _run(ctx, input_name, exec_name="abinit", run_make=run_make)
 
 
 @task
 def anaddb(ctx, input_name, run_make=False):
-    """"execute `anaddb` with the given `input_name`."""
+    """
+    Run the `anaddb` executable with the specified input file.
+
+    Args:
+        ctx: Invoke context.
+        input_name (str): Path to the ANADDB input file.
+        run_make (bool, optional): If True, build before running. Defaults to False.
+    """
     _run(ctx, input_name, exec_name="anaddb", run_make=run_make)
 
 
 def _run(ctx, input_name, exec_name, run_make):
-    """"Execute `exec_name input_name`"""
+    """
+    Internal helper to execute an Abinit binary with an input file.
+
+    Args:
+        ctx: Invoke context.
+        input_name (str): Path to the input file.
+        exec_name (str): Name of the executable.
+        run_make (bool): If True, build before running.
+    """
     if run_make: make(ctx)
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main", exec_name)
@@ -554,7 +730,13 @@ def _run(ctx, input_name, exec_name, run_make):
 
 @task
 def pull_trunk(ctx):
-    """"Execute `git stash && git pull trunk develop && git stash apply`"""
+    """
+    Update the current branch from the trunk's develop branch, maintaining
+    local changes via stash.
+
+    Args:
+        ctx: Invoke context.
+    """
     ctx.run("git stash")
     ctx.run("git pull trunk develop")
     ctx.run("git pull trunk develop --tags")
@@ -565,7 +747,13 @@ def pull_trunk(ctx):
 
 @task
 def pull(ctx):
-    """"Execute `git stash && git pull --recurse-submodules && git stash apply && makemake`"""
+    """
+    Update the current repository and its submodules, maintaining
+    local changes via stash.
+
+    Args:
+        ctx: Invoke context.
+    """
     ctx.run("git stash")
     ctx.run("git pull --recurse-submodules")
     ctx.run("git stash apply")
@@ -574,7 +762,12 @@ def pull(ctx):
 
 @task
 def push(ctx):
-    """"Execute `git commit && git push && git push --tags`"""
+    """
+    Commit and push current changes including tags to the origin repository.
+
+    Args:
+        ctx: Invoke context.
+    """
     ctx.run("git commit")
     ctx.run("git push")
     ctx.run("git push --tags")
@@ -582,7 +775,12 @@ def push(ctx):
 
 @task
 def submodules(ctx):
-    """Update Abinit submodules."""
+    """
+    Update all Abinit submodules to their latest remote versions.
+
+    Args:
+        ctx: Invoke context.
+    """
     with cd(ABINIT_ROOTDIR):
         # https://stackoverflow.com/questions/1030169/easy-way-to-pull-latest-of-all-git-submodules
         ctx.run("git submodule update --remote --init", pty=True)
@@ -590,7 +788,15 @@ def submodules(ctx):
 
 @task
 def branchoff(ctx, start_point):
-    """"Checkout new branch from start_point e.g. `trunk/release-9.0` and set default upstream to origin."""
+    """
+    Create a new local branch starting from a remote branch (e.g., trunk/develop).
+
+    Automatically sets the upstream to origin for the new branch.
+
+    Args:
+        ctx: Invoke context.
+        start_point (str): The remote branch to start from (e.g., "trunk/release-9.0").
+    """
     try:
         remote, branch = start_point.split("/")
     except:
@@ -612,7 +818,13 @@ def branchoff(ctx, start_point):
 
 @task
 def dryrun_merge(ctx, start_point):
-    """"Merge `remote/branch` in dry-run mode."""
+    """
+    Perform a dry-run merge of a remote branch into the current branch.
+
+    Args:
+        ctx: Invoke context.
+        start_point (str): The remote branch to merge from.
+    """
 
     def run(cmd):
         cprint(f"Executing: `{cmd}`", color="green")
@@ -634,7 +846,12 @@ $ git merge --abort
 @task
 def watchdog(ctx, jobs="auto", sleep_time=5):
     """
-    Start watchdog service to watch F90 files and execute `make` when changes are detected.
+    Monitor the source directory for changes and trigger recompilation automatically.
+
+    Args:
+        ctx: Invoke context.
+        jobs (str or int, optional): Parallel threads for make. Defaults to "auto".
+        sleep_time (int, optional): Sleep time in seconds between checks. Defaults to 5.
     """
     cprint("Starting watchdog service to watch F90 files and execute `make` when changes are detected", color="green")
     cprint("Enter <CTRL + C> in the terminal to kill the service.", color="green")
@@ -694,7 +911,15 @@ def watchdog(ctx, jobs="auto", sleep_time=5):
 
 
 def get_current_branch() -> str:
-    """Run git command to get the current branch"""
+    """
+    Get the name of the currently active git branch.
+
+    Returns:
+        str: The branch name.
+
+    Raises:
+        RuntimeError: If not in a git repository or git command fails.
+    """
     try:
         return subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).strip().decode("utf-8")
     except subprocess.CalledProcessError:
@@ -702,7 +927,15 @@ def get_current_branch() -> str:
 
 
 def get_git_tags() -> list[str]:
-    """Run git command to list tags"""
+    """
+    Retrieve a list of all git tags in the repository.
+
+    Returns:
+        list[str]: List of tag names.
+
+    Raises:
+        RuntimeError: If not in a git repository or git command fails.
+    """
     try:
         tags = subprocess.check_output(["git", "tag"]).decode("utf-8").split("\n")
         # Remove empty strings from the list
@@ -712,13 +945,17 @@ def get_git_tags() -> list[str]:
 
 
 @task
-def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> None:
+def official_release(ctx, new_version, dry_run=True):
     """
-    Build new officiale release ...
+    Automate the process of creating a new official Abinit release.
 
-    Example usage:
+    This involves merging develop into master, tagging, and pushing to
+    remote repositories.
 
-        invoke official-release 10.2.4
+    Args:
+        ctx: Invoke context.
+        new_version (str): The version string for the new release.
+        dry_run (bool, optional): If True, only simulate the steps. Defaults to True.
     """
     # Set variables
     github_user = "gonzex"
@@ -788,8 +1025,14 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
 
 
 @task
-def git_info(ctx: Context, top_n=20) -> None:
-    """Scan git history for largest top_n files"""
+def git_info(ctx, top_n=20):
+    """
+    Analyze git history to find the largest files ever committed.
+
+    Args:
+        ctx: Invoke context.
+        top_n (int, optional): Number of top files to display. Defaults to 20.
+    """
 
     def get_git_objects():
         """Return list of all Git objects (hash, path)."""
@@ -884,7 +1127,15 @@ def large_files(ctx, top_dir=None, size_threshold_mb=5):
 
 @task
 def system(ctx):
-    """Show System Info as a Table"""
+    """
+    Display comprehensive system information as a formatted table.
+
+    Includes OS, Kernel, Architecture, Processor, CPU Cores, Memory,
+    and Cache details.
+
+    Args:
+        ctx: Invoke context.
+    """
     import platform
 
     import psutil
@@ -905,7 +1156,13 @@ def system(ctx):
 
 @task
 def pid(ctx, pid):
-    """Show Info for given process PID."""
+    """
+    Display detailed information for a specific process ID (PID).
+
+    Args:
+        ctx: Invoke context.
+        pid (int or str): The PID of the process to inspect.
+    """
     import psutil
     from tabulate import tabulate
     pid = int(pid)
@@ -933,6 +1190,15 @@ def pid(ctx, pid):
 
 
 def get_cache_info() -> dict:
+    """
+    Retrieve CPU cache information for the current platform.
+
+    Returns:
+        dict: Mapping of cache levels to their sizes.
+
+    Raises:
+        RuntimeError: If the platform is not supported.
+    """
     system = platform.system()
     if system == "Linux":
         return get_cache_info_linux()
@@ -944,6 +1210,12 @@ def get_cache_info() -> dict:
 
 
 def get_cache_info_linux() -> dict:
+    """
+    Retrieve CPU cache information on Linux systems using sysfs.
+
+    Returns:
+        dict: Mapping of cache levels to their sizes.
+    """
     caches = {}
     base_path = "/sys/devices/system/cpu/cpu0/cache"
     for index_dir in glob(f"{base_path}/index*"):
@@ -961,6 +1233,12 @@ def get_cache_info_linux() -> dict:
 
 
 def get_cache_info_mac() -> dict:
+    """
+    Retrieve CPU cache information on macOS using sysctl.
+
+    Returns:
+        dict: Mapping of cache levels to their sizes.
+    """
     caches = {}
     keys = {
         "hw.l1dcachesize": "L1d",
@@ -978,6 +1256,12 @@ def get_cache_info_mac() -> dict:
 
 
 def get_cache_info_windows() -> dict:
+    """
+    Retrieve CPU cache information on Windows using WMIC.
+
+    Returns:
+        dict: Mapping of cache levels to their sizes.
+    """
     caches = {}
     try:
         out = subprocess.check_output(["wmic", "cpu", "get", "L2CacheSize,L3CacheSize"],
@@ -992,13 +1276,17 @@ def get_cache_info_windows() -> dict:
     return caches
 
 
-def _extract_errors(logfile, context_lines: int = 5) -> list[str]:
+def _extract_errors(logfile, context_lines=5) -> list[str]:
     """
-    Extract error lines and some context.
+    Parse a log file to extract error messages with surrounding context.
 
     Args:
-        context_lines: how many lines of context before/after the match
+        logfile (str or Path): The path to the log file to analyze.
+        context_lines (int, optional): Number of context lines to capture
+            around each error. Defaults to 5.
 
+    Returns:
+        list[str]: A list of formatted error blocks.
     """
     print(f"Extracting error lines and some context from {logfile}...")
 
@@ -1032,8 +1320,21 @@ def _extract_errors(logfile, context_lines: int = 5) -> list[str]:
     return errors
 
 
-def find_filename(filename, start_dir: Path = Path.cwd()) -> Path:
-    """Walk upward until filename is found, or return None."""
+def find_filename(filename, start_dir=None) -> Path:
+    """
+    Search for a file by walking upwards from a starting directory.
+
+    Args:
+        filename (str): The filename to search for.
+        start_dir (Path, optional): Directory to start the search from.
+            Defaults to the current working directory.
+
+    Returns:
+        Path: The absolute path to the found file.
+
+    Raises:
+        FileNotFoundError: If the file is not found before reaching the root.
+    """
     current = start_dir.resolve()
     while True:
         candidate = current / filename
@@ -1046,7 +1347,13 @@ def find_filename(filename, start_dir: Path = Path.cwd()) -> Path:
 
 @task
 def config_log(ctx, log_path="config.log"):
-    """Parse a configure-generated config.log file to extract critical errors."""
+    """
+    Analyze the `config.log` file generated by `configure` to find critical errors.
+
+    Args:
+        ctx: Invoke context.
+        log_path (str, optional): Path to the log file. Defaults to "config.log".
+    """
     log_path = find_filename(log_path)
     results = _extract_errors(log_path)
     if not results:

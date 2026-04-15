@@ -98,8 +98,7 @@ if mpi.is_master_node():
     with open(filename, "w") as f:
 
         f.write(str(len(w_mesh))+"\n")
-        for w in w_mesh:
-            f.write(str(w)+"\n")
+        f.writelines(str(w)+"\n" for w in w_mesh)
 
     # Write spectral function on file
     filename = "tdmft_triqs_3i_DS3_Self_ra-omega_iatom0001_isppol1"
@@ -107,8 +106,7 @@ if mpi.is_master_node():
     with open(filename, "w") as f:
 
         for i in range(n_orb):
-            for j in range(len(w_mesh)):
-                f.write(str(w_mesh[j])+"\t"+str(data_spectral[j, i+1])+"\n")
+            f.writelines(str(w_mesh[j])+"\t"+str(data_spectral[j, i+1])+"\n" for j in range(len(w_mesh)))
 
     # Reconstruct Sigma(iw_n) from spectral function and compare with input
     self_rec = self_iw.copy()
