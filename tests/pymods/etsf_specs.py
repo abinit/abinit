@@ -36,12 +36,14 @@ class EtsfObject:
     Subclasses implement a `validate` method that receives a nc dataset
     and return a list of errors (strings).
     """
+
     def __str__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.name)
 
 
 class EtsfDimension(EtsfObject):
     """A dimension has a name, a type and, optionally, a list of allowed values."""
+
     def __init__(self, name, xtype, allowed=None):
         self.name = name
         self.xtype = xtype
@@ -68,6 +70,7 @@ class EtsfDimension(EtsfObject):
 
 class EtsfAttribute(EtsfObject):
     """A dimension has a name, a type and, optionally, a shape and list of allowed values."""
+
     def __init__(self, name, xtype, shape=None, allowed=None):
         self.name = name
         self.allowed = allowed
@@ -96,15 +99,16 @@ class EtsfVariable(EtsfObject):
     A variable has a name, a type and a list of dimensions.
     The list of allowed values and the attributes that must be specified are optional.
     """
+
     # Stores all the instances we are gonna create.
     all_variables = []
 
     def __init__(self, name, xtype, dimensions, allowed=None, reqattrs=None):
         self.name = name
         self.xtype = xtype
-        #if xtype == "char": assert shape
+        # if xtype == "char": assert shape
         self.dimensions = dimensions
-        #self.shape = tuple(shape) if shape else ()
+        # self.shape = tuple(shape) if shape else ()
         self.allowed = allowed
         self.reqattrs = reqattrs
         # TODO dtype
@@ -141,7 +145,7 @@ class EtsfVariable(EtsfObject):
         # Test dimension names.
         dim_names = np.array([dim.name for dim in self.dimensions])
         ncdim_names = np.array(ncvar.dimensions)
-        #print("dim_names: ", dim_names); print("ncdim_names: ", ncdim_names)
+        # print("dim_names: ", dim_names); print("ncdim_names: ", ncdim_names)
         if any(dim_names != ncdim_names):
             eapp("Wrong dimension names.\n\tFile: %s\n\tSpecs: %s" % (dim_names, ncdim_names))
 
@@ -169,12 +173,16 @@ class EtsfVariable(EtsfObject):
 
 class VariableWithUnits(EtsfVariable):
     """A Variable that requires the specification of units."""
+
     def __init__(self, name, xtype, dimensions, allowed=None, reqattrs=None):
-        if reqattrs is None: reqattrs = []
+        if reqattrs is None:
+            reqattrs = []
         reqattrs = reqattrs[:]
         reqattrs.append(units)
 
-        super(VariableWithUnits, self).__init__(name, xtype, dimensions, allowed=allowed, reqattrs=reqattrs)
+        super(VariableWithUnits, self).__init__(
+            name, xtype, dimensions, allowed=allowed, reqattrs=reqattrs
+        )
 
     def validate(self, ncdata):
         """Validate the content in the nc dataset, return list of errors."""
@@ -190,6 +198,7 @@ class VariableWithUnits(EtsfVariable):
             errors.append("scale_to_atomic_units attribute must be specified")
 
         return errors
+
 
 # AND NOW, LADIES & GENTLEMEN, THE ETSF-IO SPECIFICATIONS
 
@@ -207,7 +216,7 @@ mandatory_attributes = [file_format, file_format_version, Conventions]
 # Optional attributes
 # This table presents optional attributes for ETSF NetCDF files.
 #################################################################
-history	= EtsfAttribute("history", "char", [1024])
+history = EtsfAttribute("history", "char", [1024])
 title = EtsfAttribute("title", "char", [80])
 
 k_dependent = EtsfAttribute("k_dependent", "char", [80], allowed=["yes", "no"])
@@ -230,16 +239,24 @@ scale_to_atomic_units = EtsfAttribute("scale_to_atomic_units", "double")
 # This table list the dimensions that are not supposed to lead to a splitting.
 ##############################################################################
 character_string_length = EtsfDimension("character_string_length", "integer", allowed=[80])
-real_or_complex_coefficients = EtsfDimension("real_or_complex_coefficients", "integer", allowed=[1, 2])
-real_or_complex_density	= EtsfDimension("real_or_complex_density", "integer", allowed=[1, 2])
-real_or_complex_gw_corrections = EtsfDimension("real_or_complex_gw_corrections", "integer", allowed=[1, 2])
+real_or_complex_coefficients = EtsfDimension(
+    "real_or_complex_coefficients", "integer", allowed=[1, 2]
+)
+real_or_complex_density = EtsfDimension("real_or_complex_density", "integer", allowed=[1, 2])
+real_or_complex_gw_corrections = EtsfDimension(
+    "real_or_complex_gw_corrections", "integer", allowed=[1, 2]
+)
 real_or_complex_potential = EtsfDimension("real_or_complex_potential", "integer", allowed=[1, 2])
-real_or_complex_wavefunctions = EtsfDimension("real_or_complex_wavefunctions", "integer", allowed=[1, 2])
-number_of_cartesian_directions = EtsfDimension("number_of_cartesian_directions", "integer", allowed=[3])
+real_or_complex_wavefunctions = EtsfDimension(
+    "real_or_complex_wavefunctions", "integer", allowed=[1, 2]
+)
+number_of_cartesian_directions = EtsfDimension(
+    "number_of_cartesian_directions", "integer", allowed=[3]
+)
 number_of_reduced_dimensions = EtsfDimension("number_of_reduced_dimensions", "integer", [3])
 number_of_vectors = EtsfDimension("number_of_vectors", "integer", allowed=[3])
 number_of_symmetry_operations = EtsfDimension("number_of_symmetry_operations", "integer")
-number_of_atoms	= EtsfDimension("number_of_atoms", "integer")
+number_of_atoms = EtsfDimension("number_of_atoms", "integer")
 number_of_atom_species = EtsfDimension("number_of_atom_species", "integer")
 symbol_length = EtsfDimension("symbol_length", "integer", allowed=[2])
 
@@ -251,20 +268,26 @@ symbol_length = EtsfDimension("symbol_length", "integer", allowed=[2])
 max_number_of_states = EtsfDimension("max_number_of_states", "integer")
 number_of_kpoints = EtsfDimension("number_of_kpoints", "integer")
 number_of_spins = EtsfDimension("number_of_spins", "integer", allowed=[1, 2])
-number_of_spinor_components = EtsfDimension("number_of_spinor_components", "integer", allowed=[1, 2])
+number_of_spinor_components = EtsfDimension(
+    "number_of_spinor_components", "integer", allowed=[1, 2]
+)
 number_of_components = EtsfDimension("number_of_components", "integer", allowed=[1, 2, 4])
 max_number_of_coefficients = EtsfDimension("max_number_of_coefficients", "integer")
 number_of_grid_points_vector1 = EtsfDimension("number_of_grid_points_vector1", "integer")
 number_of_grid_points_vector2 = EtsfDimension("number_of_grid_points_vector2", "integer")
 number_of_grid_points_vector3 = EtsfDimension("number_of_grid_points_vector3", "integer")
-max_number_of_basis_grid_points	= EtsfDimension("max_number_of_basis_grid_points", "integer")
-number_of_localisation_regions = EtsfDimension("number_of_localisation_regions", "integer", allowed=[1])
+max_number_of_basis_grid_points = EtsfDimension("max_number_of_basis_grid_points", "integer")
+number_of_localisation_regions = EtsfDimension(
+    "number_of_localisation_regions", "integer", allowed=[1]
+)
 
 ####################
 # Atomic information
 ####################
-valence_charges = EtsfVariable("valence_charges", "double",  [number_of_atom_species])
-pseudopotential_types = EtsfVariable("pseudopotential_types", "char", [number_of_atom_species, character_string_length])
+valence_charges = EtsfVariable("valence_charges", "double", [number_of_atom_species])
+pseudopotential_types = EtsfVariable(
+    "pseudopotential_types", "char", [number_of_atom_species, character_string_length]
+)
 
 ######################
 # Electronic structure
@@ -274,7 +297,7 @@ exchange_functional = EtsfVariable("exchange_functional", "char", [character_str
 correlation_functional = EtsfVariable("correlation_functional", "char", [character_string_length])
 fermi_energy = VariableWithUnits("fermi_energy", "double", [], reqattrs=[units])
 # Units attribute required. The attribute scale to atomic units might also be mandatory
-smearing_scheme	= EtsfVariable("smearing_scheme", "char", [character_string_length])
+smearing_scheme = EtsfVariable("smearing_scheme", "char", [character_string_length])
 smearing_width = VariableWithUnits("smearing_width", "double", [], reqattrs=[units])
 # Units attribute required. The attribute scale to atomic units might also be mandatory
 
@@ -284,81 +307,140 @@ smearing_width = VariableWithUnits("smearing_width", "double", [], reqattrs=[uni
 kinetic_energy_cutoff = VariableWithUnits("kinetic_energy_cutoff", "double", [], reqattrs=[units])
 # Units attribute required. The attribute scale to atomic units might also be mandatory
 kpoint_grid_shift = EtsfVariable("kpoint_grid_shift", "double", [number_of_reduced_dimensions])
-kpoint_grid_vectors = EtsfVariable("kpoint_grid_vectors", "double", [number_of_vectors, number_of_reduced_dimensions])
+kpoint_grid_vectors = EtsfVariable(
+    "kpoint_grid_vectors", "double", [number_of_vectors, number_of_reduced_dimensions]
+)
 monkhorst_pack_folding = EtsfVariable("monkhorst_pack_folding", "integer", [number_of_vectors])
 
 ###################################################################################
 # Atomic structure and symmetry operations
 # Variables and attributes to specify the atomic structure and symmetry operations.
 ###################################################################################
-primitive_vectors = EtsfVariable("primitive_vectors", "double", [number_of_vectors, number_of_cartesian_directions])
+primitive_vectors = EtsfVariable(
+    "primitive_vectors", "double", [number_of_vectors, number_of_cartesian_directions]
+)
 
-reduced_symmetry_matrices = EtsfVariable("reduced_symmetry_matrices", "integer",
-  [number_of_symmetry_operations, number_of_reduced_dimensions, number_of_reduced_dimensions],
-  reqattrs=[symmorphic]) # The "symmorphic" attribute is needed.
+reduced_symmetry_matrices = EtsfVariable(
+    "reduced_symmetry_matrices",
+    "integer",
+    [number_of_symmetry_operations, number_of_reduced_dimensions, number_of_reduced_dimensions],
+    reqattrs=[symmorphic],
+)  # The "symmorphic" attribute is needed.
 
-reduced_symmetry_translations = EtsfVariable("reduced_symmetry_translations", "double",
-    [number_of_symmetry_operations, number_of_reduced_dimensions])
+reduced_symmetry_translations = EtsfVariable(
+    "reduced_symmetry_translations",
+    "double",
+    [number_of_symmetry_operations, number_of_reduced_dimensions],
+)
 # The "symmorphic" attribute is needed.
 
 # In principle: allowed=range(1, 233)) but I usually use 0 when the space_group is not available
 space_group = EtsfVariable("space_group", "integer", [], allowed=range(233))
-atom_species = EtsfVariable("atom_species", "integer", [number_of_atoms]) # Between 1 and number_of_atom_species.
+atom_species = EtsfVariable(
+    "atom_species", "integer", [number_of_atoms]
+)  # Between 1 and number_of_atom_species.
 
-reduced_atom_positions = EtsfVariable("reduced_atom_positions", "double", [number_of_atoms, number_of_reduced_dimensions])
+reduced_atom_positions = EtsfVariable(
+    "reduced_atom_positions", "double", [number_of_atoms, number_of_reduced_dimensions]
+)
 atomic_numbers = EtsfVariable("atomic_numbers", "double", [number_of_atom_species])
-atom_species_names = EtsfVariable("atom_species_names", "char", [number_of_atom_species, character_string_length])
+atom_species_names = EtsfVariable(
+    "atom_species_names", "char", [number_of_atom_species, character_string_length]
+)
 chemical_symbols = EtsfVariable("chemical_symbol", "char", [number_of_atom_species, symbol_length])
 
 ##########
 # K-points
 ##########
-reduced_coordinates_of_kpoints = EtsfVariable("reduced_coordinates_of_kpoints", "double",
-    [number_of_kpoints, number_of_reduced_dimensions])
+reduced_coordinates_of_kpoints = EtsfVariable(
+    "reduced_coordinates_of_kpoints", "double", [number_of_kpoints, number_of_reduced_dimensions]
+)
 kpoint_weights = EtsfVariable("kpoint_weights", "double", [number_of_kpoints])
 
 ########
 # States
 ########
-number_of_states = EtsfVariable("number_of_states", "integer", [number_of_spins, number_of_kpoints],
-    reqattrs=[k_dependent])  # The attribute "k_dependent" must be defined.
+number_of_states = EtsfVariable(
+    "number_of_states", "integer", [number_of_spins, number_of_kpoints], reqattrs=[k_dependent]
+)  # The attribute "k_dependent" must be defined.
 
-eigenvalues = VariableWithUnits("eigenvalues", "double", [number_of_spins, number_of_kpoints, max_number_of_states])
-occupations = EtsfVariable("occupations", "double", [number_of_spins, number_of_kpoints, max_number_of_states])
+eigenvalues = VariableWithUnits(
+    "eigenvalues", "double", [number_of_spins, number_of_kpoints, max_number_of_states]
+)
+occupations = EtsfVariable(
+    "occupations", "double", [number_of_spins, number_of_kpoints, max_number_of_states]
+)
 
 # Density
 # A density in such a format (represented on a 3D homogeneous grid) is suited for the representation
 # of smooth densities, as obtained naturally from pseudopotential calculations using plane waves.
 # This specification for a density can also accommodate the response densities of Density-Functional Perturbation Theory.
 
-density = VariableWithUnits("density", "double", [number_of_components, number_of_grid_points_vector3,
-            number_of_grid_points_vector2, number_of_grid_points_vector1, real_or_complex_density],
-            reqattrs=[units])
+density = VariableWithUnits(
+    "density",
+    "double",
+    [
+        number_of_components,
+        number_of_grid_points_vector3,
+        number_of_grid_points_vector2,
+        number_of_grid_points_vector1,
+        real_or_complex_density,
+    ],
+    reqattrs=[units],
+)
 # By default, the density is given in atomic units, that is, number of electrons per Bohr3.
 # The "units" attribute is required. The attribute "scale_to_atomic_units" might also be mandatory
 
 # Exchange and correlation
-correlation_potential = VariableWithUnits("correlation_potential", "double", [number_of_components,
-  number_of_grid_points_vector3, number_of_grid_points_vector2, number_of_grid_points_vector1, real_or_complex_potential],
-  reqattrs=[units])
-#Units attribute required. The attribute scale to atomic units might also be mandatory
-
-exchange_potential = VariableWithUnits("exchange_potential", "double", [number_of_components,
-  number_of_grid_points_vector3, number_of_grid_points_vector2, number_of_grid_points_vector1, real_or_complex_potential],
-  reqattrs=[units])
+correlation_potential = VariableWithUnits(
+    "correlation_potential",
+    "double",
+    [
+        number_of_components,
+        number_of_grid_points_vector3,
+        number_of_grid_points_vector2,
+        number_of_grid_points_vector1,
+        real_or_complex_potential,
+    ],
+    reqattrs=[units],
+)
 # Units attribute required. The attribute scale to atomic units might also be mandatory
 
-exchange_correlation_potential = VariableWithUnits("exchange_correlation_potential", "double", [number_of_components,
-  number_of_grid_points_vector3, number_of_grid_points_vector2, number_of_grid_points_vector1, real_or_complex_potential],
-  reqattrs=[units])
+exchange_potential = VariableWithUnits(
+    "exchange_potential",
+    "double",
+    [
+        number_of_components,
+        number_of_grid_points_vector3,
+        number_of_grid_points_vector2,
+        number_of_grid_points_vector1,
+        real_or_complex_potential,
+    ],
+    reqattrs=[units],
+)
+# Units attribute required. The attribute scale to atomic units might also be mandatory
+
+exchange_correlation_potential = VariableWithUnits(
+    "exchange_correlation_potential",
+    "double",
+    [
+        number_of_components,
+        number_of_grid_points_vector3,
+        number_of_grid_points_vector2,
+        number_of_grid_points_vector1,
+        real_or_complex_potential,
+    ],
+    reqattrs=[units],
+)
 # Units attribute required. The attribute "scale to atomic units" might also be mandatory
 
 
 class EtsfGroup:
-    """"
+    """ "
     This object is essentially a container of variables
     A Group can contain other subgroups.
     """
+
     attributes = []
     dimensions = []
     variables = []
@@ -440,6 +522,7 @@ class CrystalGroup(EtsfGroup):
     will be preferred over chemical_symbols. In case more than one such variables are present in a file,
     the same order of preference should be followed by the reading program.
     """
+
     attributes = mandatory_attributes
 
     dimensions = [
@@ -471,6 +554,7 @@ class KpointsGroup(EtsfGroup):
         reduced_coordinates_of_kpoints,
         kpoint_weights,
     ]
+
 
 class StatesGroup(EtsfGroup):
     variables = [
@@ -528,12 +612,13 @@ class DenPotGroup(EtsfGroup):
     in Density and/or Exchange and correlation will be changed, to accommodate only the segment of data
     effectively contained in the file.
     """
+
     attributes = mandatory_attributes
 
     dimensions = [
         number_of_cartesian_directions,
         number_of_vectors,
-        #real_or_complex_density and/or real_or_complex_potential,
+        # real_or_complex_density and/or real_or_complex_potential,
         number_of_components,
         number_of_grid_points_vector1,
         number_of_grid_points_vector2,
@@ -651,11 +736,12 @@ class WavefunctionGroup(EtsfGroup):
     Wavefunctions, and BSE/GW might have to be changed, to accommodate only the segment of data effectively
     contained in the file.
     """
+
     dimensions = [
         character_string_length,
         number_of_cartesian_directions,
         number_of_vectors,
-        #real_or_complex_coefficients and/or real_or_complex_wavefunctions
+        # real_or_complex_coefficients and/or real_or_complex_wavefunctions
         number_of_symmetry_operations,
         number_of_reduced_dimensions,
         max_number_of_states,
@@ -665,9 +751,8 @@ class WavefunctionGroup(EtsfGroup):
         number_of_grid_points_vector1,
         number_of_grid_points_vector2,
         number_of_grid_points_vector3,
-
-        #coefficients_of_wavefunctions,
-        #reduced_coordinates_of_plane_waves
+        # coefficients_of_wavefunctions,
+        # reduced_coordinates_of_plane_waves
     ]
 
     subgroups = [
@@ -676,8 +761,10 @@ class WavefunctionGroup(EtsfGroup):
         StatesGroup,
     ]
 
+
 class DensityGroup(DenPotGroup):
     pass
+
 
 class PotentialGroup(DenPotGroup):
     pass
@@ -689,17 +776,18 @@ def validate_vars(path):
     Return list of errors.
     """
     ncdata = netCDF4.Dataset(path, mode="r")
-    evars, all_errors = [] , []
+    evars, all_errors = [], []
     d = {}
     for var in EtsfVariable.all_variables:
-       if var.name in ncdata.variables:
+        if var.name in ncdata.variables:
             elist = var.validate(ncdata)
             if elist:
                 all_errors.append(elist)
                 evars.append(var)
     ncdata.close()
 
-    if not all_errors: return all_errors
+    if not all_errors:
+        return all_errors
 
     # Print errors
     try:
@@ -745,7 +833,7 @@ def validate_groups(path, groups):
 
     wrong_datamodel = ""
     # TODO: Activate this test.
-    #if ncdata.data_model != "NETCDF4":
+    # if ncdata.data_model != "NETCDF4":
     #    wrong_datamodel = "Found data_model %s while it should be NETCDF4" % ncdata.data_model
 
     egroups, errors = [], []
@@ -802,44 +890,40 @@ def validate_ncfile(path):
         "EIG.nc": None,
         "OUT.nc": None,
         "WFK.nc": [WavefunctionGroup],
-        #"POT.nc": [PotentialGroup],
-        #"VH.nc": [PotentialGroup],
-        #"VXC.nc": [PotentialGroup],
+        # "POT.nc": [PotentialGroup],
+        # "VH.nc": [PotentialGroup],
+        # "VXC.nc": [PotentialGroup],
         "VHXC.nc": [PotentialGroup],
-        #"KDEN.nc": [DensityGroup],
+        # "KDEN.nc": [DensityGroup],
         "HIST.nc": None,
-        #"PAWDEN.nc": [DensityGroup],
-        #"ELF.nc": [DensityGroup],
-        #"ELF_DOWN.nc": [DensityGroup],
-        #"ELF_UP.nc": [DensityGroup],
+        # "PAWDEN.nc": [DensityGroup],
+        # "ELF.nc": [DensityGroup],
+        # "ELF_DOWN.nc": [DensityGroup],
+        # "ELF_UP.nc": [DensityGroup],
         "PSPS.nc": None,
-        #"STM.nc": [],
-        #"GDEN1.nc":
-        #"GDEN2.nc":
-        #"GDEN3.nc":
-        #"KDEN.nc":
-        #"LDEN.nc":
-
+        # "STM.nc": [],
+        # "GDEN1.nc":
+        # "GDEN2.nc":
+        # "GDEN3.nc":
+        # "KDEN.nc":
+        # "LDEN.nc":
         # DFPT files.
         "DDB.nc": [CrystalGroup],
         "WFQ.nc": [WavefunctionGroup],
-        #"DEN1.nc": [DensityGroup],
-        #"POT1.nc": [PotentialGroup],
-        #"EIGR2D.nc":
-        #"EIGI2D.nc":
-
+        # "DEN1.nc": [DensityGroup],
+        # "POT1.nc": [PotentialGroup],
+        # "EIGR2D.nc":
+        # "EIGI2D.nc":
         # Anaddb files
         "anaddb.nc": [CrystalGroup],
         "EC.nc": [CrystalGroup],
         "PHBST.nc": [CrystalGroup],
-
         # GW files.
-        #"KSS.nc": [WavefunctionGroup],
+        # "KSS.nc": [WavefunctionGroup],
         "SCR.nc": [CrystalGroup, KpointsGroup, StatesGroup],
         "SUS.nc": [CrystalGroup, KpointsGroup, StatesGroup],
         "SIGRES.nc": [CrystalGroup, KpointsGroup, StatesGroup],
-        #"QP_DEN.nc": [DensityGroup],
-
+        # "QP_DEN.nc": [DensityGroup],
         # BSE files.
         "MDF.nc": [CrystalGroup, KpointsGroup, StatesGroup],
     }
@@ -851,10 +935,13 @@ def validate_ncfile(path):
     # _DS2_1WF6.nc, _DS2_DEN6, _DEN_POSITRON
     re_1wf = re.compile(r"(\w+_)1WF(\d+)(\.nc)$")
     re_1den = re.compile(r"(\w+_)DEN(\d+)(\.nc)$")
-    #re_1den = re.compile(r"(\w+_)POT(\d+)(\.nc)$")
-    if re_1wf.match(fname): groups = [WavefunctionGroup]
-    if re_1den.match(fname): groups = [DensityGroup]
-    if groups is not None: return validate_groups(path, groups)
+    # re_1den = re.compile(r"(\w+_)POT(\d+)(\.nc)$")
+    if re_1wf.match(fname):
+        groups = [WavefunctionGroup]
+    if re_1den.match(fname):
+        groups = [DensityGroup]
+    if groups is not None:
+        return validate_groups(path, groups)
 
     ext = fname.split("_")[-1]
     try:
@@ -864,5 +951,6 @@ def validate_ncfile(path):
         print(errors)
         return errors
 
-    if groups is None: return []
+    if groups is None:
+        return []
     return validate_groups(path, groups)

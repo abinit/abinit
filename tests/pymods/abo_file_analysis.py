@@ -2,6 +2,7 @@
 Implement a class used to analyze some data from ABINIT .abo file.
 Can be used to count datasets, extract number of iterations...
 """
+
 from math import ceil, floor
 
 
@@ -34,12 +35,11 @@ class AboFileAnalysis:
         # Loop over file lines (loop over datasets)
         inDatasetMode = False
         for i, line in enumerate(abo_lines):
-
             # Open dataset mode
             if line.startswith("== DATASET"):
                 if inDatasetMode:
                     dataset_list.append(current_dataset)
-                    del(current_dataset)
+                    del current_dataset
                 else:
                     inDatasetMode = True
                 current_dataset = AboDataset(int(line.split()[2]))
@@ -47,11 +47,10 @@ class AboFileAnalysis:
             elif line.startswith("== END DATASET(S)"):
                 inDatasetMode = False
                 dataset_list.append(current_dataset)
-                del(current_dataset)
+                del current_dataset
 
             # Read data from current dataset
             else:
-
                 # Read optdriver
                 if "meta: {optdriver:" in line:
                     current_dataset.optdriver = int(line.split()[2].split(",")[0])
@@ -80,7 +79,7 @@ class AboFileAnalysis:
                     # Look for:
                     #    At SCF step X, the difference between
                     #    is converged :  diff(etot_el-etot_pos)=
-                    if "At SCF step" in line and "converged" in abo_lines[i+1]:
+                    if "At SCF step" in line and "converged" in abo_lines[i + 1]:
                         current_dataset.SCF_niter.append(int(line.split()[3].split(",")[0]))
                     # Look for:
                     #    nstep= X was not enough SCF cycles to converge;
@@ -93,7 +92,9 @@ class AboFileAnalysis:
 
         return dataset_list
 
-    def compare_with(self,other_abo_file,option,percent_allowed_small=0,percent_allowed_large=0):
+    def compare_with(
+        self, other_abo_file, option, percent_allowed_small=0, percent_allowed_large=0
+    ):
         """
         Compare the current abo file with another one
         Compare only specific parts specified by argument option (string)
@@ -106,9 +107,10 @@ class AboFileAnalysis:
                                  for large numbers of iterations (n_iter>8)
         """
         status = "succeeded"
-        err_msg = "" ; err_msg_short = ""
-        tol_small = float(percent_allowed_small)/100.
-        tol_large = float(percent_allowed_large)/100.
+        err_msg = ""
+        err_msg_short = ""
+        tol_small = float(percent_allowed_small) / 100.0
+        tol_large = float(percent_allowed_large) / 100.0
 
         if status == "succeeded":
             if other_abo_file is None:
@@ -118,40 +120,56 @@ class AboFileAnalysis:
         if status == "succeeded":
             if len(self.dtsets) != len(other_abo_file.dtsets):
                 status = "failed"
-                print ("2 lengths of dtsets = ", len(self.dtsets), len(other_abo_file.dtsets))
+                print("2 lengths of dtsets = ", len(self.dtsets), len(other_abo_file.dtsets))
                 raise ValueError("ERROR: the two abo files have different dataset numbers!")
 
         if status == "succeeded":
             if "iterations" in option and "iterations" in self.option:
-
                 for i, dtset1 in enumerate(self.dtsets):
                     dtset2 = other_abo_file.dtsets[i]
                     jdt = dtset1.number
 
                     if dtset1.MD_niter is not None and dtset2.MD_niter is not None:
-                        tol = tol_small if dtset1.MD_niter<=8 else tol_large
-                        if dtset2.MD_niter > ceil(dtset1.MD_niter*(1.+tol)) or dtset2.MD_niter < floor(dtset1.MD_niter*(1.-tol)):
+                        tol = tol_small if dtset1.MD_niter <= 8 else tol_large
+                        if dtset2.MD_niter > ceil(
+                            dtset1.MD_niter * (1.0 + tol)
+                        ) or dtset2.MD_niter < floor(dtset1.MD_niter * (1.0 - tol)):
                             status = "failed"
-                            err_msg = err_msg+"\n" if err_msg != "" else ""
-                            err_msg += "Dataset %d, # of MD/relax iterations differs by more than %d%%!" % (jdt,int(tol*100))
+                            err_msg = err_msg + "\n" if err_msg != "" else ""
+                            err_msg += (
+                                "Dataset %d, # of MD/relax iterations differs by more than %d%%!"
+                                % (jdt, int(tol * 100))
+                            )
                             err_msg_short += "(dtset %d, MD/relax cycle)" % (jdt)
 
-                    if len(dtset1.SCF_niter)>0 and len(dtset2.SCF_niter)>0:
+                    if len(dtset1.SCF_niter) > 0 and len(dtset2.SCF_niter) > 0:
                         ncycle = len(dtset1.SCF_niter)
                         for it, niter1 in enumerate(dtset1.SCF_niter):
                             niter2 = dtset2.SCF_niter[it]
-                            tol = tol_small if niter1<=8 else tol_large
-                            if niter2 > ceil(niter1*(1.+tol)) or niter2 < floor(niter1*(1.-tol)):
+                            tol = tol_small if niter1 <= 8 else tol_large
+                            if niter2 > ceil(niter1 * (1.0 + tol)) or niter2 < floor(
+                                niter1 * (1.0 - tol)
+                            ):
                                 status = "failed"
-                                err_msg = err_msg+"\n" if err_msg != "" else ""
+                                err_msg = err_msg + "\n" if err_msg != "" else ""
                                 if ncycle == 1:
-                                    err_msg += "Dataset %d, # of [non-]SCF iterations differs by more than %d%%!" % (jdt,int(tol*100))
+                                    err_msg += (
+                                        "Dataset %d, # of [non-]SCF iterations differs by more than %d%%!"
+                                        % (jdt, int(tol * 100))
+                                    )
                                     err_msg_short += "(dtset %d, SCF_iter)" % (i)
                                 else:
-                                    err_msg += "Dataset %d, MD/relax cycle %d, # of [non-]SCF iterations differs by more than %d%%!" % (jdt,it+1,int(tol*100))
-                                    err_msg_short += "(dtset %d, MD/relax cycle %d, SCF_iter)" % (jdt,it+1)
+                                    err_msg += (
+                                        "Dataset %d, MD/relax cycle %d, # of [non-]SCF iterations differs by more than %d%%!"
+                                        % (jdt, it + 1, int(tol * 100))
+                                    )
+                                    err_msg_short += "(dtset %d, MD/relax cycle %d, SCF_iter)" % (
+                                        jdt,
+                                        it + 1,
+                                    )
 
-        return status,err_msg,err_msg_short
+        return status, err_msg, err_msg_short
+
 
 class AboDataset:
     """Object storing data extracted from ABINIT abo file for ONE dataset."""
@@ -160,4 +178,4 @@ class AboDataset:
         self.number = number
         self.optddriver = 0
         self.MD_niter = None
-        self.SCF_niter = [] # This is a list because several SCF can occur in a dataset
+        self.SCF_niter = []  # This is a list because several SCF can occur in a dataset

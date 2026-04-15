@@ -1,4 +1,3 @@
-
 def get_ax_fig_plt(ax=None, **kwargs):
     """
     Helper function used in plot functions supporting an optional Axes argument.
@@ -14,6 +13,7 @@ def get_ax_fig_plt(ax=None, **kwargs):
         plt: matplotlib pyplot module.
     """
     import matplotlib.pyplot as plt
+
     if ax is None:
         fig = plt.figure(**kwargs)
         ax = fig.add_subplot(1, 1, 1)
@@ -55,8 +55,7 @@ def add_fig_kwargs(func):
             fig.suptitle(title)
 
         if size_kwargs is not None:
-            fig.set_size_inches(size_kwargs.pop("w"), size_kwargs.pop("h"),
-                                **size_kwargs)
+            fig.set_size_inches(size_kwargs.pop("w"), size_kwargs.pop("h"), **size_kwargs)
 
         if ax_grid is not None:
             for ax in fig.axes:
@@ -64,6 +63,7 @@ def add_fig_kwargs(func):
 
         if ax_annotate:
             from string import ascii_letters
+
             tags = ascii_letters
             if len(fig.axes) > len(tags):
                 tags = (1 + len(ascii_letters) // len(fig.axes)) * ascii_letters
@@ -83,12 +83,15 @@ def add_fig_kwargs(func):
 
         if show:
             import matplotlib.pyplot as plt
+
             plt.show()
 
         return fig
 
     # Add docstring to the decorated method.
-    s = "\n\n" + """\
+    s = (
+        "\n\n"
+        + """\
         Keyword arguments controlling the display of the figure:
 
         ================  ====================================================
@@ -107,6 +110,7 @@ def add_fig_kwargs(func):
         ================  ====================================================
 
 """
+    )
 
     if wrapper.__doc__ is not None:
         # Add s at the end of the docstring.
@@ -118,13 +122,14 @@ def add_fig_kwargs(func):
     return wrapper
 
 
-class MplExpose: # pragma: no cover
+class MplExpose:  # pragma: no cover
     """
     Example:
         with MplExpose() as e:
             e(obj.plot1(show=False))
             e(obj.plot2(show=False))
     """
+
     def __init__(self, slide_mode=False, slide_timeout=None, verbose=1):
         """
         Args:
@@ -144,7 +149,9 @@ class MplExpose: # pragma: no cover
             if self.slide_mode:
                 print("\nSliding matplotlib figures with slide timeout: %s [s]" % slide_timeout)
             else:
-                print("\nLoading all matplotlib figures before showing them. It may take some time...")
+                print(
+                    "\nLoading all matplotlib figures before showing them. It may take some time..."
+                )
 
         self.start_time = time.time()
 
@@ -154,6 +161,7 @@ class MplExpose: # pragma: no cover
         generator yielding figures.
         """
         import types
+
         if isinstance(obj, (types.GeneratorType, list, tuple)):
             for fig in obj:
                 self.add_fig(fig)
@@ -162,13 +170,15 @@ class MplExpose: # pragma: no cover
 
     def add_fig(self, fig):
         """Add a matplotlib figure."""
-        if fig is None: return
+        if fig is None:
+            return
 
         if not self.slide_mode:
             self.figures.append(fig)
         else:
-            #print("Printing and closing", fig)
+            # print("Printing and closing", fig)
             import matplotlib.pyplot as plt
+
             if self.timeout_ms is not None:
                 # Creating a timer object
                 # timer calls plt.close after interval milliseconds to close the window.
@@ -191,6 +201,7 @@ class MplExpose: # pragma: no cover
         if not self.slide_mode:
             print("All figures in memory, elapsed time: %.3f s" % (time.time() - self.start_time))
             import matplotlib.pyplot as plt
+
             plt.show()
             for fig in self.figures:
                 fig.clear()

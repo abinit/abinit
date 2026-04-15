@@ -3,6 +3,7 @@ Implement the steps to extract data from an Abinit output file.
 Extract lines associated with their "meta character" (that makes sense in
 fldiff), and valid YAML documents associated with their iteration context.
 """
+
 import re
 
 from .yaml_tools import Document
@@ -69,7 +70,8 @@ class DataExtractor:
         return c
 
     def ignore_line(self, line):
-        if (any(line.startswith(l) for l in self.IGNORE_LINES_STARTING_WITH)): return True
+        if any(line.startswith(l) for l in self.IGNORE_LINES_STARTING_WITH):
+            return True
         return False
 
     def extract(self, src_lines):
@@ -84,8 +86,8 @@ class DataExtractor:
 
         current_doc = None
         for i, line in enumerate(src_lines):
-
-            if self.ignore_line(line): continue
+            if self.ignore_line(line):
+                continue
 
             # TODO
             # Ignore Yaml documents matching e.g. `--- !tagname # fldiff_ignore
@@ -129,8 +131,11 @@ class DataExtractor:
                             docs[current_doc.id] = current_doc
 
                     elif self.use_fl_for_yaml:
-                         # let fldiff compare lines if YAML test is disabled
-                        lines.extend((current_doc.start + i, " ", " " + line) for i, line in enumerate(current_doc.lines))
+                        # let fldiff compare lines if YAML test is disabled
+                        lines.extend(
+                            (current_doc.start + i, " ", " " + line)
+                            for i, line in enumerate(current_doc.lines)
+                        )
 
                     # go back to normal mode
                     current_doc = None
@@ -139,7 +144,7 @@ class DataExtractor:
                 # starting a yaml doc
                 if line.startswith("---") and doc_start_re.match(line):
                     tag = doc_start_re.match(line).group(1)
-                    #iterators_state =
+                    # iterators_state =
                     current_doc = Document(self.iterators_state.copy(), i, [line], tag=tag)
                 else:
                     ignored.append((i, line))

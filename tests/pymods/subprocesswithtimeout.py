@@ -13,29 +13,57 @@ class SubProcessWithTimeout:
     """
     Based on from http://stackoverflow.com/questions/3876886/timeout-a-subprocess?rq=1
     """
+
     Error = TimeoutError
 
-    def __init__(self, timeout, delay=.05):
+    def __init__(self, timeout, delay=0.05):
         self.timeout = float(timeout)
         self.delay = float(delay)
 
         if self.delay > self.timeout or self.delay <= 0 or self.timeout <= 0:
             raise ValueError("delay and timeout must be positive with delay <= timeout")
 
-    def run(self, args,
-            bufsize=0, executable=None, stdin=None, stdout=None, stderr=None, preexec_fn=None,
-            close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0):
+    def run(
+        self,
+        args,
+        bufsize=0,
+        executable=None,
+        stdin=None,
+        stdout=None,
+        stderr=None,
+        preexec_fn=None,
+        close_fds=False,
+        shell=False,
+        cwd=None,
+        env=None,
+        universal_newlines=False,
+        startupinfo=None,
+        creationflags=0,
+    ):
         """Same interface as Popen"""
-        self.proc = subprocess.Popen(args,
-                                     bufsize, executable, stdin, stdout, stderr, preexec_fn,
-                                     close_fds, shell, cwd, env, universal_newlines, startupinfo, creationflags)
+        self.proc = subprocess.Popen(
+            args,
+            bufsize,
+            executable,
+            stdin,
+            stdout,
+            stderr,
+            preexec_fn,
+            close_fds,
+            shell,
+            cwd,
+            env,
+            universal_newlines,
+            startupinfo,
+            creationflags,
+        )
 
         return_code = self._wait_testcomplete()
         return self.proc, return_code
 
     def _wait_testcomplete(self):
         start = time.time()
-        while (time.time()-start) < self.timeout:
+        while (time.time() - start) < self.timeout:
             if self.proc.poll() is not None:  # 0 just means successful exit
                 return self.proc.returncode
             time.sleep(self.delay)
@@ -66,7 +94,7 @@ import unittest
 
 class TestSubProcessWithTimeout(unittest.TestCase):
     def test_with_sleep(self):
-        """"Testing if sleep 5 raises TimeoutError"""
+        """ "Testing if sleep 5 raises TimeoutError"""
         proc, retcode = SubProcessWithTimeout(1).run(["sleep", "5"])
         self.assertEqual(retcode, 124)
 
