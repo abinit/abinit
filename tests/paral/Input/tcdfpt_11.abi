@@ -2,7 +2,8 @@
 # at finite wave-vector antiferromagnetic MnF2
 # (M. Royo, 22.01.2026)
 
-   ndtset 3
+   ndtset 2
+   jdtset 1 2
 
 ### 1) GROUND STATE
    tolvrs1  1.0d-10   
@@ -74,7 +75,7 @@ xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
           8.0372381769E-01  1.9627618231E-01  5.0000000000E-01
 
 #Definition of the planewave basis set
-ecut   4.0         
+ecut   3.0         
 nband  42
 
 #Definition of the k-point grid
@@ -115,22 +116,13 @@ pseudos "Mn_LDA_FR_7e.psp8, F_LDA_FR.psp8"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain =  tcdfpt_11.abi, tcdfpt_12.abi, tcdfpt_14.abi
+#%% test_chain =  tcdfpt_11.abi, tcdfpt_12.abi, tcdfpt_13.abi, tcdfpt_15.abi
 #%% [files]
 #%% [NCPU_8]
 #%% files_to_test =
 #%%   tcdfpt_11_MPI8.abo, tolnlines=  5, tolabs=  4.192e-04, tolrel=  3.000e-06, fld_options=-easy
 #%% [shell]  
 #%% post_commands=
-#%%   ww_mv tcdfpt_11_MPI8o_DS1_WFK    tcdfpt_12_MPI8o_DS1_WFK;
-#%%   ww_mv tcdfpt_11_MPI8o_DS3_1WF55  tcdfpt_11_MPI8o_DS2_1WF55;
-#%%   ww_mv tcdfpt_11_MPI8o_DS3_1WF56  tcdfpt_11_MPI8o_DS2_1WF56; 
-#%%   ww_mv tcdfpt_11_MPI8o_DS3_1WF58  tcdfpt_11_MPI8o_DS2_1WF58;
-#%%   ww_mv tcdfpt_11_MPI8o_DS3_1WF59  tcdfpt_11_MPI8o_DS2_1WF59;
-#%%   ww_mv tcdfpt_11_MPI8o_DS3_1WF124 tcdfpt_11_MPI8o_DS2_1WF124;
-#%%   ww_mv tcdfpt_11_MPI8o_DS3_1WF125 tcdfpt_11_MPI8o_DS2_1WF125;
-#%%   ww_mv tcdfpt_11_MPI8o_DS3_1WF127 tcdfpt_11_MPI8o_DS2_1WF127;
-#%%   ww_mv tcdfpt_11_MPI8o_DS3_1WF128 tcdfpt_11_MPI8o_DS2_1WF128 
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8
