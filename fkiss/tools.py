@@ -1,10 +1,9 @@
 """Tools extracted by AbiPy."""
 # TODO: Rationalize modules, merged with pymods
-from __future__ import print_function, division, unicode_literals, absolute_import
 
-import sys
-import os
 import abc
+import os
+import sys
 import tempfile
 
 from .termcolor import cprint
@@ -28,13 +27,13 @@ class lazy_property:
         if inst is None:
             return self
 
-        if not hasattr(inst, '__dict__'):
+        if not hasattr(inst, "__dict__"):
             raise AttributeError("'%s' object has no attribute '__dict__'"
                                  % (inst_cls.__name__,))
 
         name = self.__name__
-        if name.startswith('__') and not name.endswith('__'):
-            name = '_%s%s' % (inst_cls.__name__, name)
+        if name.startswith("__") and not name.endswith("__"):
+            name = "_%s%s" % (inst_cls.__name__, name)
 
         value = self.__func(inst)
         inst.__dict__[name] = value
@@ -49,12 +48,12 @@ class lazy_property:
         """
         inst_cls = inst.__class__
 
-        if not hasattr(inst, '__dict__'):
+        if not hasattr(inst, "__dict__"):
             raise AttributeError("'%s' object has no attribute '__dict__'"
                                  % (inst_cls.__name__,))
 
-        if name.startswith('__') and not name.endswith('__'):
-            name = '_%s%s' % (inst_cls.__name__, name)
+        if name.startswith("__") and not name.endswith("__"):
+            name = "_%s%s" % (inst_cls.__name__, name)
 
         if not isinstance(getattr(inst_cls, name), cls):
             raise AttributeError("'%s.%s' is not a %s attribute"
@@ -228,16 +227,15 @@ class NotebookWriter: #metaclass=abc.ABCMeta):
 
         if foreground:
             return os.system("%s %s" % (appname, nbpath))
-        else:
-            fd, tmpname = tempfile.mkstemp(text=True)
-            print(tmpname)
-            cmd = "%s %s" % (appname, nbpath)
-            print("Executing:", cmd)
-            print("stdout and stderr redirected to %s" % tmpname)
-            import subprocess
-            process = subprocess.Popen(cmd.split(), shell=False, stdout=fd, stderr=fd)
-            cprint("pid: %s" % str(process.pid), "yellow")
-            return 0
+        fd, tmpname = tempfile.mkstemp(text=True)
+        print(tmpname)
+        cmd = "%s %s" % (appname, nbpath)
+        print("Executing:", cmd)
+        print("stdout and stderr redirected to %s" % tmpname)
+        import subprocess
+        process = subprocess.Popen(cmd.split(), shell=False, stdout=fd, stderr=fd)
+        cprint("pid: %s" % str(process.pid), "yellow")
+        return 0
 
     @staticmethod
     def get_nbformat_nbv():
@@ -294,13 +292,14 @@ class NotebookWriter: #metaclass=abc.ABCMeta):
         This method must be called at the end of ``write_notebook``.
         nb is the jupyter notebook and nbpath the argument passed to ``write_notebook``.
         """
-        import io, os, tempfile
+        import os
+        import tempfile
         if nbpath is None:
-            _, nbpath = tempfile.mkstemp(prefix="abinb_", suffix='.ipynb', dir=os.getcwd(), text=True)
+            _, nbpath = tempfile.mkstemp(prefix="abinb_", suffix=".ipynb", dir=os.getcwd(), text=True)
 
         # Write notebook
         import nbformat
-        with io.open(nbpath, 'wt', encoding="utf8") as fh:
+        with open(nbpath, "w", encoding="utf8") as fh:
             nbformat.write(nb, fh)
             return nbpath
 
@@ -323,7 +322,7 @@ class NotebookWriter: #metaclass=abc.ABCMeta):
             name of the pickle file.
         """
         if filepath is None:
-            _, filepath = tempfile.mkstemp(suffix='.pickle')
+            _, filepath = tempfile.mkstemp(suffix=".pickle")
 
         with open(filepath, "wb") as fh:
             pickle.dump(self, fh)

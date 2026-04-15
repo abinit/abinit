@@ -4,30 +4,31 @@ from __future__ import annotations
 __version__ = "1.0"
 __author__ = "Matteo Giantomassi"
 
-import sys
-import os
+import argparse
 import dataclasses
+import json
+import logging
+import os
 import platform
 import shutil
+import sys
 import tempfile
-import argparse
-import json
-
-from os.path import join as pj, abspath as absp, basename
-from socket import gethostname
-from warnings import warn
-from optparse import OptionParser
 from dataclasses import dataclass, field
+from os.path import abspath as absp
+from os.path import basename
+from os.path import join as pj
+from socket import gethostname
 from typing import Optional
+from warnings import warn
 
-import logging
 logger = logging.getLogger(__name__)
 
 try:
-    from ConfigParser import SafeConfigParser, NoOptionError
+    from ConfigParser import NoOptionError, SafeConfigParser
 except ImportError:
     # The ConfigParser module has been renamed to configparser in Python 3
-    from configparser import ConfigParser as SafeConfigParser, NoOptionError
+    from configparser import ConfigParser as SafeConfigParser
+    from configparser import NoOptionError
 
 
 # Set ABI_PSPDIR env variable to point to the absolute path of Pspdir
@@ -45,8 +46,8 @@ abitests = tests.abitests
 abenv = tests.abenv
 
 from pymods import termcolor
+from pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
 from pymods.testsuite import BuildEnvironment
-from pymods.jobrunner import TimeBomb, JobRunner, OMPEnvironment
 from pymods.tools import pprint_table
 
 ROOT, _ = os.path.split(absp(__file__))
@@ -56,7 +57,7 @@ TESTBOT_JSON = pj(ROOT, "testbot.json")
 
 
 def lazy__str__(func):
-    "Lazy decorator for __str__ methods"
+    """Lazy decorator for __str__ methods"""
     def oncall(*args, **kwargs):
         self = args[0]
         return "\n".join(str(k) + " : " + str(v) for (k, v) in self.__dict__.items())
@@ -67,7 +68,7 @@ def _yesno2bool(string):
     string = string.lower().strip().replace('"', "").replace("'", "")
     if string == "yes":
         return True
-    elif string == "no":
+    if string == "no":
         return False
     raise ValueError("Cannot interpret string: %s" % string)
 
@@ -207,11 +208,11 @@ def get_mpi_prefix_from_env() -> str | None:
     # This is what JMB does in buildbot_worker/testbot.py
     # The problem is that this has precedence over mpi_prefix. Should ask why!!
     try:
-       return os.environ['MPI_HOME']
+       return os.environ["MPI_HOME"]
     except:
        pass
     try:
-       return os.environ['MPIHOME']
+       return os.environ["MPIHOME"]
     except:
         pass
 
@@ -221,11 +222,11 @@ def get_mpi_prefix_from_env() -> str | None:
 def read_builders(fmt: str) -> list[dict]:
     """Read builders from file."""
     if fmt == "yaml":
-      import ruamel.yaml as yaml
-      with open(TESTBOT_YAML, "rt") as f:
-        all_builders = yaml.YAML(typ='safe', pure=True).load(f.read())
+      from ruamel import yaml
+      with open(TESTBOT_YAML) as f:
+        all_builders = yaml.YAML(typ="safe", pure=True).load(f.read())
     elif fmt == "json":
-      with open(TESTBOT_JSON, "rt") as f:
+      with open(TESTBOT_JSON) as f:
         all_builders = json.load(f)
     else:
         raise ValueError(f"Invalid {fmt=}")
@@ -465,7 +466,7 @@ class TestBot:
         numeric_level = getattr(logging, "ERROR", None)
 
         if not isinstance(numeric_level, int):
-            raise ValueError('Invalid log level: %s' % numeric_level)
+            raise ValueError("Invalid log level: %s" % numeric_level)
         logging.basicConfig(level=numeric_level)
 
         # Read testfarm configuration file with builders.
@@ -474,7 +475,7 @@ class TestBot:
         parser.read(build_examples)
 
         if self.slavename not in parser.sections():
-            print(f"workers:", parser.sections())
+            print("workers:", parser.sections())
             raise ValueError("%s is not a valid buildbot builder." % self.slavename)
 
         # 2) Initialize the job_runner.
@@ -482,7 +483,7 @@ class TestBot:
         self.build_env.set_buildbot_builder(self.slavename)
 
         # TODO: These parameters should be passed to testbot.cfg
-        from tests.pymods.devtools import number_of_cpus, number_of_gpus
+        from tests.pymods.devtools import number_of_gpus
         #max_cpus = max(1, number_of_cpus())
         if "HAVE_GPU" not in self.build_env.defined_cppvars:
             self.max_gpus = 0
@@ -566,8 +567,7 @@ class TestBot:
 
         if os.path.exists(workdir_name):
             raise RuntimeError("%s already exists!" % workdir_name)
-        else:
-            os.mkdir(workdir_name)
+        os.mkdir(workdir_name)
 
         if self.tmp_basedir:
             workdir = os.path.join(tempfile.mkdtemp(dir=self.tmp_basedir), workdir_name)
@@ -699,7 +699,7 @@ class TestBot:
         # Create file to signal this condition and return 0.
         if nexecuted == 0:
             print("No file found")
-            with open("__emptylist__", "wt") as fh:
+            with open("__emptylist__", "w") as fh:
                 fh.write("nfailed = %d, npassed = %d, nexecuted = %d" % (nfailed, npassed, nexecuted))
                 return 0
 
@@ -707,8 +707,7 @@ class TestBot:
         if self.type == "ref":
             # Reference builder --> all the tests must pass.
             return nfailed + npassed
-        else:
-            return nfailed
+        return nfailed
 
 
 def analyze(fname):
@@ -716,13 +715,13 @@ def analyze(fname):
     This piece of code has been extracted from analysis9
     """
     #fname = "testbot_summary.json"
-    with open(fname, "rt") as data_file:
+    with open(fname) as data_file:
        d = json.load(data_file)
 
     # FIXME What is this?
     #d['tag'] = sys.argv[1]
 
-    with open(fname, 'wt') as data_file:
+    with open(fname, "w") as data_file:
        json.dump(d, data_file)
 
     try:
@@ -734,21 +733,21 @@ def analyze(fname):
         print(dashline)
         rtime = 0.0
         ttime = 0.0
-        paral = ''
-        mpiio = ''
+        paral = ""
+        mpiio = ""
         for t, s in sorted(tests_status.items()):
             kt = False
             for i in d[t].keys():
-               if  d[t][i]['status'] != "skipped":
+               if  d[t][i]["status"] != "skipped":
                   kt = True
-                  rtime += d[t][i]['run_etime']
-                  ttime += d[t][i]['tot_etime']
+                  rtime += d[t][i]["run_etime"]
+                  ttime += d[t][i]["tot_etime"]
             if kt:
-                 temp = ''.join(['%5s   |' % l for l in  s.split('/') ])
-                 temp = '%15s | %10s %7.1f  | %7.1f' % (t,temp,rtime,ttime)
-                 if t == 'mpiio':
+                 temp = "".join(["%5s   |" % l for l in  s.split("/") ])
+                 temp = "%15s | %10s %7.1f  | %7.1f" % (t,temp,rtime,ttime)
+                 if t == "mpiio":
                     mpiio = temp
-                 elif t == 'paral':
+                 elif t == "paral":
                     paral = temp
                  else:
                     print(temp)
@@ -756,17 +755,17 @@ def analyze(fname):
 
         print(dashline)
         putline = 0
-        if paral != '':
+        if paral != "":
             print(paral)
             putline=1
-        if mpiio != '':
+        if mpiio != "":
             print(mpiio)
             putline=1
         if putline == 1:
             print(dashline)
     except:
         print("no results")
-        with open("ANALYSIS_SUMMARY_FAILED", "wt") as f:
+        with open("ANALYSIS_SUMMARY_FAILED", "w") as f:
             f.write("")
         sys.exit(99)
 
@@ -798,7 +797,7 @@ class TestBotSummary:
         where stats is given by "nfail/npass/nsucces"
         """
         def stats2string(stats):
-            "helper function that returns (nfail/npass/nsucc/nskipped)"
+            """Helper function that returns (nfail/npass/nsucc/nskipped)"""
             return "/".join(str(stats[k]) for k in self._possible_status)
 
         table = [self.suite_names()]
@@ -896,7 +895,7 @@ class TestBotSummary:
                 print("Warning: About to overwrite key %s" % suite_name)
             d[suite_name] = self.res_table[suite_name]
 
-        with open(fname, "wt") as fh:
+        with open(fname, "w") as fh:
             json.dump(d, fh)
 
 
@@ -919,27 +918,27 @@ def get_parser(with_epilog=False):
     parser = argparse.ArgumentParser(epilog=get_epilog() if with_epilog else "",
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
 
-    parser.add_argument('--loglevel', default="ERROR", type=str,
+    parser.add_argument("--loglevel", default="ERROR", type=str,
         help="Set the loglevel. Possible values: CRITICAL, ERROR (default), WARNING, INFO, DEBUG")
-    parser.add_argument('-V', '--version', action='version', version=__version__)
+    parser.add_argument("-V", "--version", action="version", version=__version__)
 
-    parser.add_argument('-v', '--verbose', default=0, action='count', # -vv --> verbose=2
-        help='verbose, can be supplied multiple times to increase verbosity')
+    parser.add_argument("-v", "--verbose", default=0, action="count", # -vv --> verbose=2
+        help="verbose, can be supplied multiple times to increase verbosity")
 
     # Create the parsers for the sub-commands
-    subparsers = parser.add_subparsers(dest='command', help='sub-command help',
+    subparsers = parser.add_subparsers(dest="command", help="sub-command help",
        description="Valid subcommands, use command --help for help")
 
     # Subparser for run
-    p_run = subparsers.add_parser('run', # parents=[copts_parser],
+    p_run = subparsers.add_parser("run", # parents=[copts_parser],
         help="Run tests.")
     p_run.add_argument("builder_name", type=str, help="Name of the builder")
-    p_run.add_argument('-d', '--dry-run', default=True, action="store_true", help='Dry-run mode.')
+    p_run.add_argument("-d", "--dry-run", default=True, action="store_true", help="Dry-run mode.")
 
-    p_info = subparsers.add_parser('info', help="Print info on options.")
+    p_info = subparsers.add_parser("info", help="Print info on options.")
 
     # Subparser for validate
-    p_validate = subparsers.add_parser('validate', # parents=[copts_parser],
+    p_validate = subparsers.add_parser("validate", # parents=[copts_parser],
         help="Validate yaml file and convert to JSON.")
 
     return parser

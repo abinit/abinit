@@ -1,4 +1,3 @@
-# coding: utf-8
 
 def get_ax_fig_plt(ax=None, **kwargs):
     """
@@ -122,7 +121,6 @@ def add_fig_kwargs(func):
 class MplExpose: # pragma: no cover
     """
     Example:
-
         with MplExpose() as e:
             e(obj.plot1(show=False))
             e(obj.plot2(show=False))
@@ -185,7 +183,7 @@ class MplExpose: # pragma: no cover
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Activated at the end of the with statement. """
+        """Activated at the end of the with statement."""
         self.expose()
 
     def expose(self):

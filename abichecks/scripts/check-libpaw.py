@@ -1,19 +1,17 @@
 #!/usr/bin/env python
-# encoding=utf8
-from __future__ import unicode_literals, division, print_function, absolute_import
 
+import glob
+import os
+import sys
 import tempfile
 from subprocess import Popen
-import string
-import glob,os
-import re
-import sys
 
 try:
-    sys.setdefaultencoding('utf8')
+    sys.setdefaultencoding("utf8")
 except AttributeError:
     pass
 from shutil import rmtree
+
 
 def main(home_dir=""):
   # create tarball

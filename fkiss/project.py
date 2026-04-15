@@ -1,24 +1,19 @@
-# coding: utf-8
 """
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
 
+import difflib
 import functools
 import os
-import sys
-import io
-import re
-import time
-import shutil
 import pickle
-import difflib
-
+import sys
+import time
 from collections import OrderedDict, defaultdict
+from pprint import pformat, pprint
 from textwrap import TextWrapper
-from pprint import pprint, pformat
-from .parser import FortranKissParser, fort2html
-from .tools import lazy_property, NotebookWriter
+
+from .parser import FortranKissParser
 from .termcolor import cprint
+from .tools import NotebookWriter, lazy_property
 
 try:
     from ConfigParser import ConfigParser
@@ -302,7 +297,7 @@ class FortranFile:
         """
         Find and return the public datatype with `name`. Return None if not found.
         """
-        for p in getattr(self, "modules"):
+        for p in self.modules:
             for e in p.types:
                 if e.name == name: return e
                 if all_names is not None: all_names.append(e.name)
@@ -369,7 +364,7 @@ class FortranFile:
 
         # Set graph attributes.
         fg.attr(label=self.name, rankdir="LR", pagedir="BL") # constraint="false", pack="true", packMode="clust")
-        fg.node_attr.update(color='lightblue2', style='filled')
+        fg.node_attr.update(color="lightblue2", style="filled")
 
         # Build clusters representing directories.
         all_nodes = sorted([self] + self.all_used_mods + self.all_usedby_mods, key=lambda o: o.dirname)
@@ -426,7 +421,7 @@ def parse_extra_dist(filepath, varname):
         list: A list of extracted file names.
     """
     filenames = []
-    with open(filepath, 'rt') as file:
+    with open(filepath) as file:
         multiline = False
         for line in file:
             line = line.strip()
@@ -592,8 +587,8 @@ class AbinitProject(NotebookWriter):
                 except KeyError:
                     #print(self.all_modules.keys())
                     raise RuntimeError((
-                        "Cannot find Fortran module `%s`\n used by `%s`\nin Abinit project.\n" +
-                        "It may be a syntax error or a stale import if you've removed the module.\n" +
+                        "Cannot find Fortran module `%s`\n used by `%s`\nin Abinit project.\n"
+                        "It may be a syntax error or a stale import if you've removed the module.\n"
                         "If it's an external module (e.g. mpi), add it to the EXTERNAL_MODS list in ~abinit/fkiss/project.py.\n"
                         ) % (use_name, fort_file.path))
                 fort_file.all_used_mods.append(used_mod)
@@ -813,13 +808,13 @@ class AbinitProject(NotebookWriter):
                 cprint("Cannot find interface `%s` in project" % what, color="red")
                 matches = difflib.get_close_matches(what, name2interface.keys())
                 if matches:
-                    cprint("Perhaps you meant: {}".format(matches), color="red")
+                    cprint(f"Perhaps you meant: {matches}", color="red")
         else:
             # Print all interfaces.
             for interface in name2interface.values():
                 cprint(repr(interface), color="yellow")
                 print(interface.to_string(verbose=verbose))
-                print("")
+                print()
 
     def find_public_entity(self, name):
         """
@@ -835,7 +830,7 @@ class AbinitProject(NotebookWriter):
         cprint("Cannot find public entity `%s`" % str(name), color="red")
         matches = difflib.get_close_matches(name, all_names)
         if matches:
-            cprint("Perhaps you meant: {}".format(matches), color="red")
+            cprint(f"Perhaps you meant: {matches}", color="red")
 
         return None
 
@@ -851,7 +846,7 @@ class AbinitProject(NotebookWriter):
 
         # Print closest matches
         matches = difflib.get_close_matches(name, all_names)
-        if matches: cprint("Perhaps you meant: {}".format(matches), color="red")
+        if matches: cprint(f"Perhaps you meant: {matches}", color="red")
 
         return None
 
@@ -954,7 +949,7 @@ class AbinitProject(NotebookWriter):
 
         return allmods
 
-    @functools.lru_cache(maxsize=None)
+    @functools.cache
     def _find_allmods(self, head_path):
         # This trick is needed for F90.in files that will be post-processed by the build system
         if head_path.endswith(".F90.in"): head_path = head_path[:-3]
@@ -1023,13 +1018,12 @@ class AbinitProject(NotebookWriter):
         # Read header with comments to be added to the new conf file.
         # NB: use [DEFAULT] as sentinel.
         header = []
-        with io.open(binconf_path, "rt", encoding="utf8") as fh:
+        with open(binconf_path, encoding="utf8") as fh:
             for line in fh:
                 line = line.strip()
                 if line == "[DEFAULT]":
                     break
-                else:
-                    header.append(line)
+                header.append(line)
             else:
                 raise ValueError("Cannot find `[DEFAULT]` string in %s" % binconf_path)
         header.append("")
@@ -1057,7 +1051,7 @@ class AbinitProject(NotebookWriter):
         if dryrun:
             print(fobj.getvalue())
         else:
-            with open(binconf_path, "wt") as fh:
+            with open(binconf_path, "w") as fh:
                 fh.write(fobj.getvalue())
         fobj.close()
 
@@ -1120,7 +1114,7 @@ class AbinitProject(NotebookWriter):
                 print("# For dirpath:", dirpath)
                 print(s, end=2 * "\n")
             else:
-                with open(abinitdep_path, "wt") as fh:
+                with open(abinitdep_path, "w") as fh:
                     fh.write(s)
 
             # Find dependencies outside this directory (abinit.dir).
@@ -1135,7 +1129,7 @@ class AbinitProject(NotebookWriter):
             if dryrun:
                 print(s, end=2 * "\n")
             else:
-                with open(abinitdir_path, "wt") as fh:
+                with open(abinitdir_path, "w") as fh:
                     fh.write(s)
 
             # TODO
@@ -1194,7 +1188,7 @@ class AbinitProject(NotebookWriter):
 
             # Here we check that all binaries are listed in CmakeLists.txt
             path = os.path.join(self.top, "src", "98_main", "CMakeLists.txt")
-            with open(path, "rt") as fh:
+            with open(path) as fh:
                 lines = [l.lstrip().rstrip() for l in fh]
 
             prog_names, _ = self.get_program_names_dirnames(verbose)
@@ -1232,7 +1226,7 @@ class AbinitProject(NotebookWriter):
 
             new_dependencies = []
             for use_name in fortfile.all_uses:
-                deps = EXTERNAL_MODS_DEPS.get(use_name, None)
+                deps = EXTERNAL_MODS_DEPS.get(use_name)
                 if deps is None: continue
                 if verbose:
                     print("use_name:", use_name, "deps", deps)
@@ -1292,7 +1286,7 @@ class AbinitProject(NotebookWriter):
 #
 """
         if not dryrun:
-            with io.open(corelibs_path, "wt", encoding="utf8") as fh:
+            with open(corelibs_path, "w", encoding="utf8") as fh:
                 fh.write(header)
                 config.write(fh)
 
@@ -1303,7 +1297,7 @@ class AbinitProject(NotebookWriter):
         """
         def touch(fname, times=None):
             """Emulate Unix touch."""
-            with open(fname, 'a'):
+            with open(fname, "a"):
                 os.utime(fname, times)
 
         # TODO: possible problem if new files have been added.
@@ -1534,7 +1528,7 @@ class AbinitProject(NotebookWriter):
         # Set graph attributes.
         fg.attr(label="Connections of dir: %s" % dirname,
                 rankdir="LR", pagedir="BL") # constraint="false", pack="true", packMode="clust")
-        fg.node_attr.update(color='lightblue2', style='filled')
+        fg.node_attr.update(color="lightblue2", style="filled")
 
         target = os.path.basename(dirname)
         fg.node(name=target)
@@ -1578,7 +1572,7 @@ class AbinitProject(NotebookWriter):
         # Set graph attributes.
         fg.attr(label="Connections of %s: %s" % (obj.__class__.__name__, obj.name),
                 rankdir="LR", pagedir="BL") # constraint="false", pack="true", packMode="clust")
-        fg.node_attr.update(color='lightblue2', style='filled')
+        fg.node_attr.update(color="lightblue2", style="filled")
 
         target = obj.name
         fg.node(name=target)
@@ -1635,7 +1629,7 @@ proj = AbinitProject.pickle_load(filepath=None)
             nbv.new_code_cell('proj.get_graphviz_pubname("crystal_init")'),
             nbv.new_code_cell('proj.get_graphviz_pubname("fourdp")'),
             nbv.new_code_cell('proj.get_graphviz_pubname("m_geometry")'),
-            nbv.new_code_cell('proj.get_stats()'),
+            nbv.new_code_cell("proj.get_stats()"),
             nbv.new_code_cell('proj.get_stats_dir("src/41_geometry")'),
             nbv.new_code_cell("""
 # To visualize the panel dashboard inside the notebook, uncomment the below lines.

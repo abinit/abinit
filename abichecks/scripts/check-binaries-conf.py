@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"Check binaries configuration"
+"""Check binaries configuration"""
 #
 # Copyright (C) 2012-2026 ABINIT Group (Yann Pouillon)
 #
@@ -7,18 +7,18 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
-from __future__ import unicode_literals, division, print_function, absolute_import
 
 from abirules_tools import find_abinit_toplevel_directory
 
 try:
-    from ConfigParser import ConfigParser,NoOptionError
+    from ConfigParser import ConfigParser, NoOptionError
 except ImportError:
-    from configparser import ConfigParser, NoOptionError
+    from configparser import ConfigParser
 
 import os
 import re
 import sys
+
 
 class MyConfigParser(ConfigParser):
 

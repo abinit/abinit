@@ -2,7 +2,6 @@
 Define structures depending on numpy to be found in Abinit YAML formatted
 output extending the possible operations on the extracted data.
 """
-from __future__ import print_function, division, unicode_literals
 from ..common import BaseArray
 from ..register_tag import yaml_seq
 

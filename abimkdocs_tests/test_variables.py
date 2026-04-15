@@ -1,16 +1,20 @@
-# coding: utf-8
 """Tests abiref.bib file."""
-from __future__ import division, print_function, unicode_literals, absolute_import
 
-from .tools import patch_syspath, AbimkdocsTest
+from .tools import AbimkdocsTest, patch_syspath
+
 patch_syspath()
 
-import os
-import json
 
 from collections import OrderedDict
 from pprint import pprint
-from abimkdocs.variables import get_codevars, ValueWithUnit, ValueWithConditions, MultipleValue, Range
+
+from abimkdocs.variables import (
+    MultipleValue,
+    Range,
+    ValueWithConditions,
+    ValueWithUnit,
+    get_codevars,
+)
 
 
 class VariablesTest(AbimkdocsTest):
@@ -63,7 +67,7 @@ class VariablesTest(AbimkdocsTest):
         assert fxcartfactor.to_abimarkdown()
         d = fxcartfactor.topic2relevances
         assert fxcartfactor.topic2relevances is d and len(d) == 2
-        assert "expert" in d["TransPath"] and "expert" in d['GeoOpt']
+        assert "expert" in d["TransPath"] and "expert" in d["GeoOpt"]
         assert isinstance(fxcartfactor.defaultval, ValueWithUnit)
         assert fxcartfactor.defaultval.units == "(Bohr^2)/Hartree"
         assert fxcartfactor.defaultval.value == 1
@@ -110,7 +114,7 @@ class VariablesTest(AbimkdocsTest):
         assert name2varset["ecut"] == "basic" and name2varset["ionmov"] == "rlx"
 
         print("d:", database.group_by_varset("ecut"), "hello")
-        assert database.group_by_varset("ecut") ==  {'basic': ['ecut']}
+        assert database.group_by_varset("ecut") ==  {"basic": ["ecut"]}
 
         #abinit_help("ecut", info=True)
         # Should not raise
@@ -152,7 +156,7 @@ class VariablesTest(AbimkdocsTest):
         from collections import Counter
         count_code = {}
         for code, d in codevars.items():
-            count_code[code] = Counter({k: 0 for k in d})
+            count_code[code] = Counter(dict.fromkeys(d, 0))
 
         ierr = 0
         doc_vnames = codevars["anaddb"].get_all_vnames(with_internal=False)

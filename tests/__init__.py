@@ -1,16 +1,16 @@
 import logging
-import sys
 import os
+import pickle
 import platform
 import re
-import pickle
-
+import sys
+from io import StringIO
 from pprint import pprint
 from socket import gethostname
-from io import StringIO
+
 from tests.pymods.devtools import FileLock
-from tests.pymods.testsuite import ChainOfTests, AbinitTestSuite
 from tests.pymods.termcolor import cprint
+from tests.pymods.testsuite import AbinitTestSuite, ChainOfTests
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ class AbinitEnvironment:
             try:
                 os.utime(fname, None)
             except:
-                open(fname, 'a').close()
+                open(fname, "a").close()
 
         top = os.path.join(abenv.home_dir, "src")
         print("Walking through directory:", top)
@@ -85,7 +85,7 @@ class AbinitEnvironment:
                 if not path.lower().endswith(".f90"):
                     continue
                 path = os.path.join(root, path)
-                with open(path, "rt") as fh:
+                with open(path) as fh:
                     # print(path)
                     for line in fh:
                         if any(p in line for p in patterns):
@@ -355,9 +355,8 @@ class AbinitTestsDatabase(dict):
 
         if slice_obj is None:
             return test_suite
-        else:
-            logger.debug("will slice test_suite with slice_obj= %s " % slice_obj)
-            return test_suite[slice_obj]
+        logger.debug("will slice test_suite with slice_obj= %s " % slice_obj)
+        return test_suite[slice_obj]
 
     def find_unknown_wrong_keywords(self):
         """
@@ -400,8 +399,7 @@ class AbinitTestsDatabase(dict):
                 for ius in test.inputs_used:
                     if ius not in inp2test:
                         raise ValueError("Input [%s] [%s] does not appear in Input2keys!" % (suite_name, ius))
-                    else:
-                        inp2test[ius] += 1
+                    inp2test[ius] += 1
 
             def remove_file(fname):
                 # XG130810 : When the report.in files in abirules/Input/report.in  buildsys/Input/report.in
@@ -550,7 +548,7 @@ class AbinitTests:
                 print("Found suite and subsuite with the same name: %s" % suite_name)
 
     def walk_suites(self):
-        """return list of (suite_name, suite_paths)"""
+        """Return list of (suite_name, suite_paths)"""
         return zip(self.suite_names, self.suite_paths)
 
     def __str__(self):
@@ -582,7 +580,7 @@ class AbinitTests:
             all_subnames.extend(suite.subsuites.keys())
 
         if len(all_subnames) != len(set(all_subnames)):
-            raise RuntimeError("The suite/subsuite name must be unique\n" +
+            raise RuntimeError("The suite/subsuite name must be unique\n"
                                "Please change the name of the suite/subsuite")
 
         return all_subnames
@@ -611,8 +609,7 @@ class AbinitTests:
     def inputs_of_suite(self, suite_name, active=True):
         if active:
             return self._suites[suite_name].inp_paths
-        else:
-            return self._suites[suite_name].disabled_inp_paths
+        return self._suites[suite_name].disabled_inp_paths
 
     def build_database(self, with_disabled=False):
         """
@@ -846,12 +843,12 @@ class AbinitTests:
 
             fname = os.path.join(suite_path, "ListOfTests.html")
             print("Writing ListOfTests HTML file: ", fname)
-            with open(fname, "wt") as fh:
+            with open(fname, "w") as fh:
                 fh.write(suite.make_listoftests(width=160, html=True))
 
             fname = os.path.join(suite_path, "ListOfTests.txt")
             print("Writing ListOfTests text file: ", fname)
-            with open(fname, "wt") as fh:
+            with open(fname, "w") as fh:
                 fh.write(suite.make_listoftests(width=100, html=False))
 
     def show_info(self, verbose=0):
@@ -864,16 +861,16 @@ class AbinitTests:
             disabled_tests = self.inputs_of_suite(suite_name, active=False)
             table.append([suite_name, str(len(active_tests)), str(len(disabled_tests))])
         from tests.pymods.tools import pprint_table
-        print("")
+        print()
         pprint_table(table)
-        print("")
+        print()
 
         print(8 * "=" + " KEYWORDS " + 8 * "=")
         width = max([len(k) for k in KNOWN_KEYWORDS]) + 5
         for skey in sorted(KNOWN_KEYWORDS.keys()):
             info = KNOWN_KEYWORDS[skey]
             print(skey.ljust(width), info)
-        print("")
+        print()
 
         if verbose:
             for suite_name in self.suite_names:
@@ -929,7 +926,7 @@ KNOWN_KEYWORDS = {
     "mrgscr": "Tests related to mrgscr",
     "mrggkk": "Tests related to mrggkk code",
     "mrgddb": "Tests related to mrgddb code",
-    'mrgdv': "Tests related to mrgdv code",
+    "mrgdv": "Tests related to mrgdv code",
     "optic": "Tests related to optic code",
     "lruj": "Tests related to lruj code",
     "aim": "Tests related to aim code",
@@ -938,11 +935,11 @@ KNOWN_KEYWORDS = {
     "wannier90": "Tests related to the interface with Wannier90",
     "macroave": "Tests related to macroave code",
     "bigdft": "Tests the interface with Bigdft",
-    'atdep': "Tests for atdep code",
-    'testtransposer': "Unit tests for transposer",
-    'ujdet': "Computation of U (legacy code)",
-    'fold2Bloch': "Tests related to fold2Bloch code.",
-    'multibinit': "Tests related to multibinit code",
+    "atdep": "Tests for atdep code",
+    "testtransposer": "Unit tests for transposer",
+    "ujdet": "Computation of U (legacy code)",
+    "fold2Bloch": "Tests related to fold2Bloch code.",
+    "multibinit": "Tests related to multibinit code",
     # Keywords describing the test.
     "NC": "Calculations with norm-conserving pseudos",
     "PAW": "PAW calculations",
@@ -980,63 +977,63 @@ KNOWN_KEYWORDS = {
     "PBE0": "PBE0 calculations",
     "cRPA": "RPA for correlated electrons.",
     "FAILS_IFMPI": "Tests failing if MPI is used",
-    'NVT': "MD calculations with (N,V,T) ensemble",
-    'ELASTIC': "Calculations of elastic constants",
-    'INTERNAL_STRAIN': "Calculations of internal strain",
-    'DFT-D3(BJ)': "DFT-D3 dispersion correction",
-    'DFT-D3': "DFT-D3 dispersion correction",
-    '3-BODY_TERM': "DFT-D3 dispersion correction",
-    'GWLS': "GW with the Sternheimer approach",
-    'Projected_Wannier': "Projected Wannier functions",
-    'VDW': "van der Wall interaction",
-    'LOBSTER': "Interface with LOBSTER code",
-    'RELAXATION': "Structural relaxations",
-    'magnetic_constraint': "Tests employing magnetic constraints",
+    "NVT": "MD calculations with (N,V,T) ensemble",
+    "ELASTIC": "Calculations of elastic constants",
+    "INTERNAL_STRAIN": "Calculations of internal strain",
+    "DFT-D3(BJ)": "DFT-D3 dispersion correction",
+    "DFT-D3": "DFT-D3 dispersion correction",
+    "3-BODY_TERM": "DFT-D3 dispersion correction",
+    "GWLS": "GW with the Sternheimer approach",
+    "Projected_Wannier": "Projected Wannier functions",
+    "VDW": "van der Wall interaction",
+    "LOBSTER": "Interface with LOBSTER code",
+    "RELAXATION": "Structural relaxations",
+    "magnetic_constraint": "Tests employing magnetic constraints",
     "FOLD2BLOCH": "Fold2Bloch tests.",
     "LWF": "Lattice Wannier function tests",
     "RTTDDFT": "Real-time time-dependent DFT",
     "MINIMAL": "Quick set of tests covering all abinit optdriver and executables",
-    'CC4S': "Interface between Abinit and CC4S code",
-    'CRPA': "Tests related to Constrained RPA",
-    'ConstrainedDFT': "Tests related to constrained DFT",
-    'EPH_OLD': "Legacy python-based EPH code for the ZPR",
-    'FATBANDS': "Computation of FATBANDS",
-    'GWR': "GW in real space and imaginary time.",
-    'Gruneisen': "Computation of Gruneisen parameters",
-    'HPC': "High-performance computing",
-    'IBTE': "Iterative Boltzmann Transport Equation",
-    'LONGWAVE': "Tests related to the longwave driver",
-    'LRUJ': "Computation of U/J with linear response",
-    'POSCAR': "Tests showing how to read POSCAR files in Abinit",
-    'POSITRON': "Positron calculation",
-    'PSML': "Tests using pseudos in PSML format",
-    'PSP8': "Tests using pseudos in PSP8 format",
-    'RMM-DIIS': "Tests using the RMM-DIIS eigenvalue solver.",
-    'TRIQS': "Interface between Abinit and TRIQS",
-    'UPF2': "Tests using pseudos in UPF2 format",
-    'Wannier90': "Interface between Abinit and Wannier90",
-    '2d-cutoff': "Coulomb cutoff for 2d materials",
-    'non-collinear': "Non-collinear magnetism",
-    'metaGGA': "Tests using metaGGA functionals",
-    'ext-fpmd': "Extended FPMD for high temperature calculations",
-    'z2pack': "Interface with z2pack",
-    'libxc': "Tests using libxc functionals",
-    'MD': "Molecular dynamics",
-    'NEB': "Nudged Elastic Band Method",
-    'CPRJ': "Tests related to the internal treatment of CPRJ projections.",
-    'LDA': "Tests using LDA",
+    "CC4S": "Interface between Abinit and CC4S code",
+    "CRPA": "Tests related to Constrained RPA",
+    "ConstrainedDFT": "Tests related to constrained DFT",
+    "EPH_OLD": "Legacy python-based EPH code for the ZPR",
+    "FATBANDS": "Computation of FATBANDS",
+    "GWR": "GW in real space and imaginary time.",
+    "Gruneisen": "Computation of Gruneisen parameters",
+    "HPC": "High-performance computing",
+    "IBTE": "Iterative Boltzmann Transport Equation",
+    "LONGWAVE": "Tests related to the longwave driver",
+    "LRUJ": "Computation of U/J with linear response",
+    "POSCAR": "Tests showing how to read POSCAR files in Abinit",
+    "POSITRON": "Positron calculation",
+    "PSML": "Tests using pseudos in PSML format",
+    "PSP8": "Tests using pseudos in PSP8 format",
+    "RMM-DIIS": "Tests using the RMM-DIIS eigenvalue solver.",
+    "TRIQS": "Interface between Abinit and TRIQS",
+    "UPF2": "Tests using pseudos in UPF2 format",
+    "Wannier90": "Interface between Abinit and Wannier90",
+    "2d-cutoff": "Coulomb cutoff for 2d materials",
+    "non-collinear": "Non-collinear magnetism",
+    "metaGGA": "Tests using metaGGA functionals",
+    "ext-fpmd": "Extended FPMD for high temperature calculations",
+    "z2pack": "Interface with z2pack",
+    "libxc": "Tests using libxc functionals",
+    "MD": "Molecular dynamics",
+    "NEB": "Nudged Elastic Band Method",
+    "CPRJ": "Tests related to the internal treatment of CPRJ projections.",
+    "LDA": "Tests using LDA",
     "MD-MonteCarlo": "Hybrid Monte Carlo Sampling for NPT ensemble",
     "LWF": "Lattice Wannier functions.",
-    'NONLINEAR': "Nonlinear response function calculations",
-    'spinpot': "Spin dynamics with multibinit",
-    'lattpot': "Lattice dynamics with multibinit",
-    'effpot': "Effective potentila with multibinit",
-    'Effective potential': "Effective potentila with multibinit",
-    'linear-electro-optical': "Computation of linear electro-optical coefficients",
-    'DDB_TO_NC': "Conversion of DDB file from text to netcdf and vice-versa",
-    'ddb_interpolation': "Interpolation of DDB files in q-space.",
-    'pSIC': "Tests related to the polaron self-interaction correction method.",
-    'POLARON': "Tests related to the variational polaron equations.",
+    "NONLINEAR": "Nonlinear response function calculations",
+    "spinpot": "Spin dynamics with multibinit",
+    "lattpot": "Lattice dynamics with multibinit",
+    "effpot": "Effective potentila with multibinit",
+    "Effective potential": "Effective potentila with multibinit",
+    "linear-electro-optical": "Computation of linear electro-optical coefficients",
+    "DDB_TO_NC": "Conversion of DDB file from text to netcdf and vice-versa",
+    "ddb_interpolation": "Interpolation of DDB files in q-space.",
+    "pSIC": "Tests related to the polaron self-interaction correction method.",
+    "POLARON": "Tests related to the variational polaron equations.",
     "AC": "Tests related to the analytic continuation in GW",
     "CD": "Tests related to the contour deformation method in GW",
     "GGA": "Tests using GGA",

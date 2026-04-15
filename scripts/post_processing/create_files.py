@@ -6,9 +6,9 @@
 import numpy as np
 
 nbQ = 2500
-files_name = 'temperature.files'
+files_name = "temperature.files"
 
-with open(files_name,'w') as O:
+with open(files_name,"w") as O:
   O.write("1\n")
   O.write("ZPM_para_1\n")
   O.write("0.1\n")

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from __future__ import unicode_literals, division, print_function, absolute_import
 
 import os
 import re
@@ -66,11 +65,11 @@ def main():
   for root,dirs,files in os.walk(libpaw_dir):
     for src in files:
       if ( re_hdrfile.search(src) ):
-        with open(os.path.join(root,src), "rt") as fh:
+        with open(os.path.join(root,src)) as fh:
             for line in fh:
               if ( re_cppdef.search(line) ):
                 tmp_def = re.sub("^[# ]*define[ ]*([0-9A-Z_]*).*","\\1",line).strip()
-                if ( not tmp_def in cpp_libpaw ):
+                if ( tmp_def not in cpp_libpaw ):
                   cpp_libpaw.append(tmp_def)
 
   # Extract CPP options from the libTetra header files
@@ -80,11 +79,11 @@ def main():
   for root,dirs,files in os.walk(libtetra_dir):
     for src in files:
       if ( re_hdrfile.search(src) ):
-        with open(os.path.join(root,src), "rt") as fh:
+        with open(os.path.join(root,src)) as fh:
             for line in fh:
               if ( re_cppdef.search(line) ):
                 tmp_def = re.sub("^[# ]*define[ ]*([0-9A-Z_]*).*","\\1",line).strip()
-                if ( not tmp_def in cpp_libtetra ):
+                if ( tmp_def not in cpp_libtetra ):
                   cpp_libtetra.append(tmp_def)
 
   # Extract CPP options from the build system
@@ -94,17 +93,17 @@ def main():
   for root,dirs,files in os.walk(m4_path):
     for src in files:
       if ( src.endswith(".m4") ):
-        with open(os.path.join(root, src), "rt") as fh:
+        with open(os.path.join(root, src)) as fh:
             for line in fh:
               if re_acdef.search(line):
                 tmp_def = re.sub(".*AC_DEFINE\\([\\[]?([^\\],]*).*","\\1",line).strip()
-                if not tmp_def in cpp_buildsys:
+                if tmp_def not in cpp_buildsys:
                   cpp_buildsys.append(tmp_def)
-  with open(os.path.join(top, "configure.ac"), "rt") as fh:
+  with open(os.path.join(top, "configure.ac")) as fh:
       for line in fh:
         if ( re_acdef.search(line) ):
           tmp_def = re.sub(".*AC_DEFINE\\([\\[]?([^\\],]*).*","\\1",line).strip()
-          if ( not tmp_def in cpp_buildsys ):
+          if ( tmp_def not in cpp_buildsys ):
             cpp_buildsys.append(tmp_def)
 
   cpp_buildsys = cpp_buildsys + cpp_libpaw + cpp_libtetra
@@ -116,7 +115,7 @@ def main():
     for i in range(len(tmp)):
       if ( i >= len(cpp_blocks) ):
         cpp_blocks.append(list())
-      if ( not tmp[i] in cpp_blocks[i] ):
+      if ( tmp[i] not in cpp_blocks[i] ):
         cpp_blocks[i].append(tmp[i])
 
   # Extract CPP options from the includes
@@ -126,11 +125,11 @@ def main():
   for root,dirs,files in os.walk(incs_dir):
     for src in files:
       if not re_hdrfile.search(src): continue
-      with open(os.path.join(root,src), "rt") as fh:
+      with open(os.path.join(root,src)) as fh:
         for line in fh:
           if re_cppdef.search(line):
             tmp_def = re.sub("^[# ]*define[ ]*([0-9A-Z_]*).*","\\1",line).strip()
-            if not tmp_def in cpp_includes:
+            if tmp_def not in cpp_includes:
               cpp_includes.append(tmp_def)
 
   cpp_includes.sort()
@@ -148,7 +147,7 @@ def main():
         files.sort()
         for src in files:
           if re_f90file.search(src):
-            with open(os.path.join(root, src), "rt") as fh:
+            with open(os.path.join(root, src)) as fh:
               f90_buffer = fh.readlines()
             cpp_load = False
             for i in range(len(f90_buffer)):
@@ -178,8 +177,8 @@ def main():
 
                     # Register CPP options
                     for opt in cpp_buffer:
-                      if ( not opt in cpp_ignored ):
-                        if ( not opt in cpp_source ):
+                      if ( opt not in cpp_ignored ):
+                        if ( opt not in cpp_source ):
                           cpp_source[opt] = list()
                         cpp_source[opt].append("%s/%s:%d" % (root,src,i+1))
 

@@ -33,7 +33,6 @@
 # ==                                                                  ==
 # ==                              M. Torrent - 09/2012, rev. 06/2013  ==
 # ======================================================================
-from __future__ import print_function
 
 import os
 import re
@@ -200,7 +199,7 @@ M_PARAL_ATOM_TYPES = []  # Note: use only lowercases
 M_PARAL_ATOM_ROUTINES = [  # Note: use only lowercases
 "get_my_natom",
 "get_my_atmtab",
-"free_my_atmtab"]  
+"free_my_atmtab"]
 M_PARAL_ATOM_FUNCTIONS = []  # Note: use only lowercases
 
 #Content of module "m_paw_an"
@@ -322,8 +321,8 @@ if (len(sys.argv)==1) or ("--help" in sys.argv):
   print ("  Only one option in (unused, suggest, ok, all) allowed !")
   exit()
 
-noselection=((not "--unused" in sys.argv) and (not "--suggest" in sys.argv) and \
-             (not "--ok" in sys.argv))
+noselection=(("--unused" not in sys.argv) and ("--suggest" not in sys.argv) and \
+             ("--ok" not in sys.argv))
 do_unused =(("--all" in sys.argv) or ("--unused"  in sys.argv) or (noselection))
 do_suggest=(("--all" in sys.argv) or ("--suggest" in sys.argv) or (noselection))
 do_ok     =(("--all" in sys.argv) or ("--ok"      in sys.argv) or (noselection))
@@ -339,13 +338,13 @@ else:
 # ---------------------------------------------------------------------------
 
 print()
-print( '---------------------------------------------------------------------')
+print( "---------------------------------------------------------------------")
 print( ' Looking for "use module" statements in ABINIT Fortran source files. ')
-print( '  - check if they are useful                                         ')
+print( "  - check if they are useful                                         ")
 print( '  - list missing "only" statements                                   ')
-print( '---------------------------------------------------------------------\n')
+print( "---------------------------------------------------------------------\n")
 
-re_srcfile = re.compile("\.([Ff]|[Ff]90)$")
+re_srcfile = re.compile(r"\.([Ff]|[Ff]90)$")
 file_total_count=0
 
 #Loop over files in src folder
@@ -354,7 +353,7 @@ for (root, dirs, files) in os.walk("./src"):
     if (re_srcfile.search(src)):
       file_total_count+=1
       filename=os.path.join(root,src)
-      with open(filename, "r") as fh:
+      with open(filename) as fh:
         src_data = fh.readlines()
 
 #     Ignore some files
@@ -404,17 +403,17 @@ for (root, dirs, files) in os.walk("./src"):
 #                 Looking for datatypes in line
                   for type in TYPES_LIST[mod_index]:
                     if line_lower.find("type("+type+")") != -1:
-                      if not type in types_list_mod: types_list_mod.append(type)
+                      if type not in types_list_mod: types_list_mod.append(type)
 
 #                 Looking for routines in line
                   for routine in ROUTINES_LIST[mod_index]:
                     if line_lower.find("call"+routine+"(") != -1:
-                      if not routine in routines_list_mod: routines_list_mod.append(routine)
+                      if routine not in routines_list_mod: routines_list_mod.append(routine)
 
 #                 Looking for functions in line
                   for function in FUNCTIONS_LIST[mod_index]:
                     if line_lower.find(function+"(") != -1:
-                      if not function in functions_list_mod: functions_list_mod.append(function)
+                      if function not in functions_list_mod: functions_list_mod.append(function)
 
 #                 Looking for multiple "subroutines"
                   if not module_stat_found: module_stat_found=(line_lower.find("module") != -1)
@@ -441,35 +440,34 @@ for (root, dirs, files) in os.walk("./src"):
                     sugg_only_string+=", ";len_cur=len_cur+1
                   if len_cur>75:
                     if list_all.index(item)!=-1:
-                      sugg_only_string+=" &\n&"+' '.ljust(13+len(module))
+                      sugg_only_string+=" &\n&"+" ".ljust(13+len(module))
                       len_cur=0
                   sugg_only_string+=item;len_cur=len_cur+len(item)
                 if missing_count==0:
                   if do_ok:
                     print ("File %s: module %s correctly used !" % (filename,module))
-                else:
-                  if do_suggest and not autofix:
-                    print ("File %s: module %s, suggested use:" % (filename,module))
-                    print ("  * use "+module+", only : "+sugg_only_string)
-                    if multiple_sub:
-                      print ("  * WARNING: several subroutines/functions in file !")
+                elif do_suggest and not autofix:
+                  print ("File %s: module %s, suggested use:" % (filename,module))
+                  print ("  * use "+module+", only : "+sugg_only_string)
+                  if multiple_sub:
+                    print ("  * WARNING: several subroutines/functions in file !")
 
 #             === AUTOFIX ===
               if autofix:
                 if (module_unused and do_unused) or (missing_count>0 and do_suggest):
                   print ("==> FIXING file %s" %(filename))
                   if module_unused and do_unused:
-                    print ('    ELIMINATING module %s !' % (module))
+                    print ("    ELIMINATING module %s !" % (module))
                   if missing_count>0 and do_suggest:
                     print ('    REWRITING "use module" line for %s !' % (module))
                     if multiple_sub:
-                      print ('    WARNING: several subroutines/functions in file (check it MANUALLY) !')
+                      print ("    WARNING: several subroutines/functions in file (check it MANUALLY) !")
 #                 Open a temporary file for writing
                   ErrorEncountered=False
-                  filenametmp=filename+'.tmp'
-                  try: filout=open(filenametmp,'w')
+                  filenametmp=filename+".tmp"
+                  try: filout=open(filenametmp,"w")
                   except:
-                    print ('File %s, error: could not open tmp file !' % (filename))
+                    print ("File %s, error: could not open tmp file !" % (filename))
                     ErrorEncountered=True
                   if not ErrorEncountered:
 #                   Loop over lines in the file
@@ -484,15 +482,15 @@ for (root, dirs, files) in os.walk("./src"):
                         if do_write_line==2: newline=" use "+module+", only : "+sugg_only_string+"\n"
                         try: filout.write(newline)
                         except:
-                          print ('File %s, error: could not write into tmp file !' % (filename))
+                          print ("File %s, error: could not write into tmp file !" % (filename))
                           ErrorEncountered=True;break
                   filout.close()
 #                 Replace current file by temporary file
                   if not ErrorEncountered:
-                    try: 
-                        os.system('mv -f '+filenametmp+' '+filename)
-                    except: 
-                        print ('File %s, error: could not move tmp file !' % (filename))
+                    try:
+                        os.system("mv -f "+filenametmp+" "+filename)
+                    except:
+                        print ("File %s, error: could not move tmp file !" % (filename))
 
 #Final printing
 print ("--------------------------------------")
