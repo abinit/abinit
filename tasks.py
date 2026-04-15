@@ -4,7 +4,6 @@ Pyinvoke file for automating build/config stuff.
 Can be executed everywhere inside the Abinit directory, including build directories.
 
 Examples:
-
 To get list of commands:
 
     invoke --list
@@ -18,23 +17,23 @@ To run  (some of the) abichecks scripts:
 from __future__ import annotations
 
 import os
+import platform
+import subprocess
 import sys
 import webbrowser
-import subprocess
-import platform
-
+from contextlib import contextmanager
 from glob import glob
 from pathlib import Path
 from shutil import which
-from contextlib import contextmanager
+
 try:
     from invoke import task
 except ImportError:
     raise ImportError("Cannot import invoke package. Use `pip install invoke`")
 
-from tests.pymods.testsuite import find_top_build_tree
 from tests.pymods.devtools import number_of_cpus
 from tests.pymods.termcolor import cprint
+from tests.pymods.testsuite import find_top_build_tree
 
 ABINIT_ROOTDIR = os.path.dirname(__file__)
 ABINIT_SRCDIR = os.path.join(ABINIT_ROOTDIR, "src")
@@ -95,7 +94,7 @@ def change_output_file(input_file, output_file):
     """
     Change the name of the main output file in the `input_file` using `output_file`
     """
-    with open(input_file, "rt") as fh:
+    with open(input_file) as fh:
         remove_iline = None
         lines = [l.lstrip() for l in fh.readlines()]
         for i, l in enumerate(lines):
@@ -107,7 +106,7 @@ def change_output_file(input_file, output_file):
         lines.pop(remove_iline)
 
     lines.insert(0, f'output_file = "{output_file}"')
-    with open(input_file, "wt") as fh:
+    with open(input_file, "w") as fh:
         fh.write("\n".join(lines))
 
 
@@ -269,8 +268,7 @@ def robodoc(ctx):
             html_path = os.path.join(ABINIT_ROOTDIR, "./tmp-robodoc/www/robodoc/masterindex.html")
             print("Trying to open %s in browser ..." % html_path)
             return webbrowser.open_new_tab(html_path)
-        else:
-            cprint("ROBODOC BUILD FAILED", color="red")
+        cprint("ROBODOC BUILD FAILED", color="red")
 
         return result.ok
 
@@ -408,7 +406,7 @@ def add_trunk(ctx):
     cmd = "git remote add trunk git@gitlab.abinit.org:trunk/abinit.git"
     print("Executing:", cmd)
     ctx.run(cmd, pty=True)
-    cmd = f"git fetch trunk"
+    cmd = "git fetch trunk"
     print("Executing:", cmd)
     ctx.run(cmd, pty=True)
 
@@ -521,11 +519,11 @@ def omp_check(ctx, omp_threads="1, 2", np=1, abinit_input_file="run.abi", mpi_ru
 def pyenv_clean(ctx):
     """Clean conda/pip cache."""
     if which("conda") is not None:
-        cmd = f"conda clean --all --yes"
+        cmd = "conda clean --all --yes"
         cprint(f"About to execute {cmd=}")
         ctx.run(cmd)
 
-    cmd = f"pip cache purge"
+    cmd = "pip cache purge"
     cprint("About to execute {cmd=}")
     ctx.run(cmd)
 
@@ -649,8 +647,9 @@ def watchdog(ctx, jobs="auto", sleep_time=5):
     # http://thepythoncorner.com/dev/how-to-create-a-watchdog-in-python-to-look-for-filesystem-changes/
     # https://stackoverflow.com/questions/19991033/generating-multiple-observers-with-python-watchdog
     import time
-    from watchdog.observers import Observer
+
     from watchdog.events import PatternMatchingEventHandler
+    from watchdog.observers import Observer
     event_handler = PatternMatchingEventHandler(patterns="*.F90", ignore_patterns="",
                                                 ignore_directories=False, case_sensitive=True)
 
@@ -671,8 +670,8 @@ def watchdog(ctx, jobs="auto", sleep_time=5):
                     cprint("Make completed successfully", color="green")
                     cprint("Watching for changes ...", color="green")
             except Exception:
-                cprint(f"Make returned non-zero exit status", color="red")
-                cprint(f"Keep on watching for changes hoping you get it right ...", color="red")
+                cprint("Make returned non-zero exit status", color="red")
+                cprint("Keep on watching for changes hoping you get it right ...", color="red")
 
     def on_moved(event):
         print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
@@ -742,18 +741,18 @@ def official_release(ctx: Context, new_version: str, dry_run: bool = True) -> No
     # List of files that should be added to master and then removed in develop
     configure_paths = [
         "configure",
-        'config/gnu/compile',
-        'config/gnu/config.guess',
-        'config/gnu/config.sub',
-        'config/gnu/install-sh',
-        'config/gnu/missing',
-        'config/gnu/depcomp',
+        "config/gnu/compile",
+        "config/gnu/config.guess",
+        "config/gnu/config.sub",
+        "config/gnu/install-sh",
+        "config/gnu/missing",
+        "config/gnu/depcomp",
     ]
 
     with cd(ABINIT_ROOTDIR):
         # The version in .current_version is updated manually.
         # Here we check that the value stored in the file is equal to the command line argument.
-        with open(".current_version", "rt") as fh:
+        with open(".current_version") as fh:
             old_version = fh.read().strip()
 
         if old_version != new_version:
@@ -796,23 +795,23 @@ def git_info(ctx: Context, top_n=20) -> None:
     def get_git_objects():
         """Return list of all Git objects (hash, path)."""
         result = subprocess.run(
-            ['git', 'rev-list', '--objects', '--all'],
+            ["git", "rev-list", "--objects", "--all"],
             stdout=subprocess.PIPE,
             text=True,
             check=True
         )
         objects = []
         for line in result.stdout.splitlines():
-            parts = line.split(' ', 1)
+            parts = line.split(" ", 1)
             if len(parts) == 2:
                 objects.append((parts[0], parts[1]))
         return objects
 
     def get_blob_sizes(hashes):
         """Return a dict of {hash: (size_in_bytes, path)} for blobs."""
-        input_text = '\n'.join(hashes)
+        input_text = "\n".join(hashes)
         result = subprocess.run(
-            ['git', 'cat-file', '--batch-check=%(objectname) %(objecttype) %(objectsize)'],
+            ["git", "cat-file", "--batch-check=%(objectname) %(objecttype) %(objectsize)"],
             input=input_text,
             stdout=subprocess.PIPE,
             text=True,
@@ -888,6 +887,7 @@ def large_files(ctx, top_dir=None, size_threshold_mb=5):
 def system(ctx):
     """Show System Info as a Table"""
     import platform
+
     import psutil
     from tabulate import tabulate
     info = []
@@ -937,9 +937,9 @@ def get_cache_info() -> dict:
     system = platform.system()
     if system == "Linux":
         return get_cache_info_linux()
-    elif system == "Darwin":
+    if system == "Darwin":
         return get_cache_info_mac()
-    elif system == "Windows":
+    if system == "Windows":
         return get_cache_info_windows()
     raise RuntimeError(f"Unsupported platform {system}")
 
@@ -973,7 +973,7 @@ def get_cache_info_mac() -> dict:
         try:
             out = subprocess.check_output(["sysctl", "-n", key]).decode().strip()
             caches[label] = f"{int(out) // 1024} KB"
-        except Exception as exc:
+        except Exception:
             continue
     return caches
 
@@ -1003,21 +1003,21 @@ def _extract_errors(logfile, context_lines: int = 5) -> list[str]:
     """
     print(f"Extracting error lines and some context from {logfile}...")
 
-    with open(logfile, 'r', errors='ignore') as f:
+    with open(logfile, errors="ignore") as f:
         lines = f.readlines()
 
     # Common patterns indicating critical problems
     ERROR_PATTERNS = [
-        r'error',                # generic errors
-        r'fail',                 # tests failing
-        r'cannot\s+find',        # missing library or header
-        r'no\s+such\s+file',     # missing file
-        r'not\s+found',          # program not found
-        r'undefined\s+reference' # linking errors
+        r"error",                # generic errors
+        r"fail",                 # tests failing
+        r"cannot\s+find",        # missing library or header
+        r"no\s+such\s+file",     # missing file
+        r"not\s+found",          # program not found
+        r"undefined\s+reference" # linking errors
     ]
 
     import re
-    regex = re.compile('|'.join(ERROR_PATTERNS), re.IGNORECASE)
+    regex = re.compile("|".join(ERROR_PATTERNS), re.IGNORECASE)
     n = len(lines)
     errors = []
     for i, line in enumerate(lines):
@@ -1027,7 +1027,7 @@ def _extract_errors(logfile, context_lines: int = 5) -> list[str]:
             # Capture context
             start = max(0, i - context_lines)
             end = min(n, i + context_lines + 1)
-            context = ''.join(lines[start:end])
+            context = "".join(lines[start:end])
             errors.append(context.strip())
 
     return errors

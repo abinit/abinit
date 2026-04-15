@@ -1,9 +1,8 @@
-'''
+"""
 Main home of the test engine. Define the class used to traverse the data tree
 while checking constraints as well as a few utility classes linked to that process.
-'''
-from __future__ import print_function, division, unicode_literals
-from .common import BaseDictWrapper, string, basestring
+"""
+from .common import BaseDictWrapper, basestring, string
 
 
 def short_repr(thing):
@@ -12,27 +11,25 @@ def short_repr(thing):
     """
     s = str(thing)
     if len(s) > 30:
-        if hasattr(thing, 'short_str'):
+        if hasattr(thing, "short_str"):
             return thing.short_str()
-        else:
-            return '<{} instance>'.format(type(thing).__name__)
-    else:
-        return s
+        return f"<{type(thing).__name__} instance>"
+    return s
 
 
-class Issue(object):
+class Issue:
     """
     Represent the result of a test.
     """
     def __init__(self, conf, msg):
-        self.path = conf.path if conf.path else ('top level',)
+        self.path = conf.path if conf.path else ("top level",)
         self.state = conf.current_state
         self.message = msg
 
     def __repr__(self):
-        spath = '.'.join(self.path)
-        sstate = ', '.join('{}={}'.format(*it) for it in self.state.items())
-        return 'At {}({}): {}'.format(spath, sstate, self.message)
+        spath = ".".join(self.path)
+        sstate = ", ".join("{}={}".format(*it) for it in self.state.items())
+        return f"At {spath}({sstate}): {self.message}"
 
     def is_fail(self):
         return False
@@ -49,11 +46,8 @@ class Failure(Issue):
 
     def __repr__(self):
         if self.ref is not None:
-            return Issue.__repr__(self) + '\nref: {}\ntested: {}'.format(
-                short_repr(self.ref), short_repr(self.tested)
-            )
-        else:
-            return Issue.__repr__(self)
+            return Issue.__repr__(self) + f"\nref: {short_repr(self.ref)}\ntested: {short_repr(self.tested)}"
+        return Issue.__repr__(self)
 
     def is_fail(self):
         return True
@@ -68,14 +62,14 @@ class DetailedFailure(Failure):
         Issue.__init__(self, conf, msg)
 
     def __repr__(self):
-        return Issue.__repr__(self) + '\n{}'.format(self.details)
+        return Issue.__repr__(self) + f"\n{self.details}"
 
 
 class Success(Issue):
     """Represent the success of a test."""
 
 
-class Tester(object):
+class Tester:
     """
     Drive the testing process.
     """
@@ -94,7 +88,7 @@ class Tester(object):
 
         if ref is None or tested is None:
             if ref is not tested:
-                msg = 'Expecting two None objects but got {} and {}'.format(repr(ref), repr(tested))
+                msg = f"Expecting two None objects but got {ref!r} and {tested!r}"
                 self.issues.append(Failure(self.conf, msg, ref, tested))
             else:
                 #print("Got None None for name:", name)
@@ -103,15 +97,15 @@ class Tester(object):
         def analyze(success, cons):
             """Analyse the result of a constraint check."""
             if success:
-                msg = '{} ok'.format(cons.name)
+                msg = f"{cons.name} ok"
                 self.issues.append(Success(self.conf, msg))
 
-            elif hasattr(success, 'details'):
-                msg = '{} ({}) failed'.format(cons.name, short_repr(cons.value))
+            elif hasattr(success, "details"):
+                msg = f"{cons.name} ({short_repr(cons.value)}) failed"
                 self.issues.append(DetailedFailure(self.conf, msg, success.details))
 
             else:
-                msg = '{} ({}) failed'.format(cons.name, short_repr(cons.value))
+                msg = f"{cons.name} ({short_repr(cons.value)}) failed"
                 self.issues.append(Failure(self.conf, msg, ref, tested))
 
         # we want to detect only dictionaries, not classes that inherit from it
@@ -133,43 +127,42 @@ class Tester(object):
                     try:
                         success = cons.check(ref, tested, self.conf)
                     except Exception as e:
-                        msg = ('Exception while checking {} ({}/{}):\n'
-                               '{}: {}').format(cons.name, short_repr(ref),
-                                                short_repr(tested), type(e).__name__, str(e))
+                        msg = (f"Exception while checking {cons.name} ({short_repr(ref)}/{short_repr(tested)}):\n"
+                               f"{type(e).__name__}: {e!s}")
                         self.issues.append(Failure(self.conf, msg))
                     else:
                         # no exceptions
                         analyze(success, cons)
 
-            if getattr(ref, 'is_dict_like', False):
+            if getattr(ref, "is_dict_like", False):
                 # have children
                 for child in ref:
                     if child not in tested:
-                        msg = '{} was not present'.format(child)
+                        msg = f"{child} was not present"
                         #raise RuntimeError(msg)
                         self.issues.append(Failure(self.conf, msg))
                     else:
                         self.check_this(child, ref[child], tested[child])
 
-            elif hasattr(ref, 'get_children'):
+            elif hasattr(ref, "get_children"):
                 # user made browsable
                 try:
                     dref = ref.get_children()
                     dtest = tested.get_children()
                 except Exception as e:
-                    msg = ('Tried to get a dict of item from {} but failed:\n'
-                           '{}: {}').format(name, type(e).__name__, str(e))
+                    msg = (f"Tried to get a dict of item from {name} but failed:\n"
+                           f"{type(e).__name__}: {e!s}")
                     self.issues.append(Failure(self.conf, msg))
                 else:
                     for child in dref:
                         if child not in dtest:
-                            msg = '{} was not present'.format(child)
+                            msg = f"{child} was not present"
                             self.issues.append(Failure(self.conf, msg))
                         else:
                             self.check_this(child, dref[child], dtest[child])
 
-            elif (hasattr(ref, '__iter__')
-                  and not getattr(ref, 'has_no_child', False)
+            elif (hasattr(ref, "__iter__")
+                  and not getattr(ref, "has_no_child", False)
                   and not isinstance(ref, basestring)):
                 # strings have __iter__ but should not be browsed
                 # user may want to neutralize the browsing of an iterable
@@ -183,15 +176,15 @@ class Tester(object):
         """
         top_cons = self.conf.get_top_level_constraints()
         for cons in top_cons:
-            if top_cons[cons].apply_to('this'):
+            if top_cons[cons].apply_to("this"):
                 # FIXME How to define and use top level constraints applying on
                 # this like equations ? Is it worth it ?
-                raise NotImplementedError('Top level constraints are not yet implemented')
+                raise NotImplementedError("Top level constraints are not yet implemented")
 
         # browse document from the reference file
         for doc_id, ref_doc in self.ref.items():
             if doc_id not in self.tested:
-                msg = 'Document ({}) is not present in the tested file.'.format(doc_id)
+                msg = f"Document ({doc_id}) is not present in the tested file."
                 self.issues.append(Failure(self.conf, msg))
 
             # enter filters and start checking the docuement

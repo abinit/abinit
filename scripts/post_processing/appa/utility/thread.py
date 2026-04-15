@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 Abinit Post Process Application
@@ -9,6 +8,7 @@ last edited: May 2013
 
 import threading
 
+
 class new_thread(threading.Thread):
 
     def __init__(self,target = None,args=None):
@@ -17,7 +17,7 @@ class new_thread(threading.Thread):
 
     def stop(self):
         self._stop.set()
-        
+
 
     def stoped(self):
         self._stop.isSet()

@@ -1,4 +1,3 @@
-from __future__ import absolute_import, unicode_literals, print_function
 
 from markdown.extensions import Extension
 from markdown.preprocessors import Preprocessor
@@ -7,9 +6,9 @@ from markdown.preprocessors import Preprocessor
 class MarkdownInclude(Extension):
     def __init__(self, configs={}):
         self.config = {
-            'base_path': ['.', 'Default location from which to evaluate ' \
-                'relative paths for the include statement.'],
-            'encoding': ['utf-8', 'Encoding of the files used by the include statement.']
+            "base_path": [".", "Default location from which to evaluate " \
+                "relative paths for the include statement."],
+            "encoding": ["utf-8", "Encoding of the files used by the include statement."]
         }
         for key, value in configs.items():
             self.setConfig(key, value)
@@ -19,7 +18,7 @@ class MarkdownInclude(Extension):
         #md.preprocessors.add(
         md.preprocessors.register(
             #'include', IncludePreprocessor(md, self.getConfigs()), '_begin')
-            IncludePreprocessor(md, self.getConfigs()), 'include', +10000000000)
+            IncludePreprocessor(md, self.getConfigs()), "include", +10000000000)
 
 
 class IncludePreprocessor(Preprocessor):
@@ -33,8 +32,8 @@ class IncludePreprocessor(Preprocessor):
     """
     def __init__(self, md, config):
         super(IncludePreprocessor, self).__init__(md)
-        self.base_path = config['base_path']
-        self.encoding = config['encoding']
+        self.base_path = config["base_path"]
+        self.encoding = config["encoding"]
 
     def run(self, lines):
         from abimkdocs.website import Website

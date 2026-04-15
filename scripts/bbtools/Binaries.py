@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-from __future__ import print_function
+import configparser
 import os
 import sys
-import time
 import tempfile
+import time
 from subprocess import Popen
-import configparser
 
 confdir = "config/specs"
 
@@ -62,7 +61,7 @@ for binary in binaries.sections():
 		raise RuntimeError("Error while running `%s`:" % cmd)
 	print(" ----> command terminated with retcode:", process.returncode)
 	print("**************************************\n")
-	
+
 	sys.stdout.flush()
 
 sys.exit(general_rc)

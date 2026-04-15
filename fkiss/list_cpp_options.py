@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from __future__ import print_function
 
 import os
 import re
@@ -15,7 +14,7 @@ def list_cpp_options(top):
   for root,dirs,files in os.walk(top):
     for src in files:
       if ( fortran.search(src) ):
-        with open(os.path.join(root,src), "r") as fh:
+        with open(os.path.join(root,src)) as fh:
             code = fh.readlines()
 
         for line in code:
@@ -36,7 +35,7 @@ def list_cpp_options(top):
   names = sorted(cppopts.keys())
   for opt in names:
     print ("%-32s   %10d" % (opt,cppopts[opt]))
-  print ("")
+  print()
 
   return 0
 

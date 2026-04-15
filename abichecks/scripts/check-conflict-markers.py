@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-from __future__ import unicode_literals, division, print_function, absolute_import
 
-import re
 import os
+import re
 import sys
 
 from abirules_tools import find_abinit_toplevel_directory
@@ -29,7 +28,7 @@ exclude_bins = set([
 ])
 
 def check_item(item):
-  "True if item has to be analyzed."
+  """True if item has to be analyzed."""
   if re_tmpfile.search(item): return False
   if re_rstfile.search(item): return False
   if item in exclude_bins: return False
@@ -71,10 +70,10 @@ def main():
 
       try:
           if sys.version_info >= (3, 0):
-            with open(path, "rt", encoding="ISO-8859-1") as fh:
+            with open(path, encoding="ISO-8859-1") as fh:
               chk_data = fh.readlines()
           else:
-            with open(path, "r") as fh:
+            with open(path) as fh:
               chk_data = fh.readlines()
 
           chk_stat = False

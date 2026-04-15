@@ -2,17 +2,19 @@ import os
 import sys
 import time
 
-from subprocess import Popen
-from .subprocesswithtimeout import SubProcessWithTimeout
-
 # The ConfigParser module has been renamed to configparser in Python 3
 from configparser import NoOptionError
+from subprocess import Popen
+
+from .subprocesswithtimeout import SubProcessWithTimeout
+
 try:
     from configparser import SafeConfigParser
 except ImportError:
     from configparser import ConfigParser as SafeConfigParser
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 __version__ = "0.1"
@@ -20,8 +22,8 @@ __author__ = "Matteo Giantomassi"
 
 __all__ = [
     "JobRunner",
-    "TimeBomb",
     "OMPEnvironment",
+    "TimeBomb",
 ]
 
 
@@ -210,8 +212,7 @@ class JobRunner:
     def set_timebomb(self, timebomb):
         if self.has_timebomb:
             raise ValueError("timebomb is already defined")
-        else:
-            self.timebomb = timebomb
+        self.timebomb = timebomb
 
     def set_valgrind_cmdline(self, cmdline):
         """Set the command line options to be passed to VALGRIND."""
@@ -248,18 +249,18 @@ class JobRunner:
     @property
     def has_srun(self):
         """True if we are running with Slurm srun"""
-        return hasattr(self, "mpirun_np") and getattr(self, "mpirun_np") == "srun -n"
+        return hasattr(self, "mpirun_np") and self.mpirun_np == "srun -n"
 
     @property
     def has_mpirun(self):
         """True if we are running a MPI job with mpirun"""
-        return hasattr(self, "mpirun_np") and getattr(self, "mpirun_np") != "srun -n"
+        return hasattr(self, "mpirun_np") and self.mpirun_np != "srun -n"
 
 
     @property
     def has_poe(self):
         """True if are using IBM poe for MPI executions."""
-        return hasattr(self, "poe") and bool(getattr(self, "poe"))
+        return hasattr(self, "poe") and bool(self.poe)
 
     @property
     def has_timebomb(self):
@@ -267,19 +268,18 @@ class JobRunner:
         True if we are running the job under the control of
         an application that will enforce a timeout.
         """
-        return hasattr(self, "timebomb") and bool(getattr(self, "timebomb"))
+        return hasattr(self, "timebomb") and bool(self.timebomb)
 
     @property
     def has_ompenv(self):
         """True if we are using OpenMP."""
-        return hasattr(self, "ompenv") and bool(getattr(self, "ompenv"))
+        return hasattr(self, "ompenv") and bool(self.ompenv)
 
     def set_ompenv(self, ompenv):
         """Set the value of the OpenMP env variables."""
         if self.has_ompenv:
             raise ValueError("ompenv is already defined")
-        else:
-            self.ompenv = ompenv
+        self.ompenv = ompenv
 
     def run(self, mpi_nprocs, bin_path, stdin_fname, stdout_fname, stderr_fname, bin_argstr="", cwd=None):
         """
@@ -423,7 +423,7 @@ class MemcheckParser(BaseValgrindParser):
             return bytes_lost
 
         lost_bytes = 0
-        fh = open(filename, "r")
+        fh = open(filename)
 
         for line in fh:
             if "LEAK SUMMARY:" in line: break
@@ -467,7 +467,6 @@ class TimeBomb:
             bufsize=0, executable=None, stdin=None, stdout=None, stderr=None, preexec_fn=None,
             close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0):
         """Same interface as Popen."""
-
         try:
 
             if self.exec_path:
@@ -488,26 +487,25 @@ class TimeBomb:
 
                 ret_code = p.wait()
 
+            #
+            # timeout exec is NOT available.
+            #
+            elif self.timeout > 0.0:
+                logger.debug("Using SubprocesswithTimeout and timeout_time : "+str(self.timeout))
+                p = SubProcessWithTimeout(self.timeout, delay=self.delay)
+
+                p, ret_code = p.run(args,
+                    bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
+                    close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
+                    creationflags=creationflags)
             else:
-                #
-                # timeout exec is NOT available.
-                #
-                if self.timeout > 0.0:
-                    logger.debug("Using SubprocesswithTimeout and timeout_time : "+str(self.timeout))
-                    p = SubProcessWithTimeout(self.timeout, delay=self.delay)
+                logger.debug("Using Popen (no timeout_time)")
+                p = Popen(args,
+                          bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
+                          close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
+                          creationflags=creationflags)
 
-                    p, ret_code = p.run(args,
-                        bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
-                        close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
-                        creationflags=creationflags)
-                else:
-                    logger.debug("Using Popen (no timeout_time)")
-                    p = Popen(args,
-                              bufsize=bufsize, executable=executable, stdin=stdin, stdout=stdout, stderr=stderr, preexec_fn=preexec_fn,
-                              close_fds=close_fds, shell=shell, cwd=cwd, env=env, universal_newlines=universal_newlines, startupinfo=startupinfo,
-                              creationflags=creationflags)
-
-                    ret_code = p.wait()
+                ret_code = p.wait()
 
             return p, ret_code
 

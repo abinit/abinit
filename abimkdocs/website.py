@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Classes and functions used to generate the (static) website with the Abinit documentation
 from markdown files and the mkdocs static website generator.
@@ -8,29 +7,30 @@ For the different between Absolute, Relative, and Root-relative URLs see:
     <http://ifyoucodeittheywill.com/2009/03/absolute-relative-and-root-relative-urls/>
 """
 
-import sys
+import datetime
 import os
-import io
-import time
 import re
 import shutil
+import sys
+import time
 import uuid
-import pickle
-import yaml
-import markdown
-import datetime
 
+#from markdown.util import etree
+import xml.etree.ElementTree as etree
 from collections import OrderedDict, defaultdict
 from itertools import groupby
 from pprint import pprint
-from pybtex.database import parse_file, Entry, BibliographyData
-#from markdown.util import etree
-import xml.etree.ElementTree as etree
+
+import markdown
+import yaml
+from pybtex.database import BibliographyData, Entry, parse_file
 from pygments import highlight
-from pygments.lexers import BashLexer, PythonLexer, BibTeXLexer
 from pygments.formatters import HtmlFormatter
+from pygments.lexers import BashLexer, BibTeXLexer, PythonLexer
+
 from doc.tests.pymods.termcolor import cprint
-from .variables import lazy_property, Variable,  ABI_TOPICS, ABI_RELEVANCES
+
+from .variables import ABI_RELEVANCES, ABI_TOPICS, lazy_property
 
 
 def my_unicode(s):
@@ -57,10 +57,9 @@ def gen_id(n=1, pre="uuid-"):
     # digits ([0-9]), hyphens ("-"), underscores ("_"), colons (":"), and periods (".").
     if n == 1:
         return pre + str(uuid.uuid4())
-    elif n > 1:
+    if n > 1:
         return [pre + str(uuid.uuid4()) for i in range(n)]
-    else:
-        raise ValueError("n must be > 0 but got %s" % str(n))
+    raise ValueError("n must be > 0 but got %s" % str(n))
 
 
 def splitall(path):
@@ -71,12 +70,11 @@ def splitall(path):
         if parts[0] == path:  # sentinel for absolute paths
             allparts.insert(0, parts[0])
             break
-        elif parts[1] == path: # sentinel for relative paths
+        if parts[1] == path: # sentinel for relative paths
             allparts.insert(0, parts[1])
             break
-        else:
-            path = parts[0]
-            allparts.insert(0, parts[1])
+        path = parts[0]
+        allparts.insert(0, parts[1])
     return allparts
 
 
@@ -95,8 +93,8 @@ class MyEntry(Entry):
         """String with authors. Empty if authors are not provided."""
         try:
             #return ", ".join(my_unicode(p) for p in self.persons["author"])
-            return ", ".join(my_unicode(p).partition(',')[2] + " " +
-                             my_unicode(p).partition(',')[0] for p in self.persons["author"])
+            return ", ".join(my_unicode(p).partition(",")[2] + " " +
+                             my_unicode(p).partition(",")[0] for p in self.persons["author"])
         except KeyError:
             return ""
 
@@ -116,7 +114,7 @@ class MyEntry(Entry):
 
         # FIXME: enforce format at the level of the unit tests
         if self.type == "article":
-            s = '{}  \n{}  \n'.format(authors, title)
+            s = f"{authors}  \n{title}  \n"
             if "eprint" in fields:
                 s += "{} **{}**, {} ({})".format(fields["journal"], fields.get("archivePrefix", ""),
                         fields["eprint"], fields["year"])
@@ -127,16 +125,16 @@ class MyEntry(Entry):
         elif self.type in ("book", "inproceedings", "incollection"):
             # FIXME Better treatment for incollection
             #editors = ", ".join(str(e) for e in self.persons["editor"]])
-            s = '{}  \n{}  \n'.format(authors, title)
+            s = f"{authors}  \n{title}  \n"
             s += "{} ({})".format(fields["publisher"], fields["year"])
             if "isbn" in fields:
                 s += "isbn: %s" % fields["isbn"]
 
         elif self.type in ("phdthesis", "mastersthesis"):
-            s = '{}  \n{}  \n{} ({})'.format(authors, title, fields["school"], fields["year"])
+            s = "{}  \n{}  \n{} ({})".format(authors, title, fields["school"], fields["year"])
 
         elif self.type in ("misc", "unpublished"):
-            s = '{}  \n{} ({})'.format(authors, title, fields["year"])
+            s = "{}  \n{} ({})".format(authors, title, fields["year"])
 
         else:
             raise TypeError("Don't know how to convert type: `%s` into markdown string" % self.type)
@@ -150,7 +148,7 @@ class MyEntry(Entry):
             doi_root = "https://doi.org/"
             if not doi.startswith(doi_root): doi = doi_root + doi
             #s += 'DOI: <{doi}>  \n'.format(doi=doi)
-            s += 'DOI: <a href="{doi}" target="_blank">{doi}</a><br>'.format(doi=doi)
+            s += f'DOI: <a href="{doi}" target="_blank">{doi}</a><br>'
 
         if bibtex_ui is not None:
             # Add modal window with bibtex button/link.
@@ -178,7 +176,7 @@ class MyEntry(Entry):
 _WEBSITE = None
 
 
-class Website(object):
+class Website:
     """
     This object is a singleton. It stores all the information required to generate the HTML documentation
     (input variables, test suite, bibtex entries).
@@ -188,7 +186,7 @@ class Website(object):
     # Regular expression for wikilinks.
     #WIKILINK_RE = r'\[\[([\w0-9_ -]+)\]\]'
     #WIKILINK_RE = r'\[\[([\w0-9_ -\./]+)\]\]'
-    WIKILINK_RE = r'\[\[([^\[]+)\]\]'
+    WIKILINK_RE = r"\[\[([^\[]+)\]\]"
     #WIKILINK_RE = r'(?![~`])\[\[([^\[]+)\]\]'
 
     @classmethod
@@ -222,7 +220,7 @@ class Website(object):
 
         # Read mkdocs configuration file.
         # TODO: Should read Abinit version from a centralized file.
-        with io.open(os.path.join(self.root, "..", "mkdocs.yml"), "rt", encoding="utf-8") as fh:
+        with open(os.path.join(self.root, "..", "mkdocs.yml"), encoding="utf-8") as fh:
             if hasattr(yaml, "FullLoader"):
                 self.mkdocs_config = yaml.load(fh, Loader=yaml.FullLoader)
             else:
@@ -287,7 +285,7 @@ class Website(object):
         def test_get_varnames(test, varnames):
             # TODO: This should become a method of BaseTest and must be improved.
             # See new method of BaseTest...
-            with io.open(test.inp_fname, "rt", encoding="utf-8") as fh:
+            with open(test.inp_fname, encoding="utf-8") as fh:
                 s = fh.read()
             vused = [v for v in varnames if v in s]
             return vused
@@ -392,7 +390,7 @@ Change the input yaml files or the python code
         self.md_generated.append(path)
         if self.verbose: print("Generating markdown file: `%s`" % path)
 
-        mdf = io.open(path, "wt", encoding="utf-8")
+        mdf = open(path, "w", encoding="utf-8")
 
         if hide_navigation or hide_toc:
             # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#hide-the-sidebars
@@ -472,7 +470,7 @@ and [builder matrix](https://github.com/abinit/abinit_web/blob/main/docs/builder
             path = os.path.join(dirpath, f)
             if os.path.isdir(path) or path.endswith(".swp") or path.endswith(".ac"): continue
             app("## %s  " %  f)
-            with io.open(path, "rt", encoding="utf-8") as fh:
+            with open(path, encoding="utf-8") as fh:
                 # Remove all comments except for options that are specified.
                 #print(path)
                 ac_lines = []
@@ -608,7 +606,7 @@ in order of number of occurrence in the input files provided with the package.
         self.howto_topic = {}
         for topic in self.all_topics:
             # Read description from md file.
-            with io.open(os.path.join(dirpath, "_" + topic + ".md"), "rt", encoding="utf-8") as fh:
+            with open(os.path.join(dirpath, "_" + topic + ".md"), encoding="utf-8") as fh:
                 for line in fh:
                     if "description:" in line:
                         self.howto_topic[topic] = line.replace("description:", "").strip()
@@ -637,7 +635,7 @@ in order of number of occurrence in the input files provided with the package.
                 items = [(v.topic2relevances[topic][0], v) for v in vlist]
                 for num, group in sort_and_groupby(items, key=lambda t: sort_relevances(t)):
                     # Alphabetical order inside group.
-                    group = list(sorted(group, key=lambda t: t[1].name))
+                    group = sorted(group, key=lambda t: t[1].name)
                     relevance = group[0][0]
                     lines.append("*%s:*\n" % relevance)
                     lines.extend("- %s  %s" % (v.wikilink, v.mnemonics) for (_, v) in group)
@@ -657,7 +655,7 @@ in order of number of occurrence in the input files provided with the package.
                 selected_input_files = "\n".join(lines)
 
             # Read template, interpolate and write md file included in mkdocs.yml.
-            with io.open(os.path.join(self.root, "topics", "_" + topic + ".md"), "rt", encoding="utf-8") as fh:
+            with open(os.path.join(self.root, "topics", "_" + topic + ".md"), encoding="utf-8") as fh:
                 template = fh.read()
                 template = template.replace("is the source file for this topics. Can be edited."," file has been generated automatically from the corresponding _* source file. DO NOT EDIT. Edit the source file instead.")
                 template = template.replace("{{ related_variables }}", related_variables)
@@ -683,9 +681,9 @@ in order of number of occurrence in the input files provided with the package.
         with self.new_mdfile("developers", "testsuite.md", meta=meta) as mdf:
             for suite_name, group in sort_and_groupby(items, key=lambda t: t[1].suite_name):
                 group = list(group)
-                mdf.write('## %s  \n\n' % suite_name)
+                mdf.write("## %s  \n\n" % suite_name)
                 for i, (rpath, test) in enumerate(group):
-                    mdf.write('### [[%s]]   \n\n' % rpath)
+                    mdf.write("### [[%s]]   \n\n" % rpath)
                     mdf.write(my_unicode(test.description))
                     mdf.write("\n\n")
                     mdf.write("Executable: %s   \n" % test.executable)
@@ -730,7 +728,7 @@ The full bibtex file is available [here](../abiref.bib).
                 except Exception as exc:
                     raise ValueError("Exception while trying to convert bibtex entry `%s`\n%s\n" % (name, str(exc)))
                 if citation2pages[name]:
-                    lines.append("Referred to in: %s" % ", ".join('[{url}]({url})'.format(url=url)
+                    lines.append("Referred to in: %s" % ", ".join(f"[{url}]({url})"
                         for url in sorted([page.url for page in citation2pages[name]])))
 
             mdf.write("\n".join(lines))
@@ -742,7 +740,7 @@ The full bibtex file is available [here](../abiref.bib).
                 mdf.write("## %s  \n" % fname)
                 rpdf = "/" + os.path.relpath(path, self.root)
                 src = os.path.relpath(rpdf, mdf.rpath)
-                html = '<embed src="{src}" type="application/pdf" width="100%" height="480px">\n\n'.format(src=src)
+                html = f'<embed src="{src}" type="application/pdf" width="100%" height="480px">\n\n'
                 mdf.write(html)
 
         #for dirname in ["theory"]:
@@ -752,7 +750,7 @@ The full bibtex file is available [here](../abiref.bib).
         #    for topic in page.topics:
         #        topic2pages[topic].append(page)
 
-        with open(os.path.join(self.root, ".gitignore"), "wt") as fh:
+        with open(os.path.join(self.root, ".gitignore"), "w") as fh:
             fh.write("# The following md files have been copied from ~abinit and should be `git ignored`\n")
             for p in self.ignored_paths:
                 fh.write(os.path.relpath(p, self.root) + "\n")
@@ -847,7 +845,6 @@ The full bibtex file is available [here](../abiref.bib).
 
     def _preprocess_macros(self, lines):
         """Preprocess markdown lines and replace [TUTORIAL_README] string."""
-
         tutorial_readme = """
 
 !!! note
@@ -929,9 +926,8 @@ The full bibtex file is available [here](../abiref.bib).
             if value is not None:
                 if self.verbose: print("Returning", value)
                 return " " + value + " "
-            else:
-                if self.verbose: print("Returning full match:", matchobj.group(0))
-                return matchobj.group(0)
+            if self.verbose: print("Returning full match:", matchobj.group(0))
+            return matchobj.group(0)
 
         alias_syntax = re.compile(r"[^`\$]\|(?P<key>\w+)\|")
         #alias_syntax = re.compile(r"(?!`+)\|(?P<key>\w+)\|")
@@ -939,7 +935,7 @@ The full bibtex file is available [here](../abiref.bib).
 
     def _preprocess_include(self, lines):
         """Handle {action ...} syntax."""
-        inc_syntax = re.compile(r'^\{%\s*(.+?)\s*%\}')
+        inc_syntax = re.compile(r"^\{%\s*(.+?)\s*%\}")
         new_lines = []
         for line in lines:
             m = inc_syntax.search(line)
@@ -957,7 +953,7 @@ The full bibtex file is available [here](../abiref.bib).
                     else:
                         new_lines.extend(self.dialog_from_filename(args[0]).splitlines())
                 elif action == "include":
-                    with io.open(args[0], "rt", encoding="utf-8") as f:
+                    with open(args[0], encoding="utf-8") as f:
                         new_lines.extend([l.rstrip() for l in f])
                 else:
                     raise ValueError("Don't know how to handle action: `%s` in token: `%s`" % (action, m.group(1)))
@@ -1034,8 +1030,8 @@ The full bibtex file is available [here](../abiref.bib).
             # Handle [[www.google.com|text]]
             url, a.text = token, token
             if "|" in token: url, a.text = token.split("|")
-            a.set('href', url)
-            a.set('target', "_blank")
+            a.set("href", url)
+            a.set("target", "_blank")
             return a
 
         # [[namespace:name#fragment|text]]
@@ -1114,167 +1110,165 @@ The full bibtex file is available [here](../abiref.bib).
                     self.warn("Don't know how to handle wikilink token `%s` in `%s`" % (token, page_rpath))
                     url, a.text = "FAKE_URL", "FAKE_URL"
 
-        else:
-            # namespace is defined
-            if namespace in self.codevars:
-                # Handle [[anaddb:asr|text]] or [[abinit:ecut|text]]
-                assert fragment is None
-                var = self.codevars[namespace][name.lower()]
-                url = "/variables/%s#%s" % (var.varset, var.name)
-                html_classes.append("codevar-wikilink")
-                if a.text is None:
-                    a.text = var.name if not var.is_internal else "%%%s" % var.name
+        # namespace is defined
+        elif namespace in self.codevars:
+            # Handle [[anaddb:asr|text]] or [[abinit:ecut|text]]
+            assert fragment is None
+            var = self.codevars[namespace][name.lower()]
+            url = "/variables/%s#%s" % (var.varset, var.name)
+            html_classes.append("codevar-wikilink")
+            if a.text is None:
+                a.text = var.name if not var.is_internal else "%%%s" % var.name
 
-            elif namespace == "lesson" or namespace == "tutorial" :
-                # Handle [[tutorial:wannier90|text]]
-                if name == "index":
-                    url = "/tutorial/"
-                    if a.text is None: a.text = "tutorial home page"
-                else:
-                    url = "/tutorial/%s" % name
-                    if a.text is None: a.text = "%s %s" % (name, namespace)
-                html_classes.append("lesson-wikilink")
+        elif namespace == "lesson" or namespace == "tutorial" :
+            # Handle [[tutorial:wannier90|text]]
+            if name == "index":
+                url = "/tutorial/"
+                if a.text is None: a.text = "tutorial home page"
+            else:
+                url = "/tutorial/%s" % name
+                if a.text is None: a.text = "%s %s" % (name, namespace)
+            html_classes.append("lesson-wikilink")
 
-            elif namespace == "help" or namespace == "guide" :
-                # Handle [[help:optic|text] NB: [[help:codename]] is echoed "codename help file"
-                if name == "index":
-                    url = "/guide/"
-                    if a.text is None: a.text = "user-guide home page"
-                else:
-                    url = "/guide/%s" % name
-                    if a.text is None: a.text = "%s help file" % name
-                html_classes.append("user-guide-wikilink")
+        elif namespace == "help" or namespace == "guide" :
+            # Handle [[help:optic|text] NB: [[help:codename]] is echoed "codename help file"
+            if name == "index":
+                url = "/guide/"
+                if a.text is None: a.text = "user-guide home page"
+            else:
+                url = "/guide/%s" % name
+                if a.text is None: a.text = "%s help file" % name
+            html_classes.append("user-guide-wikilink")
 
-            elif namespace == "about" :
-                # Handle [[about:release-notes|text] NB: [[about:file]] is echoed "file"
-                if name == "index":
-                    url = "/about/"
-                    if a.text is None: a.text = "no index for about at present"
-                else:
-                    url = "/about/%s" % name
-                    if a.text is None: a.text = "%s" % name
-                html_classes.append("about-wikilink")
+        elif namespace == "about" :
+            # Handle [[about:release-notes|text] NB: [[about:file]] is echoed "file"
+            if name == "index":
+                url = "/about/"
+                if a.text is None: a.text = "no index for about at present"
+            else:
+                url = "/about/%s" % name
+                if a.text is None: a.text = "%s" % name
+            html_classes.append("about-wikilink")
 
-            elif namespace == "developers" :
-                # Handle [[developers:psp8_info|text] NB: [[developers:filename]] is echoed "filename developer doc"
-                if name == "index":
-                    url = "/developers/"
-                    if a.text is None: a.text = "no index for developers at present"
-                else:
-                    url = "/developers/%s" % name
-                    if a.text is None: a.text = "%s developer doc" % name
-                html_classes.append("developers-wikilink")
+        elif namespace == "developers" :
+            # Handle [[developers:psp8_info|text] NB: [[developers:filename]] is echoed "filename developer doc"
+            if name == "index":
+                url = "/developers/"
+                if a.text is None: a.text = "no index for developers at present"
+            else:
+                url = "/developers/%s" % name
+                if a.text is None: a.text = "%s developer doc" % name
+            html_classes.append("developers-wikilink")
 
-            elif namespace == "topic":
-                # Handle [[topic:BSE|text]]
-                html_classes.append("topic-wikilink")
-                if name == "index":
-                    url = "/topics/"
-                    if a.text is None: a.text = "Topics index"
-                else:
-                    url = "/topics/%s" % name
-                    if a.text is None: a.text = "%s_%s" % (namespace, name)
-                    add_popover(a, content=self.howto_topic[name])
+        elif namespace == "topic":
+            # Handle [[topic:BSE|text]]
+            html_classes.append("topic-wikilink")
+            if name == "index":
+                url = "/topics/"
+                if a.text is None: a.text = "Topics index"
+            else:
+                url = "/topics/%s" % name
+                if a.text is None: a.text = "%s_%s" % (namespace, name)
+                add_popover(a, content=self.howto_topic[name])
 
-            elif namespace == "cite":
-                # Handle [[cite:biblio]]
-                if name == "biblio":
-                    url = "/theory/bibliography/"
-                    if a.text is None: a.text = "bibliography"
-                else:
-                    # Handle [[bib:Amadon2008]]
-                    try:
-                        ref = self.bib_data.entries[name]
-                        url = "/theory/bibliography#%s" % self.slugify(name)
-                        content = ref.fields["title"].replace("{", "").replace("}", "") #+ "\n\n" + ref.authors
-                        add_popover(a, content=content)
-                        if a.text is None: a.text = "[%s]" % name
-                        html_classes.append("citation-wikilink")
-                    except Exception as exc:
-                        self.warn("Exception `%s:%s`\nwhile treating wikilink token: `%s` in `%s`" %
-                                (exc.__class__, str(exc), token, page_rpath))
-                        url, a.text = "FAKE_URL", "FAKE_URL"
-
-            elif namespace == "theory":
-                # Handle [[theorydoc:mbpt|text]]
-                url = "/theory/%s" % name
-                html_classes.append("theory-wikilink")
-                if a.text is None: a.text = name
-
-            elif namespace == "varset":
-                # Handle [[varset:BSE|text]]
-                assert fragment is None
-                if name == "allvars":
-                    url = "/variables/"
-                else:
-                    url = "/variables/%s" % name
-                if a.text is None: a.text = "%s varset" % name
-
-            elif namespace == "test":
-                # Handle [[test:libxc_41]] (syntax for suite) [[test:gswvl_01]] (syntax for subsuite)
-                tokens = name.split("_")
-                prefix, tnum = "_".join(tokens[:-1]), tokens[-1]
-                if prefix in self.abinit_tests.all_subsuite_names:
-                    # [[test:gspw_01]]  --> Need to get the name of suite from subsuite.
-                    suite_name = self.abinit_tests.suite_of_subsuite(prefix).name
-                    url = "/tests/%s/Input/t%s.abi" % (suite_name, name)
-                else:
-                    # [[test:libxc_41]]
-                    url = "/tests/%s/Input/t%s.abi" % (prefix, tnum)
-
-                if a.text is None: a.text = "%s[%s]" % (prefix, tnum)
-                test = self.rpath2test[url[1:]]
-                content = test.description # + "\n\n" + ", ".join(test.authors)
-                add_popover(a, content=content)
-                target = "_blank"
-                html_classes.append("abifile-wikilink")
-
-            elif namespace == "src":
-                # Handle [[src:94_scfcv/scfcv.F90]]
-                url = "https://github.com/abinit/abinit/blob/master/src/%s" % name
-                if a.text is None: a.text = name
-                target = "_blank"
-                html_classes.append("abifile-wikilink")
-
-            elif namespace == "ac":
-                # Handle [[ac:abiref_gnu_9.2_debug.ac]]
-                # The following is incorrect: files in /build/config-examples are generated when makemake is issued.
-                # url = "/build/config-examples/%s" % name
-                # By contrast, the following is a permanent reference
-                # FIXME: buildsys refs are not generated anymore (YP)
-                #url = "/abichecks/buildsys/Refs/%s" % name
-                #if a.text is None: a.text = name
-                #target = "_blank"
-                #html_classes.append("abifile-wikilink")
-                url = "/build/config-template.ac9"
-                pass
-
-            elif namespace == "pdf":
-                # Handle [[pdf:howto_chebfi.pdf]] or [[pdf:howto_chebfi]]
-                if not name.endswith(".pdf"): name += ".pdf"
+        elif namespace == "cite":
+            # Handle [[cite:biblio]]
+            if name == "biblio":
+                url = "/theory/bibliography/"
+                if a.text is None: a.text = "bibliography"
+            else:
+                # Handle [[bib:Amadon2008]]
                 try:
-                    path = self.pdfs[name]
-                    url = "/" + os.path.relpath(path, self.root)
-                except KeyError:
-                    self.warn("Cannot find pdf file `%s` specified in wikilink `%s` in `%s`" % (name, token, page_rpath))
+                    ref = self.bib_data.entries[name]
+                    url = "/theory/bibliography#%s" % self.slugify(name)
+                    content = ref.fields["title"].replace("{", "").replace("}", "") #+ "\n\n" + ref.authors
+                    add_popover(a, content=content)
+                    if a.text is None: a.text = "[%s]" % name
+                    html_classes.append("citation-wikilink")
+                except Exception as exc:
+                    self.warn("Exception `%s:%s`\nwhile treating wikilink token: `%s` in `%s`" %
+                            (exc.__class__, str(exc), token, page_rpath))
                     url, a.text = "FAKE_URL", "FAKE_URL"
 
-                if a.text is None: a.text = name
-                target = "_blank"
-                html_classes.append("abifile-wikilink")
+        elif namespace == "theory":
+            # Handle [[theorydoc:mbpt|text]]
+            url = "/theory/%s" % name
+            html_classes.append("theory-wikilink")
+            if a.text is None: a.text = name
 
-            elif namespace == "gitsha":
-                # Handle [gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]
-                url = "https://github.com/abinit/abinit/commit/%s" % name
-                if a.text is None: a.text = name[:7]
-                target = "_blank"
-                html_classes.append("abigit-wikilink")
-
-            # TODO? Issue
-            #Fix issue https://github.com/abinit/abinit/issues/1
+        elif namespace == "varset":
+            # Handle [[varset:BSE|text]]
+            assert fragment is None
+            if name == "allvars":
+                url = "/variables/"
             else:
-                self.warn("Don't know how to handle wikilink token `%s` in `%s`" % (token, page_rpath))
+                url = "/variables/%s" % name
+            if a.text is None: a.text = "%s varset" % name
+
+        elif namespace == "test":
+            # Handle [[test:libxc_41]] (syntax for suite) [[test:gswvl_01]] (syntax for subsuite)
+            tokens = name.split("_")
+            prefix, tnum = "_".join(tokens[:-1]), tokens[-1]
+            if prefix in self.abinit_tests.all_subsuite_names:
+                # [[test:gspw_01]]  --> Need to get the name of suite from subsuite.
+                suite_name = self.abinit_tests.suite_of_subsuite(prefix).name
+                url = "/tests/%s/Input/t%s.abi" % (suite_name, name)
+            else:
+                # [[test:libxc_41]]
+                url = "/tests/%s/Input/t%s.abi" % (prefix, tnum)
+
+            if a.text is None: a.text = "%s[%s]" % (prefix, tnum)
+            test = self.rpath2test[url[1:]]
+            content = test.description # + "\n\n" + ", ".join(test.authors)
+            add_popover(a, content=content)
+            target = "_blank"
+            html_classes.append("abifile-wikilink")
+
+        elif namespace == "src":
+            # Handle [[src:94_scfcv/scfcv.F90]]
+            url = "https://github.com/abinit/abinit/blob/master/src/%s" % name
+            if a.text is None: a.text = name
+            target = "_blank"
+            html_classes.append("abifile-wikilink")
+
+        elif namespace == "ac":
+            # Handle [[ac:abiref_gnu_9.2_debug.ac]]
+            # The following is incorrect: files in /build/config-examples are generated when makemake is issued.
+            # url = "/build/config-examples/%s" % name
+            # By contrast, the following is a permanent reference
+            # FIXME: buildsys refs are not generated anymore (YP)
+            #url = "/abichecks/buildsys/Refs/%s" % name
+            #if a.text is None: a.text = name
+            #target = "_blank"
+            #html_classes.append("abifile-wikilink")
+            url = "/build/config-template.ac9"
+
+        elif namespace == "pdf":
+            # Handle [[pdf:howto_chebfi.pdf]] or [[pdf:howto_chebfi]]
+            if not name.endswith(".pdf"): name += ".pdf"
+            try:
+                path = self.pdfs[name]
+                url = "/" + os.path.relpath(path, self.root)
+            except KeyError:
+                self.warn("Cannot find pdf file `%s` specified in wikilink `%s` in `%s`" % (name, token, page_rpath))
                 url, a.text = "FAKE_URL", "FAKE_URL"
+
+            if a.text is None: a.text = name
+            target = "_blank"
+            html_classes.append("abifile-wikilink")
+
+        elif namespace == "gitsha":
+            # Handle [gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]
+            url = "https://github.com/abinit/abinit/commit/%s" % name
+            if a.text is None: a.text = name[:7]
+            target = "_blank"
+            html_classes.append("abigit-wikilink")
+
+        # TODO? Issue
+        #Fix issue https://github.com/abinit/abinit/issues/1
+        else:
+            self.warn("Don't know how to handle wikilink token `%s` in `%s`" % (token, page_rpath))
+            url, a.text = "FAKE_URL", "FAKE_URL"
 
         a.set("class", " ".join(html_classes))
         if fragment is not None: url = "%s#%s" % (url, fragment)
@@ -1286,7 +1280,7 @@ The full bibtex file is available [here](../abiref.bib).
 
         o = urlparse(url)
         if o.scheme:
-            a.set('href', url)
+            a.set("href", url)
             return a
 
         # From root-relative url to relative url.
@@ -1307,8 +1301,8 @@ The full bibtex file is available [here](../abiref.bib).
 
         if self.verbose: print("token", token, "page_rpath", page_rpath, "url", url)
 
-        a.set('href', url.strip())
-        if target: a.set('target', target)
+        a.set("href", url.strip())
+        if target: a.set("target", target)
         return a
 
     def build_varsearch_html(self, page_rpath):
@@ -1318,8 +1312,8 @@ The full bibtex file is available [here](../abiref.bib).
         for code, vd in self.codevars.items():
             allvars.update({v.abivarname: v for v in vd.values()})
 
-        tabs = "\n".join("""\
-<a class="TabLetterLink" href="#{cap_char}" onClick="openLetter(event,'{cap_char}')" id="click{cap_char}">{cap_char}</a>""".format(cap_char=cap_char) for cap_char in sorted(set([k[0].upper() for k in allvars])))
+        tabs = "\n".join(f"""\
+<a class="TabLetterLink" href="#{cap_char}" onClick="openLetter(event,'{cap_char}')" id="click{cap_char}">{cap_char}</a>""" for cap_char in sorted(set([k[0].upper() for k in allvars])))
 
         html_vars = ""
         for char, group in sort_and_groupby(list(allvars.items()), key=lambda t: t[0][0].upper()):
@@ -1379,7 +1373,7 @@ Enter `@anaddb` in the search bar to show only the variables of `anaddb`.
         abs_path = os.path.join(self.root, path)
 
         title = path if title is None else title
-        with io.open(os.path.join(self.root, path), "rt", encoding="utf-8") as fh:
+        with open(os.path.join(self.root, path), encoding="utf-8") as fh:
             if path.endswith(".abi") or path.endswith(".in"):
                 text = highlight(fh.read(), BashLexer(), HtmlFormatter(cssclass="codehilite small-text"))
             elif path.endswith(".py"):
@@ -1400,11 +1394,10 @@ Enter `@anaddb` in the search bar to show only the variables of `anaddb`.
         if not ret_btn_dialog:
             button = '<div class="text-center">%s</div>' % button
             return button + dialog
-        else:
-            return button, dialog
+        return button, dialog
 
 
-class Page(object):
+class Page:
 
     def __init__(self, path, website):
         self.path = os.path.abspath(path)
@@ -1455,7 +1448,7 @@ class MarkdownPage(Page):
     def __init__(self, path, website):
         super(MarkdownPage, self).__init__(path, website)
         self.meta = {}
-        with io.open(self.path, "rt", encoding="utf-8") as fh:
+        with open(self.path, encoding="utf-8") as fh:
            string = fh.read()
 
         #lines = string.split("\n")
@@ -1468,7 +1461,7 @@ class MarkdownPage(Page):
             token = m.group(1).strip()
             try:
                 link = website.get_wikilink(token, self.url)
-            except Exception as exc:
+            except Exception:
                 cprint("Exception while trying to handle wikilink `%s` in `%s`" % (token, self.path))
                 raise
 
@@ -1485,7 +1478,7 @@ class HtmlPage(Page):
         super(HtmlPage, self).__init__(path, website)
 
 
-class AbinitStats(object):
+class AbinitStats:
     """
     This object parses the data stored in statistics.txt and produces the JSON document
     used by plotly to plot the results on the web-site.
@@ -1506,7 +1499,7 @@ class AbinitStats(object):
         keys = ("versions", "dates", "targz_sizes", "num_f90files", "num_f90lines", "num_tests")
         self.data = OrderedDict([(k, []) for k in keys])
 
-        with io.open(self.path, "rt", encoding="utf-8") as fh:
+        with open(self.path, encoding="utf-8") as fh:
             indata = False
             for line in fh:
                 indata = indata or line.startswith("4.3")
@@ -1538,11 +1531,11 @@ class AbinitStats(object):
     def json_dump(self, path):
         """Write data in JSON format to file `path`."""
         import json
-        with io.open(path, "wt", encoding="utf-8") as fh:
+        with open(path, "w", encoding="utf-8") as fh:
             fh.write(my_unicode(json.dumps(self.data, ensure_ascii=False)))
 
 
-class HTMLValidator(object):
+class HTMLValidator:
     """
     This object checks HTML validity by sending requests to <https://validator.w3.org/>
 
@@ -1570,6 +1563,7 @@ class HTMLValidator(object):
         # https://bitbucket.org/nmb10/py_w3c
         # import HTML validator and create validator instance
         import urllib
+
         from py_w3c.validators.html.validator import HTMLValidator
         vld = HTMLValidator()
         num_err, num_ignored, num_warn = 0, 0, 0
@@ -1588,7 +1582,7 @@ class HTMLValidator(object):
             "input": ["autocorrect", "autocapitalize"],
         }
         for element, attrs in element2attrs.items():
-            exclude_substrings.extend('Attribute “%s” not allowed on element “%s”' % (attr, element) for attr in attrs)
+            exclude_substrings.extend("Attribute “%s” not allowed on element “%s”" % (attr, element) for attr in attrs)
 
         try:
             vld.validate_file(path)

@@ -1,13 +1,11 @@
-# coding: utf-8
-from __future__ import print_function, division, unicode_literals, absolute_import
 
 executable = "optic"
 
 try:
-    from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
+    from abimkdocs.variables import MultipleValue, Range, ValueWithUnit
 except ImportError:
     # This is needed for importing this module within Abipy
-    from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range
+    pass
 
 ValueWithConditions = dict
 Variable=dict
@@ -17,7 +15,7 @@ Variable(
     abivarname="broadening@optic",
     varset="optic",
     vartype="real",
-    topics=['Optic_basic'],
+    topics=["Optic_basic"],
     dimensions="scalar",
     defaultval="1.d-3 Ha",
     mnemonics="BROADENING",
@@ -44,7 +42,7 @@ Variable(
     abivarname="ddkfile@optic",
     varset="optic",
     vartype="string",
-    topics=['Optic_basic'],
+    topics=["Optic_basic"],
     dimensions="scalar",
     mnemonics="DDK FILE",
     commentdefault="no default",
@@ -66,7 +64,7 @@ Variable(
     abivarname="domega@optic",
     varset="optic",
     vartype="real",
-    topics=['Optic_basic'],
+    topics=["Optic_basic"],
     dimensions="scalar",
     defaultval="1.d-3 Ha",
     mnemonics="Delta OMEGA",
@@ -85,8 +83,8 @@ Variable(
     abivarname="lin_comp@optic",
     varset="optic",
     vartype="integer",
-    topics=['Optic_basic'],
-    dimensions=[['num_lin_comp']],
+    topics=["Optic_basic"],
+    dimensions=[["num_lin_comp"]],
     defaultval=0,
     mnemonics="LINear COMPonents",
     added_in_version="before_v9",
@@ -104,7 +102,7 @@ Variable(
     abivarname="maxomega@optic",
     varset="optic",
     vartype="real",
-    topics=['Optic_basic'],
+    topics=["Optic_basic"],
     dimensions="scalar",
     defaultval="1 Ha",
     mnemonics="MAXimum value of OMEGA",
@@ -123,8 +121,8 @@ Variable(
     abivarname="nonlin_comp@optic",
     varset="optic",
     vartype="integer",
-    topics=['Optic_basic'],
-    dimensions=[['num_nonlin_comp']],
+    topics=["Optic_basic"],
+    dimensions=[["num_nonlin_comp"]],
     defaultval=0,
     mnemonics="NON-LINear COMPonents",
     added_in_version="before_v9",
@@ -142,7 +140,7 @@ Variable(
     abivarname="num_lin_comp@optic",
     varset="optic",
     vartype="integer",
-    topics=['Optic_basic'],
+    topics=["Optic_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="NUMber of LINear COMPonents",
@@ -161,7 +159,7 @@ Variable(
     abivarname="num_nonlin_comp@optic",
     varset="optic",
     vartype="integer",
-    topics=['Optic_basic'],
+    topics=["Optic_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="NUMber of NON-LINear COMPonents",
@@ -178,7 +176,7 @@ Variable(
     abivarname="num_linel_comp@optic",
     varset="optic",
     vartype="integer",
-    topics=['Optic_basic'],
+    topics=["Optic_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="NUMber of LINear ELetro-optic  COMPonents",
@@ -195,7 +193,7 @@ Variable(
     abivarname="prtlincompmatrixelements@optic",
     varset="optic",
     vartype="integer",
-    topics=['Optic_basic'],
+    topics=["Optic_basic"],
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT the LINear COMPonent of the dielectric tensor's MATRIX ELEMENTS",
@@ -213,8 +211,8 @@ Variable(
     abivarname="linel_comp@optic",
     varset="optic",
     vartype="integer",
-    topics=['Optic_basic'],
-    dimensions=[['num_linel_comp']],
+    topics=["Optic_basic"],
+    dimensions=[["num_linel_comp"]],
     defaultval=0,
     mnemonics="LINear ELectro-optic COMPonents",
     added_in_version="before_v9",
@@ -231,7 +229,7 @@ Variable(
     abivarname="scissor@optic",
     varset="optic",
     vartype="real",
-    topics=['Optic_basic'],
+    topics=["Optic_basic"],
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="SCISSOR operator",
@@ -253,7 +251,7 @@ Variable(
     abivarname="tolerance@optic",
     varset="optic",
     vartype="real",
-    topics=['Optic_basic'],
+    topics=["Optic_basic"],
     dimensions="scalar",
     defaultval="1.d-3 Ha",
     mnemonics="TOLERANCE",
@@ -269,7 +267,7 @@ Variable(
     abivarname="wfkfile@optic",
     varset="optic",
     vartype="string",
-    topics=['Optic_basic'],
+    topics=["Optic_basic"],
     dimensions="scalar",
     mnemonics="WaveFunction K FILE",
     commentdefault="no default",
@@ -286,7 +284,7 @@ Variable(
     abivarname="nband_sum@optic",
     varset="optic",
     vartype="integer",
-    topics=['Optic_basic'],
+    topics=["Optic_basic"],
     dimensions="scalar",
     mnemonics="Number of BANDs in SUM",
     commentdefault="-1 i.e. use all bands found in external files. ",

@@ -1,17 +1,14 @@
-# coding: utf-8
-from __future__ import print_function, division, unicode_literals, absolute_import
 
-import sys
-import os
 import json
-
+import os
+import sys
 from collections import OrderedDict, defaultdict
 from itertools import groupby
 
 # Helper functions (coming from AbiPy)
 
 
-class lazy_property(object):
+class lazy_property:
     """
     lazy_property descriptor
 
@@ -28,13 +25,13 @@ class lazy_property(object):
         if inst is None:
             return self
 
-        if not hasattr(inst, '__dict__'):
+        if not hasattr(inst, "__dict__"):
             raise AttributeError("'%s' object has no attribute '__dict__'"
                                  % (inst_cls.__name__,))
 
         name = self.__name__
-        if name.startswith('__') and not name.endswith('__'):
-            name = '_%s%s' % (inst_cls.__name__, name)
+        if name.startswith("__") and not name.endswith("__"):
+            name = "_%s%s" % (inst_cls.__name__, name)
 
         value = self.__func(inst)
         inst.__dict__[name] = value
@@ -49,12 +46,12 @@ class lazy_property(object):
         """
         inst_cls = inst.__class__
 
-        if not hasattr(inst, '__dict__'):
+        if not hasattr(inst, "__dict__"):
             raise AttributeError("'%s' object has no attribute '__dict__'"
                                  % (inst_cls.__name__,))
 
-        if name.startswith('__') and not name.endswith('__'):
-            name = '_%s%s' % (inst_cls.__name__, name)
+        if name.startswith("__") and not name.endswith("__"):
+            name = "_%s%s" % (inst_cls.__name__, name)
 
         if not isinstance(getattr(inst_cls, name), cls):
             raise AttributeError("'%s.%s' is not a %s attribute"
@@ -90,8 +87,7 @@ def list_strings(arg):
     """
     if is_string(arg):
         return [arg]
-    else:
-        return arg
+    return arg
 
 
 def splitall(path):
@@ -102,40 +98,39 @@ def splitall(path):
         if parts[0] == path:  # sentinel for absolute paths
             allparts.insert(0, parts[0])
             break
-        elif parts[1] == path:  # sentinel for relative paths
+        if parts[1] == path:  # sentinel for relative paths
             allparts.insert(0, parts[1])
             break
-        else:
-            path = parts[0]
-            allparts.insert(0, parts[1])
+        path = parts[0]
+        allparts.insert(0, parts[1])
     return allparts
 
 
 # Unit names supported in Abinit input.
 ABI_UNITS = [
-    'au',
-    'Angstr',
-    'Angstrom',
-    'Angstroms',
-    'Bohr',
-    'Bohrs',
-    'eV',
-    'Ha',
-    'Hartree',
-    'Hartrees',
-    'K',
-    'Ry',
-    'Rydberg',
-    'Rydbergs',
-    'T',
-    'Tesla',
-    'Second',
-    'S',
-    'Sec',
+    "au",
+    "Angstr",
+    "Angstrom",
+    "Angstroms",
+    "Bohr",
+    "Bohrs",
+    "eV",
+    "Ha",
+    "Hartree",
+    "Hartrees",
+    "K",
+    "Ry",
+    "Rydberg",
+    "Rydbergs",
+    "T",
+    "Tesla",
+    "Second",
+    "S",
+    "Sec",
 ]
 
 # Operators supported by parser
-ABI_OPS = ['sqrt', 'end', '*', '/']
+ABI_OPS = ["sqrt", "end", "*", "/"]
 
 
 # List of strings with possible character of variables.
@@ -280,23 +275,23 @@ ABI_TOPICS = [
 
 # Relevance associated to the topic
 ABI_RELEVANCES = OrderedDict([
-    ("compulsory", 'Compulsory input variables'),
-    ("basic", 'Basic input variables'),
-    ("useful", 'Useful input variables'),
-    ("internal", 'Relevant internal variables'),
-    ("prpot", 'Printing input variables for potentials'),
-    ("prfermi", 'Printing input variables for fermi level or surfaces'),
-    ("prden", 'Printing input variables for density, eigenenergies, k-points and wavefunctions'),
-    ("prgeo", 'Printing input variables for geometry'),
+    ("compulsory", "Compulsory input variables"),
+    ("basic", "Basic input variables"),
+    ("useful", "Useful input variables"),
+    ("internal", "Relevant internal variables"),
+    ("prpot", "Printing input variables for potentials"),
+    ("prfermi", "Printing input variables for fermi level or surfaces"),
+    ("prden", "Printing input variables for density, eigenenergies, k-points and wavefunctions"),
+    ("prgeo", "Printing input variables for geometry"),
     ("prdos", "Printing DOS-related input variables"),
-    ("prgs", 'Printing other ground-state input variables'),
-    ("prngs", 'Printing non-ground-state input variables'),
-    ("prmisc", 'Printing miscellaneous files'),
-    ("expert",  'Input variables for experts'),
+    ("prgs", "Printing other ground-state input variables"),
+    ("prngs", "Printing non-ground-state input variables"),
+    ("prmisc", "Printing miscellaneous files"),
+    ("expert",  "Input variables for experts"),
 ])
 
 
-class Variable(object):
+class Variable:
     """
     This object gathers information about a single variable. name, associated topics, description etc
     It is constructed from the variables_CODENAME.py modules but client code usually
@@ -373,7 +368,7 @@ class Variable(object):
 
     @lazy_property
     def executable(self):
-        """string with the name of the code associated to this variable."""
+        """String with the name of the code associated to this variable."""
         if "@" in self.abivarname:
             code = self.abivarname.split("@")[1]
             assert code == self.varset
@@ -395,12 +390,11 @@ class Variable(object):
         # variables/anaddb#asr
         if self.executable == "abinit":
             return "https://docs.abinit.org/variables/%s#%s" % (self.varset, self.name)
-        else:
-            return "https://docs.abinit.org/variables/%s#%s" % (self.executable, self.name)
+        return "https://docs.abinit.org/variables/%s#%s" % (self.executable, self.name)
 
     @lazy_property
     def topic2relevances(self):
-        """topic --> list of relevances"""
+        """Topic --> list of relevances"""
         assert self.topics is not None
         od = OrderedDict()
         for tok in self.topics:
@@ -413,7 +407,7 @@ class Variable(object):
     @lazy_property
     def is_internal(self):
         """True if this is an internal variable."""
-        return self.characteristics is not None and '[[INTERNAL_ONLY]]' in self.characteristics
+        return self.characteristics is not None and "[[INTERNAL_ONLY]]" in self.characteristics
 
     @lazy_property
     def wikilink(self):
@@ -472,15 +466,14 @@ class Variable(object):
                 my_unicode(self.defaultval) + \
                 "<br/><h2>Description</h2>" + self.text
             return html.replace("[[", "<b>").replace("]]", "</b>")
-        else:
-            md = self.text.replace("[[", "<b>").replace("]]", "</b>")
-            return markdown.markdown("""
+        md = self.text.replace("[[", "<b>").replace("]]", "</b>")
+        return markdown.markdown(f"""
 ## Default value:
-{defaultval}
+{my_unicode(self.defaultval)}
 
 ## Description:
-{md}
-""".format(defaultval=my_unicode(self.defaultval), md=my_unicode(md)))
+{my_unicode(md)}
+""")
 
     def browse(self):
         """Open variable documentation in browser."""
@@ -524,7 +517,7 @@ class Variable(object):
         # if hasattr(self, ...
         import re
         parent_names = []
-        WIKILINK_RE = r'\[\[([\w0-9_ -]+)\]\]'
+        WIKILINK_RE = r"\[\[([\w0-9_ -]+)\]\]"
         # TODO
         #  parent = self[parent]
         # KeyError: "'nzchempot'
@@ -556,19 +549,18 @@ class Variable(object):
     def format_dimensions(dimensions):
         """Pretty print dimensions."""
         if dimensions is None:
-            s = ''
+            s = ""
         elif dimensions == "scalar":
-            s = 'scalar'
+            s = "scalar"
+        #s = str(dimensions)
+        elif isinstance(dimensions, (list, tuple)):
+            s = "("
+            for dim in dimensions:
+                s += str(dim) + ","
+            s = s[:-1]
+            s += ")"
         else:
-            #s = str(dimensions)
-            if isinstance(dimensions, (list, tuple)):
-                s = '('
-                for dim in dimensions:
-                    s += str(dim) + ','
-                s = s[:-1]
-                s += ')'
-            else:
-                s = str(dimensions)
+            s = str(dimensions)
 
         return s
 
@@ -669,7 +661,7 @@ class Variable(object):
 
         if self.vartype is None:
             eapp("Variable `%s` has no vartype" % svar)
-        elif not self.vartype in ("integer", "real", "string"):
+        elif self.vartype not in ("integer", "real", "string"):
             eapp("%s must have vartype in ['integer', 'real', 'string'].")
 
         if self.topics is None:
@@ -697,14 +689,13 @@ class Variable(object):
         if self.dimensions is None:
             eapp(
                 "%s does not have a dimension. If it is a *scalar*, it must be declared so." % svar)
-        else:
-            if self.dimensions != "scalar":
-                if not isinstance(self.dimensions, (list, ValueWithConditions)):
-                    eapp(
-                        'The dimensions field of %s is not a list neither a valuewithconditions' % svar)
+        elif self.dimensions != "scalar":
+            if not isinstance(self.dimensions, (list, ValueWithConditions)):
+                eapp(
+                    "The dimensions field of %s is not a list neither a valuewithconditions" % svar)
 
         if self.varset is None:
-            eapp('`%s` does not have a varset' % svar)
+            eapp("`%s` does not have a varset" % svar)
         # else:
         #    if not isinstance(self.varset, str) or self.varset not in ref_varset:
         #        print('The field varset of %s should be one of the valid varsets' % str(self))
@@ -716,7 +707,7 @@ class Variable(object):
             raise ValueError("\n".join(errors))
 
 
-class ValueWithUnit(object):
+class ValueWithUnit:
     """
     This type allows to specify values with units:
     """
@@ -732,7 +723,7 @@ class ValueWithUnit(object):
         return str(self)
 
 
-class Range(object):
+class Range:
     """
     Specifies a range (start:stop:step)
     """
@@ -761,8 +752,7 @@ class Range(object):
             return "[ " + str(self.start) + "; ->"
         if self.stop is not None:
             return "<-;" + str(self.stop) + " ]"
-        else:
-            return None
+        return None
 
 
 class ValueWithConditions(dict):
@@ -777,18 +767,18 @@ class ValueWithConditions(dict):
     """
 
     def __repr__(self):
-        s = ''
+        s = ""
         for key in self:
-            if key != 'defaultval':
-                s += str(self[key]) + ' if ' + str(key) + ',\n'
-        s += str(self["defaultval"]) + ' otherwise.\n'
+            if key != "defaultval":
+                s += str(self[key]) + " if " + str(key) + ",\n"
+        s += str(self["defaultval"]) + " otherwise.\n"
         return s
 
     def __str__(self):
         return self.__repr__()
 
 
-class MultipleValue(object):
+class MultipleValue:
     """
     Used for variables that can assume multiple values.
     This is the equivalent to the X * Y syntax in the Abinit parser.
@@ -802,8 +792,7 @@ class MultipleValue(object):
     def __repr__(self):
         if self.number is None:
             return "*" + str(self.value)
-        else:
-            return str(self.number) + " * " + str(self.value)
+        return str(self.number) + " * " + str(self.value)
 
 
 def my_unicode(s):
@@ -886,13 +875,13 @@ class VarDatabase(OrderedDict):
         Update the json file with the mapping varname --> relative url
         used by the webserve to implement the `vardocs` API.
         """
-        with open(json_path, "rt") as fh:
+        with open(json_path) as fh:
             oldd = json.load(fh)
 
         new_version, newd = self.get_version_endpoints()
         assert new_version not in oldd
         oldd[new_version] = newd
-        with open(json_path, "wt") as fh:
+        with open(json_path, "w") as fh:
             json.dump(oldd, fh, indent=indent)
 
     def _write_pymods(self, dirpath="."):
@@ -907,7 +896,7 @@ class VarDatabase(OrderedDict):
                 if must_be_string:
                     raise TypeError("obj must be string.")
                 return None
-            elif isinstance(obj, str):
+            if isinstance(obj, str):
                 s = str(obj).rstrip()
                 if "\n" in s:
                     return '"""%s"""' % s
@@ -916,8 +905,7 @@ class VarDatabase(OrderedDict):
                 if '"' in s:
                     return "'%s'" % s
                 return '"%s"' % s
-            else:
-                raise TypeError("%s: %s" % (type(obj), str(obj)))
+            raise TypeError("%s: %s" % (type(obj), str(obj)))
 
         def topics2arg(obj):
             if isinstance(obj, str):
@@ -999,8 +987,6 @@ Variable(
                     topics=topics2arg(var.topics),
                     commentdims=nones2arg(var.commentdims),
                     defaultval=defaultval2arg(var.defaultval),
-                    added_in_version=var.added_in_version,
-                    alternative_name=var.alternative_name,
                     text=text,
            )
 
@@ -1009,7 +995,7 @@ Variable(
 
             lines.append("]")
             # Write file
-            with open(os.path.join(dirpath, "variables_%s.py" % code), "wt") as fh:
+            with open(os.path.join(dirpath, "variables_%s.py" % code), "w") as fh:
                 fh.write("\n".join(lines))
                 fh.write("\n")
 
@@ -1099,8 +1085,8 @@ class InputVariables(OrderedDict):
             try:
                 sec = self.name2varset[name]
                 d[sec].append(name)
-            except KeyError as exc:
-                msg = ("`%s` is not a registered variable of code `%s`.\nPerhaps you are using an old " +
+            except KeyError:
+                msg = ("`%s` is not a registered variable of code `%s`.\nPerhaps you are using an old "
                        "version of the database with a more recent Abinit?") % (name, self.executable)
                 raise KeyError(msg)
 
@@ -1110,7 +1096,7 @@ class InputVariables(OrderedDict):
         """Return the list of :class:`Variable` objects that are related` to the given varname"""
         var_list = []
         for v in self.values():
-            if (v.text and varname in v.text or
+            if ((v.text and varname in v.text) or
                 (v.dimensions is not None and varname in str(v.dimensions)) or
                 (v.requires is not None and varname in v.requires) or
                     (v.excludes is not None and varname in v.excludes)):
@@ -1171,7 +1157,7 @@ class InputVariables(OrderedDict):
 
         # These are the default attrs for graphviz
         default_graph_attr = {
-            'rankdir': 'LR',
+            "rankdir": "LR",
             # 'size': "8.0, 12.0",
         }
         if graph_attr is None:
@@ -1259,7 +1245,7 @@ class InputVariables(OrderedDict):
 
         # These are the default attrs for graphviz
         default_graph_attr = {
-            'rankdir': 'LR',
+            "rankdir": "LR",
             # 'size': "8.0, 12.0",
         }
         if graph_attr is None:

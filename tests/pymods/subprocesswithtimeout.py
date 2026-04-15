@@ -1,8 +1,8 @@
-import time
-import os
 import errno
+import os
 import signal
 import subprocess
+import time
 
 
 class TimeoutError(Exception):
@@ -26,7 +26,6 @@ class SubProcessWithTimeout:
             bufsize=0, executable=None, stdin=None, stdout=None, stderr=None, preexec_fn=None,
             close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0):
         """Same interface as Popen"""
-
         self.proc = subprocess.Popen(args,
                                      bufsize, executable, stdin, stdout, stderr, preexec_fn,
                                      close_fds, shell, cwd, env, universal_newlines, startupinfo, creationflags)
@@ -39,8 +38,7 @@ class SubProcessWithTimeout:
         while (time.time()-start) < self.timeout:
             if self.proc.poll() is not None:  # 0 just means successful exit
                 return self.proc.returncode
-            else:
-                time.sleep(self.delay)
+            time.sleep(self.delay)
         # The process may exit between the time we check and the
         # time we send the signal.
         try:
@@ -58,8 +56,7 @@ class SubProcessWithTimeout:
                 if e.errno != errno.ESRCH:
                     raise e
             return 137  # timeout return code for SIGKILL
-        else:
-            return 124  # timeout return code for SIGTERM
+        return 124  # timeout return code for SIGTERM
 
 
 #############################################################################################################

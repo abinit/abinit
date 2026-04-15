@@ -1,20 +1,18 @@
 
 import os
-import sys
 import shutil
+import sys
 import tempfile
 import warnings
-
-from subprocess import Popen, PIPE, call
-
+from subprocess import PIPE, Popen, call
 
 __version__ = "0.1"
 __author__ = "Matteo Giantomassi"
 
 __all__ = [
+    "Editor",
     "RestrictedShell",
     "StringColorizer",
-    "Editor",
 ]
 
 # Helper functions
@@ -66,7 +64,7 @@ def unzip(gz_fname, dest=None):
         raise ValueError("%s should end with .gz" % gz_fname)
 
     try:
-        gz_fh = gzip.open(gz_fname, 'rb')
+        gz_fh = gzip.open(gz_fname, "rb")
         file_content = gz_fh.read()
     finally:
         gz_fh.close() # Cannot use try, except, finally in python2-4
@@ -82,7 +80,7 @@ def unzip(gz_fname, dest=None):
 def touch(fname, times=None):
     """Emulate unix touch."""
     import os
-    with open(fname, 'a'):
+    with open(fname, "a"):
         os.utime(fname, times)
 
 
@@ -102,13 +100,12 @@ def tail_file(fname, n, aslist=False):
 
     if aslist:
         return p.stdout.readlines()
-    else:
-        return p.stdout.read()
+    return p.stdout.read()
 
 
 def which(program):
     """
-    python version of the unix tool which locate a program file in the user's path
+    Python version of the unix tool which locate a program file in the user's path
     Return:
         None if program cannot be found.
     """
@@ -142,7 +139,7 @@ def tonumber(s):
 
 
 def nums_and_text(line):
-    """split line into (numbers, text)."""
+    """Split line into (numbers, text)."""
     tokens = line.split()
     text = ""
     numbers = []
@@ -179,7 +176,6 @@ class RestrictedShell:
 
     def __init__(self, inp_dir, workdir, psps_dir):
         """Helper function executing simple commands passed via a string."""
-
         self.exceptions = []
 
         self.prefix2dir = {
@@ -210,11 +206,11 @@ class RestrictedShell:
             if nargs != expected_nargs:
                 err_msg = " Too many arguments, cmd = %s, args = %s " % (cmd, args)
                 self.exceptions.append(self.Error(err_msg))
-                return
+                return None
         except:
             err_msg = "Not able to interpret the string: %s " % string
             self.exceptions.append(self.Error(err_msg))
-            return
+            return None
 
         new_args = []
         for pref, arg in zip(pre_s, args):
@@ -227,7 +223,7 @@ class RestrictedShell:
                 assert pre_s == "w"
                 return cmd(new_args[0])
 
-            elif nargs == 2:
+            if nargs == 2:
                 # Copy or Move
                 src, dest = new_args[0], new_args[1]
 
@@ -253,8 +249,7 @@ class RestrictedShell:
                 # Execute command
                 return cmd(src, dest)
 
-            else:
-                raise NotImplementedError("nargs = %s is too large" % nargs)
+            raise NotImplementedError("nargs = %s is too large" % nargs)
 
         except:
             import sys
@@ -299,10 +294,8 @@ class StringColorizer:
             code = self.colours.get(colour, "")
             if code:
                 return code + string + "\x1b[00m"
-            else:
-                return string
-        else:
             return string
+        return string
 
 
 def prompt(question):
@@ -617,13 +610,13 @@ class lazy_property:
         if inst is None:
             return self
 
-        if not hasattr(inst, '__dict__'):
+        if not hasattr(inst, "__dict__"):
             raise AttributeError("'%s' object has no attribute '__dict__'"
                                  % (inst_cls.__name__,))
 
         name = self.__name__
-        if name.startswith('__') and not name.endswith('__'):
-            name = '_%s%s' % (inst_cls.__name__, name)
+        if name.startswith("__") and not name.endswith("__"):
+            name = "_%s%s" % (inst_cls.__name__, name)
 
         value = self.__func(inst)
         inst.__dict__[name] = value
@@ -638,12 +631,12 @@ class lazy_property:
         """
         inst_cls = inst.__class__
 
-        if not hasattr(inst, '__dict__'):
+        if not hasattr(inst, "__dict__"):
             raise AttributeError("'%s' object has no attribute '__dict__'"
                                  % (inst_cls.__name__,))
 
-        if name.startswith('__') and not name.endswith('__'):
-            name = '_%s%s' % (inst_cls.__name__, name)
+        if name.startswith("__") and not name.endswith("__"):
+            name = "_%s%s" % (inst_cls.__name__, name)
 
         if not isinstance(getattr(inst_cls, name), cls):
             raise AttributeError("'%s.%s' is not a %s attribute"

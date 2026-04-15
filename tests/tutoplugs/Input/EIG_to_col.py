@@ -9,7 +9,7 @@ print(nband/8.)
 nrows_eig = np.ceil(nband/8.)
 print(nrows_eig)
 
-with open("tw90_6_2o_DS4_EIG", "r") as fopen:
+with open("tw90_6_2o_DS4_EIG") as fopen:
     for l, line in enumerate(fopen.readlines()):
         print(l, line)
         if not l:
@@ -23,7 +23,7 @@ with open("tw90_6_2o_DS4_EIG", "r") as fopen:
             for e, eig in enumerate(line.split()):
                 eigs[row*8+e, kpt] = float(eig)
 
-with open('band_struct.dat', 'w') as fopen:
+with open("band_struct.dat", "w") as fopen:
     for b in range(nband):
         for k in range(nkpt):
             fopen.write("%.10f  %.10f\n" % (k, eigs[b, k]))

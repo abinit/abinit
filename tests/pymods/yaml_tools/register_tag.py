@@ -4,17 +4,16 @@ It defines several decorators to easily create YAML compatible
 classes which are used both when parsing YAML formatted data
 and when writing YAML formatted data.
 """
-from __future__ import print_function, division, unicode_literals
 
 import re
 import warnings
+from inspect import ismethod
+
 import yaml
 
-from inspect import ismethod
 from . import Loader
 from .common import BaseDictWrapper, get_yaml_tag
-from .errors import NotAvailableTagError, AlreadyRegisteredTagError
-
+from .errors import AlreadyRegisteredTagError, NotAvailableTagError
 
 known_tags = set()
 
@@ -23,8 +22,7 @@ def reserve_tag(tag):
     """Prevent multiple registration of the same tag."""
     if tag in known_tags:
         raise AlreadyRegisteredTagError(tag)
-    else:
-        known_tags.add(tag)
+    known_tags.add(tag)
 
 
 def yaml_map(cls):
@@ -35,8 +33,7 @@ def yaml_map(cls):
     It can be a classmethod or a normal method but in
     the latter case 'cls()' must be a valid initialisation.
     """
-
-    tag = '!' + get_yaml_tag(cls)
+    tag = "!" + get_yaml_tag(cls)
 
     reserve_tag(tag)
 
@@ -44,8 +41,7 @@ def yaml_map(cls):
         map = dict(loader.construct_mapping(node, deep=True))
         if ismethod(cls.from_map):
             return cls.from_map(map)
-        else:
-            return cls().from_map(map)
+        return cls().from_map(map)
 
     def representer(dumper, data):
         return dumper.represent_mapping(tag, data.to_map())
@@ -64,7 +60,7 @@ def yaml_seq(cls):
     It can be a class method or a normal method but in
     the latter case 'cls()' must be a valid initialisation.
     """
-    tag = '!' + get_yaml_tag(cls)
+    tag = "!" + get_yaml_tag(cls)
 
     reserve_tag(tag)
 
@@ -72,8 +68,7 @@ def yaml_seq(cls):
         seq = list(loader.construct_sequence(node, deep=True))
         if ismethod(cls.from_seq):
             return cls.from_seq(seq)
-        else:
-            return cls().from_seq(seq)
+        return cls().from_seq(seq)
 
     def representer(dumper, data):
         return dumper.represent_sequence(tag, data.to_seq())
@@ -92,7 +87,7 @@ def yaml_scalar(cls):
     It can be a class method or a normal method but in
     the latter case 'cls()' must be a valid initialisation.
     """
-    tag = '!' + get_yaml_tag(cls)
+    tag = "!" + get_yaml_tag(cls)
 
     reserve_tag(tag)
 
@@ -100,8 +95,7 @@ def yaml_scalar(cls):
         scalar = loader.construct_scalar(node)
         if ismethod(cls.from_scalar):
             return cls.from_scalar(scalar)
-        else:
-            return cls().from_scalar(scalar)
+        return cls().from_scalar(scalar)
 
     def representer(dumper, data):
         return dumper.represent_scalar(tag, data.to_scalar())
@@ -120,8 +114,8 @@ def auto_map(Cls):
     be accessible as regular property even if the
     original name contained spaces or special characters. The original
     name can still be used in dict like access.
-    Example:
 
+    Example:
     >>> @auto_map
     ... class A(object):
     ...     pass
@@ -174,10 +168,10 @@ def yaml_implicit_scalar(cls):
     object of this same regex.
     """
     yaml_scalar(cls)  # register the constructor and the representer
-    tag = '!' + get_yaml_tag(cls)
+    tag = "!" + get_yaml_tag(cls)
 
     re_pattern = cls.yaml_pattern
-    if not hasattr(re_pattern, 'match'):
+    if not hasattr(re_pattern, "match"):
         re_pattern = re.compile(re_pattern)
     # register the implicit pattern
     yaml.add_implicit_resolver(tag, re_pattern, Loader=Loader)
@@ -191,14 +185,13 @@ def yaml_not_available_tag(tag, reason, fatal=False):
     to give more detail to the user. If fatal is False then the returned object
     is an empty dictionary.
     """
-    msg = 'The tag !{} is used but is not available:\n{}'.format(tag, reason)
+    msg = f"The tag !{tag} is used but is not available:\n{reason}"
 
-    reserve_tag('!' + tag)
+    reserve_tag("!" + tag)
 
     def constructor(loader, node):
         if fatal:
             raise NotAvailableTagError(msg)
-        else:
-            warnings.warn(msg)
-            return {'_not_available': True}
-    yaml.add_constructor('!' + tag, constructor, Loader=Loader)
+        warnings.warn(msg)
+        return {"_not_available": True}
+    yaml.add_constructor("!" + tag, constructor, Loader=Loader)

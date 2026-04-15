@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-# coding: utf-8
-from __future__ import print_function, division, unicode_literals, absolute_import
 
-import sys
 import os
 import subprocess
+import sys
 import warnings
+
 import mkdocs
 import mkdocs.__main__
 
@@ -13,11 +12,11 @@ if sys.version_info < (3, 6):
     warnings.warn("Python >= 3.6 is STRONGLY recommended when building the Abinit documentation\n" * 20)
 
 def is_git_repo(path):
-    '''
+    """
     Utility to check if current dir is the root of a git clone.
     How ? just checking .git fold exist.
     Do not require to have git installed
-    '''
+    """
     # Check whether "path/.git" exists and is a directory
     git_dir = os.path.join(path, ".git")
     return os.path.isdir(git_dir)
@@ -30,22 +29,23 @@ sys.path.insert(0, pack_dir)
 # This needed to import doc.tests
 sys.path.insert(0, os.path.join(pack_dir, "doc"))
 
-from abimkdocs.website import Website, HTMLValidator
+from abimkdocs.website import HTMLValidator, Website
+
 
 def get_abinit_version():
     abinit_version = "unknown"
-    if os.path.exists('.version'):
-        with open('.version','r') as f:
+    if os.path.exists(".version"):
+        with open(".version") as f:
             abinit_version = f.read().strip().lower()
             print(abinit_version)
 
-    if os.path.exists('.current_version'):
-        with open('.current_version','r') as f:
+    if os.path.exists(".current_version"):
+        with open(".current_version") as f:
             abinit_version = f.read().strip().lower()
             print(abinit_version)
 
-    if abinit_version == "unknown" and os.path.exists('.tarball-version'):
-        with open('.tarball-version','r') as f:
+    if abinit_version == "unknown" and os.path.exists(".tarball-version"):
+        with open(".tarball-version") as f:
             abinit_version = f.read().strip().lower()
             print(abinit_version)
 
@@ -53,7 +53,7 @@ def get_abinit_version():
         print("[get_abinit_version] Can't find either .version or .tarball-version, will run git-version-gen")
         # cross-check we are in a git repo
         if is_git_repo(os.path.dirname(__file__)):
-            abinit_version = subprocess.run(['./config/scripts/git-version-gen', '.tarball-version'], stdout=subprocess.PIPE).stdout
+            abinit_version = subprocess.run(["./config/scripts/git-version-gen", ".tarball-version"], stdout=subprocess.PIPE, check=False).stdout
 
     abinit_version = abinit_version.strip().lower()
     print("Using abinit_version:", abinit_version)
@@ -67,13 +67,13 @@ def generate_mkdocs_yml():
     abinit_version = get_abinit_version()
 
     # Read yml template and replace abinit version
-    with open('mkdocs.yml.in', 'r') as mkdocs_yml_in :
+    with open("mkdocs.yml.in") as mkdocs_yml_in :
         yml_data = mkdocs_yml_in.read()
 
-    yml_data = yml_data.replace('ABINIT_VERSION', str(abinit_version))
+    yml_data = yml_data.replace("ABINIT_VERSION", str(abinit_version))
 
     # Write mkdocs.yml
-    with open('mkdocs.yml', 'w') as mkdocs_yml:
+    with open("mkdocs.yml", "w") as mkdocs_yml:
         mkdocs_yml.write(yml_data)
 
 
@@ -86,7 +86,6 @@ def prof_main(main):
          [`prof`, `tracemalloc`, `traceopen`]
 
     Example:
-
         $ script.py arg --foo=1
 
     becomes
@@ -119,7 +118,9 @@ def prof_main(main):
 
         if do_prof:
             print("Entering profiling mode...")
-            import pstats, cProfile, tempfile
+            import cProfile
+            import pstats
+            import tempfile
             prof_file = kwargs.pop("prof_file", None)
             if prof_file is None:
                 _, prof_file = tempfile.mkstemp()
@@ -131,7 +132,7 @@ def prof_main(main):
             s.strip_dirs().sort_stats(sortby).print_stats()
             return 0
 
-        elif do_tracemalloc:
+        if do_tracemalloc:
             print("Entering tracemalloc mode...")
             # Requires py3.4
             try:
@@ -143,7 +144,7 @@ def prof_main(main):
             tracemalloc.start()
             retcode = main(*args, **kwargs)
             snapshot = tracemalloc.take_snapshot()
-            top_stats = snapshot.statistics('lineno')
+            top_stats = snapshot.statistics("lineno")
 
             n = min(len(top_stats), 20)
             print("[Top %d]" % n)
@@ -185,12 +186,11 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == "validate":
         if len(sys.argv) == 2:
             return HTMLValidator(verbose).validate_website("./site")
-        else:
-            validator = HTMLValidator(verbose)
-            retcode = 0
-            for page in sys.argv[2:]:
-                retcode += validator.validate_htmlpage(page)
-            return retcode
+        validator = HTMLValidator(verbose)
+        retcode = 0
+        for page in sys.argv[2:]:
+            retcode += validator.validate_htmlpage(page)
+        return retcode
 
     if "--help" in sys.argv or "-h" in sys.argv:
         return mkdocs.__main__.cli()
@@ -208,5 +208,5 @@ def main():
     return mkdocs_retcode + len(website.warnings)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

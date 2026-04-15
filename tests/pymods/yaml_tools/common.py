@@ -1,15 +1,15 @@
 """
 Define classes used in several places and structures required by other modules.
 """
-from __future__ import print_function, division, unicode_literals
 
 import re
 import sys
+
 import numpy as np
 
 from .abinit_iterators import ITERATOR_RANKS
 
-re_word = re.compile(r'[a-zA-Z0-9_]+')
+re_word = re.compile(r"[a-zA-Z0-9_]+")
 
 
 PY3 = sys.version_info[0] >= 3
@@ -23,14 +23,14 @@ else:
 
 
 def get_yaml_tag(cls):
-    return getattr(cls, '_' + cls.__name__.lstrip('_') + '__yaml_tag', cls.__name__)
+    return getattr(cls, "_" + cls.__name__.lstrip("_") + "__yaml_tag", cls.__name__)
 
 
 def normalize_attr(string):
-    return '_'.join(re_word.findall(string))  # .lower()
+    return "_".join(re_word.findall(string))  # .lower()
 
 
-class BaseDictWrapper(object):
+class BaseDictWrapper:
     """
     Allow attribute access and key access to the values of dictionary to
     keep a consistent behaviour with AutoMap structures. It does not
@@ -54,8 +54,7 @@ class BaseDictWrapper(object):
             elem = default
         if type(elem) is dict:
             return BaseDictWrapper(elem)
-        else:
-            return elem
+        return elem
 
     def __contains__(self, key):
         if isinstance(key, basestring):
@@ -72,8 +71,7 @@ class BaseDictWrapper(object):
         elem = self.__dict__[nkey]
         if type(elem) is dict:
             return BaseDictWrapper(elem)
-        else:
-            return elem
+        return elem
 
     def __setitem__(self, key, val):
         if isinstance(key, basestring):
@@ -89,10 +87,10 @@ class BaseDictWrapper(object):
         del self.__dict__[nkey]
 
     def __repr__(self):
-        r = type(self).__name__ + '('
+        r = type(self).__name__ + "("
         for attr, val in self.__dict__.items():
-            r += '{}={}, '.format(attr, val)
-        return r[:-2] + ')'
+            r += f"{attr}={val}, "
+        return r[:-2] + ")"
 
     def __iter__(self):
         for key in self.__dict__:
@@ -134,31 +132,31 @@ class Undef(float):
     computed. Undef() represent this value.
     """
     _is_undef = True
-    yaml_pattern = re.compile('undef')
+    yaml_pattern = re.compile("undef")
 
     @staticmethod
     def is_undef(obj):
-        return getattr(obj, '_is_undef', False)
+        return getattr(obj, "_is_undef", False)
 
     @staticmethod
     def __new__(cls):
-        return super(Undef, cls).__new__(cls, 'nan')
+        return super(Undef, cls).__new__(cls, "nan")
 
     def __eq__(self, other):
-        return getattr(other, '_is_undef', False)
+        return getattr(other, "_is_undef", False)
 
     def __repr__(self):
-        return 'undef'
+        return "undef"
 
     @classmethod
     def from_scalar(cls, scal):
         return cls()
 
     def to_scalar(self):
-        return 'undef'
+        return "undef"
 
 
-class FailDetail(object):
+class FailDetail:
     """
     Result of a failed test with additional information.
     """
@@ -166,9 +164,9 @@ class FailDetail(object):
         self.details = details
 
     def __bool__(self):
-        '''
-            As a fail it is always Falsy
-        '''
+        """
+        As a fail it is always Falsy
+        """
         return False
 
 
@@ -184,7 +182,7 @@ class BaseArray(np.ndarray):
     _is_base_array = True
 
     # Short tag name
-    __yaml_tag = 'Array'
+    __yaml_tag = "Array"
 
     # by default we want to treat this as a coherent object and do not check
     # values individualy
@@ -198,16 +196,15 @@ class BaseArray(np.ndarray):
     @classmethod
     def from_seq(cls, s):
         def check_undef(s):
-            '''
+            """
             Look for Undef in the original list because numpy convert it to nan
-            '''
-            if hasattr(s, '__iter__'):
+            """
+            if hasattr(s, "__iter__"):
                 for el in s:
                     if check_undef(el):
                         return True
                 return False
-            else:
-                return Undef.is_undef(s)
+            return Undef.is_undef(s)
 
         new = np.array(s).view(cls)
         new._has_undef = check_undef(s)
@@ -218,12 +215,11 @@ class BaseArray(np.ndarray):
         def to_list(arr):
             if len(arr.shape) > 1:
                 return [to_list(line) for line in arr]
-            else:
-                return [float(f) for f in arr]
+            return [float(f) for f in arr]
         return to_list(self)
 
 
-class IterStart(object):
+class IterStart:
     """
     Mark the begining of a iteration of a given iterator.
     """
@@ -244,4 +240,4 @@ class IterStart(object):
         return {self.iterator: self.iteration}
 
     def __repr__(self):
-        return 'IterStart({}={})'.format(self.iterator, self.iteration)
+        return f"IterStart({self.iterator}={self.iteration})"

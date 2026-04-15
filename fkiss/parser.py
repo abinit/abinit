@@ -1,18 +1,15 @@
 """
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
-import io
 import re
-import traceback
-
-from textwrap import TextWrapper
+from collections import OrderedDict, deque
 from pprint import pformat
-from collections import OrderedDict, defaultdict, deque
+from textwrap import TextWrapper
+
+from .regex import HasRegex
 from .termcolor import cprint
 from .tools import lazy_property
-from .regex import HasRegex
 
 
 def terminal_highlight(s, bg="dark"):
@@ -21,8 +18,8 @@ def terminal_highlight(s, bg="dark"):
     except ImportError:
         return s
 
-    from pygments.lexers import FortranLexer
     from pygments.formatters import TerminalFormatter
+    from pygments.lexers import FortranLexer
     return highlight(s, FortranLexer(), TerminalFormatter(bg=bg))
 
 
@@ -33,8 +30,8 @@ def fort2html(s, full=True):
     except ImportError:
         return s
 
-    from pygments.lexers import FortranLexer
     from pygments.formatters import HtmlFormatter
+    from pygments.lexers import FortranLexer
     return highlight(s, FortranLexer(), HtmlFormatter(full=full))
 
 
@@ -43,8 +40,7 @@ class Node:
     def __repr__(self):
         if self.ancestor is not None:
             return "<%s: %s.%s>" % (self.__class__.__name__, self.ancestor.name, self.name)
-        else:
-            return "<%s: %s>" % (self.__class__.__name__, self.name)
+        return "<%s: %s>" % (self.__class__.__name__, self.name)
 
     def __str__(self):
         # FIXME: This is ABC
@@ -352,7 +348,7 @@ class Procedure(Node):
 
     @lazy_property
     def dirname(self):
-        """name of the directory in which the procedure is located."""
+        """Name of the directory in which the procedure is located."""
         if self.path is None: return None
         dirname = os.path.basename(os.path.dirname(self.path))
         if dirname == "src" and os.path.join("shared", "libpaw") in self.path:
@@ -363,13 +359,12 @@ class Procedure(Node):
     def dirlevel(self):
         if self.dirname is None:
             return -1
-        else:
-            # 72_response --> 72
-            try:
-                return int(self.dirname.split("_")[0])
-            except Exception as exc:
-                cprint("Cannot extract dirlevel from dirname: `%s`" % self.dirname)
-                raise exc
+        # 72_response --> 72
+        try:
+            return int(self.dirname.split("_")[0])
+        except Exception as exc:
+            cprint("Cannot extract dirlevel from dirname: `%s`" % self.dirname)
+            raise exc
 
     @property
     def is_public(self):
@@ -393,9 +388,9 @@ class Procedure(Node):
         """List of public procedures."""
         if self.is_program:
             return [self]
-        elif self.is_module:
+        if self.is_module:
             return [self] + [p for p in self.contains if p.is_public]
-        elif self.is_subroutine or self.is_function:
+        if self.is_subroutine or self.is_function:
             return [self] if self.is_public else []
         raise TypeError("Don't know how to find public entities of type: %s" % type(self))
 
@@ -572,7 +567,7 @@ class FortranKissParser(HasRegex):
         """
         Parse Fortran file in `path`. Include external files if `include_files`.
         """
-        with io.open(path, "rt", encoding="utf8") as fh:
+        with open(path, encoding="utf8") as fh:
             # Include Fortran files?
             if include_files:
                 lines = []
@@ -580,7 +575,7 @@ class FortranKissParser(HasRegex):
                     l =  line.strip().replace("'", "").replace('"', "")
                     if l.startswith("#include") and (l.endswith(".finc") or l.endswith(".F90")):
                         basename = l.split()[-1]
-                        with io.open(os.path.join(os.path.dirname(path), basename), "rt", encoding="utf8") as incfh:
+                        with open(os.path.join(os.path.dirname(path), basename), encoding="utf8") as incfh:
                             lines.extend(il for il in incfh)
                     else:
                         lines.append(line)
@@ -638,10 +633,10 @@ class FortranKissParser(HasRegex):
                     # Be careful when splitting: `integer :: foo ! hello; word`
                     comment = None
                     if icomm != 0:
-                        toks = self.quote_split('!', line, strip=False)
+                        toks = self.quote_split("!", line, strip=False)
                         line = toks[0]
                         if len(toks) > 1: comment = "! " + "".join(toks[1:])
-                    new_lines.extend(self.quote_split(';', line, strip=True))
+                    new_lines.extend(self.quote_split(";", line, strip=True))
                     if comment:
                         napp(comment)
                 continue
@@ -753,13 +748,12 @@ class FortranKissParser(HasRegex):
             if p.ancestor is not None:
                 #print("Adding %s to ancestor %s" % (repr(p), repr(p.ancestor)))
                 p.ancestor.contains.append(p)
-            else:
-                if p.is_module: self.modules.append(p)
-                elif p.is_program: self.programs.append(p)
-                # Here only if p is subroutine or function outside module.
-                elif p.is_subroutine: self.subroutines.append(p)
-                elif p.is_function: self.functions.append(p)
-                else: raise ValueError("Don't know how to handle type `%s`" % type(p))
+            elif p.is_module: self.modules.append(p)
+            elif p.is_program: self.programs.append(p)
+            # Here only if p is subroutine or function outside module.
+            elif p.is_subroutine: self.subroutines.append(p)
+            elif p.is_function: self.functions.append(p)
+            else: raise ValueError("Don't know how to handle type `%s`" % type(p))
 
         return self
 
@@ -907,8 +901,7 @@ class FortranKissParser(HasRegex):
                 self.close_stack_entry(line, end_proc_type="module", end_name=m.group("name"))
                 return True
 
-        else:
-            raise ValueError("Cannot find `contains` in %s" % self.path)
+        raise ValueError("Cannot find `contains` in %s" % self.path)
 
     def consume_interface(self, line):
         m = self.RE_INTERFACE_START.match(line)
@@ -927,8 +920,7 @@ class FortranKissParser(HasRegex):
                 # NB Don't enforce name `end interface [name]`
                 self.stack[-1][0].interfaces.append(Interface(name, self.ancestor, buflines))
                 return True
-        else:
-            raise ValueError("Cannot find `end interface %s` in %s" % (name, self.path))
+        raise ValueError("Cannot find `end interface %s` in %s" % (name, self.path))
 
     def consume_datatype(self, line):
         m = self.RE_TYPE_START.match(line)
@@ -960,8 +952,7 @@ class FortranKissParser(HasRegex):
                 #    pass
                 self.stack[-1][0].types.append(dtype)
                 return True
-        else:
-            raise ValueError("Cannot find `end type %s` in %s" % (name, self.path))
+        raise ValueError("Cannot find `end type %s` in %s" % (name, self.path))
 
     def handle_procedure(self, line):
         if not self.RE_SEARCH_PROC.search(line): return False
@@ -1101,23 +1092,22 @@ class FortranKissParser(HasRegex):
             else:
                 raise RuntimeError("Cannot find end_name `%s` in stack:\n%s\npath: %s\nLast line:%s" % (
                     end_name, pformat([s[0].name for s in self.stack]), self.path, line))
-        else:
-            # Close the last entry in the stack with end_proc_type.
-            if end_proc_type is not None:
-                self.warn("Found `end %s` without name in %s:%s" % (end_proc_type, self.path, line))
-                for item in reversed(self.stack):
-                    if item[0].proc_type == end_proc_type:
-                        node = item[0]
-                        item[1] = "closed"
-                        break
-                else:
-                    raise RuntimeError("Cannot find end_proc_type `%s` in stack:\n%s\nLast line:%s" % (
-                        end_proc_type, pformat([s[0].proc_type for s in self.stack]), line))
+        # Close the last entry in the stack with end_proc_type.
+        elif end_proc_type is not None:
+            self.warn("Found `end %s` without name in %s:%s" % (end_proc_type, self.path, line))
+            for item in reversed(self.stack):
+                if item[0].proc_type == end_proc_type:
+                    node = item[0]
+                    item[1] = "closed"
+                    break
             else:
-                # This is the best I can do without any info.
-                self.warn("Found plain `end` without procedure_type and name in %s:%s" % (self.path, line))
-                self.stack[-1][1] = "closed"
-                node = stack[-1][0]
+                raise RuntimeError("Cannot find end_proc_type `%s` in stack:\n%s\nLast line:%s" % (
+                    end_proc_type, pformat([s[0].proc_type for s in self.stack]), line))
+        else:
+            # This is the best I can do without any info.
+            self.warn("Found plain `end` without procedure_type and name in %s:%s" % (self.path, line))
+            self.stack[-1][1] = "closed"
+            node = stack[-1][0]
 
         if self.verbose > 1: print("Closing", repr(node))
         if self.ancestor is not None and self.ancestor.name == end_name:
@@ -1147,11 +1137,10 @@ class FortranKissParser(HasRegex):
             raise ValueError(line)
             toks = line.split()
             ftype, post = toks[0], toks[1:]
-        else:
-            pre, post = line.split("::")
-            toks = pre.split(",")
-            ftype = toks[0]
-            attribs = [] if len(toks) == 1 else toks[1:]
+        pre, post = line.split("::")
+        toks = pre.split(",")
+        ftype = toks[0]
+        attribs = [] if len(toks) == 1 else toks[1:]
 
         # Extract ftype and kind
         # TODO

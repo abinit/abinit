@@ -1,9 +1,8 @@
-import os
-import time
 import errno
-import subprocess
+import os
 import shutil
-
+import subprocess
+import time
 from functools import wraps
 
 
@@ -15,7 +14,9 @@ def number_of_cpus():
     taken from:
     http://stackoverflow.com/questions/1006289/how-to-find-out-the-number-of-cpus-in-python
     """
-    import os, re, subprocess
+    import os
+    import re
+    import subprocess
 
     # Python 2.6+
     #try:
@@ -26,14 +27,14 @@ def number_of_cpus():
 
     # POSIX
     try:
-        res = int(os.sysconf('SC_NPROCESSORS_ONLN'))
+        res = int(os.sysconf("SC_NPROCESSORS_ONLN"))
         if res > 0: return res
     except (AttributeError, ValueError):
         pass
 
     # Windows
     try:
-        res = int(os.environ['NUMBER_OF_PROCESSORS'])
+        res = int(os.environ["NUMBER_OF_PROCESSORS"])
         if res > 0: return res
     except (KeyError, ValueError):
         pass
@@ -49,7 +50,7 @@ def number_of_cpus():
 
     # BSD
     try:
-        sysctl = subprocess.Popen(['sysctl', '-n', 'hw.ncpu'], stdout=subprocess.PIPE)
+        sysctl = subprocess.Popen(["sysctl", "-n", "hw.ncpu"], stdout=subprocess.PIPE)
         scStdout = sysctl.communicate()[0]
         res = int(scStdout)
         if res > 0: return res
@@ -58,15 +59,15 @@ def number_of_cpus():
 
     # Linux
     try:
-        res = open('/proc/cpuinfo').read().count('processor\t:')
+        res = open("/proc/cpuinfo").read().count("processor\t:")
         if res > 0: return res
-    except IOError:
+    except OSError:
         pass
 
     # Solaris
     try:
-        pseudoDevices = os.listdir('/devices/pseudo/')
-        expr = re.compile('^cpuid@[0-9]+$')
+        pseudoDevices = os.listdir("/devices/pseudo/")
+        expr = re.compile("^cpuid@[0-9]+$")
         res = 0
         for pd in pseudoDevices:
             if expr.match(pd) is not None:
@@ -78,13 +79,13 @@ def number_of_cpus():
     # Other UNIXes (heuristic)
     try:
         try:
-            dmesg = open('/var/run/dmesg.boot').read()
-        except IOError:
-            dmesgProcess = subprocess.Popen(['dmesg'], stdout=subprocess.PIPE)
+            dmesg = open("/var/run/dmesg.boot").read()
+        except OSError:
+            dmesgProcess = subprocess.Popen(["dmesg"], stdout=subprocess.PIPE)
             dmesg = dmesgProcess.communicate()[0]
 
         res = 0
-        while '\ncpu' + str(res) + ':' in dmesg:
+        while "\ncpu" + str(res) + ":" in dmesg:
             res += 1
 
         if res > 0: return res
@@ -101,10 +102,9 @@ def number_of_gpus():
     Return:
         Integer containing number of GPUs, 0 if none is available.
     """
-
     # Look for NVIDIA GPU first, then AMD GPU...
-    nvidia_cmd = ['nvidia-smi', '--query-gpu=name', '--format=csv,noheader']
-    amdgpu_cmd = ['roc-smi', '--listgpu']
+    nvidia_cmd = ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"]
+    amdgpu_cmd = ["roc-smi", "--listgpu"]
 
     num_gpus = 0
     for gpu_cmd in [nvidia_cmd, amdgpu_cmd]:
@@ -112,17 +112,17 @@ def number_of_gpus():
             continue
 
         try:
-            result = subprocess.run(gpu_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            result = subprocess.run(gpu_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
             # The text argument was introduced in Python 3.7 as an alias for universal_newlines=True.
             #result = subprocess.run(gpu_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
             # Check if command failed (meaning it exists)
             if result.returncode != 0:
-                print("Error while executing {}:\n{}".format(gpu_cmd[1], result.stderr))
+                print(f"Error while executing {gpu_cmd[1]}:\n{result.stderr}")
                 num_gpus = 0
 
             # Command was successful, count the lines (one per GPU) and exit
-            gpu_lines = result.stdout.strip().split('\n')
+            gpu_lines = result.stdout.strip().split("\n")
             num_gpus = len(gpu_lines)
             break
 
@@ -138,16 +138,16 @@ class FileLockException(Exception):
 
 
 class FileLock:
-    """ A file locking mechanism that has context-manager support so
-        you can use it in a with statement. This should be relatively cross
-        compatible as it doesn't rely on msvcrt or fcntl for the locking.
-        Taken from http://www.evanfosmark.com/2009/01/cross-platform-file-locking-support-in-python/
+    """A file locking mechanism that has context-manager support so
+    you can use it in a with statement. This should be relatively cross
+    compatible as it doesn't rely on msvcrt or fcntl for the locking.
+    Taken from http://www.evanfosmark.com/2009/01/cross-platform-file-locking-support-in-python/
     """
     Error = FileLockException
 
     def __init__(self, file_name, timeout=10, delay=.05):
-        """ Prepare the file locker. Specify the file to lock and optionally
-            the maximum timeout and the delay between each attempt to lock.
+        """Prepare the file locker. Specify the file to lock and optionally
+        the maximum timeout and the delay between each attempt to lock.
         """
         self.file_name = file_name
         self.lockfile = os.path.abspath(file_name) + ".lock"
@@ -174,10 +174,10 @@ class FileLock:
         return fake
 
     def acquire(self):
-        """ Acquire the lock, if possible. If the lock is in use, it check again
-            every `wait` seconds. It does this until it either gets the lock or
-            exceeds `timeout` number of seconds, in which case it throws
-            an exception.
+        """Acquire the lock, if possible. If the lock is in use, it check again
+        every `wait` seconds. It does this until it either gets the lock or
+        exceeds `timeout` number of seconds, in which case it throws
+        an exception.
         """
         start_time = time.time()
         while True:
@@ -194,9 +194,9 @@ class FileLock:
         self.is_locked = True
 
     def release(self):
-        """ Get rid of the lock by deleting the lockfile.
-            When working in a `with` statement, this gets automatically
-            called at the end.
+        """Get rid of the lock by deleting the lockfile.
+        When working in a `with` statement, this gets automatically
+        called at the end.
         """
         if self.is_locked:
             os.close(self.fd)
@@ -204,30 +204,30 @@ class FileLock:
             self.is_locked = False
 
     def __enter__(self):
-        """ Activated when used in the with statement.
-            Should automatically acquire a lock to be used in the with block.
+        """Activated when used in the with statement.
+        Should automatically acquire a lock to be used in the with block.
         """
         if not self.is_locked: self.acquire()
         return self
 
     def __exit__(self, type, value, traceback):
-        """ Activated at the end of the with statement.
-            It automatically releases the lock if it isn't locked.
+        """Activated at the end of the with statement.
+        It automatically releases the lock if it isn't locked.
         """
         if self.is_locked: self.release()
 
     def __del__(self):
-        """ Make sure that the FileLock instance doesn't leave a lockfile
-            lying around.
+        """Make sure that the FileLock instance doesn't leave a lockfile
+        lying around.
         """
         self.release()
 
 
 class NoErrorFileLock(FileLock):
-    '''
+    """
     A file locker that never raise a FileLockErrorin call of __enter__ but
     return a boolean to tell whether the lock.
-    '''
+    """
 
     def __enter__(self):
         try:
@@ -239,9 +239,9 @@ class NoErrorFileLock(FileLock):
 
 
 def makeunique(gen):
-    '''
-    gen have to be random enough not to produce too often the same thing
-    '''
+    """
+    Gen have to be random enough not to produce too often the same thing
+    """
     cache = set()
 
     @wraps(gen)

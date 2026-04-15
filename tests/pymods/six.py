@@ -50,7 +50,7 @@ else:
 
     if sys.platform.startswith("java"):
         # Jython always uses 32 bits.
-        MAXSIZE = int((1 << 31) - 1)
+        MAXSIZE = (1 << 31) - 1
     else:
         # It's possible to have sizeof(long) != sizeof(Py_ssize_t).
         class X:
@@ -60,10 +60,10 @@ else:
             len(X())
         except OverflowError:
             # 32-bit
-            MAXSIZE = int((1 << 31) - 1)
+            MAXSIZE = (1 << 31) - 1
         else:
             # 64-bit
-            MAXSIZE = int((1 << 63) - 1)
+            MAXSIZE = (1 << 63) - 1
         del X
 
 
@@ -207,9 +207,9 @@ class _SixMetaPathImporter:
     def get_code(self, fullname):
         """Return None
 
-        Required, if is_package is implemented"""
+        Required, if is_package is implemented
+        """
         self.__get_module(fullname)  # eventually raises ImportError
-        return None
     get_source = get_code  # same as get_code
 
 _importer = _SixMetaPathImporter(__name__)
@@ -443,7 +443,7 @@ class Module_six_moves_urllib(types.ModuleType):
     robotparser = _importer._get_module("moves.urllib_robotparser")
 
     def __dir__(self):
-        return ['parse', 'error', 'request', 'response', 'robotparser']
+        return ["parse", "error", "request", "response", "robotparser"]
 
 _importer._add_module(Module_six_moves_urllib(__name__ + ".moves.urllib"),
                       "moves.urllib")
@@ -512,7 +512,7 @@ else:
     def create_bound_method(func, obj):
         return types.MethodType(func, obj, obj.__class__)
 
-    class Iterator(object):
+    class Iterator:
 
         def next(self):
             return type(self).__next__(self)
@@ -586,7 +586,7 @@ else:
         return s
     # Workaround for standalone backslash
     def u(s):
-        return unicode(s.replace(r'\\', r'\\\\'), "unicode_escape")
+        return unicode(s.replace(r"\\", r"\\\\"), "unicode_escape")
     unichr = unichr
     int2byte = chr
     def byte2int(bs):
@@ -602,7 +602,7 @@ _add_doc(u, """Text literal""")
 
 
 if PY3:
-    exec_ = getattr(moves.builtins, "exec")
+    exec_ = moves.builtins.exec
 
 
     def reraise(tp, value, tb=None):
@@ -704,16 +704,16 @@ def with_metaclass(meta, *bases):
     class metaclass(meta):
         def __new__(cls, name, this_bases, d):
             return meta(name, bases, d)
-    return type.__new__(metaclass, 'temporary_class', (), {})
+    return type.__new__(metaclass, "temporary_class", (), {})
 
 
 def add_metaclass(metaclass):
     """Class decorator for creating a class with a metaclass."""
     def wrapper(cls):
         orig_vars = cls.__dict__.copy()
-        orig_vars.pop('__dict__', None)
-        orig_vars.pop('__weakref__', None)
-        slots = orig_vars.get('__slots__')
+        orig_vars.pop("__dict__", None)
+        orig_vars.pop("__weakref__", None)
+        slots = orig_vars.get("__slots__")
         if slots is not None:
             if isinstance(slots, str):
                 slots = [slots]

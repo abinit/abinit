@@ -1,10 +1,8 @@
 
 import time
-
-from pprint import pprint
+from collections import OrderedDict, defaultdict, deque, namedtuple
 from itertools import groupby
-from collections import namedtuple, deque, defaultdict
-from collections import OrderedDict
+from pprint import pprint
 
 from .plotting import add_fig_kwargs, get_ax_fig_plt
 from .tools import lazy_property
@@ -49,9 +47,8 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
         if with_addr:
             return "<var=%s, %s@%s:%s, addr=%s, size_mb=%.3f>" % (
               self.vname, self.action, self.file, self.line, hex(self.ptr), self.size_mb)
-        else:
-            return "<var=%s, %s@%s:%s, size_mb=%.3f>" %  (
-              self.vname, self.action, self.file, self.line, self.size_mb)
+        return "<var=%s, %s@%s:%s, size_mb=%.3f>" %  (
+          self.vname, self.action, self.file, self.line, self.size_mb)
 
     @lazy_property
     def size_mb(self):
@@ -216,7 +213,7 @@ class AbimemFile:
         """Parse file and create list of Entries."""
         all_entries = []
         app = all_entries.append
-        with open(self.path, "rt") as fh:
+        with open(self.path) as fh:
             for lineno, line in enumerate(fh):
                 # skip header line of abimem files
                 if line.startswith("#"): continue
@@ -434,43 +431,42 @@ class AbimemFile:
                     # Likely comes from a reallocation
                     reallocs.append(newe)
 
+            elif newe.isfree and len(heap[p]) == 1 and heap[p][0].size + newe.size == 0:
+                heap.pop(p)
             else:
-                if newe.isfree and len(heap[p]) == 1 and heap[p][0].size + newe.size == 0:
-                    heap.pop(p)
+                # In principle this should never happen but there are exceptions:
+                #
+                # 1) The compiler may decide to put the allocatable on the stack
+                #    In this case the ptr reported by gfortran is 0.
+                #
+                # 2) The allocatable variable is "reallocated" by the compiler (F2003).
+                #    Example:
+                #
+                #    allocate(foo(2,1))           ! p0 = &foo
+                #    foo = reshape([0,0], [2,1])  ! p1 = &foo. Reallocation of the LHS.
+                #                                 ! Use foo(:) to avoid that
+                #    deallocate(foo)              ! p2 = &foo
+                #
+                #    In this case, p2 != p0
+                if verbose:
+                    print("WARNING:", newe.ptr, newe, "ptr already on the heap ", len(heap[p]), \
+                          " sizes: ", heap[p][0].size, newe.size)
+                #print("HEAP:", heap[newe.ptr])
+
+                locus = newe.locus
+                if locus not in stack:
+                    stack[locus] = [newe]
                 else:
-                    # In principle this should never happen but there are exceptions:
-                    #
-                    # 1) The compiler may decide to put the allocatable on the stack
-                    #    In this case the ptr reported by gfortran is 0.
-                    #
-                    # 2) The allocatable variable is "reallocated" by the compiler (F2003).
-                    #    Example:
-                    #
-                    #    allocate(foo(2,1))           ! p0 = &foo
-                    #    foo = reshape([0,0], [2,1])  ! p1 = &foo. Reallocation of the LHS.
-                    #                                 ! Use foo(:) to avoid that
-                    #    deallocate(foo)              ! p2 = &foo
-                    #
-                    #    In this case, p2 != p0
-                    if verbose:
-                        print("WARNING:", newe.ptr, newe, "ptr already on the heap ", len(heap[p]), \
-                              " sizes: ", heap[p][0].size, newe.size)
-                    #print("HEAP:", heap[newe.ptr])
+                    #if newe.ptr != 0: print(newe)
+                    stack_loc = stack[locus]
+                    ifind = -1
+                    for i, olde in enumerate(stack_loc):
+                        if newe.frees_onstack(olde):
+                            ifind = i
+                            break
 
-                    locus = newe.locus
-                    if locus not in stack:
-                        stack[locus] = [newe]
-                    else:
-                        #if newe.ptr != 0: print(newe)
-                        stack_loc = stack[locus]
-                        ifind = -1
-                        for i, olde in enumerate(stack_loc):
-                            if newe.frees_onstack(olde):
-                                ifind = i
-                                break
-
-                        if ifind != -1:
-                            stack_loc.pop(ifind)
+                    if ifind != -1:
+                        stack_loc.pop(ifind)
                         #else:
                         #    print(newe)
 
@@ -532,7 +528,7 @@ class Heap(dict):
         if not self: return
         # for p, elist in self.items():
         pprint(self, indent=4)
-        print("")
+        print()
 
     def pop_alloc(self, entry):
         if not entry.isfree: return 0
@@ -551,14 +547,13 @@ class Stack(dict):
         print("=== STACK OF LEN %s ===" % len(self))
         if not self: return
         pprint(self)
-        print("")
+        print()
 
 
 # Copied  from abipy.tools.plotting
 class MplExpose: # pragma: no cover
     """
     Example:
-
         with MplExpose() as e:
             e(obj.plot1(show=False))
             e(obj.plot2(show=False))
@@ -621,7 +616,7 @@ class MplExpose: # pragma: no cover
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Activated at the end of the with statement. """
+        """Activated at the end of the with statement."""
         self.expose()
 
     def expose(self):

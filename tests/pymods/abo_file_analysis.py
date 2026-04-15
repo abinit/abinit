@@ -4,6 +4,7 @@ Can be used to count datasets, extract number of iterations...
 """
 from math import ceil, floor
 
+
 class AboFileAnalysis:
     """Main object containing data from abo file (for further analysis)."""
 
@@ -27,9 +28,8 @@ class AboFileAnalysis:
         option (string): which type of information do we extract from the file
              possible values: "iterations" = extract the number of iterations of all cycles
         """
-
         dataset_list = []
-        abo_lines = open(self.file_name, "rt").readlines()
+        abo_lines = open(self.file_name).readlines()
 
         # Loop over file lines (loop over datasets)
         inDatasetMode = False
@@ -54,14 +54,14 @@ class AboFileAnalysis:
 
                 # Read optdriver
                 if "meta: {optdriver:" in line:
-                    current_dataset.optdriver = int(line.split()[2].split(',')[0])
+                    current_dataset.optdriver = int(line.split()[2].split(",")[0])
 
                 if "iterations" in option:
                     # Read MD iteration number
                     # Look for:
                     #    At Broyd/MD step X, gradients are converged
                     if "At Broyd/MD step" in line and "converged" in line:
-                        current_dataset.MD_niter = int(line.split()[3].split(',')[0])
+                        current_dataset.MD_niter = int(line.split()[3].split(",")[0])
                     # Look for:
                     #    ntime= X was not enough Broyd/MD steps to converge gradients
                     if "ntime" in line and "was not enough Broyd/MD steps" in line:
@@ -76,12 +76,12 @@ class AboFileAnalysis:
                     #    At SCF step X, max residual [...] =>converged
                     #    At SCF step X, max grdnorm  [...] =>converged
                     if "At SCF step" in line and "converged" in line:
-                        current_dataset.SCF_niter.append(int(line.split()[3].split(',')[0]))
+                        current_dataset.SCF_niter.append(int(line.split()[3].split(",")[0]))
                     # Look for:
                     #    At SCF step X, the difference between
                     #    is converged :  diff(etot_el-etot_pos)=
                     if "At SCF step" in line and "converged" in abo_lines[i+1]:
-                        current_dataset.SCF_niter.append(int(line.split()[3].split(',')[0]))
+                        current_dataset.SCF_niter.append(int(line.split()[3].split(",")[0]))
                     # Look for:
                     #    nstep= X was not enough SCF cycles to converge;
                     #    nstep= X was not enough non-SCF iterations to converge;
@@ -97,6 +97,7 @@ class AboFileAnalysis:
         """
         Compare the current abo file with another one
         Compare only specific parts specified by argument option (string)
+
         Arguments:
           option: what do we compare (possible values: "iterations")
           percent_allowed_small: percentage allowed for a change in the number of iterations
@@ -104,7 +105,6 @@ class AboFileAnalysis:
           percent_allowed_large: percentage allowed for a change in the number of iterations
                                  for large numbers of iterations (n_iter>8)
         """
-
         status = "succeeded"
         err_msg = "" ; err_msg_short = ""
         tol_small = float(percent_allowed_small)/100.
@@ -132,7 +132,7 @@ class AboFileAnalysis:
                         tol = tol_small if dtset1.MD_niter<=8 else tol_large
                         if dtset2.MD_niter > ceil(dtset1.MD_niter*(1.+tol)) or dtset2.MD_niter < floor(dtset1.MD_niter*(1.-tol)):
                             status = "failed"
-                            err_msg = err_msg+'\n' if err_msg != "" else ""
+                            err_msg = err_msg+"\n" if err_msg != "" else ""
                             err_msg += "Dataset %d, # of MD/relax iterations differs by more than %d%%!" % (jdt,int(tol*100))
                             err_msg_short += "(dtset %d, MD/relax cycle)" % (jdt)
 
@@ -143,7 +143,7 @@ class AboFileAnalysis:
                             tol = tol_small if niter1<=8 else tol_large
                             if niter2 > ceil(niter1*(1.+tol)) or niter2 < floor(niter1*(1.-tol)):
                                 status = "failed"
-                                err_msg = err_msg+'\n' if err_msg != "" else ""
+                                err_msg = err_msg+"\n" if err_msg != "" else ""
                                 if ncycle == 1:
                                     err_msg += "Dataset %d, # of [non-]SCF iterations differs by more than %d%%!" % (jdt,int(tol*100))
                                     err_msg_short += "(dtset %d, SCF_iter)" % (i)
