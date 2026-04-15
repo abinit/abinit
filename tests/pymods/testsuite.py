@@ -106,12 +106,29 @@ def status2html(status):
 
 
 def sec2str(seconds):
-    """Convert seconds to string."""
+    """
+    Convert a duration in seconds to a string.
+
+    Args:
+        seconds (float): Time in seconds.
+
+    Returns:
+        str: String representation formatted to 2 decimal places.
+    """
     return "%.2f" % seconds
 
 
 def str2html(string, end="<br>"):
-    """Returns a HTML string."""
+    """
+    Convert a string with line breaks to HTML.
+
+    Args:
+        string (str): The input string.
+        end (str): Trailing HTML tag.
+
+    Returns:
+        str: HTML-formatted string.
+    """
     lines = string.splitlines()
     return "<br>".join(lines) + end
 
@@ -140,7 +157,15 @@ def html_link(string, href=None):
 
 
 def is_string(s):
-    """True is s is a string (duck typying test)"""
+    """
+    Check if the input is string-like (duck typing).
+
+    Args:
+        s: Object to check.
+
+    Returns:
+        bool: True if s behaves like a string, False otherwise.
+    """
     try:
         s + "hello"
         return True
@@ -149,7 +174,16 @@ def is_string(s):
 
 
 def has_exts(path, exts):
-    """True if path ends with extensions exts"""
+    """
+    Check if a path has one of the specified extensions.
+
+    Args:
+        path (str): File path.
+        exts (str or list): Extension(s) to check.
+
+    Returns:
+        bool: True if path matches any of the extensions.
+    """
     root, ext = os.path.splitext(path)
     if is_string(exts):
         return ext == exts
@@ -157,7 +191,15 @@ def has_exts(path, exts):
 
 
 def lazy__str__(func):
-    """Lazy decorator for __str__ methods"""
+    """
+    Lazy decorator for __str__ methods.
+
+    Args:
+        func: The function to decorate.
+
+    Returns:
+        callable: Decorated function returning a string representation of attributes.
+    """
     def oncall(*args, **kwargs):
         self = args[0]
         return "\n".join(str(k) + " : " + str(v) for (k, v) in self.__dict__.items())
@@ -299,7 +341,15 @@ class FileToTest:
     ]
 
     def __init__(self, dic):
+        """
+        Initialize the FileToTest object.
 
+        Args:
+            dic (dict): Dictionary of metadata and tolerances for the file.
+
+        Raises:
+            ValueError: If mandatory attributes are missing or options are invalid.
+        """
         for atr in FileToTest._attrbs:
             atr_name = atr[0]
             default = atr[1]
@@ -634,6 +684,12 @@ class AbinitTestInfo:
     """Container storing the options specified in the TEST_INFO section."""
 
     def __init__(self, dct):
+        """
+        Initialize the AbinitTestInfo object.
+
+        Args:
+            dct (dict): Dictionary of configuration options.
+        """
         for k, v in dct.items():
             self.__dict__[k] = v
 
@@ -683,9 +739,11 @@ class AbinitTestInfoParser:
 
     def __init__(self, inp_fname, defaults=None):
         """
+        Initialize the AbinitTestInfoParser.
+
         Args:
-            inp_fname: test input file
-            defaults: default values passed to the INI parser.
+            inp_fname (str): Path to the test input file.
+            defaults (dict, optional): Default values for the INI parser.
         """
         #print("Parsing TEST_INFO section from input file : " + str(inp_fname))
 
@@ -1395,6 +1453,18 @@ class BaseTest:
         return False
 
     def __init__(self, test_info, abenv):
+        """
+        Initialize the BaseTest object.
+
+        Args:
+            test_info (AbinitTestInfo): Configuration options for the test.
+            abenv (BuildEnvironment): The build environment information.
+
+        Raises:
+            BaseTestError: If attributes cannot be incorporated.
+            ValueError: If files_to_test is missing and no_check is False.
+            RuntimeError: If psp_files is used without use_files_file.
+        """
         logger.info("Initializing BaseTest from inp_fname: ", test_info.inp_fname)
 
         self._rid = genid()

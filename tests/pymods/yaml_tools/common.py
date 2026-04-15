@@ -39,6 +39,13 @@ class BaseDictWrapper:
     is_dict_like = True
 
     def __init__(self, d={}, **kwargs):
+        """
+        Initialize the BaseDictWrapper.
+
+        Args:
+            d (dict, optional): Initial dictionary of values.
+            **kwargs: Additional key-value pairs.
+        """
         for attr in d:
             self[attr] = d[attr]
 
@@ -161,6 +168,12 @@ class FailDetail:
     Result of a failed test with additional information.
     """
     def __init__(self, details):
+        """
+        Initialize the FailDetail.
+
+        Args:
+            details: Information about the failure.
+        """
         self.details = details
 
     def __bool__(self):
@@ -189,6 +202,13 @@ class BaseArray(np.ndarray):
     has_no_child = True
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialize the BaseArray.
+
+        Args:
+            *args: Arguments passed to the ndarray.
+            **kwargs: Keyword arguments passed to the ndarray.
+        """
         # numpy ndarray does not have __init__
         # everything is done in __new__
         self._has_undef = False
@@ -227,6 +247,13 @@ class IterStart:
     _is_iter_start = True
 
     def __init__(self, iterator, iteration):
+        """
+        Initialize the IterStart object.
+
+        Args:
+            iterator (str): The name of the iterator.
+            iteration (int): The current iteration index.
+        """
         self.iterator = iterator
         self.iteration = iteration
 

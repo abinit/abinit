@@ -43,6 +43,15 @@ CFG_KEYWORDS = {
 
 
 def is_string(s):
+    """
+    Check if the input is a string-like object.
+
+    Args:
+        s: The object to check.
+
+    Returns:
+        bool: True if s is a string, False otherwise.
+    """
     try:
         s + "hello"
         return True
@@ -236,7 +245,15 @@ class JobRunner:
         return cls(d)
 
     def __init__(self, dic):
+        """
+        Initialize the JobRunner.
 
+        Args:
+            dic (dict): Dictionary of configuration options.
+
+        Raises:
+            ValueError: If poe and (mpirun or srun) are both specified.
+        """
         self.exceptions = []
 
         for k, v in dic.items():
@@ -268,6 +285,15 @@ class JobRunner:
         return string
 
     def set_timebomb(self, timebomb):
+        """
+        Set the timebomb for the runner.
+
+        Args:
+            timebomb (TimeBomb): The TimeBomb instance.
+
+        Raises:
+            ValueError: If a timebomb is already defined.
+        """
         if self.has_timebomb:
             raise ValueError("timebomb is already defined")
         self.timebomb = timebomb

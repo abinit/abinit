@@ -10,6 +10,12 @@ class YAMLTestError(Exception):
 
 class ConfigContextError(YAMLTestError):
     def __init__(self, path):
+        """
+        Initialize ConfigContextError.
+
+        Args:
+            path (list): The path in the config tree where the error occurred.
+        """
         spath = ".".join(path)
         msg = (f"Tried to enter a None context in the config tree at {spath}"
                )
@@ -27,6 +33,13 @@ class ConfigParserError(YAMLTestError):
 
 class UnknownParamError(ConfigParserError):
     def __init__(self, cons, param):
+        """
+        Initialize UnknownParamError.
+
+        Args:
+            cons (str): Name of the constraint.
+            param (str): Name of the unknown parameter.
+        """
         msg = ('Encounterd an unknown parameter name "{}"'
                ' when registering constraint "{}".')
         super(UnknownParamError, self).__init__(msg.format(param, cons))
@@ -34,6 +47,12 @@ class UnknownParamError(ConfigParserError):
 
 class AlreadyRegisteredTagError(ConfigParserError):
     def __init__(self, tag):
+        """
+        Initialize AlreadyRegisteredTagError.
+
+        Args:
+            tag (str): The tag that was already registered.
+        """
         msg = "Attempt to register {} twice."
         super(ConfigParserError, self).__init__(msg.format(tag))
 
@@ -45,6 +64,14 @@ class ConfigError(YAMLTestError):
 
 class ValueTypeError(TypeError, ConfigError):
     def __init__(self, name, exp, found):
+        """
+        Initialize ValueTypeError.
+
+        Args:
+            name (str): Name of the parameter or constraint.
+            exp (type): The expected type.
+            found: The value found in the configuration.
+        """
         msg = ("The value found in config does not match the type expected for"
                " {}. Expected {} and found {} of type {}.")
         super(TypeError, self).__init__(msg.format(name, exp, found, type(found)))
@@ -52,6 +79,13 @@ class ValueTypeError(TypeError, ConfigError):
 
 class InvalidNodeError(ConfigError):
     def __init__(self, name, value):
+        """
+        Initialize InvalidNodeError.
+
+        Args:
+            name (str): The label of the invalid node.
+            value: The value of the invalid node.
+        """
         msg = ("The node labeled {} is not a known parameter or constraint and"
                " have not the form of a specialisation. Value: {}")
         super(InvalidNodeError, self).__init__(msg.format(name, value))
@@ -59,6 +93,12 @@ class InvalidNodeError(ConfigError):
 
 class EmptySetError(ConfigError):
     def __init__(self, obj):
+        """
+        Initialize EmptySetError.
+
+        Args:
+            obj: The object used to attempt creating an empty set.
+        """
         msg = "User tried to create an empty set with {}."
         super(EmptySetError, self).__init__(msg.format(obj))
 

@@ -15,6 +15,12 @@ from .yaml_tools.structures.commons import GenericMap
 
 
 class TestDiffer:
+    """
+    Test suite for the Differ class in fldiff.py.
+
+    Tests cover default options, line comparison for various difference types
+    (float, text, line count), and blank line handling.
+    """
     lines1 = [
         " Here are some regular lines of numbers : 0.4546\n",
         " 5.8787 44.537e+056\n",
@@ -80,6 +86,7 @@ class TestDiffer:
     ]
 
     def test_default(self):
+        """Test default Differ configuration options."""
         diff = Differ()
         assert diff.options["tolerance_abs"] == 1.01e-10
         assert diff.options["tolerance_rel"] == 1.01e-10
@@ -159,13 +166,17 @@ class TestDiffer:
 
 class TestResult:
     """
-    Result only exists to reproduce the historical fldiff.pl so
-    the fact that all tests pass is enough.
-    It may be removed in the future.
+    Test suite for the Result class.
+
+    Note:
+        Result only exists to reproduce the historical fldiff.pl so
+        the fact that all tests pass is enough.
+        It may be removed in the future.
     """
 
 
 class TestDataExtractor:
+    """Test suite for the DataExtractor class."""
     def test_default(self):
         dext = DataExtractor(True)
         assert dext.ignore

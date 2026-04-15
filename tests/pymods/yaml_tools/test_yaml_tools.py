@@ -1,3 +1,6 @@
+"""
+Tests for the yaml_tools package.
+"""
 import pytest
 
 from .abinit_iterators import IterStateFilter

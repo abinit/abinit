@@ -17,6 +17,15 @@ if has_pandas:
 
         @classmethod
         def from_scalar(cls, scal):
+            """
+            Create a Table from a CSV-like scalar string.
+
+            Args:
+                scal (str): The scalar string containing tabular data.
+
+            Returns:
+                Table: A new Table instance.
+            """
             return cls(read_csv(StringIO(scal), sep=cls.table_sep))
 
         def to_scalar(self):

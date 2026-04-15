@@ -25,12 +25,15 @@ def get_ax_fig_plt(ax=None, **kwargs):
 
 def add_fig_kwargs(func):
     """
-    Decorator that adds keyword arguments for functions returning matplotlib
-    figures.
+    Decorator that adds keyword arguments for functions returning matplotlib figures.
 
-    The function should return either a matplotlib figure or None to signal
-    some sort of error/unexpected event.
-    See doc string below for the list of supported options.
+    The decorated function should return either a matplotlib figure or None.
+
+    Args:
+        func: The function to decorate.
+
+    Returns:
+        callable: The decorated function with additional plotting options.
     """
     from functools import wraps
 

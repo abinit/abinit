@@ -8,11 +8,18 @@ soon) or problems related to the modified sys.path.
 def cstm_isinstance(obj, cls):
     """
     Rely on the true isinstance when possible.
+
     Only exists because custom sys.path makes issubclass work unexpectedly
     when two different paths are used to access the same class.
     Recursively browses parent classes until it founds a match or reaches
-    the top class. Consider that an eventual tests prefix in the path
-    is not significant.
+    the top class.
+
+    Args:
+        obj: The object to check.
+        cls (type or tuple): The class(es) to check against.
+
+    Returns:
+        bool: True if obj is an instance of cls, False otherwise.
     """
     if isinstance(obj, cls):
         return True
@@ -26,11 +33,18 @@ def cstm_isinstance(obj, cls):
 def cstm_issubclass(cls_test, cls_ref):
     """
     Rely on the true issubclass when possible.
+
     Only exists because custom sys.path make issubclass works unexpectedly
     when two different path are used to access the same class.
     Recursively browses parent classes until it founds a match or reaches
-    the top class. Consider that an eventual tests prefix in the path
-    is not significant.
+    the top class.
+
+    Args:
+        cls_test (type): The class to check.
+        cls_ref (type or tuple): The class(es) to check against.
+
+    Returns:
+        bool: True if cls_test is a subclass of cls_ref, False otherwise.
     """
     if issubclass(cls_test, cls_ref):
         return True

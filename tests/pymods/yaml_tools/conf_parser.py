@@ -29,8 +29,15 @@ conf_parser.parameter("tol_eq", default=1e-8, inherited=True)
 @conf_parser.constraint(exclude={"tol", "ceil", "ignore"})
 def tol_rel(tol, ref, tested):
     """
-    Valid if the relative difference between the values is below the
-    given tolerance.
+    Valid if the relative difference between the values is below the given tolerance.
+
+    Args:
+        tol (float): Relative tolerance.
+        ref: Reference value.
+        tested: Tested value.
+
+    Returns:
+        bool: True if difference is within tolerance, False otherwise.
     """
     if abs(ref) + abs(tested) == 0.0:
         return True
@@ -40,8 +47,15 @@ def tol_rel(tol, ref, tested):
 @conf_parser.constraint(exclude={"tol", "ceil", "ignore"})
 def tol_abs(tol, ref, tested):
     """
-    Valid if the absolute difference between the values is below the
-    given tolerance.
+    Valid if the absolute difference between the values is below the given tolerance.
+
+    Args:
+        tol (float): Absolute tolerance.
+        ref: Reference value.
+        tested: Tested value.
+
+    Returns:
+        bool: True if difference is within tolerance, False otherwise.
     """
     return abs(ref - tested) < tol
 
@@ -49,8 +63,15 @@ def tol_abs(tol, ref, tested):
 @conf_parser.constraint(apply_to="Array", inherited=True)
 def tol_vec(tol, ref, tested):
     """
-    Valid if the cartesian norm of the vector (ref - tested) is below
-    the given tolerance.
+    Valid if the cartesian norm of the vector (ref - tested) is below the given tolerance.
+
+    Args:
+        tol (float): Vector tolerance.
+        ref: Reference vector.
+        tested: Tested vector.
+
+    Returns:
+        bool: True if norm is within tolerance, False otherwise.
     """
     return norm(ref - tested) < tol
 
@@ -58,8 +79,15 @@ def tol_vec(tol, ref, tested):
 @conf_parser.constraint(exclude={"tol", "tol_abs", "tol_rel", "ignore"})
 def ceil(ceil_val, ref, tested):
     """
-    Valid if the absolute value of the tested file tested is below the
-    given tolerance.
+    Valid if the absolute value of the tested value is below the given ceiling.
+
+    Args:
+        ceil_val (float): Ceiling value.
+        ref: Reference value.
+        tested: Tested value.
+
+    Returns:
+        bool: True if tested value is below ceiling, False otherwise.
     """
     return abs(tested) < ceil_val
 
@@ -68,7 +96,15 @@ def ceil(ceil_val, ref, tested):
                                                   "tol_abs"})
 def ignore(yes, ref, tested):
     """
-    Override numbers tests and always return the same result.
+    Override number tests and always return the same result.
+
+    Args:
+        yes (bool): The constant result to return.
+        ref: Reference value.
+        tested: Tested value.
+
+    Returns:
+        bool: The value of `yes`.
     """
     return yes
 

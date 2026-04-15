@@ -22,6 +22,13 @@ class Issue:
     Represent the result of a test.
     """
     def __init__(self, conf, msg):
+        """
+        Initialize the Issue object.
+
+        Args:
+            conf (DriverTestConf): The configuration driver.
+            msg (str): The issue message.
+        """
         self.path = conf.path if conf.path else ("top level",)
         self.state = conf.current_state
         self.message = msg
@@ -40,6 +47,15 @@ class Failure(Issue):
     Represent the fail of a test.
     """
     def __init__(self, conf, msg, ref=None, tested=None):
+        """
+        Initialize the Failure object.
+
+        Args:
+            conf (DriverTestConf): The configuration driver.
+            msg (str): The failure message.
+            ref (optional): The reference value.
+            tested (optional): The tested value.
+        """
         self.ref = ref
         self.tested = tested
         Issue.__init__(self, conf, msg)
@@ -58,6 +74,14 @@ class DetailedFailure(Failure):
     Represent the fail of a test when more info are available.
     """
     def __init__(self, conf, msg, details):
+        """
+        Initialize the DetailedFailure object.
+
+        Args:
+            conf (DriverTestConf): The configuration driver.
+            msg (str): The failure message.
+            details: Additional details about the failure.
+        """
         self.details = details
         Issue.__init__(self, conf, msg)
 
@@ -74,6 +98,14 @@ class Tester:
     Drive the testing process.
     """
     def __init__(self, reference_docs, tested_docs, config):
+        """
+        Initialize the Tester object.
+
+        Args:
+            reference_docs (dict): Map of document IDs to reference Document objects.
+            tested_docs (dict): Map of document IDs to tested Document objects.
+            config (DriverTestConf): Configuration driver.
+        """
         self.ref = reference_docs
         self.tested = tested_docs
         self.conf = config

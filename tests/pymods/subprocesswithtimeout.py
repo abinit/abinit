@@ -1,8 +1,8 @@
-import errno
+import time
 import os
+import errno
 import signal
 import subprocess
-import time
 
 
 class TimeoutError(Exception):
@@ -13,60 +13,51 @@ class SubProcessWithTimeout:
     """
     Based on from http://stackoverflow.com/questions/3876886/timeout-a-subprocess?rq=1
     """
-
     Error = TimeoutError
 
-    def __init__(self, timeout, delay=0.05):
+    def __init__(self, timeout, delay=.05):
+        """
+        Initialize the SubProcessWithTimeout object.
+
+        Args:
+            timeout (float): Timeout in seconds.
+            delay (float): Delay between checks.
+
+        Raises:
+            ValueError: If delay or timeout are invalid.
+        """
         self.timeout = float(timeout)
         self.delay = float(delay)
 
         if self.delay > self.timeout or self.delay <= 0 or self.timeout <= 0:
             raise ValueError("delay and timeout must be positive with delay <= timeout")
 
-    def run(
-        self,
-        args,
-        bufsize=0,
-        executable=None,
-        stdin=None,
-        stdout=None,
-        stderr=None,
-        preexec_fn=None,
-        close_fds=False,
-        shell=False,
-        cwd=None,
-        env=None,
-        universal_newlines=False,
-        startupinfo=None,
-        creationflags=0,
-    ):
-        """Same interface as Popen"""
-        self.proc = subprocess.Popen(
-            args,
-            bufsize,
-            executable,
-            stdin,
-            stdout,
-            stderr,
-            preexec_fn,
-            close_fds,
-            shell,
-            cwd,
-            env,
-            universal_newlines,
-            startupinfo,
-            creationflags,
-        )
+    def run(self, args,
+            bufsize=0, executable=None, stdin=None, stdout=None, stderr=None, preexec_fn=None,
+            close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0):
+        """
+        Run a subprocess with a timeout.
+
+        Supports the same interface as subprocess.Popen.
+
+        Returns:
+            tuple: (subprocess.Popen object, return_code)
+        """
+
+        self.proc = subprocess.Popen(args,
+                                     bufsize, executable, stdin, stdout, stderr, preexec_fn,
+                                     close_fds, shell, cwd, env, universal_newlines, startupinfo, creationflags)
 
         return_code = self._wait_testcomplete()
         return self.proc, return_code
 
     def _wait_testcomplete(self):
         start = time.time()
-        while (time.time() - start) < self.timeout:
+        while (time.time()-start) < self.timeout:
             if self.proc.poll() is not None:  # 0 just means successful exit
                 return self.proc.returncode
-            time.sleep(self.delay)
+            else:
+                time.sleep(self.delay)
         # The process may exit between the time we check and the
         # time we send the signal.
         try:
@@ -84,7 +75,8 @@ class SubProcessWithTimeout:
                 if e.errno != errno.ESRCH:
                     raise e
             return 137  # timeout return code for SIGKILL
-        return 124  # timeout return code for SIGTERM
+        else:
+            return 124  # timeout return code for SIGTERM
 
 
 #############################################################################################################
@@ -94,7 +86,7 @@ import unittest
 
 class TestSubProcessWithTimeout(unittest.TestCase):
     def test_with_sleep(self):
-        """ "Testing if sleep 5 raises TimeoutError"""
+        """"Testing if sleep 5 raises TimeoutError"""
         proc, retcode = SubProcessWithTimeout(1).run(["sleep", "5"])
         self.assertEqual(retcode, 124)
 
