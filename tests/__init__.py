@@ -497,7 +497,7 @@ class AbinitTestsDatabase(dict):
                 if not remove_file(fname):
                     keys.append(fname)
                 else:
-                    ntest = inp2test[fname]
+                    ntest = ntimes
                     assert ntest == 0
 
             # inp2test = {k: inp2test[k] for k in keys} # requires py2.7
@@ -780,18 +780,16 @@ class AbinitTests:
             # Use file locking mechanism to prevent IO from other processes.
             if with_pickle:
                 print("Saving database to %s" % database_path)
-                with FileLock(database_path):
-                    with open(database_path, "wb") as fh:
-                        pickle.dump(database, fh, protocol=-1)
+                with FileLock(database_path), open(database_path, "wb") as fh:
+                    pickle.dump(database, fh, protocol=-1)
 
         else:
             cprint("Loading database from: %s" % database_path, "yellow")
 
             # Read the database from the cpickle file.
             # Use file locking mechanism to prevent IO from other processes.
-            with FileLock(database_path):
-                with open(database_path, "rb") as fh:
-                    database = pickle.load(fh)
+            with FileLock(database_path), open(database_path, "rb") as fh:
+                database = pickle.load(fh)
 
         return database
 

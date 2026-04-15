@@ -452,7 +452,7 @@ class FileToTest:
                 f_in=open(file_in)
                 f_out=open(file_out,"w")
                 inRecordingMode = False
-                for line in f_in.readlines():
+                for line in f_in:
                     if not inRecordingMode:
                         if start_string in line:
                             inRecordingMode = True
@@ -2971,8 +2971,8 @@ class AbinitTest(BaseTest):
         t_stdin.write(self.id + ".abo" + "\n")
 
         # Prefix for input/output/temporary files
-        i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
-        o_prefix = self.output_prefix if self.output_prefix else self.id + "o"
+        i_prefix = self.input_prefix or self.id + "i"
+        o_prefix = self.output_prefix or self.id + "o"
         # FIXME: Use t prefix and change iofn
         # t_prefix = self.id  # + "t"
         t_prefix = self.id + "t"
@@ -3014,8 +3014,8 @@ class AbinitTest(BaseTest):
             app("gpu_option %d" % self.gpu_option)
 
         # Prefix for input/output/temporary files
-        i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
-        o_prefix = self.output_prefix if self.output_prefix else self.id + "o"
+        i_prefix = self.input_prefix or self.id + "i"
+        o_prefix = self.output_prefix or self.id + "o"
         # FIXME: Use temp prefix and change iofn
         t_prefix = self.id + "t"
 

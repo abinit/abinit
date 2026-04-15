@@ -314,8 +314,7 @@ for iatom in atom_list:   # Atom (optional)
       ff.write("temp/nonlop_test_inp\n")
       ff.write("temp/nonlop_test_out\n")
       ff.write("temp/nonlop_test_tmp\n")
-      for pseudo in pseudos:
-        ff.write("pseudo/"+pseudo+"\n")
+      ff.writelines("pseudo/"+pseudo+"\n" for pseudo in pseudos)
       ff.close()
 
 #     Run ABINIT

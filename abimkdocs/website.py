@@ -61,7 +61,7 @@ def escape(text, tag=None, cls=None):
     import html
     text = html.escape(text, quote=True)
     if tag:
-        text = '<{tag} class="{cls}">\n{text}\n</{tag}>\n'.format(tag=tag, text=text, cls=cls if cls else "")
+        text = '<{tag} class="{cls}">\n{text}\n</{tag}>\n'.format(tag=tag, text=text, cls=cls or "")
     return text
 
 
@@ -870,12 +870,10 @@ The full bibtex file is available [here](../abiref.bib).
 
         with open(os.path.join(self.root, ".gitignore"), "w") as fh:
             fh.write("# The following md files have been copied from ~abinit and should be `git ignored`\n")
-            for p in self.ignored_paths:
-                fh.write(os.path.relpath(p, self.root) + "\n")
+            fh.writelines(os.path.relpath(p, self.root) + "\n" for p in self.ignored_paths)
 
             fh.write("# The following md files have been automatically generated and should be `git ignored`\n")
-            for p in self.md_generated:
-                fh.write(os.path.relpath(p, self.root) + "\n")
+            fh.writelines(os.path.relpath(p, self.root) + "\n" for p in self.md_generated)
 
         cprint("Markdown files generation completed in %.2f [s]" % (time.time() - start), "green")
 
@@ -1635,7 +1633,7 @@ class MarkdownPage(Page):
     """Representation of a page generated from a markdown file."""
 
     def __init__(self, path, website):
-        super(MarkdownPage, self).__init__(path, website)
+        super().__init__(path, website)
         self.meta = {}
         with open(self.path, encoding="utf-8") as fh:
            string = fh.read()
@@ -1665,7 +1663,7 @@ class MarkdownPage(Page):
 class HtmlPage(Page):
     """Representation of a page generated from an HTML file."""
     def __init__(self, path, website):
-        super(HtmlPage, self).__init__(path, website)
+        super().__init__(path, website)
 
 
 class AbinitStats:

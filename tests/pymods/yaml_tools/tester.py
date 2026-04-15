@@ -29,7 +29,7 @@ class Issue:
             conf (DriverTestConf): The configuration driver.
             msg (str): The issue message.
         """
-        self.path = conf.path if conf.path else ("top level",)
+        self.path = conf.path or ("top level",)
         self.state = conf.current_state
         self.message = msg
 

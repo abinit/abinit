@@ -25,8 +25,7 @@ with open("tw90_6_2o_DS4_EIG") as fopen:
 
 with open("band_struct.dat", "w") as fopen:
     for b in range(nband):
-        for k in range(nkpt):
-            fopen.write("%.10f  %.10f\n" % (k, eigs[b, k]))
+        fopen.writelines("%.10f  %.10f\n" % (k, eigs[b, k]) for k in range(nkpt))
         fopen.write("\n")
 
 for i in range(10):

@@ -12,7 +12,7 @@ import threading
 class new_thread(threading.Thread):
 
     def __init__(self,target = None,args=None):
-        super(new_thread, self).__init__(target=target,args=args,)
+        super().__init__(target=target,args=args,)
         self._stop =threading.Event()
 
     def stop(self):

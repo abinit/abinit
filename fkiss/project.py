@@ -1535,7 +1535,7 @@ class AbinitProject(NotebookWriter):
                 used_dirs[used_mod.dirname].append(used_mod.name)
 
         for k, v in used_dirs.items():
-            d = {k: [] for k in sorted(set(used_dirs[k]))}
+            d = {k: [] for k in sorted(set(v))}
             for fort_file in fort_files_indirname:
                 for use_name in fort_file.all_uses:
                     if use_name in EXTERNAL_MODS: continue

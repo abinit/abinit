@@ -4,16 +4,17 @@ This module provides functions and objects to validate netcdf files written in t
 For a quick reference to the etsf specs see: http://esl.cecam.org/mediawiki/index.php/ETSF_File_Format_Specifications
 """
 
+import logging
 import os
 import re
-import logging
+
 logger = logging.getLogger(__name__)
 
 from .termcolor import cprint
 
 try:
-    import numpy as np
     import netCDF4
+    import numpy as np
 except ImportError as exc:
     errmsg = str(exc) + "\nCannot import numpy or netCDF4. Use `anaconda or pip install netcdf`\n"
     logger.warning(errmsg)
@@ -226,7 +227,7 @@ class VariableWithUnits(EtsfVariable):
         reqattrs = reqattrs[:]
         reqattrs.append(units)
 
-        super(VariableWithUnits, self).__init__(name, xtype, dimensions, allowed=allowed, reqattrs=reqattrs)
+        super().__init__(name, xtype, dimensions, allowed=allowed, reqattrs=reqattrs)
 
     def validate(self, ncdata):
         """
@@ -238,7 +239,7 @@ class VariableWithUnits(EtsfVariable):
         Returns:
             list: List of error strings.
         """
-        errors = super(VariableWithUnits, self).validate(ncdata)
+        errors = super().validate(ncdata)
 
         if self.name not in ncdata.variables:
             assert errors
@@ -362,7 +363,7 @@ reduced_symmetry_translations = EtsfVariable("reduced_symmetry_translations", "d
 # The "symmorphic" attribute is needed.
 
 # In principle: allowed=range(1, 233)) but I usually use 0 when the space_group is not available
-space_group = EtsfVariable("space_group", "integer", [], allowed=range(0, 233))
+space_group = EtsfVariable("space_group", "integer", [], allowed=range(233))
 atom_species = EtsfVariable("atom_species", "integer", [number_of_atoms]) # Between 1 and number_of_atom_species.
 
 reduced_atom_positions = EtsfVariable("reduced_atom_positions", "double", [number_of_atoms, number_of_reduced_dimensions])
@@ -414,7 +415,7 @@ exchange_correlation_potential = VariableWithUnits("exchange_correlation_potenti
 # Units attribute required. The attribute "scale to atomic units" might also be mandatory
 
 
-class EtsfGroup(object):
+class EtsfGroup:
     """"
     This object is essentially a container of variables
     A Group can contain other subgroups.
@@ -736,12 +737,10 @@ class WavefunctionGroup(EtsfGroup):
         #real_or_complex_coefficients and/or real_or_complex_wavefunctions
         number_of_symmetry_operations,
         number_of_reduced_dimensions,
-        #
         max_number_of_states,
         number_of_kpoints,
         number_of_spins,
         number_of_spinor_components,
-        #
         number_of_grid_points_vector1,
         number_of_grid_points_vector2,
         number_of_grid_points_vector3,
@@ -961,7 +960,7 @@ def validate_ncfile(path):
     ext = fname.split("_")[-1]
     try:
         groups = ext2groups[ext]
-    except KeyError as exc:
+    except KeyError:
         errors = ["Unknown file extension in file %s" % fname]
         print(errors)
         return errors

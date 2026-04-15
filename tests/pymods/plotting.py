@@ -94,7 +94,7 @@ def add_fig_kwargs(func):
     # Add docstring to the decorated method.
     s = (
         "\n\n"
-        + """\
+         """\
         Keyword arguments controlling the display of the figure:
 
         ================  ====================================================

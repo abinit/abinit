@@ -147,7 +147,7 @@ class Undef(float):
 
     @staticmethod
     def __new__(cls):
-        return super(Undef, cls).__new__(cls, "nan")
+        return super().__new__(cls, "nan")
 
     def __eq__(self, other):
         return getattr(other, "_is_undef", False)
