@@ -4724,9 +4724,9 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, dtfil, cryst, eba
        NCF_CHECK(ncerr)
 
        ! Here we set all g below a certain threshold to zero
-       where (abs(gwork_q) < tol8)
-          gwork_q = zero
-       end where
+       !where (abs(gwork_q) < tol8)
+       !   gwork_q = zero
+       !end where
 
        ABI_MALLOC(gqk%my_gdw2, (gqk%my_npert, nb_kq, gqk%my_nq, nb_k, gqk%my_nk))
 
