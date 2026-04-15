@@ -1,4 +1,5 @@
 """Panel dashboard to analyze the data stored in the mocc files (memory allocation info)."""
+
 from fkiss.termcolor import cprint
 
 try:
@@ -19,15 +20,15 @@ class MoccViewer(param.Parameterized):
     It can can be executed either inside a jupyter notebook or as a standalone bokeh app.
     """
 
-    #engine = pn.widgets.Select(value="dot",
+    # engine = pn.widgets.Select(value="dot",
     #    options=['dot', 'neato', 'twopi', 'circo', 'fdp', 'sfdp', 'patchwork', 'osage'])
 
     def __init__(self, mocc, **params):
         super().__init__(**params)
         self.mocc = mocc
 
-    #@param.depends('dir_select.value')
-    #def view_dirname(self):
+    # @param.depends('dir_select.value')
+    # def view_dirname(self):
     #    dirpath = self.dirname2path[self.dir_select.value]
     #    # Update widgets.
     #    self.file_select.options = [f.name for f in self.dir2files[dirpath]]
@@ -39,7 +40,8 @@ class MoccViewer(param.Parameterized):
 
     def get_panel(self):
         """Return tabs with widgets to interact with the DDB file."""
-        tabs = pn.Tabs(); app = tabs.append
+        tabs = pn.Tabs()
+        app = tabs.append
         mocc = self.mocc
 
         gspec = pn.GridSpec(sizing_mode="scale_width")
@@ -50,32 +52,40 @@ class MoccViewer(param.Parameterized):
         maxlen = 50
         df = mocc.get_peaks(maxlen=maxlen, as_dataframe=True)
         df.drop(columns=["locus", "line", "action", "ptr"], inplace=True)
-        col = pn.Column(gspec,
-                        f"## DataFrame with the first {maxlen} peaks",
-                        _df(df),
-                        sizing_mode="scale_width")
+        col = pn.Column(
+            gspec, f"## DataFrame with the first {maxlen} peaks", _df(df), sizing_mode="scale_width"
+        )
         app(("Plots", col))
 
-        #app(("DataFrame", _df(mocc.dataframe)))
+        # app(("DataFrame", _df(mocc.dataframe)))
         hotdf = mocc.get_hotspots_dataframe()
         ax = hotdf.plot.pie(y="malloc_mb")
         import matplotlib
-        fig = matplotlib.pyplot.gcf()
-        app(("Hotspots",
-             pn.Column(
-                "### DataFrame with total memory allocated per Fortran file.",
-                fig,
-                _df(hotdf),
-                sizing_mode="scale_width",
-        )))
-        app(("Intense",
-             pn.Column(
-                "### DataFrame with variables that are allocated/freed many times.",
-                _df(mocc.get_intense_dataframe()),
-                sizing_mode="scale_width")
-        ))
 
-        #retcode = memfile.find_memleaks()
-        #app(("Memleaks", _df(mocc.find_memleaks())))
+        fig = matplotlib.pyplot.gcf()
+        app(
+            (
+                "Hotspots",
+                pn.Column(
+                    "### DataFrame with total memory allocated per Fortran file.",
+                    fig,
+                    _df(hotdf),
+                    sizing_mode="scale_width",
+                ),
+            )
+        )
+        app(
+            (
+                "Intense",
+                pn.Column(
+                    "### DataFrame with variables that are allocated/freed many times.",
+                    _df(mocc.get_intense_dataframe()),
+                    sizing_mode="scale_width",
+                ),
+            )
+        )
+
+        # retcode = memfile.find_memleaks()
+        # app(("Memleaks", _df(mocc.find_memleaks())))
 
         return tabs

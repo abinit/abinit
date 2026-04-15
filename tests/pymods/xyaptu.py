@@ -1,14 +1,11 @@
 """XYAPTU: Lightweight XML/HTML Document Template Engine for Python. Taken from http://code.activestate.com/recipes/162292/"""
 
 __version__ = "1.0.0"
-__author__= [
-  "Alex Martelli (aleax@aleax.it)",
-  "Mario Ruggier (mario@ruggier.org)"
-]
+__author__ = ["Alex Martelli (aleax@aleax.it)", "Mario Ruggier (mario@ruggier.org)"]
 __copyright__ = "(c) Python Style Copyright. All Rights Reserved. No Warranty."
 __dependencies__ = ["YAPTU 1.2, http://aspn.activestate.com/ASPN/Python/Cookbook/Recipe/52305"]
-__history__= {
-  "1.0.0" : "2002/11/13: First Released Version",
+__history__ = {
+    "1.0.0": "2002/11/13: First Released Version",
 }
 
 ####################################################
@@ -28,31 +25,49 @@ from .yaptu import copier
 class xcopier(copier):
     """xcopier class, inherits from yaptu.copier"""
 
-    def __init__(self, dns, rExpr=None, rOpen=None, rClose=None, rClause=None,
-                 ouf=sys.stdout, dbg=0, dbgOuf=sys.stdout):
+    def __init__(
+        self,
+        dns,
+        rExpr=None,
+        rOpen=None,
+        rClose=None,
+        rClause=None,
+        ouf=sys.stdout,
+        dbg=0,
+        dbgOuf=sys.stdout,
+    ):
         """Set default regular expressions required by yaptu.copier"""
         # Default regexps for yaptu delimiters (what xyaptu tags are first converted to)
         # These must be in sync with what is output in self._x2y_translate
         _reExpression = re.compile("_:@([^:@]+)@:_")
-        _reOpen       = re.compile(r"\++yaptu ")
-        _reClose      = re.compile("--yaptu")
-        _reClause     = re.compile("==yaptu ")
+        _reOpen = re.compile(r"\++yaptu ")
+        _reClose = re.compile("--yaptu")
+        _reClause = re.compile("==yaptu ")
 
-        rExpr         = rExpr  or _reExpression
-        rOpen         = rOpen  or _reOpen
-        rClose        = rClose or _reClose
-        rClause       = rClause or _reClause
+        rExpr = rExpr or _reExpression
+        rOpen = rOpen or _reOpen
+        rClose = rClose or _reClose
+        rClause = rClause or _reClause
 
         # Debugging
         self.dbg = dbg
         self.dbgOuf = dbgOuf
         _preproc = self._preProcess
-        if dbg: _preproc = self._preProcessDbg
+        if dbg:
+            _preproc = self._preProcessDbg
 
         # Call super init
-        copier.__init__(self, rExpr, dns, rOpen, rClose, rClause,
-                        preproc=_preproc, handle=self._handleBadExps, ouf=ouf)
-
+        copier.__init__(
+            self,
+            rExpr,
+            dns,
+            rOpen,
+            rClose,
+            rClause,
+            preproc=_preproc,
+            handle=self._handleBadExps,
+            ouf=ouf,
+        )
 
     def xcopy(self, input=None):
         """
@@ -88,52 +103,71 @@ class xcopier(copier):
         # <py-elem>{python code}</py-elem>
 
         # ${py-expr} | $py-expr | <py-expr code="pvkey" />
-        reExpr = re.compile(r"""
+        reExpr = re.compile(
+            r"""
           \$\{([^}]+)\} |  # ${py-expr}
           \$([_\w]+) | # $py-expr
           <py-expr\s+code\s*=\s*"([^"]*)"\s*/> |
           <py-expr\s+code\s*=\s*"([^"]*)"\s*>[^<]*</py-expr> |
           <py-expr\s*>([^<]*)</py-expr\s*>
-        """, re.VERBOSE)
+        """,
+            re.VERBOSE,
+        )
 
         # <py-line code="pvkeys=pageVars.keys()"/>
-        reLine = re.compile(r"""
+        reLine = re.compile(
+            r"""
           <py-line\s+code\s*=\s*"([^"]*)"\s*/> |
           <py-line\s+code\s*=\s*"([^"]*)"\s*>[^<]*</py-line> |
           <py-line\s*>([^<]*)</py-line\s*>
-        """, re.VERBOSE)
+        """,
+            re.VERBOSE,
+        )
 
         # <py-open code="for k in pageVars.keys():" />
-        reOpen = re.compile(r"""
+        reOpen = re.compile(
+            r"""
           <py-open\s+code\s*=\s*"([^"]*)"\s*/> |
           <py-open\s+code\s*=\s*"([^"]*)"\s*>[^<]*</py-open\s*> |
           <py-open\s*>([^<]*)</py-open\s*>
-        """, re.VERBOSE)
+        """,
+            re.VERBOSE,
+        )
 
         # <py-clause code="else:" />
-        reClause = re.compile(r"""
+        reClause = re.compile(
+            r"""
           <py-clause\s+code\s*=\s*"([^"]*)"\s*/> |
           <py-clause\s+code\s*=\s*"([^"]*)"\s*>[^<]*</py-clause\s*> |
           <py-clause\s*>([^<]*)</py-clause\s*>
-        """, re.VERBOSE)
+        """,
+            re.VERBOSE,
+        )
 
         # <py-close />
-        reClose = re.compile(r"""
+        reClose = re.compile(
+            r"""
           <py-close\s*/> |
           <py-close\s*>.*</py-close\s*>
-        """, re.VERBOSE)
+        """,
+            re.VERBOSE,
+        )
 
         # Call-back functions for re substitutions
         # These must be in sync with what is expected in self.__init__
-        def rexpr(match,self=self):
+        def rexpr(match, self=self):
             return "_:@%s@:_" % match.group(match.lastindex)
-        def rline(match,self=self):
+
+        def rline(match, self=self):
             return "\n++yaptu %s #\n--yaptu \n" % match.group(match.lastindex)
-        def ropen(match,self=self):
+
+        def ropen(match, self=self):
             return "\n++yaptu %s \n" % match.group(match.lastindex)
-        def rclause(match,self=self):
+
+        def rclause(match, self=self):
             return "\n==yaptu %s \n" % match.group(match.lastindex)
-        def rclose(match,self=self):
+
+        def rclose(match, self=self):
             return "\n--yaptu \n"
 
         # Substitutions
@@ -161,6 +195,7 @@ class xcopier(copier):
     def _preProcess(self, s, why):
         """Preprocess embedded python statements and expressions"""
         return self._xmlDecode(s)
+
     def _preProcessDbg(self, s, why):
         """Preprocess embedded python statements and expressions"""
         self.dbgOuf.write("!!! DBG: %s %s \n" % (s, why))
@@ -168,52 +203,54 @@ class xcopier(copier):
 
     # Decode utility for XML/HTML special characters
     _xmlCodes = [
-      ['"', "&quot;"],
-      [">", "&gt;"],
-      ["<", "&lt;"],
-      ["&", "&amp;"],
+        ['"', "&quot;"],
+        [">", "&gt;"],
+        ["<", "&lt;"],
+        ["&", "&amp;"],
     ]
+
     def _xmlDecode(self, s):
         """Returns the ASCII decoded version of the given HTML string."""
         codes = self._xmlCodes
         for code in codes:
-            #s = string.replace(s, code[1], code[0])
+            # s = string.replace(s, code[1], code[0])
             s = s.replace(code[1], code[0])
         return s
 
 
 ####################################################
 
-if __name__=="__main__":
-
+if __name__ == "__main__":
     ##################################################
     # Document Name Space (a dictionary, normally prepared by runtime application,
     # and that serves as the substitution namespace for instantiating a doc template).
     #
     DNS = {
-      "pageTitle" : "Event Log (xyaptu test page)",
-      "baseUrl" : "http://xproject.sourceforge.net/",
-      "sid" : "a1b2c3xyz",
-      "session" : 1,
-      "userName" : "mario",
-      "startTime" : "12:31:42",
-      "AllComputerCaptions" : "No",
-      "ComputerCaption" : "mymachine01",
-      "LogSeverity" : ["Info", "Warning", "Error" ],
-      "LogFileType" : "Application",
-      "logTimeStamp" : "Event Log Dump written on 25 May 2001 at 13:55",
-      "logHeadings" : ["Type", "Date", "Time", "Source", "Category", "Computer", "Message"] ,
-      "logEntries" : [
-        ["Info", "14/05/2001", "15:26", "MsiInstaller", "0", "PC01", "winzip80 install ok..."],
-        ["Warning", "16/05/2001", "02:43", "EventSystem", "4", "PC02", "COM+ failed..."],
-        ["Error", "22/05/2001", "11:35", "rasctrs", "0", "PC03", "...", " ** EXTRA ** " ],
-      ]
+        "pageTitle": "Event Log (xyaptu test page)",
+        "baseUrl": "http://xproject.sourceforge.net/",
+        "sid": "a1b2c3xyz",
+        "session": 1,
+        "userName": "mario",
+        "startTime": "12:31:42",
+        "AllComputerCaptions": "No",
+        "ComputerCaption": "mymachine01",
+        "LogSeverity": ["Info", "Warning", "Error"],
+        "LogFileType": "Application",
+        "logTimeStamp": "Event Log Dump written on 25 May 2001 at 13:55",
+        "logHeadings": ["Type", "Date", "Time", "Source", "Category", "Computer", "Message"],
+        "logEntries": [
+            ["Info", "14/05/2001", "15:26", "MsiInstaller", "0", "PC01", "winzip80 install ok..."],
+            ["Warning", "16/05/2001", "02:43", "EventSystem", "4", "PC02", "COM+ failed..."],
+            ["Error", "22/05/2001", "11:35", "rasctrs", "0", "PC03", "...", " ** EXTRA ** "],
+        ],
     }
 
     # and a function...
     def my_current_time():
         import time
+
         return str(time.clock())
+
     DNS["my_current_time"] = my_current_time
 
     """
@@ -297,7 +334,6 @@ if __name__=="__main__":
     # Initialise an xyaptu xcopier, and call xcopy
     xcp = xcopier(DNS)
     xcp.xcopy(templateStream)
-
 
     ##################################################
     # Test DBG 1

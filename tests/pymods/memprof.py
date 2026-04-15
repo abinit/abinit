@@ -1,4 +1,3 @@
-
 import time
 from collections import OrderedDict, defaultdict, deque, namedtuple
 from itertools import groupby
@@ -30,14 +29,15 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
         """Extends the base class adding type conversion of arguments."""
         # write(logunt,'(a,t60,a,1x,2(i0,1x),2(a,1x),2(i0,1x))')&
         # trim(vname), trim(act), addr, isize, trim(abimem_basename(file)), line, memtot_abi%memory
-        return super(cls, Entry).__new__(cls,
-        	vname=args[0],
-        	action=args[1],
-        	ptr=int(args[2]),
-        	size=int(args[3]),
-        	file=args[4],
-                line=int(args[5]),
-                tot_memory=int(args[6]),
+        return super(cls, Entry).__new__(
+            cls,
+            vname=args[0],
+            action=args[1],
+            ptr=int(args[2]),
+            size=int(args[3]),
+            file=args[4],
+            line=int(args[5]),
+            tot_memory=int(args[6]),
         )
 
     def __repr__(self):
@@ -46,20 +46,31 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
     def to_repr(self, with_addr=True):
         if with_addr:
             return "<var=%s, %s@%s:%s, addr=%s, size_mb=%.3f>" % (
-              self.vname, self.action, self.file, self.line, hex(self.ptr), self.size_mb)
-        return "<var=%s, %s@%s:%s, size_mb=%.3f>" %  (
-          self.vname, self.action, self.file, self.line, self.size_mb)
+                self.vname,
+                self.action,
+                self.file,
+                self.line,
+                hex(self.ptr),
+                self.size_mb,
+            )
+        return "<var=%s, %s@%s:%s, size_mb=%.3f>" % (
+            self.vname,
+            self.action,
+            self.file,
+            self.line,
+            self.size_mb,
+        )
 
     @lazy_property
     def size_mb(self):
         """Size in Megabytes."""
         sign = {"A": +1, "D": -1}[self.action]
-        return sign * self.size / (8 * 1024 ** 2)
+        return sign * self.size / (8 * 1024**2)
 
     @lazy_property
     def tot_memory_mb(self):
         """Total memory in Mb."""
-        return self.tot_memory / (8 * 1024 ** 2)
+        return self.tot_memory / (8 * 1024**2)
 
     @lazy_property
     def isalloc(self):
@@ -91,16 +102,20 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
         return not (self == other)
 
     def frees_onheap(self, other):
-        if (not self.isfree) or other.isalloc: return False
-        if self.size + other.size != 0: return False
+        if (not self.isfree) or other.isalloc:
+            return False
+        if self.size + other.size != 0:
+            return False
         return True
 
     def frees_onstack(self, other):
-        if (not self.isfree) or other.isalloc: return False
-        if self.size + other.size != 0: return False
-        if self.locus != other.locus: return False
+        if (not self.isfree) or other.isalloc:
+            return False
+        if self.size + other.size != 0:
+            return False
+        if self.locus != other.locus:
+            return False
         return True
-
 
 
 def entries_to_dataframe(entries):
@@ -108,18 +123,23 @@ def entries_to_dataframe(entries):
     Convert list of entries to pandas DataFrame.
     """
     import pandas as pd
+
     rows, index = [], []
     for e in entries:
-        rows.append(OrderedDict([
-            ("locus", e.locus),
-            ("vname", e.vname),
-            ("file", e.file),
-            ("line", e.line),
-            ("action", e.action),
-            ("size_mb", e.size_mb),
-            ("tot_memory_mb", e.tot_memory_mb),
-            ("ptr", e.ptr),
-        ]))
+        rows.append(
+            OrderedDict(
+                [
+                    ("locus", e.locus),
+                    ("vname", e.vname),
+                    ("file", e.file),
+                    ("line", e.line),
+                    ("action", e.action),
+                    ("size_mb", e.size_mb),
+                    ("tot_memory_mb", e.tot_memory_mb),
+                    ("ptr", e.ptr),
+                ]
+            )
+        )
         index.append(e.locus)
 
     return pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
@@ -139,22 +159,26 @@ class AbimemFile:
         app(df.to_string())
         return "\n".join(lines)
 
-    def find_small_allocs(self, nbits=160*8):
+    def find_small_allocs(self, nbits=160 * 8):
         """Zero sized allocations are not counted."""
         smallest = []
         for e in self.all_entries:
-            if not e.isalloc: continue
-            if 0 < e.size <= nbits: smallest.append(e)
+            if not e.isalloc:
+                continue
+            if 0 < e.size <= nbits:
+                smallest.append(e)
 
         pprint(smallest)
         return smallest
 
-    def find_large_allocs(self, nbits=10 *8*1024*1024):
+    def find_large_allocs(self, nbits=10 * 8 * 1024 * 1024):
         """Allocations below 10 Mbytes are not counted."""
         larges = []
         for e in self.all_entries:
-            if not e.isalloc: continue
-            if e.size > nbits: larges.append(e)
+            if not e.isalloc:
+                continue
+            if e.size > nbits:
+                larges.append(e)
 
         pprint(larges)
         return larges
@@ -169,14 +193,19 @@ class AbimemFile:
             this_action = g.action.values[0]
             assert all(g.action.values == this_action)
             malloc_mb = g.size_mb.sum()
-            rows.append(OrderedDict([
-                ("ncalls", len(g)),
-                ("malloc_mb", malloc_mb),
-                ("mem_per_call_mb", malloc_mb / len(g)),
-            ]))
+            rows.append(
+                OrderedDict(
+                    [
+                        ("ncalls", len(g)),
+                        ("malloc_mb", malloc_mb),
+                        ("mem_per_call_mb", malloc_mb / len(g)),
+                    ]
+                )
+            )
             index.append(locus)
 
         import pandas as pd
+
         df = pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
         return df.sort_values(by="ncalls", ascending=False)
 
@@ -190,7 +219,8 @@ class AbimemFile:
         elist = []
         eapp = elist.append
         for e in self.all_entries:
-            if e.size == 0: eapp(e)
+            if e.size == 0:
+                eapp(e)
 
         return entries_to_dataframe(elist) if as_dataframe else elist
 
@@ -199,7 +229,8 @@ class AbimemFile:
         elist = []
         eapp = elist.append
         for e in self.all_entries:
-            if e.ptr <= 0: eapp(e)
+            if e.ptr <= 0:
+                eapp(e)
 
         if elist:
             print("Found %d weird entries:" % len(elist))
@@ -216,10 +247,11 @@ class AbimemFile:
         with open(self.path) as fh:
             for lineno, line in enumerate(fh):
                 # skip header line of abimem files
-                if line.startswith("#"): continue
+                if line.startswith("#"):
+                    continue
                 try:
                     entry = Entry.from_line(line)
-                    #if entry.size >  1024 * 8
+                    # if entry.size >  1024 * 8
                     app(entry)
                 except Exception as exc:
                     print("Error while parsing lineno %d, line:\n%s" % (lineno, line))
@@ -242,14 +274,15 @@ class AbimemFile:
         for entry_list in locus_to_entries.values():
             # class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memory")):
             e0 = entry_list[0]
-            args = (e0.vname,
-                    e0.action,
-                    e0.ptr,
-                    sum(e.size for e in entry_list),
-                    e0.file,
-                    e0.line,
-                    max(e.tot_memory for e in entry_list),
-                   )
+            args = (
+                e0.vname,
+                e0.action,
+                e0.ptr,
+                sum(e.size for e in entry_list),
+                e0.file,
+                e0.line,
+                max(e.tot_memory for e in entry_list),
+            )
             new_entries.append(Entry(*args))
 
         return new_entries
@@ -267,14 +300,15 @@ class AbimemFile:
         # when new items are added, a corresponding number of items are discarded from the opposite end.
         peaks = deque(maxlen=maxlen)
 
-        entries =  self.accumulated_entries if accumulated else self.all_entries
+        entries = self.accumulated_entries if accumulated else self.all_entries
 
         visited = set()
         for e in self.all_entries:
             # Avoid redundant entries:
-            #k = (e.locus, e.size)
+            # k = (e.locus, e.size)
             k = e.locus
-            if e.size == 0 or not e.isalloc or k in visited: continue
+            if e.size == 0 or not e.isalloc or k in visited:
+                continue
             if len(peaks) == 0:
                 peaks.append(e)
                 visited.add(k)
@@ -311,7 +345,7 @@ class AbimemFile:
         Args:
             accumulated: True to use accumulated entries instead of raw ones.
         """
-        entries =  self.accumulated_entries if accumulated else self.all_entries
+        entries = self.accumulated_entries if accumulated else self.all_entries
 
         memory = [e.tot_memory_mb for e in entries]
         ax, fig, plt = get_ax_fig_plt(ax=ax)
@@ -359,11 +393,11 @@ class AbimemFile:
 
         Returns: |matplotlib-Figure|
         """
-        entries =  self.accumulated_entries if accumulated else self.all_entries
+        entries = self.accumulated_entries if accumulated else self.all_entries
 
         ax, fig, plt = get_ax_fig_plt(ax=ax)
         data = [e.size_mb for e in entries]
-        ax.hist(data) #, bins=n_bins)
+        ax.hist(data)  # , bins=n_bins)
         ax.grid(True)
         ax.set_ylabel("Number of arrays")
         ax.set_xlabel("Memory (Mb)")
@@ -385,17 +419,22 @@ class AbimemFile:
             free_mb = g[g["action"] == "D"].size_mb.sum()
             nalloc = len(g["action"] == "A")
             nfree = len(g["action"] == "D")
-            rows.append(OrderedDict([
-                ("malloc_mb", malloc_mb),
-                ("free_mb", free_mb),
-                #("diff_mb", malloc_mb + free_mb),
-                ("nalloc", nalloc),
-                ("nfree", nfree),
-                #("npall", nalloc - nfree),
-            ]))
+            rows.append(
+                OrderedDict(
+                    [
+                        ("malloc_mb", malloc_mb),
+                        ("free_mb", free_mb),
+                        # ("diff_mb", malloc_mb + free_mb),
+                        ("nalloc", nalloc),
+                        ("nfree", nfree),
+                        # ("npall", nalloc - nfree),
+                    ]
+                )
+            )
             index.append(filename)
 
         import pandas as pd
+
         df = pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
         return df.sort_values(by="malloc_mb", ascending=False)
 
@@ -403,11 +442,11 @@ class AbimemFile:
         """
         Shows a predefined list of matplotlib figures with minimal input from the user.
         """
-        #from abipy.tools.plotting import MplExpose
+        # from abipy.tools.plotting import MplExpose
         with MplExpose(slide_mode=slide_mode, slide_timeout=slide_mode, verbose=1) as e:
             e(self.plot_memory_usage(show=False))
-            #e(self.plot_peaks(show=False))
-            #e(self.plot_hist(show=False))
+            # e(self.plot_peaks(show=False))
+            # e(self.plot_hist(show=False))
 
     def find_memleaks(self, verbose=0):
         """
@@ -418,7 +457,8 @@ class AbimemFile:
 
         for newe in self.all_entries:
             p = newe.ptr
-            if newe.size == 0: continue
+            if newe.size == 0:
+                continue
             # Store new entry in list if the ptr is not in d
             # else we check if there's an allocation that matches a previous allocation
             # (zero-sized arrays are not included)
@@ -449,15 +489,23 @@ class AbimemFile:
                 #
                 #    In this case, p2 != p0
                 if verbose:
-                    print("WARNING:", newe.ptr, newe, "ptr already on the heap ", len(heap[p]), \
-                          " sizes: ", heap[p][0].size, newe.size)
-                #print("HEAP:", heap[newe.ptr])
+                    print(
+                        "WARNING:",
+                        newe.ptr,
+                        newe,
+                        "ptr already on the heap ",
+                        len(heap[p]),
+                        " sizes: ",
+                        heap[p][0].size,
+                        newe.size,
+                    )
+                # print("HEAP:", heap[newe.ptr])
 
                 locus = newe.locus
                 if locus not in stack:
                     stack[locus] = [newe]
                 else:
-                    #if newe.ptr != 0: print(newe)
+                    # if newe.ptr != 0: print(newe)
                     stack_loc = stack[locus]
                     ifind = -1
                     for i, olde in enumerate(stack_loc):
@@ -467,12 +515,12 @@ class AbimemFile:
 
                     if ifind != -1:
                         stack_loc.pop(ifind)
-                        #else:
+                        # else:
                         #    print(newe)
 
-                    #if p == 0:
+                    # if p == 0:
                     #    stack[p] = newe
-                    #else:
+                    # else:
                     #    print("varname", newe.vname, "in heap with size ",newe.size)
                     #    for weirde in heap[p]:
                     #        print("\tweird entry:", weirde)
@@ -487,26 +535,28 @@ class AbimemFile:
                 entries = [e for e in entries if e.size != 0]
 
                 entries = sorted(entries, key=keyfunc)
-                #if any(int(e.size) != 0 for e in l):
+                # if any(int(e.size) != 0 for e in l):
 
-                #msizes = []
+                # msizes = []
                 for key, group in groupby(entries, keyfunc):
                     group = list(group)
-                    #print([e.name for e in g])
-                    pos_size = [e for e in group if e.size >0]
-                    neg_size = [e for e in group if e.size <0]
+                    # print([e.name for e in g])
+                    pos_size = [e for e in group if e.size > 0]
+                    neg_size = [e for e in group if e.size < 0]
                     if len(pos_size) != len(neg_size):
                         print("key", key)
                         for e in group:
                             print(e)
-                        #print(list(g))
+                        # print(list(g))
 
-                #for i, e in enumerate(entries):
+                # for i, e in enumerate(entries):
                 #    print("\t[%d]" % i, e)
-                #print("Count=%d" % count, 60 * "=")
+                # print("Count=%d" % count, 60 * "=")
 
-        if heap: heap.show()
-        if stack: stack.show()
+        if heap:
+            heap.show()
+        if stack:
+            stack.show()
         if verbose and reallocs:
             print("Possible reallocations:")
             pprint(reallocs)
@@ -518,22 +568,25 @@ class AbimemFile:
         Build panel with widgets to interact with the memocc file either in a notebook or in panel app.
         """
         from .memprof_panel import MoccViewer
+
         return MoccViewer(self).get_panel()
 
 
 class Heap(dict):
-
     def show(self):
         print("=== HEAP OF LEN %s ===" % len(self))
-        if not self: return
+        if not self:
+            return
         # for p, elist in self.items():
         pprint(self, indent=4)
         print()
 
     def pop_alloc(self, entry):
-        if not entry.isfree: return 0
+        if not entry.isfree:
+            return 0
         elist = self.get[entry.ptr]
-        if elist is None: return 0
+        if elist is None:
+            return 0
         for i, olde in elist:
             if entry.size + olde.size != 0:
                 elist.pop(i)
@@ -542,22 +595,23 @@ class Heap(dict):
 
 
 class Stack(dict):
-
     def show(self):
         print("=== STACK OF LEN %s ===" % len(self))
-        if not self: return
+        if not self:
+            return
         pprint(self)
         print()
 
 
 # Copied  from abipy.tools.plotting
-class MplExpose: # pragma: no cover
+class MplExpose:  # pragma: no cover
     """
     Example:
         with MplExpose() as e:
             e(obj.plot1(show=False))
             e(obj.plot2(show=False))
     """
+
     def __init__(self, slide_mode=False, slide_timeout=None, verbose=1):
         """
         Args:
@@ -577,7 +631,9 @@ class MplExpose: # pragma: no cover
             if self.slide_mode:
                 print("\nSliding matplotlib figures with slide timeout: %s [s]" % slide_timeout)
             else:
-                print("\nLoading all matplotlib figures before showing them. It may take some time...")
+                print(
+                    "\nLoading all matplotlib figures before showing them. It may take some time..."
+                )
 
         self.start_time = time.time()
 
@@ -587,6 +643,7 @@ class MplExpose: # pragma: no cover
         generator yielding figures.
         """
         import types
+
         if isinstance(obj, (types.GeneratorType, list, tuple)):
             for fig in obj:
                 self.add_fig(fig)
@@ -595,13 +652,15 @@ class MplExpose: # pragma: no cover
 
     def add_fig(self, fig):
         """Add a matplotlib figure."""
-        if fig is None: return
+        if fig is None:
+            return
 
         if not self.slide_mode:
             self.figures.append(fig)
         else:
-            #print("Printing and closing", fig)
+            # print("Printing and closing", fig)
             import matplotlib.pyplot as plt
+
             if self.timeout_ms is not None:
                 # Creating a timer object
                 # timer calls plt.close after interval milliseconds to close the window.
@@ -624,6 +683,7 @@ class MplExpose: # pragma: no cover
         if not self.slide_mode:
             print("All figures in memory, elapsed time: %.3f s" % (time.time() - self.start_time))
             import matplotlib.pyplot as plt
+
             plt.show()
             for fig in self.figures:
                 fig.clear()
