@@ -1465,6 +1465,12 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
      end if
    end if
 
+!  gpu_nfft_blocks
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_nfft_blocks',dt%gpu_nfft_blocks,0,iout)
+   if (dt%gpu_option/=ABI_GPU_OPENMP .and. dt%gpu_nfft_blocks/=0) then
+     ABI_WARNING('gpu_nfft_blocks is ignored outside of OpenMP GPU (gpu_option 2)!')
+   end if
+
 !  gpu_kokkos_nthrd
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_kokkos_nthrd',dt%gpu_kokkos_nthrd,1,iout)
 
@@ -1475,8 +1481,8 @@ subroutine chkinp(dtsets, iout, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads
    end if
 
 !  gpu_nl_splitsize
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_nl_splitsize',dt%gpu_nl_splitsize,1,iout)
-   if (dt%gpu_option/=ABI_GPU_OPENMP .and. dt%gpu_nl_splitsize/=1) then
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_nl_splitsize',dt%gpu_nl_splitsize,0,iout)
+   if (dt%gpu_option/=ABI_GPU_OPENMP .and. dt%gpu_nl_splitsize/=0) then
      ABI_WARNING('gpu_nl_splitsize is ignored outside of OpenMP GPU (gpu_option 2)!')
    end if
 
