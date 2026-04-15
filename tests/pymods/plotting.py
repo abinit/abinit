@@ -1,3 +1,6 @@
+import time
+
+
 def get_ax_fig_plt(ax=None, **kwargs):
     """
     Helper function used in plot functions supporting an optional Axes argument.
@@ -94,7 +97,7 @@ def add_fig_kwargs(func):
     # Add docstring to the decorated method.
     s = (
         "\n\n"
-         """\
+        """\
         Keyword arguments controlling the display of the figure:
 
         ================  ====================================================
