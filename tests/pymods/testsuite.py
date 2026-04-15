@@ -80,6 +80,16 @@ def genid():
 
 
 def html_colorize_text(string, code):
+    """
+    Colorize text for HTML output.
+
+    Args:
+        string (str): Text to colorize.
+        code (str): HTML color code.
+
+    Returns:
+        str: HTML string with font color tags.
+    """
     return "<FONT COLOR='%s'>%s</FONT>" % (code, string)
 
 
@@ -134,6 +144,15 @@ def str2html(string, end="<br>"):
 
 
 def args2htmltr(*args):
+    """
+    Convert a list of arguments to HTML table cells (TD).
+
+    Args:
+        *args: List of objects to be converted to strings and wrapped in TD.
+
+    Returns:
+        str: Concatenated HTML table cells.
+    """
     string = ""
     for arg in args:
         string += "<td>" + str(arg) + "</td>"
@@ -209,11 +228,29 @@ def lazy__str__(func):
 # Helper functions for performing IO
 
 def lazy_read(fname):
+    """
+    Read the entire content of a file.
+
+    Args:
+        fname (str): Path to the file.
+
+    Returns:
+        str: File content.
+    """
     with open(fname, encoding="utf-8") as fh:
         return fh.read()
 
 
 def lazy_readlines(fname):
+    """
+    Read all lines from a file.
+
+    Args:
+        fname (str): Path to the file.
+
+    Returns:
+        list: List of lines.
+    """
     with open(fname, encoding="utf-8") as fh:
         return fh.readlines()
 
@@ -520,8 +557,16 @@ class FileToTest:
 
 def _str2filestotest(string):
     """
-    Parse the files_to_test section.
-    Returns a tuple of `FileToTest` objects.
+    Parse a string containing file comparison metadata.
+
+    Args:
+        string (str): Semicolon-separated file metadata strings.
+
+    Returns:
+        tuple: Tuple of FileToTest objects.
+
+    Raises:
+        AbinitTestInfoParserError: If keywords are repeated.
     """
     if not string:
         return []
@@ -546,8 +591,12 @@ def _str2filestotest(string):
     return tuple(files_to_test)
 
 
-def _str2list(string):    return [s.strip() for s in string.split(",") if s]
-def _str2intlist(string): return [int(item) for item in _str2list(string)]
+def _str2list(string):
+    """Convert comma-separated string to list."""
+    return [s.strip() for s in string.split(",") if s]
+def _str2intlist(string):
+    """Convert comma-separated string to list of integers."""
+    return [int(item) for item in _str2list(string)]
 def _str2set(string):     return {s.strip() for s in string.split(",") if s}
 def _str2cmds(string):    return [s.strip() for s in string.split(";") if s]
 
@@ -703,11 +752,21 @@ class AbinitTestInfo:
     def __str__(self): pass
 
     def add_cpp_vars(self, need_cpp_vars):
-        """Add new set of CPP variables."""
+        """
+        Add new set of CPP variables to the test requirements.
+
+        Args:
+            need_cpp_vars (set): Set of CPP variable names.
+        """
         self.need_cpp_vars = self.need_cpp_vars.union(need_cpp_vars)
 
     def add_keywords(self, keywords):
-        """Add new set of keywords."""
+        """
+        Add new set of keywords to the test metadata.
+
+        Args:
+            keywords (set): Set of keyword strings.
+        """
         self.keywords = self.keywords.union(keywords)
 
     def make_test_id(self):
@@ -800,7 +859,13 @@ class AbinitTestInfoParser:
 
     def generate_testinfo_nprocs(self, mpi_nprocs):
         """
-        Returns a record with the variables needed to handle the job with mpi_nprocs.
+        Generate a record with the variables needed to handle a job with mpi_nprocs.
+
+        Args:
+            mpi_nprocs (int): Number of MPI processes.
+
+        Returns:
+            AbinitTestInfo: The test configuration object.
         """
         d = {}
         d["yaml_test"] = self.yaml_test()
@@ -914,7 +979,12 @@ class AbinitTestInfoParser:
         return self.parser.has_option(section, opt)
 
     def chain_inputs(self):
-        """Return a list with the path of the input files belonging to the test chain"""
+        """
+        Return a list of paths for the input files belonging to the test chain.
+
+        Returns:
+            list: Absolute paths to input files.
+        """
         assert self.is_testchain
         opt = "test_chain"
         section = TESTCNF_KEYWORDS[opt][2]
@@ -926,7 +996,16 @@ class AbinitTestInfoParser:
         return [os.path.join(self.inp_dir, fname) for fname in fnames]
 
     def yaml_test(self, ytest=None, sec_name="yaml_test"):
+        """
+        Parse YAML test configuration from the input file.
 
+        Args:
+            ytest (dict, optional): Existing YAML configuration to update.
+            sec_name (str): Section name to parse from.
+
+        Returns:
+            dict: Updated YAML configuration.
+        """
         if ytest is None:
             ytest = {}
 
@@ -1029,6 +1108,15 @@ class CPreProcessor:
     Error = CPreProcessorError
 
     def __init__(self, includes=None, opts=None, bin="cpp", verbose=0):
+        """
+        Initialize the CPreProcessor.
+
+        Args:
+            includes (list, optional): List of include directories.
+            opts (list, optional): List of CPP options (e.g., -DVAR).
+            bin (str): Path to the CPP binary.
+            verbose (int): Verbosity level.
+        """
         self.includes = ["."]
         if includes is not None:
             self.includes = includes
@@ -1039,10 +1127,17 @@ class CPreProcessor:
 
     def process_file(self, filepath, remove_lhash=True):
         """
-        Read source from filepath, call CPP with the includes and the
-        options passed to the constructor.
+        Read source from filepath and process it with CPP.
 
-        Returns: preprocessed text.
+        Args:
+            filepath (str): Path to the file to process.
+            remove_lhash (bool): If True, remove leading hash lines from output.
+
+        Returns:
+            str: Preprocessed text.
+
+        Raises:
+            CPreProcessor.Error: If CPP binary fails.
         """
         if self.bin is None:
             # No pre-processing, return raw string.
@@ -1086,6 +1181,15 @@ class FortranBacktrace:
         raise NotImplementedError("parse method must be implemented by the subclass")
 
     def locate_srcfile(self, base_name):
+        """
+        Locate a source file within the ABINIT source tree.
+
+        Args:
+            base_name (str): The basename of the file to find.
+
+        Returns:
+            str or None: Absolute path to the file if found, else None.
+        """
         top = find_top_build_tree(start_path=".", with_abinit=True)
         top = os.path.join(top, "src")
 
@@ -1189,14 +1293,28 @@ class BuildEnvironment:
     def __str__(self): pass
 
     def issrctree(self):
-        """True if this is a source tree."""
+        """
+        Check if the current build directory is also a source tree.
+
+        Returns:
+            bool: True if it contains configuration and main source files.
+        """
         configac_path = os.path.join(self.build_dir, "configure.ac")
         abinitF90_path = os.path.join(self.build_dir, "src", "98_main", "abinit.F90")
 
         return os.path.isfile(configac_path) and os.path.isfile(abinitF90_path)
 
     def path_of_bin(self, bin_name, try_syspath=True):
-        """Return the absolute path of bin_name."""
+        """
+        Get the absolute path of a binary.
+
+        Args:
+            bin_name (str): Name of the binary (e.g., "abinit").
+            try_syspath (bool): If True, also search in system PATH.
+
+        Returns:
+            str: Absolute path to the binary, or empty string if not found.
+        """
         if bin_name in self._external_bins:
             bin_path = self._external_bins[bin_name]
         else:
@@ -1326,7 +1444,17 @@ def input_file_has_vars(fname, ivars, comment="#", mode="any"):
 
 def make_abitest_from_input(inp_fname, abenv, keywords=None, need_cpp_vars=None, with_np=1):
     """
-    Factory function to generate a Test object from the input file inp_fname
+    Factory function to generate a Test object from an input file.
+
+    Args:
+        inp_fname (str): Path to the ABINIT input file.
+        abenv (BuildEnvironment): Build environment information.
+        keywords (set, optional): Global keywords to add.
+        need_cpp_vars (set, optional): Global CPP requirements.
+        with_np (int): Number of MPI processes to configure.
+
+    Returns:
+        BaseTest: An instance of the appropriate test class.
     """
     inp_fname = os.path.abspath(inp_fname)
     #print("make_abitest_from_input got inp_fname", inp_fname)
@@ -1568,24 +1696,37 @@ pp_dirpath $ABI_PSPDIR
         return repr(self)
 
     def stdin_readlines(self):
+        """Read standard input lines."""
         return lazy_readlines(self.stdin_fname)
 
     def stdin_read(self):
+        """Read full standard input."""
         return lazy_read(self.stdin_fname)
 
     def stdout_readlines(self):
+        """Read standard output lines."""
         return lazy_readlines(self.stdout_fname)
 
     def stdout_read(self):
+        """Read full standard output."""
         return lazy_read(self.stdout_fname)
 
     def stderr_readlines(self):
+        """Read standard error lines."""
         return lazy_readlines(self.stderr_fname)
 
     def stderr_read(self):
+        """Read full standard error."""
         return lazy_read(self.stderr_fname)
 
     def cprint(self, msg="", color=None):
+        """
+        Print a message, optionally colorized, with thread safety.
+
+        Args:
+            msg (str): The message to print.
+            color (str, optional): Terminal color.
+        """
         with self._print_lock:
             if color is not None:
                 cprint(msg, color=color)
@@ -1616,9 +1757,14 @@ pp_dirpath $ABI_PSPDIR
 
     def has_keywords(self, keywords, mode="any"):
         """
-        True if test has keywords
-        mode == "all" --> check if all keywords are present
-        mode == "any" --> check if at least one keyword is present
+        Check if the test has specific keywords.
+
+        Args:
+            keywords (list): Keywords to look for.
+            mode (str): "all" (all must match) or "any" (at least one must match).
+
+        Returns:
+            bool: True if criteria are met.
         """
         if mode == "all":
             return set(keywords).issubset(self.keywords)
@@ -1628,10 +1774,14 @@ pp_dirpath $ABI_PSPDIR
 
     def has_authors(self, authors, mode="any"):
         """
-        True if test has authors
+        Check if the test has specific authors.
 
-        mode == "all" --> check if all authors are present
-        mode == "any" --> check if at least one author is present
+        Args:
+            authors (list): Author names to look for.
+            mode (str): "all" (all must match) or "any" (at least one must match).
+
+        Returns:
+            bool: True if criteria are met.
         """
         if mode == "all":
             return set(authors).issubset(self._authors_snames)
@@ -1712,6 +1862,17 @@ pp_dirpath $ABI_PSPDIR
             raise e
 
     def listoftests(self, width=100, html=True, abslink=True):
+        """
+        Return a string representation of the test for documentation.
+
+        Args:
+            width (int): Output width for text wrapping.
+            html (bool): If True, return HTML formatted string.
+            abslink (bool): If True, use absolute links in HTML.
+
+        Returns:
+            str: Test documentation string.
+        """
         string = self.description.lstrip()
         if self.references:
             string += "References:\n" + "\n".join(self.references)
@@ -2389,7 +2550,15 @@ pp_dirpath $ABI_PSPDIR
 
     def load_results(self, d):
         """
-        Load the run results from a run in a different process.
+        Load test results from a dictionary.
+
+        Used to synchronize results from worker processes.
+
+        Args:
+            d (dict): Dictionary containing results (status, stdout, etc.).
+
+        Raises:
+            KeyError: If mandatory keys are missing in d.
         """
         try:
             self._status = d["status"]
@@ -2408,7 +2577,13 @@ pp_dirpath $ABI_PSPDIR
 
     def get_results(self, skipped_info=False):
         """
-        Return the run results to pass it to a different process
+        Return test results as a dictionary.
+
+        Args:
+            skipped_info (bool, optional): Unused.
+
+        Returns:
+            dict: The test results for synchronization.
         """
         return {
             "id": self._rid,
@@ -2479,7 +2654,11 @@ pp_dirpath $ABI_PSPDIR
             Patcher(patcher).patch(out_fname, ref_fname)
 
     def make_html_diff_files(self):
-        """Generate and write diff files in HTML format."""
+        """
+        Generate and write diff files in HTML format for failed tests.
+
+        Uses the `diff.py` utility to create side-by-side comparisons.
+        """
         assert self._executed
         if self.make_html_diff == 0 or self._status in {"disabled", "skipped"}:
             return
@@ -2528,7 +2707,11 @@ pp_dirpath $ABI_PSPDIR
                     self.keep_files(hdiff_fname)
 
     def make_txt_diff_files(self):
-        """Generate and write diff files in text format."""
+        """
+        Generate and write diff files in text format for failed tests.
+
+        Uses the `diff.py` utility to create unified diffs (-u).
+        """
         assert self._executed
         if self._status in {"disabled", "skipped"}:
             return
@@ -2579,7 +2762,13 @@ pp_dirpath $ABI_PSPDIR
                     self.keep_files(diff_fname)
 
     def write_html_report(self, fh=None, oc="oc"):
-        """Write the HTML file summarizing the results of the test."""
+        """
+        Write an HTML report summarizing the results of the test.
+
+        Args:
+            fh (file-like, optional): Stream to write to. If None, a file is created.
+            oc (str): Controls header ("o") and footer ("c") inclusion.
+        """
         assert self._executed
 
         close_fh = False
@@ -2799,7 +2988,11 @@ class AbinitTest(BaseTest):
         return t_stdin.getvalue()
 
     def prepare_new_cli_invokation(self):
-        """Perform operations required to execute test with new CLI."""
+        """
+        Prepare input files for Abinit execution using the new CLI.
+
+        Adds prefixes and internal variables to the copied input file.
+        """
         # Read full input in line.
         with open(self.inp_fname) as fh:
             line = fh.read()
@@ -2897,6 +3090,11 @@ class AnaddbTest(BaseTest):
         return t_stdin.getvalue()
 
     def prepare_new_cli_invokation(self):
+        """
+        Prepare input files for Anaddb execution using the new CLI.
+
+        Wraps paths and prefixes into the input file.
+        """
         """Perform operations required to execute test with new CLI."""
         # Need to add extra variables depending on calculation type.
         with open(self.inp_fname) as fh:
@@ -3063,7 +3261,11 @@ class MultibinitTest(BaseTest):
         return t_stdin.getvalue()
 
     def prepare_new_cli_invokation(self):
-        """Perform operations required to execute test with the new CLI."""
+        """
+        Prepare input files for Multibinit execution using the new CLI.
+
+        Adds prefixes and potential file paths to the input file.
+        """
         # Need to add extra variables depending on calculation type.
         with open(self.inp_fname) as fh:
             line = fh.read()
@@ -3138,7 +3340,11 @@ class TdepTest(BaseTest):
         return t_stdin.getvalue()
 
     def prepare_new_cli_invokation(self):
-        """Perform operations required to execute test with new CLI."""
+        """
+        Prepare input files for aTDEP execution using the new CLI.
+
+        Adds prefixes and output file settings.
+        """
         inp_fname = os.path.basename(self.inp_fname)
         stem = os.path.splitext(inp_fname)[0]
         inpref = os.path.join(self.inp_dir, stem)
@@ -3285,17 +3491,17 @@ def exec2class(exec_name):
 
 def do_work(task_q, res_q, rank, run_func, run_func_kwargs, print_lock, kill_me, thread_mode=False):
     """
-    This is the function used as target of the subprocess
+    Worker function for parallel test execution.
 
     Args:
-        task_q: Input queue with the task.
-        res_q: Output queue with the results
-        rank: Rank of the python process.
-        run_func: Callable to be executed.
-        run_func_kwargs: kwargs passed to run_func
-        print_lock:
-        kill_me:
-        thread_mode:
+        task_q (Queue): Input queue with tests to run.
+        res_q (Queue): Output queue for results.
+        rank (int): Worker rank.
+        run_func (callable): Function responsible for running a single test.
+        run_func_kwargs (dict): Arguments passed to run_func.
+        print_lock (Lock): Thread/Process lock for printing.
+        kill_me (bool): Signal to terminate worker.
+        thread_mode (bool): If True, run as a thread instead of a process.
     """
     done = {"type": "proc_done"}
     all_done = False
@@ -3672,6 +3878,16 @@ class ChainOfTests:
         return snames
 
     def has_authors(self, authors, mode="any"):
+        """
+        Check if the test chain has specific authors.
+
+        Args:
+            authors (list): Author names to look for.
+            mode (str): "all" (all must match) or "any" (at least one must match).
+
+        Returns:
+            bool: True if criteria are met.
+        """
         # return set(authors).issubset(self._authors_snames)
         if mode == "all":
             return set(authors).issubset(self._authors_snames)
@@ -3895,14 +4111,24 @@ class AbinitTestSuite:
         return set(cpp_vars)
 
     def on_refslave(self):
-        """True if we are running on a reference slave e.g. abiref."""
+        """
+        Check if running on a reference machine.
+
+        Returns:
+            bool: True if on reference slave.
+        """
         try:
             return self._on_ref_slave
         except AttributeError:
             return False
 
     def set_on_refslave(self, value=True):
-        """Attribute setter"""
+        """
+        Set the reference slave status.
+
+        Args:
+            value (bool): True if running on reference slave.
+        """
         self._on_ref_slave = bool(value)
 
     def all_exceptions(self):
@@ -4002,6 +4228,12 @@ class AbinitTestSuite:
             self.exceptions.append(exc)
 
     def sanity_check(self):
+        """
+        Verify that all tests in the suite have unique identifiers.
+
+        Raises:
+            ValueError: If duplicate full_id is found.
+        """
         all_full_ids = [test.full_id for test in self]
         if len(all_full_ids) != len(set(all_full_ids)):
             raise ValueError("Cannot have more than two tests with the same full_id")
@@ -4417,6 +4649,15 @@ class AbinitTestSuite:
 
     @staticmethod
     def _pyhtml_table_section(status):
+        """
+        Generate a section of the HTML table for tests with a specific status.
+
+        Args:
+            status (str): The test status (failed, passed, etc.).
+
+        Returns:
+            str: XML/Xyaptu template string.
+        """
         # ['ID', 'Status', 'run_etime', 'tot_etime'],
         string = """
            <py-open code="for test in self.%s_tests():"/>
@@ -4492,6 +4733,12 @@ class Results:
     """Stores the final results."""
 
     def __init__(self, test_suite):
+        """
+        Initialize Results from an AbinitTestSuite.
+
+        Args:
+            test_suite (AbinitTestSuite): The executed test suite.
+        """
         # assert test_suite._executed
         self.test_suite = test_suite
         self.failed_tests = test_suite.failed_tests()
@@ -4505,6 +4752,15 @@ class Results:
     def __str__(self): pass
 
     def tests_with_status(self, status):
+        """
+        Return a list of tests with the given status.
+
+        Args:
+            status (str): One of ("failed", "passed", "succeeded", "disabled", "skipped", "all").
+
+        Returns:
+            list: Matching BaseTest instances.
+        """
         return {
             "succeeded": self.succeeded_tests,
             "passed": self.passed_tests,
@@ -4516,17 +4772,22 @@ class Results:
 
     @property
     def nfailed(self):
-        """Number of failures"""
+        """Number of failed tests."""
         return len(self.failed_tests)
 
     @property
     def npassed(self):
-        """Number of tests marked as passed."""
+        """Number of passed tests."""
         return len(self.passed_tests)
 
     @property
     def nexecuted(self):
-        """Number of tests executed."""
+        """
+        Number of tests executed.
+
+        Returns:
+            int: Total count of executed tests (handles chains).
+        """
         n = 0
         for test in self.test_suite:
             if isinstance(test, ChainOfTests):

@@ -135,10 +135,12 @@ class MplExpose:  # pragma: no cover
 
     def __init__(self, slide_mode=False, slide_timeout=None, verbose=1):
         """
+        Initialize the MplExpose helper.
+
         Args:
-            slide_mode: If true, iterate over figures. Default: Expose all figures at once.
-            slide_timeout: Close figure after slide-timeout seconds Block if None.
-            verbose: verbosity level
+            slide_mode (bool): If true, iterate over figures. Default: Expose all figures at once.
+            slide_timeout (float): Close figure after slide-timeout seconds. Block if None.
+            verbose (int): Verbosity level.
         """
         self.figures = []
         self.slide_mode = bool(slide_mode)
@@ -160,8 +162,10 @@ class MplExpose:  # pragma: no cover
 
     def __call__(self, obj):
         """
-        Add an object to MplExpose. Support mpl figure, list of figures or
-        generator yielding figures.
+        Add an object to MplExpose.
+
+        Args:
+            obj: Matplotlib figure, list of figures, or generator yielding figures.
         """
         import types
 
@@ -172,7 +176,12 @@ class MplExpose:  # pragma: no cover
             self.add_fig(obj)
 
     def add_fig(self, fig):
-        """Add a matplotlib figure."""
+        """
+        Add a matplotlib figure to the collection.
+
+        Args:
+            fig: Matplotlib figure instance.
+        """
         if fig is None:
             return
 

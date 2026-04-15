@@ -84,19 +84,35 @@ __ISON = True
 
 
 def enable(true_false):
-    """Enable/Disable ANSII Color formatting"""
+    """
+    Enable or disable ANSI color formatting.
+
+    Args:
+        true_false (bool): True to enable, False to disable.
+    """
     global __ISON
     __ISON = true_false
 
 
 def ison():
-    """True if ANSII Color formatting is activated."""
+    """
+    Check if ANSI color formatting is activated.
+
+    Returns:
+        bool: True if activated, False otherwise.
+    """
     return __ISON
 
 
 def stream_has_colours(stream):
     """
-    True if stream supports colours. Python cookbook, #475186
+    Check if the given stream supports colors.
+
+    Args:
+        stream: The stream to check (e.g., sys.stdout).
+
+    Returns:
+        bool: True if the stream supports colors, False otherwise.
     """
     if not hasattr(stream, "isatty"):
         return False

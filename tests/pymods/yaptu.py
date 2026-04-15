@@ -24,7 +24,13 @@ def nohandle(string):
 class copier:
     """Smart-copier (YAPTU) class."""
     def copyblock(self, i=0, last=None):
-        "Main copy method: process lines [i,last) of block"
+        """
+        Main copy method: process lines [i, last) of block.
+
+        Args:
+            i (int): Start index.
+            last (int, optional): End index. Defaults to end of block.
+        """
         def repl(match, self=self):
             "return the eval of a found expression, for replacement"
             # uncomment for debug: print '!!! replacing',match.group(1)

@@ -12,6 +12,15 @@ except ImportError as exc:
 import bokeh.models.widgets as bkw
 
 def _df(df):
+    """
+    Create a Panel DataFrame widget.
+
+    Args:
+        df (pd.DataFrame): The dataframe to display.
+
+    Returns:
+        pn.widgets.DataFrame: The initialized widget.
+    """
     return pn.widgets.DataFrame(df, disabled=True)
 
 

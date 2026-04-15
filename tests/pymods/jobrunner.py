@@ -269,6 +269,12 @@ class JobRunner:
             raise ValueError("poe and (mpirun||srun) are mutually exclusive")
 
     def __str__(self):
+        """
+        Return a string representation of the job runner's configuration.
+
+        Returns:
+            str: The configuration summary.
+        """
         #return "\n".join([str(k) + " : " + str(v) for (k, v) in self.__dict__.items()] )
 
         string = ""
@@ -299,7 +305,12 @@ class JobRunner:
         self.timebomb = timebomb
 
     def set_valgrind_cmdline(self, cmdline):
-        """Set the command line options to be passed to VALGRIND."""
+        """
+        Set the command line options to be passed to VALGRIND.
+
+        Args:
+            cmdline (str): The command line options.
+        """
         self.valgrind_cmdline = cmdline
 
     @property
@@ -308,12 +319,26 @@ class JobRunner:
         return hasattr(self, "valgrind_cmdline")
 
     def build_valgrind_parser(self):
+        """
+        Build and return a parser for Valgrind output.
+
+        Returns:
+            MemcheckParser: The initialized parser.
+
+        Raises:
+            ValueError: If Valgrind is not enabled for this runner.
+        """
         if not self.has_valgrind: raise ValueError("Runner does not use valgrind!")
         # TODO build specialized parsers for the different tools (XML?)
         return MemcheckParser()
 
     def set_debugger(self, debugger):
-        """Set the debugger."""
+        """
+        Set the debugger executable.
+
+        Args:
+            debugger (str): Path to the debugger executable.
+        """
         self.debugger = debugger
 
     @property
@@ -322,7 +347,12 @@ class JobRunner:
         return hasattr(self, "debugger")
 
     def set_perf_command(self, perf_command):
-        """Set the perf command to be used."""
+        """
+        Set the perf command to be used.
+
+        Args:
+            perf_command (str): The perf command string.
+        """
         self.perf_command = perf_command
 
     @property
@@ -360,7 +390,15 @@ class JobRunner:
         return hasattr(self, "ompenv") and bool(self.ompenv)
 
     def set_ompenv(self, ompenv):
-        """Set the value of the OpenMP env variables."""
+        """
+        Set the value of the OpenMP environmental variables.
+
+        Args:
+            ompenv (OMPEnvironment): The OMP environment instance.
+
+        Raises:
+            ValueError: If an OMP environment is already defined.
+        """
         if self.has_ompenv:
             raise ValueError("ompenv is already defined")
         self.ompenv = ompenv
@@ -494,6 +532,19 @@ class MemcheckParser(BaseValgrindParser):
     #==3851== ERROR SUMMARY: 10000000 errors from 60 contexts (suppressed: 0 from 0)
 
     def parse(self, filename):
+        """
+        Parse the Memcheck output file.
+
+        Args:
+            filename (str): Path to the output file.
+
+        Returns:
+            dict: Dictionary of detected errors.
+
+        Raises:
+            RuntimeError: If 'LEAK SUMMARY' section is missing.
+            ValueError: If a required key is not found in the line.
+        """
 
         def fragile_parser(key, string):
             """
@@ -542,6 +593,14 @@ class TimeBomb:
     """Enforces execution timeouts on subprocesses."""
 
     def __init__(self, timeout, delay=.05, exec_path=None):
+        """
+        Initialize the TimeBomb object.
+
+        Args:
+            timeout (int): Timeout in seconds.
+            delay (float, optional): Delay between checks.
+            exec_path (str, optional): Path to the timeout executable.
+        """
         self.timeout = int(timeout)
         self.delay = float(delay)
         self.exec_path = exec_path
@@ -549,7 +608,14 @@ class TimeBomb:
     def run(self, args,
             bufsize=0, executable=None, stdin=None, stdout=None, stderr=None, preexec_fn=None,
             close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0):
-        """Same interface as Popen."""
+        """
+        Execute a command with the configured timeout.
+
+        Supports the same interface as subprocess.Popen.
+
+        Returns:
+            tuple: (subprocess.Popen object, return_code)
+        """
         try:
 
             if self.exec_path:

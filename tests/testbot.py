@@ -60,8 +60,11 @@ def lazy__str__(func):
     """
     Decorator that provides a default __str__ implementation based on object attributes.
 
+    Args:
+        func (callable): The function to decorate.
+
     Returns:
-        Callable: The wrapped function.
+        callable: The wrapped function.
     """
     def oncall(*args, **kwargs):
         self = args[0]
@@ -879,7 +882,11 @@ class TestBotSummary:
         self.passed = []
 
     @lazy__str__
-    def __str__(self): pass
+    def __str__(self):
+        """
+        Default string representation.
+        """
+        pass
 
     def _min_status(self, items):
         indices = [self._possible_status.index(item) for item in items]
@@ -1013,6 +1020,12 @@ class TestBotSummary:
 
 
 def get_epilog() -> str:
+    """
+    Get the epilog string for the command-line help.
+
+    Returns:
+        str: The epilog usage examples.
+    """
     s = """\
 ======================================================================================================
 Usage example:
@@ -1027,7 +1040,15 @@ Usage example:
 
 
 def get_parser(with_epilog=False):
-    """Build and return the command-line parser"""
+    """
+    Build and return the command-line parser.
+
+    Args:
+        with_epilog (bool, optional): Whether to include the epilog in help.
+
+    Returns:
+        argparse.ArgumentParser: The configured parser.
+    """
     parser = argparse.ArgumentParser(epilog=get_epilog() if with_epilog else "",
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
 
@@ -1058,6 +1079,12 @@ def get_parser(with_epilog=False):
 
 
 def new_main():
+    """
+    Main entry point for TestBot using the modern sub-command interface.
+
+    Returns:
+        int: The exit code of the executed command.
+    """
     # Parse command line.
     parser = get_parser(with_epilog=True)
     options = parser.parse_args()
@@ -1085,6 +1112,12 @@ def new_main():
 
 
 def old_main():
+    """
+    Main entry point for TestBot using the legacy command-line interface.
+
+    Returns:
+        int: The exit code of the execution.
+    """
 
     if "--help" in sys.argv or "-h" in sys.argv:
         # Print help and exit.

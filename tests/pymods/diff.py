@@ -48,6 +48,7 @@ def abinit_char_junk(c):
 def main():
     """
     Main entry point for the command-line diff utility.
+    Parses arguments and performs the selected diff operation.
     """
     # Configure the option parser
     parser = argparse.ArgumentParser()

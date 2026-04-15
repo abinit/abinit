@@ -248,8 +248,8 @@ class FileLock:
         if self.is_locked: self.release()
 
     def __del__(self):
-        """Make sure that the FileLock instance doesn't leave a lockfile
-        lying around.
+        """
+        Destructor to ensure the lock file is released when the instance is deleted.
         """
         self.release()
 
@@ -262,6 +262,12 @@ class NoErrorFileLock(FileLock):
     """
 
     def __enter__(self):
+        """
+        Enter the runtime context and attempt to acquire the lock.
+
+        Returns:
+            bool: True if the lock was successfully acquired, False otherwise.
+        """
         try:
             self.acquire()
         except self.Error:

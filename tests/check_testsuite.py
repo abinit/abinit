@@ -22,6 +22,15 @@ __author__ = "Matteo Giantomassi"
 
 
 def check_authors(suite):
+    """
+    Check if test authors follow the project's naming conventions.
+
+    Args:
+        suite (list): The test suite to analyze.
+
+    Returns:
+        set: A set of unique author second names found in the suite.
+    """
     def first_second_name(string):
         idx = string.rfind(".")
         if idx == -1:
@@ -99,6 +108,13 @@ def get_allowed_cpp_vars():
 
 
 def main():
+    """
+    Main entry point for check_testsuite.py.
+    Performs various sanity checks on the ABINIT test suite.
+
+    Returns:
+        int: Total number of errors/failures detected.
+    """
     usage = "usage: %prog [suite_name] [options] [-h|--help] for help)"
     version = "%prog "+ str(__version__)
     parser = OptionParser(usage=usage, version=version)

@@ -130,14 +130,36 @@ class LineDifference:
         self.content = (l1, l2)
 
     def __eq__(self, other):
-        """Implement the == test."""
+        """
+        Check equality of two differences.
+
+        Args:
+            other (LineDifference): The other difference to compare.
+
+        Returns:
+            bool: True if they are equal.
+        """
         return self.lines == other.lines and self.content == other.content
 
     def __ne__(self, other):
+        """
+        Check inequality of two differences.
+
+        Args:
+            other (LineDifference): The other difference to compare.
+
+        Returns:
+            bool: True if they are not equal.
+        """
         return not (self == other)
 
     def __repr__(self):
-        """Default representation of difference inspired by gnu diff tool."""
+        """
+        Return a string representation of the difference.
+
+        Returns:
+            str: Description of the difference.
+        """
         return (
             '{}\n'.format(*self.lines)
             + '< ' + self.content[0]
@@ -211,7 +233,14 @@ class Result:
 
     def __init__(self, fl_diff, yaml_diff, extra_info=[], label=None, verbose=False):
         """
-        differences is expected to be a list of Difference instances
+        Initialize the Result object.
+
+        Args:
+            fl_diff (list): List of legacy fldiff differences.
+            yaml_diff (list): List of YAML-based differences.
+            extra_info (list, optional): List of strings with extra information.
+            label (str, optional): Label for the summary.
+            verbose (bool, optional): If True, enable verbose output.
         """
         self.fl_diff = fl_diff
         self.yaml_diff = yaml_diff
@@ -231,17 +260,13 @@ class Result:
 
     def _analyse(self):
         """
-        Analyse a difference list and extract summary information and
-        details.  Summary information is
+        Analyze a difference list and extract summary information and details.
 
-        - self.max_abs_err: maximum absolute difference
-        - self.max_rel_err: maximum relative difference
-        - self.max_abs_ln: line number where the maximum absolute
-          difference is reached for the first time
-        - self.max_rel_ln: line number where the maximum relative
-          difference is reached for the first time
-        - self.ndiff_lines: number of lines flagged as different (excluding
-          "silent" differences: line starting with '.' '+' and depending of Diff options ',' and 'P')
+        Computes maximum absolute and relative errors, their line numbers,
+        and the total number of flagged different lines.
+
+        Returns:
+            list: A list of string fragments for the detailed report.
         """
         details = []
         error_lines = set()
@@ -303,7 +328,12 @@ class Result:
         return details
 
     def get_summary(self):
-        """Return a textual summary of the diff."""
+        """
+        Return a textual summary of the diff.
+
+        Returns:
+            str: A summary string containing max errors and line counts.
+        """
         if self.yaml_error:
             summary = 'yaml_test errors.'
         elif self.fatal_error:
@@ -328,8 +358,14 @@ class Result:
 
     def dump_details(self, file=None):
         """
-        Either return a string describing all detected differences
-        or write it into the given file (expected to be a writable stream).
+        Produce a detailed report of all detected differences.
+
+        Args:
+            file (file-like, optional): If provided, the report is written to
+                this stream. Otherwise, it is returned as a string.
+
+        Returns:
+            str or None: The report string if file is None, else None.
         """
         if file is None:
             return ('\n'.join(self.extra_info) + '\n' + ''.join(self.details)
@@ -343,6 +379,17 @@ class Result:
     def passed_within_tols(self, tolnlines, tolabs, tolrel):
         """
         Check the result of the diff against the given tolerances.
+
+        Args:
+            tolnlines (int): Max number of erroneous lines allowed.
+            tolabs (float): Max absolute error allowed.
+            tolrel (float): Max relative error allowed.
+
+        Returns:
+            tuple: (is_ok, status, message) where:
+                is_ok (bool): True if tolerances are respected.
+                status (str): "succeeded", "passed", or "failed".
+                message (str): Description of the result.
         """
         if self.yaml_error:
             status = 'failed'
@@ -387,6 +434,12 @@ class Result:
         return isok, status, msg
 
     def has_line_count_error(self):
+        """
+        Check if there was a line count discrepancy between files.
+
+        Returns:
+            bool: True if a LineCountDifference was found.
+        """
         return any(isinstance(diff, LineCountDifference)
                    for diff in self.fl_diff)
 
@@ -453,14 +506,16 @@ class Differ:
 
     def diff(self, file1, file2):
         """
-        Compute the diff of file 1 (reference) and file 2 (out).
+        Compute the diff between two files.
+
+        Combines legacy fldiff and YAML-based comparison if enabled.
 
         Args:
-            file1 (str): Path to reference file.
-            file2 (str): Path to output file.
+            file1 (str): Path to the reference file.
+            file2 (str): Path to the output file.
 
         Returns:
-            Result: Object containing the diff results.
+            Result: The analysis of found differences.
         """
         if file1.endswith('.xml'):
             self.xml_mode = True
@@ -475,14 +530,16 @@ class Differ:
 
     def _diff_lines(self, src1, src2):
         """
-        Analyze lines and documents in parallel.
+        Perform a line-by-line comparison of two sources.
+
+        Utilizes multiple threads for parallel extraction.
 
         Args:
-            src1 (iterable): Reference lines.
-            src2 (iterable): Output lines.
+            src1 (iterable): Lines from the reference source.
+            src2 (iterable): Lines from the output source.
 
         Returns:
-            tuple: (lines_differences, doc_differences)
+            tuple: (line_differences, doc_differences)
         """
         lines = [None, None]
         documents = [None, None]
@@ -533,7 +590,16 @@ class Differ:
         return lines_differences, doc_differences
 
     def _test_doc(self, docs1, docs2):
-        """Compare docs2 to docs1 and apply tests on docs2."""
+        """
+        Compare two sets of YAML documents.
+
+        Args:
+            docs1 (dict): Reference documents.
+            docs2 (dict): Output documents.
+
+        Returns:
+            list: List of YAML failure objects.
+        """
         return YTester(docs1, docs2, self.yaml_conf).run()
 
     def _fldiff(self, lines1, lines2):

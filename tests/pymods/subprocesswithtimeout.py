@@ -52,6 +52,15 @@ class SubProcessWithTimeout:
         return self.proc, return_code
 
     def _wait_testcomplete(self):
+        """
+        Wait for the subprocess to complete or for the timeout to trigger.
+
+        If the timeout is reached, the process is terminated with SIGTERM,
+        followed by SIGKILL if it still hasn't exited.
+
+        Returns:
+            int: The return code of the process.
+        """
         start = time.time()
         while (time.time()-start) < self.timeout:
             if self.proc.poll() is not None:  # 0 just means successful exit

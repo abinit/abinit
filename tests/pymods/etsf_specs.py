@@ -48,6 +48,14 @@ class EtsfObject:
 class EtsfDimension(EtsfObject):
     """A dimension has a name, a type and, optionally, a list of allowed values."""
     def __init__(self, name, xtype, allowed=None):
+        """
+        Initialize an EtsfDimension instance.
+
+        Args:
+            name (str): Dimension name.
+            xtype (str): Data type.
+            allowed (list, optional): List of allowed values.
+        """
         self.name = name
         self.xtype = xtype
         self.allowed = allowed
@@ -82,8 +90,16 @@ class EtsfDimension(EtsfObject):
 class EtsfAttribute(EtsfObject):
     """A dimension has a name, a type and, optionally, a shape and list of allowed values."""
     def __init__(self, name, xtype, shape=None, allowed=None):
+        """
+        Initialize an EtsfAttribute instance.
+
+        Args:
+            name (str): Attribute name.
+            xtype (str): Data type.
+            shape (list, optional): Expected shape.
+            allowed (list, optional): List of allowed values.
+        """
         self.name = name
-        self.allowed = allowed
 
     def validate(self, ncdata):
         """
@@ -411,6 +427,15 @@ class EtsfGroup(object):
 
     @classmethod
     def validate_file(cls, path):
+        """
+        Validate the NetCDF file at path.
+
+        Args:
+            path (str): Path to the NetCDF file.
+
+        Returns:
+            list: List of error strings.
+        """
         ncdata = netCDF4.Dataset(path, mode="r")
         errors = cls.validate(ncdata)
         ncdata.close()
@@ -418,6 +443,15 @@ class EtsfGroup(object):
 
     @classmethod
     def validate(cls, ncdata):
+        """
+        Validate the NetCDF data.
+
+        Args:
+            ncdata: The NetCDF dataset to validate.
+
+        Returns:
+            list: List of error strings.
+        """
         errors = []
 
         # Test attributes.

@@ -39,7 +39,7 @@ class AboFileAnalysis:
                 Possible values: "iterations" = extract iterations of all cycles.
 
         Returns:
-            list: List of AboDataset objects.
+            list: List of AboDataset objects containing the extracted information.
         """
 
         dataset_list = []
@@ -114,13 +114,14 @@ class AboFileAnalysis:
         Compare only specific parts specified by argument option.
 
         Args:
-          other_abo_file (AboFileAnalysis): The other file to compare with.
-          option (str): What to compare (e.g., "iterations").
-          percent_allowed_small (int): Percentage allowed for small number of iterations (n_iter<=8).
-          percent_allowed_large (int): Percentage allowed for large number of iterations (n_iter>8).
+            other_abo_file (AboFileAnalysis): The other file to compare with.
+            option (str): What to compare (e.g., "iterations").
+            percent_allowed_small (int): Percentage allowed for small number of iterations (n_iter<=8).
+            percent_allowed_large (int): Percentage allowed for large number of iterations (n_iter>8).
 
         Returns:
-            tuple: (status, err_msg, err_msg_short)
+            tuple: (status, err_msg, err_msg_short) where status is "succeeded" or "failed",
+                err_msg is the detailed error message, and err_msg_short is a summary.
         """
 
         status = "succeeded"
@@ -183,6 +184,12 @@ class AboDataset:
     """
 
     def __init__(self, number):
+        """
+        Initialize an AboDataset instance.
+
+        Args:
+            number (int): The dataset number.
+        """
         self.number = number
         self.optddriver = 0
         self.MD_niter = None
