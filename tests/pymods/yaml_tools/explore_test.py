@@ -34,6 +34,12 @@ except ImportError:
 
 
 def print_iter(it):
+    """
+    Print elements of an iterator in rows of 8.
+
+    Args:
+        it: The iterator containing elements to print.
+    """
     i = 0
     for elem in it:
         i += 1
@@ -56,7 +62,14 @@ class ExtendedTestConf(DriverTestConf):
 
     def get_spec_at(self, path):
         """
-        Return the list of specializations known at the current path.
+        Return the list of specializations known at the given path.
+
+        Args:
+            path (list): Path components relative to current path.
+                Supports "TOP" and "UP" keywords.
+
+        Returns:
+            list: List of specialization names.
         """
         new_path = list(self.current_path)
         for sp in path:
@@ -193,8 +206,12 @@ class Explorer(cmd.Cmd):
     # commands
     def do_load(self, arg):
         """
-        Usage: load FILE
         Load a config file.
+
+        Usage: load FILE
+
+        Args:
+            arg (str): Path to the config file to load.
         """
         filename = os.path.realpath(os.path.expanduser(arg))
         try:
@@ -218,10 +235,13 @@ class Explorer(cmd.Cmd):
 
     def do_cd(self, arg):
         """
+        Move to PATH relative to the current path the tree.
+
         Usage: cd PATH
-        Move to PATH relative to the current path the tree.  PATH is of the
-        form name1.name2... name can be either a specialization or TOP to
-        go back to root or UP to go up one level.
+
+        Args:
+            arg (str): PATH of the form name1.name2... name can be a
+                specialization, "TOP" to go to root, or "UP" to go up one level.
         """
         if not arg.isspace():
             path = arg.replace('"', "").replace("'", "").split(".")
@@ -302,8 +322,12 @@ class Explorer(cmd.Cmd):
 
     def do_ls(self, arg):
         """
-        Usage: ls PATH
-        List nodes under the given PATH. See also cd.
+        List nodes under the given PATH.
+
+        Usage: ls [PATH]
+
+        Args:
+            arg (str, optional): Path to list. If empty, list current level.
         """
         if not arg:
             print_iter(spec for spec in self.tree.get_spec())

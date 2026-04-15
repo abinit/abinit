@@ -25,6 +25,15 @@ class YAMLComplex(complex):
 
     @classmethod
     def from_scalar(cls, scal):
+        """
+        Convert a YAML complex number scalar to a Python complex object.
+
+        Args:
+            scal (str): The scalar string representing the complex number.
+
+        Returns:
+            YAMLComplex: The parsed complex number.
+        """
         return cls(scal
                    # python always uses double and only recognise E and e
                    .replace("d", "e")

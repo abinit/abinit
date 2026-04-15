@@ -19,10 +19,25 @@ class EnergyTerms:
     }
 
     def __init__(self, comment="no comment"):
+        """
+        Initialize EnergyTerms.
+
+        Args:
+            comment (str, optional): A comment about the energy terms.
+        """
         self.comment = comment
 
     @classmethod
     def from_map(cls, map):
+        """
+        Create an EnergyTerms instance from a YAML mapping.
+
+        Args:
+            map (dict): The mapping containing energy components.
+
+        Returns:
+            EnergyTerms: A new instance populated with components.
+        """
         new = super(EnergyTerms, cls).from_map(map)
         new.components = {
             name: value for name, value in new.__dict__.items()
@@ -63,11 +78,16 @@ if has_pandas:
 
         def last_iter(self, other, **opts):
             """
-            Expects opts to be a dictionary with keys being column names and
-            values being 'ceil': ceiling_tol_value or 'tol': tolerance_value.
-            The checks are only performed on the last values of each columns.
-            An additional optional key of opts is 'tol_iter' giving a tolerance
-            for the variation of number of iterations. The default value is 5.
+            Check constraints on the last values of the iteration table.
+
+            Args:
+                other: The other EtotIters table to compare against.
+                **opts: Dictionary with column names as keys and constraint
+                    definitions as values (e.g., {'ceil': 1e-5, 'tol': 1e-8}).
+                    Optional 'tol_iter' (default 5) for iteration count variation.
+
+            Returns:
+                bool or FailDetail: True if verified, or a FailDetail object describing the failure.
             """
             tol_iter = opts.get("tol_iter", 5)
 

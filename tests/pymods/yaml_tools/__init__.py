@@ -50,11 +50,13 @@ class Document:
     """
     def __init__(self, iterators, start, lines, tag=None):
         """
+        Initialize the Document object.
+
         Args:
-            iterators:
-            start:
-            lines:
-            tag:
+            iterators (dict): State of the iterators for this document.
+            start (int): Starting line number in the original file.
+            lines (list): List of lines belonging to the document.
+            tag (str, optional): YAML tag of the document.
         """
         self.iterators = iterators
         self.start = start

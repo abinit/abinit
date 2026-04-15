@@ -1,3 +1,5 @@
+# coding: utf-8
+
 """
 Copyright (C) 2008-2011 Volvox Development Team
 
@@ -26,57 +28,57 @@ ANSII Color formatting for output in terminal.
 
 import os
 
-__all__ = ["colored", "cprint"]
+__all__ = ['colored', 'cprint']
 
 VERSION = (1, 1, 0)
 
 ATTRIBUTES = dict(
-    list(
-        zip(
-            ["bold", "dark", "", "underline", "blink", "", "reverse", "concealed"],
-            list(range(1, 9)),
-        )
-    )
+    list(zip([
+        'bold',
+        'dark',
+        '',
+        'underline',
+        'blink',
+        '',
+        'reverse',
+        'concealed'
+    ],
+        list(range(1, 9))
+    ))
 )
-del ATTRIBUTES[""]
+del ATTRIBUTES['']
 
 HIGHLIGHTS = dict(
-    list(
-        zip(
-            [
-                "on_grey",
-                "on_red",
-                "on_green",
-                "on_yellow",
-                "on_blue",
-                "on_magenta",
-                "on_cyan",
-                "on_white",
-            ],
-            list(range(40, 48)),
-        )
-    )
+    list(zip([
+        'on_grey',
+        'on_red',
+        'on_green',
+        'on_yellow',
+        'on_blue',
+        'on_magenta',
+        'on_cyan',
+        'on_white'
+    ],
+        list(range(40, 48))
+    ))
 )
 
 COLORS = dict(
-    list(
-        zip(
-            [
-                "grey",
-                "red",
-                "green",
-                "yellow",
-                "blue",
-                "magenta",
-                "cyan",
-                "white",
-            ],
-            list(range(30, 38)),
-        )
-    )
+    list(zip([
+        'grey',
+        'red',
+        'green',
+        'yellow',
+        'blue',
+        'magenta',
+        'cyan',
+        'white',
+    ],
+        list(range(30, 38))
+    ))
 )
 
-RESET = "\033[0m"
+RESET = '\033[0m'
 
 __ISON = True
 
@@ -103,7 +105,6 @@ def stream_has_colours(stream):
         return False  # auto color only on TTYs
     try:
         import curses
-
         curses.setupterm()
         return curses.tigetnum("colors") > 2
     except:
@@ -111,7 +112,17 @@ def stream_has_colours(stream):
 
 
 def colored(text, color=None, on_color=None, attrs=None):
-    """Colorize text.
+    """
+    Colorize text for terminal output.
+
+    Args:
+        text (str): Text to colorize.
+        color (str, optional): Text color.
+        on_color (str, optional): Background color.
+        attrs (list, optional): List of attributes (e.g., ['bold']).
+
+    Returns:
+        str: Colorized text.
 
     Available text colors:
         red, green, yellow, blue, magenta, cyan, white.
@@ -126,8 +137,9 @@ def colored(text, color=None, on_color=None, attrs=None):
         colored('Hello, World!', 'red', 'on_grey', ['blue', 'blink'])
         colored('Hello, World!', 'green')
     """
-    if __ISON and os.getenv("ANSI_COLORS_DISABLED") is None:
-        fmt_str = "\033[%dm%s"
+
+    if __ISON and os.getenv('ANSI_COLORS_DISABLED') is None:
+        fmt_str = '\033[%dm%s'
         if color is not None:
             text = fmt_str % (COLORS[color], text)
 
@@ -143,9 +155,15 @@ def colored(text, color=None, on_color=None, attrs=None):
 
 
 def cprint(text, color=None, on_color=None, attrs=None, **kwargs):
-    """Print colorize text.
+    """
+    Print colorized text.
 
-    It accepts arguments of print function.
+    Args:
+        text (str): Text to print.
+        color (str, optional): Text color.
+        on_color (str, optional): Background color.
+        attrs (list, optional): List of attributes.
+        **kwargs: Arguments passed to the built-in print function.
     """
     try:
         print((colored(text, color, on_color, attrs)), **kwargs)
@@ -157,15 +175,20 @@ def cprint(text, color=None, on_color=None, attrs=None, **kwargs):
 
 def colored_map(text, cmap):
     """
-    Return colorized text. cmap is a dict mapping tokens to color options.
+    Return colorized text based on a mapping of tokens to colors.
 
-    .. Example:
+    Args:
+        text (str): The text to process.
+        cmap (dict): Dictionary mapping tokens to color options.
 
-        colored_key("foo bar", {bar: "green"})
-        colored_key("foo bar", {bar: {"color": "green", "on_color": "on_red"}})
+    Returns:
+        str: The colorized text.
+
+    Example:
+        colored_key("foo bar", {"bar": "green"})
+        colored_key("foo bar", {"bar": {"color": "green", "on_color": "on_red"}})
     """
-    if not __ISON:
-        return text
+    if not __ISON: return text
     for key, v in cmap.items():
         if isinstance(v, dict):
             text = text.replace(key, colored(key, **v))
@@ -176,9 +199,12 @@ def colored_map(text, cmap):
 
 def cprint_map(text, cmap, **kwargs):
     """
-    Print colorize text.
-    cmap is a dict mapping keys to color options.
-    kwargs are passed to print function
+    Print colorized text based on a mapping of tokens to colors.
+
+    Args:
+        text (str): The text to print.
+        cmap (dict): Dictionary mapping tokens to color options.
+        **kwargs: Arguments passed to the built-in print function.
 
     Example:
         cprint_map("Hello world", {"Hello": "red"})
@@ -192,28 +218,26 @@ def cprint_map(text, cmap, **kwargs):
 
 
 def get_terminal_size():
-    """ "
-    Return the size of the terminal as (nrow, ncols)
+    """
+    Return the size of the terminal.
+
+    Returns:
+        tuple: (nrow, ncols)
 
     Based on:
-
         http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python
     """
     try:
-        rc = os.popen("stty size", "r").read().split()
+        rc = os.popen('stty size', 'r').read().split()
         return int(rc[0]), int(rc[1])
     except:
         pass
 
     env = os.environ
-
     def ioctl_GWINSZ(fd):
         try:
-            import fcntl
-            import struct
-            import termios
-
-            rc = struct.unpack("hh", fcntl.ioctl(fd, termios.TIOCGWINSZ, "1234"))
+            import fcntl, termios, struct
+            rc = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ, '1234'))
             return rc
         except:
             return None
@@ -229,50 +253,52 @@ def get_terminal_size():
             pass
 
     if not rc:
-        rc = (env.get("LINES", 25), env.get("COLUMNS", 80))
+        rc = (env.get('LINES', 25), env.get('COLUMNS', 80))
 
     return int(rc[0]), int(rc[1])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # enable(False)
-    print("Current terminal type: %s" % os.getenv("TERM"))
-    print("Test basic colors:")
-    cprint("Grey color", "grey")
-    cprint("Red color", "red")
-    cprint("Green color", "green")
-    cprint("Yellow color", "yellow")
-    cprint("Blue color", "blue")
-    cprint("Magenta color", "magenta")
-    cprint("Cyan color", "cyan")
-    cprint("White color", "white")
-    print("-" * 78)
+    print('Current terminal type: %s' % os.getenv('TERM'))
+    print('Test basic colors:')
+    cprint('Grey color', 'grey')
+    cprint('Red color', 'red')
+    cprint('Green color', 'green')
+    cprint('Yellow color', 'yellow')
+    cprint('Blue color', 'blue')
+    cprint('Magenta color', 'magenta')
+    cprint('Cyan color', 'cyan')
+    cprint('White color', 'white')
+    print(('-' * 78))
 
-    print("Test highlights:")
-    cprint("On grey color", on_color="on_grey")
-    cprint("On red color", on_color="on_red")
-    cprint("On green color", on_color="on_green")
-    cprint("On yellow color", on_color="on_yellow")
-    cprint("On blue color", on_color="on_blue")
-    cprint("On magenta color", on_color="on_magenta")
-    cprint("On cyan color", on_color="on_cyan")
-    cprint("On white color", color="grey", on_color="on_white")
-    print("-" * 78)
+    print('Test highlights:')
+    cprint('On grey color', on_color='on_grey')
+    cprint('On red color', on_color='on_red')
+    cprint('On green color', on_color='on_green')
+    cprint('On yellow color', on_color='on_yellow')
+    cprint('On blue color', on_color='on_blue')
+    cprint('On magenta color', on_color='on_magenta')
+    cprint('On cyan color', on_color='on_cyan')
+    cprint('On white color', color='grey', on_color='on_white')
+    print('-' * 78)
 
-    print("Test attributes:")
-    cprint("Bold grey color", "grey", attrs=["bold"])
-    cprint("Dark red color", "red", attrs=["dark"])
-    cprint("Underline green color", "green", attrs=["underline"])
-    cprint("Blink yellow color", "yellow", attrs=["blink"])
-    cprint("Reversed blue color", "blue", attrs=["reverse"])
-    cprint("Concealed Magenta color", "magenta", attrs=["concealed"])
-    cprint("Bold underline reverse cyan color", "cyan", attrs=["bold", "underline", "reverse"])
-    cprint("Dark blink concealed white color", "white", attrs=["dark", "blink", "concealed"])
-    print("-" * 78)
+    print('Test attributes:')
+    cprint('Bold grey color', 'grey', attrs=['bold'])
+    cprint('Dark red color', 'red', attrs=['dark'])
+    cprint('Underline green color', 'green', attrs=['underline'])
+    cprint('Blink yellow color', 'yellow', attrs=['blink'])
+    cprint('Reversed blue color', 'blue', attrs=['reverse'])
+    cprint('Concealed Magenta color', 'magenta', attrs=['concealed'])
+    cprint('Bold underline reverse cyan color', 'cyan',
+           attrs=['bold', 'underline', 'reverse'])
+    cprint('Dark blink concealed white color', 'white',
+           attrs=['dark', 'blink', 'concealed'])
+    print(('-' * 78))
 
-    print("Test mixing:")
-    cprint("Underline red on grey color", "red", "on_grey", ["underline"])
-    cprint("Reversed green on red color", "green", "on_red", ["reverse"])
+    print('Test mixing:')
+    cprint('Underline red on grey color', 'red', 'on_grey',
+           ['underline'])
+    cprint('Reversed green on red color', 'green', 'on_red', ['reverse'])
 
     # Test cprint_keys
     cprint_map("Hello world", {"Hello": "red"})

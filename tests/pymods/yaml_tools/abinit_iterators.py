@@ -23,6 +23,18 @@ class IntSet:
     Represent a subset of the natural integers.
     """
     def __init__(self, obj):
+        """
+        Initialize the IntSet.
+
+        Args:
+            obj (int, list, dict, or str): The integer set definition.
+                Can be a singleton (int), finite set (list), bounded or
+                half-bounded range (dict), or "all" (str).
+
+        Raises:
+            EmptySetError: If the range is empty.
+            TypeError: If the input type is not supported.
+        """
         if isinstance(obj, int):
             self._type = "singleton"
             self.value = obj
@@ -136,6 +148,12 @@ class IterStateFilter:
     {4} x N* x {1, 2, 3, 4, 5} x N* x N*
     """
     def __init__(self, d):
+        """
+        Initialize the IterStateFilter.
+
+        Args:
+            d (dict): Dictionary mapping iterator names to their allowed values.
+        """
         self.filters = {}
         for it in ITERATORS:
             if it in d:
@@ -143,8 +161,13 @@ class IterStateFilter:
 
     def match(self, state):
         """
-        Does a given state match this filter?
-        Is a given tuple in this set?
+        Check if a given state matches the filter.
+
+        Args:
+            state (dict): The iterator state to check.
+
+        Returns:
+            bool: True if the state matches all filters, False otherwise.
         """
         for it, int_set in self.filters.items():
             if it in state and state[it] not in int_set:

@@ -3,18 +3,16 @@ Implement the steps to extract data from an Abinit output file.
 Extract lines associated with their "meta character" (that makes sense in
 fldiff), and valid YAML documents associated with their iteration context.
 """
-
 import re
 
-from .yaml_tools import Document
-from .yaml_tools import is_available as has_yaml
+from .yaml_tools import Document, is_available as has_yaml
 from .yaml_tools.abinit_iterators import ITERATOR_RANKS
-from .yaml_tools.errors import DuplicateDocumentError, NoIteratorDefinedError
+from .yaml_tools.errors import NoIteratorDefinedError, DuplicateDocumentError
 
 # Tag is only recognised if it is a valid a word ([A-Za-z0-9_]+)
 # It won't recognise serialized tags for example
-doc_start_re = re.compile(r"---(?: !(\w+))?\n?$")
-doc_end_re = re.compile(r"\.\.\.\n?$")
+doc_start_re = re.compile(r'---(?: !(\w+))?\n?$')
+doc_end_re = re.compile(r'\.\.\.\n?$')
 
 
 class DataExtractor:
@@ -27,11 +25,13 @@ class DataExtractor:
 
     def __init__(self, use_yaml, ignore=True, ignoreP=True, xml_mode=False):
         """
+        Initialize the DataExtractor.
+
         Args:
-            use_yaml: True to use Yaml mode.
-            ignore
-            ignoreP
-            xml_mode
+            use_yaml (bool): True to use YAML mode.
+            ignore (bool): Whether to ignore certain lines.
+            ignoreP (bool): Whether to ignore 'P' meta-character lines.
+            xml_mode (bool): True if parsing XML documents.
         """
         self.use_yaml = use_yaml and has_yaml
         # do not use fldiff on data that have explicitly been written for YAML use
@@ -45,39 +45,58 @@ class DataExtractor:
 
     def _get_metachar(self, line):
         """
-        Return a meta character which gives the behaviour of the line independently from options.
+        Return a meta character which gives the behaviour of the line.
+
+        Args:
+            line (str): The line to analyze.
+
+        Returns:
+            str: The meta-character.
         """
         if not line or line.isspace():  # blank line
-            c = "-"
+            c = '-'
         elif line[0].isspace():
-            c = " "
+            c = ' '
             # dirty fix for compatibility
             # I think xml should not be compared with the basic algorithm
-            if self.xml_mode and "timeInfo" in line:
-                c = "."
+            if self.xml_mode and 'timeInfo' in line:
+                c = '.'
         else:
             c = line[0]
-            if c == ",":
+            if c == ',':
                 if self.ignore:
-                    c = "-"
+                    c = '-'
                 else:
-                    c = "+"
-            elif c == "P":
+                    c = '+'
+            elif c == 'P':
                 if self.ignoreP:
-                    c = "-"
+                    c = '-'
                 else:
-                    c = "+"
+                    c = '+'
         return c
 
     def ignore_line(self, line):
-        if any(line.startswith(l) for l in self.IGNORE_LINES_STARTING_WITH):
-            return True
+        """
+        Check if the line should be ignored.
+
+        Args:
+            line (str): The line to check.
+
+        Returns:
+            bool: True if the line should be ignored.
+        """
+        if (any(line.startswith(l) for l in self.IGNORE_LINES_STARTING_WITH)): return True
         return False
 
     def extract(self, src_lines):
         """
-        Extract formatted documents and significant lines from list of strings `src_lines`.
-        Main entry point for client code.
+        Extract formatted documents and significant lines from src_lines.
+
+        Args:
+            src_lines (list): List of strings to process.
+
+        Returns:
+            tuple: (significant_lines, documents, ignored_lines)
         """
         # Reset internal state to allow several extractions with the same instance.
         self.iterators_state = {}
@@ -86,8 +105,8 @@ class DataExtractor:
 
         current_doc = None
         for i, line in enumerate(src_lines):
-            if self.ignore_line(line):
-                continue
+
+            if self.ignore_line(line): continue
 
             # TODO
             # Ignore Yaml documents matching e.g. `--- !tagname # fldiff_ignore
@@ -96,12 +115,12 @@ class DataExtractor:
                 # accumulate source lines
                 current_doc.lines.append(line)
 
-                if line.startswith("...") and doc_end_re.match(line):
+                if line.startswith('...') and doc_end_re.match(line):
                     # reached the end of the doc
                     if self.use_yaml:
                         current_doc.end = i
 
-                        if getattr(current_doc.obj, "_is_iter_start", False):
+                        if getattr(current_doc.obj, '_is_iter_start', False):
                             # special case of IterStart
                             curr_it = current_doc.obj.iterator
 
@@ -116,7 +135,7 @@ class DataExtractor:
                             # Signal corruption but ignore the document
                             self.corrupted_docs.append(current_doc)
 
-                        elif getattr(current_doc.obj, "_is_abinit_message", False):
+                        elif getattr(current_doc.obj, '_is_abinit_message', False):
                             # Special case of Warning, Error etc.. store it for later use
                             self.abinit_messages.append(current_doc)
 
@@ -131,20 +150,17 @@ class DataExtractor:
                             docs[current_doc.id] = current_doc
 
                     elif self.use_fl_for_yaml:
-                        # let fldiff compare lines if YAML test is disabled
-                        lines.extend(
-                            (current_doc.start + i, " ", " " + line)
-                            for i, line in enumerate(current_doc.lines)
-                        )
+                         # let fldiff compare lines if YAML test is disabled
+                        lines.extend((current_doc.start + i, ' ', ' ' + line) for i, line in enumerate(current_doc.lines))
 
                     # go back to normal mode
                     current_doc = None
 
-            elif self._get_metachar(line) == "-":
+            elif self._get_metachar(line) == '-':
                 # starting a yaml doc
-                if line.startswith("---") and doc_start_re.match(line):
+                if line.startswith('---') and doc_start_re.match(line):
                     tag = doc_start_re.match(line).group(1)
-                    # iterators_state =
+                    #iterators_state =
                     current_doc = Document(self.iterators_state.copy(), i, [line], tag=tag)
                 else:
                     ignored.append((i, line))

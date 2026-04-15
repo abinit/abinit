@@ -59,6 +59,21 @@ class Constraint:
     """
     def __init__(self, name, test, val_type, inherited, use_params, exclude,
                  apply_to, handle_undef, value=None, metadata={}):
+        """
+        Initialize the Constraint object.
+
+        Args:
+            name (str): The name of the constraint.
+            test (callable): The function that performs the check.
+            val_type (type): Expected type of the value.
+            inherited (bool): Whether the constraint is inherited in sub-scopes.
+            use_params (list): List of parameter names used by the constraint.
+            exclude (set): Set of constraint names that cannot be used with this one.
+            apply_to (str or type): Type of data the constraint applies to.
+            handle_undef (bool): Whether to handle 'undef' values specially.
+            value (optional): The value to compare against.
+            metadata (dict, optional): Additional metadata.
+        """
         self.name = name
         self.test = test
         self.type = val_type
@@ -86,7 +101,15 @@ class Constraint:
 
     def check(self, ref, tested, conf):
         """
-        Return True if the constraint is verified.
+        Check if the constraint is verified for given data.
+
+        Args:
+            ref: Reference data value.
+            tested: Values from the tested file.
+            conf (DriverTestConf): Configuration driver for parameter access.
+
+        Returns:
+            bool or FailDetail: True if verified, or a FailDetail object.
         """
         # apply to floats at least
         if getattr(ref, "_not_available", False):
@@ -208,7 +231,14 @@ class ConfTree:
     @classmethod
     def make_tree(cls, src, parser):
         """
-        Create a new instance tree instance from a valid dictionary
+        Recursively build a configuration tree from source data.
+
+        Args:
+            src (dict): The source dictionary containing config nodes.
+            parser (ConfParser): The parser defining known parameters and constraints.
+
+        Returns:
+            ConfTree: The constructed configuration tree.
         """
         params, cons, ctx = parser.parameters, parser.constraints, parser.ctx()
 
@@ -385,8 +415,14 @@ class ConfParser:
 
     def make_trees(self, parsed_src, metadata={}):
         """
-        Create a dict of ConfTree instances and the associated filter dict
-        from the yaml parser output.
+        Convert parsed YAML output into configuration trees and filters.
+
+        Args:
+            parsed_src (dict): Output from the YAML parser.
+            metadata (dict, optional): Initial metadata for the trees.
+
+        Returns:
+            tuple: (dict of ConfTrees, dict of IterStateFilters).
         """
         assert isinstance(parsed_src, dict), ("parsed_src have to be derivated"
                                               " from a dictionary but it is"

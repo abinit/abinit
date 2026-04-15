@@ -227,12 +227,12 @@ class RestrictedShell:
 
     def __init__(self, inp_dir, workdir, psps_dir):
         """
-        Initialize the restricted shell with directory context.
+        Initialize the RestrictedShell with directory context.
 
         Args:
-            inp_dir: Directory for input files.
-            workdir: Working directory for the test.
-            psps_dir: Directory for pseudopotential files.
+            inp_dir (str): Directory for input files.
+            workdir (str): Working directory for the test.
+            psps_dir (str): Directory for pseudopotential files.
         """
         self.exceptions = []
 
@@ -362,9 +362,25 @@ class StringColorizer:
         }
 
     def __init__(self, stream):
+        """
+        Initialize the StringColorizer.
+
+        Args:
+            stream: The output stream to check for color support.
+        """
         self.has_colours = stream_has_colours(stream)
 
     def __call__(self, string, colour):
+        """
+        Colorize a string if the stream supports it.
+
+        Args:
+            string (str): The string to colorize.
+            colour (str): The color name (e.g., 'blue', 'red').
+
+        Returns:
+            str: Colorized string or original string if colors disabled.
+        """
         if self.has_colours:
             code = self.colours.get(colour, "")
             if code:
@@ -405,12 +421,29 @@ def user_wants_to_exit():
 class Editor:
     """Python interface to system text editors."""
     def __init__(self, editor=None):
+        """
+        Initialize the Editor.
+
+        Args:
+            editor (str, optional): Name of the editor executable.
+                Defaults to $EDITOR or 'vi'.
+        """
         if editor is None:
             self.editor = os.getenv("EDITOR", "vi")
         else:
             self.editor = str(editor)
 
     def edit_file(self, fname, lineno=None):
+        """
+        Open a file in the editor, optionally at a specific line.
+
+        Args:
+            fname (str): Path to the file.
+            lineno (int, optional): Line number to jump to.
+
+        Returns:
+            int: The return code of the editor process.
+        """
         from subprocess import call
         if lineno is None:
             retcode = call([self.editor, fname])
@@ -484,7 +517,19 @@ class Patcher:
         return self.patcher in Patcher.interactive_patchers
 
     def patch(self, fromfile, tofile):
-        """Patch a file."""
+        """
+        Apply a patch or launch an interactive patcher.
+
+        Args:
+            fromfile (str): Source patch file.
+            tofile (str): File to be patched.
+
+        Returns:
+            int: Exit status of the patch operation.
+
+        Raises:
+            PatcherError: If the patching operation fails.
+        """
         if self.patcher == "patch":
             try:
                 return patch(fromfile, tofile)

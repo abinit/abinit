@@ -37,6 +37,13 @@ class DriverTestConf:
     default_conf = DEFAULT_CONF_PATH
 
     def __init__(self, src=None, metadata={}):
+        """
+        Initialize the DriverTestConf object.
+
+        Args:
+            src (str, optional): YAML configuration source.
+            metadata (dict, optional): Metadata for the configuration (e.g., file name).
+        """
         self.known_params = conf_parser.parameters.copy()
         self.param_stack = []
         self.constraints_stack = []
@@ -77,17 +84,41 @@ class DriverTestConf:
     def from_file(cls, filename):
         """
         Create a new instance of DriverTestConf from a configuration file.
+
+        Args:
+            filename (str): Path to the configuration file.
+
+        Returns:
+            DriverTestConf: A new instance populated from the file.
         """
         with open(filename) as f:
             return cls(f.read(), {"file name": filename})
 
     def extra_info(self):
+        """
+        Return a list of info messages formatted for reporting.
+
+        Returns:
+            list: List of strings prefixed with '# '.
+        """
         return ["# " + inf for inf in self._infos]
 
     def info(self, msg):
+        """
+        Record an information message.
+
+        Args:
+            msg (str): The message to record.
+        """
         self._infos.append("[INFO] " + msg)
 
     def warning(self, msg):
+        """
+        Record a warning message.
+
+        Args:
+            msg (str): The message to record.
+        """
         self._infos.append("[WARNING] " + msg)
 
     @property
@@ -110,9 +141,14 @@ class DriverTestConf:
 
     def get_constraints_for(self, obj):
         """
-        Return a list of the constraints in the current scope that apply
-        to obj. If obj is None, return all available constraints in the
-        scope.
+        Return constraints in the current scope that apply to an object.
+
+        Args:
+            obj: The object to check constraints against.
+                If None, all constraints in the scope are returned.
+
+        Returns:
+            list: List of applicable constraints.
         """
         constraints = []
         exclude = set()

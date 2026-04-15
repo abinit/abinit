@@ -223,15 +223,27 @@ class FileLock:
             self.is_locked = False
 
     def __enter__(self):
-        """Activated when used in the with statement.
-        Should automatically acquire a lock to be used in the with block.
+        """
+        Enter the runtime context related to this object.
+
+        Automatically acquires the lock.
+
+        Returns:
+            FileLock: The locked instance.
         """
         if not self.is_locked: self.acquire()
         return self
 
     def __exit__(self, type, value, traceback):
-        """Activated at the end of the with statement.
-        It automatically releases the lock if it isn't locked.
+        """
+        Exit the runtime context related to this object.
+
+        Automatically releases the lock.
+
+        Args:
+            type: Exception type.
+            value: Exception value.
+            traceback: Exception traceback.
         """
         if self.is_locked: self.release()
 
